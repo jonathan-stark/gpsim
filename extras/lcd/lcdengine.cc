@@ -450,10 +450,12 @@ void LcdDisplay::advanceState( ControlLineEvent e)
 
   last_event = e;
 
-  if(debug)
+  if(debug) {
     cout << " to State:  " << getStateName(current_state) << '\n';
 
-  viewInternals(0xff);
+    viewInternals(0xff);
+
+  }
 }
 
 char * LcdDisplay::getStateName(State s)

@@ -114,7 +114,7 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
       if(lcd && lcd->debug)
-	//cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
+	cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
 
       value ^= bit_mask;
 
@@ -454,7 +454,7 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   fontP = NULL;
 
   // If you want to get diagnostic info, change debug to non-zero.
-  debug = 1;
+  debug = 0;
 
   interface = new LCD_Interface(this);
   gi.add_interface(interface);
