@@ -282,12 +282,26 @@ unsigned int DataPort::get(void)
 {
   unsigned int v=0;
 
+#ifdef BROKEN_GET_METHOD
+  
   for(int i=7; i>=0; i--) {
     if(pins[i]) {
       v = (v << 1) | ((pins[i]->get_digital_state()) ? 1 : 0);
     }
 
   }
+
+#else
+
+  //cout << "LCD DataPort::get - stim_mask is " << stimulus_mask << "\n";
+  if(stimulus_mask)
+    {
+      v = update_stimuli();
+      // cout << "DataPort::get - stimuli give " << v << "\n";
+      v |= (value.get() & ~stimulus_mask);
+    }
+
+#endif
 
   value.put(v);
 

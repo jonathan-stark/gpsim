@@ -154,6 +154,8 @@ void LcdDisplay::STPowerON( Event e)
 
 void LcdDisplay::latch_data(void)
 {
+    if ( debug & LCD_DEBUG_TRACE_PORT )
+        cout << "LCD:latch_data reads " << data_port->get() << "\n";
 
   if(in_8bit_mode())
     data_latch = data_port->get() & 0xff;

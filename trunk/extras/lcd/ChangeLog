@@ -1,4 +1,8 @@
-2004-07-23 Scott Dattalo  <scott@dattalo.com>
+2004-09-05 Robert Pearce
+	* lcd.cc, lcd.h, lcdengine.cc, lcdgui.cc: I/O pins and stimuli.
+	(patch applied by Scott).
+
+2004-09-01 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc, lcd.h: updated the LCD module with the current gpsim trace
 	implementation.
 	* examples/lcd_mod.stc: The node name 'DC' conflicts with the status

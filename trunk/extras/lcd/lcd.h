@@ -500,4 +500,6 @@ public:
 #define LCD_DEBUG_ENABLE	0x01	// Enable debug printfs
 #define LCD_DEBUG_DUMP_PINS	0x02	// Dump changes in the LCD pins
 #define LCD_DEBUG_TRACE_DATA	0x04	// Trace changes in CGRAM/DDRAM
+#define LCD_DEBUG_TRACE_PORT	0x08	// Trace data on port
+
 #endif //  __LCD_H__
