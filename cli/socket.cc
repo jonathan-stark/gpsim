@@ -921,9 +921,6 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 
   Socket *s = (Socket *)d;
 
-  GError *err=NULL;
-
-
   if(condition & G_IO_HUP) {
     std::cout<< "client has gone away\n";
 
@@ -949,6 +946,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 
 
     GString *line = g_string_sized_new(512);
+    GError *err=NULL;
     GIOStatus stat = g_io_channel_read_line_string(channel, line, &terminator_pos, &err);
     if(stat & G_IO_STATUS_EOF)
       return FALSE;
@@ -962,14 +960,15 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
     //std::cout << "channel status " << hex << stat << "  " ;
     //debugPrintChannelStatus(stat);
 
+    if(err) {
+      std::cout << "GError:" << err->message << endl;
+    }
+
+
 #else
     g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
 #endif
     //std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
-
-    if(err) {
-      std::cout << "GError:" << err->message << endl;
-    }
 
     if(bytes_read) {
       if (*s->buffer == '$') {
