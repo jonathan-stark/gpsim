@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "attributes.h"
 
 #include "fopen-path.h"
+#include "../../../gpsim/cli/cmd_gpsim.h"
 
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
@@ -1271,6 +1272,51 @@ void Processor::Debug()
   if(pc)
     cout << "PC=0x"<<hex << pc->value << endl;
 }
+
+void Processor::MessageBreakOnRead(unsigned int uAddress) {
+   FormattedMessage("break reading register 0x%04x\n", uAddress);
+}
+
+void Processor::MessageBreakOnRead(unsigned int uAddress, unsigned uValue) {
+   FormattedMessage("break reading register 0x%04x with value %u\n", uAddress, uValue);
+}
+
+void Processor::MessageBreakOnWrite(unsigned int uAddress) {
+   FormattedMessage("break writing register 0x%04x\n", uAddress);
+}
+
+void Processor::MessageBreakOnWrite(unsigned int uAddress, unsigned uValue) {
+   FormattedMessage("break writing register 0x%04x with value %u\n", uAddress, uValue);
+}
+
+void Processor::MessageBreakExecuteAddress(unsigned int uAddress) {
+   FormattedMessage("execution break at address 0x%03x", uAddress);
+}
+
+void Processor::FormattedMessage(FILE * pOut, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap,fmt);
+  if (pOut == NULL || pOut == stdout) {
+    gpsimInterface & gpInterface = get_interface();
+    ISimConsole &console = gpInterface.GetConsole();
+    console.VPrintf(fmt, ap);
+  }
+  else {
+    vfprintf(pOut, fmt, ap);
+  }   
+  va_end(ap);
+}
+
+void Processor::FormattedMessage(const char *fmt, ...) {
+  gpsimInterface & gpInterface = get_interface();
+  ISimConsole &console = gpInterface.GetConsole();
+  va_list ap;
+  va_start(ap,fmt);
+  console.VPrintf(fmt, ap);
+  va_end(ap);
+}
+
+
 
 //-------------------------------------------------------------------
 instruction &ProgramMemoryAccess::operator [] (unsigned int address)

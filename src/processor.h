@@ -528,6 +528,15 @@ public:
 
   virtual void Debug();
 
+  // Console or file output messages
+  static void MessageBreakOnRead(unsigned int uAddress);
+  static void MessageBreakOnRead(unsigned int uAddress, unsigned uValue);
+  static void MessageBreakOnWrite(unsigned int uAddress);
+  static void MessageBreakOnWrite(unsigned int uAddress, unsigned uValue);
+  static void MessageBreakExecuteAddress(unsigned int uAddress);
+  static void FormattedMessage(FILE * pOut, const char *fmt, ...);
+  static void FormattedMessage(const char *fmt, ...);
+
   //
   // FIXME -- create -- a way of constructing a processor (why not use constructors?)
   //

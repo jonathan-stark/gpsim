@@ -52,7 +52,7 @@ unsigned int count_bits(unsigned int ui)
 // be undefined and will get converted to a question mark.
 //
 
-char * RegisterValue::toString(char *str, int len, int regsize)
+char * RegisterValue::toString(char *str, int len, int regsize) const
 {
   if(str && len) {
     RegisterValue rv = *this;
@@ -149,7 +149,7 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 			       const char *cByteSeparator,
 			       const char *HiBitNames,
 			       const char *LoBitNames,
-			       const char *UndefBitNames)
+			       const char *UndefBitNames) const
 {
   unsigned int i,mask,max;
 
@@ -374,6 +374,44 @@ void Register::put_value(unsigned int new_value)
   update();
 
 }
+
+///
+/// New accessor functions
+//////////////////////////////////////////////////////////////
+
+//------------------------------------------------------------
+
+///  SimulatedGet()
+///  Return the contents of the file register.
+///  (note - breakpoints on file register reads
+///  are not checked here. Instead, a breakpoint
+///  object replaces those instances of file 
+///  registers for which we wish to monitor.
+///  So a file_register::SimulatedGet call will invoke
+///  the breakpoint::get member function. Depending
+///  on the type of break point, this SimulatedGet() may
+///  or may not get called).
+
+unsigned int Register::SimulatedGet(void)
+{
+  // for now call the old API
+  return get();
+}
+
+//------------------------------------------------------------
+///  SimulatedSet()
+///  Update the contents of the register.
+///  See the comment above in Register::SimulatedGet()
+///  with respect to break points
+//
+
+void Register::SimulatedSet(unsigned int new_value)
+{
+  // for now call the old API
+  put(new_value);
+}
+
+
 
 //-----------------------------------------------------------
 // set_write_trace

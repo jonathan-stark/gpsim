@@ -127,31 +127,60 @@ public:
   virtual ~gpsimValue();
 
 
-  // Access functions
+  /// Access functions
+  /// \deprecated Use SimulatedGet()
   virtual unsigned int get(void)
   {
     return get_value();
   }
 
+  /// \deprecated Use SimulatedSet()
   virtual void put(unsigned int new_value)
   {
     put_value(new_value);
   }
 
-  
-  // put_value is the same as put(), but some extra stuff like
-  // interfacing to the gui is done. (It's more efficient than
-  // burdening the run time performance with (unnecessary) gui
-  // calls.)
-  //
+  /// put_value is the same as put(), but some extra stuff like
+  /// interfacing to the gui is done. (It's more efficient than
+  /// burdening the run time performance with (unnecessary) gui
+  /// calls.)
+  ///
+  /// \deprecated Use ShuntedSet() where appropriate. If ShuntedSet()
+  /// does not meet the procise needs consider defining a new
+  /// pair of access functions.
 
   virtual void put_value(unsigned int new_value) = 0;
 
-  // A variation of get(). (for register values, get_value returns
-  // just the value whereas get() returns the value and does other
-  // register specific things like tracing.
+  /// A variation of get(). (for register values, get_value returns
+  /// just the value whereas get() returns the value and does other
+  /// register specific things like tracing.
 
   virtual unsigned int get_value(void) = 0;
+
+  /// SimulatedGet() invokes the full simulation of getting a
+  /// a value from a simulated object.
+  virtual unsigned int  SimulatedGet(void) {
+    return ShuntedGet();
+  }
+
+  /// SimulatedSet() invokes the full simulation of setting a
+  /// a value of a simulated object.
+  virtual void          SimulatedSet(unsigned int new_value) {
+    ShuntedSet(new_value);
+  }
+
+  /// ShuntedGet() bypasses all simulated effects of a SimulatedSet().
+  /// \return Returns an identical value as a SimulatedGet()
+  virtual unsigned int  ShuntedGet(void) {
+    // for now use old API
+    return get_value();
+  }
+
+  /// ShuntedSet() bypasses all simulated effects of a SimulatedSet().
+  virtual void          ShuntedSet(unsigned int new_value){
+    // for now use old API
+    put_value(new_value);
+  }
 
   virtual void set_module(Module *new_cpu)
   {

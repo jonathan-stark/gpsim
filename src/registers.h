@@ -108,12 +108,12 @@ inline unsigned int geti(void)
       data >>= val;
       init >>= val;
   }
-  char * toString(char *str, int len, int regsize=2);
+  char * toString(char *str, int len, int regsize=2) const;
   char * toBitStr(char *s, int len, unsigned int BitPos, 
 		  const char *ByteSeparator="_",
 		  const char *HiBitNames=0,
 		  const char *LoBitNames=0,
-		  const char *UndefBitNames=0);
+		  const char *UndefBitNames=0) const;
 
 };
 
@@ -209,6 +209,8 @@ public:
   }
 
   /// putRV - write a new value to the register.
+  /// \deprecated {use SimPutAsRegisterValue()}
+  /// 
 
   virtual void putRV(RegisterValue rv)
   { 
@@ -233,6 +235,16 @@ public:
     put_value(rv.data);
   }
 
+  virtual RegisterValue getRVN(void)
+  {
+    return getRVN_notrace();
+  }
+  virtual RegisterValue getRVN_notrace(void)
+  {
+    return getRV_notrace();
+  }
+
+
   /// In the Register class, the 'Register *get()' returns a
   /// pointer to itself. Derived classes may return something
   /// else (e.g. a break point may be pointing to the register
@@ -243,6 +255,12 @@ public:
     return this;
   }
   
+  /// simulatedGet() invokes the full simulation of getting a
+  /// a value from a simulated object.
+  virtual unsigned int  SimulatedGet(void);
+  /// simulatedSet() invokes the full simulation of getting a
+  /// a value from a simulated object.
+  virtual void          SimulatedSet(unsigned int new_value);
 
   virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
@@ -399,9 +417,9 @@ public:
   // initialize the dynamically allocated trace type
   virtual void set_trace_command(unsigned int);
 
-  // get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
-  // whereas get_raw_value isn't. The raw value of the program counter
-  // is used as an index into the program memory.
+  /// get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
+  /// whereas get_raw_value isn't. The raw value of the program counter
+  /// is used as an index into the program memory.
   virtual unsigned int get_raw_value()
   {
     return value;
