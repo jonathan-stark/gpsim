@@ -142,14 +142,14 @@ void Binary_Indicator::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Binary_Indicator::construct(const char *new_name)
+Module * Binary_Indicator::construct(const char *_new_name)
 {
 
   cout << " Binary Indicator \n";
 
   Binary_Indicator *biP = new Binary_Indicator;
 
-  biP->new_name((char *)new_name);
+  biP->new_name((char *)_new_name);
   biP->create_iopin_map();
 
 

@@ -363,13 +363,13 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 //--------------------------------------------------------------
 // construct
 
-Module * AND2Gate::construct(const char *new_name)
+Module * AND2Gate::construct(const char *_new_name)
 {
 
 
   AND2Gate *a2gP = new AND2Gate ;
 
-  a2gP->new_name((char*)new_name);
+  a2gP->new_name((char*)_new_name);
   a2gP->set_number_of_pins(3);
   a2gP->create_iopin_map();
 
@@ -424,13 +424,13 @@ OR2Gate::~OR2Gate(void)
 
 }
 
-Module * OR2Gate::construct(const char *new_name)
+Module * OR2Gate::construct(const char *_new_name)
 {
 
 
   OR2Gate *o2gP = new OR2Gate ;
 
-  o2gP->new_name((char*)new_name);
+  o2gP->new_name((char*)_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 
@@ -462,12 +462,12 @@ void ORGate::update_state(void)
 
 //--------------------------------------------------------------
 // construct NOT
-Module * NOTGate::construct(const char *new_name)
+Module * NOTGate::construct(const char *_new_name)
 {
 
   NOTGate *a2gP = new NOTGate ;
 
-  a2gP->new_name((char*)new_name);
+  a2gP->new_name((char*)_new_name);
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
 
@@ -521,12 +521,12 @@ XOR2Gate::~XOR2Gate(void)
 {
 }
 
-Module * XOR2Gate::construct(const char *new_name)
+Module * XOR2Gate::construct(const char *_new_name)
 {
 
   XOR2Gate *o2gP = new XOR2Gate ;
 
-  o2gP->new_name((char*)new_name);
+  o2gP->new_name((char*)_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 

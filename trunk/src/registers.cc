@@ -43,6 +43,7 @@ Register::Register(void)
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
+  replacedBy = 0;
 
 }
 

@@ -170,11 +170,11 @@ void PushButton::create_widget(PushButton *pb)
 
 //--------------------------------------------------------------
 // construct
-Module * PushButton::construct(const char *new_name=0)
+Module * PushButton::construct(const char *_new_name=0)
 {
 
   PushButton *pshbP = new PushButton ;
-  pshbP->new_name((char*)new_name);
+  pshbP->new_name((char*)_new_name);
   pshbP->create_iopin_map();
 
   pshbP->create_widget(pshbP);

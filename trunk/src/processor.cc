@@ -52,7 +52,6 @@ Boston, MA 02111-1307, USA.  */
 
 SIMULATION_MODES simulation_mode;
 
-
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
 // 'active' means that it's the one currently being simulated or the one
@@ -72,7 +71,6 @@ static void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
 Processor::Processor(void)
 {
-
 
   if(verbose)
     cout << "pic_processor constructor\n";

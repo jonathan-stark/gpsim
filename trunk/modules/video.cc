@@ -276,14 +276,14 @@ void Video::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Video::construct(const char *new_name)
+Module * Video::construct(const char *_new_name)
 {
 
   //cout << " AND2Gate  construct\n";
 
   Video *video = new Video ;
 
-  video->new_name((char*)new_name);
+  video->new_name((char*)_new_name);
   video->create_iopin_map();
 
   //cout << "AND2Gate should be constructed\n";

@@ -202,14 +202,14 @@ void Resistor::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Resistor::construct(const char *new_name)
+Module * Resistor::construct(const char *_new_name)
 {
 
   cout << " Resistor construct \n";
 
   Resistor *resP = new Resistor;
 
-  resP->new_name((char*)new_name);
+  resP->new_name((char*)_new_name);
   resP->create_iopin_map();
 
 
@@ -309,16 +309,16 @@ void PullupResistor::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-Module * PullupResistor::pu_construct(const char *new_name)
+Module * PullupResistor::pu_construct(const char *_new_name)
 {
 
   cout << "Pullup Resistor construct \n";
 
-  PullupResistor *pur = new PullupResistor(new_name);
+  PullupResistor *pur = new PullupResistor(_new_name);
 
-  if(new_name) {
-    pur->new_name((char*)new_name);
-    pur->res->put_name(new_name);
+  if(_new_name) {
+    pur->new_name((char*)_new_name);
+    pur->res->put_name(_new_name);
   }
 
   pur->create_iopin_map();
@@ -330,16 +330,16 @@ Module * PullupResistor::pu_construct(const char *new_name)
 }
 
 //--------------------------------------------------------------
-Module * PullupResistor::pd_construct(const char *new_name)
+Module * PullupResistor::pd_construct(const char *_new_name)
 {
 
   cout << "Pulldown Resistor construct \n";
 
-  PullupResistor *pur = new PullupResistor(new_name);
+  PullupResistor *pur = new PullupResistor(_new_name);
 
-  if(new_name) {
-    pur->new_name((char*)new_name);
-    pur->res->put_name(new_name);
+  if(_new_name) {
+    pur->new_name((char*)_new_name);
+    pur->res->put_name(_new_name);
   }
   pur->create_iopin_map();
 

@@ -347,14 +347,14 @@ void Paraface::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Paraface::construct(const char *new_name=NULL)
+Module * Paraface::construct(const char *_new_name=0)
 {
 
 //    cout << " Parport constructor\n";
 
     Paraface *parafaceP = new Paraface ;
     parafaceP->open_parallel_port();
-    parafaceP->new_name((char*)new_name);
+    parafaceP->new_name((char*)_new_name);
     parafaceP->create_iopin_map();
 
     return parafaceP;

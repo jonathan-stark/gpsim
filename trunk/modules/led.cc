@@ -682,13 +682,13 @@ void Led_7Segments::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Led_7Segments::construct(const char *new_name=0)
+Module * Led_7Segments::construct(const char *_new_name=0)
 {
 
 //  cout << " 7-segment LED display constructor\n";
 
   Led_7Segments *l7sP = new Led_7Segments ;
-  l7sP->new_name((char*)new_name);
+  l7sP->new_name((char*)_new_name);
   l7sP->create_iopin_map();
 
   return l7sP;
@@ -914,13 +914,13 @@ void Led::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Led::construct(const char *new_name=0)
+Module * Led::construct(const char *_new_name=0)
 {
 
 //  cout << " 7-segment LED display constructor\n";
 
   Led *ledP = new Led;
-  ledP->new_name((char*)new_name);
+  ledP->new_name((char*)_new_name);
   ledP->create_iopin_map();
 
   return ledP;
