@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 #include <gtk/gtk.h>
+#include <assert.h>
 #include <gtkextra/gtksheet.h>
 #include "../src/interface.h"
 #include "../src/gpsim_def.h"
@@ -404,6 +405,26 @@ class StopWatch_Window : public GUI_Object
   virtual void Build(void);
   virtual void Update(void);
 
+  void EnterUpdate(void)
+  {
+    assert(from_update >= 0);
+    ++from_update;
+  }
+
+  void ExitUpdate(void)
+  {
+    assert(from_update > 0);
+    --from_update;
+  }
+
+  bool IsUpdate(void) const
+  {
+    assert(from_update >= 0);
+    return from_update != 0;
+  }
+
+private:
+  int from_update;
 };
 
 
@@ -704,8 +725,13 @@ struct gui_node
 class Breadboard_Window : public GUI_Object {
  public:
 
+#if GTK_MAJOR_VERSION >= 2
+    PangoFontDescription *pinstatefont;
+    PangoFontDescription *pinnamefont;
+#else
     GdkFont *pinstatefont;
     GdkFont *pinnamefont;
+#endif
     int pinnameheight;
 
     GtkWidget *layout;

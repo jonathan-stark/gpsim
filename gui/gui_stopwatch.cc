@@ -112,12 +112,13 @@ void StopWatch_Window::Update(void)
   sprintf(offsetstring, "%Ld", offset);
   sprintf(rolloverstring, "%Ld", rollover);
 
+  EnterUpdate();
   gtk_entry_set_text (GTK_ENTRY (frequencyentry), frequencystring);
   gtk_entry_set_text (GTK_ENTRY (cycleentry), cyclestring);
   gtk_entry_set_text (GTK_ENTRY (timeentry), timestring);
   gtk_entry_set_text (GTK_ENTRY (offsetentry), offsetstring);
   gtk_entry_set_text (GTK_ENTRY (rolloverentry), rolloverstring);
-
+  ExitUpdate();
 }
 
 static void zero_cb(GtkWidget *w, gpointer user_data)
@@ -169,10 +170,10 @@ cyclechanged(GtkWidget *widget, StopWatch_Window *sww)
     const char *text;
     if(widget==0|| sww==0)
     {
-	printf("Warning cyclechanged(%p,%p)\n",widget,sww);
-	return;
+        printf("Warning cyclechanged(%p,%p)\n",widget,sww);
+        return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
+    if(!sww->IsUpdate() && (text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v = strtoll(text,0,10);
 	if(v!=(sww->cyclecounter-sww->offset)%sww->rollover)
@@ -194,7 +195,7 @@ offsetchanged(GtkWidget *widget, StopWatch_Window *sww)
 	printf("Warning offsetchanged(%p,%p)\n",widget,sww);
 	return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
+    if(!sww->IsUpdate() && (text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v = strtoll(text,0,10);
 
@@ -214,7 +215,7 @@ rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 	printf("Warning rolloverchanged(%p,%p)\n",widget,sww);
 	return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
+    if(!sww->IsUpdate() && (text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v = strtoll(text,0,10);
 
@@ -370,8 +371,7 @@ void StopWatch_Window::Build(void)
   is_built=1;
   
   UpdateMenuItem();
-  Update();
-    
+  Update();   
 }
 
 //------------------------------------------------------------------------
@@ -379,7 +379,6 @@ void StopWatch_Window::Build(void)
 //
 StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
 {
-
   char *string;
 
   menu = "<main>/Windows/Stopwatch";
@@ -396,6 +395,8 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   cyclecounter=0;
   offset=0;
 
+  from_update = 0;
+
   get_config();
   if(config_get_string(name,"rollover",&string))
     rollover = strtoll(string,0,10);
@@ -403,7 +404,6 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
     
   if(enabled)
     Build();
-
 }
 
 
