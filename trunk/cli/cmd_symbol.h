@@ -31,10 +31,10 @@ public:
   cmd_symbol(void);
 
   void dump_all(void);
-  void dump_one(char *sym_name);
+  void dump_one(const char *sym_name);
   void dump_one(Value *);
 
-  void add_one(char *sym_name, char *sym_type, Expression *);
+  void add_one(const char *sym_name, const char *sym_type, Expression *);
 };
 
 extern cmd_symbol c_symbol;

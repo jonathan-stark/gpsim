@@ -58,7 +58,7 @@ public:
   /// the type of this value. If the type cast is not supported in a
   /// derived class, an Error will be thrown.
 
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
   virtual void set(double);
   virtual void set(gint64);
   virtual void set(int);
@@ -203,7 +203,7 @@ public:
 
   virtual void set(bool);
   virtual void set(Value *);
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
 
   bool getVal() { return value; }
 
@@ -241,7 +241,7 @@ public:
   virtual void set(int);
   virtual void set(double d);
   virtual void set(Value *);
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
 
   gint64 getVal() { return value; }
 
@@ -279,7 +279,7 @@ public:
   virtual void set(gint64 v);
   virtual void set(double d);
   virtual void set(Value *);
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
 
   double getVal() { return value; }
 
@@ -298,22 +298,22 @@ class String : public Value {
 
 public:
 	
-  String(string newValue);
+  String(const char *newValue);
+  String(const char *_name, const char *newValue, const char *desc=0);
   virtual ~String();
 
   virtual string toString();
-  string toString(char* format);
-  static string toString(string value);
-  static string toString(char* format, string value);
-  string getVal();
 
-  virtual Value *copy() { return new String(value); }
+  const char *getVal();
 
-  static String* typeCheck(Value* val, string valDesc);
-  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+  virtual void set(Value *);
+  virtual void set(const char *cP,int len=0);
+  virtual void get(char *, int len);
+
+  virtual Value *copy();
 
 private:
-  string value;
+  char *value;
 };
 
 /*****************************************************************/

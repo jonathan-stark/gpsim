@@ -38,7 +38,7 @@ static cmd_options cmd_processor_options[] =
 };
 
 
-void put_chars(char c, int number_of_chars)
+static void put_chars(char c, int number_of_chars)
 {
   for(int i=0; i<number_of_chars;i++)
     putchar(c);
@@ -165,7 +165,7 @@ void cmd_processor::processor(int bit_flag)
 }
 
 
-void cmd_processor::processor(char * processor_type, char * processor_new_name)
+void cmd_processor::processor(const char * processor_type, const char * processor_new_name)
 {
 
   new_processor((Processor *)add_processor( processor_type,  processor_new_name));

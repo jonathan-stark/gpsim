@@ -69,6 +69,7 @@ static int process_intLiteral(char *buffer, int conversionBase);
 static int process_booleanLiteral(bool value);
 static int process_macroBody(const char *text);
 static int process_floatLiteral(char *buffer);
+static int process_stringLiteral(const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
 
@@ -451,8 +452,10 @@ int handle_identifier(const string &s, cmd_options **op )
 
   if(verbose&2)
     cout << " returning unknown string: " << s << endl;
-  yylval.s = strdup(s.c_str());
-  return recognize(STRING,"string");
+  //yylval.s = strdup(s.c_str());
+  //return recognize(STRING,"string");
+
+  return process_stringLiteral(s.c_str());
 
   return 0;
 
@@ -529,6 +532,15 @@ static int process_floatLiteral(char *buffer)
   return(recognize(LITERAL_FLOAT_T, "float literal"));
 }
 
+
+/*****************************************************************
+ *
+ */
+static int process_stringLiteral(const char *buffer)
+{
+  yylval.String_P = new String(buffer);
+  return(recognize(LITERAL_STRING_T, "string literal"));
+}
 
 
 static string

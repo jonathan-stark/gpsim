@@ -67,7 +67,7 @@ void cmd_help::help(void)
 }
 
 
-void cmd_help::help(char *cmd)
+void cmd_help::help(const char *cmd)
 {
 
   for(int i=0; i<number_of_commands; i++)

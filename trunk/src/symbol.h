@@ -165,7 +165,7 @@ public:
 
   virtual void set(int);
   virtual void set(Value *);
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
 
   Register *getReg();
 
@@ -245,7 +245,7 @@ public:
   virtual void set(int);
   virtual void set(Value *);
   virtual void set(Expression *);
-  virtual void set(char *cP,int len=0);
+  virtual void set(const char *cP,int len=0);
 
   virtual void get(int &);
   virtual void get(gint64 &);

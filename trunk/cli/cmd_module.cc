@@ -38,8 +38,6 @@ cmd_module c_module;
 #define CMD_MOD_DUMP    3
 #define CMD_MOD_LIB     4
 #define CMD_MOD_PINS    5
-#define CMD_MOD_SET     6
-#define CMD_MOD_POSITION 7
 
 
 static cmd_options cmd_module_options[] =
@@ -50,9 +48,6 @@ static cmd_options cmd_module_options[] =
   {"pins",      CMD_MOD_PINS,    OPT_TT_STRING},
   {"library",   CMD_MOD_LIB ,    OPT_TT_STRING},
   {"lib",       CMD_MOD_LIB ,    OPT_TT_STRING},
-  {"set",       CMD_MOD_SET ,    OPT_TT_STRING},
-  {"position",  CMD_MOD_POSITION,OPT_TT_STRING},
-  {"pos",       CMD_MOD_POSITION,OPT_TT_STRING},
   {0,0,0}
 };
 
@@ -65,7 +60,7 @@ cmd_module::cmd_module(void)
 
   long_doc = string (
     "module [ [load module_type [module_name]] | [lib lib_name] | [list] | \n"
-    "[[dump | pins] module_name] ] | [set module_name attribute value]\n"
+    "[[dump | pins] module_name] ] \n"
     "\tIf no options are specified, then the currently defined module(s)\n"
     "\twill be displayed. This is the same as the `module list' command.\n"
     "\tThe `module load lib_name' tells gpsim to search for the module\n"
@@ -92,8 +87,6 @@ cmd_module::cmd_module(void)
     "\tmodule pins my_lcd          // Display the pin states of an instantiated module\n"
     "\tmodule load lcd lcd2x20     // Create a new module.\n"
     "\tmodule load pullup R1       // and another.\n"
-    "\tmodule set R1 resistance 10e3 // change an attribute.\n"
-    "\tmodule pos R1 200 300       // Move R1 in the breadboard window\n"
 );
 
   op = cmd_module_options; 
@@ -131,14 +124,13 @@ void cmd_module::module(cmd_options *opt)
 }
 
 void cmd_module::module(cmd_options_str *cos, 
-			list <string> *strs,
-			ExprList_t *eList)
+			list <string> *strs)
 {
-  const int cMAX_PARAMETERS=2;
-  int nParameters=cMAX_PARAMETERS;
-  guint64 parameters[cMAX_PARAMETERS] = {0,0};
+  //  const int cMAX_PARAMETERS=2;
+  //  int nParameters=cMAX_PARAMETERS;
+  //  guint64 parameters[cMAX_PARAMETERS] = {0,0};
 
-  evaluate(eList, parameters, &nParameters);
+  //  evaluate(eList, parameters, &nParameters);
 
   list <string> :: iterator si;
   string s1, s2;
@@ -161,18 +153,18 @@ void cmd_module::module(cmd_options_str *cos,
 
   // Now choose the specific command based on the input parameters
   
-  if(nParameters==0 && nStrings==0)
+  if(nStrings==0)
     module(cos);
-  else if(nParameters==0 && nStrings==1)
-    module(cos, (char*)s1.c_str(), (char*)0);
-  else if(nParameters==0 && nStrings==2)
-    module(cos, (char*)s1.c_str(), (char*)s2.c_str());
-  else if(nParameters==1 && nStrings==1)
-    module(cos, (char*)s1.c_str(), parameters[0]);
-  else if(nParameters==2 && nStrings==0)
-    module(cos, parameters[0], parameters[1]);
-  else if(nParameters==1 && nStrings==2)
-    module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
+  else if(nStrings==1)
+    module(cos, s1.c_str());
+  //else if(nParameters==0 && nStrings==2)
+  //  module(cos, (char*)s1.c_str(), (char*)s2.c_str());
+  //else if(nParameters==1 && nStrings==1)
+  //  module(cos, (char*)s1.c_str(), parameters[0]);
+  //else if(nParameters==2 && nStrings==0)
+  //  module(cos, parameters[0], parameters[1]);
+  //else if(nParameters==1 && nStrings==2)
+  //  module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
   else
     cout << "module command error\n";
 
@@ -208,12 +200,6 @@ void cmd_module::module(cmd_options_str *cos)
       module_pins(cos->str);
       break;
 
-    case CMD_MOD_SET:
-      cout << "module set command :  module name = " << cos->str <<'\n';
-      // cast 0 to char's to disambiguate the call
-      module_set_attr(cos->str,(char *)0,(char *)0);
-      break;
-
     default:
       cout << "cmd_module error\n";
     }
@@ -222,8 +208,8 @@ void cmd_module::module(cmd_options_str *cos)
 
 }
 
-/*
-void cmd_module::module(cmd_options_str *cos, char * op1)
+
+void  cmd_module::module(cmd_options_str *cos, const char *op1)
 {
 
   switch(cos->co->value)
@@ -236,123 +222,8 @@ void cmd_module::module(cmd_options_str *cos, char * op1)
 
       break;
 
-    case CMD_MOD_SET:
-      cout << "module set command :  module name = " << cos->str <<'\n';
-      if(op1)
-	cout << "   option1 = " << op1 <<'\n';
-
-      module_set_attr(cos->str,op1,(char *)NULL);
-      break;
-
-    default:
-      cout << "cmd_module error\n";
-    }
-
-
-}
-*/
-
-void  cmd_module::module(cmd_options_str *cos, char *op1, char *op2)
-{
-
-  switch(cos->co->value)
-    {
-
-    case CMD_MOD_LOAD:
-      // Load a module from (an already loaded) library 
-
-      module_load_module( cos->str,  op1);
-
-      break;
-
-    case CMD_MOD_SET:
-      cout << "module set command :  module name = " << cos->str <<'\n';
-      if(op1)
-	cout << "   option1 = " << op1 <<'\n';
-
-      if(op2)
-	cout << "   option2 = " << op2 <<'\n';
-
-      module_set_attr(cos->str,op1,op2);
-      break;
-
     default:
       cout << "Warning, ignoring module command\n";
     }
 }
 
-void cmd_module::module(cmd_options_str *cos, char *op1, double op2)
-{
-
-  switch(cos->co->value)
-    {
-
-    case CMD_MOD_SET:
-      if(verbose & 2) {
-	cout << "module set command :  module name = " << cos->str <<'\n';
-	if(op1)
-	  cout << "   option1 = " << op1 <<'\n';
-
-	if(op2)
-	  cout << "   option2 = " << op2 <<'\n';
-      }
-
-      module_set_attr(cos->str,op1,op2);
-      module_update(cos->str);
-      break;
-
-    default:
-      cout << "Warning, ignoring module command\n";
-    }
-
-
-}
-
-void cmd_module::module(cmd_options_str *cos, char *op1, char *op2, int op3)
-{
-
-  switch(cos->co->value)
-    {
-
-    case CMD_MOD_SET:
-      if(verbose & 2) {
-	cout << "module set command :  module name = " << cos->str <<'\n';
-	if(op1)
-	  cout << "   option1 = " << op1 <<'\n';
-
-	if(op2)
-	  cout << "   option2 = " << op2 <<'\n';
-
-	cout << "   option3 = " << op3 <<'\n';
-      }
-
-      module_set_attr(cos->str,op1,op2,op3);
-      module_update(cos->str);
-      break;
-
-    default:
-      cout << "Warning, ignoring module command\n";
-    }
-
-
-}
-
-void cmd_module::module(cmd_options_str *cos, guint64 op1, guint64 op2)
-{
-
-  switch(cos->co->value)
-    {
-
-    case CMD_MOD_POSITION:
-      module_set_attr(cos->str, "xpos", (double)op1);
-      module_set_attr(cos->str, "ypos", (double)op2);
-      module_update(cos->str);
-
-      break;
-
-    default:
-      cout << "Warning, ignoring module command\n";
-    }
-
-
-}

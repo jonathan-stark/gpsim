@@ -45,7 +45,7 @@ class cmd_options_str
  public:
   cmd_options *co;
   char *str;
-  cmd_options_str(char *);
+  cmd_options_str(const char *);
   ~cmd_options_str();
 };
 

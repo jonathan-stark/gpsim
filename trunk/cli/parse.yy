@@ -361,7 +361,6 @@ break_cmd
           : BREAK                       {c_break.list();}
           | BREAK bit_flag              {c_break.set_break($2);}
           | BREAK bit_flag expr_list    {c_break.set_break($2,$3);}
-          | BREAK bit_flag STRING       {c_break.set_break($2,$3);}
           ;
 
 bus_cmd
@@ -394,7 +393,7 @@ frequency_cmd
 
 help_cmd
           : HELP                        {help.help(); }
-          | HELP STRING                 {help.help($2); free($2);}
+          | HELP LITERAL_STRING_T       {help.help($2->getVal()); /*free($2);*/}
           | HELP SYMBOL_T               {help.help($2);}
           ;
 
@@ -403,9 +402,9 @@ list_cmd
           | LIST bit_flag               {c_list.list($2);}
           ;
 
-load_cmd: LOAD bit_flag STRING
+load_cmd: LOAD bit_flag LITERAL_STRING_T
           {
-	    c_load.load($2->value,$3);
+	    c_load.load($2->value,$3->getVal());
             free($3);
 
 	    if(quit_parse)
@@ -419,8 +418,8 @@ load_cmd: LOAD bit_flag STRING
 log_cmd
           : LOG                         {c_log.log();}
           | LOG bit_flag                {c_log.log($2,0,0);}
-          | LOG bit_flag STRING         {c_log.log($2,$3,0);}
-          | LOG bit_flag STRING expr_list {c_log.log($2,$3,$4);}
+//          | LOG bit_flag LITERAL_STRING_T         {c_log.log($2,$3->getVal(),0);}
+//          | LOG bit_flag LITERAL_STRING_T expr_list {c_log.log($2,$3->getVal(),$4);}
           | LOG bit_flag expr_list      {c_log.log($2,0,$3);}
           ;
 
@@ -433,13 +432,9 @@ node_cmd
 module_cmd
           : MODULE                      {c_module.module();}
           | MODULE bit_flag             {c_module.module($2);}
-          | MODULE string_option        {c_module.module($2,(list <string> *)0,0);}
+          | MODULE string_option        {c_module.module($2,(list <string> *)0);}
           | MODULE string_option string_list
-                                        {c_module.module($2, $3, 0);}
-          | MODULE string_option expr_list 
-                                        {c_module.module($2, 0, $3);}
-          | MODULE string_option string_list expr_list 
-                                        {c_module.module($2, $3, $4);}
+                                        {c_module.module($2, $3);}
           ;
 
 
@@ -451,13 +446,13 @@ processor_cmd: PROCESSOR
 	  {
 	    c_processor.processor($2->value);
 	  }
-          | PROCESSOR STRING
+          | PROCESSOR LITERAL_STRING_T
 	  {
-	    c_processor.processor($2,0);
+	    c_processor.processor($2->getVal(),0);
 	  }
-          | PROCESSOR STRING STRING
+          | PROCESSOR LITERAL_STRING_T LITERAL_STRING_T
 	  { 
-            c_processor.processor($2,$3);
+            c_processor.processor($2->getVal(),$3->getVal());
           }
 
           ;
@@ -551,11 +546,11 @@ stimulus_opt:
 
 symbol_cmd
           : SYMBOL                      {c_symbol.dump_all();}
-          | SYMBOL STRING               {c_symbol.dump_one($2);}
-          | SYMBOL STRING STRING expr
-          {
-	    c_symbol.add_one($2,$3,$4);
-	  }
+          | SYMBOL LITERAL_STRING_T               {c_symbol.dump_one($2->getVal());}
+//          | SYMBOL LITERAL_STRING_T LITERAL_STRING_T expr
+//          {
+//	    c_symbol.add_one($2->getVal(),$3->getVal(),$4);
+//	  }
           | SYMBOL SYMBOL_T             {c_symbol.dump_one($2);}
           ;
 
@@ -607,8 +602,8 @@ macro_cmd:
          ;
 
 macrodef_directive
-        : STRING MACRO
-                                        {c_macro.define($1);}
+        : LITERAL_STRING_T MACRO
+                                        {c_macro.define($1->getVal());}
           opt_mdef_arglist rol
                                         {lexer_setMacroBodyMode();}
 
@@ -617,8 +612,8 @@ macrodef_directive
 
 opt_mdef_arglist
         : /* empty */
-        | STRING                        {c_macro.add_parameter($1); free($1);}
-        | opt_mdef_arglist ',' STRING   {c_macro.add_parameter($3); free($3);}
+        | STRING                        {c_macro.add_parameter($1);}
+        | opt_mdef_arglist ',' STRING   {c_macro.add_parameter($3);}
         ;
 
 
@@ -634,7 +629,7 @@ mdef_body_
 
 mdef_end
         : ENDM                          {c_macro.end_define();}
-        | STRING ENDM                   {c_macro.end_define($1); free($1);}
+        | LITERAL_STRING_T ENDM                   {c_macro.end_define($1->getVal()); }
         ;
 
 
@@ -682,9 +677,9 @@ numeric_option: NUMERIC_OPTION expr
 	}
         ;
 
-string_option: STRING_OPTION STRING
+string_option: STRING_OPTION LITERAL_STRING_T
         { 
-	  $$ = new cmd_options_str($2);
+	  $$ = new cmd_options_str($2->getVal());
 	  $$->co  = $1;
           if(verbose&2)
 	    cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
@@ -692,8 +687,8 @@ string_option: STRING_OPTION STRING
         ;
 
 string_list
-        : STRING                        {$$ = new StringList_t(); $$->push_back($1);}
-        | string_list STRING            {$1->push_back($2);}
+        : LITERAL_STRING_T                        {$$ = new StringList_t(); $$->push_back($1->getVal());}
+        | string_list LITERAL_STRING_T            {$1->push_back($2->getVal());}
         ;
 
 symbol_list

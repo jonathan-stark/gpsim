@@ -288,10 +288,9 @@ public:
 // non-class helper functions.
 
 void initialize_processor_constructor(void);
-Processor *  add_processor(char * processor_type, char * processor_new_name);
+Processor *  add_processor(const char * processor_type, const char * processor_new_name);
 void display_available_processors(void);
 void dump_processor_list(void);
-int find_in_available_processor_list(char * processor_type);
 Processor *get_processor(unsigned int cpu_id);
 
 

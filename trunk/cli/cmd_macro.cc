@@ -35,7 +35,7 @@ class MacroLine {
 
 map <const string, Macro *> macro_map;
 
-Macro::Macro(char *_name)
+Macro::Macro(const char *_name)
 {
   new_name(_name);
 
@@ -50,7 +50,7 @@ Macro::Macro(char *_name)
 // Add a new argument to the macro. This is called when
 // the macro is being defined.
 
-void Macro::add_argument(char *new_arg)
+void Macro::add_argument(const char *new_arg)
 {
   if(new_arg)
     arguments.push_back(string(new_arg));
@@ -68,7 +68,7 @@ void Macro::add_argument(char *new_arg)
 // redirected to the lexer input stream when the macro
 // is invoked.
 
-void Macro::add_body(char *new_line)
+void Macro::add_body(const char *new_line)
 {
   if(!new_line)
     return;
@@ -163,7 +163,7 @@ void Macro::prepareForInvocation()
 // arguments (i.e. the first parameter will substitute the
 // first argument).
 
-void Macro::add_parameter(char *s)
+void Macro::add_parameter(const char *s)
 {
   parameters.push_back(string(s));
 }
@@ -267,7 +267,7 @@ void cmd_macro::list(void)
 }
 
 
-void cmd_macro::define(char *name)
+void cmd_macro::define(const char *name)
 {
   if(!name)
     return;
@@ -284,7 +284,7 @@ void cmd_macro::define(char *name)
   macro_map[theMacro->name()] = theMacro;
 }
 
-void cmd_macro::add_parameter(char *parameter)
+void cmd_macro::add_parameter(const char *parameter)
 {
   if(!parameter || !theMacro)
     return;
@@ -293,7 +293,7 @@ void cmd_macro::add_parameter(char *parameter)
 
 }
 
-void cmd_macro::add_body(char *line)
+void cmd_macro::add_body(const char *line)
 {
   if(!line)
     return;
@@ -302,7 +302,7 @@ void cmd_macro::add_body(char *line)
 
 }
 
-void cmd_macro::end_define(char *opt_name)
+void cmd_macro::end_define(const char *opt_name)
 {
   cout << "ending macro definition\n";
 }

@@ -246,7 +246,7 @@ void cmd_break::set_break(int bit_flag,
     return;
 
   int b = MAX_BREAKPOINTS;
-  char *str = "err";
+  const char *str = "err";
   unsigned int reg = (unsigned int)r;
   unsigned int value = (unsigned int)v;
   unsigned int mask = (unsigned int)m;
@@ -303,38 +303,3 @@ void cmd_break::set_break(int bit_flag,
   }
 }
 
-void cmd_break::set_break(int bit_flag, char *sym, int value, int mask)
-{
-  /*
-  int sym_value;
-
-  if(!get_symbol_value(sym,&sym_value))
-    {
-      cout << '`' << sym << '\'' << " was not found in the symbol table\n";
-      return;
-    }
-
-  set_break(bit_flag,sym_value,value,mask);
-  */
-
-  cout << "this command is temporarily disabled\n";
-}
-
-void cmd_break::set_break(cmd_options *co, char *sym)
-{
-  /*
-  int sym_value;
-
-  if(!get_symbol_value(sym,&sym_value))
-    {
-      cout << '`' << sym << '\'' << " was not found in the symbol table\n";
-      return;
-    }
-
-  int bit_flag = co->value;
-
-  set_break(bit_flag,sym_value);
-  */
-  cout << "this command is temporarily disabled\n";
-
-}

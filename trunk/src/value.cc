@@ -45,7 +45,7 @@ Value::~Value()
 {
 }
 
-void Value::set(char *cP,int i)
+void Value::set(const char *cP,int i)
 {
   throw new Error(" cannot assign string to a " + showType());
 }
@@ -441,7 +441,7 @@ void Boolean::set(bool v)
   value = v;
 }
 
-void Boolean::set(char *buffer, int buf_size)
+void Boolean::set(const char *buffer, int buf_size)
 {
   if(buffer) {
 
@@ -516,7 +516,7 @@ void Integer::set(Value *v)
   Integer *iv = typeCheck(v,string("set "));
   set(iv->getVal());
 }
-void Integer::set(char *buffer, int buf_size)
+void Integer::set(const char *buffer, int buf_size)
 {
   if(buffer) {
 
@@ -719,7 +719,7 @@ void Float::set(Value *v)
   set(d);
 }
 
-void Float::set(char *buffer, int buf_size)
+void Float::set(const char *buffer, int buf_size)
 {
   if(buffer) {
 
@@ -810,66 +810,65 @@ bool Float::operator<(Value *rv)
 /*****************************************************************
  * The String class.
  */
-String::String(string newValue)
+String::String(const char *newValue)
 {
-  value = newValue;
+  if(newValue)
+    value = strdup(newValue);
+  else
+    value = 0;
 }
+String::String(const char *_name, const char *newValue,const char *_desc)
+  : Value(_name,_desc)
+{
+  if(newValue)
+    value = strdup(newValue);
+  else
+    value = 0;
+}
+
 
 String::~String()
 {
+  if(value)
+    free(value);
 }
 
 
-// -----------------------------------------------------------------
-// The string toString is a bit more complicated than you might
-// expect.  The complication comes from the fact that we want to
-// display the string in a fashion that will allow it to be
-// reparsed.  This really means that we need to reformat all
-// non-printing chars that we encounter in the string.
 string String::toString()
 {
-  unsigned int i;
-  string msg;
-  unsigned char c;
-
-  msg = "\"";
-  for (i=0; i<value.size(); ++i) {
-    c = value.at(i);
-
-    if (isprint((int)c)) {
-      /* Look for the printable chars that need to be escaped
-         so that the string could be easily reparsed by other
-         tools. */
-      if (c=='\\') msg += "\\";
-      if (c=='"') msg += "\\";
-      
-      msg += c;
-    }
-    else {
-      /* Display non-printing chars in a C-like fashion */
-      switch (c) {
-      case '\a': msg += "\\a"; break;
-      case '\b': msg += "\\b"; break;
-      case '\f': msg += "\\f"; break;
-      case '\n': msg += "\\n"; break;
-      case '\r': msg += "\\r"; break;
-      case '\t': msg += "\\t"; break;
-      case '\v': msg += "\\v"; break;
-      default:   msg += "\\" + Integer::toString("%02x", c);
-      }
-    }
-  }
-  msg += '"';
-
-  return(msg);
+  if(value)
+    return string(value);
+  else 
+    return string("");
 }
-/*
+
 void String::set(Value *v)
 {
-  String *sv = typeCheck(v,string("set "));
-  value = sv->getVal();
+  char buf[1024];
+
+  if(v) {
+    v->get(buf, sizeof(buf));
+    set(buf);
+  }
 }
-*/
+
+void String::set(const char *s,int len)
+{
+  if(value)
+    free(value);
+  if(s)
+    value = strdup(s);
+  else
+    value = 0;
+}
+void String::get(char *buf, int len)
+{
+  if(buf && value) {
+    strncpy(buf,value,len);
+  }
+}
+
+/*
 string String::toString(char* format)
 {
   char cvtBuf[1024];
@@ -877,8 +876,8 @@ string String::toString(char* format)
   sprintf(cvtBuf, format, value.c_str());
   return (string(&cvtBuf[0]));
 }
-
-
+*/
+/**
 String* String::typeCheck(Value* val, string valDesc)
 {
   if (typeid(*val) != typeid(String)) {
@@ -888,7 +887,9 @@ String* String::typeCheck(Value* val, string valDesc)
   // This static cast is totally safe in light of our typecheck, above.
   return((String*)(val));
 }
+*/
 
+/*
 bool String::compare(ComparisonOperator *compOp, Value *rvalue)
 {
   
@@ -902,16 +903,13 @@ bool String::compare(ComparisonOperator *compOp, Value *rvalue)
 
   return compOp->equal();
 }
-
-string String::getVal()
+*/
+const char *String::getVal()
 {
   return value;
 }
 
-/*
-bool String::operator<(Value *rv)
+Value *String::copy()
 {
-  String *_rv = typeCheck(rv,"OpLT");
-  return value < _rv->value;
+  return new String(value);
 }
-*/

@@ -67,7 +67,7 @@ void cmd_symbol::dump_all(void)
   get_symbol_table().dump_all();
 }
 
-void cmd_symbol::dump_one(char *sym_name)
+void cmd_symbol::dump_one(const char *sym_name)
 {
   get_symbol_table().dump_one(sym_name);
 }
@@ -78,7 +78,7 @@ void cmd_symbol::dump_one(Value *s)
     cout << s->toString() << endl;
 }
 
-void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)
+void cmd_symbol::add_one(const char *sym_name, const char *sym_type, Expression *expr)
 {
   get_symbol_table().add(sym_name,sym_type,(int)evaluate(expr));
 }
