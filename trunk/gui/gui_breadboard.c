@@ -85,6 +85,7 @@ void update(Breadboard_Window *bbw)
     if(bbw->pinline_gc==NULL)
     {
 	bbw->pinline_gc=gdk_gc_new(bbw->da->window);
+	g_assert(bbw->pinline_gc!=NULL);
 	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
 	bbw->pinname_gc=gdk_gc_new(bbw->da->window);
@@ -132,6 +133,7 @@ void update(Breadboard_Window *bbw)
 	}
 	else
 	{
+	    g_assert(bbw->pinline_gc!=NULL);
 	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
 	    draw_pin(bbw->pixmap,bbw->pinline_gc,PIN_OTHER,
                      bbw,
@@ -500,6 +502,13 @@ int CreateBreadboardWindow(GUI_Processor *gp)
   gp->breadboard_window = bbw;
 
     bbw->processor=0;
+    bbw->da = NULL;
+    bbw->pixmap = NULL;
+    bbw->pinstatefont = NULL;
+    bbw->picnamefont = NULL;
+    bbw->pinline_gc = NULL;
+    bbw->pinname_gc = NULL;
+    bbw->case_gc = NULL;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 

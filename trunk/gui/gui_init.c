@@ -112,7 +112,7 @@ void gui_styles_init(void)
   gdk_color_parse("red",&high_output_color);
   gdk_color_parse("green",&low_output_color);
   
-  gdk_color_parse("black",&black_color);
+  g_assert(gdk_color_parse("black",&black_color)!=FALSE);
   
 	gdk_colormap_alloc_color(colormap, &normal_bg_color,FALSE,TRUE );
 	gdk_colormap_alloc_color(colormap, &normal_fg_color,FALSE,TRUE );
