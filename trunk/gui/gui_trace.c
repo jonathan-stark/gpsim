@@ -189,6 +189,12 @@ void TraceWindow_update(Trace_Window *tw)
   tw->trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
   tw->last_cycle = cycle;
   gtk_clist_thaw(clist);
+
+/*  {
+      int i;
+      for(i=0;i<10;i++)
+	  printf("Cycles used %d=%d\n",i,gpsim_get_cycles_used(gp->pic_id,i));
+  }*/
 }
 
 
@@ -200,7 +206,6 @@ void TraceWindow_update(Trace_Window *tw)
 
 void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 {
-
 
 #define NAME_SIZE 32
 
@@ -266,6 +271,7 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     cross_reference->remove = NULL;
     gpsim_assign_trace_xref((gpointer) cross_reference);
 
+//    gpsim_enable_profiling(gp->pic_id);
 }
 
 static int delete_event(GtkWidget *widget,

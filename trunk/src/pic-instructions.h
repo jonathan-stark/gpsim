@@ -99,7 +99,9 @@ public:
 
   int is_modified; // flag indicating if this instruction has
                    // changed since start.
-  
+
+  guint64 cycle_count; // Nr of cycles used up by this instruction
+
   XrefObject *xref;
   
 //    GSList *gui_xref;

@@ -347,6 +347,7 @@ public:
   void init_program_memory(int address, int value);
   virtual void set_out_of_range_pm(int address, int value);
   virtual unsigned int config_word_address(void) const {return 0x2007;};
+  guint64 cycles_used(unsigned int address);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};
