@@ -3058,6 +3058,12 @@ void Breadboard_Window::Update(void)
   // loop all modules and look for changes
   if(!enabled)
     return;
+#if GTK_MAJOR_VERSION >= 2
+  enabled=0;
+  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
+  return;
+#endif
+
     
   if(!GTK_WIDGET_VISIBLE(window))
     return;
@@ -3136,6 +3142,12 @@ static int delete_event(GtkWidget *widget,
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
+#if GTK_MAJOR_VERSION >= 2
+
+  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
+  return;
+#endif
+
   if(!enabled || !is_built)
     return;
 
@@ -3150,6 +3162,12 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 /* When a module is created */
 void Breadboard_Window::NewModule(Module *module)
 {
+#if GTK_MAJOR_VERSION >= 2
+
+  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
+  return;
+#endif
+
   if(!is_built)
     Build();
 
@@ -3172,6 +3190,12 @@ void Breadboard_Window::NewModule(Module *module)
 /* When a stimulus is being connected or disconnected, or a new node is created */
 void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
+#if GTK_MAJOR_VERSION >= 2
+
+  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
+  return;
+#endif
+
   if(!is_built)
     Build();
 
@@ -3261,6 +3285,11 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
 
 void Breadboard_Window::Build(void)
 {
+#if GTK_MAJOR_VERSION >= 2
+
+  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
+  return;
+#endif
 
   GtkWidget *hpaned1;
   GtkWidget *vbox9;
@@ -3849,9 +3878,8 @@ void Breadboard_Window::Build(void)
   is_built=1;
   enabled = 1;
 
-  while(gtk_events_pending())
-    gtk_main_iteration(); 
-  
+  GTKwait();
+
   NewProcessor(gp);
 
   UpdateMenuItem();

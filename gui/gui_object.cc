@@ -156,6 +156,14 @@ void GUI_Object::Build(void)
 
 }
 
+void GUI_Object::GTKwait()
+{
+  if(window)
+    while(gtk_events_pending())
+      gtk_main_iteration();
+  else
+    cout << "GTKwait -- not waiting\n";
+}
 
 int GUI_Object::get_config(void)
 {
