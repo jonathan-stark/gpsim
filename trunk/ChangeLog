@@ -1,3 +1,7 @@
+2004-10-19 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h, src/stimuli.cc: Began adding capitance modelling
+	to stimuli.
+
 2004-10-17 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 	* src/symbol.cc: fixed gpsim crash on WIN32 in remove_module()

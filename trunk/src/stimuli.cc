@@ -243,6 +243,7 @@ void dump_stimulus_list(void)
 //========================================================================
 
 Stimulus_Node::Stimulus_Node(const char *n)
+  : TriggerObject(0)
 {
 
   stimuli = 0;
@@ -389,99 +390,116 @@ double Stimulus_Node::update(guint64 current_time)
 
   //cout << "getting state of Node " << name() << " " << nStimuli << " stim are attached\n";
 
-  if(stimuli != 0)
-    {
-      stimulus *sptr = stimuli;
+  if(stimuli) {
 
+    stimulus *sptr = stimuli;
 
-      voltage = 0.0;
+    voltage = 0.0;
+    capacitance = 0.0;
 
-      switch (nStimuli) {
+    switch (nStimuli) {
 
-      case 0:
-	// hmm, strange nStimuli is 0, but the stimuli pointer is non null.
-	break;
+    case 0:
+      // hmm, strange nStimuli is 0, but the stimuli pointer is non null.
+      break;
 
-      case 1:
-	// Only one stimulus is attached.
-	voltage = 0;
-	break;
+    case 1:
+      // Only one stimulus is attached.
+      voltage = sptr->get_Vth();
+      resistance = sptr->get_Zth();
+      capacitance = sptr->get_Cth();
+      break;
 
-      case 2:
-	// 2 stimuli are attached to the node. This is the typical case
-	// and we'll optimize for it.
-	{
-	  stimulus *sptr2 = sptr ? sptr->next : 0;
-	  if(!sptr2)
-	    break;     // error, nStimuli is two, but there aren't two stimuli
-
-	  double Z1 = sptr->get_Zth();
-	  double Z2 = sptr2->get_Zth();
-	  double Zt = Z1 + Z2;
-	  voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / Zt;
-
-	  /*
-	  cout << " *N1: " <<sptr->name() 
-	       << " V=" << sptr->get_Vth() 
-	       << " Z=" << sptr->get_Zth() << endl;
-	  cout << " *N2: " <<sptr2->name() 
-	       << " V=" << sptr2->get_Vth() 
-	       << " Z=" << sptr2->get_Zth() << endl;
-	  cout << " * ==>:  V=" << voltage
-	       << " Z=" << Zt << endl;
-	  */
-
-	  sptr->set_nodeVoltage(voltage);
-	  sptr2->set_nodeVoltage(voltage);
-	}
-	break;
-
-      default:
-	{
-	  /*
-	    There are 3 or more stimuli connected to this node. Recall
-	    that these are all in parallel. The Thevenin voltage and 
-	    impedance for this is:
-
-	    Thevenin impedance:
-	      Zt = 1 / sum(1/Zi)
-
-	    Thevenin voltage:
-
-	    Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
-	       = sum( Vi * Zt /Zi)
-	       = Zt * sum(Vi/Zi)
-	  */
-
-	  double Ct=0.0;	// Thevenin conductance.
-
-	  while(sptr) {
-	    double Cs = 1 / sptr->get_Zth();
-	    voltage += sptr->get_Vth() * Cs;
-	    Ct += Cs;
-	    sptr = sptr->next;
-	  }
-	  voltage /= Ct;
-
-	  sptr = stimuli;
-	  while(sptr) {
-	    sptr->set_nodeVoltage(voltage);
-	    sptr = sptr->next;
-	  }
-	}
-      }
-
-    }
-  else
-    if(!warned)
+    case 2:
+      // 2 stimuli are attached to the node. This is the typical case
+      // and we'll optimize for it.
       {
-	cout << "Warning: No stimulus is attached to node: \"" << name_str << "\"\n";
-	warned = 1;
+	stimulus *sptr2 = sptr ? sptr->next : 0;
+	if(!sptr2)
+	  break;     // error, nStimuli is two, but there aren't two stimuli
+
+	double Z1 = sptr->get_Zth();
+	double Z2 = sptr2->get_Zth();
+	resistance = Z1 + Z2;
+	voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
+	capacitance = sptr->get_Cth() + sptr2->get_Cth();
+
+	/*
+	  cout << " *N1: " <<sptr->name() 
+	  << " V=" << sptr->get_Vth() 
+	  << " Z=" << sptr->get_Zth() << endl;
+	  cout << " *N2: " <<sptr2->name() 
+	  << " V=" << sptr2->get_Vth() 
+	  << " Z=" << sptr2->get_Zth() << endl;
+	  cout << " * ==>:  V=" << voltage
+	  << " Z=" << Zt << endl;
+	*/
+
+	sptr->set_nodeVoltage(voltage);
+	sptr2->set_nodeVoltage(voltage);
       }
+      break;
+
+    default:
+      {
+	/*
+	  There are 3 or more stimuli connected to this node. Recall
+	  that these are all in parallel. The Thevenin voltage and 
+	  impedance for this is:
+
+	  Thevenin impedance:
+	  Zt = 1 / sum(1/Zi)
+
+	  Thevenin voltage:
+
+	  Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
+	  = sum( Vi * Zt /Zi)
+	  = Zt * sum(Vi/Zi)
+	*/
+
+	double conductance=0.0;	// Thevenin conductance.
+
+	while(sptr) {
+	  double Cs = 1 / sptr->get_Zth();
+	  capacitance += sptr->get_Cth();
+	  voltage += sptr->get_Vth() * Cs;
+	  conductance += Cs;
+	  sptr = sptr->next;
+	}
+	voltage /= conductance;
+
+	sptr = stimuli;
+	while(sptr) {
+	  sptr->set_nodeVoltage(voltage);
+	  sptr = sptr->next;
+	}
+      }
+    }
+
+  }
+  else if(!warned) {
+    cout << "Warning: No stimulus is attached to node: \"" 
+	 << name_str << "\"\n";
+    warned = 1;
+  }
 
   return(voltage);
 
 }
+
+//------------------------------------------------------------------------
+void Stimulus_Node::callback()
+{
+
+}
+
+//------------------------------------------------------------------------
+void Stimulus_Node::callback_print()
+{
+  cout << "Node: " << name() ;
+  TriggerObject::callback_print();
+}
+
 //------------------------------------------------------------------------
 stimulus::stimulus(char *n)
 {
