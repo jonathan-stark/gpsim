@@ -196,7 +196,7 @@ static void update(Stack_Window *sw)
 
 		//	    sprintf(depth_string,"#%d",i);
 		strcpy(depth_string,"");
-		retaddress=gpsim_get_stack_value(pic_id,nrofentries-1);
+		retaddress=gpsim_get_stack_value(pic_id,sw->last_stacklen);
 		
 		if(get_closest_label(sw,retaddress,labelname,&labeloffset))
 		    sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
