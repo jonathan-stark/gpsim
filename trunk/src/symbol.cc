@@ -356,13 +356,13 @@ Value * Symbol_Table::find(string *s)
     {
       Value *val = *sti;
       if(val && val->name() == *s) {
-	if(!findDuplicates)
-	  return val;
+        if(!findDuplicates)
+	        return val;
 
-	if(!ret) {
-	  ret = val;
-	} else
-	  cout << "Found duplicate:" << val->show()<<endl;
+        if(!ret) {
+	        ret = val;
+	      } else
+	        cout << "Found duplicate:" << val->show()<<endl;
       }
 
       sti++;
