@@ -1,3 +1,7 @@
+2004-09-28 Scott Dattalo  <scott@dattalo.com>
+	* configure.in: Added support for gtk-2.x. Changed the LCD version
+	to 0.2.3
+	
 2004-09-13 Scott Dattalo  <scott@dattalo.com>
 	* lcd.h: TriggerObjects used to be called BreakpointObjects in
 	gpsim.
