@@ -565,6 +565,14 @@ void pic_processor::run (bool refresh)
     if(bp.have_pm_write())
       pm_write();
 
+    if(bp.have_socket_break()) {
+      cout << " socket break point \n";
+      Interface *i = gi.get_socket_interface();
+      if (i)
+	i->Update(0);
+      bp.clear_socket_break();
+    }
+
   } while(!bp.global_break);
 
   if(realtime_mode)

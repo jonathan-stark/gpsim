@@ -37,56 +37,12 @@ extern "C"{
 #define PCPU ((Processor *)cpu)
 
 extern guint64 simulation_start_cycle;
-extern Integer *verbosity;  // in ../src/init.cc
 
 // Global declaration of THE breakpoint object
 // create an instance of inline get_trace() method by taking its address
 static Breakpoints &(*dummy_bp)(void) = get_bp;
 Breakpoints bp;
 
-//------------------------------------------------------------------------
-// TriggerAction
-//
-TriggerAction::TriggerAction()
-{
-}
-
-bool TriggerAction::evaluate(void)
-{
-  action();
-  return true;
-}
-
-bool TriggerAction::getTriggerState(void)
-{
-  return false;
-}
-
-void TriggerAction::action(void)
-{
-  if(verbosity && verbosity->getVal())
-    cout << "Hit a Breakpoint!\n";
-  bp.halt();
-}
-
-static TriggerAction DefaultTrigger;
-
-//------------------------------------------------------------------------
-// SimpleTriggerAction
-//
-// For most cases... A single trigger action coupled with a single trigger
-// object
-SimpleTriggerAction::SimpleTriggerAction(TriggerObject *_to)
-  : TriggerAction(), to(_to)
-{
-}
-
-void SimpleTriggerAction::action(void)
-{
-  TriggerAction::action();
-  if(to && verbosity && verbosity->getVal())
-    to->print();
-}
 
 //------------------------------------------------------------------------
 // find_free - search the array that holds the break points for a free slot
@@ -1267,54 +1223,3 @@ void Log_Register_Write_value::putRV(RegisterValue new_rv)
 
 
 
-//------------------------------------------------------------------------
-TriggerObject::TriggerObject()
-{
-  set_action(&DefaultTrigger);
-}
-
-TriggerObject::TriggerObject(TriggerAction *ta)
-{
-  if(ta)
-    set_action(ta);
-  else
-    set_action(&DefaultTrigger);
-}
-
-void TriggerObject::callback(void)
-{
-  cout << "generic callback\n";
-}
-
-void TriggerObject::callback_print(void)
-{
-  cout << " has callback, ID =  " << CallBackID << '\n';
-}
-
-int TriggerObject::find_free(void)
-{
-  bpn = bp.find_free();
-
-  if(bpn < MAX_BREAKPOINTS) {
-
-    bp.break_status[bpn].type = Breakpoints::BREAK_CLEAR;
-    bp.break_status[bpn].cpu  = 0; //get_cpu();
-    bp.break_status[bpn].arg1 = 0;
-    bp.break_status[bpn].arg2 = 0;
-    bp.break_status[bpn].bpo  = this;
-  }
-
-  return bpn;
-
-}
-
-void TriggerObject::print(void)
-{
-  cout << "Generic breakpoint " << bpn << endl;
-}
-
-
-void TriggerObject::clear(void)
-{
-  cout << "clear Generic breakpoint " << bpn << endl;
-}

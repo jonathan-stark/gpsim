@@ -29,8 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #include "input.h"
 
 #include "../src/pic-processor.h"
-#include "../src/interface.h"
-
 
 static int radix = 0;   // FIXME
 
@@ -39,7 +37,6 @@ cmd_set c_set;
 enum {
   SET_VERBOSE,
   SET_RADIX,
-  SET_GUI_UPDATE
 };
 
 static cmd_options cmd_set_options[] =
@@ -48,7 +45,6 @@ static cmd_options cmd_set_options[] =
   {"radix",      SET_RADIX,      OPT_TT_NUMERIC},
   {"v",          SET_VERBOSE,    OPT_TT_BITFLAG},
   {"verbose",    SET_VERBOSE,    OPT_TT_BITFLAG},
-  {"gui_update", SET_GUI_UPDATE, OPT_TT_BITFLAG},
   {0,0,0}
 };
 
@@ -75,7 +71,7 @@ void cmd_set::set(void)
 
   cout << "r | radix = " << radix << " (not fully functional)\n";
   cout << "v | verbose =  " << verbose << '\n';
-  cout << "gui_update = " << gi.gui_update_rate << '\n';
+  //  cout << "gui_update = " << gi.update_rate << '\n';
 }
 
 void cmd_set::set(int bit_flag, Expression *expr)
@@ -108,10 +104,6 @@ void cmd_set::set(int bit_flag, Expression *expr)
   case SET_VERBOSE:
     verbose = number;
     break;
-  case SET_GUI_UPDATE:
-    gi.set_update_rate(number);
-    break;
-
   default:
     cout << " Invalid set option\n";
   }

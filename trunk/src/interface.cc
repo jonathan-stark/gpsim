@@ -36,14 +36,15 @@ Boston, MA 02111-1307, USA.  */
 #define GPSIM_VERSION VERSION 
 #include "gpsim_def.h"
 
-#include "pic-processor.h"
-#include "p16x8x.h"
+#include "processor.h"
 #include "xref.h"
 #include "interface.h"
 #include "trace.h"
 #include "eeprom.h"
 #include "icd.h"
 
+
+extern Integer *verbosity;  // in ../src/init.cc
 
 // Flag to tell us when all of the init stuff is done.
 unsigned int gpsim_is_initialized = 0;
@@ -59,7 +60,6 @@ gpsimInterface gi;
 
 // create an instance of inline get_interface() method by taking its address
 static gpsimInterface &(*dummy_gi)(void) = get_interface;
-
 
 //---------------------------------------------------------------------------
 //   void gpsim_set_bulk_mode(int flag)
@@ -164,7 +164,7 @@ void gpsimInterface::update  (void)
     if(external_interfaces->data) {
       Interface *an_interface = (Interface *)(external_interfaces->data);
 
-      an_interface->GuiUpdate(an_interface->objectPTR);
+      an_interface->Update(an_interface->objectPTR);
     }
 
     external_interfaces = external_interfaces->next;
@@ -173,10 +173,9 @@ void gpsimInterface::update  (void)
 
 void gpsimInterface::callback(void)
 {
-  if(gui_update_rate) {
-    future_cycle = get_cycles().value + gui_update_rate;
+  if(update_rate) {
+    future_cycle = get_cycles().value + update_rate;
     get_cycles().set_break(future_cycle, this);
-
   }
 
   update();
@@ -188,7 +187,7 @@ void gpsimInterface::clear(void)
 
 void gpsimInterface::print(void)
 {
-  cout << "Interface update rate " << gui_update_rate << endl;
+  cout << "Interface update rate " << update_rate << endl;
 }
 
 void gpsimInterface::callback_print(void)
@@ -206,6 +205,8 @@ gpsimInterface::gpsimInterface (void )
   interfaces = 0;
   future_cycle = 0;
   interface_seq_number = 0;
+  socket_interface = 0;
+  mbSimulating = false;
 }
 
 //--------------------------------------------------------------------------
@@ -258,9 +259,10 @@ void gpsimInterface::remove_object (gpointer xref)
 void gpsimInterface::simulation_has_stopped (void)
 {
 
+
   GSList *interface_list = interfaces;
 
-  profile_keeper.catchup();
+  profile_keeper.catchup();     // FIXME: remove this!
 
   while(interface_list) {
 
@@ -275,10 +277,31 @@ void gpsimInterface::simulation_has_stopped (void)
 
 }
 
+void gpsimInterface::start_simulation (void)
+{
+  Processor *cpu = get_active_cpu();
+
+  mbSimulating = true;
+
+  if(cpu) {
+
+    if(verbosity && verbosity->getVal()) {
+      cout << "running...\n";
+      cpu->run(true);
+    } else
+      cpu->run(false);
+  }
+
+  mbSimulating = false;
+}
+
+bool gpsimInterface::bSimulating()
+{
+  return mbSimulating;
+}
+
 void gpsimInterface::new_processor (Processor *new_cpu)
 {
-  set_update_rate  (gui_update_rate);
-
   GSList *interface_list = interfaces;
 
   while(interface_list) {
@@ -361,6 +384,14 @@ unsigned int  gpsimInterface::add_interface  (Interface *new_interface)
   return interface_seq_number;
 }
 
+unsigned int  gpsimInterface::add_socket_interface  (Interface *new_interface)
+{
+  if(!socket_interface)
+    return add_interface(new_interface);
+  
+  return 0;
+}
+
 void  gpsimInterface::remove_interface  (unsigned int interface_id)
 {
   GSList *interface_list = interfaces;
@@ -374,6 +405,9 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
       {
 
 	gi.interfaces = g_slist_remove(gi.interfaces, an_interface);
+	if(an_interface == socket_interface)
+	  socket_interface = 0;
+
 	delete an_interface;
 	return;
       }
@@ -384,11 +418,12 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
   return;
 }
 
-void  gpsimInterface::set_update_rate  (guint64 update_rate)
+void  gpsimInterface::set_update_rate  (guint64 _update_rate)
 {
-  guint64 fc = get_cycles().value + update_rate;
 
-  gui_update_rate = update_rate;
+  guint64 fc = get_cycles().value + _update_rate;
+
+  update_rate = _update_rate;
 
   if(fc) {
     if(future_cycle)
@@ -401,6 +436,10 @@ void  gpsimInterface::set_update_rate  (guint64 update_rate)
 }
 
 
+guint64 gpsimInterface::get_update_rate()
+{
+  return update_rate;
+}
 
 
 

@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __GPSIM_INTERFACE_H__
 
 #include "interface.h"
-#include "breakpoints.h"
+#include "trigger.h"
 
 class Stimulus;
 class Stimulus_Node;
@@ -111,10 +111,10 @@ class Interface {
   virtual void NewProgram  (Processor *new_cpu) { };
 
   /*
-   * gui_update - Invoked when the gui should update
+   * Update - Invoked when the interface should update itself
    */
 
-  virtual void GuiUpdate  (gpointer object) {};
+  virtual void Update  (gpointer object) {};
 
   /*
    * destructor - called when the interface is destroyed - this gives
@@ -133,29 +133,28 @@ class Interface {
 class gpsimInterface : public TriggerObject {
  public:
 
-  GSList *interfaces;
-  unsigned int interface_seq_number;
-
-  guint64 gui_update_rate;
-  guint64 future_cycle;
-
-
   gpsimInterface(void);
+
+  void start_simulation (void);
+  void simulation_has_stopped (void);
+  bool bSimulating();
 
   // gpsim will call these functions to notify gui and/or modules
   // that something has changed. 
 
   void update_object (gpointer xref,int new_value);
   void remove_object (gpointer xref);
-  void simulation_has_stopped (void);
   void update (void);
   void new_processor (Processor *);
   void new_module  (Module *module);
   void node_configuration_changed  (Stimulus_Node *node);
   void new_program  (Processor *);
   void set_update_rate(guint64 rate);
+  guint64 get_update_rate();
 
   unsigned int add_interface(Interface *new_interface);
+  unsigned int add_socket_interface(Interface *new_interface);
+  Interface *get_socket_interface() { return socket_interface;}
   void remove_interface(unsigned int interface_id);
 
 
@@ -166,6 +165,16 @@ class gpsimInterface : public TriggerObject {
   virtual void clear(void);
   virtual char const * bpName() { return "gpsim interface"; }
 
+private:
+  GSList *interfaces;
+  Interface *socket_interface;
+
+  unsigned int interface_seq_number;
+
+  guint64 update_rate;
+  guint64 future_cycle;
+
+  bool mbSimulating;   // Set true if the simulation is running.
 };
 
 #ifdef IN_MODULE

@@ -314,10 +314,19 @@ void start_new_input_stream(void)
  */
 int start_parse(void)
 {
-  int retval;
+  static bool bParsing = false;
+
+  if(bParsing)
+    return -1;
+
+  bParsing = true;
 
   init_parser();
-  retval = yyparse();
+
+  int retval = yyparse();
+
+  bParsing = false;
+
 
   if(quit_parse)
     exit_gpsim();
@@ -408,14 +417,13 @@ int gpsim_open(Processor *cpu, const char *file)
     load_symbol_file(&command::cpu, file);
   else if(!strcmp(str,"stc") || !strcmp(str,"STC")) {
     process_command_file(file);
-    parse_string("\n");
+    return parse_string("\n");
   } else
-  {
-    cout << "Unknown file extension \"" << str <<"\" \n";
-    return 0;
-  }
 
-  return 1;
+    cout << "Unknown file extension \"" << str <<"\" \n";
+
+  return 0;
+
 }
 
 

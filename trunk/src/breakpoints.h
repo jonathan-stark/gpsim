@@ -27,36 +27,13 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 #include <string>
+#include "trigger.h"
 #include "pic-instructions.h"
 #include "registers.h"
 
 using namespace std;
 
 class InvalidRegister;
-class TriggerObject;
-
-//========================================================================
-//
-//
-class TriggerAction
-{
-public:
-  TriggerAction();
-  virtual ~TriggerAction() {}
-  virtual bool evaluate(void);
-  virtual bool getTriggerState(void);
-  virtual void action(void);
-};
-
-class SimpleTriggerAction : public TriggerAction
-{
-public:
-  SimpleTriggerAction(TriggerObject *_to);
-  virtual void action(void);
-protected:
-  TriggerObject *to;
-
-};
 
 class TriggerGroup : public TriggerAction
 {
@@ -71,68 +48,6 @@ protected:
 
 #define MAX_BREAKPOINTS 0x400
 #define BREAKPOINT_MASK (MAX_BREAKPOINTS-1)
-
-// TriggerObject - a base class for handling all of gpsim's breakpoints.
-//
-// The TriggerObject class is designed to be part of a multiple inheritance
-// class heirarchy. Its main function is to provide interface to the 
-// breakpoint functionality.
-
-class TriggerObject
-{
- public:
-
-  unsigned int bpn;
-
-  // When the TriggerObject becomes true, then the TriggerAction is 
-  // evaluated. E.g. If the trigger object is an execution breakpoint,
-  // then whenever the PC == break address, the Breakpoint_Instruction
-  // class (which is derived from this class) will invoke action->evaluate()
-  // which will in turn halt the execution.
-
-  TriggerAction *action;
-
-  // Enable the breakpoint and return true if successful
-  virtual bool set_break(void) {return false;}
-
-  // A unique number assigned when the break point is armed.
-  int CallBackID;
-
-  // When the breakpoint associated with this object is encountered,
-  // then 'callback' is invoked.
-  virtual void callback(void);
-
-  // Invoked to display info about the breakpoint.
-  virtual void callback_print(void);
-
-  // clear_break is invoked when the breakpoint associated with
-  // this object is cleared. 
-  virtual void clear_break(void) {};
-
-  // Will search for a place to store this break point.
-  virtual int find_free(void);
-
-  // This object has no cpu associated with it. However, derived
-  // types may and can choose to provide access to it through here:
-  //virtual Processor *get_cpu(void) { return 0; }
-
-  // Display the breakpoint - Probably should tie into a stream...
-  virtual void print(void);
-
-  // Clear the breakpoint
-  virtual void clear(void);
-
-  virtual char const * bpName() { return "Generic"; }
-
-  virtual void set_action(TriggerAction *ta) { action = ta; }
-  virtual TriggerAction *get_action(void) { return action;}
-
-  TriggerObject();
-  TriggerObject(TriggerAction *);
-  // Virtual destructor place holder
-  virtual ~TriggerObject() { }
-
-};
 
 class Breakpoint_Instruction : public instruction , public TriggerObject
 {
@@ -263,18 +178,18 @@ public:
 
   enum BREAKPOINT_TYPES
     {
-      BREAK_CLEAR          = 0,
-      BREAK_ON_EXECUTION   = 1<<24,
-      BREAK_ON_REG_READ    = 2<<24,
-      BREAK_ON_REG_WRITE   = 3<<24,
-      BREAK_ON_REG_READ_VALUE  = 4<<24,
-      BREAK_ON_REG_WRITE_VALUE = 5<<24,
-      BREAK_ON_INVALID_FR  = 6<<24,
-      BREAK_ON_CYCLE       = 7<<24,
-      BREAK_ON_WDT_TIMEOUT = 8<<24,
-      BREAK_ON_STK_OVERFLOW  = 9<<24,
-      BREAK_ON_STK_UNDERFLOW = 10<<24,
-      NOTIFY_ON_EXECUTION   = 11<<24,
+      BREAK_CLEAR               = 0,
+      BREAK_ON_EXECUTION        = 1<<24,
+      BREAK_ON_REG_READ         = 2<<24,
+      BREAK_ON_REG_WRITE        = 3<<24,
+      BREAK_ON_REG_READ_VALUE   = 4<<24,
+      BREAK_ON_REG_WRITE_VALUE  = 5<<24,
+      BREAK_ON_INVALID_FR       = 6<<24,
+      BREAK_ON_CYCLE            = 7<<24,
+      BREAK_ON_WDT_TIMEOUT      = 8<<24,
+      BREAK_ON_STK_OVERFLOW     = 9<<24,
+      BREAK_ON_STK_UNDERFLOW    = 10<<24,
+      NOTIFY_ON_EXECUTION       = 11<<24,
       PROFILE_START_NOTIFY_ON_EXECUTION = 12<<24,
       PROFILE_STOP_NOTIFY_ON_EXECUTION = 13<<24,
       NOTIFY_ON_REG_READ        = 14<<24,
@@ -282,14 +197,15 @@ public:
       NOTIFY_ON_REG_READ_VALUE  = 16<<24,
       NOTIFY_ON_REG_WRITE_VALUE = 17<<24,
       BREAK_ON_ASSERTION        = 18<<24,
-      BREAK_MASK           = 0xff<<24
+      BREAK_MASK                = 0xff<<24
     };
 
 #define  GLOBAL_CLEAR         0
-#define  GLOBAL_STOP_RUNNING  1
-#define  GLOBAL_INTERRUPT     2
-#define  GLOBAL_SLEEP         4
-#define  GLOBAL_PM_WRITE      8
+#define  GLOBAL_STOP_RUNNING  (1<<0)
+#define  GLOBAL_INTERRUPT     (1<<1)
+#define  GLOBAL_SLEEP         (1<<2)
+#define  GLOBAL_PM_WRITE      (1<<3)
+#define  GLOBAL_SOCKET        (1<<4)
 
   struct BreakStatus
   {
@@ -397,7 +313,18 @@ public:
     {
       global_break |= GLOBAL_PM_WRITE;
     }
-
+  inline bool have_socket_break()
+    {
+      return( (global_break & GLOBAL_SOCKET) != 0);
+    }
+  inline void set_socket_break()
+    {
+      global_break |= GLOBAL_SOCKET;
+    }
+  inline void clear_socket_break()
+    {
+      global_break &= ~GLOBAL_SOCKET;
+    }
 
   bool dump1(unsigned int bp_num);
   void dump(void);

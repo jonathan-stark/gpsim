@@ -110,7 +110,7 @@ public:
   virtual void NewModule (Module *module);
   virtual void NodeConfigurationChanged (Stimulus_Node *node);
   virtual void NewProgram  (Processor *);
-  virtual void GuiUpdate  (gpointer object);
+  virtual void Update  (gpointer object);
 
   virtual ~GUI_Interface();
 
@@ -292,7 +292,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 }
 
 
-void GUI_Interface::GuiUpdate(gpointer object)
+void GUI_Interface::Update(gpointer object)
 {
   SimulationHasStopped(object);
 }

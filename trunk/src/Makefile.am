@@ -55,6 +55,7 @@ libgpsim_la_SOURCES = \
 	symbol.cc \
 	tmr0.cc \
 	trace.cc \
+	trigger.cc \
 	uart.cc \
 	ssp.cc \
 	xref.cc \
@@ -115,6 +116,7 @@ gpsiminclude_HEADERS = \
 	symbol_orb.h \
 	tmr0.h \
 	trace.h \
+	trigger.h \
 	trace_orb.h \
 	uart.h \
 	xref.h \

@@ -18,11 +18,12 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-
+#include "../config.h"
 #include "trace.h"
 #include "symbol.h"
 #include "gpsim_time.h"
 #include "protocol.h"
+#include "gpsim_interface.h"
 
 //========================================================================
 //
@@ -34,7 +35,6 @@ Boston, MA 02111-1307, USA.  */
 
 class CycleCounterAttribute : public Integer
 {
-protected:
 public:
   CycleCounterAttribute() :
     Integer(0) 
@@ -59,6 +59,29 @@ public:
   }
 };
 
+//========================================================================
+//
+// GUI update rate attribute
+#ifdef HAVE_GUI
+class GUIUpdateRateAttribute : public Integer
+{
+public:
+  GUIUpdateRateAttribute() :
+    Integer(0) 
+  {
+    new_name("sim.gui_update_rate");
+    set_description(" Specifies the number of cycles between gui updates");
+  }
+  void set(gint64 i)
+  {
+    gi.set_update_rate(i);
+  }
+  void get(gint64 &i)
+  {
+    i = gi.get_update_rate();
+  }
+};
+#endif
 
 
 //==============================================================
@@ -87,9 +110,13 @@ Integer *verbosity;
 int initialize_gpsim_core()
 {
 
+  // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
   get_symbol_table().add(verbosity);
   get_symbol_table().add(new CycleCounterAttribute());
+#ifdef HAVE_GUI
+  get_symbol_table().add(new GUIUpdateRateAttribute());
+#endif
 
   return 0;
 }
