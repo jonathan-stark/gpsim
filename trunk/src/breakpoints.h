@@ -172,10 +172,25 @@ class RegisterAssertion : public Breakpoint_Instruction
 
 };
 
+class Breakpoints;
+
+#ifdef IN_MODULE
+// we are in a module: don't access the Breakpoints object directly!
+Breakpoints &get_bp(void);
+#else
+// we are in gpsim: use of get_bp() is recommended,
+// even if the bp object can be accessed directly.
+extern Breakpoints bp;
+
+inline Breakpoints &get_bp(void)
+{
+  return bp;
+}
+#endif
+
 class Breakpoints
 {
 public:
-
   enum BREAKPOINT_TYPES
     {
       BREAK_CLEAR               = 0,
@@ -215,6 +230,30 @@ public:
     unsigned int arg2;
     TriggerObject *bpo;
   } break_status[MAX_BREAKPOINTS];
+
+  class iterator {
+  public:
+    iterator(int index) : iIndex(index) { }
+    int iIndex;
+    iterator & operator++(int) {
+      iIndex++;
+      return *this;
+    }
+    BreakStatus * operator*() {
+      return &get_bp().break_status[iIndex];
+    }
+    bool operator!=(iterator &it) {
+      return iIndex != it.iIndex;
+    }
+  };
+
+  iterator begin() {
+    return iterator(0);
+  }
+
+  iterator end() {
+    return iterator(MAX_BREAKPOINTS);
+  }
 
   unsigned int  global_break;
 
@@ -339,20 +378,6 @@ public:
 			     instruction *_this);
   int find_free(void);
 };
-
-#ifdef IN_MODULE
-// we are in a module: don't access the Breakpoints object directly!
-Breakpoints &get_bp(void);
-#else
-// we are in gpsim: use of get_bp() is recommended,
-// even if the bp object can be accessed directly.
-extern Breakpoints bp;
-
-inline Breakpoints &get_bp(void)
-{
-  return bp;
-}
-#endif
 
 //
 // BreakPointRegister 

@@ -319,6 +319,7 @@ EXPORTS
     ?get_PC@ProgramMemoryAccess@@UAEIXZ
     ?put@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?get_cpu@gpsimValue@@QAEPAVProcessor@@XZ
+    ?get@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     load_library
     get_library_export
     free_error_message
