@@ -817,7 +817,6 @@ dc_supply::dc_supply(char *n)
 //========================================================================
 //
 
-
 IOPIN::IOPIN(IOPORT *i, unsigned int b)
 {
   iop = i;
@@ -827,7 +826,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   h2l_threshold = -100;
   drive = 0;
   snode = NULL;
-  //  cout << "IOPIN constructor called \n";
+  //cout << "IOPIN constructor called \n";
 
   if(iop) {
     iop->attach_iopin(this,b);
@@ -859,6 +858,28 @@ void IOPIN::put_state_value(int new_state)
   if(xref)
     xref->update();
 }
+
+int IOPIN::get_state(void)
+{
+  if(snode) {
+
+    if(state>l2h_threshold) 
+      return +1;
+    else
+      return -1;
+    
+  } else if(iop) {
+
+    if(iop->get_bit(iobit))
+      return +1;
+    else
+      return -1;
+  } 
+
+  // No I/O pin or node is associated with this I/O pin
+  return 0;
+}
+
 
 void IOPIN::attach(Stimulus_Node *s)
 {
