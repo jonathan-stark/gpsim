@@ -175,7 +175,7 @@ void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
   case WRITE_VALUE:
   case READ_VALUE:
 
-    if(opt->value = READ_VALUE) {
+    if(opt->value == READ_VALUE) {
       b = bp.set_notify_read_value(cpu, reg,value,mask);
       str = "read from";
     } else {
