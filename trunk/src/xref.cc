@@ -1,6 +1,6 @@
 
 #include "xref.h"
-#include "interface.h"
+#include "gpsim_interface.h"
 
 //-------------------------------------------------------------------
 XrefObject::XrefObject()
@@ -18,7 +18,7 @@ XrefObject::~XrefObject()
 
     ioi=xrefs.begin();
     for(;ioi!=xrefs.end();ioi++) {
-      remove_object(*ioi);
+      gi.remove_object(*ioi);
       delete *ioi;
     }
 }
@@ -47,6 +47,6 @@ void XrefObject::update()
 	    new_value=*data;
 	xref=(gpointer *) *ioi;
 
-	update_object(xref,new_value);
+	gi.update_object(xref,new_value);
     }
 }

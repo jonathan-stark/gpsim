@@ -65,10 +65,16 @@ public:
 //---------------------------------------------------------
 // IOPORT
 
+class PIC_IOPORT : public IOPORT
+{
+public:
+
+};
+
 class IOPORT_TRIS : public sfr_register
 {
 public:
-  IOPORT * port;
+  PIC_IOPORT * port;
 
   unsigned int 
     valid_iopins;   // A mask that for those ports that don't have all 8 io bits.
@@ -80,7 +86,7 @@ public:
 
 };
 
-class PORTB : public IOPORT
+class PORTB : public PIC_IOPORT
 {
 public:
 #define intedg_MASK (1<<6)
@@ -96,7 +102,7 @@ public:
   void setbit(unsigned int bit_number, bool new_value);
 };
 
-class PORTA : public IOPORT
+class PORTA : public PIC_IOPORT
 {
 public:
 
@@ -108,7 +114,7 @@ public:
 
 
 class CCPCON;
-class PORTC : public IOPORT
+class PORTC : public PIC_IOPORT
 {
 public:
 
@@ -156,7 +162,7 @@ enum
 };
 
 
-class PORTD : public IOPORT
+class PORTD : public PIC_IOPORT
 {
 public:
 
@@ -166,7 +172,7 @@ public:
 
 };
 
-class PORTE : public IOPORT
+class PORTE : public PIC_IOPORT
 {
 public:
 

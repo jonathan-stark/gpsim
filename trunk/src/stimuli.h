@@ -38,7 +38,30 @@ extern stimulus * find_stimulus (string name);
 extern void add_stimulus(stimulus * );
 extern void dump_stimulus_list(void);
 
-/*
+/****************************************************************************
+ *
+ * Include file support stimuli. 
+ *
+ *       stimulus             BreakCallBack
+ *       |  \                      /
+ *       |   -----------------+----
+ *       |                    |
+ *       |- IOPIN             |- source_stimulus
+ *          |                              |
+ *          |- IO_input                    |- square_wave
+ *             |                           |- triangle_wave
+ *             |- IO_open_collector        |- asynchronous_stimulus
+ *             |- IO_bi_directional        |- dc_supply
+ *                |                        |- open_collector
+ *                |- IO_bi_directional_pu
+ *
+ *  A stimulus is used to stimulate stimuli. What's that mean? Well,
+ * in gpsim, the pic I/O pins are derived from the stimulus base class
+ * (as can be seen from above). The I/O pins are what interface to the
+ * 'external' world. In some cases, I/O pins are inputs and others they're
+ * outputs. The stimulus base class defines the basic functionality of
+ * a stimulus and how this interface to the outside world is to occur.
+ *
  * The 'drive levels' are loosely related to the source impedance 
  * a stimulus has. Large positive drive levels mean that the source
  * has a very low output impedance while driving high. Similarly,
@@ -258,7 +281,6 @@ class IO_open_collector : public IO_input
 {
 public:
 
-  //  source_stimulus *source;
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};

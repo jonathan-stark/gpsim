@@ -1083,8 +1083,6 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
 	rw->row_to_address[j]=-1;
 
-    printf("regwin: new processor with memory size %d\n",gpsim_get_register_memory_size(pic_id, rw->type));
-
 //    gtk_widget_hide(GTK_WIDGET(sheet));
     gtk_sheet_freeze(sheet);
     
@@ -1133,7 +1131,6 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 		gtk_sheet_set_row_title(sheet, j, row_label);
 
 		rw->row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
-		printf("rw->row_to_address[0x%x]=0x%x\n",j, rw->row_to_address[j]);
 		row_created=TRUE;
 	    }
 	}

@@ -57,6 +57,7 @@ gpsiminclude_HEADERS = \
 	cod.h \
 	gpsim_classes.h \
 	gpsim_def.h \
+	gpsim_interface.h \
 	gpsim_time.h \
 	interface.h \
 	ioports.h \

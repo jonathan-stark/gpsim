@@ -439,8 +439,6 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
 
     struct cross_reference_to_gui *cross_reference;
 
-    puts("\n\nNew program");
-    
     if(sbow == NULL || gp == NULL)
 	return;
 

@@ -394,7 +394,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     // pin spacing is set
 
-	printf("pinspacing %d\n",bbw->pinspacing);
+    //printf("pinspacing %d\n",bbw->pinspacing);
 	bbw->height=(bbw->nrofpins/2)*bbw->pinspacing;
 	bbw->width=bbw->pinstatewidth*2+bbw->pinlength*2+bbw->pinnamewidth*2+2*FOORADIUS;
 
