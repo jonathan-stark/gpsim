@@ -162,7 +162,7 @@ Boolean* Boolean::typeCheck(Value* val, string valDesc)
  * The Integer class.
  */
 
-Integer::Integer(int newValue, bool isConstant)
+Integer::Integer(gint64 newValue, bool isConstant)
   : Value(isConstant)
 {
   value = newValue;
@@ -183,7 +183,7 @@ string Integer::toString(char* format)
 }
 
 
-string Integer::toString(char* format, int value)
+string Integer::toString(char* format, gint64 value)
 {
   char cvtBuf[1024];
 
@@ -191,15 +191,15 @@ string Integer::toString(char* format, int value)
   return (string(&cvtBuf[0]));
 }
 
-string Integer::toString(int value)
+string Integer::toString(gint64 value)
 {
   char cvtBuf[1024];
 
-  snprintf(cvtBuf,sizeof(cvtBuf), "%d", value);
+  snprintf(cvtBuf,sizeof(cvtBuf), "%Ld", value);
   return (string(&cvtBuf[0]));  
 }
 
-int Integer::getVal()
+gint64 Integer::getVal()
 {
   return value;
 }
@@ -214,10 +214,10 @@ Integer* Integer::typeCheck(Value* val, string valDesc)
   return((Integer*)(val));
 }
 
-Integer* Integer::assertValid(Value* val, string valDesc, int valMin)
+Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin)
 {
   Integer* iVal;
-  int i;
+  gint64 i;
 
   iVal = Integer::typeCheck(val, valDesc);
   i = iVal->getVal();
@@ -232,10 +232,10 @@ Integer* Integer::assertValid(Value* val, string valDesc, int valMin)
   return(iVal);
 }
 
-Integer* Integer::assertValid(Value* val, string valDesc, int valMin, int valMax)
+Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax)
 {
   Integer* iVal;
-  int i;
+  gint64 i;
   
   iVal = (Integer::typeCheck(val, valDesc));
 

@@ -96,6 +96,41 @@ void cmd_break::list(void)
 const char *TOO_FEW_ARGS="missing register or location\n";
 const char *TOO_MANY_ARGS="too many arguments\n";
 
+void cmd_break::set_break(cmd_options *co, ExprList_t *eList)
+{
+
+  if (!co) {
+    list();
+    return;
+  }
+
+  int bit_flag = co->value;
+  if (!eList) {
+    set_break(bit_flag);
+    return;
+  }
+
+  const int cMAX_PARAMETERS=3;
+  int nParameters=cMAX_PARAMETERS;
+  guint64 parameters[cMAX_PARAMETERS] = {0,0,0};
+
+  evaluate(eList, parameters, &nParameters);
+  
+  if(nParameters == 1) 
+    {
+      set_break(bit_flag, parameters[0]);
+      return;
+    }
+  else
+    {
+      set_break(bit_flag, parameters[0], parameters[1], parameters[2]);
+      return;
+    }
+
+  cout << "incorrect number of arguments\n";
+
+}
+
 void cmd_break::set_break(int bit_flag)
 {
 
@@ -200,7 +235,10 @@ void cmd_break::set_break(int bit_flag, guint64 value)
   }
 }
 
-void cmd_break::set_break(int bit_flag, int reg, int value,int mask)
+void cmd_break::set_break(int bit_flag,
+			  guint64 reg,
+			  guint64 value,
+			  guint64 mask)
 {
 
   if(!cpu)

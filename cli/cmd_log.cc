@@ -42,7 +42,7 @@ cmd_log c_log;
 
 static cmd_options cmd_trace_options[] =
 {
-  {"on",	 LOG_ON,      OPT_TT_BITFLAG},
+  {"on",  LOG_ON,      OPT_TT_BITFLAG},
   {"off", LOG_OFF,     OPT_TT_BITFLAG},
   {"w",   WRITE,       OPT_TT_BITFLAG},
   {"r",   READ,        OPT_TT_BITFLAG},
@@ -78,6 +78,38 @@ void cmd_log::log(void)
 
 
 
+
+void cmd_log::log(cmd_options *opt, char *str, ExprList_t *eList)
+{
+
+  if (!opt) {
+    log();
+    return;
+  }
+
+  if (!eList) {
+    if(str)
+      log(opt,str,0,0);
+    else
+      log(opt);
+
+    return;
+  }
+
+  const int cMAX_PARAMETERS=3;
+  int nParameters=cMAX_PARAMETERS;
+  guint64 parameters[cMAX_PARAMETERS] = {0,0,0};
+
+  evaluate(eList, parameters, &nParameters);
+
+  if(str) 
+    log(opt, str, parameters[0], parameters[1]);
+  else
+    log(opt, parameters[0], parameters[1], parameters[2]);
+
+}
+
+
 void cmd_log::log(cmd_options *opt)
 {
 
@@ -92,12 +124,12 @@ void cmd_log::log(cmd_options *opt)
     trace_log.disable_logging();
     break;
   default:
-    cout << " Invalid set option\n";
+    cout << " Invalid log option\n";
   }
 
 }
 
-void cmd_log::log(cmd_options *opt, char *str, int val, int mask)
+void cmd_log::log(cmd_options *opt, char *str, guint64 val, guint64 mask)
 {
 
   int sym_value;
@@ -133,7 +165,7 @@ void cmd_log::log(cmd_options *opt, char *str, int val, int mask)
 
 }
 
-void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
+void cmd_log::log(cmd_options *opt, guint64 reg, guint64 value, guint64 mask)
 {
   int b=MAX_BREAKPOINTS;
   char *str=0;
@@ -149,22 +181,12 @@ void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
     trace_log.disable_logging();
     break;
   case WRITE:
-    if((value >= 0) || (mask >= 0)) {
-      cout << "too many args\n";
-      return;
-    }
-    
     b = bp.set_notify_write(cpu, reg);
     if(b < MAX_BREAKPOINTS)
       cout << "log register " << reg << " when it is written. bp#: " << b << '\n';
 
     break;
   case READ:
-    if((value >= 0) || (mask >= 0)) {
-      cout << "too many args\n";
-      return;
-    }
-
     b = bp.set_notify_read(cpu, reg);
     if(b < MAX_BREAKPOINTS)
       cout << "log register " << reg << " when it is read.\n" << 
@@ -208,19 +230,9 @@ void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
     break;
 
   default:
-    cout << "error log opt, int,int,int\n";
+    cout << "Error, Unknown option\n";
   }
 
-
-}
-
-void cmd_log::log(int number)
-{
-
-  if(!cpu)
-    return;
-
-  cout << "log number " << number << endl;
 
 }
 

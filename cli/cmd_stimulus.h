@@ -28,21 +28,7 @@ class cmd_stimulus : public command
 public:
   int valid_options,options_entered;
   int have_data;
-  /*
-  unsigned int period,
-    phase,
-    high_time,
-    start_cycle,
-    bit_pos,
-    states,
-    initial_state,
-    time_flag,
-    digital;
 
-  char *stim_name;
-
-  vector<StimulusDataType>  temp_array;
-  */
   cmd_stimulus(void);
   void stimulus(void);
 
@@ -50,8 +36,6 @@ public:
   void stimulus(cmd_options_expr *coe);
   void stimulus(cmd_options_str *cos);
   void stimulus(ExprList_t *);
-  //void data_point(guint64 new_int_data_point);
-  //void data_point(float new_float_data_point);
   void end(void);
 
   bool can_span_lines(void) {return 1;};

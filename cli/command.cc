@@ -193,6 +193,28 @@ double command::evaluate(Expression *expr)
 }
 
 
+void command::evaluate(ExprList_t *eList,
+		       guint64 *parameters, 
+		       int *nParameters)
+{
+  ExprList_itor ei;
+
+  if ( !eList || !parameters || !nParameters || !*nParameters)
+    return;
+
+  int n = 0;
+  for(ei = eList->begin(); 
+      (ei != eList->end()) && (n < *nParameters); 
+      ++ei, n++)
+    {
+      parameters[n] = (guint64) evaluate(*ei);
+      cout << "p" << n << " = " << parameters[n] << endl;
+
+    }
+
+  *nParameters = n;
+}
+
 //========================================================================
 // Command options
 
