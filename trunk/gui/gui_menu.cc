@@ -283,7 +283,7 @@ file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
     unsigned int pic_id;
-    char *file;
+    const char *file;
     char msg[200];
     if(gp)
     {
@@ -291,7 +291,7 @@ file_selection_ok (GtkWidget        *w,
 	file=gtk_file_selection_get_filename (fs);
 	if(!gpsim_open(pic_id, file))
 	{
-	    sprintf(msg,"Open failedCould not open \"%s\"",file);
+	    sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
 	    gui_message(msg);
 	}
     }
@@ -570,6 +570,8 @@ static int dispatcher_delete_event(GtkWidget *widget,
 				   gpointer data)
 {
     do_quit_app(NULL);
+
+    return 0;
 }
 
 static GtkItemFactoryCallback
@@ -677,7 +679,11 @@ void create_dispatcher (void)
 			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
 			  NULL);
       
+#if GTK_MAJOR_VERSION >= 2
+      accel_group = gtk_accel_group_new();
+#else
       accel_group = gtk_accel_group_get_default ();
+#endif
       item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
       gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
 				"<main>",

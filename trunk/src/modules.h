@@ -74,7 +74,7 @@ public:
 
   Module_Types *module_list;
 
-  Module_Library(char *new_name, void *library_handle);
+  Module_Library(const char *new_name, void *library_handle);
 
   ~Module_Library(void) {
     if(_name)
@@ -128,7 +128,7 @@ public:
   virtual void dump_attributes(int show_values=1);
   const virtual char *type(void) { return (name_str); };
   char *name(void) {return name_str;};
-  virtual void new_name(char *);
+  virtual void new_name(const char *);
 
   static Module *construct(char *name);
   Module(void);
@@ -176,7 +176,7 @@ class Module_Types
 public:
 
   char *names[2];
-  ExternalModule * (*module_constructor) (char *module_name);
+  ExternalModule * (*module_constructor) (const char *module_name);
 };
 
 
@@ -187,8 +187,8 @@ public:
 void module_display_available(void);
 void module_list_modules(void);
 //int find_in_available_module_list(char * module_type);
-void module_load_library(char *library_name);
-void module_load_module(char * module_type, char * module_new_name=NULL);
+void module_load_library(const char *library_name);
+void module_load_module(const char * module_type, const char * module_new_name=NULL);
 void module_pins(char *module_name);
 void module_set_attr(char *module_name,char *attr, char *val);
 void module_set_attr(char *module_name,char *attr, char *val, int val2);

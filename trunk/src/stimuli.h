@@ -102,7 +102,7 @@ public:
 
   stimulus *stimuli;            /* Pointer to the first stimulus connected to this node. */
 
-  Stimulus_Node(char *n = NULL);
+  Stimulus_Node(const char *n = NULL);
   ~Stimulus_Node();
   char * name(void){return name_str;};
   int get_voltage(void) { return state; };
@@ -142,7 +142,7 @@ public:
   virtual void put_state(int new_state) {state=new_state;};      // From simulation
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);                   // From the gui
-  void put_name(char *new_name);
+  void put_name(const char *new_name);
 
   // interface to the digital state
   virtual bool get_digital_state(void) {return digital_state;};

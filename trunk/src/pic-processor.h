@@ -258,7 +258,7 @@ public:
   virtual void tris_instruction(unsigned int tris_register) {return;};
   virtual void create_symbols(void);
   virtual void create_stack(void) {stack = new Stack;};
-  virtual void load_hex(char *hex_file);
+  virtual void load_hex(const char *hex_file);
   virtual void run(void);
   void sleep(void);
   void step(unsigned int steps);

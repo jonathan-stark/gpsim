@@ -1825,7 +1825,7 @@ void USARTModule::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-ExternalModule * USARTModule::USART_construct(char *new_name)
+ExternalModule * USARTModule::USART_construct(const char *new_name)
 {
 
   cout << "USART construct \n";
@@ -1860,7 +1860,7 @@ void USARTModule::set_attribute(char *attr, char *val)
 }
 
 
-USARTModule::USARTModule(char *_name)
+USARTModule::USARTModule(const char *_name)
 {
 
   port = NULL;

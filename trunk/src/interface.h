@@ -141,7 +141,7 @@ typedef struct _sym
 					  gpointer interface_callback_data,
 					  guint64 cycle);
   void gpsim_clear_break(gpointer b);
-  int gpsim_open(unsigned int processor_id, char *file);
+  int gpsim_open(unsigned int processor_id, const char *file);
   unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
   unsigned int gpsim_get_hll_file_id(unsigned int processor_id,
 			  	 unsigned int address);
@@ -196,7 +196,7 @@ typedef struct _sym
   unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id,
 					   REGISTER_TYPE type,
 					   unsigned int register_number);
-  unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename, int format);
+  unsigned int gpsim_set_log_name(unsigned int processor_id, const char *filename, int format);
   unsigned int gpsim_reg_set_read_logging(unsigned int processor_id,
 					  REGISTER_TYPE type,
 					  unsigned int register_number);

@@ -117,7 +117,7 @@ public:
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
 
-  static ExternalModule *construct(char *new_name=NULL);
+  static ExternalModule *construct(const char *new_name=NULL);
 
 };
 
@@ -132,7 +132,7 @@ public:
 
 #endif
 
-  PullupResistor(char *init_name=NULL);
+  PullupResistor(const char *init_name=NULL);
   ~PullupResistor();
 
   // Inheritances from the Package class
@@ -141,8 +141,8 @@ public:
   // Inheritances from the Module class
   virtual void set_attribute(char *attr, char *val);
 
-  static ExternalModule *pu_construct(char *new_name=NULL);
-  static ExternalModule *pd_construct(char *new_name=NULL);
+  static ExternalModule *pu_construct(const char *new_name=NULL);
+  static ExternalModule *pd_construct(const char *new_name=NULL);
 
 #ifdef HAVE_GUI
   void build_window(void);

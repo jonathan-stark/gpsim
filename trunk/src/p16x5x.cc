@@ -248,7 +248,7 @@ void P16C54::tris_instruction(unsigned int tris_register)
         trace.write_TRIS(trisb.value);
         break;
       default:
-        cout << __PRETTY_FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
+        cout << __FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
         break;
    }
 }
@@ -355,7 +355,7 @@ void P16C55::tris_instruction(unsigned int tris_register)
         trace.write_TRIS(trisc.value);
         break;
       default:
-        cout << __PRETTY_FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
+        cout << __FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
         break;
    }
 }

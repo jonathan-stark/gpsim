@@ -216,7 +216,7 @@ void Video::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Video::construct(char *new_name)
+ExternalModule * Video::construct(const char *new_name)
 {
 
   //cout << " AND2Gate  construct\n";

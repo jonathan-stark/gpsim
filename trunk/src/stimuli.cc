@@ -222,7 +222,7 @@ void dump_stimulus_list(void)
 
 //========================================================================
 
-Stimulus_Node::Stimulus_Node(char *n)
+Stimulus_Node::Stimulus_Node(const char *n)
 {
 
   stimuli = NULL;
@@ -425,7 +425,7 @@ void stimulus::put_state_value(int new_state)
   if(xref) xref->update();
 }
 
-void stimulus::put_name(char *n)
+void stimulus::put_name(const char *n)
 {
   cout << "stimulus::put_name  " << n << '\n';
 

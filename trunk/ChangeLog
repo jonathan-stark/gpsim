@@ -1,3 +1,34 @@
+2004-01-17  Borut Razem  <borut.razem@siol.net>
+	Update to GTK+ 2.x:
+	* config_win32.h.in: version 0.21.1, updated #defines
+	* cli/cmd_load.cc, cli/input.cc, cli/input.h:
+	  char * replaced with const char *,
+	  removed unneeded #include <sys/errno.h>
+	* gui/gui.h, gui/gui_breadboard.cc, gui/gui_break.cc,
+	  gui/gui_dialog.cc, gui/gui_menu.cc,gui/gui_object.cc,
+	  gui/gui_profile.cc, gui/gui_regwin.cc, gui\gui_src.cc,
+	  gui/gui_src_asm.cc, gui/gui_src_opcode.cc, gui/gui_stack.cc,
+	  gui/gui_statusbar.cc, gui/gui_stopwatch.cc, gui/gui_symbols.cc,
+	  gui/gui_trace.cc, gui/gui_watch.cc:
+	  char * replaced with const char *,
+	  GdkFont replaced with PangoFontDescription,
+	  GtkStyle replaced with GtkStyle *,
+	  #define GTK_ENABLE_BROKEN,
+	  #include <sys/errno.h> replaced with #include <errno.h>,
+	  update for GTK+ 2.x
+	* src/cod.cc, src/interface.cc, src/interface.h, src/modules.cc,
+	  src/modules.h, src/p16x5x.cc, src/pic-processor.cc,
+	  src/pic-processor.h, src/processor.h, src/stimuli.cc, src/stimuli.h,
+	  src/symbol.cc, src/symbol.h, src/trace.cc, src/trace.h:
+	  char * replaced with const char *,
+	  __PRETTY_FUNCTION__ replaced with __FUNCTION__
+	* modules/binary_indicator.cc, modules/binary_indicator.h,
+	  modules/led.cc, modules/led.h, modules/logic.cc, modules/logic.h,
+	  modules/paraface.cc, modules/paraface.h, modules/resistor.cc,
+	  modules/resistor.h, modules/switch.cc, modules/switch.h,
+	  modules/usart.cc, modules/usart.h, modules/video.cc, modules/video.h:
+	  char * replaced with const char *,
+
 2004-01-06  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_regwin.cc -- valgrind memcheck bug fixes
 	* src/cod.cc

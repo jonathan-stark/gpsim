@@ -151,7 +151,7 @@ void Switch::create_widget(Switch *sw)
 
 //--------------------------------------------------------------
 // construct
-ExternalModule * Switch::construct(char *new_name=NULL)
+ExternalModule * Switch::construct(const char *new_name=NULL)
 {
 
 //    cout << " Switch constructor\n";

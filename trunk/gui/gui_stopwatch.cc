@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -166,7 +166,7 @@ modepopup_activated(GtkWidget *widget, gpointer data)
 static void
 cyclechanged(GtkWidget *widget, StopWatch_Window *sww)
 {
-    char *text;
+    const char *text;
     if(widget==NULL|| sww==NULL)
     {
 	printf("Warning cyclechanged(%p,%p)\n",widget,sww);
@@ -189,7 +189,7 @@ cyclechanged(GtkWidget *widget, StopWatch_Window *sww)
 static void
 offsetchanged(GtkWidget *widget, StopWatch_Window *sww)
 {
-    char *text;
+    const char *text;
     if(widget==NULL|| sww==NULL)
     {
 	printf("Warning offsetchanged(%p,%p)\n",widget,sww);
@@ -209,7 +209,7 @@ offsetchanged(GtkWidget *widget, StopWatch_Window *sww)
 static void
 rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 {
-    char *text;
+    const char *text;
     if(widget==NULL|| sww==NULL)
     {
 	printf("Warning rolloverchanged(%p,%p)\n",widget,sww);

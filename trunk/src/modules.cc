@@ -29,6 +29,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 
+#ifdef WIN32
+#undef HAVE_GUI
+#endif
+
 #ifdef HAVE_GUI
 #include <dlfcn.h>
 #endif
@@ -209,7 +213,7 @@ int Module::get_pin_state(unsigned int pin_number)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void Module::new_name(char *s)
+void Module::new_name(const char *s)
 {
   if(name_str)
     delete name_str;
@@ -359,9 +363,9 @@ void Module::add_attribute(Attribute *new_attribute)
 
 }
 
-Module_Library::Module_Library(char *new_name, void *library_handle)
+Module_Library::Module_Library(const char *new_name, void *library_handle)
 {
-    #ifdef HAVE_GUI
+#ifdef HAVE_GUI
     const char * error;
 
     if(new_name)
@@ -383,13 +387,13 @@ Module_Library::Module_Library(char *new_name, void *library_handle)
       // Get a pointer to the list of modules that this library supports.
       module_list = get_mod_list();
     }
-    #else
+#else
 
     module_list = NULL;
     _name = NULL;
     _handle = NULL;
 
-    #endif
+#endif
 
 }
 
@@ -404,7 +408,7 @@ list <Module_Library *> :: iterator module_iterator;
 // to accomodate different reference designator types).
 static int  ref_des_count = 1;
 
-void module_add_library(char *library_name, void *library_handle)
+void module_add_library(const char *library_name, void *library_handle)
 {
 
 
@@ -447,7 +451,7 @@ void module_display_available(void)
 }
 
 
-void module_load_library(char *library_name)
+void module_load_library(const char *library_name)
 {
 
 #ifdef HAVE_GUI
@@ -473,7 +477,7 @@ void module_load_library(char *library_name)
 
 }
 
-void module_load_module(char *module_type, char *module_name)
+void module_load_module(const char *module_type, const char *module_name)
 {
 
 
@@ -484,8 +488,9 @@ void module_load_module(char *module_type, char *module_name)
 
   if(module_name==NULL)
   {
-      module_name = (char*)malloc(128);
-      sprintf(module_name, "%s%d",module_type,module_sequence_number);
+      char *p = (char*)malloc(128);
+      sprintf(p, "%s%d",module_type,module_sequence_number);
+      module_name = p;
   }
 
   {

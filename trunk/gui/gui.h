@@ -209,7 +209,11 @@ class Register_Window : public GUI_Object
   int row_to_address[MAX_ROWS];
 
   char normalfont_string[256];
+#if GTK_MAJOR_VERSION >= 2
+  PangoFontDescription *normalfont;
+#else
   GdkFont *normalfont;
+#endif
   GtkStyle *current_line_number_style;
   GtkStyle *breakpoint_line_number_style;
   GdkColor breakpoint_color;
@@ -455,12 +459,12 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GdkBitmap *stopp_mask;
   GtkWidget *notebook;
 
-  GtkStyle symbol_text_style;       // for symbols in .asm display
-  GtkStyle label_text_style;        // for label in .asm display
-  GtkStyle instruction_text_style;  // for instruction in .asm display
-  GtkStyle number_text_style;       // for numbers in .asm display
-  GtkStyle comment_text_style;      // for comments in .asm display
-  GtkStyle default_text_style;      // the rest
+  GtkStyle *symbol_text_style;       // for symbols in .asm display
+  GtkStyle *label_text_style;        // for label in .asm display
+  GtkStyle *instruction_text_style;  // for instruction in .asm display
+  GtkStyle *number_text_style;       // for numbers in .asm display
+  GtkStyle *comment_text_style;      // for comments in .asm display
+  GtkStyle *default_text_style;      // the rest
     
   GdkPixmap *pixmap_pc;
   GdkPixmap *pixmap_break;
@@ -823,7 +827,7 @@ void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_valu
 int config_get_variable(char *module, char *entry, int *value);
 int config_set_variable(char *module, char *entry, int value);
 int config_get_string(char *module, char *entry, char **string);
-int config_set_string(char *module, char *entry, char *string);
+int config_set_string(char *module, char *entry, const char *string);
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 

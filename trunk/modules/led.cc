@@ -658,7 +658,7 @@ void Led_7Segments::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Led_7Segments::construct(char *new_name=NULL)
+ExternalModule * Led_7Segments::construct(const char *new_name=NULL)
 {
 
 //  cout << " 7-segment LED display constructor\n";
@@ -915,7 +915,7 @@ void Led::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Led::construct(char *new_name=NULL)
+ExternalModule * Led::construct(const char *new_name=NULL)
 {
 
 //  cout << " 7-segment LED display constructor\n";

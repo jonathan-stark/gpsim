@@ -69,7 +69,6 @@ extern "C" {
 #include <sys/file.h>
 #endif
 #include <sys/stat.h>
-//#include <sys/errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -241,10 +240,10 @@ char * gets_from_cmd_file(char **ss)
 
 }
 
-char *get_dir_delim(char *path)
+const char *get_dir_delim(const char *path)
 {
 #ifdef _WIN32
-  char *p = path + strlen(path);
+  const char *p = path + strlen(path);
 
   do
   {
@@ -259,12 +258,13 @@ char *get_dir_delim(char *path)
 #endif
 }
 
-void process_command_file(char * file_name)
+void process_command_file(const char * file_name)
 {
 
   int save_readline_state;
   FILE *save_cmd_file;
-  char directory[256], *dir_path_end;
+  char directory[256];
+  const char *dir_path_end;
 
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
@@ -550,7 +550,7 @@ gpsim_completion (const char *text, int start, int end)
      directory. */
   if (start == 0)
     //matches = completion_matches (text, (CPFunction *)command_generator);
-    matches = completion_matches (text, command_generator);
+    matches = rl_completion_matches (text, command_generator);
 #endif
 
   return (matches);
