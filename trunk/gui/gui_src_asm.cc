@@ -460,7 +460,7 @@ void SourceBrowserAsm_Window::SelectAddress(Value *addrSym)
 
 void SourceBrowserAsm_Window::Update(void)
 {
-  if(!gp || !pma)
+  if(!gp || !pma || ! window)
     return;
 
   SetTitle();
