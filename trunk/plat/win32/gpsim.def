@@ -131,6 +131,7 @@ EXPORTS
     ?set_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
+    ?set_digital_state@IOPIN@@UAEX_N@Z
     ?set_nodeVoltage@IOPIN@@UAEXN@Z
     ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
     ?set_out_of_range_pm@Processor@@UAEXII@Z
