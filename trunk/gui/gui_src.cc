@@ -43,6 +43,82 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_src.h"
 
 #include <assert.h>
+#include <map>
+
+class KeyEvent
+{
+public:
+  virtual void action(gpointer data = 0) = 0;
+};
+
+class StepEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->gp && sbw->gp->cpu)
+      {
+	sbw->gp->cpu->pma.step(1);
+      }
+  }
+};
+
+class StepOverEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->gp && sbw->gp->cpu)
+      {
+	// Step Over Next instruction, or hll statement
+	sbw->gp->cpu->pma.step_over();
+      }
+  }
+};
+
+class RunEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->gp && sbw->gp->cpu)
+      {
+	sbw->gp->cpu->pma.run();
+      }
+  }
+};
+
+class StopEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->gp && sbw->gp->cpu)
+      {
+	sbw->gp->cpu->pma.stop();
+      }
+  }
+};
+
+class FinishEvent : public KeyEvent
+{
+public:
+  void action(gpointer data)
+  {
+    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
+    if(sbw && sbw->gp && sbw->gp->cpu)
+      {
+	sbw->gp->cpu->pma.finish();
+      }
+  }
+};
+
+map<guint, KeyEvent *> KeyMap;
+
 
 static gint
 key_press(GtkWidget *widget,
@@ -67,39 +143,13 @@ key_press(GtkWidget *widget,
 
       low_level_step=1;
   }
-      
-  switch(key->keyval) {
-
-  case 's':  // Single Step
-  case 'S':
-  case GDK_F7:
-    sbw->gp->cpu->pma.step(1);
-    break;
-
-  case 'o':  // Step Over Next instruction, or hll statement
-  case 'O':
-  case 'n':
-  case GDK_F8:
-    sbw->gp->cpu->pma.step_over();
-    break;
-  case 'r':
-  case 'R':
-  case GDK_F9:
-    sbw->gp->cpu->pma.run();
-    break;
-  case GDK_Escape:
-    sbw->gp->cpu->pma.stop();
-    break;
-  case 'f':
-  case 'F':
-    sbw->gp->cpu->pma.finish();
-    break;
-      
-// Exit is Ctrl-Q; the dispatcher menu shortcut
-//  case 'q':
-//  case 'Q':
-//      exit_gpsim();
-  }
+  
+  KeyEvent *pKE = KeyMap[key->keyval];
+  if(pKE) 
+    {
+      pKE->action(data);
+      return TRUE;
+    }
 
   return TRUE;
 }
@@ -145,6 +195,27 @@ void SourceBrowser_Window::Create(void)
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event),
 		      (gpointer) this);
+
+  // FIXME - populate the KeyMap map with source browser functions. This should
+  // FIXME   probably go into some kind of configuration file.
+
+  KeyMap['s'] = new StepEvent();
+  KeyMap['S'] = KeyMap['s'];
+  KeyMap[GDK_F7] = KeyMap['s'];
+
+  KeyMap['o'] = new StepOverEvent();
+  KeyMap['O'] = KeyMap['o'];
+  KeyMap['n'] = KeyMap['o'];
+  KeyMap[GDK_F8] = KeyMap['o'];
+
+  KeyMap['r'] = new RunEvent();
+  KeyMap['R'] = KeyMap['r'];
+  KeyMap[GDK_F9] = KeyMap['r'];
+
+  KeyMap[GDK_Escape] = new StopEvent();
+
+  KeyMap['f'] = new FinishEvent();
+  KeyMap['F'] = KeyMap['f'];
 
   /* Add a signal handler for key press events. This will capture
    * key commands for single stepping, running, etc.
