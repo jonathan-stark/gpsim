@@ -158,14 +158,24 @@ void P16C8x::set_out_of_range_pm(int address, int value)
 unsigned int P16C8x::eeprom_get_value(unsigned int address)
 {
 
+  if(address<eeprom_get_size())
     return eeprom.rom[address]->get_value();
+  return 0;
+
+}
+file_register *P16C8x::eeprom_get_register(unsigned int address)
+{
+
+  if(address<eeprom_get_size())
+    return eeprom.rom[address];
+  return NULL;
 
 }
 void  P16C8x::eeprom_put_value(unsigned int value,
 				unsigned int address)
 {
+  if(address<eeprom_get_size())
     eeprom.rom[address]->put_value(value);
-  return;
 
 }
 

@@ -36,11 +36,54 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 
+unsigned int P16F874::eeprom_get_value(unsigned int address)
+{
+
+  if(address<eeprom_get_size())
+    return eeprom.rom[address]->get_value();
+  return 0;
+
+}
+file_register *P16F874::eeprom_get_register(unsigned int address)
+{
+
+  if(address<eeprom_get_size())
+    return eeprom.rom[address];
+  return NULL;
+
+}
+void  P16F874::eeprom_put_value(unsigned int value,
+				unsigned int address)
+{
+  if(address<eeprom_get_size())
+    eeprom.rom[address]->put_value(value);
+
+}
+
+void P16F874::set_out_of_range_pm(int address, int value)
+{
+
+  if( (address>= 0x2100) && (address < 0x2100 + eeprom_get_size()))
+    {
+      eeprom.rom[address - 0x2100]->value = value;
+    }
+}
+
+
 void P16F874::create_sfr_map(void)
 {
 
   if(verbose)
     cout << "creating f874 registers \n";
+
+  add_sfr_register(&eedata,  0x10c);
+  add_sfr_register(&eecon1,  0x18c, 0);
+
+  add_sfr_register(&eeadr,   0x10d);
+  add_sfr_register(&eecon2,  0x18d);
+
+  add_sfr_register(&eedatah, 0x10e);
+  add_sfr_register(&eeadrh,  0x10f);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -71,6 +114,7 @@ void P16F874::create(void)
 
   P16F874::create_sfr_map();
 
+
 }
 
 
@@ -84,6 +128,12 @@ pic_processor * P16F874::construct(void)
     cout << " f874 construct\n";
 
   p->create();
+
+  p->eeprom.cpu = p;
+  p->eeprom.initialize(128,
+		    &p->eecon1, &p->eecon2, 
+		    &p->eedata, &p->eeadr,
+		    &p->eedatah, &p->eeadrh);
 
   p->name_str = "16F874";
 
@@ -131,6 +181,7 @@ void P16F877::create(void)
 
   P16F877::create_sfr_map();
 
+
 }
 
 
@@ -144,6 +195,13 @@ pic_processor * P16F877::construct(void)
     cout << " f877 construct\n";
 
   p->create();
+
+  p->eeprom.cpu = p;
+  p->eeprom.initialize(256,
+		    &p->eecon1, &p->eecon2, 
+		    &p->eedata, &p->eeadr,
+		    &p->eedatah, &p->eeadrh);
+
 
   p->name_str = "16F877";
 

@@ -108,13 +108,7 @@ pic_processor *get_processor(unsigned int cpu_id);
 
 unsigned int processor_has_eeprom(pic_processor *pic)
 {
-    switch(pic->isa())
-    {
-    case _P16C84_:
-    case _P16F84_:
-	return TRUE;
-    }
-    return FALSE;
+  return ((pic->eeprom_get_size() > 0) ? TRUE : FALSE);
 }
 
 void  initialization_is_complete(void)
@@ -125,8 +119,11 @@ void  initialization_is_complete(void)
 //--------------------------------------------------------------------------
 //
 // valid_register - local function
+//  Given a pointer to a pic processor, the type of register (file or eeprom 
+//  for now), and the register number, this routine will return true if the
+//  register is a valid one. 'Valid' means that the register is accessable
+//  by the pic software that runs on the simulated processor.
 //
-
 unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int register_number)
 {
 
@@ -135,12 +132,10 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 
   if(type == REGISTER_EEPROM)
   {
-      if(!processor_has_eeprom(pic))
-	  return 0;
+    if(!processor_has_eeprom(pic))
+      return 0;
 
-      // perhaps try a dynamic cast?
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      if(register_number<0 || register_number>=p->eeprom_get_size())
+      if(register_number>=pic->eeprom_get_size())
 	  return FALSE;
       return TRUE;
   }
@@ -167,30 +162,52 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 
   return 0;
 }
+
 //--------------------------------------------------------------------------
+// file_register *gpsim_get_register(
+//         unsigned int processor_id, 
+//         REGISTER_TYPE type, 
+//         unsigned int register_number)
+//
+// given a processor id, a register type, and the register number, this routine
+// will return a pointer to the referenced file register. If the register doesn't
+// exist, then NULL is returned.
+//
 
-char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-  static char buffer[128], *name;
-
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
     return NULL;
 
   if(!valid_register(pic,type,register_number))
-      return NULL;
+    return NULL;
   
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      name = p->eeprom.rom[register_number]->name();
+  switch(type) {
+  case REGISTER_RAM:
+    return pic->registers[register_number];
+    break;
+  case REGISTER_EEPROM:
+    return pic->eeprom_get_register(register_number);
+    break;
+  default:
+    return NULL;
   }
-  else
-      name = pic->registers[register_number]->name();
 
+}
+//--------------------------------------------------------------------------
+
+char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+{
+  static char buffer[128];
+  char *name = NULL;
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+
+  if(fr)
+    name = fr->name();
   if(!name)
-      return NULL;
+    return NULL;
   
   if(gpsim_register_is_alias(processor_id, type, register_number))
       sprintf(buffer,"alias (%s)", name);
@@ -204,20 +221,12 @@ char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, uns
 
 unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  pic_processor *pic = get_processor(processor_id);
-
-  if(!valid_register(pic,type,register_number))
+  if(fr)
+    return fr->get_value();
+  else
     return INVALID_VALUE;
-
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      return p->eeprom_get_value(register_number);
-  }
-  
-  return pic->registers[register_number]->get_value();
-
 
 }
 
@@ -225,22 +234,14 @@ unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE t
 
 int gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-    pic_processor *pic = get_processor(processor_id);
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  if(!valid_register(pic,type,register_number))
-      return FALSE;
-  
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      if(p->eeprom.rom[register_number]->address!=register_number)
-	  return TRUE;
-      return FALSE;
-  }
-  
-  if(pic->registers[register_number]->address!=register_number)
+  if(fr) 
+    if(fr->address!=register_number)
       return TRUE;
+
   return FALSE;
+
 }
 
 //--------------------------------------------------------------------------
@@ -266,23 +267,11 @@ int gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigne
 
 void  gpsim_put_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int register_value)
 {
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  pic_processor *pic = get_processor(processor_id);
+  if(fr) 
+    fr->put_value(register_value);
 
-  if(!pic)
-    return;
-
-  if(!valid_register(pic,type,register_number))
-    return;
-
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      p->eeprom_put_value(register_value,register_number);
-      return;
-  }
-  //cout << __FUNCTION__ <<"() addr 0x"<<hex<<register_number<<", val 0x"<<register_value<<'\n';
-  pic->registers[register_number]->put_value(register_value);
 }
 
 //--------------------------------------------------------------------------
@@ -460,13 +449,10 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   if(!pic)
     return 0;
   if(!valid_register(pic,type,0))
-      return FALSE;
+      return 0;
   
   if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      return p->eeprom_get_size();
-  }
+    return pic->eeprom_get_size();
   
   return pic->register_memory_size();
 }
@@ -474,23 +460,14 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
- pic_processor *pic = get_processor(processor_id);
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  if(!valid_register(pic,type,register_number))
-    return 0;
+  if(fr) 
+    if(fr->isa() == file_register::BP_REGISTER)
+      return TRUE;
 
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      if(p->eeprom.rom[register_number]->isa() == file_register::BP_REGISTER)
-	  return 1;
-      return 0;
-  }
-  
-  if(pic->registers[register_number]->isa() == file_register::BP_REGISTER)
-    return 1;
+  return FALSE;
 
-  return 0;
 }
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
@@ -577,51 +554,23 @@ void  gpsim_assign_program_xref(unsigned int processor_id, unsigned int address,
  //--------------------------------------------------------------------------
 void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  pic_processor *pic = get_processor(processor_id);
+  if(fr)
+    if(fr->xref)
+      fr->xref->clear(xref);
 
-  if(!pic)
-    return;
-
-  if(!valid_register(pic,type,register_number))
-      return;
-  
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      if(p->eeprom.rom[register_number]->xref)
-	  p->eeprom.rom[register_number]->xref->clear(xref);
-      return;
-  }
-  
-  if(pic->registers[register_number]->xref)
-      pic->registers[register_number]->xref->clear(xref);
-    
 }
 
 //--------------------------------------------------------------------------
 
 void  gpsim_assign_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {
+  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
-  pic_processor *pic = get_processor(processor_id);
-
-  if(!pic)
-    return;
-
-  if(!valid_register(pic,type,register_number))
-      return;
-  
-  if(type == REGISTER_EEPROM)
-  {
-      P16C8x *p=static_cast<P16C8x*>(pic);
-      if(p->eeprom.rom[register_number]->xref)
-	  p->eeprom.rom[register_number]->xref->add(xref);
-      return;
-  }
-  
-  if(pic->registers[register_number]->xref)
-      pic->registers[register_number]->xref->add(xref);
+  if(fr)
+    if(fr->xref)
+      fr->xref->add(xref);
 }
 
 //--------------------------------------------------------------------------

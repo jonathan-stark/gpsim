@@ -50,6 +50,8 @@ public:
   EECON2       eecon2;
   EEDATA       eedata;
   EEADR        eeadr;
+  EEDATA       eedatah;
+  EEADR        eeadrh;
 
   EEPROM       eeprom;
 

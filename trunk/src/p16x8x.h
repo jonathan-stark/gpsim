@@ -65,6 +65,7 @@ public:
   virtual unsigned int eeprom_get_value(unsigned int address) ;
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address);
+  virtual file_register *eeprom_get_register(unsigned int address);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
