@@ -255,8 +255,7 @@ IOPIN *Module::get_pin(unsigned int pin_number)
 //-------------------------------------------------------------------
 Module_Library::Module_Library(const char *new_name, void *library_handle)
 {
-#ifndef _WIN32
-  const char * error;
+  char * error;
 
   if(new_name)
     _name = strdup(new_name);
@@ -265,10 +264,10 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
 
   _handle = library_handle;
 
-  dlerror();	// Clear possible previous errors
-  get_mod_list = (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
+  get_mod_list = (Module_Types_FPTR)get_library_export(
+    "get_mod_list", _handle, &error);
 
-  if ((error = dlerror()) != 0)  {
+  if (NULL == get_mod_list) {
     cout << "WARNING: non-conforming module library\n"
 	 << "  gpsim libraries should have the get_mod_list() function defined\n";
     fputs(error, stderr);
@@ -283,45 +282,18 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
       cout << "no modules were found in " << name() << endl;
 
     // If the module has an "initialize" function, then call it now.
-    //
     typedef  void * (*void_FPTR)(void);
-    void * (*initialize)(void) = (void_FPTR) dlsym(_handle,"initialize");
+    void * (*initialize)(void) = (void_FPTR)get_library_export(
+      "initialize", _handle, NULL);
     if(initialize)
       initialize();
-
   }
-#else
-//  module_list = 0;
-//  _name = 0;
-//  _handle = 0;
-
-    if(new_name)
-      _name = strdup(new_name);
-    else
-      _name = NULL;
-
-    _handle = library_handle;
-
-    get_mod_list = (Module_Types_FPTR) GetProcAddress((HMODULE)_handle, "get_mod_list");
-    if (NULL == get_mod_list) {
-      char *error = g_win32_error_message(GetLastError());
-
-      cout << "WARNING: non-conforming module library\n"
-	   << "  gpsim libraries should have the get_mod_list() function defined\n";
-      fprintf(stderr, "%s\n", error);
-      g_free(error);
-      module_list = NULL;
-    } else {
-
-      // Get a pointer to the list of modules that this library supports.
-      module_list = get_mod_list();
-    }
-
-#endif
 }
 
 ICommandHandler *Module_Library::GetCli() {
-  PFNGETCOMMANDHANDLER pGetCli = (PFNGETCOMMANDHANDLER)get_library_export(GPSIM_GETCOMMANDHANDLER, _handle);
+
+  PFNGETCOMMANDHANDLER pGetCli = (PFNGETCOMMANDHANDLER)get_library_export(
+    GPSIM_GETCOMMANDHANDLER, _handle, NULL);
   if (pGetCli != NULL)
     return pGetCli();
   return NULL;
