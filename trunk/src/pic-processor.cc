@@ -589,7 +589,7 @@ void pic_processor::run (void)
     {
       do
 	{
-	  step_one();
+	  program_memory[pc->value]->execute();
 	} while(!bp.global_break);
 
       if(bp.have_interrupt())

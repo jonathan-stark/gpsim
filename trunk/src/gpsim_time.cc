@@ -575,12 +575,12 @@ void Cycle_Counter::clear_current_break(void)
       l1 = inactive.next;                  // ptr to 1st inactive bp
       inactive.next = active.next;         // let the 1st active bp become the 1st inactive one
       active.next = active.next->next;     // The 2nd active bp is now the 1st
-      active.next->prev = &active;
       inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
 
-      if(active.next != NULL)
+      if(active.next != NULL) {
 	break_on_this = active.next->break_value;
-      else
+	active.next->prev = &active;
+      } else
 	break_on_this = END_OF_TIME;
     }
   else

@@ -73,6 +73,36 @@ public:
   Cycle_Counter(void);
   void preset(guint64 new_value);     // not used currently.
 
+ private:
+  /*
+    breakpoint
+    when the member function "increment()" encounters a break point, 
+    breakpoint() is called.
+  */
+
+  void breakpoint(void)
+    {
+      // There's a break point set on this cycle. If there's a callback function, then call
+      // it other wise halt execution by setting the global break flag.
+
+      // Loop in case there are multiple breaks
+      while(value == break_on_this && active.next) {
+	
+
+	reassigned = 0;    // This flag will get set true if the call back
+	// function moves the break point to another cycle.
+
+	if(active.next->f)
+	  active.next->f->callback();
+	else 
+	  bp.check_cycle_break(active.next->breakpoint_number);
+
+	if(!reassigned)    // don't try to clear if the break point was reassigned.
+	  clear_current_break();
+      }
+    }
+
+ public:
   /*
     increment - This inline member function is called once or 
     twice for every simulated instruction. Its purpose is to
@@ -91,26 +121,8 @@ public:
 
       value++;
 
-      if(value >= break_on_this)
-	{
-	  // There's a break point set on this cycle. If there's a callback function, then call
-	  // it other wise halt execution by setting the global break flag.
-
-	  while(value >= break_on_this && active.next)   // Loop in case there are multiple breaks
-	    {
-
-	      reassigned = 0;    // This flag will get set true if the call back
-	                         // function moves the break point to another cycle.
-
-	      if(active.next->f)
-		active.next->f->callback();
-	      else 
-		bp.check_cycle_break(active.next->breakpoint_number);
-
-	      if(!reassigned)    // don't try to clear if the break point was reassigned.
-		clear_current_break();
-	    }
-	}
+      if(value == break_on_this)
+	breakpoint();
 
       // Note that it's really inefficient to trace every cycle increment. 
       // Instead, we implicitly trace the increments with the instruction traces.
