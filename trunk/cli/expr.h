@@ -29,6 +29,7 @@ using namespace std;
 
 class Expression;
 class symbol;
+class ComparisonOperator;
 typedef list<Expression*> ExprList_t;
 typedef list<Expression*>::iterator ExprList_itor;
 
@@ -43,7 +44,19 @@ class Value : public gpsimObject
   virtual double getAsDouble();
   virtual unsigned int get_leftVal() {return getAsInt();}
   virtual unsigned int get_rightVal() {return getAsInt();}
+  bool isConstant();
 
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+  /*
+  virtual bool operator<(Value *);
+  virtual bool operator>(Value *);
+  virtual bool operator<=(Value *);
+  virtual bool operator>=(Value *);
+  virtual bool operator==(Value *);
+  virtual bool operator!=(Value *);
+  virtual bool operator&&(Value *);
+  virtual bool operator||(Value *);
+  */
  private:
   bool constant;
 };
@@ -88,9 +101,14 @@ public:
   virtual double getAsDouble() { return (value) ? 1.0 : 0.0;}
 
   static Boolean* Boolean::typeCheck(Value* val, string valDesc);
-  //Value* eval();
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-
+  /*
+  bool operator&&(Value *);
+  bool operator||(Value *);
+  bool operator==(Value *);
+  bool operator!=(Value *);
+  */
 private:
   bool value;
 };
@@ -118,7 +136,18 @@ public:
   static Integer* Integer::typeCheck(Value* val, string valDesc);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
+  /*
+  virtual bool operator<(Value *v);
+  virtual bool operator>(Value *);
+  virtual bool operator<=(Value *);
+  virtual bool operator>=(Value *);
+  virtual bool operator==(Value *);
+  virtual bool operator!=(Value *);
+  virtual bool operator&&(Value *);
+  virtual bool operator||(Value *);
+  */
 private:
   gint64 value;
 };
@@ -141,8 +170,18 @@ public:
   virtual double getAsDouble() { return value;}
 
   static Float* typeCheck(Value* val, string valDesc);
-  //Value* eval();
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
+  /*
+  virtual bool operator<(Value *v);
+  virtual bool operator>(Value *);
+  virtual bool operator<=(Value *);
+  virtual bool operator>=(Value *);
+  virtual bool operator==(Value *);
+  virtual bool operator!=(Value *);
+  virtual bool operator&&(Value *);
+  virtual bool operator||(Value *);
+  */
 private:
   double value;
 };
@@ -164,6 +203,7 @@ public:
   string getVal();
 
   static String* typeCheck(Value* val, string valDesc);
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
   string value;
@@ -186,7 +226,7 @@ public:
   virtual unsigned int get_rightVal();
 
   static AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc);
-  
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
   unsigned int left;

@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "expr.h"
+#include "operator.h"
 #include "errors.h"
 #include "../src/symbol.h"
 
@@ -49,6 +50,54 @@ double Value::getAsDouble()
   throw new Error(showType() +
 		  " cannot be converted to a double ");
 }
+
+bool Value::isConstant()
+{
+  return constant;
+}
+
+bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  throw new Error(compOp->showOp() + 
+		  " comparison is not defined for " + showType());
+}
+
+
+/*
+bool Value::operator<(Value *rv)
+{
+  throw Error("OpLT");
+}
+bool Value::operator>(Value *rv)
+{
+  throw Error("OpGT");
+}
+bool Value::operator<=(Value *rv)
+{
+  throw Error("OpLE");
+}
+bool Value::operator>=(Value *rv)
+{
+  throw Error("OpGE");
+}
+bool Value::operator==(Value *rv)
+{
+  throw Error("OpEQ");
+}
+bool Value::operator!=(Value *rv)
+{
+  throw Error("OpNE");
+}
+bool Value::operator&&(Value *rv)
+{
+  throw Error("Op&&");
+}
+bool Value::operator||(Value *rv)
+{
+  throw Error("Op||");
+}
+*/
+
 
 /*****************************************************************
  * The AbstractRange class.
@@ -107,6 +156,19 @@ AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc)
   // This static cast is totally safe in light of our typecheck, above.
   return((AbstractRange*)(val));
 }
+bool AbstractRange::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  throw new Error(compOp->showOp() + 
+		  " comparison is not defined for " + showType());
+}
+
+/*
+bool AbstractRange::operator<(Value *rv)
+{
+  AbstractRange *_rv = typeCheck(rv,"OpLT");
+  return right < _rv->left;
+}
+*/
 
 /*****************************************************************
  * The Boolean class.
@@ -158,6 +220,49 @@ Boolean* Boolean::typeCheck(Value* val, string valDesc)
   // This static cast is totally safe in light of our typecheck, above.
   return((Boolean*)(val));
 }
+
+bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  
+  Boolean *rv = typeCheck(rvalue,"");
+
+  switch(compOp->isa()) {
+  case ComparisonOperator::eOpEq:
+    return value == rv->value;
+  case ComparisonOperator::eOpNe:
+    return value != rv->value;
+  default:
+    Value::compare(compOp, rvalue);  // error
+  }
+
+  return false; // keep the compiler happy.
+}
+
+/*
+bool Boolean::operator&&(Value *rv)
+{
+  Boolean *_rv = typeCheck(rv,"Op&&");
+  return value && _rv->value;
+}
+
+bool Boolean::operator||(Value *rv)
+{
+  Boolean *_rv = typeCheck(rv,"Op||");
+  return value || _rv->value;
+}
+
+bool Boolean::operator==(Value *rv)
+{
+  Boolean *_rv = typeCheck(rv,"OpEq");
+  return value == _rv->value;
+}
+
+bool Boolean::operator!=(Value *rv)
+{
+  Boolean *_rv = typeCheck(rv,"OpNe");
+  return value != _rv->value;
+}
+*/
 
 /*****************************************************************
  * The Integer class.
@@ -252,6 +357,45 @@ Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 
   return(iVal);
 }
 
+bool Integer::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  
+  Integer *rv = typeCheck(rvalue,"");
+
+  if(value < rv->value)
+    return compOp->less();
+
+  if(value > rv->value)
+    return compOp->greater();
+
+  return compOp->equal();
+}
+
+/*
+bool Integer::operator<(Value *rv)
+{
+  Integer *_rv = typeCheck(rv,"OpLT");
+  return value < _rv->value;
+}
+
+bool Integer::operator>(Value *rv)
+{
+  Integer *_rv = typeCheck(rv,"OpGT");
+  return value > _rv->value;
+}
+
+bool Integer::operator<=(Value *rv)
+{
+  Integer *_rv = typeCheck(rv,"OpLE");
+  return value <= _rv->value;
+}
+
+bool Integer::operator>(Value *rv)
+{
+  Integer *_rv = typeCheck(rv,"OpGT");
+  return value > _rv->value;
+}
+*/
 
 /*****************************************************************
  * The Float class.
@@ -301,6 +445,27 @@ Float* Float::typeCheck(Value* val, string valDesc)
   return((Float*)(val));
 }
 
+bool Float::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  
+  Float *rv = typeCheck(rvalue,"");
+
+  if(value < rv->value)
+    return compOp->less();
+
+  if(value > rv->value)
+    return compOp->greater();
+
+  return compOp->equal();
+}
+
+/*
+bool Float::operator<(Value *rv)
+{
+  Float *_rv = typeCheck(rv,"OpLT");
+  return value < _rv->value;
+}
+*/
 #if 0
 /*****************************************************************
  * The gpsimSymbol class.
@@ -426,6 +591,27 @@ String* String::typeCheck(Value* val, string valDesc)
   return((String*)(val));
 }
 
+bool String::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  
+  String *rv = typeCheck(rvalue,"");
+
+  if(value < rv->value)
+    return compOp->less();
+
+  if(value > rv->value)
+    return compOp->greater();
+
+  return compOp->equal();
+}
+
+/*
+bool String::operator<(Value *rv)
+{
+  String *_rv = typeCheck(rv,"OpLT");
+  return value < _rv->value;
+}
+*/
 /*****************************************************************
  * The LiteralBoolean class.
  */

@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_x.h"
 #include "cmd_dump.h"
 #include "expr.h"
+#include "errors.h"
 
 #include "../src/pic-processor.h"
 #include "../src/symbol_orb.h"
@@ -141,16 +142,27 @@ void cmd_x::x(char *reg_name, int val)
 
 void cmd_x::x(Expression *expr)
 {
-  Value *v = toValue(expr);
+  try {
 
-  unsigned int i = v->get_leftVal();
+    Value *v = toValue(expr);
+    cout << v->toString() << endl;
+    unsigned int i = v->get_leftVal();
 
-  while (i<=v->get_rightVal()) {
-    x(i);
-    i++;
-  } 
+    while (i<=v->get_rightVal()) {
+      x(i);
+      i++;
+    } 
 
   
-  delete v;
-  delete expr;
+    delete v;
+    delete expr;
+  }
+
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
 }

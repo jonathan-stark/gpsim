@@ -226,10 +226,28 @@ void yyerror(char *message)
 %type  <coe> expression_option
 %type  <StringList_P>              string_list
 
+
+// Here are token definitions for expression operators
 %nonassoc COLON_T
 %left     PLUS_T MINUS_T XOR_T OR_T AND_T
 %left     MPY_T DIV_T
 %left     SHL_T SHR_T
+
+%left     LOR_T
+%left     LAND_T
+%left     EQ_T NE_T
+%left     LT_T LE_T GT_T GE_T MIN_T MAX_T ABS_T
+
+%nonassoc IND_T
+
+%left     BIT_T BITS_T
+%right    LOW_T HIGH_T REG_T LADDR_T WORD_T
+%nonassoc INDEXED_T
+
+%right    LNOT_T ONESCOMP_T UNARYOP_PREC
+%right    POW_T
+
+
 %%
 /* Grammar rules */
 
@@ -687,7 +705,7 @@ array   : '{' expr_list '}'             {$$=$2;}
 
 expr_list
         : expr                          {$$ = new ExprList_t(); $$->push_back($1);}
-        | expr_list expr                {$1->push_back($2);}
+        | expr_list ',' expr                {$1->push_back($3);}
         ;
 
 binary_expr
@@ -700,11 +718,25 @@ binary_expr
         | expr   XOR_T       expr       {$$ = new OpXor($1, $3);}
         | expr   SHL_T       expr       {$$ = new OpShl($1, $3);}
         | expr   SHR_T       expr       {$$ = new OpShr($1, $3);}
+        | expr   EQ_T        expr       {$$ = new OpEq($1, $3);}
+        | expr   NE_T        expr       {$$ = new OpNe($1, $3);}
+        | expr   LT_T        expr       {$$ = new OpLt($1, $3);}
+        | expr   GT_T        expr       {$$ = new OpGt($1, $3);}
+        | expr   LE_T        expr       {$$ = new OpLe($1, $3);}
+        | expr   GE_T        expr       {$$ = new OpGe($1, $3);}
+        | expr   LAND_T      expr       {$$ = new OpLogicalAnd($1, $3);}
+        | expr   LOR_T       expr       {$$ = new OpLogicalOr($1, $3);}
         | expr   COLON_T     expr       {$$ = new OpAbstractRange($1, $3);}
         ;
 
 unary_expr
         : literal                       {$$=$1;}
+        | PLUS_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpPlus($2);}
+        | MINUS_T     unary_expr   %prec UNARYOP_PREC   {$$ = new OpNegate($2);}
+        | ONESCOMP_T  unary_expr   %prec UNARYOP_PREC   {$$ = new OpOnescomp($2);}
+        | LNOT_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpLogicalNot($2);}
+        | '(' expr ')'                                  {$$=$2;}
+
         ;
 
 literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}

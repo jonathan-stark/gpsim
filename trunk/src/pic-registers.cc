@@ -181,6 +181,7 @@ Program_Counter::Program_Counter(void)
   trace_branch = 0;
   trace_skip = 0;
   trace_other = 0;
+  new_name("pc");
 }
 
 //--------------------------------------------------

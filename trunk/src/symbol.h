@@ -72,9 +72,9 @@ public:
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
   virtual char * type_name(void) { return "unknown";}
-  virtual string &name(void) {return name_str;}
-  //void new_name(string *new_name_str) {name_str = *new_name_str;}
-  virtual void print(void);
+
+  virtual string toString();
+  virtual void print();
   virtual void put_value(unsigned int new_value) {}
   virtual unsigned int get_value() { return 0; }
 
@@ -85,6 +85,7 @@ public:
 class Symbol_Table
 {
 public:
+  void add(symbol*);
 
   void add_ioport(Processor *cpu, IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
@@ -213,7 +214,7 @@ class module_symbol : public symbol
 
 };
 
-// a hack. Place W into the symbol table
+// Place W into the symbol table
 class w_symbol : public symbol
 {
  public:
@@ -228,4 +229,24 @@ class w_symbol : public symbol
   virtual void put_value(unsigned int new_value);
 
 };
+
+class val_symbol : public symbol
+{
+ public:
+
+  val_symbol(gpsimValue *);
+
+  gpsimValue *val;
+
+  virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;}
+  virtual char * type_name(void);
+
+  virtual string toString();
+  virtual void print(void);
+  virtual unsigned int get_value(void);
+  virtual void put_value(unsigned int new_value);
+  virtual string &name(void);
+
+};
+
 #endif  //  __SYMBOL_H__

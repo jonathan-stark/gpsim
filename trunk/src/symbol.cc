@@ -100,6 +100,12 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 }
 
+void Symbol_Table::add(symbol *s)
+{
+  if(s)
+    st.push_back(s);
+}
+
 void Symbol_Table::add_register(Processor *cpu, Register *new_reg, char *symbol_name )
 {
 
@@ -279,6 +285,10 @@ void symbol::print(void)
 
 }
 
+string symbol::toString()
+{
+  return showType();
+}
 
 symbol * Symbol_Table::find(string *s)
 {
@@ -558,4 +568,42 @@ string &stimulus_symbol::name()
     return s->name();
 
   return gpsimValue::name();
+}
+
+
+//------------------------------------------------------------------------
+val_symbol::val_symbol(gpsimValue *v)
+  : symbol()
+{
+  if(!v)
+    throw string(" val_symbol");
+
+  val = v;
+}
+
+char * val_symbol::type_name(void)
+{
+  return "val_symbol";
+}
+
+string val_symbol::toString()
+{
+  return val->toString();
+}
+void val_symbol::print(void)
+{
+  cout << type_name() << " " << val->name() << " = " << val->get_value() << endl;
+}
+unsigned int val_symbol::get_value(void)
+{
+  return val->get_value();
+}
+
+void val_symbol::put_value(unsigned int new_value)
+{
+  val->put_value(new_value);
+}
+string &val_symbol::name(void)
+{
+  return val->name();
 }

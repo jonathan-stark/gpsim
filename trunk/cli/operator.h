@@ -69,6 +69,51 @@ class BinaryOperator : public Operator {
 
 };
 
+class UnaryOperator : public Operator {
+  
+ public:  
+  UnaryOperator(string opString, Expression* expr);
+  virtual ~UnaryOperator();
+  virtual Value* applyOp(Value* value)=0;
+
+  virtual Value* evaluate();
+
+  string show();
+  string showType();
+  string toString();
+
+ protected:
+  Expression*  expr;
+  Value* value;
+
+};
+
+class ComparisonOperator : public BinaryOperator {
+public:
+  enum ComparisonTypes {
+    eOpEq,
+    eOpGe,
+    eOpGt,
+    eOpLe,
+    eOpLt,
+    eOpNe
+  };
+  ComparisonOperator(string opString, Expression*, Expression*);
+  virtual ~ComparisonOperator();
+  virtual Value* applyOp(Value* leftValue, Value* rightValue);
+
+  bool less() { return bLess;}
+  bool equal() { return bEqual;}
+  bool greater() { return bGreater;}
+
+  virtual ComparisonTypes isa()=0;
+
+protected:
+  bool bLess;
+  bool bEqual;
+  bool bGreater;
+};
+
 //-----------------------------------------------------------------
 class OpAbstractRange : public BinaryOperator {
 
@@ -107,12 +152,47 @@ public:
 };
 
 //-----------------------------------------------------------------
+class OpEq : public ComparisonOperator {
+
+public:
+  OpEq(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpEq();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpEq;}
+};
+
+//-----------------------------------------------------------------
+class OpGe : public ComparisonOperator {
+
+public:
+  OpGe(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpGe();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpGe;}
+};
+
+//-----------------------------------------------------------------
+class OpGt : public ComparisonOperator {
+
+public:
+  OpGt(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpGt();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpGt;}
+};
+
+//-----------------------------------------------------------------
+class OpLe : public ComparisonOperator {
+
+public:
+  OpLe(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpLe();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpLe;}
+};
+
+//-----------------------------------------------------------------
 class OpLogicalAnd : public BinaryOperator {
 
 public:
   OpLogicalAnd(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLogicalAnd();
-  Value* shortCircuit(Value* leftValue);
   Value* applyOp(Value* leftValue, Value* rightValue);
 };
 
@@ -122,8 +202,16 @@ class OpLogicalOr : public BinaryOperator {
 public:
   OpLogicalOr(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpLogicalOr();
-  Value* shortCircuit(Value* leftValue);
   Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpLt : public ComparisonOperator {
+
+public:
+  OpLt(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpLt();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpLt;}
 };
 
 //-----------------------------------------------------------------
@@ -133,6 +221,15 @@ public:
   OpMpy(Expression* leftExpr, Expression* rightExpr);
   virtual ~OpMpy();
   Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpNe : public ComparisonOperator {
+
+public:
+  OpNe(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpNe();
+  ComparisonOperator::ComparisonTypes isa() {return ComparisonOperator::eOpNe;}
 };
 
 //-----------------------------------------------------------------
@@ -179,5 +276,48 @@ public:
   virtual ~OpXor();
   Value* applyOp(Value* leftValue, Value* rightValue);
 };
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//            Unary objects
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+// -----------------------------------------------------------------
+class OpLogicalNot : public UnaryOperator {
+
+public:
+  OpLogicalNot(Expression* expr);
+  virtual ~OpLogicalNot();
+  Value* applyOp(Value* value);
+};
+
+// -----------------------------------------------------------------
+class OpNegate : public UnaryOperator {
+
+public:
+  OpNegate(Expression* expr);
+  virtual ~OpNegate();
+  Value* applyOp(Value* value);
+};
+
+// -----------------------------------------------------------------
+class OpOnescomp : public UnaryOperator {
+
+public:
+  OpOnescomp(Expression* expr);
+  virtual ~OpOnescomp();
+  Value* applyOp(Value* value);
+};
+
+// -----------------------------------------------------------------
+class OpPlus : public UnaryOperator {
+
+public:
+  OpPlus(Expression* expr);
+  virtual ~OpPlus();
+  Value* applyOp(Value* value);
+};
+
 
 #endif // __OPERATOR_H__
