@@ -1,3 +1,10 @@
+2004-12-01 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc: Fixed the socket interface for issues related
+	to gtk 2.x. Began adding the SockeLink class. This class will
+	sit on top of the socket interface and will hide it from the 
+	clients. The clients will be able to open SocketLinks and connect
+	directly to gpsim internal objects.
+	
 2004-12-01 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 

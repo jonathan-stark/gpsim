@@ -170,6 +170,8 @@ enum eGPSIMObjectTypes
     GPSIM_CMD_SYMBOL     = 0x97, // Query the value of a symbol
     GPSIM_CMD_VERSION    = 0x98,
     GPSIM_CMD_ASSIGN_RAM = 0x99,
+
+    GPSIM_CMD_SOCKET_LINK = 0xF0,
   };
 
 
@@ -219,6 +221,19 @@ int ParseString(char **buffer, char *retStr, int maxLen)
 // This class is a simple wrapper around the standard BSD socket calls.
 // 
 
+// FIXME - separate the client_socket into it's own class. This will allow
+// the one server to listen to many clients.
+
+class SocketBase
+{
+public:
+  SocketBase(SOCKET s);
+  SOCKET getSocket();
+  void Close();
+private:
+  SOCKET socket;
+};
+
 class Socket
 {
 public:
@@ -230,7 +245,7 @@ public:
 
   void init();
 
-  void Close(SOCKET &);
+  void Close(SocketBase**);
   void Bind();
   void Listen();
   void Accept();
@@ -244,44 +259,87 @@ public:
 
   bool bHaveClient()
   {
-    return (client_socket != INVALID_SOCKET);
+    return (client != 0);
   }
 
   //private:
   char     buffer[BUFSIZE];
-  SOCKET   my_socket, client_socket;
+  SocketBase *my_socket;
+  SocketBase *client;
   struct   sockaddr_in addr;
 };
 
 
+
+
+class SocketLink
+{
+public:
+  SocketLink(unsigned int _handle, Socket *);
+  void receive(char *);
+  void send(char *);
+private:
+  unsigned int handle;
+  Socket *sock;
+};
+
+#define nSOCKET_LINKS 16
+
+SocketLink *links[nSOCKET_LINKS];
+
+
+//========================================================================
+SocketBase::SocketBase(SOCKET s)
+  : socket(s)
+{
+}
+SOCKET SocketBase::getSocket()
+{
+  return socket;
+}
+
+void SocketBase::Close()
+{
+  if(socket != INVALID_SOCKET)
+    closesocket(socket);
+
+  socket = INVALID_SOCKET;
+
+}
+//========================================================================
 Socket::Socket()
 {
-  my_socket = INVALID_SOCKET;
-  client_socket = INVALID_SOCKET;
+  my_socket = 0;
+  client = 0;
 
+  for(int i=0; i<nSOCKET_LINKS; i++)
+    links[i] = 0;
 }
 
 
 Socket::~Socket()
 {
-  Close(my_socket);
-  Close(client_socket);
+  Close(&my_socket);
+  Close(&client);
 
 }
 
 
 void Socket::init(void)
 {
- 
-  if ((my_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+  SOCKET new_socket;
+
+  if ((new_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
     psocketerror("socket");
     exit(1);
   }
 
+  my_socket = new SocketBase(new_socket);
+
   std::cout << "initializing socket\n";
 
   int on = 1;
-  if ( setsockopt ( my_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) != 0 ) {
+  if ( setsockopt ( new_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) != 0 ) {
     psocketerror("setsockopt");
     exit(1);
   }
@@ -296,19 +354,22 @@ void Socket::init(void)
 }
 
 
-void Socket::Close(SOCKET &sock)
+void Socket::Close(SocketBase **sock)
 {
-  if (sock != INVALID_SOCKET)
-    closesocket(sock);
+  if (sock && *sock)
+    (*sock)->Close();
 
-  sock = INVALID_SOCKET;
+  *sock = 0;
 
 }
 
 
 void Socket::Bind()
 {
-  if (bind(my_socket, (struct sockaddr *) &addr, sizeof(addr)) != 0) {
+  if(!my_socket)
+    return;
+
+  if (bind(my_socket->getSocket(), (struct sockaddr *) &addr, sizeof(addr)) != 0) {
     psocketerror("bind");
   }
 }
@@ -316,7 +377,10 @@ void Socket::Bind()
 
 void Socket::Listen()
 {
-  if (listen(my_socket, 5) != 0) {
+  if(!my_socket)
+    return;
+
+  if (listen(my_socket->getSocket(), 5) != 0) {
     psocketerror("listen");
   }
 }
@@ -325,11 +389,14 @@ void Socket::Listen()
 void Socket::Accept()
 {
   socklen_t addrlen = sizeof(addr);
-  if ((client_socket = accept(my_socket, (struct sockaddr *)  &addr, &addrlen)) == INVALID_SOCKET) {
+  SOCKET client_socket = accept(my_socket->getSocket(),(struct sockaddr *)  &addr, &addrlen);
+
+  if (client_socket == INVALID_SOCKET) {
     psocketerror("accept");
     exit(1);
   }
 
+  client = new SocketBase(client_socket);
 }
 
 
@@ -338,30 +405,34 @@ void Socket::Recv()
 
   memset(buffer, 0, sizeof(buffer));
 
-  int ret = recv(client_socket, buffer, sizeof(buffer), 0);
+  if(!client)
+    return;
+
+  int ret = recv(client->getSocket(), buffer, sizeof(buffer), 0);
+
   if (ret < 0) {
     psocketerror("recv");
-    closesocket(my_socket);
-    closesocket(client_socket);
-    client_socket = INVALID_SOCKET;
-    my_socket = INVALID_SOCKET;
+    Close(&my_socket);
+    Close(&client);
   }
   
   if (ret == 0) {
     printf("recv: 0 bytes received\n");
-    closesocket(my_socket);
-    closesocket(client_socket);
+    Close(&client);
   }
 }
 
 
 void Socket::Send(char *b)
 {
+  if(!client)
+    return;
+
   //printf("socket-sending %s",buffer);
-  if (send(client_socket, b, strlen(b), 0) < 0) {
+  if (send(client->getSocket(), b, strlen(b), 0) < 0) {
     psocketerror("send");
-    closesocket(my_socket);
-    closesocket(client_socket);
+    closesocket(client->getSocket());
+    client = 0;
   }
 }
 
@@ -539,6 +610,7 @@ void Socket::ParseObject(char *buffer)
 	  Processor *cpu = get_active_cpu();
 
 	  if(cpu) {
+	    //std::cout << " writing 0x" << hex << ram_value << " to " << ram_address << endl;
 	    Register *reg = cpu->rma.get_register(ram_address);
 	    reg->put_value(ram_value);
 	    respond("ACK");
@@ -550,6 +622,22 @@ void Socket::ParseObject(char *buffer)
       }
       break;
 
+    case GPSIM_CMD_SOCKET_LINK:
+      {
+	unsigned int sequence = 0<<16;
+	unsigned int index = 0;
+	unsigned int handle = sequence | index;
+
+	// search for a slot and then place the new link there
+
+	links[index] = new SocketLink(handle, this);
+
+	// throw away the rest of the buffer for now...
+	buffer_len = 0;
+
+      }
+      break;
+
     default:
       printf("Invalid object type: %d\n",ObjectType);
     }
@@ -557,6 +645,27 @@ void Socket::ParseObject(char *buffer)
   }
 }
 
+
+//========================================================================
+
+SocketLink::SocketLink(unsigned int _handle, Socket *s)
+  : handle(_handle), sock(s)
+{
+  char  buf[256];
+
+  sprintf(buf, "%08X:LINK",handle);
+  send(buf);
+}
+
+void SocketLink::receive(char *m)
+{
+  std::cout<< "SocketLink::receive:" << m;
+}
+void SocketLink::send(char *m)
+{
+  if(sock)
+    sock->respond(m);
+}
 
 #ifdef USE_THREADS_BUT_NOT_RECOMMENDED_BECAUSE_OF_CROSS_PLATFORM_ISSUES
 void *server_thread(void *ignored)
@@ -590,79 +699,108 @@ void start_server(void)
 }
 #else   // if USE_THREADS
 
+static void debugPrintChannelStatus(GIOStatus stat)
+{
+  switch (stat) {
+  case G_IO_STATUS_ERROR:
+    std::cout << "G_IO_STATUS_ERROR\n";
+    break;
+  case G_IO_STATUS_NORMAL:
+    std::cout << "G_IO_STATUS_NORMAL\n";
+    break;
+  case G_IO_STATUS_EOF:
+    std::cout << "G_IO_STATUS_EOF\n";
+    break;
+  case G_IO_STATUS_AGAIN:
+    std::cout << "G_IO_STATUS_AGAIN\n";
+    break;
+  }
+}
+
+static void debugPrintCondition(GIOCondition cond)
+{
+  if(cond & G_IO_IN)
+    std::cout << "  G_IO_IN\n";
+  if(cond & G_IO_OUT)
+    std::cout << "  G_IO_OUT\n";
+  if(cond & G_IO_PRI)
+    std::cout << "  G_IO_PRI\n";
+  if(cond & G_IO_ERR)
+    std::cout << "  G_IO_ERR\n";
+  if(cond & G_IO_HUP)
+    std::cout << "  G_IO_HUP\n";
+  if(cond & G_IO_NVAL)
+    std::cout << "  G_IO_NVAL\n";
+}
 
 gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 {
-  std::cout << " Server callback\n";
+  //std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
+  //debugPrintCondition(condition);
 
   Socket *s = (Socket *)d;
 
-  switch(condition) {
-  case G_IO_IN:
-    {
-#if GLIB_MAJOR_VERSION >= 2
-      gsize terminator_pos;
+  GError *err=NULL;
 
-      std::cout << "Reading bytes\n";
 
-      GString *line = g_string_sized_new(512);
-      g_io_channel_read_line_string(channel, line, &terminator_pos, NULL);
-      g_string_truncate(line, terminator_pos);
-      g_string_append_c(line, '\n');
+  if(condition & G_IO_HUP) {
+    std::cout<< "client has gone away\n";
+    GIOStatus stat = g_io_channel_shutdown(channel, TRUE, &err);
+    std::cout << "channel status " << hex << stat << "  " ;
+    debugPrintChannelStatus(stat);
 
-      std::cout << "Read " << line->len << " bytes: " << line->str << endl;
-
-      if (0 != line->len) {
-	if (line->str[0] == '$')
-	  s->ParseObject(&line->str[1]);
-	else {
-	  parse_string(line->str);
-	  s->respond("ACK");
-	}
-      } else
-	return FALSE;
-
-      return TRUE;
-#else
-      unsigned int bytes_read=0;
-
-      memset(s->buffer, 0, 256);
-
-      std::cout << "Reading bytes\n";
-      g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
-      std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
-
-      if(bytes_read) {
-	if (*s->buffer == '$')
-	  s->ParseObject(&s->buffer[1]);
-	else {
-	  parse_string(s->buffer);
-	  s->respond("ACK");
-	}
-      } else
-	return FALSE;
-
-      return TRUE;
-#endif
-    }
-    break;
-  case G_IO_HUP:
-    std::cout << "client sent HUP\n";
     return FALSE;
-  case G_IO_OUT:
-    std::cout << "OUT\n";
-    break;
-  case G_IO_PRI:
-    std::cout << "PRI\n";
-    break;
-  case G_IO_ERR:
-    std::cout << "ERR\n";
-    break;
-  case G_IO_NVAL:
-    std::cout << "NVAL\n";
-    break;
-  default:
-    std::cout << "Unrecognized condition\n";
+  }
+
+  if(condition & G_IO_IN) {
+    unsigned int bytes_read=0;
+
+    memset(s->buffer, 0, 256);
+    //std::cout << "Reading bytes\n";
+
+#if GLIB_MAJOR_VERSION >= 2
+
+    //GIOStatus stat = g_io_channel_read_chars(channel, s->buffer, BUFSIZE, &bytes_read, &err);
+
+    gsize terminator_pos;
+
+
+    GString *line = g_string_sized_new(512);
+    GIOStatus stat = g_io_channel_read_line_string(channel, line, &terminator_pos, &err);
+    if(stat & G_IO_STATUS_EOF)
+      return FALSE;
+
+    //std::cout << "received " <<line->str << endl;
+    memcpy(s->buffer, line->str, ( (line->len+1 < BUFSIZE) ? line->len+1 : BUFSIZE));
+    bytes_read = line->len+1;
+    g_string_free(line,TRUE);
+
+
+    //std::cout << "channel status " << hex << stat << "  " ;
+    //debugPrintChannelStatus(stat);
+
+#else
+    g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+#endif
+    //std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
+
+    if(err) {
+      std::cout << "GError:" << err->message << endl;
+    }
+
+    if(bytes_read) {
+      if (*s->buffer == '$') {
+	s->buffer[bytes_read-2] = 0;
+	s->ParseObject(&s->buffer[1]);
+
+      } else {
+	parse_string(s->buffer);
+	s->respond("ACK");
+      }
+    } else
+      return FALSE;
+
+    return TRUE;
   }
 
   return FALSE;
@@ -676,10 +814,11 @@ gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 
   s->Accept();
 
+  if(!s->client)
+    return FALSE;
 
-  GIOChannel *new_channel = g_io_channel_unix_new(s->client_socket);
-  GIOCondition new_condition = (GIOCondition)( G_IO_IN | G_IO_HUP |
-					   G_IO_ERR );
+  GIOChannel *new_channel = g_io_channel_unix_new(s->client->getSocket());
+  GIOCondition new_condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
 
 
@@ -688,7 +827,7 @@ gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 		 server_callback,
 		 (void*)s);
 
-  return true;
+  return TRUE;
 }
 
 
@@ -710,12 +849,10 @@ void start_server(void)
 
   s.init();
 
-  if(s.my_socket > 0) {
+  if(s.my_socket->getSocket() > 0) {
 
-    GIOChannel *channel = g_io_channel_unix_new(s.my_socket);
-    GIOCondition condition = (GIOCondition)( G_IO_IN | G_IO_HUP |
-					     G_IO_ERR );
-
+    GIOChannel *channel = g_io_channel_unix_new(s.my_socket->getSocket());
+    GIOCondition condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
 
     g_io_add_watch(channel, 
