@@ -277,6 +277,7 @@ void gpsimInterface::simulation_has_stopped (void)
 
 }
 
+#if GLIB_MAJOR_VERSION >= 2
 
 GMutex *muRunMutex;
 GCond  *cvRunCondition;
@@ -328,7 +329,7 @@ void start_run_thread(void)
 
   std::cout << " started thread\n";
 }
-
+#endif
 
 void gpsimInterface::start_simulation (void)
 {
@@ -337,6 +338,7 @@ void gpsimInterface::start_simulation (void)
   mbSimulating = true;
 
   if(cpu) {
+#if GLIB_MAJOR_VERSION >= 2
 
     static bool thread_initialized=false;
 
@@ -360,6 +362,9 @@ void gpsimInterface::start_simulation (void)
     g_cond_signal  (cvRunCondition);
     g_mutex_unlock (muRunMutex);
     printf("leaving start_simulation\n");
+#else
+    cpu->run();
+#endif
   }
 
   mbSimulating = false;
