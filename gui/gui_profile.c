@@ -535,7 +535,15 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     dx2=malloc(numpoints*sizeof(double));
     bartext=malloc(numpoints*sizeof(GtkPlotText));
 
-    barwidth=1.0/(numpoints*2.1);
+#define WINDOWWIDTH 550
+#define WINDOWHEIGHT 650
+
+#define PLOTXPOS 0.25
+#define PLOTWIDTH 0.50
+#define PLOTYPOS 0.15
+#define PLOTHEIGHT 0.50
+
+    barwidth=PLOTWIDTH/(numpoints*1.1);
 
     for(i=0;i<numpoints;i++)
     {
@@ -596,14 +604,6 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	if(infostring[i]=='\n')
 	    infostring[i]=' ';
 
-
-#define WINDOWWIDTH 550
-#define WINDOWHEIGHT 650
-
-#define PLOTXPOS 0.25
-#define PLOTWIDTH 0.50
-#define PLOTYPOS 0.15
-#define PLOTHEIGHT 0.50
 
 
     page_width = GTK_PLOT_LETTER_W * scale;
@@ -690,7 +690,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
 			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
-			     15, 2/*(int)(((double)WINDOWWIDTH/2)*barwidth)*/+1, &color,&color);
+			     4, 0/*(int)(((double)WINDOWWIDTH/2)*barwidth)*/+1, &color,&color);
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
 				      GTK_PLOT_LINE_SOLID,
 				      5, &color);
@@ -835,7 +835,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    "start - labelx 6",
 	    "start - labelx 7"
 	};*/
-	int numpoints=16;
+	int numpoints=8;
         int i;
 
 	pointlabel=malloc(sizeof(char*)*numpoints);
