@@ -349,6 +349,12 @@ int Paraface::open_parallel_port(char *device)
     fd = open (device, O_RDWR);
     if (fd == -1) {
 	perror ("open");
+#ifdef linux
+	cout << "Could not open parallel port, parallel interface won't work.\n";
+	cout << "Make sure your kernel has ppdev.\n";
+#else
+	cout << "Could not open parallel port, parallel interface won't work.\n";
+#endif
 	return -1;
     }
 
@@ -357,6 +363,7 @@ int Paraface::open_parallel_port(char *device)
 	perror ("PPCLAIM");
 	close (fd);
         fd=-1;
+	cout << "Could not open parallel port, parallel interface won't work.\n";
 	return -1;
     }
 
@@ -368,6 +375,7 @@ int Paraface::open_parallel_port(char *device)
 	perror ("PPNEGOT");
 	close (fd);
         fd=-1;
+	cout << "Could not open parallel port, parallel interface won't work.\n";
 	return -1;
     }
 #endif // linux
