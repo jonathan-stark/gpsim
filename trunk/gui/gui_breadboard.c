@@ -319,6 +319,9 @@ static gint button(GtkWidget *widget,
 {
     assert(event&&bbw);
 
+    if(!bbw->processor)
+        return 0;
+
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
