@@ -48,6 +48,7 @@ key_press(GtkWidget *widget,
 	  GdkEventKey *key, 
 	  gpointer data)
 {
+    int low_level_step=0;
 
   SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
 
@@ -62,6 +63,8 @@ key_press(GtkWidget *widget,
 
       if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
 	  return FALSE;
+
+      low_level_step=1;
   }
       
   switch(key->keyval) {
@@ -70,7 +73,8 @@ key_press(GtkWidget *widget,
   case 'S':
   case GDK_F7:
       //sbw->gui_obj.gp->p->step(1);
-      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id))
+      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id)
+	&&!low_level_step)
       	gpsim_hll_step(sbw->gui_obj.gp->pic_id);
       else
       	gpsim_step(sbw->gui_obj.gp->pic_id, 1);
@@ -81,7 +85,8 @@ key_press(GtkWidget *widget,
   case 'n':
   case GDK_F8:
       //sbw->gui_obj.gp->p->step_over();
-      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id))
+      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id)
+	&&!low_level_step)
       	gpsim_hll_step_over(sbw->gui_obj.gp->pic_id);
       else
       	gpsim_step_over(sbw->gui_obj.gp->pic_id);
