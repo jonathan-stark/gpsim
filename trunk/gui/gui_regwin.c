@@ -591,6 +591,12 @@ show_entry(GtkWidget *widget, Register_Window *rw)
  sheet_entry = gtk_sheet_get_entry(sheet);
 
  row=sheet->active_cell.row; col=sheet->active_cell.col;
+ 
+  if(rw->row_to_address[row] < 0) {
+      printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
+    return 0;
+  }
+  
  if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
  {
      if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
@@ -622,12 +628,13 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
       return 0;
   }
   
-  regnumber = rw->row_to_address[row]+column;
-
-  if(regnumber > 0xfffff0) {
-    printf("bogus regnumber 0x%x, row %x, col %x\n",regnumber,row,column);
+  if(rw->row_to_address[row] < 0) {
+      printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
     return 0;
   }
+  
+  regnumber = rw->row_to_address[row]+column;
+
     // this statement need gtksheet-next-version
   //  RegWindow_select_symbol_regnumber(rw,rw->row_to_address[row]+column);
 
@@ -1076,6 +1083,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
 	rw->row_to_address[j]=-1;
 
+    printf("regwin: new processor with memory size %d\n",gpsim_get_register_memory_size(pic_id, rw->type));
 
 //    gtk_widget_hide(GTK_WIDGET(sheet));
     gtk_sheet_freeze(sheet);

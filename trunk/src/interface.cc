@@ -638,7 +638,7 @@ void gpsim_stop(unsigned int processor_id)
   if(!pic)
     return;
 
-  puts("Stop not implemented");
+  bp.halt();
 }
 //--------------------------------------------------------------------------
 void gpsim_reset(unsigned int processor_id)
@@ -648,7 +648,8 @@ void gpsim_reset(unsigned int processor_id)
   if(!pic)
     return;
 
-  puts("Reset not implemented");
+  if(pic)
+    pic->reset(POR_RESET);
 }
 //--------------------------------------------------------------------------
 void gpsim_return(unsigned int processor_id)
@@ -658,6 +659,7 @@ void gpsim_return(unsigned int processor_id)
   if(!pic)
     return;
 
+  // this should exit current subroutine (like 'finish' in gdb)
   puts("Return not implemented");
 }
 //--------------------------------------------------------------------------

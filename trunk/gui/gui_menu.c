@@ -413,6 +413,14 @@ resetbutton_cb(GtkWidget *widget)
 	gpsim_reset(gp->pic_id);
 }
     
+static void 
+spinb_cb(GtkWidget *widget)
+{
+    guint64 value;
+    value=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
+    gpsim_set_update_rate(value);
+}
+    
 static GtkItemFactoryCallback
 gtk_ifactory_cb (gpointer             callback_data,
 		 guint                callback_action,
@@ -477,6 +485,9 @@ void create_dispatcher (void)
       GtkWidget *buttonbox;
       GtkWidget *separator;
       GtkWidget *button;
+      GtkWidget *frame;
+      GtkWidget *spinb;
+      GtkAdjustment *spinadj;
       GtkAccelGroup *accel_group;
       
       int x,y,width,height;
@@ -522,7 +533,7 @@ void create_dispatcher (void)
 
 
       
-      buttonbox = gtk_hbox_new(TRUE,0);
+      buttonbox = gtk_hbox_new(FALSE,0);
       gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
       gtk_box_pack_start (GTK_BOX (box1), buttonbox, TRUE, TRUE, 0);
 
@@ -566,10 +577,15 @@ void create_dispatcher (void)
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
 
+      frame = gtk_frame_new("gui_update");
+      spinadj = gtk_adjustment_new(gpsim_get_update_rate(),1,2000000,1,100,100);
+      spinb = gtk_spin_button_new(spinadj,1,0);
+      gtk_container_add(GTK_CONTAINER(frame),spinb);
+      gtk_signal_connect(GTK_OBJECT(spinb),"changed",
+			 (GtkSignalFunc) spinb_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
 
 
-      
-      
       
       separator = gtk_hseparator_new ();
       gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
