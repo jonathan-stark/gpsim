@@ -231,4 +231,26 @@ public:
 
 extern TraceLog trace_log;
 
+//-----------------------------------------------------------
+class ProfileKeeper : public BreakCallBack
+{
+public:
+  bool enabled;
+  pic_processor *cpu;
+  unsigned int last_trace_index;
+  unsigned int instruction_address;
+  unsigned int trace_pc_value;
+
+  ProfileKeeper(void);
+  ~ProfileKeeper(void);
+
+  void catchup(void);
+  virtual void callback(void);
+  void enable_profiling(void);
+  void disable_profiling(void);
+  void switch_cpus(pic_processor *new_cpu);
+};
+
+extern ProfileKeeper profile_keeper;
+
 #endif

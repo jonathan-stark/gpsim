@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 
 Trace trace;     // Instantiate the trace buffer class
 TraceLog trace_log;
+ProfileKeeper profile_keeper;
 
 
 #define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
@@ -824,6 +825,107 @@ void TraceLog::disable_logging(void)
 void TraceLog::switch_cpus(pic_processor *pcpu)
 {
   cpu = pcpu;
+}
+
+
+/*****************************************************************
+ *
+ *         Profiling
+ */
+ProfileKeeper::ProfileKeeper(void)
+{
+  enabled = 0;
+  cpu = NULL;
+  last_trace_index = 0;
+}
+
+ProfileKeeper::~ProfileKeeper(void)
+{
+
+  disable_profiling();
+}
+
+void ProfileKeeper::catchup(void)
+{
+    if(!enabled)
+        return;
+    for(int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK)
+    {
+	switch (trace.trace_buffer[i] & 0xff000000)
+	{
+	case INSTRUCTION:
+	    instruction_address=trace_pc_value;
+	    cpu->program_memory[instruction_address]->cycle_count++;
+	    trace_pc_value++;
+	    break;
+
+	case PROGRAM_COUNTER:
+	case PC_SKIP:
+	    trace_pc_value=trace.trace_buffer[i]&0xffff;
+	    break;
+
+	case CYCLE_INCREMENT:
+	    cpu->program_memory[instruction_address]->cycle_count++;
+	    break;
+	}
+    }
+
+    last_trace_index = trace.trace_index;
+}
+
+void ProfileKeeper::callback(void)
+{
+    //for(int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK) 
+    //  fprintf(log_file,"%08x\n",trace.trace_buffer[i]);
+
+    puts("Profile callback!");
+
+    // last_trace_index is pointing at start of unread buffer.
+
+    // read trace buffer until we are at trace.trace_index;
+
+    // in loop, update cpu->program_memory[address].cycle_count.
+
+    if(enabled)
+    {
+        catchup();
+	cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+    }
+
+}
+
+void ProfileKeeper::enable_profiling(void)
+{
+
+    if(enabled)
+	return;
+
+    puts("Profiling enabled!");
+
+    if(!cpu) {
+	if(active_cpu)
+	    cpu = active_cpu;
+	else
+	    cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
+    }
+
+    last_trace_index = trace.trace_index;
+    cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+    enabled = 1;
+}
+
+void ProfileKeeper::disable_profiling(void)
+{
+
+    if(!enabled)
+	return;
+
+    enabled = 0;
+}
+
+void ProfileKeeper::switch_cpus(pic_processor *pcpu)
+{
+    cpu = pcpu;
 }
 
 //*****************************************************************

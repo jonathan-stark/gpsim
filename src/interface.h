@@ -104,10 +104,15 @@ typedef struct _sym
   guint64  gpsim_get_update_rate(void);
   void     gpsim_set_update_rate(guint64);
   void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref);
+
   void gpsim_assign_trace_xref(gpointer xref);
   void gpsim_get_current_trace(guint64 *current_cycle, int *trace_index,
 			       char *current_trace, int bufsize);
   void gpsim_trace_dump_to_file(int number_of_instructions, FILE *f);
+
+
+  // I want processor cycle count for instruction at address X
+
   void gpsim_step(unsigned int processor_id, unsigned int steps);
   void gpsim_step_over(unsigned int processor_id);
   void gpsim_run(unsigned int processor_id);
@@ -117,6 +122,14 @@ typedef struct _sym
   void gpsim_run_to_address(unsigned int processor_id, unsigned int address);
   unsigned int gpsim_get_stack_size(unsigned int processor_id);
   unsigned int gpsim_get_stack_value(unsigned int processor_id, unsigned int address);
+
+
+  //---------------------------------------------------------------------------
+  // Profiling
+  //---------------------------------------------------------------------------
+  void gpsim_enable_profiling(unsigned int processor_id);
+  void gpsim_disable_profiling(unsigned int processor_id);
+  guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address);
 
 
   //---------------------------------------------------------------------------

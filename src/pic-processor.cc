@@ -1354,6 +1354,13 @@ void    pic_processor::set_out_of_range_pm(int address, int value)
 }
 
 //-------------------------------------------------------------------
+
+guint64 pic_processor::cycles_used(unsigned int address)
+{
+    return program_memory[address]->cycle_count;
+}
+
+//-------------------------------------------------------------------
 void pic_processor::init_program_memory(int address, int value)
 {
 

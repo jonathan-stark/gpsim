@@ -35,6 +35,7 @@ instruction::instruction(void)
     xref = new XrefObject;
 #endif
     is_modified=0;
+    cycle_count=0;
 }
 
 void instruction::add_line_number_symbol(int address)

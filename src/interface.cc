@@ -70,9 +70,9 @@ public:
   InterfaceObject(void) {pic = NULL;};
   virtual void callback(void)
     {
-      trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
-      if(callback_function)
-	callback_function(callback_data);
+	trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
+	if(callback_function)
+	    callback_function(callback_data);
     };
 
 };
@@ -702,6 +702,34 @@ void gpsim_trace_dump_to_file(int number_of_instructions, FILE *f)
   trace.dump(number_of_instructions, f);
 
 }
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void gpsim_enable_profiling(unsigned int processor_id)
+{
+    profile_keeper.enable_profiling();
+}
+
+void gpsim_disable_profiling(unsigned int processor_id)
+{
+    profile_keeper.disable_profiling();
+}
+
+guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0;
+
+    return pic->cycles_used(address);
+}
+
 //--------------------------------------------------------------------------
 void gpsim_step(unsigned int processor_id, unsigned int steps)
 {
@@ -1409,6 +1437,8 @@ void gpsimInterface::simulation_has_stopped (void)
 {
 
   GSList *interface_list = interfaces;
+
+  profile_keeper.catchup();
 
   while(interface_list) {
 
