@@ -1,0 +1,10 @@
+
+EXTRA_DIST = \
+	gpsim.lyx \
+	gui.lyx
+	gpsim.ps
+
+MOSTLYCLEANFILES =  *~
+CLEANFILES =  *~
+DISTCLEANFILES =  *~
+MAINTAINERCLEANFILES =  *~
