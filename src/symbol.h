@@ -158,6 +158,7 @@ protected:
 
 public:
   register_symbol(const char *, Register *);
+  register_symbol(Register *_reg);
 
   virtual symbol *copy();
   virtual string &name(void);

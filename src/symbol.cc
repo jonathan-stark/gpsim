@@ -436,6 +436,11 @@ register_symbol::register_symbol(const char *_name, Register *_reg)
   }
 }
 
+register_symbol::register_symbol(Register *_reg)
+  : reg(_reg), symbol(_reg->name())
+{
+}
+
 string &register_symbol::name(void) {
   return name_str;
 }
