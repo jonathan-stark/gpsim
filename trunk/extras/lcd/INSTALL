@@ -2,11 +2,11 @@
 Installation instructions
 -------------------------
 
-You'll need at least gpsim-0.21.1 for this to work.
+You'll need at least gpsim-0.21.2 for this to work.
 
-un tar the lcd-0.2.0.tar.gz tarball and then:
+un tar the lcd-0.2.1.tar.gz tarball and then:
 
-$ cd lcd-0.2.0
+$ cd lcd-0.2.1
 $ ./configure
 $ make
 $ su
@@ -17,7 +17,7 @@ At this point, the LCD module has been compiled and installed
 as a shared library that can be loaded by gpsim. If you want to
 see if it works, then run the example:
 
-$ cd lcd-0.2.0/examples
+$ cd lcd-0.2.1/examples
 $ gpasm lcd_mod.asm
 $ gpsim -c lcd_mod.stc
 

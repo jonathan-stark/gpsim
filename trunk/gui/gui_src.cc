@@ -137,7 +137,7 @@ void SourceBrowser_Window::Update(void)
   if(!gp || !gp->cpu)
     return;
 
-  SetPC(gp->cpu->pc->get_raw_value());
+  SetPC(gp->cpu->pc->get_value());
 }
 
 
