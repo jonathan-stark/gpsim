@@ -175,7 +175,6 @@ void LcdDisplay::send_status(void)
   status = ( cursor.row * 0x40 ) + cursor.col;
 
   if ( busyTimer.isBusy() ) {
-    //cout << "busy bit is set in send_status()\n";
     status |= 0x80;
   }
 
@@ -442,6 +441,7 @@ static void debug_events(LcdDisplay *lcd, ControlLineEvent e, State s)
 
 void LcdDisplay::advanceState( ControlLineEvent e)
 {
+
   if(debug)
     debug_events(this, e, current_state);
 
@@ -561,9 +561,11 @@ void LcdDisplay::advanceState( ControlLineEvent e)
   if(debug) {
     cout << " to State:  " << getStateName(current_state) << '\n';
 
-    viewInternals(0xff);
+    viewInternals(0);
 
   }
+
+
 }
 
 char * LcdDisplay::getStateName(State s)
@@ -658,54 +660,77 @@ void LcdDisplay::InitStateMachine(void)
   for(j=0; j<cols; j++)
     ch_data[1][j] = 0;
 
-  // if(debug) test();
-}
+  if(debug) test();
 
+}
+static void debug_print(int success, char const *m)
+{
+  if (success)
+    cout << "SUCCESS: ";
+  else
+    cout << " FAILED: ";
+
+  cout << m;
+
+}
 void LcdDisplay::test(void)
 {
+  const unsigned int EWC=4;
+  const unsigned int eWC=0;
+  const unsigned int EWD=5;
+  const unsigned int eWD=0;
 
   set_8bit_mode();
 
-  data_port->value.put(LCD_CMD_FUNC_SET | LCD_8bit_MODE);
-  advanceState(EWC);
-  advanceState(eWC);
+  data_port->put(LCD_CMD_FUNC_SET | LCD_8bit_MODE);
+  control_port->put(4);
+  control_port->put(0);
+  debug_print(in_8bit_mode(), " setting 8-bit mode\n");
 
-  data_port->value.put(LCD_CMD_FUNC_SET | LCD_4bit_MODE);
-  advanceState(EWC);
-  advanceState(eWC);
-
-  data_port->value.put(LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT);
-  advanceState(EWC);
-  advanceState(eWC);
-  data_port->value.put((LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT)<<4);
-  advanceState(EWC);
-  advanceState(eWC);
+  data_port->put(LCD_CMD_FUNC_SET | LCD_4bit_MODE);
+  control_port->put(4);
+  control_port->put(0);
+  debug_print(in_4bit_mode(), " setting 4-bit mode\n");
 
 
-  data_port->value.put(LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON); //LCD_CURSOR_OFF | LCD_BLINK_OFF
-  advanceState(EWC);
-  advanceState(eWC);
-  data_port->value.put((LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON)<<4);
-  advanceState(EWC);
-  advanceState(eWC);
+  data_port->put(LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT);
+  control_port->put(4);
+  control_port->put(0);
+
+  data_port->put((LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT)<<4);
+  control_port->put(4);
+  control_port->put(0);
+  debug_print(in_2line_mode(), " setting 2-line mode\n");
+
+  data_port->put(LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON); //LCD_CURSOR_OFF | LCD_BLINK_OFF
+  control_port->put(4);
+  control_port->put(0);
+
+  data_port->put((LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON)<<4);
+  control_port->put(4);
+  control_port->put(0);
+  debug_print(display_is_on(), " turning on display\n");
+
    
-  data_port->value.put(LCD_CMD_CLEAR_DISPLAY);
-  advanceState(EWC);
-  advanceState(eWC);
-  data_port->value.put(LCD_CMD_CLEAR_DISPLAY << 4);
-  advanceState(EWC);
-  advanceState(eWC);
+  data_port->put(LCD_CMD_CLEAR_DISPLAY);
+  control_port->put(4);
+  control_port->put(0);
+
+  data_port->put(LCD_CMD_CLEAR_DISPLAY << 4);
+  control_port->put(4);
+  control_port->put(0);
 
   char *s ="ASHLEY & AMANDA";
   int l = strlen(s);
 
   for(int i=0; i<l; i++) {
-    data_port->value.put(s[i]);
-    advanceState(EWD);
-    advanceState(eWD);
-    data_port->value.put(s[i] << 4);
-    advanceState(EWD);
-    advanceState(eWD);
+    data_port->put(s[i]);
+    control_port->put(5);
+    control_port->put(1);
+
+    data_port->put(s[i] << 4);
+    control_port->put(5);
+    control_port->put(1);
   }
 
   set_8bit_mode();
