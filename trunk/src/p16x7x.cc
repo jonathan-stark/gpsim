@@ -406,7 +406,8 @@ pic_processor * P16C71::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16c71";
+  p->name_str = "p16c71";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -517,7 +518,8 @@ pic_processor * P16C712::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16c712";
+  p->name_str = "p16c712";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -543,7 +545,8 @@ pic_processor * P16C716::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16c716";
+  p->name_str = "p16c716";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -664,7 +667,8 @@ pic_processor * P16C72::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c72";
+  p->name_str = "p16c72";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -677,7 +681,8 @@ P16C72::P16C72(void)
     cout << "c72 constructor, type = " << isa() << '\n';
 
   //  create_sfr_map();
-  //  name_str = "16c72";
+  //  name_str = "p16c72";
+  //  symbol_table.add_module(p,p->name_str);
 
 }
 
@@ -789,7 +794,8 @@ pic_processor * P16C73::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c73";
+  p->name_str = "p16c73";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -802,7 +808,8 @@ P16C73::P16C73(void)
     cout << "c73 constructor, type = " << isa() << '\n';
 
   //  create_sfr_map();
-  //  name_str = "16c73";
+  //  name_str = "p16c73";
+  //  symbol_table.add_module(p,p->name_str);
 
 }
 
@@ -916,7 +923,8 @@ pic_processor * P16C74::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c74";
+  p->name_str = "p16c74";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -929,7 +937,8 @@ P16C74::P16C74(void)
     cout << "c74 constructor, type = " << isa() << '\n';
 
   //  create_sfr_map();
-  //  name_str = "16c74";
+  //  name_str = "p16c74";
+  //  symbol_table.add_module(p,p->name_str);
 
 }
 

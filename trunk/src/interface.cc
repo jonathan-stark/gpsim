@@ -108,7 +108,10 @@ public:
       InterfaceObject::callback();
       set_break();
     };
-
+  virtual ~CyclicBreakPoint()
+  {
+      pic->cycles.clear_break(this);
+  }
 };
 
 //
@@ -1481,6 +1484,17 @@ gpointer gpsim_set_cyclic_break_point2(
   return((gpointer)cbp);
 }
 
+void gpsim_clear_break(gpointer b)
+{
+
+    // FIXME ugly cast. Do we want CyclicBreakPoint to be public, so
+    // modules can delete this on their own?
+
+    BreakCallBack *bcb = (BreakCallBack*)(b);
+    active_cpu->cycles.clear_break(bcb);
+//    delete bcb;
+}
+
 pic_processor *gpsim_get_active_cpu(void)
 {
   return active_cpu;
@@ -1508,6 +1522,7 @@ void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL)
     active_cpu->cycles.set_break(next_cycle, f);
 
 }
+
 //---------------------------------------------------------------------------
 //   char *gpsim_get_version(char *dest)
 //---------------------------------------------------------------------------
@@ -1755,6 +1770,11 @@ unsigned int gpsim_register_interface(gpointer new_object)
 
   return gi.add_interface(an_interface);
 
+}
+
+void gpsim_unregister_interface(unsigned int interface_id)
+{
+  gi.remove_interface(interface_id);
 }
 
 
@@ -2010,4 +2030,25 @@ unsigned int  gpsimInterface::add_interface  (Interface *new_interface)
 
 
   return interface_seq_number;
+}
+
+void  gpsimInterface::remove_interface  (unsigned int interface_id)
+{
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->get_id()==interface_id)
+      {
+	  gi.interfaces = g_slist_remove(gi.interfaces, an_interface);
+          return;
+      }
+    }
+
+    interface_list = interface_list->next;
+  }
+  return;
 }

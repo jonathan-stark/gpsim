@@ -133,6 +133,7 @@ class gpsimInterface {
   void new_program  (unsigned int processor_id);
 
   unsigned int add_interface(Interface *new_interface);
+  void remove_interface(unsigned int interface_id);
 
 };
 

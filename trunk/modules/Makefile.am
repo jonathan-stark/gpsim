@@ -11,7 +11,8 @@ libgpsim_modules_la_SOURCES = \
 	usart.cc usart.h \
 	paraface.cc paraface.h \
 	switch.cc switch.h \
-	logic.cc logic.h 
+	logic.cc logic.h \
+	led.cc led.h
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@

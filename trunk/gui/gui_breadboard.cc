@@ -199,7 +199,7 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
     text[0]=name;
 
-    printf("treeselect_node %p\n",gui_node);
+//    printf("treeselect_node %p\n",gui_node);
 
     if(gui_node->node!=NULL)
     {
@@ -274,13 +274,15 @@ void position_module(struct gui_module *p, int x, int y)
     GList *piniter;
     struct gui_pin *pin;
 
+    x=x-x%pinspacing;
+    y=y-y%pinspacing;
+
     if(x != p->x || y != p->y)
     {
-	p->x=x-x%pinspacing;
-	p->y=y-y%pinspacing;
+	p->x=x;
+	p->y=y;
 
-	p->module->x = p->x;
-        p->module->y = p->y;
+        printf("Position %s at %d %d\n",p->module->name(), x, y);
 
 	// Position module_widget
         gtk_layout_move(GTK_LAYOUT(p->bbw->layout), p->module_widget, p->x, p->y);
@@ -353,17 +355,10 @@ struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
 
 	p = (struct gui_module*) mi->data;
 
-	if(closest==NULL)
-	{
-            closest=p;
-	}
-	else
-	{
-	    distance = module_distance(p,x,y);
-	    if(distance<min_distance) {
-		closest = p;
-		min_distance = distance;
-	    }
+	distance = module_distance(p,x,y);
+	if(distance<min_distance) {
+	    closest = p;
+	    min_distance = distance;
 	}
 
         mi=mi->next;
@@ -372,18 +367,37 @@ struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
     return closest;
 }
 
+// FIXME
+static struct gui_module *dragged_module;
+static int dragging;
+static int grab_next_module;
+
+void grab_module(gui_module *p)
+{
+    puts("Grab module");
+    dragged_module = p;
+//    gtk_grab_add(p->bbw->layout);
+    gdk_pointer_grab(p->bbw->layout->window,
+		     TRUE,
+		     (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
+		     p->bbw->layout->window,
+		     NULL,
+                     GDK_CURRENT_TIME);
+
+    treeselect_module(NULL,dragged_module);
+    dragging = 1;
+}
+
 static void pointer_cb(GtkWidget *w,
 		      GdkEventButton *event,
 		     Breadboard_Window *bbw)
 {
     static int x,y;
 
-    static int dragging;
-
-    static struct gui_module *dragged_module;
-
     x = (int) (event->x + bbw->hadj->value);
     y = (int) (event->y + bbw->vadj->value);
+
+    puts("pointer_cb");
 
     switch(event->type)
     {
@@ -391,22 +405,42 @@ static void pointer_cb(GtkWidget *w,
 	if(dragging)
 	{
             position_module(dragged_module, x, y);
-//            puts("Drag");
+	    dragged_module->module->x = dragged_module->x;
+	    dragged_module->module->y = dragged_module->y;
+            puts("Drag");
 	}
 	break;
     case GDK_BUTTON_PRESS:
-	dragged_module = find_closest_module(bbw, x, y);
-//	printf("Dragging %s\n",dragged_module->module->name());
-	gtk_grab_add(w);
-        treeselect_module(NULL,dragged_module);
-        dragging = 1;
+	if(grab_next_module)
+	{
+            puts("Done dragging new module");
+//	    gtk_grab_remove(bbw->layout);
+	    gdk_pointer_ungrab(GDK_CURRENT_TIME);
+	    dragging = 0;
+            grab_next_module=0;
+	}
+	else
+	{
+	    dragged_module = find_closest_module(bbw, x, y);
+	    printf("Dragging %s\n",dragged_module->module->name());
+//	    gtk_grab_add(bbw->layout);
+	    gdk_pointer_grab(w->window,
+			     TRUE,
+			     (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
+			     w->window,
+			     NULL,
+			     GDK_CURRENT_TIME);
+	    treeselect_module(NULL,dragged_module);
+	    dragging = 1;
+	}
 	break;
     case GDK_2BUTTON_PRESS:
 	break;
     case GDK_BUTTON_RELEASE:
 //        puts("Release");
-	gtk_grab_remove(w);
-        dragging = 0;
+//	gtk_grab_remove(bbw->layout);
+        gdk_pointer_ungrab(GDK_CURRENT_TIME);
+	dragging = 0;
 	break;
     default:
 	printf("Whoops? event type %d\n",event->type);
@@ -422,22 +456,25 @@ static gint button(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
-	if(p->iopin->snode!=NULL)
+	if(p->iopin!=NULL)
 	{
-	    struct gui_node *gn;
-
-	    gn = (struct gui_node *)
-		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
-				    p->iopin->snode->name());
-
-	    if(gn!=NULL)
+	    if(p->iopin->snode!=NULL)
 	    {
-		treeselect_node(NULL, gn);
-                return 1;
-	    }
-	}
+		struct gui_node *gn;
 
-	treeselect_stimulus(NULL, p);
+		gn = (struct gui_node *)
+		    gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
+					p->iopin->snode->name());
+
+		if(gn!=NULL)
+		{
+		    treeselect_node(NULL, gn);
+		    return 1;
+		}
+	    }
+
+	    treeselect_stimulus(NULL, p);
+	}
 	return 1;
     }
 
@@ -974,6 +1011,7 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
     if(module_type!=NULL)
     {
 	module_name = gui_get_string("Module name", module_type);
+        grab_next_module = 1;
         if(module_name != NULL)
 	    module_load_module(module_type, module_name);
     }
@@ -1032,7 +1070,7 @@ static void node_clist_cb(GtkCList       *clist,
 
 static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
 {
-    printf("Remove node %p.",bbw->selected_node);
+//    printf("Remove node %p.",bbw->selected_node);
 
 //    gtk_signal_disconnect_by_data(GTK_OBJECT(bbw->selected_node->tree_item),
 //				  bbw->selected_node);
@@ -1079,12 +1117,19 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     FILE *fo;
     list <Module_Library *> :: iterator mi;
     list <Module *> :: iterator module_iterator;
+    Module *m;
 
     fo = fopen("/tmp/foo.stc", "w");
 
     fprintf(fo, "\n# DON'T EDIT THIS FILE. IT IS AUTOGENERATED.\n");
 
     // Save processor command. How?
+    m=get_processor(((GUI_Object*)bbw)->gp->pic_id);
+    if(m->x>=0 && m->y>=0)
+	fprintf(fo, "module position %s %d %d\n",
+		m->name(),
+		m->x,
+		m->y);
 
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
@@ -1104,7 +1149,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	 module_iterator != instantiated_modules_list.end();
 	 module_iterator++)
     {
-	Module *m = *module_iterator;
+	m = *module_iterator;
 
 	fprintf(fo, "module load %s %s\n",
 		m->type(),
@@ -1162,6 +1207,37 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		load c /tmp/foo.stc");*/
 }
 
+static void expose_layout(GtkWidget *widget,
+			  GdkEventExpose *event,
+			  Breadboard_Window *bbw)
+{
+#if 0
+
+    puts("Expose layout");
+
+    stimulus *s;
+
+    row=0;
+
+    for(;;)
+    {
+	s = (stimulus*) gtk_clist_get_row_data(GTK_CLIST(bbw->node_clist), row);
+
+	if(s!=NULL)
+	{
+	    gdk_draw_line(GTK_LAYOUT (widget)->bin_window,
+			  bbw->case_gc,
+			  20-bbw->hadj->value,20-bbw->vadj->value,
+			  200-bbw->hadj->value,100-bbw->vadj->value);
+	}
+
+        row++;
+    }
+#endif
+//    gdk_window_clear_area (widget->window, event->area.x, event->area.y,
+//			   event->area.width, event->area.height);
+
+}
 
 static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orientation orientation, IOPIN *iopin)
 {
@@ -1279,6 +1355,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->module=module;
     p->module_widget = widget;
     p->type=type;
+    p->x=-1;
+    p->y=-1;
 
     p->pins=NULL;
 
@@ -1573,6 +1651,9 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     gtk_layout_put(GTK_LAYOUT(bbw->layout), p->module_widget, 0, 0);
 
+//    if(p->module->x!=-1 && p->module->y!=-1)
+//	position_module(p, p->module->x, p->module->y);
+//    else
     position_module(p, x, y);
 
     bbw->modules=g_list_append(bbw->modules, p);
@@ -1581,12 +1662,13 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     if(x+p->width>max_x)
 	max_x=x+p->width;
+
+    return p;
 }
 
 void BreadboardWindow_update(Breadboard_Window *bbw)
 {
     GList *iter;
-
 
     // loop all modules and update their pins
 
@@ -1598,11 +1680,19 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 
         p = (struct gui_module*)iter->data;
 
+//	printf("update module %s", p->module->name());
+
 	// Check if module has changed its position
-	if(p->module->x!=-1 && p->module->y!=-1)
+	if(p->module->x!=p->x && p->module->y!=p->y)
 	{
+//	    printf(" to position %d %d",p->module->x, p->module->y);
+
             position_module(p, p->module->x, p->module->y);
+	    p->module->x = p->x;
+	    p->module->y = p->y;
 	}
+
+//        printf("\n");
 
         // Check if pins have changed state
 	pin_iter=p->pins;
@@ -1682,7 +1772,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     bbw->processor=1;
 
-    if(!bbw->gui_obj.enabled)
+    if(!bbw->gui_obj.is_built)
 	return;
 
     
@@ -1696,8 +1786,8 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     struct gui_module *p=create_gui_module(bbw, PIC_MODULE, get_processor(pic_id),NULL);
 
-    check_for_modules(bbw);
-    check_for_nodes(bbw);
+//    check_for_modules(bbw);
+//    check_for_nodes(bbw);
 
 //    BreadboardWindow_update(bbw);
 }
@@ -1705,14 +1795,24 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 /* When a module is created */
 void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
 {
-    if(bbw->gui_obj.enabled)
+    if(!bbw->gui_obj.is_built)
     {
-	GtkWidget *widget=NULL;
-
-	if(module->widget!=NULL)
-	    widget=GTK_WIDGET(module->widget);
-	struct gui_module *p=create_gui_module(bbw, EXTERNAL_MODULE, module, widget);
+	BuildBreadboardWindow(bbw);
     }
+
+
+    GtkWidget *widget=NULL;
+
+    if(module->widget!=NULL)
+	widget=GTK_WIDGET(module->widget);
+    struct gui_module *p=create_gui_module(bbw, EXTERNAL_MODULE, module, widget);
+
+    if(grab_next_module)
+    {
+        grab_module(p);
+    }
+
+    BreadboardWindow_update(bbw);
 }
 
 
@@ -2204,6 +2304,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   bbw->hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(scrolledwindow5));
 
   bbw->layout = gtk_layout_new (bbw->hadj, bbw->vadj);
+  gtk_signal_connect(GTK_OBJECT(bbw->layout),
+		     "expose_event",
+		     (GtkSignalFunc) expose_layout,
+		     bbw);
   gtk_widget_ref (bbw->layout);
   gtk_object_set_data_full (GTK_OBJECT (window), "bbw->layout", bbw->layout,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -2245,8 +2349,9 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),bbw);
 
 
-
-  gtk_widget_show_now(window);
+  gtk_widget_show_now(window); // FIXME
+  if(!bbw->gui_obj.enabled)
+      gtk_widget_hide(window);
 
 	bbw->pinname_gc=gdk_gc_new(bbw->gui_obj.window->window);
 
@@ -2281,9 +2386,6 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
     gtk_widget_show(bbw->node_tree);
     gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), bbw->node_tree);
     gtk_object_set_data(GTK_OBJECT(bbw->node_tree), "root_of_nodes", gn);
-
-
-  bbw->gui_obj.enabled=1;
 
   bbw->gui_obj.is_built=1;
 

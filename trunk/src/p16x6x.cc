@@ -106,7 +106,8 @@ pic_processor * P16C61::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16c61";
+  p->name_str = "p16c61";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -491,7 +492,8 @@ pic_processor * P16C62::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c62";
+  p->name_str = "p16c62";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -606,7 +608,8 @@ pic_processor * P16C63::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c63";
+  p->name_str = "p16c63";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -692,7 +695,8 @@ pic_processor * P16C64::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c64";
+  p->name_str = "p16c64";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -807,7 +811,8 @@ pic_processor * P16C65::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "16c65";
+  p->name_str = "p16c65";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

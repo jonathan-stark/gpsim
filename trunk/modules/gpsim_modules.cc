@@ -51,6 +51,7 @@ support:
 #include "paraface.h"
 #include "switch.h"
 #include "logic.h"
+#include "led.h"
 
 /*
 class Module_Types
@@ -83,6 +84,9 @@ Module_Types available_modules[] =
   { "or2",  "or2",  OR2Gate::construct},
   { "xor2", "xor2", XOR2Gate::construct},
   { "not",  "not",  NOTGate::construct},
+
+  // Leds
+  { "led_7segments", "led7s", Led_7Segments::construct},
 
   // No more modules
   { NULL,NULL,NULL}

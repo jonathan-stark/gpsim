@@ -104,21 +104,24 @@ int IOPORT::update_stimuli(void)
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
     if(stimulus_mask & m)
       {
-	int t = pins[i]->snode->update(time);
+        if(pins[i]->snode!=NULL)
+	{
+	    int t = pins[i]->snode->update(time);
 
-	//cout << name() << ' ' << i;
-	//cout << " pin " << pins[i]->name();
-	//cout <<  " node "<< pins[i]->snode->name() << " is ";
+	    //cout << name() << ' ' << i;
+	    //cout << " pin " << pins[i]->name();
+	    //cout <<  " node "<< pins[i]->snode->name() << " is ";
 
-	if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
-	  {
-	    //cout << "above";
-	     input |= m;
-	  } else //if(!(tris->value & m))
-	    input |= (value & m);
-	//else cout << "below";
+	    if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
+	    {
+		//cout << "above";
+		input |= m;
+	    } else //if(!(tris->value & m))
+		input |= (value & m);
+	    //else cout << "below";
 
-	//cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
+	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
+	}
       }
 
   // cout << " returning " << hex << input << '\n';
@@ -140,21 +143,24 @@ int PIC_IOPORT::update_stimuli(void)
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
     if(stimulus_mask & m)
       {
-	int t = pins[i]->snode->update(time);
+        if(pins[i]->snode!=NULL)
+	{
+	    int t = pins[i]->snode->update(time);
 
-	//cout << name() << ' ' << i;
-	//cout << " pin " << pins[i]->name();
-	//cout <<  " node "<< pins[i]->snode->name() << " is ";
+	    //cout << name() << ' ' << i;
+	    //cout << " pin " << pins[i]->name();
+	    //cout <<  " node "<< pins[i]->snode->name() << " is ";
 
-	if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
-	  {
-	    //cout << "above";
-	     input |= m;
-	  } else if(!(tris->value & m))
-	    input |= (value & m);
-	//else cout << "below";
+	    if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
+	    {
+		//cout << "above";
+		input |= m;
+	    } else if(!(tris->value & m))
+		input |= (value & m);
+	    //else cout << "below";
 
-	//cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
+	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
+	}
       }
 
   // cout << " returning " << hex << input << '\n';
@@ -521,7 +527,8 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
       guint64 time = cpu->cycles.value;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
-	  pins[i]->snode->update(time);
+          if(pins[i]->snode!=NULL)
+            pins[i]->snode->update(time);
     }
 }
 

@@ -245,7 +245,8 @@ pic_processor * P16F627::construct(void)
   p->P16F62x::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16f628";
+  p->name_str = "p16f628";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -273,7 +274,8 @@ pic_processor * P16F628::construct(void)
   p->P16F62x::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16f628";
+  p->name_str = "p16f628";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

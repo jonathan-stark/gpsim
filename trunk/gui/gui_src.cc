@@ -406,6 +406,7 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	      BuildWatchWindow((Watch_Window*)_this);
 	      break;
 	  case WT_breadboard_window:
+	      _this->enabled=1;
 	      BuildBreadboardWindow((Breadboard_Window*)_this);
 	      break;
 	  case WT_stack_window:

@@ -495,7 +495,10 @@ void module_load_module(char *module_type, char *module_name=NULL)
 
 	      cout << " Found it!\n";
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
-	      new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
+
+	      // new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
+	      // NOTE! interface_id is set by the module when calling gpsim_register_interface()
+
 	      symbol_table.add_module(new_module,module_name);
 
               instantiated_modules_list.push_back(new_module);

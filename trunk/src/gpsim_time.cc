@@ -126,6 +126,42 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
 }
 
 //--------------------------------------------------
+// remove_break
+// remove break for BreakCallBack
+void Cycle_Counter::clear_break(BreakCallBack *f)
+{
+
+  Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
+
+  bool found = 0;
+
+  while( (l1->next) && !found) {
+      
+    // If the next break point is at a cycle greater than the
+    // one we wish to set, then we found the insertion point.
+    // Otherwise 
+
+      if(l1->next->f ==  f)
+      {
+	  l2 = l1->next;  // save a copy for a moment
+	  l1->next = l1->next->next;  // remove the break
+
+	  if(l2->f)
+	      l2->f->clear_break();
+      }
+      else
+	  l1=l1->next;
+  }
+
+/*  if(!found) {
+    cout << "Cycle_Counter::clear_break could not find break at cycle 0x"
+      << hex << setw(16) << setfill('0') << at_cycle << endl;
+    return;
+  }*/
+
+}
+
+//--------------------------------------------------
 // set_break_delta
 // set a cycle counter break point relative to the current cpu cycle value. Return 1 if successful.
 //
@@ -168,6 +204,8 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
     if(l1->next->break_value ==  at_cycle)
       found = 1;
+    else
+      l1=l1->next;
   }
 
   if(!found) {
