@@ -1555,6 +1555,12 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   instruction *old_inst = get_base_instruction(addr);
   instruction *new_inst = cpu->disasm(addr,new_opcode);
 
+  if(new_inst==NULL)
+  {
+      puts("FIXME, in program_memory_access::put_opcode");
+      return;
+  }
+  
   if(!old_inst) {
     put(addr,new_inst);
     return;

@@ -466,7 +466,7 @@ static GtkItemFactoryEntry menu_items[] =
   //  { "/_Break/Clear",     NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
   { "/_Windows",     NULL, 0,       0, "<Branch>" },
-  { "/Windows/Dis_assembly", NULL, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
+  { "/Windows/Program _memory", NULL, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
   { "/Windows/_Source", NULL, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
   { "/Windows/sep1",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/_Ram",    NULL, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
@@ -475,7 +475,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/Sta_ck",  NULL, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
   { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
-  { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
+  { "/Windows/_Pins",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
   { "/Windows/sep3",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/_Trace",NULL, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
 
