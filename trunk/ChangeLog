@@ -1,4 +1,8 @@
-2004-08-16 Scott Dattalo <scott@dattalo.com>
+2004-08-19 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: writeTT and readTT were not initialized
+	in Processor constructor.
+
+2004-08-18 Scott Dattalo <scott@dattalo.com>
 	* src/registers.cc, src/registers.h, src/symbol.cc,
 	  src/symbol.h, src/trace.cc, src/trace.h, cli/cmd_symbol.cc,
 	  cli/cmd_symbol.h, cli/expr.cc, cli/expr.h, cli/parse.yy,
