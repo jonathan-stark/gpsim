@@ -395,7 +395,7 @@ class Trace
 
 };
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access trace object directly!
 Trace &get_trace(void);
 #else

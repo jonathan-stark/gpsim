@@ -195,7 +195,7 @@ public:
   void set_cycles_per_second(guint64 cps);
 };
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access cycles object directly!
 Cycle_Counter &get_cycles(void);
 #else

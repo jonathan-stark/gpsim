@@ -174,7 +174,7 @@ class RegisterAssertion : public Breakpoint_Instruction
 
 class Breakpoints;
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access the Breakpoints object directly!
 Breakpoints &get_bp(void);
 #else

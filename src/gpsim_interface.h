@@ -178,7 +178,7 @@ private:
   bool mbSimulating;   // Set true if the simulation is running.
 };
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access gi object directly!
 gpsimInterface &get_interface(void);
 #else
