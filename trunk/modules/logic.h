@@ -154,7 +154,7 @@ public:
 
 // 2 input or gate
 
-class OR2Gate: public LogicGate
+class OR2Gate: public ORGate
 {
 public:
 
@@ -163,6 +163,41 @@ public:
   const virtual char *type(void) { return ("or2"); };
   OR2Gate(void);
   ~OR2Gate(void);
+  
+};
+
+class XORGate: public LogicGate
+{
+public:
+
+  virtual void update_state(void);
+
+};
+
+// 2 input or gate
+
+class XOR2Gate: public XORGate
+{
+public:
+
+  //virtual void update_state(void);
+  static ExternalModule *construct(char *new_name);
+  const virtual char *type(void) { return ("xor2"); };
+  XOR2Gate(void);
+  ~XOR2Gate(void);
+  
+};
+
+class NOTGate: public LogicGate
+{
+public:
+
+  //virtual void update_state(void);
+  static ExternalModule *construct(char *new_name);
+  const virtual char *type(void) { return ("not"); };
+  virtual void update_state(void);
+  NOTGate(void);
+  ~NOTGate(void);
   
 };
 #endif //  __LOGIC_H__

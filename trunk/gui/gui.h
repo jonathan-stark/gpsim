@@ -550,6 +550,8 @@ struct _Breadboard_Window {
 
     GtkWidget *stimulus_add_node_button;
 
+    GtkAdjustment *hadj, *vadj;
+
     int processor;
 
     struct gui_pin *selected_pin;

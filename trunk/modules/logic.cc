@@ -107,7 +107,81 @@ static char * or2_pixmap[] = {
 "                        ........",
 "                    ............"};
 
+static char * xor2_pixmap[] = {
+"40 32 3 1",
+" 	c None",
+".	c black",
+"X	c white",
+"        ....................            ",
+"  ..    ....................            ",
+" ....   ........................        ",
+"  ...   ..XXXXXXXXXXXXXXXXXX....        ",
+"  ...   ..XXXXXXXXXXXXXXXXXXXXXX..      ",
+"   ...  ..XXXXXXXXXXXXXXXXXXXXXX..      ",
+"   ....  ..XXXXXXXXXXXXXXXXXXXXXXX..    ",
+"    ...  ..XXXXXXXXXXXXXXXXXXXXXXX...   ",
+"    ...  ..XXXXXXXXXXXXXXXXXXXXXXXX..   ",
+"    ...   ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"    ....  ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"     ...  ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"     ...  ..XXXX.XXX.XX...XX....XXXXX.. ",
+"      ..   ..XXX.XXX.X.XXX.X.XXX.XXXX.. ",
+"      ..   ..XXXX.X.XX.XXX.X.XXX.XXXXX..",
+"      ..   ..XXXX.X.XX.XXX.X.XXX.XXXXX..",
+"      ...  ..XXXXX.XXX.XXX.X....XXXXXX..",
+"      ...  ..XXXX.X.XX.XXX.X.X.XXXXXXX..",
+"      ...  ..XXXX.X.XX.XXX.X.XX.XXXXXX..",
+"      ...  ..XXX.XXX.X.XXX.X.XXX.XXXXX..",
+"      ...  ..XXX.XXX.XX...XX.XXX.XXXX.. ",
+"      ... ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"      ..  ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"     ...  ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"     ...  ..XXXXXXXXXXXXXXXXXXXXXXXXX.. ",
+"    ...  ..XXXXXXXXXXXXXXXXXXXXXXXX..   ",
+"    ...  ..XXXXXXXXXXXXXXXXXXXXXXX...   ",
+"    ...  ..XXXXXXXXXXXXXXXXXXXXXXX..    ",
+"   .... ..XXXXXXXXXXXXXXXXXXXXXX..      ",
+"  ..... ..XXXXXXXXXXXXXXXXXXXXXX..      ",
+" ....   ..XXXXXXXXXXXXXXXXXX....        ",
+"  ..    ........................        "};
 
+static char * not_pixmap[] = {
+"32 32 3 1",
+" 	c black",
+".	c None",
+"X	c white",
+" ...............................",
+"   .............................",
+"     ...........................",
+"  X   ..........................",
+"  XXX   ........................",
+"  XXXX    ......................",
+"  XXXXXX    ....................",
+"  XXXXXXXX   ...................",
+"  XXXXXXXXXX   .................",
+"  XXXXXXXXXXX    ...............",
+"  XXXXXXXXXXXXX   ..............",
+"  XXXXXXXXXXXXXXX   ............",
+"  XXXXXXXXXXXXXXXX    .....   ..",
+"  XXXXXXXXXXXXXXXXXX    .. XXX .",
+"  XXXXXXXXXXXXXXXXXXXX    XXXXX ",
+"  XXXXXXXXXXXXXXXXXXXXXX  XXXXX ",
+"  XXXXXXXXXXXXXXXXXXXX    XXXXX ",
+"  XXXXXXXXXXXXXXXXXXX   .. XXX .",
+"  XXXXXXXXXXXXXXXXX   .....   ..",
+"  XXXXXXXXXXXXXXX    ...........",
+"  XXXXXXXXXXXXXX   .............",
+"  XXXXXXXXXXXX   ...............",
+"  XXXXXXXXXXX   ................",
+"  XXXXXXXXX   ..................",
+"  XXXXXXX    ...................",
+"  XXXXXX   .....................",
+"  XXXX   .......................",
+"  XXX   ........................",
+"  X   ..........................",
+"     ...........................",
+"   .............................",
+" ..............................."};
 
 #include <errno.h>
 #include <stdlib.h>
@@ -197,7 +271,7 @@ void LogicGate::create_iopin_map(void)
   //   is responsible for allocating memory for the I/O pins.
   //
 
-  create_pkg(3);
+  create_pkg(number_of_pins);
 
 
   // Define the I/O pins and assign them to the package.
@@ -363,7 +437,126 @@ void ORGate::update_state(void)
 {
   unsigned int old_value = port->value;
 
+  cout << "update_state of ORGate\n";
   if(port->value & input_bit_mask) 
+    port->value |= output_bit_mask;
+  else
+    port->value &= ~output_bit_mask;
+
+  if( (old_value ^ port->value) & output_bit_mask) {
+
+    if(port->pins[0]->snode) {
+      port->pins[0]->snode->update(0);
+    }
+    cout << "logic gate output just went " <<
+      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+  }
+
+}
+
+
+//--------------------------------------------------------------
+// construct NOT
+ExternalModule * NOTGate::construct(char *new_name)
+{
+
+  cout << " NOTGate  construct\n";
+
+  NOTGate *a2gP = new NOTGate ;
+
+  a2gP->new_name(new_name);
+  a2gP->set_number_of_pins(2);
+  a2gP->create_iopin_map();
+
+  cout << "NOTGate should be constructed\n";
+
+  return a2gP;
+
+}
+
+NOTGate::NOTGate(void)
+{
+
+    widget = create_pixmap(not_pixmap);
+
+  cout << "NOTGate constructor\n";
+}
+NOTGate::~NOTGate(void)
+{
+
+  cout << "NOTGate destructor\n";
+}
+
+void NOTGate::update_state(void)
+{
+  unsigned int old_value = port->value;
+
+  cout << "update_state of NOTGate\n";
+  if((port->value & input_bit_mask) == input_bit_mask)
+    port->value &= ~output_bit_mask;
+  else
+    port->value |= output_bit_mask;
+
+  if( (old_value ^ port->value) & output_bit_mask) {
+
+    if(port->pins[0]->snode) {
+      port->pins[0]->snode->update(0);
+    }
+    cout << "logic gate output just went " <<
+      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+  }
+
+}
+
+//--------------------------------------------------------------
+// construct
+
+
+XOR2Gate::XOR2Gate(void)
+{
+
+    widget = create_pixmap(xor2_pixmap);
+
+  cout << "XOR2Gate constructor\n";
+}
+XOR2Gate::~XOR2Gate(void)
+{
+  cout << "XOR2Gate destructor\n";
+}
+
+ExternalModule * XOR2Gate::construct(char *new_name)
+{
+
+  cout << " XOR2Gate  construct\n";
+
+  XOR2Gate *o2gP = new XOR2Gate ;
+
+  o2gP->new_name(new_name);
+  o2gP->set_number_of_pins(3);
+  o2gP->create_iopin_map();
+
+  cout << "XOR2Gate should be constructed\n";
+
+  return o2gP;
+
+}
+
+void XORGate::update_state(void)
+{
+  unsigned int old_value = port->value;
+  int i;
+  int out_value=0;
+
+  cout << "update_state of XORGate\n";
+
+  for(i=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
+      if(port->value & (1<<i))
+	  out_value++;
+  }
+
+  printf("out_value %d\n",out_value);
+
+  if(out_value&1)
     port->value |= output_bit_mask;
   else
     port->value &= ~output_bit_mask;
