@@ -171,10 +171,34 @@ bool winsockets_init(void)
   objects. These links are provide a client with an efficient access
   to gpsim's symbol table.
 
+  There are two kinds of socket connection types that gpsim supports.
+  I call them 'Simulator Source' and 'Simulator Sink' sockets. They're
+  both similar in that they connect to a client through the normal
+  mechanism. However, they're different in how they behave while the
+  simulator is running. The Simulator Sink sockets are designed to be
+  controlled by a GLIB GIOChannel. They are intended to receive
+  unsolicited data from a client. In addition, since they're
+  controlled by a GIOChannel, they can only be processed while the GTK
+  main loop has control (which in the current implementation is all
+  time except when the simulation is running). So the idea is that
+  clients can send stuff to the simulator, and if the simulator is not
+  running, the information is processed and a response is returned to
+  the client. 
+
+  Simulator Sources are for sending unsolicited simulator data to a
+  client. This is a blocking operation, i.e. it will not return until
+  the client has sent a response. Now, the client is responsible for
+  setting Simulator Source Sockets up. So during the socket connection
+  and initialization the client specifies what it wants the simulator
+  to send unsolicited. You might imagine a situation where a plugin
+  module may be receiving data from a script.
+
 */
 
 
-#define PORT 		0x1234
+#define SIM_SINK_PORT   0x1234
+#define SIM_SOURCE_PORT 0x1235
+
 #define BUFSIZE 	8192
 //------------------------------------------------------------------------
 bool ParseSocketLink(Packet *buffer, SocketLink **);
@@ -239,6 +263,7 @@ public:
 
 
   void init(int port);
+  void AssignChannel(gboolean (*server_func)(GIOChannel *,GIOCondition,void *));
 
   void Close(SocketBase**);
   void Bind();
@@ -259,13 +284,20 @@ public:
   /// Send a response back to the link.
   /// if the bTimeStamp is true, then the cycle counter is sent too.
   bool Send(bool bTimeStamp=false);
+  bool Receive();
 
   virtual void set(Packet &)=0;
   virtual void get(Packet &)=0;
   unsigned int getHandle() { return handle; }
+  void setBlocking(bool bBlocking) {
+    bWaitForResponse = bBlocking;
+  }
+  bool bBlocking()  { return bWaitForResponse; }
+
 private:
   unsigned int handle;
   SocketBase *parent;
+  bool bWaitForResponse;
 };
 
 ///========================================================================
@@ -447,6 +479,29 @@ void Socket::init(int port)
   Listen();
 }
 
+void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition,void *))
+{
+
+  if(my_socket->getSocket() > 0) {
+
+    GIOChannel *channel = g_io_channel_unix_new(my_socket->getSocket());
+    GIOCondition condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
+
+#if GLIB_MAJOR_VERSION >= 2
+    GError *err = NULL;
+    GIOStatus stat;
+
+    stat = g_io_channel_set_encoding (channel, NULL, &err);
+    stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+#endif
+
+    g_io_add_watch(channel, 
+		   condition,
+		   server_function,
+		   (void*)this);
+  }
+ 
+}
 
 void Socket::Close(SocketBase **sock)
 {
@@ -552,6 +607,11 @@ void SocketBase::ParseObject()
       AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
 
       if(sl) {
+	unsigned int i=0;
+	
+	if(packet->DecodeUInt32(i) && i) 
+	  sl->setBlocking(true);
+
 	NotifyLink *nl = new NotifyLink(sl);
 
 	links[handle&0x0f] = sl;
@@ -779,7 +839,7 @@ SocketInterface::~SocketInterface()
 //========================================================================
 
 SocketLink::SocketLink(unsigned int _handle, SocketBase *sb)
-  : handle(_handle), parent(sb)
+  : handle(_handle), parent(sb), bWaitForResponse(false)
 {
 }
 
@@ -792,13 +852,51 @@ bool SocketLink::Send(bool bTimeStamp)
     if(bTimeStamp)
       parent->packet->EncodeUInt64(get_cycles().value);
     parent->packet->txTerminate();
-    //std::cout << "SocketLink::Send() sending " << parent->packet->txBuff() << endl;
-    return parent->Send(parent->packet->txBuff());
+
+    /*
+    std::cout << "SocketLink::Send() "
+	      << " socket=" << parent->getSocket()
+	      << " sending " 
+	      << parent->packet->txBuff() << endl;
+    */
+
+    if(bWaitForResponse) {
+      //std::cout << "SocketLink::Send waiting for response\n";
+      if(parent->Send(parent->packet->txBuff()))
+	return Receive();
+    } else
+      return parent->Send(parent->packet->txBuff());
   }
 
   return false;
 }
 
+bool SocketLink::Receive()
+{
+  if(parent) {
+
+    //cout << "SocketLink is waiting for a client response\n";
+    parent->packet->prepare();
+
+    int bytes= recv(parent->getSocket(),
+		    parent->packet->rxBuff(), 
+		    parent->packet->rxSize(), 0);
+
+    if (bytes  == -1) {
+      perror("recv");
+      exit(1);
+    }
+
+    parent->packet->rxTerminate(bytes);
+    /*
+    cout << "SocketLink got client response: " << parent->packet->rxBuff() <<
+      endl;
+    */
+
+    return true;
+  }
+  return false;
+}
 //========================================================================
 AttributeLink::AttributeLink(unsigned int _handle, SocketBase *_sb, Value *_v)
   : SocketLink(_handle,_sb), v(_v)
@@ -822,17 +920,19 @@ NotifyLink::NotifyLink(AttributeLink *_sl)
 {
   new_name("notifylink");
 
+  std::cout<< "Creating a notify link \n";
   if(sl && sl->getValue()) {
     Value *v = sl->getValue();
-    //std::cout<< "Creating a notify link and asoc with "<< v->name()<<endl;
+    std::cout<< "Creating a notify link and asoc with "<< v->name()<<endl;
     sl->getValue()->set_xref(this);
   }
 }
 void NotifyLink::set(gint64 i)
 {
-  //  std::cout << "notify link is sending data back to client\n";
+  //std::cout << "notify link is sending data back to client\n";
   if(sl)
     sl->Send(true);
+
 }
 
 //========================================================================
@@ -1063,11 +1163,11 @@ static gboolean server_callback(GIOChannel *channel,
 
  */
 
-static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
+static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 {
   Socket *s = (Socket *)d;
 
-  std::cout << " accepting new client connect\n";
+  std::cout << " SourceSink accepting new client connect\n";
 
   SocketBase *client = s->Accept();
 
@@ -1095,12 +1195,43 @@ static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void 
 }
 
 
+static gboolean source_server_accept(GIOChannel *channel, GIOCondition condition, void *d )
+{
+  Socket *s = (Socket *)d;
+
+  std::cout << " SourceServer accepting new client connect\n";
+
+  SocketBase *client = s->Accept();
+  std::cout << " SourceServer accepted connection\n";
+
+  if(!client)
+    return FALSE;
+
+  int bytes= recv(client->getSocket(), 
+		  client->packet->rxBuff(), 
+		  client->packet->rxSize(), 0);
+
+  std::cout << " SourceServer received data" << client->packet->rxBuff() 
+	    << endl;
+
+  if (bytes  == -1) {
+    perror("recv");
+    exit(1);
+  }
+
+  client->packet->rxAdvance(bytes);
+
+  client->Service();
+
+  std::cout << " SourceServer serviced client\n";
+
+  return TRUE;
+}
+
 void start_server(void)
 {
   //  TestInt32Array *test = new TestInt32Array("test",16);
   //  symbol_table.add(test);
-
-  static Socket s;
 
   std::cout << "starting server....\n";
 
@@ -1113,33 +1244,19 @@ void start_server(void)
   server_started = true;
 #endif
 
-  s.init(PORT);
- 
-  if(s.my_socket->getSocket() > 0) {
+  // Create the Sink and Source servers
 
-    GIOChannel *channel = g_io_channel_unix_new(s.my_socket->getSocket());
-    GIOCondition condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
+  static Socket sinkServer;
 
-#if GLIB_MAJOR_VERSION >= 2
-    GError *err = NULL;
-    GIOStatus stat;
+  sinkServer.init(SIM_SINK_PORT);
+  sinkServer.AssignChannel(sink_server_accept);
+  gi.add_interface(new SocketInterface(&sinkServer));
 
-    stat = g_io_channel_set_encoding (channel, NULL, &err);
 
-    //int flags = g_io_channel_get_flags(channel);
-    //flags |= G_IO_FLAG_NONBLOCK;
-    stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
-#endif
 
-    g_io_add_watch(channel, 
-		   condition,
-		   server_accept,
-		   (void*)&s);
-
-    
-    gi.add_interface(new SocketInterface(&s));
-
-  }
+  static Socket sourceServer;
+  sourceServer.init(SIM_SOURCE_PORT);
+  sourceServer.AssignChannel(source_server_accept);
 
   std::cout << " started server\n";
 
