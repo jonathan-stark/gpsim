@@ -528,7 +528,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->source_text[id]),"button_press_event");
 	return TRUE;
     }
-    
+
     if(event->type==GDK_BUTTON_PRESS && event->button==4)
     { // wheel scroll up
 	GTK_TEXT(sbaw->source_text[id])->vadj->value-=GTK_TEXT(sbaw->source_text[id])->vadj->page_increment/4.0;

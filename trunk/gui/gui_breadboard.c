@@ -15,13 +15,18 @@
 
 enum _pintype {PIN_OUTPUT, PIN_INPUT, PIN_OTHER};
 
-void draw_pin(Breadboard_Window *bbw,enum _pintype type, int casex, int endx, int y)
+void draw_pin(GdkDrawable  *drawable,
+	      GdkGC *gc,
+	      enum _pintype type,
+	      Breadboard_Window *bbw,
+	      int casex, int endx,
+	      int y)
 {
     int pointx;
     int wingheight, wingx;
     
     // Draw actual pin
-    gdk_draw_line(bbw->da->window,bbw->pinline_gc,
+    gdk_draw_line(drawable,gc,
 		  casex,y,endx,y);
 
     if(type==PIN_OTHER)
@@ -33,34 +38,34 @@ void draw_pin(Breadboard_Window *bbw,enum _pintype type, int casex, int endx, in
     {
 	if(type==PIN_OUTPUT)
 	{
-	    pointx = endx + bbw->pinlength/3;
-	    wingx=endx+(bbw->pinlength*2)/3;
+	    pointx = endx + (bbw->pinlength*2)/3;
+	    wingx=endx+bbw->pinlength/3;
 	}
 	else
 	{
-	    pointx = endx + (bbw->pinlength*2)/3;
-	    wingx=endx+bbw->pinlength/3;
+	    pointx = endx + bbw->pinlength/3;
+	    wingx=endx+(bbw->pinlength*2)/3;
 	}
     }
     else
     {
 	if(type==PIN_OUTPUT)
 	{
-	    pointx = casex + (bbw->pinlength*2)/3;
-	    wingx=casex+bbw->pinlength/3;
+	    pointx = casex + bbw->pinlength/3;
+	    wingx=casex+(bbw->pinlength*2)/3;
 	}
 	else
 	{
-	    pointx = casex + bbw->pinlength/3;
-	    wingx=casex+(bbw->pinlength*2)/3;
+	    pointx = casex + (bbw->pinlength*2)/3;
+	    wingx=casex+bbw->pinlength/3;
 	}
     }
 
     
     // Draw an arrow poining at (endx,endy)
-    gdk_draw_line(bbw->da->window,bbw->pinline_gc,
+    gdk_draw_line(drawable,gc,
 		  pointx,y,wingx,y+wingheight);
-    gdk_draw_line(bbw->da->window,bbw->pinline_gc,
+    gdk_draw_line(drawable,gc,
 		  pointx,y,wingx,y-wingheight);
 }
 
@@ -69,54 +74,67 @@ void draw_pin(Breadboard_Window *bbw,enum _pintype type, int casex, int endx, in
 
 void update(Breadboard_Window *bbw)
 {
-    int x,y;
-    char *name;
-    char str[200];
     int dy;
+    GtkWidget *widget = bbw->da;
     unsigned int pic_id;
-    GtkWidget *da=bbw->da;
-    
+    int x,y;
+    char str[200];
+
     pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
-    if(!pic_id)
-	return;
+    if(bbw->pinline_gc==NULL)
+    {
+	bbw->pinline_gc=gdk_gc_new(bbw->da->window);
+	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-    gdk_draw_rectangle (da->window,
-			da->style->white_gc,
+	bbw->pinname_gc=gdk_gc_new(bbw->da->window);
+
+	bbw->case_gc=gdk_gc_new(bbw->da->window);
+	gdk_gc_set_line_attributes(bbw->case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+	bbw->pinstatefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
+
+	bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
+    }
+
+    gdk_draw_rectangle (bbw->pixmap,
+			widget->style->white_gc,
 			TRUE,
 			0, 0,
-			da->allocation.width,
-			da->allocation.height);
+			widget->allocation.width,
+			widget->allocation.height);
 
     for(dy=0;dy<bbw->pinspacing*(bbw->nrofpins/2);dy+=bbw->pinspacing)
     {
 	int pinnr;
 	char *name;
 
-        // Draw pin to the left
+	// Draw pin to the left
 	pinnr=dy/bbw->pinspacing+1;
 	name=gpsim_pin_get_name(pic_id,pinnr);
 	if(name)
 	{
 	    int state=gpsim_pin_get_value(pic_id,pinnr);
 	    int type=gpsim_pin_get_dir(pic_id, pinnr);
+	    // Draw pin name
+	    gdk_draw_text(bbw->pixmap,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
-	    draw_pin(bbw,type==0?PIN_OUTPUT:PIN_INPUT,
+	    draw_pin(bbw->pixmap,bbw->pinline_gc,type==0?PIN_INPUT:PIN_OUTPUT,
+                     bbw,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength,
 		     XOFFSET+bbw->pinstatewidth,
 		     YOFFSET+dy+bbw->pinspacing/2);
-	    // Draw pin name
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw lower pin state
 	    sprintf(str,"%c",state>0?'H':'L');
 	    name=str;
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(bbw->pixmap,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	}
 	else
 	{
 	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
-	    draw_pin(bbw,PIN_OTHER,
+	    draw_pin(bbw->pixmap,bbw->pinline_gc,PIN_OTHER,
+                     bbw,
 		     XOFFSET+bbw->pinstatewidth,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength,
 		     YOFFSET+dy+bbw->pinspacing/2);
@@ -129,23 +147,25 @@ void update(Breadboard_Window *bbw)
 	{
 	    int state=gpsim_pin_get_value(pic_id,pinnr);
 	    int type=gpsim_pin_get_dir(pic_id, pinnr);
+	    // Draw pin name
+	    gdk_draw_text(bbw->pixmap,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width-bbw->pinnamewidth,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
-	    draw_pin(bbw,type==0?PIN_OUTPUT:PIN_INPUT,
+	    draw_pin(bbw->pixmap,bbw->pinline_gc,type==0?PIN_INPUT:PIN_OUTPUT,
+                     bbw,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
 		     YOFFSET+dy+bbw->pinspacing/2);
-	    // Draw pin name
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width-bbw->pinnamewidth,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw lower pin state
 	    sprintf(str,"%c",state>0?'H':'L');
 	    name=str;
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength*2+bbw->case_width,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(bbw->pixmap,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength*2+bbw->case_width,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	}
 	else
 	{
 	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
-	    draw_pin(bbw,PIN_OTHER,
+	    draw_pin(bbw->pixmap, bbw->pinline_gc,PIN_OTHER,
+                     bbw,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
 		     YOFFSET+dy+bbw->pinspacing/2);
@@ -156,23 +176,56 @@ void update(Breadboard_Window *bbw)
     // Draw casing
     x=XOFFSET+bbw->case_x;
     y=XOFFSET+bbw->case_y;
-    gdk_draw_line(da->window,bbw->case_gc,x,y,x+bbw->case_width/2-FOORADIUS,y);
-    gdk_draw_line(da->window,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width/2+FOORADIUS,y);
-    gdk_draw_line(da->window,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width,y+bbw->case_height);
-    gdk_draw_line(da->window,bbw->case_gc,x,y+bbw->case_height,x+bbw->case_width,y+bbw->case_height);
-    gdk_draw_line(da->window,bbw->case_gc,x,y,x,y+bbw->case_height);
-    gdk_draw_arc(da->window,bbw->case_gc,0,x+bbw->case_width/2-FOORADIUS,y-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
+    gdk_draw_line(bbw->pixmap,bbw->case_gc,x,y,x+bbw->case_width/2-FOORADIUS,y);
+    gdk_draw_line(bbw->pixmap,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width/2+FOORADIUS,y);
+    gdk_draw_line(bbw->pixmap,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width,y+bbw->case_height);
+    gdk_draw_line(bbw->pixmap,bbw->case_gc,x,y+bbw->case_height,x+bbw->case_width,y+bbw->case_height);
+    gdk_draw_line(bbw->pixmap,bbw->case_gc,x,y,x,y+bbw->case_height);
+    gdk_draw_arc(bbw->pixmap,bbw->case_gc,0,x+bbw->case_width/2-FOORADIUS,y-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 
-    //	x=XOFFSET+bbw->picname_x;
-    //	y=YOFFSET+bbw->picname_y-LABELPADDING/2;
-    //	name=gpsim_get_pic_name(pic_id);
-    //	gdk_draw_text(da->window,bbw->picnamefont,bbw->case_gc,x,y,name,strlen(name));
-
+    gdk_draw_pixmap(bbw->da->window,
+		    bbw->da->style->fg_gc[GTK_WIDGET_STATE (bbw->da)],
+		    bbw->pixmap,
+		    0, 0,
+		    0, 0,
+		    widget->allocation.width,
+		    widget->allocation.height);
 }
 
-void expose(GtkWidget *da, GdkEventExpose *event, Breadboard_Window *bbw)
+
+
+/* Create a new backing pixmap of the appropriate size */
+static gint configure_event (GtkWidget *widget,
+			     GdkEventConfigure *event,
+			    Breadboard_Window *bbw)
 {
+
+    if (bbw->pixmap)
+	gdk_pixmap_unref(bbw->pixmap);
+
+    bbw->pixmap = gdk_pixmap_new(widget->window,
+				 widget->allocation.width,
+				 widget->allocation.height,
+				 -1);
     update(bbw);
+
+    return TRUE;
+}
+
+void expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
+{
+    if(bbw->pixmap==NULL)
+    {
+	puts("bbw.c: no pixmap!");
+	return;
+    }
+
+    gdk_draw_pixmap(widget->window,
+		    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+		    bbw->pixmap,
+		    event->area.x, event->area.y,
+		    event->area.x, event->area.y,
+		    event->area.width, event->area.height);
 }
 
 static void xref_update(struct cross_reference_to_gui *xref, int new_value)
@@ -270,8 +323,8 @@ static gint button(GtkWidget *widget,
 	    if(hit_state(bbw,x,y))
 	    {
 		printf("hit state\n");
-		//value = gpsim_pin_get_value(pic_id, pin);
-		//value = !value;
+		value = gpsim_pin_get_value(pic_id, pin);
+		value = !value;
 		gpsim_pin_toggle(pic_id, pin);
 	    }
 	    else//if(hit_direction(bbw,x,y))
@@ -280,7 +333,6 @@ static gint button(GtkWidget *widget,
 		dir = !dir;
 		gpsim_pin_set_dir(pic_id, pin, dir);
 		printf("hit direction, %d\n",dir);
-		//update(bbw);
 	    }
 	}
 	
@@ -311,14 +363,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     sprintf(buf,"%s's pinout",gpsim_processor_get_name(pic_id));
     gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), buf);
-    
-    bbw->pinline_gc=gdk_gc_new(bbw->da->window);
-    gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-    bbw->pinname_gc=gdk_gc_new(bbw->da->window);
-
-    bbw->case_gc=gdk_gc_new(bbw->da->window);
-    gdk_gc_set_line_attributes(bbw->case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
     
     bbw->pinlength=5*PINLINEWIDTH;
 
@@ -340,11 +385,9 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	    bbw->pinnamewidth=width;
     }
     
-    bbw->pinstatefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
     bbw->pinstatewidth = gdk_string_width (bbw->pinstatefont,"H")+LABELPAD;
     bbw->pinstateheight = gdk_string_height (bbw->pinstatefont,"H")+LABELPAD;
 
-    bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
     bbw->picnamewidth = gdk_string_width (bbw->picnamefont,gpsim_processor_get_name(pic_id))+LABELPAD;
     bbw->picnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
     
@@ -378,6 +421,9 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	cross_reference->update = xref_update;
 	gpsim_assign_pin_xref(pic_id,pin, cross_reference);
     }
+    
+    update(bbw);
+
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
@@ -385,10 +431,11 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
     GtkWidget *window, *da;
     
   int x,y,width,height;
+
   
   window=bbw->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-  gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), "Breadboard");
+//  gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), "Breadboard");
   da = gtk_drawing_area_new();
   gtk_widget_set_events(da,
 			gtk_widget_get_events(da)|
@@ -419,6 +466,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		     "button_press_event",
 		     (GtkSignalFunc) button,
 		     bbw);
+  gtk_signal_connect (GTK_OBJECT(bbw->da),"configure_event",
+		      (GtkSignalFunc) configure_event, bbw);
 
   gtk_widget_show(da);
   gtk_widget_show(window);
