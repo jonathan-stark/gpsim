@@ -1241,9 +1241,9 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 }
 
 // Return true of there are instructions corresponding to the source line
-int hll_source_line_represents_code(Processor *cpu,
-				    unsigned int file_id,
-				    unsigned int line)
+int source_line_represents_code(Processor *cpu,
+				unsigned int file_id,
+				unsigned int line)
 {
     int address;
     address = cpu->pma->find_closest_address_to_line(file_id,line);
@@ -1379,9 +1379,27 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
     // loop through the rest of the line
     while( p < end )
       {
+
+	if(!source_line_represents_code(cpu,file_id,line+1)) {
+	  {
+	    GdkFont *font = _gtk_style_get_font(instruction_text_style);
+	    if (lineascent < font->ascent)
+	      lineascent = font->ascent;
+	    if (linedescent < font->descent)
+	      linedescent = font->descent;
+	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+			    font,
+			    &comment_text_style->base[GTK_STATE_NORMAL],
+			    &instruction_text_style->base[GTK_STATE_NORMAL],
+			    p,
+			    -1);
+	    break;
+	  }
+
+	}
 	if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
 	  {
-	    if(hll_source_line_represents_code(cpu,file_id,line+1))
+	    //if(source_line_represents_code(cpu,file_id,line+1))
 	      {
 
 		GdkFont *font = _gtk_style_get_font(default_text_style);
@@ -1396,126 +1414,116 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 				p,
 				-1);
 	      }
-	    else
-	      {
-		GdkFont *font = _gtk_style_get_font(instruction_text_style);
-		if (lineascent < font->ascent)
-		  lineascent = font->ascent;
-		if (linedescent < font->descent)
-		  linedescent = font->descent;
-		gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				font,
-				&comment_text_style->base[GTK_STATE_NORMAL],
-				&instruction_text_style->base[GTK_STATE_NORMAL],
-				p,
-				-1);
+	      //else
+	    break;
+
+	  } else {
+	    // Asm mode.
+
+	    if( *p == ';')  { // comment
+
+	      GdkFont *font = _gtk_style_get_font(comment_text_style);
+	      if (lineascent < font->ascent)
+		lineascent = font->ascent;
+	      if (linedescent < font->descent)
+		linedescent = font->descent;
+	      gtk_text_insert(GTK_TEXT(pages[id].source_text),
+			      font,
+			      &comment_text_style->fg[GTK_STATE_NORMAL],
+			      &comment_text_style->base[GTK_STATE_NORMAL],
+			      p,
+			      -1);
+
+	      break;
+	    }
+	    else if(isalpha(*p) || *p=='_')
+	      { // instruction, symbol or cblock
+		q=p;
+		while(isalnum(*q) || *q=='_')
+		  q++;
+		if( ( !instruction_done && cblock==0) || !strncasecmp(p,"endc",4) )
+		  {  // instruction or cblock
+		    instruction_done=true;
+		    cblock=0;
+
+		    GdkFont *font = _gtk_style_get_font(instruction_text_style);
+		    if (lineascent < font->ascent)
+		      lineascent = font->ascent;
+		    if (linedescent < font->descent)
+		      linedescent = font->descent;
+
+		    if(!strncasecmp(p,"cblock",6))
+		      cblock=1;
+
+
+		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				    font,
+				    &instruction_text_style->fg[GTK_STATE_NORMAL],
+				    &instruction_text_style->base[GTK_STATE_NORMAL],
+				    p,
+				    q-p);
+
+		  }
+		else
+		  { // symbol
+
+		    GdkFont *font = _gtk_style_get_font(symbol_text_style);
+		    if (lineascent < font->ascent)
+		      lineascent = font->ascent;
+		    if (linedescent < font->descent)
+		      linedescent = font->descent;
+		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				    font,
+				    &symbol_text_style->fg[GTK_STATE_NORMAL],
+				    &symbol_text_style->base[GTK_STATE_NORMAL],
+				    p,
+				    q-p);
+		  }
+		p=q;
 	      }
-	    break;
-	  }
-	else if( *p == ';')
-	  { // comment
+	    else if( isxdigit(*p))
+	      { // number
+		q=p;
+		if(*p=='0' && toupper(*(p+1))=='X')
+		  q+=2;
+		while(isxdigit(*q))
+		  q++;
 
-	    GdkFont *font = _gtk_style_get_font(comment_text_style);
-	    if (lineascent < font->ascent)
-	      lineascent = font->ascent;
-	    if (linedescent < font->descent)
-	      linedescent = font->descent;
-	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-			    font,
-			    &comment_text_style->fg[GTK_STATE_NORMAL],
-			    &comment_text_style->base[GTK_STATE_NORMAL],
-			    p,
-			    -1);
-
-	    break;
-	  }
-	else if(isalpha(*p) || *p=='_')
-	  { // instruction, symbol or cblock
-	    q=p;
-	    while(isalnum(*q) || *q=='_')
-	      q++;
-	    if( ( !instruction_done && cblock==0) || !strncasecmp(p,"endc",4) )
-	      {  // instruction or cblock
-		instruction_done=true;
-		cblock=0;
-
-		GdkFont *font = _gtk_style_get_font(instruction_text_style);
+		GdkFont *font = _gtk_style_get_font(number_text_style);
 		if (lineascent < font->ascent)
 		  lineascent = font->ascent;
 		if (linedescent < font->descent)
 		  linedescent = font->descent;
-
-		if(!strncasecmp(p,"cblock",6))
-		  cblock=1;
-
-
 		gtk_text_insert(GTK_TEXT(pages[id].source_text),
 				font,
-				&instruction_text_style->fg[GTK_STATE_NORMAL],
-				&instruction_text_style->base[GTK_STATE_NORMAL],
+				&number_text_style->fg[GTK_STATE_NORMAL],
+				&number_text_style->base[GTK_STATE_NORMAL],
 				p,
 				q-p);
-
+		p=q;
 	      }
 	    else
-	      { // symbol
+	      { // default
+		// FIXME, add a 'whitespace_text_style'
+		// There is a small annoyance here. If the source
+		// initially on a line have whitespace, followed by
+		// a comment. Now if the comment have a smaller font
+		// than the default font then the line will have line
+		// spacing larger than nessesary.
 
-		GdkFont *font = _gtk_style_get_font(symbol_text_style);
+		GdkFont *font = _gtk_style_get_font(default_text_style);
 		if (lineascent < font->ascent)
 		  lineascent = font->ascent;
 		if (linedescent < font->descent)
 		  linedescent = font->descent;
 		gtk_text_insert(GTK_TEXT(pages[id].source_text),
 				font,
-				&symbol_text_style->fg[GTK_STATE_NORMAL],
-				&symbol_text_style->base[GTK_STATE_NORMAL],
+				&default_text_style->fg[GTK_STATE_NORMAL],
+				&default_text_style->base[GTK_STATE_NORMAL],
 				p,
-				q-p);
+				1);
+		p++;
 	      }
-	    p=q;
-	  }
-	else if( isxdigit(*p))
-	  { // number
-	    q=p;
-	    if(*p=='0' && toupper(*(p+1))=='X')
-	      q+=2;
-	    while(isxdigit(*q))
-	      q++;
-
-	    GdkFont *font = _gtk_style_get_font(number_text_style);
-	    if (lineascent < font->ascent)
-	      lineascent = font->ascent;
-	    if (linedescent < font->descent)
-	      linedescent = font->descent;
-	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-			    font,
-			    &number_text_style->fg[GTK_STATE_NORMAL],
-			    &number_text_style->base[GTK_STATE_NORMAL],
-			    p,
-			    q-p);
-	    p=q;
-	  }
-	else
-	  { // default
-	    // FIXME, add a 'whitespace_text_style'
-	    // There is a small annoyance here. If the source
-	    // initially on a line have whitespace, followed by
-	    // a comment. Now if the comment have a smaller font
-	    // than the default font then the line will have line
-	    // spacing larger than nessesary.
-
-	    GdkFont *font = _gtk_style_get_font(default_text_style);
-	    if (lineascent < font->ascent)
-	      lineascent = font->ascent;
-	    if (linedescent < font->descent)
-	      linedescent = font->descent;
-	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-			    font,
-			    &default_text_style->fg[GTK_STATE_NORMAL],
-			    &default_text_style->base[GTK_STATE_NORMAL],
-			    p,
-			    1);
-	    p++;
 	  }
       } //end of while( p < end )
 
