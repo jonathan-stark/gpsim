@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 
 //--------------------------------------------------
-void Branching::decode(pic_processor *new_cpu, unsigned int new_opcode)
+void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
 
@@ -169,7 +169,7 @@ void ADDWF16::execute(void)
 
 //--------------------------------------------------
 
-ADDWFC::ADDWFC (pic_processor *new_cpu, unsigned int new_opcode)
+ADDWFC::ADDWFC (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -250,7 +250,7 @@ void ANDWF16::execute(void)
 
 //--------------------------------------------------
 
-BC::BC (pic_processor *new_cpu, unsigned int new_opcode)
+BC::BC (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -272,7 +272,7 @@ void BC::execute(void)
 
 //--------------------------------------------------
 
-BN::BN (pic_processor *new_cpu, unsigned int new_opcode)
+BN::BN (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -294,7 +294,7 @@ void BN::execute(void)
 
 //--------------------------------------------------
 
-BNC::BNC (pic_processor *new_cpu, unsigned int new_opcode)
+BNC::BNC (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -316,7 +316,7 @@ void BNC::execute(void)
 
 //--------------------------------------------------
 
-BNN::BNN (pic_processor *new_cpu, unsigned int new_opcode)
+BNN::BNN (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -338,7 +338,7 @@ void BNN::execute(void)
 
 //--------------------------------------------------
 
-BNOV::BNOV (pic_processor *new_cpu, unsigned int new_opcode)
+BNOV::BNOV (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -360,7 +360,7 @@ void BNOV::execute(void)
 
 //--------------------------------------------------
 
-BNZ::BNZ (pic_processor *new_cpu, unsigned int new_opcode)
+BNZ::BNZ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -382,7 +382,7 @@ void BNZ::execute(void)
 
 //--------------------------------------------------
 
-BOV::BOV (pic_processor *new_cpu, unsigned int new_opcode)
+BOV::BOV (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -403,7 +403,7 @@ void BOV::execute(void)
 }
 
 //--------------------------------------------------
-BRA::BRA (pic_processor *new_cpu, unsigned int new_opcode)
+BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
@@ -444,7 +444,7 @@ char * BRA::name(char *return_str)
 
 //--------------------------------------------------
 
-BTG::BTG (pic_processor *new_cpu, unsigned int new_opcode)
+BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -469,7 +469,7 @@ void BTG::execute(void)
 }
 //--------------------------------------------------
 
-BZ::BZ (pic_processor *new_cpu, unsigned int new_opcode)
+BZ::BZ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -490,7 +490,7 @@ void BZ::execute(void)
 }
 
 //--------------------------------------------------
-CALL16::CALL16 (pic_processor *new_cpu, unsigned int new_opcode)
+CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   fast = new_opcode & 0x100;
@@ -559,7 +559,7 @@ void COMF16::execute(void)
 
 //--------------------------------------------------
 
-CPFSEQ::CPFSEQ (pic_processor *new_cpu, unsigned int new_opcode)
+CPFSEQ::CPFSEQ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -586,7 +586,7 @@ void CPFSEQ::execute(void)
 
 //--------------------------------------------------
 
-CPFSGT::CPFSGT (pic_processor *new_cpu, unsigned int new_opcode)
+CPFSGT::CPFSGT (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -613,7 +613,7 @@ void CPFSGT::execute(void)
 
 //--------------------------------------------------
 
-CPFSLT::CPFSLT (pic_processor *new_cpu, unsigned int new_opcode)
+CPFSLT::CPFSLT (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -640,7 +640,7 @@ void CPFSLT::execute(void)
 
 //--------------------------------------------------
 
-DAW::DAW (pic_processor *new_cpu, unsigned int new_opcode)
+DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -724,7 +724,7 @@ void DECFSZ16::execute(void)
 
 //--------------------------------------------------
 
-DCFSNZ::DCFSNZ (pic_processor *new_cpu, unsigned int new_opcode)
+DCFSNZ::DCFSNZ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -760,7 +760,7 @@ void DCFSNZ::execute(void)
 
 
 //--------------------------------------------------
-GOTO16::GOTO16 (pic_processor *new_cpu, unsigned int new_opcode)
+GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
@@ -850,7 +850,7 @@ void INCFSZ16::execute(void)
 
 //--------------------------------------------------
 
-INFSNZ::INFSNZ (pic_processor *new_cpu, unsigned int new_opcode)
+INFSNZ::INFSNZ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -928,7 +928,7 @@ void IORWF16::execute(void)
 }
 
 //--------------------------------------------------
-LCALL16::LCALL16 (pic_processor *new_cpu, unsigned int new_opcode)
+LCALL16::LCALL16 (Processor *new_cpu, unsigned int new_opcode)
 {
 //    opcode = new_opcode;
 //    fast = new_opcode & 0x100;
@@ -970,7 +970,7 @@ char *LCALL16::name(char  *return_str)
 
 //--------------------------------------------------
 
-LFSR::LFSR (pic_processor *new_cpu, unsigned int new_opcode)
+LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
 {
   
   opcode = new_opcode;
@@ -1083,7 +1083,7 @@ void MOVF16::execute(void)
 
 //--------------------------------------------------
 
-MOVFF::MOVFF (pic_processor *new_cpu, unsigned int new_opcode)
+MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
@@ -1148,7 +1148,7 @@ void MOVFF::execute(void)
 
 //--------------------------------------------------
 
-MOVFP::MOVFP (pic_processor *new_cpu, unsigned int new_opcode)
+MOVFP::MOVFP (Processor *new_cpu, unsigned int new_opcode)
 {
 //    opcode = new_opcode;
 //    cpu = new_cpu;
@@ -1213,7 +1213,7 @@ void MOVFP::execute(void)
 
 //--------------------------------------------------
 
-MOVLB::MOVLB (pic_processor *new_cpu, unsigned int new_opcode)
+MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1236,7 +1236,7 @@ void MOVLB::execute(void)
 
 //--------------------------------------------------
 
-MOVLR::MOVLR (pic_processor *new_cpu, unsigned int new_opcode)
+MOVLR::MOVLR (Processor *new_cpu, unsigned int new_opcode)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -1259,7 +1259,7 @@ void MOVLR::execute(void)
 
 //--------------------------------------------------
 
-MOVPF::MOVPF (pic_processor *new_cpu, unsigned int new_opcode)
+MOVPF::MOVPF (Processor *new_cpu, unsigned int new_opcode)
 {
 //    opcode = new_opcode;
 //    cpu = new_cpu;
@@ -1325,7 +1325,7 @@ void MOVPF::execute(void)
 
 //--------------------------------------------------
 
-MOVWF16::MOVWF16(pic_processor *new_cpu, unsigned int new_opcode) 
+MOVWF16::MOVWF16(Processor *new_cpu, unsigned int new_opcode) 
   : MOVWF(new_cpu,new_opcode)
 {
   register_address = new_opcode & 0xff;
@@ -1348,7 +1348,7 @@ void MOVWF16::execute(void)
 }
 
 //--------------------------------------------------
-MOVWF16a::MOVWF16a(pic_processor *new_cpu, unsigned int new_opcode) : MOVWF(new_cpu,new_opcode)
+MOVWF16a::MOVWF16a(Processor *new_cpu, unsigned int new_opcode) : MOVWF(new_cpu,new_opcode)
 {
   register_address = ((new_opcode & 0x80) ? 0xf80 : 0 ) | (new_opcode & 0x7f);
 }
@@ -1370,7 +1370,7 @@ void MOVWF16a::execute(void)
 
 //--------------------------------------------------
 
-MULLW::MULLW (pic_processor *new_cpu, unsigned int new_opcode)
+MULLW::MULLW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1397,7 +1397,7 @@ void MULLW::execute(void)
 
 //--------------------------------------------------
 
-MULWF::MULWF (pic_processor *new_cpu, unsigned int new_opcode)
+MULWF::MULWF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1430,7 +1430,7 @@ void MULWF::execute(void)
 
 //--------------------------------------------------
 
-NEGF::NEGF (pic_processor *new_cpu, unsigned int new_opcode)
+NEGF::NEGF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1467,7 +1467,7 @@ void NEGF::execute(void)
 
 //--------------------------------------------------
 
-NEGW::NEGW (pic_processor *new_cpu, unsigned int new_opcode)
+NEGW::NEGW (Processor *new_cpu, unsigned int new_opcode)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -1503,7 +1503,7 @@ void NEGW::execute(void)
 
 //--------------------------------------------------
 
-POP::POP (pic_processor *new_cpu, unsigned int new_opcode)
+POP::POP (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1525,7 +1525,7 @@ void POP::execute(void)
 
 //--------------------------------------------------
 
-PUSH::PUSH (pic_processor *new_cpu, unsigned int new_opcode)
+PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1546,7 +1546,7 @@ void PUSH::execute(void)
 }
 
 //--------------------------------------------------
-RCALL::RCALL (pic_processor *new_cpu, unsigned int new_opcode)
+RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
@@ -1586,7 +1586,7 @@ char * RCALL::name(char *return_str)
 
 //--------------------------------------------------
 
-RESET::RESET (pic_processor *new_cpu, unsigned int new_opcode)
+RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1652,7 +1652,7 @@ char *RETURN16::name(char  *return_str)
 
 //--------------------------------------------------
 
-RLCF::RLCF (pic_processor *new_cpu, unsigned int new_opcode)
+RLCF::RLCF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1688,7 +1688,7 @@ void RLCF::execute(void)
 
 //--------------------------------------------------
 
-RLNCF::RLNCF (pic_processor *new_cpu, unsigned int new_opcode)
+RLNCF::RLNCF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1726,7 +1726,7 @@ void RLNCF::execute(void)
 
 //--------------------------------------------------
 
-RRCF::RRCF (pic_processor *new_cpu, unsigned int new_opcode)
+RRCF::RRCF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1763,7 +1763,7 @@ void RRCF::execute(void)
 
 //--------------------------------------------------
 
-RRNCF::RRNCF (pic_processor *new_cpu, unsigned int new_opcode)
+RRNCF::RRNCF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1800,7 +1800,7 @@ void RRNCF::execute(void)
 
 //--------------------------------------------------
 
-SETF::SETF (pic_processor *new_cpu, unsigned int new_opcode)
+SETF::SETF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1863,7 +1863,7 @@ void SUBLW16::execute(void)
 
 //--------------------------------------------------
 
-SUBFWB::SUBFWB (pic_processor *new_cpu, unsigned int new_opcode)
+SUBFWB::SUBFWB (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1926,7 +1926,7 @@ void SUBWF16::execute(void)
 
 //--------------------------------------------------
 
-SUBWFB::SUBWFB (pic_processor *new_cpu, unsigned int new_opcode)
+SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -1963,7 +1963,7 @@ void SUBWFB::execute(void)
 
 //--------------------------------------------------
 
-TBLRD::TBLRD (pic_processor *new_cpu, unsigned int new_opcode)
+TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -2006,7 +2006,7 @@ void TBLRD::execute(void)
 
 //--------------------------------------------------
 
-TBLWT::TBLWT (pic_processor *new_cpu, unsigned int new_opcode)
+TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -2050,7 +2050,7 @@ void TBLWT::execute(void)
 
 //--------------------------------------------------
 
-TLRD::TLRD (pic_processor *new_cpu, unsigned int new_opcode)
+TLRD::TLRD (Processor *new_cpu, unsigned int new_opcode)
 {
 
 //    decode(new_cpu, new_opcode);
@@ -2093,7 +2093,7 @@ void TLRD::execute(void)
 
 //--------------------------------------------------
 
-TLWT::TLWT (pic_processor *new_cpu, unsigned int new_opcode)
+TLWT::TLWT (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -2136,7 +2136,7 @@ void TLWT::execute(void)
 
 //--------------------------------------------------
 
-TSTFSZ::TSTFSZ (pic_processor *new_cpu, unsigned int new_opcode)
+TSTFSZ::TSTFSZ (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);

@@ -37,9 +37,9 @@ class ADDLW : public Literal_op
 {
 
 public:
-  ADDLW(pic_processor *new_cpu, unsigned int new_opcode);
+  ADDLW(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new ADDLW(new_cpu,new_opcode);}
 
 };
@@ -51,9 +51,9 @@ class RETFIE : public instruction
 {
 public:
 
-  RETFIE(pic_processor *new_cpu, unsigned int new_opcode);
+  RETFIE(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETFIE(new_cpu,new_opcode);}
 
 };
@@ -64,9 +64,9 @@ class RETURN : public instruction
 {
 public:
 
-  RETURN(pic_processor *new_cpu, unsigned int new_opcode);
+  RETURN(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETURN(new_cpu,new_opcode);}
 
 };
@@ -78,9 +78,9 @@ class SUBLW : public Literal_op
 
 public:
 
-  SUBLW(pic_processor *new_cpu, unsigned int new_opcode);
+  SUBLW(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new SUBLW(new_cpu,new_opcode);}
 
 };
