@@ -45,6 +45,7 @@ libgpsim_la_SOURCES = \
 	pic-registers.cc \
 	pic-instructions.cc \
 	pie.cc \
+	pir.cc \
 	processor.cc \
 	registers.cc \
 	stimuli.cc \

@@ -23,10 +23,12 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 
 #include "gpsim_classes.h"	// for RESET_TYPE
+#include "trace.h"
 #include "intcon.h"
 #include "pir.h"
 #include "16bit-registers.h"
 #include "16bit-processors.h"
+#include "breakpoints.h"
 
 //--------------------------------------------------
 // member functions for the INTCON base class
@@ -48,6 +50,48 @@ void INTCON::set_T0IF(void)
   {
     trace.interrupt();
   }
+}
+
+void INTCON::put(unsigned int new_value)
+{
+
+  value = new_value;
+  trace.register_write(address,value);
+
+  // Now let's see if there's a pending interrupt
+  // The INTCON bits are:
+  // GIE | ---- | TOIE | INTE | RBIE | TOIF | INTF | RBIF
+  // There are 3 sources for interrupts, TMR0, RB0/INTF
+  // and RBIF (RB7:RB4 change). If the corresponding interrupt
+  // flag is set AND the corresponding interrupt enable bit
+  // is set AND global interrupts (GIE) are enabled, THEN
+  // there's an interrupt pending.
+  // note: bit6 is not handled here because it is processor
+  // dependent (e.g. EEIE for x84 and ADIE for x7x).
+
+  if(value & GIE)
+    {
+
+      if( (((value>>3)&value) & (T0IF | INTF | RBIF)) )
+	{
+	  trace.interrupt();
+	  bp.set_interrupt();
+	}
+      else if(value & XXIE)
+	{
+	  if(check_peripheral_interrupt())
+	    {
+	      trace.interrupt();
+	      bp.set_interrupt();
+	    }
+	}
+    }
+}
+
+void INTCON::peripheral_interrupt(void)
+{
+  if(  (value & (GIE | XXIE)) == (GIE | XXIE) )
+    bp.set_interrupt();
 }
 
 
@@ -163,6 +207,7 @@ void INTCON_16::set_gies(void)
 // outputs: none
 //
 //----------------------------------------------------------------------
+extern void DEBUG_print_interrupt_vector(Processor *cpu);
 
 void INTCON_16::put(unsigned int new_value)
 {
@@ -230,7 +275,11 @@ void INTCON_16::put(unsigned int new_value)
       // ignore interrupt priorities
 
       cout << " ignoring interrupt priorities, selecting high priority vector:" << INTERRUPT_VECTOR_HI << endl;
+  DEBUG_print_interrupt_vector(cpu);
+
+
       cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
+  DEBUG_print_interrupt_vector(cpu);
       if(value & GIE) 
 	{
 	  if( ( (value>>3)&value) & (T0IF | INTF | RBIF) )

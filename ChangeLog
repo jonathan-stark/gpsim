@@ -1,3 +1,11 @@
+2004-01-28  Scott Dattalo  <scott@dattalo.com>
+	* src/pir.h moved all of the PIR*::put()'s to the PIR base class
+	* src/intcon.h, src/intcon.cc moved inline functions that called
+	bp and trace objects from the header file to the .cc file.
+	* src/pir.cc new file - added so that inline functions that called
+	bp and trace objects could be removed from the header file.
+	* src/Makefile.am added pir.cc to the list of src files.
+	
 2004-01-26  Scott Dattalo  <scott@dattalo.com>
 	* src/* gui/*
 	  Replaced references to 'file_register' with 'Register'.

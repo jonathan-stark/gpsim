@@ -695,7 +695,6 @@ void Processor::run (void)
 // at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
 //
-
 void Processor::step (unsigned int steps)
 {
   if(simulation_mode != STOPPED) {
@@ -1069,7 +1068,7 @@ RegisterMemoryAccess::RegisterMemoryAccess(void)
 Register *RegisterMemoryAccess::get_register(unsigned int address)
 {
 
-  if(!cpu || !cpu->registers || register_memory_size()<=address)
+  if(!cpu || !cpu->registers || cpu->register_memory_size()<=address)
     return NULL;
 
   return cpu->registers[address];

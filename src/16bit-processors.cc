@@ -31,7 +31,10 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol.h"
 
-
+void DEBUG_print_interrupt_vector(Processor *cpu)
+{
+  cout << " interrupt vector " << ((_16bit_processor *)cpu)->interrupt_vector << endl;
+}
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(void)
 {

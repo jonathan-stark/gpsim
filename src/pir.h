@@ -35,9 +35,12 @@ class PIR : public sfr_register
 public:
   INTCON  *intcon;
   PIE     *pie;
-
+  int valid_bits;
+ 
   virtual void set_ccpif(void){}
   virtual bool interrupt_status(void){ return true;}
+
+  virtual void put(unsigned int new_value);
 
 };
 
@@ -62,8 +65,6 @@ enum
     EEIF    = 1<<7      // 16f62x
 };
 
-  int valid_bits;
- 
   inline void set_tmr1if(void)
     {
       put(get() | TMR1IF);
@@ -108,20 +109,13 @@ enum
    {
      return value & TXIF;
    }
- void clear_txif(void)
-   {
-     value &= ~TXIF;
-     trace.register_write(address,value);
-   }
+ void clear_txif(void);
+
  unsigned int get_rcif(void)
    {
      return value & RCIF;
    }
- void clear_rcif(void)
-   {
-     value &= ~RCIF;
-     trace.register_write(address,value);
-   }
+ void clear_rcif(void);
  
   bool interrupt_status(void)
     {
@@ -129,22 +123,6 @@ enum
 	return(1);
       else
 	return(0);
-
-    }
-
-  void put(unsigned int new_value)
-    {
-      // Only the "valid bits" can be written with put.
-      // The "invalid" ones (such as TXIF) are written
-      // through the set_/clear_ member functions.
-
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
 
     }
 
@@ -170,19 +148,17 @@ class PIR1v2 : public PIR
 {
 public:
 
-enum
-{
-    TMR1IF  = 1<<0,
-    TMR2IF  = 1<<1,
-    CCP1IF  = 1<<2,
-    SSPIF   = 1<<3,
-    TXIF    = 1<<4,
-    RCIF    = 1<<5,
-    ADIF    = 1<<6,     // 18cxxx
-    PSPIF   = 1<<7
-};
-
-  int valid_bits;
+  enum
+    {
+      TMR1IF  = 1<<0,
+      TMR2IF  = 1<<1,
+      CCP1IF  = 1<<2,
+      SSPIF   = 1<<3,
+      TXIF    = 1<<4,
+      RCIF    = 1<<5,
+      ADIF    = 1<<6,     // 18cxxx
+      PSPIF   = 1<<7
+    };
  
   inline void set_tmr1if(void)
     {
@@ -224,24 +200,16 @@ enum
       put(get() | PSPIF);
     }
 
- unsigned int get_txif(void)
-   {
-     return value & TXIF;
-   }
- void clear_txif(void)
-   {
-     value &= ~TXIF;
-     trace.register_write(address,value);
-   }
- unsigned int get_rcif(void)
-   {
-     return value & TXIF;
-   }
- void clear_rcif(void)
-   {
-     value &= ~RCIF;
-     trace.register_write(address,value);
-   }
+  unsigned int get_txif(void)
+    {
+      return value & TXIF;
+    }
+  void clear_txif(void);
+  unsigned int get_rcif(void)
+    {
+      return value & TXIF;
+    }
+  void clear_rcif(void);
  
   bool interrupt_status(void)
     {
@@ -249,22 +217,6 @@ enum
 	return(1);
       else
 	return(0);
-
-    }
-
-  void put(unsigned int new_value)
-    {
-      // Only the "valid bits" can be written with put.
-      // The "invalid" ones (such as TXIF) are written
-      // through the set_/clear_ member functions.
-
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
 
     }
 
@@ -295,23 +247,9 @@ enum
     CCP2IF  = 1<<0
 };
 
-  int valid_bits;
-
   void set_ccpif(void)
     {
       put(get() | CCP2IF);
-    }
-
-  void put(unsigned int new_value)
-    {
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
-
     }
 
   bool interrupt_status(void)
@@ -351,7 +289,6 @@ enum
     EEIF    = 1<<4,
     CMIF    = 1<<6		/* only on the PIC18F4xx devices */
 };
-  int valid_bits;
 
   void set_eccp1if(void)
     {
@@ -381,18 +318,6 @@ enum
   void set_cmif(void)
     {
       put(get() | CMIF);
-    }
-
-  void put(unsigned int new_value)
-    {
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
-
     }
 
   bool interrupt_status(void)
@@ -435,7 +360,6 @@ enum
     WAKIF   = 1<<6,
     IRXIF   = 1<<7
 };
-  int valid_bits;
 
   void set_rxb0if(void)
     {
@@ -475,18 +399,6 @@ enum
   void set_irxif(void)
     {
       put(get() | IRXIF);
-    }
-
-  void put(unsigned int new_value)
-    {
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
-
     }
 
   bool interrupt_status(void)
