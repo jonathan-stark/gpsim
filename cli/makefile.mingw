@@ -52,7 +52,6 @@ cli_OBJECTS =			\
 	cmd_version.o		\
 	cmd_x.o			\
 	command.o		\
-	errors.o		\
 	fd2raw.o		\
 	input.o			\
 	parse.o			\

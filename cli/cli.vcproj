@@ -272,9 +272,6 @@
 				RelativePath=".\command.cc">
 			</File>
 			<File
-				RelativePath=".\errors.cc">
-			</File>
-			<File
 				RelativePath=".\input.cc">
 			</File>
 			<File
@@ -473,9 +470,6 @@ ren $(InputName).hpp $(InputName).h
 "
 						Outputs="../config.h"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\errors.h">
 			</File>
 			<File
 				RelativePath=".\input.h">
