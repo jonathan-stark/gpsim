@@ -19,6 +19,7 @@
 #include "gui_interface.h"
 
 #include "eXdbm/eXdbm.h"
+// #include <eXdbm.h>
 
 /*
  * --- Function prototypes
@@ -99,6 +100,7 @@ void gui_new_processor (unsigned int pic_id)
       StatusBar_new_processor(gp->status_bar, gp);
       SourceBrowserOpcode_new_processor((SourceBrowserOpcode_Window*)gp->program_memory, gp);
       SourceBrowserAsm_new_processor((SourceBrowserAsm_Window*)gp->source_browser, gp);
+      BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
 
       init_link_to_gpsim(gp);
       //  redisplay_prompt();
@@ -349,6 +351,7 @@ int gui_init (int argc, char **argv)
   CreateSourceBrowserAsmWindow(gp);
   CreateSymbolWindow(gp);
   CreateWatchWindow(gp);
+  CreateBreadboardWindow(gp);
 
   update_object = gui_update_object;
   new_processor = gui_new_processor;
