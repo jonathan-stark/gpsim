@@ -1,3 +1,7 @@
+2004-03-23  Borut Razem  <borut.razem@siol.net>
+	* src/modules.cc: gpsim on WIN32 doesn't support modules yet
+	* gui/gui_breadboard.cc: GTK+ 2.x port
+
 2004-03-22 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_src.cc: Changed the event key processing from a case statement to
 	a C++ map object.
