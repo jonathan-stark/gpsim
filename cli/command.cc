@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "cmd_attach.h"
 #include "cmd_break.h"
+#include "cmd_bus.h"
 #include "cmd_clear.h"
 #include "cmd_disasm.h"
 #include "cmd_dump.h"
@@ -36,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_list.h"
 #include "cmd_load.h"
 #include "cmd_node.h"
+#include "cmd_module.h"
 #include "cmd_processor.h"
 #include "cmd_quit.h"
 #include "cmd_reset.h"
@@ -57,6 +59,7 @@ command *command_list[] =
 {
   &attach,
   &c_break,
+  &c_bus,
   &clear,
   &disassemble,
   &dump,
@@ -65,6 +68,7 @@ command *command_list[] =
   &c_list,
   &c_load,
   &c_node,
+  &c_module,
   &c_processor,
   &quit,
   &reset,

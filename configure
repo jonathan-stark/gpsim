@@ -648,7 +648,7 @@ test "$host_alias" != "$target_alias" &&
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=19
-GPSIM_MICRO_VERSION=0
+GPSIM_MICRO_VERSION=1
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 # Find a good install program.  We prefer a C program (faster),
@@ -3430,6 +3430,7 @@ ac_given_INSTALL="$INSTALL"
 trap 'rm -fr `echo "src/Makefile cli/Makefile Makefile \
 	gui/Makefile  xpms/Makefile \
 	gpsim/Makefile examples/Makefile \
+	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
 	doc/Makefile  config.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
@@ -3564,6 +3565,7 @@ cat >> $CONFIG_STATUS <<EOF
 CONFIG_FILES=\${CONFIG_FILES-"src/Makefile cli/Makefile Makefile \
 	gui/Makefile  xpms/Makefile \
 	gpsim/Makefile examples/Makefile \
+	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
 	doc/Makefile "}
 EOF

@@ -332,4 +332,14 @@ public:
   virtual SOURCE_TYPE isa(void) {return OPEN_COLLECTOR;};
 
 };
+
+//--------------------------------------------------------------------------
+/*
+class BUS : public Stimulus_Node
+{
+public:
+
+
+};
+*/
 #endif  // __STIMULI_H__

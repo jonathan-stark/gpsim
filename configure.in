@@ -6,7 +6,7 @@ AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=19
-GPSIM_MICRO_VERSION=0
+GPSIM_MICRO_VERSION=1
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -142,6 +142,7 @@ AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
 AC_OUTPUT( src/Makefile cli/Makefile Makefile \
 	gui/Makefile  xpms/Makefile \
 	gpsim/Makefile examples/Makefile \
+	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
 	doc/Makefile )
 
