@@ -51,24 +51,24 @@ void P16C61::create_sfr_map(void)
   add_sfr_register(indf,   0x00);
 
   add_sfr_register(&tmr0,  0x01);
-  add_sfr_register(&option_reg,  0x81, 0xff);
+  add_sfr_register(&option_reg,  0x81, RegisterValue(0xff,0));
 
-  add_sfr_register(pcl,    0x02, 0);
-  add_sfr_register(status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
+  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0x3f);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0x3f,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
 
-  add_sfr_register(pclath, 0x8a, 0);
-  add_sfr_register(pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, RegisterValue(0,0));
+  add_sfr_register(pclath, 0x0a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x8b, 0);
-  add_sfr_register(&intcon_reg, 0x0b, 0);
+  add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
   intcon = &intcon_reg;
 
@@ -328,42 +328,42 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(indf,   0x00);
 
   add_sfr_register(&tmr0,  0x01);
-  add_sfr_register(&option_reg,  0x81, 0xff);
+  add_sfr_register(&option_reg,  0x81, RegisterValue(0xff,0));
 
-  add_sfr_register(pcl,    0x02, 0);
-  add_sfr_register(status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
+  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
-  add_sfr_register(pclath, 0x8a, 0);
-  add_sfr_register(pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, RegisterValue(0,0));
+  add_sfr_register(pclath, 0x0a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x8b, 0);
-  add_sfr_register(&intcon_reg, 0x0b, 0);
+  add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
-  add_sfr_register(get_pir1(),   0x0c, 0);
-  add_sfr_register(&pie1,   0x8c, 0);
+  add_sfr_register(get_pir1(),   0x0c, RegisterValue(0,0));
+  add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
 
-  add_sfr_register(&tmr1l,  0x0e, 0);
-  add_sfr_register(&tmr1h,  0x0f, 0);
+  add_sfr_register(&tmr1l,  0x0e, RegisterValue(0,0));
+  add_sfr_register(&tmr1h,  0x0f, RegisterValue(0,0));
 
-  add_sfr_register(&pcon,   0x8e, 0);
+  add_sfr_register(&pcon,   0x8e, RegisterValue(0,0));
 
-  add_sfr_register(&t1con,  0x10, 0);
-  add_sfr_register(&tmr2,   0x11, 0);
-  add_sfr_register(&t2con,  0x12, 0);
-  add_sfr_register(&pr2,    0x92, 0xff);
+  add_sfr_register(&t1con,  0x10, RegisterValue(0,0));
+  add_sfr_register(&tmr2,   0x11, RegisterValue(0,0));
+  add_sfr_register(&t2con,  0x12, RegisterValue(0,0));
+  add_sfr_register(&pr2,    0x92, RegisterValue(0xff,0));
 
   if( init_ssp ) {
-	add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-	add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-	add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-	add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+	add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
+	add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
+	add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
+	add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
   }
 
-  add_sfr_register(&ccpr1l,  0x15, 0);
-  add_sfr_register(&ccpr1h,  0x16, 0);
-  add_sfr_register(&ccp1con, 0x17, 0);
+  add_sfr_register(&ccpr1l,  0x15, RegisterValue(0,0));
+  add_sfr_register(&ccpr1h,  0x16, RegisterValue(0,0));
+  add_sfr_register(&ccp1con, 0x17, RegisterValue(0,0));
 
   // get_pir_set()->set_pir1(get_pir1());
   pir_set_def.set_pir1(&pir1_reg);
@@ -442,13 +442,13 @@ void P16C62::create_sfr_map(void)
 
 
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0x3f);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0x3f,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
 
   add_sfr_register(portc,   0x07);
-  add_sfr_register(&trisc,  0x87, 0xff);
+  add_sfr_register(&trisc,  0x87, RegisterValue(0xff,0));
 
   ((PORTC*)portc)->ccp1con = &ccp1con;
 
@@ -529,12 +529,12 @@ void P16C63::create_sfr_map(void)
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(get_pir2(),   0x0d, 0);
-  add_sfr_register(&pie2,   0x8d, 0);
+  add_sfr_register(get_pir2(),   0x0d, RegisterValue(0,0));
+  add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
-  add_sfr_register(&ccpr2l, 0x1b, 0);
-  add_sfr_register(&ccpr2h, 0x1c, 0);
-  add_sfr_register(&ccp2con, 0x1d, 0);
+  add_sfr_register(&ccpr2l, 0x1b, RegisterValue(0,0));
+  add_sfr_register(&ccpr2h, 0x1c, RegisterValue(0,0));
+  add_sfr_register(&ccp2con, 0x1d, RegisterValue(0,0));
 
   // get_pir_set()->set_pir2(get_pir2());
   pir_set_def.set_pir2(&pir2_reg);
@@ -546,11 +546,11 @@ void P16C63::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
-  add_sfr_register(usart.txsta, 0x98, 2,"txsta");
-  add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
-  add_sfr_register(usart.txreg, 0x19, 0,"txreg");
-  add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
+  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
   usart.initialize_14(this,get_pir_set(),portc,7);
 
   //  cout << "portc HACK \n";
@@ -562,10 +562,10 @@ void P16C63::create_sfr_map(void)
   }
 
   /*
-  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
   ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
   */
 
@@ -662,19 +662,19 @@ void P16C64::create_sfr_map(void)
 
 
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0x3f);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0x3f,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
 
   add_sfr_register(portc,   0x07);
-  add_sfr_register(&trisc,  0x87, 0xff);
+  add_sfr_register(&trisc,  0x87, RegisterValue(0xff,0));
 
   add_sfr_register(portd,   0x08);
-  add_sfr_register(&trisd,  0x88, 0xff);
+  add_sfr_register(&trisd,  0x88, RegisterValue(0xff,0));
 
   add_sfr_register(porte,   0x09);
-  add_sfr_register(&trise,  0x89, 0x07);
+  add_sfr_register(&trise,  0x89, RegisterValue(0x07,0));
 
   ((PORTC*)portc)->ccp1con = &ccp1con;
 
@@ -756,12 +756,12 @@ void P16C65::create_sfr_map(void)
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(get_pir2(),   0x0d, 0);
-  add_sfr_register(&pie2,   0x8d, 0);
+  add_sfr_register(get_pir2(),   0x0d, RegisterValue(0,0));
+  add_sfr_register(&pie2,   0x8d, RegisterValue(0,0));
 
-  add_sfr_register(&ccpr2l, 0x1b, 0);
-  add_sfr_register(&ccpr2h, 0x1c, 0);
-  add_sfr_register(&ccp2con, 0x1d, 0);
+  add_sfr_register(&ccpr2l, 0x1b, RegisterValue(0,0));
+  add_sfr_register(&ccpr2h, 0x1c, RegisterValue(0,0));
+  add_sfr_register(&ccp2con, 0x1d, RegisterValue(0,0));
 
   // get_pir_set()->set_pir2(&get_pir2());
   pir_set_def.set_pir2(&pir2_reg);
@@ -773,11 +773,11 @@ void P16C65::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
-  add_sfr_register(usart.txsta, 0x98, 2,"txsta");
-  add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
-  add_sfr_register(usart.txreg, 0x19, 0,"txreg");
-  add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
+  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
   usart.initialize_14(this,get_pir_set(),portc,7);
 
   //  cout << "portc HACK \n";
@@ -789,10 +789,10 @@ void P16C65::create_sfr_map(void)
   }
 
   /*
-  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
   ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
   */
 

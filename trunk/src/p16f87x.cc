@@ -55,7 +55,7 @@ void P16F871::create_sfr_map(void)
     cout << "creating f871 registers \n";
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
 
   // Enable program memory reads and writes.
   get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
@@ -66,7 +66,7 @@ void P16F871::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
-  add_sfr_register(&adresl,  0x9e, 0);
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
 
   adres.new_name("adresh");
   adresl.new_name("adresl");
@@ -214,7 +214,7 @@ void P16F873::create_sfr_map(void)
     cout << "creating f873 registers \n";
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
 
   // Enable program memory reads and writes.
   get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
@@ -225,7 +225,7 @@ void P16F873::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
-  add_sfr_register(&adresl,  0x9e, 0);
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
 
   adres.new_name("adresh");
   adresl.new_name("adresl");
@@ -362,7 +362,7 @@ void P16F874::create_sfr_map(void)
     cout << "creating f874 registers \n";
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, RegisterValue(0,0));
 
   // Enable program memory reads and writes.
   get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
@@ -373,7 +373,7 @@ void P16F874::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
   add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
-  add_sfr_register(&adresl,  0x9e, 0);
+  add_sfr_register(&adresl,  0x9e, RegisterValue(0,0));
 
   adres.new_name("adresh");
   adresl.new_name("adresl");

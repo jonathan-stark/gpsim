@@ -42,43 +42,53 @@ class Processor;
 // are valid.
 //
 
-class RegisterValue {
- public:
+class RegisterValue
+{
+public:
 
   unsigned int data;  // The actual numeric value of the register.
   unsigned int init;  // bit mask of initialized bits.
 
   RegisterValue(void)
-    {
-      data = 0;
-      init = 0xff;  // assume 8-bit wide, unitialized registers
-    }
+  {
+    data = 0;
+    init = 0xff;  // assume 8-bit wide, unitialized registers
+  }
 
   RegisterValue(unsigned int d, unsigned int i) : 
     data(d), init(i)
-    {
-    }
+  {
+  }
 
-  bool initialized(void)
-    {
-      return init == 0;
-    }
+  inline bool initialized(void)
+  {
+    return init == 0;
+  }
 
-  unsigned int get(void)
-    {
-      return data;
-    }
+  inline unsigned int get(void)
+  {
+    return data;
+  }
 
-  void put(unsigned int d)
-    {
-      data = d;
-    }
+  inline void put(unsigned int d)
+  {
+    data = d;
+  }
 
-  void operator = (RegisterValue rv)
-    {
-      data = rv.data;
-      init = rv.init;
-    }
+  inline unsigned int geti(void)
+  {
+    return init;
+  }
+
+  inline void puti(unsigned int i)
+  {
+    init = i;
+  }
+  inline void operator = (RegisterValue rv)
+  {
+    data = rv.data;
+    init = rv.init;
+  }
 
 
 };
@@ -113,9 +123,16 @@ public:
 
   unsigned int alias_mask;
 
-  unsigned int por_value;  // power on reset value
+  RegisterValue por_value;  // power on reset value
 
   unsigned int bit_mask;   // = 7 for 8-bit registers, = 15 for 16-bit registers.
+
+  // The read_trace and write_trace variables are used while
+  // tracing register reads and writes.
+
+  RegisterValue write_trace;
+  RegisterValue read_trace;
+
 
   symbol *symbol_alias;
 
@@ -222,6 +239,13 @@ public:
     return 1;
   }
 
+  /*
+    When the register is accessed, this action is recorded in the trace buffer.
+    Here we can specify the exact trace command to use.
+   */
+  virtual void set_write_trace(unsigned int wt);
+  virtual void set_read_trace(unsigned int rt);
+
 protected:
 
   /*
@@ -262,7 +286,7 @@ class sfr_register : public Register
 {
 public:
   sfr_register() : Register(){}
-  unsigned int wdtr_value; // wdt or mclr reset value
+  RegisterValue wdtr_value; // wdt or mclr reset value
 
   virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};
   virtual void initialize(void) {return;};
@@ -271,11 +295,11 @@ public:
     switch (r) {
 
     case POR_RESET:
-      value.put(por_value);
+      value = por_value;
       break;
 
     case WDT_RESET:
-      value.put(wdtr_value);
+      value = wdtr_value;
       break;
     case SOFT_RESET:
       break;

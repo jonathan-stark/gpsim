@@ -210,22 +210,25 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
 
   if(reg && bIsValid()) {
 
-    //snprintf(str,len,pCellFormat,reg->get_value());
+    char hex2ascii[] = "0123456789ABCDEF";
 
-    //unsigned int value = reg->get_value();
     RegisterValue value = reg->getRV_notrace();
 
-    if(value.data==INVALID_VALUE || !value.initialized() ) {
+    int i;
+    int min = (len < register_size*2) ? len : register_size*2;
 
-      int i;
-      int min = (len < register_size*2) ? len : register_size*2;
+    if(value.data == INVALID_VALUE)
+      value.init = 0xfffffff;
 
-      for(i=0; i < min; i++)
-	str[i] = '?';
-      str[min] = 0;
-
-    } else
-      snprintf (str, len, pFormat, value.data);
+    for(i=0; i < min; i++) {
+      if(value.init & 0x0f)
+	str[min-i-1] = '?';
+      else
+	str[min-i-1] = hex2ascii[value.data & 0x0f];
+      value.init >>= 4;
+      value.data >>= 4;
+    }
+    str[min] = 0;
 
   } else
     *str = 0;

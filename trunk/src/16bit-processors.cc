@@ -66,111 +66,109 @@ pic_processor *_16bit_processor::construct(void)
 //-------------------------------------------------------------------
 void _16bit_processor :: create_sfr_map(void)
 {
-  //if(verbose)
+  if(verbose)
     cout << "creating 18cxxx common registers\n";
 
   add_file_registers(0x0, 0xf7f, 0);
 
+  RegisterValue porv(0,0);
 
-  add_sfr_register(&pie1,	  0xf9d,0,"pie1");
-  //cout << get_pir1()->name() << '\n';
-  //add_sfr_register(get_pir1(),	  0xf9e,0,"pir1");
-  add_sfr_register(&pir1,	  0xf9e,0,"pir1");
+  add_sfr_register(&pie1,	  0xf9d,porv,"pie1");
+  add_sfr_register(&pir1,	  0xf9e,porv,"pir1");
 
-  add_sfr_register(&ipr1,	  0xf9f,0,"ipr1");
-  add_sfr_register(&pie2,	  0xfa0,0,"pie2");
-  //add_sfr_register(get_pir2(),	  0xfa1,0,"pir2");
-  add_sfr_register(&pir2,	  0xfa1,0,"pir2");
-  add_sfr_register(&ipr2,	  0xfa2,0,"ipr2");
+  add_sfr_register(&ipr1,	  0xf9f,porv,"ipr1");
+  add_sfr_register(&pie2,	  0xfa0,porv,"pie2");
+  add_sfr_register(&pir2,	  0xfa1,porv,"pir2");
+  add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
-  add_sfr_register(&(usart16.rcsta),  0xfab,0,"rcsta");
-  add_sfr_register(&(usart16.txsta),  0xfac,0x02,"txsta");
-  add_sfr_register(&(usart16.txreg),  0xfad,0,"txreg");
-  add_sfr_register(&(usart16.rcreg),  0xfae,0,"rcreg");
-  add_sfr_register(&(usart16.spbrg),  0xfaf,0,"spbrg");
+  add_sfr_register(&(usart16.rcsta),  0xfab,porv,"rcsta");
+  add_sfr_register(&(usart16.txsta),  0xfac,RegisterValue(0x02,0),"txsta");
+  add_sfr_register(&(usart16.txreg),  0xfad,porv,"txreg");
+  add_sfr_register(&(usart16.rcreg),  0xfae,porv,"rcreg");
+  add_sfr_register(&(usart16.spbrg),  0xfaf,porv,"spbrg");
 
-  add_sfr_register(&t3con,	  0xfb1,0,"t3con");
-  add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
-  add_sfr_register(&tmr3h,	  0xfb3,0,"tmr3h");
+  add_sfr_register(&t3con,	  0xfb1,porv,"t3con");
+  add_sfr_register(&tmr3l,	  0xfb2,porv,"tmr3l");
+  add_sfr_register(&tmr3h,	  0xfb3,porv,"tmr3h");
 
-  add_sfr_register(&ccp2con,	  0xfba,0,"ccp2con");
-  add_sfr_register(&ccpr2l,	  0xfbb,0,"ccpr2l");
-  add_sfr_register(&ccpr2h,	  0xfbc,0,"ccpr2h");
-  add_sfr_register(&ccp1con,	  0xfbd,0,"ccp1con");
-  add_sfr_register(&ccpr1l,	  0xfbe,0,"ccpr1l");
-  add_sfr_register(&ccpr1h,	  0xfbf,0,"ccpr1h");
+  add_sfr_register(&ccp2con,	  0xfba,porv,"ccp2con");
+  add_sfr_register(&ccpr2l,	  0xfbb,porv,"ccpr2l");
+  add_sfr_register(&ccpr2h,	  0xfbc,porv,"ccpr2h");
+  add_sfr_register(&ccp1con,	  0xfbd,porv,"ccp1con");
+  add_sfr_register(&ccpr1l,	  0xfbe,porv,"ccpr1l");
+  add_sfr_register(&ccpr1h,	  0xfbf,porv,"ccpr1h");
 
-//   add_sfr_register(&adcon1,	  0xfc1,0,"adcon1");
-//   add_sfr_register(&adcon2,	  0xfc2,0,"adcon2");
-//   add_sfr_register(&adresl,	  0xfc3,0,"adresl");
-//   add_sfr_register(&adresh,	  0xfc4,0,"adres4");
+//   add_sfr_register(&adcon1,	  0xfc1,porv,"adcon1");
+//   add_sfr_register(&adcon2,	  0xfc2,porv,"adcon2");
+//   add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
+//   add_sfr_register(&adresh,	  0xfc4,porv,"adres4");
 
-  add_sfr_register(&ssp.sspcon1,  0xfc5,0,"sspcon1");
-  add_sfr_register(&ssp.sspcon2,  0xfc6,0,"sspcon2");
-  add_sfr_register(&ssp.sspstat,  0xfc7,0,"sspstat");
-  add_sfr_register(&ssp.sspadd,   0xfc8,0,"sspadd");
-  //add_sfr_register(&ssp.sspbuf,   0xfc9,0,"sspbuf");
+  add_sfr_register(&ssp.sspcon1,  0xfc5,porv,"sspcon1");
+  add_sfr_register(&ssp.sspcon2,  0xfc6,porv,"sspcon2");
+  add_sfr_register(&ssp.sspstat,  0xfc7,porv,"sspstat");
+  add_sfr_register(&ssp.sspadd,   0xfc8,porv,"sspadd");
+  //add_sfr_register(&ssp.sspbuf,   0xfc9,porv,"sspbuf");
 
-  add_sfr_register(&t2con,	  0xfca,0,"t2con");
-  add_sfr_register(&pr2,	  0xfcb,0xff,"pr2");
-  add_sfr_register(&tmr2,	  0xfcc,0,"tmr2");
+  add_sfr_register(&t2con,	  0xfca,porv,"t2con");
+  add_sfr_register(&pr2,	  0xfcb,RegisterValue(0xff,0),"pr2");
+  add_sfr_register(&tmr2,	  0xfcc,porv,"tmr2");
 
-  add_sfr_register(&t1con,	  0xfcd,0,"t1con");
-  add_sfr_register(&tmr1l,	  0xfce,0,"tmr1l");
-  add_sfr_register(&tmr1h,	  0xfcf,0,"tmr1h");
+  add_sfr_register(&t1con,	  0xfcd,porv,"t1con");
+  add_sfr_register(&tmr1l,	  0xfce,porv,"tmr1l");
+  add_sfr_register(&tmr1h,	  0xfcf,porv,"tmr1h");
 
-  add_sfr_register(&rcon,	  0xfd0,0,"rcon");
-  add_sfr_register(&wdtcon,	  0xfd1,0,"wdtcon");
-  add_sfr_register(&lvdcon,	  0xfd2,0,"lvdcon");
-  add_sfr_register(&osccon,	  0xfd3,0,"osccon");
+  add_sfr_register(&rcon,	  0xfd0,porv,"rcon");
+  add_sfr_register(&wdtcon,	  0xfd1,porv,"wdtcon");
+  add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
+  add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
   // 0x4 is not defined
-  add_sfr_register(&t0con,	  0xfd5,0x00,"t0con");
-  add_sfr_register(&tmr0l,	  0xfd6,0,"tmr0l");
-  add_sfr_register(&tmr0h,	  0xfd7,0,"tmr0h");
+  add_sfr_register(&t0con,	  0xfd5,porv,"t0con");
+  add_sfr_register(&tmr0l,	  0xfd6,porv,"tmr0l");
+  add_sfr_register(&tmr0h,	  0xfd7,porv,"tmr0h");
   t0con.put(0xff);  /**FIXME - need a way to set this to 0xff at reset*/
 
   add_sfr_register(status,       0xfd8);
 
-  add_sfr_register(&ind2.fsrl,	  0xfd9,0,"fsr2l");
-  add_sfr_register(&ind2.fsrh,    0xfda,0,"fsr2h");
-  add_sfr_register(&ind2.plusw,   0xfdb,0,"plusw2");
-  add_sfr_register(&ind2.preinc,  0xfdc,0,"preinc2");
-  add_sfr_register(&ind2.postdec, 0xfdd,0,"postdec2");
-  add_sfr_register(&ind2.postinc, 0xfde,0,"postinc2");
-  add_sfr_register(&ind2.indf,    0xfdf,0,"indf2");
+  add_sfr_register(&ind2.fsrl,	  0xfd9,porv,"fsr2l");
+  add_sfr_register(&ind2.fsrh,    0xfda,porv,"fsr2h");
+  add_sfr_register(&ind2.plusw,   0xfdb,porv,"plusw2");
+  add_sfr_register(&ind2.preinc,  0xfdc,porv,"preinc2");
+  add_sfr_register(&ind2.postdec, 0xfdd,porv,"postdec2");
+  add_sfr_register(&ind2.postinc, 0xfde,porv,"postinc2");
+  add_sfr_register(&ind2.indf,    0xfdf,porv,"indf2");
 
-  add_sfr_register(&bsr,          0xfe0,0,"bsr");
+  add_sfr_register(&bsr,          0xfe0,porv,"bsr");
 
-  add_sfr_register(&ind1.fsrl,	  0xfe1,0,"fsr1l");
-  add_sfr_register(&ind1.fsrh,    0xfe2,0,"fsr1h");
-  add_sfr_register(&ind1.plusw,   0xfe3,0,"plusw1");
-  add_sfr_register(&ind1.preinc,  0xfe4,0,"preinc1");
-  add_sfr_register(&ind1.postdec, 0xfe5,0,"postdec1");
-  add_sfr_register(&ind1.postinc, 0xfe6,0,"postinc1");
-  add_sfr_register(&ind1.indf,    0xfe7,0,"indf1");
+  add_sfr_register(&ind1.fsrl,	  0xfe1,porv,"fsr1l");
+  add_sfr_register(&ind1.fsrh,    0xfe2,porv,"fsr1h");
+  add_sfr_register(&ind1.plusw,   0xfe3,porv,"plusw1");
+  add_sfr_register(&ind1.preinc,  0xfe4,porv,"preinc1");
+  add_sfr_register(&ind1.postdec, 0xfe5,porv,"postdec1");
+  add_sfr_register(&ind1.postinc, 0xfe6,porv,"postinc1");
+  add_sfr_register(&ind1.indf,    0xfe7,porv,"indf1");
 
   add_sfr_register(W,            0xfe8);
 
-  add_sfr_register(&ind0.fsrl,	  0xfe9,0,"fsr0l");
-  add_sfr_register(&ind0.fsrh,    0xfea,0,"fsr0h");
-  add_sfr_register(&ind0.plusw,   0xfeb,0,"plusw0");
-  add_sfr_register(&ind0.preinc,  0xfec,0,"preinc0");
-  add_sfr_register(&ind0.postdec, 0xfed,0,"postdec0");
-  add_sfr_register(&ind0.postinc, 0xfee,0,"postinc0");
-  add_sfr_register(&ind0.indf,    0xfef,0,"indf0");
+  add_sfr_register(&ind0.fsrl,	  0xfe9,porv,"fsr0l");
+  add_sfr_register(&ind0.fsrh,    0xfea,porv,"fsr0h");
+  add_sfr_register(&ind0.plusw,   0xfeb,porv,"plusw0");
+  add_sfr_register(&ind0.preinc,  0xfec,porv,"preinc0");
+  add_sfr_register(&ind0.postdec, 0xfed,porv,"postdec0");
+  add_sfr_register(&ind0.postinc, 0xfee,porv,"postinc0");
+  add_sfr_register(&ind0.indf,    0xfef,porv,"indf0");
 
-  add_sfr_register(&intcon3, 0xff0, 0,"intcon3");
-  add_sfr_register(&intcon2, 0xff1, 0,"intcon2");
-  add_sfr_register(&intcon,  0xff2, 0,"intcon");
+  add_sfr_register(&intcon3, 0xff0, porv,"intcon3");
+  add_sfr_register(&intcon2, 0xff1, porv,"intcon2");
+  add_sfr_register(&intcon,  0xff2, porv,"intcon");
 
-  add_sfr_register(&prodl, 0xff3, 0,"prodl");
-  add_sfr_register(&prodh, 0xff4, 0,"prodh");
+  add_sfr_register(&prodl, 0xff3, porv,"prodl");
+  add_sfr_register(&prodh, 0xff4, porv,"prodh");
 
-  add_sfr_register(&tbl.tablat,  0xff5, 0,"tablat");
-  add_sfr_register(&tbl.tabptrl, 0xff6, 0,"tabptrl");
-  add_sfr_register(&tbl.tabptrh, 0xff7, 0,"tabptrh");
-  add_sfr_register(&tbl.tabptru, 0xff8, 0,"tabptru");
+  add_sfr_register(&tbl.tablat,  0xff5, porv,"tablat");
+  add_sfr_register(&tbl.tabptrl, 0xff6, porv,"tabptrl");
+  add_sfr_register(&tbl.tabptrh, 0xff7, porv,"tabptrh");
+  add_sfr_register(&tbl.tabptru, 0xff8, porv,"tabptru");
 
   if(pcl)
     delete pcl;
@@ -180,10 +178,10 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(pclath, 0xffa);
   //add_sfr_register(&pclatu, 0xffb);
   stack = &stack16;
-  add_sfr_register(&stack16.stkptr,  0xffc,0,"stkptr");
-  add_sfr_register(&stack16.tosl,    0xffd,0,"tosl");
-  add_sfr_register(&stack16.tosh,    0xffe,0,"tosh");
-  add_sfr_register(&stack16.tosu,    0xfff,0,"tosu");
+  add_sfr_register(&stack16.stkptr,  0xffc,porv,"stkptr");
+  add_sfr_register(&stack16.tosl,    0xffd,porv,"tosl");
+  add_sfr_register(&stack16.tosh,    0xffe,porv,"tosh");
+  add_sfr_register(&stack16.tosu,    0xfff,porv,"tosu");
 
 
   // Initialize all of the register cross linkages

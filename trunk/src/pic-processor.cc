@@ -811,7 +811,7 @@ void pic_processor::create (void)
 // placed in the file register map. 
 
 void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
-				      unsigned int por_value, char *new_name)
+				      RegisterValue por_value, char *new_name)
 {
 
   reg->set_cpu(this);
@@ -823,9 +823,13 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
       if(new_name)
         registers[addr]->new_name(new_name);
 
+      registers[addr]->set_write_trace(Trace::REGISTER_WRITE | (addr << 8));
+      registers[addr]->set_read_trace(Trace::REGISTER_READ | (addr << 8));
+
+
     }
 
-  reg->value.put(por_value);
+  reg->value       = por_value;
   reg->por_value   = por_value;
   reg->wdtr_value  = por_value;
   reg->initialize();

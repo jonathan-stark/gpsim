@@ -339,9 +339,9 @@ unsigned int INDF::get_value(void)
 //--------------------------------------------------
 OPTION_REG::OPTION_REG(void)
 {
-  por_value = 0xff;
-  wdtr_value = 0xff;
-  value.put(0xff);
+  por_value = RegisterValue(0xff,0);
+  wdtr_value = RegisterValue(0xff,0);
+  value = por_value;
   new_name("option");
 }
 

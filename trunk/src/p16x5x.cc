@@ -177,17 +177,17 @@ void P16C54::create_sfr_map(void)
 
   add_sfr_register(&tmr0,  0x01);
 
-  add_sfr_register(pcl,    0x02, 0);
-  add_sfr_register(status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
+  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
   add_sfr_register(fsr,     0x04);
 //alias_file_registers(0x02,0x04,0x80);
 
   add_sfr_register(porta,   0x05);
   add_sfr_register(portb,   0x06);
 
-  add_sfr_register(&option_reg,  0xffffffff, 0xff);
-  add_sfr_register(&trisa,  0xffffffff, 0x1f);
-  add_sfr_register(&trisb,  0xffffffff, 0xff);
+  add_sfr_register(&option_reg,  0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(&trisa,  0xffffffff, RegisterValue(0x1f,0));
+  add_sfr_register(&trisb,  0xffffffff, RegisterValue(0xff,0));
 
   pic_processor::create_symbols();
 
@@ -275,8 +275,8 @@ void P16C55::create_sfr_map(void)
 
   add_sfr_register(&tmr0,  0x01);
 
-  add_sfr_register(pcl,    0x02, 0);
-  add_sfr_register(status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
+  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
   add_sfr_register(fsr,     0x04);
 //alias_file_registers(0x02,0x04,0x80);
 
@@ -284,10 +284,10 @@ void P16C55::create_sfr_map(void)
   add_sfr_register(portb,   0x06);
   add_sfr_register(portc,   0x07);
 
-  add_sfr_register(&option_reg,  0xffffffff, 0xff);
-  add_sfr_register(&trisa,  0xffffffff, 0x0f);
-  add_sfr_register(&trisb,  0xffffffff, 0xff);
-  add_sfr_register(&trisc,  0xffffffff, 0xff);
+  add_sfr_register(&option_reg,  0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(&trisa,  0xffffffff, RegisterValue(0x0f,0));
+  add_sfr_register(&trisb,  0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(&trisc,  0xffffffff, RegisterValue(0xff,0));
 
   pic_processor::create_symbols();
 

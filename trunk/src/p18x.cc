@@ -157,15 +157,15 @@ void P18C2x2::create_sfr_map(void)
   if(verbose)
     cout << "create_sfr_map P18C2x2\n";
 
-  add_sfr_register(&porta,	  0xf80,0,"porta");
-  add_sfr_register(&portb,	  0xf81,0,"portb");
-  add_sfr_register(&portc,	  0xf82,0,"portc");
+  add_sfr_register(&porta,	  0xf80,RegisterValue(0,0),"porta");
+  add_sfr_register(&portb,	  0xf81,RegisterValue(0,0),"portb");
+  add_sfr_register(&portc,	  0xf82,RegisterValue(0,0),"portc");
 
   usart16.initialize_16(this,&pir_set_def,&portc);
 
-  add_sfr_register(&lata,	  0xf89,0,"lata");
-  add_sfr_register(&latb,	  0xf8a,0,"latb");
-  add_sfr_register(&latc,	  0xf8b,0,"latc");
+  add_sfr_register(&lata,	  0xf89,RegisterValue(0,0),"lata");
+  add_sfr_register(&latb,	  0xf8a,RegisterValue(0,0),"latb");
+  add_sfr_register(&latc,	  0xf8b,RegisterValue(0,0),"latc");
 
   porta.latch = &lata;
   portb.latch = &latb;
@@ -175,9 +175,9 @@ void P18C2x2::create_sfr_map(void)
   latb.port = &portb;
   latc.port = &portc;
 
-  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
-  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
-  add_sfr_register(&trisc,	  0xf94,0xff,"trisc");
+  add_sfr_register(&trisa,	  0xf92,RegisterValue(0x7f,0),"trisa");
+  add_sfr_register(&trisb,	  0xf93,RegisterValue(0xff,0),"trisb");
+  add_sfr_register(&trisc,	  0xf94,RegisterValue(0xff,0),"trisc");
 
 }
 
@@ -460,20 +460,20 @@ void P18C4x2::create_sfr_map(void)
   if(verbose)
     cout << "create_sfr_map P18C4x2\n";
 
-  add_sfr_register(&porta,	  0xf80,0,"porta");
-  add_sfr_register(&portb,	  0xf81,0,"portb");
-  add_sfr_register(&portc,	  0xf82,0,"portc");
-  add_sfr_register(&portd,	  0xf83,0,"portd");
-  add_sfr_register(&porte,	  0xf84,0,"porte");
+  add_sfr_register(&porta,	  0xf80,RegisterValue(0,0),"porta");
+  add_sfr_register(&portb,	  0xf81,RegisterValue(0,0),"portb");
+  add_sfr_register(&portc,	  0xf82,RegisterValue(0,0),"portc");
+  add_sfr_register(&portd,	  0xf83,RegisterValue(0,0),"portd");
+  add_sfr_register(&porte,	  0xf84,RegisterValue(0,0),"porte");
 
   //usart16.initialize_16(this,get_pir_set(),&portc);
   usart16.initialize_16(this,&pir_set_def,&portc);
 
-  add_sfr_register(&lata,	  0xf89,0,"lata");
-  add_sfr_register(&latb,	  0xf8a,0,"latb");
-  add_sfr_register(&latc,	  0xf8b,0,"latc");
-  add_sfr_register(&latd,	  0xf8c,0,"latd");
-  add_sfr_register(&late,	  0xf8d,0,"late");
+  add_sfr_register(&lata,	  0xf89,RegisterValue(0,0),"lata");
+  add_sfr_register(&latb,	  0xf8a,RegisterValue(0,0),"latb");
+  add_sfr_register(&latc,	  0xf8b,RegisterValue(0,0),"latc");
+  add_sfr_register(&latd,	  0xf8c,RegisterValue(0,0),"latd");
+  add_sfr_register(&late,	  0xf8d,RegisterValue(0,0),"late");
 
   porta.latch = &lata;
   portb.latch = &latb;
@@ -487,11 +487,11 @@ void P18C4x2::create_sfr_map(void)
   latd.port = &portd;
   late.port = &porte;
 
-  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
-  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
-  add_sfr_register(&trisc,	  0xf94,0xff,"trisc");
-  add_sfr_register(&trisd,	  0xf95,0xff,"trisd");
-  add_sfr_register(&trise,	  0xf96,0x0f,"trise");
+  add_sfr_register(&trisa,	  0xf92,RegisterValue(0x7f,0),"trisa");
+  add_sfr_register(&trisb,	  0xf93,RegisterValue(0xff,0),"trisb");
+  add_sfr_register(&trisc,	  0xf94,RegisterValue(0xff,0),"trisc");
+  add_sfr_register(&trisd,	  0xf95,RegisterValue(0xff,0),"trisd");
+  add_sfr_register(&trise,	  0xf96,RegisterValue(0x0f,0),"trise");
 
 
 }
@@ -649,7 +649,7 @@ void P18F242::create_sfr_map(void)
   // Add eeprom
   add_sfr_register(get_eeprom()->get_reg_eedata(), 0xfa8);
   add_sfr_register(get_eeprom()->get_reg_eeadr(), 0xfa9);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(), 0xfa7);
 
 }
@@ -779,7 +779,7 @@ void P18F442::create_sfr_map(void)
   // Add eeprom
   add_sfr_register(get_eeprom()->get_reg_eedata(), 0xfa8);
   add_sfr_register(get_eeprom()->get_reg_eeadr(), 0xfa9);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(), 0xfa7);
 
 }
@@ -1027,14 +1027,14 @@ void P18F1220::create_sfr_map(void)
   if(verbose)
     cout << "create_sfr_map P18F1220\n";
 
-  add_sfr_register(&porta,	  0xf80,0,"porta");
-  add_sfr_register(&portb,	  0xf81,0,"portb");
+  add_sfr_register(&porta,	  0xf80,RegisterValue(0,0),"porta");
+  add_sfr_register(&portb,	  0xf81,RegisterValue(0,0),"portb");
 
   //usart16.initialize_16(this,get_pir_set(),&porta);
   usart16.initialize_16(this,&pir_set_def,&porta);
 
-  add_sfr_register(&lata,	  0xf89,0,"lata");
-  add_sfr_register(&latb,	  0xf8a,0,"latb");
+  add_sfr_register(&lata,	  0xf89,RegisterValue(0,0),"lata");
+  add_sfr_register(&latb,	  0xf8a,RegisterValue(0,0),"latb");
 
   porta.latch = &lata;
   portb.latch = &latb;
@@ -1042,8 +1042,8 @@ void P18F1220::create_sfr_map(void)
   lata.port = &porta;
   latb.port = &portb;
 
-  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
-  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
+  add_sfr_register(&trisa,	  0xf92,RegisterValue(0x7f,0),"trisa");
+  add_sfr_register(&trisb,	  0xf93,RegisterValue(0xff,0),"trisb");
 
 }
 

@@ -396,6 +396,15 @@ public:
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
+  //
+  // Processor State 
+  //
+  // copy the entire processor state to a file
+  virtual void save_state(FILE *);
+
+  // restore the processor state
+  virtual void load_state(FILE *);
+
   virtual bool load_hex(const char *hex_file)=0;
 
   //
@@ -413,7 +422,7 @@ public:
   virtual void interrupt(void) = 0 ;
 
   virtual void trace_dump(int type, int amount);
-
+  virtual int trace_dump1(int type, char *buffer, int bufsize);
   //
   // Processor Clock control
   //

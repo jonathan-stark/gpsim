@@ -42,7 +42,8 @@ Register::Register(void)
   // For now, initialize the register with valid data and set that data equal to 0.
   // Eventually, the initial value will be marked as 'uninitialized.
 
-  putRV(RegisterValue(0,0));
+  por_value = RegisterValue(0,0);
+  putRV(por_value);
   _xref.assign_data(this);
   read_access_count=0;
   write_access_count=0;
@@ -71,7 +72,7 @@ Register::~Register(void)
 
 unsigned int Register::get(void)
 {
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
   return(value.get());
 }
 
@@ -86,7 +87,7 @@ unsigned int Register::get(void)
 void Register::put(unsigned int new_value)
 {
   value.put(new_value);
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 }
 
 
@@ -164,6 +165,23 @@ void Register::put_value(unsigned int new_value)
 
 }
 
+//-----------------------------------------------------------
+// set_write_trace
+// set_read_trace
+//
+// These functions initialize the trace type to be used for 
+// register reads and writes.
+//
+void Register::set_write_trace(unsigned int wt)
+{
+  write_trace.data = wt;
+  write_trace.init = wt + (Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
+}
+void Register::set_read_trace(unsigned int rt)
+{
+  read_trace.data = rt;
+  read_trace.init = rt + (Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
+}
 
 //--------------------------------------------------
 // member functions for the InvalidRegister class

@@ -224,7 +224,7 @@ public:
   EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
   void add_sfr_register(sfr_register *reg, unsigned int addr,
-			unsigned int por_value=0,char *new_name=0);
+			RegisterValue por_value=RegisterValue(0,0),char *new_name=0);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);

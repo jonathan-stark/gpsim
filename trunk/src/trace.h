@@ -75,24 +75,26 @@ class Trace
     PROGRAM_COUNTER    = (2<<24),
     PROGRAM_COUNTER_2C = (3<<24),
     REGISTER_READ      = (4<<24),
-    REGISTER_WRITE     = (5<<24),
-    BREAKPOINT         = (6<<24),
-    INTERRUPT          = (7<<24),
-    READ_W             = (8<<24),
-    WRITE_W            = (9<<24),
-    _RESET             = (0x0a<<24),
-    PC_SKIP            = (0x0b<<24),
-    WRITE_TRIS         = (0x0c<<24),
-    WRITE_OPTION       = (0x0d<<24),
-    OPCODE_WRITE       = (0x0e<<24),
-    MODULE_TRACE1      = (0x0f<<24),
-    MODULE_TRACE2      = (0x10<<24),
-    CYCLE_INCREMENT    = (0x11<<24),
-    REGISTER_READ_VAL  = (0x12<<24),
-    REGISTER_WRITE_VAL = (0x13<<24),
-    REGISTER_READ_16BITS  = (0x14<<24),
-    REGISTER_WRITE_16BITS = (0x15<<24),
-    LAST_TRACE_TYPE       = (0x16<<24),
+    REGISTER_READ_INIT = (5<<24),
+    REGISTER_WRITE     = (6<<24),
+    REGISTER_WRITE_INIT= (7<<24),
+    BREAKPOINT         = (8<<24),
+    INTERRUPT          = (9<<24),
+    READ_W             = (0x0a<<24),
+    WRITE_W            = (0x0b<<24),
+    _RESET             = (0x0c<<24),
+    PC_SKIP            = (0x0d<<24),
+    WRITE_TRIS         = (0x0e<<24),
+    WRITE_OPTION       = (0x0f<<24),
+    OPCODE_WRITE       = (0x10<<24),
+    MODULE_TRACE1      = (0x11<<24),
+    MODULE_TRACE2      = (0x12<<24),
+    CYCLE_INCREMENT    = (0x13<<24),
+    REGISTER_READ_VAL  = (0x14<<24),
+    REGISTER_WRITE_VAL = (0x15<<24),
+    REGISTER_READ_16BITS  = (0x16<<24),
+    REGISTER_WRITE_16BITS = (0x17<<24),
+    LAST_TRACE_TYPE       = (0x18<<24),
 
     CYCLE_COUNTER_LO   = (0x80<<24),
     CYCLE_COUNTER_HI   = (0x40<<24)
@@ -165,12 +167,29 @@ class Trace
     trace_buffer[trace_index] = REGISTER_READ | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  /*
+  inline void register_readRV (unsigned int address, RegisterValue rv)
+  {
+    trace_buffer[trace_index] = REGISTER_READ | (address << 8) | rv.data;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+    trace_buffer[trace_index] = REGISTER_READ_INIT | (address << 8) | rv.init;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+  */
   inline void register_write (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
+  /*
+  inline void register_writeRV (unsigned int address, RegisterValue rv)
+  {
+    trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | rv.data;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+    trace_buffer[trace_index] = REGISTER_WRITE_INIT | (address << 8) | rv.init;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+  */
 
   inline void register_read_16bits (unsigned int address, unsigned int value)
   {
@@ -290,17 +309,48 @@ class Trace
   int  dump1(unsigned int,char *, int);
   void dump_raw(int n);
 
+  // tbi - trace buffer index masking.
   inline unsigned int tbi(unsigned int index)
   {
     return index & TRACE_BUFFER_MASK;
   }
-  unsigned int type(unsigned int index)
+
+  // inRange - returns true if the trace index i is between the 
+  // indices of low and high. 
+  // It's assumed that the range does not exceed half of the trace buffer
+  bool inRange(unsigned int i, unsigned int low, unsigned int high)
   {
-    return trace_buffer[index & TRACE_BUFFER_MASK] & 0xff000000;
+    i = tbi(i);
+
+    if( low < high) 
+      return (i > low && i < high);
+    // Looks like the range straddles the roll over boundary.
+    return (i > low || i < high);
   }
 
 
-  int is_cycle_trace(unsigned int index);
+  // get() return the trace entry at 'index'
+  inline unsigned int operator [] (unsigned int index)
+  {
+    return trace_buffer[tbi(index)];
+  }
+
+  unsigned int get(unsigned int index)
+  {
+    return trace_buffer[tbi(index)];
+  }
+
+  // type() - return the trace type at 'index'
+  unsigned int type(unsigned int index)
+  {
+    return operator[](index) & 0xff000000;
+  }
+
+  // A gpsim clock cycle takes two consecutive trace buffer entries.
+  // The is_cycle_trace() member function will examine the trace
+  // buffer to determine if the two traces starting at 'index' are
+  // a cycle trace.
+  int is_cycle_trace(unsigned int index, guint64 *cvt_cycle);
 
   bool find_trace(unsigned int start,
 		  unsigned int stop,

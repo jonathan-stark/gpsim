@@ -107,30 +107,30 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(indf,   0x00);
 
   add_sfr_register(&tmr0,  0x01);
-  add_sfr_register(&option_reg,  0x81, 0xff);
+  add_sfr_register(&option_reg,  0x81, RegisterValue(0xff,0));
 
-  add_sfr_register(pcl,    0x02, 0);
-  add_sfr_register(status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
+  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0x3f);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0x3f,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x08);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x88, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x88, RegisterValue(0,0));
 
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x09);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x89);
 
-  add_sfr_register(pclath, 0x8a, 0);
-  add_sfr_register(pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, RegisterValue(0,0));
+  add_sfr_register(pclath, 0x0a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x8b, 0);
-  add_sfr_register(&intcon_reg, 0x0b, 0);
+  add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
 
   intcon = &intcon_reg;
 
