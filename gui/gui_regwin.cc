@@ -1376,6 +1376,9 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       return 0;
   }
   
+  if(!rw->gui_obj.enabled) 
+	  return 0;	   // Don't read registers when hidden. Esp with ICD.
+  
   pic_id = rw->gui_obj.gp->pic_id;
   
   if((reg_number >= MAX_REGISTERS) || (reg_number >= gpsim_get_register_memory_size(pic_id,rw->type)))
@@ -1388,7 +1391,9 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
   range.col0=rw->registers[reg_number]->col;
   range.coli=rw->registers[reg_number]->col;
 
+  gpsim_set_bulk_mode(1);
   new_value=gpsim_get_register_value(pic_id, rw->type,reg_number);
+  gpsim_set_bulk_mode(0);
   last_value=rw->registers[reg_number]->value;
   if(gpsim_get_register_name(pic_id, rw->type,reg_number))
       valid_register=1;
@@ -1667,7 +1672,9 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 	rw->registers[reg_number]->update_full=TRUE;
 	if(gpsim_get_register_name (pic_id, rw->type,reg_number))
 	{
+	    gpsim_set_bulk_mode(1);
 	    rw->registers[reg_number]->value = gpsim_get_register_value(pic_id, rw->type,reg_number);
+	    gpsim_set_bulk_mode(0);
 
 	    /* Now create a cross-reference link that the simulator can use to
 	     * send information back to the gui
@@ -1750,6 +1757,13 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 	((GUI_Object*)rw)->change_view((GUI_Object*)rw,VIEW_SHOW);
     }
 */
+}
+
+static int show_event(GtkWidget *widget,
+                        Register_Window *rw)
+{
+	RegWindow_update(rw);
+    return TRUE;
 }
 
 static int delete_event(GtkWidget *widget,
@@ -1865,6 +1879,9 @@ BuildRegisterWindow(Register_Window *rw)
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), rw);
+
+  gtk_signal_connect(GTK_OBJECT (window), "show",
+		  GTK_SIGNAL_FUNC(show_event), rw);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 

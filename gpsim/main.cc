@@ -38,6 +38,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
 
+#include "../src/pic-processor.h"
+#include "../src/icd.h"
+
 #ifdef HAVE_GUI
 int use_gui=1;
 #else
@@ -77,6 +80,7 @@ static char *pic_name     = "";
 static char *cod_name     = "";
 static char *hex_name     = "";
 static char *search_path  = "";
+static char *icd_port     = "";
 
 struct poptOption optionsTable[] = {
   //  { "help", 'h', 0, 0, 'h',
@@ -93,6 +97,8 @@ struct poptOption optionsTable[] = {
     "gpsim version",0},
   { "cli",'i',0,0,'i',
     "command line mode only",0},
+  { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
+    "use ICD (e.g. -d /dev/ttyS0).",0 },
   POPT_AUTOHELP
   { NULL, 0, 0, NULL, 0, 0 }
 };
@@ -107,17 +113,18 @@ helpme (char *iam)
   printf ("\t-c <stc_file>  : startup command file\n");
   printf ("\t-s <cod_file>  : .cod symbol file\n");
   printf ("\t-L <path list> : colon separated list of directories to search.\n");
+  printf ("\t-d <port>      : Use ICD with serial port <port>\n");
   printf ("\n\t-v             : gpsim version\n");
   printf ("\n Long options:\n\n");
   printf ("\t--cli          : command line mode only\n");
 }
-void usage(poptContext optCon, int exitcode, char *error, char *addl) 
+/*void usage(poptContext optCon, int exitcode, char *error, char *addl) 
 {
   poptPrintUsage(optCon, stderr, 0);
   if (error) 
     fprintf(stderr, "%s: %s", error, addl);
   exit(exitcode);
-}
+}*/
 
 
 
@@ -129,20 +136,14 @@ void welcome(void)
 
 }
 
-
-void 
+int 
 main (int argc, char *argv[])
 {
-
-  FILE *inputfile = stdin, *startup=NULL;
 
   int i;
   int j;
   int c,usage=0;
   char command_str[256];
-  char *b;
-  int architecture;
-  int option_index=0;
   poptContext optCon;   /* context for parsing command-line options */
 
 
@@ -179,6 +180,10 @@ main (int argc, char *argv[])
 	set_search_path (search_path);
 	break;
 
+      case 'd':
+	printf("Use ICD with serial port \"%s\".\n", icd_port);
+	break;
+	
       case 'v':
 	printf("%s\n",VERSION);
 	break;
@@ -199,11 +204,15 @@ main (int argc, char *argv[])
   }
 
 
+  if(poptPeekArg(optCon))
+	  hex_name=strdup(poptPeekArg(optCon));
+  
   initialize_gpsim();
   init_parser();
   initialize_readline();
 
   // initialize the gui
+  
 #ifdef HAVE_GUI
   if(use_gui)
     i = gui_init (argc,argv);
@@ -226,6 +235,7 @@ main (int argc, char *argv[])
 
   if(*hex_name)
     {
+	    printf("Hex file \"%s\"\n",hex_name);
       strcpy(command_str, "load h ");
       strcat(command_str, hex_name);
       parse_string(command_str);
@@ -238,6 +248,13 @@ main (int argc, char *argv[])
       parse_string(command_str);
     }
 
+  if(*icd_port)
+    {
+      strcpy(command_str, "icd open ");
+      strcat(command_str, icd_port);
+      parse_string(command_str);
+    }
+  
   if(*startup_name)
     {
       strcpy(command_str, "load c ");
@@ -266,4 +283,5 @@ main (int argc, char *argv[])
 
   exit_gpsim();
 
+  return 0;
 }

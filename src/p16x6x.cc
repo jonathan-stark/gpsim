@@ -50,8 +50,8 @@ void P16C61::create_sfr_map(void)
   add_sfr_register(&tmr0,  0x01);
   add_sfr_register(&option_reg,  0x81, 0xff);
 
-  add_sfr_register(&pcl,    0x02, 0);
-  add_sfr_register(&status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, 0);
+  add_sfr_register(status, 0x03, 0x18);
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
@@ -61,8 +61,8 @@ void P16C61::create_sfr_map(void)
   add_sfr_register(portb,   0x06);
   add_sfr_register(&trisb,  0x86, 0xff);
 
-  add_sfr_register(&pclath, 0x8a, 0);
-  add_sfr_register(&pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, 0);
+  add_sfr_register(pclath, 0x0a, 0);
 
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
@@ -325,13 +325,13 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(&tmr0,  0x01);
   add_sfr_register(&option_reg,  0x81, 0xff);
 
-  add_sfr_register(&pcl,    0x02, 0);
-  add_sfr_register(&status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, 0);
+  add_sfr_register(status, 0x03, 0x18);
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
-  add_sfr_register(&pclath, 0x8a, 0);
-  add_sfr_register(&pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, 0);
+  add_sfr_register(pclath, 0x0a, 0);
 
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
@@ -549,11 +549,11 @@ void P16C63::create_sfr_map(void)
     }
   }
 
-  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
-  ssp.initialize(this);
+  //add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  //add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  //add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  //add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  //ssp.initialize(this);
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
@@ -766,11 +766,11 @@ void P16C65::create_sfr_map(void)
     }
   }
 
-  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
-  ssp.initialize(this);
+  //add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  //add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  //add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  //add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  //ssp.initialize(this);
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");

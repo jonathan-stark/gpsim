@@ -93,14 +93,14 @@ enum _12BIT_DEFINITIONS
 
   virtual unsigned int get_pclath_branching_jump(void)
     {
-      return ((status.value & pa_bits) << 4);
+      return ((status->value & pa_bits) << 4);
     }
 
   // The modify pcl type instructions execute exactly like call instructions
 
   virtual unsigned int get_pclath_branching_modpcl(void)
     {
-      return ((status.value & pa_bits) << 4);
+      return ((status->value & pa_bits) << 4);
     }
 
   virtual unsigned int get_fsr_value ( unsigned int load_value )

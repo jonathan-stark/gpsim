@@ -414,7 +414,7 @@ unsigned int gpsim_get_status(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return pic->status.get_value();
+  return pic->status->get_value();
 
 }
 //--------------------------------------------------------------------------
@@ -427,7 +427,7 @@ void gpsim_put_status(unsigned int processor_id, unsigned int status_value)
   if(!pic)
       return;
 
-  pic->status.put_value(status_value);
+  pic->status->put_value(status_value);
   
   return;
 
@@ -443,7 +443,7 @@ unsigned int gpsim_get_w(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return pic->W.get_value();
+  return pic->W->get_value();
 
 }
 //--------------------------------------------------------------------------
@@ -455,7 +455,7 @@ void gpsim_put_w(unsigned int processor_id, unsigned int w_value)
   if(!pic)
       return;
   
-  pic->W.put_value(w_value);
+  pic->W->put_value(w_value);
 
   return;
 }
@@ -1537,6 +1537,7 @@ int gpsim_get_hll_mode(unsigned int processor_id)
   return hll_mode;
 }
 
+
 //---------------------------------------------------------------------------
 //   int gpsim_set_hll_mode(unsigned int processor_id, int mode)
 //---------------------------------------------------------------------------
@@ -1547,6 +1548,17 @@ int gpsim_set_hll_mode(unsigned int processor_id, int mode)
   if(mode==1)
     hll_mode=1;
   return hll_mode;
+}
+
+//---------------------------------------------------------------------------
+//   void gpsim_set_bulk_mode(int flag)
+//---------------------------------------------------------------------------
+void gpsim_set_bulk_mode(int flag)
+{
+	if(use_icd)
+	{
+		icd_set_bulk(flag);
+	}
 }
 
 //---------------------------------------------------------------------------

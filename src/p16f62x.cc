@@ -134,8 +134,8 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(&(eeprom->eecon1),  0x9c, 0);
   add_sfr_register(&(eeprom->eecon2),  0x9d);
 
-  add_sfr_register(&pclath, 0x18a, 0);
-  add_sfr_register(&pclath, 0x10a, 0);
+  add_sfr_register(pclath, 0x18a, 0);
+  add_sfr_register(pclath, 0x10a, 0);
 
   add_sfr_register(&intcon_reg, 0x18b, 0);
   add_sfr_register(&intcon_reg, 0x10b, 0);
@@ -222,7 +222,7 @@ void  P16F62x::create(int ram_top)
 
   P16X6X_processor::create_sfr_map();
 
-  status.rp_mask = 0x60;  // rp0 and rp1 are valid.
+  status->rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
   indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
 

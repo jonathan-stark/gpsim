@@ -275,16 +275,16 @@ void ADDWF::execute(void)
 
   source = cpu->register_bank[register_address];
 
-  new_value = (src_value = source->get()) + (w_value = cpu->W.value);
+  new_value = (src_value = source->get()) + (w_value = cpu->W->value);
 
   // Store the result
 
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu->W.put(new_value & 0xff);
+    cpu->W->put(new_value & 0xff);
 
-  cpu->status.put_Z_C_DC(new_value, src_value, w_value);
+  cpu->status->put_Z_C_DC(new_value, src_value, w_value);
 
   cpu->pc->increment();
 
@@ -306,10 +306,10 @@ void ANDLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu->W.value & L;
+  new_value = cpu->W->value & L;
 
-  cpu->W.put(new_value);
-  cpu->status.put_Z(0==new_value);
+  cpu->W->put(new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -332,14 +332,14 @@ void ANDWF::execute(void)
   trace.instruction(opcode);
 
   source = cpu->register_bank[register_address];
-  new_value = source->get() & cpu->W.value;
+  new_value = source->get() & cpu->W->value;
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -521,7 +521,7 @@ void CLRF::execute(void)
   else
     cpu->register_bank[register_address]->put(0);
 
-  cpu->status.put_Z(1);
+  cpu->status->put_Z(1);
 
   cpu->pc->increment();
 }
@@ -550,9 +550,9 @@ void CLRW::execute(void)
 {
 
   trace.instruction(opcode);
-  cpu->W.put(0);
+  cpu->W->put(0);
 
-  cpu->status.put_Z(1);
+  cpu->status->put_Z(1);
   cpu->pc->increment();
 
 }
@@ -576,8 +576,8 @@ void CLRWDT::execute(void)
 
   if(cpu->base_isa() != _16BIT_PROCESSOR_)
     {
-      cpu->status.put_TO(1);
-      cpu->status.put_PD(1);
+      cpu->status->put_TO(1);
+      cpu->status->put_PD(1);
     }
   else {
     static int warned = 0;
@@ -615,9 +615,9 @@ void COMF::execute(void)
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -647,9 +647,9 @@ void DECF::execute(void)
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -679,7 +679,7 @@ void DECFSZ::execute(void)
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
   if(0==new_value)
     cpu->pc->skip();                  // Skip next instruction
@@ -753,10 +753,10 @@ void INCF::execute(void)
   if(destination)
     source->put(new_value);
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -787,7 +787,7 @@ void INCFSZ::execute(void)
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
   if(0==new_value)
     cpu->pc->skip();                  // Skip next instruction
@@ -813,10 +813,10 @@ void IORLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu->W.value | L;
+  new_value = cpu->W->value | L;
 
-  cpu->W.put(new_value);
-  cpu->status.put_Z(0==new_value);
+  cpu->W->put(new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -841,14 +841,14 @@ void IORWF::execute(void)
 
 
   source = cpu->register_bank[register_address];
-  new_value = source->get() | cpu->W.value;
+  new_value = source->get() | cpu->W->value;
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -871,7 +871,7 @@ void MOVLW::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->W.put(L);
+  cpu->W->put(L);
 
   cpu->pc->increment();
 
@@ -903,10 +903,10 @@ void MOVF::execute(void)
   if(destination)
     source->put(source_value);
   else
-    cpu->W.put(source_value);
+    cpu->W->put(source_value);
 
 
-  cpu->status.put_Z(0==source_value);
+  cpu->status->put_Z(0==source_value);
 
   cpu->pc->increment();
 
@@ -933,7 +933,7 @@ void MOVWF::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->register_bank[register_address]->put(cpu->W.get());
+  cpu->register_bank[register_address]->put(cpu->W->get());
 
   cpu->pc->increment();
 }
@@ -993,7 +993,7 @@ void OPTION::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->option_reg.put(cpu->W.get());
+  cpu->option_reg.put(cpu->W->get());
 
   cpu->pc->increment();
 
@@ -1015,7 +1015,7 @@ void RETLW::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->W.put(L);
+  cpu->W->put(L);
 
   cpu->pc->new_address(cpu->stack->pop());
 
@@ -1040,14 +1040,14 @@ void RLF::execute(void)
 
 
   source = cpu->register_bank[register_address];
-  new_value = (source->get() << 1) | cpu->status.get_C();
+  new_value = (source->get() << 1) | cpu->status->get_C();
 
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu->W.put(new_value&0xff);
+    cpu->W->put(new_value&0xff);
 
-  cpu->status.put_C(new_value>0xff);
+  cpu->status->put_C(new_value>0xff);
 
   cpu->pc->increment();
 
@@ -1073,14 +1073,14 @@ void RRF::execute(void)
 
   source = cpu->register_bank[register_address];
   old_value = source->get();
-  new_value = (old_value >> 1) | (cpu->status.get_C() ? 0x80 : 0);
+  new_value = (old_value >> 1) | (cpu->status->get_C() ? 0x80 : 0);
 
   if(destination)
     source->put(new_value&0xff);      // Result goes to source
   else
-    cpu->W.put(new_value&0xff);
+    cpu->W->put(new_value&0xff);
 
-  cpu->status.put_C(old_value&0x01);
+  cpu->status->put_C(old_value&0x01);
 
   cpu->pc->increment();
 
@@ -1102,8 +1102,8 @@ void SLEEP::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->status.put_TO(1);
-  cpu->status.put_PD(0);
+  cpu->status->put_TO(1);
+  cpu->status->put_PD(0);
 
   bp.set_sleep();
 
@@ -1128,16 +1128,16 @@ void SUBWF::execute(void)
 
 
   source = cpu->register_bank[register_address];
-  new_value = (src_value = source->get()) - (w_value = cpu->W.value);
+  new_value = (src_value = source->get()) - (w_value = cpu->W->value);
 
   // Store the result
 
   if(destination)
     source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu->W.put(new_value & 0xff);
+    cpu->W->put(new_value & 0xff);
 
-  cpu->status.put_Z_C_DC_for_sub(new_value, src_value, w_value);
+  cpu->status->put_Z_C_DC_for_sub(new_value, src_value, w_value);
 
   cpu->pc->increment();
 
@@ -1172,7 +1172,7 @@ void SWAPF::execute(void)
   if(destination)
     source->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
   else
-    cpu->W.put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
+    cpu->W->put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
 
   cpu->pc->increment();
 
@@ -1216,7 +1216,7 @@ void TRIS::execute(void)
     {
       // Execute the instruction only if the register is valid.
       if(cpu->base_isa() == _14BIT_PROCESSOR_)
-	cpu->registers[register_address]->put(cpu->W.get());
+	cpu->registers[register_address]->put(cpu->W->get());
       else
 	cpu->tris_instruction(register_address);
     }
@@ -1250,10 +1250,10 @@ void XORLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu->W.value ^ L;
+  new_value = cpu->W->value ^ L;
 
-  cpu->W.put(new_value);
-  cpu->status.put_Z(0==new_value);
+  cpu->W->put(new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 
@@ -1277,14 +1277,14 @@ void XORWF::execute(void)
   trace.instruction(opcode);
 
   source = cpu->register_bank[register_address];
-  new_value = source->get() ^ cpu->W.value;
+  new_value = source->get() ^ cpu->W->value;
 
   if(destination)
     source->put(new_value);      // Result goes to source
   else
-    cpu->W.put(new_value);
+    cpu->W->put(new_value);
 
-  cpu->status.put_Z(0==new_value);
+  cpu->status->put_Z(0==new_value);
 
   cpu->pc->increment();
 

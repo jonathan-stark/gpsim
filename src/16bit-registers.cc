@@ -479,7 +479,7 @@ int Indirect_Addressing::plusw_fsr_value(void)
   fsr_value += fsr_delta;
   fsr_delta = 0;
 
-  unsigned int destination = (fsr_value + cpu->W.value) & _16BIT_REGISTER_MASK;
+  unsigned int destination = (fsr_value + cpu->W->value) & _16BIT_REGISTER_MASK;
   if(is_indirect_register(destination))
     return -1;
   else
@@ -495,8 +495,8 @@ void Fast_Stack::init(_16bit_processor *new_cpu)
 
 void Fast_Stack::push(void)
 {
-  w = cpu->W.value;
-  status = cpu->status.value;
+  w = cpu->W->value;
+  status = cpu->status->value;
   bsr = cpu->bsr.value;
 
 }
@@ -504,8 +504,8 @@ void Fast_Stack::push(void)
 void Fast_Stack::pop(void)
 {
   //cout << "popping fast stack\n";
-  cpu->W.put(w);
-  cpu->status.put(status);
+  cpu->W->put(w);
+  cpu->status->put(status);
   cpu->bsr.put(bsr);
 
 }
@@ -534,7 +534,7 @@ void Program_Counter16::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl.value = value & 0xff;
+  cpu->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -556,7 +556,7 @@ void Program_Counter16::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl.value = value & 0xff;
+  cpu->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -572,7 +572,7 @@ void Program_Counter16::jump(unsigned int new_address)
 
   value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -595,7 +595,7 @@ void Program_Counter16::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -623,7 +623,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   trace.cycle_increment();
   trace.program_counter(value<<1);
 
-  cpu->pcl.value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -641,7 +641,7 @@ void Program_Counter16::new_address(unsigned int new_value)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   cpu->cycles.increment();
   cpu->cycles.increment();
 }
@@ -666,31 +666,31 @@ void Program_Counter16::put_value(unsigned int new_value)
   cout << "Program_Counter16::put_value 0x" << hex << new_value << '\n';
 
   value = (new_value >> 1) & memory_size_mask;
-  cpu->pcl.value = value & 0xff;
-  cpu->pclath.value = (new_value >> 8) & 0xff;
+  cpu->pcl->value = value & 0xff;
+  cpu->pclath->value = (new_value >> 8) & 0xff;
 
   trace.program_counter(value << 1);
 
   if(xref)
     {
-      if(cpu->pcl.xref)
-	cpu->pcl.xref->update();
-      if(cpu->pclath.xref)
-	cpu->pclath.xref->update();
+      if(cpu->pcl->xref)
+	cpu->pcl->xref->update();
+      if(cpu->pclath->xref)
+	cpu->pclath->xref->update();
 	xref->update();
     }
   
 
 #if 0
   value = new_value & memory_size_mask;
-  cpu->pcl.value = value & 0xff;
-  cpu->pclath.value = (new_value >> 8) & 0xff;
+  cpu->pcl->value = value & 0xff;
+  cpu->pclath->value = (new_value >> 8) & 0xff;
   //  cpu16->pclatu.value = (new_value >> 16) & 0xff;
 
   if(xref)
     {
-      cpu->pcl.xref->update();
-      cpu->pclath.xref->update();
+      cpu->pcl->xref->update();
+      cpu->pclath->xref->update();
       //update_object(cpu16->pclatu.gui_xref,cpu->pclatu.value);
       xref->update();
     }

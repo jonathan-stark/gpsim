@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
-#include "ssp.h"
+// #include "ssp.h"
 
 class INTCON_P16C6x : public INTCON
 {
@@ -172,7 +172,7 @@ class P16C63 : public  P16C62
   public:
 
   USART_MODULE14 usart;
-  SSP_MODULE14   ssp;
+  //SSP_MODULE14   ssp;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C63_;};
   virtual void create_symbols(void);
@@ -221,7 +221,7 @@ class P16C65 : public  P16C64
   public:
 
   USART_MODULE14 usart;
-  SSP_MODULE14   ssp;
+  //SSP_MODULE14   ssp;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C65_;};
   virtual void create_symbols(void);

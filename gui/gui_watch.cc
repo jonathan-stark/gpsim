@@ -594,7 +594,8 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
     entry = (struct watch_entry*) xref->data;
     ww  = (Watch_Window *) (xref->parent_window);
 
-    update(ww,entry,new_value);
+    //    update(ww,entry,new_value);
+    WatchWindow_update(ww);
 }
 
 void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address)

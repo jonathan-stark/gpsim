@@ -107,7 +107,7 @@ void WDT::callback(void)
     update();
 
     // The TO bit gets cleared when the WDT times out.
-    cpu->status.put_TO(0);
+    cpu->status->put_TO(0);
 
     if(break_point)
       bp.halt();

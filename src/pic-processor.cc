@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p12x.h"
 #include "p17c75x.h"
 #include "p18x.h"
+#include "icd.h"
 
 #include "16bit-instructions.h" // this is only needed for pma class
 
@@ -59,6 +60,16 @@ guint64 simulation_start_cycle;
 
 // don't print out a bunch of garbage while initializing
 int     verbose=0;
+
+#ifdef HAVE_GUI
+#include <gtk/gtk.h>
+extern int use_gui;
+void gui_refresh(void)
+{
+	while(gtk_events_pending())
+		gtk_main_iteration();
+}
+#endif
 
 // Number of simulation cycles between calls to refresh the gui
 guint64 gui_update_rate = DEFAULT_GUI_UPDATE_RATE;
@@ -502,6 +513,23 @@ void pic_processor::pm_write (void)
 
 void pic_processor::run (void)
 {
+  if(use_icd)
+  {
+      simulation_mode=RUNNING;
+      icd_run();
+      while(!icd_stopped())
+      {
+#ifdef HAVE_GUI
+	  if(use_gui)
+	      gui_refresh();
+#endif
+      }
+      simulation_mode=STOPPED;
+      disassemble(pc->get_value(), pc->get_value());
+      gi.simulation_has_stopped();
+      return;
+  }
+
 
   if(simulation_mode != STOPPED) {
     if(verbose)
@@ -556,6 +584,18 @@ void pic_processor::run (void)
 void pic_processor::step (unsigned int steps)
 {
 
+  if(use_icd)
+  {
+      if(steps!=1)
+      {
+	  cout << "Can only step one step in ICD mode"<<endl;
+      }
+      icd_step();
+      pc->get_value();
+      disassemble(pc->value, pc->value); // FIXME, don't want this in HLL ICD mode.
+      gi.simulation_has_stopped();
+      return;
+  }
 
   if(simulation_mode != STOPPED) {
     if(verbose)
@@ -667,6 +707,15 @@ void pic_processor::run_to_address (unsigned int destination)
 void pic_processor::reset (RESET_TYPE r)
 {
 
+  if(use_icd)
+  {
+      puts("RESET");
+      icd_reset();
+      disassemble(pc->get_value(), pc->get_value());
+      gi.simulation_has_stopped();
+      return;
+  }
+
   if(r == SOFT_RESET)
     {
       trace.reset(r);
@@ -689,8 +738,8 @@ void pic_processor::reset (RESET_TYPE r)
 
   if(r == POR_RESET)
     {
-      status.put_TO(1);
-      status.put_PD(1);
+      status->put_TO(1);
+      status->put_PD(1);
 
       if(verbose) {
 	cout << "POR\n";
@@ -700,7 +749,7 @@ void pic_processor::reset (RESET_TYPE r)
 	wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
     }
   else if (r==WDT_RESET)
-    status.put_TO(0);
+    status->put_TO(0);
 
   gi.simulation_has_stopped();
 }
@@ -748,7 +797,6 @@ void pic_processor::disassemble (int start_address, int end_address)
 	cout << "==>";
       else
 	cout << "   ";
-
       inst = program_memory[i];
 
       // Breakpoints replace the program memory with an instruction that has
@@ -923,15 +971,22 @@ void pic_processor::create (void)
   //  cycles.cpu = this;
   wdt.cpu = this;
 
-  W.new_name("W");
-
+  W = new WREG;
+  W->cpu=this;
+  pcl = new PCL;
+  pclath = new PCLATH;
+  status = new Status_register;
+  //FIXME more
+  
+  W->new_name("W");
+  
   fsr = new FSR;
   indf = new INDF;
 
   fsr->new_name("fsr");
 
   register_bank = &registers[0];  // Define the active register bank 
-  W.value = 0;
+  W->value = 0;
 
   //set_frequency(10e6);            // 
   nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
@@ -1229,7 +1284,7 @@ void pic_processor::create_symbols (void)
     }
 
   // now add a special symbol for W
-  symbol_table.add_w(this, &W);
+  symbol_table.add_w(this, W);
 
 }
 

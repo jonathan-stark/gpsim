@@ -169,8 +169,8 @@ void P16C54::create_sfr_map(void)
 
   add_sfr_register(&tmr0,  0x01);
 
-  add_sfr_register(&pcl,    0x02, 0);
-  add_sfr_register(&status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, 0);
+  add_sfr_register(status, 0x03, 0x18);
   add_sfr_register(fsr,     0x04);
 //alias_file_registers(0x02,0x04,0x80);
 
@@ -240,11 +240,11 @@ void P16C54::tris_instruction(unsigned int tris_register)
    switch (tris_register)
    {
       case 5:
-        trisa.value = W.value;
+        trisa.value = W->value;
         trace.write_TRIS(trisa.value);
         break;
       case 6:
-        trisb.value = W.value;
+        trisb.value = W->value;
         trace.write_TRIS(trisb.value);
         break;
       default:
@@ -269,8 +269,8 @@ void P16C55::create_sfr_map(void)
 
   add_sfr_register(&tmr0,  0x01);
 
-  add_sfr_register(&pcl,    0x02, 0);
-  add_sfr_register(&status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, 0);
+  add_sfr_register(status, 0x03, 0x18);
   add_sfr_register(fsr,     0x04);
 //alias_file_registers(0x02,0x04,0x80);
 
@@ -343,15 +343,15 @@ void P16C55::tris_instruction(unsigned int tris_register)
    switch (tris_register)
    {
       case 5:
-        trisa.value = W.value;
+        trisa.value = W->value;
         trace.write_TRIS(trisa.value);
         break;
       case 6:
-        trisb.value = W.value;
+        trisb.value = W->value;
         trace.write_TRIS(trisb.value);
         break;
       case 7:
-        trisc.value = W.value;
+        trisc.value = W->value;
         trace.write_TRIS(trisc.value);
         break;
       default:
