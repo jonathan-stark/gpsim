@@ -60,18 +60,13 @@ cmd_x::cmd_x(void)
 
 void cmd_x::x(void)
 {
-
   dump.dump(cmd_dump::DUMP_RAM);
-  dump.dump(cmd_dump::DUMP_SFRS);
   if(cpu)
     cpu->dump_registers();
-
 }
 
 void cmd_x::x(int reg)
 {
-
-
   if(!cpu)
     return;
 
@@ -88,9 +83,6 @@ void cmd_x::x(int reg)
        << ov.data 
        << " = 0b" << cpu->registers[reg]->toBitStr(str,sizeof(str))
        << endl;
-
-
-
 }
 
 void cmd_x::x(int reg, int val)
