@@ -31,6 +31,7 @@ Here's where all of the pic packages are defined
 
 #include "gpsim_classes.h"
 
+class IOPIN; // forward reference
 
 enum PACKAGE_TYPE
 {

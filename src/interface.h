@@ -250,9 +250,6 @@ typedef struct _sym
   unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id,
 						   unsigned int file_id,
 						   unsigned int line);
-  char *gpsim_get_opcode_name(Processor *cpu,
-			      unsigned int address,
-			      char *buffer);
   unsigned int gpsim_get_opcode(unsigned int processor_id,
 				unsigned int address);
   void gpsim_put_opcode(unsigned int processor_id,

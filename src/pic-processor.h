@@ -27,6 +27,14 @@ Boston, MA 02111-1307, USA.  */
 #include "modules.h"
 #include "processor.h"
 
+#include "pic-registers.h"
+
+#include "pic-instructions.h"
+#include "14bit-registers.h"
+#include "pic-packages.h"
+//#include "eeprom.h"
+
+class EEPROM;
 
 extern SIMULATION_MODES simulation_mode;
 
@@ -164,8 +172,6 @@ extern guint64 gui_update_rate; // The rate (in simulation cycles) at which the 
  * First, forward-declare a few class references
  */
 
-#include "trace.h"
-#include "pic-registers.h"
 enum IOPIN_TYPES
 {
   INPUT_ONLY,          // e.g. MCLR
@@ -174,13 +180,6 @@ enum IOPIN_TYPES
   OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
 };
 
-#include "pic-instructions.h"
-#include "12bit-instructions.h"
-#include "14bit-registers.h"
-#include "14bit-instructions.h"
-#include "gpsim_interface.h"
-#include "pic-packages.h"
-#include "eeprom.h"
 
 class processor_types
 {
@@ -251,8 +250,6 @@ public:
 
   // A couple of functions for manipulating  breakpoints
 
-  void init_register_memory(unsigned int memory_size);
-  //  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
   virtual void tris_instruction(unsigned int tris_register) {return;};

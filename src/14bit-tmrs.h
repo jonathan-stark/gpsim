@@ -21,10 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __14_BIT_TMRS_H__
 #define __14_BIT_TMRS_H__
 
-#include "pic-processor.h"
-#include "trace.h"
-#include "14bit-processors.h"
-#include "pir.h"
+#include "pic-registers.h"
 
 class IOPIN;
 
@@ -33,6 +30,9 @@ class TMRH;
 class TMR2;
 class CCPRL;
 class ADCON0;
+class PIR_SET;
+
+class _14bit_processor;
 
 //---------------------------------------------------------
 // Todo
@@ -152,11 +152,7 @@ enum
 
   T1CON(void);
 
-  unsigned int get(void)
-    {
-      trace.register_read(address,value);
-      return(value);
-    }
+  unsigned int get(void);
 
   // For (at least) the 18f family, there's a 4X PLL that effects the
   // the relative timing between gpsim's cycle counter (which is equivalent
@@ -165,10 +161,8 @@ enum
   // However, for the 18f parts, the instructions execute 4 times faster when
   // the PLL is selected.
 
-  virtual unsigned int get_prescale(void)
-    {
-      return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
-    }
+  virtual unsigned int get_prescale(void);
+
   unsigned int get_tmr1cs(void)
     {
       return(value & TMR1CS);
@@ -357,10 +351,7 @@ public:
   CCPCON *ccp2con;
 
   virtual void callback(void);
-  virtual void callback_print(void) {
-    cout << "TMR2 " << name() << " CallBack ID " << CallBackID << '\n';
-  }
-
+  virtual void callback_print(void);
   TMR2(void);
 
   void put(unsigned int new_value);

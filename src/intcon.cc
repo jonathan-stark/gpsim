@@ -22,9 +22,11 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>	// for guint64
 #include <assert.h>
 
+#include "intcon.h"
+
+
 #include "gpsim_classes.h"	// for RESET_TYPE
 #include "trace.h"
-#include "intcon.h"
 #include "pir.h"
 #include "16bit-registers.h"
 #include "16bit-processors.h"

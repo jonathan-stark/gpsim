@@ -32,6 +32,9 @@ extern "C"
 {
 #include "lxt_write.h"
 }
+
+class pic_processor;
+
 //---------------------------------------------------------
 // Class for trace buffer
 

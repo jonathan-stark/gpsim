@@ -96,7 +96,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   if(verbose)
     cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
 
-  registers = (Register **) new char[sizeof (file_register *) * memory_size];
+  registers = (Register **) new char[sizeof (Register *) * memory_size];
 
   if (registers  == NULL)
     {
@@ -111,6 +111,9 @@ void Processor::init_register_memory (unsigned int memory_size)
 
   register_bank = registers;
 
+  rma.set_cpu(this);
+  rma.set_Registers(registers, memory_size);
+  
   // Make all of the file registers 'undefined' (each processor derived from this base
   // class defines its own register mapping).
 
@@ -1061,6 +1064,8 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 RegisterMemoryAccess::RegisterMemoryAccess(void)
 {
   cpu = NULL;
+  registers = NULL;
+  nRegisters = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -1068,10 +1073,10 @@ RegisterMemoryAccess::RegisterMemoryAccess(void)
 Register *RegisterMemoryAccess::get_register(unsigned int address)
 {
 
-  if(!cpu || !cpu->registers || cpu->register_memory_size()<=address)
+  if(!cpu || !registers || nRegisters<=address)
     return NULL;
 
-  return cpu->registers[address];
+  return registers[address];
 
 }
 

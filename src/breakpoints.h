@@ -21,17 +21,14 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef  __BREAKPOINTS_H__
 #define  __BREAKPOINTS_H__
-#include "gpsim_classes.h"
+
 #include "pic-instructions.h"
-#include "pic-registers.h"
-#include "icd.h"
-
+#include "registers.h"
 #include  <iostream>
-
 #include <unistd.h>
 #include <glib.h>
 
-
+class invalid_file_register;
 
 
 #define MAX_BREAKPOINTS 0x400
@@ -185,13 +182,7 @@ struct BreakStatus
   unsigned int set_notify_write_value(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
 
   inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
-  inline void halt(void) {
-      if(use_icd) {
-	  icd_halt();
-	  return;
-      }
-      global_break |= GLOBAL_STOP_RUNNING;
-  };
+  void halt(void);
   inline bool have_halt(void) { return( (global_break & GLOBAL_STOP_RUNNING) != 0 );};
   inline void clear_halt(void) {global_break &= ~GLOBAL_STOP_RUNNING;};
   inline bool have_interrupt(void) { return( (global_break & GLOBAL_INTERRUPT) != 0 );};

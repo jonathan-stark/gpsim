@@ -48,7 +48,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p18x.h"
 #include "icd.h"
 
-#include "16bit-instructions.h" // this is only needed for pma class
+//#include "16bit-instructions.h" // this is only needed for pma class
 
 #include "xref.h"
 
@@ -1042,39 +1042,6 @@ void pic_processor::init_program_memory (unsigned int memory_size)
   Processor::init_program_memory(memory_size);
 }
 
-//-------------------------------------------------------------------
-//
-void pic_processor::init_register_memory (unsigned int memory_size)
-{
-
-  if(verbose)
-    cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
-
-  // Allocate enough memory for the entire register space (e.g. 256 registers for 14-bit core)
-
-  registers = (Register **) new char[sizeof (Register *) * memory_size];
-
-  if (registers  == NULL)
-    {
-      cout << "*** ERROR *** I can't get enough memory for the PIC register space\n";
-      exit (1);
-    }
-
-  // The register_bank points to the currently active bank of registers as defined
-  // by the paging bits in the status register. Most of the pics have only 2 banks,
-  // however some of the 5x parts have 4 and there's a possibility that this could
-  // increase to 8 (if it hasn't already).
-
-  register_bank = registers;
-
-  // Make all of the file registers 'undefined' (each processor derived from this base
-  // class defines its own register mapping).
-
-  for (int i = 0; i < memory_size; i++)
-    registers[i] = NULL;
-
-
-}
 //-------------------------------------------------------------------
 //
 // Add a symbol table entry for each one of the sfr's

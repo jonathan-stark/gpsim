@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "../src/14bit-processors.h"
 #include "../src/interface.h"
+#include "../src/eeprom.h"
 
 cmd_dump dump;
 

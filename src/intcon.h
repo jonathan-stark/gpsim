@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>		// for cout used in breakpoints.h
 //using namespace std;
 #include "pic-registers.h"	// for sfr_register
-#include "breakpoints.h"	// for global bp definition!
+//#include "breakpoints.h"	// for global bp definition!
 
 //---------------------------------------------------------
 // INTCON - Interrupt control register
@@ -57,7 +57,7 @@ enum
   // which bit 6 enables becomes true. (e.g. for the c84, this
   // routine is called when EEIF goes high.)
   */
-  inline void peripheral_interrupt(void);
+  void peripheral_interrupt(void);
 
   inline void set_gie(void)
     {

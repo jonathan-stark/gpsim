@@ -1,3 +1,6 @@
+2004-01-29  Scott Dattalo  <scott@dattalo.com>
+	* almost all source files - trying to sort out include dependencies
+	
 2004-01-28  Scott Dattalo  <scott@dattalo.com>
 	* src/pir.h moved all of the PIR*::put()'s to the PIR base class
 	* src/intcon.h, src/intcon.cc moved inline functions that called

@@ -58,6 +58,10 @@ struct Module_Pin {
  * Helper functions
  *
  *****************************************************************************/
+class Module;
+class Module_Types;
+class ModuleInterface;
+
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();
 

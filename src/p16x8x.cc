@@ -38,6 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 
 #include "stimuli.h"
+#include "eeprom.h"
 
 #include "p16x8x.h"
 

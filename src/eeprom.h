@@ -27,9 +27,9 @@ Boston, MA 02111-1307, USA.  */
 #include "breakpoints.h"
 #include "intcon.h"
 #include "pir.h"
-#include "pic-processor.h"
+//#include "pic-processor.h"
 
-
+class pic_processor;
 class EEPROM;
 
 //---------------------------------------------------------
