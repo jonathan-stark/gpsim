@@ -220,4 +220,15 @@ class ProcessorInterface : public ModuleInterface
 
 };
 
+class ISimConsole;
+
+#define GPSIM_GETCOMMANDHANDLER "GetCommandHandler"
+typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
+
+class ICommandHandler {
+public:
+  virtual char *GetName(void) = 0;
+  virtual int Execute(const char * commandline, ISimConsole *out) = 0;
+};
+
 #endif // __GPSIM_INTERFACE_H__

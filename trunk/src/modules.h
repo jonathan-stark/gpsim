@@ -36,7 +36,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
-#include "../cli/cmd_gpsim.h"
 
 class Module;
 class Module_Types;
@@ -45,6 +44,7 @@ class IOPIN;
 class XrefObject;
 class Value;
 class Package;
+class ICommandHandler;
 
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();

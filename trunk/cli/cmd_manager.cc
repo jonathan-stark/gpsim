@@ -5,7 +5,7 @@
 CGpsimConsole::CGpsimConsole(FILE*) {
 }
 
-void CGpsimConsole::printf(const char *fmt, ...) {
+void CGpsimConsole::Printf(const char *fmt, ...) {
   va_list ap;
 
   va_start(ap,fmt);
@@ -13,16 +13,20 @@ void CGpsimConsole::printf(const char *fmt, ...) {
   va_end(ap);
 }
 
-void CGpsimConsole::vprintf(const char *fmt, va_list argptr) {
+void CGpsimConsole::VPrintf(const char *fmt, va_list argptr) {
   vfprintf(m_pfOut, fmt, argptr);
 }
 
-void CGpsimConsole::puts(const char*s) {
+void CGpsimConsole::Puts(const char*s) {
   fputs(s, m_pfOut);
 }
 
-void CGpsimConsole::putc(const char c) {
+void CGpsimConsole::Putc(const char c) {
   fputc(c, m_pfOut);
+}
+
+char* CGpsimConsole::Gets(char *s, int size) {
+  return fgets(s, size, m_pfIn);
 }
 
 void CGpsimConsole::SetOut(FILE *pOut) {
@@ -31,10 +35,6 @@ void CGpsimConsole::SetOut(FILE *pOut) {
 
 void CGpsimConsole::SetIn(FILE *pIn) {
   m_pfIn = pIn;
-}
-
-char* CGpsimConsole::gets(char *s, int size) {
-  return fgets(s, size, m_pfIn);
 }
 
 

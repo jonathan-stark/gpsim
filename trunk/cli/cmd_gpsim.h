@@ -13,19 +13,11 @@
 
 class ISimConsole {
 public:
-  virtual void printf(const char *fmt, ...) = 0;
-  virtual void vprintf(const char *fmt, va_list argptr) = 0;
-  virtual void puts(const char*) = 0;
-  virtual void putc(const char) = 0;
-  virtual char* gets(char *, int) = 0;
+  virtual void Printf(const char *fmt, ...) = 0;
+  virtual void VPrintf(const char *fmt, va_list argptr) = 0;
+  virtual void Puts(const char*) = 0;
+  virtual void Putc(const char) = 0;
+  virtual char* Gets(char *, int) = 0;
 };
 
-class ICommandHandler {
-public:
-  virtual char *GetName(void) = 0;
-  virtual int Execute(const char * commandline, ISimConsole *out) = 0;
-};
-
-#define GPSIM_GETCOMMANDHANDLER "GetCommandHandler"
-typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
 #endif
