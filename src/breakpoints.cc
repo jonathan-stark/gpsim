@@ -436,7 +436,7 @@ void Breakpoints::clear(unsigned int b)
 
   if(b<MAX_BREAKPOINTS) {
 
-    BreakStatus bs = break_status[b];   // 
+    BreakStatus &bs = break_status[b];   // 
 
     if(bs.bpo) {
 
@@ -549,8 +549,8 @@ void Breakpoints::clear_all(Processor *c)
 
   for(int i=0; i<MAX_BREAKPOINTS; i++)
     {
-      if(c == break_status[i].cpu)
-	clear(i);
+      if(c == break_status[i].cpu && break_status[i].type != BREAK_CLEAR)
+      	clear(i);
     }
 
 }
