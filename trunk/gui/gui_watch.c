@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/errno.h>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -738,3 +742,5 @@ int CreateWatchWindow(GUI_Processor *gp)
   
   return 1;
 }
+
+#endif // HAVE_GUI

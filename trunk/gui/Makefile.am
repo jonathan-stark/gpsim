@@ -9,7 +9,8 @@ libgui_la_SOURCES =  gui_break.c gui_callbacks.c gui_dialog.c gui_init.c gui_mai
 	gui_src_opcode.c gui_statusbar.c gui.h gui_callbacks.h gui_interface.h \
 	gui_symbols.c gui_watch.c gui_breadboard.c
 
-libgui_la_LDFLAGS = $(shell gtk-config --libs) $(shell gtkextra-config --libs)
+#libgui_la_LDFLAGS = $(shell gtk-config --libs) $(shell gtkextra-config --libs)
+libgui_la_LDFLAGS = @X_LDFLAGS@ @Y_LDFLAGS@
 
 pixmapdir = $(datadir)/gpsim
 

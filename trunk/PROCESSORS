@@ -1,4 +1,4 @@
-gpsim-0.17.0
+gpsim-0.18.0
 
 Here's a list of supported processors:
 
@@ -29,6 +29,7 @@ Here's a list of supported processors:
 
 16c84, 16f84, 16cr84
 
+16f874, 16f877 *
 
 16bit:
 -----

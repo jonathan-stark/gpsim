@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/errno.h>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -158,3 +162,4 @@ void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp)
   StatusBar_update(sbw);
 
 }
+#endif // HAVE_GUI

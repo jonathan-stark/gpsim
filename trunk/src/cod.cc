@@ -39,9 +39,8 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_GUI
 #include "../gui/gui_interface.h"
-#endif
-
 extern "C" { void gui_new_program (unsigned int); }
+#endif
 
 static FILE *codefile = NULL;
 static FILE *lstfp = NULL;

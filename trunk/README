@@ -10,9 +10,20 @@ Please see the PROCESSORS file to see a list of supported processors.
 Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
 Please see COPYING for the GPL.
 
-gpsim-0.18.0 new stuff:
+gpsim-0.19.0 new stuff:
 
-03FEB00 gpsim-0.18.0
+XXAPR00 gpsim-0.19.0
+ o Added 16f87x family
+ o gui - Added Program Memory sheet
+    --  Added support for program memory writes
+ o gui - Added Breadboard window (graphical pinout)
+ o Asynchronous mode of the usart fixed.
+ o A/D converter enhanced
+ o Analog Stimuli revisited.
+ o Scripting was fixed.
+
+
+
  o cli - added 'processor pins' command to display
          the state of a pic's I/O pins
  o cli - added 'set' command for modifying gpsim behavior
@@ -27,6 +38,7 @@ gpsim-0.18.0 new stuff:
    -- MULLW & MULWF instructions are now supported
    -- configuration word support
    -- tmr0 interrupt
+
  o Cycle counter - 64 bits is now fully supported
  o config word bug fixed
  o gui - added Watch window
@@ -44,64 +56,54 @@ gpsim-0.18.0 new stuff:
  o __config word for 18cxxx family is now supported 
 
 
+16f87x
+------
 
-processor pins
---------------
+The 16f87x series is rapidly proving to be a popular processor. So naturally, gpsim needs to support it. The major changes needed to accomodate were in the program memory writes for the 14bit core and greater than two register memory banks support. Minor changes included abstracting the data eeprom/flash logic somewhat (it was hardcoded for the 16x84 devices).
 
-A new option, 'pins', has been added to the processor command. This will display the pin out of the pic being simulated and indicate the state of each pin. The pin names shown are those assigned by gpsim (expect an option to have this user editable though). The state of the pins is indicated by 'H' or 'L'. Although I don't currently have plans to, I think that it be neat to see the voltage levels at the pins too. This would be useful when there are stimuli present or perhaps when analog inputs are being simulated.
-
-  +--+---------\/---------+--+
-L | 1| porta2      porta1 |18| L
-L | 2| porta3      porta0 |17| L
-L | 3| porta4             |16|
-  | 4|                    |15|
-  | 5|                    |14|
-H | 6| portb0      portb7 |13| H
-H | 7| portb1      portb6 |12| H
-H | 8| portb2      portb5 |11| H
-H | 9| portb3      portb4 |10| H
-  +--+--------------------+--+
-
-'set' command
--------------
-A new cli command 'set' has been added. This command is similar to gdb's set command. The purpose is to give you the ability to control gpsim's behavior. So far only two set options are provided:
-  v | verbose  - Making this non-zero will cause gpsim to spew diagnostic information.
-  r | radix - not support yet, but is intended to control the format of both the input and output of numeric data.
-  gui_update - 
-
-New 18cxxx instructions
------------------------
-The 18cxxx instruction set is now fully supported. The TBLRD, TBLWRT, MULLW, and MULWF instructions were added.
-
-64-bit cycle counter
+Program Memory sheet
 --------------------
-Version 0.17.0 haphazardly added support for a 64-bit cycle counter. This version completes the work started there (actually I totally re-did the work). The cycle counter, as you may recall, is a gpsim register that keeps track of the total tcyc (instruction cycles). It serves as the basis for gpsim's time subsystem. Only 62 of the 64 bits are used (the other two are needed for the trace buffer) thus giving gpsim 2^62 simulation cycles before it will crash. For a 20Mhz pic, it would take about 29,247 years to get through that many cycles! 
 
-config word
------------
-I think the config word bug has been fixed once and for all! Recent versions were unable to use the config word supplied by the .cod file (.hex files were okay). In the process of fixing this bug, I also stream lined the way code is read from a file and stored into the simulated cpu's program memory.
+Now the program memory may displayed like register memory. Ralf has modified the disassembly window into a notebook window with two tabs. One tab is like the previous disassembly window ( a listing of the disassembled hex file (no symbols)). The other tab is a matrix that contains the instruction opcodes. This window allows you to modify the program memory opcodes.
 
+"Breadboard" window (or pinout window)
+--------------------------------------
+Ralf has added a new window that displays the pin out of the pic. All of the pins along with their names, states (high or low), and directions (in or out) are shown. The pin directions are shown with a arrow. If the arrow is pointing toward the pic then the pin is an input other wise it's an output. The states of the pins are shown in two ways. First the color of the arrows reflect the states, a green is low and a red is high. Additionally, an 'L' or an 'H' is placed next to the pin. The 'L' and 'H' are hot - if you double click these the pins will toggle states. The pin directions are hot too; double clicking on the arrows will toggle the pin directions.
 
-gui
----
+Limitations:
+1) Pin numbers are not shown
+2) Packages are shown as dip packages only (gpsim doesn't support quad packages).
 
-Ralf has again made numerous enhancements to the gui. Most notably is the Watch Window. The watch window will give you the capability to focus on specific registers. The registers are listed one per line in a watch window list and the register name, address, value (dec and hex and binary) are all displayed. You can click on a bit field to toggle its state. And it probably goes without mentioning, but changes made in the watch window are propogate throughout all of gpsim (even if you change the indirect registers too).
+USART fix
+---------
 
-New context coloring has been added to the register window viewer (enhancing the already present context coloring). Special function registers show up in different colors than those for the regular file registers (i.e. the ram).
+The newly added usart peripheral had several bugs. For example, the receive pin was taking only one sample and that sample was occuring synchronous to the tx pin driving. This version better mimicks a real usart. The receiver will not sample until a start bit is received, and then when it does sample it takes three samples in the center of each bit and uses majority waiting to determine the bit state.
 
-Stale menu items have mostly been removed. We still have a little work to do here though.
+A new example illustrates the usart behavior fairly well:
 
-The Help-About window now gives Ralf recognition.
+examples/14bit/usart-14.asm
+examples/14bit/usart.stc
 
+Run this example (after gpsim has been installed) by:
 
-.cod files
-----------
-I had to do a major overhaul to gpasm to support the configuration word for the 18cxxx family. I could have (and in fact at one point did) just made a nasty hack, but I decided to do things properly. The issue is that the 18cxxx config word resides at an address beyond the 64k range that was previously supported in gpasm. Now gpasm can handle .cod files that generate up to about a gigabyte of code and gpsim will honor that new address range (it will not accept addresses that are out of range for a given processor...)
+$ cd examples/14bit
+$ gpasm usart-14.asm
+$ gpsim -c usart.stc
+
+The usart.stc is a command file that will load the usart-14.cod file and added a node that ties the usart RX and TX pins together. In other words, the node configures the serial port for loop back (realize that this is OUTside of the simulated pic; this is analogous to configuring a real RS232 port for loop back). When the simulated software runs, it will configure the usart TX pin for asynchronous transmissions and repeatedly send the string "0123456789ABCDEF". The RX pin is configured such that an interrupt routine is invoked when the receive register fills up with data. The interrupt routine copies the received data into a circular buffer 16 bytes long. 
+
+Limitations:
+1) Only the asynchronous mode is supported.
+
+A/D converter enhanced
+----------------------
+
+The 16f87x devices have an A/D converter with 10-bits of resolution. Previous versions of gpsim supported the A/D in the 16c74 which is only 8-bits. This version has enhanced the A/D peripheral so that both resolutions are supported. In addition, if analog stimuli (see below) are attached to the A/D inputs, then the analog values are scaled properly regardless of whether the 8-bit or 10-bit A/D is used.
 
 What's coming next?
 -------------------
 
-More 18cxxx peripherals. Support for the 16f877. A gui version of the 'processor pins' command. Maybe, and this just maybe, support for external modules (e.g. LCD's, LED's, switches, etc.)
+Modules.
 
 System Requirements:
 --------------------
@@ -209,8 +211,10 @@ Standard simulator stuff:
 Gui stuff:
   o Register viewer
   o Source file viewer
+  o Program opcode window
   o Symbol viewer
   o Watch window
+  o Pinout/breadboard window
 
 gpsim specific (not implemented)
   o Simulate multiple processors. 
@@ -226,7 +230,7 @@ Peripherals supported:
   o CCP
   o PWM
   o A/D
-  o UART (18cxxx only)
+  o UART 
 
 BUGS:
 ----

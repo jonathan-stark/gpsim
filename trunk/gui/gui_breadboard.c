@@ -1,4 +1,7 @@
+
 #include <gui.h>
+
+#ifdef HAVE_GUI
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -528,3 +531,4 @@ int CreateBreadboardWindow(GUI_Processor *gp)
 }
 
 
+#endif // HAVE_GUI

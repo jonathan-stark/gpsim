@@ -1,3 +1,5 @@
+#include "../config.h"
+#ifdef HAVE_GUI
 
 #ifdef DOING_GNOME
 #include <gnome.h>
@@ -812,3 +814,4 @@ create_notebook (void)
   else
     gtk_widget_destroy (window);
 }
+#endif // HAVE_GUI
