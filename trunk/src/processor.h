@@ -463,6 +463,10 @@ public:
   virtual void setUnknownMode(bool);
   virtual bool getUnknownMode() { return bUnknownMode; }
 
+  ///
+  /// Notification of breakpoint set
+  virtual void NotifyBreakpointSet(Breakpoints::BreakStatus &bs, TriggerObject *bpo) { }
+  virtual void NotifyBreakpointCleared(Breakpoints::BreakStatus &bs, TriggerObject *bpo) { }
 
   // Tracing control
 

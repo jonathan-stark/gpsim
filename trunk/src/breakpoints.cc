@@ -79,14 +79,12 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
   if(breakpoint_number >= MAX_BREAKPOINTS)
     return breakpoint_number;
 
-
-  break_status[breakpoint_number].type = break_type;
-  break_status[breakpoint_number].cpu  = cpu;
-  break_status[breakpoint_number].arg1 = arg1;
-  break_status[breakpoint_number].arg2 = arg2;
-  break_status[breakpoint_number].bpo  = f1;
-
-
+  BreakStatus &bs = break_status[breakpoint_number];
+  bs.type = break_type;
+  bs.cpu  = cpu;
+  bs.arg1 = arg1;
+  bs.arg2 = arg2;
+  bs.bpo  = f1;
   switch (break_type)
     {
 
@@ -97,41 +95,39 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 
     case BREAK_ON_CYCLE:
       {
-	guint64 cyc = arg2;
-	cyc = (cyc<<32) | arg1;
+      guint64 cyc = arg2;
+      cyc = (cyc<<32) | arg1;
 
-	// The cycle counter does its own break points.
-	if(get_cycles().set_break(cyc, f1, breakpoint_number))
-	  return(breakpoint_number);
-	else
-	  break_status[breakpoint_number].type = BREAK_CLEAR;
+      // The cycle counter does its own break points.
+      if(get_cycles().set_break(cyc, f1, breakpoint_number))
+	      return(breakpoint_number);
+      else
+	      bs.type = BREAK_CLEAR;
       }
       break;
 
     case BREAK_ON_STK_OVERFLOW:
       if(((pic_processor *)(cpu))->stack->set_break_on_overflow(1))
-	return (breakpoint_number);
+        return (breakpoint_number);
 
-      break_status[breakpoint_number].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
       if(((pic_processor *)(cpu))->stack->set_break_on_underflow(1))
-	return (breakpoint_number);
+        return (breakpoint_number);
 
-      break_status[breakpoint_number].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
       ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
       return(breakpoint_number);
-      break;
 
     default:   // Not a valid type
-      break_status[breakpoint_number].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       break;
     }
-
   return(MAX_BREAKPOINTS);
 }
 
@@ -144,13 +140,14 @@ unsigned int Breakpoints::set_breakpoint(TriggerObject *bpo)
     delete bpo;
     return MAX_BREAKPOINTS;
   }
-
-  break_status[bpn].bpo = bpo;
-  break_status[bpn].type = BREAK_MASK;   // place holder for now...
+  BreakStatus &bs = break_status[bpn];
+  bs.bpo = bpo;
+  bs.type = BREAK_MASK;   // place holder for now...
   bpo->bpn = bpn;
 
+  if(get_active_cpu() != NULL)
+    get_active_cpu()->NotifyBreakpointSet(bs, bpo);
   return bpn;
-
 }
 
 unsigned int  Breakpoints::set_execution_break(Processor *cpu, 
@@ -437,49 +434,48 @@ void Breakpoints::clear(unsigned int b)
 
       bs.bpo->clear();
       bs.type = BREAK_CLEAR;
-      //delete break_status[b].bpo;  // FIXME - why does this delete cause a segv?
-      break_status[b].bpo = 0;
+      get_active_cpu()->NotifyBreakpointCleared(bs, bs.bpo);
+      delete bs.bpo;  // FIXME - why does this delete cause a segv?
+      bs.bpo = 0;
       return;
     }
 
     switch (bs.type) {
 
     case BREAK_ON_CYCLE:
-      break_status[b].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       //cout << "Cleared cycle breakpoint number " << b << '\n';
-
       break;
 
     case BREAK_ON_STK_OVERFLOW:
 
-      break_status[b].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
-	cout << "Cleared stack overflow break point.\n";
+        cout << "Cleared stack overflow break point.\n";
       else
-	cout << "Stack overflow break point is already cleared.\n";
-
+        cout << "Stack overflow break point is already cleared.\n";
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
-      break_status[b].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
-	cout << "Cleared stack underflow break point.\n";
+        cout << "Cleared stack underflow break point.\n";
       else
-	cout << "Stack underflow break point is already cleared.\n";
+        cout << "Stack underflow break point is already cleared.\n";
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
-      break_status[b].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       cout << "Cleared wdt timeout breakpoint number " << b << '\n';
       ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
-
       break;
 
     default:
-      break_status[b].type = BREAK_CLEAR;
+      bs.type = BREAK_CLEAR;
       break;
 
     }
+    get_active_cpu()->NotifyBreakpointCleared(bs, NULL);
   }
 }
 
@@ -541,13 +537,11 @@ void Breakpoints::dump_traced(unsigned int b)
 
 void Breakpoints::clear_all(Processor *c)
 {
-
   for(int i=0; i<MAX_BREAKPOINTS; i++)
     {
       if(c == break_status[i].cpu && break_status[i].type != BREAK_CLEAR)
       	clear(i);
     }
-
 }
 
 void Breakpoints::clear_all_set_by_user(Processor *c)
