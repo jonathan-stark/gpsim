@@ -104,10 +104,14 @@ void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
   if(!new_reg)
     return;
 
-  cout << "adding reg to symbol table " << new_reg->name() << " sn " <<symbol_name<<endl;
-  if(new_reg->name() == string(symbol_name)  &&  find(&new_reg->name())) {
-     cout << "ignoring -- symbol is already in the table\n";
-     return;
+  if(symbol_name && 
+     new_reg->name() == string(symbol_name)  &&  
+     find(&new_reg->name())) {
+    if(verbose)
+      cout << "Warning not adding  "
+	   << symbol_name
+	   << " to symbol table\n because it is already in.\n";
+    return;
   }
 
   register_symbol *rs = new register_symbol(symbol_name, new_reg);
@@ -344,19 +348,27 @@ string symbol::toString()
 
 Value * Symbol_Table::find(string *s)
 {
-
+  const bool findDuplicates=false;
   sti = st.begin();
 
+  Value *ret=0;
   while( sti != st.end())
     {
       Value *val = *sti;
-      if(val && val->name() == *s)
-	return(val);
+      if(val && val->name() == *s) {
+	if(!findDuplicates)
+	  return val;
+
+	if(!ret) {
+	  ret = val;
+	} else
+	  cout << "Found duplicate:" << val->show()<<endl;
+      }
 
       sti++;
     }
 
-  return 0;
+  return ret;
 
 }
 
