@@ -1,3 +1,12 @@
+2004-06-12 Borut Razem <borut.razem@siol.net>
+	* cli/viewable.cc: #warning not recognised by MSVC
+	* eXdbm/eXdbm.vcproj, gui/gui.vcproj, modules.vcproj:
+	  new project files for GUI support
+	* gpsim.sln, gpsim/gpsim.vcproj, cli/cli.vcproj, src/src.vcproj:
+	  GUI support
+	* plat/win32/gpsim.def, plat/win32/modules.def: WIN32 def files for
+	  DLL modules support
+
 2004-06-09 Scott Dattalo <scott@dattalo.com>
 	* cli/expr.cc, cli/expr.h, cli/viewable.h, cli/viewable.cc, 
 	cli/operator.h, cli/operator.cc: New files to support parsing
