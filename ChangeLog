@@ -1,3 +1,7 @@
+2004-02-28 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_processor.cc:
+	Inhibit the half-baked gui_scope.
+	
 2004-02-27 Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.cc, src/interface.cc, src/interface.h, 
 	src/init.cc, src/icd.cc, src/cod.cc, src/breakpoints.cc,
