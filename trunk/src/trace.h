@@ -44,27 +44,26 @@ class TraceFrame;
 class TraceObject
 {
 public:
-  Processor *cpu;
 
   TraceObject();
-  TraceObject(Processor *_cpu);
   virtual void print(FILE *)=0;
   virtual void print_frame(TraceFrame *,FILE *);
   virtual void getState(TraceFrame *);
 
 };
-/*
-class SubTraceObject : public TraceObject
+class ProcessorTraceObject : public TraceObject
 {
 public:
-  SubTraceObject();
-  SubTraceObject(Processor *_cpu);
-  virtual void print(FILE *)=0;
-  virtual void print_frame(TraceFrame *,FILE *);
+  Processor *cpu;
 
+  ProcessorTraceObject(Processor *_cpu) : TraceObject() , cpu(_cpu)
+  {
+  }
+
+  virtual void print(FILE *)=0;
 };
-*/
-class RegisterWriteTraceObject : public TraceObject
+
+class RegisterWriteTraceObject : public ProcessorTraceObject
 {
 public:
   Register *reg;
@@ -85,7 +84,7 @@ public:
   virtual void getState(TraceFrame *);
 };
 
-class PCTraceObject : public TraceObject
+class PCTraceObject : public ProcessorTraceObject
 {
 public:
   unsigned int address;

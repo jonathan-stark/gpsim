@@ -1,3 +1,17 @@
+2004-09-01 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_macro.cc, cli/input.cc:
+	Converted the LLInput struct into a class. Now, the macro
+	command can invoke a macro and redirect it's output to the
+	parser stream.
+	* src/trace.cc, src/trace.h:
+	Added the ProcessorTraceObject to the TraceObject heirarchy.
+	Now, TraceObjects no longer store info about a processor.
+	(Thus modules can be processor agnostic.)
+	
+2004-09-01 Scott Dattalo <scott@dattalo.com>
+	* src/p16x5x.cc: The 16C55 processor was only declaring a 
+	package of 18 pins (instead of 28).
+
 2004-08-31 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc, cli/cmd_macro.h:
 	Added the 'macro' command.

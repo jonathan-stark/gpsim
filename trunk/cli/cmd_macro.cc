@@ -28,6 +28,13 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_macro.h"
 #include "expr.h"
 
+extern int parse_string(char * str);
+extern void add_string_to_input_buffer(char *s);
+extern void start_new_input_stream(void);
+class MacroLine {
+  string text;
+};
+
 class Macro :public gpsimObject {
 public:
   Macro(char *new_name);
@@ -61,8 +68,10 @@ void Macro::add_argument(char *new_arg)
 
 void Macro::add_body(char *new_line)
 {
-  if(new_line)
-    body.push_back(string(new_line));
+  if(!new_line)
+    return;
+
+  body.push_back(string(new_line));
 
   cout << "macro body: " << new_line << endl;
 
@@ -70,6 +79,18 @@ void Macro::add_body(char *new_line)
 
 void Macro::invoke(StringList_t *parameters)
 {
+  list <string> :: iterator si;
+
+  start_new_input_stream();
+
+  if(body.size()) {
+
+    for(si = body.begin();
+	si != body.end();
+	++si)
+      add_string_to_input_buffer((char *) ((*si).c_str()));
+
+  }
 
 }
 
@@ -138,6 +159,9 @@ void cmd_macro::list(void)
 {
   if(theMacro) {
     theMacro->print();
+    cout << "invoking\n";
+    theMacro->invoke(0);
+    cout << "invoked\n";
   } else
     cout << "No macros have been defined.\n";
 }

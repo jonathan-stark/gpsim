@@ -87,7 +87,7 @@ void quit_gui(void);
 void redisplay_prompt(void);
 
 char *gnu_readline (char *s, unsigned int force_readline);
-static bool using_readline=1;
+//static bool using_readline=1;
 int input_mode = 0;
 int last_command_is_repeatable=0;
 
@@ -104,9 +104,49 @@ class LLInput {
 public:
   LLInput *next;
   void *data;
+
+  LLInput();
+  LLInput(char *);
+  ~LLInput();
 };
 
-static LLInput Stack={0,0};
+LLInput::LLInput()
+  : next(0), data(0) 
+{
+}
+
+LLInput::LLInput(char *s)
+  : next(0)
+{
+  data = strdup(s);
+}
+
+LLInput::~LLInput()
+{
+  if(data)
+    free(data);
+}
+
+//************************************************************************
+class LLStack : public LLInput
+{
+public:
+  LLStack();
+
+  void Push();
+  void Pop();
+  void Append(char *);
+  LLInput *GetNext();
+
+  void print();
+};
+
+LLStack::LLStack()
+{
+
+}
+
+static LLStack Stack;
 
 //====================================================================================
 //
@@ -148,8 +188,7 @@ void initialize_signals(void)
 //==============================================================
 // initialize_gpsim 
 //
-// Not much initialization is needed now. However, the CORBA 
-// calls needed later will change this...
+// Not much initialization is needed now. 
 //
 
 void initialize_gpsim(void)
@@ -162,13 +201,11 @@ void initialize_gpsim(void)
 }
 
 
-char *cmd_string_buf = 0;
-FILE *cmd_file = 0;
-
-static void LLDumpInputBuffer(void)
+void LLStack::print(void)
 {
 #if 0
   LLInput *s = &Stack;
+
   cout << "Current state of input buffer:\n";
   int stack_number=0;
   while (s->data) {
@@ -187,46 +224,42 @@ static void LLDumpInputBuffer(void)
 #endif
 }
 
-LLInput *newLLInput(void)
+void LLStack::Push(void)
 {
-  LLInput *d = (LLInput *)(malloc(sizeof(LLInput)));
-  if(d) {
-    d->next = 0;
-    d->data = 0;
-  }
-  return d;
-}
+  LLInput *s = new LLInput();
 
-static void LLPush(void)
-{
-  LLInput *s = newLLInput();
-
-  LLDumpInputBuffer();
+  print();
   if(s) {
-    s->next = Stack.next;
-    s->data = Stack.data;
-    Stack.next = s;
-    Stack.data = 0;
+    s->next = next;
+    s->data = data;
+    next = s;
+    data = 0;
   }
   
 }
 
-static void LLPop(void)
+void LLStack::Pop()
 {
-  LLDumpInputBuffer();
+  print();
 
-  if(!Stack.next)
+  if(!next)
     return;
 
-  Stack.data = Stack.next->data;
-  Stack.next = Stack.next->next;
+  data = next->data;
+  next = next->next;
 
 }
 
-static void LLAppend(LLInput *h, LLInput *d)
+void LLStack::Append(char *s)
 {
-  if(!h)
+  
+  LLInput *d = new LLInput(s);
+  LLInput *h = (LLInput *)data;
+
+  if(!h) {
+    data = d;
     return;
+  }
 
   /* go to the end of the list */
   while(h->next)
@@ -239,22 +272,22 @@ static void LLAppend(LLInput *h, LLInput *d)
 }
 
 
-static LLInput *LLGetNext(void)
+LLInput *LLStack::GetNext()
 {
-  if(!Stack.data) {
-    if(!Stack.next)
+  if(!data) {
+    if(!next)
       return 0;
 
-    LLPop();
+    Pop();
 
-    return LLGetNext();
+    return GetNext();
   }
 
-  LLInput *d = (LLInput *)Stack.data;
+  LLInput *d = (LLInput *)data;
 
   // remove this item from the list  
   if(d) {
-    Stack.data = (void *)d->next;
+    data = (void *)d->next;
 
   }
 
@@ -263,27 +296,17 @@ static LLInput *LLGetNext(void)
 
 /*******************************************************
  */
-static void add_string_to_input_buffer(char *s)
+void add_string_to_input_buffer(char *s)
 {
-  if(!s)
-    return;
-
-  LLInput *d = newLLInput();
-
-  if(d) {
-
-    d->data = (void *)strdup(s);       // free'd by gpsim_read.
-    d->next = 0;
-
-    if(!Stack.data) 
-      Stack.data = d;
-    else
-      LLAppend((LLInput*)Stack.data, d);
-
-
-  }
+  Stack.Append(s);
 }
 
+/*******************************************************
+ */
+void start_new_input_stream(void)
+{
+  Stack.Push();
+}
 /*******************************************************
  * start_parse
  * 
@@ -293,21 +316,13 @@ static void add_string_to_input_buffer(char *s)
  */
 int start_parse(void)
 {
-  static int save_readline_state = 0;
   int retval;
 
-  //gdk_threads_enter();
   init_parser();
   retval = yyparse();
 
-  //gdk_threads_leave();
-
-  using_readline = (0 != save_readline_state);
-
-  if(quit_parse) {
-    free(cmd_string_buf);
+  if(quit_parse)
     exit_gpsim();
-  }
 
   return retval;
 
@@ -325,15 +340,12 @@ int parse_string(char * str)
 void process_command_file(const char * file_name)
 {
 
-  int save_readline_state;
-  FILE *save_cmd_file;
+  FILE *cmd_file;
   char directory[256];
   const char *dir_path_end;
 
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
-
-  save_cmd_file = cmd_file;
 
   dir_path_end = get_dir_delim(file_name);
   if(dir_path_end)
@@ -348,17 +360,13 @@ void process_command_file(const char * file_name)
 
   cmd_file = fopen(file_name,"r");
 
-  save_readline_state = using_readline;
-  using_readline = 0;
-  cmd_string_buf = 0;
-
   if(cmd_file)
     {
 
       if((verbose) && DEBUG_PARSER)
 	cout << "processing a command file\n";
 
-      LLPush();
+      Stack.Push();
 
       char *s;
       char str[256];
@@ -366,16 +374,10 @@ void process_command_file(const char * file_name)
       while( (s = fgets(str, 256, cmd_file)) != 0) 
        add_string_to_input_buffer(s);
 
-      //while(fread(str,1,256,cmd_file))
-      //  add_string_to_input_buffer(str);
-
       fclose(cmd_file);
-      cmd_file = save_cmd_file;
     }
 
-  LLDumpInputBuffer();
-
-  using_readline = (0 != save_readline_state);
+  Stack.print();
 
 }
 
@@ -448,7 +450,7 @@ gpsim_read (char *buf, unsigned max_size)
   if((verbose&4) && DEBUG_PARSER)
     cout <<"gpsim_read\n";
 
-  LLInput *d = LLGetNext();
+  LLInput *d = Stack.GetNext();
 
   if(!d  || !d->data) {
     return 0;
@@ -459,8 +461,7 @@ gpsim_read (char *buf, unsigned max_size)
 
   strncpy(buf, cPstr, count);
 
-  free (cPstr);
-  free (d);
+  delete (d);
 
   return count;
 

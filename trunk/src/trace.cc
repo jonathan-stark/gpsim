@@ -302,11 +302,6 @@ void Trace::printTraceFrame(FILE *fp)
 //
 TraceObject::TraceObject()
 {
-  throw "TraceObject";
-}
-TraceObject::TraceObject(Processor *_cpu)
-  : cpu(_cpu) 
-{
 }
 void TraceObject::print_frame(TraceFrame *tf,FILE *fp)
 {
@@ -327,7 +322,7 @@ void TraceObject::getState(TraceFrame *tf)
 RegisterWriteTraceObject::RegisterWriteTraceObject(Processor *_cpu,
 						   Register *_reg,
 						   RegisterValue trv) 
-  : TraceObject(_cpu), reg(_reg), from(trv)
+  : ProcessorTraceObject(_cpu), reg(_reg), from(trv)
 {
   if(reg) {
     to = reg->get_trace_state();
@@ -352,8 +347,8 @@ void RegisterWriteTraceObject::print(FILE *fp)
 
 
 RegisterReadTraceObject::RegisterReadTraceObject(Processor *_cpu,
-						   Register *_reg,
-						   RegisterValue trv) 
+						 Register *_reg,
+						 RegisterValue trv) 
   : RegisterWriteTraceObject(_cpu, _reg, trv)
 {
   if(reg) {
@@ -375,7 +370,7 @@ void RegisterReadTraceObject::getState(TraceFrame *tf)
 
 //========================================================================
 PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address) 
-  : TraceObject(_cpu), address(_address)
+  : ProcessorTraceObject(_cpu), address(_address)
 {
 }
 
