@@ -168,7 +168,10 @@ void LcdDisplay::send_status(void)
   unsigned short status;
   
 
-  status = ( cursor.row * 0x40 ) + cursor.col; // FIXME - No busy yet
+  status = ( cursor.row * 0x40 ) + cursor.col;
+
+  if ( is_busy() )
+    status |= 0x80;
 
   if(in_8bit_mode()) {
     data_port->put ( status );
@@ -204,6 +207,7 @@ void LcdDisplay::execute_command(void)
     if(debug)
       cout << "LCD_CMD_SET_DDRAM\n";
     write_ddram_address(data_latch & 0x7f);
+    set_busy(39);	// busy for 39 usec after set DDRAM addr
   }
   else if( (data_latch & LCD_MASK_SET_CGRAM) ==  LCD_CMD_SET_CGRAM) {
     cout << "LCD_CMD_SET_CGRAM\n";
@@ -233,6 +237,7 @@ void LcdDisplay::execute_command(void)
     else
       set_small_font_mode();
 
+    set_busy(39);	// busy for 39 usec after DDRAM write
   }
   else if( (data_latch & LCD_MASK_CURSOR_DISPLAY) ==  LCD_CMD_CURSOR_DISPLAY) {
     cout << "LCD_CMD_CURSOR_DISPLAY\n";
@@ -270,6 +275,7 @@ void LcdDisplay::execute_command(void)
     if(debug)
       cout << "LCD_CMD_CLEAR_DISPLAY\n";
     clear_display();
+    set_busy(1350);	// busy for 1.3 msec after clear screen
   }
   else
     cout << "UNKOWN command : 0x" << hex << data_latch << '\n';
@@ -346,16 +352,40 @@ void LcdDisplay::revertState(void)
 }
 
 //--------------------------------------------------
+static void debug_events(LcdDisplay *lcd, ControlLineEvent e, State s)
+{
+  if(!lcd)
+    return;
+
+
+  cout << "Event:  " 
+       << lcd->getEventName(lcd->last_event) 
+       << "->" << lcd->getEventName(e) 
+       << endl;
+  cout << " from State:  " 
+       << lcd->getStateName(s) << '\n';
+
+
+}
+
+//--------------------------------------------------
 //
 //   advanceState
 //
 
 void LcdDisplay::advanceState( ControlLineEvent e)
 {
-  if(debug) {
-    cout << "Event:  " << getEventName(last_event) << "->" << getEventName(e)<< '\n';
-    cout << " from State:  " << getStateName(current_state) << '\n';
-  }
+  if(debug)
+    debug_events(this, e, current_state);
+
+  int eventTransition = last_event ^ e;
+
+#define E_transition   (EWD ^ eWD)
+#define RW_transition  (EWD ^ ERD)
+#define CD_transition  (EWD ^ EWC)
+
+  if(e == DataChange)
+    return;
 
   switch(current_state) {
   case ST_INITIALIZED:
@@ -371,13 +401,21 @@ void LcdDisplay::advanceState( ControlLineEvent e)
       start_data();
       break;
 
+    case  ERD:
+      cout << "LCD: Read Data is not supported\n";
+      newState(ST_INITIALIZED);
+      break;
+
     case  eRD:
     case  eRC:
     case  eWD:
     case  eWC:
-    case  ERD:
-      cout << "?? unhandled state transition\n";
-      newState(ST_INITIALIZED);
+      if(eventTransition & E_transition) {
+	debug_events(this, e, current_state);
+	cout << "?? unhandled state transition\n";
+	newState(ST_INITIALIZED);
+      }
+      break;
     }
 
     break;
@@ -396,6 +434,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  ERC:
     case  EWD:
     case  EWC:
+      debug_events(this, e, current_state);
       cout << "?? unhandled state transition\n";
       newState(ST_INITIALIZED);
       break;
@@ -416,6 +455,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  ERC:
     case  EWD:
     case  EWC:
+      debug_events(this, e, current_state);
       cout << "?? unhandled state transition\n";
       newState(ST_INITIALIZED);
       break;
@@ -437,6 +477,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  ERC:
     case  EWD:
     case  EWC:
+      debug_events(this, e, current_state);
       cout << "?? unhandled state transition\n";
       newState(ST_INITIALIZED);
       break;

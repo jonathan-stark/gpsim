@@ -89,7 +89,8 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
       pc = (ch[0][j][i] == '.') ? 'B' : ' ';
       bc = (ch[0][j][i] == '.') ? 'G' : ' ';
 
-      m = i*lcdP->pixels.y;
+      //m = i*lcdP->pixels.y;
+      m = i*lcdP->pixels.x;
 
       for(jj=k; jj<k+lcdP->pixels.y-1; jj++) {
 
@@ -426,7 +427,7 @@ void LcdDisplay::clear_display(void)
 
   for(i=0; i<rows; i++)
     for(j=0; j<cols; j++)
-      ch_data[i][j] = 0;
+      ch_data[i][j] = ' ';
   
   move_cursor(0,0);
 }
@@ -439,6 +440,7 @@ void LcdDisplay::write_data(int data)
     cursor.col++;
   }
 
+  //set_busy(39);	// busy for 39 usec after DDRAM write
 }
 
 void LcdDisplay::write_ddram_address(int data)

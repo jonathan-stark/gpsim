@@ -242,7 +242,7 @@ void DataPort::put(unsigned int new_value)
 
   unsigned int old_value = value;
 
-  cout << "DataPort::" <<__FUNCTION__ << " new value " << new_value << endl;
+  //cout << "DataPort::" <<__FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
@@ -323,6 +323,17 @@ cursor_event (GtkWidget          *widget,
 
   return FALSE;
 }
+
+//--------------------------------------------------------------
+void LcdDisplay::set_busy (int time)
+{
+  busy_until_time = cycles.get(time); 
+}
+
+bool LcdDisplay::is_busy(void)
+{
+  return (busy_until_time > cycles.get());
+};
 
 //--------------------------------------------------------------
 // create_iopin_map 
