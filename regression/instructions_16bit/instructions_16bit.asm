@@ -273,6 +273,31 @@ start:
           bra   failed
 
         ;;
+        ;; decf
+        ;;
+
+        clrf    temp
+        decf    temp,F	        ;0==>0xff
+        skpc
+         skpnz
+          bra   failed
+
+        decf    temp,F          ;0xff==>0xfe
+        skpnc
+         skpnz
+          bra   failed
+
+        incf    temp,F
+        skpc
+         skpnz
+          bra   failed
+
+        incf    temp,F
+        skpnc
+         skpz
+          bra   failed
+
+        ;;
         ;; iorwf
         ;;
 
@@ -491,17 +516,17 @@ start:
         movlw   0x81
         subwf   temp,W
         bnov    failed
-                                                                                
+
         movlw   -0x05
         movwf   temp
-                                                                                
+
         ;;  negative - positive => positive,  overflow
         movlw   0x7e
         subwf   temp,W
         bnov    failed
-                                                                                
+
         ;; negative - positive => negative, no overflow
-                                                                                
+
         movlw   0x02
         subwf   temp,W
         bov     failed
@@ -510,13 +535,11 @@ start:
         movlw   -0x07
         subwf   temp,W
         bov     failed
-                                                                                
-                                                                                
+
         ;; negative - negative => negative, overflow.
         movlw   -0x02
         subwf   temp,W
         bov     failed
-                                                                                
 
         clrc
         clrdc
