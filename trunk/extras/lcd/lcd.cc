@@ -133,12 +133,12 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
 
   int bit_mask = 1<<bit_number;
 
-  if( ((bit_mask & value) != 0) ^ (new_value==1))
+  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
     {
       if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
 	cout << " Lcd+Port::set_bit bit " << bit_number << " changed due to a stimulus. new_value = " << new_value <<'\n';
 
-      value ^= bit_mask;
+      value.put(value.get() ^ bit_mask);
 
       assert_event();
       trace_register_write();
@@ -155,13 +155,13 @@ void Lcd_Port::assert_event(void)
 
 DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 {
-  value = 0;
+  value.put(0);
 
 }
 
 void DataPort::setbit(unsigned int bit_number, bool new_value)
 {
-  if((lcd->control_port->value & 6) == 4){  //E is high and R/W is low
+  if((lcd->control_port->value.get() & 6) == 4){  //E is high and R/W is low
     //cout << "DataPort::" << __FUNCTION__ << " setting bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
     Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
   } 
@@ -172,7 +172,7 @@ void DataPort::update_pin_directions(bool new_direction)
 
   if(new_direction != direction) {
 
-    //cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value <<endl;
+    //cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value.get() <<endl;
 
     direction = new_direction;
 
@@ -193,24 +193,24 @@ unsigned int DataPort::get(void)
 
   for(int i=7; i>=0; i--) {
     if(pins[i]) {
-      value = (value << 1) | ((pins[i]->state > 0) ? 1 : 0);
+      value.put((value.get() << 1) | ((pins[i]->state > 0) ? 1 : 0));
       //cout << "   Pin[" << i << "] = " << pins[i]->state << endl;
     }
 
   }
 
-  value &= 0xff;
+  value.put(value.get() & 0xff);
 
-  //cout << "DataPort::get = 0x" << value << endl;
+  //cout << "DataPort::get = 0x" << value.get() << endl;
 
-  return value;
+  return value.get();
 
 }
 
 void Lcd_Port::trace_register_write(void)
 {
 
-  trace.module1(value);
+  trace.module1(value.get());
 }
 
 //-----------------------------------------------------
@@ -223,26 +223,26 @@ ControlPort::ControlPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 void ControlPort::assert_event(void)
 {
   
-  lcd->advanceState(lcd->ControlEvents[value & 7].e);
+  lcd->advanceState(lcd->ControlEvents[value.get() & 7].e);
 }
 
 void ControlPort::put(unsigned int new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
-  if((old_value ^ value) & 2) {  // R/W bit has changed states
-    if(value & 2)
+  if((old_value ^ value.get()) & 2) {  // R/W bit has changed states
+    if(value.get() & 2)
       lcd->data_port->update_pin_directions(1);   // It's high, so make data lines outputs
     else
       lcd->data_port->update_pin_directions(0);   // make them inputs.
   }
 
-  if( (old_value ^ value) & 0x7) 
+  if( (old_value ^ value.get()) & 0x7) 
     assert_event();
 }
 
@@ -263,13 +263,13 @@ void DataPort::assert_event(void)
 void DataPort::put(unsigned int new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "DataPort::" <<__FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
-  if( (old_value ^ value) & 0xff)
+  if( (old_value ^ value.get()) & 0xff)
     lcd->advanceState(DataChange);
 
 }
@@ -367,13 +367,13 @@ void LcdDisplay::create_iopin_map(void)
 
 
   control_port = new ControlPort(8);
-  control_port->value = 0;
+  control_port->value.put(0);
   control_port->lcd = this;
 
   cycles.set_break_delta(1000, control_port);
 
   data_port = new DataPort(8);
-  data_port->value = 0;
+  data_port->value.put(0);
   data_port->lcd = this;
 
 

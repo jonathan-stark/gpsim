@@ -629,8 +629,8 @@ void LcdDisplay::viewInternals(int verbosity)
     cout << "  " << ( (in_8bit_mode()) ? '8' : '4') << "bit mode\n";
     cout << "  " << ( (in_2line_mode()) ? '2' : '1') << "-line mode\n";
     cout << "  " << ( (in_large_font_mode()) ? "large" : "small") << " font\n";
-    cout << "  " << " Control = 0x" << hex << control_port->value << endl;
-    cout << "  " << " Data = 0x" << hex << data_port->value << endl;
+    cout << "  " << " Control = 0x" << hex << control_port->value.get() << endl;
+    cout << "  " << " Data = 0x" << hex << data_port->value.get() << endl;
 
   }
 
@@ -666,33 +666,33 @@ void LcdDisplay::test(void)
 
   set_8bit_mode();
 
-  data_port->value = LCD_CMD_FUNC_SET | LCD_8bit_MODE;
+  data_port->value.put(LCD_CMD_FUNC_SET | LCD_8bit_MODE);
   advanceState(EWC);
   advanceState(eWC);
 
-  data_port->value = LCD_CMD_FUNC_SET | LCD_4bit_MODE;
+  data_port->value.put(LCD_CMD_FUNC_SET | LCD_4bit_MODE);
   advanceState(EWC);
   advanceState(eWC);
 
-  data_port->value = LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT;
+  data_port->value.put(LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT);
   advanceState(EWC);
   advanceState(eWC);
-  data_port->value = (LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT)<<4;
+  data_port->value.put((LCD_CMD_FUNC_SET | LCD_4bit_MODE | LCD_2_LINES | LCD_SMALL_FONT)<<4);
   advanceState(EWC);
   advanceState(eWC);
 
 
-  data_port->value = LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON; //LCD_CURSOR_OFF | LCD_BLINK_OFF
+  data_port->value.put(LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON); //LCD_CURSOR_OFF | LCD_BLINK_OFF
   advanceState(EWC);
   advanceState(eWC);
-  data_port->value = (LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON)<<4;
+  data_port->value.put((LCD_CMD_DISPLAY_CTRL | LCD_DISPLAY_ON)<<4);
   advanceState(EWC);
   advanceState(eWC);
    
-  data_port->value = LCD_CMD_CLEAR_DISPLAY;
+  data_port->value.put(LCD_CMD_CLEAR_DISPLAY);
   advanceState(EWC);
   advanceState(eWC);
-  data_port->value = LCD_CMD_CLEAR_DISPLAY << 4;
+  data_port->value.put(LCD_CMD_CLEAR_DISPLAY << 4);
   advanceState(EWC);
   advanceState(eWC);
 
@@ -700,10 +700,10 @@ void LcdDisplay::test(void)
   int l = strlen(s);
 
   for(int i=0; i<l; i++) {
-    data_port->value = s[i];
+    data_port->value.put(s[i]);
     advanceState(EWD);
     advanceState(eWD);
-    data_port->value = s[i] << 4;
+    data_port->value.put(s[i] << 4);
     advanceState(EWD);
     advanceState(eWD);
   }
