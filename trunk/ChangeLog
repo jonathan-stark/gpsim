@@ -1,4 +1,7 @@
 2005-03-23 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: changed the comment text color to 'dim gray'
+	
+2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* src/value.cc: Fixed write to a null pointer in String::get(char
 	*buf, int len).
 	* src/symbol.cc: Fixed infinite loop in 

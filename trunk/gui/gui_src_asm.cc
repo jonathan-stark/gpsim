@@ -1432,7 +1432,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
 
 	p=q;
-	instruction_done=true; // well, varable misnamed
+	instruction_done=true; // well, variable misnamed
       }
       else if( (isalnum(*p) || *p=='_'))
 	{ // a label
@@ -1472,8 +1472,10 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 	      linedescent = font->descent;
 	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
 			    font,
-			    &comment_text_style->base[GTK_STATE_NORMAL],
-			    &instruction_text_style->base[GTK_STATE_NORMAL],
+			      &comment_text_style->fg[GTK_STATE_NORMAL],
+			      &comment_text_style->base[GTK_STATE_NORMAL],
+			    //&comment_text_style->base[GTK_STATE_NORMAL],
+			    //&instruction_text_style->base[GTK_STATE_NORMAL],
 			    p,
 			    -1);
 	    break;
@@ -2507,7 +2509,7 @@ void SourceBrowserAsm_Window::Build(void)
   set_style_colors("orange", "white", &label_text_style);
   set_style_colors("red", "white", &instruction_text_style);
   set_style_colors("blue", "white", &number_text_style);
-  set_style_colors("black", "gray", &comment_text_style);
+  set_style_colors("dim gray", "white", &comment_text_style);
 
 
   //#if GTK_MAJOR_VERSION >= 2
