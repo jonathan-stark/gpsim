@@ -146,6 +146,7 @@ public:
   bool EncodeUInt64(guint64);
   bool EncodeObjectType(unsigned int);
   bool EncodeString(const char *str, int len=-1);
+  bool EncodeCustom(const char *str, int len);
   bool EncodeBool(bool);
   bool EncodeFloat(double);
 

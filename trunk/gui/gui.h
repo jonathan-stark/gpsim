@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "settings.h"
 
-#define SBAW_NRFILES 20 // Max number of source files
+#define SBAW_NRFILES 100 // Max number of source files
 
 
 #if defined(DEBUG)

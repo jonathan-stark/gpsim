@@ -356,3 +356,19 @@ bool Packet::EncodeString(const char *str, int len)
 
   return true;
 }
+
+bool Packet::EncodeCustom(const char *str, int len)
+{
+  if(!str)
+    return false;
+
+  txBuffer->putc(i2a(eGPSIM_TYPE_CUSTOM /16));
+  txBuffer->putc(i2a(eGPSIM_TYPE_CUSTOM ));
+
+  txBuffer->putc(i2a(len>>4));
+  txBuffer->putc(i2a(len));
+
+  txBuffer->puts(str, len);
+
+  return true;
+}
