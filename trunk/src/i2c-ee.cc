@@ -63,28 +63,40 @@ public:
     // has ever been driven at all. This way, we can capture the
     // first edge. Or we could add another parameter to the constructor.
 
-    digital_state = true;
+    bDrivingState = true;
 
   };
 
   
-  void set_digital_state(bool new_dstate) { 
-    bool diff = new_dstate ^ digital_state;
+  void setDrivingState(bool new_dstate) { 
+    bool diff = new_dstate ^ bDrivingState;
 
-    //cout << "eeprom scl set_digital_state " << new_dstate << '\n';
+    //cout << "eeprom scl setDrivingState " << new_dstate << '\n';
     if( eeprom && diff ) {
 
       //cout << "      ... that's an edge, so call handler\n";
-      digital_state = new_dstate;
-      eeprom->new_scl_edge(digital_state);
+      bDrivingState = new_dstate;
+      eeprom->new_scl_edge(bDrivingState);
 
     }
 
   }
   
-  bool get_digital_state(void)
+  void setDrivenState(bool new_dstate) { 
+    setDrivingState(new_dstate);
+    /*
+    bool diff = new_dstate ^ bDrivingState;
+
+    if( eeprom && diff ) {
+      bDrivingState = new_dstate;
+      eeprom->new_scl_edge(bDrivingState);
+    }
+    */
+  }
+
+  bool getDrivingState(void)
   {
-    return digital_state;
+    return bDrivingState;
   }
 
 };
@@ -107,7 +119,7 @@ public:
 
     eeprom = _eeprom;
 
-    digital_state = true;
+    bDrivingState = true;
     read_state = true;
 
     // Make the pin an output.
@@ -116,28 +128,40 @@ public:
   };
 
   //
-  void set_digital_state(bool new_dstate) {
-    bool diff = new_dstate ^ digital_state;
+  void setDrivingState(bool new_dstate) {
+    bool diff = new_dstate ^ bDrivingState;
 
-    //cout << "eeprom sda set_digital_state " << new_dstate << '\n';
+    //cout << "eeprom sda setDrivingState " << new_dstate << '\n';
     if( eeprom && diff ) {
 
       //cout << "      ... that's an edge, so call handler\n";
-      digital_state = new_dstate;
+      bDrivingState = new_dstate;
       eeprom->new_sda_edge(new_dstate);
     }
 
   }
 
-  bool get_digital_state() {
+  void setDrivenState(bool new_dstate) {
+    setDrivingState(new_dstate);
+    /*
+    bool diff = new_dstate ^ bDrivingState;
+
+    if( eeprom && diff ) {
+      bDrivingState = new_dstate;
+      eeprom->new_sda_edge(new_dstate);
+    }
+    */
+  }
+
+  bool getDrivingState() {
     return read_state;
   }
 
   bool get_driven_digital_state() {
-    return digital_state;
+    return bDrivingState;
   }
 
-  void put_digital_state( bool new_digital_state) {
+  void putDrivingState( bool new_digital_state) {
     read_state = new_digital_state;
     //cout << "eeprom put_digital state: " << (read_state ? "high" : "low") << endl;
     if(snode)
@@ -243,11 +267,11 @@ void I2C_EE::new_scl_edge ( bool direction )
         switch ( bus_state )
         {
             case I2C_EE::IDLE :
-                sda->put_digital_state ( true );
+                sda->putDrivingState ( true );
                 break;
 
             case I2C_EE::START :
-                sda->put_digital_state ( true );
+                sda->putDrivingState ( true );
                 bus_state = I2C_EE::RX_CMD;
                 break;
 
@@ -261,7 +285,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                         bus_state = I2C_EE::ACK_CMD;
                         if ( verbose )
                             cout << " - OK\n";
-                        sda->put_digital_state ( false );
+                        sda->putDrivingState ( false );
                     }
                     else
                     {
@@ -274,14 +298,14 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
                 
             case I2C_EE::ACK_CMD :
-                sda->put_digital_state ( true );
+                sda->putDrivingState ( true );
                 if ( xfr_data & 0x01 )
                 {
                     // it's a read command
                     bus_state = I2C_EE::TX_DATA;
                     bit_count = 8;
                     xfr_data = rom[xfr_addr]->get();
-                    sda->put_digital_state ( shift_write_bit() );
+                    sda->putDrivingState ( shift_write_bit() );
                 }
                 else
                 {
@@ -295,7 +319,7 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::RX_ADDR :
                 if ( shift_read_bit ( sda->get_driven_digital_state() ) )
                 {
-                    sda->put_digital_state ( false );
+                    sda->putDrivingState ( false );
                     bus_state = I2C_EE::ACK_ADDR;
                     xfr_addr = xfr_data % rom_size;
                     if ( verbose )
@@ -305,7 +329,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             case I2C_EE::ACK_ADDR :
-                sda->put_digital_state ( true );
+                sda->putDrivingState ( true );
                 bus_state = I2C_EE::RX_DATA;
                 bit_count = 0;
                 xfr_data = 0;
@@ -316,13 +340,13 @@ void I2C_EE::new_scl_edge ( bool direction )
                 {
                     if ( verbose )
                         cout << "I2C_EE : data set to " << hex << xfr_data << "\n";
-                    sda->put_digital_state ( false );
+                    sda->putDrivingState ( false );
                     bus_state = I2C_EE::ACK_WR;
                 }
                 break;
 
             case I2C_EE::ACK_WR :
-                sda->put_digital_state ( true );
+                sda->putDrivingState ( true );
                 bus_state = I2C_EE::WRPEND;
                 break;
 
@@ -339,14 +363,14 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::TX_DATA :
                 if ( bit_count == 0 )
                 {
-                    sda->put_digital_state ( true );     // Release the bus
+                    sda->putDrivingState ( true );     // Release the bus
                     xfr_addr++;
                     xfr_addr %= rom_size;
                     bus_state = I2C_EE::ACK_RD;
                 }
                 else
                 {
-                    sda->put_digital_state ( shift_write_bit() );
+                    sda->putDrivingState ( shift_write_bit() );
                 }
                 break;
 
@@ -363,7 +387,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             default :
-                sda->put_digital_state ( true );     // Release the bus
+                sda->putDrivingState ( true );     // Release the bus
                 break;
         }
     }
@@ -374,7 +398,7 @@ void I2C_EE::new_scl_edge ( bool direction )
 void I2C_EE::new_sda_edge ( bool direction )
 {
 
-    if ( scl->get_digital_state() )
+    if ( scl->getDrivingState() )
     {
         if ( direction )
         {

@@ -293,7 +293,7 @@ unsigned int DataPort::get(void)
   
   for(int i=7; i>=0; i--) {
     if(pins[i]) {
-      v = (v << 1) | ((pins[i]->get_digital_state()) ? 1 : 0);
+      v = (v << 1) | ((pins[i]->getDrivingState()) ? 1 : 0);
     }
 
   }

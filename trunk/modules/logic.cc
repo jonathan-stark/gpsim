@@ -207,15 +207,15 @@ static char * not_pixmap[] = {
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
 
-void Logic_Input::put_digital_state( bool new_state)
+void Logic_Input::putDrivingState( bool new_state)
 {
 
-  bool current_state = get_digital_state();
+  bool current_state = getDrivingState();
 
 
-  stimulus::put_digital_state(new_state);
+  stimulus::putDrivingState(new_state);
 
-  if(current_state != get_digital_state()) {
+  if(current_state != getDrivingState()) {
 //    cout << "logic Input " << name() << " changed to new state: " <<
 //      state << '\n';
 

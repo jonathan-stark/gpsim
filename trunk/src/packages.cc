@@ -180,7 +180,7 @@ int Package::get_pin_state(unsigned int pin_number)
 {
 
   if(pin_existance(pin_number) == E_PIN_EXISTS)
-    return pins[pin_number-1]->get_digital_state();
+    return pins[pin_number-1]->getDrivingState();
   else
     return 0;
 

@@ -147,7 +147,8 @@ public:
 
   Stimulus_Node *snode;      // Node to which this stimulus is attached
 
-  bool digital_state;        // 0/1 digitization of the analog state
+  bool bDrivingState;        // 0/1 digitization of the analog state we're driving
+  bool bDrivenState;         // 0/1 digitization of the state we're being driven to
   
   double Vth;                // Open-circuit or Thevenin voltage
   double Zth;                // Input or Thevenin resistance
@@ -161,9 +162,7 @@ public:
   virtual ~stimulus();
 
 
-  // Functions for accessing/manipulating the thevenin voltage and resistance.
-  // note that these are virtual so that derived classes can manipulate these
-  // in an abstract manner.
+  // Functions for accessing/manipulating the thevenin voltage and impedance.
   virtual double get_Vth() { return Vth; }
   virtual void   set_Vth(double v) { Vth = v; }
   virtual double get_Zth() { return Zth; }
@@ -179,9 +178,13 @@ public:
   // a stimulus that wants to drive it's own digital state will
   // call 'put' where as when an external node wishes to drive this
   // stimulus it'll call set.
-  virtual bool get_digital_state(void) {return digital_state;};
-  virtual void set_digital_state(bool new_dstate) { digital_state = new_dstate;};
-  virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
+  virtual bool getDrivingState(void) {return bDrivingState;};
+  virtual void setDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
+
+  virtual bool getDrivenState(void) {return bDrivenState;};
+  virtual void setDrivenState(bool new_dstate) { bDrivenState = new_dstate;};
+
+  virtual void putDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
 
   // getBitChar - this complements the Register class' getBitStr function
   virtual char getBitChar() { return '0'; }
@@ -291,9 +294,12 @@ class IOPIN : public stimulus
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
 
   virtual void set_nodeVoltage(double v);
-  virtual bool get_digital_state(void);
-  virtual void put_digital_state(bool new_dstate);
-  virtual void set_digital_state(bool new_dstate);
+  virtual bool getDrivingState(void);
+  virtual void setDrivingState(bool new_dstate);
+  virtual bool getDrivenState(void);
+  virtual void setDrivenState(bool new_dstate);
+
+  virtual void putDrivingState(bool new_dstate);
 
   virtual Register *get_iop(void);
   virtual void toggle(void);
