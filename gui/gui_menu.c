@@ -146,10 +146,10 @@ entry_toggle_visibility (GtkWidget *checkbutton,
 // This will display the 'new processor' dialog window.
 //
 //
-/*
+
 static GtkWidget *new_processor_name_entry;
 
-
+/*
 static void
 new_processor_dialog (void)
 {
@@ -238,31 +238,140 @@ new_processor_dialog (void)
     gtk_widget_destroy (window);
 }
 */
-/*
+
+void
+file_selection_hide_fileops (GtkWidget *widget,
+			     GtkFileSelection *fs)
+{
+  gtk_file_selection_hide_fileop_buttons (fs);
+}
+
+extern int gui_message(char *message);
+
+void
+file_selection_ok (GtkWidget        *w,
+		   GtkFileSelection *fs)
+{
+    unsigned int pic_id;
+    char *file;
+    char msg[200];
+    if(gp)
+    {
+	pic_id=gp->pic_id;
+	file=gtk_file_selection_get_filename (fs);
+	if(!gpsim_open(pic_id, file))
+	{
+	    sprintf(msg,"Open failedCould not open \"%s\"",file);
+	    gui_message(msg);
+	}
+    }
+    gtk_widget_destroy (GTK_WIDGET (fs));
+}
+
 static GtkItemFactoryCallback 
-gtk_toggle_cb (gpointer             callback_data,
+fileopen_dialog(gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
 {
-  GtkWidget *toggle_widget;
-  static gint newstate =0;
+  static GtkWidget *window = NULL;
+  GtkWidget *button;
 
-  g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
+  if (!window)
+    {
+      window = gtk_file_selection_new ("file selection dialog");
 
-  toggle_widget = gtk_item_factory_get_item (item_factory,
-					       gtk_item_factory_path_from_widget (widget)     );
-*/  /*
-   toggle_widget = gtk_item_factory_get_item (item_factory,
-					       gtk_item_factory_path_from_widget (toggle_widget)     );
+      gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
 
-  printf("%s\n",gtk_widget_get_name(widget));
-  */
-/*  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_widget), newstate);
-  
-  newstate ^= 1;
+      gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
+
+      gtk_signal_connect (GTK_OBJECT (window), "destroy",
+			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+			  &window);
+
+      gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
+			  "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+			  window);
+      gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+				 "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy),
+				 GTK_OBJECT (window));
+      
+      button = gtk_button_new_with_label ("Hide Fileops");
+      gtk_signal_connect (GTK_OBJECT (button), "clicked",
+			  (GtkSignalFunc) file_selection_hide_fileops, 
+			  (gpointer) window);
+      gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area), 
+			  button, FALSE, FALSE, 0);
+      gtk_widget_show (button);
+
+      button = gtk_button_new_with_label ("Show Fileops");
+      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
+				 (GtkSignalFunc) gtk_file_selection_show_fileop_buttons, 
+				 (gpointer) window);
+      gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area), 
+			  button, FALSE, FALSE, 0);
+      gtk_widget_show (button);
+    }
+    gtk_widget_show (window);
 }
-*/
+
+
+
+
+// Menuhandler for Windows menu buttons
 static GtkItemFactoryCallback 
+toggle_window (gpointer             callback_data,
+	      guint                callback_action,
+	      GtkWidget           *widget)
+{
+    GUI_Object *gui_object;
+    GtkWidget *menu_item;
+
+//    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
+
+    menu_item = gtk_item_factory_get_item (item_factory,
+					   gtk_item_factory_path_from_widget (widget));
+    if(gp)
+    {
+	switch(callback_action)
+	{
+	case 1:
+	    gui_object=(GUI_Object*)gp->program_memory;
+	    break;
+	case 2:
+	    gui_object=(GUI_Object*)gp->source_browser;
+	    break;
+	case 3:
+	    gui_object=(GUI_Object*)gp->regwin_ram;
+	    break;
+	case 4:
+	    gui_object=(GUI_Object*)gp->regwin_eeprom;
+	    break;
+	case 5:
+	    gui_object=(GUI_Object*)gp->watch_window;
+	    break;
+	case 6:
+	    gui_object=(GUI_Object*)gp->symbol_window;
+	    break;
+	case 7:
+	    gui_object=(GUI_Object*)gp->breadboard_window;
+            break;
+	default:
+	    puts("unknown menu action");
+	}
+	
+	if(gui_object!=NULL)
+	{
+	    if(GTK_CHECK_MENU_ITEM(menu_item)->active)
+		gui_object->change_view(gui_object,VIEW_SHOW);
+	    else
+		gui_object->change_view(gui_object,VIEW_HIDE);
+	}
+
+//	printf("%s\n",gtk_widget_get_name(widget));
+    }
+}
+
+static GtkItemFactoryCallback
 gtk_ifactory_cb (gpointer             callback_data,
 		 guint                callback_action,
 		 GtkWidget           *widget)
@@ -271,13 +380,39 @@ gtk_ifactory_cb (gpointer             callback_data,
 
 }
 
+void set_toggle_menu_states()
+{
+    GUI_Object *gui_object;
+    GtkWidget *menu_item;
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Disassembly");
+    gui_object=(GUI_Object*)gp->program_memory;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Source");
+    gui_object=(GUI_Object*)gp->source_browser;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Ram");
+    gui_object=(GUI_Object*)gp->regwin_ram;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/EEPROM");
+    gui_object=(GUI_Object*)gp->regwin_eeprom;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Watch");
+    gui_object=(GUI_Object*)gp->watch_window;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Symbols");
+    gui_object=(GUI_Object*)gp->symbol_window;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
+    gui_object=(GUI_Object*)gp->breadboard_window;
+    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
+}
 
 static GtkItemFactoryEntry menu_items[] =
 {
   { "/_File",            NULL,         0,                     0, "<Branch>" },
   { "/File/tearoff1",    NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Tearoff>" },
   { "/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { "/File/_Open",       "<control>O", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  { "/File/_Open",       "<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
   { "/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   { "/File/Save _As...", NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   { "/File/sep1",        NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Separator>" },
@@ -293,15 +428,16 @@ static GtkItemFactoryEntry menu_items[] =
   //  { "/_Break/Set",       NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   //  { "/_Break/Clear",     NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
-  { "/_Windows",     "<control>W", 0,               0, "<Branch>" },
-  { "/Windows/Disassembly", NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
-  { "/Windows/Source", NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
+  { "/_Windows",     NULL, 0,               0, "<Branch>" },
+  { "/Windows/Dis_assembly", NULL, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
+  { "/Windows/_Source", NULL, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
   { "/Windows/sep1",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/Ram",    NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
-  { "/Windows/EEPROM", NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
-  { "/Windows/Watch",  NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
+  { "/Windows/_Ram",    NULL, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
+  { "/Windows/_EEPROM", NULL, (GtkItemFactoryCallback)toggle_window,4,"<ToggleItem>" },
+  { "/Windows/_Watch",  NULL, (GtkItemFactoryCallback)toggle_window,5,"<ToggleItem>" },
   { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/Symbols",NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<ToggleItem>" },
+  { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
+  { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
 
   { "/_Preferences",          NULL, 0,               0, "<Branch>" },
   { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },
@@ -390,6 +526,8 @@ void create_dispatcher (void)
       gtk_widget_grab_default (button);
 
       gtk_widget_show_all (dispatcher_window);
+      
+      set_toggle_menu_states();
     }
   else
     gtk_widget_destroy (dispatcher_window);

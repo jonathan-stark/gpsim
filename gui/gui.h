@@ -467,7 +467,6 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
 void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address);
 void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address);
-void SourceBrowserAsm_new_processor(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
 void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address);
 void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw);
 
@@ -504,6 +503,7 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
 int CreateWatchWindow(GUI_Processor *gp);
 int BuildWatchWindow(Watch_Window *ww);
 void WatchWindow_update(Watch_Window *ww);
+void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp);
 
 // gui_breadboard.c
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);

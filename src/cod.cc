@@ -617,9 +617,22 @@ int open_cod_file(pic_processor **pcpu, char *filename)
   int suspicions = 0; // count the number of legal but suspicious items in the .cod file
   char processor_name[16],*pc;
   int error_code= COD_SUCCESS;
+  char directory[256], *dir_path_end;
 
   cout << "processing cod file " << filename << '\n';
 
+  dir_path_end=strrchr(filename,'/');
+  
+  if(dir_path_end!=NULL)
+  {
+      strncpy(directory,filename,dir_path_end-filename);
+      directory[dir_path_end-filename]=0;
+      printf("directory is \"%s\"\n",directory);
+      chdir(directory);
+      filename=dir_path_end+1;
+      printf("filename is \"%s\"\n",filename);
+  }
+  
   codefile = fopen(filename,"r");
 
   if(codefile == NULL) {

@@ -289,6 +289,8 @@ void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address
     float inc;
     int line;
     
+    if(!sbaw->source_loaded) return;
+
     for(i=0;i<SBAW_NRFILES;i++)
     {
 	if(sbaw->pageindex_to_fileid[i]==gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address))
@@ -860,7 +862,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
     int pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
 
-    printf("%d\n",file_id);
+//    printf("%d\n",file_id);
     
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
@@ -1335,17 +1337,6 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 }
 
 
-void SourceBrowserAsm_new_processor(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp)
-{
-    assert(sbaw&&gp);
-    
-  if(sbaw == NULL || gp == NULL)
-      return;
-
-  SourceBrowserAsm_close_source(sbaw, gp);
-}
-
-
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
     if(widget->window==NULL)
@@ -1363,7 +1354,7 @@ message_close_cb(GtkWidget *widget, gpointer d)
     return FALSE;
 }
 
-static int gui_message(char *message)
+int gui_message(char *message)
 {
     static GtkWidget *dialog=NULL;
     static GtkWidget *label;

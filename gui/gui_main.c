@@ -101,7 +101,9 @@ void gui_new_processor (unsigned int pic_id)
       RegWindow_new_processor(gp->regwin_ram, gp);
       StatusBar_new_processor(gp->status_bar, gp);
       SourceBrowserOpcode_new_processor((SourceBrowserOpcode_Window*)gp->program_memory, gp);
-      SourceBrowserAsm_new_processor((SourceBrowserAsm_Window*)gp->source_browser, gp);
+      SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
+      SymbolWindow_new_symbols(gp->symbol_window, gp);
+      WatchWindow_clear_watches(gp->watch_window, gp);
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
 
       init_link_to_gpsim(gp);
@@ -125,6 +127,9 @@ void gui_new_program (unsigned int pic_id)
       RegWindow_new_processor(gp->regwin_eeprom, gp);
 
       
+      SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
+      SymbolWindow_new_symbols(gp->symbol_window, gp);
+//      WatchWindow_clear_watches(gp->watch_window, gp);
       SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
@@ -144,6 +149,7 @@ void gui_new_source (unsigned int pic_id)
       SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
       SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
+//      WatchWindow_clear_watches(gp->watch_window, gp);
 
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
@@ -351,7 +357,6 @@ int gui_init (int argc, char **argv)
 
   gui_styles_init();
   
-  create_dispatcher();
 
   CreateRegisterWindow(gp, REGISTER_RAM);
   CreateRegisterWindow(gp, REGISTER_EEPROM);
@@ -361,6 +366,8 @@ int gui_init (int argc, char **argv)
   CreateWatchWindow(gp);
   CreateBreadboardWindow(gp);
 
+  create_dispatcher();
+  
   update_object = gui_update_object;
   remove_object = gui_remove_object;
   new_processor = gui_new_processor;

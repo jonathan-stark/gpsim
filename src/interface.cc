@@ -916,6 +916,60 @@ void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned in
   iopin->change_direction( new_dir & 1);//( (new_dir) ?  IOPIN::DIR_INPUT :  IOPIN::DIR_OUTPUT));
 }
 
+extern void process_command_file(char * file_name);
+extern int open_cod_file(pic_processor **, char *);
+
+int gpsim_open(unsigned int processor_id, char *file)
+{
+    char *str;
+    pic_processor *pic = get_processor(processor_id);
+
+    str = strrchr(file,'.');
+    if(str==NULL)
+    {
+//	puts("found no dot in file!");
+	return 0;
+    }
+    str++;
+    if(!strcmp(str,"hex"))
+    {
+//	printf("load hex file \"%s\"\n",file);
+	if(!pic)
+	{
+	    puts("No pic selected!");
+	    return 0;
+	}
+	pic->load_hex(file);
+    
+    }
+    else if(!strcmp(str,"cod"))
+    {
+//	printf("load symbol file \"%s\"\n",file);
+	int i;
+	i=load_symbol_file(&pic, file);
+
+	if(i)
+	{
+	    cout << "found a fatal error in the symbol file " << file <<'\n';
+	    return 0;
+	}
+	
+	new_processor(pic);
+      
+    }
+    else if(!strcmp(str,"stc"))
+    {
+//	printf("load command file \"%s\"\n",file);
+	process_command_file(file);
+    }
+    else
+    {
+	printf("Unknown file extension \"%s\" \n",str);
+    }
+
+    return 1;
+}
+
 //--------------------------------------------------------------------------
 //
 // callback registration functions
