@@ -199,7 +199,13 @@ void command::evaluate(ExprList_t *eList,
 {
   ExprList_itor ei;
 
-  if ( !eList || !parameters || !nParameters || !*nParameters)
+  if (!eList) {
+    if(nParameters)
+      *nParameters = 0;
+    return;
+  }
+
+  if ( !parameters || !nParameters || !*nParameters)
     return;
 
   int n = 0;

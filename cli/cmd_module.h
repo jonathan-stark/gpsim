@@ -21,6 +21,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_MODULE_H__
 #define __CMD_MODULE_H__
 
+#include <list>
+using namespace std;
+#include "expr.h"
+
 class cmd_module : public command
 {
 public:
@@ -29,11 +33,15 @@ public:
 
   void module(void);
 
-  void module(int bit_flag);
+  void module(cmd_options *opt);
+
+  void module(cmd_options_str *cos, list <string> *, ExprList_t *el);
+
+private:
 
   void module(cmd_options_str *cos);
 
-  void module(cmd_options_str *cos, char *name);
+  //  void module(cmd_options_str *cos, char *name);
 
   void module(cmd_options_str *cos, char *op1, char *op2);
 

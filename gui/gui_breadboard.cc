@@ -3087,7 +3087,7 @@ void Breadboard_Window::NewModule(Module *module)
     Build();
 
 
-  GtkWidget *widget=0;
+  GtkWidget *widget=(GtkWidget*)module->get_widget();
   
   //if(module->widget!=0)
   //  widget=GTK_WIDGET(module->widget);
