@@ -34,25 +34,11 @@ Boston, MA 02111-1307, USA.  */
 #define NEW_ASY    2
 #define NEW_TRI    3
 
-enum STIMULUS_DATA_POINT_TYPES {
-   STIMULUS_DPT_INT,
-   STIMULUS_DPT_FLOAT
-};
-
-typedef struct StimulusData{
-  enum STIMULUS_DATA_POINT_TYPES data_type;
-
-  union {
-     guint64 i;
-     float   f;
-  } data_point;
-
-} StimulusDataType;
 
 
 class pic_processor;
 struct char_list;
-
+/*
 extern void create_stimulus(int type, char *name);
 extern void dump_stimulus_list(void);
 extern void stimorb_period(unsigned int _period);
@@ -61,7 +47,7 @@ extern void stimorb_phase(unsigned int _phase);
 extern void stimorb_initial_state(unsigned int _initial_state);
 extern void stimorb_start_cycle(unsigned int _start_cycle);
 extern void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_array );
-extern void stimorb_attach(char *node, char_list *stimuli);
 extern void stimorb_name(char *_name);
-
+*/
+extern void stimorb_attach(char *node, char_list *stimuli);
 #endif  // __STIMULUS_ORB_H__

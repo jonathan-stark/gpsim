@@ -36,7 +36,7 @@ extern void add_node(char *node_name);
 extern void dump_node_list(void);
 extern stimulus * find_stimulus (string name);
 extern void add_stimulus(stimulus * );
-
+extern void dump_stimulus_list(void);
 
 /*
  * The 'drive levels' are loosely related to the source impedance 
@@ -58,10 +58,12 @@ extern void add_stimulus(stimulus * );
 #define MAX_DRIVE        0x100000
 #define MAX_ANALOG_DRIVE 0x1000
 
+#define STIMULUS_NAME_LENGTH   30
+
 class Stimulus_Node
 {
 public:
-  char name_str[30];
+  char name_str[STIMULUS_NAME_LENGTH];
   /*  unsigned int total_conductance; ** amount of impedance seen at this node */
   bool warned;   /* keeps track of node warnings (e.g. floating node, contentiong) */
   int state;   /* The most recent value of this node */
@@ -96,6 +98,7 @@ public:
   virtual void put_state(int new_state) {state=new_state;};      // From simulation
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);                   // From the gui
+  void put_name(char *new_name);
 
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
@@ -126,9 +129,28 @@ enum SOURCE_TYPE
     start_cycle,
     time;
 
+  source_stimulus(void) {
+    period = 0;
+    duty = 0;
+    phase = 0;
+    initial_state = 0;
+    start_cycle = 0;
+    time = 0;
+  };
+
   virtual int get_voltage(guint64 current_time) {return 0;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
   char *name(void) { return(name_str);};
+
+  void put_period(unsigned new_period) { period = new_period; };
+  void put_duty(unsigned new_duty) { duty = new_duty; };
+  void put_phase(unsigned new_phase) { phase = new_phase; };
+  void put_initial_state(unsigned new_initial_state) { initial_state = new_initial_state; };
+  void put_start_cycle(unsigned new_start_cycle) { start_cycle = new_start_cycle; };
+  virtual void put_data(guint64 data_point) {};
+  virtual void put_data(float data_point) {};
+  virtual void set_digital(void) { };
+  virtual void set_analog(void) { };
 
 };
 
@@ -238,15 +260,9 @@ class square_wave : public source_stimulus
 public:
 
   square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
+  square_wave(char *n=NULL);
 
   virtual int get_voltage(guint64 current_time);
-  /*    {
-      if( ((current_time+phase) % period) <= duty)
-	return 1;
-      else
-	return 0;
-    };
-    */
       
   char *name(void) { return(name_str);};
   virtual SOURCE_TYPE isa(void) {return SQW;};
@@ -261,10 +277,18 @@ public:
 
   virtual int get_voltage(guint64 current_time);
   triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
+  triangle_wave(char *n=NULL);
 
   virtual SOURCE_TYPE isa(void) {return TRI;};
 
 };
+
+typedef struct StimulusData {
+
+  guint64 time;
+  int value;
+
+} StimulusDataType;
 
 class asynchronous_stimulus : public source_stimulus, public BreakCallBack
 {
@@ -278,11 +302,15 @@ public:
     next_state;
 
   guint64
-    *transition_cycles,
+    //*transition_cycles,
     future_cycle;
 
-  int
-    *values;
+  GSList *current_sample;
+  GSList *samples;
+
+  //int
+  //*values;
+
 
   pic_processor *cpu;
     
@@ -290,9 +318,15 @@ public:
   virtual void callback(void);
   virtual int get_voltage(guint64 current_time);
   virtual void start(void);
+  virtual void put_data(guint64 data_point);
+  virtual void put_data(float data_point);
+  virtual void set_digital(void) { digital = 1; };
+  virtual void set_analog(void) { digital = 0; };
   asynchronous_stimulus(char *n=NULL);
   virtual SOURCE_TYPE isa(void) {return ASY;};
 
+ private:
+  bool data_flag;
 };
 
 

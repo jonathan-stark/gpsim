@@ -230,7 +230,7 @@ void process_command_file(char * file_name)
       quit_parse = 0;
       while( !quit_parse )
 	{
-	  cout << "about to re-init the parser\n";
+	  //cout << "about to re-init the parser\n";
 	  init_parser();
 	  yyparse();
 	}

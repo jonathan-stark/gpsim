@@ -458,6 +458,29 @@ void TMR1H::put(unsigned int new_value)
 
 }
 
+unsigned int TMR1H::get(void)
+{
+
+  // If the TMR1 is being read immediately after being written, then
+  // it hasn't had enough time to synchronize with the PIC's clock.
+  if(cpu->cycles.value <= tmr1l->synchronized_cycle)
+    return value;
+
+  //  int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+  tmr1l->current_value();
+
+  value = (((tmr1l->value_16bit)>>8) & 0xff);
+  trace.register_read(address, value);
+  return(value);
+  
+}
+
+// For the gui and CLI
+unsigned int TMR1H::get_value(void)
+{
+  return get();
+}
+
 
 //--------------------------------------------------
 // member functions for the TMR1L base class
@@ -502,7 +525,8 @@ void TMR1L::on_or_off(int new_state)
 
   if(new_state)
     {
-      //cout << "TMR1 is being turned on\n";
+      if(verbose & 0x4)
+	cout << "TMR1 is being turned on\n";
       // turn on the timer
 
       // Effective last cycle
@@ -511,7 +535,9 @@ void TMR1L::on_or_off(int new_state)
     }
   else
     {
-      //cout << "TMR1 is being turned off\n";
+      if(verbose & 0x4)
+	cout << "TMR1 is being turned off\n";
+
       // turn off the timer and save the current value
       current_value();
       value = value_16bit & 0xff;
@@ -528,7 +554,9 @@ void TMR1L::on_or_off(int new_state)
 void TMR1L::update(void)
 {
 
-  //cout << "TMR1 update "  << hex << cpu->cycles.value.lo << '\n';
+  if(verbose & 0x4)
+    cout << "TMR1 update "  << hex << cpu->cycles.value << '\n';
+
   if(t1con->get_tmr1on())
     {
       if(t1con->get_tmr1cs())
@@ -537,7 +565,8 @@ void TMR1L::update(void)
 	}
       else
 	{
-	  //cout << "Internal clock\n";
+	  if(verbose & 0x4)
+	    cout << "Internal clock\n";
 
 	  //value_16bit = ((tmr1h->value & 0xff) << 8) | value;
 	  current_value();
@@ -612,6 +641,11 @@ unsigned int TMR1L::get(void)
   
 }
 
+// For the gui and CLI
+unsigned int TMR1L::get_value(void)
+{
+  return get();
+}
 
 //%%%FIXME%%% inline this
 void TMR1L::current_value(void)

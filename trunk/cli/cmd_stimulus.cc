@@ -27,9 +27,11 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_stimulus.h"
 #include "../src/stimulus_orb.h"
+#include "../src/stimuli.h"
 
 
-
+//GSList *data_array=NULL;
+static source_stimulus *last_stimulus=NULL;
 cmd_stimulus c_stimulus;
 
 #define ASYNCHRONOUS_STIMULUS    1
@@ -77,6 +79,8 @@ static cmd_options cmd_stimulus_options[] =
   "dump",                  STIM_DUMP,          OPT_TT_BITFLAG,
   "sqw",                   STIM_SQW,           OPT_TT_BITFLAG,
   "sqare_wave",            STIM_SQW,           OPT_TT_BITFLAG,
+  "tri",                   STIM_TRI,           OPT_TT_BITFLAG,
+  "triangle_wave",         STIM_TRI,           OPT_TT_BITFLAG,
   "port",                  STIM_PORT,          OPT_TT_STRING,
 
   NULL,0,0
@@ -128,6 +132,18 @@ void cmd_stimulus::stimulus(void)
   dump_stimulus_list();
 }
 
+//------------------------------------------------------------------
+// stimulus(int bit_flag)
+//
+// For the bit_flags of SQW, ASY, TRI:
+//   A new stimulus is dynamically created and a pointer to it is
+// is assigned to 'last_stimulus'. The last_stimulus also acts like
+// a flag. If it is non-null then a stimulus is in the process of
+// being created. When the stimulus 'end' option is specified at the
+// cli, then 'last_stimulus' is set to NULL. Note the memory for 
+// used by the last stimulus is created here, but destroyed by the
+// stimulus code in ../src/stimuli.cc .
+//
 void cmd_stimulus::stimulus(int bit_flag)
 {
 
@@ -136,25 +152,39 @@ void cmd_stimulus::stimulus(int bit_flag)
     case STIM_SQW:
       if(verbose)
 	cout << "creating sqw stimulus\n";
-      create_stimulus(NEW_SQW,stim_name);
-      valid_options = SQW_OPTIONS;
-      options_entered = STIM_SQW;
+      if(!last_stimulus) {
+	//create_stimulus(NEW_SQW,stim_name);
+	valid_options = SQW_OPTIONS;
+	options_entered = STIM_SQW;
+	last_stimulus = new square_wave;
+      } else
+	cout << "warning: ignoring sqw stim creation";
       break;
 
     case STIM_ASY:
       if(verbose)
 	cout << "creating asy stimulus\n";
-      create_stimulus(NEW_ASY,stim_name);
-      valid_options = ASY_OPTIONS;
-      options_entered = STIM_ASY;
+
+      if(!last_stimulus) {
+	//create_stimulus(NEW_ASY,stim_name);
+	last_stimulus = new asynchronous_stimulus;
+	valid_options = ASY_OPTIONS;
+	options_entered = STIM_ASY;
+      }else
+	cout << "warning: ignoring asy stim creation";
       break;
 
     case STIM_TRI:
       if(verbose)
 	cout << "creating tri stimulus\n";
-      create_stimulus(NEW_TRI,stim_name);
-      valid_options = TRI_OPTIONS;
-      options_entered = STIM_TRI;
+
+      if(!last_stimulus) {
+	//create_stimulus(NEW_TRI,stim_name);
+	last_stimulus = new triangle_wave;
+	valid_options = TRI_OPTIONS;
+	options_entered = STIM_TRI;
+      } else
+	cout << "warning: ignoring tri stim creation";
       break;
 
     case STIM_DUMP:
@@ -162,11 +192,15 @@ void cmd_stimulus::stimulus(int bit_flag)
       return;
 
     case STIM_DIGITAL:
-      digital = 1;
+      if(last_stimulus)
+	last_stimulus->set_digital();
+      //digital = 1;
       return;
 
     case STIM_ANALOG:
-      digital = 0;
+      if(last_stimulus)
+	last_stimulus->set_analog();
+      //digital = 0;
       return;
 
     default:
@@ -175,7 +209,7 @@ void cmd_stimulus::stimulus(int bit_flag)
     }
 
   // Initialize the default stimulus parameters
-
+  /*
   period = 1000;
   phase = 0;
   high_time = 500;
@@ -189,7 +223,7 @@ void cmd_stimulus::stimulus(int bit_flag)
 
   if(temp_array.size())
     temp_array.erase(temp_array.begin(), temp_array.end());
-
+  */
 }
 
 
@@ -201,31 +235,46 @@ void cmd_stimulus::stimulus(cmd_options_num *con)
     case STIM_PHASE:
       if(verbose)
 	cout << "stimulus command got the phase " << con->n << '\n';
-      stimorb_phase( con->n);
+
+      if(last_stimulus)
+	last_stimulus->put_phase(con->n);
+      //stimorb_phase( con->n);
       break;
 
     case STIM_PERIOD:
       if(verbose)
 	cout << "stimulus command got the period " << con->n << '\n';
-      stimorb_period( con->n);
+
+      if(last_stimulus)
+	last_stimulus->put_period(con->n);
+      //stimorb_period( con->n);
       break;
 
     case STIM_HIGH_TIME:
       if(verbose)
 	cout << "stimulus command got the high_time " << con->n << '\n';
-      stimorb_duty( con->n);
+
+      if(last_stimulus)
+	last_stimulus->put_duty(con->n);
+      //stimorb_duty( con->n);
       break;
 
     case STIM_INITIAL_STATE:
       if(verbose)
 	cout << "stimulus command got the initial_state " << con->n << '\n';
-      stimorb_initial_state( con->n);
+
+      if(last_stimulus)
+	last_stimulus->put_initial_state(con->n);
+      //stimorb_initial_state( con->n);
       break;
 
     case STIM_START_CYCLE:
       if(verbose)
 	cout << "stimulus command got the start_cycle " << con->n << '\n';
-      stimorb_start_cycle( con->n);
+
+      if(last_stimulus)
+	last_stimulus->put_start_cycle(con->n);
+      //stimorb_start_cycle( con->n);
       break;
 
     default:
@@ -240,6 +289,11 @@ void cmd_stimulus::stimulus(cmd_options_num *con)
 // %%% FIXME %%%
 void cmd_stimulus::stimulus(cmd_options_float *cof)
 {
+
+  if(!last_stimulus) {
+    cout << "warning: Ignoring stimulus (float) option because there's no stimulus defined.";
+    return;
+  }
 
   int n;
 
@@ -256,31 +310,41 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
     case STIM_PHASE:
       if(verbose)
 	cout << "stimulus command got the phase " << n << '\n';
-      stimorb_phase( n);
+
+      last_stimulus->put_phase(n);
+      //stimorb_phase( n);
       break;
 
     case STIM_PERIOD:
       if(verbose)
 	cout << "stimulus command got the period " << n << '\n';
-      stimorb_period( n);
+
+      last_stimulus->put_period(n);
+      //stimorb_period( n);
       break;
 
     case STIM_HIGH_TIME:
       if(verbose)
 	cout << "stimulus command got the high_time " << n << '\n';
-      stimorb_duty( n);
+
+      last_stimulus->put_duty(n);
+      //stimorb_duty( n);
       break;
 
     case STIM_INITIAL_STATE:
       if(verbose)
 	cout << "stimulus command got the initial_state " << n << '\n';
-      stimorb_initial_state( n);
+
+      last_stimulus->put_initial_state(n);
+      //stimorb_initial_state( n);
       break;
 
     case STIM_START_CYCLE:
       if(verbose)
 	cout << "stimulus command got the start_cycle " << n << '\n';
-      stimorb_start_cycle( n);
+
+      last_stimulus->put_start_cycle(n);
+      //stimorb_start_cycle( n);
       break;
 
     default:
@@ -295,13 +359,20 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 void cmd_stimulus::stimulus(cmd_options_str *cos)
 {
 
+  if(!last_stimulus) {
+    cout << "warning: Ignoring stimulus (string) option because there's no stimulus defined.\n";
+    return;
+  }
+
 
   switch(cos->co->value)
     {
     case STIM_NAME:
       if(verbose)
 	cout << "stimulus command got the name " << cos->str << '\n';
-      stimorb_name(cos->str);
+
+      last_stimulus->put_name(cos->str);
+      //stimorb_name(cos->str);
       break;
     case STIM_PORT:
       cout << "the port option has been deprecated\n";
@@ -312,32 +383,41 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
 
 void cmd_stimulus::data_point(guint64 new_data_point)
 {
-  StimulusDataType sdt;
+  //StimulusDataType *sdt;
+
+  //sdt = (StimulusDataType *)malloc(sizeof(StimulusDataType));
 
   if(verbose)
-    cout << "stimulus command got got integer data\n";
+    cout << "stimulus command got integer data\n";
 
 
-  sdt.data_type    = STIMULUS_DPT_INT;
-  sdt.data_point.i = new_data_point;
+  //sdt->data_type    = STIMULUS_DPT_INT;
+  //sdt->data_point.i = new_data_point;
 
-  temp_array.push_back(sdt);
+  //data_array = g_slist_append(data_array, sdt);
+  //temp_array.push_back(sdt);
+
+  if(last_stimulus)
+    last_stimulus->put_data(new_data_point);
 
   have_data = 1;
 
 }
 void cmd_stimulus::data_point(float new_data_point)
 {
-  StimulusDataType sdt;
+  //  StimulusDataType sdt;
 
   if(verbose)
     cout << "stimulus command got got float data\n";
 
-  sdt.data_type    = STIMULUS_DPT_FLOAT;
-  sdt.data_point.f = new_data_point;
+  //sdt.data_type    = STIMULUS_DPT_FLOAT;
+  //sdt.data_point.f = new_data_point;
 
-  temp_array.push_back(sdt);
+  //temp_array.push_back(sdt);
 
+
+  if(last_stimulus)
+    last_stimulus->put_data(new_data_point);
 
   have_data = 1;
 
@@ -351,6 +431,10 @@ void cmd_stimulus::data_point(float new_data_point)
 
 void cmd_stimulus::end(void)
 {
+  if(!last_stimulus) {
+    cout << "warning: Ignoring stimulus (string) option because there's no stimulus defined.";
+    return;
+  }
 
   switch( options_entered & (STIM_SQW | STIM_TRI | STIM_ASY))
     {
@@ -360,8 +444,8 @@ void cmd_stimulus::end(void)
       break;
 
     case STIM_ASY:
-      if(have_data)
-	stimorb_asy(digital, cpu, temp_array );
+      //if(have_data)
+      //stimorb_asy(digital, cpu, temp_array );
       if(verbose)
 	cout << "created asy stimulus\n";
       break;
@@ -373,5 +457,5 @@ void cmd_stimulus::end(void)
 
     }
 
-
+  last_stimulus = NULL;
 }

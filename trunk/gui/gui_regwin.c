@@ -609,10 +609,12 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
   char cell[100],*n;
   char *text;
   GtkSheetCellAttr attributes;
-  int regnumber = rw->row_to_address[row]+column;
+  int regnumber;
   
-  sheet=rw->register_sheet;
   
+  if(rw)
+    sheet=rw->register_sheet;
+
   if(widget==NULL || row>sheet->maxrow || row<0||
      column>sheet->maxcol || column<0 || rw==NULL)
   {
@@ -620,6 +622,12 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
       return 0;
   }
   
+  regnumber = rw->row_to_address[row]+column;
+
+  if(regnumber > 0xfffff0) {
+    printf("bogus regnumber 0x%x, row %x, col %x\n",regnumber,row,column);
+    return 0;
+  }
     // this statement need gtksheet-next-version
   //  RegWindow_select_symbol_regnumber(rw,rw->row_to_address[row]+column);
 
@@ -1117,7 +1125,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 		gtk_sheet_set_row_title(sheet, j, row_label);
 
 		rw->row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
-		
+		printf("rw->row_to_address[0x%x]=0x%x\n",j, rw->row_to_address[j]);
 		row_created=TRUE;
 	    }
 	}

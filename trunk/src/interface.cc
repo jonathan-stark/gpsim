@@ -157,7 +157,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 	return 1;
     }
   else
-    printf("Warning: Request for register %d in processor %s is out of range",register_number,pic->name());
+    printf("Warning: Request for register 0x%x in processor %s is out of range\n",register_number,pic->name());
 
 
   return 0;

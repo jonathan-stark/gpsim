@@ -4,11 +4,11 @@
 
 # Create the processor that's to be simulated
 
-processor p16c71 fred
+set verbose 3
 
 # Load the .hex file
 
-load h p16c71_test.hex
+load s p16c71_test.cod
 
 # Create a stimulus node:
 node analog_node
@@ -27,10 +27,10 @@ high_time 300
 phase 100
 
 #port porta 0
-name triangle_wave
+name t_wave
 
 end
 
 echo stimulus created
 
-attach analog_node porta0 triangle_wave
+attach analog_node porta0 t_wave

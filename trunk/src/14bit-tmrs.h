@@ -175,6 +175,8 @@ public:
   TMR1L *tmr1l;
 
   void put(unsigned int new_value);
+  unsigned int get(void);
+  virtual unsigned int get_value(void);
 
   TMR1H(void);
 
@@ -209,6 +211,7 @@ public:
 
   void put(unsigned int new_value);
   unsigned int get(void);
+  virtual unsigned int get_value(void);
   unsigned int get_low_and_high(void);
   void on_or_off(int new_state);
   void increment(void);   // Used when TMR1 is attached to an external clock
