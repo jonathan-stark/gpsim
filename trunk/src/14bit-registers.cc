@@ -207,6 +207,7 @@ void  FSR::put(unsigned int new_value)
   if(cpu->base_isa() == _12BIT_PROCESSOR_)
     {
       cpu->register_bank = &cpu->registers[ value & register_page_bits ];
+      value = cpu->get_fsr_value ( new_value );	// adjust for missing bits
     }
 
 
@@ -330,7 +331,7 @@ void INDF::put(unsigned int new_value)
 {
 
   trace.register_write(address,value);
-  int reg = (cpu->fsr->value + 
+  int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
 	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
@@ -357,7 +358,7 @@ void INDF::put_value(unsigned int new_value)
   if(xref)
     {
       xref->update();
-      int r = (cpu->fsr->value + 
+      int r = (cpu->map_fsr_indf() + //cpu->fsr->value + 
 	       ((cpu->status.value & base_address_mask1)<<1)& base_address_mask2);
       if(r & fsr_mask) 
 	{
@@ -373,7 +374,7 @@ unsigned int INDF::get(void)
 {
 
   trace.register_read(address,value);
-  int reg = (cpu->fsr->value + 
+  int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
 	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get());
@@ -383,7 +384,6 @@ unsigned int INDF::get(void)
 
 unsigned int INDF::get_value(void)
 {
-  cout <<"INDF::get_value\n";
   int reg = (cpu->fsr->value + 
 	       ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)

@@ -791,7 +791,7 @@ unsigned int PORTC::get(void)
   int diff = old_value ^ value; // The difference between old and new
 
   // 
-  if( diff & CCP1)
+  if( ccp1con && (diff & CCP1) )
     ccp1con->new_edge(value & CCP1);
  
   // if this cpu has a usart and there's been a change detected on

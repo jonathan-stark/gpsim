@@ -102,6 +102,15 @@ enum _12BIT_DEFINITIONS
       return ((status.value & pa_bits) << 4);
     }
 
+  virtual unsigned int get_fsr_value ( unsigned int load_value )
+    {
+      return ( load_value | 0x80 );
+    }
+
+  virtual unsigned int map_fsr_indf ( void )
+    {
+      return ( this->fsr->value & 0x1F );
+    }
 
   virtual void option_new_bits_6_7(unsigned int);
 
