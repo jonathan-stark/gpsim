@@ -64,13 +64,11 @@ static char *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Regi
 static char *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
 
 struct profile_entry {
-    unsigned int pic_id;
     unsigned int address;
     guint64 last_count;
 };
 
 struct profile_range_entry {
-    unsigned int pic_id;
     char startaddress_text[64];
     char endaddress_text[64];
     unsigned int startaddress;
@@ -79,7 +77,6 @@ struct profile_range_entry {
 };
 
 struct profile_register_entry {
-    unsigned int pic_id;
     unsigned int address;
     guint64 last_count_read;
     guint64 last_count_write;
@@ -137,7 +134,6 @@ class ProfileEntry : public GUIRegister {
 public:
 
   Processor *cpu;
-  unsigned int pic_id;
   unsigned int address;
   guint64 last_count;
 
@@ -222,7 +218,6 @@ static void add_range(Profile_Window *pw,
     strcpy(profile_range_entry->endaddress_text,endaddress_text);
     profile_range_entry->startaddress=startaddress;
     profile_range_entry->endaddress=endaddress;
-    profile_range_entry->pic_id=gp->pic_id;
     profile_range_entry->last_count=gcycles;
 
     gtk_clist_set_row_data(GTK_CLIST(pw->profile_range_clist), row, (gpointer)profile_range_entry);
@@ -426,7 +421,6 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
     struct profile_entry *entry;
-    unsigned int pic_id;
 
     if(widget==0 || data==0)
     {
@@ -435,7 +429,6 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
     }
     
     item = (menu_item *)data;
-    pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
 
     entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
 
@@ -458,7 +451,6 @@ static void
 exestats_popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
-    unsigned int pic_id;
 
     if(widget==0 || data==0)
     {
@@ -467,7 +459,6 @@ exestats_popup_activated(GtkWidget *widget, gpointer data)
     }
     
     item = (menu_item *)data;
-    pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
 
     switch(item->id)
     {
@@ -632,7 +623,6 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     static double *py2;//[] = {.012*1000, .067*1000, .24*1000, .5*1000, .65*1000, .5*1000, .24*1000, .067*1000};
     gdouble tickdelta;
     gdouble barwidth;
-    int pic_id;
     time_t t;
 
     static int has_old_graph=0;
@@ -695,8 +685,6 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     
     if(!pw || !pw->gp || !pw->gp->cpu)
       return 0;
-
-    pic_id = pw->gp->pic_id;
 
     t=time(0);
 
@@ -925,7 +913,6 @@ int plot_routine_histogram(Profile_Window *pw)
     gdouble tickdelta_x;
     gdouble tickdelta_y;
     gdouble barwidth;
-    int pic_id;
     time_t t;
 
     static int has_old_graph=0;
@@ -1041,8 +1028,6 @@ int plot_routine_histogram(Profile_Window *pw)
 	minx=minx-margin;
     else
         minx=0;
-
-    pic_id = pw->gp->pic_id;
 
     page_width = GTK_PLOT_LETTER_W * scale;
     page_height = GTK_PLOT_LETTER_H * scale;
@@ -1250,8 +1235,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     struct profile_entry *entry;
     struct profile_range_entry *range_entry=0;
 
-    unsigned int pic_id;
-
     if(widget==0 || data==0)
     {
 	printf("Warning popup_activated(%p,%p)\n",widget,data);
@@ -1261,8 +1244,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 
     item = (menu_item *)data;
-    pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
-
     entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
 
     switch(item->id)
@@ -1453,7 +1434,7 @@ key_press(GtkWidget *widget,
 
   if(!pw) return(FALSE);
   if(!pw->gp) return(FALSE);
-  if(!pw->gp->pic_id) return(FALSE);
+  if(!pw->gp->cpu) return(FALSE);
 
   switch(key->keyval) {
 
@@ -1787,7 +1768,7 @@ void Profile_Window::Update()
   if(!enabled)
     return;
 
-  if(gp==0 || gp->pic_id==0)
+  if(!gp || !gp->cpu)
   {
       puts("Warning gp or gp->pic_id == 0 in ProfileWindow_update");
       return;
@@ -2215,8 +2196,6 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
       // FIXME this memory is never freed?
       profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
       profile_entry->address=i;
-      profile_entry->pic_id=gp->pic_id;
-      //	profile_entry->type=type;
       profile_entry->last_count=cycles;
 
       gtk_clist_set_row_data(GTK_CLIST(profile_clist), row, (gpointer)profile_entry);
@@ -2268,7 +2247,6 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 	// FIXME this memory is never freed?
 	profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
 	profile_register_entry->address=i;
-	profile_register_entry->pic_id=gp->pic_id;
 	profile_register_entry->last_count_read=read_cycles;
 	profile_register_entry->last_count_read=write_cycles;
 

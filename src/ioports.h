@@ -26,6 +26,9 @@ Boston, MA 02111-1307, USA.  */
 class IOPORT_TRIS;
 class IOPORT_LATCH;
 class USART_MODULE;
+class IOPIN;
+class stimulus;
+class Stimulus_Node;
 
 //---------------------------------------------------------
 // IOPORT

@@ -32,4 +32,7 @@ extern int input_mode;
 extern char *gnu_readline (char *s, unsigned int force_readline);
 #endif
 
+class Processor;
+int gpsim_open(Processor *cpu, const char *file);
+
 #endif

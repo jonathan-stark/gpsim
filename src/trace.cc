@@ -58,7 +58,7 @@ ProfileKeeper profile_keeper;
    General:
   
    gpsim traces almost everything simulated: instructions executed,
-   register reads/writes, clock cycles, special reigster accesses
+   register reads/writes, clock cycles, special register accesses
    break points, instruction skips, external modules, and a few
    other miscellaneous things. 
 
@@ -1024,7 +1024,7 @@ void TraceLog::status(void)
 
 }
 
-void TraceLog::switch_cpus(pic_processor *pcpu)
+void TraceLog::switch_cpus(Processor *pcpu)
 {
   cpu = pcpu;
 }

@@ -33,7 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 void symbol_dump_all(void);
 void symbol_dump_one(char *sym_name);
-void symbol_add_one(pic_processor *cpu, char *sym_name, char *sym_type, int value);
+void symbol_add_one(Processor *cpu, char *sym_name, char *sym_type, int value);
 int  get_symbol_value(char *sym, int *sym_value);
 void print_symbol(char *sym);
 void update_symbol_value(char *sym, int sym_value);

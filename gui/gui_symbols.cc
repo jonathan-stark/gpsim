@@ -40,7 +40,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 struct symbol_entry {
-    unsigned int pic_id;
     unsigned int value; // symbol value
     struct cross_reference_to_gui *xref;
 };
@@ -103,7 +102,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     menu_item *item;
     sym *entry;
 
-    unsigned int pic_id;
     int value;
 
     if(widget==0 || data==0)
@@ -113,7 +111,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     }
     
     item = (menu_item *)data;
-    pic_id = ((GUI_Object*)popup_sw)->gp->pic_id;
 
     entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
 

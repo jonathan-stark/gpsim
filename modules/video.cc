@@ -36,11 +36,63 @@ in1	in2	result
 #include <stdlib.h>
 #include <string>
 
+#include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
+#include "../src/gpsim_interface.h"
+#include "../src/gpsim_time.h"
+#include "../src/processor.h"
+
 #include "video.h"
+
+extern Processor *active_cpu;
+
+//--------------------------------------------------------------
+//
+// Create an "interface" to gpsim
+//
+
+
+class Video_Interface : public Interface
+{
+private:
+  Video *video;
+
+public:
+
+  //virtual void UpdateObject (gpointer xref,int new_value);
+  //virtual void RemoveObject (gpointer xref);
+  virtual void SimulationHasStopped (gpointer object)
+  {
+    if(video)
+      video->refresh();
+  }
+
+  virtual void NewProcessor (Processor *new_cpu)
+  {
+    if(video)
+      video->cpu = new_cpu;
+  }
+
+  //virtual void NewModule (Module *module);
+  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
+  //virtual void NewProgram  (unsigned int processor_id);
+  virtual void GuiUpdate  (gpointer object)
+  {
+    if(video)
+      video->refresh();
+  }
+
+
+  Video_Interface(Video *_video) : Interface((gpointer *) _video)
+  {
+    video = _video;
+  }
+
+};
+
 
 //--------------------------------------------------------------
 //   This class is a minor extension of a normal IO_input. I may
@@ -61,12 +113,14 @@ void Another_Input::put_node_state( int new_state)
   }
 }
 
+/*
 static void gui_update(gpointer callback_data)
 {
     Video *video;
     video = (Video*)callback_data;
     video->refresh();
 }
+*/
 
 static void expose(GtkWidget *widget,
 		   GdkEventExpose *event,
@@ -87,8 +141,12 @@ Video::Video(void)
   line_nr=0;
   memset(line,0x80,XRES);
 
-  cpu = get_processor(1);
-  
+  //  cpu = get_processor(1);
+  cpu = active_cpu;  //FIXME
+
+  interface = new Video_Interface(this);
+  gi.add_interface(interface);
+
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_default_size(GTK_WINDOW(window), XRES,YRES);
   gtk_window_set_title(GTK_WINDOW(window), "Video");
@@ -131,8 +189,8 @@ Video::Video(void)
 		      XRES,
 		      YRES);
 
-  interface_id = gpsim_register_interface((gpointer)this);
-  gpsim_register_simulation_has_stopped(interface_id, gui_update);
+  //  interface_id = gpsim_register_interface((gpointer)this);
+  //  gpsim_register_simulation_has_stopped(interface_id, gui_update);
 
 
 }
@@ -143,7 +201,7 @@ Video::~Video(void)
     //cout << "Video base class destructor\n";
 
     gtk_widget_destroy(window);
-    gpsim_unregister_interface(interface_id);
+    //gpsim_unregister_interface(interface_id);
     delete port;
 }
 
@@ -234,52 +292,55 @@ ExternalModule * Video::construct(const char *new_name)
 
 void Video::copy_scanline_to_pixmap(void)
 {
-	int i, y;
-	int vbl=0;
-	int last=line[0];
+  int i, y;
+  int vbl=0;
+  int last=line[0];
 
-	// Fill unfilled values
-	for(i=1;i<XRES;i++)
-	{
-		if(line[i]&0x80) // Not written, use last written value
-			line[i]=last;
-		last=line[i];
-	}
+  // Fill unfilled values
+  for(i=1;i<XRES;i++)
+    {
+      if(line[i]&0x80) // Not written, use last written value
+	line[i]=last;
+      last=line[i];
+    }
 
-	// Draw
-	for(i=1;i<XRES;i++)
+  // Draw
+  for(i=1;i<XRES;i++)
+    {
+      if(line_nr<313)
+	y=line_nr*2;
+      else
+	y=(line_nr-313)*2+1;
+      if(line[i]>2)
 	{
-		if(line_nr<313)
-			y=line_nr*2;
-		else
-			y=(line_nr-313)*2+1;
-		if(line[i]>2)
-		{
-			gdk_draw_point(pixmap, white_gc, i, y);
-		}
-		else
-		{
-			gdk_draw_point(pixmap, black_gc, i, y);
-		}
+	  gdk_draw_point(pixmap, white_gc, i, y);
 	}
-	// Copy line to drawing area
+      else
+	{
+	  gdk_draw_point(pixmap, black_gc, i, y);
+	}
+    }
+  // Copy line to drawing area
 }
 
-int Video::cycles_to_us(int cycles)
+guint64 Video::cycles_to_us(guint64 cycles)
 {
-	float ret;
+  float ret = 0;;
 
-	ret = cycles*4000000.0/cpu->frequency;
-	return (int) ret;
+  if(cpu)
+    ret = cycles*4000000.0/cpu->frequency;
+  return (guint64) ret;
 }
 
 
-int Video::us_to_cycles(int us)
+guint64 Video::us_to_cycles(guint64 us)
 {
-	float ret;
+  float ret = 0;
 
-	ret = us*cpu->frequency/4000000.0;
-	return (int) ret;
+  if(cpu)
+    ret = us*cpu->frequency/4000000.0;
+
+  return (guint64) ret;
 }
 
 void Video::refresh(void)
@@ -294,18 +355,21 @@ void Video::refresh(void)
 
 void Video::update_state(void)
 {
-  unsigned int cycletime;
+  guint64 cycletime;
   int index;
   static int last_port_value=0;
   int val=port->value;
   static int shortsync_counter, last_shortsync_counter;
 
-  cycletime = gpsim_get_cycles_lo(1); // FIXME 64 bits?
+  // get the current simulation cycle time from gpsim.
+
+  cycletime = cycles.get();
+
   if(sync_time>cycletime)
   {
-      // Cycle counter rolled over.
-      sync_time+=us_to_cycles(64); // 64 us = 1 line
-      assert(sync_time<=cycletime);
+    // Cycle counter rolled over.
+    sync_time+=us_to_cycles(64); // 64 us = 1 line
+    assert(sync_time<=cycletime);
   }
 
   // Index into line buffer. Calculated from sync_time.
@@ -313,88 +377,88 @@ void Video::update_state(void)
 
   if(cycletime-sync_time>us_to_cycles(70))
   {
-      // Long time with no sync pulses
-      // Shouldn't happen?
-      // If there was a long time since last sync, we jump over a line.
-	  sync_time+=us_to_cycles(64); // 64 us = 1 line
-	  memset(line,0x80,XRES); // clear line buffer
+    // Long time with no sync pulses
+    // Shouldn't happen?
+    // If there was a long time since last sync, we jump over a line.
+    sync_time+=us_to_cycles(64); // 64 us = 1 line
+    memset(line,0x80,XRES); // clear line buffer
   }
   
   if(last_port_value!=0 && port->value==0) // Start of sync
   {
-	  // Every 32 or 64us there should be a sync.
+    // Every 32 or 64us there should be a sync.
 	  
-	  sync_time=cycletime;
+    sync_time=cycletime;
 	  
-	  // Start measure on negative flank, when we have lots in buffer.
-	  if(index>XRES-XRES/5)
+    // Start measure on negative flank, when we have lots in buffer.
+    if(index>XRES-XRES/5)
+    {
+      // Have a full line
+      if(shortsync_counter>0)
+      {
+	// We are on first line in the frame.
+	if(shortsync_counter > last_shortsync_counter)
+	{
+	  line_nr=6;
+
+	  // Draw the last full image
+	  refresh();
+
+	  // Clear pixmap
+	  gdk_draw_rectangle (pixmap,
+			      da->style->bg_gc[GTK_WIDGET_STATE (da)],
+			      TRUE,
+			      0, 0,
+			      XRES,
+			      YRES);
+	}
+	else if(shortsync_counter < last_shortsync_counter)
 	  {
-              // Have a full line
-	      if(shortsync_counter>0)
-	      {
-                  // We are on first line in the frame.
-		  if(shortsync_counter > last_shortsync_counter)
-		  {
-		      line_nr=6;
-
-		      // Draw the last full image
-		      refresh();
-
-		      // Clear pixmap
-		      gdk_draw_rectangle (pixmap,
-					  da->style->bg_gc[GTK_WIDGET_STATE (da)],
-					  TRUE,
-					  0, 0,
-					  XRES,
-					  YRES);
-		  }
-		  else if(shortsync_counter < last_shortsync_counter)
-		  {
-		      line_nr=318;
-		  }
-                  else
-		  {
-		      puts("VSYNC error");
-                      printf("%d, %d\n",shortsync_counter, last_shortsync_counter);
-                      //bp.halt(); useful for debug
-		  }
-		  last_shortsync_counter=shortsync_counter;
-		  shortsync_counter=0;
-
-	      }
-	      copy_scanline_to_pixmap(); // display last line
-	      line_nr++;
-
-	      if(line_nr>=YRES)
-		  line_nr=0;
-	      memset(line,0x80,XRES);
-	      index=0;
+	    line_nr=318;
 	  }
-	  else if(index>XRES/3 && index<XRES-XRES/3)
+	else
 	  {
-	      // Shortsync
-              //printf("shortsync %d\n",index);
-	      shortsync_counter++;
+	    puts("VSYNC error");
+	    printf("%d, %d\n",shortsync_counter, last_shortsync_counter);
+	    //bp.halt(); useful for debug
 	  }
+	last_shortsync_counter=shortsync_counter;
+	shortsync_counter=0;
+
+      }
+      copy_scanline_to_pixmap(); // display last line
+      line_nr++;
+
+      if(line_nr>=YRES)
+	line_nr=0;
+      memset(line,0x80,XRES);
+      index=0;
+    }
+    else if(index>XRES/3 && index<XRES-XRES/3)
+      {
+	// Shortsync
+	//printf("shortsync %d\n",index);
+	shortsync_counter++;
+      }
   }
   if(last_port_value==0 && port->value!=0) // End of sync
   {
-	  int us_time;
+    int us_time;
 	  
-	  // Should be 4 us (0.000004*12000000
-	  us_time = cycles_to_us(cycletime-sync_time);
-/*	  if(us_time > 2 &&
-	     us_time < 6)
+    // Should be 4 us (0.000004*12000000
+    us_time = cycles_to_us(cycletime-sync_time);
+    /*	  if(us_time > 2 &&
+	  us_time < 6)
 	  {
-		  // Valid HSYNC
+	  // Valid HSYNC
 	  }*/
 		  
-	  if(us_time > 25 && us_time < 35)
-	  {
-		  // vertical sync (FIXME, how should this be?)
+    if(us_time > 25 && us_time < 35)
+    {
+      // vertical sync (FIXME, how should this be?)
 		  
-		  shortsync_counter=0;
-	  }
+      shortsync_counter=0;
+    }
   }
 
   if(index>=XRES)

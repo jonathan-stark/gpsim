@@ -38,13 +38,12 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
-//#include <gtkextra/gtksheetentry.h>
+
 
 #include "gui.h"
 #include "gui_callbacks.h"
 
-//static void
-//create_notebook (void);
+#include "../cli/input.h"  // for gpsim_open()
 
 typedef struct _note_book_item
 {
@@ -228,20 +227,20 @@ void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-    unsigned int pic_id;
-    const char *file;
-    char msg[200];
-    if(gp)
+
+  const char *file;
+  char msg[200];
+
+  if(gp)
+  {
+    file=gtk_file_selection_get_filename (fs);
+    if(!gpsim_open(gp->cpu, file))
     {
-	pic_id=gp->pic_id;
-	file=gtk_file_selection_get_filename (fs);
-	if(!gpsim_open(pic_id, file))
-	{
-	    sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
-	    gui_message(msg);
-	}
+      sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
+      gui_message(msg);
     }
-    gtk_widget_hide (GTK_WIDGET (fs));
+  }
+  gtk_widget_hide (GTK_WIDGET (fs));
 }
 
 extern int gui_question(char *question, char *a, char *b);

@@ -54,77 +54,65 @@ class Interface {
    *  xref - this is a pointer to some structure in the client's data space.
    *  new_value - this is the new value to which the object has changed.
    *
-   *
    */
 
-  //void (*update_object) (gpointer xref,int new_value);
   virtual void UpdateObject (gpointer xref,int new_value){};
 
   /*
-   * remove_object - pointer to the function that is invoked when an object is 
-   *                 removed. Its purpose is to notify the client when gpsim 
-   *                 has removed something.
+   * remove_object - Invoked when gpsim has removed something.
    *
    * If an object, like a register, is deleted then this function 
-   * will be called (if it's non-null). There is one parameter:
+   * will be called. There is one parameter:
    *  xref - this is a pointer to some structure in the client's data space.
-   *
    *
    */
 
-  //void (*remove_object) (gpointer xref);
   virtual void RemoveObject (gpointer xref) {};
 
 
   /*
-   * simulation_has_stopped - pointer to the function that is invoked when gpsim has
-   *                          stopped simulating. Some interfaces have more than one
-   *                          instance, so the 'object' parameter allows the interface
-   *                          to uniquely identify the particular one.
+   * simulation_has_stopped - invoked when gpsim has stopped simulating (e.g.
+   *                          when a breakpoint is encountered).
+   *
+   * Some interfaces have more than one instance, so the 'object' parameter
+   * allows the interface to uniquely identify the particular one.
    */
 
-  //void (*simulation_has_stopped) (gpointer object);
   virtual void SimulationHasStopped (gpointer object) {};
 
 
   /*
-   * new_processor - pointer to the function that is invoked when a new processor is
-   *                 added to gpsim
+   * new_processor - Invoked when a new processor is added to gpsim
    */
 
-  //void (*new_processor) (unsigned int processor_id);
-  virtual void NewProcessor (unsigned int processor_id) {};
+  virtual void NewProcessor (Processor *new_cpu) {};
 
 
   /*
-   * new_module - pointer to the function that is invoked when a new module is
-   *              added into gpsim
+   * new_module - Invoked when a new module is instantiated.
+   *
    */
 
-  //void (*new_module) (Module *module);
   virtual void NewModule (Module *module) {};
 
   /*
-   * node_configuration_changed - pointer to the function that is invoked when stimulus
-   * configuration are changed
+   * node_configuration_changed - invoked when stimulus configuration has changed
    */
 
-  //void (*node_configuration_changed) (Stimulus_Node *node);
   virtual void NodeConfigurationChanged (Stimulus_Node *node) {};
 
-  /*
-   * new_program - pointer to the function that is invoked when a new program is
-   *               loaded into gpsim
-   */
-
-  //void (*new_program)  (unsigned int processor_id);
-  virtual void NewProgram  (unsigned int processor_id) { };
 
   /*
-   * gui_update - pointer to the function that is invoked when the gui should update
+   * new_program - Invoked when a new program is loaded into gpsim
+   *
    */
 
-  //void (*gui_update)  (gpointer object);
+  virtual void NewProgram  (Processor *new_cpu) { };
+
+  /*
+   * gui_update - Invoked when the gui should update
+   */
+
   virtual void GuiUpdate  (gpointer object) {};
 
   unsigned int get_id(void) { return interface_id;};
@@ -151,10 +139,10 @@ class gpsimInterface {
   void update_object (gpointer xref,int new_value);
   void remove_object (gpointer xref);
   void simulation_has_stopped (void);
-  void new_processor (unsigned int processor_id);
+  void new_processor (Processor *);
   void new_module  (Module *module);
   void node_configuration_changed  (Stimulus_Node *node);
-  void new_program  (unsigned int processor_id);
+  void new_program  (Processor *);
   void set_update_rate(guint64 rate);
 
   unsigned int add_interface(Interface *new_interface);

@@ -675,7 +675,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
   menu_item *item;
   int i,j;
-  unsigned int pic_id;
   GtkSheetRange range;
   unsigned int address;
   int value, mask;
@@ -695,8 +694,7 @@ popup_activated(GtkWidget *widget, gpointer data)
   item = (menu_item *)data;
   sheet=GTK_SHEET(popup_rw->register_sheet);
   range = sheet->range;
-  //pic_id = ((GUI_Object*)popup_rw)->gp->pic_id;
-  pic_id = popup_rw->gp->pic_id;
+
 
   switch(item->id)
     {
@@ -1681,8 +1679,8 @@ void Register_Window::Update(void)
   if(!registers_loaded)
     return;
   
-  if(gp==0 || gp->pic_id==0 || register_sheet==0) {
-    puts("Warning gp or gp->pic_id == 0 in RegWindow_update");
+  if(!gp || !gp->cpu || !register_sheet) {
+    puts("Warning can't update register window");
     return;
   }
 

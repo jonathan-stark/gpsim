@@ -22,9 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __LOGIC_H__
 #define __LOGIC_H__
 
-#include <../src/stimuli.h>
-#include <../src/ioports.h>
-#include <../src/symbol.h>
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/symbol.h"
+#include "../src/modules.h"
 
 #include <gtk/gtk.h>
 

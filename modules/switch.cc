@@ -41,13 +41,12 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
 #include "switch.h"
-pic_processor *gpsim_get_active_cpu(void);
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 
 
 //--------------------------------------------------------------
@@ -169,10 +168,9 @@ ExternalModule * Switch::construct(const char *new_name=NULL)
 Switch::Switch(void)
 {
 
-//    cout << "Switch constructor\n";
-    name_str = strdup("Switch");
-
-    interface_id = gpsim_register_interface((gpointer)this);
+  name_str = strdup("Switch");
+  
+  //interface_id = gpsim_register_interface((gpointer)this);
 }
 
 Switch::~Switch(void)

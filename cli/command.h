@@ -28,7 +28,7 @@ using namespace std;
 #include "../config.h"
 #include "../src/gpsim_def.h"
 
-class pic_processor;
+class Processor;
 
 enum COMMAND_MODES
 {
@@ -50,7 +50,7 @@ class command
 {
 
 public:
-  static pic_processor  *cpu;
+  static Processor  *cpu;
   struct cmd_options *op;
   char   *name;
   string brief_doc;
@@ -68,7 +68,7 @@ public:
       return op;
     };
 
-  void new_processor(pic_processor *p);
+  void new_processor(Processor *p);
 
   int get_token(void) {return token_value;};
 

@@ -361,6 +361,11 @@ public:
   void disassemble (int start_address, int end_address) {};
   void list(int file_id, int pcval, int start_line, int end_line) {};
 
+  // Configuration control
+
+  virtual void set_config_word(unsigned int address, unsigned int cfg_word) = 0;
+  virtual unsigned int config_word_address(void) {return 0;}
+
   //
   // Processor reset
   // 

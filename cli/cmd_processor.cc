@@ -44,7 +44,7 @@ void put_chars(char c, int number_of_chars)
     putchar(c);
 }
 
-void dump_pins(pic_processor *cpu)
+void dump_pins(Processor *cpu)
 {
 
   int number_of_pins=0;
@@ -165,7 +165,7 @@ void cmd_processor::processor(int bit_flag)
 void cmd_processor::processor(char * processor_type, char * processor_new_name)
 {
 
-  new_processor((pic_processor *)add_processor( processor_type,  processor_new_name));
+  new_processor((Processor *)add_processor( processor_type,  processor_new_name));
 
   if(!cpu)
     cout << "Unable to add processor\n";

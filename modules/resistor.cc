@@ -47,8 +47,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/attribute.h"
 
 
-extern int use_gui; // fixme - declared in gpsim/main.cc
-
 class ResistanceAttribute : public FloatAttribute {
 
 public:
@@ -371,7 +369,8 @@ PullupResistor::PullupResistor(const char *init_name)
 #ifdef HAVE_GUI
   pu_window = NULL;
 
-  if(use_gui) {
+  //if(use_gui) {
+  if(1) {
     build_window();
     cout << "Creating resistor window\n";
   }

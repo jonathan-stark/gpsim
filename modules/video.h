@@ -22,13 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __VIDEO_H__
 #define __VIDEO_H__
 
-#include <../src/stimuli.h>
-#include <../src/ioports.h>
-#include <../src/symbol.h>
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/symbol.h"
+#include "../src/modules.h"
 
 #include <gtk/gtk.h>
 
 class Video;
+class Video_Interface;
 
 /*********************************************************
  *
@@ -69,10 +71,10 @@ class Video : public ExternalModule
 public:
 
   IOPORT  *port;
-  unsigned int sync_time; // gpsim cycle counter at last H-sync
+  guint64 sync_time; // gpsim cycle counter at last H-sync
   int scanline;
   unsigned char line[XRES]; // buffer for one line
-  pic_processor *cpu;
+  Processor *cpu;
 
   GtkWidget *window;
   GtkWidget *da;
@@ -94,10 +96,14 @@ public:
   void copy_scanline_to_pixmap(void);
   int check_for_vrt1(void);
   int check_for_vrt2(void);
-  int cycles_to_us(int cycles);
-  int us_to_cycles(int cycles);
+  guint64 cycles_to_us(guint64 cycles);
+  guint64 us_to_cycles(guint64 cycles);
   void refresh(void);
   static ExternalModule *construct(const char *new_name);
+
+private:
+    Video_Interface *interface;
+
 };
 
 #endif //  __VIDEO_H__

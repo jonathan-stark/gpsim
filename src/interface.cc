@@ -135,11 +135,11 @@ ProcessorInterface::ProcessorInterface(Processor *new_cpu) : ModuleInterface(new
 Interface::Interface(gpointer new_object)
 {
 
-  interface_id = 0;
   objectPTR = new_object;
 
 }
 
+#if 0
 Interface *get_interface(unsigned int interface_id)
 {
 
@@ -162,6 +162,7 @@ Interface *get_interface(unsigned int interface_id)
   return 0;
 
 }
+#endif
 
 //--------------------------------------------------------------------------
 //
@@ -279,7 +280,7 @@ void gpsimInterface::simulation_has_stopped (void)
 
 }
 
-void gpsimInterface::new_processor (unsigned int processor_id)
+void gpsimInterface::new_processor (Processor *new_cpu)
 {
   set_update_rate  (gui_update_rate);
 
@@ -290,7 +291,7 @@ void gpsimInterface::new_processor (unsigned int processor_id)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      an_interface->NewProcessor(processor_id);
+      an_interface->NewProcessor(new_cpu);
     }
 
     interface_list = interface_list->next;
@@ -334,7 +335,7 @@ void gpsimInterface::node_configuration_changed (Stimulus_Node *node)
 
 }
 
-void gpsimInterface::new_program  (unsigned int processor_id)
+void gpsimInterface::new_program  (Processor *cpu)
 {
 
   GSList *interface_list = interfaces;
@@ -344,7 +345,7 @@ void gpsimInterface::new_program  (unsigned int processor_id)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      an_interface->NewProgram(processor_id);
+      an_interface->NewProgram(cpu);
     }
 
     interface_list = interface_list->next;

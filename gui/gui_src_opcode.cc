@@ -203,7 +203,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
   menu_item *item;
   int i,j;
-  //unsigned int pic_id;
   GtkSheetRange range;
   unsigned int address;
   int pm_size;
@@ -222,7 +221,6 @@ popup_activated(GtkWidget *widget, gpointer data)
   item = (menu_item *)data;
   sheet=GTK_SHEET(popup_sbow->sheet);
   range = sheet->range;
-  //pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
     
   pm_size = popup_sbow->gp->cpu->program_memory_size();
 #if GTK_MAJOR_VERSION >= 2
@@ -594,12 +592,11 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
 static void update(SourceBrowserOpcode_Window *sbow, int address)
 {
 
-    if(sbow->gp->pic_id==0)
-	return;
+  if(!sbow->gp->cpu)
+    return;
 
-    update_values(sbow,address);
-    update_styles(sbow,address);
-//    update_label(sbow,address);
+  update_values(sbow,address);
+  update_styles(sbow,address);
 }
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
@@ -1144,7 +1141,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
   char buf[128];
   int opcode;
   gint i;
-  int pic_id;
   int pm_size;
   int pc;
 
@@ -1160,7 +1156,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
   assert(wt==WT_opcode_source_window);
 
-  pic_id = gp->pic_id;
   gp = _gp;
   gp->program_memory = this;
 

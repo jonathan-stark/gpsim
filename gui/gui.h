@@ -901,7 +901,6 @@ class GUI_Processor {
   Scope_Window *scope_window;
 
   // The pic that's associated with the gui
-  unsigned int pic_id;
   Processor *cpu;
 };
 

@@ -91,7 +91,7 @@ command *command_list[] =
 };
 
 
-pic_processor *command::cpu = 0;
+Processor *command::cpu = 0;
 
 command::command(void)
 {
@@ -137,7 +137,7 @@ void execute_line(char *cmd)
 }
 
 
-void command::new_processor(pic_processor *p)
+void command::new_processor(Processor *p)
 {
 
   cpu = p;

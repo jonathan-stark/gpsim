@@ -378,62 +378,59 @@ get_user_input (void)
 }
 
 extern int open_cod_file(pic_processor **, char *);
-pic_processor *get_pic_processor(unsigned int processor_id);
 
 //*********************************************
 
-int gpsim_open(unsigned int processor_id, const char *file)
+int gpsim_open(Processor *cpu, const char *file)
 {
-    char *str;
-    pic_processor *pic = get_pic_processor(processor_id);
+  char *str;
 
-    str = strrchr(file,'.');
-    if(str==0)
-    {
-//	puts("found no dot in file!");
-	return 0;
-    }
-    str++;
-    if(!strcmp(str,"hex"))
-    {
+  str = strrchr(file,'.');
+  if(str==0)
+  {
+    //	puts("found no dot in file!");
+    return 0;
+  }
+  str++;
 
-	if(!pic)
-	{
-	    puts("No pic selected!");
-	    return 0;
-	}
-	pic->load_hex(file);
+  if(!cpu)
+  {
+    puts("gpsim_open::No processor has been selected!");
+    return 0;
+  }
+
+  if(!strcmp(str,"hex"))
+  {
+
+    cpu->load_hex(file);
     
-    }
-    else if(!strcmp(str,"cod"))
+  }
+  else if(!strcmp(str,"cod"))
+  {
+
+    int i;
+    i=load_symbol_file(&cpu, file);
+
+    if(i)
     {
+      cout << "found a fatal error in the symbol file " << file <<'\n';
+      return 0;
+    }
 
-	int i;
-	i=load_symbol_file(&pic, file);
-
-	if(i)
-	{
-	    cout << "found a fatal error in the symbol file " << file <<'\n';
-	    return 0;
-	}
-
-	// FIXME: questionable
-	command_list[0]->cpu=pic;
-	trace.switch_cpus(pic);
+    // FIXME: questionable
+    command_list[0]->cpu=cpu;
+    trace.switch_cpus(cpu);
       
-    }
-    else if(!strcmp(str,"stc"))
-    {
+  }
+  else if(!strcmp(str,"stc"))
+    process_command_file(file);
+  else
+  {
+    cout << "Unknown file extension \"" << str <<"\" \n";
+    return 0;
+  }
 
-	process_command_file(file);
-    }
-    else
-    {
-      cout << "Unknown file extension \"" << str <<"\" \n";
-	return 0;
-    }
-
-    return 1;
+  return 1;
 }
 
 

@@ -160,7 +160,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
   WatchEntry *entry;
 
-  unsigned int pic_id;
   int value;
 
   if(widget==0 || data==0)
@@ -170,7 +169,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     }
     
   item = (menu_item *)data;
-  pic_id = popup_ww->gp->pic_id;
 
   entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
 
@@ -344,7 +342,7 @@ key_press(GtkWidget *widget,
 
   if(!ww) return(FALSE);
   if(!ww->gp) return(FALSE);
-  if(!ww->gp->pic_id) return(FALSE);
+  if(!ww->gp->cpu) return(FALSE);
 
   switch(key->keyval) {
 

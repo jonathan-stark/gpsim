@@ -33,7 +33,7 @@ extern "C"
 #include "lxt_write.h"
 }
 
-class pic_processor;
+class Processor;
 
 //---------------------------------------------------------
 // Class for trace buffer
@@ -84,7 +84,7 @@ class Trace
   guint64 string_cycle;          // The cycle corresponding to the decoded string
   unsigned int string_index;     // The trace buffer index corresponding "   "
 
-  pic_processor *cpu;
+  Processor *cpu;
 
   Trace (void);
   ~Trace(void);
@@ -216,7 +216,7 @@ class Trace
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
   }
 
-  void switch_cpus(pic_processor *new_cpu) {cpu = new_cpu;};
+  void switch_cpus(Processor *new_cpu) {cpu = new_cpu;};
 
   int  dump (unsigned int n=0, FILE *out_stream=0, int watch_reg=-1);
   void dump_last_instruction(void);
@@ -244,7 +244,7 @@ public:
   int items_logged;
   char *log_filename;
   FILE *log_file;
-  pic_processor *cpu;
+  Processor *cpu;
   unsigned int last_trace_index;
   Trace buffer;
   int file_format;
@@ -257,7 +257,7 @@ public:
   virtual void callback(void);
   void enable_logging(const char *new_filename=0, int format=TRACE_FILE_FORMAT_ASCII);
   void disable_logging(void);
-  void switch_cpus(pic_processor *new_cpu);
+  void switch_cpus(Processor *new_cpu);
   void open_logfile(const char *new_fname, int format);
   void close_logfile(void);
   void write_logfile(void);
