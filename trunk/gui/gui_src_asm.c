@@ -1644,7 +1644,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   {
       gpsim_file = gpsim_get_file_context(pic_id, i);
       file_name = gpsim_file->name;
-      if(!strcmp(file_name+strlen(file_name)-4,".asm")
+/*      if(!strcmp(file_name+strlen(file_name)-4,".asm")
 	 ||!strcmp(file_name+strlen(file_name)-4,".inc")
 	 ||!strcmp(file_name+strlen(file_name)-4,".ASM")
 	 ||!strcmp(file_name+strlen(file_name)-4,".INC")
@@ -1653,7 +1653,11 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	 ||!strcmp(file_name+strlen(file_name)-2,".C")
 	 ||!strcmp(file_name+strlen(file_name)-4,".jal")
 	 ||!strcmp(file_name+strlen(file_name)-4,".JAL")
-	)
+	)*/
+      if(strcmp(file_name+strlen(file_name)-4,".lst")
+	 &&strcmp(file_name+strlen(file_name)-4,".LST")
+	 &&strcmp(file_name+strlen(file_name)-4,".cod")
+	 &&strcmp(file_name+strlen(file_name)-4,".COD"))
       {
 	  if(!strcmp(file_name+strlen(file_name)-2,".c")
 	     ||!strcmp(file_name+strlen(file_name)-2,".C")
