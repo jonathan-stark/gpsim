@@ -8,6 +8,9 @@ RT=./rt.sh
 
 ${RT} instructions_14bit instructions_14bit
 
+#instruction set simulation for the 16bit cores:
+${RT} instructions_16bit instructions_16bit
+
 ${RT} node_test node_test
 
 #${RT} p12c509 it_12bit
