@@ -128,27 +128,27 @@ void link_src_to_gpsim(GUI_Processor *gp)
 
   if(gp) {
 
-      // Create a cross reference between the pic's program memory and the gui.
-      pm_size =  gp->cpu->program_memory_size();
+    // Create a cross reference between the pic's program memory and the gui.
+    pm_size =  gp->cpu->program_memory_size();
 
-      if(verbose) {
-	printf("link_src_to_gpsim\n");
-	printf(" processor pma = %d\n",pm_size);
-      }
-
-      for(i=0; i < pm_size; i++) {
-	
-	cross_reference = new linkXREF();
-	//cross_reference->parent_window_type = WT_asm_source_window;
-	//cross_reference->parent_window = (gpointer) gp;
-	cross_reference-> gp = gp;
-	address = (int *) malloc(sizeof(int *));
-	*address = gp->cpu->map_pm_index2address(i);
-
-	cross_reference->data = (gpointer) address;
-	gp->cpu->pma->assign_xref(*address,(gpointer) cross_reference);
-      }
+    if(verbose) {
+      printf("link_src_to_gpsim\n");
+      printf(" processor pma = %d\n",pm_size);
     }
+
+    for(i=0; i < pm_size; i++) {
+
+      cross_reference = new linkXREF();
+      //cross_reference->parent_window_type = WT_asm_source_window;
+      //cross_reference->parent_window = (gpointer) gp;
+      cross_reference-> gp = gp;
+      address = (int *) malloc(sizeof(int *));
+      *address = gp->cpu->map_pm_index2address(i);
+
+      cross_reference->data = (gpointer) address;
+      gp->cpu->pma->assign_xref(*address,(gpointer) cross_reference);
+    }
+  }
 }
 
 #endif //HAVE_GUI
