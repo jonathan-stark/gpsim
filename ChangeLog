@@ -1,4 +1,9 @@
 2004-05-20 Scott Dattalo <scott@dattalo.com>
+	* Tons of files... Changed the Register class' 'unsigned int value'
+	field to an object. The get() and put() accessor functions now provide
+	read and write access.
+
+2004-05-20 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Syntax highlighting now is only applied to lines
 	that are associated with generated code.
 	
