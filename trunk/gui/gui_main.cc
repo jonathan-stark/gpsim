@@ -67,8 +67,6 @@ extern int gui_animate_delay; // in milliseconds
 /*
  * --- Function prototypes
  */
-void redisplay_prompt(void);
-
 void init_link_to_gpsim(GUI_Processor *gp);
 void link_src_to_gpsim(GUI_Processor *gp);
 
@@ -371,7 +369,6 @@ void gui_new_program (unsigned int pic_id)
       gp->program_memory->NewSource(gp);
       gp->profile_window->NewProgram(gp);
       link_src_to_gpsim( gp);
-      //      redisplay_prompt();
     }
 }
 
@@ -448,15 +445,13 @@ int gui_init (int argc, char **argv)
     
   gp = new GUI_Processor();
 
-  gi.add_interface(new GUI_Interface(gp));
+  get_interface().add_interface(new GUI_Interface(gp));
   return(0);
 }
 
 void gui_main(void)
 {
-  redisplay_prompt();
   gtk_main();
-
 }
 
 #endif //HAVE_GUI
