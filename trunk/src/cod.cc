@@ -317,6 +317,7 @@ void read_src_files_from_cod(pic_processor *cpu)
   FILE *t;
 
   num_files = 0;
+  end_block = 0;			// eliminates a (spurious) warning
   //start_block = get_short_int(&directory_block_data[COD_DIR_NAMTAB]);
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_NAMTAB]);
 
@@ -333,15 +334,13 @@ void read_src_files_from_cod(pic_processor *cpu)
 	  num_files++;
       }
     }
+    if(verbose)
+      printf ("Found up to %d source files in .cod file\n", num_files);
   }
-
-  if(verbose)
-    cout << "found " <<num_files<< " source files in .cod file\n";
 
   int found_lst_in_cod = 0;
 
   if(num_files) {
-
     cpu->files = new file_context[num_files+1];
     cpu->number_of_source_files = num_files;
     cpu->lst_file_id = num_files;
@@ -354,13 +353,24 @@ void read_src_files_from_cod(pic_processor *cpu)
       for(i=0; i<FILES_PER_BLOCK; i++) {
 	int	alreadyExists = 0;
 	int	jj;
+	char	*filenm;
+
 	offset = i*FILE_SIZE;
 	substr(b,&temp_block[offset+1],FILE_SIZE);
-	for (jj = 0; jj < num_files; ++jj) {
-	  // this could be fooled by search pathes
-	  if (0 == strcmp (b, cpu->files[jj].name)) {
+	filenm = b;
+
+	if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
+	    && (':' == filenm[1]) && ('\\' == filenm[2])) {
+	  filenm += 3;			// strip C:\ from MPLAB files
+					// convert \ to / now???
+	}
+
+	for (jj = 0; jj < num_files; ++jj) { // check if already opened
+	  // this could be fooled by search paths
+	  if (0 == strcasecmp (filenm, cpu->files[jj].name)) {
 	    alreadyExists = 1;
-	    if (verbose) printf ("Found redundant source file %s\n", b);
+	    if (verbose)
+	      printf ("Found redundant source file %s\n", filenm);
 					// fix:: this leaks memory
 	    cpu->number_of_source_files--; // adjust total file count
 	    break;
@@ -371,17 +381,16 @@ void read_src_files_from_cod(pic_processor *cpu)
 	  //cpu->files[num_files].name = new char [strlen(b)];
 	  //strcpy(cpu->files[num_files].name,b);
 
-	  cpu->files[num_files].name = strdup(b);
+	  cpu->files[num_files].name = strdup(filenm);
 
 	  if(verbose)
 	    printf("%s\n",cpu->files[num_files].name);
 
 	  cpu->files[num_files].file_ptr = open_a_file(&cpu->files[num_files].name);
 	  
-	  //cpu->files[num_files].file_ptr = fopen(cpu->files[num_files].name,"r");
 	  cpu->files[num_files].max_line = 0;
 
-	  if((strncmp(lstfilename, b,256) == 0) && 
+	  if((strncmp(lstfilename, filenm,256) == 0) && 
 	     (cpu->lst_file_id > cpu->number_of_source_files))
 	    {
 	      if(verbose)
@@ -394,6 +403,9 @@ void read_src_files_from_cod(pic_processor *cpu)
 	}
       }
     }
+
+    if(verbose)
+      printf ("Found %d source files in .cod file\n", num_files);
 
     if(num_files != cpu->number_of_source_files)
       cout << "warning, number of sources changed from " << num_files << " to " << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
@@ -704,7 +716,7 @@ int open_cod_file(pic_processor **pcpu, char *filename)
 
   ccpu = *pcpu;
 
-  ccpu->set_config_word(0xffff);  // assume no configuration word is in the cod file.
+  ccpu->set_config_word(0x2007,0xffff);  // assume no configuration word is in the cod file.
 
   read_hex_from_cod(ccpu);
 

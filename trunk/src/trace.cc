@@ -330,7 +330,8 @@ TraceLog::TraceLog(void)
 {
   logging = 0;
   log_filename = NULL;
-  //  log_file = (FILE)NULL;
+  cpu = NULL;
+  log_file = NULL;
 }
 
 TraceLog::~TraceLog(void)
@@ -338,8 +339,7 @@ TraceLog::~TraceLog(void)
 
   disable_logging();
     
-  if(log_filename)
-    free(log_filename);
+  close_logfile();
 
 }
 
@@ -350,11 +350,55 @@ void TraceLog::callback(void)
 
 }
 
+void TraceLog::open_logfile(char *new_fname)
+{
+
+  if(!new_fname)
+    new_fname = "gpsim.log";
+
+  if(log_filename) {
+    //
+    // Looks like there's a log file open and now we
+    // want to open a different one.
+    //
+
+    if(strcmp(new_fname, log_filename) == 0 ) 
+      return;  // the file with this name is already opened
+
+
+    close_logfile();
+
+  }
+
+  log_file = fopen(new_fname, "w");
+  log_filename = strdup(new_fname);
+
+}
+
+void TraceLog::close_logfile(void)
+{
+
+  if(log_filename) {
+    fclose(log_file);
+    free(log_filename);
+  }
+
+}
+
 void TraceLog::enable_logging(char *new_fname)
 {
 
   if(logging)
     return;
+
+  if(!cpu) {
+    if(active_cpu)
+      cpu = active_cpu;
+    else
+      cout << "Warning: Logging can't be enabled until a cpu has been selected.";
+  }
+
+  open_logfile(new_fname);
 
   logging = 1;
 
@@ -370,6 +414,12 @@ void TraceLog::disable_logging(void)
 
 
 }
+
+void TraceLog::switch_cpus(pic_processor *pcpu)
+{
+  cpu = pcpu;
+}
+
 //*****************************************************************
 // *** KNOWN CHANGE ***
 //  Support functions that will get replaced by the CORBA interface.

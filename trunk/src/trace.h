@@ -185,7 +185,8 @@ class TraceLog : public BreakCallBack
 public:
   bool logging;
   char *log_filename;
-  FILE log_file;
+  FILE *log_file;
+  pic_processor *cpu;
 
   TraceLog(void);
   ~TraceLog(void);
@@ -193,6 +194,9 @@ public:
   virtual void callback(void);
   void enable_logging(char *new_filename=NULL);
   void disable_logging(void);
+  void switch_cpus(pic_processor *new_cpu);
+  void open_logfile(char *new_fname);
+  void close_logfile(void);
 
 };
 

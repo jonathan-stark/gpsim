@@ -104,7 +104,49 @@ enum PROCESSOR_TYPE
 };
 
 // Configuration modes.
-#define  CM_WDTE 1<<0
+//  The configuration mode bits are the config word bits remapped.
+//  The remapping removes processor dependent bit definitions.
+class ConfigMode {
+public:
+#define  CM_FOSC0 1<<0
+#define  CM_FOSC1 1<<1
+#define  CM_WDTE  1<<2
+#define  CM_CP0   1<<3
+#define  CM_CP1   1<<4
+#define  CM_PWRTE 1<<5
+#define  CM_BODEN 1<<6
+#define  CM_CPD   1<<7
+
+  int config_mode;
+  int valid_bits;
+  ConfigMode(void) { config_mode = 0xffff; valid_bits=0x7;};
+
+  void set_fosc0(void){config_mode |= CM_FOSC0;};
+  void clear_fosc0(void){config_mode &= ~CM_FOSC0;};
+  bool get_fosc0(void){return (config_mode & CM_FOSC0);};
+  void set_fosc1(void){config_mode |= CM_FOSC1;};
+  void clear_fosc1(void){config_mode &= ~CM_FOSC1;};
+  bool get_fosc1(void){return (config_mode & CM_FOSC1);};
+
+  void set_cp0(void)  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
+  void clear_cp0(void){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
+  bool get_cp0(void)  {return (config_mode & CM_CP0);};
+  void set_cp1(void)  {config_mode |= CM_CP1;  valid_bits |= CM_CP1;};
+  void clear_cp1(void){config_mode &= ~CM_CP1; valid_bits |= CM_CP1;};
+  bool get_cp1(void)  {return (config_mode & CM_CP1);};
+
+  void enable_wdt(void)  {config_mode |= CM_WDTE;};
+  void disable_wdt(void) {config_mode &= ~CM_WDTE;};
+  bool get_wdt(void)     {return (config_mode & CM_WDTE);};
+
+  void enable_pwrte(void)   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
+  void disable_pwrte(void)  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
+  bool get_pwrte(void)      {return (config_mode & CM_PWRTE);};
+  bool is_valid_pwrte(void) {return (valid_bits & CM_PWRTE);};
+
+  void print(void);
+
+};
 
 /*==================================================================
  * FIXME - move these global references somewhere else
@@ -214,7 +256,7 @@ public:
   int processor_id; // An identifier to differentiate this instantiation from others
 
   unsigned int config_word;        // as read from hex or cod file
-  unsigned int config_modes;       // processor independent configuration bits.
+  ConfigMode   config_modes;       // processor independent configuration bits.
   double frequency,period;
   double Vdd;
   double nominal_wdt_timeout;
@@ -289,7 +331,7 @@ public:
   virtual void interrupt(void) { return; };
   void pm_write(void);
 
-  virtual void set_config_word(unsigned int cfg_word);
+  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
   unsigned int get_config_word(void) {return config_word;};
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
   unsigned int time_to_cycles( double t) 

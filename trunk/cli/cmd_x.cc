@@ -83,6 +83,8 @@ void cmd_x::x(int reg)
 
   cout << " is " << ov << '\n';
 
+
+
 }
 
 void cmd_x::x(int reg, int val)
@@ -120,28 +122,12 @@ void cmd_x::x(int reg, int val)
 
 void cmd_x::x(char *reg_name)
 {
-  int sym_value;
 
-  if(get_symbol_value(reg_name,&sym_value))
-    {
-      cout << '`' << reg_name << '\'' << " was not found in the symbol table\n";
-      return;
-    }
-
-  x(sym_value);
+  print_symbol(reg_name);
 
 }
 
 void cmd_x::x(char *reg_name, int val)
 {
-  int sym_value;
-
-  if(get_symbol_value(reg_name,&sym_value))
-    {
-      cout << '`' << reg_name << '\'' << " was not found in the symbol table\n";
-      return;
-    }
-
-  x(sym_value, val);
-
+  update_symbol_value(reg_name,val);
 }
