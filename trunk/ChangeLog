@@ -1,3 +1,7 @@
+2004-03-01  Bert Driehuis <driehuis@playbeing.org>
+	* acinclude.m4, cli/input.cc:
+	Fix readline support for BSD 4.9
+	
 2004-03-02 Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.cc: fixed a memory allocation bug in the
 	FileContext class; an array was one element too small.
