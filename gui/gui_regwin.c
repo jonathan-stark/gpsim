@@ -329,6 +329,14 @@ file_selection_ok (GtkWidget        *w,
     gtk_main_quit();
 }
 
+static void
+file_selection_cancel (GtkWidget        *w,
+		       GtkFileSelection *fs)
+{
+    gtk_widget_hide (GTK_WIDGET (fs));
+    gtk_main_quit();
+}
+
 static char *gui_get_filename(char *prompt)
 {
     static GtkWidget *window = NULL;
@@ -351,9 +359,9 @@ static char *gui_get_filename(char *prompt)
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
 			    window);
-	gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-				   "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
-				   GTK_OBJECT (window));
+	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+			    "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
+			    window);
     }
 
     file_selection_name=NULL;
