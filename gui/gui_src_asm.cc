@@ -373,9 +373,10 @@ void SourceBrowserAsm_Window::SetPC(int address)
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
     gdouble nvalue = pixel - inc/2;
-
+    /*
     if(nvalue > (adj->upper -adj->page_size - 50))
       nvalue = adj->upper -adj->page_size - 50.0;
+    */
     gtk_adjustment_set_value(adj, nvalue);
 
     //printf(" SetPC: %s , setting adjustment to %g\n", 
@@ -529,7 +530,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     if(!e->bpwidget) {
       e->bpwidget = gtk_pixmap_new(pixmap_canbreak, canbp_mask);
 
-      //printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
+      printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
       gtk_layout_put(GTK_LAYOUT(pages[id].source_layout),
 		     e->bpwidget,
 		     PIXMAP_SIZE*0,
@@ -1641,8 +1642,10 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 		  &default_text_style->base[GTK_STATE_NORMAL],
 		  " ",
 		  1);
-  
-  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),2*PIXMAP_SIZE,totallinesheight);
+  printf("SetText: height=%d\n",totallinesheight);
+  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
+		      2*PIXMAP_SIZE,
+		      totallinesheight+5*PIXMAP_SIZE);
   gtk_text_thaw(GTK_TEXT(pages[id].source_text));
 
 }

@@ -33,10 +33,17 @@ Boston, MA 02111-1307, USA.  */
 
 instruction::instruction(void)
 {
+  opcode = 0;
+
   is_modified = 0;
   cycle_count = 0;
-  hll_file_id = 0;
+
+  file_id = -1;
+  hll_file_id = -1;
+  src_line = -1;
+  lst_line = -1;
   hll_src_line = -1;
+
 }
 
 
