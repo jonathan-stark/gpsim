@@ -1,5 +1,5 @@
 2004-09-14 Borut Razem <borut.razem@siol.net>
-	* cli/cli.cvproj, src/src.vcproj: MSVC sync
+	* cli/cli.cvproj, src/src.vcproj, plat/win32/gpsim.def: MSVC sync
 	* cli/makefile.mingw, src/makefile.mingw: MinGW sync
 	* plat/win32/gpsim.nsi: corrected revision number to 0.22.3
 
