@@ -41,10 +41,10 @@ class _18pins  : public Package
 {
 public:
 
-  PORTA        *porta;
+  PIC_IOPORT   *porta;
   IOPORT_TRIS  trisa;
 
-  PORTB        *portb;
+  PIC_IOPORT   *portb;
   IOPORT_TRIS  trisb;
 
   virtual void create_iopin_map(void){return;};
@@ -56,7 +56,7 @@ class _28pins  : public _18pins
 {
 public:
 
-  PORTC        *portc;
+  PIC_IOPORT   *portc;
   IOPORT_TRIS  trisc;
 
   virtual void create_iopin_map(void);

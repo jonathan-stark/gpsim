@@ -439,7 +439,7 @@ void P16C62::create_sfr_map(void)
   add_sfr_register(portc,   0x07);
   add_sfr_register(&trisc,  0x87, 0xff);
 
-  portc->ccp1con = &ccp1con;
+  ((PORTC*)portc)->ccp1con = &ccp1con;
 
 }
 
@@ -548,7 +548,7 @@ void P16C63::create_sfr_map(void)
   pie2.new_name("pie2");
 
 
-  portc->usart = &usart;
+  ((PORTC*)portc)->usart = &usart;
 }
 
 void P16C63::create_symbols(void)
@@ -638,7 +638,7 @@ void P16C64::create_sfr_map(void)
   add_sfr_register(porte,   0x09);
   add_sfr_register(&trise,  0x89, 0x07);
 
-  portc->ccp1con = &ccp1con;
+  ((PORTC*)portc)->ccp1con = &ccp1con;
 
 }
 
@@ -749,7 +749,7 @@ void P16C65::create_sfr_map(void)
   pie2.new_name("pie2");
 
 
-  portc->usart = &usart;
+  ((PORTC*)portc)->usart = &usart;
 }
 
 void P16C65::create_symbols(void)
