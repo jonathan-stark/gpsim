@@ -38,24 +38,32 @@ extern int verbose;
 
 
 //---------------------------------------------------------
-// The program_memory_access class is the interface used
+// The ProgramMemoryAccess class is the interface used
 // by objects other than the simulator to manipulate the 
 // pic's program memory. For example, the breakpoint class
 // modifies program memory when break points are set or
 // cleared. The modification goes through here.
 //
-class program_memory_access :  public BreakCallBack
+class ProgramMemoryAccess :  public BreakCallBack
 {
  public:
   Processor *cpu;
 
   unsigned int address, opcode, state;
 
+  // Symbolic debugging
+  enum HLL_MODES {
+    ASM_MODE,      // Source came from plain old .asm files
+    HLL_MODE       // Source came from a high level language like C or JAL.
+  };
+
+  enum HLL_MODES hll_mode;
+
   // breakpoint instruction pointer. This is used by get_base_instruction().
   // If an instruction has a breakpoint set on it, then get_base_instruction
   // will return a pointer to the instruction and will initialize bpi to
-  // the breakpoint instruction that has replaced the one in the pic program
-  // memory.
+  // the breakpoint instruction that has replaced the one in the processor's
+  // program memory.
   Breakpoint_Instruction *bpi;
 
   void put(int addr, instruction *new_instruction);
@@ -74,9 +82,10 @@ class program_memory_access :  public BreakCallBack
   void assign_xref(unsigned int address, gpointer cross_reference);
 
   virtual void callback(void);
-  program_memory_access(void)
+  ProgramMemoryAccess(void)
     {
       address=opcode=state=0;
+      hll_mode = ASM_MODE;
     }
 
   // Helper functions for querying the program memory
@@ -90,9 +99,17 @@ class program_memory_access :  public BreakCallBack
   bool isModified(unsigned int address);
 
 
-  // A couple of functions for manipulating  breakpoints
+  // Given a file and a line in that file, find the instrucion in the
+  // processor's memory that's closest to it.
   virtual int  find_closest_address_to_line(int file_id, int src_line);
-  virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
+  //virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
+
+  // Given an address to an instruction, find the source line that 
+  // created it:
+  //unsigned int get_hll_src_line(unsigned int address);
+  unsigned int get_src_line(unsigned int address);
+
+  // A couple of functions for manipulating  breakpoints
   void set_break_at_address(int address);
   void set_notify_at_address(int address, BreakCallBack *cb);
   void set_profile_start_at_address(int address, BreakCallBack *cb);
@@ -110,11 +127,14 @@ class program_memory_access :  public BreakCallBack
   void set_break_at_line(int file_id, int src_line);
   void clear_break_at_line(int file_id, int src_line);
   void toggle_break_at_line(int file_id, int src_line);
-  void set_break_at_hll_line(int file_id, int src_line);
-  void clear_break_at_hll_line(int file_id, int src_line);
-  void toggle_break_at_hll_line(int file_id, int src_line);
 
+  //void set_break_at_hll_line(int file_id, int src_line);
+  //void clear_break_at_hll_line(int file_id, int src_line);
+  //void toggle_break_at_hll_line(int file_id, int src_line);
 
+  void set_hll_mode(int);
+  enum HLL_MODES get_hll_mode(void) { return hll_mode;}
+  bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
 };
 
 
@@ -139,11 +159,12 @@ public:
 
   double frequency,period;     // Oscillator frequency and period.
 
-  file_register **registers;       // 
-  file_register **register_bank;   //
+  Register **registers;       // 
+  Register **register_bank;   //
 
-  instruction   **program_memory;
-  program_memory_access pma;
+  instruction   **program_memory;  // THE program memory
+  ProgramMemoryAccess pma;
+  //RegisterMemoryAccess rma;
 
   Program_Counter *pc;
 
@@ -229,8 +250,6 @@ public:
 
   virtual void create(void);
   static Processor *construct(void);
-
-
 
   Processor(void);
 };

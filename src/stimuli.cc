@@ -986,7 +986,7 @@ dc_supply::dc_supply(char *n)
 //========================================================================
 //
 
-IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
+IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 {
   iop = i;
   iopp = _iopp;
@@ -1054,7 +1054,7 @@ IOPIN::~IOPIN()
 
 void IOPIN::put_state_value(int new_state)
 {
-  file_register *port = get_iop();
+  Register *port = get_iop();
   if(port)
     port->setbit_value(iobit, new_state &1);
 
@@ -1064,7 +1064,7 @@ void IOPIN::put_state_value(int new_state)
 
 int IOPIN::get_state(void)
 {
-  file_register *port = get_iop();
+  Register *port = get_iop();
 
   if(snode) {
 
@@ -1099,7 +1099,7 @@ void IOPIN::attach(Stimulus_Node *s)
 // through which the ioport is selected. The breakpoint
 // engine is cabable of intercepting this indirect access.
 //
-file_register *IOPIN::get_iop(void)
+Register *IOPIN::get_iop(void)
 {
 
   if(iopp)
@@ -1111,7 +1111,7 @@ file_register *IOPIN::get_iop(void)
 
 //========================================================================
 //
-IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
+IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
 
@@ -1128,7 +1128,7 @@ IO_input::IO_input(void)
 }
 void IO_input::toggle(void)
 {
-  file_register *port = get_iop();
+  Register *port = get_iop();
 
   if(port) {
 
@@ -1185,7 +1185,7 @@ int IO_input::get_voltage(guint64 current_time)
 void IO_input::put_state( int new_digital_state)
 {
   //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
-  file_register *port = get_iop();
+  Register *port = get_iop();
 
   if( (new_digital_state != 0) && (state < h2l_threshold)) {
 
@@ -1221,7 +1221,7 @@ void IO_input::put_node_state( int new_state)
   if(new_state == state)
     return;
 
-  file_register *port = get_iop();
+  Register *port = get_iop();
 
   if(port) {
 
@@ -1268,7 +1268,7 @@ void IO_input::put_node_state( int new_state)
 
 //========================================================================
 //
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
+IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IO_input(i,b,opt_name,_iopp)
 {
   //  source = new source_stimulus();
@@ -1290,7 +1290,7 @@ void IO_bi_directional::put_state( int new_digital_state)
   // If the bi-directional pin is an output then driving is TRUE.
   if(driving) {
 
-    file_register *port = get_iop();
+    Register *port = get_iop();
 
     if(port) {
       // If the new state to which the stimulus is being set is different than
@@ -1340,7 +1340,7 @@ IO_bi_directional::IO_bi_directional(void)
   cout << "IO_bi_directional constructor shouldn't be called\n";
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IO_bi_directional(i, b,opt_name,_iopp)
 {
 
@@ -1449,7 +1449,7 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 }
 
 
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
+IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IO_input(i,b,opt_name,_iopp)
 {
 

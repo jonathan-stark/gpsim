@@ -253,7 +253,7 @@ EEPROM::EEPROM(void)
   intcon = 0;
 }
 
-file_register *EEPROM::get_register(unsigned int address)
+Register *EEPROM::get_register(unsigned int address)
 {
 
   if(address<rom_size)
@@ -359,7 +359,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
   // Create the rom
 
-  rom = (file_register **) new char[sizeof (file_register *) * rom_size];
+  rom = (Register **) new char[sizeof (Register *) * rom_size];
   assert(rom != 0);
 
 
@@ -369,7 +369,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
   for (int i = 0; i < rom_size; i++)
     {
 
-      rom[i] = new file_register;
+      rom[i] = new Register;
       rom[i]->address = i;
       rom[i]->break_point = 0;
       rom[i]->value = 0;

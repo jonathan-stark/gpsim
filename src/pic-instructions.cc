@@ -260,7 +260,7 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
 // Instantiate an invalid instruction
 invalid_instruction bad_instruction;
 
-file_register * Register_op::source = NULL;
+Register * Register_op::source = NULL;
 
 //--------------------------------------------------
 

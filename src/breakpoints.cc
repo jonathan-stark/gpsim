@@ -45,7 +45,7 @@ Breakpoints bp;
 
 unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1)
 {
-  file_register *fr;
+  Register *fr;
   int i;
   Breakpoint_Instruction *abp;
 
@@ -385,7 +385,7 @@ unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int re
 
 
 //---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_write_break(file_register *fr)
+unsigned int Breakpoints::check_write_break(Register *fr)
 {
   //  cout << "debug   checking for write break point " << fr->name() << " @ " << hex << fr->address << "  cpu addr = " << active_cpu->pc.value <<'\n';
 
@@ -409,7 +409,7 @@ unsigned int Breakpoints::check_write_break(file_register *fr)
 }
 
 //---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_read_break(file_register *fr)
+unsigned int Breakpoints::check_read_break(Register *fr)
 {
 
   cout << "debug   checking for read break point " << fr->address << '\n';
@@ -470,7 +470,7 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 
 }
 //---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_break(file_register *fr)
+unsigned int Breakpoints::check_break(Register *fr)
 {
   cout << "checking for a bp doesn't do anything...\n";
 
@@ -604,7 +604,7 @@ void Breakpoints::clear(unsigned int b)
   Breakpoint_Instruction *abp;
   instruction *inst;
   instruction *previous;
-  file_register *fr;
+  Register *fr;
 
   if(b<MAX_BREAKPOINTS)
     {
@@ -731,7 +731,7 @@ void Breakpoints::clear(unsigned int b)
 	case BREAK_ON_REG_WRITE:
 	case BREAK_ON_REG_WRITE_VALUE:
 	  fr = bs.cpu->registers[bs.arg1];
-	  if (fr->isa() == file_register::BP_REGISTER )
+	  if (fr->isa() == Register::BP_REGISTER )
 	    {
 	      Notify_Register *br = (Notify_Register *)fr;
 	      int cleared = 0;
@@ -749,7 +749,7 @@ void Breakpoints::clear(unsigned int b)
 		    }
 		  else
 		    {
-		      if(br->replaced->isa() == file_register::BP_REGISTER)
+		      if(br->replaced->isa() == Register::BP_REGISTER)
 			br = (Notify_Register *)br->replaced;
 		      else
 			br = NULL; // Break out of loop and display error
@@ -894,7 +894,7 @@ void Breakpoints::clear_all_register(Processor *c,unsigned int address)
   if(!c || address<0 || address > c->register_memory_size())
     return;
 
-  while(c->registers[address]->isa()==file_register::BP_REGISTER)
+  while(c->registers[address]->isa()==Register::BP_REGISTER)
     bp.clear(c->registers[address]->break_point & ~Breakpoints::BREAK_MASK);
 }
 
@@ -1008,9 +1008,9 @@ Notify_Register::Notify_Register(Processor *_cpu, int _repl, int bp)
 
 void Notify_Register::replace(Processor *_cpu, unsigned int reg)
 {
-  file_register *fr = _cpu->registers[reg];
+  Register *fr = _cpu->registers[reg];
 
-  if(fr->isa() == file_register::BP_REGISTER)
+  if(fr->isa() == Register::BP_REGISTER)
     {
       // We're setting a break on top of another break
       ((Notify_Register *)fr)->next = this;
@@ -1039,7 +1039,7 @@ unsigned int Notify_Register::clear(unsigned int bp_num)
   if(bp_num != (break_point & ~Breakpoints::BREAK_MASK))
     return 0;
 
-  if(replaced->isa() == file_register::BP_REGISTER)
+  if(replaced->isa() == Register::BP_REGISTER)
     {
       // We're clearing a break that is set on top of another break
       ((Notify_Register *)replaced)->next = next;
@@ -1142,12 +1142,11 @@ int Break_register_read_value::get_bit_voltage(unsigned int bit_number)
 void Break_register_write_value::put(unsigned int new_value)
 {
 
-  // The lower 8-bits of 'break_mask' describe the bits which are significant. If bit-9 of break_mask
-  // is set, then we only break if this write is DIFFERENT than the last write to this register. This
-  // saves us from breaking multiple times for writing the same value.
-/*  cout << "brwv::put new_value "<<hex<< new_value << "  last_value " << last_value << "   break_mask = " << break_mask 
-       << "   break_value = " << break_value << '\n'; 
-*/
+  // The lower 8-bits of 'break_mask' describe the bits which are significant.
+  // If bit-9 of break_mask is set, then we only break if this write is
+  // DIFFERENT than the last write to this register. This saves us from
+  // breaking multiple times for writing the same value.
+
   if( ((  (break_mask & 0x100) && ((new_value ^ last_value) & break_mask & 0xff))
        ||
        (  (break_mask & 0x100) == 0))

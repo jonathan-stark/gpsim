@@ -1052,8 +1052,7 @@ void pic_processor::init_register_memory (unsigned int memory_size)
 
   // Allocate enough memory for the entire register space (e.g. 256 registers for 14-bit core)
 
-  //registers = (file_register **) new char[sizeof (file_register *) * 16*FILE_REGISTERS];
-  registers = (file_register **) new char[sizeof (file_register *) * memory_size];
+  registers = (Register **) new char[sizeof (Register *) * memory_size];
 
   if (registers  == NULL)
     {
@@ -1071,7 +1070,6 @@ void pic_processor::init_register_memory (unsigned int memory_size)
   // Make all of the file registers 'undefined' (each processor derived from this base
   // class defines its own register mapping).
 
-  //for (int i = 0; i < 16*FILE_REGISTERS; i++)
   for (int i = 0; i < memory_size; i++)
     registers[i] = NULL;
 
@@ -1250,7 +1248,7 @@ void ConfigMode::print(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void program_memory_access::callback(void)
+void ProgramMemoryAccess::callback(void)
 {
 
   if(state)

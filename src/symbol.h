@@ -67,7 +67,7 @@ public:
   void add_stimulus(stimulus *s);
   void add_line_number(Processor *cpu, int address);
   void add_constant(pic_processor *cpu, char *, int );
-  void add_register(pic_processor *cpu, file_register *reg);
+  void add_register(pic_processor *cpu, Register *reg);
   void add_address(pic_processor *cpu, char *, int );
   void add_w(pic_processor *cpu, WREG *w );
   void add_module(Module * m, const char *module_name);
@@ -152,7 +152,7 @@ class register_symbol : public symbol
 {
 public:
 
-  file_register *reg;
+  Register *reg;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual void print(void) {
     if(reg)

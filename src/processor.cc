@@ -96,7 +96,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   if(verbose)
     cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
 
-  registers = (file_register **) new char[sizeof (file_register *) * memory_size];
+  registers = (Register **) new char[sizeof (file_register *) * memory_size];
 
   if (registers  == NULL)
     {
@@ -440,7 +440,7 @@ void Processor::read_src_files(void)
 
 
 //-------------------------------------------------------------------
-int program_memory_access::find_closest_address_to_line(int file_id, int src_line)
+int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 {
   int closest_address = -1;
 
@@ -452,55 +452,64 @@ int program_memory_access::find_closest_address_to_line(int file_id, int src_lin
   for(int i = cpu->program_memory_size()-1; i>=0; i--) {
 
     // Find the closet instruction to the src file line number
-    if(cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-       cpu->program_memory[i]->get_file_id()==file_id ) {
+    if( (cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION) &&
+	(cpu->program_memory[i]->get_file_id()==file_id)                    &&
+	(abs(cpu->program_memory[i]->get_src_line() - src_line) < distance))
 
-      if(abs(cpu->program_memory[i]->get_src_line() - src_line) < distance) {
+      {
 	distance = abs(cpu->program_memory[i]->get_src_line() - src_line);
 	closest_address = i;
+
 	if(distance == 0)
-	  break;
+	  return cpu->map_pm_index2address(closest_address);
       }
-    }
   }
 
-  return closest_address;
+  return cpu->map_pm_index2address(closest_address);
 
 }
+//--------------------------------------------------------------------------
+//
+// temporary - this could is going to get deleted as soon as file related 
+// stuff gets put into its own object/class.
 
-//-------------------------------------------------------------------
-int program_memory_access::find_closest_address_to_hll_line(int file_id, int src_line)
+void ProgramMemoryAccess::set_hll_mode(int new_hll_mode)
 {
+  switch(new_hll_mode) {
+  case ASM_MODE:
+    hll_mode = ASM_MODE;
+    break;
+  case HLL_MODE:
+    hll_mode = HLL_MODE;
+  }
+}
+//--------------------------------------------------------------------------
+unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
+{
+  unsigned int line;
+    
+  if(!cpu || cpu->program_memory_size()<=address)
+    return INVALID_VALUE;
 
-  int closest_address = -1;
+  switch(get_hll_mode()) {
 
-  if(!cpu)
-    return closest_address;
+  case ASM_MODE:
+    line = cpu->program_memory[address]->get_src_line();
+    break;
 
-  int closest_distance = 0x7fffffff;
-
-  for(int i = cpu->program_memory_size()-1; i>=0; i--) {
-    // Find the closet instruction to the src file line number
-    if(cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-       cpu->program_memory[i]->get_hll_file_id()==file_id )
-      {
-	if(cpu->program_memory[i]->get_hll_src_line() >= src_line &&
-	   (cpu->program_memory[i]->get_hll_src_line() - src_line) <= closest_distance)
-	  {
-	    closest_address = i;
-	    closest_distance = cpu->program_memory[i]->get_hll_src_line() - src_line;
-	  }
-      }
+  case HLL_MODE:
+    line = cpu->program_memory[address]->get_hll_src_line();
+    break;
   }
 
-  return  cpu->map_pm_index2address(closest_address);
+  // line 1 is first line (?), so zero or less means invalid line
+  if(line<=0)
+    return INVALID_VALUE;
 
+  return line;
 }
-
-
-
 //-------------------------------------------------------------------
-void program_memory_access::set_break_at_address(int address)
+void ProgramMemoryAccess::set_break_at_address(int address)
 {
   if( address >= 0  && address<cpu->program_memory_size())
     if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
@@ -508,7 +517,7 @@ void program_memory_access::set_break_at_address(int address)
 }
 
 //-------------------------------------------------------------------
-void program_memory_access::set_notify_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_notify_at_address(int address, BreakCallBack *cb)
 {
   if( address >= 0  && address<cpu->program_memory_size())
     if (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
@@ -516,7 +525,7 @@ void program_memory_access::set_notify_at_address(int address, BreakCallBack *cb
 }
 
 //-------------------------------------------------------------------
-void program_memory_access::set_profile_start_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBack *cb)
 {
   if( address >= 0  && address<cpu->program_memory_size())
     if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
@@ -524,7 +533,7 @@ void program_memory_access::set_profile_start_at_address(int address, BreakCallB
 }
 
 //-------------------------------------------------------------------
-void program_memory_access::set_profile_stop_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakCallBack *cb)
 {
   if( address >= 0  && address<cpu->program_memory_size())
     if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
@@ -532,7 +541,7 @@ void program_memory_access::set_profile_stop_at_address(int address, BreakCallBa
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::clear_break_at_address(int address, 
+int ProgramMemoryAccess::clear_break_at_address(int address, 
 				       enum instruction::INSTRUCTION_TYPES type = 
 				       instruction::BREAKPOINT_INSTRUCTION)
 {
@@ -552,25 +561,25 @@ int program_memory_access::clear_break_at_address(int address,
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::clear_notify_at_address(int address)
+int ProgramMemoryAccess::clear_notify_at_address(int address)
 {
   return clear_break_at_address(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::clear_profile_start_at_address(int address)
+int ProgramMemoryAccess::clear_profile_start_at_address(int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::clear_profile_stop_at_address(int address)
+int ProgramMemoryAccess::clear_profile_stop_at_address(int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::address_has_break(int address, 
+int ProgramMemoryAccess::address_has_break(int address, 
 					     enum instruction::INSTRUCTION_TYPES type)
 {
   if(find_instruction(address,type)!=NULL)
@@ -580,26 +589,26 @@ int program_memory_access::address_has_break(int address,
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::address_has_notify(int address)
+int ProgramMemoryAccess::address_has_notify(int address)
 {
   return address_has_break(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::address_has_profile_start(int address)
+int ProgramMemoryAccess::address_has_profile_start(int address)
 {
   return address_has_break(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int program_memory_access::address_has_profile_stop(int address)
+int ProgramMemoryAccess::address_has_profile_stop(int address)
 {
   return address_has_break(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 
 //-------------------------------------------------------------------
-void program_memory_access::toggle_break_at_address(int address)
+void ProgramMemoryAccess::toggle_break_at_address(int address)
 {
   if(address_has_break(address))
     clear_break_at_address(address);
@@ -608,7 +617,7 @@ void program_memory_access::toggle_break_at_address(int address)
 }
 //-------------------------------------------------------------------
 
-void program_memory_access::set_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::set_break_at_line(int file_id, int src_line)
 {
   int address;
 
@@ -616,7 +625,7 @@ void program_memory_access::set_break_at_line(int file_id, int src_line)
       set_break_at_address(address);
 }
 
-void program_memory_access::clear_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::clear_break_at_line(int file_id, int src_line)
 {
 
   int address;
@@ -625,14 +634,14 @@ void program_memory_access::clear_break_at_line(int file_id, int src_line)
       clear_break_at_address(address);
 }
 
-void program_memory_access::toggle_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::toggle_break_at_line(int file_id, int src_line)
 {
   toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
 }
 
 //-------------------------------------------------------------------
-
-void program_memory_access::set_break_at_hll_line(int file_id, int src_hll_line)
+#if 0
+void ProgramMemoryAccess::set_break_at_hll_line(int file_id, int src_hll_line)
 {
   int address;
 
@@ -640,7 +649,7 @@ void program_memory_access::set_break_at_hll_line(int file_id, int src_hll_line)
       set_break_at_address(address);
 }
 
-void program_memory_access::clear_break_at_hll_line(int file_id, int src_hll_line)
+void ProgramMemoryAccess::clear_break_at_hll_line(int file_id, int src_hll_line)
 {
 
   int address;
@@ -649,12 +658,12 @@ void program_memory_access::clear_break_at_hll_line(int file_id, int src_hll_lin
       clear_break_at_address(address);
 }
 
-void program_memory_access::toggle_break_at_hll_line(int file_id, int src_hll_line)
+void ProgramMemoryAccess::toggle_break_at_hll_line(int file_id, int src_hll_line)
 {
   toggle_break_at_address(find_closest_address_to_hll_line(file_id, src_hll_line));
 }
 
-
+#endif
 
 //-------------------------------------------------------------------
 //
@@ -787,7 +796,7 @@ void Processor::dump_registers (void)
 
 
 //-------------------------------------------------------------------
-instruction *program_memory_access::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
+instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
 {
     instruction *p;
 
@@ -851,7 +860,7 @@ guint64 Processor::register_write_accesses(unsigned int address)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 //
-void program_memory_access::put(int addr, instruction *new_instruction)
+void ProgramMemoryAccess::put(int addr, instruction *new_instruction)
 {
 
   cpu->program_memory[addr] = new_instruction;
@@ -862,7 +871,7 @@ void program_memory_access::put(int addr, instruction *new_instruction)
 
 }
 
-instruction *program_memory_access::get(int addr)
+instruction *ProgramMemoryAccess::get(int addr)
 {
   if(addr < cpu->program_memory_size())
     return(cpu->program_memory[addr]);
@@ -872,7 +881,7 @@ instruction *program_memory_access::get(int addr)
 }
 
 // like get, but will ignore instruction break points 
-instruction *program_memory_access::get_base_instruction(int addr)
+instruction *ProgramMemoryAccess::get_base_instruction(int addr)
 {
     instruction *p;
 
@@ -905,7 +914,7 @@ instruction *program_memory_access::get_base_instruction(int addr)
 // get_opcode - return an opcode from program memory.
 //              If the address is out of range return 0.
 
-unsigned int program_memory_access::get_opcode(int addr)
+unsigned int ProgramMemoryAccess::get_opcode(int addr)
 {
 
   if(addr < cpu->program_memory_size())
@@ -919,7 +928,7 @@ unsigned int program_memory_access::get_opcode(int addr)
 // get_opcode_name - return an opcode name from program memory.
 //                   If the address is out of range return NULL;
 
-char *program_memory_access::get_opcode_name(int addr, char *buffer, int size)
+char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
 {
 
   if(addr < cpu->program_memory_size())
@@ -931,12 +940,12 @@ char *program_memory_access::get_opcode_name(int addr, char *buffer, int size)
 
 //----------------------------------------
 // Get the current value of the program counter.
-unsigned int program_memory_access::get_PC(void)
+unsigned int ProgramMemoryAccess::get_PC(void)
 {
   return 0;
 }
 
-void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
+void ProgramMemoryAccess::put_opcode_start(int addr, unsigned int new_opcode)
 {
 
   if( (addr < cpu->program_memory_size()) && (state == 0))
@@ -950,7 +959,7 @@ void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
 
 }
 
-void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
+void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
 {
   int i;
 
@@ -963,7 +972,7 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
 
   if(new_inst==NULL)
   {
-      puts("FIXME, in program_memory_access::put_opcode");
+      puts("FIXME, in ProgramMemoryAccess::put_opcode");
       return;
   }
   
@@ -1013,7 +1022,7 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
 
 //--------------------------------------------------------------------------
 
-void  program_memory_access::assign_xref(unsigned int address, gpointer xref)
+void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
 {
 
   if(cpu->program_memory_size()<=address)
@@ -1026,7 +1035,7 @@ void  program_memory_access::assign_xref(unsigned int address, gpointer xref)
 
 //--------------------------------------------------------------------------
 
-bool  program_memory_access::isValid_opcode(unsigned int address)
+bool  ProgramMemoryAccess::isValid_opcode(unsigned int address)
 {
 
   if((address < cpu->program_memory_size()) && 
@@ -1037,7 +1046,7 @@ bool  program_memory_access::isValid_opcode(unsigned int address)
 }
 //--------------------------------------------------------------------------
 
-bool  program_memory_access::isModified(unsigned int address)
+bool  ProgramMemoryAccess::isModified(unsigned int address)
 {
 
   if((address < cpu->program_memory_size()) && 

@@ -79,7 +79,7 @@ void cmd_dump::dump_sfrs(void)
   // Examine all registers this pic has to offer
   for (int i = 0; i < cpu->register_memory_size(); i++) {
 
-    if(cpu->registers[i]->isa() == file_register::SFR_REGISTER) {
+    if(cpu->registers[i]->isa() == Register::SFR_REGISTER) {
 
       // Found an sfr. Display its contents only if not aliased
       // at some other address too.
@@ -112,7 +112,7 @@ void cmd_dump::dump(int mem_type)
   unsigned int i, j, reg_num,mem_size=0;
   unsigned int v;
   unsigned int previous_row_is_invalid, all_invalid;
-  file_register **fr=NULL;
+  Register **fr=NULL;
 
   if(!have_cpu(1))
     return;
