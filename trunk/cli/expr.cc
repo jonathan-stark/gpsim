@@ -29,8 +29,6 @@ Value::Value()
 
 Value::~Value()
 {
-  cout << "deleting Value\n";
-
 }
 
 string Integer::toString()
@@ -76,7 +74,6 @@ LiteralInteger::LiteralInteger(Integer* newValue)
 {
   delete value;
  
-  cout << "deleting LiteralInteger\n";
 }
 
 

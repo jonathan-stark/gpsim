@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_X_H__
 #define __CMD_X_H__
 
+class Expression;
+
 class cmd_x : public command
 {
 public:
@@ -32,6 +34,7 @@ public:
   void x(int reg, int val);
   void x(char *reg_name, int val);
   void x(char *reg_name);
+  void x(Expression *);
 
   virtual int is_repeatable(void) { return 1; };
 };

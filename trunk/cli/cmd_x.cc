@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_x.h"
 #include "cmd_dump.h"
+#include "expr.h"
 
 #include "../src/pic-processor.h"
 #include "../src/symbol_orb.h"
@@ -134,4 +135,23 @@ void cmd_x::x(char *reg_name)
 void cmd_x::x(char *reg_name, int val)
 {
   update_symbol_value(reg_name,val);
+}
+
+void cmd_x::x(Expression *expr)
+{
+  if(expr) {
+
+    cout << expr->show() << endl;
+
+    Value *v = expr->evaluate();
+    if(v) {
+      cout << v->get() << endl;
+
+      x(v->get());
+
+      delete v;
+    }
+    delete expr;
+  }
+
 }

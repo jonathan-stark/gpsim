@@ -375,7 +375,8 @@ static int process_intLiteral(char *buffer, int conversionBase)
 static int recognize(int token_id,const char *description)
 {
   /* add optional debugging stuff here */
-  cout << description << endl;
+  if(0)
+    cout << description << endl;
 
   return(token_id);
 }

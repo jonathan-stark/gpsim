@@ -19,8 +19,6 @@ BinaryOperator::~BinaryOperator()
   delete leftExpr;
   delete rightExpr;
   delete value;
-
-  cout << "deleting BinaryOperator\n";
 }
 
 
@@ -87,7 +85,6 @@ OpAdd::OpAdd(Expression* leftExpr, Expression* rightExpr)
 
 OpAdd::~OpAdd()
 {
-  cout << "deleting OpAdd\n";
 }
 
 Value *OpAdd::applyOp(Value *lval, Value *rval)
