@@ -48,6 +48,7 @@ support:
 #include "binary_indicator.h"
 #include "resistor.h"
 #include "usart.h"
+#include "paraface.h"
 
 /*
 class Module_Types
@@ -68,6 +69,9 @@ Module_Types available_modules[] =
 
   // USART
   { "usart",            "usart", USARTModule::USART_construct},
+
+  // Parallel port interface
+  { "parallel_interface",         "paraface", Paraface::construct},
 
   // No more modules
   { NULL,NULL,NULL}
