@@ -396,6 +396,7 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
 	  return;
       }
 	  
+      // extract value from sheet cell
       text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
 
       errno = 0;
@@ -410,6 +411,9 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
 	  rw->registers[reg]->value = -1;
 	}
 
+      // n=value in sheet cell
+
+      // check if value has changed, and write if so
       if(gpsim_get_register_name(gp->pic_id,rw->type, reg))
       {
 	  if(n != rw->registers[reg]->value)
@@ -594,7 +598,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
  
   if(rw->row_to_address[row] < 0) {
       printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
-    return 0;
+    return;
   }
   
  if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
@@ -901,7 +905,8 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       
       retval=TRUE;
   }
-  else if((new_value=gpsim_get_register_value(pic_id, rw->type,reg_number)) != rw->registers[reg_number]->value) {
+  else if((new_value=gpsim_get_register_value(pic_id, rw->type,reg_number)) != rw->registers[reg_number]->value)
+  {
       if(new_value==INVALID_VALUE)
       {
 	  rw->registers[reg_number]->value = -1;
@@ -923,6 +928,9 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
 
       retval=TRUE;
   }
+
+  // FIXME, what about the entry above the sheet?
+
   return retval;
 }
 
@@ -1210,8 +1218,6 @@ BuildRegisterWindow(Register_Window *rw)
 
 
     
-	GtkSheet *sheet;
-
 	gchar name[10];
 	gint i;
 	gint column_width,char_width;
@@ -1257,7 +1263,7 @@ BuildRegisterWindow(Register_Window *rw)
   rw->register_sheet = GTK_SHEET(register_sheet);
 
     /* create popupmenu */
-    rw->popup_menu=build_menu(sheet,rw);
+    rw->popup_menu=build_menu(GTK_WIDGET(register_sheet),rw);
 
   build_entry_bar(main_vbox, rw);
 
@@ -1303,45 +1309,43 @@ BuildRegisterWindow(Register_Window *rw)
                          	char_width = gdk_string_width (normal_style->font,"9");
 	column_width = 3 * char_width + 6;
 
-	sheet=rw->register_sheet;
-
-	for(i=0; i<sheet->maxcol; i++){
+	for(i=0; i<rw->register_sheet->maxcol; i++){
 	  //sprintf(name,"0x%02x",i);
 		sprintf(name,"%02x",i);
-		gtk_sheet_column_button_add_label(sheet, i, name);
-		gtk_sheet_set_column_title(sheet, i, name);
-		gtk_sheet_set_column_width (sheet, i, column_width);
+		gtk_sheet_column_button_add_label(rw->register_sheet, i, name);
+		gtk_sheet_set_column_title(rw->register_sheet, i, name);
+		gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
 	}
 
 	sprintf(name,"ASCII");
-	gtk_sheet_column_button_add_label(sheet, i, name);
-	gtk_sheet_set_column_title(sheet, i, name);
-	gtk_sheet_set_column_width (sheet, i, REGISTERS_PER_ROW*char_width + 6);
+	gtk_sheet_column_button_add_label(rw->register_sheet, i, name);
+	gtk_sheet_set_column_title(rw->register_sheet, i, name);
+	gtk_sheet_set_column_width (rw->register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
 
-	gtk_sheet_set_row_titles_width(sheet, column_width);
+	gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
 
 	
-	gtk_signal_connect(GTK_OBJECT(sheet),
+	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "key_press_event",
 			   (GtkSignalFunc) clipboard_handler, 
 			   NULL);
 
-	gtk_signal_connect(GTK_OBJECT(sheet),
+	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "resize_range",
 			   (GtkSignalFunc) resize_handler, 
 			   rw);
 
-	gtk_signal_connect(GTK_OBJECT(sheet),
+	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "move_range",
 			   (GtkSignalFunc) move_handler, 
 			   rw);
 	
-	gtk_signal_connect(GTK_OBJECT(sheet),
+	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "button_press_event",
 			   (GtkSignalFunc) do_popup, 
 			   rw);
 
-	gtk_signal_connect(GTK_OBJECT(sheet),
+	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "set_cell",
 			   (GtkSignalFunc) parse_numbers,
 			   rw);

@@ -589,9 +589,15 @@ void create_dispatcher (void)
 
       frame = gtk_frame_new("gui_update");
       if(config_get_variable("dispatcher", "gui_update", &update_rate))
+      {
+	  printf("set update rate %d from file\n",update_rate);
 	  gpsim_set_update_rate(update_rate);
+      }
       else
+      {
+	  printf("using default update rate\n");
 	  update_rate=gpsim_get_update_rate();
+      }
       spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
       spinb = gtk_spin_button_new(spinadj,1,0);
       gtk_container_add(GTK_CONTAINER(frame),spinb);
