@@ -464,7 +464,24 @@ public:
 //----------------------------------------------------------
 // Global definitions:
 
+#ifdef IN_MODULE
+// we are in a module: don't access active_cpu object directly!
+Processor *get_active_cpu(void);
+#else
+// we are in gpsim: use of get_active_cpu() and set_active_cpu() is recommended,
+// even if active_cpu object can be accessed directly.
 extern Processor *active_cpu;
+
+inline Processor *get_active_cpu(void)
+{
+  return active_cpu;
+}
+
+inline void set_active_cpu(Processor *act_cpu)
+{
+  active_cpu = act_cpu;
+}
+#endif
 
 
 #endif

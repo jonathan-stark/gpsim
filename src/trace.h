@@ -245,7 +245,19 @@ class Trace
   int find_previous_cycle(int index);
 };
 
+#ifdef IN_MODULE
+// we are in a module: don't access trace object directly!
+Trace &get_trace(void);
+#else
+// we are in gpsim: use of get_trace() is recommended,
+// even if trace object can be accessed directly.
 extern Trace trace;
+
+inline Trace &get_trace(void)
+{
+  return trace;
+}
+#endif
 
 
 //-----------------------------------------------------------

@@ -160,7 +160,19 @@ class gpsimInterface : public BreakpointObject {
 
 };
 
+#ifdef IN_MODULE
+// we are in a module: don't access gi object directly!
+gpsimInterface &get_interface(void);
+#else
+// we are in gpsim: use of get_interface() is recommended,
+// even if gi object can be accessed directly.
 extern gpsimInterface gi;
+
+inline gpsimInterface &get_interface(void)
+{
+  return gi;
+}
+#endif
 
 //------------------------------------------------------------------------
 
