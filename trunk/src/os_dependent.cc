@@ -116,14 +116,6 @@ void * load_library(const char *library_name, char **pszError)
 {
   void *handle;
 
-  // First, see if we can load the library from where ever the 
-  // system thinks libraries are located.
-  if( (handle = sLoad(library_name)) != 0)
-    return handle;
-
-  // Failed to find the library in the system paths, so try to load
-  // from one of our paths.
-
   string sFile;
   string sPath(library_name);
   translatePath(sPath);
@@ -131,6 +123,15 @@ void * load_library(const char *library_name, char **pszError)
     sPath.append(MODULE_EXT);
   }
   AddToSearchPath(sPath, sFile);
+
+  // First, see if we can load the library from where ever the 
+  // system thinks libraries are located.
+  if( (handle = sLoad(sPath.c_str())) != 0)
+    return handle;
+
+  // Failed to find the library in the system paths, so try to load
+  // from one of our paths.
+
   vector<string>::iterator itSearchPath;
   for (itSearchPath = asDllSearchPath.begin();
       itSearchPath != asDllSearchPath.end();
