@@ -14,6 +14,7 @@ gpsim-0.20.0 new stuff:
 
 05APR00 gpsim-0.20.0
   o Modules - gpsim now supports dynamically loaded modules
+    -- module command
   o gui - Menu items now work
   o gui - button bar
   o gui - now refreshes while simulating
@@ -23,6 +24,9 @@ gpsim-0.20.0 new stuff:
 Modules
 -------
 The big story this release is Modules. gpsim now has a way to allow you to create specific simulation environments without having to learn everything about gpsim. This has been a major overhaul of the infrastructure of gpsim. 
+
+The idea is that you'll be able to create your own custom modules, package these into a library, and then load them from 
+There are two example modules: an LED one and a Logic one. These are somewhat experimental, but can serve as templates for creating your own modules. The LED module consist
 
 gui - Menu items now work
 -------------------------
