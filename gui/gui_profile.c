@@ -1579,6 +1579,7 @@ int CreateProfileWindow(GUI_Processor *gp)
   profile_window->gui_obj.is_built = 0;
   profile_window->profile_list=NULL;
   profile_window->profile_range_list=NULL;
+  profile_window->profile_register_list=NULL;
   gp->profile_window = profile_window;
 
   profile_window->processor=0;
