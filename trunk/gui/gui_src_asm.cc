@@ -536,14 +536,11 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     e->Set(pages[id].source_layout,pixmap_break, bp_mask);
     breakpoints.Add(address,
     	gtk_pixmap_new(pixmap_break,bp_mask),
-	pages[id].source_layout,
-	e->pos);
-
+                     pages[id].source_layout,
+                     e->pos);
   } else {
-
     e->Clear(pages[id].source_layout, pixmap_canbreak, canbp_mask);
   }
-
 }
 
 SourceBrowserAsm_Window *popup_sbaw;
@@ -1024,95 +1021,95 @@ static gint marker_cb(GtkWidget *w1,
   case GDK_MOTION_NOTIFY:
     if(button_pressed == 1 && dragbreak == 0)
       {
-	button_pressed=0;
-	// actually button is pressed, but setting
-	// this to zero makes this block of code
-	// execute exactly once for each drag motion
-	if(button_pressed_x<PIXMAP_SIZE)
-	  {
-	    // find out if we want to start drag of a breakpoint
-	    i=0;
-	    mindiff=1000000; // large distance
-	    dragbpi=0;   // start with invalid index
-
-	    // loop all breakpoints, and save the one that is closest as dragbpi
-	    iter=sbaw->breakpoints.iter;
-	    while(iter!=0)
+	    button_pressed=0;
+	    // actually button is pressed, but setting
+	    // this to zero makes this block of code
+	    // execute exactly once for each drag motion
+	    if(button_pressed_x<PIXMAP_SIZE)
 	      {
-		bpi=(BreakPointInfo*)iter->data;
-		    
-		diff = button_pressed_y - (bpi->break_widget->allocation.y+PIXMAP_SIZE/2);
-		if(abs(diff) < abs(mindiff))
-		  {
-		    mindiff=diff;
-		    dragbpi=(BreakPointInfo *)iter->data;
-		  }
-		    
-		iter=iter->next;
-	      }
-		
-	    if(dragbpi!=0 && mindiff<PIXMAP_SIZE/2)
-	      {  // mouse hit breakpoint pixmap in dragbpi
+	        // find out if we want to start drag of a breakpoint
+	        i=0;
+	        mindiff=1000000; // large distance
+	        dragbpi=0;   // start with invalid index
 
-		pixel = dragbpi->break_widget->allocation.y-
-		  sbaw->layout_offset+PIXMAP_SIZE/2;
+	        // loop all breakpoints, and save the one that is closest as dragbpi
+	        iter=sbaw->breakpoints.iter;
+	        while(iter!=0)
+	          {
+            bpi=(BreakPointInfo*)iter->data;
+    		    
+            diff = button_pressed_y - (bpi->break_widget->allocation.y+PIXMAP_SIZE/2);
+            if(abs(diff) < abs(mindiff))
+              {
+              mindiff=diff;
+              dragbpi=(BreakPointInfo *)iter->data;
+              }
+    		    
+            iter=iter->next;
+            }
+    		
+          if(dragbpi!=0 && mindiff<PIXMAP_SIZE/2)
+            {  // mouse hit breakpoint pixmap in dragbpi
 
-		// we want to remember which line drag started on
-		// to be able to disable this breakpoint later
-		// FIXME: perhaps we should simply disable bp now?
-		//dragstartline = gui_pixel_to_entry(id,pixel)->line;
-		dragstartline = sbaw->getBPatPixel(id,pixel)->line;
+            pixel = dragbpi->break_widget->allocation.y-
+            sbaw->layout_offset+PIXMAP_SIZE/2;
 
-		dragbreak=1;  // start drag
-		dragwidget = dragbpi->break_widget;
-		dragwidget_x = 0;
-		dragwidget_oldy=dragwidget->allocation.y+
-		  (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-		gtk_grab_add(sbaw->pages[id].source_layout);
+            // we want to remember which line drag started on
+            // to be able to disable this breakpoint later
+            // FIXME: perhaps we should simply disable bp now?
+            //dragstartline = gui_pixel_to_entry(id,pixel)->line;
+            dragstartline = sbaw->getBPatPixel(id,pixel)->line;
+
+            dragbreak=1;  // start drag
+            dragwidget = dragbpi->break_widget;
+            dragwidget_x = 0;
+            dragwidget_oldy=dragwidget->allocation.y+
+	            (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+            gtk_grab_add(sbaw->pages[id].source_layout);
+	          }
 	      }
-	  }
-	else
-	  { // we see if we hit the pixmap widget
-	    if( abs(button_pressed_y-
-		    (sbaw->pages[id].source_pcwidget->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2)
-	      { // hit
-		dragbreak=1; // start drag
-		dragwidget = sbaw->pages[id].source_pcwidget;
-		dragwidget_x = PIXMAP_SIZE;
-		dragwidget_oldy=dragwidget->allocation.y+
-		  (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-		gtk_grab_add(sbaw->pages[id].source_layout);
+	    else
+	      { // we see if we hit the pixmap widget
+	        if( abs(button_pressed_y-
+		        (sbaw->pages[id].source_pcwidget->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2)
+	          { // hit
+            dragbreak=1; // start drag
+            dragwidget = sbaw->pages[id].source_pcwidget;
+            dragwidget_x = PIXMAP_SIZE;
+            dragwidget_oldy=dragwidget->allocation.y+
+	            (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+            gtk_grab_add(sbaw->pages[id].source_layout);
+	          }
 	      }
-	  }
       }
     else if(dragbreak==1)
       {  // drag is in progress
-	if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) >0.9
-	   ||((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1)
-	  {
-	    if(timeout_tag==-1)
-	      {
-		timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
-	      }
-	    if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
-	      drag_scroll_speed = (((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
-	    else
-	      drag_scroll_speed = -(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
-	  }
-	else if(timeout_tag!=-1)
-	  {
-	  puts("remove timeout");
-	    gtk_timeout_remove(timeout_tag);
-	    timeout_tag=-1;
-	  }
+      if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) >0.9
+         ||((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1)
+        {
+        if(timeout_tag==-1)
+          {
+          timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
+          }
+        if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
+          drag_scroll_speed = (((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
+        else
+          drag_scroll_speed = -(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
+        }
+      else if(timeout_tag!=-1)
+        {
+        puts("remove timeout");
+        gtk_timeout_remove(timeout_tag);
+        timeout_tag=-1;
+        }
 	    
-	// update position of dragged pixmap
-	gtk_layout_move(GTK_LAYOUT(sbaw->pages[id].source_layout),
-			dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2
+      // update position of dragged pixmap
+      gtk_layout_move(GTK_LAYOUT(sbaw->pages[id].source_layout),
+                      dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2
 #if GTK_MAJOR_VERSION < 2
-			+ (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value
+			                + (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value
 #endif
-			);
+			                );
       }
     break;
   case GDK_BUTTON_PRESS:
@@ -1143,8 +1140,8 @@ static gint marker_cb(GtkWidget *w1,
     button_pressed=0;
     if(timeout_tag!=-1)
       {
-	gtk_timeout_remove(timeout_tag);
-	timeout_tag=-1;
+      gtk_timeout_remove(timeout_tag);
+      timeout_tag=-1;
       }
     if(dragbreak==0)
       break;  // we weren't dragging, so we don't move anything
@@ -1162,7 +1159,7 @@ static gint marker_cb(GtkWidget *w1,
       unsigned int address = sbaw->pma->find_closest_address_to_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
 
       if(address!=INVALID_VALUE)
-	sbaw->gp->cpu->pc->put_value(address);
+      sbaw->gp->cpu->pc->put_value(address);
     } else {
       
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,dragstartline+1);
