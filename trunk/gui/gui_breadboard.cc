@@ -1427,25 +1427,25 @@ static double module_distance(struct gui_module *p, int x, int y)
     double min_distance=100000000;
 
     // Upper left
-    distance=sqrt(abs(p->x-x)*abs(p->x-x) +
+    distance=sqrt((double)abs(p->x-x)*abs(p->x-x) +
 		  abs(p->y-y)*abs(p->y-y));
     if(distance<min_distance)
         min_distance=distance;
 
     // Upper right
-    distance=sqrt(abs(p->x+p->width-x)*abs(p->x+p->width-x) +
+    distance=sqrt((double)abs(p->x+p->width-x)*abs(p->x+p->width-x) +
 		  abs(p->y-y)*abs(p->y-y));
     if(distance<min_distance)
         min_distance=distance;
 
     // Lower left
-    distance=sqrt(abs(p->x-x)*abs(p->x-x) +
+    distance=sqrt((double)abs(p->x-x)*abs(p->x-x) +
 		  abs(p->y+p->height-y)*abs(p->y+p->height-y));
     if(distance<min_distance)
         min_distance=distance;
 
     // Lower right
-    distance=sqrt(abs(p->x+p->width-x)*abs(p->x+p->width-x) +
+    distance=sqrt((double)abs(p->x+p->width-x)*abs(p->x+p->width-x) +
 		  abs(p->y+p->height-y)*abs(p->y+p->height-y));
     if(distance<min_distance)
 	min_distance=distance;

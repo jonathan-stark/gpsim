@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.  */
 // by gpasm (which is written in C). Consequently
 //
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include <string.h>
 

@@ -1,9 +1,26 @@
-// FIXME. Stolen from Geir and extended with debug stuff.
+/*
+   Copyright (C) 2002 Ralf Forsberg
 
-
+This is based on the program icdprog 0.3 made by Geir Thomassen
+   
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+   
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+   
+You should have received a copy of the GNU General Public License
+along with gpasm; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+   
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <list>
 #include <sys/ioctl.h>
@@ -463,6 +480,7 @@ int icd_connect(char *port)
 
     if(!icd_baudrate_init()) {
 	fprintf(stderr,"Can't initialize the ICD\n");
+	return 0;
     }
 
     create_dumb_register_file();
@@ -516,20 +534,52 @@ int icd_disconnect(void)
     return 1;
 }
 
+static void make_stale(void)
+{
+    if(icd_fd<0) return;
+
+    pic_processor *cpu=get_processor(1);
+    for(int i=0;i<cpu->register_memory_size();i++)
+    {
+	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
+	assert(ir!=NULL);
+	ir->is_stale=1;
+    }
+
+    icd_WREG *iw = dynamic_cast<icd_WREG*>(cpu->W);
+    assert(iw!=NULL);
+    iw->is_stale=1;
+
+    icd_PC *ipc = dynamic_cast<icd_PC*>(cpu->pc);
+    assert(ipc!=NULL);
+    ipc->is_stale=1;
+
+    icd_PCLATH *ipclath = dynamic_cast<icd_PCLATH*>(cpu->pclath);
+    assert(ipclath!=NULL);
+    ipclath->is_stale=1;
+
+    icd_FSR *ifsr = dynamic_cast<icd_FSR*>(cpu->fsr);
+    assert(ifsr!=NULL);
+    ifsr->is_stale=1;
+
+    icd_StatusReg *isreg = dynamic_cast<icd_StatusReg*>(cpu->status);
+    assert(isreg!=NULL);
+    isreg->is_stale=1;
+}
+
 int icd_reset(void)
 {
     if(icd_fd<0) return 0;
-
-    pic_processor *pic=get_processor(1);
 
     cout << "Reset" << endl;
     icd_cmd("$$700A\r");
     icd_cmd("$$701B\r");
 
-    pic->pc->get_value(); // FIXME
+    make_stale();
+
+    pic_processor *pic=get_processor(1);
+    pic->pc->get_value();
     gi.simulation_has_stopped();
-
-
     return 1;
 }
 
@@ -578,39 +628,6 @@ float icd_vpp(void)
     icd_cmd("$$7001\r");     // disable Vpp
 
     return ((double)vpp) / 11.25;
-}
-
-static void make_stale(void)
-{
-    if(icd_fd<0) return;
-
-    pic_processor *cpu=get_processor(1);
-    for(int i=0;i<cpu->register_memory_size();i++)
-    {
-	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
-	assert(ir!=NULL);
-	ir->is_stale=1;
-    }
-
-    icd_WREG *iw = dynamic_cast<icd_WREG*>(cpu->W);
-    assert(iw!=NULL);
-    iw->is_stale=1;
-
-    icd_PC *ipc = dynamic_cast<icd_PC*>(cpu->pc);
-    assert(ipc!=NULL);
-    ipc->is_stale=1;
-
-    icd_PCLATH *ipclath = dynamic_cast<icd_PCLATH*>(cpu->pclath);
-    assert(ipclath!=NULL);
-    ipclath->is_stale=1;
-
-    icd_FSR *ifsr = dynamic_cast<icd_FSR*>(cpu->fsr);
-    assert(ifsr!=NULL);
-    ifsr->is_stale=1;
-
-    icd_StatusReg *isreg = dynamic_cast<icd_StatusReg*>(cpu->status);
-    assert(isreg!=NULL);
-    isreg->is_stale=1;
 }
 
 int icd_step(void)

@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 // T. Scott Dattalo 16bit core routines
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <list>
 

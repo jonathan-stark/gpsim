@@ -67,7 +67,7 @@ extern "C" {
 #include <string>
 #include <list>
 #include <csignal>
-#include <iostream.h>
+#include <iostream>
 
 #include "command.h"
 #include "input.h"

@@ -54,7 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
-#include <iostream.h>
+#include <iostream>
 
 #include <gtk/gtk.h>
 
@@ -89,7 +89,7 @@ void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 // tracing, stimulus interface, etc.). The ParafacePort class extends
 // IOPORT by redirecting changes to the paraface.
 
-Paraface_Port::Paraface_Port (unsigned int _num_iopins=8) : IOPORT(_num_iopins)
+Paraface_Port::Paraface_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
 
 }
@@ -99,7 +99,7 @@ void Paraface_Port::setbit(unsigned int bit_number, bool new_value)
     IOPORT::setbit(bit_number, new_value);
 }
 
-OutputPort::OutputPort (unsigned int _num_iopins=8) : Paraface_Port(_num_iopins)
+OutputPort::OutputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 {
 
 }

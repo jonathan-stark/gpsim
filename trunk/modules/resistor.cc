@@ -200,7 +200,7 @@ void Resistor::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Resistor::construct(char *new_name = NULL)
+ExternalModule * Resistor::construct(char *new_name)
 {
 
   cout << " Resistor construct \n";
@@ -307,7 +307,7 @@ void PullupResistor::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-ExternalModule * PullupResistor::pu_construct(char *new_name = NULL)
+ExternalModule * PullupResistor::pu_construct(char *new_name)
 {
 
   cout << "Pullup Resistor construct \n";
@@ -328,7 +328,7 @@ ExternalModule * PullupResistor::pu_construct(char *new_name = NULL)
 }
 
 //--------------------------------------------------------------
-ExternalModule * PullupResistor::pd_construct(char *new_name = NULL)
+ExternalModule * PullupResistor::pd_construct(char *new_name)
 {
 
   cout << "Pulldown Resistor construct \n";

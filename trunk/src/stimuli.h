@@ -21,10 +21,11 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef __STIMULI_H__
 #define __STIMULI_H__
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include <unistd.h>
 #include <glib.h>
+using namespace std;
 #include <list>
 
 #include "gpsim_classes.h"

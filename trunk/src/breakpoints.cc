@@ -19,8 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 #include "../config.h"
 #include "pic-processor.h"
@@ -43,7 +43,7 @@ extern pic_processor *active_cpu;
 
 Breakpoints bp;
 
-unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1 = NULL)
+unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1)
 {
   file_register *fr;
   int i;
@@ -270,12 +270,12 @@ unsigned int  Breakpoints::set_notify_break(pic_processor *cpu, unsigned int add
   return(set_breakpoint (Breakpoints::NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
-unsigned int  Breakpoints::set_profile_start_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
+unsigned int  Breakpoints::set_profile_start_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1)
 {
   return(set_breakpoint (Breakpoints::PROFILE_START_NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
-unsigned int  Breakpoints::set_profile_stop_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
+unsigned int  Breakpoints::set_profile_stop_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1)
 {
   return(set_breakpoint (Breakpoints::PROFILE_STOP_NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
@@ -290,7 +290,7 @@ unsigned int  Breakpoints::set_write_break(pic_processor *cpu, unsigned int regi
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE, cpu, register_number, 0));
 }
 
-unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask=0xff)
+unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;
@@ -302,7 +302,7 @@ unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_READ_VALUE, cpu, register_number, value));
 }
 
-unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask=0xff)
+unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;
@@ -314,7 +314,7 @@ unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned in
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE_VALUE, cpu, register_number, value));
 }
 
-unsigned int  Breakpoints::set_cycle_break(pic_processor *cpu, guint64 future_cycle, BreakCallBack *f1 = NULL)
+unsigned int  Breakpoints::set_cycle_break(pic_processor *cpu, guint64 future_cycle, BreakCallBack *f1)
 {
 
   return(set_breakpoint (Breakpoints::BREAK_ON_CYCLE, cpu, future_cycle & 0xffffffff, future_cycle>>32,f1));    
@@ -351,7 +351,7 @@ unsigned int Breakpoints::set_notify_write(pic_processor *cpu, unsigned int regi
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
 }
 unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int register_number, 
-						unsigned int value, unsigned int mask=0xff)
+						unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;
@@ -364,7 +364,7 @@ unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int
 }
 
 unsigned int Breakpoints::set_notify_write_value(pic_processor *cpu, unsigned int register_number,
-						   unsigned int value, unsigned int mask=0xff)
+						   unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;

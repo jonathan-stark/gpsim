@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <string.h>
 
-#include <iostream.h>
+#include <iostream>
 #include "../config.h"
 #include "../cli/input.h"
 #include "../src/gpsim_def.h"
@@ -134,6 +134,7 @@ void welcome(void)
   printf("\ngpsim - the GNUPIC simulator\nversion: %s\n", VERSION);
   printf("\n\ntype help for help\n");
 
+  return;
 }
 
 int 

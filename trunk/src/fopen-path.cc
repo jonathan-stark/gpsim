@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 // The functions use a C calling convention for compatibility.
 
 #include <stdio.h>
-#include <iostream.h>
+#include <iostream>
 #include <string>
 #include <string.h>
 
@@ -61,7 +61,8 @@ void set_search_path (const char *path)
 	if (':' == *cp) ++pathLen;
     }
     ++pathLen;				// always one more segments than colons
-    searchPath = (char *[])calloc (pathLen, sizeof (char *));
+    // searchPath = (char *[])calloc (pathLen, sizeof (char *));
+    searchPath = static_cast<char **>(calloc (pathLen, sizeof (char *)));
     assert (NULL != searchPath);
 
     for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');

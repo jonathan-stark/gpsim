@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 #include "../config.h"
 #include "16bit-registers.h"

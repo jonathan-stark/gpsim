@@ -140,7 +140,7 @@ void Binary_Indicator::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Binary_Indicator::construct(char *new_name = NULL)
+ExternalModule * Binary_Indicator::construct(char *new_name)
 {
 
   cout << " Binary Indicator \n";

@@ -226,7 +226,7 @@ void Module::new_name(char *s)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-void  Module::dump_attributes(int show_values=1)
+void  Module::dump_attributes(int show_values)
 {
 
   list <Attribute *> :: iterator attribute_iterator;
@@ -471,7 +471,7 @@ void module_load_library(char *library_name)
 
 }
 
-void module_load_module(char *module_type, char *module_name=NULL)
+void module_load_module(char *module_type, char *module_name)
 {
 
 

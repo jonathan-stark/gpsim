@@ -41,7 +41,7 @@ support:
   Module * getmodule(char *module_type) - creates a new module
  */
 
-#include <iostream.h>
+#include <iostream>
 #include <dlfcn.h>
 #include <stdio.h>
 #include "../src/modules.h"

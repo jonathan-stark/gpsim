@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 //#include <stdio.h>
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <list>
 
@@ -1151,7 +1151,7 @@ void pic_processor::create_invalid_registers (void)
 // placed in the file register map. 
 
 void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
-				      unsigned int por_value=0, char *new_name=NULL)
+				      unsigned int por_value, char *new_name)
 {
 
   reg->cpu         = this;
