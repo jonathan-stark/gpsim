@@ -414,16 +414,20 @@ symbol *symbol::copy()
   return 0;
 }
 
-void symbol::put_value(unsigned int new_value)
+void symbol::set(int new_value)
 {
   throw new Error("cannot assign value to symbol");
 }
 
-unsigned int symbol::get_value()
+void symbol::set(Value *v)
+{
+  throw new Error("cannot assign value to symbol");
+}
+
+void symbol::get(int &i)
 {
   throw new Error("cannot get value of symbol");
 
-  return 0; // keep the compiler happy.
 }
 
 //------------------------------------------------------------------------
@@ -447,7 +451,7 @@ void symbol::assignTo(Expression *expr)
     if(!v)
       throw new Error(" cannot evaluate expression ");
 
-    v->get_leftVal();
+    set(v);
 
   
     delete v;
@@ -531,25 +535,36 @@ void register_symbol::print(void)
 	 << endl;
   }
 }
-
+/*
 unsigned int register_symbol::get_value(void)
 {
   if(reg)
     return reg->address;
   return 0;
 }
-int register_symbol::getAsInt()
+*/
+
+void  register_symbol::get(int &i)
 {
   if(reg)
-    return reg->get_value();
-
-  return 0;
+    i = reg->get_value();
+  else
+    i = 0;
 }
 
-void register_symbol::put_value(unsigned int new_value)
+void register_symbol::set(int new_value)
 {
   if(reg)
     reg->put_value(new_value);
+}
+
+void register_symbol::set(Value *v)
+{
+  if(reg && v) {
+    int i;
+    v->get(i);
+    reg->put_value(i);
+  }
 }
 
 symbol *register_symbol::copy()
@@ -580,18 +595,27 @@ symbol *ioport_symbol::copy()
   return new ioport_symbol(ioport);
 }
 
-void ioport_symbol::put_value(unsigned int new_value)
+void ioport_symbol::set(int new_value)
 {
   if(ioport)
     ioport->put_value(new_value);
 }
 
-int ioport_symbol::getAsInt()
+void ioport_symbol::set(Value *v)
+{
+  if(ioport && v) {
+    int i;
+    v->get(i);
+    ioport->put_value(i);
+  }
+}
+
+void  ioport_symbol::get(int &i)
 {
   if(ioport)
-    return ioport->get_value();
-
-  return 0;
+    i = ioport->get_value();
+  else
+    i = 0;
 }
 
 //------------------------------------------------------------------------
@@ -610,17 +634,31 @@ symbol *constant_symbol::copy()
   return new constant_symbol((char *)name().c_str(),val);
 }
 
-int constant_symbol::getAsInt()
+void constant_symbol::get(int &i)
 {
-  return val;
+  i = val;
+}
+void constant_symbol::set(int i)
+{
+  val = i;
 }
 
+void constant_symbol::set(Value *v)
+{
+  if(v) {
+    int i;
+    v->get(i);
+    val = i;
+  }
+}
+
+/*
 double constant_symbol::getAsDouble()
 {
   double dVal = val;
   return dVal;
 }
-
+*/
 //------------------------------------------------------------------------
 address_symbol::address_symbol(char *_name, unsigned int _val)
   :  constant_symbol(_name,_val)
@@ -699,12 +737,15 @@ void val_symbol::print(void)
 {
   cout << type_name() << " " << val->name() << " = " << val->get_value() << endl;
 }
-unsigned int val_symbol::get_value(void)
+void val_symbol::get(int &i)
 {
-  return val->get_value();
+  if (val)
+    i = val->get_value();
+  else
+    i = 0;
 }
 
-void val_symbol::put_value(unsigned int new_value)
+void val_symbol::set(int new_value)
 {
   val->put_value(new_value);
 }

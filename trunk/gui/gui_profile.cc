@@ -156,7 +156,9 @@ static unsigned int lookup_address_symbol(const char *name)
   for(sti = st.begin(); sti != st.end(); sti++) {
     
     if(!strcmp((*sti)->name().data(),name)) {
-      return (*sti)->get_value();
+      int i;
+      (*sti)->get(i);
+      return i;
     }
   }
 
@@ -1264,7 +1266,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	  sym * data=(sym*)malloc(sizeof(sym));
 	  data->name = pstr;
 	  data->type = (*sti)->isa();
-	  data->value=(*sti)->get_value();
+	  (*sti)->get(data->value);
 	  symlist=g_list_append(symlist,data);
 
 	}
@@ -1308,7 +1310,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	  sym * data=(sym*)malloc(sizeof(sym));
 	  data->name = pstr;
 	  data->type = (*sti)->isa();
-	  data->value=(*sti)->get_value();
+	  (*sti)->get(data->value);
 	  symlist=g_list_append(symlist,data);
 
 	}
