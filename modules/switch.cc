@@ -152,7 +152,7 @@ void Switch::create_widget(Switch *sw)
 ExternalModule * Switch::construct(char *new_name=NULL)
 {
 
-    cout << " Switch constructor\n";
+//    cout << " Switch constructor\n";
 
     Switch *switchP = new Switch ;
     switchP->new_name(new_name);
@@ -167,7 +167,7 @@ ExternalModule * Switch::construct(char *new_name=NULL)
 Switch::Switch(void)
 {
 
-    cout << "Switch constructor\n";
+//    cout << "Switch constructor\n";
     name_str = strdup("Switch");
 
     interface_id = gpsim_register_interface((gpointer)this);
@@ -175,7 +175,7 @@ Switch::Switch(void)
 
 Switch::~Switch(void)
 {
-    cout << "Switch destructor\n";
+//    cout << "Switch destructor\n";
 
     delete switch_port;
 

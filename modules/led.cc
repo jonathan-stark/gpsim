@@ -537,7 +537,7 @@ void Led_7Segments::build_window(void)
 Led_7Segments::Led_7Segments(void)
 {
 
-  cout << "7-segment led constructor\n";
+  //cout << "7-segment led constructor\n";
   name_str = strdup("Led 7-segments");
 
 
@@ -556,7 +556,7 @@ Led_7Segments::Led_7Segments(void)
 
 Led_7Segments::~Led_7Segments(void)
 {
-    cout << "7-segment led destructor\n";
+    //cout << "7-segment led destructor\n";
 
     gpsim_unregister_interface(interface_id);
     gpsim_clear_break(cbp);
@@ -649,7 +649,7 @@ void Led_7Segments::create_iopin_map(void)
 ExternalModule * Led_7Segments::construct(char *new_name=NULL)
 {
 
-  cout << " 7-segment LED display constructor\n";
+//  cout << " 7-segment LED display constructor\n";
 
   Led_7Segments *l7sP = new Led_7Segments ;
   l7sP->new_name(new_name);

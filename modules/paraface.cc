@@ -322,7 +322,7 @@ void Paraface::create_iopin_map(void)
 ExternalModule * Paraface::construct(char *new_name=NULL)
 {
 
-    cout << " Parport constructor\n";
+//    cout << " Parport constructor\n";
 
     Paraface *parafaceP = new Paraface ;
     parafaceP->open_parallel_port();
@@ -336,7 +336,7 @@ ExternalModule * Paraface::construct(char *new_name=NULL)
 Paraface::Paraface(void)
 {
 
-    cout << "Paraface constructor\n";
+//    cout << "Paraface constructor\n";
     name_str = "Paraface";
 
     interface_id = gpsim_register_interface((gpointer)this);

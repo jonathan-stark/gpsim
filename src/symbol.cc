@@ -191,7 +191,7 @@ void Symbol_Table::add_line_number(pic_processor *cpu, int address)
 
 void Symbol_Table::add_module(Module * m, char *new_name)
 {
-  cout << "adding module symbol\n";
+//  cout << "adding module symbol\n";
 
   module_symbol *ms = new module_symbol();
 
@@ -204,7 +204,7 @@ void Symbol_Table::add_module(Module * m, char *new_name)
 
 void Symbol_Table::remove_module(Module * m, char *name)
 {
-  cout << "removing module symbol\n";
+//  cout << "removing module symbol\n";
 
   sti = st.begin();
   symbol *sym;

@@ -246,9 +246,9 @@ void cmd_module::module(cmd_options_str *cos, int op1, int op2)
     {
 
     case CMD_MOD_POSITION:
-      cout << "module set command :  module name = " << cos->str <<'\n';
-	cout << "   x = " << op1 <<'\n';
-	cout << "   y = " << op2 <<'\n';
+//    cout << "module set command :  module name = " << cos->str <<'\n';
+//      cout << "   x = " << op1 <<'\n';
+//      cout << "   y = " << op2 <<'\n';
 
       module_set_position(cos->str,op1,op2);
       break;

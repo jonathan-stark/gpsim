@@ -467,7 +467,7 @@ void module_load_module(char *module_type, char *module_name=NULL)
     if(module_name)
       cout << " named " << module_name;
 
-    cout  << '\n';
+//    cout  << '\n';
   }
 
 
@@ -476,7 +476,8 @@ void module_load_module(char *module_type, char *module_name=NULL)
        module_iterator++) {
 
     Module_Library *t = *module_iterator;
-    cout << t->name() << '\n';
+    if(verbose)
+      cout << t->name() << '\n';
 
     if(t->module_list) {
       // Loop through the list and search for the module.
@@ -517,7 +518,7 @@ void module_load_module(char *module_type, char *module_name=NULL)
     }
   }
 
-  cout << "NOT FOUND\n";
+  cout << " NOT FOUND\n";
 
 }
 
@@ -543,7 +544,7 @@ Module *module_check_cpu(char *module_name)
 
   if(mP && mP->cpu) {
 
-    cout << "Module " << mP->cpu->name() << '\n';
+//    cout << "Module " << mP->cpu->name() << '\n';
     return mP->cpu;
   }
   else {
