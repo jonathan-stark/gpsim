@@ -221,9 +221,6 @@
 				RelativePath=".\16bit-tmrs.cc">
 			</File>
 			<File
-				RelativePath=".\attribute.cc">
-			</File>
-			<File
 				RelativePath=".\breakpoints.cc">
 			</File>
 			<File
@@ -427,9 +424,6 @@
 				RelativePath=".\16bit-tmrs.h">
 			</File>
 			<File
-				RelativePath=".\attribute.h">
-			</File>
-			<File
 				RelativePath=".\breakpoints.h">
 			</File>
 			<File
@@ -445,7 +439,8 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -453,7 +448,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -461,7 +457,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -469,7 +466,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 			</File>

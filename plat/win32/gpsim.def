@@ -1,10 +1,7 @@
 EXPORTS
-    ??AProgramMemoryAccess@@QAEAAVinstruction@@I@Z
-    ??0Attribute@@QAE@PAD@Z
-    ??0Attribute@@QAE@XZ
     ??0Breakpoint_Instruction@@QAE@PAVProcessor@@II@Z
     ??0Files@@QAE@H@Z
-    ??0FloatAttribute@@QAE@XZ
+    ??0Float@@QAE@N@Z
     ??0IOPIN@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IOPIN@@QAE@XZ
     ??0IOPORT@@QAE@I@Z
@@ -31,6 +28,7 @@ EXPORTS
     ??0instruction@@QAE@XZ
     ??0invalid_instruction@@QAE@PAVProcessor@@I@Z
     ??0stimulus@@QAE@PAD@Z
+    ??1Float@@UAE@XZ
     ??1IOPIN@@UAE@XZ
     ??1IOPORT@@UAE@XZ
     ??1Module@@UAE@XZ
@@ -40,18 +38,16 @@ EXPORTS
     ??1gpsimValue@@UAE@XZ
     ??1stimulus@@UAE@XZ
     ??AFiles@@QAEPAVFileContext@@H@Z
+    ??AProgramMemoryAccess@@QAEAAVinstruction@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
     ?Add@Files@@QAEHPADPAU_iobuf@@@Z
     ?Find@Files@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?add@TraceFrame@@UAEXPAVTraceObject@@@Z
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
     ?addToCurrentFrame@Trace@@QAEXPAVTraceObject@@@Z
-    ?add_address@Symbol_Table@@QAEXPAVProcessor@@PADH@Z
-    ?add_attribute@Module@@QAEXPAVAttribute@@@Z
-    ?add_constant@Symbol_Table@@QAEXPAVProcessor@@PADH@Z
+    ?add_attribute@Module@@QAEXPAVValue@@@Z
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
-    ?add_register@Symbol_Table@@QAEXPAVProcessor@@PAVRegister@@PAD@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
@@ -77,6 +73,7 @@ EXPORTS
     ?clear_notify_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?clear_profile_start_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?clear_profile_stop_at_address@ProgramMemoryAccess@@UAEHI@Z
+    ?compare@Float@@UAE_NPAVComparisonOperator@@PAVValue@@@Z
     ?compare@Value@@UAE_NPAVComparisonOperator@@PAV1@@Z
     ?computed_goto@Program_Counter@@UAEXI@Z
     ?create@Processor@@UAEXXZ
@@ -94,9 +91,11 @@ EXPORTS
     ?find_instruction@ProgramMemoryAccess@@UAEPAVinstruction@@IW4INSTRUCTION_TYPES@2@@Z
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
+    ?get@Float@@UAEXAAN@Z
+    ?get@Float@@UAEXAA_J@Z
     ?get@IOPORT@@UAEIXZ
-    ?getAsDouble@Value@@UAENXZ
-    ?getAsInt@Value@@UAEHXZ
+    ?get@Value@@UAEXAAH@Z
+    ?get@Value@@UAEXPADH@Z
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@RegisterWriteTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@TraceObject@@UAEXPAVTraceFrame@@@Z
@@ -104,7 +103,7 @@ EXPORTS
     ?get_Vth@IO_input@@UAENXZ
     ?get_Zth@IO_bi_directional@@UAENXZ
     ?get_active_cpu@@YAPAVProcessor@@XZ
-    ?get_attribute@Module@@UAEPAVAttribute@@PAD_N@Z
+    ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
     ?get_bit@IOPORT@@UAE_NI@Z
     ?get_bit_voltage@IOPORT@@UAENI@Z
     ?get_bit_voltage@Register@@UAENI@Z
@@ -121,6 +120,7 @@ EXPORTS
     ?get_pin_state@Module@@UAEHI@Z
     ?get_symbol_table@@YAAAVSymbol_Table@@XZ
     ?get_trace@@YAAAVTrace@@XZ
+    ?get_value@IOPORT@@UAEIXZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
@@ -134,7 +134,6 @@ EXPORTS
     ?name@gpsimObject@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z
-    ?new_name@Attribute@@UAEXPAD@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPAD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
@@ -150,18 +149,12 @@ EXPORTS
     ?run@Processor@@UAEXXZ
     ?run@ProgramMemoryAccess@@UAEXXZ
     ?run_to_address@Processor@@UAEXI@Z
-    ?sGet@FloatAttribute@@UAEPADPADH@Z
-    ?sGet@IntAttribute@@UAEPADPADH@Z
     ?save_state@Processor@@UAEXPAU_iobuf@@@Z
     ?save_state@Processor@@UAEXXZ
-    ?set@FloatAttribute@@UAEXH@Z
-    ?set@FloatAttribute@@UAEXN@Z
-    ?set@FloatAttribute@@UAEXPAD@Z
-    ?set@FloatAttribute@@UAEXPADH@Z
-    ?set@IntAttribute@@UAEXH@Z
-    ?set@IntAttribute@@UAEXN@Z
-    ?set@IntAttribute@@UAEXPAD@Z
-    ?set@IntAttribute@@UAEXPADH@Z
+    ?set@Float@@UAEXN@Z
+    ?set@Float@@UAEXPAVValue@@@Z
+    ?set@Float@@UAEX_J@Z
+    ?set@Value@@UAEXPADH@Z
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_attribute@Module@@UAEXPAD0@Z
     ?set_attribute@Module@@UAEXPAD0H@Z
@@ -172,6 +165,7 @@ EXPORTS
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_breakpoint@Breakpoints@@QAEIPAVTriggerObject@@@Z
     ?set_cpu@MemoryAccess@@UAEXPAVProcessor@@@Z
+    ?set_cpu@gpsimValue@@UAEXPAVProcessor@@@Z
     ?set_digital_state@IOPIN@@UAEX_N@Z
     ?set_nodeVoltage@IOPIN@@UAEXN@Z
     ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
@@ -189,6 +183,7 @@ EXPORTS
     ?stop@ProgramMemoryAccess@@UAEXXZ
     ?toBitStr@Register@@UAEPADPADH@Z
     ?toBitStr@RegisterValue@@QAEPADPADHI000@Z
+    ?toString@Float@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Register@@UAEPADPADH@Z
     ?toString@RegisterValue@@QAEPADPADHH@Z
     ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
@@ -197,7 +192,7 @@ EXPORTS
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?trace_dump1@Processor@@UAEHHPADH@Z
-    ?update@Stimulus_Node@@QAEN_K@Z
+    ?update@Stimulus_Node@@QAEX_K@Z
     ?update@gpsimValue@@UAEXXZ
     ?update_direction@IO_bi_directional@@UAEXI@Z
     ?update_state@TraceFrame@@UAEXXZ
