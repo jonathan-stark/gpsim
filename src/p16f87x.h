@@ -88,6 +88,19 @@ class P16F873 : public P16C73
 };
 
 
+class P16F876 : public P16F873
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P16F876_;};
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+  virtual unsigned int register_memory_size () const { return 0x200;};
+
+  P16F876(void);
+  static Processor *construct(void);
+};
 
 
 class P16F874 : public P16C74
