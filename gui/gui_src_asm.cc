@@ -463,6 +463,11 @@ void SourceBrowserAsm_Window::Update(void)
   if(!gp || !pma)
     return;
 
+  SetTitle();
+  if (gp->cpu->simulation_mode == RUNNING ||
+    gp->cpu->simulation_mode == SINGLE_STEPPING)
+    return;
+
   SetPC(pma->get_PC());
 
   if(status_bar)
@@ -567,7 +572,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       gtk_widget_show(searchdlg.window);
       break;
     case MENU_FIND_PC:
-      address=popup_sbaw->gp->cpu->pc->get_raw_value();
+      address=popup_sbaw->pma->get_PC();
       popup_sbaw->SetPC(address);
       break;
     case MENU_MOVE_PC:
@@ -812,7 +817,8 @@ static gint switch_page_cb(GtkNotebook     *notebook,
       sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
 
     // Update pc widget
-    address=sbaw->gp->cpu->pc->get_raw_value();
+    // address=sbaw->gp->cpu->pc->get_raw_value();
+    address = sbaw->pma->get_PC();
     sbaw->SetPC(address);
 
     remove_all_points(sbaw);
@@ -1765,7 +1771,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   // fails with widget_map() -> not visible
   GTKWAIT;
 
-  address=gp->cpu->pc->get_value();
+  address=gp->cpu->pma->get_PC();
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else
@@ -2481,13 +2487,7 @@ void SourceBrowserAsm_Window::Build(void)
 
   SourceBrowser_Window::Create();
 
-  if(pma) {
-    char buffer[256];
-    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
-    gtk_window_set_title (GTK_WINDOW (window), buffer);
-  } else 
-    gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
-
+  SetTitle();
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
 
@@ -2566,17 +2566,12 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
   if(window && pma) {
 
-    char buffer[256];
-
-    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
-    gtk_window_set_title (GTK_WINDOW (window), buffer);
+    SetTitle();
     Dprintf(("new source browser name: %s\n",buffer));
   }
 
   if(status_bar)
     status_bar->NewProcessor(gp, pma);
-
-
 }
 
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
