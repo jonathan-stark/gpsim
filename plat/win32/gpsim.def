@@ -312,6 +312,13 @@ EXPORTS
     ?update_stimuli@IOPORT@@UAEHXZ
     ?verbose@@3HA
     ?Debug@Processor@@UAEXXZ
+    ?hasValid_opcode@ProgramMemoryAccess@@QAE_NI@Z
+    ?createProgramMemoryAccess@Processor@@UAEPAVProgramMemoryAccess@@PAV1@@Z
+    ?step_over@ProgramMemoryAccess@@UAEX_N@Z
+    ?step@ProgramMemoryAccess@@UAEXI_N@Z
+    ?get_PC@ProgramMemoryAccess@@UAEIXZ
+    ?put@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
+    ?get_cpu@gpsimValue@@QAEPAVProcessor@@XZ
     load_library
     get_library_export
     free_error_message
