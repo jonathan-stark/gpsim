@@ -23,33 +23,15 @@ Boston, MA 02111-1307, USA.  */
 
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
+#include "intcon.h"
+#include "pir.h"
 // #include "ssp.h"
-
-class INTCON_P16C6x : public INTCON
-{
-public:
-
-  PIR1 *pir1;
-  PIR2 *pir2;
-
-  bool check_peripheral_interrupt(void)
-    {
-      if(pir2)
-	return( pir1->interrupt_status() | pir2->interrupt_status());
-      else
-	return( pir1->interrupt_status());
-    }
- INTCON_P16C6x(void)
-   {
-     pir2=NULL;
-   }
-};
 
 class P16C61 : public  _14bit_processor, public _14bit_18pins
 {
 public:
 
-  INTCON       intcon_reg;
+  INTCON_14       intcon_reg;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
   virtual void create_symbols(void);
@@ -85,9 +67,9 @@ class P16X6X_processor : public _14bit_processor
 public:
 
   T1CON   t1con;
-  PIR1    pir1;
+  PIR1v1  pir1_reg;
   PIE     pie1;
-  PIR2    pir2;
+  PIR2v1  pir2_reg;
   PIE     pie2;
   T2CON   t2con;
   PR2     pr2;
@@ -101,7 +83,8 @@ public:
   CCPRL   ccpr2l;
   CCPRH   ccpr2h;
   PCON    pcon;
-  INTCON_P16C6x intcon_reg;
+  INTCON_14_PIR intcon_reg;
+  PIR_SET_1 pir_set_def;
 
   //  void create_iopin_map(void);
 
@@ -112,6 +95,11 @@ public:
     {
       //((PORTB *)portb)->rbpu_intedg_update(bits);
     }
+
+  virtual PIR *get_pir2(void) { return (&pir2_reg); }
+  virtual PIR *get_pir1(void) { return (&pir1_reg); }
+  virtual PIR_SET *get_pir_set(void) { return (&pir_set_def); }
+
   P16X6X_processor(void);
 
 };

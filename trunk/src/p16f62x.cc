@@ -20,14 +20,12 @@ Boston, MA 02111-1307, USA.  */
 
 
 //
-// p16x8x
+// p16f62x
 //
 //  This file supports:
-//    PIC16C84
-//    PIC16CR84
-//    PIC16F84
-//    PIC16F83
-//    PIC16CR83
+//    PIC16F627
+//    PIC16F628
+//    PIC16F648
 //
 
 #include <stdio.h>
@@ -129,10 +127,10 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(portb,   0x106);
   add_sfr_register(&trisb,  0x186, 0xff);
 
-  add_sfr_register(&(eeprom->eedata),  0x9a);
-  add_sfr_register(&(eeprom->eeadr),   0x9b);
-  add_sfr_register(&(eeprom->eecon1),  0x9c, 0);
-  add_sfr_register(&(eeprom->eecon2),  0x9d);
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x9a);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x9b);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
 
   add_sfr_register(pclath, 0x18a, 0);
   add_sfr_register(pclath, 0x10a, 0);
@@ -147,7 +145,7 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portb,1);
+  usart.initialize_14(this,get_pir_set(),portb,1);
 
   add_sfr_register(&comparator.cmcon, 0x1f, 0,"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, 0,"vrcon");
@@ -156,8 +154,7 @@ void P16F62x::create_sfr_map(void)
   num_of_sfrs = 0;
 
   intcon = &intcon_reg;
-  intcon_reg.pir1 = &pir1;
-  intcon_reg.pir2 = NULL;
+  intcon_reg.set_pir_set(get_pir_set());
 
   // Link the usart and portb
   ((PORTB_62x*)portb)->usart = &usart;
@@ -167,15 +164,12 @@ void P16F62x::create_sfr_map(void)
 
   // Link ccp1 and portb
   ((PORTB_62x*)portb)->ccp1con = &ccp1con;
-
-  pir1.valid_bits = pir1.TMR1IF | pir1.TMR2IF | pir1.CCP1IF | pir1.TXIF 
-    | pir1.RCIF | pir1.CMIF | pir1.EEIF;
 }
 
 void P16F62x::create_symbols(void)
 {
   if(verbose)
-    cout << "8x create symbols\n";
+    cout << "62x create symbols\n";
 
   symbol_table.add_ioport(this, portb);
   symbol_table.add_ioport(this, porta);
@@ -185,36 +179,11 @@ void P16F62x::create_symbols(void)
 void P16F62x::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
+  if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
     {
-      eeprom->rom[address - 0x2100]->value = value;
+      get_eeprom()->change_rom(address - 0x2100, value);
     }
 }
-#if 0
-unsigned int P16F62x::eeprom_get_value(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address]->get_value();
-  return 0;
-
-}
-file_register *P16F62x::eeprom_get_register(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address];
-  return NULL;
-
-}
-void  P16F62x::eeprom_put_value(unsigned int value,
-				unsigned int address)
-{
-  if(address<eeprom_get_size())
-    eeprom.rom[address]->put_value(value);
-
-}
-#endif
 
 //========================================================================
 void P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
@@ -277,16 +246,22 @@ void P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
 }
 
 //========================================================================
-void  P16F62x::create(int ram_top)
+void  P16F62x::create(int ram_top, unsigned int eeprom_size)
 {
+  EEPROM_PIR *e;
+
   create_iopin_map();
 
   _14bit_processor::create();
 
-  eeprom = new EEPROM_62x;
-  eeprom->cpu = this;
-  eeprom->initialize(128);
-  ((EEPROM_62x *)eeprom)->pir1 = &pir1;
+  e = new EEPROM_PIR;
+  e->set_cpu(this);
+  e->initialize(eeprom_size);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon_reg);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
 
   P16X6X_processor::create_sfr_map();
 
@@ -310,12 +285,12 @@ Processor * P16F627::construct(void)
 
   P16F627 *p = new P16F627;
 
-  cout << " f628 construct\n";
+  cout << " f627 construct\n";
 
-  p->P16F62x::create(0x2f);
+  p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16f628";
+  p->name_str = "p16f627";
   symbol_table.add_module(p,p->name_str);
 
   return p;
@@ -325,7 +300,7 @@ Processor * P16F627::construct(void)
 P16F627::P16F627(void)
 {
   if(verbose)
-    cout << "f628 constructor, type = " << isa() << '\n';
+    cout << "f627 constructor, type = " << isa() << '\n';
 
 }
 
@@ -341,7 +316,7 @@ Processor * P16F628::construct(void)
 
   cout << " f628 construct\n";
 
-  p->P16F62x::create(0x2f);
+  p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
   p->name_str = "p16f628";
@@ -358,3 +333,39 @@ P16F628::P16F628(void)
 
 }
 
+
+//========================================================================
+//
+// Pic 16F648 
+//
+
+pic_processor * P16F648::construct(void)
+{
+
+  P16F648 *p = new P16F648;
+
+  cout << " f648 construct\n";
+
+  p->P16F62x::create(0x2f, 256);
+  p->create_sfr_map();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
+  p->name_str = "p16f648";
+  symbol_table.add_module(p,p->name_str);
+
+  return p;
+
+}
+
+P16F648::P16F648(void)
+{
+  if(verbose)
+    cout << "f648 constructor, type = " << isa() << '\n';
+
+}
+
+void P16F648::create_sfr_map(void)
+{
+ 
+  add_file_registers(0x150,0x16f,0);
+}

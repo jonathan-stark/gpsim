@@ -30,11 +30,11 @@ class invalid_file_register;   // Forward reference
 
 #include "pic-processor.h"
 #include "14bit-registers.h"
+#include "pir.h"
 
 class _TXSTA;   // Forward references
 class _SPBRG;
 class _RCSTA;
-class PIR1;
 class  _14bit_processor;
 class IOPORT;
 
@@ -55,7 +55,7 @@ class _TXREG : public sfr_register
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-  virtual void assign_pir(PIR1 *new_pir);
+  virtual void assign_pir_set(PIR_SET *new_pir_set);
 };
 
 class _TXSTA : public sfr_register, public BreakCallBack
@@ -113,7 +113,7 @@ class _RCREG : public sfr_register
   virtual void push(unsigned int);
   virtual void pop(void);
 
-  virtual void assign_pir(PIR1 *new_pir);
+  virtual void assign_pir_set(PIR_SET *new_pir_set);
 
 };
 
@@ -209,23 +209,23 @@ class _SPBRG : public sfr_register, public BreakCallBack
 class TXREG_14 : public _TXREG
 {
  public:
-  PIR1 *pir1;
+  PIR_SET *pir_set;
 
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
+  virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
 };
 
 class RCREG_14 : public _RCREG
 {
  public:
-  PIR1 *pir1;
+  PIR_SET *pir_set;
 
   virtual void push(unsigned int);
   virtual void pop(void);
 
-  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
+  virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
 
 };
 
@@ -259,7 +259,8 @@ class USART_MODULE14 : public USART_MODULE
   //RCREG_14     rcreg;
 
   USART_MODULE14(void);
-  void initialize_14(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port, int rx_pin);
+  void initialize_14(_14bit_processor *new_cpu,PIR_SET *ps,
+     IOPORT *uart_port, int rx_pin);
   virtual void new_rx_edge(unsigned int);
 
 };

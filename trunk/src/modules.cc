@@ -55,7 +55,7 @@ list <Module *> instantiated_modules_list;
  *
  * A Module is define to be something that gpsim knows how to simulate.
  * When gpsim was originally designed, a module was simple a pic processor.
- * This concept was expanded to accomodate addition devices like LEDs, switches,
+ * This concept was expanded to accomodate devices like LEDs, switches,
  * LCDs and so on. 
  */
 
@@ -66,7 +66,9 @@ Module::Module(void)
   interface_id = 0;
   widget=NULL;
   package = NULL;
+  interface = NULL;
 
+  // FIXME - remove these gui references:
   x=-1; // -1 means automatic positioning
   y=-1;
 

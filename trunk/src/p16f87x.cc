@@ -37,57 +37,33 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 
-#if 0
-unsigned int P16F873::eeprom_get_value(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address]->get_value();
-  return 0;
-
-}
-file_register *P16F873::eeprom_get_register(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address];
-  return NULL;
-
-}
-void  P16F873::eeprom_put_value(unsigned int value,
-				unsigned int address)
-{
-  if(address<eeprom_get_size())
-    eeprom.rom[address]->put_value(value);
-
-}
-
-#endif
-
 void P16F873::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
+  if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
     {
-      eeprom->rom[address - 0x2100]->value = value;
+      get_eeprom()->change_rom(address - 0x2100, value);
     }
 }
 
 
 void P16F873::create_sfr_map(void)
 {
+
   if(verbose)
     cout << "creating f873 registers \n";
 
-  add_sfr_register(&(eeprom->eedata),  0x10c);
-  add_sfr_register(&(eeprom->eecon1),  0x18c, 0);
-  eeprom->eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, 0);
 
-  add_sfr_register(&(eeprom->eeadr),   0x10d);
-  add_sfr_register(&(eeprom->eecon2),  0x18d);
+  // Enable program memory reads and writes.
+  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
 
-  add_sfr_register(&(((EEPROM_87x *)eeprom)->eedatah), 0x10e);
-  add_sfr_register(&(((EEPROM_87x *)eeprom)->eeadrh),  0x10f);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
+
+  add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
   add_sfr_register(&adresl,  0x9e, 0);
 
@@ -164,13 +140,18 @@ Processor * P16F873::construct(void)
 {
 
   P16F873 *p = new P16F873;
+  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f873 construct\n";
 
-  p->eeprom = new EEPROM_87x;
-  p->eeprom->cpu = p;
-  p->eeprom->initialize(128);
+  e = new EEPROM_WIDE;
+  e->set_cpu(p);
+  e->initialize(128);
+  e->set_intcon(&p->intcon_reg);
+
+  // assign the eeprom to the processor
+  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -201,38 +182,12 @@ P16F873::P16F873(void)
 
 //-------------------------------------------------------
 
-#if 0
-unsigned int P16F874::eeprom_get_value(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address]->get_value();
-  return 0;
-
-}
-file_register *P16F874::eeprom_get_register(unsigned int address)
-{
-
-  if(address<eeprom_get_size())
-    return eeprom.rom[address];
-  return NULL;
-
-}
-void  P16F874::eeprom_put_value(unsigned int value,
-				unsigned int address)
-{
-  if(address<eeprom_get_size())
-    eeprom.rom[address]->put_value(value);
-
-}
-#endif
-
 void P16F874::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
+  if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
     {
-      eeprom->rom[address - 0x2100]->value = value;
+      get_eeprom()->change_rom(address - 0x2100, value);
     }
 }
 
@@ -242,15 +197,17 @@ void P16F874::create_sfr_map(void)
   if(verbose)
     cout << "creating f874 registers \n";
 
-  add_sfr_register(&(eeprom->eedata),  0x10c);
-  add_sfr_register(&(eeprom->eecon1),  0x18c, 0);
-  eeprom->eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
+  add_sfr_register(get_eeprom()->get_reg_eedata(),  0x10c);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x18c, 0);
 
-  add_sfr_register(&(eeprom->eeadr),   0x10d);
-  add_sfr_register(&(eeprom->eecon2),  0x18d);
+  // Enable program memory reads and writes.
+  get_eeprom()->get_reg_eecon1()->set_bits(EECON1::EEPGD);
 
-  add_sfr_register(&(((EEPROM_87x *)eeprom)->eedatah), 0x10e);
-  add_sfr_register(&(((EEPROM_87x *)eeprom)->eeadrh),  0x10f);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x10d);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x18d);
+
+  add_sfr_register(get_eeprom()->get_reg_eedatah(), 0x10e);
+  add_sfr_register(get_eeprom()->get_reg_eeadrh(),  0x10f);
 
   add_sfr_register(&adresl,  0x9e, 0);
 
@@ -327,13 +284,18 @@ Processor * P16F874::construct(void)
 {
 
   P16F874 *p = new P16F874;
+  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f874 construct\n";
 
-  p->eeprom = new EEPROM_87x;
-  p->eeprom->cpu = p;
-  p->eeprom->initialize(128);
+  e = new EEPROM_WIDE;
+  e->set_cpu(p);
+  e->initialize(128);
+  e->set_intcon(&p->intcon_reg);
+
+  // assign the eeprom to the processor
+  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();
@@ -397,13 +359,16 @@ Processor * P16F877::construct(void)
 {
 
   P16F877 *p = new P16F877;
+  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f877 construct\n";
 
-  p->eeprom = new EEPROM_87x;
-  p->eeprom->cpu = p;
-  p->eeprom->initialize(256);
+  e = new EEPROM_WIDE;
+  e->set_cpu(p);
+  e->initialize(256);
+  e->set_intcon(&p->intcon_reg);
+  p->set_eeprom_wide(e);
 
   p->create();
   p->create_invalid_registers ();

@@ -314,7 +314,7 @@ void _TXREG::full(void)
 {
   cout << "TXREG:: function not implemented\n";
 }
-void _TXREG::assign_pir(PIR1 *new_pir)
+void _TXREG::assign_pir_set(PIR_SET *new_pir_set)
 {
   cout << "TXREG:: function not implemented\n";
 }
@@ -638,7 +638,7 @@ unsigned int _RCREG::get(void)
   trace.register_read(address,value);
   return value;
 }
-void _RCREG::assign_pir(PIR1 *new_pir)
+void _RCREG::assign_pir_set(PIR_SET *new_pir_set)
 {
   cout <<"_RCREG:: function not impl\n";
 }
@@ -802,17 +802,17 @@ void _SPBRG::callback(void)
 
 bool TXREG_14::is_empty(void)
 {
-  return(pir1->get_txif());
+  return(pir_set->get_txif());
 }
 
 void TXREG_14::empty(void)
 {
-  pir1->set_txif();
+  pir_set->set_txif();
 }
 
 void TXREG_14::full(void)
 {
-  pir1->clear_txif();
+  pir_set->clear_txif();
 }
 
 void RCREG_14::push(unsigned int new_value)
@@ -820,7 +820,7 @@ void RCREG_14::push(unsigned int new_value)
 
   _RCREG::push(new_value);
 
-  pir1->set_rcif();
+  pir_set->set_rcif();
 
 }
 
@@ -829,7 +829,7 @@ void RCREG_14::pop(void)
 
   _RCREG::pop();
   if(fifo_sp == 0)
-    pir1->clear_rcif();
+    pir_set->clear_rcif();
 
 }
 
@@ -846,7 +846,7 @@ void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
   }
 
   if(txreg) {
-    txreg->assign_pir(NULL);
+    txreg->assign_pir_set(NULL);
     txreg->txsta = txsta;
   }
 
@@ -866,7 +866,7 @@ void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
   }
 
   if(rcreg) {
-    rcreg->assign_pir(NULL);
+    rcreg->assign_pir_set(NULL);
     rcreg->rcsta = rcsta;
   }
 
@@ -903,7 +903,8 @@ USART_MODULE14::USART_MODULE14(void)
 }
 
 //--------------------------------------------------
-void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port, int rx_pin)
+void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR_SET *ps,
+    IOPORT *uart_port, int rx_pin)
 {
   _cpu14 = new_cpu;
 
@@ -913,7 +914,7 @@ void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT
   //spbrg.rcsta = &rcsta;
 
   if(txreg) //this should be unnecessary
-    txreg->assign_pir(pir1);
+    txreg->assign_pir_set(ps);
 
   //txreg.txsta = &txsta;
 
@@ -931,7 +932,7 @@ void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT
 
   //rcreg.rcsta = &rcsta;
   if(rcreg) 
-    rcreg->assign_pir(pir1);
+    rcreg->assign_pir_set(ps);
 
   //  spbrg.start();
 

@@ -235,17 +235,6 @@ typedef struct _sym
   //---------------------------------------------------------------------------
   // program memory functions
   //---------------------------------------------------------------------------
-  unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
-  unsigned int gpsim_address_has_breakpoint(unsigned int processor_id,
-					    unsigned int address);
-  unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
-					       unsigned int address);
-  unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
-					       unsigned int address);
-  unsigned int gpsim_address_has_opcode(unsigned int processor_id,
-					unsigned int address);
-  unsigned int gpsim_address_has_changed(unsigned int processor_id,
-					 unsigned int address);
   void gpsim_set_read_break_at_address(unsigned int processor_id,
 					  unsigned int address);
   void gpsim_set_write_break_at_address(unsigned int processor_id,
@@ -296,50 +285,4 @@ typedef struct _sym
 				  unsigned int address);
   unsigned int gpsim_get_hll_src_line(unsigned int processor_id,
                                     unsigned int address);
-
-  //---------------------------------------------------------------------------
-  // pin interface functions
-  //---------------------------------------------------------------------------
-  void  gpsim_assign_pin_xref(unsigned int processor_id,
-			      unsigned int pin,
-			      gpointer xref);
-  unsigned int  gpsim_package_pin_count(unsigned int processor_id);
-  char *gpsim_pin_get_name(unsigned int processor_id,
-			   unsigned int pin);
-  unsigned int  gpsim_pin_get_value(unsigned int processor_id,
-				    unsigned int pin);
-  void  gpsim_pin_toggle(unsigned int processor_id,
-			 unsigned int pin);
-  unsigned int  gpsim_pin_get_dir(unsigned int processor_id,
-				  unsigned int pin);
-  void  gpsim_pin_set_dir(unsigned int processor_id,
-			  unsigned int pin,
-			  unsigned int new_dir);
-
-
-  //---------------------------------------------------------------------------
-  //
-  //          callback function registration
-  //
-  //---------------------------------------------------------------------------
-  unsigned int gpsim_register_interface(gpointer _new_object);
-  void gpsim_unregister_interface(unsigned int interface_id);
-  void gpsim_register_update_object(unsigned int interface_id,
-				    void (*update_object) (gpointer xref,int new_value) );
-  void gpsim_register_remove_object(unsigned int interface_id, 
-				    void (*remove_object) (gpointer xref));
-  void gpsim_register_new_processor(unsigned int interface_id, 
-				    void (*new_processor) (unsigned int processor_id));
-  void gpsim_register_new_module(unsigned int interface_id,
-				 void (*new_module) (Module *module));
-  void gpsim_register_node_configuration_changed(unsigned int interface_id,
-						 void (*node_configuration_changed) (Stimulus_Node *node));
-  void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
-					     void (*simulation_has_stopped) (gpointer));
-  void gpsim_register_new_program(unsigned int interface_id, 
-				  void (*new_program)  (unsigned int processor_id));
-  void gpsim_register_gui_update(unsigned int interface_id,
-				 void (*gui_update) (gpointer));
-
-
 #endif /* __INTERFACE_H__ */

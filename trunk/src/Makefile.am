@@ -21,10 +21,12 @@ libgpsim_la_SOURCES = \
 	attribute.cc \
 	breakpoints.cc \
 	cod.cc \
+	eeprom.cc \
 	fopen-path.cc \
 	gpsim_time.cc \
 	hexutils.cc \
 	init.cc \
+	intcon.cc \
 	interface.cc \
 	ioports.cc \
         lxt_write.c \
@@ -42,6 +44,7 @@ libgpsim_la_SOURCES = \
 	pic-processor.cc \
 	pic-registers.cc \
 	pic-instructions.cc \
+	pie.cc \
 	processor.cc \
 	registers.cc \
 	stimuli.cc \
@@ -66,11 +69,13 @@ gpsiminclude_HEADERS = \
 	attribute.h \
 	breakpoints.h \
 	cod.h \
+	eeprom.h \
+	fopen-path.h \
 	gpsim_classes.h \
 	gpsim_def.h \
 	gpsim_interface.h \
 	gpsim_time.h \
-	fopen-path.h \
+	intcon.h \
 	interface.h \
 	ioports.h \
 	lxt_write.h \
@@ -90,6 +95,7 @@ gpsiminclude_HEADERS = \
 	pic-processor.h \
 	pic-registers.h \
 	picdis.h \
+	pir.h \
 	processor.h \
 	registers.h \
 	stimuli.h \

@@ -24,8 +24,10 @@ Boston, MA 02111-1307, USA.  */
 #define __16_BIT_PROCESSORS_H__
 
 #include "pic-processor.h"
+#include "intcon.h"
 #include "16bit-registers.h"
 #include "16bit-tmrs.h"
+#include "pir.h"
 #include "uart.h"
 #include "pic-packages.h"
 
@@ -76,12 +78,12 @@ public:
   TMR0H        tmr0h;
   T0CON        t0con;
   RCON         rcon;
-  PIR1         pir1;
+  PIR1v2       pir1_reg;
   sfr_register ipr1;
   sfr_register ipr2;
   T1CON        t1con;
   PIE          pie1;
-  PIR2         pir2;
+  PIR2v2       pir2_reg;
   PIE          pie2;
   T2CON        t2con;
   PR2          pr2;
@@ -97,6 +99,7 @@ public:
   TMR3L        tmr3l;
   TMR3H        tmr3h;
   T3CON        t3con;
+  PIR_SET_2    pir_set_def;
 
   OSCCON       osccon;
   LVDCON       lvdcon;
@@ -127,6 +130,9 @@ public:
     {
       return disasm16(this, address, inst);
     }
+  virtual PIR1v2 *get_pir1(void) { return (&pir1_reg); }
+  virtual PIR2v2 *get_pir2(void) { return (&pir2_reg); }
+  virtual PIR_SET_2 *get_pir_set(void) { return (&pir_set_def); }
 
   void create_sfr_map(void);
 

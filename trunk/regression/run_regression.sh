@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/local/bin/bash
 #
 # A meta-script that invokes each of the individual
 # regression tests.

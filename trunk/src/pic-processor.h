@@ -54,6 +54,7 @@ enum PROCESSOR_TYPE
   _P16CR62_,
   _P16F627_,
   _P16F628_,
+  _P16F648_,
   _P16C63_,
   _P16C64_,
   _P16C64A_,
@@ -80,6 +81,7 @@ enum PROCESSOR_TYPE
   _P18C442_,
   _P18C452_,
   _P18F442_,
+  _P18F248_,
   _P18F452_
 };
 
@@ -176,6 +178,7 @@ enum IOPIN_TYPES
 #include "14bit-instructions.h"
 #include "gpsim_interface.h"
 #include "pic-packages.h"
+#include "eeprom.h"
 
 class processor_types
 {
@@ -304,6 +307,9 @@ public:
       return ( fsr->value );
     }
 
+
+  virtual void set_eeprom(EEPROM *e) { eeprom = e; }
+  virtual EEPROM *get_eeprom(void) { return (eeprom); }
 
   static Processor *construct(void);
   pic_processor(void);

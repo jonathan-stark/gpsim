@@ -59,7 +59,7 @@ void StopWatch_Window::Update(void)
   char offsetstring[100];
   char rolloverstring[100];
 
-  if(!has_processor)
+  if(!has_processor || !is_built)
     return;
     
   if(rollover<=0)

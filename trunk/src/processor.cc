@@ -79,7 +79,7 @@ Processor::Processor(void)
 
   set_frequency(1.0);
 
-
+  interface = new ProcessorInterface(this);
 
 }
 
@@ -1010,6 +1010,28 @@ void  program_memory_access::assign_xref(unsigned int address, gpointer xref)
 
 }
 
+//--------------------------------------------------------------------------
+
+bool  program_memory_access::isValid_opcode(unsigned int address)
+{
+
+  if((address < cpu->program_memory_size()) && 
+     (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION))
+    return true;
+
+  return false;
+}
+//--------------------------------------------------------------------------
+
+bool  program_memory_access::isModified(unsigned int address)
+{
+
+  if((address < cpu->program_memory_size()) && 
+     cpu->program_memory[address]->is_modified)
+    return true;
+
+  return false;
+}
 //========================================================================
 // Processor Constructor
 

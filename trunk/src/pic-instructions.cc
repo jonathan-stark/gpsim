@@ -102,6 +102,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
 	case  _P18C442_:
 	case  _P18C452_:
 	case  _P18F442_:
+	case  _P18F248_:
 	case  _P18F452_:
           mask = 1 << ((opcode >> 9) & 7);
           register_address = opcode & REG_MASK_16BIT;
@@ -275,7 +276,10 @@ void ADDWF::execute(void)
 
   trace.instruction(opcode);
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
 
   new_value = (src_value = source->get()) + (w_value = cpu_pic->W->value);
 
@@ -333,7 +337,11 @@ void ANDWF::execute(void)
 
   trace.instruction(opcode);
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = source->get() & cpu_pic->W->value;
 
   if(destination)
@@ -611,7 +619,11 @@ void COMF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = source->get() ^ 0xff;
 
   if(destination)
@@ -643,7 +655,11 @@ void DECF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = (source->get() - 1)&0xff;
 
   if(destination)
@@ -675,7 +691,11 @@ void DECFSZ::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = (source->get() - 1)&0xff;
 
   if(destination)
@@ -746,7 +766,10 @@ void INCF::execute(void)
 
   trace.instruction(opcode);
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -782,7 +805,10 @@ void INCFSZ::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -842,7 +868,11 @@ void IORWF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = source->get() | cpu_pic->W->value;
 
   if(destination)
@@ -896,7 +926,10 @@ void MOVF::execute(void)
 
   trace.instruction(opcode);
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
 
   source_value = source->get();
 
@@ -935,7 +968,10 @@ void MOVWF::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->register_bank[register_address]->put(cpu_pic->W->get());
+  if(!access)
+    cpu->registers[register_address]->put(cpu_pic->W->get());
+  else
+    cpu->register_bank[register_address]->put(cpu_pic->W->get());
 
   cpu_pic->pc->increment();
 }
@@ -943,7 +979,7 @@ void MOVWF::execute(void)
 char * MOVWF::name(char *return_str)
 {
 
-  sprintf(return_str,"%s\t%s",name_str,cpu->register_bank[register_address]->name());
+  sprintf(return_str,"%s\t%s",name_str,cpu->registers[register_address]->name());
 
   return(return_str);
 }
@@ -1041,7 +1077,11 @@ void RLF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = (source->get() << 1) | cpu_pic->status->get_C();
 
   if(destination)
@@ -1073,7 +1113,11 @@ void RRF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   old_value = source->get();
   new_value = (old_value >> 1) | (cpu_pic->status->get_C() ? 0x80 : 0);
 
@@ -1129,7 +1173,11 @@ void SUBWF::execute(void)
   trace.instruction(opcode);
 
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value);
 
   // Store the result
@@ -1278,7 +1326,11 @@ void XORWF::execute(void)
 
   trace.instruction(opcode);
 
-  source = cpu->register_bank[register_address];
+  if(!access)
+    source = cpu->registers[register_address];
+  else
+    source = cpu->register_bank[register_address];
+
   new_value = source->get() ^ cpu_pic->W->value;
 
   if(destination)

@@ -29,8 +29,6 @@ class XrefObject;
 #include "gpsim_classes.h"
 #include "registers.h"
 
-#include "breakpoints.h"
-
 
 //------------------------------------------------------------
 class file_register : public Register
@@ -50,6 +48,10 @@ class file_register : public Register
   virtual int get_bit_voltage(unsigned int bit_number);
 */
 };
+
+#include "breakpoints.h"
+
+
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to
 // to this class' value get 0

@@ -381,7 +381,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   
   assert(address>=0);
 
-  if(!source_loaded)
+  if(!source_loaded || !gp->cpu)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
@@ -463,7 +463,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new profile start widget if address has notify start
-  if(gpsim_address_has_profile_start(gp->pic_id, address))
+  if(gp->cpu->address_has_profile_start(address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
@@ -478,7 +478,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new profile stop widget if address has notify start
-  if(gpsim_address_has_profile_stop(gp->pic_id, address))
+  if(gp->cpu->address_has_profile_stop(address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
@@ -493,7 +493,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new breakpoint widget if address has breakpoint
-  if(gpsim_address_has_breakpoint( gp->pic_id, address))
+  if(gp->cpu->address_has_break(address))
   {
       // There has appeared a new breakpoint, so we
       // append it to sbaw->breakpoints;
@@ -541,7 +541,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	break;
     case MENU_FIND_PC:
 	pic_id = popup_sbaw->gp->pic_id;
-	address=popup_sbaw->gp->cpu->pc->get_value();
+	address=popup_sbaw->gp->cpu->pc->value; // FIXME -- should use get_value()
 	//address=gpsim_get_pc_value(pic_id);
 	//SourceBrowserAsm_set_pc(popup_sbaw, address);
 	popup_sbaw->SetPC(address);
@@ -584,11 +584,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 	{
 	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
-	if(gpsim_address_has_profile_start(pic_id,address))
+	if(popup_sbaw->gp->cpu->address_has_profile_start(address))
 	    gpsim_clear_profile_start_at_address(pic_id,address);
 	else
 	{
-	    if(gpsim_address_has_profile_stop(pic_id,address))
+	    if(popup_sbaw->gp->cpu->address_has_profile_stop(address))
 	    {
 		// Can't have both start and stop at the same address
 		// ..it becomes difficult to calculate the cycles
@@ -611,11 +611,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
-	if(gpsim_address_has_profile_stop(pic_id,address))
+	if(popup_sbaw->gp->cpu->address_has_profile_stop(address))
 	    gpsim_clear_profile_stop_at_address(pic_id,address);
 	else
 	{
-	    if(gpsim_address_has_profile_start(pic_id,address))
+	    if(popup_sbaw->gp->cpu->address_has_profile_start(address))
 	    {
 		// Can't have both start and stop at the same address
 		// ..it becomes difficult to calculate the cycles
@@ -798,7 +798,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 	gpsim_set_hll_mode(sbaw->gp->pic_id,file_id_to_source_mode[id]);
 
         // Update pc widget
-	address=sbaw->gp->cpu->pc->get_value();
+	address=sbaw->gp->cpu->pc->value; //FIXME should use get_value()
 	//address=gpsim_get_pc_value(sbaw->gp->pic_id);
 	//SourceBrowserAsm_set_pc(sbaw, address);
 	sbaw->SetPC(address);
@@ -1683,7 +1683,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   while(gtk_events_pending())
       gtk_main_iteration();
   
-  address=gp->cpu->pc->get_value();
+  address=gp->cpu->pc->value; // FIXME should use get_value
   //address = gpsim_get_pc_value(pic_id);
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");

@@ -76,6 +76,16 @@ class program_memory_access :  public BreakCallBack
     {
       address=opcode=state=0;
     }
+
+  // Helper functions for querying the program memory
+
+  // isValid_opcode -- returns true if the opcode at the address is valid
+  bool isValid_opcode(unsigned int address);
+
+  // isModified -- returns true if the program at the address has been modified 
+  // (this is only valid for those processor capable of writing to their own
+  // program memory)
+  bool isModified(unsigned int address);
 };
 
 
@@ -163,7 +173,7 @@ public:
   int clear_notify_at_address(int address);
   int clear_profile_start_at_address(int address);
   int clear_profile_stop_at_address(int address);
-  int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type);
+  int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
   int address_has_notify(int address);
   int address_has_profile_start(int address);
   int address_has_profile_stop(int address);

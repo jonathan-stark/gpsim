@@ -49,6 +49,7 @@ void Branching::decode(pic_processor *new_cpu, unsigned int new_opcode)
     case  _P18C442_:
     case  _P18C452_:
     case  _P18F442_:
+    case  _P18F248_:
     case  _P18F452_:
       destination = (new_opcode & 0xff)+1;
       absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;

@@ -964,185 +964,6 @@ void T0CON::put(unsigned int new_value)
 
 //--------------------------------------------------
 
-void INTCON_16::initialize(void)
-{
-  tmr0l = &cpu16->tmr0l;
-  rcon  = &cpu16->rcon;
-  intcon2  = &cpu16->intcon2;
-}
-
-//----------------------------------------------------------------------
-// void INTCON_16::clear_gies(void)
-//
-//  This routine clears the global interrupt enable bit(s). If priority
-// interrupts are used (IPEN in RCON is set) then the appropriate gie
-// bit (either giel or gieh) is cleared.
-//
-// This routine is called from 16bit_processor::interrupt().
-//
-//----------------------------------------------------------------------
-
-void INTCON_16::clear_gies(void)
-{
-
-  if(cpu16->interrupt_vector == INTERRUPT_VECTOR_HI)
-    put(get() & ~GIEH);
-  else
-    put(get() & ~GIEL);
-
-
-}
-
-
-//----------------------------------------------------------------------
-// void INTCON_16::clear_gies(void)
-//
-//----------------------------------------------------------------------
-
-void INTCON_16::set_gies(void)
-{
-
-  get();   // Update the current value of intcon
-           // (and emit 'register read' trace).
-
-  if(rcon->value & RCON::IPEN)
-    {
-      // Interrupt priorities are being used.
-
-      if(0 == (value & GIEH))
-	{
-	  // GIEH is cleared, so we need to set it
-
-	  put(value | GIEH);
-	  return;
-
-	}
-      else
-	{
-	  // GIEH is set. This means high priority interrupts are enabled.
-	  // So we most probably got here because of an RETFIE instruction
-	  // after handling a low priority interrupt. We could check to see
-	  // if GIEL is low before calling put(), but it's not necessary.
-	  // So we'll just blindly re-enable giel, and continue with the
-	  // simulation.
-
-	  put(value | GIEL);
-	  return;
-
-	}
-    }
-  else
-    {
-
-      // Interrupt priorities are not used, so re-enable GIEH (which is in
-      // the same bit-position as GIE on the mid-range core).
-
-      put(value | GIEH);
-      return;
-
-    }
-
-
-}
-
-
-//----------------------------------------------------------------------
-// void INTCON_16::put(unsigned int new_value)
-//
-//  Here's were the 18cxxx interrupt logic is primarily handled. 
-//
-// inputs: new_value - 
-// outputs: none
-//
-//----------------------------------------------------------------------
-
-void INTCON_16::put(unsigned int new_value)
-{
-
-  value = new_value;
-  trace.register_write(address,value);
-  //cout << " INTCON_16::put\n";
-  // Now let's see if there's a pending interrupt
-  // if IPEN is set in RCON, then interrupt priorities
-  // are being used. (In other words, there are two
-  // interrupt priorities on the 18cxxx core. If a
-  // low priority interrupt is being serviced, it's
-  // possible for a high priority interrupt to interject.
-
-  if(rcon->value & RCON::IPEN)
-    {
-      unsigned int i1;
-
-      // Use interrupt priorities
-
-      if( 0 == (value & GIEH))
-	return;    // Interrupts are disabled
-
-      // Now we just go through the interrupt logic of the 18cxxx
-      // First we check the high priorities and then we check the
-      // low ones. When ever we detect an interrupt, then the 
-      // bp.interrupt flag is set (which will cause the interrupt
-      // to be handled at the high level) and additional checks
-      // are aborted.
-
-      // If TO, INT, or RB flags are set AND their correspond
-      // interrupts are enabled, then the lower three bits of
-      // i1 will reflect this. Note that INTF does NOT have an
-      // associated priority bit!
-
-      i1 =  ( (value>>3)&value) & (T0IF | INTF | RBIF);
-
-      if(i1 & ( (intcon2->value & (T0IF | RBIF)) | INTF))
-	{
-	  //cout << " selecting high priority vector\n";
-	  cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
-	  trace.interrupt();
-	  bp.set_interrupt();
-	  return;
-	}
-
-
-      // If we reach here, then there are no high priority
-      // interrupts pending. So let's check for the low priority
-      // ones.
-
-      if(i1 & ( (~intcon2->value & (T0IF | RBIF)) | INTF))
-	{
-	  //cout << " selecting low priority vector\n";
-	  cpu16->interrupt_vector = INTERRUPT_VECTOR_LO;
-	  trace.interrupt();
-	  bp.set_interrupt();
-	  return;
-	}
-
-
-    }
-  else
-    {
-      // ignore interrupt priorities
-
-      //cout << " ignoring interrupt priorities, selecting high priority vector\n";
-      cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
-      if(value & GIE) 
-	{
-	  if( ( (value>>3)&value) & (T0IF | INTF | RBIF) )
-	    {
-	      trace.interrupt();
-	      bp.set_interrupt();
-	    }
-	  else if(value & XXIE)
-	    {
-	      if(check_peripheral_interrupt())
-		{
-		  trace.interrupt();
-		  bp.set_interrupt();
-		}
-	    }
-
-	}
-
-    }
-}
 
 //--------------------------------------------------
 void TMR0H::put(unsigned int new_value)
@@ -1337,15 +1158,15 @@ TMR3_MODULE::TMR3_MODULE(void)
 {
 
   t3con = NULL;
-  pir1 = NULL;
+  pir_set = NULL;
 
 }
 
-void TMR3_MODULE::initialize(T3CON *t3con_, PIR1 *pir1_)
+void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 {
 
   t3con = t3con_;
-  pir1  = pir1_;
+  pir_set  = pir_set_;
 
 }
 
@@ -1361,29 +1182,29 @@ TXREG_16::TXREG_16(void)
 bool TXREG_16::is_empty(void)
 {
   cout << "Txreg_16::empty\n";
-  if(pir1)
-    return(pir1->get_txif());
+  if(pir_set)
+    return(pir_set->get_txif());
   return 0;
 
 }
 
 void TXREG_16::empty(void)
 {
-  if(pir1)
-    pir1->set_txif();
+  if(pir_set)
+    pir_set->set_txif();
   cout << "Txreg_16::empty\n";
 }
 
 void TXREG_16::full(void)
 {
-  if(pir1)
-    pir1->clear_txif();
+  if(pir_set)
+    pir_set->clear_txif();
   cout << "Txreg_16::full\n";
 }
 
-void TXREG_16::assign_pir(PIR1 *new_pir)
+void TXREG_16::assign_pir_set(PIR_SET *new_pir_set)
 {
-  pir1 = new_pir;
+  pir_set = new_pir_set;
 
 }
 
@@ -1393,9 +1214,9 @@ RCREG_16::RCREG_16(void)
   cout << "rcreg 16 constructor\n";
 }
 
-void RCREG_16::assign_pir(PIR1 *new_pir)
+void RCREG_16::assign_pir_set(PIR_SET *new_pir_set)
 {
-  pir1 = new_pir;
+  pir_set = new_pir_set;
 
 }
 
@@ -1404,8 +1225,8 @@ void RCREG_16::push(unsigned int new_value)
 
   _RCREG::push(new_value);
 
-  if(pir1)
-    pir1->set_rcif();
+  if(pir_set)
+    pir_set->set_rcif();
 
 }
 
@@ -1413,8 +1234,8 @@ void RCREG_16::pop(void)
 {
 
   _RCREG::pop();
-  if((fifo_sp == 0) && pir1)
-    pir1->clear_rcif();
+  if((fifo_sp == 0) && pir_set)
+    pir_set->clear_rcif();
 
 }
 
@@ -1438,7 +1259,8 @@ USART_MODULE16::USART_MODULE16(void)
 }
 
 //--------------------------------------------------
-void USART_MODULE16::initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port)
+void USART_MODULE16::initialize_16(_16bit_processor *new_cpu, PIR_SET *pir_set,
+    IOPORT *uart_port)
 //void USART_MODULE16::initialize(_16bit_processor *new_cpu)
 
 {
@@ -1447,7 +1269,7 @@ void USART_MODULE16::initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT 
   spbrg.txsta = &txsta;
   spbrg.rcsta = &rcsta;
 
-  txreg.assign_pir(pir1);
+  txreg.assign_pir_set(pir_set);
   txreg.txsta = &txsta;
 
   txsta.txreg = &txreg;
@@ -1461,7 +1283,7 @@ void USART_MODULE16::initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT 
   rcsta.uart_port = uart_port;
   rcsta.rx_bit = 7;
 
-  rcreg.assign_pir(pir1);
+  rcreg.assign_pir_set(pir_set);
   rcreg.rcsta = &rcsta;
 
 }

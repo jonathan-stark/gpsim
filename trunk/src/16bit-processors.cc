@@ -74,12 +74,12 @@ void _16bit_processor :: create_sfr_map(void)
 
 
   add_sfr_register(&pie1,	  0xf9d,0,"pie1");
-  //cout << pir1.name() << '\n';
-  add_sfr_register(&pir1,	  0xf9e,0,"pir1");
+  //cout << get_pir1()->name() << '\n';
+  add_sfr_register(get_pir1(),	  0xf9e,0,"pir1");
 
   add_sfr_register(&ipr1,	  0xf9f,0,"ipr1");
   add_sfr_register(&pie2,	  0xfa0,0,"pie2");
-  add_sfr_register(&pir2,	  0xfa1,0,"pir2");
+  add_sfr_register(get_pir2(),	  0xfa1,0,"pir2");
   add_sfr_register(&ipr2,	  0xfa2,0,"ipr2");
 
 
@@ -186,11 +186,12 @@ void _16bit_processor :: create_sfr_map(void)
 
 
   // Initialize all of the register cross linkages
-  pir1.valid_bits = 0xff;  /* All PIR bits are valid for 18x parts */
+  get_pir_set()->set_pir1(get_pir1());
+  get_pir_set()->set_pir2(get_pir2());
 
   tmr1l.tmrh   = &tmr1h;
   tmr1l.t1con  = &t1con;
-  tmr1l.pir1   = &pir1;
+  tmr1l.pir_set   = get_pir_set();
   tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;
@@ -198,7 +199,7 @@ void _16bit_processor :: create_sfr_map(void)
   t1con.tmrl  = &tmr1l;
 
   t2con.tmr2  = &tmr2;
-  tmr2.pir1   = &pir1;
+  tmr2.pir_set   = get_pir_set();
   tmr2.pr2    = &pr2;
   tmr2.t2con  = &t2con;
   tmr2.ccp1con = &ccp1con;
@@ -208,7 +209,7 @@ void _16bit_processor :: create_sfr_map(void)
 
   tmr3l.tmrh  = &tmr3h;
   tmr3l.t1con = &t3con;
-  tmr3l.pir1  = &pir1;
+  tmr3l.pir_set  = get_pir_set();
   tmr3l.ccpcon = &ccp1con;
 
   tmr3h.tmrl  = &tmr3l;
@@ -219,16 +220,21 @@ void _16bit_processor :: create_sfr_map(void)
   t3con.ccpr2l = &ccpr2l;
 
   ccp1con.ccprl = &ccpr1l;
-  ccp1con.pir   = &pir1;
+  ccp1con.pir_set   = get_pir_set();
   ccp1con.tmr2  = &tmr2;
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
-  pir1.intcon = &intcon;
-  pir1.pie    = &pie1;
-  pie1.pir    = &pir1;
+  get_pir1()->intcon = &intcon;
+  get_pir1()->pie    = &pie1;
+  pie1.pir    = get_pir1();
   pie1.new_name("pie1");
+
+  get_pir2()->intcon = &intcon;
+  get_pir2()->pie    = &pie2;
+  pie2.pir    = get_pir2();
+  pie2.new_name("pie2");
 
   // All of the status bits on the 16bit core are writable
   status->write_mask = 0xff;
@@ -272,7 +278,10 @@ void _16bit_processor :: create (void)
 
   trace.program_counter (pc->value);
   tmr0l.initialize();
-  intcon.initialize();
+
+  intcon.set_rcon(&rcon);
+  intcon.set_intcon2(&intcon2);
+  intcon.set_cpu(this);
 
   tbl.initialize(this);
   tmr0l.start(0);
