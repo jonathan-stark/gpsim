@@ -1,0 +1,56 @@
+/*
+   Copyright (C) 1998,1999,2000,2001,2002,2003,2004
+   T. Scott Dattalo and Ralf Forsberg
+
+This file is part of gpsim.
+
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gpsim; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+#ifndef __GUI_PROCESSOR_H__
+#define __GUI_PROCESSOR_H__
+
+
+//
+//  The gui_processor structure ties the gui window(s)
+// to a pic that is being simulated.
+//
+
+class GUI_Processor {
+ public:
+
+  GUI_Processor(void);
+
+  RAM_RegisterWindow *regwin_ram;
+  EEPROM_RegisterWindow *regwin_eeprom;
+  StatusBar_Window *status_bar;
+  SourceBrowser_Window *program_memory;
+  SourceBrowser_Window *source_browser;
+  Symbol_Window *symbol_window;
+  Watch_Window *watch_window;
+  Stack_Window *stack_window;
+  Breadboard_Window *breadboard_window;
+  Trace_Window *trace_window;
+  Profile_Window *profile_window;
+  StopWatch_Window *stopwatch_window;
+  Scope_Window *scope_window;
+
+  // The pic that's associated with the gui
+  Processor *cpu;
+};
+
+
+#endif //__GUI_PROCESSOR_H__
+
