@@ -1030,7 +1030,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 
     // If a name was provided, use it:
     if(opt_name)
-      new_name(name_str);
+      new_name(opt_name);
   }
 
   add_stimulus(this);

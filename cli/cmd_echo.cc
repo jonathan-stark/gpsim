@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 
 #include "command.h"
-#include "parse.h"
 #include "cmd_echo.h"
 
 // See cmd_echo.h for why this file is basically a skeleton
