@@ -149,13 +149,15 @@ void cmd_log::log(cmd_options *opt, char *str, guint64 val, guint64 mask)
   case WRITE_VALUE:
   case READ_VALUE:
 
+    cout << "this command is temporarily disabled\n";
+    /*
       if(!get_symbol_value(str,&sym_value)) {
 	cout << '`' << str << '\'' << " was not found in the symbol table\n";
 	return;
       }
 
       log(opt, sym_value, val, mask);
-
+    */
     break;
 
   default:

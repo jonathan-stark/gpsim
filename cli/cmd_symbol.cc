@@ -64,12 +64,12 @@ cmd_symbol::cmd_symbol(void)
 
 void cmd_symbol::dump_all(void)
 {
-  symbol_dump_all();
+  get_symbol_table().dump_all();
 }
 
 void cmd_symbol::dump_one(char *sym_name)
 {
-  symbol_dump_one(sym_name);
+  get_symbol_table().dump_one(sym_name);
 }
 
 void cmd_symbol::dump_one(symbol *s)
@@ -80,6 +80,6 @@ void cmd_symbol::dump_one(symbol *s)
 
 void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)
 {
-  symbol_add_one(cpu, sym_name,sym_type,(int)evaluate(expr));
+  get_symbol_table().add(sym_name,sym_type,(int)evaluate(expr));
 }
 

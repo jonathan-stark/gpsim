@@ -369,8 +369,8 @@ void P16C71::create_symbols(void)
 {
 
 
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(porta);
 
 
 }

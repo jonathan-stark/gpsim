@@ -19,13 +19,13 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
+#include "attribute.h"
+
 #include <iostream>
 using namespace std;
-
 #include <stdio.h>
 #include <string.h>
 
-#include "attribute.h"
 
 
 /*********************************************************************
@@ -36,7 +36,6 @@ using namespace std;
 
 
  *********************************************************************/
-FloatAttribute TestGlobalFloat("globalfloat", 42.0);
 
 //-------------------------------------------------------------------
 Attribute::Attribute(void)

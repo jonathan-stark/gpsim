@@ -65,7 +65,7 @@ class Register;
 class Module;
 class Expression;
 
-class symbol : public gpsimValue
+class symbol : public Value
 {
 public:
 
@@ -79,8 +79,8 @@ public:
   virtual void assignTo(Expression *);
   virtual symbol *copy();
 
-  symbol(Module *, char *);
-  symbol(Module *, string &);
+  symbol(char *);
+  symbol(string &);
   virtual ~symbol();
 };
 
@@ -89,17 +89,17 @@ class Symbol_Table
 public:
   void add(symbol*);
 
-  void add_ioport(Processor *cpu, IOPORT *ioport);
+  void add_ioport(IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
-  void add_line_number(Processor *cpu, int address, char *symbol_name=0);
-  void add_constant(Processor *cpu, char *, int );
-  void add_register(Processor *cpu, Register *reg, char *symbol_name=0);
-  void add_address(Processor *cpu, char *, int );
-  void add_w(Processor *cpu, WREG *w );
+  void add_line_number(int address, char *symbol_name=0);
+  void add_constant(char *, int );
+  void add_register(Register *reg, char *symbol_name=0);
+  void add_address(char *, int );
+  void add_w(WREG *w );
   void add_module(Module * m, const char *module_name);
   void remove_module(Module * m);
-  void add(Processor *cpu, char *symbol_name, char *symbol_type, int value);
+  void add(char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);
   void dump_one(string *s);
@@ -133,7 +133,7 @@ protected:
 public:
   virtual symbol *copy();
 
-  constant_symbol(Module *cpu, char *, unsigned int);
+  constant_symbol(char *, unsigned int);
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
   virtual char * type_name(void) { return "constant";}
@@ -150,7 +150,7 @@ class ioport_symbol : public symbol
 protected:
   IOPORT *ioport;
 public:
-  ioport_symbol(Module *, IOPORT *);
+  ioport_symbol(IOPORT *);
   virtual symbol *copy();
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
@@ -178,7 +178,7 @@ protected:
   Register *reg;
 
 public:
-  register_symbol(Module *cpu, char *, Register *);
+  register_symbol(char *, Register *);
 
   virtual symbol *copy();
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
@@ -203,7 +203,7 @@ class address_symbol : public constant_symbol
 {
 public:
 
-  address_symbol(Module *cpu, char *, unsigned int);
+  address_symbol(char *, unsigned int);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
   virtual char * type_name(void) { return "address";}
   virtual void print(void);
@@ -216,7 +216,7 @@ protected:
   int src_id,src_line,lst_id,lst_line,lst_page;
  public:
 
-  line_number_symbol(Module *cpu, char *, unsigned int);
+  line_number_symbol(char *, unsigned int);
   void put_address(int new_address) {val = new_address;}
   void put_src_line(int new_src_line) {src_line = new_src_line;}
   void put_lst_line(int new_lst_line) {lst_line = new_lst_line;}
@@ -228,12 +228,14 @@ protected:
 
 class module_symbol : public symbol
 {
- public:
-  module_symbol(Module *cpu, char *);
+protected:
+  Module *module;
+public:
+  module_symbol(Module *, char *);
   virtual void print(void);      
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
   virtual char * type_name(void) { return "module";}
-
+  Module *get_module() { return module;}
 };
 
 // Place W into the symbol table
@@ -241,7 +243,7 @@ class w_symbol : public register_symbol
 {
  public:
 
-  w_symbol(Module *cpu, char*, Register *);
+  w_symbol(char*, Register *);
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
   virtual char * type_name(void) { return "W";}

@@ -38,11 +38,10 @@ Boston, MA 02111-1307, USA.  */
 class Processor;
 
 //---------------------------------------------------------
-// MemoryAccess
-// 
-// The MemoryAccess class is a base class designed to support
-// access to memory. For the PIC, this class is extended by
-// the ProgramMemoryAccess and RegisterMemoryAccess classes.
+/// MemoryAccess - A base class designed to support
+/// access to memory. For the PIC, this class is extended by
+/// the ProgramMemoryAccess and RegisterMemoryAccess classes.
+
 class MemoryAccess :  public TriggerObject, public gpsimObject
 {
 public:
@@ -56,17 +55,15 @@ public:
 
 protected:
 
-  //string name_str;            // Optional name
-  Processor *cpu;             // The processor to which this object belongs
+  Processor *cpu;             /// The processor to which this object belongs
 };
 
 //---------------------------------------------------------
-// The ProgramMemoryAccess class is the interface used
-// by objects other than the simulator to manipulate the 
-// pic's program memory. For example, the breakpoint class
-// modifies program memory when break points are set or
-// cleared. The modification goes through here.
-//
+/// The ProgramMemoryAccess class is the interface used
+/// by objects other than the simulator to manipulate the 
+/// pic's program memory. For example, the breakpoint class
+/// modifies program memory when break points are set or
+/// cleared. The modification goes through here.
 
 class ProgramMemoryAccess :  public MemoryAccess
 {
@@ -162,13 +159,6 @@ class ProgramMemoryAccess :  public MemoryAccess
   void set_hll_mode(unsigned int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
   bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
-  /*
-  string &name(void)
-    {
-      return name_str;
-    }
-  void name(string &new_name);
-  */
 
  private:
 

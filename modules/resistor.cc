@@ -48,16 +48,18 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 #include "../src/ioports.h"
 #include "../src/symbol.h"
-#include "../src/attribute.h"
+#include "../src/value.h"
 
 
-class ResistanceAttribute : public FloatAttribute {
+class ResistanceAttribute : public Float {
 
 public:
   PullupResistor *pur;
 
 
-  ResistanceAttribute(PullupResistor *ppur) {
+  ResistanceAttribute(PullupResistor *ppur) 
+    : Float(0.0)
+  {
 
     pur = ppur;
     if(!pur)
@@ -66,14 +68,14 @@ public:
     new_name("resistance");
     cout << "Resistance Attribute constructor\n";
 
-    value = pur->res.get_Zth();
+    Float::set(pur->res.get_Zth());
   }
 
 
   void set(double r) {
 
     cout << "Setting resistance attribute!\n";
-    value = r;
+    Float::set(r);
 
     if(!pur)
       return;

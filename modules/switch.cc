@@ -46,7 +46,7 @@ Boston, MA 02111-1307, USA.  */
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
-
+#include "../src/packages.h"
 #include "switch.h"
 
 

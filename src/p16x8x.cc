@@ -42,7 +42,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "p16x8x.h"
 
-
+#include "packages.h"
 
 void P16C8x::create_iopin_map(void)
 {
@@ -142,8 +142,8 @@ void P16C8x::create_symbols(void)
   if(verbose)
     cout << "8x create symbols\n";
 
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(porta);
 
 }
 

@@ -305,6 +305,7 @@ void cmd_break::set_break(int bit_flag,
 
 void cmd_break::set_break(int bit_flag, char *sym, int value, int mask)
 {
+  /*
   int sym_value;
 
   if(!get_symbol_value(sym,&sym_value))
@@ -314,11 +315,14 @@ void cmd_break::set_break(int bit_flag, char *sym, int value, int mask)
     }
 
   set_break(bit_flag,sym_value,value,mask);
+  */
 
+  cout << "this command is temporarily disabled\n";
 }
 
 void cmd_break::set_break(cmd_options *co, char *sym)
 {
+  /*
   int sym_value;
 
   if(!get_symbol_value(sym,&sym_value))
@@ -330,5 +334,7 @@ void cmd_break::set_break(cmd_options *co, char *sym)
   int bit_flag = co->value;
 
   set_break(bit_flag,sym_value);
+  */
+  cout << "this command is temporarily disabled\n";
 
 }

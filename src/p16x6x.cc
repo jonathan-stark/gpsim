@@ -78,8 +78,8 @@ void P16C61::create_sfr_map(void)
 void P16C61::create_symbols(void)
 {
 
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(porta);
 
 
 }
@@ -460,9 +460,9 @@ void P16C62::create_symbols(void)
   if(verbose)
     cout << "creating c62 symbols\n";
 
-  symbol_table.add_ioport(this, porta);
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, portc);
+  symbol_table.add_ioport(porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(portc);
 
 }
 
@@ -683,11 +683,11 @@ void P16C64::create_symbols(void)
   if(verbose)
     cout << "creating c64 symbols\n";
 
-  symbol_table.add_ioport(this, porta);
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, portc);
-  symbol_table.add_ioport(this, portd);
-  symbol_table.add_ioport(this, porte);
+  symbol_table.add_ioport(porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(portc);
+  symbol_table.add_ioport(portd);
+  symbol_table.add_ioport( porte);
 
 }
 

@@ -65,14 +65,10 @@ Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 // create an instance of inline get_symbol_table() method by taking its address
 static Symbol_Table &(*dummy_symbol_table)(void) = get_symbol_table;
 
-void Symbol_Table::add_ioport(Processor *cpu, IOPORT *_ioport)
+void Symbol_Table::add_ioport(IOPORT *_ioport)
 {
 
-  ioport_symbol *is = new ioport_symbol(cpu,_ioport);
-
-  //is->new_name(_ioport->name());
-  //is->set_cpu(_ioport->get_cpu());
-  //is->ioport   = _ioport;
+  ioport_symbol *is = new ioport_symbol(_ioport);
 
   st.push_back(is);
 
@@ -83,9 +79,6 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
 
   node_symbol *ns = new node_symbol(s);
 
-  //ns->new_name(s->name());
-  //ns->set_cpu(0);
-  //ns->stimulus_node = s;
   st.push_back(ns);
 
 }
@@ -95,9 +88,6 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
   stimulus_symbol *ss = new stimulus_symbol(s);
 
-  //ss->new_name(s->name());
-  //ss->set_cpu(0);
-  //ss->s        = s;
   st.push_back(ss);
 
 }
@@ -108,13 +98,13 @@ void Symbol_Table::add(symbol *s)
     st.push_back(s);
 }
 
-void Symbol_Table::add_register(Processor *cpu, Register *new_reg, char *symbol_name )
+void Symbol_Table::add_register(Register *new_reg, char *symbol_name )
 {
 
   if(!new_reg)
     return;
 
-  register_symbol *rs = new register_symbol(cpu, symbol_name, new_reg);
+  register_symbol *rs = new register_symbol(symbol_name, new_reg);
 
   new_reg->symbol_alias = rs;
 
@@ -122,13 +112,13 @@ void Symbol_Table::add_register(Processor *cpu, Register *new_reg, char *symbol_
 
 }
 
-void Symbol_Table::add_w(Processor *cpu, WREG *new_w)
+void Symbol_Table::add_w(WREG *new_w)
 {
 
-  if(cpu==0 || new_w==0)
+  if(!new_w)
     return;
 
-  w_symbol *ws = new w_symbol(cpu, (char *)0, new_w);
+  w_symbol *ws = new w_symbol((char *)0, new_w);
 
   new_w->symbol_alias = ws;
 
@@ -136,63 +126,40 @@ void Symbol_Table::add_w(Processor *cpu, WREG *new_w)
 
 }
 
-void Symbol_Table::add_constant(Processor *cpu, char *new_name, int value)
+void Symbol_Table::add_constant(char *new_name, int value)
 {
 
-  constant_symbol *sc = new constant_symbol(cpu, new_name, value);
+  constant_symbol *sc = new constant_symbol(new_name, value);
 
-  //sc->set_cpu(cpu);
-  //sc->new_name(new_name);
-  //sc->val      = value;
   st.push_back(sc);
 
 }
 
-void Symbol_Table::add_address(Processor *cpu, char *new_name, int value)
+void Symbol_Table::add_address(char *new_name, int value)
 {
 
-  address_symbol *as = new address_symbol(cpu,new_name,value);
+  address_symbol *as = new address_symbol(new_name,value);
 
-  //as->set_cpu(cpu);
-  //as->new_name(new_name);
-  //as->val      = value;
   st.push_back(as);
 
 }
 
-void Symbol_Table::add_line_number(Processor *cpu, int address, char *symbol_name)
+void Symbol_Table::add_line_number(int address, char *symbol_name)
 {
 
-  line_number_symbol *lns = new line_number_symbol(cpu, symbol_name,  address);
+  line_number_symbol *lns = new line_number_symbol(symbol_name,  address);
 
-  /*
-  if(symbol_name) 
-    lns->new_name(symbol_name);
-  else {
-    char buf[64];
-    sprintf(buf,"line_%04x",address);  //there's probably a c++ way to do this
-    lns->new_name(buf);
-  }
-  lns->set_cpu(cpu);
-  lns->address  = address;
-  */
   st.push_back(lns);
 }
 
 void Symbol_Table::add_module(Module * m, const char *cPname)
 {
-//  cout << "adding module symbol\n";
-
   module_symbol *ms = new module_symbol(m,(char *)cPname);
-
-  //ms->set_module(m);
-  //ms->new_name((char*)cPname);
 
   st.push_back(ms);
 
 }
 
-//void Symbol_Table::remove_module(Module * m, char *name)
 void Symbol_Table::remove_module(Module * m)
 {
   sti = st.begin();
@@ -213,16 +180,15 @@ void Symbol_Table::remove_module(Module * m)
     }
 }
 
-void Symbol_Table::add(Processor *cpu, char *new_name, char *new_type, int value)
+void Symbol_Table::add(char *new_name, char *new_type, int value)
 {
 
-  //  cout << "NOT SUPPORTED-->Adding new symbol " << new_name << " of type " << new_type << '\n';
 
   if(new_type) {
 
     // ugh.. FIXME
     if ( strcmp("constant", new_type) == 0)
-      add_constant(cpu,new_name, value);
+      add_constant(new_name, value);
 
   }
 
@@ -236,7 +202,7 @@ void Symbol_Table::add(Processor *cpu, char *new_name, char *new_type, int value
 	  switch(symbol_types[i].type)
 	    {
 	    case SYMBOL_CONSTANT:
-	      add_constant(cpu, new_name, value);
+	      add_constant(new_name, value);
 	      break;
 
 	    case SYMBOL_BASE_CLASS:
@@ -361,7 +327,7 @@ int  load_symbol_file(Processor **cpu, const char *filename)
 // *** KNOWN CHANGE ***
 //  Support functions that will get replaced by the CORBA interface.
 //  
-
+#if 0
 //--------------------------------------------
 void symbol_dump_all(void)
 {
@@ -375,10 +341,10 @@ void symbol_dump_one(char *sym_name)
 }
 
 //--------------------------------------------
-void symbol_add_one(Processor *cpu, char *sym_name, char *sym_type, int value)
+void symbol_add_one(char *sym_name, char *sym_type, int value)
 {
 
-  symbol_table.add(cpu, sym_name,sym_type,value);
+  symbol_table.add(sym_name,sym_type,value);
 }
 
 //--------------------------------------------
@@ -421,21 +387,19 @@ void update_symbol_value(char *sym, int new_value)
     cout << sym << " was not found in the symbol table\n";
 
 }
-
+#endif
 //------------------------------------------------------------------------
 // symbols
 //
 //
 
-symbol::symbol(Module *_cpu, char *_name)
+symbol::symbol(char *_name)
 {
-  set_module(_cpu);
   if(_name)
     new_name(_name);
 }
-symbol::symbol(Module *_cpu, string &_name)
+symbol::symbol(string &_name)
 {
-  set_module(_cpu);
   new_name(_name);
 }
 
@@ -468,8 +432,6 @@ void symbol::print(void)
 
   cout << name() << " type " << type_name();
   
-  if(cpu)
-      cout << " in cpu " << cpu->name();
   cout << endl;
 
 }
@@ -485,7 +447,7 @@ void symbol::assignTo(Expression *expr)
     if(!v)
       throw new Error(" cannot evaluate expression ");
 
-    put(v->get_leftVal());
+    v->get_leftVal();
 
   
     delete v;
@@ -528,7 +490,7 @@ symbol * Symbol_Table::find(string *s)
 
 //------------------------------------------------------------------------
 node_symbol::node_symbol(Stimulus_Node *_sn)
-  : symbol(0,0) , stimulus_node(_sn)
+  : symbol(0) , stimulus_node(_sn)
 {
   if(stimulus_node)
     new_name(stimulus_node->name());
@@ -551,11 +513,9 @@ void node_symbol::print(void)
 //------------------------------------------------------------------------
 // register_symbol
 //
-register_symbol::register_symbol(Module *_cpu, char *_name, Register *_reg)
-  : symbol(_cpu, _name), reg(_reg)
+register_symbol::register_symbol(char *_name, Register *_reg)
+  : symbol(_name), reg(_reg)
 {
-  set_module(_cpu);
-
   if(reg)
     new_name(reg->name());
 }
@@ -594,33 +554,30 @@ void register_symbol::put_value(unsigned int new_value)
 
 symbol *register_symbol::copy()
 {
-  return new register_symbol(get_module(),(char *)0,reg);
+  return new register_symbol((char *)0,reg);
 }
 
 //------------------------------------------------------------------------
-w_symbol::w_symbol(Module *_cpu, char *_name, Register *_reg)
-  : register_symbol(_cpu, _name, _reg)
+w_symbol::w_symbol(char *_name, Register *_reg)
+  : register_symbol(_name, _reg)
 {
 }
 void w_symbol::print(void)
 {
-  if(cpu)
-    cout << reg->name() << hex << " = 0x" << reg->get_value() <<'\n';
+  cout << reg->name() << hex << " = 0x" << reg->get_value() <<'\n';
 }
 
 //------------------------------------------------------------------------
-ioport_symbol::ioport_symbol(Module *_cpu, IOPORT *_ioport)
-  : symbol(_cpu,0), ioport(_ioport)
+ioport_symbol::ioport_symbol(IOPORT *_ioport)
+  : symbol(0), ioport(_ioport)
 {
-  if(ioport) {
-    set_cpu(ioport->get_cpu());
+  if(ioport)
     new_name(ioport->name());
-  }
 }
 
 symbol *ioport_symbol::copy()
 {
-  return new ioport_symbol(get_module(),ioport);
+  return new ioport_symbol(ioport);
 }
 
 void ioport_symbol::put_value(unsigned int new_value)
@@ -638,8 +595,8 @@ int ioport_symbol::getAsInt()
 }
 
 //------------------------------------------------------------------------
-constant_symbol::constant_symbol(Module *_cpu, char *_name, unsigned int _val)
-  :  symbol(_cpu,_name), val(_val)
+constant_symbol::constant_symbol(char *_name, unsigned int _val)
+  :  symbol(_name), val(_val)
 {
 }
 
@@ -650,7 +607,7 @@ void constant_symbol::print(void)
 
 symbol *constant_symbol::copy()
 {
-  return new constant_symbol(get_module(),(char *)name().c_str(),val);
+  return new constant_symbol((char *)name().c_str(),val);
 }
 
 int constant_symbol::getAsInt()
@@ -665,16 +622,17 @@ double constant_symbol::getAsDouble()
 }
 
 //------------------------------------------------------------------------
-address_symbol::address_symbol(Module *_cpu, char *_name, unsigned int _val)
-  :  constant_symbol(_cpu,_name,_val)
+address_symbol::address_symbol(char *_name, unsigned int _val)
+  :  constant_symbol(_name,_val)
+
 {
 }
 void address_symbol::print(void)
 {
   cout << name() << " at address 0x" << hex << val <<'\n';
 }
-line_number_symbol::line_number_symbol(Module *_cpu, char *_name, unsigned int _val)
-  :  address_symbol(_cpu,_name,_val)
+line_number_symbol::line_number_symbol(char *_name, unsigned int _val)
+  :  address_symbol(_name,_val)
 {
   if(!_name) {
     char buf[64];
@@ -684,22 +642,25 @@ line_number_symbol::line_number_symbol(Module *_cpu, char *_name, unsigned int _
 
 }
 //------------------------------------------------------------------------
-module_symbol::module_symbol(Module *_cpu, char *_name)
-  : symbol(_cpu,_name)
+module_symbol::module_symbol(Module *_module, char *_name)
+  : symbol(_name), module(_module)
 {
 }
 
 void module_symbol::print(void)
 {
-  if(cpu)
-    cout << cpu->type() << "  named ";
+  if(module) {
+    cout << module->type() << "  named ";
 
-  cout << name() << '\n';
+    cout << name() << '\n';
+    cout << "Attributes:\n";
+    module->dump_attributes();
+  }
 }
 
 //------------------------------------------------------------------------
 stimulus_symbol::stimulus_symbol(stimulus *_s)
-  : symbol(0,0), s(_s)
+  : symbol(0), s(_s)
 {
   if(s)
     new_name(s->name());
@@ -712,12 +673,12 @@ string &stimulus_symbol::name()
   if(s)
     return s->name();
 
-  return gpsimValue::name();
+  return Value::name();
 }
 
 //------------------------------------------------------------------------
 val_symbol::val_symbol(gpsimValue *v)
-  : symbol(0,(char*)0)
+  : symbol((char*)0)
 {
   if(!v)
     throw string(" val_symbol");

@@ -37,7 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 #include "p16f62x.h"
-
+#include "packages.h"
 #include "symbol.h"
 
 CMCON::CMCON(void)
@@ -170,8 +170,8 @@ void P16F62x::create_symbols(void)
   if(verbose)
     cout << "62x create symbols\n";
 
-  symbol_table.add_ioport(this, portb);
-  symbol_table.add_ioport(this, porta);
+  symbol_table.add_ioport(portb);
+  symbol_table.add_ioport(porta);
 
 }
 

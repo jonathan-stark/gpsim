@@ -1,4 +1,21 @@
 2004-11-04 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc, cli/cmd_log.cc, cli/cmd_symbol.cc, cli/cmd_x.cc,
+	src/attribute.cc, src/cod.cc, src/expr.cc, src/gpsim_classes.h,
+	src/modules.cc, src/modules.h, src/p12x.cc, src/p16f62x.cc,
+	src/p16x5x.cc, src/p16x6x.cc, src/p16x7x.cc, src/p16x8x.cc,
+	src/p18x.cc, src/pic-instructions.cc, src/pic-processor.cc,
+	src/processor.h, src/symbol.cc, src/symbol.h, src/value.cc,
+	src/value.h:
+	- Rearranged class heirarchy so that gpsimValue derives from
+	gpsimObject instead of Value.
+	- Substitued the Value class for those places where the Attribute
+	class is used.
+	* modules/encoder.cc, modules/led.cc, modules/logic.cc, 
+	modules/push_button.cc, modules/resistor.cc, modules/switch.cc,
+	modules/usart.cc, modules/video.cc
+
+
+2004-11-04 Scott Dattalo <scott@dattalo.com>
 	* regression/create_stc, regression/simulate, src/expr.cc,
 	src/symbol.cc, src/symbol.h, src/value.cc:
 	Regression tests were failing due to recent parser changes.

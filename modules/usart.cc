@@ -1561,12 +1561,14 @@ public:
 //   
 
 
-class BaudRateAttribute : public FloatAttribute {
+class BaudRateAttribute : public Float {
 
 public:
   USARTModule *usart;
 
-  BaudRateAttribute(USARTModule *pusart, char *_name=NULL) {
+  BaudRateAttribute(USARTModule *pusart, char *_name=NULL)
+    : Float(0.0)
+  {
 
     usart = pusart;
     //brg = pbrg;
@@ -1586,8 +1588,8 @@ public:
 
 
     cout << "Setting baud rate attribute!\n";
-    cout << " old value: " << value << " New value: " << b << endl;
-    value = b;
+    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    Float::set(b);
   };
 
 
@@ -1618,10 +1620,10 @@ public:
 
 
     cout << "Setting Rx baud rate attribute!\n";
-    cout << " old value: " << value << " New value: " << b << endl;
-    value = b;
+    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    Float::set(b);
     if(rcreg)
-      rcreg->set_baud_rate(value);
+      rcreg->set_baud_rate(b);
 
   };
 
@@ -1652,10 +1654,10 @@ public:
 
 
     cout << "Setting Tx baud rate attribute!\n";
-    cout << " old value: " << value << " New value: " << b << endl;
-    value = b;
+    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    Float::set(b);
     if(txreg)
-      txreg->set_baud_rate(value);
+      txreg->set_baud_rate(b);
 
   };
 

@@ -888,7 +888,7 @@ void pic_processor::create_symbols (void)
       switch (registers[i]->isa()) {
       case Register::SFR_REGISTER:
 	if(!symbol_table.find((char *)registers[i]->name().c_str()))
-	  symbol_table.add_register(this, registers[i]);
+	  symbol_table.add_register(registers[i]);
 	break;
       default:
 	break;
@@ -896,7 +896,7 @@ void pic_processor::create_symbols (void)
     }
 
   // now add a special symbol for W
-  symbol_table.add_w(this, W);
+  symbol_table.add_w(W);
 
   symbol_table.add(new val_symbol(pc));
 
