@@ -48,14 +48,16 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplotprint.h>
 
 #define PROFILE_COLUMNS    3
-static char *profile_titles[PROFILE_COLUMNS]={"Address", "Count","Instruction"};
+static char *profile_titles[PROFILE_COLUMNS]={"Address", "Cycles","Instruction"};
 
 #define PROFILE_RANGE_COLUMNS    3
-static char *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Count"};
+static char *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Cycles"};
+
+#define PROFILE_REGISTER_COLUMNS    4
+static char *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
 
 struct profile_entry {
     unsigned int pic_id;
-//    REGISTER_TYPE type;
     unsigned int address;
     struct cross_reference_to_gui *xref;
     guint64 last_count;
@@ -63,13 +65,20 @@ struct profile_entry {
 
 struct profile_range_entry {
     unsigned int pic_id;
-//    REGISTER_TYPE type;
     char startaddress_text[64];
     char endaddress_text[64];
     unsigned int startaddress;
     unsigned int endaddress;
     struct cross_reference_to_gui *xref;
     guint64 last_count;
+};
+
+struct profile_register_entry {
+    unsigned int pic_id;
+    unsigned int address;
+    struct cross_reference_to_gui *xref;
+    guint64 last_count_read;
+    guint64 last_count_write;
 };
 
 typedef enum {
@@ -116,7 +125,6 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 {
     gtk_clist_remove(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
     pw->profile_range_list=g_list_remove(pw->profile_range_list,entry);
-//    gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
     free(entry);
 }
 
@@ -1094,14 +1102,9 @@ profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
 void ProfileWindow_update(Profile_Window *pw)
 {
   GUI_Processor *gp;
-  GtkCList *profile_clist;
-  GtkCList *profile_range_clist;
-  guint64 count;
   int i;
 
   char count_string[100];
-  struct profile_entry *entry;
-  struct profile_range_entry *range_entry;
   GList *iter;
 
   if(  (pw == NULL)  || (!((GUI_Object*)pw)->enabled))
@@ -1116,14 +1119,13 @@ void ProfileWindow_update(Profile_Window *pw)
       return;
   }
 
-  profile_clist=GTK_CLIST(pw->profile_clist);
-
   iter=pw->profile_list;
-
-//  gtk_clist_freeze(profile_clist);
 
   while(iter)
   {
+      struct profile_entry *entry;
+      guint64 count;
+
       entry=iter->data;
 
       count=gpsim_get_cycles_used(gp->pic_id,entry->address);
@@ -1141,23 +1143,20 @@ void ProfileWindow_update(Profile_Window *pw)
 	  }
 
 	  sprintf(count_string,"0x%Lx",count);
-	  gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
+	  gtk_clist_set_text (GTK_CLIST(pw->profile_clist),row,1,count_string);
       }
       iter=iter->next;
   }
-  gtk_clist_sort(profile_clist);
-//  gtk_clist_thaw(profile_clist);
+  gtk_clist_sort(pw->profile_clist);
 
 
   // Update range list
-  profile_range_clist=GTK_CLIST(pw->profile_range_clist);
-
   iter=pw->profile_range_list;
-
-//  gtk_clist_freeze(profile_range_clist);
 
   while(iter)
   {
+      struct profile_range_entry *range_entry;
+      guint64 count;
       range_entry=iter->data;
 
       count=0;
@@ -1179,12 +1178,44 @@ void ProfileWindow_update(Profile_Window *pw)
 	  }
 
 	  sprintf(count_string,"0x%Lx",count);
-	  gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
+	  gtk_clist_set_text (GTK_CLIST(pw->profile_range_clist),row,2,count_string);
       }
       iter=iter->next;
   }
-  gtk_clist_sort(profile_range_clist);
-//  gtk_clist_thaw(profile_range_clist);
+  gtk_clist_sort(pw->profile_range_clist);
+
+  iter=pw->profile_register_list;
+  while(iter)
+  {
+      struct profile_register_entry *register_entry;
+      guint64 count_read, count_write;
+
+      register_entry=iter->data;
+
+      count_read=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
+      count_write=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
+
+      if(register_entry->last_count_read!=count_read||
+	 register_entry->last_count_write!=count_write)
+      {
+	  int row;
+
+	  register_entry->last_count_read=count_read;
+	  register_entry->last_count_write=count_write;
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_register_clist),register_entry);
+	  if(row==-1)
+	  {
+	      puts("\n\nwhooopsie\n");
+	      break;
+	  }
+
+	  sprintf(count_string,"0x%Lx",count_read);
+	  gtk_clist_set_text (GTK_CLIST(pw->profile_register_clist),row,2,count_string);
+	  sprintf(count_string,"0x%Lx",count_write);
+	  gtk_clist_set_text (GTK_CLIST(pw->profile_register_clist),row,3,count_string);
+      }
+      iter=iter->next;
+  }
 
 }
 
@@ -1196,12 +1227,6 @@ void ProfileWindow_update(Profile_Window *pw)
 
 void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
 {
-    struct profile_entry *profile_entry;
-    char buf[100];
-    char address_string[100];
-    char instruction_string[100];
-    char count_string[100];
-    char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     int row;
     int i;
     int pic_id;
@@ -1217,10 +1242,19 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
     pic_id = gp->pic_id;
 
     gpsim_enable_profiling(gp->pic_id);
+
+    // Instruction clist
     gtk_clist_freeze(pw->profile_clist);
     for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++)
     {
+	struct profile_entry *profile_entry;
+	char buf[100];
+	char address_string[100];
+	char instruction_string[100];
+	char count_string[100];
+	char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
 	guint64 cycles;
+
 	if(gpsim_address_has_opcode( gp->pic_id, i))
 	{
 	    sprintf(address_string,"0x%04x",i);
@@ -1244,6 +1278,54 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
 	}
     }
     gtk_clist_thaw(pw->profile_clist);
+
+    // Register clist
+    gtk_clist_freeze(pw->profile_register_clist);
+    for(i=0; i < gpsim_get_register_memory_size(gp->pic_id,REGISTER_RAM); i++)
+    {
+	struct profile_register_entry *profile_register_entry;
+	char buf[100];
+	char address_string[100];
+	char count_string_read[100];
+	char count_string_write[100];
+	char register_string[100];
+	char *entry_register[PROFILE_REGISTER_COLUMNS]={address_string,register_string,count_string_read,count_string_write};
+	guint64 read_cycles;
+	guint64 write_cycles;
+        char *name;
+
+	if(!gpsim_register_is_sfr(gp->pic_id, REGISTER_RAM, i)&&
+	   !gpsim_register_is_alias(gp->pic_id, REGISTER_RAM, i)&&
+	   gpsim_register_is_valid(gp->pic_id, REGISTER_RAM, i))
+	{
+	    sprintf(address_string,"0x%04x",i);
+	    name = gpsim_get_register_name( gp->pic_id, REGISTER_RAM, i);
+	    if(name==NULL)
+		name = address_string;
+	    strcpy(register_string, name);
+
+	    read_cycles=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,i);
+	    sprintf(count_string_read,"0x%Lx",read_cycles);
+
+	    write_cycles=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,i);
+	    sprintf(count_string_write,"0x%Lx",write_cycles);
+
+	    row=gtk_clist_append(GTK_CLIST(pw->profile_register_clist), entry_register);
+
+	    // FIXME this memory is never freed?
+	    profile_register_entry = malloc(sizeof(struct profile_register_entry));
+	    profile_register_entry->address=i;
+	    profile_register_entry->pic_id=pic_id;
+	    profile_register_entry->last_count_read=read_cycles;
+	    profile_register_entry->last_count_read=write_cycles;
+
+	    gtk_clist_set_row_data(GTK_CLIST(pw->profile_register_clist), row, (gpointer)profile_register_entry);
+
+	    pw->profile_register_list = g_list_append(pw->profile_register_list, (gpointer)profile_register_entry);
+	}
+    }
+    gtk_clist_thaw(pw->profile_register_clist);
+
 }
 
 /*****************************************************************
@@ -1294,6 +1376,7 @@ BuildProfileWindow(Profile_Window *pw)
 {
   GtkWidget *window;
   GtkWidget *profile_clist;
+  GtkWidget *profile_register_clist;
   GtkWidget *profile_range_clist;
   GtkWidget *label;
   GtkWidget *main_vbox;
@@ -1415,6 +1498,41 @@ BuildProfileWindow(Profile_Window *pw)
   label=gtk_label_new("Instruction range profile");
   gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
 
+  ///////////////////////////////////////////////////
+
+  // Register profile clist
+  profile_register_clist=gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS,profile_register_titles);
+  pw->profile_register_clist = GTK_CLIST(profile_register_clist);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),0,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),1,TRUE);
+//  gtk_clist_set_sort_column (pw->profile_register_clist,1);
+//  gtk_clist_set_sort_type (pw->profile_register_clist,GTK_SORT_DESCENDING);
+  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_register_clist),
+			     (GtkCListCompareFunc)profile_compare_func);
+
+  GTK_WIDGET_UNSET_FLAGS(profile_register_clist,GTK_CAN_DEFAULT);
+    
+
+  width=((GUI_Object*)pw)->width;
+  height=((GUI_Object*)pw)->height;
+  x=((GUI_Object*)pw)->x;
+  y=((GUI_Object*)pw)->y;
+  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
+
+
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_register_clist);
+  
+  gtk_widget_show(profile_register_clist);
+
+  gtk_widget_show(scrolled_window);
+
+//  gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
+  label=gtk_label_new("Register profile");
+  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
   ///////////////////////////////////////////////////
 
 

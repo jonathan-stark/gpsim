@@ -48,6 +48,8 @@ file_register::file_register(void)
   name_str1 = NULL;
   new_name("file_register");
   xref = new XrefObject(&value);
+  read_access_count=0;
+  write_access_count=0;
 }
 
 file_register::~file_register(void)

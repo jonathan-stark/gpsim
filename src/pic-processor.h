@@ -380,6 +380,8 @@ public:
   void init_program_memory(int address, int value);
   virtual void set_out_of_range_pm(int address, int value);
   guint64 cycles_used(unsigned int address);
+  guint64 register_read_accesses(unsigned int address);
+  guint64 register_write_accesses(unsigned int address);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};

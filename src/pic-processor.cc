@@ -1512,10 +1512,21 @@ void    pic_processor::set_out_of_range_pm(int address, int value)
 }
 
 //-------------------------------------------------------------------
-
 guint64 pic_processor::cycles_used(unsigned int address)
 {
     return program_memory[address]->cycle_count;
+}
+
+//-------------------------------------------------------------------
+guint64 pic_processor::register_read_accesses(unsigned int address)
+{
+    return registers[address]->read_access_count;
+}
+
+//-------------------------------------------------------------------
+guint64 pic_processor::register_write_accesses(unsigned int address)
+{
+    return registers[address]->write_access_count;
 }
 
 //-------------------------------------------------------------------

@@ -500,8 +500,10 @@ struct _Profile_Window {
 
   GtkCList *profile_clist;
   GtkCList *profile_range_clist;
+  GtkCList *profile_register_clist;
   GList *profile_list;
   GList *profile_range_list;
+  GList *profile_register_list;
   GtkWidget *notebook;
   gint range_current_row;
   GtkWidget *range_popup_menu;
