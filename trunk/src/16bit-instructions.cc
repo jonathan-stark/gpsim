@@ -48,6 +48,8 @@ void Branching::decode(pic_processor *new_cpu, unsigned int new_opcode)
     case  _P18C252_:
     case  _P18C442_:
     case  _P18C452_:
+    case  _P18F442_:
+    case  _P18F452_:
       destination = (new_opcode & 0xff)+1;
       absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
  
@@ -127,7 +129,7 @@ void ADDLW16::execute(void)
   cpu->W.put(new_value & 0xff);
   cpu->status.put_Z_C_DC_OV_N(new_value, old_value, L);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -158,7 +160,7 @@ void ADDWF16::execute(void)
       cpu->status.put_Z_C_DC_OV_N(new_value, w_value, src_value);
     }
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -196,7 +198,7 @@ void ADDWFC::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N(new_value, src_value, w_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -213,7 +215,7 @@ void ANDLW16::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -239,7 +241,7 @@ void ANDWF16::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -259,9 +261,9 @@ void BC::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_C)
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
   else
-    cpu->pc.increment();
+    cpu->pc->increment();
 
 }
 
@@ -281,9 +283,9 @@ void BN::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_N)
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
   else
-    cpu->pc.increment();
+    cpu->pc->increment();
 
 }
 
@@ -303,9 +305,9 @@ void BNC::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_C)
-    cpu->pc.increment();
+    cpu->pc->increment();
   else
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
 
 }
 
@@ -325,9 +327,9 @@ void BNN::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_N)
-    cpu->pc.increment();
+    cpu->pc->increment();
   else
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
 
 }
 
@@ -347,9 +349,9 @@ void BNOV::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_OV)
-    cpu->pc.increment();
+    cpu->pc->increment();
   else
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
 
 }
 
@@ -369,9 +371,9 @@ void BNZ::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_Z)
-    cpu->pc.increment();
+    cpu->pc->increment();
   else
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
 
 }
 
@@ -391,9 +393,9 @@ void BOV::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_OV)
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
   else
-    cpu->pc.increment();
+    cpu->pc->increment();
 
 }
 
@@ -419,7 +421,7 @@ void BRA::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->pc.jump(absolute_destination);
+  cpu->pc->jump(absolute_destination);
 
 }
 
@@ -459,7 +461,7 @@ void BTG::execute(void)
 
   reg->put(reg->get() ^ mask);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 //--------------------------------------------------
@@ -478,9 +480,9 @@ void BZ::execute(void)
   trace.instruction(opcode);
 
   if(cpu->status.value & STATUS_Z)
-    cpu->pc.jump(absolute_destination);
+    cpu->pc->jump(absolute_destination);
   else
-    cpu->pc.increment();
+    cpu->pc->increment();
 
 }
 
@@ -504,11 +506,11 @@ void CALL16::execute(void)
   if(!initialized)
     runtime_initialize();
 
-  cpu->stack->push(cpu->pc.get_next());
+  cpu->stack->push(cpu->pc->get_next());
   if(fast)
     cpu16->fast_stack.push();
 
-  cpu->pc.jump(destination);
+  cpu->pc->jump(destination);
 
 }
 
@@ -548,7 +550,7 @@ void COMF16::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -573,9 +575,9 @@ void CPFSEQ::execute(void)
 	    cpu->register_bank[register_address] );
 
   if(source->get() == cpu->W.value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -600,9 +602,9 @@ void CPFSGT::execute(void)
 	    cpu->register_bank[register_address] );
 
   if(source->get() > cpu->W.value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -627,9 +629,9 @@ void CPFSLT::execute(void)
 	    cpu->register_bank[register_address] );
 
   if(source->get() < cpu->W.value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -660,7 +662,7 @@ void DAW::execute(void)
   cpu->W.put(new_value & 0xff);
   cpu->status.put_C(new_value>0xff);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -686,7 +688,7 @@ void DECF16::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -711,9 +713,9 @@ void DECFSZ16::execute(void)
     cpu->W.put(new_value);
 
   if(0==new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -747,9 +749,9 @@ void DCFSNZ::execute(void)
     cpu->W.put(new_value);
 
   if(0!=new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -772,16 +774,16 @@ void GOTO16::execute(void)
   if(!initialized)
     runtime_initialize();
 
-  //  cpu->stack.push(cpu->pc.get_next());
+  //  cpu->stack.push(cpu->pc->get_next());
 
-  cpu->pc.jump(destination);
+  cpu->pc->jump(destination);
 
 }
 //--------------------------------------------------
 
 void INCF16::execute(void)
 {
-  unsigned int new_value;
+  unsigned int new_value, src_value;
 
   trace.instruction(opcode);
 
@@ -790,16 +792,29 @@ void INCF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (source->get() + 1)&0xff;
+  src_value = source->get();
+  new_value = (src_value + 1);
 
   if(destination)
-    source->put(new_value);      // Result goes to source
+    {
+      source->put(new_value & 0xff);      // Result goes to source
+      cpu->status.put_Z_C_DC_OV_N(new_value, src_value, 1);
+    }
   else
-    cpu->W.put(new_value);
+    {
+      cpu->W.put(new_value & 0xff);
+      cpu->status.put_Z_C_DC_OV_N(new_value, 1, src_value);
+    }
 
-  cpu->status.put_N_Z(new_value);
+//   if(destination) {
+//     source->put(new_value);      // Result goes to source
+//   } else {
+//     cpu->W.put(new_value);
+//   }
 
-  cpu->pc.increment();
+//   cpu->status.put_N_Z(new_value);
+
+  cpu->pc->increment();
 
 }
 
@@ -824,9 +839,9 @@ void INCFSZ16::execute(void)
     cpu->W.put(new_value);
 
   if(0==new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -860,9 +875,9 @@ void INFSNZ::execute(void)
     cpu->W.put(new_value);
 
   if(0!=new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -879,7 +894,7 @@ void IORLW16::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -905,7 +920,7 @@ void IORWF16::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -929,11 +944,11 @@ void LCALL16::execute(void)
 //    if(!initialized)
 //      runtime_initialize();
 
-//    cpu->stack->push(cpu->pc.get_next());
+//    cpu->stack->push(cpu->pc->get_next());
 //    if(fast)
 //      cpu16->fast_stack.push();
 
-//    cpu->pc.jump(destination);
+//    cpu->pc->jump(destination);
 
 }
 
@@ -1030,8 +1045,8 @@ void LFSR::execute(void)
 
   ia->put_fsr(k);
 
-  cpu->pc.skip();
-  cpu->pc.increment();
+  cpu->pc->skip();
+  cpu->pc->increment();
 
 }
 //--------------------------------------------------
@@ -1059,7 +1074,7 @@ void MOVF16::execute(void)
 
   cpu->status.put_N_Z(source_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1120,11 +1135,11 @@ void MOVFF::execute(void)
     runtime_initialize();
 
   unsigned int r =  cpu->registers[source]->get();
-  cpu->pc.skip();
+  cpu->pc->skip();
 
   cpu->registers[destination]->put(r);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1185,11 +1200,11 @@ void MOVFP::execute(void)
 //      runtime_initialize();
 
 //    unsigned int r =  cpu->registers[source]->get();
-//    cpu->pc.skip();
+//    cpu->pc->skip();
 
 //    cpu->registers[destination]->put(r);
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
@@ -1212,7 +1227,7 @@ void MOVLB::execute(void)
 
   cpu16->bsr.put(L);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1235,7 +1250,7 @@ void MOVLR::execute(void)
 
 //    cpu16->bsr.put(L);
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
@@ -1296,28 +1311,58 @@ void MOVPF::execute(void)
 //      runtime_initialize();
 
 //    unsigned int r =  cpu->registers[source]->get();
-//    cpu->pc.skip();
+//    cpu->pc->skip();
 
 //    cpu->registers[destination]->put(r);
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
 
 //--------------------------------------------------
+
+MOVWF16::MOVWF16(pic_processor *new_cpu, unsigned int new_opcode) 
+  : MOVWF(new_cpu,new_opcode)
+{
+  register_address = new_opcode & 0xff;
+}
+
 void MOVWF16::execute(void)
 {
   trace.instruction(opcode);
 
-  source = ((!access) ?
-	    cpu->registers[register_address] 
-	    :
-	    cpu->register_bank[register_address] );
+//   source = ((!access) ?
+// 	    cpu->registers[register_address] 
+// 	    :
+// 	    cpu->register_bank[register_address] );
+
+  source = cpu->register_bank[register_address];
 
   source->put(cpu->W.get());
 
-  cpu->pc.increment();
+  cpu->pc->increment();
+}
+
+//--------------------------------------------------
+MOVWF16a::MOVWF16a(pic_processor *new_cpu, unsigned int new_opcode) : MOVWF(new_cpu,new_opcode)
+{
+  register_address = ((new_opcode & 0x80) ? 0xf80 : 0 ) | (new_opcode & 0x7f);
+}
+
+void MOVWF16a::execute(void)
+{
+  trace.instruction(opcode);
+
+//   source = ((!access) ?
+// 	    cpu->registers[register_address] 
+// 	    :
+// 	    cpu->register_bank[register_address] );
+
+  source = cpu->registers[register_address];
+  source->put(cpu->W.get());
+
+  cpu->pc->increment();
 }
 
 //--------------------------------------------------
@@ -1343,7 +1388,7 @@ void MULLW::execute(void)
   cpu16->prodh.put((value>>8) &0xff);
 
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1376,7 +1421,7 @@ void MULWF::execute(void)
   cpu16->prodl.put(value &0xff);
   cpu16->prodh.put((value>>8) &0xff);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1412,7 +1457,7 @@ void NEGF::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1449,7 +1494,7 @@ void NEGW::execute(void)
 
 //    cpu->status.put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
@@ -1471,7 +1516,7 @@ void POP::execute(void)
 
   cpu->stack->pop();  // discard TOS
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1491,9 +1536,9 @@ void PUSH::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->stack->push(cpu->pc.get_next());
+  cpu->stack->push(cpu->pc->get_next());
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1516,9 +1561,9 @@ void RCALL::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->stack->push(cpu->pc.get_next());
+  cpu->stack->push(cpu->pc->get_next());
 
-  cpu->pc.jump(absolute_destination);
+  cpu->pc->jump(absolute_destination);
 
 }
 
@@ -1562,10 +1607,10 @@ void RETFIE16::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->pc.new_address(cpu->stack->pop());
+  cpu->pc->new_address(cpu->stack->pop());
   if(fast)
     cpu16->fast_stack.pop();
-  cout << "retfie: need to enable interrupts\n";
+  //cout << "retfie: need to enable interrupts\n";
 
   cpu16->intcon.set_gies();  // re-enable the appropriate interrupt
 
@@ -1587,7 +1632,7 @@ void RETURN16::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->pc.new_address(cpu->stack->pop());
+  cpu->pc->new_address(cpu->stack->pop());
   if(fast)
     cpu16->fast_stack.pop();
 }
@@ -1634,7 +1679,7 @@ void RLCF::execute(void)
 
   cpu->status.put_Z_C_N(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1671,7 +1716,7 @@ void RLNCF::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1709,7 +1754,7 @@ void RRCF::execute(void)
 
   cpu->status.put_Z_C_N(new_value | ((src_value & 1) ? 0x100 : 0) );
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1746,7 +1791,7 @@ void RRNCF::execute(void)
 
   cpu->status.put_Z_C_N(new_value | ((src_value & 1) ? 0x100 : 0) );
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1774,7 +1819,7 @@ void SETF::execute(void)
 
   source->put(0xff);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1808,7 +1853,7 @@ void SUBLW16::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value, old_value, L);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1845,7 +1890,7 @@ void SUBFWB::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value, w_value, src_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1872,7 +1917,7 @@ void SUBWF16::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value, src_value, w_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1908,7 +1953,7 @@ void SUBWFB::execute(void)
 
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value, src_value, w_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1952,7 +1997,7 @@ void TBLRD::execute(void)
   else if((opcode & 3)==2)
     cpu16->tbl.decrement();
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1995,7 +2040,7 @@ void TBLWT::execute(void)
   else if((opcode & 3)==2)
     cpu16->tbl.decrement();
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -2039,7 +2084,7 @@ void TLRD::execute(void)
 //    else if((opcode & 3)==2)
 //      cpu16->tbl.decrement();
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
@@ -2082,7 +2127,7 @@ void TLWT::execute(void)
 //    else if((opcode & 3)==2)
 //      cpu16->tbl.decrement();
 
-//    cpu->pc.increment();
+//    cpu->pc->increment();
 
 }
 
@@ -2109,10 +2154,10 @@ void TSTFSZ::execute(void)
 
   if( 0 == (source->get() & 0xff) )
     {
-      cpu->pc.skip();                  // Skip next instruction
+      cpu->pc->skip();                  // Skip next instruction
     }
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 //--------------------------------------------------
@@ -2128,7 +2173,7 @@ void XORLW16::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -2154,7 +2199,7 @@ void XORWF16::execute(void)
 
   cpu->status.put_N_Z(new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 

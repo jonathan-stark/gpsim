@@ -438,6 +438,7 @@ void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
     cout << "Warning: iopin pin number ("<<bit_position 
 	 <<") is too large for " << name() << ". Max is " << num_iopins << '\n';
 
+  cout << "attaching iopin to ioport " << name() << '\n';
 }
 
 //-------------------------------------------------------------------
@@ -548,7 +549,7 @@ void IOPORT::trace_register_write(void)
 PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins=8) : IOPORT(_num_iopins)
 {
   tris = NULL;
-
+  latch = NULL;
 }
 
 IOPORT::IOPORT(unsigned int _num_iopins=8)
@@ -669,6 +670,79 @@ void IOPORT_TRIS::put_value(unsigned int new_value)
 }
 
 IOPORT_TRIS::IOPORT_TRIS(void)
+{
+  break_point = 0;
+  port = NULL;
+  valid_iopins = 0;
+  new_name("ioport");
+}
+
+//-------------------------------------------------------------------
+// IOPORT_LATCH
+//
+//-------------------------------------------------------------------
+
+unsigned int IOPORT_LATCH::get(void)
+{
+
+  trace.register_read(address,value);
+
+  return(value);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void IOPORT_LATCH::put(unsigned int new_value)
+{
+
+  if(verbose)
+    cout << "IOPORT_LATCH::put 0x"<<hex<<new_value<<'\n';
+
+  value = new_value;
+
+  port->put(value);
+
+  trace.register_write(address,value);
+
+}
+
+//-------------------------------------------------------------------
+// void IOPORT_LATCH::setbit(unsigned int bit_number, bool new_value)
+//
+//  This routine will set the bit, 'bit_number', to the value 'new_value'
+// If the new_value is different than the old one then we will also
+// update the 
+//
+//-------------------------------------------------------------------
+void IOPORT_LATCH::setbit(unsigned int bit_number, bool new_value)
+{
+
+  port->setbit(bit_number,new_value);
+
+}
+
+//-------------------------------------------------------------------
+// void IOPORT_LATCH::put_value(unsigned int new_value)
+//
+//  When the gui tries to change the tris register, we'll pass
+// though here. There are three things that we do. First, we update
+// the tris port the way the gui asks us. Next, we'll update any cross
+// references, and finally we'll update any cross references for the
+// I/O port associated with this tris register.
+//-------------------------------------------------------------------
+
+void IOPORT_LATCH::put_value(unsigned int new_value)
+{
+ 
+  put(new_value);
+  port->put(new_value);
+
+  if(xref)
+    xref->update();
+
+}
+
+IOPORT_LATCH::IOPORT_LATCH(void)
 {
   break_point = 0;
   port = NULL;

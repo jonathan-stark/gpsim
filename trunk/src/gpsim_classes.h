@@ -51,6 +51,7 @@ class open_collector;
 class Stimulus_Node;
 
 class IOPORT_TRIS;
+class IOPORT_LATCH;
 class USART_MODULE;
 class EEPROM;
 

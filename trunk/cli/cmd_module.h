@@ -41,6 +41,8 @@ public:
 
   void module(cmd_options_str *cos, int op1, int op2);
 
+  void module(cmd_options_str *cos, char *op1, char *op2, int op3);
+
 };
 
 extern cmd_module c_module;

@@ -41,7 +41,12 @@ pic_processor * _14bit_processor::construct(void)
   return NULL;
 
 }
+//-------------------------------------------------------------------
+_14bit_processor::_14bit_processor(void)
+{
+  pc = new Program_Counter();
 
+}
 //-------------------------------------------------------------------
 //
 // 
@@ -86,12 +91,12 @@ interrupt (void)
   
   bp.clear_interrupt();
 
-  stack->push(pc.value);
+  stack->push(pc->value);
   intcon->clear_gie();
 
   trace.cycle_increment();
 
-  pc.interrupt(INTERRUPT_VECTOR);
+  pc->interrupt(INTERRUPT_VECTOR);
 
 }
 

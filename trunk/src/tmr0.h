@@ -29,7 +29,8 @@ public:
   unsigned int 
     prescale,
     prescale_counter,
-    old_option;       // Save option register contents here.
+    old_option,       // Save option register contents here.
+    state;            // Either on or off right now.
   guint64
     synchronized_cycle,
     future_cycle;
@@ -45,6 +46,7 @@ public:
   unsigned int get(void);
   virtual unsigned int get_value(void);
   virtual void start(int new_value,int sync=0);
+  virtual void stop(void);
   virtual void increment(void);   // Used when tmr0 is attached to an external clock
   virtual void new_prescale(void);
   virtual unsigned int get_prescale(void);

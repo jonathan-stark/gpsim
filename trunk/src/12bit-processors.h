@@ -118,6 +118,7 @@ enum _12BIT_DEFINITIONS
   virtual unsigned int config_word_address(void) const {return 0xfff;};
   virtual void set_config_word(unsigned int address, unsigned int cfg_word);
 
+  _12bit_processor(void);
 };
 
 #define cpu12 ( (_12bit_processor *)cpu)

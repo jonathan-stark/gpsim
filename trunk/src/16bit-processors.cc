@@ -29,12 +29,62 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 #include "stimuli.h"
+#include "symbol.h"
+
+
+//-------------------------------------------------------------------
+//
+// usart registers are fucked up.
+
+
+class vapid_sfr : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value)
+  {
+
+    cout << name() << " is not implemented\n";
+
+    sfr_register::put(new_value);
+  }
+
+};
+
+vapid_sfr rcsta;
+vapid_sfr txsta;
+vapid_sfr txreg;
+vapid_sfr rcreg;
+vapid_sfr spbrg;
+vapid_sfr pie1;
+
 
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(void)
 {
 
   cout << "_16bit processor constructor, type = " << isa() << '\n';
+  package = NULL;
+  pc = new Program_Counter16();
+
+}
+//-------------------------------------------------------------------
+pic_processor *_16bit_processor::construct(void)
+{
+    cout << "creating 16bit processor construct\n";
+
+  _16bit_processor *p = new _16bit_processor;
+
+  if(verbose)
+    cout << " 18c242 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "generic 16bit processor";
+  symbol_table.add_module(p,p->name_str);
+
+  return p;
 
 
 }
@@ -42,44 +92,36 @@ _16bit_processor::_16bit_processor(void)
 //-------------------------------------------------------------------
 void _16bit_processor :: create_sfr_map(void)
 {
-  if(verbose)
+  //if(verbose)
     cout << "creating 18cxxx common registers\n";
 
   add_file_registers(0x0, 0xf7f, 0);
 
-  //add_sfr_register(&porta,	  0xf80,0,"porta");
-  //add_sfr_register(&portb,	  0xf81,0,"portb");
-  //add_sfr_register(&portc,	  0xf82,0,"portc");
-  //add_sfr_register(&portd,	  0xf83,0,"portd");
-  //add_sfr_register(&porte,	  0xf84,0,"porte");
 
-  //add_sfr_register(&lata,	  0xf89,0,"lata");
-  //add_sfr_register(&latb,	  0xf8a,0,"latb");
-  //add_sfr_register(&latc,	  0xf8b,0,"latc");
-  //add_sfr_register(&latd,	  0xf8c,0,"latd");
-  //add_sfr_register(&late,	  0xf8d,0,"late");
-
-  //add_sfr_register(&trisa,	  0xf92,0,"trisa");
-  //add_sfr_register(&trisb,	  0xf93,0,"trisb");
-  //add_sfr_register(&trisc,	  0xf94,0,"trisc");
-  //add_sfr_register(&trisd,	  0xf95,0,"trisd");
-  //add_sfr_register(&trise,	  0xf96,0,"trise");
-
-  //add_sfr_register(&pie1,	  0xf9d,0,"pie1");
+  add_sfr_register(&pie1,	  0xf9d,0,"pie1");
   //cout << pir1.name() << '\n';
   add_sfr_register(&pir1,	  0xf9e,0,"pir1");
 
-  //add_sfr_register(&ipr1,	  0xf9f,0,"ipr1");
-  //add_sfr_register(&pie2,	  0xfa0,0,"pie2");
-  //add_sfr_register(&pir2,	  0xfa1,0,"pir2");
-  //add_sfr_register(&ipr2,	  0xfa2,0,"ipr2");
+  add_sfr_register(&ipr1,	  0xf9f,0,"ipr1");
+  add_sfr_register(&pie2,	  0xfa0,0,"pie2");
+  add_sfr_register(&pir2,	  0xfa1,0,"pir2");
+  add_sfr_register(&ipr2,	  0xfa2,0,"ipr2");
 
 
-  add_sfr_register(usart.rcsta,  0xfab,0,"rcsta");
-  add_sfr_register(usart.txsta,  0xfac,0x02,"txsta");
-  add_sfr_register(usart.txreg,  0xfad,0,"txreg");
-  add_sfr_register(usart.rcreg,  0xfae,0,"rcreg");
-  add_sfr_register(usart.spbrg,  0xfaf,0,"spbrg");
+  add_sfr_register(&(usart16.rcsta),  0xfab,0,"rcsta");
+  add_sfr_register(&(usart16.txsta),  0xfac,0x02,"txsta");
+  cout << "txsta assignment name: " << usart16.txsta.name() << "\n";
+  cout << "txreg assignment name: " << usart16.txreg.name() << "\n";
+  add_sfr_register(&(usart16.txreg),  0xfad,0,"txreg");
+  cout << "txreg assignment name: " << usart16.txreg.name() << "\n";
+  add_sfr_register(&(usart16.rcreg),  0xfae,0,"rcreg");
+  add_sfr_register(&(usart16.spbrg),  0xfaf,0,"spbrg");
+
+//   add_sfr_register(&rcsta,  0xfab,0,"rcsta");
+//   add_sfr_register(&txsta,  0xfac,0x02,"txsta");
+//   add_sfr_register(&txreg,  0xfad,0,"txreg");
+//   add_sfr_register(&rcreg,  0xfae,0,"rcreg");
+//   add_sfr_register(&spbrg,  0xfaf,0,"spbrg");
 
   //add_sfr_register(&t3con,	  0xfb1,0xff,"t3con");
   //add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
@@ -92,6 +134,17 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&ccpr1l,	  0xfbe,0,"ccpr1l");
   add_sfr_register(&ccpr1h,	  0xfbf,0,"ccpr1h");
 
+//   add_sfr_register(&adcon1,	  0xfc1,0,"adcon1");
+//   add_sfr_register(&adcon2,	  0xfc2,0,"adcon2");
+//   add_sfr_register(&adresl,	  0xfc3,0,"adresl");
+//   add_sfr_register(&adresh,	  0xfc4,0,"adres4");
+
+  add_sfr_register(&ssp.sspcon1,  0xfc5,0,"sspcon1");
+  add_sfr_register(&ssp.sspcon2,  0xfc6,0,"sspcon2");
+  add_sfr_register(&ssp.sspstat,  0xfc7,0,"sspstat");
+  add_sfr_register(&ssp.sspadd,   0xfc8,0,"sspadd");
+  //add_sfr_register(&ssp.sspbuf,   0xfc9,0,"sspbuf");
+
   add_sfr_register(&t2con,	  0xfca,0,"t2con");
   add_sfr_register(&pr2,	  0xfcb,0xff,"pr2");
   add_sfr_register(&tmr2,	  0xfcc,0,"tmr2");
@@ -101,9 +154,14 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&tmr1h,	  0xfcf,0,"tmr1h");
 
   add_sfr_register(&rcon,	  0xfd0,0,"rcon");
-  add_sfr_register(&t0con,	  0xfd5,0xff,"t0con");
+  add_sfr_register(&wdtcon,	  0xfd1,0,"wdtcon");
+  add_sfr_register(&lvdcon,	  0xfd2,0,"lvdcon");
+  add_sfr_register(&osccon,	  0xfd3,0,"osccon");
+  // 0x4 is not defined
+  add_sfr_register(&t0con,	  0xfd5,0x00,"t0con");
   add_sfr_register(&tmr0l,	  0xfd6,0,"tmr0l");
   add_sfr_register(&tmr0h,	  0xfd7,0,"tmr0h");
+  t0con.put(0xff);  /**FIXME - need a way to set this to 0xff at reset*/
 
   add_sfr_register(&status,       0xfd8);
 
@@ -158,6 +216,8 @@ void _16bit_processor :: create_sfr_map(void)
 
 
   // Initialize all of the register cross linkages
+  pir1.valid_bits = 0xff;  /* All PIR bits are valid for 18x parts */
+
   tmr1l.tmr1h = &tmr1h;
   tmr1l.t1con = &t1con;
   tmr1l.pir1  = &pir1;
@@ -183,8 +243,16 @@ void _16bit_processor :: create_sfr_map(void)
   ccpr1l.tmr1l  = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
+  pir1.intcon = &intcon;
+  pir1.pie    = &pie1;
+  pie1.pir    = &pir1;
+  pie1.new_name("pie1");
+
   // All of the status bits on the 16bit core are writable
   status.write_mask = 0xff;
+
+
+  //cout << "end  txsta assignment name: " << usart.txsta->name() << "\n";
 }
 
 //-------------------------------------------------------------------
@@ -208,22 +276,27 @@ void _16bit_processor :: create (void)
   num_of_sfrs = 0;
  
 
-  pic_processor::create();
-  cout << "_16bit_processor :: create -> pic proc created\n";
-  _16bit_processor::create_sfr_map();
-  cout << "_16bit_processor :: create -> sfr map created\n";
-
   fast_stack.init(this);
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
-  trace.program_counter (pc.value);
+  //usart16 = new USART_MODULE16();
+
+  cout << "16bit_processor1 create txreg => " << usart16.txreg.name() << "\n";
+  pic_processor::create();
+  cout << "16bit_processor2 create txreg => " << usart16.txreg.name() << "\n";
+  _16bit_processor::create_sfr_map();
+  cout << "16bit_processor3 create txreg => " << usart16.txreg.name() << "\n";
+
+  trace.program_counter (pc->value);
   tmr0l.initialize();
   intcon.initialize();
 
-  usart.initialize(this);
   tbl.initialize(this);
   tmr0l.start(0);
+
+// note usart.txsta is fucked right here for some damned reason.
+
 }
 
 //
@@ -260,18 +333,18 @@ interrupt (void)
   
   bp.clear_interrupt();
 
-  stack->push(pc.value);
+  stack->push(pc->value);
 
   // Save W,status, and BSR if this is a high priority interrupt.
-  if(interrupt_vector == INTERRUPT_VECTOR_HI)
-    fast_stack.push();
+  //if(interrupt_vector == INTERRUPT_VECTOR_HI)
+  //cout << "16bit interrupt, vector = 0x" <<hex<<interrupt_vector<<'\n';
+  fast_stack.push();
 
   intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)
 
-  pc.jump(interrupt_vector);
+  pc->jump(interrupt_vector);
 
 }
-
 //-------------------------------------------------------------------
 void _16bit_processor::por(void)
 {
@@ -309,37 +382,52 @@ void _16bit_processor::option_new_bits_6_7(unsigned int bits)
 //-------------------------------------------------------------------
 void _16bit_processor::set_out_of_range_pm(int address, int value)
 {
-
+  cout << hex << "16bit proc setting config address 0x" <<(address<<1) << " to 0x"<<value<<'\n';
   switch (address) {
   case CONFIG2:
     if(config_modes) {
       if(value & WDTEN) {
-	if(verbose)
-	  cout << "Enabling WDT\n";
+	//if(verbose)
+	  cout << "config Enabling WDT\n";
 
 	config_modes->enable_wdt();
-    } else 
-      config_modes->disable_wdt();
+      } else {
+	cout << "config disabling WDT\n";
+	config_modes->disable_wdt();
+      }
     }
-
-    if((value & (FOSC0 | FOSC1 | FOSC2)) != (FOSC0 | FOSC1 | FOSC2))
-      cout << "FOSC bits in CONFIG2H are not supported\n";
 
     break;
 
   case CONFIG1:
+    if(((value>>8) & (OSCEN | FOSC0 | FOSC1 | FOSC2)) != (OSCEN | FOSC0 | FOSC1 | FOSC2))
+      cout << "FOSC bits in CONFIG1H are not supported\n";
+
+    cout << "18cxxx config address 0x" << hex << (address<<1) << " Copy protection " <<
+      (value&0xff) << '\n';
+
+    break;
+
   case CONFIG3:
   case CONFIG4:
-    cout << "18cxxx config address " << (address<<1) << " is not supported\n";
+    cout << "18cxxx config address 0x" << hex << (address<<1) << " is not supported\n";
     break;
 
   case DEVID:
 
-    cout << "18cxxx device id address " << (address<<1) << " is not supported\n";
+    cout << "18cxxx device id address 0x" << hex << (address<<1) << " is not supported\n";
     break;
 
   default:
-    cout << "WARNING: 18cxxx is ignoring code at address " << (address<<1) << '\n';
+    cout << "WARNING: 18cxxx is ignoring code at address 0x" << hex <<(address<<1) << '\n';
   }
 
+}
+//-------------------------------------------------------------------
+//
+// Package stuff
+//
+void _16bit_processor::create_iopin_map(void)
+{
+  cout << "_16bit_processor::create_iopin_map WARNING --- not createing package \n";
 }

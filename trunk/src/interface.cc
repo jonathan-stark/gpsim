@@ -385,7 +385,7 @@ unsigned int gpsim_get_pc_value(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return pic->pc.value;
+  return pic->pc->value;
 
 }
 
@@ -399,7 +399,7 @@ void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value)
   if(!pic)
     return;
 
-  pic->pc.put_value(pc_value);
+  pic->pc->put_value(pc_value);
 
 
 }
@@ -828,8 +828,8 @@ void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref)
 
   if(!pic)
     return;
-  if(pic->pc.xref)
-      pic->pc.xref->add(xref);
+  if(pic->pc->xref)
+      pic->pc->xref->add(xref);
 
 }
 

@@ -97,8 +97,9 @@ extern list <Module *> instantiated_modules_list;
 class Module {
 public:
 
-  char * name_str;
-  list<Attribute *> attributes;
+  char * name_str;                // A unique name to describe the Module
+  list<Attribute *> attributes;   // A list of attributes that pertain to the Module
+  Package  *package;              // A package for the module
 
   unsigned int interface_id;
 
@@ -116,11 +117,13 @@ public:
 
   void add_attribute(Attribute *);
 
+  virtual void set_attribute(char *attr, char *val, int val2);
   virtual void set_attribute(char *attr, char *val);
   virtual void set_attribute(char *attr, double val);
 
   virtual Attribute *get_attribute(char *attr);
 
+  virtual void dump_attributes(int show_values=1);
   const virtual char *type(void) { return (name_str); };
   char *name(void) {return name_str;};
   virtual void new_name(char *);
@@ -186,6 +189,7 @@ void module_load_library(char *library_name);
 void module_load_module(char * module_type, char * module_new_name=NULL);
 void module_pins(char *module_name);
 void module_set_attr(char *module_name,char *attr, char *val);
+void module_set_attr(char *module_name,char *attr, char *val, int val2);
 void module_set_attr(char *module_name,char *attr, double val);
 void module_set_position(char *module_name, int x, int y);
 #endif // __MODULES_H__

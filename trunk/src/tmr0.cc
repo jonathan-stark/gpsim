@@ -43,15 +43,24 @@ TMR0::TMR0(void)
   synchronized_cycle=0;
   future_cycle=0;
   last_cycle=0;
+  state=0;      // start disabled (will change to enabled by other init code)
   prescale=1;
   new_name("tmr0");
+}
+
+void TMR0::stop(void)
+{
+  cout << "TMR0 stop\n";
+  state &= (~1);      // the timer is disabled.
 }
 
 void TMR0::start(int restart_value, int sync=0)
 {
 
+  state |= 1;          // the timer is on
+
   value = restart_value;
-  if(verbose)
+  //if(verbose)
     cout << "TMRO::start\n";
 
   old_option = cpu->option_reg.value;
@@ -80,7 +89,7 @@ void TMR0::start(int restart_value, int sync=0)
 
     future_cycle = fc;
 
-    if(verbose)
+    //if(verbose)
       cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
 
 
@@ -110,6 +119,9 @@ void TMR0::increment(void)
 {
   //  cout << "TMR0 increment because of external clock ";
 
+  if((state & 1) == 0)
+    return;
+
   if(--prescale_counter == 0)
     {
       prescale_counter = prescale;
@@ -131,7 +143,10 @@ void TMR0::put(unsigned int new_value)
       cout << "TMR0::put external clock...\n";
     }
 
-  start(new_value,2);
+  // If tmr0 is enabled, then start it up.
+
+  if(state & 1)
+    start(new_value,2);
 
   trace.register_write(address,value);
 
@@ -144,7 +159,9 @@ unsigned int TMR0::get_value(void)
   if(cpu->cycles.value <= synchronized_cycle)
     return value;
 
-  if(get_t0cs())
+  // If we're running off the external clock or the tmr is disabled
+  // then just return the register value.
+  if(get_t0cs() || ((state & 1)==0))
     return(value);
 
   int new_value = (cpu->cycles.value - last_cycle)/ prescale;
@@ -215,7 +232,7 @@ void TMR0::new_prescale(void)
 
   } else {
 
-    if(cpu->option_reg.get_t0cs()) {
+    if(get_t0cs() || ((state & 1)==0)) {
       prescale = 1 << get_prescale();
       prescale_counter = prescale;
 
@@ -306,6 +323,11 @@ void TMR0::callback(void)
 {
 
   //cout<<"TMR0 rollover: " << hex << cpu->cycles.value << '\n';
+
+  if((state & 1) == 0) {
+
+    cout << "TMR0 callback ignored because timer is disabled\n";
+  }
 
   // If tmr0 is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to

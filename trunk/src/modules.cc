@@ -65,6 +65,7 @@ Module::Module(void)
   name_str = NULL;
   interface_id = 0;
   widget=NULL;
+  package = NULL;
 
   x=-1; // -1 means automatic positioning
   y=-1;
@@ -221,8 +222,45 @@ void Module::new_name(char *s)
 
 
 
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  Module::dump_attributes(int show_values=1)
+{
+
+  list <Attribute *> :: iterator attribute_iterator;
+
+  cout << __FUNCTION__ << endl;
+
+  for (attribute_iterator = attributes.begin();  
+       attribute_iterator != attributes.end(); 
+       attribute_iterator++) {
+
+    Attribute *locattr = *attribute_iterator;
+
+    cout << locattr->get_name();
+    if(show_values) {
+
+      char buf[50];
+
+      cout << " = " << locattr->sGet(buf,50);
+    }
+    cout << endl;
+  }
+
+
+}
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
 Attribute * Module::get_attribute(char *attribute_name)
 {
+
+  if(!attribute_name)
+    return NULL;
 
   list <Attribute *> :: iterator attribute_iterator;
 
@@ -245,8 +283,7 @@ Attribute * Module::get_attribute(char *attribute_name)
     }
   }
 
-  if(attribute_name)
-    cout << "Could not find attribute named " << attribute_name  << '\n';
+  cout << "Could not find attribute named " << attribute_name  << '\n';
 
   return NULL;
 }
@@ -258,69 +295,57 @@ Attribute * Module::get_attribute(char *attribute_name)
 void Module::set_attribute(char *attr, char *val)
 {
 
-  Attribute *locattr = get_attribute(attr);
+  if(attr) {
+    Attribute *locattr = get_attribute(attr);
 
-  if(locattr)
-    locattr->set(val);
-
-  //cout << " warning " << name_str << " does not have any changable attributes\n";
-/*
-  if(!attr)
-    return;
-
-  list <Attribute *> :: iterator attribute_iterator;
-
-  for (attribute_iterator = attributes.begin();  
-       attribute_iterator != attributes.end(); 
-       attribute_iterator++) {
-
-    Attribute *locattr = *attribute_iterator;
-
-    if(strcmp(locattr->get_name(), attr) == 0) {
-      cout << "Found attribute: " << locattr->get_name() << '\n';
-
+    if(locattr)
       locattr->set(val);
+  } else {
 
-      return;
-    }
+    // Go ahead and dump the attribute list:
+    dump_attributes();
   }
 
-  cout << "Could not find (attr = " << attr << " , val = " << val << ")\n";
-*/
 }
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void Module::set_attribute(char *attr, char *val, int val2)
+{
+
+  if(attr) {
+    Attribute *locattr = get_attribute(attr);
+
+    if(locattr)
+      locattr->set(val,val2);
+  } else {
+
+    // Go ahead and dump the attribute list:
+    dump_attributes();
+  }
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 
 void Module::set_attribute(char *attr, double val)
 {
 
-  Attribute *locattr = get_attribute(attr);
+  if(attr) {
+    Attribute *locattr = get_attribute(attr);
 
-  if(locattr)
-    locattr->set(val);
-
-  // cout << " warning " << name_str << " does not have any changable attributes\n";
-/*
-  if(!attr)
-    return;
-
-  list <Attribute *> :: iterator attribute_iterator;
-
-  for (attribute_iterator = attributes.begin();  
-       attribute_iterator != attributes.end(); 
-       attribute_iterator++) {
-
-    Attribute *locattr = *attribute_iterator;
-
-    if(strcmp(locattr->get_name(), attr) == 0) {
-      cout << "Found attribute: " << locattr->get_name() << '\n';
-
+    if(locattr)
       locattr->set(val);
+  } else {
 
-      return;
-    }
+    // Go ahead and dump the attribute list:
+    dump_attributes();
+
   }
+ 
 
-  cout << "Could not find (attr = " << attr << " , val = " << val << ")\n";
-*/
 }
 
 void Module::add_attribute(Attribute *new_attribute)
@@ -576,7 +601,7 @@ void module_pins(char *module_name)
 
 //--------------------------------------------------
 // module_set_attr
-// Display the states of the pins of a module
+// Set module attribute
 
 void module_set_attr(char *module_name,char *attr, char *val)
 {
@@ -590,9 +615,26 @@ void module_set_attr(char *module_name,char *attr, char *val)
   cpu->set_attribute(attr,val);
 
 }
+
 //--------------------------------------------------
 // module_set_attr
-// Display the states of the pins of a module
+// Set module attribute
+
+void module_set_attr(char *module_name,char *attr, char *val, int val2)
+{
+
+  Module *cpu=module_check_cpu(module_name);
+
+
+  if(!cpu)
+    return;
+
+  cpu->set_attribute(attr,val,val2);
+
+}
+//--------------------------------------------------
+// module_set_attr
+// Set module attribute
 
 void module_set_attr(char *module_name,char *attr, double val)
 {
@@ -605,6 +647,7 @@ void module_set_attr(char *module_name,char *attr, double val)
   cpu->set_attribute(attr,val);
 
 }
+
 
 void module_set_position(char *module_name, int x, int y)
 {

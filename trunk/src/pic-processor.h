@@ -78,7 +78,9 @@ enum PROCESSOR_TYPE
   _P18C242_,
   _P18C252_,
   _P18C442_,
-  _P18C452_
+  _P18C452_,
+  _P18F442_,
+  _P18F452_
 };
 
 // Configuration modes.
@@ -274,7 +276,7 @@ public:
   Cycle_Counter cycles;
   Status_register status;
   WREG          W;
-  Program_Counter pc;
+  Program_Counter *pc;
   OPTION_REG   option_reg;
   PCL          pcl;
   PCLATH       pclath;

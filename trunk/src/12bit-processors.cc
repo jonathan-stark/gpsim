@@ -33,6 +33,13 @@ Boston, MA 02111-1307, USA.  */
 extern unsigned int config_word;
 
 
+//-------------------------------------------------------------------
+_12bit_processor::_12bit_processor(void)
+{
+  pc = new Program_Counter();
+
+}
+
 void _12bit_processor::create_symbols(void)
 {
   cout << "12bit create symbols\n";

@@ -50,7 +50,7 @@ void invalid_instruction::execute(void)
 
   /* Don't know what to do, so just plow thorugh like nothing happened */
   if(cpu)
-    cpu->pc.increment();
+    cpu->pc->increment();
 
 };
 
@@ -99,6 +99,8 @@ void Bit_op::decode(pic_processor *new_cpu, unsigned int new_opcode)
 	case  _P18C252_:
 	case  _P18C442_:
 	case  _P18C452_:
+	case  _P18F442_:
+	case  _P18F452_:
           mask = 1 << ((opcode >> 9) & 7);
           register_address = opcode & REG_MASK_16BIT;
           access = opcode & ACCESS_MASK_16BIT;
@@ -284,7 +286,7 @@ void ADDWF::execute(void)
 
   cpu->status.put_Z_C_DC(new_value, src_value, w_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -309,7 +311,7 @@ void ANDLW::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -339,7 +341,7 @@ void ANDWF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -369,7 +371,7 @@ void BCF::execute(void)
 
   reg->put(reg->get() & mask);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -397,7 +399,7 @@ void BSF::execute(void)
   reg->put(reg->get() | mask);
 
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -422,11 +424,11 @@ void BTFSC::execute(void)
   else
     reg = cpu->register_bank[register_address];
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
   if( 0 == (mask & reg->get()) )
     {
-      cpu->pc.skip();                  // Skip next instruction
+      cpu->pc->skip();                  // Skip next instruction
     }
 
 }
@@ -452,11 +454,11 @@ void BTFSS::execute(void)
   else
     reg = cpu->register_bank[register_address];
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
   if( 0 != (mask & reg->get()) )
     {
-      cpu->pc.skip();                  // Skip next instruction
+      cpu->pc->skip();                  // Skip next instruction
     }
 
 }
@@ -487,9 +489,9 @@ void CALL::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->stack->push(cpu->pc.get_next());
+  cpu->stack->push(cpu->pc->get_next());
 
-  cpu->pc.jump(cpu->get_pclath_branching_jump() | destination);
+  cpu->pc->jump(cpu->get_pclath_branching_jump() | destination);
 
 }
 
@@ -521,7 +523,7 @@ void CLRF::execute(void)
 
   cpu->status.put_Z(1);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 }
 
 char * CLRF::name(char *return_str)
@@ -551,7 +553,7 @@ void CLRW::execute(void)
   cpu->W.put(0);
 
   cpu->status.put_Z(1);
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -577,10 +579,15 @@ void CLRWDT::execute(void)
       cpu->status.put_TO(1);
       cpu->status.put_PD(1);
     }
-  else
-    cout << "FIXME: CLRWDT for 16 bit processors\n";
+  else {
+    static int warned = 0;
+    if(!warned) {
+      cout << "FIXME: CLRWDT for 16 bit processors\n";
+      warned=1;
+    }
+  }
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -612,7 +619,7 @@ void COMF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -644,7 +651,7 @@ void DECF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -675,9 +682,9 @@ void DECFSZ::execute(void)
     cpu->W.put(new_value);
 
   if(0==new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -707,7 +714,7 @@ void GOTO::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->pc.jump(cpu->get_pclath_branching_jump() | destination);
+  cpu->pc->jump(cpu->get_pclath_branching_jump() | destination);
 
 }
 
@@ -751,7 +758,7 @@ void INCF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -783,9 +790,9 @@ void INCFSZ::execute(void)
     cpu->W.put(new_value);
 
   if(0==new_value)
-    cpu->pc.skip();                  // Skip next instruction
+    cpu->pc->skip();                  // Skip next instruction
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -811,7 +818,7 @@ void IORLW::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -843,7 +850,7 @@ void IORWF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -866,7 +873,7 @@ void MOVLW::execute(void)
 
   cpu->W.put(L);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -901,7 +908,7 @@ void MOVF::execute(void)
 
   cpu->status.put_Z(0==source_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -928,7 +935,7 @@ void MOVWF::execute(void)
 
   cpu->register_bank[register_address]->put(cpu->W.get());
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 }
 
 char * MOVWF::name(char *return_str)
@@ -966,7 +973,7 @@ void NOP::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -988,7 +995,7 @@ void OPTION::execute(void)
 
   cpu->option_reg.put(cpu->W.get());
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1010,7 +1017,7 @@ void RETLW::execute(void)
 
   cpu->W.put(L);
 
-  cpu->pc.new_address(cpu->stack->pop());
+  cpu->pc->new_address(cpu->stack->pop());
 
 }
 
@@ -1042,7 +1049,7 @@ void RLF::execute(void)
 
   cpu->status.put_C(new_value>0xff);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1075,7 +1082,7 @@ void RRF::execute(void)
 
   cpu->status.put_C(old_value&0x01);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1132,7 +1139,7 @@ void SUBWF::execute(void)
 
   cpu->status.put_Z_C_DC_for_sub(new_value, src_value, w_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1167,7 +1174,7 @@ void SWAPF::execute(void)
   else
     cpu->W.put( ((src_value >> 4) & 0x0f) | ( (src_value << 4) & 0xf0) );
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1214,7 +1221,7 @@ void TRIS::execute(void)
 	cpu->tris_instruction(register_address);
     }
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 }
 
 char * TRIS::name(char *return_str)
@@ -1248,7 +1255,7 @@ void XORLW::execute(void)
   cpu->W.put(new_value);
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }
 
@@ -1279,6 +1286,6 @@ void XORWF::execute(void)
 
   cpu->status.put_Z(0==new_value);
 
-  cpu->pc.increment();
+  cpu->pc->increment();
 
 }

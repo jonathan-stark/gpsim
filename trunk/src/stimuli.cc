@@ -865,17 +865,16 @@ dc_supply::dc_supply(char *n)
 //========================================================================
 //
 
-IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name)
+IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp=NULL)
 {
   iop = i;
+  iopp = _iopp;
   iobit=b;
   state = 0;
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
   snode = NULL;
-
-  //cout << "IOPIN constructor called \n";
 
   if(iop) {
     iop->attach_iopin(this,b);
@@ -904,7 +903,6 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name)
 
   add_stimulus(this);
 
-
 }
 
 IOPIN::IOPIN(void)
@@ -913,6 +911,7 @@ IOPIN::IOPIN(void)
   cout << "IOPIN default constructor\n";
 
   iop = NULL;
+  iopp = NULL;
   iobit=0;
   state = 0;
   l2h_threshold = 100;
@@ -934,15 +933,18 @@ IOPIN::~IOPIN()
 
 void IOPIN::put_state_value(int new_state)
 {
-  if(iop)
-    iop->setbit_value(iobit, new_state &1);
-  //put_state(new_state);
+  file_register *port = get_iop();
+  if(port)
+    port->setbit_value(iobit, new_state &1);
+
   if(xref)
     xref->update();
 }
 
 int IOPIN::get_state(void)
 {
+  file_register *port = get_iop();
+
   if(snode) {
 
     if(state>l2h_threshold) 
@@ -950,9 +952,9 @@ int IOPIN::get_state(void)
     else
       return -1;
     
-  } else if(iop) {
+  } else if(port) {
 
-    if(iop->get_bit(iobit))
+    if(port->get_bit(iobit))
       return +1;
     else
       return -1;
@@ -971,10 +973,25 @@ void IOPIN::attach(Stimulus_Node *s)
   snode = s;
 }
 
+//
+// Accomodate breakpoints by providing an indirect way
+// through which the ioport is selected. The breakpoint
+// engine is cabable of intercepting this indirect access.
+//
+file_register *IOPIN::get_iop(void)
+{
+
+  if(iopp)
+    return *iopp;
+
+  if(iop)
+    return iop;
+}
+
 //========================================================================
 //
-IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL)
-  : IOPIN(i,b,opt_name)
+IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+  : IOPIN(i,b,opt_name,iopp)
 {
 
   state = 0;
@@ -990,11 +1007,21 @@ IO_input::IO_input(void)
 }
 void IO_input::toggle(void)
 {
-  if(iop) {
+  file_register *port = get_iop();
+
+  if(port) {
+
+    port->setbit(iobit, 1^port->get_bit(iobit));
+    if(port->xref)
+      port->xref->update();
+    state = port->get_bit(iobit);
+
+/*
     iop->setbit(iobit, 1^iop->get_bit(iobit));
     if(iop->xref)
       iop->xref->update();
     state = iop->get_bit(iobit);
+*/
   }
   else
     state ^= 1;
@@ -1037,22 +1064,23 @@ int IO_input::get_voltage(guint64 current_time)
 void IO_input::put_state( int new_digital_state)
 {
   //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
+  file_register *port = get_iop();
 
   if( (new_digital_state != 0) && (state < h2l_threshold)) {
 
     //cout << " driving I/O line high \n";
     state = l2h_threshold + 1;
 
-    if(iop)
-      iop->setbit(iobit,1);
+    if(port)
+      port->setbit(iobit,1);
 
   } 
   else if((new_digital_state == 0) && (state > l2h_threshold)) {
 
     //cout << " driving I/O line low \n";
     state = h2l_threshold - 1;
-    if(iop)
-      iop->setbit(iobit,0);
+    if(port)
+      port->setbit(iobit,0);
 
   }
   //else cout << " no change in IO_input state\n";
@@ -1072,8 +1100,9 @@ void IO_input::put_node_state( int new_state)
   if(new_state == state)
     return;
 
+  file_register *port = get_iop();
 
-  if(iop) {
+  if(port) {
 
     // If the I/O pin to which this stimulus is mapped is at a logic 
     // high AND the new state is below the high-to-low threshold
@@ -1082,12 +1111,12 @@ void IO_input::put_node_state( int new_state)
     // Similarly, if the I/O line is low and the new_state is above
     // the low-to-high threshold, we need to drive it low.
 
-    if(iop->get_bit(iobit)) {
+    if(port->get_bit(iobit)) {
       if(new_state < h2l_threshold)
-	iop->setbit(iobit,0);
+	port->setbit(iobit,0);
     } else {
       if(new_state > l2h_threshold)
-	iop->setbit(iobit,1);
+	port->setbit(iobit,1);
     }
   } else {
 
@@ -1118,8 +1147,8 @@ void IO_input::put_node_state( int new_state)
 
 //========================================================================
 //
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL)
-  : IO_input(i,b,opt_name)
+IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+  : IO_input(i,b,opt_name,iopp)
 {
   //  source = new source_stimulus();
 
@@ -1140,14 +1169,16 @@ void IO_bi_directional::put_state( int new_digital_state)
   // If the bi-directional pin is an output then driving is TRUE.
   if(driving) {
 
-    if(iop) {
+    file_register *port = get_iop();
+
+    if(port) {
       // If the new state to which the stimulus is being set is different than
       // the current state of the bit in the ioport (to which this stimulus is
       // mapped), then we need to update the ioport.
 
-      if((new_digital_state!=0) ^ ( iop->value & (1<<iobit))) {
+      if((new_digital_state!=0) ^ ( port->value & (1<<iobit))) {
 
-	iop->setbit(iobit,new_digital_state);
+	port->setbit(iobit,new_digital_state);
 
 	// If this stimulus is attached to a node, then let the node be updated
 	// with the new state as well.
@@ -1157,6 +1188,18 @@ void IO_bi_directional::put_state( int new_digital_state)
 	// the io port.
 
       }
+    } else {
+
+      // a port-less pin, probably an external module
+
+      if((new_digital_state ^ digital_state) & 1) {
+
+	digital_state = new_digital_state & 1;
+
+	if(snode)
+	  snode->update(digital_state);
+      }
+
     }
 
   }
@@ -1176,8 +1219,8 @@ IO_bi_directional::IO_bi_directional(void)
   cout << "IO_bi_directional constructor shouldn't be called\n";
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL)
-  : IO_bi_directional(i, b,opt_name)
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+  : IO_bi_directional(i, b,opt_name,iopp)
 {
 
   pull_up_resistor = new resistor();
@@ -1199,6 +1242,7 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 
   if(driving || !snode)
     {
+
       if( iop->value & (1<<iobit))
 	{
 	  //cout << " high\n";
@@ -1284,8 +1328,8 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 }
 
 
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL)
-  : IO_input(i,b,opt_name)
+IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+  : IO_input(i,b,opt_name,iopp)
 {
 
   drive = MAX_DRIVE / 2;

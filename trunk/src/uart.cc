@@ -29,6 +29,36 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 //-----------------------------------------------------------
+_RCSTA::_RCSTA(void)
+{
+  cout << "_RCSTA constructor\n";
+}
+
+//-----------------------------------------------------------
+_TXSTA::_TXSTA(void)
+{
+  cout << "_TXSTA constructor\n";
+}
+
+//-----------------------------------------------------------
+_RCREG::_RCREG(void)
+{
+  cout << "_RCREG constructor\n";
+}
+
+_TXREG::_TXREG(void)
+{
+  cout << "_TXREG constructor\n";
+  new_name("txhello");
+}
+
+
+_SPBRG::_SPBRG(void)
+{
+  cout << "_SPBRG constructor\n";
+}
+
+//-----------------------------------------------------------
 // TXREG - USART Transmit Register
 
 
@@ -45,7 +75,8 @@ void _TXREG::put(unsigned int new_value)
 
   full();
 
-  if( (txsta->value & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN))
+  if(txsta &&
+     ( (txsta->value & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
     {
       // If the transmit buffer is empty and the transmitter is enabled
       // then transmit this new data now...
@@ -104,8 +135,14 @@ void _TXSTA::put(unsigned int new_value)
     // transmission.
 
     if(value & TXEN) {
-      if(!txreg->is_empty())
-	start_transmitting();
+      cout << "TXSTA - enabling transmitter\n";
+      if(txreg) {
+	cout << " TXSTA - does have a txreg\n";
+	if(txreg->is_empty())
+	  txreg->empty();
+	else
+	  start_transmitting();
+      }
     } else 
       stop_transmitting();
   }
@@ -172,6 +209,8 @@ void _TXSTA::start_transmitting(void)
 
   // The start bit, which is always low, occupies bit position
   // zero. The next 8 bits come from the txreg.
+  if(!txreg)
+    return;
 
   tsr = txreg->value << 1;
 
@@ -220,7 +259,8 @@ void _TXSTA::transmit_a_bit(void)
     {
 
       //cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
-      txpin->put_state(tsr&1);
+      if(txpin)
+	txpin->put_state(tsr&1);
 
       tsr >>= 1;
 
@@ -233,6 +273,7 @@ void _TXSTA::transmit_a_bit(void)
 void _TXSTA::callback(void)
 {
 
+  cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
 
   transmit_a_bit();
 
@@ -245,7 +286,7 @@ void _TXSTA::callback(void)
     // (See the note above about the 'extra' stop bit that was stuffed
     // into the tsr register. 
 
-    if(txreg->is_empty())
+    if(txreg && txreg->is_empty())
       value |= TRMT;
     else
       start_transmitting();
@@ -259,6 +300,23 @@ void _TXSTA::callback(void)
     }
   }
 
+}
+bool _TXREG::is_empty(void)
+{
+  cout << "TXREG:: function not implemented\n";
+  return 0;
+}
+void _TXREG::empty(void)
+{
+  cout << "TXREG:: function not implemented\n";
+}
+void _TXREG::full(void)
+{
+  cout << "TXREG:: function not implemented\n";
+}
+void _TXREG::assign_pir(PIR1 *new_pir)
+{
+  cout << "TXREG:: function not implemented\n";
 }
 
 //-----------------------------------------------------------
@@ -295,13 +353,16 @@ void _RCSTA::put(unsigned int new_value)
   diff = new_value ^ value;
   value = ( value & (RX9D | OERR | FERR) )   |  (new_value & ~(RX9D | OERR | FERR));
 
+  if(!txsta || !txsta->txreg)
+    return;
   // First check whether or not the serial port is being enabled
   if(diff & SPEN) {
 
     if(value & SPEN) {
       spbrg->start();
       // Make the tx line high when the serial port is enabled.
-      txsta->txpin->put_state(1);
+      if(txsta->txpin)
+	txsta->txpin->put_state(1);
       txsta->txreg->empty();
     } else {
 
@@ -311,6 +372,7 @@ void _RCSTA::put(unsigned int new_value)
       txsta->txreg->full();         // Turn off TXIF
       stop_receiving();
 
+      trace.register_write(address,value);
       return;
     }
 
@@ -329,7 +391,7 @@ void _RCSTA::put(unsigned int new_value)
 	start_receiving();
 
 	// If the rx line is low, then go ahead and start receiving now.
-	if(!uart_port->get_bit(rx_bit))
+	if(uart_port && !uart_port->get_bit(rx_bit))
 	  receive_start_bit();
       }
 
@@ -396,7 +458,8 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 	    rsr >>= 1;
 
 	  // copy the rsr to the fifo
-	  rcreg->push( rsr & 0xff);
+	  if(rcreg)
+	    rcreg->push( rsr & 0xff);
 
 	  // If we're continuously receiving, then set up for the next byte.
 	  // FIXME -- may want to set a half bit delay before re-starting...
@@ -445,16 +508,21 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 {
   //  last_cycle = cpu->cycles.value;
 
-  if(cpu)
+  if(cpu && spbrg)
     cpu->cycles.set_break(cpu->cycles.value + (spbrg->value + 1) * spbrg_edge, this);
 
 }
 void _RCSTA::receive_start_bit(void)
 {
 
-  //cout << "USART received a start bit\n";
+  cout << "USART received a start bit\n";
 
-  if(txsta->value & _TXSTA::BRGH)
+  if((value & (CREN | SREN)) == 0) {
+    cout << "  but not enabled\n";
+    return;
+  }
+  
+  if(txsta && (txsta->value & _TXSTA::BRGH))
     set_callback_break(BRGH_FIRST_MID_SAMPLE);
   else
     set_callback_break(BRGH_FIRST_MID_SAMPLE);
@@ -467,14 +535,14 @@ void _RCSTA::receive_start_bit(void)
 void _RCSTA::callback(void)
 {
 
-  //cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
+  cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
 
   switch(state) {
   case RCSTA_WAITING_MID1:
     if(uart_port->get_bit(rx_bit))
       sample++;
 
-    if(txsta->value & _TXSTA::BRGH)
+    if(txsta && (txsta->value & _TXSTA::BRGH))
       set_callback_break(BRGH_SECOND_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE);
     else
       set_callback_break(BRGL_SECOND_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE);
@@ -487,7 +555,7 @@ void _RCSTA::callback(void)
     if(uart_port->get_bit(rx_bit))
       sample++;
 
-    if(txsta->value & _TXSTA::BRGH)
+    if(txsta && (txsta->value & _TXSTA::BRGH))
       set_callback_break(BRGH_THIRD_MID_SAMPLE - BRGH_SECOND_MID_SAMPLE);
     else
       set_callback_break(BRGL_THIRD_MID_SAMPLE - BRGL_SECOND_MID_SAMPLE);
@@ -497,7 +565,7 @@ void _RCSTA::callback(void)
     break;
 
   case RCSTA_WAITING_MID3:
-    if(uart_port->get_bit(rx_bit))
+    if(uart_port && uart_port->get_bit(rx_bit))
       sample++;
 
     receive_a_bit( (sample>=2));
@@ -505,7 +573,7 @@ void _RCSTA::callback(void)
 
     // If this wasn't the last bit then go ahead and set a break for the next bit.
     if(state==RCSTA_WAITING_MID3) {
-      if(txsta->value & _TXSTA::BRGH)
+      if(txsta && (txsta->value & _TXSTA::BRGH))
 	set_callback_break(TOTAL_BRGH_STATES -(BRGH_THIRD_MID_SAMPLE - BRGH_FIRST_MID_SAMPLE));
       else
 	set_callback_break(TOTAL_BRGL_STATES -(BRGL_THIRD_MID_SAMPLE - BRGL_FIRST_MID_SAMPLE));
@@ -570,6 +638,10 @@ unsigned int _RCREG::get(void)
   trace.register_read(address,value);
   return value;
 }
+void _RCREG::assign_pir(PIR1 *new_pir)
+{
+  cout <<"_RCREG:: function not impl\n";
+}
 
 
 //-----------------------------------------------------------
@@ -583,7 +655,7 @@ unsigned int _RCREG::get(void)
 void _SPBRG::get_next_cycle_break(void)
 {
 
-  if(txsta->value & _TXSTA::SYNC)
+  if(txsta && (txsta->value & _TXSTA::SYNC))
     {
       // Synchronous mode
       future_cycle = last_cycle + (value + 1)*4;
@@ -591,7 +663,7 @@ void _SPBRG::get_next_cycle_break(void)
   else
     {
       // Asynchronous mode
-      if(txsta->value & _TXSTA::BRGH)
+      if(txsta && (txsta->value & _TXSTA::BRGH))
 	future_cycle = last_cycle + (value + 1)*16;
       else
 	future_cycle = last_cycle + (value + 1)*64;
@@ -600,7 +672,7 @@ void _SPBRG::get_next_cycle_break(void)
   if(cpu)
     cpu->cycles.set_break(future_cycle, this);
 
-  //  cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
+  //cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
   
 }
 
@@ -635,9 +707,11 @@ guint64 _SPBRG::get_last_cycle(void)
 {
 
   // There's a chance that a SPBRG break point exists on the current
-  // cpu cycle, but has not yet been serviced. 
-  return( (cpu->cycles.value == future_cycle) ? future_cycle : last_cycle);
-
+  // cpu cycle, but has not yet been serviced.
+  if(cpu)
+    return( (cpu->cycles.value == future_cycle) ? future_cycle : last_cycle);
+  else
+    return 0;
 }
 //--------------------------
 //guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
@@ -665,7 +739,7 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
   // cpu cycle, but has not yet been serviced. 
   guint64 cycle = (cpu->cycles.value == future_cycle) ? future_cycle : last_cycle;
 
-  if(txsta->value & _TXSTA::SYNC)
+  if(txsta && (txsta->value & _TXSTA::SYNC))
     {
       // Synchronous mode
       return ( edges_from_now * (value + 1)*4 + cycle);
@@ -673,7 +747,7 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
   else
     {
       // Asynchronous mode
-      if(txsta->value & _TXSTA::BRGH)
+      if(txsta && (txsta->value & _TXSTA::BRGH))
 	return ( edges_from_now * (value + 1)*16 + cycle);
       else
 	return ( edges_from_now * (value + 1)*64 + cycle);
@@ -715,7 +789,7 @@ void _SPBRG::callback(void)
 
   //cout << "SPBRG rollover at cycle " << last_cycle << '\n';
 
-  if(rcsta->value & _RCSTA::SPEN)
+  if(rcsta && (rcsta->value & _RCSTA::SPEN))
     {
 
       // If the serial port is enabled, then set another 
@@ -799,11 +873,18 @@ void USART_MODULE::initialize(IOPORT *uart_port)
 }
 
 //--------------------------------------------------
+void   USART_MODULE::new_rx_edge(unsigned int bit)
+{
+  cout << "USART_MODULE::new_rx_edge - shouldn't get called!\n";
+
+}
+//--------------------------------------------------
 USART_MODULE::USART_MODULE(void)
 {
-
+  cout << "usart module constructor\n";
   txreg = NULL;
   rcreg = NULL;
+  spbrg = NULL;
 
   rcsta = new _RCSTA;
   txsta = new _TXSTA;
@@ -822,9 +903,9 @@ USART_MODULE14::USART_MODULE14(void)
 }
 
 //--------------------------------------------------
-void USART_MODULE14::initialize(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port)
+void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port)
 {
-  cpu = new_cpu;
+  _cpu14 = new_cpu;
 
   USART_MODULE::initialize(uart_port);
 

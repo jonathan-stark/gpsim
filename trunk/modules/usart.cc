@@ -47,12 +47,12 @@ Boston, MA 02111-1307, USA.  */
 
 
 
+#include "../src/attribute.h"
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"
 #include "../src/ioports.h"
 #include "../src/symbol.h"
-#include "../src/attribute.h"
 #include "../src/interface.h"
 
 #include "usart.h"
@@ -323,13 +323,14 @@ public:
   }
 };
 
-
+//--------------------------------------------------------------
 //
 //  BRG
 //
 // Serial Port Baud Rate Generator
 //
 //
+//--------------------------------------------------------------
 
 class BRG       //  : public BreakCallBack
 {
@@ -450,7 +451,7 @@ public:
 
   virtual void put_node_state(int new_state) {
 
-    cout << "USART_RXPIN put_node_state " << new_state << '\n';
+    //cout << "USART_RXPIN put_node_state " << new_state << '\n';
 
     state = new_state;
 
@@ -472,7 +473,7 @@ public:
     bool diff = new_dstate ^ digital_state;
     digital_state = new_dstate;
 
-    cout << "usart rx put_digital_state " << digital_state << '\n';
+    //cout << "usart rx put_digital_state " << digital_state << '\n';
     if( usart && diff ) {
 
       usart->new_rx_edge(digital_state);
@@ -494,8 +495,111 @@ public:
 
 
 
+//--------------------------------------------------------------
+//
+//
+
+class USART_TXPIN : public IO_bi_directional
+{
+public:
+
+  USART_CORE *usart;
+
+  USART_TXPIN(void) {
+    cout << "USART_TXPIN constructor - do nothing\n";
+  }
+  USART_TXPIN (USART_CORE *_usart,
+	       IOPORT *i, 
+	       unsigned int b, 
+	       char *opt_name=NULL) : IO_bi_directional(i,b,opt_name) { 
+
+    usart = _usart;
+
+    digital_state = 1;
+    update_direction(1);   // Make the TX pin an output.
+
+  };
+
+  virtual void put_node_state(int new_state) {
+
+    cout << "USART_TXPIN put_node_state " << new_state << '\n';
+    /*
+    state = new_state;
+
+    if( state < h2l_threshold) {
+      state = l2h_threshold + 1;
+      put_digital_state(0);
+
+    } else {
+
+      if(state > l2h_threshold) {
+	state = h2l_threshold - 1;
+	put_digital_state(1);
+      }
+    }
+    */
+  }
+
+  void put_digital_state(bool new_dstate) { 
+
+    cout << "usart tx put_digital_state " << new_dstate << '\n';
+    /*
+    bool diff = new_dstate ^ digital_state;
+    digital_state = new_dstate;
+
+    cout << "usart tx put_digital_state " << digital_state << '\n';
+    if( usart && diff ) {
+
+      usart->new_rx_edge(digital_state);
+
+      if(iop) // this check should not be necessary...
+	iop->setbit(iobit,digital_state);
+    }
+    */
+
+  }
+
+  void put_state( int new_digital_state) {
+
+    file_register *port = get_iop();
+
+    if(port) {
+      // If the new state to which the stimulus is being set is different than
+      // the current state of the bit in the ioport (to which this stimulus is
+      // mapped), then we need to update the ioport.
+
+      if((new_digital_state!=0) ^ ( port->value & (1<<iobit))) {
+
+	port->setbit(iobit,new_digital_state);
+
+	digital_state = new_digital_state;
+	// If this stimulus is attached to a node, then let the node be updated
+	// with the new state as well.
+	if(snode)
+	  snode->update(0);
+	// Note that this will auto magically update
+	// the io port.
+
+      }
+    }
+  }
+
+  virtual int get_voltage(guint64 current_time) {
+    cout << "USART_TXPIN::" <<__FUNCTION__ <<  " digital state=" << digital_state << '\n';
+    
+    if(digital_state)
+      return drive;
+    else
+      return -drive;
+  }
+
+};
 
 
+
+
+
+//=================================================================
 //
 //  TXREG
 //
@@ -503,13 +607,40 @@ public:
 // defined in the main gpsim code.
 //
 
-class TXREG // : public _TXREG
+class TXREG : public BreakCallBack
 {
  public:
-  IOPIN   *txpin;
-  BRG     *brg;
+  USART_TXPIN *txpin;
+  USART_CORE  *usart;
+  //BRG         *brg;
 
   bool empty_flag;
+  double baud;
+
+  guint64 time_per_bit;
+  guint64 last_time;
+  guint64 start_time;
+  guint64 future_time;
+
+  unsigned int start_bit_time;
+  unsigned int start_bit_index;
+  bool last_bit;
+  int bits_per_byte;
+
+  double  stop_bits;
+  guint64 time_per_packet;
+
+  unsigned int txr;    // Transmit register
+  int bit_count;       // used while transmitting.
+  unsigned int tx_byte;
+
+  enum TX_STATES {
+    TX_TRANSMITTING
+  }  transmit_state;
+
+  bool use_parity;
+  bool parity;         // 0 = even, 1 = odd
+
 
   virtual bool is_empty(void) { return empty_flag;};
   virtual void empty(void) {empty_flag = 0;};
@@ -518,11 +649,129 @@ class TXREG // : public _TXREG
 
   TXREG(void) {
     txpin = NULL;
-    brg = NULL;
+
+    baud = 9600;
+    bits_per_byte = 8;
+    stop_bits = 1;
+    use_parity = 0;
+
+    tx_byte = '0';
+
+    update_packet_time();
+
   }
 
+  void set_bits_per_byte(int num_bits) {
+    bits_per_byte = num_bits;
+    update_packet_time();
+  }
+
+
+
+  void update_packet_time(void) {
+    // for now the stop bit time is included in the total packet time
+
+    if(baud <= 0.0)
+      baud = 9600;  //arbitrary
+
+    /*
+      Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
+    */
+
+    time_per_packet = gpsim_digitize_time( (1.0 +                 // start bit
+					    bits_per_byte +       // data bits
+					    stop_bits  +          // stop bit(s)
+					    use_parity)           //
+					    /baud);
+    time_per_bit = gpsim_digitize_time( 1.0/baud );
+    cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
+  }
+
+  void set_baud_rate(double new_baud) {
+    cout << "TXREG::" << __FUNCTION__ << "\n";
+
+    baud = new_baud;
+    update_packet_time();
+
+  };
+
+  void set_stop_bits(double new_stop_bits) {
+
+    stop_bits = new_stop_bits;
+
+  }
+
+  void set_noparity(void) {
+    use_parity = 0;
+  }
+
+  void set_parity(bool new_parity) {
+    use_parity = 1;
+    parity = new_parity;
+  }
+
+
+
+  virtual void callback(void) {
+    cout << "\n\n";
+    cout << "TXREG::" << __FUNCTION__ << "\n";
+    cout << "\n\n";
+
+    last_time = gpsim_get_current_time();
+    start_time = last_time;
+
+    if(txpin) {
+      txpin->put_state(txr & 1);
+      cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
+    }
+
+    if(bit_count) {
+      txr >>= 1;
+      bit_count--;
+      future_time = last_time + time_per_bit;
+    } else {
+
+      if(usart)
+	tx_byte = usart->get_tx_byte();
+      else
+	tx_byte++;
+
+      build_tx_packet(tx_byte);
+      future_time = last_time + time_per_bit * 12;
+      
+    }
+
+    gpsim_set_break(future_time, this);
+  }
+
+  void build_tx_packet(unsigned int tb) {
+
+
+    tx_byte = tb &  ((1<<bits_per_byte) - 1);
+
+    txr =  ((3 << bits_per_byte) | tx_byte) << 1;
+
+    // total bits = byte + start and stop bits
+    bit_count = bits_per_byte + 1 + 1;
+
+    cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb <<" txr 0x" << txr << "  bits " << bit_count << '\n';
+
+  }
+
+  void enable(void) {
+
+    cout << "\n\n";
+    cout << "TXREG::" << __FUNCTION__ << "\n";
+    cout << "\n\n";
+
+    build_tx_packet(tx_byte);
+    last_time = gpsim_get_current_time();
+    future_time = last_time + time_per_bit;
+    gpsim_set_break(future_time, this);
+  }
 };
 
+//=================================================================
 //
 //  RCREG 
 //
@@ -551,7 +800,8 @@ class RCREG : public BreakCallBack // : public _RCREG
     RS_3,
     RS_4,
     RS_RECEIVING,
-    RS_STOPPED
+    RS_STOPPED,
+    RS_OVERRUN
   } receive_state;
 
   BoolEventLogger *rx_event;
@@ -615,7 +865,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 
     receive_state = RS_WAITING_FOR_START;
 
-    autobaud = 1;
+    autobaud = 0;
     set_bits_per_byte(8);
     set_stop_bits(1.0);
     set_noparity();
@@ -644,10 +894,12 @@ class RCREG : public BreakCallBack // : public _RCREG
 					    stop_bits  +          // stop bit(s)
 					    use_parity)           //
 					    /baud);
+    time_per_bit = gpsim_digitize_time( 1.0/baud );
+    //cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
   }
 
   void set_baud_rate(double new_baud) {
-    cout << "RCREG::" << __FUNCTION__ << "\n";
+    //cout << "RCREG::" << __FUNCTION__ << "\n";
 
     baud = new_baud;
     update_packet_time();
@@ -682,19 +934,22 @@ class RCREG : public BreakCallBack // : public _RCREG
     
 
   virtual void callback(void) {
+    cout << "\n\n";
     cout << "RCREG::" << __FUNCTION__ << "\n";
+    cout << "\n\n";
 
     //// process the data.....
 
-    rx_event->dump(-1);  // dump all events
-    rx_event->dump_ASCII_art( 4, start_bit_index );  // time_per_packet/10,-1);
+    //rx_event->dump(-1);  // dump all events
+    rx_event->dump_ASCII_art( time_per_bit/4, start_bit_index );  // time_per_packet/10,-1);
 
     guint64 current_time =  gpsim_get_current_time();
     int edges = rx_event->get_edges(start_time, current_time);
-    cout << " # of edges for one byte time " << edges << '\n';
+    //cout << " gpsim time is " << current_time << "\n";
+    //cout << " # of edges for one byte time " << edges << '\n';
 
-    if(edges > (1+bits_per_byte))
-      cout << "noisy\n";
+    //if(edges > (1+bits_per_byte))
+    //  cout << "noisy\n";
 
     // Decipher the byte:
 
@@ -703,6 +958,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 
     switch(receive_state) {
     case RS_WAITING_FOR_START:
+      //cout << "waiting for start\n";
       break;
     case RS_RECEIVING:
       if(last_bit) {
@@ -710,20 +966,34 @@ class RCREG : public BreakCallBack // : public _RCREG
 	// is correct it was also the last rising edge before
 	// the stop bit. So process the event queue and 
 	// decipher the byte from it...
-	cout << "Looks like we've definitely received a stop bit\n";
+	//cout << "Looks like we've definitely received a stop bit\n";
+	receive_state = RS_WAITING_FOR_START;
+
+	unsigned int b = decode_byte(start_bit_index, time_per_bit);
+	cout << "RCREG: decoded to 0x" << b << "\n";
+
+      } else {
+	receive_state = RS_OVERRUN;
+	cout << "Looks like we've overrun\n";
       }
-      receive_state = RS_WAITING_FOR_START;
 
       break;
     case RS_STOPPED:
+      receive_state = RS_WAITING_FOR_START;
+      cout << "received a stop bit\n";
       break;
     }
 
     // If the rx line is sitting low, then we can just start
     // receiving the next byte:
 
-    if(!last_bit) 
-      start();
+//     if(!last_bit) 
+//       start();
+
+    //if(!autobaud)
+    //  gpsim_set_break(future_time, this);
+
+
   };
 
 
@@ -739,11 +1009,12 @@ class RCREG : public BreakCallBack // : public _RCREG
 
     future_time = last_time + time_per_packet;
 
-    if(!autobaud)
+    if(!autobaud) {
       gpsim_set_break(future_time, this);
-
-    cout << "RCREG::start   last_cycle = " << 
-      hex << last_time << " future_cycle = " << future_time << '\n';
+      //cout << "RCREG::start Setting Break\n";
+    }
+    //cout << "RCREG::start   last_cycle = " << 
+    //  hex << last_time << " future_cycle = " << future_time << '\n';
 
   }
 
@@ -849,26 +1120,31 @@ class RCREG : public BreakCallBack // : public _RCREG
 
     while(i<8  && decoding) {
       b = (b>>1) | ((index1 & 0x0001) << 7);
-      //cout << " time: 0x" << hex << t1 << " evt index: 0x" << index1 << '\n';
+      cout << " time: 0x" << hex << t1 << " evt index: 0x" << index1 <<" b "<<b << '\n';
       t1 += bit_time;
       if(t1>=cur_time)
 	decoding = 0;
       if(t1 > rx_event->buffer[index2]) {
 	index1 = index2;
 	index2 = (index2 + 1) & rx_event->max_events;
-	if(index2 == cur_index)
+	if(index2 == cur_index) {
 	  decoding = 0;
+	  if(!autobaud)
+	    b >>= 7-i;
+	}
       }
       i++;
     }
 
-    // t1 is now pointing to the middle of the stop bit
-    // and index1 has the most recent edge prior to t1
-    if(decoding) {
-      if((index1 & 0x0001)==0)
-	b |= 0x100;             // Error: The state is high 
-    } else
-      b |= 0x200;               // Error: under run
+    if(autobaud) {
+      // t1 is now pointing to the middle of the stop bit
+      // and index1 has the most recent edge prior to t1
+      if(decoding) {
+	if((index1 & 0x0001)==0)
+	  b |= 0x100;             // Error: The state is high 
+      } else
+	b |= 0x200;               // Error: under run
+    }
 
     return b;
 
@@ -937,7 +1213,21 @@ class RCREG : public BreakCallBack // : public _RCREG
 
   void new_rx_edge(bool bit) {
 
-    cout << "RCREG::" << __FUNCTION__ << "\n";
+    cout << "USART MODULE RCREG::" << __FUNCTION__ << "\n";
+    switch(receive_state) {
+    case RS_WAITING_FOR_START:
+      cout << "state = WAITING_FOR_START\n";
+      break;
+    case RS_RECEIVING:
+      cout << "state = RECEIVING\n";
+      break;
+    case RS_STOPPED:
+      cout << "state = STOPPED\n";
+      break;
+    case RS_OVERRUN:
+      cout << "state = OVERRUN\n";
+      break;
+    }
 
     // If this bit is different from the last one we got
     // then save it in the event buffer.
@@ -963,168 +1253,195 @@ class RCREG : public BreakCallBack // : public _RCREG
 	start_index = old_index;
       }
 
-      dump_pulses();
+      //dump_pulses();
 
 
       last_bit ^= 1;                 // change current state
 
-      if(!bit && receive_state == RS_WAITING_FOR_START) {
-	// Looks like we just got a start bit.
-	start_bit_time = gpsim_get_current_time();
 
-	cout  << "Start bit at t = 0x" << start_bit_time << '\n';
+      if(autobaud) {
 
-	receive_state = RS_RECEIVING;
+	if(!bit && receive_state == RS_WAITING_FOR_START) {
+	  // Looks like we just got a start bit.
+	  start_bit_time = gpsim_get_current_time();
+	  cout  << "Start bit at t = 0x" << start_bit_time << '\n';
+	  receive_state = RS_RECEIVING;
+	}
 
-      }
 
-      if(autobaud & bit) {
-	guint64 pw[64];  // pulse widths will get stored here.
+	if(bit) {
+	  guint64 pw[64];  // pulse widths will get stored here.
+	  cur_index = rx_event->get_index();
+	  guint32 edges = (cur_index - start_bit_index) & rx_event->max_events;
+
+
+	  // Don't bother autobauding if we haven't received more than 4 pulses (8 edges)
+	  if(edges >= 8) {
+	    int i,j;
+	    cout << "Auto bauding\n";
+
+	    if(edges > 64) {
+	      start_bit_index = (start_bit_index + 8 ) & rx_event->max_events;
+	      start_bit_time = rx_event->buffer[start_bit_index];
+	      edges -= 8;
+	    }
+	    rx_event->dump_ASCII_art( pulses[0].width/2, (cur_index - edges+3) & rx_event->max_events, cur_index );
+
+	    // Analyze...
+
+	    guint64 min = pulses[0].width;
+	    double w = 1.0*pulses[0].width;
+
+	    cout << "Bit times based on minimum:\n";
+	    bool suspicious=0;
+	    j = 0;
+	    int istart = 0;
+	    int istop = 3;
+	    do {
+	      do {
+		suspicious=0;
+		for(i=istart; i<istop && pulses[i].occurs; i++) {
+		  //double p = pulses[i].width / w;
+		  double p = pulses[i].sumofwidths / w / pulses[i].occurs;
+		  cout << i << ": " << p ;
+		  if( (p - floor(p)) > 0.25) {
+		    cout << "  <-- suspicious";
+		    suspicious = 1;
+		  }
+		  cout << '\n';
+		}
+		if(suspicious) {
+		  w /= 2.0;
+		  min >>= 1;
+		  cout << "halving the measured pulse width\n";
+		}
+	      }while (suspicious && ++j<4);
+
+	      // the first pulse must be a glitch. So repeat with the next.
+
+	      if(suspicious) {
+		istart++;
+		istop++;
+		min = pulses[1].width;
+		w = 1.0*min;
+		cout << "Hmm, moving to next pulse\n";
+	      }
+	    }while (suspicious && j<8);
+
+	    if(suspicious)
+	      cout << "Unable to determine the baud rate.\n";
+
+	    cout << "Minimum pulse width " << hex << min << " Baud = " << (gpsim_digitize_time(1.0)/w) <<'\n';
+
+	    // Assume the baud rate is correct.
+	    // use it to decode the bit stream.
+
+	    suspicious = 0;  // assume all bytes decode correctly
+
+	    //unsigned int b = decode_byte(rx_event->buffer[start_bit_index] + min + min/2, min);
+	    // unsigned int b = decode_byte(start_bit_index, min);
+
+	    //guint32 index1 = rx_event->get_index(rx_event->buffer[cur_index] - min * 11);
+	    guint32 index1 = (rx_event->get_index() - edges)& rx_event->max_events;
+
+	    if(index1&1)
+	      index1 &= 0xfffffe;
+
+	    guint32 b=0;
+
+	    j=0;
+	    do {
+
+	      b = decode_byte(index1, min);
+
+	      cout <<j<< ": Decoded byte 0x"<< (b&0xff) << " is ";
+	      if(b >=0x100) {
+		index1 = (index1 + 2) & rx_event->max_events;
+		cout << "invalid b=0x" <<b<<'\n';
+	      } else {
+		index1 = rx_event->get_index(rx_event->buffer[index1] + 11*min);
+		cout <<"valid\n";
+	      }
+
+	    } while ( ++j < 8);
+
+#if 0
+	    if( (max / min) > 9)
+	      cout << " max / min > 9\n";
+
+	    // If there was a falling edge nine bit times ago, then we have
+	    // captured a valid byte.
+
+	    //double start_edge = rx_event->buffer[cur_index] - min * 9;
+	    guint32 index1 = rx_event->get_index(rx_event->buffer[cur_index] - (min * 9  + (min >> 2)));
+	    guint32 index2 = rx_event->get_index(rx_event->buffer[cur_index] - (min * 9  - (min >> 2)));
+	    guint32 delta  = (index2 - index1) & rx_event->max_events;
+
+	    if( (delta == 1) && ( (index2&1) == 0)) {
+	      cout << " !! Found a valid byte !!\n";
+	      receive_state = RS_WAITING_FOR_START;
+	      cout << " Captured Start bit time vs calculated start bit time\n";
+	      cout << hex << "0x"<<start_bit_time << " vs 0x" << (rx_event->buffer[cur_index] - (min * 9)) << '\n';
+	      guint64 t1 = rx_event->buffer[cur_index] - min / 2; 
+	      index1 = (cur_index-1) & rx_event->max_events;
+	      guint32 b = 0;
+	      i = 0;
+	      //for(j=0; j<4  &&  (  ((index1-prev_index) & rx_event->max_events) > 0  ); j++) {
+	      do {
+		b = (b<<1) | (index1 & 0x0001);
+		cout << " time: 0x" << hex << t1 << " evt index: 0x" << index1 << '\n';
+		if(t1 < rx_event->buffer[index1])
+		  index1 = (index1 - 1) & rx_event->max_events;
+		t1 -= min;
+		i++;
+	      } while(i<=8);
+	      cout << "Most recent byte: 0x" <<hex<< b << '\n';
+	      //}
+
+
+	    }
+
+	    rx_event->dump_ASCII_art( min/2, (cur_index - edges+3) & rx_event->max_events, cur_index );
+#endif
+	  }
+
+	}
+      } else {
+
 	cur_index = rx_event->get_index();
 	guint32 edges = (cur_index - start_bit_index) & rx_event->max_events;
 
+	/* Not autobauding */ 
+	switch(receive_state) {
+	case RS_WAITING_FOR_START:
+	  if(!bit) {
+	    // Looks like we just got a start bit.
+	    start_bit_time = gpsim_get_current_time();
 
-	// Don't bother autobauding if we haven't received more than 4 pulses (8 edges)
-	if(edges >= 8) {
-	  int i,j;
-	  cout << "Auto bauding\n";
+	    cout  << "Start bit at t = 0x" << start_bit_time << '\n';
 
-	  if(edges > 64) {
-	    start_bit_index = (start_bit_index + 8 ) & rx_event->max_events;
-	    start_bit_time = rx_event->buffer[start_bit_index];
-	    edges -= 8;
+	    start();
 	  }
-	  rx_event->dump_ASCII_art( pulses[0].width/2, (cur_index - edges+3) & rx_event->max_events, cur_index );
 
-	  // Analyze...
+	  break;
+	case RS_RECEIVING:
+	  cout << "edges " << edges << "\n";
+	  if(edges > 8)
+	    receive_state = RS_OVERRUN;
 
-	  guint64 min = pulses[0].width;
-	  double w = 1.0*pulses[0].width;
-
-	  cout << "Bit times based on minimum:\n";
-	  bool suspicious=0;
-	  j = 0;
-	  int istart = 0;
-	  int istop = 3;
-	  do {
-	    do {
-	      suspicious=0;
-	      for(i=istart; i<istop && pulses[i].occurs; i++) {
-		//double p = pulses[i].width / w;
-		double p = pulses[i].sumofwidths / w / pulses[i].occurs;
-		cout << i << ": " << p ;
-		if( (p - floor(p)) > 0.25) {
-		  cout << "  <-- suspicious";
-		  suspicious = 1;
-		}
-		cout << '\n';
-	      }
-	      if(suspicious) {
-		w /= 2.0;
-		min >>= 1;
-		cout << "halving the measured pulse width\n";
-	      }
-	    }while (suspicious && ++j<4);
-
-	    // the first pulse must be a glitch. So repeat with the next.
-
-	    if(suspicious) {
-	      istart++;
-	      istop++;
-	      min = pulses[1].width;
-	      w = 1.0*min;
-	      cout << "Hmm, moving to next pulse\n";
-	    }
-	  }while (suspicious && j<8);
-
-	  if(suspicious)
-	    cout << "Unable to determine the baud rate.\n";
-
-	  cout << "Minimum pulse width " << hex << min << " Baud = " << (gpsim_digitize_time(1.0)/w) <<'\n';
-
-	  // Assume the baud rate is correct.
-	  // use it to decode the bit stream.
-
-	  suspicious = 0;  // assume all bytes decode correctly
-
-	  //unsigned int b = decode_byte(rx_event->buffer[start_bit_index] + min + min/2, min);
-	  // unsigned int b = decode_byte(start_bit_index, min);
-
-	  //guint32 index1 = rx_event->get_index(rx_event->buffer[cur_index] - min * 11);
-	  guint32 index1 = (rx_event->get_index() - edges)& rx_event->max_events;
-
-	  if(index1&1)
-	    index1 &= 0xfffffe;
-
-	  guint32 b=0;
-
-	  j=0;
-	  do {
-
-	    b = decode_byte(index1, min);
-
-	    cout <<j<< ": Decoded byte 0x"<< (b&0xff) << " is ";
-	    if(b >=0x100) {
-	      index1 = (index1 + 2) & rx_event->max_events;
-	      cout << "invalid b=0x" <<b<<'\n';
-	    } else {
-	      index1 = rx_event->get_index(rx_event->buffer[index1] + 11*min);
-	      cout <<"valid\n";
-	    }
-
-	  } while ( ++j < 8);
-
-#if 0
-	  if( (max / min) > 9)
-	    cout << " max / min > 9\n";
-
-	  // If there was a falling edge nine bit times ago, then we have
-	  // captured a valid byte.
-
-	  //double start_edge = rx_event->buffer[cur_index] - min * 9;
-	  guint32 index1 = rx_event->get_index(rx_event->buffer[cur_index] - (min * 9  + (min >> 2)));
-	  guint32 index2 = rx_event->get_index(rx_event->buffer[cur_index] - (min * 9  - (min >> 2)));
-	  guint32 delta  = (index2 - index1) & rx_event->max_events;
-
-	  if( (delta == 1) && ( (index2&1) == 0)) {
-	    cout << " !! Found a valid byte !!\n";
+	  break;
+	case RS_OVERRUN:
+	  if(bit) {
+	    cout << "Clearing overrun condition\n";
 	    receive_state = RS_WAITING_FOR_START;
-	    cout << " Captured Start bit time vs calculated start bit time\n";
-	    cout << hex << "0x"<<start_bit_time << " vs 0x" << (rx_event->buffer[cur_index] - (min * 9)) << '\n';
-	    guint64 t1 = rx_event->buffer[cur_index] - min / 2; 
-	    index1 = (cur_index-1) & rx_event->max_events;
-	    guint32 b = 0;
-	    i = 0;
-	    //for(j=0; j<4  &&  (  ((index1-prev_index) & rx_event->max_events) > 0  ); j++) {
-	    do {
-	      b = (b<<1) | (index1 & 0x0001);
-	      cout << " time: 0x" << hex << t1 << " evt index: 0x" << index1 << '\n';
-	      if(t1 < rx_event->buffer[index1])
-		index1 = (index1 - 1) & rx_event->max_events;
-	      t1 -= min;
-	      i++;
-	    } while(i<=8);
-	    cout << "Most recent byte: 0x" <<hex<< b << '\n';
-	    //}
-
-
 	  }
-
-	  rx_event->dump_ASCII_art( min/2, (cur_index - edges+3) & rx_event->max_events, cur_index );
-#endif
+	  break;
 	}
 
       }
 
+
     }
-
-    // If we're waiting for a start bit and this bit is low
-    // then we've got the start bit!
-/*
-    if ((receive_state ==  RS_WAITING_FOR_START) && !bit) 
-      start();
-*/
-
 
   }
 
@@ -1223,6 +1540,125 @@ public:
 };
 
 
+//
+//  USART attributes
+//
+//  Provide attributes that allow the user to dynamically 
+// configure the USART module
+//
+// Attribute    Default
+//    Name      Value
+// -------------------
+//   baud       9600
+//   parity        0
+//   start_bits    1
+//   stop_bits     1
+//   
+
+
+class BaudRateAttribute : public FloatAttribute {
+
+public:
+  USARTModule *usart;
+
+  BaudRateAttribute(USARTModule *pusart, char *_name=NULL) {
+
+    usart = pusart;
+    //brg = pbrg;
+    if(!pusart)// || !pbrg)
+      return;
+
+    if(_name)
+      new_name(_name);
+    else 
+      new_name("baud");
+    cout << "BaudRateAttribute constr\n";
+
+  };
+
+
+  void set(double b) {
+
+
+    cout << "Setting baud rate attribute!\n";
+    cout << " old value: " << value << " New value: " << b << endl;
+    value = b;
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
+
+
+class RxBaudRateAttribute : public BaudRateAttribute  {
+
+public:
+  RCREG *rcreg;
+
+  RxBaudRateAttribute(USARTModule *pusart):BaudRateAttribute(pusart,"rxbaud") {
+
+    if(!pusart || !pusart->usart || !pusart->usart->rcreg)// || !pbrg)
+      return;
+
+    rcreg = pusart->usart->rcreg;
+
+    cout << "RxBaudRateAttribute constructor\n";
+
+  };
+
+
+  void set(double b) {
+
+
+    cout << "Setting Rx baud rate attribute!\n";
+    cout << " old value: " << value << " New value: " << b << endl;
+    value = b;
+    if(rcreg)
+      rcreg->set_baud_rate(value);
+
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
+
+class TxBaudRateAttribute : public BaudRateAttribute  {
+
+public:
+  TXREG *txreg;
+
+  TxBaudRateAttribute(USARTModule *pusart):BaudRateAttribute(pusart,"txbaud") {
+
+    if(!pusart || !pusart->usart || !pusart->usart->txreg)// || !pbrg)
+      return;
+
+    txreg = pusart->usart->txreg;
+
+    cout << "TxBaudRateAttribute constructor\n";
+
+  };
+
+
+  void set(double b) {
+
+
+    cout << "Setting Tx baud rate attribute!\n";
+    cout << " old value: " << value << " New value: " << b << endl;
+    value = b;
+    if(txreg)
+      txreg->set_baud_rate(value);
+
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
 //--------------------------------------------------------------
 USART_CORE::USART_CORE(void)
 {
@@ -1239,9 +1675,6 @@ USART_CORE::USART_CORE(void)
 //--------------------------------------------------------------
 void USART_CORE::new_rx_edge(unsigned int bit)
 {
-
-  cout << "usart_core rx_edge got  a bit: " << bit << '\n';
-
   if(rcreg)
     rcreg->new_rx_edge(bit);
 
@@ -1254,6 +1687,22 @@ void USART_CORE::initialize(USART_IOPORT *new_iop=NULL)
   port = new_iop;
 
   rcreg = new RCREG;
+  txreg = new TXREG;
+  txreg->enable();
+
+}
+//--------------------------------------------------------------
+static int _tx_index=0;
+static char Test_Hello[] = {
+  0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L',
+  'O', 0x17, 0x55
+};
+int USART_CORE::get_tx_byte(void)
+{
+  if(_tx_index > sizeof(Test_Hello))
+    _tx_index = 0;
+
+  return Test_Hello[_tx_index++];
 
 }
 //--------------------------------------------------------------
@@ -1324,8 +1773,9 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_RXPIN *rxpin =  new USART_RXPIN(usart,port, 1,"RX");
-  assign_pin(1, new USART_IO(port, 0,"TX"));
+  USART_TXPIN *txpin = new USART_TXPIN(usart,port, 0,"TX");
+  USART_RXPIN *rxpin = new USART_RXPIN(usart,port, 1,"RX");
+  assign_pin(1, txpin);
   assign_pin(2, rxpin);
   assign_pin(3, new USART_IO(port, 2,"CTS"));
   assign_pin(4, new USART_IO(port, 3,"RTS"));
@@ -1350,7 +1800,8 @@ void USARTModule::create_iopin_map(void)
 */
 
   if(usart->txreg) {
-    usart->txreg->txpin = Package::get_pin(USART_PKG_TXPIN);
+    usart->txreg->txpin = txpin; 
+    usart->txreg->usart = usart; // Point back to the module
 
   }
 
@@ -1381,6 +1832,11 @@ ExternalModule * USARTModule::USART_construct(char *new_name = NULL)
 
   um->create_iopin_map();
 
+  RxBaudRateAttribute *rxattr = new RxBaudRateAttribute(um);
+  um->add_attribute(rxattr);
+
+  TxBaudRateAttribute *txattr = new TxBaudRateAttribute(um);
+  um->add_attribute(txattr);
 
   return um;
 
@@ -1391,7 +1847,7 @@ ExternalModule * USARTModule::USART_construct(char *new_name = NULL)
 void USARTModule::set_attribute(char *attr, char *val)
 {
 
-  cout << "USARTModule::set_attribute\n";
+  cout << "--USARTModule::set_attribute\n";
 
   Module::set_attribute(attr,val);
 }
@@ -1402,6 +1858,7 @@ USARTModule::USARTModule(char *_name = NULL)
 
   port = NULL;
   usart = NULL;
+
 }
 
 USARTModule::~USARTModule()

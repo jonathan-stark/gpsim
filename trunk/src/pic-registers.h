@@ -105,6 +105,21 @@ public:
   virtual void new_name(char *);
   virtual REGISTER_TYPES isa(void) {return FILE_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
+  /* 
+     setbit functions are not really intended for general purpose
+     registers (although they can be). Instead, they provide place
+     holders which are over-ridden by IO ports. The purpose is to
+     provide an abstract way in which break points can be set
+     on individual IO pin changes.
+  */
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit_value(unsigned int bit_number, bool new_value);
+
+  /*
+    like setbit, getbit is used mainly for breakpoints.
+   */
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
 };
 
 //---------------------------------------------------------

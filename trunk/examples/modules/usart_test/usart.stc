@@ -10,6 +10,9 @@
 # Load the source code:
 load s usart.cod
 
+# Set the Clock frequency to 20 Mhz.
+frequency 20000000
+
 # load the gpsim module library. Not that this is a 'shared library'.
 # If the library fails to load then 1) it's not installed (try installing
 # gpsim) 2) or the path to library is not available (see the documentation
@@ -25,8 +28,10 @@ module load usart   U1
 # Tie rx and tx together to create a loop back.
 # This will cause whatever is transmitted to be received...
 
-node loop_back
-attach loop_back portc6 portc7
+#node loop_back
+#attach loop_back portc6 portc7
+node PIC_tx
+node PIC_rx
 
 # Attach the usart module to the PIC
 
@@ -38,6 +43,52 @@ attach loop_back portc6 portc7
 
 # Let the usart receiver monitor the data flow.
 
-attach loop_back U1.RX
+attach PIC_tx portc6 U1.RX
+attach PIC_rx portc7 U1.TX
+
+# set the usart module's baud rate
+module set U1 baud 9600
+
+
+#
+#  Create a message using the Asynchronous stimulus
+#
+
+stimulus asynchronous_stimulus   # or we could've used asy
+
+# The initial state AND the state the stimulus is when
+# it rolls over
+
+initial_state 1
+
+# all times are with respect to the cpu's cycle counter
+
+start_cycle 100
+
+# the asynchronous stimulus will roll over in 'period'
+# cycles. Delete this line if you don't want a roll over.
+
+period 0x10000
+
+
+0x1000 0x41
+0x2000 0x42
+0x3000 0x43
+0x4000 0x44
+0x5000 0x45
+
+
+# Give the stimulus a name:
+
+name msg1
+
+# Finally, tell the command line interface that we're done
+# with the stimulus
+
+end
+
 
 break c 1000
+
+#break wv PORTC 0x40 0x40
+break w PORTC

@@ -1034,11 +1034,31 @@ unsigned int Break_register_read::get(void)
   //  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | (replaced->address)  );
 }
 
+int Break_register_read::get_bit(unsigned int bit_number)
+{
+  bp.halt();
+  return(replaced->get_bit(bit_number));
+}
+
+int Break_register_read::get_bit_voltage(unsigned int bit_number)
+{
+  return replaced->get_bit_voltage(bit_number);
+}
+
+
 void Break_register_write::put(unsigned int new_value)
 {
   bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
   replaced->put(new_value);
   trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
+}
+
+void Break_register_write::setbit(unsigned int bit_number, bool new_value)
+{
+  bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
+  replaced->setbit(bit_number,new_value);
+  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
+
 }
 
 unsigned int Break_register_read_value::get(void)
@@ -1057,6 +1077,24 @@ unsigned int Break_register_read_value::get(void)
   last_value = v;
   return v;
 }
+
+int Break_register_read_value::get_bit(unsigned int bit_number)
+{
+  unsigned int v = replaced->get();
+  unsigned int mask = 1<<(bit_number & 7);
+
+  if( (break_mask & mask) && (v & mask) == (break_value&mask))
+    bp.halt();
+
+  return replaced->get_bit(bit_number);
+}
+
+int Break_register_read_value::get_bit_voltage(unsigned int bit_number)
+{
+  return replaced->get_bit_voltage(bit_number);
+}
+
+
 
 void Break_register_write_value::put(unsigned int new_value)
 {
@@ -1078,6 +1116,22 @@ void Break_register_write_value::put(unsigned int new_value)
     }
   last_value = new_value;
   replaced->put(new_value);
+}
+
+void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
+{
+  int val_mask = 1 << bit_number;
+  int new_value = ((int)new_bit) << bit_number;
+
+  if( (val_mask & break_mask) &&
+      ( (replaced->value & break_mask) == new_value) )
+    {
+      bp.halt();
+      trace_log.buffer.register_write_value(replaced->address, break_value);
+    }
+
+  replaced->setbit(bit_number,new_value);
+
 }
 
 //====================================================================================
@@ -1117,12 +1171,33 @@ void Log_Register_Write::put(unsigned int new_value)
 
 }
 
+void Log_Register_Write::setbit(unsigned int bit_number, bool new_value)
+{
+
+  replaced->setbit(bit_number,new_value);
+  
+  trace_log.register_write( replaced->address, replaced->get_value(), cpu->cycles.value);
+
+}
+
 unsigned int Log_Register_Read::get(void)
 {
   int v = replaced->get();
   trace_log.register_read(replaced->address, v, cpu->cycles.value);
   return v;
 
+}
+
+int Log_Register_Read::get_bit(unsigned int bit_number)
+{
+  int v = replaced->get_bit(bit_number);
+  trace_log.register_read(replaced->address, v, cpu->cycles.value);
+  return v;
+
+}
+int Log_Register_Read::get_bit_voltage(unsigned int bit_number)
+{
+  return replaced->get_bit_voltage(bit_number);
 }
 
 unsigned int Log_Register_Read_value::get(void)
@@ -1140,6 +1215,22 @@ unsigned int Log_Register_Read_value::get(void)
 
   last_value = v;
   return v;
+}
+
+int Log_Register_Read_value::get_bit(unsigned int bit_number)
+{
+  unsigned int v = replaced->get();
+  unsigned int mask = 1<<(bit_number & 7);
+
+  if( (break_mask & mask) && (v & mask) == (break_value&mask))
+    trace_log.register_read_value(replaced->address, v, cpu->cycles.value);
+
+  return replaced->get_bit(bit_number);
+}
+
+int Log_Register_Read_value::get_bit_voltage(unsigned int bit_number)
+{
+  return replaced->get_bit_voltage(bit_number);
 }
 
 void Log_Register_Write_value::put(unsigned int new_value)

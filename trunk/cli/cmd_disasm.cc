@@ -74,6 +74,6 @@ void cmd_disassemble::disassemble(int start, int end)
 {
 
   if(cpu)
-    cpu->disassemble(cpu->pc.value + start, cpu->pc.value + end);
+    cpu->disassemble(cpu->pc->value + start, cpu->pc->value + end);
 
 }

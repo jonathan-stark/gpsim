@@ -567,11 +567,25 @@ class MOVWF16 : public MOVWF
 {
 public:
 
-  MOVWF16(pic_processor *new_cpu, unsigned int new_opcode) : MOVWF(new_cpu,new_opcode){};
+  MOVWF16(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
 
   static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
     {return new MOVWF16(new_cpu,new_opcode);}
+
+};
+
+//---------------------------------------------------------
+
+class MOVWF16a : public MOVWF
+{
+public:
+
+  MOVWF16a(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVWF16a(new_cpu,new_opcode);}
 
 };
 

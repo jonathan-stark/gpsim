@@ -1279,20 +1279,27 @@ static void treeselect_stimulus(GtkItem *item, struct gui_pin *pin)
     char text[STRING_SIZE];
     char string[STRING_SIZE];
 
+    char *pText = "Not connected";
+    char *pString = "Stimulus";
+    if(!pin)
+      return;
+
     gtk_widget_show(pin->bbw->stimulus_frame);
     gtk_widget_hide(pin->bbw->node_frame);
     gtk_widget_hide(pin->bbw->module_frame);
     gtk_widget_hide(pin->bbw->pic_frame);
 
-    snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name());
-    gtk_frame_set_label(GTK_FRAME(pin->bbw->stimulus_frame),string);
+    if(pin->iopin) {
+      snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name());
+      pString = string;
 
-    if(pin->iopin->snode!=NULL)
+      if(pin->iopin->snode!=NULL)
 	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name());
-    else
-        strcpy(text,"Not connected");
+      pText = text;
+    }
 
-    gtk_label_set_text(GTK_LABEL(pin->bbw->stimulus_settings_label), text);
+    gtk_frame_set_label(GTK_FRAME(pin->bbw->stimulus_frame),pString);
+    gtk_label_set_text(GTK_LABEL(pin->bbw->stimulus_settings_label), pText);
 
     pin->bbw->selected_pin = pin;
 }
@@ -2508,10 +2515,12 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
 
     // FIXME. Perhaps the bbw should use Package instead of Module?
-    Package *pa;
+    Package *package = p->module->package;
     float pin_position;
-    pa=dynamic_cast<Package*>(p->module);
-    assert(pa!=NULL);
+    if(!package)
+      package=dynamic_cast<Package*>(p->module);
+
+    assert(package!=NULL);
 
     GtkWidget *tree_item;
     tree_item = gtk_tree_item_new_with_label (p->module->name());
@@ -2591,7 +2600,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    char *name;
 	    int label_x, label_y;
 
-	    pin_position=pa->get_pin_position(i);
+	    pin_position=package->get_pin_position(i);
 
 	    if(pin_position>=0.0 && pin_position<1.0)
 	    {
@@ -2700,7 +2709,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    iopin->xref->add(cross_reference);
 	}
 
-	pin_position=pa->get_pin_position(i);
+	pin_position=package->get_pin_position(i);
 
 	// Put pin in layout
 	if(pin_position>=0.0 && pin_position<1.0)
@@ -2720,9 +2729,9 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    // FIXME
 
 	    printf("################### Error:\n");
-	    printf("Number of pins %d\n",pa->number_of_pins);
+	    printf("Number of pins %d\n",package->number_of_pins);
 	    printf("pin_position %f\n",pin_position);
-	    printf("pin_position2 %f\n",pa->pin_position[i-1]);
+	    printf("pin_position2 %f\n",package->pin_position[i-1]);
 	    printf("i %d\n",i);
 	    assert(0);
 	}

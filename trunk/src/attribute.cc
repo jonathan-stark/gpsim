@@ -144,6 +144,13 @@ void IntAttribute::set(char *new_value)
 
 }
 
+//-------------------------------------------------------------------
+void IntAttribute::set(char *val1, int val2)
+{
+
+  value = 1;
+
+}
 
 //-------------------------------------------------------------------
 void IntAttribute::set(int n)
@@ -198,6 +205,14 @@ void FloatAttribute::set(char *new_value)
 
 
 //-------------------------------------------------------------------
+void FloatAttribute::set(char *val1, int val2)
+{
+
+  cout << "Warning: this attribute prefers numbers over strings\n";
+
+}
+
+//-------------------------------------------------------------------
 void FloatAttribute::set(int n)
 {
   value = n;
@@ -242,6 +257,13 @@ void StringAttribute::set(char *new_value)
   else
     value = NULL;
 
+}
+
+//-------------------------------------------------------------------
+void StringAttribute::set(char *val1, int val2)
+{
+
+  set(val1);
 }
 
 //-------------------------------------------------------------------

@@ -152,8 +152,8 @@ void P12C508::create(void)
 
   fsr->register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
 
-  pc.reset();
-  //trace.program_counter (pc.value);
+  pc->reset();
+  //trace.program_counter (pc->value);
 
 }
 
@@ -165,7 +165,7 @@ pic_processor * P12C508::construct(void)
 
   cout << " 12c508 construct\n";
 
-  p->pc.reset_address = 0x1ff;
+  p->pc->reset_address = 0x1ff;
 
   p->create();
   p->pic_processor::create_symbols();
@@ -203,7 +203,7 @@ pic_processor * P12C509::construct(void)
 
   cout << " 12c508 construct\n";
 
-  p->pc.reset_address = 0x3ff;
+  p->pc->reset_address = 0x3ff;
 
   p->create();
   p->pic_processor::create_symbols();
@@ -279,7 +279,7 @@ so the processor is waking up\n";
 	// If the cpu is not running then advance the program counter
 	if((simulation_mode == STOPPED) ||
 	   (simulation_mode == SINGLE_STEPPING) )
-	  cpu->pc.increment();
+	  cpu->pc->increment();
       }
     }
 
