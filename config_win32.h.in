@@ -84,6 +84,7 @@
 #define GPSIM_MINOR_VERSION 21
 #define GPSIM_MICRO_VERSION 2
 
+#ifdef _MSC_VER
 #ifndef __FUNCTION__
 #define __FUNCTION__  __FILE__
 #endif
@@ -92,6 +93,5 @@
 #define strcasecmp  stricmp
 #define strncasecmp strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
-#ifdef _MSC_VER
 #define strtoll _strtoi64
 #endif

@@ -26,7 +26,6 @@ Boston, MA 02111-1307, USA.  */
 /* Copyright (c) 1994 Ian King */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
 #include "picdis.h"
 
