@@ -279,8 +279,6 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 
   if(gp) {
 
-    // this is here because the eeprom is not set to values in cod
-    // when gui_new_processor is run. eeprom is with program memory data
     gp->regwin_eeprom->NewProcessor(gp);
       
     gp->source_browser->CloseSource();

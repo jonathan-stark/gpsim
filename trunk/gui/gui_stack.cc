@@ -262,6 +262,8 @@ void Stack_Window::Update(void)
 
 void Stack_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
 
   GtkWidget *vbox;
   GtkWidget *scrolled_window;
@@ -311,7 +313,7 @@ void Stack_Window::Build(void)
 
   enabled=1;
 
-  is_built=1;
+  bIsBuilt = true;
     
   UpdateMenuItem();
 
@@ -337,7 +339,6 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
   wc = WC_data;
   wt = WT_stack_window;
   window = 0;
-  is_built=0;
 
   last_stacklen=0;
   current_row=0;

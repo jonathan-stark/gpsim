@@ -49,7 +49,7 @@ GUI_Object::GUI_Object(void)
 
   wc = WC_misc;
   wt = WT_INVALID;
-  is_built = 0;
+  bIsBuilt = false;
   window = 0;
   menu = 0;
 
@@ -120,7 +120,7 @@ void GUI_Object::ChangeView (int view_state)
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
       ) {
     
-    if(!is_built) {
+    if(!bIsBuilt) {
 	
       if(!get_config()) {
 	printf("warning %s\n",__FUNCTION__);
@@ -154,15 +154,6 @@ void GUI_Object::ChangeView (int view_state)
 void GUI_Object::Build(void)
 {
 
-}
-
-void GUI_Object::GTKwait()
-{
-  if(window)
-    while(gtk_events_pending())
-      gtk_main_iteration();
-  else
-    cout << "GTKwait -- not waiting\n";
 }
 
 int GUI_Object::get_config(void)

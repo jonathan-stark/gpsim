@@ -637,7 +637,7 @@ void Scope_Window::Build(void)
   gtk_widget_show_all (window);
     
   //    cout <<  "end function:" << __FUNCTION__ << "\n";
-  is_built = 1;
+  bIsBuilt = true;
 
 
   aw = window->allocation.width;
@@ -649,7 +649,7 @@ void Scope_Window::Build(void)
 void Scope_Window::Update(void)
 {
   int i;
-  if(!is_built)
+  if(!bIsBuilt)
     Build();
 
   cout << "function:" << __FUNCTION__ << "\n";

@@ -608,6 +608,9 @@ void Watch_Window::ClearWatches(void)
 
 void Watch_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
+
   GtkWidget *vbox;
   GtkWidget *scrolled_window;
 
@@ -672,7 +675,7 @@ void Watch_Window::Build(void)
   
   enabled=1;
 
-  is_built=1;
+  bIsBuilt = true;
 
   UpdateMenuItem();
 
@@ -692,7 +695,6 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
   wc = WC_data;
   wt = WT_watch_window;
   window = 0;
-  is_built = 0;
 
   watches=0;
   current_row=0;

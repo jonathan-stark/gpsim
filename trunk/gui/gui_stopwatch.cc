@@ -60,8 +60,13 @@ void StopWatch_Window::Update(void)
   char offsetstring[100];
   char rolloverstring[100];
 
-  if(!is_built || !gp || !gp->cpu)
+  if(!gp || !gp->cpu)
     return;
+  if(!enabled)
+    return;
+
+  if(!bIsBuilt)
+    Build();
 
   if(rollover<=0)
     rollover=1;
@@ -227,6 +232,9 @@ rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 
 void StopWatch_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
+
   GtkWidget *vbox, *button, *label, *entry;
   GtkWidget *menuitem, *optionmenu, *table, *optionmenu_menu;
 
@@ -364,7 +372,7 @@ void StopWatch_Window::Build(void)
 
   enabled=1;
 
-  is_built=1;
+  bIsBuilt=true;
   
   UpdateMenuItem();
   Update();   
@@ -384,7 +392,6 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   wc = WC_data;
   wt = WT_stopwatch_window;
   window = 0;
-  is_built=0;
 
   count_dir=1;
   rollover=1000000;

@@ -220,7 +220,8 @@ static int delete_event(GtkWidget *widget,
 
 void Trace_Window::Build(void)
 {
-
+  if(bIsBuilt)
+    return;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
     
@@ -289,7 +290,7 @@ void Trace_Window::Build(void)
   }
 
   enabled=1;
-  is_built=1;
+  bIsBuilt = true;
   last_cycle = 0;
 
   NewProcessor(gp);
@@ -315,7 +316,6 @@ Trace_Window::Trace_Window(GUI_Processor *_gp)
   window = 0;
   wc = WC_data;
   wt = WT_trace_window;
-  is_built = 0;
   trace_map = 0;
 
   trace_flags = 0;

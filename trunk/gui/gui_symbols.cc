@@ -555,6 +555,9 @@ static char *symbol_titles[3]={"Name","Type","Address/Value"};
 
 void Symbol_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
+
   GtkWidget *vbox;
   GtkWidget *scrolled_window;
   GtkWidget *hbox;
@@ -642,7 +645,7 @@ void Symbol_Window::Build(void)
   
   enabled=1;
 
-  is_built=1;
+  bIsBuilt = true;
 
   if(load_symbols)
     NewSymbols();
@@ -669,7 +672,6 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   wc = WC_misc;
   wt = WT_symbol_window;
   window = 0;
-  is_built = 0;
 
   symbols=0;
   filter_addresses=0;

@@ -55,7 +55,7 @@ class GUI_Object {
   // (x,y) but doesn't save the size (width,height).
   int x,y,width,height;
   int enabled;   // Whether or not the window is up on the screen
-  int is_built;  // Whether or not the window is built
+  bool bIsBuilt;  // Whether or not the window is built
 
   // A pointer to a function that will allow the window associated
   // with this gui object to be viewable or hidden.
@@ -82,8 +82,6 @@ class GUI_Object {
     {
       gp = _gp;
     }
-  void GTKwait();
-
  private:
   string name_str;
 
