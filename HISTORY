@@ -2,6 +2,19 @@ gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 
 T. Scott Dattalo
 
+05APR00 gpsim-0.19.0
+ o Daniel Schudel joins gpsim development.
+   -- Added support for the 16x5x family
+ o Added 16f87x family
+ o gui - Added Program Memory sheet
+    --  Added support for program memory writes
+ o gui - Added Breadboard window (graphical pinout)
+ o Asynchronous mode of the usart fixed.
+ o A/D converter enhanced
+ o Analog Stimuli revisited.
+ o Scripting was fixed.
+ o cli - Once again, gpsim can be built without the gui.
+
 03FEB00 gpsim-0.18.0
  o cli - added 'processor pins' command to display
          the state of a pic's I/O pins
