@@ -782,7 +782,7 @@ unsigned int PORTC::get(void)
 
   old_value = value;
 
-  //cout << "PORTC::get()\n";
+  cout << "PORTC::get()\n";
   IOPORT::get();
 
   int diff = old_value ^ value; // The difference between old and new
@@ -795,6 +795,8 @@ unsigned int PORTC::get(void)
   // the RX pin, then we need to notify the usart
   if( usart && (diff & RX))
     usart->new_rx_edge(value & RX);
+
+  return(value);
 }
 
 //-------------------------------------------------------------------
@@ -804,7 +806,7 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value;
 
-  //cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
+  cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 

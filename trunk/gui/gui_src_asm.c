@@ -1930,7 +1930,7 @@ int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
   sbaw->breakpoints=NULL;
   
   sbaw->layout_offset=-1;
-
+  sbaw->sbw.gui_obj.enabled = 0;
     
     
     sbaw->pixmap_pc = NULL; // these are created somewhere else

@@ -105,7 +105,7 @@ public:
 	    }
 	}
 
-      trace.cycle_counter(value);
+      //trace.cycle_counter(value);
     }
 
 

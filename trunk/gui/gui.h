@@ -36,7 +36,8 @@ enum window_types {
   WT_asm_source_window,
   WT_opcode_source_window,
   WT_list_source_window,
-  WT_breadboard_window
+  WT_breadboard_window,
+  WT_trace_window
 };
 
 //
@@ -390,6 +391,23 @@ typedef struct _Breadboard_Window Breadboard_Window;
 
 
 //
+// The trace window 
+//
+struct _Trace_Window {
+    GUI_Object     gui_obj;
+
+    GtkSheet *trace_sheet;
+    
+    GtkWidget *entry;
+    GtkWidget *location;
+    GtkWidget *popup_menu;
+
+    int processor; // if non-zero window has processor
+};
+
+typedef struct _Trace_Window Trace_Window;
+
+//
 // Future Items that will be declared.
 //
 /*
@@ -427,6 +445,7 @@ struct _gui_processor {
   Watch_Window *watch_window;
   Stack_Window *stack_window;
   Breadboard_Window *breadboard_window;
+  Trace_Window *trace_window;
   // GtkWidget *stack_window;
   // GtkWidget *sfr_window;
   // GtkWidget *watch_window;
@@ -523,6 +542,7 @@ void gp_add_window_to_list(GUI_Processor *gp, GUI_Object *go);
 
 int config_get_variable(char *module, char *entry, int *value);
 int config_set_variable(char *module, char *entry, int value);
+int gui_object_set_default_config(GUI_Object *obj);
 int gui_object_set_config(GUI_Object *obj);
 int gui_object_get_config(GUI_Object *obj);
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
@@ -546,6 +566,11 @@ int BuildBreadboardWindow(Breadboard_Window *bbw);
 int CreateBreadboardWindow(GUI_Processor *gp);
 void BreadboardWindow_update(Breadboard_Window *bbw);
 
+// gui_trace.c
+void TraceWindow_new_processor(Trace_Window *bbw, GUI_Processor *gp);
+int BuildTraceWindow(Trace_Window *bbw);
+int CreateTraceWindow(GUI_Processor *gp);
+void TraceWindow_update(Trace_Window *bbw);
 
 #endif // __GUI_H__
 

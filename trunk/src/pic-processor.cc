@@ -485,6 +485,7 @@ void pic_processor::run (void)
     } while(!bp.global_break);
 
   bp.clear_global();
+  trace.cycle_counter(cycles.value);
   trace.dump_last_instruction();
 
   simulation_mode = STOPPED;
@@ -531,6 +532,7 @@ void pic_processor::step (unsigned int steps)
 	{
 
 	  program_memory[pc.value]->execute();
+	  trace.cycle_counter(cycles.value);
 	  trace.dump_last_instruction();
 
 	} 

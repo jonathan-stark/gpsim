@@ -549,6 +549,7 @@ void Program_Counter::increment(void)
 void Program_Counter::skip(void)
 {
 
+  trace.cycle_increment();
   value = (value + 1) & memory_size_mask;
   trace.pc_skip(value);
 
@@ -574,9 +575,11 @@ void Program_Counter::jump(unsigned int new_address)
 
   value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
 
+  trace.cycle_increment();
   trace.program_counter(value);
 
   cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+
   cpu->cycles.increment();
   cpu->cycles.increment();
 }
@@ -594,6 +597,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
 
   value = (new_address | cpu->get_pclath_branching_modpcl() ) & memory_size_mask;
 
+  trace.cycle_increment();
   trace.program_counter(value);
 
   cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
@@ -611,6 +615,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
 void Program_Counter::new_address(unsigned int new_value)
 {
   value = new_value & memory_size_mask;
+  trace.cycle_increment();
   trace.program_counter(value);
 
   cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
