@@ -51,6 +51,7 @@ typedef  Module_Types * (*Module_Types_FPTR)();
 
 enum SIMULATION_MODES
 {
+  INITIAL,
   STOPPED,
   RUNNING,
   SLEEPING,
@@ -106,7 +107,6 @@ public:
   Package  *package;                // A package for the module
   ModuleInterface *interface;       // An interface to the module.
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
-
 
   XrefObject *xref;               // Updated when the module changes
 
