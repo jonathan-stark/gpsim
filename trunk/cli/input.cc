@@ -192,7 +192,7 @@ static void LLDumpInputBuffer(void)
 
 LLInput *newLLInput(void)
 {
-  LLInput *d = (LLInput *)(malloc(sizeof(struct LLInput)));
+  LLInput *d = (LLInput *)(malloc(sizeof(LLInput)));
   if(d) {
     d->next = 0;
     d->data = 0;
