@@ -562,9 +562,9 @@ void Integer::set(const char *buffer, int buf_size)
 {
   if(buffer) {
 
-    gint64 i;
-
-    int converted = sscanf(buffer, "%Ld",  &i);
+    long long int j;
+    int converted = sscanf(buffer, "%Ld",  &j);
+    gint64 i=j;
 
     if(converted)
       set(i);
@@ -589,8 +589,8 @@ void Integer::get(char *buffer, int buf_size)
 
     gint64 i;
     get(i);
-
-    snprintf(buffer,buf_size,"%Ld",i);
+    long long int j = i;
+    snprintf(buffer,buf_size,"%Ld",j);
   }
 
 }
@@ -608,7 +608,8 @@ string Integer::toString()
   char buf[256];
   gint64 i;
   get(i);
-  snprintf(buf,sizeof(buf)," = %Ld = 0x%08LX",i,i);
+  long long int j = i;
+  snprintf(buf,sizeof(buf)," = %Ld = 0x%08LX",j,j);
   return (name() +string(buf));
 }
 
@@ -636,8 +637,8 @@ string Integer::toString(char* format, gint64 value)
 string Integer::toString(gint64 value)
 {
   char cvtBuf[1024];
-
-  snprintf(cvtBuf,sizeof(cvtBuf), "%Ld", value);
+  long long int v=value;
+  snprintf(cvtBuf,sizeof(cvtBuf), "%Ld", v);
   return (string(&cvtBuf[0]));  
 }
 

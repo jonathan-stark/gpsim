@@ -722,7 +722,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   }
 
   if(condition & G_IO_IN) {
-    unsigned int bytes_read=0;
+    gsize bytes_read=0;
 
     s->packet->prepare();
     memset(s->packet->rxBuff(), 0, 256);
@@ -731,22 +731,31 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 
     GError *err=NULL;
 
-#if 0
+#if 1
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
     GIOStatus stat;
     bytes_read = 0;
     do {
-      unsigned int b;
-      stat = g_io_channel_read_chars(channel, &s->buffer[bytes_read], 1, &b, &err);
+      gsize b;
+      GIOStatus stat = g_io_channel_read_chars(channel, 
+					       s->packet->rxBuff(), 
+					       BUFSIZE, 
+					       &b, 
+					       &err);
+    //stat = g_io_channel_read_chars(channel, &s->buffer[bytes_read], 1, &b, &err);
       bytes_read++;
-      printf("read: %c  ", *s->buffer);
+      //printf("read: %c  ", *s->buffer);
       debugPrintChannelStatus(stat);
       debugPrintCondition(g_io_channel_get_buffer_condition (channel));
 
     } while(G_IO_STATUS_NORMAL == stat);
 #else
-    //GIOStatus stat = g_io_channel_read_chars(channel, s->buffer, BUFSIZE, &bytes_read, &err);
-    g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
+    GIOStatus stat = g_io_channel_read_chars(channel, 
+					     s->packet->rxBuff(), 
+					     BUFSIZE, 
+					     &bytes_read, 
+					     &err);
+    //g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
 #endif
 
     if(err) {
