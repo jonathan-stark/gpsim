@@ -156,6 +156,7 @@ EXPORTS
     ?get_Zth@IO_bi_directional@@UAENXZ
     ?get_Zth@IO_bi_directional_pu@@UAENXZ
     ?get_Zth@IO_open_collector@@UAENXZ
+    ??0IO_open_collector@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
     ?get_bit@IOPORT@@UAE_NI@Z
@@ -327,6 +328,7 @@ EXPORTS
     ?getBitChar@IO_bi_directional_pu@@UAEDXZ
     ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?getReg@register_symbol@@QAEPAVRegister@@XZ
+    ?reset@Program_Counter@@QAEXXZ
     load_library
     get_library_export
     free_error_message
