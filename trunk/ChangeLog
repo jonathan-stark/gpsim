@@ -1,3 +1,7 @@
+2004-03-08 Scott Dattalo  <scott@dattalo.com>
+	* modules/push_button.cc, modules/push_button.h: new module
+	from Carlos Ghirardelli.
+
 2004-03-04 Scott Dattalo  <scott@dattalo.com>
 	* src/register.h, src/pic-register.h, src/pic-processor.h,
 	src/pic-processor.cc, src/14bit-registers.cc

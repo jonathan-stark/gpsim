@@ -13,7 +13,8 @@ libgpsim_modules_la_SOURCES = \
 	switch.cc switch.h \
 	logic.cc logic.h \
 	led.cc led.h \
-	video.cc video.h
+	video.cc video.h \
+	push_button.cc push_button.h
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@

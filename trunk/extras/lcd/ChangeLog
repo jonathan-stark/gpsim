@@ -1,4 +1,8 @@
 2004-03-08  Scott Dattalo  <scott@dattalo.com>
+	* lcd.h, lcd.cc, lcdengine.cc, examples/lcd.asm:
+	Fixed the busy bit logic.
+	
+2004-03-08  Scott Dattalo  <scott@dattalo.com>
 	* lcd.h, lcd.cc, lcdengine.cc: Merged a portion of a patch from
 	Robert Pearce.
 	
