@@ -1,3 +1,8 @@
+2005-03-08 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: removed examples\14bit\*.inc
+	* cli/cmd_manager.h: added newline at the end of file
+	* doc/gpsimWin32.html: atk upgraded to 1.8.0
+
 2005-03-08 Scott Dattalo <scott@dattalo.com>
 	* regression/ccp/ccp.asm: improvements to ccp regression test
 	* gui/gui_profile.cc, gui/gui_trace.cc, gui/gui_statusbar.cc,
@@ -14,7 +19,7 @@
 	resolved in FC3. Since these were introduced to resolve a linking
 	problem with WIN32 DLL's, I made the demarcation dependent on only
 	Windows. 
-	
+
 2005-02-25 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added methods to the IOPIN class
 	to differentiate between a pin driving a node and one being driven
@@ -31,11 +36,11 @@
 
 2005-02-16 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc: experiments in ioport redesign.
-	
+
 2005-02-16 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added 'getBitChar()' method to
 	the open collector stimulus class.
-	
+
 2005-02-15 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h: Added a 'getIO' method to the
 	IOPIN class that will allow an individual I/O pin in a port to be
@@ -54,7 +59,7 @@
 	part of the Makefile
 	* cli/input.cc, src/os_dependent.cc: abstracted some os dependent
 	changes that were recently added
-	
+
 2005-02-01 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc, src/trace.cc: Added 'Debug()'
 	method to processor class and call it whenever a register
