@@ -232,7 +232,8 @@ class Register_Window : public GUI_Object
   virtual void NewProcessor(GUI_Processor *gp);
   virtual gboolean UpdateRegisterCell(unsigned int reg_number);
 
-  virtual int Create(GUI_Processor *gp);
+  Register_Window(GUI_Processor *gp);
+  Register_Window(void);
 };
 
 
@@ -249,10 +250,8 @@ class RAM_RegisterWindow : public Register_Window
 class EEPROM_RegisterWindow : public Register_Window
 {
  public:
-  EEPROM_RegisterWindow(void);
+  EEPROM_RegisterWindow(GUI_Processor *gp);
 
-  virtual int Create(GUI_Processor *gp);
-  
 };
 
 //
@@ -773,8 +772,8 @@ class GUI_Processor {
 
   GUI_Processor(void);
 
-  Register_Window *regwin_ram;
-  Register_Window *regwin_eeprom;
+  RAM_RegisterWindow *regwin_ram;
+  EEPROM_RegisterWindow *regwin_eeprom;
   StatusBar_Window *status_bar;
   SourceBrowser_Window *program_memory;
   SourceBrowser_Window *source_browser;
