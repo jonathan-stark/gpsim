@@ -1,4 +1,8 @@
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
+	* src/16bit-instructions.cc, src/trace.cc:
+	Addresses displayed for the 18F devices are now displayed properly.
+
+2004-03-09 Scott Dattalo  <scott@dattalo.com>
 	* src/14bit-processor.cc:
 	PCL (low byte of program counter) was one count too large.
 	
