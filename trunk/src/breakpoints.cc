@@ -585,18 +585,18 @@ void Breakpoints::dump(void)
 
 instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, instruction *_this)
 {
-    Breakpoint_Instruction *p;
+  Breakpoint_Instruction *p;
 
-    p=(Breakpoint_Instruction*)cpu->program_memory[address];
+  p=(Breakpoint_Instruction*)cpu->program_memory[address];
 
-    if(p==_this)
-        return NULL;
+  if(p==_this)
+    return NULL;
 
-    while(p->replaced!=_this)
+  while(p->replaced!=_this)
     {
-	p=(Breakpoint_Instruction*)p->replaced;
+      p=(Breakpoint_Instruction*)p->replaced;
     }
-    return p;
+  return p;
 }
 
 void Breakpoints::clear(unsigned int b)

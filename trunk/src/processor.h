@@ -44,6 +44,7 @@ extern int verbose;
 // modifies program memory when break points are set or
 // cleared. The modification goes through here.
 //
+
 class ProgramMemoryAccess :  public BreakCallBack
 {
  public:
@@ -65,6 +66,8 @@ class ProgramMemoryAccess :  public BreakCallBack
   // the breakpoint instruction that has replaced the one in the processor's
   // program memory.
   Breakpoint_Instruction *bpi;
+
+  instruction &operator [] (int address);
 
   void put(int addr, instruction *new_instruction);
   instruction *get(int addr);
