@@ -1,3 +1,7 @@
+2004-02-29  Borut Razem  <borut.razem@siol.net>
+	* src/eeprom.cc: initialization of variable eestate in EECON2::EECON2(void)
+	by calling ee_reset()
+
 2004-02-28  Borut Razem  <borut.razem@siol.net>
 	* config_win32.h.in : strtoll defined as _strtoi64, removed definition
 	of atoll, version number updated to 0.21.2
