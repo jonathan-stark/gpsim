@@ -87,14 +87,14 @@ public:
 class DataPort : public Lcd_Port
 {
 public:
-  unsigned int direction;
+  bool direction;
   bool acceptingData;
 
   void put(unsigned int new_value);
   virtual void assert_event(void);
   virtual void setbit(unsigned int bit_number, bool new_value);
   DataPort (unsigned int _num_iopins=8);
-  void update_pin_directions(unsigned int );
+  void update_pin_directions(bool);
 
   unsigned int get(void);
 };
@@ -134,9 +134,13 @@ public:
 
 class LcdBusy : public BreakCallBack
 {
+ public:
+  LcdBusy(void) {bBusyState=false;}
   void set(double waitTime);
   void clear(void);
   inline bool isBusy(void) { return bBusyState; }
+  virtual void callback(void);
+
  private:
   bool bBusyState;
 
@@ -228,7 +232,6 @@ enum State {
   POWERON,
   ST_INITIALIZED,
   ST_COMMAND_PH0,
-  ST_DATA_PH0,
   ST_STATUS_READ,
 
   //_8BITMODE_START,
@@ -256,7 +259,7 @@ public:
   int data_latch_phase;
   int debug;
 
-  guint64  busy_until_time;
+  LcdBusy busyTimer;
 
   SMEvent ControlEvents[8];
 
@@ -389,7 +392,6 @@ public:
   void set_blink_off(void) { mode_flag &= ~BLINK_ON_FLAG;};
   void set_cursor_on(void) { mode_flag |= CURSOR_ON_FLAG;};
   void set_cursor_off(void) { mode_flag &= ~CURSOR_ON_FLAG;};
-  void set_busy ( int time );
 
   bool in_8bit_mode(void) {return ((mode_flag & _8BIT_MODE_FLAG) != 0);};
   bool in_4bit_mode(void) {return ((mode_flag & _8BIT_MODE_FLAG) == 0);};
@@ -399,9 +401,6 @@ public:
   bool in_small_font_mode(void) {return ((mode_flag & LARGE_FONT_MODE_FLAG) == 0);};
   bool display_is_on(void) {return ((mode_flag & DISPLAY_ON_FLAG) != 0);};
   bool display_is_off(void) {return ((mode_flag & DISPLAY_ON_FLAG) == 0);};
-  bool is_busy(void);
-
-
 };
 
 class LcdDisplayDisplaytech161A : public LcdDisplay

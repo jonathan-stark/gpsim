@@ -95,6 +95,29 @@ void LCD_Interface::GuiUpdate (gpointer)
 }
 
 //--------------------------------------------------------------
+void LcdBusy::set(double waitTime)
+{
+  if(!bBusyState) {
+    //cout << "busy start\n";
+    bBusyState = true;
+    cycles.set_break(cycles.get(waitTime), this);
+  }
+}
+
+void LcdBusy::clear(void)
+{
+  clear_break();
+  bBusyState = false;
+}
+
+//--------------------------------------------------------------
+void LcdBusy::callback(void)
+{
+  //cout << "busy stop\n";
+  bBusyState = false;
+}
+
+//--------------------------------------------------------------
 // LcdPort class
 //
 // The LcdPort class is derived from the gpsim class "IOPORT".
@@ -145,13 +168,14 @@ void DataPort::setbit(unsigned int bit_number, bool new_value)
   } 
   //else cout << "DataPort::" << __FUNCTION__ << " ignoring data. bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
 }
-void DataPort::update_pin_directions(unsigned int new_direction)
+void DataPort::update_pin_directions(bool new_direction)
 {
 
-  if((new_direction ^ direction) & 1) {
-    direction = new_direction & 1;
+  if(new_direction != direction) {
 
     //cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value <<endl;
+
+    direction = new_direction;
 
     // Change the directions of the I/O pins
     for(int i=0; i<8; i++) {
@@ -324,16 +348,6 @@ cursor_event (GtkWidget          *widget,
   return FALSE;
 }
 
-//--------------------------------------------------------------
-void LcdDisplay::set_busy (int time)
-{
-  busy_until_time = cycles.get(time); 
-}
-
-bool LcdDisplay::is_busy(void)
-{
-  return (busy_until_time > cycles.get());
-};
 
 //--------------------------------------------------------------
 // create_iopin_map 

@@ -2,7 +2,9 @@
 	* lcd.h, lcd.cc, lcdengine.cc: Merged a portion of a patch from
 	Robert Pearce.
 	
-	
+2004-03-05  Scott Dattalo  <scott@dattalo.com>
+	* configure.in: changed revision to 0.2.2
+
 2004-02-08  Scott Dattalo  <scott@dattalo.com>
 	* configure.in: changed revision to 0.2.1
 	* updated to the new gpsim API
