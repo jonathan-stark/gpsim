@@ -1221,10 +1221,13 @@ char IO_open_collector::getBitChar()
     if(snode->get_nodeZth() > ZthFloating)
       return bPullUp ? 'W' : 'Z';
 
+    if(driving && getDrivenState() && !getDrivingState())
+      return 'X';
+
     if(snode->get_nodeZth() > ZthWeak)
-      return getDrivingState() ? 'W' : 'w';
+      return getDrivenState() ? 'W' : 'w';
     else
-      return getDrivingState() ? '1' : '0';
+      return getDrivenState() ? '1' : '0';
   }
 
   return getDrivingState() ? 'W' : '0';
