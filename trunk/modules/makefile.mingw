@@ -40,7 +40,7 @@ modules_OBJECTS =		\
 	video.o
 
 ../config.h : ../config_win32.h.in
-	$(CP) ../config_win32.h.in ../config.h
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
 
 ################ The modules DLL
 

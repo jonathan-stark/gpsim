@@ -131,7 +131,6 @@ EXPORTS
     ?list@Processor@@UAEXIIII@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
     ?log@TraceRawLog@@QAEXXZ
-    ?name@ProgramMemoryAccess@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?name@gpsimObject@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z

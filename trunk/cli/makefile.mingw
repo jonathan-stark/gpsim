@@ -60,7 +60,7 @@ cli_OBJECTS =			\
 	uxtime.o
 
 ../config.h : ../config_win32.h.in
-	$(CP) ../config_win32.h.in ../config.h
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
 
 fd2raw.o : ../plat/win32/fd2raw.cpp
 	$(CXX) $(CFLAGS) -c -o fd2raw.o ../plat/win32/fd2raw.cpp

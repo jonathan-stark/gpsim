@@ -80,7 +80,7 @@ src_OBJECTS =			\
 	xref.o
 
 ../config.h : ../config_win32.h.in
-	$(CP) ../config_win32.h.in ../config.h
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
 
 icd.o : ../plat/win32/icd.cc
 	$(CXX) -I . $(CFLAGS) -c $< -o $@

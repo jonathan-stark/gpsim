@@ -1,3 +1,12 @@
+2004-10-03 Borut Razem <borut.razem@siol.net>
+	* config_win32.h.in, plat/win32/configure_win32.awk,
+	  cli/cli.vcproj, src/src.vcproj,
+	  plat/win32/make.mingw, makefile.mingw, cli/makefile.mingw, gpsim/makefile.mingw,
+	  gui/makefile.mingw, modules/makefile.mingw, src/makefile.mingw:
+	  added configure_win32.awk script, which takes version number from
+	  configure.in and inserts them into config_win32.h.in and generates cofig.h
+	* plat/win32/gpsim.def: MSVC sync
+
 2004-10-01 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, gui/gui.h, gui/gui_regwin.c
 	gui/gui_asm.cc, gui/gui_src_opcode.c, plat/win32/make.mingw:
@@ -5,20 +14,20 @@
 	problem if you issue too many gui calls to the GTK library. I
 	found that this can be mitigated by periodically clearing out
 	the gtk event queue.
-	
+
 2004-09-29 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, gui/gui_menu.cc, gui/gui_src_asm.cc, 
 	src/modules.h, src/modules.cc, src/processor.cc,
 	src/pic-processor.cc, src/pic-processor.h, src/trace.h
 	plat/win32/gpsim.def: Clean ups to get the Windows
 	port to compile.
-	
+
 2004-09-29 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, src/pic-instructions.cc: Uninitialized variables
 	in the instruction class were causing the source browser to
 	place objects beyond the range allocated to the source browser.
 	This confused GTK+ 2.x.
-	
+
 2004-09-28 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc, 
 	gui/gui_object.h, gui/gui_regwin.cc, gui/gui_src.h,
@@ -27,7 +36,7 @@
 	  -- Window state was not being saved
 	  -- Register window font was fouled up
 	  -- Source browser pixel position calculations are different
-          There are still some other bugs that need to be fixed: 
+	  There are still some other bugs that need to be fixed: 
 	  -- The breadboard window somehow prevents the Source browser
 	     window from opening
 	  -- <control>Q no longer quits
@@ -38,7 +47,7 @@
 2004-09-24 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: save_state() was skipping address 0.
 	* src/registers.cc: Bit string encoding has been enhanced
-	
+
 2004-09-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.h, gui/gui_regwin.cc: max allowable registers
 	is 64k (used to be 4k)
@@ -61,7 +70,7 @@
 	* src/processor.cc, src/trace.cc, gui/gui_src_opcode.cc:
 	- 18f processors' addresses were off by a factor of two in
 	disassembly operations.
-	
+
 2004-09-14 Borut Razem <borut.razem@siol.net>
 	* cli/cli.cvproj, src/src.vcproj, plat/win32/gpsim.def: MSVC sync
 	* cli/makefile.mingw, src/makefile.mingw: MinGW sync

@@ -76,13 +76,20 @@
 /* Name of package */
 #define PACKAGE "gpsim"
 
-/* Version number of package */
-#define VERSION "0.21.2"
-
 /* manually added stuff */
+/*
+  the version nuber values should be replaced with values from configure.in
+  during the generation of config.h from config_win32.h.in
+*/
 #define GPSIM_MAJOR_VERSION 0
-#define GPSIM_MINOR_VERSION 21
-#define GPSIM_MICRO_VERSION 2
+#define GPSIM_MINOR_VERSION 0
+#define GPSIM_MICRO_VERSION 0
+
+#define QUOTIZE_DO(x) #x
+#define QUOTIZE(x) QUOTIZE_DO(x)
+
+/* Version number of package */
+#define VERSION QUOTIZE(GPSIM_MAJOR_VERSION.GPSIM_MINOR_VERSION.GPSIM_MICRO_VERSION)
 
 #ifdef _MSC_VER
 #ifndef __FUNCTION__

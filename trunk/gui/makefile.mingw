@@ -47,7 +47,7 @@ gui_OBJECTS =			\
 	settings_reg.o
 
 ../config.h : ../config_win32.h.in
-	$(CP) ../config_win32.h.in ../config.h
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
 
 settings_reg.o : ../plat/win32/settings_reg.cpp
 	$(CXX) $(CFLAGS) -c -o settings_reg.o ../plat/win32/settings_reg.cpp
