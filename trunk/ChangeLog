@@ -1,3 +1,7 @@
+2004-01-18  Borut Razem  <borut.razem@siol.net>
+	* configure.in: added --enable-gtk2 configure command line option for
+	  linking with GTK+ 2.x
+
 2004-01-17  Borut Razem  <borut.razem@siol.net>
 	Update to GTK+ 2.x:
 	* config_win32.h.in: version 0.21.1, updated #defines
