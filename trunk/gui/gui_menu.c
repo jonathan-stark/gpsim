@@ -112,7 +112,7 @@ by T. Scott Dattalo - mailto:scott@dattalo.com
 
 }
 
-
+/*
 static void
 entry_toggle_editable (GtkWidget *checkbutton,
 		       GtkWidget *entry)
@@ -136,7 +136,7 @@ entry_toggle_visibility (GtkWidget *checkbutton,
 			 GTK_TOGGLE_BUTTON(checkbutton)->active);
 }
 
-
+*/
 
 //--------------------------------------------------------------
 // new_processor_dialog
@@ -144,7 +144,7 @@ entry_toggle_visibility (GtkWidget *checkbutton,
 // This will display the 'new processor' dialog window.
 //
 //
-
+/*
 static GtkWidget *new_processor_name_entry;
 
 
@@ -152,14 +152,9 @@ static void
 new_processor_dialog (void)
 {
   static GtkWidget *window = NULL;
-  static int first_time = 1;
-
-  int i;
 
   GtkWidget *box1;
   GtkWidget *box2;
-  GtkWidget *editable_check;
-  GtkWidget *sensitive_check;
   GtkWidget *cb;
   GtkWidget *button;
   GtkWidget *separator;
@@ -240,7 +235,8 @@ new_processor_dialog (void)
   else
     gtk_widget_destroy (window);
 }
-
+*/
+/*
 static GtkItemFactoryCallback 
 gtk_toggle_cb (gpointer             callback_data,
 	      guint                callback_action,
@@ -253,17 +249,17 @@ gtk_toggle_cb (gpointer             callback_data,
 
   toggle_widget = gtk_item_factory_get_item (item_factory,
 					       gtk_item_factory_path_from_widget (widget)     );
-  /*
+*/  /*
    toggle_widget = gtk_item_factory_get_item (item_factory,
 					       gtk_item_factory_path_from_widget (toggle_widget)     );
 
   printf("%s\n",gtk_widget_get_name(widget));
   */
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_widget), newstate);
+/*  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(toggle_widget), newstate);
   
   newstate ^= 1;
 }
-
+*/
 static GtkItemFactoryCallback 
 gtk_ifactory_cb (gpointer             callback_data,
 		 guint                callback_action,
@@ -326,7 +322,6 @@ void create_dispatcher (void)
       GtkWidget *box1;
       GtkWidget *box2;
       GtkWidget *separator;
-      GtkWidget *label;
       GtkWidget *button;
       GtkAccelGroup *accel_group;
       
@@ -481,7 +476,7 @@ static char * book_closed_xpm[] = {
 "     ..O..      ",
 "      ..        ",
 "                "};
-
+/*
 static char * mini_page_xpm[] = {
 "16 16 4 1",
 "       c None s None",
@@ -544,7 +539,7 @@ static char * gtk_mini_xpm[] = {
 "    %;@'&#     ",
 "     >%$$      ",
 "      >=       "};
-
+*/
 
 /*
  * GtkNotebook
@@ -657,10 +652,10 @@ create_page (GUI_Processor *gp, GtkNotebook *notebook, NotebookItem *page, int i
   GtkWidget *menu_box;
   GtkWidget *pixwid;
   gint i;
-  char *buffer;
+  char *buffer=NULL;
 
   GUI_Object *go;
-  GList *gol;
+  GList *gol=NULL;
 
 
   for(i=0; i<3; i++)
@@ -736,7 +731,7 @@ create_page (GUI_Processor *gp, GtkNotebook *notebook, NotebookItem *page, int i
     }
 
 }
-
+/*
 static void
 notebook_popup (GtkToggleButton *button,
 		GtkNotebook     *notebook)
@@ -753,18 +748,15 @@ notebook_homogeneous (GtkToggleButton *button,
 {
   gtk_notebook_set_homogeneous_tabs (notebook, button->active);
 }
-
+*/
 static void
 create_notebook (void)
 {
   static GtkWidget *window = NULL;
   GtkWidget *box1;
-  GtkWidget *box2;
   GtkWidget *button;
   GtkWidget *separator;
-  GtkWidget *omenu;
   GdkColor *transparent = NULL;
-  GtkWidget *label;
 
   if (!window)
     {

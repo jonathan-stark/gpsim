@@ -33,7 +33,6 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
 #define MNEMONIC_COLUMN 3
 
 static char *default_row_text[PROGRAM_MEMORY_WINDOW_COLUMNS];
-static gint pc_row = 0;
 
 static void 
 clist_click_column (GtkCList *clist, gint column, gpointer data)
@@ -44,23 +43,18 @@ clist_click_column (GtkCList *clist, gint column, gpointer data)
 static void filter(char *clean, char *dirty, int max)
 {
 
-  int i=0,j;
+    int i=0,j;
 
-  do {
+    do {
 
 
-    if(*dirty == '\t')
-
-      for(j=0,*dirty++; j<8 && i%8; j++,i++)
-	*clean++ = ' ';
-
-    else if (*dirty <' ') 
-
-      *dirty++;
-
-    else
-
-      *clean++ = *dirty++;
+	if(*dirty == '\t')
+	    for(j=0,dirty++; j<8 && i%8; j++,i++)
+		*clean++ = ' ';
+	else if (*dirty <' ')
+	    dirty++;
+	else
+	    *clean++ = *dirty++;
 
 
 
@@ -106,8 +100,7 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
 
 void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address)
 {
-  char buffer[20];
-  gint new_row,last_address, new_address;
+  gint new_row,last_address;
 
   unsigned int pic_id = ((GUI_Object*)sbow)->gp->pic_id;
   
@@ -147,8 +140,6 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
 {
   char text_buffer[128];
   char clean_buffer[128];
-
-  char *default_row_text[PROGRAM_MEMORY_WINDOW_COLUMNS];
 
   gint i;
   int pic_id;
@@ -257,17 +248,8 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
 
 void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow)
 {
-  GtkWidget *window;
-  GtkWidget *vbox;
-  GtkWidget *hbox;
   static GtkWidget *clist;
-  GtkWidget *button;
-  GtkWidget *separator;
   GtkWidget *scrolled_win;
-  GtkWidget *check;
-
-  GtkWidget *undo_button;
-  GtkWidget *label;
   
   gint i;
   char address[16];
@@ -368,8 +350,6 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     "profile", "address", "opcode", "instruction"
   };
 
-
-  gint i;
   static SourceBrowserOpcode_Window *sbow;
   
 //  SourceBrowserOpcode_Data *sbow;

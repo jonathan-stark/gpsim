@@ -17,8 +17,6 @@
 
 #include <assert.h>
 
-void exit_gpsim(void);
-
 static gint
 key_press(GtkWidget *widget,
 	  GdkEventKey *key, 
@@ -60,6 +58,7 @@ key_press(GtkWidget *widget,
   return TRUE;
 }
 
+/*
 static int
 SourceBrowser_close(GtkWidget *widget,
 		    SourceBrowser_Window *sbw)
@@ -73,6 +72,7 @@ SourceBrowser_close(GtkWidget *widget,
   return(TRUE);
 
 }
+*/
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
@@ -121,11 +121,11 @@ button_press(GtkWidget *widget,
 	  printf("Toggle at line %d\n",break_row);
 	  return TRUE;
 
-      case WT_list_source_window:
-	  //sbw->gui_obj.gp->p->toggle_break_at_line(1, break_row);
-	  gpsim_toggle_break_at_line(sbow->sbw.gui_obj.gp->pic_id, 1, break_row);
-
-	  return TRUE;
+//      case WT_list_source_window:
+//	  //sbw->gui_obj.gp->p->toggle_break_at_line(1, break_row);
+//	  gpsim_toggle_break_at_line(sbow->sbw.gui_obj.gp->pic_id, 1, break_row);
+//
+//	  return TRUE;
 
       default:
 	  printf("bad window type %d\n",sbw->gui_obj.wt);
@@ -149,13 +149,15 @@ void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address)
     case WT_opcode_source_window:
 	SourceBrowserOpcode_select_address(sbow,address);
 	break;
+    default:
+	puts("SourceBrowser_select_address(): unhandled case");
+	break;
     }
 }
 
 void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value)
 {
   GUI_Processor *gp;
-  SourceBrowser_Window *sbw;
   int address;
 
   gp = (GUI_Processor *)xref->parent_window;
@@ -175,8 +177,7 @@ void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_valu
 
 void SourceBrowser_update(SourceBrowser_Window *sbw)
 {
-  char buffer[20];
-  gint new_row,last_address, new_address;
+  gint new_address;
   
   SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
   SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)sbw;
@@ -218,7 +219,7 @@ void SourceBrowser_update(SourceBrowser_Window *sbw)
 
 
 }
-
+/*
 static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
 {
     SourceBrowserAsm_Window *sbaw=(SourceBrowserAsm_Window*)(xref->parent_window);
@@ -230,25 +231,14 @@ static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
     }
     SourceBrowserOpcode_set_pc(sbow,new_address);
 }
+*/
 
-GtkWidget *CreateSBW(SourceBrowser_Window *sbw)
+void CreateSBW(SourceBrowser_Window *sbw)
 {
-
-
-  gint i;
 
 
   GtkWidget *window;
   GtkWidget *vbox;
-  GtkWidget *hbox;
-  static GtkWidget *clist;
-  GtkWidget *button;
-  GtkWidget *separator;
-  GtkWidget *scrolled_win;
-  GtkWidget *check;
-
-  GtkWidget *undo_button;
-  GtkWidget *label;
   
   int x,y,width,height;
   
@@ -329,7 +319,7 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
     return 0; // what should be returned?, FIXME
 }
 
-int SourceBrowser_change_view (struct _gui_object *_this, int view_state)
+void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 {
 /*    if (GTK_WIDGET_VISIBLE(GTK_WIDGET(_this->window)))
     {
@@ -351,22 +341,25 @@ int SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	  switch(_this->wt)
 	  {
 	  case WT_register_window:
-	      BuildRegisterWindow(_this);
+	      BuildRegisterWindow((Register_Window*)_this);
 	      break;
 	  case WT_symbol_window:
-	      BuildSymbolWindow(_this);
+	      BuildSymbolWindow((Symbol_Window*)_this);
 	      break;
 	  case WT_asm_source_window:
-	      BuildSourceBrowserAsmWindow(_this);
+	      BuildSourceBrowserAsmWindow((SourceBrowserAsm_Window*)_this);
 	      break;
 	  case WT_opcode_source_window:
-	      BuildSourceBrowserOpcodeWindow(_this);
+	      BuildSourceBrowserOpcodeWindow((SourceBrowserOpcode_Window*)_this);
 	      break;
 	  case WT_watch_window:
-	      BuildWatchWindow(_this);
+	      BuildWatchWindow((Watch_Window*)_this);
 	      break;
 	  case WT_breadboard_window:
-	      BuildBreadboardWindow(_this);
+	      BuildBreadboardWindow((Breadboard_Window*)_this);
+	      break;
+	  default:
+	      puts("SourceBrowser_change_view(): unhandled case");
 	      break;
 	  }
       }

@@ -414,6 +414,8 @@ int BuildSymbolWindow(Symbol_Window *sw)
 
   if(sw->load_symbols)
       SymbolWindow_new_symbols(sw, sw->gui_obj.gp);
+
+  return 0;
 }
 
 int CreateSymbolWindow(GUI_Processor *gp)

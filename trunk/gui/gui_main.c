@@ -205,7 +205,6 @@ int config_set_variable(char *module, char *entry, int value)
     list = eXdbmGetList(dbid, NULL, module);
     if(list==NULL)
     {
-	char comment[256];
 	ret = eXdbmCreateList(dbid, NULL, module, NULL);
 	if(ret==-1)
 	{
@@ -254,6 +253,7 @@ int gui_object_set_config(GUI_Object *obj)
     config_set_variable(obj->name, "y", obj->y);
     config_set_variable(obj->name, "width", obj->width);
     config_set_variable(obj->name, "height", obj->height);
+    return 1;
 }
 
 int config_get_variable(char *module, char *entry, int *value)
@@ -290,6 +290,7 @@ int gui_object_get_config(GUI_Object *obj)
 	obj->width=300;
     if(!config_get_variable(obj->name, "height", &obj->height))
 	obj->height=100;
+    return 1;
 }
 
 
@@ -300,11 +301,7 @@ int gui_object_get_config(GUI_Object *obj)
 
 int gui_init (int argc, char **argv)
 {
-    FILE *fp;
-
     int ret;
-
-    DB_LIST *dblist;
 
     char path[256], *homedir;
     
