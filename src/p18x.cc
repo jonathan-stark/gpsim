@@ -772,3 +772,191 @@ Processor * P18F452::construct(void)
 
 
 }
+
+
+//------------------------------------------------------------------------
+//
+// P18F1220
+// 
+
+Processor * P18F1220::construct(void)
+{
+
+  P18F1220 *p = new P18F1220;
+
+  if(verbose)
+    cout << " 18F1220 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "p18f1220";
+  symbol_table.add_module(p,p->name_str);
+  //cout << "c4x2 -2 txsta assignment name: " << usart.txsta->name() << "\n";
+  //cout << "c4x2 -2 txsta assignment name: " << p->usart.txsta->name() << "\n";
+
+  return p;
+}
+
+void P18F1220::create(void)
+{
+  if(verbose)
+    cout << "P18F1220::create\n";
+
+  create_iopin_map();
+
+  _16bit_processor::create();
+
+  create_sfr_map();
+
+  //trace.program_counter (pc->value);
+
+  //usart.init_ioport(portc);
+  cout << "f1220::create usart txreg => " << usart16.txreg.name() << "\n";
+
+}
+//------------------------------------------------------------------------
+void P18F1220::create_iopin_map(void)
+{
+
+  package = new Package(18);
+
+  if(!package)
+    return;
+
+  // Build the links between the I/O Ports and their tris registers.
+  porta.tris = &trisa;
+  trisa.port = &porta;
+
+  portb.tris = &trisb;
+  trisb.port = &portb;
+
+  porta.new_name("porta");
+  portb.new_name("portb");
+
+  trisa.new_name("trisa");
+  trisb.new_name("trisb");
+
+  // Define the valid I/O pins.
+  porta.valid_iopins = 0xff;
+  portb.valid_iopins = 0xff;
+
+  package->assign_pin(1, new IO_bi_directional(&porta, 0));
+  package->assign_pin(2, new IO_bi_directional(&porta, 1));
+  package->assign_pin(6, new IO_bi_directional(&porta, 2));
+  package->assign_pin(7, new IO_bi_directional(&porta, 3));
+  package->assign_pin(4, new IO_open_collector(&porta, 5));
+  package->assign_pin(3, new IO_bi_directional(&porta, 4));
+  package->assign_pin(15, new IO_bi_directional(&porta, 6));
+  package->assign_pin(16, new IO_bi_directional(&porta, 7));
+
+  package->assign_pin(8, new IO_bi_directional(&portb, 0));
+  package->assign_pin(9, new IO_bi_directional(&portb, 1));
+  package->assign_pin(17, new IO_bi_directional(&portb, 2));
+  package->assign_pin(18, new IO_bi_directional(&portb, 3));
+  package->assign_pin(10, new IO_bi_directional(&portb, 4));
+  package->assign_pin(11, new IO_bi_directional(&portb, 5));
+  package->assign_pin(12, new IO_bi_directional(&portb, 6));
+  package->assign_pin(13, new IO_bi_directional(&portb, 7));
+
+  package->assign_pin(5, NULL);
+  package->assign_pin(14, NULL);
+
+}
+void P18F1220::create_symbols(void)
+{
+  if(verbose)
+    cout << "P18F1220 create symbols\n";
+
+  symbol_table.add_ioport(this, &porta);
+  symbol_table.add_ioport(this, &portb);
+
+}
+
+P18F1220::P18F1220(void)
+{
+
+  if(verbose)
+    cout << "18F1220 constructor, type = " << isa() << '\n';
+
+
+}
+
+
+void P18F1220::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "create_sfr_map P18F1220\n";
+
+  cout << "F1220::create_sfr_map1 usart txreg => " << usart16.txreg.name() << "\n";
+
+  add_sfr_register(&porta,	  0xf80,0,"porta");
+  add_sfr_register(&portb,	  0xf81,0,"portb");
+
+  usart16.initialize_16(this,get_pir_set(),&porta);
+  cout << "Fx220::create_sfr_map2 usart txreg => " << usart16.txreg.name() << "\n";
+
+  add_sfr_register(&lata,	  0xf89,0,"lata");
+  add_sfr_register(&latb,	  0xf8a,0,"latb");
+
+  porta.latch = &lata;
+  portb.latch = &latb;
+
+  lata.port = &porta;
+  latb.port = &portb;
+
+  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
+  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
+
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18Fx320
+// 
+
+P18F1320::P18F1320(void)
+{
+
+  //if(verbose)
+    cout << "18f1320 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F1320::create(void)
+{
+
+  //if(verbose)
+    cout << " 18fx320 create \n";
+
+  P18F1220::create();
+
+  P18F1220::create_sfr_map();
+
+
+}
+
+Processor * P18F1320::construct(void)
+{
+
+  P18F1320 *p = new P18F1320;
+
+  if(verbose)
+    cout << " 18F1320 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "p18f1320";
+  symbol_table.add_module(p,p->name_str);
+  //cout << "c4x2 -2 txsta assignment name: " << usart.txsta->name() << "\n";
+  //cout << "c4x2 -2 txsta assignment name: " << p->usart.txsta->name() << "\n";
+
+  return p;
+
+
+}
+

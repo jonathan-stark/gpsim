@@ -95,6 +95,7 @@ gpsiminclude_HEADERS = \
 	pic-processor.h \
 	pic-registers.h \
 	picdis.h \
+	pie.h \
 	pir.h \
 	processor.h \
 	registers.h \

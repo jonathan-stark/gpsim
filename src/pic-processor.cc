@@ -203,6 +203,10 @@ ProcessorConstructor pP18F248(P18F248::construct ,
 			      "__18F248", "pic18f248",  "p18f248", "18f248");
 ProcessorConstructor pP18F452(P18F452::construct,
 			      "__18F452", "pic18f452",  "p18f452", "18f452");
+ProcessorConstructor pP18F1220(P18F1220::construct,
+			      "__18F1220", "pic18f1220",  "p18f1220", "18f1220");
+ProcessorConstructor pP18F1320(P18F1320::construct,
+			      "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 
 
 //-------------------------------------------------------------------

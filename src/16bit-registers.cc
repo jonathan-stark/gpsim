@@ -706,9 +706,11 @@ void Program_Counter16::put_value(unsigned int new_value)
 
 }
 //------------------------------------------------
+// get_value()
+//
+
 unsigned int Program_Counter16::get_value(void)
 {
-  cout << "Program_Counter16::get_value 0x" << hex << value << '\n';
   return value << 1;
 }
 

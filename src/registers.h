@@ -154,6 +154,12 @@ public:
   virtual unsigned int get_value(void) {
     return value;
   };
+  // get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
+  // whereas get_raw_value isn't. The raw value of the program counter
+  // is used as an index into the program memory.
+  virtual unsigned int get_raw_value(void) {
+    return value;
+  }
 
   void reset(void);
 
