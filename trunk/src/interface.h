@@ -128,6 +128,8 @@ typedef struct _sym
   void gpsim_enable_profiling(unsigned int processor_id);
   void gpsim_disable_profiling(unsigned int processor_id);
   guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address);
+  guint64 gpsim_get_register_read_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address);
+  guint64 gpsim_get_register_write_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address);
 
 
   //---------------------------------------------------------------------------
@@ -201,6 +203,9 @@ typedef struct _sym
   gboolean gpsim_register_is_sfr(unsigned int processor_id,
 				 REGISTER_TYPE type,
 				 unsigned int register_number);
+  gboolean gpsim_register_is_valid(unsigned int processor_id,
+				   REGISTER_TYPE type,
+				   unsigned int register_number);
   void  gpsim_clear_register_xref(unsigned int processor_id,
 				  REGISTER_TYPE type,
 				  unsigned int reg_number,

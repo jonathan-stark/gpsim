@@ -263,7 +263,7 @@ unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE t
 
 //--------------------------------------------------------------------------
 
-int gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
   file_register *fr = gpsim_get_register( processor_id, type,  register_number);
 
@@ -277,7 +277,7 @@ int gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsig
 
 //--------------------------------------------------------------------------
 
-int gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
     pic_processor *pic = get_processor(processor_id);
 
@@ -291,6 +291,18 @@ int gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigne
 	return TRUE;
 
     return FALSE;
+}
+
+//--------------------------------------------------------------------------
+
+gboolean gpsim_register_is_valid(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!valid_register(pic,type,register_number))
+	return FALSE;
+  
+    return TRUE;
 }
 
 
@@ -779,6 +791,26 @@ guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address)
 	return 0;
 
     return pic->cycles_used(address);
+}
+
+guint64 gpsim_get_register_read_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0;
+
+    return pic->register_read_accesses(address);
+}
+
+guint64 gpsim_get_register_write_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0;
+
+    return pic->register_write_accesses(address);
 }
 
 //--------------------------------------------------------------------------

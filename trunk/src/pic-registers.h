@@ -57,6 +57,9 @@ public:
   symbol *symbol_alias;
   pic_processor *cpu;
 
+  guint64 read_access_count;
+  guint64 write_access_count;
+
   //  #ifdef HAVE_GUI
   // If we are linking with a gui, then here are a
   // few declarations that are used to send data to it.
