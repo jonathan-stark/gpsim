@@ -1917,6 +1917,7 @@ void Profile_Window::Update()
       {
 	  chc=(struct cycle_histogram_counter*)iter->data;
 
+	  
 	  if(start==chc->start_address &&
 	     stop==chc->stop_address)
 	  {
@@ -2141,8 +2142,8 @@ void Profile_Window::StopExe(int address)
       gp->cpu->pma.clear_profile_start_at_address(address);
 	
     // FIXME -- memory leak...
-    gp->cpu->pma.set_profile_start_at_address(address,
-					      new ProfileStart(this,address));
+    gp->cpu->pma.set_profile_stop_at_address(address,
+					      new ProfileStop(this,address));
   }
 }
 
