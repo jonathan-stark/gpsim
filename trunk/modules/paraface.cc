@@ -41,10 +41,10 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef LINUX
+#ifdef linux
 #include <linux/parport.h>
 #include <linux/ppdev.h>
-#endif // LINUX
+#endif // linux
 
 #ifdef __FreeBSD__
 #include <dev/ppbus/ppi.h>
@@ -352,7 +352,7 @@ int Paraface::open_parallel_port(char *device)
 	return -1;
     }
 
-#ifdef LINUX
+#ifdef linux
     if (ioctl (fd, PPCLAIM)) {
 	perror ("PPCLAIM");
 	close (fd);
@@ -370,8 +370,9 @@ int Paraface::open_parallel_port(char *device)
         fd=-1;
 	return -1;
     }
-#endif // LINUX
+#endif // linux
 
+    cout << "Parallel port was successfully opened.\n";
 }
 
 // Return low five bits containing:
@@ -383,19 +384,19 @@ int Paraface::open_parallel_port(char *device)
 // Bit levels are inverted when needed, so they match parallel input states
 int Paraface::read_parallel_status(void)
 {
-#ifdef LINUX
+#ifdef linux
     unsigned int ppstatus;
-#endif // LINUX
+#endif // linux
 #ifdef __FreeBSD__
     u_int8_t ppstatus;
-    int err;
 #endif // __FreeBSD__
 
     if(fd==-1)
 	return -1;
 
-#ifdef LINUX
-    ioctl (fd, PPRSTATUS, &ppstatus);
+#ifdef linux
+    if(ioctl (fd, PPRSTATUS, &ppstatus) == -1)
+        perror("ioctl");
 
     if(ppstatus&PARPORT_STATUS_ACK)
 	status|=0x01;
@@ -417,10 +418,10 @@ int Paraface::read_parallel_status(void)
         status|=0x10;
     else
 	status&=~0x10;
-#endif // LINUX
+#endif // linux
 
 #ifdef __FreeBSD__
-    if ((err = ioctl (fd, PPIGSTATUS, &ppstatus)) == -1) {
+    if (ioctl (fd, PPIGSTATUS, &ppstatus) == -1) {
       perror("ioctl");
     }
 
@@ -460,12 +461,14 @@ int Paraface::write_parallel_data(int newdata)
 
     /* Set the data lines */
     data = newdata;
-#ifdef LINUX
-    ioctl (fd, PPWDATA, &data);
-#endif // LINUX
+#ifdef linux
+    if(ioctl (fd, PPWDATA, &data)==-1)
+        perror("ioctl");
+#endif // linux
 
 #ifdef __FreeBSD__
-    ioctl (fd, PPISDATA, &data);
+    if(ioctl (fd, PPISDATA, &data)==-1)
+        perror("ioctl");
 #endif // __FreeBSD__
 
     //    cout << "data" << (int)data << endl;
