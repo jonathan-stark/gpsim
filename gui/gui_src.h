@@ -23,7 +23,9 @@ Boston, MA 02111-1307, USA.  */
 #define __GUI_SRC_H__
 
 
-class SourceBrowserAsm_Window;
+// forward references
+class SourceBrowserAsm_Window;     
+class SourceBrowserParent_Window;
 
 
 class SourceBrowser_Window : public GUI_Object {
@@ -44,9 +46,20 @@ class SourceBrowser_Window : public GUI_Object {
 
 
 
-struct breakpoint_info {
-    int address;
-    GtkWidget *widget;
+class breakpoint_info {
+ public:
+  int address;
+  GtkWidget *widget;
+};
+
+class BreakPointList {
+ public:
+
+  GList *iter;
+
+  BreakPointList(void);
+  void Remove(int);
+  void Add(int, GtkWidget *,GtkWidget *,int);
 };
 
 // the prefix 'sa' doesn't make sense anymore, FIXME.
@@ -57,7 +70,6 @@ struct sa_entry{         // entry in the sa_xlate_list
     int font_center;     // from base line
 };
 
-class SourceBrowserParent_Window;  // forward reference
 //
 // The Source Assembler Browser 
 //
@@ -65,9 +77,14 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 {
  public:
 
-  GList *breakpoints;       // List of breakpoint info structs
-  GList *notify_start_list; // List of breakpoint info structs
-  GList *notify_stop_list;  // List of breakpoint info structs
+  BreakPointList breakpoints;
+  BreakPointList notify_start_list;
+  BreakPointList notify_stop_list;
+
+  //GList *breakpoints;       // List of breakpoint info structs
+  //GList *notify_start_list; // List of breakpoint info structs
+  //GList *notify_stop_list;  // List of breakpoint info structs
+
   int layout_offset;
 
   // We need one of these for each source file
