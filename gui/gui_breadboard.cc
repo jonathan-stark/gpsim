@@ -1399,7 +1399,7 @@ static void settings_clist_cb(GtkCList       *clist,
 static void settings_set_cb(GtkWidget *button, 
 		Breadboard_Window *bbw)
 {
-	char *entry_string;
+	const char *entry_string;
 	char attribute_name[256];
 	char attribute_newval[256];
 	// We get here from both the button and entry->enter
