@@ -11,11 +11,14 @@ ifdef DEBUG
     OPTIMIZE = -O2 -g
   endif
   CLDFLAGS =
+  DEFINES = -DDEBUG
 else
   ifndef OPTIMIZE
     OPTIMIZE = -O2
   endif
   CLDFLAGS = -Wl,--strip-all
+# uncomment the following line to disable assertions
+# DEFINES = -DNDEBUG
 endif
 
 ifndef WARNINGS

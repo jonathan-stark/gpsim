@@ -21,7 +21,7 @@ INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0 \
 	-I ../../atk/include/atk-1.0
 
-DEFINES = -DWIN32 -DNDEBUG -D_WINDOWS -D_USRDLL -DMODULES_EXPORTS
+DEFINES += -DHAVE_GUI -DMODULES_EXPORTS
 
 all :				\
 	../config.h		\

@@ -15,8 +15,8 @@ INCLUDES = -I ../.. -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
 	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0
 
-DEFINES = -DWIN32 -DNDEBUG -D_LIB -DHAVE_READLINE -DHAVE_GUI \
-	-DHAVE_NSCLEAN_READLINE -DREADLINE_STATIC
+DEFINES += -DHAVE_READLINE -DHAVE_GUI -DHAVE_NSCLEAN_READLINE
+#       -DREADLINE_STATIC
 
 all :				\
 	../config.h		\
