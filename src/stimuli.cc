@@ -1354,7 +1354,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_n
 
 }
 
-IO_bi_directional::~IO_bi_directional(void)
+IO_bi_directional_pu::~IO_bi_directional_pu(void)
 {
   delete pull_up_resistor;
 }
