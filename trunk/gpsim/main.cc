@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../cli/input.h"
 #include "../src/gpsim_def.h"
 #include "../src/interface.h"
+#include "../src/fopen-path.h"
 
 extern "C" {
 int gui_init (int argc, char **argv);
@@ -68,8 +69,9 @@ helpme (char *iam)
   printf ("\t-p <device>    : processor (e.g. -pp16c84 for the 'c84)\n");
   printf ("\t<hex_file>     : input file in \"intelhex16\" format\n");
   printf ("\t-c <stc_file>  : startup command file\n");
-  printf ("\t-s <cod_file>  : .cod symbol file\n\n");
-  printf ("\t-v             : gpsim version\n");
+  printf ("\t-s <cod_file>  : .cod symbol file\n");
+  printf ("\t-L <path list> : colon separated list of directories to search.\n");
+  printf ("\n\t-v             : gpsim version\n");
 }
 
 
@@ -151,7 +153,7 @@ main (int argc, char *argv[])
     }
 #endif
 
-  while ((c = getopt(argc, argv, "h?p:c:s:v")) != EOF) {
+  while ((c = getopt(argc, argv, "h?p:c:s:L:v")) != EOF) {
     switch (c) {
 
     default:
@@ -172,6 +174,10 @@ main (int argc, char *argv[])
       strncpy(cod_name, optarg,FILE_STRING_LENGTH);
       break;
 
+    case 'L':
+	set_search_path (optarg);
+      break;
+
     case 'v':
       printf("%s\n",VERSION);
       break;
@@ -184,8 +190,10 @@ main (int argc, char *argv[])
   if (optind < argc)
     strncpy(hex_name, argv[optind],FILE_STRING_LENGTH);
 
-  if (usage) 
+  if (usage) {
     helpme(argv[0]);
+    exit (1);
+  }
 
 
   initialize_gpsim();
