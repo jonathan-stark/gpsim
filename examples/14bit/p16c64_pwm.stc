@@ -6,9 +6,9 @@
 processor p16c64 big_pic
 
 # Source code:
-load h p16c64_pwm.hex
+load s p16c64_pwm.cod
 
 # Stimuli:
-# load c portc_stim.stc
+load c portc_stim.stc
 
 break c 1000

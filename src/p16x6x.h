@@ -72,7 +72,13 @@ public:
 
 };
 
-class _14bit_40pins : public _40pins
+
+//
+//   -- Define a class to contain most of the registers/peripherals 
+//      of a 16x6x device (where the second `x' is >= 3
+//
+
+class P16X6X_processor : public _14bit_processor
 {
 public:
 
@@ -94,11 +100,90 @@ public:
   CCPRH   ccpr2h;
   INTCON_P16C6x intcon_reg;
 
+  //  void create_iopin_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x800; };
+
+  virtual void create_sfr_map(void);
+  virtual void option_new_bits_6_7(unsigned int bits)
+    {
+      //((PORTB *)portb)->rbpu_intedg_update(bits);
+    }
+  P16X6X_processor(void);
+
+};
+
+class _14bit_28pins : public _28pins
+{
+public:
+
   void create_iopin_map(void);
 
 };
 
-class P16C64 : public  _14bit_processor, public _14bit_40pins
+class _14bit_40pins : public _40pins
+{
+public:
+
+  void create_iopin_map(void);
+
+};
+
+/*********************************************************************
+ *  class definitions for the 16c6x family of processors
+ */
+
+
+class P16C62 : public  P16X6X_processor, public _14bit_28pins
+{
+  public:
+
+
+  TMR2_MODULE tmr2_module;
+  virtual PROCESSOR_TYPE isa(void){return _P16C62_;};
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x800; };
+
+  virtual void option_new_bits_6_7(unsigned int bits)
+    {
+      ((PORTB *)portb)->rbpu_intedg_update(bits);
+    }
+
+  P16C62(void);
+  static pic_processor *construct(void);
+  void create(void);
+
+  virtual int get_pin_count(void){return Package::get_pin_count();};
+  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
+  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+
+
+};
+
+
+class P16C63 : public  P16C62
+{
+  public:
+
+  USART_MODULE14 usart;
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C63_;};
+  virtual void create_symbols(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+
+
+  P16C63(void);
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+};
+
+
+class P16C64 : public  P16X6X_processor, public _14bit_40pins
 {
   public:
 
