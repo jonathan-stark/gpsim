@@ -1721,21 +1721,21 @@ static gint button(GtkWidget *widget,
 		if(gn!=0)
 		{
 		    treeselect_node(0, gn);
-		    return GTKSIGNAL_DONE;
+		    return 1;
 		}
 	    }
 
 	    treeselect_stimulus(0, p);
 	    puts("Stimulus should now be selected");
 	}
-	return GTKSIGNAL_DONE;
+	return 1;
     }
 
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
       p->iopin->toggle();
-      return GTKSIGNAL_DONE;
+      return 1;
     }
 
     if(event->type==GDK_BUTTON_PRESS &&
@@ -1752,10 +1752,10 @@ static gint button(GtkWidget *widget,
 	    trace_node(gn);
             draw_nodes(gn->bbw);
 	}
-	return GTKSIGNAL_DONE;
+	return 1;
     }
 
-    return GTKSIGNAL_CONTINUE;
+    return 0;
 }
 
 
