@@ -90,7 +90,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
   if(xref == NULL)
     {
-      printf("Warning gui_trace.c: xref_update: xref=%x\n",(unsigned int)xref);
+      printf("Warning gui_trace.c: xref_update: xref=%p\n",xref);
       return;
     }
 
@@ -277,7 +277,7 @@ BuildTraceWindow(Trace_Window *tw)
 	
   if(tw==NULL)
   {
-      printf("Warning build_trace_viewer(%x)\n",(unsigned int)tw);
+      printf("Warning build_trace_viewer(%p)\n",tw);
       return 0;
   }
 

@@ -250,10 +250,10 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     if(xref == NULL)
     {
-	printf("Warning gui_breadboard.c: xref_update: xref=%x\n",(unsigned int)xref);
+	printf("Warning gui_breadboard.c: xref_update: xref=%p\n",xref);
 	if(xref->data == NULL || xref->parent_window==NULL)
 	{
-	    printf("Warning gui_breadboard.c: xref_update: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
+	    printf("Warning gui_breadboard.c: xref_update: xref->data=%p, xref->parent_window=%p\n",xref->data,xref->parent_window);
 	}
 	return;
     }
