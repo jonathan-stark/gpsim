@@ -54,6 +54,14 @@ SIMULATION_MODES simulation_mode;
 
 
 //------------------------------------------------------------------------
+// active_cpu  is a pointer to the pic processor that is currently 'active'. 
+// 'active' means that it's the one currently being simulated or the one
+// currently being manipulated by the user (e.g. register dumps, break settings)
+
+Processor *active_cpu=0;
+
+
+//------------------------------------------------------------------------
 //
 // Processor - Constructor
 //
@@ -1067,6 +1075,11 @@ void ProgramMemoryAccess::init(Processor *new_cpu)
   
 }
 
+void ProgramMemoryAccess::name(string & new_name)
+{
+  name_str = new_name;
+}
+
 void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 {
 
@@ -1155,6 +1168,9 @@ char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
 // Get the current value of the program counter.
 unsigned int ProgramMemoryAccess::get_PC(void)
 {
+  if(cpu && cpu->pc)
+    return cpu->pc->get_value();
+
   return 0;
 }
 

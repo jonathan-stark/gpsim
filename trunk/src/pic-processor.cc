@@ -86,12 +86,6 @@ guint64 gui_update_rate = DEFAULT_GUI_UPDATE_RATE;
 list <Processor *> processor_list;
 list <Processor *> :: iterator processor_iterator;
 
-// active_cpu  is a pointer to the pic processor that is currently 'active'. 
-// 'active' means that it's the one currently being simulated or the one
-// currently being manipulated by the user (e.g. register dumps, break settings)
-
-Processor *active_cpu=0;
-
 // active_cpu_id is the id of the currently active cpu. In other words:
 //  active_cpu_id == active_cpu->processor_id
 // It's redundant to define this id in addition to the *active_cpu pointer.
@@ -912,6 +906,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 
   pc->memory_size_mask = memory_size - 1;
   pma.init(this);
+  pma.name();
 
   Processor::init_program_memory(memory_size);
 }

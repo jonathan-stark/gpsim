@@ -77,7 +77,7 @@ void Switch::create_iopin_map(void)
     //   name of the logic gate (which is assigned by the user and
     //   obtained with the name() member function call).
 
-    char *pin_name = name();   // Get the name of this switch
+    char *pin_name = (char*)name().c_str();   // Get the name of this switch
     if(pin_name) {
 	switch_port->new_name(pin_name);
     }
@@ -137,7 +137,7 @@ void Switch::create_widget(Switch *sw)
 
     box1 = gtk_vbox_new (FALSE, 0);
 
-    button = gtk_toggle_button_new_with_label (sw->name());
+    button = gtk_toggle_button_new_with_label ((char*)sw->name().c_str());
     gtk_container_set_border_width (GTK_CONTAINER (button), 5);
     gtk_signal_connect (GTK_OBJECT (button), "toggled",
 			GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
@@ -145,7 +145,7 @@ void Switch::create_widget(Switch *sw)
     gtk_box_pack_start (GTK_BOX (box1), button, FALSE, FALSE, 0);
 
     // Tell gpsim which widget to use in breadboard.
-    sw->widget=box1;
+    sw->set_widget(box1);
 }
 
 //--------------------------------------------------------------
@@ -156,7 +156,7 @@ Module * Switch::construct(const char *new_name=NULL)
 //    cout << " Switch constructor\n";
 
     Switch *switchP = new Switch ;
-    switchP->new_name(new_name);
+    switchP->new_name((char*)new_name);
     switchP->create_iopin_map();
 
     switchP->create_widget(switchP);

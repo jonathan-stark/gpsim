@@ -551,7 +551,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
 
     int address  = cpu->map_pm_index2address(i);
     snprintf(string_buffer, sizeof(string_buffer),
-	     "%s  0x%04X  0x%04X  %s",cpu->name_str,
+	     "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 	     address,
 	     trace_buffer[instruction_index]&0xffff,
 	     cpu->pma[address].name(a_string));
@@ -672,7 +672,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 
 	int address  = cpu->map_pm_index2address(i);
 	snprintf(string_buffer, sizeof(string_buffer),
-		 "%s  0x%04X  0x%04X  %s",cpu->name_str,
+		 "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 		 address,
 		 trace_buffer[instruction_index]&0xffff,
 		 cpu->pma[address].name(a_string));

@@ -205,7 +205,7 @@ Module * Resistor::construct(const char *new_name)
 
   Resistor *resP = new Resistor;
 
-  resP->new_name(new_name);
+  resP->new_name((char*)new_name);
   resP->create_iopin_map();
 
 
@@ -285,7 +285,7 @@ void PullupResistor::create_iopin_map(void)
 
   pur = new PUResistor_IO();
   pur->res = res;
-  pur->put_name(name_str);
+  pur->put_name(name_str.c_str());
   assign_pin(1, pur);
 
 
@@ -313,7 +313,7 @@ Module * PullupResistor::pu_construct(const char *new_name)
   PullupResistor *pur = new PullupResistor(new_name);
 
   if(new_name) {
-    pur->new_name(new_name);
+    pur->new_name((char*)new_name);
     pur->res->put_name(new_name);
   }
 
@@ -334,7 +334,7 @@ Module * PullupResistor::pd_construct(const char *new_name)
   PullupResistor *pur = new PullupResistor(new_name);
 
   if(new_name) {
-    pur->new_name(new_name);
+    pur->new_name((char*)new_name);
     pur->res->put_name(new_name);
   }
   pur->create_iopin_map();
@@ -362,9 +362,7 @@ PullupResistor::PullupResistor(const char *init_name)
   attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
-  name_str = NULL; 
-
-  new_name(init_name);
+  new_name((char*)init_name);
 
 #ifdef HAVE_GUI
   pu_window = NULL;
@@ -403,7 +401,7 @@ void PullupResistor::build_window(void)
 
   gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
       
-  button = gtk_button_new_with_label (name());
+  button = gtk_button_new_with_label (name().c_str());
   gtk_signal_connect(GTK_OBJECT(button), "clicked",
 		     (GtkSignalFunc) pu_cb, (gpointer)this);
   gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);

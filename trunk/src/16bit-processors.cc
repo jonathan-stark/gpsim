@@ -56,7 +56,7 @@ pic_processor *_16bit_processor::construct(void)
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
   p->name_str = "generic 16bit processor";
-  symbol_table.add_module(p,p->name_str);
+  symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
 

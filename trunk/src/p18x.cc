@@ -232,8 +232,9 @@ Processor * P18C242::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18c242";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18c242");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -286,8 +287,8 @@ Processor * P18C252::construct(void)
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
 
-  p->name_str = "p18c252";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p18c252");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -527,8 +528,9 @@ Processor * P18C442::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18c442";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18c442");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -581,8 +583,9 @@ Processor * P18C452::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18c452";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18c452");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -660,8 +663,9 @@ Processor * P18F442::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18f442";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18f442");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -710,9 +714,9 @@ Processor * P18F248::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18f248";
 
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p18f248");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -761,9 +765,9 @@ Processor * P18F452::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18f452";
 
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p18f452");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -787,8 +791,9 @@ Processor * P18F1220::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18f1220";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18f1220");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 }
@@ -939,8 +944,9 @@ Processor * P18F1320::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "p18f1320";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p18f1320");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 

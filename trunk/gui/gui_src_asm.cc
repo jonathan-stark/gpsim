@@ -374,6 +374,14 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 			     pixel-inc/2);
 }
 
+void SourceBrowserAsm_Window::Update(void)
+{
+  if(!gp || !pma)
+    return;
+
+  SetPC(pma->get_PC());
+}
+
 /*
  this happens when breakpoint is set or unset
  ( Can it happen for another reason? )
@@ -2387,6 +2395,20 @@ void SourceBrowserAsm_Window::Build(void)
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();
+}
+
+void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
+{
+  pma = new_pma;
+
+  if(window && pma) {
+
+    char buffer[256];
+
+    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
+    gtk_window_set_title (GTK_WINDOW (window), buffer);
+    
+  }
 }
 
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)

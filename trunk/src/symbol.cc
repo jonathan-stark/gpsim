@@ -181,9 +181,9 @@ void Symbol_Table::add_module(Module * m, const char *new_name)
 
 }
 
-void Symbol_Table::remove_module(Module * m, char *name)
+//void Symbol_Table::remove_module(Module * m, char *name)
+void Symbol_Table::remove_module(Module * m)
 {
-//  cout << "removing module symbol\n";
 
   sti = st.begin();
   symbol *sym;

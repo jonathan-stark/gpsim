@@ -147,7 +147,7 @@ Module * Binary_Indicator::construct(const char *new_name)
 
   Binary_Indicator *biP = new Binary_Indicator;
 
-  biP->new_name(new_name);
+  biP->new_name((char *)new_name);
   biP->create_iopin_map();
 
 

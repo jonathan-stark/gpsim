@@ -75,7 +75,7 @@ void PushButton::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this switch
+  char *pin_name = (char*)name().c_str();   // Get the name of this switch
   if(pin_name) {
     pshb_port->new_name(pin_name);
   }
@@ -150,7 +150,7 @@ void PushButton::create_widget(PushButton *pb)
 	
   box1 = gtk_vbox_new (FALSE, 0);
 
-  button = gtk_button_new_with_label (pb->name());
+  button = gtk_button_new_with_label ((char*)pb->name().c_str());
   gtk_container_set_border_width (GTK_CONTAINER (button), 5);
 
   gtk_signal_connect (GTK_OBJECT (button), "pressed",			    
@@ -164,16 +164,16 @@ void PushButton::create_widget(PushButton *pb)
 	
 	
   // Tell gpsim which widget to use in breadboard.
-  pb->widget=box1;
+  pb->set_widget(box1);
 }
 
 //--------------------------------------------------------------
 // construct
-Module * PushButton::construct(const char *new_name=NULL)
+Module * PushButton::construct(const char *new_name=0)
 {
 
   PushButton *pshbP = new PushButton ;
-  pshbP->new_name(new_name);
+  pshbP->new_name((char*)new_name);
   pshbP->create_iopin_map();
 
   pshbP->create_widget(pshbP);

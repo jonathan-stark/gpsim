@@ -264,7 +264,7 @@ void LogicGate::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this logic gate
+  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
   if(pin_name) {
     port->new_name(pin_name);
   }
@@ -362,15 +362,12 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 Module * AND2Gate::construct(const char *new_name)
 {
 
-  //cout << " AND2Gate  construct\n";
 
   AND2Gate *a2gP = new AND2Gate ;
 
-  a2gP->new_name(new_name);
+  a2gP->new_name((char*)new_name);
   a2gP->set_number_of_pins(3);
   a2gP->create_iopin_map();
-
-  //cout << "AND2Gate should be constructed\n";
 
   return a2gP;
 
@@ -379,15 +376,11 @@ Module * AND2Gate::construct(const char *new_name)
 AND2Gate::AND2Gate(void)
 {
 
-    widget = create_pixmap(and2_pixmap);
+  set_widget(create_pixmap(and2_pixmap));
 
-  //cout << "AND2Gate constructor\n";
 }
 AND2Gate::~AND2Gate(void)
 {
-
-    //cout << "AND2Gate destructor\n";
-
 }
 
 
@@ -419,28 +412,23 @@ void ANDGate::update_state(void)
 OR2Gate::OR2Gate(void)
 {
 
-    widget = create_pixmap(or2_pixmap);
+  set_widget(create_pixmap(or2_pixmap));
 
-  //cout << "OR2Gate constructor\n";
 }
 OR2Gate::~OR2Gate(void)
 {
-  //cout << "OR2Gate destructor\n";
 
 }
 
 Module * OR2Gate::construct(const char *new_name)
 {
 
-  //cout << " OR2Gate  construct\n";
 
   OR2Gate *o2gP = new OR2Gate ;
 
-  o2gP->new_name(new_name);
+  o2gP->new_name((char*)new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
-
-  //cout << "OR2Gate should be constructed\n";
 
   return o2gP;
 
@@ -473,15 +461,11 @@ void ORGate::update_state(void)
 Module * NOTGate::construct(const char *new_name)
 {
 
-  //cout << " NOTGate  construct\n";
-
   NOTGate *a2gP = new NOTGate ;
 
-  a2gP->new_name(new_name);
+  a2gP->new_name((char*)new_name);
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
-
-  //cout << "NOTGate should be constructed\n";
 
   return a2gP;
 
@@ -490,14 +474,11 @@ Module * NOTGate::construct(const char *new_name)
 NOTGate::NOTGate(void)
 {
 
-    widget = create_pixmap(not_pixmap);
+  set_widget(create_pixmap(not_pixmap));
 
-  //cout << "NOTGate constructor\n";
 }
 NOTGate::~NOTGate(void)
 {
-
-  //cout << "NOTGate destructor\n";
 
 }
 
@@ -529,28 +510,21 @@ void NOTGate::update_state(void)
 XOR2Gate::XOR2Gate(void)
 {
 
-    widget = create_pixmap(xor2_pixmap);
+  set_widget(create_pixmap(xor2_pixmap));
 
-  //cout << "XOR2Gate constructor\n";
 }
 XOR2Gate::~XOR2Gate(void)
 {
-  //cout << "XOR2Gate destructor\n";
-
 }
 
 Module * XOR2Gate::construct(const char *new_name)
 {
 
-  //cout << " XOR2Gate  construct\n";
-
   XOR2Gate *o2gP = new XOR2Gate ;
 
-  o2gP->new_name(new_name);
+  o2gP->new_name((char*)new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
-
-  //cout << "XOR2Gate should be constructed\n";
 
   return o2gP;
 

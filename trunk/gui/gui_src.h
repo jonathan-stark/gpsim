@@ -33,6 +33,10 @@ class SourceBrowser_Window : public GUI_Object {
 
   GtkWidget *vbox;          // for children to put widgets in
 
+  ProgramMemoryAccess *pma;   // pointer to the processor's pma.
+
+  void set_pma(ProgramMemoryAccess *new_pma);
+
   void Create(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
@@ -77,7 +81,6 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 {
  public:
 
-  ProgramMemoryAccess *pma;   // pointer to the processor's pma.
 
   BreakPointList breakpoints;
   BreakPointList notify_start_list;
@@ -134,6 +137,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
+  virtual void Update(void);
   virtual void UpdateLine(int address);
   virtual void SetText(int id, int file_id);
 

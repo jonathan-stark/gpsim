@@ -70,14 +70,14 @@ list <Module *> instantiated_modules_list;
 Module::Module(void)
 {
 
-  name_str = 0;
-  widget=0;
+  //name_str = 0;
+  //widget=0;
   package = 0;
   interface = 0;
 
   // FIXME - remove these gui references:
-  x=-1; // -1 means automatic positioning
-  y=-1;
+  //x=-1; // -1 means automatic positioning
+  //y=-1;
 
   xref = new XrefObject;
 
@@ -86,7 +86,7 @@ Module::Module(void)
 Module::~Module(void)
 {
 
-  symbol_table.remove_module(this,name_str);
+  symbol_table.remove_module(this);
 
   instantiated_modules_list.remove(this);
 
@@ -107,19 +107,25 @@ Module * Module::construct(char * name)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void Module::new_name(const char *s)
+void Module::new_name(char *s)
 {
-  if(name_str)
-    delete name_str;
-
+  //  if(name_str)
+  //    delete name_str;
+  /*
   if(s)
     name_str = strdup(s);
   else
     name_str = 0;
+  */
 
+  name_str = string(s);
 }
 
 
+void Module::new_name(string &new_name)
+{
+  name_str = new_name;
+}
 
 
 
@@ -655,8 +661,15 @@ void module_set_position(char *module_name, int x, int y)
   if(!cpu)
     return;
 
+  // I (scott) removed the x and y member variables from the module class.
+  // These should either be module attributes or they should be handled
+  // with a gui wrapper. 
+
+  /*
   cpu->x=x;
   cpu->y=y;
+  */
+  cout << "module_set_position is broken at the moment\n";
   if(cpu->xref)
       cpu->xref->update();
 }

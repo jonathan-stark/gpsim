@@ -87,16 +87,13 @@ extern list <Module *> instantiated_modules_list;
 class Module {
 public:
 
-  char * name_str;                // A unique name to describe the Module
+  string  name_str;               // A unique name to describe the Module
   list<Attribute *> attributes;   // A list of attributes that pertain to the Module
   Package  *package;              // A package for the module
   ModuleInterface *interface;     // An interface to the module.
 
 
-  void *widget; // GtkWidget * that is put in the breadboard.
-
-  int x,y;
-  XrefObject *xref; // Updated when the module changes position
+  XrefObject *xref;               // Updated when the module changes position
 
   // I/O pin specific
 
@@ -116,54 +113,27 @@ public:
   virtual void set_attribute(char *attr, double val);
 
   virtual Attribute *get_attribute(char *attr);
-
   virtual void dump_attributes(int show_values=1);
-  const virtual char *type(void) { return (name_str); };
-  char *name(void) {return name_str;};
-  virtual void new_name(const char *);
 
-  static Module *construct(char *name);
+  // gui
+  virtual void set_widget(void * a_widget) {widget = a_widget;}
+  virtual void *get_widget(void) {return widget;}
+
+  const virtual char *type(void) { return (name_str.c_str()); };
+  string &name(void) {return name_str;};
+  virtual void new_name(char *);
+  virtual void new_name(string &);
+
+  static Module *construct(char *);
   Module(void);
   virtual ~Module();
 
-};
+ private:
+  void *widget;   // GtkWidget * that is put in the breadboard.
 
-#if 0
-/**************************************************************
-* External Modules
-*  The class for external modules is a combination of the internal
-* module class and the package class. 
-*
-*/
-class ExternalModule : public Module, public Package
-{
- public:
-
-  // Define a set of virtual functions to redirect overloaded functions
-  // to the proper place. There probably is a better way to do this...
-
-  virtual int get_pin_count(void)
-    {
-      return Package::get_pin_count();
-    };
-
-  virtual char *get_pin_name(unsigned int pin_number) 
-    {
-      return Package::get_pin_name(pin_number);
-    };
-
-  virtual int get_pin_state(unsigned int pin_number) 
-    {
-      return Package::get_pin_state(pin_number);
-    };
-
-  virtual IOPIN *get_pin(unsigned int pin_number) 
-    {
-      return Package::get_pin(pin_number);
-    };
+  //  int x,y;
 
 };
-#endif
 
 class Module_Types
 {

@@ -1,3 +1,7 @@
+2004-03-30  Scott Dattalo  <scott@dattalo.com>
+	* lcd.cc: updated to latest simulator interface changes (where 
+	char *'s were changed to strings)
+	
 2004-03-08  Scott Dattalo  <scott@dattalo.com>
 	* lcd.h, lcd.cc, lcdengine.cc, examples/lcd.asm:
 	Fixed the busy bit logic.

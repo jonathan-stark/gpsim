@@ -1430,8 +1430,8 @@ static void settings_set_cb(GtkWidget *button,
 
 static void treeselect_module(GtkItem *item, struct gui_module *p)
 {
-    char string[STRING_SIZE];
-    snprintf(string,sizeof(string),"%s settings",p->module->name());
+    char buffer[STRING_SIZE];
+    snprintf(buffer,sizeof(buffer),"%s settings",p->module->name().c_str());
     switch(p->type)
     {
     case PIC_MODULE:
@@ -1439,14 +1439,14 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
 	gtk_widget_hide(p->bbw->node_frame);
 	gtk_widget_hide(p->bbw->module_frame);
 	gtk_widget_show(p->bbw->pic_frame);
-        gtk_frame_set_label(GTK_FRAME(p->bbw->pic_frame),string);
+        gtk_frame_set_label(GTK_FRAME(p->bbw->pic_frame),buffer);
         break;
     case EXTERNAL_MODULE:
 	gtk_widget_hide(p->bbw->stimulus_frame);
 	gtk_widget_hide(p->bbw->node_frame);
 	gtk_widget_hide(p->bbw->pic_frame);
 	gtk_widget_show(p->bbw->module_frame);
-	gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),string);
+	gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),buffer);
 
 	// freeze
         gtk_clist_freeze(GTK_CLIST(p->bbw->attribute_clist));
@@ -1641,8 +1641,8 @@ static void pointer_cb(GtkWidget *w,
 	if(dragging)
 	{
             position_module(dragged_module, x+pinspacing, y+pinspacing);
-	    dragged_module->module->x = dragged_module->x;
-	    dragged_module->module->y = dragged_module->y;
+	    //dragged_module->module->x = dragged_module->x;
+	    //dragged_module->module->y = dragged_module->y;
 	}
 	break;
     case GDK_BUTTON_PRESS:
@@ -2419,12 +2419,13 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     // Save processor command. How?
     m=bbw->gp->cpu;
+    /*
     if(m && m->x>=0 && m->y>=0)
 	fprintf(fo, "module position %s %d %d\n",
 		m->name(),
 		m->x,
 		m->y);
-
+    */
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
     for (mi = module_list.begin();
@@ -2448,13 +2449,14 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 	fprintf(fo, "module load %s %s\n",
 		m->type(),
-		m->name());
-
+		m->name().c_str());
+	/*
         if(m->x>=0 && m->y>=0)
 	    fprintf(fo, "module position %s %d %d\n",
 		    m->name(),
 		    m->x,
 		    m->y);
+	*/
 
 	for(attribute_iterator = m->attributes.begin();
 		attribute_iterator != m->attributes.end();
@@ -2464,7 +2466,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		locattr->sGet(attrval,50);
 		
 		fprintf(fo, "module set %s %s %s\n",
-				m->name(),
+				m->name().c_str(),
 				locattr->get_name(),
 				attrval);
 	}
@@ -2682,7 +2684,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     assert(package!=0);
 
     GtkWidget *tree_item;
-    tree_item = gtk_tree_item_new_with_label (p->module->name());
+    tree_item = gtk_tree_item_new_with_label (p->module->name().c_str());
     gtk_signal_connect(GTK_OBJECT(tree_item),
 		       "select",
 		       (GtkSignalFunc) treeselect_module,
@@ -2845,14 +2847,14 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->name_widget = gtk_drawing_area_new();
 #if GTK_MAJOR_VERSION >= 2
     height = gdk_string_height(gdk_font_from_description(bbw->pinnamefont),
-			       p->module->name());
+			       p->module->name().c_str());
     width = gdk_string_width(gdk_font_from_description(bbw->pinnamefont),
-			    p->module->name());
+			    p->module->name().c_str());
 #else
     height = gdk_string_height(bbw->pinnamefont,
-			       p->module->name());
+			       p->module->name().c_str());
     width = gdk_string_width(bbw->pinnamefont,
-			    p->module->name());
+			    p->module->name().c_str());
 #endif
     gtk_drawing_area_size(GTK_DRAWING_AREA(p->name_widget),width,height);
     p->name_pixmap = gdk_pixmap_new(bbw->window->window,
@@ -2873,7 +2875,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 #endif
                   p->bbw->pinname_gc,
 		  0,height,
-		  p->module->name(),strlen(p->module->name()));
+		  p->module->name().c_str(),strlen(p->module->name().c_str()));
     gtk_signal_connect(GTK_OBJECT(p->name_widget),
 		       "expose_event",
 		       (GtkSignalFunc) name_expose,
@@ -2992,6 +2994,7 @@ void Breadboard_Window::Update(void)
 
     p = (struct gui_module*)iter->data;
 
+    /*
     // Check if module has changed its position
     if(p->module->x!=p->x || p->module->y!=p->y)
       {
@@ -3005,7 +3008,7 @@ void Breadboard_Window::Update(void)
 	    update_board_matrix(p->bbw);
 	  }
       }
-
+    */
 
     // Check if pins have changed state
     pin_iter=p->pins;
@@ -3098,9 +3101,9 @@ void Breadboard_Window::NewModule(Module *module)
 
 
   GtkWidget *widget=0;
-
-  if(module->widget!=0)
-    widget=GTK_WIDGET(module->widget);
+  
+  //if(module->widget!=0)
+  //  widget=GTK_WIDGET(module->widget);
 
   struct gui_module *p=create_gui_module(this, EXTERNAL_MODULE, module, widget);
 

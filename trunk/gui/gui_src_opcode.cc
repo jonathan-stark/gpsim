@@ -1239,7 +1239,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   assert(wt==WT_opcode_source_window);
 
-
+  pma = &gp->cpu->pma;
   pm_size = gp->cpu->program_memory_size();
 
   if(memory!=0)
@@ -1574,6 +1574,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   menu = "<main>/Windows/Program memory";
 
   window = 0;
+  pma =0;
 
   column_titles = titles;
   columns = 4;
