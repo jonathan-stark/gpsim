@@ -84,8 +84,8 @@ char *Branching::name(char *return_str)
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%x)",
 	  name_str,
 	  (opcode & 0x80) ? '-' : '+', 
-	  destination & 0x7f,
-	  absolute_destination);
+	  (destination & 0x7f)<<1,
+	  absolute_destination<<1);
 
 
   return(return_str);
@@ -115,7 +115,7 @@ char * multi_word_branch::name(char *return_str)
   if(!initialized)
     runtime_initialize();
 
-  sprintf(return_str,"%s\t0x%05x",name_str,destination);
+  sprintf(return_str,"%s\t0x%05x",name_str,destination<<1);
 
   return(return_str);
 }
@@ -435,8 +435,8 @@ char * BRA::name(char *return_str)
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  name_str,
 	  (opcode & 0x400) ? '-' : '+', 
-	  destination & 0x7ff,
-	  absolute_destination);
+	  (destination & 0x7ff)<<1,
+	  absolute_destination<<1);
 
   return(return_str);
 }
@@ -524,7 +524,7 @@ char *CALL16::name(char  *return_str)
     runtime_initialize();
 
   sprintf(return_str,"call\t0x%05x%s",
-	  destination,
+	  destination<<1,
 	  ((fast) ? ",f" : " "));
 
   return(return_str);
@@ -1577,8 +1577,8 @@ char * RCALL::name(char *return_str)
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  name_str,
 	  (destination < 0) ? '-' : '+', 
-	  destination & 0x7ff,
-	  absolute_destination);
+	  (destination & 0x7ff)<<1,
+	  absolute_destination<<1);
 
   return(return_str);
 }

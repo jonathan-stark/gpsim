@@ -525,7 +525,7 @@ unsigned int PCL16::get(void)
 
 unsigned int PCL16::get_value(void)
 {
-  return(((value+1)<<1) & 0xff);
+  return((value<<1) & 0xff);
 
 }
 

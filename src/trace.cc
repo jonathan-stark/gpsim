@@ -245,15 +245,19 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       break;
     case PROGRAM_COUNTER:
       if(trace_flag & TRACE_PROGRAM_COUNTER) {
-	i = trace_buffer[index]&0xffff;
+	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
 	snprintf(buffer, bufsize,"  pc: 0x%04x %s", 
-		 i ,cpu->program_memory[i]->name(a_string));
+		 address ,
+		 cpu->pma[address].name(a_string));
       }
       break;
     case PC_SKIP:
-      i = trace_buffer[index]&0xffff;
-      snprintf(buffer, bufsize,"  skipped: %04x %s",
-	       i, cpu->program_memory[i]->name(a_string));
+      {
+	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
+	snprintf(buffer, bufsize,"  skipped: %04x %s",
+		 address ,
+		 cpu->pma[address].name(a_string));
+      }
       break;
     case REGISTER_READ_VAL:
     case REGISTER_READ:
@@ -531,10 +535,14 @@ int Trace::dump_instruction(unsigned int instruction_index)
     if(string_cycle && out_stream) 
       fprintf(out_stream,"0x%016LX  ",string_cycle);
 
+
+    int address  = cpu->map_pm_index2address(i);
     snprintf(string_buffer, sizeof(string_buffer),
-	     "%s  0x%04X  0x%04X  %s",cpu->name_str,i,
+	     "%s  0x%04X  0x%04X  %s",cpu->name_str,
+	     address,
 	     trace_buffer[instruction_index]&0xffff,
-	     cpu->program_memory[i]->name(a_string) );
+	     cpu->pma[address].name(a_string));
+
     if(out_stream)
       fprintf(out_stream,"%s\n",string_buffer);
     string_index = instruction_index;
@@ -649,10 +657,14 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 	if(string_cycle && out_stream) 
 	  fprintf(out_stream,"0x%016LX  ",string_cycle);
 
+	int address  = cpu->map_pm_index2address(i);
 	snprintf(string_buffer, sizeof(string_buffer),
-		 "%s  0x%04X  0x%04X  %s",cpu->name_str,i,
+		 "%s  0x%04X  0x%04X  %s",cpu->name_str,
+		 address,
 		 trace_buffer[instruction_index]&0xffff,
-		 cpu->program_memory[i]->name(a_string) );
+		 cpu->pma[address].name(a_string));
+
+
 	if(out_stream)
 	  fprintf(out_stream,"%s\n",string_buffer);
 	string_index = instruction_index;
