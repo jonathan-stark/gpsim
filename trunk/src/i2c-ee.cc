@@ -91,7 +91,7 @@ public:
 //
 //
 
-class I2C_EE_SDA : public IO_bi_directional
+class I2C_EE_SDA : public IO_open_collector
 {
 public:
 
@@ -99,15 +99,15 @@ public:
   bool read_state;
 
   I2C_EE_SDA (I2C_EE *_eeprom, char *opt_name=NULL) 
-    : IO_bi_directional((IOPORT *)0,1,opt_name) { 
+    : IO_open_collector((IOPORT *)0,1,opt_name) { 
 
     eeprom = _eeprom;
 
     digital_state = true;
-    read_state = 1;
+    read_state = true;
 
     // Make the pin an output.
-    update_direction(IO_bi_directional::DIR_INPUT);
+    update_direction(IO_bi_directional::DIR_OUTPUT);
 
   };
 
@@ -149,6 +149,7 @@ public:
       cout << "      ... that's an edge, so call handler\n";
       eeprom->new_sda_edge(new_dstate);
       digital_state = new_dstate;
+      read_state = new_dstate;
 
     }
 
@@ -382,6 +383,10 @@ void I2C_EE::new_scl_edge ( bool direction )
 
 void I2C_EE::new_sda_edge ( bool direction )
 {
+  cout << "I2C_EE::new_sda_edge " 
+       << " direction=" << direction
+       << " scl->digital_state=" << scl->digital_state
+       << " bus_state="<< bus_state << endl;
     if ( scl->digital_state )
     {
         if ( direction )

@@ -165,7 +165,7 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
 //-------------------------------------------------------------------
 bool IOPORT::get_bit(unsigned int bit_number)
 {
-  cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
+  //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
   return (internal_latch &  (1<<bit_number )) ? true : false;
 
 }

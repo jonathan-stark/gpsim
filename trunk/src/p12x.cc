@@ -305,7 +305,7 @@ void P12CE518::create(void)
   gpio.value       = por_value;
   gpio.por_value   = por_value;
   gpio.wdtr_value  = por_value;
-  gpio.putRV(por_value);
+  gpio.put(0xc0);
 
   if(verbose)
     cout << " ... create additional (internal) I/O\n";
