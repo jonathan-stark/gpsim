@@ -30,7 +30,6 @@ Boston, MA 02111-1307, USA.  */
   POWERON,
   ST_INITIALIZED,
   ST_COMMAND_PH0,
-  ST_DATA_PH0,
   ST_STATUS_READ,
   
 */
@@ -170,18 +169,22 @@ void LcdDisplay::send_status(void)
 
   status = ( cursor.row * 0x40 ) + cursor.col;
 
-  if ( is_busy() )
+  if ( busyTimer.isBusy() ) {
+    //cout << "busy bit is set in send_status()\n";
     status |= 0x80;
+  }
 
   if(in_8bit_mode()) {
+    data_port->update_pin_directions(true);
     data_port->put ( status );
-    //data_port->update_pin_directions(0xFF);
   } else {
+    data_port->update_pin_directions(true);
+
     if (data_latch_phase & 1 )
       data_port->put ( status );
     else
       data_port->put ( status << 4 );
-    //data_port->update_pin_directions(0xF0);
+
     data_latch_phase ^= 1;
   }
 
@@ -190,7 +193,7 @@ void LcdDisplay::send_status(void)
 
 void LcdDisplay::release_port(void)
 {
-  //data_port->update_pin_directions(0);
+  data_port->update_pin_directions(false);
   newState(ST_INITIALIZED);
 }
 
@@ -207,7 +210,7 @@ void LcdDisplay::execute_command(void)
     if(debug)
       cout << "LCD_CMD_SET_DDRAM\n";
     write_ddram_address(data_latch & 0x7f);
-    set_busy(39);	// busy for 39 usec after set DDRAM addr
+    busyTimer.set(39e-6);	// busy for 39 usec after set DDRAM addr
   }
   else if( (data_latch & LCD_MASK_SET_CGRAM) ==  LCD_CMD_SET_CGRAM) {
     cout << "LCD_CMD_SET_CGRAM\n";
@@ -237,7 +240,7 @@ void LcdDisplay::execute_command(void)
     else
       set_small_font_mode();
 
-    set_busy(39);	// busy for 39 usec after DDRAM write
+    busyTimer.set(39e-6);	// busy for 39 usec after DDRAM write
   }
   else if( (data_latch & LCD_MASK_CURSOR_DISPLAY) ==  LCD_CMD_CURSOR_DISPLAY) {
     cout << "LCD_CMD_CURSOR_DISPLAY\n";
@@ -275,7 +278,7 @@ void LcdDisplay::execute_command(void)
     if(debug)
       cout << "LCD_CMD_CLEAR_DISPLAY\n";
     clear_display();
-    set_busy(1350);	// busy for 1.3 msec after clear screen
+    busyTimer.set(1350e-6);	// busy for 1.3 msec after clear screen
   }
   else
     cout << "UNKOWN command : 0x" << hex << data_latch << '\n';
@@ -387,6 +390,9 @@ void LcdDisplay::advanceState( ControlLineEvent e)
   if(e == DataChange)
     return;
 
+  if(!(eventTransition & E_transition))
+    return;
+
   switch(current_state) {
   case ST_INITIALIZED:
   case POWERON:
@@ -442,28 +448,6 @@ void LcdDisplay::advanceState( ControlLineEvent e)
 
     break;
 
-  case ST_DATA_PH0:
-    switch(e) {
-    case  eWD:
-      new_data();
-      break;
-
-    case  eRD:
-    case  eRC:
-    case  eWC:
-    case  ERD:
-    case  ERC:
-    case  EWD:
-    case  EWC:
-      debug_events(this, e, current_state);
-      cout << "?? unhandled state transition\n";
-      newState(ST_INITIALIZED);
-      break;
-    }
-
-
-    break;
-
   case ST_STATUS_READ:
     switch(e) {
     case  eRD:
@@ -509,8 +493,6 @@ char * LcdDisplay::getStateName(State s)
     return "initialized";
   case ST_COMMAND_PH0:
     return "command start";
-  case ST_DATA_PH0:
-    return "data start";
   case ST_STATUS_READ:
     return "reading status";
 
