@@ -41,10 +41,13 @@ cmd_icd::cmd_icd(void)
 { 
   name = "icd";
 
-    brief_doc = string("ICD commands.");
+    brief_doc = string("ICD command.");
 
-    long_doc = string ("\nicd [FIXME]\n\
-\tFIXME.\n\
+    long_doc = string ("\nicd [open <port>]\n\
+\tThe open command is used to enable ICD mode and specify the serial\n\
+\tport where the ICD is. (e.g. \"icd open /dev/ttyS0\").\n\
+\tWithout options (and after the icd is enabled), it will print some\n\
+\tinformation about the ICD.\n\
 ");
 
   op = cmd_icd_options; 

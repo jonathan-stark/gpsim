@@ -351,6 +351,9 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
             continue;
         }
 	//
+	if(s.name!=NULL)
+		free(s.name);
+	s.name=(char*)malloc((*interface_sti)->name()->length()+1);
         strncpy(s.name,
                 (*interface_sti)->name()->data(),
                 (*interface_sti)->name()->length());
