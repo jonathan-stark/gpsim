@@ -159,6 +159,87 @@ private:
   PortRegister *port_register;
 };
 
+/// MuxSource - A single input to a Multiplexer.
+///  A MuxSource is a pure virtual base class designed to be 
+///  one of the base classes in in a multiple inheritance 
+///  class design.
+///
+class MuxSource
+{
+public:
+  virtual unsigned int mGet()=0;
+private:
+};
+
+/// MuxControl - The control for a 2:1 multiplexer.
+class MuxControl
+{
+public:
+  virtual bool bGet()=0;
+private:
+};
+
+/// Mux2_1 - A 2:1 multiplexer
+
+class Mux2_1
+{
+public:
+  Mux2_1(MuxSource *srcA, MuxSource *srcB, MuxControl *cont, unsigned int m);
+  unsigned int get();
+private:
+  MuxSource *a;
+  MuxSource *b;
+  MuxControl *control;
+  unsigned int valid_bits;
+};
+
+
+class DecoderSink
+{
+public:
+  virtual void dPut(unsigned int)=0;
+};
+class DecoderControl
+{
+public:
+  virtual bool bDecControl()=0;
+};
+class Decoder1_2
+{
+public:
+  Decoder1_2();
+  void put(unsigned int);
+private:
+  DecoderSink *a;
+  DecoderSink *b;
+  DecoderControl *control;
+  unsigned int valid_bits;
+};
+
+
+//-------------------------------------------------------------------
+Mux2_1::Mux2_1(MuxSource *srcA, MuxSource *srcB, MuxControl *cont, unsigned int m)
+  : a(srcA), b(srcB), control(cont), valid_bits(m)
+{
+}
+//-------------------------------------------------------------------
+// Mux2_1::get()
+//
+// The mux output is driven from one of 2 inputs
+//-------------------------------------------------------------------
+unsigned int Mux2_1::get()
+{
+  return (control->bGet() ? a->mGet() : b->mGet()) & valid_bits;
+}
+
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+// Experiment:
+
+//class PortARegister : public Register , public 
+
 //-------------------------------------------------------------------
 //
 // IOPORT::update_stimuli
@@ -179,80 +260,7 @@ int IOPORT::update_stimuli(void)
   return v ^ get_value();
 }
 
-#if 0
-  guint64 time = cycles.value;
-  int input = 0;
-  int m;
-  unsigned int i;
 
-  // Loop through the io pins and determine if there are
-  // any sources attached to the same node
-
-
-  for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-    if(stimulus_mask & m) {
-      if(pins[i] && pins[i]->snode!=0) {
-	pins[i]->snode->update(time);
-	cout << "warning -- IOPORT::update_stimuli has changed\n";
-	/*
-	double t = pins[i]->snode->update(time);
-
-	if(t  > pins[i]->l2h_threshold)
-	  input |= m;
-	else if (t >= pins[i]->h2l_threshold)
-	  input |= (value.get() & m);
-	*/
-      }
-    }
-
-  return input;
-#endif
-
-
-
-#if 0
-int PIC_IOPORT::update_stimuli(void)
-{
-
-  // Loop through the io pins and determine if there are
-  // any sources attached to the same node
-
-  guint64 time = cycles.value;
-  int input = 0;
-  unsigned int old_value = value.get();
-
-  for(unsigned int i = 0, m=1; i<num_iopins; i++, m <<= 1)
-    if(stimulus_mask & m) {
-      if(pins[i] && pins[i]->snode!=0) {
-
-	pins[i]->snode->update(time);
-	cout << "warning -- IOPORT::update_stimuli has changed\n";
-	/*
-	double t = pins[i]->snode->update(time);
-
-	if(old_value & m) {
-	  // The old value was a high.
-	  if (t >= pins[i]->h2l_threshold)
-	    input |= m;   // still is high
-	} else {
-	  // The old value was a low
-	  if(t  > pins[i]->l2h_threshold)
-	    input |= m;   // changed to a high.
-	}
-	*/
-	/*
-	cout << "Pin " << i 
-	     << ", current value = " << ((old_value & m) ? 1:0)
-	     << " stimulus voltage " << t
-	     << " new value = " << ((input & m) ? 1:0)
-	     << endl;
-	*/
-      }
-    }
-
-  return input;
-}
-#endif
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -389,12 +397,6 @@ void IOPORT::put(unsigned int new_value)
       if((diff&1) && pins[i] && pins[i]->snode)
 	pins[i]->snode->update(time);
   }
-
-  // Update the stimuli - if there are any
-  /*
-  if(stimulus_mask)
-    update_stimuli();
-  */
 
 }
 
