@@ -76,6 +76,7 @@ typedef enum {
     MENU_REMOVE_GROUP,
     MENU_ADD_GROUP,
     MENU_ADD_ALL_LABELS,
+    MENU_ADD_FUNCTION_LABELS,
     MENU_PLOT,
 } menu_id;
 
@@ -95,6 +96,7 @@ static menu_item menu_items[] = {
     {"Remove range", MENU_REMOVE_GROUP},
     {"Add range...", MENU_ADD_GROUP},
     {"Add all labels", MENU_ADD_ALL_LABELS},
+    {"Add C functions (non-matching _<hexval>_DS_)", MENU_ADD_FUNCTION_LABELS},
     {"Snapshot to plot", MENU_PLOT},
 };
 
@@ -509,6 +511,12 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     if(has_old_graph)
     {
+	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext);
+	for(i=0;i<last_numpoints;i++)
+	{
+	    gtk_plot_remove_text(GTK_PLOT(active_plot),bartext[i]);
+
+	}
         free(px2);
         free(py2);
 	free(dx2);
@@ -518,7 +526,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     px2=malloc(numpoints*sizeof(double));
     py2=malloc(numpoints*sizeof(double));
     dx2=malloc(numpoints*sizeof(double));
-    bartext=malloc(numpoints*sizeof(GtkPlotText));
+    bartext=malloc(numpoints*sizeof(GtkPlotText*));
 
 #define WINDOWWIDTH 550
 #define WINDOWHEIGHT 650
@@ -561,6 +569,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     t=time(NULL);
 
+    // Compute module name to put in infostring
     for(i=0;i<gpsim_get_number_of_source_files(pic_id);i++)
     {
 	struct file_context *gpsim_file;
@@ -579,6 +588,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	}
     }
 
+    // This information is put at top of the plot
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
 	    filename,
             ctime(&t),
@@ -594,6 +604,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     page_width = GTK_PLOT_LETTER_W * scale;
     page_height = GTK_PLOT_LETTER_H * scale;
 
+    // Only create the window once.
     if(!window1)
     {
 	window1=gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -654,8 +665,6 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
-	//    gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT,"Cycles");
-	//    gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT,"Cycles");
 	gtk_plot_set_legends_border(GTK_PLOT(active_plot), 2, 3);
 	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
 	gtk_widget_show(active_plot);
@@ -668,8 +677,6 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_ORIENTATION_VERTICAL, tickdelta, 1);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
-
-    printf("maxy %f, barwidth %f, tickdelta %f\n",(float)maxy,barwidth,tickdelta);
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, dx2, NULL, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
@@ -684,13 +691,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     gtk_widget_show(GTK_WIDGET(dataset));
 
-//    gtk_plot_data_draw_points(GTK_PLOT_DATA(dataset),numpoints);
-//    gtk_plot_data_paint(GTK_PLOT_DATA(dataset));
-
-    for(i=0;i<last_numpoints;i++)
-    {
-	gtk_plot_remove_text(GTK_PLOT(active_plot),bartext[i]);
-    }
+    // Put the description text under each bar in the plot.
     for(i=0;i<numpoints;i++)
     {
 
@@ -709,9 +710,6 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	gtk_plot_draw_text(GTK_PLOT(active_plot),*bartext[i]);
 
     }
-
-    if(has_old_graph)
-	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext);
 
     infotext=gtk_plot_put_text(GTK_PLOT(active_plot),
 			       PLOTXPOS,
@@ -740,8 +738,8 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
-    char fromaddress_string[32];
-    char toaddress_string[32];
+    char fromaddress_string[256];
+    char toaddress_string[256];
     menu_item *item;
     sym *s;
     GList *symlist=NULL;
@@ -789,7 +787,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	iter=symlist;
 	while(iter!=NULL)
 	{
-	    sym *s=iter->data;
+	    s=iter->data;
 
 	    strcpy(toaddress_string,s->name);
 	    add_range(popup_pw,fromaddress_string,toaddress_string);
@@ -801,6 +799,52 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
 	add_range(popup_pw,fromaddress_string,toaddress_string);
+
+	while(symlist!=NULL)
+	    symlist=g_list_remove(symlist,symlist->data);
+
+	break;
+    case MENU_ADD_FUNCTION_LABELS:
+	gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+	while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+	{
+	    if(s->type==SYMBOL_ADDRESS)
+	    {
+                unsigned int whatever;
+		if(NULL==strstr(s->name,"_DS_"))
+		{
+		    sym *data;
+		    data=malloc(sizeof(sym));
+		    memcpy(data,s,sizeof(sym));
+		    symlist=g_list_append(symlist,data);
+		}
+	    }
+	}
+	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+
+	iter=symlist;
+	if(iter!=NULL)
+	{
+	    s=iter->data;
+	    strcpy(fromaddress_string,s->name);
+	    free(s);
+	    iter=iter->next;
+	    while(iter!=NULL)
+	    {
+		s=iter->data;
+		strcpy(toaddress_string,s->name);
+		add_range(popup_pw,fromaddress_string,toaddress_string);
+		strcpy(fromaddress_string,toaddress_string);
+		toaddress_string[0]='\0';
+		free(s);
+		iter=iter->next;
+	    }
+
+	    sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	    add_range(popup_pw,fromaddress_string,toaddress_string);
+
+	}
 
 	while(symlist!=NULL)
 	    symlist=g_list_remove(symlist,symlist->data);
@@ -837,7 +881,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    else
 	    {
                 pointlabel[i]=malloc(128);
-		sprintf(pointlabel[i],"%s - %s",range_entry->startaddress_text,range_entry->endaddress_text);
+		sprintf(pointlabel[i],"%s (end: %s)",range_entry->startaddress_text,range_entry->endaddress_text);
                 cyclearray[i]=range_entry->last_count;
 	    }
 	}
@@ -866,6 +910,7 @@ static void update_menus(Profile_Window *pw)
 		entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
 		if(menu_items[i].id!=MENU_ADD_GROUP &&
 		   menu_items[i].id!=MENU_ADD_ALL_LABELS &&
+		   menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
 		   menu_items[i].id!=MENU_PLOT &&
 		   entry==NULL)
 		    gtk_widget_set_sensitive (item, FALSE);
@@ -1265,8 +1310,8 @@ BuildProfileWindow(Profile_Window *pw)
       return 0;
   }
 
-  gui_message("There are bugs here in the profile viewer.\n\
-	      Please help them get reported and/or fixed.");
+//  gui_message("There are bugs here in the profile viewer.\n\
+//	      Please help them get reported and/or fixed.");
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
