@@ -31,16 +31,17 @@ CONFIG_WORD	EQU	_CP_OFF & _WDT_OFF
     ;; Simple program to square a number:
 
 
-        movlw   4
-        movwf   count
-
-        movf    count,W
+    ;; This loop is designed to be easily controlled by the script.
+    ;; The script will set a break point at the 'start:' label. Each
+    ;; time the breakpoint is encounterd, the previous call to 'square'
+    ;; is checked and the input for the next time is initialized.
 
 start:
+        movf    count,W
         call    square
 
 
-        goto    done
+        goto    start
 
 
 
