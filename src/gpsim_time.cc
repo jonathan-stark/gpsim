@@ -365,10 +365,10 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
 
-  bool found_old = 0;
-  bool break_set = 0;
+  bool found_old = false;
+  bool break_set = false;
 
-  reassigned = 1;   // assume that the break point does actually get reassigned.
+  reassigned = true;   // assume that the break point does actually get reassigned.
 
 #ifdef __DEBUG_CYCLE_COUNTER__
   cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle;
@@ -416,7 +416,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
 #endif
 	
       if(l1->next->f == f)
-	found_old = 1;
+	found_old = true;
       else
 	l1 = l1->next;
     }
@@ -520,6 +520,9 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
       if(l1->break_value < new_cycle)
 	{
 	  l1->next->break_value = new_cycle;
+
+	  break_on_this = active.next->break_value;
+
 #ifdef __DEBUG_CYCLE_COUNTER__
 	  cout << " replaced at current position\n";
 	  dump_breakpoints();   // debug
@@ -568,7 +571,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
     // oops our assumption was wrong, we were unable to reassign the break point 
     // to another cycle because we couldn't find the old one!
 
-    reassigned = 0;
+    reassigned = false;
 
     // If the break point was not found, it can't be moved. So let's just create
     // a new break point.
