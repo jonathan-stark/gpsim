@@ -1,3 +1,10 @@
+2004-11-01 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_time.cc, src/gpsim_time.h, src/breakpoints.cc, src/ioports.h, 
+	src/ioports.cc, src/stimuli.cc, src/tmr0.cc: Interrupts, tmr0 and
+	I/O pins were all broken in some way.
+	* regression/interrupts_14bit.asm, regression/interrupts_14bit.stc:
+	Added regression test for the midrange devices
+
 2004-10-29 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc, src/gpsim_time.h: Cycle counter debugging.
 	

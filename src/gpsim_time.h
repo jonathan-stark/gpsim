@@ -30,23 +30,56 @@ Boston, MA 02111-1307, USA.  */
 // between the different peripherals within a processor and
 // in some cases, the timing between several simulated processors
 // and modules.
+//
+// The smallest quantum of simulated time is called a 'cycle'.
+// The simuluation engine increments a 'Cycle Counter' at quantum
+// simulation step. Simulation objects that wished to be notified
+// at a specific instance in time can set a cycle counter break
+// point that will get invoked whenever the cycle counter reaches
+// that instance.
+
+
+
+//------------------------------------------------------------
+//
+// Cycle counter breakpoint list
+//
+// This is a friend class to the Cycle Counter class. Its purpose
+// is to maintain a doubly linked list of cycle counter break
+// points.
 
 class Cycle_Counter_breakpoint_list
 {
-  // This class is used to implement a very simple doubly-linked-list.
-  // See Cycle_Counter::set_break for more details on how it is used.
 
 public:
+  // This is the value compared to the cycle counter.
+  guint64 break_value;
+
+  // True when this break is active.
+  bool bActive;
+
+  // The breakpoint_number is a number uniquely identifying this
+  // cycle counter break point. Note, this number is used only 
+  // when the break point was assigned by a user
+
+  unsigned int breakpoint_number;
+
+  // If non-null, the TriggerObject will point to an object that will get invoked
+  // when the breakpoint is encountered.
+
+  TriggerObject *f;
+
+  // Doubly-linked list mechanics..
+  // (these will be made private eventually)
   Cycle_Counter_breakpoint_list *next;
   Cycle_Counter_breakpoint_list *prev;
 
-  guint64 break_value;
-  unsigned int breakpoint_number;  // sytem bp (this is used if the user set a bp.
-				   // It tells which system bp needs to be cleared
-                                   // when the cycle break is hit. If a peripheral set
-                                   // a cycle break, then there is no corresponding 
-                                   // system break.)
-  TriggerObject *f;
+
+  Cycle_Counter_breakpoint_list *getNext();
+  Cycle_Counter_breakpoint_list *getPrev();
+  void clear();
+  void invoke();
+  
 };
 
 class Cycle_Counter
@@ -91,21 +124,21 @@ public:
       while(active.next  && value == active.next->break_value) {
 	
 
+	reassigned = false;
 	if(active.next->f) {
 	  // This flag will get set true if the call back
 	  // function moves the break point to another cycle.
-	  reassigned = false;
 
 	  active.next->f->callback();
 
-	  if(!reassigned)    // don't try to clear if the break point was reassigned.
-	    clear_current_break();
-
-	  if(active.next)
-	    break_on_this = active.next->break_value;
-
 	} else 
 	  get_bp().check_cycle_break(active.next->breakpoint_number);
+
+	if(!reassigned)    // don't try to clear if the break point was reassigned.
+	  clear_current_break();
+
+	if(active.next)
+	  break_on_this = active.next->break_value;
 
       }
     }

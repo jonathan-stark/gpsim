@@ -313,34 +313,11 @@ void IOPORT::put(unsigned int new_value)
 
 void PIC_IOPORT::put(unsigned int new_value)
 {
+  //cout << name() << "::put 0x" << hex << new_value << endl;
+
+  RegisterValue oldValue = value;
   IOPORT::put(new_value);
-#if 0
-  if(new_value > 255)
-    cout << "PIC_IOPORT::put value >255\n";
-
-  // The I/O Ports have an internal latch that holds the state of the last
-  // write, even if the I/O pins are configured as inputs. If the tris port
-  // changes an I/O pin from an input to an output, then the contents of this
-  // internal latch will be placed onto the external I/O pin.
-
-  internal_latch = new_value;
-
-  trace.raw(write_trace.get() | value.get());
-
-  // Update the stimuli - if there are any
-  unsigned int outputs=new_value & ~tris->value.get() & ~stimulus_mask;
-  unsigned int inputs=value.get() & tris->value.get() & ~stimulus_mask;
-  unsigned int stim= stimulus_mask ? update_stimuli() : 0;
-
-  /*
-  cout << name() << "::put("<<new_value<<") " 
-       << " outputs=" << outputs
-       << " inputs=" << inputs
-       << " stim=" << stim << endl;
-  */
-
-  value.put(stim | outputs | inputs);
-#endif
+  check_peripherals(oldValue);
 }
 //-------------------------------------------------------------------
 // void IOPORT::put_value(unsigned int new_value)
@@ -401,6 +378,8 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
     {
       trace_register_write();
       value.put(current_value ^ bit_mask);
+
+      internal_latch = (current_value & bit_mask) | (internal_latch & ~bit_mask);
     }
 
 }
@@ -523,6 +502,28 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
           if(pins[i] && pins[i]->snode!=0)
             pins[i]->snode->update(time);
     }
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+unsigned int PIC_IOPORT::get(void)
+{
+  RegisterValue oldValue = value;
+
+  IOPORT::get();
+
+  check_peripherals(oldValue);
+
+  return value.get();
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+bool PIC_IOPORT::get_bit(unsigned int bit_number)
+{
+  //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
+  return (internal_latch &  (1<<bit_number )) ? true : false;
+
 }
 
 //-------------------------------------------------------------------
@@ -807,16 +808,10 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-unsigned int PORTB::get(void)
+void PORTB::check_peripherals(RegisterValue oldValue)
 {
-  unsigned int old_value;
 
-  old_value = value.get();
-
-  //  cout << "PORTB::get()\n";
-  IOPORT::get();
-
-  int diff = old_value ^ value.get(); // The difference between old and new
+  int diff = oldValue.get() ^ value.get(); // The difference between old and new
 
   // If portb bit 0 changed states, check to see if an interrupt should occur
   if( diff & 1)
@@ -827,10 +822,17 @@ unsigned int PORTB::get(void)
       // If the option register is selecting 'interrupt on falling edge' AND
       // the old_value was high (and hence the new low) then set  INTF
 
-      // These two statements can be combined into an exclusive or:
+      bool bInterruptOnRisingEdge = (intedg &  intedg_MASK) ? true : false;
+      bool bRisingEdge = (value.get() & 1) ? true : false;
 
-      if( (intedg &  intedg_MASK) ^ (old_value & 1))
+      if(verbose)
+	cout << "RB0 changed\n";
+      if(bInterruptOnRisingEdge == bRisingEdge) {
+	if(verbose)
+	  cout << "Now setting intf\n";
+
 	cpu14->intcon->set_intf();
+      }
     }
 
 
@@ -839,6 +841,23 @@ unsigned int PORTB::get(void)
   // configured as inputs.
   if(diff & 0xf0 & tris->value.get())
     cpu14->intcon->set_rbif();
+
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+unsigned int PORTB::get(void)
+{
+  //  cout << "PORTB::get  -- value at entry 0x" << hex << value.get() << endl;
+
+  RegisterValue oldValue = value;
+
+  IOPORT::get();
+
+  check_peripherals(oldValue);
+
+  //  cout << "PORTB::get  -- value at exit 0x" << hex << value.get() << endl;
 
   return value.get();
 }
@@ -847,35 +866,18 @@ unsigned int PORTB::get(void)
 //-------------------------------------------------------------------
 void PORTB::setbit(unsigned int bit_number, bool new_value)
 {
-  unsigned int old_value = value.get();
-
+  RegisterValue oldValue = value;
   IOPORT::setbit( bit_number,  new_value);
-
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  // If portb bit 0 changed states, check to see if an interrupt should occur
-  if( diff & 1)
-    {
-      // If the option register is selecting 'interrupt on rising edge' AND
-      // the old_value was low (and hence the new high) then set  INTF
-      //                    OR
-      // If the option register is selecting 'interrupt on falling edge' AND
-      // the old_value was high (and hence the new low) then set  INTF
-
-      // These two statements can be combined into an exclusive or:
-
-      if( (intedg &  intedg_MASK) ^ (old_value & 1))
-	cpu14->intcon->set_intf();
-    }
-
-
-  // If any of the upper 4 bits of port b changed states then set RBIF
-  // Note, that the interrupt on change feature only works for I/O's
-  // configured as inputs.
-  if(diff & 0xf0 & tris->value.get())
-    cpu14->intcon->set_rbif();
+  check_peripherals(oldValue);
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTB::put(unsigned int new_value)
+{
+  PIC_IOPORT::put(new_value);
+  
+}
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -1109,18 +1111,41 @@ PORTA::PORTA(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
+void PORTA::check_peripherals(RegisterValue oldValue)
+{
+  int diff = oldValue.get() ^ value.get(); // The difference between old and new
+
+  // If porta bit 4 changed states, check to see if tmr0 should increment
+  if( diff & 0x10) {
+
+    if(cpu14->option_reg.get_t0cs()) {
+
+      bool bClockOnRisingEdge = cpu14->option_reg.get_t0se() ? false : true;
+      bool bRisingEdge = (value.get() & 0x10) ? true : false;
+
+      if(verbose)
+	cout << "PORTA check peripherals RA4 changed\n";
+      if(bClockOnRisingEdge == bRisingEdge) {
+	cpu14->tmr0.increment();
+      }
+    }
+  }
+
+  if( ssp && (diff & SS) ) {
+    ssp->new_ss_edge( (value.get() & SS) ? SS : 0);
+  }
+  
+
+}
+
 unsigned int PORTA::get(void)
 {
-  unsigned int old_value;
 
-  old_value = value.get();
+  RegisterValue oldValue = value;
 
   IOPORT::get();
 
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  if( ssp && (diff & SS))
-    ssp->new_ss_edge(value.get() & SS);
+  check_peripherals(oldValue);
 
   return(value.get());
 }
@@ -1130,29 +1155,10 @@ unsigned int PORTA::get(void)
 void PORTA::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value.get();
-
-
+  RegisterValue oldValue = value;
   IOPORT::setbit( bit_number,  new_value);
+  check_peripherals(oldValue);
 
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  // If porta bit 4 changed states, check to see if tmr0 should increment
-  if( diff & 0x10)
-    {
-
-      if(cpu14->option_reg.get_t0cs())
-	{
-
-	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
-	  cpu14->tmr0.increment();
-	}
-    }
-
-  if( ssp && (diff & SS) ) {
-	  ssp->new_ss_edge(new_value ? SS : 0);
-  }
-  
 }
 
 //-------------------------------------------------------------------

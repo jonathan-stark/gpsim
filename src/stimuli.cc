@@ -488,7 +488,14 @@ void Stimulus_Node::update()
 	double capacitance=0.0; // total capacitance on the node.
 	double final_voltage=0.0; 
 
+	//cout << "multi-node summing:\n";
 	while(sptr) {
+	  /*
+	  cout << " N: " <<sptr->name() 
+	  << " V=" << sptr->get_Vth() 
+	  << " Z=" << sptr->get_Zth()
+	  << " C=" << sptr->get_Cth() << endl; 
+	  */
 	  double Cs = 1 / sptr->get_Zth();
 	  final_voltage += sptr->get_Vth() * Cs;
 	  conductance += Cs;
@@ -501,6 +508,7 @@ void Stimulus_Node::update()
 	if(current_time_constant < min_time_constant) {
 	  voltage = final_voltage;
 	  sptr = stimuli;
+	  //cout << " Setting voltage to: " << final_voltage << endl;
 	  while(sptr) {
 	    sptr->set_nodeVoltage(voltage);
 	    sptr = sptr->next;

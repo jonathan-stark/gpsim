@@ -522,6 +522,7 @@ void Breakpoints::clear(unsigned int b)
       break;
 
     default:
+      break_status[b].type = BREAK_CLEAR;
       break;
 
     }
