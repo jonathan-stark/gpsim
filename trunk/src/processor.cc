@@ -892,7 +892,7 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 {
   unsigned int line=0;
     
-  if(!cpu || cpu->program_memory_size()<=address)
+  if(!cpu || cpu->IsAddressInRange(address))
     return INVALID_VALUE;
 
   switch(get_hll_mode()) {
@@ -1276,7 +1276,7 @@ void Processor::Debug()
 instruction &ProgramMemoryAccess::operator [] (unsigned int address)
 {
   //cout << "pma[0x"<< hex << address << "]\n";
-  if(!cpu ||cpu->program_memory_size()<=address  || address<0)
+  if(!cpu ||cpu->IsAddressInRange(address))
     return bad_instruction;
 
   return *cpu->program_memory[cpu->map_pm_address2index(address)];

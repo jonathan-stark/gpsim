@@ -402,6 +402,9 @@ public:
   virtual int  map_pm_index2address(int index) {return index;};
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   guint64 cycles_used(unsigned int address);
+  virtual bool         IsAddressInRange(unsigned int address) {
+    return program_memory_size()<=address  || address<0;
+  }
 
   //
   // Symbolic debugging
