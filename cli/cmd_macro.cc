@@ -25,7 +25,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_macro.h"
-#include "expr.h"
 
 extern int parse_string(char * str);
 extern void add_string_to_input_buffer(char *s,Macro *);

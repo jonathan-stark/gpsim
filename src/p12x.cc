@@ -300,11 +300,11 @@ void P12CE518::create(void)
     cout << " ... create additional (internal) I/O\n";
   scl = new Stimulus_Node ( "EE_SCL" );
 
-  scl->attach_stimulus ( new IO_bi_directional(&gpio,7) );
+  scl->attach_stimulus ( package->get_pin(7) );
 
   sda = new Stimulus_Node ( "EE_SDA" );
 
-  sda->attach_stimulus ( new IO_open_collector(&gpio,6) );
+  sda->attach_stimulus ( package->get_pin(6) );
 
   e->attach ( scl, sda );
 

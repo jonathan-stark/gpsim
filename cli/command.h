@@ -26,7 +26,7 @@ using namespace std;
 #include <unistd.h>
 #include <glib.h>
 #include "misc.h"
-#include "expr.h"
+#include "../src/expr.h"
 #include "../config.h"
 #include "../src/gpsim_def.h"
 

@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_TRACE_H__
 #define __CMD_TRACE_H__
 
-#include "expr.h"
+#include "command.h"
 
 class cmd_trace : public command
 {

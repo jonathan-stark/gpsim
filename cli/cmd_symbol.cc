@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_symbol.h"
 #include "../src/symbol.h"
 #include "../src/symbol_orb.h"
-#include "expr.h"
 
 cmd_symbol c_symbol;
 

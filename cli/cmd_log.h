@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_LOG_H__
 
 #include <glib.h>
-#include "expr.h"
+#include "command.h"
 
 class cmd_log : public command
 {

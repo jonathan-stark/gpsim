@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <unistd.h>
 #include <glib.h>
-#include "expr.h"
+#include "command.h"
 
 class cmd_break : public command
 {

@@ -678,7 +678,7 @@ TraceObject * WTraceType::decode(unsigned int tbi)
   RegisterValue rv = RegisterValue(tv & 0xff,0);
   TraceObject *wto;
 
-  if (tbi & (1<<23)) 
+  if (tv & (1<<23)) 
     wto = new WReadTraceObject(cpu, rv);
   else
     wto = new WWriteTraceObject(cpu, rv);

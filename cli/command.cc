@@ -55,7 +55,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_x.h"
 #include "cmd_icd.h"
 
-#include "expr.h"
+#include "../src/expr.h"
 #include "errors.h"
 
 #include "../src/pic-processor.h"

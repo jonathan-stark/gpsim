@@ -246,6 +246,9 @@ public:
     program_memory[pc->value]->execute();
   }
 
+  // Take a snap shot of the internal state.
+  virtual void save_state();
+
   virtual void interrupt(void) { return; };
   void pm_write(void);
 

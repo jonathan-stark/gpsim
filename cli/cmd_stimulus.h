@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_STIMULUS_H__
 #define __CMD_STIMULUS_H__
 #include "../src/stimulus_orb.h"
-#include "expr.h"
+#include "command.h"
 
 class cmd_stimulus : public command
 {

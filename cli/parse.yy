@@ -60,8 +60,8 @@ using namespace std;
 #include "cmd_version.h"
 #include "cmd_x.h"
 #include "cmd_icd.h"
-#include "expr.h"
-#include "operator.h"
+#include "../src/expr.h"
+#include "../src/operator.h"
 #include "errors.h"
 
 #include "../src/symbol.h"
