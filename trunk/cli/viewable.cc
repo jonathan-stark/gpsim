@@ -34,10 +34,12 @@ string Viewable::showType()
   while (isdigit(*name)) {
     name++;
   }
+#elif defined _MSC_VER
+  #pragma message("--->You might want to clean up the result of typeid() here...")
 #else
   #warning --->You might want to clean up the result of typeid() here...
 #endif
-  
+
   return string(name);
 }
 
