@@ -37,7 +37,6 @@ extern "C"{
 #define PCPU ((Processor *)cpu)
 
 extern guint64 simulation_start_cycle;
-extern void redisplay_prompt(void);  // in input.cc
 
 // Global declaration of THE breakpoint object
 // create an instance of inline get_trace() method by taking its address
