@@ -135,6 +135,7 @@ public:
   virtual symbol *copy();
 
   virtual void get(int &);
+  virtual void get(gint64 &);
 
   virtual void set(int);
   virtual void set(Value *);
@@ -164,6 +165,7 @@ public:
   virtual string toString();
 
   virtual void get(int &);
+  virtual void get(gint64 &);
 
   virtual void set(int);
   virtual void set(Value *);
