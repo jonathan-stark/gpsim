@@ -431,14 +431,17 @@ string node_symbol::toString(void)
 register_symbol::register_symbol(const char *_name, Register *_reg)
   : symbol(_name), reg(_reg)
 {
+  if (_name == NULL && reg != NULL) {
+    name_str = _reg->name();
+  }
 }
 
 string &register_symbol::name(void) {
-  return reg->name();
+  return name_str;
 }
 
 char *register_symbol::name(char *buf, int len) {
-  return reg->name(buf, len);
+  return name(buf, len);
 }
 
 string register_symbol::toString()
@@ -451,7 +454,7 @@ string register_symbol::toString()
 
     snprintf(buff,sizeof(buff)," [0x%x] = 0x%x = 0b",reg->address, reg->get_value());
 
-    return reg->name() + string(buff) + string(bits);
+    return name() + string(buff) + string(bits);
   }
   return string("");
 }
