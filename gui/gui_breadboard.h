@@ -53,6 +53,7 @@ struct gui_pin
     Breadboard_Window *bbw;
 
     class IOPIN *iopin;
+    CrossReferenceToGUI *xref;
 
     GtkWidget *widget;
     GdkPixmap *pixmap;
@@ -90,6 +91,8 @@ struct gui_module
     int height; // Height of module_widget
 
     int pinnamewidth;
+
+    int pin_count;
 
     GdkPixmap *module_pixmap;
     GdkPixmap *name_pixmap;
