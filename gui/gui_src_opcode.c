@@ -39,7 +39,9 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtksheet.h>
 //#include <gtkextra/gtksheetentry.h>
 
-#include "../xpms/pc.xpm"
+extern int gui_question(char *question, char *a, char *b);
+extern int config_set_string(char *module, char *entry, char *string);
+extern int config_get_string(char *module, char *entry, char **string);
 
 /*
 unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address);
@@ -192,7 +194,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     unsigned int pic_id;
     GtkSheetRange range;
     unsigned int address;
-    int value;
     int pm_size;
     gint char_width;
 
@@ -361,8 +362,6 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
     GtkWidget *menu;
     GtkWidget *item;
 
-    GSList *group=NULL;
-    
   int i;
 
   if(sbow==NULL)
@@ -476,7 +475,6 @@ static void filter(char *clean, char *dirty, int max)
 
 static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 {
-    int pc;
     GtkSheetRange range;
     int row=address/16;
     int column=address%16;
@@ -656,7 +654,6 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
     GtkWidget *button;
     static int retval;
     GtkWidget *hbox;
-    GtkWidget *vbox;
     static GtkWidget *normalfontstringentry;
     static GtkWidget *breakpointfontstringentry;
     static GtkWidget *pcfontstringentry;
@@ -1049,9 +1046,6 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
 void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address)
 {
     gint last_address;
-    int row=address/16;
-    int col=address%16;
-    GdkRectangle rect;
 
     if(! ((GUI_Object*)sbow)->enabled)
 	return;
@@ -1245,7 +1239,6 @@ void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow)
 {
     static GtkWidget *clist;
     GtkWidget *label;
-    GtkWidget *entry;
     GtkWidget *vbox;
     GtkWidget *hbox;
   GtkWidget *scrolled_win;
@@ -1254,13 +1247,10 @@ void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow)
 	gchar name[10];
 	gint column_width,char_width;
   gint i;
-  char address[16];
 
   int x,y,width,height;
   
-static GdkPixmap *pixmap_pc;
 static GtkStyle *style=NULL;
-static GdkBitmap *mask;
 char *fontstring;
 
     if(sbow->sbw.gui_obj.window!=NULL)

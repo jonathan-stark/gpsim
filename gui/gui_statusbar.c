@@ -273,8 +273,6 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
 static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
 {
-    GtkWidget *popup;
-
     if(widget==NULL || event==NULL || sbw==NULL)
     {
         printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbw);

@@ -117,7 +117,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
   if(trace_string[0] && (cycle>=tw->last_cycle)) {
     tw->last_cycle = cycle;
     tw->trace_map[tw->trace_map_index].cycle = cycle;
-    tw->trace_map[tw->trace_map_index].simulation_trace_index = index;
+    tw->trace_map[tw->trace_map_index].simulation_trace_index = trace_index;
 
     // Advance the trace_map_index using rollover arithmetic
     if(++tw->trace_map_index >= MAXTRACES)
@@ -137,7 +137,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 		       1,  // column
 		       GTK_JUSTIFY_LEFT,str);*/
 
-    sprintf(cycle_string,"0x%016x", cycle);
+    sprintf(cycle_string,"0x%016ullx", (unsigned int) cycle);
 
     //trace_map[trace_index].cycle = cycle;
     //trace_map[trace_index].simulation_trace_index = gpsim_get;
@@ -177,10 +177,7 @@ void TraceWindow_update(Trace_Window *tw)
 {
   GUI_Processor *gp;
   GtkCList *trace_clist;
-  char buffer[50];
   guint64 cycle;
-  guint64 count;
-  int i;
 
   if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
     return;
@@ -230,13 +227,8 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 
 #define NAME_SIZE 32
 
-    gint i,j, border_mask, border_width;
-    GtkCList *clist;
     struct cross_reference_to_gui *cross_reference;
-    gboolean row_created;
-//    GtkCListRange range;
     int pic_id;
-    char row_label[50];
 
 
     if(tw == NULL || gp == NULL)
@@ -277,7 +269,6 @@ BuildTraceWindow(Trace_Window *tw)
   GtkWidget *scrolled_window;
 
     
-  gchar name[10];
   gint i;
   gint column_width,char_width;
 
@@ -287,7 +278,7 @@ BuildTraceWindow(Trace_Window *tw)
   if(tw==NULL)
   {
       printf("Warning build_trace_viewer(%x)\n",(unsigned int)tw);
-      return;
+      return 0;
   }
 
 	
@@ -375,7 +366,6 @@ BuildTraceWindow(Trace_Window *tw)
 
 int CreateTraceWindow(GUI_Processor *gp)
 {
-    int i;
   Trace_Window *trace_window;
 
   trace_window = (Trace_Window *)malloc(sizeof(Trace_Window));

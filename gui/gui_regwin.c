@@ -47,6 +47,10 @@ Boston, MA 02111-1307, USA.  */
 #define DEFAULT_PRECISION 3
 #define DEFAULT_SPACE 8
 
+extern int gui_question(char *question, char *a, char *b);
+extern int config_set_string(char *module, char *entry, char *string);
+extern int config_get_string(char *module, char *entry, char **string);
+
 static void update_ascii(Register_Window *rw, gint row);
 
 // extern GUI_Processor *gp;
@@ -479,7 +483,7 @@ static void update_label(Register_Window *rw)
 
   
     if(rw->row_to_address[row] < 0) {
-	printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
+	printf("row_to_address[%d]=0x%x\n",row,rw->row_to_address[row]);
 	return;
     }
 
@@ -530,7 +534,7 @@ static void update_entry(Register_Window *rw)
   
     // ******************************** update entry:
     if(rw->row_to_address[row] < 0) {
-	printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
+	printf("row_to_address[%d]=0x%x",row,rw->row_to_address[row]);
 	return;
     }
 
@@ -598,7 +602,6 @@ static int settings_dialog(Register_Window *rw)
     GtkWidget *button;
     static int retval;
     GtkWidget *hbox;
-    GtkWidget *vbox;
     static GtkWidget *normalfontstringentry;
     GtkWidget *label;
     int fonts_ok=0;
@@ -875,7 +878,7 @@ static gint
 activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
 {
 
-    GtkSheet *sheet;
+    GtkSheet *sheet=NULL;
     int regnumber;
     
     if(rw)
@@ -914,11 +917,6 @@ do_quit_app(GtkWidget *widget)
 */
 void RegWindow_select_register(Register_Window *rw, int regnumber)
 {
-  GtkSheet *sheet;
-  GtkEntry *sheet_entry;
-  char cell[100],*n;
-  char *text;
-  GtkSheetCellAttr attributes;
     GtkSheetRange range;
     int row, col;
     
@@ -1091,7 +1089,7 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       else
       {
 	  new_value=-1; // magic value
-	  sprintf(name, "");
+	  strcpy(name, "");
       }
       if(rw->registers[reg_number]->row<=rw->register_sheet->maxrow)
       {

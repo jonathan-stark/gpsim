@@ -240,6 +240,8 @@ void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
                         gtk_main_iteration();
 		}
 		break;
+	    default:
+		break;
 	    }
 	    break;
 	}

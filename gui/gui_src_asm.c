@@ -51,6 +51,11 @@ Boston, MA 02111-1307, USA.  */
 #define PIXMAP_SIZE 14
 #define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
 
+extern int gui_question(char *question, char *a, char *b);
+extern int config_set_string(char *module, char *entry, char *string);
+extern int config_get_string(char *module, char *entry, char **string);
+
+
 static GList *sa_xlate_list[SBAW_NRFILES]={NULL};  // lists containing sa_entry pointers
 
 static struct sa_entry *gui_line_to_entry(int id,int line);
@@ -626,8 +631,6 @@ static gint sigh_button_event(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
-	GtkWidget *popup=NULL;
-
 	popup_sbaw=sbaw;
 
 	sbaw->menu_data = gui_pixel_to_entry(id, (int) (event->y + GTK_TEXT(sbaw->source_text[id])->vadj->value));
@@ -1035,7 +1038,6 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     char *p;
     char text_buffer[256];
     int cblock=0;
-    int i;
 
     int index;
 
@@ -1286,7 +1288,6 @@ void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor 
 {
     int i;
 
-    struct breakpoint_info breakpoint_false={-1,NULL};
     GList *iter;
     struct breakpoint_info *bpi;
     
@@ -1529,7 +1530,6 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
     GtkWidget *button;
     static int retval;
     GtkWidget *hbox;
-    GtkWidget *vbox;
     static GtkWidget *commentfontstringentry;
     static GtkWidget *sourcefontstringentry;
     GtkWidget *label;
@@ -2168,9 +2168,6 @@ int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
 
   SourceBrowserAsm_Window *sbaw;
 
-  struct breakpoint_info breakpoint_false={-1,NULL};
-  
-  
   sbaw = (SourceBrowserAsm_Window *) malloc(sizeof(SourceBrowserAsm_Window));
 
   

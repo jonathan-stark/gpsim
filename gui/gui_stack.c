@@ -64,7 +64,6 @@ static gint sigh_button_event(GtkWidget *widget,
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
-	int column=sw->current_column;
 	int row=sw->current_row;
 	
 	entry = gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
@@ -158,8 +157,6 @@ static int get_closest_label(Stack_Window *sw,
 
     while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
     {
-	int row;
-	
 	switch(s->type)
 	{
 	case SYMBOL_ADDRESS:
@@ -176,6 +173,8 @@ static int get_closest_label(Stack_Window *sw,
 		}
 	    }
 	    break;
+	default:
+	    break;
 	}
     }
     return retval;
@@ -183,7 +182,7 @@ static int get_closest_label(Stack_Window *sw,
 
 static void update(Stack_Window *sw)
 {
-    int i;
+    int i=0;
     int nrofentries;
     unsigned int pic_id;
     char depth_string[64];
@@ -284,11 +283,6 @@ void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp)
 
 void StackWindow_update(Stack_Window *sw)
 {
-    GList *iter;
-    struct stack_entry *entry;
-    int clist_frozen=0;
-    int value;
-
     if( !((GUI_Object*)sw)->enabled)
 	return;
 
@@ -300,8 +294,6 @@ int BuildStackWindow(Stack_Window *sw)
     GtkWidget *window;
     GtkWidget *vbox;
     GtkWidget *scrolled_window;
-
-    int i;
 
     int x,y,width,height;
 
@@ -368,8 +360,6 @@ int CreateStackWindow(GUI_Processor *gp)
 {
     Stack_Window *stack_window;
 
-    int i;
-    
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
