@@ -43,56 +43,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_callbacks.h"
-/*
 
-void gp_add_window_to_list(GUI_Processor *gp, GUI_Object *go)
-{
-
-  if(!gp) return;
-
-  switch(go->wc)
-    {
-    case WC_misc:
-      gp->misc_windows = g_list_append(gp->misc_windows, (gpointer)go);
-      break;
-
-    case WC_source:
-      gp->source_windows = g_list_append(gp->source_windows, (gpointer)go);
-      break;
-
-    case WC_data:
-      gp->data_windows = g_list_append(gp->data_windows, (gpointer)go);
-      break;
-
-    default:
-      g_warning("bad window type in gp_add_window_to_list");
-    }
-
-
-}
-  */
-
-GUI_Processor *new_GUI_Processor(void)
-{
-
-  GUI_Processor *gp;
-
-  gp = (GUI_Processor *)malloc(sizeof(GUI_Processor));
-  memset(gp, 0, sizeof(GUI_Processor));
-  gp->source_windows = g_list_alloc();
-  gp->data_windows = g_list_alloc();
-  gp->misc_windows = g_list_alloc();
-  gp->pic_id = 0;
-
-  return gp;
-}
 
 GUI_Processor::GUI_Processor(void)
 {
-
-  source_windows = g_list_alloc();
-  data_windows = g_list_alloc();
-  misc_windows = g_list_alloc();
 
   regwin_ram = NULL;
   regwin_eeprom = NULL;
@@ -111,34 +65,5 @@ GUI_Processor::GUI_Processor(void)
 
 }
 
-
-
-void GUI_Processor::add_window_to_list(GUI_Object *go)
-{
-
-
-  switch(go->wc)
-    {
-    case WC_misc:
-      if(misc_windows)
-	misc_windows = g_list_append(misc_windows, (gpointer)go);
-      break;
-
-    case WC_source:
-      if(source_windows)
-	source_windows = g_list_append(source_windows, (gpointer)go);
-      break;
-
-    case WC_data:
-      if(data_windows)
-	data_windows = g_list_append(data_windows, (gpointer)go);
-      break;
-
-    default:
-      g_warning("bad window type in gp_add_window_to_list");
-    }
-
-
-}
 
 #endif // HAVE_GUI

@@ -1872,7 +1872,6 @@ int Register_Window::Create(GUI_Processor *_gp)
   window = NULL;
   wc = WC_data;
   wt = WT_register_window;
-  change_view = NULL;
   is_built = 0;
   enabled = 0;
 
@@ -1882,8 +1881,6 @@ int Register_Window::Create(GUI_Processor *_gp)
   registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
-
-  gp->add_window_to_list(this);
 
   if(!get_config())
     printf("warning %s\n",__FUNCTION__);
@@ -1895,22 +1892,17 @@ int Register_Window::Create(GUI_Processor *_gp)
 }
 
 
-RAM_RegisterWindow::RAM_RegisterWindow(void)
+RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp)
 {
   menu = "<main>/Windows/Ram";
   type = REGISTER_RAM;
 
-}
-
-int RAM_RegisterWindow::Create(GUI_Processor *_gp)
-{
   int i;
 
   gp = _gp;
   window = NULL;
   wc = WC_data;
   wt = WT_register_window;
-  change_view = NULL;
   is_built = 0;
   enabled = 0;
 
@@ -1929,8 +1921,6 @@ int RAM_RegisterWindow::Create(GUI_Processor *_gp)
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
 
-  gp->add_window_to_list(this);
-
   if(!get_config())
     printf("warning %s\n",__FUNCTION__);
 
@@ -1938,7 +1928,6 @@ int RAM_RegisterWindow::Create(GUI_Processor *_gp)
       Build();
   printf(__FUNCTION__);
 
-  return 1;
 }
 
 
@@ -1959,7 +1948,6 @@ int EEPROM_RegisterWindow::Create(GUI_Processor *_gp)
   window = NULL;
   wc = WC_data;
   wt = WT_register_window;
-  change_view = NULL;
   is_built = 0;
   enabled = 0;
 
@@ -1972,8 +1960,6 @@ int EEPROM_RegisterWindow::Create(GUI_Processor *_gp)
   registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
-
-  gp->add_window_to_list(this);
 
   if(!get_config())
     printf("warning %s\n",__FUNCTION__);

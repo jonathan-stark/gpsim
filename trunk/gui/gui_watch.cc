@@ -767,19 +767,8 @@ int Watch_Window::Create(GUI_Processor *_gp)
 
 
   gp = _gp;
-  name = "watch_viewer";
-  wc = WC_data;
-  wt = WT_watch_window;
-  change_view = NULL;
-  window = NULL;
-  is_built = 0;
   gp->watch_window = this;
 
-  watches=NULL;
-  current_row=0;
-
-  
-  gp->add_window_to_list(this);
 
   get_config();
 
@@ -799,6 +788,16 @@ int Watch_Window::Create(GUI_Processor *_gp)
 Watch_Window::Watch_Window(void)
 {
   menu = "<main>/Windows/Watch";
+
+  name = "watch_viewer";
+  wc = WC_data;
+  wt = WT_watch_window;
+  window = NULL;
+  is_built = 0;
+
+  watches=NULL;
+  current_row=0;
+
 }
 
 #endif // HAVE_GUI

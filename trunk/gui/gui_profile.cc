@@ -163,7 +163,7 @@ static void add_range(Profile_Window *pw,
     char *entry[PROFILE_COLUMNS]={startaddress_text,endaddress_text,count_string};
     int row;
     int i;
-    GUI_Processor *gp;
+
     char *end;
     char msg[128];
 
@@ -192,8 +192,6 @@ static void add_range(Profile_Window *pw,
 	    gui_message(msg);
 	}
     }
-
-    gp=pw->gui_obj.gp;
 
     cycles=0;
     for(i=startaddress;i<endaddress;i++)
@@ -1379,12 +1377,12 @@ key_press(GtkWidget *widget,
 	  gpointer data)
 {
 
-    struct profile_range_entry *entry;
-    Profile_Window *pw = (Profile_Window *) data;
+  struct profile_range_entry *entry;
+  Profile_Window *pw = (Profile_Window *) data;
 
   if(!pw) return(FALSE);
-  if(!pw->gui_obj.gp) return(FALSE);
-  if(!pw->gui_obj.gp->pic_id) return(FALSE);
+  if(!pw->gp) return(FALSE);
+  if(!pw->gp->pic_id) return(FALSE);
 
   switch(key->keyval) {
 
@@ -1401,13 +1399,10 @@ static gint profile_range_list_row_selected(GtkCList *profilelist,gint row, gint
 {
     struct profile_range_entry *entry;
     //    int bit;
-    GUI_Processor *gp;
     
     pw->range_current_row=row;
 //    pw->current_column=column;
 
-    gp=pw->gui_obj.gp;
-    
     entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
 
     if(!entry)
@@ -1710,19 +1705,16 @@ float calculate_stddev(GList *start, GList *stop, float average)
 }
 
 
-void ProfileWindow_update(Profile_Window *pw)
+void Profile_Window::Update()
 {
-  GUI_Processor *gp;
+
   int i;
 
   char count_string[100];
   GList *iter;
 
-  if(  (pw == NULL)  || (!((GUI_Object*)pw)->enabled))
+  if(!enabled)
     return;
-
-  // Get the pointer to the `gui processor' structure
-  gp = ((GUI_Object*)pw)->gp;
 
   if(gp==NULL || gp->pic_id==0)
   {
@@ -1731,7 +1723,7 @@ void ProfileWindow_update(Profile_Window *pw)
   }
 
   // Update profile list
-  iter=pw->profile_list;
+  iter=profile_list;
   while(iter)
   {
       struct profile_entry *entry;
@@ -1746,7 +1738,7 @@ void ProfileWindow_update(Profile_Window *pw)
 	  int row;
 
 	  entry->last_count=count;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_clist),entry);
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_clist),entry);
 	  if(row==-1)
 	  {
 	      puts("\n\nwhooopsie\n");
@@ -1754,15 +1746,15 @@ void ProfileWindow_update(Profile_Window *pw)
 	  }
 
 	  sprintf(count_string,"0x%Lx",count);
-	  gtk_clist_set_text (GTK_CLIST(pw->profile_clist),row,1,count_string);
+	  gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
       }
       iter=iter->next;
   }
-  gtk_clist_sort(pw->profile_clist);
+  gtk_clist_sort(profile_clist);
 
 
   // Update range list
-  iter=pw->profile_range_list;
+  iter=profile_range_list;
 
   while(iter)
   {
@@ -1781,7 +1773,7 @@ void ProfileWindow_update(Profile_Window *pw)
 	  int row;
 
 	  range_entry->last_count=count;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_range_clist),range_entry);
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_range_clist),range_entry);
 	  if(row==-1)
 	  {
 	      puts("\n\nwhooopsie\n");
@@ -1789,14 +1781,14 @@ void ProfileWindow_update(Profile_Window *pw)
 	  }
 
 	  sprintf(count_string,"0x%Lx",count);
-	  gtk_clist_set_text (GTK_CLIST(pw->profile_range_clist),row,2,count_string);
+	  gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
       }
       iter=iter->next;
   }
-  gtk_clist_sort(pw->profile_range_clist);
+  gtk_clist_sort(profile_range_clist);
 
   // Update register list
-  iter=pw->profile_register_list;
+  iter=profile_register_list;
   while(iter)
   {
       struct profile_register_entry *register_entry;
@@ -1814,7 +1806,7 @@ void ProfileWindow_update(Profile_Window *pw)
 
 	  register_entry->last_count_read=count_read;
 	  register_entry->last_count_write=count_write;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_register_clist),register_entry);
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_register_clist),register_entry);
 	  if(row==-1)
 	  {
 	      puts("\n\nwhooopsie\n");
@@ -1822,20 +1814,20 @@ void ProfileWindow_update(Profile_Window *pw)
 	  }
 
 	  sprintf(count_string,"0x%Lx",count_read);
-	  gtk_clist_set_text (GTK_CLIST(pw->profile_register_clist),row,2,count_string);
+	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,2,count_string);
 	  sprintf(count_string,"0x%Lx",count_write);
-	  gtk_clist_set_text (GTK_CLIST(pw->profile_register_clist),row,3,count_string);
+	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,3,count_string);
       }
       iter=iter->next;
   }
 
   // Update cummulative statistics list
-  pw->histogram_profile_list = g_list_sort(pw->histogram_profile_list,
+  histogram_profile_list = g_list_sort(histogram_profile_list,
 					   histogram_list_compare_func);
   // Remove all of clist (for now)
-  gtk_clist_freeze(GTK_CLIST(pw->profile_exestats_clist));
-  gtk_clist_clear(GTK_CLIST(pw->profile_exestats_clist));
-  if(pw->histogram_profile_list!=NULL)
+  gtk_clist_freeze(GTK_CLIST(profile_exestats_clist));
+  gtk_clist_clear(GTK_CLIST(profile_exestats_clist));
+  if(histogram_profile_list!=NULL)
   {
       struct cycle_histogram_counter *chc;
       int count_sum=0;
@@ -1864,7 +1856,7 @@ void ProfileWindow_update(Profile_Window *pw)
             total_string
 	};
 
-	iter=pw->histogram_profile_list;
+	iter=histogram_profile_list;
         list_start = iter;
       while(iter!=NULL)
       {
@@ -1896,7 +1888,7 @@ void ProfileWindow_update(Profile_Window *pw)
                   sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
 		  sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
                   sprintf(total_string,"%d",(int)cycles_sum);
-		  gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
+		  gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
 	      }
 
 	      // Start new calculation
@@ -1923,7 +1915,7 @@ void ProfileWindow_update(Profile_Window *pw)
       sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
       sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
       sprintf(total_string,"%d",(int)cycles_sum);
-      gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
+      gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
   }
 
   // print debug info:
@@ -1940,7 +1932,7 @@ void ProfileWindow_update(Profile_Window *pw)
       iter=iter->next;
   }*/
 
-  gtk_clist_thaw(GTK_CLIST(pw->profile_exestats_clist));
+  gtk_clist_thaw(GTK_CLIST(profile_exestats_clist));
 
 }
 
@@ -2128,7 +2120,7 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
  * 
  */
 
-void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp)
+void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *_gp)
 {
 
 #define NAME_SIZE 32
@@ -2141,10 +2133,10 @@ void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp)
 
     pw->processor=1;
     
-    if( !((GUI_Object*)pw)->enabled)
+    if( !pw->enabled)
 	return;
     
-    pw->gui_obj.gp = gp;
+    pw->gp = _gp;
     pic_id = gp->pic_id;
 
 }
@@ -2153,7 +2145,8 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
 {
-  ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
+  rw->ChangeView(VIEW_HIDE);
+
   return TRUE;
 }
 
@@ -2166,28 +2159,15 @@ gdouble gaussian(GtkPlot *plot, GtkPlotData *data, gdouble x, gboolean *err)
  return y;
 }
 
-int
-BuildProfileWindow(Profile_Window *pw)
+void Profile_Window::Build(void)
 {
-  GtkWidget *window;
-  GtkWidget *profile_clist;
-  GtkWidget *profile_register_clist;
-  GtkWidget *profile_range_clist;
-  GtkWidget *profile_exestats_clist;
+
   GtkWidget *label;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
     
   gint column_width,char_width;
 
-  int x,y,width,height;
-  
-	
-  if(pw==NULL)
-  {
-      printf("Warning build_profile_viewer(%p)\n",pw);
-      return 0;
-  }
 
 //  gui_message("There are bugs here in the profile viewer.\n\
 //	      Please help them get reported and/or fixed.");
@@ -2195,9 +2175,7 @@ BuildProfileWindow(Profile_Window *pw)
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), pw);
-
-  ((GUI_Object*)pw)->window=window;
+		     GTK_SIGNAL_FUNC(delete_event), this);
 
 //  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
 //			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
@@ -2209,210 +2187,200 @@ BuildProfileWindow(Profile_Window *pw)
 
   gtk_window_set_title(GTK_WINDOW(window), "profile viewer");
 
-  pw->notebook = gtk_notebook_new();
-  gtk_widget_show(pw->notebook);
+  notebook = gtk_notebook_new();
+  gtk_widget_show(notebook);
 
-  gtk_box_pack_start (GTK_BOX (main_vbox), pw->notebook, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (main_vbox), notebook, TRUE, TRUE, 0);
 
 
   // Instruction profile clist
-  profile_clist=gtk_clist_new_with_titles(PROFILE_COLUMNS,profile_titles);
-  pw->profile_clist = GTK_CLIST(profile_clist);
+  profile_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_COLUMNS,profile_titles));
+  //profile_clist = GTK_CLIST(profile_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
 //  gtk_clist_set_sort_column (pw->profile_clist,1);
 //  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_clist),
+  gtk_clist_set_compare_func(GTK_CLIST(profile_clist),
 			     (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_clist,GTK_CAN_DEFAULT);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_clist));
   
-  gtk_widget_show(profile_clist);
+  gtk_widget_show(GTK_WIDGET(profile_clist));
 
   gtk_widget_show(scrolled_window);
 
 //  gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
   label=gtk_label_new("Instruction profile");
-  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),scrolled_window,label);
   ///////////////////////////////////////////////////
   ///////////////////////////////////////////////////
 
 
   // Instruction range profile clist
-  profile_range_clist=gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,profile_range_titles);
-  pw->profile_range_clist = GTK_CLIST(profile_range_clist);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_range_clist),0,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_range_clist),1,TRUE);
-  gtk_clist_set_sort_column (pw->profile_range_clist,2);
-  gtk_clist_set_sort_type (pw->profile_range_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_range_clist),
+  profile_range_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,profile_range_titles));
+  gtk_clist_set_column_auto_resize(profile_range_clist,0,TRUE);
+  gtk_clist_set_column_auto_resize(profile_range_clist,1,TRUE);
+  gtk_clist_set_sort_column (profile_range_clist,2);
+  gtk_clist_set_sort_type (profile_range_clist,GTK_SORT_DESCENDING);
+  gtk_clist_set_compare_func(GTK_CLIST(profile_range_clist),
 			     (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_range_clist,GTK_CAN_DEFAULT);
     
-  pw->range_popup_menu=build_menu(pw);
+  range_popup_menu=build_menu(this);
 
-  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),
+  gtk_signal_connect(GTK_OBJECT(profile_range_clist),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
-		     pw);
-  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),"key_press_event",
+		     this);
+  gtk_signal_connect(GTK_OBJECT(profile_range_clist),"key_press_event",
 		     (GtkSignalFunc) key_press,
-		     (gpointer) pw);
-  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),"select_row",
-		     (GtkSignalFunc)profile_range_list_row_selected,pw);
+		     (gpointer) this);
+  gtk_signal_connect(GTK_OBJECT(profile_range_clist),"select_row",
+		     (GtkSignalFunc)profile_range_list_row_selected,this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_range_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_range_clist));
   
-  gtk_widget_show(profile_range_clist);
+  gtk_widget_show(GTK_WIDGET(profile_range_clist));
 
   gtk_widget_show(scrolled_window);
 
   label=gtk_label_new("Instruction range profile");
-  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),scrolled_window,label);
 
   ///////////////////////////////////////////////////
 
 
   // Register profile clist
-  profile_register_clist=gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS,profile_register_titles);
-  pw->profile_register_clist = GTK_CLIST(profile_register_clist);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),0,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),1,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),2,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),3,TRUE);
+  profile_register_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS,profile_register_titles));
+  gtk_clist_set_column_auto_resize(profile_register_clist,0,TRUE);
+  gtk_clist_set_column_auto_resize(profile_register_clist,1,TRUE);
+  gtk_clist_set_column_auto_resize(profile_register_clist,2,TRUE);
+  gtk_clist_set_column_auto_resize(profile_register_clist,3,TRUE);
 //  gtk_clist_set_sort_column (pw->profile_register_clist,1);
 //  gtk_clist_set_sort_type (pw->profile_register_clist,GTK_SORT_DESCENDING);
-  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_register_clist),
+  gtk_clist_set_compare_func(profile_register_clist,
 			     (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_register_clist,GTK_CAN_DEFAULT);
     
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_register_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_register_clist));
   
-  gtk_widget_show(profile_register_clist);
+  gtk_widget_show(GTK_WIDGET(profile_register_clist));
 
   gtk_widget_show(scrolled_window);
 
 //  gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
   label=gtk_label_new("Register profile");
-  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),scrolled_window,label);
 
   ///////////////////////////////////////////////////
 
 
   // Execution time statistics tab
-  profile_exestats_clist=gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS,profile_exestats_titles);
-  pw->profile_exestats_clist = GTK_CLIST(profile_exestats_clist);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),0,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),1,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),2,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),3,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),4,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),5,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),6,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),7,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),8,TRUE);
+  profile_exestats_clist=GTK_CLIST(gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS,profile_exestats_titles));
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,0,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,1,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,2,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,3,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,4,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,5,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,6,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,7,TRUE);
+  gtk_clist_set_column_auto_resize(profile_exestats_clist,8,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(profile_exestats_clist,GTK_CAN_DEFAULT);
 
-  pw->exestats_popup_menu=exestats_build_menu(pw);
-  gtk_signal_connect(GTK_OBJECT(pw->profile_exestats_clist),
+  exestats_popup_menu=exestats_build_menu(this);
+  gtk_signal_connect(GTK_OBJECT(profile_exestats_clist),
 		     "button_press_event",
 		     (GtkSignalFunc) exestats_do_popup,
-		     pw);
+		     this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_exestats_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(profile_exestats_clist));
   
-  gtk_widget_show(profile_exestats_clist);
+  gtk_widget_show(GTK_WIDGET(profile_exestats_clist));
 
   gtk_widget_show(scrolled_window);
 
   label=gtk_label_new("Routine profile");
-  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),scrolled_window,label);
   ///////////////////////////////////////////////////
 
 
-  width=((GUI_Object*)pw)->width;
-  height=((GUI_Object*)pw)->height;
-  x=((GUI_Object*)pw)->x;
-  y=((GUI_Object*)pw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
   normal_style = gtk_style_new ();
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 
-  gtk_signal_connect_after(GTK_OBJECT(pw->gui_obj.window), "configure_event",
-  			   GTK_SIGNAL_FUNC(gui_object_configure_event),pw);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+  			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
 
 
   gtk_widget_show (window);
 
 
-  pw->gui_obj.enabled=1;
-  pw->gui_obj.is_built=1;
+  enabled=1;
+  is_built=1;
 
-  if(pw->processor)
-      ProfileWindow_new_processor(pw, ((GUI_Object*)pw)->gp);
+  if(processor)
+      ProfileWindow_new_processor(this, gp);
 
-  if(pw->program)
-      ProfileWindow_new_program(pw, ((GUI_Object*)pw)->gp);
+  if(program)
+    ProfileWindow_new_program(this, gp);
 
-  ProfileWindow_update(pw);
+  Update();
 
-  update_menu_item((GUI_Object*)pw);
+  UpdateMenuItem();
 
-
-
-
-  return 0;
 }
 
-int CreateProfileWindow(GUI_Processor *gp)
+int Profile_Window::Create(GUI_Processor *_gp)
 {
-  Profile_Window *profile_window;
 
-  profile_window = (Profile_Window *)malloc(sizeof(Profile_Window));
+  gp = _gp;
+  name = "profile";
+  window = NULL;
+  wc = WC_data;
+  wt = WT_profile_window;
+  is_built = 0;
+  profile_list=NULL;
+  profile_range_list=NULL;
+  profile_register_list=NULL;
+  histogram_profile_list=NULL;
 
-  profile_window->gui_obj.gp = gp;
-  profile_window->gui_obj.name = "profile";
-  profile_window->gui_obj.window = NULL;
-  profile_window->gui_obj.wc = WC_data;
-  profile_window->gui_obj.wt = WT_profile_window;
-  profile_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
-  profile_window->gui_obj.is_built = 0;
-  profile_window->profile_list=NULL;
-  profile_window->profile_range_list=NULL;
-  profile_window->profile_register_list=NULL;
-  profile_window->histogram_profile_list=NULL;
+  gp->profile_window = this;
 
-  gp->profile_window = profile_window;
+  processor=0;
+  program=0;
 
-  profile_window->processor=0;
-  profile_window->program=0;
+  get_config();
 
-  gp->add_window_to_list((GUI_Object *)profile_window);
-
-  profile_window->gui_obj.get_config();
-
-  if(profile_window->gui_obj.enabled)
-      BuildProfileWindow(profile_window);
+  if(enabled)
+      Build();
 
   return 1;
+}
+
+Profile_Window::Profile_Window(void)
+{
+
+  menu = "<main>/Windows/Profile";
+
 }
 
 #endif // HAVE_GUI

@@ -132,7 +132,6 @@ class GUI_Object {
 #define VIEW_HIDE 0
 #define VIEW_SHOW 1
 #define VIEW_TOGGLE 2
-  void (* change_view) (GUI_Object *_this, int view_state);
 
   GUI_Object(void);
   virtual void ChangeView(int view_state);
@@ -220,8 +219,6 @@ class Register_Window : public GUI_Object
   GtkWidget *location;
   GtkWidget *popup_menu;
 
-  //    int allow_change_view;
-
   int registers_loaded; // non zero when registers array is loaded
 
   int processor; // if non-zero window has processor
@@ -243,9 +240,9 @@ class Register_Window : public GUI_Object
 class RAM_RegisterWindow : public Register_Window
 {
  public:
-  RAM_RegisterWindow(void);
+  RAM_RegisterWindow(GUI_Processor *gp);
 
-  virtual int Create(GUI_Processor *gp);
+  //  virtual int Create();
   
 };
 
@@ -537,8 +534,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 // The Breadboard window data
 //
 
-struct _Breadboard_Window;
-typedef struct _Breadboard_Window Breadboard_Window;
+class Breadboard_Window;
 
 enum orientation {LEFT, RIGHT, UP, DOWN};
 enum direction {PIN_INPUT, PIN_OUTPUT};
@@ -624,8 +620,8 @@ struct gui_node
 
 
 
-struct _Breadboard_Window {
-    GUI_Object gui_obj;
+class Breadboard_Window : public GUI_Object {
+ public:
 
     GdkFont *pinstatefont;
     GdkFont *pinnamefont;
@@ -665,9 +661,13 @@ struct _Breadboard_Window {
     struct gui_pin *selected_pin;
     struct gui_node *selected_node;
     struct gui_module *selected_module;
-};
 
-typedef struct _Breadboard_Window Breadboard_Window;
+
+  Breadboard_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+
+};
 
 
 //
@@ -728,8 +728,10 @@ struct cycle_histogram_counter{
 
     int count; // The number of time 'cycles' cycles are used.
 };
-struct _Profile_Window {
-  GUI_Object     gui_obj;
+
+class Profile_Window : public GUI_Object
+{
+ public:
 
   int processor;    // if non-zero window has processor
   int program;    // if non-zero window has program
@@ -751,31 +753,14 @@ struct _Profile_Window {
 
   // List of cycle_count structs
   GList *histogram_profile_list;
+
+  Profile_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
 };
 
-typedef struct _Profile_Window Profile_Window;
-
-//
-// Future Items that will be declared.
-//
-/*
-struct _Stack_Window {
-  GUI_Processor *gp;
-  stack data...
-};
-
-struct _sfr_window {
-  GUI_Processor *gp;
-  sfr data ...
-};
-
-struct watch_window {
-  GUI_Processor *gp;
-  watch data ...
-};
-
-
-*/
 
 
 //
@@ -787,7 +772,6 @@ class GUI_Processor {
  public:
 
   GUI_Processor(void);
-  void add_window_to_list(GUI_Object *go);
 
   Register_Window *regwin_ram;
   Register_Window *regwin_eeprom;
@@ -801,18 +785,9 @@ class GUI_Processor {
   Trace_Window *trace_window;
   Profile_Window *profile_window;
   StopWatch_Window *stopwatch_window;
-  // GtkWidget *stack_window;
-  // GtkWidget *sfr_window;
-  // GtkWidget *watch_window;
 
-  // Doubly-linked lists keep track of all of the windows
-  // associated with this processor. 
-  GList *misc_windows;
-  GList *source_windows;
-  GList *data_windows;
 
   // The pic that's associated with the gui
-  //  pic_processor *p;
   unsigned int pic_id;
 };
 

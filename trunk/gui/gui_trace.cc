@@ -347,15 +347,12 @@ int Trace_Window::Create(GUI_Processor *_gp)
   window = NULL;
   wc = WC_data;
   wt = WT_trace_window;
-  change_view = NULL;
   is_built = 0;
   trace_map = NULL;
   gp->trace_window = this;
 
   trace_flags = 0;
   processor=0;
-
-  gp->add_window_to_list(this);
 
   get_config();
 

@@ -361,71 +361,56 @@ toggle_window (gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
 {
-    GUI_Object *gui_object = NULL;
-    GtkWidget *menu_item = NULL;
+  GtkWidget *menu_item = NULL;
 
-//    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
+  //    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
 
-    menu_item = gtk_item_factory_get_item (item_factory,
-					   gtk_item_factory_path_from_widget (widget));
-    if(gp && menu_item)
-    {
-	switch(callback_action)
-	{
-	case 1:
-	    gui_object=(GUI_Object*)gp->program_memory;
-	    break;
-	case 2:
-	    gui_object=(GUI_Object*)gp->source_browser;
-	    break;
-	case 3:
-	    gui_object=(GUI_Object*)gp->regwin_ram;
-	    break;
-	case 4:
-	    gui_object=(GUI_Object*)gp->regwin_eeprom;
-	    break;
-	case 5:
-	    gui_object=(GUI_Object*)gp->watch_window;
-	    break;
-	case 6:
-	    gui_object=(GUI_Object*)gp->symbol_window;
-	    break;
-	case 7:
-	    gui_object=(GUI_Object*)gp->breadboard_window;
-            break;
-	case 8:
-	    gui_object=(GUI_Object*)gp->stack_window;
-            break;
-	case 9:
-	  gui_object=(GUI_Object*)gp->trace_window;
-            break;
-	case 10:
-	  gui_object=(GUI_Object*)gp->profile_window;
-            break;
-	case 11:
-	    gui_object=(GUI_Object*)gp->stopwatch_window;
-            break;
-	default:
-	    puts("unknown menu action");
-	}
-  printf("%s\n",__FUNCTION__);
-	
-	if(gui_object!=NULL)
-	{
-	  if(gui_object->change_view) {
-
-	    if(GTK_CHECK_MENU_ITEM(menu_item)->active)
-		gui_object->change_view(gui_object,VIEW_SHOW);
-	    else
-		gui_object->change_view(gui_object,VIEW_HIDE);
-	  } else
-	    gui_object->ChangeView( (GTK_CHECK_MENU_ITEM(menu_item)->active) ? 
-				    VIEW_SHOW : VIEW_HIDE);
-	}
-
-//	printf("%s\n",gtk_widget_get_name(widget));
+  menu_item = gtk_item_factory_get_item (item_factory,
+					 gtk_item_factory_path_from_widget (widget));
+  if(gp && menu_item) {
+    
+    int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
+			
+    switch(callback_action) {
+    case 1:
+      gp->program_memory->ChangeView(view_state);
+      break;
+    case 2:
+      gp->source_browser->ChangeView(view_state);
+      break;
+    case 3:
+      gp->regwin_ram->ChangeView(view_state);
+      break;
+    case 4:
+      gp->regwin_eeprom->ChangeView(view_state);
+      break;
+    case 5:
+      gp->watch_window->ChangeView(view_state);
+      break;
+    case 6:
+      gp->symbol_window->ChangeView(view_state);
+      break;
+    case 7:
+      gp->breadboard_window->ChangeView(view_state);
+      break;
+    case 8:
+      gp->stack_window->ChangeView(view_state);
+      break;
+    case 9:
+      gp->trace_window->ChangeView(view_state);
+      break;
+    case 10:
+      gp->profile_window->ChangeView(view_state);
+      break;
+    case 11:
+      gp->stopwatch_window->ChangeView(view_state);
+      break;
+    default:
+      puts("unknown menu action");
     }
-    return NULL;
+
+  }
+  return NULL;
 }
 
 static void 
@@ -1144,205 +1129,5 @@ tab_pack (GtkToggleButton *button, GtkWidget *child)
 }
 */
 
-/*
-static void
-toggle_view (GtkToggleButton *button, struct _gui_object *go)
-{
-
-  if(!go) return;
-
-  if(GTK_TOGGLE_BUTTON(button)->active)
-      go->change_view(go,VIEW_SHOW);
-  else
-      go->change_view(go,VIEW_HIDE);
-
-}
-
-NotebookItem source_pages[] =
-{
-  { "Source", NULL },
-  { "Object", toggle_view },
-  { ".asm",   toggle_view },
-  { ".lst",   NULL }
-};
-
-
-static void
-create_page (GUI_Processor *gp, GtkNotebook *notebook, NotebookItem *page, int items)
-{
-  GtkWidget *child = NULL;
-  GtkWidget *button;
-  GtkWidget *label;
-  GtkWidget *hbox;
-  GtkWidget *vbox;
-  GtkWidget *label_box;
-  GtkWidget *menu_box;
-  GtkWidget *pixwid;
-  gint i;
-  char *buffer=NULL;
-
-  GUI_Object *go;
-  GList *gol=NULL;
-
-
-  for(i=0; i<3; i++)
-    {
-      switch(i)
-	{
-	case 0:
-	  gol = gp->source_windows;
-	  buffer = "Source";
-	  break;
-
-	case 1:
-	  gol = gp->data_windows;
-	  buffer = "Data";
-	  break;
-
-	case 2:
-	  gol = gp->misc_windows;
-	  buffer = "Misc";
-	  break;
-
-	}
-
-      child = gtk_frame_new (buffer);
-      gtk_container_set_border_width (GTK_CONTAINER (child), 10);
-      
-      vbox = gtk_vbox_new (TRUE,0);
-      gtk_container_set_border_width (GTK_CONTAINER (vbox), 10);
-      gtk_container_add (GTK_CONTAINER (child), vbox);
-
-      hbox = gtk_hbox_new (TRUE,0);
-      gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, TRUE, 5);
-
-      for( ; gol; gol = gol->next)
-	{
-	  if(gol->data)
-	    {
-
-	      go = (GUI_Object *) gol->data;
-	      button = gtk_check_button_new_with_label ( go->name);
-	      gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
-
-	      if( go->enabled && GTK_WIDGET_VISIBLE(go->window))
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-	      else
-		gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
-      
-	      gtk_signal_connect (GTK_OBJECT (button), "toggled",
-				  GTK_SIGNAL_FUNC (toggle_view), (gpointer)go);
-
-	    }
-	}
-
-      gtk_widget_show_all (child);
-
-
-      label_box = gtk_hbox_new (FALSE, 0);
-      pixwid = gtk_pixmap_new (book_closed, book_closed_mask);
-      gtk_box_pack_start (GTK_BOX (label_box), pixwid, FALSE, TRUE, 0);
-      gtk_misc_set_padding (GTK_MISC (pixwid), 3, 1);
-      label = gtk_label_new (buffer);
-      gtk_box_pack_start (GTK_BOX (label_box), label, FALSE, TRUE, 0);
-      gtk_widget_show_all (label_box);
-
-      menu_box = gtk_hbox_new (FALSE, 0);
-      pixwid = gtk_pixmap_new (book_closed, book_closed_mask);
-      gtk_box_pack_start (GTK_BOX (menu_box), pixwid, FALSE, TRUE, 0);
-      gtk_misc_set_padding (GTK_MISC (pixwid), 3, 1);
-      label = gtk_label_new (buffer);
-      gtk_box_pack_start (GTK_BOX (menu_box), label, FALSE, TRUE, 0);
-      gtk_widget_show_all (menu_box);
-      gtk_notebook_append_page_menu (notebook, child, label_box, menu_box);
-    }
-
-}
-*/
-/*
-static void
-notebook_popup (GtkToggleButton *button,
-		GtkNotebook     *notebook)
-{
-  if (button->active)
-    gtk_notebook_popup_enable (notebook);
-  else
-    gtk_notebook_popup_disable (notebook);
-}
-
-static void
-notebook_homogeneous (GtkToggleButton *button,
-		      GtkNotebook     *notebook)
-{
-  gtk_notebook_set_homogeneous_tabs (notebook, button->active);
-}
-*/
-
-
-/*
-static void
-create_notebook (void)
-{
-  static GtkWidget *window = NULL;
-  GtkWidget *box1;
-  GtkWidget *button;
-  GtkWidget *separator;
-  GdkColor *transparent = NULL;
-
-  if (!window)
-    {
-      window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			  &window);
-
-      gtk_window_set_title (GTK_WINDOW (window), "Window Selector");
-      gtk_container_set_border_width (GTK_CONTAINER (window), 0);
-
-      box1 = gtk_vbox_new (FALSE, 0);
-      gtk_container_add (GTK_CONTAINER (window), box1);
-
-      sample_notebook = gtk_notebook_new ();
-      gtk_signal_connect (GTK_OBJECT (sample_notebook), "switch_page",
-			  GTK_SIGNAL_FUNC (page_switch), NULL);
-      gtk_notebook_set_tab_pos (GTK_NOTEBOOK (sample_notebook), GTK_POS_TOP);
-      gtk_box_pack_start (GTK_BOX (box1), sample_notebook, TRUE, TRUE, 0);
-      gtk_container_set_border_width (GTK_CONTAINER (sample_notebook), 10);
-
-      gtk_widget_realize (sample_notebook);
-      book_open = gdk_pixmap_create_from_xpm_d (sample_notebook->window,
-						&book_open_mask, 
-						transparent, 
-						book_open_xpm);
-      book_closed = gdk_pixmap_create_from_xpm_d (sample_notebook->window,
-						  &book_closed_mask,
-						  transparent, 
-						  book_closed_xpm);
-
-      create_page (gp, GTK_NOTEBOOK (sample_notebook), source_pages,
-		   sizeof (source_pages) / sizeof (source_pages[0]));
-
-      //      create_page (GTK_NOTEBOOK (sample_notebook), "Registers" );
-
-      separator = gtk_hseparator_new ();
-      gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
-
-      button = gtk_button_new_with_label ("close");
-      gtk_container_set_border_width (GTK_CONTAINER (button), 5);
-      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-				 GTK_SIGNAL_FUNC (gtk_widget_destroy),
-				 GTK_OBJECT (window));
-      gtk_box_pack_start (GTK_BOX (box1), button, FALSE, FALSE, 0);
-      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-      gtk_widget_grab_default (button);
-    }
-
-  if (!GTK_WIDGET_VISIBLE (window))
-    gtk_widget_show_all (window);
-  else
-    gtk_widget_destroy (window);
-}
-*/
 
 #endif // HAVE_GUI

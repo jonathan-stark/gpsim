@@ -1498,7 +1498,6 @@ int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
   wc = WC_source;
   wt = WT_opcode_source_window;
 
-  change_view = NULL;
   is_built = 0;
 
   memory=NULL;
@@ -1506,8 +1505,6 @@ int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
 
   processor=0;
   program=0;
-
-  gp->add_window_to_list(this);
 
   ascii_mode=1; /// default, two bytes/cell, MSB first
   config_get_variable(name,"ascii_mode",&ascii_mode);

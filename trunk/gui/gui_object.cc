@@ -48,7 +48,6 @@ GUI_Object::GUI_Object(void)
   window = NULL;
   name = NULL;
   menu = NULL;
-  change_view = NULL;
 
   x=0; y=0;
   width = 100;
@@ -80,84 +79,40 @@ void GUI_Object::UpdateMenuItem(void)
 void GUI_Object::ChangeView (int view_state)
 {
 
-  printf("%s 1\n",__FUNCTION__);
-  if(change_view) {
-    change_view(this, view_state);
-    return;
-  }
-    
-  printf("%s 2\n",__FUNCTION__);
-
   if( (view_state==VIEW_SHOW) || (window==NULL) ||
       ((view_state==VIEW_TOGGLE) &&
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
-      )
-    {
-      if(!is_built)
-	{
-	  if(!get_config()) {
-	    printf("warning %s\n",__FUNCTION__);
-	    set_default_config();
-	  }
-	  switch(wt)
-	    {
-	    case WT_register_window:
-	      Build();
-	      break;
-	    case WT_symbol_window:
-	      Build();
-	      break;
-	    case WT_asm_source_window:
-	      Build();
-	      break;
-	    case WT_opcode_source_window:
-	      Build();
-	      break;
-	    case WT_watch_window:
-	      Build();
-	      break;
-	    case WT_breadboard_window:
-	      enabled=1;
-	      BuildBreadboardWindow((Breadboard_Window*)this);
-	      break;
-	    case WT_stack_window:
-	      Build();
-	      break;
-	    case WT_trace_window:
-	      Build();
-	      break;
-	    case WT_profile_window:
-	      BuildProfileWindow((Profile_Window*)this);
-	      break;
-	    case WT_stopwatch_window:
-	      Build();
-	      break;
-	    default:
-	      puts("SourceBrowser_change_view(): unhandled case");
-	      break;
-	    }
-	}
-      else
-	{
-	  enabled=1;
-	  gtk_widget_show(window);
-	}
+      ) {
+    
+    if(!is_built) {
+	
+      if(!get_config()) {
+	printf("warning %s\n",__FUNCTION__);
+	set_default_config();
+      }
 
+      Build();
+    } else {
+     
+      enabled=1;
+      gtk_widget_show(window);
     }
+
+  }
   else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window)))
     {
-  printf("%s 4\n",__FUNCTION__);
       enabled=0;
       gtk_widget_hide(window);
     }
 
-  printf("%s 5\n",__FUNCTION__);
+
 
   // we update config database
   set_config();
 
   // Update menu item
-  update_menu_item(this);
+  //  update_menu_item(this);
+  UpdateMenuItem();
 }
 
 
