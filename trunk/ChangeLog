@@ -1,3 +1,19 @@
+2004-12-09 Scott Dattalo <scott@dattalo.com>
+	* src/protocol.h, src/protocol.cc, src/Makefile.am: New files to
+	support a communication protocol for gpsim.
+	* cli/socket.cc: moved much of the protocol related stuff to the
+	new files.
+	* src/value.h, src/value.cc, src/symbol.h, src/symbol.cc: Symbols
+	and Values can now be assigned by Packets.
+	* src/12bit-instructions.h, src/12bit-processors.h,
+	src/14bit-instructions.h, src/14bit-processors.h,
+	src/14bit-tmrs.h, src/16bit-processors.h, src/16bit-tmrs.h,
+	src/breakpoints.h, src/p12x.h, src/p16f62x.h, src/p16x5x.h,
+	src/p16x6x.h, src/p16x8x.h, src/pic-instructions.h,
+	src/pic-processor.h, src/processor.h, src/trace.h, src/xref.h:
+	fixed typo in GPL disclaimer.
+
+	
 2004-12-07 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: More socket clean up
 	* src/modules.cc, src/modules.h, src/processor.cc,
