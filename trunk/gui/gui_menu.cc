@@ -423,15 +423,17 @@ static void set_simulation_mode(char m)
 {
     guint64 value=1;
 
+    realtime_mode=0;
+    realtime_mode_with_gui=0;
     gui_animate_delay=0;
 
+    printf("setting simulation mode to %c\n",m);
     switch(m)
     {
     case 'r':
         value=0;
         gui_animate_delay=0;
 	realtime_mode=1;
-        realtime_mode_with_gui=0;
 	break;
     case 'R':
         value=0;
@@ -442,50 +444,29 @@ static void set_simulation_mode(char m)
     case 'b':
 	value=1;
         gui_animate_delay=100;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case 'c':
 	value=1;
         gui_animate_delay=300;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case 'd':
 	value=1;
         gui_animate_delay=600;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case '1':
         value=1;
-        gui_animate_delay=0;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case '2':
         value=1000;
-        gui_animate_delay=0;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case '3':
         value=100000;
-        gui_animate_delay=0;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case '4':
         value=2000000;
-        gui_animate_delay=0;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     case '5':
         value=0;
-        gui_animate_delay=0;
-	realtime_mode=0;
-        realtime_mode_with_gui=0;
         break;
     }
     gi.set_update_rate(value);
@@ -683,7 +664,7 @@ void create_dispatcher (void)
       frame = gtk_frame_new("Simulation mode");
       if(!config_get_variable("dispatcher", "SimulationMode", &SimulationMode))
       {
-	  SimulationMode='R';
+	  SimulationMode='4';
       }
       set_simulation_mode(SimulationMode);
 	update_rate_menu = gtk_option_menu_new();

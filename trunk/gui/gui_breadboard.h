@@ -78,31 +78,35 @@ class GuiPin
 
 enum module_type {PIC_MODULE, EXTERNAL_MODULE};
 
-struct gui_module
+class GuiModule
 {
+public:
+  bool bIsBuilt;              // True after the module gets displayed.
+  Module *module;
+  Breadboard_Window *bbw;
+  GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
+  GtkWidget *name_widget;    // Name of widget, positioned above module_widget.
+  int x;                     // Position in layout widget
+  int y;                     // Position in layout widget
+  int width;                 // Width of module_widget
+  int height;                // Height of module_widget
 
-    GtkWidget *fixed; // Main layout that contains everything about the module
+  int pinnamewidth;
 
-    enum module_type type;
-    Breadboard_Window *bbw;
-    Module *module;
-    GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
-    GtkWidget *name_widget;    // Name of widget, positioned above module_widget.
-    int x;    // Position in layout widget
-    int y;    // Position in layout widget
-    int width;  // Width of module_widget
-    int height; // Height of module_widget
+  int pin_count;
 
-    int pinnamewidth;
+  GdkPixmap *module_pixmap;
+  GdkPixmap *name_pixmap;
 
-    int pin_count;
+  GtkWidget *tree_item;
 
-    GdkPixmap *module_pixmap;
-    GdkPixmap *name_pixmap;
+  GList *pins;
 
-    GtkWidget *tree_item;
-
-    GList *pins;
+  GuiModule(Module *, Breadboard_Window *);
+  void SetPosition(int x, int y);
+  double Distance(int x, int y);
+  void Refresh();
+  void Build();
 };
 
 
@@ -165,7 +169,7 @@ class Breadboard_Window : public GUI_Object {
 
     struct GuiPin *selected_pin;
     struct gui_node *selected_node;
-    struct gui_module *selected_module;
+    struct GuiModule *selected_module;
 
 
   Breadboard_Window(GUI_Processor *gp);
