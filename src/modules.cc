@@ -66,6 +66,11 @@ Module::Module(void)
   interface_id = 0;
   widget=NULL;
 
+  x=-1; // -1 means automatic positioning
+  y=-1;
+
+  xref = new XrefObject;
+
 }
 
 
@@ -585,4 +590,18 @@ void module_set_attr(char *module_name,char *attr, double val)
 
   cpu->set_attribute(attr,val);
 
+}
+
+void module_set_position(char *module_name, int x, int y)
+{
+
+  Module *cpu=module_check_cpu(module_name);
+
+  if(!cpu)
+    return;
+
+  cpu->x=x;
+  cpu->y=y;
+  if(cpu->xref)
+      cpu->xref->update();
 }
