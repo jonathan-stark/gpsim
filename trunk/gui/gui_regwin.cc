@@ -1160,7 +1160,11 @@ static int settings_dialog(Register_Window *rw)
     while(fonts_ok!=1)
     {
 	char fontname[256];
-	GdkFont *font;
+#if GTK_MAJOR_VERSION >= 2
+        PangoFontDescription *font;
+#else
+        GdkFont *font;
+#endif
 
         settings_active=1;
 	while(settings_active)
@@ -1169,14 +1173,21 @@ static int settings_dialog(Register_Window *rw)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
 	if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
 	else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(rw->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
 	    config_set_string(rw->name,"normalfont",rw->normalfont_string);
             fonts_ok++;
@@ -1907,7 +1918,7 @@ void Register_Window::Build(void)
 
   /**************************** load fonts *********************************/
 #if GTK_MAJOR_VERSION >= 2
-#define DEFAULT_NORMALFONT "Courier 12"
+#define DEFAULT_NORMALFONT "Courier Roman 14"
 #else
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
 #endif
