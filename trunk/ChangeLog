@@ -1,4 +1,10 @@
 2004-02-10  Scott Dattalo  <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/pic-processor.h:
+	Added step, run, and finish members to the ProgramMemoryAccess class
+	* src/interface.cc, gui/gui*
+	removed more gpsim_* functions from interface.cc
+	
+2004-02-10  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_symbol.cc, src/symbol.h, src/symbol.cc
 	Cleaned up symbol api.
 	

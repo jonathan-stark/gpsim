@@ -237,47 +237,6 @@ gboolean gpsim_register_is_valid(unsigned int processor_id, REGISTER_TYPE type, 
 
 //--------------------------------------------------------------------------
 
-#include <list>
-#include "symbol.h"
-
-extern list <symbol *> st;
-
-static list <symbol *>::iterator interface_sti;
-
-void gpsim_symbol_rewind(unsigned int processor_id)
-{
-    interface_sti=st.begin();
-}
-
-sym *gpsim_symbol_iter(unsigned int processor_id)
-{
-    static sym s;
-
-    while(interface_sti!=st.end())
-    {
-        if((*interface_sti)->isa() == SYMBOL_LINE_NUMBER)
-        {
-            interface_sti++;
-            continue;
-        }
-	//
-	if(s.name!=0)
-		free(s.name);
-	s.name=(char*)malloc((*interface_sti)->name()->length()+1);
-        strncpy(s.name,
-                (*interface_sti)->name()->data(),
-                (*interface_sti)->name()->length());
-        s.name[(*interface_sti)->name()->length()]=0;
-        s.type=(*interface_sti)->isa();
-        s.value=(*interface_sti)->get_value();
-        interface_sti++;
-        return &s;
-    }
-    return 0;
-}
-
-//--------------------------------------------------------------------------
-
 unsigned int gpsim_get_status(unsigned int processor_id)
 {
 
@@ -554,6 +513,7 @@ void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref)
 //
 // Trace buffer interface routines
 //
+#if 0
 void gpsim_assign_trace_xref(gpointer xref)
 {
 
@@ -561,21 +521,7 @@ void gpsim_assign_trace_xref(gpointer xref)
       trace.xref->add(xref);
 
 }
-
-//--------------------------------------------------------------------------
-
-void gpsim_get_current_trace(guint64 *current_cycle, int *current_index,
-			     char *current_trace, int bufsize)
-{
-
-  if(current_cycle)
-    *current_cycle = trace.string_cycle;
-  if(current_index)
-    *current_index = trace.string_index;
-  if(current_trace)
-    strncpy(current_trace,trace.string_buffer,bufsize);
-}
-
+#endif
 int gpsim_move_to_last_trace(void)
 {
 

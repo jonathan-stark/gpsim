@@ -96,6 +96,10 @@ class ProgramMemoryAccess :  public BreakCallBack
   void step(unsigned int steps);
   void step_over(void);
 
+  void run(void);
+  void stop(void);
+  void finish(void);
+
   // isModified -- returns true if the program at the address has been modified 
   // (this is only valid for those processor capable of writing to their own
   // program memory)
@@ -133,10 +137,6 @@ class ProgramMemoryAccess :  public BreakCallBack
   void set_break_at_line(int file_id, int src_line);
   void clear_break_at_line(int file_id, int src_line);
   void toggle_break_at_line(int file_id, int src_line);
-
-  //void set_break_at_hll_line(int file_id, int src_line);
-  //void clear_break_at_hll_line(int file_id, int src_line);
-  //void toggle_break_at_hll_line(int file_id, int src_line);
 
   void set_hll_mode(int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
@@ -253,6 +253,8 @@ public:
 
   virtual void run(void);
   void run_to_address(unsigned int destination);
+  virtual void finish(void);
+
   virtual void sleep(void) {};
   void step(unsigned int steps);
   void step_over(void);

@@ -61,24 +61,26 @@ void StopWatch_Window::Update(void)
 
   if(!has_processor || !is_built)
     return;
-    
+  if(!gp || !gp->cpu)
+    return;
+
   if(rollover<=0)
     rollover=1;
 
   if(offset>rollover)
     offset%=rollover;
 
-  double frequency = gpsim_get_inst_clock(gp->pic_id)*4;
+  double frequency = gp->cpu->time_to_cycles(1.0); //gpsim_get_inst_clock(gp->pic_id)*4;
   _cyclecounter=cyclecounter;
 
   ////////////////////////
 
   if(count_dir<0)
-    _cyclecounter -= gpsim_get_cycles(gp->pic_id)-cyclecounter_last;
+    _cyclecounter -= cycles.value - cyclecounter_last;
   else
-    _cyclecounter += gpsim_get_cycles(gp->pic_id)-cyclecounter_last;
+    _cyclecounter += cycles.value - cyclecounter_last;
 
-  cyclecounter_last=gpsim_get_cycles(gp->pic_id);
+  cyclecounter_last = cycles.value;
 
 
   while(cyclecounter<offset)

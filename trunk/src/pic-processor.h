@@ -259,6 +259,8 @@ public:
   virtual void create_stack(void) {stack = new Stack;};
   virtual void load_hex(const char *hex_file);
   virtual void run(void);
+  virtual void finish(void);
+
   void sleep(void);
   void step(unsigned int steps);
   void step_over(void);

@@ -755,6 +755,18 @@ void Processor::step_over (void)
 }
 
 
+
+//-------------------------------------------------------------------
+//
+// finish
+//
+// this method really only applies to processors with stacks.
+
+void Processor::finish(void)
+{
+
+}
+
 //-------------------------------------------------------------------
 
 void Processor::run_to_address (unsigned int destination)
@@ -1153,6 +1165,29 @@ void ProgramMemoryAccess::step_over(void)
 
   redisplay_prompt();
 }
+
+//--------------------------------------------------------------------------
+void ProgramMemoryAccess::run(void)
+{
+  cpu->run();
+
+  redisplay_prompt();
+}
+
+//--------------------------------------------------------------------------
+void ProgramMemoryAccess::stop(void)
+{
+  bp.halt();
+
+  redisplay_prompt();
+}
+
+//--------------------------------------------------------------------------
+void ProgramMemoryAccess::finish(void)
+{
+  cpu->finish();
+}
+
 
 //--------------------------------------------------------------------------
 
