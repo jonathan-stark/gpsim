@@ -59,7 +59,8 @@ enum window_types {
   WT_list_source_window,
   WT_breadboard_window,
   WT_trace_window,
-  WT_profile_window
+  WT_profile_window,
+  WT_stopwatch_window
 };
 
 //
@@ -255,6 +256,17 @@ struct _Stack_Window {
 };
 
 typedef struct _Stack_Window Stack_Window;
+
+//
+// The stopwatch window
+//
+struct _StopWatch_Window {
+    GUI_Object     gui_obj;
+
+    int has_processor;
+};
+
+typedef struct _StopWatch_Window StopWatch_Window;
 
 //
 // The symbol window
@@ -579,6 +591,7 @@ struct _gui_processor {
   Breadboard_Window *breadboard_window;
   Trace_Window *trace_window;
   Profile_Window *profile_window;
+  StopWatch_Window *stopwatch_window;
   // GtkWidget *stack_window;
   // GtkWidget *sfr_window;
   // GtkWidget *watch_window;

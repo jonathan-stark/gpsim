@@ -399,6 +399,9 @@ toggle_window (gpointer             callback_data,
 	case 10:
 	  gui_object=(GUI_Object*)gp->profile_window;
             break;
+	case 11:
+	    gui_object=(GUI_Object*)gp->stopwatch_window;
+            break;
 	default:
 	    puts("unknown menu action");
 	}
@@ -521,6 +524,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/sep3",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/_Trace",NULL, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
   { "/Windows/Pro_file",NULL, (GtkItemFactoryCallback)toggle_window,10,"<ToggleItem>" },
+  { "/Windows/St_opwatch",NULL, (GtkItemFactoryCallback)toggle_window,11,"<ToggleItem>" },
 
 //  { "/_Preferences",          NULL, 0,               0, "<Branch>" },
 //  { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },
