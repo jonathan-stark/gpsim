@@ -29,7 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-tmrs.h"
 #include "pir.h"
 #include "uart.h"
-#include "pic-packages.h"
 
      // forward references
 
@@ -78,12 +77,12 @@ public:
   TMR0H        tmr0h;
   T0CON        t0con;
   RCON         rcon;
-  PIR1v2       pir1_reg;
+  PIR1v2       pir1;
   sfr_register ipr1;
   sfr_register ipr2;
   T1CON        t1con;
   PIE          pie1;
-  PIR2v2       pir2_reg;
+  PIR2v2       pir2;
   PIE          pie2;
   T2CON        t2con;
   PR2          pr2;
@@ -130,10 +129,13 @@ public:
     {
       return disasm16(this, address, inst);
     }
-  virtual PIR1v2 *get_pir1(void) { return (&pir1_reg); }
-  virtual PIR2v2 *get_pir2(void) { return (&pir2_reg); }
+  /*
+    GCC doesn't like this for some damn reason. there's a 4-byte offset
+    in the pointer.
+  virtual PIR1v2 *get_pir1(void) { return (&pir1); }
+  virtual PIR2v2 *get_pir2(void) { return (&pir2); }
   virtual PIR_SET_2 *get_pir_set(void) { return (&pir_set_def); }
-
+  */
   void create_sfr_map(void);
 
   virtual void create_stack(void) {stack = new Stack16;};
@@ -158,35 +160,6 @@ public:
   // -- the derived classes must define their parameters appropriately.
 
   virtual unsigned int register_memory_size () const { return 0x1000;};
-
-  virtual int get_pin_count(void){ 
-    if(package) 
-      return package->get_pin_count();
-    else
-      return 0;
-  };
-
-  virtual char *get_pin_name(unsigned int pin_number) {
-    if(package) 
-      return package->get_pin_name(pin_number);
-    else
-      return NULL;
-  };
-
-  virtual int get_pin_state(unsigned int pin_number) {
-    if(package) 
-      return package->get_pin_state(pin_number);
-    else
-      return 0;
-  };
-
-  virtual IOPIN *get_pin(unsigned int pin_number) {
-    if(package)
-      return package->get_pin(pin_number);
-    else
-      return NULL;
-  };
-
   virtual void set_out_of_range_pm(int address, int value);
 
   virtual void create_iopin_map(void);

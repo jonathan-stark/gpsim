@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 
 #include "../config.h"
+#include "stimuli.h"
 #include "uart.h"
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"

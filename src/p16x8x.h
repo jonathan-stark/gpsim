@@ -24,55 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "intcon.h"
 
-/***************************************************************************
- *
- * Include file for:  P16C84, P16F84, P16F83, P16CR83, P16CR84
- *
- * The x84 processors have a 14-bit core, eeprom, and are in an 18-pin
- * package. The class taxonomy is:
- *
- *   pic_processor                  Package
- *      |-> 14bit_processor           |-> _18_pins
- *             |                            |-> _14bit_18pins
- *             |----------\ /-----------------------|
- *                         |
- *                         |- P16C8x
- *                              |->P16C84
- *                              |->P16F84
- *                              |->P16C83
- *                              |->P16CR83
- *                              |->P16CR84
- *
- ***************************************************************************/
-
-class P16C8x : public  _14bit_processor, public _14bit_18pins
-{
-public:
-
-  INTCON_14       intcon_reg;
-
-  virtual void set_out_of_range_pm(int address, int value);
-
-  virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
-  virtual void create_symbols(void);
-
-  virtual unsigned int program_memory_size(void) { return 0; };
-
-  virtual void create_sfr_map(void);
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-
-  virtual void create(int ram_top);
-
-};
-
 class P16C84 : public P16C8x
 {
 public:

@@ -143,16 +143,11 @@ enum
 
 };
 
-// just a place holder in case we need to move stuff out of INTCON
-class INTCON_14 : public INTCON
-{
-};
-
 
 class PIR_SET;
 
 // A 14-bit intcon with pir registers
-class INTCON_14_PIR : public INTCON_14
+class INTCON_14_PIR : public INTCON
 {
 public:
 
@@ -174,7 +169,6 @@ private:
 //---------------------------------------------------------
 // INTCON_16 - Interrupt control register for the 16-bit core
 class RCON;
-class _16bit_processor;
 
 class INTCON_16 : public INTCON
 {

@@ -150,12 +150,8 @@ class RegisterMemoryAccess
   RegisterMemoryAccess(void);
   virtual Register *get_register(unsigned int address);
   int get_size(void) { return nRegisters; }
-  void set_cpu(Processor *p) { cpu = p; }
-  void set_Registers(Register **_registers, int _nRegisters) 
-    { 
-      nRegisters = _nRegisters; 
-      registers = _registers;
-    }
+  void set_cpu(Processor *p);
+  void set_Registers(Register **_registers, int _nRegisters);
 
 private:
   int nRegisters;

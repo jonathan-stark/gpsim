@@ -31,8 +31,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "pic-instructions.h"
 #include "14bit-registers.h"
-#include "pic-packages.h"
-//#include "eeprom.h"
 
 class EEPROM;
 
@@ -310,13 +308,16 @@ public:
   virtual void set_eeprom(EEPROM *e) { eeprom = e; }
   virtual EEPROM *get_eeprom(void) { return (eeprom); }
 
+  virtual int get_pin_count(void);
+  virtual char *get_pin_name(unsigned int pin_number);
+  virtual int get_pin_state(unsigned int pin_number);
+  virtual IOPIN *get_pin(unsigned int pin_number);
+
   static Processor *construct(void);
   pic_processor(void);
 };
 
 #define cpu_pic ( (pic_processor *)cpu)
-
-
 
 
 //----------------------------------------------------------

@@ -1080,6 +1080,20 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
 
 }
 
+//--------------------------------------------------------------------------
+void RegisterMemoryAccess::set_cpu(Processor *p)
+{ 
+  cpu = p;
+}
+
+
+//--------------------------------------------------------------------------
+void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters) 
+{ 
+  nRegisters = _nRegisters; 
+  registers = _registers;
+}
+
 //========================================================================
 // Processor Constructor
 

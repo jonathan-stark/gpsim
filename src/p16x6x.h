@@ -27,11 +27,9 @@ Boston, MA 02111-1307, USA.  */
 #include "pir.h"
 // #include "ssp.h"
 
-class P16C61 : public  _14bit_processor, public _14bit_18pins
+class P16C61 : public P16C8x
 {
 public:
-
-  INTCON_14       intcon_reg;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
   virtual void create_symbols(void);
@@ -40,18 +38,9 @@ public:
 
   virtual void create_sfr_map(void);
 
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-
   P16C61(void);
-  void create(void);
+  virtual void create(void);
 
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   static Processor *construct(void);
 
 };
@@ -62,9 +51,18 @@ public:
 //      of a 16x6x device (where the second `x' is >= 3
 //
 
-class P16X6X_processor : public _14bit_processor
+class P16X6X_processor :  public _14bit_processor
 {
 public:
+
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
+
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
+
+  PIC_IOPORT   *portc;
+  IOPORT_TRIS  trisc;
 
   T1CON   t1con;
   PIR1v1  pir1_reg;
@@ -86,16 +84,14 @@ public:
   INTCON_14_PIR intcon_reg;
   PIR_SET_1 pir_set_def;
 
-  //  void create_iopin_map(void);
-
   virtual unsigned int program_memory_size(void) const { return 0x800; };
 
   virtual void create_sfr_map(void);
-  virtual void option_new_bits_6_7(unsigned int bits)
+  /*  virtual void option_new_bits_6_7(unsigned int bits)
     {
       //((PORTB *)portb)->rbpu_intedg_update(bits);
     }
-
+  */
   virtual PIR *get_pir2(void) { return (&pir2_reg); }
   virtual PIR *get_pir1(void) { return (&pir1_reg); }
   virtual PIR_SET *get_pir_set(void) { return (&pir_set_def); }
@@ -104,28 +100,12 @@ public:
 
 };
 
-class _14bit_28pins : public _28pins
-{
-public:
-
-  void create_iopin_map(void);
-
-};
-
-class _14bit_40pins : public _40pins
-{
-public:
-
-  void create_iopin_map(void);
-
-};
-
 /*********************************************************************
  *  class definitions for the 16c6x family of processors
  */
 
 
-class P16C62 : public  P16X6X_processor, public _14bit_28pins
+class P16C62 : public  P16X6X_processor
 {
   public:
 
@@ -136,22 +116,17 @@ class P16C62 : public  P16X6X_processor, public _14bit_28pins
   void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
-
+  /*
   virtual void option_new_bits_6_7(unsigned int bits)
     {
       ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
-
+  */
   P16C62(void);
   static Processor *construct(void);
+  virtual void create_iopin_map(void);
+
   void create(void);
-
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-
-
 };
 
 
@@ -175,9 +150,15 @@ class P16C63 : public  P16C62
 };
 
 
-class P16C64 : public  P16X6X_processor, public _14bit_40pins
+class P16C64 : public  P16X6X_processor
 {
   public:
+
+  PIC_IOPORT   *portd;
+  IOPORT_TRIS  trisd;
+
+  PIC_IOPORT   *porte;
+  IOPORT_TRIS  trise;
 
 
   TMR2_MODULE tmr2_module;
@@ -186,21 +167,16 @@ class P16C64 : public  P16X6X_processor, public _14bit_40pins
   void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
-
+  /*
   virtual void option_new_bits_6_7(unsigned int bits)
     {
       ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
-
+  */
   P16C64(void);
   static Processor *construct(void);
   void create(void);
-
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-
+  virtual void create_iopin_map(void);
 
 };
 

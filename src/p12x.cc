@@ -31,16 +31,20 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
-#include "../config.h"
+#include "packages.h"
+#include "stimuli.h"
 #include "symbol.h"
 
 #include "p12x.h"
 
 
 
-void _12bit_8pins::create_iopin_map(void)
+void P12C508::create_iopin_map(void)
 {
 
+  package = new Package(8);
+  if(!package)
+    return;
 
   // Build the links between the gpio and tris registers.
   gpio.tris = &tris;
@@ -53,17 +57,15 @@ void _12bit_8pins::create_iopin_map(void)
   // Define the valid I/O pins.
   gpio.valid_iopins = 0x3f;
 
-  create_pkg(8);
+  package->assign_pin(7, new IO_bi_directional_pu(&gpio, 0));
+  package->assign_pin(6, new IO_bi_directional_pu(&gpio, 1));
+  package->assign_pin(5, new IO_bi_directional(&gpio, 2));
+  package->assign_pin(4, new IO_input(&gpio, 3));
+  package->assign_pin(3, new IO_bi_directional(&gpio, 4));
+  package->assign_pin(2, new IO_bi_directional(&gpio, 5));
 
-  assign_pin(7, new IO_bi_directional_pu(&gpio, 0));
-  assign_pin(6, new IO_bi_directional_pu(&gpio, 1));
-  assign_pin(5, new IO_bi_directional(&gpio, 2));
-  assign_pin(4, new IO_input(&gpio, 3));
-  assign_pin(3, new IO_bi_directional(&gpio, 4));
-  assign_pin(2, new IO_bi_directional(&gpio, 5));
-
-  assign_pin(1, NULL);
-  assign_pin(8, NULL);
+  package->assign_pin(1, NULL);
+  package->assign_pin(8, NULL);
 
 
 }

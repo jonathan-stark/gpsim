@@ -1164,6 +1164,40 @@ void pic_processor::load_hex (const char *hex_file)
 
 }
 
+
+//-------------------------------------------------------------------
+int pic_processor::get_pin_count(void)
+{
+  if(package) 
+    return package->get_pin_count();
+  else
+    return 0;
+}
+
+char *pic_processor::get_pin_name(unsigned int pin_number)
+{
+  if(package) 
+    return package->get_pin_name(pin_number);
+  else
+    return NULL;
+}
+
+int pic_processor::get_pin_state(unsigned int pin_number)
+{
+  if(package) 
+    return package->get_pin_state(pin_number);
+  else
+    return 0;
+}
+
+IOPIN *pic_processor::get_pin(unsigned int pin_number)
+{
+  if(package)
+    return package->get_pin(pin_number);
+  else
+    return NULL;
+}
+
 //-------------------------------------------------------------------
 //  ConfigMode
 //

@@ -174,7 +174,7 @@ class P16C71 :  public P16C61
 
 };
 
-class P16C712 :  public P16X6X_processor, public _14bit_18pins
+class P16C712 :  public P16C62
 {
  public:
 
@@ -182,7 +182,7 @@ class P16C712 :  public P16X6X_processor, public _14bit_18pins
   ADCON1 adcon1;
   ADRES  adres;
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C716_;};
+  virtual PROCESSOR_TYPE isa(void){return _P16C712_;};
 
   virtual void create_sfr_map(void);
 
@@ -191,17 +191,19 @@ class P16C712 :  public P16X6X_processor, public _14bit_18pins
   void create(void);
   static Processor *construct(void);
 
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+  /*
+    virtual int get_pin_count(void){return Package::get_pin_count();};
+    virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
+    virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
+    virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+  */
 };
 
 class P16C716 :  public P16C712
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C712_;};
+  virtual PROCESSOR_TYPE isa(void){return _P16C716_;};
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
 

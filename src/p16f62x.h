@@ -92,11 +92,10 @@ class COMPARATOR_MODULE
 };
 
 
-class P16F62x : public P16X6X_processor,  public _14bit_18pins
+class P16F62x : public P16X6X_processor
 {
 public:
 
-  //INTCON       intcon_reg;
   USART_MODULE14 usart;
   COMPARATOR_MODULE comparator;
 
@@ -109,19 +108,16 @@ public:
   virtual unsigned int program_memory_size(void) { return 0; };
 
   virtual void create_sfr_map(void);
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual void set_config_word(unsigned int address, unsigned int cfg_word);
 
-
+  /*
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+  */
 
   virtual void create(int ram_top, unsigned int eeprom_size);
   virtual void create_iopin_map(void);

@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-processor.h"
 #include "14bit-registers.h"
 
-#include "symbol.h"
+//#include "symbol.h"
 #include "pic-instructions.h"
 #include "12bit-instructions.h"
 #include "16bit-instructions.h"

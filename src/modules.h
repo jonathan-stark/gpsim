@@ -36,22 +36,6 @@ Boston, MA 02111-1307, USA.  */
 #include "attribute.h"
 
 
-/*
-
-port
- pin
-  type
-  number
-  position in port
-
-struct Module_Pin {
- char *port_name,
- char *pin_name,
- PIN_TYPE pin_type,
- int  pin_number
- int  pin_position
-} 
-*/
 
 /*****************************************************************************
  *
@@ -61,6 +45,7 @@ struct Module_Pin {
 class Module;
 class Module_Types;
 class ModuleInterface;
+class IOPIN;
 
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();

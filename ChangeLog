@@ -1,3 +1,8 @@
+2004-01-30  Scott Dattalo  <scott@dattalo.com>
+	* almost all source files - still trying to sort out include 
+	dependencies. There's a weird bug where gcc is adding an extra
+	4-byte offset to pointers in some instances. I have no clue why...
+	
 2004-01-29  Scott Dattalo  <scott@dattalo.com>
 	* almost all source files - trying to sort out include dependencies
 	

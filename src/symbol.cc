@@ -479,3 +479,25 @@ void update_symbol_value(char *sym, int new_value)
     cout << sym << " was not found in the symbol table\n";
 
 }
+
+//------------------------------------------------------------------------
+void node_symbol::print(void)
+{
+  if(stimulus_node) {
+    cout << "node: " << stimulus_node->name() << '\n';
+    stimulus *s = stimulus_node->stimuli;
+    while(s) {
+      cout << '\t' << s->name() << '\n';
+      s = s->next;
+    }
+  } else
+    cout << "has no attached stimuli\n";
+
+}
+
+void register_symbol::print(void)
+{
+  if(reg)
+    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->cpu->registers[reg->address]->get_value() <<'\n';
+}
+

@@ -25,8 +25,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "p18x.h"
-#include "pic-packages.h"
-
+#include "packages.h"
+#include "stimuli.h"
 #include "symbol.h"
 
 void P18Cxx2::create_symbols(void)
@@ -452,8 +452,8 @@ void P18C4x2::create_sfr_map(void)
   add_sfr_register(&portd,	  0xf83,0,"portd");
   add_sfr_register(&porte,	  0xf84,0,"porte");
 
-  usart16.initialize_16(this,get_pir_set(),&portc);
-  cout << "c4x2::create_sfr_map2 usart txreg => " << usart16.txreg.name() << "\n";
+  //usart16.initialize_16(this,get_pir_set(),&portc);
+  usart16.initialize_16(this,&pir_set_def,&portc);
 
   add_sfr_register(&lata,	  0xf89,0,"lata");
   add_sfr_register(&latb,	  0xf8a,0,"latb");
@@ -616,7 +616,8 @@ void P18F442::create(void)
   e->set_cpu(this);
   // We might want to pass this value in for larger eeproms
   e->initialize(256);
-  e->set_pir_set(get_pir_set());
+  //e->set_pir_set(get_pir_set());
+  e->set_pir_set(&pir_set_def);
   e->set_intcon(&intcon);
 
   // assign this eeprom to the processor
@@ -889,13 +890,11 @@ void P18F1220::create_sfr_map(void)
   if(verbose)
     cout << "create_sfr_map P18F1220\n";
 
-  cout << "F1220::create_sfr_map1 usart txreg => " << usart16.txreg.name() << "\n";
-
   add_sfr_register(&porta,	  0xf80,0,"porta");
   add_sfr_register(&portb,	  0xf81,0,"portb");
 
-  usart16.initialize_16(this,get_pir_set(),&porta);
-  cout << "Fx220::create_sfr_map2 usart txreg => " << usart16.txreg.name() << "\n";
+  //usart16.initialize_16(this,get_pir_set(),&porta);
+  usart16.initialize_16(this,&pir_set_def,&porta);
 
   add_sfr_register(&lata,	  0xf89,0,"lata");
   add_sfr_register(&latb,	  0xf8a,0,"latb");

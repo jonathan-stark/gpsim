@@ -20,7 +20,6 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "pic-processor.h"
-#include "pic-packages.h"
 #include "intcon.h"
 #include "uart.h"
 
@@ -91,11 +90,6 @@ public:
 				unsigned int address)
     {return;};
 
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
-
   virtual unsigned int program_memory_size(void) const {return 0;};
 
   static pic_processor *construct(void);
@@ -103,6 +97,58 @@ public:
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)
+
+
+/***************************************************************************
+ *
+ * Include file for:  P16C84, P16F84, P16F83, P16CR83, P16CR84
+ *
+ * The x84 processors have a 14-bit core, eeprom, and are in an 18-pin
+ * package. The class taxonomy is:
+ *
+ *   pic_processor 
+ *      |-> 14bit_processor
+ *             |    
+ *             |----------\ 
+ *                         |
+ *                         |- P16C8x
+ *                              |->P16C84
+ *                              |->P16F84
+ *                              |->P16C83
+ *                              |->P16CR83
+ *                              |->P16CR84
+ *
+ ***************************************************************************/
+
+class P16C8x : public  _14bit_processor  //, public _14bit_18pins
+{
+public:
+
+  INTCON       intcon_reg;
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
+
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
+
+
+  virtual void set_out_of_range_pm(int address, int value);
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
+  virtual void create_symbols(void);
+
+  virtual unsigned int program_memory_size(void) { return 0; };
+
+  virtual void create_sfr_map(void);
+  virtual void option_new_bits_6_7(unsigned int bits)
+    {
+      ((PORTB *)portb)->rbpu_intedg_update(bits);
+    }
+  virtual void create_iopin_map(void);
+  virtual void create(int ram_top);
+
+};
+
 
 
 #endif
