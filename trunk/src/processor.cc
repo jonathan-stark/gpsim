@@ -196,7 +196,6 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
       registers[j]->alias_mask = 0;
 
     registers[j]->address = j;
-    registers[j]->break_point = 0;
     registers[j]->value = 0;
     registers[j]->symbol_alias = NULL;
 
@@ -498,12 +497,10 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    //line = cpu->program_memory[address]->get_src_line();
     line = (this->operator[](address)).get_src_line();
     break;
 
   case HLL_MODE:
-    //line = cpu->program_memory[address]->get_hll_src_line();
     line = (this->operator[](address)).get_hll_src_line();
     break;
   }
@@ -785,7 +782,7 @@ void Processor::dump_registers (void)
 //-------------------------------------------------------------------
 instruction &ProgramMemoryAccess::operator [] (int address)
 {
-  cout << "pma[0x"<< hex << address << "]\n";
+  //cout << "pma[0x"<< hex << address << "]\n";
   if(!cpu ||cpu->program_memory_size()<=address  || address<0)
     return bad_instruction;
 
@@ -877,8 +874,6 @@ void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 
   if(hasValid_opcode(address)) {
 
-    //(this->operator[](address)) = *new_instruction;
-
     cpu->program_memory[cpu->map_pm_address2index(address)] = new_instruction;
 
     if(new_instruction->xref)
@@ -890,7 +885,7 @@ void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 instruction *ProgramMemoryAccess::get(int address)
 {
   if(address < cpu->program_memory_size())
-    return &(this->operator[](address)); //(cpu->program_memory[addr]);
+    return &(this->operator[](address));
   else
     return NULL;
 
@@ -1057,9 +1052,6 @@ bool  ProgramMemoryAccess::hasValid_opcode(unsigned int address)
   if((this->operator[](address)).isa() != instruction::INVALID_INSTRUCTION)
     return true;
 
-  //  if((address < cpu->program_memory_size()) && 
-  //     (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION))
-
   return false;
 }
 //--------------------------------------------------------------------------
@@ -1092,7 +1084,16 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
   if(!cpu || !registers || nRegisters<=address)
     return NULL;
 
-  return registers[address];
+  Register *reg = registers[address];
+
+  // If there are breakpoints set on the register, then drill down
+  // through them until we get to the real register.
+
+  while(reg->isa() == Register::BP_REGISTER)
+    reg = ((Notify_Register *)reg)->replaced;
+
+
+  return reg;
 
 }
 
@@ -1108,6 +1109,16 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
 { 
   nRegisters = _nRegisters; 
   registers = _registers;
+}
+
+bool RegisterMemoryAccess::hasBreak(int address)
+{
+
+  if(!cpu || !registers || nRegisters<=address)
+    return false;
+
+  return registers[address]->isa() == Register::BP_REGISTER;
+
 }
 
 //========================================================================

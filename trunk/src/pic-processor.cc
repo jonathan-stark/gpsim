@@ -1021,7 +1021,6 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
   reg->value       = por_value;
   reg->por_value   = por_value;
   reg->wdtr_value  = por_value;
-  reg->break_point = 0;              // %%% FIX ME %%% Is this still needed?
   reg->initialize();
 }
 

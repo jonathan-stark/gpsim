@@ -37,7 +37,6 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 INTCON::INTCON(void)
 {
-  break_point = 0;
   new_name("intcon");
 }
 

@@ -514,7 +514,6 @@ void Fast_Stack::pop(void)
 //--------------------------------------------------
 PCL16::PCL16(void) : PCL()
 {
-  break_point = 0;
   new_name("pcl");
 }
 
@@ -925,7 +924,6 @@ void Stack16::put_tos(unsigned int new_tos)
 //--------------------------------------------------
 T0CON::T0CON(void)
 {
-  break_point = 0;
   por_value = 0xff;
   wdtr_value = 0xff;
   new_name("t0con");

@@ -38,7 +38,6 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 TMR0::TMR0(void)
 {
-  break_point = 0;
   value=0;
   synchronized_cycle=0;
   future_cycle=0;

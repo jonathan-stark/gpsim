@@ -50,7 +50,8 @@ public:
   };
 
   char *name_str1;
-  unsigned int value,address,break_point;
+  unsigned int value;
+  unsigned int address;
 
   // If non-zero, the alias_mask describes all address at which
   // this file register appears. The assumption (that is true so
@@ -92,6 +93,16 @@ public:
   virtual void put(unsigned int new_value);
 
   
+  // In the Register class, the 'Register *get()' returns a
+  // pointer to itself. Derived classes may return something
+  // else (e.g. a break point may be pointing to the register
+  // it replaced and will return that instead).
+
+  virtual Register *getReg(void)
+    {
+      return this;
+    }
+  
 
   /* put_value is the same as put(), but some extra stuff like
    * interfacing to the gui is done. (It's more efficient than
@@ -127,15 +138,13 @@ public:
   virtual int get_bit_voltage(unsigned int bit_number);
 
   /*
-    Provide a way to query whether or not there is a break point set
-    on this register. This code works by taking advantage of the 
-    fact that isa() is a virtual function. Register breakpoints
-    are implemented with "breakpoint objects" that are derived
-    from the register class. These objects will replace the real
-    register objects that exist in the register memory.
+    Breakpoint objects will overload this function and return true.
    */
 
-  virtual bool hasBreak(void) { return isa() == BP_REGISTER; }
+  virtual bool hasBreak(void)
+    { 
+      return false;
+    }
 };
 
 

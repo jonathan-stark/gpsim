@@ -129,9 +129,6 @@ unsigned int invalid_file_register::get(void)
 {
   cout << "attempt read from invalid file register\n";
 
-  //  if(break_point)
-  //    bp.check_invalid_fr_break(this);
-
   trace.register_read(address,value);
 
   return(0);
@@ -241,7 +238,6 @@ void inline Status_register::put(unsigned int new_value)
 //--------------------------------------------------
 INDF::INDF(void)
 {
-  break_point = 0;
   fsr_mask = 0x7f;           // assume a 14bit core
   base_address_mask1 = 0;    //   "          "
   base_address_mask2 = 0xff; //   "          "
@@ -341,7 +337,6 @@ unsigned int INDF::get_value(void)
 //--------------------------------------------------
 OPTION_REG::OPTION_REG(void)
 {
-  break_point = 0;
   por_value = 0xff;
   wdtr_value = 0xff;
   value = 0xff;
@@ -387,7 +382,6 @@ void OPTION_REG::put(unsigned int new_value)
 //--------------------------------------------------
 PCL::PCL(void) : sfr_register()
 {
-  break_point = 0;
   new_name("pcl");
 }
 
@@ -423,15 +417,11 @@ unsigned int PCL::get_value(void)
 
 PCLATH::PCLATH(void)
 {
-  break_point = 0;
   new_name("pclath");
 }
 
 void PCLATH::put(unsigned int new_value)
 {
-  //  if(break_point) 
-  //    bp.check_write_break(this);
-
   value = new_value & PCLATH_MASK;
 
   trace.register_write(address,value);
@@ -448,9 +438,6 @@ void PCLATH::put_value(unsigned int new_value)
 
 unsigned int PCLATH::get(void)
 {
-  //  if(break_point) 
-  //    bp.check_read_break(this);
-
   trace.register_read(address,value);
   return(value & PCLATH_MASK);
 }
@@ -578,9 +565,6 @@ bool Stack::set_break_on_underflow(bool clear_or_set)
 
 unsigned int WREG::get(void)
 {
-  //  if(break_point) 
-  //    bp.check_read_break(this);
-
   trace.read_W(value);
 
   return(value);
@@ -589,9 +573,6 @@ unsigned int WREG::get(void)
 void WREG::put(unsigned int new_value)
 {
 
-  //  if(break_point) 
-  //    bp.check_write_break(this);
-
   value = new_value;
   trace.write_W(value);
 
@@ -599,7 +580,6 @@ void WREG::put(unsigned int new_value)
 
 WREG::WREG(void)
 {
-  break_point = 0;
   new_name("W");
 }
 

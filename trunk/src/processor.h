@@ -152,6 +152,8 @@ class RegisterMemoryAccess
   void set_cpu(Processor *p);
   void set_Registers(Register **_registers, int _nRegisters);
 
+  bool hasBreak(int address);
+
   //private:
   int nRegisters;
   bool initialized;

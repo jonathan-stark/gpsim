@@ -38,9 +38,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtkextra/gtksheet.h>
 
-/*#include <src/interface.h>*/
-
 #include "../src/interface.h"
+#include "../src/trace.h"
+#include "../src/breakpoints.h"
 
 #include "gui.h"
 
@@ -144,9 +144,25 @@ static int dlg_x=200, dlg_y=200;
 Register_Window *popup_rw;
 
 //========================================================================
+//
+
+//--------------------------------------------------
+// get_register
+// get the "real" register. If 'bTopLevelOnly' is true
+// 
+Register *GUIRegister::get_register(void)
+{
+  if(!rma)
+    return 0;
+
+  return rma->get_register(address);
+}
 
 void GUIRegister::put_value(unsigned int new_value)
 {
+
+  Register *reg = get_register();
+
   if(reg)
     reg->put_value(new_value);
 
@@ -164,6 +180,8 @@ void GUIRegister::put_shadow(unsigned int new_value)
 
 unsigned int GUIRegister::get_value(void)
 {
+  Register *reg = get_register();
+
   if(reg)
     return reg->get_value();
 
@@ -177,12 +195,16 @@ unsigned int GUIRegister::get_shadow(void)
 
 void GUIRegister::Clear_xref(void)
 {
+  Register *reg = get_register();
+
   if(reg && reg->xref)
     reg->xref->clear((gpointer *)xref);
 }
 
 void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
 {
+
+  Register *reg = get_register();
 
   if(reg && reg->xref)
     reg->xref->add( (gpointer *)new_xref);
@@ -192,10 +214,34 @@ void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
 
 bool GUIRegister::hasBreak(void)
 {
-  if(reg)
-    return reg->hasBreak();
+
+  if(rma)
+    return rma->hasBreak(address);
 
   return false;
+}
+
+char *GUIRegister::name(void)
+{
+
+  Register *reg = get_register();
+
+  if(!reg || reg->isa()==Register::INVALID_REGISTER)
+    return 0;
+
+  static char buffer[128];
+
+  if(bIsAliased)
+    sprintf(buffer,"alias (%s)", reg->name());
+  else
+    strcpy(buffer,reg->name());
+
+  return buffer;
+}
+
+GUIRegister:: GUIRegister(void)
+{
+  rma = 0;
 }
 //========================================================================
 
@@ -239,11 +285,14 @@ public:
 
 class InvalidGuiRegister : public GUIRegister {
 public:
-  void put_value(unsigned int new_value) { };
+  void put_value(unsigned int new_value) 
+  { 
+    printf("(gui_regwin)Warning: writing to invalid register\n");
+  };
   unsigned int get_value(void) { return 0;};
 
   InvalidGuiRegister(void) {
-    reg = NULL;
+    rma=0;
   }
 private:
   void operator delete(void *ignore) {};
@@ -689,7 +738,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address,popup_rw->registers[address]->reg);
+	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address,popup_rw->registers[address]->get_register());
 	  }
       break;
     case MENU_SETTINGS:
@@ -698,14 +747,18 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_LOG_SETTINGS:
       gui_get_log_settings(&filename, &mode);
       if(filename!=NULL)
-	gpsim_set_log_name(pic_id,filename,mode);
+	trace_log.enable_logging(filename,mode);
       break;
     case MENU_LOG_READ:
       for(j=range.row0;j<=range.rowi;j++)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_read_logging(pic_id, popup_rw->type, address);
+	    trace_log.enable_logging();
+	    // FIXME the register type is ignored here (and in all other cases
+	    // where we're logging -- it's assumed that the register address is
+	    // for ram, even if in fact the user requests eeprom.
+	    bp.set_notify_read(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_LOG_WRITE:
@@ -713,7 +766,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_write_logging(pic_id, popup_rw->type, address);
+	    bp.set_notify_write(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_LOG_READ_VALUE:
@@ -725,7 +778,9 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
+	    //gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
+	    bp.set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
+
 	  }
       break;
     case MENU_LOG_WRITE_VALUE:
@@ -737,7 +792,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
+	    //gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
+	    bp.set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
 	  }
       break;
     default:
@@ -868,59 +924,41 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
   if(widget==NULL ||
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || rw==NULL)
-  {
+    {
       printf("Warning set_cell(%p,%x,%x,%p)\n",widget,row,col,rw);
       return;
-  }
-
-  gp = rw->gp;
-  
-  if(gp->pic_id==0)
-    return;
-  
-  justification=GTK_JUSTIFY_RIGHT;
-
-  if(col < REGISTERS_PER_ROW)
-    {
-
-      int reg = rw->row_to_address[row] + col;
-
-      if( rw->row_to_address[row] == -1)
-      {
-	  puts("Warning row_to_address[row] == -1 in set_cell");
-	  return;
-      }
-	  
-      // extract value from sheet cell
-      text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
-
-      errno = 0;
-      if(text!=NULL && strlen(text)>0)
-	n = get_number_in_string(text);
-      else
-	errno = ERANGE;
-
-      if(errno != 0)
-	{
-	  n = rw->registers[reg]->get_value();
-	  rw->registers[reg]->put_shadow(INVALID_VALUE);
-	}
-
-      // n=value in sheet cell
-
-      // check if value has changed, and write if so
-      if(gpsim_get_register_name(gp->pic_id,rw->type, reg))
-      {
-	if(n != rw->registers[reg]->get_shadow())
-	{
-	  printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
-	  rw->registers[reg]->put_value(n&0xff);
-	  update_ascii(rw,row);
-	}
-      }
     }
+
+
+  GUIRegister *reg = rw->getRegister(row,col);
+
+  
+  if(!reg)
+    return; // ignore user changes in ascii column for right now
+
+  // extract value from sheet cell
+  text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
+
+  errno = 0;
+  if(text!=NULL && strlen(text)>0)
+    n = get_number_in_string(text);
   else
-      ; // ignore user changes in ascii column for right now
+    errno = ERANGE;
+
+  if(errno != 0)
+    {
+      n = reg->get_value();
+      reg->put_shadow(INVALID_VALUE);
+    }
+
+  // n is the value in the sheet cell
+
+  if(n != reg->get_shadow())
+    {
+      printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
+      reg->put_value(n&0xff);
+      update_ascii(rw,row);
+    }
 
 }
 
@@ -931,48 +969,23 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
 void Register_Window::UpdateLabel(void)
 {
-  gint row, col;
-
-  int regnumber;
-  char cell[100],*n;
-
+  int row, col;
 
   row=register_sheet->active_cell.row;
   col=register_sheet->active_cell.col;
 
-  
-  if(row_to_address[row] < 0) {
-    printf("row_to_address[%d]=0x%x\n",row,row_to_address[row]);
-    return;
+
+  if(col >= REGISTERS_PER_ROW)
+    gtk_label_set(GTK_LABEL(location), "  ascii  ");
+  else {
+
+    GUIRegister *reg = getRegister(row,col);
+
+    const char *n = reg ? reg->name() : "INVALID_REGISTER";
+
+    gtk_label_set(GTK_LABEL(location), n);
   }
 
-  regnumber = row_to_address[row]+col;
-
-  // get the string to put in label
-  cell[0] = 0;
-
-  if(gp) {
-    if(col < REGISTERS_PER_ROW) {
-
-      if(gp->pic_id != 0) {
-	n = gpsim_get_register_name(gp->pic_id, type, regnumber);
-	if(n==NULL)
-	  n="INVALID REGISTER";
-      }  else
-	n = "00"; // FIXME
-
-      strncpy(cell,n,100);
-    }
-    else
-      sprintf(cell,"  ascii  ");
-  }
-  else
-    {
-      puts("**************** Warning not gp?");
-      sprintf(cell," 0x%02x  ", regnumber);
-    }
-  // cell is now the string we want. Set the label
-  gtk_label_set(GTK_LABEL(location), cell);
 
 }
 
@@ -1390,6 +1403,23 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
   return TRUE;
 }
 
+GUIRegister *Register_Window::getRegister(int row, int col)
+{
+
+  if(registers && col < REGISTERS_PER_ROW) {
+
+    int reg_address = row_to_address[row];
+
+    if(reg_address < 0)
+      return 0;
+
+    if(reg_address+ col < MAX_REGISTERS)
+      return registers[reg_address+col];
+  }
+
+  return 0;
+
+}
 
 void Register_Window::SelectRegister(int regnumber)
 {
@@ -1650,9 +1680,8 @@ void Register_Window::Update(void)
   }
 }
 
-extern file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-
-void Register_Window::NewProcessor(GUI_Processor *gp)
+//------------------------------------------------------------------------
+void Register_Window::NewProcessor(GUI_Processor *_gp)
 {
 
 
@@ -1661,10 +1690,10 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   CrossReferenceToGUI *cross_reference;
   gboolean row_created;
   GtkSheetRange range;
-  int pic_id;
+
   int row_height, char_width;
     
-  if(gp == NULL)
+  if(gp == NULL || rma == NULL)
     return;
 
   has_processor=true;
@@ -1672,8 +1701,6 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   if( !enabled)
     return;
     
-  pic_id = gp->pic_id;
-
   for(i=0;i<MAX_REGISTERS;i++){
     registers[i]=&THE_invalid_register;
   }
@@ -1696,29 +1723,27 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   row_height = 3 * char_width + 6;
   gtk_sheet_set_row_height (register_sheet, j, row_height);
 
-  cout << " ram " << gp->cpu->rma.get_size() << endl;
-  cout << " eeprom " << gp->cpu->ema.get_size() << endl;
-
-
-  RegisterMemoryAccess *rma = (type == REGISTER_RAM) ? &gp->cpu->rma : &gp->cpu->ema;
 
   for(reg_number=0;reg_number<rma->nRegisters;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
 	
-    if(i==0 && row_created)
-      {
-	j++;
-	row_created=FALSE;
-      }
+    if(i==0 && row_created) {
+      j++;
+      row_created=FALSE;
+    }
 	
     registers[reg_number] = new GUIRegister;
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
     registers[reg_number]->put_shadow(INVALID_VALUE);
     registers[reg_number]->update_full=TRUE;
-    registers[reg_number]->reg = rma->registers[reg_number];
+    registers[reg_number]->rma = rma;
+    registers[reg_number]->address = reg_number;
 
-    if(gpsim_get_register_name (pic_id, type,reg_number)) {
+
+    registers[reg_number]->bIsAliased = rma->registers[reg_number]->address != reg_number;
+
+    if(rma->registers[reg_number]->name()) {
 
       gpsim_set_bulk_mode(1);
       registers[reg_number]->put_shadow(registers[reg_number]->get_value());
@@ -2003,6 +2028,7 @@ void Register_Window::Build(void)
   UpdateMenuItem();
 }
 
+//------------------------------------------------------------------------
 Register_Window::Register_Window(void)
 {
   printf("WARNING: calling default constructor: %s\n",__FUNCTION__);
@@ -2055,6 +2081,17 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 }
 
 
+void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
+{
+
+  if(!_gp || !_gp->cpu)
+    return;
+
+  rma = &_gp->cpu->rma;
+
+  Register_Window::NewProcessor(_gp);
+}
+
 
 
 EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
@@ -2071,5 +2108,16 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
       Build();
 }
 
+
+void EEPROM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
+{
+
+  if(!_gp || !_gp->cpu)
+    return;
+
+  rma = &_gp->cpu->ema;
+
+  Register_Window::NewProcessor(_gp);
+}
 
 #endif // HAVE_GUI

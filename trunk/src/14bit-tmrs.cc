@@ -434,7 +434,6 @@ unsigned int T1CON::get_prescale(void)
 TMRH::TMRH(void)
 {
 
-  break_point = 0;
   value=0;
   new_name("TMRH");
 
@@ -488,7 +487,6 @@ unsigned int TMRH::get_value(void)
 TMRL::TMRL(void)
 {
 
-  break_point = 0;
   value=0;
   synchronized_cycle=0;
   prescale=1;
@@ -828,7 +826,6 @@ TMR2::TMR2(void)
 {
   update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
   pwm_mode = 0;
-  break_point = 0;
   value=0;
   synchronized_cycle=0;
   future_cycle = 0;

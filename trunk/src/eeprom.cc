@@ -155,7 +155,6 @@ unsigned int EECON2::get(void)
 EECON2::EECON2(void)
 {
   new_name("eecon2");
-  break_point = 0;
 }
 
 
@@ -180,7 +179,6 @@ void EEDATA::put(unsigned int new_value)
 EEDATA::EEDATA(void)
 {
   new_name("eedata");
-  break_point = 0;
 }
 
 
@@ -206,7 +204,6 @@ void EEADR::put(unsigned int new_value)
 EEADR::EEADR(void)
 {
   new_name("eeadr");
-  break_point = 0;
 }
 
 
@@ -378,7 +375,6 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
       rom[i] = new Register;
       rom[i]->address = i;
-      rom[i]->break_point = 0;
       rom[i]->value = 0;
       rom[i]->alias_mask = 0;
 

@@ -163,7 +163,10 @@ class GUI_Object {
 
 class GUIRegister {
  public:
-  Register *reg;  // Pointer to the real register.
+  //Register *reg;  // Pointer to the real register.
+
+  RegisterMemoryAccess *rma;  // Pointer to the rma that controls this register.
+  int address;                // index in rma register array.
   
   int row;        // row & col in register window
   int col;
@@ -175,9 +178,11 @@ class GUIRegister {
 
   CrossReferenceToGUI *xref;
 
+  bool bIsAliased;  // true if this register is aliased and this instance is not the base.
 
   void put_value(unsigned int new_value);
   unsigned int get_value(void);
+  Register *get_register();
 
   // put and get for update the shadow
   void put_shadow(unsigned int new_value);
@@ -189,6 +194,10 @@ class GUIRegister {
 
   bool hasBreak(void);
 
+  char *name(void);
+
+  GUIRegister(void);
+
 };
 
 class WatchEntry : public GUIRegister {
@@ -197,7 +206,6 @@ public:
   unsigned int pic_id;
   Processor *cpu;
   REGISTER_TYPE type;
-  unsigned int address;
 
 };
 
@@ -258,6 +266,8 @@ class Register_Window : public GUI_Object
   REGISTER_TYPE type;
   GUIRegister **registers;
   GtkSheet *register_sheet;
+
+  RegisterMemoryAccess *rma;  // Apointer to the Processor's rma or ema.
     
   GtkWidget *entry;
   GtkWidget *location;
@@ -273,6 +283,7 @@ class Register_Window : public GUI_Object
   virtual void UpdateLabelEntry(void);
   virtual void SelectRegister(int reg_number);
   virtual void NewProcessor(GUI_Processor *gp);
+  virtual GUIRegister *getRegister(int row, int col);
   virtual gboolean UpdateRegisterCell(unsigned int reg_number);
 
   Register_Window(GUI_Processor *gp);
@@ -285,6 +296,7 @@ class RAM_RegisterWindow : public Register_Window
 {
  public:
   RAM_RegisterWindow(GUI_Processor *gp);
+  virtual void NewProcessor(GUI_Processor *gp);
 
 };
 
@@ -292,6 +304,7 @@ class EEPROM_RegisterWindow : public Register_Window
 {
  public:
   EEPROM_RegisterWindow(GUI_Processor *gp);
+  virtual void NewProcessor(GUI_Processor *gp);
 
 };
 

@@ -225,9 +225,10 @@ extern Breakpoints bp;
 class Notify_Register : public Register
 {
 public:
-  Register *replaced;   // A pointer to the register that this break replaces
-  Notify_Register *next; /* If multiple breaks are set on one register,
-			      * then this will point to the next one.  */
+  unsigned int break_point; // The number associated with this break point.
+  Register *replaced;       // A pointer to the register that this break replaces
+  Notify_Register *next;    // If multiple breaks are set on one register,
+			    // then this will point to the next one. 
 
   Notify_Register(void){ replaced = NULL; next = NULL;};
   Notify_Register(Processor *, int, int );
@@ -265,6 +266,14 @@ public:
       return(replaced->get());
     }
 
+  virtual Register *getReg(void)
+    {
+      if(replaced)
+	return replaced;
+      else
+	return this;
+    }
+
   virtual void setbit(unsigned int bit_number, bool new_value)
     {
       replaced->setbit(bit_number, new_value);
@@ -278,6 +287,11 @@ public:
   virtual int get_bit_voltage(unsigned int bit_number)
     {
       return(replaced->get_bit_voltage(bit_number));
+    }
+
+  virtual bool hasBreak(void)
+    { 
+      return true;
     }
 
   void replace(Processor *_cpu, unsigned int reg);
@@ -322,9 +336,9 @@ public:
     Notify_Register(_cpu,_repl,bp ) { };
 
 
-  unsigned int get(void);
-  int get_bit(unsigned int bit_number);
-  int get_bit_voltage(unsigned int bit_number);
+  virtual unsigned int get(void);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
 
 };
 
@@ -336,8 +350,8 @@ public:
   Break_register_write(void){ };
   Break_register_write(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
-  void put(unsigned int new_value);
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void put(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
 
 };
 
@@ -349,9 +363,9 @@ public:
   Break_register_read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
-  unsigned int get(void);
-  int get_bit(unsigned int bit_number);
-  int get_bit_voltage(unsigned int bit_number);
+  virtual unsigned int get(void);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
 
 };
 
@@ -363,8 +377,8 @@ public:
   Break_register_write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
-  void put(unsigned int new_value);
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void put(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
 };
 
 class Log_Register_Write : public Notify_Register
@@ -374,8 +388,8 @@ class Log_Register_Write : public Notify_Register
   Log_Register_Write(void){ };
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
-  void put(unsigned int new_value);
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void put(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
 
 };
 
@@ -387,9 +401,9 @@ public:
   Log_Register_Read(void){ };
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
-  unsigned int get(void);
-  int get_bit(unsigned int bit_number);
-  int get_bit_voltage(unsigned int bit_number);
+  virtual unsigned int get(void);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
 };
 
 class Log_Register_Read_value : public Notify_Register_Value
@@ -399,9 +413,9 @@ public:
   Log_Register_Read_value(void){ };
   Log_Register_Read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
-  unsigned int get(void);
-  int get_bit(unsigned int bit_number);
-  int get_bit_voltage(unsigned int bit_number);
+  virtual unsigned int get(void);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
 };
 
 class Log_Register_Write_value : public Notify_Register_Value
@@ -412,7 +426,7 @@ public:
   Log_Register_Write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
 
 };
 

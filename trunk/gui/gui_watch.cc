@@ -566,7 +566,12 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Reg
   watch_entry->cpu = gp->cpu;
   watch_entry->type=type;
 
-  watch_entry->reg = reg;
+  if(type == REGISTER_RAM)
+    watch_entry->rma = &gp->cpu->rma;
+  else 
+    watch_entry->rma = &gp->cpu->ema;
+
+  //watch_entry->reg = reg;
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
     
