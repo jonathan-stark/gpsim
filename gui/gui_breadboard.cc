@@ -40,8 +40,6 @@ Boston, MA 02111-1307, USA.  */
 
 #define LABELPAD 0 // increase this so wide lines doesn't clutter labels
 
-typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
-
 GdkColor high_output_color;
 GdkColor low_output_color;
 GdkColor black_color;
@@ -50,6 +48,7 @@ GdkColor black_color;
 #include "../src/stimuli.h"
 #include "../src/pic-processor.h"
 #include "../src/symbol.h"
+#include "../src/stimuli.h"
 
 #include <vector>
 
@@ -59,30 +58,6 @@ static int pinspacing = PINLENGTH;
 
 #define LAYOUTSIZE_X 800
 #define LAYOUTSIZE_Y 800
-
-enum orientation {LEFT, RIGHT, UP, DOWN};
-enum direction {PIN_INPUT, PIN_OUTPUT};
-
-struct gui_pin
-{
-    Breadboard_Window *bbw;
-
-    class IOPIN *iopin;
-
-    GtkWidget *widget;
-    GdkPixmap *pixmap;
-    GdkGC *gc;
-
-    int x;
-    int y;
-    int width;
-    int height;
-
-    int value;
-    enum direction direction;
-    enum orientation orientation;
-    pintype type;
-};
 
 static void draw_pin(struct gui_pin *pin)
 {
@@ -216,6 +191,266 @@ static gint button(GtkWidget *widget,
 }
 
 
+
+// get_value
+static void a_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=TRUE;
+    gtk_main_quit();
+}
+static void b_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=FALSE;
+    gtk_main_quit();
+}
+// used for reading a value from user when break on value is requested
+char *gui_get_string(char *prompt)
+{
+    static GtkWidget *dialog=NULL;
+    static GtkWidget *label;
+    static GtkWidget *entry;
+    GtkWidget *button;
+    GtkWidget *hbox;
+    
+    int retval;
+
+    char *string;
+    
+    if(dialog==NULL)
+    {
+	dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
+//	gtk_signal_connect(GTK_OBJECT(dialog),
+//			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+
+	label=gtk_label_new("Enter string:");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+	
+	hbox = gtk_hbox_new(0,0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+
+	button = gtk_button_new_with_label("OK");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+	
+	button = gtk_button_new_with_label("Cancel");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+
+	label=gtk_label_new(prompt);
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+
+	entry=gtk_entry_new();
+	gtk_widget_show(entry);
+	gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
+
+    }
+    else
+    {
+	gtk_label_set_text(GTK_LABEL(label),prompt);
+    }
+    
+//    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+    gtk_widget_show_now(dialog);
+
+    gtk_grab_add(dialog);
+    gtk_main();
+    gtk_grab_remove(dialog);
+    
+    gtk_widget_hide(dialog);
+
+    if(retval)
+	string=gtk_entry_get_text(GTK_ENTRY(entry));
+    else
+        string=NULL;
+    
+    return string;
+}
+
+static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
+{
+    char *node_name = gui_get_string("Node name");
+
+    if(node_name !=NULL)
+	new Stimulus_Node(node_name);
+}
+
+
+////////////////////////////////////////////////////////////////////
+/*static void ok_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=FALSE; // cancel=FALSE;
+    gtk_main_quit();
+}*/
+static gint ok_cb(GtkWidget *widget,
+		   GdkEventButton *event,
+		    gpointer user_data)
+{
+    if(event->type==GDK_2BUTTON_PRESS &&
+       event->button==1)
+    {
+	*(int*)user_data=FALSE; // cancel=FALSE;
+	gtk_main_quit();
+	return 1;
+    }
+    return 0;
+}
+static void cancel_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=TRUE; // cancel=TRUE;
+    gtk_main_quit();
+}
+
+// Select row
+static void node_cb(GtkCList       *clist,
+		    gint            row,
+		    gint            column,
+		    GdkEvent       *event,
+		    gpointer user_data)
+
+{
+    Stimulus_Node *snode;
+
+    snode = (Stimulus_Node*)gtk_clist_get_row_data (clist, row);
+
+    *((Stimulus_Node**) user_data)=snode;
+}
+static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
+{
+    Stimulus_Node *node;
+    char name[128];
+    char *text[1]={name};
+    int row;
+
+//    text[0]=name;
+
+    node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
+
+
+    strcpy(name,node->name());
+
+    row = gtk_clist_append(GTK_CLIST(clist),
+			   text);
+
+    gtk_clist_set_row_data (GTK_CLIST(clist),
+			    row,
+			    (gpointer)node);
+}
+
+static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
+{
+    GtkWidget *dialog;
+    GtkWidget *node_clist;
+    GtkWidget *okbutton;
+    GtkWidget *cancelbutton;
+    int cancel;
+
+    Stimulus_Node *snode=NULL;
+
+	GtkWidget *vbox;
+	GtkWidget *scrolledwindow;
+        GtkWidget *hbox;
+
+//    if(window==NULL)
+//    {
+
+        // Build window
+	dialog = gtk_dialog_new();
+	gtk_window_set_title (GTK_WINDOW (dialog), "Select node to connect to");
+
+	vbox = GTK_DIALOG(dialog)->vbox;
+
+	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	gtk_widget_show (scrolledwindow);
+	gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
+	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+
+	node_clist = gtk_clist_new (1);
+	gtk_widget_show (node_clist);
+	gtk_container_add (GTK_CONTAINER(scrolledwindow), node_clist);
+
+//	hbox = gtk_hbox_new (FALSE, 0);
+//	gtk_widget_show (hbox);
+//	gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 0);
+
+/*	okbutton = gtk_button_new_with_label ("Add stimuli to node ...");
+	gtk_widget_show (okbutton);
+	gtk_box_pack_start (GTK_BOX (hbox), okbutton, FALSE, FALSE, 0);
+	gtk_signal_connect(GTK_OBJECT(okbutton),"clicked",
+			   GTK_SIGNAL_FUNC(ok_cb),(gpointer)&cancel);*/
+
+	cancelbutton = gtk_button_new_with_label ("Cancel");
+	gtk_widget_show (cancelbutton);
+	gtk_box_pack_start (GTK_BOX(GTK_DIALOG(dialog)->action_area), cancelbutton, FALSE, FALSE, 0);
+	gtk_signal_connect(GTK_OBJECT(cancelbutton),"clicked",
+			   GTK_SIGNAL_FUNC(cancel_cb),(gpointer)&cancel);
+//    }
+
+	gtk_signal_connect(GTK_OBJECT(node_clist),
+			   "select_row",
+			   (GtkSignalFunc) node_cb,
+			   (gpointer)&snode);
+//    gtk_widget_set_events(pin->widget,
+//			  gtk_widget_get_events(pin->widget)|
+//			  GDK_BUTTON_PRESS_MASK);
+	gtk_signal_connect(GTK_OBJECT(node_clist),
+			   "button_press_event",
+			   GTK_SIGNAL_FUNC(ok_cb),
+			   (gpointer)&cancel);
+
+        // Add all nodes
+	gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
+			      copy_node_tree_to_clist,
+			      (gpointer)node_clist);
+
+	gtk_widget_set_usize(dialog, 320, 200);
+
+
+    gtk_widget_show(dialog);
+
+    gtk_grab_add(dialog);
+    gtk_main();
+    gtk_grab_remove(dialog);
+
+
+    if(cancel)
+    {
+	gtk_widget_destroy(dialog);
+	return NULL;
+    }
+
+    gtk_widget_destroy(dialog);
+    // Get clist selection
+
+    return snode;
+}
+
+static void stimuli_add_node(GtkWidget *button, Breadboard_Window *bbw)
+{
+
+    struct Stimulus_Node *node;
+
+
+    node = select_node_dialog(bbw);
+
+    if(node!=NULL && bbw->selected_pin!=NULL)
+    {
+        node->attach_stimulus(bbw->selected_pin->iopin);
+    }
+}
+
 static struct gui_pin *create_iopin(Breadboard_Window *bbw, int x, int y, orientation orientation, IOPIN *iopin)
 {
     struct gui_pin *pin;
@@ -280,29 +515,6 @@ static struct gui_pin *create_iopin(Breadboard_Window *bbw, int x, int y, orient
     return pin;
 }
 
-enum module_type {PIC_MODULE, EXTERNAL_MODULE};
-
-struct gui_module
-{
-    enum module_type type;
-    Breadboard_Window *bbw;
-    class Module *module;
-    GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
-    int x;    // Position in layout widget
-    int y;    // Position in layout widget
-    int width;  // Width of module_widget
-    int height; // Height of module_widget
-
-    int pinnamewidth;
-
-    GdkPixmap *pixmap;
-
-//    GtkWidget *left_pins;  // Set in draw_pins
-//    GtkWidget *right_pins; // Set in draw_pins
-
-    GList *pins;
-};
-
 static void expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
     if(p->pixmap==NULL)
@@ -321,23 +533,61 @@ static void expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *
 
 static void treeselect_stimuli(GtkItem *item, struct gui_pin *pin)
 {
+    char text[128];
+    char string[128];
+
+    gtk_widget_show(pin->bbw->stimuli_frame);
     gtk_widget_hide(pin->bbw->node_frame);
     gtk_widget_hide(pin->bbw->module_frame);
     gtk_widget_hide(pin->bbw->pic_frame);
+
+    snprintf(string,sizeof(string),"Stimuli %s",pin->iopin->name());
+    gtk_frame_set_label(GTK_FRAME(pin->bbw->stimuli_frame),string);
+
+    if(pin->iopin->snode!=NULL)
+	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name());
+    else
+        strcpy(text,"Not connected");
+
+    gtk_label_set_text(GTK_LABEL(pin->bbw->stimuli_settings_label), text);
+
+    pin->bbw->selected_pin = pin;
 }
-
-struct gui_node
-{
-    Breadboard_Window *bbw;
-    Stimulus_Node *node;
-};
-
 
 static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 {
-    gtk_widget_show(gui_node->bbw->node_frame);
+    char name[128];
+    char *text[1];
+    stimulus *stimulus;
+
+    text[0]=name;
+
+    if(gui_node->node!=NULL)
+	gtk_widget_show(gui_node->bbw->node_frame);
+    else
+	gtk_widget_hide(gui_node->bbw->node_frame);
+    gtk_widget_hide(gui_node->bbw->stimuli_frame);
     gtk_widget_hide(gui_node->bbw->module_frame);
     gtk_widget_hide(gui_node->bbw->pic_frame);
+
+    // Clear node_clist
+    gtk_clist_clear(GTK_CLIST(gui_node->bbw->node_settings_clist));
+
+    if(gui_node->node!=NULL)
+    {
+	// Add to node_clist
+	stimulus = gui_node->node->stimuli;
+
+	while(stimulus!=NULL)
+	{
+	    strncpy(name, stimulus->name(), sizeof(name));
+	    gtk_clist_append(GTK_CLIST(gui_node->bbw->node_settings_clist),
+			     text);
+	    stimulus = stimulus->next;
+	}
+    }
+
+    gui_node->bbw->selected_node = gui_node;
 }
 
 static void treeselect_module(GtkItem *item, struct gui_module *p)
@@ -347,18 +597,22 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
     switch(p->type)
     {
     case PIC_MODULE:
+	gtk_widget_hide(p->bbw->stimuli_frame);
 	gtk_widget_hide(p->bbw->node_frame);
 	gtk_widget_hide(p->bbw->module_frame);
 	gtk_widget_show(p->bbw->pic_frame);
         gtk_frame_set_label(GTK_FRAME(p->bbw->pic_frame),string);
         break;
     case EXTERNAL_MODULE:
+	gtk_widget_hide(p->bbw->stimuli_frame);
 	gtk_widget_hide(p->bbw->node_frame);
 	gtk_widget_hide(p->bbw->pic_frame);
 	gtk_widget_show(p->bbw->module_frame);
         gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),string);
         break;
     }
+
+    p->bbw->selected_module = p;
 }
 
 #define PACKAGESPACING 50
@@ -677,51 +931,7 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
-// calculate which pin is closest to (x,y)
-static int get_pin(Breadboard_Window *bbw, int x, int y)
-{
-    int pin;
-
-/*    x-=XOFFSET;
-    y-=YOFFSET;
-
-    y-=bbw->case_y;
-
-    if(y<0)
-	y=0;
-
-    if(y>bbw->case_height-bbw->pinspacing/2)
-	y=bbw->case_height-bbw->pinspacing/2;
-
-    pin = y/bbw->pinspacing+1;
-
-    if(x>bbw->case_x+bbw->case_width/2)
-    {
-	pin = bbw->nrofpins - pin + 1;
-    }*/
-
-    pin=1;
-
-    return pin;
-}
-
-static int hit_state(Breadboard_Window *bbw, int x, int y)
-{
-/*    int center_offset;
-    
-    x-=XOFFSET;
-    x-=bbw->case_x;
-    x-=bbw->case_width/2;
-    
-    center_offset=abs(x);
-
-    printf("offset %d\n",center_offset);
-
-    if(center_offset<bbw->case_width/2+PINLENGTH)*/
-	return FALSE;
-//    return TRUE;
-}
-
+/* When a processor is created */
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 {
     char buf[128];
@@ -762,11 +972,14 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 //    BreadboardWindow_update(bbw);
 }
 
+/* When a module is created */
 void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
 {
     struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, NULL);
 }
 
+
+/* When a stimuli is being connected or disconnected, or a new node is created */
 void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node)
 {
     struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
@@ -787,7 +1000,8 @@ void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus
 			   gn);
 	gtk_widget_show(node_item);
 	gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
-        gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
+	gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
+        gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
     }
 
 /*    delete gn->stimuli_list;
@@ -817,11 +1031,19 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   GtkWidget *hbox11;
   GtkWidget *pic_settings_entry;
   GtkWidget *pic_settings_button;
+
   GtkWidget *vbox11;
   GtkWidget *scrolledwindow2;
   GtkWidget *viewport7;
   GtkWidget *hbox10;
-  GtkWidget *node_add_stimuli_button;
+  GtkWidget *remove_node_button;
+  GtkWidget *remove_stimuli_button;
+
+  GtkWidget *vbox14;
+//  GtkWidget *scrolledwindow6;
+//  GtkWidget *viewport10;
+  GtkWidget *hbox13;
+
   GtkWidget *vbox10;
   GtkWidget *scrolledwindow1;
   GtkWidget *viewport6;
@@ -846,47 +1068,6 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
     gdk_colormap_alloc_color(colormap, &low_output_color,FALSE,TRUE);
     gdk_colormap_alloc_color(colormap, &black_color,FALSE,TRUE);
 
-
-/*  window=bbw->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-//  gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), "Breadboard");
-  da = gtk_drawing_area_new();
-  gtk_widget_set_events(da,
-			gtk_widget_get_events(da)|
-			GDK_BUTTON_PRESS_MASK);
-
-  gtk_container_add(GTK_CONTAINER(window),da);
-  gtk_signal_connect(GTK_OBJECT(da),
-		     "expose_event",
-		     (GtkSignalFunc) expose,
-		     bbw);
-  
-  bbw->da=da;
-	
-  width=((GUI_Object*)bbw)->width;
-  height=((GUI_Object*)bbw)->height;
-  x=((GUI_Object*)bbw)->x;
-  y=((GUI_Object*)bbw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(bbw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(bbw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(bbw->gui_obj.window),bbw->gui_obj.name,"Gpsim");
-  
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
-  gtk_signal_connect (GTK_OBJECT (bbw->gui_obj.window), "delete_event",
-			    GTK_SIGNAL_FUNC(delete_event), (gpointer)bbw);
-  gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),bbw);
-  gtk_signal_connect(GTK_OBJECT(bbw->da),
-		     "button_press_event",
-		     (GtkSignalFunc) button,
-		     bbw);
-  gtk_signal_connect (GTK_OBJECT(bbw->da),"configure_event",
-		      (GtkSignalFunc) configure_event, bbw);
-
-  gtk_widget_show(da);
-  gtk_widget_show(window);
-*/
 
 
 
@@ -953,6 +1134,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (button5);
   gtk_box_pack_start (GTK_BOX (hbox12), button5, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(button5),
+		     "clicked",
+		     (GtkSignalFunc) add_new_snode,
+		     bbw);
 
   button6 = gtk_button_new_with_label ("Add module");
   gtk_widget_ref (button6);
@@ -960,6 +1145,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (button6);
   gtk_box_pack_start (GTK_BOX (hbox12), button6, FALSE, FALSE, 0);
+
+
+
+
 
   bbw->pic_frame = gtk_frame_new ("PIC settings");
   gtk_widget_ref (bbw->pic_frame);
@@ -990,7 +1179,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (viewport8);
   gtk_container_add (GTK_CONTAINER (scrolledwindow3), viewport8);
 
-  pic_settings_clist = gtk_list_new ();
+  pic_settings_clist = gtk_clist_new (1);
   gtk_widget_ref (pic_settings_clist);
   gtk_object_set_data_full (GTK_OBJECT (window), "pic_settings_clist", pic_settings_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -1017,6 +1206,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (pic_settings_button);
   gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_button, FALSE, FALSE, 0);
+
+
+
+
 
   bbw->node_frame = gtk_frame_new ("Node settings");
   gtk_widget_ref (bbw->node_frame);
@@ -1047,12 +1240,12 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (viewport7);
   gtk_container_add (GTK_CONTAINER (scrolledwindow2), viewport7);
 
-  node_settings_clist = gtk_list_new ();
-  gtk_widget_ref (node_settings_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "node_settings_clist", node_settings_clist,
+  bbw->node_settings_clist = gtk_clist_new (1);
+  gtk_widget_ref (bbw->node_settings_clist);
+  gtk_object_set_data_full (GTK_OBJECT (window), "bbw->node_settings_clist", bbw->node_settings_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (node_settings_clist);
-  gtk_container_add (GTK_CONTAINER (viewport7), node_settings_clist);
+  gtk_widget_show (bbw->node_settings_clist);
+  gtk_container_add (GTK_CONTAINER (viewport7), bbw->node_settings_clist);
 
   hbox10 = gtk_hbox_new (FALSE, 0);
   gtk_widget_ref (hbox10);
@@ -1061,12 +1254,86 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (hbox10);
   gtk_box_pack_start (GTK_BOX (vbox11), hbox10, FALSE, FALSE, 0);
 
-  node_add_stimuli_button = gtk_button_new_with_label ("Add stimuli to node ...");
-  gtk_widget_ref (node_add_stimuli_button);
-  gtk_object_set_data_full (GTK_OBJECT (window), "node_add_stimuli_button", node_add_stimuli_button,
+  remove_stimuli_button = gtk_button_new_with_label ("Remove stimuli");
+  gtk_widget_ref (remove_stimuli_button);
+  gtk_object_set_data_full (GTK_OBJECT (window), "remove_stimuli_button", remove_stimuli_button,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (node_add_stimuli_button);
-  gtk_box_pack_start (GTK_BOX (hbox10), node_add_stimuli_button, FALSE, FALSE, 0);
+  gtk_widget_show (remove_stimuli_button);
+  gtk_box_pack_start (GTK_BOX (hbox10), remove_stimuli_button, FALSE, FALSE, 0);
+
+  remove_node_button = gtk_button_new_with_label ("Remove node");
+  gtk_widget_ref (remove_node_button);
+  gtk_object_set_data_full (GTK_OBJECT (window), "remove_node_button", remove_node_button,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (remove_node_button);
+  gtk_box_pack_start (GTK_BOX (hbox10), remove_node_button, FALSE, FALSE, 0);
+
+
+
+
+
+  bbw->stimuli_frame = gtk_frame_new ("Stimuli settings");
+  gtk_widget_ref (bbw->stimuli_frame);
+  gtk_object_set_data_full (GTK_OBJECT (window), "stimuli_frame", bbw->stimuli_frame,
+                            (GtkDestroyNotify) gtk_widget_unref);
+//  gtk_widget_show (stimuli_frame);
+  gtk_box_pack_start (GTK_BOX (vbox9), bbw->stimuli_frame, FALSE, FALSE, 0);
+
+  vbox14 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_ref (vbox14);
+  gtk_object_set_data_full (GTK_OBJECT (window), "vbox14", vbox14,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (vbox14);
+  gtk_container_add (GTK_CONTAINER (bbw->stimuli_frame), vbox14);
+
+
+  bbw->stimuli_settings_label=gtk_label_new("");
+  gtk_widget_show(bbw->stimuli_settings_label);
+  gtk_box_pack_start(GTK_BOX(vbox14), bbw->stimuli_settings_label, FALSE,FALSE,0);
+  /*
+  scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_ref (scrolledwindow6);
+  gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow6", scrolledwindow6,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (scrolledwindow6);
+  gtk_box_pack_start (GTK_BOX (vbox14), scrolledwindow6, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_POLICY_AUTOMATIC, GTK_POLICY_ALWAYS);
+
+  viewport10 = gtk_viewport_new (NULL, NULL);
+  gtk_widget_ref (viewport10);
+  gtk_object_set_data_full (GTK_OBJECT (window), "viewport10", viewport10,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (viewport10);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow6), viewport10);
+
+  bbw->stimuli_settings_clist = gtk_clist_new (1);
+  gtk_widget_ref (bbw->stimuli_settings_clist);
+  gtk_object_set_data_full (GTK_OBJECT (window), "bbw->stimuli_settings_clist", bbw->stimuli_settings_clist,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (bbw->stimuli_settings_clist);
+  gtk_container_add (GTK_CONTAINER (viewport10), bbw->stimuli_settings_clist);
+*/
+  hbox13 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_ref (hbox13);
+  gtk_object_set_data_full (GTK_OBJECT (window), "hbox13", hbox13,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (hbox13);
+  gtk_box_pack_start (GTK_BOX (vbox14), hbox13, FALSE, FALSE, 0);
+
+  bbw->stimuli_add_node_button = gtk_button_new_with_label ("Connect stimuli to node");
+  gtk_widget_ref (bbw->stimuli_add_node_button);
+  gtk_object_set_data_full (GTK_OBJECT (window), "stimuli_add_node_button", bbw->stimuli_add_node_button,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (bbw->stimuli_add_node_button);
+  gtk_box_pack_start (GTK_BOX (hbox13), bbw->stimuli_add_node_button, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(bbw->stimuli_add_node_button),
+		     "clicked",
+		     (GtkSignalFunc) stimuli_add_node,
+		     bbw);
+
+
+
+
 
   bbw->module_frame = gtk_frame_new ("Module settings");
   gtk_widget_ref (bbw->module_frame);
@@ -1097,7 +1364,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (viewport6);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), viewport6);
 
-  module_settings_clist = gtk_list_new ();
+  module_settings_clist = gtk_clist_new (1);
   gtk_widget_ref (module_settings_clist);
   gtk_object_set_data_full (GTK_OBJECT (window), "module_settings_clist", module_settings_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -1124,6 +1391,12 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (module_settings_button);
   gtk_box_pack_start (GTK_BOX (hbox9), module_settings_button, FALSE, FALSE, 0);
+
+
+
+
+
+
 
   save_stc_button = gtk_button_new_with_label ("Save configuration  ...");
   gtk_widget_ref (save_stc_button);
@@ -1162,8 +1435,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_set_uposition(GTK_WIDGET(bbw->gui_obj.window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(bbw->gui_obj.window),bbw->gui_obj.name,"Gpsim");
   
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   gtk_signal_connect (GTK_OBJECT (bbw->gui_obj.window), "delete_event",
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)bbw);
   gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",
@@ -1247,6 +1520,16 @@ int CreateBreadboardWindow(GUI_Processor *gp)
     bbw->node_tree = NULL;
 
     bbw->modules=NULL;
+
+    bbw->node_settings_clist=NULL;
+
+    bbw->stimuli_settings_label=NULL;
+
+    bbw->stimuli_add_node_button=NULL;
+
+    bbw->selected_node=NULL;
+    bbw->selected_pin=NULL;
+    bbw->selected_module=NULL;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 

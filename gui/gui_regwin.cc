@@ -133,8 +133,8 @@ int gui_get_value(char *prompt)
 	gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
 //	gtk_signal_connect(GTK_OBJECT(dialog),
 //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 	gtk_widget_show(label);
@@ -216,8 +216,8 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 	gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
 //	gtk_signal_connect(GTK_OBJECT(dialog),
 //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 	gtk_widget_show(label);
@@ -375,11 +375,11 @@ static char *gui_get_log_settings(char **filename, int *mode)
 
 	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect(GTK_OBJECT(window),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
-	gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    (gpointer)&window);
+	gtk_signal_connect_object(GTK_OBJECT(window),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
+	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				   GTK_OBJECT(window));
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -931,8 +931,8 @@ static int settings_dialog(Register_Window *rw)
 	gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 
 	// Normal font
@@ -1798,8 +1798,8 @@ BuildRegisterWindow(Register_Window *rw)
 
   ((GUI_Object*)rw)->window=window;
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   //GTK_SIGNAL_FUNC (quit), NULL);
 
   main_vbox=gtk_vbox_new(FALSE,1);

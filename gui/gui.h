@@ -449,27 +449,82 @@ struct _SourceBrowserOpcode_Window {
 
 typedef struct _SourceBrowserOpcode_Window SourceBrowserOpcode_Window;
 
+
+
+
+//
+// The Breadboard window data
+//
+
+struct _Breadboard_Window;
+typedef struct _Breadboard_Window Breadboard_Window;
+
+enum orientation {LEFT, RIGHT, UP, DOWN};
+enum direction {PIN_INPUT, PIN_OUTPUT};
+typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
+
+
+struct gui_pin
+{
+    Breadboard_Window *bbw;
+
+    class IOPIN *iopin;
+
+    GtkWidget *widget;
+    GdkPixmap *pixmap;
+    GdkGC *gc;
+
+    int x;
+    int y;
+    int width;
+    int height;
+
+    int value;
+    enum direction direction;
+    enum orientation orientation;
+    pintype type;
+};
+
+
+enum module_type {PIC_MODULE, EXTERNAL_MODULE};
+
+struct gui_module
+{
+    enum module_type type;
+    Breadboard_Window *bbw;
+    class Module *module;
+    GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
+    int x;    // Position in layout widget
+    int y;    // Position in layout widget
+    int width;  // Width of module_widget
+    int height; // Height of module_widget
+
+    int pinnamewidth;
+
+    GdkPixmap *pixmap;
+
+    GList *pins;
+};
+
+
+
+struct gui_node
+{
+    Breadboard_Window *bbw;
+    Stimulus_Node *node;
+};
+
+
+
 struct _Breadboard_Window {
     GUI_Object gui_obj;
 
     GdkFont *pinstatefont;
-//    int pinstateheight;
-//    int pinstatewidth;
-
     GdkFont *pinnamefont;
     int pinnameheight;
-//    int pinnamewidth;
-
-//    GdkFont *pinnamefont;
-//    int pinnameheight;
-//    int pinnamewidth;
-
-//    int pinlength;
-//    int pinspacing;
 
     GtkWidget *layout;
 
-//    GdkGC *pinline_gc;
     GdkGC *pinname_gc;
     GdkGC *case_gc;
 
@@ -482,10 +537,21 @@ struct _Breadboard_Window {
     GtkWidget *pic_frame;
     GtkWidget *node_frame;
     GtkWidget *module_frame;
+    GtkWidget *stimuli_frame;
 
     GtkWidget *node_tree;
 
+    GtkWidget *node_settings_clist;
+
+    GtkWidget *stimuli_settings_label;
+
+    GtkWidget *stimuli_add_node_button;
+
     int processor;
+
+    struct gui_pin *selected_pin;
+    struct gui_node *selected_node;
+    struct gui_module *selected_module;
 };
 
 typedef struct _Breadboard_Window Breadboard_Window;
