@@ -201,7 +201,9 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../popt/lib/libpopt.lib"
 				IgnoreDefaultLibraryNames="LIBC.lib"
-				ModuleDefinitionFile="../plat/win32/gpsim.def"/>
+				ModuleDefinitionFile="../plat/win32/gpsim.def"
+				SubSystem="1"
+				TargetMachine="1"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -253,6 +255,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
 					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCLCompilerTool"/>
