@@ -62,7 +62,6 @@ using namespace std;
 #include "cmd_icd.h"
 #include "../src/expr.h"
 #include "../src/operator.h"
-#include "errors.h"
 
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
