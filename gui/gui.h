@@ -513,6 +513,7 @@ struct gui_module
     Breadboard_Window *bbw;
     Module *module;
     GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
+    GtkWidget *name_widget;    // Name of widget, positioned above module_widget.
     int x;    // Position in layout widget
     int y;    // Position in layout widget
     int width;  // Width of module_widget
@@ -520,7 +521,8 @@ struct gui_module
 
     int pinnamewidth;
 
-    GdkPixmap *pixmap;
+    GdkPixmap *module_pixmap;
+    GdkPixmap *name_pixmap;
 
     GtkWidget *tree_item;
 
