@@ -3,7 +3,7 @@ EXTRA_DIST = \
 	analog_stim.stc analog_stim2.stc ap.stc async_pulse.stc async_stim.stc async_stim2.stc \
 	dtmf.stc interrupt_test.stc iopin_stim.stc ioport_stim.stc module_test.stc \
 	p16c64_ccp.stc p16c64_pwm.stc \
-	p16c64_test.stc p16c65_pwm.stc p16c74_pwm.stc p16c74_test.stc p16f877_test2.stc 
+	p16c64_test.stc p16c65_pwm.stc p16c74_pwm.stc p16c74_test.stc p16f877_test2.stc \
 	portc_stim.stc usart.stc \
 	sync_stim.stc t.stc time_test.stc \
 	bcd.asm eetest.asm interrupt_test.asm iopin_stim.asm it.asm loop_test.asm \
