@@ -558,15 +558,25 @@ attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
     snprintf(buf,sizeof(buf),"%s.%s",module->name().c_str(), attribute->name().c_str());
     cout << "creating attribute symbol named: " << buf << endl;
     new_name(buf);
-  }
+  } 
 }
 
 string attribute_symbol::toString()
 {
+
   if(attribute)
-    return attribute->toString();
+    return attribute->showType()+": " + attribute->name() + " = " + attribute->toString();
   else
     return string("(null)");
+}
+
+string attribute_symbol::description()
+{
+
+  if(attribute)
+    return attribute->description();
+  else
+    return string("no attribute");  // <-- this has to be an error
 }
 
 void attribute_symbol::set(double d)

@@ -225,6 +225,7 @@ Processor * add_processor(char * processor_type, char * processor_new_name)
     if(p) {
 
       processor_list.push_back(p);
+      p->initializeAttributes();
       active_cpu = p;
       //p->processor_id = 
       active_cpu_id = ++cpu_ids;

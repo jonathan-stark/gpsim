@@ -395,6 +395,7 @@ frequency_cmd
 help_cmd
           : HELP                        {help.help(); }
           | HELP STRING                 {help.help($2); free($2);}
+          | HELP SYMBOL_T               {help.help($2);}
           ;
 
 list_cmd

@@ -1175,12 +1175,12 @@ void IOPIN::set_digital_state(bool new_state)
 
 bool IOPIN::get_digital_state(void)
 {
-  /*
+  /**/
   Register *port = get_iop();
 
   if(port)
     digital_state = port->get_bit(iobit);
-  */
+  /**/
   //cout << "get_digital_state -- changed 14NOV04\n";
   return digital_state;
 }

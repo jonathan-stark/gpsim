@@ -31,7 +31,14 @@ Boston, MA 02111-1307, USA.  */
 
 //------------------------------------------------------------------------
 Value::Value()
+  : cpDescription(0)
 {
+}
+
+Value::Value(const char *_name, const char *desc)
+  : cpDescription(desc)
+{
+  new_name(_name);
 }
 
 Value::~Value()
@@ -126,6 +133,19 @@ Value *Value::copy()
 {
   throw new Error(" cannot copy " + showType());
 
+}
+
+string Value::description()
+{
+  if(cpDescription)
+    return string(cpDescription);
+  else
+    return string("no description");
+}
+
+void  Value::set_description(const char *new_description)
+{
+  cpDescription = new_description;
 }
 
 /*
@@ -287,17 +307,28 @@ bool AbstractRange::operator<(Value *rv)
  * The Boolean class.
  */
 Boolean::Boolean(bool newValue)
+  : bCanDelete(true)
+{
+  value = new bool(newValue);
+}
+
+Boolean::Boolean(const char *_name, bool *newValue,const char *_desc)
+  : Value(_name,_desc), bCanDelete(false)
 {
   value = newValue;
+  if(!value)
+    throw new Error("null pointer in Boolean constructor");
 }
 
 Boolean::~Boolean()
 {
+  if(bCanDelete)
+    delete value;
 }
 
 string Boolean::toString()
 {
-  return (string(value ? "true" : "false"));
+  return (string(*value ? "true" : "false"));
 }
 
 string Boolean::toString(bool value)
@@ -309,7 +340,7 @@ string Boolean::toString(char* format)
 {
   char cvtBuf[1024];
 
-  sprintf(cvtBuf, format, value);
+  sprintf(cvtBuf, format, *value);
   return (string(&cvtBuf[0]));
 }
 
@@ -343,7 +374,7 @@ bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
 void Boolean::set(Value *v)
 {
   Boolean *bv = typeCheck(v,string("set "));
-  value = bv->getVal();
+  *value = bv->getVal();
 }
 
 /*
@@ -375,38 +406,57 @@ bool Boolean::operator!=(Value *rv)
 /*****************************************************************
  * The Integer class.
  */
+Integer::Integer(gint64 newValue)
+  : bCanDelete(true)
+{
+  value = new gint64(newValue);
+}
+
+Integer::Integer(const char *_name, gint64 *newValue,const char *_desc)
+  : Value(_name,_desc), bCanDelete(false)
+{
+   value = newValue;
+  if(!value)
+    throw new Error("null pointer in Integer constructor");
+}
+
+Integer::~Integer()
+{
+  if(bCanDelete)
+    delete value;
+}
 void Integer::set(double d)
 {
-  value = (gint64) d;
+  *value = (gint64) d;
 }
 
 void Integer::set(gint64 i)
 {
-  value = i;
+  *value = i;
 }
 void Integer::set(int i)
 {
-  value = i;
+  *value = i;
 }
 void Integer::set(Value *v)
 {
   Integer *iv = typeCheck(v,string("set "));
-  value = iv->getVal();
+  *value = iv->getVal();
 }
 
 void Integer::get(gint64 &i)
 { 
-  i = value;
+  i = *value;
 }
 void Integer::get(double &d)
 { 
-  d = value;
+  d = *value;
 }
 
 string Integer::toString()
 {
   char buf[256];
-  int i = value;
+  int i = *value;
   snprintf(buf,sizeof(buf)," = %d = 0x%08X",i,i);
   return (name() +string(buf));
 }
@@ -416,7 +466,7 @@ string Integer::toString(char* format)
 {
   char cvtBuf[1024];
 
-  snprintf(cvtBuf,sizeof(cvtBuf), format, value);
+  snprintf(cvtBuf,sizeof(cvtBuf), format, *value);
   return (string(&cvtBuf[0]));
 }
 
@@ -489,10 +539,10 @@ bool Integer::compare(ComparisonOperator *compOp, Value *rvalue)
   
   Integer *rv = typeCheck(rvalue,"");
 
-  if(value < rv->value)
+  if(*value < *rv->value)
     return compOp->less();
 
-  if(value > rv->value)
+  if(*value > *rv->value)
     return compOp->greater();
 
   return compOp->equal();
@@ -528,37 +578,48 @@ bool Integer::operator>(Value *rv)
  * The Float class.
  */
 Float::Float(double newValue)
+  : bCanDelete(true)
+{
+  value = new double(newValue);
+}
+
+Float::Float(const char *_name, double *newValue,const char *_desc)
+  : Value(_name,_desc), bCanDelete(false)
 {
   value = newValue;
+  if(!value)
+    throw new Error("null pointer in Float constructor");
 }
 
 Float::~Float()
 {
+  if(bCanDelete)
+    delete value;
 }
 
 void Float::set(double d)
 {
-  value = d;
+  *value = d;
 }
 
 void Float::set(gint64 i)
 {
-  value = i;
+  *value = i;
 }
 
 void Float::set(Value *v)
 {
   Float *fv = typeCheck(v,string("set "));
-  value = fv->getVal();
+  *value = fv->getVal();
 }
 
 void Float::get(gint64 &i)
 { 
-  i = (gint64)value;
+  i = (gint64)*value;
 }
 void Float::get(double &d)
 { 
-  d = value;
+  d = *value;
 }
 
 string Float::toString()
@@ -571,7 +632,7 @@ string Float::toString(char* format)
 {
   char cvtBuf[1024];
 
-  sprintf(cvtBuf, format, value);
+  sprintf(cvtBuf, format, *value);
   return (string(&cvtBuf[0]));
 }
 
@@ -590,10 +651,10 @@ bool Float::compare(ComparisonOperator *compOp, Value *rvalue)
   
   Float *rv = typeCheck(rvalue,"");
 
-  if(value < rv->value)
+  if(*value < *rv->value)
     return compOp->less();
 
-  if(value > rv->value)
+  if(*value > *rv->value)
     return compOp->greater();
 
   return compOp->equal();

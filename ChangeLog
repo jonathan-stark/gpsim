@@ -1,3 +1,12 @@
+2004-11-16 Scott Dattalo <scott@dattalo.com>
+	* src/value.h, src/value.cc, src/processor.h, src/processor.cc,
+	src/pic-processor.cc, src/symbol.h, src/symbol.cc: Added 3 new
+	attributes: SafeMode, WarnMode, and UnknownMode to control the
+	simulator's behavior under certain simulation conditions. Attribute
+	handling has also been enhanced.
+	* cli/parse.yy, cli/cmd_help.cc, cli/cmd_help.h: Help command
+	will display information about attributes.
+	
 2004-11-15 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.h, src/ioports.cc, src/16bit-registers.cc: Beginning
 	to redesign I/O ports.
