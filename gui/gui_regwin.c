@@ -326,6 +326,7 @@ file_selection_ok (GtkWidget        *w,
     file_selection_name=gtk_file_selection_get_filename (fs);
 
     gtk_widget_hide (GTK_WIDGET (fs));
+    gtk_main_quit();
 }
 
 static char *gui_get_filename(char *prompt)
