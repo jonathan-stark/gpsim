@@ -3,6 +3,7 @@
 INCLUDES = @X_CFLAGS@
 
 lib_LTLIBRARIES = libgpsim.la
+gpsimincludedir = $(includedir)/gpsim
 
 libgpsim_la_SOURCES = \
 	12bit-hexdecode.cc \
@@ -40,7 +41,9 @@ libgpsim_la_SOURCES = \
 	tmr0.cc \
 	trace.cc \
 	uart.cc \
-	xref.cc \
+	xref.cc
+
+gpsiminclude_HEADERS = \
 	12bit-instructions.h \
 	12bit-processors.h \
 	14bit-instructions.h \

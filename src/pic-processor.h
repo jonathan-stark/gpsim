@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PROCESSORS_H__
 #define __PROCESSORS_H__
 #include "gpsim_def.h"
-
+#include "modules.h"
 
 #ifdef HAVE_GUI
 #include <glib.h>
@@ -134,7 +134,7 @@ enum IOPIN_TYPES
   BI_DIRECTIONAL_PU,   // same as bi_directional, but with pullup resistor. e.g. portb
   OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
 };
-
+/*
 class IOPIN_map
 {
 public:
@@ -145,7 +145,7 @@ public:
   IOPIN_TYPES type;
 
 };
-
+*/
 #include "pic-instructions.h"
 #include "12bit-instructions.h"
 #include "14bit-registers.h"
@@ -223,14 +223,11 @@ class program_memory_access :  public BreakCallBack
  * All pic processors are derived from this class.
  */
 
-class pic_processor
+class pic_processor : public Module
 {
 public:
 
   #define FILE_REGISTERS  0x100
-  #define BAD_REGISTER    (FILE_REGISTERS + 1)
-
-  char * name_str;
 
   struct file_context *files;  // A dynamically allocated array for src file info
   int number_of_source_files;  // The number of elements allocated to that array
@@ -268,10 +265,6 @@ public:
 
   SFR_map*     sfr_map;
   int          num_of_sfrs;
-  /* ### FIX ME ### - remove the iopin declares from here */
-  IOPIN        **iopins;
-  IOPIN_map*   iopin_map;
-  int          num_of_iopins;
   
   TMR0         tmr0;
   int          num_of_gprs;
@@ -301,7 +294,7 @@ public:
   void toggle_break_at_line(int file_id, int src_line);
 
   void init_register_memory(unsigned int memory_size);
-  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
+  //  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
@@ -328,7 +321,6 @@ public:
   void list(int file_id, int pcval, int start_line, int end_line);
 
   virtual void por(void);
-  char *name(void) {return name_str;};
   virtual void create(void);
 
   virtual unsigned int program_memory_size(void) const {return 0;};
@@ -365,7 +357,7 @@ public:
   pic_processor(void);
 };
 
-
+/*
 class peripheral
 {
 public:
@@ -373,7 +365,7 @@ public:
   char * name_str;
 };
 
-
+*/
 
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to

@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1998,1999,2000 T. Scott Dattalo
+   Copyright (C) 1999 T. Scott Dattalo
 
 This file is part of gpsim.
 
@@ -18,34 +18,26 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-/*
+#ifndef __CMD_MODULE_H__
+#define __CMD_MODULE_H__
 
-  binary_indicator.c
-
-  This is an example module illustrating how modules may be created 
-
-*/
-
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-
-#include "binary_indicator.h"
-
-
-Binary_Indicator::Binary_Indicator(void)
+class cmd_module : public command
 {
+public:
 
-  cout << "binary indicator constructor\n";
+  cmd_module(void);
 
-}
+  void module(void);
 
-void Binary_Indicator::test(void)
-{
+  void module(int bit_flag);
 
-  cout << "test";
+  void module(cmd_options_str *cos);
 
-}
+  void module(char *proc, char *name);
 
+
+};
+
+extern cmd_module c_module;
+#endif
 

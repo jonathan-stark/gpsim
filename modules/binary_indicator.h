@@ -22,8 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __BINARY_INDICATOR_H__
 #define __BINARY_INDICATOR_H__
 
-/*
-#include "../src/modules.h"
+
+#include <gpsim/modules.h>
 
 class Binary_Indicator : public Module
 {
@@ -32,5 +32,5 @@ public:
   Binary_Indicator(void);
   void test(void) ;
 };
-*/
+
 #endif //  __BINARY_INDICATOR_H__

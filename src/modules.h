@@ -31,10 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MODULES_H__
 #define __MODULES_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
 
+class IOPIN;
 
 /*
 
@@ -54,8 +52,23 @@ struct Module_Pin {
 */
 
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+class Module {
+public:
+
+  char * name_str;
+
+  char *name(void) {return name_str;};
+
+
+  // I/O pin specific
+  virtual int get_pin_count(void){return 0;};
+  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
+  virtual int get_pin_state(unsigned int pin_number) {return 0;};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
+
+  static Module *construct(void);
+  Module(void);
+
+};
 
 #endif // __MODULES_H__

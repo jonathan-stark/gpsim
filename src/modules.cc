@@ -27,60 +27,45 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <vector>
 
+#include "modules.h"
 #include "pic-processor.h"
 #include "stimuli.h"
 #include "stimulus_orb.h"
 #include "symbol.h"
 #include "xref.h"
 
-#include "modules.h"
 
 
-
-class Module
-{
-public:
-
-  int number_of_pins;
-
-
-  IOPIN **pins;  /* An array containing all of the module's pins. The index
-		  * into the array is the module's pin #. If pins[i] is NULL
-		  * then gpsim does not provide any resources for 
-		  * simulating the pin.
-		  */
-
-
-  Module(void);
-  Module(unsigned int number_of_pins);
-
-  void assign_pin(unsigned int pin_number, IOPIN *pin);
-  void create_pkg(unsigned int _number_of_pins);
-
-  virtual void create_iopin_map(void);
-
-  virtual int get_pin_count(void) {return number_of_pins;};
-  virtual char *get_pin_name(unsigned int pin_number);
-  virtual int get_pin_state(unsigned int pin_number);
-  int pin_existance(unsigned int pin_number);
-  IOPIN *get_pin(unsigned int pin_number);
-};
-
+/*****************************************************************************
+ *
+ * Module.cc
+ *
+ * Here's where much of the infrastructure of gpsim is defined.
+ *
+ * A Module is define to be something that gpsim knows how to simulate.
+ * When gpsim was originally designed, a module was simple a pic processor.
+ * This concept was expanded to accomodate addition devices like LEDs, switches,
+ * LCDs and so on. 
+ */
 
 Module::Module(void)
 {
 
-  pins = NULL;
-  number_of_pins = 0;
+  name_str = NULL;
 
 }
 
-Module::Module(unsigned int _number_of_pins)
+
+Module * Module::construct(void)
 {
-  number_of_pins = 0;
-  create_pkg(_number_of_pins);
+
+  cout << " Can't create a generic Module\n";
+
+  return NULL;
+
 }
 
+#if 0
 void Module::create_pkg(unsigned int _number_of_pins)
 {
   if(number_of_pins)
@@ -188,4 +173,36 @@ int Module::get_pin_state(unsigned int pin_number)
 
 }
 
+#endif
 
+
+/*****************************************************************************
+ *
+ * Helper functions
+ *
+ *****************************************************************************/
+
+list <Module *> module_list;
+list <Module *> :: iterator module_iterator;
+
+
+void display_available_modules(void)
+{
+  cout << "Module List\n";
+
+  for (module_iterator = module_list.begin();  
+       module_iterator != module_list.end(); 
+       module_iterator++) {
+
+    Module *t = *module_iterator;
+    cout << t->name() << '\n';
+
+    }
+}
+
+
+void load_module_library(char *library_name)
+{
+
+  cout << __FUNCTION__ << "() " << library_name << '\n';
+}

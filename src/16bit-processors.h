@@ -110,7 +110,7 @@ public:
   // will cause errors if they are used (in some cases)
   // -- the derived classes must define their parameters appropriately.
 
-  virtual unsigned int register_memory_size () const { return 16*FILE_REGISTERS;};
+  virtual unsigned int register_memory_size () const { return 0x1000;};
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};

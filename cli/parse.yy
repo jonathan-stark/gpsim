@@ -160,6 +160,7 @@ acmd: ignored
      | list_cmd
      | load_cmd
      | node_cmd
+     | module_cmd
      | processor_cmd
      | quit_cmd
      | reset_cmd
@@ -308,14 +309,16 @@ node_cmd: NODE
           ;
 
 module_cmd: MODULE
-          { c_module.module(); YYABORT;}
+          { 
+            cout << "module command\n";
+            c_module.module(); YYABORT;
+          }
           | MODULE bit_flag
 	  { c_module.module($2->value); YYABORT;}
-          | MODULE STRING
-	  { c_module.module($2,NULL); YYABORT; }
-          | MODULE STRING STRING
+          | MODULE string_option
 	  { 
-            c_module.module($2,$3);
+            c_module.module($2);
+            delete $2;
             YYABORT;
           }
 
