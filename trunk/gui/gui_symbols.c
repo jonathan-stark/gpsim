@@ -551,7 +551,7 @@ toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
     update_symbols(sw, ((GUI_Object*)sw)->gp);
 }
 
-static char *symbol_titles[3]={"Name","Type","Value"};
+static char *symbol_titles[3]={"Name","Type","Address/Value"};
 
 int BuildSymbolWindow(Symbol_Window *sw)
 {
