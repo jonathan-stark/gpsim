@@ -32,3 +32,21 @@ message "GPSIM WROTE THIS" will be repeatedly written. The LCD is
 not automatically updated, so you'll have to force a manual refresh
 by partially hiding the LCD window and then re-exposing it.
 
+
+CVS
+---
+
+If you're getting the code from CVS, you'll need to perform a few
+extra steps:
+
+$ aclocal
+$ autoheader
+$ automake --add-missing
+$ autoconf
+
+After that, you should be able to 
+
+$ ./configure
+$ make
+
+etc.
