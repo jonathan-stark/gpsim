@@ -54,6 +54,15 @@ Boston, MA 02111-1307, USA.  */
 #include "../xpms/canbreak.xpm"
 #include "../xpms/startp.xpm"
 #include "../xpms/stopp.xpm"
+
+//#define DEBUG
+
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 #define PIXMAP_SIZE 14
 #define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
 
@@ -154,8 +163,6 @@ void PixmapObject::CreateFromXPM(GdkWindow *window,
 				 GdkColor *transparent_color,
 				 gchar **xpm)
 {
-  printf("CreateFromXPM\n");
-
   pixmap = gdk_pixmap_create_from_xpm_d(window,
 					&mask,
 					transparent_color,
@@ -314,12 +321,12 @@ void SourceBrowserAsm_Window::SetPC(int address)
     puts("SourceBrowserAsm_set_pc(): could not find notebook page");
     return;
   }
-  if(0){
+  if(1){
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
-    printf(" SetPC: %s , vadj=%g, lower=%g, upper=%g,page_size=%g, page_inc=%g\n", 
+    Dprintf((" SetPC: %s , vadj=%g, lower=%g, upper=%g,page_size=%g, page_inc=%g\n", 
 	   name(),
-	   adj->value,adj->lower, adj->upper, adj->page_size, adj->page_increment);
+	   adj->value,adj->lower, adj->upper, adj->page_size, adj->page_increment));
     //gtk_adjustment_get_value(GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj)));
   }
 
@@ -360,27 +367,13 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if( pixel< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
       pixel> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
-    // FIXME GtkAdjustment hack Gtk 2+ bug?
-    //
-    // For some weird reason, if the adjustment value is larger than
-    //   upper - page_size - 'a little amount'
-    // then there appears to be a scaling error. I.e. the icons along
-    // the side of the browser do not line up with the source code.
-    //
-    // So as a hack, we'll check to see if the value of the adjustment
-    // is too big and then clip it if it is.
-    //
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
     gdouble nvalue = pixel - inc/2;
-    /*
-    if(nvalue > (adj->upper -adj->page_size - 50))
-      nvalue = adj->upper -adj->page_size - 50.0;
-    */
     gtk_adjustment_set_value(adj, nvalue);
 
-    //printf(" SetPC: %s , setting adjustment to %g\n", 
-    //   name(),  nvalue );
+    printf(" SetPC: %s , setting adjustment to %g\n", 
+       name(),  nvalue );
   }
   
   if(!GTK_WIDGET_VISIBLE(new_pcw)) {
@@ -393,8 +386,8 @@ void SourceBrowserAsm_Window::SetPC(int address)
 		  PIXMAP_POS(this,e)
 		  );
 
-  // printf(" SetPC: %s , moving to %d\n", 
-  //   name(), PIXMAP_POS(this,e));
+  printf(" SetPC: %s , moving to %d\n", 
+   name(), PIXMAP_POS(this,e));
 
   GTKwait();
 }
@@ -1785,7 +1778,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   for(address=0;address<gp->cpu->program_memory_size();address++)
     UpdateLine(address);
 
+  GTKwait();
 
+  Dprintf((" Source is loaded\n"));
 }
 
 
@@ -2557,6 +2552,9 @@ void SourceBrowserAsm_Window::Build(void)
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();
+
+  GTKwait();
+
 }
 
 void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
@@ -2567,9 +2565,9 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
     char buffer[256];
 
-	sprintf(buffer,"Source Browser: %s",pma->name().c_str());
+    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
     gtk_window_set_title (GTK_WINDOW (window), buffer);
-    printf("new source browser name: %s\n",buffer);
+    Dprintf(("new source browser name: %s\n",buffer));
     if(status_bar)
       status_bar->NewProcessor(gp, pma);
 
@@ -2685,6 +2683,8 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 	}
 
     }
+
+  Dprintf(("built source browser children\n"));
 }
 
 void SourceBrowserParent_Window::SelectAddress(int address)

@@ -43,7 +43,7 @@ class Processor;
 // The MemoryAccess class is a base class designed to support
 // access to memory. For the PIC, this class is extended by
 // the ProgramMemoryAccess and RegisterMemoryAccess classes.
-class MemoryAccess :  public TriggerObject
+class MemoryAccess :  public TriggerObject, public gpsimObject
 {
 public:
 
@@ -56,7 +56,7 @@ public:
 
 protected:
 
-  string name_str;            // Optional name
+  //string name_str;            // Optional name
   Processor *cpu;             // The processor to which this object belongs
 };
 
@@ -162,13 +162,13 @@ class ProgramMemoryAccess :  public MemoryAccess
   void set_hll_mode(unsigned int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
   bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
-
+  /*
   string &name(void)
     {
       return name_str;
     }
   void name(string &new_name);
-  
+  */
 
  private:
 
