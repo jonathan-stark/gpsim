@@ -262,7 +262,15 @@ void Symbol_Window::Update(void)
     entry[0] = _strndup(sym->name().c_str(), cMaxLength);
     entry[1] = _strndup(sym->showType().c_str(), cMaxLength);
     entry[2] = (char*)malloc(cMaxLength);
-    sym->get(entry[2],cMaxLength);
+    if (typeid(*sym) == typeid(register_symbol)) {
+      Register * pReg = ((register_symbol*)sym)->getReg();
+      char sValue[cMaxLength];
+      sym->get(sValue,cMaxLength);
+      snprintf(entry[2], cMaxLength, "%02x / %s", pReg->address, sValue);
+    }
+    else {
+      sym->get(entry[2],cMaxLength);
+    }
 
     symbols=g_list_append(symbols,sym);
 
