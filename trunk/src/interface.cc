@@ -547,9 +547,6 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type)
 {
 
-  if(verbose & 0x8)
-    cout << __FUNCTION__ << "()\n";
-
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)

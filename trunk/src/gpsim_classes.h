@@ -57,4 +57,42 @@ class EEPROM;
 class Module;
 class Module_Types;
 
+
+/*==================================================================
+ *
+ * Here are a few enum definitions 
+ */
+
+
+/*
+ * Define all of the different types of reset conditions:
+ */
+
+enum RESET_TYPE
+{
+  POR_RESET,
+  WDT_RESET,
+  SOFT_RESET
+};
+
+
+enum SIMULATION_MODES
+{
+  STOPPED,
+  RUNNING,
+  SLEEPING,
+  SINGLE_STEPPING,
+  STEPPING_OVER,
+  RUNNING_OVER
+};
+
+
+enum PROCESSOR_STATES
+{
+
+  POR_,
+  IDLE
+
+};
+
 #endif //  __GPSIM_CLASSES_H__

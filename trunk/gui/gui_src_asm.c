@@ -432,7 +432,7 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
       
       if(bpi->address==address)
       {
-          puts("Remove break");
+	//puts("Remove break");
 	  // remove the breakpoint
 	  gtk_widget_destroy(bpi->widget);
 	  free( (struct breakpoint_info*)iter->data );

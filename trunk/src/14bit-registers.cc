@@ -401,6 +401,7 @@ OPTION_REG::OPTION_REG(void)
   break_point = 0;
   por_value = 0xff;
   wdtr_value = 0xff;
+  value = 0xff;
   new_name("option");
 }
 
@@ -412,15 +413,18 @@ void OPTION_REG::put(unsigned int new_value)
 
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
-  if( (value ^ old_value) & T0CS)
-    cpu->tmr0.new_clock_source();
+  //if( (value ^ old_value) & T0CS)
+  //    cpu->tmr0.new_clock_source();
 
   // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
   // increment if tmr0 is being clocked by an external clock?
 
   // Now check the rest of the tmr0 bits.
-  if( (value ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
+  if( (value ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
     cpu->tmr0.new_prescale();
+
+  if( (value ^ old_value) & (PSA | PS2 | PS1 | PS0))
+    cpu->wdt.new_prescale();
 
   if( (value ^ old_value) & (BIT6 | BIT7))
     cpu->option_new_bits_6_7(value & (BIT6 | BIT7));

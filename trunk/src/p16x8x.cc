@@ -187,12 +187,13 @@ void  P16C8x::create(int ram_top)
 
   _14bit_processor::create();
 
-  add_file_registers(0x0c, ram_top, 0x80);
-  P16C8x::create_sfr_map();
-
   eeprom = new EEPROM;
   eeprom->cpu = this;
   eeprom->initialize(EEPROM_SIZE);
+
+  add_file_registers(0x0c, ram_top, 0x80);
+  P16C8x::create_sfr_map();
+
 }
 
 //========================================================================

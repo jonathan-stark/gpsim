@@ -645,7 +645,7 @@ public:
   guint64
     future_cycle;
 
-  double timeout;
+  double timeout;   // When no prescaler is assigned
   bool   wdte;
   bool   warned;
 
@@ -654,6 +654,9 @@ public:
   void clear(void);
   virtual void callback(void);
   virtual void start_sleep(void);
+  virtual void new_prescale(void);
+  virtual void update(void);
+  virtual void callback_print(void);
 };
 
 //---------------------------------------------------------

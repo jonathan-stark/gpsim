@@ -61,6 +61,15 @@ public:
 };
 
 
+//
+// BreakCallBack - this object is intended to be one of the classes in
+// in a multiple inheritance class declaration. It's purpose is to provide
+// a mechanism by which a break point can notify an object that the break
+// has occurred.
+// Note that BreakCallBack is typically used in conjunction with Cycle
+// Counter break points (see the CycleCounter class). 
+//
+
 class BreakCallBack
 {
 public:
@@ -69,6 +78,14 @@ public:
       cout << "generic callback\n";
     }
 
+  // Invoked by Cycle counter to display info about break call back.
+  virtual void callback_print(void) {
+    cout << " has callback\n";
+  }
+
+  // clear_break is invoked when a BreakCallBack object's
+  // associated break point is cleared. 
+  virtual void clear_break(void) {};
 };
 
 class Notify_Instruction : public Breakpoint_Instruction

@@ -673,16 +673,7 @@ void pic_processor::reset (RESET_TYPE r)
   cout << " --- Reset\n";
 
   for(int i=0; i<register_memory_size(); i++)
-    {
-      if(registers[i]->isa() == file_register::SFR_REGISTER)
-	{
-	  sfr_register *reg = (sfr_register *)registers[i];
-	  if(r == POR_RESET)
-	    reg->value = reg->por_value;
-	  else if (r==WDT_RESET)
-	    reg->value = reg->wdtr_value;
-	}
-    }
+    registers[i]->reset(r);
 
 
   trace.reset(r);

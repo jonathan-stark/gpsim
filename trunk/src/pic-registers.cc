@@ -34,9 +34,42 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 //--------------------------------------------------
+void WDT::update(void)
+{
+  if(wdte){
+
+    value = cpu->time_to_cycles(timeout);
+    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+
+    if(future_cycle) {
+
+      guint64 fc = cpu->cycles.value + value * (1<<prescale);
+
+      //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
+
+      cpu->cycles.reassign_break(future_cycle, fc, this);
+      future_cycle = fc;
+
+    } else {
+    
+      future_cycle = cpu->cycles.value + value * (1<<prescale);
+
+      cpu->cycles.set_break(future_cycle, this);
+    }
+  }
+
+}
+
+//--------------------------------------------------
+// WDT::put - shouldn't be called?
+//
+
 void WDT::put(unsigned int new_value)
 {
   value = new_value;
+
+  update();
+
 }
 
 void WDT::initialize(bool enable, double _timeout)
@@ -69,12 +102,9 @@ void WDT::callback(void)
 
   if(wdte) {
     cout<<"WDT timeout: " << hex << cpu->cycles.value << '\n';
-    
-    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
-    future_cycle = cpu->cycles.value + value * (1<<prescale);
-
-    cpu->cycles.set_break(future_cycle, this);
+    future_cycle = 0;
+    update();
 
     // The TO bit gets cleared when the WDT times out.
     cpu->status.put_TO(0);
@@ -92,17 +122,7 @@ void WDT::callback(void)
 void WDT::clear(void)
 {
   if(wdte)
-    {
-      prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
-
-      guint64 fc = cpu->cycles.value + value * (1<<prescale);
-
-      // cout << "moving break from " << future_cycle << " to " << fc << '\n';
-
-      cpu->cycles.reassign_break(future_cycle, fc, this);
-
-      future_cycle = fc;
-    }
+    update();
   else
     {
       if(!warned)
@@ -122,10 +142,23 @@ void WDT::start_sleep(void)
 
     guint64 fc = cpu->cycles.value + value * (1<<prescale);
 
-    // cout << "moving break from " << future_cycle << " to " << fc << '\n';
+    //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
 
     cpu->cycles.reassign_break(future_cycle, fc, this);
 
     future_cycle = fc;
   }
+}
+
+void WDT::new_prescale(void)
+{
+
+  update();
+
+}
+
+void WDT::callback_print(void)
+{
+
+  cout << "WDT\n";
 }
