@@ -38,6 +38,7 @@ src_OBJECTS =			\
 	breakpoints.o		\
 	cod.o			\
 	eeprom.o		\
+	errors.o		\
 	expr.o			\
 	fopen-path.o		\
 	gpsim_object.o		\

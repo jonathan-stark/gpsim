@@ -1,3 +1,8 @@
+2004-09-14 Borut Razem <borut.razem@siol.net>
+	* cli/cli.cvproj, src/src.vcproj: MSVC sync
+	* cli/makefile.mingw, src/makefile.mingw: MinGW sync
+	* plat/win32/gpsim.nsi: corrected revision number to 0.22.3
+
 2004-09-14 Scott Dattalo <scott@dattalo.com>
 	* regression/p12ce518/p12c518.asm, regression/p12ce518/p12c518.stc,
 	regression/p12ce518/EEdriver.asm: Added a regression test

@@ -233,6 +233,9 @@
 				RelativePath=".\eeprom.cc">
 			</File>
 			<File
+				RelativePath=".\errors.cc">
+			</File>
+			<File
 				RelativePath=".\expr.cc">
 			</File>
 			<File
@@ -464,6 +467,9 @@
 			</File>
 			<File
 				RelativePath=".\eeprom.h">
+			</File>
+			<File
+				RelativePath=".\errors.h">
 			</File>
 			<File
 				RelativePath=".\expr.h">
