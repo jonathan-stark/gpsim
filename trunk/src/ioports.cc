@@ -92,7 +92,7 @@ int IOPORT::update_stimuli(void)
 
 	if(t  > pins[i]->l2h_threshold)
 	  input |= m;
-	else
+	else if (t >= pins[i]->h2l_threshold)
 	  input |= (value.get() & m);
       }
     }
@@ -108,6 +108,7 @@ int PIC_IOPORT::update_stimuli(void)
 
   guint64 time = cycles.value;
   int input = 0;
+  unsigned int old_value = value.get();
 
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
     if(stimulus_mask & m) {
@@ -115,11 +116,23 @@ int PIC_IOPORT::update_stimuli(void)
 
 	double t = pins[i]->snode->update(time);
 
-	if(t  > pins[i]->l2h_threshold)
-	  input |= m;
-	else if(!(tris->value.get() & m))
-	  input |= (value.get() & m);
+	if(old_value & m) {
+	  // The old value was a high.
+	  if (t >= pins[i]->h2l_threshold)
+	    input |= m;   // still is high
+	} else {
+	  // The old value was a low
+	  if(t  > pins[i]->l2h_threshold)
+	    input |= m;   // changed to a high.
+	}
 
+	/*
+	cout << "Pin " << i 
+	     << ", current value = " << ((old_value & m) ? 1:0)
+	     << " stimulus voltage " << t
+	     << " new value = " << ((input & m) ? 1:0)
+	     << endl;
+	*/
       }
     }
 
@@ -152,8 +165,8 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
 //-------------------------------------------------------------------
 bool IOPORT::get_bit(unsigned int bit_number)
 {
-
-  return (value.get() &  (1<<bit_number )) ? true : false;
+  //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
+  return (internal_latch &  (1<<bit_number )) ? true : false;
 
 }
 
@@ -208,7 +221,7 @@ void IOPORT::put(unsigned int new_value)
   // update only those bits that are really outputs
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);
+
   value.put(new_value);
 
   // Update the stimuli - if there are any
@@ -234,6 +247,7 @@ void PIC_IOPORT::put(unsigned int new_value)
 
   if(new_value > 255)
     cout << "PIC_IOPORT::put value >255\n";
+
   // The I/O Ports have an internal latch that holds the state of the last
   // write, even if the I/O pins are configured as inputs. If the tris port
   // changes an I/O pin from an input to an output, then the contents of this
@@ -241,17 +255,14 @@ void PIC_IOPORT::put(unsigned int new_value)
 
   internal_latch = new_value;
 
-  // update only those bits that are really outputs
-
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,new_value);  // RP - we actually wrote the pre-masking value
-  value.put((new_value & ~tris->value.get()) | (value.get() & tris->value.get()));
 
   // Update the stimuli - if there are any
-  if(stimulus_mask)
-    update_stimuli();
+  unsigned int outputs=new_value & ~tris->value.get() & ~stimulus_mask;
+  unsigned int inputs=value.get() & tris->value.get() & ~stimulus_mask;
+  unsigned int stim= stimulus_mask ? update_stimuli() : 0;
 
-
+  value.put(stim | outputs | inputs);
 }
 //-------------------------------------------------------------------
 // void IOPORT::put_value(unsigned int new_value)
