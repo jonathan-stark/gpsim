@@ -276,6 +276,12 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories="../src"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="../src"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\init.cc">
