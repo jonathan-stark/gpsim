@@ -179,7 +179,8 @@ double command::evaluate(Expression *expr)
     if(expr) {
 
       Value *v = toValue(expr);
-      value = v->getAsDouble();
+      
+      v->get(value);
 
       delete v;
       delete expr;

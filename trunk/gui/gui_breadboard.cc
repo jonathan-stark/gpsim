@@ -1381,14 +1381,14 @@ static void settings_clist_cb(GtkCList       *clist,
 
 	// Save the Attribute*
 	Value *attr;
-	char attrstr[50];
 	char str[256];
 	attr = (Value*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
 					       row);
 
 	//attr->getAsStr(attrstr,50);
-	
-	sprintf(str,"%s = %g",attr->name().c_str(),attr->getAsDouble());
+	double d=0.0;
+	attr->get(d);
+	sprintf(str,"%s = %g",attr->name().c_str(),d);
 	
 	gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
@@ -1451,8 +1451,9 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
        attribute_iterator++) {
 
     Value *locattr = *attribute_iterator;
-
-    sprintf(attribute_string,"%s = %g",locattr->name().c_str(),locattr->getAsDouble());
+    double d;
+    locattr->get(d);
+    sprintf(attribute_string,"%s = %g",locattr->name().c_str(),d);
 
     row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
 			   text);
@@ -2425,13 +2426,13 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		attribute_iterator++) {
 
 		Value *locattr = *attribute_iterator;
-		char attrval[50];
-		locattr->getAsStr(attrval,50);
+		//char attrval[50];
+		//locattr->getAsStr(attrval,50);
 		
 		fprintf(fo, "module set %s %s %s\n",
-				m->name().c_str(),
-				locattr->name().c_str(),
-				attrval);
+			m->name().c_str(),
+			locattr->name().c_str(),
+			"broken" ); //attrval);
 	}
 	fprintf(fo, "\n");
 	module_iterator=module_iterator->next;

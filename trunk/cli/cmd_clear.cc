@@ -65,7 +65,9 @@ void cmd_clear::clear(Expression *expr)
       /* for now, assume that the expression evaluates to an integer
 	 (later, things like 'clear all' will be add)
       */
-      bp.clear(v->getAsInt());
+      gint64 i;
+      v->get(i);
+      bp.clear((unsigned int)i);
 
       delete v;
     }

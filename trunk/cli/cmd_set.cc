@@ -87,7 +87,9 @@ void cmd_set::set(int bit_flag, Expression *expr)
       {
 	Value *v = expr->evaluate();
 	if(v) {
-	  number = v->getAsInt();
+	  gint64 i;
+	  v->get(i);
+	  number = (int)i;
 	  delete v;
 	}
 	delete expr;

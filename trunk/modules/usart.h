@@ -34,7 +34,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <glib.h>
 
-#include "../src/attribute.h"
+#include "../src/value.h"
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"
@@ -77,7 +77,7 @@ class USART_CORE //: public USART_MODULE
 
   EventLogger *tx_event;
 
-  Attribute *baud_rate;
+  Value *baud_rate;
 
   USARTModule *um;
 

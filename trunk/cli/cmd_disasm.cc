@@ -72,10 +72,12 @@ void cmd_disassemble::disassemble(Expression *expr)
 	if(ar) {
 	  start = ar->get_leftVal();
 	  end = ar->get_rightVal();
-	} else if (v)
+	} else if (v) {
 	  start = 0;
-	  end = v->getAsInt();
-
+	  gint64 i;
+	  v->get(i);
+	  end = (int) i;
+	}
       }
 
       catch (Error *err) {
