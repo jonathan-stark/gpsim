@@ -1,4 +1,8 @@
 2004-03-22 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_src.cc: Changed the event key processing from a case statement to
+	a C++ map object.
+	
+2004-03-22 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui.h, gui/gui_breadboard.h, gui/gui_object.h, gui/gui_processor.h,
 	* gui/gui_profile.h, gui/gui_register.h, gui/gui_regwin.h, gui/gui_scope.h,
 	* gui/gui_src.h, gui/gui_stack.h, gui/gui_stopwatch.h, gui/gui_symbols.h,
