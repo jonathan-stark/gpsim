@@ -1,4 +1,8 @@
 2004-08-16 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc, src/trace.h:
+	CVS was broken.
+
+2004-08-16 Scott Dattalo <scott@dattalo.com>
 	* src/intcon.cc, src/intcon.h, src/processor.h, src/trace.cc
 	src/trace.h, src/value.h:
 	Trace stuff *** CVS is broken at the moment but will be fixed
