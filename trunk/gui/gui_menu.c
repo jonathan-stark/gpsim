@@ -434,14 +434,24 @@ static void
 stepbutton_cb(GtkWidget *widget)
 {
     if(gp)
-	gpsim_step(gp->pic_id, 1);
+    {
+	if(gpsim_get_hll_mode(gp->pic_id))
+	    gpsim_hll_step(gp->pic_id);
+        else
+	    gpsim_step(gp->pic_id, 1);
+    }
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
     if(gp)
-	gpsim_step_over(gp->pic_id);
+    {
+	if(gpsim_get_hll_mode(gp->pic_id))
+	    gpsim_hll_step_over(gp->pic_id);
+        else
+	    gpsim_step_over(gp->pic_id);
+    }
 }
     
 static void 

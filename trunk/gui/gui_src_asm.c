@@ -550,10 +550,16 @@ popup_activated(GtkWidget *widget, gpointer data)
 	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
 	break;
     case MENU_STEP:
-	gpsim_step(popup_sbaw->sbw.gui_obj.gp->pic_id, 1);
+	if(gpsim_get_hll_mode(popup_sbaw->sbw.gui_obj.gp->pic_id))
+	    gpsim_hll_step(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	else
+	    gpsim_step(popup_sbaw->sbw.gui_obj.gp->pic_id, 1);
 	break;
     case MENU_STEP_OVER:
-	gpsim_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	if(gpsim_get_hll_mode(popup_sbaw->sbw.gui_obj.gp->pic_id))
+	    gpsim_hll_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	else
+	    gpsim_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     case MENU_RUN:
 	gpsim_run(popup_sbaw->sbw.gui_obj.gp->pic_id);
