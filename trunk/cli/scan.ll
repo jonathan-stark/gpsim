@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 #include "expr.h"
 #include "errors.h"
+#include "cmd_macro.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
 
@@ -43,7 +44,7 @@ Boston, MA 02111-1307, USA.  */
 #include "input.h"
 #include "scan.h"
 
-int state;
+  //int state;
 
 /* This is the max length of a line within a macro definition */
 static char macroBody[65536], *macroBodyPtr=0;
@@ -70,12 +71,14 @@ static int process_booleanLiteral(bool value);
 static int process_macroBody(const char *text);
 static int process_floatLiteral(char *buffer);
 static int recognize(int token,const char *);
- static void SetMode(int newmode);
+static void SetMode(int newmode);
 
 int cli_corba_init (char *ior_id);
 
+extern Macro *isMacro(const string &s);
+
 #define YYDEBUG 1
-#define YY_NO_UNPUT
+//#define YY_NO_UNPUT
 
 %}
 
@@ -243,11 +246,16 @@ abort_gpsim_now {
 {IDENT} {
   string tok = strip_trailing_whitespace (yytext);
 
+  int ret=0;
   if(strlen(tok.c_str()))
-    return handle_identifier (tok,&op);
+    ret = handle_identifier (tok,&op);
   else
-    return recognize(0,"invalid identifier");
+    ret = recognize(0,"invalid identifier");
+
+  if(ret)
+    return ret;
   }
+
 
 %{
 /* Default is to recognize the character we are looking at as a single char */
@@ -346,17 +354,21 @@ int handle_identifier(const string &s, cmd_options **op )
       last_command_is_repeatable = cmd->is_repeatable();
       return recognize(retval,"good command");
 
-    } else {
-      //cout << " command: \"" << s << "\" was not found\n";
-
-      if(verbose&2)
-	cout << " returning unknown string: " << s << endl;
-
-      yylval.s = strdup(s.c_str());
-
-      return recognize(STRING," string");
-
     }
+
+    // Search the macros
+    yylval.Macro_P = isMacro(s);
+    if(yylval.Macro_P) {
+
+      return MACROINVOCATION_T;
+    }
+
+    if(verbose&2)
+      cout << " returning unknown string: " << s << endl;
+
+    yylval.s = strdup(s.c_str());
+
+    return recognize(STRING," string");
 
  } else {
 
@@ -601,4 +613,84 @@ void lexer_setInitialMode(void)
 {
   cout << "setting lexer INITIAL mode\n";
   SetMode(INITIAL);
+}
+
+
+//----------------------------------------
+static bool isWhiteSpace(char c)
+{
+  return (c==' ' || c == '\t');
+}
+
+static bool getNextMacroParameter(char *s, int l)
+{
+
+  char c;
+
+  do {
+    c = yyinput();
+  } while(isWhiteSpace(c));
+
+  if(c==',') {
+    goto done;
+  }
+
+  unput(c);
+
+  if(!c)
+    return false;
+
+  {
+    int nParen=0;
+    bool bDone = false;
+
+    do {
+      c = yyinput();
+
+      cout << "[" << c << "]\n";
+      if(c == '(')
+	nParen++;
+      if(c == ')' && --nParen < 0 )
+	bDone = true;
+
+      if(c==',')
+	break;
+
+      if(c==0 || c=='\n' ) {
+	bDone=true;
+	unput(c);
+      } else
+	*s++ = c;
+    } while(--l>0  && !bDone);
+  }
+done:
+  *s=0;
+
+  return true;
+}
+
+void lexer_InvokeMacro(class Macro *m)
+{
+
+  if(!m)
+    return;
+
+  m->prepareForInvocation();
+
+  int i=0;
+  bool bValidParameter = false;
+  do {
+
+    i++;
+    char s[256];
+
+    bValidParameter = getNextMacroParameter(s,sizeof(s));
+    
+    if(bValidParameter) {
+      m->add_parameter(s);
+    cout << "macro param: " << s << endl;
+    }
+  } while (bValidParameter && i<m->nParameters());
+
+  m->invoke();
 }

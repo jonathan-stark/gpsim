@@ -53,6 +53,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/breakpoints.h"
 #include "command.h"
 #include "input.h"
+#include "cmd_macro.h"
 
 #ifdef HAVE_LIBREADLINE
 #define HAVE_READLINE
@@ -87,9 +88,10 @@ void quit_gui(void);
 void redisplay_prompt(void);
 
 char *gnu_readline (char *s, unsigned int force_readline);
-//static bool using_readline=1;
+
 int input_mode = 0;
 int last_command_is_repeatable=0;
+extern Macro *gCurrentMacro;
 
 extern int quit_parse;
 
@@ -103,9 +105,10 @@ class LLInput {
 public:
   LLInput *next;
   void *data;
+  Macro *macro;  // macro generating this text
 
   LLInput();
-  LLInput(char *);
+  LLInput(char *,Macro *);
   ~LLInput();
 };
 
@@ -114,8 +117,8 @@ LLInput::LLInput()
 {
 }
 
-LLInput::LLInput(char *s)
-  : next(0)
+LLInput::LLInput(char *s,Macro *m)
+  : next(0), macro(m)
 {
   data = strdup(s);
 }
@@ -134,7 +137,7 @@ public:
 
   void Push();
   void Pop();
-  void Append(char *);
+  void Append(char *, Macro *);
   LLInput *GetNext();
 
   void print();
@@ -247,10 +250,10 @@ void LLStack::Pop()
 
 }
 
-void LLStack::Append(char *s)
+void LLStack::Append(char *s, Macro *m)
 {
   
-  LLInput *d = new LLInput(s);
+  LLInput *d = new LLInput(s,m);
   LLInput *h = (LLInput *)data;
 
   if(!h) {
@@ -293,9 +296,9 @@ LLInput *LLStack::GetNext()
 
 /*******************************************************
  */
-void add_string_to_input_buffer(char *s)
+void add_string_to_input_buffer(char *s, Macro *m=0)
 {
-  Stack.Append(s);
+  Stack.Append(s,m);
 }
 
 /*******************************************************
@@ -452,6 +455,9 @@ gpsim_read (char *buf, unsigned max_size)
   if(!d  || !d->data) {
     return 0;
   }
+
+  gCurrentMacro = d->macro;
+
   char *cPstr = (char *) d->data;
   unsigned int count = strlen(cPstr);
   count = (count < max_size) ? count : max_size;

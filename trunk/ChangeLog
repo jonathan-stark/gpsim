@@ -1,3 +1,9 @@
+2004-09-02 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_macro.cc, cli/cmd_macro.h, cli/input.cc,
+	cli/parse.yy, cli/scan.ll: Added support for parameterized
+	macros. This is not completed
+
+
 2004-09-02 Borut Razem <borut.razem@siol.net>
 	* cli/input.cc, cli/socket.cc: socket port to WIN32
 	* gpsim/gpsim.vcproj, cli/cli.vcproj, cli/makefile.mingw,

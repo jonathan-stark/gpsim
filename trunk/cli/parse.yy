@@ -68,7 +68,8 @@ using namespace std;
 #include "../src/stimuli.h"
 
 extern void lexer_setMacroBodyMode(void);
- extern void lexer_setInitialMode(void);
+extern void lexer_setInitialMode(void);
+extern void lexer_InvokeMacro(Macro *m);
 
 
 #define YYERROR_VERBOSE
@@ -128,6 +129,7 @@ void yyerror(char *message)
   ExprList_t               *ExprList_P;
   SymbolList_t             *SymbolList_P;
 
+  Macro                    *Macro_P;
 }
 
 
@@ -167,6 +169,7 @@ void yyerror(char *message)
 %type <s>    mdef_end
 
 %token <s>   MACROBODY_T
+%token <Macro_P>   MACROINVOCATION_T
 
 %token <s>  STRING
 
@@ -573,6 +576,8 @@ icd_cmd:
 macro_cmd:
 	  MACRO                         { c_macro.list();}
          | macrodef_directive           { }
+         | MACROINVOCATION_T            { lexer_InvokeMacro($1); }
+
          ;
 
 macrodef_directive
