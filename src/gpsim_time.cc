@@ -32,7 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 //#include "gpsim_time.h"
 
-#define __DEBUG_CYCLE_COUNTER__
+//#define __DEBUG_CYCLE_COUNTER__
 
 // Largest cycle counter value
 
@@ -75,12 +75,12 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 #endif
 
 
-  if(inactive.next == NULL)
+    if(inactive.next == NULL)
     {
       cout << " too many breaks are set on the cycle counter \n";
-      return 0;
+     return 0;
     }
-  else if(future_cycle <= value)
+    else if(future_cycle <= value)
     {
       cout << "Cycle break point was ignored because cycle " << future_cycle << " has already gone by\n";
       cout << "current cycle is " << value << '\n';
@@ -108,7 +108,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 
       l2 = l1->next;
       l1->next = inactive.next;
-      inactive.next = l1->next->next;
+      inactive.next = inactive.next->next;
       l1->next->next = l2;
       l1->next->break_value = future_cycle;
       l1->next->f = f;
@@ -136,38 +136,51 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 void Cycle_Counter::clear_break(BreakCallBack *f)
 {
 
-  Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
+  Cycle_Counter_breakpoint_list  *l1 = &active, *l2 = NULL;
 
   bool found = 0;
 
-  while( (l1->next) && !found) {
+  if(!f)
+    return;
+
+  while( (l1->next) && !l2) {
       
-    // If the next break point is at a cycle greater than the
-    // one we wish to set, then we found the insertion point.
-    // Otherwise 
+    if(l1->next->f ==  f)
+      l2 = l1;
 
-      if(l1->next->f ==  f)
-      {
-	  l2 = l1->next;  // save a copy for a moment
-	  l1->next = l1->next->next;  // remove the break
-
-	  if(l2->f)
-	      l2->f->clear_break();
-#ifdef __DEBUG_CYCLE_COUNTER__
-	  if (f) 
-	    cout << "Clearing break call back sequence number = "<< f->CallBackID <<'\n';
-#endif
-
-      }
-      else
-	  l1=l1->next;
+    l1=l1->next;
   }
 
-/*  if(!found) {
-    cout << "Cycle_Counter::clear_break could not find break at cycle 0x"
-      << hex << setw(16) << setfill('0') << at_cycle << endl;
+  if(!l2) {
+#ifdef __DEBUG_CYCLE_COUNTER__
+    cout << "clear_break could not find break point)\n";
+#endif
     return;
-  }*/
+  }
+  // at this point l2->next points to our break point
+  // It needs to be removed from the 'active' list to the 'inactive' list.
+
+  l1 = l2;
+  l2 = l1->next;  // save a copy for a moment
+  l1->next = l1->next->next;  // remove the break
+
+  if(l2->f)
+    l2->f->clear_break();
+#ifdef __DEBUG_CYCLE_COUNTER__
+  if (f) 
+    cout << "Clearing break call back sequence number = "<< f->CallBackID <<'\n';
+#endif
+
+  // Now move the break to the inactive list.
+
+  l1 = inactive.next;
+  if(!l1) 
+    return;
+
+  l2->next = l1;
+  inactive.next = l2;
+
+  break_on_this =  active.next ? active.next->break_value : 0;
 
 }
 
@@ -206,7 +219,7 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
   bool found = 0;
 
-  while( (l1->next) && !found) {
+  while( l1->next && !found) {
       
     // If the next break point is at a cycle greater than the
     // one we wish to set, then we found the insertion point.
@@ -229,6 +242,18 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
   if(l2->f)
     l2->f->clear_break();
+
+  // Now move the break to the inactive list.
+
+  l1 = inactive.next;
+  if(!l1) 
+    return;
+
+  l2->next = l1;
+  inactive.next = l2;
+
+  break_on_this =  active.next ? active.next->break_value : 0;
+
 }
 
 

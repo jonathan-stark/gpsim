@@ -1,4 +1,9 @@
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
+	* src/breakpoints.cc - this time the 'Too many cycle counter breakpoints' was
+	fixed. BTW the problem was that 'clear_break' was not putting the cleared
+	breakpoint back into the 'inactive' list
+	
+2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/pic_processor.cc -- Fixed the "Too many cycle counter breakpoints" bug
 	* src/interface.cc        It turns out that the "realtime" stuff was 
 	* src/breakpoints.cc      1) duplicating a class declaration. 2) not clearing
