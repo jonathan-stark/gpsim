@@ -12,7 +12,8 @@ libgpsim_modules_la_SOURCES = \
 	paraface.cc paraface.h \
 	switch.cc switch.h \
 	logic.cc logic.h \
-	led.cc led.h
+	led.cc led.h \
+	video.cc video.h
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@

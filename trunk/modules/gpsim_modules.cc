@@ -52,6 +52,7 @@ support:
 #include "switch.h"
 #include "logic.h"
 #include "led.h"
+#include "video.h"
 
 /*
 class Module_Types
@@ -87,6 +88,10 @@ Module_Types available_modules[] =
 
   // Leds
   { "led_7segments", "led7s", Led_7Segments::construct},
+  { "led", "led", Led::construct},
+
+  // Video
+  { "PAL_video", "video", Video::construct},
 
   // No more modules
   { NULL,NULL,NULL}
