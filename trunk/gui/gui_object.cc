@@ -177,7 +177,6 @@ int GUI_Object::get_config(void)
   if(!config_get_variable(pName, "height", &height))
     height=100;
 
-  printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
   check();
 
   return 1;
