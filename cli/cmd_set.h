@@ -21,17 +21,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_SET_H__
 #define __CMD_SET_H__
 
+class Expression;
+
 class cmd_set : public command
 {
 public:
   cmd_set(void);
   void set(void);
 
-  //void set(int bit_flag);
-  void set(int bit_flag,int number);
-  void set(cmd_options_num *con);
-  //void set(cmd_options_str *cos);
-
+  void set(int bit_flag,Expression *);
 };
 
 extern cmd_set c_set;

@@ -230,54 +230,60 @@ void cmd_stimulus::stimulus(int bit_flag)
 }
 
 
-void cmd_stimulus::stimulus(cmd_options_num *con)
+void cmd_stimulus::stimulus(cmd_options_expr *coe)
 {
+  double dvalue = 0.0;
 
-  switch(con->co->value)
+  if(coe->expr)
+    dvalue = evaluate(coe->expr);
+
+  int value = (int) dvalue;
+
+  switch(coe->co->value)
     {
     case STIM_PHASE:
       if(verbose)
-	cout << "stimulus command got the phase " << con->n << '\n';
+	cout << "stimulus command got the phase " << value << '\n';
 
       if(last_stimulus)
-	last_stimulus->put_phase(con->n);
-      //stimorb_phase( con->n);
+	last_stimulus->put_phase(value);
+
       break;
 
     case STIM_PERIOD:
       if(verbose)
-	cout << "stimulus command got the period " << con->n << '\n';
+	cout << "stimulus command got the period " << value << '\n';
 
       if(last_stimulus)
-	last_stimulus->put_period(con->n);
-      //stimorb_period( con->n);
+	last_stimulus->put_period(value);
+
       break;
 
     case STIM_HIGH_TIME:
       if(verbose)
-	cout << "stimulus command got the high_time " << con->n << '\n';
+	cout << "stimulus command got the high_time " << value << '\n';
 
       if(last_stimulus)
-	last_stimulus->put_duty(con->n);
-      //stimorb_duty( con->n);
+	last_stimulus->put_duty(value);
+
       break;
 
     case STIM_INITIAL_STATE:
       if(verbose)
-	cout << "stimulus command got the initial_state " << con->n << '\n';
+	cout << "stimulus command got the initial_state " << value << '\n';
 
       if(last_stimulus)
-	last_stimulus->put_initial_state(con->n);
-      //stimorb_initial_state( con->n);
+	last_stimulus->put_initial_state(value);
+
       break;
 
     case STIM_START_CYCLE:
       if(verbose)
-	cout << "stimulus command got the start_cycle " << con->n << '\n';
+	cout << "stimulus command got the start_cycle " << value << '\n';
 
       if(last_stimulus)
-	last_stimulus->put_start_cycle(con->n);
-      //stimorb_start_cycle( con->n);
+	last_stimulus->put_start_cycle(value);
+
       break;
 
     default:
@@ -285,74 +291,10 @@ void cmd_stimulus::stimulus(cmd_options_num *con)
       return;
     }
 
-  options_entered |= con->co->value;
+  options_entered |= coe->co->value;
 
 }
 
-// %%% FIXME %%%
-void cmd_stimulus::stimulus(cmd_options_float *cof)
-{
-
-  if(!last_stimulus) {
-    cout << "warning: Ignoring stimulus (float) option because there's no stimulus defined.";
-    return;
-  }
-
-  int n;
-
-  if(cof->f > 0.0)
-    n = 1;
-  else
-    n = 0;
-
-  if(verbose)
-    cout << "stimulus command got floating point option\n";
-
-  switch(cof->co->value)
-    {
-    case STIM_PHASE:
-      if(verbose)
-	cout << "stimulus command got the phase " << n << '\n';
-
-      last_stimulus->put_phase(n);
-      break;
-
-    case STIM_PERIOD:
-      if(verbose)
-	cout << "stimulus command got the period " << n << '\n';
-
-      last_stimulus->put_period(n);
-      break;
-
-    case STIM_HIGH_TIME:
-      if(verbose)
-	cout << "stimulus command got the high_time " << n << '\n';
-
-      last_stimulus->put_duty(n);
-      break;
-
-    case STIM_INITIAL_STATE:
-      if(verbose)
-	cout << "stimulus command got the initial_state " << n << '\n';
-
-      last_stimulus->put_initial_state(n);
-      break;
-
-    case STIM_START_CYCLE:
-      if(verbose)
-	cout << "stimulus command got the start_cycle " << n << '\n';
-
-      last_stimulus->put_start_cycle(n);
-      break;
-
-    default:
-      cout << " Invalid stimulus option\n";
-      return;
-    }
-
-  options_entered |= cof->co->value;
-
-}
 
 void cmd_stimulus::stimulus(cmd_options_str *cos)
 {
@@ -379,30 +321,24 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
   options_entered |= cos->co->value;
 }
 
-void cmd_stimulus::data_point(guint64 new_data_point)
+void cmd_stimulus::stimulus(ExprList_t *eList)
 {
+  ExprList_itor ei;
 
-  if(verbose)
-    cout << "stimulus command got integer data\n";
+  for(ei = eList->begin(); ei != eList->end(); ++ei)
+    {
+      double v = evaluate(*ei);
 
-  if(last_stimulus)
-    last_stimulus->put_data(new_data_point);
+      if(last_stimulus) {
+	last_stimulus->put_data((guint64)v);
+	have_data = 1;
+      }
 
-  have_data = 1;
+    }
 
+  eList->clear();
+  delete eList;
 }
-void cmd_stimulus::data_point(float new_data_point)
-{
-  if(verbose)
-    cout << "stimulus command got got float data\n";
-
-  if(last_stimulus)
-    last_stimulus->put_data(new_data_point);
-
-  have_data = 1;
-
-}
-
 
 //-----------------
 // end()

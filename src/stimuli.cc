@@ -770,7 +770,7 @@ void asynchronous_stimulus::start(void)
     }
   else {
     if(cpu) 
-      cout << "Warning: aynchronous stimulus has no cpu\n";
+      cout << "Warning: aynchronous stimulus has no data\n";
   }
 
   if(verbose)
@@ -1574,4 +1574,46 @@ void stimorb_attach(char *node, char_list *stimuli)
     cout << "Warning: Node \"" << node << "\" was not found in the node list\n";
   }
 
+}
+
+//========================================================================
+//  stimuli_attach(list <string> * sl)
+//
+//  Attach stimuli to a node
+//
+// The first item in the input list is the name of the node.
+// The remaining items are the names of the stimuli.
+
+void stimuli_attach(list <string> * sl)
+{
+  if (!sl)
+    return;
+
+  list <string> :: iterator si;
+
+  si = sl->begin();
+
+  Stimulus_Node *sn = find_node (*si);
+
+  if(sn)
+    {
+      for(++si; si != sl->end(); ++si)
+	{
+	  string s = *si;
+	  stimulus *st = find_stimulus(s);
+
+	  if(st) {
+	    sn->attach_stimulus(st);
+	    if(verbose&2)
+	      cout << " attaching stimulus: " << s << '\n';
+	  }
+	  else
+	    cout << "Warning, stimulus: " << s << " not attached\n";
+	}
+
+      sn->update(0);
+    }
+  else {
+    cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
+  }
 }

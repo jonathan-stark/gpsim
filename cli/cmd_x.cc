@@ -139,19 +139,6 @@ void cmd_x::x(char *reg_name, int val)
 
 void cmd_x::x(Expression *expr)
 {
-  if(expr) {
-
-    cout << expr->show() << endl;
-
-    Value *v = expr->evaluate();
-    if(v) {
-      cout << v->get() << endl;
-
-      x(v->get());
-
-      delete v;
-    }
-    delete expr;
-  }
+  x((int)evaluate(expr));
 
 }

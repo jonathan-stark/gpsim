@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_STIMULUS_H__
 #define __CMD_STIMULUS_H__
 #include "../src/stimulus_orb.h"
+#include "expr.h"
 
 class cmd_stimulus : public command
 {
@@ -46,11 +47,11 @@ public:
   void stimulus(void);
 
   void stimulus(int bit_flag);
-  void stimulus(cmd_options_num *con);
+  void stimulus(cmd_options_expr *coe);
   void stimulus(cmd_options_str *cos);
-  void stimulus(cmd_options_float *cof);
-  void data_point(guint64 new_int_data_point);
-  void data_point(float new_float_data_point);
+  void stimulus(ExprList_t *);
+  //void data_point(guint64 new_int_data_point);
+  //void data_point(float new_float_data_point);
   void end(void);
 
   bool can_span_lines(void) {return 1;};

@@ -21,12 +21,14 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_FREQUENCY_H__
 #define __CMD_FREQUENCY_H__
 
+class Expression;
+
 class cmd_frequency : public command
 {
 public:
 
   cmd_frequency(void);
-  void set(double value);
+  void set(Expression *);
   void print();
 };
 

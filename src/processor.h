@@ -396,8 +396,8 @@ public:
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
 
-  virtual void disassemble (unsigned int start_address, 
-			    unsigned int end_address);
+  virtual void disassemble (signed int start_address, 
+			    signed int end_address);
   virtual void list(unsigned int file_id, 
 		    unsigned int pcval, 
 		    unsigned int start_line, 

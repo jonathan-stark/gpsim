@@ -47,17 +47,13 @@ struct cmd_options_float {
 
    /* Command option with a string parameter */
 
-struct cmd_options_str {
+class cmd_options_str
+{
+ public:
   cmd_options *co;
   char *str;
-};
-
-// Char list.
-// Here's a singly linked-list of char *'s.
-
-struct char_list {
-  char *name;
-  char_list *next;
+  cmd_options_str(char *);
+  ~cmd_options_str();
 };
 
 #endif

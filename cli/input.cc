@@ -78,39 +78,33 @@ extern "C" {
 #include "../src/pic-processor.h"
 #include "../src/breakpoints.h"
 
-#define MAX_LINE_LENGTH 256  
-
 int yyparse(void);
 void initialize_readline (void);
-//extern "C" {
+
 void exit_gpsim(void);
 #ifdef HAVE_GUI
-  void quit_gui(void);
-
+void quit_gui(void);
 #endif
 
 void redisplay_prompt(void);
-//}
 
 char *gnu_readline (char *s, unsigned int force_readline);
-bool using_readline=1;
+static bool using_readline=1;
 int input_mode = 0;
-int allocs = 0;
 int last_command_is_repeatable=0;
-/* When non-zero, this global means the user is done using this program. */
-int done = 0;
-
-//const char *gpsim = "gpsim> ";  // Normal prompt
-//const char *gpsim_cont = "> ";  // command continuation prompt
 
 extern int quit_parse;
 
-/* Command file reference counter. This global variable keeps track
- * of the nesting level of loaded command files */
+/*
+  temporary --- linked list input buffer
+*/
+class LLInput {
+public:
+  LLInput *next;
+  void *data;
+};
 
-int Gcmd_file_ref_count=0;
-
-
+static LLInput Stack={0,0};
 
 //====================================================================================
 //
@@ -167,76 +161,136 @@ void initialize_gpsim(void)
 char *cmd_string_buf = 0;
 FILE *cmd_file = 0;
 
-
-/*******************************************************
- */
-char * strip_cmd(char *buff)
+static void LLDumpInputBuffer(void)
 {
-  char *comment;
+#if 0
+  LLInput *s = &Stack;
+  cout << "Current state of input buffer:\n";
+  int stack_number=0;
+  while (s->data) {
+    LLInput *h = (LLInput *)s->data;
+    int depth =0;
+    while(h) {
+      
+      cout << "   " <<stack_number <<':'<<depth << "  "<< (char *)  h->data;
+      depth++;
+      h = h->next;
+    }
+    stack_number++;
+    s = s->next;
+  }
+  cout << "\n ---Leaving dump \n";
+#endif
+}
 
-  if(!buff)
-    return buff;
+LLInput *newLLInput(void)
+{
+  LLInput *d = (LLInput *)(malloc(sizeof(struct LLInput)));
+  if(d) {
+    d->next = 0;
+    d->data = 0;
+  }
+  return d;
+}
 
-  // Strip leading spaces
-  while(*buff == ' ') 
-    *buff++;
+static void LLPush(void)
+{
+  LLInput *s = newLLInput();
 
-  comment = strchr(buff, '#');
+  LLDumpInputBuffer();
+  if(s) {
+    s->next = Stack.next;
+    s->data = Stack.data;
+    Stack.next = s;
+    Stack.data = 0;
+  }
+  
+}
 
-  // If there's a comment, remove it.
-  if(comment) {
-    *comment = '\0';
+static void LLPop(void)
+{
+  LLDumpInputBuffer();
+
+  if(!Stack.next)
+    return;
+
+  Stack.data = Stack.next->data;
+  Stack.next = Stack.next->next;
+
+}
+
+static void LLAppend(LLInput *h, LLInput *d)
+{
+  if(!h)
+    return;
+
+  /* go to the end of the list */
+  while(h->next)
+    h = h->next;
+
+  /* add d to the end */
+
+  h->next = d;
+
+}
+
+
+static LLInput *LLGetNext(void)
+{
+  if(!Stack.data) {
+    if(!Stack.next)
+      return 0;
+
+    LLPop();
+
+    return LLGetNext();
   }
 
-  return buff;
+  LLInput *d = (LLInput *)Stack.data;
+
+  // remove this item from the list  
+  if(d) {
+    Stack.data = (void *)d->next;
+
+  }
+
+  return d;
 }
 
 /*******************************************************
- * parse_string
+ */
+static void add_string_to_input_buffer(char *s)
+{
+  if(!s)
+    return;
+
+  LLInput *d = newLLInput();
+
+  if(d) {
+
+    d->data = (void *)strdup(s);       // free'd by gpsim_read.
+    d->next = 0;
+
+    if(!Stack.data) 
+      Stack.data = d;
+    else
+      LLAppend((LLInput*)Stack.data, d);
+
+
+  }
+}
+
+/*******************************************************
+ * start_parse
  * 
  * This routine will run a string through the command parser
  *this is useful if you want to execute a command but do not
  *wish to go through the readline stuff.
  */
-int parse_string(char *cmd_string)
+int start_parse(void)
 {
   static int save_readline_state = 0;
-  static char last_line[256] = {0};
-
   int retval;
-
-  save_readline_state = using_readline;
-  using_readline = 0;
-
-  if(!cmd_string)
-    return 0;
-
-  if(verbose & 2)
-    printf("   %s: %s\n",__FUNCTION__,cmd_string);
-
-  cmd_string = strip_cmd(cmd_string);
-
-  cmd_string_buf = strdup(cmd_string); // free'd by gpsim_read
-
-
-  if( strlen (cmd_string) == 0)
-    {
-      if(*last_line && last_command_is_repeatable)
-	cmd_string_buf = strdup(last_line);
-
-    }
-  else
-    {
-
-#ifdef HAVE_READLINE
-      if(strlen(cmd_string)) {
-	add_history (cmd_string);
-
-	strncpy(last_line,cmd_string,256);
-      }
-#endif
-    }
-
 
   init_parser();
   retval = yyparse();
@@ -252,26 +306,14 @@ int parse_string(char *cmd_string)
 
 }
 
-char * gets_from_cmd_file(char **ss)
+int parse_string(char * str)
 {
-  char str[MAX_LINE_LENGTH];
-
-  str[0] = 0;
-
-  if((verbose&4) && DEBUG_PARSER)
-    cout << __FUNCTION__ <<"()\n";
-
-  if(cmd_file) {
-    fgets(str, MAX_LINE_LENGTH, cmd_file);
-    *ss= strdup(str); // free'd by gpsim_read
-    allocs++;
-    //cout << "allocs++" << allocs << '\n';
-  }
-
-  return *ss;
-
+  add_string_to_input_buffer(str);
+  return start_parse();
 }
 
+//========================================================================
+//
 void process_command_file(const char * file_name)
 {
 
@@ -304,71 +346,31 @@ void process_command_file(const char * file_name)
 
   if(cmd_file)
     {
+
       if((verbose) && DEBUG_PARSER)
-        cout << "processing a command file\n";
+	cout << "processing a command file\n";
 
-      quit_parse = 0;
-      Gcmd_file_ref_count++;
-      while( !quit_parse )
-	{
-	  //cout << "about to re-init the parser\n";
-	  init_parser();
-	  yyparse();
-	}
+      LLPush();
 
-      // decrement the reference counter if it's greater than 0.
-      if(Gcmd_file_ref_count>0)
-	Gcmd_file_ref_count--;
+      char *s;
+      char str[256];
+
+      while( (s = fgets(str, 256, cmd_file)) != 0) 
+       add_string_to_input_buffer(s);
+
+      //while(fread(str,1,256,cmd_file))
+      //  add_string_to_input_buffer(str);
 
       fclose(cmd_file);
       cmd_file = save_cmd_file;
     }
 
+  LLDumpInputBuffer();
 
   using_readline = (0 != save_readline_state);
 
 }
 
-static char *
-get_user_input (void)
-{
-  char *retval = 0;
-
-  if((verbose&4) && DEBUG_PARSER)
-    cout << __FUNCTION__ <<"() --- \n";
-
-  if( !bUseGUI && using_readline) {
-    //cout << "  1";
-#ifdef HAVE_READLINE
-    // If we're in cli-only mode and we're not processing a command file
-    // then we use readline to get the commands
-    retval = gnu_readline ( "**gpsim> ",1);
-
-#else
-    cout << "__gpsim> ";
-    cout.flush();
-    static char buf[256];
-    cin.getline(buf, sizeof(buf));
-    if (cin.eof()) {
-      cout << buf << endl;
-      return 0;
-    }
-    return buf;
-#endif
-
-  } else {
-
-    //cout << "  2";
-    // We're either using the gui or we're parsing a command file.
-
-    gets_from_cmd_file(&cmd_string_buf);
-    retval = cmd_string_buf;
-
-  }
-  //cout << "  3 returning " << retval << endl;
-
-  return retval;
-}
 
 extern int open_cod_file(pic_processor **, char *);
 
@@ -441,122 +443,27 @@ int gpsim_open(Processor *cpu, const char *file)
 int
 gpsim_read (char *buf, unsigned max_size)
 {
-  char *input_buf;
-  static unsigned chars_left = 0;
 
   if((verbose&4) && DEBUG_PARSER)
     cout <<"gpsim_read\n";
 
-  input_buf = get_user_input ();
-  chars_left = input_buf ? (unsigned)strlen (input_buf) : 0;
+  LLInput *d = LLGetNext();
 
-  if (chars_left > 0)
-    {
-      buf[0] = '\0';
-
-      chars_left = ( (chars_left < max_size) ? chars_left : max_size);
-
-      strncpy (buf, input_buf, chars_left);
-
-      // If the input string does not have a carriage return, then add one.
-      if (buf[chars_left-1] != '\n')
-	buf[chars_left++] = '\n';
-      buf[chars_left] = 0;
-
-      //cout << "chars_left > 0, copied cur_pos into buff\n";
-      //cout << "buf[]  " << buf << '\n';
-    }
-    // If we are reading from a command file (and not stdin), then
-    // the string that was read copied into a dynamically allocated
-    // buffer that we need to delete.
-
-  if(allocs) {
-    allocs--;
-
-    //cout << "freeing input_buf " <<input_buf <<'\n';
-    //cout << "allocs--" << allocs << '\n';
-
-    free (input_buf);
+  if(!d  || !d->data) {
+    return 0;
   }
-  //status = len;
-  //chars_left = 0;
+  char *cPstr = (char *) d->data;
+  unsigned int count = strlen(cPstr);
+  count = (count < max_size) ? count : max_size;
 
-  if((verbose&4) && DEBUG_PARSER)
-    cout << "leaving gpsim_read\n";
+  strncpy(buf, cPstr, count);
 
-  return chars_left;
+  free (cPstr);
+  free (d);
+
+  return count;
+
 }
-
-#if 0
-___main_input (void)
-{
-
-  COMMAND_MODES command_mode=NO_COMMAND;
-
-
-  // if there is a startup file then read it and do what it says
-  //  if(startup)
-  //  process_command_file(startup);
-
-  initialize_readline ();	/* Bind our completer. */
-
-  //  initialize_signals();
-
-  char last_line[256];
-  last_line[0] = 0;
-
-  int flag = 0;
-
-  /* Loop reading and executing lines until the user quits. */
-  while (!quit_gpsim)
-    {
-      char *line;
-      
-      if(command_mode == NO_COMMAND)
-	{
-	  //line = ::readline (gpsim);
-	  line = ::readline ("gpsim> ");
-	}
-      else
-	{
-	  //line = ::readline (gpsim_cont);
-	  line = ::readline (">");
-	}
-
-      if (!line)
-	{
-	  done = 1;		/* Encountered EOF at top level. */
-	}
-      else
-	{
-	  /* Remove leading and trailing whitespace from the line.
-	     Then, if there is anything left, add it to the history list
-	     and execute it. */
-	  //stripwhite (line);
-
-	  if (*line)
-	    {
-	      add_history (line);
-	      //command_mode = execute_line (line);
-	      strncpy(last_line,line,256);
-	    }
-	  else
-	    {
-	      //cout << "empty line\n";
-	      //if(*last_line)
-	      // command_mode = execute_line (last_line);
-	    }
-	}
-
-      if (line)
-	free (line);
-      line = 0;
-
-    }
-  exit (0);
-}
-
-#endif
 
 /* **************************************************************** */
 /*                                                                  */
@@ -659,7 +566,7 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 //============================================================================
 //
 // have_line
-// When <cr> is press at the command line, the text string on the command
+// When <cr> is pressed at the command line, the text string on the command
 // is copied into a buffer and passed to the command parser.
 //
 
@@ -669,14 +576,30 @@ void have_line(char *s)
   if(simulation_mode != STOPPED)
     return;
 
-  parse_string(s);
+  static char last_line[256] = {0};
+
+  if(strlen(s) == 0) {
+    if(*last_line && last_command_is_repeatable)
+      add_string_to_input_buffer(last_line);
+
+  } else {
+    // save a copy in the history buffer:
+    strncpy(last_line,s,256);
+    add_history (s);
+    add_string_to_input_buffer(s);
+  }
+
+  add_string_to_input_buffer("\n");
+  start_parse();
+
   free(s);
 #endif
 }
 
 #endif
 
-
+/**********************************************************************
+ **/
 void exit_gpsim(void)
 {
   if(use_icd)
@@ -691,8 +614,6 @@ void exit_gpsim(void)
   rl_callback_handler_remove();
   g_io_channel_unref(channel);
 #endif
-
-  //  simulation_cleanup();
 
   exit(0);
 }
@@ -730,7 +651,7 @@ static int gpsim_rl_getc(FILE *in)
    if not. */
 void initialize_readline (void)
 {
-  //cout << __FUNCTION__ << endl;
+
 #ifdef HAVE_READLINE
 #ifdef HAVE_GUI
   rl_getc_function = gpsim_rl_getc;
@@ -741,104 +662,10 @@ void initialize_readline (void)
   rl_callback_handler_install ("gpsim> ", have_line);
 #endif
 
-  /* Allow conditional parsing of the ~/.inputrc file. */
-  //  rl_readline_name = "gpsim";
 
   /* Tell the completer that we want a crack first. */
     rl_attempted_completion_function = gpsim_completion;
-#else
-  //char buf [256];
-
-  //while(1) {
-    //cout << "gpsim> ";
-    //cout.flush();
-
-    //cin.getline(buf, sizeof(buf));
-    //if (cin.eof()) {
-    //cout << buf << endl;
-    //}
-
-    //parse_string(buf);
-    //}
 
 #endif //HAVE_READLINE
 }
 
-#ifdef HAVE_READLINE
-char *gnu_readline (char *s, unsigned int force_readline)
-{
-  static char last_line[256]={0};
-  char *retval = 0;
-
-  //cout << __FUNCTION__ << endl;
-
-  if(using_readline || force_readline)
-    {
-      //cout << "about to do readline\n";
-
-      char *tmp;
-
-      if(input_mode == CONTINUING_LINE)
-        //retval = ::readline (const_cast<char*>(gpsim_cont));
-	retval = ::readline (">");
-      else
-	retval = ::readline (s);
-      tmp = retval;
-
-      /*
-      if(tmp)
-	{
-	  cout << "tmp is not null and is " << strlen(tmp) << " chars long\n";
-	}
-      else
-	{
-	  cout << "tmp is null";
-	}
-      */
-
-      if (!tmp)
-	{
-	  retval = (char *) malloc (2);
-	  retval[0] = '\n';
-	  retval[1] = '\0';
-	}
-      else
-	{
-	  if( strlen (tmp) == 0)
-	    {
-	      if(*last_line)
-		{
-		  retval = strdup(last_line);
-		}
-	      else
-		{
-		  retval = (char *) malloc (2);
-		  retval[0] = '\n';
-		  retval[1] = '\0';
-		}
-	    }
-	  else
-	    {
-	      add_history (tmp);
-
-	      strncpy(last_line,tmp,256);
-	    }
-	}
-    }
-  else
-    {
-      if(cmd_string_buf)
-	{
-	  //cout << "processing a command string\n";
-	  retval = cmd_string_buf;
-	}
-      else
-	{
-	  cout << "read line error\n";
-	  exit(1);
-	}
-    }
-
-  return retval;
-}
-#endif  // HAVE_READLINE

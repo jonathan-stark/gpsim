@@ -3791,7 +3791,7 @@ void Breadboard_Window::Build(void)
   if(enabled)
     gtk_widget_show(window);
 
-  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
+  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
 
 }
 

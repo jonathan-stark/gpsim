@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_BUS_H__
 #include "misc.h"
 
+#include <list>
+using namespace std;
+
 class cmd_bus : public command
 {
 public:
@@ -29,8 +32,7 @@ public:
   cmd_bus(void);
   void list_busses(void);
 
-  void add_busses(char_list *busses);
-
+  void add_busses(list <string> *);
 
 };
 

@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_clear.h"
+#include "expr.h"
 
 #include "../src/pic-processor.h"
 
@@ -52,10 +53,25 @@ display the currently set break points.\n\
 }
 
 
-void cmd_clear::clear(int bp_number)
+void cmd_clear::clear(Expression *expr)
 {
 
-  bp.clear(bp_number);
+  if(expr) {
+
+    cout << expr->show() << endl;
+
+    Value *v = expr->evaluate();
+    if(v) {
+
+      /* for now, assume that the expression evaluates to an integer
+	 (later, things like 'clear all' will be add)
+      */
+      bp.clear(v->getAsInt());
+
+      delete v;
+    }
+    delete expr;
+  }
 
 }
 

@@ -21,16 +21,13 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_CLEAR_H__
 #define __CMD_CLEAR_H__
 
+class Expression;
+
 class cmd_clear : public command
 {
 public:
-
   cmd_clear(void);
-  void clear(void) { cout << "clear command\n";};
-
-  void clear(int bp_number);
-
-
+  void clear(Expression *);
 };
 
 extern cmd_clear clear;

@@ -27,6 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_disasm.h"
 
 #include "../src/pic-processor.h"
+#include "expr.h"
+#include "errors.h"
 
 cmd_disassemble disassemble;
 
@@ -52,28 +54,42 @@ cmd_disassemble::cmd_disassemble(void)
   op = cmd_disassemble_options; 
 }
 
-/*
-void cmd_disassemble::disassemble(void)
+
+void cmd_disassemble::disassemble(Expression *expr)
 {
 
-  if(cpu)
-    cpu->disassemble(cpu->pc.value - 10, cpu->pc.value + 5);
+  if(cpu) {
 
-}
+    // Select a default range:
 
-void cmd_disassemble::disassemble(int length)
-{
+    int start = -10;
+    int end = 5;
 
-  if(cpu)
-    cpu->disassemble(cpu->pc.value, cpu->pc.value + length);
+    if(expr) {
 
-}
-*/
+      try {
+	Value *v = expr->evaluate();
 
-void cmd_disassemble::disassemble(int start, int end)
-{
+	AbstractRange *ar = dynamic_cast<AbstractRange *>(v);
+	if(ar) {
+	  start = ar->get_leftVal();
+	  end = ar->get_rightVal();
+	} else if (v)
+	  start = 0;
+	  end = v->getAsInt();
 
-  if(cpu)
+      }
+
+      catch (Error *err) {
+	if(err)
+	  cout << "ERROR:" << err->toString() << endl;
+	delete err;
+      }
+
+    }
+
     cpu->disassemble(cpu->pc->value + start, cpu->pc->value + end);
+
+  }
 
 }

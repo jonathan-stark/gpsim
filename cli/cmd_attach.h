@@ -20,13 +20,15 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef __CMD_ATTACH_H__
 #define __CMD_ATTACH_H__
+#include <list>
+using namespace std;
 
 class cmd_attach : public command
 {
 public:
 
   cmd_attach(void);
-  void attach(char_list *);
+  void attach(list <string> *);
 
 };
 

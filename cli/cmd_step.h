@@ -21,13 +21,16 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_STEP_H__
 #define __CMD_STEP_H__
 
+class Expression;
+
 class cmd_step : public command
 {
 public:
 
   cmd_step(void);
 
-  void step(int instructions);
+  void step(int);
+  void step(Expression *);
   void over(void);
 
   virtual int is_repeatable(void) { return 1; };

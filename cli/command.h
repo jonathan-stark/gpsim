@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #if !defined (__COMMAND_H_)
 #define __COMMAND_H_
 #include <string>
+#include <list>
 using namespace std;
 #include <unistd.h>
 #include <glib.h>
@@ -49,6 +50,7 @@ enum COMMAND_MODES
                             // that is being created).
 
 void init_parser(void);
+class Expression;
 
 class command
 {
@@ -81,6 +83,19 @@ public:
 
   // Assume command is not repeatable
   virtual int is_repeatable(void) { return 0; };
+  virtual double evaluate(Expression *);
+
+};
+
+class cmd_options_expr
+{
+ public:
+  
+  cmd_options_expr(cmd_options *, Expression *);
+  ~cmd_options_expr();
+
+  cmd_options *co;
+  Expression *expr;
 };
 
 extern command *command_list[];
@@ -90,5 +105,10 @@ extern int quit_gpsim;
 extern void execute_line(char *);
 
 #define DEBUG_PARSER 0
+
+//========================================
+// typedefs 
+
+typedef list<string> StringList_t;
 
 #endif
