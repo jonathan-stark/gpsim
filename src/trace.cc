@@ -1405,6 +1405,7 @@ void ProfileKeeper::catchup(void)
 	    }
 	    break;
 	    */
+		break;
 	}
     }
 
