@@ -378,7 +378,8 @@ void PCTraceObject::print(FILE *fp)
 {
   char a_string[50];
 
-  unsigned addr = address & 0xffff;
+  unsigned addr = cpu->map_pm_index2address(address &0xffff);
+
   // ugh - hardcoding the specific program counter trace type 
   /*
   unsigned int tracetype = (address>>16) & 3;
@@ -395,9 +396,8 @@ void PCTraceObject::print(FILE *fp)
   }
   */
   fprintf(fp,"0x%04X 0x%04X %s\n",
-	  //cpu->map_pm_index2address(address &0xffff),
-	  address &0xffff,
-	  cpu->pma->get_opcode(addr),
+	  addr,
+	  (*cpu->pma)[addr].opcode,
 	  (*cpu->pma)[addr].name(a_string,sizeof(a_string)));
 
 

@@ -1253,7 +1253,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   GtkSheetRange range;
 
-  if(!gp)
+  if(!gp || !gp->cpu)
     return;
 
   current_address=0;

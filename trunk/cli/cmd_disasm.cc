@@ -86,7 +86,11 @@ void cmd_disassemble::disassemble(Expression *expr)
 
     }
 
-    cpu->disassemble((signed int)(cpu->pc->value + start), (signed int)(cpu->pc->value + end));
+    if(cpu->pma) {
+      int current_pc = cpu->pma->get_PC();
+      cout << hex << " current pc = 0x"<<current_pc << endl;
+      cpu->disassemble(current_pc + start, current_pc + end);
+    }
 
   }
 
