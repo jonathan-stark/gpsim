@@ -42,6 +42,7 @@ libgpsim_la_SOURCES = \
 	pic-processor.cc \
 	pic-registers.cc \
 	pic-instructions.cc \
+	processor.cc
 	stimuli.cc \
 	symbol.cc \
 	tmr0.cc \
@@ -88,6 +89,7 @@ gpsiminclude_HEADERS = \
 	pic-processor.h \
 	pic-registers.h \
 	picdis.h \
+	processor.h \
 	stimuli.h \
 	stimulus_orb.h \
 	symbol.h \
