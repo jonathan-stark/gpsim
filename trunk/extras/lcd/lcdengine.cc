@@ -160,8 +160,6 @@ void LcdDisplay::start_data(void)
     data_latch_phase ^= 1;
   }
 
-  cout << __FUNCTION__ << " data latch = " << data_latch << endl;
-
   newState(ST_COMMAND_PH0);
 }
 
@@ -171,8 +169,6 @@ void LcdDisplay::send_status(void)
   
 
   status = ( cursor.row * 0x40 ) + cursor.col; // FIXME - No busy yet
-
-  cout << __FUNCTION__ << " status = " << status << endl;
 
   if(in_8bit_mode()) {
     data_port->put ( status );
@@ -295,8 +291,6 @@ void LcdDisplay::execute_command(void)
 void LcdDisplay::new_command(void)
 {
 
-  cout << __FUNCTION__ << endl;
-
   if(in_8bit_mode())
     execute_command();
 
@@ -317,8 +311,6 @@ void LcdDisplay::new_command(void)
 
 void LcdDisplay::new_data(void)
 {
-
-  cout << __FUNCTION__ << endl;
 
   if(in_8bit_mode())
     write_data(data_latch);
@@ -360,9 +352,10 @@ void LcdDisplay::revertState(void)
 
 void LcdDisplay::advanceState( ControlLineEvent e)
 {
-
-  cout << "Event:  " << getEventName(last_event) << "->" << getEventName(e)<< '\n';
-  cout << " from State:  " << getStateName(current_state) << '\n';
+  if(debug) {
+    cout << "Event:  " << getEventName(last_event) << "->" << getEventName(e)<< '\n';
+    cout << " from State:  " << getStateName(current_state) << '\n';
+  }
 
   switch(current_state) {
   case ST_INITIALIZED:
@@ -457,7 +450,8 @@ void LcdDisplay::advanceState( ControlLineEvent e)
 
   last_event = e;
 
-  cout << " to State:  " << getStateName(current_state) << '\n';
+  if(debug)
+    cout << " to State:  " << getStateName(current_state) << '\n';
 
   viewInternals(0xff);
 }

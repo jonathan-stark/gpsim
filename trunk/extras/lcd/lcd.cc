@@ -178,7 +178,7 @@ unsigned int DataPort::get(void)
 
   value &= 0xff;
 
-  cout << "DataPort::get = 0x" << value << endl;
+  //cout << "DataPort::get = 0x" << value << endl;
 
   return value;
 
