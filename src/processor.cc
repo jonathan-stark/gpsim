@@ -402,11 +402,16 @@ void Processor::init_program_memory (unsigned int memory_size)
       program_memory[i]->set_cpu(this);
     }
 
-  pma = new ProgramMemoryAccess(this);
+  pma = createProgramMemoryAccess(this);
   pma->name();
 
 
 }
+
+ProgramMemoryAccess * Processor::createProgramMemoryAccess(Processor *processor) {
+  return new ProgramMemoryAccess(processor);
+}
+
 
 //-------------------------------------------------------------------
 // init_program_memory(int address, int value)
@@ -1383,7 +1388,7 @@ void ProgramMemoryAccess::put(unsigned int address, instruction *new_instruction
   if(!new_instruction)
     return;
 
-
+ 
   if(hasValid_opcode(address)) {
 
     cpu->program_memory[cpu->map_pm_address2index(address)] = new_instruction;
@@ -1414,20 +1419,20 @@ instruction *ProgramMemoryAccess::get_base_instruction(unsigned int address)
 
     for(;;)
     {
-	switch(p->isa())
-	{
-	case instruction::MULTIWORD_INSTRUCTION:
-	case instruction::INVALID_INSTRUCTION:
-	case instruction::NORMAL_INSTRUCTION:
-            return p;
-	case instruction::BREAKPOINT_INSTRUCTION:
-	case instruction::NOTIFY_INSTRUCTION:
-	case instruction::PROFILE_START_INSTRUCTION:
-	case instruction::PROFILE_STOP_INSTRUCTION:
-	case instruction::ASSERTION_INSTRUCTION:
-	    p=((Breakpoint_Instruction *)p)->replaced;
-            break;
-	}
+        switch(p->isa())
+        {
+        case instruction::MULTIWORD_INSTRUCTION:
+        case instruction::INVALID_INSTRUCTION:
+        case instruction::NORMAL_INSTRUCTION:
+                  return p;
+        case instruction::BREAKPOINT_INSTRUCTION:
+        case instruction::NOTIFY_INSTRUCTION:
+        case instruction::PROFILE_START_INSTRUCTION:
+        case instruction::PROFILE_STOP_INSTRUCTION:
+        case instruction::ASSERTION_INSTRUCTION:
+	          p=((Breakpoint_Instruction *)p)->replaced;
+                  break;
+        }
 
     }
     return 0;

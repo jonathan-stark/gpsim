@@ -58,6 +58,7 @@ protected:
   Processor *cpu;             /// The processor to which this object belongs
 };
 
+
 //---------------------------------------------------------
 /// The ProgramMemoryAccess class is the interface used
 /// by objects other than the simulator to manipulate the 
@@ -80,7 +81,7 @@ class ProgramMemoryAccess :  public MemoryAccess
 
   instruction &operator [] (unsigned int address);
 
-  void put(unsigned int addr, instruction *new_instruction);
+  virtual void put(unsigned int addr, instruction *new_instruction);
   instruction *get(unsigned int addr);
   instruction *get_base_instruction(unsigned int addr);
   unsigned int get_opcode(unsigned int addr);
@@ -337,6 +338,7 @@ public:
 
   /// Program memory interface
   ProgramMemoryAccess  *pma;
+  virtual ProgramMemoryAccess * createProgramMemoryAccess(Processor *processor);
 
   /// register memory interface
   RegisterMemoryAccess rma;
