@@ -27,12 +27,16 @@ Boston, MA 02111-1307, USA.  */
 #include "modules.h"
 #include "processor.h"
 
-#include "pic-registers.h"
+//#include "pic-registers.h"
 
-#include "pic-instructions.h"
+//#include "pic-instructions.h"
 #include "14bit-registers.h"
 
 class EEPROM;
+class instruction;
+class Register;
+class sfr_register;
+class pic_register;
 
 extern SIMULATION_MODES simulation_mode;
 

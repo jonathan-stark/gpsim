@@ -22,21 +22,23 @@ Boston, MA 02111-1307, USA.  */
 // symbol.h
 //
 
+#include <iostream>
 #include <string>
 #include "gpsim_classes.h"
-#include "14bit-processors.h"
-#include "icd.h"
 
+using namespace std;
 
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
+class pic_processor;
 int load_symbol_file(pic_processor **, const char *);
 void display_symbol_file_error(int);
 
-#include "gpsim_interface.h"
-/*enum SYMBOL_TYPE
+//#include "gpsim_interface.h"
+enum SYMBOL_TYPE
 {
+  SYMBOL_INVALID,
   SYMBOL_BASE_CLASS,
   SYMBOL_IOPORT,
   SYMBOL_STIMULUS_NODE,
@@ -44,11 +46,20 @@ void display_symbol_file_error(int);
   SYMBOL_LINE_NUMBER,
   SYMBOL_CONSTANT,
   SYMBOL_REGISTER,
-  SYMBOL_ADDRESS
-};*/
+  SYMBOL_ADDRESS,
+  SYMBOL_SPECIAL_REGISTER,   // like W
+  SYMBOL_PROCESSOR,
+  SYMBOL_MODULE
+};
+
 
 class stimulus;
 class Stimulus_Node;
+class WREG;
+class IOPORT;
+class Processor;
+class Register;
+class Module;
 
 class symbol_type
 {
@@ -58,6 +69,25 @@ public:
 };
 
 extern symbol_type symbol_types[];
+
+class symbol
+{
+public:
+
+  string name_str;
+
+  Module *cpu;
+
+  virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
+  char * type_name(void) { return symbol_types[isa()].name_str;};
+  string *name(void) { return &name_str;};
+  void new_name(string *new_name_str) {name_str = *new_name_str;};
+  virtual void print(void);
+  virtual int get_value(void){return 0;};
+  virtual void put_value(int i) {;};
+  symbol(void);
+
+};
 
 class Symbol_Table
 {
@@ -86,24 +116,6 @@ public:
 
 extern Symbol_Table symbol_table;
 
-class symbol
-{
-public:
-
-  string name_str;
-
-  Module *cpu;
-
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
-  char * type_name(void) { return symbol_types[isa()].name_str;};
-  string *name(void) { return &name_str;};
-  void new_name(string *new_name_str) {name_str = *new_name_str;};
-  virtual void print(void);
-  virtual int get_value(void){return 0;};
-  virtual void put_value(int i) {;};
-  symbol(void);
-
-};
 
 
 class constant_symbol : public symbol
@@ -112,9 +124,7 @@ public:
 
   int val;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
-  virtual void print(void) {
-    cout << *name() << " = 0x" << hex << val <<'\n';
-  }
+  virtual void print(void);
   virtual int get_value(void){return val;};
 };
 
@@ -125,7 +135,7 @@ public:
 
   IOPORT *ioport;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
-  virtual void put_value(int new_value) { if(ioport) ioport->put_value(new_value);};
+  virtual void put_value(int new_value);
 };
 
 class node_symbol : public symbol
@@ -145,14 +155,8 @@ public:
   Register *reg;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual void print(void);
-  virtual int get_value(void) {
-    if(reg)
-      return reg->address;
-  }
-  virtual void put_value(int new_value) {
-    if(reg)
-      reg->put_value(new_value);
-  };
+  virtual int get_value(void);
+  virtual void put_value(int new_value);
 };
 
 class stimulus_symbol : public symbol
@@ -169,9 +173,7 @@ public:
   int val;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
-  virtual void print(void) {
-    cout << *name() << " at address 0x" << hex << val <<'\n';
-  }
+  virtual void print(void);
   virtual int get_value(void){return val;};
 
 };
@@ -193,13 +195,7 @@ class line_number_symbol : public symbol
 class module_symbol : public symbol
 {
  public:
-  virtual void print(void) {
-    if(cpu) {
-      cout << cpu->type() << "  named ";
-    }
-    cout << *name() << '\n';
-  }
-      
+  virtual void print(void);      
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
 
 };
@@ -213,17 +209,9 @@ class w_symbol : public symbol
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
 
-  virtual void print(void) {
-    if(cpu)
-      cout << w->name() << hex << " = 0x" << w->get_value() <<'\n';
-  }
-  virtual int get_value(void) {
-    return w->value;
-  }
+  virtual void print(void);
+  virtual int get_value(void);
+  virtual void put_value(int new_value);
 
-  virtual void put_value(int new_value) {
-    if(w)
-      w->put_value(new_value);
-  };
 };
 #endif  //  __SYMBOL_H__

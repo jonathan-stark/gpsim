@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 #include "../src/symbol.h"
 #include "../src/trace.h"
+#include "../src/ioports.h"
 
 class Resistor;
 

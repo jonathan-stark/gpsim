@@ -32,12 +32,13 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
-#include "../config.h"
-#include "symbol.h"
+//#include "../config.h"
 
 #include "stimuli.h"
 
 #include "p16f62x.h"
+
+#include "symbol.h"
 
 CMCON::CMCON(void)
 {

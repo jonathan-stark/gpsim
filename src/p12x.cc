@@ -33,9 +33,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "packages.h"
 #include "stimuli.h"
-#include "symbol.h"
 
 #include "p12x.h"
+
+#include "symbol.h"
 
 
 
@@ -167,7 +168,7 @@ Processor * P12C508::construct(void)
 
   cout << " 12c508 construct\n";
 
-  p->pc->reset_address = 0x1ff;
+  p->pc->set_reset_address(0x1ff);
 
   p->create();
   p->pic_processor::create_symbols();
@@ -205,7 +206,7 @@ Processor * P12C509::construct(void)
 
   cout << " 12c508 construct\n";
 
-  p->pc->reset_address = 0x3ff;
+  p->pc->set_reset_address(0x3ff);
 
   p->create();
   p->pic_processor::create_symbols();

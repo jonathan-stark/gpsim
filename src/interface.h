@@ -32,22 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 #include "modules.h"
-//#include "symbol.h"
-enum SYMBOL_TYPE
-{
-  SYMBOL_INVALID,
-  SYMBOL_BASE_CLASS,
-  SYMBOL_IOPORT,
-  SYMBOL_STIMULUS_NODE,
-  SYMBOL_STIMULUS,
-  SYMBOL_LINE_NUMBER,
-  SYMBOL_CONSTANT,
-  SYMBOL_REGISTER,
-  SYMBOL_ADDRESS,
-  SYMBOL_SPECIAL_REGISTER,   // like W
-  SYMBOL_PROCESSOR,
-  SYMBOL_MODULE
-};
+#include "symbol.h"
 
 typedef enum _REGISTER_TYPE
 {

@@ -177,9 +177,7 @@ public:
 
   int processor_id;              // An identifier to differentiate this instantiation from others
 
-#ifdef HAVE_GUI
   GUI_Processor *gp;
-#endif
 
   double frequency,period;     // Oscillator frequency and period.
 

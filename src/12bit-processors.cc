@@ -23,8 +23,6 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 
 #include "../config.h"
-//#include "14bit-registers.h"
-//#include "14bit-instructions.h"
 #include "12bit-processors.h"
 
 #include <string>
@@ -37,7 +35,6 @@ extern unsigned int config_word;
 _12bit_processor::_12bit_processor(void)
 {
   pc = new Program_Counter();
-
 }
 
 void _12bit_processor::create_symbols(void)
