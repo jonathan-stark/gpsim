@@ -120,7 +120,7 @@ public:
 
   CALL(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *str);
+  virtual char *name(char *str,int len);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CALL(new_cpu,new_opcode);}
@@ -133,7 +133,7 @@ public:
 
   CLRF(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *str);
+  virtual char *name(char *str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CLRF(new_cpu,new_opcode);}
 };
@@ -206,7 +206,7 @@ public:
 
   GOTO(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *str);
+  virtual char *name(char *str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new GOTO(new_cpu,new_opcode);}
 
@@ -293,7 +293,7 @@ public:
 
   MOVWF(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *str);
+  virtual char *name(char *str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new MOVWF(new_cpu,new_opcode);}
 
@@ -408,7 +408,7 @@ public:
 
   TRIS(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *str);
+  virtual char *name(char *str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TRIS(new_cpu,new_opcode);}
 

@@ -315,7 +315,6 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 	cout << "stimulus command got the phase " << n << '\n';
 
       last_stimulus->put_phase(n);
-      //stimorb_phase( n);
       break;
 
     case STIM_PERIOD:
@@ -323,7 +322,6 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 	cout << "stimulus command got the period " << n << '\n';
 
       last_stimulus->put_period(n);
-      //stimorb_period( n);
       break;
 
     case STIM_HIGH_TIME:
@@ -331,7 +329,6 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 	cout << "stimulus command got the high_time " << n << '\n';
 
       last_stimulus->put_duty(n);
-      //stimorb_duty( n);
       break;
 
     case STIM_INITIAL_STATE:
@@ -339,7 +336,6 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 	cout << "stimulus command got the initial_state " << n << '\n';
 
       last_stimulus->put_initial_state(n);
-      //stimorb_initial_state( n);
       break;
 
     case STIM_START_CYCLE:
@@ -347,7 +343,6 @@ void cmd_stimulus::stimulus(cmd_options_float *cof)
 	cout << "stimulus command got the start_cycle " << n << '\n';
 
       last_stimulus->put_start_cycle(n);
-      //stimorb_start_cycle( n);
       break;
 
     default:
@@ -374,8 +369,8 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
       if(verbose)
 	cout << "stimulus command got the name " << cos->str << '\n';
 
-      last_stimulus->put_name(cos->str);
-      //stimorb_name(cos->str);
+      last_stimulus->new_name(cos->str);
+
       break;
     case STIM_PORT:
       cout << "the port option has been deprecated\n";
@@ -386,19 +381,9 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
 
 void cmd_stimulus::data_point(guint64 new_data_point)
 {
-  //StimulusDataType *sdt;
-
-  //sdt = (StimulusDataType *)malloc(sizeof(StimulusDataType));
 
   if(verbose)
     cout << "stimulus command got integer data\n";
-
-
-  //sdt->data_type    = STIMULUS_DPT_INT;
-  //sdt->data_point.i = new_data_point;
-
-  //data_array = g_slist_append(data_array, sdt);
-  //temp_array.push_back(sdt);
 
   if(last_stimulus)
     last_stimulus->put_data(new_data_point);
@@ -408,16 +393,8 @@ void cmd_stimulus::data_point(guint64 new_data_point)
 }
 void cmd_stimulus::data_point(float new_data_point)
 {
-  //  StimulusDataType sdt;
-
   if(verbose)
     cout << "stimulus command got got float data\n";
-
-  //sdt.data_type    = STIMULUS_DPT_FLOAT;
-  //sdt.data_point.f = new_data_point;
-
-  //temp_array.push_back(sdt);
-
 
   if(last_stimulus)
     last_stimulus->put_data(new_data_point);
@@ -447,8 +424,6 @@ void cmd_stimulus::end(void)
       break;
 
     case STIM_ASY:
-      //if(have_data)
-      //stimorb_asy(digital, cpu, temp_array );
       if(verbose)
 	cout << "created asy stimulus\n";
       last_stimulus->start();

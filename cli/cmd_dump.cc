@@ -88,12 +88,12 @@ void cmd_dump::dump_sfrs(void)
 	  }
 
 	printf("%03x  %s = %02x", cpu->registers[i]->address,
-	       cpu->registers[i]->name(),
+	       cpu->registers[i]->name().c_str(),
 	       cpu->registers[i]->get_value());
 
 	// Align the columns by printing spaces 
 
-	int l = MAX_SFR_NAME - strlen(cpu->registers[i]->name());
+	int l = MAX_SFR_NAME - strlen(cpu->registers[i]->name().c_str());
 	for(int k=0; k<l; k++)
 	  putchar(' ');
       }
@@ -206,7 +206,7 @@ void cmd_dump::dump(int mem_type)
 
     pic_processor *pic = dynamic_cast<pic_processor *>(cpu);
     if(pic)
-      printf("\n%s = %02x\n",pic->W->name(), pic->W->get_value());
+      printf("\n%s = %02x\n",pic->W->name().c_str(), pic->W->get_value());
 
     printf("pc = 0x%x\n",cpu->pc->value);
   }

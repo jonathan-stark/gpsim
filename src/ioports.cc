@@ -343,8 +343,7 @@ void IOPORT::put_value(unsigned int new_value)
 
   //  cout << " IOPORT::put_value just set port value to " << value << '\n';
 
-  if(xref)
-    xref->update();
+  update();
 
   // Find the pins that have changed states
   diff = (old_value ^ value.get()) & valid_iopins;
@@ -352,14 +351,8 @@ void IOPORT::put_value(unsigned int new_value)
   // Update the cross references for each pin that has changed.
   for(i=0,j=1; i<8; i++,j<<=1) {
 
-    if(j & diff ) {
-
-      if(pins[i]->xref) {
-	pins[i]->xref->update();
-	//cout << " IOPORT::put_value updating pin # " << i << '\n';
-      }
-
-    }
+    if(j & diff )
+      pins[i]->update();
 
   }
 
@@ -395,11 +388,8 @@ void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
 
   if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
   {
-  //  cout << " IOPORT::setbit_value bit " << bit_number << " to " << new_value << '\n';
     put_value(value.get() ^ bit_mask);
-    //cout << "     is changing\n";
-    if(xref)
-      xref->update();
+    update();
   }
 
 }
@@ -630,10 +620,8 @@ void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
     value.put(value.get() ^ diff);
 
     trace.register_write(address,value.get());
-    if(xref)
-      xref->update();
-    if(port->pins[bit_number]->xref)
-      port->pins[bit_number]->xref->update();
+    update();
+    port->pins[bit_number]->update();
 
   }
 
@@ -654,19 +642,12 @@ void IOPORT_TRIS::put_value(unsigned int new_value)
  
   put(new_value);
 
+  update();
 
-  if(xref)
-    xref->update();
+  port->update();
 
-  //port->put_value(port->internal_latch);
-
-  if(port->xref)           // The I/O pins have changed states
-    port->xref->update();  // so tell the gui.
-
-  for(int i=0; i<port->num_iopins; i++) {
-    if(port->pins[i] && port->pins[i]->xref)
-      port->pins[i]->xref->update();
-  }
+  for(int i=0; i<port->num_iopins; i++)
+    port->pins[i]->update();
 
 }
 
@@ -736,9 +717,7 @@ void IOPORT_LATCH::put_value(unsigned int new_value)
  
   put(new_value);
   port->put(new_value);
-
-  if(xref)
-    xref->update();
+  update();
 
 }
 

@@ -28,16 +28,15 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #endif
 
-class XrefObject;
-class Processor;
+#include "value.h"
+
 class Register;
-class Processor;
 
 /*
  *  base class for an instruction
  */
 
-class instruction
+class instruction : public gpsimValue
 {
 public:
 
@@ -70,10 +69,8 @@ public:
   };
 
 
-  char name_str[20];      /* %%% FIX ME %%% dyanmically allocate? */
+  //char name_str[20];      /* %%% FIX ME %%% dynamically allocate? */
   unsigned int opcode;
-  Processor *cpu;     /* A pointer to the microcontroller to which this
-                           *  instruction belongs  */
   int file_id;            /* The source file that declared this instruction
 			   * (The file_id is an index into an array of files) */
   int hll_file_id;        /* The hll source file that declared this instruction */
@@ -82,18 +79,20 @@ public:
   int hll_src_line;       /* The line number within the HLL source file */
 
   instruction(void);
-  virtual void execute(void){ };
-  virtual void debug(void){ };
-  virtual char *name(char *str){ return(name_str);};
-  virtual int instruction_size(void) { return 1;};
-  virtual unsigned int get_opcode(void) { return opcode; };
-  virtual int get_src_line(void) { return(src_line); };
-  virtual int get_hll_src_line(void) { return(hll_src_line); };
-  virtual int get_lst_line(void) { return(lst_line); };
-  virtual int get_file_id(void) {return(file_id); };
-  virtual int get_hll_file_id(void) {return(hll_file_id); };
-  virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;};
-  void decode(Processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;};
+  virtual void execute(void){ }
+  virtual void debug(void){ }
+  //virtual char *name(char *str){ return(name_str);}
+  virtual int instruction_size(void) { return 1;}
+  virtual unsigned int get_opcode(void) { return opcode; }
+  virtual unsigned int get_value(void) { return opcode; }
+  virtual void put_value(unsigned int new_value) { }
+  virtual int get_src_line(void) { return(src_line); }
+  virtual int get_hll_src_line(void) { return(hll_src_line); }
+  virtual int get_lst_line(void) { return(lst_line); }
+  virtual int get_file_id(void) {return(file_id); }
+  virtual int get_hll_file_id(void) {return(hll_file_id); }
+  virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;}
+  void decode(Processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;}
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
@@ -108,12 +107,6 @@ public:
 
   guint64 cycle_count; // Nr of cycles used up by this instruction
 
-
-  // xref - a Cross reference object.
-  // External applications like the gui can register call back functions
-  // through the xref object. 
-
-  XrefObject *xref;
 
 };
 
@@ -132,7 +125,7 @@ public:
 
   invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
   virtual INSTRUCTION_TYPES isa(void) {return INVALID_INSTRUCTION;};
-  virtual char *name(char *str){return("INVALID");};
+  //virtual char *name(char *str){return("INVALID");};
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new invalid_instruction(new_cpu,new_opcode);}
 
@@ -146,7 +139,7 @@ public:
 
   virtual void execute(void){ };
   virtual void debug(void){ };
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode)
     {
@@ -167,7 +160,7 @@ public:
 
   virtual void execute(void){ };
   virtual void debug(void){ };
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 
@@ -187,7 +180,7 @@ public:
 
   virtual void execute(void){ };
   virtual void debug(void){ };
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 

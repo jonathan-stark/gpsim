@@ -28,10 +28,6 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "interface.h"
 
-//#include <string>
-//#include "stimuli.h"
-
-#include "xref.h"
 
 //--------------------------------------------------
 void WDT::update(void)
@@ -179,9 +175,6 @@ Program_Counter::Program_Counter(void)
   reset_address = 0;
   value = 0;
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
-
-  xref = new XrefObject(&value);
-
 
 }
 
@@ -342,16 +335,9 @@ void Program_Counter::put_value(unsigned int new_value)
 
   trace.program_counter(value);
 
-  if(xref)
-    {
-      if(cpu_pic->pcl->xref)
-	cpu_pic->pcl->xref->update();
-      if(cpu_pic->pclath->xref)
-	cpu_pic->pclath->xref->update();
-	xref->update();
-    }
-  
-
+  cpu_pic->pcl->update();
+  cpu_pic->pclath->update();
+  update();
 }
 
 void Program_Counter::reset(void)

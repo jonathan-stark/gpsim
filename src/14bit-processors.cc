@@ -65,7 +65,7 @@ void _14bit_processor :: create (void)
   fsr = new FSR;
   fsr->new_name("fsr");
 
-  tmr0.cpu = this;
+  tmr0.set_cpu(this);
   tmr0.start(0);
 
 }

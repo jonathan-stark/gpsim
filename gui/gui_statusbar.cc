@@ -484,7 +484,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
    * send information back to the gui
    */
 
-  if(gp->cpu && gp->cpu->pc && gp->cpu->pc->xref) {
+  if(gp->cpu && gp->cpu->pc) {
     StatusBarXREF *cross_reference;
 
     cross_reference = new StatusBarXREF();
@@ -492,7 +492,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
   
-    gp->cpu->pc->xref->add((gpointer) cross_reference);
+    gp->cpu->pc->add_xref((gpointer) cross_reference);
 
   }
 

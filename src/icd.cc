@@ -72,85 +72,115 @@ static int icd_sync(void);
 class icd_Register : public Register
 {
 public:
-    Register *replaced;
-    int is_stale;
+  Register *replaced;
+  int is_stale;
 
-    icd_Register();
+  icd_Register();
 
-    virtual REGISTER_TYPES isa(void) {return replaced->isa();};
-    virtual char *name(void) {return replaced->name();};
+  virtual REGISTER_TYPES isa(void) {return replaced->isa();};
+  virtual string &name(void)
+  {
+    if(replaced)
+      return replaced->name();
+    else
+      return gpsimValue::name();
+  };
 
-    virtual void put_value(unsigned int new_value);
-    virtual void put(unsigned int new_value);
-    virtual unsigned int get_value(void);
-    virtual unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get(void);
 };
 
 class icd_StatusReg : public Status_register
 {
 public:
-    Status_register *replaced;
-    int is_stale;
+  Status_register *replaced;
+  int is_stale;
 
-    icd_StatusReg();
+  icd_StatusReg();
 
-    virtual REGISTER_TYPES isa(void) {return replaced->isa();};
-    virtual char *name(void) {return replaced->name();};
+  virtual REGISTER_TYPES isa(void) {return replaced->isa();};
+  virtual string &name(void)
+  {
+    if(replaced)
+      return replaced->name();
+    else
+      return gpsimValue::name();
+  }
 
-    virtual void put_value(unsigned int new_value);
-    virtual void put(unsigned int new_value);
-    virtual unsigned int get_value(void);
-    virtual unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get(void);
 };
 
 class icd_WREG : public WREG
 {
 public:
-    WREG *replaced;  
-    int is_stale;
+  WREG *replaced;  
+  int is_stale;
 
-    icd_WREG();
+  icd_WREG();
 
-    virtual REGISTER_TYPES isa(void) {return replaced->isa();};
-    virtual char *name(void) {return replaced->name();};
+  virtual REGISTER_TYPES isa(void) {return replaced->isa();};
+  virtual string &name(void)
+  {
+    if(replaced)
+      return replaced->name();
+    else
+      return gpsimValue::name();
+  }
 
-    virtual void put_value(unsigned int new_value);
-    virtual void put(unsigned int new_value);
-    virtual unsigned int get_value(void);
-    virtual unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get(void);
 };
 
 class icd_PCLATH : public PCLATH
 {
 public:
-    PCLATH *replaced;
-    int is_stale;
+  PCLATH *replaced;
+  int is_stale;
 
-    icd_PCLATH();
+  icd_PCLATH();
 
-    virtual REGISTER_TYPES isa(void) {return replaced->isa();};
-    virtual char *name(void) {return replaced->name();};
+  virtual REGISTER_TYPES isa(void) {return replaced->isa();};
+  virtual string &name(void)
+  {
+    if(replaced)
+      return replaced->name();
+    else
+      return gpsimValue::name();
+  }
 
-    virtual void put_value(unsigned int new_value);
-    virtual void put(unsigned int new_value);
-    virtual unsigned int get_value(void);
-    virtual unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get(void);
 };
 class icd_FSR : public FSR
 {
 public:
-    FSR *replaced;   
-    int is_stale;
+  FSR *replaced;   
+  int is_stale;
 
-    icd_FSR();
+  icd_FSR();
 
-    virtual REGISTER_TYPES isa(void) {return replaced->isa();};
-    virtual char *name(void) {return replaced->name();};
+  virtual REGISTER_TYPES isa(void) {return replaced->isa();};
+  virtual string &name(void)
+  {
+    if(replaced)
+      return replaced->name();
+    else
+      return gpsimValue::name();
+  }
 
-    virtual void put_value(unsigned int new_value);
-    virtual void put(unsigned int new_value);
-    virtual unsigned int get_value(void);
-    virtual unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get(void);
 };
 
 class icd_PC : public Program_Counter
@@ -397,58 +427,52 @@ void put_dumb_register(Register **frp, int address)
 {
     Register *fr = *frp;
     icd_Register *ir = new icd_Register;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
     ir->address = address;
-    ir->xref = fr->xref;
 }
 void put_dumb_status_register(Status_register **frp)
 {
     Status_register *fr = *frp;
     icd_StatusReg *ir = new icd_StatusReg;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
     ir->address = fr->address;
-    ir->xref = fr->xref;
 }
 void put_dumb_pc_register(Program_Counter **frp)
 {
     Program_Counter *fr = *frp;
     icd_PC *ir = new icd_PC;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     ir->memory_size_mask = fr->memory_size_mask;
     *frp = ir;
     ir->replaced = fr;
-    ir->xref = fr->xref;
 }
 void put_dumb_pclath_register(PCLATH **frp)
 {
     PCLATH *fr = *frp;
     icd_PCLATH *ir = new icd_PCLATH;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
-    ir->xref = fr->xref;
 }
 void put_dumb_w_register(WREG **frp)
 {
     WREG *fr = *frp;
     icd_WREG *ir = new icd_WREG;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
-    ir->xref = fr->xref;
 }
 void put_dumb_fsr_register(FSR **frp)
 {
     FSR *fr = *frp;
     icd_FSR *ir = new icd_FSR;
-    ir->cpu = fr->cpu;
+    ir->set_cpu(fr->get_cpu());
     *frp = ir;
     ir->replaced = fr;
-    ir->xref = fr->xref;
 }
 
 static void create_dumb_register_file(void)
@@ -919,14 +943,12 @@ unsigned int icd_Register::get(void)
 	case 3:
 	    value.put(icd_cmd("$$7016\r")&0x00ff);
 	    is_stale=0;
-	    if(xref)
-		xref->update();
+	    replaced->update();
 	    break;
 	case 4:
 	    value.put(icd_cmd("$$7019\r")&0x00ff);
 	    is_stale=0;
-	    if(xref)
-		xref->update();
+	    replaced->update();
 	    break;
 	case 10:
 	    value.put(icd_cmd("$$701F\r"));
@@ -975,8 +997,7 @@ unsigned int icd_Register::get(void)
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
 			    assert(ifr!=0);
-			    if(ifr->xref)
-				ifr->xref->update();
+			    ifr->replaced->update();
 			    break;
 			}
 		    }
@@ -1020,8 +1041,7 @@ unsigned int icd_Register::get(void)
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
 			    assert(ifr!=0);
-			    if(ifr->xref)
-				ifr->xref->update();
+			    ifr->replaced->update();
 			    break;
 			}
 		    }
@@ -1059,8 +1079,7 @@ unsigned int icd_WREG::get(void)
     {
 	value.put(icd_cmd("$$7017\r")&0x00ff);
 	is_stale=0;
-	if(xref)
-	    xref->update();
+	replaced->update();
     }
     return(value.get());
 }
@@ -1093,8 +1112,7 @@ unsigned int icd_StatusReg::get(void)
     {
 	value.put(icd_cmd("$$7016\r")&0x00ff);
 	is_stale=0;
-	if(xref)
-	    xref->update();
+	replaced->update();
     }
     return(value.get());
 }
@@ -1126,8 +1144,7 @@ unsigned int icd_FSR::get_value(void)
     {
 	value.put(icd_cmd("$$7019\r")&0x00ff);
 	is_stale=0;
-	if(xref)
-	    xref->update();
+	replaced->update();
     }
     return(value.get());
 }
@@ -1159,8 +1176,7 @@ unsigned int icd_PCLATH::get_value(void)
     {
 	value.put((icd_cmd("$$701F\r")&0xff00)>>8);
 	is_stale=0;
-	if(xref)
-	    xref->update();
+	replaced->update();
     }
     return(value.get());
 }

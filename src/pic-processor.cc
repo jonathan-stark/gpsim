@@ -48,10 +48,6 @@ Boston, MA 02111-1307, USA.  */
 #include "p18x.h"
 #include "icd.h"
 
-//#include "16bit-instructions.h" // this is only needed for pma class
-
-#include "xref.h"
-
 #include "fopen-path.h"
 
 extern SIMULATION_MODES simulation_mode;
@@ -824,12 +820,12 @@ void pic_processor::create (void)
   create_stack();
 
   // Now, initialize the core stuff:
-  pc->cpu = this;
+  pc->set_cpu(this);
   //  cycles.cpu = this;
   wdt.cpu = this;
 
   W = new WREG;
-  W->cpu=this;
+  W->set_cpu(this);
   pcl = new PCL;
   pclath = new PCLATH;
   status = new Status_register;
@@ -868,7 +864,7 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
 				      unsigned int por_value, char *new_name)
 {
 
-  reg->cpu         = this;
+  reg->set_cpu(this);
   if(addr < register_memory_size())
     {
       registers[addr] = reg;
@@ -927,7 +923,7 @@ void pic_processor::create_symbols (void)
     {
       switch (registers[i]->isa()) {
       case Register::SFR_REGISTER:
-	if(!symbol_table.find(registers[i]->name()))
+	if(!symbol_table.find((char *)registers[i]->name().c_str()))
 	  symbol_table.add_register(this, registers[i]);
       }
     }
@@ -1029,38 +1025,6 @@ bool pic_processor::load_hex (const char *hex_file)
 
 
 //-------------------------------------------------------------------
-int pic_processor::get_pin_count(void)
-{
-  if(package) 
-    return package->get_pin_count();
-  else
-    return 0;
-}
-
-char *pic_processor::get_pin_name(unsigned int pin_number)
-{
-  if(package) 
-    return package->get_pin_name(pin_number);
-  else
-    return 0;
-}
-
-int pic_processor::get_pin_state(unsigned int pin_number)
-{
-  if(package) 
-    return package->get_pin_state(pin_number);
-  else
-    return 0;
-}
-
-IOPIN *pic_processor::get_pin(unsigned int pin_number)
-{
-  if(package)
-    return package->get_pin(pin_number);
-  else
-    return 0;
-}
-
 //-------------------------------------------------------------------
 //  ConfigMode
 //

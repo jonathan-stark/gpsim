@@ -33,7 +33,7 @@ ADDLW::ADDLW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
-  sprintf(name_str,"%s","addlw");
+  new_name("addlw");
 
 }
 
@@ -61,7 +61,7 @@ RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","retfie");
+  new_name("retfie");
 
 }
 
@@ -82,7 +82,7 @@ RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","return");
+  new_name("return");
 
 }
 
@@ -102,7 +102,7 @@ SUBLW::SUBLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","sublw");
+  new_name("sublw");
 
 }
 

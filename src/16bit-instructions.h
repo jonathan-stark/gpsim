@@ -48,7 +48,7 @@ public:
 
   virtual void execute(void){ };
   virtual void debug(void){ };
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 
@@ -76,7 +76,7 @@ class multi_word_branch : public multi_word_instruction
 
   void runtime_initialize(void);
   virtual void execute(void){};
-  char *name(char *str);
+  virtual char *name(char *,int);
 
 };
 
@@ -233,7 +233,7 @@ public:
 
   BRA(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new BRA(new_cpu,new_opcode);}
 };
@@ -274,7 +274,7 @@ public:
   virtual void execute(void);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CALL16(new_cpu,new_opcode);}
-  char *name(char *str);
+  virtual char *name(char *,int);
 
 };
 
@@ -458,7 +458,7 @@ public:
   virtual void execute(void);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new LCALL16(new_cpu,new_opcode);}
-  char *name(char *str);
+  virtual char *name(char *,int);
 
 };
 
@@ -471,7 +471,7 @@ public:
 
   LFSR(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   void runtime_initialize(void);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
@@ -499,7 +499,7 @@ public:
 
   MOVFF(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   void runtime_initialize(void);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
@@ -515,7 +515,7 @@ public:
 
   MOVFP(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   void runtime_initialize(void);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
@@ -555,7 +555,7 @@ public:
 
   MOVPF(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   void runtime_initialize(void);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
@@ -672,7 +672,7 @@ public:
 
   RCALL(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  char *name(char *return_str);
+  virtual char *name(char *,int);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RCALL(new_cpu,new_opcode);}
 };
@@ -703,7 +703,7 @@ public:
       fast = (new_opcode & 1);
     };
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETFIE16(new_cpu,new_opcode);}
@@ -723,7 +723,7 @@ public:
       fast = (new_opcode & 1);
     };
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETURN16(new_cpu,new_opcode);}
@@ -875,7 +875,7 @@ public:
 
   TBLRD(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TBLRD(new_cpu,new_opcode);}
@@ -889,7 +889,7 @@ public:
 
   TBLWT(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TBLWT(new_cpu,new_opcode);}
@@ -903,7 +903,7 @@ public:
 
   TLRD(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TLRD(new_cpu,new_opcode);}
@@ -917,7 +917,7 @@ public:
 
   TLWT(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int);
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TLWT(new_cpu,new_opcode);}

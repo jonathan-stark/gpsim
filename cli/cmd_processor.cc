@@ -58,7 +58,7 @@ void dump_pins(Processor *cpu)
 
   for(i=1; i<=number_of_pins/2; i++)
     {
-      char *s = cpu->get_pin_name(i);
+      const char *s = cpu->get_pin_name(i).c_str();
       if(s)
 	if( (j=strlen(s)) > longest_name)
 	  longest_name = j;
@@ -75,11 +75,13 @@ void dump_pins(Processor *cpu)
     {
 
 
-      if(cpu->get_pin_name(i))
+      const char *s = cpu->get_pin_name(i).c_str();
+
+      if(s)
 	{
 	  putchar( (cpu->get_pin_state(i)>0) ? 'H' : 'L');
-	  printf(" |%2d| %s",i,  cpu->get_pin_name(i));
-	  put_chars(' ',longest_name - strlen(cpu->get_pin_name(i)) + 6 );
+	  printf(" |%2d| %s",i,  s);
+	  put_chars(' ',longest_name - strlen(cpu->get_pin_name(i).c_str()) + 6 );
 	}
       else
 	{
@@ -88,9 +90,10 @@ void dump_pins(Processor *cpu)
 	}
 
       j = number_of_pins-i+1;
-      if(cpu->get_pin_name(j))
+      s = cpu->get_pin_name(j).c_str();
+      if(s)
 	{
-	  printf("%s |%2d| ",  cpu->get_pin_name(j), j);
+	  printf("%s |%2d| ",  s, j);
 	  putchar( (cpu->get_pin_state(j)>0) ? 'H' : 'L');
 	  putchar('\n');
 	}

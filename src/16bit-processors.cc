@@ -281,7 +281,7 @@ void _16bit_processor :: create (void)
 
   intcon.set_rcon(&rcon);
   intcon.set_intcon2(&intcon2);
-  intcon.cpu = this;
+  intcon.set_cpu(this);
 
   tbl.initialize(this);
   tmr0l.start(0);

@@ -33,11 +33,6 @@ Boston, MA 02111-1307, USA.  */
 
 instruction::instruction(void)
 {
-#ifdef HAVE_GUI
-  xref = new XrefObject;
-#else
-  xref = 0;
-#endif
   is_modified = 0;
   cycle_count = 0;
   hll_file_id = 0;
@@ -62,6 +57,7 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
 {
   cpu=new_cpu;
   opcode=new_opcode;
+  new_name("INVALID");
 }
 
 void instruction::add_line_number_symbol(int address)
@@ -80,10 +76,11 @@ void instruction::update_line_number(int file, int sline, int lline, int hllfile
   hll_file_id = hllfile;
 }
 
-char * Literal_op::name(char *return_str)
+char * Literal_op::name(char *return_str,int len)
 {
 
-  sprintf(return_str,"%s\t0x%02x",name_str,L);
+  snprintf(return_str,len,"%s\t0x%02x",
+	   gpsimValue::name().c_str(),L);
 
   return(return_str);
 }
@@ -152,7 +149,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
 
 }
 
-char * Bit_op::name(char *return_str)
+char * Bit_op::name(char *return_str,int len)
 {
   //  %%% FIX ME %%% Actually just a slight dilemma - the source register will always be in
   //                 the lower bank of memory...
@@ -165,11 +162,11 @@ char * Bit_op::name(char *return_str)
     {
     case _16BIT_PROCESSOR_:
       bit = ((opcode >> 9) & 7);
-      sprintf(return_str,"%s\t%s,%d,%c",
-	      name_str,
-	      reg->name(), 
-	      bit,
-	      access ? '1' : '0');
+      snprintf(return_str,len,"%s\t%s,%d,%c",
+	       gpsimValue::name().c_str(),
+	       reg->name().c_str(), 
+	       bit,
+	       access ? '1' : '0');
 
       return(return_str);
       break;
@@ -186,7 +183,10 @@ char * Bit_op::name(char *return_str)
     }
 
 
-  sprintf(return_str,"%s\t%s,%d",name_str,reg->name(), bit);
+  snprintf(return_str,len,"%s\t%s,%d",
+	   gpsimValue::name().c_str(),
+	   reg->name().c_str(),
+	   bit);
 
   return(return_str);
 }
@@ -197,7 +197,7 @@ char * Bit_op::name(char *return_str)
 // Register_op::name
 //
 
-char * Register_op::name(char *return_str)
+char * Register_op::name(char *return_str,int len)
 {
   //  %%% FIX ME %%% Actually just a slight dilemma - the source register will always be in
   //                 the lower bank of memory (for the 12 and 14 bit cores).
@@ -205,13 +205,16 @@ char * Register_op::name(char *return_str)
   source = cpu->registers[register_address];
 
   if(cpu_pic->base_isa() != _16BIT_PROCESSOR_)
-    sprintf(return_str,"%s\t%s,%c",name_str,source->name(), destination ? 'f' : 'w');
+    snprintf(return_str,len,"%s\t%s,%c",
+	     gpsimValue::name().c_str(),
+	     source->name().c_str(),
+	     destination ? 'f' : 'w');
   else
-    sprintf(return_str,"%s\t%s,%c,%c",
-	    name_str,
-	    source->name(), 
-	    destination ? 'f' : 'w',
-	    access ? '1' : '0');
+    snprintf(return_str,len,"%s\t%s,%c,%c",
+	     gpsimValue::name().c_str(),
+	     source->name().c_str(), 
+	     destination ? 'f' : 'w',
+	     access ? '1' : '0');
 
   return(return_str);
 }
@@ -272,7 +275,7 @@ ADDWF::ADDWF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
-  sprintf(name_str,"%s","addwf");
+  new_name("addwf");
 
 }
 
@@ -308,7 +311,7 @@ ANDLW::ANDLW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
-  sprintf(name_str,"%s","andlw");
+  new_name("andlw");
 
 }
 
@@ -333,7 +336,7 @@ ANDWF::ANDWF (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
-  sprintf(name_str,"%s","andwf");
+  new_name("andwf");
 
 }
 
@@ -371,7 +374,7 @@ BCF::BCF (Processor *new_cpu, unsigned int new_opcode)
 
   mask ^= 0xff;        // decode initializes the mask to 1<<bit
 
-  sprintf(name_str,"%s","bcf");
+  new_name("bcf");
 
 }
 
@@ -398,7 +401,7 @@ BSF::BSF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","bsf");
+  new_name("bsf");
 
 }
 
@@ -426,7 +429,7 @@ BTFSC::BTFSC (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","btfsc");
+  new_name("btfsc");
 
 }
 
@@ -456,7 +459,7 @@ BTFSS::BTFSS (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","btfss");
+  new_name("btfss");
 
 }
 
@@ -498,7 +501,7 @@ CALL::CALL (Processor *new_cpu, unsigned int new_opcode)
       cout << "ERROR: (Bit_op) the processor has a bad base type\n";
     }
 
-  sprintf(name_str,"%s","call");
+  new_name("call");
 }
 
 void CALL::execute(void)
@@ -511,10 +514,12 @@ void CALL::execute(void)
 
 }
 
-char * CALL::name(char *return_str)
+char * CALL::name(char *return_str,int len)
 {
 
-  sprintf(return_str,"%s\t0x%04x",name_str,destination);
+  snprintf(return_str,len,"%s\t0x%04x",
+	   gpsimValue::name().c_str(),
+	   destination);
 
   return(return_str);
 }
@@ -525,7 +530,7 @@ CLRF::CLRF (Processor *new_cpu, unsigned int new_opcode)
 {
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","clrf");
+  new_name("clrf");
 }
 
 void CLRF::execute(void)
@@ -542,10 +547,12 @@ void CLRF::execute(void)
   cpu_pic->pc->increment();
 }
 
-char * CLRF::name(char *return_str)
+char * CLRF::name(char *return_str,int len)
 {
 
-  sprintf(return_str,"%s\t%s",name_str,cpu->registers[register_address]->name());
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -558,7 +565,7 @@ CLRW::CLRW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","clrw");
+  new_name("clrw");
 
 }
 
@@ -580,7 +587,7 @@ CLRWDT::CLRWDT (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","clrwdt");
+  new_name("clrwdt");
 
 }
 
@@ -614,7 +621,7 @@ COMF::COMF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","comf");
+  new_name("comf");
 
 }
 
@@ -650,7 +657,7 @@ DECF::DECF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","decf");
+  new_name("decf");
 
 }
 
@@ -686,7 +693,7 @@ DECFSZ::DECFSZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","decfsz");
+  new_name("decfsz");
 
 }
 
@@ -735,7 +742,7 @@ GOTO::GOTO (Processor *new_cpu, unsigned int new_opcode)
       cout << "ERROR: (Bit_op) the processor has a bad base type\n";
     }
 
-  sprintf(name_str,"%s","goto");
+  new_name("goto");
 }
 
 void GOTO::execute(void)
@@ -746,10 +753,11 @@ void GOTO::execute(void)
 
 }
 
-char * GOTO::name(char *return_str)
+char * GOTO::name(char *return_str,int len)
 {
 
-  sprintf(return_str,"%s\t0x%04x",name_str,destination);
+  snprintf(return_str,len,"%s\t0x%04x",
+	  gpsimValue::name().c_str(),destination);
 
   return(return_str);
 }
@@ -762,7 +770,7 @@ INCF::INCF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","incf");
+  new_name("incf");
 
 }
 
@@ -800,7 +808,7 @@ INCFSZ::INCFSZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","incfsz");
+  new_name("incfsz");
 
 }
 
@@ -837,7 +845,7 @@ IORLW::IORLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","iorlw");
+  new_name("iorlw");
 
 }
 
@@ -863,7 +871,7 @@ IORWF::IORWF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","iorwf");
+  new_name("iorwf");
 
 }
 
@@ -899,7 +907,7 @@ MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","movlw");
+  new_name("movlw");
 
 }
 
@@ -922,7 +930,7 @@ MOVF::MOVF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","movf");
+  new_name("movf");
 
 }
 
@@ -967,7 +975,7 @@ MOVWF::MOVWF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","movwf");
+  new_name("movwf");
 }
 
 void MOVWF::execute(void)
@@ -982,10 +990,12 @@ void MOVWF::execute(void)
   cpu_pic->pc->increment();
 }
 
-char * MOVWF::name(char *return_str)
+char * MOVWF::name(char *return_str, int len)
 {
 
-  sprintf(return_str,"%s\t%s",name_str,cpu->registers[register_address]->name());
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -997,7 +1007,7 @@ NOP::NOP (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu,new_opcode);
-  sprintf(name_str,"%s","nop");
+  new_name("nop");
 
   // For the 18cxxx family, this 'nop' may in fact be the
   // 2nd word in a 2-word opcode. So just to be safe, let's
@@ -1028,7 +1038,7 @@ OPTION::OPTION (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","option");
+  new_name("option");
 
 }
 
@@ -1050,7 +1060,7 @@ RETLW::RETLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","retlw");
+  new_name("retlw");
 
 }
 
@@ -1072,7 +1082,7 @@ RLF::RLF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","rlf");
+  new_name("rlf");
 
 }
 
@@ -1108,7 +1118,7 @@ RRF::RRF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","rrf");
+  new_name("rrf");
 
 }
 
@@ -1145,7 +1155,7 @@ SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","sleep");
+  new_name("sleep");
 
 }
 
@@ -1168,7 +1178,7 @@ SUBWF::SUBWF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","subwf");
+  new_name("subwf");
 
 }
 
@@ -1207,7 +1217,7 @@ SWAPF::SWAPF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","swapf");
+  new_name("swapf");
 
 }
 
@@ -1261,7 +1271,7 @@ TRIS::TRIS (Processor *new_cpu, unsigned int new_opcode)
      if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
        register_address |= 0x80;  // The destination register is the TRIS
   }
-  sprintf(name_str,"%s","tris");
+  new_name("tris");
 }
 
 void TRIS::execute(void)
@@ -1280,10 +1290,12 @@ void TRIS::execute(void)
   cpu_pic->pc->increment();
 }
 
-char * TRIS::name(char *return_str)
+char * TRIS::name(char *return_str,int len)
 {
 
-  sprintf(return_str,"%s\t%s",name_str,cpu->registers[register_address]->name());
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -1296,7 +1308,7 @@ XORLW::XORLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","xorlw");
+  new_name("xorlw");
 
 }
 
@@ -1322,7 +1334,7 @@ XORWF::XORWF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"%s","xorwf");
+  new_name("xorwf");
 
 }
 

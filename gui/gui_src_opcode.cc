@@ -1164,7 +1164,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
-  if(gp->cpu && gp->cpu->pc && gp->cpu->pc->xref) {
+  if(gp->cpu && gp->cpu->pc) {
     SourceOpcodeXREF *cross_reference;
 
     cross_reference = new SourceOpcodeXREF();
@@ -1172,7 +1172,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
   
-    gp->cpu->pc->xref->add((gpointer) cross_reference);
+    gp->cpu->pc->add_xref((gpointer) cross_reference);
 
   }
 

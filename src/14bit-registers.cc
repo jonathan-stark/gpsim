@@ -112,16 +112,8 @@ void  FSR::put_value(unsigned int new_value)
 
   put(new_value);
 
-  //#ifdef HAVE_GUI
-
-  if(xref)
-  {
-      xref->update();
-      if(cpu_pic->indf->xref)
-	cpu_pic->indf->xref->update();
-  }
-
-  //#endif
+  update();
+  cpu_pic->indf->update();
 
 
 }
@@ -164,17 +156,8 @@ void  FSR_12::put_value(unsigned int new_value)
 
   put(new_value);
 
-  //#ifdef HAVE_GUI
-
-  if(xref)
-  {
-      xref->update();
-      if(cpu_pic->indf->xref)
-	cpu_pic->indf->xref->update();
-  }
-
-  //#endif
-
+  update();
+  cpu_pic->indf->update();
 
 }
 
@@ -317,17 +300,11 @@ void INDF::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    {
-      xref->update();
-      int r = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
-	       ((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2);
-      if(r & fsr_mask) 
-	{
-	  if(cpu->registers[r]->xref)
-	    cpu->registers[r]->xref->update();
-	}
-    }
+  update();
+  int r = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
+	   ((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2);
+  if(r & fsr_mask) 
+    cpu->registers[r]->update();
 
 }
 

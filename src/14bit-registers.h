@@ -239,11 +239,11 @@ public:
 
   inline void put_Z_C_DC_OV_N_for_sub(unsigned int new_value, unsigned int src1, unsigned int src2)
     {
-      value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |  
+      value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |  
 	((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	((new_value & 0x100)  ? 0 : STATUS_C)   |
 	(((new_value ^ src1 ^ src2)&0x10) ? 0 : STATUS_DC) |
-	((src2 > src1) ? STATUS_N : 0) |
+	(((src1 & ~src2 & ~new_value | new_value & ~src1 & src2) & 0x80) ? STATUS_OV : 0) |
 	((new_value & 0x80)   ? STATUS_N : 0));
 
       get_trace().register_write(address,value.get());

@@ -106,6 +106,22 @@ public:
   virtual void print(void);
   virtual void clear(void);
   virtual char const * bpName() { return "Execution"; }
+  virtual void update(void)
+    {
+      if(replaced)
+	replaced->update();
+    }
+  virtual void add_xref(void *an_xref)
+    {
+      if(replaced)
+	replaced->add_xref(an_xref);
+    }
+  virtual void remove_xref(void *an_xref)
+    {
+      if(replaced)
+	replaced->remove_xref(an_xref);
+    }
+
 
   Breakpoint_Instruction(Processor *new_cpu, 
 			 unsigned int new_address, 
@@ -113,7 +129,7 @@ public:
 
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
-  virtual char *name(char *);
+  virtual char *name(char *,int len);
 
   string &message(void) {return message_str;}
   virtual void new_message(char *);
@@ -371,10 +387,12 @@ public:
   BreakpointRegister(Processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
-  virtual char *name(void)
+  virtual string &name(void)
     {
       if(replaced)
 	return replaced->name();
+      else
+	return gpsimValue::name();
     };
   /* direct all accesses to the member functions of the
    * register that is being replaced. Note that we assume
@@ -438,6 +456,24 @@ public:
   virtual bool hasBreak(void)
     { 
       return true;
+    }
+
+  virtual void update(void)
+    {
+      if(replaced)
+	replaced->update();
+    }
+
+  virtual void add_xref(void *an_xref)
+    {
+      if(replaced)
+	replaced->add_xref(an_xref);
+    }
+
+  virtual void remove_xref(void *an_xref)
+    {
+      if(replaced)
+	replaced->remove_xref(an_xref);
     }
 
   void replace(Processor *_cpu, unsigned int reg);

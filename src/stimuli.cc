@@ -33,7 +33,6 @@ Boston, MA 02111-1307, USA.  */
 #include "stimulus_orb.h"
 #include "symbol.h"
 #include "interface.h"
-#include "xref.h"
 
 list <Stimulus_Node *> node_list;
 list <Stimulus_Node *> :: iterator node_iterator;
@@ -73,8 +72,8 @@ Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
   for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
     {
       Stimulus_Node *t = *node_iterator;
-      string s(t->name_str);
-      if ( s == name)
+
+      if ( t->name() == name)
 	{
 	  //cout << "found it\n";
 	  return (t);
@@ -172,8 +171,8 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
        stimulus_iterator++)
     {
       stimulus *t = *stimulus_iterator;
-      string s(t->name_str);
-      if ( s == name)
+
+      if ( t->name() == name)
 	{
 	  //cout << "found it\n";
 	  return (t);
@@ -195,28 +194,27 @@ void remove_stimulus(stimulus * stimulus)
 
 void dump_stimulus_list(void)
 {
-	cout << "Stimulus List\n";
+  cout << "Stimulus List\n";
 
-	for (stimulus_iterator = stimulus_list.begin();  
-	     stimulus_iterator != stimulus_list.end(); 
-	     stimulus_iterator++)
-	{
+  for (stimulus_iterator = stimulus_list.begin();  
+       stimulus_iterator != stimulus_list.end(); 
+       stimulus_iterator++)
+    {
 
-		stimulus *t = *stimulus_iterator;
+      stimulus *t = *stimulus_iterator;
 
-		if(t)
-		{
-			cout << "stimulus ";
-			if(t->name())
-				cout << t->name();
+      if(t) {
+	cout << "stimulus ";
 
-			if(t->snode)
-				cout << " attached to " << t->snode->name();
+	cout << t->name();
 
-			cout << '\n';
-		}
-	}
-	cout << "returning from dump\n";
+	if(t->snode)
+	  cout << " attached to " << t->snode->name();
+
+	cout << '\n';
+      }
+    }
+  cout << "returning from dump\n";
 }
 
 
@@ -230,14 +228,14 @@ Stimulus_Node::Stimulus_Node(const char *n)
 
   if(n)
     {
-      strcpy(name_str,n);
+      new_name((char *)n);
     }
   else
     {
-      strcpy(name_str,"node   ");
-
-      // give the node a unique name
-      name_str[5] = num_nodes++;    // %%% FIX ME %%%
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"node%d",num_nodes);
+      num_nodes++;    // %%% FIX ME %%%
+      new_name(name_str);
     }
 
   add_node(this);
@@ -405,33 +403,22 @@ int Stimulus_Node::update(unsigned int current_time)
 
 stimulus::stimulus(char *n)
 {
-  strcpy(name_str,"stimulus");
+  new_name("stimulus");
 
   snode = 0;
   drive = 0;
   state = 0;
   digital_state = 0;
-  xref = 0;
   next = 0;
 
-
-  //cout << "stimulus\n";
-  xref = new XrefObject((unsigned int *)&state);
 }
 
 void stimulus::put_state_value(int new_state)
 {
   put_state(new_state);
-  if(xref) xref->update();
+  update();
 }
 
-void stimulus::put_name(const char *n)
-{
-  cout << "stimulus::put_name  " << n << '\n';
-
-  strncpy(name_str,n, STIMULUS_NAME_LENGTH);
-    
-}
 //========================================================================
 
 
@@ -441,11 +428,13 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
   //cout << "creating sqw stimulus\n";
 
   if(n)
-    strcpy(name_str,n);
+    new_name(n);
   else
     {
-      strcpy(name_str,"s1_square_wave");
-      name_str[1] = num_stimuli++;
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"s%d_square_wave",num_stimuli);
+      num_stimuli++;
+      new_name(name_str);
     }
 
 
@@ -490,11 +479,13 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   //cout << "creating sqw stimulus\n";
 
   if(n)
-    strcpy(name_str,n);
+    new_name(n);
   else
     {
-      strcpy(name_str,"s1_triangle_wave");
-      name_str[1] = num_stimuli++;
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"s%d_triangle_wave",num_stimuli);
+      num_stimuli++;
+      new_name(name_str);
     }
 
   if(p==0)  //error
@@ -952,11 +943,13 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
   samples = 0;
 
   if(n)
-    strcpy(name_str,n);
+    new_name(n);
   else
     {
-      strcpy(name_str,"a1_asynchronous_stimulus");
-      name_str[1] = num_stimuli++;
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
+      num_stimuli++;
+      new_name(name_str);
     }
 
   add_stimulus(this);
@@ -971,11 +964,13 @@ dc_supply::dc_supply(char *n)
   next = 0;
 
   if(n)
-    strcpy(name_str,n);
+    new_name(n);
   else
     {
-      strcpy(name_str,"v1_supply");
-      name_str[1] = num_stimuli++;
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"v%d_supply",num_stimuli);
+      num_stimuli++;
+      new_name(name_str);
     }
 
 
@@ -1006,17 +1001,17 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
     // otherwise, derive the name from the I/O port to 
     // which this pin is attached.
 
+    char name_str[100];
     if(opt_name) {
-      strncpy(name_str, 
-	      iop->name(),
-	      STIMULUS_NAME_LENGTH-((strlen(opt_name)>30)?30:strlen(opt_name)));
-      strcat(name_str,".");
-      strcat(name_str,opt_name);
+      snprintf(name_str,sizeof(name_str),"%s.%s",
+	       iop->name().c_str(),
+	       opt_name);
 
     } else {
 
-      strncpy(name_str, iop->name(),STIMULUS_NAME_LENGTH-3);
       char bs[3];
+
+      strncpy(name_str, iop->name().c_str(),sizeof(name_str) - sizeof(bs));
       if(iobit < 10) {
 	bs[0] = iobit+'0';
 	bs[1] = 0;
@@ -1028,12 +1023,14 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 
       strcat(name_str,bs);
     }
+
+    new_name(name_str);
   } else {
     // there's no IO port associated with this pin.
 
     // If a name was provided, use it:
-    if(opt_name) 
-      strncpy(name_str, opt_name,STIMULUS_NAME_LENGTH);
+    if(opt_name)
+      new_name(name_str);
   }
 
   add_stimulus(this);
@@ -1061,10 +1058,10 @@ IOPIN::IOPIN(void)
 
 IOPIN::~IOPIN()
 {
-    if(snode)
-	snode->detach_stimulus(this);
+  if(snode)
+    snode->detach_stimulus(this);
 
-    remove_stimulus(this);
+  remove_stimulus(this);
 }
 
 void IOPIN::put_state_value(int new_state)
@@ -1073,8 +1070,7 @@ void IOPIN::put_state_value(int new_state)
   if(port)
     port->setbit_value(iobit, new_state &1);
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 int IOPIN::get_state(void)
@@ -1147,22 +1143,14 @@ void IO_input::toggle(void)
   if(port) {
 
     port->setbit(iobit, 1^port->get_bit(iobit));
-    if(port->xref)
-      port->xref->update();
+    port->update();
     state = port->get_bit(iobit);
 
-/*
-    iop->setbit(iobit, 1^iop->get_bit(iobit));
-    if(iop->xref)
-      iop->xref->update();
-    state = iop->get_bit(iobit);
-*/
   }
   else
     state ^= 1;
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 /*************************************
@@ -1291,9 +1279,6 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
   drive = MAX_DRIVE / 2;
   driving = 0;
 
-  //sprintf(name_str,"%s%n",iop->name_str,iobit);
-  //cout << name_str;
-  // cout << "IO_bi_directional\n";
 }
 
 
@@ -1440,8 +1425,7 @@ void IO_bi_directional::change_direction(unsigned int new_direction)
   if(iop)
     iop->change_pin_direction(iobit, new_direction & 1);
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 int IO_bi_directional_pu::get_voltage(guint64 current_time)
@@ -1484,13 +1468,24 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
 
   state = 0;
 
-  //  sprintf(name_str,"%s%n",iop->name_str,iobit);
-  //cout << name_str;
-  strcpy(name_str, iop->name());
-  char bs[2];
-  bs[0] = iobit+'0';
-  bs[1] = 0;
-  strcat(name_str,bs);
+
+  char name_str[100];
+  char suffix[3];
+
+  strncpy(name_str, iop->name().c_str(),sizeof(name_str) - sizeof(suffix));
+
+  if(iobit < 10) {
+    suffix[0] = iobit+'0';
+    suffix[1] = 0;
+  } else {
+    suffix[0] = (iobit / 10) + '0';
+    suffix[1] = (iobit % 10) + '0';
+    suffix[2] = 0;
+  }
+
+  strcat(name_str,suffix);
+
+
   add_stimulus(this);
 }
 
@@ -1548,8 +1543,7 @@ void IO_open_collector::change_direction(unsigned int new_direction)
 
   //iop->tris->setbit(iobit, new_direction & 1);
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 //--------------------------------------------------------

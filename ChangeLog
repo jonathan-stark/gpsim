@@ -1,3 +1,20 @@
+2004-05-31 Scott Dattalo <scott@dattalo.com>
+	* almost all files: Since the Register class and the Instruction class
+	are now derived from gpsimValue, all objects that use registers
+	and instructions have to change. These changes have been propogated
+	through gpsim. Next, the gui will start taking advantage of the
+	abstractness that this change introduces.
+	* src/16bit-instructions.cc, src/14bit-instructions.h: Manuel Boyer
+	reported two bugs with the 16bit subwf instruction. He fixed one
+	(N-bit was ignored) with a patch and I fixed the other (OV bit was 
+	ignored).
+
+2004-05-27 Scott Dattalo <scott@dattalo.com>
+	* src/value.h, src/value.cc: New files that support abstract values.
+	* src/register.h, src/pic-instructions.h:
+	Now all base objects that have values are derived from the new
+	gpsimValue object.
+
 2004-05-27 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.h, src/breakpoints.cc: Execution breakpoints now
 	support a customizable message that will be displayed when the

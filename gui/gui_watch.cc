@@ -545,7 +545,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 
   Register *cpu_reg = reg->get_register();
 
-  strncpy(name,cpu_reg->name(),sizeof(name));
+  strncpy(name,cpu_reg->name().c_str(),sizeof(name));
   sprintf(addressstring,"0x%02x",reg->address);
   strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 

@@ -1019,7 +1019,7 @@ static void trace_node(struct gui_node *gn)
     // Allocate an array of shortest_paths, indexed with 2x glist position.
 //FIXME    shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
 
-    printf("Tracing node %s:",gn->node->name());
+    printf("Tracing node %s:",gn->node->name().c_str());
     fflush(stdout);
 
     permutations = (int*)malloc(sizeof(int)*nr_of_nodes);
@@ -1036,7 +1036,7 @@ static void trace_node(struct gui_node *gn)
 	li = g_list_nth(pinlist,i);
         assert(li!=0);
         pi = (gui_pin*) li->data;
-	printf(" %s",pi->iopin->name());
+	printf(" %s",pi->iopin->name().c_str());
 	fflush(stdout);
 	for(j=i+1;j<nr_of_nodes;j++)
 	{
@@ -1058,8 +1058,8 @@ static void trace_node(struct gui_node *gn)
 	    if(shortest_path[i][j]==0)
 	    {
 		printf("\n### Couldn't trace from pin %s to pin %s!\n",
-                       pi->iopin->name(),
-                       pj->iopin->name());
+                       pi->iopin->name().c_str(),
+                       pj->iopin->name().c_str());
 		didnt_work=1;
 	    }
 	    pathlen[i][j]=maxdepth;
@@ -1071,7 +1071,7 @@ static void trace_node(struct gui_node *gn)
 
     if(didnt_work)
     {
-	printf("\n###### Couldn't trace node %s!\n",gn->node->name());
+	printf("\n###### Couldn't trace node %s!\n",gn->node->name().c_str());
 	for(i=0;i<nr_of_nodes;i++)
 	    for(j=i+1;j<nr_of_nodes;j++)
 		clear_path(&shortest_path[i][j]);
@@ -1306,11 +1306,11 @@ static void treeselect_stimulus(GtkItem *item, struct gui_pin *pin)
     gtk_widget_hide(pin->bbw->pic_frame);
 
     if(pin->iopin) {
-      snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name());
+      snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name().c_str());
       pString = string;
 
       if(pin->iopin->snode!=0)
-	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name());
+	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name().c_str());
       else
 	snprintf(text,sizeof(text),"Not connected");
       pText = text;
@@ -1327,7 +1327,7 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     char name[STRING_SIZE];
     char *text[1];
     stimulus *stimulus;
-    char string[STRING_SIZE];
+    char str[STRING_SIZE];
 
     text[0]=name;
 
@@ -1335,8 +1335,8 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
     if(gui_node->node!=0)
     {
-	snprintf(string,sizeof(string),"Node %s",gui_node->node->name());
-	gtk_frame_set_label(GTK_FRAME(gui_node->bbw->node_frame),string);
+	snprintf(str,sizeof(str),"Node %s",gui_node->node->name().c_str());
+	gtk_frame_set_label(GTK_FRAME(gui_node->bbw->node_frame),str);
 
 	gtk_widget_show(gui_node->bbw->node_frame);
     }
@@ -1360,7 +1360,7 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 	{
 	    int row;
 
-	    strncpy(name, stimulus->name(), sizeof(name));
+	    strncpy(name, stimulus->name().c_str(), sizeof(name));
 
 	    row = gtk_clist_append(GTK_CLIST(gui_node->bbw->node_clist),
 				   text);
@@ -1707,7 +1707,7 @@ static gint button(GtkWidget *widget,
 
 		gn = (struct gui_node *)
 		    gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
-					p->iopin->snode->name());
+					p->iopin->snode->name().c_str());
 
 		if(gn!=0)
 		{
@@ -1744,7 +1744,7 @@ static gint button(GtkWidget *widget,
 
 	    gn = (struct gui_node *)
 		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
-				    p->iopin->snode->name());
+				    p->iopin->snode->name().c_str());
 
 	    trace_node(gn);
             draw_nodes(gn->bbw);
@@ -1915,7 +1915,7 @@ static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
     node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
 
 
-    strcpy(name,node->name());
+    strcpy(name,node->name().c_str());
 
     row = gtk_clist_append(GTK_CLIST(clist),
 			   text);
@@ -2276,7 +2276,7 @@ static void node_clist_cb(GtkCList       *clist,
 static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
 {
     gtk_object_remove_data(GTK_OBJECT(bbw->node_tree),
-			   bbw->selected_node->node->name());
+			   bbw->selected_node->node->name().c_str());
 
     gtk_object_remove_data(GTK_OBJECT(bbw->selected_node->tree_item), "snode");
 
@@ -2484,17 +2484,17 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	Stimulus_Node *node = *node_iterator;
         stimulus *stimulus;
 
-	fprintf(fo, "node %s\n",node->name());
+	fprintf(fo, "node %s\n",node->name().c_str());
 
 	if(node->stimuli!=0)
 	{
-	    fprintf(fo, "attach %s",node->name());
+	    fprintf(fo, "attach %s",node->name().c_str());
 
 	    stimulus = node->stimuli;
 
 	    while(stimulus!=0)
 	    {
-		fprintf(fo, " %s",stimulus->name());
+		fprintf(fo, " %s",stimulus->name().c_str());
 
 		stimulus = stimulus->next;
 	    }
@@ -2522,7 +2522,7 @@ static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
 
     node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
 
-    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(((Breadboard_Window*)bbw)->node_tree), node->name());
+    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(((Breadboard_Window*)bbw)->node_tree), node->name().c_str());
 
     trace_node(gn);
 }
@@ -2706,7 +2706,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    char *name;
 	    int width;
 
-	    name=p->module->get_pin_name(i);
+	    name=(char *)p->module->get_pin_name(i).c_str();
 	    if(name==0)
 		continue;
 #if GTK_MAJOR_VERSION >= 2
@@ -2776,7 +2776,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 		label_y+=LABELPAD+CASELINEWIDTH+pinspacing/2-bbw->pinnameheight/3;
 	    }
 
-	    name=p->module->get_pin_name(i);
+	    name=(char*)p->module->get_pin_name(i).c_str();
 	    if(name==0)
 		continue;
 	    gdk_draw_text(p->module_pixmap,
@@ -2838,7 +2838,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     cross_reference->parent_window_type = WT_breadboard_window;
     cross_reference->parent_window = (gpointer) bbw;
     cross_reference->data = (gpointer) 0;
-    p->module->xref->add(cross_reference);
+    p->module->xref->_add(cross_reference);
 
     gtk_widget_show(p->module_widget);
 
@@ -2906,7 +2906,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	  cross_reference->parent_window_type = WT_breadboard_window;
 	  cross_reference->parent_window = (gpointer) bbw;
 	  cross_reference->data = (gpointer) 0;
-	  iopin->xref->add(cross_reference);
+	  iopin->add_xref(cross_reference);
 	}
 
 	pin_position=package->get_pin_position(i);
@@ -2949,7 +2949,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	p->pins = g_list_append(p->pins, pin);
 
         // Add pin to tree
-	name=p->module->get_pin_name(i);
+	name=(char *)p->module->get_pin_name(i).c_str();
 	if(name!=0)
 	{
 	    tree_item = gtk_tree_item_new_with_label (name);
@@ -3121,7 +3121,7 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
   if(!is_built)
     Build();
 
-  struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name());
+  struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name().c_str());
 
   if(gn==0) {
     GtkWidget *node_item;
@@ -3131,7 +3131,7 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
     gn->bbw=this;
     gn->node=node;
 
-    node_item = gtk_tree_item_new_with_label (node->name());
+    node_item = gtk_tree_item_new_with_label (node->name().c_str());
     gn->tree_item = node_item;
     gtk_signal_connect(GTK_OBJECT(node_item),
 		       "select",
@@ -3139,7 +3139,7 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 		       gn);
     gtk_widget_show(node_item);
     gtk_tree_append(GTK_TREE(node_tree), node_item);
-    gtk_object_set_data(GTK_OBJECT(node_tree), node->name(), gn);
+    gtk_object_set_data(GTK_OBJECT(node_tree), node->name().c_str(), gn);
     gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
 
   }

@@ -1175,7 +1175,7 @@ int plot_routine_histogram(Profile_Window *pw)
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
 	    filename,
             ctime(&t),
-	    pw->gp->cpu->name());
+	    pw->gp->cpu->name().c_str());
 
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
@@ -2234,7 +2234,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
        !((reg->isa() == Register::SFR_REGISTER) || (i != reg->address)) ) {
 
 	sprintf(address_string,"0x%04x",i);
-	name = reg->name();
+	name = (char*)reg->name().c_str();
 	if(name==0)
 	  name = address_string;
 	strcpy(register_string, name);

@@ -28,6 +28,8 @@ Here's where all of the pic packages are defined
 
 #ifndef __PACKAGES_H__
 #define __PACKAGES_H__
+#include <string>
+using namespace std;
 
 #include "gpsim_classes.h"
 
@@ -83,7 +85,7 @@ public:
   virtual void create_iopin_map(void);
 
   virtual int get_pin_count(void) {return number_of_pins;};
-  virtual char *get_pin_name(unsigned int pin_number);
+  virtual string &get_pin_name(unsigned int pin_number);
   virtual int get_pin_state(unsigned int pin_number);
   virtual float get_pin_position(unsigned int pin_number);
   virtual void set_pin_position(unsigned int pin_number, float position);
