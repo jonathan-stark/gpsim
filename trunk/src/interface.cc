@@ -957,15 +957,24 @@ void gpsim_set_write_break_at_address(unsigned int processor_id,
 void gpsim_set_execute_break_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    gpsim_toggle_break_at_address(processor_id, address);
-    puts("Implement this in interface.cc");sleep(1);
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    pic->set_break_at_address(address);
 }
 //--------------------------------------------------------------------------
 void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    gpsim_toggle_break_at_address(processor_id, address);
-    puts("Implement this in interface.cc");sleep(1);
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    while(pic->program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+	pic->clear_break_at_address(address);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address)
