@@ -700,6 +700,20 @@ void pic_processor::step_over (void)
 
 }
 
+//-------------------------------------------------------------------
+//
+// finish
+//
+// this method really only applies to processors with stacks.
+
+void pic_processor::finish(void)
+{
+  if(!stack)
+    return;
+
+  run_to_address( stack->contents[stack->pointer-1 & stack->stack_mask]);
+
+}
 
 
 //-------------------------------------------------------------------

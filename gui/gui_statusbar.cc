@@ -141,36 +141,43 @@ void StatusBar_Window::Update(void)
   
   //update the displayed values
 
-  status->value.i32 = gpsim_get_status(gp->pic_id);
+  if(!gp || !gp->cpu)
+    return;
+
+  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
+  if(!pic)
+    return;
+
+  status->value.i32 = pic->status->get_value();
   sprintf(buffer,"0x%02x",status->value.i32);
   gtk_entry_set_text (GTK_ENTRY (status->entry), buffer);
 
 
-  W->value.i32 = gpsim_get_w(gp->pic_id);
+  W->value.i32 = pic->W->get_value();
   sprintf(buffer,"0x%02x",W->value.i32);
   gtk_entry_set_text (GTK_ENTRY (W->entry), buffer);
 
-  if(!gp || !gp->cpu)
-    return;
 
   pc->value.i32 = gp->cpu->pc->get_value();
   sprintf(buffer,"0x%04x",pc->value.i32);
   gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
 
-  cpu_cycles->value.ui64 = gpsim_get_cycles(gp->pic_id);
+  cpu_cycles->value.ui64 = cycles.value;
   sprintf(buffer,"0x%016Lx",cpu_cycles->value.ui64);
   gtk_entry_set_text (GTK_ENTRY (cpu_cycles->entry), buffer);
 
+  time->value.db = 4.0 * cycles.value / (double)pic->time_to_cycles(1.0);
+
   if(time_format==MENU_TIME_USECONDS) {
-    time->value.db = gpsim_get_cycles(gp->pic_id)*1e6/(double)gpsim_get_inst_clock(gp->pic_id);
+    time->value.db *= 1e6;
     sprintf(buffer,"%19.2f us",time->value.db);
   }
   else if(time_format==MENU_TIME_MSECONDS) {
-    time->value.db = gpsim_get_cycles(gp->pic_id)*1e3/(double)gpsim_get_inst_clock(gp->pic_id);
+    time->value.db *= 1e3;
     sprintf(buffer,"%19.3f ms",time->value.db);
   }
   else if(time_format==MENU_TIME_HHMMSS) {
-    double v=time->value.db = gpsim_get_cycles(gp->pic_id)/(double)gpsim_get_inst_clock(gp->pic_id);
+    double v=time->value.db;
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
     mm=(int)(v/60);
@@ -180,7 +187,6 @@ void StatusBar_Window::Update(void)
     sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
   }
   else {
-    time->value.db = gpsim_get_cycles(gp->pic_id)/(double)gpsim_get_inst_clock(gp->pic_id);
     sprintf(buffer,"%19.3f s",time->value.db);
   }
   gtk_entry_set_text (GTK_ENTRY (time->entry), buffer);
@@ -189,57 +195,66 @@ void StatusBar_Window::Update(void)
 
 static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    const char *text;
-    unsigned int value;
-    unsigned int pic_id;
-    char *bad_position;
+  const char *text;
+  unsigned int value;
+  unsigned int pic_id;
+  char *bad_position;
 
-    pic_id = sbw->gp->pic_id;
-    text=gtk_entry_get_text (GTK_ENTRY (sbw->W->entry));
-    
-    value = strtoul(text, &bad_position, 16);
-    if( strlen(bad_position) )
-	return;  /* string contains an invalid number */
-
-    gpsim_put_w(pic_id, value);
-
-    sbw->Update();
-
+  if(!gp || !gp->cpu)
     return;
+
+  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
+  if(!pic)
+    return;
+
+  text=gtk_entry_get_text (GTK_ENTRY (sbw->W->entry));
+    
+  value = strtoul(text, &bad_position, 16);
+  if( strlen(bad_position) )
+    return;  /* string contains an invalid number */
+
+  pic->W->put_value(value);
+
+  sbw->Update();
+
+  return;
 }
 
 static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    const char *text;
-    unsigned int value;
-    unsigned int pic_id;
-    char *bad_position;
+  const char *text;
+  unsigned int value;
+  char *bad_position;
 
-    pic_id = sbw->gp->pic_id;
-    text=gtk_entry_get_text (GTK_ENTRY (sbw->status->entry));
-    
-    value = strtoul(text, &bad_position, 16);
-    if( strlen(bad_position) )
-	return;  /* string contains an invalid number */
-    
-    gpsim_put_status(pic_id, value);
-    
-    sbw->Update();
-
+  if(!gp || !gp->cpu)
     return;
+
+  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
+  if(!pic)
+    return;
+
+  text=gtk_entry_get_text (GTK_ENTRY (sbw->status->entry));
+    
+  value = strtoul(text, &bad_position, 16);
+  if( strlen(bad_position) )
+    return;  /* string contains an invalid number */
+    
+  pic->status->put_value(value);
+    
+  sbw->Update();
+
+  return;
 }
 
 static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    const char *text;
-    unsigned int value;
-    unsigned int pic_id;
-    char *bad_position;
+  const char *text;
+  unsigned int value;
+  char *bad_position;
 
   if(!sbw || !sbw->gp || !sbw->gp->cpu)
     return;
 
-  pic_id = sbw->gp->pic_id;
   text=gtk_entry_get_text (GTK_ENTRY (sbw->pc->entry));
     
   value = strtoul(text, &bad_position, 16);
@@ -380,7 +395,6 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
 void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 {
 
-  StatusBarXREF *cross_reference;
 
   if(_gp == 0)
     return;
@@ -394,12 +408,17 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
    * send information back to the gui
    */
 
-  cross_reference = new StatusBarXREF();
-  cross_reference->parent_window_type =   WT_status_bar;
-  cross_reference->parent_window = (gpointer) this;
-  cross_reference->data = (gpointer) this;
+  if(gp->cpu && gp->cpu->pc && gp->cpu->pc->xref) {
+    StatusBarXREF *cross_reference;
+
+    cross_reference = new StatusBarXREF();
+    cross_reference->parent_window_type =   WT_status_bar;
+    cross_reference->parent_window = (gpointer) this;
+    cross_reference->data = (gpointer) this;
   
-  gpsim_assign_pc_xref(gp->pic_id, (gpointer) cross_reference);
+    gp->cpu->pc->xref->add((gpointer) cross_reference);
+
+  }
 
   Update();
 

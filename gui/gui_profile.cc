@@ -42,6 +42,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 #include "../src/symbol.h"
+extern list <symbol *> st;
 
 #include <gtkextra/gtkplot.h>
 #include <gtkextra/gtkplotdata.h>
@@ -152,15 +153,28 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 
 static unsigned int lookup_address_symbol(const char *name)
 {
-    sym *s;
-    gpsim_symbol_rewind((unsigned int)gp->pic_id);
+  list <symbol *>::iterator sti;
 
-    while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-    {
-	if(!strcmp(name,s->name))
-            return s->value;
+  for(sti = st.begin(); sti != st.end(); sti++) {
+    
+    if(!strcmp((*sti)->name()->data(),name)) {
+      return (*sti)->get_value();
     }
-    return UINT_MAX;
+  }
+#if 0
+  sym *s;
+  gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+  while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
+    {
+      if(!strcmp(name,s->name))
+	return s->value;
+    }
+
+#endif
+
+
+  return UINT_MAX;
 }
 
 static void add_range(Profile_Window *pw,
@@ -1238,7 +1252,9 @@ popup_activated(GtkWidget *widget, gpointer data)
 	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
     }
-    
+    list <symbol *>::iterator sti;
+
+
     item = (menu_item *)data;
     pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
 
@@ -1253,6 +1269,25 @@ popup_activated(GtkWidget *widget, gpointer data)
         add_range_dialog(popup_pw);
 	break;
     case MENU_ADD_ALL_LABELS:
+      for(sti = st.begin(); sti != st.end(); sti++) {
+
+	if((*sti)->isa() == SYMBOL_ADDRESS) {
+
+	  char *pstr=(char*)malloc((*sti)->name()->length()+1);
+	  strncpy(pstr,
+		  (*sti)->name()->data(),
+		  (*sti)->name()->length());
+	  pstr[(*sti)->name()->length()]=0;
+
+	  sym * data=(sym*)malloc(sizeof(sym));
+	  data->name = pstr;
+	  data->type = (*sti)->isa();
+	  data->value=(*sti)->get_value();
+	  symlist=g_list_append(symlist,data);
+
+	}
+      }
+	/*
 	gpsim_symbol_rewind((unsigned int)gp->pic_id);
 
 	while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
@@ -1267,6 +1302,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 		symlist=g_list_append(symlist,data);
 	    }
 	}
+	*/
 	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
 	strcpy(fromaddress_string,"0");
 	iter=symlist;
@@ -1291,6 +1327,28 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	break;
     case MENU_ADD_FUNCTION_LABELS:
+      for(sti = st.begin(); sti != st.end(); sti++) {
+
+	if(((*sti)->isa() == SYMBOL_ADDRESS) &&
+	   !strstr((*sti)->name()->data(),"_DS_")) {
+	 
+
+	  char *pstr=(char*)malloc((*sti)->name()->length()+1);
+	  strncpy(pstr,
+		  (*sti)->name()->data(),
+		  (*sti)->name()->length());
+	  pstr[(*sti)->name()->length()]=0;
+
+	  sym * data=(sym*)malloc(sizeof(sym));
+	  data->name = pstr;
+	  data->type = (*sti)->isa();
+	  data->value=(*sti)->get_value();
+	  symlist=g_list_append(symlist,data);
+
+	}
+      }
+
+      /*
 	gpsim_symbol_rewind((unsigned int)gp->pic_id);
 
 	while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
@@ -1308,6 +1366,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 		}
 	    }
 	}
+      */
 	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
 
 	iter=symlist;

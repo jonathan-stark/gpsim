@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 
 #include "../src/interface.h"
+#include "../src/trace.h"
 
 #include "gui.h"
 
@@ -81,8 +82,7 @@ public:
   void Update(int new_value)
   {
 
-    GUI_Processor *gp;
-    guint64 cycle;
+    //guint64 cycle;
     int trace_index;
 
 #define TRACE_STRING 100
@@ -95,15 +95,12 @@ public:
 
     Trace_Window *tw  = (Trace_Window *) (parent_window);
 
-    if(  (tw == 0) || !tw->enabled)
+    if(!tw  || !tw->enabled)
       return;
 
-    // Get the pointer to the `gui processor' structure
-    gp = tw->gp;
-
-    if(gp==0 || gp->pic_id==0)
+    if(!tw->gp || !tw->gp->cpu)
       {
-	puts("Warning gp or gp->pic_id == 0 in TraceWindow_update");
+	puts("Warning gp or gp->cpu == NULL in TraceWindow_update");
 	return;
       }
 
@@ -111,13 +108,12 @@ public:
     if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
       return;
 
-    trace_string[0] = 0;  // Assume that the trace is empty.
-    gpsim_get_current_trace(&cycle, &trace_index, trace_string, TRACE_STRING);
+    strncpy(trace_string,trace.string_buffer,TRACE_STRING);
 
-    if(trace_string[0] && (cycle>=tw->last_cycle)) {
-      tw->last_cycle = cycle;
-      tw->trace_map[tw->trace_map_index].cycle = cycle;
-      tw->trace_map[tw->trace_map_index].simulation_trace_index = trace_index;
+    if(trace_string[0] && (trace.string_cycle>=tw->last_cycle)) {
+      tw->last_cycle = trace.string_cycle;
+      tw->trace_map[tw->trace_map_index].cycle = trace.string_cycle;
+      tw->trace_map[tw->trace_map_index].simulation_trace_index = trace.string_index;
 
       // Advance the trace_map_index using rollover arithmetic
       if(++tw->trace_map_index >= MAXTRACES)
@@ -125,7 +121,7 @@ public:
 
       clist=GTK_CLIST(tw->trace_clist);
 
-      sprintf(cycle_string,"0x%016llx", cycle); // how do you specify 'unsigned'?
+      sprintf(cycle_string,"0x%016llx", trace.string_cycle);
 
       gtk_clist_append  (clist, entry);
       
@@ -158,14 +154,14 @@ public:
 void Trace_Window::Update(void)
 {
 
-  guint64 cycle;
+  //guint64 cycle;
 
   if(!enabled)
     return;
 
-  if(gp==0 || gp->pic_id==0)
+  if(!gp || !gp->cpu)
   {
-      puts("Warning gp or gp->pic_id == 0 in TraceWindow_update");
+      puts("Warning gp or gp->cpu == NULL in TraceWindow_update");
       return;
   }
 
@@ -174,21 +170,16 @@ void Trace_Window::Update(void)
 
   gtk_clist_freeze(trace_clist);
 
-  cycle = gpsim_get_cycles(gp->pic_id);
-
   trace_flags |= GTF_ENABLE_XREF_UPDATES;
-  if(cycle-last_cycle>=MAXTRACES) {
+  if(cycles.value-last_cycle>=MAXTRACES)
     // redraw the whole thing
-    gpsim_trace_dump_to_file(MAXTRACES, 0);
+    trace.dump(MAXTRACES, 0);
+  else 
+    trace.dump(cycles.value-last_cycle, 0);
 
-  } else {
-    gpsim_trace_dump_to_file(cycle-last_cycle, 0);
-
-
-  }
 
   trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
-  last_cycle = cycle;
+  last_cycle = cycles.value;
   gtk_clist_thaw(trace_clist);
 
 }
@@ -221,7 +212,9 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = 0;
-  gpsim_assign_trace_xref((gpointer) cross_reference);
+  if(trace.xref)
+      trace.xref->add((gpointer) cross_reference);
+
 }
 
 static int delete_event(GtkWidget *widget,

@@ -482,7 +482,6 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     new_value >>= 1;
   }
 
-  //if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
   if(entry->hasBreak())
     gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "yes");
   else
@@ -563,7 +562,7 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Reg
 
   watch_entry = new WatchEntry();
   watch_entry->address=address;
-  //watch_entry->pic_id=pic_id;
+
   watch_entry->cpu = gp->cpu;
 
   watch_entry->type=type;
@@ -607,8 +606,6 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
     Build();
 
 
-  //regname = gpsim_get_register_name(pic_id,type,address);
-
   Register *cpu_reg = reg->get_register();
 
   strncpy(name,cpu_reg->name(),sizeof(name));
@@ -619,7 +616,6 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 
   watch_entry = new WatchEntry();
   watch_entry->address=reg->address;
-  //watch_entry->pic_id=pic_id;
   watch_entry->cpu = gp->cpu;
 
   watch_entry->type=type;

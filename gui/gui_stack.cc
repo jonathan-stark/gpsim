@@ -36,6 +36,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/interface.h"
 
+#include "../src/symbol.h"
+
+extern list <symbol *> st;
+
 #include "gui.h"
 
 struct stack_entry {
@@ -54,28 +58,30 @@ static gint sigh_button_event(GtkWidget *widget,
 		       GdkEventButton *event,
 		       Stack_Window *sw)
 {
-    struct stack_entry *entry;
-    assert(event&&sw);
+  struct stack_entry *entry;
+  assert(event&&sw);
     
-    if(!sw->has_processor)
-      return 0;
-    
-
-    if(event->type==GDK_2BUTTON_PRESS &&
-       event->button==1)
-    {
-	int row=sw->current_row;
-	
-	entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
-
-	if(entry!=0)
-	    gpsim_toggle_break_at_address(((GUI_Object*)sw)->gp->pic_id, entry->retaddress);
-	
-	return 1;
-	
-    }
-
+  if(!sw->has_processor)
     return 0;
+
+  if(!sw->gp || !sw->gp->cpu)
+    return 0;
+
+  if(event->type==GDK_2BUTTON_PRESS &&
+     event->button==1) {
+    
+    int row=sw->current_row;
+	
+    entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
+
+    if(entry)
+      sw->gp->cpu->pma.toggle_break_at_address(entry->retaddress);
+
+    return 1;
+	
+  }
+
+  return 0;
 }
 
 static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,GdkEvent *event, Stack_Window *sw)
@@ -139,54 +145,48 @@ static int delete_event(GtkWidget *widget,
 // find name of label closest before 'address' and copy found data
 // into name and offset
 static int get_closest_label(Stack_Window *sw,
-			      unsigned int address,
+			      int address,
 			      char *name,
 			      int *offset)
 {
     
-    // this function assumes that address symbols are sorted
+  // this function assumes that address symbols are sorted
     
-    GUI_Processor *gp;
-    sym *s;
+  symbol *closest_symbol = 0;
 
-    unsigned int minimum_delta=0x2000000;
-    unsigned int delta;
-    int retval=0;
+  int minimum_delta=0x2000000;
+  int delta;
 
-    gp = ((GUI_Object*)sw)->gp;
+  list <symbol *>::iterator sti;
+
+  for(sti = st.begin(); sti != st.end(); sti++) {
     
-    gpsim_symbol_rewind((unsigned int)gp->pic_id);
+    if((*sti)->isa() == SYMBOL_ADDRESS) {
 
-    while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-    {
-	switch(s->type)
-	{
-	case SYMBOL_ADDRESS:
-	    if(s->value<=address)
-	    {
-		delta = address-s->value;
-		if( delta < minimum_delta)
-		{
-		    strcpy(name,s->name);
-		    *offset=address-s->value;
-		    retval=1;
-		    
-		    minimum_delta=delta;
-		}
-	    }
-	    break;
-	default:
-	    break;
-	}
+      delta = abs( (*sti)->get_value() - address);
+      if(delta < minimum_delta) {
+	minimum_delta = delta;
+	closest_symbol = *sti;
+      }
     }
-    return retval;
+  }
+
+  if(closest_symbol) {
+    strcpy(name,closest_symbol->name()->data());
+    *offset=address-closest_symbol->get_value();
+    return 1;
+  }
+
+
+  return 0;
+
 }
 
 void Stack_Window::Update(void)
 {
   int i=0;
   int nrofentries;
-  unsigned int pic_id;
+  //unsigned int pic_id;
   char depth_string[64];
   char retaddress_string[64];
   char labelname[64];
@@ -198,9 +198,13 @@ void Stack_Window::Update(void)
   if(!has_processor || !enabled)
     return;
     
-  pic_id = gp->pic_id;
+  //pic_id = gp->pic_id;
 
-  nrofentries=gpsim_get_stack_size(pic_id);
+  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
+  if(!pic)
+    return;
+
+  nrofentries = pic->stack->pointer & pic->stack->stack_mask;
 
   if(last_stacklen!=nrofentries) {
     
@@ -226,7 +230,7 @@ void Stack_Window::Update(void)
 	// stack has grown
 
 	strcpy(depth_string,"");
-	retaddress=gpsim_get_stack_value(pic_id,last_stacklen);
+	retaddress=pic->stack->contents[last_stacklen & pic->stack->stack_mask];
 		
 	if(get_closest_label(this,retaddress,labelname,&labeloffset))
 	  sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
