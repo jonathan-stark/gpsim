@@ -405,10 +405,10 @@ int CreateStopWatchWindow(GUI_Processor *gp)
     stopwatch_window->gui_obj.is_built=0;
     gp->stopwatch_window = stopwatch_window;
     stopwatch_window->count_dir=1;
-    stopwatch_window->rollover=10;
+    stopwatch_window->rollover=1000000;
     stopwatch_window->cyclecounter=0;
     stopwatch_window->frequency=0;
-    stopwatch_window->offset=5;
+    stopwatch_window->offset=0;
 
     stopwatch_window->has_processor=1;
 
