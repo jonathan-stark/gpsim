@@ -202,13 +202,18 @@ public:
   /// getRV - get the whole register value - including the info
   /// of the three-state bits.
 
-  virtual RegisterValue getRV(void) { return value;}
+  virtual RegisterValue getRV(void) 
+  {
+    value.data = get();
+    return value;
+  }
 
   /// putRV - write a new value to the register.
 
   virtual void putRV(RegisterValue rv)
   { 
-    value = rv;
+    value.init = rv.init;
+    put(rv.data);
   }
 
   /// getRV_notrace and putRV_notrace are analogous to getRV and putRV
@@ -217,10 +222,15 @@ public:
   /// refresh it's windows without having the side effect of filling
   /// up the trace buffer
 
-  virtual RegisterValue getRV_notrace(void) { return value;}
+  virtual RegisterValue getRV_notrace(void)
+  { 
+    value.data = get_value();
+    return value;
+  }
   virtual void putRV_notrace(RegisterValue rv)
   { 
-    value = rv;
+    value.init = rv.init;
+    put_value(rv.data);
   }
 
   /// In the Register class, the 'Register *get()' returns a

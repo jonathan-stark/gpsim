@@ -285,16 +285,23 @@ void Symbol_Window::Update(void)
 
 static void do_symbol_select(Symbol_Window *sw, Value *e)
 {
-    // Do what is to be done when a symbol is selected.
-    // Except for selecting the symbol row in the symbol_clist
+
+  if(!sw || !sw->gp)
+    return;
+
+  // Do what is to be done when a symbol is selected.
+  // Except for selecting the symbol row in the symbol_clist
 
   if(typeid(*e) == typeid(line_number_symbol) ||
      typeid(*e) == typeid(address_symbol)) {
-    sw->gp->source_browser->SelectAddress(e);
-    sw->gp->program_memory->SelectAddress(e);
+    if(sw->gp->source_browser)
+      sw->gp->source_browser->SelectAddress(e);
+    if(sw->gp->program_memory)
+      sw->gp->program_memory->SelectAddress(e);
   } else 
     if(typeid(*e) == typeid(register_symbol))
-      sw->gp->regwin_ram->SelectRegister(e);
+      if(sw->gp->regwin_ram)
+	sw->gp->regwin_ram->SelectRegister(e);
 }
 
 static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,GdkEvent *event, Symbol_Window *sw)
@@ -315,7 +322,8 @@ static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,Gdk
 void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 {
     GList *p;
-    
+    if(!sw)
+      return;
     if(!sw->enabled)
 	return;
     

@@ -1358,10 +1358,11 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   PIC_IOPORT::setbit( bit_number,  new_value);
 
-  cout << "PORTC::setbit() bit " 
-       << bit_number << " is done new value is "
-       << ( (value.get() & (1<<bit_number)) ? "high" : "low")
-       << endl;
+  if(verbose)
+    cout << "PORTC::setbit() bit " 
+	 << bit_number << " is done new value is "
+	 << ( (value.get() & (1<<bit_number)) ? "high" : "low")
+	 << endl;
   
 }
 

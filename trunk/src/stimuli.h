@@ -195,6 +195,9 @@ public:
   // any other stimuli that are connected to it.
   virtual void updateNode(void) { if(snode) snode->update(0);}
 
+  // Display info about the stimulus.
+  virtual void show();
+
   // These are only here because they're pure virtual functions in the parent class.
   virtual unsigned int get_value(void) { return 0;}
   virtual void put_value(unsigned int new_value) {}
@@ -240,6 +243,8 @@ enum SOURCE_TYPE
   virtual void set_digital(void) { digital = true;}
   virtual void set_analog(void) { digital = false;}
   virtual void start(void) { };
+
+  virtual void show();
 
 protected:
   bool digital;
@@ -314,6 +319,8 @@ class IOPIN : public stimulus
   virtual double get_Vth();
 
   virtual char getBitChar();
+  virtual void show();
+
 };
 
 class IO_bi_directional : public IOPIN
@@ -407,36 +414,10 @@ public:
 
 };
 
-/// asynchronous_stimulus
-///
-class asynchronous_stimulus : public source_stimulus
-{
-private:
-  unsigned int  max_states;
-  guint64       future_cycle;
-  double        current_state;
-  StimulusData  next_sample;
-
-  list<StimulusData> samples;
-  list<StimulusData>::iterator sample_iterator;
-
-public:
-
-  virtual void callback(void);
-  virtual double get_Vth();
-  virtual void start(void);
-  virtual void re_start(guint64 new_start_time);
-  virtual void put_data(StimulusData &data_point);
-
-  asynchronous_stimulus(const char *n=0);
-
-};
-
 class ValueStimulusData {
 public:
   guint64 time;
   Value  *v;
-
 };
 
 /// ValueStimulus
@@ -457,12 +438,13 @@ public:
 
   virtual void callback();
   virtual void put_data(ValueStimulusData &data_point);
-  virtual void put_initial(Value *);
   virtual double get_Vth();
-  virtual void start(void);
+  virtual void start();
 
   ValueStimulus(const char*n=0);
   virtual ~ValueStimulus();
+  virtual void show();
+
 protected:
   ValueStimulusData *getNextSample();
 };
@@ -477,7 +459,7 @@ public:
 
   virtual void callback();
   void setClientAttribute(Value *);
-
+  virtual void show();
 };
 
 /*

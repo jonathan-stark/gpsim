@@ -462,6 +462,13 @@ void TMRH::put(unsigned int new_value)
 unsigned int TMRH::get(void)
 {
 
+  trace.raw(read_trace.get() | value.get());
+  return get_value();
+}
+
+// For the gui and CLI
+unsigned int TMRH::get_value(void)
+{
   // If the TMR1 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
 
@@ -475,16 +482,9 @@ unsigned int TMRH::get(void)
   tmrl->current_value();
 
   value.put(((tmrl->value_16bit)>>8) & 0xff);
-  trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address, value.get());
+
   return(value.get());
   
-}
-
-// For the gui and CLI
-unsigned int TMRH::get_value(void)
-{
-  return get();
 }
 
 
@@ -646,7 +646,13 @@ void TMRL::put(unsigned int new_value)
 
 unsigned int TMRL::get(void)
 {
+  trace.raw(read_trace.get() | value.get());
+  return get_value();
+}
 
+// For the gui and CLI
+unsigned int TMRL::get_value(void)
+{
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(get_cycles().value <= synchronized_cycle)
@@ -659,16 +665,8 @@ unsigned int TMRL::get(void)
   current_value();
 
   value.put(value_16bit & 0xff);
-  trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address, value.get());
-  return(value.get());
-  
-}
 
-// For the gui and CLI
-unsigned int TMRL::get_value(void)
-{
-  return get();
+  return(value.get());
 }
 
 //%%%FIXME%%% inline this
@@ -1205,7 +1203,9 @@ void TMR2::new_pr2(void)
 
 void TMR2::current_value(void)
 {
-  value.put((unsigned int)((get_cycles().value - last_cycle)/ prescale));
+//  value.put((unsigned int)((get_cycles().value - last_cycle)/ prescale));
+  value.put((unsigned int)(pr2->value.get() - (future_cycle - get_cycles().value)/ prescale ));
+// MGF
 
   if(value.get()>0xff)
     cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";

@@ -84,14 +84,6 @@ public:
   
   void setDrivenState(bool new_dstate) { 
     setDrivingState(new_dstate);
-    /*
-    bool diff = new_dstate ^ bDrivingState;
-
-    if( eeprom && diff ) {
-      bDrivingState = new_dstate;
-      eeprom->new_scl_edge(bDrivingState);
-    }
-    */
   }
 
   bool getDrivingState(void)
@@ -143,14 +135,6 @@ public:
 
   void setDrivenState(bool new_dstate) {
     setDrivingState(new_dstate);
-    /*
-    bool diff = new_dstate ^ bDrivingState;
-
-    if( eeprom && diff ) {
-      bDrivingState = new_dstate;
-      eeprom->new_sda_edge(new_dstate);
-    }
-    */
   }
 
   bool getDrivingState() {

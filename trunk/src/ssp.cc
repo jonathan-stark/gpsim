@@ -422,6 +422,7 @@ unsigned int _SSPBUF::get(void)
 
   */
   
+  trace.raw(read_trace.get() | value.get());
   unread = false;
 
   return value.get();
@@ -429,7 +430,6 @@ unsigned int _SSPBUF::get(void)
   
 unsigned int _SSPBUF::get_value(void)
 {
-  trace.raw(read_trace.get() | value.get());
   return value.get();
 }
 
