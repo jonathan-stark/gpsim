@@ -8,10 +8,10 @@ EXPORTS
     ??0Interface@@QAE@PAX@Z
     ??0Module@@QAE@XZ
     ??0stimulus@@QAE@PAD@Z
-    ??1IOPIN@@QAE@XZ
-    ??1IOPORT@@QAE@XZ
+    ??1IOPIN@@UAE@XZ
+    ??1IOPORT@@UAE@XZ
     ??1Module@@UAE@XZ
-    ??1XrefObject@@QAE@XZ
+    ??1stimulus@@UAE@XZ
     ?add_attribute@Module@@QAEXPAVAttribute@@@Z
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
@@ -74,6 +74,6 @@ EXPORTS
     ?setbit_value@IOPORT@@UAEXI_N@Z
     ?toggle@IO_input@@UAEXXZ
     ?update@gpsimValue@@UAEXXZ
-    ?update@Stimulus_Node@@QAEHI@Z
+    ?update@Stimulus_Node@@QAEH_K@Z
     ?update_direction@IO_bi_directional@@UAEXI@Z
     ?update_stimuli@IOPORT@@UAEHXZ

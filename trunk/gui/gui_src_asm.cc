@@ -491,7 +491,8 @@ popup_activated(GtkWidget *widget, gpointer data)
     menu_item *item;
     unsigned int id, address, line;
     char text[256];
-    unsigned int i,start,end, temp;
+    unsigned int i, temp;
+    gint start, end;
 
     if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
       return;
