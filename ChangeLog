@@ -1,3 +1,9 @@
+2004-10-06 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_src_opcode.cc,
+	gui/gui_statusbar.cc, src/breakpoints.cc: Fixed breakpoint
+	icon refreshing. Also fixed  Source browser window creation if either
+	~/gpsim is missing or the registry hasn't been initialized
+
 2004-10-05 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Moved the creation of the Search Dialog
 	window out of Build() and into its own function. Changed the behavior 

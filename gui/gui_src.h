@@ -50,11 +50,30 @@ class SourceBrowser_Window : public GUI_Object {
 };
 
 
-
+/*
 class breakpoint_info {
  public:
   int address;
-  GtkWidget *widget;
+  GtkWidget *break_widget;
+  GtkWidget *can_break_widget;
+};
+*/
+
+class BreakPointInfo {
+public:
+  int address;
+  int pos;
+  unsigned int index;           // gtktext index to start of line
+  unsigned int line;            // line number, first line eq. 0
+  //unsigned int pixel;           // pixels from top of text
+  //unsigned int font_center;     // from base line
+  GtkWidget *break_widget;      // breakpoint widget on this line.
+  GtkWidget *canbreak_widget;   // 'can break' widget on this line.
+
+  void Set(GtkWidget *, GdkPixmap *, GdkBitmap *);
+  void Clear(GtkWidget *, GdkPixmap *, GdkBitmap *);
+  BreakPointInfo();
+  
 };
 
 class BreakPointList {
@@ -67,15 +86,6 @@ class BreakPointList {
   void Add(int, GtkWidget *,GtkWidget *,int);
 };
 
-// the prefix 'sa' doesn't make sense anymore, FIXME.
-struct sa_entry {      // entry in the sa_xlate_list
-  unsigned int index;           // gtktext index to start of line
-  unsigned int line;            // line number, first line eq. 0
-  unsigned int pixel;           // pixels from top of text
-  unsigned int font_center;     // from base line
-  GtkWidget *bpwidget; // breakpoint widget on this line.
-  
-};
 
 class PixmapObject {
 public:
@@ -140,6 +150,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   // Where the source is stored:
 
   SourcePage pages[SBAW_NRFILES];
+  GList *sa_xlate_list[SBAW_NRFILES];
 
   int layout_offset;
 
@@ -150,7 +161,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 
   GtkWidget *popup_menu;
 
-  struct sa_entry *menu_data;  // used by menu callbacks
+  BreakPointInfo *menu_data;  // used by menu callbacks
     
   GdkBitmap *pc_mask;
   GdkBitmap *bp_mask;
@@ -191,6 +202,10 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void UpdateLine(int address);
   virtual void SetText(int id, int file_id);
 
+  BreakPointInfo *getBPatLine(int id, unsigned int line);
+  BreakPointInfo *getBPatPixel(int id, int pixel);
+  BreakPointInfo *getBPatIndex(int id, unsigned int index);
+
 };
 
 //
@@ -218,8 +233,6 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   char **column_titles; //
   int  columns;         //
 
-  int program;
-    
   GtkWidget *notebook;
   GtkWidget *sheet;
   GtkWidget *entry;

@@ -33,20 +33,12 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include <string.h>
 
-/*
-#include <gtkextra/gtkcombobox.h>
-#include <gtkextra/gtkbordercombo.h>
-#include <gtkextra/gtkcolorcombo.h>
-#include <gtkextra/gtksheet.h>
-*/
+
+#define DEBUG
 
 #include "gui.h"
 #include "gui_statusbar.h"
 #include "../src/processor.h"
-//#include "gui_regwin.h"
-
-
-
 
 //========================================================================
 //
@@ -251,7 +243,7 @@ RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
   reg = new_reg;
 
   if(reg) {
-
+    printf("RegisterLabeledEntry\n");
     pCellFormat = new char[10];
     sprintf(pCellFormat,"0x%%0%dx",reg->register_size()*2);
 
@@ -443,7 +435,9 @@ void StatusBar_Window::Update(void)
 
   if( !created)
       return;
-  
+
+  Dprintf((" %s\n",__FUNCTION__));
+
   //update the displayed values
 
   if(!gp || !gp->cpu)
@@ -457,12 +451,6 @@ void StatusBar_Window::Update(void)
       ++iRLE)
 
     (*iRLE)->Update();
-
-  /*
-  status->Update();
-  W->Update();
-  pc->Update();
-  */
 
   cpu_cycles->Update();
   time->Update();
@@ -501,13 +489,15 @@ do_popup(GtkWidget *widget, GdkEventButton *event, TimeLabeledEntry *tle)
 
 void StatusBar_Window::Create(GtkWidget *vbox_main)
 {
-  /* --- Create h-box for holding the status line --- */
-  hbox = gtk_hbox_new (FALSE, 0);
+  if(created)
+    return;
+  Dprintf((" %s",__FUNCTION__));
 
   /* --- Put up h-box --- */
   gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
-  
+
+  created=1;
 }
 
 /*  NewProcessor
@@ -521,8 +511,12 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
   if(!_gp  || !_gp->cpu || !_ma || !hbox)
     return;
 
+  if(ma)
+    return;
+
   gp = _gp;
   ma = _ma;
+  Dprintf((" %s",__FUNCTION__));
 
   list<Register *>::iterator iReg;
 
@@ -547,8 +541,6 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
 		     tle);
-
-  created=1;
 
   /* Now create a cross-reference link that the simulator can use to
    * send information back to the gui
@@ -577,8 +569,10 @@ StatusBar_Window::StatusBar_Window(void)
 
   cpu_cycles = 0;
   time = 0;
-  hbox = 0;
   created = false;
+
+  /* --- Create h-box for holding the status line --- */
+  hbox = gtk_hbox_new (FALSE, 0);
 
 }
 

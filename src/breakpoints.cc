@@ -475,7 +475,7 @@ instruction *Breakpoints::find_previous(Processor *cpu,
 void Breakpoints::clear(unsigned int b)
 {
 
-	if(b<MAX_BREAKPOINTS) {
+  if(b<MAX_BREAKPOINTS) {
 
     BreakStatus bs = break_status[b];   // 
 
