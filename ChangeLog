@@ -1,3 +1,9 @@
+2004-06-03 Scott Dattalo <scott@dattalo.com>
+	* examples/12bit/it_12bit.asm: removed
+	* regressions/instructions_12bit/instructions_12bit.asm: added
+	* regressions/instructions_12bit/instructions_12bit.stc: added
+	Now the 12bit core has a regression test.
+	
 2004-06-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, src/processor.cc: 18fxxx addressing was broken.
 	(the divide by 2 issue for the 18f addressess was not being handled
