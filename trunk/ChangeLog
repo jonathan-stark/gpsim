@@ -1,4 +1,10 @@
 2003-11-29  Scott Dattalo  <scott@dattalo.com>
+	* src/pic-processor.cc - rewrote the way gpsim groups together all of
+	the processors it supports. Now the ProcessorConstructor class will
+	allow processors to be instantiated anywhere in the code (before, they
+	were declared in one giant array.)
+
+2003-11-29  Scott Dattalo  <scott@dattalo.com>
 	* src/16bit-registers.cc - Access to PLUSWx are now signed.
 	
 2003-11-28  Scott Dattalo  <scott@dattalo.com>
