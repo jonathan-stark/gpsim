@@ -932,6 +932,7 @@ int plot_routine_histogram(Profile_Window *pw)
     // Find values, and put them in the point arrays
     j=0;
     iter=pw->histogram_profile_list;
+    puts("");
     while(iter!=NULL)
 //    for(j=0;j<10;j++)
     {
@@ -955,6 +956,7 @@ int plot_routine_histogram(Profile_Window *pw)
         j++;
 	iter=iter->next;
     }
+    puts("");
 
     mincycles=minx;
     maxcycles=maxx;
@@ -1532,6 +1534,18 @@ profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
 
 
 
+gint histogram_list_compare_func_cycles(gconstpointer a, gconstpointer b)
+{
+    const struct cycle_histogram_counter *h1=(struct cycle_histogram_counter*)a;
+    const struct cycle_histogram_counter *h2=(struct cycle_histogram_counter*)b;
+
+    if(h1->cycles > h2->cycles)
+	return 1;
+    if(h1->cycles == h2->cycles)
+	return 0;
+    return -1;
+}
+
 gint histogram_list_compare_func(gconstpointer a, gconstpointer b)
 {
     const struct cycle_histogram_counter *h1=(struct cycle_histogram_counter*)a;
@@ -1556,6 +1570,8 @@ gint histogram_list_compare_func(gconstpointer a, gconstpointer b)
 
 double calculate_median(GList *start, GList *stop)
 {
+    GList *sorted_list=NULL;
+
     struct cycle_histogram_counter *chc_start, *chc_stop;//, *chc_result;
 //    GList *result;
     int count_sum=0;
@@ -1569,6 +1585,22 @@ double calculate_median(GList *start, GList *stop)
 	while(stop->next!=NULL)
 	    stop=stop->next;
     }
+
+    // Copy list and sort it on cycles
+    while(start!=stop)
+    {
+	sorted_list=g_list_append(sorted_list,start->data);
+        start=start->next;
+    }
+    sorted_list=g_list_append(sorted_list,start->data);
+
+    sorted_list=g_list_sort(sorted_list,histogram_list_compare_func_cycles);
+
+    start=sorted_list;
+    stop=start;
+    while(stop->next!=NULL)
+	stop=stop->next;
+
 
     chc_start=(struct cycle_histogram_counter*)start->data;
     chc_stop=(struct cycle_histogram_counter*)stop->data;
@@ -1597,28 +1629,33 @@ double calculate_median(GList *start, GList *stop)
     {
         start=start->next;
 	chc_start=(struct cycle_histogram_counter*)start->data;
+	g_list_free(sorted_list);
 	return chc_start->cycles;
     }
     if(count_sum<-chc_start->count)
     {
         start=start->prev;
 	chc_start=(struct cycle_histogram_counter*)start->data;
+	g_list_free(sorted_list);
 	return chc_start->cycles;
     }
     if(-count_sum==chc_start->count)
     {
         stop=stop->prev;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
+	g_list_free(sorted_list);
 	return (chc_start->cycles+chc_stop->cycles)/2.0;
     }
     if(count_sum==chc_start->count)
     {
         stop=stop->next;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
+	g_list_free(sorted_list);
 	return (chc_start->cycles+chc_stop->cycles)/2.0;
     }
     if(abs(count_sum)<chc_start->count)
     {
+	g_list_free(sorted_list);
 	return chc_start->cycles;
     }
 
