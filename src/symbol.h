@@ -88,6 +88,8 @@ public:
   Value *find(const char *s);
   Value *find(string &s);
   Value *find(type_info const&t, const char *s);
+  Register * findRegister(unsigned int address);
+  Register * findRegister(const char *s);
 };
 
 /// The Symbol_Table_Iterator is a class that provides an accessor interface
