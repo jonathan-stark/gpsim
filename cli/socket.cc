@@ -238,7 +238,7 @@ public:
   ~Socket();
 
 
-  void init();
+  void init(int port);
 
   void Close(SocketBase**);
   void Bind();
@@ -421,7 +421,7 @@ Socket::~Socket()
 }
 
 
-void Socket::init(void)
+void Socket::init(int port)
 {
   SOCKET new_socket;
 
@@ -441,8 +441,8 @@ void Socket::init(void)
   memset(&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = INADDR_ANY;
-  addr.sin_port = htons(PORT);
-
+  addr.sin_port = htons(port);
+  
   Bind();
   Listen();
 }
@@ -1097,8 +1097,8 @@ static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void 
 
 void start_server(void)
 {
-  TestInt32Array *test = new TestInt32Array("test",16);
-  symbol_table.add(test);
+  //  TestInt32Array *test = new TestInt32Array("test",16);
+  //  symbol_table.add(test);
 
   static Socket s;
 
@@ -1113,7 +1113,7 @@ void start_server(void)
   server_started = true;
 #endif
 
-  s.init();
+  s.init(PORT);
  
   if(s.my_socket->getSocket() > 0) {
 
