@@ -404,7 +404,7 @@ public:
 class TRIS : public Register_op
 {
 public:
-  file_register *reg;
+  Register *reg;
 
   TRIS(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);

@@ -32,34 +32,6 @@ class XrefObject;
 
 
 
-//---------------------------------------------------------
-// Base class for a special function register.
-class sfr_register : public file_register
-{
-public:
-  sfr_register() :file_register(){}
-  unsigned int wdtr_value; // wdt or mclr reset value
-
-  virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};
-  virtual void initialize(void) {return;};
-
-  virtual void reset(RESET_TYPE r) {
-    switch (r) {
-
-    case POR_RESET:
-      value = por_value;
-      break;
-
-    case WDT_RESET:
-      value = wdtr_value;
-      break;
-    case SOFT_RESET:
-      break;
-    }
-
-  }
-};
-
 
 class SFR_map                   // Special Function Register (e.g. status)
 {
