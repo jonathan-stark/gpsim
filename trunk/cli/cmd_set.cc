@@ -86,7 +86,8 @@ void cmd_set::set(int bit_flag, int number)
     verbose = number;
     break;
   case SET_GUI_UPDATE:
-    gpsim_set_update_rate(number);
+    //gpsim_set_update_rate(number);
+    gi.set_update_rate(number);
     break;
 
   default:

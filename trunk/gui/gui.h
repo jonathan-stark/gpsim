@@ -817,6 +817,8 @@ class Profile_Window : public GUI_Object
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void NewProgram(GUI_Processor *gp);
+  virtual void StopExe(int address);
+  virtual void StartExe(int address);
 
 };
 

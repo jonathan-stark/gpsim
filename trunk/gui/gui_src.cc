@@ -74,13 +74,6 @@ key_press(GtkWidget *widget,
   case 'S':
   case GDK_F7:
     sbw->gp->cpu->pma.step(1);
-    /*
-    if(sbw->gp->cpu->pma.isHLLmode()
-       &&!low_level_step)
-      gpsim_hll_step(sbw->gp->pic_id);
-    else
-      gpsim_step(sbw->gp->pic_id, 1);
-    */
     break;
 
   case 'o':  // Step Over Next instruction, or hll statement
@@ -88,28 +81,18 @@ key_press(GtkWidget *widget,
   case 'n':
   case GDK_F8:
     sbw->gp->cpu->pma.step_over();
-    /*
-    if(sbw->gp->cpu->pma.isHLLmode()
-       &&!low_level_step)
-      gpsim_hll_step_over(sbw->gp->pic_id);
-    else
-      gpsim_step_over(sbw->gp->pic_id);
-    */
     break;
   case 'r':
   case 'R':
   case GDK_F9:
     sbw->gp->cpu->pma.run();
-    //gpsim_run(sbw->gp->pic_id);
     break;
   case GDK_Escape:
     sbw->gp->cpu->pma.stop();
-    //gpsim_stop(sbw->gp->pic_id);
     break;
   case 'f':
   case 'F':
     sbw->gp->cpu->pma.finish();
-    //gpsim_finish(sbw->gp->pic_id);
     break;
       
 // Exit is Ctrl-Q; the dispatcher menu shortcut

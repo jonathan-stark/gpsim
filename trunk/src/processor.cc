@@ -864,20 +864,6 @@ guint64 Processor::cycles_used(unsigned int address)
     return program_memory[address]->cycle_count;
 }
 
-//-------------------------------------------------------------------
-guint64 Processor::register_read_accesses(unsigned int address)
-{
-    return registers[address]->read_access_count;
-}
-
-//-------------------------------------------------------------------
-guint64 Processor::register_write_accesses(unsigned int address)
-{
-    return registers[address]->write_access_count;
-}
-
-
-
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------

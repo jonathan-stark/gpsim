@@ -279,7 +279,7 @@ class ProfileKeeper : public BreakCallBack
 {
 public:
   bool enabled;
-  pic_processor *cpu;
+  Processor *cpu;
   unsigned int last_trace_index;
   unsigned int instruction_address;
   unsigned int trace_pc_value;
@@ -291,7 +291,7 @@ public:
   virtual void callback(void);
   void enable_profiling(void);
   void disable_profiling(void);
-  void switch_cpus(pic_processor *new_cpu);
+  void switch_cpus(Processor *new_cpu);
 
 };
 

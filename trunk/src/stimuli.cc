@@ -587,12 +587,13 @@ void Event::callback(void)
 
   // If there's a node attached to this stimulus, then update it.
   if(snode)
-    snode->update(gpsim_get_current_time());
+    snode->update(cycles.value);
 
   //
   // If the event is inactive.
   if(current_state == 0) {
-    gpsim_set_break_delta(1,this);
+    cycles.set_break_delta(1,this);
+    //gpsim_set_break_delta(1,this);
     current_state = 1;
     state = drive;
   } else {

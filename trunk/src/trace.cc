@@ -1191,7 +1191,7 @@ void ProfileKeeper::enable_profiling(void)
 
     if(!cpu) {
 	if(active_cpu)
-	    cpu = (pic_processor *)active_cpu;
+	    cpu = active_cpu;
 	else
 	    cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
     }
@@ -1210,7 +1210,7 @@ void ProfileKeeper::disable_profiling(void)
     enabled = 0;
 }
 
-void ProfileKeeper::switch_cpus(pic_processor *pcpu)
+void ProfileKeeper::switch_cpus(Processor *pcpu)
 {
     cpu = pcpu;
 }
