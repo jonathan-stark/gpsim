@@ -3077,8 +3077,6 @@ void Breadboard_Window::Update(void)
 	    // If so, move the module
 	    position_module(p, x, y);
 	    update_board_matrix(p->bbw);
-	    printf(" Moved module to position %d %d\n",p->x, p->y);
-
 	  }
     }
 

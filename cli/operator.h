@@ -88,5 +88,96 @@ public:
 
 };
 
+//-----------------------------------------------------------------
+class OpAnd : public BinaryOperator {
+
+public:
+  OpAnd(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpAnd();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpDiv : public BinaryOperator {
+
+public:
+  OpDiv(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpDiv();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpLogicalAnd : public BinaryOperator {
+
+public:
+  OpLogicalAnd(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpLogicalAnd();
+  Value* shortCircuit(Value* leftValue);
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpLogicalOr : public BinaryOperator {
+
+public:
+  OpLogicalOr(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpLogicalOr();
+  Value* shortCircuit(Value* leftValue);
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpMpy : public BinaryOperator {
+
+public:
+  OpMpy(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpMpy();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpOr : public BinaryOperator {
+
+public:
+  OpOr(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpOr();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpShl : public BinaryOperator {
+
+public:
+  OpShl(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpShl();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpShr : public BinaryOperator {
+
+public:
+  OpShr(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpShr();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpSub : public BinaryOperator {
+
+public:
+  OpSub(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpSub();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
+class OpXor : public BinaryOperator {
+
+public:
+  OpXor(Expression* leftExpr, Expression* rightExpr);
+  virtual ~OpXor();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
 
 #endif // __OPERATOR_H__

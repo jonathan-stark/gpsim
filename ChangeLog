@@ -1,4 +1,10 @@
 2004-07-02 Scott Dattalo <scott@dattalo.com>
+	* gpsim/input.cc, gui/gui_menu.cc: Now files are correctly
+	loaded through the menu interface (File/Open)
+	* cli/parse.yy, cli/scan.ll, cli/operator.cc, cli/operator.h:
+	Added new binary operators: -,*,/,&,^,<<,>>
+	
+2004-07-02 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: Emit warning if a user specifies both
 	a .hex file and a .cod file at the command line.
 

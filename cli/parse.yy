@@ -83,7 +83,7 @@ void yyerror(char *message)
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
   init_cmd_state();
 
-#if 1
+#if 0
   static int i = 0;
 
   if(i++>5)
@@ -178,10 +178,18 @@ void yyerror(char *message)
 %token <String_P>    LITERAL_STRING_T
 
 
+%token AND_T
 %token COLON_T
 %token COMMENT_T
+%token DIV_T
 %token EOLN_T
+%token MINUS_T
+%token MPY_T
+%token OR_T
 %token PLUS_T
+%token SHL_T
+%token SHR_T
+%token XOR_T
 
 
 
@@ -195,8 +203,9 @@ void yyerror(char *message)
 %type  <StringList_P>              string_list
 
 %nonassoc COLON_T
-%left     PLUS_T
-
+%left     PLUS_T MINUS_T XOR_T OR_T AND_T
+%left     MPY_T DIV_T
+%left     SHL_T SHR_T
 %%
 /* Grammar rules */
 
@@ -592,6 +601,14 @@ expr_list
 
 binary_expr
         : expr   PLUS_T      expr       {$$ = new OpAdd($1, $3);}
+        | expr   MINUS_T     expr       {$$ = new OpSub($1, $3);}
+        | expr   MPY_T       expr       {$$ = new OpMpy($1, $3);}
+        | expr   DIV_T       expr       {$$ = new OpDiv($1, $3);}
+        | expr   AND_T       expr       {$$ = new OpAnd($1, $3);}
+        | expr   OR_T        expr       {$$ = new OpOr($1, $3);}
+        | expr   XOR_T       expr       {$$ = new OpXor($1, $3);}
+        | expr   SHL_T       expr       {$$ = new OpShl($1, $3);}
+        | expr   SHR_T       expr       {$$ = new OpShr($1, $3);}
         | expr   COLON_T     expr       {$$ = new OpAbstractRange($1, $3);}
         ;
 

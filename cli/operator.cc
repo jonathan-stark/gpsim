@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "operator.h"
-
+#include "errors.h"
 
 
 BinaryOperator::BinaryOperator(string  opString, 
@@ -120,5 +120,172 @@ Value *OpAdd::applyOp(Value *lval, Value *rval)
 {
 
   return new Integer(lval->getAsInt() + rval->getAsInt());
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpAnd::OpAnd(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("&",leftExpr,rightExpr)
+{
+}
+
+OpAnd::~OpAnd()
+{
+}
+
+Value *OpAnd::applyOp(Value *lval, Value *rval)
+{
+
+  return new Integer(lval->getAsInt() & rval->getAsInt());
+
+}
+
+
+//------------------------------------------------------------------------
+
+
+OpSub::OpSub(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("-",leftExpr,rightExpr)
+{
+}
+
+OpSub::~OpSub()
+{
+}
+
+Value *OpSub::applyOp(Value *lval, Value *rval)
+{
+
+  return new Integer(lval->getAsInt() - rval->getAsInt());
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpMpy::OpMpy(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("*",leftExpr,rightExpr)
+{
+}
+
+OpMpy::~OpMpy()
+{
+}
+
+Value *OpMpy::applyOp(Value *lval, Value *rval)
+{
+
+  return new Integer(lval->getAsInt() * rval->getAsInt());
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpOr::OpOr(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("|",leftExpr,rightExpr)
+{
+}
+
+OpOr::~OpOr()
+{
+}
+
+Value *OpOr::applyOp(Value *lval, Value *rval)
+{
+
+  return new Integer(lval->getAsInt() | rval->getAsInt());
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpXor::OpXor(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("^",leftExpr,rightExpr)
+{
+}
+
+OpXor::~OpXor()
+{
+}
+
+Value *OpXor::applyOp(Value *lval, Value *rval)
+{
+
+  return new Integer(lval->getAsInt() ^ rval->getAsInt());
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpDiv::OpDiv(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("/",leftExpr,rightExpr)
+{
+}
+
+OpDiv::~OpDiv()
+{
+}
+
+Value *OpDiv::applyOp(Value *lval, Value *rval)
+{
+  int i = rval->getAsInt();
+
+  if(i == 0)
+    throw new Error("Operator " + showOp() + " Divide by 0");
+
+  return new Integer(lval->getAsInt() / i);
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpShl::OpShl(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("<<",leftExpr,rightExpr)
+{
+}
+
+OpShl::~OpShl()
+{
+}
+
+Value *OpShl::applyOp(Value *lval, Value *rval)
+{
+
+  int i = rval->getAsInt();
+
+  if(i < 0  || i > 31)
+    throw new Error("Operator " + showOp() + " bad shift count");
+
+  return new Integer(lval->getAsInt() << i);
+
+}
+
+//------------------------------------------------------------------------
+
+
+OpShr::OpShr(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator(">>",leftExpr,rightExpr)
+{
+}
+
+OpShr::~OpShr()
+{
+}
+
+Value *OpShr::applyOp(Value *lval, Value *rval)
+{
+
+  int i = rval->getAsInt();
+
+  if(i < 0  || i > 31)
+    throw new Error("Operator " + showOp() + " bad shift count");
+
+  return new Integer(lval->getAsInt() >> i);
 
 }
