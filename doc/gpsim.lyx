@@ -1472,10 +1472,10 @@ Stop Stop execution
 Reset Reset CPU
 \layout Subsection
 
-gui update rate
+Simulation mode
 \layout Standard
 
-This variable sets the update interval of the gui.
+This controls how gpsim simulates, and how the gui updates.
 \layout List
 \labelwidthstring 0000000.00.0000
 
@@ -1500,6 +1500,11 @@ x\SpecialChar ~
 ms\SpecialChar ~
 animate Here you can slow down simulation with a delay between every
  cycle.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+realtime This will make gpsim try to synchronize simulation speed with wall
+ clock time.
 \layout Section
 
 Source Browsers
