@@ -164,7 +164,7 @@ int eXdbmInit(void)
 
   /* create the DbmList variable */
 
-  DbmDbList = (TDbmDbList *) malloc(sizeof(DbmDbList));
+  DbmDbList = (TDbmDbList *) malloc(sizeof(TDbmDbList));
   if(DbmDbList==NULL) {
     RaiseError(DBM_ALLOC);
     return -1;
