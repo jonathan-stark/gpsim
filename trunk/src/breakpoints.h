@@ -76,19 +76,14 @@ class BreakCallBack
 public:
   int CallBackID;  // A unique number assigned when the break point is armed.
 
-  virtual void callback(void)
-    {
-      cout << "generic callback\n";
-    }
+  virtual void callback(void);
 
   // Invoked by Cycle counter to display info about break call back.
-  virtual void callback_print(void) {
-    cout << " has callback, ID =  " << CallBackID << '\n';
-  }
+  virtual void callback_print(void);
 
   // clear_break is invoked when a BreakCallBack object's
   // associated break point is cleared. 
-  virtual void clear_break(void) {};
+  virtual void clear_break(void);
 };
 
 class Notify_Instruction : public Breakpoint_Instruction

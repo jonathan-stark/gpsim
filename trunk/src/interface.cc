@@ -189,19 +189,6 @@ char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, uns
 }
 
 //--------------------------------------------------------------------------
-#if 0
-unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
-{
-  Register *fr = gpsim_get_register( processor_id, type,  register_number);
-
-  if(fr)
-    return fr->get_value();
-  else
-    return INVALID_VALUE;
-
-}
-#endif
-//--------------------------------------------------------------------------
 
 gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {

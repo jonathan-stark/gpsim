@@ -30,23 +30,14 @@ Boston, MA 02111-1307, USA.  */
 //---------------------------------------------------------
 // PIR Peripheral Interrupt register base class for PIR1 & PIR2
 
-class PIR_base
-{
-public:
-
-  virtual void set_ccpif(void)=0;
-  virtual bool interrupt_status(void)=0;
-};
-
-
-class PIR : public sfr_register, public PIR_base
+class PIR : public sfr_register
 {
 public:
   INTCON  *intcon;
   PIE     *pie;
 
-  virtual void set_ccpif(void){cout<<"PIR ccpif\n";}
-  virtual bool interrupt_status(void){cout<<"PIR intstat\n"; return true;}
+  virtual void set_ccpif(void){}
+  virtual bool interrupt_status(void){ return true;}
 
 };
 

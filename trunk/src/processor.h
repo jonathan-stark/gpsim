@@ -138,6 +138,22 @@ class ProgramMemoryAccess :  public BreakCallBack
 };
 
 
+//---------------------------------------------------------
+// The RegisterMemoryAccess class is the interface used
+// by objects other than the simulator to manipulate the 
+// cpu's register memory.
+
+class RegisterMemoryAccess :  public BreakCallBack
+{
+ public:
+  
+  RegisterMemoryAccess(void);
+  virtual void set_cpu(Processor *p) { cpu = p; }
+  virtual Register *get_register(unsigned int address);
+
+  Processor *cpu;
+
+};
 //------------------------------------------------------------------------
 //
 // Processor - a generic base class for processors supported by gpsim
@@ -163,8 +179,9 @@ public:
   Register **register_bank;   //
 
   instruction   **program_memory;  // THE program memory
+
   ProgramMemoryAccess pma;
-  //RegisterMemoryAccess rma;
+  RegisterMemoryAccess rma;
 
   Program_Counter *pc;
 

@@ -1055,6 +1055,27 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 
   return false;
 }
+
+//========================================================================
+// Register Memory Access 
+
+RegisterMemoryAccess::RegisterMemoryAccess(void)
+{
+  cpu = NULL;
+}
+
+//--------------------------------------------------------------------------
+
+Register *RegisterMemoryAccess::get_register(unsigned int address)
+{
+
+  if(!cpu || !cpu->registers || register_memory_size()<=address)
+    return NULL;
+
+  return cpu->registers[address];
+
+}
+
 //========================================================================
 // Processor Constructor
 
