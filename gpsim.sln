@@ -1,6 +1,7 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gpsim", "gpsim\gpsim.vcproj", "{6747B599-55D9-4224-A04E-AE6D8C33BFEF}"
 	ProjectSection(ProjectDependencies) = postProject
+		{76A9CD80-43BA-48A9-B8DE-833F1DBE6B6A} = {76A9CD80-43BA-48A9-B8DE-833F1DBE6B6A}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "src", "src\src.vcproj", "{6BA847CD-9CDA-49A0-AF7E-B25B1144C9B1}"
@@ -9,6 +10,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "src", "src\src.vcproj", "{6
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cli", "cli\cli.vcproj", "{770FEBE4-6F1A-4837-833C-33602556896F}"
 	ProjectSection(ProjectDependencies) = postProject
+		{AF81F599-C97C-406A-B87B-490046F3BDB3} = {AF81F599-C97C-406A-B87B-490046F3BDB3}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gui", "gui\gui.vcproj", "{1234584B-F8A2-473D-A101-14839CCD4CE3}"
