@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 #include <iomanip.h>
 
+#include "../config.h"
 #include "14bit-processors.h"
 #include "trace.h"
 #include "trace_orb.h"

@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 #include <string>
 
+#include "../config.h"
 #include "pic-processor.h"
 #include "symbol.h"
 #include "xref.h"

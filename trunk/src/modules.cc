@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <dlfcn.h>
 
+#include "../config.h"
 #include "modules.h"
 #include "pic-processor.h"
 #include "stimuli.h"

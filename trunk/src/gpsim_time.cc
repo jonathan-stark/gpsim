@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "stimuli.h"
 
+#include "../config.h"
 #include "xref.h"
 //#include "gpsim_time.h"
 

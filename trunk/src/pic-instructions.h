@@ -22,7 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PIC_INSTRUCTIONS_H__
 #define __PIC_INSTRUCTIONS_H__
 
-#include "gpsim_def.h"
 
 #ifdef HAVE_GUI
 #include <glib.h>

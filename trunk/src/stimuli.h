@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #define __STIMULI_H__
 #include <iostream.h>
 #include <string>
+#include <glib.h>
 
 #include "gpsim_classes.h"
 #include "breakpoints.h"

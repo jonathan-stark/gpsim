@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 #include <string>
 
+#include "../config.h"
 #include "symbol.h"
 
 #include "p16x7x.h"

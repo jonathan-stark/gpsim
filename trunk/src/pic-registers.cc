@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 
 
+#include "../config.h"
 #include "14bit-processors.h"
 #include "interface.h"
 

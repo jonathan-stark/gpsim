@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 #include <string>
 
+#include "../config.h"
 #include "14bit-tmrs.h"
 #include "stimuli.h"
 #include "p16x7x.h"

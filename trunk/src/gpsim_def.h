@@ -27,13 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_VERSION_H__
 #define __GPSIM_VERSION_H__
 
-#include "../config.h"
-
-#include <glib.h>
-
-#define GPSIM_VERSION VERSION 
-
-#define HAVE_CORBA 1
+//#define GPSIM_VERSION VERSION 
 
 #define MAX_PROGRAM_MEMORY 0xffff
 

@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 //#include "14bit-registers.h"
 //#include "14bit-instructions.h"
+#include "../config.h"
 #include "16bit-processors.h"
 
 #include <string>

@@ -32,9 +32,13 @@ Boston, MA 02111-1307, USA.  */
 //-------------------------------------------------------------------
 
 #include <stdio.h>
+#include <unistd.h>
 #include <glib.h>
 
+#include "../config.h"
+#define GPSIM_VERSION VERSION 
 #include "gpsim_def.h"
+
 #include "pic-processor.h"
 #include "p16x8x.h"
 #include "xref.h"
@@ -912,6 +916,16 @@ gpointer gpsim_set_cyclic_break_point2(
   cbp->set_break();
   
   return((gpointer)cbp);
+}
+
+//---------------------------------------------------------------------------
+//   char *gpsim_get_version(char *dest)
+//---------------------------------------------------------------------------
+char *gpsim_get_version(char *dest, int max_len)
+{
+
+  return( strncpy(dest, GPSIM_VERSION, max_len));
+
 }
 
 //---------------------------------------------------------------------------

@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream.h>
 
+#include "../config.h"
 #include "12bit-processors.h"
 
 instruction * disasm12 (pic_processor *cpu, unsigned int inst)

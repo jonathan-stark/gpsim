@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 #include <iomanip.h>
 
+#include "../config.h"
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "interface.h"
