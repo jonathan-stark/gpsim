@@ -114,6 +114,7 @@ int initialize_gpsim_core()
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
   get_symbol_table().add(verbosity);
   get_symbol_table().add(new CycleCounterAttribute());
+  stop_watch.init();
 #ifdef HAVE_GUI
   get_symbol_table().add(new GUIUpdateRateAttribute());
 #endif

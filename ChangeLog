@@ -1,3 +1,13 @@
+2005-01-23 Scott Dattalo <scott@dattalo.com>
+	* configure.ac: Craig Franklin updated gpsim's configure files. It
+	turns out there was a tiny bug preventing things to build a
+	*second* time (the first time would work fine)
+	* src/gpsim_time.h, src/gpsim_time.cc, src/init.cc: The newly
+	added and globally instantiated StopWatch class' constructor was
+	making calls to the globally instantiated (but not necessarily
+	constructed) Symbol_Table class. Now, StopWatch::init() will make
+	the calls to the symbol table.
+
 2005-01-21 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, src/src.vcproj: MSVC sync
 	* doc/gpsimWin32.html: gpsim works with flex 2.4.31

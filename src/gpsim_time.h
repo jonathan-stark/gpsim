@@ -218,7 +218,8 @@ class StopWatch : public TriggerObject
 {
  public:
 
-  StopWatch(void);
+  StopWatch();
+  void init();
 
   guint64 get(void);
   double get_time(void);
@@ -242,6 +243,7 @@ private:
   Boolean *direction;
 
   bool count_dir;
+  bool initialized;
 
   guint64 offset;
   guint64 break_cycle;

@@ -862,21 +862,29 @@ public:
 StopWatch::StopWatch()
 {
 
-  offset    = 0;
-  value     = new StopWatchValue(this);
-  rollover  = new StopWatchRollover(this);
-  enable    = new StopWatchEnable(this);
-  direction = new StopWatchDirection(this);
+  offset      = 0;
+  initialized = false;
+  value       = new StopWatchValue(this);
+  rollover    = new StopWatchRollover(this);
+  enable      = new StopWatchEnable(this);
+  direction   = new StopWatchDirection(this);
 
   if(!value || !rollover || !enable || !direction)
     throw Error("StopWatch");
 
-  get_symbol_table().add(value);
-  get_symbol_table().add(rollover);
-  get_symbol_table().add(enable);
-  get_symbol_table().add(direction);
+}
 
-  update();
+void StopWatch::init()
+{
+  if(!initialized) {
+    get_symbol_table().add(value);
+    get_symbol_table().add(rollover);
+    get_symbol_table().add(enable);
+    get_symbol_table().add(direction);
+
+    update();
+    initialized = true;
+  }
 }
 
 //----------------------------------------
