@@ -1,3 +1,6 @@
+2004-01-06  Scott Dattalo  <scott@dattalo.com>
+	* src/p16x5x.cc - patch from Rob Pearce that fixes the 16C5X tris writes.
+
 2004-01-05  Scott Dattalo  <scott@dattalo.com>
 	* src/14bit-tmrs.cc - tmr2 bug. PWM period was getting ANDed with 0xff.
 

@@ -240,11 +240,11 @@ void P16C54::tris_instruction(unsigned int tris_register)
    switch (tris_register)
    {
       case 5:
-        trisa.value = W->value;
+        trisa.put(W->value);
         trace.write_TRIS(trisa.value);
         break;
       case 6:
-        trisb.value = W->value;
+        trisb.put(W->value);
         trace.write_TRIS(trisb.value);
         break;
       default:
@@ -343,15 +343,15 @@ void P16C55::tris_instruction(unsigned int tris_register)
    switch (tris_register)
    {
       case 5:
-        trisa.value = W->value;
+        trisa.put(W->value);
         trace.write_TRIS(trisa.value);
         break;
       case 6:
-        trisb.value = W->value;
+        trisb.put(W->value);
         trace.write_TRIS(trisb.value);
         break;
       case 7:
-        trisc.value = W->value;
+        trisc.put(W->value);
         trace.write_TRIS(trisc.value);
         break;
       default:
