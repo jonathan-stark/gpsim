@@ -308,6 +308,9 @@ void _14bit_40pins::create_iopin_map(void)
 void P16X6X_processor::create_sfr_map(void)
 {
 
+  if(verbose)
+    cout << "P16X6X_processor::create_sfr_map\n";
+
   // The 16c62,c64 have general purpose registers
   // at addresses 20-7f and a0-bf
   add_file_registers(0x20, 0x7f, 0);

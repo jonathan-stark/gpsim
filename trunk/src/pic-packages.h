@@ -119,7 +119,7 @@ class _16bit_68pins  : public _68pins
 {
 public:
 
-  virtual void create_iopin_map(void) {return;};
+  //virtual void create_iopin_map(void) {return;};
 
 };
 

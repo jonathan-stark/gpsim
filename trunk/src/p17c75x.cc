@@ -187,7 +187,7 @@ pic_processor * P17C7xx::construct(void)
 
   cout << " 17c7xx construct\n";
 
-  p->P17C7xx::create(0x1fff);
+  p->create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
   p->name_str = "17c7xx";
@@ -201,7 +201,7 @@ P17C7xx::P17C7xx(void)
   if(verbose)
     cout << "17c7xx constructor, type = " << isa() << '\n';
   
-  _16bit_processor::create();
+  //_16bit_processor::create();
   
   //  create_iopins(iopin_map, num_of_iopins);
   
@@ -213,12 +213,36 @@ void  P17C7xx::create(int ram_top)
 {
   cout << "p17c7xx create\n";
 
+
   create_iopin_map();
-  //  _16bit_processor::create();
+
+  //_16bit_processor::create();
+
+  // FIXME - TSD the 17c7xx is derived from the 16bit_processor,
+  // but it can call the _16bit_processor::create member function
+  // (because it assumes the 16bit processor is an 18cxxx device)
+
+  pic_processor::create();
+
+  fast_stack.init(this);
+  ind0.init(this);
+  ind1.init(this);
+  ind2.init(this);
+  trace.program_counter (pc.value);
+  tmr0l.initialize();
+  intcon.initialize();
+
+  
+  //usart.initialize(this);
+  tbl.initialize(this);
+  //tmr0l.start(0);
+
+  //  create_iopin_map();
+  //  create_sfr_map();
 
   add_file_registers(0x0, ram_top, 0);
 
-  P17C7xx::create_sfr_map();
+
 }
 
 
@@ -264,12 +288,14 @@ pic_processor * P17C75x::construct(void)
 
 void P17C75x::create(int ram_top)
 {
+
   cout << "p17c75x create\n";
-  create_iopin_map();
+  P17C7xx::create(ram_top);
+
+  //  create_iopin_map();
 
   //  _16bit_processor::create();
 
-  P17C7xx::create(ram_top);
   cout << "p17c75x parent created\n";
   P17C75x::create_sfr_map();
   cout << "p17c75x sfr map created\n";
@@ -289,6 +315,9 @@ void P17C75x::create_symbols(void)
   if(verbose)
     cout << "p17c75x create symbols\n";
 
+
+    return;
+/*
   symbol_table.add_ioport(portb->cpu, portb);
   symbol_table.add_ioport(porta->cpu, porta);
   symbol_table.add_ioport(portc->cpu, portc);
@@ -296,7 +325,7 @@ void P17C75x::create_symbols(void)
   symbol_table.add_ioport(porte->cpu, porte);
   symbol_table.add_ioport(portf->cpu, portf);
   symbol_table.add_ioport(portg->cpu, portg);
-
+*/
 }
 
 void P17C75x::create_sfr_map(void)

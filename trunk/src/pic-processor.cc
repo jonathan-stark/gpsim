@@ -894,7 +894,7 @@ invalid_file_register::invalid_file_register(unsigned int at_address)
 // Since this is a base class member function, only those things that
 // are common to all pics are created.
 
-void pic_processor :: create (void)
+void pic_processor::create (void)
 {
 
   init_program_memory (program_memory_size());
