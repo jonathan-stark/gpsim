@@ -212,8 +212,8 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 
     registers[j]->address = j;
 
-    registers[j]->set_write_trace(getWriteTT()->type | (j << 8));
-    registers[j]->set_read_trace(getReadTT()->type | (j << 8));
+    registers[j]->set_write_trace(getWriteTT(j));
+    registers[j]->set_read_trace(getReadTT(j));
 
     registers[j]->symbol_alias = 0;
 
@@ -1020,24 +1020,40 @@ int Processor::trace_dump1(int type, char *buffer, int bufsize)
   return 1;
 }
 
-TraceType *Processor::getWriteTT()
+//-------------------------------------------------------------------
+// getWriteTT
+//
+// For devices with more than 64k of registers (which are not supported
+// at the moment), we can enhance this function to return different Trace
+// type objects base on the upper address bits.
+
+unsigned int Processor::getWriteTT(unsigned int j)
 {
   if(!writeTT) {
     writeTT = new RegisterWriteTraceType(this,0,1);
     trace.allocateTraceType(writeTT);
   }
 
-  return writeTT;
+  // The upper 8-bits define the dynamically allocated trace type
+  // The lower 8-bits will record the register value that is written.
+  // The middle 16-bits are the register address
+  
+  return writeTT->type = (writeTT->type & 0xff000000) | ((j & 0xffff) << 8);
 
 }
 
-TraceType *Processor::getReadTT()
+unsigned int Processor::getReadTT(unsigned int j)
 {
   if(!readTT) {
     readTT = new RegisterReadTraceType(this,0,1);
     trace.allocateTraceType(readTT);
   }
-  return readTT;
+
+  // The upper 8-bits define the dynamically allocated trace type
+  // The lower 8-bits will record the register value that is written.
+  // The middle 16-bits are the register address
+
+  return (readTT->type & 0xff000000) | ((j & 0xffff) << 8);
 }
 
 //-------------------------------------------------------------------
