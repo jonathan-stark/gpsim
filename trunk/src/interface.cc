@@ -899,7 +899,7 @@ unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
 
   return pic->get_pin_state( pin );
 }
-void  gpsim_pin_set_value(unsigned int processor_id, unsigned int pin)
+void  gpsim_pin_set_value(unsigned int processor_id, unsigned int pin, unsigned int value)
 {
   pic_processor *pic = get_processor(processor_id);
 
@@ -934,7 +934,7 @@ void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned in
 
   IOPIN *iopin = pic->get_pin(pin);
 
-  if(!pin)
+  if(iopin==NULL)
     return;
 
   iopin->change_direction( ( (new_dir) ?  IOPIN::DIR_OUTPUT :  IOPIN::DIR_INPUT));
