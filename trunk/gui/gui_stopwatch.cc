@@ -272,8 +272,8 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
     gtk_widget_set_uposition(GTK_WIDGET(sww->gui_obj.window),x,y);
     gtk_window_set_wmclass(GTK_WINDOW(sww->gui_obj.window),sww->gui_obj.name,"Gpsim");
 
-    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+//    gtk_signal_connect (GTK_OBJECT (window), "destroy",
+//			GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
     gtk_signal_connect (GTK_OBJECT (sww->gui_obj.window), "delete_event",
 			GTK_SIGNAL_FUNC(delete_event), (gpointer)sww);
     gtk_signal_connect_after(GTK_OBJECT(sww->gui_obj.window), "configure_event",

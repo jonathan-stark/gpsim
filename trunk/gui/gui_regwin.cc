@@ -378,9 +378,9 @@ static char *gui_get_log_settings(char **filename, int *mode)
 
 	gtk_signal_connect_object(GTK_OBJECT(window),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
-	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				   GTK_OBJECT(window));
+//	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				   GTK_OBJECT(window));
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -1803,8 +1803,8 @@ BuildRegisterWindow(Register_Window *rw)
 
   ((GUI_Object*)rw)->window=window;
 
-  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
+//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   //GTK_SIGNAL_FUNC (quit), NULL);
 
   main_vbox=gtk_vbox_new(FALSE,1);

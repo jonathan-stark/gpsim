@@ -94,8 +94,8 @@ show_message (char *title, char *message)
 
   window = gtk_dialog_new ();
 
-  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
+//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
 
   gtk_window_set_title (GTK_WINDOW (window), title);
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -103,9 +103,9 @@ show_message (char *title, char *message)
 
   button = gtk_button_new_with_label ("close");
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
-			     GTK_OBJECT (window));
+//  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
+//			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
+//			     GTK_OBJECT (window));
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
   gtk_widget_grab_default(button);
@@ -293,7 +293,7 @@ file_selection_ok (GtkWidget        *w,
 	    gui_message(msg);
 	}
     }
-    gtk_widget_destroy (GTK_WIDGET (fs));
+    gtk_widget_hide (GTK_WIDGET (fs));
 }
 
 extern int gui_question(char *question, char *a, char *b);
@@ -318,15 +318,15 @@ fileopen_dialog(gpointer             callback_data,
 
       gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				 GTK_OBJECT(window));
+//      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				 GTK_OBJECT(window));
 
       gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			  "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
 			  window);
       gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
-				 "clicked", GTK_SIGNAL_FUNC(gtk_widget_destroy),
+				 "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
 				 GTK_OBJECT (window));
       
       button = gtk_button_new_with_label ("Hide Fileops");
@@ -579,9 +579,9 @@ void create_dispatcher (void)
       gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
       
       
-      gtk_signal_connect_object (GTK_OBJECT (dispatcher_window), "destroy",
-				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				 GTK_OBJECT(dispatcher_window));
+//      gtk_signal_connect_object (GTK_OBJECT (dispatcher_window), "destroy",
+//				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				 GTK_OBJECT(dispatcher_window));
       gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
 			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
 			  NULL);
