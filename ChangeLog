@@ -1,3 +1,9 @@
+2004-05-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, src/gui_src_asm.cc: Fixed memory leak with 'canbreak' XPM.
+	Added 'SourcePage' class to hold information about a source browser notebook
+	page. Corresponding info in 'SourceBrowserAsm_Window'.
+	Added a new member to the sa_entry structure to keep track of pixmaps.
+	
 2004-05-15 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor: If the simulation is started from an address that has
 	an execution break, now gpsim will ignore that break.
@@ -20,6 +26,9 @@
 	Converted the structure labeled_entry into a class and renamed it
 	to LabeledEntry.
 	* gui/gui_statusbar.h: Added.
+
+2004-05-12 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll: Identifiers can now contain dashes.
 
 2004-05-12 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: bi-directional I/O pins were not working properly
