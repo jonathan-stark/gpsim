@@ -13,6 +13,11 @@
 
         failures
 
+	;; The capTime 16-bit register is a working register that keeps track
+        ;; of the capture edge.
+
+	capTimeH, capTimeL
+
         temp1,temp2
         t1,t2,t3
         kz
@@ -95,6 +100,7 @@ main:
         ;;      Select Fosc/4 as the clock source
         ;;      Disable the External oscillator feedback circuit
         ;;      Select a 1:1 prescale
+        ;; In this mode, TMR1 will count instruction cycles.
         
         clrf    T1CON           ;
         clrf    PIR1            ; Clear the interrupt/roll over flag
@@ -128,39 +134,40 @@ ccp_test1:
         ;; ccp = 7  <- capture every 16th rising edge
         ;;
         ;; Note, the capture only works if the stimulus is present
-        ;; on the ccp pin. (Try invoking gpsim with 'p16c64_ccp.stc'
-        ;; to get the proper stimulus defined.)
-        
+        ;; on the ccp pin!
+
+        call    ccpWaitForPORTC2_high
+
         movlw   4
         movwf   CCP1CON
 
         ;; Start the timer
 
         bsf     T1CON,TMR1ON
-        clrf    t1              ;A 16-bit software timeout counter
-        clrf    t2
+
+        call    ccpWaitForCapture
+
+lll:
+	movf	CCPR1L,W
+	movwf	capTimeL
+	movf	CCPR1H,W
+	movwf	capTimeH
+
+	call    ccpWaitForCapture
+
+	movf	CCPR1L,W
+	subwf	capTimeL,F
+
+	movf	CCPR1H,W
+	skpc
+	 incfsz CCPR1H,W
+          subwf	capTimeH,F
+
+  goto lll
 
 ccp_t1:
+        call    ccpWaitForCapture
 
-        ;;
-        ;; when an edge is captured, the interrupt routine will
-        ;; set a flag:
-        ;; 
-        btfsc   temp1,1
-         goto   ccp_next_capture_mode
-
-        movlw   1               ;This 16-bit software counter
-        addwf   t1,f            ;will time out if there's something wrong,
-        rlf     kz,w
-        addwf   t2,f
-        skpc
-         goto   ccp_t1
-
-        goto    failed          ;If we get here then we haven't caught anything!
-                                ;Either a) there's a gpsim bug or b) the stimulus
-                                ;file is incorrect (maybe even the wrong cpu).
-
-ccp_next_capture_mode:
         movlw   7               ;if we just processed the 16th rising edge capture mode
         xorwf   CCP1CON,W       ;
         skpnz                   ;
@@ -168,7 +175,72 @@ ccp_next_capture_mode:
 
         clrf    temp1
         incf    CCP1CON,F       ;Next mode
-        goto    ccp_t1 - 2      ;clear t1 and t2 too.
+        goto    ccp_t1          ;clear t1 and t2 too.
+
+;------------------------------------------------------------------------
+;ccpWaitForCapture
+;
+; Spin loop that polls an interrupt flag that is set whenever a capture 
+; interrupt triggers.
+
+ccpWaitForCapture:
+
+        clrf    t1              ;A 16-bit software timeout counter
+        clrf    t2
+ccpWaitLoop:	
+        ;; The watchdog counter ensures we don't loop forever!
+        call    ccpWDCounter
+
+        ;;
+        ;; when an edge is captured, the interrupt routine will
+        ;; set a flag:
+        ;; 
+
+        btfss   temp1,1
+         goto    ccpWaitLoop
+
+	bcf	temp1,1
+        return
+
+
+
+
+;------------------------------------------------------------------------
+ccpWaitForPORTC2_high:
+
+	btfsc	PORTC,2
+         return
+	call	ccpWDCounter
+	goto	ccpWaitForPORTC2_high
+ccpWaitForPORTC2_low:
+
+	btfss	PORTC,2
+         return
+	call	ccpWDCounter
+	goto	ccpWaitForPORTC2_high
+
+;------------------------------------------------------------------------
+; ccpWDCounter
+;  a 16bit watch dog counter is incremented by 1. If it rolls over then we failed.
+
+ccpWDCounter:
+
+	incfsz  t1,f
+         return
+        incfsz  t2,f
+         return
+
+        goto    failed          ;If we get here then we haven't caught anything!
+                                ;Either a) there's a gpsim bug or b) the stimulus
+                                ;file is incorrect.
+
+
+;        movlw   1               ;This 16-bit software counter
+;        addwf   t1,f            ;will time out if there's something wrong,
+;        rlf     kz,w
+;        addwf   t2,f
+;	skpc
+;         return
 
 
         ;;
@@ -176,6 +248,11 @@ ccp_next_capture_mode:
         ;;
         ;; Now for the compare mode. 
 ccp_test2:
+
+	goto    done
+
+  ;;##########################################
+
 
         clrf    T1CON
         clrf    TMR1L
