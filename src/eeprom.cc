@@ -155,6 +155,7 @@ unsigned int EECON2::get(void)
 EECON2::EECON2(void)
 {
   new_name("eecon2");
+  ee_reset();
 }
 
 
