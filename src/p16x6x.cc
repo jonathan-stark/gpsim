@@ -90,7 +90,7 @@ void P16C61::create(void)
 
   _14bit_processor::create();
 
-  create_sfr_map();
+  P16C61::create_sfr_map();
 
 }
 
