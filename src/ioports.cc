@@ -976,7 +976,7 @@ void PORTA_62x::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  //cout << "IOPORT::put trying to put " << new_value << '\n';
+  cout << "PORTA_62X::put trying to put " << new_value << '\n';
 
   // Bit 4 is an open collector output (it can only drive low)
   // If we're trying to drive bit 4 high and bit 4 is an output
@@ -998,7 +998,7 @@ void PORTA_62x::put(unsigned int new_value)
   if(stimulus_mask)
     update_stimuli();
 
-  //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
+  cout << " PORTA_62X::put port value is " << value << " after updating stimuli\n";
 
   trace.register_write(address,value);
 
@@ -1041,7 +1041,8 @@ unsigned int PORTA_62x::get(void)
 
   }
 
-  
+  cout << " PORTA_62X::get port value is " << value << " \n";
+
   return value;
 }
 
@@ -1077,7 +1078,7 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
 //-------------------------------------------------------------------
 PORTA_62x::PORTA_62x(void)
 {
-  //new_name("portb");
+  new_name("porta");
 }
 
 //-------------------------------------------------------------------
