@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#define STRICMP strcasecmp
 #else
 #define G_PLATFORM_WIN32
 #define G_OS_WIN32
@@ -42,6 +43,9 @@ Boston, MA 02111-1307, USA.  */
 #include <glib/gwin32.h>
 #include <direct.h>
 #include <windows.h>
+
+#define STRICMP stricmp
+
 #endif
 
 using namespace std;
@@ -92,7 +96,7 @@ void * load_library(const char *library_name, char **pszError)
   string sFile;
   string sPath(library_name);
   translatePath(sPath);
-  if (stricmp(&sPath[sPath.size() - 4], MODULE_EXT) != 0) {
+  if (STRICMP(&sPath[sPath.size() - (sizeof(MODULE_EXT)-1)], MODULE_EXT) != 0) {
     sPath.append(MODULE_EXT);
   }
   AddToSearchPath(sPath, sFile);

@@ -35,9 +35,17 @@ Boston, MA 02111-1307, USA.  */
 #ifdef _WIN32
 #include <direct.h>
 #include "fd2raw.h"
+#define GETCWD _getcwd
+
 #else
 #include <sys/file.h>
 #include <unistd.h>
+
+#if !defined(_MAX_PATH)
+#define _MAX_PATH 1024
+#endif
+
+#define GETCWD getcwd
 // temp fix to over come 23jan05 changes to configure script that prevent
 // readline from being found on older systems.
 #define HAVE_READLINE
@@ -435,7 +443,7 @@ void process_command_file(const char * file_name)
       cout << file_name;
       cout << endl;
       char cw[_MAX_PATH];
-      _getcwd(cw, _MAX_PATH);
+      GETCWD(cw, _MAX_PATH);
       cout << "current working directory is ";
       cout << cw;
       cout << endl;
