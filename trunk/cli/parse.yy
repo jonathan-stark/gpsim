@@ -58,7 +58,8 @@ using namespace std;
 #include "cmd_version.h"
 #include "cmd_x.h"
 #include "cmd_icd.h"
-
+#include "expr.h"
+#include "operator.h"
 #define YYERROR_VERBOSE
 
  extern char *yytext; 
@@ -94,6 +95,11 @@ void free_char_list(char_list *);
   cmd_options_num   *con;
   cmd_options_float *cof;
   cmd_options_str   *cos;
+
+  BinaryOperator*           BinaryOperator_P;
+  Expression*               Expression_P;
+  Integer*                  Integer_P;
+
 }
 
 
@@ -145,13 +151,26 @@ void free_char_list(char_list *);
 %token <li>  NUMBER
 %token <f>   FLOAT_NUMBER
 
+/* Expression parsing stuff */
+%type <BinaryOperator_P>        binary_expr
+%type <Expression_P>            expr
+%type <Expression_P>            literal
+%type <Expression_P>            unary_expr
+
+%token <Integer_P>   LITERAL_INT_T
+%token PLUS_T
+
+
+
 %type  <li>   _register
 %type  <co>  bit_flag
 %type  <co>  cmd_subtype
-%type  <li>   indirect
+%type  <li>  indirect
 %type  <con> numeric_option
 %type  <cof> numeric_float_option
 %type  <cos> string_option
+
+%left     PLUS_T
 
 %%
 /* Grammar rules */
@@ -162,7 +181,7 @@ list_of_commands:
        ;
 cmd:
 
-     | ignored
+     ignored
         {
 	  cout << " cmd ignored\n";
 	}
@@ -193,7 +212,7 @@ cmd:
      | version_cmd
      | x_cmd
      | icd_cmd
-     | spanning_lines
+     //| spanning_lines
      | END_OF_INPUT
      {
        if(verbose&2)
@@ -228,7 +247,7 @@ ignored: IGNORED
             }
           }
           ;
-
+/*
 spanning_lines:  SPANNING_LINES
           {
             if(verbose)
@@ -238,6 +257,7 @@ spanning_lines:  SPANNING_LINES
 	    YYACCEPT;
           }
           ;
+*/
 
 aborting: ABORT
           {
@@ -587,23 +607,20 @@ stimulus_cmd: STIMULUS
           ;
 
 stimulus_opt: 
+	  
 	  SPANNING_LINES
           {
             if(verbose)
               cout << "parser is ignoring spanned line in stimulus\n";
             parser_spanning_lines=1;
           }
-          | numeric_option
+          | 
+	  numeric_option
           {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
 	    c_stimulus.stimulus($1);
 	  }
-          | stimulus_opt IGNORED
-          {
-            if(verbose)
-              cout << "parser is ignoring garbage in stimulus\n";
-          }
           | stimulus_opt bit_flag
           {
             if(verbose)
@@ -689,6 +706,14 @@ version_cmd: gpsim_VERSION
 x_cmd: X
           {
 	    c_x.x();
+	  }
+          | X expr
+          {
+	    Value *v = $2->evaluate();
+            cout << "x command with an expression!\n";
+	    cout << $2->show() << endl;
+	    cout << v->get() << endl;
+	    delete $2;
 	  }
           | X NUMBER
           {
@@ -803,6 +828,26 @@ string_list: STRING
 	}
         ;
 
+
+//----------------------------------------
+// Expression parsing
+
+expr    : binary_expr                   {$$=$1;}
+        | unary_expr                    {$$=$1;}
+        ;
+
+binary_expr
+        : expr   PLUS_T      expr         {
+  cout << " Binary expression\n";
+  $$ = new OpAdd($1, $3);}
+        ;
+
+unary_expr
+        : literal                                       {$$=$1;}
+        ;
+
+literal : LITERAL_INT_T                         {$$ = new LiteralInteger($1);}
+        ;
 
 %%
 

@@ -1,4 +1,12 @@
 2004-06-09 Scott Dattalo <scott@dattalo.com>
+	* cli/expr.cc, cli/expr.h, cli/viewable.h, cli/viewable.cc, 
+	cli/operator.h, cli/operator.cc: New files to support parsing
+	* cli/parse.yy, cli/scan.ll: added new parsing and lexing rules
+	for expression parsing.
+	* src/stimuli.cc: Manuel Boyer found and fixed a bug where the
+	a named stimulus was ignoring its newly assigned name.
+
+2004-06-09 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/scan.ll, cli/misc.h, cli/cmd_stimulus.cc, cli/command.h
 	Cleaned up the parser by removing the explicit YYABORT and YYACCEPT macros.
 	Also, redesigned the parser implementation of the stimulus command.

@@ -11,6 +11,11 @@ typedef union {
   cmd_options_num   *con;
   cmd_options_float *cof;
   cmd_options_str   *cos;
+
+  BinaryOperator*           BinaryOperator_P;
+  Expression*               Expression_P;
+  Integer*                  Integer_P;
+
 } yystype;
 # define YYSTYPE yystype
 # define YYSTYPE_IS_TRIVIAL 1
@@ -54,6 +59,8 @@ typedef union {
 # define	CMD_SUBTYPE	293
 # define	NUMBER	294
 # define	FLOAT_NUMBER	295
+# define	LITERAL_INT_T	296
+# define	PLUS_T	297
 
 
 extern YYSTYPE yylval;

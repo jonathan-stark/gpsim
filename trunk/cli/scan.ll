@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 #include "command.h"
+#include "operator.h"
+#include "expr.h"
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
@@ -54,7 +56,9 @@ extern int parser_spanning_lines;
 extern int last_command_is_repeatable;
 
 static string strip_trailing_whitespace (char *s);
-int handle_identifier(const string &tok, cmd_options **op );
+static int handle_identifier(const string &tok, cmd_options **op );
+static int process_intLiteral(char *buffer, int conversionBase);
+static int recognize(int token,const char *);
 
 int cli_corba_init (char *ior_id);
 
@@ -85,30 +89,9 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 // Comments. Ignore all text after a comment character
 %}
 
-{COMMENT} { 
-   unput('\n');
-   if(verbose)
-     cout << "Lex comment\n";
+{COMMENT} { unput('\n'); }   /* ignore comments */
 
-   //return IGNORED;
-   }
-
-{S} { 
-   int c;
-   do {
-    c = yyinput();
-   } while(c == ' ');
-
-   if(c == '\n') {
-     if(verbose)
-       cout << "Lex found EOL after white space\n";
-     return IGNORED;
-   }
-
-   unput(c);
-
-   }
-
+{S}+  /* ignore white space */
 
 \n  { 
       // Got an eol.
@@ -120,53 +103,50 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 	if(verbose)
           cout << "EOL with " << cmd->name << '\n';
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
-	  if(verbose)
-            cout << " spanning lines     \n";
           input_mode = CONTINUING_LINE;
-          return SPANNING_LINES; //IGNORED; 
-        } else {
-	  if(verbose)
-	    cout << " returning IGNORED\n";
-          return IGNORED;
-	}
-      } else {
-	if((verbose))// && DEBUG_PARSER)
-          cout << "EOL but no pending command\n";
-        return IGNORED; 
-      }
+          return recognize(SPANNING_LINES,"spanning lines");
+        } else
+	  return recognize(IGNORED, "returning IGNORED"); 
+
+      } else
+        return recognize(IGNORED, "EOL but no pending command"); 
     }
 
-q\n   { 
-   quit_parse  =1;
-   return QUIT;  }
+q\n { /* short cut for quiting */ 
+      quit_parse  =1;
+      return QUIT;
+    }
 
 abort_gpsim_now {
+  /* a sure way to abort a script */
    return ABORT;
    }
 
 <<EOF>> {
-    //cout << "got an <<EOF>> in scan.l\n";
-    //quit_parse = 1;
     return END_OF_INPUT;
   }
+
+"+"    {return(recognize(PLUS_T,"+"));}
+
+L{DEC} {return(process_intLiteral(&yytext[1], 10));}
 
 {DEC} {
    //yylval.i = strtoul(yytext,0,numeric_base);
    sscanf(yytext,"%Ld",&yylval.li);
    // printf("a number: 0x%x\n",yylval.i);
-   return NUMBER;
+   return recognize(NUMBER,"decimal number");
   }
 
 {HEX} { 
    //yylval.i = strtoul(yytext,0,0);
    sscanf(yytext,"%Lx",&yylval.li);
    // printf("a hex number: 0x%x\n",yylval.i);
-   return NUMBER;
+   return recognize(NUMBER,"hex number");
   }
 
 {FLOAT} {
     sscanf(yytext,"%f",&yylval.f);
-    return FLOAT_NUMBER;  
+    return recognize(FLOAT_NUMBER,"float number");  
   }
 
 %{
@@ -179,7 +159,8 @@ abort_gpsim_now {
 
 "echo".*{NL} {
    fprintf(yyout,"%s",&yytext[5]);
-   return IGNORED;
+   unput('\n');
+   // return IGNORED;
   }
 
 %{
@@ -192,11 +173,11 @@ abort_gpsim_now {
   }
 
 %{
-// If this a command that is spanning more than one line
+// If this is a command that is spanning more than one line
 // then the 'end' command will finish it.
 %}
 
-"end"{S}* {
+"end"{S}*{NL} {
     end_of_command = 1;
     return(END_OF_COMMAND);
   }
@@ -206,12 +187,12 @@ abort_gpsim_now {
 // don't write directly on yytext.
 %}
 
-{IDENT}{S}* {
+{IDENT} {
   string tok = strip_trailing_whitespace (yytext);
   if(strlen(tok.c_str()))
     return handle_identifier (tok,&op);
   else
-    return 0;
+    return recognize(0,"invalid identifier");
   }
 
 . {
@@ -302,12 +283,12 @@ int handle_identifier(const string &s, cmd_options **op )
       have_parameters = 0;
       retval = cmd->get_token();
       last_command_is_repeatable = cmd->is_repeatable();
-      return retval;
+      return recognize(retval,"good command");
 
     } else {
       cout << " command: \"" << s << "\" was not found\n";
       //cout << " command: was not found\n";
-      return IGNORED;
+      return recognize(IGNORED,"ignoring command");
 
     }
 
@@ -330,7 +311,7 @@ int handle_identifier(const string &s, cmd_options **op )
       if(verbose&2)
         cout << "found option '" << opt->name << "'\n";
       yylval.co = opt;
-      return translate_token(opt->token_type);
+      return recognize(translate_token(opt->token_type),"option");
     }
     else
       opt++;
@@ -350,11 +331,53 @@ int handle_identifier(const string &s, cmd_options **op )
    // In either case, let's let the parser deal with it.
 
    yylval.s = strdup(s.c_str());
-   return STRING;
+   return recognize(STRING,"string");
  }
 
  return 0;
 
+}
+
+
+/*****************************************************************
+ * Process an integer literal.  This routine constructs the
+ * YYSTYPE object.  The caller is responsible from returning the
+ * LITERAL_INT_T token identifer to the parser.
+ */
+static int process_intLiteral(char *buffer, int conversionBase)
+{
+  char c;
+  int literalValue=0;
+  int nxtDigit;
+
+  while (*buffer) {
+    c = toupper(*buffer++);
+    /*printf("%s:c=%c\n", __FUNCTION__, c);*/
+    nxtDigit = (c) <= '9' ? c-'0' : c-'A'+10;
+    if (nxtDigit >= conversionBase) {
+      //lexErr = new Error("bad digit in integer literal");
+      literalValue = 0;
+      break;
+    }
+    
+    literalValue *= conversionBase;
+    literalValue += nxtDigit;
+  }
+
+  yylval.Integer_P = new Integer(literalValue);
+
+  return(recognize(LITERAL_INT_T,"literal int"));
+}
+
+/*****************************************************************
+ * 
+ */
+static int recognize(int token_id,const char *description)
+{
+  /* add optional debugging stuff here */
+  cout << description << endl;
+
+  return(token_id);
 }
 
 

@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 
 #include "command.h"
-#include "parse.h"
 
 #include "cmd_quit.h"
 
@@ -44,7 +43,6 @@ cmd_quit::cmd_quit(void)
 
   long_doc = string ("Quit gpsim\n");
 
-  token_value = QUIT;
   op = cmd_quit_options;
 }
 
