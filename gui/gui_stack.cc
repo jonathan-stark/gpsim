@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/symbol.h"
 
-extern list <symbol *> st;
+extern list <Value *> st;  //FIXME
 
 #include "gui.h"
 #include "gui_stack.h"
@@ -149,16 +149,16 @@ static int get_closest_label(Stack_Window *sw,
     
   // this function assumes that address symbols are sorted
     
-  symbol *closest_symbol = 0;
+  Value *closest_symbol = 0;
 
   int minimum_delta=0x2000000;
   int delta;
 
-  list <symbol *>::iterator sti;
+  list <Value *>::iterator sti;
 
   for(sti = st.begin(); sti != st.end(); sti++) {
 
-    symbol *s = *sti;
+    Value *s = *sti;
 
     if(  (typeid(*s) == typeid(address_symbol)) ||
 	 (typeid(*s) == typeid(line_number_symbol))) {

@@ -86,8 +86,8 @@ static void update_menus(Symbol_Window *sw)
 	item=menu_items[i].item;
 	if(sw)
 	{
-            sym *entry;
-	    entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
+            Value *entry;
+	    entry = (Value*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
 	    if(entry==0)
 		gtk_widget_set_sensitive (item, FALSE);
 	    else
@@ -104,34 +104,35 @@ static void update_menus(Symbol_Window *sw)
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
-    menu_item *item;
-    sym *entry;
+  menu_item *item;
 
-    if(widget==0 || data==0)
+  if(widget==0 || data==0)
     {
-	printf("Warning popup_activated(%p,%p)\n",widget,data);
-	return;
+      printf("Warning popup_activated(%p,%p)\n",widget,data);
+      return;
     }
     
-    item = (menu_item *)data;
+  item = (menu_item *)data;
 
-    entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
+  Value *entry = 
+    (Value*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
 
-    if(entry==0)
-	return;
+  if(!entry)
+    return;
 
-    switch(item->id) {
+  switch(item->id) {
 
-    case MENU_ADD_WATCH:
-      {
-	GUIRegister *reg = (*popup_sw->gp->regwin_ram)[entry->value];
-	popup_sw->gp->watch_window->Add(popup_sw->gp->regwin_ram->type, reg);
-      }
-      break;
-    default:
-      puts("Unhandled menuitem?");
-      break;
+  case MENU_ADD_WATCH:
+    {
+      //GUIRegister *reg = (*popup_sw->gp->regwin_ram)[entry->value];
+      //popup_sw->gp->watch_window->Add(popup_sw->gp->regwin_ram->type, reg);
+      popup_sw->gp->watch_window->Add(entry);
     }
+    break;
+  default:
+    puts("Unhandled menuitem?");
+    break;
+  }
 }
 
 // helper function, called from do_popup
@@ -203,12 +204,13 @@ static void unselect_row(GtkCList *clist,
 {
     update_menus(sw);
 }
-extern list <symbol *> st;
+
+
+extern list <Value *> st;  // FIXME - this is really screwed up.....
 
 void Symbol_Window::Update(void)
 {
 
-  char **entry;
 
   GList *iter;
 
@@ -226,64 +228,39 @@ void Symbol_Window::Update(void)
   for(iter=symbols;iter!=0;)
     {
       GList *next=iter->next;
-      free(((sym*)iter->data)->name);
-      free((sym*)iter->data);
       g_list_remove(iter,iter->data);
       iter=next;
-      //	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }
   symbols=0;
 
-  list <symbol *>::iterator sti = st.begin();
+  Value *sym=0;
+  Symbol_Table_Iterator sti;
 
-  while(sti != st.end()) {
+
+  for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
 
     // ignore line numbers
-    if(  (typeid(**sti) == typeid(line_number_symbol) )            ||
-	 (filter_addresses && (typeid(**sti) == typeid(address_symbol)))  ||
-	 (filter_constants && (typeid(**sti) == typeid(Integer))) ||
-	 (filter_registers && (typeid(**sti) == typeid(register_symbol)))) {
-      sti++;
+    if((typeid(*sym) == typeid(line_number_symbol) )            ||
+       (filter_addresses && (typeid(*sym) == typeid(address_symbol)))  ||
+       (filter_constants && (typeid(*sym) == typeid(Integer))) ||
+       (filter_registers && (typeid(*sym) == typeid(register_symbol)))) {
+
       continue;
     }
 
-#define SYMBOL_NR_COLUMNS 3
-    entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
-    char *pstr=(char*)malloc((*sti)->name().length()+1);
-    strncpy(pstr,
-	    (*sti)->name().data(),
-	    (*sti)->name().length());
-    pstr[(*sti)->name().length()]=0;
-    entry[0] = pstr;
+    
+    char **entry = (char**)malloc(3*sizeof(char*));
+    const int cMaxLength = 32;
 
-    int row;
-    sym *e;
+    entry[0] = strndup(sym->name().c_str(), cMaxLength);
+    entry[1] = strndup(sym->showType().c_str(), cMaxLength);
+    entry[2] = (char*)malloc(cMaxLength);
+    sym->get(entry[2],cMaxLength);
 
-    int len = strlen("FIXME"); //(*sti)->type_name());
-    pstr=(char*)malloc(len+1);
-    strncpy(pstr,"FIXME", len); //(*sti)->type_name(),len);
-    pstr[len]=0;
-    entry[1] = pstr;
+    symbols=g_list_append(symbols,sym);
 
-    {
-      entry[2]=(char*)malloc(32);
-      int i;
-      (*sti)->get(i);
-      snprintf(entry[2],32,"0x%X",i);
-    }
-
-	
-    e=(sym*)malloc(sizeof(sym));
-    e->name = entry[0];
-    //e->type = (*sti)->isa();
-    (*sti)->get(e->value);
-
-    symbols=g_list_append(symbols,e);
-
-    row=gtk_clist_append(GTK_CLIST(symbol_clist),entry);
-    gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,e);
-
-    sti++;
+    int row = gtk_clist_append(GTK_CLIST(symbol_clist),entry);
+    gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,sym);
 
   }
 
@@ -291,23 +268,18 @@ void Symbol_Window::Update(void)
 
 }
 
-static void do_symbol_select(Symbol_Window *sw, sym *e)
+static void do_symbol_select(Symbol_Window *sw, Value *e)
 {
     // Do what is to be done when a symbol is selected.
     // Except for selecting the symbol row in the symbol_clist
-    switch(e->type)
-    {
-    case SYMBOL_REGISTER:
-	sw->gp->regwin_ram->SelectRegister(e->value);
-	break;
-    case SYMBOL_ADDRESS:
-	sw->gp->source_browser->SelectAddress(e->value);
-	sw->gp->program_memory->SelectAddress(e->value);
-	break;
-    default:
-	// symbols that can't be 'selected' (e.g constants)
-	break;
-    }
+
+  if(typeid(*e) == typeid(line_number_symbol) ||
+     typeid(*e) == typeid(address_symbol)) {
+    sw->gp->source_browser->SelectAddress(e);
+    sw->gp->program_memory->SelectAddress(e);
+  } else 
+    if(typeid(*e) == typeid(register_symbol))
+      sw->gp->regwin_ram->SelectRegister(e);
 }
 
 static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,GdkEvent *event, Symbol_Window *sw)
@@ -315,7 +287,7 @@ static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,Gdk
   if(!symlist || !sw)
     return 0;
 
-  sym *e=(sym*)gtk_clist_get_row_data(symlist,row);
+  Value *e=(Value*)gtk_clist_get_row_data(symlist,row);
   sw->current_row=row;
   do_symbol_select(sw,e);
   update_menus(sw);
@@ -335,23 +307,30 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
     p=sw->symbols;
     while(p)
     {
-	sym *e;
-	e=(sym*)p->data;
-	if(e->type==SYMBOL_REGISTER && e->value==regnumber)
-	{
-	    int row;
-	    row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
-	    if(row!=-1)
-	    {
-		gtk_clist_select_row(GTK_CLIST(sw->symbol_clist),row,0);
-		gtk_clist_moveto(GTK_CLIST(sw->symbol_clist),row,0,0.5,0.5);
+      Value *e = (Value*)p->data;
 
-		do_symbol_select(sw,e);
-	    }
-	    break;
+      if(typeid(*e) == typeid(register_symbol)) {
+
+	int i;
+
+	e->get(i);
+
+	if(i == regnumber) {
+	  int row;
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
+
+	  if(row!=-1) {
+	    gtk_clist_select_row(GTK_CLIST(sw->symbol_clist),row,0);
+	    gtk_clist_moveto(GTK_CLIST(sw->symbol_clist),row,0,0.5,0.5);
+
+	    do_symbol_select(sw,e);
+	  }
+	  break;
 	}
 	p=p->next;
+      }
     }
+       
 }
 
 void Symbol_Window::SelectSymbolName(char *symbol_name)

@@ -583,6 +583,7 @@ stimulus::stimulus(char *n)
   Vth = 5.0;   // Volts
   Zth = 250;   // Ohms
   Cth = 0;     // Farads
+  nodeVoltage = 0.0; // Volts
 }
 
 stimulus::~stimulus(void)

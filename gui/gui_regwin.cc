@@ -1577,7 +1577,15 @@ void Register_Window::SelectRegister(int regnumber)
   UpdateLabelEntry();
     
 }
+void Register_Window::SelectRegister(Value *regSym)
+{
+  if(regSym  && typeid(*regSym) == typeid(register_symbol)) {
+    int i;
+    regSym->get(i);
+    SelectRegister(i);
+  }
 
+}
 static void
 build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 {

@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 // stuff for gpsim. Most of the work is handled by the C++ map
 // container class.
 //
+#include "symbol.h"
 
 #include <iostream>
 #include <iomanip>
@@ -35,9 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "14bit-processors.h"
-#include "value.h"
 #include "stimuli.h"
-#include "symbol.h"
 #include "symbol_orb.h"
 #include "expr.h"
 #include "errors.h"
@@ -306,6 +305,28 @@ void Symbol_Table::dump_type(type_info const &symt)
 
 }
 
+//------------------------------------------------------------------------
+Symbol_Table_Iterator::Symbol_Table_Iterator()
+{
+  sti = st.begin();
+}
+
+Value *Symbol_Table_Iterator::begin()
+{
+  sti = st.begin();
+  return *sti;
+}
+
+Value *Symbol_Table_Iterator::end()
+{
+  return *st.end();
+}
+
+Value *Symbol_Table_Iterator::next()
+{
+  ++sti;
+  return *sti;
+}
 
 //--------------------------------------------
 
@@ -410,6 +431,16 @@ void  register_symbol::get(gint64 &i)
   else
     i = 0;
 }
+void register_symbol::get(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    Register *reg = getReg();
+    int v = reg ? reg->get_value() : 0;
+    snprintf(buffer,buf_size,"%d",v);
+  }
+
+}
 
 void register_symbol::set(int new_value)
 {
@@ -426,9 +457,36 @@ void register_symbol::set(Value *v)
   }
 }
 
+void register_symbol::set(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    int i;
+    int converted=0;
+
+    // if a straight decimal conversion fails, then try hexadecimal.
+
+    converted = sscanf(buffer, "%d",  &i);
+
+    if(!converted)
+      converted = sscanf(buffer, "0x%x",  &i);
+
+    if(!converted)
+      converted = sscanf(buffer, "$%x",  &i);
+
+    if(converted)
+      set(i);
+
+  }
+
+}
 symbol *register_symbol::copy()
 {
   return new register_symbol((char *)0,reg);
+}
+Register *register_symbol::getReg()
+{
+  return reg;
 }
 
 //------------------------------------------------------------------------
@@ -436,71 +494,11 @@ w_symbol::w_symbol(const char *_name, Register *_reg)
   : register_symbol(_name, _reg)
 {
 }
-/*
-void w_symbol::print(void)
-{
-  cout << reg->name() << hex << " = 0x" << reg->get_value() <<'\n';
-}
-*/
 
 //------------------------------------------------------------------------
 ioport_symbol::ioport_symbol(IOPORT *_ioport)
-  : symbol(0), ioport(_ioport)
+  : register_symbol(0, _ioport)
 {
-  if(ioport)
-    new_name(ioport->name());
-}
-
-symbol *ioport_symbol::copy()
-{
-  return new ioport_symbol(ioport);
-}
-
-void ioport_symbol::set(int new_value)
-{
-  if(ioport)
-    ioport->put_value(new_value);
-}
-
-void ioport_symbol::set(Value *v)
-{
-  if(ioport && v) {
-    int i;
-    v->get(i);
-    ioport->put_value(i);
-  }
-}
-
-void  ioport_symbol::get(int &i)
-{
-  if(ioport)
-    i = ioport->get_value();
-  else
-    i = 0;
-}
-
-void  ioport_symbol::get(gint64 &i)
-{
-  if(ioport)
-    i = ioport->get_value();
-  else
-    i = 0;
-}
-
-// FIXME - derive ioport_symbol from register_symbol
-string ioport_symbol::toString()
-{
-  if(ioport) {
-    char buff[256];
-    char bits[256];
-
-    ioport->toBitStr(bits,sizeof(bits));
-
-    snprintf(buff,sizeof(buff)," [0x%x] = 0x%x = 0b",ioport->address, ioport->get_value());
-
-    return name() + string(buff) + string(bits);
-  }
-  return string("");
 }
 
 //------------------------------------------------------------------------
@@ -599,6 +597,11 @@ void attribute_symbol::set(Value *v)
   if(attribute)
     attribute->set(v);
 }
+void attribute_symbol::set(char *cp,int len)
+{
+  if(attribute)
+    attribute->set(cp,len);
+}
 void attribute_symbol::set(Expression *e)
 {
   if(attribute)
@@ -619,6 +622,11 @@ void attribute_symbol::get(double &d)
 {
   if(attribute)
     attribute->get(d);
+}
+void attribute_symbol::get(char *c, int len)
+{
+  if(attribute)
+    attribute->get(c,len);
 }
 
 

@@ -242,6 +242,19 @@ void SourceBrowser_Window::SelectAddress(int address)
 {
   printf("%s shouldn't be called \n",__FUNCTION__);
 }
+void SourceBrowser_Window::SelectAddress(Value *addrSym)
+{
+
+  if(typeid(*addrSym) == typeid(line_number_symbol) ||
+     typeid(*addrSym) == typeid(address_symbol)) {
+
+    int i;
+    addrSym->get(i);
+    SelectAddress(i);
+  }
+       
+}
+
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
 {

@@ -81,6 +81,7 @@ class Register_Window : public GUI_Object
   virtual void UpdateLabel(void);
   virtual void UpdateEntry(void);
   virtual void UpdateLabelEntry(void);
+  virtual void SelectRegister(Value *);
   virtual void SelectRegister(int reg_number);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual GUIRegister *getRegister(int row, int col);

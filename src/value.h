@@ -198,10 +198,11 @@ public:
 
   virtual void get(bool &b);
   virtual void get(int &i);
-  virtual void get(double &d);
+  virtual void get(char *, int len);
 
   virtual void set(bool);
   virtual void set(Value *);
+  virtual void set(char *cP,int len=0);
 
   bool getVal() { return *value; }
 
@@ -234,11 +235,13 @@ public:
 
   virtual void get(gint64 &i);
   virtual void get(double &d);
+  virtual void get(char *, int len);
 
   virtual void set(gint64 v);
   virtual void set(int);
   virtual void set(double d);
   virtual void set(Value *);
+  virtual void set(char *cP,int len=0);
 
   gint64 getVal() { return *value; }
 
@@ -272,10 +275,12 @@ public:
 
   virtual void get(gint64 &i);
   virtual void get(double &d);
+  virtual void get(char *, int len);
 
   virtual void set(gint64 v);
   virtual void set(double d);
   virtual void set(Value *);
+  virtual void set(char *cP,int len=0);
 
   double getVal() { return *value; }
 

@@ -22,10 +22,7 @@ Boston, MA 02111-1307, USA.  */
 // symbol.h
 //
 
-#include <iostream>
 #include <string>
-#include <list>
-#include "gpsim_classes.h"
 #include "value.h"
 
 using namespace std;
@@ -92,6 +89,20 @@ public:
   Value *find(type_info const&t, const char *s);
 };
 
+/// The Symbol_Table_Iterator is a class that provides an accessor interface
+/// to the symbol table.
+
+class Symbol_Table_Iterator
+{
+  list <Value *>::iterator sti;
+  
+public:
+  Symbol_Table_Iterator();
+  Value *begin();
+  Value *end();
+  Value *next();
+
+};
 
 #ifdef IN_MODULE
 // we are in a module: don't access symbol_table object directly!
@@ -126,22 +137,6 @@ public:
   virtual ~symbol();
 };
 
-class ioport_symbol : public symbol
-{
-protected:
-  IOPORT *ioport;
-public:
-  ioport_symbol(IOPORT *);
-  virtual symbol *copy();
-
-  virtual void get(int &);
-  virtual void get(gint64 &);
-
-  virtual void set(int);
-  virtual void set(Value *);
-
-  virtual string toString();
-};
 
 class node_symbol : public symbol
 {
@@ -166,10 +161,20 @@ public:
 
   virtual void get(int &);
   virtual void get(gint64 &);
+  virtual void get(char *, int len);
 
   virtual void set(int);
   virtual void set(Value *);
+  virtual void set(char *cP,int len=0);
 
+  Register *getReg();
+
+};
+
+class ioport_symbol : public register_symbol
+{
+public:
+  ioport_symbol(IOPORT *);
 };
 
 class stimulus_symbol : public symbol
@@ -240,10 +245,12 @@ public:
   virtual void set(int);
   virtual void set(Value *);
   virtual void set(Expression *);
+  virtual void set(char *cP,int len=0);
 
   virtual void get(int &);
   virtual void get(gint64 &);
   virtual void get(double &);
+  virtual void get(char *, int len);
 
 };
 
