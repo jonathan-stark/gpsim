@@ -380,14 +380,21 @@ void PIC_IOPORT::change_pin_direction(unsigned int bit_number, bool new_directio
 }
 
 //-------------------------------------------------------------------
+// attach_iopin
+//   This will store a pointer to the iopin that is associated with
+// one of the bits of the I/O port.
+//
 //-------------------------------------------------------------------
 void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
 {
-  //  cout << "trying to attach iopin\n";
 
-  bit_position &= 7;
+  if(bit_position < num_iopins)
 
-  pins[bit_position] = new_pin;
+    pins[bit_position] = new_pin;
+
+  else
+    cout << "Warning: iopin pin number ("<<bit_position 
+	 <<") is too large for " << name() << ". Max is " << num_iopins << '\n';
 
 }
 
@@ -397,22 +404,26 @@ void IOPORT::attach_stimulus(stimulus *new_stimulus, unsigned int bit_position)
 {
   //  cout << "trying to attach " << name() << " to " << new_stimulus->name() <<  '\n';
 
-  bit_position &= 7;
   //cout << bit_position  << "  " << (1<<bit_position) << '\n';
 
-  stimulus_mask |= (1<<bit_position);
-  // io_stimulus[bit_position] = new_stimulus_node;
 
-  if(pins[bit_position]->snode == NULL)
-    {
-      // If this I/O pin is not attached to a node yet, then create a node and attach it.
-      pins[bit_position]->snode = new Stimulus_Node();
-      pins[bit_position]->snode->attach_stimulus(pins[bit_position]);
-    }
+  if(pins  && (bit_position < num_iopins) && pins[bit_position]) {
 
-  // attach the new stimulus to the same node as this I/O pin's
+    stimulus_mask |= (1<<bit_position);
 
-  pins[bit_position]->snode->attach_stimulus(new_stimulus);
+    if(pins[bit_position]->snode == NULL)
+      {
+	// If this I/O pin is not attached to a node yet, 
+	// then create a node and attach it.
+
+	pins[bit_position]->snode = new Stimulus_Node();
+	pins[bit_position]->snode->attach_stimulus(pins[bit_position]);
+      }
+
+    // attach the new stimulus to the same node as this I/O pin's
+
+    pins[bit_position]->snode->attach_stimulus(new_stimulus);
+  }
 
   //cout << "IOPORT attached new stimulus to " << pins[bit_position]->snode->name() << " named " <<
   //  pins[bit_position]->snode->name() << '\n';

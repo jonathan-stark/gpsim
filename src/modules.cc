@@ -202,7 +202,7 @@ public:
   Module_Types *module_list;
 
   Module_Library(char *new_name, void *library_handle) {
-    char * error;
+    const char * error;
 
     if(new_name)
       _name = strdup(new_name);

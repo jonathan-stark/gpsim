@@ -750,7 +750,7 @@ struct file_context * gpsim_get_file_context(unsigned int processor_id, unsigned
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
-    return 0;
+    return NULL;
 
   return &pic->files[file_id];
 

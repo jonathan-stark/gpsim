@@ -6,7 +6,7 @@ AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=19
-GPSIM_MICRO_VERSION=6
+GPSIM_MICRO_VERSION=7
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -124,18 +124,24 @@ dnl Checks for header files.
 AC_STDC_HEADERS
 dnl AC_CHECK_HEADERS(malloc.h sys/file.h unistd.h)
 
+dnl move the alloca check here since it doesn't produce valid C++
+dnl code either
+AC_FUNC_ALLOCA
+
 dnl Set lang to C++ after checking for C Gtk; checks after this will use CXX 
 dnl  instead of CC
 AC_LANG_CPLUSPLUS
 
 
 dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-AC_C_INLINE
+dnl the const and inline checks produce illegal C++ code, skip them,
+dnl C++ is required to have both, a working const and a working inline
+dnl AC_C_CONST
+dnl AC_C_INLINE
 AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
-AC_FUNC_ALLOCA
+dnl AC_FUNC_ALLOCA
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
 
