@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2003 Borut Razem
+   Copyright (C) 2003-2004 Borut Razem
 
 This file is part of gpsim.
 
@@ -127,6 +127,7 @@ g_slist_last (GSList *list)
 
   return list;
 }
+
 
 gchar *
 g_win32_error_message (gint error)

@@ -80,6 +80,7 @@ Module::Module(void)
 
   xref = new XrefObject;
 
+  widget = 0;
 }
 
 Module::~Module(void)
