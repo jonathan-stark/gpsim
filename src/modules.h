@@ -174,7 +174,7 @@ class Module_Types
 public:
 
   char *names[2];
-  ExternalModule * (*module_constructor) (char *module_name=NULL);
+  ExternalModule * (*module_constructor) (char *module_name);
 };
 
 

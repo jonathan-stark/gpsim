@@ -92,35 +92,38 @@ cmd_stimulus::cmd_stimulus(void)
 { 
   name = "stimulus";
 
-    brief_doc = string("Create a stimulus");
+  brief_doc = string("Create a stimulus");
 
-    long_doc = string ("\nstimulus [[type] options]\n\
-\tstimulus will create a signal that can be tied to an io port.
-\tNote that in most cases it is easier to create a stimulus
-\tfile then to type all this junk by hand.\n\n\
-\t  Supported stimuli:\n\n\
-\tsquare_wave | sqw  [period p] [high_time h] [phase ph] [initial_state i]\n\
-\t  port port_name bit_pos end\n\
-\t\t  creates a square wave with a period of \"p\" cpu cycles.\n\
-\t\t  If the high time is specified then that's the number of cycles\n\
-\t\t  the square wave will be high.\n\
-\t\t  The phase is with respect to the cpu's cycle counter.\n\
-\t\t  The \"port_name\" and \"bit_pos\" describe where the stimulus\n\
-\t\t  will be attached.
-\tasynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]
-\t  d0 [d1 d2 ... dn] port port_name bit_pos end\n\
-\t\t  creates an asynchronous square wave with a period of \"p\" cpu
-\t\t  cycles.  The phase is with respect to the cpu's cycle counter.\n\
-\t\t  The \"port_name\" and \"bit_pos\" describe where the stimulus\n\
-\t\t  will be attached.
-
-\n\texamples:\n\n\
-\t  stimulus sqw period 200 high_time 20 phase 60 port portb 0 end 
-\t  create a square wave stimulus that repeats every 200 cpu cycles, 
-\t  is high for 20 cpu cycles (and low for 200-20=180 cycles). The 
-\t  first rising edge will occur at cycle\n\
-\t  60, the second at 260, . . . Bit 0 of portb will receive the stimulus.\n\
-\n");
+  long_doc = string ("\nstimulus [[type] options]\n"
+    "\tstimulus will create a signal that can be tied to an io port.\n"
+    "\tNote that in most cases it is easier to create a stimulus\n"
+    "\tfile then to type all this junk by hand.\n"
+    "\n"
+    "\t  Supported stimuli:\n"
+    "\n"
+    "\tsquare_wave | sqw  [period p] [high_time h] [phase ph] [initial_state i]\n"
+    "\t  port port_name bit_pos end\n"
+    "\t\t  creates a square wave with a period of \"p\" cpu cycles.\n"
+    "\t\t  If the high time is specified then that's the number of cycles\n"
+    "\t\t  the square wave will be high.\n"
+    "\t\t  The phase is with respect to the cpu's cycle counter.\n"
+    "\t\t  The \"port_name\" and \"bit_pos\" describe where the stimulus\n"
+    "\t\t  will be attached.\n"
+    "\tasynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]\n"
+    "\t  d0 [d1 d2 ... dn] port port_name bit_pos end\n"
+    "\t\t  creates an asynchronous square wave with a period of \"p\" cpu\n"
+    "\t\t  cycles.  The phase is with respect to the cpu's cycle counter.\n"
+    "\t\t  The \"port_name\" and \"bit_pos\" describe where the stimulus\n"
+    "\t\t  will be attached.\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\t  stimulus sqw period 200 high_time 20 phase 60 port portb 0 end\n"
+    "\t  create a square wave stimulus that repeats every 200 cpu cycles,\n"
+    "\t  is high for 20 cpu cycles (and low for 200-20=180 cycles). The\n"
+    "\t  first rising edge will occur at cycle\n"
+    "\t  60, the second at 260, . . . Bit 0 of portb will receive the stimulus.\n"
+    "\n");
 
   op = cmd_stimulus_options;
 

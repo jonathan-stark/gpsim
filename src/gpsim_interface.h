@@ -112,9 +112,8 @@ class Interface {
   void (*gui_update)  (gpointer object);
 
   unsigned int get_id(void) { return interface_id;};
-  unsigned int set_id(unsigned int new_id) { interface_id = new_id;};
+  void set_id(unsigned int new_id) { interface_id = new_id;};
   Interface(gpointer new_object=NULL);
-  Interface(void) { Interface(NULL); };
 };
 
 

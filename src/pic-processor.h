@@ -23,8 +23,6 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 
-using namespace std;
-
 #include "gpsim_classes.h"
 #include "modules.h"
 
@@ -120,28 +118,28 @@ class ConfigMode {
   bool get_fosc0(void){return (config_mode & CM_FOSC0);};
   void set_fosc1(void){config_mode |= CM_FOSC1;};
   void clear_fosc1(void){config_mode &= ~CM_FOSC1;};
-  bool get_fosc1(void){return (config_mode & CM_FOSC1);};
-  bool get_fosc1x(void){return (config_mode & CM_FOSC1x);};
+  bool get_fosc1(void){return (0 != (config_mode & CM_FOSC1));};
+  bool get_fosc1x(void){return (0 != (config_mode & CM_FOSC1x));};
 
   void set_cp0(void)  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
   void clear_cp0(void){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
-  bool get_cp0(void)  {return (config_mode & CM_CP0);};
+  bool get_cp0(void)  {return (0 != (config_mode & CM_CP0));};
   void set_cp1(void)  {config_mode |= CM_CP1;  valid_bits |= CM_CP1;};
   void clear_cp1(void){config_mode &= ~CM_CP1; valid_bits |= CM_CP1;};
-  bool get_cp1(void)  {return (config_mode & CM_CP1);};
+  bool get_cp1(void)  {return (0 != (config_mode & CM_CP1));};
 
   void enable_wdt(void)  {config_mode |= CM_WDTE;};
   void disable_wdt(void) {config_mode &= ~CM_WDTE;};
-  bool get_wdt(void)     {return (config_mode & CM_WDTE);};
+  bool get_wdt(void)     {return (0 != (config_mode & CM_WDTE));};
 
   void enable_mclre(void)  {config_mode |= CM_MCLRE;};
   void disable_mclre(void) {config_mode &= ~CM_MCLRE;};
-  bool get_mclre(void)     {return (config_mode & CM_MCLRE);};
+  bool get_mclre(void)     {return (0 != (config_mode & CM_MCLRE));};
 
   void enable_pwrte(void)   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
   void disable_pwrte(void)  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
-  bool get_pwrte(void)      {return (config_mode & CM_PWRTE);};
-  bool is_valid_pwrte(void) {return (valid_bits & CM_PWRTE);};
+  bool get_pwrte(void)      {return (0 != (config_mode & CM_PWRTE));};
+  bool is_valid_pwrte(void) {return (0 != (valid_bits & CM_PWRTE));};
 
   virtual void print(void);
 

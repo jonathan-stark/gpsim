@@ -20,7 +20,11 @@ Boston, MA 02111-1307, USA.  */
 
 //#include <stdio.h>
 #include <stdio.h>
+#ifdef _WIN32
+#include "uxtime.h"
+#else
 #include <sys/time.h>
+#endif
 #include <time.h>
 #include <iostream>
 #include <iomanip>

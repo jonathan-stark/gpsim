@@ -63,34 +63,35 @@ cmd_module::cmd_module(void)
   brief_doc = string("Select & Display modules");
 
   long_doc = string (
-"module [ [load module_type [module_name]] | [lib lib_name] | [list] | \n\
-[[dump | pins] module_name] ] | [set module_name attribute value]\
-\n\tIf no options are specified, then the currently defined module(s)\
-\n\twill be displayed. This is the same as the `module list' command.\
-\n\tThe `module load lib_name' tells gpsim to search for the module\
-\n\tlibrary called `lib_name' and to load it. (Note that the format of\
-\n\tmodule libraries is exactly the same as a Linux shared library. This\
-\n\tmeans that the module library should reside in a path available to\
-\n\tdlopen(). Please see the README.MODULES in the gpsim distribution.\
-\n\tTo instantiate a new module, then type\
-\n\t  module module_type module_name\
-\n\twhere module_type refers to a specific module in a module library\
-\n\tand module_name is the user name assigned to it.\
-\n\tInformation about a module can be displayed by the command\
-\n\t  module module_name [dump | pins]
-\n\twhere module_name is the name that you assigned when the module\
-\n\twas instantiated. The optional dump and pins identifiers specify\
-\n\tthe information you wish to display (dump is the default).\
-\n\n\texamples:
-\n\n\tmodule                      // Display the modules you've already defined.\
-\n\tmodule lib my_mods.so       // Load the module library called my_mods.\
-\n\tmodule list                 // Display the list of modules supported.\
-\n\tmodule load lcd my_lcd      // Create an instance of an 'lcd'\
-\n\tmodule pins my_lcd          // Display the pin states of an instantiated module\
-\n\tmodule load lcd lcd2x20     // Create a new module.\
-\n\tmodule load pullup R1       // and another.\
-\n\tmodule set R1 resistance 10e3 // change an attribute.
-\n");
+    "module [ [load module_type [module_name]] | [lib lib_name] | [list] | \n"
+    "[[dump | pins] module_name] ] | [set module_name attribute value]\n"
+    "\tIf no options are specified, then the currently defined module(s)\n"
+    "\twill be displayed. This is the same as the `module list' command.\n"
+    "\tThe `module load lib_name' tells gpsim to search for the module\n"
+    "\tlibrary called `lib_name' and to load it. (Note that the format of\n"
+    "\tmodule libraries is exactly the same as a Linux shared library. This\n"
+    "\tmeans that the module library should reside in a path available to\n"
+    "\tdlopen(). Please see the README.MODULES in the gpsim distribution.\n"
+    "\tTo instantiate a new module, then type\n"
+    "\t  module module_type module_name\n"
+    "\twhere module_type refers to a specific module in a module library\n"
+    "\tand module_name is the user name assigned to it.\n"
+    "\tInformation about a module can be displayed by the command\n"
+    "\t  module module_name [dump | pins]\n"
+    "\twhere module_name is the name that you assigned when the module\n"
+    "\twas instantiated. The optional dump and pins identifiers specify\n"
+    "\tthe information you wish to display (dump is the default).\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\tmodule                      // Display the modules you've already defined.\n"
+    "\tmodule lib my_mods.so       // Load the module library called my_mods.\n"
+    "\tmodule list                 // Display the list of modules supported.\n"
+    "\tmodule load lcd my_lcd      // Create an instance of an 'lcd'\n"
+    "\tmodule pins my_lcd          // Display the pin states of an instantiated module\n"
+    "\tmodule load lcd lcd2x20     // Create a new module.\n"
+    "\tmodule load pullup R1       // and another.\n"
+    "\tmodule set R1 resistance 10e3 // change an attribute.\n");
 
   op = cmd_module_options; 
 }

@@ -136,14 +136,14 @@ public:
   virtual void reset(RESET_TYPE r) {
     switch (r) {
 
-    POR_RESET:
+    case POR_RESET:
       value = por_value;
       break;
 
-    WDT_RESET:
+    case WDT_RESET:
       value = wdtr_value;
       break;
-    SOFT_RESET:
+    case SOFT_RESET:
       break;
     }
 

@@ -280,7 +280,7 @@ public:
 
   virtual void setbit(unsigned int bit_number, bool new_value)
     {
-      return(replaced->setbit(bit_number, new_value));
+      replaced->setbit(bit_number, new_value);
     }
 
   virtual int get_bit(unsigned int bit_number)

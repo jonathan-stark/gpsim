@@ -38,7 +38,9 @@ extern SIMULATION_MODES simulation_mode;
 
 extern void simulation_cleanup(void);
 extern int use_gui;
+#ifndef _WIN32
 #define HAVE_READLINE
+#endif
 #ifdef HAVE_READLINE
 //#define RALF
 #define SCOTT
@@ -61,9 +63,13 @@ extern "C" {
 #endif
 
 #include <sys/types.h>
+#ifdef _WIN32
+#include <direct.h>
+#else
 #include <sys/file.h>
+#endif
 #include <sys/stat.h>
-#include <sys/errno.h>
+//#include <sys/errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -206,7 +212,7 @@ int parse_string(char *cmd_string)
   init_parser();
   retval = yyparse();
 
-  using_readline = save_readline_state;
+  using_readline = (0 != save_readline_state);
 
   if(quit_parse)
     exit_gpsim();
@@ -287,7 +293,7 @@ void process_command_file(char * file_name)
     }
 
 
-  using_readline = save_readline_state;
+  using_readline = (0 != save_readline_state);
 
 }
 
@@ -664,8 +670,8 @@ void initialize_readline (void)
   //char buf [256];
 
   //while(1) {
-    cout << "gpsim> ";
-    cout.flush();
+    //cout << "gpsim> ";
+    //cout.flush();
 
     //cin.getline(buf, sizeof(buf));
     //if (cin.eof()) {

@@ -44,24 +44,24 @@ cmd_list::cmd_list(void)
 
   brief_doc = string("Display source and list files");
 
-  long_doc = string("list [[s | l] [*pc] [line_number1 [,line_number2]]]\
-\n\n\tDisplay the contents of source and list files.\
-\n\tWithout any options, list will use the last specified options.\
-\n\tlist s will display lines in the source (or .asm) file.\
-\n\tlist l will display lines in the .lst file\
-\n\tlist *pc will display either .asm or .lst lines around the\
-\n\t   value specified by pc (e.g. list *20 will list lines around\
-\n\t   address 20)\
-\n\tline_number1, line_number2 - specify the list range.\
-\n\n\tExamples:\
-\n\tlist s *0x3a -5 5\
-\n\t  will list 11 lines (5 before, 5 after, & 1 at) around addr 3a\
-\n\tlist\
-\n\t  repeat the last list except use the current pc as the reference.\
-\n\tlist l\
-\n\t  will list lines from .lst file around the current pc.\
-\n
-");
+  long_doc = string("list [[s | l] [*pc] [line_number1 [,line_number2]]]\n"
+    "\n"
+    "\tDisplay the contents of source and list files.\n"
+    "\tWithout any options, list will use the last specified options.\n"
+    "\tlist s will display lines in the source (or .asm) file.\n"
+    "\tlist l will display lines in the .lst file\n"
+    "\tlist *pc will display either .asm or .lst lines around the\n"
+    "\t   value specified by pc (e.g. list *20 will list lines around\n"
+    "\t   address 20)\n"
+    "\tline_number1, line_number2 - specify the list range.\n"
+    "\n"
+    "\tExamples:\n"
+    "\tlist s *0x3a -5 5\n"
+    "\t  will list 11 lines (5 before, 5 after, & 1 at) around addr 3a\n"
+    "\tlist\n"
+    "\t  repeat the last list except use the current pc as the reference.\n"
+    "\tlist l\n"
+    "\t  will list lines from .lst file around the current pc.\n");
 
   op = cmd_list_options; 
 

@@ -38,19 +38,20 @@ static cmd_options cmd_attach_options[] =
 
 cmd_attach::cmd_attach(void)
 { 
-    name = "attach";
+  name = "attach";
 
-    brief_doc = string("Attach stimuli to nodes");
+  brief_doc = string("Attach stimuli to nodes");
 
-    long_doc = string ("attach node1 stimulus1 [stimulus2 stimulu_N]\
-\n\t  attach is used to define the connections between stimuli and nodes.\
-\n\tAt least one node and one stimulus must be specified. If more stimuli\
-\n\tare specified then they will all be attached to the node.\
-\n\n\texamples:
-\n\n\tnode pin2pin_test                  // Define a new node.\
-\n\tattach pin2pin_test porta4 portb0  // Connect two I/O pins to the node.\
-\n\tnode                               // Display the new \"net list\".\
-\n");
+  long_doc = string ("attach node1 stimulus1 [stimulus2 stimulu_N]\n"
+    "\t  attach is used to define the connections between stimuli and nodes.\n"
+    "\tAt least one node and one stimulus must be specified. If more stimuli\n"
+    "\tare specified then they will all be attached to the node.\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\tnode pin2pin_test                  // Define a new node.\n"
+    "\tattach pin2pin_test porta4 portb0  // Connect two I/O pins to the node.\n"
+    "\tnode                               // Display the new \"net list\".\n");
 
   op = cmd_attach_options; 
 }
