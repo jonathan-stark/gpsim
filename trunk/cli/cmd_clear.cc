@@ -57,8 +57,6 @@ void cmd_clear::clear(Expression *expr)
 
   if(expr) {
 
-    cout << expr->show() << endl;
-
     Value *v = expr->evaluate();
     if(v) {
 
