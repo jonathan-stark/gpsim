@@ -468,7 +468,7 @@ processor_cmd: PROCESSOR
           | PROCESSOR bit_flag
 	  { c_processor.processor($2->value); YYABORT;}
           | PROCESSOR STRING
-	  { c_processor.processor($2,NULL); YYABORT; }
+	  { c_processor.processor($2,0); YYABORT; }
           | PROCESSOR STRING STRING
 	  { 
             c_processor.processor($2,$3);
@@ -795,7 +795,7 @@ string_list: STRING
 	  str_list = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list_head = str_list;
 	  str_list->name = strdup($1);
-	  str_list->next = NULL;
+	  str_list->next = 0;
 	  if(verbose&2)
 	    cout << "got a string. added " << str_list->name << '\n';
 	}
@@ -804,7 +804,7 @@ string_list: STRING
 	  str_list->next = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list = str_list->next;
 	  str_list->name = strdup($2);
-	  str_list->next = NULL;
+	  str_list->next = 0;
 	  if(verbose&2)
 	    cout << " -- have a list of strings. added " << str_list->name << '\n';
 	}

@@ -104,7 +104,7 @@ int IOPORT::update_stimuli(void)
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
     if(stimulus_mask & m)
       {
-        if(pins[i]->snode!=NULL)
+        if(pins[i]->snode!=0)
 	{
 	    int t = pins[i]->snode->update(time);
 
@@ -143,7 +143,7 @@ int PIC_IOPORT::update_stimuli(void)
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
     if(stimulus_mask & m)
       {
-        if(pins[i]->snode!=NULL)
+        if(pins[i]->snode!=0)
 	{
 	    int t = pins[i]->snode->update(time);
 
@@ -455,7 +455,7 @@ void IOPORT::attach_stimulus(stimulus *new_stimulus, unsigned int bit_position)
 
     stimulus_mask |= (1<<bit_position);
 
-    if(pins[bit_position]->snode == NULL)
+    if(pins[bit_position]->snode == 0)
       {
 	// If this I/O pin is not attached to a node yet, 
 	// then create a node and attach it.
@@ -529,7 +529,7 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
       guint64 time = cycles.value;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
-          if(pins[i]->snode!=NULL)
+          if(pins[i]->snode!=0)
             pins[i]->snode->update(time);
     }
 }
@@ -549,8 +549,8 @@ void IOPORT::trace_register_write(void)
 //-------------------------------------------------------------------
 PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
-  tris = NULL;
-  latch = NULL;
+  tris = 0;
+  latch = 0;
 }
 
 IOPORT::IOPORT(unsigned int _num_iopins)
@@ -564,7 +564,7 @@ IOPORT::IOPORT(unsigned int _num_iopins)
   pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
 
   for(int i=0; i<num_iopins; i++)
-    pins[i] = NULL;
+    pins[i] = 0;
 
   new_name("ioport");
 }
@@ -573,7 +573,7 @@ IOPORT::~IOPORT()
 {
     for(int i=0; i<num_iopins; i++)
     {
-	if(pins[i] != NULL)
+	if(pins[i] != 0)
 	    delete pins[i];
     }
     delete pins;
@@ -671,7 +671,7 @@ void IOPORT_TRIS::put_value(unsigned int new_value)
 
 IOPORT_TRIS::IOPORT_TRIS(void)
 {
-  port = NULL;
+  port = 0;
   valid_iopins = 0;
   new_name("ioport");
 }
@@ -743,7 +743,7 @@ void IOPORT_LATCH::put_value(unsigned int new_value)
 
 IOPORT_LATCH::IOPORT_LATCH(void)
 {
-  port = NULL;
+  port = 0;
   valid_iopins = 0;
   new_name("ioport");
 }
@@ -1155,7 +1155,7 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
 PORTC::PORTC(void)
 {
   new_name("portc");
-  usart = NULL;
+  usart = 0;
 }
 
 //-------------------------------------------------------------------

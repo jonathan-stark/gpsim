@@ -63,8 +63,8 @@ void link_src_to_gpsim(GUI_Processor *gp);
  * --- Global variables
  */
 
-GUI_Processor *gp=NULL;
-GSList *gui_processors=NULL;
+GUI_Processor *gp=0;
+GSList *gui_processors=0;
 unsigned int interface_id=0;
 
 DB_ID dbid=-1;
@@ -467,7 +467,7 @@ int gui_init (int argc, char **argv)
   }
 
   homedir=getenv("HOME");
-  if(homedir==NULL)
+  if(homedir==0)
       homedir=".";
 
   sprintf(path,"%s/.gpsim",homedir);

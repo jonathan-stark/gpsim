@@ -36,8 +36,8 @@ Boston, MA 02111-1307, USA.  */
 
 Register::Register(void)
 {
-  cpu = NULL;
-  name_str1 = NULL;
+  cpu = 0;
+  name_str1 = 0;
   new_name("file_register");
   xref = new XrefObject(&value);
   read_access_count=0;
@@ -130,7 +130,7 @@ void Register::setbit_value(unsigned int bit_number, bool new_value)
 // Assign a new name to a register. If the register already has
 // a name, the old one is deleted and then the new one is assigned.
 //
-// Specifying a NULL name effectively deletes the register name
+// Specifying a 0 name effectively deletes the register name
 
 void Register::new_name(char *s)
 {
@@ -141,7 +141,7 @@ void Register::new_name(char *s)
   if(s)
     name_str1 = strdup(s);
   else
-    name_str1 = NULL;
+    name_str1 = 0;
 
 }
 

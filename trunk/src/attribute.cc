@@ -34,54 +34,11 @@ Boston, MA 02111-1307, USA.  */
 
  *********************************************************************/
 
-/*
-AttributeType::AttributeType (ATTRIBUTE_VALUE_TYPES t)
-{ 
-  type = t;
-
-
-  switch(type) {
-
-  case ATTRIBUTE_INT:
-    val.n = 0;
-    break;
-
-  case ATTRIBUTE_FLOAT:
-    val.f = 0.0;
-    break;
-
-  case ATTRIBUTE_STRING:
-    val.s = NULL;
-
-  }
-
-}
-
-
--------------------------------------------------------------------
-void AttributeType::set(char *s) {
-
-  if(type == ATTRIBUTE_STRING) {
-    if (val.s)
-      delete val.s;
-
-    if(s)
-      val.s = strdup(s); 
-    else
-      val.s = NULL;
-
-  }
-
-}
-
-*/
 //-------------------------------------------------------------------
 Attribute::Attribute(void)
 {
 
-  name = NULL;
-  //xref = NULL;
-
+  name = 0;
 
 }
 
@@ -92,7 +49,7 @@ Attribute::Attribute(char *init_name)
   if(init_name)
     name = strdup(init_name);
   else
-    name = NULL;
+    name = 0;
   
 
 }
@@ -105,7 +62,7 @@ void Attribute::new_name(char *s)
   if(s)
     name = strdup(s);
   else
-    name = NULL;
+    name = 0;
 
 }
 
@@ -128,7 +85,7 @@ char * IntAttribute::sGet(char *buffer, int buf_size)
 {
 
   if(!buffer || buf_size==0)
-    return NULL;
+    return 0;
 
 
   snprintf(buffer,buf_size,"%d",value);
@@ -186,7 +143,7 @@ char * FloatAttribute::sGet(char *buffer, int buf_size)
 {
 
   if(!buffer || buf_size==0)
-    return NULL;
+    return 0;
 
 
   snprintf(buffer,buf_size,"%g",value);
@@ -235,7 +192,7 @@ char * StringAttribute::sGet(char *buffer, int buf_size)
 {
 
   if(!buffer || buf_size==0)
-    return NULL;
+    return 0;
 
   if(value)
     strncpy(buffer,value,buf_size);
@@ -255,7 +212,7 @@ void StringAttribute::set(char *new_value)
   if(new_value)
     value = strdup(new_value); 
   else
-    value = NULL;
+    value = 0;
 
 }
 

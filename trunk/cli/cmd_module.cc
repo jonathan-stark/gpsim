@@ -52,7 +52,7 @@ static cmd_options cmd_module_options[] =
   "lib",       CMD_MOD_LIB ,    OPT_TT_STRING,
   "set",       CMD_MOD_SET ,    OPT_TT_STRING,
   "position",  CMD_MOD_POSITION,OPT_TT_STRING,
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -152,7 +152,8 @@ void cmd_module::module(cmd_options_str *cos)
 
     case CMD_MOD_SET:
       cout << "module set command :  module name = " << cos->str <<'\n';
-      module_set_attr(cos->str,(char *)NULL,(char *)NULL);
+      // cast 0 to char's to disambiguate the call
+      module_set_attr(cos->str,(char *)0,(char *)0);
       break;
 
     default:

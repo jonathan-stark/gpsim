@@ -35,7 +35,7 @@ cmd_x c_x;
 
 static cmd_options cmd_x_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -68,7 +68,7 @@ void cmd_x::x(int reg)
 {
 
 
-  if(cpu == NULL)
+  if(!cpu)
     return;
 
   if(reg<0 || (reg >= cpu->register_memory_size()) )
@@ -91,7 +91,7 @@ void cmd_x::x(int reg, int val)
 {
 
 
-  if(cpu == NULL)
+  if(!cpu)
     return;
 
   if(reg<0 || (reg >= cpu->register_memory_size()) )

@@ -91,7 +91,7 @@ void P16F62x::create_iopin_map(void)
   package->assign_pin(15, new IO_bi_directional(porta, 6));  // Assume RC mode
   package->assign_pin(16, new IO_bi_directional(porta, 7));  //   "        "
 
-  package->assign_pin(5, NULL);  // Vss
+  package->assign_pin(5, 0);  // Vss
   package->assign_pin(6, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(7, new IO_bi_directional_pu(portb, 1));
   package->assign_pin(8, new IO_bi_directional_pu(portb, 2));
@@ -100,7 +100,7 @@ void P16F62x::create_iopin_map(void)
   package->assign_pin(11, new IO_bi_directional_pu(portb, 5));
   package->assign_pin(12, new IO_bi_directional_pu(portb, 6));
   package->assign_pin(13, new IO_bi_directional_pu(portb, 7));
-  package->assign_pin(14, NULL);  // Vdd
+  package->assign_pin(14, 0);  // Vdd
 
 }
 
@@ -152,7 +152,7 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(&comparator.cmcon, 0x1f, 0,"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, 0,"vrcon");
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   intcon = &intcon_reg;

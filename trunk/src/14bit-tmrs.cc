@@ -42,7 +42,7 @@ Boston, MA 02111-1307, USA.  */
 CCPRL::CCPRL(void)
 {
 
-  ccprh = NULL;
+  ccprh = 0;
 
 }
 
@@ -133,7 +133,7 @@ void CCPRL::assign_tmr(TMRL *ptmr)
 CCPRH::CCPRH(void)
 {
 
-  ccprl = NULL;
+  ccprl = 0;
   pwm_mode = 0;
   pwm_value = 0;
 }
@@ -171,7 +171,7 @@ CCPCON::CCPCON(void)
 {
 
   edges = 0;
-  adcon0 = NULL;
+  adcon0 = 0;
 
 }
 
@@ -1251,9 +1251,9 @@ void TMR2::callback(void)
 TMR2_MODULE::TMR2_MODULE(void)
 {
 
-  t2con = NULL;
-  pr2   = NULL;
-  tmr2  = NULL;
+  t2con = 0;
+  pr2   = 0;
+  tmr2  = 0;
 
 }
 

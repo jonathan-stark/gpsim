@@ -217,7 +217,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
   int return_value = is_cycle_trace(index);
 
   if(bufsize)
-    buffer[0] = 0;   // NULL terminate just in case no string is created
+    buffer[0] = 0;   // 0 terminate just in case no string is created
 
   if(return_value == 2) {
 
@@ -473,7 +473,7 @@ guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_i
 int Trace::dump_instruction(unsigned int instruction_index)
 {
 
-  FILE *out_stream=NULL;
+  FILE *out_stream=0;
   char a_string[50];
 
   instruction_index &= TRACE_BUFFER_MASK;
@@ -788,10 +788,10 @@ void Trace::dump_last_instruction(void)
 TraceLog::TraceLog(void)
 {
   logging = 0;
-  log_filename = NULL;
-  cpu = NULL;
-  log_file = NULL;
-  lxtp=NULL;
+  log_filename = 0;
+  cpu = 0;
+  log_file = 0;
+  lxtp=0;
   last_trace_index = 0;
   items_logged = 0;
   buffer.trace_flag = TRACE_ALL;
@@ -872,14 +872,14 @@ void TraceLog::open_logfile(const char *new_fname, int format)
   {
   case TRACE_FILE_FORMAT_ASCII:
       log_file = fopen(new_fname, "w");
-      lxtp=NULL;
+      lxtp=0;
       break;
   case TRACE_FILE_FORMAT_LXT:
       lxtp = lt_init(new_fname);
       lt_set_timescale(lxtp, -8);
       lt_set_clock_compress(lxtp);
       lt_set_initial_value(lxtp, 'X');
-      log_file=NULL;
+      log_file=0;
       break;
   }
 
@@ -903,8 +903,8 @@ void TraceLog::close_logfile(void)
       }
 
       free(log_filename);
-      log_file = NULL;
-      log_filename = NULL;
+      log_file = 0;
+      log_filename = 0;
   }
 }
 
@@ -1038,7 +1038,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
     lt_set_time(lxtp, (int)(cycles.value*4.0e8*cpu->period));
 
     symp=lt_symbol_find(lxtp, name);
-    if(symp==NULL)
+    if(symp==0)
     {
 	symp=lt_symbol_add(lxtp,
 			   name,         // name
@@ -1047,7 +1047,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 			   0,            // lsb
 			   LT_SYM_F_BITS //flags
 			  );
-        assert(symp!=NULL);
+        assert(symp!=0);
     }
     lt_emit_value_int(lxtp, symp, 0, value);
 }
@@ -1119,7 +1119,7 @@ void TraceLog::register_write_value(unsigned int address, unsigned int value, gu
 ProfileKeeper::ProfileKeeper(void)
 {
   enabled = 0;
-  cpu = NULL;
+  cpu = 0;
   last_trace_index = 0;
 }
 

@@ -163,7 +163,7 @@ static void udelay(unsigned usec)
     time.tv_sec  = usec / 1000000;
     time.tv_nsec = ( usec % 1000000) * 1000;
 
-    nanosleep(&time,NULL);
+    nanosleep(&time,0);
 
 }
 
@@ -337,7 +337,7 @@ char *icd_target(void)
     static char return_string[256];
     unsigned int dev_id, type,rev;
 
-    if(icd_fd<0) return NULL;
+    if(icd_fd<0) return 0;
 
     dev_id=icd_cmd("$$7020\r");
     type = (dev_id>>5) & 0x1FF;
@@ -456,7 +456,7 @@ int icd_connect(char *port)
 {
     pic_processor *pic=(pic_processor*)get_processor(1);
 
-    if(pic==NULL)
+    if(pic==0)
     {
 	cout << "You have to load the .cod file (or .hex and processor)" << endl;
 	return 0;
@@ -549,28 +549,28 @@ static void make_stale(void)
     for(int i=0;i<cpu->register_memory_size();i++)
     {
 	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
-	assert(ir!=NULL);
+	assert(ir!=0);
 	ir->is_stale=1;
     }
 
     icd_WREG *iw = dynamic_cast<icd_WREG*>(cpu->W);
-    assert(iw!=NULL);
+    assert(iw!=0);
     iw->is_stale=1;
 
     icd_PC *ipc = dynamic_cast<icd_PC*>(cpu->pc);
-    assert(ipc!=NULL);
+    assert(ipc!=0);
     ipc->is_stale=1;
 
     icd_PCLATH *ipclath = dynamic_cast<icd_PCLATH*>(cpu->pclath);
-    assert(ipclath!=NULL);
+    assert(ipclath!=0);
     ipclath->is_stale=1;
 
     icd_FSR *ifsr = dynamic_cast<icd_FSR*>(cpu->fsr);
-    assert(ifsr!=NULL);
+    assert(ifsr!=0);
     ifsr->is_stale=1;
 
     icd_StatusReg *isreg = dynamic_cast<icd_StatusReg*>(cpu->status);
-    assert(isreg!=NULL);
+    assert(isreg!=0);
     isreg->is_stale=1;
 }
 
@@ -604,7 +604,7 @@ char *icd_version(void)
     static char ret[256];
     unsigned int ver1,ver2;
 
-    if(icd_fd<0) return NULL;
+    if(icd_fd<0) return 0;
 
     ver1 = icd_cmd("$$7F00\r");
     ver2 = icd_cmd("$$7021\r");
@@ -926,7 +926,7 @@ unsigned int icd_Register::get(void)
 			    break;
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
-			    assert(ifr!=NULL);
+			    assert(ifr!=0);
 			    ifr->value=buf[i];
 			    ifr->is_stale=0;
 			    break;
@@ -944,7 +944,7 @@ unsigned int icd_Register::get(void)
 			    break;
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
-			    assert(ifr!=NULL);
+			    assert(ifr!=0);
 			    if(ifr->xref)
 				ifr->xref->update();
 			    break;
@@ -971,7 +971,7 @@ unsigned int icd_Register::get(void)
 			    break;
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
-			    assert(ifr!=NULL);
+			    assert(ifr!=0);
 			    ifr->value=buf[i];
 			    ifr->is_stale=0;
 			    break;
@@ -989,7 +989,7 @@ unsigned int icd_Register::get(void)
 			    break;
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
-			    assert(ifr!=NULL);
+			    assert(ifr!=0);
 			    if(ifr->xref)
 				ifr->xref->update();
 			    break;

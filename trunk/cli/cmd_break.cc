@@ -52,7 +52,7 @@ static cmd_options cmd_break_options[] =
   "so",  STK_OVERFLOW, OPT_TT_BITFLAG,
   "su",  STK_UNDERFLOW,OPT_TT_BITFLAG,
   "wdt", WDT,          OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -99,7 +99,7 @@ const char *TOO_MANY_ARGS="too many arguments\n";
 void cmd_break::set_break(int bit_flag)
 {
 
-  if(cpu==NULL)
+  if(!cpu)
     return;
 
   int b;
@@ -145,7 +145,7 @@ void cmd_break::set_break(int bit_flag)
 void cmd_break::set_break(int bit_flag, guint64 value)
 {
 
-  if(cpu==NULL)
+  if(!cpu)
     return;
 
   int b;
@@ -203,7 +203,7 @@ void cmd_break::set_break(int bit_flag, guint64 value)
 void cmd_break::set_break(int bit_flag, int reg, int value,int mask)
 {
 
-  if(cpu==NULL)
+  if(!cpu)
     return;
 
   int b = MAX_BREAKPOINTS;

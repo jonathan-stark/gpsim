@@ -269,7 +269,7 @@ unsigned int  Breakpoints::set_execution_break(Processor *cpu, unsigned int addr
   return(set_breakpoint (Breakpoints::BREAK_ON_EXECUTION, cpu, address, 0));
 }
 
-unsigned int  Breakpoints::set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
+unsigned int  Breakpoints::set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = 0)
 {
   trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
@@ -461,7 +461,7 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
   halt();
   if( abp < MAX_BREAKPOINTS)
     {
-      if (NULL != break_status[abp].f)
+      if (0 != break_status[abp].f)
 	  break_status[abp].f->callback();
 
       trace.breakpoint( (Breakpoints::BREAK_ON_CYCLE>>8) );
@@ -595,7 +595,7 @@ instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, in
   p = (Breakpoint_Instruction*) cpu->pma.get(address);
 
   if(!_this || p==_this)
-    return NULL;
+    return 0;
 
   while(p->replaced!=_this)
     {
@@ -628,7 +628,7 @@ void Breakpoints::clear(unsigned int b)
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==NULL)
+	  if(previous==0)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
@@ -657,7 +657,7 @@ void Breakpoints::clear(unsigned int b)
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==NULL)
+	  if(previous==0)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
@@ -684,7 +684,7 @@ void Breakpoints::clear(unsigned int b)
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==NULL)
+	  if(previous==0)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
@@ -710,7 +710,7 @@ void Breakpoints::clear(unsigned int b)
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==NULL)
+	  if(previous==0)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
@@ -762,14 +762,14 @@ void Breakpoints::clear(unsigned int b)
 		    {
 		      cleared = 1;
 		      delete br;
-		      br = NULL;
+		      br = 0;
 		    }
 		  else
 		    {
 		      if(br->replaced->isa() == Register::BP_REGISTER)
 			br = (Notify_Register *)br->replaced;
 		      else
-			br = NULL; // Break out of loop and display error
+			br = 0; // Break out of loop and display error
 		    }
 		}
 
@@ -1059,7 +1059,7 @@ void Notify_Register::replace(Processor *_cpu, unsigned int reg)
   cpu = _cpu;
   cpu->registers[reg] = this;
   replaced = fr;
-  next = NULL;
+  next = 0;
   address=fr->address;
   
   // use the replaced registers xref object

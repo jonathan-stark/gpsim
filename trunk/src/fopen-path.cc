@@ -64,20 +64,20 @@ void set_search_path (const char *path)
     ++pathLen;				// always one more segments than colons
     // searchPath = (char *[])calloc (pathLen, sizeof (char *));
     searchPath = static_cast<char **>(calloc (pathLen, sizeof (char *)));
-    assert (NULL != searchPath);
+    assert (0 != searchPath);
 
     for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');
-	 (NULL != tp) && (ii < pathLen);
+	 (0 != tp) && (ii < pathLen);
 	 ++ii) {
 	
-	assert ((NULL != cp) && (NULL != tp));
+	assert ((0 != cp) && (0 != tp));
 	if (tp == cp) {			// treat empty path as "."
 	    *pathStr = strdup (".");	// allocate, in case we free later
 	} else {			// copy out the string section
 	    const char *sp;
 	    char *dp;
 	    *pathStr = (char *)malloc (tp - cp + 1);
-	    assert (NULL != *pathStr);
+	    assert (0 != *pathStr);
 	    for (dp = *pathStr, sp = cp; sp < tp; *dp++ = *sp++);
 	    *dp = 0;			// NULL terminate
 	}
@@ -121,7 +121,7 @@ FILE *fopen_path(const char *filename, const char *perms)
   }
 
   fp = fopen (nameBuff, perms);		// first try absolute path
-  if (NULL != fp) {
+  if (0 != fp) {
       if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
       return fp;
   }
@@ -140,7 +140,7 @@ FILE *fopen_path(const char *filename, const char *perms)
 	      if ('\\' == *cp) *cp = '/';
 	  }
 	  fp = fopen (nameBuff, perms);	// try it
-	  if (NULL != fp) {
+	  if (0 != fp) {
 	      if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
 	      return fp;
 	  }
@@ -156,5 +156,5 @@ FILE *fopen_path(const char *filename, const char *perms)
       printf ("\n");
   }
 
-  return NULL;
+  return 0;
 }

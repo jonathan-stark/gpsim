@@ -33,7 +33,7 @@ extern void add_node(char *node_name);
 
 static cmd_options cmd_node_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

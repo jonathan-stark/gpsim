@@ -70,7 +70,7 @@ void P16C61::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   intcon = &intcon_reg;
@@ -166,7 +166,7 @@ void P16C62::create_iopin_map(void)
   // Now Create the package and place the I/O pins
 
 
-  package->assign_pin(1, NULL);
+  package->assign_pin(1, 0);
 
   package->assign_pin(2, new IO_bi_directional(porta, 0));
   package->assign_pin(3, new IO_bi_directional(porta, 1));
@@ -175,9 +175,9 @@ void P16C62::create_iopin_map(void)
   package->assign_pin(6, new IO_open_collector(porta, 4));
   package->assign_pin(7, new IO_bi_directional(porta, 5));
 
-  package->assign_pin(8, NULL); //VSS
-  package->assign_pin(9, NULL);  // OSC
-  package->assign_pin(10, NULL); // OSC
+  package->assign_pin(8, 0); //VSS
+  package->assign_pin(9, 0);  // OSC
+  package->assign_pin(10, 0); // OSC
 
   package->assign_pin(11, new IO_bi_directional(portc, 0));
   package->assign_pin(12, new IO_bi_directional(portc, 1));
@@ -189,8 +189,8 @@ void P16C62::create_iopin_map(void)
   package->assign_pin(18, new IO_bi_directional(portc, 7));
 
 
-  package->assign_pin(19, NULL); //VSS
-  package->assign_pin(20, NULL); //VDD
+  package->assign_pin(19, 0); //VSS
+  package->assign_pin(20, 0); //VDD
 
   package->assign_pin(21, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(22, new IO_bi_directional_pu(portb, 1));
@@ -256,7 +256,7 @@ void P16C64::create_iopin_map(void)
 
   // Now Create the package and place the I/O pins
 
-  package->assign_pin(1, NULL);
+  package->assign_pin(1, 0);
 
   package->assign_pin(2, new IO_bi_directional(porta, 0));
   package->assign_pin(3, new IO_bi_directional(porta, 1));
@@ -270,10 +270,10 @@ void P16C64::create_iopin_map(void)
   package->assign_pin(10, new IO_bi_directional(porte, 2));
 
 
-  package->assign_pin(11, NULL);
-  package->assign_pin(12, NULL);
-  package->assign_pin(13, NULL);
-  package->assign_pin(14, NULL);
+  package->assign_pin(11, 0);
+  package->assign_pin(12, 0);
+  package->assign_pin(13, 0);
+  package->assign_pin(14, 0);
 
   package->assign_pin(15, new IO_bi_directional(portc, 0));
   package->assign_pin(16, new IO_bi_directional(portc, 1));
@@ -294,8 +294,8 @@ void P16C64::create_iopin_map(void)
   package->assign_pin(29, new IO_bi_directional(portd, 6));
   package->assign_pin(30, new IO_bi_directional(portd, 7));
 
-  package->assign_pin(31, NULL);
-  package->assign_pin(32, NULL);
+  package->assign_pin(31, 0);
+  package->assign_pin(32, 0);
 
   package->assign_pin(33, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(34, new IO_bi_directional_pu(portb, 1));
@@ -366,7 +366,7 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(&ccpr1h,  0x16, 0);
   add_sfr_register(&ccp1con, 0x17, 0);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   // get_pir_set()->set_pir1(get_pir1());
@@ -476,7 +476,7 @@ void  P16C62::create(void)
 
   create_iopin_map();
   
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
  
   _14bit_processor::create();
@@ -694,7 +694,7 @@ void  P16C64::create(void)
 
   create_iopin_map();
   
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
  
   _14bit_processor::create();

@@ -68,7 +68,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	
 	entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
-	if(entry!=NULL)
+	if(entry!=0)
 	    gpsim_toggle_break_at_address(((GUI_Object*)sw)->gp->pic_id, entry->retaddress);
 	
 	return 1;
@@ -157,7 +157,7 @@ static int get_closest_label(Stack_Window *sw,
     
     gpsim_symbol_rewind((unsigned int)gp->pic_id);
 
-    while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+    while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
     {
 	switch(s->type)
 	{
@@ -289,11 +289,11 @@ void Stack_Window::Build(void)
   gtk_clist_set_selection_mode (GTK_CLIST(stack_clist), GTK_SELECTION_BROWSE);
 
   gtk_signal_connect(GTK_OBJECT(stack_clist),"click_column",
-		     (GtkSignalFunc)stack_click_column,NULL);
+		     (GtkSignalFunc)stack_click_column,0);
   gtk_signal_connect(GTK_OBJECT(stack_clist),"select_row",
 		     (GtkSignalFunc)stack_list_row_selected,this);
 
-  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
@@ -335,7 +335,7 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
   name = "stack_viewer";
   wc = WC_data;
   wt = WT_stack_window;
-  window = NULL;
+  window = 0;
   is_built=0;
 
   last_stacklen=0;

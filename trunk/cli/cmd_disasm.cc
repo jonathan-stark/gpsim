@@ -32,7 +32,7 @@ cmd_disassemble disassemble;
 
 static cmd_options cmd_disassemble_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

@@ -129,7 +129,7 @@ public:
     //cout << "*** INVALID INSTRUCTION ***\n";
   };
 
-  invalid_instruction(pic_processor *new_cpu=NULL,unsigned int new_opcode=0);
+  invalid_instruction(pic_processor *new_cpu=0,unsigned int new_opcode=0);
   virtual INSTRUCTION_TYPES isa(void) {return INVALID_INSTRUCTION;};
   virtual char *name(char *str){return("INVALID");};
   static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)

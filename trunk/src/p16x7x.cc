@@ -336,7 +336,7 @@ void P16C71::create_sfr_map(void)
 
   adcon0.analog_port = porta;
   adcon0.adres = &adres;
-  adcon0.adresl = NULL;
+  adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   adcon0.channel_mask = 3;
@@ -446,7 +446,7 @@ void P16C712::create_sfr_map(void)
 
   adcon0.analog_port = porta;
   adcon0.adres = &adres;
-  adcon0.adresl = NULL;
+  adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   adcon0.channel_mask = 3;
@@ -577,9 +577,9 @@ void P16C72::create_sfr_map(void)
   add_sfr_register(&adres,  0x1e, 0);
 
   adcon0.analog_port = porta;
-  adcon0.analog_port2 = NULL;
+  adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
-  adcon0.adresl = NULL;
+  adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();
@@ -707,9 +707,9 @@ void P16C73::create_sfr_map(void)
   add_sfr_register(&adres,  0x1e, 0);
 
   adcon0.analog_port = porta;
-  adcon0.analog_port2 = NULL;
+  adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
-  adcon0.adresl = NULL;
+  adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();
@@ -841,7 +841,7 @@ void P16C74::create_sfr_map(void)
   adcon0.analog_port = porta;
   adcon0.analog_port2 = porte;
   adcon0.adres = &adres;
-  adcon0.adresl = NULL;
+  adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();

@@ -31,8 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 
 
-//GSList *data_array=NULL;
-static asynchronous_stimulus *last_stimulus=NULL;
+static asynchronous_stimulus *last_stimulus=0;
 cmd_stimulus c_stimulus;
 
 #define ASYNCHRONOUS_STIMULUS    1
@@ -84,7 +83,7 @@ static cmd_options cmd_stimulus_options[] =
   "triangle_wave",         STIM_TRI,           OPT_TT_BITFLAG,
   "port",                  STIM_PORT,          OPT_TT_STRING,
 
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -462,5 +461,5 @@ void cmd_stimulus::end(void)
 
     }
 
-  last_stimulus = NULL;
+  last_stimulus = 0;
 }

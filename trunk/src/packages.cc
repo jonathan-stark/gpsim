@@ -29,9 +29,9 @@ Boston, MA 02111-1307, USA.  */
 Package::Package(void)
 {
 
-  pins = NULL;
+  pins = 0;
   number_of_pins = 0;
-  pin_position = NULL;
+  pin_position = 0;
 
 }
 
@@ -59,7 +59,7 @@ void Package::create_pkg(unsigned int _number_of_pins)
   for(int i=0; i<number_of_pins; i++)
   {
     int pins_per_side;
-    pins[i] = NULL;
+    pins[i] = 0;
 
     pins_per_side = number_of_pins/2;
     if(number_of_pins&1) // If odd number of pins
@@ -108,7 +108,7 @@ IOPIN *Package::get_pin(unsigned int pin_number)
   if(E_PIN_EXISTS == pin_existance(pin_number))
     return pins[pin_number-1];
   else
-    return NULL;
+    return 0;
 
 }
 
@@ -170,7 +170,7 @@ char *Package::get_pin_name(unsigned int pin_number)
   if(pin_existance(pin_number) == E_PIN_EXISTS)
     return pins[pin_number-1]->name();
   else
-    return NULL;
+    return 0;
 
 }
 

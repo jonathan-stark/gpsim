@@ -43,7 +43,7 @@ Boston, MA 02111-1307, USA.  */
  * GtkDialog
  */
 
-static GtkWidget *dialog_window = NULL;
+static GtkWidget *dialog_window = 0;
 
 static void enter_callback(GtkWidget *entry, char *label)
 {
@@ -177,7 +177,7 @@ fill_range (void)
 			  button, TRUE, TRUE, 0);
       gtk_widget_show (button);
 
-      label = NULL;
+      label = 0;
     }
 
   if (!GTK_WIDGET_VISIBLE (dialog_window))

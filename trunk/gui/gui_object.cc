@@ -52,11 +52,11 @@ GUI_Object::GUI_Object(void)
 {
 
 
-  gp = NULL;
+  gp = 0;
   has_processor = false;
-  window = NULL;
-  name = NULL;
-  menu = NULL;
+  window = 0;
+  name = 0;
+  menu = 0;
 
   x=0; y=0;
   width = 100;
@@ -79,7 +79,7 @@ void GUI_Object::UpdateMenuItem(void)
 
     gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),enabled);
   } else {
-    printf("GUI_Object::UpdateMenuItem(void) -- NULL menu\n");
+    printf("GUI_Object::UpdateMenuItem(void) -- 0 menu\n");
   }
 
 
@@ -88,7 +88,7 @@ void GUI_Object::UpdateMenuItem(void)
 void GUI_Object::ChangeView (int view_state)
 {
 
-  if( (view_state==VIEW_SHOW) || (window==NULL) ||
+  if( (view_state==VIEW_SHOW) || (window==0) ||
       ((view_state==VIEW_TOGGLE) &&
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
       ) {
@@ -207,18 +207,18 @@ int config_set_string(char *module, char *entry, const char *string)
     int ret;
     DB_LIST list;
 
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
+    list = eXdbmGetList(dbid, 0, module);
+    if(list==0)
     {
-	ret = eXdbmCreateList(dbid, NULL, module, NULL);
+	ret = eXdbmCreateList(dbid, 0, module, 0);
 	if(ret==-1)
 	{
 	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
 	    return 0;
 	}
 	
-	list = eXdbmGetList(dbid, NULL, module);
-	if(list==NULL)
+	list = eXdbmGetList(dbid, 0, module);
+	if(list==0)
 	{
 	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
 	    return 0;
@@ -230,7 +230,7 @@ int config_set_string(char *module, char *entry, const char *string)
     ret = eXdbmChangeVarString(dbid, list, entry, (char *)string);
     if(ret == -1)
     {
-	ret = eXdbmCreateVarString(dbid, list, entry, NULL, (char *)string);
+	ret = eXdbmCreateVarString(dbid, list, entry, 0, (char *)string);
 	if(ret==-1)
 	{
 	    puts("\n\n\n\ndidn't work");
@@ -253,18 +253,18 @@ int config_set_variable(char *module, char *entry, int value)
     int ret;
     DB_LIST list;
 
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
+    list = eXdbmGetList(dbid, 0, module);
+    if(list==0)
     {
-	ret = eXdbmCreateList(dbid, NULL, module, NULL);
+	ret = eXdbmCreateList(dbid, 0, module, 0);
 	if(ret==-1)
 	{
 	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
 	    return 0;
 	}
 	
-	list = eXdbmGetList(dbid, NULL, module);
-	if(list==NULL)
+	list = eXdbmGetList(dbid, 0, module);
+	if(list==0)
 	{
 	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
 	    return 0;
@@ -276,7 +276,7 @@ int config_set_variable(char *module, char *entry, int value)
     ret = eXdbmChangeVarInt(dbid, list, entry, value);
     if(ret == -1)
     {
-	ret = eXdbmCreateVarInt(dbid, list, entry, NULL, value);
+	ret = eXdbmCreateVarInt(dbid, list, entry, 0, value);
 	if(ret==-1)
 	{
 	    puts("\n\n\n\ndidn't work");
@@ -299,8 +299,8 @@ int config_get_variable(char *module, char *entry, int *value)
     int ret;
     DB_LIST list;
 
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
+    list = eXdbmGetList(dbid, 0, module);
+    if(list==0)
 	return 0;
 
     // We have the list
@@ -317,8 +317,8 @@ int config_get_string(char *module, char *entry, char **string)
     int ret;
     DB_LIST list;
 
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
+    list = eXdbmGetList(dbid, 0, module);
+    if(list==0)
 	return 0;
 
     // We have the list

@@ -75,8 +75,8 @@ Processor::Processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
-  files = NULL;
-  pc = NULL;
+  files = 0;
+  pc = 0;
 
   set_frequency(1.0);
 
@@ -99,7 +99,7 @@ void Processor::init_register_memory (unsigned int memory_size)
 
   registers = (Register **) new char[sizeof (Register *) * memory_size];
 
-  if (registers  == NULL)
+  if (registers  == 0)
     {
       cout << "*** ERROR *** Out of memory - PIC register space\n";
       exit (1);
@@ -119,7 +119,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   // class defines its own register mapping).
 
   for (int i = 0; i < memory_size; i++)
-    registers[i] = NULL;
+    registers[i] = 0;
 
 
 }
@@ -152,19 +152,19 @@ void Processor::create_invalid_registers (void)
 
   for (i = 0; i < register_memory_size(); i++)
     {
-      if (NULL == registers[i])
+      if (0 == registers[i])
       {
 	  registers[i] = new invalid_file_register(i);
 	  registers[i]->address = 0;    // BAD_REGISTER;
 	  registers[i]->alias_mask = 0;
 	  registers[i]->value = 0;	// unimplemented registers are read as 0
-	  registers[i]->symbol_alias = NULL;
+	  registers[i]->symbol_alias = 0;
 
 	  registers[i]->cpu = this;
 	  //If we are linking with a gui, then initialize a cross referencing
 	  //pointer. This pointer is used to keep track of which gui window(s)
 	  //display the register. For invalid registers this should always be null.
-	  registers[i]->xref = NULL;
+	  registers[i]->xref = 0;
 
 	}
     }
@@ -198,7 +198,7 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 
     registers[j]->address = j;
     registers[j]->value = 0;
-    registers[j]->symbol_alias = NULL;
+    registers[j]->symbol_alias = 0;
 
     //The default register name is simply its address
     sprintf (str, "0x%02x", j);
@@ -236,11 +236,11 @@ void Processor::delete_file_registers(unsigned int start_address, unsigned int e
 	// of its aliases.
 	for(i=SMALLEST_ALIAS_DISTANCE; i<register_memory_size(); i+=SMALLEST_ALIAS_DISTANCE)
 	  if(registers[j] == registers[i])
-	    registers[i] = NULL;
+	    registers[i] = 0;
       }
 
       delete registers[j];
-      registers[j] = NULL;
+      registers[j] = 0;
     }
   }
 
@@ -313,7 +313,7 @@ void Processor::init_program_memory (unsigned int memory_size)
 
   program_memory = (instruction **) new char[sizeof (instruction *) * memory_size];
 
-  if (program_memory == NULL)
+  if (program_memory == 0)
     {
       cout << "*** ERROR *** Out of memory for program space\n";
       exit (1);
@@ -343,7 +343,7 @@ void Processor::init_program_memory(int address, int value)
   if(address < program_memory_size())
     {
       program_memory[address] = disasm(address,value);
-      if(program_memory[address] == NULL)
+      if(program_memory[address] == 0)
 	program_memory[address] = &bad_instruction;
       program_memory[address]->add_line_number_symbol(address);
     }
@@ -424,7 +424,7 @@ void Processor::read_src_files(void)
       // file. (e.g. files[3].line_seek[20] references the
       // 20th line of the third source file.)
       files[i].line_seek = new int[files[i].max_line+1];
-      if( NULL == (files[i].file_ptr = fopen_path(files[i].name,"r")))
+      if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
 	continue;
       rewind(files[i].file_ptr);
 
@@ -579,7 +579,7 @@ int ProgramMemoryAccess::clear_break_at_address(int address,
 
     instruction *instr = find_instruction(address,type);
 
-    if(instr!=NULL) {
+    if(instr!=0) {
       int b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
       bp.clear( b );
       return 1;
@@ -611,7 +611,7 @@ int ProgramMemoryAccess::clear_profile_stop_at_address(int address)
 int ProgramMemoryAccess::address_has_break(int address, 
 					     enum instruction::INSTRUCTION_TYPES type)
 {
-  if(find_instruction(address,type)!=NULL)
+  if(find_instruction(address,type)!=0)
     return 1;
 
   return 0;
@@ -675,7 +675,7 @@ Processor * Processor::construct(void)
 
   cout << " Can't create a generic processor\n";
 
-  return NULL;
+  return 0;
 
 }
 
@@ -812,11 +812,11 @@ instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction
 {
 
   if(cpu->program_memory_size()<=address  || address<0)
-    return NULL;
+    return 0;
 
   instruction &q = this->operator[](address);
   if(q.isa()==instruction::INVALID_INSTRUCTION)
-    return NULL;
+    return 0;
 
 
   instruction *p = &q;
@@ -831,7 +831,7 @@ instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction
 	case instruction::MULTIWORD_INSTRUCTION:
 	case instruction::INVALID_INSTRUCTION:
 	case instruction::NORMAL_INSTRUCTION:
-	  return NULL;
+	  return 0;
 	case instruction::BREAKPOINT_INSTRUCTION:
 	case instruction::NOTIFY_INSTRUCTION:
 	case instruction::PROFILE_START_INSTRUCTION:
@@ -842,7 +842,7 @@ instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction
 
     }
 
-  return NULL;
+  return 0;
 }
 
 
@@ -905,7 +905,7 @@ instruction *ProgramMemoryAccess::get(int address)
   if(address < cpu->program_memory_size())
     return &(this->operator[](address));
   else
-    return NULL;
+    return 0;
 
 }
 
@@ -916,8 +916,8 @@ instruction *ProgramMemoryAccess::get_base_instruction(int address)
 
     p=get(address);
 
-    if(p==NULL)
-        return NULL;
+    if(p==0)
+        return 0;
 
     for(;;)
     {
@@ -936,7 +936,7 @@ instruction *ProgramMemoryAccess::get_base_instruction(int address)
 	}
 
     }
-    return NULL;
+    return 0;
 }
 
 //----------------------------------------
@@ -955,7 +955,7 @@ unsigned int ProgramMemoryAccess::get_opcode(int addr)
 
 //----------------------------------------
 // get_opcode_name - return an opcode name from program memory.
-//                   If the address is out of range return NULL;
+//                   If the address is out of range return 0;
 
 char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
 {
@@ -964,7 +964,7 @@ char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
     return cpu->program_memory[addr]->name(buffer);
 
   *buffer = 0;
-  return NULL;
+  return 0;
 }
 
 //----------------------------------------
@@ -999,7 +999,7 @@ void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
   instruction *old_inst = get_base_instruction(addr);
   instruction *new_inst = cpu->disasm(addr,new_opcode);
 
-  if(new_inst==NULL)
+  if(new_inst==0)
   {
       puts("FIXME, in ProgramMemoryAccess::put_opcode");
       return;
@@ -1181,8 +1181,8 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 
 RegisterMemoryAccess::RegisterMemoryAccess(void)
 {
-  cpu = NULL;
-  registers = NULL;
+  cpu = 0;
+  registers = 0;
   nRegisters = 0;
 }
 
@@ -1192,7 +1192,7 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
 {
 
   if(!cpu || !registers || nRegisters<=address)
-    return NULL;
+    return 0;
 
   Register *reg = registers[address];
 
@@ -1242,7 +1242,7 @@ ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (vo
 			 char *name3,
 			 char *name4) 
 {
-  if (processor_list == NULL)
+  if (processor_list == 0)
     processor_list = new list <ProcessorConstructor *>;
 
   cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
@@ -1280,7 +1280,7 @@ ProcessorConstructor *ProcessorConstructor::find(char *name)
 	return p;
   }
 
-  return NULL;
+  return 0;
 
 }
 

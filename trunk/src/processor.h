@@ -331,8 +331,8 @@ public:
   ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
 			 char *name1, 
 			 char *name2, 
-			 char *name3=NULL,
-			 char *name4=NULL);
+			 char *name3=0,
+			 char *name4=0);
 
 
   ProcessorConstructor * find(char *name);

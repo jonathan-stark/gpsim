@@ -136,7 +136,7 @@ static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
     gchar name[45];
     unsigned char byte;
 
-    if(sbow == NULL || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
+    if(sbow == 0 || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
     {
 	printf("Warning update_ascii(%p,%x)\n",sbow,row);
 	return;
@@ -209,14 +209,14 @@ popup_activated(GtkWidget *widget, gpointer data)
     int pm_size;
     gint char_width;
 
-    if(widget==NULL || data==NULL)
+    if(widget==0 || data==0)
     {
 	printf("Warning popup_activated(%p,%p)\n",widget,(unsigned int)data);
 	return;
     }
     
     if(!popup_sbow || !popup_sbow->gp || !popup_sbow->gp->cpu) {
-      printf("%s:%d - NULL pointer \n",__FILE__,__LINE__);
+      printf("%s:%d - 0 pointer \n",__FILE__,__LINE__);
       return;
     }
     item = (menu_item *)data;
@@ -312,16 +312,16 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
     GtkWidget *menu;
     GtkWidget *item;
 
-    GSList *group=NULL;
+    GSList *group=0;
     
     GtkWidget *submenu;
 
   int i;
 
-  if(sbow==NULL)
+  if(sbow==0)
   {
       printf("Warning build_menu_for_sheet(%p)\n",sbow);
-      return NULL;
+      return 0;
   }
 
   popup_sbow=sbow;
@@ -385,10 +385,10 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
 
   int i;
 
-  if(sbow==NULL)
+  if(sbow==0)
   {
       printf("Warning build_menu_for_sheet(%p)\n",sbow);
-      return NULL;
+      return 0;
   }
 
   popup_sbow=sbow;
@@ -430,7 +430,7 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
     if(!sbow || !sbow->gp || !sbow->gp->cpu)
       return 0;
 
-    if(widget==NULL || event==NULL)
+    if(widget==0 || event==0)
     {
 	printf("Warning button_press(%p,%p,%p)\n",widget,event,sbow);
 	return 0;
@@ -443,13 +443,13 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 	if(GTK_IS_CLIST(GTK_OBJECT(widget)))
 	{
 	    popup=sbow->clist_popup_menu;
-    	    gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+    	    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
 			   3, event->time);
 	}
 	else
 	{
 	    popup=sbow->sheet_popup_menu;
-    	    gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+    	    gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
 			   3, event->time);
 	}
     }
@@ -477,7 +477,7 @@ static void filter(char *clean, char *dirty, int max)
 
   int i=0,j;
 
-  if(dirty!=NULL) {
+  if(dirty!=0) {
 
     do {
 
@@ -609,7 +609,7 @@ static void update(SourceBrowserOpcode_Window *sbow, int address)
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
-    if(widget->window==NULL)
+    if(widget->window==0)
 	return 0;
     
     gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
@@ -676,16 +676,16 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     gdk_colormap_alloc_color(colormap, &sbow->pm_has_changed_color,FALSE,TRUE);
 
 #if GTK_MAJOR_VERSION >= 2
-    if (gtk_style_get_font(sbow->breakpoint_line_number_style) == NULL ||
-      gtk_style_get_font(sbow->current_line_number_style) == NULL ||
-      gtk_style_get_font(sbow->normal_style) == NULL)
+    if (gtk_style_get_font(sbow->breakpoint_line_number_style) == 0 ||
+      gtk_style_get_font(sbow->current_line_number_style) == 0 ||
+      gtk_style_get_font(sbow->normal_style) == 0)
       return 0;
 #else
-    if(sbow->breakpoint_line_number_style->font==NULL)
+    if(sbow->breakpoint_line_number_style->font==0)
 	return 0;
-    if(sbow->current_line_number_style->font==NULL)
+    if(sbow->current_line_number_style->font==0)
 	return 0;
-    if(sbow->normal_style->font==NULL)
+    if(sbow->normal_style->font==0)
 	return 0;
 #endif
 
@@ -703,7 +703,7 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
 }
 static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 {
-    static GtkWidget *dialog=NULL;
+    static GtkWidget *dialog=0;
     GtkWidget *button;
     static int retval;
     GtkWidget *hbox;
@@ -713,7 +713,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
     GtkWidget *label;
     int fonts_ok=0;
     
-    if(dialog==NULL)
+    if(dialog==0)
     {
 	dialog = gtk_dialog_new();
 	gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
@@ -813,7 +813,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	if((font=gdk_fontset_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==0)
 	{
 	    if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -827,7 +827,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-	if((font=gdk_fontset_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==0)
 	{
 	    if(gui_question("Breakpointfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -841,7 +841,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-	if((font=gdk_fontset_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==0)
 	{
 	    if(gui_question("PCfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -870,7 +870,7 @@ static unsigned long get_number_in_string(const char *number_string)
   char *bad_position;
   int current_base = 16;
   
-  if(number_string==NULL)
+  if(number_string==0)
   {
       printf("Warning get_number_in_string(%p)\n",number_string);
       errno = EINVAL;
@@ -916,7 +916,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
       return;
   }
 
-  if(sbow->memory==NULL)
+  if(sbow->memory==0)
       return;
 
   
@@ -964,7 +964,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 
  int row,col;
  
- if(widget==NULL|| sbow==NULL)
+ if(widget==0|| sbow==0)
   {
       printf("Warning show_sheet_entry(%p,%p)\n",widget,sbow);
       return;
@@ -994,7 +994,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   GtkSheet *sheet;
   gint row, col;
 
-  if(widget==NULL|| sbow==NULL)
+  if(widget==0|| sbow==0)
   {
       printf("Warning activate_sheet_entry(%p,%p)\n",widget,sbow);
       return;
@@ -1021,7 +1021,7 @@ show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  GtkWidget * sheet_entry;
   gint row, col;
 
-  if(widget==NULL|| sbow==NULL)
+  if(widget==0|| sbow==0)
   {
       printf("Warning show_entry(%p,%p)\n",widget,sbow);
       return;
@@ -1048,8 +1048,8 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
   
     sheet=GTK_SHEET(sbow->sheet);
 
-    if(widget==NULL || row>sheet->maxrow || row<0||
-       column>sheet->maxcol || column<0 || sbow==NULL)
+    if(widget==0 || row>sheet->maxrow || row<0||
+       column>sheet->maxcol || column<0 || sbow==0)
     {
 	printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,sbow);
 	return 0;
@@ -1130,7 +1130,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
     SourceOpcodeXREF *cross_reference;
 
-    if(gp == NULL)
+    if(gp == 0)
       return;
 
     current_address=0;
@@ -1151,7 +1151,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     cross_reference = new SourceOpcodeXREF();
     cross_reference->parent_window_type = WT_opcode_source_window;
     cross_reference->parent_window = (gpointer) this;
-    cross_reference->data = (gpointer) NULL;
+    cross_reference->data = (gpointer) 0;
     gpsim_assign_pc_xref(pic_id, cross_reference);
 
     gtk_clist_freeze (GTK_CLIST (clist));
@@ -1207,7 +1207,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   char buf[128];
   GtkSheetRange range;
 
-  if(_gp == NULL)
+  if(_gp == 0)
     return;
 
   gp = _gp;
@@ -1224,7 +1224,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   pm_size = gp->cpu->program_memory_size();
 
-  if(memory!=NULL)
+  if(memory!=0)
     free(memory);
   memory=(int*)malloc(pm_size*sizeof(*memory));
 
@@ -1300,10 +1300,10 @@ void SourceBrowserOpcode_Window::Build(void)
   gint column_width,char_width;
   gint i;
 
-  static GtkStyle *style=NULL;
+  static GtkStyle *style=0;
   char *fontstring;
 
-  if(window!=NULL)
+  if(window!=0)
     gtk_widget_destroy(window);
   
   SourceBrowser_Window::Create();
@@ -1362,7 +1362,7 @@ void SourceBrowserOpcode_Window::Build(void)
   /////////////////////////////////////////////////////////////////
   // create clist
   /////////////////////////////////////////////////////////////////
-  scrolled_win = gtk_scrolled_window_new (NULL, NULL);
+  scrolled_win = gtk_scrolled_window_new (0, 0);
   gtk_widget_show(scrolled_win);
   gtk_container_set_border_width (GTK_CONTAINER (scrolled_win), 5);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolled_win),
@@ -1452,7 +1452,7 @@ void SourceBrowserOpcode_Window::Build(void)
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
   
   // Create sheet
-  scrolled_win=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_win=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_win);
   gtk_box_pack_start(GTK_BOX(vbox), scrolled_win, TRUE, TRUE, 0);
   
@@ -1548,7 +1548,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
   menu = "<main>/Windows/Program memory";
 
-  window = NULL;
+  window = 0;
 
   column_titles = titles;
   columns = 4;
@@ -1562,7 +1562,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
   is_built = 0;
 
-  memory=NULL;
+  memory=0;
   current_address=0;
 
   has_processor=false;

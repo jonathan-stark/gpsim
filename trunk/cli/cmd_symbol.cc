@@ -31,7 +31,7 @@ cmd_symbol c_symbol;
 
 static cmd_options cmd_symbol_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

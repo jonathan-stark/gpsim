@@ -134,8 +134,8 @@ void initialize_signals(void)
 }
 */
 
-char *cmd_string_buf = NULL;
-FILE *cmd_file = NULL;
+char *cmd_string_buf = 0;
+FILE *cmd_file = 0;
 
 
 /*******************************************************
@@ -250,7 +250,7 @@ const char *get_dir_delim(const char *path)
   do
   {
     if (--p < path)
-      return NULL;
+      return 0;
   }
   while (*p != '/' && *p != '\\');
 
@@ -274,7 +274,7 @@ void process_command_file(const char * file_name)
   save_cmd_file = cmd_file;
 
   dir_path_end = get_dir_delim(file_name);
-  if(dir_path_end!=NULL)
+  if(dir_path_end)
   {
       strncpy(directory,file_name,dir_path_end-file_name);
       directory[dir_path_end-file_name]=0;
@@ -288,7 +288,7 @@ void process_command_file(const char * file_name)
 
   save_readline_state = using_readline;
   using_readline = 0;
-  cmd_string_buf = NULL;
+  cmd_string_buf = 0;
 
   if(cmd_file)
     {
@@ -339,7 +339,7 @@ get_user_input (void)
     cin.getline(buf, sizeof(buf));
     if (cin.eof()) {
       cout << buf << endl;
-      return NULL;
+      return 0;
     }
     return buf;
 #endif
@@ -481,7 +481,7 @@ ___main_input (void)
 
       if (line)
 	free (line);
-      line = NULL;
+      line = 0;
 
     }
   exit (0);
@@ -517,7 +517,7 @@ command_generator (const char *text, int state)
       if(strstr(command_list[i]->name, text) == command_list[i]->name)
 	{
 	  n = (char *) malloc(strlen(command_list[i]->name));
-	  if(n == NULL)
+	  if(n == 0)
 	    {
 	      //fprintf (stderr, "malloc: Out of virtual memory!\n");
 	      abort ();
@@ -530,7 +530,7 @@ command_generator (const char *text, int state)
     }
 
   /* If no names matched, then return NULL. */
-  return ((char *)NULL);
+  return 0;
 }
 
 /* Attempt to complete on the contents of TEXT.  START and END show the
@@ -544,7 +544,7 @@ gpsim_completion (const char *text, int start, int end)
   char **matches;
   //char *command_generator (char *, int);
 
-  matches = (char **)NULL;
+  matches = 0;
 
 #ifdef HAVE_READLINE
   /* If this word is at the start of the line, then it is a command
@@ -733,7 +733,7 @@ char *gnu_readline (char *s, unsigned int force_readline)
 	}
       */
 
-      if (tmp == NULL)
+      if (!tmp)
 	{
 	  retval = (char *) malloc (2);
 	  retval[0] = '\n';

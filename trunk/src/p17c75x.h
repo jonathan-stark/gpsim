@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 
 
-class P17C7xx : public  _16bit_processor //, public _16bit_68pins
+class P17C7xx : public  _16bit_processor
 {
 public:
 
@@ -41,13 +41,6 @@ public:
   virtual void create_sfr_map(void);
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
-  //  void create_sfr_map(void);
-/*
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
-*/
 };
 
 class P17C75x : public P17C7xx
@@ -64,13 +57,6 @@ class P17C75x : public P17C7xx
   
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
 
-/*
-  virtual int get_pin_count(void){return Package::get_pin_count();}; 
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);}; 
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);}; 
-*/
-  
 };
 
 class P17C752 : public P17C75x
@@ -100,7 +86,6 @@ class P17C756 : public P17C75x
   P17C756(void);
   static Processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
   virtual unsigned int register_memory_size(void) const { return 0x800; };
@@ -119,7 +104,6 @@ class P17C756A : public P17C75x
   P17C756A(void);
   static Processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
   virtual unsigned int register_memory_size(void) const { return 0x800; };
@@ -138,7 +122,6 @@ class P17C762 : public P17C75x
   P17C762(void);
   static Processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
   virtual unsigned int register_memory_size(void) const { return 0x800; };
@@ -157,7 +140,6 @@ class P17C766 : public P17C75x
   P17C766(void);
   static Processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
   virtual unsigned int register_memory_size(void) const { return 0x800; };

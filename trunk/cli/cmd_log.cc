@@ -48,7 +48,7 @@ static cmd_options cmd_trace_options[] =
   "r",   READ,        OPT_TT_BITFLAG,
   "wv",  WRITE_VALUE, OPT_TT_BITFLAG,
   "rv",  READ_VALUE,  OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 cmd_log::cmd_log(void)
@@ -86,7 +86,7 @@ void cmd_log::log(cmd_options *opt)
 
   switch(opt->value) {
   case LOG_ON:
-    trace_log.enable_logging(NULL);
+    trace_log.enable_logging(0);
     break;
   case LOG_OFF:
     trace_log.disable_logging();
@@ -136,7 +136,7 @@ void cmd_log::log(cmd_options *opt, char *str, int val, int mask)
 void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
 {
   int b=MAX_BREAKPOINTS;
-  char *str=NULL;
+  char *str=0;
 
   if(!cpu)
     cout << "warning, no cpu\n";
@@ -217,7 +217,7 @@ void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
 void cmd_log::log(int number)
 {
 
-  if(cpu==NULL)
+  if(!cpu)
     return;
 
   cout << "log number " << number << endl;

@@ -95,15 +95,15 @@ public:
 
     Trace_Window *tw  = (Trace_Window *) (parent_window);
 
-    if(  (tw == NULL) || !tw->enabled)
+    if(  (tw == 0) || !tw->enabled)
       return;
 
     // Get the pointer to the `gui processor' structure
     gp = tw->gp;
 
-    if(gp==NULL || gp->pic_id==0)
+    if(gp==0 || gp->pic_id==0)
       {
-	puts("Warning gp or gp->pic_id == NULL in TraceWindow_update");
+	puts("Warning gp or gp->pic_id == 0 in TraceWindow_update");
 	return;
       }
 
@@ -163,9 +163,9 @@ void Trace_Window::Update(void)
   if(!enabled)
     return;
 
-  if(gp==NULL || gp->pic_id==0)
+  if(gp==0 || gp->pic_id==0)
   {
-      puts("Warning gp or gp->pic_id == NULL in TraceWindow_update");
+      puts("Warning gp or gp->pic_id == 0 in TraceWindow_update");
       return;
   }
 
@@ -179,10 +179,10 @@ void Trace_Window::Update(void)
   trace_flags |= GTF_ENABLE_XREF_UPDATES;
   if(cycle-last_cycle>=MAXTRACES) {
     // redraw the whole thing
-    gpsim_trace_dump_to_file(MAXTRACES, NULL);
+    gpsim_trace_dump_to_file(MAXTRACES, 0);
 
   } else {
-    gpsim_trace_dump_to_file(cycle-last_cycle, NULL);
+    gpsim_trace_dump_to_file(cycle-last_cycle, 0);
 
 
   }
@@ -207,7 +207,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
 
   TraceXREF *cross_reference;
 
-  if(gp == NULL)
+  if(gp == 0)
     return;
 
   has_processor=true;
@@ -220,7 +220,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
   cross_reference = new TraceXREF();
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
-  cross_reference->data = NULL;
+  cross_reference->data = 0;
   gpsim_assign_trace_xref((gpointer) cross_reference);
 }
 
@@ -264,7 +264,7 @@ void Trace_Window::Build(void)
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), this);
 
-  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window=gtk_scrolled_window_new(0, 0);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(trace_clist));
   
@@ -327,11 +327,11 @@ Trace_Window::Trace_Window(GUI_Processor *_gp)
 
   gp = _gp;
   name = "trace";
-  window = NULL;
+  window = 0;
   wc = WC_data;
   wt = WT_trace_window;
   is_built = 0;
-  trace_map = NULL;
+  trace_map = 0;
 
   trace_flags = 0;
   has_processor=false;

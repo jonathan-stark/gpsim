@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 _16bit_processor::_16bit_processor(void)
 {
 
-  package = NULL;
+  package = 0;
   cout << "FIXME: 16bit processor is assuming that PLL is on - should check config bits\n";
   pll_factor = 2;
 
@@ -263,7 +263,7 @@ void _16bit_processor :: create (void)
   //create_iopin_map(&iopin_map, &num_of_iopins);
   //create_iopins(iopin_map, num_of_iopins);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
  
 

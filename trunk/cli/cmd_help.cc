@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 static cmd_options cmd_help_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 cmd_help help;

@@ -33,7 +33,7 @@ cmd_echo echo;
 
 static cmd_options cmd_echo_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

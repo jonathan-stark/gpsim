@@ -32,7 +32,7 @@ cmd_run c_run;
 
 static cmd_options cmd_run_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -52,7 +52,7 @@ cmd_run::cmd_run(void)
 void cmd_run::run(void)
 {
 
-  if(NULL == cpu)
+  if(!cpu)
     {
       cout << "no cpu has been selected\n";
       return;

@@ -99,7 +99,7 @@ struct poptOption optionsTable[] = {
   { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
     "use ICD (e.g. -d /dev/ttyS0).",0 },
   POPT_AUTOHELP
-  { NULL, 0, 0, NULL, 0, 0 }
+  { 0, 0, 0, 0, 0, 0 }
 };
 
 void 
@@ -147,7 +147,7 @@ main (int argc, char *argv[])
   poptContext optCon;   /* context for parsing command-line options */
 
 
-  optCon = poptGetContext(NULL, argc, (const char **)argv, optionsTable, 0);
+  optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
 

@@ -193,16 +193,13 @@ instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int i
 
   cpu16->current_disasm_address = address;
 
-  pi = NULL;
+  pi = 0;
   for(int i =0; i<NUM_OP_18CXX; i++)
     if((op_18cxx[i].inst_mask & inst) == op_18cxx[i].opcode)
       pi = op_18cxx[i].inst_constructor(cpu, inst);
 
-  if(pi == NULL)
+  if(pi == 0)
     pi = invalid_instruction::construct(cpu, inst);
-
-  //  if(pi != NULL)
-  //    cout << hex << "0x" << address << '\t' << pi->name(buf) << '\n';
 
   return (pi);
 }

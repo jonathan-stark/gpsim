@@ -86,34 +86,34 @@ void _68pins::create_iopin_map(void)
   create_pkg(68);
 
   // Vdd and Vss pins
-  assign_pin(2, NULL);
-  assign_pin(20, NULL);
-  assign_pin(37, NULL);
-  assign_pin(49, NULL);
-  assign_pin(19, NULL);
-  assign_pin(36, NULL);
-  assign_pin(53, NULL);
-  assign_pin(68, NULL);
+  assign_pin(2, 0);
+  assign_pin(20, 0);
+  assign_pin(37, 0);
+  assign_pin(49, 0);
+  assign_pin(19, 0);
+  assign_pin(36, 0);
+  assign_pin(53, 0);
+  assign_pin(68, 0);
 
   // AVdd and AVss pins
-  assign_pin(29, NULL);
-  assign_pin(30, NULL);
+  assign_pin(29, 0);
+  assign_pin(30, 0);
 
   // NC pins
-  assign_pin(1, NULL);
-  assign_pin(18, NULL);
-  assign_pin(35, NULL);
-  assign_pin(52, NULL);
+  assign_pin(1, 0);
+  assign_pin(18, 0);
+  assign_pin(35, 0);
+  assign_pin(52, 0);
 
   // Test pin
-  assign_pin(17, NULL);
+  assign_pin(17, 0);
 
   // Reset pin
-  assign_pin(16, NULL);
+  assign_pin(16, 0);
   
   // Oscillator pins
-  assign_pin(50, NULL);
-  assign_pin(51, NULL);
+  assign_pin(50, 0);
+  assign_pin(51, 0);
 
   assign_pin(60, new IO_input(porta, 0));
   assign_pin(44, new IO_input(porta, 1));

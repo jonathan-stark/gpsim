@@ -97,7 +97,7 @@ list <Processor *> :: iterator processor_iterator;
 // 'active' means that it's the one currently being simulated or the one
 // currently being manipulated by the user (e.g. register dumps, break settings)
 
-Processor *active_cpu=NULL;
+Processor *active_cpu=0;
 
 // active_cpu_id is the id of the currently active cpu. In other words:
 //  active_cpu_id == active_cpu->processor_id
@@ -256,7 +256,7 @@ Processor * add_processor(char * processor_type, char * processor_new_name)
   } else
     cout << processor_type << " is not a valid processor.\n(try 'processor list' to see a list of valid processors.\n";
 
-  return(NULL);
+  return(0);
 }
 
 
@@ -335,7 +335,7 @@ Processor *get_processor(unsigned int cpu_id)
       if(gpsim_is_initialized)
 	cout << "Processor ID " << hex << cpu_id << "was not found\n";
 
-      return NULL;
+      return 0;
     }
 
   // This may not be the best solution, but if the cpu_id is invalid just
@@ -354,7 +354,7 @@ Processor * pic_processor::construct(void)
 
   cout << " Can't create a generic pic processor\n";
 
-  return NULL;
+  return 0;
 
 }
 
@@ -426,7 +426,7 @@ public:
 
   RealTimeBreakPoint(void)
   {
-    cpu = NULL;
+    cpu = 0;
     warntimer = 1;
     period = 1;
     future_cycle = 0;
@@ -443,7 +443,7 @@ public:
 
     cpu = active_cpu;
 
-    gettimeofday(&tv_start,NULL);
+    gettimeofday(&tv_start,0);
 
     cycle_start=cycles.value;
 
@@ -488,7 +488,7 @@ public:
     // briefly.
 
 
-    gettimeofday(&tv,NULL);
+    gettimeofday(&tv,0);
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
@@ -597,7 +597,7 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+  if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
     {
       simulation_start_cycle = cycles.value;
     }
@@ -684,7 +684,7 @@ void pic_processor::step_over (void)
 
   if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
     {
-        if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+        if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
 	  return;
 	else
 	{
@@ -817,7 +817,7 @@ void pic_processor::disassemble (int start_address, int end_address)
 	  inst = bpi->replaced;
 	}
 
-      if((files != NULL) && (use_src_to_disasm))
+      if((files != 0) && (use_src_to_disasm))
 	{
 	  int fid = program_memory[i]->file_id;
 	  char buf[256];
@@ -847,7 +847,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
 {
 
 
-  if((number_of_source_files == 0) || (files == NULL))
+  if((number_of_source_files == 0) || (files == 0))
     return;
 
   if(pc_val > program_memory_size())
@@ -884,14 +884,14 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
        << " Ending line " << end_line << '\n';
 
   // Make sure that the file is open
-  if(files[file_id].file_ptr == NULL)
+  if(files[file_id].file_ptr == 0)
     {
-      if(files[file_id].name != NULL)
+      if(files[file_id].name != 0)
 	files[file_id].file_ptr = fopen_path(files[file_id].name,"r");
 
-      if(files[file_id].file_ptr == NULL)
+      if(files[file_id].file_ptr == 0)
 	{
-	  if(files[file_id].name != NULL)
+	  if(files[file_id].name != 0)
 	    cout << files[file_id].name;
 	  else
 	    cout << ".lst file";
@@ -930,11 +930,11 @@ pic_processor::pic_processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
-  pc = NULL;
+  pc = 0;
 
-  files = NULL;
+  files = 0;
 
-  eeprom = NULL;
+  eeprom = 0;
   config_modes = create_ConfigMode();
   set_frequency(DEFAULT_PIC_CLOCK);
   pll_factor = 0;
@@ -1130,7 +1130,7 @@ void pic_processor::load_hex (const char *hex_file)
   if(verbose)
     cout << "load hex\n";
 
-  if (inputfile == NULL)
+  if (inputfile == 0)
     {
       cout << "Error: Couldn't open " << hex_file << '\n';
       return;
@@ -1189,7 +1189,7 @@ char *pic_processor::get_pin_name(unsigned int pin_number)
   if(package) 
     return package->get_pin_name(pin_number);
   else
-    return NULL;
+    return 0;
 }
 
 int pic_processor::get_pin_state(unsigned int pin_number)
@@ -1205,7 +1205,7 @@ IOPIN *pic_processor::get_pin(unsigned int pin_number)
   if(package)
     return package->get_pin(pin_number);
   else
-    return NULL;
+    return 0;
 }
 
 //-------------------------------------------------------------------

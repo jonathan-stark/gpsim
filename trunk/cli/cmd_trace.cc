@@ -40,7 +40,7 @@ static cmd_options cmd_trace_options[] =
   "mask",		TRACE_MASK_CMD,		OPT_TT_NUMERIC,
   "enable_log",	TRACE_LOGON_CMD,	OPT_TT_STRING,
   "disable_log",TRACE_LOGOFF_CMD,	OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 cmd_trace::cmd_trace(void)
