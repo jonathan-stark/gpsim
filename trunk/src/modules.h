@@ -61,6 +61,8 @@ public:
 
   unsigned int interface_id;
 
+  void *widget; // GtkWidget * that is put in the breadboard.
+
   // I/O pin specific
 
   virtual int get_pin_count(void){return 0;};

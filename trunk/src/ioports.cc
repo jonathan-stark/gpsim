@@ -92,9 +92,39 @@ int IOPORT::update_stimuli(void)
 
 {
 
-  //cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
+  // ??? cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
 
-  return 0;
+  // Loop through the io pins and determine if there are
+  // any sources attached to the same node
+
+  //cout << "updating the stimuli\n";
+  guint64 time = active_cpu->cycles.value;
+  int input = 0;
+
+  for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
+    if(stimulus_mask & m)
+      {
+	int t = pins[i]->snode->update(time);
+
+	//cout << name() << ' ' << i;
+	//cout << " pin " << pins[i]->name();
+	//cout <<  " node "<< pins[i]->snode->name() << " is ";
+
+	if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
+	  {
+	    //cout << "above";
+	     input |= m;
+	  } else //if(!(tris->value & m))
+	    input |= (value & m);
+	//else cout << "below";
+
+	//cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
+      }
+
+  // cout << " returning " << hex << input << '\n';
+
+  return input;
+
 }
 
 int PIC_IOPORT::update_stimuli(void)

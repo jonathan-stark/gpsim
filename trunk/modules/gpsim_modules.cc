@@ -49,6 +49,7 @@ support:
 #include "resistor.h"
 #include "usart.h"
 #include "paraface.h"
+#include "switch.h"
 
 /*
 class Module_Types
@@ -72,6 +73,9 @@ Module_Types available_modules[] =
 
   // Parallel port interface
   { "parallel_interface",         "paraface", Paraface::construct},
+
+  // Switch
+  { "switch",         "sw", Switch::construct},
 
   // No more modules
   { NULL,NULL,NULL}
