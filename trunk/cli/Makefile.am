@@ -9,6 +9,7 @@ libgpsimcli_la_SOURCES = \
 	scan.ll \
 	cmd_attach.cc \
 	cmd_break.cc \
+	cmd_bus.cc \
 	cmd_clear.cc \
 	cmd_disasm.cc \
 	cmd_dump.cc \
@@ -17,6 +18,7 @@ libgpsimcli_la_SOURCES = \
 	cmd_list.cc \
 	cmd_load.cc \
 	cmd_node.cc \
+	cmd_module.cc \
 	cmd_processor.cc \
 	cmd_quit.cc \
 	cmd_reset.cc \
@@ -30,8 +32,8 @@ libgpsimcli_la_SOURCES = \
 	cmd_x.cc \
 	command.cc \
 	input.cc \
-	cmd_attach.h cmd_dump.h cmd_load.h cmd_reset.h cmd_symbol.h \
-	command.h cmd_break.h cmd_echo.h cmd_node.h cmd_run.h cmd_trace.h \
+	cmd_attach.h cmd_bus.h cmd_dump.h cmd_load.h cmd_reset.h cmd_symbol.h \
+	command.h cmd_break.h cmd_echo.h cmd_module.h cmd_node.h cmd_run.h cmd_trace.h \
 	input.h cmd_clear.h cmd_help.h cmd_processor.h cmd_set.h cmd_step.h \
 	cmd_version.h misc.h cmd_disasm.h  cmd_list.h  cmd_quit.h \
 	cmd_stimulus.h cmd_x.h symbol_t.h

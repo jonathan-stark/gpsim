@@ -136,9 +136,22 @@ unsigned int TMR0::get_value(void)
 
   int new_value = (cpu->cycles.value - last_cycle)/ prescale;
 
+  //  if(new_value == 256) {
+    // tmr0 is about to roll over. However, the user code
+    // has requested the current value before the callback function
+    // has been invoked. S0 just return 0.
+
+  //    new_value = 0;
+
+  //  }
+
   if (new_value > 255)
     {
       cout << "TMR0: bug TMR0 is larger than 255...\n";
+      cout << "cpu->cycles.value = " << cpu->cycles.value <<
+	"  last_cycle = " << last_cycle <<
+	"  prescale = "  << prescale << 
+	"  calculated value = " << new_value << '\n';
       return 0;
     }
 
@@ -214,7 +227,7 @@ void TMR0::new_clock_source(void)
 void TMR0::callback(void)
 {
 
-  //cout<<"TMR0 rollover: " << hex << cpu->cycles.value.lo << '\n';
+  //cout<<"TMR0 rollover: " << hex << cpu->cycles.value << '\n';
 
   // If tmr0 is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to

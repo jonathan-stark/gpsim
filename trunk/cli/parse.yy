@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "cmd_attach.h"
 #include "cmd_break.h"
+#include "cmd_bus.h"
 #include "cmd_clear.h"
 #include "cmd_disasm.h"
 #include "cmd_dump.h"
@@ -39,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_list.h"
 #include "cmd_load.h"
 #include "cmd_node.h"
+#include "cmd_module.h"
 #include "cmd_processor.h"
 #include "cmd_quit.h"
 #include "cmd_reset.h"
@@ -87,6 +89,7 @@ void free_char_list(char_list *);
 /* gpsim commands: */
 %token <s>  ATTACH
 %token <s>  BREAK
+%token <s>  BUS
 %token <s>  CLEAR
 %token <s>  DISASSEMBLE
 %token <s>  DUMP
@@ -94,6 +97,7 @@ void free_char_list(char_list *);
 %token <s>  LOAD
 %token <s>  LIST
 %token <s>  NODE
+%token <s>  MODULE
 %token <s>  PROCESSOR
 %token <s>  QUIT
 %token <s>  RESET
@@ -148,6 +152,7 @@ cmd: acmd
 acmd: ignored
      | attach_cmd
      | break_cmd
+     | bus_cmd
      | clear_cmd
      | disassemble_cmd
      | dump_cmd
@@ -227,6 +232,19 @@ break_cmd: BREAK
           { c_break.set_break($2->value,$3,$4); }
           ;
 
+bus_cmd: BUS
+          { 
+	    c_bus.list_busses();
+	  }
+          | BUS string_list
+          {
+	    //cout << "bus command with a string list\n";
+	    c_bus.add_busses(str_list_head);
+	    free_char_list(str_list_head);
+            YYABORT;
+          }
+          ;
+
 clear_cmd: CLEAR NUMBER
           { clear.clear($2); }
           ;
@@ -288,6 +306,21 @@ node_cmd: NODE
             YYABORT;
           }
           ;
+
+module_cmd: MODULE
+          { c_module.module(); YYABORT;}
+          | MODULE bit_flag
+	  { c_module.module($2->value); YYABORT;}
+          | MODULE STRING
+	  { c_module.module($2,NULL); YYABORT; }
+          | MODULE STRING STRING
+	  { 
+            c_module.module($2,$3);
+            YYABORT;
+          }
+
+          ;
+
 
 processor_cmd: PROCESSOR
           { c_processor.processor(); YYABORT;}
@@ -580,12 +613,14 @@ void initialize_commands(void)
 
   attach.token_value = ATTACH;
   c_break.token_value = BREAK;
+  c_bus.token_value = BUS;
   clear.token_value = CLEAR;
   disassemble.token_value = DISASSEMBLE;
   dump.token_value = DUMP;
   help.token_value = HELP;
   c_list.token_value = LIST;
   c_load.token_value = LOAD;
+  c_module.token_value = MODULE;
   c_node.token_value = NODE;
   c_processor.token_value = PROCESSOR;
   quit.token_value = QUIT;

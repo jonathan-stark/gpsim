@@ -23,6 +23,7 @@ libgpsim_la_SOURCES = \
 	init.cc \
 	interface.cc \
 	ioports.cc \
+	modules.cc \
 	p12x.cc \
 	p16x8x.cc \
 	p16f87x.cc \
@@ -55,6 +56,7 @@ libgpsim_la_SOURCES = \
 	gpsim_time.h \
 	interface.h \
 	ioports.h \
+	modules.h \
 	p12x.h \
 	p16x5x.h \
 	p16x6x.h \

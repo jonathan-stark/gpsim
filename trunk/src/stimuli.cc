@@ -90,6 +90,7 @@ void add_node(char *node_name)
     sn = new Stimulus_Node(node_name);
 
 }
+
 void add_node(Stimulus_Node * new_node)
 {
 
@@ -117,8 +118,31 @@ void dump_node_list(void)
     }
 }
 
+void dump_bus_list(void)
+{
+  dump_node_list();
+}
 
 
+void add_bus(char *bus_name)
+{
+
+  /*
+  Stimulus_Node *sn = find_node(string(node_name));
+
+  if(sn)
+    cout << "Warning node `" << node_name << "' is already in the node list.\n(You can't have duplicate nodes in the node list.)\n";
+  else
+    sn = new Stimulus_Node(node_name);
+  */
+  cout << "add_bus\n";
+}
+/*
+void add_bus(Stimulus_Node * new_node)
+{
+  node_list.push_back(new_node);
+}
+*/
 stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 {
   register int i;

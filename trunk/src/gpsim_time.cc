@@ -82,7 +82,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
 	  // If the next break point is at a cycle greater than the
 	  // one we wish to set, then we found the insertion point.
 	  // Otherwise 
-	  if(l1->next->break_value > future_cycle)
+	  if(l1->next->break_value >= future_cycle)
 	    break_set = 1;
 	  else
 	    l1 = l1->next;
@@ -175,7 +175,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 	    }
 
 	  // Is the next one in the list still beyond this one?
-	  if(l1->next->next->break_value > new_cycle)
+	  if(l1->next->next->break_value >= new_cycle)
 	    {
 	      //cout << " replaced at current position (next is greater)\n";
 	      l1->next->break_value = new_cycle;
