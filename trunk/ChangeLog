@@ -1,3 +1,6 @@
+2003-08-27  Scott Dattalo  <scott@dattalo.com>
+	* config_win32.h.in - added
+
 2003-08-25  Scott Dattalo  <scott@dattalo.com>
 	* src/ioports.cc - more 16f628 Port A fixes
 	
