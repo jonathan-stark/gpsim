@@ -294,4 +294,110 @@ public:
 
 extern ProfileKeeper profile_keeper;
 
+
+/**********************************************************************
+ * boolean event logging
+ *
+ * The boolean event logger is a class for logging the time
+ * of boolean (i.e. 0/1) events.
+ *
+ * The class is designed to be efficient for both logging events and
+ * for accessing events that have already been logged. The events
+ * are stored in several small buffers that are linked together with
+ * binary trees. Each small buffer is linear, i.e. an array. Each
+ * element of the array stores the time when the event occurred.
+ * The state of the event is encoded in the position of the array.
+ * In other words, "high" events are at the odd indices of the array
+ * and "low" ones at the even ones.
+ *
+ * Each small buffer is associated with a contiguous time span. The
+ * start and end of this span is recorded so that one can quickly
+ * ascertain if a certain time instant resideds in the buffer. 
+ *
+ * The binary tree is fairly standard. A single top node records three
+ * numbers: the start time for the left child, the end time for the
+ * left child (which by default is the start time for the right child)
+ * and the end time for the right child. The nodes of left and right
+ * children are similar to the parents. To find which small buffer
+ * contains an event for a certain time, one simply starts at the
+ * top of the tree and traverses the nodes until a leaf is reached.
+ * A leaf, of course, is where the data is stored.
+ *
+ * The time for the event comes from gpsim's global cycle counter.
+ * This counter is 64-bits wide. The buffers that store the time however,
+ * are only 32-bits wide. There are two simple tricks employed to get
+ * around this problem. First, full 64-bit time for the first event
+ * is recorded. All subsequent events are 32-bit offsets from this.
+ * Second, to ensure that the 32-bit offset does not wrap around, the
+ * boolean event logger will set a cycle counter break point that is
+ * less than 2^32 cycles in the future. If this break point is encountered
+ * before the buffer fills, then this buffer is closed and added to the
+ * binary and a new buffer is started.
+ *
+ * Repeated events are not logged. E.g.. if two 1's are logged, the 
+ * second one is ignored.
+ * 
+ */
+
+class BoolEventBuffer : public BreakCallBack
+{
+public:
+
+  guint32  index;               // Index into the buffer
+  guint32  *buffer;             // Where the time is stored
+  guint32  max_events;          // Size of the event buffer
+  guint64  start_time;          // time of the first event
+  guint64  future_cycle;        // time at which the buffer can store no more data.
+  bool     bInitialState;       // State when started.
+  bool     bActive;             // True if the buffer is enabled for storing.
+  bool     bFull;               // True if the buffer has been filled.
+
+
+  BoolEventBuffer(bool _initial_state, guint32 _max_events = 4096);
+  ~BoolEventBuffer(void);
+  unsigned int get_index(guint64 event_time);
+  void activate(bool _initial_state);
+  void deactivate(void);
+  void callback(void);
+  void callback_print(void);
+  inline bool event(bool state);
+
+
+  inline bool isActive(void)
+  {
+    return bActive;
+  }
+
+  inline bool isFull(void)
+  {
+    return (index < max_events);
+  }
+
+  /*
+    get_index - return the current index
+
+    This is used by the callers to record where in the event
+    buffer a specific event is stored. (e.g. The start bit
+    of a usart bit stream.)
+   */
+  inline unsigned int get_index(void) {
+    return index;
+  }
+
+
+  bool get_event(int index) {
+
+    return (index & 1)^bInitialState;
+  }
+
+  bool get_state(guint64 event_time) {
+    return get_event(get_index(event_time));
+  }
+
+  int get_edges(guint64 start_time, guint64 end_time) {
+    return ( get_index(end_time) - get_index(start_time) );
+  }
+
+};
+
 #endif

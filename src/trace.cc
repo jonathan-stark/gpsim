@@ -1248,3 +1248,278 @@ void trace_enable_logging(char *file, int format)
 void trace_watch_register(int reg) {
   //trace_log.watch_reg = reg;
 }
+
+
+
+//--------------------------------------------------
+//  BoolEventBuffer::event(bool state)
+//
+//    Record a 0/1 event (e.g. the state of an I/O line).
+//    returns false if this event has filled the buffer
+//    or if the buffer is full. Note, an event will get lost
+//    if the callee attempts to save it in a full buffer.
+
+inline bool BoolEventBuffer::event(bool state)
+{
+
+  // If the new event is different than the most recently logged one
+  // then we need to log this event. (Note that the event is implicitly
+  // logged in the "index". I.e. 1 events are at odd indices.
+
+  if(state ^ (index & 1) ^ ~bInitialState)  {
+
+    if(index < max_events) {
+      buffer[index++] = cycles.value - start_time;
+      return true;
+    }
+
+    return false;
+	
+  }
+
+  return true;
+}
+
+//--------------------------------------------------
+//
+// BoolEventBuffer::get_index
+//
+// given an event time, get_index will perform a binary
+// search for it in the event buffer.
+//
+
+unsigned int BoolEventBuffer::get_index(guint64 event_time) 
+{
+  guint32 start_index, end_index, search_index, bstep;
+  guint32 time_offset;
+
+  end_index = index;
+  start_index = 0;
+
+  bstep = (max_events+1) >> 1;
+  search_index = start_index + bstep;
+
+  bstep >>= 1;
+
+  time_offset = event_time - start_time;
+
+  // Binary search for the event time:
+  do {
+    if(time_offset == buffer[search_index])
+      return search_index;
+
+    if(time_offset < buffer[search_index])
+      search_index = search_index - bstep;
+    else
+      search_index = search_index + bstep;
+
+    //cout << hex << "search index "<< search_index << "  buffer[search_index] " << buffer[search_index] << '\n';
+    bstep >>= 1;
+
+  } while(bstep);
+
+  if(time_offset >= buffer[search_index])
+    return search_index;
+  else
+    return (--search_index);
+
+}
+
+//--------------------------------------------------
+//
+// BoolEventBuffer::activate
+//
+// 
+void BoolEventBuffer::activate(bool _initial_state)
+{
+
+  // If the buffer is activated already or the buffer is full,
+  // then we can't activate it.
+
+  if(isActive() || isFull())
+    return;
+
+  // Save the time for this initial event
+  start_time = cycles.value;
+  bInitialState = _initial_state;
+
+  index = 0;  // next state gets stored at the first position in the buffer.
+
+  bActive = true;
+
+  future_cycle = start_time + (1<<31);
+  cycles.set_break(future_cycle, this);
+
+}
+//--------------------------------------------------
+void BoolEventBuffer::deactivate(void)
+{
+
+  bActive = false;
+
+  if(future_cycle)
+    cycles.clear_break(this);
+
+  future_cycle = 0;
+
+}
+//--------------------------------------------------
+void BoolEventBuffer::callback(void)
+{
+  future_cycle = 0;
+
+  if(isActive())
+    deactivate();
+}
+void BoolEventBuffer::callback_print(void)
+{
+  cout << "BoolEventBuffer\n";
+}
+
+//--------------------------------------------------
+// BoolEventBuffer -- constructor
+//
+BoolEventBuffer::BoolEventBuffer(bool _initial_state, guint32 _max_events)
+{
+
+  max_events = _max_events;
+
+  // Make sure that max_events is an even power of 2
+  if(max_events & (max_events - 1)) {
+    max_events <<= 1;
+    while(1) {
+      if(max_events && (max_events & (max_events-1)))
+	max_events &= max_events - 1;
+      else
+	break;
+
+    }
+  } else if(!max_events)
+    max_events = 4096;
+    
+  max_events--;  // make the max_events a mask
+
+  buffer = new guint32[max_events];
+
+  activate(_initial_state);
+}
+
+BoolEventBuffer::~BoolEventBuffer(void)
+{
+
+  delete [] buffer;
+  
+}
+
+#if 0
+  void dump(int start_index, int end_index=-1) {
+
+    
+    if((start_index > max_events) || (start_index <= 0 ))
+      start_index = 0;
+
+    if(end_index == -1)
+      end_index = index;
+
+    if(start_index == end_index)
+      return;
+
+    // Loop through and dump events between the start and end points requested
+
+    do {
+      cout << hex << "0x" << start_index << " = 0x" << buffer[start_index];
+
+      if(start_index & 1)
+	cout << ": hi\n";
+      else
+	cout << ": lo\n";
+
+      start_index = (start_index + 1) & max_events;
+
+    }while ( start_index != end_index);
+
+  }
+
+  void dump_ASCII_art(guint64 time_step, int start_index, int end_index=-1) {
+
+    cout << "ascii art\n";
+
+    if((start_index > max_events) || (start_index <= 0 ))
+      start_index = 0;
+
+    if(buffer[start_index] == 0) 
+      start_index = 0;
+
+    if( (end_index > max_events) || (end_index <= 0 ))
+      end_index = index;
+
+    if(start_index == end_index)
+      return;
+
+    if(time_step == 0)
+      time_step = 1;
+
+    // Loop through and dump events between the start and end points requested
+
+    guint64 min_pulse = buffer[end_index] - buffer[start_index];
+    guint32 i = start_index;
+    guint32 j = (start_index+1) & max_events;
+
+    do {
+
+      if(  (buffer[j] - buffer[i]) < min_pulse )
+	min_pulse = (buffer[j] - buffer[i]);
+
+      i = j;
+      j = ++j & max_events; 
+
+    }while (j != end_index);
+
+    cout << "minimum pulse width :" << min_pulse << '\n';
+
+    if(min_pulse == 0) { // bummer - there's an error in the log
+      min_pulse = 1;
+      cout << "log error - minimum pulse width shouldn't be zero\n";
+    }
+
+    int num_chars = 0;
+    guint64 t = buffer[start_index];
+    i = start_index;
+    do {
+      j = get_index(t);
+      switch(j-i) {
+      case 0:
+      case 1:
+	if(i&1)
+	  cout <<'-';
+	else
+	  cout <<'_';
+	break;
+      case 2:
+	cout << '|';
+	break;
+      case 3:
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+      case 8:
+      case 9:
+	cout << (j-i);
+	break;
+      default:
+	cout << '*';
+      }
+      i = j;
+      t += time_step;
+    } while( t<=buffer[end_index] && num_chars++<1000);
+    cout << "\nend of ASCII art\n";
+
+  }
+
+#endif
+
+
+
+
+

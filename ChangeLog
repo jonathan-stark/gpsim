@@ -1,3 +1,8 @@
+2004-01-23  Scott Dattalo  <scott@dattalo.com>
+	* src/trace.cc, src/trace.h: added boolean event logger
+	* src/intcon.cc, src/16bit-*: Debugging an interrupt problem
+	with the 16-bit core
+	
 2004-01-22  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui*.cc: converted the cross_reference_to_gui structure
 	into the CrossReferenceToGUI class.
@@ -47,6 +52,7 @@
 	  modules/resistor.h, modules/switch.cc, modules/switch.h,
 	  modules/usart.cc, modules/usart.h, modules/video.cc, modules/video.h:
 	  char * replaced with const char *,
+
 
 2004-01-06  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_regwin.cc -- valgrind memcheck bug fixes

@@ -232,7 +232,6 @@ enum
 
   inline void set_rcon(RCON *r) { rcon = r; }
   inline void set_intcon2(INTCON2 *ic) { intcon2 = ic; }
-  inline void set_cpu(_16bit_processor *p) { cpu = p; }
 
   virtual void put(unsigned int new_value);
 
@@ -242,7 +241,6 @@ enum
 private:
   RCON *rcon;
   INTCON2 *intcon2;
-  _16bit_processor *cpu;
 };
 
 

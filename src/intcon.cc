@@ -91,7 +91,7 @@ void INTCON_16::clear_gies(void)
 
   assert(cpu != 0);
 
-  if(cpu->interrupt_vector == INTERRUPT_VECTOR_HI)
+  if(cpu16->interrupt_vector == INTERRUPT_VECTOR_HI)
     put(get() & ~GIEH);
   else
     put(get() & ~GIEL);
@@ -203,7 +203,7 @@ void INTCON_16::put(unsigned int new_value)
       if(i1 & ( (intcon2->value & (T0IF | RBIF)) | INTF))
 	{
 	  //cout << " selecting high priority vector\n";
-	  cpu->interrupt_vector = INTERRUPT_VECTOR_HI;
+	  cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
 	  trace.interrupt();
 	  bp.set_interrupt();
 	  return;
@@ -217,7 +217,7 @@ void INTCON_16::put(unsigned int new_value)
       if(i1 & ( (~intcon2->value & (T0IF | RBIF)) | INTF))
 	{
 	  //cout << " selecting low priority vector\n";
-	  cpu->interrupt_vector = INTERRUPT_VECTOR_LO;
+	  cpu16->interrupt_vector = INTERRUPT_VECTOR_LO;
 	  trace.interrupt();
 	  bp.set_interrupt();
 	  return;
@@ -229,8 +229,8 @@ void INTCON_16::put(unsigned int new_value)
     {
       // ignore interrupt priorities
 
-      //cout << " ignoring interrupt priorities, selecting high priority vector\n";
-      cpu->interrupt_vector = INTERRUPT_VECTOR_HI;
+      cout << " ignoring interrupt priorities, selecting high priority vector:" << INTERRUPT_VECTOR_HI << endl;
+      cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
       if(value & GIE) 
 	{
 	  if( ( (value>>3)&value) & (T0IF | INTF | RBIF) )
