@@ -95,8 +95,16 @@ public:
 
   virtual string description();
   void set_description(const char *);
+
+  /// xrefs - a cross reference allows a Value to notify another
+  /// Value when it is changed.
+
+  void set_xref(Value *);
+  Value *get_xref();
+
  private:
   const char *cpDescription;
+  Value *xref;
 };
 
 //========================================================================

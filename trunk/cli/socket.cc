@@ -147,6 +147,30 @@ bool winsockets_init(void)
 
   The purpose of a socket interface into the simulator is to provide an
   external interface that only loosely depends upon gpsim's internals.
+
+  Towards the bottom of this file is code that will start a server
+  'process' that will listen for clients. This 'process' is really
+  a glib GIOChannel. The GIOChannel is a glib mechanism for handling
+  things like sockets so that they work nicely when compiled for other
+  platforms. Now, whenever a client connects to gpsim, another GIOChannel
+  is created. This new channel has the client socket associated with
+  it and is used to communicate with the client. 
+
+  Thus, like most socket server applications, gpsim creates a single
+  socket to listen for clients. As clients come along, connections are
+  established with them. gpsim uses GLIB's GIOChannels to facilitate
+  the simultaneous multiple connections.
+
+  Once a client has connected to gpsim, it can do just about everything
+  a user sitting at a keyboard can do. In fact, the client can issue
+  command line commands that are directed to the command line parser.
+  Although, at the moment, the output of these commands still is sent
+  to the terminal from which the gpsim executable was spawned (instead
+  of being sent to the client socket...). Probably more powerful though 
+  is the ability for a client to establish 'links' to gpsim internal
+  objects. These links are provide a client with an efficient access
+  to gpsim's symbol table.
+
 */
 
 
@@ -182,22 +206,29 @@ public:
 // This class is a simple wrapper around the standard BSD socket calls.
 // 
 
-// FIXME - separate the client_socket into it's own class. This will allow
-// the one server to listen to many clients.
 
 class SocketBase
 {
 public:
   SocketBase(SOCKET s);
+  ~SocketBase();
+
   SOCKET getSocket();
   void Close();
+  void Send(char *);
+  void Service();
+  void ParseObject();
+
+  Packet     *packet;
+
 private:
   SOCKET socket;
 };
 
 //------------------------------------------------------------------------
 // Socket class
-
+// This class is responsible for listening to clients.
+//
 class Socket
 {
 public:
@@ -212,62 +243,73 @@ public:
   void Close(SocketBase**);
   void Bind();
   void Listen();
-  void Accept();
-  void Recv();
-  void Send(char *);
-  void Service();
-
-  void ParseObject();
-
-  void respond(char *);
-
-  bool bHaveClient()
-  {
-    return (client != 0);
-  }
-
-
-
-  Packet     *packet;
+  SocketBase * Accept();
 
   SocketBase *my_socket;
-  SocketBase *client;
+
   struct   sockaddr_in addr;
 };
-
-
 
 
 class SocketLink
 {
 public:
-  SocketLink(unsigned int _handle);
-  //  void send(char *);
+  SocketLink(unsigned int _handle, SocketBase *);
+
+  void Send();
 
   virtual void set(Packet &)=0;
   virtual void get(Packet &)=0;
   unsigned int getHandle() { return handle; }
 private:
   unsigned int handle;
+  SocketBase *parent;
 };
+
+///========================================================================
+/// AttributeLink
+/// An attribute link is a link associated with a gpsim attribute.
+/// Clients will establish attribute links by providing the name
+/// of the gpsim object with which they wish to link. The over head
+/// for parsing the link name and looking it up in the table only
+/// has to be done once.
 
 class AttributeLink : public SocketLink
 {
 public:
-  AttributeLink(unsigned int _handle, Value *);
+  AttributeLink(unsigned int _handle, SocketBase *, Value *);
 
   void set(Packet &);
   void get(Packet &);
 
+  Value *getValue() { return v; }
 private:
+  /// This is a pointer to the gpsim Value object associated with
+  /// this link.
   Value *v;
 };
 
+///========================================================================
+/// NotifyLink
+/// A notify link is a link designed to be a sort of cross reference. It
+/// is associated with a gpsim attribute in such a way that whenever the
+/// gpsim attribute changes, the notify link will notify a client socket.
+
+class NotifyLink : public Value
+{
+public:
+  virtual void set(gint64);
+  NotifyLink(AttributeLink *);
+private:
+  AttributeLink *sl;
+};
+
+//========================================================================
 #define nSOCKET_LINKS 16
 
 SocketLink *links[nSOCKET_LINKS];
 
-SocketLink *gCreateSocketLink(unsigned int, Packet &);
+AttributeLink *gCreateSocketLink(unsigned int, Packet &, SocketBase *);
 
 unsigned int FindFreeHandle()
 {
@@ -284,7 +326,14 @@ unsigned int FindFreeHandle()
 SocketBase::SocketBase(SOCKET s)
   : socket(s)
 {
+  packet = new Packet(BUFSIZE,BUFSIZE);
 }
+
+SocketBase::~SocketBase()
+{
+  delete packet;
+}
+
 SOCKET SocketBase::getSocket()
 {
   return socket;
@@ -329,6 +378,8 @@ void CloseSocketLink(SocketLink *sl)
     return;
 
   unsigned int handle = sl->getHandle();
+  std::cout << " closing link with handle 0x" << hex << handle << endl;
+
   if(links[handle&0x000f] == sl)
     links[handle&0x000f] = 0;
 
@@ -337,9 +388,6 @@ void CloseSocketLink(SocketLink *sl)
 Socket::Socket()
 {
   my_socket = 0;
-  client = 0;
-
-  packet = new Packet(BUFSIZE,BUFSIZE);
 
   for(int i=0; i<nSOCKET_LINKS; i++)
     links[i] = 0;
@@ -349,8 +397,6 @@ Socket::Socket()
 Socket::~Socket()
 {
   Close(&my_socket);
-  Close(&client);
-
 }
 
 
@@ -413,7 +459,7 @@ void Socket::Listen()
 }
 
 
-void Socket::Accept()
+SocketBase *Socket::Accept()
 {
   socklen_t addrlen = sizeof(addr);
   SOCKET client_socket = accept(my_socket->getSocket(),(struct sockaddr *)  &addr, &addrlen);
@@ -423,53 +469,20 @@ void Socket::Accept()
     exit(1);
   }
 
-  client = new SocketBase(client_socket);
+  return new SocketBase(client_socket);
 }
 
 
-void Socket::Recv()
+void SocketBase::Send(char *b)
 {
-
-  char *buffer = packet->rxBuff();
-  memset(buffer, 0, sizeof(buffer));
-
-  if(!client)
+  if(!socket)
     return;
 
-  int ret = recv(client->getSocket(), buffer, sizeof(buffer), 0);
-
-  if (ret < 0) {
-    psocketerror("recv");
-    Close(&my_socket);
-    Close(&client);
-  }
-  
-  if (ret == 0) {
-    printf("recv: 0 bytes received\n");
-    Close(&client);
-  }
-}
-
-
-void Socket::Send(char *b)
-{
-  if(!client)
-    return;
-
-  if (send(client->getSocket(), b, strlen(b), 0) < 0) {
+  if (send(socket, b, strlen(b), 0) < 0) {
     psocketerror("send");
-    closesocket(client->getSocket());
-    client = 0;
+    closesocket(socket);
   }
 }
-
-
-void Socket::respond(char *buf)
-{
-  if (bHaveClient() && buf)
-    Send(buf);
-}
-
 
 //------------------------------------------------------------------------
 // ParseObject
@@ -482,27 +495,51 @@ void Socket::respond(char *buf)
 // This code will change. 
 //
 
-void Socket::ParseObject()
+void SocketBase::ParseObject()
 {
+
+  std::cout << "ParseObject: " << packet->rxBuff() << endl;
 
   unsigned int ObjectType;
   if(!packet->DecodeObjectType(ObjectType))
     return;
+
+  std::cout << "ParseObject: " << packet->rxBuff() << endl;
 
   switch (ObjectType) {
 
   case GPSIM_CMD_CREATE_SOCKET_LINK:
     {
       unsigned int handle = FindFreeHandle();
-      SocketLink *sl = gCreateSocketLink(handle, *packet);
+      AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
 
+  std::cout << "ParseObject: " << packet->rxBuff() << endl;
 
       if(sl) {
 	links[handle&0x0f] = sl;
 	packet->EncodeHeader();
 	packet->EncodeUInt32(handle);
 	packet->txTerminate();
-	respond(packet->txBuff());
+	Send(packet->txBuff());
+      }
+    }
+    break;
+
+  case GPSIM_CMD_CREATE_NOTIFY_LINK:
+    {
+      unsigned int handle = FindFreeHandle();
+      AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
+
+      std::cout << "ParseObject notify link create: " << packet->rxBuff() << endl;
+
+      if(sl) {
+	NotifyLink *nl = new NotifyLink(sl);
+
+	links[handle&0x0f] = sl;
+	packet->EncodeHeader();
+	packet->EncodeUInt32(handle);
+	packet->txTerminate();
+      	Send(packet->txBuff());
       }
     }
     break;
@@ -510,7 +547,7 @@ void Socket::ParseObject()
   case GPSIM_CMD_REMOVE_SOCKET_LINK:
     {
       SocketLink *sl=0;
-
+      std::cout << "remove socket link command\n";
       ParseSocketLink(packet, &sl);
 
       if(sl)
@@ -525,12 +562,8 @@ void Socket::ParseObject()
 
       ParseSocketLink(packet, &sl);
 
-      if(sl) {
-	packet->EncodeHeader();
-	sl->get(*packet);
-	packet->txTerminate();
-	respond(packet->txBuff());
-      }
+      if(sl) 
+	sl->Send();
     }
     break;
 
@@ -542,7 +575,7 @@ void Socket::ParseObject()
 
       if(sl) {
 	sl->set(*packet);
-	respond("$");
+	Send("$");
       }
 
     }
@@ -559,10 +592,10 @@ void Socket::ParseObject()
 	  packet->EncodeHeader();
 	  sym->get(*packet);
 	  packet->txTerminate();
-	  respond(packet->txBuff());
+	  Send(packet->txBuff());
 
 	} else
-	  respond("-");
+	  Send("-");
       }
     }
     break;
@@ -593,10 +626,10 @@ void Socket::ParseObject()
 	  sym->set(*packet);
 	  packet->txTerminate();
 
-	  respond(packet->txBuff());
+	  Send(packet->txBuff());
 
 	} else
-	  respond("-");
+	  Send("-");
       }
     }
     break;
@@ -630,26 +663,26 @@ void Socket::ParseObject()
       packet->EncodeObjectType(GPSIM_CMD_RUN);
       packet->EncodeUInt64(get_cycles().get() - startCycle);
       packet->txTerminate();
-      respond(packet->txBuff());
+      Send(packet->txBuff());
 
     }
     break;
 
   case GPSIM_CMD_RESET:
     get_interface().reset();
-    respond("-");
+    Send("-");
     break;
     
   default:
     printf("Invalid object type: %d\n",ObjectType);
-    respond("-");
+    Send("-");
 
   }
 
 }
 //------------------------------------------------------------------------
 //
-void Socket::Service()
+void SocketBase::Service()
 {
   if(packet->brxHasData()) {
 
@@ -657,9 +690,9 @@ void Socket::Service()
       ParseObject();
     } else {
       if(parse_string(packet->rxBuff()) >= 0)
-	respond("+ACK");
+	Send("+ACK");
       else
-	respond("+BUSY");
+	Send("+BUSY");
     }
   }
 
@@ -677,33 +710,42 @@ void SocketInterface::SimulationHasStopped (gpointer object)
 }
 void SocketInterface::Update  (gpointer object)
 {
+  /*
   if(sock)
     sock->Service();
   printf("socket update\n");
+  */
 }
 
 SocketInterface::~SocketInterface()
 {
+  /*
   if(sock)
     sock->Service();
+  */
 }
 
 //========================================================================
 
-SocketLink::SocketLink(unsigned int _handle)
-  : handle(_handle)
+SocketLink::SocketLink(unsigned int _handle, SocketBase *sb)
+  : handle(_handle), parent(sb)
 {
 }
-/*
-void SocketLink::send(char *m)
+
+void SocketLink::Send()
 {
-  if(sock)
-    sock->respond(m);
+  if(parent) {
+    parent->packet->prepare();
+    parent->packet->EncodeHeader();
+    get(*parent->packet);
+    parent->packet->txTerminate();
+    parent->Send(parent->packet->txBuff());
+  }
 }
-*/
+
 //========================================================================
-AttributeLink::AttributeLink(unsigned int _handle, Value *_v)
-  : SocketLink(_handle), v(_v)
+AttributeLink::AttributeLink(unsigned int _handle, SocketBase *_sb, Value *_v)
+  : SocketLink(_handle,_sb), v(_v)
 {
 }
 
@@ -718,10 +760,23 @@ void AttributeLink::get(Packet &p)
   if(v)
     v->get(p);
 }
+//========================================================================
+NotifyLink::NotifyLink(AttributeLink *_sl)
+  : Value(), sl(_sl)
+{
+  if(sl && sl->getValue())
+    sl->getValue()->set_xref(this);
+}
+void NotifyLink::set(gint64 i)
+{
+  std::cout << "notify link is sending data back to client\n";
+  if(sl)
+    sl->Send();
+}
 
 //========================================================================
 
-SocketLink *gCreateSocketLink(unsigned int handle, Packet &p)
+AttributeLink *gCreateSocketLink(unsigned int handle, Packet &p, SocketBase *sb)
 {
 
   char tmp[256];
@@ -730,7 +785,7 @@ SocketLink *gCreateSocketLink(unsigned int handle, Packet &p)
 
     Value *sym = get_symbol_table().find(tmp);
     if(sym)
-      return new AttributeLink(handle,sym);
+      return new AttributeLink(handle,sb,sym);
   }
 
   return 0; 
@@ -808,13 +863,21 @@ static void debugPrintCondition(GIOCondition cond)
 }
 #endif
 
-//gboolean service_socket()
-static gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
-{
-  //std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
-  //debugPrintCondition(condition);
+/*========================================================================
+  server_callback ()
 
-  Socket *s = (Socket *)d;
+  This call back function is invoked from the GTK main loop whenever a client
+  socket has sent something to gpsim.
+
+ */
+
+static gboolean server_callback(GIOChannel *channel, 
+				GIOCondition condition, 
+				void *d )
+{
+
+
+  SocketBase *s = (SocketBase *)d;
 
   if(condition & G_IO_HUP) {
     std::cout<< "client has gone away\n";
@@ -825,6 +888,8 @@ static gboolean server_callback(GIOChannel *channel, GIOCondition condition, voi
     std::cout << "channel status " << hex << stat << "  " ;
     debugPrintChannelStatus(stat);
 #endif
+    delete s;
+
     return FALSE;
   }
 
@@ -873,18 +938,31 @@ static gboolean server_callback(GIOChannel *channel, GIOCondition condition, voi
   return FALSE;
 }
 
+/*========================================================================
+
+  server_accept( )
+
+  This call back function is invoked from the GTK loop whenever a client
+  is attempting to establish a socket connection to gpsim. The purpose
+  of this function is to accept a socket connection and to create a GLIB
+  GIOChannel associated with it. This GIOChannel will listen to the client
+  socket and will invoke the server_callback() callback whenever the client
+  sends data.
+
+ */
 
 static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 {
   Socket *s = (Socket *)d;
 
+  std::cout << " accepting new client connect\n";
 
-  s->Accept();
+  SocketBase *client = s->Accept();
 
-  if(!s->client)
+  if(!client)
     return FALSE;
 
-  GIOChannel *new_channel = g_io_channel_unix_new(s->client->getSocket());
+  GIOChannel *new_channel = g_io_channel_unix_new(client->getSocket());
   GIOCondition new_condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
 #if GLIB_MAJOR_VERSION >= 2
@@ -899,7 +977,7 @@ static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void 
   g_io_add_watch(new_channel, 
 		 new_condition,
 		 server_callback,
-		 (void*)s);
+		 (void*)client);
 
   return TRUE;
 }

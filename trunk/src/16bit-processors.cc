@@ -103,7 +103,14 @@ void _16bit_processor :: create_sfr_map(void)
 //   add_sfr_register(&adcon1,	  0xfc1,porv,"adcon1");
 //   add_sfr_register(&adcon2,	  0xfc2,porv,"adcon2");
 //   add_sfr_register(&adresl,	  0xfc3,porv,"adresl");
-//   add_sfr_register(&adresh,	  0xfc4,porv,"adres4");
+//   add_sfr_register(&adresh,	  0xfc4,porv,"adresh");
+
+  //Fixme - temporary hack
+  add_file_registers(0xfc1, 0xfc4, 0);
+  rma[0xfc1].new_name("adcon1");
+  rma[0xfc2].new_name("adcon2");
+  rma[0xfc3].new_name("adresl");
+  rma[0xfc4].new_name("adresh");
 
   add_sfr_register(&ssp.sspcon1,  0xfc5,porv,"sspcon1");
   add_sfr_register(&ssp.sspcon2,  0xfc6,porv,"sspcon2");
