@@ -26,19 +26,22 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 using namespace std;
 
+class gpsimValue;
+
 class XrefObject {
-private:
-    unsigned int *data;
-    list<void*> xrefs;
-public:
-    XrefObject();
-    XrefObject(unsigned int *value);
-    ~XrefObject();
+ private:
+  gpsimValue *data;
+  list<void*> xrefs;
+ public:
+  XrefObject();
+  XrefObject(gpsimValue *value);
+  ~XrefObject();
     
-    virtual void add(void *xref);
-    virtual void clear(void *xref);
-    virtual void update();
-    virtual int get_val(void);
+  virtual void _add(void *xref);
+  virtual void clear(void *xref);
+  virtual void _update();
+  virtual int get_val(void);
+  virtual void assign_data(gpsimValue *);
 };
 
 #endif

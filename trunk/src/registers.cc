@@ -37,14 +37,13 @@ Boston, MA 02111-1307, USA.  */
 Register::Register(void)
 {
   cpu = 0;
-  name_str1 = 0;
   new_name("file_register");
 
   // For now, initialize the register with valid data and set that data equal to 0.
   // Eventually, the initial value will be marked as 'uninitialized.
 
   putRV(RegisterValue(0,0));
-  xref = new XrefObject(&value.data);
+  _xref.assign_data(this);
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
@@ -54,11 +53,6 @@ Register::Register(void)
 
 Register::~Register(void)
 {
-  if(name_str1)
-    free(name_str1);     // Note - use free instead of delete since memory is allocated
-                         // via strdup which in turn uses malloc instead of new.
-                         // See the member function new_name();
-
 
 }
 
@@ -130,27 +124,6 @@ void Register::setbit_value(unsigned int bit_number, bool new_value)
   setbit(bit_number,new_value);
 }
 
-//--------------------------------------------------
-// new_name
-//
-// Assign a new name to a register. If the register already has
-// a name, the old one is deleted and then the new one is assigned.
-//
-// Specifying a 0 name effectively deletes the register name
-
-void Register::new_name(char *s)
-{
-  if(name_str1)
-    free(name_str1);     // Note - use free instead of delete since memory is allocated
-                         // via strdup which in turn uses malloc instead of new.
-
-  if(s)
-    name_str1 = strdup(s);
-  else
-    name_str1 = 0;
-
-}
-
 
 
 //-----------------------------------------------------------
@@ -194,8 +167,7 @@ void Register::put_value(unsigned int new_value)
   // So we should explicitly tell the gui (if it's
   // present) to update its display.
 
-  if(xref)
-    xref->update();
+  update();
 
 }
 

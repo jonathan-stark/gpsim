@@ -165,11 +165,7 @@ void Processor::create_invalid_registers (void)
 	  registers[i]->value.put(0);	// unimplemented registers are read as 0
 	  registers[i]->symbol_alias = 0;
 
-	  registers[i]->cpu = this;
-	  //If we are linking with a gui, then initialize a cross referencing
-	  //pointer. This pointer is used to keep track of which gui window(s)
-	  //display the register. For invalid registers this should always be null.
-	  registers[i]->xref = 0;
+	  registers[i]->set_cpu(this);
 
 	}
     }
@@ -208,7 +204,7 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
     sprintf (str, "0x%02x", j);
     registers[j]->new_name(str);
 
-    registers[j]->cpu = this;
+    registers[j]->set_cpu(this);
 
   }
 
@@ -326,7 +322,7 @@ void Processor::init_program_memory (unsigned int memory_size)
   for (int i = 0; i < memory_size; i++)
     {
       program_memory[i] = &bad_instruction;
-      program_memory[i]->cpu = this;     // %%% FIX ME %%% 
+      program_memory[i]->set_cpu(this);
     }
 
   pma = new ProgramMemoryAccess(this);
@@ -655,7 +651,7 @@ void Processor::disassemble (int start_address, int end_address)
       else
 	cout << hex << setw(4) << setfill('0') << i << "  "
 	     << hex << setw(4) << setfill('0') << inst->opcode << "    "
-	     << inst->name(str) << '\n';
+	     << inst->name(str,sizeof(str)) << '\n';
 
     }
 }
@@ -1143,8 +1139,7 @@ void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 
     cpu->program_memory[cpu->map_pm_address2index(address)] = new_instruction;
 
-    if(new_instruction->xref)
-      new_instruction->xref->update();
+    new_instruction->update();
   }
 
 }
@@ -1210,7 +1205,7 @@ char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
 {
 
   if(addr < cpu->program_memory_size())
-    return cpu->program_memory[addr]->name(buffer);
+    return cpu->program_memory[addr]->name(buffer,size);
 
   *buffer = 0;
   return 0;
@@ -1286,7 +1281,7 @@ void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
 			       old_inst->get_hll_src_line(),
 			       old_inst->get_hll_file_id());
 
-  new_inst->xref = old_inst->xref;
+  //new_inst->xref = old_inst->xref;
 
   if(b) 
     b->replaced = new_inst;
@@ -1295,8 +1290,8 @@ void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
 
   cpu->program_memory[addr]->is_modified=1;
   
-  if(cpu->program_memory[addr]->xref)
-      cpu->program_memory[addr]->xref->update();
+  //if(cpu->program_memory[addr]->xref)
+  cpu->program_memory[addr]->update();
   
   delete(old_inst);
 }
@@ -1310,8 +1305,7 @@ void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
   if(q.isa()==instruction::INVALID_INSTRUCTION)
     return;
 
-  if(q.xref)
-    q.xref->add(xref);
+  q.add_xref(xref);
 }
 
 //--------------------------------------------------------------------------

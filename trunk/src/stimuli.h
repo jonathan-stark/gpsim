@@ -88,44 +88,41 @@ extern void dump_stimulus_list(void);
 #define MAX_DRIVE        0x100000
 #define MAX_ANALOG_DRIVE 0x1000
 
-#define STIMULUS_NAME_LENGTH   30
-
 extern list <Stimulus_Node *> node_list;
 
 extern list <stimulus *> stimulus_list;
 
 
-class Stimulus_Node
+class Stimulus_Node : public gpsimValue
 {
 public:
-  char name_str[STIMULUS_NAME_LENGTH];
-  /*  unsigned int total_conductance; ** amount of impedance seen at this node */
-  bool warned;   /* keeps track of node warnings (e.g. floating node, contentiong) */
-  int state;   /* The most recent value of this node */
+  bool warned;   // keeps track of node warnings (e.g. floating node, contentiong)
+  int state;          // The most recent value of this node
 
-  stimulus *stimuli;            /* Pointer to the first stimulus connected to this node. */
+  stimulus *stimuli;  // Pointer to the first stimulus connected to this node.
 
   Stimulus_Node(const char *n = 0);
   ~Stimulus_Node();
-  char * name(void){return name_str;};
-  int get_voltage(void) { return state; };
+
+  int get_voltage(void) { return state; }
   int update(unsigned int current_time);
-  /*  void put_state(int new_state);*/
+
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
-  /* void update_conductance(unsigned int stimulus_old_conductance, unsigned int stimulus_new_conductance);*/
+
+  virtual unsigned int get_value(void) { return state;}
+  virtual void put_value(unsigned int new_value) {}
 
 };
 
-class stimulus
+class stimulus : public gpsimValue
 {
 public:
-  char name_str[STIMULUS_NAME_LENGTH];
+
   Stimulus_Node *snode;      /* Node to which this stimulus is attached */
   int drive;        /* This defines the strength of the source or the magnitude of the load. */
   int state;                 /* The most recent value of this stimulus */
   bool digital_state;        /* 0/1 digitization of the analog state */
-  XrefObject *xref;          /* A link to the gui. */
 
   stimulus *next;
 
@@ -145,15 +142,16 @@ public:
   virtual void put_state(int new_state) {state=new_state;};      // From simulation
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);                   // From the gui
-  void put_name(const char *new_name);
-
   // interface to the digital state
   virtual bool get_digital_state(void) {return digital_state;};
   virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
 
-  virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
-  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; else cout<<"errrrrrr\n";};
+  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
+
+  virtual unsigned int get_value(void) { return state;}
+  virtual void put_value(unsigned int new_value) {}
+
 };
 
 class source_stimulus : public stimulus, public BreakpointObject
@@ -194,7 +192,6 @@ enum SOURCE_TYPE
   virtual int get_voltage(guint64 current_time) {return 0;};
   virtual int get_state(void) {return state;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
-  char *name(void) { return(name_str);};
 
   virtual void callback(void);
   virtual void callback_print(void);
@@ -342,7 +339,6 @@ public:
 
   virtual int get_voltage(guint64 current_time);
       
-  char *name(void) { return(name_str);};
   virtual SOURCE_TYPE isa(void) {return SQW;};
 
 };

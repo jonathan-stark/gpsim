@@ -31,7 +31,7 @@ class XrefObject;
 class Processor;
 
 #include "gpsim_classes.h"
-
+#include "value.h"
 
 
 //---------------------------------------------------------
@@ -86,7 +86,7 @@ class RegisterValue {
 
 //---------------------------------------------------------
 // Base class for a file register.
-class Register
+class Register : public gpsimValue
 {
 public:
 
@@ -98,8 +98,6 @@ public:
     SFR_REGISTER,
     BP_REGISTER
   };
-
-  char *name_str1;
 
   RegisterValue value;
 
@@ -120,20 +118,10 @@ public:
   unsigned int bit_mask;   // = 7 for 8-bit registers, = 15 for 16-bit registers.
 
   symbol *symbol_alias;
-  Processor *cpu;
 
   guint64 read_access_count;
   guint64 write_access_count;
 
-
-  // If we are linking with a gui, then here are a
-  // few declarations that are used to send data to it.
-  // This is essentially a singly-linked list of pointers
-  // to structures. The structures provide information
-  // such as where the data is located, the type of window
-  // it's in, and also the way in which the data is presented
-  
-  XrefObject *xref;
 
 
   Register(void);
@@ -177,8 +165,6 @@ public:
     }
   
 
-  virtual char *name(void) { return(name_str1);};
-  virtual void new_name(char *);
   virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
 
@@ -284,11 +270,9 @@ public:
 // Program Counter
 //
 
-class Program_Counter
+class Program_Counter : public gpsimValue
 {
 public:
-  Processor *cpu;
-
   unsigned int value;              /* pc's current value */
   unsigned int memory_size_mask; 
   unsigned int pclath_mask;        /* pclath confines PC to banks */
@@ -302,19 +286,28 @@ public:
   virtual void computed_goto(unsigned int new_value);
   virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value(void) {
-    return value;
-  };
+  virtual unsigned int get_value(void)
+    {
+      return value;
+    }
+
   // get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
   // whereas get_raw_value isn't. The raw value of the program counter
   // is used as an index into the program memory.
-  virtual unsigned int get_raw_value(void) {
-    return value;
-  }
+  virtual unsigned int get_raw_value(void)
+    {
+      return value;
+    }
 
-  virtual void set_phase(int phase) { instruction_phase = phase;}
-  virtual int get_phase(void) {return instruction_phase; }
-
+  virtual void set_phase(int phase)
+    { 
+      instruction_phase = phase;
+    }
+  virtual int get_phase(void) 
+    {
+      return instruction_phase; 
+    }
+  
   void set_reset_address(unsigned int _reset_address)
     {
       reset_address = _reset_address;
@@ -327,8 +320,6 @@ public:
   void reset(void);
 
   virtual unsigned int get_next(void);
-
-  XrefObject *xref;
 
 private:
   unsigned int reset_address;      /* Value pc gets at reset */

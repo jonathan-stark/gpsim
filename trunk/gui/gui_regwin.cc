@@ -254,8 +254,8 @@ void GUIRegister::Clear_xref(void)
 {
   Register *reg = get_register();
 
-  if(reg && reg->xref)
-    reg->xref->clear((gpointer *)xref);
+  if(reg)
+    reg->remove_xref((gpointer *)xref);
 }
 
 void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
@@ -263,8 +263,8 @@ void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
 
   Register *reg = get_register();
 
-  if(reg && reg->xref)
-    reg->xref->add( (gpointer *)new_xref);
+  if(reg)
+    reg->add_xref( (gpointer *)new_xref);
 
   xref = new_xref;
 }
@@ -289,9 +289,9 @@ char *GUIRegister::name(void)
   static char buffer[128];
 
   if(bIsAliased)
-    sprintf(buffer,"alias (%s)", reg->name());
+    sprintf(buffer,"alias (%s)", reg->name().c_str());
   else
-    strcpy(buffer,reg->name());
+    strcpy(buffer,reg->name().c_str());
 
   return buffer;
 }

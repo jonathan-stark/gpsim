@@ -639,7 +639,7 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
   replaced = cpu->pma->get(address);
 
   // use the replaced instructions xref object
-  xref = replaced->xref;
+  //xref = replaced->xref;
 }
 
 //-------------------------------------------------------------------
@@ -682,10 +682,10 @@ int Breakpoint_Instruction::get_hll_file_id(void)
   return(replaced->get_hll_file_id());
 }
 
-char * Breakpoint_Instruction::name(char *return_str)
+char * Breakpoint_Instruction::name(char *return_str,int len)
 {
 
-  return(replaced->name(return_str));
+  return(replaced->name(return_str,len));
 }
 
 bool Breakpoint_Instruction::set_break(void)
@@ -696,7 +696,7 @@ bool Breakpoint_Instruction::set_break(void)
   if(address < cpu->program_memory_size()) {
 
     replaced = cpu->pma->get(address);
-    xref = replaced->xref;
+    //xref = replaced->xref;
 
     cpu->pma->put(address, this);
 
@@ -722,7 +722,7 @@ void Breakpoint_Instruction::clear(void)
     icd_clear_break();
 
   cpu->pma->put(address, replaced);
-  (*cpu->pma)[address].xref->update();
+  (*cpu->pma)[address].update();
 
 }
 
@@ -863,11 +863,7 @@ void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
   if(replaced)
     replaced->replacingWith(this);
 
-  // use the replaced registers xref object
-  xref=fr->xref;
-
-  if(xref)
-    xref->update();
+  update();
 
 }
   
@@ -895,8 +891,7 @@ void BreakpointRegister::clear(void)
 
   replaced->replacingWith(0);
 
-  if(cpu->registers[address]->xref)
-    cpu->registers[address]->xref->update();
+  cpu->registers[address]->update();
 
   return;
 }

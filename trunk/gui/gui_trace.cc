@@ -209,7 +209,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = 0;
   if(trace.xref)
-    trace.xref->add((gpointer) cross_reference);
+    trace.xref->_add((gpointer) cross_reference);
 
 }
 

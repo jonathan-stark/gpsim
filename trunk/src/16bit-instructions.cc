@@ -80,14 +80,14 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
   }
 }
 
-char *Branching::name(char *return_str)
+char *Branching::name(char *return_str, int len)
 {
 
-  sprintf(return_str,"%s\t$%c0x%x\t;(0x%x)",
-	  name_str,
-	  (opcode & 0x80) ? '-' : '+', 
-	  (destination & 0x7f)<<1,
-	  absolute_destination<<1);
+  snprintf(return_str, len,"%s\t$%c0x%x\t;(0x%x)",
+	   gpsimValue::name().c_str(),
+	   (opcode & 0x80) ? '-' : '+', 
+	   (destination & 0x7f)<<1,
+	   absolute_destination<<1);
 
 
   return(return_str);
@@ -112,12 +112,14 @@ void multi_word_branch::runtime_initialize(void)
     }
 }
 
-char * multi_word_branch::name(char *return_str)
+char * multi_word_branch::name(char *return_str,int len)
 {
   if(!initialized)
     runtime_initialize();
 
-  sprintf(return_str,"%s\t0x%05x",name_str,destination<<1);
+  snprintf(return_str,len,"%s\t0x%05x",
+	   gpsimValue::name().c_str(),
+	   destination<<1);
 
   return(return_str);
 }
@@ -175,7 +177,7 @@ ADDWFC::ADDWFC (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
-  sprintf(name_str,"addwfc");
+  new_name("addwfc");
 
 }
 
@@ -257,7 +259,7 @@ BC::BC (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bc");
+  new_name("bc");
 
 }
 
@@ -279,7 +281,7 @@ BN::BN (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bn");
+  new_name("bn");
 
 }
 
@@ -301,7 +303,7 @@ BNC::BNC (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bnc");
+  new_name("bnc");
 
 }
 
@@ -323,7 +325,7 @@ BNN::BNN (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bnn");
+  new_name("bnn");
 
 }
 
@@ -345,7 +347,7 @@ BNOV::BNOV (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bnov");
+  new_name("bnov");
 
 }
 
@@ -367,7 +369,7 @@ BNZ::BNZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bnz");
+  new_name("bnz");
 
 }
 
@@ -389,7 +391,7 @@ BOV::BOV (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bov");
+  new_name("bov");
 
 }
 
@@ -419,7 +421,7 @@ BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
       destination = 0x800 - destination;
     }
 
-  sprintf(name_str,"bra");
+  new_name("bra");
 }
 
 void BRA::execute(void)
@@ -430,12 +432,12 @@ void BRA::execute(void)
 
 }
 
-char * BRA::name(char *return_str)
+char * BRA::name(char *return_str,int len)
 {
 
 
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
-	  name_str,
+	  gpsimValue::name().c_str(),
 	  (opcode & 0x400) ? '-' : '+', 
 	  (destination & 0x7ff)<<1,
 	  absolute_destination<<1);
@@ -451,7 +453,7 @@ BTG::BTG (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"btg");
+  new_name("btg");
 
 }
 
@@ -476,7 +478,7 @@ BZ::BZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"bz");
+  new_name("bz");
 
 }
 
@@ -500,7 +502,7 @@ CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
   address = cpu16->current_disasm_address;
   initialized = false;
 
-  sprintf(name_str,"call");
+  new_name("call");
 
 }
 
@@ -519,13 +521,13 @@ void CALL16::execute(void)
 
 }
 
-char *CALL16::name(char  *return_str)
+char *CALL16::name(char  *return_str,int len)
 {
 
   if(!initialized)
     runtime_initialize();
 
-  sprintf(return_str,"call\t0x%05x%s",
+  snprintf(return_str,len,"call\t0x%05x%s",
 	  destination<<1,
 	  ((fast) ? ",f" : " "));
 
@@ -566,7 +568,7 @@ CPFSEQ::CPFSEQ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"cpfseq");
+  new_name("cpfseq");
 
 }
 
@@ -593,7 +595,7 @@ CPFSGT::CPFSGT (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"cpfsgt");
+  new_name("cpfsgt");
 
 }
 
@@ -620,7 +622,7 @@ CPFSLT::CPFSLT (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"cpfslt");
+  new_name("cpfslt");
 
 }
 
@@ -647,7 +649,7 @@ DAW::DAW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"daw");
+  new_name("daw");
 
 }
 
@@ -731,7 +733,7 @@ DCFSNZ::DCFSNZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"dcfsnz");
+  new_name("dcfsnz");
 
 }
 
@@ -769,7 +771,7 @@ GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
   address = cpu16->current_disasm_address;
   initialized = false;
 
-  sprintf(name_str,"goto");
+  new_name("goto");
 }
 
 void GOTO16::execute(void)
@@ -857,7 +859,7 @@ INFSNZ::INFSNZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"infsnz");
+  new_name("infsnz");
 
 }
 
@@ -938,7 +940,7 @@ LCALL16::LCALL16 (Processor *new_cpu, unsigned int new_opcode)
 //    address = cpu16->current_disasm_address;
 //    initialized = 0;
 
-  sprintf(name_str,"lcall");
+  new_name("lcall");
 
 }
 
@@ -957,13 +959,13 @@ void LCALL16::execute(void)
 
 }
 
-char *LCALL16::name(char  *return_str)
+char *LCALL16::name(char  *return_str,int len)
 {
 
 //    if(!initialized)
 //      runtime_initialize();
 
-  sprintf(return_str,"lcall\t0x%05x%s",
+  snprintf(return_str,len,"lcall\t0x%05x%s",
 	  destination,
 	  ((fast) ? ",f" : " "));
 
@@ -1000,7 +1002,7 @@ LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
       ia = &cpu16->ind0;
     }
 
-  sprintf(name_str,"lfsr");
+  new_name("lfsr");
 }
 
 void LFSR::runtime_initialize(void)
@@ -1022,16 +1024,16 @@ void LFSR::runtime_initialize(void)
 
 }
 
-char *LFSR::name(char *return_str)
+char *LFSR::name(char *return_str,int len)
 {
 
   if(!initialized)
     runtime_initialize();
 
-  sprintf(return_str,"%s\t%d,0x%x",
-	  name_str,
-	  fsr,
-	  k);
+  snprintf(return_str,len,"%s\t%d,0x%x",
+	   gpsimValue::name().c_str(),
+	   fsr,
+	   k);
 
 
   return(return_str);
@@ -1094,7 +1096,7 @@ MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
   destination = 0;
   source = opcode & 0xfff;
 
-  sprintf(name_str,"movff");
+  new_name("movff");
 }
 
 void MOVFF::runtime_initialize(void)
@@ -1116,16 +1118,16 @@ void MOVFF::runtime_initialize(void)
 
 }
 
-char *MOVFF::name(char *return_str)
+char *MOVFF::name(char *return_str,int len)
 {
 
   if(!initialized)
     runtime_initialize();
 
-  sprintf(return_str,"%s\t%s,%s",
-	  name_str,
-	  cpu->registers[source]->name(),
-	  cpu->registers[destination]->name());
+  snprintf(return_str,len,"%s\t%s,%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[source]->name().c_str(),
+	   cpu->registers[destination]->name().c_str());
 
 
   return(return_str);
@@ -1159,7 +1161,7 @@ MOVFP::MOVFP (Processor *new_cpu, unsigned int new_opcode)
 //    destination = 0;
 //    source = opcode & 0xfff;
 
-  sprintf(name_str,"movfp");
+  new_name("movfp");
 }
 
 void MOVFP::runtime_initialize(void)
@@ -1181,16 +1183,16 @@ void MOVFP::runtime_initialize(void)
 
 }
 
-char *MOVFP::name(char *return_str)
+char *MOVFP::name(char *return_str, int len)
 {
 
 //    if(!initialized)
 //      runtime_initialize();
 
-  sprintf(return_str,"%s\t%s,%s",
-	  name_str,
-	  cpu->registers[source]->name(),
-	  cpu->registers[destination]->name());
+  snprintf(return_str,len,"%s\t%s,%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[source]->name().c_str(),
+	   cpu->registers[destination]->name().c_str());
 
 
   return(return_str);
@@ -1220,7 +1222,7 @@ MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"movlb");
+  new_name("movlb");
 
 }
 
@@ -1243,7 +1245,7 @@ MOVLR::MOVLR (Processor *new_cpu, unsigned int new_opcode)
 
 //    decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"movlb");
+  new_name("movlr");
 
 }
 
@@ -1270,7 +1272,7 @@ MOVPF::MOVPF (Processor *new_cpu, unsigned int new_opcode)
 //    destination = 0;
 //    source = opcode & 0xfff;
 
-  sprintf(name_str,"movpf");
+  new_name("movpf");
 }
 
 void MOVPF::runtime_initialize(void)
@@ -1292,16 +1294,16 @@ void MOVPF::runtime_initialize(void)
 
 }
 
-char *MOVPF::name(char *return_str)
+char *MOVPF::name(char *return_str,int len)
 {
 
 //    if(!initialized)
 //      runtime_initialize();
 
-  sprintf(return_str,"%s\t%s,%s",
-	  name_str,
-	  cpu->registers[source]->name(),
-	  cpu->registers[destination]->name());
+  snprintf(return_str,len,"%s\t%s,%s",
+	   gpsimValue::name().c_str(),
+	   cpu->registers[source]->name().c_str(),
+	   cpu->registers[destination]->name().c_str());
 
 
   return(return_str);
@@ -1377,7 +1379,7 @@ MULLW::MULLW (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"mullw");
+  new_name("mullw");
 
 }
 
@@ -1404,7 +1406,7 @@ MULWF::MULWF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"mulwf");
+  new_name("mulwf");
 
 }
 
@@ -1437,7 +1439,7 @@ NEGF::NEGF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"negf");
+  new_name("negf");
 
 }
 
@@ -1474,7 +1476,7 @@ NEGW::NEGW (Processor *new_cpu, unsigned int new_opcode)
 
 //    decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"negw");
+  new_name("negw");
 
 }
 
@@ -1510,7 +1512,7 @@ POP::POP (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"pop");
+  new_name("pop");
 
 }
 
@@ -1532,7 +1534,7 @@ PUSH::PUSH (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"push");
+  new_name("push");
 
 }
 
@@ -1559,7 +1561,7 @@ RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
 
   absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
 
-  sprintf(name_str,"rcall");
+  new_name("rcall");
 }
 
 void RCALL::execute(void)
@@ -1572,15 +1574,15 @@ void RCALL::execute(void)
 
 }
 
-char * RCALL::name(char *return_str)
+char * RCALL::name(char *return_str,int len)
 {
 
 
-  sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
-	  name_str,
-	  (destination < 0) ? '-' : '+', 
-	  (destination & 0x7ff)<<1,
-	  absolute_destination<<1);
+  snprintf(return_str,len,"%s\t$%c0x%x\t;(0x%05x)",
+	   gpsimValue::name().c_str(),
+	   (destination < 0) ? '-' : '+', 
+	   (destination & 0x7ff)<<1,
+	   absolute_destination<<1);
 
   return(return_str);
 }
@@ -1593,7 +1595,7 @@ RESET::RESET (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"reset");
+  new_name("reset");
 
 }
 
@@ -1621,12 +1623,12 @@ void RETFIE16::execute(void)
 
 }
 
-char *RETFIE16::name(char  *return_str)
+char *RETFIE16::name(char  *return_str,int len)
 {
   if(fast)
-    sprintf(return_str,"retfie\tfast");
+    snprintf(return_str,len,"retfie\tfast");
   else
-    sprintf(return_str,"retfie");
+    snprintf(return_str,len,"retfie");
 
   return(return_str);
 }
@@ -1642,12 +1644,12 @@ void RETURN16::execute(void)
     cpu16->fast_stack.pop();
 }
 
-char *RETURN16::name(char  *return_str)
+char *RETURN16::name(char  *return_str,int len)
 {
   if(fast)
-    sprintf(return_str,"return\tfast");
+    snprintf(return_str,len,"return\tfast");
   else
-    sprintf(return_str,"return");
+    snprintf(return_str,len,"return");
 
   return(return_str);
 }
@@ -1659,7 +1661,7 @@ RLCF::RLCF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"rlcf");
+  new_name("rlcf");
 
 }
 
@@ -1695,7 +1697,7 @@ RLNCF::RLNCF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"rlncf");
+  new_name("rlncf");
 
 }
 
@@ -1733,7 +1735,7 @@ RRCF::RRCF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"rrcf");
+  new_name("rrcf");
 
 }
 
@@ -1770,7 +1772,7 @@ RRNCF::RRNCF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"rrncf");
+  new_name("rrncf");
 
 }
 
@@ -1807,7 +1809,7 @@ SETF::SETF (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"setf");
+  new_name("setf");
 
 }
 
@@ -1870,7 +1872,7 @@ SUBFWB::SUBFWB (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"subfwb");
+  new_name("subfwb");
 
 }
 
@@ -1933,7 +1935,7 @@ SUBWFB::SUBWFB (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"subwfb");
+  new_name("subwfb");
 
 }
 
@@ -1970,17 +1972,17 @@ TBLRD::TBLRD (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"tblrd");
+  new_name("tblrd");
 
 }
 
-char *TBLRD::name(char *return_str)
+char *TBLRD::name(char *return_str,int len)
 {
   char *index_modes[4] = {"*","*+","*-","+*"};
 
-  sprintf(return_str,"%s\t%s",
-	  name_str,
-	  index_modes[opcode&0x3]);
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   index_modes[opcode&0x3]);
 
 
   return(return_str);
@@ -2013,17 +2015,17 @@ TBLWT::TBLWT (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"tblwt");
+  new_name("tblwt");
 
 }
 
-char *TBLWT::name(char *return_str)
+char *TBLWT::name(char *return_str,int len)
 {
   char *index_modes[4] = {"*","*+","*-","+*"};
 
-  sprintf(return_str,"%s\t%s",
-	  name_str,
-	  index_modes[opcode&0x3]);
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   index_modes[opcode&0x3]);
 
 
   return(return_str);
@@ -2057,16 +2059,16 @@ TLRD::TLRD (Processor *new_cpu, unsigned int new_opcode)
 
 //    decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"tlrd");
+  new_name("tlrd");
 
 }
 
-char *TLRD::name(char *return_str)
+char *TLRD::name(char *return_str,int len)
 {
   char *index_modes[4] = {"*","*+","*-","+*"};
 
-  sprintf(return_str,"%s\t%s",
-	  name_str,
+  snprintf(return_str,len,"%s\t%s",
+	  gpsimValue::name().c_str(),
 	  index_modes[opcode&0x3]);
 
 
@@ -2100,17 +2102,17 @@ TLWT::TLWT (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"tlwt");
+  new_name("tlwt");
 
 }
 
-char *TLWT::name(char *return_str)
+char *TLWT::name(char *return_str,int len)
 {
   char *index_modes[4] = {"*","*+","*-","+*"};
 
-  sprintf(return_str,"%s\t%s",
-	  name_str,
-	  index_modes[opcode&0x3]);
+  snprintf(return_str,len,"%s\t%s",
+	   gpsimValue::name().c_str(),
+	   index_modes[opcode&0x3]);
 
 
   return(return_str);
@@ -2143,7 +2145,7 @@ TSTFSZ::TSTFSZ (Processor *new_cpu, unsigned int new_opcode)
 
   decode(new_cpu, new_opcode);
 
-  sprintf(name_str,"tstfsz");
+  new_name("tstfsz");
 
 }
 

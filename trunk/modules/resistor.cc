@@ -289,7 +289,7 @@ void PullupResistor::create_iopin_map(void)
 
   pur = new PUResistor_IO();
   pur->res = res;
-  pur->put_name(name_str.c_str());
+  pur->new_name(name_str);
   assign_pin(1, pur);
 
 
@@ -318,7 +318,7 @@ Module * PullupResistor::pu_construct(const char *_new_name)
 
   if(_new_name) {
     pur->new_name((char*)_new_name);
-    pur->res->put_name(_new_name);
+    pur->res->new_name((char*)_new_name);
   }
 
   pur->create_iopin_map();
@@ -339,7 +339,7 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 
   if(_new_name) {
     pur->new_name((char*)_new_name);
-    pur->res->put_name(_new_name);
+    pur->res->new_name((char*)_new_name);
   }
   pur->create_iopin_map();
 

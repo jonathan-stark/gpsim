@@ -302,11 +302,6 @@ public:
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom(void) { return (eeprom); }
 
-  virtual int get_pin_count(void);
-  virtual char *get_pin_name(unsigned int pin_number);
-  virtual int get_pin_state(unsigned int pin_number);
-  virtual IOPIN *get_pin(unsigned int pin_number);
-
   static Processor *construct(void);
   pic_processor(void);
 };

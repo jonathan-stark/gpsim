@@ -53,6 +53,15 @@ static Trace &(*dummy_trace)(void) = get_trace;
 TraceLog trace_log;
 ProfileKeeper profile_keeper;
 
+//========================================================================
+traceValue::traceValue(void)
+{
+  
+}
+unsigned int traceValue::get_value(void)
+{
+  return trace.trace_index;
+}
 
 /****************************************************************************
  *
@@ -105,7 +114,7 @@ Trace::Trace(void)
   trace_index = 0;
   string_cycle = 0;
 
-  xref = new XrefObject(&trace_index);
+  xref = new XrefObject(&trace_value);
 
 }
 
@@ -252,7 +261,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
 	snprintf(buffer, bufsize,"  pc: 0x%04x %s", 
 		 address ,
-		 (*cpu->pma)[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
       }
       break;
     case PC_SKIP:
@@ -260,30 +269,30 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
 	snprintf(buffer, bufsize,"  skipped: %04x %s",
 		 address ,
-		 (*cpu->pma)[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
       }
       break;
     case REGISTER_READ_VAL:
     case REGISTER_READ:
       r = cpu->registers[(trace_buffer[index]>>8) & 0xfff];
       snprintf(buffer, bufsize,"   read: 0x%02x from %s",
-	       trace_buffer[index]&0xff, r->name());
+	       trace_buffer[index]&0xff, r->name().c_str());
       break;
     case REGISTER_WRITE_VAL:
     case REGISTER_WRITE:
       r = cpu->registers[(trace_buffer[index]>>8) & 0xfff];
       snprintf(buffer, bufsize,"  wrote: 0x%02x to %s",
-	       trace_buffer[index]&0xff, r->name());
+	       trace_buffer[index]&0xff, r->name().c_str());
       break;
     case REGISTER_READ_16BITS:
       r = cpu->registers[(trace_buffer[index]>>16) & 0xff];
       snprintf(buffer, bufsize,"   read: 0x%04x from %s",
-	       trace_buffer[index]&0xffff, r->name());
+	       trace_buffer[index]&0xffff, r->name().c_str());
       break;
     case REGISTER_WRITE_16BITS:
       r = cpu->registers[(trace_buffer[index]>>16) & 0xff];
       snprintf(buffer, bufsize,"  wrote: 0x%04x to %s",
-	       trace_buffer[index]&0xffff, r->name());
+	       trace_buffer[index]&0xffff, r->name().c_str());
       break;
     case READ_W:
       snprintf(buffer, bufsize,"   read: 0x%02x from W",
@@ -558,14 +567,14 @@ int Trace::dump_instruction(unsigned int instruction_index)
 	     "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 	     address,
 	     trace_buffer[instruction_index]&0xffff,
-	     (*cpu->pma)[address].name(a_string));
+	     (*cpu->pma)[address].name(a_string,sizeof(a_string)));
 
     if(out_stream)
       fprintf(out_stream,"%s\n",string_buffer);
     string_index = instruction_index;
 
     if(xref)
-      xref->update();
+      xref->_update();
 
     found_pc = 0;
     found_instruction = 0;
@@ -609,7 +618,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
 	    fprintf(out_stream,"%s\n",string_buffer);
 
 	  if(xref)
-	    xref->update();
+	    xref->_update();
 	}
 
       } while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK))
@@ -679,7 +688,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 		 "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 		 address,
 		 trace_buffer[instruction_index]&0xffff,
-		 (*cpu->pma)[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
 
 
 	if(out_stream)
@@ -687,7 +696,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 	string_index = instruction_index;
 
 	if(xref)
-	  xref->update();
+	  xref->_update();
       }
 
       found_pc = 0;
@@ -733,7 +742,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 		fprintf(out_stream,"%s\n",string_buffer);
 
 	      if(xref)
-		xref->update();
+		xref->_update();
 	    }
 	  } else {
 	    int oldi = i;
@@ -1062,7 +1071,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 {
     char *name;
 
-    name = cpu->registers[address]->name();
+    name = (char *)cpu->registers[address]->name().c_str();
 
     lt_set_time(lxtp, (int)(get_cycles().value*4.0e8*cpu->period));
 

@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_classes.h"
 #include "breakpoints.h"
+#include "value.h"
 
 extern "C"
 {
@@ -34,7 +35,16 @@ extern "C"
 }
 
 class Processor;
+class Trace;
 
+
+class traceValue : public gpsimValue
+{
+ public:
+  traceValue(void);
+  virtual void put_value(unsigned int new_value) {};
+  virtual unsigned int get_value(void);
+};
 //---------------------------------------------------------
 // Class for trace buffer
 
@@ -77,6 +87,7 @@ class Trace
   unsigned int trace_buffer[TRACE_BUFFER_SIZE];
   unsigned int trace_index;
   unsigned int trace_flag;
+  traceValue trace_value;
 
   // When interfaced with a gui, the contents of the trace
   // buffer are decoded one line-at-a-time, copied to the string_buffer

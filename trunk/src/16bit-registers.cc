@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "interface.h"
-#include "xref.h"
 
 
 //--------------------------------------------------
@@ -49,13 +48,8 @@ void  BSR::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-  {
-    xref->update();
-    cpu16->indf->xref->update();
-  }
-
-
+  update();
+  cpu16->indf->update();
 
 }
 
@@ -80,14 +74,8 @@ void  FSRL::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    {
-	xref->update();
-  
-	if(cpu16->indf->xref)
-	  cpu16->indf->xref->update();
-    }
-
+  update();
+  cpu16->indf->update();
 
 }
 
@@ -106,15 +94,8 @@ void  FSRH::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    {
-
-	xref->update();
-  
-	if(cpu16->indf->xref)
-	  cpu16->indf->xref->update();
-
-    }
+  update();
+  cpu16->indf->update();
 }
 
 void  INDF16::put(unsigned int new_value)
@@ -132,8 +113,7 @@ void INDF16::put_value(unsigned int new_value)
 {
   put(new_value);
 
-  if(xref)
-      xref->update();
+  update();
 
 
 }
@@ -182,8 +162,7 @@ void PREINC::put_value(unsigned int new_value)
 {
   put(new_value);
 
-  if(xref)
-      xref->update();
+  update();
 
 }
 
@@ -215,9 +194,7 @@ void POSTINC::put_value(unsigned int new_value)
 {
   put(new_value);
 
-
-  if(xref)
-      xref->update();
+  update();
 
 
 }
@@ -251,8 +228,7 @@ void POSTDEC::put_value(unsigned int new_value)
 {
   put(new_value);
 
-  if(xref)
-      xref->update();
+  update();
 
 }
 
@@ -299,12 +275,9 @@ void PLUSW::put_value(unsigned int new_value)
     cpu->registers[destination]->put_value(new_value);
 
 
-  if(xref)
-    {
-	xref->update();
-      if(destination > 0)
-	  cpu->registers[destination]->xref->update();
-    }
+  update();
+  if(destination > 0)
+    cpu->registers[destination]->update();
 
 }
 
@@ -693,16 +666,9 @@ void Program_Counter16::put_value(unsigned int new_value)
 
   trace.program_counter(value << 1);
 
-  if(xref)
-    {
-      if(cpu_pic->pcl->xref)
-	cpu_pic->pcl->xref->update();
-      if(cpu_pic->pclath->xref)
-	cpu_pic->pclath->xref->update();
-	xref->update();
-    }
-  
-
+  cpu_pic->pcl->update();
+  cpu_pic->pclath->update();
+  update();
 }
 //------------------------------------------------
 // get_value()
@@ -743,8 +709,7 @@ void TOSL::put_value(unsigned int new_value)
 
   stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
 
-  if(xref)
-      xref->update();
+  update();
 
 }
 
@@ -779,8 +744,7 @@ void TOSH::put_value(unsigned int new_value)
 
   stack->put_tos( stack->get_tos() & 0xffff00ff | ( (new_value & 0xff) << 8));
 
-  if(xref)
-      xref->update();
+  update();
 
 }
 
@@ -816,9 +780,7 @@ void TOSU::put_value(unsigned int new_value)
 
   stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
 
-  if(xref)
-      xref->update();
-
+  update();
 
 }
 
@@ -852,8 +814,7 @@ void STKPTR::put_value(unsigned int new_value)
 
   value.put(new_value);
 
-  if(xref)
-      xref->update();
+  update();
 
 }
 

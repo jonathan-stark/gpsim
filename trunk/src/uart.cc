@@ -27,8 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
 
-#include "xref.h"
-
 //-----------------------------------------------------------
 _RCSTA::_RCSTA(void)
 {
@@ -94,8 +92,7 @@ void _TXREG::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 //-----------------------------------------------------------
@@ -106,8 +103,7 @@ void _TXSTA::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    xref->update();
+  update();
 
 }
 
@@ -419,8 +415,7 @@ void _RCSTA::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(xref)
-    xref->update();
+  update();
 }
 
 //-----------------------------------------------------------

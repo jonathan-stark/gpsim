@@ -69,7 +69,7 @@ void Symbol_Table::add_ioport(Processor *cpu, IOPORT *_ioport)
   ioport_symbol *is = new ioport_symbol();
 
   is->name_str = _ioport->name();
-  is->cpu      = _ioport->cpu;
+  is->cpu      = _ioport->get_cpu();
   is->ioport   = _ioport;
   st.push_back(is);
 
@@ -471,7 +471,7 @@ void node_symbol::print(void)
 void register_symbol::print(void)
 {
   if(reg)
-    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->cpu->registers[reg->address]->get_value() <<'\n';
+    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_cpu()->registers[reg->address]->get_value() <<'\n';
 }
 int register_symbol::get_value(void)
 {

@@ -296,11 +296,12 @@ int Module::get_pin_count(void)
 }
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-char *Module::get_pin_name(unsigned int pin_number)
+string &Module::get_pin_name(unsigned int pin_number)
 {
+  static string invalid("");
   if(package)
     return package->get_pin_name(pin_number);
-  return 0;
+  return invalid;  //FIXME
 
 }
 //-------------------------------------------------------------------
@@ -672,5 +673,5 @@ void module_set_position(char *module_name, int x, int y)
   */
   cout << "module_set_position is broken at the moment\n";
   if(cpu->xref)
-      cpu->xref->update();
+    cpu->xref->_update();
 }

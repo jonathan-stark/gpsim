@@ -164,13 +164,13 @@ void Package::create_iopin_map(void)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-char *Package::get_pin_name(unsigned int pin_number)
+string &Package::get_pin_name(unsigned int pin_number)
 {
-
+  static string invalid("");
   if(pin_existance(pin_number) == E_PIN_EXISTS)
     return pins[pin_number-1]->name();
   else
-    return 0;
+    return invalid;  //FIXME
 
 }
 

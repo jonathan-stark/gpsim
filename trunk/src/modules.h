@@ -98,7 +98,7 @@ public:
   // I/O pin specific
 
   virtual int get_pin_count(void);
-  virtual char *get_pin_name(unsigned int pin_number);
+  virtual string &get_pin_name(unsigned int pin_number);
   virtual int get_pin_state(unsigned int pin_number);
   virtual IOPIN *get_pin(unsigned int pin_number);
   virtual void assign_pin(unsigned int pin_number, IOPIN *pin);
