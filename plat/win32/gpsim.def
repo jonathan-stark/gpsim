@@ -27,6 +27,7 @@ EXPORTS
     ??0RegisterReadTraceType@@QAE@PAVProcessor@@II@Z
     ??0RegisterWriteTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
     ??0RegisterWriteTraceType@@QAE@PAVProcessor@@II@Z
+    ??0Stimulus_Node@@QAE@PBD@Z
     ??0String@@QAE@PBD@Z
     ??0TraceFrame@@QAE@XZ
     ??0TriggerObject@@QAE@XZ
@@ -76,6 +77,7 @@ EXPORTS
     ?assign_pin@Module@@UAEXIPAVIOPIN@@@Z
     ?attach@IOPIN@@UAEXPAVStimulus_Node@@@Z
     ?attach_src_line@Processor@@QAEXIIII@Z
+    ?attach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
     ?breakpoint@Cycle_Counter@@AAEXXZ
     ?callback@ProgramMemoryAccess@@UAEXXZ
     ?callback@TriggerObject@@UAEXXZ
