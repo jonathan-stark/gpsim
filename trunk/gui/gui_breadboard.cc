@@ -2371,9 +2371,10 @@ static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
     update_board_matrix(bbw);
 }
 
-static void trace_all_foreach_function(GtkWidget *item, Breadboard_Window *bbw)
+static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
 {
     Stimulus_Node *node;
+    Breadboard_Window *bbw = (Breadboard_Window*)bbw_gpointer;
 
     node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
 
