@@ -31,6 +31,7 @@ cmd_trace c_trace;
 
 static cmd_options cmd_trace_options[] =
 {
+  "r",1,    OPT_TT_NUMERIC,
   NULL,0,0
 };
 
@@ -59,4 +60,30 @@ void cmd_trace::trace(int numberof)
 {
 
   trace_dump_n(numberof);
+}
+
+void cmd_trace::trace(cmd_options *opt)
+{
+
+  switch(opt->value) {
+  case 1:
+    cout << "test\n";
+    break;
+  default:
+    cout << " Invalid set option\n";
+  }
+
+}
+
+void cmd_trace::trace(cmd_options_num *con)
+{
+
+  switch(con->co->value) {
+  case 1:
+    trace_dump_raw(con->n);
+    break;
+  default:
+    cout << " Invalid set option\n";
+  }
+
 }

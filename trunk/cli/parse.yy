@@ -524,6 +524,10 @@ trace_cmd: TRACE
           {
 	    c_trace.trace($2); YYABORT;
 	  }
+          | TRACE numeric_option
+          {
+	    c_trace.trace($2); YYABORT;
+	  }
           ;
 
 version_cmd: gpsim_VERSION

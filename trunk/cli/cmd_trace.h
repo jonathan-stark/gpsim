@@ -29,6 +29,8 @@ public:
   void trace(void);
 
   void trace(int numberof);
+  void trace(cmd_options *opt);
+  void trace(cmd_options_num *con);
 
 
 };

@@ -189,7 +189,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       break;
     case INSTRUCTION:
       if(trace_flag & TRACE_INSTRUCTION)
-	snprintf(buffer, bufsize,"instruction: 0x%04x",
+	snprintf(buffer, bufsize," instruction: 0x%04x",
 		 trace_buffer[index]&0xffff);
       break;
     case PROGRAM_COUNTER:
@@ -279,6 +279,39 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 }
 
 //------------------------------------------------------------------
+// find_previous_cycle
+//
+//  Starting at the trace index passed to it, this routine will search
+// backwards in the trace buffer for the next instruction.
+
+int Trace::find_previous_cycle(int index)
+{
+
+  int cycles = 0;
+
+  index &= TRACE_BUFFER_MASK;
+
+  do {
+
+      switch (trace_buffer[index] & 0xff000000) {
+
+      case INSTRUCTION:
+	return ((cycles << 16) | index);
+
+      case CYCLE_INCREMENT:
+	cycles++;
+	break;
+	
+      }
+
+      index = (index - 1) & TRACE_BUFFER_MASK;
+    
+  } while (index != trace_index);
+
+  return 0;
+}
+
+//------------------------------------------------------------------
 // find_cycle
 //
 //  This routine will search for the n'th cycle BEFORE the last one
@@ -308,7 +341,7 @@ guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cyc
     found_pc =0,
     found_cycle = 0;
 
-  // =1 means the index wasn't found.
+  // -1 means the index wasn't found.
   instruction_index=-1;
   pc_index=-1;
   cycle_index=-1;
@@ -371,6 +404,143 @@ guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cyc
 }
 
 //------------------------------------------------------------------
+// int Trace::dump_instruction(unsigned int instruction_index)
+//
+//  Starting at the `instruction_index', this function will decode the
+// trace buffer upto the next instruction.
+//
+
+int Trace::dump_instruction(unsigned int instruction_index)
+{
+
+  FILE *out_stream=NULL;
+  char a_string[50];
+
+  instruction_index &= TRACE_BUFFER_MASK;
+
+  // make sure the instruction index really does point to a traced instruction.
+  if(INSTRUCTION != trace_buffer[instruction_index] & 0xff000000)
+    return -1;
+
+  int i = (instruction_index + 1) & TRACE_BUFFER_MASK;
+
+
+  bool 
+    found_instruction = 0,
+    found_pc =0,
+    found_cycle = 0;
+
+  // -1 means the index wasn't found.
+  int pc_index=-1;
+  int cycle_index=-1;
+  int cycle =0;
+
+  // Starting at the latest trace, search backwards first for 
+  // an instruction and then for a program_counter
+  do
+  {
+    switch (trace_buffer[i] & 0xff000000) {
+
+    case INSTRUCTION:
+      found_instruction = 1;
+      break;
+
+    case PROGRAM_COUNTER:
+      found_pc = 1;
+      pc_index = i;
+
+      break;
+
+    case CYCLE_INCREMENT:
+      cycle++;
+      break;
+	
+    }
+
+
+    i = (i+1) & TRACE_BUFFER_MASK;
+
+ 
+  } while( (i != trace_index) && (!found_pc));
+
+
+  do {
+
+    i = trace_buffer[pc_index]&0xffff;
+
+    if(string_cycle && out_stream) 
+      fprintf(out_stream,"0x%016LX  ",string_cycle);
+
+    snprintf(string_buffer, sizeof(string_buffer),
+	     "%s  0x%04X  0x%04X  %s",cpu->name_str,i,
+	     trace_buffer[instruction_index]&0xffff,
+	     cpu->program_memory[i]->name(a_string) );
+    if(out_stream)
+      fprintf(out_stream,"%s\n",string_buffer);
+    string_index = instruction_index;
+
+    if(xref)
+      xref->update();
+
+    found_pc = 0;
+    found_instruction = 0;
+
+    if(instruction_index != trace_index) {
+
+      // Get the trace buffer index just past the point where the instruction was traced
+      i = (instruction_index  + 1) & TRACE_BUFFER_MASK;
+
+      // Now dump all of the trace information that occurred along with this
+      // instruction.
+      do  {
+	switch (trace_buffer[i] & 0xff000000) {
+
+	case INSTRUCTION:
+	  instruction_index = i;
+	  string_cycle++;
+	  found_instruction = 1;
+	  break;
+
+	case PROGRAM_COUNTER:
+	  pc_index = i;
+	  found_pc = 1;
+
+	  break;
+
+	case CYCLE_INCREMENT:
+	  string_cycle++;
+	  break;
+	
+	}
+
+
+	string_index = i;
+
+	i = (i + dump1(i,string_buffer, sizeof(string_buffer))) & TRACE_BUFFER_MASK;
+
+	if(string_buffer[0]) {
+
+	  if(out_stream)
+	    fprintf(out_stream,"%s\n",string_buffer);
+
+	  if(xref)
+	    xref->update();
+	}
+
+      } while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK))
+	       &&
+	       (!found_pc || !found_instruction)
+	       );
+
+    } else
+      i = trace_index;  // break out of the loop
+
+  } while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK)));
+
+
+}
+
+//------------------------------------------------------------------
 // int Trace::dump(unsigned int n=0)
 //
 
@@ -420,6 +590,7 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 	       cpu->program_memory[i]->name(a_string) );
       if(out_stream)
 	fprintf(out_stream,"%s\n",string_buffer);
+      string_index = instruction_index;
 
       if(xref)
 	xref->update();
@@ -456,9 +627,12 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 	  }
 
 
+	  string_index = i;
+
 	  i = (i + dump1(i,string_buffer, sizeof(string_buffer))) & TRACE_BUFFER_MASK;
 
 	  if(string_buffer[0]) {
+
 	    if(out_stream)
 	      fprintf(out_stream,"%s\n",string_buffer);
 
@@ -482,6 +656,36 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 
 }
 
+//---------------------------------------------------------
+// dump_raw
+// mostly for debugging, 
+void Trace::dump_raw(int n)
+{
+  if(!n)
+    return;
+
+  const int BUFFER_SIZE = 50;
+
+  char buffer[BUFFER_SIZE];
+
+  int i = (trace_index - n)  & TRACE_BUFFER_MASK;
+
+  trace_flag = TRACE_ALL;
+
+  do {
+    if(is_cycle_trace(i))
+      printf("0x%016LX:%016LX",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
+    else
+      printf("0x%016LX",trace_buffer[i]);
+
+    i = (i + dump1(i,buffer,BUFFER_SIZE)) & TRACE_BUFFER_MASK;
+
+    if(buffer[0]) 
+      printf("%s",buffer);
+    putc('\n',stdout);
+
+  } while((i!=trace_index) && (i!=((trace_index+1)&TRACE_BUFFER_MASK)));
+}
 
 //
 // dump_last_instruction(void)
@@ -631,4 +835,9 @@ void trace_dump_all(void)
 void trace_dump_n(int numberof)
 {
   trace.dump(numberof,stdout);
+}
+//--------------------------------------------
+void trace_dump_raw(int numberof)
+{
+  trace.dump_raw(numberof);
 }

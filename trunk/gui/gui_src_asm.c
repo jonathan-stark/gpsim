@@ -1381,6 +1381,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	  set_text(sbaw,id,file_id);
 	  
       } else {
+	if(verbose)
 	  printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
 		  file_name);
       }

@@ -71,7 +71,8 @@ class Trace
   // is notified that new data is available in the string_buffer).
   XrefObject *xref;
   char  string_buffer[TRACE_STRING_BUFFER];
-  guint64 string_cycle;  // The cycle corresponding to the decoded string
+  guint64 string_cycle;          // The cycle corresponding to the decoded string
+  unsigned int string_index;     // The trace buffer index corresponding "   "
 
   pic_processor *cpu;
 
@@ -194,8 +195,12 @@ class Trace
   int  dump (unsigned int n=0, FILE *out_stream=NULL);
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
+  int  dump_instruction(unsigned int instruction_index);
+  void dump_raw(int n);
+
   int is_cycle_trace(unsigned int index);
   guint64 find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index);
+  int find_previous_cycle(int index);
 };
 
 extern Trace trace;
