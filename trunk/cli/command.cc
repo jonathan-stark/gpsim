@@ -66,7 +66,7 @@ command *command_list[] =
 {
   &attach,
   &c_break,
-  &c_bus,
+  //  &c_bus,
   &clear,
   &disassemble,
   &dump,

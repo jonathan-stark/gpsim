@@ -71,6 +71,7 @@ public:
   /// derived class, an Error will be thrown.
 
   virtual void get(int &);
+  virtual void get(guint64 &);
   virtual void get(gint64 &);
   virtual void get(double &);
   virtual void get(char *, int len);

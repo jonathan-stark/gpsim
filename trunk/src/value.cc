@@ -116,6 +116,15 @@ void Value::get(int &i)
   get(i64);
   i = (int) i64;
 }
+
+void Value::get(guint64 &i)
+{
+  // FIXME - casting an signed int to an unsigned int -- probably should issue a warning
+  gint64 i64;
+  get(i64);
+  i = (gint64) i64;
+}
+
 void Value::get(double &d)
 {
   throw new Error(showType() +
@@ -729,7 +738,7 @@ void Float::set(char *buffer, int buf_size)
 
     double d;
 
-    int converted = sscanf(buffer, "%g",  &d);
+    int converted = sscanf(buffer, "%lf",  &d);
 
     if(converted)
       set(d);
