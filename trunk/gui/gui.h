@@ -451,35 +451,30 @@ typedef struct _SourceBrowserOpcode_Window SourceBrowserOpcode_Window;
 struct _Breadboard_Window {
     GUI_Object gui_obj;
 
-    GtkWidget *da;
-    
-    GdkPixmap *pixmap;
-    
     GdkFont *pinstatefont;
-    int pinstateheight;
-    int pinstatewidth;
+//    int pinstateheight;
+//    int pinstatewidth;
 
     GdkFont *pinnamefont;
     int pinnameheight;
-    int pinnamewidth;
+//    int pinnamewidth;
 
-    GdkFont *picnamefont;
-    int picnameheight;
-    int picnamewidth;
+//    GdkFont *pinnamefont;
+//    int pinnameheight;
+//    int pinnamewidth;
 
-    int pinlength;
-    int pinspacing;
-    int nrofpins;
-    GdkGC *pinline_gc;
+//    int pinlength;
+//    int pinspacing;
+
+    GtkWidget *layout;
+
+//    GdkGC *pinline_gc;
     GdkGC *pinname_gc;
     GdkGC *case_gc;
 
-    int picname_x, picname_y;
-
     int width, height;
 
-    int case_x, case_y;
-    int case_height, case_width;
+    GList *packages;
 
     int processor;
 };
@@ -624,6 +619,7 @@ struct _gui_processor {
 //
 // External references and function prototypes
 //
+/*
 extern GdkColor item_has_changed_color;
 extern GdkColor normal_fg_color;
 extern GdkColor normal_bg_color;
@@ -636,10 +632,11 @@ extern GdkColor low_output_color;
 extern GdkColor black_color;
 extern GdkColor pm_has_changed_color;
 extern GdkColor normal_pm_bg_color;
-
-extern GtkStyle *normal_style;
+  */
+/*extern GtkStyle *normal_style;
 extern GtkStyle *current_line_number_style;
 extern GtkStyle *breakpoint_line_number_style;
+*/
 
 extern GtkItemFactory *item_factory;
 
@@ -704,6 +701,8 @@ int config_set_variable(char *module, char *entry, int value);
 int gui_object_set_default_config(GUI_Object *obj);
 int gui_object_set_config(GUI_Object *obj);
 int gui_object_get_config(GUI_Object *obj);
+int config_get_string(char *module, char *entry, char **string);
+int config_set_string(char *module, char *entry, char *string);
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
 // gui_watch.c
@@ -739,6 +738,13 @@ int CreateProfileWindow(GUI_Processor *gp);
 void ProfileWindow_update(Profile_Window *pw);
 void ProfileWindow_notify_start_callback(Profile_Window *pw);
 void ProfileWindow_notify_stop_callback(Profile_Window *pw);
+
+// gui_stopwatch.c
+void StopWatchWindow_new_processor(StopWatch_Window *sww, GUI_Processor *gp);
+void StopWatchWindow_new_program(StopWatch_Window *sww, GUI_Processor *gp);
+int BuildStopWatchWindow(StopWatch_Window *sww);
+int CreateStopWatchWindow(GUI_Processor *gp);
+void StopWatchWindow_update(StopWatch_Window *sww);
 
 #endif // __GUI_H__
 

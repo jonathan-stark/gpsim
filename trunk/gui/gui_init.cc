@@ -46,23 +46,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
-GdkColor black_color;
-GdkColor high_output_color;
-GdkColor low_output_color;
-
 void gui_styles_init(void)
 {
-    GdkColormap *colormap = gdk_colormap_get_system();
-
-    gdk_color_parse("red",&high_output_color);
-    gdk_color_parse("green",&low_output_color);
-
-    g_assert(gdk_color_parse("black",&black_color)!=FALSE);
-
-
-    gdk_colormap_alloc_color(colormap, &high_output_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &low_output_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &black_color,FALSE,TRUE);
-
 }
 #endif // HAVE_GUI
