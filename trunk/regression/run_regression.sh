@@ -11,6 +11,9 @@ ${RT} instructions_14bit instructions_14bit
 #instruction set simulation for the 16bit cores:
 ${RT} instructions_16bit instructions_16bit
 
+#instruction set simulation for the 12bit cores:
+${RT} instructions_12bit instructions_12bit
+
 ${RT} node_test node_test
 
 #${RT} p12c509 it_12bit
