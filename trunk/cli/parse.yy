@@ -639,6 +639,8 @@ literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
         | LITERAL_BOOL_T                {$$ = new LiteralBoolean($1);}
         | LITERAL_STRING_T              {$$ = new LiteralString($1);}
         | LITERAL_FLOAT_T               {$$ = new LiteralFloat($1);}
+        | SYMBOL_T                      {$$ = new LiteralSymbol($1);}
+
         ;
 
 %%

@@ -163,6 +163,13 @@ bool command::have_cpu(bool display_warning)
 
 }
 
+Value *command::toValue(Expression *expr)
+{
+  if(expr)
+    return expr->evaluate();
+
+  return new Integer(0);
+}
 double command::evaluate(Expression *expr)
 {
   double value = 0.0;
@@ -170,14 +177,10 @@ double command::evaluate(Expression *expr)
   try {
     if(expr) {
 
-      Value *v = expr->evaluate();
-      //cout << "Expression:" << expr->toString() << "==>" << v->toString() << endl;
-      if(v) {
+      Value *v = toValue(expr);
+      value = v->getAsDouble();
 
-	value = v->getAsDouble();
-
-	delete v;
-      }
+      delete v;
       delete expr;
     }
 

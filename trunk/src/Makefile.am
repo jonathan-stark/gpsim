@@ -24,6 +24,7 @@ libgpsim_la_SOURCES = \
 	eeprom.cc \
 	i2c-ee.cc \
 	fopen-path.cc \
+	gpsim_object.cc \
 	gpsim_time.cc \
 	hexutils.cc \
 	init.cc \
@@ -79,6 +80,7 @@ gpsiminclude_HEADERS = \
 	gpsim_classes.h \
 	gpsim_def.h \
 	gpsim_interface.h \
+	gpsim_object.h \
 	gpsim_time.h \
 	intcon.h \
 	interface.h \

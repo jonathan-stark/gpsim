@@ -29,7 +29,16 @@ Boston, MA 02111-1307, USA.  */
 #include "registers.h"
 #include "trace.h"
 
+unsigned int count_bits(unsigned int ui)
+{
+  unsigned int bits=0;
 
+  while (ui) {
+    ui &= (ui-1);
+    bits++;
+  }
+  return bits;
+}
 //========================================================================
 // toString
 //
@@ -93,12 +102,17 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
   unsigned int j,mask,max;
   int i;
 
-  if(!s)
+  if(!s || len<=0)
     return 0;
 
   max = 32;
 
-  for(i=len-2,j=0,mask=1; j<max; j++, mask<<=1) {
+  int nBits = count_bits(BitPos);
+
+  if(nBits >= len)
+    nBits = len-1;
+
+  for(i=nBits-1,j=0,mask=1; j<max; j++, mask<<=1) {
 
     if(BitPos & mask) {
 
@@ -115,7 +129,7 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 
   }
 
-  s[len-1] = 0;
+  s[nBits] = 0;
 
   return s;
 }
@@ -292,6 +306,21 @@ void Register::set_read_trace(unsigned int rt)
   read_trace.data = rt;
   read_trace.init = rt + (1<<24); //(Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
 }
+
+//------------------------------------------------------------
+
+char * Register::toString(char *str, int len)
+{
+  return value.toString(str, len, register_size()*2);
+}
+char * Register::toBitStr(char *s, int len)
+{
+  unsigned int bit_length = register_size() * 8;
+  unsigned int bits = (1<<bit_length) - 1;
+
+  return value.toBitStr(s,len,bits);
+}
+
 
 //--------------------------------------------------
 //--------------------------------------------------

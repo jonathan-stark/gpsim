@@ -82,11 +82,13 @@ void cmd_x::x(int reg)
       return;
     }
 
+  char str[33];
   RegisterValue ov = cpu->registers[reg]->getRV();
 
-  cout << cpu->registers[reg]->name() << '(' << hex << reg << ')';
-
-  cout << " is " << ov.data << " and initialized bits are " << ov.init << endl;
+  cout << cpu->registers[reg]->name() << '[' << hex << reg << "]= "
+       << ov.data 
+       << " = 0b" << cpu->registers[reg]->toBitStr(str,sizeof(str))
+       << endl;
 
 
 
@@ -139,6 +141,14 @@ void cmd_x::x(char *reg_name, int val)
 
 void cmd_x::x(Expression *expr)
 {
-  x((int)evaluate(expr));
+  Value *v = toValue(expr);
 
+  unsigned int i;
+
+  for(i=v->get_leftVal(); i<v->get_rightVal(); i++)
+    x(i);
+
+  
+  delete v;
+  delete expr;
 }

@@ -21,17 +21,18 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <string>
 #include <glib.h>
-#include "viewable.h"
+#include "../src/gpsim_object.h"
 
 #if !defined(__EXPR_H__)
 #define __EXPR_H__
 using namespace std;
 
 class Expression;
+class symbol;
 typedef list<Expression*> ExprList_t;
 typedef list<Expression*>::iterator ExprList_itor;
 
-class Value : public Viewable
+class Value : public gpsimObject
 {
  public:
   Value();
@@ -40,13 +41,15 @@ class Value : public Viewable
   virtual ~Value();
   virtual int getAsInt();
   virtual double getAsDouble();
+  virtual unsigned int get_leftVal() {return getAsInt();}
+  virtual unsigned int get_rightVal() {return getAsInt();}
 
  private:
   bool constant;
 };
 
 
-class Expression : public Viewable
+class Expression : public gpsimObject
 {
 
  public:
@@ -179,8 +182,8 @@ public:
   string toString();
   string toString(char* format);
 
-  unsigned int get_leftVal();
-  unsigned int get_rightVal();
+  virtual unsigned int get_leftVal();
+  virtual unsigned int get_rightVal();
 
   static AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc);
   
@@ -192,7 +195,6 @@ private:
 
 /*****************************************************************/
 /*
-class symbol;
 class gpsimSymbol : public Value {
 
 public:
@@ -214,21 +216,21 @@ private:
 };
 */
 //----------------------------------------------------------------
-/*
+
 class LiteralSymbol : public Expression {
 
 public:
 
-  LiteralSymbol(gpsimSymbol *);
+  LiteralSymbol(symbol *);
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
   string toString();
 
  private:
-  gpsimSymbol *value;
-	
+  symbol *sym;
+  Integer* value;
 };
-*/
+
 //-----------------------------------------------------------------
 class LiteralBoolean : public Expression {
 

@@ -529,12 +529,13 @@ string LiteralString::toString()
 
 
 /*****************************************************************
- * The gpsimSymbol class.
+ * The LiteralSymbol class.
  */
-/*
-LiteralSymbol::LiteralSymbol(gpsimSymbol *_sym)
-  : value(_sym)
+
+LiteralSymbol::LiteralSymbol(symbol *_sym)
+  : sym(_sym)
 {
+  value = new Integer(0);
 }
 
 LiteralSymbol::~LiteralSymbol()
@@ -543,12 +544,17 @@ LiteralSymbol::~LiteralSymbol()
 
 Value* LiteralSymbol::evaluate()
 {
+  if(sym)
+    value->put(sym->get_value());
+
   return  value;
 }
 
 string LiteralSymbol::toString()
 {
-  return value->toString();
+  if(sym)
+    return sym->name();
+
+  return string("");
 }
 
-*/

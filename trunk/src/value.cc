@@ -40,11 +40,6 @@ gpsimValue::~gpsimValue(void)
 {
 }
 
-void gpsimValue::new_name(char *s)
-{
-  name_str = string(s);
-}
-
 void gpsimValue::update(void)
 {
   _xref._update();
@@ -58,17 +53,4 @@ void gpsimValue::add_xref(void *an_xref)
 void gpsimValue::remove_xref(void *an_xref)
 {
   _xref.clear(an_xref);
-}
-
-void gpsimValue::new_name(string &new_name)
-{
-  name_str = new_name;
-}
-
-char *gpsimValue::name(char *return_str, int len)
-{
-  if(return_str)
-    snprintf(return_str,len,"%s",name_str.c_str());
-
-  return return_str;
 }

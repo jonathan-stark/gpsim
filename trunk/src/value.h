@@ -21,8 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __VALUE_H__
 #define __VALUE_H__
 
-#include <string>
-using namespace std;
+#include "gpsim_object.h"
 
 class Processor;
 #include "xref.h"
@@ -39,7 +38,7 @@ class Processor;
 //
 //
 
-class gpsimValue {
+class gpsimValue : public gpsimObject {
  public:
 
   gpsimValue(void);
@@ -82,11 +81,6 @@ class gpsimValue {
       return cpu;
     }
 
-  virtual string &name(void) {return name_str;};
-  virtual char *name(char *, int len);
-  virtual void new_name(char *);
-  virtual void new_name(string &);
-
   // When the value changes, then update() is called 
   // to update all things that are watching this value.
   virtual void update(void);
@@ -108,8 +102,6 @@ class gpsimValue {
   // A pointer to the processor that owns this value.
   // FIXME - should this be a Module pointer instead?
   Processor *cpu;
-
-  string  name_str;               // A unique name to describe the Value
 
 };
 

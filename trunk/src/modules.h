@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MODULES_H__
 #define __MODULES_H__
 
+#include "gpsim_object.h"
 #include "gpsim_classes.h"
 #include "packages.h"
 #include "attribute.h"
@@ -84,7 +85,7 @@ extern list <Module_Library *> module_list;
 
 extern list <Module *> instantiated_modules_list;
 
-class Module {
+class Module : public gpsimObject {
 public:
 
   string  name_str;               // A unique name to describe the Module

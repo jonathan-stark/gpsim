@@ -1,4 +1,21 @@
 2004-08-26 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_object.cc, src/gpsim_object.h: New files that
+	support the gpsimObject class. This is a base class for 
+	almost all gpsim objects.
+	* cli/viewable.cc, cli/viewable.h: Removed. The functionality
+	that was provide by these was moved to gpsimObject.
+	* src/Makefile.am, src/modules.h, src/registers.cc,
+	  src/registers.h, src/symbol.cc, src/value.cc, src/value.h, 
+	  cli/Makefile.am, cli/cmd_x.cc, cli/command.cc, cli/command.h,
+	  cli/expr.cc, cli/expr.h, cli/parse.yy:
+	Added the gpsimObject Meta class.
+	Added support for symbolically viewing registers with the 'x' 
+	command.
+	Added support for viewing a range of registers.
+
+
+
+2004-08-26 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/symbol.cc, src/symbol.h,
 	  gui/gui_profile.cc, gui/gui_stack.cc, gui/gui_symbols.cc
 	  cli/scan.ll:
