@@ -531,8 +531,10 @@ public:
   // Console or file output messages
   static void MessageBreakOnRead(unsigned int uAddress);
   static void MessageBreakOnRead(unsigned int uAddress, unsigned uValue);
+  static void MessageBreakOnRead(unsigned int uAddress, const char * sOperator, unsigned uValue);
   static void MessageBreakOnWrite(unsigned int uAddress);
   static void MessageBreakOnWrite(unsigned int uAddress, unsigned uValue);
+  static void MessageBreakOnWrite(unsigned int uAddress, const char * sOperator, unsigned uValue);
   static void MessageBreakExecuteAddress(unsigned int uAddress);
   static void FormattedMessage(FILE * pOut, const char *fmt, ...);
   static void FormattedMessage(const char *fmt, ...);

@@ -1,3 +1,6 @@
+2005-04-06 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cc.h: Two new break message functions.
+
 2005-04-05 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/value.h, src/registers.cc,h, src/processor.cc.h,
 	src/preakpoints.cc,h, plat/win32/gpsim.def: Implemented
