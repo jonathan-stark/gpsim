@@ -149,4 +149,38 @@ public:
 
 };
 
+class Led: public ExternalModule
+{
+public:
+
+  GtkWidget *darea;
+  GdkGC *gc;
+  GdkColor led_segment_on_color;
+  GdkColor led_segment_off_color;
+  int w_width, w_height;
+
+  gpointer cbp;  // cycle break point pointer (need to delete in destructor)
+
+  Led_Port  *port;
+
+  Led(void);
+  ~Led(void);
+
+  void build_window( void );
+  void update(void);
+  void update( GtkWidget *drawable,   
+	       guint max_width,
+	       guint max_height);
+
+  // Inheritances from the Package class
+  virtual void create_iopin_map(void);
+
+  // Inheritance from Module class
+  const virtual char *type(void) { return ("led"); };
+  static ExternalModule *construct(char *new_name);
+
+
+};
+
+
 #endif //  __LED_H__
