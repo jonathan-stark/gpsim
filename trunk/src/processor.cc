@@ -173,7 +173,6 @@ void Processor::create_invalid_registers (void)
 	  registers[i]->address = 0;    // BAD_REGISTER;
 	  registers[i]->alias_mask = 0;
 	  registers[i]->value.put(0);	// unimplemented registers are read as 0
-	  registers[i]->symbol_alias = 0;
 
 	  registers[i]->set_cpu(this);
 
@@ -211,8 +210,6 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 
     registers[j]->set_write_trace(getWriteTT(j));
     registers[j]->set_read_trace(getReadTT(j));
-
-    registers[j]->symbol_alias = 0;
 
     //The default register name is simply its address
     sprintf (str, "0x%02x", j);

@@ -228,7 +228,6 @@ Register::Register(void)
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
-  replacedBy = 0;
 
 }
 //ugh duplication in constructors...
@@ -247,7 +246,6 @@ Register::Register(Processor *_cpu)
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
-  replacedBy = 0;
 
 }
 Register::~Register(void)

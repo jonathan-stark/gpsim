@@ -98,15 +98,13 @@ void Symbol_Table::add(symbol *s)
     st.push_back(s);
 }
 
-void Symbol_Table::add_register(Register *new_reg, char *symbol_name )
+void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
 {
 
   if(!new_reg)
     return;
 
   register_symbol *rs = new register_symbol(symbol_name, new_reg);
-
-  new_reg->symbol_alias = rs;
 
   st.push_back(rs);
 
@@ -120,13 +118,11 @@ void Symbol_Table::add_w(WREG *new_w)
 
   w_symbol *ws = new w_symbol((char *)0, new_w);
 
-  new_w->symbol_alias = ws;
-
   st.push_back(ws);
 
 }
 
-void Symbol_Table::add_constant(char *_name, int value)
+void Symbol_Table::add_constant(const char *_name, int value)
 {
 
   //  constant_symbol *sc = new constant_symbol(new_name, value);
@@ -138,7 +134,7 @@ void Symbol_Table::add_constant(char *_name, int value)
 
 }
 
-void Symbol_Table::add_address(char *new_name, int value)
+void Symbol_Table::add_address(const char *new_name, int value)
 {
 
   address_symbol *as = new address_symbol(new_name,value);
@@ -147,7 +143,7 @@ void Symbol_Table::add_address(char *new_name, int value)
 
 }
 
-void Symbol_Table::add_line_number(int address, char *symbol_name)
+void Symbol_Table::add_line_number(int address, const char *symbol_name)
 {
 
   line_number_symbol *lns = new line_number_symbol(symbol_name,  address);
@@ -157,7 +153,7 @@ void Symbol_Table::add_line_number(int address, char *symbol_name)
 
 void Symbol_Table::add_module(Module * m, const char *cPname)
 {
-  module_symbol *ms = new module_symbol(m,(char *)cPname);
+  module_symbol *ms = new module_symbol(m,cPname);
 
   st.push_back(ms);
 
@@ -182,7 +178,7 @@ void Symbol_Table::remove_module(Module * m)
   }
 }
 
-void Symbol_Table::add(char *new_name, char *new_type, int value)
+void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 {
 
 
@@ -220,14 +216,14 @@ void Symbol_Table::add(char *new_name, char *new_type, int value)
 
 }
 
-Value * Symbol_Table::find(char *str)
+Value * Symbol_Table::find(const char *str)
 {
   string s =  string(str);
   return(find(&s));
 
 }
 
-Value * Symbol_Table::find(type_info const &symt, char *str)
+Value * Symbol_Table::find(type_info const &symt, const char *str)
 {
 
   string s =  string(str);
@@ -256,7 +252,7 @@ void Symbol_Table::dump_one(string *s)
     cout << val->toString() << endl;
 }
 
-void Symbol_Table::dump_one(char *str)
+void Symbol_Table::dump_one(const char *str)
 {
   string s =  string(str);
   dump_one(&s);
@@ -325,7 +321,7 @@ int  load_symbol_file(Processor **cpu, const char *filename)
 //
 //
 
-symbol::symbol(char *_name)
+symbol::symbol(const char *_name)
 {
   new_name(_name);
 }
@@ -378,7 +374,7 @@ string node_symbol::toString(void)
 //------------------------------------------------------------------------
 // register_symbol
 //
-register_symbol::register_symbol(char *_name, Register *_reg)
+register_symbol::register_symbol(const char *_name, Register *_reg)
   : symbol(_name), reg(_reg)
 {
   if(reg)
@@ -429,7 +425,7 @@ symbol *register_symbol::copy()
 }
 
 //------------------------------------------------------------------------
-w_symbol::w_symbol(char *_name, Register *_reg)
+w_symbol::w_symbol(const char *_name, Register *_reg)
   : register_symbol(_name, _reg)
 {
 }
@@ -493,7 +489,7 @@ string ioport_symbol::toString()
 }
 
 //------------------------------------------------------------------------
-address_symbol::address_symbol(char *_name, unsigned int _val)
+address_symbol::address_symbol(const char *_name, unsigned int _val)
   :  Integer(_val)
 
 {
@@ -514,7 +510,7 @@ string address_symbol::toString()
   return name() + string(buf);
 }
 
-line_number_symbol::line_number_symbol(char *_name, unsigned int _val)
+line_number_symbol::line_number_symbol(const char *_name, unsigned int _val)
   :  address_symbol(_name,_val)
 {
   if(!_name) {
@@ -525,10 +521,18 @@ line_number_symbol::line_number_symbol(char *_name, unsigned int _val)
 
 }
 //------------------------------------------------------------------------
-module_symbol::module_symbol(Module *_module, char *_name)
+module_symbol::module_symbol(Module *_module, const char *_name)
   : symbol(_name), module(_module)
 {
 }
+
+symbol *module_symbol::copy()
+{
+  cout << "copying module symbol: " << name() << endl;
+
+  return new module_symbol(module,name().c_str());
+}
+//------------------------------------------------------------------------
 
 attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
   : module_symbol(_module, 0) , attribute(_attribute)
@@ -544,7 +548,10 @@ attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
 
 string attribute_symbol::toString()
 {
-  return attribute->toString();
+  if(attribute)
+    return attribute->toString();
+  else
+    return string("(null)");
 }
 
 void attribute_symbol::set(double d)
@@ -595,18 +602,6 @@ string module_symbol::toString()
   return name();
 }
 
-/*
-void module_symbol::print(void)
-{
-  if(module) {
-    cout << module->type() << "  named ";
-
-    cout << name() << '\n';
-    cout << "Attributes:\n";
-    module->dump_attributes();
-  }
-}
-*/
 //------------------------------------------------------------------------
 stimulus_symbol::stimulus_symbol(stimulus *_s)
   : symbol(0), s(_s)

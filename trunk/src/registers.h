@@ -100,7 +100,11 @@ public:
 
 
 //---------------------------------------------------------
-// Base class for a file register.
+/// Register - base class for gpsim registers.
+/// The Register class is used by processors and modules to
+/// to create memory maps and special function registers.
+/// 
+
 class Register : public gpsimValue
 {
 public:
@@ -144,7 +148,6 @@ public:
 
   RegisterValue trace_state;
 
-  symbol *symbol_alias;
 
   guint64 read_access_count;
   guint64 write_access_count;
@@ -156,38 +159,46 @@ public:
   virtual ~Register(void);
 
 
-  // Register access functions
+  /// get - method for accessing the register's contents.
+
   virtual unsigned int get(void);
+
+  /// put - method for writing a new value to the register.
+  
   virtual void put(unsigned int new_value);
 
   
-  /* put_value is the same as put(), but some extra stuff like
-   * interfacing to the gui is done. (It's more efficient than
-   * burdening the run time performance with (unnecessary) gui
-   * calls.)
-   */
+  /// put_value - is the same as put(), but some extra stuff like
+  /// interfacing to the gui is done. (It's more efficient than
+  /// burdening the run time performance with (unnecessary) gui
+  ///  calls.)
+
 
   virtual void put_value(unsigned int new_value);
 
-  /* same as get(), but no trace is performed */
+  /// get_value - same as get(), but no trace is performed
+
   virtual unsigned int get_value(void) { return(value.get()); }
 
-  /* getRV and putRV are the accessor functions that get the
-   * the fule RegisterValue object (minus the value.valid bits)
-   */
+  /// getRV - get the whole register value - including the info
+  /// of the three-state bits.
+
   virtual RegisterValue getRV(void) { return value;}
+
+  /// putRV - write a new value to the register.
+
   virtual void putRV(RegisterValue rv)
   { 
     value.data = rv.data;
     value.init = rv.init;
   }
 
-  /* getRV_notrace and putRV_notrace are analogous to getRV and putRV
-   * except that the action (in the derived classes) will not be
-   * traced. The primary reason for this is to allow the gui to
-   * refresh it's windows without having the side effect of filling
-   * up the trace buffer
-   */
+  /// getRV_notrace and putRV_notrace are analogous to getRV and putRV
+  /// except that the action (in the derived classes) will not be
+  /// traced. The primary reason for this is to allow the gui to
+  /// refresh it's windows without having the side effect of filling
+  /// up the trace buffer
+
   virtual RegisterValue getRV_notrace(void) { return value;}
   virtual void putRV_notrace(RegisterValue rv)
   { 
@@ -195,10 +206,10 @@ public:
     value.init = rv.init;
   }
 
-  // In the Register class, the 'Register *get()' returns a
-  // pointer to itself. Derived classes may return something
-  // else (e.g. a break point may be pointing to the register
-  // it replaced and will return that instead).
+  /// In the Register class, the 'Register *get()' returns a
+  /// pointer to itself. Derived classes may return something
+  /// else (e.g. a break point may be pointing to the register
+  /// it replaced and will return that instead).
 
   virtual Register *getReg(void)
   {
@@ -209,42 +220,31 @@ public:
   virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
 
-  /* 
-     The setbit function is not really intended for general purpose
-     registers. Instead, it is a place holder which is over-ridden
-     by the IO ports.
-  */
+   
+  /// The setbit function is not really intended for general purpose
+  /// registers. Instead, it is a place holder which is over-ridden
+  /// by the IO ports.
+  
   virtual void setbit(unsigned int bit_number, bool new_value);
 
-  /*
-    like setbit, getbit is used mainly for breakpoints.
-  */
+  
+  ///  like setbit, getbit is used mainly for breakpoints.
+  
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
 
-  /*
-    Breakpoint objects will overload this function and return true.
-  */
+
+  ///  Breakpoint objects will overload this function and return true.
 
   virtual bool hasBreak(void)
   { 
     return false;
   }
 
-  /*
-    When a breakpoint is set on this register, that object (which is derived
-    from the register class) will save a pointer to itself here:
-  */
-  virtual bool replacingWith(Register *replacer)
-  {
-    replacedBy = replacer;
-    return true;
-  }
 
-  /*
-    register_size returns the number of bytes required to store the register
-    (this is used primarily by the gui to determine how wide to make text fields)
-   */
+  ///  register_size returns the number of bytes required to store the register
+  ///  (this is used primarily by the gui to determine how wide to make text fields)
+
   virtual unsigned int register_size () const
   { 
     return 1;
@@ -272,14 +272,6 @@ public:
   virtual char * toString(char *str, int len);
   virtual char * toBitStr(char *s, int len); 
 
-protected:
-
-  /*
-    If a breakpoint gets set on a register, then a copy of the pointer to it will
-    get stored here.
-  */
-
-  Register *replacedBy;
 };
 
 

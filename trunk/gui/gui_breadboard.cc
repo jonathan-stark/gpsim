@@ -2707,6 +2707,11 @@ void GuiModule::Build()
   GtkWidget *da;
   int width=50, height=18;
 
+  Package *package = module->package;
+  if(!package)
+    return;     // embedded module 
+
+
   //p->module_widget = widget;
   module_widget = (GtkWidget *)module->get_widget();
   x=sx;
@@ -2730,9 +2735,6 @@ void GuiModule::Build()
     ypos->get(y);
   }
 
-
-  Package *package = module->package;
-  assert(package!=0);
 
   tree_item = gtk_tree_item_new_with_label (module->name().c_str());
   gtk_signal_connect(GTK_OBJECT(tree_item),
