@@ -70,6 +70,7 @@ public:
   InterfaceObject(void) {pic = NULL;};
   virtual void callback(void)
     {
+      trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
       if(callback_function)
 	callback_function(callback_data);
     };

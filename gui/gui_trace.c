@@ -14,15 +14,13 @@
 
 #include <assert.h>
 
-#include <gtkextra/gtksheet.h>
-
 #include "../src/interface.h"
 
 #include "gui.h"
 
 
 #define MAXTRACES  100
-#define MAXCOLS    3
+#define COLUMNS    2
 
 typedef enum {
     MENU_BREAK_CLEAR,
@@ -32,6 +30,8 @@ typedef enum {
     MENU_BREAK_WRITE_VALUE,
     MENU_ADD_WATCH,
 } menu_id;
+
+static char *trace_titles[COLUMNS]={"Cycle", "Trace"};
 
 // gui trace flags:
 #define GTF_ENABLE_XREF_UPDATES    (1<<0)
@@ -55,8 +55,12 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
   int trace_index;
 
 #define TRACE_STRING 100
-  char str[TRACE_STRING];
-  GtkSheet *sheet;
+//  char str[TRACE_STRING];
+  GtkCList *clist;
+
+  char cycle_string[TRACE_STRING];
+  char trace_string[TRACE_STRING];
+  char *entry[COLUMNS]={cycle_string,trace_string};
 
   Trace_Window *tw;
 
@@ -83,10 +87,10 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
   if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
     return;
 
-  str[0] = 0;  // Assume that the trace is empty.
-  gpsim_get_current_trace(&cycle, &trace_index, str, TRACE_STRING);
+  trace_string[0] = 0;  // Assume that the trace is empty.
+  gpsim_get_current_trace(&cycle, &trace_index, trace_string, TRACE_STRING);
 
-  if(str[0] && (cycle>=tw->last_cycle)) {
+  if(trace_string[0] && (cycle>=tw->last_cycle)) {
     tw->last_cycle = cycle;
     tw->trace_map[tw->trace_map_index].cycle = cycle;
     tw->trace_map[tw->trace_map_index].simulation_trace_index = index;
@@ -95,30 +99,35 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
     if(++tw->trace_map_index >= MAXTRACES)
       tw->trace_map_index = 0;
 
-    sheet=GTK_SHEET(tw->trace_sheet);
-    gtk_sheet_freeze(sheet);
+    clist=GTK_CLIST(tw->trace_clist);
+//    gtk_clist_freeze(clist);
 
-    // Delete the first row in the sheet
-    gtk_sheet_delete_rows(sheet,0,1);
+    // Delete the first row in the clist
+//    gtk_clist_delete_rows(clist,0,1);
 
     // and then add a row at the end for the new trace data
-    gtk_sheet_add_row(sheet,1);
+//    gtk_clist_add_row(clist,1);
     
-    gtk_sheet_set_cell(sheet,
-		       sheet->maxrow,
+/*    gtk_clist_set_cell(clist,
+		       clist->maxrow,
 		       1,  // column
-		       GTK_JUSTIFY_LEFT,str);
+		       GTK_JUSTIFY_LEFT,str);*/
 
-    sprintf(str,"%016x", cycle);
+    sprintf(cycle_string,"0x%016x", cycle);
 
     //trace_map[trace_index].cycle = cycle;
     //trace_map[trace_index].simulation_trace_index = gpsim_get;
     
-    gtk_sheet_set_cell(sheet,
-		       sheet->maxrow,
+/*    gtk_clist_set_cell(clist,
+		       clist->maxrow,
 		       0,  // column
-		       GTK_JUSTIFY_LEFT,str);
-    gtk_sheet_thaw(sheet);
+		       GTK_JUSTIFY_LEFT,str);*/
+    gtk_clist_append  (clist, entry);
+
+    if(clist->rows>MAXTRACES)
+        gtk_clist_remove(clist,0);
+
+//    gtk_clist_thaw(clist);
   }
 
 
@@ -143,7 +152,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 void TraceWindow_update(Trace_Window *tw)
 {
   GUI_Processor *gp;
-  GtkSheet *sheet;
+  GtkCList *clist;
   char buffer[50];
   guint64 cycle;
 
@@ -159,29 +168,27 @@ void TraceWindow_update(Trace_Window *tw)
       return;
   }
 
+  // Get a convenient pointer to the gtk_clist that the trace is in.
+  clist=GTK_CLIST(tw->trace_clist);
 
-  // Get a convenient pointer to the gtk_sheet that the trace is in.
-  sheet=GTK_SHEET(tw->trace_sheet);
-
-  gtk_sheet_freeze(sheet);
+  gtk_clist_freeze(clist);
 
   cycle = gpsim_get_cycles(gp->pic_id);
 
   tw->trace_flags |= GTF_ENABLE_XREF_UPDATES;
-  if(tw->last_cycle +(MAXTRACES/4) <  cycle) {
+  if(cycle-tw->last_cycle>=MAXTRACES) {
     // redraw the whole thing
-    gpsim_trace_dump_to_file(MAXTRACES/2, NULL);
+    gpsim_trace_dump_to_file(MAXTRACES, NULL);
 
   } else {
-
-    gpsim_trace_dump_to_file(2, NULL);
+    gpsim_trace_dump_to_file(cycle-tw->last_cycle, NULL);
 
 
   }
 
   tw->trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
   tw->last_cycle = cycle;
-  gtk_sheet_thaw(sheet);
+  gtk_clist_thaw(clist);
 }
 
 
@@ -198,10 +205,10 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 #define NAME_SIZE 32
 
     gint i,j,reg_number, border_mask, border_width;
-    GtkSheet *sheet;
+    GtkCList *clist;
     struct cross_reference_to_gui *cross_reference;
     gboolean row_created;
-    GtkSheetRange range;
+//    GtkCListRange range;
     int pic_id;
     char row_label[50];
 
@@ -217,38 +224,38 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     pic_id = gp->pic_id;
 
     
-    sheet=GTK_SHEET(tw->trace_sheet);
+    clist=GTK_CLIST(tw->trace_clist);
 
-    gtk_sheet_freeze(sheet);
+/*    gtk_clist_freeze(clist);
 
     
     range.row0=0;
-    range.rowi=sheet->maxrow;
+    range.rowi=clist->maxrow;
     range.col0=0;
-    range.coli=sheet->maxcol;
+    range.coli=clist->maxcol;
 
-    gtk_sheet_range_set_font(sheet, &range, normal_style->font);
+    gtk_clist_range_set_font(clist, &range, normal_style->font);
 
-    border_mask = GTK_SHEET_RIGHT_BORDER |
-	GTK_SHEET_LEFT_BORDER |
-	GTK_SHEET_BOTTOM_BORDER |
-	GTK_SHEET_TOP_BORDER;
+    border_mask = GTK_CLIST_RIGHT_BORDER |
+	GTK_CLIST_LEFT_BORDER |
+	GTK_CLIST_BOTTOM_BORDER |
+	GTK_CLIST_TOP_BORDER;
 
     border_width = 1;
 
-    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
+    gtk_clist_range_set_border(clist, &range, border_mask, border_width, 0);
 
-    border_mask = GTK_SHEET_LEFT_BORDER;
+    border_mask = GTK_CLIST_LEFT_BORDER;
     border_width = 3;
 
     range.col0=REGISTERS_PER_ROW;
     range.coli=REGISTERS_PER_ROW;
 
-    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
+    gtk_clist_range_set_border(clist, &range, border_mask, border_width, 0);
 
 
 
-    gtk_sheet_thaw(sheet);
+    gtk_clist_thaw(clist);*/
 
 
     cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
@@ -273,7 +280,7 @@ int
 BuildTraceWindow(Trace_Window *tw)
 {
   GtkWidget *window;
-  GtkWidget *trace_sheet;
+  GtkWidget *trace_clist;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
 
@@ -304,12 +311,13 @@ BuildTraceWindow(Trace_Window *tw)
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
-  trace_sheet=gtk_sheet_new(MAXTRACES,MAXCOLS-1,"gpsim Trace Viewer");
+  trace_clist=gtk_clist_new_with_titles(COLUMNS,trace_titles);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(trace_clist),0,TRUE);
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
 
-  GTK_WIDGET_UNSET_FLAGS(trace_sheet,GTK_CAN_DEFAULT);
+  GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);
     
-  tw->trace_sheet = GTK_SHEET(trace_sheet);
+  tw->trace_clist = GTK_CLIST(trace_clist);
 
   width=((GUI_Object*)tw)->width;
   height=((GUI_Object*)tw)->height;
@@ -324,11 +332,11 @@ BuildTraceWindow(Trace_Window *tw)
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), trace_sheet);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), trace_clist);
   
-  GTK_SHEET_SET_FLAGS(trace_sheet, GTK_SHEET_CLIP_TEXT);
+//  GTK_CLIST_SET_FLAGS(trace_clist, GTK_CLIST_CLIP_TEXT);
 
-  gtk_widget_show(trace_sheet);
+  gtk_widget_show(trace_clist);
 
   gtk_widget_show(scrolled_window);
 
@@ -337,14 +345,14 @@ BuildTraceWindow(Trace_Window *tw)
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 
-  gtk_sheet_column_button_add_label(tw->trace_sheet, 0, "cycle");
-  gtk_sheet_column_button_add_label(tw->trace_sheet, 1, "trace");
+//  gtk_clist_column_button_add_label(tw->trace_clist, 0, "cycle");
+//  gtk_clist_column_button_add_label(tw->trace_clist, 1, "trace");
 
-  gtk_sheet_set_column_width (tw->trace_sheet, 0, char_width*16);
-  gtk_sheet_set_column_width (tw->trace_sheet, 1, char_width*50);
-  gtk_sheet_set_row_titles_width(tw->trace_sheet, char_width*16);
+//  gtk_clist_set_column_width (tw->trace_clist, 0, char_width*16);
+//  gtk_clist_set_column_width (tw->trace_clist, 1, char_width*50);
+//  gtk_clist_set_row_titles_width(tw->trace_clist, char_width*16);
 
-  gtk_sheet_hide_row_titles(tw->trace_sheet);
+//  gtk_clist_hide_row_titles(tw->trace_clist);
   gtk_signal_connect_after(GTK_OBJECT(tw->gui_obj.window), "configure_event",
   			   GTK_SIGNAL_FUNC(gui_object_configure_event),tw);
 
@@ -365,6 +373,11 @@ BuildTraceWindow(Trace_Window *tw)
   tw->gui_obj.enabled=1;
   tw->gui_obj.is_built=1;
   tw->last_cycle = 0;
+
+  if(tw->processor)
+      TraceWindow_new_processor(tw, ((GUI_Object*)tw)->gp);
+
+  TraceWindow_update(tw);
 
   update_menu_item((GUI_Object*)tw);
 
