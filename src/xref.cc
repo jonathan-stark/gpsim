@@ -78,7 +78,6 @@ int XrefObject::get_val(void)
     return data->get_value();
 
   return 0;
-
 }
 
 void XrefObject::assign_data(gpsimValue *new_data)

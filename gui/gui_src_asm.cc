@@ -279,7 +279,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   if(!pma)
     return;
-
+  printf("SetPC to address 0x%x\n",address);
   // find notebook page containing address 'address'
   sbawFileId = pma->get_file_id(address);
 

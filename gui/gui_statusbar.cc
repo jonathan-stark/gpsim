@@ -56,17 +56,7 @@ typedef struct _menu_item {
     menu_id id;
 } menu_item;
 
-static menu_item menu_items[] = {
-    {"Micro seconds", MENU_TIME_USECONDS},
-    {"Mili seconds", MENU_TIME_MSECONDS},
-    {"Seconds", MENU_TIME_SECONDS},
-    {"HH:MM:SS.CC", MENU_TIME_HHMMSS}
-};
 
-static menu_id time_format=MENU_TIME_USECONDS;
-
-// Used only in popup menus
-static StatusBar_Window *popup_sbw;
 
 //========================================================================
 //
@@ -80,15 +70,8 @@ public:
   GtkWidget *entry;
   StatusBar_Window *sbw;
 
-  union {
-    gint32    i32;
-    guint64   ui64;
-    double    db;
-  } value;           // value displayed
-
-
   LabeledEntry(void);
-  void Create(GtkWidget *box,char *clabel, int string_width);
+  void Create(GtkWidget *box,char *clabel, int string_width,bool isEditable);
   void NewLabel(char *clabel);
   virtual void Update(void);
   void AssignParent(StatusBar_Window *);
@@ -100,12 +83,54 @@ class RegisterLabeledEntry : public LabeledEntry {
 public:
 
   Register *reg;
+  char *pCellFormat;
 
   RegisterLabeledEntry(Register *);
 
   virtual void put_value(unsigned int);
-  void AssignRegister(Register *new_reg) {reg = new_reg;}
+  void AssignRegister(Register *new_reg);
+  virtual void Update(void);
+
 };
+
+class CyclesLabeledEntry : public LabeledEntry {
+public:
+
+  CyclesLabeledEntry();
+  virtual void Update(void);
+};
+
+class PCLabeledEntry : public LabeledEntry {
+public:
+
+  PCLabeledEntry();
+  virtual void Update(void);
+  virtual void put_value(unsigned int);
+  void AssignPma(ProgramMemoryAccess *new_pma) { pma = new_pma;}
+
+  ProgramMemoryAccess *pma;
+};
+
+class TimeLabeledEntry : public LabeledEntry {
+public:
+  TimeLabeledEntry();
+  virtual void Update(void);
+  GtkWidget *build_menu();
+
+  void set_time_format(menu_id id)
+  {
+    time_format = id;
+  }
+
+  GtkWidget *menu;
+  menu_id time_format;
+
+};
+struct popup_data {
+  TimeLabeledEntry *tle;
+  menu_id id;
+};
+
 
 //========================================================================
 
@@ -131,9 +156,13 @@ LabeledEntry::LabeledEntry(void)
 {
   label = 0;
   entry = 0;
+  sbw = 0;
 }
 
-void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
+void LabeledEntry::Create(GtkWidget *box,
+			  char *clabel, 
+			  int string_width,
+			  bool isEditable=true)
 {
 
   label = (GtkWidget *)gtk_label_new (clabel);
@@ -147,9 +176,6 @@ void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
 
   gtk_entry_set_text (GTK_ENTRY (entry), "----");
 
-  value.i32 = 0;
-
-
 #if GTK_MAJOR_VERSION >= 2
   gtk_widget_set_usize (entry,
 			string_width * gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
@@ -161,7 +187,12 @@ void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
 #endif
 
   gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
+
   gtk_widget_show (entry);
+
+  if(!isEditable)
+    gtk_entry_set_editable(GTK_ENTRY(entry),0);
+
 }
 
 void LabeledEntry::AssignParent(StatusBar_Window *new_sbw)
@@ -171,8 +202,9 @@ void LabeledEntry::AssignParent(StatusBar_Window *new_sbw)
 
 void LabeledEntry::Update(void)
 {
-  if(sbw)
-    sbw->Update();
+  //  if(sbw)
+  //    sbw->Update();
+
 }
 
 void LabeledEntry::put_value(unsigned int new_value)
@@ -191,6 +223,7 @@ RegisterLabeledEntry::RegisterLabeledEntry(Register *new_reg)
  : LabeledEntry()
 {
   reg = new_reg;
+  pCellFormat=0;
 }
 
 void RegisterLabeledEntry::put_value(unsigned int new_value)
@@ -199,28 +232,112 @@ void RegisterLabeledEntry::put_value(unsigned int new_value)
     reg->put_value(new_value);
 }
 
+void RegisterLabeledEntry::Update(void)
+{
+  char buffer[32];
+
+  if(reg) {
+
+    unsigned int value = reg->get_value();
+
+    const char *format = "0x%02x";
+
+    sprintf(buffer,format,value);
+
+    gtk_entry_set_text (GTK_ENTRY (entry), buffer);
+
+  }
+}
+void RegisterLabeledEntry::AssignRegister(Register *new_reg)
+{
+  reg = new_reg;
+
+  if(pCellFormat)
+    delete pCellFormat;
+
+  if(reg) {
+    pCellFormat = new char[10];
+    sprintf(pCellFormat,"%%0%dx",reg->get_cpu()->register_size()*2);
+
+  }
+}
+
 //------------------------------------------------------------------------
+CyclesLabeledEntry::CyclesLabeledEntry()
+{
+}
+
+void CyclesLabeledEntry::Update(void)
+{
+  char buffer[32];
+  sprintf(buffer,"0x%016Lx",cycles.value);
+  gtk_entry_set_text (GTK_ENTRY (entry), buffer);
+}
+
+TimeLabeledEntry::TimeLabeledEntry()
+{
+  time_format = MENU_TIME_USECONDS;
+  menu = 0;
+}
+
+void TimeLabeledEntry::Update()
+{
+  char buffer[32];
+  double time_db = 4.0 * cycles.value / (double)gp->cpu->time_to_cycles(1.0);
+
+  if(time_format==MENU_TIME_USECONDS) {
+    time_db *= 1e6;
+    sprintf(buffer,"%19.2f us",time_db);
+  }
+  else if(time_format==MENU_TIME_MSECONDS) {
+    time_db *= 1e3;
+    sprintf(buffer,"%19.3f ms",time_db);
+  }
+  else if(time_format==MENU_TIME_HHMMSS) {
+    double v=time_db;
+    int hh=(int)(v/3600),mm,ss,cc;
+    v-=hh*3600.0;
+    mm=(int)(v/60);
+    v-=mm*60.0;
+    ss=(int)v;
+    cc=(int)(v*100.0+0.5);
+    sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
+  }
+  else {
+    sprintf(buffer,"%19.3f s",time_db);
+  }
+  gtk_entry_set_text (GTK_ENTRY (entry), buffer);
+
+}
+
+//----------------------------------------
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
-    menu_item *item;
-
-    if(widget==0 || data==0)
-    {
-	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
-	return;
-    }
+  if(!widget || !data)
+  {
+    printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+    return;
+  }
     
-    item = (menu_item *)data;
-    time_format = (menu_id)item->id;
-    popup_sbw->Update(); //StatusBar_update(popup_sbw);
+  popup_data *pd = (popup_data *)data;
+  if(pd->tle) {
+    pd->tle->set_time_format(pd->id);
+    pd->tle->Update();
+  }
 }
 
-static GtkWidget *
-build_menu(void)
+GtkWidget * TimeLabeledEntry::build_menu(void)
 {
-  GtkWidget *menu;
+  static menu_item menu_items[] = {
+    {"Micro seconds", MENU_TIME_USECONDS},
+    {"Mili seconds", MENU_TIME_MSECONDS},
+    {"Seconds", MENU_TIME_SECONDS},
+    {"HH:MM:SS.CC", MENU_TIME_HHMMSS}
+  };
+
+
   GtkWidget *item;
   unsigned int i;
 
@@ -232,23 +349,48 @@ build_menu(void)
   
   
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      item=gtk_menu_item_new_with_label(menu_items[i].name);
+    item=gtk_menu_item_new_with_label(menu_items[i].name);
 
-      gtk_signal_connect(GTK_OBJECT(item),"activate",
-			 (GtkSignalFunc) popup_activated,
-			 &menu_items[i]);
+    popup_data *pd = new popup_data;
+    pd->tle = this;
+    pd->id = menu_items[i].id;
 
-      gtk_widget_show(item);
-      gtk_menu_append(GTK_MENU(menu),item);
+    gtk_signal_connect(GTK_OBJECT(item),"activate",
+		       (GtkSignalFunc) popup_activated,
+		       pd);
+
+    gtk_widget_show(item);
+    gtk_menu_append(GTK_MENU(menu),item);
   }
   
   return menu;
 }
 
+//------------------------------------------------------------------------
+PCLabeledEntry::PCLabeledEntry()
+{
+  pma = 0;
+}
+
+void PCLabeledEntry::Update()
+{
+  char buffer[32];
+
+  if(pma) {
+    sprintf(buffer,"0x%04x",pma->get_PC());
+    gtk_entry_set_text (GTK_ENTRY (entry), buffer);
+  }
+
+}
+
+void PCLabeledEntry::put_value(unsigned int value)
+{
+  if(pma)
+    pma->set_PC(value);
+}
 
 void StatusBar_Window::Update(void)
 {
-  char buffer[32];
 
   if( !created)
       return;
@@ -258,55 +400,15 @@ void StatusBar_Window::Update(void)
   if(!gp || !gp->cpu)
     return;
 
-  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
-  if(!pic)
-    return;
+  status->Update();
+  W->Update();
+  pc->Update();
+  cpu_cycles->Update();
 
-  status->value.i32 = pic->status->get_value();
-  sprintf(buffer,"0x%02x",status->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (status->entry), buffer);
-
-
-  W->value.i32 = pic->W->get_value();
-  sprintf(buffer,"0x%02x",W->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (W->entry), buffer);
-
-
-  pc->value.i32 = gp->cpu->pc->get_value();
-  sprintf(buffer,"0x%04x",pc->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
-
-  cpu_cycles->value.ui64 = cycles.value;
-  sprintf(buffer,"0x%016Lx",cpu_cycles->value.ui64);
-  gtk_entry_set_text (GTK_ENTRY (cpu_cycles->entry), buffer);
-
-  time->value.db = 4.0 * cycles.value / (double)pic->time_to_cycles(1.0);
-
-  if(time_format==MENU_TIME_USECONDS) {
-    time->value.db *= 1e6;
-    sprintf(buffer,"%19.2f us",time->value.db);
-  }
-  else if(time_format==MENU_TIME_MSECONDS) {
-    time->value.db *= 1e3;
-    sprintf(buffer,"%19.3f ms",time->value.db);
-  }
-  else if(time_format==MENU_TIME_HHMMSS) {
-    double v=time->value.db;
-    int hh=(int)(v/3600),mm,ss,cc;
-    v-=hh*3600.0;
-    mm=(int)(v/60);
-    v-=mm*60.0;
-    ss=(int)v;
-    cc=(int)(v*100.0+0.5);
-    sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
-  }
-  else {
-    sprintf(buffer,"%19.3f s",time->value.db);
-  }
-  gtk_entry_set_text (GTK_ENTRY (time->entry), buffer);
-
+  time->Update();
 }
 
+//------------------------------------------------------------------------
 static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
 {
   const char *text;
@@ -323,81 +425,50 @@ static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
     return;  /* string contains an invalid number */
 
   le->put_value(value);
-  le->Update();
+
+  if(le->sbw)
+    le->sbw->Update();
 
   return;
 }
-
-static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
+/*
+static void pc_callback(GtkWidget *entry, PCLabeledEntry *pcle)//StatusBar_Window *sbw)
 {
   const char *text;
   unsigned int value;
   char *bad_position;
 
-  if(!gp || !gp->cpu)
+  if(!pcle || !pcle->pma)
     return;
 
-  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
-  if(!pic)
-    return;
-
-  text=gtk_entry_get_text (GTK_ENTRY (sbw->W->entry));
+  text=gtk_entry_get_text (GTK_ENTRY (entry));
     
   value = strtoul(text, &bad_position, 16);
   if( strlen(bad_position) )
-    return;  /* string contains an invalid number */
-
-  pic->W->put_value(value);
-
-  sbw->Update();
-
-  return;
-}
-
-static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
-{
-  const char *text;
-  unsigned int value;
-  char *bad_position;
-
-  if(!sbw || !sbw->gp || !sbw->gp->cpu)
     return;
 
-  text=gtk_entry_get_text (GTK_ENTRY (sbw->pc->entry));
-    
-  value = strtoul(text, &bad_position, 16);
-  if( strlen(bad_position) )
-    return;  /* string contains an invalid number */
+  pcle->pma->set_PC(value);
 
-  sbw->gp->cpu->pc->put_value(value);
-    
+  if(pcle->
   sbw->Update();
 }
-
+*/
 
 
 // button press handler
 static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
+do_popup(GtkWidget *widget, GdkEventButton *event, TimeLabeledEntry *tle)
 {
-    if(widget==0 || event==0 || sbw==0)
-    {
-        printf("Warning do_popup(%x,%x,%x)\n",
-	       (unsigned int)widget,
-	       (unsigned int)event,
-	       (unsigned int)sbw);
-        return 0;
-    }
+    if(!widget || !event || !tle)
+      return 0;
   
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
-	popup_sbw = sbw;
-  
-	gtk_menu_popup(GTK_MENU(sbw->popup_menu), 0, 0, 0, 0,
+	gtk_menu_popup(GTK_MENU(tle->menu), 0, 0, 0, 0,
 			   3, event->time);
 	// It looks like we need it to avoid a selection in the entry.
 	// For this we tell the entry to stop reporting this event.
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbw->time->entry),"button_press_event");
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(tle->entry),"button_press_event");
     }
     return FALSE;
 }
@@ -430,40 +501,41 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
 		     GTK_SIGNAL_FUNC(LabeledEntry_callback),
 		     status);
 
-  W = new LabeledEntry();
+  W = new RegisterLabeledEntry(0);
   W->Create(hbox,"W:", 4);
   gtk_signal_connect(GTK_OBJECT(W->entry), "activate",
-		     GTK_SIGNAL_FUNC(w_callback),
-		     this);
+		     GTK_SIGNAL_FUNC(LabeledEntry_callback),
+		     W);
 
-  pc = new LabeledEntry();
+  pc = new PCLabeledEntry();
   pc->Create(hbox,"PC:", 6);
   pc->AssignParent(this);
 
   gtk_signal_connect(GTK_OBJECT(pc->entry), "activate",
-		     GTK_SIGNAL_FUNC(pc_callback),
-		     this);
+		     GTK_SIGNAL_FUNC(LabeledEntry_callback),
+		     pc);
 
-  cpu_cycles = new LabeledEntry();
-  cpu_cycles->Create(hbox,"Cycles:", 18);
+  cpu_cycles = new CyclesLabeledEntry();
+  cpu_cycles->Create(hbox,"Cycles:", 18,false);
 
-  gtk_entry_set_editable(GTK_ENTRY(cpu_cycles->entry),0);
-
-  time = new LabeledEntry();
-  time->Create(hbox,"Time:", 22);
-
-  gtk_entry_set_editable(GTK_ENTRY(time->entry),0);
+  TimeLabeledEntry *tle = new TimeLabeledEntry();
+  time = tle;
+  time->Create(hbox,"Time:", 22,false);
 
   /* create popupmenu */
-  popup_menu=build_menu();
+  popup_menu = tle->build_menu();
   gtk_signal_connect(GTK_OBJECT(time->entry),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
-		     this);
+		     tle);
 
   created=1;
   
 }
+
+/*  NewProcessor
+ *
+ */
 
 void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 {
@@ -478,13 +550,23 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 
   if(gp->cpu) {
 
-    RegisterLabeledEntry *rle = dynamic_cast<RegisterLabeledEntry *>(status);
     pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
-    if(pic && rle)
+
+    RegisterLabeledEntry *rle = dynamic_cast<RegisterLabeledEntry *>(status);
+    if(pic && rle) {
       rle->AssignRegister(pic->status);
+      status->NewLabel((char *) rle->reg->name().c_str());
+    }
 
-    status->NewLabel((char *) rle->reg->name().c_str());
+    rle = dynamic_cast<RegisterLabeledEntry *>(W);
+    if(pic && rle) {
+      rle->AssignRegister(pic->W);
+      W->NewLabel((char *) rle->reg->name().c_str());
+    }
 
+    PCLabeledEntry *pcle = dynamic_cast<PCLabeledEntry *>(pc);
+    if(pcle)
+      pcle->AssignPma(gp->cpu->pma);
   }
 
   /* Now create a cross-reference link that the simulator can use to

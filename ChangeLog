@@ -1,3 +1,9 @@
+2004-07-13 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_statusbar.cc: abstracting the status bar boxes.
+	* src/pic-registers.cc: cross reference to Program Counter was broken.
+	* src/processor.h, src/processor.cc: Added a set_PC method to the pma 
+	class
+	
 2004-07-12 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_statusbar.cc: abstracting the status bar boxes.
 	* examples/scripts/gensquares.asm, examples/scripts/testgensquares.py,
