@@ -35,6 +35,12 @@ using namespace std;
 class Stimulus_Node;
 class stimulus;
 class IOPORT;
+class symbol;
+
+/* typedefs */
+typedef list<symbol*> SymbolList_t;
+typedef list<string> StringList_t;
+
 
 /* Support functions */
 extern Stimulus_Node * find_node (string name);
@@ -44,6 +50,9 @@ extern void dump_node_list(void);
 extern stimulus * find_stimulus (string name);
 extern void add_stimulus(stimulus * );
 extern void dump_stimulus_list(void);
+
+extern void stimuli_attach(StringList_t *);
+extern void stimuli_attach(SymbolList_t *);
 
 /****************************************************************************
  *

@@ -36,10 +36,12 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 #include "expr.h"
 #include "errors.h"
+#include "src/symbol.h"
+#include "src/stimuli.h"
+
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
-#include "src/symbol.h"
 
 int state;
 
@@ -172,10 +174,15 @@ abort_gpsim_now {
 // Indirect register access
 %}
 
+%{
+  /*
 {INDIRECT} {
-  // printf("got indirect\n");
+
   return INDIRECT;
   }
+*/
+%}
+
 
 %{
 // If this is a command that is spanning more than one line
@@ -331,7 +338,10 @@ int handle_identifier(const string &s, cmd_options **op )
    string s1(s);
    symbol *sym = get_symbol_table().find(&s1);
    if(sym) {
-     yylval.Symbol_P = new gpsimSymbol(sym);
+     yylval.Symbol_P = sym;
+
+      if(verbose&2)
+        cout << "found symbol '" << sym->name_str << "'\n";
 
      return recognize(SYMBOL_T,"symbol");
    }

@@ -73,15 +73,10 @@ void cmd_symbol::dump_one(char *sym_name)
   symbol_dump_one(sym_name);
 }
 
-void cmd_symbol::dump_one(gpsimSymbol *s)
+void cmd_symbol::dump_one(symbol *s)
 {
-  if(s) {
-
-    symbol *sym = s->get_sym();
-
-    if(sym)
-      sym->print();
-  }
+  if(s)
+    s->print();
 }
 
 void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)

@@ -77,6 +77,20 @@ Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
   return ((Stimulus_Node *)0);
 }
 
+Stimulus_Node * find_node (symbol *sym)
+{
+  for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
+    {
+      Stimulus_Node *t = *node_iterator;
+
+      if ( t->name() == sym->name_str)
+	{
+	  return (t);
+	}
+    }
+  return ((Stimulus_Node *)0);
+}
+
 void add_node(char *node_name)
 {
   
@@ -173,6 +187,23 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
   return ((stimulus *)0);
 }
 
+stimulus * find_stimulus (symbol *sym)
+{
+  if(sym) {
+    for (stimulus_iterator = stimulus_list.begin();
+	 stimulus_iterator != stimulus_list.end(); 
+	 stimulus_iterator++)
+      {
+	stimulus *t = *stimulus_iterator;
+
+	if ( t->name() == sym->name_str)
+	  return (t);
+      }
+  }
+
+  return ((stimulus *)0);
+}
+
 void add_stimulus(stimulus * new_stimulus)
 {
   stimulus_list.push_back(new_stimulus);
@@ -222,6 +253,7 @@ Stimulus_Node::Stimulus_Node(const char *n)
   if(n)
     {
       new_name((char *)n);
+      symbol_table.add_stimulus_node(this);
     }
   else
     {
@@ -1006,7 +1038,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   }
 
   add_stimulus(this);
-
+  symbol_table.add_stimulus(this);
 }
 
 IOPIN::IOPIN(void)
@@ -1349,7 +1381,7 @@ void stimorb_attach(char *node, char_list *stimuli)
 // The first item in the input list is the name of the node.
 // The remaining items are the names of the stimuli.
 
-void stimuli_attach(list <string> * sl)
+void stimuli_attach(StringList_t *sl)
 {
   if (!sl)
     return;
@@ -1382,3 +1414,39 @@ void stimuli_attach(list <string> * sl)
     cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
   }
 }
+
+
+void stimuli_attach(SymbolList_t *sl)
+{
+  if (!sl)
+    return;
+
+  list <symbol*> :: iterator si;
+
+  si = sl->begin();
+
+  Stimulus_Node *sn = find_node (*si);
+
+  if(sn)
+    {
+      for(++si; si != sl->end(); ++si)
+	{
+	  symbol *s = *si;
+	  stimulus *st = find_stimulus(s);
+
+	  if(st) {
+	    sn->attach_stimulus(st);
+	    if(verbose&2)
+	      cout << " attaching stimulus: " << s << '\n';
+	  }
+	  else
+	    cout << "Warning, stimulus: " << s << " not attached\n";
+	}
+
+      sn->update(0);
+    }
+  else {
+    cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
+  }
+}
+

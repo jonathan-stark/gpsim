@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream>
 #include <string>
+#include <list>
 #include "gpsim_classes.h"
 
 using namespace std;
@@ -32,6 +33,7 @@ using namespace std;
 #define __SYMBOL_H__
 
 class Processor;
+
 int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
@@ -60,15 +62,6 @@ class IOPORT;
 class Processor;
 class Register;
 class Module;
-/*
-class symbol_type
-{
-public:
-  SYMBOL_TYPE type;
-  char * name_str;
-};
-*/
-//extern symbol_type symbol_types[];
 
 class symbol
 {

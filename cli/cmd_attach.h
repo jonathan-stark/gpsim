@@ -23,12 +23,15 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 using namespace std;
 
+class symbol;
+
 class cmd_attach : public command
 {
 public:
 
   cmd_attach(void);
   void attach(list <string> *);
+  void attach(list <symbol*> *);
 
 };
 

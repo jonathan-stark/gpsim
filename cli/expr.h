@@ -191,6 +191,7 @@ private:
 };
 
 /*****************************************************************/
+/*
 class symbol;
 class gpsimSymbol : public Value {
 
@@ -211,7 +212,7 @@ public:
 private:
   symbol *sym;
 };
-
+*/
 //----------------------------------------------------------------
 /*
 class LiteralSymbol : public Expression {
