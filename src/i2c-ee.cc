@@ -181,7 +181,7 @@ public:
 
   }
 
-  void put_state( int new_digital_state) {
+  void put_state( bool new_digital_state) {
 
     Register *port = get_iop();
 
@@ -337,11 +337,11 @@ void I2C_EE::new_scl_edge ( bool direction )
         switch ( bus_state )
         {
             case I2C_EE::IDLE :
-                sda->put_state ( 1 );
+                sda->put_state ( true );
                 break;
 
             case I2C_EE::START :
-                sda->put_state ( 1 );
+                sda->put_state ( true );
                 bus_state = I2C_EE::RX_CMD;
                 break;
 
@@ -355,7 +355,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                         bus_state = I2C_EE::ACK_CMD;
                         if ( verbose )
                             cout << " - OK\n";
-                        sda->put_state ( 0 );
+                        sda->put_state ( false );
                     }
                     else
                     {
@@ -368,7 +368,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
                 
             case I2C_EE::ACK_CMD :
-                sda->put_state ( 1 );
+                sda->put_state ( true );
                 if ( xfr_data & 0x01 )
                 {
                     // it's a read command
@@ -389,7 +389,7 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::RX_ADDR :
                 if ( shift_read_bit ( sda->read_state ) )
                 {
-                    sda->put_state ( 0 );
+                    sda->put_state ( false );
                     bus_state = I2C_EE::ACK_ADDR;
                     xfr_addr = xfr_data % rom_size;
                     if ( verbose )
@@ -399,7 +399,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             case I2C_EE::ACK_ADDR :
-                sda->put_state ( 1 );
+                sda->put_state ( true );
                 bus_state = I2C_EE::RX_DATA;
                 bit_count = 0;
                 xfr_data = 0;
@@ -410,13 +410,13 @@ void I2C_EE::new_scl_edge ( bool direction )
                 {
                     if ( verbose )
                         cout << "I2C_EE : data set to " << hex << xfr_data << "\n";
-                    sda->put_state ( 0 );
+                    sda->put_state ( false );
                     bus_state = I2C_EE::ACK_WR;
                 }
                 break;
 
             case I2C_EE::ACK_WR :
-                sda->put_state ( 1 );
+                sda->put_state ( true );
                 bus_state = I2C_EE::WRPEND;
                 break;
 
@@ -433,7 +433,7 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::TX_DATA :
                 if ( bit_count == 0 )
                 {
-                    sda->put_state ( 1 );     // Release the bus
+                    sda->put_state ( true );     // Release the bus
                     xfr_addr++;
                     xfr_addr %= rom_size;
                     bus_state = I2C_EE::ACK_RD;
@@ -457,7 +457,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             default :
-                sda->put_state ( 1 );     // Release the bus
+                sda->put_state ( true );     // Release the bus
                 break;
         }
     }
