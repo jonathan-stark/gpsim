@@ -64,7 +64,7 @@ public:
   virtual void create_symbols(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x200; };
-  virtual unsigned int register_memory_size(void) const { return 0x20 + 3; };
+  virtual unsigned int register_memory_size(void) const { return 0x20; };
   virtual unsigned int config_word_address(void) const {return 0xFFF;};
 
   virtual void create_sfr_map(void);
