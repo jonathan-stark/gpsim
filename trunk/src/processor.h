@@ -600,7 +600,7 @@ public:
 //----------------------------------------------------------
 // Global definitions:
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access active_cpu object directly!
 Processor *get_active_cpu(void);
 #else

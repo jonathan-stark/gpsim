@@ -1,3 +1,11 @@
+2005-02-26 Scott Dattalo <scott@dattalo.com>
+	* src/processor.h, src/trace.h, src/breakpoints.h, src/symbol.h,
+	src/gpsim_interface.h, src/gpsim_time.h:
+	The external references demarcated by 'IN_MODULE' were not getting
+	resolved in FC3. Since these were introduced to resolve a linking
+	problem with WIN32 DLL's, I made the demarcation dependent on only
+	Windows. 
+	
 2005-02-25 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added methods to the IOPIN class
 	to differentiate between a pin driving a node and one being driven

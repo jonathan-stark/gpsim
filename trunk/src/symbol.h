@@ -104,7 +104,7 @@ public:
 
 };
 
-#ifdef IN_MODULE
+#if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access symbol_table object directly!
 Symbol_Table &get_symbol_table(void);
 #else
