@@ -1,3 +1,9 @@
+2004-10-07 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_opcode.cc: window was being built before cpu had been
+	initialized.
+	* cli/cmd_disasm.cc, src/processor.cc, src/trace.cc: Disassembling
+	and tracing had wrong addresses for the 18F family (again...)
+	
 2004-10-06 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_src_opcode.cc,
 	gui/gui_statusbar.cc, src/breakpoints.cc: Fixed breakpoint

@@ -637,8 +637,8 @@ void Processor::disassemble (signed int s, signed int e)
   if(s >= e)
     return;
 
-  unsigned int start_address = map_pm_index2address(pc->value) + s;
-  unsigned int end_address = map_pm_index2address(pc->value) + e;
+  unsigned int start_address = map_pm_address2index(s);
+  unsigned int end_address = map_pm_address2index(e);
 
   if(start_address >= program_memory_size()) {
     if(s <0)
