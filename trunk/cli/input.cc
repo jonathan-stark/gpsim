@@ -712,6 +712,7 @@ void redisplay_prompt(void)
 #endif
 }
 
+#if defined HAVE_READLINE && defined HAVE_GUI
 static int gpsim_rl_getc(FILE *in)
 {
   gchar buf[6];
@@ -725,7 +726,7 @@ static int gpsim_rl_getc(FILE *in)
 
   return buf[0];
 }
-
+#endif
 
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames
