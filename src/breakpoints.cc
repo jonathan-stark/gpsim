@@ -108,6 +108,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
+	  //cpu->pma[arg1] = *  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number);
 	  cpu->pma.put(arg1,  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number));
 
 	  //cpu->program_memory[arg1] =
@@ -129,6 +130,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
+	  //cpu->pma[arg1] = *  new  Notify_Instruction(cpu,arg1,NOTIFY_ON_EXECUTION | breakpoint_number, f1);
 	  cpu->pma.put(arg1,  new Notify_Instruction(cpu,arg1,NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -141,6 +143,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
+	  //cpu->pma[arg1] = *  new Profile_Start_Instruction(cpu,arg1,PROFILE_START_NOTIFY_ON_EXECUTION | breakpoint_number, f1);
 	  cpu->pma.put(arg1,  new Profile_Start_Instruction(cpu,arg1,PROFILE_START_NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -153,6 +156,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
+	  //cpu->pma[arg1] = *  new Profile_Stop_Instruction(cpu,arg1,PROFILE_STOP_NOTIFY_ON_EXECUTION | breakpoint_number, f1);
 	  cpu->pma.put(arg1,  new Profile_Stop_Instruction(cpu,arg1,PROFILE_STOP_NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -587,7 +591,9 @@ instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, in
 {
   Breakpoint_Instruction *p;
 
-  p=(Breakpoint_Instruction*) &(cpu->pma[address]); //cpu->program_memory[address];
+  //p=(Breakpoint_Instruction*) &(cpu->pma[address]); //cpu->program_memory[address];
+
+  p = (Breakpoint_Instruction*) cpu->pma.get(address);
 
   if(!_this || p==_this)
     return NULL;
@@ -627,6 +633,8 @@ void Breakpoints::clear(unsigned int b)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
+	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
+
 	  }
 	  else
 	  {
@@ -654,6 +662,8 @@ void Breakpoints::clear(unsigned int b)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
+	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
+
 	  }
 	  else
 	  {
@@ -679,6 +689,7 @@ void Breakpoints::clear(unsigned int b)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
+	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
 	  }
 	  else
 	  {
@@ -704,6 +715,8 @@ void Breakpoints::clear(unsigned int b)
 	  {
 	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
 	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
+	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
+
 	  }
 	  else
 	  {
@@ -947,7 +960,8 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, unsigned int 
   address = new_address;
   opcode = 0xffffffff;
   bpn = bp;
-  replaced = &(cpu->pma[address]);//cpu->program_memory[address];
+  //replaced = &(cpu->pma[address]);//cpu->program_memory[address];
+  replaced = cpu->pma.get(address);
 
   // use the replaced instructions xref object
   xref = replaced->xref; //cpu->program_memory[address]->xref;

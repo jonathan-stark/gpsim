@@ -388,7 +388,8 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 {
   if(address < program_memory_size())
     {
-      program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
+      pma[address].update_line_number(file_id,sline,lst_line,0,0);
+      //program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
       //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
       if(sline > files[file_id].max_line)
 	files[file_id].max_line = sline;
@@ -497,11 +498,13 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    line = cpu->program_memory[address]->get_src_line();
+    //line = cpu->program_memory[address]->get_src_line();
+    line = (this->operator[](address)).get_src_line();
     break;
 
   case HLL_MODE:
-    line = cpu->program_memory[address]->get_hll_src_line();
+    //line = cpu->program_memory[address]->get_hll_src_line();
+    line = (this->operator[](address)).get_hll_src_line();
     break;
   }
 
@@ -852,7 +855,20 @@ guint64 Processor::register_write_accesses(unsigned int address)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 //
-void ProgramMemoryAccess::put(int addr, instruction *new_instruction)
+
+ProgramMemoryAccess::ProgramMemoryAccess(void)
+{
+  _address, _opcode, _state = 0;
+  hll_mode = ASM_MODE;
+}
+
+void ProgramMemoryAccess::init(Processor *new_cpu)
+{
+  cpu = new_cpu;
+  
+}
+
+void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 {
 
   if(!new_instruction)
@@ -861,37 +877,31 @@ void ProgramMemoryAccess::put(int addr, instruction *new_instruction)
 
   if(hasValid_opcode(address)) {
 
-    (this->operator[](address)) = *new_instruction;
+    //(this->operator[](address)) = *new_instruction;
+
+    cpu->program_memory[cpu->map_pm_address2index(address)] = new_instruction;
 
     if(new_instruction->xref)
       new_instruction->xref->update();
   }
 
-
-/*
-  cpu->program_memory[addr] = new_instruction;
-
-  if(cpu->program_memory[addr]->xref)
-      cpu->program_memory[addr]->xref->update();
-*/
-
 }
 
-instruction *ProgramMemoryAccess::get(int addr)
+instruction *ProgramMemoryAccess::get(int address)
 {
-  if(addr < cpu->program_memory_size())
-    return(cpu->program_memory[addr]);
+  if(address < cpu->program_memory_size())
+    return &(this->operator[](address)); //(cpu->program_memory[addr]);
   else
     return NULL;
 
 }
 
 // like get, but will ignore instruction break points 
-instruction *ProgramMemoryAccess::get_base_instruction(int addr)
+instruction *ProgramMemoryAccess::get_base_instruction(int address)
 {
     instruction *p;
 
-    p=get(addr);
+    p=get(address);
 
     if(p==NULL)
         return NULL;
@@ -954,11 +964,11 @@ unsigned int ProgramMemoryAccess::get_PC(void)
 void ProgramMemoryAccess::put_opcode_start(int addr, unsigned int new_opcode)
 {
 
-  if( (addr < cpu->program_memory_size()) && (state == 0))
+  if( (addr < cpu->program_memory_size()) && (_state == 0))
     {
-      state = 1;
-      address = addr;
-      opcode = new_opcode;
+      _state = 1;
+      _address = addr;
+      _opcode = new_opcode;
       cycles.set_break_delta(40000, this);
       bp.set_pm_write();
     }
