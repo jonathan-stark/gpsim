@@ -202,20 +202,19 @@ void Symbol_Table::add_module(Module * m, const char *cPname)
 //void Symbol_Table::remove_module(Module * m, char *name)
 void Symbol_Table::remove_module(Module * m)
 {
-
   sti = st.begin();
   symbol *sym;
 
   while( sti != st.end())
     {
       sym = *sti;
-      if(sym->name() == m->name() &&
-	 sym->isa()==SYMBOL_MODULE)
-      {
-	  st.remove(sym);
-	  cout << "found and removed\n";
+      if(sym->isa() == SYMBOL_MODULE &&
+        sym->name() == m->name())
+        {
+          st.remove(sym);
+          cout << "found and removed\n";
           return;
-      }
+        }
 
       sti++;
     }
