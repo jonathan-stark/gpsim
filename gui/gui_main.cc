@@ -328,10 +328,10 @@ int gui_init (int argc, char **argv)
   // gpsim to send commands to the gui from multiple 
   // threads (e.g. when communicating to an external
   // module or communicating across a socket).
-#if GTK_MAJOR_VERSION >= 2
-  gdk_threads_init();
-#endif
-  g_thread_init (NULL);
+  //#if GTK_MAJOR_VERSION >= 2
+  //  gdk_threads_init();
+  //#endif
+  //  g_thread_init (NULL);
 
   if (!gtk_init_check (&argc, &argv))
   {
@@ -347,9 +347,9 @@ int gui_init (int argc, char **argv)
 
 void gui_main(void)
 {
-  GDK_THREADS_ENTER ();
+  //  GDK_THREADS_ENTER ();
   gtk_main ();
-  GDK_THREADS_LEAVE ();
+  //  GDK_THREADS_LEAVE ();
 }
 
 #endif //HAVE_GUI
