@@ -640,8 +640,8 @@ void Processor::disassemble (signed int s, signed int e)
   if(s >= e)
     return;
 
-  unsigned int start_address = (int)(pc->value ) + s;
-  unsigned int end_address = (int)(pc->value ) + e;
+  unsigned int start_address = map_pm_index2address(pc->value) + s;
+  unsigned int end_address = map_pm_index2address(pc->value) + e;
 
   if(start_address >= program_memory_size()) {
     if(s <0)
@@ -693,7 +693,7 @@ void Processor::disassemble (signed int s, signed int e)
 
 	}
       else
-	cout << hex << setw(4) << setfill('0') << i << "  "
+	cout << hex << setw(4) << setfill('0') << map_pm_index2address(i) << "  "
 	     << hex << setw(4) << setfill('0') << inst->opcode << "    "
 	     << inst->name(str,sizeof(str)) << '\n';
 

@@ -1195,6 +1195,14 @@ double IO_bi_directional_pu::get_Zth()
 
 double IO_bi_directional_pu::get_Vth()
 {
+  
+  /*
+  cout << name() << "get_Vth "
+       << " driving=" << driving
+       << " digital_state=" << digital_state
+       << " bPullUp=" << bPullUp << endl;
+  */  
+
   // If the pin is configured as an output, then the driving voltage
   // depends on the pin state. If the pin is an input, and the pullup resistor
   // is enabled, then the pull-up resistor will 'drive' the output. The
@@ -1216,11 +1224,6 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
 
 double IO_open_collector::get_Vth()
 {
-  /*
-  cout << name() << "get_Vth "
-       << " digital_state=" << digital_state
-       << " bPullUp=" << bPullUp << endl;
-  */
   if(driving && !get_digital_state())
     return 0.0;
 
