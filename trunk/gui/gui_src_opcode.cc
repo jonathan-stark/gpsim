@@ -191,7 +191,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     menu_item *item;
     int i,j;
-    unsigned int pic_id;
+    //unsigned int pic_id;
     GtkSheetRange range;
     unsigned int address;
     int pm_size;
@@ -203,10 +203,14 @@ popup_activated(GtkWidget *widget, gpointer data)
 	return;
     }
     
+    if(!popup_sbow || !popup_sbow->gp || !popup_sbow->gp->cpu) {
+      printf("%s:%d - NULL pointer \n",__FILE__,__LINE__);
+      return;
+    }
     item = (menu_item *)data;
     sheet=GTK_SHEET(popup_sbow->sheet);
     range = sheet->range;
-    pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
+    //pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
     
     pm_size = popup_sbow->gp->cpu->program_memory_size();
     char_width = gdk_string_width (popup_sbow->normal_style->font,"9");
