@@ -69,6 +69,7 @@ public:
 
   double cycles_per_second; // The number of cycles that correspond to one second
                             // i.e. this is the frequency.
+  double seconds_per_cycle;
 
   Cycle_Counter(void);
   void preset(guint64 new_value);     // not used currently.
@@ -159,10 +160,14 @@ public:
     }
 
 
+  // Return the current cycle counter value
   guint64 get(void) 
   {
     return value;
   }
+
+  // Return the cycle counter for some time off in the future:
+  guint64 get(double future_time_from_now);
 
   bool set_break(guint64 future_cycle,
 		 BreakCallBack *f=0, unsigned int abp = MAX_BREAKPOINTS);
@@ -174,6 +179,7 @@ public:
 
   void clear_break(guint64 at_cycle);
   void clear_break(BreakCallBack *f);
+  void set_cycles_per_second(guint64 cps);
 };
 
 extern Cycle_Counter cycles;
