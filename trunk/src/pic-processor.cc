@@ -162,6 +162,8 @@ ProcessorConstructor pP16F627(P16F627::construct ,
 			      "__16F627", "pic16f627",  "p16f627", "16f627");
 ProcessorConstructor pP16F628(P16F628::construct ,
 			      "__16F628", "pic16f628",  "p16f628", "16f628");
+ProcessorConstructor pP16F871(P16F871::construct ,
+			      "__16F871", "pic16f871",  "p16f871", "16f871");
 ProcessorConstructor pP16F873(P16F873::construct ,
 			      "__16F873", "pic16f873",  "p16f873", "16f873");
 ProcessorConstructor pP16F874(P16F874::construct ,

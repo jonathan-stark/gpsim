@@ -28,6 +28,35 @@ Boston, MA 02111-1307, USA.  */
 class IOPORT;
 
 
+
+class P16F871 : public P16C74
+{
+ public:
+  ADRES  adresl;
+
+  virtual void set_out_of_range_pm(int address, int value);
+
+  virtual PROCESSOR_TYPE isa(void){return _P16F871_;};
+  virtual unsigned int program_memory_size(void) const { return 0x0800; };
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+  void create(void);
+  virtual unsigned int register_memory_size () const { return 0x200;};
+
+  P16F871(void);
+  static Processor *construct(void);
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // use set_eeprom_wide as P16F871 expect a wide EEPROM
+    assert(0);
+  }
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
+};
+
+
 class P16F873 : public P16C73
 {
 

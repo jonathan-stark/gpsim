@@ -375,6 +375,7 @@ public:
 
   void execute_command(void);
   void start_data(void);
+  void latch_data(void);
   void send_status(void);
   void release_port(void);
   void new_command(void);

@@ -162,6 +162,22 @@ LTE2:
         BCF     LCD_CONTROL_PORT, LCD_E ;Turn off E
         RETURN
 
+LCD_DROP_E
+        BCF  LCD_CONTROL_PORT,LCD_E     ;Make sure E is low
+        GOTO    $+1                     ;Delays needed primarily for 10Mhz and faster clocks
+        GOTO    $+1
+        GOTO    $+1
+        GOTO    $+1
+        RETURN
+
+LCD_RAISE_E
+        BSF  LCD_CONTROL_PORT,LCD_E     ;Make sure E is high
+        GOTO    $+1                     ;Delays needed primarily for 10Mhz and faster clocks
+        GOTO    $+1
+        GOTO    $+1
+        GOTO    $+1
+        RETURN
+
 
 ;*******************************************************************
 ;LCD_WRITE_DATA - Sends a character to LCD
@@ -186,6 +202,7 @@ LCD_WRITE
   endif
 
     ;First, write the upper nibble
+        CALL    LCD_RAISE_E
         MOVF    LCD_CHAR, w
         ANDLW   LCD_DATA_MASK
         MOVWF   temp
@@ -193,9 +210,11 @@ LCD_WRITE
         ANDLW   ~LCD_DATA_MASK
         IORWF   temp,W
         MOVWF   LCD_DATA_PORT
-        CALL    LCD_TOGGLE_E
+        ;CALL    LCD_TOGGLE_E
+        CALL    LCD_DROP_E
 
     ;Next, write the lower nibble
+        CALL    LCD_RAISE_E
         SWAPF   LCD_CHAR, w
         ANDLW   LCD_DATA_MASK
         MOVWF   temp
@@ -203,7 +222,8 @@ LCD_WRITE
         ANDLW   ~LCD_DATA_MASK
         IORWF   temp,W
         MOVWF   LCD_DATA_PORT
-        GOTO    LCD_TOGGLE_E
+        ;GOTO    LCD_TOGGLE_E
+        GOTO    LCD_DROP_E
 
 ;*******************************************************************
 ;LCD_WRITE_CMD
