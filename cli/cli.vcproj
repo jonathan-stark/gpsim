@@ -12,22 +12,108 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			Name="Debug GUI|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;;../eXdbm"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;YYDEBUG=1"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../readline;../../readline/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_READLINE;HAVE_GUI;HAVE_NSCLEAN_READLINE;READLINE_STATIC"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="5"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/cli.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release GUI|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;../../readline;../../readline/include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_READLINE;HAVE_GUI;HAVE_NSCLEAN_READLINE;READLINE_STATIC"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)/cli.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_NSCLEAN_READLINE"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
@@ -55,24 +141,21 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
-			IntermediateDirectory="Release"
-			ConfigurationType="4"
-			CharacterSet="2">
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;;../eXdbm"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;YYDEBUG=1"
-				RuntimeLibrary="4"
-				UsePrecompiledHeader="0"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;YYDEBUG=1;HAVE_NSCLEAN_READLINE"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"/>
+				Detect64BitPortabilityProblems="FALSE"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/cli.lib"/>
+				Name="VCLinkerTool"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -87,6 +170,8 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -185,7 +270,52 @@
 				RelativePath=".\command.cc">
 			</File>
 			<File
+				RelativePath=".\expr.cc">
+				<FileConfiguration
+					Name="Debug GUI|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="snprintf=_snprintf"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release GUI|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="snprintf=_snprintf"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="snprintf=_snprintf"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						PreprocessorDefinitions="snprintf=_snprintf"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\plat\win32\glib_fixes.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCLCompilerTool"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath=".\input.cc">
+			</File>
+			<File
+				RelativePath=".\operator.cc">
 			</File>
 			<File
 				RelativePath=".\parse.cpp">
@@ -193,20 +323,30 @@
 			<File
 				RelativePath=".\parse.yy">
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison  -d -o $(InputName).cpp $(InputFileName)
+						CommandLine="bison  -dt -o $(InputName).cpp $(InputFileName)
 if exist $(InputName).h del $(InputName).h
 ren $(InputName).hpp $(InputName).h
 "
 						Outputs="$(InputName).cpp;$(InputName).h"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="bison  -d -o $(InputName).cpp $(InputFileName)
+						CommandLine="bison  -dt -o $(InputName).cpp $(InputFileName)
+if exist $(InputName).h del $(InputName).h
+ren $(InputName).hpp $(InputName).h
+"
+						Outputs="$(InputName).cpp;$(InputName).h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="bison  -dt -o $(InputName).cpp $(InputFileName)
 if exist $(InputName).h del $(InputName).h
 ren $(InputName).hpp $(InputName).h
 "
@@ -219,7 +359,7 @@ ren $(InputName).hpp $(InputName).h
 			<File
 				RelativePath=".\scan.ll">
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
@@ -228,7 +368,16 @@ ren $(InputName).hpp $(InputName).h
 						Outputs="$(InputName).cpp"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release GUI|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
+"
+						AdditionalDependencies="parse.h"
+						Outputs="$(InputName).cpp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
@@ -239,6 +388,9 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath="..\plat\win32\uxtime.cc">
+			</File>
+			<File
+				RelativePath=".\viewable.cc">
 			</File>
 		</Filter>
 		<Filter
@@ -335,18 +487,46 @@ ren $(InputName).hpp $(InputName).h
 			<File
 				RelativePath="..\config_win32.h.in">
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="copy ..\config_win32.h.in ..\config.h"
+						CommandLine="copy ..\config_win32.h.in ..\config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
-					Name="Release|Win32">
+					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="copy ..\config_win32.h.in ..\config.h"
+						CommandLine="copy ..\config_win32.h.in ..\config.h
+"
 						Outputs="../config.h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="copy ..\config_win32.h.in ..\config.h
+"
+						Outputs="../config.h"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\expr.h">
+			</File>
+			<File
+				RelativePath="..\plat\win32\glib_fixes.h">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -354,6 +534,9 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\misc.h">
+			</File>
+			<File
+				RelativePath=".\operator.h">
 			</File>
 			<File
 				RelativePath=".\parse.h">
@@ -369,6 +552,9 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath="..\plat\win32\uxtime.h">
+			</File>
+			<File
+				RelativePath=".\viewable.h">
 			</File>
 		</Filter>
 	</Files>
