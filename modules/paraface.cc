@@ -41,9 +41,15 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef LINUX
 #include <linux/parport.h>
 #include <linux/ppdev.h>
+#endif // LINUX
 
+#ifdef __FreeBSD__
+#include <dev/ppbus/ppi.h>
+#include <dev/ppbus/ppbconf.h>
+#endif
 
 #include <errno.h>
 #include <stdlib.h>
@@ -346,6 +352,7 @@ int Paraface::open_parallel_port(char *device)
 	return -1;
     }
 
+#ifdef LINUX
     if (ioctl (fd, PPCLAIM)) {
 	perror ("PPCLAIM");
 	close (fd);
@@ -363,6 +370,8 @@ int Paraface::open_parallel_port(char *device)
         fd=-1;
 	return -1;
     }
+#endif // LINUX
+
 }
 
 // Return low five bits containing:
@@ -374,11 +383,18 @@ int Paraface::open_parallel_port(char *device)
 // Bit levels are inverted when needed, so they match parallel input states
 int Paraface::read_parallel_status(void)
 {
+#ifdef LINUX
     unsigned int ppstatus;
+#endif // LINUX
+#ifdef __FreeBSD__
+    u_int8_t ppstatus;
+    int err;
+#endif // __FreeBSD__
 
     if(fd==-1)
 	return -1;
 
+#ifdef LINUX
     ioctl (fd, PPRSTATUS, &ppstatus);
 
     if(ppstatus&PARPORT_STATUS_ACK)
@@ -401,6 +417,34 @@ int Paraface::read_parallel_status(void)
         status|=0x10;
     else
 	status&=~0x10;
+#endif // LINUX
+
+#ifdef __FreeBSD__
+    if ((err = ioctl (fd, PPIGSTATUS, &ppstatus)) == -1) {
+      perror("ioctl");
+    }
+
+    if(ppstatus&nACK)
+	status|=0x01;
+    else
+	status&=~0x01;
+    if(ppstatus&nBUSY)
+        status&=~0x02;
+    else
+	status|=0x02;
+    if(ppstatus&PERROR)
+	status|=0x04;
+    else
+	status&=~0x04;
+    if(ppstatus&SELECT)
+	status|=0x08;
+    else
+        status&=~0x08;
+    if(ppstatus&nFAULT)
+        status|=0x10;
+    else
+	status&=~0x10;
+#endif // __FreeBSD__
 
     //    cout << "status" << (int)status << endl;
 
@@ -416,7 +460,13 @@ int Paraface::write_parallel_data(int newdata)
 
     /* Set the data lines */
     data = newdata;
+#ifdef LINUX
     ioctl (fd, PPWDATA, &data);
+#endif // LINUX
+
+#ifdef __FreeBSD__
+    ioctl (fd, PPISDATA, &data);
+#endif // __FreeBSD__
 
     //    cout << "data" << (int)data << endl;
 
