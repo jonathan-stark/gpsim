@@ -384,7 +384,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   int i,id=-1;
   struct sa_entry *e;
-  struct breakpoint_info *bpi;
+  breakpoint_info *bpi;
   GList *iter;
   
   assert(address>=0);
@@ -413,108 +413,31 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   e = gui_line_to_entry(id,row);
 
   if(e==0)
-  {
-      puts("This is odd!?");
-      return;
-  }
+    return;
 
-  // Find widget from address, and remove if found
-  iter=breakpoints;
-  while(iter!=0)
-  {
-      GList *next=iter->next;
-      bpi=(struct breakpoint_info*)iter->data;
-      
-      if(bpi->address==address)
-      {
-	//puts("Remove break");
-	  // remove the breakpoint
-	  gtk_widget_destroy(bpi->widget);
-	  free( (struct breakpoint_info*)iter->data );
-	  breakpoints=g_list_remove(breakpoints,iter->data); // FIXME. I really need a tutorial
-      }
-      iter=next;
-  }
-  // Find widget from address, and remove if found
-  iter=notify_start_list;
-  while(iter!=0)
-  {
-      GList *next=iter->next;
-      bpi=(struct breakpoint_info*)iter->data;
-      
-      if(bpi->address==address)
-      {
-	  // remove the breakpoint
-	  gtk_widget_destroy(bpi->widget);
-	  free( (struct breakpoint_info*)iter->data );
-	  notify_start_list=g_list_remove(notify_start_list,iter->data); // FIXME. I really need a tutorial
-      }
-      iter=next;
-  }
-  // Find widget from address, and remove if found
-  iter=notify_stop_list;
-  while(iter!=0)
-  {
-      GList *next=iter->next;
-      bpi=(struct breakpoint_info*)iter->data;
-      
-      if(bpi->address==address)
-      {
-	  // remove the breakpoint
-	  gtk_widget_destroy(bpi->widget);
-	  free( (struct breakpoint_info*)iter->data );
-	  notify_stop_list=g_list_remove(notify_stop_list,iter->data); // FIXME. I really need a tutorial
-      }
-      iter=next;
-  }
+  breakpoints.Remove(address);
+  notify_start_list.Remove(address);
+  notify_stop_list.Remove(address);
 
-  // Create a new profile start widget if address has notify start
+
   if(gp->cpu->pma.address_has_profile_start(address))
-  {
-      bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
-      bpi->address=address;
-      bpi->widget = gtk_pixmap_new(pixmap_profile_start,startp_mask);
-      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
-		     bpi->widget,
-		     PIXMAP_SIZE*0,
-		     PIXMAP_POS(this,e)
-		    );
-      gtk_widget_show(bpi->widget);
-      notify_start_list=g_list_append(notify_start_list,bpi);
-  }
+    notify_start_list.Add(address, 
+			 gtk_pixmap_new(pixmap_profile_start,startp_mask), 
+			 source_layout[id],
+			 PIXMAP_POS(this,e));
 
-  // Create a new profile stop widget if address has notify start
   if(gp->cpu->pma.address_has_profile_stop(address))
-  {
-      bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
-      bpi->address=address;
-      bpi->widget = gtk_pixmap_new(pixmap_profile_stop,stopp_mask);
-      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
-		     bpi->widget,
-		     PIXMAP_SIZE*0,
-		     PIXMAP_POS(this,e)
-		    );
-      gtk_widget_show(bpi->widget);
-      notify_stop_list=g_list_append(notify_stop_list,bpi);
-  }
+    notify_stop_list.Add(address, 
+			 gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
+			 source_layout[id],
+			 PIXMAP_POS(this,e));
 
-  // Create a new breakpoint widget if address has breakpoint
   if(gp->cpu->pma.address_has_break(address))
-  {
-      // There has appeared a new breakpoint, so we
-      // append it to sbaw->breakpoints;
+    breakpoints.Add(address,
+		    gtk_pixmap_new(pixmap_break,bp_mask),
+		    source_layout[id],
+		    PIXMAP_POS(this,e));
 
-      bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
-      bpi->address=address;
-      bpi->widget = gtk_pixmap_new(pixmap_break,bp_mask);
-      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
-		     bpi->widget,
-		     0,
-		     PIXMAP_POS(this,e)
-		    );
-      gtk_widget_show(bpi->widget);
-      breakpoints=g_list_append(breakpoints,bpi);
-  }
 }
 
 SourceBrowserAsm_Window *popup_sbaw;
@@ -695,47 +618,75 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
   return menu;
 }
 
+//========================================================================
+// BreakPointList - a helper class to assist in managing breakpoints
+BreakPointList::BreakPointList(void)
+{
+  iter = 0;
+}
+
+//----------------------------------------
+// Remove items from a breakpoint list
+//
+// Input: address - if this is less than 0 then all items are removed from
+//        the list. Otherwise, only the items that match the address field
+//        in the breakpoint structure are removed.
+
+void BreakPointList::Remove(int address = -1)
+{
+
+  GList *li = iter;
+
+  while(li)
+  {
+    GList *next = li->next;
+
+    breakpoint_info *bpi = (breakpoint_info*)li->data;
+      
+    // remove the breakpoint
+    if(address<0 || bpi->address==address)
+    {
+      iter = g_list_remove(li,li->data);
+      if(bpi) {
+	if(bpi->widget)
+	  gtk_widget_destroy(bpi->widget);
+
+	free(bpi);
+      }
+    }
+
+    li = next;
+  }
+
+  if(address<0)
+    iter = 0;
+}
+
+//----------------------------------------
+// Add - add a new item to the breakpoint list.
+//
+void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int pos)
+{
+  breakpoint_info *bpi=(breakpoint_info*)malloc(sizeof(breakpoint_info));
+
+  bpi->address=address;
+  bpi->widget = pwidget;
+  gtk_layout_put(GTK_LAYOUT(layout),
+		 bpi->widget,
+		 PIXMAP_SIZE*0,
+		 pos
+		 );
+  gtk_widget_show(bpi->widget);
+  iter=g_list_append(iter,bpi);
+}
+
+
 void remove_all_points(SourceBrowserAsm_Window *sbaw)
 {
-    GList *iter;
-	struct breakpoint_info *bpi;
-
-    // remove all breakpoints
-    while(sbaw->breakpoints!=0)
-    {
-	iter=sbaw->breakpoints;
-	bpi=(struct breakpoint_info*)iter->data;
-      
-	// remove the breakpoint
-	gtk_widget_destroy(bpi->widget);
-	free( (struct breakpoint_info*)iter->data );
-	sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
-    }
-
-    // remove all notify start widgets
-    while(sbaw->notify_start_list!=0)
-    {
-	iter=sbaw->notify_start_list;
-	bpi=(struct breakpoint_info*)iter->data;
-      
-	// remove the breakpoint
-	gtk_widget_destroy(bpi->widget);
-	free( (struct breakpoint_info*)iter->data );
-	sbaw->notify_start_list=g_list_remove(sbaw->notify_start_list,iter->data); // FIXME. I really need a tutorial
-    }
-
-    // remove all notify stop widgets
-    while(sbaw->notify_stop_list!=0)
-    {
-	iter=sbaw->notify_stop_list;
-	bpi=(struct breakpoint_info*)iter->data;
-      
-	// remove the breakpoint
-	gtk_widget_destroy(bpi->widget);
-	free( (struct breakpoint_info*)iter->data );
-	sbaw->notify_stop_list=g_list_remove(sbaw->notify_stop_list,iter->data); // FIXME. I really need a tutorial
-    }
-}
+  sbaw->breakpoints.Remove();
+  sbaw->notify_start_list.Remove();
+  sbaw->notify_stop_list.Remove();
+}  
 
 static gint switch_page_cb(GtkNotebook     *notebook,
 			   GtkNotebookPage *page,
@@ -918,8 +869,8 @@ static void marker_cb(GtkWidget *w1,
 {
   static int dragbreak=0;
   static int dragstartline;
-  struct breakpoint_info *bpi;
-  struct breakpoint_info *dragbpi;
+  breakpoint_info *bpi;
+  breakpoint_info *dragbpi;
   static int button_pressed;
   static int button_pressed_y;
   static int button_pressed_x;
@@ -963,16 +914,16 @@ static void marker_cb(GtkWidget *w1,
 	    dragbpi=0;   // start with invalid index
 
 	    // loop all breakpoints, and save the one that is closest as dragbpi
-	    iter=sbaw->breakpoints;
+	    iter=sbaw->breakpoints.iter;
 	    while(iter!=0)
 	      {
-		bpi=(struct breakpoint_info*)iter->data;
+		bpi=(breakpoint_info*)iter->data;
 		    
 		diff = button_pressed_y - (bpi->widget->allocation.y+PIXMAP_SIZE/2);
 		if(abs(diff) < abs(mindiff))
 		  {
 		    mindiff=diff;
-		    dragbpi=(struct breakpoint_info *)iter->data;
+		    dragbpi=(breakpoint_info *)iter->data;
 		  }
 		    
 		iter=iter->next;
@@ -1279,7 +1230,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
   int line=0;
   struct sa_entry *entry;
   GList *iter;
-  struct breakpoint_info *bpi;
+  breakpoint_info *bpi;
     
   // get a manageable pointer to the processor
   Processor *cpu = gp->cpu;
@@ -2455,9 +2406,9 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp)
   for(i=0;i<SBAW_NRFILES;i++)
       notebook_child[i]=0;
 
-  breakpoints=0;
-  notify_start_list=0;
-  notify_stop_list=0;
+  breakpoints.iter=0;
+  notify_start_list.iter=0;
+  notify_stop_list.iter=0;
   
   layout_offset=-1;
   enabled = 0;

@@ -1,3 +1,7 @@
+2004-03-24 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_src_asm.cc, gui/gui_src.h: Added BreakPointList class to handle
+	the 3 lists of breakpoints. Removed duplicate code too.
+
 2004-03-23  Borut Razem  <borut.razem@siol.net>
 	* src/modules.cc: gpsim on WIN32 doesn't support modules yet
 	* gui/gui_breadboard.cc: GTK+ 2.x port
