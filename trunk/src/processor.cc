@@ -2086,8 +2086,7 @@ int Files::Add(char *new_name, FILE *fptr)
 
 FileContext *Files::operator [] (int file_id)
 {
-
-  if(file_id >= lastFile)
+  if(file_id<0 || file_id >= lastFile)
     return 0;
 
 #define GCC_VERSION 296

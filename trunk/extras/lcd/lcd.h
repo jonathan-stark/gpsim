@@ -104,11 +104,11 @@ public:
 // logic for handling I/O pin changes resides in the IOPORT
 // class.)
 
-class Lcd_Input : public IO_input
+class Lcd_Input : public IOPIN
 {
 public:
 
-  Lcd_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
+  Lcd_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IOPIN(i,b,opt_name) { };
 
 };
 
