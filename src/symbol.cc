@@ -61,7 +61,7 @@ list <symbol *>::iterator sti;
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
 // create an instance of inline get_symbol_table() method by taking its address
-static Symbol_Table &(*dummy_symbol_table)(void) = get_symbol_table;
+//static Symbol_Table &(*dummy_symbol_table)(void) = get_symbol_table;
 
 void Symbol_Table::add_ioport(Processor *cpu, IOPORT *_ioport)
 {
@@ -238,14 +238,17 @@ void Symbol_Table::add(Processor *cpu, char *new_name, char *new_type, int value
 
 }
 
-// default base constructor for a symbol is not used
-
+//------------------------------------------------------------------------
+//
 symbol::symbol(void)
 {
-  //  cout << " a symbol table\n";
-
   cpu = 0;
 }
+
+symbol::~symbol(void)
+{
+}
+
 
 void symbol::print(void)
 {

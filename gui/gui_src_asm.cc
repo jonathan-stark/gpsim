@@ -308,7 +308,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
   row = pma->get_src_line(address);
 
-  if(row==INVALID_VALUE)
+  if(row==(int)INVALID_VALUE)
     return;
   row--;
 
@@ -414,8 +414,6 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   int i,id=-1;
   struct sa_entry *e;
-  breakpoint_info *bpi;
-  GList *iter;
   
   assert(address>=0);
 

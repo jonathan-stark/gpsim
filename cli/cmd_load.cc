@@ -38,10 +38,10 @@ cmd_load c_load;
 
 static cmd_options cmd_load_options[] =
 {
-  "h",1,    OPT_TT_BITFLAG,
-  "c",2,    OPT_TT_BITFLAG,
-  "s",3,    OPT_TT_BITFLAG,
-  0,0,0
+  {"h",1,    OPT_TT_BITFLAG},
+  {"c",2,    OPT_TT_BITFLAG},
+  {"s",3,    OPT_TT_BITFLAG},
+ { 0,0,0}
 };
 
 
@@ -73,7 +73,6 @@ extern void process_command_file(const char * file_name);
 
 void cmd_load::load(int bit_flag,char *filename)
 {
-  int verbose_save;
   switch(bit_flag)
     {
     case 1:

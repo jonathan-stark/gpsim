@@ -82,6 +82,9 @@ class BreakpointObject
 
   virtual char const * bpName() { return "Generic"; }
 
+  // Virtual destructor place holder
+  virtual ~BreakpointObject() { }
+
 };
 
 class Breakpoint_Instruction : public instruction , public BreakpointObject

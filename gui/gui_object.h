@@ -65,6 +65,7 @@ class GUI_Object {
 #define VIEW_TOGGLE 2
 
   GUI_Object(void);
+  virtual ~GUI_Object(void);
   virtual void ChangeView(int view_state);
 
   int get_config(void);

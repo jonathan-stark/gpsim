@@ -86,7 +86,7 @@ public:
   virtual int get_value(void){return 0;}
   virtual void put_value(int i) { }
   symbol(void);
-
+  virtual ~symbol();
 };
 
 class Symbol_Table

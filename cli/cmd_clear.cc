@@ -32,7 +32,7 @@ cmd_clear clear;
 
 static cmd_options cmd_clear_options[] =
 {
-  0,0,0
+  {0,0,0}
 };
 
 

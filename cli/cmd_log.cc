@@ -42,13 +42,13 @@ cmd_log c_log;
 
 static cmd_options cmd_trace_options[] =
 {
-  "on",	 LOG_ON,      OPT_TT_BITFLAG,
-  "off", LOG_OFF,     OPT_TT_BITFLAG,
-  "w",   WRITE,       OPT_TT_BITFLAG,
-  "r",   READ,        OPT_TT_BITFLAG,
-  "wv",  WRITE_VALUE, OPT_TT_BITFLAG,
-  "rv",  READ_VALUE,  OPT_TT_BITFLAG,
-  0,0,0
+  {"on",	 LOG_ON,      OPT_TT_BITFLAG},
+  {"off", LOG_OFF,     OPT_TT_BITFLAG},
+  {"w",   WRITE,       OPT_TT_BITFLAG},
+  {"r",   READ,        OPT_TT_BITFLAG},
+  {"wv",  WRITE_VALUE, OPT_TT_BITFLAG},
+  {"rv",  READ_VALUE,  OPT_TT_BITFLAG},
+  { 0,0,0}
 };
 
 cmd_log::cmd_log(void)

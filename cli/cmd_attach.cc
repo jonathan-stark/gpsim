@@ -32,7 +32,7 @@ cmd_attach attach;
 
 static cmd_options cmd_attach_options[] =
 {
-  0,0,0
+  {0,0,0}
 };
 
 

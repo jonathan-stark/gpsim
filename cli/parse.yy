@@ -383,11 +383,10 @@ list_cmd: LIST
 	  }
           | LIST indirect
           {
-	    printf("got a list with an indirect reference %d\n",$2);
+	    printf("got a list with an indirect reference %d\n",(int)$2);
 	  }
           | LIST bit_flag
           { 
-	    cmd_options *opt = $2;
 	    c_list.list($2);
 	  }
            ;
@@ -752,7 +751,7 @@ icd_cmd: ICD
 indirect: INDIRECT _register
 	{
 	  if(verbose)
-            printf(" indirect register *%d",$2);
+            printf(" indirect register *%d",(int)$2);
 	  $$ = $2;
         }
         ;
@@ -760,7 +759,7 @@ indirect: INDIRECT _register
 _register: NUMBER
       {
 	if(verbose)
-         printf("  --- register %d\n", $1);
+         printf("  --- register %d\n", (int)$1);
       }
       ;
 

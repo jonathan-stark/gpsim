@@ -35,7 +35,7 @@ class XrefObject {
  public:
   XrefObject();
   XrefObject(gpsimValue *value);
-  ~XrefObject();
+  virtual ~XrefObject();
     
   virtual void _add(void *xref);
   virtual void clear(void *xref);

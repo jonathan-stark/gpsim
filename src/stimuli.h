@@ -102,7 +102,7 @@ public:
   stimulus *stimuli;  // Pointer to the first stimulus connected to this node.
 
   Stimulus_Node(const char *n = 0);
-  ~Stimulus_Node();
+  virtual ~Stimulus_Node();
 
   int get_voltage(void) { return state; }
   int update(guint64 current_time);
@@ -127,6 +127,7 @@ public:
   stimulus *next;
 
   stimulus(char *n=0);
+  virtual ~stimulus();
 
   // Two different ways to obtain the stimulus state.
   // 'get_voltage' is sort of like an analog representation of the stimulus state.
@@ -280,6 +281,7 @@ public:
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  virtual ~IO_bi_directional();
   virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);

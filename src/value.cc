@@ -28,11 +28,12 @@ Boston, MA 02111-1307, USA.  */
 
 gpsimValue::gpsimValue(void)
 {
-
   cpu = 0;
-
 }
 
+gpsimValue::~gpsimValue(void)
+{
+}
 
 void gpsimValue::new_name(char *s)
 {

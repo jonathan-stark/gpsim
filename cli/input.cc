@@ -333,7 +333,6 @@ static char *
 get_user_input (void)
 {
   char *retval = 0;
-  static char buf[256];
 
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"() --- \n";
@@ -348,6 +347,7 @@ get_user_input (void)
 #else
     cout << "__gpsim> ";
     cout.flush();
+    static char buf[256];
     cin.getline(buf, sizeof(buf));
     if (cin.eof()) {
       cout << buf << endl;
@@ -443,9 +443,6 @@ gpsim_read (char *buf, unsigned max_size)
 {
   char *input_buf;
   static unsigned chars_left = 0;
-  int status = 0;
-
-//cout << __FUNCTION__ << endl;
 
   if((verbose&4) && DEBUG_PARSER)
     cout <<"gpsim_read\n";

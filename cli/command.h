@@ -66,6 +66,7 @@ public:
 
   command(void);
   command(struct cmd_options *options,int tv);
+  virtual ~command() {}
 
   struct cmd_options *get_op(void)
     {

@@ -125,7 +125,7 @@ public:
 
 
   Register(void);
-  ~Register(void);
+  virtual ~Register(void);
 
 
   // Register access functions

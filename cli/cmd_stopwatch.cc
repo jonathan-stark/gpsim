@@ -36,10 +36,10 @@ enum STOPWATCH_OPTIONS {
 
 static cmd_options cmd_stopwatch_options[] =
 {
-  "start",eStart,    OPT_TT_BITFLAG,
-  "stop", eStop,    OPT_TT_BITFLAG,
-  "clear",eClear,    OPT_TT_BITFLAG,
-  0,0,0
+  {"start",eStart,    OPT_TT_BITFLAG},
+  {"stop", eStop,    OPT_TT_BITFLAG},
+  {"clear",eClear,    OPT_TT_BITFLAG},
+  {0,0,0}
 };
 
 cmd_stopwatch::cmd_stopwatch(void)

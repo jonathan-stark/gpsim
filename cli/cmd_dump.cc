@@ -37,10 +37,10 @@ cmd_dump dump;
 
 static cmd_options cmd_dump_options[] =
 {
-  "e", cmd_dump::DUMP_EEPROM,    OPT_TT_BITFLAG,
-  "r", cmd_dump::DUMP_RAM,       OPT_TT_BITFLAG,
-  "s", cmd_dump::DUMP_SFRS,      OPT_TT_BITFLAG,
-  0,0,0
+  {"e", cmd_dump::DUMP_EEPROM,    OPT_TT_BITFLAG},
+  {"r", cmd_dump::DUMP_RAM,       OPT_TT_BITFLAG},
+  {"s", cmd_dump::DUMP_SFRS,      OPT_TT_BITFLAG},
+  {0,0,0}
 };
 
 
@@ -72,7 +72,7 @@ void cmd_dump::dump_sfrs(void)
   putchar('\n');
 
   // Examine all registers this pic has to offer
-  for (int i = 0; i < cpu->register_memory_size(); i++) {
+  for (unsigned int i = 0; i < cpu->register_memory_size(); i++) {
 
     if(cpu->registers[i]->isa() == Register::SFR_REGISTER) {
 
@@ -106,7 +106,10 @@ void cmd_dump::dump(int mem_type)
 {
   unsigned int i, j, reg_num,mem_size=0;
   unsigned int v;
-  unsigned int previous_row_is_invalid, all_invalid;
+  bool 
+    previous_row_is_invalid=false, 
+    all_invalid=false;
+
   Register **fr=0;
 
   if(!have_cpu(1))
@@ -151,16 +154,16 @@ void cmd_dump::dump(int mem_type)
   for (i = 0; i < mem_size; i+=REGISTERS_PER_ROW) {
 
     /* First, see if there are any valid registers on this row */
-    all_invalid = 1;
+    all_invalid = true;
     for (j = 0; j < REGISTERS_PER_ROW; j++)
 
       if(fr[i+j]->address) {
-	all_invalid = 0;
+	all_invalid = false;
 	break;
       }
 
     if(!all_invalid) {
-      previous_row_is_invalid = 0;
+      previous_row_is_invalid = false;
     
       printf("%03x:  ",i);
 
@@ -192,7 +195,7 @@ void cmd_dump::dump(int mem_type)
     } else {
       if(!previous_row_is_invalid)
 	putchar('\n');
-      previous_row_is_invalid = 1;
+      previous_row_is_invalid = true;
       reg_num += REGISTERS_PER_ROW;
     }
 
