@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 #include "stimuli.h"
-
+#include "errors.h"
 #include "../config.h"
 #include "xref.h"
 
@@ -756,19 +756,127 @@ Cycle_Counter::Cycle_Counter(void)
 
 
 //------------------------------------------------------------------------
-// StopWatch class
+// StopWatch 
 //
 
-StopWatch::StopWatch(void)
+//========================================================================
+// Stop Watch Attributes
+//========================================================================
+class StopWatchValue : public Integer
+{
+private:
+  StopWatch *sw;
+public:
+  StopWatchValue(StopWatch *_sw) : Integer(0), sw(_sw) 
+  {
+    new_name("stopwatch");
+    set_description(" A timer for monitoring and controlling the simulation.\n"
+		    " The units are in simulation cycles.\n"
+		    "  stopwatch.rollover - specifies rollover value.\n"
+		    "  stopwatch.direction - specifies count direction.\n"
+		    "  stopwatch.enable - enables counting if true.\n"
+		    );
+  }
+  virtual void set(Value *v)
+  {
+    Integer::set(v);
+    if(sw) sw->update();
+  }
+  virtual void get(gint64 &i)
+  {
+    i = (sw) ? sw->get() : 0;
+    Integer::set(i);
+  }
+  virtual void set_break()
+  {
+    if(sw) sw->set_break(true);
+  }
+  virtual void clear_break()
+  {
+    if(sw) sw->set_break(false);
+  }
+
+};
+class StopWatchRollover : public Integer
+{
+private:
+  StopWatch *sw;
+public:
+  StopWatchRollover(StopWatch *_sw) : Integer(1000000), sw(_sw) 
+  {
+    new_name("stopwatch.rollover");
+    set_description(" specifies the stop watch roll over time.");
+  }
+  virtual void set(Value *v)
+  {
+    Integer::set(v);
+    if(sw) sw->update();
+  }
+};
+
+class StopWatchEnable : public Boolean
+{
+private:
+  StopWatch *sw;
+public:
+  StopWatchEnable(StopWatch *_sw) : Boolean(true) , sw(_sw)
+  {
+    new_name("stopwatch.enable");
+    set_description(" If true, the stop watch is enabled.");
+  }
+  virtual void set(Value *v)
+  {
+    if(sw) sw->update();
+    Boolean::set(v);
+
+  }
+  
+};
+class StopWatchDirection : public Boolean
+{
+private:
+  StopWatch *sw;
+public:
+  StopWatchDirection(StopWatch *_sw) : Boolean(true) , sw(_sw)
+  {
+    new_name("stopwatch.direction");
+    set_description(" If true, the stop watch counts up otherwise down.");
+  }
+  virtual void set(Value *v)
+  {
+    if(!v)
+      return;
+
+    bool bOldVal = getVal();
+    bool bNewVal;
+    
+    v->get(bNewVal);
+
+    if(sw && bOldVal != bNewVal)
+      sw->set_direction(bNewVal);
+
+  }
+};
+//------------------------------------------------------------
+
+StopWatch::StopWatch()
 {
 
-  enabled = false;
-  count_dir = false;
+  offset    = 0;
+  value     = new StopWatchValue(this);
+  rollover  = new StopWatchRollover(this);
+  enable    = new StopWatchEnable(this);
+  direction = new StopWatchDirection(this);
 
-  value = 0;
-  rollover = 0;
-  offset = 0;
-  
+  if(!value || !rollover || !enable || !direction)
+    throw Error("StopWatch");
+
+  get_symbol_table().add(value);
+  get_symbol_table().add(rollover);
+  get_symbol_table().add(enable);
+  get_symbol_table().add(direction);
+
+  update();
 }
 
 //----------------------------------------
@@ -779,10 +887,14 @@ StopWatch::StopWatch(void)
 guint64 StopWatch::get(void)
 {
 
-  if(!enabled)
-    return value;
+  if(enable->getVal()) {
+    gint64 v = (cycles.value - offset) % rollover->getVal();
+    if(!direction->getVal())
+      v = rollover->getVal() - v;
+    return v;
+  }
 
-  return 0;
+  return value->getVal();
 
 }
 
@@ -803,19 +915,93 @@ double StopWatch::get_time(void)
 
 }
 
-void StopWatch::start(void)
+void StopWatch::set_enable(bool b)
 {
+  if(enable->getVal() != b)
+    enable->set(b);
+  update();
 
 }
-void StopWatch::stop(void)
+void StopWatch::set_direction(bool b)
 {
+  if(direction->getVal() == b)
+    return;
+
+  direction->set(b);
+
+  offset = 
+    cycles.value - 
+    ((rollover->getVal() - value->getVal()) % rollover->getVal());
+
+
+  if(break_cycle)
+    set_break(true);
 
 }
+
 void StopWatch::set_rollover(guint64 new_rollover)
 {
-
+  // setting the rollover attribute will update the stopwatch too.
+  if(rollover)
+    rollover->set((gint64)new_rollover);
 }
-void StopWatch::set_offset(guint64 new_rollover)
+void StopWatch::set_value(guint64 new_value)
 {
-
+  if(value)
+    value->set((gint64)new_value);
 }
+
+// update() compute a new offset such that the current
+// value of the stopwatch is correlated with the cycle counter.
+void StopWatch::update()
+{
+  if(enable->getVal()) {
+    if(direction->getVal())
+      offset = cycles.value - value->getVal();
+    else
+      offset = cycles.value - (rollover->getVal() - value->getVal());
+
+    if(break_cycle)
+      set_break(true);
+  }
+}
+void StopWatch::set_break(bool b)
+{
+  if(!b) {
+    cycles.clear_break(this);
+    break_cycle = 0;
+    return;
+  }
+  if(!enable->getVal())
+    return;
+
+  guint64 old_break_cycle = break_cycle;
+
+  if(direction->getVal())
+    break_cycle = cycles.value + rollover->getVal()  - get();
+  else
+    break_cycle = cycles.value + get();
+
+  if(old_break_cycle == break_cycle)
+    return;
+
+  if(old_break_cycle)
+    cycles.reassign_break(old_break_cycle,break_cycle ,this);
+  else
+    cycles.set_break(break_cycle ,this);
+    
+}
+
+void StopWatch::callback()
+{
+  break_cycle = cycles.value + rollover->getVal();
+  cycles.set_break(break_cycle,this);
+  cout << " stopwatch break\n";
+  get_bp().halt();
+}
+
+void StopWatch::callback_print()
+{
+  cout << "stopwatch\n";
+}
+

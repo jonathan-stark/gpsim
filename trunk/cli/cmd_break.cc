@@ -131,6 +131,12 @@ void cmd_break::set_break(cmd_options *co, ExprList_t *eList)
 
 }
 
+void cmd_break::set_break(Value *v)
+{
+  if(v)
+    v->set_break();
+}
+
 void cmd_break::set_break(int bit_flag)
 {
 

@@ -1,4 +1,20 @@
 2005-01-15 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_time.h, src/gpsim_time.cc: Finished the StopWatch
+	class.
+	* src/value.cc, src/value.h, src/attributes.cc, src/attributes.h:
+	Added attribute breakpoints. For attributes that can be associated
+	with breakpoints, you can now write 'break attribute' to set a
+	breakpoint on that attribute.
+	* cli/Makefile.am, cli/cmd_break.cc, cli/cmd_break.h,
+	cli/cmd_help.cc, cli/command.cc, cli/parse.yy: The 'stopwatch'
+	command is now handled by attributes. Added the following
+	attributes:
+	stopwatch, stopwatch.enable, stopwatch.direction,
+	stopwatch.rollover.
+	The 'stopwatch' attribute supports breakpoints, so the 'break
+	stopwatch'  command will break whenever the stopwatch rolls over.
+
+2005-01-15 Scott Dattalo <scott@dattalo.com>
 	* src/attributes.cc, src/attributes.h: New files to support gpsim
 	attributes.
 	* src/Makefile.am, src/makefile.mingw: added the new files to the

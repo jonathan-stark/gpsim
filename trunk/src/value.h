@@ -72,6 +72,7 @@ public:
   /// to other value types. If the type cast is not supported in a
   /// derived class, an Error will be thrown.
 
+  virtual void get(bool &b);
   virtual void get(int &);
   virtual void get(guint64 &);
   virtual void get(gint64 &);
@@ -101,6 +102,10 @@ public:
 
   virtual void set_xref(Value *);
   virtual Value *get_xref();
+
+  /// breakpoints
+  virtual void set_break();
+  virtual void clear_break();
 
  private:
   const char *cpDescription;
