@@ -1,4 +1,8 @@
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
+	* src/14bit-processor.cc:
+	PCL (low byte of program counter) was one count too large.
+	
+2004-03-09 Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/pic-processor.h:
 	Moved the implementations of the disasm() and list() methods from the 
 	pic_processor class to the processor class.
