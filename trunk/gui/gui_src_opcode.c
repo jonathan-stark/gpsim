@@ -1389,7 +1389,7 @@ char *fontstring;
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
   
   sbow->label=gtk_label_new("");
-  style=gtk_widget_get_style(sbow->label);
+  style=gtk_style_new();
   style->font=sbow->normal_style->font;
   gtk_widget_set_style(sbow->label,style);
   gtk_widget_size_request(sbow->label, &request);
@@ -1398,7 +1398,7 @@ char *fontstring;
   gtk_box_pack_start(GTK_BOX(hbox), sbow->label, FALSE, TRUE, 0);
 
   sbow->entry=gtk_entry_new();
-  style=gtk_widget_get_style(sbow->entry);
+  style=gtk_style_new();
   style->font=sbow->normal_style->font;
   gtk_widget_set_style(sbow->entry,style);
   gtk_widget_show(sbow->entry);
