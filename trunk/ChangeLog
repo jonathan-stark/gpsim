@@ -1,4 +1,8 @@
 2004-11-19 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc, gui/gui_regwin.cc, cli/parse.yy: valgrind
+	check - fixed some uninitialized memory.
+	
+2004-11-19 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc: Don't let modules open a closed breadboard 
 	window.
 	

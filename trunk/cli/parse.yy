@@ -406,7 +406,7 @@ list_cmd
 load_cmd: LOAD bit_flag STRING
           {
 	    c_load.load($2->value,$3);
-            delete $3;
+            free($3);
 
 	    if(quit_parse)
 	      {
