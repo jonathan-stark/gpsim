@@ -52,8 +52,8 @@ Error::~Error()
  * observed yy" variety.
  */
 TypeMismatch::TypeMismatch(string theOperator, string expectedType, string observedType)
-  : Error(theOperator + " expects operand of type " + expectedType
-          + ", saw " + observedType)
+  : Error(" Type mismatch for " + theOperator + " Types: " +expectedType
+          + "," + observedType)
 {
 }
 

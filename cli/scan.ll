@@ -505,7 +505,7 @@ static int process_macroBody(const char *text)
  */
 static int process_booleanLiteral(bool value)
 {
-  yylval.Boolean_P = new Boolean(value, true);
+  yylval.Boolean_P = new Boolean(value);
   return(recognize(LITERAL_BOOL_T, "boolean literal"));
 }
 
@@ -525,7 +525,7 @@ static int process_floatLiteral(char *buffer)
     throw new Error("Bad floating point literal");
   }
 
-  yylval.Float_P = new Float(floatValue, true);
+  yylval.Float_P = new Float(floatValue);
   return(recognize(LITERAL_FLOAT_T, "float literal"));
 }
 

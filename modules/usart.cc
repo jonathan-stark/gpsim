@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 
-#include "../src/attribute.h"
+#include "../src/value.h"
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"
@@ -1507,7 +1507,7 @@ public:
 //  Usart Attributes - derived from gpsim's FloatAttribute
 // 
 //--------------------------------------------------------------
-class UsartAttribute : public FloatAttribute {
+class UsartAttribute : public Float {
 
 public:
   enum UA_TYPE {
@@ -1519,14 +1519,14 @@ public:
   UA_TYPE type;
 
 
-  UsartAttribute(char *_name, UA_TYPE new_type, double def_val) {
+  UsartAttribute(char *_name, UA_TYPE new_type, double def_val) :
+    Float(def_val)
+  {
 
     cout << "USART Attribute constructor\n";
 
     type = new_type;
     new_name(_name);
-    value = def_val;
-
   }
 
 
@@ -1534,7 +1534,7 @@ public:
 
     cout << "Setting usart attribute\n";
 
-    value = new_val;
+    Float::set(new_val);
 
   };
 
@@ -1588,7 +1588,9 @@ public:
 
 
     cout << "Setting baud rate attribute!\n";
-    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    double old_value;
+    get(old_value);
+    cout << " old value: " << old_value << " New value: " << b << endl;
     Float::set(b);
   };
 
@@ -1620,7 +1622,10 @@ public:
 
 
     cout << "Setting Rx baud rate attribute!\n";
-    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    double old_value;
+    get(old_value);
+
+    cout << " old value: " << old_value << " New value: " << b << endl;
     Float::set(b);
     if(rcreg)
       rcreg->set_baud_rate(b);
@@ -1654,7 +1659,10 @@ public:
 
 
     cout << "Setting Tx baud rate attribute!\n";
-    cout << " old value: " << getAsDouble() << " New value: " << b << endl;
+    double old_value;
+    get(old_value);
+
+    cout << " old value: " << old_value << " New value: " << b << endl;
     Float::set(b);
     if(txreg)
       txreg->set_baud_rate(b);

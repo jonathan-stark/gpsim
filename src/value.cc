@@ -32,53 +32,52 @@ Boston, MA 02111-1307, USA.  */
 //------------------------------------------------------------------------
 Value::Value()
 {
-  constant = false;
 }
 
 Value::~Value()
 {
 }
 
-Value::Value(bool isConstant)
+void Value::set(char *cP,int i)
 {
-  constant = isConstant;
+  throw new Error(" cannot assign string to a " + showType());
+}
+void Value::set(double d)
+{
+  throw new Error(" cannot assign a double to a " + showType());
+}
+void Value::set(gint64 i)
+{
+  throw new Error(" cannot assign an integer to a " + showType());
+}
+void Value::set(int i)
+{
+  gint64 i64 = i;
+  set(i64);
 }
 
-int Value::getAsInt()
+void Value::get(gint64 &i)
 {
   throw new Error(showType() +
 		  " cannot be converted to an integer ");
 }
+
 void Value::get(int &i)
 {
-  i = getAsInt();
+  gint64 i64;
+  get(i64);
+  i = (int) i64;
 }
-
-double Value::getAsDouble()
+void Value::get(double &d)
 {
   throw new Error(showType() +
 		  " cannot be converted to a double ");
 }
-char *Value::getAsStr(char *buffer, int buf_size)
+
+void Value::get(char *buffer, int buf_size)
 {
   throw new Error(showType() +
-		  "::getAsStr() should not be called ");
-  /*
-  if(!buffer || buf_size==0)
-    return 0;
-
-  if(value)
-    strncpy(buffer,value,buf_size);
-  else
-    *buffer = 0;
-
-  return buffer;
-  */
-}
-
-bool Value::isConstant()
-{
-  return constant;
+		  "cannot be converted to a string ");
 }
 
 bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
@@ -87,17 +86,10 @@ bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
 		  " comparison is not defined for " + showType());
 }
 
-void Value::set(char *cP)
+Value *Value::copy()
 {
-  throw new Error(" cannot assign string to a " + showType());
-}
-void Value::set(char *cP,int i)
-{
-  throw new Error(" cannot assign string to a " + showType());
-}
-void Value::set(double d)
-{
-  throw new Error(" cannot assign a double to a " + showType());
+  throw new Error(" cannot copy " + showType());
+
 }
 
 /*
@@ -196,14 +188,6 @@ AbstractRange::AbstractRange(unsigned int newLeft, unsigned int newRight)
 }
 
 
-AbstractRange::AbstractRange(unsigned int newLeft, unsigned int newRight, bool isConstant)
-  : Value(isConstant)
-{
-  left = newLeft;
-  right = newRight;
-}
-
-
 AbstractRange::~AbstractRange()
 {
 }
@@ -265,12 +249,6 @@ Boolean::Boolean(bool newValue)
   value = newValue;
 }
 
-Boolean::Boolean(bool newValue, bool isConstant)
-  : Value(isConstant)
-{
-  value = newValue;
-}
-
 Boolean::~Boolean()
 {
 }
@@ -291,11 +269,6 @@ string Boolean::toString(char* format)
 
   sprintf(cvtBuf, format, value);
   return (string(&cvtBuf[0]));
-}
-
-bool Boolean::getVal()
-{
-  return value;
 }
 
 Boolean* Boolean::typeCheck(Value* val, string valDesc)
@@ -354,11 +327,24 @@ bool Boolean::operator!=(Value *rv)
 /*****************************************************************
  * The Integer class.
  */
-
-Integer::Integer(gint64 newValue, bool isConstant)
-  : Value(isConstant)
+void Integer::set(double d)
 {
-  value = newValue;
+  value = (gint64) d;
+}
+
+void Integer::set(gint64 i)
+{
+  value = i;
+}
+
+
+void Integer::get(gint64 &i)
+{ 
+  i = value;
+}
+void Integer::get(double &d)
+{ 
+  d = value;
 }
 
 string Integer::toString()
@@ -392,11 +378,6 @@ string Integer::toString(gint64 value)
   return (string(&cvtBuf[0]));  
 }
 
-gint64 Integer::getVal()
-{
-  return value;
-}
-
 Integer* Integer::typeCheck(Value* val, string valDesc)
 {
   if (typeid(*val) != typeid(Integer)) {
@@ -413,7 +394,7 @@ Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin)
   gint64 i;
 
   iVal = Integer::typeCheck(val, valDesc);
-  i = iVal->getVal();
+  iVal->get(i);
   
   if (i < valMin) {
     throw new Error(valDesc +
@@ -432,7 +413,7 @@ Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 
   
   iVal = (Integer::typeCheck(val, valDesc));
 
-  i = iVal->getVal();
+  iVal->get(i);
   
   if ((i < valMin) || (i>valMax)) {
     throw new Error(valDesc +
@@ -492,14 +473,28 @@ Float::Float(double newValue)
   value = newValue;
 }
 
-Float::Float(double newValue, bool isConstant)
-  : Value(isConstant)
-{
-  value = newValue;
-}
-
 Float::~Float()
 {
+}
+
+void Float::set(double d)
+{
+  value = d;
+}
+
+void Float::set(gint64 i)
+{
+  value = i;
+}
+
+
+void Float::get(gint64 &i)
+{ 
+  i = (gint64)value;
+}
+void Float::get(double &d)
+{ 
+  d = value;
 }
 
 string Float::toString()
@@ -514,16 +509,6 @@ string Float::toString(char* format)
 
   sprintf(cvtBuf, format, value);
   return (string(&cvtBuf[0]));
-}
-
-double Float::getVal()
-{
-  return(value);
-}
-
-void Float::set(double v)
-{
-  value = v;
 }
 
 Float* Float::typeCheck(Value* val, string valDesc)
@@ -565,13 +550,6 @@ String::String(string newValue)
 {
   value = newValue;
 }
-
-String::String(string newValue, bool isConstant)
-  : Value(isConstant)
-{
-  value = newValue;
-}
-
 
 String::~String()
 {
@@ -631,12 +609,6 @@ string String::toString(char* format)
 }
 
 
-string String::getVal()
-{
-  return(value);
-}
-
-
 String* String::typeCheck(Value* val, string valDesc)
 {
   if (typeid(*val) != typeid(String)) {
@@ -659,6 +631,11 @@ bool String::compare(ComparisonOperator *compOp, Value *rvalue)
     return compOp->greater();
 
   return compOp->equal();
+}
+
+string String::getVal()
+{
+  return value;
 }
 
 /*

@@ -31,53 +31,67 @@ class ComparisonOperator;
 
 //------------------------------------------------------------------------
 //
-// Values
-//
-// Everything that can hold a value is derived from the Value class.
-// The primary purpose of this is to provide external objects (like
-// the gui) an abstract way of getting the value of diverse things
-// like registers, program counters, cycle counters, etc.
-//
-// In addition, expressions of Values can be created and operated
-// on.
-//
+/// Value - the base class that supports types
+///
+/// Everything that can hold a value is derived from the Value class.
+/// The primary purpose of this is to provide external objects (like
+/// the gui) an abstract way of getting the value of diverse things
+/// like registers, program counters, cycle counters, etc.
+///
+/// In addition, expressions of Values can be created and operated
+/// on.
+
 
 class Value : public gpsimObject
 {
- public:
+public:
   Value();
-  Value(bool isConstant);
 
   virtual ~Value();
-  virtual char *getAsStr(char *buf, int len);
-  virtual int getAsInt();
-  virtual double getAsDouble();
-  virtual unsigned int get_leftVal() {return getAsInt();}
-  virtual unsigned int get_rightVal() {return getAsInt();}
 
-  virtual void set(char *);
-  virtual void set(char *,int);
+  virtual unsigned int get_leftVal() {return 0;}
+  virtual unsigned int get_rightVal() {return 0;}
+
+  /// Value 'set' methods provide a mechanism for casting values to the
+  /// the type of this value. If the type cast is not supported in a
+  /// derived class, an Error will be thrown.
+
+  virtual void set(char *cP,int len=0);
   virtual void set(double);
+  virtual void set(gint64);
+  virtual void set(int);
+
+  /// Value 'get' methods provide a mechanism of casting Value objects
+  /// to other value types. If the type cast is not supported in a
+  /// derived class, an Error will be thrown.
 
   virtual void get(int &);
+  virtual void get(gint64 &);
+  virtual void get(double &);
+  virtual void get(char *, int len);
 
-  bool isConstant();
+  /// compare - this method will compare another object to this 
+  /// object. It takes a pointer to a ComparisonOperator as its
+  /// input. Of the object's are mismatched for the particular
+  /// operator, a 'Type Mismatch' Error will be thown.
 
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
-  /*
-  virtual bool operator&&(Value *);
-  virtual bool operator||(Value *);
-  */
- private:
-  bool constant;
+
+  /// copy - return an object that is identical to this one.
+
+  virtual Value *copy();
+
 };
 
 //========================================================================
 //
-// gpsimValue is a Value object that is unique to the simulator.
+/// gpsimValue is a Value object that is unique to the simulator.
+/// All value objects of the behavioral models are derived from gpsimValue.
+/// A gpsimValue object 'belongs to' a Module.
 
-class gpsimValue : public gpsimObject {
- public:
+class gpsimValue : public gpsimObject 
+{
+public:
 
   gpsimValue(void);
   gpsimValue(Module *);
@@ -86,14 +100,14 @@ class gpsimValue : public gpsimObject {
 
   // Access functions
   virtual unsigned int get(void)
-    {
-      return get_value();
-    }
+  {
+    return get_value();
+  }
 
   virtual void put(unsigned int new_value)
-    {
-      put_value(new_value);
-    }
+  {
+    put_value(new_value);
+  }
 
   
   // put_value is the same as put(), but some extra stuff like
@@ -111,14 +125,14 @@ class gpsimValue : public gpsimObject {
   virtual unsigned int get_value(void) = 0;
 
   virtual void set_module(Module *new_cpu)
-    {
-      cpu = new_cpu;
-    }
+  {
+    cpu = new_cpu;
+  }
 
   Module *get_module(void)
-    {
-      return cpu;
-    }
+  {
+    return cpu;
+  }
 
   virtual void set_cpu(Processor *new_cpu);
 
@@ -133,7 +147,7 @@ class gpsimValue : public gpsimObject {
   XrefObject xref(void) { return _xref; }
 
   virtual string toString();
- protected:
+protected:
   // If we are linking with a gui, then here are a
   // few declarations that are used to send data to it.
   // This is essentially a singly-linked list of pointers
@@ -162,86 +176,86 @@ class Boolean : public Value {
 public:
 	
   Boolean(bool newValue);
-  Boolean(bool newValue, bool isConstant);
   virtual ~Boolean();
 
   string toString();
   string toString(char* format);
   static string toString(bool value);
   static string toString(char* format, bool value);
-  bool getVal();
-  virtual int getAsInt() { return (value) ? 1 : 0; }
-  virtual double getAsDouble() { return (value) ? 1.0 : 0.0;}
+
+  virtual void get(bool &b) { b = value; }
+  virtual void get(int &i) { i = value ? 1 : 0; }
+  virtual void get(double &d) { d = value ? 1.0 : 0.0;}
+
+  bool getVal() { return value; }
 
   static Boolean* Boolean::typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  /*
-  bool operator&&(Value *);
-  bool operator||(Value *);
-  bool operator==(Value *);
-  bool operator!=(Value *);
-  */
+  virtual Value *copy() { return new Boolean(value); }
 private:
   bool value;
 };
 
 
-/*****************************************************************/
+//------------------------------------------------------------------------
+/// Integer - built in gpsim type for a 64-bit integer.
+
 class Integer : public Value {
 
 public:
 	
   Integer(gint64 new_value) : Value() { value = new_value;};
-  Integer(gint64 newValue, bool isConstant);
   virtual ~Integer() {}
 
   string toString();
   string toString(char* format);
   static string toString(gint64 value);
   static string toString(char* format, gint64 value);
-  gint64 getVal();
 
-  virtual int getAsInt() { return (int)value; }
-  virtual double getAsDouble() { return (double)value;}
-  virtual void put(gint64 v) {value = v; }
+  virtual void get(gint64 &i);
+  virtual void get(double &d);
+
+  virtual void set(gint64 v);
+  virtual void set(double d);
+
+  gint64 getVal() { return value; }
+
+  virtual Value *copy() { return new Integer(value); }
 
   static Integer* Integer::typeCheck(Value* val, string valDesc);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  /*
-  virtual bool operator<(Value *v);
-  virtual bool operator>(Value *);
-  virtual bool operator<=(Value *);
-  virtual bool operator>=(Value *);
-  virtual bool operator==(Value *);
-  virtual bool operator!=(Value *);
-  virtual bool operator&&(Value *);
-  virtual bool operator||(Value *);
-  */
 private:
   gint64 value;
 };
 
-/*****************************************************************/
+//------------------------------------------------------------------------
+/// Float - built in gpsim type for a 'double'
+
 class Float : public Value {
 
 public:
 	
   Float(double newValue);
-  Float(double newValue, bool isConstant);
   virtual ~Float();
 
   string toString();
   string toString(char* format);
   static string toString(double value);
   static string toString(char* format, double value);
-  double getVal();
-  virtual int getAsInt() { return (int)value; }
-  virtual double getAsDouble() { return value;}
-  virtual void set(double);
+
+  virtual void get(gint64 &i);
+  virtual void get(double &d);
+
+  virtual void set(gint64 v);
+  virtual void set(double d);
+
+  double getVal() { return value; }
+
+  virtual Value *copy() { return new Float(value); }
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
@@ -261,7 +275,6 @@ class String : public Value {
 public:
 	
   String(string newValue);
-  String(string newValue, bool isConstant);
   virtual ~String();
 
   string toString();
@@ -269,6 +282,8 @@ public:
   static string toString(string value);
   static string toString(char* format, string value);
   string getVal();
+
+  virtual Value *copy() { return new String(value); }
 
   static String* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
@@ -284,7 +299,6 @@ class AbstractRange : public Value {
 public:
 	
   AbstractRange(unsigned int leftVal, unsigned int rightVal);
-  AbstractRange(unsigned int leftVal, unsigned int rightVal, bool isConstant);
   virtual ~AbstractRange();
 
   string toString();
@@ -292,6 +306,8 @@ public:
 
   virtual unsigned int get_leftVal();
   virtual unsigned int get_rightVal();
+
+  virtual Value *copy() { return new AbstractRange(left,right); }
 
   static AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
@@ -301,27 +317,5 @@ private:
   unsigned int right;
 };
 
-/*****************************************************************/
-/*
-class gpsimSymbol : public Value {
-
-public:
-	
-  gpsimSymbol(symbol *);
-  gpsimSymbol(symbol *, bool isConstant);
-
-  virtual ~gpsimSymbol();
-
-
-  string toString();
-
-  virtual int getAsInt();
-  virtual double getAsDouble();
-
-  virtual symbol *get_sym() { return sym; }
-private:
-  symbol *sym;
-};
-*/
 
 #endif // __VALUE_H__

@@ -4,6 +4,26 @@
 #include "errors.h"
 
 
+
+static bool isFloat(Value *v)
+{
+  if(v &&  (typeid(*v) == typeid(Float)))
+    return true;
+  return false;
+}
+static bool isInteger(Value *v)
+{
+  if(v &&  (typeid(*v) == typeid(Integer)))
+    return true;
+  return false;
+}
+static bool isBoolean(Value *v)
+{
+  if(v &&  (typeid(*v) == typeid(Boolean)))
+    return true;
+  return false;
+}
+
 BinaryOperator::BinaryOperator(string  opString, 
 			       Expression* _leftExpr, 
 			       Expression* _rightExpr) : Operator(opString)
@@ -46,32 +66,7 @@ string BinaryOperator::toString()
 Value *BinaryOperator::evaluate()
 {
 
-  Value* lVal;
-  Value* rVal;
-  Value* tmp;
-
-  lVal = leftExpr->evaluate();
-
-  // If this operator wants to make a short-circuit decision
-  // based on our evaluated left operand, we let that operator
-  // class make its decision right now before we eval the right
-  // operand:
-  //  tmp = shortCircuit(lVal);
-  //  if (tmp) {
-  //    return(tmp);
-  //  }
-
-  rVal = rightExpr->evaluate();
-
-  // Apply the specific operator to the evaluated operands:
-  tmp = applyOp(lVal, rVal);
-
-  // If the result is constant, save the result for future use:
-  //if (tmp->isConstant()) {
-  //  value = tmp;
-  //}
-
-  return tmp;
+  return applyOp(leftExpr->evaluate(), rightExpr->evaluate());
 }
 
 /*****************************************************************
@@ -189,10 +184,27 @@ OpAdd::~OpAdd()
 
 Value *OpAdd::applyOp(Value *lval, Value *rval)
 {
+  if(isFloat(lval) || isFloat(rval)) {
+    double d1,d2;
 
-  return new Integer(lval->getAsInt() + rval->getAsInt());
+    lval->get(d1);
+    rval->get(d2);
 
+    return new Float(d1+d2);
+  }
+
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
+
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1+i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
+
 //------------------------------------------------------------------------
 
 
@@ -208,7 +220,16 @@ OpAnd::~OpAnd()
 Value *OpAnd::applyOp(Value *lval, Value *rval)
 {
 
-  return new Integer(lval->getAsInt() & rval->getAsInt());
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
+
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1 & i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -278,9 +299,17 @@ OpLogicalAnd::~OpLogicalAnd()
 {
 }
 
-Value *OpLogicalAnd::applyOp(Value* leftValue, Value* rightValue)
+Value *OpLogicalAnd::applyOp(Value* lval, Value* rval)
 {
-  return new Boolean(leftValue && rightValue);
+  if(isBoolean(lval) && isBoolean(rval)) {
+    bool b1 = (static_cast<Boolean *>(lval))->getVal();
+    bool b2 = (static_cast<Boolean *>(rval))->getVal();
+
+    return new Boolean(b1 & b2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+
 }
 
 //------------------------------------------------------------------------
@@ -293,9 +322,17 @@ OpLogicalOr::~OpLogicalOr()
 {
 }
 
-Value *OpLogicalOr::applyOp(Value* leftValue, Value* rightValue)
+Value *OpLogicalOr::applyOp(Value* lval, Value* rval)
 {
-  return new Boolean(leftValue || rightValue);
+  if(isBoolean(lval) && isBoolean(rval)) {
+    bool b1 = (static_cast<Boolean *>(lval))->getVal();
+    bool b2 = (static_cast<Boolean *>(rval))->getVal();
+
+    return new Boolean(b1 | b2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+
 }
 
 
@@ -326,8 +363,25 @@ OpSub::~OpSub()
 
 Value *OpSub::applyOp(Value *lval, Value *rval)
 {
+  if(isFloat(lval) || isFloat(rval)) {
+    double d1,d2;
 
-  return new Integer(lval->getAsInt() - rval->getAsInt());
+    lval->get(d1);
+    rval->get(d2);
+
+    return new Float(d1-d2);
+  }
+
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
+
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1-i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -345,8 +399,25 @@ OpMpy::~OpMpy()
 
 Value *OpMpy::applyOp(Value *lval, Value *rval)
 {
+  if(isFloat(lval) || isFloat(rval)) {
+    double d1,d2;
 
-  return new Integer(lval->getAsInt() * rval->getAsInt());
+    lval->get(d1);
+    rval->get(d2);
+
+    return new Float(d1*d2);
+  }
+
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
+
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1*i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
 
 //------------------------------------------------------------------------
@@ -363,8 +434,16 @@ OpOr::~OpOr()
 
 Value *OpOr::applyOp(Value *lval, Value *rval)
 {
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
 
-  return new Integer(lval->getAsInt() | rval->getAsInt());
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1 | i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -383,8 +462,16 @@ OpXor::~OpXor()
 Value *OpXor::applyOp(Value *lval, Value *rval)
 {
 
-  return new Integer(lval->getAsInt() ^ rval->getAsInt());
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
 
+    lval->get(i1);
+    rval->get(i2);
+
+    return new Integer(i1 ^ i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
 
 //------------------------------------------------------------------------
@@ -401,12 +488,32 @@ OpDiv::~OpDiv()
 
 Value *OpDiv::applyOp(Value *lval, Value *rval)
 {
-  int i = rval->getAsInt();
 
-  if(i == 0)
-    throw new Error("Operator " + showOp() + " Divide by 0");
+  if(isFloat(lval) || isFloat(rval)) {
+    double d1,d2;
 
-  return new Integer(lval->getAsInt() / i);
+    lval->get(d1);
+    rval->get(d2);
+
+    if(d2 == 0.0)
+      throw new Error("Divide by zero");
+
+    return new Float(d1/d2);
+  }
+
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1,i2;
+
+    lval->get(i1);
+    rval->get(i2);
+
+    if(i2 == 0)
+      throw new Error("Divide by zero");
+
+    return new Integer(i1+i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -425,12 +532,21 @@ OpShl::~OpShl()
 Value *OpShl::applyOp(Value *lval, Value *rval)
 {
 
-  int i = rval->getAsInt();
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1;
+    gint64 i2;
 
-  if(i < 0  || i > 31)
-    throw new Error("Operator " + showOp() + " bad shift count");
+    rval->get(i2);
 
-  return new Integer(lval->getAsInt() << i);
+    if(i2 < 0  || i2 > 63)
+      throw new Error("Operator " + showOp() + " bad shift count");
+
+    lval->get(i1);
+
+    return new Integer(i1<<i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -449,13 +565,22 @@ OpShr::~OpShr()
 Value *OpShr::applyOp(Value *lval, Value *rval)
 {
 
-  int i = rval->getAsInt();
 
-  if(i < 0  || i > 31)
-    throw new Error("Operator " + showOp() + " bad shift count");
+  if(isInteger(lval) && isInteger(rval)) {
+    gint64 i1;
+    gint64 i2;
 
-  return new Integer(lval->getAsInt() >> i);
+    rval->get(i2);
 
+    if(i2 < 0  || i2 > 63)
+      throw new Error("Operator " + showOp() + " bad shift count");
+
+    lval->get(i1);
+
+    return new Integer(i1>>i2);
+  }
+
+  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
 
 
@@ -478,7 +603,7 @@ Value* OpLogicalNot::applyOp(Value* operand)
 
   op = Boolean::typeCheck(operand, showOp());
   bVal = op->getVal();
-  return new Boolean(!bVal, op->isConstant());
+  return new Boolean(!bVal);
 }
 
 /******************************************************************************
@@ -498,11 +623,11 @@ Value* OpNegate::applyOp(Value* operand)
 {
   Value* rVal=0;
 
-  if (typeid(*operand) == typeid(Integer)) {
+  if (isInteger(operand)) {
     Integer* iOp = (Integer*)(operand);
     rVal = new Integer(-(iOp->getVal()));
   }
-  else if (typeid(*operand) == typeid(Float)) {
+  else if (isFloat(operand)) {
     Float* fOp = (Float*)(operand);
     rVal = new Float(-(fOp->getVal()));
   }
@@ -531,7 +656,7 @@ Value* OpOnescomp::applyOp(Value* operand)
   Integer* op;
   
   op = Integer::typeCheck(operand, showOp());  
-  return new Integer(~(op->getVal()), op->isConstant());
+  return new Integer(~ op->getVal() );
 }
 
 /******************************************************************************
@@ -551,11 +676,11 @@ Value* OpPlus::applyOp(Value* operand)
 {
   Value* rVal=0;
 
-  if (typeid(*operand) == typeid(Integer)) {
+  if (isInteger(operand)) {
     Integer* iOp = (Integer*)(operand);
     rVal = new Integer(iOp->getVal());
   }
-  else if (typeid(*operand) == typeid(Float)) {
+  else if (isFloat(operand) ) {
     Float* fOp = (Float*)(operand);
     rVal = new Float(fOp->getVal());
   }
@@ -583,11 +708,13 @@ Value* OpIndirect::applyOp(Value* operand)
 {
   Value* rVal=0;
 
-  if (typeid(*operand) == typeid(Integer)) {
+  //FIXME - this doesn't work!!
+
+  if (isInteger(operand)) {
     Integer* iOp = (Integer*)(operand);
     rVal = new Integer(iOp->getVal());
   }
-  else if (typeid(*operand) == typeid(Float)) {
+  else if (isFloat(operand) ) {
     Float* fOp = (Float*)(operand);
     rVal = new Float(fOp->getVal());
   }
