@@ -1,8 +1,11 @@
 2005-02-16 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc: experiments in ioport redesign.
+	
+2005-02-16 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added 'getBitChar()' method to
 	the open collector stimulus class.
 	
-2005-02-11 Scott Dattalo <scott@dattalo.com>
+2005-02-15 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h: Added a 'getIO' method to the
 	IOPIN class that will allow an individual I/O pin in a port to be
 	accessed.
