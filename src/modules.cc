@@ -33,6 +33,10 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#if !defined(_MAX_PATH)
+  #define _MAX_PATH 1024
+#endif
+
 #else
 #include <direct.h>
 #include <windows.h>

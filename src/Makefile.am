@@ -34,6 +34,7 @@ libgpsim_la_SOURCES = \
 	ioports.cc \
         lxt_write.c \
 	modules.cc \
+	os_dependent.cc \
 	p12x.cc \
 	p16f62x.cc \
 	p16x8x.cc \

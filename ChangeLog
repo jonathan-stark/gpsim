@@ -1,3 +1,14 @@
+2005-02-09 Scott Dattalo <scott@dattalo.com>
+	* src/Makefile.am: Newly added src file 'os_dependent.cc' was not
+	part of the Makefile
+	* cli/input.cc, src/os_dependent.cc: abstracted some os dependent
+	changes that were recently added
+	
+2005-02-01 Scott Dattalo <scott@dattalo.com>
+	* src/processor.h, src/processor.cc, src/trace.cc: Added 'Debug()'
+	method to processor class and call it whenever a register
+	assertion occur.s
+
 2005-01-30 Borut Razem <borut.razem@siol.net>
 	* config_win32.h.in, configure_win32.awk: extract version, package and
 	  bugreport values from configure.ac
