@@ -703,8 +703,9 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     // source line strings are ignored, and the file with
     // the same basename is used instead.
     // Each program memory address should have a line number in them.
-    for(i=0;cpu->files[i].file_ptr!=NULL;i++)
-	;
+    //for(i=0;cpu->files[i].file_ptr!=NULL;i++)
+    //	;
+    i=cpu->number_of_source_files;
 
     // 'i' is where we can put the ".c" file entry.
 
