@@ -38,6 +38,11 @@ Boston, MA 02111-1307, USA.  */
 #else
 #include <sys/file.h>
 #include <unistd.h>
+// temp fix to over come 23jan05 changes to configure script that prevent
+// readline from being found on older systems.
+#define HAVE_READLINE
+#define HAVE_NSCLEAN_READLINE
+
 #endif
 
 #ifdef HAVE_GUI

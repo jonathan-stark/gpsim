@@ -1258,6 +1258,13 @@ void Processor::dump_registers (void)
 
 }
 
+//-------------------------------------------------------------------
+void Processor::Debug()
+{
+  cout << " === Debug === \n";
+  if(pc)
+    cout << "PC=0x"<<hex << pc->value << endl;
+}
 
 //-------------------------------------------------------------------
 instruction &ProgramMemoryAccess::operator [] (unsigned int address)

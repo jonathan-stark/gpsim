@@ -513,6 +513,12 @@ public:
   virtual void set_Vdd(double v) { Vdd = v; }
 
   //
+  // Debugging - used to view the state of the processor (or whatever).
+  //
+
+  virtual void Debug();
+
+  //
   // FIXME -- create -- a way of constructing a processor (why not use constructors?)
   //
 
