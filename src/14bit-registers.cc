@@ -598,14 +598,14 @@ class WReadTraceObject : public RegisterReadTraceObject
 {
 public:
   WReadTraceObject(Processor *_cpu, RegisterValue trv);
-  virtual void print(void);
+  virtual void print(FILE *fp);
 };
 
 class WWriteTraceObject : public RegisterWriteTraceObject
 {
 public:
   WWriteTraceObject(Processor *_cpu, RegisterValue trv);
-  virtual void print(void);
+  virtual void print(FILE *fp);
 };
 
 
@@ -636,12 +636,12 @@ WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv)
 
 }
 
-void WWriteTraceObject::print(void)
+void WWriteTraceObject::print(FILE *fp)
 {
   char sFrom[16];
   char sTo[16];
 
-  fprintf(stdout, "  Wrote: 0x%s to W was 0x%s\n",
+  fprintf(fp, "  Wrote: 0x%s to W was 0x%s\n",
 	  to.toString(sTo,sizeof(sTo)),
 	  from.toString(sFrom,sizeof(sFrom)));
 
@@ -660,11 +660,11 @@ WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv)
 
 }
 
-void WReadTraceObject::print(void)
+void WReadTraceObject::print(FILE *fp)
 {
   char sFrom[16];
 
-  fprintf(stdout, "  Read: 0x%s from W\n",
+  fprintf(fp, "  Read: 0x%s from W\n",
 	  from.toString(sFrom,sizeof(sFrom)));
 
 }
@@ -674,7 +674,6 @@ TraceObject * WTraceType::decode(unsigned int tbi)
 {
 
   unsigned int tv = trace.get(tbi);
-  printf(" WTraceType: 0x%x\n",tv);
 
   RegisterValue rv = RegisterValue(tv & 0xff,0);
   TraceObject *wto;
