@@ -19,7 +19,7 @@ char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address);
 unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
 */
 
-// #define EXPERIMENTAL
+#define EXPERIMENTAL
 
 #include "gui.h"
 
@@ -32,6 +32,8 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
 #define ADDRESS_COLUMN  1
 #define OPCODE_COLUMN   2
 #define MNEMONIC_COLUMN 3
+
+static GtkStyle *row_default_style;
 
 static void filter(char *clean, char *dirty, int max)
 {
@@ -346,6 +348,8 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
   if(! ((GUI_Object*)sbow)->enabled)
       return;
 
+  puts("Update line");
+  
   assert(sbow->sbw.gui_obj.wt == WT_opcode_source_window);
 
   if(address >= 0)
@@ -354,7 +358,7 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
       if(gpsim_address_has_breakpoint(sbow->sbw.gui_obj.gp->pic_id,  address))
 	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), row, breakpoint_line_number_style);
       else
-	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), row, normal_style);
+	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), row, row_default_style);
 
   }
 }
@@ -375,7 +379,7 @@ void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address)
 //	  gtk_clist_freeze (GTK_CLIST (sbow->clist));
 
 	  SourceBrowserOpcode_update_line( sbow, last_address, sbow->current_row);
-	  //gtk_clist_set_row_style (GTK_CLIST (sbw->clist), sbw->current_row, normal_style);
+	  //gtk_clist_set_row_style (GTK_CLIST (sbw->clist), sbw->current_row, row_default_style);
 	  sbow->current_row = new_row;
 	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), sbow->current_row, current_line_number_style);
 
@@ -470,7 +474,7 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
 
 #endif
       gtk_clist_append (GTK_CLIST (sbow->clist), row_text);
-//      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, normal_style);
+//      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, row_default_style);
       
 /*      gtk_clist_set_text (GTK_CLIST (sbow->clist),
 			  i, MNEMONIC_COLUMN, 
@@ -527,7 +531,7 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
 	  sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
 	  sprintf(row_text[OPCODE_COLUMN], "0x%04X", gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,i));
 	  gtk_clist_append (GTK_CLIST (sbow->clist), row_text);
-//	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, normal_style);
+//	  gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, row_default_style);
 	}
 
 /*      for(i=0; i < pm_size; i++)
@@ -632,7 +636,6 @@ void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow)
   label=gtk_label_new("clist page");
   gtk_notebook_append_page(GTK_NOTEBOOK(sbow->notebook),scrolled_win,label);
 
-  
   gtk_clist_set_row_height (GTK_CLIST (clist), 18);
   gtk_widget_set_usize (clist, 300, 100);
   gtk_clist_set_selection_mode (GTK_CLIST (clist), GTK_SELECTION_EXTENDED);
@@ -655,10 +658,11 @@ void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow)
     {
       sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
       gtk_clist_append (GTK_CLIST (sbow->clist), row_text);
-      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, normal_style);
+      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), i, row_default_style);
 
     }
 
+  row_default_style=gtk_clist_get_row_style(GTK_CLIST (clist), 0);
 
 
 #ifdef EXPERIMENTAL

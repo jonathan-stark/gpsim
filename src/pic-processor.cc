@@ -964,8 +964,8 @@ void pic_processor::add_file_registers(unsigned int start_address, unsigned int 
       registers[j]->value = 0;
       registers[j]->symbol_alias = NULL;
 
-      //The default register name is a simple string with its address
-      sprintf (str, "reg @0x%02x", j);
+      //The default register name is simply its address
+      sprintf (str, "0x%02x", j);
       registers[j]->new_name(str);
 
       registers[j]->cpu = this;
