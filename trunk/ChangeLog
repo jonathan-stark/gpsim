@@ -1,4 +1,7 @@
 2004-02-17  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_scope.cc: expose and resizing kind of work.
+
+2004-02-17  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: taking off the rough edges.
 	
 2004-02-16  Scott Dattalo  <scott@dattalo.com>
