@@ -65,6 +65,11 @@ public:
 		  * simulating the pin.
 		  */
 
+  // pin_position is used by the breadboard to position the pin
+  // Its value can be in the range from 0.0000 to 3.9999.
+  // 0.0 is upmost left position. 0.9999 is lowest left.
+  // 1.0 is leftmost bottom position. 1.99 is rightmost bottom.. A.S.O
+  float *pin_position;
 
   Package(void);
   Package(unsigned int number_of_pins);
@@ -79,6 +84,8 @@ public:
   virtual int get_pin_count(void) {return number_of_pins;};
   virtual char *get_pin_name(unsigned int pin_number);
   virtual int get_pin_state(unsigned int pin_number);
+  virtual float get_pin_position(unsigned int pin_number);
+  virtual void set_pin_position(unsigned int pin_number, float position);
   int pin_existance(unsigned int pin_number);
   IOPIN *get_pin(unsigned int pin_number);
 };
