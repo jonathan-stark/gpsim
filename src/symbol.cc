@@ -209,10 +209,17 @@ void Symbol_Table::remove_module(Module * m)
 void Symbol_Table::add(Processor *cpu, char *new_name, char *new_type, int value)
 {
 
-  cout << "NOT SUPPORTED-->Adding new symbol " << new_name << " of type " << new_type << '\n';
+  //  cout << "NOT SUPPORTED-->Adding new symbol " << new_name << " of type " << new_type << '\n';
+
+  if(new_type) {
+
+    // ugh.. FIXME
+    if ( strcmp("constant", new_type) == 0)
+      add_constant(cpu,new_name, value);
+
+  }
 
 #if 0
-
   int i;
   for(i=0; i<num_of_symbol_types; i++)
     {
