@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "stimuli.h"
 #include "p16x5x.h"
+#include "p16f62x.h"
 #include "p16x8x.h"
 #include "p16f87x.h"
 #include "p16x6x.h"
@@ -199,6 +200,12 @@ processor_types available_processors[] =
   {_P16C74_,
    "__16C74",   "pic16c74",   "p16c74",  "16c74",
    P16C74::construct },
+  {_P16F627_,
+   "__16F627", "pic16f627",  "p16f627", "16f627",
+   P16F627::construct },
+  {_P16F628_,
+   "__16F628", "pic16f628",  "p16f628", "16f628",
+   P16F628::construct },
   {_P16F873_,
    "__16F873", "pic16f873",  "p16f873", "16f873",
    P16F873::construct },

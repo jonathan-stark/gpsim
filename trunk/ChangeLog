@@ -4,6 +4,7 @@ T. Scott Dattalo
 
 gpsim-0.21.0
 	* Starting with 0.21.0, Changelog will be properly formatted
+	* Added 16f627,16f628 processors
 	* log command has been added (Command Line)
 	* Profiling has been added (gui)
 	* Trace viewer has been added

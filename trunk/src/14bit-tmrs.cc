@@ -1067,6 +1067,21 @@ unsigned int TMR2::get(void)
   
 }
 
+unsigned int TMR2::get_value(void)
+{
+
+  if(t2con->get_tmr2on())
+    {
+      ///int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+
+      ///value = new_value;
+
+      current_value();
+    }
+
+  return(value);
+  
+}
 void TMR2::new_pre_post_scale(void)
 {
 

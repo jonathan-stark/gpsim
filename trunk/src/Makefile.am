@@ -29,6 +29,7 @@ libgpsim_la_SOURCES = \
 	ioports.cc \
 	modules.cc \
 	p12x.cc \
+	p16f62x.cc \
 	p16x8x.cc \
 	p16f87x.cc \
 	p16x7x.cc \
@@ -71,6 +72,7 @@ gpsiminclude_HEADERS = \
 	modules.h \
 	p12x.h \
 	p16x5x.h \
+	p16f62x.h \
 	p16x6x.h \
 	p16x7x.h \
 	p16x8x.h \

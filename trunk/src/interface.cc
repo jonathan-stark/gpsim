@@ -54,7 +54,10 @@ int hll_mode=0; // 0 - asm, 1 - HLL
 
 extern "C" {
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
-  }
+}
+extern "C" {
+  extern void redisplay_prompt(void);  // in input.cc
+}
 
 //--------------------------------------------------------------------
 // InterfaceObject 
@@ -628,6 +631,8 @@ unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYP
 	bp.clear(breakpoint_number);
     }
 
+    redisplay_prompt();
+
     return 1;
 }
 //--------------------------------------------------------------------------
@@ -842,6 +847,8 @@ void gpsim_step(unsigned int processor_id, unsigned int steps)
     return;
 
   pic->step(steps);
+  redisplay_prompt();
+
 }
 //--------------------------------------------------------------------------
 void gpsim_step_over(unsigned int processor_id)
@@ -852,6 +859,8 @@ void gpsim_step_over(unsigned int processor_id)
     return;
 
   pic->step_over();
+  redisplay_prompt();
+
 }
 //--------------------------------------------------------------------------
 void gpsim_hll_step(unsigned int processor_id)
@@ -931,6 +940,8 @@ void gpsim_run(unsigned int processor_id)
     return;
 
   pic->run();
+  redisplay_prompt();
+
 }
 //--------------------------------------------------------------------------
 void gpsim_stop(unsigned int processor_id)
@@ -952,6 +963,9 @@ void gpsim_reset(unsigned int processor_id)
 
   if(pic)
     pic->reset(POR_RESET);
+
+  redisplay_prompt();
+
 }
 //--------------------------------------------------------------------------
 void gpsim_finish(unsigned int processor_id)
@@ -975,6 +989,9 @@ void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
     return;
 
   pic->run_to_address(address);
+
+  redisplay_prompt();
+
 }
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_stack_size(unsigned int processor_id)
