@@ -2,6 +2,7 @@
 #define __CMD_MANAGER_H__
 #include <stdio.h>
 #include "cmd_gpsim.h"
+#include "../src/gpsim_interface.h"
 #include <vector>
 #include <string>
 #include <functional>
@@ -10,11 +11,11 @@ using namespace std;
 class CGpsimConsole : public ISimConsole {
 public:
   CGpsimConsole(FILE* pOut = NULL);
-  void printf(const char *fmt, ...);
-  void vprintf(const char *fmt, va_list argptr);
-  void puts(const char*);
-  void putc(const char);
-  char* gets(char *, int);
+  void Printf(const char *fmt, ...);
+  void VPrintf(const char *fmt, va_list argptr);
+  void Puts(const char*);
+  void Putc(const char);
+  char* Gets(char *, int);
 
   void SetOut(FILE *pOut);
   void SetIn(FILE *pIn);
