@@ -310,7 +310,7 @@ void read_src_files_from_cod(pic_processor *cpu)
   int i,j,start_block,end_block,offset,num_files;
   char b[FILE_SIZE];
 
-  if(cpu->files) 
+  if(cpu->_files) 
     {
       cout << "This cpu already has source files\n";
       return;
@@ -343,16 +343,12 @@ void read_src_files_from_cod(pic_processor *cpu)
   int found_lst_in_cod = 0;
 
   if(num_files) {
+
     cpu->_files = new Files(num_files+1+MAX_HLL_FILES);
     cpu->_files->nsrc_files(num_files);
     cpu->_files->list_id(num_files);
 
-    cpu->files = new file_context[num_files+1+MAX_HLL_FILES];
-    cpu->number_of_source_files = num_files;
-    cpu->lst_file_id = num_files;
 
-    for(i=0;i<num_files+1+MAX_HLL_FILES;i++)
-    	cpu->files[i].file_ptr = 0;
 
     num_files = 0;  // now use 'num_files' as a counter.
 
@@ -393,48 +389,34 @@ void read_src_files_from_cod(pic_processor *cpu)
 
 	for (jj = 0; jj < num_files; ++jj) { // check if already opened
 	  // this could be fooled by search paths
-	  if (0 == strcasecmp (filenm, cpu->files[jj].name)) {
+
+
+	  string s1 = ((*cpu->_files)[jj])->name();
+	  string s2 = string(filenm);
+	  if (s1 == s2) {
 	    alreadyExists = 1;
 	    if (verbose)
 	      printf ("Found redundant source file %s\n", filenm);
-					// fix:: this leaks memory
-	    cpu->number_of_source_files--; // adjust total file count
 
 	    cpu->_files->nsrc_files(cpu->_files->nsrc_files() - 1);
 	    break;
 	  }
+
+
 	}
 	if(temp_block[offset] && !alreadyExists) {
-
-	  //// old way
-	  cpu->files[num_files].name = strdup(filenm);
-	  if(verbose)
-	    printf("%s\n",cpu->files[num_files].name);
-	  FILE *fp  = open_a_file(&cpu->files[num_files].name);
-	  cpu->files[num_files].file_ptr = fp;
-	  cpu->files[num_files].max_line = 0;
-
-	  if((strncmp(lstfilename, filenm,256) == 0) && 
-	     (cpu->lst_file_id > cpu->number_of_source_files))
-	    {
-	      if(verbose)
-		printf("Found list file %s\n",cpu->files[num_files].name);
-	      cpu->lst_file_id = num_files;
-	      found_lst_in_cod = 1;
-	    }
-
-	  //// new way
 
 	  //
 	  // Add this file to the list
 	  //
+	  FILE *fp  = open_a_file(&filenm);
 	  cpu->_files->Add(filenm, fp);
 
 	  if((strncmp(lstfilename, filenm,256) == 0) && 
 	     (cpu->_files->list_id() >= cpu->_files->nsrc_files()) )
 	    {
-	      //if(verbose)
-	      cout << "Found list file " << ((*cpu->_files)[num_files])->name() << endl;
+	      if(verbose)
+		cout << "Found list file " << ((*cpu->_files)[num_files])->name() << endl;
 	      cpu->_files->list_id(num_files);
 	      found_lst_in_cod = 1;
 	    }
@@ -448,30 +430,11 @@ void read_src_files_from_cod(pic_processor *cpu)
       cout << "Found " << num_files << " source files in .cod file\n";
 
 
-    //// old way
-
-    if(num_files != cpu->number_of_source_files)
-      cout << "warning, number of sources changed from " << num_files << " to " 
-	   << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
-
-    if(!found_lst_in_cod) {
-      
-      cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
-      cpu->files[num_files].name = strdup(lstfilename);
-      //	  cpu->files[cpu->number_of_source_files].file_ptr = 0;
-      if(verbose)
-	printf("List file %s wasn't in .cod\n",cpu->files[num_files].name);
-
-      cpu->files[num_files].file_ptr = open_a_file(&cpu->files[num_files].name);
-
-      cpu->files[num_files].max_line = 0;
-    }
 
 
-    //// new way
     if(num_files != cpu->_files->nsrc_files())
       cout << "warning, number of sources changed from " << num_files << " to " 
-	   << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
+	   << cpu->_files->nsrc_files() << " while reading code (gpsim bug)\n";
 
     if(!found_lst_in_cod) {
       cpu->_files->nsrc_files(num_files + 1);
@@ -483,7 +446,7 @@ void read_src_files_from_cod(pic_processor *cpu)
         printf("List file %s wasn't in .cod\n",lstfilename);
     }
 
-  }else
+  } else
     printf("No source file info\n");
 
   {
@@ -535,12 +498,12 @@ void read_line_numbers_from_cod(pic_processor *cpu)
 	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
 	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
-	  if( (file_id <= cpu->number_of_source_files) &&
+	  if( (file_id <= cpu->_files->nsrc_files()) &&
 	      (address <= cpu->program_memory_size()) &&
-	      (smod == 0x80) ) {
-	    cpu->attach_src_line(address,file_id,sline,lst_line_number);
+	      (smod == 0x80) )
 
-	  }
+	    cpu->attach_src_line(address,file_id,sline,lst_line_number);
+	  
 	}
       }
     }
@@ -747,6 +710,8 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
   int file_index;
   int filearray_index;
 
+#if USE_OLD_FILE_CONTEXT == 1
+
   // Find the file context that contain the .asm file.
   // This assumes 'there can be only one'.
   for(i=0;i<cpu->number_of_source_files;i++) {
@@ -756,18 +721,20 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     if(!strcmp(file_name+strlen(file_name)-4,".asm")) {
       
       // Make sure that the file is open
-      if(gpsim_file->file_ptr == 0)
-	{
-	  gpsim_file->file_ptr = fopen_path(file_name,"r");
-	  if(gpsim_file->file_ptr == 0)
-	    {
-	      printf("file \"%s\" not found!!!\n",file_name);
-	      return;
-	    }
+      if(!gpsim_file->file_ptr) {
+	
+	gpsim_file->file_ptr = fopen_path(file_name,"r");
+	if(!gpsim_file->file_ptr) {
+
+	  printf("file \"%s\" not found!!!\n",file_name);
+	  return;
 	}
+      }
       break;
     }
   }
+
+
 
   if(i==cpu->number_of_source_files)
     {
@@ -916,6 +883,11 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	  cpu->program_memory[address]->hll_src_line=line_number;
 	}
     }
+
+#else
+  cout << "FIXME:  HLL files are not supported at the moment" << endl;
+#endif
+
 }
 
 //-----------------------------------------------------------

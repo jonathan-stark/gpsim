@@ -197,6 +197,13 @@ class FileContext
   FileContext(string &new_name, FILE *_fptr);
   FileContext(char *new_name, FILE *_fptr);
   ~FileContext(void);
+
+  void ReadSource(void);
+  char *ReadLine(int line_number, char *buf, int nBytes);
+  char *gets(char *buf, int nBytes);
+  void rewind(void);
+  void open(const char *mode);
+
   string &name(void)
     {
       return name_str;
@@ -246,7 +253,9 @@ class Files
       return num_src_files;
     }
 
-
+  char *ReadLine(int file_id, int line_number, char *buf, int nBytes);
+  char *gets(int file_id, char *buf, int nBytes);
+  void rewind(int file_id);
 
  private:
   vector<FileContext *> *vpfile;
@@ -264,16 +273,11 @@ class Processor : public Module
 {
 public:
 
-  struct file_context *files;  // A dynamically allocated array for src file info
-  int number_of_source_files;  // The number of elements allocated to that array
-  int lst_file_id;
+  Files *_files;              // The source files for this processor.
 
+  int processor_id;           // An identifier to differentiate this instantiation from others
 
-  Files *_files;        // The source files for this processor.
-
-  int processor_id;              // An identifier to differentiate this instantiation from others
-
-  double frequency,period;     // Oscillator frequency and period.
+  double frequency,period;    // Oscillator frequency and period.
 
   Register **registers;       // 
   Register **register_bank;   //

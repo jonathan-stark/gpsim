@@ -1118,8 +1118,13 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
     // FIXME - there's a chance of buffer overflow & there's a chance of index overflow...
-    strcpy(str,(gp->cpu->files[file_id]).name);
+    FileContext *fc = (*sbaw->gp->cpu->_files)[file_id];
+    
+    //strcpy(str,(gp->cpu->files[file_id]).name);
+    strcpy(str,fc->name().c_str());
+
     label_string=strrchr(str,'/');
+
     if(label_string!=0)
       label_string++; // Skip the '/'
     else
@@ -1265,11 +1270,6 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     
     gtk_text_freeze(GTK_TEXT(sbaw->source_text[id]));
 
-    fseek(cpu->files[file_id].file_ptr,
-	  0,
-	  SEEK_SET);
-
-
     gtk_editable_delete_text(GTK_EDITABLE(sbaw->source_text[id]),0,-1);
     for(iter=sa_xlate_list[id];iter!=0;)
     {
@@ -1291,7 +1291,15 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 
     totallinesheight=0;
 
-    while(fgets(text_buffer, 256, cpu->files[file_id].file_ptr)!=0)
+    /*
+    fseek(cpu->files[file_id].file_ptr,
+	  0,
+	  SEEK_SET);
+    */
+    //while(fgets(text_buffer, 256, cpu->files[file_id].file_ptr)!=0)
+    cpu->_files->rewind(file_id);
+
+    while(cpu->_files->gets(file_id, text_buffer, 256))
     {
 	char *end, *q;
 
@@ -1700,8 +1708,8 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   
   //int pic_id;
 
-  char *file_name;
-  struct file_context *gpsim_file;
+  const char *file_name;
+  //struct file_context *gpsim_file;
   int file_id;
 
   int address;
@@ -1737,10 +1745,15 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   }
 
-  for(i=0;i<gp->cpu->number_of_source_files;i++)
+  //for(i=0;i<gp->cpu->number_of_source_files;i++)
+  for(i=0;i<gp->cpu->_files->nsrc_files();i++)
   {
-      gpsim_file = &(gp->cpu->files[i]);
-      file_name = gpsim_file->name;
+    FileContext *fc = (*gp->cpu->_files)[i];
+    file_name = fc->name().c_str();
+
+    //gpsim_file = &(gp->cpu->files[i]);
+    //file_name = gpsim_file->name;
+
 
       if(strcmp(file_name+strlen(file_name)-4,".lst")
 	 &&strcmp(file_name+strlen(file_name)-4,".LST")
@@ -1762,6 +1775,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 	  file_id = i;
 
 	  // Make sure that the file is open
+	  fc->open("r");
+
+	  /*
 	  if(gpsim_file->file_ptr == 0)
 	  {
 	      if(file_name != 0)
@@ -1773,6 +1789,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 		  continue;
 	      }
 	  }
+	  */
 
 	  id = add_page(this,file_id);
 
