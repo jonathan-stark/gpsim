@@ -256,7 +256,6 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\src\xref.h"
 
   SetOutPath "$INSTDIR\examples\12bit"
-  File "${GPSIM_ROOT}\examples\12bit\Makefile.am"
   File "${GPSIM_ROOT}\examples\12bit\*.asm"
   File "${GPSIM_ROOT}\examples\12bit\*.inc"
   File "${GPSIM_ROOT}\examples\12bit\*.stc"
@@ -322,6 +321,7 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\examples\scripts\makefile"
   File "${GPSIM_ROOT}\examples\scripts\README"
   File "${GPSIM_ROOT}\examples\scripts\*.cc"
+  File "${GPSIM_ROOT}\examples\scripts\*.h"
   File "${GPSIM_ROOT}\examples\scripts\*.asm"
   File "${GPSIM_ROOT}\examples\scripts\*.py"
 

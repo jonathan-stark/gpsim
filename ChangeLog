@@ -1,3 +1,13 @@
+2004-12-19 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: added examples/scripts/client_interface.h
+	  to installation
+	* mingw/makefile.mingw, gpsim/gpsim.vcproj: added gthread-2.0.lib
+	* src/src.vcproj: removed plat\win32\glist.cpp from project; CLI
+	  mode now requires linking with full glib library; added src/trigger.cc
+	  and src/trigger.h to the project
+	* modules/modules.vcproj: pthreads to the project
+	* gpsim.sln: removed building of modules in CLI configuration
+
 2004-12-17 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, src/interface.cc: replaced pthread_* calls and
 	declarations with the corresponding GTK ones.
@@ -5,7 +15,7 @@
 2004-12-17 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, src/interface.cc: Added experimental code to
 	test threading.
-	
+
 2004-12-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_menu.cc: Use the interface instead of
 	the cpu pointer to initiate simulation.
