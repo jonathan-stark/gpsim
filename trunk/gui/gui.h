@@ -342,7 +342,7 @@ struct _SourceBrowserOpcode_Window {
     GtkWidget *sheet;
     GtkWidget *entry;
     GtkWidget *label;
-    GtkWidget *pcwidget;
+//    GtkWidget *pcwidget;
     GtkWidget *popup_menu;
 
 

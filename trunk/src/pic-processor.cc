@@ -1593,6 +1593,8 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   else
     cpu->program_memory[addr] = new_inst;
 
+  cpu->program_memory[addr]->is_modified=1;
+  
   if(cpu->program_memory[addr]->xref)
       cpu->program_memory[addr]->xref->update();
   

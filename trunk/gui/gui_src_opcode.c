@@ -297,20 +297,24 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
     range.col0=column;
     range.coli=column;
     
-    pc=gpsim_get_pc_value(sbow->sbw.gui_obj.gp->pic_id);
+/*    pc=gpsim_get_pc_value(sbow->sbw.gui_obj.gp->pic_id);
     // Set styles/indicators
     if(address==pc)
     {
 	SourceBrowserOpcode_set_pc(sbow, pc);
     }
     else
+    {*/
+    if(gpsim_address_has_breakpoint(sbow->sbw.gui_obj.gp->pic_id,  address))
     {
-	if(gpsim_address_has_breakpoint(sbow->sbw.gui_obj.gp->pic_id,  address))
-	    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, breakpoint_line_number_style);
-	else
-	    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, row_default_style);
-
+	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, breakpoint_line_number_style);
     }
+    else
+    {
+	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, row_default_style);
+    }
+
+//    }
     
     if(gpsim_address_has_breakpoint(sbow->sbw.gui_obj.gp->pic_id, address))
 	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &breakpoint_color);
@@ -341,18 +345,24 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
     int row=address/16;
     int column=address%16;
     char buf[128];
-    
-    // Put new values, in case they changed
-    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
-    sprintf(row_text[OPCODE_COLUMN], "0x%04X", gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address));
-    filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,buf), 128);
-    gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
-    gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
+    unsigned int oc;
 
-    gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
-		       row,column,
-		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
-    
+    oc=gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address);
+
+    if(oc != sbow->memory[address])
+    {
+	sbow->memory[address]=oc;
+	// Put new values, in case they changed
+	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
+	sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
+	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,buf), 128);
+	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
+	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
+
+	gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
+			   row,column,
+			   GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+    }
 }
 
 static void update(SourceBrowserOpcode_Window *sbow, int address)
@@ -363,8 +373,7 @@ static void update(SourceBrowserOpcode_Window *sbow, int address)
 
     update_values(sbow,address);
     update_styles(sbow,address);
-    update_label(sbow,address);
-    
+//    update_label(sbow,address);
 }
 
 
@@ -395,6 +404,42 @@ static unsigned long get_number_in_string(char *number_string)
   */
 
   return(retval);
+}
+
+
+static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
+{
+  gint i;
+  gchar name[45];
+
+  if(sbow == NULL || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
+  {
+      printf("Warning update_ascii(%x,%x)\n",(unsigned int)sbow,row);
+      return;
+  }
+
+  if(row<0 || row>GTK_SHEET(sbow->sheet)->maxrow)
+      return;
+  
+  for(i=0; i<32; i++)
+  {
+      unsigned char byte;
+
+      if(i%2)
+	  byte = sbow->memory[row*16 + i/2]&0xff;
+      else
+	  byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
+      
+      name[i] = byte;
+
+	if( (name[i] < ' ') || (name[i]>'z'))
+	    name[i] = '.';
+    }
+
+  name[REGISTERS_PER_ROW*2] = 0;
+
+  gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
+
 }
 
 
@@ -447,7 +492,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 	  printf("Writing new value, new %d, last %d\n",n,sbow->memory[reg]);
 	  sbow->memory[reg]=n;
 	  gpsim_put_opcode(gp->pic_id, reg, n);
-//	      update_ascii(sbow,row);
+	  update_ascii(sbow,row);
       }
     }
   else
@@ -505,8 +550,8 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   row=sheet->active_cell.row; col=sheet->active_cell.col;
 
   parse_numbers(GTK_WIDGET(sheet),sheet->active_cell.row,sheet->active_cell.col,sbow);
-//  update_ascii(sbow,row);
-      
+  
+  update_label(sbow,row*16+col);
 }
 
 /*
@@ -555,7 +600,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
 	return 0;
     }
 
-    update(sbow,row*16+column);
+    update_label(sbow,row*16+column);
     
     gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
 			     sheet->active_cell.col, &attributes);
@@ -594,6 +639,7 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
 
     if(address >= 0)
     {
+	printf("update line %d\n",address);
 	update(sbow,address);
 
     }
@@ -615,11 +661,11 @@ void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address)
     if(address != last_address)
     {
 	SourceBrowserOpcode_update_line( sbow, last_address, address);
-	//gtk_clist_set_row_style (GTK_CLIST (sbw->clist), sbw->current_row, row_default_style);
+//	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), last_address, row_default_style);
 	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, current_line_number_style);
 
-	gtk_sheet_get_cell_area(GTK_SHEET(sbow->sheet),row,col,&rect);
-	gtk_sheet_move_child(GTK_SHEET(sbow->sheet),sbow->pcwidget,rect.x,rect.y);
+//	gtk_sheet_get_cell_area(GTK_SHEET(sbow->sheet),row,col,&rect);
+//	gtk_sheet_move_child(GTK_SHEET(sbow->sheet),sbow->pcwidget,rect.x,rect.y);
     }
     
     if(GTK_VISIBILITY_FULL != gtk_clist_row_is_visible (GTK_CLIST (sbow->clist),
@@ -701,6 +747,10 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
 
 	gtk_clist_append (GTK_CLIST (sbow->clist), row_text);
     }
+
+    for(i=0;i<pm_size/16;i++)
+	update_ascii(sbow,i);
+    
     gtk_clist_set_row_style (GTK_CLIST (sbow->clist), 0, current_line_number_style);
 
     gtk_clist_thaw (GTK_CLIST (sbow->clist));
@@ -761,6 +811,8 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
     range.rowi=GTK_SHEET(sbow->sheet)->maxrow;
     range.coli=GTK_SHEET(sbow->sheet)->maxcol;
     gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &normal_pm_bg_color);
+    gtk_sheet_range_set_font(sbow->sheet, &range, normal_style->font);
+
 
     // Clearing and appending is faster than changing
     gtk_clist_clear(GTK_CLIST(sbow->clist));
@@ -992,14 +1044,15 @@ static GdkBitmap *mask;
 
 
   
-  style = gtk_widget_get_style(sbow->sbw.gui_obj.window);
+/*  style = gtk_widget_get_style(sbow->sbw.gui_obj.window);
   pixmap_pc = gdk_pixmap_create_from_xpm_d(sbow->sbw.gui_obj.window->window,
 					   &mask,
 					   &style->bg[GTK_STATE_NORMAL],
 					   (gchar**)pc_xpm);
-  sbow->pcwidget = gtk_pixmap_new(pixmap_pc,mask);
-  gtk_widget_show(sbow->pcwidget);
-  gtk_sheet_put(GTK_SHEET(sbow->sheet),sbow->pcwidget,0,0);
+*/
+//  sbow->pcwidget = gtk_pixmap_new(pixmap_pc,mask);
+//  gtk_widget_show(sbow->pcwidget);
+//  gtk_sheet_put(GTK_SHEET(sbow->sheet),sbow->pcwidget,0,0);
 
   
   

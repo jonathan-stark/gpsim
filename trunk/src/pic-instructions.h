@@ -97,6 +97,9 @@ public:
   // the type of window it's in, and also the way in which
   // the data is presented
 
+  int is_modified; // flag indicating if this instruction has
+                   // changed since start.
+  
   XrefObject *xref;
   
 //    GSList *gui_xref;
