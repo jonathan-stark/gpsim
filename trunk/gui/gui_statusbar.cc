@@ -71,14 +71,14 @@ static StatusBar_Window *popup_sbw;
 //========================================================================
 //
 // A LabeledEntry is an object consisting of gtk entry
-// widget that is labeled (with a gtk lable widget) and 
-// has information about its parent.
+// widget that is labeled (with a gtk lable widget)
 //
 
 class LabeledEntry {
 public:
   GtkWidget *label;
   GtkWidget *entry;
+  StatusBar_Window *sbw;
 
   union {
     gint32    i32;
@@ -86,14 +86,26 @@ public:
     double    db;
   } value;           // value displayed
 
-  gpointer parent;   // a pointer to the owner
-
 
   LabeledEntry(void);
   void Create(GtkWidget *box,char *clabel, int string_width);
+  void NewLabel(char *clabel);
+  virtual void Update(void);
+  void AssignParent(StatusBar_Window *);
+  virtual void put_value(unsigned int);
 
 };
 
+class RegisterLabeledEntry : public LabeledEntry {
+public:
+
+  Register *reg;
+
+  RegisterLabeledEntry(Register *);
+
+  virtual void put_value(unsigned int);
+  void AssignRegister(Register *new_reg) {reg = new_reg;}
+};
 
 //========================================================================
 
@@ -119,14 +131,13 @@ LabeledEntry::LabeledEntry(void)
 {
   label = 0;
   entry = 0;
-  parent = 0;
 }
 
 void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
 {
 
   label = (GtkWidget *)gtk_label_new (clabel);
-
+    
   gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
   gtk_widget_set_usize (label, 0, 15);
   gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
@@ -140,21 +151,55 @@ void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
 
 
 #if GTK_MAJOR_VERSION >= 2
- gtk_widget_set_usize (entry,
-		       string_width * gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
+  gtk_widget_set_usize (entry,
+			string_width * gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
 			-1);
 #else
- gtk_widget_set_usize (entry,
-		       string_width * gdk_string_width (entry->style->font, "9") + 6,
-		       -1);
+  gtk_widget_set_usize (entry,
+			string_width * gdk_string_width (entry->style->font, "9") + 6,
+			-1);
 #endif
 
   gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
   gtk_widget_show (entry);
+}
 
+void LabeledEntry::AssignParent(StatusBar_Window *new_sbw)
+{
+  sbw = new_sbw;
+}
+
+void LabeledEntry::Update(void)
+{
+  if(sbw)
+    sbw->Update();
+}
+
+void LabeledEntry::put_value(unsigned int new_value)
+{
 
 }
 
+void LabeledEntry::NewLabel(char *clabel)
+{
+  if(label)
+    gtk_label_set_text(GTK_LABEL(label),clabel);
+
+}
+//------------------------------------------------------------------------
+RegisterLabeledEntry::RegisterLabeledEntry(Register *new_reg) 
+ : LabeledEntry()
+{
+  reg = new_reg;
+}
+
+void RegisterLabeledEntry::put_value(unsigned int new_value)
+{
+  if(reg)
+    reg->put_value(new_value);
+}
+
+//------------------------------------------------------------------------
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
@@ -262,6 +307,27 @@ void StatusBar_Window::Update(void)
 
 }
 
+static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
+{
+  const char *text;
+  unsigned int value;
+  char *bad_position;
+
+  if(!gp || !gp->cpu || !le || !le->entry)
+    return;
+
+  text=gtk_entry_get_text (GTK_ENTRY (le->entry));
+    
+  value = strtoul(text, &bad_position, 16);
+  if( strlen(bad_position) )
+    return;  /* string contains an invalid number */
+
+  le->put_value(value);
+  le->Update();
+
+  return;
+}
+
 static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
   const char *text;
@@ -283,32 +349,6 @@ static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
   pic->W->put_value(value);
 
-  sbw->Update();
-
-  return;
-}
-
-static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
-{
-  const char *text;
-  unsigned int value;
-  char *bad_position;
-
-  if(!gp || !gp->cpu)
-    return;
-
-  pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
-  if(!pic)
-    return;
-
-  text=gtk_entry_get_text (GTK_ENTRY (sbw->status->entry));
-    
-  value = strtoul(text, &bad_position, 16);
-  if( strlen(bad_position) )
-    return;  /* string contains an invalid number */
-    
-  pic->status->put_value(value);
-    
   sbw->Update();
 
   return;
@@ -336,56 +376,16 @@ static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
 
 
-/*
- * create_labeled_entry
- */
-#if 0
-labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width)
-{
-
-  labeled_entry *le;
-
-
-  le = (labeled_entry *)malloc(sizeof(labeled_entry));
-
-  le->label = gtk_label_new (label);
-
-  gtk_misc_set_alignment (GTK_MISC (le->label), 1.0, 0.5);
-  gtk_widget_set_usize (le->label, 0, 15);
-  gtk_box_pack_start (GTK_BOX (box), le->label, FALSE, FALSE, 0);
-  gtk_widget_show (le->label);
-
-  le->entry = gtk_entry_new ();
-//  gtk_signal_connect(GTK_OBJECT(le->entry), "activate",
-//		     GTK_SIGNAL_FUNC(enter_callback),
-//		     label);
-  gtk_entry_set_text (GTK_ENTRY (le->entry), "----");
-
-  le->value.i32 = 0;
-
-#if GTK_MAJOR_VERSION >= 2
- gtk_widget_set_usize (le->entry,
-			string_width * gdk_string_width (gtk_style_get_font(le->entry->style), "9") + 6,
-			-1);
-#else
- gtk_widget_set_usize (le->entry,
-			string_width * gdk_string_width (le->entry->style->font, "9") + 6,
-			-1);
-#endif
-  gtk_box_pack_start (GTK_BOX (box), le->entry, FALSE, FALSE, 0);
-  gtk_widget_show (le->entry);
-
-  return(le);
-}
-#endif //0
-
 // button press handler
 static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
 {
     if(widget==0 || event==0 || sbw==0)
     {
-        printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbw);
+        printf("Warning do_popup(%x,%x,%x)\n",
+	       (unsigned int)widget,
+	       (unsigned int)event,
+	       (unsigned int)sbw);
         return 0;
     }
   
@@ -423,15 +423,12 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
   gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
-  status = new LabeledEntry();
+  status = new RegisterLabeledEntry(0);
   status->Create(hbox,"Status:", 4);
-/*
-  status = create_labeled_entry(hbox,"Status:", 4);
-  status->parent = this;
-*/
+
   gtk_signal_connect(GTK_OBJECT(status->entry), "activate",
-		     GTK_SIGNAL_FUNC(status_callback),
-		     this);
+		     GTK_SIGNAL_FUNC(LabeledEntry_callback),
+		     status);
 
   W = new LabeledEntry();
   W->Create(hbox,"W:", 4);
@@ -441,6 +438,7 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
 
   pc = new LabeledEntry();
   pc->Create(hbox,"PC:", 6);
+  pc->AssignParent(this);
 
   gtk_signal_connect(GTK_OBJECT(pc->entry), "activate",
 		     GTK_SIGNAL_FUNC(pc_callback),
@@ -478,6 +476,16 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 
   gp->status_bar = this;
 
+  if(gp->cpu) {
+
+    RegisterLabeledEntry *rle = dynamic_cast<RegisterLabeledEntry *>(status);
+    pic_processor *pic = dynamic_cast<pic_processor *>(gp->cpu);
+    if(pic && rle)
+      rle->AssignRegister(pic->status);
+
+    status->NewLabel((char *) rle->reg->name().c_str());
+
+  }
 
   /* Now create a cross-reference link that the simulator can use to
    * send information back to the gui
