@@ -154,6 +154,10 @@ AC_FUNC_SELECT_ARGTYPES
 AC_FUNC_STRTOD
 AC_CHECK_FUNCS([floor gethostbyname gethostname gettimeofday memset pow select socket sqrt strcasecmp strchr strdup strerror strncasecmp strndup strpbrk strrchr strstr strtoul])
 
+# printf modifier define for long long as "ll"
+# config_win32.h.in defines this for Visual Studio stdclib as "I64"
+AC_DEFINE([PRINTF_INT64_MODIFIER],["ll"],[printf modifier define for long long])
+
 AM_CFLAGS=
 AM_CXXFLAGS=
 AM_LDFLAGS=
