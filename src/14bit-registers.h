@@ -439,7 +439,7 @@ class PCON : public sfr_register
 // Watch Dog Timer
 //
 
-class WDT : public BreakpointObject
+class WDT : public TriggerObject
 {
 public:
   pic_processor *cpu;           // The cpu to which this wdt belongs.

@@ -139,7 +139,7 @@ guint64 Cycle_Counter::get(double future_time_from_now)
 // value of 'future_cycle' is compared against the values in the
 // 'active' list.
 
-bool Cycle_Counter::set_break(guint64 future_cycle, BreakpointObject *f, unsigned int bpn)
+bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned int bpn)
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
@@ -222,8 +222,8 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakpointObject *f, unsigne
 
 //--------------------------------------------------
 // remove_break
-// remove break for BreakpointObject
-void Cycle_Counter::clear_break(BreakpointObject *f)
+// remove break for TriggerObject
+void Cycle_Counter::clear_break(TriggerObject *f)
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2 = 0;
@@ -279,7 +279,7 @@ void Cycle_Counter::clear_break(BreakpointObject *f)
 // set a cycle counter break point relative to the current cpu cycle value. Return 1 if successful.
 //
 
-bool Cycle_Counter::set_break_delta(guint64 delta, BreakpointObject *f, unsigned int bpn)
+bool Cycle_Counter::set_break_delta(guint64 delta, TriggerObject *f, unsigned int bpn)
 {
 
 #ifdef __DEBUG_CYCLE_COUNTER__
@@ -359,7 +359,7 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 // over on a certain cycle and the program changes the pre-scale value, 
 // then the break point has to be moved to the new cycle.
 
-bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakpointObject *f)
+bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, TriggerObject *f)
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;

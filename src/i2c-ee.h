@@ -39,7 +39,7 @@ class I2C_EE_SDA;
 
 const int I2C_EE_WRITE_TIME = 4000;
 
-class I2C_EE :  public BreakpointObject
+class I2C_EE :  public TriggerObject
 {
 public:
 

@@ -63,8 +63,8 @@ Boston, MA 02111-1307, USA.  */
 #include "usart.h"
 
 
-//void  gpsim_set_break(guint64 next_cycle, BreakpointObject *f=NULL);
-//void  gpsim_set_break_delta(guint64 delta, BreakpointObject *f=NULL);
+//void  gpsim_set_break(guint64 next_cycle, TriggerObject *f=NULL);
+//void  gpsim_set_break_delta(guint64 delta, TriggerObject *f=NULL);
 //pic_processor *gpsim_get_active_cpu(void);
 //guint64 gpsim_get_current_time(void);
 //guint64 gpsim_digitize_time(double time);
@@ -337,7 +337,7 @@ public:
 //
 //--------------------------------------------------------------
 
-class BRG       //  : public BreakpointObject
+class BRG       //  : public TriggerObject
 {
 public:
   double baud;
@@ -596,7 +596,7 @@ public:
 // defined in the main gpsim code.
 //
 
-class TXREG : public BreakpointObject
+class TXREG : public TriggerObject
 {
  public:
   USART_TXPIN *txpin;
@@ -775,7 +775,7 @@ class TXREG : public BreakpointObject
 // in the main gpsim code
 //
 
-class RCREG : public BreakpointObject // : public _RCREG
+class RCREG : public TriggerObject // : public _RCREG
 {
  public:
 

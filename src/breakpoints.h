@@ -33,22 +33,64 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 class InvalidRegister;
+class TriggerObject;
+
+//========================================================================
+//
+//
+class TriggerAction
+{
+public:
+  TriggerAction();
+  virtual ~TriggerAction() {}
+  virtual bool evaluate(void);
+  virtual bool getTriggerState(void);
+  virtual void action(void);
+};
+
+class SimpleTriggerAction : public TriggerAction
+{
+public:
+  SimpleTriggerAction(TriggerObject *_to);
+  virtual void action(void);
+protected:
+  TriggerObject *to;
+
+};
+
+class TriggerGroup : public TriggerAction
+{
+public:
+
+protected:
+  list<TriggerObject*> triggerList;
+
+  virtual ~TriggerGroup(){}
+};
 
 
 #define MAX_BREAKPOINTS 0x400
 #define BREAKPOINT_MASK (MAX_BREAKPOINTS-1)
 
-// BreakpointObject - a base class for handling all of gpsim's breakpoints.
+// TriggerObject - a base class for handling all of gpsim's breakpoints.
 //
-// The BreakpointObject class is designed to be part of a multiple inheritance
-// class heirarchy. As its name implies, this class will provide an
-// interface to the breakpoint functionality.
+// The TriggerObject class is designed to be part of a multiple inheritance
+// class heirarchy. Its main function is to provide interface to the 
+// breakpoint functionality.
 
-class BreakpointObject
+class TriggerObject
 {
  public:
 
   unsigned int bpn;
+
+  // When the TriggerObject becomes true, then the TriggerAction is 
+  // evaluated. E.g. If the trigger object is an execution breakpoint,
+  // then whenever the PC == break address, the Breakpoint_Instruction
+  // class (which is derived from this class) will invoke action->evaluate()
+  // which will in turn halt the execution.
+
+  TriggerAction *action;
 
   // Enable the breakpoint and return true if successful
   virtual bool set_break(void) {return false;}
@@ -82,12 +124,17 @@ class BreakpointObject
 
   virtual char const * bpName() { return "Generic"; }
 
+  virtual void set_action(TriggerAction *ta) { action = ta; }
+  virtual TriggerAction *get_action(void) { return action;}
+
+  TriggerObject();
+  TriggerObject(TriggerAction *);
   // Virtual destructor place holder
-  virtual ~BreakpointObject() { }
+  virtual ~TriggerObject() { }
 
 };
 
-class Breakpoint_Instruction : public instruction , public BreakpointObject
+class Breakpoint_Instruction : public instruction , public TriggerObject
 {
 private:
   string  message_str;               // printed when break occurs.
@@ -145,12 +192,12 @@ public:
 
 class Notify_Instruction : public Breakpoint_Instruction
 {
-  BreakpointObject *callback;
+  TriggerObject *callback;
  public:
   Notify_Instruction(Processor *cpu, 
 		     unsigned int address, 
 		     unsigned int bp, 
-		     BreakpointObject *cb);
+		     TriggerObject *cb);
   virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
   virtual void execute(void);
   virtual char const * bpName() { return "Notify Execution"; }
@@ -163,7 +210,7 @@ class Profile_Start_Instruction : public Notify_Instruction
   Profile_Start_Instruction(Processor *cpu, 
 			    unsigned int address, 
 			    unsigned int bp, 
-			    BreakpointObject *cb);
+			    TriggerObject *cb);
   virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Start"; }
 };
@@ -174,7 +221,7 @@ class Profile_Stop_Instruction : public Notify_Instruction
   Profile_Stop_Instruction(Processor *cpu, 
 			   unsigned int address, 
 			   unsigned int bp, 
-			   BreakpointObject *cb);
+			   TriggerObject *cb);
   virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
   virtual char const * bpName() { return "Profile Stop"; }
 };
@@ -250,7 +297,7 @@ public:
     Processor *cpu;
     unsigned int arg1;
     unsigned int arg2;
-    BreakpointObject *bpo;
+    TriggerObject *bpo;
   } break_status[MAX_BREAKPOINTS];
 
   unsigned int  global_break;
@@ -262,19 +309,19 @@ public:
   unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,
 			      unsigned int, 
 			      unsigned int,
-			      BreakpointObject *f = 0);
-  unsigned int set_breakpoint(BreakpointObject *);
+			      TriggerObject *f = 0);
+  unsigned int set_breakpoint(TriggerObject *);
 
   unsigned int set_execution_break(Processor *cpu, unsigned int address);
   unsigned int set_notify_break(Processor *cpu, 
 				unsigned int address, 
-				BreakpointObject *cb);
+				TriggerObject *cb);
   unsigned int set_profile_start_break(Processor *cpu, 
 				       unsigned int address, 
-				       BreakpointObject *f1 = 0);
+				       TriggerObject *f1 = 0);
   unsigned int set_profile_stop_break(Processor *cpu, 
 				      unsigned int address, 
-				      BreakpointObject *f1 = 0);
+				      TriggerObject *f1 = 0);
   unsigned int set_read_break(Processor *cpu, unsigned int register_number);
   unsigned int set_write_break(Processor *cpu, unsigned int register_number);
   unsigned int set_read_value_break(Processor *cpu, 
@@ -287,7 +334,7 @@ public:
 				     unsigned int mask=0xff);
   unsigned int set_cycle_break(Processor *cpu,
 			       guint64 cycle,
-			       BreakpointObject *f = 0);
+			       TriggerObject *f = 0);
   unsigned int set_wdt_break(Processor *cpu);
   unsigned int set_stk_overflow_break(Processor *cpu);
   unsigned int set_stk_underflow_break(Processor *cpu);
@@ -392,13 +439,14 @@ inline Breakpoints &get_bp(void)
 // the simulation can be manipulated.
 //
 
-class BreakpointRegister : public Register, public BreakpointObject
+class BreakpointRegister : public Register, public TriggerObject
 {
 public:
 
   Register *replaced;       // A pointer to the register that this break replaces
 
-  BreakpointRegister(void){ replaced = 0;};
+  BreakpointRegister(void) : TriggerObject(0)
+  { replaced = 0;};
   BreakpointRegister(Processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
@@ -662,7 +710,7 @@ public:
 };
 
 #ifdef HAVE_GUI
-class GuiCallBack: public BreakpointObject
+class GuiCallBack: public TriggerObject
 {
 public:
   virtual void callback(void);

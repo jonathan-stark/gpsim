@@ -342,7 +342,7 @@ int realtime_mode=0;
 int realtime_mode_with_gui=0;
 extern void update_gui(void);
 
-class RealTimeBreakPoint : public BreakpointObject
+class RealTimeBreakPoint : public TriggerObject
 {
 public:
   Processor *cpu;

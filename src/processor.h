@@ -43,7 +43,7 @@ class Processor;
 // The MemoryAccess class is a base class designed to support
 // access to memory. For the PIC, this class is extended by
 // the ProgramMemoryAccess and RegisterMemoryAccess classes.
-class MemoryAccess :  public BreakpointObject
+class MemoryAccess :  public TriggerObject
 {
 public:
 
@@ -135,11 +135,11 @@ class ProgramMemoryAccess :  public MemoryAccess
   // A couple of functions for manipulating  breakpoints
   virtual void set_break_at_address(unsigned int address);
   virtual void set_notify_at_address(unsigned int address,
-				     BreakpointObject *cb);
+				     TriggerObject *cb);
   virtual void set_profile_start_at_address(unsigned int address,
-					    BreakpointObject *cb);
+					    TriggerObject *cb);
   virtual void set_profile_stop_at_address(unsigned int address,
-					   BreakpointObject *cb);
+					   TriggerObject *cb);
   virtual int clear_break_at_address(unsigned int address,
 				     enum instruction::INSTRUCTION_TYPES type);
   virtual int clear_notify_at_address(unsigned int address);

@@ -34,7 +34,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
-class Encoder : public Module, private BreakpointObject
+class Encoder : public Module, private TriggerObject
 {
     void create_widget(Encoder *enc);
 public:

@@ -156,7 +156,7 @@ public:
 
 const int EPROM_WRITE_TIME = 20;
 
-class EEPROM :  public BreakpointObject
+class EEPROM :  public TriggerObject
 {
 public:
 

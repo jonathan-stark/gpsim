@@ -1977,7 +1977,7 @@ static unsigned int stopaddress;
 //
 // ProfileStart class
 //
-class ProfileStart : public BreakpointObject
+class ProfileStart : public TriggerObject
 {
 
 public:
@@ -2007,7 +2007,7 @@ private:
 //
 // ProfileStop class
 //
-class ProfileStop : public BreakpointObject
+class ProfileStop : public TriggerObject
 {
 
 public:
