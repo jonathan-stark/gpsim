@@ -560,7 +560,7 @@ static int load_styles(Register_Window *rw)
 {
     GdkColormap *colormap = gdk_colormap_get_system();
 
-    rw->normalfont=gdk_font_load (rw->normalfont_string);
+    rw->normalfont=gdk_fontset_load (rw->normalfont_string);
     gdk_color_parse("light cyan", &rw->normal_bg_color);
     gdk_color_parse("black", &rw->normal_fg_color);
     gdk_color_parse("blue", &rw->item_has_changed_color);
@@ -666,7 +666,7 @@ static int settings_dialog(Register_Window *rw)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
