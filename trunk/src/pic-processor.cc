@@ -551,6 +551,8 @@ public:
 
     guint64 fc = cycle_start+100;
 
+    cout << "real time start : " << future_cycle << '\n';
+
     if(future_cycle)
       cpu->cycles.reassign_break(future_cycle, fc, this);
     else
@@ -564,8 +566,10 @@ public:
   {
 
     // Clear any pending break point.
+    cout << "real time stop : " << future_cycle << '\n';
 
     if(future_cycle) {
+      cout << " real time clearing\n";
       cpu->cycles.clear_break(this);
       future_cycle = 0;
     }
