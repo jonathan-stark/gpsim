@@ -556,9 +556,11 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   if(!valid_register(pic,type,0))
       return 0;
   
-  if(type == REGISTER_EEPROM)
-    return pic->eeprom_get_size();
-  
+  if(type == REGISTER_EEPROM) {
+    if(pic->eeprom)
+      return pic->eeprom->rom_size;
+    return 0;
+  }
   return pic->register_memory_size();
 }
 
