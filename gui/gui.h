@@ -47,6 +47,8 @@ Boston, MA 02111-1307, USA.  */
 #define Dprintf(arg) {}
 #endif
 
+#define GTKWAIT { while(gtk_events_pending()) gtk_main_iteration(); }
+
 //------------------------------------------------------------
 //
 // Create structures to generically access the pic-processor

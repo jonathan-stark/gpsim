@@ -2288,6 +2288,8 @@ gdouble gaussian(GtkPlot *plot, GtkPlotData *data, gdouble x, gboolean *err)
 
 void Profile_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
 
   GtkWidget *label;
   GtkWidget *main_vbox;
@@ -2457,7 +2459,7 @@ void Profile_Window::Build(void)
 
 
   enabled=1;
-  is_built=1;
+  bIsBuilt=true;
 
   NewProcessor(gp);
 
@@ -2480,7 +2482,7 @@ Profile_Window::Profile_Window(GUI_Processor *_gp)
   window = 0;
   wc = WC_data;
   wt = WT_profile_window;
-  is_built = 0;
+
   profile_list=0;
   profile_range_list=0;
   profile_register_list=0;

@@ -242,6 +242,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   virtual void SetPC(int address);
   virtual void NewSource(GUI_Processor *gp);
   virtual void UpdateLine(int address);
+  virtual void Fill();
 
 };
 

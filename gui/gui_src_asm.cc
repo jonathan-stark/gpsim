@@ -389,7 +389,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   printf(" SetPC: %s , moving to %d\n", 
    name(), PIXMAP_POS(this,e));
 
-  GTKwait();
+  //  GTKWAIT;
 }
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
@@ -446,7 +446,7 @@ void SourceBrowserAsm_Window::Update(void)
   if(status_bar)
     status_bar->Update();
 
-  GTKwait();
+  //  GTKWAIT;
 }
 
 /*
@@ -1263,7 +1263,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
 
-    sbaw->GTKwait();
+    GTKWAIT;
     //while(gtk_events_pending()) // display everything, so that
     //	gtk_main_iteration();  // gtk_notebook_get_current_page() works
 
@@ -1314,7 +1314,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
 		 sbaw->pages[id].source_pcwidget,0,0);
   gtk_widget_show(sbaw->pages[id].source_pcwidget);
-  sbaw->GTKwait();
+  //  GTKWAIT;
   return id;
     
 }
@@ -1765,7 +1765,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
-  GTKwait();
+  GTKWAIT;
 
   address=gp->cpu->pc->get_value();
   if(address==INVALID_VALUE)
@@ -1778,7 +1778,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   for(address=0;address<gp->cpu->program_memory_size();address++)
     UpdateLine(address);
 
-  GTKwait();
+  //  GTKWAIT;
 
   Dprintf((" Source is loaded\n"));
 }
@@ -2407,6 +2407,9 @@ static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyl
 
 void SourceBrowserAsm_Window::Build(void)
 {
+  if(bIsBuilt)
+    return;
+
   GtkWidget *hbox;
   GtkWidget *button;
 
@@ -2544,16 +2547,16 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_widget_show(window);
 
-  GTKwait();
+  //  GTKWAIT;
   enabled=1;
 
-  is_built=1;
+  bIsBuilt = true;;
   cout << name() << " is built" << endl;
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();
 
-  GTKwait();
+  //  GTKWAIT;
 
 }
 
@@ -2589,7 +2592,6 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
 
   wc = WC_source;
   wt = WT_asm_source_window;
-  is_built = 0;
 
   status_bar = new StatusBar_Window();
 

@@ -1992,6 +1992,10 @@ static int delete_event(GtkWidget *widget,
 
 void Register_Window::Build(void)
 {
+
+  if(bIsBuilt)
+    return;
+
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
 
@@ -2140,15 +2144,15 @@ void Register_Window::Build(void)
 
   gtk_widget_grab_default(location);
   
-  GTKwait();
+  GTKWAIT;
   enabled=1;
   
-  is_built=1;
+  bIsBuilt = true;
   
   for(i=0;i<MAX_REGISTERS;i++)
       registers[i]=0;
   
-  NewProcessor(gp);
+  //NewProcessor(gp);
 
   UpdateMenuItem();
   Dprintf((" regwin is built\n"));
@@ -2169,7 +2173,6 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   window = 0;
   wc = WC_data;
   wt = WT_register_window;
-  is_built = 0;
   enabled = 0;
   pCellFormat = 0;
   char_width = 0;

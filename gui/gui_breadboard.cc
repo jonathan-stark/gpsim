@@ -3038,6 +3038,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     position_module(p, x, y);
     xpos->set(x);
     ypos->set(y);
+
     update_board_matrix(p->bbw);
 
     bbw->modules=g_list_append(bbw->modules, p);
@@ -3058,11 +3059,6 @@ void Breadboard_Window::Update(void)
   // loop all modules and look for changes
   if(!enabled)
     return;
-#if GTK_MAJOR_VERSION >= 2
-  enabled=0;
-  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
-  return;
-#endif
 
     
   if(!GTK_WIDGET_VISIBLE(window))
@@ -3129,6 +3125,9 @@ void Breadboard_Window::Update(void)
 
     iter = iter->next;
   }
+
+  //  GTKWAIT;
+
 }
 
 static int delete_event(GtkWidget *widget,
@@ -3142,13 +3141,8 @@ static int delete_event(GtkWidget *widget,
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
-#if GTK_MAJOR_VERSION >= 2
 
-  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
-  return;
-#endif
-
-  if(!enabled || !is_built)
+  if(!enabled)
     return;
 
   if(!gp || !gp->cpu)
@@ -3162,13 +3156,8 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 /* When a module is created */
 void Breadboard_Window::NewModule(Module *module)
 {
-#if GTK_MAJOR_VERSION >= 2
 
-  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
-  return;
-#endif
-
-  if(!is_built)
+  if(!bIsBuilt)
     Build();
 
 
@@ -3190,13 +3179,8 @@ void Breadboard_Window::NewModule(Module *module)
 /* When a stimulus is being connected or disconnected, or a new node is created */
 void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
-#if GTK_MAJOR_VERSION >= 2
 
-  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
-  return;
-#endif
-
-  if(!is_built)
+  if(!bIsBuilt)
     Build();
 
   struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name().c_str());
@@ -3283,13 +3267,11 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
     gtk_widget_queue_draw(widget);
 }
 
+
 void Breadboard_Window::Build(void)
 {
-#if GTK_MAJOR_VERSION >= 2
-
-  cout << " The bread board widget doesn't work properly under GTK 2.x\n";
-  return;
-#endif
+  if(bIsBuilt)
+    return;
 
   GtkWidget *hpaned1;
   GtkWidget *vbox9;
@@ -3875,10 +3857,10 @@ void Breadboard_Window::Build(void)
   gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), node_tree);
   gtk_object_set_data(GTK_OBJECT(node_tree), "root_of_nodes", gn);
 
-  is_built=1;
+  bIsBuilt = true;
   enabled = 1;
 
-  GTKwait();
+  //  GTKWAIT;
 
   NewProcessor(gp);
 
@@ -3902,7 +3884,6 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   wc = WC_misc;
   wt = WT_breadboard_window;
   window = 0;
-  is_built = 0;
   enabled = 0;
 
   pinstatefont = 0;
