@@ -9,3 +9,5 @@ RT=./rt.sh
 ${RT} instructions_14bit/instructions_14bit
 
 ${RT} node_test/node_test
+
+${RT} p16f84/p16f84
