@@ -88,9 +88,11 @@ class DataPort : public Lcd_Port
 {
 public:
   unsigned int direction;
+  bool acceptingData;
 
   void put(unsigned int new_value);
   virtual void assert_event(void);
+  virtual void setbit(unsigned int bit_number, bool new_value);
   DataPort (unsigned int _num_iopins=8);
   void update_pin_directions(unsigned int );
  

@@ -113,8 +113,10 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
 
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
-      //cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = "
-      //   << new_value <<'\n';
+      if(lcd && lcd->debug)
+	cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = "
+         << new_value <<'\n';
+
       value ^= bit_mask;
 
       assert_event();
@@ -132,14 +134,24 @@ void Lcd_Port::assert_event(void)
 
 DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 {
+  value = 0;
 
 }
- 
+
+void DataPort::setbit(unsigned int bit_number, bool new_value)
+{
+  if((lcd->control_port->value & 2) == 1)
+    Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
+  else
+    cout << "DataPort::" << __FUNCTION__ << " ignoring data\n";
+}
 void DataPort::update_pin_directions(unsigned int new_direction)
 {
 
   if((new_direction ^ direction) & 1) {
     direction = new_direction & 1;
+
+    cout << __FUNCTION__ << " new direction " <<new_direction << endl;
 
     // Change the directions of the I/O pins
     for(int i=0; i<8; i++) {
@@ -147,13 +159,13 @@ void DataPort::update_pin_directions(unsigned int new_direction)
 	pins[i]->update_direction(direction);
 
 	if(pins[i]->snode)
-		pins[i]->snode->update(0);
+	  pins[i]->snode->update(0);
       }
     }
   }
 }
 
- 
+
 void Lcd_Port::trace_register_write(void)
 {
 
@@ -177,6 +189,8 @@ void ControlPort::put(unsigned int new_value)
 {
 
   unsigned int old_value = value;
+
+  cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
@@ -203,6 +217,7 @@ void DataPort::put(unsigned int new_value)
 
   unsigned int old_value = value;
 
+  cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
@@ -227,7 +242,7 @@ void Lcd_Input::put_node_state( int new_state)
   IO_input::put_node_state(new_state);
 
   if(current_state ^ state) {
-    //cout << "Lcd Input " << name() << " changed to new state: " << state << '\n';
+    cout << "Lcd Input " << name() << " changed to new state: " << state << '\n';
   }
 
 }
@@ -377,7 +392,6 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   set_crt_resolution();
   set_contrast();
 
-  // Hard code to 2 rows and 20 columns.
   rows = aRows;
   cols = aCols;
 
@@ -385,17 +399,10 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   fontP = NULL;
 
   // If you want to get diagnostic info, change debug to non-zero.
-  debug = 0;
+  debug = 1;
 
   interface = new LCD_Interface(this);
   gi.add_interface(interface);
-
-/*
-  interface_id = gpsim_register_interface((gpointer)this);
-
-  gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
-  gpsim_register_gui_update(interface_id, simulation_has_stopped);
-*/
 
   CreateGraphics();
 

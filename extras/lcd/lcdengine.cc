@@ -160,6 +160,8 @@ void LcdDisplay::start_data(void)
     data_latch_phase ^= 1;
   }
 
+  cout << __FUNCTION__ << " data latch = " << data_latch << endl;
+
   newState(ST_COMMAND_PH0);
 }
 
@@ -167,7 +169,10 @@ void LcdDisplay::send_status(void)
 {
   unsigned short status;
   
+
   status = ( cursor.row * 0x40 ) + cursor.col; // FIXME - No busy yet
+
+  cout << __FUNCTION__ << "status = " << status << endl;
 
   if(in_8bit_mode()) {
     data_port->put ( status );
@@ -290,6 +295,8 @@ void LcdDisplay::execute_command(void)
 void LcdDisplay::new_command(void)
 {
 
+  cout << __FUNCTION__ << endl;
+
   if(in_8bit_mode())
     execute_command();
 
@@ -310,6 +317,8 @@ void LcdDisplay::new_command(void)
 
 void LcdDisplay::new_data(void)
 {
+
+  cout << __FUNCTION__ << endl;
 
   if(in_8bit_mode())
     write_data(data_latch);
@@ -352,9 +361,8 @@ void LcdDisplay::revertState(void)
 void LcdDisplay::advanceState( ControlLineEvent e)
 {
 
-  last_event = e;
-  //cout << "Event:  " << getEventName(e) << '\n';
-  //cout << " from State:  " << getStateName(current_state) << '\n';
+  cout << "Event:  " << getEventName(last_event) << "->" << getEventName(e)<< '\n';
+  cout << " from State:  " << getStateName(current_state) << '\n';
 
   switch(current_state) {
   case ST_INITIALIZED:
@@ -392,11 +400,16 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     break;
     
   default:
+    
     break;
 
   }
 
-  //cout << " to State:  " << getStateName(current_state) << '\n';
+  last_event = e;
+
+  cout << " to State:  " << getStateName(current_state) << '\n';
+
+  viewInternals(0xff);
 }
 
 char * LcdDisplay::getStateName(State s)
@@ -462,6 +475,8 @@ void LcdDisplay::viewInternals(int verbosity)
     cout << "  " << ( (in_8bit_mode()) ? '8' : '4') << "bit mode\n";
     cout << "  " << ( (in_2line_mode()) ? '2' : '1') << "-line mode\n";
     cout << "  " << ( (in_large_font_mode()) ? "large" : "small") << " font\n";
+    cout << "  " << " Control = 0x" << hex << control_port->value << endl;
+    cout << "  " << " Data = 0x" << hex << data_port->value << endl;
 
   }
 
@@ -489,8 +504,7 @@ void LcdDisplay::InitStateMachine(void)
   for(j=0; j<cols; j++)
     ch_data[1][j] = 0;
 
-  if(debug)
-    test();
+  // if(debug) test();
 }
 
 void LcdDisplay::test(void)
@@ -540,6 +554,7 @@ void LcdDisplay::test(void)
     advanceState(eWD);
   }
 
+  set_8bit_mode();
 
   viewInternals(0xff);
 }
