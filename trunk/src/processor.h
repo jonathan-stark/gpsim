@@ -120,6 +120,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   // Given a file and a line in that file, find the instrucion in the
   // processor's memory that's closest to it.
   virtual int  find_closest_address_to_line(int file_id, int src_line);
+  virtual int  find_address_from_line(int file_id, int src_line);
   //virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
 
   // Given an address to an instruction, find the source line that 
