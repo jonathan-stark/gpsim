@@ -261,7 +261,11 @@ void Symbol_Window::Update(void)
     int row;
     sym *e;
 
-    entry[1] = strndup((*sti)->type_name(), strlen((*sti)->type_name()));
+    int len = strlen((*sti)->type_name());
+    pstr=(char*)malloc(len+1);
+    strncpy(pstr,(*sti)->type_name(),len);
+    pstr[len]=0;
+    entry[1] = pstr;
 
     entry[2]=(char*)malloc(32);
     if((*sti)->isa()==SYMBOL_ADDRESS||

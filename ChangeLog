@@ -1,4 +1,7 @@
 2004-02-11  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_symbols.cc: - changed strndup to a strcpy (plus malloc...):
+	
+2004-02-11  Scott Dattalo  <scott@dattalo.com>
 	* gui/* changed calls to gpsim_* to the C++ interface.
 	* src/interface.cc - removed many of the gpsim_* functions
 	* src/stimuli.cc, cli/cmd_set.cc - changed calls to gpsim_* to
