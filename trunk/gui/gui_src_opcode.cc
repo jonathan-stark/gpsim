@@ -43,12 +43,6 @@ extern int gui_question(char *question, char *a, char *b);
 extern int config_set_string(char *module, char *entry, char *string);
 extern int config_get_string(char *module, char *entry, char **string);
 
-/*
-unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address);
-char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address);
-unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
-*/
-
 #include "gui.h"
 
 #include <assert.h>
@@ -534,7 +528,7 @@ static void update_label(SourceBrowserOpcode_Window *sbow, int address)
     {
 	oc=gpsim_get_opcode(sbow->gp->pic_id  ,address);
 	
-	filter(labeltext,gpsim_get_opcode_name( sbow->gp->pic_id, address,entrytext),sizeof(labeltext));
+	filter(labeltext,gpsim_get_opcode_name( sbow->gp->cpu, address,entrytext),sizeof(labeltext));
 	sprintf(entrytext, "0x%04X", oc);
     }
     
@@ -561,7 +555,7 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
 	// Put new values, in case they changed
 	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
 	sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->gp->pic_id, address,buf), 128);
+	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->gp->cpu, address,buf), 128);
 	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
 	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
 
@@ -1131,7 +1125,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 	memory[i]=opcode;
 	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
 	sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->pic_id, i,buf), 128);
+	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), 128);
 
 	gtk_sheet_set_cell(GTK_SHEET(sheet),
 			   i/16,
@@ -1222,7 +1216,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
       memory[i]=opcode=gpsim_get_opcode(gp->pic_id  ,i);
       sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
       sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-      filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->pic_id, i,buf), 128);
+      filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), 128);
       gtk_clist_append (GTK_CLIST (clist), row_text);
       gtk_sheet_set_cell(GTK_SHEET(sheet),
 			 i/16,i%16,

@@ -55,10 +55,6 @@ typedef enum _REGISTER_TYPE
     REGISTER_EEPROM
 } REGISTER_TYPE;
 
-#ifdef __cplusplus
-//extern "C" {
-#endif /* __cplusplus */
-
 struct file_context {
   char *name;           /* file name */
   FILE *file_ptr;
@@ -288,7 +284,7 @@ typedef struct _sym
   unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id,
 						   unsigned int file_id,
 						   unsigned int line);
-  char *gpsim_get_opcode_name(unsigned int processor_id,
+  char *gpsim_get_opcode_name(Processor *cpu,
 			      unsigned int address,
 			      char *buffer);
   unsigned int gpsim_get_opcode(unsigned int processor_id,
@@ -344,12 +340,6 @@ typedef struct _sym
 				  void (*new_program)  (unsigned int processor_id));
   void gpsim_register_gui_update(unsigned int interface_id,
 				 void (*gui_update) (gpointer));
-
-
-
-#ifdef __cplusplus
-//}
-#endif /* __cplusplus */
 
 
 #endif /* __INTERFACE_H__ */

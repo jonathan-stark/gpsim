@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1998,1999,2000,2001
+   Copyright (C) 1998,1999,2000,2001,2002,2003
    T. Scott Dattalo and Ralf Forsberg
 
 This file is part of gpsim.
@@ -2060,7 +2060,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
     if(gpsim_address_has_opcode( gp->pic_id, i)) {
 	
       sprintf(address_string,"0x%04x",i);
-      strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
+      strcpy(instruction_string,gpsim_get_opcode_name( gp->cpu, i,buf));
 
       cycles=gp->cpu->cycles_used(i);
       sprintf(count_string,"0x%Lx",cycles);
