@@ -25,13 +25,6 @@ protected:
   FILE * m_pfIn;
 };
 
-/*
-struct lessCommandManager : binary_function<ICommandHandler, ICommandHandler, bool> {
-bool operator()(const string& _X, const string& _Y) const
-	{return (_X < _Y); }
-};
-*/
-
 class CommandHandlerKey : public ICommandHandler {
 public:
   CommandHandlerKey(const char *name) {
@@ -64,7 +57,6 @@ private:
     }
   };
 
-  // typedef map<string, ICommandHandler*, lessCommandManager> List;
   typedef vector<ICommandHandler*> List;
 
   List                  m_HandlerList;
