@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 
 #include <vector>
+#include <list>
 
 #include "gpsim_classes.h"
 #include "modules.h"
@@ -33,11 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_interface.h"
 
 
-extern SIMULATION_MODES simulation_mode;
-class GUI_Processor;
 class Processor;
-extern int verbose;
-
 
 //---------------------------------------------------------
 // The ProgramMemoryAccess class is the interface used
@@ -95,12 +92,12 @@ class ProgramMemoryAccess :  public BreakCallBack
   bool hasValid_opcode(unsigned int address);
 
   // step - step one of more instructions
-  void step(unsigned int steps);
-  void step_over(void);
+  virtual void step(unsigned int steps);
+  virtual void step_over(void);
 
-  void run(void);
-  void stop(void);
-  void finish(void);
+  virtual void run(void);
+  virtual void stop(void);
+  virtual void finish(void);
 
   // isModified -- returns true if the program at the address has been modified 
   // (this is only valid for those processor capable of writing to their own
@@ -277,8 +274,6 @@ public:
 
   Files *files;               // The source files for this processor.
 
-  //int processor_id;           // An identifier to differentiate this instantiation from others
-
   double frequency,period;    // Oscillator frequency and period.
 
   Register **registers;       // 
@@ -291,6 +286,13 @@ public:
   RegisterMemoryAccess ema;   // eeprom memory interface (if present).
 
   Program_Counter *pc;
+
+  // Context debugging is a way of debugging the processor while it is
+  // in different states. For example, when the interrupt flag is set
+  // (for those processors that support interrupts), the processor is
+  // in a different 'state' then when the interrupt flag is cleared.
+
+  list<ProgramMemoryAccess *> pma_context;
 
   //
   // Creation and manipulation of registers

@@ -190,7 +190,7 @@ void SourceBrowser_Window::Create(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event),

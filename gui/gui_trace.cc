@@ -247,7 +247,7 @@ void Trace_Window::Build(void)
     
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
@@ -314,7 +314,7 @@ Trace_Window::Trace_Window(GUI_Processor *_gp)
   menu = "<main>/Windows/Trace";
 
   gp = _gp;
-  name = "trace";
+  set_name("trace");
   window = 0;
   wc = WC_data;
   wt = WT_trace_window;

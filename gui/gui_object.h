@@ -48,7 +48,6 @@ class GUI_Object {
   enum window_category wc;
   enum window_types wt;
 
-  char *name;
   char *menu;
 
   // Window geometry. This info is saved when the window associated
@@ -72,7 +71,9 @@ class GUI_Object {
   void check(void);
   int set_default_config(void);
   int set_config(void);
-
+  char *name(void);
+  void set_name(char * new_name);
+  void set_name(string &new_name);
   virtual void Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
@@ -80,6 +81,9 @@ class GUI_Object {
     {
       gp = _gp;
     }
+
+ private:
+  string name_str;
 
 };
 

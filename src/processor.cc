@@ -36,7 +36,6 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <list>
 
 #include "../config.h"
 #include "gpsim_def.h"
@@ -50,16 +49,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 
-//int use_gui=0;
 
-//#ifdef HAVE_GUI
-//#include <gtk/gtk.h>
-//void gui_refresh(void)
-//{
-//	while(gtk_events_pending())
-//		gtk_main_iteration();
-//}
-//#endif
+SIMULATION_MODES simulation_mode;
+
 
 //------------------------------------------------------------------------
 //
@@ -77,6 +69,17 @@ Processor::Processor(void)
   pc = 0;
 
   set_frequency(1.0);
+
+  // add the 'main' pma to the list pma context's. Processors may
+  // choose to add multiple pma's to the context list. The gui
+  // will build a source browser for each one of these. The purpose
+  // is to provide more than one way of debugging the code. (e.g.
+  // this is useful for debugging interrupt versus non-interrupt code).
+
+  pma_context.push_back(&pma);
+
+  // Uncomment this to get two identical source browsers in the gui:
+  //  pma_context.push_back(&pma);
 
   interface = new ProcessorInterface(this);
 

@@ -1224,7 +1224,7 @@ int Register_Window::SettingsDialog(void)
 	  gdk_font_unref(font);
 #endif
 	  strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	  config_set_string(name,"normalfont",normalfont_string);
+	  config_set_string(name(),"normalfont",normalfont_string);
 	  fonts_ok++;
 	}
   }
@@ -1985,7 +1985,7 @@ void Register_Window::Build(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   /**************************** load fonts *********************************/
 #if GTK_MAJOR_VERSION >= 2
@@ -1994,7 +1994,7 @@ void Register_Window::Build(void)
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
 #endif
   strcpy(normalfont_string,DEFAULT_NORMALFONT);
-  if(config_get_string(name,"normalfont",&fontstring))
+  if(config_get_string(name(),"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
 
   while(!LoadStyles())
@@ -2002,7 +2002,7 @@ void Register_Window::Build(void)
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
 	strcpy(normalfont_string,DEFAULT_NORMALFONT);
-	config_set_string(name,"normalfont",normalfont_string);
+	config_set_string(name(),"normalfont",normalfont_string);
       }
       else
       {
@@ -2137,7 +2137,7 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 
   int i;
 
-  name = "register_viewer_ram";
+  set_name("register_viewer_ram");
   // Add a status bar
   gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
   gp->status_bar->created=0;
@@ -2168,7 +2168,7 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   menu = "<main>/Windows/EEPROM";
   type = REGISTER_EEPROM;
 
-  name = "register_viewer_eeprom";
+  set_name("register_viewer_eeprom");
   
   get_config();
 

@@ -531,7 +531,7 @@ static void
 toggle_addresses (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_addresses = !sw->filter_addresses;
-    config_set_variable(sw->name, "filter_addresses", sw->filter_addresses);
+    config_set_variable(sw->name(), "filter_addresses", sw->filter_addresses);
     sw->Update();
 }
 
@@ -539,7 +539,7 @@ static void
 toggle_constants (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_constants = !sw->filter_constants;
-    config_set_variable(sw->name, "filter_constants", sw->filter_constants);
+    config_set_variable(sw->name(), "filter_constants", sw->filter_constants);
     sw->Update();
 }
 
@@ -547,7 +547,7 @@ static void
 toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_registers = !sw->filter_registers;
-    config_set_variable(sw->name, "filter_registers", sw->filter_registers);
+    config_set_variable(sw->name(), "filter_registers", sw->filter_registers);
     sw->Update();
 }
 
@@ -569,7 +569,7 @@ void Symbol_Window::Build(void)
   
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
   
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
@@ -669,7 +669,7 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   menu = "<main>/Windows/Symbols";
 
   gp = _gp;
-  name = "symbol_viewer";
+  set_name("symbol_viewer");
   wc = WC_misc;
   wt = WT_symbol_window;
   window = 0;
@@ -684,9 +684,9 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   
   get_config();
 
-  config_get_variable(name,"filter_addresses",&filter_addresses);
-  config_get_variable(name,"filter_constants",&filter_constants);
-  config_get_variable(name,"filter_registers",&filter_registers);
+  config_get_variable(name(),"filter_addresses",&filter_addresses);
+  config_get_variable(name(),"filter_constants",&filter_constants);
+  config_get_variable(name(),"filter_registers",&filter_registers);
 
   if(enabled)
     Build();

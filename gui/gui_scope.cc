@@ -694,7 +694,7 @@ Scope_Window::Scope_Window(GUI_Processor *_gp)
   wt = WT_scope_window;
 
   menu = "<main>/Windows/Scope";
-  name = "scope";
+  set_name("scope");
 
   get_config();
 

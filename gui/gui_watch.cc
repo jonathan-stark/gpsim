@@ -231,7 +231,7 @@ static void set_column(GtkCheckButton *button, struct _coldata *coldata)
     else
 	gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,0);
     sprintf(str,"show_column%d",coldata->column);
-    config_set_variable(coldata->ww->name,str,button->toggle_button.active);
+    config_set_variable(coldata->ww->name(),str,button->toggle_button.active);
 }
 
 static void select_columns(Watch_Window *ww, GtkWidget *clist)
@@ -621,7 +621,7 @@ void Watch_Window::Build(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
   
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
@@ -690,7 +690,7 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
 
   menu = "<main>/Windows/Watch";
 
-  name = "watch_viewer";
+  set_name("watch_viewer");
   wc = WC_data;
   wt = WT_watch_window;
   window = 0;
@@ -707,7 +707,7 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
     char str[128];
     sprintf(str,"show_column%d",i);
     coldata[i].visible=1; // default
-    config_get_variable(name,str,&coldata[i].visible);
+    config_get_variable(name(),str,&coldata[i].visible);
   }
 
   if(enabled)
