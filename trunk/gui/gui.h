@@ -258,6 +258,10 @@ struct _Symbol_Window {
     int filter_constants;
     int filter_registers;
 
+    GtkWidget *addressesbutton;
+    GtkWidget *constantsbutton;
+    GtkWidget *registersbutton;
+
     int load_symbols;
 };
 

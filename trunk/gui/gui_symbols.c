@@ -196,19 +196,62 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
 {
     GList *p;
+    sym *s;
     
     if(name==NULL)
 	return;
 
+    // If window is not displayed, then display it.
     if(!sw->gui_obj.enabled)
-	return;
-    
+    {
+	sw->gui_obj.change_view((GUI_Object*)sw,VIEW_SHOW);
+    }
+
+    // See if the type of symbol selected is currently filtered out, and
+    // if so we unfilter it.
+    gpsim_symbol_rewind((unsigned int)gp->pic_id);
+    while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+    {
+	if(!strcasecmp(s->name,name))
+	{
+	    switch(s->type)
+	    {
+	    case SYMBOL_ADDRESS:
+		if(sw->filter_addresses)
+		{
+		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), TRUE);
+		    while(gtk_events_pending()) // FIXME. Not so nice...
+                        gtk_main_iteration();
+		}
+		break;
+	    case SYMBOL_CONSTANT:
+		if(sw->filter_constants)
+		{
+		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), TRUE);
+		    while(gtk_events_pending()) // FIXME. Not so nice...
+                        gtk_main_iteration();
+		}
+		break;
+	    case SYMBOL_REGISTER:
+		if(sw->filter_registers)
+		{
+		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), TRUE);
+		    while(gtk_events_pending()) // FIXME. Not so nice...
+                        gtk_main_iteration();
+		}
+		break;
+	    }
+	    break;
+	}
+    }
+
+    // Find the symbol and select it in the clist
     p=sw->symbols;
     while(p)
     {
 	sym *e;
 	e=(sym*)p->data;
-	if(!strcmp(e->name,name))
+	if(!strcasecmp(e->name,name))
 	{
 	    int row;
 	    row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
@@ -358,7 +401,6 @@ int BuildSymbolWindow(Symbol_Window *sw)
   GtkWidget *scrolled_window;
 //  GtkWidget *separator;
   GtkWidget *hbox;
-  GtkWidget *button;
 
   int x,y,width,height;
   
@@ -410,33 +452,33 @@ int BuildSymbolWindow(Symbol_Window *sw)
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE,FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
 
-  button = gtk_check_button_new_with_label ("addresses");
-  gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
+  sw->addressesbutton = gtk_check_button_new_with_label ("addresses");
+  gtk_box_pack_start (GTK_BOX (hbox), sw->addressesbutton, TRUE, TRUE, 5);
   if(sw->filter_addresses)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-  gtk_signal_connect (GTK_OBJECT (button), "toggled",
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (sw->addressesbutton), "toggled",
 		      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)sw);
 
   
-  button = gtk_check_button_new_with_label ("constants");
-  gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
+  sw->constantsbutton = gtk_check_button_new_with_label ("constants");
+  gtk_box_pack_start (GTK_BOX (hbox), sw->constantsbutton, TRUE, TRUE, 5);
   if(sw->filter_constants)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-  gtk_signal_connect (GTK_OBJECT (button), "toggled",
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (sw->constantsbutton), "toggled",
 		      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)sw);
 
   
-  button = gtk_check_button_new_with_label ("registers");
-  gtk_box_pack_start (GTK_BOX (hbox), button, TRUE, TRUE, 5);
+  sw->registersbutton = gtk_check_button_new_with_label ("registers");
+  gtk_box_pack_start (GTK_BOX (hbox), sw->registersbutton, TRUE, TRUE, 5);
   if(sw->filter_registers)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), FALSE);
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (button), TRUE);
-  gtk_signal_connect (GTK_OBJECT (button), "toggled",
+      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (sw->registersbutton), "toggled",
 		      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)sw);
 
   gtk_signal_connect_after(GTK_OBJECT(sw->gui_obj.window), "configure_event",
