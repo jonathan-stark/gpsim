@@ -360,6 +360,28 @@ int parse_string(char * str)
 
 //========================================================================
 //
+
+static int check_old_command(char *s)
+{
+    char new_command[256];
+    { // "module position <modulename> <xpos> <ypos>
+    	char module_name[256];
+	int xpos, ypos;
+    	if(sscanf(s,"module position %s %d %d\n",module_name, &xpos, &ypos)==3)
+	{
+		cout<<"Found old style \"module position\" command"<<endl;
+		sprintf(new_command,"%s.xpos=%d.0\n",module_name,xpos);
+		add_string_to_input_buffer(new_command);
+		cout<<"Translation: "<<new_command<<endl;
+		sprintf(new_command,"%s.ypos=%d.0\n",module_name,ypos);
+		add_string_to_input_buffer(new_command);
+		cout<<"Translation: "<<new_command<<endl;
+		return 1;
+	}
+    }
+    return 0;
+}
+
 void process_command_file(const char * file_name)
 {
 
@@ -395,7 +417,10 @@ void process_command_file(const char * file_name)
       char str[256];
 
       while( (s = fgets(str, 256, cmd_file)) != 0) 
-       add_string_to_input_buffer(s);
+      {
+          if(!check_old_command(s))
+              add_string_to_input_buffer(s);
+      }
 
       fclose(cmd_file);
     }
