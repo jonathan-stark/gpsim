@@ -242,6 +242,16 @@ void TraceFrame::print()
     (*toIter)->print_frame(this);
 }
 
+void TraceFrame::update_state() 
+{
+  list <TraceObject *> :: iterator toIter;
+
+  for(toIter = traceObjects.begin();
+      toIter != traceObjects.end();
+      ++toIter) 
+    (*toIter)->getState(this);
+}
+
 
 void Trace::addFrame(TraceFrame *newFrame)
 {
@@ -305,6 +315,11 @@ void TraceObject::print_frame(TraceFrame *tf)
   // printers.
 }
 
+void TraceObject::getState(TraceFrame *tf)
+{
+  // Provide an opportunity for derived classes to copy specific state
+  // information to the TraceFrame.
+}
 
 //========================================================================
 // RegisterTraceObject
@@ -315,10 +330,15 @@ RegisterWriteTraceObject::RegisterWriteTraceObject(Processor *_cpu,
   : TraceObject(_cpu), reg(_reg), from(trv)
 {
   if(reg) {
-    to = reg->trace_state;
-    reg->trace_state = from;
+    to = reg->get_trace_state();
+    reg->put_trace_state(from);
   }
 }
+
+void RegisterWriteTraceObject::getState(TraceFrame *tf)
+{
+}
+
 void RegisterWriteTraceObject::print(void)
 {
   char sFrom[16];
@@ -337,8 +357,7 @@ RegisterReadTraceObject::RegisterReadTraceObject(Processor *_cpu,
   : RegisterWriteTraceObject(_cpu, _reg, trv)
 {
   if(reg) {
-    //to = reg->trace_state;
-    reg->trace_state = from;
+    reg->put_trace_state(from);
   }
 }
 void RegisterReadTraceObject::print(void)
@@ -348,6 +367,10 @@ void RegisterReadTraceObject::print(void)
   if(reg)
     fprintf(stdout, "  Read: 0x%s from %s(0x%04X)\n",
 	    from.toString(sFrom,sizeof(sFrom)), reg->name().c_str(), reg->address);
+}
+
+void RegisterReadTraceObject::getState(TraceFrame *tf)
+{
 }
 
 //========================================================================
@@ -551,6 +574,7 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
   unsigned int tv = trace.get(tbi);
   printf(" PCTraceType: 0x%x\n",tv);
 
+  trace.addFrame(new TraceFrame( ));
 
   PCTraceObject *pcto = new PCTraceObject(cpu, tv);
   trace.addToCurrentFrame(pcto);
@@ -824,9 +848,10 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	if(tti != trace_map.end()) {
 	  TraceType *tt = (*tti).second;
 
-	  if(tt) 
+	  if(tt) {
 	    tt->dump_raw(index,buffer,bufsize);
-
+	    return_value = tt->size;
+	  }
 	  break;
 	} 
 
@@ -902,23 +927,26 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   while(traceFrames.size()<n && inRange(k,frame_end,frame_start)) {
 
     printf("k=%d  ",k);
+
+    // Look up this trace type in the trace map
     map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(k));
 
     if(tti != trace_map.end()) {
+      // The trace type was found in the trace map
+      // Now decode it. Note that this is where things
+      // like trace frames are created (e.g. for PCTraceType
+      // decode() creates a new trace frame).
+
       TraceType *tt = (*tti).second;
 
-      if(tt) {
-	if(tt->isFrameBoundary() )
-	  addFrame(new TraceFrame( ));
-	   
+      if(tt)
 	tt->decode(k);
-      } 
-
 
     } else if(is_cycle_trace(k,&cycle) == 2) {
+
       current_cycle_time = cycle;
       printf(" Cycle Trace type 0x%Lx\n",cycle);
-      //printf(" ignoring cycle trace\n");
+
     } else {
 
       if(type(k) == 0)

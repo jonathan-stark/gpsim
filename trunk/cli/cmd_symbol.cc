@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_symbol.h"
+#include "../src/symbol.h"
 #include "../src/symbol_orb.h"
 #include "expr.h"
 
@@ -70,6 +71,17 @@ void cmd_symbol::dump_all(void)
 void cmd_symbol::dump_one(char *sym_name)
 {
   symbol_dump_one(sym_name);
+}
+
+void cmd_symbol::dump_one(gpsimSymbol *s)
+{
+  if(s) {
+
+    symbol *sym = s->get_sym();
+
+    if(sym)
+      sym->print();
+  }
 }
 
 void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)

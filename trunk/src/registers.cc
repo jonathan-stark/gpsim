@@ -71,6 +71,55 @@ char * RegisterValue::toString(char *str, int len, int regsize)
   return str;
 }
 
+//========================================================================
+// toBitStr
+//
+// Convert a RegisterValue type to a bit string
+//
+// Given a pointer to a string, this function will convert a register
+// value into a string of ASCII characters. If no names are given
+// for the bits, then the default values of 'H', 'L', and '?' are 
+// used for high, low and undefined.
+//
+// The input 'BitPos' is a bit mask that has a bit set for each bit that
+// the user wishes to display.
+//
+
+char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos, 
+			     char *HiBitNames,
+			     char *LoBitNames,
+			     char *UndefBitNames)
+{
+  unsigned int j,mask,max;
+  int i;
+
+  if(!s)
+    return 0;
+
+  max = 32;
+
+  for(i=len-2,j=0,mask=1; j<max; j++, mask<<=1) {
+
+    if(BitPos & mask) {
+
+      char H = HiBitNames ? HiBitNames[i] : '1';
+      char L = LoBitNames ? LoBitNames[i] : '0';
+      char U = UndefBitNames ? UndefBitNames[i] : '?';
+
+      s[i] = (init & mask) ?  U : 
+	((data & mask) ? H : L);
+
+      if(--i < 0)
+	break;
+    }
+
+  }
+
+  s[len-1] = 0;
+
+  return s;
+}
+
 
 //--------------------------------------------------
 // Member functions for the file_register base class
