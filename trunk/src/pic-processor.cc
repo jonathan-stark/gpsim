@@ -569,7 +569,7 @@ void pic_processor::run (void)
 	//#endif
       }
       simulation_mode=STOPPED;
-      disassemble(pc->get_value(), pc->get_value());
+      disassemble((signed int)pc->get_value(), (signed int)pc->get_value());
       gi.simulation_has_stopped();
       return;
   }
@@ -645,7 +645,7 @@ void pic_processor::step (unsigned int steps)
       }
       icd_step();
       pc->get_value();
-      disassemble(pc->value, pc->value); // FIXME, don't want this in HLL ICD mode.
+      disassemble((signed int)pc->value, (signed int)pc->value); // FIXME, don't want this in HLL ICD mode.
       gi.simulation_has_stopped();
       return;
   }
@@ -721,7 +721,7 @@ void pic_processor::reset (RESET_TYPE r)
   {
       puts("RESET");
       icd_reset();
-      disassemble(pc->get_value(), pc->get_value());
+      disassemble((signed int)pc->get_value(), (signed int)pc->get_value());
       gi.simulation_has_stopped();
       return;
   }

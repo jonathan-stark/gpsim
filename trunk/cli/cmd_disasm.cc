@@ -88,7 +88,7 @@ void cmd_disassemble::disassemble(Expression *expr)
 
     }
 
-    cpu->disassemble(cpu->pc->value + start, cpu->pc->value + end);
+    cpu->disassemble((signed int)(cpu->pc->value + start), (signed int)(cpu->pc->value + end));
 
   }
 
