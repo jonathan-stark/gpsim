@@ -1260,7 +1260,7 @@ void pic_processor::read_src_files(void)
 	  // is the offset (in bytes) from the beginning of the 
 	  // file. (e.g. files[3].line_seek[20] references the
 	  // 20th line of the third source file.)
-	  files[i].line_seek = new int[files[i].max_line];
+	  files[i].line_seek = new int[files[i].max_line+1];
 	  if( NULL == (files[i].file_ptr = fopen_path(files[i].name,"r")))
 	    continue;
 	  rewind(files[i].file_ptr);

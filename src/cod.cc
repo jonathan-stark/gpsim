@@ -459,7 +459,7 @@ void read_line_numbers_from_cod(pic_processor *cpu)
 
       // Get the line number info from within one .cod block
 
-      for(offset=0; offset<COD_BLOCK_SIZE; offset += COD_LS_SIZE) {
+      for(offset=0; offset<(COD_BLOCK_SIZE-COD_LS_SIZE); offset += COD_LS_SIZE) {
 
 	if((temp_block[offset+COD_LS_SMOD] & 4) == 0) {
 	  lst_line_number++;
