@@ -648,6 +648,24 @@ string module_symbol::toString()
   return name();
 }
 
+void attribute_symbol::set_xref(Value *v)
+{
+  if(attribute) {
+    attribute->set_xref(v);
+  } 
+
+  Value::set_xref(v);
+}
+
+Value *attribute_symbol::get_xref()
+{
+
+  if(attribute)
+    return attribute->get_xref();
+
+  return Value::get_xref();
+}
+
 //------------------------------------------------------------------------
 stimulus_symbol::stimulus_symbol(stimulus *_s)
   : symbol(0), s(_s)

@@ -99,8 +99,8 @@ public:
   /// xrefs - a cross reference allows a Value to notify another
   /// Value when it is changed.
 
-  void set_xref(Value *);
-  Value *get_xref();
+  virtual void set_xref(Value *);
+  virtual Value *get_xref();
 
  private:
   const char *cpDescription;

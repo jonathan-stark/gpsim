@@ -263,6 +263,9 @@ public:
   virtual void get(char *, int len);
   virtual void get(Packet &);
 
+  virtual void set_xref(Value *);
+  virtual Value *get_xref();
+
 };
 
 // Place W into the symbol table
