@@ -220,11 +220,23 @@ void process_command_file(char * file_name)
 
   int save_readline_state;
   FILE *save_cmd_file;
+  char directory[256], *dir_path_end;
 
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
 
   save_cmd_file = cmd_file;
+
+  dir_path_end=strrchr(file_name,'/');
+  if(dir_path_end!=NULL)
+  {
+      strncpy(directory,file_name,dir_path_end-file_name);
+      directory[dir_path_end-file_name]=0;
+      printf("directory is \"%s\"\n",directory);
+      chdir(directory);
+      file_name=dir_path_end+1;
+      printf("file_name is \"%s\"\n",file_name);
+  }
 
   cmd_file = fopen(file_name,"r");
 
@@ -492,7 +504,7 @@ void myfunc(int data, int fd, GdkInputCondition gdk_cond)
 }
 
 //void test_func(...)
-void test_func()
+void test_func(char *x)
 {
 
   char *t;
