@@ -621,11 +621,12 @@ void Program_Counter::jump(unsigned int new_address)
   value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
 
   cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
-
+  
+  cpu->cycles.increment();
+  
   trace.cycle_increment(); 
   trace.program_counter(value);
 
-  cpu->cycles.increment();
   cpu->cycles.increment();
 
 }

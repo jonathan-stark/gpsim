@@ -20,6 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <csignal>
+#include "pic-processor.h"
+#include "trace.h"
 
 //==============================================================
 
@@ -51,5 +53,21 @@ void initialize_gpsim(void)
 {
 
   initialize_signals();
+
+}
+
+
+//==============================================================
+// simulation_cleanup()
+//
+//  Called just before gpsim exits.
+//
+
+void simulation_cleanup(void)
+{
+
+  // Flush the log file (if there is one).
+
+  trace_log.close_logfile();
 
 }

@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 
+extern void simulation_cleanup(void);
 extern int use_gui;
 
 //#define RALF
@@ -535,6 +536,7 @@ void exit_gpsim(void)
 #endif
 
   rl_callback_handler_remove ();
+  simulation_cleanup();
 
   exit(0);
 }
@@ -572,21 +574,24 @@ void initialize_readline (void)
   // Sigh - the readline library has changed again (and again...)
   // I don't have an automated way to choose between the following
   // two lines
-  //#ifdef RALF
+  #ifdef RALF
   rl_callback_handler_install ("gpsim> ", test_func);
-  //#endif
-  //#ifdef SCOTT
-  //rl_callback_handler_install ("gpsim> ", (void(*)(char*))test_func);
-  //#endif
+  #endif
+  #ifdef SCOTT
+  rl_callback_handler_install ("gpsim> ", (void(*)(char*))test_func);
+  #endif
 #endif
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   //  rl_readline_name = "gpsim";
 
   /* Tell the completer that we want a crack first. */
+#ifdef RALF
     rl_attempted_completion_function = (CPPFunction *)gpsim_completion;
-  //rl_attempted_completion_function = &gpsim_completion;
-
+#endif
+#ifdef SCOTT
+  rl_attempted_completion_function = &gpsim_completion;
+#endif
 
 }
 /*

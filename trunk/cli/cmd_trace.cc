@@ -29,12 +29,19 @@ Boston, MA 02111-1307, USA.  */
 
 cmd_trace c_trace;
 
+#define TRACE_RAW_CMD		1
+#define TRACE_MASK_CMD		2
+#define TRACE_LOGON_CMD		3
+#define TRACE_LOGOFF_CMD	4
+
 static cmd_options cmd_trace_options[] =
 {
-  "r",1,    OPT_TT_NUMERIC,
+  "r",			TRACE_RAW_CMD,		OPT_TT_NUMERIC,
+  "mask",		TRACE_MASK_CMD,		OPT_TT_NUMERIC,
+  "enable_log",	TRACE_LOGON_CMD,	OPT_TT_STRING,
+  "disable_log",TRACE_LOGOFF_CMD,	OPT_TT_BITFLAG,
   NULL,0,0
 };
-
 
 cmd_trace::cmd_trace(void)
 { 
@@ -58,7 +65,6 @@ void cmd_trace::trace(void)
 
 void cmd_trace::trace(int numberof)
 {
-
   trace_dump_n(numberof);
 }
 
@@ -66,9 +72,11 @@ void cmd_trace::trace(cmd_options *opt)
 {
 
   switch(opt->value) {
-  case 1:
-    cout << "test\n";
-    break;
+
+  case TRACE_LOGOFF_CMD:
+	trace_enable_logging();
+	cout << "Logging to file disabled" << endl;
+	break;
   default:
     cout << " Invalid set option\n";
   }
@@ -77,11 +85,27 @@ void cmd_trace::trace(cmd_options *opt)
 
 void cmd_trace::trace(cmd_options_num *con)
 {
-
   switch(con->co->value) {
-  case 1:
+  case TRACE_RAW_CMD:
     trace_dump_raw(con->n);
     break;
+  case TRACE_MASK_CMD:
+	trace_watch_register(con->n);
+    cout << "logging register " << con->n << '\n';
+    break;
+  default:
+    cout << " Invalid set option\n";
+  }
+
+}
+
+void cmd_trace::trace(cmd_options_str *cos)
+{
+  switch(cos->co->value) {
+  case TRACE_LOGON_CMD:
+	trace_enable_logging(cos->str);
+	cout << "Logging to file enabled" << endl;
+	break;
   default:
     cout << " Invalid set option\n";
   }

@@ -179,7 +179,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
       
       while(reg->isa() == file_register::BP_REGISTER)
 	{
-	  reg = ((Breakpoint_Register *)reg)->replaced;
+	  reg = ((Notify_Register *)reg)->replaced;
 	}
 
 

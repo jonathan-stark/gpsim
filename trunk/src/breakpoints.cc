@@ -38,10 +38,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
   file_register *fr;
   int i;
   Breakpoint_Instruction *abp;
-  Break_register_read *bfrr;
-  Break_register_write *bfrw;
-  Break_register_read_value *bfrrv;
-  Break_register_write_value *bfrwv;
+
   bool found =0;
 
   // First, find a free break point
@@ -137,42 +134,30 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
       break;
 
     case BREAK_ON_REG_WRITE:
-      bfrw = new Break_register_write();
-      bfrw->break_point = BREAK_ON_REG_WRITE | breakpoint_number;
-      bfrw->replace(cpu,arg1);
-
+      new Break_register_write(cpu,arg1,BREAK_ON_REG_WRITE | breakpoint_number);
       return(breakpoint_number);
       break;
 
     case BREAK_ON_REG_WRITE_VALUE:
-      bfrwv = new Break_register_write_value();
-      bfrwv->break_value = arg2 & 0xff;
-      bfrwv->break_mask = (arg2 >> 8) & 0x1ff;
-      bfrwv->break_point = BREAK_ON_REG_WRITE_VALUE | breakpoint_number;
-      bfrwv->replace(cpu,arg1);
-      bfrwv->last_value = bfrwv->replaced->get_value();
-
+      new Break_register_write_value(cpu,
+				     arg1,
+				     BREAK_ON_REG_WRITE_VALUE | breakpoint_number,
+				     arg2 & 0xff,
+				     (arg2 >> 8) & 0x1ff);
       return(breakpoint_number);
       break;
 
     case BREAK_ON_REG_READ:
-      bfrr = new Break_register_read();
-      bfrr->break_point = BREAK_ON_REG_READ | breakpoint_number;
-      bfrr->replace(cpu,arg1);
-
+      new Break_register_read(cpu,arg1,BREAK_ON_REG_READ | breakpoint_number);
       return(breakpoint_number);
-      break;
 
     case BREAK_ON_REG_READ_VALUE:
-      bfrrv = new Break_register_read_value();
-      bfrrv->break_value = arg2 & 0xff;
-      bfrrv->break_mask = (arg2 >> 8) & 0x1ff;
-      bfrrv->break_point = BREAK_ON_REG_READ_VALUE | breakpoint_number;
-      bfrrv->replace(cpu,arg1);
-      bfrrv->last_value = bfrrv->replaced->get_value();
-
+      new Break_register_read_value(cpu,
+				    arg1,
+				    BREAK_ON_REG_READ_VALUE | breakpoint_number,
+				    arg2 & 0xff,
+				    (arg2 >> 8) & 0x1ff);
       return(breakpoint_number);
-      break;
 
     case BREAK_ON_INVALID_FR:
       fr = cpu->registers[arg1];
@@ -211,6 +196,32 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
       ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
       return(breakpoint_number);
       break;
+
+    case NOTIFY_ON_REG_WRITE:
+      new Log_Register_Write(cpu,arg1,BREAK_ON_REG_WRITE | breakpoint_number);
+      return(breakpoint_number);
+
+
+    case NOTIFY_ON_REG_WRITE_VALUE:
+      new Log_Register_Write_value(cpu,
+				   arg1,
+				   BREAK_ON_REG_WRITE_VALUE | breakpoint_number,
+				   arg2 & 0xff,
+				   (arg2 >> 8) & 0x1ff);
+      return(breakpoint_number);
+
+    case NOTIFY_ON_REG_READ:
+      new Log_Register_Read(cpu,arg1,BREAK_ON_REG_READ | breakpoint_number);
+      return(breakpoint_number);
+
+    case NOTIFY_ON_REG_READ_VALUE:
+      new Log_Register_Read_value(cpu,
+				  arg1,
+				  BREAK_ON_REG_READ_VALUE | breakpoint_number,
+				  arg2 & 0xff,
+				  (arg2 >> 8) & 0x1ff);
+
+      return(breakpoint_number);
 
     default:   // Not a valid type
       break_status[breakpoint_number].type = BREAK_CLEAR;
@@ -300,6 +311,44 @@ unsigned int  Breakpoints::set_wdt_break(pic_processor *cpu)
   else
     return MAX_BREAKPOINTS;
 }
+
+
+unsigned int Breakpoints::set_notify_read(pic_processor *cpu, unsigned int register_number)
+{
+  return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ, cpu, register_number, 0));
+}
+
+unsigned int Breakpoints::set_notify_write(pic_processor *cpu, unsigned int register_number)
+{
+  cout << "in breakpoints.cc\n";
+  return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
+}
+unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int register_number, 
+						unsigned int value, unsigned int mask=0xff)
+{
+  if(mask == 0)
+    mask = 0xff;
+  else
+    mask |= 0x100;
+
+  value |= ( (0x100 | (mask & 0xff)) << 8);
+
+  return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ_VALUE, cpu, register_number, value));
+}
+
+unsigned int Breakpoints::set_notify_write_value(pic_processor *cpu, unsigned int register_number,
+						   unsigned int value, unsigned int mask=0xff)
+{
+  if(mask == 0)
+    mask = 0xff;
+  else
+    mask |= 0x100;
+
+  value |= ( (0x100 | (mask & 0xff)) << 8);
+
+  return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE_VALUE, cpu, register_number, value));
+}
+
 
 //---------------------------------------------------------------------------------------
 unsigned int Breakpoints::check_write_break(file_register *fr)
@@ -459,6 +508,11 @@ bool Breakpoints::dump1(unsigned int bp_num)
       set_by_user = 1;
       break;
 
+    case NOTIFY_ON_REG_READ:
+    case NOTIFY_ON_REG_WRITE:
+    case NOTIFY_ON_REG_READ_VALUE:
+    case NOTIFY_ON_REG_WRITE_VALUE:
+      cout << "NOTIFY BREAK\n";
     }
 
   return(set_by_user);
@@ -623,6 +677,10 @@ void Breakpoints::clear(unsigned int b)
 
 	  break;
 
+	case NOTIFY_ON_REG_READ:
+	case NOTIFY_ON_REG_WRITE:
+	case NOTIFY_ON_REG_READ_VALUE:
+	case NOTIFY_ON_REG_WRITE_VALUE:
 	case BREAK_ON_REG_READ:
 	case BREAK_ON_REG_READ_VALUE:
 	case BREAK_ON_REG_WRITE:
@@ -630,7 +688,7 @@ void Breakpoints::clear(unsigned int b)
 	  fr = bs.cpu->registers[bs.arg1];
 	  if (fr->isa() == file_register::BP_REGISTER )
 	    {
-	      Breakpoint_Register *br = (Breakpoint_Register *)fr;
+	      Notify_Register *br = (Notify_Register *)fr;
 	      int cleared = 0;
 	      // There may be multiple break points set on this register.
 	      // So let's loop through them all to find the one that has
@@ -647,7 +705,7 @@ void Breakpoints::clear(unsigned int b)
 		  else
 		    {
 		      if(br->replaced->isa() == file_register::BP_REGISTER)
-			br = (Breakpoint_Register *)br->replaced;
+			br = (Notify_Register *)br->replaced;
 		      else
 			br = NULL; // Break out of loop and display error
 		    }
@@ -883,22 +941,29 @@ Profile_Stop_Instruction::Profile_Stop_Instruction(pic_processor *cpu, unsigned 
 {
     
 }
+//---------------------------------------------------------------------------------------
+Notify_Register::Notify_Register(pic_processor *_cpu, int _repl, int bp)
+{
 
-void Breakpoint_Register::replace(pic_processor *_cpu, unsigned int reg)
+  break_point = bp;
+  replace(_cpu,_repl);
+
+}
+
+void Notify_Register::replace(pic_processor *_cpu, unsigned int reg)
 {
   file_register *fr = _cpu->registers[reg];
 
   if(fr->isa() == file_register::BP_REGISTER)
     {
       // We're setting a break on top of another break
-      ((Breakpoint_Register *)fr)->next = this;
+      ((Notify_Register *)fr)->next = this;
     }
 
   cpu = _cpu;
   cpu->registers[reg] = this;
   replaced = fr;
   next = NULL;
-
   address=fr->address;
   
   // use the replaced registers xref object
@@ -909,7 +974,7 @@ void Breakpoint_Register::replace(pic_processor *_cpu, unsigned int reg)
 
 }
   
-unsigned int Breakpoint_Register::clear(unsigned int bp_num)
+unsigned int Notify_Register::clear(unsigned int bp_num)
 {
 
   if(bp.break_status[bp_num].type == Breakpoints::BREAK_CLEAR)   // This is a redundant check.
@@ -921,14 +986,14 @@ unsigned int Breakpoint_Register::clear(unsigned int bp_num)
   if(replaced->isa() == file_register::BP_REGISTER)
     {
       // We're clearing a break that is set on top of another break
-      ((Breakpoint_Register *)replaced)->next = next;
+      ((Notify_Register *)replaced)->next = next;
     }
 
   if(next)
     {
       // There's a break that is set on top of this one
       if(next->replaced != this)
-	cout << "Breakpoint_Register::clear is confused\n";
+	cout << "Notify_Register::clear is confused\n";
 
       next->replaced = replaced;
 
@@ -969,7 +1034,7 @@ unsigned int Break_register_read_value::get(void)
   if(v == break_value)
     {
       bp.halt();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ_VALUE>>8) | (break_value <<8) | (replaced->address)  );
+      trace_log.buffer.register_read_value(replaced->address, break_value);
     }
   return v;
 }
@@ -990,12 +1055,93 @@ void Break_register_write_value::put(unsigned int new_value)
       (new_value & break_mask) == break_value)
     {
       bp.halt();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE_VALUE>>8) | (break_value <<8) | (replaced->address)  );
+      trace_log.buffer.register_write_value(replaced->address, break_value);
     }
   last_value = new_value;
   replaced->put(new_value);
 }
 
+//====================================================================================
+
+
+// Log_Register_write::put
+//  Here, register writes are captured and stored into the trace_log.buffer.
+// where they can be written to a file
+
+void Log_Register_Write::put(unsigned int new_value)
+{
+  // First perform the write operation:
+
+  replaced->put(new_value);
+
+  // Now (verbosely) record the current cpu cycle 
+
+  trace_log.buffer.cycle_counter(cpu->cycles.value);
+
+#if 1
+  // Finally, record the value that was written to the register.
+  // Note that 'get_value' is used instead of directly referencing
+  // the register's value. This is because the actual value written
+  // differ from the value that was attempted to be written. (E.g.
+  // this only happens in special function registers).
+
+  trace_log.buffer.register_write(replaced->address, replaced->get_value());
+
+#else
+
+  // another option is to log the value the simulated pic was trying
+  // to write. I'm not sure which is more useful.
+
+  trace_log.buffer.register_write(replaced->address, new_value);
+
+#endif
+
+
+  if(trace_log.buffer.near_full())
+    trace_log.write_logfile();
+    
+}
+
+unsigned int Log_Register_Read::get(void)
+{
+  trace_log.buffer.cycle_counter(cpu->cycles.value);
+
+  int v = replaced->get(); 
+  trace_log.buffer.register_read(replaced->address, v);
+  return v;
+
+}
+
+unsigned int Log_Register_Read_value::get(void)
+{
+  unsigned int v = replaced->get();
+  if(v == break_value)
+    {
+      trace_log.buffer.cycle_counter(cpu->cycles.value);
+      trace_log.buffer.register_read_value(replaced->address, v);
+    }
+  return v;
+}
+
+void Log_Register_Write_value::put(unsigned int new_value)
+{
+
+  // The lower 8-bits of 'break_mask' describe the bits which are significant. If bit-9 of break_mask
+  // is set, then we only break if this write is DIFFERENT than the last write to this register. This
+  // saves us from breaking multiple times for writing the same value.
+
+  if( ((  (break_mask & 0x100) && ((new_value ^ last_value) & break_mask & 0xff))
+       ||
+       (  (break_mask & 0x100) == 0))
+      &&
+      (new_value & break_mask) == break_value)
+    {
+      trace_log.buffer.cycle_counter(cpu->cycles.value);
+      trace_log.buffer.register_write_value(replaced->address, break_value);
+    }
+  last_value = new_value;
+  replaced->put(new_value);
+}
 
 //====================================================================================
 //

@@ -26,11 +26,11 @@ Version: @VERSION@
 Release: 1
 Summary: A simulator for Microchip (TM) PIC (TM) microcontrollers
 Copyright: GPL
-Group: Development/Languages
-Source: http://ftp1.sourceforge.net/gpsim/gpsim-%{version}.tar.gz
+Group: Development/Debuggers
+Source: http://www.dattalo.com/gnupic/gpsim-%{version}.tar.gz
 Packager: @NAME@ @EMAIL@
 Distribution: Red Hat Linux
-URL: http://gpsim.sourceforge.net
+URL: http://www.dattalo.com/gnupic/gpsim.html
 Buildroot: %{_builddir}/%{name}-%{version}-root
 
 %description

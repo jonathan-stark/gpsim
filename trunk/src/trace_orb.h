@@ -33,4 +33,6 @@ Boston, MA 02111-1307, USA.  */
 void trace_dump_all(void);
 void trace_dump_n(int numberof);
 void trace_dump_raw(int numberof);   // more for debugging gpsim
+void trace_enable_logging(char *file=0);
+void trace_watch_register(int reg);
 #endif

@@ -145,7 +145,7 @@ overflow
    retlw 0xff
 
 
-CONSTANT	EQU	0
+CONST		EQU	0
 CNT_PER_LOOP	EQU	7
 	
 cnt16bit:
@@ -216,7 +216,7 @@ quit2
 
 quit1   incf    kz,w
 
-        addlw	CONSTANT	;take into account
+        addlw	CONST   	;take into account
                                 ;initial latency
         addwf   lo,f
         skpnc

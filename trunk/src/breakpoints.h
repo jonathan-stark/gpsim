@@ -115,6 +115,12 @@ enum BREAKPOINT_TYPES
   NOTIFY_ON_EXECUTION   = 11<<24,
   PROFILE_START_NOTIFY_ON_EXECUTION = 12<<24,
   PROFILE_STOP_NOTIFY_ON_EXECUTION = 13<<24,
+  NOTIFY_ON_REG_READ        = 14<<24,
+  NOTIFY_ON_REG_WRITE       = 15<<24,
+  NOTIFY_ON_REG_READ_VALUE  = 16<<24,
+  NOTIFY_ON_REG_WRITE_VALUE = 17<<24,
+
+
   BREAK_MASK           = 0xff<<24
 };
 
@@ -158,6 +164,11 @@ struct BreakStatus
   unsigned int check_invalid_fr_break(invalid_file_register *fr);
   unsigned int check_cycle_break(unsigned int abp);
 
+  unsigned int set_notify_read(pic_processor *cpu, unsigned int register_number);
+  unsigned int set_notify_write(pic_processor *cpu, unsigned int register_number);
+  unsigned int set_notify_read_value(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_notify_write_value(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+
   inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
   inline void halt(void) { global_break |= GLOBAL_STOP_RUNNING;};
   inline bool have_halt(void) { return( (global_break & GLOBAL_STOP_RUNNING) != 0 );};
@@ -186,12 +197,27 @@ struct BreakStatus
 
 extern Breakpoints bp;
 
-class Breakpoint_Register : public file_register
+//
+// Notify_Register 
+//
+//  This class serves as the base class for register break point and logging
+// classes. Register breakpoints are handled by replacing a register object
+// with one of the breakpoint objects. The simulated pic code has no idea that
+// breakpoints exist on a register. However, when the member functions of the
+// a register are accessed, the breakpoint member functions of the classes
+// described below are the ones actually invoked. Consequently, control of
+// the simulation can be manipulated.
+//
+
+class Notify_Register : public file_register
 {
 public:
   file_register *replaced;   // A pointer to the register that this break replaces
-  Breakpoint_Register *next; /* If multiple breaks are set on one register,
+  Notify_Register *next; /* If multiple breaks are set on one register,
 			      * then this will point to the next one.  */
+
+  Notify_Register(void){ replaced = NULL; next = NULL;};
+  Notify_Register(pic_processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
   virtual char *name(void)
@@ -199,103 +225,157 @@ public:
       if(replaced)
 	return replaced->name();
     };
-  virtual void put_value(unsigned int new_value)=0;
-  virtual void put(unsigned int new_value)=0;
-  virtual unsigned int get(void)=0;
-  virtual unsigned int get_value(void)=0;
+  /* direct all accesses to the member functions of the
+   * register that is being replaced. Note that we assume
+   * "replaced" is properly initialized which it will be
+   * if this object is accessed. (Why? well, we only access
+   * register notify/breaks via the PIC's file register 
+   * memory and never directly access them. But the only
+   * way this instantiation can be accessed is if it successfully
+   * replaced a file register object */
+
+  virtual void put_value(unsigned int new_value)
+    {
+      replaced->put_value(new_value);
+    }
+  virtual void put(unsigned int new_value)
+    {
+      replaced->put(new_value);
+    }
+
+  virtual unsigned int get_value(void)
+    {
+      return(replaced->get_value());
+    }
+  virtual unsigned int get(void)
+    {
+      return(replaced->get());
+    }
+
+
   void replace(pic_processor *_cpu, unsigned int reg);
   unsigned int clear(unsigned int bp_num);
 
 };
 
-class Break_register_read : public Breakpoint_Register
-{
-public:
-
-
-  Break_register_read(void){ replaced = NULL;}
-  void put(unsigned int new_value)
-    {
-      replaced->put(new_value);
-    }
-  unsigned int get(void);
-  unsigned int get_value(void)
-    {
-      return(replaced->get_value());
-    }
-
-  virtual void put_value(unsigned int new_value)
-    {
-      replaced->put_value(new_value);
-    }
-
-};
-
-class Break_register_write : public Breakpoint_Register
-{
-public:
-
-
-  Break_register_write(void){ replaced = NULL;}
-  void put(unsigned int new_value);
-  unsigned int get(void)
-    {
-      return(replaced->get());
-    }
-  unsigned int get_value(void)
-    {
-      return(replaced->get_value());
-    }
-  virtual void put_value(unsigned int new_value)
-    {
-      replaced->put_value(new_value);
-    }
-
-};
-
-class Break_register_read_value : public Breakpoint_Register
+class Notify_Register_Value : public Notify_Register
 {
 public:
 
   unsigned int break_value, break_mask, last_value;
 
-  Break_register_read_value(void){ replaced = NULL;}
-  void put(unsigned int new_value)
-    {
-      replaced->put(new_value);
+  Notify_Register_Value(void)
+    { 
+      replaced = NULL;
+      break_value = 0;
+      break_mask = 0;
+      last_value = 0;
     }
-  unsigned int get(void);
-  unsigned int get_value(void)
-    {
-      return(replaced->get_value());
-    }
-  virtual void put_value(unsigned int new_value)
-    {
-      replaced->put_value(new_value);
-    }
+
+  Notify_Register_Value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ):
+    Notify_Register(_cpu,_repl,bp ) 
+    { 
+      break_value = bv;
+      break_mask = bm;
+      if(replaced)
+	last_value = replaced->get_value();
+
+    };
 
 };
 
-class Break_register_write_value : public Breakpoint_Register
+
+class Break_register_read : public Notify_Register
 {
 public:
 
-  unsigned int break_value, break_mask,last_value;
 
-  Break_register_write_value(void){ replaced = NULL;}
+  Break_register_read(void){ };
+  Break_register_read(pic_processor *_cpu, int _repl, int bp ):
+    Notify_Register(_cpu,_repl,bp ) { };
+
+
+  unsigned int get(void);
+
+};
+
+class Break_register_write : public Notify_Register
+{
+public:
+
+
+  Break_register_write(void){ };
+  Break_register_write(pic_processor *_cpu, int _repl, int bp ):
+    Notify_Register(_cpu,_repl,bp ) { };
   void put(unsigned int new_value);
-  unsigned int get(void)
-    {
-      return(replaced->get());
-    }
-  unsigned int get_value(void)
-    {
-      return(replaced->get_value());
-    }
-  virtual void put_value(unsigned int new_value)
-    {
-      replaced->put_value(new_value);
-    }
+
+};
+
+class Break_register_read_value : public Notify_Register_Value
+{
+public:
+
+  Break_register_read_value(void){ };
+  Break_register_read_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+    Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
+
+  unsigned int get(void);
+
+};
+
+class Break_register_write_value : public Notify_Register_Value
+{
+public:
+
+  Break_register_write_value(void){ };
+  Break_register_write_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+    Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
+
+  void put(unsigned int new_value);
+};
+
+class Log_Register_Write : public Notify_Register
+{
+ public:
+
+  Log_Register_Write(void){ };
+  Log_Register_Write(pic_processor *_cpu, int _repl, int bp ):
+    Notify_Register(_cpu,_repl,bp ) { };
+  void put(unsigned int new_value);
+
+};
+
+class Log_Register_Read : public Notify_Register
+{
+public:
+
+
+  Log_Register_Read(void){ };
+  Log_Register_Read(pic_processor *_cpu, int _repl, int bp ):
+    Notify_Register(_cpu,_repl,bp ) { };
+  unsigned int get(void);
+
+};
+
+class Log_Register_Read_value : public Notify_Register_Value
+{
+public:
+
+  Log_Register_Read_value(void){ };
+  Log_Register_Read_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+    Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
+  unsigned int get(void);
+};
+
+class Log_Register_Write_value : public Notify_Register_Value
+{
+public:
+
+  Log_Register_Write_value(void){ };
+  Log_Register_Write_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+    Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
+
+  void put(unsigned int new_value);
 
 };
 
