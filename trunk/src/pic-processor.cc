@@ -1111,7 +1111,7 @@ void pic_processor::create_symbols (void)
   for(int i = 0; i<register_memory_size(); i++)
     {
       switch (registers[i]->isa()) {
-      case file_register::SFR_REGISTER:
+      case Register::SFR_REGISTER:
 	if(!symbol_table.find(registers[i]->name()))
 	  symbol_table.add_register(this, registers[i]);
       }

@@ -187,7 +187,7 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
   char str[100];
   for  (j = start_address; j <= end_address; j++) {
 
-    registers[j] = new file_register;
+    registers[j] = new Register;
     if (alias_offset) {
       registers[j + alias_offset] = registers[j];
       registers[j]->alias_mask = alias_offset;

@@ -1,4 +1,9 @@
 2004-03-04 Scott Dattalo  <scott@dattalo.com>
+	* src/register.h, src/pic-register.h, src/pic-processor.h,
+	src/pic-processor.cc, src/14bit-registers.cc
+	Removed the "file_register" class. Moved the sfr_register class to register.h.
+
+2004-03-04 Scott Dattalo  <scott@dattalo.com>
 	* src/processor.h, src/processor.cc, src/cod.cc:
 	Added the new meber 'Find()' to the 'Files' class.
 

@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 pic_processor *temp_cpu;
-
+#if 0
 //--------------------------------------------------
 // Member functions for the file_register base class
 //--------------------------------------------------
@@ -56,8 +56,12 @@ file_register::~file_register(void)
 {
   //delete(xref);
 }
+#endif
 
+// FIXME file_register::put_value has a useful feature...
 
+//
+#if 0
 //-----------------------------------------------------------
 //  void file_register::put_value(unsigned int new_value)
 //
@@ -111,7 +115,7 @@ void file_register::put_value(unsigned int new_value)
     }
 }
 
-
+#endif
 
 //
 //--------------------------------------------------
