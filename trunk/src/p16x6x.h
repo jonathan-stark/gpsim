@@ -100,6 +100,7 @@ public:
   CCPCON  ccp2con;
   CCPRL   ccpr2l;
   CCPRH   ccpr2h;
+  PCON    pcon;
   INTCON_P16C6x intcon_reg;
 
   //  void create_iopin_map(void);

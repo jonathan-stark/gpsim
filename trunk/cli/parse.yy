@@ -235,11 +235,19 @@ break_cmd: BREAK
           | BREAK bit_flag _register
           { c_break.set_break($2->value,$3); YYABORT;}
           | BREAK bit_flag _register NUMBER
-          { c_break.set_break($2->value,$3,$4); YYABORT;}
+          { cout <<"break 1 number\n";
+	     c_break.set_break($2->value,$3,$4,0); YYABORT;}
+          | BREAK bit_flag _register NUMBER NUMBER
+          { cout <<"break 2 number\n";
+	    c_break.set_break($2->value,$3,$4,$5); YYABORT;}
           | BREAK bit_flag STRING
           { c_break.set_break($2->value,$3); YYABORT;}
           | BREAK bit_flag STRING NUMBER
-          { c_break.set_break($2->value,$3,$4); YYABORT;}
+          { cout <<"break 1 number string\n";
+	    c_break.set_break($2->value,$3,$4, 0); YYABORT;}
+          | BREAK bit_flag STRING NUMBER NUMBER
+          { cout <<"break 1 number string\n";
+	    c_break.set_break($2->value,$3,$4,$5); YYABORT;}
           ;
 
 bus_cmd: BUS

@@ -50,7 +50,7 @@ ProfileKeeper profile_keeper;
    one global trace instantiated and all the pieces of gpsim make
    direct references to it.
 
-   How can gpsim trace every thing and still be the faster
+   How can gpsim trace every thing and still be the fastest
    microcontroller simulator? Well, gpsim writes trace
    information into a giant circular buffer. So one optimization
    is that there are no array bounds to check. Another optimization

@@ -358,6 +358,22 @@ enum
 };
 
 //---------------------------------------------------------
+class CPUSTA :  public sfr_register
+{
+public:
+
+enum
+{
+  BOR      = 1<<0,
+  POR      = 1<<1,
+  PD       = 1<<2,
+  TO       = 1<<3,
+  GLINTD   = 1<<4,
+  STKAV    = 1<<5,
+};
+};
+
+//---------------------------------------------------------
 // INTCON_16 - Interrupt control register for the 16-bit core
 
 class INTCON_16 : public INTCON
@@ -526,6 +542,7 @@ class TXREG_16 : public _TXREG
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
+  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
 
 };
 
@@ -535,6 +552,7 @@ class RCREG_16 : public _RCREG
   PIR1 *pir1;
 
   virtual void push(unsigned int);
+  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
 
 };
 
@@ -550,8 +568,10 @@ class USART_MODULE16 : public USART_MODULE
   //_TXSTA       txsta;
   //_RCSTA       rcsta;
   //_SPBRG       spbrg;
-  TXREG_16     txreg;
-  RCREG_16     rcreg;
+  // TXREG_16     txreg;
+  // RCREG_16     rcreg;
+
+  USART_MODULE16(void);
 
   void initialize(_16bit_processor *);
   virtual void new_rx_edge(unsigned int);

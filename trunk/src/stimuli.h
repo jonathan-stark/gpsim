@@ -113,6 +113,7 @@ public:
   Stimulus_Node *snode;      /* Node to which this stimulus is attached */
   int drive;        /* This defines the strength of the source or the magnitude of the load. */
   int state;                 /* The most recent value of this stimulus */
+  bool digital_state;        /* 0/1 digitization of the analog state */
   XrefObject *xref;          /* A link to the gui. */
 
   stimulus *next;
@@ -134,6 +135,10 @@ public:
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);                   // From the gui
   void put_name(char *new_name);
+
+  // interface to the digital state
+  virtual bool get_digital_state(void) {return digital_state;};
+  virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
 
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};

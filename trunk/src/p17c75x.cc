@@ -185,7 +185,7 @@ pic_processor * P17C7xx::construct(void)
 
   P17C7xx *p = new P17C7xx;
 
-  cout << " 17c75x construct\n";
+  cout << " 17c7xx construct\n";
 
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
@@ -214,7 +214,7 @@ void  P17C7xx::create(int ram_top)
   cout << "p17c7xx create\n";
 
   create_iopin_map();
-  _16bit_processor::create();
+  //  _16bit_processor::create();
 
   add_file_registers(0x0, ram_top, 0);
 
@@ -245,13 +245,16 @@ void P17C7xx::create_sfr_map(void)
 pic_processor * P17C75x::construct(void)
 {
 
-  P17C75x *p = new P17C75x;
-
   cout << " 17c75x construct\n";
 
-  p->P17C75x::create(0x1fff);
+  P17C75x *p = new P17C75x;
+  cout << "1\n";
+  p->create(0x1fff);
+  cout << "2\n";
   p->create_invalid_registers ();
+  cout << "3\n";
   p->pic_processor::create_symbols();
+  cout << "4\n";
   p->name_str = "17c75x";
 
   return p;
@@ -261,29 +264,24 @@ pic_processor * P17C75x::construct(void)
 
 void P17C75x::create(int ram_top)
 {
+  cout << "p17c75x create\n";
   create_iopin_map();
 
-  _16bit_processor::create();
+  //  _16bit_processor::create();
 
+  P17C7xx::create(ram_top);
+  cout << "p17c75x parent created\n";
   P17C75x::create_sfr_map();
+  cout << "p17c75x sfr map created\n";
   P17C75x::create_symbols();
+  cout << "p17c75x parent created\n";
 
 }
 
 P17C75x::P17C75x(void)
 {
-  if(verbose)
+  //if(verbose)
     cout << "17c75x constructor, type = " << isa() << '\n';
-  
-  create_sfr_map();
-  //  create_iopin_map(&iopin_map, &num_of_iopins);
-  
-  _16bit_processor::create();
-  
-  //  create_iopins(iopin_map, num_of_iopins);
-  
-  name_str = "17c75x";
-  
 }
 
 void P17C75x::create_symbols(void)
@@ -303,6 +301,144 @@ void P17C75x::create_symbols(void)
 
 void P17C75x::create_sfr_map(void)
 {
+  if (verbose) 
+    cout << "creating p17c75x common registers\n";
+  
+  add_file_registers(0x01A, 0x01f, 0x100);
+  alias_file_registers(0x1A, 0x1f, 0x200);
+  alias_file_registers(0x1A, 0x1f, 0x300);
+  alias_file_registers(0x1A, 0x1f, 0x400);
+  alias_file_registers(0x1A, 0x1f, 0x500);
+  alias_file_registers(0x1A, 0x1f, 0x600);
+  alias_file_registers(0x1A, 0x1f, 0x700);
+  
+  add_file_registers(0x020, 0x0ff, 0);
+  add_file_registers(0x120, 0x1ff, 0);
+  add_file_registers(0x220, 0x2ff, 0);
+  add_file_registers(0x320, 0x3ff, 0);
+
+  //Unbanked registers
+  add_sfr_register(&ind0.indf,    0x00,    0, "indf0");
+  add_sfr_register(&ind0.fsrl,	  0x01,    0, "fsr0"); // Indirect addressing
+
+  add_sfr_register(&pcl,          0x02,    0, "pcl");
+  add_sfr_register(&pclath,       0x03,    0, "pclath");   // Program counter
+
+  add_sfr_register(&status,       0x04, 0xf0, "alusta");  // ALU status
+  //  add_sfr_register(&t0sta,        0x05,    0, "t0sta");  // Timer0 Status
+  add_sfr_register(&cpusta,       0x06, 0x3C, "cpusta");  // CPU status
+  //  add_sfr_register(&intsta,       0x07,    0, "intsta");  
+  add_sfr_register(&ind1.indf,    0x08,    0, "indf1");
+  add_sfr_register(&ind1.fsrl,    0x09,    0, "fsr1");
+  add_sfr_register(&W,            0x0a,    0, "wreg");
+  //  add_sfr_register(&tmr0l,        0x0b,    0, "tmr0l");  // Timer0 registers
+  //  add_sfr_register(&tmr0h,        0x0c,    0, "tmr0h");
+  //  add_sfr_register(&tblptrl,      0x0d,    0, "tblptrl");  // Program memory table pointer
+  //  add_sfr_register(&tblptrh,      0x0e,    0, "tblptrh");
+  add_sfr_register(&bsr,          0x0f,    0, "bsr");  // Bank select register
+
+  add_sfr_register(&prodl,        0x18,    0, "prodl");  // 16 bit product registers
+  add_sfr_register(&prodh,        0x19,    0, "prodh");
+  alias_file_registers(0x18, 0x19, 0x100);
+  alias_file_registers(0x18, 0x19, 0x200);
+  alias_file_registers(0x18, 0x19, 0x300);
+  alias_file_registers(0x18, 0x19, 0x400);
+  alias_file_registers(0x18, 0x19, 0x500);
+  alias_file_registers(0x18, 0x19, 0x600);
+  alias_file_registers(0x18, 0x19, 0x700);
+
+  // Bank 0
+  add_sfr_register(porta,        0x10,    0, "porta");  // PortA bits
+  add_sfr_register(&ddrb,         0x11, 0xff, "ddrb");  // Data direction register of portA
+  add_sfr_register(portb,        0x12,    0, "portb");
+  /*
+  add_sfr_register(&rcsta1,       0x13,    0, "rcsta1");  // Serial port 1 rec. status register
+  add_sfr_register(&rcreg1,       0x14,    0, "rcreg1");  // Serial port 1 receive register
+  add_sfr_register(&txsta1,       0x15,    0, "txsta1");
+  add_sfr_register(&txreg1,       0x16,    0, "txreg1");
+  add_sfr_register(&spbrg1,       0x17,    0, "spbrg1");
+  */
+  // Bank 1
+  add_sfr_register(&ddrc,         0x110, 0xff, "ddrc");
+  add_sfr_register(portc,        0x111,    0, "portc");
+  add_sfr_register(&ddrd,         0x112, 0xff, "ddrd");
+  add_sfr_register(portd,        0x113,    0, "portd");
+  add_sfr_register(&ddre,         0x114, 0x0f, "ddre");
+  add_sfr_register(porte,        0x115,    0, "porte");
+  add_sfr_register(&pir1,         0x116, 0x02, "pir1"); 
+  add_sfr_register(&pie1,         0x117,    0, "pie1");
+
+  // Bank 2
+  /*
+  add_sfr_register(&tmr1,         0x210,    0, "tmr1");
+  add_sfr_register(&tmr2,         0x211,    0, "tmr2");
+  add_sfr_register(&tmr3l,        0x212,    0, "tmr3l");
+  add_sfr_register(&tmr3h,        0x213,    0, "tmr3h");
+  add_sfr_register(&pr1,          0x214,    0, "pr1");   // Timer1's period register
+  add_sfr_register(&pr2,          0x215,    0, "pr2");   // Timer2's period register
+  add_sfr_register(&pr3l,         0x216,    0, "pr3l");   // Timer3's period registers
+  add_sfr_register(&pr3h,         0x217,    0, "pr3h");   
+
+  // Bank 3
+  add_sfr_register(&pw1dcl,       0x310,    0, "pw1dcl");
+  add_sfr_register(&pw2dcl,       0x311,    0, "pw2dcl");
+  add_sfr_register(&pw1dch,       0x312,    0, "pw1dch");
+  add_sfr_register(&pw2dch,       0x313,    0, "pw2dch");
+  add_sfr_register(&ca2l,         0x314,    0, "ca2l");   // Capture2 registers
+  add_sfr_register(&ca2h,         0x315,    0, "ca2h");
+  add_sfr_register(&tcon1,        0x316,    0, "tcon1");
+  add_sfr_register(&tcon2,        0x317,    0, "tcon2");
+  */
+  // Bank 4
+  add_sfr_register(&pir2,         0x410,    0, "pir2");
+  add_sfr_register(&pie2,         0x411,    0, "pie2");
+  //add_sfr_register(&     ,        0x412);
+  /*
+  add_sfr_register(&rcsta2,       0x413,    0, "rcsta2");
+  add_sfr_register(&rcreg2,       0x414,    0, "rcreg2");
+  add_sfr_register(&txsta2,       0x415, 0x02, "txsta2");
+  add_sfr_register(&txreg2,       0x416,    0, "txreg2");
+  add_sfr_register(&spbrg2,       0x417,    0, "spbrg2");
+  */
+  // Bank 5
+  add_sfr_register(&ddrf,         0x510, 0xff, "ddrf");
+  add_sfr_register(portf,        0x511,    0, "portf");
+  add_sfr_register(&ddrg,         0x512, 0xff, "ddrg");
+  add_sfr_register(portg,        0x513,    0, "portg");
+  /*
+  add_sfr_register(&adcon0,       0x514,    0, "adcon0");
+  add_sfr_register(&adcon1,       0x515,    0, "adcon1");
+  add_sfr_register(&adresl,       0x516,    0, "adresl");
+  add_sfr_register(&adresh,       0x517,    0, "adresh");
+  */
+  // Bank 6
+  /*
+  add_sfr_register(&sspadd,       0x610,    0, "sspadd");  // Synchronous serial port registers
+  add_sfr_register(&sspcon1,      0x611,    0, "sspcon1");
+  add_sfr_register(&sspcon2,      0x612,    0, "sspcon2");
+  add_sfr_register(&sspstat,      0x613,    0, "sspstat");
+  add_sfr_register(&sspbuf,       0x614,    0, "sspbuf");
+  */
+  //add_sfr_register(&              0x615);
+  //add_sfr_register(&              0x616);
+  //add_sfr_register(&              0x617);
+
+  // Bank 7
+  /*
+  add_sfr_register(&pw3dcl,       0x710,    0, "pw3dcl");
+  add_sfr_register(&pw3dch,       0x711,    0, "pw3dch");
+  add_sfr_register(&ca3l,         0x712,    0, "ca3l");
+  add_sfr_register(&ca3h,         0x713,    0, "ca3h");
+  add_sfr_register(&ca4l,         0x714,    0, "ca4l");
+  add_sfr_register(&ca4h,         0x715,    0, "ca4h");
+  add_sfr_register(&tcon3,        0x716,    0, "tcon3");
+  //add_sfr_register(&              0x717);
+  */
+  // Initialize all of the register cross linkages
+
+  // All of the status bits on the 16bit core are writable
+  status.write_mask = 0xff;
+
 
 }
 

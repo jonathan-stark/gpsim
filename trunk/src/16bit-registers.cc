@@ -1126,30 +1126,48 @@ void RCREG_16::push(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
+
+USART_MODULE16::USART_MODULE16(void)
+{
+
+  txreg = new TXREG_16;
+  rcreg = new RCREG_16;
+
+  spbrg = new _SPBRG;
+
+}
+
+//--------------------------------------------------
 void USART_MODULE16::initialize(_16bit_processor *new_cpu)
 {
   cpu = new_cpu;
 
-  spbrg.txsta = &txsta;
-  spbrg.rcsta = &rcsta;
+  USART_MODULE::initialize(NULL);
+  //spbrg.txsta = &txsta;
+  //spbrg.rcsta = &rcsta;
 
-  txreg.pir1 = &cpu->pir1;
-  txreg.txsta = &txsta;
+  if(txreg)
+    txreg->assign_pir(&cpu->pir1);
 
-  txsta.txreg = &txreg;
+  //txreg.txsta = &txsta;
+
+  //txsta.txreg = &txreg;
   //txsta.spbrg = &spbrg;
   //txsta.txpin = uart_port->pins[6];
   //txsta.bit_count = 0;
 
 
-  rcsta.rcreg = &rcreg;
-  rcsta.spbrg = &spbrg;
-  rcsta.txsta = &txsta;
+  //rcsta.rcreg = &rcreg;
+  //rcsta.spbrg = &spbrg;
+  //rcsta.txsta = &txsta;
   //rcsta.uart_port = uart_port;
   //rcsta.rx_bit = 7;
 
-  rcreg.rcsta = &rcsta;
-  rcreg.pir1 = &cpu->pir1;
+  if(rcreg) 
+    rcreg->assign_pir(&cpu->pir1);
+
+  //rcreg.rcsta = &rcsta;
+  //rcreg.pir1 = &cpu->pir1;
 }
 
 void   USART_MODULE16::new_rx_edge(unsigned int bit)

@@ -93,7 +93,19 @@ void _TXSTA::start_transmitting(void)
   // bits, optional 9th data bit and the stop, and places
   // this into the tsr register. But since the contents of
   // the tsr are inaccessible, I guess we'll never know.
-
+  //
+  // (BTW, if you look carefully you may puzzle over why
+  //  there appear to be 2 stop bits in the packet built
+  //  below. Well, it's because the way gpsim implements
+  //  the transmit logic. The second stop bit doesn't
+  //  actually get transmitted - it merely causes the first
+  //  stop bit to get transmitted before the TRMT bit is set.
+  //  [Recall that the TRMT bit indicates when the tsr 
+  //  {transmit shift register} is empty. It's not tied to
+  //  an interrupt pin, so the pic application software
+  //  most poll this bit. This bit is set after the STOP
+  //  bit is transmitted.] This is a cheap trick that saves
+  //  one comparison in the callback code.)
 
   // The start bit, which is always low, occupies bit position
   // zero. The next 8 bits come from the txreg.
@@ -104,20 +116,26 @@ void _TXSTA::start_transmitting(void)
   if(value & TX9)
     {
       // Copy the stop bit and the 9th data bit to the tsr.
-      tsr |= ( (value & TX9D) ? (3<<9) : (2<<9));
-      bit_count = 11;
+      // (See note above for the reason why two stop bits 
+      // are appended to the packet.)
+
+      tsr |= ( (value & TX9D) ? (7<<9) : (6<<9));
+      bit_count = 12;  // 1 start, 9 data, 1 stop , 1 delay
     }
   else
     {
-      // The stop bit is always high.
-      tsr |= (1<<9);
-      bit_count = 10;
+      // The stop bit is always high. (See note above
+      // for the reason why two stop bits are appended to
+      // the packet.)
+      tsr |= (3<<9);
+      bit_count = 11;  // 1 start, 8 data, 1 stop , 1 delay
     }
 
 
   // Set a callback breakpoint at the next SPBRG edge
 
-  cpu->cycles.set_break(spbrg->get_cpu_cycle(1), this);
+  if(cpu)
+    cpu->cycles.set_break(spbrg->get_cpu_cycle(1), this);
 
   // The TSR now has data, so clear the Transmit Shift 
   // Register Status bit.
@@ -152,14 +170,17 @@ void _TXSTA::transmit_a_bit(void)
 void _TXSTA::callback(void)
 {
 
-  //cout << "TXSTA callback " << (cpu->cycles.value) << '\n';
 
   transmit_a_bit();
 
   if(!bit_count) {
+
     // tsr is empty.
     // If there is any more data in the TXREG, then move it to
     // the tsr and continue transmitting other wise set the TRMT bit
+
+    // (See the note above about the 'extra' stop bit that was stuffed
+    // into the tsr register. 
 
     if(txreg->is_empty())
       value |= TRMT;
@@ -170,11 +191,16 @@ void _TXSTA::callback(void)
     // bit_count is non zero which means there is still
     // data in the tsr that needs to be sent.
 
-    if(value & BRGH) 
-      cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGH_STATES),this);
-    else
-      cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGL_STATES),this);
-
+    if(cpu) {
+      cpu->cycles.set_break(spbrg->get_cpu_cycle(1),this);
+    }
+/*
+      if(value & BRGH) 
+	cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGH_STATES),this);
+      else
+	cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGL_STATES),this);
+    }
+*/
   }
 
 }
@@ -340,7 +366,8 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 {
   //  last_cycle = cpu->cycles.value;
 
-  cpu->cycles.set_break(spbrg->get_cpu_cycle(spbrg_edge), this);
+  if(cpu)
+    cpu->cycles.set_break(cpu->cycles.value + (spbrg->value + 1) * spbrg_edge, this);
 
 }
 void _RCSTA::receive_start_bit(void)
@@ -351,7 +378,7 @@ void _RCSTA::receive_start_bit(void)
   if(txsta->value & _TXSTA::BRGH)
     set_callback_break(BRGH_FIRST_MID_SAMPLE);
   else
-    set_callback_break(BRGL_FIRST_MID_SAMPLE);
+    set_callback_break(BRGH_FIRST_MID_SAMPLE);
 
   sample = 0;
   state = RCSTA_WAITING_MID1;
@@ -490,9 +517,11 @@ void _SPBRG::get_next_cycle_break(void)
 	future_cycle = last_cycle + (value + 1)*64;
     }
 
-  cpu->cycles.set_break(future_cycle, this);
+  if(cpu)
+    cpu->cycles.set_break(future_cycle, this);
 
-
+  //  cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
+  
 }
 
 void _SPBRG::start(void)
@@ -501,7 +530,8 @@ void _SPBRG::start(void)
   if(verbose)
     cout << "SPBRG::start\n";
 
-  last_cycle = cpu->cycles.value;
+  if(cpu)
+    last_cycle = cpu->cycles.value;
   start_cycle = last_cycle;
 
   get_next_cycle_break();
@@ -510,11 +540,25 @@ void _SPBRG::start(void)
     cout << " SPBRG::start   last_cycle = " << 
       hex << last_cycle << " future_cycle = " << future_cycle << '\n';
 
-  if(verbose)
+  if(verbose && cpu)
     cpu->cycles.dump_breakpoints();
 
 }
 
+//--------------------------
+//guint64 _SPBRG::get_last_cycle(void)
+//
+// Get the cpu cycle corresponding to the last edge of the SPBRG
+//
+
+guint64 _SPBRG::get_last_cycle(void)
+{
+
+  // There's a chance that a SPBRG break point exists on the current
+  // cpu cycle, but has not yet been serviced. 
+  return( (cpu->cycles.value == future_cycle) ? future_cycle : last_cycle);
+
+}
 //--------------------------
 //guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
 //
@@ -639,29 +683,94 @@ void RCREG_14::pop(void)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
+void USART_MODULE::initialize(IOPORT *uart_port)
+{
+
+  if(spbrg) {
+    spbrg->txsta = txsta;
+    spbrg->rcsta = rcsta;
+  }
+
+  if(txreg) {
+    txreg->assign_pir(NULL);
+    txreg->txsta = txsta;
+  }
+
+  if(txsta) {
+    txsta->txreg = txreg;
+    txsta->spbrg = spbrg;
+    txsta->txpin = NULL; //uart_port->pins[6];
+    txsta->bit_count = 0;
+  }
+
+  if(rcsta) {
+    rcsta->rcreg = rcreg;
+    rcsta->spbrg = spbrg;
+    rcsta->txsta = txsta;
+    rcsta->uart_port = uart_port;
+    rcsta->rx_bit = 7;
+  }
+
+  if(rcreg) {
+    rcreg->assign_pir(NULL);
+    rcreg->rcsta = rcsta;
+  }
+
+}
+
+//--------------------------------------------------
+USART_MODULE::USART_MODULE(void)
+{
+
+  txreg = NULL;
+  rcreg = NULL;
+
+  rcsta = new _RCSTA;
+  txsta = new _TXSTA;
+
+}
+
+//--------------------------------------------------
+USART_MODULE14::USART_MODULE14(void)
+{
+
+  txreg = new TXREG_14;
+  rcreg = new RCREG_14;
+
+  spbrg = new _SPBRG;
+
+}
+
+//--------------------------------------------------
 void USART_MODULE14::initialize(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port)
 {
   cpu = new_cpu;
 
-  spbrg.txsta = &txsta;
-  spbrg.rcsta = &rcsta;
+  USART_MODULE::initialize(uart_port);
 
-  txreg.pir1 = pir1;
-  txreg.txsta = &txsta;
+  //spbrg.txsta = &txsta;
+  //spbrg.rcsta = &rcsta;
 
-  txsta.txreg = &txreg;
-  txsta.spbrg = &spbrg;
-  txsta.txpin = uart_port->pins[6];
-  txsta.bit_count = 0;
+  if(txreg) //this should be unnecessary
+    txreg->assign_pir(pir1);
 
-  rcsta.rcreg = &rcreg;
-  rcsta.spbrg = &spbrg;
-  rcsta.txsta = &txsta;
-  rcsta.uart_port = uart_port;
-  rcsta.rx_bit = 7;
+  //txreg.txsta = &txsta;
 
-  rcreg.rcsta = &rcsta;
-  rcreg.pir1 = pir1;
+  //txsta.txreg = &txreg;
+  //txsta.spbrg = &spbrg;
+  if(txsta)
+    txsta->txpin = uart_port->pins[6];
+  //txsta.bit_count = 0;
+
+  //rcsta.rcreg = &rcreg;
+  //rcsta.spbrg = &spbrg;
+  //rcsta.txsta = &txsta;
+  //rcsta.uart_port = uart_port;
+  //rcsta.rx_bit = 7;
+
+  //rcreg.rcsta = &rcsta;
+  if(rcreg) 
+    rcreg->assign_pir(pir1);
 
   //  spbrg.start();
 
@@ -674,6 +783,7 @@ void USART_MODULE14::initialize(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *u
 
 void   USART_MODULE14::new_rx_edge(unsigned int bit)
 {
-  if( (rcsta.state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
-    rcsta.receive_start_bit();
+  if(rcsta)
+    if( (rcsta->state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
+      rcsta->receive_start_bit();
 }

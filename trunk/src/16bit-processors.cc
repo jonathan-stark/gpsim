@@ -75,11 +75,11 @@ void _16bit_processor :: create_sfr_map(void)
   //add_sfr_register(&ipr2,	  0xfa2,0,"ipr2");
 
 
-  add_sfr_register(&usart.rcsta,	  0xfab,0,"rcsta");
-  add_sfr_register(&usart.txsta,	  0xfac,0x02,"txsta");
-  add_sfr_register(&usart.txreg,	  0xfad,0,"txreg");
-  add_sfr_register(&usart.rcreg,	  0xfae,0,"rcreg");
-  add_sfr_register(&usart.spbrg,	  0xfaf,0,"spbrg");
+  add_sfr_register(usart.rcsta,  0xfab,0,"rcsta");
+  add_sfr_register(usart.txsta,  0xfac,0x02,"txsta");
+  add_sfr_register(usart.txreg,  0xfad,0,"txreg");
+  add_sfr_register(usart.rcreg,  0xfae,0,"rcreg");
+  add_sfr_register(usart.spbrg,  0xfaf,0,"spbrg");
 
   //add_sfr_register(&t3con,	  0xfb1,0xff,"t3con");
   //add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
@@ -209,8 +209,9 @@ void _16bit_processor :: create (void)
  
 
   pic_processor::create();
-
+  cout << "_16bit_processor :: create -> pic proc created\n";
   _16bit_processor::create_sfr_map();
+  cout << "_16bit_processor :: create -> sfr map created\n";
 
   fast_stack.init(this);
   ind0.init(this);

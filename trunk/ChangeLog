@@ -14,6 +14,7 @@ gpsim-0.21.0
 	- Patch from Rudy Moore to fix TMR0 bug
 	- Beautified the Single Step and Trace dump outputs
 	- Added break on stack overflow and underflow
+	- Added break mask to wv/rv type break points. Now you can specify which bits are significant.
 	- Added "abort_gpsim_now" command. This will unconditionally abort gpsim.
 	- Added "--cli" command line option. Invokes gpsim in command line mode even if it has been configured to use the gui.
 	- Program viewer can now display ASCII encode text in "dt" tables
@@ -26,6 +27,7 @@ gpsim-0.21.0
 	- SET - added "frequency" command
 	- SET - Added time field to the gui status bar.
 	- Carlos Nieves Ónega - Massive patch for the 17cxx core
+	- Carlos Nieves Ónega - Registers for 17cxx core
 From Salvador Eduardo Tropea mailto:salvador@inti.gov.ar
 * Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps
   is a fault in the version I use of popt, double check it.

@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtkextra/gtksheet.h>
 
-#include <src/interface.h>
+/*#include <src/interface.h>*/
 
 #include "../src/interface.h"
 

@@ -93,6 +93,7 @@ int IOPORT::update_stimuli(void)
 
   cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
 
+  return 0;
 }
 
 int PIC_IOPORT::update_stimuli(void)
@@ -806,7 +807,8 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value;
 
-  cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
+  if(verbose)
+    cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 

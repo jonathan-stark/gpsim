@@ -1,4 +1,6 @@
-# gpsim gui
+# gpsim  executable Makefile
+#
+#
 
 INCLUDES = @X_CFLAGS@ @Y_CFLAGS@
 

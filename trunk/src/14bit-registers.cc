@@ -516,6 +516,23 @@ unsigned int PCLATH::get(void)
 }
 
 //--------------------------------------------------
+// member functions for the PCON base class
+//--------------------------------------------------
+//
+PCON::PCON(void)
+{
+  valid_bits = BOR | POR;
+}
+
+void PCON::put(unsigned int new_value)
+{
+
+  value = (new_value&valid_bits);
+  trace.register_write(address,value);
+
+}
+
+//--------------------------------------------------
 // member functions for the Program_Counter base class
 //--------------------------------------------------
 //

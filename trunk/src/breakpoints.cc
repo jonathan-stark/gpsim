@@ -110,9 +110,11 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
 
     case BREAK_ON_REG_WRITE_VALUE:
       bfrwv = new Break_register_write_value();
-      bfrwv->break_value = arg2;
+      bfrwv->break_value = arg2 & 0xff;
+      bfrwv->break_mask = (arg2 >> 8) & 0x1ff;
       bfrwv->break_point = BREAK_ON_REG_WRITE_VALUE | breakpoint_number;
       bfrwv->replace(cpu,arg1);
+      bfrwv->last_value = bfrwv->replaced->get_value();
 
       return(breakpoint_number);
       break;
@@ -127,9 +129,11 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
 
     case BREAK_ON_REG_READ_VALUE:
       bfrrv = new Break_register_read_value();
-      bfrrv->break_value = arg2;
+      bfrrv->break_value = arg2 & 0xff;
+      bfrrv->break_mask = (arg2 >> 8) & 0x1ff;
       bfrrv->break_point = BREAK_ON_REG_READ_VALUE | breakpoint_number;
       bfrrv->replace(cpu,arg1);
+      bfrrv->last_value = bfrrv->replaced->get_value();
 
       return(breakpoint_number);
       break;
@@ -196,13 +200,27 @@ unsigned int  Breakpoints::set_write_break(pic_processor *cpu, unsigned int regi
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE, cpu, register_number, 0));
 }
 
-unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value)
+unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask=0xff)
 {
+  if(mask == 0)
+    mask = 0xff;
+  else
+    mask |= 0x100;
+
+  value |= ( (0x100 | (mask & 0xff)) << 8);
+
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_READ_VALUE, cpu, register_number, value));
 }
 
-unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value)
+unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask=0xff)
 {
+  if(mask == 0)
+    mask = 0xff;
+  else
+    mask |= 0x100;
+
+  value |= ( (0x100 | (mask & 0xff)) << 8);
+
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE_VALUE, cpu, register_number, value));
 }
 
@@ -772,11 +790,23 @@ unsigned int Break_register_read_value::get(void)
 
 void Break_register_write_value::put(unsigned int new_value)
 {
-  if(new_value == break_value)
+
+  // The lower 8-bits of 'break_mask' describe the bits which are significant. If bit-9 of break_mask
+  // is set, then we only break if this write is DIFFERENT than the last write to this register. This
+  // saves us from breaking multiple times for writing the same value.
+/*  cout << "brwv::put new_value "<<hex<< new_value << "  last_value " << last_value << "   break_mask = " << break_mask 
+       << "   break_value = " << break_value << '\n'; 
+*/
+  if( ((  (break_mask & 0x100) && ((new_value ^ last_value) & break_mask & 0xff))
+       ||
+       (  (break_mask & 0x100) == 0))
+      &&
+      (new_value & break_mask) == break_value)
     {
       bp.halt();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE_VALUE>>8) | (break_value <<8) | (replaced->address)  );
     }
+  last_value = new_value;
   replaced->put(new_value);
 }
 

@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <glib.h>
 
+#include "../src/attribute.h"
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"
@@ -39,13 +40,47 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/uart.h"
 
 class USART_IOPORT;
+class USARTModule;
+class EventLogger;
+
+class TXREG;
+class RCREG;
+class USART_IOPORT;
+
+class USART_CORE //: public USART_MODULE
+{
+ public:
+
+  /* */
+  USART_IOPORT *port;
+
+  /*  receiver stuff **/
+  RCREG *rcreg;
+
+
+
+  /* Transmitter stuff **/
+  TXREG *txreg;
+
+  EventLogger *tx_event;
+
+  Attribute *baud_rate;
+
+  USARTModule *um;
+
+  virtual void new_rx_edge(unsigned int);
+
+  void initialize(USART_IOPORT *new_iop=NULL);
+
+  USART_CORE(void);
+};
 
 class USARTModule : public ExternalModule
 {
  public:
 
   USART_IOPORT *port;
-  USART_MODULE14 *usart;    // Use the PIC usart core 
+  USART_CORE   *usart;    // Use the PIC usart core 
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);

@@ -374,9 +374,11 @@ pic_processor *get_processor(unsigned int cpu_id)
       return NULL;
     }
 
-  //  cout << "Processor ID is NULL (and that's bad)\n";
+  // This may not be the best solution, but if the cpu_id is invalid just
+  // return the active cpu. Note that this is only a problem if gpsim is
+  // simulating more than one processor at a time. 
 
-  return NULL;
+  return active_cpu;
 }
 
 
@@ -868,7 +870,7 @@ pic_processor::pic_processor(void)
     cout << "pic_processor constructor\n";
   files = NULL;
 
-  clock = DEFAULT_PIC_CLOCK;
+  set_frequency(DEFAULT_PIC_CLOCK);
   // Test code for logging to disk:
   //trace_log.switch_cpus(this);
   //trace_log.enable_logging("gpsim.log");
@@ -914,7 +916,7 @@ void pic_processor :: create (void)
   register_bank = &registers[0];  // Define the active register bank 
   W.value = 0;
 
-  set_frequency(10e6);            // 
+  //set_frequency(10e6);            // 
   nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
@@ -1407,7 +1409,7 @@ void pic_processor::init_program_memory(int address, int value)
     }
   else if(address == config_word_address())
     {
-      cout << "** SETTING CONFIG\n";
+      cout << "** SETTING CONFIG address = 0x"<<hex<< address << "  value = 0x"<<value<<'\n';
       set_config_word(address, value);
     }
   else

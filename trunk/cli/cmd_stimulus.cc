@@ -78,7 +78,7 @@ static cmd_options cmd_stimulus_options[] =
   "d",                     STIM_DUMP,          OPT_TT_BITFLAG,
   "dump",                  STIM_DUMP,          OPT_TT_BITFLAG,
   "sqw",                   STIM_SQW,           OPT_TT_BITFLAG,
-  "sqare_wave",            STIM_SQW,           OPT_TT_BITFLAG,
+  "square_wave",           STIM_SQW,           OPT_TT_BITFLAG,
   "tri",                   STIM_TRI,           OPT_TT_BITFLAG,
   "triangle_wave",         STIM_TRI,           OPT_TT_BITFLAG,
   "port",                  STIM_PORT,          OPT_TT_STRING,

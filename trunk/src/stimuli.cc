@@ -377,6 +377,15 @@ int Stimulus_Node::update(unsigned int current_time)
 stimulus::stimulus(char *n = NULL)
 {
   strcpy(name_str,"stimulus");
+
+  snode = NULL;
+  drive = 0;
+  state = 0;
+  digital_state = 0;
+  xref = NULL;
+  next = NULL;
+
+
   //cout << "stimulus\n";
   xref = new XrefObject((unsigned int *)&state);
 }
@@ -1046,8 +1055,29 @@ void IO_input::put_node_state( int new_state)
       if(new_state > l2h_threshold)
 	iop->setbit(iobit,1);
     }
-  } 
-  //else cout << __FUNCTION__ << "Warning: iopin has no accompanying ioport\n";
+  } else {
+
+    // No I/O port is associated with this I/O pin.
+    // Most probably then this is a pin in a Module.
+
+    if(get_digital_state()) {
+      if( state < h2l_threshold) {
+
+	cout << " driving I/O line low \n";
+	state = l2h_threshold + 1;
+	put_digital_state(0);
+
+      } 
+    } else {
+      if(state > l2h_threshold) {
+
+	cout << " driving I/O line high \n";
+	state = h2l_threshold - 1;
+	put_digital_state(1);
+      }
+    }
+  }
+
 
   state = new_state;
 }

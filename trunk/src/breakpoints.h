@@ -114,8 +114,8 @@ struct BreakStatus
   unsigned int set_execution_break(pic_processor *cpu, unsigned int address);
   unsigned int set_read_break(pic_processor *cpu, unsigned int register_number);
   unsigned int set_write_break(pic_processor *cpu, unsigned int register_number);
-  unsigned int set_read_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value);
-  unsigned int set_write_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value);
+  unsigned int set_read_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_write_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
   unsigned int set_cycle_break(pic_processor *cpu, guint64 cycle,BreakCallBack *f = NULL);
   unsigned int set_wdt_break(pic_processor *cpu);
   unsigned int set_stk_overflow_break(pic_processor *cpu);
@@ -224,7 +224,7 @@ class Break_register_read_value : public Breakpoint_Register
 {
 public:
 
-  unsigned int break_value, break_mask;
+  unsigned int break_value, break_mask, last_value;
 
   Break_register_read_value(void){ replaced = NULL;}
   void put(unsigned int new_value)
@@ -247,7 +247,7 @@ class Break_register_write_value : public Breakpoint_Register
 {
 public:
 
-  unsigned int break_value, break_mask;
+  unsigned int break_value, break_mask,last_value;
 
   Break_register_write_value(void){ replaced = NULL;}
   void put(unsigned int new_value);

@@ -29,6 +29,8 @@ class P17C7xx : public  _16bit_processor, public _16bit_68pins
 {
 public:
 
+  CPUSTA cpusta;
+  
   P17C7xx(void);
 
   static pic_processor *construct(void);
@@ -60,7 +62,7 @@ class P17C75x : public P17C7xx
   virtual PROCESSOR_TYPE isa(void){return _P17C75x_;};
   virtual void create_symbols(void);
   
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size(void) const { return 0x4000; };
   
   virtual int get_pin_count(void){return Package::get_pin_count();}; 
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);}; 
@@ -82,6 +84,7 @@ class P17C752 : public P17C75x
   void create_sfr_map(void);
   void create_symbols(void);
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual unsigned int register_memory_size(void) const { return 0x800; };
 
 };
 
@@ -99,6 +102,7 @@ class P17C756 : public P17C75x
   //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int register_memory_size(void) const { return 0x800; };
 
 
 };
@@ -117,6 +121,7 @@ class P17C756A : public P17C75x
   //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int register_memory_size(void) const { return 0x800; };
 
 
 };
@@ -135,6 +140,7 @@ class P17C762 : public P17C75x
   //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int register_memory_size(void) const { return 0x800; };
 
 
 };
@@ -153,6 +159,7 @@ class P17C766 : public P17C75x
   //  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int register_memory_size(void) const { return 0x800; };
 
 
 };

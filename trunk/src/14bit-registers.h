@@ -73,6 +73,8 @@ public:
 #define STATUS_TO_BIT  4
 #define STATUS_OV_BIT  3     //18cxxx
 #define STATUS_N_BIT   4     //18cxxx
+#define STATUS_FSR0_BIT 4     //17c7xx
+#define STATUS_FSR1_BIT 6     //17c7xx
 #define STATUS_Z       (1<<STATUS_Z_BIT)
 #define STATUS_C       (1<<STATUS_C_BIT)
 #define STATUS_DC      (1<<STATUS_DC_BIT)
@@ -80,6 +82,8 @@ public:
 #define STATUS_TO      (1<<STATUS_TO_BIT)
 #define STATUS_OV      (1<<STATUS_OV_BIT)
 #define STATUS_N       (1<<STATUS_N_BIT)
+#define STATUS_FSR0_MODE (3<<STATUS_FSR0_BIT)     //17c7xx
+#define STATUS_FSR1_MODE (3<<STATUS_FSR1_BIT)     //17c7xx
 #define BREAK_Z_ACCESS 2
 #define BREAK_Z_WRITE  1
 
@@ -265,6 +269,47 @@ public:
 	((new_value & 0x80)   ? STATUS_N : 0);
 
       trace.register_write(address,value);
+    }
+
+  // Special member function to control just the FSR mode
+  void put_FSR0_mode(unsigned int new_value)
+    {
+      if(break_point)
+	bp.check_write_break(this);
+
+      value = (value & ~(STATUS_FSR0_MODE)) | 
+	(new_value & 0x03 );
+
+      trace.register_write(address,value);
+    }
+
+  unsigned int get_FSR0_mode(unsigned int new_value)
+    {
+      if(break_point)
+	bp.check_write_break(this);
+
+      trace.register_write(address,value);
+      return( (value>>STATUS_FSR0_BIT) & 0x03);
+    }
+
+  void put_FSR1_mode(unsigned int new_value)
+    {
+      if(break_point)
+	bp.check_write_break(this);
+
+      value = (value & ~(STATUS_FSR1_MODE)) | 
+	(new_value & 0x03 );
+
+      trace.register_write(address,value);
+    }
+
+  unsigned int get_FSR1_mode(unsigned int new_value)
+    {
+      if(break_point)
+	bp.check_write_break(this);
+
+      trace.register_write(address,value);
+      return( (value>>STATUS_FSR1_BIT) & 0x03);
     }
 
   
@@ -559,6 +604,25 @@ public:
   unsigned int get(void);
 
   PCLATH(void);
+};
+
+//---------------------------------------------------------
+// PCON - Power Control/Status Register
+//
+class PCON : public sfr_register
+{
+ public:
+
+  enum {
+    BOR = 1<<0,   // Brown Out Reset
+    POR = 1<<1    // Power On Reset
+  };
+
+  unsigned int valid_bits;
+
+  void put(unsigned int new_value);
+
+  PCON(void);
 };
 
 class EEPROM;    // forward reference to the EE prom peripheral
