@@ -179,7 +179,7 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(pcl,    0xff9);
   add_sfr_register(pclath, 0xffa);
   //add_sfr_register(&pclatu, 0xffb);
-
+  stack = &stack16;
   add_sfr_register(&stack16.stkptr,  0xffc,0,"stkptr");
   add_sfr_register(&stack16.tosl,    0xffd,0,"tosl");
   add_sfr_register(&stack16.tosh,    0xffe,0,"tosh");
