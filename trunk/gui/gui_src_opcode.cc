@@ -1267,7 +1267,6 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   assert(wt==WT_opcode_source_window);
 
   pma = gp->cpu->pma;
-  gint pm_size = gp->cpu->program_memory_size();
 
   Fill();
 
