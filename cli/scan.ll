@@ -348,7 +348,7 @@ int handle_identifier(const string &s, cmd_options **op )
      yylval.Symbol_P = sym;
 
       if(verbose&2)
-        cout << "found symbol '" << sym->name_str << "'\n";
+        cout << "found symbol '" << sym->name() << "'\n";
 
      return recognize(SYMBOL_T,"symbol");
    }

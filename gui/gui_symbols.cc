@@ -249,11 +249,11 @@ void Symbol_Window::Update(void)
 
 #define SYMBOL_NR_COLUMNS 3
     entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
-    char *pstr=(char*)malloc((*sti)->name()->length()+1);
+    char *pstr=(char*)malloc((*sti)->name().length()+1);
     strncpy(pstr,
-	    (*sti)->name()->data(),
-	    (*sti)->name()->length());
-    pstr[(*sti)->name()->length()]=0;
+	    (*sti)->name().data(),
+	    (*sti)->name().length());
+    pstr[(*sti)->name().length()]=0;
     entry[0] = pstr;
 
     int row;
@@ -373,7 +373,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
 
   for(sti = st.begin(); sti != st.end(); sti++) {
     
-    if(!strcasecmp((*sti)->name()->data(),symbol_name)) {
+    if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 	
       //switch(s->type) {
       switch((*sti)->isa()) {

@@ -2,9 +2,6 @@
 # Startup commands for testing the pwm module on a 16c64
 #
 
-# Define it:
-processor p16c64 big_pic
-
 # Source code:
 load s p16c64_pwm.cod
 
