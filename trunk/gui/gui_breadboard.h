@@ -29,8 +29,8 @@ Boston, MA 02111-1307, USA.  */
 
 class Breadboard_Window;
 
-enum orientation {LEFT, RIGHT, UP, DOWN};
-enum direction {PIN_INPUT, PIN_OUTPUT};
+enum eOrientation {LEFT, RIGHT, UP, DOWN};
+enum eDirection {PIN_INPUT, PIN_OUTPUT};
 typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
 
 // Routing types
@@ -48,28 +48,31 @@ typedef struct _path
 } path;
 // End routing types
 
-struct gui_pin
+class GuiPin
 {
-    Breadboard_Window *bbw;
+ public:
+  Breadboard_Window *bbw;
 
-    class IOPIN *iopin;
-    CrossReferenceToGUI *xref;
+  IOPIN *iopin;
+  CrossReferenceToGUI *xref;
 
-    GtkWidget *widget;
-    GdkPixmap *pixmap;
-    GdkGC *gc;
+  GtkWidget *widget;
+  GdkPixmap *pixmap;
+  GdkGC *gc;
 
-    int x;
-    int y;
-    int width;
-    int height;
+  int x;
+  int y;
+  int width;
+  int height;
 
-    int layout_xpos, layout_ypos;
+  int layout_xpos, layout_ypos;
 
-    bool value;
-    enum direction direction;
-    enum orientation orientation;
-    pintype type;
+  bool value;
+  eDirection direction;
+  eOrientation orientation;
+  pintype type;
+
+  GuiPin(Breadboard_Window *, int x, int y, eOrientation _or, IOPIN *);
 };
 
 
@@ -160,7 +163,7 @@ class Breadboard_Window : public GUI_Object {
 
     GtkAdjustment *hadj, *vadj;
 
-    struct gui_pin *selected_pin;
+    struct GuiPin *selected_pin;
     struct gui_node *selected_node;
     struct gui_module *selected_module;
 
@@ -171,6 +174,9 @@ class Breadboard_Window : public GUI_Object {
   virtual void Update(void);
   virtual void NewModule(Module *module);
   virtual void NodeConfigurationChanged(Stimulus_Node *node);
+
+  GtkWidget *add_button(const char *label, const char *name,
+			GtkSignalFunc f, GtkWidget *box);
 };
 
 

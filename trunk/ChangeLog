@@ -1,4 +1,10 @@
 2004-10-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc, gui/gui_breadboard.h:
+	The breadboard expose events invalidated drawing areas which in
+	turn recursively generated expose events. I'm not sure why this
+	code worked with GTK+ 1.x
+
+2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, gui/gui.h, gui/gui_stopwatch.cc,
 	gui/gui_object.cc, gui/gui_main.cc, gui/gui_object.h,
 	gui/gui_profile.cc, gui/gui_regwin.cc, gui/gui_scope.cc,
@@ -37,6 +43,11 @@
 	in the instruction class were causing the source browser to
 	place objects beyond the range allocated to the source browser.
 	This confused GTK+ 2.x.
+
+2004-09-28 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_load.cc, cmd/input.cc:
+	Allow loading of filenames with spaces. (note, gpsim's
+	command line interface still does not support this).
 
 2004-09-28 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc, 
