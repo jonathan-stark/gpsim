@@ -265,6 +265,7 @@ EXPORTS
     ?set@Value@@UAEX_J@Z
     ?set@Value@@UAEX_N@Z
     ?setDrivenState@IOPIN@@UAEX_N@Z
+    ?setDrivingState@IOPIN@@UAEX_N@Z
     ?setSafeMode@Processor@@UAEX_N@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
     ?setWarnMode@Processor@@UAEX_N@Z
