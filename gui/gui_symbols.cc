@@ -206,7 +206,14 @@ static void unselect_row(GtkCList *clist,
 }
 
 
-extern list <Value *> st;  // FIXME - this is really screwed up.....
+static char *_strndup(const char *s, int len)
+{
+#if defined(strndup)
+  return strndup(s,len);
+#else
+  return strdup(s);
+#endif
+}
 
 void Symbol_Window::Update(void)
 {
@@ -252,8 +259,8 @@ void Symbol_Window::Update(void)
     char **entry = (char**)malloc(3*sizeof(char*));
     const int cMaxLength = 32;
 
-    entry[0] = strndup(sym->name().c_str(), cMaxLength);
-    entry[1] = strndup(sym->showType().c_str(), cMaxLength);
+    entry[0] = _strndup(sym->name().c_str(), cMaxLength);
+    entry[1] = _strndup(sym->showType().c_str(), cMaxLength);
     entry[2] = (char*)malloc(cMaxLength);
     sym->get(entry[2],cMaxLength);
 

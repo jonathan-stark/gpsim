@@ -485,6 +485,14 @@ void cli_main(void)
 /*                                                                  */
 /* **************************************************************** */
 
+static char *_strndup(const char *s, int len)
+{
+#if defined(strndup)
+  return strndup(s,len);
+#else
+  return strdup(s);
+#endif
+}
 
 /* Generator function for command completion.  STATE lets us know whether
    to start from scratch; without any state (i.e. STATE == 0), then we
@@ -492,11 +500,11 @@ void cli_main(void)
 char *
 command_generator (const char *text, int state)
 {
+  //static char *empty="";
   static int i = 0;
   const int cMaxStringLen = 64;
 
   /* If this is a new word to complete, initialize now.  */
-
   if (state == 0)
     i = 0;
 
@@ -505,12 +513,19 @@ command_generator (const char *text, int state)
     {
 
       if(strstr(command_list[i]->name, text) == command_list[i]->name)
-	return(strndup(command_list[i++]->name, cMaxStringLen));
+	return(_strndup(command_list[i++]->name, cMaxStringLen));
 
       i++;
     }
 
-  /* If no names matched, then return NULL. */
+  // If no names matched, and this is the first item on a line (i.e. state==0)
+  // then return a copy of the input text. (Note, it was emperically determined
+  // that 'something' must be returned if there are no matches at all - 
+  // otherwise readline crashes on windows.)
+
+  if(state == 0)
+    return _strndup(text,cMaxStringLen);
+
   return 0;
 }
 
@@ -522,8 +537,8 @@ char **
 gpsim_completion (const char *text, int start, int end)
 {
   char **matches;
-
-  matches = 0;
+  static char *empty="";
+  matches = &empty;
 
 #ifdef HAVE_READLINE
   /* If this word is at the start of the line, then it is a command
@@ -645,11 +660,12 @@ static int gpsim_rl_getc(FILE *in)
 #else
   g_io_channel_read(channel, buf, 1, &bytes_read);
 #endif
-
+  /*
 #if defined(_WIN32)
   if(buf[0] == 9)
     return 0x61;  // don't accept tabs in windows
 #endif
+  */
   return buf[0];
 }
 #endif
