@@ -489,6 +489,144 @@ void Processor::read_src_files(void)
 
 
 //-------------------------------------------------------------------
+//
+// processor -- list
+//
+// Display the contents of either a source or list file
+//
+void Processor::list(int file_id, int pc_val, int start_line, int end_line)
+{
+
+
+  if(!files || files->nsrc_files())
+    return;
+
+  if(pc_val > program_memory_size())
+    return;
+
+  if(program_memory[pc_val]->isa() == instruction::INVALID_INSTRUCTION)
+    {
+      cout << "There's no code at address 0x" << hex << pc_val << '\n';
+      return;
+    }
+
+  int line,pc_line;
+  if(file_id)
+    {
+      file_id = files->list_id();
+      line = program_memory[pc_val]->get_lst_line();
+      pc_line = program_memory[pc->value]->get_lst_line();
+    }
+  else
+    {
+      file_id = program_memory[pc_val]->file_id;
+      line = program_memory[pc_val]->get_src_line();
+      pc_line = program_memory[pc->value]->get_src_line();
+    }
+
+  start_line += line;
+  end_line += line;
+
+  FileContext *fc = (*files)[file_id];
+  if(fc)
+    return;
+
+  if(start_line < 0) start_line = 0;
+
+  if(end_line > fc->max_line())
+    end_line = fc->max_line();
+
+  cout << " listing " << fc->name() << " Starting line " << start_line
+       << " Ending line " << end_line << '\n';
+
+
+  for(int i=start_line; i<=end_line; i++)
+  {
+
+    char buf[256];
+
+    files->ReadLine(program_memory[i]->file_id,
+		    program_memory[i]->src_line - 1,
+		    buf,
+		    sizeof(buf));
+
+    if (pc_line == i)
+      cout << "==>";
+    else
+      cout << "   ";
+
+    cout << buf;
+  }
+}
+//-------------------------------------------------------------------
+//
+// disassemble - Disassemble the contents of program memory from
+// 'start_address' to 'end_address'. The instruction at the current
+// PC is marked with an arrow '==>'. If an instruction has a break
+// point set on it then it will be marked with a 'B'. The instruction
+// mnemonics come from the class declarations for each instruction.
+// However, it is possible to modify this on a per instruction basis.
+// In other words, each instruction in the program memory has it's
+// own instantiation. So a MOVWF at address 0x20 is different than
+// one at address 0x21. It is possible to change the mnemonic of
+// one without affecting the other. As of version 0.0.7 though, this
+// is not implemented.
+//
+
+void Processor::disassemble (int start_address, int end_address)
+{
+  instruction *inst;
+  int use_src_to_disasm =0;
+
+  if(start_address < 0) start_address = 0;
+  if(end_address >= pc->memory_size_mask) end_address = pc->memory_size_mask;
+
+  char str[50];
+
+  for(int i = start_address; i<=end_address; i++)
+    {
+      str[0] =0;
+      if (pc->value == i)
+	cout << "==>";
+      else
+	cout << "   ";
+      inst = program_memory[i];
+
+      // Breakpoints replace the program memory with an instruction that has
+      // an opcode larger than 16 bits.
+
+      if(program_memory[i]->opcode < 0x10000)
+	{
+	  cout << ' ';
+	}
+      else
+	{
+	  cout << 'B';
+	  Breakpoint_Instruction *bpi =  (Breakpoint_Instruction *)program_memory[i];
+	  inst = bpi->replaced;
+	}
+
+      if(files && use_src_to_disasm)
+	{
+	  char buf[256];
+
+	  files->ReadLine(program_memory[i]->file_id,
+			   program_memory[i]->src_line - 1,
+			   buf,
+			   sizeof(buf));
+	  cout << buf;
+
+	}
+      else
+	cout << hex << setw(4) << setfill('0') << i << "  "
+	     << hex << setw(4) << setfill('0') << inst->opcode << "    "
+	     << inst->name(str) << '\n';
+
+    }
+}
+
+
+//-------------------------------------------------------------------
 int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 {
   int closest_address = -1;

@@ -1,4 +1,9 @@
 2004-03-09 Scott Dattalo  <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/pic-processor.h:
+	Moved the implementations of the disasm() and list() methods from the 
+	pic_processor class to the processor class.
+
+2004-03-09 Scott Dattalo  <scott@dattalo.com>
 	* src/pic-instructions.h, src/12bit-instructions.h, src/stimuli.h,
 	src/14bit-instructions.h, src/14bit-instructions.h, src/16bit-instructions.h,
 	src/16bit-instructions.cc: changed references of pic-processor to Processor.

@@ -360,8 +360,8 @@ public:
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
 
-  void disassemble (int start_address, int end_address) {};
-  void list(int file_id, int pcval, int start_line, int end_line) {};
+  void disassemble (int start_address, int end_address);
+  void list(int file_id, int pcval, int start_line, int end_line);
 
   // Configuration control
 
