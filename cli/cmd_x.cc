@@ -82,11 +82,11 @@ void cmd_x::x(int reg)
       return;
     }
 
-  int ov = cpu->registers[reg]->get_value();
+  RegisterValue ov = cpu->registers[reg]->getRV();
 
   cout << cpu->registers[reg]->name() << '(' << hex << reg << ')';
 
-  cout << " is " << ov << '\n';
+  cout << " is " << ov.data << " and initialized bits are " << ov.init << endl;
 
 
 
