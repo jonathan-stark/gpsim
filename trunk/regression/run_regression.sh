@@ -26,3 +26,5 @@ ${RT} p16f84 p16f84
 #${RT} p16f873 p16f873
 
 ${RT} digital_stim digital_stim
+
+${RT} p12ce518 p12ce518

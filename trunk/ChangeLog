@@ -1,3 +1,11 @@
+2004-09-14 Scott Dattalo <scott@dattalo.com>
+	* regression/p12ce518/p12c518.asm, regression/p12ce518/p12c518.stc,
+	regression/p12ce518/EEdriver.asm: Added a regression test
+	for the 12ce518.
+	* src/stimuli.cc, src/i2c-ee.cc, src/ioports.cc, src/stimuli.h,
+	src/14bit-registers.cc:
+	Fixed stimuli so that the 12CE518 internal EEPROM would work.
+	
 2004-09-13 Scott Dattalo <scott@dattalo.com>
 	* src/i2c-ee.cc, src/i2c-ee.h, src/ioports.cc, src/p12x.cc,
 	src/stimuli.cc, src/stimuli.h: Partially check in for work

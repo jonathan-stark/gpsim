@@ -521,10 +521,7 @@ void IOPORT_TRIS::put(unsigned int new_value)
   int save_port_latch = port->internal_latch;
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
-  if(verbose)
-    cout << "IOPORT_TRIS::put 0x"<<hex<<new_value<<'\n';
   port->update_pin_directions(new_value);
 
   value.put(new_value);
