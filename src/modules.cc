@@ -107,6 +107,11 @@ Module * Module::construct(char * name)
 
 }
 
+void Module::reset(RESET_TYPE r)
+{
+  cout << " resetting module " << name() << endl;
+}
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
@@ -158,67 +163,6 @@ Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
   return 0;
 }
 
-
-#if 0
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-void Module::set_attribute(char *attr, char *val)
-{
-
-  if(attr) {
-    Value *locattr = get_attribute(attr);
-
-    if(locattr)
-      locattr->set(val);
-  } else {
-
-    // Go ahead and dump the attribute list:
-    dump_attributes();
-  }
-
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-void Module::set_attribute(char *attr, char *val, int val2)
-{
-
-  if(attr) {
-    Value *locattr = get_attribute(attr);
-
-    if(locattr)
-      locattr->set(val,val2);
-  } else {
-
-    // Go ahead and dump the attribute list:
-    dump_attributes();
-  }
-
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-void Module::set_attribute(char *attr, double val)
-{
-
-  if(attr) {
-    Value *locattr = get_attribute(attr);
-
-    if(locattr)
-      locattr->set(val);
-  } else {
-
-    // Go ahead and dump the attribute list:
-    dump_attributes();
-
-  }
- 
-
-}
-#endif
 
 void Module::set(const char *cP,int len)
 {
@@ -497,7 +441,7 @@ void module_load_module(const char *module_type, const char *module_name)
 
   for (module_iterator = module_list.begin();  
        module_iterator != module_list.end(); 
-       module_iterator++) {
+       ++module_iterator) {
 
     Module_Library *t = *module_iterator;
     if(verbose)
@@ -544,6 +488,18 @@ void module_load_module(const char *module_type, const char *module_name)
 
 }
 
+//------------------------------------------------------------------------
+void module_reset_all(RESET_TYPE r)
+{
+  list <Module *> :: iterator mi;
+  //list <Module *> instantiated_modules_list;
+
+  for (mi = instantiated_modules_list.begin();  
+       mi != instantiated_modules_list.end(); 
+       ++mi)
+    (*mi)->reset(r);
+
+}
 //--------------------------------------------------
 // Print out all of the symbols that are of type 'SYMBOL_MODULE'
 
@@ -594,60 +550,6 @@ void module_pins(char *module_name)
   }
 
 }
-
-
-#if 0
-//--------------------------------------------------
-// module_set_attr
-// Set module attribute
-
-void module_set_attr(char *module_name,char *attr, char *val)
-{
-
-  Module *cpu=module_check_cpu(module_name);
-
-
-  if(!cpu)
-    return;
-
-  cpu->set_attribute(attr,val);
-
-}
-
-//--------------------------------------------------
-// module_set_attr
-// Set module attribute
-
-void module_set_attr(char *module_name,char *attr, char *val, int val2)
-{
-
-  Module *cpu=module_check_cpu(module_name);
-
-
-  if(!cpu)
-    return;
-
-  cpu->set_attribute(attr,val,val2);
-
-}
-
-
-//--------------------------------------------------
-// module_set_attr
-// Set module attribute
-
-void module_set_attr(char *module_name,char *attr, double val)
-{
-
-  Module *cpu=module_check_cpu(module_name);
-
-  if(!cpu)
-    return;
-
-  cpu->set_attribute(attr,val);
-
-}
-#endif
 
 
 

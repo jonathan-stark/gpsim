@@ -145,6 +145,7 @@ void command::new_processor(Processor *p)
 {
 
   cpu = p;
+  set_active_cpu(p);
   trace.switch_cpus(cpu);
 
 }

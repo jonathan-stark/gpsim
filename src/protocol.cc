@@ -221,7 +221,7 @@ bool Packet::DecodeObjectType(unsigned int &i)
   i = ascii2uint(rxBuffer->getBuffer(),2);
   rxBuffer->index += 2;
 
-  return true;;
+  return true;
 }
 
 bool Packet::DecodeString(char *retStr, int maxLen)

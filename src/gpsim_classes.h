@@ -29,40 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_CLASSES_H__
 #define __GPSIM_CLASSES_H__
 
-/*
-class IOPIN;
-class IOPORT;
-class PIC_IOPORT;
-
-class instruction;
-class file_register;
-class invalid_file_register;
-class gpsimInterface;
-class Processor;
-class pic_processor;
-class symbol;
-class XrefObject;
-
-class _14bit_processor;
-
-class stimulus;
-class source_stimulus;
-class resistor;
-class open_collector;
-class Stimulus_Node;
-
-class IOPORT_TRIS;
-class IOPORT_LATCH;
-class USART_MODULE;
-class EEPROM;
-
-class Module;
-class Module_Types;
-
-class ModuleInterface;
-class ProcessorInterface;
-*/
-
 /*==================================================================
  *
  * Here are a few enum definitions 
@@ -79,7 +45,9 @@ enum RESET_TYPE
   WDT_RESET,          // Watch Dog timer timeout reset
   EXTERNAL_RESET,     // I/O pin (e.g. MCLR going low) reset
   SOFT_RESET,         // Software initiated reset
-  BOD_RESET           // Brown out detection reset
+  BOD_RESET,          // Brown out detection reset
+  SIM_RESET,          // Simulation Reset
+  
 };
 
 

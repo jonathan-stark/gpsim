@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/protocol.h"
 #include "../src/gpsim_interface.h"
 #include "../src/breakpoints.h"
+#include "../src/gpsim_time.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -600,7 +601,45 @@ void Socket::ParseObject()
     }
     break;
 
+  case GPSIM_CMD_RUN:
+    {
+      guint64 nCycles;
+      guint64 startCycle = get_cycles().get();
 
+      // Extract from the packet the number of cycles we should run.
+      // If the number of cycles is greater than 0, then we'll set
+      // a cycle breakpoint; otherwise we'll run forever.
+
+      if(packet->DecodeUInt64(nCycles)) {
+	guint64 fc = startCycle + nCycles;
+	if(nCycles) {
+	  get_bp().set_cycle_break(0,fc);
+	}
+
+      }
+
+      // Start running...
+
+      get_interface().start_simulation();
+
+      // The simulation has stopped. For the response (to the run
+      // command) we'll send the current value of the cycle counter.
+      // (A client can use this to determine if the break was due to
+      // cycle break set above or to something else).
+
+      packet->EncodeObjectType(GPSIM_CMD_RUN);
+      packet->EncodeUInt64(get_cycles().get() - startCycle);
+      packet->txTerminate();
+      respond(packet->txBuff());
+
+    }
+    break;
+
+  case GPSIM_CMD_RESET:
+    get_interface().reset();
+    respond("-");
+    break;
+    
   default:
     printf("Invalid object type: %d\n",ObjectType);
     respond("-");
@@ -772,7 +811,7 @@ static void debugPrintCondition(GIOCondition cond)
 //gboolean service_socket()
 static gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 {
-  std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
+  //std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
   //debugPrintCondition(condition);
 
   Socket *s = (Socket *)d;

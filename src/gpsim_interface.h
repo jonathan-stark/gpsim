@@ -136,6 +136,7 @@ class gpsimInterface : public TriggerObject {
   gpsimInterface(void);
 
   void start_simulation (void);
+  void reset (void);
   void simulation_has_stopped (void);
   bool bSimulating();
 

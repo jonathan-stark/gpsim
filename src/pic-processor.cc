@@ -240,6 +240,7 @@ Processor * add_processor(const char * processor_type, const char * processor_ne
       // Tell the gui or any modules that are interfaced to gpsim
       // that a new processor has been declared.
       gi.new_processor(p);
+      instantiated_modules_list.push_back(p);
 
       return p;
     }

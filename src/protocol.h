@@ -54,7 +54,8 @@ enum eGPSIMObjectTypes
   };
 
 /// Socket Commands
-///
+/// FIXME - document how these are used.
+/// 
 enum eGPSIMSocketCommands
   {
 
@@ -65,6 +66,9 @@ enum eGPSIMSocketCommands
 
     GPSIM_CMD_QUERY_SYMBOL          = 0xF4,
     GPSIM_CMD_WRITE_TO_SYMBOL       = 0xF5,
+
+    GPSIM_CMD_RUN                   = 0xF6,
+    GPSIM_CMD_RESET                 = 0xF7,
 
   };
 
