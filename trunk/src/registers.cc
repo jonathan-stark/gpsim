@@ -54,10 +54,11 @@ Register::Register(void)
 Register::~Register(void)
 {
   if(name_str1)
-    delete(name_str1);
+    free(name_str1);     // Note - use free instead of delete since memory is allocated
+                         // via strdup which in turn uses malloc instead of new.
+                         // See the member function new_name();
 
-//  if(xref)
-//    delete(xref);
+
 }
 
 //------------------------------------------------------------
@@ -128,11 +129,19 @@ void Register::setbit_value(unsigned int bit_number, bool new_value)
   setbit(bit_number,new_value);
 }
 
+//--------------------------------------------------
+// new_name
+//
+// Assign a new name to a register. If the register already has
+// a name, the old one is deleted and then the new one is assigned.
+//
+// Specifying a NULL name effectively deletes the register name
 
 void Register::new_name(char *s)
 {
   if(name_str1)
-    delete name_str1;
+    free(name_str1);     // Note - use free instead of delete since memory is allocated
+                         // via strdup which in turn uses malloc instead of new.
 
   if(s)
     name_str1 = strdup(s);

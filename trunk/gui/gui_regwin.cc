@@ -1565,9 +1565,6 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
       
   row_created=FALSE;
 
-  for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
-    row_to_address[j]=-1;
-
   gtk_sheet_freeze(register_sheet);
     
   j=0;
@@ -1692,7 +1689,7 @@ void Register_Window::Build(void)
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
     
-  gchar name[10];
+  gchar buffer[10];
   gint i;
   gint column_width,char_width;
 
@@ -1799,16 +1796,16 @@ void Register_Window::Build(void)
 
   for(i=0; i<register_sheet->maxcol; i++){
 
-    sprintf(name,"%02x",i);
-    gtk_sheet_column_button_add_label(register_sheet, i, name);
-    gtk_sheet_set_column_title(register_sheet, i, name);
+    sprintf(buffer,"%02x",i);
+    gtk_sheet_column_button_add_label(register_sheet, i, buffer);
+    gtk_sheet_set_column_title(register_sheet, i, buffer);
     gtk_sheet_set_column_width (register_sheet, i, column_width);
   }
 
   i = REGISTERS_PER_ROW;
-  sprintf(name,"ASCII");
-  gtk_sheet_column_button_add_label(register_sheet, i, name);
-  gtk_sheet_set_column_title(register_sheet, i, name);
+  sprintf(buffer,"ASCII");
+  gtk_sheet_column_button_add_label(register_sheet, i, buffer);
+  gtk_sheet_set_column_title(register_sheet, i, buffer);
 
   gtk_sheet_set_column_width (register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
 
@@ -1887,6 +1884,10 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   registers = (GUIRegister  **)malloc(MAX_REGISTERS*sizeof(GUIRegister *));
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
+
+  for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
+    row_to_address[i]=-1;
+
 
 
 }
