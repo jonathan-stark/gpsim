@@ -161,7 +161,9 @@ class RegisterMemoryAccess
 
   bool hasBreak(int address);
 
-  //private:
+  Register &operator [] (int address);
+
+ private:
   int nRegisters;
   bool initialized;
   Register **registers;       // Pointer to the array of registers.

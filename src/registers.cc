@@ -194,13 +194,41 @@ void Register::put_value(unsigned int new_value)
 }
 
 
-//------------------------------------------------------------------------
-invalid_file_register::invalid_file_register(unsigned int at_address)
+//--------------------------------------------------
+// member functions for the InvalidRegister class
+//--------------------------------------------------
+void InvalidRegister::put(unsigned int new_value)
+{
+  cout << "attempt write to invalid file register: address 0x" << 
+    hex << address<< ", value 0x" << new_value << '\n';
+
+  bp.halt();
+  trace.register_write(address,value);
+
+  return;
+}
+
+unsigned int InvalidRegister::get(void)
+{
+  cout << "attempt read from invalid file register\n";
+
+  trace.register_read(address,value);
+
+  return(0);
+}
+
+
+InvalidRegister::InvalidRegister(unsigned int at_address)
 {
 
   char name_str[100];
   sprintf (name_str, "invalid fr  0x%02x", at_address);
   new_name(name_str);
+}
+
+InvalidRegister::InvalidRegister(void)
+{
+  new_name("INVALID_REGISTER");
 }
 
 

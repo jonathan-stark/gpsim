@@ -157,28 +157,28 @@ class file_register : public Register
   ~file_register(void);
   virtual void put_value(unsigned int new_value);
 
-/*
-  virtual void put(unsigned int new_value);
-  virtual void new_name(char *);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  virtual void setbit_value(unsigned int bit_number, bool new_value);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
-*/
 };
 
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to
 // to this class' value get 0
 
-class invalid_file_register : public file_register
+class InvalidRegister : public file_register
 {
 public:
 
+  InvalidRegister(void);
+  InvalidRegister(unsigned int at_address);
+
   void put(unsigned int new_value);
   unsigned int get(void);
-  invalid_file_register(unsigned int at_address);
   virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
+  virtual Register *getReg(void)
+    {
+      return 0;
+    }
+  
+
 };
 
 

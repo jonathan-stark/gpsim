@@ -114,7 +114,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     switch(item->id)
     {
     case MENU_ADD_WATCH:
-      //WatchWindow_add(popup_sw->gui_obj.gp->watch_window,
+
       popup_sw->gp->watch_window->Add(pic_id,
 				      REGISTER_RAM,
 				      entry->value);
@@ -194,9 +194,12 @@ static void unselect_row(GtkCList *clist,
 {
     update_menus(sw);
 }
+extern list <symbol *> st;
 
 void Symbol_Window::Update(void)
 {
+
+  static list <symbol *>::iterator interface_sti;
 
   char **entry; // 'name', 'type', 'typedata'
   sym *s;
@@ -243,6 +246,10 @@ void Symbol_Window::Update(void)
 	
       entry[0]=(char*)malloc(strlen(s->name)+1);
       strcpy(entry[0],s->name);
+
+      strdup(entry[1],s->type_name());
+
+#if 0
       entry[1]=(char*)malloc(64);
       switch(s->type)
 	{
@@ -268,6 +275,7 @@ void Symbol_Window::Update(void)
 	  strcpy(entry[1],"unknown symbol type");
 	  break;
 	}
+#endif
       entry[2]=(char*)malloc(32);
       if(s->type==SYMBOL_ADDRESS||
 	 s->type==SYMBOL_CONSTANT||

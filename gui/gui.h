@@ -155,9 +155,10 @@ class GUI_Object {
 };
 
 
+//========================================================================
 //
-// A 'register' has two attributes as far as the gui is concerned:
-//   1) its location and 2) value that is being displayed
+// A GUI register is a shadow of a register in a simulated cpu (or module).
+// 
 //
 // FIXME -- why not just derive from the Register base class?
 
@@ -178,7 +179,13 @@ class GUIRegister {
 
   CrossReferenceToGUI *xref;
 
-  bool bIsAliased;  // true if this register is aliased and this instance is not the base.
+  bool bIsAliased;     // true if this register is aliased 
+                       // and this instance is not the base.
+
+  bool bIsValid(void); // true if this register is a valid one (i.e.
+                       // there's a defined register at the address).
+
+  bool bIsSFR(void);   // true if this register is a special function register
 
   void put_value(unsigned int new_value);
   unsigned int get_value(void);
@@ -203,7 +210,6 @@ class GUIRegister {
 class WatchEntry : public GUIRegister {
 public:
 
-  unsigned int pic_id;
   Processor *cpu;
   REGISTER_TYPE type;
 
@@ -329,6 +335,7 @@ class Watch_Window : public  GUI_Object
   virtual void ClearWatch(WatchEntry *entry);
   virtual void UpdateWatch(WatchEntry *entry);
   virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg=0);
+  virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
   virtual void Update(void);
   virtual void UpdateMenus(void);
   
@@ -883,93 +890,6 @@ void ProfileWindow_notify_start_callback(Profile_Window *pw);
 void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 int gui_get_value(char *prompt);
 
-
-#if 0
-// gui_symbols.c
-void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber);
-void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name);
-void SymbolWindow_new_symbols(Symbol_Window *sw, GUI_Processor *gp);
-int CreateSymbolWindow(GUI_Processor *gp);
-int BuildSymbolWindow(Symbol_Window *sw);
-
-// gui_statusbar.c
-void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw);
-void StatusBar_update(StatusBar_Window *sbw);
-void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp);
-
-// gui_src_opcode.c
-void SourceBrowserOpcode_select_address(SourceBrowserOpcode_Window *sbow,int address);
-void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address);
-void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
-void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
-int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp);
-void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow);
-
-// gui_src_asm.c
-int CreateSourceBrowserAsmWindow(GUI_Processor *gp);
-void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
-void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
-void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address);
-void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address);
-void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw);
-
-// gui_src.c
-void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address);
-void SourceBrowser_update(SourceBrowser_Window *sbw);
-void CreateSBW(SourceBrowser_Window *sbw);
-void SourceBrowser_change_view (GUI_Object *_this, int view_state);
-
-// gui_regwin.c
-void RegWindow_update(Register_Window *rw);
-void RegWindow_select_symbol_name(Register_Window *rw, char *name);
-void RegWindow_select_symbol_regnumber(Register_Window *rw, int n);
-void RegWindow_select_register(Register_Window *rw, int regnumber);
-void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp);
-
-
-
-// gui_watch.c
-void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address);
-int CreateWatchWindow(GUI_Processor *gp);
-int BuildWatchWindow(Watch_Window *ww);
-void WatchWindow_update(Watch_Window *ww);
-void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp);
-
-// gui_stack.c
-int CreateStackWindow(GUI_Processor *gp);
-int BuildStackWindow(Stack_Window *sw);
-void StackWindow_update(Stack_Window *sw);
-void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp);
-
-// gui_breadboard.c
-void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);
-void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module);
-void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node);
-
-int BuildBreadboardWindow(Breadboard_Window *bbw);
-int CreateBreadboardWindow(GUI_Processor *gp);
-void BreadboardWindow_update(Breadboard_Window *bbw);
-
-// gui_trace.c
-void TraceWindow_new_processor(Trace_Window *bbw, GUI_Processor *gp);
-int BuildTraceWindow(Trace_Window *bbw);
-int CreateTraceWindow(GUI_Processor *gp);
-void TraceWindow_update(Trace_Window *bbw);
-
-// gui_profile.c
-void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp);
-void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp);
-int BuildProfileWindow(Profile_Window *pw);
-int CreateProfileWindow(GUI_Processor *gp);
-void ProfileWindow_update(Profile_Window *pw);
-
-// gui_stopwatch.c
-void StopWatchWindow_new_processor(StopWatch_Window *sww, GUI_Processor *gp);
-void StopWatchWindow_new_program(StopWatch_Window *sww, GUI_Processor *gp);
-int BuildStopWatchWindow(StopWatch_Window *sww);
-int CreateStopWatchWindow(GUI_Processor *gp);
-void StopWatchWindow_update(StopWatch_Window *sww);
-#endif
 
 #endif // __GUI_H__
 

@@ -482,7 +482,8 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     new_value >>= 1;
   }
 
-  if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
+  //if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
+  if(entry->hasBreak())
     gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "yes");
   else
     gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "no");
@@ -562,16 +563,15 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Reg
 
   watch_entry = new WatchEntry();
   watch_entry->address=address;
-  watch_entry->pic_id=pic_id;
+  //watch_entry->pic_id=pic_id;
   watch_entry->cpu = gp->cpu;
+
   watch_entry->type=type;
 
   if(type == REGISTER_RAM)
     watch_entry->rma = &gp->cpu->rma;
   else 
     watch_entry->rma = &gp->cpu->ema;
-
-  //watch_entry->reg = reg;
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
     
@@ -589,6 +589,59 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Reg
   UpdateMenus();
 }
 
+//------------------------------------------------------------------------
+void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
+{
+  char name[50], addressstring[50], typestring[30];
+  char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
+  int row;
+  WatchWindowXREF *cross_reference;
+  char *regname;
+
+  WatchEntry *watch_entry;
+    
+  if(!gp || !gp->cpu || !reg || !reg->bIsValid())
+    return;
+
+  if(!enabled)
+    Build();
+
+
+  //regname = gpsim_get_register_name(pic_id,type,address);
+
+  Register *cpu_reg = reg->get_register();
+
+  strncpy(name,cpu_reg->name(),sizeof(name));
+  sprintf(addressstring,"0x%02x",reg->address);
+  strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
+
+  row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
+
+  watch_entry = new WatchEntry();
+  watch_entry->address=reg->address;
+  //watch_entry->pic_id=pic_id;
+  watch_entry->cpu = gp->cpu;
+
+  watch_entry->type=type;
+
+  watch_entry->rma = reg->rma;
+
+  gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
+    
+  watches = g_list_append(watches, (gpointer)watch_entry);
+
+  UpdateWatch(watch_entry);
+
+  cross_reference = new WatchWindowXREF();
+  cross_reference->parent_window_type = WT_watch_window;
+  cross_reference->parent_window = (gpointer) this;
+  cross_reference->data = (gpointer) watch_entry;
+
+  watch_entry->Assign_xref(cross_reference);
+
+  UpdateMenus();
+
+}
 //------------------------------------------------------------------------
 // ClearWatches
 //

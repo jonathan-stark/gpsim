@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 
 
-class invalid_file_register;   // Forward reference
+class InvalidRegister;   // Forward reference
 
 
 #ifndef __16_BIT_REGISTERS_H__
