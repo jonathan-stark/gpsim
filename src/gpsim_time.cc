@@ -58,20 +58,20 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
 
+
   if(inactive.next == NULL)
     {
       cout << " too many breaks are set on the cycle counter \n";
-      exit(1);
       return 0;
     }
   else if(future_cycle <= value)
     {
       cout << "Cycle break point was ignored because cycle " << future_cycle << " has already gone by\n";
+      cout << "current cycle is " << value << '\n';
       return 0;
     }
   else
     {
-
       // place the future cycle at which we intend to break into the
       // sorted break list
 

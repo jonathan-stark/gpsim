@@ -19,6 +19,7 @@ libgpsim_la_SOURCES = \
 	16bit-hexdecode.cc \
 	breakpoints.cc \
 	cod.cc \
+	fopen-path.cc \
 	gpsim_time.cc \
 	hexutils.cc \
 	init.cc \

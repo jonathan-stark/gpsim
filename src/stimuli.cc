@@ -1010,7 +1010,7 @@ void IO_input::put_state( int new_digital_state)
 
 void IO_input::put_node_state( int new_state)
 {
-  // cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
+  //cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
 
 
   // No need to proceed if we already in the new_state.
@@ -1035,7 +1035,8 @@ void IO_input::put_node_state( int new_state)
       if(new_state > l2h_threshold)
 	iop->setbit(iobit,1);
     }
-  }
+  } 
+  //else cout << __FUNCTION__ << "Warning: iopin has no accompanying ioport\n";
 
   state = new_state;
 }
@@ -1064,22 +1065,23 @@ void IO_bi_directional::put_state( int new_digital_state)
   // If the bi-directional pin is an output then driving is TRUE.
   if(driving) {
 
-    // If the new state to which the stimulus is being set is different than
-    // the current state of the bit in the ioport (to which this stimulus is
-    // mapped), then we need to update the ioport.
+    if(iop) {
+      // If the new state to which the stimulus is being set is different than
+      // the current state of the bit in the ioport (to which this stimulus is
+      // mapped), then we need to update the ioport.
 
-    if((new_digital_state!=0) ^ ( iop->value & (1<<iobit))) {
+      if((new_digital_state!=0) ^ ( iop->value & (1<<iobit))) {
 
-      iop->setbit(iobit,new_digital_state);
+	iop->setbit(iobit,new_digital_state);
 
-      // If this stimulus is attached to a node, then let the node be updated
-      // with the new state as well.
-      if(snode)
-	snode->update(0);
-      // Note that this will auto magically update
-      // the io port.
+	// If this stimulus is attached to a node, then let the node be updated
+	// with the new state as well.
+	if(snode)
+	  snode->update(0);
+	// Note that this will auto magically update
+	// the io port.
 
-
+      }
     }
 
   }

@@ -984,7 +984,6 @@ void pic_processor::create_invalid_registers (void)
   // individual invalid file registers. By default, gpsim halts whenever
   // there is an invalid file register access.
 
-  //for (i = 0; i < 16*FILE_REGISTERS; i++)
   for (i = 0; i < register_memory_size(); i++)
     {
       if (NULL == registers[i])

@@ -994,6 +994,17 @@ gpointer gpsim_set_cyclic_break_point2(
   return((gpointer)cbp);
 }
 
+pic_processor *gpsim_get_active_cpu(void)
+{
+  return active_cpu;
+}
+void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL)
+{
+  if(active_cpu)
+    active_cpu->cycles.set_break_delta(delta, f);
+
+}
+
 //---------------------------------------------------------------------------
 //   char *gpsim_get_version(char *dest)
 //---------------------------------------------------------------------------

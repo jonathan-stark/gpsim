@@ -353,7 +353,6 @@ void module_load_library(char *library_name)
 void module_load_module(char *module_type, char *module_name=NULL)
 {
 
-  //cout << __FUNCTION__ << '\n';
 
   if(!module_type) {
     cout << "WARNING: module type is NULL\n";
