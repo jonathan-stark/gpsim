@@ -83,21 +83,6 @@ static void update(Breadboard_Window *bbw)
 
     pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
-    if(bbw->pinline_gc==NULL)
-    {
-	bbw->pinline_gc=gdk_gc_new(bbw->da->window);
-	g_assert(bbw->pinline_gc!=NULL);
-	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-
-	bbw->pinname_gc=gdk_gc_new(bbw->da->window);
-
-	bbw->case_gc=gdk_gc_new(bbw->da->window);
-	gdk_gc_set_line_attributes(bbw->case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-
-	bbw->pinstatefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
-
-	bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
-    }
 
     gdk_draw_rectangle (bbw->pixmap,
 			widget->style->white_gc,
@@ -106,6 +91,9 @@ static void update(Breadboard_Window *bbw)
 			widget->allocation.width,
 			widget->allocation.height);
 
+    if(bbw->pinline_gc==NULL)
+	return;
+    
     for(dy=0;dy<bbw->pinspacing*(bbw->nrofpins/2);dy+=bbw->pinspacing)
     {
 	int pinnr;
@@ -353,8 +341,6 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
     int pin;
 
     bbw->processor=1;
-    if(!bbw->gui_obj.enabled)
-	return;
     
     pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
@@ -372,8 +358,6 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     bbw->nrofpins=gpsim_package_pin_count(pic_id);
 
-    bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
-    bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
     bbw->pinnamewidth=0;
     for(i=1;i<=bbw->nrofpins;i++)
     {
@@ -388,11 +372,12 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	    bbw->pinnamewidth=width;
     }
     
-    bbw->pinstatewidth = gdk_string_width (bbw->pinstatefont,"H")+LABELPAD;
-    bbw->pinstateheight = gdk_string_height (bbw->pinstatefont,"H")+LABELPAD;
+  bbw->pinstatewidth = gdk_string_width (bbw->pinstatefont,"H")+LABELPAD;
+  bbw->pinstateheight = gdk_string_height (bbw->pinstatefont,"H")+LABELPAD;
 
-    bbw->picnamewidth = gdk_string_width (bbw->picnamefont,gpsim_processor_get_name(pic_id))+LABELPAD;
-    bbw->picnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
+  bbw->picnamewidth = gdk_string_width (bbw->picnamefont,gpsim_processor_get_name(pic_id))+LABELPAD;
+  bbw->picnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
+
     
     bbw->pinspacing=bbw->pinlength;
     
@@ -427,7 +412,6 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
     }
     
     update(bbw);
-
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
@@ -474,7 +458,23 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		      (GtkSignalFunc) configure_event, bbw);
 
   gtk_widget_show(da);
-  gtk_widget_show(window);
+  gtk_widget_show_now(window);
+
+  bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
+  bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
+
+	bbw->pinline_gc=gdk_gc_new(bbw->da->window);
+	g_assert(bbw->pinline_gc!=NULL);
+	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+	bbw->pinname_gc=gdk_gc_new(bbw->da->window);
+
+	bbw->case_gc=gdk_gc_new(bbw->da->window);
+	gdk_gc_set_line_attributes(bbw->case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+	bbw->pinstatefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
+
+	bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
 
   bbw->gui_obj.enabled=1;
 
