@@ -2627,6 +2627,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	gdk_draw_arc(p->pixmap,((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],TRUE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 	gdk_draw_arc(p->pixmap,p->bbw->case_gc,FALSE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 
+//	gtk_widget_realize(da);
+
 	gtk_signal_connect(GTK_OBJECT(da),
 			   "expose_event",
 			   (GtkSignalFunc) expose,
@@ -2753,8 +2755,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     gtk_layout_put(GTK_LAYOUT(bbw->layout), p->module_widget, 0, 0);
 
     position_module(p, x, y);
-    p->module->x = p->x;
-    p->module->y = p->y;
+    //p->module->x = p->x;
+    //p->module->y = p->y;
     update_board_matrix(p->bbw);
 
     bbw->modules=g_list_append(bbw->modules, p);
@@ -2786,12 +2788,15 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 	// Check if module has changed its position
 	if(p->module->x!=p->x || p->module->y!=p->y)
 	{
-	    // printf(" to position %d %d",p->module->x, p->module->y);
+	    if(p->module->x>=0 && p->module->y>=0)
+	    {
+		// printf(" to position %d %d",p->module->x, p->module->y);
 
-            position_module(p, p->module->x, p->module->y);
-	    p->module->x = p->x;
-	    p->module->y = p->y;
-	    update_board_matrix(p->bbw);
+		position_module(p, p->module->x, p->module->y);
+		p->module->x = p->x;
+		p->module->y = p->y;
+		update_board_matrix(p->bbw);
+	    }
 	}
 
         // printf("\n");
@@ -2888,6 +2893,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     struct gui_module *p=create_gui_module(bbw, PIC_MODULE, get_processor(pic_id),NULL);
 
+    BreadboardWindow_update(bbw);
 }
 
 /* When a module is created */
@@ -2942,9 +2948,11 @@ void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus
     }
 }
 
-// It feels like I'm doing something wrong when I have to do this... FIXME
 static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 {
+    if(GTK_LAYOUT (bbw->layout)->bin_window==NULL)
+	return;
+
     if(bbw->layout_pixmap==NULL)
     {
 	puts("bbw.c: no pixmap!");
@@ -2959,7 +2967,6 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 
     xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
     yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
-
 
     gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
 		    ((GUI_Object*)bbw)->window->style->white_gc,
@@ -2990,7 +2997,6 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
 
     xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
     yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
-
 
     gdk_draw_pixmap(GTK_LAYOUT (widget)->bin_window,
 			    ((GUI_Object*)bbw)->window->style->white_gc,
@@ -3544,10 +3550,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),bbw);
 
 
-  // FIXME, this sucks.
-  gtk_widget_show_now(window);
-  if(!bbw->gui_obj.enabled)
-      gtk_widget_hide(window);
+  gtk_widget_realize(window);
 
   bbw->pinname_gc=gdk_gc_new(bbw->gui_obj.window->window);
 
@@ -3606,6 +3609,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   update_menu_item((GUI_Object*)bbw);
 
   draw_nodes(bbw);
+
+  if(bbw->gui_obj.enabled)
+      gtk_widget_show(window);
+
 
   return 0;
 }
