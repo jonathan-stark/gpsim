@@ -48,6 +48,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
+#define DEBUG
 
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
@@ -1110,7 +1111,7 @@ void Register_Window::UpdateEntry(void)
 
   GUIRegister *reg = getRegister(row,col);
 
-  if(reg && reg->bIsValid() )
+  if(entry && reg && reg->bIsValid() )
     {
       if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
 	gtk_entry_set_text(GTK_ENTRY(entry), text);
@@ -1431,7 +1432,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 
   GUIRegister *reg = rw->getRegister(row,col);
 
-  if(reg && reg->bIsValid() )
+  if(rw->entry && reg && reg->bIsValid() )
     if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))))
       gtk_entry_set_text(sheet_entry, text);
 
@@ -1516,7 +1517,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
     gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
 
     
-  rw->UpdateLabelEntry();
+  //rw->UpdateLabelEntry();
 
   return TRUE;
 }
@@ -1574,7 +1575,7 @@ void Register_Window::SelectRegister(int regnumber)
      GTK_SHEET(register_sheet)->view.rowi<range.rowi)
     gtk_sheet_moveto(GTK_SHEET(register_sheet),row,col,0.5,0.5);
 
-  UpdateLabelEntry();
+  //UpdateLabelEntry();
     
 }
 
@@ -1847,6 +1848,8 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   gboolean row_created;
   GtkSheetRange range;
 
+  Dprintf((" regwin::NewProcessor\n"));
+
   if(!gp || !gp->cpu || !rma)
     return;
 
@@ -1860,6 +1863,8 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
     return;
   }
+
+  Dprintf((" regwin::NewProcessor -- building sheet\n"));
       
   row_created=FALSE;
 
@@ -1989,9 +1994,11 @@ static int delete_event(GtkWidget *widget,
 // Build
 //
 //
+extern GtkWidget* RegisterWindowExperiment;
 
 void Register_Window::Build(void)
 {
+  Dprintf((" regwin::Build\n"));
 
   if(bIsBuilt)
     return;
@@ -2015,23 +2022,31 @@ void Register_Window::Build(void)
 	registers[i]=&THE_invalid_register;
       }
   }
-	
+
+  /*	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+  */
+  window = RegisterWindowExperiment;
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
+
   if(type==REGISTER_RAM)
   {
     register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]"));
-    gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
+    
+    // GUI experiment - place reg window in frame
+    //gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
     // Add a status bar
-
+    /*
     RAM_RegisterWindow *rrw = dynamic_cast<RAM_RegisterWindow *>(this);
     if(rrw && rrw->sbw)
       rrw->sbw->Create(main_vbox);
+    */
   }
   else
   {
@@ -2044,11 +2059,13 @@ void Register_Window::Build(void)
   /* create popupmenu */
   popup_menu=build_menu(this);
 
-  build_entry_bar(main_vbox,this);
+  //build_entry_bar(main_vbox,this);
 
+  /*
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
+  */
 
   /**************************** load fonts *********************************/
 #if GTK_MAJOR_VERSION >= 2
@@ -2200,7 +2217,8 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 
   set_name("register_viewer_ram");
   // Add a status bar
-  sbw = new StatusBar_Window();
+  //sbw = new StatusBar_Window();
+  sbw=0;
 
   get_config();
 
@@ -2241,7 +2259,7 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   get_config();
 
   if(enabled)
-      Build();
+    Build();
 }
 
 

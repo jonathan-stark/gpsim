@@ -40,84 +40,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_statusbar.h"
 #include "../src/processor.h"
 
-//========================================================================
-//
-// A LabeledEntry is an object consisting of gtk entry
-// widget that is labeled (with a gtk lable widget)
-//
-
-class LabeledEntry {
-public:
-  GtkWidget *label;
-  GtkWidget *entry;
-  StatusBar_Window *sbw;
-
-  LabeledEntry(void);
-  void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
-  void SetEntryWidth(int string_width);
-  void NewLabel(char *clabel);
-  virtual void Update(void);
-  void AssignParent(StatusBar_Window *);
-  virtual void put_value(unsigned int);
-
-};
-
-class RegisterLabeledEntry : public LabeledEntry {
-public:
-
-  Register *reg;
-  char *pCellFormat;
-
-  RegisterLabeledEntry(GtkWidget *,Register *,bool);
-
-  virtual void put_value(unsigned int);
-  void AssignRegister(Register *new_reg);
-  virtual void Update(void);
-
-};
-
-class CyclesLabeledEntry : public LabeledEntry {
-public:
-
-  CyclesLabeledEntry();
-  virtual void Update(void);
-};
-
-
-typedef enum {
-  MENU_TIME_USECONDS,
-  MENU_TIME_MSECONDS,
-  MENU_TIME_SECONDS,
-  MENU_TIME_HHMMSS
-} menu_id;
-
-typedef struct _menu_item {
-  char *name;
-  menu_id id;
-} menu_item;
-
-class TimeLabeledEntry : public LabeledEntry 
-{
-public:
-  TimeLabeledEntry();
-  virtual void Update(void);
-  GtkWidget *build_menu();
-
-  void set_time_format(menu_id id)
-  {
-    time_format = id;
-  }
-
-  GtkWidget *menu;
-  menu_id time_format;
-
-};
-
-struct popup_data {
-  TimeLabeledEntry *tle;
-  menu_id id;
-};
-
 
 //========================================================================
 
@@ -155,10 +77,40 @@ static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
 
   le->put_value(value);
 
-  if(le->sbw)
-    le->sbw->Update();
+  if(le->parent)
+    le->parent->Update();
 
   return;
+}
+
+//========================================================================
+EntryWidget::EntryWidget()
+{
+  entry = 0;
+  parent = 0;
+}
+
+void EntryWidget::SetEntryWidth(int string_width)
+{
+  if(entry)
+    gtk_widget_set_usize (entry,
+			  string_width * 
+			  gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
+			  -1);
+}
+
+void EntryWidget::AssignParent(GUI_Object *new_parent)
+{
+  parent = new_parent;
+}
+
+
+void EntryWidget::Create(bool isEditable)
+{
+  entry = gtk_entry_new ();
+  if(!isEditable)
+    gtk_entry_set_editable(GTK_ENTRY(entry),0);
+  gtk_widget_show (entry);
 }
 
 //========================================================================
@@ -167,8 +119,6 @@ static void LabeledEntry_callback(GtkWidget *entry, LabeledEntry *le)
 LabeledEntry::LabeledEntry(void)
 {
   label = 0;
-  entry = 0;
-  sbw = 0;
 }
 #if GTK_MAJOR_VERSION < 2
 #define gtk_style_get_font(X) X->font
@@ -187,7 +137,7 @@ void LabeledEntry::Create(GtkWidget *box,
   gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
 
-  entry = gtk_entry_new ();
+  EntryWidget::Create(isEditable);
 
   gtk_entry_set_text (GTK_ENTRY (entry), "----");
 
@@ -195,25 +145,8 @@ void LabeledEntry::Create(GtkWidget *box,
 
   gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
 
-  gtk_widget_show (entry);
 
-  if(!isEditable)
-    gtk_entry_set_editable(GTK_ENTRY(entry),0);
 
-}
-
-void LabeledEntry::SetEntryWidth(int string_width)
-{
-  if(entry)
-    gtk_widget_set_usize (entry,
-			  string_width * 
-			  gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
-			  -1);
-}
-
-void LabeledEntry::AssignParent(StatusBar_Window *new_sbw)
-{
-  sbw = new_sbw;
 }
 
 void LabeledEntry::Update(void)
@@ -317,119 +250,6 @@ void RegisterLabeledEntry::AssignRegister(Register *new_reg)
 }
 
 //------------------------------------------------------------------------
-CyclesLabeledEntry::CyclesLabeledEntry()
-{
-}
-
-void CyclesLabeledEntry::Update(void)
-{
-  char buffer[32];
-  sprintf(buffer,"0x%016Lx",cycles.value);
-  gtk_entry_set_text (GTK_ENTRY (entry), buffer);
-}
-
-TimeLabeledEntry::TimeLabeledEntry()
-{
-  time_format = MENU_TIME_USECONDS;
-  menu = 0;
-}
-
-void TimeLabeledEntry::Update()
-{
-  char buffer[32];
-
-  double time_db = gp->cpu->get_InstPeriod() * cycles.value;
-
-
-  switch(time_format) {
-  case MENU_TIME_USECONDS:
-    time_db *= 1e6;
-    sprintf(buffer,"%19.2f us",time_db);
-    break;
-  
-  case MENU_TIME_MSECONDS:
-    time_db *= 1e3;
-    sprintf(buffer,"%19.3f ms",time_db);
-    break;
-
-  case MENU_TIME_HHMMSS:
-    {
-      double v=time_db;
-      int hh=(int)(v/3600),mm,ss,cc;
-      v-=hh*3600.0;
-      mm=(int)(v/60);
-      v-=mm*60.0;
-      ss=(int)v;
-      cc=(int)(v*100.0+0.5);
-      sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
-    }
-    break;
-
-  default:
-    sprintf(buffer,"%19.3f s",time_db);
-  }
-
-  gtk_entry_set_text (GTK_ENTRY (entry), buffer);
-
-}
-
-//----------------------------------------
-// called when user has selected a menu item
-static void
-popup_activated(GtkWidget *widget, gpointer data)
-{
-  if(!widget || !data)
-  {
-    printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
-    return;
-  }
-    
-  popup_data *pd = (popup_data *)data;
-  if(pd->tle) {
-    pd->tle->set_time_format(pd->id);
-    pd->tle->Update();
-  }
-}
-
-GtkWidget * TimeLabeledEntry::build_menu(void)
-{
-  static menu_item menu_items[] = {
-    {"Micro seconds", MENU_TIME_USECONDS},
-    {"Mili seconds", MENU_TIME_MSECONDS},
-    {"Seconds", MENU_TIME_SECONDS},
-    {"HH:MM:SS.CC", MENU_TIME_HHMMSS}
-  };
-
-
-  GtkWidget *item;
-  unsigned int i;
-
-  menu=gtk_menu_new();
-
-  item = gtk_tearoff_menu_item_new ();
-  gtk_menu_append (GTK_MENU (menu), item);
-  gtk_widget_show (item);
-  
-  
-  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-    item=gtk_menu_item_new_with_label(menu_items[i].name);
-
-    popup_data *pd = new popup_data;
-    pd->tle = this;
-    pd->id = menu_items[i].id;
-
-    gtk_signal_connect(GTK_OBJECT(item),"activate",
-		       (GtkSignalFunc) popup_activated,
-		       pd);
-
-    gtk_widget_show(item);
-    gtk_menu_append(GTK_MENU(menu),item);
-  }
-  
-  return menu;
-}
-
-//------------------------------------------------------------------------
 void StatusBar_Window::Update(void)
 {
 
@@ -450,28 +270,8 @@ void StatusBar_Window::Update(void)
 
     (*iRLE)->Update();
 
-  cpu_cycles->Update();
-  time->Update();
 }
 
-
-// button press handler
-static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, TimeLabeledEntry *tle)
-{
-    if(!widget || !event || !tle)
-      return 0;
-  
-    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
-    {
-	gtk_menu_popup(GTK_MENU(tle->menu), 0, 0, 0, 0,
-			   3, event->time);
-	// It looks like we need it to avoid a selection in the entry.
-	// For this we tell the entry to stop reporting this event.
-	gtk_signal_emit_stop_by_name(GTK_OBJECT(tle->entry),"button_press_event");
-    }
-    return FALSE;
-}
 
 /*
  * CreateStatusBar
@@ -522,23 +322,9 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
       iReg != ma->SpecialRegisters.end();
       ++iReg) {
 
-    //cout << " Adding " << ((*iReg)->showType()) << " to status bar\n";
     entries.push_back(new RegisterLabeledEntry(hbox, *iReg));
   }
 
-  cpu_cycles = new CyclesLabeledEntry();
-  cpu_cycles->Create(hbox,"Cycles:", 18,false);
-
-  TimeLabeledEntry *tle = new TimeLabeledEntry();
-  time = tle;
-  time->Create(hbox,"Time:", 22,false);
-
-  /* create popupmenu */
-  tle->build_menu();
-  gtk_signal_connect(GTK_OBJECT(time->entry),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup,
-		     tle);
 
   /* Now create a cross-reference link that the simulator can use to
    * send information back to the gui

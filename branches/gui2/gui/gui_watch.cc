@@ -407,8 +407,8 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
     
   if(entry->type==REGISTER_RAM)
     gp->regwin_ram->SelectRegister(entry->address);
-  else if(entry->type==REGISTER_EEPROM)
-    gp->regwin_eeprom->SelectRegister(entry->address);
+  //else if(entry->type==REGISTER_EEPROM)
+  //  gp->regwin_eeprom->SelectRegister(entry->address);
 
 
   ww->UpdateMenus();
