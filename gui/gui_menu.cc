@@ -747,32 +747,76 @@ void dispatch_Update()
 //========================================================================
 // experimental register window replacement
 static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, MainWindow *mw)
+do_popup(GtkWidget *widget, GdkEventButton *event, void *)
 {
 
-  GtkWidget *popup;
+  if(widget==0 || event==0 ) {
     
-  if(widget==0 || event==0 || mw==0) {
-    
-    printf("Warning do_popup(%p,%p,%p)\n",widget,event,mw);
+    printf("Warning do_popup(%p,%p)\n",widget,event);
     return FALSE;
   }
   printf("event\n");
-  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
-    {
-      printf("button 3 pressed\n");
-
-      /*
-      popup_rw = rw;
-  
-      gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
-		     3, event->time);
-      */
-      return TRUE;
-    }
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) ) {
+    printf("button 3 pressed\n");
+    
+    return TRUE;
+  }
   return FALSE;
 }
 
+//========================================================================
+//
+class RegWindow
+{
+public:
+
+private:
+
+  GtkWidget *parent;  /// Container that holds the register window.
+  int rows;
+  int cols;
+
+  int cols_per_row;
+};
+
+GtkWidget *BuildExperimentalRegisterWindow()
+{
+  GtkWidget *frame = gtk_frame_new("Table");
+
+  GtkAdjustment *hadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  GtkAdjustment *vadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  GtkWidget *scrolled_window = gtk_scrolled_window_new(hadj,vadj);
+  gtk_widget_show(scrolled_window);
+  gtk_container_add(GTK_CONTAINER(frame),scrolled_window);
+  GtkWidget *table = gtk_table_new (5,18,TRUE);
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),table);
+
+  int row,col;
+  for(row=0; row<5; row++)
+    for(col=0; col<18;col++) {
+      char buf[32];
+      snprintf(buf,sizeof(buf),"%02X%02X",row,col);
+      GtkWidget *entry = gtk_entry_new ();
+      gtk_widget_set_size_request (entry,36,-1);
+      gtk_entry_set_text (GTK_ENTRY (entry), buf);
+
+      //GtkWidget *label = gtk_label_new(buf);
+      gtk_table_attach_defaults(GTK_TABLE(table),entry, col, col+1, row, row+1);
+
+      gtk_signal_connect(GTK_OBJECT(entry),
+			 "button_press_event",
+			 (GtkSignalFunc) do_popup, 
+			 0);
+    }
+
+  gtk_signal_connect(GTK_OBJECT(table),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup, 
+		     0);
+
+  return frame;
+
+}
 
 //========================================================================
 //========================================================================
@@ -962,39 +1006,9 @@ void MainWindow::Create (void)
   separator = gtk_hseparator_new ();
   gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
 
-  frame = gtk_frame_new("Table");
-  gtk_box_pack_start (GTK_BOX (box1), frame, TRUE, TRUE, 0);
-
-  GtkAdjustment *hadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
-  GtkAdjustment *vadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
-  GtkWidget *scrolled_window = gtk_scrolled_window_new(hadj,vadj);
-  gtk_widget_show(scrolled_window);
-  gtk_container_add(GTK_CONTAINER(frame),scrolled_window);
-  GtkWidget *table = gtk_table_new (5,18,TRUE);
-  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),table);
-
-  int row,col;
-  for(row=0; row<5; row++)
-    for(col=0; col<18;col++) {
-      char buf[32];
-      snprintf(buf,sizeof(buf),"%02X%02X",row,col);
-      GtkWidget *entry = gtk_entry_new ();
-      gtk_widget_set_usize (entry,36,-1);
-      gtk_entry_set_text (GTK_ENTRY (entry), buf);
-
-      //GtkWidget *label = gtk_label_new(buf);
-      gtk_table_attach_defaults(GTK_TABLE(table),entry, col, col+1, row, row+1);
-
-      gtk_signal_connect(GTK_OBJECT(entry),
-			 "button_press_event",
-			 (GtkSignalFunc) do_popup, 
-			 this);
-    }
-
-  gtk_signal_connect(GTK_OBJECT(table),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup, 
-		     this);
+  // experimental register window.
+  frame = BuildExperimentalRegisterWindow();
+  gtk_box_pack_start (GTK_BOX (box1), frame, FALSE, FALSE, 0);
 
   gtk_widget_show_all (dispatcher_window);
       
@@ -1004,13 +1018,6 @@ void create_dispatcher (void)
 {
   TheWindow.Create();
 }
-
-
-
-
-
-
-
 
 
 #endif // HAVE_GUI
