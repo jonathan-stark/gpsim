@@ -506,6 +506,8 @@ struct gui_module
 
     GdkPixmap *pixmap;
 
+    GtkWidget *tree_item;
+
     GList *pins;
 };
 
@@ -515,6 +517,8 @@ struct gui_node
 {
     Breadboard_Window *bbw;
     Stimulus_Node *node;
+    GtkWidget *tree_item;
+    int selected_row;
 };
 
 
@@ -544,7 +548,7 @@ struct _Breadboard_Window {
 
     GtkWidget *node_tree;
 
-    GtkWidget *node_settings_clist;
+    GtkWidget *node_clist;
 
     GtkWidget *stimulus_settings_label;
 

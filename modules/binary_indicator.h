@@ -49,6 +49,7 @@ public:
   IOPORT  *port;
 
   Binary_Indicator(void);
+  ~Binary_Indicator(void);
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);

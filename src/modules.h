@@ -127,6 +127,7 @@ public:
 
   static Module *construct(char *name);
   Module(void);
+  virtual ~Module();
 
 };
 

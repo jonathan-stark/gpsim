@@ -324,12 +324,12 @@ void  gpsim_put_register_value(unsigned int processor_id, REGISTER_TYPE type, un
 //--------------------------------------------------------------------------
 
 
-#include <vector>
+#include <list>
 #include "symbol.h"
 
-extern vector <symbol *> st;
+extern list <symbol *> st;
 
-static vector <symbol *>::iterator interface_sti;
+static list <symbol *>::iterator interface_sti;
 
 void gpsim_symbol_rewind(unsigned int processor_id)
 {
@@ -1721,6 +1721,7 @@ Interface::Interface(gpointer new_object=NULL)
   new_processor = NULL;
   new_module = NULL;
   new_program = NULL;
+  remove_object = NULL;
   node_configuration_changed = NULL;
 
 }

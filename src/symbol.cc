@@ -55,8 +55,8 @@ int open_cod_file(pic_processor **, char *);
 //map <string, symbol *, less<string> > st;
 //map <string, symbol *, less<string> >::iterator sti;
 
-vector <symbol *> st;
-vector <symbol *>::iterator sti;
+list <symbol *> st;
+list <symbol *>::iterator sti;
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
@@ -200,6 +200,28 @@ void Symbol_Table::add_module(Module * m, char *new_name)
 
   st.push_back(ms);
 
+}
+
+void Symbol_Table::remove_module(Module * m, char *name)
+{
+  cout << "removing module symbol\n";
+
+  sti = st.begin();
+  symbol *sym;
+
+  while( sti != st.end())
+    {
+      sym = *sti;
+      if(sym->name_str == m->name() &&
+	 sym->isa()==SYMBOL_MODULE)
+      {
+	  st.remove(sym);
+	  cout << "found and removed\n";
+          return;
+      }
+
+      sti++;
+    }
 }
 
 void Symbol_Table::add(pic_processor *cpu, char *new_name, char *new_type, int value)

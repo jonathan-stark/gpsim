@@ -112,6 +112,7 @@ public:
   Resistor_IOPORT  *port;
 
   Resistor(void);
+  ~Resistor(void);
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
@@ -132,6 +133,7 @@ public:
 #endif
 
   PullupResistor(char *init_name=NULL);
+  ~PullupResistor();
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);

@@ -561,6 +561,16 @@ IOPORT::IOPORT(unsigned int _num_iopins=8)
   new_name("ioport");
 }
 
+IOPORT::~IOPORT()
+{
+    for(int i=0; i<num_iopins; i++)
+    {
+	if(pins[i] != NULL)
+	    delete pins[i];
+    }
+    delete pins;
+}
+
 //-------------------------------------------------------------------
 // IOPORT_TRIS
 //

@@ -57,6 +57,7 @@ public:
   virtual void change_pin_direction(unsigned int bit_number, bool new_direction);
 
   IOPORT(unsigned int _num_iopins=8);
+  ~IOPORT();
 
 };
 

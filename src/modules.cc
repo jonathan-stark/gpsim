@@ -73,6 +73,16 @@ Module::Module(void)
 
 }
 
+Module::~Module(void)
+{
+
+    symbol_table.remove_module(this,name_str);
+
+    instantiated_modules_list.remove(this);
+
+    delete xref;
+}
+
 
 Module * Module::construct(char * name)
 {

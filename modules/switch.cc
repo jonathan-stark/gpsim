@@ -172,3 +172,10 @@ Switch::Switch(void)
     interface_id = gpsim_register_interface((gpointer)this);
 }
 
+Switch::~Switch(void)
+{
+    cout << "Switch destructor\n";
+
+    delete switch_port;
+
+}
