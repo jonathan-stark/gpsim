@@ -1,3 +1,6 @@
+2004-03-29  Borut Razem  <borut.razem@siol.net>
+	* src/modules.cc: support of external modules on WIN32
+
 2004-03-25 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_src_asm.cc: Now we can load hex files again.
 

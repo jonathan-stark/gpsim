@@ -31,6 +31,14 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#else
+#include <windows.h>
+/*
+ * interface is a Module class member variable in gpsim,
+ * in WIN32 Platform SDK it is a macro, defined in BaseTypes.h
+ * the WIN32 Platform SDK definition should be undefined
+ */
+#undef interface
 #endif
 
 #include "modules.h"
@@ -345,9 +353,32 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
 
   }
 #else
-  module_list = 0;
-  _name = 0;
-  _handle = 0;
+//  module_list = 0;
+//  _name = 0;
+//  _handle = 0;
+
+    if(new_name)
+      _name = strdup(new_name);
+    else
+      _name = NULL;
+
+    _handle = library_handle;
+
+    get_mod_list = (Module_Types_FPTR) GetProcAddress((HMODULE)_handle, "get_mod_list");
+    if (NULL == get_mod_list) {
+      char *error = g_win32_error_message(GetLastError());
+
+      cout << "WARNING: non-conforming module library\n"
+	   << "  gpsim libraries should have the mod_list() function defined\n";
+      fprintf(stderr, "%s\n", error);
+      g_free(error);
+      module_list = NULL;
+    } else {
+
+      // Get a pointer to the list of modules that this library supports.
+      module_list = get_mod_list();
+    }
+
 #endif
 }
 
@@ -422,7 +453,21 @@ void module_load_library(const char *library_name)
 
   module_display_available();
 #else
-  cout << "  -- gpsim on WIN32 doesn't support modules yet\n";
+//  cout << "  -- gpsim on WIN32 doesn't support modules yet\n";
+  void *handle;
+
+  handle = (void *)LoadLibrary(library_name);
+  if (NULL == handle) {
+    char *error = g_win32_error_message(GetLastError());
+
+    fprintf (stderr, "%s\n", error);
+    g_free(error);
+    return;
+  }
+
+  module_add_library(library_name,handle);
+
+  module_display_available();
 #endif
 }
 
