@@ -35,7 +35,6 @@ public:
   IOPIN  **pins; // [IOPINS];
 
 
-  IOPORT_TRIS * tris;
 
   unsigned int 
     valid_iopins,   // A mask that for those ports that don't have all 8 io bits.
@@ -43,7 +42,7 @@ public:
     internal_latch, // 
     num_iopins;     // Number of I/O pins attached to this port
 
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
   void put_value(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void setbit_value(unsigned int bit_number, bool new_value);
@@ -51,11 +50,11 @@ public:
   int get_bit_voltage(unsigned int bit_number);
   unsigned int get(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
-  int update_stimuli(void);
+  virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);
   void attach_node(Stimulus_Node *new_node, unsigned int bit_position);
-  void update_pin_directions(unsigned int new_tris);
   virtual void trace_register_write(void);
+  virtual void change_pin_direction(unsigned int bit_number, bool new_direction);
 
   IOPORT(unsigned int _num_iopins=8);
 
@@ -67,6 +66,14 @@ public:
 class PIC_IOPORT : public IOPORT
 {
 public:
+  IOPORT_TRIS * tris;
+
+  int update_stimuli(void);
+  void put(unsigned int new_value);
+  void update_pin_directions(unsigned int new_tris);
+  void change_pin_direction(unsigned int bit_number, bool new_direction);
+
+  PIC_IOPORT(unsigned int _num_iopins=8);
 
 };
 

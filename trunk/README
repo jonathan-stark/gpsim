@@ -10,30 +10,35 @@ Please see the PROCESSORS file to see a list of supported processors.
 Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
 Please see COPYING for the GPL.
 
-gpsim-0.19.0 new stuff:
+gpsim-0.20.0 new stuff:
 
-05APR00 gpsim-0.19.0
- o Daniel Schudel joins gpsim development.
-   -- Added support for the 16x5x family
- o Added 16f87x family
- o gui - Added Program Memory sheet
-    --  Added support for program memory writes
- o gui - Added Breadboard window (graphical pinout)
- o Asynchronous mode of the usart fixed.
- o A/D converter enhanced
- o Analog Stimuli revisited.
- o Scripting was fixed.
- o cli - Once again, gpsim can be built without the gui.
+05APR00 gpsim-0.20.0
+  o Modules - gpsim now supports dynamically loaded modules
+  o gui - Menu items now work
+  o gui - button bar
+  o gui - now refreshes while simulating
+  o numerous bug fixes
 
 
-New Developer
--------------
-Daniel Schudel joins Ralf and myself. He has added support for the 16x5x devices and in particularly the 16c54.
+Modules
+-------
+The big story this release is Modules. gpsim now has a way to allow you to create specific simulation environments without having to learn everything about gpsim. This has been a major overhaul of the infrastructure of gpsim. 
 
-16f87x
-------
+gui - Menu items now work
+-------------------------
+Before Ralf joined the gpsim development, I had created a rough outline of the gui interface. There were numerous menus that were not fully implemented. Ralf has fixed that. Now gpsim can load files by navigating through the menus. In addition, the various windows were enabled/disabled with this cumbersome tabbed notebook window. Ralf has gotten rid of that and provided a <windows> menu item that will allow you to open and close windows.
 
-The 16f87x series is rapidly proving to be a popular processor. So naturally, gpsim needs to support it. The major changes needed to accomodate were in the program memory writes for the 14bit core and greater than two register memory banks support. Minor changes included abstracting the data eeprom/flash logic somewhat (it was hardcoded for the 16x84 devices).
+gui - button bar
+----------------
+Ralf has added a button bar to the gui control panel. This allows you to perform simple commands like step, run, stop, etc. with a simple click. 
+
+gui - now refreshes while simulating
+------------------------------------
+The gui now can be refreshed will the simulation is running. Before, the simulation engine would hog all of the cpu and would ignore the gui until the simulation completed (e.g. when  a break point was encountered). Also, the rate at which the gui is updated is controlled directly from the gui control window.
+
+bug fixes
+---------
+
 
 Program Memory sheet
 --------------------

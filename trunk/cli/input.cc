@@ -75,8 +75,8 @@ int allocs = 0;
 /* When non-zero, this global means the user is done using this program. */
 int done = 0;
 
-const char *gpsim = "gpsim> ";  // Normal prompt
-const char *gpsim_cont = "> ";  // command continuation prompt
+//const char *gpsim = "gpsim> ";  // Normal prompt
+//const char *gpsim_cont = "> ";  // command continuation prompt
 
 extern int quit_parse;
 
@@ -258,7 +258,8 @@ get_user_input (void)
   if(using_readline)
     {
 
-      retval = gnu_readline (const_cast<char*>(gpsim),1);
+      //retval = gnu_readline (const_cast<char*>(gpsim),1);
+      retval = gnu_readline ( "gpsim> ",1);
     }
   else
     {
@@ -360,11 +361,13 @@ ___main_input (void)
       
       if(command_mode == NO_COMMAND)
 	{
-	  line = ::readline (gpsim);
+	  //line = ::readline (gpsim);
+	  line = ::readline ("gpsim> ");
 	}
       else
 	{
-	  line = ::readline (gpsim_cont);
+	  //line = ::readline (gpsim_cont);
+	  line = ::readline (">");
 	}
 
       if (!line)
@@ -543,7 +546,8 @@ void initialize_readline (void)
   gdk_input_add (fileno(stdin), GDK_INPUT_READ, 
                  (GdkInputFunction) myfunc, b);
 
-  rl_callback_handler_install (gpsim, test_func);
+  //rl_callback_handler_install (gpsim, test_func);
+  rl_callback_handler_install ("gpsim> ", test_func);
 
 #endif
 
@@ -572,7 +576,8 @@ char *gnu_readline (char *s, unsigned int force_readline)
       char *tmp;
 
       if(input_mode == CONTINUING_LINE)
-        retval = ::readline (const_cast<char*>(gpsim_cont));
+        //retval = ::readline (const_cast<char*>(gpsim_cont));
+	retval = ::readline (">");
       else
 	retval = ::readline (s);
       tmp = retval;
