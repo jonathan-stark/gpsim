@@ -31,7 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <unistd.h>
 
-extern void have_line(char *s); // in input.cc -- will send a string through the command parser
+// in input.cc -- parse_string sends a string through the command parser
+extern int parse_string(char * str);
 
 #ifndef _WIN32
 
@@ -161,6 +162,9 @@ void Socket::Accept()
 
 void Socket::Recv()
 {
+
+  memset(buffer, 0, sizeof(buffer));
+
   if (recv(client_socket, buffer, sizeof(buffer), 0) == -1) {
     perror("recv");
     exit(1);
@@ -170,6 +174,7 @@ void Socket::Recv()
 
 void Socket::Send()
 {
+  printf("socket-sending %s",buffer);
   if (send(client_socket, buffer, strlen(buffer), 0) == -1) {
     perror("send");
     exit(1);
@@ -183,7 +188,7 @@ void Socket::receive(void)
   if(strlen(buffer)) {
     printf("received %s\n",buffer);
 
-    have_line(buffer);
+    parse_string(buffer);
   }
 }
 

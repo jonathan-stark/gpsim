@@ -299,10 +299,18 @@ int start_parse(void)
   static int save_readline_state = 0;
   int retval;
 
+  //pthread_mutex_lock(&mu_parse);
+  //pthread_cond_wait(&cv_StartParse, &mu_parse);
+
+  gdk_threads_enter();
   init_parser();
   retval = yyparse();
 
+  gdk_threads_leave();
+
   using_readline = (0 != save_readline_state);
+
+  //pthread_mutex_unlock(&mu_parse);
 
   if(quit_parse) {
     free(cmd_string_buf);
@@ -312,6 +320,7 @@ int start_parse(void)
   return retval;
 
 }
+
 
 int parse_string(char * str)
 {
@@ -613,6 +622,9 @@ void have_line(char *s)
   }
 
   add_string_to_input_buffer("\n");
+
+  //pthread_cond_signal(&cv_StartParse);
+
   start_parse();
 
   free(s);

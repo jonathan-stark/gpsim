@@ -147,7 +147,7 @@ else
     GTK=
     GDK=
     GLIB=
-    X_LDFLAGS=`$GTKCONFIG --libs`
+    X_LDFLAGS=`$GTKCONFIG --libs gthread`
     X_CFLAGS=`$GTKCONFIG --cflags`
     Y_LDFLAGS=`$GTKEXTRACONFIG --libs`
     Y_CFLAGS=`$GTKEXTRACONFIG --cflags`
@@ -164,7 +164,7 @@ else
     GTK=
     GDK=
     GLIB=
-    X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0`
+    X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
     X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
     Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
     Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`

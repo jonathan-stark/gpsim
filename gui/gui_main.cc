@@ -406,6 +406,16 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
+  // gtk is thread aware but not thread safe.
+  // Under certain circumstances, it is possible for
+  // gpsim to send commands to the gui from multiple 
+  // threads (e.g. when communicating to an external
+  // module or communicating across a socket).
+#if GTK_MAJOR_VERSION >= 2
+  gdk_threads_init();
+#endif
+  g_thread_init (NULL);
+
   if (!gtk_init_check (&argc, &argv))
   {
       return -1;
@@ -420,7 +430,9 @@ int gui_init (int argc, char **argv)
 
 void gui_main(void)
 {
-  gtk_main();
+  GDK_THREADS_ENTER ();
+  gtk_main ();
+  GDK_THREADS_LEAVE ();
 }
 
 #endif //HAVE_GUI
