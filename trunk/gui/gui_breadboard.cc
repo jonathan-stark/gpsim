@@ -2381,7 +2381,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
     FILE *fo;
     list <Module_Library *> :: iterator mi;
-    list <Module *> :: iterator module_iterator;
+    GList *module_iterator;
     Module *m;
     const char *filename;
 
@@ -2406,15 +2406,17 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     fprintf(fo, "\n#");
     fprintf(fo, "\n");
 
-    // Save processor command. How?
-    m=bbw->gp->cpu;
-    /*
-    if(m && m->x>=0 && m->y>=0)
+    fprintf(fo, "\n\n# Processor position:\n");
+
+    /*m=bbw->gp->cpu;
+    Attribute *xpos = m->get_attribute("xpos", false);
+    Attribute *ypos = m->get_attribute("ypos", false);
+    if(xpos && ypos && xpos->nGet()>=0 && ypos->nGet()>=0)
 	fprintf(fo, "module position %s %d %d\n",
 		m->name(),
-		m->x,
-		m->y);
-    */
+		xpos->nGet(),
+		ypos->nGet());*/
+    
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
     for (mi = module_list.begin();
@@ -2429,23 +2431,19 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     // Save modules
     fprintf(fo, "\n\n# Modules:\n");
-    for (module_iterator = instantiated_modules_list.begin();
-	 module_iterator != instantiated_modules_list.end();
-	 module_iterator++)
+    module_iterator = bbw->modules;
+    while(module_iterator!=0)
     {
+	gui_module *p;
+
+	p = (struct gui_module*) module_iterator->data;
+
 	list <Attribute*> :: iterator attribute_iterator;
-	m = *module_iterator;
+	m = p->module;
 
 	fprintf(fo, "module load %s %s\n",
 		m->type(),
 		m->name().c_str());
-	/*
-        if(m->x>=0 && m->y>=0)
-	    fprintf(fo, "module position %s %d %d\n",
-		    m->name(),
-		    m->x,
-		    m->y);
-	*/
 
 	for(attribute_iterator = m->attributes.begin();
 		attribute_iterator != m->attributes.end();
@@ -2459,6 +2457,8 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 				locattr->get_name(),
 				attrval);
 	}
+	fprintf(fo, "\n");
+	module_iterator=module_iterator->next;
     }
 
 
@@ -2957,8 +2957,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     gtk_layout_put(GTK_LAYOUT(bbw->layout), p->name_widget, 0,0);
 
     position_module(p, x, y);
-    //p->module->x = p->x;
-    //p->module->y = p->y;
+    xpos->set(x);
+    ypos->set(y);
     update_board_matrix(p->bbw);
 
     bbw->modules=g_list_append(bbw->modules, p);
@@ -2974,6 +2974,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 void Breadboard_Window::Update(void)
 {
   GList *iter;
+  int x,y;
 
   // loop all modules and update their pins
 
@@ -2988,19 +2989,20 @@ void Breadboard_Window::Update(void)
     Attribute *xpos = p->module->get_attribute("xpos", false);
     Attribute *ypos = p->module->get_attribute("ypos", false);
 
+    if(xpos && ypos)
+    {
+        x = xpos->nGet();
+        y = ypos->nGet();
+
     // Check if module has changed its position
-    if(xpos && ypos && (p->x!=xpos->nGet() || p->y!=ypos->nGet()))
-      {
-	p->x = xpos->nGet();
-	p->y = ypos->nGet();
-	if(p->x>=0 && p->y>=0)
+        if(p->x!=x || p->y!=y)
 	  {
-	    position_module(p, p->x, p->y);
+	    position_module(p, x, y);
 	    update_board_matrix(p->bbw);
 	    printf(" Moved module to position %d %d\n",p->x, p->y);
 
 	  }
-      }
+    }
 
     // Check if pins have changed state
     pin_iter=p->pins;
@@ -3041,35 +3043,6 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-#if 0
-static void check_for_modules(Breadboard_Window *bbw)
-{
-    list <Module *> :: iterator module_iterator;
-
-    for (module_iterator = instantiated_modules_list.begin();
-	 module_iterator != instantiated_modules_list.end();
-	 module_iterator++)
-    {
-	Module *m = *module_iterator;
-
-        bbw->NewModule(m);
-    }
-}
-
-static void check_for_nodes(Breadboard_Window *bbw)
-{
-    list <Stimulus_Node *> :: iterator node_iterator;
-
-    for (node_iterator = node_list.begin();
-	 node_iterator != node_list.end();
-	 node_iterator++)
-    {
-	Stimulus_Node *node = *node_iterator;
-
-	bbw->NodeConfigurationChanged(node);
-    }
-}
-#endif
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
