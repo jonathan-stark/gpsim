@@ -40,6 +40,7 @@ _16bit_processor::_16bit_processor(void)
   pll_factor = 2;
 
   pc = new Program_Counter16();
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
 
 }
 //-------------------------------------------------------------------
@@ -270,7 +271,6 @@ void _16bit_processor :: create (void)
   pic_processor::create();
   _16bit_processor::create_sfr_map();
 
-  trace.program_counter (pc->value);
   tmr0l.initialize();
 
   intcon.set_rcon(&rcon);

@@ -86,8 +86,8 @@ unsigned int Register::get(void)
 
 void Register::put(unsigned int new_value)
 {
-  value.put(new_value);
   trace.raw(write_trace.get() | value.get());
+  value.put(new_value);
 }
 
 

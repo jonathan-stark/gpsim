@@ -45,6 +45,7 @@ pic_processor * _14bit_processor::construct(void)
 _14bit_processor::_14bit_processor(void)
 {
   pc = new Program_Counter();
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
 
 }
 //-------------------------------------------------------------------

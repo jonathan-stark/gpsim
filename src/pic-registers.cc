@@ -177,8 +177,20 @@ Program_Counter::Program_Counter(void)
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
   _xref.assign_data(this);
 
+  trace_increment = 0;
+  trace_branch = 0;
+  trace_skip = 0;
+  trace_other = 0;
 }
 
+//--------------------------------------------------
+void Program_Counter::set_trace_command(unsigned int new_command)
+{
+  trace_increment = new_command | (0<<22);
+  trace_branch    = new_command | (1<<22);
+  trace_skip      = new_command | (2<<22);
+  trace_other     = new_command | (3<<22);
+}
 //--------------------------------------------------
 // increment - update the program counter. All non-branching instructions pass through here.
 //   
@@ -187,7 +199,7 @@ void Program_Counter::increment(void)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter(value);
+  trace.raw(trace_increment | value);
   value = (value + 1) & memory_size_mask;
 
   // Update pcl. Note that we don't want to pcl.put() because that 
@@ -208,7 +220,7 @@ void Program_Counter::skip(void)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.pc_skip(value);
+  trace.raw(trace_skip | value);
 
   value = (value + 1) & memory_size_mask;
 
@@ -229,7 +241,7 @@ void Program_Counter::jump(unsigned int new_address)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter_2Cycles(value);
+  trace.raw(trace_branch | value);
 
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
@@ -253,7 +265,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter_2Cycles(value);
+  trace.raw(trace_branch | value);
 
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
@@ -276,7 +288,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter(value);
+  trace.raw(trace_other | value);
 
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
@@ -302,7 +314,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
 void Program_Counter::new_address(unsigned int new_value)
 {
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter_2Cycles(value);
+  trace.raw(trace_branch | value);
 
   value = new_value & memory_size_mask;
 
@@ -334,11 +346,11 @@ void Program_Counter::put_value(unsigned int new_value)
   // FIXME 
 #define PCLATH_MASK              0x1f
 
+  trace.raw(trace_other | value);
+
   value = new_value & memory_size_mask;
   cpu_pic->pcl->value.put(value & 0xff);
   cpu_pic->pclath->value.put((new_value >> 8) & PCLATH_MASK);
-
-  trace.program_counter(value);
 
   cpu_pic->pcl->update();
   cpu_pic->pclath->update();

@@ -1012,7 +1012,7 @@ void Processor::trace_dump(int type, int amount)
 // Decode a single trace item
 int Processor::trace_dump1(int type, char *buffer, int bufsize)
 {
-  snprintf(buffer, bufsize,"*** INVALID TRACE *** 0x%x\n",type);
+  snprintf(buffer, bufsize,"*** INVALID TRACE *** 0x%x",type);
 
   return 1;
 }
