@@ -186,6 +186,14 @@ cmd:
 	  cout << " cmd ignored\n";
 	}
      | aborting
+     | expr {
+       Value *v = $1->evaluate();
+       if(v) {
+	 cout << " " << v->toString() << endl;
+	 delete v;
+       }
+       delete $1;
+     }
      | attach_cmd
      | break_cmd
      | bus_cmd
@@ -707,14 +715,7 @@ x_cmd: X
           {
 	    c_x.x();
 	  }
-          | X expr
-          {
-	    Value *v = $2->evaluate();
-            cout << "x command with an expression!\n";
-	    cout << $2->show() << endl;
-	    cout << v->get() << endl;
-	    delete $2;
-	  }
+          | X expr { c_x.x($2); }
           | X NUMBER
           {
 	    c_x.x($2);
@@ -837,9 +838,7 @@ expr    : binary_expr                   {$$=$1;}
         ;
 
 binary_expr
-        : expr   PLUS_T      expr         {
-  cout << " Binary expression\n";
-  $$ = new OpAdd($1, $3);}
+        : expr   PLUS_T      expr         {$$ = new OpAdd($1, $3);}
         ;
 
 unary_expr
