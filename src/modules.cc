@@ -43,6 +43,10 @@ Boston, MA 02111-1307, USA.  */
 
 static int module_sequence_number = 0;
 
+
+list <Module *> instantiated_modules_list;
+
+
 /*****************************************************************************
  *
  * Module.cc
@@ -513,6 +517,8 @@ void module_load_module(char *module_type, char *module_name=NULL)
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
 	      new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
 	      symbol_table.add_module(new_module,module_name);
+
+              instantiated_modules_list.push_back(new_module);
 
 	      // Tell the gui or any modules that are interfaced to gpsim
 	      // that a new module has been added.

@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <unistd.h>
 #include <glib.h>
+#include <list>
 
 #include "gpsim_classes.h"
 #include "breakpoints.h"
@@ -84,6 +85,11 @@ extern void dump_stimulus_list(void);
 #define MAX_ANALOG_DRIVE 0x1000
 
 #define STIMULUS_NAME_LENGTH   30
+
+extern list <Stimulus_Node *> node_list;
+
+extern list <stimulus *> stimulus_list;
+
 
 class Stimulus_Node
 {
