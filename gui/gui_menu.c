@@ -380,33 +380,6 @@ gtk_ifactory_cb (gpointer             callback_data,
 
 }
 
-void set_toggle_menu_states()
-{
-    GUI_Object *gui_object;
-    GtkWidget *menu_item;
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Disassembly");
-    gui_object=(GUI_Object*)gp->program_memory;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Source");
-    gui_object=(GUI_Object*)gp->source_browser;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Ram");
-    gui_object=(GUI_Object*)gp->regwin_ram;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/EEPROM");
-    gui_object=(GUI_Object*)gp->regwin_eeprom;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Watch");
-    gui_object=(GUI_Object*)gp->watch_window;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Symbols");
-    gui_object=(GUI_Object*)gp->symbol_window;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
-    gui_object=(GUI_Object*)gp->breadboard_window;
-    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),gui_object->enabled);
-}
-
 static GtkItemFactoryEntry menu_items[] =
 {
   { "/_File",            NULL,         0,                     0, "<Branch>" },
@@ -428,7 +401,7 @@ static GtkItemFactoryEntry menu_items[] =
   //  { "/_Break/Set",       NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   //  { "/_Break/Clear",     NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
-  { "/_Windows",     NULL, 0,               0, "<Branch>" },
+  { "/_Windows",     NULL, 0,       0, "<Branch>" },
   { "/Windows/Dis_assembly", NULL, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
   { "/Windows/_Source", NULL, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
   { "/Windows/sep1",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
@@ -439,8 +412,8 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
   { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
 
-  { "/_Preferences",          NULL, 0,               0, "<Branch>" },
-  { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },
+//  { "/_Preferences",          NULL, 0,               0, "<Branch>" },
+//  { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },
 
 
   { "/_Help",            NULL,         0,                     0, "<LastBranch>" },
@@ -527,7 +500,7 @@ void create_dispatcher (void)
 
       gtk_widget_show_all (dispatcher_window);
       
-      set_toggle_menu_states();
+//      set_toggle_menu_states();
     }
   else
     gtk_widget_destroy (dispatcher_window);
@@ -568,7 +541,7 @@ build_option_menu (OptionMenuItem items[],
   return omenu;
 }
 */
-
+/*
 static char * book_open_xpm[] = {
 "16 16 4 1",
 "       c None s None",
@@ -616,6 +589,7 @@ static char * book_closed_xpm[] = {
 "     ..O..      ",
 "      ..        ",
 "                "};
+*/
 /*
 static char * mini_page_xpm[] = {
 "16 16 4 1",
@@ -684,7 +658,7 @@ static char * gtk_mini_xpm[] = {
 /*
  * GtkNotebook
  */
-
+/*
 GdkPixmap *book_open;
 GdkPixmap *book_closed;
 GdkBitmap *book_open_mask;
@@ -718,7 +692,7 @@ page_switch (GtkWidget *widget, GtkNotebookPage *page, gint page_num)
       gtk_pixmap_set (GTK_PIXMAP (pixwid), book_closed, book_closed_mask);
     }
 }
-
+*/
 /*
 static void
 tab_fill (GtkToggleButton *button, GtkWidget *child)
@@ -758,6 +732,7 @@ tab_pack (GtkToggleButton *button, GtkWidget *child)
 }
 */
 
+/*
 static void
 toggle_view (GtkToggleButton *button, struct _gui_object *go)
 {
@@ -871,6 +846,7 @@ create_page (GUI_Processor *gp, GtkNotebook *notebook, NotebookItem *page, int i
     }
 
 }
+*/
 /*
 static void
 notebook_popup (GtkToggleButton *button,
@@ -889,6 +865,9 @@ notebook_homogeneous (GtkToggleButton *button,
   gtk_notebook_set_homogeneous_tabs (notebook, button->active);
 }
 */
+
+
+/*
 static void
 create_notebook (void)
 {
@@ -952,4 +931,6 @@ create_notebook (void)
   else
     gtk_widget_destroy (window);
 }
+*/
+
 #endif // HAVE_GUI

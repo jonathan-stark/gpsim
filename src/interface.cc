@@ -721,7 +721,11 @@ char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, cha
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
-    return NULL;
+  {
+      puts("no pic");
+      sleep(5);
+      return NULL;
+  }
 
   return pic->program_memory[address]->name(buffer);
 
@@ -918,6 +922,7 @@ void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned in
 
 extern void process_command_file(char * file_name);
 extern int open_cod_file(pic_processor **, char *);
+#include <cli/command.h>
 
 int gpsim_open(unsigned int processor_id, char *file)
 {
@@ -953,8 +958,9 @@ int gpsim_open(unsigned int processor_id, char *file)
 	    cout << "found a fatal error in the symbol file " << file <<'\n';
 	    return 0;
 	}
-	
-	new_processor(pic);
+
+	command_list[0]->cpu=pic;
+	trace.switch_cpus(pic);
       
     }
     else if(!strcmp(str,"stc"))
@@ -965,6 +971,7 @@ int gpsim_open(unsigned int processor_id, char *file)
     else
     {
 	printf("Unknown file extension \"%s\" \n",str);
+	return 0;
     }
 
     return 1;

@@ -357,6 +357,7 @@ int gui_init (int argc, char **argv)
 
   gui_styles_init();
   
+  create_dispatcher();
 
   CreateRegisterWindow(gp, REGISTER_RAM);
   CreateRegisterWindow(gp, REGISTER_EEPROM);
@@ -366,7 +367,6 @@ int gui_init (int argc, char **argv)
   CreateWatchWindow(gp);
   CreateBreadboardWindow(gp);
 
-  create_dispatcher();
   
   update_object = gui_update_object;
   remove_object = gui_remove_object;
