@@ -2518,13 +2518,15 @@ void SourceBrowserAsm_Window::Build(void)
 #define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
 #define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
 
-  strcpy(commentfont_string,DEFAULT_COMMENTFONT);
   if(config_get_string(name,"commentfont",&fontstring))
     strcpy(commentfont_string,fontstring);
+  else 
+    strcpy(commentfont_string,DEFAULT_COMMENTFONT);
 
-  strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
   if(config_get_string(name,"sourcefont",&fontstring))
     strcpy(sourcefont_string,fontstring);
+  else
+    strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
 
   while(!load_fonts(this)) {
 

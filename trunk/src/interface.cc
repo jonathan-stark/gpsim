@@ -459,64 +459,6 @@ unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, REGISTER_TYPE t
 
 }
 //--------------------------------------------------------------------------
-unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  return bp.set_read_break(pic,register_number);
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  return bp.set_write_break(pic,register_number);
-}
-//--------------------------------------------------------------------------
-unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  return bp.set_read_value_break(pic,register_number,value);
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  return bp.set_write_value_break(pic,register_number,value);
-}
-//--------------------------------------------------------------------------
-unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
-{
-    unsigned int breakpoint_number;
-    pic_processor *pic = get_pic_processor(processor_id);
-    
-    if(!pic)
-	return 0;
-
-    while(pic->registers[register_number]->isa()==file_register::BP_REGISTER)
-    {
-      //breakpoint_number = pic->registers[register_number]->replaced->break_point & ~Breakpoints::BREAK_MASK;
-      breakpoint_number = pic->registers[register_number]->break_point & ~Breakpoints::BREAK_MASK;
-	bp.clear(breakpoint_number);
-    }
-
-    redisplay_prompt();
-
-    return 1;
-}
-//--------------------------------------------------------------------------
 unsigned int gpsim_set_log_name(unsigned int processor_id, const char *filename, int format)
 {
     pic_processor *pic = get_pic_processor(processor_id);
@@ -558,9 +500,6 @@ unsigned int gpsim_reg_set_write_logging(unsigned int processor_id,
     if(!pic)
 	return 0;
 
-    if(!trace_log.logging)
-	trace_log.enable_logging();
-
     b = bp.set_notify_write(pic, register_number);
 
     return 0;
@@ -578,9 +517,6 @@ unsigned int gpsim_reg_set_read_value_logging(unsigned int processor_id,
     if(!pic)
 	return 0;
 
-    if(!trace_log.logging)
-	trace_log.enable_logging();
-
     b = bp.set_notify_read_value(pic, register_number, value, mask);
 
     return 0;
@@ -597,9 +533,6 @@ unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
     
     if(!pic)
 	return 0;
-
-    if(!trace_log.logging)
-	trace_log.enable_logging();
 
     b = bp.set_notify_write_value(pic, register_number, value, mask);
 

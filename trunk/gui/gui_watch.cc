@@ -40,11 +40,12 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 struct watch_entry {
-    unsigned int pic_id;
-    REGISTER_TYPE type;
-    unsigned int address;
-    struct cross_reference_to_gui *xref;
-    int last_value;
+  unsigned int pic_id;
+  Processor *cpu;
+  REGISTER_TYPE type;
+  unsigned int address;
+  struct cross_reference_to_gui *xref;
+  int last_value;
 };
 
 #define COLUMNS 15
@@ -119,13 +120,14 @@ static void update_menus(Watch_Window *ww)
 	    if(ww)
 	    {
 		entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
-		if(menu_items[i].id!=MENU_COLUMNS && (entry==NULL ||
-						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
-						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
-						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
-						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
-						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
-						     ))
+		if(menu_items[i].id!=MENU_COLUMNS && 
+		   (entry==NULL ||
+		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
+		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
+		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
+		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
+		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
+		    ))
 		    gtk_widget_set_sensitive (item, FALSE);
 		else
 		    gtk_widget_set_sensitive (item, TRUE);
@@ -172,6 +174,9 @@ popup_activated(GtkWidget *widget, gpointer data)
     if(entry==NULL && item->id!=MENU_COLUMNS)
 	return;
 
+    if(!entry || !entry->cpu)
+      return;
+
     switch(item->id)
     {
     case MENU_REMOVE:
@@ -184,26 +189,26 @@ popup_activated(GtkWidget *widget, gpointer data)
 	gpsim_put_register_value(entry->pic_id,entry->type,entry->address, value);
 	break;
     case MENU_BREAK_READ:
-	gpsim_reg_set_read_breakpoint(entry->pic_id, entry->type, entry->address);
-	break;
+      bp.set_read_break(entry->cpu,entry->address);
+      break;
     case MENU_BREAK_WRITE:
-	gpsim_reg_set_write_breakpoint(entry->pic_id, entry->type, entry->address);
-	break;
+      bp.set_write_break(entry->cpu,entry->address);
+      break;
     case MENU_BREAK_READ_VALUE:
-	value = gui_get_value("value to read for breakpoint:");
-	if(value<0)
-	    break; // Cancel
-	gpsim_reg_set_read_value_breakpoint(entry->pic_id, entry->type, entry->address, value);
-	break;
+      value = gui_get_value("value to read for breakpoint:");
+      if(value<0)
+	break; // Cancel
+      bp.set_read_value_break(entry->cpu,entry->address,value);
+      break;
     case MENU_BREAK_WRITE_VALUE:
-	value = gui_get_value("value to write for breakpoint:");
-	if(value<0)
-	    break; // Cancel
-	gpsim_reg_set_write_value_breakpoint(entry->pic_id, entry->type, entry->address, value);
-	break;
+      value = gui_get_value("value to write for breakpoint:");
+      if(value<0)
+	break; // Cancel
+      bp.set_write_value_break(entry->cpu,entry->address,value);
+      break;
     case MENU_BREAK_CLEAR:
-	gpsim_reg_clear_breakpoints(entry->pic_id, entry->type,entry->address);
-	break;
+      bp.clear_all_register(entry->cpu,entry->address);
+      break;
     case MENU_COLUMNS:
         select_columns(popup_ww, popup_ww->watch_clist);
 	break;
@@ -447,19 +452,6 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 
     update_menus(ww);
     
-/*    if(column>=MSBCOL && column<=LSBCOL)
-    {
-	// Toggle the bit.
-	value = gpsim_get_register_value(entry->pic_id,entry->type, entry->address);
-	value ^= (1<< (7-(column-MSBCOL)));
-	//bit = (value &(1<< (7-(column-MSBCOL)) ))?1:0;
-	//bit=!bit;
-	//if(bit)
-	//    value |= (1<< (7-(column-MSBCOL)) );
-	//else
-	//    value &= ~(value &(1<< (7-(column-MSBCOL)) ));
-	gpsim_put_register_value(entry->pic_id,entry->type, entry->address,value);
-    }*/
     return 0;
 }
 
@@ -582,21 +574,16 @@ void Watch_Window::Update(void)
 
 static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 {
-    struct watch_entry *entry;
+  //struct watch_entry *entry;
     Watch_Window *ww;
 
     if(xref == NULL)
     {
-	printf("Warning gui_watch.c: xref_update: xref=%p\n",xref);
-/*	if(xref->data == NULL || xref->parent_window==NULL)
-	{
-	    printf("Warning gui_watch.c: xref_update: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
-	}
-*/
-	return;
+      printf("Warning gui_watch.c: xref_update: xref=%p\n",xref);
+      return;
     }
 
-    entry = (struct watch_entry*) xref->data;
+    //entry = (struct watch_entry*) xref->data;
     ww  = (Watch_Window *) (xref->parent_window);
 
     //    update(ww,entry,new_value);
@@ -616,6 +603,9 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
   if(!enabled)
     Build();
 
+  if(!gp || !gp->cpu)
+    return;
+
   regname = gpsim_get_register_name(pic_id,type,address);
 
   if(!regname)
@@ -631,6 +621,7 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
   watch_entry = (struct watch_entry*) malloc(sizeof(struct watch_entry));
   watch_entry->address=address;
   watch_entry->pic_id=pic_id;
+  watch_entry->cpu = gp->cpu;
   watch_entry->type=type;
   watch_entry->last_value=-1; // non-normal value to force first update
 

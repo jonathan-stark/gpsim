@@ -54,8 +54,7 @@ file_register::file_register(void)
 
 file_register::~file_register(void)
 {
-//  if(xref)
-//    delete(xref);
+  //delete(xref);
 }
 
 

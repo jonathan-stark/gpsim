@@ -267,6 +267,7 @@ unsigned int  Breakpoints::set_execution_break(Processor *cpu, unsigned int addr
 
 unsigned int  Breakpoints::set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
 {
+  trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
@@ -343,16 +344,20 @@ unsigned int  Breakpoints::set_wdt_break(Processor *cpu)
 
 unsigned int Breakpoints::set_notify_read(Processor *cpu, unsigned int register_number)
 {
+  trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ, cpu, register_number, 0));
 }
 
 unsigned int Breakpoints::set_notify_write(Processor *cpu, unsigned int register_number)
 {
+  trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
 }
 unsigned int Breakpoints::set_notify_read_value(Processor *cpu, unsigned int register_number, 
 						unsigned int value, unsigned int mask)
 {
+  trace_log.enable_logging();
+
   if(mask == 0)
     mask = 0xff;
   else
@@ -364,8 +369,10 @@ unsigned int Breakpoints::set_notify_read_value(Processor *cpu, unsigned int reg
 }
 
 unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int register_number,
-						   unsigned int value, unsigned int mask)
+						 unsigned int value, unsigned int mask)
 {
+  trace_log.enable_logging();
+
   if(mask == 0)
     mask = 0xff;
   else
@@ -881,6 +888,15 @@ void Breakpoints::clear_all_set_by_user(Processor *c)
 
 }
 
+void Breakpoints::clear_all_register(Processor *c,unsigned int address)
+{
+
+  if(!c || address<0 || address > c->register_memory_size())
+    return;
+
+  while(c->registers[address]->isa()==file_register::BP_REGISTER)
+    bp.clear(c->registers[address]->break_point & ~Breakpoints::BREAK_MASK);
+}
 
 Breakpoints::Breakpoints(void)
 {

@@ -213,8 +213,10 @@ int parse_string(char *cmd_string)
 
   using_readline = (0 != save_readline_state);
 
-  if(quit_parse)
+  if(quit_parse) {
+    free(cmd_string_buf);
     exit_gpsim();
+  }
 
   return retval;
 

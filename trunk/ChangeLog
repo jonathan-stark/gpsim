@@ -1,3 +1,12 @@
+2004-01-20  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_regwin.cc, gui/gui_src_asm.cc, gui_watch.cc:
+	  Changed gpsim_* api calls to their direct counterparts
+	* src/interface.cc, src/interface.h:
+	  Removed obsolete API's
+	* src/breakpoints.cc (clear_all_register): added
+	* cli/input.cc: fixed memory leak.
+	* doc/gpsim.lyx: updated documentation with recent CLI changes
+
 2004-01-18  Borut Razem  <borut.razem@siol.net>
 	* configure.in: added --enable-gtk2 configure command line option for
 	  linking with GTK+ 2.x

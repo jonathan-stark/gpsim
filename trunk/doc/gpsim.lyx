@@ -1,5 +1,5 @@
-#LyX 1.1 created this file. For more info see http://www.lyx.org/
-\lyxformat 218
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
 \textclass book
 \language english
 \inputencoding default
@@ -11,6 +11,8 @@
 \paperpackage a4
 \use_geometry 0
 \use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
 \paperorientation portrait
 \leftmargin -0.5cm
 \topmargin 0.5cm
@@ -51,7 +53,11 @@ Introduction
 
 gpsim is a full-featured software simulator for Microchip PIC microcontrollers
  distributed under the GNU General Public License 
-\begin_inset Info
+\begin_inset Note
+collapsed true
+
+\layout Standard
+
 scott2 Wed Sep 30 13:25:58 1998
 \end_inset 
 
@@ -80,11 +86,15 @@ gpsim has been designed to be as useful as possible.
  break if a specific value is read from or written to a register).
 \layout Standard
 
-gpsim is not fancy.
- It's a straight-forward text based command line interface.
- The CLI uses the same library as gdb (the GNU debugger).
- Thus command history, command editing, and command completion are all available.
- Other projects are beautifying gpsim with gui wrappers.
+gpsim can be operated either in a command line only mode or in a graphical
+ mode.
+ The command line mode is similar to gdb.
+ Users can set break points and control the simulation.
+ The graphical mode provides a more intuitive debugging interface.
+\layout Standard
+
+gpsim also supports external modules.
+ Users can extend gpsim for their custom debugging applications.
 \layout Chapter
 
 gpsim - An Overview
@@ -105,12 +115,12 @@ gpsim's executable is create in a manner that's consistant with many of
 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="5" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="left" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="left" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="5" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="0pt">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -118,7 +128,7 @@ gpsim's executable is create in a manner that's consistant with many of
 command 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -127,16 +137,16 @@ description
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
 
-tar -xvzf gpsim-0.x.0.tar.gz
+tar -xvzf gpsim-x.y.z.tar.gz
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -145,8 +155,8 @@ expand the compressed tar file
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -154,7 +164,7 @@ expand the compressed tar file
 ./configure
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -163,8 +173,8 @@ Create a 'makefile' unique to your system
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -172,7 +182,7 @@ Create a 'makefile' unique to your system
 make
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -181,8 +191,8 @@ compile gpsim
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -190,7 +200,7 @@ compile gpsim
 make install
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -223,10 +233,6 @@ The default configuration will provide a gui (graphical user interface).
 \layout LyX-Code
 
 ./configure --disable-gui
-\layout Standard
-
-As of version 0.17.0, you'll still need the gui to compile (I know, that sucks).
- 
 \layout Subsubsection*
 
 debugging
@@ -250,34 +256,55 @@ The executable created above is called: gpsim.
  The following command line options may be specified when gpsim is invoked.
 \layout LyX-Code
 
-gpsim [-h] [-p<device> [<hex_file>]] [-c<stc_file>] 
+gpsim [-?] [-p <device> [<hex_file>]] [-c <stc_file>]
 \layout LyX-Code
 
-   -h           : this help list 
-\layout LyX-Code
-
-   -p<device>   : processor (e.g.
+  -p, --processor=<processor name>     processor (e.g.
  -pp16c84 for the 'c84)
 \layout LyX-Code
 
-   <hex_file>   : input file in "intelhex16" format
+  -c, --command=STRING                 startup command file
 \layout LyX-Code
 
-   -c<stc_file> : startup command file
+  -s, --symbol=STRING                  .cod symbol file
 \layout LyX-Code
 
-   -s<cod_file> : .cod symbol file
+  -L, --                               colon separated list of directories
+ to
 \layout LyX-Code
 
-   -v           : gpsim version
+                                       search.
+\layout LyX-Code
+
+  -v, --version                        gpsim version
+\layout LyX-Code
+
+  -i, --cli                            command line mode only
+\layout LyX-Code
+
+  -d, --icd=STRING                     use ICD (e.g.
+ -d /dev/ttyS0).
+\layout LyX-Code
+
+  Help options:
+\layout LyX-Code
+
+  -?, --help                           Show this help message
+\layout LyX-Code
+
+  --usage                              Display brief usage message
+\layout LyX-Code
+
 \layout Section
 
 Requirements
 \layout Standard
 
 gpsim has been developed under Linux.
- It should build just fine under the popular Linux distributions like Redhat.
- I know of no port to windows.
+ It should build and run just fine under the popular Linux distributions
+ like Redhat.
+ gpsim has also been ported to the MAC, MicroSoft Windows, Solaris, and
+ BSD.
  Two packages gpsim requires that may not be available with all Linux distributi
 ons are readline and gtk (the gimp tool kit).
  The ./configure script should tell you if these packages are not installed
@@ -289,13 +316,30 @@ There are no minimum hardware requirements to run gpsim.
  Faster is better though!
 \layout Standard
 
-gpasm, the gnupic assembler, is also very useful.
+gputils, the gnupic utilities package, is also very useful.
  gpsim will accept straight hex files, but if you want to do any symbolic
- debugging then you'll want to use the .cod files that gpasm produces.
- The .cod files are in the same format as the .cod files MPASM produces.
- Unfortunately, it's not possible to use MPASM produced .cod files with gpsim.
- This is because the .cod file has os dependent directory information (If
- I get a serious request, then I'll fix this limitation).
+ debugging then you'll want to use the .cod
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+.cod files are symbol files that were created by ByteCraft and are used by
+ Microchip.
+\end_inset 
+
+ files that gputils produces.
+ The .cod files are in the same format as the .cod files MPASM
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+MPASM is Microchip's Assembler.
+\end_inset 
+
+ produces.
+ 
 \layout Chapter
 
 Command Line Interface
@@ -309,12 +353,12 @@ The command line interface is fairly straight-forward.
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="22" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="27" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -322,7 +366,7 @@ The command line interface is fairly straight-forward.
 command
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -331,8 +375,8 @@ summary
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -345,7 +389,7 @@ attach
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -354,8 +398,8 @@ Attach stimuli to nodes
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -368,7 +412,7 @@ break
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -377,8 +421,31 @@ Set a break point
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+bus
+\begin_inset LatexCommand \index{bus}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Add or display node busses
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -391,7 +458,7 @@ clear
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -400,8 +467,8 @@ Remove a break point
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -414,7 +481,7 @@ disassemble
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -423,8 +490,8 @@ Disassemble the current cpu
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -437,7 +504,7 @@ dump
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -446,8 +513,8 @@ Display either the RAM or EEPROM
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -460,7 +527,7 @@ frequency
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -469,31 +536,8 @@ Set processor frequency
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-echo
-\begin_inset LatexCommand \index{echo}
-
-\end_inset 
-
-
-\end_inset 
-</cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
-\begin_inset Text
-
-\layout Standard
-
-echo "text"
-\end_inset 
-</cell>
-</row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -506,7 +550,7 @@ help
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -515,8 +559,8 @@ Type help "command" for more help on a command
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -529,7 +573,7 @@ icd
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -538,8 +582,8 @@ In Circuit Debugger support.
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -552,7 +596,7 @@ list
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -561,8 +605,8 @@ Display source and list files
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -575,7 +619,7 @@ load
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -584,8 +628,31 @@ Load either a hex or command file
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+log
+\begin_inset LatexCommand \index{log}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Log/record events to a file
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -598,7 +665,7 @@ node
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -607,8 +674,40 @@ Add or display stimulus nodes
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+module
+\begin_inset LatexCommand \index{module}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Select & Display modules
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -621,7 +720,7 @@ processor
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -630,8 +729,8 @@ Add/list processors
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -644,7 +743,7 @@ quit
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -653,8 +752,35 @@ Quit gpsim
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+reset
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Reset all or parts of the simulation
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -667,7 +793,7 @@ run
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -676,8 +802,40 @@ Execute the pic program
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+set
+\begin_inset LatexCommand \index{set}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+display and control gpsim behavior flags
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -690,7 +848,7 @@ step
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -699,8 +857,8 @@ Execute one or more instructions
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -713,7 +871,7 @@ stimulus
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -722,8 +880,40 @@ Create a stimulus
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+stopwatch
+\begin_inset LatexCommand \index{stopwatch}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Measure time between events
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -736,7 +926,7 @@ symbol
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -745,8 +935,8 @@ Add/list symbols
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -759,7 +949,7 @@ trace
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -768,8 +958,8 @@ Dump the trace history
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -782,7 +972,7 @@ version
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -791,8 +981,8 @@ Display gpsim's version
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -805,7 +995,7 @@ x
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -821,7 +1011,7 @@ examine and/or modify memory
 
 \layout Standard
 
-The built in 'help' command provides addtional online information.
+The built in 'help' command provides additional online information.
 \layout Subsection*
 
 attach
@@ -906,6 +1096,14 @@ break [c | e | w | r | wv | rv | wdt [location] [value] ]
 \layout LyX-Code
 
       break            # display all of the break points  
+\layout Subsection*
+
+bus
+\begin_inset LatexCommand \index{bus}
+
+\end_inset 
+
+
 \layout Subsection*
 
 clear
@@ -1108,6 +1306,22 @@ Configuration files are script files containing gpsim commands.
  These are extremely useful for creating a debugging enviroment that will
  be used repeatedly.
  For example
+\layout Subsection*
+
+log
+\begin_inset LatexCommand \index{log}
+
+\end_inset 
+
+
+\layout Subsection*
+
+module
+\begin_inset LatexCommand \index{module}
+
+\end_inset 
+
+
 \layout Subsection*
 
 node
@@ -1349,6 +1563,14 @@ asynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]
 \layout LyX-Code
 
       Bit 0 of portb will receive the stimulus
+\layout Subsection*
+
+stopwatch
+\begin_inset LatexCommand \index{stopwatch}
+
+\end_inset 
+
+
 \layout Subsection*
 
 trace
@@ -2164,13 +2386,17 @@ Cycle break points allow the program to be halted at a specific instruction
  Suppose you have a 20 Mhz pic and want to break after one second of simulation
  time.
  You could set a break at the 5 millionth instruction cycle.
-\begin_float footnote 
+\begin_inset Foot
+collapsed true
+
 \layout Standard
 
 There are 4 clock cycles per instruction.
  Also, a future feature of gpsim will provide you with the ability to set
  break points in terms of seconds.
-\end_float 
+\end_inset 
+
+
 \layout Chapter
 
 What has happen?: Trace
@@ -2192,12 +2418,12 @@ Inspecting the current state of your program is sometimes insufficient to
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="13" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="13" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2205,7 +2431,7 @@ Inspecting the current state of your program is sometimes insufficient to
 What's traced
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2214,8 +2440,8 @@ notes
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2223,7 +2449,7 @@ notes
 program counter
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2232,8 +2458,8 @@ adresses executed
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2241,7 +2467,7 @@ adresses executed
 instructions
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2250,8 +2476,8 @@ opcode
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2259,7 +2485,7 @@ opcode
 register read
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2268,8 +2494,8 @@ value and location
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2277,7 +2503,7 @@ value and location
 register write
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2286,8 +2512,8 @@ value and location
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2295,7 +2521,7 @@ value and location
 cycle counter
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2304,8 +2530,8 @@ current value
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2313,7 +2539,7 @@ current value
 skipped instructions
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2322,8 +2548,8 @@ addresses skipped
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2331,7 +2557,7 @@ addresses skipped
 status register
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2340,8 +2566,8 @@ during implicit modification
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2349,7 +2575,7 @@ during implicit modification
 interrupts
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2357,8 +2583,8 @@ interrupts
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2366,7 +2592,7 @@ interrupts
 break points
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2375,8 +2601,8 @@ type
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2384,7 +2610,7 @@ type
 resets
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2393,15 +2619,15 @@ type
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2409,15 +2635,15 @@ type
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
 
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2489,13 +2715,16 @@ In the simplest case, a stimulus acts a source for an I/O pin on a pic.
 
 In general, you can have several 'sources' and several 'loads' that are
  interconnected with nodes
-\begin_float footnote 
+\begin_inset Foot
+collapsed true
+
 \layout Standard
 
 Although, gpsim is currently limited to 'one-port' devices.
  In other words, it is assumed that ground serves as a common reference
  for the sources and the loads.
-\end_float 
+\end_inset 
+
 .
  A good analogy is a spice circuit.
  The spice netlist corresponds to a node-list in gpsim and the spice elements
@@ -2583,12 +2812,12 @@ Here's a list of the types of I/O pin stimuli that are supported:
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="5" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="5" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2596,7 +2825,7 @@ Here's a list of the types of I/O pin stimuli that are supported:
 I/O Pin Type
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2605,8 +2834,8 @@ Function
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2614,7 +2843,7 @@ Function
 INPUT_ONLY
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2623,8 +2852,8 @@ Only accepts input (like MCLR)
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2632,7 +2861,7 @@ Only accepts input (like MCLR)
 BI_DIRECTIONAL
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2641,8 +2870,8 @@ Can be a source or a load (most I/O pins)
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2650,7 +2879,7 @@ Can be a source or a load (most I/O pins)
 BI_DIRECTIONAL_PU
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2659,8 +2888,8 @@ PU=Pullup resistor (PORTB)
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2668,7 +2897,7 @@ PU=Pullup resistor (PORTB)
 OPEN_COLLECTOR
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2695,26 +2924,29 @@ Synchronous Stimuli
 
 Synchronous stimuli are periodic functions that are synchronized to the
  cpu's clock
-\begin_float footnote 
+\begin_inset Foot
+collapsed true
+
 \layout Standard
 
 This will probably be made optional in the future.
  In other words, you'll get the choice to specify whether or not the 'synchronou
 s' stimulus parameters are synchronized to the cpu or are absolute time
  values.
-\end_float 
+\end_inset 
+
 .
  They are defined by the following parameters:
 \layout Standard
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="6" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="left" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2722,7 +2954,7 @@ s' stimulus parameters are synchronized to the cpu or are absolute time
 parameter
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2731,8 +2963,8 @@ function
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2740,7 +2972,7 @@ function
 phase
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="left" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="left" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2749,8 +2981,8 @@ The # of cycles (after start) before the stimulus starts
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2758,7 +2990,7 @@ The # of cycles (after start) before the stimulus starts
 period
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2767,8 +2999,8 @@ The # of cycles for one period
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2776,7 +3008,7 @@ The # of cycles for one period
 start
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2785,8 +3017,8 @@ The cycle the stimulus becomes active
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2794,7 +3026,7 @@ The cycle the stimulus becomes active
 initial_state
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2803,8 +3035,8 @@ The initial state of the stimulus
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2812,7 +3044,7 @@ The initial state of the stimulus
 type
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2832,7 +3064,7 @@ One cycle of the periodic function can be written like so
 \layout Standard
 \align center 
 
-\begin_inset Formula \( func(t)=something\: for\: t=0\ldots period \)
+\begin_inset Formula $func(t)=something\: for\: t=0\ldots period$
 \end_inset 
 
 
@@ -2842,18 +3074,18 @@ And then can be made periodic by:
 \layout Standard
 \align center 
 
-\begin_inset Formula \( func(t+period)=func(t) \)
+\begin_inset Formula $func(t+period)=func(t)$
 \end_inset 
 
  
 \layout Standard
 
 which just says that the function has the same value at 
-\begin_inset Formula \( t \)
+\begin_inset Formula $t$
 \end_inset 
 
  and 
-\begin_inset Formula \( t+period \)
+\begin_inset Formula $t+period$
 \end_inset 
 
 .
@@ -2861,7 +3093,7 @@ which just says that the function has the same value at
 \layout Standard
 
 The 
-\begin_inset Formula \( phase \)
+\begin_inset Formula $phase$
 \end_inset 
 
  allows the periodic function to be shifted by an arbitrary amount.
@@ -2871,11 +3103,11 @@ The
 In some instances, you don't want the stimulus to be active until after
  a certain amount of time.
  The parameters 
-\begin_inset Formula \( start \)
+\begin_inset Formula $start$
 \end_inset 
 
 and 
-\begin_inset Formula \( initial\: state \)
+\begin_inset Formula $initial\: state$
 \end_inset 
 
  describe how long the stimulus should wait before becoming active and what
@@ -2907,12 +3139,12 @@ The simplest example of a synchronous stimulus is a square wave.
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="2" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="2" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2920,7 +3152,7 @@ The simplest example of a synchronous stimulus is a square wave.
 parameter
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2929,8 +3161,8 @@ function
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2938,7 +3170,7 @@ function
 duty cycle
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -2972,7 +3204,7 @@ f_{sq}=\frac{1}{period}*\frac{f_{osc}}{4}\]
 Where 
 \emph on 
 
-\begin_inset Formula \( f_{osc} \)
+\begin_inset Formula $f_{osc}$
 \end_inset 
 
 
@@ -2994,7 +3226,7 @@ Synchronous stimuli are useful as clocks.
  For example, it's possible to create a synchronous stimulus and attach
  it to the TMR0 input pin.
  Or another example may be the clock line in an 
-\begin_inset Formula \( I^{2}C \)
+\begin_inset Formula $I^{2}C$
 \end_inset 
 
  interface.
@@ -3115,12 +3347,12 @@ Asynchronous stimuli are analog or digital stimuli that can change states
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="6" columns="2">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3128,7 +3360,7 @@ Asynchronous stimuli are analog or digital stimuli that can change states
 parameter
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3137,8 +3369,8 @@ function
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3146,7 +3378,7 @@ function
 start
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3155,8 +3387,8 @@ The # of cycles before the stimulus starts
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3164,7 +3396,7 @@ The # of cycles before the stimulus starts
 cycles[]
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3173,8 +3405,8 @@ An array of cycle #'s
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3182,7 +3414,7 @@ An array of cycle #'s
 data[]
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3191,8 +3423,8 @@ Stimulus state for a cycle
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3200,7 +3432,7 @@ Stimulus state for a cycle
 period
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3209,8 +3441,8 @@ The # of cycles for one period
 \end_inset 
 </cell>
 </row>
-<row topline="false" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3218,7 +3450,7 @@ The # of cycles for one period
 initial state
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3355,6 +3587,20 @@ Analog Stimuli are really a subset or type of asynchronous or synchronous
  stimuli.
 \layout Chapter
 
+Modules
+\layout Standard
+
+gpsim has been designed to debug microprocessors.
+ However, microprocessors are always a part of a system.
+ And invariably, the bugs one often encounters are those that are a result
+ of interfacing with a system.
+ Modules provide users with a way to extend gpsim and simulate a system.
+\layout Standard
+
+A module is a stand alone application that a user writes.
+ 
+\layout Chapter
+
 Symbolic Debugging
 \layout Standard
 
@@ -3418,13 +3664,13 @@ Don't use these registers and program words:
 \newline 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="4" columns="3">
-<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
-<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<lyxtabular version="3" rows="4" columns="3">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3432,7 +3678,7 @@ Don't use these registers and program words:
 Processor
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3440,7 +3686,7 @@ Processor
 Register
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3449,8 +3695,8 @@ Program
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3458,7 +3704,7 @@ Program
 -870/1/2
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3466,7 +3712,7 @@ Program
 0x70, 0xBB-0xBF
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3475,8 +3721,8 @@ Program
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="false" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3484,7 +3730,7 @@ Program
 -873/4
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3492,7 +3738,7 @@ Program
 0x6D, 0x1fD, 0xEB-0xF0, 0x1Eb-0x1F0
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3501,8 +3747,8 @@ Program
 \end_inset 
 </cell>
 </row>
-<row topline="true" bottomline="true" newpage="false">
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3510,7 +3756,7 @@ Program
 -876/7
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3518,7 +3764,7 @@ Program
 0x70, 0x1Eb-0x1Ef
 \end_inset 
 </cell>
-<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
 \begin_inset Text
 
 \layout Standard
@@ -3958,14 +4204,17 @@ Cycle breakpoints allow gpsim to alter execution at a specific instruction
 Cycle break points are implemented with a sorted doubly-linked list.
  The linked list contains two pieces of information (besides the links):
  the cycle at which the break is to occur and the call back function
-\begin_float footnote 
+\begin_inset Foot
+collapsed true
+
 \layout Standard
 
 A call back function is a pointer to a function.
  In this context, gpsim is given a pointer to the function that's to be
  invoked (called) whenever a cycle break occurs.
  
-\end_float 
+\end_inset 
+
  that's to be invoked when the cycle does occur.
  The break logic is extremely simple.
  Whenever the cycle counter is advanced (that is, incremented), it's compared
