@@ -2,6 +2,9 @@
  *
  * callback functions for the register viewer
  */
+#include "../config.h"
+#ifdef HAVE_GUI
+
 #include <stdio.h>
 #include <gtk/gtk.h>
 
@@ -60,3 +63,4 @@ void gui_cb_break_w (GtkWidget *widget, gpointer data)
   printf("break on write\n");
 
 }
+#endif // HAVE_GUI

@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../config.h"
+#ifdef HAVE_GUI
 
 #ifdef DOING_GNOME
 #include <gnome.h>
@@ -75,3 +77,4 @@ GUI_Processor *new_GUI_Processor(void)
 
   return gp;
 }
+#endif // HAVE_GUI

@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -151,3 +155,5 @@ fill_range (void)
   else
     gtk_widget_destroy (dialog_window);
 }
+
+#endif

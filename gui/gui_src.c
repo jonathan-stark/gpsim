@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/errno.h>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -328,3 +332,4 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
     gui_object_set_config(_this);
     
 }
+#endif // HAVE_GUI

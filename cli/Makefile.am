@@ -39,7 +39,7 @@ libgpsimcli_la_SOURCES = \
 
 YFLAGS = -dvt
 
-libgpsimcli_la_LDFLAGS = $(shell gtk-config --libs)
+libgpsimcli_la_LDFLAGS = @X_LDFLAGS@
 
 
 EXTRA_DIST = scan.h parse.h

@@ -78,5 +78,6 @@ libgpsim_la_SOURCES = \
 	xref.h
 
 
-libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
+#libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
+libgpsim_la_LDFLAGS =  @X_LDFLAGS@
 

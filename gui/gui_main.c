@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../config.h"
+#ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
@@ -374,3 +376,5 @@ void gui_main(void)
   gtk_main();
 
 }
+
+#endif //HAVE_GUI

@@ -1,6 +1,11 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
+#include "../config.h"
+
+#ifdef HAVE_GUI
+
+
 #include <gtk/gtk.h>
 #include <gtkextra/gtksheet.h>
 #include "../src/interface.h"
@@ -508,3 +513,4 @@ int CreateBreadboardWindow(GUI_Processor *gp);
 
 #endif // __GUI_H__
 
+#endif // HAVE_GUI

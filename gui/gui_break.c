@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/errno.h>
+
+#include "../config.h"
+
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -141,3 +146,5 @@ void link_src_to_gpsim(GUI_Processor *gp)
 	}
     }
 }
+
+#endif //HAVE_GUI

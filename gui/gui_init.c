@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../config.h"
+#ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
@@ -129,3 +131,4 @@ void gui_styles_init(void)
 	puts("Initialized");
 
 }
+#endif // HAVE_GUI

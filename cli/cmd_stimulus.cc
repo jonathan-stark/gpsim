@@ -73,6 +73,9 @@ static cmd_options cmd_stimulus_options[] =
   "analog",                STIM_ANALOG,        OPT_TT_BITFLAG,
   "d",                     STIM_DUMP,          OPT_TT_BITFLAG,
   "dump",                  STIM_DUMP,          OPT_TT_BITFLAG,
+  "sqw",                   STIM_SQW,           OPT_TT_BITFLAG,
+  "sqare_wave",            STIM_SQW,           OPT_TT_BITFLAG,
+
   NULL,0,0
 };
 
