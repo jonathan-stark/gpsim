@@ -1,3 +1,9 @@
+2005-01-07 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc: stop gap hack - added registers
+	to hold the places of the analog SFR's
+	* cli/socket.cc, src/protocol.h, src/value.cc, src/value.h:
+	More socket improvements.
+	
 2005-01-05 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/gpsim_classes.h, src/gpsim_interface.h,
 	src/interface.cc, src/modules.cc, src/modules.h,

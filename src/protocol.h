@@ -59,6 +59,8 @@ enum eGPSIMObjectTypes
 enum eGPSIMSocketCommands
   {
 
+    GPSIM_CMD_CREATE_NOTIFY_LINK    = 0xE0,
+
     GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
     GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
     GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,

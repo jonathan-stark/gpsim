@@ -33,18 +33,19 @@ Boston, MA 02111-1307, USA.  */
 
 //------------------------------------------------------------------------
 Value::Value()
-  : cpDescription(0)
+  : cpDescription(0), xref(0)
 {
 }
 
 Value::Value(const char *_name, const char *desc)
-  : cpDescription(desc)
+  : cpDescription(desc), xref(0)
 {
   new_name(_name);
 }
 
 Value::~Value()
 {
+  delete xref;
 }
 
 void Value::set(const char *cP,int i)
@@ -177,41 +178,16 @@ void  Value::set_description(const char *new_description)
   cpDescription = new_description;
 }
 
-/*
-bool Value::operator<(Value *rv)
+void Value::set_xref(Value *v)
 {
-  throw Error("OpLT");
+  delete xref;
+  xref = v;
 }
-bool Value::operator>(Value *rv)
-{
-  throw Error("OpGT");
-}
-bool Value::operator<=(Value *rv)
-{
-  throw Error("OpLE");
-}
-bool Value::operator>=(Value *rv)
-{
-  throw Error("OpGE");
-}
-bool Value::operator==(Value *rv)
-{
-  throw Error("OpEQ");
-}
-bool Value::operator!=(Value *rv)
-{
-  throw Error("OpNE");
-}
-bool Value::operator&&(Value *rv)
-{
-  throw Error("Op&&");
-}
-bool Value::operator||(Value *rv)
-{
-  throw Error("Op||");
-}
-*/
 
+Value *Value::get_xref()
+{
+  return xref;
+}
 //------------------------------------------------------------------------
 // gpsimValue
 
@@ -456,6 +432,8 @@ void Boolean::set(Value *v)
 void Boolean::set(bool v)
 {
   value = v;
+  if(get_xref())
+    get_xref()->set(v);
 }
 
 void Boolean::set(const char *buffer, int buf_size)
@@ -529,6 +507,8 @@ void Integer::set(double d)
 void Integer::set(gint64 i)
 {
   value = i;
+  if(get_xref())
+    get_xref()->set(i);
 }
 void Integer::set(int i)
 {
@@ -755,6 +735,8 @@ Float::~Float()
 void Float::set(double d)
 {
   value = d;
+  if(get_xref())
+    get_xref()->set(d);
 }
 
 void Float::set(gint64 i)
