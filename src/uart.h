@@ -31,10 +31,13 @@ class invalid_file_register;   // Forward reference
 #include "pic-processor.h"
 #include "14bit-registers.h"
 
-
 class _TXSTA;   // Forward references
 class _SPBRG;
 class _RCSTA;
+class PIR1;
+class  _14bit_processor;
+class IOPORT;
+
 
 class _TXREG : public sfr_register
 {
@@ -44,7 +47,7 @@ class _TXREG : public sfr_register
 
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
-  virtual bool  is_empty(void)=0;
+  virtual bool is_empty(void)=0;
   virtual void empty(void)=0;
   virtual void full(void)=0;
 
@@ -54,6 +57,8 @@ class _TXSTA : public sfr_register
 {
 public:
   _TXREG  *txreg;
+  IOPIN   *txpin;
+
   unsigned int tsr;
   unsigned int bit_count;
 
@@ -113,11 +118,14 @@ class _RCSTA : public sfr_register
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
   _TXSTA  *txsta;
+  IOPORT  *uart_port;
+  
 
   unsigned int rsr;
   unsigned int bit_count;
+  unsigned int rx_bit;
 
-  unsigned int new_bit;    //TEST!!!!
+  //  unsigned int new_bit;    //TEST!!!!
 
 
   virtual void put(unsigned int new_value);
@@ -142,17 +150,52 @@ class _SPBRG : public sfr_register, public BreakCallBack
 };
 
 //---------------------------------------------------------------
-/*
+class TXREG_14 : public _TXREG
+{
+ public:
+  PIR1 *pir1;
+
+  virtual bool is_empty(void);
+  virtual void empty(void);
+  virtual void full(void);
+
+};
+
+class RCREG_14 : public _RCREG
+{
+ public:
+  PIR1 *pir1;
+
+  virtual void push(unsigned int);
+
+};
+
+//---------------------------------------------------------------
 class USART_MODULE
 {
 public:
 
-  pic_processor *cpu;
-  char * name_str;
+  //  pic_processor *cpu;
 
-  USART_MODULE(void);
-  void initialize(void);
+  _TXSTA       txsta;
+  _RCSTA       rcsta;
+  _SPBRG       spbrg;
+
+  //  USART_MODULE(void);
 
 };
-*/
+
+class USART_MODULE14 : public USART_MODULE
+{
+ public:
+
+  _14bit_processor *cpu;
+
+  TXREG_14     txreg;
+  RCREG_14     rcreg;
+
+  virtual void initialize(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+
+};
+
 #endif

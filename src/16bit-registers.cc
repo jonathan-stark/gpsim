@@ -1286,7 +1286,7 @@ void RCREG_16::push(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
-void USART_MODULE::initialize(_16bit_processor *new_cpu)
+void USART_MODULE16::initialize(_16bit_processor *new_cpu)
 {
   cpu = new_cpu;
 

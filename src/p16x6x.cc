@@ -252,7 +252,7 @@ void P16C64::create_sfr_map(void)
   add_sfr_register(&trisb,  0x86, 0xff);
 
   add_sfr_register(portc,   0x07);
-  add_sfr_register(&trisc,  0x87, 0x1f);
+  add_sfr_register(&trisc,  0x87, 0xff);
 
   add_sfr_register(portd,   0x08);
   add_sfr_register(&trisd,  0x88, 0xff);
@@ -425,6 +425,13 @@ void P16C65::create_sfr_map(void)
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmr1l  = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
+
+  add_sfr_register(&usart.rcsta, 0x18, 0,"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, 2,"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, 0,"spbrg");
+  add_sfr_register(&usart.txreg, 0x19, 0,"txreg");
+  add_sfr_register(&usart.rcreg, 0x1a, 0,"rcreg");
+  usart.initialize(this,&pir1,portc);
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");

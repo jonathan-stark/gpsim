@@ -160,14 +160,14 @@ void ADCON0::put_conversion(void)
   int converted;
 
 
-  if(reference != 0)
-    converted = acquired_value/reference;
-  else
-    converted = 0xffffffff;  // As close to infinity as possible...
-
   if(adresl) {   // non-null for 16f877
 
-    cout << "A/D putting 10-bit result\n";
+    if(reference != 0)
+      converted = (4*acquired_value)/reference;
+    else
+      converted = 0xffffffff;  // As close to infinity as possible...
+
+    cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
     if(adcon1->value & ADCON1::ADFM) {
       adresl->put(converted & 0xff);
       adres->put( (converted >> 8) & 0x3);
@@ -178,7 +178,13 @@ void ADCON0::put_conversion(void)
 
   } else {
 
-    adres->put((converted >>2) & 0xff);
+    if(reference != 0)
+      converted = acquired_value/reference;
+    else
+      converted = 0xffffffff;  // As close to infinity as possible...
+
+    cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
+    adres->put((converted ) & 0xff);
 
   }
 
@@ -271,7 +277,7 @@ int ADCON1::get_Vref(void)
   if ( Vrefhi_position[value & valid_bits] ==  3)
     vrefhi = analog_port->get_bit_voltage(3);
   else
-    vrefhi = (int)(cpu->Vdd * MAX_ANALOG_DRIVE * 0x100);
+    vrefhi = (int)(cpu->Vdd * MAX_ANALOG_DRIVE);
 
 
   if ( Vreflo_position[value & valid_bits] ==  2)
@@ -412,6 +418,7 @@ void P16C74::create_sfr_map(void)
   adcon0.analog_port = porta;
   adcon0.analog_port2 = porte;
   adcon0.adres = &adres;
+  adcon0.adresl = NULL;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   adcon0.pir = &pir1;

@@ -145,7 +145,9 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
     v = (value &  one_shifted_left_by_n [bit_number]) ? 
 	    (MAX_DRIVE / 2) : -(MAX_DRIVE / 2) ;
 
-  cout << __FUNCTION__ << "() for bit " << bit_number << ", voltage = " << v << '\n';
+  float vf = v;
+  vf = vf / MAX_ANALOG_DRIVE;
+  //cout << __FUNCTION__ << "() for bit " << bit_number << ", voltage = " << v << ", vf = " << vf << " volts\n";
 
   return v;
 }      
@@ -307,7 +309,7 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 {
 
   int bit_mask = one_shifted_left_by_n[bit_number];
-  //cout << name();
+  cout << name();
 
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
@@ -316,7 +318,7 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 
       trace.register_write(address,value); // %%% FIX ME %%% give this another trace type.
     }
-  //  else cout <<  " IOPORT::set_bit bit did not change\n";
+  //else cout <<  " IOPORT::set_bit bit did not change\n";
 
 }
 
@@ -417,8 +419,10 @@ void IOPORT::update_pin_directions(unsigned int new_tris)
       int i,m;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(m & diff & valid_iopins)
+	  {
 	  pins[i]->update_direction(m & (~new_tris));
-
+	  //cout << __FUNCTION__ << " name " << pins[i]->name() << " pin number " << i << '\n';
+	  }
       // Now, update the nodes to which the(se) pin(s) may be attached
 
       guint64 time = cpu->cycles.value;
@@ -683,7 +687,7 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value;
 
-  //  cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
+  //cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 

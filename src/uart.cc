@@ -22,7 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 
 #include "uart.h"
-
+#include "14bit-processors.h"
+#include "14bit-tmrs.h"
 
 //-----------------------------------------------------------
 // TXREG - USART Transmit Register
@@ -130,6 +131,8 @@ void _TXSTA::transmit_a_bit(void)
     {
 
       cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
+      txpin->put_state(tsr&1);
+
       tsr >>= 1;
 
       if(--bit_count == 0)
@@ -196,9 +199,9 @@ void _RCSTA::receive_a_bit(void)
   if(bit_count)
     {
 
-      new_bit >>= 1;  // TEST!!!!
+      //new_bit >>= 1;  // TEST!!!!
 
-      if(new_bit & 1)
+      if(uart_port->get_bit(rx_bit))
 	rsr |= 1<<9;
 
       cout << "Receive bit #" << bit_count << ": " << (rsr&(1<<9)) << '\n';
@@ -230,7 +233,7 @@ void _RCSTA::start_receiving(void)
 {
   cout << "The USART is starting to receive data\n";
 
-  new_bit = (3<<9) | (0x5a << 1); // test
+  //  new_bit = (3<<9) | (0x5a << 1); // test
 
   rsr = 0;
 
@@ -364,4 +367,60 @@ void _SPBRG::callback(void)
 
       cpu->cycles.set_break(future_cycle, this);
     }
+}
+//--------------------------------------------------
+
+bool TXREG_14::is_empty(void)
+{
+  return(pir1->get_txif());
+}
+
+void TXREG_14::empty(void)
+{
+  pir1->set_txif();
+}
+
+void TXREG_14::full(void)
+{
+  pir1->clear_txif();
+}
+
+void RCREG_14::push(unsigned int new_value)
+{
+
+  _RCREG::push(new_value);
+
+  pir1->set_rcif();
+
+}
+
+
+//--------------------------------------------------
+// member functions for the USART
+//--------------------------------------------------
+void USART_MODULE14::initialize(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port)
+{
+  cpu = new_cpu;
+
+  spbrg.txsta = &txsta;
+  spbrg.rcsta = &rcsta;
+
+  txreg.pir1 = pir1;
+  txreg.txsta = &txsta;
+
+  txsta.txreg = &txreg;
+  txsta.txpin = uart_port->pins[6];
+  txsta.bit_count = 0;
+
+  rcsta.rcreg = &rcreg;
+  rcsta.spbrg = &spbrg;
+  rcsta.txsta = &txsta;
+  rcsta.uart_port = uart_port;
+  rcsta.rx_bit = 7;
+
+  rcreg.rcsta = &rcsta;
+  rcreg.pir1 = pir1;
+
+  //  spbrg.start();
+
 }
