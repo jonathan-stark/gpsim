@@ -87,7 +87,7 @@ IOPIN *Package::get_pin(unsigned int pin_number)
 {
 
   if(E_PIN_EXISTS == pin_existance(pin_number))
-    return pins[pin_number];
+    return pins[pin_number-1];
   else
     return NULL;
 

@@ -88,6 +88,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
 //  char *gpsim_get_register_name(unsigned int processor_id, unsigned int register_number);
 //  unsigned int gpsim_get_register_value(unsigned int processor_id, unsigned int register_number);
 //  void  gpsim_put_register_value(unsigned int processor_id, unsigned int register_number, unsigned int register_value);
+  char *gpsim_processor_get_name(unsigned int processor_id);
   unsigned int gpsim_get_pc_value(unsigned int processor_id);
   void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value);
   unsigned int gpsim_get_status(unsigned int processor_id);
