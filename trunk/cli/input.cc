@@ -60,6 +60,7 @@ extern "C" {
 #include <sys/types.h>
 #ifdef _WIN32
 #include <direct.h>
+#include "fd2raw.h"
 #else
 #include <sys/file.h>
 #endif
@@ -654,8 +655,18 @@ void initialize_readline (void)
 
 #ifdef HAVE_READLINE
 #ifdef HAVE_GUI
+  #ifdef _WIN32
+    /* set console to raw mode */ 
+    win32_fd_to_raw(fileno(stdin));
+  #endif
+
   rl_getc_function = gpsim_rl_getc;
   channel = g_io_channel_unix_new (fileno(stdin));
+
+#ifdef _WIN32
+  /* set console to raw mode */ 
+  win32_set_is_readable(channel);
+#endif
 
   g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
 
