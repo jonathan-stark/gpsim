@@ -1761,20 +1761,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 	  // Make sure that the file is open
 	  fc->open("r");
 
-	  /*
-	  if(gpsim_file->file_ptr == 0)
-	  {
-	      if(file_name != 0)
-		  gpsim_file->file_ptr = fopen_path(file_name,"r");
-
-	      if(gpsim_file->file_ptr == 0)
-	      {
-		  printf("file \"%s\" not found\n",file_name);
-		  continue;
-	      }
-	  }
-	  */
-
 	  id = add_page(this,file_id);
 
 	  set_text(this,id,file_id);
@@ -1850,12 +1836,10 @@ static int load_fonts(SourceBrowserAsm_Window *sbaw)
 static void fontselok_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE; // cancel=FALSE;
-//    gtk_main_quit();
 }
 static void fontselcancel_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE; // cancel=TRUE;
-//    gtk_main_quit();
 }
 int font_dialog_browse(GtkWidget *w, gpointer user_data)
 {
@@ -2207,202 +2191,202 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 {
 
     
-    const char *p;
-    GList *l;
+  const char *p;
+  GList *l;
     
-    int casesensitive;
-    int direction;
+  int casesensitive;
+  int direction;
     
-    int last_matched=0;
-    int k=0;
+  int last_matched=0;
+  int k=0;
     
-    int char1, char2;
-    int j;  // index into search string
-    int tlen;
-    int id;
+  int char1, char2;
+  int j;  // index into search string
+  int tlen;
+  int id;
 
   if(!sbaw->source_loaded) return;
     
   id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    if(id != searchdlg.lastid)
+  if(id != searchdlg.lastid)
     { //  Changed notebook tab since last search reset search.
-        searchdlg.lastid=id;
-	searchdlg.found=0;
-	searchdlg.looped=0;
-	searchdlg.start=0;
-	searchdlg.lastfound=0;
-	searchdlg.i=0;
+      searchdlg.lastid=id;
+      searchdlg.found=0;
+      searchdlg.looped=0;
+      searchdlg.start=0;
+      searchdlg.lastfound=0;
+      searchdlg.i=0;
     }
     
-    if(GTK_TOGGLE_BUTTON(searchdlg.case_button)->active)
-	casesensitive=TRUE;
-    else
-	casesensitive=FALSE;
+  if(GTK_TOGGLE_BUTTON(searchdlg.case_button)->active)
+    casesensitive=TRUE;
+  else
+    casesensitive=FALSE;
 
-    if(GTK_TOGGLE_BUTTON(searchdlg.backwards_button)->active)
-	direction=-1;
-    else
-	direction=1;
+  if(GTK_TOGGLE_BUTTON(searchdlg.backwards_button)->active)
+    direction=-1;
+  else
+    direction=1;
 
-    p=gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry));
+  p=gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry));
 
-    if(*p=='\0')
-	return;
+  if(*p=='\0')
+    return;
 
-    if(searchdlg.string==0 || strcmp(searchdlg.string,p))
+  if(searchdlg.string==0 || strcmp(searchdlg.string,p))
     {  // not same string as last time
-	// search list to prevent duplicates
-	l=searchdlg.combo_strings;
-	while(l)
+      // search list to prevent duplicates
+      l=searchdlg.combo_strings;
+      while(l)
 	{
-	    if(!strcmp((char*)l->data,p))
+	  if(!strcmp((char*)l->data,p))
 	    {
-		// the string p already is in list
-		// move it first?, FIXME
+	      // the string p already is in list
+	      // move it first?, FIXME
 
-		searchdlg.string = (char*)l->data;
-		break;
+	      searchdlg.string = (char*)l->data;
+	      break;
 	    }
 
-	    l=l->next;
+	  l=l->next;
 	}
-	if(l == 0)
+      if(l == 0)
 	{ // we didn't find string in history, create a new one
-	    searchdlg.string=(char*)malloc(strlen(p)+1);
-	    strcpy(searchdlg.string,p);
-	    searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
-	    gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
+	  searchdlg.string=(char*)malloc(strlen(p)+1);
+	  strcpy(searchdlg.string,p);
+	  searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
+	  gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
 	}
 
-	// initialize variables for a new search
-	searchdlg.found=0;
-	searchdlg.looped=0;
-	searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->index;
-	searchdlg.start = searchdlg.i; // remember where we started searching
+      // initialize variables for a new search
+      searchdlg.found=0;
+      searchdlg.looped=0;
+      searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->index;
+      searchdlg.start = searchdlg.i; // remember where we started searching
     }
 
-    tlen =gtk_text_get_length(GTK_TEXT(sbaw->source_text[id]));
-    j=0;
-    for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
+  tlen =gtk_text_get_length(GTK_TEXT(sbaw->source_text[id]));
+  j=0;
+  for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
     {
-	if(searchdlg.string[j]=='\0')
+      if(searchdlg.string[j]=='\0')
 	{  // match! We found the string in text.
-	    int start_i, end_i;
+	  int start_i, end_i;
 	    
-	    searchdlg.found++;
+	  searchdlg.found++;
 
-	    start_i = k+ (direction==-1);      // comparing backwards means
-	    end_i = searchdlg.i+ (direction==-1); // we have to add 1
+	  start_i = k+ (direction==-1);      // comparing backwards means
+	  end_i = searchdlg.i+ (direction==-1); // we have to add 1
 
-	    if(start_i>end_i)
+	  if(start_i>end_i)
 	    {
-		int temp=end_i;  // swap, so that k is the smaller
-		end_i=start_i;
-		start_i=temp;
+	      int temp=end_i;  // swap, so that k is the smaller
+	      end_i=start_i;
+	      start_i=temp;
 	    }
-	    assert(start_i<end_i);
-	    if(start_i==searchdlg.lastfound)
+	  assert(start_i<end_i);
+	  if(start_i==searchdlg.lastfound)
 	    {  // we found the same position as last time
-                // happens when searching backwards
-		j=0;
-		if(direction==1)
-		    searchdlg.i++; // skip this match
-		else
-		    searchdlg.i--; // skip this match
-		last_matched=0;
+	      // happens when searching backwards
+	      j=0;
+	      if(direction==1)
+		searchdlg.i++; // skip this match
+	      else
+		searchdlg.i--; // skip this match
+	      last_matched=0;
 	    }
-	    else
+	  else
 	    {
-		int pixel;
-		float inc;
+	      int pixel;
+	      float inc;
 
-		searchdlg.lastfound=start_i;
+	      searchdlg.lastfound=start_i;
 
-		pixel = gui_index_to_entry(id,start_i)->pixel;
-		inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->source_text[id])->vadj)->page_increment;
-		gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->source_text[id])->vadj),
-					 pixel-inc/2);
-		gtk_editable_select_region(GTK_EDITABLE(sbaw->source_text[id]),start_i,end_i);
-		return;
+	      pixel = gui_index_to_entry(id,start_i)->pixel;
+	      inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->source_text[id])->vadj)->page_increment;
+	      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->source_text[id])->vadj),
+				       pixel-inc/2);
+	      gtk_editable_select_region(GTK_EDITABLE(sbaw->source_text[id]),start_i,end_i);
+	      return;
 	    }
 	}
-	if(searchdlg.looped && (searchdlg.start == searchdlg.i))
+      if(searchdlg.looped && (searchdlg.start == searchdlg.i))
 	{
-	    if(searchdlg.found==0)
+	  if(searchdlg.found==0)
 	    {
-		gui_message("Not found");
-		return;
+	      gui_message("Not found");
+	      return;
 	    }
-	    else if(searchdlg.found==1)
+	  else if(searchdlg.found==1)
 	    {
-		gui_message("Just a single occurance in text");
+	      gui_message("Just a single occurance in text");
 
-		// so that the next next call marks text too, we do:
-		searchdlg.found=0;
-		searchdlg.looped=0;
-		searchdlg.lastfound=-1;
-		return;
+	      // so that the next next call marks text too, we do:
+	      searchdlg.found=0;
+	      searchdlg.looped=0;
+	      searchdlg.lastfound=-1;
+	      return;
 	    }
 	}
 
-	// get another character
-	char1=GTK_TEXT_INDEX(GTK_TEXT(sbaw->source_text[id]),(unsigned)searchdlg.i);
-	if(direction==1)
-	    char2=searchdlg.string[j];
-	else
-	    char2=searchdlg.string[strlen(searchdlg.string)-1-j];
-	//FIXME, many calls to strlen
+      // get another character
+      char1=GTK_TEXT_INDEX(GTK_TEXT(sbaw->source_text[id]),(unsigned)searchdlg.i);
+      if(direction==1)
+	char2=searchdlg.string[j];
+      else
+	char2=searchdlg.string[strlen(searchdlg.string)-1-j];
+      //FIXME, many calls to strlen
 
-	if(casesensitive==FALSE)
+      if(casesensitive==FALSE)
 	{
-	    char1=toupper(char1); // FIXME, what about native letters?
-	    char2=toupper(char2);
+	  char1=toupper(char1); // FIXME, what about native letters?
+	  char2=toupper(char2);
 	}
 
-	if(char1!=char2)
+      if(char1!=char2)
 	{                   // if these characters don't match
-	    j=0;            // set search index for string back to zero
-	    last_matched=0; // char in this loop didn't match
+	  j=0;            // set search index for string back to zero
+	  last_matched=0; // char in this loop didn't match
 	}
-	else
+      else
 	{
-	    if(!last_matched)
+	  if(!last_matched)
 	    {
-		k=searchdlg.i;     // remember first matching index for later
-		last_matched=1; // char in this loop matched
+	      k=searchdlg.i;     // remember first matching index for later
+	      last_matched=1; // char in this loop matched
 	    }
-	    j++;  // forward string index to compare next char
+	  j++;  // forward string index to compare next char
 	}
 	
     }
-    // the string was not found in text between index 'search start' and
-    // one end of text (index '0' or index 'tlen')
+  // the string was not found in text between index 'search start' and
+  // one end of text (index '0' or index 'tlen')
 
-    // We ask user it he want to search from other end of file
-    if(direction==1)
+  // We ask user it he want to search from other end of file
+  if(direction==1)
     {
-	if(gui_question("I reached end of file\ncontinue from start?","Yes","No")==TRUE)
+      if(gui_question("End of file\ncontinue from start?","Yes","No")==TRUE)
 	{
-	    searchdlg.i=0;
-	    searchdlg.looped=1;
-	    find_cb(w,sbaw);  // tail recursive, FIXME
-	    return;
+	  searchdlg.i=0;
+	  searchdlg.looped=1;
+	  find_cb(w,sbaw);  // tail recursive, FIXME
+	  return;
 	}
-	else
-	    searchdlg.i=tlen-1;
+      else
+	searchdlg.i=tlen-1;
     }
-    else
+  else
     {
-	if(gui_question("I reached top of file\ncontinue from end?","Yes", "No")==TRUE)
+      if(gui_question("I reached top of file\ncontinue from end?","Yes", "No")==TRUE)
 	{
-	    searchdlg.i=tlen-1;
-	    searchdlg.looped=1;
-	    find_cb(w,sbaw);  // tail recursive, FIXME
-	    return;
+	  searchdlg.i=tlen-1;
+	  searchdlg.looped=1;
+	  find_cb(w,sbaw);  // tail recursive, FIXME
+	  return;
 	}
-	else
-	    searchdlg.i=0;
+      else
+	searchdlg.i=0;
     }
 }
 
