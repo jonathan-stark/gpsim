@@ -32,6 +32,9 @@ using namespace std;
 #include "breakpoints.h"
 
 /* forward references: */
+class Stimulus_Node;
+class stimulus;
+class IOPORT;
 
 /* Support functions */
 extern Stimulus_Node * find_node (string name);
@@ -287,6 +290,20 @@ public:
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 };
 
+
+/* For now, a resistor has one end attached to either ground or vcc and the
+** other end is attached to a node. As we get more ambitious, this may change.
+**/
+
+class resistor : public source_stimulus
+{
+public:
+
+  virtual int get_voltage(guint64 current_time) {return drive;};
+  virtual SOURCE_TYPE isa(void) {return RESISTOR;};
+};
+
+
 class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
@@ -397,18 +414,6 @@ class dc_supply : public source_stimulus {
   virtual SOURCE_TYPE isa(void) {return DC;};
   virtual int get_voltage(guint64 current_time) { return drive;};
 
-};
-
-/* For now, a resistor has one end attached to either ground or vcc and the
-** other end is attached to a node. As we get more ambitious, this may change.
-**/
-
-class resistor : public source_stimulus
-{
-public:
-
-  virtual int get_voltage(guint64 current_time) {return drive;};
-  virtual SOURCE_TYPE isa(void) {return RESISTOR;};
 };
 
 class open_collector : public source_stimulus

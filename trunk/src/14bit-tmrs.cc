@@ -415,6 +415,18 @@ void T1CON::put(unsigned int new_value)
 
 }
 
+unsigned int T1CON::get(void)
+{
+  trace.register_read(address,value);
+  return(value);
+}
+
+unsigned int T1CON::get_prescale(void)
+{
+  return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
+}
+
+
 
 //--------------------------------------------------
 // member functions for the TMRH base class
@@ -822,6 +834,11 @@ TMR2::TMR2(void)
   future_cycle = 0;
   prescale=1;
   new_name("TMR2");
+}
+
+void TMR2::callback_print(void) 
+{
+  cout << "TMR2 " << name() << " CallBack ID " << CallBackID << '\n';
 }
 
 void TMR2::start(void)

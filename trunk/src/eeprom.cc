@@ -27,6 +27,8 @@ using namespace std;
 
 #include <glib.h>
 
+#include "trace.h"
+#include "pic-processor.h"
 #include "eeprom.h"
 
 
@@ -361,8 +363,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
   rom = (Register **) new char[sizeof (Register *) * rom_size];
   assert(rom != 0);
-
-
+  
   // Initialize the rom
 
   char str[100];
@@ -383,6 +384,10 @@ void EEPROM::initialize(unsigned int new_rom_size)
   //??? FIXME:
   reset(POR_RESET);
 
+
+  assert(cpu != 0);
+  cpu->ema.set_cpu(cpu);
+  cpu->ema.set_Registers(rom, rom_size);
 }
 
 

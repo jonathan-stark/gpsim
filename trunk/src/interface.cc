@@ -42,6 +42,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 #include "interface.h"
 #include "trace.h"
+#include "eeprom.h"
 
 gpointer create_interface(unsigned int processor_id, 
 			  void (*interface_callback)(gpointer), 

@@ -1695,7 +1695,14 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
 #endif
   row_height = 3 * char_width + 6;
   gtk_sheet_set_row_height (register_sheet, j, row_height);
-  for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, type);reg_number++) {
+
+
+  RegisterMemoryAccess 
+    *rma = (type == REGISTER_RAM) ?
+    &(gp->cpu->rma) : &(gp->cpu->ema);
+
+  //for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, type);reg_number++) {
+  for(reg_number=0;reg_number<rma->get_size();reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
 	
     if(i==0 && row_created)
@@ -1709,10 +1716,13 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
     registers[reg_number]->col = i;
     registers[reg_number]->put_shadow(INVALID_VALUE);
     registers[reg_number]->update_full=TRUE;
-    registers[reg_number]->reg = gpsim_get_register(gp->cpu->processor_id,
-						    type,
-						    reg_number);
+    registers[reg_number]->reg = rma->get_register(reg_number);
 
+      /*
+      gpsim_get_register(gp->cpu->processor_id,
+			 type,
+			 reg_number);
+      */
     if(gpsim_get_register_name (pic_id, type,reg_number)) {
 
       gpsim_set_bulk_mode(1);

@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 class XrefObject;
 class pic_processor;
 class Register;
+class Processor;
 
 /*
  *  base class for an instruction

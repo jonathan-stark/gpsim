@@ -30,6 +30,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "14bit-processors.h"
+#include "14bit-instructions.h"
+
 struct instruction_constructor op_16cxx[] = {
 
   { 0x3f00,  0x3e00,  ADDLW::construct }, 

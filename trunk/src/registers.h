@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 
 class symbol;
 class XrefObject;
+class Processor;
 
 #include "gpsim_classes.h"
 

@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __16BIT_INSTRUCTIONS_H__
 #define __16BIT_INSTRUCTIONS_H__
 
-#include "pic-instructions.h"
+#include "14bit-instructions.h"
 #include "16bit-registers.h"
 
 /*---------------------------------------------------------

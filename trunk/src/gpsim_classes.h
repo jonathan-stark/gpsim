@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_CLASSES_H__
 #define __GPSIM_CLASSES_H__
 
-
+/*
 class IOPIN;
 class IOPORT;
 class PIC_IOPORT;
@@ -61,7 +61,7 @@ class Module_Types;
 
 class ModuleInterface;
 class ProcessorInterface;
-
+*/
 
 /*==================================================================
  *

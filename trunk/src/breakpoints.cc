@@ -898,6 +898,14 @@ void Breakpoints::clear_all_register(Processor *c,unsigned int address)
     bp.clear(c->registers[address]->break_point & ~Breakpoints::BREAK_MASK);
 }
 
+void Breakpoints::halt(void)
+{
+  if(use_icd) {
+    icd_halt();
+    return;
+  }
+  global_break |= GLOBAL_STOP_RUNNING;
+}
 Breakpoints::Breakpoints(void)
 {
   

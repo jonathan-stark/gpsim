@@ -143,15 +143,27 @@ class ProgramMemoryAccess :  public BreakCallBack
 // by objects other than the simulator to manipulate the 
 // cpu's register memory.
 
-class RegisterMemoryAccess :  public BreakCallBack
+class RegisterMemoryAccess
 {
  public:
   
   RegisterMemoryAccess(void);
-  virtual void set_cpu(Processor *p) { cpu = p; }
   virtual Register *get_register(unsigned int address);
+  int get_size(void) { return nRegisters; }
+  void set_cpu(Processor *p) { cpu = p; }
+  void set_Registers(Register **_registers, int _nRegisters) 
+    { 
+      nRegisters = _nRegisters; 
+      registers = _registers;
+    }
 
-  Processor *cpu;
+private:
+  int nRegisters;
+  bool initialized;
+  Register **registers;       // Pointer to the array of registers.
+                              // 
+  Processor *cpu;             // Pointer to the processor whose registers
+                              // are being managed.
 
 };
 //------------------------------------------------------------------------
@@ -180,8 +192,9 @@ public:
 
   instruction   **program_memory;  // THE program memory
 
-  ProgramMemoryAccess pma;
-  RegisterMemoryAccess rma;
+  ProgramMemoryAccess  pma;   // Program memory interface
+  RegisterMemoryAccess rma;   // register memory interface
+  RegisterMemoryAccess ema;   // eeprom memory interface (if present).
 
   Program_Counter *pc;
 
