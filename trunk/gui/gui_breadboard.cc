@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <gtk/gtk.h>
 #include <glib.h>
-
+#include <math.h>
 #include <assert.h>
 
 #define PINLINEWIDTH 3
@@ -299,7 +299,7 @@ void position_module(struct gui_module *p, int x, int y)
     }
 }
 
-int module_distance(struct gui_module *p, int x, int y)
+double module_distance(struct gui_module *p, int x, int y)
 {
     double distance;
     double min_distance=100000000;
@@ -382,8 +382,8 @@ static void pointer_cb(GtkWidget *w,
 
     static struct gui_module *dragged_module;
 
-    x = event->x + bbw->hadj->value;
-    y = event->y + bbw->vadj->value;
+    x = (int) (event->x + bbw->hadj->value);
+    y = (int) (event->y + bbw->vadj->value);
 
     switch(event->type)
     {
@@ -1175,6 +1175,9 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
     pin->width=pinspacing;
     pin->height=pinspacing;
     pin->bbw=bbw;
+
+    pin->y-=pin->height/2;
+
     if(iopin!=NULL)
     {
 	pin->value=iopin->get_state();
@@ -1505,19 +1508,21 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	if(pin_position>=0.0 && pin_position<1.0)
 	{
 	    pin_x=0;
-	    pin_y=(int)package_height/2+((pin_position-0.5)*package_height);
-            pin_y+=CASELINEWIDTH;
-            orientation = LEFT;
+	    pin_y=(int)(p->height/2+((pin_position-0.5)*package_height));
+//            pin_y+=CASELINEWIDTH;
+	    orientation = LEFT;
 	}
 	else if(pin_position>=2.0 && pin_position<3.0)
 	{
 	    pin_x=p->width;
-	    pin_y=(int)package_height/2+((3.0-pin_position-0.5)*package_height);
-            pin_y+=CASELINEWIDTH;
+	    pin_y=(int)(p->height/2+((3.0-pin_position-0.5)*package_height));
+//            pin_y+=CASELINEWIDTH;
 	    orientation = RIGHT;
 	}
 	else
 	{
+	    // FIXME
+
 	    printf("################### Error:\n");
 	    printf("Number of pins %d\n",pa->number_of_pins);
 	    printf("pin_position %f\n",pin_position);
