@@ -359,12 +359,14 @@ static unsigned long get_number_in_string(char *number_string)
 
 // when a new cell is selected, we write changes in
 // previously selected cell to gpsim
+// (the name of the signal seems a bit strange)
 static void
-parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
+set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 {
   GtkSheet *sheet;
   gchar *text;
   int justification,n=0;
+  //int crow, ccol;
 
   GUI_Processor *gp;
   
@@ -374,13 +376,16 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || rw==NULL)
   {
-      printf("Warning parse_numbers(%x,%x,%x,%x)\n",(unsigned int)widget,row,col,(unsigned int)rw);
+      printf("Warning set_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,col,(unsigned int)rw);
       return;
   }
 
+  if(gp->pic_id==0)
+      return;
+  
   gp = ((GUI_Object*)rw)->gp;
   
-  //printf ("parse_numbers %d %d\n", row, col);
+  //printf ("set_cell %d %d,  %d %d\n", row, col);
   
 
   justification=GTK_JUSTIFY_RIGHT;
@@ -392,7 +397,7 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
 
       if( rw->row_to_address[row] == -1)
       {
-	  puts("Warning row_to_address[row] == -1 in parse_numbers");
+	  puts("Warning row_to_address[row] == -1 in set_cell");
 	  return;
       }
 	  
@@ -429,6 +434,89 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
 
 }
 
+static void update_label(Register_Window *rw)
+{
+    gint row, col;
+    GtkSheet *sheet;
+    int regnumber;
+    char cell[100],*n;
+
+    puts("update label");
+    
+    sheet=GTK_SHEET(rw->register_sheet);
+    row=sheet->active_cell.row; col=sheet->active_cell.col;
+
+  
+    if(rw->row_to_address[row] < 0) {
+	printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
+	return;
+    }
+
+    regnumber = rw->row_to_address[row]+col;
+
+    // get the string to put in label
+    cell[0] = 0;
+    if(((GUI_Object*)rw)->gp)
+    {
+	if(col < REGISTERS_PER_ROW) {
+	    if(((GUI_Object*)rw)->gp->pic_id != 0)
+	    {
+		n = gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber);
+		if(n==NULL)
+		    n="INVALID REGISTER";
+	    }
+	    else
+	    {
+		n = "00"; // FIXME
+	    }
+
+	    strncpy(cell,n,100);
+	}
+	else
+	    sprintf(cell,"  ascii  ");
+    }
+    else
+    {
+	puts("**************** Warning not gp?");
+	sprintf(cell," 0x%02x  ", regnumber);
+    }
+    // cell is now the string we want. Set the label
+    gtk_label_set(GTK_LABEL(rw->location), cell);
+
+}
+
+static void update_entry(Register_Window *rw)
+{
+    gint row, col;
+    GtkSheet *sheet;
+    char *text; 
+    GtkWidget * sheet_entry;
+
+    puts("update entry");
+    
+    sheet=GTK_SHEET(rw->register_sheet);
+    sheet_entry = gtk_sheet_get_entry(sheet);
+    row=sheet->active_cell.row; col=sheet->active_cell.col;
+
+  
+    // ******************************** update entry:
+    if(rw->row_to_address[row] < 0) {
+	printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
+	return;
+    }
+
+    if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
+    {
+	if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
+	    gtk_entry_set_text(GTK_ENTRY(rw->entry), text);
+    }
+}
+
+static void update_labelentry(Register_Window *rw)
+{
+    update_label(rw);
+    update_entry(rw);
+}
 
 static void
 clipboard_handler(GtkWidget *widget, GdkEventKey *key)
@@ -552,10 +640,8 @@ static void
 activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
   GtkSheet *sheet;
-//  GtkEntry *sheet_entry;
 
   gint row, col;
-//  gint justification=GTK_JUSTIFY_RIGHT;
 
   if(widget==NULL|| rw==NULL)
   {
@@ -564,9 +650,12 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
   }
   
   sheet=GTK_SHEET(rw->register_sheet);
-  row=sheet->active_cell.row; col=sheet->active_cell.col;
 
-  parse_numbers(GTK_WIDGET(sheet),sheet->active_cell.row,sheet->active_cell.col,rw);
+  // if there are text written in the entry above the sheet, then
+  // the same data is in the sheet cell (because of show_sheet_entry())
+
+  // so we use set_cell() to write the changes from the sheet cell to gpsim
+  set_cell(GTK_WIDGET(sheet),row,col,rw);
   update_ascii(rw,row);
       
 }
@@ -578,120 +667,55 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 static void
 show_entry(GtkWidget *widget, Register_Window *rw)
 {
- char *text; 
- GtkSheet *sheet;
- GtkWidget * sheet_entry;
-  gint row, col;
-
-  if(widget==NULL|| rw==NULL)
-  {
-      printf("Warning show_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
-      return;
-  }
-  
- if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
-
- sheet=GTK_SHEET(rw->register_sheet);
- sheet_entry = gtk_sheet_get_entry(sheet);
-
- row=sheet->active_cell.row; col=sheet->active_cell.col;
- 
-  if(rw->row_to_address[row] < 0) {
-      printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
-    return;
-  }
-  
- if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
- {
-     if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
-	 gtk_entry_set_text(GTK_ENTRY(rw->entry), text);
- }
+    if(widget==NULL|| rw==NULL)
+    {
+	printf("Warning show_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
+	return;
+    }
+    
+    if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
+    
+    update_entry(rw);
 
 }
 
-/* when a cell is activated, we set the label and entry above the sheet
+/* when the sheet cursor has activated a new cell, we set the
+   label and entry above the sheet
  */
 static gint
 activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
 {
-  GtkSheet *sheet;
-  GtkEntry *sheet_entry;
-  char cell[100],*n;
-  char *text;
-  GtkSheetCellAttr attributes;
-  int regnumber;
-  
-  
-  if(rw)
-    sheet=rw->register_sheet;
 
-  if(widget==NULL || row>sheet->maxrow || row<0||
-     column>sheet->maxcol || column<0 || rw==NULL)
-  {
-      printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,column,(unsigned int)rw);
-      return 0;
-  }
-  
-  if(rw->row_to_address[row] < 0) {
-      printf("row_to_address[%d]=0x%x, row %x, col %x\n",row,rw->row_to_address[row]);
-    return 0;
-  }
-  
-  regnumber = rw->row_to_address[row]+column;
-
-    // this statement need gtksheet-next-version
-  //  RegWindow_select_symbol_regnumber(rw,rw->row_to_address[row]+column);
-
-
-//  RegWindow_select_register(rw,rw->row_to_address[row]+column);
-    // FIXME, use RegWindow_select_register instead
-  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
+    GtkSheet *sheet;
+    int regnumber;
     
-  cell[0] = 0;
-  if(((GUI_Object*)rw)->gp)
-  {
-      if(column < REGISTERS_PER_ROW) {
-	  if(((GUI_Object*)rw)->gp->pic_id != 0)
-	  {
-	      n = gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber);
-	      if(n==NULL)
-		  n="INVALID REGISTER";
-	  }
-	  else
-	      n = "00"; // FIXME
+    printf("Activate sheet cell %d,%d",row,column);
+    
+    if(rw)
+	sheet=rw->register_sheet;
 
-	  strncpy(cell,n,100);
-      }
-      else
-	  sprintf(cell,"  ascii  ");
-  }
-  else
-  {
-      puts("Warning not gp in activate_sheet_cell()?");
-      sprintf(cell," 0x%02x  ", regnumber);
-  }
+    if(widget==NULL || row>sheet->maxrow || row<0||
+       column>sheet->maxcol || column<0 || rw==NULL)
+    {
+	printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,column,(unsigned int)rw);
+	return 0;
+    }
 
+    regnumber = rw->row_to_address[row]+column;
 
-  gtk_label_set(GTK_LABEL(rw->location), cell);
+    if(!gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber))
+    {
+	// disable editing invalid cells
+	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
+    }
+    else
+    {
+	// enable editing valid cells
+	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 1);
+    }
+    
+    update_labelentry(rw);
 
-  gtk_entry_set_max_length(GTK_ENTRY(rw->entry),
-	GTK_ENTRY(sheet_entry)->text_max_length);
-
-  if((text=gtk_entry_get_text(GTK_ENTRY(gtk_sheet_get_entry(sheet)))))
-    gtk_entry_set_text(GTK_ENTRY(rw->entry), text);
-  else
-    gtk_entry_set_text(GTK_ENTRY(rw->entry), "");
-
-
-  gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
-			   sheet->active_cell.col, &attributes);
-
-  gtk_entry_set_editable(GTK_ENTRY(rw->entry), attributes.is_editable);
-
-
-  gtk_sheet_range_set_justification(sheet, sheet->range, GTK_JUSTIFY_RIGHT);
-
-  
   return TRUE;
 }
 /*
@@ -731,7 +755,9 @@ void RegWindow_select_register(Register_Window *rw, int regnumber)
        GTK_SHEET(rw->register_sheet)->view.rowi<range.rowi)
 	gtk_sheet_moveto(GTK_SHEET(rw->register_sheet),row,col,0.5,0.5);
 
-  sheet=rw->register_sheet;
+    update_labelentry(rw);
+    
+/*  sheet=rw->register_sheet;
   sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
     
   cell[0] = 0;
@@ -762,6 +788,7 @@ void RegWindow_select_register(Register_Window *rw, int regnumber)
 
 
   gtk_sheet_range_set_justification(sheet, sheet->range, GTK_JUSTIFY_RIGHT);
+*/
 }
 
 static void
@@ -805,6 +832,9 @@ static void update_ascii(Register_Window *rw, gint row)
       printf("Warning update_ascii(%x,%x)\n",(unsigned int)rw,row);
       return;
   }
+
+  if(!rw->registers_loaded)
+      return;
   
   if(row<0 || row>rw->register_sheet->maxrow)
       return;
@@ -812,10 +842,10 @@ static void update_ascii(Register_Window *rw, gint row)
   for(i=0; i<REGISTERS_PER_ROW; i++)
     {
 
-      name[i] = rw->registers[rw->row_to_address[row] + i]->value;
+	name[i] = rw->registers[rw->row_to_address[row] + i]->value;
 
-      if( (name[i] < ' ') || (name[i]>'z'))
-	name[i] = '.';
+	if( (name[i] < ' ') || (name[i]>'z'))
+	    name[i] = '.';
 
     }
 
@@ -828,11 +858,14 @@ static void update_ascii(Register_Window *rw, gint row)
 static gboolean update_register_cell(Register_Window *rw, unsigned int reg_number)
 {
   gchar name[16];
-  gint new_value;
+//  gint new_value;
   unsigned int pic_id;
   GtkSheetRange range;
   gboolean retval=FALSE;
   GUI_Processor *gp;
+  int new_value;
+  int last_value;
+  int valid_register=0;
   
   if(rw == NULL || reg_number<0 || reg_number>MAX_REGISTERS)
   {
@@ -851,14 +884,18 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
   range.rowi=rw->registers[reg_number]->row;
   range.col0=rw->registers[reg_number]->col;
   range.coli=rw->registers[reg_number]->col;
-  
 
+  new_value=gpsim_get_register_value(pic_id, rw->type,reg_number);
+  last_value=rw->registers[reg_number]->value;
+  if(gpsim_get_register_name(pic_id, rw->type,reg_number))
+      valid_register=1;
+  
   if(rw->registers[reg_number]->update_full)
   {
       rw->registers[reg_number]->update_full=FALSE;
-      if(gpsim_get_register_name(pic_id, rw->type,reg_number))
+      
+      if(valid_register)
       {
-	  new_value=gpsim_get_register_value(pic_id, rw->type,reg_number);
 	  if(new_value==INVALID_VALUE)
 	      sprintf (name, "??");
 	  else
@@ -867,7 +904,7 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       else
       {
 	  new_value=-1; // magic value
-	  sprintf(name, "----");
+	  sprintf(name, "");
       }
       if(rw->registers[reg_number]->row<=rw->register_sheet->maxrow)
       {
@@ -879,18 +916,22 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       // else the register is invalid and out of the register sheet
  
 
-      if(new_value != rw->registers[reg_number]->value)
+      if(new_value != last_value)
       {
 	  rw->registers[reg_number]->value = new_value;
 	  rw->registers[reg_number]->update_full=TRUE;
+	  printf("%x is now hilighted\n",reg_number);
 	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), range, &item_has_changed_color);
       }
       else
+      {
+	  printf("%x is now normal\n",reg_number);
 	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), range, &normal_fg_color);
+      }
 
       if(gpsim_reg_has_breakpoint(pic_id, rw->type, reg_number))
 	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &breakpoint_color);
-      else if(gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, reg_number)==NULL)
+      else if(!valid_register)
 	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &invalid_color);
       else if(gpsim_register_is_alias(((GUI_Object*)rw)->gp->pic_id, rw->type, reg_number))
 	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &alias_color);
@@ -898,15 +939,15 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       {
 	  if(gpsim_register_is_sfr(pic_id, rw->type, reg_number))
 	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &sfr_bg_color);
-          else
+	  else
 	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &normal_bg_color);
-	      
       }
-      
+
       retval=TRUE;
   }
-  else if((new_value=gpsim_get_register_value(pic_id, rw->type,reg_number)) != rw->registers[reg_number]->value)
+  else if(new_value!=last_value)
   {
+      printf("%x is now changed\n",reg_number);
       if(new_value==INVALID_VALUE)
       {
 	  rw->registers[reg_number]->value = -1;
@@ -929,7 +970,14 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       retval=TRUE;
   }
 
-  // FIXME, what about the entry above the sheet?
+  if(reg_number==(rw->row_to_address[rw->register_sheet->active_cell.row]+
+		  rw->register_sheet->active_cell.col))
+  {
+      // if sheet cursor is standing on a cell that is changed, then
+      // we update the entry above the sheet
+      if(new_value!=last_value)
+	  update_entry(rw);
+  }
 
   return retval;
 }
@@ -969,6 +1017,8 @@ void RegWindow_update(Register_Window *rw)
       return;
   }
 
+  puts("\n\n\n*************************update");
+  
 //  gtk_sheet_freeze(rw->register_sheet);
   
     for(j = 0; j<=GTK_SHEET(rw->register_sheet)->maxrow; j++)
@@ -980,13 +1030,14 @@ void RegWindow_update(Register_Window *rw)
 	{
 	    address = rw->row_to_address[j]+i;
 	    if(rw->registers[address]->value!=-1 || rw->registers[address]->update_full)
+	    {
 		if(update_register_cell(rw, rw->row_to_address[j]+i) == TRUE)
 		    row_changed = TRUE;
+	    }
 	}
 	if(row_changed)
 	   update_ascii(rw,j);
     }
-
 }
 
 
@@ -1347,7 +1398,7 @@ BuildRegisterWindow(Register_Window *rw)
 
 	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
 			   "set_cell",
-			   (GtkSignalFunc) parse_numbers,
+			   (GtkSignalFunc) set_cell,
 			   rw);
 	
 //  rw->gui_obj.window = window;
