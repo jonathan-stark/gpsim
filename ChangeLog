@@ -1,4 +1,7 @@
-2004-02-13  Scott Dattalo  <scott@dattalo.com>
+2004-02-17  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_scope.cc: taking off the rough edges.
+	
+2004-02-16  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: - new file that will support a simple waveform viewer.
 	* gui/Makefile.am: add the gui_scope.cc to the list
 	* gui/gui_regwin.cc: Check for null pointers
