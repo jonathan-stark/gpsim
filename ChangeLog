@@ -1,4 +1,11 @@
 2004-10-07 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc, gui/gui_breadboard.h, gui/gui_menu.cc:
+	Cleaned up the gui breadboard code a little by making the gui_module
+	structure a GuiModule class. In addition, new modules are queued 
+	into the breadboard and realized only after the breadboard has
+	been built.
+	
+2004-10-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_opcode.cc: window was being built before cpu had been
 	initialized.
 	* cli/cmd_disasm.cc, src/processor.cc, src/trace.cc: Disassembling
