@@ -2,11 +2,11 @@
 Installation instructions
 -------------------------
 
-You'll need at least gpsim-0.20.2 for this to work.
+You'll need at least gpsim-0.21.1 for this to work.
 
-un tar the lcd-0.1.0.tar.gz tarball and then:
+un tar the lcd-0.2.0.tar.gz tarball and then:
 
-$ cd lcd-0.1.0
+$ cd lcd-0.2.0
 $ ./configure
 $ make
 $ su
@@ -14,10 +14,10 @@ $ su
 # exit
 
 At this point, the LCD module has been compiled and installed
-as shared library that can be loaded by gpsim. If you want to
+as a shared library that can be loaded by gpsim. If you want to
 see if it works, then run the example:
 
-$ cd lcd-0.1.0/examples
+$ cd lcd-0.2.0/examples
 $ gpasm lcd_mod.asm
 $ gpsim -c lcd_mod.stc
 
@@ -36,17 +36,14 @@ by partially hiding the LCD window and then re-exposing it.
 CVS
 ---
 
-If you're getting the code from CVS, you'll need to perform a few
-extra steps:
+If you're getting the code from CVS, you'll need to generate files
+that are unique to your system. This is done with the script:
 
-$ aclocal
-$ autoheader
-$ automake --add-missing
-$ autoconf
+$ ./autogen.sh
+
 
 After that, you should be able to 
 
-$ ./configure
 $ make
 
 etc.
