@@ -1067,7 +1067,11 @@ unsigned int PORTA_62x::get(void)
 
   }
 
-  //int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value; // The difference between old and new
+  
+  if( ssp && (diff & SS))
+    ssp->new_ss_edge(value & SS);
+  
   // cout << " PORTA_62X::get port value is " << value << " \n";
 
   return value;
@@ -1099,6 +1103,10 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
 	}
     }
 
+  if( ssp && (diff & SS) ) {
+	ssp->new_ss_edge(new_value & SS);
+  }
+  
 }
 
 //-------------------------------------------------------------------
@@ -1106,6 +1114,8 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
 PORTA_62x::PORTA_62x(void)
 {
   new_name("porta");
+  comparator = 0;
+  ssp = 0;
 }
 
 //-------------------------------------------------------------------
@@ -1116,6 +1126,26 @@ PORTA_62x::PORTA_62x(void)
 PORTA::PORTA(void)
 {
   new_name("porta");
+  ssp = 0;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+unsigned int PORTA::get(void)
+{
+  unsigned int old_value;
+
+  old_value = value;
+
+  // cout << "PORTC::get()\n";
+  IOPORT::get();
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  if( ssp && (diff & SS))
+    ssp->new_ss_edge(value & SS);
+
+  return(value);
 }
 
 //-------------------------------------------------------------------
@@ -1144,6 +1174,10 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
 	}
     }
 
+  if( ssp && (diff & SS) ) {
+	ssp->new_ss_edge(new_value & SS);
+  }
+  
 }
 
 //-------------------------------------------------------------------
@@ -1156,6 +1190,7 @@ PORTC::PORTC(void)
 {
   new_name("portc");
   usart = 0;
+  ssp = 0;
 }
 
 //-------------------------------------------------------------------
@@ -1180,6 +1215,9 @@ unsigned int PORTC::get(void)
   if( usart && (diff & RX))
     usart->new_rx_edge(value & RX);
 
+  if( ssp && (diff & SCK))
+    ssp->new_sck_edge(value & SCK);
+
   return(value);
 }
 
@@ -1202,6 +1240,9 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   if( usart && (diff & RX))
     usart->new_rx_edge(value & RX);
+
+  if( ssp && (diff & SCK))
+    ssp->new_sck_edge(value & SCK);
 
 }
 

@@ -59,7 +59,6 @@ Boston, MA 02111-1307, USA.  */
 #include "lcd.h"
 #include <gpsim/gpsim_time.h>
 pic_processor *gpsim_get_active_cpu(void);
-void gpsim_clear_break(gpointer b);
 
 
 
@@ -506,7 +505,7 @@ LcdDisplay::~LcdDisplay()
 
   //gpsim_unregister_interface(interface_id);
   delete data_port;
-  gpsim_clear_break(control_port); // Hmmmm. FIXME.
+  cycles.clear_break(control_port); // Hmmmm. FIXME.
   delete control_port;
   delete interface;
 

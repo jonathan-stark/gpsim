@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 class IOPORT_TRIS;
 class IOPORT_LATCH;
 class USART_MODULE;
+class SSP_MODULE;
 class IOPIN;
 class stimulus;
 class Stimulus_Node;
@@ -175,7 +176,16 @@ public:
 
   PORTA(void);
 
+  enum {
+	// there should probably be other things listed here, but I don't
+	// really know what and I figure better no data than wrong data.
+	SS = 1 << 5,
+  };
+
   void setbit(unsigned int bit_number, bool new_value);
+  unsigned int get(void);
+
+  SSP_MODULE *ssp;
 
 };
 
@@ -204,10 +214,12 @@ class PORTA_62x : public PIC_IOPORT
       CMP2 = 1 << 4,
       TOCKI = 1 << 4,
       THV = 1 << 5,
+      SS = 1 << 5,
 
     };
 
   COMPARATOR_MODULE *comparator;
+  SSP_MODULE *ssp;
 
   PORTA_62x(void);
 
@@ -258,6 +270,7 @@ enum
 
   CCPCON *ccp1con;
   USART_MODULE *usart;
+  SSP_MODULE *ssp;
 
   PORTC(void);
   unsigned int get(void);

@@ -1,3 +1,35 @@
+2004-04-07 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.h, src/breakpoints: Adding assertion type breakpoints
+	and redesigning the whole Breakpoint class.
+	
+2004-04-07  Bert Driehuis <driehuis@playbeing.org>
+	* extras/lcd/lcd.cc:  reference was made to a no-longer existing API
+	* extras/lcd/module_manager.cc: contained comments
+	which were out of date, that hampered readability.
+	* src/modules.cc: will not load two shared extension modules, if the
+	first does not have an "initialize" routine. As a side effect of
+	debugging this one, the error reporting of the dynaloader has been
+	expanded. The trick turned out to be to clear pre-existing error
+	conditions with a dummy call to dlerror(). An alternative
+	implementation would call dlerror in an else clause when loading
+	"initialize" fails, but doing it like this patch does it has the
+	advantage of also dealing with like errors in libraries gpsim might
+	use. For a similar situation, look up "not a typewriter" and "perror"
+	in Google.
+	- did not immediately fail when incomplete linking
+	conditions exist. By changing to RTLD_NOW, a bad dynamic module will
+	be detected at load time rather than at run time. *** this will break
+	broken modules out there that until now appeared to have worked ***
+                                                                                
+
+2004-04-04  Arthur Peters <amp@singingwizard.org>
+	* src/Makefile.am, src/ssp.cc, src/ssp.h:
+	Added SSP support to gpsim.
+	* src/14bit-processors.h, src/ioports.cc, src/ioports.h,
+	src/p16f87x.cc, src/p16x6x.cc, src/p16x6x.h, src/p16x7x.cc,
+	src/p16x8x.cc, src/pir.cc, src/14bit-processors.h, src/pir.h:
+	Added SSP support to gpsim.
+	
 2004-04-04  Borut Razem  <borut.razem@siol.net>
 	* modules/encoder.cc, modules/gpsim_modules.cc, modules/paraface.cc,
 	modules/push_button.cc, modules/switch.cc, modules/video.cc:

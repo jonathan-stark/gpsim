@@ -40,6 +40,12 @@ void PIR::put(unsigned int new_value)
 }
 
 
+void PIR1v1::clear_sspif(void)
+{
+  value &= ~SSPIF;
+  trace.register_write(address,value);
+}
+
 void PIR1v1::clear_txif(void)
 {
   value &= ~TXIF;
@@ -55,6 +61,12 @@ void PIR1v1::clear_rcif(void)
 
 
 
+
+void PIR1v2::clear_sspif(void)
+{
+  value &= ~SSPIF;
+  trace.register_write(address,value);
+}
 
 void PIR1v2::clear_txif(void)
 {

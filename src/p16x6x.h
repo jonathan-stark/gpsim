@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-tmrs.h"
 #include "intcon.h"
 #include "pir.h"
-// #include "ssp.h"
+#include "ssp.h"
 
 class P16C61 : public P16C8x
 {
@@ -84,6 +84,16 @@ public:
   INTCON_14_PIR intcon_reg;
   PIR_SET_1 pir_set_def;
 
+  // Only used in some models. It is initialized based on the value of
+  // init_ssp. Only the sfrs are added, the derived class must still
+  // call initialize_14 on the SSP_MODULE.
+  // This doesn't seem like a good way to do it, but some proccessor
+  // classes that shouldn't have an SSP are derived from classes that
+  // should.
+  SSP_MODULE14   ssp;
+  bool init_ssp;
+
+
   virtual unsigned int program_memory_size(void) const { return 0x800; };
 
   virtual void create_sfr_map(void);
@@ -135,7 +145,7 @@ class P16C63 : public  P16C62
   public:
 
   USART_MODULE14 usart;
-  //SSP_MODULE14   ssp;
+  SSP_MODULE14   ssp;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C63_;};
   virtual void create_symbols(void);
@@ -185,7 +195,6 @@ class P16C65 : public  P16C64
   public:
 
   USART_MODULE14 usart;
-  //SSP_MODULE14   ssp;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C65_;};
   virtual void create_symbols(void);

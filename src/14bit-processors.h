@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-processor.h"
 #include "intcon.h"
 #include "uart.h"
+#include "ssp.h"
 
 #ifndef __14_BIT_PROCESSORS_H__
 #define __14_BIT_PROCESSORS_H__

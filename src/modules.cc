@@ -338,12 +338,14 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
 
   _handle = library_handle;
 
+  dlerror();	// Clear possible previous errors
   get_mod_list = (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
 
   if ((error = dlerror()) != 0)  {
     cout << "WARNING: non-conforming module library\n"
-	 << "  gpsim libraries should have the mod_list() function defined\n";
+	 << "  gpsim libraries should have the get_mod_list() function defined\n";
     fputs(error, stderr);
+    fputs ("\n", stderr);
     module_list = 0;
   } else {
 
@@ -375,7 +377,7 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
       char *error = g_win32_error_message(GetLastError());
 
       cout << "WARNING: non-conforming module library\n"
-	   << "  gpsim libraries should have the mod_list() function defined\n";
+	   << "  gpsim libraries should have the get_mod_list() function defined\n";
       fprintf(stderr, "%s\n", error);
       g_free(error);
       module_list = NULL;
@@ -448,10 +450,10 @@ void module_load_library(const char *library_name)
   void *handle;
   char *error;
 
-  handle = dlopen (library_name, RTLD_LAZY);
+  handle = dlopen (library_name, RTLD_NOW);
   if (!handle) {
 
-    fputs (dlerror(), stderr);
+    fprintf(stderr, "%s in dlopen(%s)\n", dlerror(), library_name);
     return;
   }
 
