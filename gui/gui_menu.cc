@@ -56,6 +56,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_watch.h"
 
 #include "../cli/input.h"  // for gpsim_open()
+#include "../src/gpsim_interface.h"
 
 typedef struct _note_book_item
 {
@@ -66,7 +67,6 @@ typedef struct _note_book_item
 GtkItemFactory *item_factory=0;
 
 extern GUI_Processor *gp;
-extern guint64 gui_update_rate;
 
 static void 
 do_quit_app(GtkWidget *widget) 
@@ -375,8 +375,7 @@ toggle_window (gpointer             callback_data,
 static void 
 runbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->pma->run();
+  get_interface().start_simulation();
 }
 
 static void 

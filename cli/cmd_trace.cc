@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_trace.h"
 
-#include "../src/processor.h"
+//#include "../src/processor.h"
 #include "../src/trace.h"
 #include "../src/trace_orb.h"
 

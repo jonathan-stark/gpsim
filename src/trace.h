@@ -26,8 +26,9 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 
 #include "gpsim_classes.h"
-#include "breakpoints.h"
+#include "trigger.h"
 #include "value.h"
+#include "registers.h"
 
 extern "C"
 {

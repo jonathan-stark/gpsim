@@ -1,3 +1,30 @@
+2004-12-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, gui/gui_menu.cc: Use the interface instead of
+	the cpu pointer to initiate simulation.
+	* src/Makefile.am, src/trigger.cc, src/trigger.h,
+	src/breakpoints.cc, src/breakpoints.h: Split the
+	trigger classes away from the breakpoint classes.
+	* src/gpsim_interface.h, src/init.cc, src/interface.cc,
+	src/pic-processor.cc, src/protocol.cc, src/protocol.h,
+	src/trace.h, cli/cmd_run.cc, cli/cmd_set.cc, cli/cmd_trace.cc,
+	cli/input.cc, cli/socket.cc:
+	Attempted (but failed) to add a feature that would allow a socket
+	interface to send data to the simulator while a simulation is
+	running. It turns out that the giochannel stuff used to control
+	the socket runs in the gui event loop. The only time the socket is
+	handled is whenever the loop can run. However, since gpsim is a
+	single threaded application (the gui does spawn its own private
+	thread), the gui event loop only runs whenever the simulation
+	gives it cpu time. Thus it's not possible for a socket to update
+	the simulation except when the gui is being refreshed!
+	* examples/scripts/client.cc, examples/scripts/gensquares.asm,
+	examples/scripts/makefile, examples/scripts/client2.cc,
+	examples/scripts/client_interface.cc,
+	examples/scripts/client_interface.h:
+	Added a class to encapsulate the gpsim client socket
+	interface. Added another example to test socket updates while the
+	simulation is running.
+
 2004-12-16 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 	* src/14bit-registers.h: declare void

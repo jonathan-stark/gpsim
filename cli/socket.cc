@@ -34,6 +34,8 @@ Boston, MA 02111-1307, USA.  */
 //#include "../src/processor.h"
 #include "../src/symbol.h"
 #include "../src/protocol.h"
+#include "../src/gpsim_interface.h"
+#include "../src/breakpoints.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -87,6 +89,7 @@ private:
 
 
 class SocketLink;
+class Socket;
 
 // in input.cc -- parse_string sends a string through the command parser
 extern int parse_string(char * str);
@@ -151,6 +154,27 @@ bool winsockets_init(void)
 //------------------------------------------------------------------------
 bool ParseSocketLink(Packet *buffer, SocketLink **);
 
+
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+//
+
+class SocketInterface : public Interface
+{
+private:
+  Socket *sock;
+
+public:
+
+  virtual void SimulationHasStopped (gpointer object);
+  virtual void Update  (gpointer object);
+
+  virtual ~SocketInterface();
+
+  SocketInterface(Socket *);
+};
+
+
 //------------------------------------------------------------------------
 // Socket wrapper class
 // 
@@ -170,6 +194,9 @@ private:
   SOCKET socket;
 };
 
+//------------------------------------------------------------------------
+// Socket class
+
 class Socket
 {
 public:
@@ -187,6 +214,7 @@ public:
   void Accept();
   void Recv();
   void Send(char *);
+  void Service();
 
   void ParseObject();
 
@@ -580,7 +608,46 @@ void Socket::ParseObject()
   }
 
 }
+//------------------------------------------------------------------------
+//
+void Socket::Service()
+{
+  if(packet->brxHasData()) {
 
+    if (packet->DecodeHeader()) {
+      ParseObject();
+    } else {
+      if(parse_string(packet->rxBuff()) >= 0)
+	respond("+ACK");
+      else
+	respond("+BUSY");
+    }
+  }
+
+}
+
+//========================================================================
+// Socket Interface
+
+SocketInterface::SocketInterface(Socket *new_socket)
+  : sock(new_socket)
+{
+}
+void SocketInterface::SimulationHasStopped (gpointer object)
+{
+}
+void SocketInterface::Update  (gpointer object)
+{
+  if(sock)
+    sock->Service();
+  printf("socket update\n");
+}
+
+SocketInterface::~SocketInterface()
+{
+  if(sock)
+    sock->Service();
+}
 
 //========================================================================
 
@@ -702,9 +769,10 @@ static void debugPrintCondition(GIOCondition cond)
 }
 #endif
 
-gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
+//gboolean service_socket()
+static gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 {
-  //std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
+  std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
   //debugPrintCondition(condition);
 
   Socket *s = (Socket *)d;
@@ -736,14 +804,12 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
     stat = g_io_channel_read_chars(channel, 
 				   s->packet->rxBuff(), 
-				   BUFSIZE, 
+				   s->packet->rxSize(), 
 				   &b, 
 				   &err);
     bytes_read = b;
-
-    //debugPrintChannelStatus(stat);
-    //debugPrintCondition(g_io_channel_get_buffer_condition (channel));
-
+    s->packet->rxAdvance(bytes_read);
+ 
     if(err) {
       std::cout << "GError:" << err->message << endl;
     }
@@ -752,17 +818,13 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 #else
     g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
 #endif
-    //std::cout << "Read " << bytes_read << " bytes: " << s->packet->rxBuff() << endl;
 
     if(bytes_read) {
-      if (s->packet->DecodeHeader()) {
-	//s->packet->rxBuff()[bytes_read-1] = 0;
-	s->ParseObject();
-      } else {
-	//std::cout << " command line string from socket: " << s->packet->rxBuff() << endl;
-	parse_string(s->packet->rxBuff());
-	s->respond("ACK");
-      }
+      if(get_interface().bSimulating()) {
+	std::cout << "setting a socket break point because sim is running \n";
+	get_bp().set_socket_break();
+      } else
+	s->Service();
     } else
       return FALSE;
 
@@ -773,7 +835,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 }
 
 
-gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
+static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 {
   Socket *s = (Socket *)d;
 
@@ -841,9 +903,15 @@ void start_server(void)
 		   condition,
 		   server_accept,
 		   (void*)&s);
+
+    
+    gi.add_interface(new SocketInterface(&s));
+
   }
 
   std::cout << " started server\n";
+
+
 }
 
 

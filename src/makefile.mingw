@@ -75,6 +75,7 @@ src_OBJECTS =			\
 	symbol.o		\
 	tmr0.o			\
 	trace.o			\
+	trigger.o		\
 	uart.o			\
 	value.o			\
 	xref.o

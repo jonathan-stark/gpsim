@@ -119,6 +119,14 @@ void PacketBuffer::puts(const char *s, int len)
   }
 }
 
+void PacketBuffer::advanceIndex(unsigned int amount)
+{
+  if(index + amount <  size)
+    index += amount;
+  else
+    index = size-1;
+}
+
 void PacketBuffer::terminate()
 {
   if(index < size)

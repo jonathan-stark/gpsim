@@ -58,20 +58,9 @@ cmd_run::cmd_run(void)
 void cmd_run::run(void)
 {
 
-  if(!cpu)
-    {
-      cout << "no cpu has been selected\n";
-      return;
-    }
+  get_interface().start_simulation();
 
-
-  bool bRefresh = (verbosity && verbosity->getVal()) ? true : false;
-  if(bRefresh) {
-    cout << "running...\n";
-
-    cpu->run(true);
+  if(verbosity && verbosity->getVal())
     redisplay_prompt();
-  } else
-    cpu->run(false);
 
 }

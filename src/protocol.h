@@ -89,7 +89,7 @@ public:
 
   unsigned int getSize()
   {
-    return size;
+    return size-index;
   }
 
   void terminate();
@@ -106,6 +106,12 @@ public:
   }
 
   void puts(const char *, int);
+
+  /// advanceIndex() will move the index pointer forward
+
+  void advanceIndex(unsigned int amount);
+
+  bool bHasData() { return index!=0; }
 
   //private:
   char          *buffer;
@@ -141,11 +147,20 @@ public:
   }
   unsigned int rxSize()
   {
-    return rxBuffer->size;
+    return rxBuffer->getSize();
   }
   void rxTerminate(int pos)
   {
     rxBuffer->putAt(pos,0);
+  }
+
+  void rxAdvance(unsigned int amount)
+  {
+    rxBuffer->advanceIndex(amount);
+  }
+  bool brxHasData()
+  { 
+    return rxBuffer->bHasData(); 
   }
 
   char *txBuff()
