@@ -73,9 +73,6 @@
 /* Define if you have the <readline/tilde.h> header file.  */
 #undef HAVE_READLINE_TILDE_H
 
-/* Define if you have the eXdbm library (-leXdbm).  */
-#undef HAVE_LIBEXDBM
-
 /* Name of package */
 #undef PACKAGE
 
