@@ -42,14 +42,14 @@ class Processor;
 // The MemoryAccess class is a base class designed to support
 // access to memory. For the PIC, this class is extended by
 // the ProgramMemoryAccess and RegisterMemoryAccess classes.
-class MemoryAccess
+class MemoryAccess :  public BreakpointObject
 {
 public:
 
   MemoryAccess(Processor *new_cpu);
 
-  Processor *get_cpu(void);
-  void set_cpu(Processor *p);
+  virtual Processor *get_cpu(void);
+  virtual void set_cpu(Processor *p);
 
   list<Register *> SpecialRegisters;
 
@@ -67,7 +67,7 @@ protected:
 // cleared. The modification goes through here.
 //
 
-class ProgramMemoryAccess :  public BreakpointObject ,  public MemoryAccess
+class ProgramMemoryAccess :  public MemoryAccess
 {
  public:
   // Symbolic debugging
