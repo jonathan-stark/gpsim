@@ -23,14 +23,15 @@
 
 static GtkWidget *dialog_window = NULL;
 
-void enter_callback(GtkWidget *widget, GtkWidget *entry)
+static void enter_callback(GtkWidget *entry, char *label)
 {
   gchar *entry_text;
   entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
-  //printf("Entry contents: %s\n", entry_text);
+  printf("label %s, entry contents: %s\n", label, entry_text);
+
+  
+  
 }
-
-
 
 void create_labeled_boxes(GtkWidget *box, char **labels, int num_labels)
 {

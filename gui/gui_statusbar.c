@@ -21,7 +21,101 @@
 
 #include "gui.h"
 
-void enter_callback(GtkWidget *widget, GtkWidget *entry);
+void StatusBar_update(StatusBar_Window *sbw)
+{
+  char buffer[20];
+  unsigned int pic_id;
+
+  pic_id = sbw->gp->pic_id;
+
+  if( !sbw->created)
+      return;
+  
+  //update the displayed values
+
+  sbw->status->value.i32 = gpsim_get_status(pic_id);
+  sprintf(buffer,"0x%02x",sbw->status->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (sbw->status->entry), buffer);
+
+
+  sbw->W->value.i32 = gpsim_get_w(pic_id);
+  sprintf(buffer,"0x%02x",sbw->W->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (sbw->W->entry), buffer);
+
+  sbw->pc->value.i32 = gpsim_get_pc_value(pic_id);
+  sprintf(buffer,"0x%04x",sbw->pc->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (sbw->pc->entry), buffer);
+
+  sbw->cycles->value.ui64 = gpsim_get_cycles(pic_id);
+  sprintf(buffer,"0x%016Lx",sbw->cycles->value.ui64);
+  gtk_entry_set_text (GTK_ENTRY (sbw->cycles->entry), buffer);
+
+}
+
+static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
+{
+    char *text;
+    unsigned int value;
+    unsigned int pic_id;
+    char *bad_position;
+
+    pic_id = sbw->gp->pic_id;
+    text=gtk_entry_get_text (GTK_ENTRY (sbw->W->entry));
+    
+    value = strtoul(text, &bad_position, 16);
+    if( strlen(bad_position) )
+	return;  /* string contains an invalid number */
+
+    gpsim_put_w(pic_id, value);
+
+    StatusBar_update(sbw);
+
+    return;
+}
+
+static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
+{
+    char *text;
+    unsigned int value;
+    unsigned int pic_id;
+    char *bad_position;
+
+    pic_id = sbw->gp->pic_id;
+    text=gtk_entry_get_text (GTK_ENTRY (sbw->status->entry));
+    
+    value = strtoul(text, &bad_position, 16);
+    if( strlen(bad_position) )
+	return;  /* string contains an invalid number */
+    
+    gpsim_put_status(pic_id, value);
+    
+    StatusBar_update(sbw);
+
+    return;
+}
+
+static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
+{
+    char *text;
+    unsigned int value;
+    unsigned int pic_id;
+    char *bad_position;
+
+    pic_id = sbw->gp->pic_id;
+    text=gtk_entry_get_text (GTK_ENTRY (sbw->pc->entry));
+    
+    value = strtoul(text, &bad_position, 16);
+    if( strlen(bad_position) )
+	return;  /* string contains an invalid number */
+
+    gpsim_put_pc_value(pic_id, value);
+    
+    StatusBar_update(sbw);
+
+    return;
+}
+
+
 
 /*
  * create_labeled_entry
@@ -43,9 +137,9 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
   gtk_widget_show (le->label);
 
   le->entry = gtk_entry_new ();
-  gtk_signal_connect(GTK_OBJECT(le->entry), "activate",
-		     GTK_SIGNAL_FUNC(enter_callback),
-		     le->entry);
+//  gtk_signal_connect(GTK_OBJECT(le->entry), "activate",
+//		     GTK_SIGNAL_FUNC(enter_callback),
+//		     label);
   gtk_entry_set_text (GTK_ENTRY (le->entry), "----");
 
   le->value.i32 = 0;
@@ -79,52 +173,30 @@ void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw)
   gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
-  sbw->status = create_labeled_entry(hbox,"Status: ", 4);
+  sbw->status = create_labeled_entry(hbox,"Status:", 4);
   sbw->status->parent = sbw;
+  gtk_signal_connect(GTK_OBJECT(sbw->status->entry), "activate",
+		     GTK_SIGNAL_FUNC(status_callback),
+		     sbw);
 
-  sbw->W = create_labeled_entry(hbox,"  W: ", 4);
+  sbw->W = create_labeled_entry(hbox,"W:", 4);
   sbw->W->parent = sbw;
+  gtk_signal_connect(GTK_OBJECT(sbw->W->entry), "activate",
+		     GTK_SIGNAL_FUNC(w_callback),
+		     sbw);
 
-  sbw->pc = create_labeled_entry(hbox,"  PC: ", 6);
+  sbw->pc = create_labeled_entry(hbox,"PC:", 6);
   sbw->pc->parent = sbw;
+  gtk_signal_connect(GTK_OBJECT(sbw->pc->entry), "activate",
+		     GTK_SIGNAL_FUNC(pc_callback),
+		     sbw);
 
-  sbw->cycles = create_labeled_entry(hbox,"  Cycles: ", 18);
+  sbw->cycles = create_labeled_entry(hbox,"Cycles:", 18);
   sbw->cycles->parent = sbw;
+  gtk_entry_set_editable(GTK_ENTRY(sbw->cycles->entry),0);
 
   sbw->created=1;
   
-}
-
-
-void StatusBar_update(StatusBar_Window *sbw)
-{
-  char buffer[20];
-  unsigned int pic_id;
-
-  pic_id = sbw->gp->pic_id;
-
-  if( !sbw->created)
-      return;
-  
-  //update the displayed values
-
-  sbw->status->value.i32 = gpsim_get_status(pic_id);
-  sprintf(buffer,"0x%02x",sbw->status->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->status->entry), buffer);
-
-
-  sbw->W->value.i32 = gpsim_get_w(pic_id);
-  sprintf(buffer,"0x%02x",sbw->W->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->W->entry), buffer);
-
-  sbw->pc->value.i32 = gpsim_get_pc_value(pic_id);
-  sprintf(buffer,"0x%04x",sbw->pc->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->pc->entry), buffer);
-
-  sbw->cycles->value.ui64 = gpsim_get_cycles(pic_id);
-  sprintf(buffer,"0x%016Lx",sbw->cycles->value.ui64);
-  gtk_entry_set_text (GTK_ENTRY (sbw->cycles->entry), buffer);
-
 }
 
 void StatusBar_update_xref(struct cross_reference_to_gui *xref, int new_value)
