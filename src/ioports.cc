@@ -335,6 +335,7 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
+      //if(verbose)
       //cout << " IOPORT::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
       value ^= bit_mask;
 

@@ -585,24 +585,24 @@ void asynchronous_stimulus::callback(void)
       //cout << "  stimulus rolled over\n";
       //cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
-  //  else
 
-      // get the cycle at which it will change
-      
-      //future_cycle = *(transition_cycles + current_index) + start_cycle;
-      future_cycle = ((StimulusDataType *)(current_sample->data))->time + start_cycle;
+  // get the cycle at which it will change
+
+  future_cycle = ((StimulusDataType *)(current_sample->data))->time + start_cycle;
       
 
 
   if(future_cycle <= current_cycle)
     {
+
       // There's an error in the data. Set a break on the next simulation cycle
       // and see if it can be resolved.
+
       future_cycle = current_cycle+1;
     }
   else
     next_state = ((StimulusDataType *)(current_sample->data))->value;
-  // next_state = *(values + current_index);
+
 
   cpu->cycles.set_break(future_cycle, this);
 
@@ -649,10 +649,10 @@ void asynchronous_stimulus::start(void)
       if(digital)
 	initial_state = initial_state ? (MAX_DRIVE / 2) : -(MAX_DRIVE / 2);
 
+
       current_state = initial_state;
 
-      start_cycle = cpu->cycles.value + phase;
-      //future_cycle = *(transition_cycles + current_index) + start_cycle;
+      next_state = ((StimulusDataType *)(samples->data))->value;
       future_cycle = ((StimulusDataType *)(samples->data))->time + start_cycle;
 
       //if( (period!=0) && (period<transition_cycles[max_states-1]))
@@ -663,7 +663,7 @@ void asynchronous_stimulus::start(void)
 
       if(verbose) {
 
-	cout << "Asynchronous stimulus\n";
+	cout << "Asynchronous " << ((digital)?"digital":"analog") << " stimulus\n";
 	cout << "  states = " << max_states << '\n';
 
 	current_sample = samples;
@@ -678,27 +678,11 @@ void asynchronous_stimulus::start(void)
 
 	cout << "first break will be at cycle " <<future_cycle << '\n';
       }
-      /*
-      for(int i=0; i<max_states; i++)
-	{
-	  if(digital)
-	    {
-	      if(values[i])
-		values[i] = MAX_DRIVE/2;
-	      else
-		values[i] = -MAX_DRIVE/2;
-	    }
-	  if(verbose&2)
-	    cout << "    " << transition_cycles[i] <<  '\t' << values[i] << '\n';
-	}
-      */
+
       cout << "period = " << period << '\n'
 	   << "phase = " << phase << '\n'
 	   << "start_cycle = " << start_cycle << '\n'
 	   << "Next break cycle = " << future_cycle << '\n';
-
-      //next_state = *values;
-      next_state = ((StimulusDataType *)(samples->data))->value;
 
       current_sample = samples;
     }
@@ -744,6 +728,7 @@ void asynchronous_stimulus::put_data(guint64 data_point)
 
   } else {
 
+
     // put time
     current_sample = g_slist_append(current_sample, (void *)(new StimulusDataType) );
     max_states++;
@@ -778,8 +763,7 @@ void asynchronous_stimulus::put_data(float data_point)
 asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
 {
   cpu = NULL;
-  //transition_cycles = NULL;
-  //values = NULL;
+
   snode = NULL;
   next = NULL;
 
@@ -789,6 +773,7 @@ asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
   initial_state  = 0;
   start_cycle    = 0;
 
+  digital = 1;
   current_sample = NULL;
   data_flag = 0;
   samples = NULL;
@@ -801,8 +786,6 @@ asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
       name_str[1] = num_stimuli++;
     }
 
-
-  //  drive = MAX_DRIVE / 2;
   add_stimulus(this);
 
 }
@@ -1012,7 +995,7 @@ void IO_input::put_state( int new_digital_state)
 
 void IO_input::put_node_state( int new_state)
 {
-  //cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
+  cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
 
 
   // No need to proceed if we already in the new_state.
@@ -1307,7 +1290,6 @@ void stimorb_attach(char *node, char_list *stimuli)
 
   if(sn)
     {
-      int i=2;
 	
       stimulus *st;
       while(stimuli)
@@ -1321,6 +1303,8 @@ void stimorb_attach(char *node, char_list *stimuli)
 	  }
 	  stimuli = stimuli->next;
 	}
+
+      sn->update(0);
     }
   else {
     cout << "Warning: Node \"" << node << "\" was not found in the node list\n";
