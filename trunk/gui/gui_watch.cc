@@ -438,11 +438,11 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
     
     if(entry->type==REGISTER_RAM)
     {
-	RegWindow_select_register(gp->regwin_ram, entry->address);
+	gp->regwin_ram->SelectRegister(entry->address);
     }
     else if(entry->type==REGISTER_EEPROM)
     {
-	RegWindow_select_register(gp->regwin_eeprom, entry->address);
+	gp->regwin_eeprom->SelectRegister(entry->address);
     }
 
     update_menus(ww);
@@ -786,10 +786,10 @@ int CreateWatchWindow(GUI_Processor *gp)
   watch_window->current_row=0;
 
   
-  gp_add_window_to_list(gp, (GUI_Object *)watch_window);
+  gp->add_window_to_list((GUI_Object *)watch_window);
 
-  
-  gui_object_get_config((GUI_Object*)watch_window);
+  watch_window->gui_obj.get_config();
+
   for(i=0;i<COLUMNS;i++)
   {
       char str[128];

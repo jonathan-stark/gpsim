@@ -43,28 +43,13 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_callbacks.h"
-
+/*
 
 void gp_add_window_to_list(GUI_Processor *gp, GUI_Object *go)
 {
 
   if(!gp) return;
 
-/*  gui_config_load_winattr(go->name,&winattr);
-  
-    go->x=winattr.x;
-    go->y=winattr.y;
-    go->width=winattr.width;
-    go->height=winattr.height;
-    go->visible=winattr.visible;
-*/
-  // add resize and move callbacks
-/*  if(!go->visible)
-  {
-      puts("HASODJDASFHGJHFDSJ");
-      go->change_view(go,VIEW_HIDE);
-  }*/
-  
   switch(go->wc)
     {
     case WC_misc:
@@ -85,7 +70,8 @@ void gp_add_window_to_list(GUI_Processor *gp, GUI_Object *go)
 
 
 }
-  
+  */
+
 GUI_Processor *new_GUI_Processor(void)
 {
 
@@ -100,4 +86,59 @@ GUI_Processor *new_GUI_Processor(void)
 
   return gp;
 }
+
+GUI_Processor::GUI_Processor(void)
+{
+
+  source_windows = g_list_alloc();
+  data_windows = g_list_alloc();
+  misc_windows = g_list_alloc();
+
+  regwin_ram = NULL;
+  regwin_eeprom = NULL;
+  status_bar = NULL;
+  program_memory = NULL;
+  source_browser = NULL;
+  symbol_window = NULL;
+  watch_window = NULL;
+  stack_window = NULL;
+  breadboard_window = NULL;
+  trace_window = NULL;
+  profile_window = NULL;
+  stopwatch_window = NULL;
+
+  pic_id = 0;
+
+}
+
+
+
+void GUI_Processor::add_window_to_list(GUI_Object *go)
+{
+
+
+  switch(go->wc)
+    {
+    case WC_misc:
+      if(misc_windows)
+	misc_windows = g_list_append(misc_windows, (gpointer)go);
+      break;
+
+    case WC_source:
+      if(source_windows)
+	source_windows = g_list_append(source_windows, (gpointer)go);
+      break;
+
+    case WC_data:
+      if(data_windows)
+	data_windows = g_list_append(data_windows, (gpointer)go);
+      break;
+
+    default:
+      g_warning("bad window type in gp_add_window_to_list");
+    }
+
+
+}
+
 #endif // HAVE_GUI

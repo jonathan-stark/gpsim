@@ -1533,12 +1533,13 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     sbow->processor=0;
     sbow->program=0;
 
-    gp_add_window_to_list(gp, (GUI_Object *)sbow);
+    gp->add_window_to_list((GUI_Object *)sbow);
 
     sbow->ascii_mode=1; /// default, two bytes/cell, MSB first
     config_get_variable(sbow->sbw.gui_obj.name,"ascii_mode",&sbow->ascii_mode);
 
-    gui_object_get_config((GUI_Object*)sbow);
+    //gui_object_get_config((GUI_Object*)sbow);
+    sbow->sbw.gui_obj.get_config();
 
     if(sbow->sbw.gui_obj.enabled)
 	BuildSourceBrowserOpcodeWindow(sbow);

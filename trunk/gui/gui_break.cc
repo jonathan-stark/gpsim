@@ -57,8 +57,8 @@ void gui_simulation_has_stopped(gpointer callback_data)
   if(callback_data)
     {
       GUI_Processor *gp = (GUI_Processor *) callback_data;
-      RegWindow_update(gp->regwin_ram);
-      RegWindow_update(gp->regwin_eeprom);
+      gp->regwin_ram->Update();
+      gp->regwin_eeprom->Update();
       StatusBar_update(gp->status_bar);
       SourceBrowser_update(gp->program_memory);
       SourceBrowser_update(gp->source_browser);

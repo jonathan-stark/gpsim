@@ -303,7 +303,7 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
     gdk_window_get_root_origin(widget->window,&go->x,&go->y);
     gdk_window_get_size(widget->window,&go->width,&go->height);
     
-    gui_object_set_config(go);
+    go->set_config();
 /*
     winattr.x=go->x;
     winattr.y=go->y;
@@ -315,12 +315,15 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
     return 0; // what should be returned?, FIXME
 }
 
-void update_menu_item(struct _gui_object *_this)
+void update_menu_item(struct GUI_Object *_this)
 {
     GtkWidget *menu_item;
     switch(_this->wt)
     {
     case WT_register_window:
+      _this->UpdateMenuItem();
+
+/*
 	if(((Register_Window*)_this)->type==REGISTER_RAM)
 	{
 	    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Ram");
@@ -332,6 +335,8 @@ void update_menu_item(struct _gui_object *_this)
 	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	}
 	break;
+*/
+      break;
     case WT_symbol_window:
 	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Symbols");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
@@ -374,7 +379,7 @@ void update_menu_item(struct _gui_object *_this)
     }
 }
 
-void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
+void SourceBrowser_change_view (GUI_Object *_this, int view_state)
 {
     
     if( (view_state==VIEW_SHOW) || (_this->window==NULL) ||
@@ -384,14 +389,14 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
     {
       if(!_this->is_built)
       {
-	if(!gui_object_get_config(_this)) {
+	if(!_this->get_config()) {
 	  printf("warning %s\n",__FUNCTION__);
-	  gui_object_set_default_config(_this);
+	  _this->set_default_config();
 	}
 	  switch(_this->wt)
 	  {
 	  case WT_register_window:
-	      BuildRegisterWindow((Register_Window*)_this);
+	      _this->Build();
 	      break;
 	  case WT_symbol_window:
 	      BuildSymbolWindow((Symbol_Window*)_this);
@@ -440,7 +445,7 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
   }
 
     // we update config database
-    gui_object_set_config(_this);
+    _this->set_config();
 
     // Update menu item
     update_menu_item(_this);

@@ -380,10 +380,10 @@ int CreateStackWindow(GUI_Processor *gp)
     stack_window->has_processor=1;
 
 
-    gp_add_window_to_list(gp, (GUI_Object *)stack_window);
+    gp->add_window_to_list((GUI_Object *)stack_window);
 
 
-    gui_object_get_config((GUI_Object*)stack_window);
+    stack_window->gui_obj.get_config();
     
     if(stack_window->gui_obj.enabled)
 	BuildStackWindow(stack_window);
