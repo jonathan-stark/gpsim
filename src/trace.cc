@@ -395,6 +395,7 @@ void PCTraceObject::print(FILE *fp)
   }
   */
   fprintf(fp,"0x%04X 0x%04X %s\n",
+	  //cpu->map_pm_index2address(address &0xffff),
 	  address &0xffff,
 	  cpu->pma->get_opcode(addr),
 	  (*cpu->pma)[addr].name(a_string,sizeof(a_string)));

@@ -455,8 +455,8 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 	{
 	    break_row =  GTK_CLIST (sbow->clist)->focus_row;
 
-
-	    sbow->gp->cpu->pma->toggle_break_at_address(break_row);
+	    unsigned address = sbow->gp->cpu->map_pm_index2address(break_row);
+	    sbow->gp->cpu->pma->toggle_break_at_address(address);
 	    return TRUE;
 	}
     }
@@ -494,9 +494,16 @@ static void filter(char *clean, char *dirty, int max)
 static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 {
     GtkSheetRange range;
-    int row=address/16;
-    int column=address%16;
-    
+
+    int index = address;
+
+    if(sbow->gp->cpu)
+      index = sbow->gp->cpu->map_pm_address2index(address);
+
+    int row=index/16;
+    int column=index%16;
+
+
     range.row0=row;
     range.rowi=row;
     range.col0=column;
@@ -509,12 +516,12 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 
     if(sbow->gp->cpu && sbow->gp->cpu->pma->address_has_break(address)) {
 
-      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->breakpoint_line_number_style);
+      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->breakpoint_line_number_style);
       gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
 
     } else {
 
-      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->normal_style);
+      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->normal_style);
 
       if(sbow->gp->cpu->pma->isModified(address))
 	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
@@ -567,7 +574,7 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
   char buf[128];
   unsigned int oc;
 
-    oc = sbow->gp->cpu->pma->get_opcode(address);
+  oc = sbow->gp->cpu->pma->get_opcode(address);
 
   if(oc != sbow->memory[address]) {
     
@@ -1091,11 +1098,14 @@ void SourceBrowserOpcode_Window::SelectAddress(int address)
 {
   if(!enabled)
     return;
-  
+  unsigned int row = address;
+  if(gp->cpu)
+    row = gp->cpu->map_pm_address2index(address);
+
   gtk_clist_unselect_all(GTK_CLIST(clist));
-  gtk_clist_select_row(GTK_CLIST(clist),address,0);
-  if(GTK_VISIBILITY_FULL != gtk_clist_row_is_visible (GTK_CLIST (clist),address))
-    gtk_clist_moveto (GTK_CLIST (clist), address, 0, .5, 0.0);
+  gtk_clist_select_row(GTK_CLIST(clist),row,0);
+  if(GTK_VISIBILITY_FULL != gtk_clist_row_is_visible (GTK_CLIST (clist),row))
+    gtk_clist_moveto (GTK_CLIST (clist), row, 0, .5, 0.0);
 
 }
 
@@ -1123,16 +1133,23 @@ void SourceBrowserOpcode_Window::SetPC(int address)
   if(address != last_address)
     {
       UpdateLine(last_address);
-      gtk_clist_set_row_style (GTK_CLIST (clist), last_address, normal_style);
+      gtk_clist_set_row_style (GTK_CLIST (clist),
+			       gp->cpu->map_pm_address2index(last_address),
+			       normal_style);
 
       UpdateLine(address);
-      gtk_clist_set_row_style (GTK_CLIST (clist), address, current_line_number_style);
+      gtk_clist_set_row_style (GTK_CLIST (clist), 
+			       gp->cpu->map_pm_address2index(address),
+			       current_line_number_style);
     }
-    
+
+  unsigned int current_row = gp->cpu->map_pm_address2index(current_address);
   if(GTK_VISIBILITY_FULL != gtk_clist_row_is_visible (GTK_CLIST (clist),
-						      current_address))
+						      current_row))
     {
-      gtk_clist_moveto (GTK_CLIST (clist), current_address, 0, .5, 0.0);
+      gtk_clist_moveto (GTK_CLIST (clist), 
+			current_row, 
+			0, .5, 0.0);
     }
 }
 
@@ -1188,7 +1205,8 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     {
       opcode = gp->cpu->pma->get_opcode(i);
       memory[i]=opcode;
-      sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
+      int address = gp->cpu->map_pm_index2address(i);
+      sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
       sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
       filter(row_text[MNEMONIC_COLUMN],
 	     gp->cpu->pma->get_opcode_name(i,buf,sizeof(buf)),
@@ -1279,7 +1297,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
     memory[i] = opcode = gp->cpu->pma->get_opcode(i);
 
-    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
+    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", gp->cpu->map_pm_index2address(i));
     sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
 
     filter(row_text[MNEMONIC_COLUMN],
