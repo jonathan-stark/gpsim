@@ -25,6 +25,8 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include "command.h"
 
+class Value;
+
 class cmd_break : public command
 {
 public:
@@ -33,6 +35,8 @@ public:
   void list(void);
 
   void set_break(cmd_options *co, ExprList_t *el=0);
+  void set_break(Value *);
+
 private:
   
   void set_break(int bit_flag);

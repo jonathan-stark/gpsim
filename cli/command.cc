@@ -48,7 +48,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_set.h"
 #include "cmd_step.h"
 #include "cmd_stimulus.h"
-#include "cmd_stopwatch.h"
 #include "cmd_symbol.h"
 #include "cmd_trace.h"
 #include "cmd_version.h"
@@ -87,7 +86,6 @@ command *command_list[] =
   &c_set,
   &step,
   &c_stimulus,
-  &stopwatch,
   &c_symbol,
   &c_trace,
   &version,

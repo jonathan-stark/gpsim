@@ -132,6 +132,12 @@ void Value::get(guint64 &i)
   i = (gint64) i64;
 }
 
+void Value::get(bool &b)
+{
+  throw new Error(showType() +
+		  " cannot be converted to an integer ");
+}
+
 void Value::get(double &d)
 {
   throw new Error(showType() +
@@ -188,6 +194,15 @@ Value *Value::get_xref()
 {
 
   return xref;
+}
+
+void Value::set_break()
+{
+  cout << showType() << " objects do not support break points\n";
+}
+void Value::clear_break()
+{
+  cout << showType() << " objects do not support break points\n";
 }
 //------------------------------------------------------------------------
 // gpsimValue

@@ -102,3 +102,9 @@ void UnknownModeAttribute::get(bool &b)
   Boolean::set(b);
 }
 
+
+//########################################################################
+void init_attributes()
+{
+  
+}

@@ -44,7 +44,10 @@ cmd_help::cmd_help(void)
   long_doc = string ("\n\tgpsim is a software simulator for the Microchip PIC microcontrollers\n\
 \tPlease refer to the distributed README files and the ./doc subdirectory\n\
 \tfor more information\n\
-\n\tTo get help on a command, type help \"command\"\n"
+\n\tTo get help on a command, type help \"command\"\n\
+\n\tIn addition, help on most symbols can be obtained by help\"symbol name\"\n\
+\n\t(Use the symbol command to see the currently defined symbols\n\
+"
 );
 
   op = cmd_help_options;

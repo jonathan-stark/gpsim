@@ -211,27 +211,40 @@ inline Cycle_Counter &get_cycles(void)
 
 
 
-// The stopwatch object is used to keep track of the amount of
-// time between events.
-class StopWatch 
+/// The stopwatch object is used to keep track of the amount of
+/// time between events. It can be controlled either through the
+/// class API or through its attributes
+class StopWatch : public TriggerObject
 {
  public:
-  bool enabled;
-  bool count_dir;
 
-  guint64 rollover;
-  guint64 offset;
-  guint64 value;
+  StopWatch(void);
 
   guint64 get(void);
   double get_time(void);
 
-  void start(void);
-  void stop(void);
-  void set_rollover(guint64 new_rollover);
-  void set_offset(guint64 new_rollover);
+  void set_enable(bool);
+  void set_direction(bool);
+  void set_rollover(guint64);
+  void set_value(guint64);
 
-  StopWatch(void);
+  void set_break(bool);
+
+  void update();
+
+  virtual void callback(void);
+  virtual void callback_print(void);
+
+private:
+  Integer *value;
+  Integer *rollover;
+  Boolean *enable;
+  Boolean *direction;
+
+  bool count_dir;
+
+  guint64 offset;
+  guint64 break_cycle;
 
 };
 

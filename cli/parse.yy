@@ -54,7 +54,6 @@ using namespace std;
 #include "cmd_set.h"
 #include "cmd_step.h"
 #include "cmd_stimulus.h"
-#include "cmd_stopwatch.h"
 #include "cmd_symbol.h"
 #include "cmd_trace.h"
 #include "cmd_version.h"
@@ -156,7 +155,6 @@ void yyerror(char *message)
 %token   SET
 %token   STEP
 %token   STIMULUS
-%token   STOPWATCH
 %token   SYMBOL
 %token   TRACE
 %token   gpsim_VERSION
@@ -305,7 +303,6 @@ cmd:
      | set_cmd
      | step_cmd
      | stimulus_cmd
-     | stopwatch_cmd
      | symbol_cmd
      | trace_cmd
      | version_cmd
@@ -361,6 +358,7 @@ break_cmd
           : BREAK                       {c_break.list();}
           | BREAK bit_flag              {c_break.set_break($2);}
           | BREAK bit_flag expr_list    {c_break.set_break($2,$3);}
+          | BREAK SYMBOL_T              {c_break.set_break($2);}
           ;
 
 bus_cmd
@@ -490,11 +488,6 @@ step_cmd
           | STEP bit_flag               {step.over();}
           ;
 
-stopwatch_cmd
-          : STOPWATCH                   {stopwatch.set();}
-          | STOPWATCH bit_flag          {stopwatch.set($2->value);}
-          ;
-
 stimulus_cmd: STIMULUS
           {
 	    c_stimulus.stimulus();
@@ -546,11 +539,7 @@ stimulus_opt:
 
 symbol_cmd
           : SYMBOL                      {c_symbol.dump_all();}
-          | SYMBOL LITERAL_STRING_T               {c_symbol.dump_one($2->getVal());}
-//          | SYMBOL LITERAL_STRING_T LITERAL_STRING_T expr
-//          {
-//	    c_symbol.add_one($2->getVal(),$3->getVal(),$4);
-//	  }
+          | SYMBOL LITERAL_STRING_T     {c_symbol.dump_one($2->getVal());}
           | SYMBOL SYMBOL_T             {c_symbol.dump_one($2);}
           ;
 
@@ -793,7 +782,6 @@ void initialize_commands(void)
   c_set.token_value = SET;
   step.token_value = STEP;
   c_stimulus.token_value = STIMULUS;
-  stopwatch.token_value = STOPWATCH;
   c_symbol.token_value = SYMBOL;
   c_trace.token_value = TRACE;
   version.token_value = gpsim_VERSION;
