@@ -166,8 +166,7 @@ void _14bit_28pins::create_iopin_map(void)
   assign_pin(4, new IO_bi_directional(porta, 2));
   assign_pin(5, new IO_bi_directional(porta, 3));
   assign_pin(6, new IO_open_collector(porta, 4));
-
-  assign_pin(7, NULL); //fixme ra5 does exist!
+  assign_pin(7, new IO_bi_directional(porta, 5));
 
   assign_pin(8, NULL); //VSS
   assign_pin(9, NULL);  // OSC
@@ -255,9 +254,7 @@ void _14bit_40pins::create_iopin_map(void)
   assign_pin(4, new IO_bi_directional(porta, 2));
   assign_pin(5, new IO_bi_directional(porta, 3));
   assign_pin(6, new IO_open_collector(porta, 4));
-
-  assign_pin(7, NULL);
-
+  assign_pin(7, new IO_bi_directional(porta, 5));
 
   assign_pin(8, new IO_bi_directional(porte, 0));
   assign_pin(9, new IO_bi_directional(porte, 1));
