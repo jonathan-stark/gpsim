@@ -1,3 +1,8 @@
+2004-04-03  Borut Razem  <borut.razem@siol.net>
+	* src/stimuli.cc: fixed warning C4715: 'IOPIN::get_iop' : not all
+	control paths return a value: IOPIN::get_iop() returns 0 in case that
+	iopp and iop are NULL
+
 2004-04-01 Scott Dattalo  <scott@dattalo.com>
 	* modules/resistor.cc, modules/resitor.h: Several member functions
 	in the resistor classes were declared, but not defined anywhere.
