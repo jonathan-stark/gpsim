@@ -1830,9 +1830,9 @@ static int load_fonts(SourceBrowserAsm_Window *sbaw)
 {
 #if GTK_MAJOR_VERSION >= 2
     gtk_style_set_font(sbaw->comment_text_style,
-      gdk_fontset_load(sbaw->commentfont_string));
+      gdk_font_from_description(pango_font_description_from_string(sbaw->commentfont_string)));
 
-    GdkFont *font = gdk_fontset_load(sbaw->sourcefont_string);
+    GdkFont *font = gdk_font_from_description(pango_font_description_from_string(sbaw->sourcefont_string));
     gtk_style_set_font(sbaw->default_text_style, font);
     gtk_style_set_font(sbaw->label_text_style, font);
     gtk_style_set_font(sbaw->symbol_text_style, font);
@@ -2015,7 +2015,11 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
     while(fonts_ok!=2)
     {
 	char fontname[256];
-	GdkFont *font;
+#if GTK_MAJOR_VERSION >= 2
+        PangoFontDescription *font;
+#else
+        GdkFont *font;
+#endif
 
         settings_active=1;
 	while(settings_active)
@@ -2024,28 +2028,42 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
 	if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
 	else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
 	    config_set_string(sbaw->name,"sourcefont",sbaw->sourcefont_string);
             fonts_ok++;
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
 	if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
         else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
 	    config_set_string(sbaw->name,"commentfont",sbaw->commentfont_string);
             fonts_ok++;
@@ -2476,8 +2494,13 @@ void SourceBrowserAsm_Window::Build(void)
   comment_text_style->base[GTK_STATE_NORMAL] = text_bg;
   comment_text_style->fg[GTK_STATE_NORMAL] = text_fg;
 
+#if GTK_MAJOR_VERSION >= 2
+#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
+#define DEFAULT_SOURCEFONT "Courier Bold 12"
+#else
 #define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
 #define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
+#endif
 
   if(config_get_string(name,"commentfont",&fontstring))
     strcpy(commentfont_string,fontstring);

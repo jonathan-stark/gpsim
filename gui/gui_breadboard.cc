@@ -2579,7 +2579,11 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    name=p->module->get_pin_name(i);
 	    if(name==0)
 		continue;
+#if GTK_MAJOR_VERSION >= 2
+	    width = gdk_string_width (gdk_font_from_description(bbw->pinnamefont),name)+LABELPAD;
+#else
 	    width = gdk_string_width (bbw->pinnamefont,name)+LABELPAD;
+#endif
 	    if(width>p->pinnamewidth)
 		p->pinnamewidth=width;
 	}
@@ -2646,7 +2650,11 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    if(name==0)
 		continue;
 	    gdk_draw_text(p->module_pixmap,
+#if GTK_MAJOR_VERSION >= 2
+			  gdk_font_from_description(p->bbw->pinnamefont),
+#else
 			  p->bbw->pinnamefont,
+#endif
 			  p->bbw->pinname_gc,
 			  label_x,
 			  PINLENGTH/2+label_y,
@@ -2707,10 +2715,17 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     // Create name_widget
     p->name_widget = gtk_drawing_area_new();
+#if GTK_MAJOR_VERSION >= 2
+    height = gdk_string_height(gdk_font_from_description(bbw->pinnamefont),
+			       p->module->name());
+    width = gdk_string_width(gdk_font_from_description(bbw->pinnamefont),
+			    p->module->name());
+#else
     height = gdk_string_height(bbw->pinnamefont,
 			       p->module->name());
     width = gdk_string_width(bbw->pinnamefont,
 			    p->module->name());
+#endif
     gtk_drawing_area_size(GTK_DRAWING_AREA(p->name_widget),width,height);
     p->name_pixmap = gdk_pixmap_new(bbw->window->window,
 			       width,
@@ -2723,8 +2738,12 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 			width,
 			height);
     gdk_draw_text(p->name_pixmap,
-		  p->bbw->pinnamefont,
-		  p->bbw->pinname_gc,
+#if GTK_MAJOR_VERSION >= 2
+		  gdk_font_from_description(p->bbw->pinnamefont),
+#else
+                  p->bbw->pinnamefont,
+#endif
+                  p->bbw->pinname_gc,
 		  0,height,
 		  p->module->name(),strlen(p->module->name()));
     gtk_signal_connect(GTK_OBJECT(p->name_widget),
@@ -3584,10 +3603,13 @@ void Breadboard_Window::Build(void)
   case_gc=gdk_gc_new(window->window);
   gdk_gc_set_line_attributes(case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
+#if GTK_MAJOR_VERSION >= 2
+  pinstatefont = pango_font_description_from_string("Courier Bold 8");
+  pinnamefont = pango_font_description_from_string("Courier Bold 8");
+#else
   pinstatefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
-
   pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
-
+#endif
   pinline_gc=gdk_gc_new(window->window);
   g_assert(pinline_gc!=0);
   gdk_gc_set_line_attributes(pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
@@ -3597,7 +3619,11 @@ void Breadboard_Window::Build(void)
 				      LAYOUTSIZE_Y,
 				      -1);
 
+#if GTK_MAJOR_VERSION >= 2
+  pinnameheight = gdk_string_height (gdk_font_from_description(pinnamefont),"9y");
+#else
   pinnameheight = gdk_string_height (pinnamefont,"9y");
+#endif
 
   if(pinspacing<pinnameheight)
     pinspacing=pinnameheight+2;
@@ -3620,10 +3646,7 @@ void Breadboard_Window::Build(void)
   //		       "select",
   //		       (GtkSignalFunc) treeselect_node,
   //		       gn);
-#if GTK_MAJOR_VERSION < 2
-  /* borutr: gpsim crashes if this line is included */
   gtk_widget_show(tree_item);
-#endif
   gtk_tree_append(GTK_TREE(tree), tree_item);
   node_tree= gtk_tree_new();
   gtk_widget_show(node_tree);

@@ -799,7 +799,11 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
     while(fonts_ok!=3)
     {
 	char fontname[256];
+#if GTK_MAJOR_VERSION >= 2
+        PangoFontDescription *font;
+#else
 	GdkFont *font;
+#endif
 
         settings_active=1;
 	while(settings_active)
@@ -808,42 +812,63 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
 	if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
 	else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(sbow->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
 	    config_set_string(sbow->name,"normalfont",sbow->normalfont_string);
             fonts_ok++;
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-	if((font=gdk_fontset_load(fontname))==0)
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
+        if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("Breakpointfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
         else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(sbow->breakpointfont_string,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
 	    config_set_string(sbow->name,"breakpointfont",sbow->breakpointfont_string);
             fonts_ok++;
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-	if((font=gdk_fontset_load(fontname))==0)
+#if GTK_MAJOR_VERSION >= 2
+	if((font=pango_font_description_from_string(fontname))==0)
+#else
+        if((font=gdk_fontset_load(fontname))==0)
+#endif
 	{
 	    if(gui_question("PCfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
 	}
         else
 	{
+#if GTK_MAJOR_VERSION >= 2
+#else
             gdk_font_unref(font);
+#endif
 	    strcpy(sbow->pcfont_string,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
 	    config_set_string(sbow->name,"pcfont",sbow->pcfont_string);
             fonts_ok++;
@@ -1322,9 +1347,16 @@ void SourceBrowserOpcode_Window::Build(void)
 
 
   /**************************** load fonts *********************************/
+#if GTK_MAJOR_VERSION >= 2
+#define DEFAULT_NORMALFONT "Courier Roman 14"
+#define DEFAULT_BREAKPOINTFONT "Courier Bold 14"
+#define DEFAULT_PCFONT "Courier Bold 14"
+#else
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
 #define DEFAULT_BREAKPOINTFONT "-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*"
 #define DEFAULT_PCFONT "-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*"
+#endif
+
   strcpy(normalfont_string,DEFAULT_NORMALFONT);
   if(config_get_string(name,"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
