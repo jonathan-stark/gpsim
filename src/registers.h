@@ -156,6 +156,7 @@ public:
   };
 
   void reset(void);
+
   virtual unsigned int get_next(void);
 
   XrefObject *xref;
