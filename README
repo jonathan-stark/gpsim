@@ -19,13 +19,14 @@ gpsim-0.20.0 new stuff:
   o gui - Menu items now work
   o gui - button bar
   o gui - now refreshes while simulating
+  o gui - Stack Window has been added
   o BSD is now supported
   o numerous bug fixes
 
 
 Modules
 -------
-The big story this release is Modules. gpsim now has a way to allow you to create specific simulation environments without having to learn everything about gpsim. This has been a major overhaul of the infrastructure of gpsim. 
+One of big features in this release is Modules. gpsim now has a way to allow you to create specific simulation environments without having to learn everything about gpsim. This has been a major overhaul of the infrastructure of gpsim. 
 
 The idea is that you'll be able to create your own custom modules, package these into a library, and then load them from gpsim.
 
@@ -36,6 +37,7 @@ There are two example modules: an LED one and a Logic one. These are somewhat ex
 
 (Note, the version number may change, so it would be best to go to the gpsim web page and look for the latest version there).
 
+The README.modules file explains in more detail how to create/use modules.
 
 `module' command
 ----------------
@@ -92,15 +94,29 @@ gui - now refreshes while simulating
 ------------------------------------
 The gui now can be refreshed will the simulation is running. Before, the simulation engine would hog all of the cpu and would ignore the gui until the simulation completed (e.g. when  a break point was encountered). Also, the rate at which the gui is updated is controlled directly from the gui control window.
 
+gui - Stack Viewer
+------------------
+Ralf has added a stack viewer that will display the contents of the PIC stack. You can double click on entries in the Stack Viewer to set breakpoints on the addresses.
+
+BSD supported:
+--------------
+Joerg Wunsch <joerg_wunsch@interface-business.de>, a BSD guy, has taken the time to  get gpsim to compile under BSD.In the process he has fixed a few system dependcy bugs that have plagued gpsim for a really long time.
+
 bug fixes
 ---------
+There were literally so many bug fixes that I lost track.
+  -- core dumps for instantiating several processors
+  -- TMR0 rollover bug (actually in the breakpoint code)
+  -- stimuli -> there are ALWAYS bugs here
+  -- multi-line stimuli weren't working
 
 
 What's coming next?
 -------------------
 
 Register Stimuli.
-
+More Modules
+Begin research into a schematic capture front end.
 
 System Requirements:
 --------------------
@@ -152,6 +168,7 @@ echo           echo "text"
 help           Type help "command" for more help on a command
 list           Display source and list files
 load           Load either a hex,command, or .cod file
+module         Select & Display modules
 node           Add or display stimulus nodes
 processor      Select & Display processors
 quit           Quit gpsim
@@ -212,10 +229,12 @@ Gui stuff:
   o Symbol viewer
   o Watch window
   o Pinout/breadboard window
+  o Stack Viewer
 
-gpsim specific (not implemented)
-  o Simulate multiple processors. 
-  o Step backwards
+
+gpsim specific
+  o Simulate multiple processors (not fully supported)
+  o Dynamically loaded modules
 
 Peripherals supported:
   o eeprom

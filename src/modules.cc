@@ -278,7 +278,7 @@ list <Module_Library *> :: iterator module_iterator;
 // to accomodate different reference designator types).
 static int  ref_des_count = 1;
 
-void add_module_library(char *library_name, void *library_handle)
+void module_add_library(char *library_name, void *library_handle)
 {
 
 
@@ -296,7 +296,7 @@ void add_module_library(char *library_name, void *library_handle)
 // dump_available_libraries
 // ...
 
-void display_available_modules(void)
+void module_display_available(void)
 {
 
   cout << "Module Libraries\n";
@@ -321,7 +321,7 @@ void display_available_modules(void)
 }
 
 
-void load_module_library(char *library_name)
+void module_load_library(char *library_name)
 {
   cout << __FUNCTION__ << "() " << library_name << '\n';
 
@@ -339,9 +339,9 @@ void load_module_library(char *library_name)
     return;
   }
 
-  add_module_library(library_name,handle);
+  module_add_library(library_name,handle);
 
-  display_available_modules();
+  module_display_available();
 #else
 
   cout << "  -- gpsim doesn't support modules in the cli-only mode\n";
@@ -350,7 +350,7 @@ void load_module_library(char *library_name)
 
 }
 
-void load_module(char *module_type, char *module_name=NULL)
+void module_load_module(char *module_type, char *module_name=NULL)
 {
 
   cout << __FUNCTION__ << '\n';
@@ -409,11 +409,16 @@ void load_module(char *module_type, char *module_name=NULL)
 }
 
 
-void dump_module_list(void)
+void module_list_modules(void)
 {
 
- cout << __FUNCTION__ << '\n';
-
+ symbol_table.dump_type( SYMBOL_MODULE);
 }
 
+void module_pins(char *module_name)
+{
+
+ symbol_table.dump_type( SYMBOL_MODULE);
+
+}
 

@@ -79,7 +79,7 @@ symbol_type symbol_types[] =
 
 };
 
-int num_of_symbol_types = (sizeof(symbol_types))/ (sizeof(symbol_type));
+const int num_of_symbol_types = (sizeof(symbol_types))/ (sizeof(symbol_type));
 
 void Symbol_Table::add_ioport(pic_processor *cpu, IOPORT *_ioport)
 {
@@ -174,7 +174,7 @@ void Symbol_Table::add_line_number(pic_processor *cpu, int address)
 
 void Symbol_Table::add_module(Module * m, char *new_name)
 {
-  cout << "add module\n";
+  cout << "adding module symbol\n";
 
   module_symbol *ms = new module_symbol();
 
@@ -298,6 +298,53 @@ void Symbol_Table::dump_all(void)
     }
 }
 
+
+void Symbol_Table::dump_type(SYMBOL_TYPE symt)
+{
+  int i;
+
+  // Search for the type of symbole we wish to display
+
+  for(i=0; i<num_of_symbol_types; i++) {
+    if(symbol_types[i].type == symt)
+      break;
+  }
+
+  // Was it found?
+  if(i>=num_of_symbol_types) {
+    cout << "? Bad symbol type in " << __FUNCTION__ << "()\n";
+    return;
+  }
+
+  // Now loop through the whole table and display all instances of the type of interest
+
+  int first=1;     // On the first encounter of one, display the title
+
+  sti = st.begin();
+
+  symbol *sym;
+
+  while( sti != st.end())
+    {
+      sym = *sti;
+      if(sym)
+	if(sym->isa() == symt) {
+	  if(first) {
+	    first = 0;
+	    cout << "Symbol Table for \"" << symbol_types[i].name_str << "\"\n";
+	  }
+
+	  sym->print();
+	}
+
+      sti++;
+    }
+  
+  if(first)
+    cout << "No \"" << symbol_types[i].name_str <<  "\" symbols found\n";
+
+}
+
 //--------------------------------------------
 
 int  load_symbol_file(pic_processor **cpu, char *filename)
@@ -346,3 +393,4 @@ int get_symbol_value(char *sym, int *sym_value)
   return 1; // symbol not found
 
 }
+
