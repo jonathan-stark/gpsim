@@ -32,3 +32,5 @@ ${RT} register_stim register_stim
 ${RT} p12ce518 p12ce518
 
 ${RT} interrupts_14bit interrupts_14bit
+
+#${RT} ccp ccp
