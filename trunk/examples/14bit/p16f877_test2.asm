@@ -1,11 +1,14 @@
 
-	list	p=16c74
+	list	p=16f877
   __config _wdt_off
 
-	;; The purpose of this program is to test gpsim's ability to simulate a pic 16c74.
+	;; The purpose of this program is to test gpsim's ability to 
+	;; simulate a pic 16f877.
 	;; Specifically, the a/d converter is tested.
-
-include "p16c74.inc"
+	;; This file was copied from the similar file that
+	;; tests the 16c74's a/d.
+	
+include "p16f877.inc"
 		
   cblock  0x20
 
@@ -227,10 +230,12 @@ l1:
 	btfss	t1,0		;Wait for the interrupt to set the flag
 	 goto	$-1
 
-	movf	adres,w		;Read the result
+	movf	adresl,w	;Read the result
 	addwf	avg_lo,f	;and accumulate it here
+	movf	adresh,w
 	skpnc
-	 incf	avg_hi,f
+	 incfsz	adresh,w
+	  addwf	avg_hi,f
 
 	decfsz	t2,f
 	 goto	l1

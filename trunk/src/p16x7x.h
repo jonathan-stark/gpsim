@@ -51,27 +51,32 @@ public:
 
   IOPORT *analog_port;
 
+  unsigned int valid_bits;
+
 enum PCFG_bits
 {
   PCFG0 = 1<<0,
   PCFG1 = 1<<1,
-  PCFG2 = 1<<2
+  PCFG2 = 1<<2,
+  PCFG3 = 1<<3,   // 16f87x
+  ADFM  = 1<<7    // 16f87x
 };
 
-  /* Vref_bits is an array that tells which channel the A/D converter's
-   * voltage reference is located. The index into the array is formed from
-   * the PCFG bits. The encoding is as follows:
-   *   0-7:  analog channel containing Vref (note, on all of the current version
-   *         14-bit pics only analog channel 3 can supply Vref.
+  /* Vrefhi/lo_position - this is an array that tells which
+   * channel the A/D converter's  voltage reference(s) are located. 
+   * The index into the array is formed from the PCFG bits. 
+   * The encoding is as follows:
+   *   0-7:  analog channel containing Vref(s)
    *     8:  The reference is internal (i.e. Vdd)
    *  0xff:  The analog inputs are configured as digital inputs
    */
-  unsigned int Vref_position[8];
+  unsigned int Vrefhi_position[16];
+  unsigned int Vreflo_position[16];
 
   /* configuration bits is an array of 8-bit masks definining whether or not
    * a given channel is analog or digital
    */
-  unsigned int configuration_bits[8];
+  unsigned int configuration_bits[16];
 
   //  unsigned int get(void) {return value;};
   int get_Vref(void);
@@ -87,7 +92,9 @@ class ADCON0 : public sfr_register, public BreakCallBack
 {
 public:
   IOPORT *analog_port;
+  IOPORT *analog_port2;
   ADRES *adres;
+  ADRES *adresl;
   ADCON1 *adcon1;
   INTCON *intcon;
 
@@ -113,6 +120,7 @@ enum AD_states
   unsigned int Tad_2;
   int acquired_value;
   int reference;
+  unsigned int channel_mask;
   guint64 future_cycle;
 
   void start_conversion(void);
@@ -120,7 +128,7 @@ enum AD_states
   virtual void set_interrupt(void);
   virtual void callback(void);
   void put(unsigned int new_value);
-
+  void put_conversion(void);
   ADCON0(void)
   {
     ad_state = AD_IDLE;

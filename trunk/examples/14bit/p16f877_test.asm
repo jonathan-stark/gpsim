@@ -9,7 +9,7 @@ include "p16f877.inc"
 		
   cblock  0x20
 
-	x
+	x,y
 	t1,t2,t3
 	pma_string		; starting here's where a string will be copied from flash
   endc
@@ -78,7 +78,12 @@ main:
 	call	obliterate_data_eeprom
 	call	bank_access_test
 	call	read_program_flash
-
+	
+;;	call	tmr1_test
+;; 	call	tmr2_test
+;; 	call	tmr1_test2
+;; 	call	tmr1_test3
+;; 	call	pwm_test
 
 	goto	$
 
@@ -141,7 +146,7 @@ pgm_table_end
 	;;
 	;; TMR1 test
 	;;
-
+tmr1_test:	
 	;; Clear all of the bits of the TMR1 control register:
 	;; this will:
 	;;	Turn the tmr off
@@ -192,6 +197,7 @@ tmr1_test1:
 	
 	clrf	t1con
 
+	return
 	;;
 	;; TMR2 test
 	;;
@@ -225,7 +231,7 @@ tmr2_test1:
 	btfss	x,2
 	 goto	tmr2_test1
 
-	goto	$
+	return
 
 tmr1_test2:	
 	bsf	status,rp0
@@ -238,14 +244,17 @@ tmr1_test2:
 	;; Start the timer
 
 	bsf	t1con,tmr1on
-
+	clrf	y
 tt2:	
 	movf	portc,w
 	decfsz	x,f
 	 goto	$-1
-	
-	goto	tt2	
-	goto	main
+	decfsz	y,f
+	  goto	tt2
+
+
+	return
+
 
 tmr1_test3:
 	bsf	status,rp0
@@ -302,7 +311,8 @@ pwm_test1:
 	movwf	t2con
 	movlw	0xc
 	movwf	ccp1con
-	
+
+	return	
 die:
 
 	goto	$

@@ -35,6 +35,10 @@ public:
 
   IOPIN  *pins[IOPINS];
 
+  // Specify the pin low to high and high to low thresholds.
+  int l2h_threshold[IOPINS];
+  int h2l_threshold[IOPINS];
+
   IOPORT_TRIS * tris;
 
   unsigned int 
@@ -47,6 +51,7 @@ public:
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void setbit_value(unsigned int bit_number, bool new_value);
   int get_bit(unsigned int bit_number);
+  int get_bit_voltage(unsigned int bit_number);
   unsigned int get(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   int update_stimuli(void);

@@ -86,6 +86,13 @@ void P16F874::create_sfr_map(void)
   add_sfr_register(&eedatah, 0x10e);
   add_sfr_register(&eeadrh,  0x10f);
 
+  add_sfr_register(&adresl,  0x9e, 0);
+  adres.new_name("adresh");
+  adresl.new_name("adresl");
+
+  adcon0.adresl = &adresl;
+  adcon1.valid_bits |= (ADCON1::PCFG3 | ADCON1::ADFM);
+
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
   alias_file_registers(0x82,0x84,0x80);
@@ -101,6 +108,36 @@ void P16F874::create_sfr_map(void)
   alias_file_registers(0x20,0x7f,0x100);
   alias_file_registers(0xa0,0xff,0x100);
 
+
+  adcon1.Vrefhi_position[8] = 3;
+  adcon1.Vrefhi_position[9] = 8;
+  adcon1.Vrefhi_position[10] = 3;
+  adcon1.Vrefhi_position[11] = 3;
+  adcon1.Vrefhi_position[12] = 3;
+  adcon1.Vrefhi_position[13] = 3;
+  adcon1.Vrefhi_position[14] = 8;
+  adcon1.Vrefhi_position[15] = 3;
+
+  adcon1.Vreflo_position[8] = 2;
+  adcon1.Vreflo_position[9] = 8;
+  adcon1.Vreflo_position[10] = 8;
+  adcon1.Vreflo_position[11] = 2;
+  adcon1.Vreflo_position[12] = 2;
+  adcon1.Vreflo_position[13] = 2;
+  adcon1.Vreflo_position[14] = 8;
+  adcon1.Vreflo_position[15] = 2;
+
+  adcon1.configuration_bits[8] = 0xff;
+  adcon1.configuration_bits[9] = 0x3f;
+  adcon1.configuration_bits[10] = 0x3f;
+  adcon1.configuration_bits[11] = 0x3f;
+  adcon1.configuration_bits[12] = 0x3f;
+  adcon1.configuration_bits[13] = 0x0f;
+  adcon1.configuration_bits[14] = 0;
+  adcon1.configuration_bits[15] = 0x0d;
+
+
+
 }
 
 void P16F874::create(void)
@@ -108,7 +145,7 @@ void P16F874::create(void)
 
   cout << " f874 create \n";
 
-  P16C65::create();
+  P16C74::create();
 
   status.rp_mask = 0x60;  // rp0 and rp1 are valid.
   indf.base_address_mask = 0x80; // used for indirect accesses above 0x100

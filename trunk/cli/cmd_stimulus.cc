@@ -306,6 +306,10 @@ void cmd_stimulus::data_point(guint64 new_data_point)
 {
   StimulusDataType sdt;
 
+  if(verbose)
+    cout << "stimulus command got got integer data\n";
+
+
   sdt.data_type    = STIMULUS_DPT_INT;
   sdt.data_point.i = new_data_point;
 
@@ -317,6 +321,9 @@ void cmd_stimulus::data_point(guint64 new_data_point)
 void cmd_stimulus::data_point(float new_data_point)
 {
   StimulusDataType sdt;
+
+  if(verbose)
+    cout << "stimulus command got got float data\n";
 
   sdt.data_type    = STIMULUS_DPT_FLOAT;
   sdt.data_point.f = new_data_point;

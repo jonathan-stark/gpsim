@@ -355,14 +355,14 @@ stimulus_cmd: STIMULUS
             if(verbose)
               cout << "parser sees stimulus with number: " << $2 << '\n';
 
-	    //c_stimulus.stimulus($2->value);
+	    c_stimulus.stimulus($2);
 	  }
           | STIMULUS FLOAT_NUMBER
           { 
             if(verbose)
               cout << "parser sees stimulus with float number: " << $2 << '\n';
 
-	    //c_stimulus.stimulus($2->value);
+	    c_stimulus.stimulus($2);
 	  }
 
           | STIMULUS stimulus_opt END_OF_COMMAND

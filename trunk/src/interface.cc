@@ -852,7 +852,7 @@ unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
   if(iopin==NULL)
     return 0;
 
-  return iopin->get_state(0);
+  return iopin->get_voltage(0);
 }
 void  gpsim_pin_toggle(unsigned int processor_id, unsigned int pin)
 {
