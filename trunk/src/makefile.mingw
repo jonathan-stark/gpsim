@@ -39,6 +39,7 @@ src_OBJECTS =			\
 	cod.o			\
 	eeprom.o		\
 	fopen-path.o		\
+	gpsim_object.o		\
 	gpsim_time.o		\
 	hexutils.o		\
 	i2c-ee.o		\

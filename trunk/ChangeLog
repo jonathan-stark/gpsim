@@ -1,3 +1,10 @@
+2004-08-29 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gsim.def, cli/makefile.migw, src/makefile.migw,
+	  cli/cli.vcproj, src/src.vcproj: updated
+	* cli/errors.h, cli/scan.ll: corrected include paths
+	* plat/win32/gpsim.nsi: gpsom.pdf included in WIN32 setup
+	* doc/gpsimWin32.html: gtk+ 2.4.7
+
 2004-08-27 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/gpsim_object.cc, src/gpsim_object.h,
 	  src/modules.cc, src/modules.h, src/pic-processor.cc,
@@ -20,7 +27,6 @@
 	Added support for symbolically viewing registers with the 'x' 
 	command.
 	Added support for viewing a range of registers.
-
 
 
 2004-08-26 Scott Dattalo <scott@dattalo.com>
@@ -71,7 +77,6 @@
 	  cli/scan.ll:
 	More improvements to tracing.
 	Added some more symbolic command line processing.
-
 
 2004-08-16 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h:

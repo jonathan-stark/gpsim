@@ -36,8 +36,8 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 #include "expr.h"
 #include "errors.h"
-#include "src/symbol.h"
-#include "src/stimuli.h"
+#include "../src/symbol.h"
+#include "../src/stimuli.h"
 
 #include "parse.h"
 #include "input.h"

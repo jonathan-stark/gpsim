@@ -251,6 +251,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\gpsim_object.cc">
+			</File>
+			<File
 				RelativePath=".\gpsim_time.cc">
 			</File>
 			<File
@@ -467,6 +470,9 @@
 			</File>
 			<File
 				RelativePath=".\gpsim_interface.h">
+			</File>
+			<File
+				RelativePath=".\gpsim_object.h">
 			</File>
 			<File
 				RelativePath=".\gpsim_time.h">

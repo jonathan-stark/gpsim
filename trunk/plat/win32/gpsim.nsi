@@ -72,6 +72,9 @@ SetCompressor lzma
 
 ; MUI end ------
 
+#!system "lyx -e latex ../../doc/gpsim.lyx" = 0
+#!system "pdflatex ../../doc/gpsim.tex" = 0
+
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "${SETUP_DIR}\gpsim-${PRODUCT_VERSION}-YYYYMMDD-setup.exe"
 InstallDir "$PROGRAMFILES\gpsim"
@@ -140,6 +143,7 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\doc"
   File "${GPSIM_ROOT}\doc\gpsim_cvs.html"
   File "${GPSIM_ROOT}\doc\gpsimWin32.html"
+  File "${GPSIM_ROOT}\doc\gpsim.pdf"
 
   SetOutPath "$INSTDIR\etc\gtk-2.0"
   File "${PKG_ROOT}\etc\gtk-2.0\gdk-pixbuf.loaders"
@@ -446,10 +450,11 @@ Section -Icons
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
 ;  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} on the Web.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\doc\gpsim.pdf" "" "$INSTDIR\gpsim.ico" "" "" "" ""
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Change Log.lnk" "$INSTDIR\ChangeLog.txt" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\README.lnk" "$INSTDIR\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\GPL 2 License.lnk" "$INSTDIR\COPYING.TXT"
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
 SectionEnd
 
 Section -Post
@@ -559,6 +564,7 @@ Section Uninstall
   Delete "$INSTDIR\etc\gtk-2.0\gtkrc"
   Delete "$INSTDIR\etc\gtk-2.0\gdk-pixbuf.loaders"
 
+  Delete "$INSTDIR\doc\gpsim.pdf"
   Delete "$INSTDIR\doc\gpsimWin32.html"
   Delete "$INSTDIR\doc\gpsim_cvs.html"
 
