@@ -160,7 +160,7 @@ public:
 
   bool check_peripheral_interrupt(void);
 
-private:
+  //private:
   PIR_SET *pir_set;
 };
 
@@ -190,7 +190,7 @@ enum
   void clear_gies(void);
   void set_gies(void);
 
-private:
+  //private:
   RCON *rcon;
   INTCON2 *intcon2;
 };
