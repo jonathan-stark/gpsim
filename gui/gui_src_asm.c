@@ -1443,14 +1443,14 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 static int load_fonts(SourceBrowserAsm_Window *sbaw)
 {
     sbaw->comment_text_style.font=
-	gdk_font_load(sbaw->commentfont_string);
+	gdk_fontset_load(sbaw->commentfont_string);
 
     sbaw->default_text_style.font=
 	sbaw->label_text_style.font=
 	sbaw->symbol_text_style.font=
 	sbaw->instruction_text_style.font=
 	sbaw->number_text_style.font=
-	gdk_font_load(sbaw->sourcefont_string);
+	gdk_fontset_load(sbaw->sourcefont_string);
 
     if(sbaw->comment_text_style.font==NULL)
         return 0;
@@ -1613,7 +1613,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -1627,7 +1627,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;

@@ -602,7 +602,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->normal_style->base[GTK_STATE_NORMAL] = text_bg;
     gdk_font_unref (sbow->normal_style->font);
     sbow->normal_style->font =
-	gdk_font_load (sbow->normalfont_string);
+	gdk_fontset_load (sbow->normalfont_string);
 
     text_bg.red   = 30000;
     text_bg.green = 30000;
@@ -613,7 +613,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->current_line_number_style->base[GTK_STATE_NORMAL] = text_bg;
     gdk_font_unref (sbow->current_line_number_style->font);
     sbow->current_line_number_style->font =
-	gdk_font_load (sbow->pcfont_string);
+	gdk_fontset_load (sbow->pcfont_string);
 
     gdk_color_parse("red", &text_bg);
     sbow->breakpoint_color=text_bg;
@@ -623,7 +623,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->breakpoint_line_number_style->base[GTK_STATE_NORMAL] = text_bg;
     gdk_font_unref (sbow->breakpoint_line_number_style->font);
     sbow->breakpoint_line_number_style->font =
-	gdk_font_load (sbow->breakpointfont_string);
+	gdk_fontset_load (sbow->breakpointfont_string);
 
 
     gdk_color_parse("white",&sbow->normal_pm_bg_color);
@@ -762,7 +762,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	fonts_ok=0;
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("Normalfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -776,7 +776,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("Breakpointfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;
@@ -790,7 +790,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	}
 
 	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-	if((font=gdk_font_load(fontname))==NULL)
+	if((font=gdk_fontset_load(fontname))==NULL)
 	{
 	    if(gui_question("PCfont did not load!","Try again","Ignore/Cancel")==FALSE)
 		break;

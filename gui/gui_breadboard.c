@@ -490,7 +490,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show(da);
   gtk_widget_show(window);
 
-  bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
+  bbw->pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
   bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
 
 	bbw->pinline_gc=gdk_gc_new(bbw->da->window);
@@ -502,9 +502,9 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 	bbw->case_gc=gdk_gc_new(bbw->da->window);
 	gdk_gc_set_line_attributes(bbw->case_gc,CASELINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
-	bbw->pinstatefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
+	bbw->pinstatefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
 
-	bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
+	bbw->picnamefont = gdk_fontset_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
 
   bbw->gui_obj.enabled=1;
 
