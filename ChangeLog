@@ -1,3 +1,7 @@
+2004-05-20 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: Syntax highlighting now is only applied to lines
+	that are associated with generated code.
+	
 2004-05-16 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/processor.cc:
 	Added mapping between program memory and source file line numbers
