@@ -147,17 +147,6 @@ public:
   virtual void put(unsigned int new_value);
 
   
-  // In the Register class, the 'Register *get()' returns a
-  // pointer to itself. Derived classes may return something
-  // else (e.g. a break point may be pointing to the register
-  // it replaced and will return that instead).
-
-  virtual Register *getReg(void)
-    {
-      return this;
-    }
-  
-
   /* put_value is the same as put(), but some extra stuff like
    * interfacing to the gui is done. (It's more efficient than
    * burdening the run time performance with (unnecessary) gui
@@ -169,6 +158,26 @@ public:
   /* same as get(), but no trace is performed */
   virtual unsigned int get_value(void) { return(value.get()); }
 
+  /* getRV and putRV are the accessor functions that get the
+   * the fule RegisterValue object (minus the value.valid bits)
+   */
+  virtual RegisterValue getRV(void) { return value;}
+  virtual void putRV(RegisterValue rv)
+    { 
+      value.data = rv.data;
+      value.init = rv.init;
+    }
+
+  // In the Register class, the 'Register *get()' returns a
+  // pointer to itself. Derived classes may return something
+  // else (e.g. a break point may be pointing to the register
+  // it replaced and will return that instead).
+
+  virtual Register *getReg(void)
+    {
+      return this;
+    }
+  
 
   virtual char *name(void) { return(name_str1);};
   virtual void new_name(char *);
