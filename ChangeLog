@@ -1,4 +1,9 @@
 2004-10-04 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc: Send an extra CR to the parser when loading a
+	command file. Turns out that when the gui loads a file, the
+	parser doesn't process it until another CR is seen.
+	
+2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_regwin.cc, gui/gui_breadboard.cc:
 	Removed some debugging printfs.
 	* gui/gui_object.cc:
