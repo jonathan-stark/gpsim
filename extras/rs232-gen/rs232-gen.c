@@ -111,7 +111,7 @@ static int parse_data(char *str, int type) {
   if ((str[0] == '+') && (i > 0))
     offset = data[i-1].cycle;
 
-  data[i].cycle = offset + atoll(str);
+  data[i].cycle = offset + strtoll(str,0,10);
 
   /* Extract the actual data
    *

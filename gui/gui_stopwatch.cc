@@ -174,8 +174,7 @@ cyclechanged(GtkWidget *widget, StopWatch_Window *sww)
     }
     if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
-        long long v;
-	v=atoll(text);
+        long long v = strtoll(text,0,10);
 	if(v!=(sww->cyclecounter-sww->offset)%sww->rollover)
 	{
             v=(v+sww->offset)%sww->rollover;
@@ -197,8 +196,8 @@ offsetchanged(GtkWidget *widget, StopWatch_Window *sww)
     }
     if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
-        long long v;
-	v=atoll(text);
+        long long v = strtoll(text,0,10);
+
 	if(v!=sww->offset)
 	{
             sww->offset=v;
@@ -217,8 +216,8 @@ rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
     }
     if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
-        long long v;
-	v=atoll(text);
+        long long v = strtoll(text,0,10);
+
 	if(v!=sww->rollover)
 	{
             sww->rollover=v;
@@ -399,7 +398,7 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
 
   get_config();
   if(config_get_string(name,"rollover",&string))
-    rollover=atoll(string);
+    rollover = strtoll(string,0,10);
   config_get_variable(name,"count_dir",&count_dir);
     
   if(enabled)
