@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 // protocol.h
 //
 
+#include <glib.h>
 
 #ifndef __PROTCOL_H__
 #define __PROTCOL_H__
@@ -121,14 +122,14 @@ public:
   bool DecodeHeader();
   bool DecodeObjectType(unsigned int &);
   bool DecodeUInt32(unsigned int &);
-  bool DecodeUInt64(unsigned long long &);
+  bool DecodeUInt64(guint64 &);
   bool DecodeString(char *, int);
   bool DecodeBool(bool &);
   bool DecodeFloat(double &);
 
   bool EncodeHeader();
   bool EncodeUInt32(unsigned int);
-  bool EncodeUInt64(unsigned long long);
+  bool EncodeUInt64(guint64);
   bool EncodeObjectType(unsigned int);
   bool EncodeString(const char *str, int len=-1);
   bool EncodeBool(bool);

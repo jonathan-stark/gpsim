@@ -519,7 +519,7 @@ static int process_booleanLiteral(bool value)
 static int process_floatLiteral(char *buffer)
 {
   double floatValue;
-
+#if 0
   errno = 0;
   floatValue = atof(buffer);
   
@@ -527,6 +527,12 @@ static int process_floatLiteral(char *buffer)
     /* The conversion failed */
     throw new Error("Bad floating point literal");
   }
+#else
+  char *endptr=0;
+  floatValue = strtod(buffer, &endptr);
+  if (endptr == buffer)
+    throw new Error("Bad floating point literal");
+#endif
 
   yylval.Float_P = new Float(floatValue);
   return(recognize(LITERAL_FLOAT_T, "float literal"));

@@ -1,3 +1,7 @@
+2004-12-14 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, cli/socket.cc, src/protocol.cc, src/protocol.h,
+	src/value.cc: Fixed compilation issues with FC3 on an Athlon 64.
+
 2004-12-11 Borut Razem <borut.razem@siol.net>
 	* src/makefile.mingw, src/src.vcproj: added protocol.cc and protocol.h
 	* plat/win32/gpsim.def: MSVC sync
