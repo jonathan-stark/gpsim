@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 #include <string>
 #include <stdio.h>
+#include <vector>
 
 #include "command.h"
 #include "cmd_dump.h"
@@ -63,48 +64,59 @@ cmd_dump::cmd_dump(void)
 
 
 #define REGISTERS_PER_ROW  16
-#define SFR_COLUMNS         4
+#define SFR_COLUMNS         3
 #define MAX_SFR_NAME       10
 
 void cmd_dump::dump_sfrs(void)
 {
-  int regs_in_a_row = 0;
-  putchar('\n');
-
+  unsigned int reg_size = cpu->register_size();
+  unsigned int uToDisplayCount = 0;
+  unsigned int uColumns = SFR_COLUMNS;
+  vector<Register*> RegListToDisplay;
+  unsigned int auTopRowIndex[SFR_COLUMNS];
   // Examine all registers this pic has to offer
   for (unsigned int i = 0; i < cpu->register_memory_size(); i++) {
-
-    if(cpu->registers[i]->isa() == Register::SFR_REGISTER) {
-
+    if(cpu->registers[i]->isa() == Register::SFR_REGISTER &&
       // Found an sfr. Display its contents only if not aliased
       // at some other address too.
-
-      if(i == cpu->registers[i]->address) {
-	    
-	if(++regs_in_a_row > SFR_COLUMNS)
-	  {
-	    putchar('\n');
-	    regs_in_a_row = 1;
-	  }
-
-	printf("%03x  %s = %02x", cpu->registers[i]->address,
-	       cpu->registers[i]->name().c_str(),
-	       cpu->registers[i]->get_value());
-
-	// Align the columns by printing spaces 
-
-	int l = MAX_SFR_NAME - strlen(cpu->registers[i]->name().c_str());
-	for(int k=0; k<l; k++)
-	  putchar(' ');
-      }
+      i == cpu->registers[i]->address) {
+      uToDisplayCount++;
+      RegListToDisplay.push_back(cpu->registers[i]);
     }
+  }
+  //
+  //  All this is so we can have the reg number sequence go
+  //  from top to bottom of each column instead of across columns.
+  unsigned int uMod = uToDisplayCount % uColumns;
+  unsigned int uRowsPerColumn = uToDisplayCount / uColumns;
+  auTopRowIndex[0] = 0;
+  for (unsigned int i = 1; i < sizeof(auTopRowIndex) / sizeof(unsigned int);
+    i++) {
+    auTopRowIndex[i] = auTopRowIndex[i-1] + uRowsPerColumn + (uMod > i ? 1 : 0);
+  }
+  uRowsPerColumn += (uMod == 0 ? 0 : 1);
 
+  putchar('\n');
+  unsigned int uRegCount = 0;
+  for (unsigned int uRow = 0; uRow < uRowsPerColumn; uRow++) {
+    for (unsigned int uColCurrent = 0; uColCurrent < uColumns; uColCurrent++) {
+      unsigned int uIndex = auTopRowIndex[uColCurrent] + uRow;
+      if(uRegCount > uToDisplayCount)
+        break;
+//      printf("%03d ", uIndex); // used for testings
+      uRegCount++;
+      Register *pReg = RegListToDisplay[uIndex];
+      printf("%03x %-7s = %0*x   ", pReg->address,
+        pReg->name().c_str(), reg_size * 2,
+        pReg->get_value());
+    }
+    putchar('\n');
   }
 }
 
 void cmd_dump::dump(int mem_type)
 {
-  unsigned int i, j, reg_num,mem_size=0;
+  unsigned int i, j, reg_num,mem_size=0,reg_size=1,uRegPerRow = REGISTERS_PER_ROW;
   unsigned int v;
   bool 
     previous_row_is_invalid=false, 
@@ -119,16 +131,18 @@ void cmd_dump::dump(int mem_type)
     {
     case DUMP_EEPROM:
       {
-	pic_processor *pic = dynamic_cast<pic_processor *> (cpu);
-	if(pic && pic->eeprom) {
-	  fr = pic->eeprom->get_rom();
-	  mem_size = pic->eeprom->get_rom_size();
-	} else
-	  return;
+      pic_processor *pic = dynamic_cast<pic_processor *> (cpu);
+      if(pic && pic->eeprom) {
+        fr = pic->eeprom->get_rom();
+        mem_size = pic->eeprom->get_rom_size();
+      } else
+        return;
       }
       break;
     case DUMP_RAM:
       mem_size = cpu->register_memory_size();
+      reg_size = cpu->register_size();
+      uRegPerRow = reg_size == 1 ? REGISTERS_PER_ROW : 8;
       fr = cpu->registers;
       break;
     case DUMP_SFRS:
@@ -142,63 +156,66 @@ void cmd_dump::dump(int mem_type)
 
   gpsim_set_bulk_mode(1);
   
-  printf("     ");
 
-  // Column labels
-  for (i = 0; i < REGISTERS_PER_ROW; i++)
-    printf(" %02x",i);
+  if(reg_size == 1) {
+    printf("     ");
+    // Column labels
+    for (i = 0; i < uRegPerRow; i++)
+      printf(" %0*x", reg_size * 2, i);
 
-  putchar('\n');
-
+    putchar('\n');
+  }
   reg_num = 0;
-  for (i = 0; i < mem_size; i+=REGISTERS_PER_ROW) {
+  for (i = 0; i < mem_size; i+=uRegPerRow) {
 
     /* First, see if there are any valid registers on this row */
     all_invalid = true;
-    for (j = 0; j < REGISTERS_PER_ROW; j++)
-
+    for (j = 0; j < uRegPerRow; j++) {
       if(fr[i+j]->address) {
-	all_invalid = false;
-	break;
+        all_invalid = false;
+        break;
       }
-
+    }
     if(!all_invalid) {
       previous_row_is_invalid = false;
     
       printf("%03x:  ",i);
 
-      for (j = 0; j < REGISTERS_PER_ROW; j++)
-	{
-	  reg_num = i  + j;
+      for (j = 0; j < uRegPerRow; j++)
+      {
+        reg_num = i  + j;
 
-	  if(reg_num || fr[reg_num]->address) {
+        if(reg_num || fr[reg_num]->address) {
 
-	    v = fr[reg_num]->get_value();
-	    printf("%02x ",v);
+          v = fr[reg_num]->get_value();
+          printf("%0*x ",reg_size * 2, v);
+        } else {
+          for (unsigned int i = 0; i < reg_size; i++)
+            printf("--");
+          putchar(' ');
+        }
+      }
+      if(reg_size == 1) {
+        // don't bother with ASCII for > 8 bit registers
+        printf("   ");
 
-	  } else
-	    printf("-- ");
-
-	}
-      printf("   ");
-
-      for (j = 0; j < REGISTERS_PER_ROW; j++)
-	{
-	  reg_num = i + j;
-	  v = fr[reg_num]->get_value();
-	  if( (v >= ' ') && (v <= 'z'))
-	    putchar(v);
-	  else
-	    putchar('.');
-	}
+        for (j = 0; j < uRegPerRow; j++)
+        {
+          reg_num = i + j;
+          v = fr[reg_num]->get_value();
+          if( (v >= ' ') && (v <= 'z'))
+            putchar(v);
+          else
+            putchar('.');
+        }
+      }
       putchar('\n');
     } else {
       if(!previous_row_is_invalid)
-	putchar('\n');
+        putchar('\n');
       previous_row_is_invalid = true;
       reg_num += REGISTERS_PER_ROW;
     }
-
   }
 
   // Now Dump the sfr's 
