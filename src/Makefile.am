@@ -90,6 +90,7 @@ gpsiminclude_HEADERS = \
 	ioports.h \
 	lxt_write.h \
 	modules.h \
+	operator.h \
 	p12x.h \
 	p16x5x.h \
 	p16f62x.h \
@@ -124,7 +125,6 @@ gpsiminclude_HEADERS = \
 	ssp.h \
 	errors.h \
 	expr.h \
-	operator.cc \
 	value.h
 
 

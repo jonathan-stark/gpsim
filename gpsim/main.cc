@@ -276,7 +276,6 @@ main (int argc, char *argv[])
   if(abort_gpsim)
     exit_gpsim();
 
-  //    parser_cleanup();
 
   // Now enter the event loop and start processing user
   // commands.
