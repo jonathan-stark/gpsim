@@ -328,7 +328,7 @@ public:
     case WDT_RESET:
       value = wdtr_value;
       break;
-    case SOFT_RESET:
+    default:
       break;
     }
 

@@ -135,6 +135,9 @@ public:
 
   void put_digital_state( bool new_digital_state) {
     read_state = new_digital_state;
+    //cout << "eeprom put_digital state: " << (read_state ? "high" : "low") << endl;
+    if(snode)
+      snode->update(0);
   }
 };
 

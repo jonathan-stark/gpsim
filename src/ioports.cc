@@ -87,13 +87,16 @@ int IOPORT::update_stimuli(void)
   for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
     if(stimulus_mask & m) {
       if(pins[i] && pins[i]->snode!=0) {
-	
+	pins[i]->snode->update(time);
+	cout << "warning -- IOPORT::update_stimuli has changed\n";
+	/*
 	double t = pins[i]->snode->update(time);
 
 	if(t  > pins[i]->l2h_threshold)
 	  input |= m;
 	else if (t >= pins[i]->h2l_threshold)
 	  input |= (value.get() & m);
+	*/
       }
     }
 
@@ -114,6 +117,9 @@ int PIC_IOPORT::update_stimuli(void)
     if(stimulus_mask & m) {
       if(pins[i] && pins[i]->snode!=0) {
 
+	pins[i]->snode->update(time);
+	cout << "warning -- IOPORT::update_stimuli has changed\n";
+	/*
 	double t = pins[i]->snode->update(time);
 
 	if(old_value & m) {
@@ -125,7 +131,7 @@ int PIC_IOPORT::update_stimuli(void)
 	  if(t  > pins[i]->l2h_threshold)
 	    input |= m;   // changed to a high.
 	}
-
+	*/
 	/*
 	cout << "Pin " << i 
 	     << ", current value = " << ((old_value & m) ? 1:0)
@@ -149,8 +155,10 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
   double v;
 
   if(pins[bit_number]) {
-    if(pins[bit_number]->snode)
-      v = pins[bit_number]->snode->update(time);
+    if(pins[bit_number]->snode) {
+      cout << "Warning IOPORT::get_bit_voltage has changed\n";
+      v = pins[bit_number]->snode->get_nodeVoltage();
+    }
     else
       v = pins[bit_number]->get_Vth();
   }
@@ -186,10 +194,31 @@ unsigned int IOPORT::get(void)
 {
   // Update the stimuli - if there are any
 
-  if(stimulus_mask)
-    {
-      value.put( (value.get() & ~stimulus_mask) | update_stimuli());
+  if(stimulus_mask) {
+
+    unsigned int current_value = value.get();
+
+    unsigned int i=0;
+    unsigned int m=1;
+
+    for(i=0; i<num_iopins; i++, m<<=1) {
+      if(pins[i] && pins[i]->snode) {
+
+	double v = pins[i]->snode->get_nodeVoltage();
+
+	if(current_value & m) {
+	  // this io bit is currently a high
+	  if(v <= pins[i]->h2l_threshold)
+	    current_value ^= m;
+	} else
+	  if (v > pins[i]->l2h_threshold)
+	    current_value ^= m;
+      }
     }
+
+    value.put(current_value);
+
+  }
 
   trace.raw(read_trace.get() | value.get());
   return(value.get());
@@ -218,15 +247,31 @@ void IOPORT::put(unsigned int new_value)
 
   internal_latch = new_value;
 
-  // update only those bits that are really outputs
-
   trace.raw(write_trace.get() | value.get());
+
+  unsigned int current_value = value.get();
 
   value.put(new_value);
 
+  if(stimulus_mask && (current_value != new_value)) {
+
+    unsigned int diff = current_value ^ new_value;
+
+    guint64 time = cycles.value;
+
+    // Update all I/O pins that have stimuli attached to
+    // them and their state is being changed by this put() operation.
+
+    for(unsigned int i = 0; i<num_iopins; i++,diff>>=1)
+      if((diff&1) && pins[i] && pins[i]->snode)
+	pins[i]->snode->update(time);
+  }
+
   // Update the stimuli - if there are any
+  /*
   if(stimulus_mask)
     update_stimuli();
+  */
 
 }
 
@@ -244,7 +289,8 @@ void IOPORT::put(unsigned int new_value)
 
 void PIC_IOPORT::put(unsigned int new_value)
 {
-
+  IOPORT::put(new_value);
+#if 0
   if(new_value > 255)
     cout << "PIC_IOPORT::put value >255\n";
 
@@ -270,6 +316,7 @@ void PIC_IOPORT::put(unsigned int new_value)
   */
 
   value.put(stim | outputs | inputs);
+#endif
 }
 //-------------------------------------------------------------------
 // void IOPORT::put_value(unsigned int new_value)
