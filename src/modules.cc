@@ -63,7 +63,7 @@ Module::Module(void)
 }
 
 
-Module * Module::construct(void)
+Module * Module::construct(char * name)
 {
 
   cout << " Can't create a generic Module\n";
@@ -150,6 +150,7 @@ void Module::assign_pin(unsigned int pin_number, IOPIN *pin)
 
 
 }
+
 void Module::create_iopin_map(void)
 {
 
@@ -181,6 +182,20 @@ int Module::get_pin_state(unsigned int pin_number)
 }
 
 #endif
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::new_name(char *s)
+{
+  if(name_str)
+    delete name_str;
+
+  if(s)
+    name_str = strdup(s);
+  else
+    name_str = NULL;
+
+}
 
 
 /*****************************************************************************
@@ -378,7 +393,7 @@ void load_module(char *module_type, char *module_name=NULL)
 	      // the symbol library
 
 	      cout << " Found it!\n";
-	      Module *new_module = t->module_list[i].module_constructor();
+	      Module *new_module = t->module_list[i].module_constructor(module_name);
 	      symbol_table.add_module(new_module,module_name);
 	      return;
 	    }

@@ -58,7 +58,7 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { "binary_indicator", "bi", Binary_Indicator::construct}
+  { "binary_indicator", "bi", Binary_Indicator::construct }
 };
 
 #ifdef __cplusplus
