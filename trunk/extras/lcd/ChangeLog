@@ -1,3 +1,7 @@
+2004-09-13 Scott Dattalo  <scott@dattalo.com>
+	* lcd.h: TriggerObjects used to be called BreakpointObjects in
+	gpsim.
+	
 2004-09-05 Robert Pearce
 	* lcd.cc, lcd.h, lcdengine.cc, lcdgui.cc: I/O pins and stimuli.
 	(patch applied by Scott).
