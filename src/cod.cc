@@ -487,6 +487,83 @@ void read_line_numbers_from_cod(Processor *cpu)
 }
 
 //-----------------------------------------------------------
+void read_message_area(Processor *cpu)
+{
+#define MAX_STRING_LEN  255 /* Maximum length of a debug message */
+  char DebugType,DebugMessage[MAX_STRING_LEN];
+
+  unsigned short i, j, start_block, end_block;
+  unsigned short laddress;
+
+  start_block = get_short_int(&main_dir.dir.block[COD_DIR_MESSTAB]);
+
+  if(start_block) {
+
+    end_block = get_short_int(&main_dir.dir.block[COD_DIR_MESSTAB+2]);
+
+    for(i=start_block; i<=end_block; i++) {
+      read_block(temp_block, i);
+    
+      j = 0;
+
+      while (j < 504) {
+
+	/* read big endian */
+	laddress = get_be_int(&temp_block[j]);
+        
+        j += 4;
+
+	DebugType = temp_block[j++];
+
+	if (DebugType == 0) {
+	  break;
+	}
+
+        get_string(DebugMessage, &temp_block[j], sizeof DebugMessage);
+
+	j += strlen(DebugMessage);
+
+        if(verbose)
+          printf("debug message: addr=%#x command=\"%c\" string=\"%s\"\n",
+                  laddress,
+                  DebugType,
+                  DebugMessage);
+      
+        // The lower case commands are user commands.  The upper case are
+        // compiler or assembler generated.  This code makes no distinction
+        // between them.
+      
+        switch(DebugType) {
+        case 'a':
+        case 'A':
+          // assertion
+
+          break;
+        case 'e':
+        case 'E':
+          // gpsim command
+
+          break;
+        case 'f':
+        case 'F':
+          // printf
+
+          break;
+        case 'l':
+        case 'L':
+          // log
+
+          break;
+        default:
+          cout << "Warning: unknown debug message \"" << DebugType << "\"\n";
+        }
+      }
+    }
+  }
+    
+}
+
+//-----------------------------------------------------------
 // open_cod_file
 //
 void read_symbols( Processor *cpu )
@@ -965,6 +1042,9 @@ int open_cod_file(Processor **pcpu, const char *filename)
   // If the .asm file contains special HLL source line comment, then
   // read these and put the HLL line numbers into each instruction.
   read_hll_line_numbers_from_asm(ccpu);
+
+  // Read all the debug messages
+  read_message_area(ccpu);
 
   //delete directory_block_data;
   delete_directory();
