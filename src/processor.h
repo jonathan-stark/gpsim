@@ -363,6 +363,9 @@ public:
   TraceType *readTT, *writeTT;
   map <unsigned int, TraceType *> mTrace;
 
+  virtual void set(const char *cP,int len=0);
+  virtual void get(char *, int len);
+
   //
   // Creation and manipulation of registers
   //

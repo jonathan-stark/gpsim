@@ -1608,17 +1608,6 @@ Module * USARTModule::USART_construct(const char *_new_name)
 
 }
 
-//--------------------------------------------------------------
-
-void USARTModule::set_attribute(char *attr, char *val)
-{
-
-  cout << "--USARTModule::set_attribute\n";
-
-  Module::set_attribute(attr,val);
-}
-
-
 USARTModule::USARTModule(const char *_name)
 {
 

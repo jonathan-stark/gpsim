@@ -119,9 +119,6 @@ public:
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
 
-  // Inheritances from the Module class
-  virtual void set_attribute(char *attr, char *val);
-
   static Module *pu_construct(const char *new_name=NULL);
   static Module *pd_construct(const char *new_name=NULL);
 

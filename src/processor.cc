@@ -241,6 +241,15 @@ double  Processor::get_OSCperiod()
     return 0.0;
 }
 
+void Processor::set(const char *cP,int len)
+{
+
+}
+
+void Processor::get(char *cP, int len)
+{
+}
+
 //-------------------------------------------------------------------
 //
 // init_register_memory (unsigned int memory_size)

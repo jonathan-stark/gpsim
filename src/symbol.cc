@@ -189,30 +189,6 @@ void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 
   }
 
-#if 0
-  int i;
-  for(i=0; i<num_of_symbol_types; i++)
-    {
-
-      if(strcmp(symbol_types[i].name_str, new_type) == 0)
-	{
-	  switch(symbol_types[i].type)
-	    {
-	    case SYMBOL_CONSTANT:
-	      add_constant(new_name, value);
-	      break;
-
-	    case SYMBOL_BASE_CLASS:
-	    case SYMBOL_IOPORT:
-	    case SYMBOL_STIMULUS_NODE:
-	    case SYMBOL_STIMULUS:
-	    default:
-	      cout << " need to declare a new symbol\n";
-	    }
-	}
-    }
-#endif
-
 }
 
 Value * Symbol_Table::find(const char *str)
@@ -508,12 +484,7 @@ address_symbol::address_symbol(const char *_name, unsigned int _val)
 {
   new_name(_name);
 }
-/*
-void address_symbol::print(void)
-{
-  cout << name() << " at address 0x" << hex << getVal() <<'\n';
-}
-*/
+
 string address_symbol::toString()
 {
   char buf[256];
@@ -545,6 +516,18 @@ symbol *module_symbol::copy()
 
   return new module_symbol(module,name().c_str());
 }
+void module_symbol::set(const char *cP,int len)
+{
+  if(module)
+    module->set(cP,len);
+}
+
+void module_symbol::get(char *cP, int len)
+{
+  if(module)
+    module->get(cP,len);
+}
+
 //------------------------------------------------------------------------
 
 attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)

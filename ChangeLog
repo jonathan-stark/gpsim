@@ -1,12 +1,23 @@
+2004-12-07 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc: More socket clean up
+	* src/modules.cc, src/modules.h, src/processor.cc,
+	src/processor.h, src/symbol.cc, src/symbol.h: Removed deprecated
+	code for setting/getting attributes. Added a new member function
+	to the module_symbol that allows a character string to assign
+	values to a module (this doesn't do anything yet).
+
+	* modules/resistor.cc, modules/resistor.h, modules/usart.cc,
+	modules/usart.h: removed deprecated set_attribute member function.
+
 2004-12-06 Scott Dattalo <scott@dattalo.com>
-	* src/socket.cc: Experimenting with binary data. Cleaned up socket
+	* cli/socket.cc: Experimenting with binary data. Cleaned up socket
 	link creation. Added a generic symbol read/write socket command.
 
 2004-12-06 Scott Dattalo <scott@dattalo.com>
-	* src/socket.cc: Wrap gtk2.x calls with #defines
+	* cli/socket.cc: Wrap gtk2.x calls with #defines
 	
 2004-12-02 Scott Dattalo <scott@dattalo.com>
-	* src/socket.cc: More additions to SocketLinks. It's now possible
+	* cli/socket.cc: More additions to SocketLinks. It's now possible
 	to tie a socket to a gpsim attribute. This allows an external
 	application to directly control gpsim's behavior.
 

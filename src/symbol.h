@@ -220,6 +220,13 @@ public:
   Module *get_module() { return module;}
   virtual symbol *copy();
 
+  /// The set and get methods for the module_symbol take char strings
+  /// as their inputs. These strings are dynamically decoded such
+  /// that various internal states of the processor can be controlled.
+
+  virtual void set(const char *cP,int len=0);
+  virtual void get(char *, int len);
+
 };
 
 /// attribute_symbol - a symbol that is associated with a specific
