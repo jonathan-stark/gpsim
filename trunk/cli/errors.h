@@ -3,12 +3,12 @@
 
 #include <string>
 
-#include "viewable.h"
+#include "src/gpsim_object.h"
 using namespace std;
 
 
 //*****************************************************************
-class AnError : public Viewable {
+class AnError : public gpsimObject {
  public:
   AnError(string severity, string errMsg);
   virtual ~AnError();

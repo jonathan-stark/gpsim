@@ -168,6 +168,7 @@ void yyerror(char *message)
 %token <co>  NUMERIC_OPTION
 %token <co>  STRING_OPTION
 %token <co>  CMD_SUBTYPE
+%token <co>  SYMBOL_OPTION
 
 /* Expression parsing stuff */
 %type <BinaryOperator_P>        binary_expr

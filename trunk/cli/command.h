@@ -49,6 +49,7 @@ enum COMMAND_MODES
                             // be subtyped (e.g. the stimulus command
                             // is subtyped by the type of stimulus
                             // that is being created).
+#define OPT_TT_SYMBOL   5   // A symbol is the option parameter
 
 void init_parser(void);
 

@@ -236,26 +236,34 @@ yywrap (void)
   return 1;
 }
 
+
+/*****************************************************************
+ * 
+ */
+static int recognize(int token_id,const char *description)
+{
+  /* add optional debugging stuff here */
+  if(verbose && description)
+    cout << "scan: " << description << endl;
+
+  return(token_id);
+}
+
+
 int translate_token(int tt)
 {
   switch(tt)
   {
   case OPT_TT_BITFLAG:
-    if((verbose & 0x2) && DEBUG_PARSER)
-      cout << " tt bit flag\n";
-    return BIT_FLAG;
+    return recognize(BIT_FLAG,"BIT_FLAG");
   case OPT_TT_NUMERIC:
-    if((verbose & 0x2) && DEBUG_PARSER)
-      cout << " tt numeric\n";
-    return EXPRESSION_OPTION;
+    return recognize(EXPRESSION_OPTION,"EXPRESSION_OPTION");
   case OPT_TT_STRING:
-    if((verbose & 0x2) && DEBUG_PARSER)
-      cout << " tt string\n";
-    return STRING_OPTION;
+    return recognize(STRING_OPTION,"STRING_OPTION");
   case OPT_TT_SUBTYPE:
-    if((verbose & 0x2) && DEBUG_PARSER)
-      cout << " tt bit flag\n";
-    return CMD_SUBTYPE;
+      return recognize(CMD_SUBTYPE,"CMD_SUBTYPE");
+  case OPT_TT_SYMBOL:
+    return recognize(SYMBOL_OPTION,"SYMBOL_OPTION");
   }
 
   return 0;
@@ -439,18 +447,6 @@ static int process_floatLiteral(char *buffer)
   return(recognize(LITERAL_FLOAT_T, "float literal"));
 }
 
-
-/*****************************************************************
- * 
- */
-static int recognize(int token_id,const char *description)
-{
-  /* add optional debugging stuff here */
-  if(verbose && description)
-    cout << "scan: " << description << endl;
-
-  return(token_id);
-}
 
 
 static string
