@@ -1191,7 +1191,6 @@ TXREG_16::TXREG_16(void)
 
 bool TXREG_16::is_empty(void)
 {
-  cout << "Txreg_16::empty\n";
   if(pir_set)
     return(pir_set->get_txif());
   return 0;
@@ -1202,14 +1201,12 @@ void TXREG_16::empty(void)
 {
   if(pir_set)
     pir_set->set_txif();
-  cout << "Txreg_16::empty\n";
 }
 
 void TXREG_16::full(void)
 {
   if(pir_set)
     pir_set->clear_txif();
-  cout << "Txreg_16::full\n";
 }
 
 void TXREG_16::assign_pir_set(PIR_SET *new_pir_set)

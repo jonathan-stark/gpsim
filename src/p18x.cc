@@ -70,62 +70,44 @@ void P18C2x2::create(void)
   if(verbose)
     cout << "P18C2x2::create\n";
 
-  //  cout << "PIR " << pir1.name() << '\n';
-
   create_iopin_map();
-
-
-  //  cout << "after create_iopin_mapPIR " << pir1.name() << '\n';
-
-  //P18C2x2::create_sfr_map();
-  //  create_iopin_map(&iopin_map, &num_of_iopins);
-  //cout << "after create_sfr_map PIR " << pir1.name() << '\n';
 
   _16bit_processor::create();
 
-  //usart.init_ioport(portc);
-
-  //  create_iopins(iopin_map, num_of_iopins);
+  trace.program_counter (pc->value);
 
 }
 
 //------------------------------------------------------------------------
 void P18C2x2::create_iopin_map(void)
 {
-  cout << "p18c2x2::create_iopin_map WARNING --- not creating package \n";
-
-}
-void P18C2x2::create_sfr_map(void)
-{
-
-  if(verbose)
-    cout << "create_sfr_map P18C2x2\n";
-
   package = new Package(28);
 
   if(!package)
     return;
 
-  add_sfr_register(&porta,	  0xf80,0,"porta");
-  add_sfr_register(&portb,	  0xf81,0,"portb");
-  add_sfr_register(&portc,	  0xf82,0,"portc");
+  // Build the links between the I/O Ports and their tris registers.
+  porta.tris = &trisa;
+  trisa.port = &porta;
 
-  add_sfr_register(&lata,	  0xf89,0,"lata");
-  add_sfr_register(&latb,	  0xf8a,0,"latb");
-  add_sfr_register(&latc,	  0xf8b,0,"latc");
+  portb.tris = &trisb;
+  trisb.port = &portb;
 
-  porta.latch = &lata;
-  portb.latch = &latb;
-  portc.latch = &latc;
+  portc.tris = &trisc;
+  trisc.port = &portc;
 
-  lata.port = &porta;
-  latb.port = &portb;
-  latc.port = &portc;
+  porta.new_name("porta");
+  portb.new_name("portb");
+  portc.new_name("portc");
 
-  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
-  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
-  add_sfr_register(&trisc,	  0xf94,0xff,"trisc");
+  trisa.new_name("trisa");
+  trisb.new_name("trisb");
+  trisc.new_name("trisc");
 
+  // Define the valid I/O pins.
+  porta.valid_iopins = 0x3f;
+  portb.valid_iopins = 0xff;
+  portc.valid_iopins = 0xff;
 
   package->assign_pin(1, 0);  // /MCLR
 
@@ -165,6 +147,37 @@ void P18C2x2::create_sfr_map(void)
   package->assign_pin(27, new IO_bi_directional_pu(&portb, 6));
   package->assign_pin(28, new IO_bi_directional_pu(&portb, 7));
 
+  portc.ccp1con = &ccp1con;
+  portc.usart = &usart16;
+
+}
+void P18C2x2::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "create_sfr_map P18C2x2\n";
+
+  add_sfr_register(&porta,	  0xf80,0,"porta");
+  add_sfr_register(&portb,	  0xf81,0,"portb");
+  add_sfr_register(&portc,	  0xf82,0,"portc");
+
+  usart16.initialize_16(this,&pir_set_def,&portc);
+
+  add_sfr_register(&lata,	  0xf89,0,"lata");
+  add_sfr_register(&latb,	  0xf8a,0,"latb");
+  add_sfr_register(&latc,	  0xf8b,0,"latc");
+
+  porta.latch = &lata;
+  portb.latch = &latb;
+  portc.latch = &latc;
+
+  lata.port = &porta;
+  latb.port = &portb;
+  latc.port = &portc;
+
+  add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
+  add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
+  add_sfr_register(&trisc,	  0xf94,0xff,"trisc");
 
 }
 
@@ -362,7 +375,7 @@ void P18C4x2::create_iopin_map(void)
   portd.valid_iopins = 0xff;
   porte.valid_iopins = 0x07;
 
-  package->assign_pin(1, 0);
+  package->assign_pin(1, 0); // /MCLR
 
   package->assign_pin(2, new IO_bi_directional(&porta, 0));
   package->assign_pin(3, new IO_bi_directional(&porta, 1));
@@ -592,6 +605,135 @@ Processor * P18C452::construct(void)
 
 }
 
+
+//------------------------------------------------------------------------
+//
+// P18F242
+// 
+
+P18F242::P18F242(void)
+{
+
+  //if(verbose)
+    cout << "18f242 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F242::create(void)
+{
+  EEPROM_PIR *e;
+
+  //if(verbose)
+    cout << " 18f242 create \n";
+
+  P18C242::create();
+
+  e = new EEPROM_PIR;
+  e->set_cpu(this);
+  // We might want to pass this value in for larger eeproms
+  e->initialize(256);
+  //e->set_pir_set(get_pir_set());
+  e->set_pir_set(&pir_set_def);
+  e->set_intcon(&intcon);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
+
+  P18F242::create_sfr_map();
+
+}
+
+void P18F242::create_sfr_map(void)
+{
+
+  // Add eeprom
+  add_sfr_register(get_eeprom()->get_reg_eedata(), 0xfa8);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(), 0xfa9);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(), 0xfa7);
+
+}
+
+void P18F242::set_out_of_range_pm(int address, int value)
+{
+
+  if( (address>= 0xf00000) && (address < 0xf00000 +
+    get_eeprom()->get_rom_size()))
+    {
+      get_eeprom()->change_rom(address - 0xf00000, value);
+    }
+}
+
+Processor * P18F242::construct(void)
+{
+
+  P18F242 *p = new P18F242;
+
+  if(verbose)
+    cout << " 18F242 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+
+  p->new_name("p18f242");
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+
+}
+
+
+//------------------------------------------------------------------------
+//
+// P18F252
+// 
+
+P18F252::P18F252(void)
+{
+
+  if(verbose)
+    cout << "18f252 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F252::create(void)
+{
+
+  if(verbose)
+    cout << " 18f252 create \n";
+
+  P18F242::create();
+  P18F252::create_sfr_map();
+
+}
+
+void P18F252::create_sfr_map(void)
+{
+
+
+}
+
+Processor * P18F252::construct(void)
+{
+
+  P18F252 *p = new P18F252;
+
+  if(verbose)
+    cout << " 18F252 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+
+  p->new_name("p18f252");
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+
+}
 
 //------------------------------------------------------------------------
 //

@@ -143,6 +143,40 @@ class P18C452 : public P18C442
 
 };
 
+class P18F242 : public P18C242
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F242_;};
+  P18F242(void);
+  static Processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+
+  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
+   assert(0);
+  }
+  virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
+  virtual EEPROM_PIR *get_eeprom(void) { return ((EEPROM_PIR *)eeprom); }
+
+};
+
+class P18F252 : public P18F242
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F252_;};
+  P18F252(void);
+  static Processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+
+};
+
 class P18F442 : public P18C442
 {
  public:

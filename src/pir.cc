@@ -46,6 +46,14 @@ void PIR1v1::clear_sspif(void)
   trace.register_write(address,value);
 }
 
+void PIR1v1::set_txif(void)
+{
+  trace.register_write(address,value);
+  value |= TXIF;
+  if( value & pie->value )
+    intcon->peripheral_interrupt();
+}
+
 void PIR1v1::clear_txif(void)
 {
   value &= ~TXIF;
@@ -66,6 +74,14 @@ void PIR1v2::clear_sspif(void)
 {
   value &= ~SSPIF;
   trace.register_write(address,value);
+}
+
+void PIR1v2::set_txif(void)
+{
+  trace.register_write(address,value);
+  value |= TXIF;
+  if( value & pie->value )
+    intcon->peripheral_interrupt();
 }
 
 void PIR1v2::clear_txif(void)
