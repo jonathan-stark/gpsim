@@ -1,10 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
 
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
-<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0" />
+<meta name="ProgId" content="FrontPage.Editor.Document" />
 <title>gpsimWin32</title>
 </head>
 
@@ -15,11 +16,11 @@
 <h3 align="center"><a href="http://www.dattalo.com/gnupic/gpsim.html">gpsim</a> 
 - The gnupic simulator, a simulator for <a href="http://www.microchip.com/">Microchip 
 PIC microcontrollers</a>.</h3>
-<hr>
+<hr />
 <h2 align="center">Introduction</h2>
 <p>This document describes how to compile and install gpsim on WIN32 platforms.</p>
 <p>Gpsim can be compiled in a CLI - command line interface mode (no gui), or in 
-GUI - graphical user interface mode.<br>
+GUI - graphical user interface mode.<br />
 &nbsp;</p>
 <h2 align="center">Which tools are required, where to get them</h2>
 <p>Microsoft Visual Studio .NET 2003 is required to build WIN32 port of gpsim.</p>
@@ -38,17 +39,17 @@ is to use nativeWIN32 ports of bison and flex, which are part of
 <a href="http://unxutils.sourceforge.net">UnxUtils</a> project 
 and <a href="http://gnuwin32.sourceforge.net">GnuWin32</a> project.</p>
 <p>Cygwin environment is required (or at least recommended) for WIN32 native 
-compilation of additional packages.<br>
+compilation of additional packages.<br />
 &nbsp;</p>
 <h2 align="center">How to set up development environment for WIN32 port of gpsim</h2>
 <h3 align="left">Cygwin installation:</h3>
 <p align="left">Select DOS as the Default Text File type. In the Devel Category 
-select bison and flex.<br>
+select bison and flex.<br />
 You have to have c:\cygwin\bin specified in the PATH environment variable, but I 
 think that this is done by default from the Cygwin installation.</p>
-<p align="left">In Microsoft Visual Studio .NET 2003 select Tools/Options...<br>
+<p align="left">In Microsoft Visual Studio .NET 2003 select Tools/Options...<br />
 In the Options dialog select Projects VC++ Directories and add C:\cygwin\bin 
-path.<br>
+path.<br />
 &nbsp;</p>
 <h2 align="center">Which additional packages are required, where to get them, 
 how to to install them</h2>
@@ -69,10 +70,10 @@ how to to install them</h2>
       <li><a href="http://gnuwin32.sourceforge.net/downlinks/libiconv-bin-zip.php">libiconv-1.8-1-bin.zip</a>: 
         required by libintl run time</li>
     </ul>
-    <br>
+    <br />
   </li>
   <li><a href="http://www.gtk.org/">glib</a> is the low-level core library that 
-    forms the basis for projects such as GTK+ and GNOME.<br>
+    forms the basis for projects such as GTK+ and GNOME.<br />
   The WIN32 port of glib package is a part of Tor Lillqvist&#39;s <a href="http://www.gimp.org/~tml/gimp/win32/">GTK+ (and GIMP) 
   for Windows</a> project.
   The latest version of developer, runtime and source package can be found at 
@@ -99,7 +100,7 @@ addition to popt and glib, mentioned in the CLI section:</p>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-4.3-5-mswin32.zip">readline-4.3-5-mswin32.zip</a>: sources</li>
     </ul>
-    <br>
+    <br />
   </li>
   <li>gtkextra-2 - <a href="http://gtkextra.sourceforge.net/">GtkExtra</a> is a 
   useful set of widgets for creating GUI&#39;s for the Xwindows system using GTK+. 
@@ -139,7 +140,7 @@ Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
       <a href="http://www.gimp.org/~tml/gimp/win32/libiconv-1.9.1.bin.woe32.zip">libiconv-1.9.1.bin.woe32.zip</a>: 
         required by GTK+ run time</li>
     </ul>
-    <br>
+    <br />
   </li>
   <li>pango - <a href="http://www.gtk.org/">Pango</a> is a library for layout 
     and rendering of text, with an emphasis on internationalization. It forms 
@@ -152,7 +153,7 @@ Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
       pango-1.4.0.zip</a>: required by 
         gpsim GUI run time</li>
     </ul>
-    <br>
+    <br />
   </li>
   <li>atk - The <a href="http://www.gtk.org/">ATK</a> library provides a set of 
     interfaces for accessibility.
@@ -162,16 +163,18 @@ Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
         for gpsim development</li>
       <li><a href="http://www.gimp.org/~tml/gimp/win32/atk-1.6.0.zip">
       atk-1.6.0.zip</a>: required by gpsim 
-        GUI run time<br>
+        GUI run time<br />
 &nbsp;</li>
     </ul>
+  </li>
 </ul>
 <h2 align="center">Setting up the development environment</h2>
 <ul>
   <li>Create the gpsim_proj directory for the complete gpsim project</li>
   <li>Create the gpsim subdirectory for the gpsim package and download the 
     latest gpsim version from 
-  <a href="http://sourceforge.net/cvs/?group_id=2341">CVS</a></ul>
+  <a href="http://sourceforge.net/cvs/?group_id=2341">CVS</a></li>
+</ul>
 <h3><b>CLI:</b></h3>
 <ul>
   <li>Create the readline subdirectory and extract <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-4.3-5-mswin32.zip">readline-4.3-5-mswin32.zip</a> 
@@ -229,7 +232,7 @@ Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
   </li>
   <li>Double-click on gpsim.sln to start the Microsoft Visual Studio .NET 2003, 
     select Debug GUI or Release GUI solution configuration and rebuild the 
-    solution.<br>
+    solution.<br />
 &nbsp;</li>
 </ul>
 <h2 align="center">Setting up the runtimee</h2>
@@ -264,38 +267,29 @@ Lillqvist--GTK+ (and GIMP) for Windows--Downloads</a>.</p>
   <a href="http://www.gimp.org/~tml/gimp/win32/pango-1.4.0.zip">pango-1.4.0.zip</a> 
     package to the same directory where gpsim.exe resides.</li>
   <li>Extract bin\libatk-1.0-0.dll from 
-  <a href="http://www.gimp.org/~tml/gimp/win32/atk-1.6.0.zip">atk-1.6.0.zip</a>package to the same directory where gpsim.exe resides.<br>
+  <a href="http://www.gimp.org/~tml/gimp/win32/atk-1.6.0.zip">atk-1.6.0.zip</a>package to the same directory where gpsim.exe resides.<br />
 &nbsp;</li>
 </ul>
+
 <h2 align="center">gpsimWin32 snapshots</h2>
-  <p>These binaries are occasionally built from the developmental 
-  code in the CVS server. They are not official releases and should be 
-  considered "beta" quality. Some may not even work at all if a serious bug was 
-  introduced during development, so several are provided to give you the best 
-  chance of finding one that will work.</p>
-  <blockquote>
-    <h3>Windows binaries</h3>
-    <p><a href="http://gpsim.sourceforge.net/gpsimWin32/snapshots/gpsim-0.21.2-20040626.zip">
-    gpsim-0.21.2-20040626.zip</a><br>
-    <a href="http://gpsim.sourceforge.net/gpsimWin32/snapshots/gpsim-0.21.2-20040703-setup.exe">
-    gpsim-0.21.2-20040703-setup.exe</a></p>
-  </blockquote>
+<p>gpsimWin32 snapshots can be found at <a href="http://gpsim.sourceforge.net/snap.php">http://gpsim.sourceforge.net/snap.php.</a></p>
+
 <h2 align="center">Document status</h2>
 <p>If you have questions / comments / other experiences about WIN32 gpsim port, 
 post them to the gnupic mailing list: <a href="mailto:gnupic@linuxhacker.org">gnupic@linuxhacker.org</a>.</p>
-<hr>
-<p>Last update: July 3, 2004 by Borut Ražem</p>
+<hr />
+<p>Last update: July 19, 2004 by Borut Ražem</p>
 <table border="0" width="100%">
   <tr>
     <td align="center">
       <p><i>This site is hosted by</i></p>
-      <p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=2341&amp;type=5" border="0" alt="SourceForge.net Logo" /></a>
-
+      <p><a href="http://sourceforge.net"><img src="http://sourceforge.net/sflogo.php?group_id=2341&amp;type=5" border="0" alt="SourceForge.net Logo" /></a></p>
     </td>
     <td align="center">
-    <a href="http://validator.w3.org/check/referer"><img border="0"
-        src="http://www.w3.org/Icons/valid-html32"
-        alt="Valid HTML 3.2!" height="31" width="88"></a></td>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-xhtml10"
+        alt="Valid XHTML 1.0!" height="31" width="88" /></a>
+    </td>
   </tr>
 </table>
 

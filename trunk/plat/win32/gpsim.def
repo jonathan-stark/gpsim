@@ -6,6 +6,7 @@ EXPORTS
     ??0IOPIN@@QAE@XZ
     ??0IOPORT@@QAE@I@Z
     ??0IO_bi_directional@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
+    ??0IO_bi_directional@@QAE@XZ
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IO_input@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0Interface@@QAE@PAX@Z
@@ -70,23 +71,24 @@ EXPORTS
     ?get@IOPORT@@UAEIXZ
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVAttribute@@PAD_N@Z
-    ?get_bit@IOPORT@@UAEHI@Z
-    ?get_bit@Register@@UAEHI@Z
-    ?get_bit_voltage@IOPORT@@UAEHI@Z
-    ?get_bit_voltage@Register@@UAEHI@Z
+    ?get_bit@IOPORT@@UAE_NI@Z
+    ?get_bit_voltage@IOPORT@@UAENI@Z
     ?get_bp@@YAAAVBreakpoints@@XZ
     ?get_cycles@@YAAAVCycle_Counter@@XZ
+    ?get_digital_state@IOPIN@@UAE_NXZ
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
     ?get_pin@Module@@UAEPAVIOPIN@@I@Z
     ?get_pin_count@Module@@UAEHXZ
     ?get_pin_name@Module@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?get_pin_state@Module@@UAEHI@Z
-    ?get_state@IOPIN@@UAEHXZ
     ?get_symbol_table@@YAAAVSymbol_Table@@XZ
     ?get_trace@@YAAAVTrace@@XZ
-    ?get_voltage@IO_bi_directional@@UAEH_K@Z
-    ?get_voltage@IO_input@@UAEH_K@Z
+    ?get_Vth@IO_bi_directional@@UAENXZ
+    ?get_Vth@IO_input@@UAENXZ
+    ?get_Zth@IO_bi_directional@@UAENXZ
+;    ?get_Zth@PUResistor_IO@@UAENXZ
+;    ?get_Zth@Resistor_IO@@UAENXZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
@@ -105,11 +107,7 @@ EXPORTS
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?print@BreakpointObject@@UAEXXZ
     ?put@IOPORT@@UAEXI@Z
-    ?put_node_state@IO_input@@UAEXH@Z
-    ?put_state@IO_bi_directional@@UAEXH@Z
-    ?put_state@IO_input@@UAEXH@Z
-    ?put_state_value@IOPIN@@UAEXH@Z
-    ?put_state_value@stimulus@@UAEXH@Z
+    ?put_digital_state@IOPIN@@UAEX_N@Z
     ?put_value@IOPORT@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
@@ -135,8 +133,10 @@ EXPORTS
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVBreakpointObject@@I@Z
     ?set_breakpoint@Breakpoints@@QAEIPAVBreakpointObject@@@Z
-    ?set_out_of_range_pm@Processor@@UAEXII@Z
+    ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
+    ?set_nodeVoltage@IOPIN@@UAEXN@Z
     ?set_notify_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
+    ?set_out_of_range_pm@Processor@@UAEXII@Z
     ?set_profile_start_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
     ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
     ?setbit@IOPORT@@UAEXI_N@Z
@@ -149,11 +149,11 @@ EXPORTS
     ?step@Processor@@UAEXI@Z
     ?step_over@Processor@@UAEXXZ
     ?stop@ProgramMemoryAccess@@UAEXXZ
-    ?toggle@IO_input@@UAEXXZ
+    ?toggle@IOPIN@@UAEXXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?update@gpsimValue@@UAEXXZ
-    ?update@Stimulus_Node@@QAEH_K@Z
+    ?update@Stimulus_Node@@QAEN_K@Z
     ?update_direction@IO_bi_directional@@UAEXI@Z
     ?update_stimuli@IOPORT@@UAEHXZ
     ?verbose@@3HA
