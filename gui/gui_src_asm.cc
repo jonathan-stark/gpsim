@@ -299,7 +299,7 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, unsigned int index
       e = (BreakPointInfo*)p->data;
 	      
       if(e->index > index)
-	break;
+        break;
       p=p->next;
     }
     
@@ -336,17 +336,17 @@ void SourceBrowserAsm_Window::SetPC(int address)
   for(i=0;i<SBAW_NRFILES;i++)
     {
       if(pages[i].pageindex_to_fileid == sbawFileId)
-	{
-	  id=i;
-	}
+      {
+        id=i;
+      }
       else
-	{
-	  if( pages[i].source_pcwidget!=0 &&
-	      GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
-	    //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
-	    gtk_widget_hide(pages[i].source_pcwidget);
-	  }
-	}
+      {
+      if( pages[i].source_pcwidget!=0 &&
+        GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
+        //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
+        gtk_widget_hide(pages[i].source_pcwidget);
+	      }
+      }
     }
 
 
@@ -373,14 +373,14 @@ void SourceBrowserAsm_Window::SetPC(int address)
       int xfixed, yfixed;
 
       if(GTK_TEXT(pages[id].source_text)->text_area!=0 &&
-	 pages[id].source_layout->window!=0)
-	{
-	  gdk_window_get_origin(GTK_TEXT(pages[id].source_text)->text_area,&xtext,&ytext);
-	  gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
+	        pages[id].source_layout->window!=0)
+        {
+          gdk_window_get_origin(GTK_TEXT(pages[id].source_text)->text_area,&xtext,&ytext);
+          gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
 
-	  layout_offset = ytext-yfixed;
-	  //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
-	}
+          layout_offset = ytext-yfixed;
+          //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
+        }
     }
   e = getBPatLine(id, row);
   if(e==0)
@@ -808,8 +808,8 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 
     sbaw->current_page=page_num;
     id=sbaw->pages[page_num].pageindex_to_fileid;
-	
-    sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
+    if (id != -1)
+      sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
 
     // Update pc widget
     address=sbaw->gp->cpu->pc->get_raw_value();
