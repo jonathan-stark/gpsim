@@ -301,8 +301,7 @@ struct _SourceBrowserOpcode_Window {
 
     GtkWidget *clist;
 //    int clist_rows;      // Number of rows in the clist
-    int current_row;     // row number of clist that corresponds
-                         // to the PC of the pic.
+    int current_address;   // current PC
 
     char **column_titles; //
     int  columns;         //
@@ -314,6 +313,8 @@ struct _SourceBrowserOpcode_Window {
     GtkWidget *sheet;
     GtkWidget *entry;
     GtkWidget *label;
+    GtkWidget *pcwidget;
+
 
     int *memory;
 };

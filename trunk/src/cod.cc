@@ -70,9 +70,11 @@ enum cod_errors
 
 char * substr(char *a, char *b, int n)
 {
+    char *temp;
   *a = 0;
-  return strncat(a,b,n);
-
+  temp=strncat(a,b,n);
+  assert(strlen(a)<=n);
+  return temp;
 }
 
 // Capitalize a string (there must be a library function that does this!

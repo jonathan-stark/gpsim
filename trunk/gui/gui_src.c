@@ -83,60 +83,6 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
-static gint
-button_press(GtkWidget *widget,
-	     GdkEvent  *event, 
-	     gpointer data)
-{
-
-    SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
-  int break_row;
-
-  if(!sbw) return(FALSE);
-  if(!sbw->gui_obj.gp) return(FALSE);
-  if(!sbw->gui_obj.gp->pic_id) return(FALSE);
-  
-  if ( ((event->type == GDK_BUTTON_PRESS) &&
-        (event->button.button == 3))
-       ||
-       ((event->type == GDK_2BUTTON_PRESS) &&
-        (event->button.button == 1)) )
-
-  {
-      switch(sbw->gui_obj.wt) {
-
-      case WT_asm_source_window:
-/*	  index = gtk_editable_get_position(GTK_EDITABLE(sbaw->source_text));
-	  e = gui_index_to_entry(index);
-	  sbw->gui_obj.gp->p->toggle_break_at_line(0, e->line);*/
-	  return FALSE;
-
-      case WT_opcode_source_window:
-	  break_row =  GTK_CLIST (sbow->clist)->focus_row;
-
-	  if(!sbow->processor)
-	      return TRUE;      // no code is in this window
-	  //sbow->sbw.gui_obj.gp->p->toggle_break_at_address(break_row);
-	   gpsim_toggle_break_at_address(sbow->sbw.gui_obj.gp->pic_id, break_row);
-	  printf("Toggle at line %d\n",break_row);
-	  return TRUE;
-
-//      case WT_list_source_window:
-//	  //sbw->gui_obj.gp->p->toggle_break_at_line(1, break_row);
-//	  gpsim_toggle_break_at_line(sbow->sbw.gui_obj.gp->pic_id, 1, break_row);
-//
-//	  return TRUE;
-
-      default:
-	  printf("bad window type %d\n",sbw->gui_obj.wt);
-      }
-
-    }
-
-  return FALSE;
-}
-
 void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address)
 {
     SourceBrowserOpcode_Window *sbow=(SourceBrowserOpcode_Window*)sbw;
@@ -280,13 +226,6 @@ void CreateSBW(SourceBrowser_Window *sbw)
 //  gtk_signal_connect(GTK_OBJECT(window),"key_release_event",
 //		     (GtkSignalFunc) key_release,
 //		     (gpointer) sbw);
-
-  /* Add a signal handler for button press events. This will capture
-   * commands for setting and/or clearing break points
-   */
-  gtk_signal_connect(GTK_OBJECT(window),"button_press_event",
-		     (GtkSignalFunc) button_press,
-		     (gpointer) sbw);
 
   
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
