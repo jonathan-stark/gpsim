@@ -1231,6 +1231,8 @@ USART_CORE::USART_CORE(void)
 
   baud_rate = new UsartAttribute("BAUD", UsartAttribute::UA_BAUDRATE, 1200);
 
+  txreg=NULL;
+  rcreg=NULL;
 
 }
 
@@ -1355,6 +1357,7 @@ void USARTModule::create_iopin_map(void)
   if(usart->rcreg) {
     usart->rcreg->rxpin = rxpin;
   }
+
   //usart->brg->put(0);
   //usart->spbrg->set_baud_rate(38400);
   //usart->rcsta->put(_RCSTA::SPEN | _RCSTA::CREN);

@@ -223,13 +223,13 @@ static void add_range(Profile_Window *pw,
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 
 static void add_range_dialog(Profile_Window *pw)
@@ -240,7 +240,7 @@ static void add_range_dialog(Profile_Window *pw)
     GtkWidget *label;
     static GtkWidget *startentry;
     static GtkWidget *endentry;
-    int retval;
+    int retval=-1;
 
     if(dialog==NULL)
     {
@@ -297,12 +297,13 @@ static void add_range_dialog(Profile_Window *pw)
     gtk_widget_show_now(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
-    if(retval)
+    if(retval==TRUE)
     {
 	// Add range.
 

@@ -490,6 +490,9 @@ enum module_type {PIC_MODULE, EXTERNAL_MODULE};
 
 struct gui_module
 {
+
+    GtkWidget *fixed; // Main layout that contains everything about the module
+
     enum module_type type;
     Breadboard_Window *bbw;
     Module *module;
