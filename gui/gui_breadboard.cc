@@ -40,9 +40,9 @@ Boston, MA 02111-1307, USA.  */
 
 #define LABELPAD 0 // increase this so wide lines doesn't clutter labels
 
-GdkColor high_output_color;
-GdkColor low_output_color;
-GdkColor black_color;
+static GdkColor high_output_color;
+static GdkColor low_output_color;
+static GdkColor black_color;
 
 #include "../src/modules.h"
 #include "../src/stimuli.h"
@@ -60,6 +60,1113 @@ static int pinspacing = PINLENGTH;
 #define LAYOUTSIZE_Y 800
 
 #define STRING_SIZE 128
+
+#define ROUTE_RES (2*PINLINEWIDTH)
+
+///////////////////////////////////////////////////////////////////////
+// Start of autorouting pain 
+///////////////////////////////////////////////////////////////////////
+#define XSIZE LAYOUTSIZE_X/ROUTE_RES 
+#define YSIZE LAYOUTSIZE_Y/ROUTE_RES
+
+
+/* If HMASK is set in board_matrix, then this position
+ is unavailable for horizontal track */
+#define HMASK 1 
+#define VMASK 2
+/*
+ board matrix contains information about how a track can be routed.
+ */
+static unsigned char board_matrix[XSIZE][YSIZE];
+
+
+static inline int allow_horiz(point p)
+{
+    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
+	return FALSE;
+    if(board_matrix[p.x][p.y] & HMASK)
+	return FALSE;
+    if(board_matrix[p.x][p.y] & 0xF0)
+	return FALSE;
+    return TRUE;
+}
+
+static inline int allow_vert(point p)
+{
+    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
+	return FALSE;
+    if(board_matrix[p.x][p.y] & VMASK)
+	return FALSE;
+    if(board_matrix[p.x][p.y] & 0xF0)
+	return FALSE;
+    return TRUE;
+}
+
+// Find the birds direction of choice to get to from s to e.
+static inline route_direction calculate_route_direction(point s, point e)
+{
+    if(abs(s.x-e.x) > abs(s.y-e.y))
+    {
+	// Left or right
+	if(s.x<e.x)
+	    return R_RIGHT;
+	return R_LEFT;
+    }
+    if(s.y<e.y)
+	return R_UP;
+    return R_DOWN;
+}
+
+static inline route_direction calculate_route_direction_exact(point s, point e)
+{
+    if(s.x!=e.x && s.y!=e.y)
+        return R_NONE;
+    if(s.y==e.y)
+    {
+	// Left or right
+	if(s.x<e.x)
+	    return R_RIGHT;
+	return R_LEFT;
+    }
+    if(s.y<e.y)
+	return R_UP;
+    return R_DOWN;
+}
+
+// Put point p as first point in pat
+static void inline prepend_point_to_path(path **pat, point p)
+{
+    path *new_point;
+    route_direction dir=R_NONE;
+
+/*    int add_point=0;
+
+    if(*pat!=NULL)
+    {
+	dir = calculate_route_direction_exact(p, (*pat)->p);
+	if(dir==R_NONE)
+            add_point=1;
+	else if(*pat!=NULL && (*pat)->next!=NULL)
+	{
+	    if((*pat)->p.x == p.x &&
+	       (*pat)->next->p.x == p.x &&
+	       (*pat)->dir==dir)
+	    {
+		// same x, just change y
+		(*pat)->p.y=p.y;
+	    }
+	    else if((*pat)->p.y == p.y &&
+		    (*pat)->next->p.y == p.y &&
+		    (*pat)->dir==dir)
+	    {
+		// same y, just change x
+		(*pat)->p.x=p.x;
+	    }
+	    else
+	    {
+                add_point=1;
+	    }
+	}
+	else
+	{
+	    add_point=1;
+	}
+    }
+    else
+    {
+        add_point=1;
+    }
+
+    if(add_point)*/
+
+    {
+	new_point = (path*)malloc(sizeof(path));
+	new_point->p=p;
+	new_point->next = *pat;
+	if((*pat)!=NULL)
+	{
+	    dir = calculate_route_direction(p, (*pat)->p);
+	    if((*pat)->dir==R_NONE)
+		(*pat)->dir=dir;
+	}
+	new_point->dir=dir;
+	*pat = new_point;
+    }
+}
+
+// Free all of pat
+static void clear_path(path **pat)
+{
+    path *current_path, *next;
+
+    if(*pat==NULL)
+	return;
+
+    current_path = *pat;
+
+    *pat = NULL;
+
+    while(current_path!=NULL)
+    {
+	next = current_path->next;
+
+	free(current_path);
+
+	current_path = next;
+    }
+}
+
+// Compress sequences with same x or y to one sequence
+static void compress_path(path **pat)
+{
+    int x,y;
+
+    path *current_path;
+
+    current_path = *pat;
+
+    x=current_path->p.x;
+    y=current_path->p.y;
+
+    while(current_path!=NULL)
+    {
+        path *next_path = current_path->next;
+	path *next2_path = next_path->next;
+
+	if(next_path==NULL || next2_path==NULL)
+            break;
+
+	if(current_path->p.x==next_path->p.x &&
+	   current_path->p.x==next2_path->p.x &&
+	   current_path->dir==next_path->dir &&
+	   current_path->dir==next2_path->dir)
+	{
+	    current_path->next=next2_path;
+	    free(next_path);
+            continue;
+	}
+	if(current_path->p.y==next_path->p.y &&
+	   current_path->p.y==next2_path->p.y &&
+	   current_path->dir==next_path->dir &&
+	   current_path->dir==next2_path->dir)
+	{
+	    current_path->next=next2_path;
+	    free(next_path);
+            continue;
+	}
+
+	current_path = current_path->next;
+    }
+}
+
+// mask_matrix is used by trace_two_poins to know where is has been, and
+// how quickly it came here. (depth is stored here if lower)
+static unsigned short mask_matrix[XSIZE][YSIZE];
+
+// maxdepth is shortest path from start to end
+static unsigned short maxdepth;
+
+// Penalty for making a turn in a trace
+#define turnq(a,b) (((a)!=(b))*10)
+
+static unsigned long calls;
+
+/*
+This is an recursive routine that tries to find a path between p and end.
+*/
+static int trace_two_points(path **pat,   // Pointer to resulting path
+			    point p,  // Where we are now
+			    point end,    // Where we want to go
+			    int depth,
+			    route_direction lastdir)    // How deep in we are
+{
+    int retval;
+    route_direction dir;
+    point up, left, right, down;
+
+    if(depth==0)
+    {
+	// Initialize mask_matrix and maxdepth on first call
+
+	int x,y;
+	// Initialize mask_matrix and maxdepth
+	//maxdepth=500;
+	for(x=0;x<XSIZE;x++)
+	    for(y=0;y<YSIZE;y++)
+		mask_matrix[x][y]=maxdepth;
+
+	clear_path(pat);
+        calls=0;
+    }
+
+    calls++;
+
+    ////////////////////////////////////////
+    // Recusion termination
+    ////////////////////////////////////////
+    if(depth>maxdepth)
+	return FALSE;
+    if(depth>mask_matrix[p.x][p.y])
+	return FALSE;
+    if(p.x == end.x && p.y==end.y)
+    {
+	// We are at end point
+
+	if(depth < maxdepth)
+	{
+	    // We found a new shortest path.
+
+	    //printf("Found path with length %d\n",depth);
+
+	    maxdepth = depth;
+	    clear_path(pat);
+	    prepend_point_to_path(pat, p);
+	    return TRUE;
+	}
+	return FALSE;
+    }
+
+    // Store new (closer) depth in mask_matrix.
+    mask_matrix[p.x][p.y]=depth;
+
+    // Find the general direction we want to go
+    dir = calculate_route_direction(p,end);
+
+    // Recursion return value
+    retval=0;
+
+    // Convenience
+    up=p;up.y++;
+    down=p;down.y--;
+    left=p;left.x--;
+    right=p;right.x++;
+
+    /* Depending on where we wish to go, do recursion so that we likely
+     will quickly find at least some kind of path to end.
+
+     If we don't do that maxdepth will stay large, and the traceing will
+     likely take a long time.
+
+     We use allow_vert and allow_horiz to determine if the movement is
+     allowed, of if there is something in our way.
+
+     */
+    switch(dir)
+    {
+    case R_UP:
+	if(allow_vert(up))
+	    retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	if(p.x<end.x)
+	{
+	    if(allow_horiz(right))
+		retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	    if(allow_horiz(left))
+		retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+	}
+	else
+	{
+	    if(allow_horiz(left))
+		retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+	    if(allow_horiz(right))
+		retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	}
+	if(allow_vert(down))
+	    retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	break;
+    case R_DOWN:
+	if(allow_vert(down))
+	    retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	if(p.x<end.x)
+	{
+	    if(allow_horiz(right))
+		retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	    if(allow_horiz(left))
+		retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+            }
+	else
+	{
+	    if(allow_horiz(left))
+		retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+	    if(allow_horiz(right))
+		retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	}
+	if(allow_vert(up))
+	    retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	break;
+    case R_LEFT:
+	if(allow_horiz(left))
+	    retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+	if(p.y<end.y)
+	{
+	    if(allow_vert(up))
+		retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	    if(allow_vert(down))
+		retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	}
+	else
+	{
+	    if(allow_vert(down))
+		retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	    if(allow_vert(up))
+		retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	}
+	if(allow_horiz(right))
+	    retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	break;
+    case R_RIGHT:
+	if(allow_horiz(right))
+	{
+	    retval|=trace_two_points(pat,right,end,depth+1+turnq(lastdir,R_RIGHT),R_RIGHT);
+	}
+	if(p.y<end.y)
+	{
+	    if(allow_vert(up))
+		retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	    if(allow_vert(down))
+		retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	}
+	else
+	{
+	    if(allow_vert(down))
+		retval|=trace_two_points(pat,down,end,depth+1+turnq(lastdir,R_DOWN),R_DOWN);
+	    if(allow_vert(up))
+		retval|=trace_two_points(pat,up,end,depth+1+turnq(lastdir,R_UP),R_UP);
+	}
+	if(allow_horiz(left))
+	{
+	    retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
+	}
+	break;
+    }
+
+
+    // Check if some of the recursive traces went well.
+    if(retval==TRUE)
+    {
+	// We found a path to end. Add point p to path.
+/*	if(*pat!=NULL && (*pat)->next!=NULL)
+	{
+          // If there are point in pat already, then check if
+            // we can use that and just change the coords there.
+	    if((*pat)->p.x == p.x &&
+	       (*pat)->next->p.x == p.x &&
+	      (*pat)->dir==dir)
+	    {
+		// same x, just change y
+		(*pat)->p.y=p.y;
+	    }
+	    else if((*pat)->p.y == p.y &&
+	       (*pat)->next->p.y == p.y)
+	    {
+		// same y, just change x
+		(*pat)->p.x=p.x;
+	    }
+	    else
+	    {
+                // This is a turn in the trace. We need another point.
+		prepend_point_to_path(pat, p, dir);
+	    }
+	}
+	else*/
+	{
+          // This is first or second point.
+	    prepend_point_to_path(pat, p);
+	}
+	if(depth==0)
+	{
+            printf("Successful trace with %ld steps\n",calls);
+	}
+	return TRUE;
+    }
+
+    if(depth==0)
+    {
+	printf("Unsuccessful trace with %ld steps\n",calls);
+    }
+    return FALSE; 
+}
+    /*
+void print_matrix(void)
+{
+    int x,y;
+
+    for(y=YSIZE-1;y>=0;y--)
+    {
+        for(x=0;x<XSIZE;x++)
+        {
+	    if(board_matrix[x][y]==0)
+		putchar('.');
+	    else if(board_matrix[x][y]==(HMASK|VMASK))
+		putchar('X');
+	    else if(board_matrix[x][y]==HMASK)
+		putchar('-');
+	    else if(board_matrix[x][y]==VMASK)
+		putchar('|');
+	    else// if(isalnum(board_matrix[x][y]))
+		putchar(board_matrix[x][y]);
+	    //			else
+	    //				assert(0);
+	}
+	putchar('\r');
+	putchar('\n');
+    }
+} */
+
+// Debug. Draw routing constraints. FIXME draw from board_matrix instead.
+static void draw_board_matrix(Breadboard_Window *bbw)
+{
+    int x,y, width, height;
+    GList *mi;
+    int i;
+
+    // Loop all modules
+    mi = bbw->modules;
+    while(mi!=NULL)
+    {
+	gui_module *p;
+
+	p = (struct gui_module*) mi->data;
+
+        x=p->x;
+	y=p->y/*-PINLENGTH*/;
+	width=p->width/*+PINLENGTH*/;
+	height=p->height/*+PINLENGTH*/;
+
+        // Debug. This shows the boxes that limits traceing.
+	gdk_draw_rectangle(bbw->layout_pixmap,
+			   bbw->case_gc,0,
+			   x,y,width,height);
+
+	// Draw barriers around pins so the tracker can only get in
+        // straigt to the pin and not from the side.
+	for(i=1;i<=p->module->get_pin_count();i++)
+	{
+//	    struct stimulus *s;
+	    GList *e;
+            struct gui_pin *gp;
+
+//	    s=p->module->get_pin(i);
+
+
+	    e = g_list_nth(p->pins, i-1);
+
+	    gp = (struct gui_pin*)e->data;
+
+	    switch(gp->orientation)
+	    {
+	    case LEFT:
+		y=p->y+gp->y;
+		gdk_draw_line(bbw->layout_pixmap,
+			      bbw->case_gc,
+			      p->x+gp->x-PINLENGTH,y,
+			      p->x+gp->x+gp->width,y);
+		y=p->y+gp->y+gp->height;
+		gdk_draw_line(bbw->layout_pixmap,
+			      bbw->case_gc,
+			      p->x+gp->x-PINLENGTH,y,
+			      p->x+gp->x+gp->width,y);
+		break;
+	    case RIGHT:
+		y=p->y+gp->y;
+		gdk_draw_line(bbw->layout_pixmap,
+			      bbw->case_gc,
+			      p->x+gp->x,y,
+			      p->x+gp->x+gp->width+PINLENGTH,y);
+		y=p->y+gp->y+gp->height;
+		gdk_draw_line(bbw->layout_pixmap,
+			      bbw->case_gc,
+			      p->x+gp->x,y,
+			      p->x+gp->x+gp->width+PINLENGTH,y);
+		break;
+	    default:
+                assert(0);
+	    }
+	}
+        mi=mi->next;
+    }
+}
+
+static GList *nodepath_list;
+
+// Draw node in nodepath_list to layout_pixmap
+static void clear_nodes(Breadboard_Window *bbw)
+{
+    GList *iter;
+    path *nodepath;
+
+    iter = nodepath_list;
+    while(iter!=NULL)
+    {
+	nodepath = (path*)iter->data;
+
+	clear_path(&nodepath);
+
+        nodepath_list = g_list_remove(nodepath_list, iter->data);
+
+        iter=nodepath_list;
+    }
+
+}
+
+// Draw node in nodepath_list to layout_pixmap
+static void draw_nodes(Breadboard_Window *bbw)
+{
+    GList *iter;
+
+    gdk_draw_rectangle (bbw->layout_pixmap,
+			bbw->gui_obj.window->style->bg_gc[GTK_WIDGET_STATE (bbw->gui_obj.window)],
+//			((GUI_Object*)bbw)->window->style->white_gc,
+			TRUE,
+			0, 0,
+			bbw->layout->allocation.width,
+			bbw->layout->allocation.height);
+
+    iter = nodepath_list;
+
+    while(iter!=NULL)
+    {
+	    int last_x, last_y;
+	    path *current_path;
+
+
+	    path *nodepath;
+	    nodepath = (path*)iter->data;
+
+	    current_path = nodepath;
+
+	    last_x = current_path->p.x*ROUTE_RES;
+	    last_y = current_path->p.y*ROUTE_RES;
+
+	    current_path=current_path->next;
+
+	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
+
+	    while(current_path!=NULL)
+	    {
+		int x,y;
+
+		x=current_path->p.x*ROUTE_RES;
+		y=current_path->p.y*ROUTE_RES;
+
+		gdk_draw_line(bbw->layout_pixmap,
+			      bbw->pinline_gc,
+			      last_x-(int)bbw->hadj->value,last_y-(int)bbw->vadj->value,
+			      x-(int)bbw->hadj->value,y-(int)bbw->vadj->value);
+	    //    printf("(%d, %d) - (%d, %d)\n",last_x,last_y,x,y);
+
+		last_x=x;
+		last_y=y;
+
+		current_path = current_path->next;
+	    }
+            iter=iter->next;
+    }
+
+    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
+		    ((GUI_Object*)bbw)->window->style->white_gc,
+		    bbw->layout_pixmap,
+		    0, 0,
+		    0, 0,
+		    bbw->layout->allocation.width,
+		    bbw->layout->allocation.height);
+
+    gtk_widget_queue_draw(bbw->layout);
+}
+
+
+
+// Here we fill board_matrix with module packages, so that trace_two_points
+// know not to trace over them.
+static void update_board_matrix(Breadboard_Window *bbw)
+{
+    int x,y, width, height;
+    GList *mi;
+    int i;
+
+    // Clear first.
+    for(y=YSIZE-1;y>=0;y--)
+    {
+	for(x=0;x<XSIZE;x++)
+	    board_matrix[x][y]=0;
+    }
+
+
+    // Loop all modules, and put its package and pins to board_matrix
+    mi = bbw->modules;
+    while(mi!=NULL)
+    {
+	gui_module *p;
+
+	p = (struct gui_module*) mi->data;
+
+        x=p->x;
+	y=p->y/*-PINLENGTH*/;
+	width=p->width/*+PINLENGTH*/;
+	height=p->height/*+PINLENGTH*/;
+
+	for(;y<p->y+height;y+=ROUTE_RES)
+	{
+	    x=p->x;
+	    for(;x<p->x+width;x+=ROUTE_RES)
+	    {
+		board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+	    }
+	}
+
+	// Draw barriers around pins so the tracker can only get in
+        // straigt to the pin and not from the side.
+	for(i=1;i<=p->module->get_pin_count();i++)
+	{
+//	    struct stimulus *s;
+	    GList *e;
+            struct gui_pin *gp;
+
+//	    s=p->module->get_pin(i);
+
+
+	    e = g_list_nth(p->pins, i-1);
+
+	    gp = (struct gui_pin*)e->data;
+
+	    switch(gp->orientation)
+	    {
+	    case LEFT:
+		y=p->y+gp->y;
+		for(x=p->x+gp->x-PINLENGTH;
+		    x<p->x+gp->x+gp->width;
+		    x+=ROUTE_RES)
+		    board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+		y=p->y+gp->y+gp->height;
+		for(x=p->x+gp->x-PINLENGTH;
+		    x<p->x+gp->x+gp->width;
+		    x+=ROUTE_RES)
+		    board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+		break;
+	    case RIGHT:
+		y=p->y+gp->y;
+		for(x=p->x+gp->x;
+		    x<p->x+gp->x+gp->width+PINLENGTH;
+		    x+=ROUTE_RES)
+		    board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+		y=p->y+gp->y+gp->height;
+		for(x=p->x+gp->x;
+		    x<p->x+gp->x+gp->width+PINLENGTH;
+		    x+=ROUTE_RES)
+		    board_matrix[x/ROUTE_RES][y/ROUTE_RES]=(HMASK|VMASK);
+		break;
+	    default:
+                assert(0);
+	    }
+	}
+        mi=mi->next;
+    }
+
+    clear_nodes(bbw);
+    draw_nodes(bbw);
+}
+
+// Add path to board_matrix. This will make trace_two_point to not trace
+// at its place. It can trace over it when in straight angle.
+static void add_path_to_matrix(path *pat)
+{
+    int x=-1, y=-1;
+    if(pat!=NULL)
+    {
+	x=pat->p.x;
+	y=pat->p.y;
+	pat=pat->next;
+    }
+    while(pat!=NULL)
+    {
+	if(pat->dir==R_LEFT || pat->dir==R_RIGHT)
+	    board_matrix[x][y]|=HMASK;
+	if(pat->dir==R_DOWN || pat->dir==R_UP)
+	    board_matrix[x][y]|=VMASK;
+//	printf("xi %d yi %d\n",x,y);
+//	printf("patx %d paty %d\n",pat->p.x,pat->p.y);
+//        printf("patdir %d\n",pat->dir);
+	while(x!=pat->p.x || y!=pat->p.y)
+	{
+	    if(x<pat->p.x)
+		x++;
+	    if(x>pat->p.x)
+		x--;
+	    if(y<pat->p.y)
+		y++;
+	    if(y>pat->p.y)
+                y--;
+	    if(pat->dir==R_LEFT || pat->dir==R_RIGHT)
+		board_matrix[x][y]|=HMASK;
+	    if(pat->dir==R_DOWN || pat->dir==R_UP)
+		board_matrix[x][y]|=VMASK;
+//            printf("x %d y %d\n",x,y);
+	}
+
+	pat = pat->next;
+    }
+}
+
+static struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin);
+
+#define MAX_PATHS 32
+
+static path *shortest_path[100][100]={NULL};//[MAX_PATHS]=NULL;
+static int pathlen[100][100]={0};
+
+static int *permutations;
+static int *shortest_permutation;
+
+#include <algorithm>
+
+static void reverse_path(path **pat)
+{
+    path *next, *last=NULL;
+
+    while(*pat != NULL)
+    {
+//	    output_list=*pat;
+
+	// Keep a pointer to next
+	next = (*pat)->next;
+
+	// New next poins to last (reversing the list)
+	(*pat)->next = last;
+//	if(last!=NULL)
+//	    last->next=*pat;
+
+	last = *pat;
+	*pat = next;
+    }
+    *pat = last;
+}
+
+static void reverse_path_if_endpoint(point startpoint, path **pat)
+{
+    point pat_start, pat_end;
+    int dist_start, dist_end;
+    path *iter, *next, *last;
+
+//    path **input_list;
+//    path *output_list=NULL;
+
+    iter = *pat;
+
+    pat_start = iter->p;
+
+    while(iter->next!=NULL)
+        iter=iter->next;
+
+    pat_end = iter->p;
+
+    dist_start = abs(pat_start.x-startpoint.x) + abs(pat_start.y-startpoint.y);
+    dist_end = abs(pat_end.x-startpoint.x) + abs(pat_end.y-startpoint.y);
+
+    if(dist_start > dist_end && dist_end<5)
+    {
+        puts("REVERSE");
+	// Reverse the list *pat
+
+        reverse_path(pat);
+    }
+    puts("no reverse");
+}
+
+static void reverse_path_if_startpoint(point startpoint, path **pat)
+{
+    point pat_start, pat_end;
+    int dist_start, dist_end;
+    path *iter, *next, *last;
+
+//    path **input_list;
+//    path *output_list=NULL;
+
+    iter = *pat;
+
+    pat_start = iter->p;
+
+    while(iter->next!=NULL)
+        iter=iter->next;
+
+    pat_end = iter->p;
+
+    dist_start = abs(pat_start.x-startpoint.x) + abs(pat_start.y-startpoint.y);
+    dist_end = abs(pat_end.x-startpoint.x) + abs(pat_end.y-startpoint.y);
+
+    if(dist_start < dist_end && dist_start<5)
+    {
+        puts("REVERSE");
+	// Reverse the list *pat
+
+        reverse_path(pat);
+    }
+    puts("no reverse");
+}
+
+static void path_copy_and_cat(path **pat, path **source)
+{
+    path *dest, *prev=NULL;
+
+    dest = *pat;
+
+    if(dest!=NULL)
+    {
+	reverse_path_if_startpoint((*source)->p, pat);
+
+	while(dest->next!=NULL)
+	{
+	    dest=dest->next;
+	}
+
+	reverse_path_if_endpoint(dest->p, source);
+
+	printf("dx %d, dy %d\n",
+	       abs((*source)->p.x-dest->p.x),
+	       abs((*source)->p.y-dest->p.y));
+
+	assert( (abs((*source)->p.x-dest->p.x) + abs((*source)->p.y-dest->p.y)) < 5);
+
+	prev = dest;
+	dest=dest->next;
+    }
+
+    path *sourceiter = *source;
+
+    while(sourceiter!=NULL)
+    {
+
+	dest = (path*) malloc(sizeof(path));
+	memcpy(dest, sourceiter, sizeof(path));
+	dest->next=NULL;
+
+	if(*pat==NULL)
+	    *pat=dest;
+
+	if(prev!=NULL)
+	{
+	    prev->next = dest;
+	}
+
+	prev = dest;
+	sourceiter=sourceiter->next;
+    }
+}
+
+
+
+/*
+ Trace a node, and add result to nodepath_list
+ */
+static void trace_node(struct gui_node *gn)
+{
+    struct gui_pin *p;
+    Breadboard_Window *bbw;
+    stimulus *stimulus;
+    GList *pinlist=NULL;
+    int nr_of_nodes=0;
+    int i,j;
+    int didnt_work=0;
+
+    path *pat;
+
+    point start={-1,-1},end;
+
+    bbw=gn->bbw;
+
+    stimulus = gn->node->stimuli;
+
+    puts("");
+
+    // Make a glist of all gui_pins in the node
+    while(stimulus!=NULL)
+    {
+	p = find_gui_pin(bbw, stimulus);
+
+	if(p==NULL)
+	{
+	    puts("Not found");
+	    assert(0);
+	}
+
+	pinlist = g_list_append(pinlist, p);
+        nr_of_nodes++;
+
+	stimulus=stimulus->next;
+    }
+
+    // Allocate an array of shortest_paths, indexed with 2x glist position.
+//FIXME    shortest_path = (path***) malloc(nr_of_nodes*nr_of_nodes*sizeof(path*));
+
+    permutations = (int*)malloc(sizeof(int)*nr_of_nodes);
+    shortest_permutation = (int*)malloc(sizeof(int)*nr_of_nodes);
+    for(i=0;i<nr_of_nodes;i++)
+        permutations[i]=i;
+
+    // Trace between all stimulus, and store the distances in the array.
+    for(i=0;i<nr_of_nodes;i++)
+    {
+	struct gui_pin *pi, *pj;
+        GList *li, *lj;
+
+	li = g_list_nth(pinlist,i);
+        assert(li!=NULL);
+        pi = (gui_pin*) li->data;
+	for(j=i+1;j<nr_of_nodes;j++)
+	{
+	    lj = g_list_nth(pinlist,j);
+	    assert(lj!=NULL);
+	    pj = (gui_pin*) lj->data;
+
+	    start.x=pi->layout_xpos/ROUTE_RES;
+	    start.y=pi->layout_ypos/ROUTE_RES;
+
+	    end.x=pj->layout_xpos/ROUTE_RES;
+	    end.y=pj->layout_ypos/ROUTE_RES;
+
+	    printf("Tracing from %d,%d to %d,%d\n",start.x,start.y,end.x,end.y);
+	    maxdepth=abs(start.x-end.x)+abs(start.y-end.y);
+	    maxdepth=maxdepth*2+100;
+	    printf("Trying maxdepth %d\n",maxdepth);
+	    trace_two_points(&shortest_path[i][j], start, end,0,R_UP);
+	    if(shortest_path[i][j]==NULL)
+	    {
+		printf("%%% Couldn't trace from pin %s to pin %s!\n",
+                       pi->iopin->name(),
+                       pj->iopin->name());
+		didnt_work=1;
+	    }
+            else
+		printf("Trace is %d long\n",maxdepth);
+	    pathlen[i][j]=maxdepth;
+
+	    pathlen[j][i]=maxdepth;
+            shortest_path[j][i]=shortest_path[i][j];
+	}
+    }
+
+    if(didnt_work)
+    {
+	printf("%%%%% Couldn't trace node %s!\n",gn->node->name());
+	for(i=0;i<nr_of_nodes;i++)
+	    for(j=i+1;j<nr_of_nodes;j++)
+		clear_path(&shortest_path[i][j]);
+	free(permutations);
+	free(shortest_permutation);
+	return;
+    }
+
+    // Find the combination that produces the shortest node.
+    int minlen = 100000;
+    do
+    {
+	int sum=0;
+
+	printf("%d ",permutations[0]);
+
+	for(i=0;i<nr_of_nodes-1;i++)
+	{
+	    printf("%d ",permutations[i+1]);
+	    sum+=pathlen[permutations[i]][permutations[i+1]];
+	}
+
+	printf("length %d\n",sum);
+
+	if(sum < minlen)
+	{
+	    minlen=sum;
+	    for(i=0;i<nr_of_nodes;i++)
+	    {
+                shortest_permutation[i]=permutations[i];
+	    }
+	}
+        // Fixme, I'd rather use next_combination().
+    } while ( next_permutation( permutations, permutations+nr_of_nodes ) );
+
+    printf("Shortest path is %d long: ", minlen);
+    for(i=0;i<nr_of_nodes;i++)
+    {
+	printf("%d ",shortest_permutation[i]);
+    }
+    puts("");
+
+    path *nodepath=NULL;
+    for(i=0;i<nr_of_nodes-1;i++)
+    {
+	path_copy_and_cat(&nodepath,&shortest_path[shortest_permutation[i]][shortest_permutation[i+1]]);
+    }
+
+    for(i=0;i<nr_of_nodes;i++)
+	for(j=i+1;j<nr_of_nodes;j++)
+	    clear_path(&shortest_path[i][j]);
+    free(permutations);
+    free(shortest_permutation);
+
+	if(nodepath!=NULL)
+	{
+
+	    //compress_path(&nodepath);
+
+	    add_path_to_matrix(nodepath);
+
+	    nodepath_list = g_list_append(nodepath_list, nodepath);
+
+//            clear_path(&nodepath);
+	}
+
+
+/*	start.x = end.x;
+        start.y = end.y;
+	stimulus=stimulus->next;
+    }*/
+}
+
+
+///////////////////////////////////////////////////////////////////////
+// Pain is over!
+///////////////////////////////////////////////////////////////////////
+
+struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
+{
+    GList *iter;
+    int i;
+    gui_module *m;
+
+
+
+    iter = bbw->modules;
+    while(iter!=NULL)
+    {
+	m = (gui_module *)iter->data;
+
+//	Package *pa;
+//	pa=dynamic_cast<Package*>(m);
+//	assert(pa!=NULL);
+
+	for(i=1;i<=m->module->get_pin_count();i++)
+	{
+	    struct stimulus *p;
+
+	    p=m->module->get_pin(i);
+
+	    if(p == pin)
+	    {
+                GList *e;
+
+		e = g_list_nth(m->pins, i-1);
+
+                return (struct gui_pin*)e->data;
+	    }
+	}
+
+	iter = iter->next;
+    }
+
+    return NULL;
+}
+
+
+
+
+
 
 static void draw_pin(struct gui_pin *pin)
 {
@@ -269,7 +1376,7 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
     p->bbw->selected_module = p;
 }
 
-void position_module(struct gui_module *p, int x, int y)
+static void position_module(struct gui_module *p, int x, int y)
 {
     GList *piniter;
     struct gui_pin *pin;
@@ -293,6 +1400,14 @@ void position_module(struct gui_module *p, int x, int y)
 	{
 	    pin = (struct gui_pin*) piniter->data;
 
+            pin->layout_xpos = p->x + pin->x;
+            pin->layout_ypos = p->y + pin->y + pin->height/2; // FIXME /2?
+
+//	    if(pin->orientation==LEFT)
+//                pin->layout_xpos-=pinspacing/2;
+	    if(pin->orientation==RIGHT)
+		pin->layout_xpos+=PINLENGTH /*+ pinspacing/2*/;
+
 	    gtk_layout_move(GTK_LAYOUT(p->bbw->layout),
 			    pin->widget,p->x+pin->x,p->y+pin->y);
 
@@ -301,7 +1416,7 @@ void position_module(struct gui_module *p, int x, int y)
     }
 }
 
-double module_distance(struct gui_module *p, int x, int y)
+static double module_distance(struct gui_module *p, int x, int y)
 {
     double distance;
     double min_distance=100000000;
@@ -341,7 +1456,7 @@ double module_distance(struct gui_module *p, int x, int y)
     return min_distance;
 }
 
-struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
+static struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
 {
     GList *mi;
     gui_module *closest=NULL;
@@ -386,6 +1501,7 @@ void grab_module(gui_module *p)
 
     treeselect_module(NULL,dragged_module);
     dragging = 1;
+    gtk_widget_set_app_paintable(p->bbw->layout, FALSE);
 }
 
 static void pointer_cb(GtkWidget *w,
@@ -415,9 +1531,13 @@ static void pointer_cb(GtkWidget *w,
 	{
             puts("Done dragging new module");
 //	    gtk_grab_remove(bbw->layout);
-	    gdk_pointer_ungrab(GDK_CURRENT_TIME);
-	    dragging = 0;
-            grab_next_module=0;
+	    if(dragging)
+	    {
+		gdk_pointer_ungrab(GDK_CURRENT_TIME);
+		dragging = 0;
+		gtk_widget_set_app_paintable(bbw->layout, TRUE);
+		grab_next_module=0;
+	    }
 	}
 	else
 	{
@@ -432,6 +1552,7 @@ static void pointer_cb(GtkWidget *w,
 			     GDK_CURRENT_TIME);
 	    treeselect_module(NULL,dragged_module);
 	    dragging = 1;
+	    gtk_widget_set_app_paintable(bbw->layout, FALSE);
 	}
 	break;
     case GDK_2BUTTON_PRESS:
@@ -439,8 +1560,13 @@ static void pointer_cb(GtkWidget *w,
     case GDK_BUTTON_RELEASE:
 //        puts("Release");
 //	gtk_grab_remove(bbw->layout);
-        gdk_pointer_ungrab(GDK_CURRENT_TIME);
-	dragging = 0;
+	if(dragging)
+	{
+	    gdk_pointer_ungrab(GDK_CURRENT_TIME);
+	    update_board_matrix(bbw);
+	    dragging = 0;
+	    gtk_widget_set_app_paintable(bbw->layout, TRUE);
+	}
 	break;
     default:
 	printf("Whoops? event type %d\n",event->type);
@@ -448,7 +1574,7 @@ static void pointer_cb(GtkWidget *w,
     }
 }
 
-
+// When clicked on a pin
 static gint button(GtkWidget *widget,
 		   GdkEventButton *event,
 		   struct gui_pin *p)
@@ -503,7 +1629,10 @@ static gint button(GtkWidget *widget,
 		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
 				    p->iopin->snode->name());
 
-	    treeselect_node(NULL, gn);
+            update_board_matrix(p->bbw);
+	    trace_node(gn);
+            draw_nodes(gn->bbw);
+
 	    return 1;
 	}
     }
@@ -1000,6 +2129,18 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
     }
 }
 
+static void add_library(GtkWidget *button, Breadboard_Window *bbw)
+{
+    char *library_name;
+
+    library_name = gui_get_string("Module library name (e.g. libgpsim_modules.so)","");
+
+    if(library_name!=NULL)
+    {
+        module_load_library(library_name);
+    }
+}
+
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
 
@@ -1111,6 +2252,88 @@ static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
     bbw->selected_node->selected_row=-1;
 }
 
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+static char *file_selection_name;
+static int fs_done;
+
+static void
+file_selection_ok (GtkWidget        *w,
+		   GtkFileSelection *fs)
+{
+    char *file;
+
+    file_selection_name=gtk_file_selection_get_filename (fs);
+
+    fs_done=1;
+}
+
+static void
+file_selection_cancel (GtkWidget        *w,
+		       GtkFileSelection *fs)
+{
+    file_selection_name=NULL;
+    fs_done=1;
+}
+
+static char *gui_get_filename(char *filename)
+{
+    static GtkWidget *window = NULL;
+
+    GtkWidget *hbox, *optionmenu, *label;
+
+    GtkWidget *menu;
+    GtkWidget *item;
+
+    char *prompt="Log settings";
+
+    if (!window)
+    {
+
+	window = gtk_file_selection_new (prompt);
+
+	gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
+
+	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
+
+	gtk_signal_connect_object(GTK_OBJECT(window),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
+	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				   GTK_OBJECT(window));
+
+	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
+			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+			    window);
+	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+			    "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
+			    window);
+    }
+
+    gtk_file_selection_set_filename(GTK_FILE_SELECTION (window),
+				    filename);
+
+    file_selection_name=NULL;
+    gtk_widget_show_now(window);
+
+    fs_done=0;
+    file_selection_name=NULL;
+    gtk_grab_add(window);
+    while(!fs_done && GTK_WIDGET_VISIBLE(window))
+	gtk_main_iteration();
+    gtk_grab_remove(window);
+    
+    gtk_widget_hide(window);
+
+    if(file_selection_name==NULL)
+    {
+	return NULL;
+    }
+
+    return file_selection_name;
+}
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
     GList *iter;
@@ -1118,8 +2341,12 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     list <Module_Library *> :: iterator mi;
     list <Module *> :: iterator module_iterator;
     Module *m;
+    char *filename;
 
-    fo = fopen("/tmp/foo.stc", "w");
+    filename = gui_get_filename("netlist.stc");
+    if(filename == NULL)
+        filename="/tmp/foo.stc";
+    fo = fopen(filename, "w");
 
     fprintf(fo, "\n# DON'T EDIT THIS FILE. IT IS AUTOGENERATED.\n");
 
@@ -1196,7 +2423,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     fprintf(fo, "\n\n# End.\n");
     fclose(fo);
 
-    text_dialog("/tmp/foo.stc");
+    text_dialog(filename);
 
 /*    gui_message("Saved to /tmp/foo.stc"); // FIXME path
 
@@ -1207,36 +2434,48 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		load c /tmp/foo.stc");*/
 }
 
-static void expose_layout(GtkWidget *widget,
-			  GdkEventExpose *event,
-			  Breadboard_Window *bbw)
+static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
 {
-#if 0
+    update_board_matrix(bbw);
 
-    puts("Expose layout");
+//    gdk_draw_rectangle (bbw->layout_pixmap,
+//			    ((GUI_Object*)bbw)->window->style->white_gc,
+//			TRUE,
+//			0, 0,
+//			bbw->layout->allocation.width,
+//			bbw->layout->allocation.height);
 
-    stimulus *s;
+//    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
+//		    ((GUI_Object*)bbw)->window->style->white_gc,
+//		    bbw->layout_pixmap,
+//		    0, 0,
+//		    0, 0,
+//		    bbw->layout->allocation.width,
+//		    bbw->layout->allocation.height);
+}
 
-    row=0;
+static void trace_all_foreach_function(GtkWidget *item, Breadboard_Window *bbw)
+{
+    Stimulus_Node *node;
 
-    for(;;)
-    {
-	s = (stimulus*) gtk_clist_get_row_data(GTK_CLIST(bbw->node_clist), row);
+    node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
 
-	if(s!=NULL)
-	{
-	    gdk_draw_line(GTK_LAYOUT (widget)->bin_window,
-			  bbw->case_gc,
-			  20-bbw->hadj->value,20-bbw->vadj->value,
-			  200-bbw->hadj->value,100-bbw->vadj->value);
-	}
+    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
 
-        row++;
-    }
-#endif
-//    gdk_window_clear_area (widget->window, event->area.x, event->area.y,
-//			   event->area.width, event->area.height);
+    trace_node(gn);
+}
 
+static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
+{
+    update_board_matrix(bbw);
+
+    gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
+			  trace_all_foreach_function,
+			  (gpointer)bbw);
+
+    draw_nodes(bbw);
+
+    puts("Trace all is done.");
 }
 
 static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orientation orientation, IOPIN *iopin)
@@ -1251,6 +2490,7 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
     pin->width=pinspacing;
     pin->height=pinspacing;
     pin->bbw=bbw;
+    pin->gc=bbw->pinline_gc;
 
     pin->y-=pin->height/2;
 
@@ -1295,9 +2535,6 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
 				-1);
 
     // Draw pin
-    pin->gc=gdk_gc_new(bbw->gui_obj.window->window);
-    g_assert(pin->gc!=NULL);
-    gdk_gc_set_line_attributes(pin->gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
     draw_pin(pin);
 
     gtk_widget_show(pin->widget);
@@ -1655,6 +2892,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 //	position_module(p, p->module->x, p->module->y);
 //    else
     position_module(p, x, y);
+    p->module->x = p->x;
+    p->module->y = p->y;
 
     bbw->modules=g_list_append(bbw->modules, p);
 
@@ -1662,6 +2901,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     if(x+p->width>max_x)
 	max_x=x+p->width;
+
+    update_board_matrix(p->bbw);
 
     return p;
 }
@@ -1843,8 +3084,44 @@ void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus
 	    gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
 	    gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
 	    gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
+
 	}
     }
+}
+
+static gint layout_configure_event (GtkWidget *widget,
+				    GdkEventConfigure *event,
+				    Breadboard_Window *bbw)
+{
+
+    puts("Configure");
+
+    if (bbw->layout_pixmap)
+	gdk_pixmap_unref(bbw->layout_pixmap);
+
+    bbw->layout_pixmap = gdk_pixmap_new(widget->window,
+					widget->allocation.width,
+					widget->allocation.height,
+					-1);
+
+    draw_nodes(bbw);
+    return TRUE;
+}
+
+static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
+{
+    if(bbw->layout_pixmap==NULL)
+    {
+	puts("bbw.c: no pixmap!");
+	return;
+    }
+
+    gdk_draw_pixmap(GTK_LAYOUT (widget)->bin_window,
+			    ((GUI_Object*)bbw)->window->style->white_gc,
+		    bbw->layout_pixmap,
+		    event->area.x, event->area.y,
+		    event->area.x, event->area.y,
+		    event->area.width, event->area.height);
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
@@ -1859,6 +3136,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   GtkWidget *viewport9;
   GtkWidget *tree1;
   GtkWidget *hbox12;
+  GtkWidget *hbox15;
   GtkWidget *button5;
   GtkWidget *button6;
   GtkWidget *button7;
@@ -1893,6 +3171,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   GtkWidget *scrolledwindow5;
   GtkWidget *pic_settings_clist;
   GtkWidget *module_settings_clist;
+
+  GtkWidget *button25, *button26;
 
     int x,y,width,height;
 
@@ -1988,16 +3268,45 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		     (GtkSignalFunc) add_module,
 		     bbw);
 
-  button7 = gtk_button_new_with_label ("Libraries");
+  button7 = gtk_button_new_with_label ("Add library");
   gtk_widget_ref (button7);
   gtk_object_set_data_full (GTK_OBJECT (window), "button7", button7,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (button7);
   gtk_box_pack_start (GTK_BOX (hbox12), button7, FALSE, FALSE, 0);
-/*  gtk_signal_connect(GTK_OBJECT(button7),
+  gtk_signal_connect(GTK_OBJECT(button7),
 		     "clicked",
-		     (GtkSignalFunc) edit_libraries,
-		     bbw);*/
+		     (GtkSignalFunc) add_library,
+		     bbw);
+
+  hbox15 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_ref (hbox15);
+  gtk_object_set_data_full (GTK_OBJECT (window), "hbox15", hbox15,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (hbox15);
+  gtk_box_pack_start (GTK_BOX (vbox13), hbox15, FALSE, FALSE, 0);
+
+  button25 = gtk_button_new_with_label ("Trace all");
+  gtk_widget_ref (button25);
+  gtk_object_set_data_full (GTK_OBJECT (window), "button25", button25,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (button25);
+  gtk_box_pack_start (GTK_BOX (hbox15), button25, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(button25),
+		     "clicked",
+		     (GtkSignalFunc) trace_all,
+		     bbw);
+
+  button26 = gtk_button_new_with_label ("Clear traces ");
+  gtk_widget_ref (button26);
+  gtk_object_set_data_full (GTK_OBJECT (window), "button26", button26,
+                            (GtkDestroyNotify) gtk_widget_unref);
+  gtk_widget_show (button26);
+  gtk_box_pack_start (GTK_BOX (hbox15), button26, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(button26),
+		     "clicked",
+		     (GtkSignalFunc) clear_traces,
+		     bbw);
 
 
 
@@ -2304,14 +3613,9 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   bbw->hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(scrolledwindow5));
 
   bbw->layout = gtk_layout_new (bbw->hadj, bbw->vadj);
-  gtk_signal_connect(GTK_OBJECT(bbw->layout),
-		     "expose_event",
-		     (GtkSignalFunc) expose_layout,
-		     bbw);
   gtk_widget_ref (bbw->layout);
   gtk_object_set_data_full (GTK_OBJECT (window), "bbw->layout", bbw->layout,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (bbw->layout);
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), bbw->layout);
   gtk_layout_set_size (GTK_LAYOUT (bbw->layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
   GTK_ADJUSTMENT (GTK_LAYOUT (bbw->layout)->hadjustment)->step_increment = 10;
@@ -2327,6 +3631,12 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_release_event",
 		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
+  gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",
+			   GTK_SIGNAL_FUNC(layout_configure_event),bbw);
+  gtk_signal_connect(GTK_OBJECT(bbw->layout),"expose_event",
+		     (GtkSignalFunc) layout_expose,bbw);
+  gtk_widget_set_app_paintable(bbw->layout, TRUE);
+  gtk_widget_show (bbw->layout);
 
 
 
@@ -2362,10 +3672,20 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
 	bbw->pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
 
+	bbw->pinline_gc=gdk_gc_new(bbw->gui_obj.window->window);
+	g_assert(bbw->pinline_gc!=NULL);
+	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
   bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y");
 
   if(pinspacing<bbw->pinnameheight)
       pinspacing=bbw->pinnameheight+2;
+
+  if(pinspacing%ROUTE_RES)
+  {
+      pinspacing-=pinspacing%ROUTE_RES;
+      pinspacing+=ROUTE_RES;
+  }
 
 
 
@@ -2419,6 +3739,7 @@ int CreateBreadboardWindow(GUI_Processor *gp)
     bbw->pinstatefont = NULL;
     bbw->pinnamefont = NULL;
     bbw->pinname_gc = NULL;
+    bbw->pinline_gc = NULL;
     bbw->case_gc = NULL;
     bbw->gui_obj.enabled = 0;
     bbw->node_tree = NULL;
@@ -2437,6 +3758,8 @@ int CreateBreadboardWindow(GUI_Processor *gp)
 
     bbw->hadj = NULL;
     bbw->vadj = NULL;
+
+    bbw->layout_pixmap=NULL;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 

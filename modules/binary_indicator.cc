@@ -67,7 +67,7 @@ Binary_Indicator::Binary_Indicator(void)
 {
 
   cout << "binary indicator constructor\n";
-  name_str = "Binary Indicator";
+  name_str = strdup("Binary Indicator");
 }
 
 Binary_Indicator::~Binary_Indicator(void)
