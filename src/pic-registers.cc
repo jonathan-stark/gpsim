@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "14bit-processors.h"
 #include "interface.h"
-
+#include "pic-registers.h"
 
 //--------------------------------------------------
 void WDT::update(void)
@@ -347,3 +347,28 @@ void Program_Counter::reset(void)
   trace.program_counter(value);
 }
 
+
+//========================================================================
+//
+// Helper registers
+//
+ 
+PCHelper::PCHelper(ProgramMemoryAccess *new_pma)
+{
+  pma = new_pma;
+  new_name("PC");
+}
+
+void PCHelper::put_value(unsigned int new_value)
+{
+  if(pma)
+    pma->set_PC(new_value);
+}
+
+unsigned int PCHelper::get_value(void)
+{
+ if(pma)
+    return pma->get_PC();
+
+ return 0;
+}

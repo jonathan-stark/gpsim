@@ -174,7 +174,6 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 
     gp->regwin_ram->Update();
     gp->regwin_eeprom->Update();
-    gp->status_bar->Update();
     gp->program_memory->Update();
     gp->source_browser->Update();
     gp->watch_window->Update();
@@ -216,7 +215,6 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     gui_processors = g_slist_append(gui_processors,gp);
 
     gp->regwin_ram->NewProcessor(gp);
-    gp->status_bar->NewProcessor(gp);
     gp->program_memory->NewProcessor(gp);
     gp->source_browser->CloseSource();
     gp->source_browser->NewProcessor(gp);
@@ -310,87 +308,6 @@ void quit_gui(void)
 
     gtk_main_quit();
 }
-
-/*------------------------------------------------------------------
- * gui_new_processor - Add a new processor 
- *
- * This routine adds another processor to the list of currently
- * simulated processors (as of 0.0.14 though, you're still limited
- * to a list of one). It then notifies each child window. Finally
- * a communication link between the gui and the simulator is established.
- */
-#if 0
-void gui_new_processor (unsigned int pic_id)
-{
-
-  // Create an gui representation of the new processor
-
-  if(gp)
-    {
-      gp->pic_id = pic_id;
-      gp->cpu = get_processor(pic_id);
-
-      gui_processors = g_slist_append(gui_processors,gp);
-
-      gp->regwin_ram->NewProcessor(gp);
-      gp->status_bar->NewProcessor(gp);
-      gp->program_memory->NewProcessor(gp);
-      gp->source_browser->CloseSource();
-      gp->symbol_window->NewSymbols();
-      gp->watch_window->ClearWatches();
-      gp->breadboard_window->NewProcessor(gp);
-      gp->stack_window->NewProcessor(gp);
-      gp->trace_window->NewProcessor(gp);
-      gp->profile_window->NewProcessor(gp);
-      gp->stopwatch_window->NewProcessor(gp);
-
-
-    }
-
-}
-
-
-/*------------------------------------------------------------------
- *
- */
-void gui_new_program (unsigned int pic_id)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp)
-  {
-
-      // this is here because the eeprom is not set to values in cod
-      // when gui_new_processor is run. eeprom is with program memory data
-      gp->regwin_eeprom->NewProcessor(gp);
-      
-      gp->source_browser->CloseSource();
-      gp->symbol_window->NewSymbols();
-      gp->program_memory->NewSource(gp);
-      gp->profile_window->NewProgram(gp);
-      link_src_to_gpsim( gp);
-    }
-}
-
-
-/*------------------------------------------------------------------
- *
- */
-void gui_new_source (unsigned int pic_id)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp) {
-	
-    gp->program_memory->NewSource(gp);
-    gp->source_browser->NewSource(gp);
-    gp->symbol_window->NewSymbols();
-    link_src_to_gpsim( gp);
-
-  }
-}
-#endif
-
 
 
 /*------------------------------------------------------------------

@@ -26,14 +26,15 @@ Boston, MA 02111-1307, USA.  */
 // forward references
 class SourceBrowserAsm_Window;     
 class SourceBrowserParent_Window;
-
+class StatusBar_Window;
 
 class SourceBrowser_Window : public GUI_Object {
  public:
 
-  GtkWidget *vbox;          // for children to put widgets in
+  GtkWidget *vbox;               // for children to put widgets in
 
-  ProgramMemoryAccess *pma;   // pointer to the processor's pma.
+  ProgramMemoryAccess *pma;      // pointer to the processor's pma.
+  StatusBar_Window *status_bar;  // display's PC, status, etc.
 
   void set_pma(ProgramMemoryAccess *new_pma);
 

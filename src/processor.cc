@@ -89,6 +89,12 @@ Processor::Processor(void)
 
 }
 
+
+//-------------------------------------------------------------------
+Processor::~Processor()
+{
+  delete registers;
+}
 //-------------------------------------------------------------------
 //
 // init_register_memory (unsigned int memory_size)
@@ -1118,13 +1124,31 @@ guint64 Processor::cycles_used(unsigned int address)
     return program_memory[address]->cycle_count;
 }
 
+//-------------------------------------------------------------------
+MemoryAccess::MemoryAccess(Processor *new_cpu)
+{
+  cpu = new_cpu;
+}
+
+Processor *MemoryAccess::get_cpu(void)
+{
+  return cpu;
+}
+
+void MemoryAccess::set_cpu(Processor *p)
+{ 
+  cpu = p;
+}
+
+
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 //
 
 
-ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu)
+ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu) :
+  MemoryAccess(new_cpu)
 {
   init(new_cpu);
 }
@@ -1132,10 +1156,10 @@ ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu)
 void ProgramMemoryAccess::init(Processor *new_cpu)
 {
 
+  set_cpu(new_cpu);
+
   _address = _opcode = _state = 0;
   hll_mode = ASM_MODE;
-
-  cpu = new_cpu;
 
   // add the 'main' pma to the list pma context's. Processors may
   // choose to add multiple pma's to the context list. The gui
@@ -1147,11 +1171,6 @@ void ProgramMemoryAccess::init(Processor *new_cpu)
     cpu->pma_context.push_back(this);
 
 
-}
-
-Processor *ProgramMemoryAccess::get_cpu(void)
-{
-  return cpu;
 }
 
 void ProgramMemoryAccess::name(string & new_name)
@@ -1483,11 +1502,17 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 //========================================================================
 // Register Memory Access 
 
-RegisterMemoryAccess::RegisterMemoryAccess(void)
+RegisterMemoryAccess::RegisterMemoryAccess(Processor *new_cpu) :
+  MemoryAccess(new_cpu)
 {
   cpu = 0;
   registers = 0;
   nRegisters = 0;
+}
+
+RegisterMemoryAccess::~RegisterMemoryAccess()
+{
+
 }
 
 //--------------------------------------------------------------------------
@@ -1510,13 +1535,6 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
   return reg;
 
 }
-
-//--------------------------------------------------------------------------
-void RegisterMemoryAccess::set_cpu(Processor *p)
-{ 
-  cpu = p;
-}
-
 
 //--------------------------------------------------------------------------
 void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters) 

@@ -2011,8 +2011,10 @@ void Register_Window::Build(void)
     register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]"));
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
     // Add a status bar
-    //StatusBar_create(main_vbox,gp->status_bar);
-    gp->status_bar->Create(main_vbox);
+
+    RAM_RegisterWindow *rrw = dynamic_cast<RAM_RegisterWindow *>(this);
+    if(rrw && rrw->sbw)
+      rrw->sbw->Create(main_vbox);
   }
   else
   {
@@ -2181,8 +2183,7 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 
   set_name("register_viewer_ram");
   // Add a status bar
-  gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
-  gp->status_bar->created=0;
+  sbw = new StatusBar_Window();
 
   get_config();
 
@@ -2200,9 +2201,17 @@ void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
   rma = &_gp->cpu->rma;
 
   Register_Window::NewProcessor(_gp);
+  if(sbw)
+    sbw->NewProcessor(_gp, rma);
+
 }
 
-
+void RAM_RegisterWindow::Update()
+{
+  Register_Window::Update();
+  if(sbw)
+    sbw->Update();
+}
 
 EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   Register_Window(_gp)

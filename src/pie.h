@@ -3,7 +3,9 @@
 
 class PIR;
 
-#include "pic-registers.h"
+#include "gpsim_classes.h"
+#include "registers.h"
+#include "breakpoints.h"
 
 //---------------------------------------------------------
 // PIE Peripheral Interrupt Enable register base class 

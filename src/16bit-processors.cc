@@ -263,10 +263,6 @@ void _16bit_processor :: create (void)
   //create_iopin_map(&iopin_map, &num_of_iopins);
   //create_iopins(iopin_map, num_of_iopins);
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
- 
-
   fast_stack.init(this);
   ind0.init(this);
   ind1.init(this);

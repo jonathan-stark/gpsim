@@ -142,6 +142,7 @@ FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
   register_page_bits = _rpb;
   valid_bits = _valid_bits;
 }
+
 void  FSR_12::put(unsigned int new_value)
 {
   value.put(new_value);
@@ -256,8 +257,8 @@ void INDF::initialize(void)
 
   case _12BIT_PROCESSOR_:
     fsr_mask = 0x1f;
-    base_address_mask1 = 0x1f;
-    base_address_mask2 = 0x0;
+    base_address_mask1 = 0x0;
+    base_address_mask2 = 0x1f;
 
     break;
 

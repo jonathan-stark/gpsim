@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "gpsim_def.h"
 #include "pic-processor.h"
+#include "pic-registers.h"
 #include "picdis.h"
 #include "symbol.h"
 #include "stimuli.h"
@@ -103,6 +104,10 @@ ProcessorConstructor pP12C508(P12C508::construct ,
 			      "__12C508", "pic12c508",  "p12c508", "12c508");
 ProcessorConstructor pP12C509(P12C509::construct ,
 			      "__12C509", "pic12c509",  "p12c509", "12c509");
+ProcessorConstructor pP12CE518(P12CE518::construct ,
+			      "__12ce518", "pic12ce518",  "p12ce518", "12ce518");
+ProcessorConstructor pP12CE519(P12CE519::construct ,
+			      "__12ce519", "pic12ce519",  "p12ce519", "12ce519");
 ProcessorConstructor pP16C84(P16C84::construct ,
 			     "__16C84",  "pic16c84",   "p16c84", "16c84");
 ProcessorConstructor pP16CR83(P16CR83::construct ,
@@ -272,69 +277,6 @@ void dump_processor_list(void)
 
 }
 
-//---------------------------------------------------------------
-#if 0
-void switch_active_cpu(int cpu_id)
-{
-
-  bool have_processors = 0;
-
-  for (processor_iterator = processor_list.begin();
-       processor_iterator != processor_list.end(); 
-       processor_iterator++)
-    {
-      have_processors = 1;
-      Processor *p = *processor_iterator;
-      if(p->processor_id == cpu_id) 
-	{
-	  active_cpu = p;
-	  active_cpu_id = cpu_id;
-	  cout << "Switching cpus: ID = "<<cpu_id << " name = " <<  p->name_str << '\n';
-	  break;
-	}
-    }
-
-  if(!have_processors)
-    cout << "(empty)\n";
-}
-#endif
-
-//-------------------------------------------------------------------
-#if 0
-Processor *get_processor(unsigned int cpu_id)
-{
-
-  if(cpu_id)
-    {
-
-      // No need in searching the list if they're requesting the active cpu.
-
-      if(active_cpu_id == cpu_id)
-	return active_cpu;
-
-      // Search the cpu list
-      for (processor_iterator = processor_list.begin();  processor_iterator != processor_list.end(); processor_iterator++)
-	{
-	  Processor *p = *processor_iterator;
-	  if(p->processor_id == cpu_id) 
-	    return(p);
-	}
-
-      if(gpsim_is_initialized)
-	cout << "Processor ID " << hex << cpu_id << "was not found\n";
-
-      return 0;
-    }
-
-  // This may not be the best solution, but if the cpu_id is invalid just
-  // return the active cpu. Note that this is only a problem if gpsim is
-  // simulating more than one processor at a time. 
-
-  return active_cpu;
-}
-#endif
-
-
 //-------------------------------------------------------------------
 //
 Processor * pic_processor::construct(void)
@@ -349,8 +291,6 @@ Processor * pic_processor::construct(void)
 void pic_processor::set_eeprom(EEPROM *e)
 { 
   eeprom = e; 
-
-  //  eeprom->cpu = this;
 
   ema.set_cpu(this);
   ema.set_Registers(e->rom, e->rom_size);
@@ -835,19 +775,26 @@ void pic_processor::create (void)
   
   indf = new INDF;
 
-  //  fsr = new FSR;
-  //  fsr->new_name("fsr");
-
   register_bank = &registers[0];  // Define the active register bank 
   W->value.put(0);
 
-  //set_frequency(10e6);            // 
   nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
   trace.program_counter (pc->value);
 
+  if(pma) {
+    
+    rma.SpecialRegisters.push_back(new PCHelper(pma));
+    rma.SpecialRegisters.push_back(status);
+    rma.SpecialRegisters.push_back(W);
+
+    pma->SpecialRegisters.push_back(new PCHelper(pma));
+    pma->SpecialRegisters.push_back(status);
+    pma->SpecialRegisters.push_back(W);
+
+  }
 
 }
 

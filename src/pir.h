@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #define PIR_H
 
 #include "assert.h"
-#include "pic-registers.h"
+
 #include "pie.h"
 
 class INTCON;

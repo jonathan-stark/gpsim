@@ -24,8 +24,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
-#include "pic-registers.h"
-
+#include "gpsim_classes.h"
+#include "registers.h"
+#include "breakpoints.h"
 
 class pic_processor;
 class EEPROM;

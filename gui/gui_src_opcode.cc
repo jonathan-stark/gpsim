@@ -1573,6 +1573,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
   window = 0;
   pma =0;
+  status_bar = 0;
 
   column_titles = titles;
   columns = 4;

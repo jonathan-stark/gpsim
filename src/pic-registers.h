@@ -15,36 +15,42 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with gpasm; see the file COPYING.  If not, write to
+along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #ifndef __PIC_REGISTERS_H__
 #define __PIC_REGISTERS_H__
 
-class pic_processor;
-class symbol;
-class XrefObject;
 
 #include "gpsim_classes.h"
 #include "registers.h"
 #include "breakpoints.h"
 
 
+//------------------------------------------------------------------------
+//
+// PCHelper
+//
+// The purpose of this class is to provide a register wrapper around the
+// program counter. On the low and mid range pics, the program counter spans
+// two registers. On the high end ones it spans 3. This class allows the
+// gui to treat the program counter as though if it's a single register.
 
-
-class SFR_map                   // Special Function Register (e.g. status)
+class PCHelper : public Register 
 {
 public:
-  int address;			// Base address of the register
 
-  sfr_register *sfr_reg;        // a pointer to it
+  PCHelper(ProgramMemoryAccess *);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int register_size () const
+  { 
+    return 2;
+  }
 
-  int por_value;
+  ProgramMemoryAccess *pma;
 };
-
-
-
 
 
 #endif

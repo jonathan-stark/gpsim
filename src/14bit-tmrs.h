@@ -21,7 +21,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __14_BIT_TMRS_H__
 #define __14_BIT_TMRS_H__
 
-#include "pic-registers.h"
+#include "gpsim_classes.h"
+#include "registers.h"
+#include "breakpoints.h"
 
 class IOPIN;
 

@@ -22,6 +22,7 @@ libgpsim_la_SOURCES = \
 	breakpoints.cc \
 	cod.cc \
 	eeprom.cc \
+	i2c-ee.cc \
 	fopen-path.cc \
 	gpsim_time.cc \
 	hexutils.cc \
@@ -73,6 +74,7 @@ gpsiminclude_HEADERS = \
 	breakpoints.h \
 	cod.h \
 	eeprom.h \
+	i2c-ee.h \
 	fopen-path.h \
 	gpsim_classes.h \
 	gpsim_def.h \

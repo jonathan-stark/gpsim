@@ -152,9 +152,6 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(&comparator.cmcon, 0x1f, 0,"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, 0,"vrcon");
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
-
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
 

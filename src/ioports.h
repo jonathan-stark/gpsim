@@ -22,7 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #define __IOPORTS_H__
 
 #include "gpsim_classes.h"
-#include "pic-registers.h"
+#include "registers.h"
+#include "breakpoints.h"
+
 class IOPORT_TRIS;
 class IOPORT_LATCH;
 class USART_MODULE;
