@@ -272,7 +272,7 @@ LCD_BUSY_CHECK
 
         CALL    LCD_READ
         ANDLW   0x80                    ;Check busy flag, high = busy
- andlw 0
+
         SKPNZ
           RETURN
         MOVLW   5

@@ -1247,7 +1247,7 @@ void IO_input::put_node_state( int new_state)
     if(get_digital_state()) {
       if( state < h2l_threshold) {
 
-	cout << " driving I/O line low \n";
+	//cout << " driving I/O line low \n";
 	state = l2h_threshold + 1;
 	put_digital_state(0);
 
@@ -1255,7 +1255,7 @@ void IO_input::put_node_state( int new_state)
     } else {
       if(state > l2h_threshold) {
 
-	cout << " driving I/O line high \n";
+	//cout << " driving I/O line high \n";
 	state = h2l_threshold - 1;
 	put_digital_state(1);
       }
@@ -1381,6 +1381,7 @@ int IO_bi_directional::get_voltage(guint64 current_time)
       // as an input). There is a stimulus attached to it, so
       // don't upset the 'node summing'. I guess we could return
       // a input leakage value...
+      //cout << " not driving\n";
       return 0;
     }
 
@@ -1417,7 +1418,6 @@ void IO_bi_directional::change_direction(unsigned int new_direction)
   //cout << __FUNCTION__ << '\n';
   if(iop)
     iop->change_pin_direction(iobit, new_direction & 1);
-    //iop->tris->setbit(iobit, new_direction & 1);
 
   if(xref)
     xref->update();

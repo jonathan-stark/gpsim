@@ -242,7 +242,7 @@ void DataPort::put(unsigned int new_value)
 
   unsigned int old_value = value;
 
-  //cout << __FUNCTION__ << " new value " << new_value << endl;
+  cout << "DataPort::" <<__FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 

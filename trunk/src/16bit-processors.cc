@@ -281,7 +281,7 @@ void _16bit_processor :: create (void)
 
   intcon.set_rcon(&rcon);
   intcon.set_intcon2(&intcon2);
-  intcon.set_cpu(this);
+  intcon.cpu = this;
 
   tbl.initialize(this);
   tmr0l.start(0);
@@ -326,7 +326,7 @@ interrupt (void)
 
   // Save W,status, and BSR if this is a high priority interrupt.
   //if(interrupt_vector == INTERRUPT_VECTOR_HI)
-  //cout << "16bit interrupt, vector = 0x" <<hex<<interrupt_vector<<'\n';
+  cout << "16bit interrupt, vector = 0x" <<hex<<interrupt_vector<<'\n';
   fast_stack.push();
 
   intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)

@@ -361,13 +361,13 @@ void LcdDisplay::advanceState( ControlLineEvent e)
   case ST_INITIALIZED:
   case POWERON:
     switch(e) {
-    case  ERC:
+    case  ERC:  // Active Read Command 
       send_status();
       break;
-    case  EWD:
+    case  EWD:  // Active Write Data
       start_data();
       break;
-    case  EWC:
+    case  EWC:  // Active Write Command
       start_data();
       break;
 
