@@ -2019,7 +2019,7 @@ public:
 
     if(startcycle==END_OF_TIME) {
       startcycle   = get_cycles().value;
-      startaddress = pw->gp->cpu->pc->get_raw_value();
+      startaddress = pw->gp->cpu->pma->get_PC();
     }
   }
 
@@ -2059,7 +2059,7 @@ public:
 	
 	guint64 cycles;
 	GList *iter;
-	stopaddress=pw->gp->cpu->pc->get_raw_value();
+  stopaddress=pw->gp->cpu->pma->get_PC();
 
 	// We have a new measurement
 	cycles=(int)stopcycle-(int)startcycle;
