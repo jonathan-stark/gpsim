@@ -66,7 +66,6 @@ public:
       return;
 
     new_name("resistance");
-    cout << "Resistance Attribute constructor\n";
 
     Float::set(pur->res.get_Zth());
   }
@@ -74,7 +73,6 @@ public:
 
   void set(double r) {
 
-    cout << "Setting resistance attribute!\n";
     Float::set(r);
 
     if(!pur)
@@ -103,15 +101,12 @@ void Resistor_IOPORT::trace_register_write(void)
 Resistor::Resistor(void)
 {
 
-  cout << "resistor constructor\n";
   name_str = strdup("Resistor");
 }
 
 Resistor::~Resistor(void)
 {
-    cout << "resistor destructor\n";
-
-    delete port;
+  delete port;
 }
 
 //--------------------------------------------------------------
@@ -170,8 +165,6 @@ void Resistor::create_iopin_map(void)
 Module * Resistor::construct(const char *_new_name)
 {
 
-  cout << " Resistor construct \n";
-
   Resistor *resP = new Resistor;
 
   resP->new_name((char*)_new_name);
@@ -187,7 +180,7 @@ Module * Resistor::construct(const char *_new_name)
 
 void PullupResistor::set_attribute(char *attr, char *val)
 {
-
+  /*
   cout << " Pull up resistor " << name_str << " update attribute\n";
   if(attr) {
     cout << "(attr = " << attr;
@@ -196,7 +189,7 @@ void PullupResistor::set_attribute(char *attr, char *val)
     cout << ")\n";
 
   }
-
+  */
   Module::set_attribute(attr,val);
 
 }
@@ -206,8 +199,6 @@ void PullupResistor::set_attribute(char *attr, char *val)
 
 void PullupResistor::create_iopin_map(void)
 {
-
-  cout << "PullupResistor::create_iopin_map\n";
 
   //   The PullupResistor has only one pin.
 
@@ -229,10 +220,12 @@ void PullupResistor::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
   IOPIN *iop = get_pin(1);
+  /*
   if(iop) {
     cout << "pullup resistor pin name: "<<iop->name() << '\n';
     cout << "voltage " << iop->get_Vth() << '\n';
   }
+  */
   get_symbol_table().add_stimulus(get_pin(1));
 
 }
@@ -244,8 +237,6 @@ void PullupResistor::create_iopin_map(void)
 Module * PullupResistor::pu_construct(const char *_new_name)
 {
 
-  cout << "Pullup Resistor construct \n";
-
   PullupResistor *pur = new PullupResistor(_new_name);
 
   if(_new_name) {
@@ -256,17 +247,12 @@ Module * PullupResistor::pu_construct(const char *_new_name)
   pur->create_iopin_map();
 
   pur->res.set_Vth(5.0);
-  cout << "Resistance " << pur->res.get_Zth() << '\n';
-
   return pur;
-
 }
 
 //--------------------------------------------------------------
 Module * PullupResistor::pd_construct(const char *_new_name)
 {
-
-  cout << "Pulldown Resistor construct \n";
 
   PullupResistor *pur = new PullupResistor(_new_name);
 
@@ -278,8 +264,6 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 
   pur->res.set_Vth(0);
 
-  cout << "Resistance " << pur->res.get_Zth() << '\n';
-
   return pur;
 
 }
@@ -289,7 +273,6 @@ PullupResistor::PullupResistor(const char *init_name)
 {
 
   ResistanceAttribute *attr;
-  cout << "Pull up resistor constructor\n";
 
   // Create the resistor:
   res.set_Zth(10e3);
@@ -320,8 +303,6 @@ PullupResistor::~PullupResistor()
 static void pu_cb(GtkWidget *button, gpointer pur_class)
 {
   PullupResistor *pur = (PullupResistor *)pur_class;
-
-  cout << "pu_cb call back for " << pur->name() << '\n';
 }
 
 void PullupResistor::build_window(void)

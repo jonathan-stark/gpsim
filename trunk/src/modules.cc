@@ -227,7 +227,8 @@ void Module::add_attribute(Value *new_attribute)
 
   symbol_table.add(new attribute_symbol(this,new_attribute));
 
-  cout << "add_attribute  name = " << new_attribute->name() << '\n';
+  if(verbose)
+    cout << "add_attribute  name = " << new_attribute->name() << '\n';
 
 }
 
@@ -433,7 +434,8 @@ void module_load_library(const char *library_name)
 
   module_add_library(library_name,handle);
 
-  module_display_available();
+  if(verbose)
+    module_display_available();
 #else
 //  cout << "  -- gpsim on WIN32 doesn't support modules yet\n";
   void *handle;
@@ -449,7 +451,8 @@ void module_load_library(const char *library_name)
 
   module_add_library(library_name,handle);
 
-  module_display_available();
+  if(verbose)
+    module_display_available();
 #endif
 }
 
@@ -470,12 +473,13 @@ void module_load_module(const char *module_type, const char *module_name)
   }
 
   {
-    cout << "Searching for module:  " << module_type;
+    if(verbose) {
+      cout << "Searching for module:  " << module_type;
 
-    if(module_name)
-      cout << " named " << module_name;
-
-//    cout  << '\n';
+      if(module_name)
+	cout << " named " << module_name;
+      cout  << '\n';
+    }
   }
 
 
@@ -501,8 +505,8 @@ void module_load_module(const char *module_type, const char *module_name)
 	      // We found a module that matches.
 	      // Now, let's create an instance of it and throw it into
 	      // the symbol library
-
-	      cout << " Found it!\n";
+	      if(verbose)
+		cout << " Found it!\n";
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
 
 	      symbol_table.add_module(new_module,module_name);
@@ -523,7 +527,8 @@ void module_load_module(const char *module_type, const char *module_name)
     }
   }
 
-  cout << " NOT FOUND\n";
+  
+  cout << "Warning: Module '" << module_type <<  "' was not found\n";
 
 }
 

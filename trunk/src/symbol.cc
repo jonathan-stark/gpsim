@@ -554,7 +554,8 @@ attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
     char buf[256];
 
     snprintf(buf,sizeof(buf),"%s.%s",module->name().c_str(), attribute->name().c_str());
-    cout << "creating attribute symbol named: " << buf << endl;
+    if(verbose)
+      cout << "creating attribute symbol named: " << buf << endl;
     new_name(buf);
   } 
 }

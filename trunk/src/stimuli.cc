@@ -1048,8 +1048,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 
 IOPIN::IOPIN(void)
 {
-
-  cout << "IOPIN default constructor\n";
+  if(verbose)
+    cout << "IOPIN default constructor\n";
 
   iop = 0;
   iopp = 0;
@@ -1199,9 +1199,8 @@ IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 
 IO_input::IO_input(void)
 {
-  cout << "IO_input default constructor\n";
-
-
+  if(verbose)
+    cout << "IO_input default constructor\n";
 }
 
 
@@ -1247,7 +1246,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
 
 IO_bi_directional::IO_bi_directional(void)
 {
-  cout << "IO_bi_directional constructor shouldn't be called\n";
+
   driving = false;
 
   // Thevenin equivalent while configured as an output 
