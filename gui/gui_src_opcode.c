@@ -101,7 +101,7 @@ static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
     if(row<0 || row>GTK_SHEET(sbow->sheet)->maxrow)
 	return;
 
-    switch(popup_sbow->ascii_mode)
+    switch(sbow->ascii_mode)
     {
     case 0:
 	for(i=0; i<16; i++)
@@ -1101,9 +1101,6 @@ static GdkBitmap *mask;
   gtk_sheet_set_column_title(GTK_SHEET(sbow->sheet), i, name);
   gtk_sheet_set_row_titles_width(GTK_SHEET(sbow->sheet), column_width);
 
-  /* create popupmenu */
-  sbow->popup_menu=build_menu(sbow);
-
   
   gtk_signal_connect(GTK_OBJECT(sbow->sheet),
 		     "button_press_event",
@@ -1166,6 +1163,9 @@ static GdkBitmap *mask;
   if(sbow->program)
       SourceBrowserOpcode_new_program(sbow, sbow->sbw.gui_obj.gp);
   
+  /* create popupmenu */
+  sbow->popup_menu=build_menu(sbow);
+
   update_menu_item((GUI_Object*)sbow);
 }
 
