@@ -782,7 +782,7 @@ unsigned int PORTC::get(void)
 
   old_value = value;
 
-  cout << "PORTC::get()\n";
+  // cout << "PORTC::get()\n";
   IOPORT::get();
 
   int diff = old_value ^ value; // The difference between old and new

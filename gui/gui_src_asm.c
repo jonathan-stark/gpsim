@@ -24,6 +24,7 @@
 
 #include <assert.h>
 
+#include "../src/fopen-path.h"
 #include "../xpms/pc.xpm"
 #include "../xpms/break.xpm"
 #define PIXMAP_SIZE 14
@@ -1367,7 +1368,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	  if(gpsim_file->file_ptr == NULL)
 	  {
 	      if(file_name != NULL)
-		  gpsim_file->file_ptr = fopen(file_name,"r");
+		  gpsim_file->file_ptr = fopen_path(file_name,"r");
 
 	      if(gpsim_file->file_ptr == NULL)
 	      {

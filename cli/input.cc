@@ -40,15 +40,16 @@ char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
 #include <readline/readline.h>
 #undef completion_matches
 }
-
+/*
 extern "C" {
 #include <readline/history.h>
 }
+*/
 
 //#endif
 
 //#include <readline/readline.h>
-//#include <readline/history.h>
+#include <readline/history.h>
 
 #include <sys/types.h>
 #include <sys/file.h>
@@ -465,7 +466,7 @@ char **
 gpsim_completion (char *text, int start, int end)
 {
   char **matches;
-  //  char *command_generator (char *, int);
+  //char *command_generator (char *, int);
 
   matches = (char **)NULL;
 
@@ -473,7 +474,8 @@ gpsim_completion (char *text, int start, int end)
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if (start == 0)
-    matches = completion_matches (text, (CPFunction *)command_generator);
+    //matches = completion_matches (text, (CPFunction *)command_generator);
+    matches = completion_matches (text, command_generator);
 
   return (matches);
 }
@@ -492,7 +494,8 @@ void myfunc(int data, int fd, GdkInputCondition gdk_cond)
 
 }
 
-void test_func(...)
+//void test_func(...)
+void test_func()
 {
 
   char *t;

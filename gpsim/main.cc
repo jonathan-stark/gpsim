@@ -46,8 +46,12 @@ int use_gui=0;
 int quit_state;
 
 extern "C" {
+<<<<<<< main.cc
+int gui_init (int argc, const char **argv);
+=======
 #include <popt.h>
 int gui_init (int argc, char **argv);
+>>>>>>> 1.7
 void gui_main(void);
 extern void exit_gpsim(void);
 
@@ -77,7 +81,7 @@ static char *startup_name = "";
 static char *pic_name     = "";
 static char *cod_name     = "";
 static char *hex_name     = "";
-
+static char *search_path  = "";
 
 struct poptOption optionsTable[] = {
   //  { "help", 'h', 0, 0, 'h',
@@ -85,21 +89,21 @@ struct poptOption optionsTable[] = {
   { "processor", 'p', POPT_ARG_STRING, &pic_name, 0,
     "processor (e.g. -pp16c84 for the 'c84)","<processor name>" },
   { "command",   'c', POPT_ARG_STRING, &startup_name, 0,
-    "startup command file" },
+    "startup command file",0 },
   { "symbol",    's', POPT_ARG_STRING, &cod_name, 0,
-    ".cod symbol file" } ,
+    ".cod symbol file",0 } ,
   { "", 'L',0,0,'L',
-    "colon separated list of directories to search."},
+    "colon separated list of directories to search.", 0},
   { "version",'v',0,0,'v',
-    "gpsim version"},
+    "gpsim version",0},
   { "cli",'i',0,0,'i',
-    "command line mode only"},
+    "command line mode only",0},
   POPT_AUTOHELP
-  { NULL, 0, 0, NULL, 0 }
+  { NULL, 0, 0, NULL, 0, 0 }
 };
 
 void 
-helpme (char *iam)
+helpme (const char *iam)
 {
   printf ("\n\nuseage:\n%s [-h] [-p <device> [<hex_file>]] [-c <stc_file>]\n", iam);
   printf ("\t-h             : this help list\n");
@@ -132,7 +136,7 @@ void welcome(void)
 
 
 void 
-main (int argc, char *argv[])
+main (int argc, const char *argv[])
 {
 
   FILE *inputfile = stdin, *startup=NULL;
@@ -147,7 +151,7 @@ main (int argc, char *argv[])
   poptContext optCon;   /* context for parsing command-line options */
 
 
-  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  optCon = poptGetContext(NULL, argc, (const char **)argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
 
@@ -182,7 +186,7 @@ main (int argc, char *argv[])
       //break;
 
     case 'L':
-	set_search_path (optarg);
+	set_search_path (search_path);
       break;
 
     case 'v':
