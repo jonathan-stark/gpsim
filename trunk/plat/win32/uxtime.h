@@ -36,7 +36,7 @@ extern "C" {
  * Structure returned by gettimeofday(2) system call
  */
 
-#ifndef _WINSOCKAPI_
+#if defined _MSC_VER && !defined _WINSOCKAPI_
 struct timeval {
   unsigned long tv_sec; /* seconds */
   long tv_usec;         /* and microseconds */

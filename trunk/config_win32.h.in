@@ -92,4 +92,6 @@
 #define strcasecmp  stricmp
 #define strncasecmp strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
+#ifdef _MSC_VER
 #define strtoll _strtoi64
+#endif
