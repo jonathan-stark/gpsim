@@ -38,9 +38,10 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
-//#include <gtkextra/gtksheetentry.h>
+
 
 #include "gui.h"
+#include "gui_regwin.h"
 
 typedef enum {
     MENU_TIME_USECONDS,

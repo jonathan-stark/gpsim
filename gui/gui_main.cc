@@ -39,7 +39,20 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/gpsim_interface.h"
 
 #include "gui.h"
+#include "gui_breadboard.h"
 #include "gui_interface.h"
+#include "gui_processor.h"
+#include "gui_profile.h"
+#include "gui_register.h"
+#include "gui_regwin.h"
+#include "gui_scope.h"
+#include "gui_src.h"
+#include "gui_stack.h"
+#include "gui_stopwatch.h"
+#include "gui_symbols.h"
+#include "gui_trace.h"
+#include "gui_watch.h"
+
 
 #undef TRUE
 #undef FALSE
@@ -380,78 +393,6 @@ void gui_new_source (unsigned int pic_id)
 }
 #endif
 
-#if 0
-/*------------------------------------------------------------------
- *
- */
-void gui_new_module (Module *module)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp)
-    gp->breadboard_window->NewModule(module);
-}
-
-/*------------------------------------------------------------------
- *
- */
-void gui_node_configuration_changed (Stimulus_Node *node)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp)
-    gp->breadboard_window->NodeConfigurationChanged(node);
-}
-
-
-/*------------------------------------------------------------------
- * update_program_memory
- *
- */
-void update_program_memory(GUI_Processor *gp, unsigned int reg_number)
-{
-
-    //  printf("program memory needs to be updated\n");
-
-}
-/*------------------------------------------------------------------
- * gui_update_object
- *
- * Each 'thing' that the gui displays about a simulated pic has an
- * associated cross reference structure. Sometimes these 'things' 
- * displayed in more than one place (like the status register).
- * Each graphical instance has its own structure. All of the structures
- * pertaining to the same pic object (again, like the status register)
- * are stored in a singly-linked list. This routine scans through
- * this list and updates each instance of the object.
- */
-
-void gui_update_object(gpointer gui_xref,int new_value)
-{
-
-  struct cross_reference_to_gui *xref;
-
-  xref = (struct cross_reference_to_gui *)gui_xref;
-  xref->update(xref,new_value);
-
-}
-
-/*------------------------------------------------------------------
- * gui_remove_object
- *
- */
-
-void gui_remove_object(gpointer gui_xref)
-{
-
-  struct cross_reference_to_gui *xref;
-
-  xref = (struct cross_reference_to_gui *)gui_xref;
-  if(xref->remove)
-    xref->remove(xref);
-
-}
-#endif //  0
 
 
 /*------------------------------------------------------------------
@@ -498,7 +439,10 @@ int gui_init (int argc, char **argv)
   }
 
 
-  gtk_init (&argc, &argv);
+  if (!gtk_init_check (&argc, &argv))
+  {
+      return -1;
+  }
 
     
   gp = new GUI_Processor();

@@ -43,6 +43,10 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/breakpoints.h"
 
 #include "gui.h"
+#include "gui_register.h"
+#include "gui_regwin.h"
+#include "gui_watch.h"
+
 
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1

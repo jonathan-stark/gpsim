@@ -38,6 +38,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 
 #include "gui.h"
+#include "gui_register.h"
+#include "gui_regwin.h"
+#include "gui_watch.h"
 
 #define COLUMNS 15
 #define BPCOL 0

@@ -38,6 +38,11 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 
 #include "gui.h"
+#include "gui_regwin.h"
+#include "gui_symbols.h"
+#include "gui_watch.h"
+#include "gui_processor.h"
+#include "gui_src.h"
 
 struct symbol_entry {
     unsigned int value; // symbol value
@@ -297,11 +302,11 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
     switch(e->type)
     {
     case SYMBOL_REGISTER:
-	((GUI_Object*)sw)->gp->regwin_ram->SelectRegister(e->value);
+	sw->gp->regwin_ram->SelectRegister(e->value);
 	break;
     case SYMBOL_ADDRESS:
-	(((GUI_Object*)sw)->gp->source_browser)->SelectAddress(e->value);
-	(((GUI_Object*)sw)->gp->program_memory)->SelectAddress(e->value);
+	sw->gp->source_browser->SelectAddress(e->value);
+	sw->gp->program_memory->SelectAddress(e->value);
 	break;
     default:
 	// symbols that can't be 'selected' (e.g constants)

@@ -40,6 +40,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 
 #include "gui.h"
+#include "gui_profile.h"
+#include "gui_regwin.h"
 
 #include "../src/symbol.h"
 extern list <symbol *> st;
