@@ -57,8 +57,8 @@ Boston, MA 02111-1307, USA.  */
 #include <gtk/gtk.h>
 
 #include "lcd.h"
+#include <gpsim/gpsim_time.h>
 pic_processor *gpsim_get_active_cpu(void);
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 void gpsim_clear_break(gpointer b);
 
 
@@ -228,7 +228,7 @@ void ControlPort::callback(void)
   if(lcd && lcd->debug)
     cout << "ControlPort::callback(void)\n";
 
-  gpsim_set_break_delta(break_delta, this);
+  cycles.set_break_delta(break_delta, this);
 
 }
 
@@ -346,7 +346,7 @@ void LcdDisplay::create_iopin_map(void)
   control_port->value = 0;
   control_port->lcd = this;
 
-  gpsim_set_break_delta(1000, control_port);
+  cycles.set_break_delta(1000, control_port);
 
   data_port = new DataPort(8);
   data_port->value = 0;
@@ -437,7 +437,7 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
 
   if (verbose)
      cout << "LcdDisplay constructor\n";
-  name_str = "Lcd Display";
+  new_name("Lcd Display");
 
   mode_flag = _8BIT_MODE_FLAG;
   data_latch_phase = 1;
