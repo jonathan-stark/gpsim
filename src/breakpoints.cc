@@ -1036,7 +1036,22 @@ Profile_Stop_Instruction::Profile_Stop_Instruction(Processor *cpu, unsigned int 
 {
     
 }
-//---------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+RegisterAssertion::RegisterAssertion(Processor *cpu,
+				     unsigned int address,
+				     unsigned int bp,
+				     unsigned int _regAddress,
+				     int _regMask,
+				     int _regValue) :
+  Breakpoint_Instruction(cpu, address,bp),
+  regAddress(_regAddress),
+  regMask(_regMask),
+  regValue(_regValue)
+{
+
+}
+
+//------------------------------------------------------------------------------
 Notify_Register::Notify_Register(Processor *_cpu, int _repl, int bp)
 {
 

@@ -1075,6 +1075,11 @@ void ProgramMemoryAccess::init(Processor *new_cpu)
   
 }
 
+Processor *ProgramMemoryAccess::get_cpu(void)
+{
+  return cpu;
+}
+
 void ProgramMemoryAccess::name(string & new_name)
 {
   name_str = new_name;

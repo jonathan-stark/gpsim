@@ -2490,20 +2490,25 @@ void SourceBrowserParent_Window::Build(void)
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 {
 
+
   list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
   list <ProgramMemoryAccess *> :: iterator pma_iterator;
 
   sbaw_iterator = children.begin();
   pma_iterator = gp->cpu->pma_context.begin();
 
+  int child = 1;
   SourceBrowserAsm_Window *sbaw=0;
   while( (sbaw_iterator != children.end()) ||
 	 (pma_iterator != gp->cpu->pma_context.end()))
     {
-
+      char child_name[64];
       if(sbaw_iterator == children.end())
 	{
-	  sbaw = new SourceBrowserAsm_Window(gp);
+	  child++;
+	  sprintf(child_name,"source_browser%d",child);
+	  printf("Creating child window %s\n",child_name);
+	  sbaw = new SourceBrowserAsm_Window(gp,child_name);
 	  children.push_back(sbaw);
 	}
       else
@@ -2511,8 +2516,7 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 
       if(pma_iterator != gp->cpu->pma_context.end()) 
 	{
-	  //(*sbaw_iterator)->NewProcessor(gp);
-	  sbaw->pma = *pma_iterator;
+	  sbaw->set_pma(*pma_iterator);
 	  pma_iterator++;
 	}
       else

@@ -135,6 +135,7 @@ class ProgramMemoryAccess :  public BreakCallBack
     }
   void name(string &new_name);
   
+  Processor *get_cpu(void);
 
  private:
   string name_str;            // Optional name if this is one of several pma's
