@@ -216,8 +216,8 @@ public:
 			    unsigned int alias_offset);
   virtual void init_register_memory(unsigned int memory_size);
   virtual unsigned int register_memory_size () const { return 0;};
-  guint64 register_read_accesses(unsigned int address);
-  guint64 register_write_accesses(unsigned int address);
+  //guint64 register_read_accesses(unsigned int address);
+  //guint64 register_write_accesses(unsigned int address);
 
   //
   // Creation and manipulation of Program Memory

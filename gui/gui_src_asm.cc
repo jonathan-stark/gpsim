@@ -262,7 +262,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
   // find notebook page containing address 'address'
   sbawFileId = gp->cpu->pma.get_file_id(address);
-              //gpsim_get_file_id( gp->pic_id, address);
 
   for(i=0;i<SBAW_NRFILES;i++)
     {
@@ -564,7 +563,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line);
 
       if(address!=INVALID_VALUE)
-	gpsim_run_to_address(pic_id, address);
+	popup_sbaw->gp->cpu->run_to_address(address);
       break;
 
     case MENU_BP_HERE:
@@ -577,23 +576,8 @@ popup_activated(GtkWidget *widget, gpointer data)
       line = popup_sbaw->menu_data->line;
       address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
 
-      if(!popup_sbaw->gp->profile_window->enabled)
-	popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
+      popup_sbaw->gp->profile_window->StartExe(address);
 
-      if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
-	gpsim_clear_profile_start_at_address(pic_id,address);
-      else {
-
-	if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
-	  // Can't have both start and stop at the same address
-	  // ..it becomes difficult to calculate the cycles
-	  gpsim_clear_profile_stop_at_address(pic_id,address);
-
-	gpsim_set_profile_start_at_address(pic_id,
-					   address,
-					   (void (*)(gpointer))ProfileWindow_notify_start_callback,
-					   popup_sbaw->gp->profile_window);
-      }
       break;
 
     case MENU_PROFILE_STOP_HERE:
@@ -601,23 +585,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 
       address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
 
-      if(!popup_sbaw->gp->profile_window->enabled)
-	popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
+      popup_sbaw->gp->profile_window->StopExe(address);
 
-      if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
-	gpsim_clear_profile_stop_at_address(pic_id,address);
-      else {
-	
-	if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
-	  // Can't have both start and stop at the same address
-	  // ..it becomes difficult to calculate the cycles
-	  gpsim_clear_profile_start_at_address(pic_id,address);
-
-	gpsim_set_profile_stop_at_address(pic_id,
-					  address,
-					  (void (*)(gpointer))ProfileWindow_notify_stop_callback,
-					  popup_sbaw->gp->profile_window);
-      }
       break;
 
     case MENU_SELECT_SYMBOL:
@@ -658,34 +627,21 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
     case MENU_STEP:
       popup_sbaw->gp->cpu->pma.step(1);
-      /*
-      if(popup_sbaw->gp->cpu->pma.isHLLmode())
-	gpsim_hll_step(popup_sbaw->gp->pic_id);
-      else
-	gpsim_step(popup_sbaw->gp->pic_id, 1);
       break;
-      */
     case MENU_STEP_OVER:
       popup_sbaw->gp->cpu->pma.step_over();
-      /*
-      if(popup_sbaw->gp->cpu->pma.isHLLmode())
-	gpsim_hll_step_over(popup_sbaw->gp->pic_id);
-      else
-	gpsim_step_over(popup_sbaw->gp->pic_id);
       break;
-      */
     case MENU_RUN:
       popup_sbaw->gp->cpu->run();
-      //gpsim_run(popup_sbaw->gp->pic_id);
       break;
     case MENU_STOP:
-      gpsim_stop(popup_sbaw->gp->pic_id);
+      popup_sbaw->gp->cpu->pma.stop();
       break;
     case MENU_RESET:
-      gpsim_reset(popup_sbaw->gp->pic_id);
+      popup_sbaw->gp->cpu->reset(POR_RESET);
       break;
     case MENU_FINISH:
-      gpsim_finish(popup_sbaw->gp->pic_id);
+      popup_sbaw->gp->cpu->pma.finish();
       break;
     default:
       puts("Unhandled menuitem?");
@@ -1156,12 +1112,13 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
     int id;
 
-    int pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
+    int pic_id = sbaw->gp->pic_id;
 
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
-    strcpy(str,gpsim_get_file_context(pic_id, file_id)->name);
+    // FIXME - there's a chance of buffer overflow & there's a chance of index overflow...
+    strcpy(str,(gp->cpu->files[file_id]).name);
     label_string=strrchr(str,'/');
     if(label_string!=0)
       label_string++; // Skip the '/'
@@ -1308,7 +1265,7 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     
     gtk_text_freeze(GTK_TEXT(sbaw->source_text[id]));
 
-    fseek(gpsim_get_file_context(pic_id,file_id)->file_ptr,
+    fseek(cpu->files[file_id].file_ptr,
 	  0,
 	  SEEK_SET);
 
@@ -1334,7 +1291,7 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 
     totallinesheight=0;
 
-    while(fgets(text_buffer, 256, gpsim_get_file_context(pic_id,file_id)->file_ptr)!=0)
+    while(fgets(text_buffer, 256, cpu->files[file_id].file_ptr)!=0)
     {
 	char *end, *q;
 
@@ -1741,16 +1698,15 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   int i;
   int id;
   
-  int pic_id;
+  //int pic_id;
 
   char *file_name;
   struct file_context *gpsim_file;
   int file_id;
 
-  SourceXREF *cross_reference;
   int address;
 
-  if(gp == 0)
+  if(!gp)
     return;
 
   if(!enabled)
@@ -1761,7 +1717,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   
   assert(wt==WT_asm_source_window);
   
-  pic_id = gp->pic_id;
+  //pic_id = gp->pic_id;
 
   CloseSource();
 
@@ -1770,15 +1726,20 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
-  cross_reference = new SourceXREF();
-  cross_reference->parent_window_type =   WT_asm_source_window;
-  cross_reference->parent_window = (gpointer) this;
-  cross_reference->data = (gpointer) 0;
-  gpsim_assign_pc_xref(pic_id, cross_reference);
+  if(gp->cpu && gp->cpu->pc && gp->cpu->pc->xref) {
+    SourceXREF *cross_reference = new SourceXREF();
+
+    cross_reference->parent_window_type =   WT_asm_source_window;
+    cross_reference->parent_window = (gpointer) this;
+    cross_reference->data = (gpointer) 0;
+  
+    gp->cpu->pc->xref->add((gpointer) cross_reference);
+
+  }
 
   for(i=0;i<gp->cpu->number_of_source_files;i++)
   {
-      gpsim_file = gpsim_get_file_context(pic_id, i);
+      gpsim_file = &(gp->cpu->files[i]);
       file_name = gpsim_file->name;
 
       if(strcmp(file_name+strlen(file_name)-4,".lst")
@@ -1832,7 +1793,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
       gtk_main_iteration();
   
   address=gp->cpu->pc->get_value();
-  //address = gpsim_get_pc_value(pic_id);
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else

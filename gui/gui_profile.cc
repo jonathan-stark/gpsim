@@ -161,18 +161,6 @@ static unsigned int lookup_address_symbol(const char *name)
       return (*sti)->get_value();
     }
   }
-#if 0
-  sym *s;
-  gpsim_symbol_rewind((unsigned int)gp->pic_id);
-
-  while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-    {
-      if(!strcmp(name,s->name))
-	return s->value;
-    }
-
-#endif
-
 
   return UINT_MAX;
 }
@@ -246,14 +234,12 @@ static void add_range(Profile_Window *pw,
 
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
-    *(int*)user_data=TRUE;
-//    gtk_main_quit();
+  *(int*)user_data=TRUE;
 }
 
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
-    *(int*)user_data=FALSE;
-//    gtk_main_quit();
+  *(int*)user_data=FALSE;
 }
 
 static void add_range_dialog(Profile_Window *pw)
@@ -719,7 +705,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     {
 	struct file_context *gpsim_file;
         char *file_name;
-	gpsim_file = gpsim_get_file_context(pic_id, i);
+	gpsim_file = &(gp->cpu->files[i]);
 	file_name = gpsim_file->name;
 	if(!strcmp(file_name+strlen(file_name)-4,".asm")
 	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
@@ -1166,7 +1152,8 @@ int plot_routine_histogram(Profile_Window *pw)
     {
 	struct file_context *gpsim_file;
         char *file_name;
-	gpsim_file = gpsim_get_file_context(pic_id, i);
+
+	gpsim_file = &(gp->cpu->files[i]);
 	file_name = gpsim_file->name;
 	if(!strcmp(file_name+strlen(file_name)-4,".asm")
 	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
@@ -1287,22 +1274,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	}
       }
-	/*
-	gpsim_symbol_rewind((unsigned int)gp->pic_id);
-
-	while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-	{
-	    sym *data;
-	    if(s->type==SYMBOL_ADDRESS)
-	    {
-		data=(sym*)malloc(sizeof(sym));
-		memcpy(data,s,sizeof(sym));
-		data->name=(char*)malloc(strlen(s->name)+1);
-                strcpy(data->name,s->name);
-		symlist=g_list_append(symlist,data);
-	    }
-	}
-	*/
 	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
 	strcpy(fromaddress_string,"0");
 	iter=symlist;
@@ -1348,25 +1319,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	}
       }
 
-      /*
-	gpsim_symbol_rewind((unsigned int)gp->pic_id);
-
-	while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-	{
-	    if(s->type==SYMBOL_ADDRESS)
-	    {
-		if(0==strstr(s->name,"_DS_"))
-		{
-		    sym *data;
-		    data=(sym*)malloc(sizeof(sym));
-		    memcpy(data,s,sizeof(sym));
-		    data->name=(char*)malloc(strlen(s->name)+1);
-		    strcpy(data->name,s->name);
-		    symlist=g_list_append(symlist,data);
-		}
-	    }
-	}
-      */
 	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
 
 	iter=symlist;
@@ -1897,8 +1849,9 @@ void Profile_Window::Update()
 
       register_entry=(struct profile_register_entry*)iter->data;
 
-      count_read=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
-      count_write=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
+      Register *reg = gp->cpu->rma.get_register(register_entry->address);
+      count_read  = reg->read_access_count;
+      count_write = reg->write_access_count;
 
       if(register_entry->last_count_read!=count_read||
 	 register_entry->last_count_write!=count_write)
@@ -2028,75 +1981,168 @@ static unsigned int startaddress;
 static guint64 stopcycle=END_OF_TIME;
 static unsigned int stopaddress;
 
-void ProfileWindow_notify_start_callback(Profile_Window *pw)
+//------------------------------------------------------------------------
+//
+// ProfileStart class
+//
+class ProfileStart : public BreakCallBack
 {
-  if(!pw->gp->cpu)
-    return;
 
-  if(startcycle==END_OF_TIME) {
-    startcycle=gpsim_get_cycles(pw->gp->pic_id);
-    startaddress=pw->gp->cpu->pc->get_raw_value();
-    //gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
+public:
+  ProfileStart(Profile_Window *_pw, int _address)
+  {
+    pw = _pw;
+    address = _address;
   }
+
+  void callback(void)
+  {
+    if(!gp || !gp->cpu || !pw->gp->cpu)
+      return;
+
+    if(startcycle==END_OF_TIME) {
+      startcycle   = cycles.value;
+      startaddress = pw->gp->cpu->pc->get_raw_value();
+    }
+  }
+
+private:
+  Profile_Window *pw;
+  int address;
+};
+
+//------------------------------------------------------------------------
+//
+// ProfileStop class
+//
+class ProfileStop : public BreakCallBack
+{
+
+public:
+  ProfileStop(Profile_Window *_pw, int _address)
+  {
+    pw = _pw;
+    address = _address;
+  }
+
+  void callback(void)
+  {
+    if(!gp || !gp->cpu || !pw->gp->cpu)
+      return;
+
+    if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME) {
+
+      stopcycle = cycles.value;
+      if(startcycle==stopcycle)
+	// This was probably an attempt to measure the whole loop.
+	// Set stopcycle to unset, and wait for the next one
+	stopcycle=END_OF_TIME;
+
+      else {
+	
+	guint64 cycles;
+	GList *iter;
+	stopaddress=pw->gp->cpu->pc->get_raw_value();
+
+	// We have a new measurement
+	cycles=(int)stopcycle-(int)startcycle;
+
+	// Search to see if there are an entry with this startaddress,
+	// stopaddress and cycle count.
+	iter=pw->histogram_profile_list;
+	while(iter!=0) {
+	  
+	  struct cycle_histogram_counter *chc;
+	  chc=(struct cycle_histogram_counter*)iter->data;
+	  if(chc->start_address == startaddress &&
+	     chc->stop_address == stopaddress &&
+	     chc->histo_cycles == cycles)
+	    {
+	      // If so then add 1 to the counter
+	      chc->count++;
+	      break;
+	    }
+	  iter=iter->next;
+	}
+
+	if(iter==0) {
+	  
+	  // Else malloc a new struct, fill with values and add (sorted) to list
+	  struct cycle_histogram_counter *chc;
+
+	  chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
+	  chc->start_address=startaddress;
+	  chc->stop_address=stopaddress;
+	  chc->histo_cycles=cycles;
+	  chc->count=1;
+
+	  pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
+	}
+
+	startcycle=stopcycle=END_OF_TIME;
+      }
+    }
+  }
+
+
+private:
+  Profile_Window *pw;
+  int address;
+};
+
+/*****************************************************************
+ * StartExe
+ *
+ * Create a 'profile start' object for the program memory.
+ *
+ */
+void Profile_Window::StartExe(int address)
+{
+
+  if(!enabled)
+    ChangeView(VIEW_SHOW);
+
+  if(gp->cpu->pma.address_has_profile_start(address))
+    gp->cpu->pma.clear_profile_start_at_address(address);
+  else {
+
+    if(gp->cpu->pma.address_has_profile_stop(address))
+      // Can't have both start and stop at the same address
+      // ..it becomes difficult to calculate the cycles
+      gp->cpu->pma.clear_profile_stop_at_address(address);
+
+    // FIXME -- memory leak...
+    gp->cpu->pma.set_profile_start_at_address(address,
+					      new ProfileStart(this,address));
+
+  }
+
 }
 
-void ProfileWindow_notify_stop_callback(Profile_Window *pw)
+/*****************************************************************
+ * SopExe
+ *
+ * Create a 'profile stop' object for the program memory.
+ *
+ */
+void Profile_Window::StopExe(int address)
 {
-  if(!pw->gp->cpu)
-    return;
-
-  if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME)
-    {
-      stopcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
-      if(startcycle==stopcycle)
-	{
-	  // This was probably an attempt to measure the whole loop.
-	  // Set stopcycle to unset, and wait for the next one
-	  stopcycle=END_OF_TIME;
-	}
-      else
-	{
-	  guint64 cycles;
-	  GList *iter;
-	  stopaddress=pw->gp->cpu->pc->get_raw_value();
-	  //stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
-	  // We have a new measurement
-	  cycles=(int)stopcycle-(int)startcycle;
-
-	  // Search to see if there are an entry with this startaddress,
-	  // stopaddress and cycle count.
-	  iter=pw->histogram_profile_list;
-	  while(iter!=0)
-	    {
-	      struct cycle_histogram_counter *chc;
-	      chc=(struct cycle_histogram_counter*)iter->data;
-	      if(chc->start_address == startaddress &&
-		 chc->stop_address == stopaddress &&
-		 chc->histo_cycles == cycles)
-		{
-		  // If so then add 1 to the counter
-		  chc->count++;
-		  break;
-		}
-	      iter=iter->next;
-	    }
-	  if(iter==0)
-	    {
-	      // Else malloc a new struct, fill with values and add (sorted) to list
-	      struct cycle_histogram_counter *chc;
-
-	      chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
-	      chc->start_address=startaddress;
-	      chc->stop_address=stopaddress;
-	      chc->histo_cycles=cycles;
-	      chc->count=1;
-
-	      pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
-	    }
-
-	  startcycle=stopcycle=END_OF_TIME;
-	}
-    }
+  if(enabled)
+    ChangeView(VIEW_SHOW);
+      
+  if(gp->cpu->pma.address_has_profile_stop(address))
+    gp->cpu->pma.clear_profile_stop_at_address(address);
+  else {
+	
+    if(gp->cpu->pma.address_has_profile_start(address))
+      // Can't have both start and stop at the same address
+      // ..it becomes difficult to calculate the cycles
+      gp->cpu->pma.clear_profile_start_at_address(address);
+	
+    // FIXME -- memory leak...
+    gp->cpu->pma.set_profile_start_at_address(address,
+					      new ProfileStart(this,address));
+  }
 }
 
 /*****************************************************************
@@ -2105,12 +2151,17 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
  * 
  */
 
-void Profile_Window::NewProgram(GUI_Processor *gp)
+void Profile_Window::NewProgram(GUI_Processor *_gp)
 {
   int row;
   int i;
 
-  if(gp == 0)
+  if(!_gp)
+    return;
+
+  gp = _gp;
+
+  if(!gp->cpu)
     return;
 
   program=1;
@@ -2118,8 +2169,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
   if(!enabled)
     return;
     
-
-  gpsim_enable_profiling(gp->pic_id);
+  profile_keeper.enable_profiling();
 
   // Instruction clist
   gtk_clist_freeze(profile_clist);
@@ -2160,7 +2210,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
 
   // Register clist
   gtk_clist_freeze(profile_register_clist);
-  for(i=0; i < gpsim_get_register_memory_size(gp->pic_id,REGISTER_RAM); i++) {
+  for(i=0; i < gp->cpu->rma.get_size(); i++) {
     
     struct profile_register_entry *profile_register_entry;
     char address_string[100];
@@ -2172,20 +2222,27 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
     guint64 write_cycles;
     char *name;
 
-    if(!gpsim_register_is_sfr(gp->pic_id, REGISTER_RAM, i)&&
-       !gpsim_register_is_alias(gp->pic_id, REGISTER_RAM, i)&&
-       gpsim_register_is_valid(gp->pic_id, REGISTER_RAM, i))
-      {
+    Register *reg = gp->cpu->rma.get_register(i);
+
+    //
+    // If the register is valid, but it's not aliased and it's not a special function
+    // register, then we can profile it.
+    //
+
+    if(reg->isa() != Register::INVALID_REGISTER    // i.e. the register is valid
+          &&
+       !((reg->isa() == Register::SFR_REGISTER) || (i != reg->address)) ) {
+
 	sprintf(address_string,"0x%04x",i);
-	name = gpsim_get_register_name( gp->pic_id, REGISTER_RAM, i);
+	name = reg->name();
 	if(name==0)
 	  name = address_string;
 	strcpy(register_string, name);
 
-	read_cycles=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,i);
+	read_cycles=reg->read_access_count;
 	sprintf(count_string_read,"0x%Lx",read_cycles);
 
-	write_cycles=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,i);
+	write_cycles=reg->write_access_count;
 	sprintf(count_string_write,"0x%Lx",write_cycles);
 
 	row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
@@ -2253,18 +2310,9 @@ void Profile_Window::Build(void)
   GtkWidget *scrolled_window;
     
   gint column_width,char_width;
-
-
-//  gui_message("There are bugs here in the profile viewer.\n\
-//	      Please help them get reported and/or fixed.");
-	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), this);
-
-//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 

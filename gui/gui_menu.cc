@@ -63,30 +63,6 @@ do_quit_app(GtkWidget *widget)
 	exit_gpsim();
 }
 
-/*
-#ifdef DOING_GNOME
-static void
-about_cb (GtkWidget *widget, void *data)
-{
-	GtkWidget *about;
-	const gchar *authors[] = {
-		"Scott Dattalo - scott@dattalo.com",
-		"Ralf Forsberg - rfg@home.se",
-		0
-	};
-	
-	about = gnome_about_new ( "The GNUPIC Simulator - ", GPSIM_VERSION,
-	// copyright notice
-				  "(C) 1999 ",
-				  authors,
-				  "A simulator for Microchip PIC microcontrollers.",
-				  0);
-	gtk_widget_show (about);
-	
-	return;
-}
-#endif
-*/
 
 static void
 show_message (char *title, char *message)
@@ -131,44 +107,14 @@ about_cb (gpointer             callback_data,
 	  guint                callback_action,
 	  GtkWidget           *widget)
 {
-  gchar version[100];
-  //gchar *version = "The GNUPIC Simulator - " GPSIM_VERSION;
-  strncpy(version, "The GNUPIC Simulator - ", 100);
 
-  gpsim_get_version(&version[strlen(version)], (100 - strlen(version)) );
-
-  show_message(  version, "A simulator for Microchip PIC microcontrollers.\n"
+  show_message(  "The GNUPIC Simulator - " VERSION, "A simulator for Microchip PIC microcontrollers.\n"
 		 "by T. Scott Dattalo - mailto:scott@dattalo.com\n"
 		 "   Ralf Forsberg - mailto:rfg@home.se\n\n"
 		 "gpsim homepage: http://www.dattalo.com/gnupic/gpsim.html\n");
 
 }
 
-/*
-static void
-entry_toggle_editable (GtkWidget *checkbutton,
-		       GtkWidget *entry)
-{
-   gtk_entry_set_editable(GTK_ENTRY(entry),
-			  GTK_TOGGLE_BUTTON(checkbutton)->active);
-}
-
-static void
-entry_toggle_sensitive (GtkWidget *checkbutton,
-			GtkWidget *entry)
-{
-   gtk_widget_set_sensitive (entry, GTK_TOGGLE_BUTTON(checkbutton)->active);
-}
-
-static void
-entry_toggle_visibility (GtkWidget *checkbutton,
-			GtkWidget *entry)
-{
-   gtk_entry_set_visibility(GTK_ENTRY(entry),
-			 GTK_TOGGLE_BUTTON(checkbutton)->active);
-}
-
-*/
 
 //--------------------------------------------------------------
 // new_processor_dialog
@@ -311,7 +257,6 @@ fileopen_dialog(gpointer             callback_data,
   if (!window)
   {
 
-    //if(gpsim_processor_get_name(1))
     gui_question("This may not work well (yet?), better restart gpsim from command line","OK","OK");
 
       window = gtk_file_selection_new ("file selection dialog");
@@ -415,53 +360,44 @@ toggle_window (gpointer             callback_data,
 static void 
 runbutton_cb(GtkWidget *widget)
 {
-    if(gp)
-	gpsim_run(gp->pic_id);
+  if(gp && gp->cpu)
+    gp->cpu->pma.run();
 }
 
 static void 
 stopbutton_cb(GtkWidget *widget)
 {
-    if(gp)
-	gpsim_stop(gp->pic_id);
+  if(gp && gp->cpu)
+    gp->cpu->pma.stop();
 }
     
 static void 
 stepbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) {
-
-    if(gp->cpu->pma.isHLLmode())
-      gpsim_hll_step(gp->pic_id);
-    else
-      gpsim_step(gp->pic_id, 1);
-  }
+  if(gp && gp->cpu) 
+    gp->cpu->pma.step(1);
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) {
+  if(gp && gp->cpu) 
+    gp->cpu->pma.step_over();
 
-    if(gp->cpu->pma.isHLLmode())
-      gpsim_hll_step_over(gp->pic_id);
-    else
-      gpsim_step_over(gp->pic_id);
-  }
 }
     
 static void 
 finishbutton_cb(GtkWidget *widget)
 {
-    if(gp)
-	gpsim_finish(gp->pic_id);
+  if(gp && gp->cpu) 
+    gp->cpu->pma.finish();
 }
 
 static void 
 resetbutton_cb(GtkWidget *widget)
 {
-    if(gp)
-	gpsim_reset(gp->pic_id);
+  if(gp && gp->cpu)
+    gp->cpu->reset(POR_RESET);
 }
 
 int gui_animate_delay; // in milliseconds
@@ -537,11 +473,10 @@ static void set_simulation_mode(char m)
         realtime_mode_with_gui=0;
         break;
     }
+    gi.set_update_rate(value);
 
-    gpsim_set_update_rate(value);
-
-    if(gp)
-      gpsim_stop(gp->pic_id);
+    if(gp && gp->cpu)
+      gp->cpu->pma.stop();
 
     config_set_variable("dispatcher", "simulation_mode", m);
 }
@@ -556,15 +491,6 @@ gui_update_cb(GtkWidget *widget, gpointer data)
 }
 
 
-/*static void
-spinb_cb(GtkWidget *widget)
-{
-    guint64 value;
-    value=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
-    gpsim_set_update_rate(value);
-    config_set_variable("dispatcher", "gui_update", value);
-}
-*/
 static int dispatcher_delete_event(GtkWidget *widget,
 				   GdkEvent  *event,
 				   gpointer data)
@@ -692,7 +618,7 @@ void create_dispatcher (void)
 //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
       gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
       gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
-			    gpsim_get_version(version_buffer,100)); //GPSIM_VERSION);
+			    VERSION);
       gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
       
       box1 = gtk_vbox_new (FALSE, 0);
