@@ -1151,7 +1151,7 @@ static void marker_cb(GtkWidget *w1,
  */
 static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 {
-
+    char str[256], *label_string;
     GtkWidget *hbox, *label, *vscrollbar;
     GtkStyle *style=NULL;
 
@@ -1162,9 +1162,14 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
-    //    label=gtk_label_new(((GUI_Object*)sbaw)->gp->p->files[file_id].name);
+    strcpy(str,gpsim_get_file_context(pic_id, file_id)->name);
+    label_string=strrchr(str,'/');
+    if(label_string!=NULL)
+	    label_string++; // Skip the '/'
+    else
+	    label_string=str;
     
-    label=gtk_label_new(gpsim_get_file_context(pic_id, file_id)->name);
+    label=gtk_label_new(label_string);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(sbaw->notebook),hbox,label);
 
@@ -2311,6 +2316,8 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
   
     sbaw->notebook = gtk_notebook_new();
+    gtk_notebook_set_tab_pos((GtkNotebook*)sbaw->notebook,GTK_POS_LEFT);
+    gtk_notebook_set_scrollable((GtkNotebook*)sbaw->notebook,TRUE);
     gtk_signal_connect(GTK_OBJECT(sbaw->notebook),
 		       "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),sbaw);
     gtk_widget_show(sbaw->notebook);
