@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 class SourceBrowserAsm_Window;     
 class SourceBrowserParent_Window;
 class StatusBar_Window;
+class Value;
 
 class SourceBrowser_Window : public GUI_Object {
  public:
@@ -41,6 +42,7 @@ class SourceBrowser_Window : public GUI_Object {
   void Create(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
+  virtual void SelectAddress(Value *);
   virtual void Update(void);
   virtual void UpdateLine(int address);
   virtual void SetPC(int address);
@@ -195,6 +197,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
   virtual void Build(void);
   virtual void SelectAddress(int address);
+  virtual void SelectAddress(Value *);
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
@@ -278,6 +281,7 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
+  virtual void SelectAddress(Value *);
   virtual void Update(void);
   virtual void UpdateLine(int address);
   virtual void SetPC(int address);

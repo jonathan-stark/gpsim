@@ -174,9 +174,13 @@ Program_Counter::Program_Counter(void)
 
   reset_address = 0;
   value = 0;
+  memory_size_mask = 0;
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
+  instruction_phase = 0;
+
   _xref.assign_data(this);
 
+  trace_state = 0;
   trace_increment = 0;
   trace_branch = 0;
   trace_skip = 0;

@@ -33,6 +33,7 @@ public:
 };
 
 
+class Value;
 
 //
 // The watch window
@@ -57,6 +58,7 @@ class Watch_Window : public  GUI_Object
   //virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg=0);
   //virtual void Add(GUIRegister *reg);
   virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
+  virtual void Add(Value *);
   virtual void Update(void);
   virtual void UpdateMenus(void);
   

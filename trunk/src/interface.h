@@ -54,15 +54,8 @@ void  initialization_is_complete(void);
 
 #define INVALID_VALUE 0xffffffff
 
-  /*********************************************************************
-   * 
-   * What follows are a whole bunch of functions that provide access to
-   * gpsim's innards. This is what the gui uses to interface to gpsim.
-   * All of the functions here have "C" signatures, which is to say
-   * they may be called from "C" code as well as from C++
-   */
 
-
+/*
 #define SYMBOL_NAME_LEN 32
 typedef struct _sym
 {
@@ -70,8 +63,7 @@ typedef struct _sym
     char *name;
     int value;
 } sym;
-
-
+*/
 
 
 void gpsim_set_bulk_mode(int flag);

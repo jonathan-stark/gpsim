@@ -492,8 +492,8 @@ void cli_main(void)
 char *
 command_generator (const char *text, int state)
 {
-  char  *n;
   static int i = 0;
+  const int cMaxStringLen = 64;
 
   /* If this is a new word to complete, initialize now.  */
 
@@ -505,17 +505,8 @@ command_generator (const char *text, int state)
     {
 
       if(strstr(command_list[i]->name, text) == command_list[i]->name)
-	{
-	  n = (char *) malloc(strlen(command_list[i]->name));
-	  if(n == 0)
-	    {
-	      //fprintf (stderr, "malloc: Out of virtual memory!\n");
-	      abort ();
-	    }
-	  strcpy(n,command_list[i]->name);
-	  i++;
-	  return(n);
-	}
+	return(strndup(command_list[i++]->name, cMaxStringLen));
+
       i++;
     }
 

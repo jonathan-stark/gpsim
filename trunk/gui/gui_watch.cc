@@ -574,6 +574,28 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
   UpdateMenus();
 
 }
+
+//---
+// Add - given a symbol, verify that it is a register symbol. If it
+// is then extract the register and use it's address to get the 
+// GUI representation of the register.
+
+void Watch_Window::Add( Value *regSym)
+{
+  if(regSym && gp && gp->regwin_ram) {
+
+    if(typeid(*regSym) == typeid(register_symbol)) {
+      register_symbol *rs = static_cast<register_symbol *>(regSym);
+      Register *reg = rs->getReg();
+      
+      if(reg) {
+	GUIRegister *greg = (*gp->regwin_ram)[reg->address];
+	Add(REGISTER_RAM, greg);
+      }
+    }
+  }
+
+}
 //------------------------------------------------------------------------
 // ClearWatches
 //

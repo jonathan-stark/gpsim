@@ -222,6 +222,7 @@ Register::Register(void)
   // For now, initialize the register with valid data and set that data equal to 0.
   // Eventually, the initial value will be marked as 'uninitialized.
 
+  value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
   putRV(por_value);
   _xref.assign_data(this);
@@ -240,6 +241,7 @@ Register::Register(Processor *_cpu)
   // For now, initialize the register with valid data and set that data equal to 0.
   // Eventually, the initial value will be marked as 'uninitialized.
 
+  value = RegisterValue(0,0);
   por_value = RegisterValue(0,0);
   putRV(por_value);
   _xref.assign_data(this);

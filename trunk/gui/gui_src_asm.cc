@@ -454,6 +454,11 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   }
 }
 
+void SourceBrowserAsm_Window::SelectAddress(Value *addrSym)
+{
+  SourceBrowser_Window::SelectAddress(addrSym);
+}
+
 void SourceBrowserAsm_Window::Update(void)
 {
   if(!gp || !pma)
@@ -2684,6 +2689,16 @@ void SourceBrowserParent_Window::SelectAddress(int address)
        sbaw_iterator != children.end(); 
        sbaw_iterator++)
     (*sbaw_iterator)->SelectAddress(address);
+}
+
+void SourceBrowserParent_Window::SelectAddress(Value *addrSym)
+{
+  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
+
+  for (sbaw_iterator = children.begin();  
+       sbaw_iterator != children.end(); 
+       sbaw_iterator++)
+    (*sbaw_iterator)->SelectAddress(addrSym);
 }
 
 void SourceBrowserParent_Window::Update(void)

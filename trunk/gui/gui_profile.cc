@@ -38,13 +38,13 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 
 #include "../src/interface.h"
+#include "../src/errors.h"
 
 #include "gui.h"
 #include "gui_profile.h"
 #include "gui_regwin.h"
 
 #include "../src/symbol.h"
-extern list <symbol *> st;
 
 #include <gtkextra/gtkplot.h>
 #include <gtkextra/gtkplotdata.h>
@@ -151,13 +151,15 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 
 static unsigned int lookup_address_symbol(const char *name)
 {
-  list <symbol *>::iterator sti;
+  Value *sym=0;
+  Symbol_Table_Iterator sti;
 
-  for(sti = st.begin(); sti != st.end(); sti++) {
-    
-    if(!strcmp((*sti)->name().data(),name)) {
+
+  for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
+
+    if(!strcmp(sym->name().data(),name)) {
       int i;
-      (*sti)->get(i);
+      sym->get(i);
       return i;
     }
   }
@@ -337,13 +339,24 @@ static void add_range_dialog(Profile_Window *pw)
  this function compares sym pointers for g_list_sort()
  */
 static gint
-symcompare(sym *sym1, sym *sym2)
+symcompare(Value *sym1, Value *sym2)
 {
-    if(sym1->value<sym2->value)
-	return -1;
-    if(sym1->value>sym2->value)
-	return 1;
-    return 0;
+  try {
+    int i1,i2;
+
+    sym1->get(i1);
+    sym2->get(i2);
+    if(i1 < i2)
+      return -1;
+
+    if(i1 > i2)
+      return 1;
+  }
+  catch (Error *e) {
+    
+    delete e;
+  }
+  return 0;
 }
 
 static void
@@ -1224,6 +1237,12 @@ static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
 #if 0
+
+  ////////
+  ///
+  ///  THIS CODE IS BROKEN.
+  ///
+  ////////
     char fromaddress_string[256];
     char toaddress_string[256];
     menu_item *item;
@@ -1239,8 +1258,10 @@ popup_activated(GtkWidget *widget, gpointer data)
 	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
     }
-    list <symbol *>::iterator sti;
 
+
+    Value *sym=0;
+    Symbol_Table_Iterator sti;
 
     item = (menu_item *)data;
     entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
@@ -1254,15 +1275,15 @@ popup_activated(GtkWidget *widget, gpointer data)
         add_range_dialog(popup_pw);
 	break;
     case MENU_ADD_ALL_LABELS:
-      for(sti = st.begin(); sti != st.end(); sti++) {
+      for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
 
-	if((*sti)->isa() == SYMBOL_ADDRESS) {
+	if(typeid(*sym) == typeid(address_symbol)) {
 
-	  char *pstr=(char*)malloc((*sti)->name().length()+1);
+	  char *pstr=(char*)malloc(sym->name().length()+1);
 	  strncpy(pstr,
-		  (*sti)->name().data(),
-		  (*sti)->name().length());
-	  pstr[(*sti)->name().length()]=0;
+		  sym->name().data(),
+		  sym->name().length());
+	  pstr[sym->name().length()]=0;
 
 	  sym * data=(sym*)malloc(sizeof(sym));
 	  data->name = pstr;

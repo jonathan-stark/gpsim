@@ -568,6 +568,7 @@ void IOPORT::trace_register_write(void)
 }
 
 IOPORT::IOPORT(unsigned int _num_iopins)
+  : sfr_register()
 {
   stimulus_mask = 0;
   num_iopins = _num_iopins;

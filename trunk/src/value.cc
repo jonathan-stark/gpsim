@@ -122,10 +122,14 @@ void Value::get(double &d)
 		  " cannot be converted to a double ");
 }
 
+// get as a string - no error is thrown if the derived class
+// does not provide a method for converting to a string - 
+// instead we'll return a bogus value.
+
 void Value::get(char *buffer, int buf_size)
 {
-  throw new Error(showType() +
-		  "cannot be converted to a string ");
+  if(buffer)
+    strncpy(buffer,"INVALID",buf_size);
 }
 
 bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
@@ -397,14 +401,27 @@ void Boolean::get(int &i)
   get(b);
   i = b ? 1 : 0; 
 }
-
+/*
 void Boolean::get(double &d) 
 {
   bool b;
   get(b);
   d = b ? 1.0 : 0.0;
 }
+*/
+void Boolean::get(char *buffer, int buf_size)
+{
+  if(buffer) {
 
+    bool b;
+    get(b);
+    if(b)
+      strncpy(buffer,"true",buf_size);
+    else 
+      strncpy(buffer,"false",buf_size);
+  }
+
+}
 
 void Boolean::set(Value *v)
 {
@@ -416,6 +433,18 @@ void Boolean::set(Value *v)
 void Boolean::set(bool v)
 {
   *value = v;
+}
+
+void Boolean::set(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    if(strncmp("true", buffer, sizeof("true")-1) == 0)
+      set(true);
+    else 
+      if(strncmp("false", buffer, sizeof("false")-1) == 0)
+	set(false);
+  }
 }
 
 /*
@@ -486,6 +515,19 @@ void Integer::set(Value *v)
   Integer *iv = typeCheck(v,string("set "));
   set(iv->getVal());
 }
+void Integer::set(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    gint64 i;
+
+    int converted = sscanf(buffer, "%Ld",  &i);
+
+    if(converted)
+      set(i);
+  }
+}
+
 
 void Integer::get(gint64 &i)
 { 
@@ -496,6 +538,18 @@ void Integer::get(double &d)
   gint64 i;
   get(i);
   d = i;;
+}
+
+void Integer::get(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    gint64 i;
+    get(i);
+
+    snprintf(buffer,buf_size,"%Ld",i);
+  }
+
 }
 
 string Integer::toString()
@@ -669,6 +723,19 @@ void Float::set(Value *v)
   set(d);
 }
 
+void Float::set(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    double d;
+
+    int converted = sscanf(buffer, "%g",  &d);
+
+    if(converted)
+      set(d);
+  }
+}
+
 void Float::get(gint64 &i)
 { 
   double d;
@@ -680,6 +747,17 @@ void Float::get(double &d)
   d = *value;
 }
 
+void Float::get(char *buffer, int buf_size)
+{
+  if(buffer) {
+
+    double d;;
+    get(d);
+
+    snprintf(buffer,buf_size,"%g",d);
+  }
+
+}
 string Float::toString()
 {
   return toString("%#-16.16g");
