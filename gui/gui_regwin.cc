@@ -1866,7 +1866,10 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   SetRegisterSize();
 
-  for(reg_number=0;reg_number<rma->get_size();reg_number++) {
+  unsigned int nRegs;
+  nRegs = (rma->get_size() < MAX_REGISTERS) ? (rma->get_size()) : MAX_REGISTERS;
+
+  for(reg_number=0;reg_number<nRegs;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
 	
     if(i==0 && row_created) {

@@ -430,7 +430,11 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   if(id==-1)
   {
-    puts("SourceBrowserAsm_update_line(): could not find notebook page");
+    static int warned=0;
+    if(warned<10) {
+      puts("SourceBrowserAsm_update_line(): could not find notebook page");
+      warned++;
+    }
     return;
   }
   
