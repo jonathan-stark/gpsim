@@ -16,7 +16,7 @@ CODVIEWER       = gpvc -d
 GPSIM		= gpsim
 
 # project data
-PROJECT         = partest
+PROJECT         = logic_mod
 VERSION         = 0.0.1
 
 HEADER	        = /usr/local/share/gpasm/header
