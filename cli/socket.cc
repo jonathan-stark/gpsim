@@ -491,7 +491,9 @@ void Socket::ParseObject(char *buffer)
 	  printf("Symbol command with string %s\n",tmp);
 	  symbol *sym = get_symbol_table().find(tmp);
 	  if(sym) {
-	    snprintf(tmp,sizeof(tmp),"$03%08x",sym->get_value());
+	    int i;
+	    sym->get(i);
+	    snprintf(tmp,sizeof(tmp),"$03%08x",i);
 	    printf("responding with %s\n",tmp);
 	    respond(tmp);
 	  } else

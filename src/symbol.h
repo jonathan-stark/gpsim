@@ -64,25 +64,8 @@ class Processor;
 class Register;
 class Module;
 class Expression;
+class symbol;
 
-class symbol : public Value
-{
-public:
-
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
-  virtual char * type_name(void) { return "unknown";}
-
-  virtual string toString();
-  virtual void print();
-  virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value();
-  virtual void assignTo(Expression *);
-  virtual symbol *copy();
-
-  symbol(char *);
-  symbol(string &);
-  virtual ~symbol();
-};
 
 class Symbol_Table
 {
@@ -110,6 +93,7 @@ public:
   symbol * find(SYMBOL_TYPE symt, char *s);
 };
 
+
 #ifdef IN_MODULE
 // we are in a module: don't access symbol_table object directly!
 Symbol_Table &get_symbol_table(void);
@@ -126,6 +110,34 @@ inline Symbol_Table &get_symbol_table(void)
 
 
 
+//------------------------------------------------------------------------
+/// symbol - base class for symbols.
+
+class symbol : public Value
+{
+public:
+
+  virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
+  virtual char * type_name(void) { return "unknown";}
+
+  virtual string toString();
+  virtual void print();
+
+  virtual void assignTo(Expression *);
+
+  virtual void get(int &);
+
+  virtual void set(Value *);
+  virtual void set(int);
+
+  virtual symbol *copy();
+
+  symbol(char *);
+  symbol(string &);
+  virtual ~symbol();
+};
+
+// Do we need this? a constant_symbol is identical to an Integer!
 class constant_symbol : public symbol
 {
 protected:
@@ -138,9 +150,11 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
   virtual char * type_name(void) { return "constant";}
   virtual void print(void);
-  virtual unsigned int get_value(void){return val;};
-  virtual int getAsInt();
-  virtual double getAsDouble();
+
+  virtual void get(int &);
+
+  virtual void set(int);
+  virtual void set(Value *);
 
 };
 
@@ -155,8 +169,12 @@ public:
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
   virtual char * type_name(void) { return "ioport";}
-  virtual void put_value(unsigned int new_value);
-  virtual int getAsInt();
+
+  virtual void get(int &);
+
+  virtual void set(int);
+  virtual void set(Value *);
+
 };
 
 class node_symbol : public symbol
@@ -184,9 +202,12 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual char * type_name(void) { return "register";}
   virtual void print(void);
-  virtual unsigned int get_value(void);
-  virtual void put_value(unsigned int new_value);
-  virtual int getAsInt();
+
+  virtual void get(int &);
+
+  virtual void set(int);
+  virtual void set(Value *);
+
 };
 
 class stimulus_symbol : public symbol
@@ -250,6 +271,7 @@ class w_symbol : public register_symbol
   virtual void print(void);
 };
 
+
 class val_symbol : public symbol
 {
  public:
@@ -263,8 +285,10 @@ class val_symbol : public symbol
 
   virtual string toString();
   virtual void print(void);
-  virtual unsigned int get_value(void);
-  virtual void put_value(unsigned int new_value);
+
+  virtual void get(int &);
+  virtual void set(int);
+
   virtual string &name(void);
 
 };

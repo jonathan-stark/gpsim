@@ -60,6 +60,7 @@ public:
   virtual void set(double);
   virtual void set(gint64);
   virtual void set(int);
+  virtual void set(Value *);
 
   /// Value 'get' methods provide a mechanism of casting Value objects
   /// to other value types. If the type cast is not supported in a
@@ -187,6 +188,8 @@ public:
   virtual void get(int &i) { i = value ? 1 : 0; }
   virtual void get(double &d) { d = value ? 1.0 : 0.0;}
 
+  virtual void set(Value *);
+
   bool getVal() { return value; }
 
   static Boolean* Boolean::typeCheck(Value* val, string valDesc);
@@ -218,6 +221,7 @@ public:
 
   virtual void set(gint64 v);
   virtual void set(double d);
+  virtual void set(Value *);
 
   gint64 getVal() { return value; }
 
@@ -252,6 +256,7 @@ public:
 
   virtual void set(gint64 v);
   virtual void set(double d);
+  virtual void set(Value *);
 
   double getVal() { return value; }
 
@@ -306,6 +311,8 @@ public:
 
   virtual unsigned int get_leftVal();
   virtual unsigned int get_rightVal();
+
+  virtual void set(Value *);
 
   virtual Value *copy() { return new AbstractRange(left,right); }
 

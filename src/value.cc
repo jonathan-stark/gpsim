@@ -55,6 +55,10 @@ void Value::set(int i)
   gint64 i64 = i;
   set(i64);
 }
+void Value::set(Value *v)
+{
+  throw new Error(" cannot assign a Value to a " + showType());
+}
 
 void Value::get(gint64 &i)
 {
@@ -232,6 +236,12 @@ bool AbstractRange::compare(ComparisonOperator *compOp, Value *rvalue)
   throw new Error(compOp->showOp() + 
 		  " comparison is not defined for " + showType());
 }
+void AbstractRange::set(Value *v)
+{
+  AbstractRange *ar=typeCheck(v, string(""));
+  left = ar->get_leftVal();
+  right = ar->get_rightVal();
+}
 
 /*
 bool AbstractRange::operator<(Value *rv)
@@ -298,6 +308,12 @@ bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
   return false; // keep the compiler happy.
 }
 
+void Boolean::set(Value *v)
+{
+  Boolean *bv = typeCheck(v,string("set "));
+  value = bv->getVal();
+}
+
 /*
 bool Boolean::operator&&(Value *rv)
 {
@@ -337,6 +353,11 @@ void Integer::set(gint64 i)
   value = i;
 }
 
+void Integer::set(Value *v)
+{
+  Integer *iv = typeCheck(v,string("set "));
+  value = iv->getVal();
+}
 
 void Integer::get(gint64 &i)
 { 
@@ -487,6 +508,11 @@ void Float::set(gint64 i)
   value = i;
 }
 
+void Float::set(Value *v)
+{
+  Float *fv = typeCheck(v,string("set "));
+  value = fv->getVal();
+}
 
 void Float::get(gint64 &i)
 { 
@@ -599,7 +625,13 @@ string String::toString()
 
   return(msg);
 }
-
+/*
+void String::set(Value *v)
+{
+  String *sv = typeCheck(v,string("set "));
+  value = sv->getVal();
+}
+*/
 string String::toString(char* format)
 {
   char cvtBuf[1024];

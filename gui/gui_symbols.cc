@@ -268,15 +268,17 @@ void Symbol_Window::Update(void)
     entry[2]=(char*)malloc(32);
     if((*sti)->isa()==SYMBOL_ADDRESS||
        (*sti)->isa()==SYMBOL_CONSTANT||
-       (*sti)->isa()==SYMBOL_REGISTER)
-      sprintf(entry[2],"0x%X",(*sti)->get_value());
-    else
+       (*sti)->isa()==SYMBOL_REGISTER) {
+      int i;
+      (*sti)->get(i);
+      sprintf(entry[2],"0x%X",i);
+    } else
       strcpy(entry[2],"");
 	
     e=(sym*)malloc(sizeof(sym));
     e->name = entry[0];
     e->type = (*sti)->isa();
-    e->value=(*sti)->get_value();
+    (*sti)->get(e->value);
 
     symbols=g_list_append(symbols,e);
 

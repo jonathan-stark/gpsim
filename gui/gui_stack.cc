@@ -159,8 +159,9 @@ static int get_closest_label(Stack_Window *sw,
   for(sti = st.begin(); sti != st.end(); sti++) {
     
     if((*sti)->isa() == SYMBOL_ADDRESS) {
-
-      delta = abs( (int)((*sti)->get_value()) - address);
+      int i;
+      (*sti)->get(i);
+      delta = abs( i - address);
       if(delta < minimum_delta) {
 	minimum_delta = delta;
 	closest_symbol = *sti;
@@ -170,7 +171,9 @@ static int get_closest_label(Stack_Window *sw,
 
   if(closest_symbol) {
     strcpy(name,closest_symbol->name().data());
-    *offset=address-closest_symbol->get_value();
+    int i;
+    closest_symbol->get(i);
+    *offset=address-i;
     return 1;
   }
 

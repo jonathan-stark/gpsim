@@ -1,3 +1,9 @@
+2004-11-06 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc, gui/gui_profile.cc, gui/gui_stack.cc, 
+	gui/gui_symbol.cc, src/symbol.cc, src/symbol.h, src/value.cc
+	src/value.h:
+	gpsim symbols now support more of the methods of the Value class.
+	
 2004-11-05 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_clear.cc, cli/cmd_disasm.cc, cli/cmd_set.cc
 	cli/command.cc, cli/scan.ll, gui/gui_breadboard.cc, src/errors.cc
