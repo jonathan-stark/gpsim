@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 #include <gtkextra/gtkplot.h>
+#include <gtkextra/gtkplotdata.h>
 #include <gtkextra/gtkplotcanvas.h>
 #include <gtkextra/gtkplotps.h>
 
@@ -190,6 +191,8 @@ static void add_range(Profile_Window *pw,
     gtk_clist_set_row_data(GTK_CLIST(pw->profile_range_clist), row, (gpointer)profile_range_entry);
 
     pw->profile_range_list = g_list_append(pw->profile_range_list, (gpointer)profile_range_entry);
+
+    gtk_clist_sort(GTK_CLIST(pw->profile_range_clist));
 }
 
 static void a_cb(GtkWidget *w, gpointer user_data)
@@ -498,7 +501,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     static GtkPlotText *infotext;
     static GtkPlotText **bartext;
     GtkWidget *plot;
-    static GtkPlotData *dataset;
+    static GtkWidget *dataset;
     char infostring[128];
     char filename[128];
 
@@ -666,22 +669,27 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
 
 	dataset = gtk_plot_data_new();
-	gtk_plot_add_data(GTK_PLOT(active_plot), dataset);
+	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_ORIENTATION_VERTICAL, tickdelta, 1);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
 
-    gtk_plot_data_set_points(dataset, px2, py2, dx2, NULL, numpoints);
-    gtk_plot_data_set_symbol(dataset,
+    gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, dx2, NULL, numpoints);
+    gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
 			     GTK_PLOT_SYMBOL_IMPULSE,
 			     GTK_PLOT_SYMBOL_FILLED,
 			     15, (int)(((double)WINDOWWIDTH/2)*barwidth)+1, &color,&color);
-    gtk_plot_data_set_line_attributes(dataset,
+    gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
 				      GTK_PLOT_LINE_SOLID,
 				      5, &color);
 
-    gtk_plot_data_set_connector(dataset, GTK_PLOT_CONNECT_NONE);
+    gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
+
+    gtk_widget_show(dataset);
+
+//    gtk_plot_data_draw_points(GTK_PLOT_DATA(dataset),numpoints);
+//    gtk_plot_data_paint(GTK_PLOT_DATA(dataset));
 
     for(i=0;i<last_numpoints;i++)
     {
@@ -1249,8 +1257,6 @@ gdouble gaussian(GtkPlot *plot, GtkPlotData *data, gdouble x, gboolean *err)
  return y;
 }
 
-GtkPlotData *dataset[5];
-
 int
 BuildProfileWindow(Profile_Window *pw)
 {
@@ -1313,8 +1319,8 @@ BuildProfileWindow(Profile_Window *pw)
   pw->profile_clist = GTK_CLIST(profile_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
-  gtk_clist_set_sort_column (pw->profile_clist,1);
-  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
+//  gtk_clist_set_sort_column (pw->profile_clist,1);
+//  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(GTK_CLIST(pw->profile_clist),
 			     (GtkCListCompareFunc)profile_compare_func);
 
