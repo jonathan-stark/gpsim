@@ -582,7 +582,7 @@ int PCTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
 
 //========================================================================
 
-#define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
+//#define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
 //#define TRACE_PROGRAM_COUNTER   (1<< (PROGRAM_COUNTER >> 24))
 //#define TRACE_CYCLE_INCREMENT   (1<< (CYCLE_INCREMENT >> 24))
 #define TRACE_ALL (0xffffffff)
@@ -767,11 +767,13 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
     case NOTHING:
       snprintf(buffer, bufsize,"  empty trace cycle\n");
       break;
+      /*
     case INSTRUCTION:
       if(trace_flag & TRACE_INSTRUCTION)
 	snprintf(buffer, bufsize," instruction: 0x%04x",
 		 get(index)&0xffff);
       break;
+      */
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
@@ -813,12 +815,6 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	       get(index - 1) & 0xffffff);
 
       break;
-      /*
-    case MODULE_TRACE2:
-      return_value = 2;
-    case MODULE_TRACE1:
-      */
-      // fall through
 
     default:
       if(type(index) != CYCLE_COUNTER_HI) {
@@ -944,6 +940,9 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   return n;
 }
 //------------------------------------------------------------------------
+// allocateTraceType - allocate one or more trace commands
+//
+//
 unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
 {
   
@@ -1032,6 +1031,7 @@ TraceLog::~TraceLog(void)
 
 void TraceLog::callback(void)
 {
+  /*
   int n = 0;
   get_trace().cycle_counter(get_cycles().value);
 
@@ -1056,7 +1056,7 @@ void TraceLog::callback(void)
     last_trace_index = trace.trace_index;
     get_cycles().set_break(get_cycles().value + 1000,this);
   }
-
+  */
 }
 
 void TraceLog::open_logfile(const char *new_fname, int format)
@@ -1361,23 +1361,20 @@ void ProfileKeeper::catchup(void)
     {
 	switch (trace.trace_buffer[i] & 0xff000000)
 	{
+	  /*
 	case Trace::INSTRUCTION:
 	    instruction_address=trace_pc_value;
 	    cpu->program_memory[instruction_address]->cycle_count++;
 	    trace_pc_value++;
 	    break;
-	    /*
+
 	case Trace::PROGRAM_COUNTER:
 	case Trace::PC_SKIP:
 	    trace_pc_value=trace.trace_buffer[i]&0xffff;
 	    break;
-	    */
-	    /*
 	case Trace::CYCLE_INCREMENT:
 	    cpu->program_memory[instruction_address]->cycle_count++;
 	    break;
-	    */
-	    /*
 	case Trace::REGISTER_READ:
 	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
 	    if(r->isa() == Register::FILE_REGISTER)

@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 // member functions for the INTCON base class
 //--------------------------------------------------
 INTCON::INTCON(void)
+  : interrupt_trace(0)
 {
   new_name("intcon");
 }
@@ -44,7 +45,6 @@ void INTCON::set_T0IF(void)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   value.put(value.get() | T0IF);
 
@@ -54,11 +54,21 @@ void INTCON::set_T0IF(void)
   }
 }
 
+void INTCON::set_cpu(Processor *new_cpu)
+{
+  cpu = new_cpu;
+
+  pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
+
+  assert(pcpu);
+
+}
+
 void INTCON::put(unsigned int new_value)
 {
 
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
+
   value.put(new_value);
 
   // Now let's see if there's a pending interrupt
@@ -113,11 +123,9 @@ bool INTCON_14_PIR::check_peripheral_interrupt(void)
 //
 //----------------------------------------------------------------------
 INTCON_16::INTCON_16()
+  : rcon(0), intcon2(0), interrupt_vector(0)
 {
 
-  rcon = 0;
-  intcon2 = 0;
-  cpu = 0;
 }
 
 
