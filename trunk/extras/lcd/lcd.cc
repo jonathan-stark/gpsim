@@ -481,7 +481,7 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   in_cgram = FALSE;
   cgram_updated = FALSE;
   cgram_cursor = 0;
-  memset(&cgram[0], 0, sizeof(cgram));
+  memset(&cgram[0], 0xff, sizeof(cgram));
   // The font is created dynamically later on.
   fontP = NULL;
 
