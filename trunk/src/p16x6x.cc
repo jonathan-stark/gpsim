@@ -150,7 +150,7 @@ void _14bit_28pins::create_iopin_map(void)
   trisc.new_name("trisc");
 
   // Define the valid I/O pins.
-  porta->valid_iopins = 0x1f;
+  porta->valid_iopins = 0x3f;
   portb->valid_iopins = 0xff;
   portc->valid_iopins = 0xff;
 
@@ -237,7 +237,7 @@ void _14bit_40pins::create_iopin_map(void)
   trise.new_name("trise");
 
   // Define the valid I/O pins.
-  porta->valid_iopins = 0x1f;
+  porta->valid_iopins = 0x3f;
   portb->valid_iopins = 0xff;
   portc->valid_iopins = 0xff;
   portd->valid_iopins = 0xff;
