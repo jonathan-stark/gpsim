@@ -429,6 +429,18 @@ void process_command_file(const char * file_name)
 
       fclose(cmd_file);
     }
+  else
+    {
+      cout << "failed to open command file ";
+      cout << file_name;
+      cout << endl;
+      char cw[_MAX_PATH];
+      _getcwd(cw, _MAX_PATH);
+      cout << "current working directory is ";
+      cout << cw;
+      cout << endl;
+
+    }
 
   Stack.print();
 
@@ -770,4 +782,3 @@ void initialize_readline (void)
 
 #endif //HAVE_READLINE
 }
-
