@@ -1,3 +1,6 @@
+2004-12-01 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: MSVC sync
+
 2004-11-30 Scott Dattalo <scott@dattalo.com>
 	* gpsim/gpsim.vcproj: Removed references to files resource.h and
 	gpsim.rc.
@@ -18,7 +21,6 @@
 	of STL string (yes this IS an enhancement) 2) the set() and get()
 	methods can read and write to the String class.
 	- Changed many instances of 'char *' to 'const char *'.
-
 
 2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/processor.cc, src/processor.h,
@@ -43,7 +45,6 @@
 	can be tied to a register symbol to create a 'register stimulus'.
 	* cli/cmd_stimulus.cc, cli/command.cc, cli/parse.yy: Added support
 	for attribute stimuli.
-
 
 2004-11-28 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync

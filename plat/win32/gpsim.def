@@ -2,20 +2,18 @@ EXPORTS
     ??0Breakpoint_Instruction@@QAE@PAVProcessor@@II@Z
     ??0Files@@QAE@H@Z
     ??0Float@@QAE@N@Z
-    ??0IOPIN@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
+    ??0IOPIN@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0IOPIN@@QAE@XZ
     ??0IOPORT@@QAE@I@Z
-    ??0IO_bi_directional@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IO_bi_directional@@QAE@XZ
-    ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
-    ??0IO_open_collector@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
+    ??0IO_bi_directional@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
+    ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0Integer@@QAE@_J@Z
     ??0Interface@@QAE@PAX@Z
     ??0Module@@QAE@XZ
     ??0PCTraceObject@@QAE@PAVProcessor@@I@Z
     ??0PCTraceType@@QAE@PAVProcessor@@II@Z
     ??0Processor@@QAE@XZ
-    ??0ProcessorConstructor@@QAE@P6APAVProcessor@@XZPAD111@Z
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
     ??0Program_Counter@@QAE@XZ
     ??0Register@@QAE@XZ
@@ -28,7 +26,6 @@ EXPORTS
     ??0TriggerObject@@QAE@XZ
     ??0instruction@@QAE@XZ
     ??0invalid_instruction@@QAE@PAVProcessor@@I@Z
-    ??0stimulus@@QAE@PAD@Z
     ??0symbol@@QAE@PBD@Z
     ??1Float@@UAE@XZ
     ??1IOPIN@@UAE@XZ
@@ -119,6 +116,7 @@ EXPORTS
     ?get@Value@@UAEXAAH@Z
     ?get@Value@@UAEXAAN@Z
     ?get@Value@@UAEXAA_J@Z
+    ?get@Value@@UAEXAA_K@Z
     ?get@Value@@UAEXPADH@Z
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@RegisterWriteTraceObject@@UAEXPAVTraceFrame@@@Z
@@ -192,17 +190,16 @@ EXPORTS
     ?save_state@Processor@@UAEXPAU_iobuf@@@Z
     ?save_state@Processor@@UAEXXZ
     ?set@Float@@UAEXN@Z
-    ?set@Float@@UAEXPADH@Z
+    ?set@Float@@UAEXPBDH@Z
     ?set@Float@@UAEXPAVValue@@@Z
     ?set@Float@@UAEX_J@Z
     ?set@Integer@@UAEXH@Z
     ?set@Integer@@UAEXN@Z
-    ?set@Integer@@UAEXPADH@Z
+    ?set@Integer@@UAEXPBDH@Z
     ?set@Integer@@UAEXPAVValue@@@Z
     ?set@Integer@@UAEX_J@Z
     ?set@Value@@UAEXH@Z
     ?set@Value@@UAEXN@Z
-    ?set@Value@@UAEXPADH@Z
     ?set@Value@@UAEXPAVExpression@@@Z
     ?set@Value@@UAEX_J@Z
     ?set@Value@@UAEX_N@Z
