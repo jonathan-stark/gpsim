@@ -54,13 +54,13 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_trace.h"
 #include "gui_watch.h"
 
+#ifndef _WIN32
 #undef TRUE
 #undef FALSE
-// #include <eXdbm.h>
-
-extern "C" {
-#include "../eXdbm/eXdbm.h"
-}
+#include "settings_exdbm.h"
+#else
+#include "settings_reg.h"
+#endif
 
 extern int gui_animate_delay; // in milliseconds
 
@@ -78,7 +78,7 @@ GUI_Processor *gp=0;
 GSList *gui_processors=0;
 unsigned int interface_id=0;
 
-DB_ID dbid=-1;
+Settings *settings;
 
 extern GtkWidget *dispatcher_window;
 
@@ -400,42 +400,11 @@ void gui_new_source (unsigned int pic_id)
 
 int gui_init (int argc, char **argv)
 {
-    int ret;
-
-    char path[256], *homedir;
-    
-  ret = eXdbmInit();
-  if(ret==-1)
-  {
-      puts(eXdbmGetErrorString(eXdbmGetLastError()));
-  }
-
-  homedir=getenv("HOME");
-  if(homedir==0)
-      homedir=".";
-
-  sprintf(path,"%s/.gpsim",homedir);
-  
-  ret = eXdbmOpenDatabase(path,&dbid);
-  if(ret==-1)
-  {
-      int error=eXdbmGetLastError();
-      if(error==DBM_OPEN_FILE)
-      {
-	  ret=eXdbmNewDatabase(path,&dbid);
-	  if(ret==-1)
-	      puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	  else
-	  {
-	      ret=eXdbmUpdateDatabase(dbid);
-	      if(ret==-1)
-		  puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	  }
-      }
-      else
-	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
-  }
-
+#ifndef _WIN32
+  settings = new SettingsEXdbm("gpsim");
+#else
+  settings = new SettingsReg("gpsim");
+#endif
 
   if (!gtk_init_check (&argc, &argv))
   {

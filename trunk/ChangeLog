@@ -1,3 +1,10 @@
+2004-07-06 Borut Razem <borut.razem@siol.net>
+	* gui/settings.h, gui/settings_exdbm.h, gui/settings_exdbm.cc,
+	  gui/gui.h, plat/win32/settings_reg.h, plat/win32/settings_reg.cpp,
+	  gui/gui.vcproj, gui/Makefile.am: added additional layer to hide
+	  differences between eXdbm and WIN32 registry
+	* store settings in registy on WIN32
+
 2004-07-03 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.ico, plat/win32/gpsim.nsi: created NSIS setup script
 
