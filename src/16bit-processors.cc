@@ -244,7 +244,6 @@ void _16bit_processor :: create_sfr_map(void)
   status->write_mask = 0xff;
 
 
-  //cout << "end  txsta assignment name: " << usart.txsta->name() << "\n";
 }
 
 //-------------------------------------------------------------------
@@ -274,11 +273,8 @@ void _16bit_processor :: create (void)
   ind2.init(this);
   //usart16 = new USART_MODULE16();
 
-  cout << "16bit_processor1 create txreg => " << usart16.txreg.name() << "\n";
   pic_processor::create();
-  cout << "16bit_processor2 create txreg => " << usart16.txreg.name() << "\n";
   _16bit_processor::create_sfr_map();
-  cout << "16bit_processor3 create txreg => " << usart16.txreg.name() << "\n";
 
   trace.program_counter (pc->value);
   tmr0l.initialize();

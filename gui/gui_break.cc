@@ -134,11 +134,11 @@ void link_src_to_gpsim(GUI_Processor *gp)
 	//cross_reference->parent_window_type = WT_asm_source_window;
 	//cross_reference->parent_window = (gpointer) gp;
 	cross_reference-> gp = gp;
-	address = (int *) malloc(sizeof(int));
-	*address = i;
+	address = (int *) malloc(sizeof(int *));
+	*address = gp->cpu->map_pm_index2address(i);
 
 	cross_reference->data = (gpointer) address;
-	gp->cpu->pma.assign_xref(i,(gpointer) cross_reference);
+	gp->cpu->pma.assign_xref(*address,(gpointer) cross_reference);
       }
     }
 }

@@ -51,6 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #include "fopen-path.h"
 
 int parse_string(char *cmd_string);
+extern void redisplay_prompt(void);  // in input.cc
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
@@ -387,8 +388,8 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 {
   if(address < program_memory_size())
     {
-      pma[address].update_line_number(file_id,sline,lst_line,0,0);
-      //program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
+      //pma[address].update_line_number(file_id,sline,lst_line,0,0);
+      program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
       //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
       if(sline > files[file_id].max_line)
 	files[file_id].max_line = sline;
@@ -511,6 +512,29 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 
   return line;
 }
+
+//--------------------------------------------------------------------------
+unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
+{
+    
+  if(!cpu)
+    return INVALID_VALUE;
+
+  switch(get_hll_mode()) {
+
+  case ASM_MODE:
+    return (this->operator[](address)).get_file_id();
+    break;
+
+  case HLL_MODE:
+    return (this->operator[](address)).get_hll_file_id();
+    break;
+  }
+
+  return INVALID_VALUE;
+
+}
+
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_break_at_address(int address)
 {
@@ -541,12 +565,6 @@ void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBac
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakCallBack *cb)
 {
-/*
-  int pm_index = cpu->map_pm_address2index(address);
-
-  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
-    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
-*/
   if(hasValid_opcode(address))
     bp.set_profile_stop_break(cpu, address, cb);
 }
@@ -1036,12 +1054,104 @@ void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
 void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
 {
 
-  if(cpu->program_memory_size()<=address)
+  instruction &q = this->operator[](address);
+  if(q.isa()==instruction::INVALID_INSTRUCTION)
     return;
 
-  if(cpu->program_memory[address] && cpu->program_memory[address]->xref)
-      cpu->program_memory[address]->xref->add(xref);
+  if(q.xref)
+    q.xref->add(xref);
+}
 
+//--------------------------------------------------------------------------
+void ProgramMemoryAccess::step(unsigned int steps)
+{
+
+  if(!cpu)
+    return;
+
+  switch(get_hll_mode()) {
+
+  case ASM_MODE:
+    cpu->step(steps);
+    break;
+
+  case HLL_MODE:
+    {
+      unsigned int initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
+      unsigned int initial_pc = cpu->pc->get_value();
+
+      while(1)
+	{
+	  cpu->step(1);
+
+	  if(cpu->pc->get_value()==initial_pc)
+	    break;
+
+	  if(get_src_line(cpu->pc->get_value())
+	     != initial_line)
+	    break;
+	}
+
+      break;
+    }
+  }
+}
+
+//--------------------------------------------------------------------------
+void ProgramMemoryAccess::step_over(void)
+{
+
+  if(!cpu)
+    return;
+
+  switch(get_hll_mode()) {
+
+  case ASM_MODE:
+    cpu->step_over();
+    break;
+
+  case HLL_MODE:
+    {
+
+#if 0
+      //
+      // High level language step-overs are only supported for 
+      // pic processors
+      //
+
+      pic_processor *pic = dynamic_cast<pic_processor *>cpu;
+
+      if(!pic) {
+	cout << "step-over is not supported for non-PIC processors\n";
+	return;
+      }
+      unsigned int initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
+      unsigned int initial_pc = cpu->pc->get_value();
+      unsigned int initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
+
+      while(1)
+	{
+	  step(1);
+
+	  if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
+	    gpsim_finish(processor_id);
+
+	  if(pic->pc->get_value()==initial_pc)
+	    break;
+
+	  if(get_src_line(initial_pc) != initial_line)
+	    {
+	      if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
+		break;
+	    }
+	}
+      break;
+#endif
+      cout << "HLL Step is not supported\n";
+    }
+  }
+
+  redisplay_prompt();
 }
 
 //--------------------------------------------------------------------------

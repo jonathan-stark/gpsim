@@ -309,9 +309,6 @@ void P18C4x2::create(void)
 
   trace.program_counter (pc->value);
 
-  //usart.init_ioport(portc);
-  cout << "c4x2::create usart txreg => " << usart16.txreg.name() << "\n";
-
 }
 //------------------------------------------------------------------------
 void P18C4x2::create_iopin_map(void)
@@ -443,8 +440,6 @@ void P18C4x2::create_sfr_map(void)
 
   if(verbose)
     cout << "create_sfr_map P18C4x2\n";
-
-  cout << "c4x2::create_sfr_map1 usart txreg => " << usart16.txreg.name() << "\n";
 
   add_sfr_register(&porta,	  0xf80,0,"porta");
   add_sfr_register(&portb,	  0xf81,0,"portb");
@@ -662,8 +657,6 @@ Processor * P18F442::construct(void)
   p->pic_processor::create_symbols();
   p->name_str = "p18f442";
   symbol_table.add_module(p,p->name_str);
-  //cout << "c4x2 -2 txsta assignment name: " << usart.txsta->name() << "\n";
-  //cout << "c4x2 -2 txsta assignment name: " << p->usart.txsta->name() << "\n";
 
   return p;
 
@@ -741,7 +734,6 @@ void P18F452::create(void)
   if(verbose)
     cout << " 18f452 create \n";
 
-  cout << "f452 usart txreg => " << usart16.txreg.name() << "\n";
   P18F442::create();
   P18F452::create_sfr_map();
 
@@ -766,7 +758,6 @@ Processor * P18F452::construct(void)
   p->pic_processor::create_symbols();
   p->name_str = "p18f452";
 
-  cout << "usart txreg => " << p->usart16.txreg.name() << "\n";
   symbol_table.add_module(p,p->name_str);
 
   return p;
@@ -793,8 +784,6 @@ Processor * P18F1220::construct(void)
   p->pic_processor::create_symbols();
   p->name_str = "p18f1220";
   symbol_table.add_module(p,p->name_str);
-  //cout << "c4x2 -2 txsta assignment name: " << usart.txsta->name() << "\n";
-  //cout << "c4x2 -2 txsta assignment name: " << p->usart.txsta->name() << "\n";
 
   return p;
 }
@@ -810,10 +799,6 @@ void P18F1220::create(void)
 
   create_sfr_map();
 
-  //trace.program_counter (pc->value);
-
-  //usart.init_ioport(portc);
-  cout << "f1220::create usart txreg => " << usart16.txreg.name() << "\n";
 
 }
 //------------------------------------------------------------------------
@@ -951,8 +936,6 @@ Processor * P18F1320::construct(void)
   p->pic_processor::create_symbols();
   p->name_str = "p18f1320";
   symbol_table.add_module(p,p->name_str);
-  //cout << "c4x2 -2 txsta assignment name: " << usart.txsta->name() << "\n";
-  //cout << "c4x2 -2 txsta assignment name: " << p->usart.txsta->name() << "\n";
 
   return p;
 

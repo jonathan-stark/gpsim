@@ -92,6 +92,10 @@ class ProgramMemoryAccess :  public BreakCallBack
   // hasValid_opcode -- returns true if the opcode at the address is valid
   bool hasValid_opcode(unsigned int address);
 
+  // step - step one of more instructions
+  void step(unsigned int steps);
+  void step_over(void);
+
   // isModified -- returns true if the program at the address has been modified 
   // (this is only valid for those processor capable of writing to their own
   // program memory)
@@ -105,8 +109,11 @@ class ProgramMemoryAccess :  public BreakCallBack
 
   // Given an address to an instruction, find the source line that 
   // created it:
-  //unsigned int get_hll_src_line(unsigned int address);
+
   unsigned int get_src_line(unsigned int address);
+
+  // Return the file ID of the source program responsible for the opcode at address.
+  unsigned int get_file_id(unsigned int address);
 
   // A couple of functions for manipulating  breakpoints
   void set_break_at_address(int address);

@@ -261,7 +261,9 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
 
   // find notebook page containing address 'address'
-  sbawFileId = gpsim_get_file_id( gp->pic_id, address);
+  sbawFileId = gp->cpu->pma.get_file_id(address);
+              //gpsim_get_file_id( gp->pic_id, address);
+
   for(i=0;i<SBAW_NRFILES;i++)
     {
       if(pageindex_to_fileid[i] == sbawFileId)
@@ -342,9 +344,8 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   if(!gp || !gp->cpu)
     return;
 
-
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pageindex_to_fileid[i]==gpsim_get_file_id(gp->pic_id, address))
+    if(pageindex_to_fileid[i]==gp->cpu->pma.get_file_id(address))
       id=i;
   }
 
@@ -391,7 +392,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pageindex_to_fileid[i]==gpsim_get_file_id( gp->pic_id, address))
+    if(pageindex_to_fileid[i]==gp->cpu->pma.get_file_id(address))
       id=i;
   }
 
@@ -656,20 +657,26 @@ popup_activated(GtkWidget *widget, gpointer data)
       popup_sbaw->gp->symbol_window->SelectSymbolName(text);
       break;
     case MENU_STEP:
-
+      popup_sbaw->gp->cpu->pma.step(1);
+      /*
       if(popup_sbaw->gp->cpu->pma.isHLLmode())
 	gpsim_hll_step(popup_sbaw->gp->pic_id);
       else
 	gpsim_step(popup_sbaw->gp->pic_id, 1);
       break;
+      */
     case MENU_STEP_OVER:
+      popup_sbaw->gp->cpu->pma.step_over();
+      /*
       if(popup_sbaw->gp->cpu->pma.isHLLmode())
 	gpsim_hll_step_over(popup_sbaw->gp->pic_id);
       else
 	gpsim_step_over(popup_sbaw->gp->pic_id);
       break;
+      */
     case MENU_RUN:
-      gpsim_run(popup_sbaw->gp->pic_id);
+      popup_sbaw->gp->cpu->run();
+      //gpsim_run(popup_sbaw->gp->pic_id);
       break;
     case MENU_STOP:
       gpsim_stop(popup_sbaw->gp->pic_id);
@@ -1157,9 +1164,9 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     strcpy(str,gpsim_get_file_context(pic_id, file_id)->name);
     label_string=strrchr(str,'/');
     if(label_string!=NULL)
-	    label_string++; // Skip the '/'
+      label_string++; // Skip the '/'
     else
-	    label_string=str;
+      label_string=str;
     
     label=gtk_label_new(label_string);
 
@@ -1824,7 +1831,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   while(gtk_events_pending())
       gtk_main_iteration();
   
-  address=gp->cpu->pc->get_raw_value();
+  address=gp->cpu->pc->get_value();
   //address = gpsim_get_pc_value(pic_id);
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
