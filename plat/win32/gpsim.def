@@ -45,7 +45,6 @@ EXPORTS
     ?callback@source_stimulus@@UAEXXZ
     ?callback_print@BreakpointObject@@UAEXXZ
     ?callback_print@source_stimulus@@UAEXXZ
-    ?change_direction@IO_bi_directional@@UAEXI@Z
     ?change_pin_direction@IOPORT@@UAEXI_N@Z
     ?check_cycle_break@Breakpoints@@QAEII@Z
     ?clear@BreakpointObject@@UAEXXZ
@@ -87,8 +86,6 @@ EXPORTS
     ?get_Vth@IO_bi_directional@@UAENXZ
     ?get_Vth@IO_input@@UAENXZ
     ?get_Zth@IO_bi_directional@@UAENXZ
-;    ?get_Zth@PUResistor_IO@@UAENXZ
-;    ?get_Zth@Resistor_IO@@UAENXZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
@@ -141,8 +138,6 @@ EXPORTS
     ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
-    ?setbit_value@IOPORT@@UAEXI_N@Z
-    ?setbit_value@Register@@UAEXI_N@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_mode@@3W4SIMULATION_MODES@@A
     ?simulation_start_cycle@@3_KA

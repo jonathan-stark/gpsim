@@ -10,7 +10,7 @@ dnl   aclocal -I . --verbose
 dnl
 dnl The --verbose will show all of the files that are searched
 dnl for .m4 macros.
-AC_DEFUN(wi_LIB_READLINE, [
+AC_DEFUN([wi_LIB_READLINE], [
 AC_MSG_CHECKING([for GNU Readline library, version 2.0 or newer])
 
 wi_cv_lib_readline=no

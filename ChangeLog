@@ -1,3 +1,7 @@
+2004-07-31 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: updated exports
+	* acinclude.m4, src/breakpoints.cc, cli/input.cc: small cleanups
+
 2004-07-29 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-instructions.cc, src/16bit-instructions.cc, src/pic-instructions.cc,
 	src/pic-registers.cc, src/trace.cc, src/trace.h: The newly rewritten

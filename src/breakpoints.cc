@@ -1158,11 +1158,12 @@ RegisterValue Log_Register_Read::getRV(void)
 
 bool Log_Register_Read::get_bit(unsigned int bit_number)
 {
-  int v = replaced->get_bit(bit_number);
+  bool v = replaced->get_bit(bit_number);
   trace_log.register_read(replaced->address, v, cycles.value);
   return v;
 
 }
+
 double Log_Register_Read::get_bit_voltage(unsigned int bit_number)
 {
   return replaced->get_bit_voltage(bit_number);
