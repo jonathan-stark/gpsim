@@ -42,7 +42,7 @@ list <stimulus *> :: iterator stimulus_iterator;
 static char num_nodes = 'a';
 static char num_stimuli = 'a';
 
-
+extern pic_processor *active_cpu;
 /*
  * stimulus.cc
  *
@@ -533,13 +533,19 @@ int triangle_wave::get_voltage(guint64 current_time)
 //   
 //
 
+void source_stimulus::callback(void)
+{
+  cout << "shouldn't be called\n";
+}
+
 void asynchronous_stimulus::callback(void)
 {
 
   current_state = next_state;
   guint64 current_cycle = future_cycle;
 
-  //cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
+  //  if(verbose)
+    cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
   // If we've passed through all of the states
   // then start over from the beginning.
@@ -586,10 +592,13 @@ void asynchronous_stimulus::callback(void)
 
   cpu->cycles.set_break(future_cycle, this);
 
-  //cout <<"  next transition = " << future_cycle << '\n';
-  //cout <<"  next value = " << next_state << '\n';
+  if(verbose) {
+    cout <<"  next transition = " << future_cycle << '\n';
+    cout <<"  next value = " << next_state << '\n';
+  }
 
-  snode->update(current_cycle);
+  if(snode)
+    snode->update(current_cycle);
 }
 
 int asynchronous_stimulus::get_voltage(guint64 current_time) 
@@ -609,12 +618,17 @@ int asynchronous_stimulus::get_voltage(guint64 current_time)
 void asynchronous_stimulus::start(void)
 {
 
+  if(verbose)
+    cout << "Starting asynchronous stimulus\n";
+
+  // FIXME - If a cpu has been specified then assign the active one
+  //   (a cpu is only needed for the cycle counter)
+
+  if(!cpu)
+    cpu = active_cpu;
+
   if(cpu && samples) //  && transition_cycles)
     {
-
-      if(max_states == 0)
-	return;
-
 
       current_index = 0;
 
@@ -634,8 +648,21 @@ void asynchronous_stimulus::start(void)
       cpu->cycles.set_break(future_cycle, this);
 
       if(verbose) {
+
 	cout << "Asynchronous stimulus\n";
 	cout << "  states = " << max_states << '\n';
+
+	current_sample = samples;
+	while(current_sample) {
+	  
+	  cout << "    " << ((StimulusDataType *)(current_sample->data))->time
+	       <<  '\t'  << ((StimulusDataType *)(current_sample->data))->value
+	       << '\n';
+
+	  current_sample = current_sample->next;
+	}
+
+	cout << "first break will be at cycle " <<future_cycle << '\n';
       }
       /*
       for(int i=0; i<max_states; i++)
@@ -659,10 +686,17 @@ void asynchronous_stimulus::start(void)
       //next_state = *values;
       next_state = ((StimulusDataType *)(samples->data))->value;
 
+      current_sample = samples;
     }
+  else {
+    if(cpu) 
+      cout << "Warning: aynchronous stimulus has no cpu\n";
+  }
 
   if(verbose)
     cout << "asy should've been started\n";
+
+
 }
 
 //-------------------------------------------------------------
@@ -676,21 +710,54 @@ void asynchronous_stimulus::start(void)
 // 
 void asynchronous_stimulus::put_data(guint64 data_point)
 {
-  if(data_flag) {
-    if(samples) {
-      ((StimulusDataType *)(samples->data))->value = data_point;
-    } else {
-      samples = g_slist_append(samples, (void *)(new StimulusDataType) );
+  // On the very first call, create the samples linked list.
+  cout << __FUNCTION__ << " value " << data_point << '\n';
 
-      ((StimulusDataType *)(samples->data))->time = data_point;
-    }
+  /*  if(!samples) {
+      samples = g_slist_append(samples, (void *)(new StimulusDataType) );
+      current_sample = samples;
+      cout << "  creating samples link list\n";
   }
+  */
+
+  if(data_flag) {
+    cout << "  sample is data\n";
+
+    // put data
+    if(data_point)
+      ((StimulusDataType *)(current_sample->data))->value = MAX_DRIVE/2;
+    else
+      ((StimulusDataType *)(current_sample->data))->value = -MAX_DRIVE/2;
+
+
+  } else {
+    cout << "  sample is time\n";
+
+    // put time
+    current_sample = g_slist_append(current_sample, (void *)(new StimulusDataType) );
+    max_states++;
+
+
+    if(!samples)
+      samples = current_sample;
+    else
+      current_sample = current_sample->next;
+
+    ((StimulusDataType *)(current_sample->data))->time = data_point;
+
+    cout << "  sample is time\n";
+
+  }
+
   data_flag ^= 1;
 }
 
 void asynchronous_stimulus::put_data(float data_point)
 {
-  put_data( ((guint64)(MAX_ANALOG_DRIVE * data_point))) ;
+  ((StimulusDataType *)(current_sample->data))->value =
+    ((guint64)(MAX_ANALOG_DRIVE * data_point));
+
+  data_flag ^= 1;
 
 }
 
@@ -1168,147 +1235,7 @@ void IO_open_collector::change_direction(unsigned int new_direction)
     xref->update();
 }
 
-//*****************************************************************
-// *** KNOWN CHANGE ***
-//  Support functions that will get replaced by the CORBA interface.
-//  
-
-//source_stimulus *last_stimulus=NULL;
-
-/*
-void create_stimulus(int type, char *name)
-{
-  //cout << "Got request to create a stimulus \n";
-
-  asynchronous_stimulus *asy;
-  square_wave *sqw;
-  triangle_wave *tri;
-
-  switch(type)
-    {
-    case NEW_SQW:
-      sqw = new square_wave(0,0,0,name);
-      last_stimulus = sqw;
-      break;
-
-    case NEW_ASY:
-      asy = new asynchronous_stimulus(name);
-      last_stimulus = asy;
-      break;
-
-    case NEW_TRI:
-      tri = new triangle_wave(0,0,0,name);
-      last_stimulus = tri;
-      break;
-    }
-  last_stimulus->period = 0;
-  last_stimulus->duty   = 0;
-  last_stimulus->phase  = 0;
-  last_stimulus->initial_state  = 0;
-  last_stimulus->start_cycle    = 0;
-
-}
-*/
-/*
-void stimorb_period(unsigned int _period)
-{
-  if(last_stimulus)
-    last_stimulus->period = _period;
-}
-
-void stimorb_duty(unsigned int _duty)
-{
-  if(last_stimulus)
-    last_stimulus->duty = _duty;
-}
-
-void stimorb_phase(unsigned int _phase)
-{
-  if(last_stimulus)
-    last_stimulus->phase = _phase;
-}
-
-void stimorb_initial_state(unsigned int _initial_state)
-{
-  if(last_stimulus)
-    last_stimulus->initial_state = _initial_state;
-}
-
-void stimorb_start_cycle(unsigned int _start_cycle)
-{
-  if(last_stimulus)
-    last_stimulus->start_cycle = _start_cycle;
-}
-
-void stimorb_name(char *_name)
-{
-  //cout << "changing name to " << _name << '\n';
-
-  //cout << "before " << last_stimulus->name();
-  if(last_stimulus)
-    strcpy(last_stimulus->name_str,_name);
-  //cout << " after " << last_stimulus->name() << '\n';
-
-}
-*/
-
-/*
-void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_array )
-{
-
-  if(!last_stimulus)
-    return;
-  asynchronous_stimulus *asy;
-
-  asy  =  (asynchronous_stimulus *) last_stimulus;
-
-  if(temp_array.size())
-    {
-
-      asy->digital = digital;
-      asy->max_states =  temp_array.size()/2;
-      asy->transition_cycles = new guint64[ asy->max_states];
-      asy->values            = new int[ asy->max_states];
-
-      for(int j=0; j<=2*asy->max_states; j++)
-	{
-	  StimulusDataType dp = temp_array[j];
-	  int new_data;
-
-	  switch(dp.data_type) {
-
-	  case STIMULUS_DPT_INT:
-	    new_data = (dp.data_point.i & 0xfffffff);
-	    break;
-
-	  case STIMULUS_DPT_FLOAT:
-	    new_data = (int)(MAX_ANALOG_DRIVE * dp.data_point.f);
-	    break;
-
-	  default:
-	    new_data = 0;
-	    break;
-	  }
-
-	  if(j&1)
-	    asy->values[j>>1] = new_data;
-	  else
-	    asy->transition_cycles[j>>1] = new_data;
-	}
-
-      asy->cpu = cpu;
-
-      //      if (options_entered & STIM_IOPORT)
-      //	is->ioport->attach_stimulus(asy, bit_pos);
-
-      //cout << "Starting asynchronous stimulus\n";
-      asy->start();
-      if(verbose)
-	cout << __FUNCTION__ << "()\n";
-    }
-}
-  */
-
+//--------------------------------------------------------
 // Char list.
 // Here's a singly linked-list of char *'s.
 

@@ -16,11 +16,11 @@ echo Sample asynchronous stimulus file
 
 # Create the processor that's to be simulated
 
-processor p16c71 fred
+#processor p16c71 fred
 
 # Load the .hex file
 
-load h p16c71_test.hex
+load s p16c71_test.cod
 
 stimulus asynchronous_stimulus   # or we could've used asy
 

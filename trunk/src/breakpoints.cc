@@ -275,7 +275,9 @@ unsigned int Breakpoints::check_invalid_fr_break(invalid_file_register *fr)
 
 unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 {
-  
+  if(verbose)
+    "cycle break is halting sim\n";
+
   halt();
   if( abp < MAX_BREAKPOINTS)
     {
@@ -375,6 +377,10 @@ void Breakpoints::dump(void)
 	have_breakpoints = 1;
     }
 
+  //  if(verbose) {
+    cout << " Cycle counter break points\n";
+    active_cpu->cycles.dump_breakpoints();
+    // }
 
   if(!have_breakpoints)
     cout << "No user breakpoints are set... I think\n";

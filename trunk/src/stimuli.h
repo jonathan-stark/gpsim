@@ -104,7 +104,7 @@ public:
   virtual void attach(Stimulus_Node *s) { snode = s;};
 };
 
-class source_stimulus : public stimulus
+class source_stimulus : public stimulus, public BreakCallBack
 {
 public:
 
@@ -142,6 +142,7 @@ enum SOURCE_TYPE
   virtual SOURCE_TYPE isa(void) {return SQW;};
   char *name(void) { return(name_str);};
 
+  virtual void callback(void);
   void put_period(unsigned new_period) { period = new_period; };
   void put_duty(unsigned new_duty) { duty = new_duty; };
   void put_phase(unsigned new_phase) { phase = new_phase; };
@@ -151,6 +152,7 @@ enum SOURCE_TYPE
   virtual void put_data(float data_point) {};
   virtual void set_digital(void) { };
   virtual void set_analog(void) { };
+  virtual void start(void) { };
 
 };
 
@@ -290,7 +292,7 @@ typedef struct StimulusData {
 
 } StimulusDataType;
 
-class asynchronous_stimulus : public source_stimulus, public BreakCallBack
+class asynchronous_stimulus : public source_stimulus
 {
 public:
 

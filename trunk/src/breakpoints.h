@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-instructions.h"
 #include "pic-registers.h"
 
+#include  <iostream.h>
+
 #ifdef HAVE_GUI
 #include "glib.h"
 #endif
@@ -64,7 +66,7 @@ class BreakCallBack
 public:
   virtual void callback(void)
     {
-      //cout << "generic callback\n";
+      cout << "generic callback\n";
     }
 
 };

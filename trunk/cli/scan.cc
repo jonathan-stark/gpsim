@@ -733,17 +733,17 @@ YY_RULE_SETUP
       // Got an eol.
       input_mode = 0;  // assume that this is not a multi-line command.
       if(cmd != NULL) {
-	if(verbose)
+	if((verbose) && DEBUG_PARSER)
           cout << "EOL with " << cmd->name << '\n';
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
-	  if(verbose)
+	  if((verbose) && DEBUG_PARSER)
             cout << " spanning lines     \n";
           input_mode = CONTINUING_LINE;
           return SPANNING_LINES; //IGNORED; 
         } else
           return IGNORED;
       } else {
-	if(verbose)
+	if((verbose) && DEBUG_PARSER)
           cout << "EOL but no pending command\n";
         return IGNORED; 
       }
@@ -1760,15 +1760,15 @@ int translate_token(int tt)
   switch(tt)
   {
     case OPT_TT_BITFLAG:
-      if(verbose & 0x2)
+      if((verbose & 0x2) && DEBUG_PARSER)
         cout << " tt bit flag\n";
       return BIT_FLAG;
      case OPT_TT_NUMERIC:
-      if(verbose & 0x2)
+      if((verbose & 0x2) && DEBUG_PARSER)
         cout << " tt numeric\n";
       return NUMERIC_OPTION;
      case OPT_TT_STRING:
-      if(verbose & 0x2)
+      if((verbose & 0x2) && DEBUG_PARSER)
         cout << " tt string\n";
       return STRING_OPTION;
   }
@@ -1816,12 +1816,12 @@ int handle_identifier(const string &s, cmd_options **op )
 
    have_parameters = 1;
 
-   if(verbose)
+   if((verbose) && DEBUG_PARSER)
      cout << "search options\n";
 
    while(opt->name != NULL)
     if(strcmp(opt->name, s.c_str()) == 0) {
-      if(verbose)
+      if((verbose) && DEBUG_PARSER)
         cout << "found option '" << opt->name << "'\n";
       yylval.co = opt;
       return translate_token(opt->token_type);
@@ -1870,7 +1870,7 @@ void initialize_commands(void);
 
 void init_parser(void)
 {
-  if(verbose & 2)
+  if((verbose & 2) && DEBUG_PARSER)
     cout << __FUNCTION__  << "()\n";
   initialize_commands();
 
@@ -1883,13 +1883,13 @@ void init_parser(void)
     op = NULL;
     input_mode = 0;
     end_of_command = 0;
-    if(verbose & 2)
+    if((verbose & 2) && DEBUG_PARSER)
       cout << "not ";
 
     yyrestart (stdin);
 
   }
-  if(verbose & 2)
+  if((verbose & 2) && DEBUG_PARSER)
     cout << "spanning lines"  << '\n';
 
 }

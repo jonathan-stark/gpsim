@@ -164,7 +164,7 @@ cmd: ignored
      | spanning_lines
      | END_OF_INPUT
      {
-       if(verbose&2)
+       if((verbose&2) && DEBUG_PARSER)
          cout << "got an END_OF_INPUT\n";
        quit_parse = 1;
        YYABORT;
@@ -174,11 +174,11 @@ cmd: ignored
 ignored: IGNORED
           {
             //if(parser_warnings || (verbose & 2 ))
-            if(verbose & 2)
+            if((verbose & 2) && DEBUG_PARSER)
               cout << "parser is ignoring input\n";
 
             if(!parser_spanning_lines) {
-              if(verbose & 2)
+              if((verbose & 2) && DEBUG_PARSER)
                 cout << "  parser is aborting current input stream\n";
 
 	      YYABORT;
@@ -189,7 +189,7 @@ ignored: IGNORED
 
 spanning_lines:  SPANNING_LINES
           {
-            if(verbose)
+            if((verbose) && DEBUG_PARSER)
               cout << "parser is spanning lines\n";
 
             parser_spanning_lines = 1;
@@ -199,7 +199,7 @@ spanning_lines:  SPANNING_LINES
 
 attach_cmd: ATTACH string_list
           {
-            if(verbose&2)
+            if((verbose&2) && DEBUG_PARSER)
 	      cout << "attach command with a string list\n";
 	    attach.attach(str_list_head);
 	    free_char_list(str_list_head);
@@ -443,15 +443,15 @@ stimulus_opt:
 	  }
           | stimulus_opt SPANNING_LINES
           {
-            if(verbose)
-              cout << "parser is ignoring spanned line in stimulus\n";
+            //if(verbose)
+              //cout << "parser is ignoring spanned line in stimulus\n";
             parser_spanning_lines=1;
             //YYACCEPT;
           }
           | stimulus_opt IGNORED
           {
-            if(verbose)
-              cout << "parser is ignoring garbage in stimulus\n";
+            //if(verbose)
+              //cout << "parser is ignoring garbage in stimulus\n";
             //YYACCEPT;
           }
           | stimulus_opt bit_flag
