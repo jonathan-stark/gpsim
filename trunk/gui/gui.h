@@ -174,7 +174,7 @@ struct _Register_Window {
     GtkWidget *location;
     GtkWidget *popup_menu;
 
-    int allow_change_view;
+//    int allow_change_view;
 
     int registers_loaded; // non zero when registers array is loaded
 

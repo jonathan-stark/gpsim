@@ -1075,6 +1075,7 @@ static void xref_remove_cell(struct cross_reference_to_gui *xref)
     printf("%s() doesn't do anything\n", __FUNCTION__);
 
 }
+/*
 static void change_view (struct _gui_object *_this, int view_state)
 {
     Register_Window *rw;
@@ -1082,8 +1083,8 @@ static void change_view (struct _gui_object *_this, int view_state)
     if(_this == (GUI_Object*)_this->gp->regwin_eeprom) {
 	rw = _this->gp->regwin_eeprom;
 
-	if(!_this->gp->regwin_eeprom->allow_change_view)
-	  return;
+//	if(!_this->gp->regwin_eeprom->allow_change_view)
+//	  return;
     }
     else if(_this == (GUI_Object*)_this->gp->regwin_ram)
 	rw = _this->gp->regwin_ram;
@@ -1095,7 +1096,7 @@ static void change_view (struct _gui_object *_this, int view_state)
     RegWindow_update(rw);
 
     return;
-}
+}*/
 
 void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 {
@@ -1227,23 +1228,24 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     
     RegWindow_select_register(rw, 0);
 
-    if(gpsim_get_register_memory_size(pic_id,rw->type)==0)
+/*    if(gpsim_get_register_memory_size(pic_id,rw->type)==0)
     {
 	((GUI_Object*)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
-        rw->allow_change_view=0;
+//        rw->allow_change_view=0;
     }
     else if(!GTK_WIDGET_VISIBLE(((GUI_Object*)rw)->window))
     {
-	rw->allow_change_view=1;
+//	rw->allow_change_view=1;
 	((GUI_Object*)rw)->change_view((GUI_Object*)rw,VIEW_SHOW);
     }
-
+*/
 }
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
 {
+//    puts("Delete");
     ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
     return TRUE;
 }
@@ -1430,10 +1432,10 @@ int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)
   register_window->gui_obj.window = NULL;
   register_window->gui_obj.wc = WC_data;
   register_window->gui_obj.wt = WT_register_window;
-  register_window->gui_obj.change_view = change_view;
+  register_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
   register_window->gui_obj.is_built = 0;
   
-  register_window->allow_change_view=1;
+//  register_window->allow_change_view=1;
   register_window->registers_loaded=0;
   register_window->processor=0;
 
