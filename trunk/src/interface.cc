@@ -602,6 +602,20 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
 }
 
 //--------------------------------------------------------------------------
+unsigned int gpsim_address_has_opcode(unsigned int processor_id, unsigned int address)
+{
+ pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  if(pic->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+    return 1;
+
+  return 0;
+}
+
+//--------------------------------------------------------------------------
 unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int address)
 {
  pic_processor *pic = get_processor(processor_id);
