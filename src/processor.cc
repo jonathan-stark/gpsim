@@ -514,11 +514,18 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_break_at_address(int address)
 {
+  /*
   int pm_index = cpu->map_pm_address2index(address);
 
   if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
     if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_execution_break(cpu, address);
+  */
+
+  instruction &q = this->operator[](address);
+  if(q.isa() != instruction::INVALID_INSTRUCTION)
+    bp.set_execution_break(cpu, address);
+
 
 }
 
@@ -781,22 +788,28 @@ void Processor::dump_registers (void)
 
 
 //-------------------------------------------------------------------
+instruction &ProgramMemoryAccess::operator [] (int address)
+{
+
+  if(!cpu ||cpu->program_memory_size()<=address  || address<0)
+    throw;
+
+  return *cpu->program_memory[cpu->map_pm_address2index(address)];
+}
+
+//-------------------------------------------------------------------
 instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
 {
-  instruction *p;
-
-  address = cpu->map_pm_address2index(address);
 
   if(cpu->program_memory_size()<=address  || address<0)
     return NULL;
 
-  p=cpu->program_memory[address];
-
-  if(p==NULL)
+  instruction &q = this->operator[](address);
+  if(q.isa()==instruction::INVALID_INSTRUCTION)
     return NULL;
 
-  if(p->isa()==instruction::INVALID_INSTRUCTION)
-    return NULL;
+
+  instruction *p = &q;
 
   for(;;)
     {
