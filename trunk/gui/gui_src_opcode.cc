@@ -37,7 +37,6 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
-//#include <gtkextra/gtksheetentry.h>
 
 extern int gui_question(char *question, char *a, char *b);
 
@@ -1173,14 +1172,10 @@ void SourceBrowserOpcode_Window::Fill()
   int pm_size;
   int pc;
 
-  ////  gtk_clist_freeze (GTK_CLIST (clist));
-
   // Clearing and appending is faster than changing
   gtk_clist_clear(GTK_CLIST(clist));
 
   pm_size = gp->cpu->program_memory_size();
-
-  ////  gtk_sheet_freeze(GTK_SHEET(sheet));
 
   if(memory!=0)
     free(memory);
@@ -1214,10 +1209,6 @@ void SourceBrowserOpcode_Window::Fill()
     
   gtk_clist_set_row_style (GTK_CLIST (clist), 0, current_line_number_style);
 
-  ////  gtk_clist_thaw (GTK_CLIST (clist));
-
-  ////  gtk_sheet_thaw(GTK_SHEET(sheet));
-
   pc=gp->cpu->pc->get_raw_value();
   SetPC(pc);
   update_label(this,pc);
@@ -1237,8 +1228,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     Build();
 
   assert(wt==WT_opcode_source_window);
-
-  gp = _gp;
 
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
@@ -1262,8 +1251,6 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 {
 
-  //gint i, pm_size,opcode;
-  //char buf[128];
   GtkSheetRange range;
 
   if(!gp)
@@ -1284,26 +1271,6 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   Fill();
 
-  /*
-  gtk_clist_freeze (GTK_CLIST (clist));
-  gtk_sheet_freeze(GTK_SHEET(sheet));
-
-  for(i=0;i<pm_size;i+=16)
-    {
-      char row_label[100];
-      if(GTK_SHEET(sheet)->maxrow<i/16)
-	{
-	  gtk_sheet_add_row(GTK_SHEET(sheet),1);
-	}
-
-      sprintf(row_label,"%x0",i/16);
-      gtk_sheet_row_button_add_label(GTK_SHEET(sheet), i/16, row_label);
-      gtk_sheet_set_row_title(GTK_SHEET(sheet), i/16, row_label);
-    }
-  if(i/16 < GTK_SHEET(sheet)->maxrow)
-    gtk_sheet_delete_rows(GTK_SHEET(sheet),i/16,GTK_SHEET(sheet)->maxrow-i/16);
-  */
-
   range.row0=0;range.col0=0;
   range.rowi=GTK_SHEET(sheet)->maxrow;
   range.coli=GTK_SHEET(sheet)->maxcol;
@@ -1314,33 +1281,6 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font);
 #endif
 
-
-  // Clearing and appending is faster than changing
-  /*
-  gtk_clist_clear(GTK_CLIST(clist));
-    
-  for(i=0; i < pm_size; i++) {
-
-    memory[i] = opcode = gp->cpu->pma->get_opcode(i);
-
-    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", gp->cpu->map_pm_index2address(i));
-    sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-
-    filter(row_text[MNEMONIC_COLUMN],
-	   gp->cpu->pma->get_opcode_name(i,buf,sizeof(buf)),
-	   128);
-
-    gtk_clist_append (GTK_CLIST (clist), row_text);
-    gtk_sheet_set_cell(GTK_SHEET(sheet),
-		       i/16,i%16,
-		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
-  }
-
-  gtk_clist_thaw (GTK_CLIST (clist));
-
-
-  gtk_sheet_thaw(GTK_SHEET(sheet));
-  */
 
   range.row0=range.rowi=0;
   range.col0=range.coli=0;
@@ -1589,12 +1529,9 @@ void SourceBrowserOpcode_Window::Build(void)
   bIsBuilt = true;
 
   GTKWAIT;
-  /*
-  if(gp->cpu)
-    NewProcessor(gp);
-  if(program)
-    NewSource(gp);
-  */
+
+  NewProcessor(gp);
+  NewSource(gp);
 
   /* create popupmenu for sheet */
   sheet_popup_menu=build_menu_for_sheet(this);
@@ -1623,15 +1560,12 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
 
   gp = _gp;
-  //  gp->program_memory = this;
   set_name("program_memory");
   wc = WC_source;
   wt = WT_opcode_source_window;
 
   memory=0;
   current_address=0;
-
-  program=0;
 
   ascii_mode=1; /// default, two bytes/cell, MSB first
   int tmp=0;

@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #ifdef HAVE_GUI
 
+#define DEBUG
+
 #include <unistd.h>
 #define GTK_ENABLE_BROKEN
 #include <gtk/gtk.h>
@@ -55,24 +57,12 @@ Boston, MA 02111-1307, USA.  */
 #include "../xpms/startp.xpm"
 #include "../xpms/stopp.xpm"
 
-//#define DEBUG
-
-#if defined(DEBUG)
-#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
-#else
-#define Dprintf(arg) {}
-#endif
-
+#define PAGE_BORDER 3
 #define PIXMAP_SIZE 14
-#define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
+//#define PIXMAP_POS(sbaw,e) ((e)->pixel+(sbaw)->layout_offset+-PIXMAP_SIZE/2-(e)->font_center)
 
 extern int gui_question(char *question, char *a, char *b);
 
-
-static GList *sa_xlate_list[SBAW_NRFILES]={0};  // lists containing sa_entry pointers
-
-static struct sa_entry *gui_line_to_entry(int id,unsigned int line);
-static struct sa_entry *gui_index_to_entry(int id, unsigned int index);
 
 typedef enum {
     MENU_FIND_TEXT,
@@ -172,6 +162,57 @@ void PixmapObject::CreateFromXPM(GdkWindow *window,
 }
 
 //========================================================================
+BreakPointInfo::BreakPointInfo()
+{
+  address = 0; 
+  index = 0;
+  line = 0;
+  //pixel = 0;
+  //font_center = 0;
+  pos = 0;
+  break_widget = 0;
+  canbreak_widget = 0;
+}
+
+void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *bp_mask)// , int pos)
+{
+  if(!break_widget) {
+    break_widget = gtk_pixmap_new(pixmap_break,bp_mask);
+
+    gtk_layout_put(GTK_LAYOUT(layout),
+		   break_widget,
+		   PIXMAP_SIZE*0,
+		   pos
+		   );
+  }
+
+  if(canbreak_widget)
+    gtk_widget_hide(canbreak_widget);
+
+  gtk_widget_show(break_widget);
+
+}
+
+void BreakPointInfo::Clear(GtkWidget *layout, GdkPixmap *pixmap_canbreak, GdkBitmap *bp_mask)//, int pos)
+{
+  if(!canbreak_widget) {
+    canbreak_widget = gtk_pixmap_new(pixmap_canbreak,bp_mask);
+
+    gtk_layout_put(GTK_LAYOUT(layout),
+		   canbreak_widget,
+		   PIXMAP_SIZE*0,
+		   pos
+		   );
+  }
+
+  if(break_widget)
+    gtk_widget_hide(break_widget);
+
+  gtk_widget_show(canbreak_widget);
+
+}
+
+//========================================================================
 
 static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 
@@ -182,106 +223,100 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 //pixel is 0 -> maxfont-1 for line zero.
 //         maxfont -> maxfont*2-1 for line one
 //         ...
-static struct sa_entry *gui_pixel_to_entry(SourceBrowserAsm_Window *sbaw, int id, unsigned int pixel)
+BreakPointInfo *SourceBrowserAsm_Window::getBPatPixel(int id, int pixel)
 {
 
-  struct sa_entry *e;      // to simplify expressions
-  GList *p;                // iterator
+  BreakPointInfo *e;      // to simplify expressions
+  GList *p;         // iterator
 
-  assert(sa_xlate_list[id]!=0);
+  if(!sa_xlate_list[id])
+    return 0;
 
   if(pixel<0)
-    return (struct sa_entry*)sa_xlate_list[id]->data;
+    return (BreakPointInfo*)sa_xlate_list[id]->data;
     
-  /*
-  int vadj = GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-  pixel += vadj;
-  */
-
   p=sa_xlate_list[id];
 
   // find listentry with address larger than argument
   while(p->next!=0)
     {
-      e = (struct sa_entry*)p->data;
-      if(e->pixel > pixel)
+      e = (BreakPointInfo*)p->data;
+      if(e->pos+12 > pixel)
 	break;
       p=p->next;
     }
     
-  e=(struct sa_entry*)p->data;
+  e=(BreakPointInfo*)p->data;
 
   return e;
 }
 
-static struct sa_entry *gui_line_to_entry(int id, unsigned int line)
+BreakPointInfo *SourceBrowserAsm_Window::getBPatLine(int id, unsigned int line)
 {
-    struct sa_entry *e;
-    GList *p;
+  BreakPointInfo *e;
+  GList *p;
 
-    if(sa_xlate_list[id]==0)
-      return 0;
+  if(!sa_xlate_list[id])
+    return 0;
 
-    if(line<0)
-      return 0;
+  if(line<0)
+    return 0;
 
-    p=sa_xlate_list[id];
+  p=sa_xlate_list[id];
 
-    /*
-     locate listentry with index larger than argument
-     */
-    while(p->next!=0)
+  /*
+    locate listentry with index larger than argument
+  */
+  while(p->next!=0)
     {
-        e = (struct sa_entry*)p->data;
+      e = (BreakPointInfo*)p->data;
 	      
-	if(e->line > line)
-	    break;
-	p=p->next;
+      if(e->line > line)
+	break;
+      p=p->next;
     }
 
-    assert(p->prev); // FIXME, happens if only one line of source
-    p=p->prev;
+  assert(p->prev); // FIXME, happens if only one line of source
+  p=p->prev;
     
-    e=(struct sa_entry*)p->data;
-    return e;
+  e=(BreakPointInfo*)p->data;
+  return e;
 }
 
-static struct sa_entry *gui_index_to_entry(int id, unsigned int index)
+BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, unsigned int index)
 {
-    struct sa_entry *e;
-    GList *p;
+  BreakPointInfo *e;
+  GList *p;
     
-    assert(sa_xlate_list[id]!=0);
+  if(!sa_xlate_list[id] || index<0)
+    return 0;
 
-    assert(index>=0);
-
-    p=sa_xlate_list[id];
+  p=sa_xlate_list[id];
     
-    /*
-     locate listentry with index larger than argument
-     */
-    while(p->next!=0)
+  /*
+    locate listentry with index larger than argument
+  */
+  while(p->next!=0)
     {
-        e = (struct sa_entry*)p->data;
+      e = (BreakPointInfo*)p->data;
 	      
-	if(e->index > index)
-	    break;
-	p=p->next;
+      if(e->index > index)
+	break;
+      p=p->next;
     }
     
-    assert(p->prev); // FIXME, could happen
+  assert(p->prev); // FIXME, could happen
     
-    p=p->prev;
+  p=p->prev;
     
-    e=(struct sa_entry*)p->data;
-    return e;
+  e=(BreakPointInfo*)p->data;
+  return e;
 }
 
 void SourceBrowserAsm_Window::SetPC(int address)
 { 
-  struct sa_entry *e; 
+  BreakPointInfo *e; 
   int row; 
-  unsigned int pixel; 
   float inc; 
   unsigned int i;
   unsigned int sbawFileId;
@@ -321,13 +356,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
     puts("SourceBrowserAsm_set_pc(): could not find notebook page");
     return;
   }
-  if(1){
-    GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
-
-    Dprintf((" SetPC: %s , vadj=%g, lower=%g, upper=%g,page_size=%g, page_inc=%g\n", 
-	   name(),
-	   adj->value,adj->lower, adj->upper, adj->page_size, adj->page_increment));
-  }
 
   new_pcw = pages[id].source_pcwidget;
 
@@ -337,7 +365,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   row--;
 
-  if(current_page != id)
+  if((int)current_page != id)
     gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)
@@ -353,23 +381,22 @@ void SourceBrowserAsm_Window::SetPC(int address)
 	  gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
 
 	  layout_offset = ytext-yfixed;
-	  //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
+	  cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
 	}
     }
-  e = gui_line_to_entry(id, row);
+  e = getBPatLine(id, row);
   if(e==0)
     return;
 
-  pixel = PIXMAP_POS(this,e);
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
-  if( pixel< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      pixel> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+  if( e->pos< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
+      e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
-    gdouble nvalue = pixel - inc/2;
-    printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
+    gdouble nvalue = e->pos - inc/2;
+    //printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
     gtk_adjustment_set_value(adj, nvalue);
 
   }
@@ -380,16 +407,15 @@ void SourceBrowserAsm_Window::SetPC(int address)
   gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
 		  new_pcw,
 		  PIXMAP_SIZE,
-		  PIXMAP_POS(this,e)
+		  e->pos
 		  );
 
 }
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
 {
-  struct sa_entry *e;
+  BreakPointInfo *e;
   int id=-1, i;
-  unsigned int pixel;
   float inc;
   unsigned int line;
     
@@ -416,19 +442,16 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   if(line==INVALID_VALUE)
     return;
     
-  e = gui_line_to_entry(id, line);
+  e = getBPatLine(id, line);
   if(e==0)
     return;
 
-  pixel = PIXMAP_POS(this,e);
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
-  if( pixel<= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      pixel>= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+  if( e->pos <= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
+      e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
     gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
-			     pixel-inc/2);
-    printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
-
+			     e->pos-inc/2);
   }
 }
 
@@ -436,13 +459,12 @@ void SourceBrowserAsm_Window::Update(void)
 {
   if(!gp || !pma)
     return;
-  //cout << "Update " << name() << endl;
+
   SetPC(pma->get_PC());
 
   if(status_bar)
     status_bar->Update();
 
-  //  GTKWAIT;
 }
 
 /*
@@ -454,7 +476,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   unsigned int row;
 
   int i,id=-1;
-  struct sa_entry *e;
+  BreakPointInfo *e;
   
   assert(address>=0);
 
@@ -475,7 +497,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     }
     return;
   }
-  if(id != current_page) {
+  if(id != (int)current_page) {
     return;
   }
   row = pma->get_src_line(address);
@@ -485,7 +507,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   row--;
 
 
-  e = gui_line_to_entry(id,row);
+  e = getBPatLine(id,row);
 
   if(e==0)
     return;
@@ -497,36 +519,22 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   if(pma->address_has_profile_start(address))
     notify_start_list.Add(address, 
-			 gtk_pixmap_new(pixmap_profile_start,startp_mask), 
-			 pages[id].source_layout,
-			 PIXMAP_POS(this,e));
+			  gtk_pixmap_new(pixmap_profile_start,startp_mask), 
+			  pages[id].source_layout,
+			  e->pos);
 
   else if(pma->address_has_profile_stop(address))
     notify_stop_list.Add(address, 
 			 gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
 			 pages[id].source_layout,
-			 PIXMAP_POS(this,e));
+			 e->pos);
 
   else if(pma->address_has_break(address)) {
-    //printf("adding a break: address=%d, current_page=%d, id=%d\n",
-    //   address,current_page,id);
-    breakpoints.Add(address,
-		    gtk_pixmap_new(pixmap_break,bp_mask),
-		    pages[id].source_layout,
-		    PIXMAP_POS(this,e));
+    e->Set(pages[id].source_layout,pixmap_break, bp_mask);
+
   } else {
 
-    if(!e->bpwidget) {
-      e->bpwidget = gtk_pixmap_new(pixmap_canbreak, canbp_mask);
-
-      //printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
-      gtk_layout_put(GTK_LAYOUT(pages[id].source_layout),
-		     e->bpwidget,
-		     PIXMAP_SIZE*0,
-		     PIXMAP_POS(this,e)
-		     );
-      gtk_widget_show(e->bpwidget);
-    }
+    e->Clear(pages[id].source_layout, pixmap_canbreak, canbp_mask);
   }
 
 }
@@ -539,9 +547,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     menu_item *item;
     unsigned int id, address, line;
     char text[256];
-    unsigned int i, temp;
-    gint start, end;
-
     if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
       return;
 
@@ -560,7 +565,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_FIND_PC:
       address=popup_sbaw->gp->cpu->pc->get_raw_value();
       popup_sbaw->SetPC(address);
-      //	gui_simulation_has_stopped(); // FIXME
       break;
     case MENU_MOVE_PC:
       line = popup_sbaw->menu_data->line;
@@ -603,40 +607,45 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
 
     case MENU_SELECT_SYMBOL:
+      {
+	gint i, temp;
+	gint start, end;
+
 
 #if GTK_MAJOR_VERSION >= 2
-      if (!gtk_editable_get_selection_bounds(
-					     GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-					     &start, &end))
-	break;
+	if (!gtk_editable_get_selection_bounds(
+					       GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+					       &start, &end))
+	  break;
 #else
-      start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
-      end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
+	start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
+	end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
 #endif
-      if(start>end)
-	{
-	  temp=start;
-	  start=end;
-	  end=temp;
-	}
-      if((end-start+2)>256) // FIXME bounds?
-	end=start+256-2;
-      for(i=start;i<end;i++)
-	text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),i);
+	if(start>end)
+	  {
+	    temp=start;
+	    start=end;
+	    end=temp;
+	  }
+	if((end-start+2)>256) // FIXME bounds?
+	  end=start+256-2;
+	for(i=start;i<end;i++)
+	  text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
 
-      text[i-start]=0;
+	text[i-start]=0;
 	
-      if(!popup_sbaw->gp->symbol_window->enabled)
-	popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+	if(!popup_sbaw->gp->symbol_window->enabled)
+	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
 
-      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
 
 
-      // We also try with a '_' prefix.
-      for(i=strlen(text)+1;i>0;i--)
-	text[i]=text[i-1];
-      text[i]='_';
-      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+	// We also try with a '_' prefix.
+	for(i=strlen(text)+1;i>0;i--)
+	  text[i]=text[i-1];
+	text[i]='_';
+	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+      }
       break;
     case MENU_STEP:
       popup_sbaw->pma->step(1);
@@ -733,15 +742,15 @@ void BreakPointList::Remove(int address = -1)
   {
     GList *next = li->next;
 
-    breakpoint_info *bpi = (breakpoint_info*)li->data;
+    BreakPointInfo *bpi = (BreakPointInfo*)li->data;
       
     // remove the breakpoint
     if(address<0 || bpi->address==address)
     {
       iter = g_list_remove(li,li->data);
       if(bpi) {
-	if(bpi->widget)
-	  gtk_widget_destroy(bpi->widget);
+	if(bpi->break_widget)
+	  gtk_widget_destroy(bpi->break_widget);
 
 	free(bpi);
       }
@@ -759,19 +768,18 @@ void BreakPointList::Remove(int address = -1)
 //
 void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int pos)
 {
-  breakpoint_info *bpi=(breakpoint_info*)malloc(sizeof(breakpoint_info));
+  BreakPointInfo *bpi= new BreakPointInfo();
   //printf("Add: address:%d, pos:%d\n",address,pos);
   bpi->address=address;
-  bpi->widget = pwidget;
+  bpi->break_widget = pwidget;
   gtk_layout_put(GTK_LAYOUT(layout),
-		 bpi->widget,
+		 bpi->break_widget,
 		 PIXMAP_SIZE*0,
 		 pos
 		 );
-  gtk_widget_show(bpi->widget);
+  gtk_widget_show(bpi->break_widget);
   iter=g_list_append(iter,bpi);
 }
-
 
 void remove_all_points(SourceBrowserAsm_Window *sbaw)
 {
@@ -830,15 +838,14 @@ static gint sigh_button_event(GtkWidget *widget,
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    //printf("button event\n");
+    printf("button event\n");
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
 	popup_sbaw=sbaw;
 
-	//sbaw->menu_data = gui_pixel_to_entry(id, (int) (event->y + GTK_TEXT(sbaw->pages[id].source_text)->vadj->value));
-	sbaw->menu_data = gui_pixel_to_entry(sbaw, id, (int) (event->y));
+	sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y));
 
 	
 	for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
@@ -922,7 +929,7 @@ static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
     {
 	if (adj_to_update->upper >= adj->value )
 	{
-	    printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
+	  //printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
 	    gtk_adjustment_set_value(adj_to_update, adj->value);
 	}
     }
@@ -968,8 +975,8 @@ static gint marker_cb(GtkWidget *w1,
 {
   static int dragbreak=0;
   static int dragstartline;
-  breakpoint_info *bpi;
-  breakpoint_info *dragbpi;
+  BreakPointInfo *bpi;
+  BreakPointInfo *dragbpi;
   static int button_pressed;
   static int button_pressed_y;
   static int button_pressed_x;
@@ -1016,13 +1023,13 @@ static gint marker_cb(GtkWidget *w1,
 	    iter=sbaw->breakpoints.iter;
 	    while(iter!=0)
 	      {
-		bpi=(breakpoint_info*)iter->data;
+		bpi=(BreakPointInfo*)iter->data;
 		    
-		diff = button_pressed_y - (bpi->widget->allocation.y+PIXMAP_SIZE/2);
+		diff = button_pressed_y - (bpi->break_widget->allocation.y+PIXMAP_SIZE/2);
 		if(abs(diff) < abs(mindiff))
 		  {
 		    mindiff=diff;
-		    dragbpi=(breakpoint_info *)iter->data;
+		    dragbpi=(BreakPointInfo *)iter->data;
 		  }
 		    
 		iter=iter->next;
@@ -1031,25 +1038,17 @@ static gint marker_cb(GtkWidget *w1,
 	    if(dragbpi!=0 && mindiff<PIXMAP_SIZE/2)
 	      {  // mouse hit breakpoint pixmap in dragbpi
 
-		// pixel = (position of pixmap in window)
-		//         - (constant) + (constant)
-		//         + (top of window, counting from top of text)
-		/*
-		pixel = dragbpi->widget->allocation.y-
-		  sbaw->layout_offset+PIXMAP_SIZE/2+
-		  (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-		*/
-		pixel = dragbpi->widget->allocation.y-
+		pixel = dragbpi->break_widget->allocation.y-
 		  sbaw->layout_offset+PIXMAP_SIZE/2;
 
 		// we want to remember which line drag started on
 		// to be able to disable this breakpoint later
 		// FIXME: perhaps we should simply disable bp now?
 		//dragstartline = gui_pixel_to_entry(id,pixel)->line;
-		dragstartline = gui_pixel_to_entry(sbaw,id,pixel)->line;
+		dragstartline = sbaw->getBPatPixel(id,pixel)->line;
 
 		dragbreak=1;  // start drag
-		dragwidget = dragbpi->widget;
+		dragwidget = dragbpi->break_widget;
 		dragwidget_x = 0;
 		dragwidget_oldy=dragwidget->allocation.y+
 		  (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
@@ -1106,12 +1105,12 @@ static gint marker_cb(GtkWidget *w1,
   case GDK_2BUTTON_PRESS:
     if(event->button == 1) {
       int pos = (int)event->y -	sbaw->layout_offset /*+ (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value */ ;
-      //sa_entry *e = gui_pixel_to_entry(id, pos);
-      sa_entry *e = gui_pixel_to_entry(sbaw, id, pos);
+
+      BreakPointInfo *e = sbaw->getBPatPixel(id, pos);
       line = e->line;
       /*
       printf("Toggling break: line:%d pos: (%d,%d), id=%d\n",line,(int)event->x,(int)event->y,id);
-      printf("                sa_entry -- index:%d, line:%d, pixel:%d, font_center:%d\n",
+      printf("                BreakPointInfo -- index:%d, line:%d, pixel:%d, font_center:%d\n",
 	     e->index,e->line,e->pixel,e->font_center);
       printf("                layout_offset:%d, vadj->value=%d\n",
 	     sbaw->layout_offset,
@@ -1134,17 +1133,9 @@ static gint marker_cb(GtkWidget *w1,
     gtk_grab_remove(sbaw->pages[id].source_layout);
 
 	
-    // pixel = (position of pixmap in window)
-    //         + (constant) - (constant)
-    //         + (top of window, counting from top of text)
-    /*pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
-      sbaw->layout_offset+
-      (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-    */
-    pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
-      sbaw->layout_offset;
-    //line = gui_pixel_to_entry(id,pixel)->line;
-    line = gui_pixel_to_entry(sbaw,id,pixel)->line;
+    pixel = dragwidget->allocation.y+PIXMAP_SIZE/2 - sbaw->layout_offset;
+
+    line = sbaw->getBPatPixel(id,pixel)->line;
 	
     if(dragwidget == sbaw->pages[id].source_pcwidget) {
       
@@ -1185,12 +1176,10 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     int id;
 
     hbox = gtk_hbox_new(0,0);
-    gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
 
-    // FIXME - there's a chance of buffer overflow & there's a chance of index overflow...
     FileContext *fc = (*sbaw->gp->cpu->files)[file_id];
     
-    //strcpy(str,(gp->cpu->files[file_id]).name);
     strncpy(str,fc->name().c_str(),sizeof(str));
 
     label_string=str;
@@ -1264,10 +1253,8 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
 
+    // display everything, so that gtk_notebook_get_current_page() works
     GTKWAIT;
-    //while(gtk_events_pending()) // display everything, so that
-    //	gtk_main_iteration();  // gtk_notebook_get_current_page() works
-
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
   // succeed. I tried putting this code in CreateSourceBrowserAsmWindow()
@@ -1296,12 +1283,6 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 							   &style->bg[GTK_STATE_NORMAL],
 							   (gchar**)canbreak_xpm);
 
-      /*
-      sbaw->canbreak.CreateFromXPM(sbaw->window->window,
-				   &style->bg[GTK_STATE_NORMAL],
-				   (gchar**)canbreak_xpm);
-      */
-
       sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							       &sbaw->startp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
@@ -1315,7 +1296,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
 		 sbaw->pages[id].source_pcwidget,0,0);
   gtk_widget_show(sbaw->pages[id].source_pcwidget);
-  //  GTKWAIT;
+
   return id;
     
 }
@@ -1373,7 +1354,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
   int index;
 
   int line=0;
-  struct sa_entry *entry;
+  BreakPointInfo *entry;
   GList *iter;
 
   // get a manageable pointer to the processor
@@ -1385,7 +1366,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
   for(iter=sa_xlate_list[id];iter!=0;)
     {
       GList *next=iter->next;
-      free( (struct sa_entry*)iter->data );
+      free( (BreakPointInfo*)iter->data );
       g_list_remove(iter,iter->data);
       iter=next;
     }
@@ -1615,19 +1596,18 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
     totallinesheight+=linedescent+lineascent;
 
-    // crate an entry in sa_xlate_list for this source line.
+    // create an entry in sa_xlate_list for this source line.
     // 'this source line' is the one in 'buf' with line number
     // 'line' and index 'index' into text
-    entry=(struct sa_entry*) malloc(sizeof(struct sa_entry));
+    entry= new BreakPointInfo();
     entry->index=index;
     entry->line=line;
-    entry->pixel=totallinesheight;
-    entry->font_center=lineascent-linedescent;
-    entry->bpwidget = 0;
-
+    entry->break_widget = 0;
+    entry->canbreak_widget = 0;
+    entry->pos = totallinesheight - (lineascent-linedescent) - PIXMAP_SIZE/2 + PAGE_BORDER;
     sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
     line++;
-  } // end while(fgets(...)...)
+  }
 
   // this made the end case of the search simpler once
   gtk_text_insert(GTK_TEXT(pages[id].source_text),
@@ -1636,7 +1616,6 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 		  &default_text_style->base[GTK_STATE_NORMAL],
 		  " ",
 		  1);
-  //printf("SetText: height=%d\n",totallinesheight);
   gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
 		      2*PIXMAP_SIZE,
 		      totallinesheight+5*PIXMAP_SIZE);
@@ -1705,6 +1684,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   load_source=1;
 
+  Dprintf(("NewSource\n"));
 
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
@@ -2258,8 +2238,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
       // initialize variables for a new search
       searchdlg.found=0;
       searchdlg.looped=0;
-      //searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value)->index;
-      searchdlg.i = gui_pixel_to_entry(sbaw,id,0)->index;
+      searchdlg.i = sbaw->getBPatPixel(id,0)->index;
       searchdlg.start = searchdlg.i; // remember where we started searching
     }
 
@@ -2300,11 +2279,11 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 
 	      searchdlg.lastfound=start_i;
 
-	      pixel = gui_index_to_entry(id,start_i)->pixel;
+	      pixel = sbaw->getBPatPixel(id,start_i)->pos + 12;
 	      inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->pages[id].source_text)->vadj)->page_increment;
 	      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->pages[id].source_text)->vadj),
 				       pixel-inc/2);
-	      printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
+	      //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
 
 	      gtk_editable_select_region(GTK_EDITABLE(sbaw->pages[id].source_text),start_i,end_i);
 	      return;
@@ -2482,11 +2461,16 @@ void SourceBrowserAsm_Window::Build(void)
 
   char *fontstring;
 
+  Dprintf(("Build\n"));
 
   SourceBrowser_Window::Create();
 
-  
-  gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
+  if(pma) {
+    char buffer[256];
+    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
+    gtk_window_set_title (GTK_WINDOW (window), buffer);
+  } else 
+    gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
@@ -2553,15 +2537,12 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_widget_show(window);
 
-  //  GTKWAIT;
   enabled=1;
 
   bIsBuilt = true;;
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();
-
-  //  GTKWAIT;
 
 }
 
@@ -2576,10 +2557,12 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
     sprintf(buffer,"Source Browser: %s",pma->name().c_str());
     gtk_window_set_title (GTK_WINDOW (window), buffer);
     Dprintf(("new source browser name: %s\n",buffer));
-    if(status_bar)
-      status_bar->NewProcessor(gp, pma);
-
   }
+
+  if(status_bar)
+    status_bar->NewProcessor(gp, pma);
+
+
 }
 
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
@@ -2620,6 +2603,11 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
 
   get_config();
   current_page = 0xffffffff;
+
+  for(int i=0; i<SBAW_NRFILES; i++) {
+    sa_xlate_list[i] = 0;
+  }
+
   if(enabled)
     Build();
 
