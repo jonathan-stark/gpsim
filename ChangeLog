@@ -1,4 +1,8 @@
 2004-12-06 Scott Dattalo <scott@dattalo.com>
+	* src/socket.cc: Experimenting with binary data. Cleaned up socket
+	link creation. Added a generic symbol read/write socket command.
+
+2004-12-06 Scott Dattalo <scott@dattalo.com>
 	* src/socket.cc: Wrap gtk2.x calls with #defines
 	
 2004-12-02 Scott Dattalo <scott@dattalo.com>
