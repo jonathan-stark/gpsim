@@ -1,4 +1,9 @@
-2005-01-10 Scott Dattalo <scott@dattalo.com>
+2005-01-14 Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc, gui/gui_main.cc: The gtk main loop is now started
+	even if the command line option --cli is specified. This way, the
+	GIOChannels will still operate.
+	
+2005-01-13 Scott Dattalo <scott@dattalo.com>
 	* cli/sockect.cc, src/value.cc: Added support for 'Socket Sinks'
 	and 'Socket Sources'. These essentially are two ways in which a
 	client can choose to communicate with gpsim. 
