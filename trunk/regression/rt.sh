@@ -17,6 +17,8 @@ gpasm  $2.asm
 
 ../create_stc $2 temp.stc
 
+echo $2
+
 ../simulate temp.stc garbage.log
 cat garbage.log
 rm garbage.log
