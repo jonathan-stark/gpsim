@@ -37,6 +37,34 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
 #define OPCODE_COLUMN   2
 #define MNEMONIC_COLUMN 3
 
+typedef enum {
+    MENU_BREAK_CLEAR,
+    MENU_BREAK_READ,
+    MENU_BREAK_WRITE,
+    MENU_BREAK_EXECUTE,
+    MENU_ADD_WATCH,
+} menu_id;
+
+
+
+
+typedef struct _menu_item {
+    char *name;
+    menu_id id;
+} menu_item;
+
+static menu_item menu_items[] = {
+    {"Clear breakpoints", MENU_BREAK_CLEAR},
+    {"Set break on read", MENU_BREAK_READ},
+    {"Set break on write", MENU_BREAK_WRITE},
+    {"Set break on execute", MENU_BREAK_EXECUTE},
+    {"Add watch", MENU_ADD_WATCH},
+};
+
+
+// Used only in popup menus
+SourceBrowserOpcode_Window *popup_sbow;
+
 static char profile_buffer[128];
 static char address_buffer[128];
 static char opcode_buffer[128];
@@ -46,6 +74,170 @@ static char *row_text[PROGRAM_MEMORY_WINDOW_COLUMNS]={
 };
 
 static GtkStyle *row_default_style;
+
+
+// called when user has selected a menu item
+static void
+popup_activated(GtkWidget *widget, gpointer data)
+{
+    GtkSheet *sheet;
+
+    menu_item *item;
+    int i,j;
+    unsigned int pic_id;
+    GtkSheetRange range;
+    unsigned int address;
+    int value;
+
+    if(widget==NULL || data==NULL)
+    {
+	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	return;
+    }
+    
+    item = (menu_item *)data;
+    sheet=GTK_SHEET(popup_sbow->sheet);
+    range = sheet->range;
+    pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
+    
+    switch(item->id)
+    {
+    case MENU_BREAK_READ:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=j*16+i;
+		gpsim_set_read_break_at_address(popup_sbow->sbw.gui_obj.gp->pic_id, address);
+	    }
+	break;
+    case MENU_BREAK_WRITE:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=j*16+i;
+		gpsim_set_write_break_at_address(popup_sbow->sbw.gui_obj.gp->pic_id, address);
+	    }
+	break;
+    case MENU_BREAK_EXECUTE:
+	value = gui_get_value("value to read for breakpoint:");
+	if(value<0)
+	    break; // Cancel
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=j*16+i;
+		gpsim_set_execute_break_at_address(popup_sbow->sbw.gui_obj.gp->pic_id, address);
+	    }
+	break;
+    case MENU_BREAK_CLEAR:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=j*16+i;
+		gpsim_clear_breakpoints_at_address(popup_sbow->sbw.gui_obj.gp->pic_id, address);
+//		gpsim_reg_clear_breakpoints(pic_id, popup_sbow->type,address);
+	    }
+	break;
+    case MENU_ADD_WATCH:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=j*16+i;
+		puts("not implemented");
+//		WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
+	    }
+	break;
+    default:
+	puts("Unhandled menuitem?");
+	break;
+    }
+}
+
+
+static GtkWidget *
+build_menu(SourceBrowserOpcode_Window *sbow)
+{
+  GtkWidget *menu;
+  GtkWidget *item;
+//  GtkAccelGroup *accel_group;
+  int i;
+
+  if(sbow==NULL)
+  {
+      printf("Warning build_menu(%x)\n",(unsigned int)sbow);
+      return NULL;
+  }
+    
+  menu=gtk_menu_new();
+
+/*  accel_group = gtk_accel_group_new ();
+  gtk_accel_group_attach (accel_group, GTK_OBJECT (sbow->gui_obj.window));
+  
+  gtk_menu_set_accel_group (GTK_MENU (menu), accel_group);
+  */
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+      item=gtk_menu_item_new_with_label(menu_items[i].name);
+
+      gtk_signal_connect(GTK_OBJECT(item),"activate",
+			 (GtkSignalFunc) popup_activated,
+			 &menu_items[i]);
+      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+
+      if(menu_items[i].id==MENU_ADD_WATCH)
+      {
+	  GTK_WIDGET_UNSET_FLAGS (item,
+				  GTK_SENSITIVE | GTK_CAN_FOCUS);
+      }
+      gtk_widget_show(item);
+      gtk_menu_append(GTK_MENU(menu),item);
+  }
+  
+  return menu;
+}
+
+// button press handler
+static gint
+do_popup(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Window *sbow)
+{
+
+    GtkWidget *popup;
+//	GdkModifierType mods;
+    GtkSheet *sheet;
+
+    popup=sbow->popup_menu;
+    
+  if(widget==NULL || event==NULL || sbow==NULL)
+  {
+      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbow);
+      return 0;
+  }
+  
+    sheet=GTK_SHEET(widget);
+
+    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+
+/*	if (event->window == sheet->column_title_window )
+	    //printf("popup column window\n");
+	    return TRUE;
+	else if (event->window == sheet->row_title_window )
+	    //printf("popup  window\n");
+	    return TRUE;
+	else*/
+	popup_sbow = sbow;
+  
+	gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+			   3, event->time);
+    }
+    return FALSE;
+}
+
 
 static void filter(char *clean, char *dirty, int max)
 {
@@ -98,6 +290,15 @@ button_press(GtkWidget *widget,
 static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 {
     int pc;
+    GtkSheetRange range;
+    int row=address/16;
+    int column=address%16;
+    
+    range.row0=row;
+    range.rowi=row;
+    range.col0=column;
+    range.coli=column;
+    
     pc=gpsim_get_pc_value(sbow->sbw.gui_obj.gp->pic_id);
     // Set styles/indicators
     if(address==pc)
@@ -112,6 +313,14 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 	    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, row_default_style);
 
     }
+    
+    if(gpsim_address_has_breakpoint(sbow->sbw.gui_obj.gp->pic_id, address))
+	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &breakpoint_color);
+    else if(gpsim_address_has_changed(sbow->sbw.gui_obj.gp->pic_id, address))
+	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &pm_has_changed_color);
+    else
+        gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &normal_pm_bg_color);
+
 }
 
 static void update_label(SourceBrowserOpcode_Window *sbow, int address)
@@ -134,16 +343,20 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
     int row=address/16;
     int column=address%16;
     char buf[128];
+    
     // Put new values, in case they changed
     sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
     sprintf(row_text[OPCODE_COLUMN], "0x%04X", gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address));
     filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,buf), 128);
     gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
     gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
+
     gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
 		       row,column,
 		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+    
 }
+
 static void update(SourceBrowserOpcode_Window *sbow, int address)
 {
 
@@ -236,7 +449,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 	  printf("Writing new value, new %d, last %d\n",n,sbow->memory[reg]);
 	  sbow->memory[reg]=n;
 	  gpsim_put_opcode(gp->pic_id, reg, n);
-//	      update_ascii(rw,row);
+//	      update_ascii(sbow,row);
       }
     }
   else
@@ -294,7 +507,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   row=sheet->active_cell.row; col=sheet->active_cell.col;
 
   parse_numbers(GTK_WIDGET(sheet),sheet->active_cell.row,sheet->active_cell.col,sbow);
-//  update_ascii(rw,row);
+//  update_ascii(sbow,row);
       
 }
 
@@ -546,6 +759,11 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
 	gtk_sheet_delete_rows(GTK_SHEET(sbow->sheet),i/16,GTK_SHEET(sbow->sheet)->maxrow-i/16);
     }
 
+    range.row0=0;range.col0=0;
+    range.rowi=GTK_SHEET(sbow->sheet)->maxrow;
+    range.coli=GTK_SHEET(sbow->sheet)->maxcol;
+    gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &normal_pm_bg_color);
+
     // Clearing and appending is faster than changing
     gtk_clist_clear(GTK_CLIST(sbow->clist));
     
@@ -727,6 +945,15 @@ static GdkBitmap *mask;
   gtk_sheet_set_column_title(GTK_SHEET(sbow->sheet), i, name);
   gtk_sheet_set_column_width (GTK_SHEET(sbow->sheet), i, REGISTERS_PER_ROW*char_width + 6);
   gtk_sheet_set_row_titles_width(GTK_SHEET(sbow->sheet), column_width);
+
+  /* create popupmenu */
+  sbow->popup_menu=build_menu(sbow);
+
+  
+  gtk_signal_connect(GTK_OBJECT(sbow->sheet),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup,
+		     sbow);
 
   gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet))),
 		     "changed", (GtkSignalFunc)show_entry, sbow);

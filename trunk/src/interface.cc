@@ -579,6 +579,13 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
 
   return 0;
 }
+
+//--------------------------------------------------------------------------
+unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int address)
+{
+    return (rand()%10==0);
+}
+
 //--------------------------------------------------------------------------
 
 void  gpsim_assign_program_xref(unsigned int processor_id, unsigned int address, gpointer xref)
@@ -699,6 +706,34 @@ void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
     return;
 
   pic->run_to_address(address);
+}
+//--------------------------------------------------------------------------
+void gpsim_set_read_break_at_address(unsigned int processor_id,
+				     unsigned int address)
+{
+    gpsim_toggle_break_at_address(processor_id, address);
+    puts("Implement this in interface.cc");sleep(1);
+}
+//--------------------------------------------------------------------------
+void gpsim_set_write_break_at_address(unsigned int processor_id,
+				      unsigned int address)
+{
+    gpsim_toggle_break_at_address(processor_id, address);
+    puts("Implement this in interface.cc");sleep(1);
+}
+//--------------------------------------------------------------------------
+void gpsim_set_execute_break_at_address(unsigned int processor_id,
+					unsigned int address)
+{
+    gpsim_toggle_break_at_address(processor_id, address);
+    puts("Implement this in interface.cc");sleep(1);
+}
+//--------------------------------------------------------------------------
+void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
+					unsigned int address)
+{
+    gpsim_toggle_break_at_address(processor_id, address);
+    puts("Implement this in interface.cc");sleep(1);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address)
