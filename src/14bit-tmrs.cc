@@ -71,7 +71,7 @@ void CCPRL::capture_tmr(void)
   ccprh->value = tmrl->tmrh->value;
   trace.register_write(ccprh->address,ccprh->value);
 
-  tmrl->pir1->set_ccpif();
+  tmrl->pir_set->set_ccpif();
 
   int c = value + 256*ccprh->value;
   if(verbose & 4)
@@ -266,21 +266,21 @@ void CCPCON::compare_match(void)
 
     case COM_SET_OUT:
       iopin->put_state(1);
-      pir->set_ccpif();
+      pir_set->set_ccpif();
       break;
 
     case COM_CLEAR_OUT:
       iopin->put_state(0);
-      pir->set_ccpif();
+      pir_set->set_ccpif();
       break;
 
     case COM_INTERRUPT:
-      pir->set_ccpif();
+      pir_set->set_ccpif();
       break;
 
     case COM_TRIGGER:
       ccprl->tmrl->clear_timer();
-      pir->set_ccpif();
+      pir_set->set_ccpif();
       if(adcon0)
 	adcon0->start_conversion();
 
@@ -412,51 +412,6 @@ void T1CON::put(unsigned int new_value)
     tmrl->update();
 
   trace.register_write(address,value);
-
-}
-//--------------------------------------------------
-// PIR1
-//--------------------------------------------------
-PIR1::PIR1(void)
-{
-
-  //valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | PSPIF;
-  //
-  // Even though TXIF is a valid bit, it can't be written by the PIC 
-  // source code. Its state reflects whether the usart txreg is full or
-  // not.
-
-  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | PSPIF;
-
-  break_point = 0;
-  new_name("pir1");
-
-}
-
-
-//--------------------------------------------------
-// PIR2
-//--------------------------------------------------
-PIR2::PIR2(void)
-{
-
-  break_point = 0;
-  new_name("pir2");
-
-}
-
-//--------------------------------------------------
-// PIE
-//--------------------------------------------------
-void PIE::put(unsigned int new_value)
-{
-  value = new_value;
-  trace.register_write(address,value);
-
-  if( pir->interrupt_status())
-    {
-      pir->intcon->peripheral_interrupt();
-    }
 
 }
 
@@ -785,7 +740,7 @@ void TMRL::callback(void)
       // The break was due to a roll-over
 
       //cout<<"TMRL rollover: " << hex << cycles.value.lo << '\n';
-      pir1->set_tmr1if();
+      pir_set->set_tmr1if();
 
       // Reset the timer to 0.
 
@@ -1259,7 +1214,7 @@ void TMR2::callback(void)
 	  if(--post_scale < 0)
 	    {
 	      //cout << "setting IF\n";
-	      pir1->set_tmr2if();
+	      pir_set->set_tmr2if();
 	      post_scale = t2con->get_post_scale();
 	    }
 

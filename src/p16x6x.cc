@@ -336,7 +336,7 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
 
-  add_sfr_register(&pir1,   0x0c, 0);
+  add_sfr_register(get_pir1(),   0x0c, 0);
   add_sfr_register(&pie1,   0x8c, 0);
 
   add_sfr_register(&tmr1l,  0x0e, 0);
@@ -362,16 +362,18 @@ void P16X6X_processor::create_sfr_map(void)
   sfr_map = NULL;
   num_of_sfrs = 0;
 
+  // get_pir_set()->set_pir1(get_pir1());
+  pir_set_def.set_pir1(&pir1_reg);
+
   intcon = &intcon_reg;
-  intcon_reg.pir1 = &pir1;
-  intcon_reg.pir2 = NULL;
+  intcon_reg.set_pir_set(get_pir_set());
 
   // Maybe there's a better place for this, but let's go ahead and link all
   // of the registers together (there's probably a better way too) :
 
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
-  tmr1l.pir1  = &pir1;
+  tmr1l.pir_set  = get_pir_set();
   tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;
@@ -379,7 +381,7 @@ void P16X6X_processor::create_sfr_map(void)
   t1con.tmrl  = &tmr1l;
 
   t2con.tmr2  = &tmr2;
-  tmr2.pir1   = &pir1;
+  tmr2.pir_set   = get_pir_set();
   tmr2.pr2    = &pr2;
   tmr2.t2con  = &t2con;
   tmr2.ccp1con = &ccp1con;
@@ -388,7 +390,7 @@ void P16X6X_processor::create_sfr_map(void)
 
 
   ccp1con.ccprl = &ccpr1l;
-  ccp1con.pir   = &pir1;
+  ccp1con.pir_set   = get_pir_set();
   ccp1con.tmr2  = &tmr2;
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
@@ -400,9 +402,9 @@ void P16X6X_processor::create_sfr_map(void)
   ccpr1h.new_name("ccpr1h");
   ccp1con.new_name("ccp1con");
 
-  pir1.intcon = &intcon_reg;
-  pir1.pie    = &pie1;
-  pie1.pir    = &pir1;
+  get_pir1()->intcon = &intcon_reg;
+  get_pir1()->pie    = &pie1;
+  pie1.pir    = get_pir1();
   pie1.new_name("pie1");
 
 
@@ -415,6 +417,7 @@ P16X6X_processor::P16X6X_processor(void)
 
   if(verbose)
     cout << "generic 16X6X constructor, type = " << isa() << '\n';
+
 }
 
 /*******************************************************************
@@ -518,17 +521,18 @@ void P16C63::create_sfr_map(void)
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(&pir2,   0x0d, 0);
+  add_sfr_register(get_pir2(),   0x0d, 0);
   add_sfr_register(&pie2,   0x8d, 0);
 
   add_sfr_register(&ccpr2l, 0x1b, 0);
   add_sfr_register(&ccpr2h, 0x1c, 0);
   add_sfr_register(&ccp2con, 0x1d, 0);
 
-  intcon_reg.pir2 = &pir2;
+  // get_pir_set()->set_pir2(get_pir2());
+  pir_set_def.set_pir2(&pir2_reg);
 
   ccp2con.ccprl = &ccpr2l;
-  ccp2con.pir   = &pir2;
+  ccp2con.pir_set   = get_pir_set();
   ccp2con.tmr2  = &tmr2;
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -539,7 +543,7 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portc,7);
+  usart.initialize_14(this,get_pir_set(),portc,7);
 
   //  cout << "portc HACK \n";
   int i;
@@ -559,9 +563,9 @@ void P16C63::create_sfr_map(void)
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
 
-  pir2.intcon = &intcon_reg;
-  pir2.pie    = &pie2;
-  pie2.pir    = &pir2;
+  get_pir2()->intcon = &intcon_reg;
+  get_pir2()->pie    = &pie2;
+  pie2.pir    = get_pir2();
   pie2.new_name("pie2");
 
 
@@ -735,17 +739,18 @@ void P16C65::create_sfr_map(void)
 
   add_file_registers(0xc0, 0xff, 0);
 
-  add_sfr_register(&pir2,   0x0d, 0);
+  add_sfr_register(get_pir2(),   0x0d, 0);
   add_sfr_register(&pie2,   0x8d, 0);
 
   add_sfr_register(&ccpr2l, 0x1b, 0);
   add_sfr_register(&ccpr2h, 0x1c, 0);
   add_sfr_register(&ccp2con, 0x1d, 0);
 
-  intcon_reg.pir2 = &pir2;
+  // get_pir_set()->set_pir2(&get_pir2());
+  pir_set_def.set_pir2(&pir2_reg);
 
   ccp2con.ccprl = &ccpr2l;
-  ccp2con.pir   = &pir2;
+  ccp2con.pir_set   = get_pir_set();
   ccp2con.tmr2  = &tmr2;
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
@@ -756,7 +761,7 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portc,7);
+  usart.initialize_14(this,get_pir_set(),portc,7);
 
   //  cout << "portc HACK \n";
   int i;
@@ -776,9 +781,9 @@ void P16C65::create_sfr_map(void)
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
 
-  pir2.intcon = &intcon_reg;
-  pir2.pie    = &pie2;
-  pie2.pir    = &pir2;
+  get_pir2()->intcon = &intcon_reg;
+  get_pir2()->pie    = &pie2;
+  pie2.pir    = get_pir2();
   pie2.new_name("pie2");
 
 

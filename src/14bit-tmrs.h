@@ -24,11 +24,10 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-processor.h"
 #include "trace.h"
 #include "14bit-processors.h"
+#include "pir.h"
 
 class IOPIN;
 
-class PIR;
-class PIR1;
 class TMRL;
 class TMRH;
 class TMR2;
@@ -120,7 +119,7 @@ enum
   int edges;
   CCPRL *ccprl;
   IOPIN *iopin;
-  PIR   *pir;
+  PIR_SET   *pir_set;
   TMR2  *tmr2;
   ADCON0 *adcon0;
 
@@ -205,7 +204,7 @@ public:
 
   TMRH  *tmrh;
   T1CON *t1con;
-  PIR1  *pir1;
+  PIR_SET  *pir_set;
   CCPCON *ccpcon;
 
   unsigned int 
@@ -240,206 +239,6 @@ public:
 };
 
 
-//---------------------------------------------------------
-// PIE Peripheral Interrupt Enable register base class 
-// for PIE1 & PIE2
-
-class PIE : public sfr_register
-{
-public:
-  PIR *pir;
-
-  void put(unsigned int new_value);
-  
-};
-
-//---------------------------------------------------------
-// PIR Peripheral Interrupt register base class for PIR1 & PIR2
-
-class PIR_base
-{
-public:
-
-  virtual void set_ccpif(void)=0;
-  virtual bool interrupt_status(void)=0;
-};
-
-
-class PIR : public sfr_register, public PIR_base
-{
-public:
-  INTCON  *intcon;
-  PIE     *pie;
-
-  virtual void set_ccpif(void){cout<<"PIR ccpif\n";}
-  virtual bool interrupt_status(void){cout<<"PIR intstat\n"; return true;}
-
-};
-
-
-//---------------------------------------------------------
-// PIR1 Peripheral Interrupt register # 1
-
-class PIR1 : public PIR
-{
-public:
-
-enum
-{
-    TMR1IF  = 1<<0,
-    TMR2IF  = 1<<1,
-    CCP1IF  = 1<<2,
-    SSPIF   = 1<<3,
-    TXIF    = 1<<4,
-    RCIF    = 1<<5,
-    ADIF    = 1<<6,     // 18cxxx
-    CMIF    = 1<<6,     // 16f62x
-    PSPIF   = 1<<7,
-    EEIF    = 1<<7      // 16f62x
-};
-
-//  int VALID_BITS;
-  int valid_bits;
- 
-  inline void set_tmr1if(void)
-    {
-      put(get() | TMR1IF);
-    }
-
-  inline void set_tmr2if(void)
-    {
-      put(get() | TMR2IF);
-    }
-
-  void set_ccpif(void)
-    {
-      put(get() | CCP1IF);
-    }
-
-  inline void set_sspif(void)
-    {
-      put(get() | SSPIF);
-    }
-
-  inline void set_txif(void)
-    {
-      put(get() | TXIF);
-    }
-
-  inline void set_rcif(void)
-    {
-      put(get() | RCIF);
-    }
-
-  inline void set_adif(void)
-    {
-      put(get() | ADIF);
-    }
-
-  inline void set_cmif(void)
-    {
-      put(get() | CMIF);
-    }
-
-  inline void set_pspif(void)
-    {
-      put(get() | PSPIF);
-    }
-
-  inline void set_eeif(void)
-    {
-      put(get() | EEIF);
-    }
-
- unsigned int get_txif(void)
-   {
-     return value & TXIF;
-   }
- void clear_txif(void)
-   {
-     value &= ~TXIF;
-     trace.register_write(address,value);
-   }
- void clear_rcif(void)
-   {
-     value &= ~RCIF;
-     trace.register_write(address,value);
-   }
- 
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
-  void put(unsigned int new_value)
-    {
-      // Only the "valid bits" can be written with put.
-      // The "invalid" ones (such as TXIF) are written
-      // through the set_/clear_ member functions.
-
-      value = new_value & valid_bits | value & ~valid_bits;
-      trace.register_write(address,value);
-
-      if( value & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
-
-    }
-
-  PIR1(void);
-};
-
-//---------------------------------------------------------
-// PIR2 Peripheral Interrupt register # 2
-
-class PIR2 : public PIR
-{
-public:
-
-  /*
-  INTCON  *intcon;
-  PIE     *pie;
-  */
-
-#define  CCP2IF   1<<0
-
-  //  const int
-  //  VALID_BITS = CCP2IF;
-
-  void set_ccpif(void)
-    {
-      put(get() | CCP2IF);
-    }
-
-  void put(unsigned int new_value)
-    {
-      value = new_value;
-      trace.register_write(address,value);
-
-      if( value & CCP2IF & pie->value )
-	{
-	  intcon->peripheral_interrupt();
-	}
-
-    }
-
-  bool interrupt_status(void)
-    {
-      if( value & CCP2IF & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
-
-  PIR2(void);
-};
 
 
 
@@ -552,7 +351,7 @@ public:
     future_cycle;
 
   PR2  *pr2;
-  PIR1 *pir1;
+  PIR_SET *pir_set;
   T2CON *t2con;
   CCPCON *ccp1con;
   CCPCON *ccp2con;
@@ -615,10 +414,10 @@ public:
   char * name_str;
 
   T1CON *t1con;
-  PIR1  *pir1;
+  PIR_SET  *pir_set;
 
   TMR1_MODULE(void);
-  void initialize(T1CON *t1con, PIR1 *pir1);
+  void initialize(T1CON *t1con, PIR_SET *pir_set);
 
 };
 

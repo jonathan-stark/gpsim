@@ -161,4 +161,32 @@ class gpsimInterface {
 
 extern gpsimInterface gi;
 
+//------------------------------------------------------------------------
+
+class Module;
+
+class ModuleInterface
+{
+
+ public:
+  Module *module;  // The module we're interfacing with.
+
+
+  ModuleInterface(Module *new_module);
+
+
+};
+
+//------------------------------------------------------------------------
+
+class Processor;
+
+class ProcessorInterface : public ModuleInterface
+{
+ public:
+
+  ProcessorInterface(Processor *cpu);
+
+};
+
 #endif // __GPSIM_INTERFACE_H__

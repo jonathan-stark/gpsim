@@ -281,7 +281,7 @@ void ADCON0::set_interrupt(void)
 void ADCON0_withccp::set_interrupt(void)
 {
 
-  pir->set_adif();
+  pir_set->set_adif();
 
 }
 
@@ -567,6 +567,10 @@ void P16C72::create_sfr_map(void)
   if(verbose)
     cout << "creating c72 registers \n";
 
+  // Parent classes just set PIR version 1
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir2(&pir2_2_reg);
+
   add_sfr_register(&adcon0, 0x1f, 0);
   add_sfr_register(&adcon1, 0x9f, 0);
 
@@ -578,10 +582,9 @@ void P16C72::create_sfr_map(void)
   adcon0.adresl = NULL;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
-  adcon0.pir = &pir1;
+  // adcon0.pir_set = get_pir_set();
+  adcon0.pir_set = &pir_set_2_def;
   adcon0.channel_mask = 7;  // even though there are only 5 inputs...
-
-  pir1.valid_bits = 0xff;  // All 8-bits are valid interrupt sources.
 
   intcon = &intcon_reg;
 
@@ -694,6 +697,10 @@ void P16C73::create_sfr_map(void)
   if(verbose)
     cout << "creating c73 registers \n";
 
+  // Parent classes just set PIR version 1
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir2(&pir2_2_reg);
+
   add_sfr_register(&adcon0, 0x1f, 0);
   add_sfr_register(&adcon1, 0x9f, 0);
 
@@ -705,10 +712,9 @@ void P16C73::create_sfr_map(void)
   adcon0.adresl = NULL;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
-  adcon0.pir = &pir1;
+  // adcon0.pir_set = get_pir_set();
+  adcon0.pir_set = &pir_set_2_def;
   adcon0.channel_mask = 7;  // even though there are only 5 inputs...
-
-  pir1.valid_bits = 0xff;  // All 8-bits are valid interrupt sources.
 
   intcon = &intcon_reg;
 
@@ -823,6 +829,10 @@ void P16C74::create_sfr_map(void)
   if(verbose)
     cout << "creating c74 registers \n";
 
+  // Parent classes just set PIR version 1
+  pir_set_2_def.set_pir1(&pir1_2_reg);
+  pir_set_2_def.set_pir2(&pir2_2_reg);
+
   add_sfr_register(&adcon0, 0x1f, 0);
   add_sfr_register(&adcon1, 0x9f, 0);
 
@@ -834,10 +844,9 @@ void P16C74::create_sfr_map(void)
   adcon0.adresl = NULL;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
-  adcon0.pir = &pir1;
+  // adcon0.pir_set = get_pir_set();
+  adcon0.pir_set = &pir_set_2_def;
   adcon0.channel_mask = 7;
-
-  pir1.valid_bits = 0xff;  // All 8-bits are valid interrupt sources.
 
   intcon = &intcon_reg;
 

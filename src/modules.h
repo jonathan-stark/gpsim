@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "packages.h"
 #include "attribute.h"
 
+
 /*
 
 port
@@ -100,6 +101,7 @@ public:
   char * name_str;                // A unique name to describe the Module
   list<Attribute *> attributes;   // A list of attributes that pertain to the Module
   Package  *package;              // A package for the module
+  ModuleInterface *interface;     // An interface to the module.
 
   unsigned int interface_id;
 

@@ -54,6 +54,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/ioports.h"
 #include "../src/symbol.h"
 #include "../src/interface.h"
+#include "../src/pir.h"
 
 #include "usart.h"
 
@@ -645,7 +646,7 @@ class TXREG : public BreakCallBack
   virtual bool is_empty(void) { return empty_flag;};
   virtual void empty(void) {empty_flag = 0;};
   virtual void full(void)  {empty_flag = 1;};
-  virtual void assign_pir(PIR1 *new_pir){};
+  virtual void assign_pir_set(PIR_SET *new_pir_set){};
 
   TXREG(void) {
     txpin = NULL;
@@ -846,7 +847,7 @@ class RCREG : public BreakCallBack // : public _RCREG
   //  virtual void push(unsigned int);
   //  virtual void pop(void);
 
-  //  virtual void assign_pir(PIR1 *new_pir){};
+  //  virtual void assign_pir_set(PIR_SET *new_pir_set){};
 
   /**************************/
   // RCREG constructor

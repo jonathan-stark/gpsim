@@ -31,6 +31,7 @@ class invalid_file_register;   // Forward reference
 #include "pic-processor.h"
 #include "14bit-registers.h"
 #include "14bit-tmrs.h"
+#include "pir.h"
 #include "uart.h"
 
 #define _16BIT_REGISTER_MASK   0xfff
@@ -360,7 +361,6 @@ public:
 
 
 class TMR0_16;
-class INTCON2;
 
 //---------------------------------------------------------
 class RCON :  public sfr_register
@@ -395,112 +395,7 @@ enum
 };
 };
 
-//---------------------------------------------------------
-// INTCON_16 - Interrupt control register for the 16-bit core
 
-class INTCON_16 : public INTCON
-{
-public:
-
-enum 
-{
-  GIEH = GIE,
-  GIEL = XXIE
-};
-
-  TMR0_16 *tmr0l;
-  RCON    *rcon;
-  INTCON2 *intcon2;
-
-  virtual void put(unsigned int new_value);
-
-  void clear_gies(void);
-  void set_gies(void);
-  virtual void initialize(void);
-};
-
-
-
-//---------------------------------------------------------
-class INTCON2 :  public sfr_register
-{
-public:
-
-enum
-{
-  RBIP    = 1<<0,
-  TMR0IP  = 1<<2,
-  INTEDG2 = 1<<4,
-  INTEDG1 = 1<<5,
-  INTEDG0 = 1<<6,
-  RBPU    = 1<<7
-};
-};
-
-
-class INTCON3 :  public sfr_register
-{
-public:
-
-enum
-{
-  INT1IF  = 1<<0,
-  INT2IF  = 1<<1,
-  INT1IE  = 1<<3,
-  INT2IE  = 1<<4,
-  INT1IP  = 1<<6,
-  INT2IP  = 1<<7
-};
-
-};
-
-
-//---------------------------------------------------------
-// PIR1
-/*
-class PIR1_16 : public sfr_register
-{
- public:
-
-enum
-{
-  TMR1IF = 1<<0,
-  TMR2IF = 1<<1,
-  CCP1IF = 1<<2,
-  SSPIF  = 1<<3,
-  TXIF   = 1<<4,
-  RCIF   = 1<<5,
-  ADIF   = 1<<6,
-  PSPIF  = 1<<7
-};
-
- unsigned int get_TXIF(void)
-   {
-     return value & TXIF;
-   }
- void set_TXIF(void)
-   {
-     value |= TXIF;
-     trace.register_write(address,value);
-   }
- void clear_TXIF(void)
-   {
-     value &= ~TXIF;
-     trace.register_write(address,value);
-   }
- 
- unsigned int get_RCIF(void)
-   {
-     return value & RCIF;
-   }
- void set_RCIF(void)
-   {
-     value |= RCIF;
-     trace.register_write(address,value);
-   }
- PIR1_16(void);
-};
-*/
 //---------------------------------------------------------
 // T0CON - Timer 0 control register
 class T0CON : public OPTION_REG
@@ -602,10 +497,10 @@ public:
   char * name_str;
 
   T3CON *t3con;
-  PIR1  *pir1;
+  PIR_SET  *pir_set;
 
   TMR3_MODULE(void);
-  void initialize(T3CON *t1con, PIR1 *pir1);
+  void initialize(T3CON *t1con, PIR_SET *pir_set);
 
 };
 
@@ -614,24 +509,24 @@ public:
 class TXREG_16 : public _TXREG
 {
  public:
-  PIR1 *pir1;
+  PIR_SET *pir_set;
 
   TXREG_16(void);
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-  virtual void assign_pir(PIR1 *new_pir);
+  virtual void assign_pir_set(PIR_SET *new_pir_set);
 
 };
 
 class RCREG_16 : public _RCREG
 {
  public:
-  PIR1 *pir1;
+  PIR_SET *pir_set;
   RCREG_16(void);
   virtual void push(unsigned int);
   virtual void pop(void);
-  virtual void assign_pir(PIR1 *new_pir);
+  virtual void assign_pir_set(PIR_SET *new_pir_set);
 
 };
 
@@ -656,7 +551,8 @@ class USART_MODULE16
 
   USART_MODULE16(void);
 
-  void initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+  void initialize_16(_16bit_processor *new_cpu, PIR_SET *pir_set,
+    IOPORT *uart_port);
   void init_ioport(IOPORT *);
   void new_rx_edge(unsigned int);
 

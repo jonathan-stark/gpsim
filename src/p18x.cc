@@ -452,7 +452,7 @@ void P18C4x2::create_sfr_map(void)
   add_sfr_register(&portd,	  0xf83,0,"portd");
   add_sfr_register(&porte,	  0xf84,0,"porte");
 
-  usart16.initialize_16(this,&pir1,&portc);
+  usart16.initialize_16(this,get_pir_set(),&portc);
   cout << "c4x2::create_sfr_map2 usart txreg => " << usart16.txreg.name() << "\n";
 
   add_sfr_register(&lata,	  0xf89,0,"lata");
@@ -605,11 +605,22 @@ P18F442::P18F442(void)
 
 void P18F442::create(void)
 {
+  EEPROM_PIR *e;
 
   //if(verbose)
     cout << " 18f442 create \n";
 
   P18C442::create();
+
+  e = new EEPROM_PIR;
+  e->set_cpu(this);
+  // We might want to pass this value in for larger eeproms
+  e->initialize(256);
+  e->set_pir_set(get_pir_set());
+  e->set_intcon(&intcon);
+
+  // assign this eeprom to the processor
+  set_eeprom_pir(e);
 
   //P18C4x2::create_sfr_map();
   P18F442::create_sfr_map();
@@ -619,7 +630,22 @@ void P18F442::create(void)
 void P18F442::create_sfr_map(void)
 {
 
+  // Add eeprom
+  add_sfr_register(get_eeprom()->get_reg_eedata(), 0xfa8);
+  add_sfr_register(get_eeprom()->get_reg_eeadr(), 0xfa9);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(), 0xfa6, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon2(), 0xfa7);
 
+}
+
+void P18F442::set_out_of_range_pm(int address, int value)
+{
+
+  if( (address>= 0xf00000) && (address < 0xf00000 +
+    get_eeprom()->get_rom_size()))
+    {
+      get_eeprom()->change_rom(address - 0xf00000, value);
+    }
 }
 
 Processor * P18F442::construct(void)
@@ -642,6 +668,58 @@ Processor * P18F442::construct(void)
 
 
 }
+
+
+//------------------------------------------------------------------------
+//
+// P18F258
+// 
+
+P18F248::P18F248(void)
+{
+
+  if(verbose)
+    cout << "18f248 constructor, type = " << isa() << '\n';
+
+}
+
+void P18F248::create(void)
+{
+
+  if(verbose)
+    cout << " 18f248 create \n";
+
+  P18F442::create();
+  P18F248::create_sfr_map();
+
+}
+
+void P18F248::create_sfr_map(void)
+{
+
+
+}
+
+Processor * P18F248::construct(void)
+{
+
+  P18F248 *p = new P18F248;
+
+  if(verbose)
+    cout << " 18F248 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "p18f248";
+
+  symbol_table.add_module(p,p->name_str);
+
+  return p;
+
+
+}
+
 
 //------------------------------------------------------------------------
 //

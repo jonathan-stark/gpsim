@@ -104,7 +104,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 
   if(type == REGISTER_EEPROM)
   {
-    if(pic->eeprom && (register_number < pic->eeprom->rom_size))
+    if(pic->eeprom && (register_number < pic->eeprom->get_rom_size()))
       return TRUE;
 
     return FALSE;
@@ -426,18 +426,6 @@ void  gpsim_set_update_rate(guint64 new_rate)
     gi.set_update_rate(new_rate);
 }
 
-/*
-//--------------------------------------------------------------------------
-unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
-{
-
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-  return pic->program_memory_size();
-}
-*/
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type)
 {
@@ -452,7 +440,7 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   
   if(type == REGISTER_EEPROM) {
     if(pic->eeprom)
-      return pic->eeprom->rom_size;
+      return pic->eeprom->get_rom_size();
     return 0;
   }
   return pic->register_memory_size();
@@ -618,67 +606,7 @@ unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
     return 0;
 }
 //--------------------------------------------------------------------------
-unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned int address)
-{
- pic_processor *pic = get_pic_processor(processor_id);
 
-  if(!pic)
-    return 0;
-
-  return pic->address_has_break(address,instruction::BREAKPOINT_INSTRUCTION);
-}
-//--------------------------------------------------------------------------
-unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
-					     unsigned int address)
-{
-    pic_processor *pic = get_pic_processor(processor_id);
-
-    if(!pic)
-	return 0;
-
-    return pic->address_has_profile_start(address);
-}
-//--------------------------------------------------------------------------
-unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
-					    unsigned int address)
-{
-    pic_processor *pic = get_pic_processor(processor_id);
-
-    if(!pic)
-	return 0;
-
-    return pic->address_has_profile_stop(address);
-}
-//--------------------------------------------------------------------------
-unsigned int gpsim_address_has_opcode(unsigned int processor_id, unsigned int address)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-  if(pic->program_memory_size()<=address)
-      return 0;
-
-  if(pic->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-    return 1;
-
-  return 0;
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int address)
-{
- pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-  if(pic->program_memory_size()<=address)
-      return 0;
-
-    return pic->program_memory[address]->is_modified;
-}
-
- //--------------------------------------------------------------------------
 void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {
   file_register *fr = gpsim_get_register( processor_id, type,  register_number);
@@ -1053,7 +981,7 @@ void gpsim_clear_profile_start_at_address(unsigned int processor_id,
     if(!pic)
 	return;
 
-    while(gpsim_address_has_profile_start(processor_id,address))
+    while(pic->address_has_profile_start(address))
 	pic->clear_profile_start_at_address(address);
 }
 
@@ -1066,7 +994,7 @@ void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
     if(!pic)
 	return;
 
-    while(gpsim_address_has_profile_stop(processor_id,address))
+    while(pic->address_has_profile_stop(address))
 	pic->clear_profile_stop_at_address(address);
 }
 
@@ -1079,7 +1007,7 @@ void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
     if(!pic)
 	return;
 
-    while(gpsim_address_has_breakpoint(processor_id,address))
+    while(pic->address_has_break(address))
 	pic->clear_break_at_address(address,
 				    instruction::BREAKPOINT_INSTRUCTION);
 }
@@ -1418,112 +1346,40 @@ void gpsim_set_bulk_mode(int flag)
 }
 
 //---------------------------------------------------------------------------
-// pin interface functions
 //---------------------------------------------------------------------------
-void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointer xref)
+/*
+  *            Module Interface
+  *
+  *
+*/
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+
+ModuleInterface::ModuleInterface(Module *new_module)
 {
-  pic_processor *pic = get_pic_processor(processor_id);
+  module = new_module;
+}
 
-  if(!pic)
-    return;
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
+/*
+  *            Processor Interface
+  *
+  *
+*/
+//---------------------------------------------------------------------------
+//---------------------------------------------------------------------------
 
-  IOPIN *iopin = pic->get_pin(pin);
+ProcessorInterface::ProcessorInterface(Processor *new_cpu) : ModuleInterface(new_cpu)
+{
 
-  if(!iopin)
-    return;
-
-  if(iopin->xref)
-      iopin->xref->add(xref);
-  else
-    cout << "no xref on " << pin << '\n';
 
 }
 
 
-unsigned int  gpsim_package_pin_count(unsigned int processor_id)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
 
-  if(!pic)
-    return 0;
-
-  return pic->get_pin_count();
-
-}
-
-char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-
-  return pic->get_pin_name( pin );
-}
-
-unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-
-  IOPIN *iopin = pic->get_pin(pin);
-
-  if(iopin==NULL)
-    return 0;
-
-  //return iopin->get_voltage(0);
-  return iopin->get_state();
-}
-void  gpsim_pin_toggle(unsigned int processor_id, unsigned int pin)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return;
-
-  IOPIN *iopin = pic->get_pin(pin);
-
-  if(iopin==NULL)
-    return;
-
-  iopin->toggle();
-
-}
-
-unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-
-  IOPIN *iopin = pic->get_pin(pin);
-
-  if(!iopin)
-    return 0;
-
-  if(iopin->get_direction() == IOPIN::DIR_INPUT)
-    return 1;
-  else
-    return 0;
-
-}
-void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned int new_dir)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return;
-
-  IOPIN *iopin = pic->get_pin(pin);
-
-  if(iopin==NULL)
-    return;
-
-  iopin->change_direction( new_dir & 1);//( (new_dir) ?  IOPIN::DIR_INPUT :  IOPIN::DIR_OUTPUT));
-}
+//========================================================================
+//========================================================================
 
 extern void process_command_file(char * file_name);
 extern int open_cod_file(pic_processor **, char *);

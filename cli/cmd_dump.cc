@@ -121,8 +121,8 @@ void cmd_dump::dump(int mem_type)
     {
     case DUMP_EEPROM:
       if(cpu->eeprom) {
-	fr = cpu->eeprom->rom;
-	mem_size = cpu->eeprom->rom_size;
+	fr = cpu->eeprom->get_rom();
+	mem_size = cpu->eeprom->get_rom_size();
       } else
 	return;
       break;

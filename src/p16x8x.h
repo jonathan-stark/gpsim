@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P16X8X_H__
 
 #include "14bit-processors.h"
+#include "intcon.h"
 
 /***************************************************************************
  *
@@ -48,7 +49,7 @@ class P16C8x : public  _14bit_processor, public _14bit_18pins
 {
 public:
 
-  INTCON       intcon_reg;
+  INTCON_14       intcon_reg;
 
   virtual void set_out_of_range_pm(int address, int value);
 
@@ -62,13 +63,6 @@ public:
     {
       ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
-#if 0
-  virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
-  virtual unsigned int eeprom_get_value(unsigned int address) ;
-  virtual void eeprom_put_value(unsigned int value,
-				unsigned int address);
-  virtual file_register *eeprom_get_register(unsigned int address);
-#endif
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};

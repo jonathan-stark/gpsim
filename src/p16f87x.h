@@ -23,6 +23,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "p16x7x.h"
 
+#include "eeprom.h"
+
 class IOPORT;
 
 
@@ -42,15 +44,16 @@ class P16F873 : public P16C73
   void create(void);
   virtual unsigned int register_memory_size () const { return 0x200;};
 
-#if 0
-  virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
-  virtual unsigned int eeprom_get_value(unsigned int address) ;
-  virtual void eeprom_put_value(unsigned int value,
-				unsigned int address);
-  virtual file_register *eeprom_get_register(unsigned int address);
-#endif
-
   P16F873(void);
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // use set_eeprom_wide as P16F873 expect a wide EEPROM
+    assert(0);
+  }
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
   static Processor *construct(void);
 
 };
@@ -71,16 +74,18 @@ class P16F874 : public P16C74
   void create_sfr_map(void);
   void create(void);
   virtual unsigned int register_memory_size () const { return 0x200;};
-#if 0
-  virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
-  virtual unsigned int eeprom_get_value(unsigned int address) ;
-  virtual void eeprom_put_value(unsigned int value,
-				unsigned int address);
-  virtual file_register *eeprom_get_register(unsigned int address);
-#endif
 
   P16F874(void);
   static Processor *construct(void);
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // use set_eeprom_wide as P16F873 expect a wide EEPROM
+    assert(0);
+  }
+  virtual void set_eeprom_wide(EEPROM_WIDE *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
 };
 
 class P16F877 : public P16F874

@@ -610,6 +610,7 @@ int ParseFile(FILE *f, TDbmListEntry *list, int level)
 	  }
 	    
 	  newnode = list->child[hash_value];
+	  newnode->next = NULL;
 	} else { /* there's already an entry at this place */
 	  
 	  newnode = list->child[hash_value];

@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "p16x6x.h"    /* The '7x stuff is like '6x stuff with a/d converters */
+#include "pir.h"
 
 class IOPORT;
 
@@ -144,7 +145,7 @@ class ADCON0_withccp : public ADCON0
 {
 public:
 
-  PIR1   *pir;
+  PIR_SET_2   *pir_set;
   virtual void set_interrupt(void);
 
 };
@@ -212,7 +213,14 @@ class P16C716 :  public P16C712
 class P16C72 : public P16C62 
 {
  public:
-
+  // XXX
+  // This pir1_2, pir2_2 stuff is not particularly pretty.  It would be
+  // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
+  // PIR2v2, but C++ only supports covariance in member function return
+  // values.
+  PIR1v2 pir1_2_reg;
+  PIR2v2 pir2_2_reg;
+  PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
   ADRES  adres;
@@ -220,6 +228,9 @@ class P16C72 : public P16C62
   virtual PROCESSOR_TYPE isa(void){return _P16C72_;};
   virtual void create_symbols(void);
   void create_sfr_map(void);
+  virtual PIR *get_pir1(void) { return (&pir1_2_reg); }
+  virtual PIR *get_pir2(void) { return (&pir2_2_reg); }
+  virtual PIR_SET *get_pir_set(void) { return (&pir_set_2_def); }
 
   //virtual unsigned int program_memory_size(void) const { return 0x800; };
 
@@ -233,7 +244,14 @@ class P16C72 : public P16C62
 class P16C73 : public P16C63
 {
  public:
-
+  // XXX
+  // This pir1_2, pir2_2 stuff is not particularly pretty.  It would be
+  // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
+  // PIR2v2, but C++ only supports covariance in member function return
+  // values.
+  PIR1v2 pir1_2_reg;
+  PIR2v2 pir2_2_reg;
+  PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
   ADRES  adres;
@@ -241,6 +259,9 @@ class P16C73 : public P16C63
   virtual PROCESSOR_TYPE isa(void){return _P16C73_;};
   virtual void create_symbols(void);
   void create_sfr_map(void);
+  virtual PIR *get_pir1(void) { return (&pir1_2_reg); }
+  virtual PIR *get_pir2(void) { return (&pir2_2_reg); }
+  virtual PIR_SET *get_pir_set(void) { return (&pir_set_2_def); }
 
   //virtual unsigned int program_memory_size(void) const { return 0x800; };
 
@@ -256,7 +277,14 @@ class P16C73 : public P16C63
 class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c64!
 {
  public:
-
+  // XXX
+  // This pir1_2, pir2_2 stuff is not particularly pretty.  It would be
+  // better to just tell C++ to redefine pir1 and pir2 and PIR1v2 and
+  // PIR2v2, but C++ only supports covariance in member function return
+  // values.
+  PIR1v2 pir1_2_reg;
+  PIR2v2 pir2_2_reg;
+  PIR_SET_2 pir_set_2_def;
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
   ADRES  adres;
@@ -266,6 +294,9 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   virtual PROCESSOR_TYPE isa(void){return _P16C74_;};
   virtual void create_symbols(void);
   void create_sfr_map(void);
+  virtual PIR *get_pir1(void) { return (&pir1_2_reg); }
+  virtual PIR *get_pir2(void) { return (&pir2_2_reg); }
+  virtual PIR_SET *get_pir_set(void) { return (&pir_set_2_def); }
 
   virtual unsigned int program_memory_size(void) const { return 0x1000; };
 

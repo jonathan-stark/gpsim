@@ -1,7 +1,19 @@
+2003-12-32  Scott Dattalo  <scott@dattalo.com>
+	* Applied patch from Mike Durian. He's added several files to more reasonably
+	group together portions of the simulator. In addition, he's added eeprom support
+	to the 18f devices
+	* src/eeprom.cc - new file to consolidate eeprom related stuff
+	* src/intcon.cc - new file to consolidate variations in intcon registers
+	* src/pie.cc - new file for pie register
+	* src/intcon.h 
+	* src/pir.h 
+	* src/pic-instructions - fixed bug in 18f banking
+	* src/16x5x.h - 16c54 register memory size was wrong
+	* gui/gui_stopwatch.cc - added a check to make sure there's a processor
+	* gui/gui_src*.cc - removed reference to cpu->pc->get_value()
+	
 2003-12-28  Scott Dattalo  <scott@dattalo.com>
 	* another patch from Borut Razem:
-	* README.WIN32:
-	    - some additional changes. I think that you can add it to CVS now ;-)
 	* cli/input.cc:
 	    - added function get_dir_delim(), which searches for both /
 	      and \ delimiters on WIN32 systems.

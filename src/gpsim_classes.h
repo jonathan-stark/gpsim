@@ -59,6 +59,9 @@ class EEPROM;
 class Module;
 class Module_Types;
 
+class ModuleInterface;
+class ProcessorInterface;
+
 
 /*==================================================================
  *

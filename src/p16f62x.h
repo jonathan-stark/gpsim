@@ -23,9 +23,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "p16x6x.h"
 
+#include "eeprom.h"
+
 /***************************************************************************
  *
- * Include file for:  P16F627, P16F628
+ * Include file for:  P16F627, P16F628, P16F648
  *
  *
  * The F62x devices are quite a bit different from the other PICs. The class
@@ -115,21 +117,23 @@ public:
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
   virtual void set_config_word(unsigned int address, unsigned int cfg_word);
 
-#if 0
-  virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
-  virtual unsigned int eeprom_get_value(unsigned int address) ;
-  virtual void eeprom_put_value(unsigned int value,
-				unsigned int address);
-  virtual file_register *eeprom_get_register(unsigned int address);
-#endif
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
 
-  virtual void create(int ram_top);
+  virtual void create(int ram_top, unsigned int eeprom_size);
   virtual void create_iopin_map(void);
+
+  virtual void set_eeprom(EEPROM *ep) {
+    // Use set_eeprom_pir as P16F62x expects to have a PIR capable EEPROM
+    assert(0);
+  }
+  virtual void set_eeprom_pir(EEPROM_PIR *ep) {
+    eeprom = ep;
+  }
+  virtual EEPROM_PIR *get_eeprom(void) { return ((EEPROM_PIR *)eeprom); }
 };
 
 class P16F627 : public P16F62x
@@ -154,6 +158,19 @@ public:
 
   P16F628(void);
   static Processor *construct(void);
+};
+
+class P16F648 : public P16F628
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(void){return _P16F648_;};
+
+  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual void create_sfr_map(void);
+
+  P16F648(void);
+  static pic_processor *construct(void);
 };
 
 #endif

@@ -1957,7 +1957,7 @@ void ProfileWindow_notify_start_callback(Profile_Window *pw)
 
   if(startcycle==END_OF_TIME) {
     startcycle=gpsim_get_cycles(pw->gp->pic_id);
-    startaddress=pw->gp->cpu->pc->get_value();
+    startaddress=pw->gp->cpu->pc->value; // FIXME should use get_value();
     //gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
   }
 }
@@ -1980,7 +1980,7 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 	{
 	  guint64 cycles;
 	  GList *iter;
-	  stopaddress=pw->gp->cpu->pc->get_value();
+	  stopaddress=pw->gp->cpu->pc->value; // FIXME should use get_value();
 	  //stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
 	  // We have a new measurement
 	  cycles=(int)stopcycle-(int)startcycle;
@@ -2040,7 +2040,6 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
   if(!enabled)
     return;
     
-  gp->pic_id;
 
   gpsim_enable_profiling(gp->pic_id);
 
@@ -2057,7 +2056,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
     char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     guint64 cycles;
 
-    if(gpsim_address_has_opcode( gp->pic_id, i)) {
+    if(gp->cpu->pma.isValid_opcode(i)) {
 	
       sprintf(address_string,"0x%04x",i);
       strcpy(instruction_string,gpsim_get_opcode_name( gp->cpu, i,buf));

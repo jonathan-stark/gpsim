@@ -485,32 +485,34 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
     range.col0=column;
     range.coli=column;
     
-/*    pc=gpsim_get_pc_value(sbow->sbw.gui_obj.gp->pic_id);
-    // Set styles/indicators
-    if(address==pc)
-    {
-	SourceBrowserOpcode_set_pc(sbow, pc);
-    }
-    else
-    {*/
-    if(gpsim_address_has_breakpoint(sbow->gp->pic_id,  address))
-    {
-	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->breakpoint_line_number_style);
-    }
-    else
-    {
-	gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->normal_style);
+    if(!sbow->gp->cpu) {
+      gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
+      return;
     }
 
-//    }
-    
+    if(sbow->gp->cpu && sbow->gp->cpu->address_has_break(address)) {
+
+      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->breakpoint_line_number_style);
+      gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
+
+    } else {
+
+      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->normal_style);
+
+      if(sbow->gp->cpu->pma.isModified(address))
+	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
+      else
+        gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
+    }
+
+/*    
     if(gpsim_address_has_breakpoint(sbow->gp->pic_id, address))
 	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
     else if(gpsim_address_has_changed(sbow->gp->pic_id, address))
 	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
     else
         gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
-
+*/
 }
 
 static void update_label(SourceBrowserOpcode_Window *sbow, int address)
@@ -1148,7 +1150,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     if(!gp || !gp->cpu)
       return;
 
-    pc=gp->cpu->pc->get_value();
+    pc=gp->cpu->pc->value;// FIXME should use get_value();
     SetPC(pc);
     update_label(this,pc);
 }
