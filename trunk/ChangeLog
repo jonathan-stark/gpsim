@@ -2,6 +2,10 @@
 	* plat/win32/gpsim.def: MSVC sync
 	* src/symbol.cc: fixed gpsim crash on WIN32 in remove_module()
 
+2004-10-13 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc: Applied patch from Craig Franklin that adds support
+	for reading .cod file message area.
+
 2004-10-12 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc: Added diagnostic printf's
 	* src/pic-processor.cc, src/pic-processor.h, src/processor.cc,

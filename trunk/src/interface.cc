@@ -388,13 +388,16 @@ void  gpsimInterface::set_update_rate  (guint64 update_rate)
 {
   guint64 fc = cycles.value + update_rate;
 
-  if(future_cycle)
-    cycles.reassign_break(future_cycle, fc, this);
-  else
-    cycles.set_break(fc, this);
-  
   gui_update_rate = update_rate;
-  future_cycle = fc;
+
+  if(fc) {
+    if(future_cycle)
+      cycles.reassign_break(future_cycle, fc, this);
+    else
+      cycles.set_break(fc, this);
+  
+    future_cycle = fc;
+  }
 }
 
 
