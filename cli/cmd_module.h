@@ -47,7 +47,7 @@ private:
 
   void module(cmd_options_str *cos, char *op1, double op2);
 
-  void module(cmd_options_str *cos, int op1, int op2);
+  void module(cmd_options_str *cos, guint64 op1, guint64 op2);
 
   void module(cmd_options_str *cos, char *op1, char *op2, int op3);
 

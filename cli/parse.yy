@@ -275,8 +275,8 @@ cmd:
      | error {
        init_cmd_state();
        yyclearin;
-       yyerrok;
-       
+       //yyerrok;
+       YYABORT;
      }
 
    ;
@@ -378,6 +378,8 @@ module_cmd
           | MODULE string_option        {c_module.module($2,(list <string> *)0,0);}
           | MODULE string_option string_list
                                         {c_module.module($2, $3, 0);}
+          | MODULE string_option expr_list 
+                                        {c_module.module($2, 0, $3);}
           | MODULE string_option string_list expr_list 
                                         {c_module.module($2, $3, $4);}
 /*

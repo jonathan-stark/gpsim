@@ -93,7 +93,7 @@ public:
   ModuleInterface *interface;     // An interface to the module.
 
 
-  XrefObject *xref;               // Updated when the module changes position
+  XrefObject *xref;               // Updated when the module changes
 
   // I/O pin specific
 
@@ -112,7 +112,7 @@ public:
   virtual void set_attribute(char *attr, char *val);
   virtual void set_attribute(char *attr, double val);
 
-  virtual Attribute *get_attribute(char *attr);
+  virtual Attribute *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual void dump_attributes(int show_values=1);
 
   // Version
@@ -166,5 +166,5 @@ void module_pins(char *module_name);
 void module_set_attr(char *module_name,char *attr, char *val);
 void module_set_attr(char *module_name,char *attr, char *val, int val2);
 void module_set_attr(char *module_name,char *attr, double val);
-void module_set_position(char *module_name, int x, int y);
+void module_update(char *module_name);
 #endif // __MODULES_H__
