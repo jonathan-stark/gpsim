@@ -52,6 +52,7 @@ class Trace
 #define    OPCODE_WRITE     (0x0d<<24)
 #define    MODULE_TRACE1    (0x0e<<24)
 #define    MODULE_TRACE2    (0x0f<<24)
+#define    CYCLE_INCREMENT  (0x10<<24)
 #define    CYCLE_COUNTER_LO (0x80<<24)
 #define    CYCLE_COUNTER_HI (0x40<<24)
 
@@ -61,6 +62,8 @@ class Trace
 
   unsigned int trace_buffer[TRACE_BUFFER_SIZE];
   unsigned int trace_index;
+  unsigned int trace_flag;
+
   pic_processor *cpu;
 
   Trace (void);
@@ -112,6 +115,14 @@ class Trace
     trace_buffer[trace_index] = CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO);
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
+  inline void cycle_increment (void)
+  {
+    // For those instructions that advance the cycle counter by 2,
+    // we have to record the extra cycle.
+    trace_buffer[trace_index] = CYCLE_INCREMENT;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
   inline void breakpoint (unsigned int bp)
   {
     trace_buffer[trace_index] = BREAKPOINT | bp;
@@ -170,9 +181,10 @@ class Trace
 
   void switch_cpus(pic_processor *new_cpu) {cpu = new_cpu;};
 
-  void dump (unsigned int n=0);
+  int  dump (unsigned int n=0);
   void dump_last_instruction(void);
   int  dump1(unsigned int);
+  int is_cycle_trace(unsigned int index);
 
 };
 

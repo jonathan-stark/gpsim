@@ -522,11 +522,13 @@ int CreateBreadboardWindow(GUI_Processor *gp)
     bbw->pinline_gc = NULL;
     bbw->pinname_gc = NULL;
     bbw->case_gc = NULL;
+    bbw->gui_obj.enabled = 0;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 
-
-    gui_object_get_config((GUI_Object*)bbw);
+    
+    if(!gui_object_get_config((GUI_Object*)bbw))
+      printf("warning: %s\n",__FUNCTION__);
     
     if(bbw->gui_obj.enabled)
 	BuildBreadboardWindow(bbw);

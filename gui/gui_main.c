@@ -108,6 +108,7 @@ void gui_new_processor (unsigned int pic_id)
       WatchWindow_clear_watches(gp->watch_window, gp);
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
       StackWindow_new_processor(gp->stack_window,gp);
+      TraceWindow_new_processor(gp->trace_window,gp);
 
       init_link_to_gpsim(gp);
       //  redisplay_prompt();
@@ -254,12 +255,55 @@ int config_set_variable(char *module, char *entry, int value)
     return 1;
 }
 
+void gui_check_object(GUI_Object *obj)
+{
+#define MAX_REASONABLE   2000
+
+  if(!obj) {
+    printf("Warning %s\n",__FUNCTION__);
+    return;
+  }
+
+  if((obj->x < 0 || obj->x > MAX_REASONABLE) ||
+     (obj->y < 0 || obj->y > MAX_REASONABLE) ||
+     (obj->width < 0 || obj->width > MAX_REASONABLE) ||
+     (obj->height < 0 || obj->height > MAX_REASONABLE) )
+
+    gui_object_set_default_config(obj);
+
+}
+
+int gui_object_set_default_config(GUI_Object *obj)
+{
+  static int x = 100;
+  static int y = 100;
+
+  if(!obj) {
+    printf("Warning %s\n",__FUNCTION__);
+    return 0;
+  }
+
+
+  obj->enabled = 0;
+  obj->x = x;
+  obj->y = y;
+  x += 100;
+  y += 100;
+
+  obj->width = 100;
+  obj->height = 100;
+
+  return 1;
+}
+
 int gui_object_set_config(GUI_Object *obj)
 {
   if(!obj)
     return 0;
 
-    config_set_variable(obj->name, "enabled", obj->enabled);
+  gui_check_object(obj);
+
+    config_set_variable(obj->name, "enabled", ((obj->enabled) ? 1 : 0) );
     config_set_variable(obj->name, "x", obj->x);
     config_set_variable(obj->name, "y", obj->y);
     config_set_variable(obj->name, "width", obj->width);
@@ -288,7 +332,7 @@ int config_get_variable(char *module, char *entry, int *value)
 
 int gui_object_get_config(GUI_Object *obj)
 {
-  if(!obj)
+  if(!obj || !obj->name)
     return 0;
 
     if(!config_get_variable(obj->name, "enabled", &obj->enabled))
@@ -301,6 +345,9 @@ int gui_object_get_config(GUI_Object *obj)
 	obj->width=300;
     if(!config_get_variable(obj->name, "height", &obj->height))
 	obj->height=100;
+
+  gui_check_object(obj);
+
     return 1;
 }
 
@@ -370,6 +417,7 @@ int gui_init (int argc, char **argv)
   CreateWatchWindow(gp);
   CreateBreadboardWindow(gp);
   CreateStackWindow(gp);
+  CreateTraceWindow(gp);
 
 
   interface_id = gpsim_register_interface((gpointer) gp);

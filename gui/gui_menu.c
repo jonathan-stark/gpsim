@@ -330,14 +330,14 @@ toggle_window (gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
 {
-    GUI_Object *gui_object;
-    GtkWidget *menu_item;
+    GUI_Object *gui_object = NULL;
+    GtkWidget *menu_item = NULL;
 
 //    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
 
     menu_item = gtk_item_factory_get_item (item_factory,
 					   gtk_item_factory_path_from_widget (widget));
-    if(gp)
+    if(gp && menu_item)
     {
 	switch(callback_action)
 	{
@@ -364,6 +364,9 @@ toggle_window (gpointer             callback_data,
             break;
 	case 8:
 	    gui_object=(GUI_Object*)gp->stack_window;
+            break;
+	case 9:
+	  gui_object=(GUI_Object*)gp->trace_window;
             break;
 	default:
 	    puts("unknown menu action");
@@ -473,6 +476,8 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
   { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
+  { "/Windows/sep3",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/_Trace",NULL, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
 
 //  { "/_Preferences",          NULL, 0,               0, "<Branch>" },
 //  { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },

@@ -1434,7 +1434,8 @@ int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)
   register_window->gui_obj.wt = WT_register_window;
   register_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
   register_window->gui_obj.is_built = 0;
-  
+  register_window->gui_obj.enabled = 0;
+
 //  register_window->allow_change_view=1;
   register_window->registers_loaded=0;
   register_window->processor=0;
@@ -1463,7 +1464,8 @@ int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)
 
   gp_add_window_to_list(gp, (GUI_Object *)register_window);
 
-  gui_object_get_config((GUI_Object*)register_window);
+  if(!gui_object_get_config((GUI_Object*)register_window))
+    printf("warning %s\n",__FUNCTION__);
 
   if(register_window->gui_obj.enabled)
       BuildRegisterWindow(register_window);
