@@ -47,6 +47,9 @@ Boston, MA 02111-1307, USA.  */
 #define DEFAULT_PRECISION 3
 #define DEFAULT_SPACE 8
 
+#define TRACE_FILE_FORMAT_ASCII 0
+#define TRACE_FILE_FORMAT_LXT 1
+
 extern int gui_question(char *question, char *a, char *b);
 extern int config_set_string(char *module, char *entry, char *string);
 extern int config_get_string(char *module, char *entry, char **string);
@@ -63,7 +66,7 @@ typedef enum {
     MENU_BREAK_WRITE_VALUE,
     MENU_ADD_WATCH,
     MENU_SETTINGS,
-    MENU_LOG_FILENAME,
+    MENU_LOG_SETTINGS,
     MENU_LOG_READ,
     MENU_LOG_WRITE,
     MENU_LOG_READ_VALUE,
@@ -82,7 +85,7 @@ static menu_item menu_items[] = {
     {"Set break on write", MENU_BREAK_WRITE},
     {"Set break on read value...", MENU_BREAK_READ_VALUE},
     {"Set break on write value...", MENU_BREAK_WRITE_VALUE},
-    {"Set log filename...", MENU_LOG_FILENAME},
+    {"Set log settings...", MENU_LOG_SETTINGS},
     {"Set log on read", MENU_LOG_READ},
     {"Set log on write", MENU_LOG_WRITE},
     {"Set log on read value...", MENU_LOG_READ_VALUE},
@@ -316,6 +319,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 
 
 static char *file_selection_name;
+static int filemode;
 
 static void
 file_selection_ok (GtkWidget        *w,
@@ -333,13 +337,34 @@ static void
 file_selection_cancel (GtkWidget        *w,
 		       GtkFileSelection *fs)
 {
+    file_selection_name=NULL;
     gtk_widget_hide (GTK_WIDGET (fs));
     gtk_main_quit();
 }
 
-static char *gui_get_filename(char *prompt)
+static void
+modepopup_activated(GtkWidget *widget, gpointer data)
+{
+    char *modestring;
+
+    modestring=(char*)data;
+
+    if(!strcmp(modestring,"ASCII"))
+        filemode=TRACE_FILE_FORMAT_ASCII;
+    if(!strcmp(modestring,"LXT"))
+	filemode=TRACE_FILE_FORMAT_LXT;
+}
+
+static char *gui_get_log_settings(char **filename, int *mode)
 {
     static GtkWidget *window = NULL;
+
+    GtkWidget *hbox, *optionmenu, *label;
+
+    GtkWidget *menu;
+    GtkWidget *item;
+
+    char *prompt="Log settings";
 
     if (!window)
     {
@@ -362,6 +387,44 @@ static char *gui_get_filename(char *prompt)
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_cancel),
 			    window);
+
+	hbox = gtk_hbox_new(0,0);
+        gtk_widget_show(hbox);
+
+	gtk_box_pack_end(GTK_BOX(GTK_FILE_SELECTION (window)->action_area),
+			 hbox,
+			 FALSE,FALSE,20);
+
+	label = gtk_label_new("File format:");
+	gtk_box_pack_end(GTK_BOX(hbox),
+			 label,
+			 FALSE,FALSE,20);
+
+	optionmenu = gtk_option_menu_new();
+        gtk_widget_show(optionmenu);
+	gtk_box_pack_end(GTK_BOX(hbox),
+			 optionmenu,
+			 FALSE,FALSE,20);
+
+	menu=gtk_menu_new();
+
+	item=gtk_menu_item_new_with_label("ASCII");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) modepopup_activated,
+			   "ASCII");
+//      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+	item=gtk_menu_item_new_with_label("LXT");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) modepopup_activated,
+			   "LXT");
+//      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+        gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), menu);
+
     }
 
     file_selection_name=NULL;
@@ -373,7 +436,14 @@ static char *gui_get_filename(char *prompt)
     
     gtk_widget_hide(window);
 
-    return file_selection_name;
+    if(file_selection_name==NULL)
+    {
+        *filename=NULL;
+	return;
+    }
+
+    *filename=file_selection_name;
+    *mode=filemode;
 }
 
 extern int gui_question(char *question, char *a, char *b);
@@ -391,6 +461,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     unsigned int address;
     int value, mask;
     char *filename;
+    int mode;
 
     if(widget==NULL || data==NULL)
     {
@@ -462,10 +533,10 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_SETTINGS:
         settings_dialog(popup_rw);
         break;
-    case MENU_LOG_FILENAME:
-	filename = gui_get_filename("Log file name:");
-        if(filename!=NULL)
-	    gpsim_set_log_name(pic_id,filename);
+    case MENU_LOG_SETTINGS:
+        gui_get_log_settings(&filename, &mode);
+	if(filename!=NULL)
+	    gpsim_set_log_name(pic_id,filename,mode);
         break;
     case MENU_LOG_READ:
 	for(j=range.row0;j<=range.rowi;j++)

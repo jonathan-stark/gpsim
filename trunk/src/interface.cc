@@ -635,7 +635,7 @@ unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYP
     return 1;
 }
 //--------------------------------------------------------------------------
-unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename)
+unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename, int format)
 {
     pic_processor *pic = get_processor(processor_id);
     
@@ -643,7 +643,7 @@ unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename)
 	return 0;
 
     if(filename!=NULL)
-	trace_log.enable_logging(filename);
+	trace_log.enable_logging(filename, format);
 
     return 0;
 }

@@ -28,6 +28,10 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "xref.h"
 
+extern "C"{
+#include "lxt_write.h"
+}
+
 extern int last_command_is_repeatable;
 extern unsigned int simulation_start_cycle;
 extern pic_processor *active_cpu;
@@ -1086,13 +1090,11 @@ void Break_register_write_value::put(unsigned int new_value)
 
 void Log_Register_Write::put(unsigned int new_value)
 {
+    int v;
+
   // First perform the write operation:
 
   replaced->put(new_value);
-
-  // Now (verbosely) record the current cpu cycle 
-
-  trace_log.buffer.cycle_counter(cpu->cycles.value);
 
 #if 1
   // Finally, record the value that was written to the register.
@@ -1101,29 +1103,25 @@ void Log_Register_Write::put(unsigned int new_value)
   // differ from the value that was attempted to be written. (E.g.
   // this only happens in special function registers).
 
-  trace_log.buffer.register_write(replaced->address, replaced->get_value());
+  v = replaced->get_value();
 
 #else
 
   // another option is to log the value the simulated pic was trying
   // to write. I'm not sure which is more useful.
 
-  trace_log.buffer.register_write(replaced->address, new_value);
+  v = new_value;
 
 #endif
 
+  trace_log.register_write(replaced->address, v, cpu->cycles.value);
 
-  if(trace_log.buffer.near_full())
-    trace_log.write_logfile();
-    
 }
 
 unsigned int Log_Register_Read::get(void)
 {
-  trace_log.buffer.cycle_counter(cpu->cycles.value);
-
-  int v = replaced->get(); 
-  trace_log.buffer.register_read(replaced->address, v);
+  int v = replaced->get();
+  trace_log.register_read(replaced->address, v, cpu->cycles.value);
   return v;
 
 }
@@ -1138,8 +1136,7 @@ unsigned int Log_Register_Read_value::get(void)
       &&
       (v & break_mask) == break_value)
     {
-      trace_log.buffer.cycle_counter(cpu->cycles.value);
-      trace_log.buffer.register_read_value(replaced->address, v);
+	trace_log.register_read_value(replaced->address, v, cpu->cycles.value);
     }
 
   last_value = v;
@@ -1159,8 +1156,7 @@ void Log_Register_Write_value::put(unsigned int new_value)
       &&
       (new_value & break_mask) == break_value)
     {
-      trace_log.buffer.cycle_counter(cpu->cycles.value);
-      trace_log.buffer.register_write_value(replaced->address, break_value);
+      trace_log.register_write_value(replaced->address, break_value, cpu->cycles.value);
     }
   last_value = new_value;
   replaced->put(new_value);

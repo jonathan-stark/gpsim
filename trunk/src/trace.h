@@ -28,6 +28,10 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "breakpoints.h"
 
+extern "C"
+{
+#include "lxt_write.h"
+}
 //---------------------------------------------------------
 // Class for trace buffer
 
@@ -227,6 +231,8 @@ extern Trace trace;
 
 
 //-----------------------------------------------------------
+#define TRACE_FILE_FORMAT_ASCII 0
+#define TRACE_FILE_FORMAT_LXT 1
 class TraceLog : public BreakCallBack
 {
 public:
@@ -238,18 +244,29 @@ public:
   pic_processor *cpu;
   unsigned int last_trace_index;
   Trace buffer;
+  int file_format;
+  struct lt_trace *lxtp;
+  struct lt_symbol *symp;
 
   TraceLog(void);
   ~TraceLog(void);
 
   virtual void callback(void);
-  void enable_logging(char *new_filename=NULL);
+  void enable_logging(char *new_filename=NULL, int format=TRACE_FILE_FORMAT_ASCII);
   void disable_logging(void);
   void switch_cpus(pic_processor *new_cpu);
-  void open_logfile(char *new_fname);
+  void open_logfile(char *new_fname, int format);
   void close_logfile(void);
   void write_logfile(void);
   void status(void);
+
+  void lxt_trace(unsigned int address, unsigned int value, guint64 cc);
+
+  void register_read(unsigned int address, unsigned int value, guint64 cc);
+  void register_write(unsigned int address, unsigned int value, guint64 cc);
+  void register_read_value(unsigned int address, unsigned int value, guint64 cc);
+  void register_write_value(unsigned int address, unsigned int value, guint64 cc);
+
 };
 
 extern TraceLog trace_log;
@@ -272,6 +289,7 @@ public:
   void enable_profiling(void);
   void disable_profiling(void);
   void switch_cpus(pic_processor *new_cpu);
+
 };
 
 extern ProfileKeeper profile_keeper;

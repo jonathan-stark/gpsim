@@ -197,7 +197,7 @@ typedef struct _sym
   unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id,
 					   REGISTER_TYPE type,
 					   unsigned int register_number);
-  unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename);
+  unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename, int format);
   unsigned int gpsim_reg_set_read_logging(unsigned int processor_id,
 					  REGISTER_TYPE type,
 					  unsigned int register_number);
