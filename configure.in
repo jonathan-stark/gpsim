@@ -130,7 +130,7 @@ else
   AC_CHECK_LIB(eXdbm,eXdbmInit,,[
   AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
   see ./configure --help for instructions])
-  ])
+  ],-lm)
 
 fi
 
