@@ -318,35 +318,37 @@ IOPIN *Module::get_pin(unsigned int pin_number)
 //-------------------------------------------------------------------
 Module_Library::Module_Library(const char *new_name, void *library_handle)
 {
-#ifdef HAVE_GUI
-    const char * error;
 
-    if(new_name)
-      _name = strdup(new_name);
-    else
-      _name = 0;
+  const char * error;
 
-    _handle = library_handle;
-
-    get_mod_list =   (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
-
-    if ((error = dlerror()) != 0)  {
-      cout << "WARNING: non-conforming module library\n"
-	   << "  gpsim libraries should have the mod_list() function defined\n";
-      fputs(error, stderr);
-      module_list = 0;
-    } else {
-
-      // Get a pointer to the list of modules that this library supports.
-      module_list = get_mod_list();
-    }
-#else
-
-    module_list = 0;
+  if(new_name)
+    _name = strdup(new_name);
+  else
     _name = 0;
-    _handle = 0;
 
-#endif
+  _handle = library_handle;
+
+  get_mod_list = (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
+
+  if ((error = dlerror()) != 0)  {
+    cout << "WARNING: non-conforming module library\n"
+	 << "  gpsim libraries should have the mod_list() function defined\n";
+    fputs(error, stderr);
+    module_list = 0;
+  } else {
+
+    // Get a pointer to the list of modules that this library supports.
+    module_list = get_mod_list();
+
+    // If the module has an "initialize" function, then call it now.
+    //
+    typedef  void * (*void_FPTR)(void);
+    void * (*initialize)(void) = (void_FPTR) dlsym(_handle,"initialize");
+    if(initialize)
+      initialize();
+
+  }
+
 
 }
 
@@ -372,7 +374,7 @@ void module_add_library(const char *library_name, void *library_handle)
     module_list.push_back(ml);
 
   } else 
-    cout << "BUG: " << __FUNCTION__ << " called with library_name == 0";
+    cout << "BUG: " << __FUNCTION__ << " called with NULL library_name";
 
 }
 
@@ -407,8 +409,6 @@ void module_display_available(void)
 void module_load_library(const char *library_name)
 {
 
-#ifdef HAVE_GUI
-
   void *handle;
   char *error;
 
@@ -422,11 +422,6 @@ void module_load_library(const char *library_name)
   module_add_library(library_name,handle);
 
   module_display_available();
-#else
-
-  cout << "  -- gpsim doesn't support modules in the cli-only mode yet\n";
-
-#endif
 
 }
 
@@ -481,9 +476,6 @@ void module_load_module(const char *module_type, const char *module_name)
 
 	      cout << " Found it!\n";
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
-
-	      // new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
-	      // NOTE! interface_id is set by the module when calling gpsim_register_interface()
 
 	      symbol_table.add_module(new_module,module_name);
 

@@ -254,6 +254,7 @@ class IOPIN : public stimulus
   virtual void attach(Stimulus_Node *s);
   virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int x){return;};
+  virtual void update_pullup(bool new_state){return;}
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
 };
 
@@ -279,7 +280,7 @@ public:
 
   //  source_stimulus *source;
   bool driving;
-  
+
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
@@ -309,11 +310,12 @@ class IO_bi_directional_pu : public IO_bi_directional
 public:
 
   resistor *pull_up_resistor;
+  bool pull_up_enabled;
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
   IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   virtual int get_voltage(guint64 current_time);
-
+  virtual void update_pullup(bool new_state) { pull_up_enabled = new_state; }
 };
 
 class IO_open_collector : public IO_input

@@ -1347,7 +1347,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_n
 
   pull_up_resistor = new resistor();
   pull_up_resistor->drive = 10;    // %%% FIX ME %%%
-
+  pull_up_enabled = true;
 
   state = 0;
   drive  = MAX_DRIVE / 2;
@@ -1444,9 +1444,11 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
   else
     {
       //cout << " pulled up\n";
-      return (pull_up_resistor->get_voltage(current_time));
+      if(pull_up_enabled)
+	return (pull_up_resistor->get_voltage(current_time));
     }
 
+  return 0;
 }
 
 

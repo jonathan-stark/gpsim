@@ -1,3 +1,7 @@
+2004-03-16 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_regwin.cc, gui/gui.h:
+	abstracted the width of registers
+
 2004-03-15 Scott Dattalo  <scott@dattalo.com>
 	* src/modules.h, src/modules.cc:
 	Removed the "ExternalModule" class

@@ -44,15 +44,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
-#define DEFAULT_PRECISION 3
-#define DEFAULT_SPACE 8
-
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
 
 extern int gui_question(char *question, char *a, char *b);
 
-static void update_ascii(Register_Window *rw, gint row);
 
 // extern GUI_Processor *gp;
 
@@ -135,7 +131,6 @@ static menu_item menu_items[] = {
     {"Settings...", MENU_SETTINGS}
 };
 
-static int settings_dialog(Register_Window *rw);
 extern int font_dialog_browse(GtkWidget *w, gpointer user_data);
 static int dlg_x=200, dlg_y=200;
 
@@ -284,7 +279,7 @@ public:
     rw->registers[address]->update_full=TRUE;
     rw->UpdateRegisterCell(address);
   
-    update_ascii(rw,reg->row);
+    rw->UpdateASCII(reg->row);
   }
 
 };
@@ -754,7 +749,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	  }
       break;
     case MENU_SETTINGS:
-      settings_dialog(popup_rw);
+      popup_rw->SettingsDialog();
       break;
     case MENU_LOG_SETTINGS:
       gui_get_log_settings(&filename, &mode);
@@ -967,9 +962,38 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
     {
       printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
       reg->put_value(n&0xff);
-      update_ascii(rw,row);
+      rw->UpdateASCII(row);
     }
 
+}
+
+//------------------------------------------------------------------------
+int Register_Window::column_width(int col)
+{
+
+  int esthetic_padding = 6;   // pixels 
+
+  if(!char_width)
+    return 0;
+
+  if(col < 0)
+    return char_width * 3 + esthetic_padding;
+
+  if(col < REGISTERS_PER_ROW)
+    return char_width * chars_per_column + esthetic_padding;
+
+  return char_width * REGISTERS_PER_ROW + esthetic_padding;
+}
+
+//------------------------------------------------------------------------
+int Register_Window::row_height(int col)
+{
+  int esthetic_padding = 6;  // pixels 
+
+  if(!char_width)
+    return 0;
+
+  return 3 * char_width + esthetic_padding;
 }
 
 //------------------------------------------------------------------------
@@ -1053,34 +1077,46 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
   return 0; // what should be returned?, FIXME
 }
 
-static int load_styles(Register_Window *rw)
+int Register_Window::LoadStyles(void)
 {
-    GdkColormap *colormap = gdk_colormap_get_system();
+  GdkColormap *colormap = gdk_colormap_get_system();
 
 #if GTK_MAJOR_VERSION >= 2
-    rw->normalfont = pango_font_description_from_string(rw->normalfont_string);
+  normalfont = pango_font_description_from_string(normalfont_string);
 #else
-    rw->normalfont=gdk_fontset_load (rw->normalfont_string);
+  normalfont=gdk_fontset_load (normalfont_string);
 #endif
-    gdk_color_parse("light cyan", &rw->normal_bg_color);
-    gdk_color_parse("black", &rw->normal_fg_color);
-    gdk_color_parse("blue", &rw->item_has_changed_color);
-    gdk_color_parse("red", &rw->breakpoint_color);
-    gdk_color_parse("light gray", &rw->alias_color);
-    gdk_color_parse("black", &rw->invalid_color);
-    gdk_color_parse("cyan", &rw->sfr_bg_color);
 
-    gdk_colormap_alloc_color(colormap, &rw->normal_bg_color,FALSE,TRUE );
-    gdk_colormap_alloc_color(colormap, &rw->normal_fg_color,FALSE,TRUE );
-    gdk_colormap_alloc_color(colormap, &rw->item_has_changed_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &rw->breakpoint_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &rw->alias_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &rw->invalid_color,FALSE,TRUE);
-    gdk_colormap_alloc_color(colormap, &rw->sfr_bg_color,FALSE,TRUE);
+  gdk_color_parse("light cyan", &normal_bg_color);
+  gdk_color_parse("black", &normal_fg_color);
+  gdk_color_parse("blue", &item_has_changed_color);
+  gdk_color_parse("red", &breakpoint_color);
+  gdk_color_parse("light gray", &alias_color);
+  gdk_color_parse("black", &invalid_color);
+  gdk_color_parse("cyan", &sfr_bg_color);
 
-    if(rw->normalfont==0)
-	return 0;
-    return 1;
+  gdk_colormap_alloc_color(colormap, &normal_bg_color,FALSE,TRUE );
+  gdk_colormap_alloc_color(colormap, &normal_fg_color,FALSE,TRUE );
+  gdk_colormap_alloc_color(colormap, &item_has_changed_color,FALSE,TRUE);
+  gdk_colormap_alloc_color(colormap, &breakpoint_color,FALSE,TRUE);
+  gdk_colormap_alloc_color(colormap, &alias_color,FALSE,TRUE);
+  gdk_colormap_alloc_color(colormap, &invalid_color,FALSE,TRUE);
+  gdk_colormap_alloc_color(colormap, &sfr_bg_color,FALSE,TRUE);
+
+
+  if(!normalfont)
+  {
+    char_width = 0;
+    return 0;
+  }
+
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
+#else
+  char_width = gdk_string_width (normalfont,"9");
+#endif
+
+  return 1;
 }
 
 /********************** Settings dialog ***************************/
@@ -1093,133 +1129,131 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
 //	gtk_main_quit();
     }
 }
-static int settings_dialog(Register_Window *rw)
+
+int Register_Window::SettingsDialog(void)
 {
-    static GtkWidget *dialog=0;
-    GtkWidget *button;
-    static int retval;
-    GtkWidget *hbox;
-    static GtkWidget *normalfontstringentry;
-    GtkWidget *label;
-    int fonts_ok=0;
-    GtkSheet *sheet;
-    GtkSheetRange range;
-    gint row_height,column_width,char_width;
-    int i;
+  static GtkWidget *dialog=0;    // fixme
+  GtkWidget *button;
+  GtkWidget *hbox;
+  static GtkWidget *normalfontstringentry;   //fixme
+  GtkWidget *label;
+  int fonts_ok=0;
+  GtkSheet *sheet;
+  GtkSheetRange range;
+  int i;
 
-    sheet=GTK_SHEET(rw->register_sheet);
+  if(!dialog)
+  {
+    dialog = gtk_dialog_new();
+    gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
+    gtk_signal_connect(GTK_OBJECT(dialog),
+		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    gtk_signal_connect_object(GTK_OBJECT(dialog),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+
+
+    // Normal font
+    hbox = gtk_hbox_new(0,0);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+    gtk_widget_show(hbox);
+    label=gtk_label_new("Normal font:");
+    gtk_box_pack_start(GTK_BOX(hbox), label,
+		       FALSE,FALSE, 20);
+    gtk_widget_show(label);
+    normalfontstringentry=gtk_entry_new();
+    gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
+		       TRUE, TRUE, 0);
+    gtk_widget_show(normalfontstringentry);
+    button = gtk_button_new_with_label("Browse...");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(hbox), button,
+		       FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		       GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+
+
+    // OK button
+    button = gtk_button_new_with_label("OK");
+    gtk_widget_show(button);
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+		       FALSE,FALSE,10);
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		       GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+  }
     
-    if(dialog==0)
-    {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+  gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), normalfont_string);
 
-
-	// Normal font
-	hbox = gtk_hbox_new(0,0);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
-	gtk_widget_show(hbox);
-	label=gtk_label_new("Normal font:");
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
-	gtk_widget_show(label);
-	normalfontstringentry=gtk_entry_new();
-	gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
-			   TRUE, TRUE, 0);
-	gtk_widget_show(normalfontstringentry);
-	button = gtk_button_new_with_label("Browse...");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(hbox), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
-
-
-	// OK button
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
-    }
-    
-    gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), rw->normalfont_string);
-
-    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
+  gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+  gtk_widget_show_now(dialog);
 
 
 
-    while(fonts_ok!=1)
-    {
-	char fontname[256];
+  while(fonts_ok!=1)
+  {
+    char fontname[256];
 #if GTK_MAJOR_VERSION >= 2
-        PangoFontDescription *font;
+    PangoFontDescription *font;
 #else
-        GdkFont *font;
+    GdkFont *font;
 #endif
 
-        settings_active=1;
-	while(settings_active)
-	    gtk_main_iteration();
+    settings_active=1;
+    while(settings_active)
+      gtk_main_iteration();
 
-	fonts_ok=0;
+    fonts_ok=0;
 
-	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+    strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
 #if GTK_MAJOR_VERSION >= 2
-	if((font=pango_font_description_from_string(fontname))==0)
+    if((font=pango_font_description_from_string(fontname))==0)
 #else
-	if((font=gdk_fontset_load(fontname))==0)
+      if((font=gdk_fontset_load(fontname))==0)
 #endif
 	{
-	    if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
-		break;
+	  if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
+	    break;
 	}
-	else
+      else
 	{
 #if GTK_MAJOR_VERSION >= 2
 #else
-            gdk_font_unref(font);
+	  gdk_font_unref(font);
 #endif
-	    strcpy(rw->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	    config_set_string(rw->name,"normalfont",rw->normalfont_string);
-            fonts_ok++;
+	  strcpy(normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+	  config_set_string(name,"normalfont",normalfont_string);
+	  fonts_ok++;
 	}
-    }
+  }
 
-    load_styles(rw);
+  if(!LoadStyles())
+  {
+    printf("%s - no font is available\n");
+    return 0;
+  }
 
-    gtk_sheet_freeze(rw->register_sheet);
-    range.row0=0;
-    range.rowi=sheet->maxrow;
-    range.col0=0;
-    range.coli=sheet->maxcol;
-    gtk_sheet_range_set_font(sheet, &range, rw->normalfont);
+  gtk_sheet_freeze(register_sheet);
+  range.row0=0;
+  range.rowi=sheet->maxrow;
+  range.col0=0;
+  range.coli=sheet->maxcol;
+  gtk_sheet_range_set_font(sheet, &range, normalfont);
 
-#if GTK_MAJOR_VERSION >= 2
-    char_width = gdk_string_width(gdk_font_from_description(rw->normalfont), "9");
-#else
-    char_width = gdk_string_width (rw->normalfont,"9");
-#endif
-    row_height = 3 * char_width + 6;
-    column_width = 3 * char_width + 6;
-    for(i=0; i<rw->register_sheet->maxcol; i++){
-        gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
-        gtk_sheet_set_row_height (rw->register_sheet, i, row_height);
-    }
-    gtk_sheet_set_column_width (rw->register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
-    gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
-    gtk_sheet_set_column_titles_height(rw->register_sheet, row_height);
-    gtk_sheet_thaw(rw->register_sheet);
+  // FIXME - this code doesn't look right. 'i' iterates over both
+  // the columns and rows. If there are more rows then columns, then
+  // this code breaks.
 
-    gtk_widget_hide(dialog);
+  for(i=0; i<=register_sheet->maxcol; i++){
+    gtk_sheet_set_column_width (register_sheet, i, column_width(i));
+    gtk_sheet_set_row_height (register_sheet, i, row_height(i));
+  }
 
-    return retval;
+  gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
+  gtk_sheet_set_column_titles_height(register_sheet, row_height(0));
+  gtk_sheet_thaw(register_sheet);
+
+  gtk_widget_hide(dialog);
+
+  return 0;
 }
 
 static void
@@ -1365,7 +1399,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 
   // so we use set_cell() to write the changes from the sheet cell to gpsim
   set_cell(GTK_WIDGET(sheet),row,col,rw);
-  update_ascii(rw,row);
+  rw->UpdateASCII(row);
       
 }
 
@@ -1510,36 +1544,33 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 
 }
 
-static void update_ascii(Register_Window *rw, gint row)
+void Register_Window::UpdateASCII(gint row)
 {
   gint i;
   gchar name[32];
 
-  if(rw == 0 || row<0 || row > rw->register_sheet->maxrow)
+  if(row<0 || row > register_sheet->maxrow)
   {
-      printf("Warning update_ascii(%p,%x)\n",rw,row);
+      printf("Warning update_ascii(%x)\n",row);
       return;
   }
 
-  if(!rw->registers_loaded)
-      return;
-  
-  if(row<0 || row>rw->register_sheet->maxrow)
+  if(!registers_loaded)
       return;
   
   for(i=0; i<REGISTERS_PER_ROW; i++)
-    {
+  {
 
-      name[i] = rw->registers[rw->row_to_address[row] + i]->get_shadow(); //->value;
+    name[i] = registers[row_to_address[row] + i]->get_shadow();
 
-	if( (name[i] < ' ') || (name[i]>'z'))
-	    name[i] = '.';
+    if( (name[i] < ' ') || (name[i]>'z'))
+      name[i] = '.';
 
-    }
+  }
 
   name[REGISTERS_PER_ROW] = 0;
 
-  gtk_sheet_set_cell(GTK_SHEET(rw->register_sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
+  gtk_sheet_set_cell(GTK_SHEET(register_sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
 
 }
 
@@ -1588,7 +1619,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       if(new_value==INVALID_VALUE)
 	sprintf (name, "??");
       else
-	sprintf (name, "%02x", new_value);
+	sprintf (name, pCellFormat, new_value);
     }
     else {
       new_value=INVALID_VALUE; // magic value
@@ -1636,7 +1667,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
       // the register has changed since last update
       registers[reg_number]->put_shadow(new_value);
-      sprintf (name, "%02x", new_value);
+      sprintf (name, pCellFormat, new_value);
     }
 
     gtk_sheet_set_cell(GTK_SHEET(register_sheet),
@@ -1699,10 +1730,55 @@ void Register_Window::Update(void)
       }
     }
     if(row_changed)
-      update_ascii(this,j);
+      UpdateASCII(j);
   }
 }
 
+//------------------------------------------------------------------------
+void Register_Window::SetRegisterSize(void)
+{
+  if(gp && gp->cpu)
+    register_size = gp->cpu->register_size();
+  else
+    register_size = 1;
+
+  chars_per_column = 1 + 2*register_size;
+
+  if(pCellFormat)
+    delete pCellFormat;
+
+  pCellFormat = new char[10];
+  sprintf(pCellFormat,"%%0%dx",register_size*2);
+
+  if(register_sheet) {
+
+    int i;
+    char buffer[10];
+
+    for(i=0; i<register_sheet->maxcol; i++){
+
+      sprintf(buffer,"%02x",i);
+      gtk_sheet_column_button_add_label(register_sheet, i, buffer);
+      gtk_sheet_set_column_title(register_sheet, i, buffer);
+      gtk_sheet_set_column_width (register_sheet, i, column_width(i));
+    }
+
+
+
+    i = REGISTERS_PER_ROW;
+    sprintf(buffer,"ASCII");
+    gtk_sheet_column_button_add_label(register_sheet, i, buffer);
+    gtk_sheet_set_column_title(register_sheet, i, buffer);
+
+    gtk_sheet_set_column_width (register_sheet, i, column_width(i));
+  
+    gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
+
+  }
+
+
+
+}
 //------------------------------------------------------------------------
 void Register_Window::NewProcessor(GUI_Processor *_gp)
 {
@@ -1714,19 +1790,16 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   gboolean row_created;
   GtkSheetRange range;
 
-  int row_height, char_width;
-    
-  if(!gp || !rma)
+  if(!gp || !gp->cpu || !rma)
     return;
 
   if( !enabled)
     return;
     
-  for(i=0;i<MAX_REGISTERS;i++){
+  for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=&THE_invalid_register;
-  }
 
-  if(register_sheet == 0){
+  if(!register_sheet){
     printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
     return;
   }
@@ -1736,14 +1809,11 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   gtk_sheet_freeze(register_sheet);
     
   j=0;
-#if GTK_MAJOR_VERSION >= 2
-  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
-#else
-  char_width = gdk_string_width (normalfont,"9");
-#endif
-  row_height = 3 * char_width + 6;
-  gtk_sheet_set_row_height (register_sheet, j, row_height);
+  i=0;
 
+  gtk_sheet_set_row_height (register_sheet, j, row_height(i));
+
+  SetRegisterSize();
 
   for(reg_number=0;reg_number<rma->get_size();reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
@@ -1786,7 +1856,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 	  if(register_sheet->maxrow<j)
 	    {
 	      gtk_sheet_add_row(register_sheet,1);
-	      gtk_sheet_set_row_height (register_sheet, j, row_height);
+	      gtk_sheet_set_row_height (register_sheet, j, row_height(0));
 	    }
 
 	  sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
@@ -1868,7 +1938,6 @@ void Register_Window::Build(void)
     
   gchar buffer[10];
   gint i;
-  gint column_width,char_width;
 
   char *fontstring;
 
@@ -1924,7 +1993,7 @@ void Register_Window::Build(void)
   if(config_get_string(name,"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
 
-  while(!load_styles(this))
+  while(!LoadStyles())
   {
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
@@ -1933,7 +2002,7 @@ void Register_Window::Build(void)
       }
       else
       {
-	settings_dialog(this);
+	SettingsDialog();
       }
   }
 
@@ -1973,32 +2042,6 @@ void Register_Window::Build(void)
 		     "activate", (GtkSignalFunc)activate_sheet_entry,
 		     this);
 
-//  gtk_widget_realize(window);
-
-#if GTK_MAJOR_VERSION >= 2
-  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
-#else
-  char_width = gdk_string_width (normalfont,"9");
-#endif
-  column_width = 3 * char_width + 6;
-
-  for(i=0; i<register_sheet->maxcol; i++){
-
-    sprintf(buffer,"%02x",i);
-    gtk_sheet_column_button_add_label(register_sheet, i, buffer);
-    gtk_sheet_set_column_title(register_sheet, i, buffer);
-    gtk_sheet_set_column_width (register_sheet, i, column_width);
-  }
-
-  i = REGISTERS_PER_ROW;
-  sprintf(buffer,"ASCII");
-  gtk_sheet_column_button_add_label(register_sheet, i, buffer);
-  gtk_sheet_set_column_title(register_sheet, i, buffer);
-
-  gtk_sheet_set_column_width (register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
-
-  gtk_sheet_set_row_titles_width(register_sheet, column_width);
-
   gtk_signal_connect(GTK_OBJECT(register_sheet),
 		     "key_press_event",
 		     (GtkSignalFunc) clipboard_handler, 
@@ -2028,6 +2071,7 @@ void Register_Window::Build(void)
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),
 			   this);
 
+  SetRegisterSize();
 
   gtk_widget_show (window);
 
@@ -2063,6 +2107,9 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   wt = WT_register_window;
   is_built = 0;
   enabled = 0;
+  pCellFormat = 0;
+  char_width = 0;
+  chars_per_column = 3; // assume byte-sized registers
 
   registers_loaded=0;
   
