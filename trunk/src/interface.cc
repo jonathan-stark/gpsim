@@ -395,6 +395,21 @@ unsigned int gpsim_get_status(unsigned int processor_id)
   return pic->status.get_value();
 
 }
+//--------------------------------------------------------------------------
+
+void gpsim_put_status(unsigned int processor_id, unsigned int status_value)
+{
+
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+      return;
+
+  pic->status.put_value(status_value);
+  
+  return;
+
+}
 
 //--------------------------------------------------------------------------
 
@@ -408,6 +423,19 @@ unsigned int gpsim_get_w(unsigned int processor_id)
 
   return pic->W.get_value();
 
+}
+//--------------------------------------------------------------------------
+
+void gpsim_put_w(unsigned int processor_id, unsigned int w_value)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+      return;
+  
+  pic->W.put_value(w_value);
+
+  return;
 }
 
 //--------------------------------------------------------------------------

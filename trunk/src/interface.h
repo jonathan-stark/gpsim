@@ -94,7 +94,9 @@ typedef struct _sym
   unsigned int gpsim_get_pc_value(unsigned int processor_id);
   void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value);
   unsigned int gpsim_get_status(unsigned int processor_id);
+  void gpsim_put_status(unsigned int processor_id, unsigned int status_value);
   unsigned int gpsim_get_w(unsigned int processor_id);
+  void gpsim_put_w(unsigned int processor_id, unsigned int w_value);
   unsigned int gpsim_get_cycles_lo(unsigned int processor_id);
   guint64  gpsim_get_cycles(unsigned int processor_id);
   guint64  gpsim_get_update_rate(void);
