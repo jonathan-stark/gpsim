@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 
 #include "protocol.h"
-#include "config.h"
+#include "../config.h"
 
 #define PRINTF_INT64_MODIFIER "L"
 //------------------------------------------------------------------------
