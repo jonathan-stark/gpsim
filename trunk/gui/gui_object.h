@@ -71,7 +71,7 @@ class GUI_Object {
   int get_config(void);
   void check(void);
   int set_default_config(void);
-  int set_config(void);
+  virtual int set_config(void);
   char *name(void);
   void set_name(char * new_name);
   void set_name(string &new_name);

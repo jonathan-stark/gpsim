@@ -116,6 +116,14 @@ class Interface {
 
   virtual void GuiUpdate  (gpointer object) {};
 
+  /*
+   * destructor - called when the interface is destroyed - this gives
+   *  the interface object a chance to save state information.
+   */
+  virtual ~Interface() 
+  {
+  }
+
   unsigned int get_id(void) { return interface_id;};
   void set_id(unsigned int new_id) { interface_id = new_id;};
   Interface(gpointer new_object=NULL);

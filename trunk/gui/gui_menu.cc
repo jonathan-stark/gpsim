@@ -611,9 +611,6 @@ void create_dispatcher (void)
       gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
       
       
-//      gtk_signal_connect_object (GTK_OBJECT (dispatcher_window), "destroy",
-//				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//				 GTK_OBJECT(dispatcher_window));
       gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
 			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
 			  0);
@@ -654,37 +651,31 @@ void create_dispatcher (void)
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) stepbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
       
       button = gtk_button_new_with_label ("over");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) overbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("finish");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) finishbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("run");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) runbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("stop");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) stopbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("reset");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) resetbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
 
       frame = gtk_frame_new("Simulation mode");
@@ -815,29 +806,13 @@ void create_dispatcher (void)
       
       separator = gtk_hseparator_new ();
       gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
-
-
-
-      
-//      box2 = gtk_vbox_new (FALSE, 10);
-//      gtk_container_set_border_width (GTK_CONTAINER (box2), 10);
-//      gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, TRUE, 0);
-
       button = gtk_button_new_with_label ("Quit gpsim");
-      /*      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-				 GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				 GTK_OBJECT (dispatcher_window));
-      */
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			 (GtkSignalFunc) do_quit_app, 0);
 
       gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
-//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-//      gtk_widget_grab_default (button);
-
       gtk_widget_show_all (dispatcher_window);
       
-//      set_toggle_menu_states();
     }
   else
     gtk_widget_destroy (dispatcher_window);
@@ -876,196 +851,6 @@ build_option_menu (OptionMenuItem items[],
   gtk_option_menu_set_history (GTK_OPTION_MENU (omenu), history);
   
   return omenu;
-}
-*/
-/*
-static char * book_open_xpm[] = {
-"16 16 4 1",
-"       c None s None",
-".      c black",
-"X      c #808080",
-"o      c white",
-"                ",
-"  ..            ",
-" .Xo.    ...    ",
-" .Xoo. ..oo.    ",
-" .Xooo.Xooo...  ",
-" .Xooo.oooo.X.  ",
-" .Xooo.Xooo.X.  ",
-" .Xooo.oooo.X.  ",
-" .Xooo.Xooo.X.  ",
-" .Xooo.oooo.X.  ",
-"  .Xoo.Xoo..X.  ",
-"   .Xo.o..ooX.  ",
-"    .X..XXXXX.  ",
-"    ..X.......  ",
-"     ..         ",
-"                "};
-
-static char * book_closed_xpm[] = {
-"16 16 6 1",
-"       c None s None",
-".      c black",
-"X      c red",
-"o      c yellow",
-"O      c #808080",
-"#      c white",
-"                ",
-"       ..       ",
-"     ..XX.      ",
-"   ..XXXXX.     ",
-" ..XXXXXXXX.    ",
-".ooXXXXXXXXX.   ",
-"..ooXXXXXXXXX.  ",
-".X.ooXXXXXXXXX. ",
-".XX.ooXXXXXX..  ",
-" .XX.ooXXX..#O  ",
-"  .XX.oo..##OO. ",
-"   .XX..##OO..  ",
-"    .X.#OO..    ",
-"     ..O..      ",
-"      ..        ",
-"                "};
-*/
-/*
-static char * mini_page_xpm[] = {
-"16 16 4 1",
-"       c None s None",
-".      c black",
-"X      c white",
-"o      c #808080",
-"                ",
-"   .......      ",
-"   .XXXXX..     ",
-"   .XoooX.X.    ",
-"   .XXXXX....   ",
-"   .XooooXoo.o  ",
-"   .XXXXXXXX.o  ",
-"   .XooooooX.o  ",
-"   .XXXXXXXX.o  ",
-"   .XooooooX.o  ",
-"   .XXXXXXXX.o  ",
-"   .XooooooX.o  ",
-"   .XXXXXXXX.o  ",
-"   ..........o  ",
-"    oooooooooo  ",
-"                "};
-
-static char * gtk_mini_xpm[] = {
-"15 20 17 1",
-"       c None",
-".      c #14121F",
-"+      c #278828",
-"@      c #9B3334",
-"#      c #284C72",
-"$      c #24692A",
-"%      c #69282E",
-"&      c #37C539",
-"*      c #1D2F4D",
-"=      c #6D7076",
-"-      c #7D8482",
-";      c #E24A49",
-">      c #515357",
-",      c #9B9C9B",
-"'      c #2FA232",
-")      c #3CE23D",
-"!      c #3B6CCB",
-"               ",
-"      ***>     ",
-"    >.*!!!*    ",
-"   ***....#*=  ",
-"  *!*.!!!**!!# ",
-" .!!#*!#*!!!!# ",
-" @%#!.##.*!!$& ",
-" @;%*!*.#!#')) ",
-" @;;@%!!*$&)'' ",
-" @%.%@%$'&)$+' ",
-" @;...@$'*'*)+ ",
-" @;%..@$+*.')$ ",
-" @;%%;;$+..$)# ",
-" @;%%;@$$$'.$# ",
-" %;@@;;$$+))&* ",
-"  %;;;@+$&)&*  ",
-"   %;;@'))+>   ",
-"    %;@'&#     ",
-"     >%$$      ",
-"      >=       "};
-*/
-
-/*
- * GtkNotebook
- */
-/*
-GdkPixmap *book_open;
-GdkPixmap *book_closed;
-GdkBitmap *book_open_mask;
-GdkBitmap *book_closed_mask;
-GtkWidget *sample_notebook;
-
-static void
-page_switch (GtkWidget *widget, GtkNotebookPage *page, gint page_num)
-{
-  GtkNotebookPage *oldpage;
-  GtkWidget *pixwid;
-
-  oldpage = GTK_NOTEBOOK (widget)->cur_page;
-
-  if (page == oldpage)
-    return;
-  pixwid = ((GtkBoxChild*)
-	    (GTK_BOX (page->tab_label)->children->data))->widget;
-  gtk_pixmap_set (GTK_PIXMAP (pixwid), book_open, book_open_mask);
-  pixwid = ((GtkBoxChild*)
-	    (GTK_BOX (page->menu_label)->children->data))->widget;
-  gtk_pixmap_set (GTK_PIXMAP (pixwid), book_open, book_open_mask);
-
-  if (oldpage)
-    {
-      pixwid = ((GtkBoxChild*)
-		(GTK_BOX (oldpage->tab_label)->children->data))->widget;
-      gtk_pixmap_set (GTK_PIXMAP (pixwid), book_closed, book_closed_mask);
-      pixwid = ((GtkBoxChild*)
-		(GTK_BOX (oldpage->menu_label)->children->data))->widget;
-      gtk_pixmap_set (GTK_PIXMAP (pixwid), book_closed, book_closed_mask);
-    }
-}
-*/
-/*
-static void
-tab_fill (GtkToggleButton *button, GtkWidget *child)
-{
-  gboolean expand;
-  GtkPackType pack_type;
-
-  gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					&expand, 0, &pack_type);
-  gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-				      expand, button->active, pack_type);
-}
-
-static void
-tab_expand (GtkToggleButton *button, GtkWidget *child)
-{
-  gboolean fill;
-  GtkPackType pack_type;
-
-  gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					0, &fill, &pack_type);
-  gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-				      button->active, fill, pack_type);
-}
-
-static void
-tab_pack (GtkToggleButton *button, GtkWidget *child)
-	  
-{ 
-  gboolean expand;
-  gboolean fill;
-
-  gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					&expand, &fill, 0);
-  gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-				      expand, fill, button->active);
 }
 */
 

@@ -269,6 +269,7 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
   virtual void ChangeView(int view_state);
+  virtual int set_config();
 
 };
 

@@ -1,3 +1,19 @@
+2004-09-28 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc, 
+	gui/gui_object.h, gui/gui_regwin.cc, gui/gui_src.h,
+	gui/gui_src_asm.cc, src/gpsim_interface.h, M src/interface.cc:
+	- Fixed a few bugs caused by upgrading to GTK+ 2.x:
+	  -- Window state was not being saved
+	  -- Register window font was fouled up
+	  -- Source browser pixel position calculations are different
+          There are still some other bugs that need to be fixed: 
+	  -- The breadboard window somehow prevents the Source browser
+	     window from opening
+	  -- <control>Q no longer quits
+	  -- scrolling in source browser only works if the scroll pane
+	     has focus
+	  -- The register window cheats in guessing character width.
+
 2004-09-24 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: save_state() was skipping address 0.
 	* src/registers.cc: Bit string encoding has been enhanced

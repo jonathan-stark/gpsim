@@ -114,7 +114,7 @@ void GUI_Object::UpdateMenuItem(void)
 
 void GUI_Object::ChangeView (int view_state)
 {
-
+  printf("ChangeView\n");
   if( (view_state==VIEW_SHOW) || (window==0) ||
       ((view_state==VIEW_TOGGLE) &&
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
@@ -164,6 +164,9 @@ int GUI_Object::get_config(void)
   if(!pName)
     return 0;
 
+  if(!config_get_variable(pName, "x", &x))
+    printf("get_config %s failed",pName);
+
   if(!config_get_variable(pName, "enabled", &enabled))
     enabled=0;
   if(!config_get_variable(pName, "x", &x))
@@ -175,7 +178,7 @@ int GUI_Object::get_config(void)
   if(!config_get_variable(pName, "height", &height))
     height=100;
 
-  //printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
+  printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
   check();
 
   return 1;
@@ -221,6 +224,12 @@ int GUI_Object::set_config(void)
 
   if(!pName)
     return 0;
+  printf("%s\n",name());
+  if(window) {
+    gdk_window_get_root_origin(window->window,&x,&y);
+    gdk_window_get_size(window->window,&width,&height);
+  printf("set_config: %s enabled:%d x:%d y:%d w:%d h:%d\n",name(),enabled,x,y,width,height);
+  }
 
   config_set_variable(pName, "enabled", ((enabled) ? 1 : 0) );
   config_set_variable(pName, "x", x);
