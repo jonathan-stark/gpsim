@@ -148,6 +148,8 @@ public:
   Module(void);
   virtual ~Module();
 
+  /// Functions to support actual hardware
+  virtual bool isHardwareOnline() { return true; }
 
  private:
   void *widget;   // GtkWidget * that is put in the breadboard.
