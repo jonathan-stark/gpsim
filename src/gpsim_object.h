@@ -27,12 +27,8 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 
-/*
-
-Most of the class in gpsim are subclassed off of the gpsimObject
-class.
-
-*/
+/// gpsimObject - base class for most of gpsim's objects
+/// 
 
 
 class gpsimObject {
@@ -43,7 +39,7 @@ class gpsimObject {
 
   virtual string &name(void);
   virtual char *name(char *, int len);
-  virtual void new_name(char *);
+  virtual void new_name(const char *);
   virtual void new_name(string &);
 
   string show();

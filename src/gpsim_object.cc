@@ -66,7 +66,7 @@ string gpsimObject::show()
   return showType() + ":" + toString();
 }
 
-void gpsimObject::new_name(char *s)
+void gpsimObject::new_name(const char *s)
 {
   if(s)
     name_str = string(s);

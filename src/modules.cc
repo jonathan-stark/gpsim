@@ -319,6 +319,9 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
     // Get a pointer to the list of modules that this library supports.
     module_list = get_mod_list();
 
+    if(!module_list)
+      cout << "no modules were found in " << name() << endl;
+
     // If the module has an "initialize" function, then call it now.
     //
     typedef  void * (*void_FPTR)(void);
@@ -416,7 +419,12 @@ void module_load_library(const char *library_name)
 #ifndef _WIN32
   void *handle;
 
-  handle = dlopen (library_name, RTLD_NOW);
+  // According to the man page for dlopen, the RTLD_GLOBAL flag can
+  // be or'd with the second pararmeter of the function call. However,
+  // under Linux at least, this apparently cause *all* symbols to
+  // disappear.
+
+  handle = dlopen (library_name, RTLD_NOW); // | RTLD_GLOBAL);
   if (!handle) {
 
     fprintf(stderr, "%s in dlopen(%s)\n", dlerror(), library_name);

@@ -905,9 +905,6 @@ void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
   replaced = fr;
   address=fr->address;
   
-  if(replaced)
-    replaced->replacingWith(this);
-
   update();
 
 }
@@ -933,8 +930,6 @@ void BreakpointRegister::clear(void)
   }
 
   get_cpu()->registers[address] = replaced;
-
-  replaced->replacingWith(0);
 
   get_cpu()->registers[address]->update();
 

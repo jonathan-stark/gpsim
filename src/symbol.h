@@ -74,22 +74,22 @@ public:
   void add_ioport(IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
-  void add_line_number(int address, char *symbol_name=0);
-  void add_constant(char *, int );
-  void add_register(Register *reg, char *symbol_name=0);
-  void add_address(char *, int );
+  void add_line_number(int address, const char *symbol_name=0);
+  void add_constant(const char *, int );
+  void add_register(Register *reg, const char *symbol_name=0);
+  void add_address(const char *, int );
   void add_w(WREG *w );
   void add_module(Module * m, const char *module_name);
   void remove_module(Module * m);
-  void add(char *symbol_name, char *symbol_type, int value);
+  void add(const char *symbol_name, const char *symbol_type, int value);
   void dump_all(void);
-  void dump_one(char *s);
+  void dump_one(const char *s);
   void dump_one(string *s);
   void dump_type(type_info const&t);
 
-  Value *find(char *s);
+  Value *find(const char *s);
   Value *find(string *s);
-  Value *find(type_info const&t, char *s);
+  Value *find(type_info const&t, const char *s);
 };
 
 
@@ -121,7 +121,7 @@ public:
 
   virtual string toString();
 
-  symbol(char *);
+  symbol(const char *);
   symbol(string &);
   virtual ~symbol();
 };
@@ -158,7 +158,7 @@ protected:
   Register *reg;
 
 public:
-  register_symbol(char *, Register *);
+  register_symbol(const char *, Register *);
 
   virtual symbol *copy();
   virtual string toString();
@@ -185,7 +185,7 @@ class address_symbol : public Integer
 {
 public:
 
-  address_symbol(char *, unsigned int);
+  address_symbol(const char *, unsigned int);
   virtual string toString();
 };
 
@@ -195,7 +195,7 @@ protected:
   int src_id,src_line,lst_id,lst_line,lst_page;
  public:
 
-  line_number_symbol(char *, unsigned int);
+  line_number_symbol(const char *, unsigned int);
   void put_address(int new_address) {set(new_address);}
   void put_src_line(int new_src_line) {src_line = new_src_line;}
   void put_lst_line(int new_lst_line) {lst_line = new_lst_line;}
@@ -208,9 +208,11 @@ class module_symbol : public symbol
 protected:
   Module *module;
 public:
-  module_symbol(Module *, char *);
+  module_symbol(Module *, const char *);
   virtual string toString();
   Module *get_module() { return module;}
+  virtual symbol *copy();
+
 };
 
 /// attribute_symbol - a symbol that is associated with a specific
@@ -246,7 +248,7 @@ public:
 class w_symbol : public register_symbol
 {
  public:
-  w_symbol(char*, Register *);
+  w_symbol(const char*, Register *);
 };
 
 
