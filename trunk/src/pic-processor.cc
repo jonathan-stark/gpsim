@@ -183,6 +183,10 @@ ProcessorConstructor pP18C442(P18C442::construct ,
 			      "__18C442", "pic18c442",  "p18c442", "18c442");
 ProcessorConstructor pP18C452(P18C452::construct ,
 			      "__18C452", "pic18c452",  "p18c452", "18c452");
+ProcessorConstructor pP18F242(P18F242::construct ,
+			      "__18F242", "pic18f242",  "p18f242", "18f242");
+ProcessorConstructor pP18F252(P18F252::construct ,
+			      "__18F252", "pic18f252",  "p18f252", "18f252");
 ProcessorConstructor pP18F442(P18F442::construct ,
 			      "__18F442", "pic18f442",  "p18f442", "18f442");
 ProcessorConstructor pP18F248(P18F248::construct ,

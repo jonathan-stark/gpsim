@@ -135,6 +135,7 @@ class _RCSTA : public sfr_register, public BreakpointObject
   enum {
     RCSTA_DISABLED,
     RCSTA_WAITING_FOR_START,
+    RCSTA_MAYBE_START,
     RCSTA_WAITING_MID1,
     RCSTA_WAITING_MID2,
     RCSTA_WAITING_MID3,
@@ -162,7 +163,7 @@ class _RCSTA : public sfr_register, public BreakpointObject
   unsigned int rsr;
   unsigned int bit_count;
   unsigned int rx_bit;
-  unsigned int sample,state;
+  unsigned int sample,state, sample_state;
   guint64 future_cycle, last_cycle;
 
   _RCSTA(void);

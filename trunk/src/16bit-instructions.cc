@@ -48,6 +48,8 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
     case  _P18C252_:
     case  _P18C442_:
     case  _P18C452_:
+    case  _P18F242_:
+    case  _P18F252_:
     case  _P18F442_:
     case  _P18F248_:
     case  _P18F452_:

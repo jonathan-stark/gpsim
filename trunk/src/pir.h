@@ -93,11 +93,7 @@ enum
       put(get() | SSPIF);
     }
 
-  inline void set_txif(void)
-    {
-      put(get() | TXIF);
-    }
-
+  void set_txif(void);
   inline void set_rcif(void)
     {
       put(get() | RCIF);
@@ -190,11 +186,7 @@ public:
     }
   void clear_sspif(void);
 
-  inline void set_txif(void)
-    {
-      put(get() | TXIF);
-    }
-
+  void set_txif(void);
   inline void set_rcif(void)
     {
       put(get() | RCIF);
@@ -217,7 +209,7 @@ public:
   void clear_txif(void);
   unsigned int get_rcif(void)
     {
-      return value & TXIF;
+      return value & RCIF;
     }
   void clear_rcif(void);
  
