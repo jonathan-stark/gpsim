@@ -1028,15 +1028,16 @@ static void change_view (struct _gui_object *_this, int view_state)
 {
     Register_Window *rw;
 
-    if(_this == (GUI_Object*)_this->gp->regwin_eeprom)
+    if(_this == (GUI_Object*)_this->gp->regwin_eeprom) {
 	rw = _this->gp->regwin_eeprom;
+
+	if(!_this->gp->regwin_eeprom->allow_change_view)
+	  return;
+    }
     else if(_this == (GUI_Object*)_this->gp->regwin_ram)
 	rw = _this->gp->regwin_ram;
     else
         assert(0);
-
-    if(!_this->gp->regwin_eeprom->allow_change_view)
-	return;
 
     SourceBrowser_change_view(_this,view_state);
     

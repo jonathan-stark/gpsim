@@ -76,7 +76,7 @@ const int one_shifted_left_by_n [8] =
 
 //-------------------------------------------------------------------
 //
-// IOPORT::update_stimuli
+// PICIOPORT::update_stimuli
 //
 //   input: none
 //  return: the states of the stimuli that are driving this ioport
@@ -86,8 +86,15 @@ const int one_shifted_left_by_n [8] =
 //  
 //
 //-------------------------------------------------------------------
-
 int IOPORT::update_stimuli(void)
+
+{
+
+  cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
+
+}
+
+int PIC_IOPORT::update_stimuli(void)
 
 {
   // Loop through the io pins and determine if there are
@@ -190,6 +197,46 @@ unsigned int IOPORT::get(void)
 //-------------------------------------------------------------------
 //  IOPORT::put(unsigned int new_value)
 //
+//  inputs:  new_value - 
+//                       
+//  returns: none
+//
+//  The I/O Port is updated with the new value. If there are any stimuli
+// attached to the I/O pins then they will be updated as well.
+//
+//-------------------------------------------------------------------
+
+void IOPORT::put(unsigned int new_value)
+{
+
+
+  // The I/O Ports have an internal latch that holds the state of the last
+  // write, even if the I/O pins are configured as inputs. If the tris port
+  // changes an I/O pin from an input to an output, then the contents of this
+  // internal latch will be placed onto the external I/O pin.
+
+  internal_latch = new_value;
+
+  // update only those bits that are really outputs
+  //cout << "IOPORT::put trying to put " << new_value << '\n';
+
+  value = new_value;
+
+  //cout << " IOPORT::put just set port value to " << value << '\n';
+
+  // Update the stimuli - if there are any
+  if(stimulus_mask)
+    update_stimuli();
+
+  //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
+
+  trace.register_write(address,value);
+
+}
+
+//-------------------------------------------------------------------
+//  PIC_IOPORT::put(unsigned int new_value)
+//
 //  inputs:  new_value - here's where the I/O port is written (e.g.
 //                       gpsim is executing a MOVWF IOPORT,F instruction.)
 //  returns: none
@@ -199,7 +246,7 @@ unsigned int IOPORT::get(void)
 //
 //-------------------------------------------------------------------
 
-void IOPORT::put(unsigned int new_value)
+void PIC_IOPORT::put(unsigned int new_value)
 {
 
 
@@ -315,6 +362,24 @@ void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
+void IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
+{
+
+  cout << " IOPORT::" << __FUNCTION__ <<'(' << bit_number << ',' << new_direction << ") doesn't do anything.\n";
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PIC_IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
+{
+
+  if(tris)
+    tris->setbit(bit_number, new_direction);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
 {
   //  cout << "trying to attach iopin\n";
@@ -371,7 +436,7 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 }
 
 //-------------------------------------------------------------------
-// IOPORT::update_pin_directions(unsigned int new_tris)
+// PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 //
 //  Whenever a new value is written to a tris register, then we need
 // to update the stimuli associated with the I/O pins. This is true
@@ -382,7 +447,7 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 // will pull the I/O pin high.
 //
 //-------------------------------------------------------------------
-void IOPORT::update_pin_directions(unsigned int new_tris)
+void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 {
 
   unsigned int diff = tris->value ^ new_tris;
@@ -419,6 +484,12 @@ void IOPORT::trace_register_write(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
+PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins=8) : IOPORT(_num_iopins)
+{
+  tris = NULL;
+
+}
+
 IOPORT::IOPORT(unsigned int _num_iopins=8)
 {
   break_point = 0;
@@ -428,9 +499,7 @@ IOPORT::IOPORT(unsigned int _num_iopins=8)
 
   pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
 
-  tris = NULL;
-
-  for(int i=0; i<IOPINS; i++)
+  for(int i=0; i<num_iopins; i++)
     pins[i] = NULL;
 
   new_name("ioport");

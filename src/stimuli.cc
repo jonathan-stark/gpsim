@@ -1145,8 +1145,9 @@ void IO_bi_directional::change_direction(unsigned int new_direction)
 {
 
   //cout << __FUNCTION__ << '\n';
-
-  iop->tris->setbit(iobit, new_direction & 1);
+  if(iop)
+    iop->change_pin_direction(iobit, new_direction & 1);
+    //iop->tris->setbit(iobit, new_direction & 1);
 
   if(xref)
     xref->update();
@@ -1245,7 +1246,10 @@ void IO_open_collector::change_direction(unsigned int new_direction)
 
   //cout << "IO_open_collector::" << __FUNCTION__ << '\n';
 
-  iop->tris->setbit(iobit, new_direction & 1);
+  if(iop)
+    iop->change_pin_direction(iobit, new_direction & 1);
+
+  //iop->tris->setbit(iobit, new_direction & 1);
 
   if(xref)
     xref->update();
