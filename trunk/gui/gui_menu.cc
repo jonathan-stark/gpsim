@@ -797,27 +797,35 @@ void create_dispatcher (void)
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
 
 	int gui_update_index;
+
 	if(gui_animate_delay==0)
 	{
-	    gui_update_index=4;
-	    if(update_rate<4000000)
-		gui_update_index=1;
+	    // No animate
+
+	    gui_update_index=1; // 2000000 cycles
+
 	    if(update_rate<400000)
-		gui_update_index=2;
+		gui_update_index=2; // 100000 cycles
 	    if(update_rate<4000)
-		gui_update_index=3;
-	    if(update_rate==0)
-		gui_update_index=0;
+		gui_update_index=3; // 1000 cycles
+            if(update_rate==1)
+		gui_update_index=4; // every cycle
+	    if(update_rate<=0)
+                gui_update_index=0; // Never
 	}
 	else
 	{
-	    gui_update_index=7;
+	    // Animate
+
+	    gui_update_index=7;       // 700 ms
+
             if(gui_animate_delay<500)
-		gui_update_index=6;
+		gui_update_index=6;   // 300 ms
 	    if(gui_animate_delay<200)
-		gui_update_index=5;
+		gui_update_index=5;   // 100 ms
 	}
-    gtk_option_menu_set_history(GTK_OPTION_MENU(update_rate_menu), gui_update_index);
+
+	gtk_option_menu_set_history(GTK_OPTION_MENU(update_rate_menu), gui_update_index);
 
 
       gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
