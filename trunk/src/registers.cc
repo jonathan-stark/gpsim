@@ -39,6 +39,11 @@ Register::Register(void)
   cpu = 0;
   name_str1 = 0;
   new_name("file_register");
+
+  // For now, initialize the register with valid data and set that data equal to 0.
+  // Eventually, the initial value will be marked as 'uninitialized.
+
+  putRV(RegisterValue(0,0));
   xref = new XrefObject(&value.data);
   read_access_count=0;
   write_access_count=0;

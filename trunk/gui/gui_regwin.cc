@@ -169,13 +169,13 @@ void GUIRegister::put_value(unsigned int new_value)
   // Shadow a copy of the register value so that we can tell if it has changed
   // when we go to perform an update in the future.
 
-  shadow_value = new_value;
+  shadow = reg->getRV();
 }
 
-void GUIRegister::put_shadow(unsigned int new_value)
+void GUIRegister::put_shadow(RegisterValue new_value)
 {
   // Update the shadow copy of the register without updating the register.
-  shadow_value = new_value;
+  shadow = new_value;
 }
 
 unsigned int GUIRegister::get_value(void)
@@ -188,9 +188,66 @@ unsigned int GUIRegister::get_value(void)
   return 0;
 }
 
-unsigned int GUIRegister::get_shadow(void)
+
+RegisterValue GUIRegister::getRV(void)
 {
-  return shadow_value;
+  Register *reg = get_register();
+
+  if(reg)
+    return reg->getRV();
+
+  return RegisterValue(0,0);
+}
+
+char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
+{
+
+  if(!str || !len)
+    return 0;
+
+  Register *reg = get_register();
+
+
+  if(reg && bIsValid()) {
+
+    //snprintf(str,len,pCellFormat,reg->get_value());
+
+    //unsigned int value = reg->get_value();
+    RegisterValue value = reg->getRV();
+
+    if(value.data==INVALID_VALUE || !value.initialized() ) {
+
+      int i;
+      int min = (len < register_size*2) ? len : register_size*2;
+
+      for(i=0; i < min; i++)
+	str[i] = '?';
+      str[min] = 0;
+
+    } else
+      snprintf (str, len, pFormat, value.data);
+
+  } else
+    *str = 0;
+
+  return str;
+
+}
+bool GUIRegister::hasChanged(void)
+{
+
+  Register *reg = get_register();
+
+  if(!reg)
+    return false;
+
+  RegisterValue current_value = reg->getRV();
+
+  if( (shadow.data != current_value.data)  ||
+      (shadow.init != current_value.init) )
+    return true;
+
+  return false;
 }
 
 void GUIRegister::Clear_xref(void)
@@ -281,7 +338,7 @@ public:
 
     address = rw->row_to_address[reg->row]+reg->col;
 
-    rw->registers[address]->update_full=TRUE;
+    rw->registers[address]->bUpdateFull=true;
     rw->UpdateRegisterCell(address);
   
     rw->UpdateASCII(reg->row);
@@ -958,12 +1015,12 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
   if(errno != 0)
     {
       n = reg->get_value();
-      reg->put_shadow(INVALID_VALUE);
+      reg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
     }
 
   // n is the value in the sheet cell
 
-  if(n != reg->get_shadow())
+  if(n != reg->get_shadow().data)
     {
       printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
       reg->put_value(n&0xff);
@@ -1566,7 +1623,7 @@ void Register_Window::UpdateASCII(gint row)
   for(i=0; i<REGISTERS_PER_ROW; i++)
   {
 
-    name[i] = registers[row_to_address[row] + i]->get_shadow();
+    name[i] = registers[row_to_address[row] + i]->get_shadow().data;
 
     if( (name[i] < ' ') || (name[i]>'z'))
       name[i] = '.';
@@ -1587,9 +1644,6 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   GtkSheetRange range;
   gboolean retval=FALSE;
 
-  int new_value;
-  int last_value;
-  
   if(reg_number<0 || reg_number>=MAX_REGISTERS)
   {
       printf("Warning update_register_cell(%x)\n",reg_number);
@@ -1599,8 +1653,9 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   if(!enabled) 
     return 0;	   // Don't read registers when hidden. Esp with ICD.
   
-  
-  if(reg_number >= registers[reg_number]->rma->get_size())
+  GUIRegister *greg = registers[reg_number];
+
+  if(reg_number >= greg->rma->get_size())
     return 0;
 
   range.row0=registers[reg_number]->row;
@@ -1610,29 +1665,19 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   // bulk mode stuff is for the ICD.
   gpsim_set_bulk_mode(1);
-  new_value=registers[reg_number]->get_value();
+  RegisterValue new_value = registers[reg_number]->getRV();
   gpsim_set_bulk_mode(0);
 
-  last_value=registers[reg_number]->get_shadow();
+  RegisterValue last_value=registers[reg_number]->get_shadow();
 
-  if(registers[reg_number]->update_full) {
+  if(registers[reg_number]->bUpdateFull) {
 
-    registers[reg_number]->update_full=FALSE;
-      
-    if(registers[reg_number]->bIsValid()) {
-
-      if(new_value==INVALID_VALUE)
-	sprintf (name, "??");
-      else
-	sprintf (name, pCellFormat, new_value);
-    }
-    else {
-      new_value=INVALID_VALUE; // magic value
-      strcpy(name, "");
-    }
+    registers[reg_number]->bUpdateFull=false;
 
     if(registers[reg_number]->row<=register_sheet->maxrow) {
 
+      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat);
+    
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
 			 registers[reg_number]->row,
 			 registers[reg_number]->col,
@@ -1641,10 +1686,11 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     // else the register is invalid and out of the register sheet
  
 
-    if(new_value != last_value) {
+    //if(new_value != last_value) {
+    if(greg->hasChanged()) {
 
       registers[reg_number]->put_shadow(new_value);
-      registers[reg_number]->update_full=TRUE;
+      registers[reg_number]->bUpdateFull=true;
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
     } else
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
@@ -1662,17 +1708,18 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
    
 
     retval=TRUE;
-  } else if(new_value!=last_value) {
+  } else if(greg->hasChanged()) { //new_value!=last_value) {
 
-    if(new_value==INVALID_VALUE) {
+    if(new_value.data==INVALID_VALUE) {
       
-      registers[reg_number]->put_shadow(INVALID_VALUE);
+      registers[reg_number]->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
       sprintf (name, "??");
     } else {
 
       // the register has changed since last update
       registers[reg_number]->put_shadow(new_value);
-      sprintf (name, pCellFormat, new_value);
+      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat);
+      //sprintf (name, pCellFormat, new_value.data);
     }
 
     gtk_sheet_set_cell(GTK_SHEET(register_sheet),
@@ -1680,7 +1727,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 		       registers[reg_number]->col,
 		       GTK_JUSTIFY_RIGHT,name);
 
-    registers[reg_number]->update_full=TRUE;
+    registers[reg_number]->bUpdateFull=true;
     gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
 
     retval=TRUE;
@@ -1691,7 +1738,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   {
     // if sheet cursor is standing on a cell that is changed, then
     // we update the entry above the sheet
-    if(new_value!=last_value)
+    if(new_value.data!=last_value.data)
       UpdateEntry();
   }
 
@@ -1703,7 +1750,7 @@ void Register_Window::Update(void)
 {
 
   int address;
-  gboolean row_changed;
+  bool bRowChanged;
   int j, i;
 
   if(!enabled)
@@ -1725,16 +1772,17 @@ void Register_Window::Update(void)
 
     if(row_to_address[j]==-1)
       continue;
-    row_changed = FALSE;
+
+    bRowChanged = false;
     for(i = 0; i<REGISTERS_PER_ROW; i++) {
       address = row_to_address[j]+i;
-      if(registers[address]->get_shadow()!=INVALID_VALUE || registers[address]->update_full) {
+      if(registers[address]->get_shadow().data!=INVALID_VALUE || registers[address]->bUpdateFull) {
 
 	if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
-	  row_changed = TRUE;
+	  bRowChanged = true;
       }
     }
-    if(row_changed)
+    if(bRowChanged)
       UpdateASCII(j);
   }
 }
@@ -1831,10 +1879,11 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     registers[reg_number] = new GUIRegister;
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
-    registers[reg_number]->put_shadow(INVALID_VALUE);
-    registers[reg_number]->update_full=TRUE;
+    registers[reg_number]->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
+    registers[reg_number]->bUpdateFull=true;
     registers[reg_number]->rma = rma;
     registers[reg_number]->address = reg_number;
+    registers[reg_number]->register_size = register_size;
 
 
     registers[reg_number]->bIsAliased = (*rma)[reg_number].address != reg_number;
@@ -1842,7 +1891,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     if(registers[reg_number]->bIsValid()) {
 
       gpsim_set_bulk_mode(1);
-      registers[reg_number]->put_shadow(registers[reg_number]->get_value());
+      registers[reg_number]->put_shadow(registers[reg_number]->getRV());
       gpsim_set_bulk_mode(0);
 
       /* Now create a cross-reference link that the simulator can use to

@@ -1,3 +1,13 @@
+2004-05-27 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.h, src/breakpoints.cc: Execution breakpoints now
+	support a customizable message that will be displayed when the
+	break is encountered.
+
+2004-05-21 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/register.h, register.cc, gui/gui_register.h,
+	gui/gui_regwin.c: Gui Register Window now can show unitialized register
+	data.
+
 2004-05-21 Scott Dattalo <scott@dattalo.com>
 	* src/register.h: Added new accessor member functions to the Register
 	class to manipulate the new way register values are represented.
