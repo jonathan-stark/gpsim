@@ -187,8 +187,6 @@ EXPORTS
     ?read_src_files@Processor@@QAEXXZ
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
-    ?run@Processor@@UAEXXZ
-    ?run@ProgramMemoryAccess@@UAEXXZ
     ?run_to_address@Processor@@UAEXI@Z
     ?save_state@Processor@@UAEXPAU_iobuf@@@Z
     ?save_state@Processor@@UAEXXZ

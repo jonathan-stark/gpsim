@@ -1,3 +1,8 @@
+2004-12-16 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: MSVC sync
+	* src/14bit-registers.h: declare void
+	  Status_register::put(unsigned int new_value) as virtual, not inline
+
 2004-12-15 Scott Dattalo <scott@dattalo.com>
 	* src/init.cc, src/gpsim_time.cc:
 	Delayed creation of the cycle counter attribute. It turns out that
@@ -5,7 +10,7 @@
 	is called by the globally instantiated 'cycles' object. On
 	Windows, this call happened before the symbol table was
 	inititialized .
-	
+
 2004-12-14 Scott Dattalo <scott@dattalo.com>
 	* src/init.cc: added new function for initialization. Also added
 	new attribute 'sim.verbosity' that will control the simulator's

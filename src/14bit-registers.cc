@@ -203,7 +203,7 @@ Status_register::Status_register(void)
 //--------------------------------------------------
 // put
 
-void inline Status_register::put(unsigned int new_value)
+void Status_register::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());

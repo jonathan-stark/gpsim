@@ -115,7 +115,7 @@ public:
 
   Status_register(void);
 
-  inline void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
 
   inline unsigned int get(void)
   {
