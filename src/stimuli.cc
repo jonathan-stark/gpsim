@@ -389,6 +389,7 @@ void stimulus::put_state_value(int new_state)
 
 void stimulus::put_name(char *n)
 {
+  cout << "stimulus::put_name  " << n << '\n';
 
   strncpy(name_str,n, STIMULUS_NAME_LENGTH);
     
@@ -876,6 +877,16 @@ IOPIN::IOPIN(void)
 
   cout << "IOPIN default constructor\n";
 
+  iop = NULL;
+  iobit=0;
+  state = 0;
+  l2h_threshold = 100;
+  h2l_threshold = -100;
+  drive = 0;
+  snode = NULL;
+
+  add_stimulus(this);
+
 }
 
 void IOPIN::put_state_value(int new_state)
@@ -911,8 +922,8 @@ int IOPIN::get_state(void)
 
 void IOPIN::attach(Stimulus_Node *s)
 {
-
-  iop->attach_node(s,iobit);
+  if(iop)
+    iop->attach_node(s,iobit);
 
   snode = s;
 }
