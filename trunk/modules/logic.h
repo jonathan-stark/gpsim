@@ -137,6 +137,7 @@ class AND2Gate: public ANDGate
 public:
 
   static ExternalModule *construct(char *new_name);
+  const virtual char *type(void) { return ("and2"); };
   // virtual void update_state(void);
   AND2Gate(void);
   ~AND2Gate(void);
@@ -159,6 +160,7 @@ public:
 
   //virtual void update_state(void);
   static ExternalModule *construct(char *new_name);
+  const virtual char *type(void) { return ("or2"); };
   OR2Gate(void);
   ~OR2Gate(void);
   

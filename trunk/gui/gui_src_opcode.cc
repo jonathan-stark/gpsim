@@ -648,7 +648,6 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
     if(settings_active)
     {
         settings_active=0;
-	gtk_main_quit();
     }
 }
 static int settings_dialog(SourceBrowserOpcode_Window *sbow)
@@ -757,7 +756,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	GdkFont *font;
 
         settings_active=1;
-	gtk_main();
+	while(settings_active)
+	    gtk_main_iteration();
 
 	fonts_ok=0;
 

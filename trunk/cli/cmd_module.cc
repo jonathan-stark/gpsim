@@ -39,6 +39,7 @@ cmd_module c_module;
 #define CMD_MOD_LIB     4
 #define CMD_MOD_PINS    5
 #define CMD_MOD_SET     6
+#define CMD_MOD_POSITION 7
 
 
 static cmd_options cmd_module_options[] =
@@ -50,6 +51,7 @@ static cmd_options cmd_module_options[] =
   "library",   CMD_MOD_LIB ,    OPT_TT_STRING,
   "lib",       CMD_MOD_LIB ,    OPT_TT_STRING,
   "set",       CMD_MOD_SET ,    OPT_TT_STRING,
+  "position",  CMD_MOD_POSITION,OPT_TT_STRING,
   NULL,0,0
 };
 
@@ -228,6 +230,27 @@ void cmd_module::module(cmd_options_str *cos, char *op1, double op2)
 	cout << "   option2 = " << op2 <<'\n';
 
       module_set_attr(cos->str,op1,op2);
+      break;
+
+    default:
+      cout << "Warning, ignoring module command\n";
+    }
+
+
+}
+
+void cmd_module::module(cmd_options_str *cos, int op1, int op2)
+{
+
+  switch(cos->co->value)
+    {
+
+    case CMD_MOD_POSITION:
+      cout << "module set command :  module name = " << cos->str <<'\n';
+	cout << "   x = " << op1 <<'\n';
+	cout << "   y = " << op2 <<'\n';
+
+      module_set_position(cos->str,op1,op2);
       break;
 
     default:

@@ -1743,51 +1743,55 @@ static int load_fonts(SourceBrowserAsm_Window *sbaw)
 static void fontselok_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE; // cancel=FALSE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 static void fontselcancel_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE; // cancel=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 int font_dialog_browse(GtkWidget *w, gpointer user_data)
 {
     gchar *spacings[] = { "c", "m", NULL };
-    GtkWidget *fontsel;
+    static GtkWidget *fontsel;
     GtkEntry *entry=GTK_ENTRY(user_data);
     char *fontstring;
     gchar *fontname;
     int cancel;
 
+    if(fontsel==NULL)
+    {
 
-    fontsel=gtk_font_selection_dialog_new("Select font");
+	fontsel=gtk_font_selection_dialog_new("Select font");
 
-    fontstring=gtk_entry_get_text(entry);
-    gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontsel),fontstring);
-    gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (fontsel),
-					  GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
-					  NULL, NULL, NULL, NULL, spacings, NULL);
+	fontstring=gtk_entry_get_text(entry);
+	gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontsel),fontstring);
+	gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (fontsel),
+					      GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
+					      NULL, NULL, NULL, NULL, spacings, NULL);
 
-    gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->ok_button),"clicked",
-		       GTK_SIGNAL_FUNC(fontselok_cb),(gpointer)&cancel);
-    gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->cancel_button),"clicked",
-		       GTK_SIGNAL_FUNC(fontselcancel_cb),(gpointer)&cancel);
+	gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->ok_button),"clicked",
+			   GTK_SIGNAL_FUNC(fontselok_cb),(gpointer)&cancel);
+	gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->cancel_button),"clicked",
+			   GTK_SIGNAL_FUNC(fontselcancel_cb),(gpointer)&cancel);
+    }
 
     gtk_widget_show(fontsel);
 
     gtk_grab_add(fontsel);
-    gtk_main();
+    while(cancel==-1 && GTK_WIDGET_VISIBLE(fontsel))
+	gtk_main_iteration();
     gtk_grab_remove(fontsel);
 
 
     if(cancel)
     {
-	gtk_widget_destroy(fontsel);
+	gtk_widget_hide(fontsel);
 	return 0;
     }
 
     fontname=gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(fontsel));
-    gtk_widget_destroy(fontsel);
+    gtk_widget_hide(fontsel);
     gtk_entry_set_text(entry,fontname);
     g_free(fontname);
     return 1;
@@ -1800,7 +1804,7 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
     if(settings_active)
     {
         settings_active=0;
-	gtk_main_quit();
+//	gtk_main_quit();
     }
 }
 static int settings_dialog(SourceBrowserAsm_Window *sbaw)
@@ -1887,7 +1891,8 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	GdkFont *font;
 
         settings_active=1;
-	gtk_main();
+	while(settings_active)
+	    gtk_main_iteration();
 
 	fonts_ok=0;
 
@@ -1990,13 +1995,13 @@ int gui_message(char *message)
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 
 // modal dialog, asking a yes/no question
@@ -2007,7 +2012,7 @@ int gui_question(char *question, char *a, char *b)
     static GtkWidget *abutton;
     static GtkWidget *bbutton;
     GtkWidget *hbox;
-    static int retval;
+    static int retval=-1;
     
     if(dialog==NULL)
     {
@@ -2054,7 +2059,8 @@ int gui_question(char *question, char *a, char *b)
     gtk_widget_show_now(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);

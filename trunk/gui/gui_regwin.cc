@@ -107,12 +107,12 @@ Register_Window *popup_rw;
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 // used for reading a value from user when break on value is requested
 int gui_get_value(char *prompt)
@@ -123,7 +123,7 @@ int gui_get_value(char *prompt)
     GtkWidget *button;
     GtkWidget *hbox;
     
-    int retval;
+    int retval=-1;
 
     int value;
     
@@ -177,12 +177,13 @@ int gui_get_value(char *prompt)
     gtk_widget_show_now(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
-    if(retval)
+    if(retval==TRUE)
     {
 	char *end;
 	gchar *entry_text;
@@ -208,7 +209,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 
     int value;
     
-    int retval;
+    int retval=-1;
 
     if(dialog==NULL)
     {
@@ -276,12 +277,13 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
     gtk_widget_show_now(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
-    if(retval)
+    if(retval==TRUE)
     {
 	// "Ok"
 
@@ -320,6 +322,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 
 static char *file_selection_name;
 static int filemode;
+static int fs_done;
 
 static void
 file_selection_ok (GtkWidget        *w,
@@ -329,8 +332,7 @@ file_selection_ok (GtkWidget        *w,
 
     file_selection_name=gtk_file_selection_get_filename (fs);
 
-    gtk_widget_hide (GTK_WIDGET (fs));
-    gtk_main_quit();
+    fs_done=1;
 }
 
 static void
@@ -338,8 +340,7 @@ file_selection_cancel (GtkWidget        *w,
 		       GtkFileSelection *fs)
 {
     file_selection_name=NULL;
-    gtk_widget_hide (GTK_WIDGET (fs));
-    gtk_main_quit();
+    fs_done=1;
 }
 
 static void
@@ -431,8 +432,11 @@ static char *gui_get_log_settings(char **filename, int *mode)
     file_selection_name=NULL;
     gtk_widget_show_now(window);
 
+    fs_done=0;
+    file_selection_name=NULL;
     gtk_grab_add(window);
-    gtk_main();
+    while(!fs_done && GTK_WIDGET_VISIBLE(window))
+	gtk_main_iteration();
     gtk_grab_remove(window);
     
     gtk_widget_hide(window);
@@ -906,7 +910,7 @@ static void settingsok_cb(GtkWidget *w, gpointer user_data)
     if(settings_active)
     {
         settings_active=0;
-	gtk_main_quit();
+//	gtk_main_quit();
     }
 }
 static int settings_dialog(Register_Window *rw)
@@ -977,7 +981,8 @@ static int settings_dialog(Register_Window *rw)
 	GdkFont *font;
 
         settings_active=1;
-	gtk_main();
+	while(settings_active)
+	    gtk_main_iteration();
 
 	fonts_ok=0;
 

@@ -177,7 +177,7 @@ static void treeselect_stimulus(GtkItem *item, struct gui_pin *pin)
     gtk_widget_hide(pin->bbw->module_frame);
     gtk_widget_hide(pin->bbw->pic_frame);
 
-    snprintf(string,sizeof(string),"Stimuli %s",pin->iopin->name());
+    snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name());
     gtk_frame_set_label(GTK_FRAME(pin->bbw->stimulus_frame),string);
 
     if(pin->iopin->snode!=NULL)
@@ -309,12 +309,12 @@ static gint button(GtkWidget *widget,
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 // used for reading a value from user when break on value is requested
 char *gui_get_string(char *prompt, char *initial_text)
@@ -325,7 +325,7 @@ char *gui_get_string(char *prompt, char *initial_text)
     GtkWidget *button;
     GtkWidget *hbox;
     
-    int retval;
+    int retval=-1;
 
     char *string;
     
@@ -383,17 +383,18 @@ char *gui_get_string(char *prompt, char *initial_text)
     gtk_entry_set_text(GTK_ENTRY(entry), initial_text);
 
 //    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
-    gtk_widget_show_now(dialog);
+    gtk_widget_show(dialog);
 
     gtk_widget_grab_focus (entry);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
-    if(retval)
+    if(retval==TRUE)
 	string=gtk_entry_get_text(GTK_ENTRY(entry));
     else
         string=NULL;
@@ -443,7 +444,7 @@ static gint ok_cb(GtkWidget *widget,
        event->button==1)
     {
 	*(int*)user_data=FALSE; // cancel=FALSE;
-	gtk_main_quit();
+//	gtk_main_quit();
 	return 1;
     }
     return 0;
@@ -451,7 +452,7 @@ static gint ok_cb(GtkWidget *widget,
 static void cancel_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE; // cancel=TRUE;
-    gtk_main_quit();
+//    gtk_main_quit();
 }
 
 // Select row
@@ -502,11 +503,11 @@ static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
 
 static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 {
-    GtkWidget *dialog;
+    static GtkWidget *dialog;
     GtkWidget *node_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
-    int cancel;
+    int cancel=-1;
 
     Stimulus_Node *snode=NULL;
 
@@ -514,8 +515,8 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 	GtkWidget *scrolledwindow;
         GtkWidget *hbox;
 
-//    if(window==NULL)
-//    {
+    if(dialog==NULL)
+    {
 
         // Build window
 	dialog = gtk_dialog_new();
@@ -547,7 +548,6 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 	gtk_box_pack_start (GTK_BOX(GTK_DIALOG(dialog)->action_area), cancelbutton, FALSE, FALSE, 0);
 	gtk_signal_connect(GTK_OBJECT(cancelbutton),"clicked",
 			   GTK_SIGNAL_FUNC(cancel_cb),(gpointer)&cancel);
-//    }
 
 	gtk_signal_connect(GTK_OBJECT(node_clist),
 			   "select_row",
@@ -561,28 +561,30 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 			   GTK_SIGNAL_FUNC(ok_cb),
 			   (gpointer)&cancel);
 
-        // Add all nodes
-	gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
-			      copy_node_tree_to_clist,
-			      (gpointer)node_clist);
-
 	gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
+    }
+    gtk_clist_clear(GTK_CLIST(node_clist));
 
+    // Add all nodes
+    gtk_container_foreach(GTK_CONTAINER(bbw->node_tree),
+			  copy_node_tree_to_clist,
+			  (gpointer)node_clist);
 
     gtk_widget_show(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
 
 
-    if(cancel)
+    if(cancel==TRUE)
     {
-	gtk_widget_destroy(dialog);
+	gtk_widget_hide(dialog);
 	return NULL;
     }
 
-    gtk_widget_destroy(dialog);
+    gtk_widget_hide(dialog);
     // Get clist selection
 
     return snode;
@@ -590,11 +592,11 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 
 static char *select_module_dialog(Breadboard_Window *bbw)
 {
-    GtkWidget *dialog;
+    static GtkWidget *dialog;
     GtkWidget *module_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
-    int cancel;
+    int cancel=-1;
     list <Module_Library *> :: iterator mi;
     static char module_type[STRING_SIZE];
 
@@ -604,8 +606,8 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
 	char *module_clist_titles[]={"Name","Library"};
 
-//    if(window==NULL)
-//    {
+    if(dialog==NULL)
+    {
 
         // Build window
 	dialog = gtk_dialog_new();
@@ -652,6 +654,11 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 			   GTK_SIGNAL_FUNC(ok_cb),
 			   (gpointer)&cancel);
 
+	gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
+    }
+
+    gtk_clist_clear(GTK_CLIST(module_clist));
+
         // Add all modules
 	for (mi = module_list.begin();
 	     mi != module_list.end();
@@ -687,23 +694,22 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 	    }
 	}
 
-	gtk_window_set_default_size(GTK_WINDOW(dialog), 220, 400);
-
 
     gtk_widget_show(dialog);
 
     gtk_grab_add(dialog);
-    gtk_main();
+    while(cancel==-1 && GTK_WIDGET_VISIBLE(dialog))
+	gtk_main_iteration();
     gtk_grab_remove(dialog);
 
 
-    if(cancel)
+    if(cancel==TRUE)
     {
-	gtk_widget_destroy(dialog);
+	gtk_widget_hide(dialog);
 	return NULL;
     }
 
-    gtk_widget_destroy(dialog);
+    gtk_widget_hide(dialog);
     // Get clist selection
 
     return module_type;
@@ -990,18 +996,22 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     struct gui_module *p;
     int i;
+    struct cross_reference_to_gui *cross_reference;
 
     p = (struct gui_module*) malloc(sizeof(*p));
 
     p->bbw=bbw;
     p->module=module;
     p->module_widget = widget;
+    p->type=type;
     p->x=x;
     p->y=y;
-    p->type=type;
 
 
     p->pins=NULL;
+
+
+
 
     // FIXME. Perhaps the bbw should use Package instead of Module?
     Package *pa;
@@ -1052,16 +1062,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	if(module->get_pin_count()%2)
             p->height+=pinspacing;
         p->height+=2*CASELINEWIDTH+2*LABELPAD;
-
-
-	if(p->y+p->height>LAYOUTSIZE_Y-30)
-	{
-	    y=30;
-	    x=max_x+4*PINLENGTH;
-	}
-
-	p->x=x;
-	p->y=y;
 
 	da = gtk_drawing_area_new();
 /*	gtk_widget_set_events(da,
@@ -1178,11 +1178,43 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
         p->height=req.height;
     }
 
-//    gtk_signal_connect(GTK_OBJECT(p->module_widget),
-//		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+    if(p->y+p->height>LAYOUTSIZE_Y-30)
+    {
+	// When we reach the bottom of the layout, we move up again
+	// and to the right of current row of modules.
+	y=30;
+	x=max_x+4*PINLENGTH;
+    }
 
-    gtk_layout_put(GTK_LAYOUT(bbw->layout),
-		   p->module_widget,p->x,p->y);
+    p->x=x;
+    p->y=y;
+
+
+
+    // Create xref
+    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+    cross_reference->parent_window_type = WT_breadboard_window;
+    cross_reference->parent_window = (gpointer) bbw;
+    cross_reference->data = (gpointer) NULL;
+    cross_reference->update = xref_update;
+    cross_reference->remove = NULL;
+    //gpsim_assign_pin_xref(pic_id,pin, cross_reference);
+    p->module->xref->add(cross_reference);
+
+
+
+    p->fixed = gtk_fixed_new();
+
+
+
+
+
+
+
+
+
+
+    gtk_fixed_put(GTK_FIXED(p->fixed), p->module_widget,PINLENGTH,PINLENGTH);
 
     gtk_widget_show(p->module_widget);
 
@@ -1262,8 +1294,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 			     orientation,
 			     iopin);
 
-	gtk_layout_put(GTK_LAYOUT(bbw->layout),
-		       pin->widget,p->x+pin->x,p->y+pin->y);
+	gtk_fixed_put(GTK_FIXED(p->fixed),
+		      pin->widget,PINLENGTH+pin->x,PINLENGTH+pin->y);
 
 
 	p->pins = g_list_append(p->pins, pin);
@@ -1283,6 +1315,10 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     }
 
 
+    gtk_widget_show(p->fixed);
+
+    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
+
 
     bbw->modules=g_list_append(bbw->modules, p);
 
@@ -1292,6 +1328,16 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	max_x=x+p->width;
 }
 
+void position_module(Breadboard_Window *bbw, struct gui_module *p, int x, int y)
+{
+    if(p->module->x != p->x || p->module->y != p->y)
+    {
+	p->x=p->module->x;
+	p->y=p->module->y;
+
+        gtk_layout_move(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
+    }
+}
 
 void BreadboardWindow_update(Breadboard_Window *bbw)
 {
@@ -1308,6 +1354,13 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 
         p = (struct gui_module*)iter->data;
 
+	// Check if module has changed its position
+	if(p->module->x!=-1 && p->module->y!=-1)
+	{
+            position_module(bbw, p, p->module->x, p->module->y);
+	}
+
+        // Check if pins have changed state
 	pin_iter=p->pins;
 	while(pin_iter!=NULL)
 	{
@@ -1333,6 +1386,7 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 	    }
             pin_iter = pin_iter->next;
 	}
+
         iter = iter->next;
     }
 }
@@ -1726,7 +1780,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
 
 
-  bbw->stimulus_frame = gtk_frame_new ("Stimuli settings");
+  bbw->stimulus_frame = gtk_frame_new ("Stimulus settings");
   gtk_widget_ref (bbw->stimulus_frame);
   gtk_object_set_data_full (GTK_OBJECT (window), "stimulus_frame", bbw->stimulus_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
