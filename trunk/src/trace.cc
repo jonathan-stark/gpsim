@@ -791,6 +791,7 @@ TraceLog::TraceLog(void)
   cpu = NULL;
   log_file = NULL;
   last_trace_index = 0;
+  items_logged = 0;
   buffer.trace_flag = TRACE_ALL;
 
 }
@@ -854,6 +855,7 @@ void TraceLog::open_logfile(char *new_fname)
 
   log_file = fopen(new_fname, "w");
   log_filename = strdup(new_fname);
+  items_logged = 0;
 
 }
 
@@ -887,6 +889,7 @@ void TraceLog::write_logfile(void)
       i = (i + buffer.dump1(i,buf, sizeof(buf))) & TRACE_BUFFER_MASK;
 
       if(buf[0]) {
+	items_logged++;
 	fprintf(log_file,"%s\n", buf);
       } else {
 	cout << " write_logfile: ERROR, couldn't decode trace buffer\n";
@@ -930,6 +933,47 @@ void TraceLog::disable_logging(void)
   close_logfile();
   logging = 0;
 
+
+}
+
+void TraceLog::status(void)
+{
+
+  if(logging) {
+    cout << "Logging to file: " << log_filename << endl;
+
+    // note that there's the cycle counter is traced for every
+    // item that is in the log buffer, so the actual events that
+    // triggered a log is the total buffer size divided by 2.
+
+    int total_items = (buffer.trace_index + items_logged)/2;
+    if(total_items) {
+      cout << "So far, it contains " << hex << "0x" << total_items << " logged events\n";
+    } else {
+      cout << "Nothing has been logged yet\n";
+    }
+
+    int first = 1;
+
+    for(int i = 0; i<MAX_BREAKPOINTS; i++) {
+      if( 
+	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ) ||
+	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE) ||
+	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_READ_VALUE) ||
+	 (bp.break_status[i].type == bp.NOTIFY_ON_REG_WRITE_VALUE)
+	 ) {
+
+	if(first) 
+	  cout << "Log triggers:\n";
+	first = 0;
+
+	bp.dump1(i);
+      }
+    }
+
+  } else {
+    cout << "Logging is disabled\n";
+  }
 
 }
 

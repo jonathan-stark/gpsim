@@ -458,29 +458,40 @@ bool Breakpoints::dump1(unsigned int bp_num)
       set_by_user = 1;
       break;
 
+    case NOTIFY_ON_REG_WRITE:
     case BREAK_ON_REG_WRITE:
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-      cout << "reg write: " << hex << setw(2) << setfill('0') <<  break_status[bp_num].arg1 << '\n';
+      if(break_type == NOTIFY_ON_REG_WRITE)
+	cout << "Log ";
+      cout << "reg write: 0x" << hex <<  break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;
 
+    case NOTIFY_ON_REG_WRITE_VALUE:
     case BREAK_ON_REG_WRITE_VALUE:
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-      cout << "reg write. Break when " << hex << setw(2) << setfill('0') <<  break_status[bp_num].arg2 << 
-	" is written to register " << break_status[bp_num].arg1 << '\n';
+      cout << "reg write. " << ( (break_type == BREAK_ON_REG_WRITE_VALUE) ?  "Break" : "Log") 
+	   << " when 0x" << hex  
+	   <<  break_status[bp_num].arg2 
+	   << " is written to register 0x" << break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;
 
+    case NOTIFY_ON_REG_READ:
     case BREAK_ON_REG_READ:
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-      cout << "reg read: " << hex << setw(2) << setfill('0') <<  break_status[bp_num].arg1 << '\n';
+      if(break_type == NOTIFY_ON_REG_READ)
+	cout << "Log ";
+      cout << "reg read: 0x" << hex << break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;
 
+    case NOTIFY_ON_REG_READ_VALUE:
     case BREAK_ON_REG_READ_VALUE:
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-      cout << "reg read. Break when " << hex << setw(2) << setfill('0') <<  break_status[bp_num].arg2 << 
-	" is read from register " << break_status[bp_num].arg1 << '\n';
+      cout << "reg read. " << ( (break_type == BREAK_ON_REG_READ_VALUE) ?  "Break" : "Log") 
+	   << " when 0x" << hex <<  break_status[bp_num].arg2 << 
+	" is read from register 0x" << break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;
 
@@ -508,11 +519,6 @@ bool Breakpoints::dump1(unsigned int bp_num)
       set_by_user = 1;
       break;
 
-    case NOTIFY_ON_REG_READ:
-    case NOTIFY_ON_REG_WRITE:
-    case NOTIFY_ON_REG_READ_VALUE:
-    case NOTIFY_ON_REG_WRITE_VALUE:
-      cout << "NOTIFY BREAK\n";
     }
 
   return(set_by_user);
