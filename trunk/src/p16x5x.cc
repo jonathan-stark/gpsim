@@ -97,7 +97,7 @@ void P16C54::create_iopin_map(void)
 
 void P16C55::create_iopin_map(void)
 {
-  package = new Package(18);
+  package = new Package(28);
   if(!package)
     return;
 
