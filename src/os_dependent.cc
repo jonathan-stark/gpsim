@@ -90,9 +90,40 @@ void AddToSearchPath(string &sFolder, string &sFile) {
   }
 }
 
+//---------------------------
+//OS agnostic library loader
+
+static void * sLoad(const char *library_name)
+{
+  if(!library_name)
+    return 0;
+
+  void *handle;
+#ifndef _WIN32
+  // According to the man page for dlopen, the RTLD_GLOBAL flag can
+  // be or'd with the second pararmeter of the function call. However,
+  // under Linux at least, this apparently cause *all* symbols to
+  // disappear.
+
+  handle = dlopen (library_name, RTLD_NOW); // | RTLD_GLOBAL);
+#else
+  handle = (void *)LoadLibrary((LPCSTR)library_name);
+#endif
+  return handle;
+}
+
 void * load_library(const char *library_name, char **pszError)
 {
   void *handle;
+
+  // First, see if we can load the library from where ever the 
+  // system thinks libraries are located.
+  if( (handle = sLoad(library_name)) != 0)
+    return handle;
+
+  // Failed to find the library in the system paths, so try to load
+  // from one of our paths.
+
   string sFile;
   string sPath(library_name);
   translatePath(sPath);
@@ -105,6 +136,7 @@ void * load_library(const char *library_name, char **pszError)
       itSearchPath != asDllSearchPath.end();
       itSearchPath++) {
      sPath = *itSearchPath + sFile;
+#if 0
 #ifndef _WIN32
     // According to the man page for dlopen, the RTLD_GLOBAL flag can
     // be or'd with the second pararmeter of the function call. However,
@@ -115,6 +147,9 @@ void * load_library(const char *library_name, char **pszError)
 #else
     handle = (void *)LoadLibrary((LPCSTR)sPath.c_str());
 #endif
+#endif
+    handle = sLoad(sPath.c_str());
+
     if (NULL != handle) {
       return handle;
     }
