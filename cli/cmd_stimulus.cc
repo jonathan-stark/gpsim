@@ -197,13 +197,11 @@ void cmd_stimulus::stimulus(int bit_flag)
     case STIM_DIGITAL:
       if(last_stimulus)
 	last_stimulus->set_digital();
-      //digital = 1;
       return;
 
     case STIM_ANALOG:
       if(last_stimulus)
 	last_stimulus->set_analog();
-      //digital = 0;
       return;
 
     default:
@@ -211,22 +209,6 @@ void cmd_stimulus::stimulus(int bit_flag)
       return;
     }
 
-  // Initialize the default stimulus parameters
-  /*
-  period = 1000;
-  phase = 0;
-  high_time = 500;
-  initial_state = 1;
-  start_cycle = 0;
-  bit_pos = 0;
-  states = 0;
-  time_flag = 1;
-  digital = 1;
-  have_data = 0;
-
-  if(temp_array.size())
-    temp_array.erase(temp_array.begin(), temp_array.end());
-  */
 }
 
 
@@ -325,16 +307,28 @@ void cmd_stimulus::stimulus(ExprList_t *eList)
 {
   ExprList_itor ei;
 
-  for(ei = eList->begin(); ei != eList->end(); ++ei)
-    {
+  bool bHaveSample=false;
+  StimulusData sample;
+  sample.time = 0;
+  sample.value = 0.0;
+
+  if(last_stimulus) {
+    for(ei = eList->begin(); ei != eList->end(); ++ei) {
+
       double v = evaluate(*ei);
 
-      if(last_stimulus) {
-	last_stimulus->put_data((guint64)v);
+      if(!bHaveSample) {
+	sample.time = (guint64) v;
+	bHaveSample = true;
+      } else {
+	sample.value = v;
+	last_stimulus->put_data(sample);
+	bHaveSample = false;
 	have_data = 1;
       }
-
     }
+
+  }
 
   eList->clear();
   delete eList;

@@ -192,14 +192,6 @@ enum SOURCE_TYPE
   EVENT
 };
 
-  guint64
-    start_cycle,
-    time,
-    period,
-    duty,
-    phase;
-  double
-    initial_state;
 
 
   source_stimulus(void) {
@@ -209,6 +201,7 @@ enum SOURCE_TYPE
     initial_state = 0;
     start_cycle = 0;
     time = 0;
+    digital = true;
   };
 
   virtual SOURCE_TYPE isa(void) {return SQW;};
@@ -219,15 +212,25 @@ enum SOURCE_TYPE
   void put_period(guint64 new_period) { period = new_period; };
   void put_duty(guint64 new_duty) { duty = new_duty; };
   void put_phase(guint64 new_phase) { phase = new_phase; };
-  void put_initial_state(int new_initial_state) { initial_state = new_initial_state; };
+  void put_initial_state(double new_initial_state) { initial_state = new_initial_state; };
   void put_start_cycle(guint64 new_start_cycle) { 
     phase = start_cycle = new_start_cycle; };
-  virtual void put_data(guint64 data_point) {};
-  virtual void put_data(float data_point) {};
-  virtual void set_digital(void) { };
-  virtual void set_analog(void) { };
+  virtual void set_digital(void) { digital = true;}
+  virtual void set_analog(void) { digital = false;}
   virtual void start(void) { };
 
+protected:
+  bool digital;
+
+
+  guint64
+    start_cycle,
+    time,
+    period,
+    duty,
+    phase;
+  double
+    initial_state;
 };
 
 class IOPIN : public stimulus
@@ -379,31 +382,27 @@ public:
 
 };
 
-typedef struct StimulusData {
-
+class StimulusData {
+public:
   guint64 time;
   double value;
 
-} StimulusDataType;
+};
 
 class asynchronous_stimulus : public source_stimulus
 {
 public:
 
-  unsigned int
-    max_states,
-    current_index,
-    digital;
-
-  double
-    current_state,
-    next_state;
+  unsigned int max_states;
 
   guint64
     future_cycle;
 
-  GSList *current_sample;
-  GSList *samples;
+  double current_state, next_state;
+
+  StimulusData current_sample;
+  list<StimulusData> samples;
+  list<StimulusData>::iterator sample_iterator;
 
   Processor *cpu;
 
@@ -411,14 +410,11 @@ public:
   virtual double get_Vth();
   virtual void start(void);
   virtual void re_start(guint64 new_start_time);
-  virtual void put_data(double data_point);
-  virtual void set_digital(void) { digital = 1; };
-  virtual void set_analog(void) { digital = 0; };
+  virtual void put_data(StimulusData &data_point);
+
   asynchronous_stimulus(char *n=0);
   virtual SOURCE_TYPE isa(void) {return ASY;};
 
- private:
-  bool data_flag;
 };
 
 
