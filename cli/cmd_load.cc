@@ -28,6 +28,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/pic-processor.h"
 
+extern int parser_warnings;
+
 // instead of including the whole symbol.h file, just get what we need:
 int load_symbol_file(pic_processor **, char *);
 void display_symbol_file_error(int);
@@ -71,7 +73,7 @@ extern void process_command_file(char * file_name);
 
 void cmd_load::load(int bit_flag,char *filename)
 {
-
+  int verbose_save;
   switch(bit_flag)
     {
     case 1:
@@ -86,7 +88,10 @@ void cmd_load::load(int bit_flag,char *filename)
       break;
 
     case 2:
+      /* Don't display parser warnings will processing the command file */
+      parser_warnings = 0;
       process_command_file(filename);
+      parser_warnings = 1;
       break;
     case 3:
       if(verbose)

@@ -145,6 +145,13 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
+DEP_FILES =  .deps/cmd_attach.P .deps/cmd_break.P .deps/cmd_clear.P \
+.deps/cmd_disasm.P .deps/cmd_dump.P .deps/cmd_echo.P .deps/cmd_help.P \
+.deps/cmd_list.P .deps/cmd_load.P .deps/cmd_node.P \
+.deps/cmd_processor.P .deps/cmd_quit.P .deps/cmd_reset.P \
+.deps/cmd_run.P .deps/cmd_set.P .deps/cmd_step.P .deps/cmd_stimulus.P \
+.deps/cmd_symbol.P .deps/cmd_trace.P .deps/cmd_version.P .deps/cmd_x.P \
+.deps/command.P .deps/input.P .deps/parse.P .deps/scan.P
 SOURCES = $(libgpsimcli_la_SOURCES)
 OBJECTS = $(libgpsimcli_la_OBJECTS)
 
@@ -152,9 +159,9 @@ all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .cc .ll .lo .o .s .yy
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps cli/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu cli/Makefile
 
-Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status $(BUILT_SOURCES)
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
@@ -184,9 +191,6 @@ uninstall-libLTLIBRARIES:
 	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
 	done
 
-.c.o:
-	$(COMPILE) -c $<
-
 .s.o:
 	$(COMPILE) -c $<
 
@@ -202,9 +206,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 maintainer-clean-compile:
-
-.c.lo:
-	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
 
 .s.lo:
 	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
@@ -272,6 +273,11 @@ distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
 subdir = cli
 
 distdir: $(DISTFILES)
+	here=`cd $(top_builddir) && pwd`; \
+	top_distdir=`cd $(top_distdir) && pwd`; \
+	distdir=`cd $(distdir) && pwd`; \
+	cd $(top_srcdir) \
+	  && $(AUTOMAKE) --include-deps --build-dir=$$here --srcdir-name=$(top_srcdir) --output-dir=$$top_distdir --gnu cli/Makefile
 	@for file in $(DISTFILES); do \
 	  d=$(srcdir); \
 	  if test -d $$d/$$file; then \
@@ -282,135 +288,57 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-cmd_attach.lo cmd_attach.o : cmd_attach.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_attach.h \
-	../src/stimulus_orb.h
-cmd_break.lo cmd_break.o : cmd_break.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_break.h \
-	../src/pic-processor.h ../src/trace.h ../src/pic-registers.h \
-	../src/pic-instructions.h ../src/12bit-instructions.h \
-	../src/14bit-registers.h ../src/breakpoints.h ../src/ioports.h \
-	../src/gpsim_time.h ../src/tmr0.h ../src/14bit-instructions.h \
-	../src/interface.h ../src/packages.h ../src/stimuli.h \
-	../src/symbol_orb.h
-cmd_clear.lo cmd_clear.o : cmd_clear.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_clear.h \
-	../src/pic-processor.h ../src/trace.h ../src/pic-registers.h \
-	../src/pic-instructions.h ../src/12bit-instructions.h \
-	../src/14bit-registers.h ../src/breakpoints.h ../src/ioports.h \
-	../src/gpsim_time.h ../src/tmr0.h ../src/14bit-instructions.h \
-	../src/interface.h ../src/packages.h ../src/stimuli.h
-cmd_disasm.lo cmd_disasm.o : cmd_disasm.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_disasm.h \
-	../src/pic-processor.h ../src/trace.h ../src/pic-registers.h \
-	../src/pic-instructions.h ../src/12bit-instructions.h \
-	../src/14bit-registers.h ../src/breakpoints.h ../src/ioports.h \
-	../src/gpsim_time.h ../src/tmr0.h ../src/14bit-instructions.h \
-	../src/interface.h ../src/packages.h ../src/stimuli.h
-cmd_dump.lo cmd_dump.o : cmd_dump.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_dump.h input.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h ../src/14bit-processors.h
-cmd_echo.lo cmd_echo.o : cmd_echo.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h parse.h cmd_echo.h
-cmd_help.lo cmd_help.o : cmd_help.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_help.h
-cmd_list.lo cmd_list.o : cmd_list.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_list.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-cmd_load.lo cmd_load.o : cmd_load.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_load.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-cmd_node.lo cmd_node.o : cmd_node.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_node.h
-cmd_processor.lo cmd_processor.o : cmd_processor.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_processor.h \
-	../src/pic-processor.h ../src/trace.h ../src/pic-registers.h \
-	../src/pic-instructions.h ../src/12bit-instructions.h \
-	../src/14bit-registers.h ../src/breakpoints.h ../src/ioports.h \
-	../src/gpsim_time.h ../src/tmr0.h ../src/14bit-instructions.h \
-	../src/interface.h ../src/packages.h ../src/stimuli.h
-cmd_quit.lo cmd_quit.o : cmd_quit.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h parse.h cmd_quit.h
-cmd_reset.lo cmd_reset.o : cmd_reset.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_reset.h \
-	../src/pic-processor.h ../src/trace.h ../src/pic-registers.h \
-	../src/pic-instructions.h ../src/12bit-instructions.h \
-	../src/14bit-registers.h ../src/breakpoints.h ../src/ioports.h \
-	../src/gpsim_time.h ../src/tmr0.h ../src/14bit-instructions.h \
-	../src/interface.h ../src/packages.h ../src/stimuli.h
-cmd_run.lo cmd_run.o : cmd_run.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_run.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-cmd_set.lo cmd_set.o : cmd_set.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_set.h input.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-cmd_step.lo cmd_step.o : cmd_step.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_step.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-cmd_stimulus.lo cmd_stimulus.o : cmd_stimulus.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_stimulus.h \
-	../src/stimulus_orb.h
-cmd_symbol.lo cmd_symbol.o : cmd_symbol.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_symbol.h \
-	../src/symbol_orb.h
-cmd_trace.lo cmd_trace.o : cmd_trace.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_trace.h \
-	../src/trace_orb.h
-cmd_version.lo cmd_version.o : cmd_version.cc command.h misc.h \
-	../src/gpsim_def.h ../src/../config.h cmd_version.h
-cmd_x.lo cmd_x.o : cmd_x.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_x.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h ../src/symbol_orb.h
-command.lo command.o : command.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h cmd_attach.h cmd_break.h cmd_clear.h \
-	cmd_disasm.h cmd_dump.h cmd_echo.h cmd_help.h cmd_list.h \
-	cmd_load.h cmd_node.h cmd_processor.h cmd_quit.h cmd_reset.h \
-	cmd_run.h cmd_set.h cmd_step.h cmd_stimulus.h cmd_symbol.h \
-	cmd_trace.h cmd_version.h cmd_x.h ../src/pic-processor.h \
-	../src/trace.h ../src/pic-registers.h ../src/pic-instructions.h \
-	../src/12bit-instructions.h ../src/14bit-registers.h \
-	../src/breakpoints.h ../src/ioports.h ../src/gpsim_time.h \
-	../src/tmr0.h ../src/14bit-instructions.h ../src/interface.h \
-	../src/packages.h ../src/stimuli.h
-input.lo input.o : input.cc ../src/gpsim_def.h ../src/../config.h \
-	command.h misc.h input.h
-parse.lo parse.o : parse.cc misc.h command.h ../src/gpsim_def.h \
-	../src/../config.h cmd_attach.h cmd_break.h cmd_clear.h \
-	cmd_disasm.h cmd_dump.h cmd_help.h cmd_list.h cmd_load.h \
-	cmd_node.h cmd_processor.h cmd_quit.h cmd_reset.h cmd_run.h \
-	cmd_set.h cmd_step.h cmd_stimulus.h cmd_symbol.h cmd_trace.h \
-	cmd_version.h cmd_x.h
-scan.lo scan.o : scan.cc command.h misc.h ../src/gpsim_def.h \
-	../src/../config.h parse.h input.h scan.h
 
+DEPS_MAGIC := $(shell mkdir .deps > /dev/null 2>&1 || :)
+
+-include $(DEP_FILES)
+
+mostlyclean-depend:
+
+clean-depend:
+
+distclean-depend:
+	-rm -rf .deps
+
+maintainer-clean-depend:
+
+%.o: %.c
+	@echo '$(COMPILE) -c $<'; \
+	$(COMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.c
+	@echo '$(LTCOMPILE) -c $<'; \
+	$(LTCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
+
+%.o: %.cc
+	@echo '$(CXXCOMPILE) -c $<'; \
+	$(CXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-cp .deps/$(*F).pp .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm .deps/$(*F).pp
+
+%.lo: %.cc
+	@echo '$(LTCXXCOMPILE) -c $<'; \
+	$(LTCXXCOMPILE) -Wp,-MD,.deps/$(*F).pp -c $<
+	@-sed -e 's/^\([^:]*\)\.o[ 	]*:/\1.lo \1.o :/' \
+	  < .deps/$(*F).pp > .deps/$(*F).P; \
+	tr ' ' '\012' < .deps/$(*F).pp \
+	  | sed -e 's/^\\$$//' -e '/^$$/ d' -e '/:$$/ d' -e 's/$$/ :/' \
+	    >> .deps/$(*F).P; \
+	rm -f .deps/$(*F).pp
 info-am:
 info: info-am
 dvi-am:
@@ -449,27 +377,27 @@ distclean-generic:
 maintainer-clean-generic:
 	-test -z "scanllparsehhparsecc" || rm -f scanll parsehh parsecc
 mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
-		mostlyclean-libtool mostlyclean-tags \
+		mostlyclean-libtool mostlyclean-tags mostlyclean-depend \
 		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
 clean-am:  clean-libLTLIBRARIES clean-compile clean-libtool clean-tags \
-		clean-generic mostlyclean-am
+		clean-depend clean-generic mostlyclean-am
 
 clean: clean-am
 
 distclean-am:  distclean-libLTLIBRARIES distclean-compile \
-		distclean-libtool distclean-tags distclean-generic \
-		clean-am
+		distclean-libtool distclean-tags distclean-depend \
+		distclean-generic clean-am
 	-rm -f libtool
 
 distclean: distclean-am
 
 maintainer-clean-am:  maintainer-clean-libLTLIBRARIES \
 		maintainer-clean-compile maintainer-clean-libtool \
-		maintainer-clean-tags maintainer-clean-generic \
-		distclean-am
+		maintainer-clean-tags maintainer-clean-depend \
+		maintainer-clean-generic distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
@@ -481,12 +409,13 @@ uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
 distclean-compile clean-compile maintainer-clean-compile \
 mostlyclean-libtool distclean-libtool clean-libtool \
 maintainer-clean-libtool tags mostlyclean-tags distclean-tags \
-clean-tags maintainer-clean-tags distdir info-am info dvi-am dvi check \
-check-am installcheck-am installcheck install-exec-am install-exec \
-install-data-am install-data install-am install uninstall-am uninstall \
-all-redirect all-am all installdirs mostlyclean-generic \
-distclean-generic clean-generic maintainer-clean-generic clean \
-mostlyclean distclean maintainer-clean
+clean-tags maintainer-clean-tags distdir mostlyclean-depend \
+distclean-depend clean-depend maintainer-clean-depend info-am info \
+dvi-am dvi check check-am installcheck-am installcheck install-exec-am \
+install-exec install-data-am install-data install-am install \
+uninstall-am uninstall all-redirect all-am all installdirs \
+mostlyclean-generic distclean-generic clean-generic \
+maintainer-clean-generic clean mostlyclean distclean maintainer-clean
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

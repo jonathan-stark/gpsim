@@ -231,6 +231,61 @@ void cmd_stimulus::stimulus(cmd_options_num *con)
 
 }
 
+// %%% FIXME %%%
+void cmd_stimulus::stimulus(cmd_options_float *cof)
+{
+
+  int n;
+
+  if(cof->f > 0.0)
+    n = 1;
+  else
+    n = 0;
+
+  if(verbose)
+    cout << "stimulus command got floating point option\n";
+
+  switch(cof->co->value)
+    {
+    case STIM_PHASE:
+      if(verbose)
+	cout << "stimulus command got the phase " << n << '\n';
+      stimorb_phase( n);
+      break;
+
+    case STIM_PERIOD:
+      if(verbose)
+	cout << "stimulus command got the period " << n << '\n';
+      stimorb_period( n);
+      break;
+
+    case STIM_HIGH_TIME:
+      if(verbose)
+	cout << "stimulus command got the high_time " << n << '\n';
+      stimorb_duty( n);
+      break;
+
+    case STIM_INITIAL_STATE:
+      if(verbose)
+	cout << "stimulus command got the initial_state " << n << '\n';
+      stimorb_initial_state( n);
+      break;
+
+    case STIM_START_CYCLE:
+      if(verbose)
+	cout << "stimulus command got the start_cycle " << n << '\n';
+      stimorb_start_cycle( n);
+      break;
+
+    default:
+      cout << " Invalid stimulus option\n";
+      return;
+    }
+
+  options_entered |= cof->co->value;
+
+}
+
 void cmd_stimulus::stimulus(cmd_options_str *cos)
 {
 
@@ -247,10 +302,27 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
   options_entered |= cos->co->value;
 }
 
-void cmd_stimulus::data_point(int new_data_point)
+void cmd_stimulus::data_point(guint64 new_data_point)
 {
+  StimulusDataType sdt;
 
-  temp_array.push_back(new_data_point);
+  sdt.data_type    = STIMULUS_DPT_INT;
+  sdt.data_point.i = new_data_point;
+
+  temp_array.push_back(sdt);
+
+  have_data = 1;
+
+}
+void cmd_stimulus::data_point(float new_data_point)
+{
+  StimulusDataType sdt;
+
+  sdt.data_type    = STIMULUS_DPT_FLOAT;
+  sdt.data_point.f = new_data_point;
+
+  temp_array.push_back(sdt);
+
 
   have_data = 1;
 
