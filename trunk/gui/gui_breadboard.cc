@@ -933,7 +933,13 @@ static void path_copy_and_cat(path **pat, path **source)
 
 	reverse_path_if_endpoint(dest->p, source);
 
-	assert( (abs((*source)->p.x-dest->p.x) + abs((*source)->p.y-dest->p.y)) < 5);
+	if((abs((*source)->p.x-dest->p.x) + abs((*source)->p.y-dest->p.y)) > 5)
+	{
+	    puts("Assert failure");
+	    printf("%d, %d\n",
+		   abs((*source)->p.x-dest->p.x),
+		   abs((*source)->p.y-dest->p.y));
+	}
 
 	prev = dest;
 	dest=dest->next;
@@ -1264,7 +1270,7 @@ static void expose_pin(GtkWidget *widget,
 {
     if(p->pixmap==NULL)
     {
-	puts("bbw.c: no pixmap!");
+	puts("bbw.c: no pixmap1!");
 	return;
     }
 
@@ -1402,6 +1408,9 @@ static void position_module(struct gui_module *p, int x, int y)
 
 	// Position module_widget
         gtk_layout_move(GTK_LAYOUT(p->bbw->layout), p->module_widget, p->x, p->y);
+
+	// Position module_name
+        gtk_layout_move(GTK_LAYOUT(p->bbw->layout), p->name_widget, p->x, p->y-10);
 
         // Position pins
 	piniter = p->pins;
@@ -2150,6 +2159,8 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
     // Remove widget
     gtk_container_remove(GTK_CONTAINER(bbw->layout),
 			 bbw->selected_module->module_widget);
+    gtk_container_remove(GTK_CONTAINER(bbw->layout),
+			 bbw->selected_module->name_widget);
 
     // Remove from local list of modules
     bbw->modules=g_list_remove(bbw->modules, bbw->selected_module);
@@ -2478,17 +2489,33 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
     return pin;
 }
 
-static void expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
+static void name_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
-    if(p->pixmap==NULL)
+    if(p->name_pixmap==NULL)
     {
-	puts("bbw.c: no pixmap!");
+	puts("bbw.c: no pixmap2!");
 	return;
     }
 
     gdk_draw_pixmap(widget->window,
 		    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-		    p->pixmap,
+		    p->name_pixmap,
+		    event->area.x, event->area.y,
+		    event->area.x, event->area.y,
+		    event->area.width, event->area.height);
+}
+
+static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
+{
+    if(p->module_pixmap==NULL)
+    {
+	puts("bbw.c: no pixmap3!");
+	return;
+    }
+
+    gdk_draw_pixmap(widget->window,
+		    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+		    p->module_pixmap,
 		    event->area.x, event->area.y,
 		    event->area.x, event->area.y,
 		    event->area.width, event->area.height);
@@ -2509,6 +2536,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     struct gui_module *p;
     int i;
     struct cross_reference_to_gui *cross_reference;
+    GtkWidget *da;
+    int width=50, height=18;
 
     p = (struct gui_module*) malloc(sizeof(*p));
 
@@ -2549,7 +2578,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	// Create a static representation.
 	int pin_x, pin_y;
 	int pic_id;
-	GtkWidget *da;
 	
 	pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
@@ -2583,21 +2611,21 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
 
 
-	p->pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
+	p->module_pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
 				p->width,
 				p->height,
 				-1);
 
 
 
-	gdk_draw_rectangle (p->pixmap,
+	gdk_draw_rectangle (p->module_pixmap,
 			    ((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],
 			    TRUE,
 			    0, 0,
 			    p->width,
 			    p->height);
 
-	gdk_draw_rectangle (p->pixmap,
+	gdk_draw_rectangle (p->module_pixmap,
 			    ((GUI_Object*)bbw)->window->style->white_gc,
 			    TRUE,
 			    CASEOFFSET, CASEOFFSET,
@@ -2628,7 +2656,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    name=p->module->get_pin_name(i);
 	    if(name==NULL)
 		continue;
-	    gdk_draw_text(p->pixmap,
+	    gdk_draw_text(p->module_pixmap,
 			  p->bbw->pinnamefont,
 			  p->bbw->pinname_gc,
 			  label_x,
@@ -2639,19 +2667,19 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
         // Draw case outline
 	gdk_gc_set_foreground(p->bbw->case_gc,&black_color);
-	gdk_draw_line(p->pixmap,p->bbw->case_gc,CASEOFFSET,CASEOFFSET,p->width/2-FOORADIUS,CASEOFFSET);
-	gdk_draw_line(p->pixmap,p->bbw->case_gc,p->width-CASEOFFSET,CASEOFFSET,p->width/2+FOORADIUS,CASEOFFSET);
-	gdk_draw_line(p->pixmap,p->bbw->case_gc,p->width-CASEOFFSET,CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
-	gdk_draw_line(p->pixmap,p->bbw->case_gc,CASEOFFSET,p->height-CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
-	gdk_draw_line(p->pixmap,p->bbw->case_gc,CASEOFFSET,CASEOFFSET,CASEOFFSET,p->height-CASEOFFSET);
-	gdk_draw_arc(p->pixmap,((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],TRUE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
-	gdk_draw_arc(p->pixmap,p->bbw->case_gc,FALSE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
+	gdk_draw_line(p->module_pixmap,p->bbw->case_gc,CASEOFFSET,CASEOFFSET,p->width/2-FOORADIUS,CASEOFFSET);
+	gdk_draw_line(p->module_pixmap,p->bbw->case_gc,p->width-CASEOFFSET,CASEOFFSET,p->width/2+FOORADIUS,CASEOFFSET);
+	gdk_draw_line(p->module_pixmap,p->bbw->case_gc,p->width-CASEOFFSET,CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
+	gdk_draw_line(p->module_pixmap,p->bbw->case_gc,CASEOFFSET,p->height-CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
+	gdk_draw_line(p->module_pixmap,p->bbw->case_gc,CASEOFFSET,CASEOFFSET,CASEOFFSET,p->height-CASEOFFSET);
+	gdk_draw_arc(p->module_pixmap,((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],TRUE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
+	gdk_draw_arc(p->module_pixmap,p->bbw->case_gc,FALSE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 
 //	gtk_widget_realize(da);
 
 	gtk_signal_connect(GTK_OBJECT(da),
 			   "expose_event",
-			   (GtkSignalFunc) expose,
+			   (GtkSignalFunc) module_expose,
 			   p);
 
         p->module_widget=da;
@@ -2687,9 +2715,37 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     cross_reference->remove = NULL;
     p->module->xref->add(cross_reference);
 
-
-
     gtk_widget_show(p->module_widget);
+
+
+    // Create name_widget
+    p->name_widget = gtk_drawing_area_new();
+    height = gdk_string_height(bbw->pinnamefont,
+			       p->module->name());
+    width = gdk_string_width(bbw->pinnamefont,
+			    p->module->name());
+    gtk_drawing_area_size(GTK_DRAWING_AREA(p->name_widget),width,height);
+    p->name_pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
+			       width,
+			       height,
+			       -1);
+    gdk_draw_rectangle (p->name_pixmap,
+			((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (p->name_widget)],
+			TRUE,
+			0, 0,
+			width,
+			height);
+    gdk_draw_text(p->name_pixmap,
+		  p->bbw->pinnamefont,
+		  p->bbw->pinname_gc,
+		  0,height,
+		  p->module->name(),strlen(p->module->name()));
+    gtk_signal_connect(GTK_OBJECT(p->name_widget),
+		       "expose_event",
+		       (GtkSignalFunc) name_expose,
+		       p);
+    gtk_widget_show(p->name_widget);
+
 
     // Create pins
     GtkWidget *subtree = gtk_tree_new();
@@ -2773,6 +2829,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     }
 
     gtk_layout_put(GTK_LAYOUT(bbw->layout), p->module_widget, 0, 0);
+    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->name_widget, 0,0);
 
     position_module(p, x, y);
     //p->module->x = p->x;
@@ -2980,7 +3037,7 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 
     if(bbw->layout_pixmap==NULL)
     {
-	puts("bbw.c: no pixmap!");
+	puts("bbw.c: no pixmap4!");
 	return;
     }
 
@@ -3008,7 +3065,7 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
 {
     if(bbw->layout_pixmap==NULL)
     {
-	puts("bbw.c: no pixmap!");
+	puts("bbw.c: no pixmap5!");
 	return;
     }
 

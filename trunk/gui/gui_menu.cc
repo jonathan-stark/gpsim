@@ -751,7 +751,7 @@ void create_dispatcher (void)
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
 
-      frame = gtk_frame_new("Execution mode");
+      frame = gtk_frame_new("Simulation mode");
       if(!config_get_variable("dispatcher", "simulation_mode", &simulation_mode))
       {
 	  simulation_mode='R';
@@ -768,35 +768,35 @@ void create_dispatcher (void)
 
 	menu=gtk_menu_new();
 
-	item=gtk_menu_item_new_with_label("Never (fastest simulation)");
+	item=gtk_menu_item_new_with_label("Without gui (fastest simulation)");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) gui_update_cb,
 			   (gpointer)"5");
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 
-	item=gtk_menu_item_new_with_label("2000000 cycles");
+	item=gtk_menu_item_new_with_label("2000000 cycles/gui update");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) gui_update_cb,
 			   (gpointer)"4");
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 
-	item=gtk_menu_item_new_with_label("100000 cycles");
+	item=gtk_menu_item_new_with_label("100000 cycles/gui update");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) gui_update_cb,
 			   (gpointer)"3");
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 
-	item=gtk_menu_item_new_with_label("1000 cycles");
+	item=gtk_menu_item_new_with_label("1000 cycles/gui update");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) gui_update_cb,
 			   (gpointer)"2");
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 
-	item=gtk_menu_item_new_with_label("Every cycle");
+	item=gtk_menu_item_new_with_label("Update gui every cycle");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) gui_update_cb,
 			   (gpointer)"1");
