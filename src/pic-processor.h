@@ -18,14 +18,14 @@ along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#ifndef __PROCESSORS_H__
-#define __PROCESSORS_H__
+#ifndef __PIC_PROCESSORS_H__
+#define __PIC_PROCESSORS_H__
 #include <unistd.h>
 #include <glib.h>
 
 #include "gpsim_classes.h"
 #include "modules.h"
-
+#include "processor.h"
 
 
 extern SIMULATION_MODES simulation_mode;
@@ -239,22 +239,16 @@ class program_memory_access :  public BreakCallBack
  * All pic processors are derived from this class.
  */
 
-class pic_processor : public Module
+class pic_processor : public Processor
 {
 public:
 
   #define FILE_REGISTERS  0x100
   #define DEFAULT_PIC_CLOCK 4000000
 
-  struct file_context *files;  // A dynamically allocated array for src file info
-  int number_of_source_files;  // The number of elements allocated to that array
-  int lst_file_id;
-
-  int processor_id;              // An identifier to differentiate this instantiation from others
 
   unsigned int config_word;      // as read from hex or cod file
   ConfigMode   *config_modes;    // processor dependent configuration bits.
-  double frequency,period;
 
   unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
                                  // to the instruction execution rate.
@@ -262,21 +256,15 @@ public:
   double Vdd;
   double nominal_wdt_timeout;
 
-#ifdef HAVE_GUI
-  GUI_Processor *gp;
-#endif
-
   WDT          wdt;
 
   INDF         *indf;
   FSR          *fsr;
   Stack         *stack;
-  file_register **registers;
+
   file_register **register_bank;   // a pointer to the currently active register bank
-  instruction   **program_memory;
   program_memory_access pma;
 
-  Cycle_Counter cycles;
   Status_register *status;
   WREG          *W;
   Program_Counter *pc;
@@ -292,17 +280,8 @@ public:
 
   EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
-  void create_invalid_registers (void);
   void add_sfr_register(sfr_register *reg, unsigned int addr,
 			unsigned int por_value=0,char *new_name=NULL);
-  void add_file_registers(unsigned int start_address, 
-			  unsigned int end_address, 
-			  unsigned int alias_offset);
-  void delete_file_registers(unsigned int start_address, 
-			     unsigned int end_address);
-  void alias_file_registers(unsigned int start_address, 
-			    unsigned int end_address, 
-			    unsigned int alias_offset);
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
