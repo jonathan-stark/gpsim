@@ -45,7 +45,7 @@ Boston, MA 02111-1307, USA.  */
 void ADRES::put(int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 
   if(new_value > 255)
     value.put(255);
@@ -106,7 +106,7 @@ void ADCON0::stop_conversion(void)
 void ADCON0::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 
   // Get the A/D Conversion Clock Select bits
   // 

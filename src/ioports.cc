@@ -178,9 +178,7 @@ unsigned int IOPORT::get(void)
       value.put( (value.get() & ~stimulus_mask) | update_stimuli());
     }
 
-  trace.register_read(address,value.get());
-
-
+  trace.raw(read_trace.get() | value.get());
   return(value.get());
 }
 
@@ -209,7 +207,8 @@ void IOPORT::put(unsigned int new_value)
 
   // update only those bits that are really outputs
 
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
   value.put(new_value);
 
   // Update the stimuli - if there are any
@@ -244,7 +243,8 @@ void PIC_IOPORT::put(unsigned int new_value)
 
   // update only those bits that are really outputs
 
-  trace.register_write(address,new_value);  // RP - we actually wrote the pre-masking value
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);  // RP - we actually wrote the pre-masking value
   value.put((new_value & ~tris->value.get()) | (value.get() & tris->value.get()));
 
   // Update the stimuli - if there are any
@@ -444,7 +444,8 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 //-------------------------------------------------------------------
 void IOPORT::trace_register_write(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 }
 
 //-------------------------------------------------------------------
@@ -489,7 +490,8 @@ IOPORT::~IOPORT()
 unsigned int IOPORT_TRIS::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
 
   return(value.get());
 }
@@ -500,7 +502,8 @@ void IOPORT_TRIS::put(unsigned int new_value)
 {
   int save_port_latch = port->internal_latch;
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   if(verbose)
     cout << "IOPORT_TRIS::put 0x"<<hex<<new_value<<'\n';
@@ -528,7 +531,8 @@ void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
 
   if(diff) {
 
-    trace.register_write(address,value.get());
+    trace.raw(write_trace.get() | value.get());
+    //trace.register_write(address,value.get());
 
     port->update_pin_directions(value.get() ^ diff);
 
@@ -580,7 +584,8 @@ IOPORT_TRIS::IOPORT_TRIS(void)
 unsigned int IOPORT_LATCH::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
 
   return(value.get());
 }
@@ -593,7 +598,8 @@ void IOPORT_LATCH::put(unsigned int new_value)
   if(verbose)
     cout << "IOPORT_LATCH::put 0x"<<hex<<new_value<<'\n';
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(new_value);
 
@@ -701,7 +707,8 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 	temp_value = (tris->value.get() & ~stimulus_mask);
 
       if(temp_value ^ value.get()) {
-	trace.register_write(address,value.get());
+	trace.raw(write_trace.get() | value.get());
+	//trace.register_write(address,value.get());
 	value.put(temp_value);
       }
     }
@@ -891,7 +898,8 @@ void PORTA_62x::put(unsigned int new_value)
   if(new_value > 255)
     cout << "PIC_IOPORT::put value >255\n";
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   // The I/O Ports have an internal latch that holds the state of the last
   // write, even if the I/O pins are configured as inputs. If the tris port

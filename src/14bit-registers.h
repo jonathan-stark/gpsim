@@ -119,7 +119,7 @@ public:
 
   inline unsigned int get(void)
   {
-    //get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return(value.get());
   }
 
@@ -127,13 +127,13 @@ public:
 
   inline void put_Z(unsigned int new_z)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~STATUS_Z) | ((new_z) ? STATUS_Z : 0));
   }
 
   inline unsigned int get_Z(void)
   {
-    get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_Z) == 0) ? 0 : 1);
   }
 
@@ -141,13 +141,13 @@ public:
   // Special member function to control just the C bit
   void put_C(unsigned int new_c)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~STATUS_C) | ((new_c) ? STATUS_C : 0));
   }
 
   unsigned int get_C(void)
   {
-    get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_C) == 0) ? 0 : 1);
   }
 
@@ -155,7 +155,7 @@ public:
 
   inline void put_Z_C_DC(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
 
     value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |  
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
@@ -167,7 +167,7 @@ public:
   inline void put_Z_C_DC_for_sub(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
 
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
 
     value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC)) |  
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
@@ -179,26 +179,26 @@ public:
   inline void put_PD(unsigned int new_pd)
   {
 
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~STATUS_PD) | ((new_pd) ? STATUS_PD : 0));
   }
 
   inline unsigned int get_PD(void)
   {
 
-    get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_PD) == 0) ? 0 : 1);
   }
 
   inline void put_TO(unsigned int new_to)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~STATUS_TO) | ((new_to) ? STATUS_TO : 0));
   }
 
   inline unsigned int get_TO(void)
   {
-    get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return( ( (value.get() & STATUS_TO) == 0) ? 0 : 1);
   }
 
@@ -207,7 +207,7 @@ public:
   // Special member function to control just the N bit
   void put_N_Z(unsigned int new_value)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~(STATUS_Z | STATUS_N)) | 
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x80) ? STATUS_N : 0));
@@ -215,7 +215,7 @@ public:
 
   void put_Z_C_N(unsigned int new_value)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~(STATUS_Z | STATUS_C | STATUS_N)) | 
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? STATUS_C : 0)   |
@@ -224,7 +224,7 @@ public:
 
   inline void put_Z_C_DC_OV_N(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |  
 	      ((new_value & 0xff )  ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? STATUS_C : 0)   |
@@ -235,7 +235,7 @@ public:
 
   inline void put_Z_C_DC_OV_N_for_sub(unsigned int new_value, unsigned int src1, unsigned int src2)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~ (STATUS_Z | STATUS_C | STATUS_DC | STATUS_OV | STATUS_N)) |  
 	      ((new_value & 0xff)   ? 0 : STATUS_Z)   |
 	      ((new_value & 0x100)  ? 0 : STATUS_C)   |
@@ -247,27 +247,27 @@ public:
   // Special member function to control just the FSR mode
   void put_FSR0_mode(unsigned int new_value)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~(STATUS_FSR0_MODE)) | 
 	      (new_value & 0x03 ));
   }
 
   unsigned int get_FSR0_mode(unsigned int new_value)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     return( (value.get()>>STATUS_FSR0_BIT) & 0x03);
   }
 
   void put_FSR1_mode(unsigned int new_value)
   {
-    get_trace().register_write(address,value.get());
+    get_trace().raw(write_trace.get() | value.get());
     value.put((value.get() & ~(STATUS_FSR1_MODE)) | 
 	      (new_value & 0x03 ));
   }
 
   unsigned int get_FSR1_mode(unsigned int new_value)
   {
-    get_trace().register_read(address,value.get());
+    get_trace().raw(read_trace.get() | value.get());
     return( (value.get()>>STATUS_FSR1_BIT) & 0x03);
   }
 

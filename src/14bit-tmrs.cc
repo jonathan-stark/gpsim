@@ -49,7 +49,8 @@ CCPRL::CCPRL(void)
 void CCPRL::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(new_value);
 
@@ -63,10 +64,12 @@ void CCPRL::capture_tmr(void)
 
   tmrl->get_low_and_high();
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(tmrl->value.get());
 
-  trace.register_write(ccprh->address,ccprh->value.get());
+  trace.raw(ccprh->write_trace.get() | ccprh->value.get());
+  //trace.register_write(ccprh->address,ccprh->value.get());
   ccprh->value.put(tmrl->tmrh->value.get());
 
   tmrl->pir_set->set_ccpif();
@@ -143,7 +146,8 @@ void CCPRH::put(unsigned int new_value)
 
   if(pwm_mode == 0)   // In pwm_mode, CCPRH is a read-only register.
     {
-      trace.register_write(address,value.get());
+      trace.raw(write_trace.get() | value.get());
+      //trace.register_write(address,value.get());
 
       value.put(new_value);
 
@@ -159,7 +163,8 @@ unsigned int CCPRH::get(void)
 
   unsigned int read_value =  (pwm_mode) ? (pwm_value >>2) : value.get();
 
-  trace.register_read(address, read_value);
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address, read_value);
   return read_value;
 }
 
@@ -326,7 +331,8 @@ void CCPCON::pwm_match(int level)
 void CCPCON::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(new_value);
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
@@ -395,7 +401,8 @@ T1CON::T1CON(void)
 void T1CON::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
@@ -414,7 +421,8 @@ void T1CON::put(unsigned int new_value)
 
 unsigned int T1CON::get(void)
 {
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 }
 
@@ -439,7 +447,8 @@ TMRH::TMRH(void)
 void TMRH::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
 
   tmrl->synchronized_cycle = cycles.value;
@@ -466,7 +475,8 @@ unsigned int TMRH::get(void)
   tmrl->current_value();
 
   value.put(((tmrl->value_16bit)>>8) & 0xff);
-  trace.register_read(address, value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address, value.get());
   return(value.get());
   
 }
@@ -508,7 +518,8 @@ void TMRL::increment(void)
     // If TMRH/TMRL have been manually changed, we'll want to 
     // get the up-to-date values;
 
-    trace.register_write(address,value.get());
+    trace.raw(write_trace.get() | value.get());
+    //trace.register_write(address,value.get());
     current_value();
 
     value_16bit = 0xffff & ( value_16bit + 1);
@@ -621,7 +632,8 @@ void TMRL::update(void)
 void TMRL::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
 
   synchronized_cycle = cycles.value;
@@ -647,7 +659,8 @@ unsigned int TMRL::get(void)
   current_value();
 
   value.put(value_16bit & 0xff);
-  trace.register_read(address, value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address, value.get());
   return(value.get());
   
 }
@@ -680,10 +693,12 @@ unsigned int TMRL::get_low_and_high(void)
   current_value();
 
   value.put(value_16bit & 0xff);
-  trace.register_read(address, value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address, value.get());
 
   tmrh->value.put((value_16bit>>8) & 0xff);
-  trace.register_read(tmrh->address, tmrh->value.get());
+  trace.raw(tmrh->read_trace.get() | tmrh->value.get());
+  //trace.register_read(tmrh->address, tmrh->value.get());
 
   return(value_16bit);
   
@@ -790,7 +805,8 @@ PR2::PR2(void)
 void PR2::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   if(value.get() != new_value)
     {
@@ -815,7 +831,8 @@ T2CON::T2CON(void)
 
 void T2CON::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
   tmr2->new_pre_post_scale();
 
@@ -1024,7 +1041,8 @@ void TMR2::put(unsigned int new_value)
 {
 
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(new_value & 0xff);
 
@@ -1060,7 +1078,8 @@ unsigned int TMR2::get(void)
       current_value();
     }
 
-  trace.register_read(address, value.get());
+  trace.raw(read_trace.get() | value.get());
+  // trace.register_read(address, value.get());
   return(value.get());
   
 }

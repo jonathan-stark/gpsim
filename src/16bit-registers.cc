@@ -36,7 +36,8 @@ Boston, MA 02111-1307, USA.  */
 //
 void  BSR::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(new_value & 0x0f);
   cpu->register_bank = &cpu->registers[ value.get() << 8 ];
@@ -61,7 +62,8 @@ void  BSR::put_value(unsigned int new_value)
 //
 void  FSRL::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
   //  iam->fsr_delta = 0;
   iam->update_fsr_value();
@@ -79,7 +81,8 @@ void  FSRL::put_value(unsigned int new_value)
 
 void  FSRH::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & 0x0f);
 
   //  iam->fsr_delta = 0;
@@ -98,7 +101,8 @@ void  FSRH::put_value(unsigned int new_value)
 
 void  INDF16::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   iam->fsr_value += iam->fsr_delta;
   iam->fsr_delta = 0;
@@ -119,7 +123,8 @@ void INDF16::put_value(unsigned int new_value)
 unsigned int INDF16::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
 
   iam->fsr_value += iam->fsr_delta;
   iam->fsr_delta = 0;
@@ -137,7 +142,8 @@ unsigned int INDF16::get_value(void)
 unsigned int PREINC::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   iam->preinc_fsr_value();
 
   return(iam->get());
@@ -150,7 +156,8 @@ unsigned int PREINC::get_value(void)
 
 void PREINC::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   iam->preinc_fsr_value();
   iam->put(new_value);
@@ -169,7 +176,8 @@ void PREINC::put_value(unsigned int new_value)
 unsigned int POSTINC::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   iam->postinc_fsr_value();
 
   return(iam->get());
@@ -182,7 +190,8 @@ unsigned int POSTINC::get_value(void)
 
 void POSTINC::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   iam->postinc_fsr_value();
   iam->put(new_value);
@@ -203,7 +212,8 @@ void POSTINC::put_value(unsigned int new_value)
 unsigned int POSTDEC::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   iam->postdec_fsr_value();
 
   return(iam->get());
@@ -216,7 +226,8 @@ unsigned int POSTDEC::get_value(void)
 
 void POSTDEC::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   iam->postdec_fsr_value();
   iam->put(new_value);
@@ -236,7 +247,8 @@ void POSTDEC::put_value(unsigned int new_value)
 unsigned int PLUSW::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
@@ -259,7 +271,8 @@ unsigned int PLUSW::get_value(void)
 
 void PLUSW::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
@@ -679,7 +692,8 @@ unsigned int Program_Counter16::get_value(void)
 unsigned int TOSL::get(void)
 {
   value.put(stack->get_tos() & 0xff);
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 
 }
@@ -694,7 +708,8 @@ unsigned int TOSL::get_value(void)
 
 void TOSL::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   stack->put_tos( stack->get_tos() & 0xffffff00 | new_value & 0xff);
 }
@@ -714,7 +729,8 @@ void TOSL::put_value(unsigned int new_value)
 unsigned int TOSH::get(void)
 {
   value.put((stack->get_tos() >> 8) & 0xff);
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 
 }
@@ -729,7 +745,8 @@ unsigned int TOSH::get_value(void)
 
 void TOSH::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   stack->put_tos( stack->get_tos() & 0xffff00ff | ( (new_value & 0xff) << 8));
 }
@@ -749,7 +766,8 @@ void TOSH::put_value(unsigned int new_value)
 unsigned int TOSU::get(void)
 {
   value.put((stack->get_tos() >> 16) & 0x1f);
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 
 }
@@ -764,7 +782,8 @@ unsigned int TOSU::get_value(void)
 
 void TOSU::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   stack->put_tos( stack->get_tos() & 0xffe0ffff | ( (new_value & 0x1f) << 16));
 
@@ -785,7 +804,8 @@ void TOSU::put_value(unsigned int new_value)
 unsigned int STKPTR::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 
 }
@@ -799,7 +819,8 @@ unsigned int STKPTR::get_value(void)
 
 void STKPTR::put(unsigned int new_value)
 {
-  trace.register_write(address,new_value);
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,new_value);
 
   value.put(new_value);
 }
@@ -900,7 +921,8 @@ void T0CON::put(unsigned int new_value)
 
   unsigned int old_value = value.get();
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
 
   if( (value.get() ^ old_value) & (T08BIT | TMR0ON)) {
@@ -934,7 +956,8 @@ void T0CON::put(unsigned int new_value)
 //--------------------------------------------------
 void TMR0H::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
 
 }
@@ -947,7 +970,8 @@ void TMR0H::put_value(unsigned int new_value)
 
 unsigned int TMR0H::get(void)
 {
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 }
 
@@ -1006,7 +1030,8 @@ unsigned int TMR0_16::max_counts(void)
 void TMR0_16::increment(void)
 {
   //  cout << "_TMR0 increment because of external clock ";
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   if(--prescale_counter == 0)
     {
@@ -1577,7 +1602,8 @@ void PORTC16::put(unsigned int new_value)
   if (usart && usart->txsta.get() & _TXSTA::TXEN)
       mack_value |= 1 << 6;
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put((new_value & ~mack_value) | (value.get() & mack_value));
 
   // Update the stimuli - if there are any

@@ -43,7 +43,8 @@ INTCON::INTCON(void)
 void INTCON::set_T0IF(void)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put(value.get() | T0IF);
 
@@ -56,7 +57,8 @@ void INTCON::set_T0IF(void)
 void INTCON::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
 
   // Now let's see if there's a pending interrupt
@@ -212,7 +214,8 @@ void INTCON_16::set_gies(void)
 void INTCON_16::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
   //cout << " INTCON_16::put\n";
   // Now let's see if there's a pending interrupt

@@ -1,3 +1,12 @@
+2004-08-13 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-processors.cc, src/14bit-registers.cc, src/14bit-registers.h
+	src/14bit-tmrs.cc, src/16bit-registers.cc, src/eeprom.cc, src/intcon.cc,
+	src/ioports.cc, src/p16x7x.cc, src/pic-processor.cc,
+	src/pic-registers.cc, src/pie.cc, src/pir.cc, src/processor.cc,
+	src/processor.h, src/registers.cc, src/registers.h, src/ssp.cc,
+	src/tmr0.cc, src/trace.cc, src/trace.h, src/uart.cc:
+	More Tracing. 
+
 2004-08-11 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h, src/processor.cc, src/pic-processors.cc
 	src/value.h, src/value.cc, src/registers.h, src/registers.cc, 
