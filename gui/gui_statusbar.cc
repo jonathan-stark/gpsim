@@ -528,19 +528,11 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 
   for(iReg = ma->SpecialRegisters.begin();
       iReg != ma->SpecialRegisters.end();
-      ++iReg)
+      ++iReg) {
 
+    //cout << " Adding " << ((*iReg)->showType()) << " to status bar\n";
     entries.push_back(new RegisterLabeledEntry(hbox, *iReg));
-
-  /*  
-  pc = new RegisterLabeledEntry(hbox, *iReg);
-
-  ++iReg;
-  status = new RegisterLabeledEntry(hbox, *iReg);
-
-  ++iReg;
-  W = new RegisterLabeledEntry(hbox, *iReg);
-  */
+  }
 
   cpu_cycles = new CyclesLabeledEntry();
   cpu_cycles->Create(hbox,"Cycles:", 18,false);

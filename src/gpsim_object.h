@@ -41,7 +41,7 @@ class gpsimObject {
   gpsimObject();
   virtual ~gpsimObject();
 
-  virtual string &name(void) {return name_str;};
+  virtual string &name(void);
   virtual char *name(char *, int len);
   virtual void new_name(char *);
   virtual void new_name(string &);

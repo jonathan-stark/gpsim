@@ -1,3 +1,11 @@
+2004-08-27 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc, src/gpsim_object.cc, src/gpsim_object.h,
+	  src/modules.cc, src/modules.h, src/pic-processor.cc,
+	  gui/gui_src_asm.cc, gui/gui_statusbar.cc:
+	The Module class was overriding functionality provided in the
+	gpsimObject class. This caused problems for external processors 
+	(That is, processors not a part of gpsim).
+
 2004-08-26 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_object.cc, src/gpsim_object.h: New files that
 	support the gpsimObject class. This is a base class for 
