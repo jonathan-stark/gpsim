@@ -39,30 +39,31 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
-//#include <gtkextra/gtksheetentry.h>
 
 #include "gui.h"
 #include "gui_callbacks.h"
 
+void create_dispatcher (void);
 
 GUI_Processor::GUI_Processor(void)
 {
 
-  regwin_ram = NULL;
-  regwin_eeprom = NULL;
+  create_dispatcher();
+
   status_bar = NULL;
-  program_memory = NULL;
-  source_browser = NULL;
-  symbol_window = NULL;
-  watch_window = NULL;
-  stack_window = NULL;
-  breadboard_window = NULL;
-  trace_window = NULL;
-  profile_window = NULL;
-  stopwatch_window = NULL;
+  regwin_ram =  new  RAM_RegisterWindow(this);
+  regwin_eeprom = new  EEPROM_RegisterWindow(this);
+  program_memory = new  SourceBrowserOpcode_Window(this);
+  source_browser = new  SourceBrowserAsm_Window(this);
+  symbol_window = new  Symbol_Window(this);
+  watch_window = new  Watch_Window(this);
+  stack_window = new  Stack_Window(this);
+  breadboard_window = new  Breadboard_Window(this);
+  trace_window = new  Trace_Window(this);
+  profile_window = new  Profile_Window(this);
+  stopwatch_window = new  StopWatch_Window(this);
 
   pic_id = 0;
-
 }
 
 

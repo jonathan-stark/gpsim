@@ -108,11 +108,10 @@ void GUI_Object::ChangeView (int view_state)
 
 
 
-  // we update config database
+  // Update the config database
   set_config();
 
   // Update menu item
-  //  update_menu_item(this);
   UpdateMenuItem();
 }
 

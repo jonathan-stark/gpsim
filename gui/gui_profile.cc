@@ -2012,105 +2012,105 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
  * 
  */
 
-void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
+void Profile_Window::NewProgram(GUI_Processor *gp)
 {
-    int row;
-    int i;
-    int pic_id;
+  int row;
+  int i;
 
-    if(pw == NULL || gp == NULL)
-	return;
+  if(gp == NULL)
+    return;
 
-    pw->program=1;
+  program=1;
     
-    if( !((GUI_Object*)pw)->enabled)
-	return;
+  if(!enabled)
+    return;
     
-    pic_id = gp->pic_id;
+  gp->pic_id;
 
-    gpsim_enable_profiling(gp->pic_id);
+  gpsim_enable_profiling(gp->pic_id);
 
-    // Instruction clist
-    gtk_clist_freeze(pw->profile_clist);
-    for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++)
-    {
-	struct profile_entry *profile_entry;
-	char buf[100];
-	char address_string[100];
-	char instruction_string[100];
-	char count_string[100];
-	char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
-	guint64 cycles;
+  // Instruction clist
+  gtk_clist_freeze(profile_clist);
 
-	if(gpsim_address_has_opcode( gp->pic_id, i))
-	{
-	    sprintf(address_string,"0x%04x",i);
-	    strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
+  for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++) {
+    
+    struct profile_entry *profile_entry;
+    char buf[100];
+    char address_string[100];
+    char instruction_string[100];
+    char count_string[100];
+    char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
+    guint64 cycles;
 
-	    cycles=gpsim_get_cycles_used(gp->pic_id,i);
-	    sprintf(count_string,"0x%Lx",cycles);
+    if(gpsim_address_has_opcode( gp->pic_id, i)) {
+	
+      sprintf(address_string,"0x%04x",i);
+      strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
 
-	    row=gtk_clist_append(GTK_CLIST(pw->profile_clist), entry);
+      cycles=gpsim_get_cycles_used(gp->pic_id,i);
+      sprintf(count_string,"0x%Lx",cycles);
 
-	    // FIXME this memory is never freed?
-	    profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
-	    profile_entry->address=i;
-	    profile_entry->pic_id=pic_id;
-//	profile_entry->type=type;
-	    profile_entry->last_count=cycles;
+      row=gtk_clist_append(GTK_CLIST(profile_clist), entry);
 
-	    gtk_clist_set_row_data(GTK_CLIST(pw->profile_clist), row, (gpointer)profile_entry);
+      // FIXME this memory is never freed?
+      profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
+      profile_entry->address=i;
+      profile_entry->pic_id=gp->pic_id;
+      //	profile_entry->type=type;
+      profile_entry->last_count=cycles;
 
-	    pw->profile_list = g_list_append(pw->profile_list, (gpointer)profile_entry);
-	}
+      gtk_clist_set_row_data(GTK_CLIST(profile_clist), row, (gpointer)profile_entry);
+
+      profile_list = g_list_append(profile_list, (gpointer)profile_entry);
     }
-    gtk_clist_thaw(pw->profile_clist);
+  }
+  gtk_clist_thaw(profile_clist);
 
-    // Register clist
-    gtk_clist_freeze(pw->profile_register_clist);
-    for(i=0; i < gpsim_get_register_memory_size(gp->pic_id,REGISTER_RAM); i++)
-    {
-	struct profile_register_entry *profile_register_entry;
-	char address_string[100];
-	char count_string_read[100];
-	char count_string_write[100];
-	char register_string[100];
-	char *entry_register[PROFILE_REGISTER_COLUMNS]={address_string,register_string,count_string_read,count_string_write};
-	guint64 read_cycles;
-	guint64 write_cycles;
-        char *name;
+  // Register clist
+  gtk_clist_freeze(profile_register_clist);
+  for(i=0; i < gpsim_get_register_memory_size(gp->pic_id,REGISTER_RAM); i++) {
+    
+    struct profile_register_entry *profile_register_entry;
+    char address_string[100];
+    char count_string_read[100];
+    char count_string_write[100];
+    char register_string[100];
+    char *entry_register[PROFILE_REGISTER_COLUMNS]={address_string,register_string,count_string_read,count_string_write};
+    guint64 read_cycles;
+    guint64 write_cycles;
+    char *name;
 
-	if(!gpsim_register_is_sfr(gp->pic_id, REGISTER_RAM, i)&&
-	   !gpsim_register_is_alias(gp->pic_id, REGISTER_RAM, i)&&
-	   gpsim_register_is_valid(gp->pic_id, REGISTER_RAM, i))
-	{
-	    sprintf(address_string,"0x%04x",i);
-	    name = gpsim_get_register_name( gp->pic_id, REGISTER_RAM, i);
-	    if(name==NULL)
-		name = address_string;
-	    strcpy(register_string, name);
+    if(!gpsim_register_is_sfr(gp->pic_id, REGISTER_RAM, i)&&
+       !gpsim_register_is_alias(gp->pic_id, REGISTER_RAM, i)&&
+       gpsim_register_is_valid(gp->pic_id, REGISTER_RAM, i))
+      {
+	sprintf(address_string,"0x%04x",i);
+	name = gpsim_get_register_name( gp->pic_id, REGISTER_RAM, i);
+	if(name==NULL)
+	  name = address_string;
+	strcpy(register_string, name);
 
-	    read_cycles=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,i);
-	    sprintf(count_string_read,"0x%Lx",read_cycles);
+	read_cycles=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,i);
+	sprintf(count_string_read,"0x%Lx",read_cycles);
 
-	    write_cycles=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,i);
-	    sprintf(count_string_write,"0x%Lx",write_cycles);
+	write_cycles=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,i);
+	sprintf(count_string_write,"0x%Lx",write_cycles);
 
-	    row=gtk_clist_append(GTK_CLIST(pw->profile_register_clist), entry_register);
+	row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
 
-	    // FIXME this memory is never freed?
-	    profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
-	    profile_register_entry->address=i;
-	    profile_register_entry->pic_id=pic_id;
-	    profile_register_entry->last_count_read=read_cycles;
-	    profile_register_entry->last_count_read=write_cycles;
+	// FIXME this memory is never freed?
+	profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
+	profile_register_entry->address=i;
+	profile_register_entry->pic_id=gp->pic_id;
+	profile_register_entry->last_count_read=read_cycles;
+	profile_register_entry->last_count_read=write_cycles;
 
-	    gtk_clist_set_row_data(GTK_CLIST(pw->profile_register_clist), row, (gpointer)profile_register_entry);
+	gtk_clist_set_row_data(GTK_CLIST(profile_register_clist), row, (gpointer)profile_register_entry);
 
-	    pw->profile_register_list = g_list_append(pw->profile_register_list, (gpointer)profile_register_entry);
-	}
-    }
-    gtk_clist_thaw(pw->profile_register_clist);
+	profile_register_list = g_list_append(profile_register_list, (gpointer)profile_register_entry);
+      }
+  }
+  gtk_clist_thaw(profile_register_clist);
 
 }
 
@@ -2335,7 +2335,7 @@ void Profile_Window::Build(void)
     NewProcessor(gp);
 
   if(program)
-    ProfileWindow_new_program(this, gp);
+    NewProgram(gp);
 
   Update();
 
@@ -2343,8 +2343,10 @@ void Profile_Window::Build(void)
 
 }
 
-int Profile_Window::Create(GUI_Processor *_gp)
+Profile_Window::Profile_Window(GUI_Processor *_gp)
 {
+
+  menu = "<main>/Windows/Profile";
 
   gp = _gp;
   name = "profile";
@@ -2357,8 +2359,6 @@ int Profile_Window::Create(GUI_Processor *_gp)
   profile_register_list=NULL;
   histogram_profile_list=NULL;
 
-  gp->profile_window = this;
-
   has_processor=false;
   program=0;
 
@@ -2367,14 +2367,7 @@ int Profile_Window::Create(GUI_Processor *_gp)
   if(enabled)
       Build();
 
-  return 1;
 }
 
-Profile_Window::Profile_Window(void)
-{
-
-  menu = "<main>/Windows/Profile";
-
-}
 
 #endif // HAVE_GUI

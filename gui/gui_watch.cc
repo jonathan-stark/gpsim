@@ -758,17 +758,26 @@ void Watch_Window::Build(void)
 
 }
 
-int Watch_Window::Create(GUI_Processor *_gp)
+
+Watch_Window::Watch_Window(GUI_Processor *_gp)
 {
   int i;
     
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
+  menu = "<main>/Windows/Watch";
+
+  name = "watch_viewer";
+  wc = WC_data;
+  wt = WT_watch_window;
+  window = NULL;
+  is_built = 0;
+
+  watches=NULL;
+  current_row=0;
 
   gp = _gp;
-  gp->watch_window = this;
-
 
   get_config();
 
@@ -782,22 +791,6 @@ int Watch_Window::Create(GUI_Processor *_gp)
   if(enabled)
     Build();
   
-  return 1;
-}
-
-Watch_Window::Watch_Window(void)
-{
-  menu = "<main>/Windows/Watch";
-
-  name = "watch_viewer";
-  wc = WC_data;
-  wt = WT_watch_window;
-  window = NULL;
-  is_built = 0;
-
-  watches=NULL;
-  current_row=0;
-
 }
 
 #endif // HAVE_GUI

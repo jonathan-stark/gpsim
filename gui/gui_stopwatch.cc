@@ -384,12 +384,14 @@ void StopWatch_Window::Build(void)
 }
 
 //------------------------------------------------------------------------
-// Create
+// 
 //
-int StopWatch_Window::Create(GUI_Processor *_gp)
+StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
 {
 
   char *string;
+
+  menu = "<main>/Windows/Stopwatch";
 
   gp = _gp;
   name = "stopwatch_viewer";
@@ -397,7 +399,7 @@ int StopWatch_Window::Create(GUI_Processor *_gp)
   wt = WT_stopwatch_window;
   window = NULL;
   is_built=0;
-  gp->stopwatch_window = this;
+
   count_dir=1;
   rollover=1000000;
   cyclecounter=0;
@@ -414,14 +416,7 @@ int StopWatch_Window::Create(GUI_Processor *_gp)
   if(enabled)
     Build();
 
-  return 1;
 }
 
-StopWatch_Window::StopWatch_Window(void)
-{
-
-  menu = "<main>/Windows/Stopwatch";
-
-}
 
 #endif // HAVE_GUI

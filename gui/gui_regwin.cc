@@ -1888,8 +1888,6 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
 
-  if(!get_config())
-    printf("warning %s\n",__FUNCTION__);
 
 }
 
@@ -1902,12 +1900,12 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 
   int i;
 
-  gp->regwin_ram = this;
-      
   name = "register_viewer_ram";
   // Add a status bar
   gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
   gp->status_bar->created=0;
+
+  get_config();
 
   if(enabled)
       Build();
@@ -1922,9 +1920,10 @@ EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
   menu = "<main>/Windows/EEPROM";
   type = REGISTER_EEPROM;
 
-  gp->regwin_eeprom = this;
   name = "register_viewer_eeprom";
   
+  get_config();
+
   if(enabled)
       Build();
 }

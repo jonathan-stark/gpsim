@@ -195,7 +195,7 @@ void Stack_Window::Update(void)
   unsigned int retaddress;
   struct stack_entry *stack_entry;
 
-  if(!has_processor)
+  if(!has_processor || !enabled)
     return;
     
   pic_id = gp->pic_id;
@@ -323,11 +323,13 @@ void Stack_Window::Build(void)
 //
 //
 
-int Stack_Window::Create(GUI_Processor *_gp)
+
+Stack_Window::Stack_Window(GUI_Processor *_gp)
 {
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
+  menu = "<main>/Windows/Stack";
 
   gp = _gp;
   name = "stack_viewer";
@@ -335,7 +337,6 @@ int Stack_Window::Create(GUI_Processor *_gp)
   wt = WT_stack_window;
   window = NULL;
   is_built=0;
-  gp->stack_window = this;
 
   last_stacklen=0;
   current_row=0;
@@ -345,13 +346,6 @@ int Stack_Window::Create(GUI_Processor *_gp)
     
   if(enabled)
     Build();
-
-  return 0;
 }
 
-
-Stack_Window::Stack_Window(void)
-{
-  menu = "<main>/Windows/Stack";
-}
 #endif // HAVE_GUI

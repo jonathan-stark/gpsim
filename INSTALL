@@ -11,7 +11,7 @@ TOC
  4.0  How to create your own gpsim distribution
  5.0  Installing gtk+-extra and eXdbm
  6.0  How to install gpsim from RPM's
-
+ 7.0  MAC OS
 
 
 1.0 Installation instructions
@@ -196,4 +196,12 @@ Where package is either gtk+-extra or eXdbm.
 
 6.0 INSTALLING RPM's
     ----------------
+
+7.0 MAC OS
+    ------
+
+There's a conflict with shared libraries and gpsim on the new MAC OS's. So for the MAC, configure gpsim like so:
+
+$ ./configure --disable-shared
+
 
