@@ -25,7 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_help.h"
-
+#include "../src/value.h"
 
 static cmd_options cmd_help_options[] =
 {
@@ -84,3 +84,10 @@ void cmd_help::help(char *cmd)
   help();
 }
 
+void cmd_help::help(Value *s)
+{
+  if(s) {
+    cout << s->toString() << endl;
+    cout << s->description() << endl;
+  }
+}

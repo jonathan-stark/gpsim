@@ -61,6 +61,77 @@ Processor *active_cpu = 0;
 static Processor *(*dummy_get_active_cpu)(void) = get_active_cpu;
 static void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
+//========================================================================
+// Attribute wrappers
+//
+// Attribute wrappers are simple classes that handle specific processor
+// attributes. Their primary purpose is to allow for a way to call back
+// into the processor classs whenever the attribute changes.
+
+class WarnModeAttribute : public Boolean
+{
+protected:
+  Processor *cpu;
+public:
+  WarnModeAttribute(Processor *_cpu) :
+    Boolean(false) ,cpu(_cpu)
+  {
+    new_name("WarnMode");
+    set_description(" enable warning messages when true");
+  }
+  void set(Value *v)
+  {
+    Boolean::set(v);
+    bool currentVal;
+    get(currentVal);
+    cpu->setWarnMode(currentVal);
+  }
+};
+
+class SafeModeAttribute : public Boolean
+{
+protected:
+  Processor *cpu;
+public:
+  SafeModeAttribute(Processor *_cpu) :
+    Boolean(false) ,cpu(_cpu)
+  {
+    new_name("SafeMode");
+    set_description(" Model the processor's specification when true. Model the actual\n"
+		    " processor when false (e.g. TRIS instruction for mid range PICs\n"
+		    " will emit a warning if SafeMode is true).");
+  }
+  void set(Value *v)
+  {
+    Boolean::set(v);
+    bool currentVal;
+    get(currentVal);
+    cpu->setSafeMode(currentVal);
+  }
+};
+
+class UnknownModeAttribute : public Boolean
+{
+protected:
+  Processor *cpu;
+public:
+  UnknownModeAttribute(Processor *_cpu) :
+    Boolean(false) ,cpu(_cpu)
+  {
+    new_name("UnknownMode");
+    set_description(" Enable three-state register logic. Unknown values are treated \n"
+		    " as 0 when this is false.");
+
+  }
+  void set(Value *v)
+  {
+    Boolean::set(v);
+    bool currentVal;
+    get(currentVal);
+    cpu->setUnknownMode(currentVal);
+  }
+};
+
 //------------------------------------------------------------------------
 //
 // Processor - Constructor
@@ -78,6 +149,9 @@ Processor::Processor(void)
   set_frequency(1.0);
   set_ClockCycles_per_Instruction(1);
   set_Vdd(5.0);
+  setWarnMode(true);
+  setSafeMode(true);
+  setUnknownMode(true);
 
   readTT = 0;
   writeTT = 0;
@@ -99,6 +173,33 @@ Processor::~Processor()
 {
   delete registers;
 }
+
+void Processor::initializeAttributes()
+{
+  add_attribute(new WarnModeAttribute(this));
+  add_attribute(new SafeModeAttribute(this));
+  add_attribute(new UnknownModeAttribute(this));
+
+  add_attribute(new Float("frequency",&frequency, " oscillator frequency."));
+}
+
+//-------------------------------------------------------------------
+// Simulation modes:
+void Processor::setWarnMode(bool newWarnMode)
+{
+  bWarnMode = newWarnMode;
+}
+void Processor::setSafeMode(bool newSafeMode)
+{
+  bSafeMode = newSafeMode;
+}
+void Processor::setUnknownMode(bool newUnknownMode)
+{
+  bUnknownMode = newUnknownMode;
+}
+
+
+
 //-------------------------------------------------------------------
 //
 // init_register_memory (unsigned int memory_size)

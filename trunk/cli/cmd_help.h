@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_HELP_H__
 #define __CMD_HELP_H__
 
+class Value;
+
 class cmd_help : public command
 {
 public:
@@ -29,6 +31,8 @@ public:
 
   void help(void);
   void help(char *cmd);
+  void help(Value *);
+
   virtual int is_repeatable(void) { return 1; };
 
 };

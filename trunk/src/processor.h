@@ -68,7 +68,8 @@ protected:
 class ProgramMemoryAccess :  public MemoryAccess
 {
  public:
-  // Symbolic debugging
+
+  /// Symbolic debugging
   enum HLL_MODES {
     ASM_MODE,      // Source came from plain old .asm files
     HLL_MODE       // Source came from a high level language like C or JAL.
@@ -178,14 +179,13 @@ class ProgramMemoryAccess :  public MemoryAccess
   // program memory.
   Breakpoint_Instruction *bpi;
 
-
 };
 
 
 //---------------------------------------------------------
-// The RegisterMemoryAccess class is the interface used
-// by objects other than the simulator to manipulate the 
-// cpu's register memory.
+/// The RegisterMemoryAccess class is the interface used
+/// by objects other than the simulator to manipulate the 
+/// cpu's register memory.
 
 class RegisterMemoryAccess : public MemoryAccess
 {
@@ -308,44 +308,64 @@ class Files
 
 //------------------------------------------------------------------------
 //
-// Processor - a generic base class for processors supported by gpsim
-//
+/// Processor - a generic base class for processors supported by gpsim
 
 class Processor : public Module
 {
 public:
 
-  Files *files;               // The source files for this processor.
+  /// The source files for this processor.
+  Files *files;
 
-  double frequency,period;    // Oscillator frequency and period.
-  unsigned int clocks_per_inst;	// Osc cycles for 1 instruction
+  /// Oscillator frequency
+  double frequency;
+
+  /// Oscillator  period
+  double period;
+
+  /// Oscillator cycles for 1 instruction
+  unsigned int clocks_per_inst;
+
+  /// Supply voltage
   double Vdd;
 
-  Register **registers;       // 
-  Register **register_bank;   //
+  /// Processor RAM
 
-  instruction   **program_memory;  // THE program memory
+  Register **registers;
 
-  ProgramMemoryAccess  *pma;  // Program memory interface
-  RegisterMemoryAccess rma;   // register memory interface
-  RegisterMemoryAccess ema;   // eeprom memory interface (if present).
+  /// Currently selected RAM bank
+  Register **register_bank;
 
+  /// Program memory - where instructions are stored.
+
+  instruction   **program_memory;
+
+  /// Program memory interface
+  ProgramMemoryAccess  *pma;
+
+  /// register memory interface
+  RegisterMemoryAccess rma;
+
+  /// eeprom memory interface (if present).
+  RegisterMemoryAccess ema;
+
+  /// Program Counter
   Program_Counter *pc;
 
-  // Context debugging is a way of debugging the processor while it is
-  // in different states. For example, when the interrupt flag is set
-  // (for those processors that support interrupts), the processor is
-  // in a different 'state' then when the interrupt flag is cleared.
+  /// Context debugging is a way of debugging the processor while it is
+  /// in different states. For example, when the interrupt flag is set
+  /// (for those processors that support interrupts), the processor is
+  /// in a different 'state' then when the interrupt flag is cleared.
 
   list<ProgramMemoryAccess *> pma_context;
 
-  // Tracing
-  // The readTT and writeTT are TraceType objects for tracing
-  // register reads and writes.
-  // The mTrace map is a collection of special trace types that
-  // share the same trace function code. For example, interrupts
-  // and resets are special trace events that don't warrant thier
-  // own trace function code.
+  /// Tracing
+  /// The readTT and writeTT are TraceType objects for tracing
+  /// register reads and writes.
+  /// The mTrace map is a collection of special trace types that
+  /// share the same trace function code. For example, interrupts
+  /// and resets are special trace events that don't warrant thier
+  /// own trace function code.
   TraceType *readTT, *writeTT;
   map <unsigned int, TraceType *> mTrace;
 
@@ -397,6 +417,7 @@ public:
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
+  virtual void initializeAttributes();
   //
   // Processor State 
   //
@@ -424,12 +445,32 @@ public:
   virtual void step_one(bool refresh=true) = 0;
   virtual void interrupt(void) = 0 ;
 
+  // Simulation modes
+
+  /// setWarnMode - when true, gpsim will issue warnings whenever
+  /// suspicious is occuring.
+  virtual void setWarnMode(bool);
+  virtual bool getWarnMode() { return bWarnMode; }
+
+  /// setSafeMode - when true, model will model the 'official'
+  /// behavior of the chip. When false, the simulator behaves the same
+  /// as the hardware.
+  virtual void setSafeMode(bool);
+  virtual bool getSafeMode() { return bSafeMode; }
+
+  /// setUnknownMode - when true, gpsim will implement three-state logic
+  /// for data. When false, unkown data are treated as zeros. 
+  virtual void setUnknownMode(bool);
+  virtual bool getUnknownMode() { return bUnknownMode; }
+
+
   // Tracing control
 
   virtual void trace_dump(int type, int amount);
   virtual int trace_dump1(int type, char *buffer, int bufsize);
   virtual unsigned int getWriteTT(unsigned int addr);
   virtual unsigned int getReadTT(unsigned int addr);
+
   //
   // Processor Clock control
   //
@@ -484,6 +525,14 @@ public:
 
   Processor();
   virtual ~Processor();
+
+private:
+
+  // Simulation modes
+  bool bSafeMode;
+  bool bWarnMode;
+  bool bUnknownMode;
+
 };
 
 

@@ -230,6 +230,7 @@ protected:
 public:
   attribute_symbol(Module *, Value *);
   virtual string toString();
+  virtual string description();
 
   /// The get and set methods will call the attribute's get and
   /// set methods.

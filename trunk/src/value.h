@@ -47,6 +47,7 @@ class Value : public gpsimObject
 {
 public:
   Value();
+  Value(const char *name, const char *desc);
 
   virtual ~Value();
 
@@ -84,6 +85,13 @@ public:
 
   virtual Value *copy();
 
+  /// description - get a description of this value. If the value has 
+  /// a name, then 'help value_name' will display the description.
+
+  virtual string description();
+  void set_description(const char *);
+ private:
+  const char *cpDescription;
 };
 
 //========================================================================
@@ -179,6 +187,7 @@ class Boolean : public Value {
 public:
 	
   Boolean(bool newValue);
+  Boolean(const char *_name, bool *newValue, const char *desc=0);
   virtual ~Boolean();
 
   string toString();
@@ -186,20 +195,21 @@ public:
   static string toString(bool value);
   static string toString(char* format, bool value);
 
-  virtual void get(bool &b) { b = value; }
-  virtual void get(int &i) { i = value ? 1 : 0; }
-  virtual void get(double &d) { d = value ? 1.0 : 0.0;}
+  virtual void get(bool &b) { b = *value; }
+  virtual void get(int &i) { i = *value ? 1 : 0; }
+  virtual void get(double &d) { d = *value ? 1.0 : 0.0;}
 
   virtual void set(Value *);
 
-  bool getVal() { return value; }
+  bool getVal() { return *value; }
 
   static Boolean* Boolean::typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  virtual Value *copy() { return new Boolean(value); }
+  virtual Value *copy() { return new Boolean(*value); }
 private:
-  bool value;
+  bool bCanDelete;
+  bool *value;
 };
 
 
@@ -210,8 +220,10 @@ class Integer : public Value {
 
 public:
 	
-  Integer(gint64 new_value) : Value() { value = new_value;};
-  virtual ~Integer() {}
+  Integer(gint64 new_value);
+  Integer(const char *_name, gint64 *new_value, const char *desc=0);
+
+  virtual ~Integer();
 
   virtual string toString();
   string toString(char* format);
@@ -226,9 +238,9 @@ public:
   virtual void set(double d);
   virtual void set(Value *);
 
-  gint64 getVal() { return value; }
+  gint64 getVal() { return *value; }
 
-  virtual Value *copy() { return new Integer(value); }
+  virtual Value *copy() { return new Integer(*value); }
 
   static Integer* Integer::typeCheck(Value* val, string valDesc);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
@@ -236,7 +248,8 @@ public:
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
-  gint64 value;
+  bool bCanDelete;
+  gint64 *value;
 };
 
 //------------------------------------------------------------------------
@@ -247,6 +260,7 @@ class Float : public Value {
 public:
 	
   Float(double newValue);
+  Float(const char *_name, double *newValue, const char *desc=0);
   virtual ~Float();
 
   virtual string toString();
@@ -261,19 +275,16 @@ public:
   virtual void set(double d);
   virtual void set(Value *);
 
-  double getVal() { return value; }
+  double getVal() { return *value; }
 
-  virtual Value *copy() { return new Float(value); }
+  virtual Value *copy() { return new Float(*value); }
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  /*
-  virtual bool operator&&(Value *);
-  virtual bool operator||(Value *);
-  */
 private:
-  double value;
+  bool bCanDelete;
+  double *value;
 };
 
 
