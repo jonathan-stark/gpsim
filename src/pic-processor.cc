@@ -218,10 +218,10 @@ processor_types available_processors[] =
    P18C252::construct },
   {_P18C442_,
    "__18C442", "pic18c442",  "p18c442", "18c442",
-   pic_processor::construct },
+   P18C442::construct },
   {_P18C452_,
    "__18C452", "pic18c452",  "p18c452", "18c452",
-   pic_processor::construct }
+   P18C452::construct }
 
 };
 
@@ -422,11 +422,15 @@ void pic_processor::sleep (void)
 {
   simulation_mode = SLEEPING;
 
+  if(!bp.have_sleep())
+    return;
+
   do
     {
       cycles.increment();   // burn cycles until something wakes us
     } while(bp.have_sleep()); // %%%FIX ME%%% ===>  && !bp.have_halt());
 
+  pc.increment();
   simulation_mode = RUNNING;
 
 }
@@ -889,6 +893,7 @@ void pic_processor :: create (void)
 
   set_frequency(10e6);            // 
   nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
+
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
   trace.program_counter (pc.value);

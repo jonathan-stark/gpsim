@@ -169,7 +169,8 @@ void ADCON0::put_conversion(void)
     else
       converted = 0xffffffff;  // As close to infinity as possible...
 
-    cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
+    if(verbose)
+      cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
     if(adcon1->value & ADCON1::ADFM) {
       adresl->put(converted & 0xff);
       adres->put( (converted >> 8) & 0x3);
@@ -185,7 +186,8 @@ void ADCON0::put_conversion(void)
     else
       converted = 0xffffffff;  // As close to infinity as possible...
 
-    cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
+    if(verbose)
+      cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
     adres->put((converted ) & 0xff);
 
   }

@@ -557,8 +557,11 @@ void initialize_readline (void)
   gdk_input_add (fileno(stdin), GDK_INPUT_READ, 
                  (GdkInputFunction) myfunc, b);
 
-  //rl_callback_handler_install (gpsim, test_func);
+  // Sigh - the readline library has changed again (and again...)
+  // I don't have an automated way to choose between the following
+  // two lines
   rl_callback_handler_install ("gpsim> ", test_func);
+  //rl_callback_handler_install ("gpsim> ", (void(*)(char*))test_func);
 
 #endif
 

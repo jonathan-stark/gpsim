@@ -6,6 +6,7 @@ gpsim-0.21.0
   o Profiling has been added
   o Trace viewer has been added
   o Added 16c62,16c63,16c72,16c73 processors
+  o Added 18c442,18c452 processor
   o breadboard updates when either a tris or port is changed in the register viewer
   o Enhanced module interface - now LCD module works with gpsim
   o Patch from Rudy Moore to fix TMR0 bug
@@ -17,6 +18,10 @@ gpsim-0.21.0
   o Program viewer can now display ASCII encode text in "dt" tables
   o Symbolic setting of execution breaks was not working.
   o C++ bugs fixed
+
+Patches from Salvador  mailto:salvador@inti.gov.ar to A2D,window management, and miscellaneous. 
+Patch from JG for Suse 7.1. 
+Fixed WDT during SLEEP bug reported by Tor Fredrik Aas mailto:tfa@abn.hibu.no
 
 From Salvador Eduardo Tropea mailto:salvador@inti.gov.ar
 * Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps

@@ -376,7 +376,7 @@ open_plotsave_dialog(Profile_Window *pw)
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
 	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    &window);
+			    (gpointer)&window);
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -620,7 +620,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window1);
 	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    &window1);
+			    (gpointer)&window1);
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -914,7 +914,7 @@ key_press(GtkWidget *widget,
   case GDK_Delete:
       entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
       if(entry!=NULL)
-	  remove_entry(pw,entry);
+	  remove_entry(pw,(struct profile_entry *)entry);
       break;
   }
   return TRUE;
@@ -1344,6 +1344,7 @@ BuildProfileWindow(Profile_Window *pw)
   y=((GUI_Object*)pw)->y;
   gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
 
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);

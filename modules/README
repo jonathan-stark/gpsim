@@ -1,3 +1,7 @@
 gpsim modules
 
-This directory contains modules dynamically loaded by gpsim. Currently, if you want to create a custom module you'll need to hack the source. Eventually (release 0.21.0?) I'll add true dynamically loaded modules.
+This directory contains modules dynamically loaded by gpsim, but are not part of gpsim proper.
+
+Additional modules may be found on gpsim's web page:
+http://www.dattalo.com/gnupic/gpsim.html
+

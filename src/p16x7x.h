@@ -190,6 +190,10 @@ class P16C712 :  public P16X6X_processor, public _14bit_18pins
   void create(void);
   static pic_processor *construct(void);
 
+  virtual int get_pin_count(void){return Package::get_pin_count();};
+  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
+  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
 };
 
 class P16C716 :  public P16C712

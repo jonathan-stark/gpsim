@@ -1,4 +1,4 @@
 
-SUBDIRS = cli xpms gui src gpsim examples doc
+SUBDIRS = cli xpms gui src gpsim modules examples doc
 
 EXTRA_DIST = PROCESSORS HISTORY README.EXAMPLES ANNOUNCE README.MODULES

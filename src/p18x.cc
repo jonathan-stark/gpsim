@@ -50,7 +50,7 @@ P18Cxx2::P18Cxx2(void)
   //create_sfr_map();
   //  create_iopin_map(&iopin_map, &num_of_iopins);
 
-  _16bit_processor::create();
+  //_16bit_processor::create();
 
   //  create_iopins(iopin_map, num_of_iopins);
 
@@ -157,16 +157,37 @@ void P18C2x2::create(void)
   //  create_iopins(iopin_map, num_of_iopins);
 
 }
-/*
+
 void P18C2x2::create_sfr_map(void)
 {
 
-  cout << "create_sfr_map P18C2x2\n";
+  if(verbose)
+    cout << "create_sfr_map P18C2x2\n";
+
+  add_sfr_register(porta,	  0xf80,0,"porta");
+  add_sfr_register(portb,	  0xf81,0,"portb");
+  add_sfr_register(portc,	  0xf82,0,"portc");
+
+#if 0
+  add_sfr_register(&lata,	  0xf89,0,"lata");
+  add_sfr_register(&latb,	  0xf8a,0,"latb");
+  add_sfr_register(&latc,	  0xf8b,0,"latc");
+#endif
+
+  add_sfr_register(&trisa,	  0xf92,0,"trisa");
+  add_sfr_register(&trisb,	  0xf93,0,"trisb");
+  add_sfr_register(&trisc,	  0xf94,0,"trisc");
+
 }
-*/
+
 void P18C2x2::create_symbols(void)
 {
-  cout << "P18C2x2 create symbols\n";
+  if(verbose)
+    cout << "P18C2x2 create symbols\n";
+
+  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(portb->cpu, portb);
+  symbol_table.add_ioport(portc->cpu, portc);
 
 }
 
@@ -196,11 +217,19 @@ P18C242::P18C242(void)
 void P18C242::create(void)
 {
 
-  cout << " 18c242 create \n";
+  if(verbose)
+    cout << " 18c242 create \n";
 
   P18C2x2::create();
 
-  //  P18C242::create_sfr_map();
+  P18C2x2::create_sfr_map();
+  P18C242::create_sfr_map();
+
+}
+
+void P18C242::create_sfr_map(void)
+{
+
 
 }
 
@@ -209,7 +238,8 @@ pic_processor * P18C242::construct(void)
 
   P18C242 *p = new P18C242;
 
-  cout << " 18c242 construct\n";
+  if(verbose)
+    cout << " 18c242 construct\n";
 
   p->create();
   p->create_invalid_registers();
@@ -237,20 +267,31 @@ P18C252::P18C252(void)
 void P18C252::create(void)
 {
 
-  cout << " 18c252 create \n";
+  if(verbose)
+    cout << " 18c252 create \n";
 
   P18C242::create();
 
-  //  P18C252::create_sfr_map();
+  P18C2x2::create_sfr_map();
+  P18C252::create_sfr_map();
 
 }
+
+void P18C252::create_sfr_map(void)
+{
+
+
+}
+
+
 
 pic_processor * P18C252::construct(void)
 {
 
   P18C252 *p = new P18C252;
 
-  cout << " 18c252 construct\n";
+  if(verbose)
+    cout << " 18c252 construct\n";
 
   p->create();
   p->create_invalid_registers();
@@ -259,5 +300,184 @@ pic_processor * P18C252::construct(void)
   p->name_str = "18c252";
 
   return p;
+
+}
+
+
+
+
+
+
+
+//========================================================================
+//
+// Pic 18C4x2
+//
+
+void P18C4x2::create(void)
+{
+  if(verbose)
+    cout << "P18C4x2::create\n";
+
+  create_iopin_map();
+  _16bit_processor::create();
+
+
+}
+
+void P18C4x2::create_symbols(void)
+{
+  if(verbose)
+    cout << "P18C4x2 create symbols\n";
+
+  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(portb->cpu, portb);
+  symbol_table.add_ioport(portc->cpu, portc);
+  symbol_table.add_ioport(portc->cpu, portd);
+  symbol_table.add_ioport(portc->cpu, porte);
+
+}
+
+P18C4x2::P18C4x2(void)
+{
+
+  if(verbose)
+    cout << "18c4x2 constructor, type = " << isa() << '\n';
+
+
+}
+
+
+void P18C4x2::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "create_sfr_map P18C4x2\n";
+
+  add_sfr_register(porta,	  0xf80,0,"porta");
+  add_sfr_register(portb,	  0xf81,0,"portb");
+  add_sfr_register(portc,	  0xf82,0,"portc");
+  add_sfr_register(portd,	  0xf83,0,"portd");
+  add_sfr_register(porte,	  0xf84,0,"porte");
+
+#if 0
+  add_sfr_register(&lata,	  0xf89,0,"lata");
+  add_sfr_register(&latb,	  0xf8a,0,"latb");
+  add_sfr_register(&latc,	  0xf8b,0,"latc");
+  add_sfr_register(&latd,	  0xf8c,0,"latd");
+  add_sfr_register(&late,	  0xf8d,0,"late");
+#endif
+
+  add_sfr_register(&trisa,	  0xf92,0,"trisa");
+  add_sfr_register(&trisb,	  0xf93,0,"trisb");
+  add_sfr_register(&trisc,	  0xf94,0,"trisc");
+  add_sfr_register(&trisd,	  0xf95,0,"trisd");
+  add_sfr_register(&trise,	  0xf96,0,"trise");
+
+
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18C442
+// 
+
+P18C442::P18C442(void)
+{
+
+  if(verbose)
+    cout << "18c442 constructor, type = " << isa() << '\n';
+
+}
+
+void P18C442::create(void)
+{
+
+  if(verbose)
+    cout << " 18c442 create \n";
+
+  P18C4x2::create();
+
+  P18C4x2::create_sfr_map();
+  P18C442::create_sfr_map();
+
+}
+
+void P18C442::create_sfr_map(void)
+{
+
+
+}
+
+pic_processor * P18C442::construct(void)
+{
+
+  P18C442 *p = new P18C442;
+
+  if(verbose)
+    cout << " 18c442 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "18c442";
+
+  return p;
+
+
+}
+
+
+
+//------------------------------------------------------------------------
+//
+// P18C452
+// 
+
+P18C452::P18C452(void)
+{
+
+  if(verbose)
+    cout << "18c452 constructor, type = " << isa() << '\n';
+
+}
+
+void P18C452::create(void)
+{
+
+  if(verbose)
+    cout << " 18c452 create \n";
+
+  P18C442::create();
+
+  P18C4x2::create_sfr_map();
+  P18C452::create_sfr_map();
+
+}
+
+void P18C452::create_sfr_map(void)
+{
+
+
+}
+
+
+pic_processor * P18C452::construct(void)
+{
+
+  P18C452 *p = new P18C452;
+
+  if(verbose)
+    cout << " 18c452 construct\n";
+
+  p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
+  p->name_str = "18c452";
+
+  return p;
+
 
 }
