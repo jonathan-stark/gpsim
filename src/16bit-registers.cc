@@ -403,7 +403,7 @@ void Indirect_Addressing::put_fsr(unsigned int new_fsr)
 void Indirect_Addressing::update_fsr_value(void)
 {
 
-  if(current_cycle != cycles.value)
+  if(current_cycle != get_cycles().value)
     {
       fsr_value = (fsrh.value.get() << 8) |  fsrl.value.get();
       fsr_delta = 0;
@@ -420,11 +420,11 @@ void Indirect_Addressing::update_fsr_value(void)
 void Indirect_Addressing::preinc_fsr_value(void)
 {
 
-  if(current_cycle != cycles.value)
+  if(current_cycle != get_cycles().value)
     {
       fsr_value += (fsr_delta+1);
       fsr_delta = 0;
-      current_cycle = cycles.value;
+      current_cycle = get_cycles().value;
       put_fsr(fsr_value);
     }
 
@@ -433,11 +433,11 @@ void Indirect_Addressing::preinc_fsr_value(void)
 void Indirect_Addressing::postinc_fsr_value(void)
 {
 
-  if(current_cycle != cycles.value)
+  if(current_cycle != get_cycles().value)
     {
       fsr_value += fsr_delta;
       fsr_delta = 1;
-      current_cycle = cycles.value;
+      current_cycle = get_cycles().value;
       put_fsr(fsr_value+1);
       
     }
@@ -446,11 +446,11 @@ void Indirect_Addressing::postinc_fsr_value(void)
 void Indirect_Addressing::postdec_fsr_value(void)
 {
 
-  if(current_cycle != cycles.value)
+  if(current_cycle != get_cycles().value)
     {
       fsr_value += fsr_delta;
       fsr_delta = -1;
-      current_cycle = cycles.value;
+      current_cycle = get_cycles().value;
       put_fsr(fsr_value-1);
       
     }
@@ -630,7 +630,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
   value--;
-  cycles.increment();
+  get_cycles().increment();
 }
 
 //--------------------------------------------------
@@ -1077,13 +1077,13 @@ unsigned int TMR0_16::get_value(void)
   //cout << "tmr0_16 get_value\n";
   // If the _TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
-  if(cycles.value <= synchronized_cycle)
+  if(get_cycles().value <= synchronized_cycle)
     return value.get();
 
   if(get_t0cs() ||  ((t0con->value.get() & T0CON::TMR0ON) == 0))
     return(value.get());
 
-  int new_value = (int) ((cycles.value - last_cycle)/ prescale);
+  int new_value = (int) ((get_cycles().value - last_cycle)/ prescale);
 
   value.put(new_value & 0xff);
 
@@ -1652,7 +1652,7 @@ void PORTC16::update_pin_directions(unsigned int new_tris)
 	  }
       // Now, update the nodes to which the(se) pin(s) may be attached
 
-      guint64 time = cycles.value;
+      guint64 time = get_cycles().value;
       for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
           if(pins[i]->snode!=0)

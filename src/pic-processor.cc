@@ -311,7 +311,7 @@ void pic_processor::sleep (void)
 
   do
     {
-      cycles.increment();   // burn cycles until something wakes us
+      get_cycles().increment();   // burn cycles until something wakes us
     } while(bp.have_sleep() && !bp.have_halt());
 
   if(!bp.have_sleep())
@@ -332,7 +332,7 @@ void pic_processor::pm_write (void)
 
   do
     {
-      cycles.increment();     // burn cycles until we're through writing
+      get_cycles().increment();     // burn cycles until we're through writing
     } while(bp.have_pm_write());
 
   simulation_mode = RUNNING;
@@ -374,16 +374,16 @@ public:
 
     gettimeofday(&tv_start,0);
 
-    cycle_start=cycles.value;
+    cycle_start=get_cycles().value;
 
     guint64 fc = cycle_start+100;
 
     cout << "real time start : " << future_cycle << '\n';
 
     if(future_cycle)
-      cycles.reassign_break(future_cycle, fc, this);
+      get_cycles().reassign_break(future_cycle, fc, this);
     else
-      cycles.set_break(fc, this);
+      get_cycles().set_break(fc, this);
 
     future_cycle = fc;
 
@@ -397,7 +397,7 @@ public:
 
     if(future_cycle) {
       cout << " real time clearing\n";
-      cycles.clear_break(this);
+      get_cycles().clear_break(this);
       future_cycle = 0;
     }
       
@@ -421,7 +421,7 @@ public:
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((cycles.value-cycle_start)*4.0e6*cpu->get_OSCperiod());
+    diff = system_time - ((get_cycles().value-cycle_start)*4.0e6*cpu->get_OSCperiod());
 
     guint64  idiff;
     if( diff < 0 )
@@ -474,12 +474,12 @@ public:
     }
 
 
-    guint64 fc = cycles.value + delta_cycles;
+    guint64 fc = get_cycles().value + delta_cycles;
 
     if(future_cycle)
-      cycles.reassign_break(future_cycle, fc, this);
+      get_cycles().reassign_break(future_cycle, fc, this);
     else
-      cycles.set_break(fc, this);
+      get_cycles().set_break(fc, this);
 
     future_cycle = fc;
 
@@ -543,7 +543,7 @@ void pic_processor::run (bool refresh)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  simulation_start_cycle = cycles.value;
+  simulation_start_cycle = get_cycles().value;
 
   do {
 
@@ -571,7 +571,7 @@ void pic_processor::run (bool refresh)
     realtime_cbp.stop();
 
   bp.clear_global();
-  trace.cycle_counter(cycles.value);
+  trace.cycle_counter(get_cycles().value);
 
   simulation_mode = STOPPED;
 
@@ -987,7 +987,7 @@ bool pic_processor::load_hex (const char *hex_file)
     simulation_mode = STOPPED;
 
     if(verbose)
-      cycles.dump_breakpoints();
+      get_cycles().dump_breakpoints();
 
     return true;
   }

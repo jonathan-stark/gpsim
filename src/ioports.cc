@@ -281,7 +281,7 @@ void IOPORT::put(unsigned int new_value)
 
     unsigned int diff = current_value ^ new_value;
 
-    guint64 time = cycles.value;
+    guint64 time = get_cycles().value;
 
     // Update all I/O pins that have stimuli attached to
     // them and their state is being changed by this put() operation.
@@ -496,7 +496,7 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 
       // Now, update the nodes to which the(se) pin(s) may be attached
 
-      guint64 time = cycles.value;
+      guint64 time = get_cycles().value;
       for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
           if(pins[i] && pins[i]->snode!=0)

@@ -5,6 +5,16 @@
 	* gui/gui_src_opcode.cc: removed definition of unused variable pm_size
 	  in method SourceBrowserOpcode_Window::NewProcessor()
 	* extras/lcd/makefile.mingw: added
+	* plat/win32/gpsim.nsi: added additional files from examples\scripts to
+	  the package
+	* cli/input.cc: function have_line() is needed also in non GUI mode
+	* gui/profile.cc, gui/gui_statusbar.cc, gui/gui_stopwatch.cc,
+	  gui/gui_trace.cc, src/14bit-tmrs.cc, src/16bit-registers.cc,
+	  src/eeprom.cc, src/i2c-ee.cc, src/interface.cc, src/interface.h,
+	  src/ioports.cc, src/p16x7x.cc, src/pic-processor.cc,
+	  src/pic-registers.cc, src/ssp.cc, src/stimuli.cc, src/tmr0.cc,
+	  src/uart.cc: replace direct access to cycles with a getter
+	  function get_cycles()
 
 2004-12-15 Scott Dattalo <scott@dattalo.com>
 	* src/init.cc, src/gpsim_time.cc:

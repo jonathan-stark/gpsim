@@ -459,9 +459,9 @@ void Stimulus_Node::update()
 	  delta_voltage = final_voltage - initial_voltage;
 
 	  if(bSettling) 
-	    cycles.reassign_break(future_cycle,cycles.value + 1,this);
+	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
 	  else
-	    cycles.set_break(cycles.value +1,this);
+	    get_cycles().set_break(get_cycles().value +1,this);
 
 	  bSettling = true;
 	}
@@ -520,9 +520,9 @@ void Stimulus_Node::update()
 	  delta_voltage = final_voltage - initial_voltage;
 
 	  if(bSettling) 
-	    cycles.reassign_break(future_cycle,cycles.value + 1,this);
+	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
 	  else
-	    cycles.set_break(cycles.value +1,this);
+	    get_cycles().set_break(get_cycles().value +1,this);
 
 	  bSettling = true;
 	}
@@ -622,7 +622,7 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, const
 
 double square_wave::get_Vth()
 {
-  guint64 current_time = cycles.value;
+  guint64 current_time = get_cycles().value;
 
   if(verbose)
     cout << "Getting new state of the square wave.\n";
@@ -691,7 +691,7 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
 
 double triangle_wave::get_Vth()
 {
-  guint64 current_time = cycles.value;
+  guint64 current_time = get_cycles().value;
 
   //cout << "Getting new state of the triangle wave.\n";
 
@@ -726,12 +726,12 @@ void Event::callback(void)
 
   // If there's a node attached to this stimulus, then update it.
   if(snode)
-    snode->update(cycles.value);
+    snode->update(get_cycles().value);
 
   // If the event is inactive.
 
   if(current_state == 0) {
-    cycles.set_break_delta(1,this);
+    get_cycles().set_break_delta(1,this);
     current_state = 1;
   } else {
     current_state = 0;
@@ -833,7 +833,7 @@ void asynchronous_stimulus::callback(void)
   }
 
 
-  cycles.set_break(future_cycle, this);
+  get_cycles().set_break(future_cycle, this);
 
   if(verbose) {
     cout <<"  next transition = " << future_cycle << '\n';
@@ -876,7 +876,7 @@ void asynchronous_stimulus::start(void)
     next_sample   = *sample_iterator;
     future_cycle  = next_sample.time + start_cycle;
 
-    cycles.set_break(future_cycle, this);
+    get_cycles().set_break(future_cycle, this);
 
     if(verbose) {
 
@@ -932,9 +932,9 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
     future_cycle = next_sample.time + start_cycle;
 
     if(old_future_cycle) 
-      cycles.reassign_break(old_future_cycle,future_cycle, this);
+      get_cycles().reassign_break(old_future_cycle,future_cycle, this);
     else
-      cycles.set_break(future_cycle, this);
+      get_cycles().set_break(future_cycle, this);
 
   }
 
@@ -1450,7 +1450,7 @@ void ValueStimulus::callback()
       future_cycle = current_cycle+1;
     }
 
-    cycles.set_break(future_cycle, this);
+    get_cycles().set_break(future_cycle, this);
   } else
     future_cycle = 0;
 
@@ -1503,7 +1503,7 @@ void ValueStimulus::start(void)
     next_sample   = *sample_iterator;
     future_cycle  = next_sample.time + start_cycle;
 
-    cycles.set_break(future_cycle, this);
+    get_cycles().set_break(future_cycle, this);
 
     if(verbose) {
 
@@ -1620,7 +1620,7 @@ void AttributeStimulus::callback()
       future_cycle = current_cycle+1;
     }
 
-    cycles.set_break(future_cycle, this);
+    get_cycles().set_break(future_cycle, this);
   } else
     future_cycle = 0;
 

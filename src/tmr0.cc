@@ -72,7 +72,7 @@ void TMR0::start(int restart_value, int sync)
 
   } else {
 
-    synchronized_cycle = cycles.value + sync;
+    synchronized_cycle = get_cycles().value + sync;
   
     last_cycle = value.get() * prescale;
     last_cycle = synchronized_cycle - last_cycle;
@@ -81,9 +81,9 @@ void TMR0::start(int restart_value, int sync)
 
 
     if(future_cycle)
-      cycles.reassign_break(future_cycle, fc, this);
+      get_cycles().reassign_break(future_cycle, fc, this);
     else
-      cycles.set_break(fc, this);
+      get_cycles().set_break(fc, this);
 
     future_cycle = fc;
 
@@ -155,7 +155,7 @@ unsigned int TMR0::get_value(void)
 {
   // If the TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
-  if(cycles.value <= synchronized_cycle)
+  if(get_cycles().value <= synchronized_cycle)
     return value.get();
 
   // If we're running off the external clock or the tmr is disabled
@@ -163,7 +163,7 @@ unsigned int TMR0::get_value(void)
   if(get_t0cs() || ((state & 1)==0))
     return(value.get());
 
-  int new_value = (int )((cycles.value - last_cycle)/ prescale);
+  int new_value = (int )((get_cycles().value - last_cycle)/ prescale);
 
   //  if(new_value == 256) {
     // tmr0 is about to roll over. However, the user code
@@ -177,7 +177,7 @@ unsigned int TMR0::get_value(void)
   if (new_value > 255)
     {
       cout << "TMR0: bug TMR0 is larger than 255...\n";
-      cout << "cycles.value = " << cycles.value <<
+      cout << "cycles.value = " << get_cycles().value <<
 	"  last_cycle = " << last_cycle <<
 	"  prescale = "  << prescale << 
 	"  calculated value = " << new_value << '\n';
@@ -187,7 +187,7 @@ unsigned int TMR0::get_value(void)
       // let's just go ahead and reset the logic.
       new_value &= 0xff;
       last_cycle = new_value*prescale;
-      last_cycle = cycles.value - last_cycle;
+      last_cycle = get_cycles().value - last_cycle;
       synchronized_cycle = last_cycle;
     }
 
@@ -221,7 +221,7 @@ void TMR0::new_prescale(void)
       // External clock
       if(verbose)
 	cout << "external clock\n";
-      cycles.clear_break(future_cycle);
+      get_cycles().clear_break(future_cycle);
       future_cycle = 0;
     } else {
       // Internal Clock
@@ -238,15 +238,15 @@ void TMR0::new_prescale(void)
 
     } else {
 
-    if(last_cycle < (gint64)cycles.value)
-	  new_value = (unsigned int)((cycles.value - last_cycle)/prescale);
+    if(last_cycle < (gint64)get_cycles().value)
+	  new_value = (unsigned int)((get_cycles().value - last_cycle)/prescale);
     else
 	  new_value = 0;
 
       if(new_value>=max_counts()) {
 	cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
 	cout << "   last_cycle = 0x" << hex << last_cycle << endl;
-	cout << "   cpu cycle = 0x" << hex << (cycles.value) << endl;
+	cout << "   cpu cycle = 0x" << hex << (get_cycles().value) << endl;
 
 	cout << "   prescale = 0x" << hex << prescale << endl;
 
@@ -271,14 +271,14 @@ void TMR0::new_prescale(void)
 
       // cout << " effective last_cycle " << last_cycle << '\n';
 
-      if(cycles.value <= synchronized_cycle)
-	last_cycle += (synchronized_cycle - cycles.value);
+      if(get_cycles().value <= synchronized_cycle)
+	last_cycle += (synchronized_cycle - get_cycles().value);
 
       guint64 fc = last_cycle + max_counts() * prescale;
 
       // cout << "moving break from " << future_cycle << " to " << fc << '\n';
 
-      cycles.reassign_break(future_cycle, fc, this);
+      get_cycles().reassign_break(future_cycle, fc, this);
 
       future_cycle = fc;
     }
@@ -339,10 +339,10 @@ void TMR0::callback(void)
     }
 
   value.put(0);
-  synchronized_cycle = cycles.value;
+  synchronized_cycle = get_cycles().value;
   last_cycle = synchronized_cycle;
   future_cycle = last_cycle + max_counts()*prescale;
-  cycles.set_break(future_cycle, this);
+  get_cycles().set_break(future_cycle, this);
   set_t0if();
 }
 

@@ -281,7 +281,7 @@ void _SSPBUF::set_halfclock_break( unsigned int clocks )
 	//break;
   }
   
-  cycles.set_break(cycles.value + clocks*clock_in_cycles, this);
+  get_cycles().set_break(get_cycles().value + clocks*clock_in_cycles, this);
 }
 
 void _SSPBUF::clock( unsigned int new_value )

@@ -81,11 +81,11 @@ void StopWatch_Window::Update(void)
   ////////////////////////
 
   if(count_dir<0)
-    _cyclecounter -= cycles.value - cyclecounter_last;
+    _cyclecounter -= get_cycles().value - cyclecounter_last;
   else
-    _cyclecounter += cycles.value - cyclecounter_last;
+    _cyclecounter += get_cycles().value - cyclecounter_last;
 
-  cyclecounter_last = cycles.value;
+  cyclecounter_last = get_cycles().value;
 
 
   while(cyclecounter<offset)

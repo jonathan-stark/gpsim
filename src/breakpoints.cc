@@ -144,7 +144,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 	cyc = (cyc<<32) | arg1;
 
 	// The cycle counter does its own break points.
-	if(cycles.set_break(cyc, f1, breakpoint_number))
+	if(get_cycles().set_break(cyc, f1, breakpoint_number))
 	  return(breakpoint_number);
 	else
 	  break_status[breakpoint_number].type = BREAK_CLEAR;
@@ -447,7 +447,7 @@ void Breakpoints::dump(void)
     }
 
   cout << "Internal Cycle counter break points" << endl;
-  cycles.dump_breakpoints();
+  get_cycles().dump_breakpoints();
   cout << endl;
 
   if(!have_breakpoints)
@@ -656,7 +656,7 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value)) {
+  if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != get_cycles().value)) {
 
     if(action->evaluate()) {
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
@@ -862,7 +862,7 @@ void RegisterAssertion::execute(void)
 	 << " regValue = 0x" << regValue << endl;
 
     if( (PCPU->simulation_mode == RUNNING) && 
-	(simulation_start_cycle != cycles.value)) {
+	(simulation_start_cycle != get_cycles().value)) {
 
       action->evaluate();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
@@ -1157,14 +1157,14 @@ void Log_Register_Write::put(unsigned int new_value)
 
 #endif
 
-  trace_log.register_write(replaced->address, v, cycles.value);
+  trace_log.register_write(replaced->address, v, get_cycles().value);
 
 }
 
 void Log_Register_Write::putRV(RegisterValue rv)
 {
   replaced->putRV(rv);
-  trace_log.register_write(replaced->address, rv.data, cycles.value);
+  trace_log.register_write(replaced->address, rv.data, get_cycles().value);
 }
 
 void Log_Register_Write::setbit(unsigned int bit_number, bool new_value)
@@ -1172,14 +1172,14 @@ void Log_Register_Write::setbit(unsigned int bit_number, bool new_value)
 
   replaced->setbit(bit_number,new_value);
   
-  trace_log.register_write( replaced->address, replaced->get_value(), cycles.value);
+  trace_log.register_write( replaced->address, replaced->get_value(), get_cycles().value);
 
 }
 
 unsigned int Log_Register_Read::get(void)
 {
   int v = replaced->get();
-  trace_log.register_read(replaced->address, v, cycles.value);
+  trace_log.register_read(replaced->address, v, get_cycles().value);
   return v;
 
 }
@@ -1187,7 +1187,7 @@ unsigned int Log_Register_Read::get(void)
 RegisterValue Log_Register_Read::getRV(void)
 {
   RegisterValue rv = replaced->getRV();
-  trace_log.register_read(replaced->address, rv.data, cycles.value);
+  trace_log.register_read(replaced->address, rv.data, get_cycles().value);
   return rv;
 
 }
@@ -1195,7 +1195,7 @@ RegisterValue Log_Register_Read::getRV(void)
 bool Log_Register_Read::get_bit(unsigned int bit_number)
 {
   bool v = replaced->get_bit(bit_number);
-  trace_log.register_read(replaced->address, v, cycles.value);
+  trace_log.register_read(replaced->address, v, get_cycles().value);
   return v;
 
 }
@@ -1211,7 +1211,7 @@ unsigned int Log_Register_Read_value::get(void)
 
   if( (v & break_mask) == break_value)
     {
-      trace_log.register_read_value(replaced->address, v, cycles.value);
+      trace_log.register_read_value(replaced->address, v, get_cycles().value);
     }
 
   return v;
@@ -1223,7 +1223,7 @@ RegisterValue Log_Register_Read_value::getRV(void)
 
   if( (rv.data & break_mask) == break_value)
     {
-      trace_log.register_read_value(replaced->address, rv.data, cycles.value);
+      trace_log.register_read_value(replaced->address, rv.data, get_cycles().value);
     }
 
   return rv;
@@ -1235,7 +1235,7 @@ bool Log_Register_Read_value::get_bit(unsigned int bit_number)
   unsigned int mask = 1<<(bit_number & 7);
 
   if( (break_mask & mask) && (v & mask) == (break_value&mask))
-    trace_log.register_read_value(replaced->address, v, cycles.value);
+    trace_log.register_read_value(replaced->address, v, get_cycles().value);
 
   return replaced->get_bit(bit_number);
 }
@@ -1250,7 +1250,7 @@ void Log_Register_Write_value::put(unsigned int new_value)
 
   if((new_value & break_mask) == break_value)
     {
-      trace_log.register_write_value(replaced->address, break_value, cycles.value);
+      trace_log.register_write_value(replaced->address, break_value, get_cycles().value);
     }
   replaced->put(new_value);
 }
@@ -1260,7 +1260,7 @@ void Log_Register_Write_value::putRV(RegisterValue new_rv)
 
   if((new_rv.data & break_mask) == break_value)
     {
-      trace_log.register_write_value(replaced->address, break_value, cycles.value);
+      trace_log.register_write_value(replaced->address, break_value, get_cycles().value);
     }
   replaced->putRV(new_rv);
 }

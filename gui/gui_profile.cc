@@ -2018,7 +2018,7 @@ public:
       return;
 
     if(startcycle==END_OF_TIME) {
-      startcycle   = cycles.value;
+      startcycle   = get_cycles().value;
       startaddress = pw->gp->cpu->pc->get_raw_value();
     }
   }
@@ -2049,7 +2049,7 @@ public:
 
     if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME) {
 
-      stopcycle = cycles.value;
+      stopcycle = get_cycles().value;
       if(startcycle==stopcycle)
 	// This was probably an attempt to measure the whole loop.
 	// Set stopcycle to unset, and wait for the next one
