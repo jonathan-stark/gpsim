@@ -1399,6 +1399,40 @@ void ProgramMemoryAccess::put(unsigned int address, instruction *new_instruction
 
 }
 
+void ProgramMemoryAccess::remove(unsigned int address, instruction *bp_instruction)
+{
+  if(!bp_instruction)
+    return;
+
+  instruction *instr = cpu->program_memory[cpu->map_pm_address2index(address)];
+  if (typeid(Breakpoint_Instruction) == typeid(*instr) ||
+    typeid(RegisterAssertion) == typeid(*instr)) {
+    Breakpoint_Instruction* toRemove = (Breakpoint_Instruction*)bp_instruction;
+    Breakpoint_Instruction *last = (Breakpoint_Instruction*)instr;
+    if (toRemove == last) {
+      cpu->program_memory[cpu->map_pm_address2index(address)] = last->replaced;
+      return;
+    }
+    do {
+      if(typeid(Breakpoint_Instruction) != typeid(*last->replaced) &&
+        typeid(RegisterAssertion) != typeid(*last->replaced))
+        // not found
+        return;
+      Breakpoint_Instruction *replaced = (Breakpoint_Instruction*)last->replaced;
+      if(toRemove == replaced) {
+        // remove from the chain
+        last->replaced = replaced->replaced;
+        return;
+      }
+      last = replaced;
+    }
+    while(typeid(Breakpoint_Instruction) != typeid(*last));
+  }
+  // if we get here the object was not in the list or was
+  // not a Breakpoint_Instruction
+//  assert(typeid(*instr) != typeid(Breakpoint_Instruction));
+}
+
 instruction *ProgramMemoryAccess::get(unsigned int address)
 {
   if(address < cpu->program_memory_size())

@@ -1,3 +1,11 @@
+2005-03-24 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/breakpoints.cc, src/processor.cc, h, cli/cmd_clear.cc:
+	Fixed crash in Breakpoints::clear() that I reintroduced in my last checkin.
+	Also Fixed the original memory leak by properly removing chained 
+	Breakpoint_Instruction objects from the instruction chain when clearing a
+	break object. When the chain is properly maintained the object may be
+	deleted.
+
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: changed the comment text color to 'dim gray'
 	

@@ -66,7 +66,7 @@ void cmd_clear::clear(Expression *expr)
         char szParam[20];
         ((String*)v)->get(szParam, 20);
         if(strcmp(szParam, "all") == 0) {
-          bp.clear_all(NULL);
+          bp.clear_all(get_active_cpu());
         }
       }
       else if (typeid(*v) == typeid(Integer)) {
