@@ -1,3 +1,8 @@
+2005-03-21 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/breakpoints.cc, src/processor.h: created a notification
+	to Processor when breakpoints are set or cleared. Cleaned up
+	code in breakpoints.cc.
+
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc: The NEGF instruction for the 18f
 	family was erroneously writing the negated result to W.
