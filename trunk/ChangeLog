@@ -1,4 +1,9 @@
 2004-10-20 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-instructions.cc: Fixed bug in DECF instruction.
+	* regression/instructions_16bit/instructions_16bit.asm: Added
+	decf instruction to the regression test.
+	
+2004-10-20 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h, src/stimuli.cc, src/stimuli.h:
 	PORTB pullups updated. 
 	Added an overloaded update() member to Stimulus_Node that doesn't

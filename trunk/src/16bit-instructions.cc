@@ -677,23 +677,22 @@ void DAW::execute(void)
 
 void DECF16::execute(void)
 {
-  unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu->registers[register_address] 
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (source->get() - 1)&0xff;
+  unsigned int src_value = source->get();
+  unsigned int new_value = src_value - 1;
 
   if(destination)
-    source->put(new_value);      // Result goes to source
+    source->put(new_value & 0xff);      // Result goes to source
   else
-    cpu16->W->put(new_value);
+    cpu16->W->put(new_value & 0xff);
 
-  cpu16->status->put_N_Z(new_value);
+  //  cpu16->status->put_N_Z(new_value);
+  cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value,src_value,1);
 
   cpu16->pc->increment();
 
