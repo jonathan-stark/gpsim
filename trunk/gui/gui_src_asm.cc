@@ -1820,8 +1820,8 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	gtk_window_set_title (GTK_WINDOW (dialog), "Source browser settings");
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 
 	// Source font
@@ -1953,8 +1953,8 @@ int gui_message(char *message)
 	
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 	hbox = gtk_hbox_new(0,0);
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
@@ -2014,8 +2014,8 @@ int gui_question(char *question, char *a, char *b)
 	dialog = gtk_dialog_new();
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 	
 	hbox = gtk_hbox_new(0,0);
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
@@ -2374,8 +2374,8 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
     gtk_signal_connect(GTK_OBJECT(search.window),
 		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect(GTK_OBJECT(search.window),
-		       "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)search.window);
+    gtk_signal_connect_object(GTK_OBJECT(search.window),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(search.window));
 
     gtk_window_set_title(GTK_WINDOW(search.window),"Find");
     
@@ -2425,11 +2425,11 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     button = gtk_button_new_with_label("Close");
     gtk_widget_show(button);
     gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(search.window)->action_area),button);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)search.window);
+    gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+			      GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(search.window));
 
-  gtk_signal_connect_after(GTK_OBJECT(sbaw->sbw.gui_obj.window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),sbaw);
+    gtk_signal_connect_after(GTK_OBJECT(sbaw->sbw.gui_obj.window), "configure_event",
+			     GTK_SIGNAL_FUNC(gui_object_configure_event),sbaw);
 
     gtk_widget_show(sbaw->sbw.gui_obj.window);
 

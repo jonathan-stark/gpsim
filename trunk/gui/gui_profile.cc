@@ -246,8 +246,10 @@ static void add_range_dialog(Profile_Window *pw)
     {
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog),"Add range");
-	gtk_signal_connect(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",
+				  GTK_SIGNAL_FUNC(gtk_widget_hide),
+				  GTK_OBJECT(dialog));
 
 	label=gtk_label_new("addresses can be entered either as symbols, or as values. \nValues can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 	gtk_widget_show(label);
@@ -377,11 +379,13 @@ open_plotsave_dialog(Profile_Window *pw)
 
 	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect(GTK_OBJECT(window),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
-	gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    (gpointer)&window);
+	gtk_signal_connect_object(GTK_OBJECT(window),
+				  "delete_event",
+				  GTK_SIGNAL_FUNC(gtk_widget_hide),
+				  GTK_OBJECT(window));
+	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				   GTK_OBJECT(window));
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -716,11 +720,11 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
 	gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect(GTK_OBJECT(window1),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window1);
-	gtk_signal_connect (GTK_OBJECT (window1), "destroy",
-			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    (gpointer)&window1);
+	gtk_signal_connect_object(GTK_OBJECT(window1),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
+	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				   GTK_OBJECT(window1));
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -1008,11 +1012,11 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
 	gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect(GTK_OBJECT(window1),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window1);
-	gtk_signal_connect (GTK_OBJECT (window1), "destroy",
-			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			    (gpointer)&window1);
+	gtk_signal_connect_object(GTK_OBJECT(window1),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
+	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				   GTK_OBJECT(window1));
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -2188,8 +2192,8 @@ BuildProfileWindow(Profile_Window *pw)
 
   ((GUI_Object*)pw)->window=window;
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 

@@ -669,8 +669,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect(GTK_OBJECT(dialog),
-			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 
 	// Normal font

@@ -94,8 +94,8 @@ show_message (char *title, char *message)
 
   window = gtk_dialog_new ();
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
 
   gtk_window_set_title (GTK_WINDOW (window), title);
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -318,9 +318,9 @@ fileopen_dialog(gpointer             callback_data,
 
       gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-      gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			  &window);
+      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				 GTK_OBJECT(window));
 
       gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			  "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -579,9 +579,9 @@ void create_dispatcher (void)
       gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
       
       
-      gtk_signal_connect (GTK_OBJECT (dispatcher_window), "destroy",
-			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			  &dispatcher_window);
+      gtk_signal_connect_object (GTK_OBJECT (dispatcher_window), "destroy",
+				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+				 GTK_OBJECT(dispatcher_window));
       gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
 			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
 			  NULL);

@@ -234,8 +234,8 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 
     gtk_container_set_border_width(GTK_CONTAINER(dialog),30);
 
-    gtk_signal_connect(GTK_OBJECT(dialog),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),(gpointer)dialog);
+    gtk_signal_connect_object(GTK_OBJECT(dialog),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
 
     for(i=0;i<COLUMNS;i++)
     {
@@ -254,8 +254,8 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
 		       FALSE,FALSE,10);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(gtk_widget_destroy),(gpointer)dialog);
+    gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+			      GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
     gtk_widget_grab_default(button);
 
@@ -696,8 +696,8 @@ int BuildWatchWindow(Watch_Window *ww)
   gtk_widget_set_uposition(GTK_WIDGET(ww->gui_obj.window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(ww->gui_obj.window),ww->gui_obj.name,"Gpsim");
   
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   gtk_signal_connect (GTK_OBJECT (ww->gui_obj.window), "delete_event",
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)ww);
   gtk_signal_connect_after(GTK_OBJECT(ww->gui_obj.window), "configure_event",
