@@ -82,7 +82,6 @@ public:
   bool ee_busy;
   bool nxtbit;
 
-  IOPORT * port;
   I2C_EE_SCL * scl;
   I2C_EE_SDA * sda;
 

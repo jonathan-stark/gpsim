@@ -296,15 +296,32 @@ void P12CE518::create(void)
   e->set_cpu(this);
   e->initialize ( 0x10 );
 
+  // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
+  // to the internal I2C device.
+  gpio.valid_iopins |= 0xc0;
+  gpio.num_iopins = 8;
+
+  RegisterValue por_value(0xc0,0x00);
+  gpio.value       = por_value;
+  gpio.por_value   = por_value;
+  gpio.wdtr_value  = por_value;
+  gpio.putRV(por_value);
+
   if(verbose)
     cout << " ... create additional (internal) I/O\n";
   scl = new Stimulus_Node ( "EE_SCL" );
 
-  scl->attach_stimulus ( package->get_pin(7) );
+  scl->attach_stimulus ( new IO_bi_directional(&gpio,7) );
 
   sda = new Stimulus_Node ( "EE_SDA" );
 
-  sda->attach_stimulus ( package->get_pin(6) );
+  IO_open_collector *io_sda = new IO_open_collector(&gpio,6);
+
+  // enable the pullup resistor.
+  if(io_sda)
+    io_sda->update_pullup(true);
+
+  sda->attach_stimulus (io_sda);
 
   e->attach ( scl, sda );
 

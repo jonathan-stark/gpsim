@@ -52,10 +52,8 @@ public:
 
   I2C_EE *eeprom;
 
-  I2C_EE_SCL (I2C_EE *_eeprom,
-	       IOPORT *i, 
-	       unsigned int b, 
-	       char *opt_name=NULL) : IO_input(i,b,opt_name) { 
+  I2C_EE_SCL (I2C_EE *_eeprom, char *opt_name=NULL) 
+    : IO_input((IOPORT *)0,1,opt_name) { 
 
     eeprom = _eeprom;
 
@@ -70,19 +68,15 @@ public:
   };
 
   
-  void put_digital_state(bool new_dstate) { 
+  void set_digital_state(bool new_dstate) { 
     bool diff = new_dstate ^ digital_state;
-    digital_state = new_dstate;
 
-    //    cout << "eeprom scl put_digital_state " << digital_state << '\n';
+    cout << "eeprom scl set_digital_state " << new_dstate << '\n';
     if( eeprom && diff ) {
 
-      //  cout << "      ... that's an edge, so call handler\n";
+      cout << "      ... that's an edge, so call handler\n";
+      digital_state = new_dstate;
       eeprom->new_scl_edge(digital_state);
-
-      if(iop) // this check should not be necessary...
-	iop->setbit(iobit,digital_state);
-
 
     }
 
@@ -97,46 +91,27 @@ public:
 //
 //
 
-class I2C_EE_SDA : public IO_open_collector
+class I2C_EE_SDA : public IO_bi_directional
 {
 public:
 
   I2C_EE *eeprom;
   bool read_state;
 
-  I2C_EE_SDA (I2C_EE *_eeprom,
-	       IOPORT *i, 
-	       unsigned int b, 
-	       char *opt_name=NULL) : IO_open_collector(i,b,opt_name) { 
+  I2C_EE_SDA (I2C_EE *_eeprom, char *opt_name=NULL) 
+    : IO_bi_directional((IOPORT *)0,1,opt_name) { 
 
     eeprom = _eeprom;
 
     digital_state = true;
     read_state = 1;
-    update_direction(0);   // Make the pin an output.
+
+    // Make the pin an output.
+    update_direction(IO_bi_directional::DIR_INPUT);
 
   };
+
   /*
-  void put_digital_state(bool new_dstate) { 
-
-
-    bool diff = new_dstate ^ read_state;
-    read_state = new_dstate;
-
-//    cout << "I2C_EE_SDA put_digital_state " << read_state << '\n';
-    if( eeprom && diff ) {
-
-//        cout << "      ... that's an edge, so call handler\n";
-      eeprom->new_sda_edge(read_state);
-
-//      if(iop) // this check should not be necessary...
-//	iop->setbit(iobit,digital_state);
-    }
-
-
-  }
-  */
-
   void put_digital_state( bool new_digital_state) {
 
     Register *port = get_iop();
@@ -163,7 +138,21 @@ public:
       }
     }
   }
+  */
 
+  void set_digital_state(bool new_dstate) {
+    bool diff = new_dstate ^ digital_state;
+
+    cout << "eeprom sda set_digital_state " << new_dstate << '\n';
+    if( eeprom && diff ) {
+
+      cout << "      ... that's an edge, so call handler\n";
+      eeprom->new_sda_edge(new_dstate);
+      digital_state = new_dstate;
+
+    }
+
+  }
 };
 
 
@@ -213,14 +202,6 @@ void I2C_EE::start_write(void)
 
 void I2C_EE::write_is_complete(void) 
 {
-
-//  assert(intcon != 0);
-
-//  eecon1.value = (eecon1.value  & (~eecon1.WR)) | eecon1.EEIF;
-
-//  intcon->peripheral_interrupt();
-
-
 }
 
 
@@ -228,20 +209,8 @@ void I2C_EE::write_is_complete(void)
 void I2C_EE::callback(void)
 {
 
-    ee_busy = false;
-    cout << "I2C_EE::callback() - write cycle is complete\n";
-//  switch ( state ) {
-//  case I2C_EE::EEREAD:
-    //cout << "eeread\n";
-
-//    eecon2.unarm();
-//    eedata.value = rom[eeadr.value]->get();
-//    eecon1.value &= (~EECON1::RD);
-//    break;
-
-//  default:
-//    cout << "I2C_EE::callback() bad eeprom state " << state << '\n';
-//  }
+  ee_busy = false;
+  cout << "I2C_EE::callback() - write cycle is complete\n";
 }
 
 
@@ -274,12 +243,12 @@ void I2C_EE::new_scl_edge ( bool direction )
     {
         // Rising edge
         nxtbit = sda->read_state;
-//        cout << "I2C_EE SCL : Rising edge, data=" << nxtbit << "\n";
+        cout << "I2C_EE SCL : Rising edge, data=" << nxtbit << "\n";
     }
     else
     {
         // Falling edge
-//        cout << "I2C_EE SCL : Falling edge\n";
+        cout << "I2C_EE SCL : Falling edge\n";
         switch ( bus_state )
         {
             case I2C_EE::IDLE :
@@ -407,7 +376,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
         }
     }
-//    cout << "I2C_EE new bus state = " << bus_state << "\n";
+    cout << "I2C_EE new bus state = " << bus_state << "\n";
 }
 
 
@@ -493,9 +462,8 @@ void I2C_EE::initialize(unsigned int new_rom_size)
 
     }
 
-  port = new IOPORT ( 2 );
-  scl = new I2C_EE_SCL ( this, port, 0, "SCL" );
-  sda = new I2C_EE_SDA ( this, port, 1, "SDA" );
+  scl = new I2C_EE_SCL ( this, "SCL" );
+  sda = new I2C_EE_SDA ( this, "SDA" );
 
   if(cpu) {
     cpu->ema.set_cpu(cpu);

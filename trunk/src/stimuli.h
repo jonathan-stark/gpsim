@@ -343,7 +343,7 @@ public:
 };
 
 
-class IO_open_collector : public IO_bi_directional
+class IO_open_collector : public IO_bi_directional_pu
 {
 public:
 

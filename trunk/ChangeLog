@@ -1,3 +1,8 @@
+2004-09-13 Scott Dattalo <scott@dattalo.com>
+	* src/i2c-ee.cc, src/i2c-ee.h, src/ioports.cc, src/p12x.cc,
+	src/stimuli.cc, src/stimuli.h: Partially check in for work
+	on the 12ce518 bug (internal I/O pins).
+
 2004-09-12 Scott Dattalo <scott@dattalo.com>
 	* cli/Makefile.am, cli/errors.cc, cli/errors.h:
 	* src/Makefile.am, src/errors.cc, src/errors.h:
