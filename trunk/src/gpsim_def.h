@@ -33,4 +33,6 @@ Boston, MA 02111-1307, USA.  */
 
 #define DEFAULT_GUI_UPDATE_RATE   0x100000
 
+#define MAX_HLL_FILES 20
+
 #endif // __GPSIM_VERSION_H__

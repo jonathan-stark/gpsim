@@ -887,6 +887,7 @@ void gpsim_hll_step_over(unsigned int processor_id)
     unsigned int address;
     unsigned int initial_stack_depth;
     unsigned int initial_pc;
+    unsigned int initial_id;
 
     pic_processor *pic = get_processor(processor_id);
 
@@ -899,6 +900,7 @@ void gpsim_hll_step_over(unsigned int processor_id)
     initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
 
     initial_pc = gpsim_get_pc_value(processor_id);
+    initial_id = gpsim_get_file_id(processor_id, initial_pc);
 
     while(1)
     {
@@ -913,7 +915,10 @@ void gpsim_hll_step_over(unsigned int processor_id)
 	    break;
 	if(gpsim_get_hll_src_line(processor_id, gpsim_get_pc_value(processor_id))
 	   != initial_line)
-	    break;
+	{
+	    if(gpsim_get_file_id(processor_id, gpsim_get_pc_value(processor_id))==initial_id)
+		break;
+	}
     }
 
 }
