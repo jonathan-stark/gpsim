@@ -55,10 +55,42 @@ void Value::set(int i)
   gint64 i64 = i;
   set(i64);
 }
+
 void Value::set(Value *v)
 {
   throw new Error(" cannot assign a Value to a " + showType());
 }
+
+void Value::set(Expression *expr)
+{
+  Value *v=0;
+
+  try {
+
+    if(!expr)
+      throw new Error(" null expression ");
+
+    v = expr->evaluate();
+    if(!v)
+      throw new Error(" cannot evaluate expression ");
+
+    set(v);
+
+  }
+
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
+
+  delete v;
+  delete expr;
+
+}
+
 
 void Value::get(gint64 &i)
 {
@@ -352,7 +384,10 @@ void Integer::set(gint64 i)
 {
   value = i;
 }
-
+void Integer::set(int i)
+{
+  value = i;
+}
 void Integer::set(Value *v)
 {
   Integer *iv = typeCheck(v,string("set "));
@@ -370,7 +405,10 @@ void Integer::get(double &d)
 
 string Integer::toString()
 {
-  return toString("%d");
+  char buf[256];
+  int i = value;
+  snprintf(buf,sizeof(buf)," = %d = 0x%08X",i,i);
+  return (name() +string(buf));
 }
 
 

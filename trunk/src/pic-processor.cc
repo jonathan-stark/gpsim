@@ -216,8 +216,7 @@ Processor * add_processor(char * processor_type, char * processor_new_name)
 	 << processor_new_name << "'\n";
 
   ProcessorConstructor *pc = Generic.find(processor_type);
-  if(pc)
-    cout << "Found " << pc->names[1] << endl;
+
 
   if(pc) {
 
@@ -687,8 +686,6 @@ void pic_processor::reset (RESET_TYPE r)
       cout << " --- Soft Reset (not fully implemented)\n";
       return;
     }
-
-  cout << " --- Reset\n";
 
   for(unsigned int i=0; i<register_memory_size(); i++)
     registers[i]->reset(r);

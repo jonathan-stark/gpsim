@@ -2657,6 +2657,29 @@ void GuiModule::Refresh()
 
 //========================================================================
 //========================================================================
+class PositionAttribute : public Float
+{
+protected:
+  Breadboard_Window *bbw;
+public:
+  PositionAttribute(Breadboard_Window *_bbw,const char *n, double v);
+  void set(Value *v);
+};
+
+PositionAttribute::PositionAttribute(Breadboard_Window *_bbw, const char *n, double v)
+  : Float(v), bbw(_bbw)
+{
+  new_name((char*)n);
+}
+
+void PositionAttribute::set(Value *v)
+{
+  Float::set(v);
+  if(bbw)
+    bbw->Update();
+}
+
+/*
 Value *newFloatAttribute(const char *n, double v)
 {
   Float *f = new Float(v);
@@ -2664,7 +2687,7 @@ Value *newFloatAttribute(const char *n, double v)
 
   return f;
 }
-
+*/
 
 void GuiModule::Build()
 {
@@ -2696,8 +2719,8 @@ void GuiModule::Build()
   Value *ypos = module->get_attribute("ypos", false);
   if(!xpos || !ypos) {
 
-      xpos = newFloatAttribute("xpos",(double)sx);
-      ypos = newFloatAttribute("ypos",(double)sy);
+    xpos = new PositionAttribute(bbw,"xpos",(double)sx);//newFloatAttribute("xpos",(double)sx);
+    ypos = new PositionAttribute(bbw,"ypos",(double)sy);//newFloatAttribute("ypos",(double)sy);
 
       module->add_attribute(xpos);
       module->add_attribute(ypos);

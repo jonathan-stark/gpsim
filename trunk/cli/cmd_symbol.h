@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_SYMBOL_H__
 
 class Expression;
-class symbol;
+class Value;
 
 class cmd_symbol : public command
 {
@@ -32,7 +32,7 @@ public:
 
   void dump_all(void);
   void dump_one(char *sym_name);
-  void dump_one(symbol *);
+  void dump_one(Value *);
 
   void add_one(char *sym_name, char *sym_type, Expression *);
 };

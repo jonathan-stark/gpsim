@@ -1,3 +1,21 @@
+2004-11-08 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_attach.h, cli/cmd_load.cc, cli/cmd_symbol.cc, 
+	cli/cmd_symbol.h, cli/command.cc, cli/parse.yy, cli/scan.ll
+	cli/socket.cc: More attibute updates
+	* gui/gui_breadboard.cc, gui/gui_menu.cc, gui/gui_object.cc,
+	gui/gui_profile.cc, gui/gui_regwin.cc, gui/gui_src_asm.cc,
+	gui/gui_stack.cc, gui/gui_statusbar.cc, gui/gui_symbols.cc:
+	- Removed debugging printfs.
+	- Changed attribute handling.
+	* src/cod.cc, src/expr.cc, src/expr.h, src/gpsim_object.cc,
+	src/modules.cc, src/p16x8x.cc, src/pic-processor.cc, src/processor.cc
+	src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h,
+	src/tmr0.cc, src/value.cc, src/value.h:
+	- Removed debugging statements
+	- Added the attribute_symbol class.
+	- Added more methods to the derived symbol classes to handle type 
+	casting.
+
 2004-11-07 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, plat/win32/gpsim.nsi, src/makefile.mingw,
 	  src/src.vcproj: MSVC sync

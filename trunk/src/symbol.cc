@@ -57,8 +57,8 @@ int open_cod_file(Processor **, const char *);
 //map <string, symbol *, less<string> > st;
 //map <string, symbol *, less<string> >::iterator sti;
 
-list <symbol *> st;
-list <symbol *>::iterator sti;
+list <Value *> st;
+list <Value *>::iterator sti;
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
@@ -126,12 +126,15 @@ void Symbol_Table::add_w(WREG *new_w)
 
 }
 
-void Symbol_Table::add_constant(char *new_name, int value)
+void Symbol_Table::add_constant(char *_name, int value)
 {
 
-  constant_symbol *sc = new constant_symbol(new_name, value);
+  //  constant_symbol *sc = new constant_symbol(new_name, value);
 
-  st.push_back(sc);
+  Integer *i = new Integer(value);
+  i->new_name(_name);
+
+  st.push_back(i);
 
 }
 
@@ -163,21 +166,20 @@ void Symbol_Table::add_module(Module * m, const char *cPname)
 void Symbol_Table::remove_module(Module * m)
 {
   sti = st.begin();
-  symbol *sym;
+  Value *sym;
 
-  while( sti != st.end())
-    {
-      sym = *sti;
-      if(sym->isa() == SYMBOL_MODULE &&
-        sym->name() == m->name())
-        {
-          st.remove(sym);
-          cout << "found and removed\n";
-          return;
-        }
+  while( sti != st.end()) {
 
-      sti++;
+    sym = *sti;
+    if((typeid(sym) == typeid(module_symbol)) &&
+       sym->name() == m->name()) {
+
+      st.remove(sym);
+      return;
     }
+
+    sti++;
+  }
 }
 
 void Symbol_Table::add(char *new_name, char *new_type, int value)
@@ -218,29 +220,28 @@ void Symbol_Table::add(char *new_name, char *new_type, int value)
 
 }
 
-symbol * Symbol_Table::find(char *str)
+Value * Symbol_Table::find(char *str)
 {
   string s =  string(str);
   return(find(&s));
 
 }
 
-symbol * Symbol_Table::find(SYMBOL_TYPE symt, char *str)
+Value * Symbol_Table::find(type_info const &symt, char *str)
 {
 
   string s =  string(str);
-  symbol *sym;
-
   sti = st.begin();
 
-  while( sti != st.end())
-    {
-      sym = *sti;
-      if((sym->name() == s) && (sym->isa() == symt))
-	return(sym);
+  while( sti != st.end()) {
 
-      sti++;
-    }
+    Value *val = *sti;
+    
+    if(val && (val->name() == s) && (typeid(val) == symt))
+      return(val);
+
+    sti++;
+  }
 
   return 0;
 
@@ -249,12 +250,10 @@ symbol * Symbol_Table::find(SYMBOL_TYPE symt, char *str)
 void Symbol_Table::dump_one(string *s)
 {
 
-  symbol * sym = find(s);
+  Value *val = find(s);
 
-  if(sym)
-    {
-      sym->print();
-    }
+  if(val)
+    cout << val->toString() << endl;
 }
 
 void Symbol_Table::dump_one(char *str)
@@ -269,50 +268,48 @@ void Symbol_Table::dump_all(void)
   cout << "  Symbol Table\n";
   sti = st.begin();
 
-  symbol *sym;
-
   while( sti != st.end())
     {
-      sym = *sti;
-      if(sym)
-	if(sym->isa() != SYMBOL_LINE_NUMBER)
-	  sym->print();
+      Value *val = *sti;
+
+      if(val &&(typeid(*val) != typeid(line_number_symbol)))
+	cout << val->showType() << ": " << val->toString() << endl;
 
       sti++;
     }
 }
 
 
-void Symbol_Table::dump_type(SYMBOL_TYPE symt)
+void Symbol_Table::dump_type(type_info const &symt)
 {
+
+
   // Now loop through the whole table and display all instances of the type of interest
 
   int first=1;     // On the first encounter of one, display the title
 
   sti = st.begin();
 
-  symbol *sym;
+  while( sti != st.end()) {
 
-  while( sti != st.end())
-    {
-      sym = *sti;
-      if(sym)
-	if(sym->isa() == symt) {
-	  if(first) {
-	    first = 0;
-	    cout << "Symbol Table for \"" << sym->type_name() << "\"\n";
-	  }
+    Value *sym = *sti;
+    if(sym && (typeid(*sym) == symt)) {
+      if(first) {
+	first = 0;
+	cout << "Symbol Table for \"" << sym->showType() << "\"\n";
+      }
 
-	  sym->print();
-	}
-
-      sti++;
+      cout << sym->toString() << endl;
     }
+
+    sti++;
+  }
   
   if(first)
     cout << "No symbols found\n";
 
 }
+
 
 //--------------------------------------------
 
@@ -323,71 +320,6 @@ int  load_symbol_file(Processor **cpu, const char *filename)
 
 }
 
-//*****************************************************************
-// *** KNOWN CHANGE ***
-//  Support functions that will get replaced by the CORBA interface.
-//  
-#if 0
-//--------------------------------------------
-void symbol_dump_all(void)
-{
-  symbol_table.dump_all();
-
-}
-//--------------------------------------------
-void symbol_dump_one(char *sym_name)
-{
-  symbol_table.dump_one(sym_name);
-}
-
-//--------------------------------------------
-void symbol_add_one(char *sym_name, char *sym_type, int value)
-{
-
-  symbol_table.add(sym_name,sym_type,value);
-}
-
-//--------------------------------------------
-int get_symbol_value(char *sym, int *sym_value)
-{
-
-  symbol *s = symbol_table.find(sym);
-
-  if(s)
-    {
-      *sym_value = s->get_value();
-      return 1;
-    }
-
-  return 0; // symbol not found
-
-}
-
-//--------------------------------------------
-void print_symbol(char *sym)
-{
-
-  symbol *s = symbol_table.find(sym);
-
-  if(s)
-    s->print();
-  else 
-    cout << sym << " was not found in the symbol table\n";
-
-}
-
-void update_symbol_value(char *sym, int new_value)
-{
-
-  symbol *s = symbol_table.find(sym);
-
-  if(s)
-    s->put_value(new_value);
-  else 
-    cout << sym << " was not found in the symbol table\n";
-
-}
-#endif
 //------------------------------------------------------------------------
 // symbols
 //
@@ -395,8 +327,7 @@ void update_symbol_value(char *sym, int new_value)
 
 symbol::symbol(char *_name)
 {
-  if(_name)
-    new_name(_name);
+  new_name(_name);
 }
 symbol::symbol(string &_name)
 {
@@ -407,83 +338,22 @@ symbol::~symbol(void)
 {
 }
 
-symbol *symbol::copy()
-{
-
-  throw new Error("symbol can't be copied");
-  return 0;
-}
-
-void symbol::set(int new_value)
-{
-  throw new Error("cannot assign value to symbol");
-}
-
-void symbol::set(Value *v)
-{
-  throw new Error("cannot assign value to symbol");
-}
-
-void symbol::get(int &i)
-{
-  throw new Error("cannot get value of symbol");
-
-}
-
-//------------------------------------------------------------------------
-void symbol::print(void)
-{
-
-  cout << name() << " type " << type_name();
-  
-  cout << endl;
-
-}
-
-void symbol::assignTo(Expression *expr)
-{
-  try {
-
-    if(!expr)
-      throw new Error(" null expression ");
-
-    Value *v = expr->evaluate();
-    if(!v)
-      throw new Error(" cannot evaluate expression ");
-
-    set(v);
-
-  
-    delete v;
-    delete expr;
-  }
-
-
-  catch (Error *err) {
-    if(err)
-      cout << "ERROR:" << err->toString() << endl;
-    delete err;
-  }
-
-}
-
 //------------------------------------------------------------------------
 string symbol::toString()
 {
   return showType();
 }
 
-symbol * Symbol_Table::find(string *s)
+Value * Symbol_Table::find(string *s)
 {
 
   sti = st.begin();
-  symbol *sym;
 
   while( sti != st.end())
     {
-      sym = *sti;
-      if(sym->name() == *s)
-	return(sym);
+      Value *val = *sti;
+      if(val && val->name() == *s)
+	return(val);
 
       sti++;
     }
@@ -500,18 +370,9 @@ node_symbol::node_symbol(Stimulus_Node *_sn)
     new_name(stimulus_node->name());
 }
 
-void node_symbol::print(void)
+string node_symbol::toString(void)
 {
-  if(stimulus_node) {
-    cout << "node: " << stimulus_node->name() << " voltage = " << stimulus_node->get_nodeVoltage() << endl;
-    stimulus *s = stimulus_node->stimuli;
-    while(s) {
-      cout << '\t' << s->name() << '\n';
-      s = s->next;
-    }
-  } else
-    cout << "has no attached stimuli\n";
-
+  return string("node:")+name();
 }
 
 //------------------------------------------------------------------------
@@ -524,25 +385,20 @@ register_symbol::register_symbol(char *_name, Register *_reg)
     new_name(reg->name());
 }
 
-void register_symbol::print(void)
+string register_symbol::toString()
 {
   if(reg) {
-    char str[33];
+    char buff[256];
+    char bits[256];
 
-    cout << name() << hex << " [0x" << reg->address << "] = 0x" 
-	 << reg->get_value()
-	 << " = 0b" << (reg->toBitStr(str,sizeof(str)))
-	 << endl;
+    reg->toBitStr(bits,sizeof(bits));
+
+    snprintf(buff,sizeof(buff)," [0x%x] = 0x%x = 0b",reg->address, reg->get_value());
+
+    return reg->name() + string(buff) + string(bits);
   }
+  return string("");
 }
-/*
-unsigned int register_symbol::get_value(void)
-{
-  if(reg)
-    return reg->address;
-  return 0;
-}
-*/
 
 void  register_symbol::get(int &i)
 {
@@ -577,10 +433,12 @@ w_symbol::w_symbol(char *_name, Register *_reg)
   : register_symbol(_name, _reg)
 {
 }
+/*
 void w_symbol::print(void)
 {
   cout << reg->name() << hex << " = 0x" << reg->get_value() <<'\n';
 }
+*/
 
 //------------------------------------------------------------------------
 ioport_symbol::ioport_symbol(IOPORT *_ioport)
@@ -618,63 +476,50 @@ void  ioport_symbol::get(int &i)
     i = 0;
 }
 
-//------------------------------------------------------------------------
-constant_symbol::constant_symbol(char *_name, unsigned int _val)
-  :  symbol(_name), val(_val)
+// FIXME - derive ioport_symbol from register_symbol
+string ioport_symbol::toString()
 {
-}
+  if(ioport) {
+    char buff[256];
+    char bits[256];
 
-void constant_symbol::print(void)
-{
-  cout << name() << " = 0x" << hex << val <<'\n';
-}
+    ioport->toBitStr(bits,sizeof(bits));
 
-symbol *constant_symbol::copy()
-{
-  return new constant_symbol((char *)name().c_str(),val);
-}
+    snprintf(buff,sizeof(buff)," [0x%x] = 0x%x = 0b",ioport->address, ioport->get_value());
 
-void constant_symbol::get(int &i)
-{
-  i = val;
-}
-void constant_symbol::set(int i)
-{
-  val = i;
-}
-
-void constant_symbol::set(Value *v)
-{
-  if(v) {
-    int i;
-    v->get(i);
-    val = i;
+    return name() + string(buff) + string(bits);
   }
+  return string("");
 }
 
-/*
-double constant_symbol::getAsDouble()
-{
-  double dVal = val;
-  return dVal;
-}
-*/
 //------------------------------------------------------------------------
 address_symbol::address_symbol(char *_name, unsigned int _val)
-  :  constant_symbol(_name,_val)
+  :  Integer(_val)
 
 {
+  new_name(_name);
 }
+/*
 void address_symbol::print(void)
 {
-  cout << name() << " at address 0x" << hex << val <<'\n';
+  cout << name() << " at address 0x" << hex << getVal() <<'\n';
 }
+*/
+string address_symbol::toString()
+{
+  char buf[256];
+  int i = getVal();
+  snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
+  
+  return name() + string(buf);
+}
+
 line_number_symbol::line_number_symbol(char *_name, unsigned int _val)
   :  address_symbol(_name,_val)
 {
   if(!_name) {
     char buf[64];
-    snprintf(buf,sizeof(buf), "line_%04x",val);
+    snprintf(buf,sizeof(buf), "line_%04x",_val);
     new_name(buf);
   }
 
@@ -685,6 +530,72 @@ module_symbol::module_symbol(Module *_module, char *_name)
 {
 }
 
+attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
+  : module_symbol(_module, 0) , attribute(_attribute)
+{
+  if(module && attribute) {
+    char buf[256];
+
+    snprintf(buf,sizeof(buf),"%s.%s",module->name().c_str(), attribute->name().c_str());
+    cout << "creating attribute symbol named: " << buf << endl;
+    new_name(buf);
+  }
+}
+
+string attribute_symbol::toString()
+{
+  return attribute->toString();
+}
+
+void attribute_symbol::set(double d)
+{
+  if(attribute)
+    attribute->set(d);
+}
+void attribute_symbol::set(gint64 i)
+{
+  if(attribute)
+    attribute->set(i);
+}
+void attribute_symbol::set(int i)
+{
+  if(attribute)
+    attribute->set(i);
+}
+void attribute_symbol::set(Value *v)
+{
+  if(attribute)
+    attribute->set(v);
+}
+void attribute_symbol::set(Expression *e)
+{
+  if(attribute)
+    attribute->set(e);
+}
+
+void attribute_symbol::get(int &i)
+{
+  if(attribute)
+    attribute->get(i);
+}
+void attribute_symbol::get(gint64 &i)
+{
+  if(attribute)
+    attribute->get(i);
+}
+void attribute_symbol::get(double &d)
+{
+  if(attribute)
+    attribute->get(d);
+}
+
+
+string module_symbol::toString()
+{
+  return name();
+}
+
+/*
 void module_symbol::print(void)
 {
   if(module) {
@@ -695,7 +606,7 @@ void module_symbol::print(void)
     module->dump_attributes();
   }
 }
-
+*/
 //------------------------------------------------------------------------
 stimulus_symbol::stimulus_symbol(stimulus *_s)
   : symbol(0), s(_s)
@@ -713,7 +624,10 @@ string &stimulus_symbol::name()
 
   return Value::name();
 }
-
+string stimulus_symbol::toString()
+{
+  return name();
+}
 //------------------------------------------------------------------------
 val_symbol::val_symbol(gpsimValue *v)
   : symbol((char*)0)
@@ -723,20 +637,11 @@ val_symbol::val_symbol(gpsimValue *v)
 
   val = v;
 }
-
-char * val_symbol::type_name(void)
-{
-  return "val_symbol";
-}
-
 string val_symbol::toString()
 {
   return val->toString();
 }
-void val_symbol::print(void)
-{
-  cout << type_name() << " " << val->name() << " = " << val->get_value() << endl;
-}
+
 void val_symbol::get(int &i)
 {
   if (val)

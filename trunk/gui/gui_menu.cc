@@ -427,7 +427,6 @@ static void set_simulation_mode(char m)
     realtime_mode_with_gui=0;
     gui_animate_delay=0;
 
-    printf("setting simulation mode to %c\n",m);
     switch(m)
     {
     case 'r':

@@ -139,9 +139,6 @@ void P16C8x::create_sfr_map(void)
 
 void P16C8x::create_symbols(void)
 {
-  if(verbose)
-    cout << "8x create symbols\n";
-
   symbol_table.add_ioport(portb);
   symbol_table.add_ioport(porta);
 
@@ -188,8 +185,6 @@ Processor * P16C84::construct(void)
 
   P16C84 *p = new P16C84;
 
-  cout << " c84 construct\n";
-
   p->P16C8x::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
@@ -202,9 +197,6 @@ Processor * P16C84::construct(void)
 
 P16C84::P16C84(void)
 {
-  if(verbose)
-    cout << "c84 constructor, type = " << isa() << '\n';
-
 }
 
 
@@ -220,8 +212,6 @@ Processor * P16F84::construct(void)
 
   P16F84 *p = new P16F84;
 
-  cout << " f84 construct\n";
-
   p->P16C8x::create(0x4f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
@@ -234,9 +224,6 @@ Processor * P16F84::construct(void)
 
 P16F84::P16F84(void)
 {
-  if(verbose)
-    cout << "f84 constructor, type = " << isa() << '\n';
-
 }
 
 //========================================================================
@@ -246,9 +233,6 @@ P16F84::P16F84(void)
 
 P16F83::P16F83(void)
 {
-  if(verbose)
-    cout << "f83 constructor, type = " << isa() << '\n';
-
   name_str = "p16f83";
 }
 
@@ -256,8 +240,6 @@ Processor * P16F83::construct(void)
 {
 
   P16F83 *p = new P16F83;
-
-  cout << " f83 construct\n";
 
   p->P16C8x::create(0x2f);
   p->create_invalid_registers ();
@@ -271,19 +253,12 @@ Processor * P16F83::construct(void)
 
 Processor * P16CR83::construct(void)
 {
-
-  cout << " cr83 construct\n";
-
   return 0;
 
 }
 
 Processor * P16CR84::construct(void)
 {
-
-  cout << " cr84 construct\n";
-
   return 0;
-
 }
 

@@ -68,7 +68,8 @@ string gpsimObject::show()
 
 void gpsimObject::new_name(char *s)
 {
-  name_str = string(s);
+  if(s)
+    name_str = string(s);
 }
 
 void gpsimObject::new_name(string &new_name)

@@ -162,9 +162,10 @@ int GUI_Object::get_config(void)
 
   if(!pName)
     return 0;
-
+  /*
   if(!config_get_variable(pName, "x", &x))
-    printf("get_config %s failed",pName);
+    printf("get_config %s failed\n",pName);
+  */
 
   if(!config_get_variable(pName, "enabled", &enabled))
     enabled=0;

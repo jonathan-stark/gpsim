@@ -38,7 +38,7 @@ class IOPORT;
 class symbol;
 
 /* typedefs */
-typedef list<symbol*> SymbolList_t;
+typedef list<Value*> SymbolList_t;
 typedef list<string> StringList_t;
 
 

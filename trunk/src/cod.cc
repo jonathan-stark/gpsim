@@ -232,7 +232,7 @@ FILE *open_a_file(char **filename)
 {
   FILE *t;
 
-  //if(verbose)
+  if(verbose)
     cout << "Trying to open a file: " << *filename << '\n';
 
   if(0 != (t = fopen_path(*filename,"r")))
@@ -416,14 +416,14 @@ void read_src_files_from_cod(Processor *cpu)
       cpu->files->Add(lstfilename, open_a_file(&lstfilename));
 
 
-      // if(verbose)
+      if(verbose)
         printf("List file %s wasn't in .cod\n",lstfilename);
     }
 
   } else
     printf("No source file info\n");
 
-  {
+  if(0){
     // Debug code 
     int i;
 
@@ -573,12 +573,10 @@ void read_symbols( Processor *cpu )
   int i,j,start_block,end_block, value;
   char b[256];
 
-  //start_block = get_short_int(&directory_block_data[COD_DIR_LSYMTAB]);
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_LSYMTAB]);
 
   if(start_block) {
 
-    //end_block   = get_short_int(&directory_block_data[COD_DIR_LSYMTAB+2]);
     end_block   = get_short_int(&main_dir.dir.block[COD_DIR_LSYMTAB+2]);
 
     for(j=start_block; j<=end_block; j++) {
@@ -600,10 +598,15 @@ void read_symbols( Processor *cpu )
 	switch(type) 
 	  {
           case COD_ST_C_SHORT:
-	    // Change the register name to its symbolic name
-	    cpu->registers[value]->new_name(get_string(b, s, sizeof b));
-	    cout << cpu->registers[value]->name() << '\n';
-	    symbol_table.add_register(cpu->registers[value]);
+	    {
+	      // Change the register name to its symbolic name
+	      cpu->registers[value]->new_name(get_string(b, s, sizeof b));
+	      //cout << cpu->registers[value]->name() << '\n';
+	      register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
+
+	      //symbol_table.add_register(cpu->registers[value]);
+	      symbol_table.add(rs);
+	    }
 	    break;
 
 	  case COD_ST_ADDRESS:
@@ -612,7 +615,7 @@ void read_symbols( Processor *cpu )
 
               symbol = get_string(b, s, sizeof b);
 	      symbol_table.add_address(symbol, value);
-	      cout << "symbol at address " << value << " name " << symbol <<'\n';
+	      //cout << "symbol at address " << value << " name " << symbol <<'\n';
             }
 	    break;
 	    //COD_ST_CONSTANT:
@@ -961,7 +964,7 @@ int open_cod_file(Processor **pcpu, const char *filename)
   char directory[256];
   const char *dir_path_end;
 
-  cout << "processing cod file " << filename << '\n';
+  //cout << "processing cod file " << filename << '\n';
 
   dir_path_end = get_dir_delim(filename);
   
@@ -1002,7 +1005,7 @@ int open_cod_file(Processor **pcpu, const char *filename)
     {
       if(verbose)
 	cout << "ascertaining cpu from the .cod file\n";
-      //substr(processor_name,&directory_block_data[COD_DIR_PROCESSOR],8);
+
       get_string(processor_name,&main_dir.dir.block[COD_DIR_PROCESSOR - 1], sizeof processor_name);
 
       if(verbose)
@@ -1066,10 +1069,6 @@ void display_symbol_file_error(int err)
 {
 
   switch(err) {
-
-    //  case COD_SUCCESS:
-    //cout << "no error\n";
-    //break;
 
   case COD_FILE_NOT_FOUND:
     cout << "unable to find the symbol file\n";

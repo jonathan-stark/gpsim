@@ -380,7 +380,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
 	  gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
 
 	  layout_offset = ytext-yfixed;
-	  cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
+	  //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
 	}
     }
   e = getBPatLine(id, row);
@@ -1751,7 +1751,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   else
       SetPC(address);
 
-  cout << "about to UpdateLine's in page\n";
   // update breakpoint widgets
   for(address=0;address<gp->cpu->program_memory_size();address++)
     UpdateLine(address);

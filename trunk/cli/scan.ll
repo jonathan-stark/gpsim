@@ -433,7 +433,7 @@ int handle_identifier(const string &s, cmd_options **op )
   // If we get here, then the option was not found.
   // So let's check the symbols
   string s1(s);
-  symbol *sym = get_symbol_table().find(&s1);
+  Value *sym = get_symbol_table().find(&s1);
   if(sym) {
     yylval.Symbol_P = sym;
 

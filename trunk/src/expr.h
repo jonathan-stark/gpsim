@@ -58,13 +58,13 @@ class LiteralSymbol : public Expression {
 
 public:
 
-  LiteralSymbol(symbol *);
+  LiteralSymbol(Value *);
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
   string toString();
 
  private:
-  symbol *sym;
+  Value *sym;
 };
 
 //-----------------------------------------------------------------

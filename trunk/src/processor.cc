@@ -1950,8 +1950,9 @@ int Files::Add(string &new_name, FILE *fptr)
 
   lastFile++;
 
-  cout << "Added new file named: " << new_name 
-       << "  id = " << lastFile << endl;
+  if(verbose)
+    cout << "Added new file named: " << new_name 
+	 << "  id = " << lastFile << endl;
 
   return lastFile-1;
 }
@@ -1963,8 +1964,9 @@ int Files::Add(char *new_name, FILE *fptr)
 
   lastFile++;
 
-  cout << "Added new file named: " << new_name 
-       << "  id = " << lastFile << endl;
+  if(verbose)
+    cout << "Added new file named: " << new_name 
+	 << "  id = " << lastFile << endl;
 
   return lastFile-1;
 }

@@ -77,7 +77,7 @@ Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
   return ((Stimulus_Node *)0);
 }
 
-Stimulus_Node * find_node (symbol *sym)
+Stimulus_Node * find_node (Value *sym)
 {
   for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
     {
@@ -122,7 +122,7 @@ void dump_node_list(void)
   for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
     {
       Stimulus_Node *t = *node_iterator;
-      cout << t->name() << '\n';
+      cout << t->name() << " voltage = " << t->get_nodeVoltage() << "V\n";
       if(t->stimuli)
 	{
 	  stimulus *s = t->stimuli;
@@ -187,7 +187,7 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
   return ((stimulus *)0);
 }
 
-stimulus * find_stimulus (symbol *sym)
+stimulus * find_stimulus (Value *sym)
 {
   if(sym) {
     for (stimulus_iterator = stimulus_list.begin();
@@ -1433,7 +1433,7 @@ void stimuli_attach(SymbolList_t *sl)
   if (!sl)
     return;
 
-  list <symbol*> :: iterator si;
+  list <Value*> :: iterator si;
 
   si = sl->begin();
 
@@ -1443,7 +1443,7 @@ void stimuli_attach(SymbolList_t *sl)
     {
       for(++si; si != sl->end(); ++si)
 	{
-	  symbol *s = *si;
+	  Value *s = *si;
 	  stimulus *st = find_stimulus(s);
 
 	  if(st) {

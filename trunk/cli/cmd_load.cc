@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/processor.h"
 
 extern int parser_warnings;
+extern void redisplay_prompt(void);  // in input.cc
 
 // instead of including the whole symbol.h file, just get what we need:
 int load_symbol_file(Processor **, const char *);
@@ -108,5 +109,10 @@ void cmd_load::load(int bit_flag,char *filename)
 
       break;
     }
+
+  // Most of the time diagnostic info will get printed while a processor
+  // is being loaded.
+
+  redisplay_prompt();
 }
 

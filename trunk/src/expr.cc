@@ -133,7 +133,7 @@ string LiteralString::toString()
  * encounters a symbol. 
  */
 
-LiteralSymbol::LiteralSymbol(symbol *_sym)
+LiteralSymbol::LiteralSymbol(Value *_sym)
   : sym(_sym)
 {
 }
