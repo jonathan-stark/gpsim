@@ -62,6 +62,8 @@ Processor *active_cpu = 0;
 static Processor *(*dummy_get_active_cpu)(void) = get_active_cpu;
 static void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
+static char pkg_version[] = PACKAGE_VERSION;
+
 //------------------------------------------------------------------------
 //
 // Processor - Constructor
@@ -89,9 +91,7 @@ Processor::Processor(void)
   interface = new ProcessorInterface(this);
 
   // let the processor version number simply be gpsim's version number.
-  major_version = GPSIM_MAJOR_VERSION;
-  minor_version = GPSIM_MINOR_VERSION;
-  micro_version = GPSIM_MICRO_VERSION;
+  version = &pkg_version[0];
 
   get_trace().cycle_counter(get_cycles().value);
 
