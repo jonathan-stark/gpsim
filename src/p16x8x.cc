@@ -116,11 +116,11 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(portb,   0x06);
   add_sfr_register(&trisb,  0x86, 0xff);
 
-  add_sfr_register(&eedata,  0x08);
-  add_sfr_register(&eecon1,  0x88, 0);
+  add_sfr_register(&(eeprom->eedata),  0x08);
+  add_sfr_register(&(eeprom->eecon1),  0x88, 0);
 
-  add_sfr_register(&eeadr,   0x09);
-  add_sfr_register(&eecon2,  0x89);
+  add_sfr_register(&(eeprom->eeadr),   0x09);
+  add_sfr_register(&(eeprom->eecon2),  0x89);
 
   add_sfr_register(&pclath, 0x8a, 0);
   add_sfr_register(&pclath, 0x0a, 0);
@@ -149,17 +149,18 @@ void P16C8x::create_symbols(void)
 void P16C8x::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + EEPROM_SIZE))
+  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
     {
-      eeprom.rom[address - 0x2100]->value = value;
+      eeprom->rom[address - 0x2100]->value = value;
     }
 }
 
+#if 0
 unsigned int P16C8x::eeprom_get_value(unsigned int address)
 {
 
-  if(address<eeprom_get_size())
-    return eeprom.rom[address]->get_value();
+  if(address<eeprom->rom_size)
+    return eeprom->rom[address]->get_value();
   return 0;
 
 }
@@ -178,6 +179,7 @@ void  P16C8x::eeprom_put_value(unsigned int value,
     eeprom.rom[address]->put_value(value);
 
 }
+#endif
 
 void  P16C8x::create(int ram_top)
 {
@@ -188,8 +190,9 @@ void  P16C8x::create(int ram_top)
   add_file_registers(0x0c, ram_top, 0x80);
   P16C8x::create_sfr_map();
 
-  eeprom.cpu = this;
-  eeprom.initialize(EEPROM_SIZE,&eecon1, &eecon2, &eedata, &eeadr);
+  eeprom = new EEPROM;
+  eeprom->cpu = this;
+  eeprom->initialize(EEPROM_SIZE);
 }
 
 //========================================================================

@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "14bit-processors.h"
+#include "p16x6x.h"
 #include "interface.h"
 
 #include <string>
@@ -861,18 +862,15 @@ WREG::WREG(void)
 void EECON1::put(unsigned int new_value)
 {
 
-  //  if(break_point) 
-  //    bp.check_write_break(this);
-
 
   new_value &= valid_bits;
   
   //cout << "EECON1::put new_value " << new_value << "  valid_bits " << valid_bits << '\n';
   if(new_value & WREN)
     {
-      if(eeprom->eecon2->eestate == EECON2::EEUNARMED)
+      if(eeprom->eecon2.eestate == EECON2::EEUNARMED)
 	{
-	  eeprom->eecon2->eestate = EECON2::EENOT_READY;
+	  eeprom->eecon2.eestate = EECON2::EENOT_READY;
 	  value |= WREN;
 
 	}
@@ -881,7 +879,7 @@ void EECON1::put(unsigned int new_value)
       // once before with WREN true). Initiate an eeprom write only if WR is true and
       // RD is false AND EECON2 is ready
 
-      else if( (new_value & WR) && !(new_value & RD)  && (eeprom->eecon2->eestate == EECON2::EEREADY_FOR_WRITE))
+      else if( (new_value & WR) && !(new_value & RD)  && (eeprom->eecon2.eestate == EECON2::EEREADY_FOR_WRITE))
 	{
 	  value |= WR;
 	  eeprom->start_write();
@@ -894,24 +892,23 @@ void EECON1::put(unsigned int new_value)
     {
       // WREN is low so inhibit eeprom writes:
 
-      eeprom->eecon2->eestate = EECON2::EEUNARMED;
+      eeprom->eecon2.eestate = EECON2::EEUNARMED;
       //cout << "EECON1: write is disabled\n";
 
     }
 
-  //value = (new_value & ~(EEIF | WRERR | WREN)) | (value & (EEIF | WRERR | WREN)) ;
   value = (value & (RD | WR)) | new_value;
 
   if ( (value & RD) && !( value & WR) )
     {
       if(value & EEPGD) {
-	eeprom->eecon2->eestate = EECON2::EEREAD;
+	eeprom->eecon2.eestate = EECON2::EEREAD;
 	eeprom->start_program_memory_read();
 	//cout << "eestate " << eeprom->eecon2->eestate << '\n';
 	// read program memory
       } else {
 	//eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
-	eeprom->eecon2->eestate = EECON2::EEREAD;
+	eeprom->eecon2.eestate = EECON2::EEREAD;
 	eeprom->callback();
 	value &= ~RD;
       }
@@ -935,10 +932,6 @@ EECON1::EECON1(void)
   new_name("eecon1");
   valid_bits = EECON1_VALID_BITS;
 }
-
-
-
-
 
 void EECON2::put(unsigned int new_value)
 {
@@ -1039,41 +1032,76 @@ EEPROM::EEPROM(void)
 {
 
   rom_size = 0;
-  eecon1  = NULL;
-  eecon2  = NULL;
-  eedata  = NULL;
-  eedatah = NULL;
-  eeadr   = NULL;
-  eeadrh  = NULL;
 
+}
+
+file_register *EEPROM::get_register(unsigned int address)
+{
+
+  if(address<rom_size)
+    return rom[address];
+  return NULL;
 
 }
 
 
 void EEPROM::start_write(void)
 {
-  //cout << "start the eewrite\n";
+
   cpu->cycles.set_break(cpu->cycles.value + EPROM_WRITE_TIME, this);
 
-  wr_adr = eeadr->value;
-  if(eeadrh)
-    wr_adr = (eeadrh->value << 8) + wr_adr;
+  wr_adr = eeadr.value;
+  wr_data = eedata.value;
 
-  wr_data = eedata->value;
-  if(eedatah)
-    wr_data = (eedatah->value << 8) + wr_data;
+}
+
+void EEPROM_87x::start_write(void)
+{
+
+  cpu->cycles.set_break(cpu->cycles.value + EPROM_WRITE_TIME, this);
+
+  wr_adr = eeadr.value + (eeadrh.value << 8);
+  wr_data = eedata.value + (eedatah.value << 8);
+
+}
+
+// Set the EEIF and clear the WR bits. 
+
+void EEPROM::write_is_complete(void) 
+{
+
+  eecon1.value = (eecon1.value  & (~eecon1.WR)) | eecon1.EEIF;
+
+  cpu->intcon->peripheral_interrupt();
+
+
+}
+
+// Set the EEIF and clear the WR bits. 
+
+void EEPROM_62x::write_is_complete(void) 
+{
+
+  eecon1.value = (eecon1.value  & (~eecon1.WR));
+
+  ((P16X6X_processor *)cpu)->pir1.set_eeif();
+
 
 }
 
 void EEPROM::start_program_memory_read(void)
 {
-  //cout << "start the program memory read\n";
-  //cout << "eestate (in spmr) " << eecon2->eestate << '\n';
 
+  cout << "ERROR: program memory flash should not be accessible\n";
 
-  rd_adr = eeadr->value;
-  if(eeadrh)
-    rd_adr = (eeadrh->value << 8) + rd_adr;
+  bp.halt();
+
+}
+
+void EEPROM_87x::start_program_memory_read(void)
+{
+
+  rd_adr = eeadr.value | (eeadrh.value << 8);
 
   cpu->cycles.set_break(cpu->cycles.value + 2, this);
 
@@ -1081,35 +1109,14 @@ void EEPROM::start_program_memory_read(void)
 
 void EEPROM::callback(void)
 {
-  //cout << "eeprom call back\n";
-  
-  unsigned int eecon1_value, i;
 
-  eecon1_value = eecon1->get();
-
-  switch(eecon2->eestate) {
+  switch(eecon2.eestate) {
   case EECON2::EEREAD:
     //cout << "eeread\n";
-    eecon1->value = (eecon1_value  & (~eecon1->RD));
-    eecon2->eestate = EECON2::EEUNARMED;
-    if(eecon1->value & EECON1::EEPGD) {
-      // read program memory
-      
-      i = eeadr->value;
-      if(eeadrh)
-	i |= (eeadrh->value << 8);
 
-      i = cpu->pma.get_opcode(i);
-      //cout << "read " << i << " from program memory\n";
-      eedata->value = i & 0xff;
-      if(eedatah)
-	eedatah->value = (i>>8) & 0xff;
-
-    } else {
-      eedata->value = rom[eeadr->value]->get();
-    }
-
-    eecon1->value &= (~EECON1::RD);
+    eecon2.eestate = EECON2::EEUNARMED;
+    eedata.value = rom[eeadr.value]->get();
+    eecon1.value &= (~EECON1::RD);
     break;
   case EECON2::EEREADY_FOR_WRITE:
     //cout << "eewrite\n";
@@ -1119,22 +1126,66 @@ void EEPROM::callback(void)
     else
       cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
 
-    eecon1->value = (eecon1_value  & (~eecon1->WR)) | eecon1->EEIF;
+    write_is_complete();
 
-    cpu->intcon->peripheral_interrupt();
-
-    if (eecon1_value & eecon1->WREN)
-      eecon2->eestate = EECON2::EENOT_READY;
+    if (eecon1.value & eecon1.WREN)
+      eecon2.eestate = EECON2::EENOT_READY;
     else
-      eecon2->eestate = EECON2::EEUNARMED;
+      eecon2.eestate = EECON2::EEUNARMED;
     break;
 
-    eecon1->value &= (~EECON1::WR);
+    eecon1.value &= (~EECON1::WR);
   default:
-    cout << "EEPROM::callback() bad eeprom state " << eecon2->eestate << '\n';
+    cout << "EEPROM::callback() bad eeprom state " << eecon2.eestate << '\n';
   }
 }
 
+
+void EEPROM_87x::callback(void)
+{
+  //cout << "eeprom call back\n";
+  
+
+  switch(eecon2.eestate) {
+  case EECON2::EEREAD:
+    //cout << "eeread\n";
+
+    eecon2.eestate = EECON2::EEUNARMED;
+    if(eecon1.value & EECON1::EEPGD) {
+      // read program memory
+      
+      int opcode = cpu->pma.get_opcode(eeadr.value | (eeadrh.value << 8));
+      //cout << "read " << i << " from program memory\n";
+      eedata.value = opcode & 0xff;
+      eedatah.value = (opcode>>8) & 0xff;
+
+    } else {
+      eedata.value = rom[eeadr.value]->get();
+    }
+
+    eecon1.value &= (~EECON1::RD);
+    break;
+  case EECON2::EEREADY_FOR_WRITE:
+    //cout << "eewrite\n";
+
+    if(wr_adr < rom_size)
+      rom[wr_adr]->value = wr_data;
+    else
+      cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
+
+    write_is_complete();
+
+    if (eecon1.value & eecon1.WREN)
+      eecon2.eestate = EECON2::EENOT_READY;
+    else
+      eecon2.eestate = EECON2::EEUNARMED;
+    break;
+
+    eecon1.value &= (~EECON1::WR);
+  default:
+    cout << "EEPROM::callback() bad eeprom state " << eecon2.eestate << '\n';
+  }
+}
 
 void EEPROM::reset(RESET_TYPE by)
 {
@@ -1142,41 +1193,24 @@ void EEPROM::reset(RESET_TYPE by)
   switch(by)
     {
     case POR_RESET:
-      eecon1->value = 0;          // eedata & eeadr are undefined at power up
-      eecon2->eestate = EECON2::EEUNARMED;
+      eecon1.value = 0;          // eedata & eeadr are undefined at power up
+      eecon2.eestate = EECON2::EEUNARMED;
     }
 
 }
 
-void EEPROM::initialize(unsigned int new_rom_size, 
-			EECON1 *con1,  EECON2 *con2, 
-			EEDATA *data,  EEADR *adr,
-			EEDATA *datah=NULL, EEADR *adrh=NULL)
+void EEPROM::initialize(unsigned int new_rom_size)
 {
 
   rom_size = new_rom_size;
-  cpu->eeprom_size = new_rom_size;
-
-  // Save the pointers to all of the control registers
-  
-  eecon1  = con1;
-  eecon2  = con2;
-  eedata  = data;
-  eeadr   = adr;
-  eedatah = datah;
-  eeadrh  = adrh;
+  //  cpu->eeprom_size = new_rom_size;
 
   // Let the control registers have a pointer to the peripheral in which they belong.
 
-  eecon1->eeprom = this;
-  eecon2->eeprom = this;
-  eedata->eeprom = this;
-  eeadr->eeprom  = this;
-  if(eedatah)
-    eedatah->eeprom = this;
-  if(eeadrh)
-    eeadrh->eeprom  = this;
-
+  eecon1.eeprom = this;
+  eecon2.eeprom = this;
+  eedata.eeprom = this;
+  eeadr.eeprom  = this;
 
   // Create the rom
 
@@ -1202,6 +1236,19 @@ void EEPROM::initialize(unsigned int new_rom_size,
 
   //??? FIXME:
   reset(POR_RESET);
+
+}
+
+void EEPROM_87x::initialize(unsigned int new_rom_size)
+{
+
+  eedatah.eeprom = this;
+  eeadrh.eeprom  = this;
+
+
+
+  EEPROM::initialize(new_rom_size);
+
 
 }
 

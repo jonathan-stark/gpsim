@@ -143,7 +143,7 @@ pic_processor *get_processor(unsigned int cpu_id);
 
 unsigned int processor_has_eeprom(pic_processor *pic)
 {
-  return ((pic->eeprom_get_size() > 0) ? TRUE : FALSE);
+  return ((pic->eeprom) ? TRUE : FALSE);
 }
 
 void  initialization_is_complete(void)
@@ -167,12 +167,10 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 
   if(type == REGISTER_EEPROM)
   {
-    if(!processor_has_eeprom(pic))
-      return 0;
-
-      if(register_number>=pic->eeprom_get_size())
-	  return FALSE;
+    if(pic->eeprom && (register_number < pic->eeprom->rom_size))
       return TRUE;
+
+    return FALSE;
   }
   
   if(register_number < pic->register_memory_size())
@@ -226,8 +224,9 @@ file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type,
     return pic->registers[register_number];
     break;
   case REGISTER_EEPROM:
-    return pic->eeprom_get_register(register_number);
-    break;
+    if(pic->eeprom)
+      return pic->eeprom->get_register(register_number);
+    // fall through to return NULL
   default:
     return NULL;
   }
@@ -559,9 +558,12 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   if(!valid_register(pic,type,0))
       return 0;
   
-  if(type == REGISTER_EEPROM)
-    return pic->eeprom_get_size();
-  
+  if(type == REGISTER_EEPROM) {
+    if(pic->eeprom) 
+      return pic->eeprom->rom_size;
+    return 0;
+  }
+
   return pic->register_memory_size();
 }
 

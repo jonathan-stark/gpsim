@@ -60,11 +60,11 @@ void _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
   //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
   //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
-  if(address == config_word_address())
-    config_modes.config_mode = (config_modes.config_mode & ~7) | (cfg_word & 7);
+  if((address == config_word_address()) && config_modes)
+    config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
 
-  if(verbose)
-    config_modes.print();
+  if(verbose && config_modes)
+    config_modes->print();
 
 }
 

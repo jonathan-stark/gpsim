@@ -697,10 +697,10 @@ void pic_processor::reset (RESET_TYPE r)
 
       if(verbose) {
 	cout << "POR\n";
-	config_modes.print();
+	if(config_modes) config_modes->print();
       }
-
-      wdt.initialize( config_modes.get_wdt() , nominal_wdt_timeout);
+      if(config_modes)
+	wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
     }
   else if (r==WDT_RESET)
     status.put_TO(0);
@@ -715,8 +715,8 @@ void pic_processor::reset (RESET_TYPE r)
 
 void pic_processor::por(void)
 {
-
-  wdt.initialize( config_modes.get_wdt(), nominal_wdt_timeout);
+  if(config_modes)
+    wdt.initialize( config_modes->get_wdt(), nominal_wdt_timeout);
 
 }
 
@@ -882,6 +882,8 @@ pic_processor::pic_processor(void)
     cout << "pic_processor constructor\n";
   files = NULL;
 
+  eeprom = NULL;
+  config_modes = create_ConfigMode();
   set_frequency(DEFAULT_PIC_CLOCK);
   // Test code for logging to disk:
   trace_log.switch_cpus(this);
@@ -1701,11 +1703,11 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
   //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
   //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
-  if(address == config_word_address())
-    config_modes.config_mode = (config_modes.config_mode & ~7) | (cfg_word & 7);
+  if((address == config_word_address()) && config_modes)
+    config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
 
-  if(verbose)
-    config_modes.print();
+  if(verbose && config_modes)
+    config_modes->print();
 
 }
 

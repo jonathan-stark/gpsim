@@ -119,20 +119,22 @@ enum PROCESSOR_TYPE
 //  The configuration mode bits are the config word bits remapped.
 //  The remapping removes processor dependent bit definitions.
 class ConfigMode {
-public:
-#define  CM_FOSC0 1<<0    // FOSC0 and  FOSC1 together define the PIC clock
-#define  CM_FOSC1 1<<1    // All PICs todate have these two bits, but the
-                          // ones with internal oscillators use them differently
-#define  CM_WDTE  1<<2    // Watch dog timer enable
-#define  CM_CP0   1<<3    // Code Protection
-#define  CM_CP1   1<<4
-#define  CM_PWRTE 1<<5    // Power on/Reset timer enable
-#define  CM_BODEN 1<<6    // Brown out detection enable
-#define  CM_CPD   1<<7
-#define  CM_MCLRE 1<<8    // MCLR enable
+ public:
 
-#define  CM_FOSC1x 1<<9   // Hack for internal oscillators
+  enum {
+    CM_FOSC0 = 1<<0,    // FOSC0 and  FOSC1 together define the PIC clock
+    CM_FOSC1 = 1<<1,    // All PICs todate have these two bits, but the
+                        // ones with internal oscillators use them differently
+    CM_WDTE =  1<<2,    // Watch dog timer enable
+    CM_CP0 =   1<<3,    // Code Protection
+    CM_CP1 =   1<<4,
+    CM_PWRTE = 1<<5,    // Power on/Reset timer enable
+    CM_BODEN = 1<<6,    // Brown out detection enable
+    CM_CPD =   1<<7,
+    CM_MCLRE = 1<<8,    // MCLR enable
 
+    CM_FOSC1x = 1<<9,   // Hack for internal oscillators
+  };
 
   int config_mode;
   int valid_bits;
@@ -141,8 +143,8 @@ public:
     valid_bits = CM_FOSC0 | CM_FOSC1 | CM_WDTE;
   };
 
-  void set_config_mode(int new_value) { config_mode = new_value & valid_bits;};
-  void set_valid_bits(int new_value) { valid_bits = new_value;};
+  virtual void set_config_mode(int new_value) { config_mode = new_value & valid_bits;};
+  virtual void set_valid_bits(int new_value) { valid_bits = new_value;};
   void set_fosc0(void){config_mode |= CM_FOSC0;};
   void clear_fosc0(void){config_mode &= ~CM_FOSC0;};
   bool get_fosc0(void){return (config_mode & CM_FOSC0);};
@@ -171,7 +173,7 @@ public:
   bool get_pwrte(void)      {return (config_mode & CM_PWRTE);};
   bool is_valid_pwrte(void) {return (valid_bits & CM_PWRTE);};
 
-  void print(void);
+  virtual void print(void);
 
 };
 
@@ -284,7 +286,7 @@ public:
   int processor_id; // An identifier to differentiate this instantiation from others
 
   unsigned int config_word;        // as read from hex or cod file
-  ConfigMode   config_modes;       // processor independent configuration bits.
+  ConfigMode   *config_modes;       // processor independent configuration bits.
   double frequency,period;
   double Vdd;
   double nominal_wdt_timeout;
@@ -316,6 +318,8 @@ public:
   
   TMR0         tmr0;
   int          num_of_gprs;
+
+  EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
   void create_invalid_registers (void);
   void add_sfr_register(sfr_register *reg, unsigned int addr,
@@ -379,6 +383,7 @@ public:
   virtual void set_config_word(unsigned int address, unsigned int cfg_word);
   unsigned int get_config_word(void) {return config_word;};
   virtual unsigned int config_word_address(void) const {return 0x2007;};
+  virtual ConfigMode *create_ConfigMode(void) { return new ConfigMode; };
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
@@ -417,14 +422,6 @@ public:
       return ( this->fsr->value );
     }
 
-  // There's probably a better way to specify eeprom stuff other than definining it
-  // here in the base class...
-  virtual unsigned int eeprom_get_size(void) {return 0;};
-  virtual unsigned int eeprom_get_value(unsigned int address) {return 0;};
-  virtual void eeprom_put_value(unsigned int value,
-				unsigned int address)
-    {return;};
-  virtual file_register *eeprom_get_register(unsigned int address) { return NULL; }
 
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};

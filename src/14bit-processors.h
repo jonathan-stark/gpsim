@@ -46,7 +46,7 @@ public:
   unsigned int eeprom_size;
 
   INTCON       *intcon;
-
+/*
   EECON1       eecon1;
   EECON2       eecon2;
   EEDATA       eedata;
@@ -55,7 +55,7 @@ public:
   EEADR        eeadrh;
 
   EEPROM       eeprom;
-
+*/
 
   virtual void create_symbols(void);
 //  virtual void load_hex(char *hex_file);

@@ -753,12 +753,10 @@ public:
   char * name_str;
   _14bit_processor *cpu;
 
-  EECON1 *eecon1;            // The EEPROM consists of 4 control registers
-  EECON2 *eecon2;            // on the F84 and 6 on the F877
-  EEDATA *eedata;
-  EEADR  *eeadr;
-  EEDATA *eedatah;
-  EEADR  *eeadrh;
+  EECON1 eecon1;            // The EEPROM consists of 4 control registers
+  EECON2 eecon2;            // on the F84 and 6 on the F877
+  EEDATA eedata;
+  EEADR  eeadr;
 
   file_register **rom;          //  and the data area.
   unsigned int rom_size;
@@ -769,13 +767,43 @@ public:
   EEPROM(void);
   void reset(RESET_TYPE);
   virtual void callback(void);
-  void start_write(void);
-  void start_program_memory_read(void);
-  void initialize(unsigned int new_rom_size,
-		  EECON1 *con1, EECON2 *con2, 
-		  EEDATA *data, EEADR *adr,
-		  EEDATA *datah=NULL, EEADR *adrh=NULL);
+  virtual void start_write(void);
+  virtual void write_is_complete(void);
+  virtual void start_program_memory_read(void);  
+  virtual void initialize(unsigned int new_rom_size);
+  virtual file_register *get_register(unsigned int address);
+
   void dump(void);
 
 };
+
+class PIR1;
+class EEPROM_62x : public EEPROM
+{
+ public:
+
+  PIR1 *pir1;
+
+  // the 16f628 eeprom is identical to the 16f84 eeprom except
+  // for the size and the location of EEIF. The size is taken
+  // care of when the '628 is constructed, the EEIF is taken
+  // care of here:
+
+  virtual void write_is_complete(void);
+
+};
+
+class EEPROM_87x : public EEPROM
+{
+ public:
+
+  EEDATA eedatah;
+  EEADR  eeadrh;
+
+  virtual void start_write(void);
+  virtual void callback(void);
+  virtual void start_program_memory_read(void);
+  virtual void initialize(unsigned int new_rom_size);
+};
+
 #endif
