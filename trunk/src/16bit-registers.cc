@@ -1297,18 +1297,28 @@ void USART_MODULE16::initialize(_16bit_processor *new_cpu)
   txreg.txsta = &txsta;
 
   txsta.txreg = &txreg;
+  //txsta.spbrg = &spbrg;
+  //txsta.txpin = uart_port->pins[6];
+  //txsta.bit_count = 0;
+
 
   rcsta.rcreg = &rcreg;
   rcsta.spbrg = &spbrg;
   rcsta.txsta = &txsta;
+  //rcsta.uart_port = uart_port;
+  //rcsta.rx_bit = 7;
 
   rcreg.rcsta = &rcsta;
   rcreg.pir1 = &cpu->pir1;
 
-  //  spbrg.start();
-
 }
 
+void   USART_MODULE16::new_rx_edge(unsigned int bit)
+{
+
+  //  if( (rcsta.state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
+  //    rcsta.receive_start_bit();
+}
 
 //-------------------------------------------------------------------
 //

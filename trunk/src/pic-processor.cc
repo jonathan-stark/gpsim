@@ -913,7 +913,7 @@ void pic_processor :: create (void)
 
   init_register_memory (register_memory_size());
 
-  create_invalid_registers ();
+  //  create_invalid_registers ();
   create_symbols();
   create_stack();
 
@@ -1055,7 +1055,8 @@ void pic_processor::create_invalid_registers (void)
   // individual invalid file registers. By default, gpsim halts whenever
   // there is an invalid file register access.
 
-  for (i = 0; i < 16*FILE_REGISTERS; i++)
+  //for (i = 0; i < 16*FILE_REGISTERS; i++)
+  for (i = 0; i < register_memory_size(); i++)
     {
       if (NULL == registers[i])
       {
@@ -1168,7 +1169,8 @@ void pic_processor::init_register_memory (unsigned int memory_size)
 
   // Allocate enough memory for the entire register space (e.g. 256 registers for 14-bit core)
 
-  registers = (file_register **) new char[sizeof (file_register *) * 16*FILE_REGISTERS];
+  //registers = (file_register **) new char[sizeof (file_register *) * 16*FILE_REGISTERS];
+  registers = (file_register **) new char[sizeof (file_register *) * memory_size];
 
   if (registers  == NULL)
     {
@@ -1186,7 +1188,8 @@ void pic_processor::init_register_memory (unsigned int memory_size)
   // Make all of the file registers 'undefined' (each processor derived from this base
   // class defines its own register mapping).
 
-  for (int i = 0; i < 16*FILE_REGISTERS; i++)
+  //for (int i = 0; i < 16*FILE_REGISTERS; i++)
+  for (int i = 0; i < memory_size; i++)
     registers[i] = NULL;
 
 

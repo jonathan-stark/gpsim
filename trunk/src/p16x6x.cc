@@ -104,7 +104,7 @@ pic_processor * P16C61::construct(void)
   cout << " c61 construct\n";
 
   p->create();
-
+  p->create_invalid_registers ();
   p->name_str = "16c61";
 
   return p;
@@ -335,7 +335,6 @@ void P16C64::create_sfr_map(void)
   pie1.pir    = &pir1;
   pie1.new_name("pie1");
 
-  pic_processor::create_symbols();
 
 }
 
@@ -385,6 +384,8 @@ pic_processor * P16C64::construct(void)
   cout << " c64 construct\n";
 
   p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
 
   p->name_str = "16c64";
 
@@ -442,7 +443,8 @@ void P16C65::create_sfr_map(void)
   pie2.pir    = &pir2;
   pie2.new_name("pie2");
 
-  pic_processor::create_symbols();
+
+  portc->usart = &usart;
 }
 
 void P16C65::create_symbols(void)
@@ -495,6 +497,9 @@ pic_processor * P16C65::construct(void)
   cout << " c65 construct\n";
 
   p->create();
+  p->create_invalid_registers ();
+
+  p->pic_processor::create_symbols();
 
   p->name_str = "16c65";
 

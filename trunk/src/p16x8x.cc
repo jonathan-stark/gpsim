@@ -132,7 +132,6 @@ void P16C8x::create_sfr_map(void)
 
   intcon = &intcon_reg;
 
-  pic_processor::create_symbols();
 
 }
 
@@ -205,7 +204,8 @@ pic_processor * P16C84::construct(void)
   cout << " c84 construct\n";
 
   p->P16C8x::create(0x2f);
-
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
   p->name_str = "16c84";
 
   return p;
@@ -235,7 +235,8 @@ pic_processor * P16F84::construct(void)
   cout << " c84 construct\n";
 
   p->P16C8x::create(0x4f);
-
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
   p->name_str = "16f84";
 
   return p;
@@ -269,7 +270,8 @@ pic_processor * P16F83::construct(void)
   cout << " f83 construct\n";
 
   p->P16C8x::create(0x2f);
-
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
   p->name_str = "16f83";
 
   return p;

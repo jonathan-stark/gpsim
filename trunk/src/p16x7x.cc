@@ -387,7 +387,7 @@ pic_processor * P16C71::construct(void)
   cout << " c71 construct\n";
 
   p->create();
-
+  p->create_invalid_registers ();
   p->name_str = "16c71";
 
   return p;
@@ -476,7 +476,6 @@ void P16C74::create_sfr_map(void)
   // Link the A/D converter to the Capture Compare Module
   ccp2con.adcon0 = &adcon0;
 
-  pic_processor::create_symbols();
 
 }
 
@@ -507,6 +506,8 @@ pic_processor * P16C74::construct(void)
   cout << " c74 construct\n";
 
   p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
 
   p->name_str = "16c74";
 

@@ -309,7 +309,7 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 {
 
   int bit_mask = one_shifted_left_by_n[bit_number];
-  cout << name();
+  //cout << name();
 
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
@@ -659,6 +659,7 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
 PORTC::PORTC(void)
 {
   new_name("portc");
+  usart = NULL;
 }
 
 //-------------------------------------------------------------------
@@ -678,6 +679,10 @@ unsigned int PORTC::get(void)
   if( diff & CCP1)
     ccp1con->new_edge(value & CCP1);
  
+  // if this cpu has a usart and there's been a change detected on
+  // the RX pin, then we need to notify the usart
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
 }
 
 //-------------------------------------------------------------------
@@ -696,6 +701,8 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
   if( diff & CCP1)
     ccp1con->new_edge(value & CCP1);
 
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
 
 }
 
