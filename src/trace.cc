@@ -235,7 +235,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
     int k = (index + 1) & TRACE_BUFFER_MASK;
     if(trace_flag & (CYCLE_COUNTER_LO | CYCLE_COUNTER_HI))
-      snprintf(buffer, bufsize,"  cycle: 0x%x%x" ,
+      snprintf(buffer, bufsize," cycle: 0x%x%x" ,
 	     (trace_buffer[k]&0x3fffffff),
 	     ((trace_buffer[index]&0x7fffffff) | (trace_buffer[k]&0x80000000 )));
 
@@ -258,7 +258,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
     case PROGRAM_COUNTER:
       if(trace_flag & TRACE_PROGRAM_COUNTER) {
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
-	snprintf(buffer, bufsize,"  pc: 0x%04x %s", 
+	snprintf(buffer, bufsize," pc: 0x%04x %s", 
 		 address ,
 		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
       }
@@ -314,16 +314,16 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       bp.dump_traced(trace_buffer[index] & 0xffffff);
       break;
     case INTERRUPT:
-      snprintf(buffer, bufsize,"interrupt");
+      snprintf(buffer, bufsize," interrupt");
       break;
     case _RESET:
       switch( (RESET_TYPE) (trace_buffer[index]&0xff))
 	{
 	case POR_RESET:
-	  snprintf(buffer, bufsize,"POR");
+	  snprintf(buffer, bufsize," POR");
 	  break;
 	case WDT_RESET:
-	  snprintf(buffer, bufsize,"WDT reset");
+	  snprintf(buffer, bufsize," WDT reset");
 	  break;
 	case SOFT_RESET:
 	  snprintf(buffer, bufsize,"SOFT reset");
@@ -335,7 +335,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
     case OPCODE_WRITE:
       if((trace_buffer[(index-1)&TRACE_BUFFER_MASK] & 0xff000000) == OPCODE_WRITE)
-	snprintf(buffer, bufsize,"wrote opcode: 0x%04x to pgm memory: 0x%05x",
+	snprintf(buffer, bufsize," wrote opcode: 0x%04x to pgm memory: 0x%05x",
 	       trace_buffer[index]&0xffff,
 	       trace_buffer[(index-1)&TRACE_BUFFER_MASK] & 0xffffff);
 
@@ -343,7 +343,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
     case CYCLE_INCREMENT:
       if(trace_flag & TRACE_CYCLE_INCREMENT)
-	snprintf(buffer, bufsize,"cycle increment");
+	snprintf(buffer, bufsize," cycle increment");
       break;
     case MODULE_TRACE2:
       return_value = 2;
@@ -796,9 +796,9 @@ void Trace::dump_raw(int n)
 
   do {
     if(is_cycle_trace(i))
-      printf("0x%016uX:%016uX",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
+      printf("%08X:%08X",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
     else
-      printf("0x%016uX",trace_buffer[i]);
+      printf("%08X         ",trace_buffer[i]);
 
     i = (i + dump1(i,buffer,BUFFER_SIZE)) & TRACE_BUFFER_MASK;
 

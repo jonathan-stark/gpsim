@@ -512,6 +512,7 @@ trace_cmd:
           | TRACE numeric_option        { c_trace.trace($2); }
           | TRACE string_option         { c_trace.trace($2); }
           | TRACE bit_flag              { c_trace.trace($2); }
+          | TRACE expression_option     { c_trace.trace($2); }
           ;
 
 version_cmd: gpsim_VERSION              {version.version();}

@@ -77,12 +77,34 @@ void cmd_trace::trace(cmd_options *opt)
   switch(opt->value) {
 
   case TRACE_LOGOFF_CMD:
-	trace_enable_logging();
-	cout << "Logging to file disabled" << endl;
-	break;
+    trace_enable_logging();
+    cout << "Logging to file disabled" << endl;
+    break;
   default:
     cout << " Invalid set option\n";
   }
+
+}
+
+void cmd_trace::trace(cmd_options_expr *coe)
+{
+  double dvalue = 0.0;
+
+  if(coe->expr)
+    dvalue = evaluate(coe->expr);
+
+  int value = (int) dvalue;
+
+  switch(coe->co->value)
+    {
+
+    case TRACE_RAW_CMD:
+      trace_dump_raw(value);
+      break;
+
+    default:
+      cout << " Invalid option\n";
+    }
 
 }
 
