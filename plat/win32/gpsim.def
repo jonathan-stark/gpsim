@@ -2,6 +2,7 @@ EXPORTS
     ??0Attribute@@QAE@XZ
     ??0Breakpoint_Instruction@@QAE@PAVProcessor@@II@Z
     ??0Files@@QAE@H@Z
+    ??0FloatAttribute@@QAE@XZ
     ??0IOPIN@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IOPIN@@QAE@XZ
     ??0IOPORT@@QAE@I@Z
@@ -136,6 +137,8 @@ EXPORTS
     ?set_out_of_range_pm@Processor@@UAEXII@Z
     ?set_profile_start_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
     ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
+    ?set_read_trace@Register@@UAEXI@Z
+    ?set_write_trace@Register@@UAEXI@Z
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
