@@ -72,7 +72,7 @@ class gpsimValue {
 
   virtual unsigned int get_value(void) = 0;
 
-  void set_cpu(Processor *new_cpu)
+  virtual void set_cpu(Processor *new_cpu)
     {
       cpu = new_cpu;
     }

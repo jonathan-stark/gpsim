@@ -53,6 +53,16 @@ public:
 
 };
 
+class SubTraceObject : public TraceObject
+{
+public:
+  SubTraceObject();
+  TraceObject(Processor *_cpu);
+  virtual void print(void)=0;
+  virtual void print_frame(TraceFrame *);
+
+};
+
 class RegisterWriteTraceObject : public TraceObject
 {
 public:
@@ -154,6 +164,16 @@ public:
 
 };
 
+class SubTraceType : public ProcessorTraceType
+{
+public:
+  static map <unsigned int, TraceType *> subTrace_map;
+
+  SubTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+
+};
 //========================================================================
 // TraceFrame
 //
@@ -206,16 +226,13 @@ class Trace
 
   enum eTraceTypes {
     NOTHING =  0,
-    INSTRUCTION        = (1<<24),
+    //INSTRUCTION        = (1<<24),
     BREAKPOINT         = (2<<24),
     INTERRUPT          = (3<<24),
     _RESET             = (4<<24),
     WRITE_TRIS         = (5<<24),
     WRITE_OPTION       = (6<<24),
     OPCODE_WRITE       = (7<<24),
-    //CYCLE_INCREMENT    = (0x13<<24),
-    //REGISTER_READ_VAL  = (0x14<<24),
-    //REGISTER_WRITE_VAL = (0x15<<24),
     LAST_TRACE_TYPE       = (8<<24),
 
     CYCLE_COUNTER_LO   = (0x80<<24),
@@ -265,11 +282,6 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
-  inline void instruction (unsigned int opcode)
-  {
-    trace_buffer[trace_index] = INSTRUCTION | opcode;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
   inline void opcode_write (unsigned int address, unsigned int opcode)
   {
     trace_buffer[trace_index] = OPCODE_WRITE | (address & 0xffffff);
@@ -289,15 +301,6 @@ class Trace
     if(bLogging && near_full()) 
       logger.log();
   }
-  /*
-  inline void cycle_increment (void)
-  {
-    // For those instructions that advance the cycle counter by 2,
-    // we have to record the extra cycle.
-    trace_buffer[trace_index] = CYCLE_INCREMENT;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
   inline void breakpoint (unsigned int bp)
   {
     trace_buffer[trace_index] = BREAKPOINT | bp;

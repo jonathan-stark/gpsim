@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <vector>
 #include <list>
+#include <map>
 
 #include "gpsim_classes.h"
 #include "modules.h"
@@ -348,8 +349,15 @@ public:
 
   list<ProgramMemoryAccess *> pma_context;
 
-  //
+  // Tracing
+  // The readTT and writeTT are TraceType objects for tracing
+  // register reads and writes.
+  // The mTrace map is a collection of special trace types that
+  // share the same trace function code. For example, interrupts
+  // and resets are special trace events that don't warrant thier
+  // own trace function code.
   TraceType *readTT, *writeTT;
+  map <unsigned int, TraceType *> mTrace;
 
   //
   // Creation and manipulation of registers

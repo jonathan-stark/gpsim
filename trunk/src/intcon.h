@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 class INTCON : public sfr_register
 {
 public:
+  unsigned int interrupt_trace;
 
 enum
 {
@@ -50,6 +51,9 @@ enum
 
 
   INTCON(void);
+
+  virtual void set_cpu(Processor *new_cpu);
+
   void set_T0IF(void);
 
   /*
