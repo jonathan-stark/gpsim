@@ -1,0 +1,59 @@
+## Makefile for building the gpsim with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+TOP = ../..
+
+include ../plat/win32/make.mingw
+
+################################################################
+
+# Nothing much configurable below
+
+INCLUDES = -I . -I ../plat/win32 -I ../../glib/include/glib-2.0 \
+	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
+	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0 \
+	-I ../../atk/include/atk-1.0 -I ../../gtkextra-2
+
+DEFINES = -DWIN32 -DNDEBUG -D_LIB -DHAVE_GUI
+
+all :				\
+	../config.h		\
+	libgui.a 
+
+gui_OBJECTS =			\
+	gui_breadboard.o	\
+	gui_break.o		\
+	gui_callbacks.o		\
+	gui_dialog.o		\
+	gui_init.o		\
+	gui_main.o		\
+	gui_menu.o		\
+	gui_object.o		\
+	gui_processor.o		\
+	gui_profile.o		\
+	gui_regwin.o		\
+	gui_scope.o		\
+	gui_src.o		\
+	gui_src_asm.o		\
+	gui_src_opcode.o	\
+	gui_stack.o		\
+	gui_statusbar.o		\
+	gui_stopwatch.o		\
+	gui_symbols.o		\
+	gui_trace.o		\
+	gui_watch.o		\
+	settings_reg.o
+
+../config.h : ../config_win32.h.in
+	$(CP) ../config_win32.h.in ../config.h
+
+settings_reg.o : ../plat/win32/settings_reg.cpp
+	$(CXX) $(CFLAGS) -c -o settings_reg.o ../plat/win32/settings_reg.cpp
+
+################ The libgui LIB
+
+libgui.a : $(gui_OBJECTS)
+	$(RM) -f $@
+	$(AR) $(ARFLAGS) $@ $(gui_OBJECTS)
