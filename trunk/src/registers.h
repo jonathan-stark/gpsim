@@ -140,6 +140,7 @@ public:
   unsigned int memory_size_mask; 
   unsigned int reset_address;      /* Value pc gets at reset */
   unsigned int pclath_mask;        /* pclath confines PC to banks */
+  unsigned int instruction_phase;
 
   Program_Counter(void);
   virtual void increment(void);
@@ -158,6 +159,9 @@ public:
   virtual unsigned int get_raw_value(void) {
     return value;
   }
+
+  virtual void set_phase(int phase) { instruction_phase = phase;}
+  virtual int get_phase(void) {return instruction_phase; }
 
   void reset(void);
 

@@ -62,6 +62,7 @@ class program_memory_access :  public BreakCallBack
   instruction *get(int addr);
   instruction *get_base_instruction(int addr);
   unsigned int get_opcode(int addr);
+  unsigned int get_PC(void);
 
   void put_opcode(int addr, unsigned int new_opcode);
   // When a pic is replacing one of it's own instructions, this routine
