@@ -36,7 +36,6 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <ctype.h>
 
-#include <gtkextra/gtkcombobox.h>
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
