@@ -325,23 +325,20 @@ bool AbstractRange::operator<(Value *rv)
  * The Boolean class.
  */
 Boolean::Boolean(bool newValue)
-  : bCanDelete(true)
-{
-  value = new bool(newValue);
-}
-
-Boolean::Boolean(const char *_name, bool *newValue,const char *_desc)
-  : Value(_name,_desc), bCanDelete(false)
 {
   value = newValue;
-  if(!value)
-    throw new Error("null pointer in Boolean constructor");
+}
+
+Boolean::Boolean(const char *_name, bool newValue,const char *_desc)
+  : Value(_name,_desc)
+{
+  value = newValue;
+
 }
 
 Boolean::~Boolean()
 {
-  if(bCanDelete)
-    delete value;
+
 }
 
 string Boolean::toString()
@@ -397,7 +394,7 @@ bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
 // get(bool&) - primary method for accessing the value.
 void Boolean::get(bool &b)
 {
-  b = *value;
+  b = value;
 }
 
 // get(int&) - type cast an integer into a boolean. Note
@@ -441,7 +438,7 @@ void Boolean::set(Value *v)
 
 void Boolean::set(bool v)
 {
-  *value = v;
+  value = v;
 }
 
 void Boolean::set(char *buffer, int buf_size)
@@ -486,23 +483,18 @@ bool Boolean::operator!=(Value *rv)
  * The Integer class.
  */
 Integer::Integer(gint64 newValue)
-  : bCanDelete(true)
 {
-  value = new gint64(newValue);
+  value = newValue;
 }
 
-Integer::Integer(const char *_name, gint64 *newValue,const char *_desc)
-  : Value(_name,_desc), bCanDelete(false)
+Integer::Integer(const char *_name, gint64 newValue,const char *_desc)
+  : Value(_name,_desc)
 {
    value = newValue;
-  if(!value)
-    throw new Error("null pointer in Integer constructor");
 }
 
 Integer::~Integer()
 {
-  if(bCanDelete)
-    delete value;
 }
 void Integer::set(double d)
 {
@@ -512,7 +504,7 @@ void Integer::set(double d)
 
 void Integer::set(gint64 i)
 {
-  *value = i;
+  value = i;
 }
 void Integer::set(int i)
 {
@@ -540,7 +532,7 @@ void Integer::set(char *buffer, int buf_size)
 
 void Integer::get(gint64 &i)
 { 
-  i = *value;
+  i = value;
 }
 void Integer::get(double &d)
 { 
@@ -695,28 +687,23 @@ bool Integer::operator>(Value *rv)
  * The Float class.
  */
 Float::Float(double newValue)
-  : bCanDelete(true)
-{
-  value = new double(newValue);
-}
-
-Float::Float(const char *_name, double *newValue,const char *_desc)
-  : Value(_name,_desc), bCanDelete(false)
 {
   value = newValue;
-  if(!value)
-    throw new Error("null pointer in Float constructor");
+}
+
+Float::Float(const char *_name, double newValue,const char *_desc)
+  : Value(_name,_desc)
+{
+  value = newValue;
 }
 
 Float::~Float()
 {
-  if(bCanDelete)
-    delete value;
 }
 
 void Float::set(double d)
 {
-  *value = d;
+  value = d;
 }
 
 void Float::set(gint64 i)
@@ -753,7 +740,7 @@ void Float::get(gint64 &i)
 }
 void Float::get(double &d)
 { 
-  d = *value;
+  d = value;
 }
 
 void Float::get(char *buffer, int buf_size)

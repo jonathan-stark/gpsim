@@ -1,4 +1,12 @@
 2004-11-29 Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/processor.cc, src/processor.h,
+	src/trace.cc, src/value.cc, src/value.h: Change Integer,
+	Boolean, and Float classes back to hold values of native types
+	(as opposed to holding pointers to the native types).
+	* modules/video.cc: changed reference to cpu->frequency to 
+	cpu->set_frequency
+
+2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_stimulus.cc: register stim were not getting started.
 	* regression/register_stim/register_stim.[asm|stc], 
 	regression/run_regression.sh:
