@@ -7,13 +7,24 @@ LIBS     =  -lstdc++  `pkg-config --libs glib-2.0` -lgpsim
 ASM      = gpasm
 PICSRC   = gensquares
 
-all: client $(PICSRC).cod
+all: client client2 $(PICSRC).cod
+
+client_interface.o: client_interface.cc
+	$(GCC) -c client_interface.cc $(CFLAGS)
 
 client.o: client.cc
 	$(GCC) -c client.cc $(CFLAGS)
 
-client: client.o
-	$(GCC) -o client client.o $(LIBS)
+client: client.o client_interface.o
+	$(GCC) -o client client.o client_interface.o $(LIBS)
+
+
+client2.o: client2.cc
+	$(GCC) -c client2.cc $(CFLAGS)
+
+client2: client2.o client_interface.o
+	$(GCC) -o client2 client2.o client_interface.o $(LIBS)
+
 
 $(PICSRC).cod: $(PICSRC).asm
 	gpasm $(PICSRC).asm

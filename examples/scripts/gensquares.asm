@@ -21,7 +21,8 @@ CONFIG_WORD	EQU	_CP_OFF & _WDT_OFF
 	count
         odd_int
         x_lo, x_hi
-
+        reg1
+        reg2
    endc
 
 
