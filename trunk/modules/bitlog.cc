@@ -18,9 +18,10 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#define IN_MODULE
 
 #include "bitlog.h"
-#include <gpsim/gpsim_time.h>
+#include "../src/gpsim_time.h"
 
 BoolEventLogger::BoolEventLogger(unsigned int _max_events)
   : max_events(_max_events)

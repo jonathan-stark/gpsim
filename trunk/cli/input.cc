@@ -530,9 +530,7 @@ command_generator (const char *text, int state)
 char **
 gpsim_completion (const char *text, int start, int end)
 {
-
   char **matches;
-  //char *command_generator (char *, int);
 
   matches = 0;
 
@@ -566,14 +564,10 @@ static GIOChannel *channel;
 
 static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer data)
 {
-  //if(simulation_mode == STOPPED) {
+
 #ifdef HAVE_READLINE
     rl_callback_read_char ();
 #endif
-  //} else { 
-
-    // We're either running, sleeping, single stepping...
-  //}
 
   return TRUE;
 }
@@ -588,8 +582,8 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 void have_line(char *s)
 {
 
-  //if(simulation_mode != STOPPED)
-  //  return;
+  if(!s)
+    return;
 
   static char last_line[256] = {0};
 
@@ -645,7 +639,7 @@ void exit_gpsim(void)
 void redisplay_prompt(void)
 {
 #ifdef HAVE_READLINE
-  rl_forced_update_display();
+  //  rl_forced_update_display();
 #endif
 }
 
@@ -661,6 +655,10 @@ static int gpsim_rl_getc(FILE *in)
   g_io_channel_read(channel, buf, 1, &bytes_read);
 #endif
 
+#if defined(_WIN32)
+  if(buf[0] == 9)
+    return 0x61;  // don't accept tabs in windows
+#endif
   return buf[0];
 }
 #endif
@@ -670,7 +668,6 @@ static int gpsim_rl_getc(FILE *in)
    if not. */
 void initialize_readline (void)
 {
-
   const char *gpsim_prompt="gpsim> ";
   const char *gpsim_cli_prompt="**gpsim> ";
   const char *prompt = gpsim_cli_prompt;
@@ -699,9 +696,8 @@ void initialize_readline (void)
 
   rl_callback_handler_install (prompt, have_line);
 
-
   /* Tell the completer that we want a crack first. */
-    rl_attempted_completion_function = gpsim_completion;
+  rl_attempted_completion_function = gpsim_completion;
 
 #endif //HAVE_READLINE
 }

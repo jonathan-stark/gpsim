@@ -124,6 +124,12 @@ addition to popt and glib, mentioned in the CLI section:</p>
       <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a></li>
     </ul>
   </li>
+  <li>pthreads - The <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> package implements Posix Threads on Win32. Note, pthreads are only currently used in modules and in particular the usart module.</li>
+    <ul>
+      <li>
+      <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> is an ftp directory containing the latest dll builds. The contents of this directory can be copied to gpsim_proj/pthreads/
+      </li>
+    </ul>
 </ul>
 <p>The WIN32 ports of following packages are a part of Tor Lillqvist&#39;s <a href="http://www.gimp.org/~tml/gimp/win32/">GTK+ (and GIMP) 
   for Windows</a> project.
@@ -222,6 +228,8 @@ compilation)</span>:</b></h3>
     create gtkextra-2\lib directory and copy gtkextra-2\gtkextra\libgtkextra-win32-2.0.a 
     to gtkextra-2\lib\libgtkextra-win32-2.0.lib</li>
     </ul>
+    <li>Create the pthreads directory and copy the <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> to it.
+    </ul>
   </li>
   <li>
   Compile gpsim native WIN32 port:<ul>
@@ -246,6 +254,7 @@ compilation)</span>:</b></h3>
   +- pango
   +- atk
   +- gtkextra-2
+  +- pthreads    (for modules).
 </pre>
 
 <h2 align="center">Setting up the runtime</h2>
@@ -278,6 +287,11 @@ compilation)</span>:</b></h3>
   <li>Extract bin\libatk-1.0-0.dll from 
   <a href="#atk">atk-*.zip</a> package to the same directory where gpsim.exe resides.<br />
 &nbsp;</li>
+</ul>
+<h3><b>Modules:</b></h3>
+<ul>
+  <li>Extract bin\pthreadVC.dll from 
+  <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/lib/">pthreads latest</a> and copy it it to the same directory where gpsim.exe resides.</li>
 </ul>
 <h2 align="center">gpsimWin32 snapshots</h2>
 <p>gpsimWin32 snapshots can be found at <a href="http://gpsim.sourceforge.net/snap.php">http://gpsim.sourceforge.net/snap.php.</a><br />
@@ -330,6 +344,9 @@ project:</p>
 <ul>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-4.3-5-mswin32.zip" name="readline_mswin32">readline-4.3-5-mswin32.zip</a></li>
+      <li>
+      From <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> get
+<a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a></li>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-dev-1.1.0-20040626.zip" name="gtk_extra_dev">gtk+extra-2-dev-1.1.0-20040626.zip</a></li>
       <li>
