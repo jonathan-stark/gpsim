@@ -45,6 +45,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
+#include "../src/packages.h"
 #include "push_button.h"
 
 

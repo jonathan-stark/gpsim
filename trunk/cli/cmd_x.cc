@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_dump.h"
 
 #include "../src/pic-processor.h"
-#include "../src/symbol_orb.h"
+#include "../src/symbol.h"
 
 
 cmd_x c_x;
@@ -129,13 +129,13 @@ void cmd_x::x(int reg, int val)
 void cmd_x::x(char *reg_name)
 {
 
-  print_symbol(reg_name);
-
+  get_symbol_table().dump_one(reg_name);
 }
 
 void cmd_x::x(char *reg_name, int val)
 {
-  update_symbol_value(reg_name,val);
+  cout << "this command is deprecated. use: \n  symbol_name = value\n\ninstead\n";
+  //  update_symbol_value(reg_name,val);
 }
 
 void cmd_x::x(Expression *expr)

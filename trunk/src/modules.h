@@ -32,11 +32,12 @@ Boston, MA 02111-1307, USA.  */
 #define __MODULES_H__
 
 #include <list>
+#include <string>
 
 #include "gpsim_object.h"
-#include "gpsim_classes.h"
-#include "packages.h"
-#include "string"
+//#include "gpsim_classes.h"
+//#include "packages.h"
+
 
 
 /*****************************************************************************
@@ -49,10 +50,22 @@ class Module_Types;
 class ModuleInterface;
 class IOPIN;
 class XrefObject;
-class Attribute;
+class Value;
+class Package;
 
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();
+
+enum SIMULATION_MODES
+{
+  STOPPED,
+  RUNNING,
+  SLEEPING,
+  SINGLE_STEPPING,
+  STEPPING_OVER,
+  RUNNING_OVER
+};
+
 
 //----------------------------------------------------------
 // An instance of the Module_Library class is created each
@@ -88,18 +101,26 @@ extern list <Module_Library *> module_list;
 
 extern list <Module *> instantiated_modules_list;
 
+
+//------------------------------------------------------------------------
+//
+/// Module - Base class for all gpsim behavior models. 
+
 class Module : public gpsimObject {
 public:
 
-  list<Attribute *> attributes;   // A list of attributes that pertain to the Module
-  Package  *package;              // A package for the module
-  ModuleInterface *interface;     // An interface to the module.
+  list<Value *> attributes;         // A list of attributes that pertain to the Module
+  Package  *package;                // A package for the module
+  ModuleInterface *interface;       // An interface to the module.
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
 
 
   XrefObject *xref;               // Updated when the module changes
 
-  // I/O pin specific
+  //! I/O pin specific
+  /*
+    
+  */
 
   virtual int get_pin_count(void);
   virtual string &get_pin_name(unsigned int pin_number);
@@ -110,13 +131,13 @@ public:
 
   // Attributes:
 
-  void add_attribute(Attribute *);
+  void add_attribute(Value *);
 
   virtual void set_attribute(char *attr, char *val, int val2);
   virtual void set_attribute(char *attr, char *val);
   virtual void set_attribute(char *attr, double val);
 
-  virtual Attribute *get_attribute(char *attr, bool bWarnIfNotFound=true);
+  virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual void dump_attributes(int show_values=1);
 
   // Version

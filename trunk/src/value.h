@@ -49,10 +49,18 @@ class Value : public gpsimObject
   Value(bool isConstant);
 
   virtual ~Value();
+  virtual char *getAsStr(char *buf, int len);
   virtual int getAsInt();
   virtual double getAsDouble();
   virtual unsigned int get_leftVal() {return getAsInt();}
   virtual unsigned int get_rightVal() {return getAsInt();}
+
+  virtual void set(char *);
+  virtual void set(char *,int);
+  virtual void set(double);
+
+  virtual void get(int &);
+
   bool isConstant();
 
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
@@ -68,12 +76,13 @@ class Value : public gpsimObject
 //
 // gpsimValue is a Value object that is unique to the simulator.
 
-class gpsimValue : public Value {
+class gpsimValue : public gpsimObject {
  public:
 
   gpsimValue(void);
   gpsimValue(Module *);
   virtual ~gpsimValue();
+
 
   // Access functions
   virtual unsigned int get(void)
@@ -232,6 +241,7 @@ public:
   double getVal();
   virtual int getAsInt() { return (int)value; }
   virtual double getAsDouble() { return value;}
+  virtual void set(double);
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);

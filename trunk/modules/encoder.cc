@@ -47,6 +47,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 #include "../src/gpsim_time.h"
+#include "../src/packages.h"
 
 #include "encoder.h"
 

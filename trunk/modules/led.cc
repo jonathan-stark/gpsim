@@ -78,6 +78,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/gpsim_interface.h"
 
 #include "led.h"
+#include "../src/packages.h"
 
 //--------------------------------------------------------------
 //

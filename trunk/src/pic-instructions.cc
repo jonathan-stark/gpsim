@@ -75,7 +75,7 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
 void instruction::add_line_number_symbol(int address)
 {
 
-  symbol_table.add_line_number(get_cpu(), address);
+  symbol_table.add_line_number(address);
 
 }
 

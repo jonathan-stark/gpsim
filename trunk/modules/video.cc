@@ -48,6 +48,7 @@ in1	in2	result
 #include "../src/gpsim_interface.h"
 #include "../src/gpsim_time.h"
 #include "../src/processor.h"
+#include "../src/packages.h"
 
 #include "video.h"
 

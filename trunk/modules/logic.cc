@@ -198,6 +198,7 @@ static char * not_pixmap[] = {
 #include <gtk/gtk.h>
 
 #include "logic.h"
+#include "../src/packages.h"
 
 //--------------------------------------------------------------
 // Led_Input

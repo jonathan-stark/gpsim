@@ -19,6 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
+#include "modules.h"
+
 #include <stdio.h>
 #include <ctype.h>
 #include <errno.h>
@@ -41,18 +43,13 @@ Boston, MA 02111-1307, USA.  */
 #undef interface
 #endif
 
-#include "modules.h"
 #include "pic-processor.h"
 #include "stimuli.h"
 #include "stimulus_orb.h"
 #include "symbol.h"
 #include "xref.h"
-#include "attribute.h"
-
-FloatAttribute *newFloatAttribute(char * n, double v)
-{
-  return new FloatAttribute(n,v);
-}
+#include "value.h"
+#include "packages.h"
 
 static int module_sequence_number = 0;
 
@@ -116,22 +113,20 @@ Module * Module::construct(char * name)
 void  Module::dump_attributes(int show_values)
 {
 
-  list <Attribute *> :: iterator attribute_iterator;
-
-  cout << __FUNCTION__ << endl;
+  list <Value *> :: iterator attribute_iterator;
 
   for (attribute_iterator = attributes.begin();  
        attribute_iterator != attributes.end(); 
        attribute_iterator++) {
 
-    Attribute *locattr = *attribute_iterator;
+    Value *locattr = *attribute_iterator;
 
-    cout << locattr->get_name();
+    cout << locattr->name();
     if(show_values) {
 
       char buf[50];
 
-      cout << " = " << locattr->sGet(buf,50);
+      cout << " = " << locattr->toString();
     }
     cout << endl;
   }
@@ -143,21 +138,21 @@ void  Module::dump_attributes(int show_values)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-Attribute * Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
+Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
 {
 
   if(!attribute_name)
     return 0;
 
-  list <Attribute *> :: iterator attribute_iterator;
+  list <Value *> :: iterator attribute_iterator;
 
   for (attribute_iterator = attributes.begin();  
        attribute_iterator != attributes.end(); 
        attribute_iterator++) {
 
-    Attribute *locattr = *attribute_iterator;
+    Value *locattr = *attribute_iterator;
 
-    if(strcmp(locattr->get_name(), attribute_name) == 0)
+    if(locattr->name() == string(attribute_name))
       return locattr;
   }
 
@@ -175,7 +170,7 @@ void Module::set_attribute(char *attr, char *val)
 {
 
   if(attr) {
-    Attribute *locattr = get_attribute(attr);
+    Value *locattr = get_attribute(attr);
 
     if(locattr)
       locattr->set(val);
@@ -194,7 +189,7 @@ void Module::set_attribute(char *attr, char *val, int val2)
 {
 
   if(attr) {
-    Attribute *locattr = get_attribute(attr);
+    Value *locattr = get_attribute(attr);
 
     if(locattr)
       locattr->set(val,val2);
@@ -213,7 +208,7 @@ void Module::set_attribute(char *attr, double val)
 {
 
   if(attr) {
-    Attribute *locattr = get_attribute(attr);
+    Value *locattr = get_attribute(attr);
 
     if(locattr)
       locattr->set(val);
@@ -229,12 +224,12 @@ void Module::set_attribute(char *attr, double val)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void Module::add_attribute(Attribute *new_attribute)
+void Module::add_attribute(Value *new_attribute)
 {
 
   attributes.push_back(new_attribute);
 
-  cout << "add_attribute  name = " << new_attribute->get_name() << '\n';
+  cout << "add_attribute  name = " << new_attribute->name() << '\n';
 
 }
 
@@ -546,8 +541,10 @@ Module *module_check_cpu(char *module_name)
 
   symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
 
-  if(mP)
-    return mP->get_module();
+  module_symbol *ms = dynamic_cast<module_symbol *>(mP);
+
+  if(ms)
+    return ms->get_module();
   else {
     cout << "module `" << module_name << "' wasn't found\n";
     return 0;

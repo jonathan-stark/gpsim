@@ -112,7 +112,7 @@ void P12C508::create_sfr_map(void)
 void P12C508::create_symbols(void)
 {
 
-  symbol_table.add_ioport(this, &gpio);
+  symbol_table.add_ioport(&gpio);
 
 }
 

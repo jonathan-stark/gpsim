@@ -603,7 +603,7 @@ void read_symbols( Processor *cpu )
 	    // Change the register name to its symbolic name
 	    cpu->registers[value]->new_name(get_string(b, s, sizeof b));
 	    cout << cpu->registers[value]->name() << '\n';
-	    symbol_table.add_register(cpu,cpu->registers[value]);
+	    symbol_table.add_register(cpu->registers[value]);
 	    break;
 
 	  case COD_ST_ADDRESS:
@@ -611,13 +611,13 @@ void read_symbols( Processor *cpu )
               char *symbol;
 
               symbol = get_string(b, s, sizeof b);
-	      symbol_table.add_address(cpu, symbol, value);
+	      symbol_table.add_address(symbol, value);
 	      cout << "symbol at address " << value << " name " << symbol <<'\n';
             }
 	    break;
 	    //COD_ST_CONSTANT:
 	  default:
-	    symbol_table.add_constant(cpu,get_string(b,s,sizeof b),value);
+	    symbol_table.add_constant(get_string(b,s,sizeof b),value);
 	  }
 
 

@@ -39,7 +39,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
-#include "../src/attribute.h"
+#include "../src/value.h"
+#include "../src/packages.h"
 
 #include <vector>
 
@@ -1379,15 +1380,15 @@ static void settings_clist_cb(GtkCList       *clist,
 {
 
 	// Save the Attribute*
-	Attribute *attr;
+	Value *attr;
 	char attrstr[50];
 	char str[256];
-	attr = (Attribute*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
-			row);
+	attr = (Value*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
+					       row);
 
-	attr->sGet(attrstr,50);
+	//attr->getAsStr(attrstr,50);
 	
-	sprintf(str,"%s = %s",attr->get_name(),attrstr);
+	sprintf(str,"%s = %g",attr->name().c_str(),attr->getAsDouble());
 	
 	gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
@@ -1407,21 +1408,21 @@ static void settings_set_cb(GtkWidget *button,
 
 	printf("change attribute \"%s\" to \"%s\"\n",attribute_name, attribute_newval);
 	
-	Attribute *attr;
+	Value *attr;
 	
 	// Change the Attribute
 	attr = bbw->selected_module->module->get_attribute(attribute_name);
 	if(attr)
 	{
-		// Set attribute
-		attr->set(atoi(attribute_newval));
+	  // Set attribute
+	  attr->set(atoi(attribute_newval));
 
-		// Update clist
-		treeselect_module(0, bbw->selected_module);
+	  // Update clist
+	  treeselect_module(0, bbw->selected_module);
 	}
 	else
 	{
-		printf("Could not find attribute \"%s\"\n",attribute_name);
+	  printf("Could not find attribute \"%s\"\n",attribute_name);
 	}
 }
 
@@ -1441,22 +1442,18 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
   // read attributes and add to clist
   char attribute_string[STRING_SIZE];
   char *text[1]={attribute_string};
-  list <Attribute *> :: iterator attribute_iterator;
+
+  list <Value *>::iterator attribute_iterator;
   int row;
 
   for (attribute_iterator = p->module->attributes.begin();
        attribute_iterator != p->module->attributes.end();
        attribute_iterator++) {
 
-    Attribute *locattr = *attribute_iterator;
+    Value *locattr = *attribute_iterator;
 
-    strcpy(attribute_string,locattr->get_name());
+    sprintf(attribute_string,"%s = %g",locattr->name().c_str(),locattr->getAsDouble());
 
-    char buf[50];
-    locattr->sGet(buf,50);
-
-    strcat(attribute_string," = ");
-    strcat(attribute_string,buf);
     row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
 			   text);
     // add the Attribute* as data for the clist rows.
@@ -1619,8 +1616,8 @@ static void pointer_cb(GtkWidget *w,
 	if(dragging && 0 != dragged_module)
 	{
             dragged_module->SetPosition(x+pinspacing, y+pinspacing);
-	    Attribute *xpos = dragged_module->module->get_attribute("xpos", false);
-	    Attribute *ypos = dragged_module->module->get_attribute("ypos", false);
+	    Value *xpos = dragged_module->module->get_attribute("xpos", false);
+	    Value *ypos = dragged_module->module->get_attribute("ypos", false);
 	    if(xpos)
 	      xpos->set(dragged_module->x);
 	    if(ypos)
@@ -2416,7 +2413,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 	p = static_cast<GuiModule*>( module_iterator->data);
 
-	list <Attribute*> :: iterator attribute_iterator;
+	list <Value *> :: iterator attribute_iterator;
 	m = p->module;
 
 	fprintf(fo, "module load %s %s\n",
@@ -2426,13 +2423,14 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	for(attribute_iterator = m->attributes.begin();
 		attribute_iterator != m->attributes.end();
 		attribute_iterator++) {
-		Attribute *locattr = *attribute_iterator;
+
+		Value *locattr = *attribute_iterator;
 		char attrval[50];
-		locattr->sGet(attrval,50);
+		locattr->getAsStr(attrval,50);
 		
 		fprintf(fo, "module set %s %s %s\n",
 				m->name().c_str(),
-				locattr->get_name(),
+				locattr->name().c_str(),
 				attrval);
 	}
 	fprintf(fo, "\n");
@@ -2651,17 +2649,21 @@ void GuiModule::Refresh()
   bbw->modules=g_list_remove(bbw->modules, this);
 
   // rebuild module
-  GuiModule *new_gui_module = new GuiModule(module, bbw);
+  new GuiModule(module, bbw);
 
-
-  //new_gui_module=create_gui_module(p->bbw, p->type, p->module, p->module_widget);
-  //*p=*new_gui_module;
   gtk_widget_unref(module_widget);
 }
 
 //========================================================================
 //========================================================================
-extern FloatAttribute *newFloatAttribute(char * , double);
+Value *newFloatAttribute(const char *n, double v)
+{
+  Float *f = new Float(v);
+  f->new_name((char *)n);  //fixme
+
+  return f;
+}
+
 
 void GuiModule::Build()
 {
@@ -2689,8 +2691,8 @@ void GuiModule::Build()
   pins=0;
   pin_count=module->get_pin_count();
 
-  Attribute *xpos = module->get_attribute("xpos", false);
-  Attribute *ypos = module->get_attribute("ypos", false);
+  Value *xpos = module->get_attribute("xpos", false);
+  Value *ypos = module->get_attribute("ypos", false);
   if(!xpos || !ypos) {
 
       xpos = newFloatAttribute("xpos",(double)sx);
@@ -2700,15 +2702,12 @@ void GuiModule::Build()
       module->add_attribute(ypos);
   } else {
 
-    x=xpos->nGet();
-    y=ypos->nGet();
+    xpos->get(x);
+    ypos->get(y);
   }
 
-  // FIXME. Perhaps the bbw should use Package instead of Module?
-  Package *package = module->package;
-  if(!package)
-    package=dynamic_cast<Package*>(module);
 
+  Package *package = module->package;
   assert(package!=0);
 
   tree_item = gtk_tree_item_new_with_label (module->name().c_str());
@@ -3045,11 +3044,11 @@ void Breadboard_Window::Update(void)
 	p->Refresh();
 
       // Check if module has changed its position
-      Attribute *xpos = p->module->get_attribute("xpos", false);
-      Attribute *ypos = p->module->get_attribute("ypos", false);
+      Value *xpos = p->module->get_attribute("xpos", false);
+      Value *ypos = p->module->get_attribute("ypos", false);
       if(xpos && ypos) {
-	x = xpos->nGet();
-	y = ypos->nGet();
+	xpos->get(x);
+	ypos->get(y);
 
 	if(p->x!=x || p->y!=y)
 	  {
