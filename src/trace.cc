@@ -810,7 +810,7 @@ TraceLog::~TraceLog(void)
 void TraceLog::callback(void)
 {
   int n = 0;
-  trace.cycle_counter(cpu->cycles.value);
+  trace.cycle_counter(cycles.value);
 
   if((log_file||lxtp) && logging) {
     if(last_trace_index < trace.trace_index) { 
@@ -831,7 +831,7 @@ void TraceLog::callback(void)
 	trace.dump(n, log_file, -1);
 
     last_trace_index = trace.trace_index;
-    cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+    cycles.set_break(cycles.value + 1000,this);
   }
 
 }
@@ -956,7 +956,7 @@ void TraceLog::enable_logging(char *new_fname, int format)
   open_logfile(new_fname, format);
 
   last_trace_index = buffer.trace_index;
-  // cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+  // cycles.set_break(cycles.value + 1000,this);
   logging = 1;
 
 }
@@ -1035,7 +1035,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 
     name = cpu->registers[address]->name();
 
-    lt_set_time(lxtp, (int)(cpu->cycles.value*4.0e8*cpu->period));
+    lt_set_time(lxtp, (int)(cycles.value*4.0e8*cpu->period));
 
     symp=lt_symbol_find(lxtp, name);
     if(symp==NULL)
@@ -1179,7 +1179,7 @@ void ProfileKeeper::callback(void)
     if(enabled)
     {
         catchup();
-	cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+	cycles.set_break(cycles.value + 1000,this);
     }
 }
 
@@ -1197,7 +1197,7 @@ void ProfileKeeper::enable_profiling(void)
     }
 
     last_trace_index = trace.trace_index;
-    cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+    cycles.set_break(cycles.value + 1000,this);
     enabled = 1;
 }
 

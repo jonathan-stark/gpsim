@@ -929,7 +929,7 @@ void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
       state = 1;
       address = addr;
       opcode = new_opcode;
-      cpu->cycles.set_break_delta(40000, this);
+      cycles.set_break_delta(40000, this);
       bp.set_pm_write();
     }
 

@@ -157,7 +157,7 @@ static void add_range(Profile_Window *pw,
 		      char *startaddress_text,
 		      char *endaddress_text)
 {
-    guint64 cycles;
+    guint64 gcycles;
     struct profile_range_entry *profile_range_entry;
     unsigned int startaddress;
     unsigned int endaddress;
@@ -195,12 +195,12 @@ static void add_range(Profile_Window *pw,
 	}
     }
 
-    cycles=0;
+    gcycles=0;
     for(i=startaddress;i<endaddress;i++)
     {
-	cycles+=gpsim_get_cycles_used(gp->pic_id,i);
+	gcycles+=gpsim_get_cycles_used(gp->pic_id,i);
     }
-    sprintf(count_string,"0x%Lx",cycles);
+    sprintf(count_string,"0x%Lx",gcycles);
 
     row=gtk_clist_append(GTK_CLIST(pw->profile_range_clist), entry);
 
@@ -211,7 +211,7 @@ static void add_range(Profile_Window *pw,
     profile_range_entry->startaddress=startaddress;
     profile_range_entry->endaddress=endaddress;
     profile_range_entry->pic_id=gp->pic_id;
-    profile_range_entry->last_count=cycles;
+    profile_range_entry->last_count=gcycles;
 
     gtk_clist_set_row_data(GTK_CLIST(pw->profile_range_clist), row, (gpointer)profile_range_entry);
 
@@ -942,7 +942,7 @@ int plot_routine_histogram(Profile_Window *pw)
 
 //	px2[j]=i;
 //	py2[j]=i*4;
-	px2[j]=chc->cycles;
+	px2[j]=chc->histo_cycles;
 	py2[j]=chc->count;
 	if(maxy<py2[j])
 	    maxy=py2[j];
@@ -951,7 +951,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	if(minx>px2[j])
 	    minx=px2[j];
 
-	totalcycles+=chc->cycles*chc->count;
+	totalcycles+=chc->histo_cycles*chc->count;
         totalcount+=chc->count;
 
         j++;
@@ -1543,9 +1543,9 @@ gint histogram_list_compare_func_cycles(gconstpointer a, gconstpointer b)
     const struct cycle_histogram_counter *h1=(struct cycle_histogram_counter*)a;
     const struct cycle_histogram_counter *h2=(struct cycle_histogram_counter*)b;
 
-    if(h1->cycles > h2->cycles)
+    if(h1->histo_cycles > h2->histo_cycles)
 	return 1;
-    if(h1->cycles == h2->cycles)
+    if(h1->histo_cycles == h2->histo_cycles)
 	return 0;
     return -1;
 }
@@ -1563,9 +1563,9 @@ gint histogram_list_compare_func(gconstpointer a, gconstpointer b)
 	    return 1;
 	if(h1->stop_address == h2->stop_address)
 	{
-	    if(h1->cycles*h1->count > h2->cycles*h2->count)
+	    if(h1->histo_cycles*h1->count > h2->histo_cycles*h2->count)
 		return 1;
-	    if(h1->cycles*h1->count == h2->cycles*h2->count)
+	    if(h1->histo_cycles*h1->count == h2->histo_cycles*h2->count)
 		return 0;
 	}
     }
@@ -1634,33 +1634,33 @@ double calculate_median(GList *start, GList *stop)
         start=start->next;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
-	return chc_start->cycles;
+	return chc_start->histo_cycles;
     }
     if(count_sum<-chc_start->count)
     {
         start=start->prev;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
-	return chc_start->cycles;
+	return chc_start->histo_cycles;
     }
     if(-count_sum==chc_start->count)
     {
         stop=stop->prev;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
 	g_list_free(sorted_list);
-	return (chc_start->cycles+chc_stop->cycles)/2.0;
+	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
     if(count_sum==chc_start->count)
     {
         stop=stop->next;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
 	g_list_free(sorted_list);
-	return (chc_start->cycles+chc_stop->cycles)/2.0;
+	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
     if(abs(count_sum)<chc_start->count)
     {
 	g_list_free(sorted_list);
-	return chc_start->cycles;
+	return chc_start->histo_cycles;
     }
 
     assert(0);
@@ -1691,7 +1691,7 @@ float calculate_stddev(GList *start, GList *stop, float average)
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
 
-	diff=chc_start->cycles-average;
+	diff=chc_start->histo_cycles-average;
 
 	diff2=diff*diff;
 
@@ -1870,11 +1870,11 @@ void Profile_Window::Update()
 	      // Add data to statistics
 
 	      count_sum+=chc->count;
-	      if(chc->cycles<min)
-		  min=chc->cycles;
-	      if(chc->cycles>max)
-		  max=chc->cycles;
-              cycles_sum+=chc->cycles*chc->count;
+	      if(chc->histo_cycles<min)
+		  min=chc->histo_cycles;
+	      if(chc->histo_cycles>max)
+		  max=chc->histo_cycles;
+              cycles_sum+=chc->histo_cycles*chc->count;
 	  }
 	  else
 	  {
@@ -1897,9 +1897,9 @@ void Profile_Window::Update()
 	      count_sum=chc->count;
 	      start = chc->start_address;
 	      stop = chc->stop_address;
-	      min=chc->cycles;
-	      max=chc->cycles;
-	      cycles_sum=chc->cycles*chc->count;
+	      min=chc->histo_cycles;
+	      max=chc->histo_cycles;
+	      cycles_sum=chc->histo_cycles*chc->count;
 	      list_start = iter;
 
 	  }
@@ -1929,7 +1929,7 @@ void Profile_Window::Update()
       printf("start %d, stop %d, cycles %d, count %d\n",
 	     (int)chc->start_address,
 	     (int)chc->stop_address,
-	     (int)chc->cycles,
+	     (int)chc->histo_cycles,
 	     (int)chc->count);
       iter=iter->next;
   }*/
@@ -1981,7 +1981,7 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 		chc=(struct cycle_histogram_counter*)iter->data;
 		if(chc->start_address == startaddress &&
 		   chc->stop_address == stopaddress &&
-		   chc->cycles == cycles)
+		   chc->histo_cycles == cycles)
 		{
 		    // If so then add 1 to the counter
 		    chc->count++;
@@ -1997,7 +1997,7 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 		chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
 		chc->start_address=startaddress;
 		chc->stop_address=stopaddress;
-		chc->cycles=cycles;
+		chc->histo_cycles=cycles;
 		chc->count=1;
 
 		pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);

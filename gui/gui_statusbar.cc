@@ -134,9 +134,9 @@ void StatusBar_Window::Update(void)
   sprintf(buffer,"0x%04x",pc->value.i32);
   gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
 
-  cycles->value.ui64 = gpsim_get_cycles(gp->pic_id);
-  sprintf(buffer,"0x%016Lx",cycles->value.ui64);
-  gtk_entry_set_text (GTK_ENTRY (cycles->entry), buffer);
+  cpu_cycles->value.ui64 = gpsim_get_cycles(gp->pic_id);
+  sprintf(buffer,"0x%016Lx",cpu_cycles->value.ui64);
+  gtk_entry_set_text (GTK_ENTRY (cpu_cycles->entry), buffer);
 
   if(time_format==MENU_TIME_USECONDS) {
     time->value.db = gpsim_get_cycles(gp->pic_id)*1e6/(double)gpsim_get_inst_clock(gp->pic_id);
@@ -328,9 +328,9 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
 		     GTK_SIGNAL_FUNC(pc_callback),
 		     this);
 
-  cycles = create_labeled_entry(hbox,"Cycles:", 18);
-  cycles->parent = this;
-  gtk_entry_set_editable(GTK_ENTRY(cycles->entry),0);
+  cpu_cycles = create_labeled_entry(hbox,"Cycles:", 18);
+  cpu_cycles->parent = this;
+  gtk_entry_set_editable(GTK_ENTRY(cpu_cycles->entry),0);
 
   time = create_labeled_entry(hbox,"Time:", 22);
   time->parent = this;
@@ -394,7 +394,7 @@ StatusBar_Window::StatusBar_Window(void)
   status = NULL;
   W = NULL;
   pc = NULL;
-  cycles = NULL;
+  cpu_cycles = NULL;
   time = NULL;
   
 }

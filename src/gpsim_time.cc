@@ -39,6 +39,14 @@ Boston, MA 02111-1307, USA.  */
 #define END_OF_TIME 0xFFFFFFFFFFFFFFFFULL
 
 //--------------------------------------------------
+// Global instantiation of the cycle counter 
+// and the stop watch;
+//--------------------------------------------------
+
+Cycle_Counter cycles;
+StopWatch stop_watch;
+
+//--------------------------------------------------
 // member functions for the Cycle_Counter class
 //--------------------------------------------------
 
@@ -632,5 +640,71 @@ Cycle_Counter::Cycle_Counter(void)
     }
   l1->next = NULL;
 
+
+}
+
+
+//------------------------------------------------------------------------
+// StopWatch class
+//
+
+StopWatch::StopWatch(void)
+{
+
+  enabled = false;
+  count_dir = false;
+
+  value = 0;
+  rollover = 0;
+  offset = 0;
+  
+}
+
+//----------------------------------------
+// get()
+// If the stopwatch is running, then compute
+// the current value based on the cycle_counter.
+
+guint64 StopWatch::get(void)
+{
+
+  if(!enabled)
+    return value;
+
+  return 0;
+
+}
+
+//----------------------------------------
+// get()
+// If the stopwatch is running, then compute
+// the current value based on the cycle_counter.
+
+double StopWatch::get_time(void)
+{
+
+  guint64 current_value =get();
+
+  if(current_value)
+    return current_value /4000000.0;
+
+  return 1.0;
+
+}
+
+void StopWatch::start(void)
+{
+
+}
+void StopWatch::stop(void)
+{
+
+}
+void StopWatch::set_rollover(guint64 new_rollover)
+{
+
+}
+void StopWatch::set_offset(guint64 new_rollover)
+{
 
 }

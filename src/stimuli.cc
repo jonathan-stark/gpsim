@@ -701,7 +701,7 @@ void asynchronous_stimulus::callback(void)
     next_state = ((StimulusDataType *)(current_sample->data))->value;
 
 
-  cpu->cycles.set_break(future_cycle, this);
+  cycles.set_break(future_cycle, this);
 
   if(verbose) {
     cout <<"  next transition = " << future_cycle << '\n';
@@ -754,7 +754,7 @@ void asynchronous_stimulus::start(void)
       //  cout << "Warning: Asynchronous Stimulus has a period shorter than its last event.\n";
       // This means that the stimulus will not rollover.\n";
 
-      cpu->cycles.set_break(future_cycle, this);
+      cycles.set_break(future_cycle, this);
 
       if(verbose) {
 
@@ -828,9 +828,9 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
       // This means that the stimulus will not rollover.\n";
 
       if(old_future_cycle) 
-	cpu->cycles.reassign_break(old_future_cycle,future_cycle, this);
+	cycles.reassign_break(old_future_cycle,future_cycle, this);
       else
-	cpu->cycles.set_break(future_cycle, this);
+	cycles.set_break(future_cycle, this);
 
       if(verbose) {
 

@@ -428,16 +428,16 @@ public:
 
     gettimeofday(&tv_start,NULL);
 
-    cycle_start=cpu->cycles.value;
+    cycle_start=cycles.value;
 
     guint64 fc = cycle_start+100;
 
     cout << "real time start : " << future_cycle << '\n';
 
     if(future_cycle)
-      cpu->cycles.reassign_break(future_cycle, fc, this);
+      cycles.reassign_break(future_cycle, fc, this);
     else
-      cpu->cycles.set_break(fc, this);
+      cycles.set_break(fc, this);
 
     future_cycle = fc;
 
@@ -451,7 +451,7 @@ public:
 
     if(future_cycle) {
       cout << " real time clearing\n";
-      cpu->cycles.clear_break(this);
+      cycles.clear_break(this);
       future_cycle = 0;
     }
       
@@ -475,7 +475,7 @@ public:
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((cpu->cycles.value-cycle_start)*4.0e6*cpu->period);
+    diff = system_time - ((cycles.value-cycle_start)*4.0e6*cpu->period);
 
     guint64  idiff;
     if( diff < 0 )
@@ -528,12 +528,12 @@ public:
     }
 
 
-    guint64 fc = cpu->cycles.value + delta_cycles;
+    guint64 fc = cycles.value + delta_cycles;
 
     if(future_cycle)
-      cpu->cycles.reassign_break(future_cycle, fc, this);
+      cycles.reassign_break(future_cycle, fc, this);
     else
-      cpu->cycles.set_break(fc, this);
+      cycles.set_break(fc, this);
 
     future_cycle = fc;
 

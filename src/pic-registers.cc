@@ -43,18 +43,18 @@ void WDT::update(void)
 
     if(future_cycle) {
 
-      guint64 fc = cpu->cycles.value + value * (1<<prescale);
+      guint64 fc = cycles.value + value * (1<<prescale);
 
       //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
 
-      cpu->cycles.reassign_break(future_cycle, fc, this);
+      cycles.reassign_break(future_cycle, fc, this);
       future_cycle = fc;
 
     } else {
     
-      future_cycle = cpu->cycles.value + value * (1<<prescale);
+      future_cycle = cycles.value + value * (1<<prescale);
 
-      cpu->cycles.set_break(future_cycle, this);
+      cycles.set_break(future_cycle, this);
     }
   }
 
@@ -88,9 +88,9 @@ void WDT::initialize(bool enable, double _timeout)
       value = cpu->time_to_cycles(timeout);
       prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
-      future_cycle = cpu->cycles.value + value * (1<<prescale);
+      future_cycle = cycles.value + value * (1<<prescale);
 
-      cpu->cycles.set_break(future_cycle, this);
+      cycles.set_break(future_cycle, this);
 
     }
 
@@ -101,7 +101,7 @@ void WDT::callback(void)
 
 
   if(wdte) {
-    cout<<"WDT timeout: " << hex << cpu->cycles.value << '\n';
+    cout<<"WDT timeout: " << hex << cycles.value << '\n';
 
     future_cycle = 0;
     update();
@@ -140,11 +140,11 @@ void WDT::start_sleep(void)
   if(wdte) {
     prescale = 0;
 
-    guint64 fc = cpu->cycles.value + value * (1<<prescale);
+    guint64 fc = cycles.value + value * (1<<prescale);
 
     //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
 
-    cpu->cycles.reassign_break(future_cycle, fc, this);
+    cycles.reassign_break(future_cycle, fc, this);
 
     future_cycle = fc;
   }

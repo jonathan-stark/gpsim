@@ -107,9 +107,6 @@ public:
   program_memory_access pma;
 
 
-  Cycle_Counter cycles;
-
-
   void create_invalid_registers (void);
   void add_file_registers(unsigned int start_address, 
 			  unsigned int end_address, 
