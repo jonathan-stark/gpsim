@@ -4,6 +4,8 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
+#include <assert.h>
+
 #define PINLINEWIDTH 4
 #define CASELINEWIDTH 6
 
@@ -61,14 +63,16 @@ void draw_pin(Breadboard_Window *bbw,enum _pintype type, int casex, int endx, in
     gdk_draw_line(bbw->da->window,bbw->pinline_gc,
 		  pointx,y,wingx,y-wingheight);
 }
+
+#define XOFFSET 20
+#define YOFFSET 20
+
 void update(Breadboard_Window *bbw)
 {
     int x,y;
     char *name;
     char str[200];
     int dy;
-    int xoffset=20;
-    int yoffset=20;
     unsigned int pic_id;
     GtkWidget *da=bbw->da;
     
@@ -76,6 +80,13 @@ void update(Breadboard_Window *bbw)
 
     if(!pic_id)
 	return;
+
+    gdk_draw_rectangle (da->window,
+			da->style->white_gc,
+			TRUE,
+			0, 0,
+			da->allocation.width,
+			da->allocation.height);
 
     for(dy=0;dy<bbw->pinspacing*(bbw->nrofpins/2);dy+=bbw->pinspacing)
     {
@@ -92,23 +103,23 @@ void update(Breadboard_Window *bbw)
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
 	    draw_pin(bbw,type==0?PIN_INPUT:PIN_OUTPUT,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength,
-		     xoffset+bbw->pinstatewidth,
-		     yoffset+dy+bbw->pinspacing/2);
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength,
+		     XOFFSET+bbw->pinstatewidth,
+		     YOFFSET+dy+bbw->pinspacing/2);
 	    // Draw pin name
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+xoffset+bbw->pinstatewidth+bbw->pinlength,LABELPAD/2+yoffset+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw lower pin state
 	    sprintf(str,"%c",state>0?'H':'L');
 	    name=str;
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+xoffset,LABELPAD/2+yoffset+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	}
 	else
 	{
 	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
 	    draw_pin(bbw,PIN_OTHER,
-		     xoffset+bbw->pinstatewidth,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength,
-		     yoffset+dy+bbw->pinspacing/2);
+		     XOFFSET+bbw->pinstatewidth,
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength,
+		     YOFFSET+dy+bbw->pinspacing/2);
 	}
 
         // Draw pin to the right
@@ -121,30 +132,30 @@ void update(Breadboard_Window *bbw)
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
 	    draw_pin(bbw,type==0?PIN_INPUT:PIN_OUTPUT,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
-		     yoffset+dy+bbw->pinspacing/2);
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
+		     YOFFSET+dy+bbw->pinspacing/2);
 	    // Draw pin name
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+xoffset+bbw->pinstatewidth+bbw->pinlength+bbw->case_width-bbw->pinnamewidth,LABELPAD/2+yoffset+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width-bbw->pinnamewidth,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	    // Draw lower pin state
 	    sprintf(str,"%c",state>0?'H':'L');
 	    name=str;
-	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+xoffset+bbw->pinstatewidth+bbw->pinlength*2+bbw->case_width,LABELPAD/2+yoffset+dy+bbw->pinspacing/2,name,strlen(name));
+	    gdk_draw_text(da->window,bbw->pinnamefont,bbw->pinname_gc,LABELPAD/2+XOFFSET+bbw->pinstatewidth+bbw->pinlength*2+bbw->case_width,LABELPAD/2+YOFFSET+dy+bbw->pinspacing/2,name,strlen(name));
 	}
 	else
 	{
 	    gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
 	    draw_pin(bbw,PIN_OTHER,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
-		     xoffset+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
-		     yoffset+dy+bbw->pinspacing/2);
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
+		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
+		     YOFFSET+dy+bbw->pinspacing/2);
 	}
 
     }
 
     // Draw casing
-    x=xoffset+bbw->case_x;
-    y=yoffset+bbw->case_y;
+    x=XOFFSET+bbw->case_x;
+    y=XOFFSET+bbw->case_y;
     gdk_draw_line(da->window,bbw->case_gc,x,y,x+bbw->case_width/2-FOORADIUS,y);
     gdk_draw_line(da->window,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width/2+FOORADIUS,y);
     gdk_draw_line(da->window,bbw->case_gc,x+bbw->case_width,y,x+bbw->case_width,y+bbw->case_height);
@@ -152,8 +163,8 @@ void update(Breadboard_Window *bbw)
     gdk_draw_line(da->window,bbw->case_gc,x,y,x,y+bbw->case_height);
     gdk_draw_arc(da->window,bbw->case_gc,0,x+bbw->case_width/2-FOORADIUS,y-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 
-    //	x=xoffset+bbw->picname_x;
-    //	y=yoffset+bbw->picname_y-LABELPADDING/2;
+    //	x=XOFFSET+bbw->picname_x;
+    //	y=YOFFSET+bbw->picname_y-LABELPADDING/2;
     //	name=gpsim_get_pic_name(pic_id);
     //	gdk_draw_text(da->window,bbw->picnamefont,bbw->case_gc,x,y,name,strlen(name));
 
@@ -190,6 +201,93 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
+// calculate which pin is closest to (x,y)
+int get_pin(Breadboard_Window *bbw, int x, int y)
+{
+    int pin;
+
+    x-=XOFFSET;
+    y-=YOFFSET;
+
+    y-=bbw->case_y;
+
+    if(y<0)
+	y=0;
+
+    if(y>bbw->case_height-bbw->pinspacing/2)
+	y=bbw->case_height-bbw->pinspacing/2;
+
+    pin = y/bbw->pinspacing+1;
+
+    if(x>bbw->case_x+bbw->case_width/2)
+    {
+	pin = bbw->nrofpins - pin + 1;
+    }
+
+    return pin;
+}
+
+int hit_state(Breadboard_Window *bbw, int x, int y)
+{
+    int center_offset;
+    
+    x-=XOFFSET;
+    x-=bbw->case_x;
+    x-=bbw->case_width/2;
+    
+    center_offset=abs(x);
+
+    printf("offset %d\n",center_offset);
+
+    if(center_offset<bbw->case_width/2+bbw->pinlength)
+	return FALSE;
+    return TRUE;
+}
+
+static gint button(GtkWidget *widget,
+		   GdkEventButton *event,
+		   Breadboard_Window *bbw)
+{
+    assert(event&&bbw);
+
+    if(event->type==GDK_2BUTTON_PRESS &&
+       event->button==1)
+    {
+	int x,y;
+	int pin;
+	int value, dir;
+	int pic_id;
+	
+	pic_id = ((GUI_Object*)bbw)->gp->pic_id;
+
+	x=event->x;
+	y=event->y;
+
+	pin = get_pin(bbw,x,y);
+	if(pin>0)
+	{
+	    printf("\nPin nr %d, ",pin);
+	    if(hit_state(bbw,x,y))
+	    {
+		printf("hit state\n");
+		value = gpsim_pin_get_value(pic_id, pin);
+		value = !value;
+		gpsim_pin_set_value(pic_id, pin, value);
+	    }
+	    else//if(hit_direction(bbw,x,y))
+	    {
+		dir = gpsim_pin_get_dir(pic_id, pin);
+		dir = !dir;
+		gpsim_pin_set_dir(pic_id, pin, dir);
+		printf("hit direction, %d\n",dir);
+	    }
+	}
+	
+	return 1;
+    }
+    return 0;
+}
+
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 {
     char buf[128];
@@ -209,6 +307,9 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	puts("BreadboardWindow_new_processor(): pic_id==0");
 	return;
     }
+
+    sprintf(buf,"%s's pinout",gpsim_processor_get_name(pic_id));
+    gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), buf);
     
     bbw->pinline_gc=gdk_gc_new(bbw->da->window);
     gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
@@ -222,7 +323,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 
     bbw->nrofpins=gpsim_package_pin_count(pic_id);
 
-    bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-140-*-*-*-*-*-*");
+    bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
     bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
     bbw->pinnamewidth=0;
     for(i=1;i<=bbw->nrofpins;i++)
@@ -242,7 +343,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
     bbw->pinstatewidth = gdk_string_width (bbw->pinstatefont,"H")+LABELPAD;
     bbw->pinstateheight = gdk_string_height (bbw->pinstatefont,"H")+LABELPAD;
 
-    bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-340-*-*-*-*-*-*");
+    bbw->picnamefont = gdk_font_load ("-adobe-courier-bold-o-*-*-*-340-*-*-*-*-*-*");
     bbw->picnamewidth = gdk_string_width (bbw->picnamefont,gpsim_processor_get_name(pic_id))+LABELPAD;
     bbw->picnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
     
@@ -288,6 +389,9 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
   gtk_window_set_title(GTK_WINDOW(bbw->gui_obj.window), "Breadboard");
   da = gtk_drawing_area_new();
+  gtk_widget_set_events(da,
+			gtk_widget_get_events(da)|
+			GDK_BUTTON_PRESS_MASK);
 
   gtk_container_add(GTK_CONTAINER(window),da);
   gtk_signal_connect(GTK_OBJECT(da),
@@ -310,7 +414,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)bbw);
   gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),bbw);
-  
+  gtk_signal_connect(GTK_OBJECT(bbw->da),
+		     "button_press_event",
+		     (GtkSignalFunc) button,
+		     bbw);
 
   gtk_widget_show(da);
   gtk_widget_show(window);

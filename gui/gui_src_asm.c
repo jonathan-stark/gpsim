@@ -1354,7 +1354,7 @@ static int gui_question(char *question, char *a, char *b)
     static GtkWidget *label;
     GtkWidget *button;
     GtkWidget *hbox;
-    int retval;
+    static int retval;
     
     if(dialog==NULL)
     {
