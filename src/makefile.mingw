@@ -53,6 +53,7 @@ src_OBJECTS =			\
 	lxt_write.o		\
 	modules.o		\
 	operator.o		\
+	os_dependent.o \
 	p12x.o			\
 	p16f62x.o		\
 	p16f87x.o		\
