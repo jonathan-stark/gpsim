@@ -12,7 +12,7 @@ TOC
  5.0  Installing gtk+-extra and eXdbm
  6.0  How to install gpsim from RPM's
  7.0  MAC OS
-
+ 8.0  CVS 
 
 1.0 Installation instructions
     -------------------------
@@ -167,7 +167,10 @@ rm -rf $HOME/compiling/gtk+extra
 
 4.0 HOW TO MAKE YOUR OWN gpsim DISTRIBUTION
     ---------------------------------------
-Since gpsim uses automake, you get a whole lot of features for free. I won't go into all of them, but sometimes you might want to tweak gpsim and make your own tar ball. All you have to do is:
+
+Since gpsim uses automake, you get a whole lot of features for free. I
+won't go into all of them, but sometimes you might want to tweak gpsim
+and make your own tar ball. All you have to do is:
 
 $ make dist
 
@@ -181,7 +184,13 @@ $ make dist
 5.0 INSTALLING gtk+-extra and eXdbm
     -------------------------------
 
-First, you're going to need to grab these two packages. gtk+-extra can be obtained from either its own web page or gpsim's (At the time of this writing, I do not know gtk+-extra's home page url). eXdbm, on the other hand, should be grabbed from gpsim's web page. I've fixed a bug in their install logic and changed their static Makefile to an automake type. For each of these packages, you can use the `standard' technique for installing gnu software:
+First, you're going to need to grab these two packages. gtk+-extra can
+be obtained from either its own web page or gpsim's (At the time of
+this writing, I do not know gtk+-extra's home page url). eXdbm, on the
+other hand, should be grabbed from gpsim's web page. I've fixed a bug
+in their install logic and changed their static Makefile to an
+automake type. For each of these packages, you can use the `standard'
+technique for installing gnu software:
 
 $ tar -xvzf package.tar.gz
 $ cd package
@@ -204,4 +213,7 @@ There's a conflict with shared libraries and gpsim on the new MAC OS's. So for t
 
 $ ./configure --disable-shared
 
+8.0 CVS
+    ---
 
+See 

@@ -175,7 +175,7 @@ if test "$wi_cv_lib_readline" = yes ; then
 		wi_cv_lib_readline=no
 		wi_cv_lib_readline_result="no (headers not installed)"
 	else
-		AC_DEFINE_UNQUOTED(HAVE_LIBREADLINE, $rlver)
+		AC_DEFINE_UNQUOTED(HAVE_LIBREADLINE, $rlver,[Readline])
 	fi
 fi
 	dnl Check to see if we have a namespace clean version of readline

@@ -64,7 +64,7 @@ else
 	[
 	 use_gui=yes
 	]
-	AC_DEFINE(HAVE_GUI)
+	AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
 fi
 
 dnl --enable-gtk2 : link with GTK+ 2.x
