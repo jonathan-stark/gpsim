@@ -139,6 +139,7 @@ void P16F62x::create_sfr_map(void)
 
   add_sfr_register(&intcon_reg, 0x18b, 0);
   add_sfr_register(&intcon_reg, 0x10b, 0);
+  add_sfr_register(&intcon_reg, 0x00b, 0);
 
   add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
   add_sfr_register(usart.txsta, 0x98, 2,"txsta");
