@@ -1,3 +1,6 @@
+2004-07-03 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.ico, plat/win32/gpsim.nsi: created NSIS setup script
+
 2004-07-02 Scott Dattalo <scott@dattalo.com>
 	* gpsim/input.cc, gui/gui_menu.cc: Now files are correctly
 	loaded through the menu interface (File/Open)
