@@ -384,6 +384,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  eWC:
     case  ERD:
       cout << "?? unhandled state transition\n";
+      newState(ST_INITIALIZED);
     }
 
     break;
@@ -403,13 +404,9 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  EWD:
     case  EWC:
       cout << "?? unhandled state transition\n";
+      newState(ST_INITIALIZED);
       break;
     }
-
-
-    if(e == eWC)
-
-    if(e == eWD)
 
     break;
 
@@ -427,6 +424,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  EWD:
     case  EWC:
       cout << "?? unhandled state transition\n";
+      newState(ST_INITIALIZED);
       break;
     }
 
@@ -447,6 +445,7 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  EWD:
     case  EWC:
       cout << "?? unhandled state transition\n";
+      newState(ST_INITIALIZED);
       break;
     }
     

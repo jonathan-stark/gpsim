@@ -114,15 +114,14 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
       if(lcd && lcd->debug)
-	cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = "
-         << new_value <<'\n';
+	//cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
 
       value ^= bit_mask;
 
       assert_event();
       trace_register_write();
     }
-  else cout <<  " IOPORT::set_bit bit did not change\n";
+  //else cout <<  " IOPORT::set_bit bit did not change\n";
 
 }
 
@@ -141,10 +140,10 @@ DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 void DataPort::setbit(unsigned int bit_number, bool new_value)
 {
   if((lcd->control_port->value & 6) == 4){  //E is high and R/W is low
-    cout << "DataPort::" << __FUNCTION__ << " setting bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
+    //cout << "DataPort::" << __FUNCTION__ << " setting bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
     Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
-  } else
-    cout << "DataPort::" << __FUNCTION__ << " ignoring data. bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
+  } 
+  //else cout << "DataPort::" << __FUNCTION__ << " ignoring data. bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
 }
 void DataPort::update_pin_directions(unsigned int new_direction)
 {
@@ -152,7 +151,7 @@ void DataPort::update_pin_directions(unsigned int new_direction)
   if((new_direction ^ direction) & 1) {
     direction = new_direction & 1;
 
-    cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value <<endl;
+    //cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value <<endl;
 
     // Change the directions of the I/O pins
     for(int i=0; i<8; i++) {
@@ -169,14 +168,19 @@ void DataPort::update_pin_directions(unsigned int new_direction)
 unsigned int DataPort::get(void)
 {
 
-  for(int i=0; i<8; i++) {
+  for(int i=7; i>=0; i--) {
     if(pins[i]) {
-      value = (value << 1) | (pins[i]->state & 1);
+      value = (value << 1) | ((pins[i]->state > 0) ? 1 : 0);
+      //cout << "   Pin[" << i << "] = " << pins[i]->state << endl;
     }
 
   }
 
+  value &= 0xff;
+
   cout << "DataPort::get = 0x" << value << endl;
+
+  return value;
 
 }
 
@@ -204,7 +208,7 @@ void ControlPort::put(unsigned int new_value)
 
   unsigned int old_value = value;
 
-  cout << __FUNCTION__ << " new value " << new_value << endl;
+  //cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
@@ -238,7 +242,7 @@ void DataPort::put(unsigned int new_value)
 
   unsigned int old_value = value;
 
-  cout << __FUNCTION__ << " new value " << new_value << endl;
+  //cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
 
@@ -259,14 +263,15 @@ void Lcd_Input::put_node_state( int new_state)
 
   int diff = state^new_state;
 
-  cout << " " << name() << " Lcd_Input::put_node_state = " << new_state << endl;
+  //cout << " " << name() << " Lcd_Input::put_node_state = " << new_state << endl;
 
   IO_input::put_node_state(new_state);
-
-  if(diff) {
+/*
+  if(diff)
     cout << "Lcd Input " << name() << " changed to new state: " << state << '\n';
-  }
-
+  else
+    cout << "Lcd Input " << name() << " didn't change states\n";
+*/
 }
 //---------------------------------------------------------------
 Lcd_bi_directional::Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name) :
@@ -282,17 +287,17 @@ void Lcd_bi_directional::put_node_state( int new_state)
 
   if(driving) {
     
-    cout << " " << name() << " Lcd_bi_directional::put_node_state -- driving, so ignoring new state of " << new_state << endl;
+    //cout << " " << name() << " Lcd_bi_directional::put_node_state -- driving, so ignoring new state of " << new_state << endl;
     return;
   }
 
-  cout << " " << name() << " Lcd_bi_directional::put_node_state = " << new_state << endl;
+  //cout << " " << name() << " Lcd_bi_directional::put_node_state = " << new_state << endl;
   IO_bi_directional::put_node_state(new_state);
-
+/*
   if(old_state ^ state) {
     cout << "Lcd bi di " << name() << " changed to new state: " << state << '\n';
   }
-
+*/
 }
 
 //---------------------------------------------------------------
