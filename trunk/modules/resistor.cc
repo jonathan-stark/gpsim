@@ -137,7 +137,7 @@ Resistor::Resistor(void)
 {
 
   cout << "resistor constructor\n";
-  name_str = "Resistor";
+  name_str = strdup("Resistor");
 }
 
 Resistor::~Resistor(void)

@@ -530,7 +530,7 @@ Led_7Segments::Led_7Segments(void)
 {
 
   cout << "7-segment led constructor\n";
-  name_str = "Led 7-segments";
+  name_str = strdup("Led 7-segments");
 
 
   build_segments(100, 100);

@@ -168,7 +168,7 @@ Switch::Switch(void)
 {
 
     cout << "Switch constructor\n";
-    name_str = "Switch";
+    name_str = strdup("Switch");
 
     interface_id = gpsim_register_interface((gpointer)this);
 }

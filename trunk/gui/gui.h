@@ -463,6 +463,20 @@ enum orientation {LEFT, RIGHT, UP, DOWN};
 enum direction {PIN_INPUT, PIN_OUTPUT};
 typedef enum {PIN_DIGITAL, PIN_ANALOG, PIN_OTHER} pintype;
 
+// Routing types
+typedef enum {R_NONE,R_LEFT, R_RIGHT, R_UP, R_DOWN} route_direction;
+typedef struct
+{
+    int x;
+    int y;
+} point;
+typedef struct _path
+{
+    point p;
+    route_direction dir;
+    struct _path *next;
+} path;
+// End routing types
 
 struct gui_pin
 {
@@ -478,6 +492,8 @@ struct gui_pin
     int y;
     int width;
     int height;
+
+    int layout_xpos, layout_ypos;
 
     int value;
     enum direction direction;
@@ -519,6 +535,8 @@ struct gui_node
     Stimulus_Node *node;
     GtkWidget *tree_item;
     int selected_row;
+
+    GList *pins;
 };
 
 
@@ -533,6 +551,7 @@ struct _Breadboard_Window {
     GtkWidget *layout;
 
     GdkGC *pinname_gc;
+    GdkGC *pinline_gc;
     GdkGC *case_gc;
 
     int width, height;
@@ -553,6 +572,8 @@ struct _Breadboard_Window {
     GtkWidget *stimulus_settings_label;
 
     GtkWidget *stimulus_add_node_button;
+
+    GdkPixmap *layout_pixmap;
 
     GtkAdjustment *hadj, *vadj;
 
