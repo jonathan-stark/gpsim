@@ -136,7 +136,7 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
 
   if( ((bit_mask & value) != 0) ^ (new_value==1))
     {
-      if(lcd && lcd->debug)
+      if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
 	cout << " Lcd+Port::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
 
       value ^= bit_mask;
@@ -249,7 +249,7 @@ void ControlPort::put(unsigned int new_value)
 
 void ControlPort::callback(void)
 {
-  if(lcd && lcd->debug)
+  if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
     cout << "ControlPort::callback(void)\n";
 
   cycles.set_break_delta(break_delta, this);
@@ -465,7 +465,9 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   new_name("Lcd Display");
 
   mode_flag = _8BIT_MODE_FLAG;
+  data_latch = 0;
   data_latch_phase = 1;
+  last_event = eWC;
 
   disp_type=aType;
   set_pixel_resolution();
@@ -474,12 +476,20 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
 
   rows = aRows;
   cols = aCols;
+  cursor.row = 0;
+  cursor.col = 0;
 
+  in_cgram = FALSE;
+  cgram_updated = FALSE;
+  cgram_cursor = 0;
+  memset(&cgram[0], 0, sizeof(cgram));
   // The font is created dynamically later on.
   fontP = NULL;
 
   // If you want to get diagnostic info, change debug to non-zero.
   debug = 0;
+  if (getenv("GPSIM_LCD_DEBUG"))
+    debug = atoi(getenv("GPSIM_LCD_DEBUG"));
 
   interface = new LCD_Interface(this);
   gi.add_interface(interface);

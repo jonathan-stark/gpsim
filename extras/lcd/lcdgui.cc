@@ -19,23 +19,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
-typedef char _5X7 [7][6];
-#include "lcdfont.h"
 #include "lcd.h"
-
-static gchar **xpm_template;
-
-
-//GtkWidget *test_pix=NULL;
-//GdkPixmap *test_pixmap=NULL;
-
-//GdkPixmap *LCD_font[FONT_LEN];
-//gint total_chars = 0;
-
-//
-
-gchar ch,n;
-
+#include "lcdfont.h"
 
 /****************************************************************
  * CreateXPMdataFromLCDdata -
@@ -112,34 +97,6 @@ gchar  **CreateXPMdataFromLCDdata(LcdDisplay *lcdP, _5X7 *ch )
   return xpm_template;
 }
 
-#if 0
-/*
- * CreateWidgetFromXpm (borrowed from Harlow)
- *
- * Using the window information and the string with the icon color/data, 
- * create a widget that represents the data.  Once done, this widget can
- * be added to buttons or other container widgets.
- */
-GtkWidget *CreateWidgetFromXpm (GtkWidget *parent_window,LCD_display *lcd, gchar **xpm_data)
-{
-    GdkBitmap *mask;
-
-    GtkWidget *pixmap_widget;
-
-    test_pixmap = gdk_pixmap_create_from_xpm_d (
-                                 parent_window->window, 
-                                 &mask,
-                                 lcd->dot_color,
-                                 (gchar **) xpm_data);
-
-    //pixmap_widget = gtk_pixmap_new (test_pixmap, mask);
-    //gtk_widget_show (pixmap_widget);
-
-    return (pixmap_widget);
-}
-
-#endif
-
 
 /***************************************************************
  * CreateFont
@@ -154,6 +111,7 @@ LcdFont::LcdFont (gint characters,  GtkWidget *parent_window, LcdDisplay *lcdP)
 
   num_elements = characters;
   pixmaps = (GdkPixmap **)malloc( sizeof (GdkPixmap *) * num_elements);
+  mywindow = parent_window->window;
 
   for(i=0; i<num_elements; i++) {
 
@@ -161,16 +119,55 @@ LcdFont::LcdFont (gint characters,  GtkWidget *parent_window, LcdDisplay *lcdP)
       pixmaps[i] = NULL;
     else
       pixmaps[i] = gdk_pixmap_create_from_xpm_d (
-				 parent_window->window, 
+                                 mywindow,
                                  NULL,
                                  lcdP->dot_color,
                                  CreateXPMdataFromLCDdata(lcdP,&test[i]));
   }
-  
+}
+
+void LcdFont::update_pixmap(int pos, _5X7 *tempchar, LcdDisplay *lcdP)
+{
+    if (pixmaps[pos]) {
+      g_free(pixmaps[pos]);
+      pixmaps[pos] = NULL;
+    }
+    pixmaps[pos] = gdk_pixmap_create_from_xpm_d (
+                               mywindow,
+                               NULL,
+                               lcdP->dot_color,
+                               CreateXPMdataFromLCDdata(lcdP, tempchar));
+}
+
+void LcdDisplay::update_cgram_pixmaps()
+{
+  int i, j, k;
+  _5X7 tempchar;
+
+  if (fontP == NULL)
+    return;
+
+  for (i = 0; i < CGRAM_SIZE / 8; i++) {
+    for (j = 0; j < 7; j++) {
+      for (k = 0; k < 5; k++) {
+        if (cgram[8 * i + j] & (1 << (4 - k)))
+          tempchar[j][k] = '.';
+        else
+          tempchar[j][k] = ' ';
+      }
+      tempchar[j][5] = 0;
+    }
+    fontP->update_pixmap(i, &tempchar, this);
+
+  }
+  cgram_updated = FALSE;
 }
 
 GdkPixmap *LcdDisplay::get_pixmap(gint row, gint col)
 {
+
+  if (cgram_updated)
+    update_cgram_pixmaps();
 
   if(fontP) {
 
@@ -434,6 +431,14 @@ void LcdDisplay::clear_display(void)
 
 void LcdDisplay::write_data(int data)
 {
+  if (debug & LCD_DEBUG_TRACE_DATA)
+    cout << "lcd_write " << data << (in_cgram ? "cgram" : "data") << " mode\n";
+  if (in_cgram) {
+    cgram[cgram_cursor] = data;
+    cgram_cursor = (cgram_cursor + 1) & CGRAM_MASK;
+    cgram_updated = TRUE;
+    return;
+  }
 
   if(cursor.col < cols) {
     ch_data[cursor.row][cursor.col] = data & 0xff;
@@ -458,4 +463,18 @@ void LcdDisplay::write_ddram_address(int data)
   cursor.col = (data & 0x3f) % 40;
   cursor.row = (data & 0x40) ? 1 : 0;
 
+  if (in_cgram && debug)
+    cout << "Leaving CGRAM update mode\n";
+  in_cgram = FALSE;
+
+}
+
+void LcdDisplay::write_cgram_address(int data)
+{
+  data &= CGRAM_MASK;
+
+  cgram_cursor = data;
+  if ((!in_cgram) && debug)
+    cout << "Entering CGRAM update mode\n";
+  in_cgram = TRUE;
 }

@@ -217,8 +217,9 @@ void LcdDisplay::execute_command(void)
     busyTimer.set(39e-6);	// busy for 39 usec after set DDRAM addr
   }
   else if( (data_latch & LCD_MASK_SET_CGRAM) ==  LCD_CMD_SET_CGRAM) {
-    cout << "LCD_CMD_SET_CGRAM\n";
-    cout << "NOT SUPPORTED\n";
+    if(debug)
+      cout << "LCD_CMD_SET_CGRAM\n";
+    write_cgram_address(data_latch & 0x3f);
   }
   else if( (data_latch & LCD_MASK_FUNC_SET) == LCD_CMD_FUNC_SET) {
 

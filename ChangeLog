@@ -1,4 +1,9 @@
-2004-03-24 Scott Dattalo  <scott@dattalo.com>
+2004-03-25  Bert Driehuis <driehuis@playbeing.org>
+	* extras/lcd/lcdengine.cc, extras/lcd/lcdengine.cc,
+	extras/lcd/lcd.h, extras/lcd/lcdgui.cc, extras/lcd/examples/lcd.asm:
+	Added support for CGRAM in the LCD module.
+
+2004-03-25 Scott Dattalo  <scott@dattalo.com>
 	* src/processor.h, src/processor.cc: Added pma_context list
 	* gui/Makefile.am: Recently added .h files are now in the Makefile
 	* gui/gui_src.h, gui/gui_src_asm.cc: Multiple source browsers are
