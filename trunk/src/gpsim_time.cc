@@ -240,9 +240,10 @@ void Cycle_Counter::clear_break(TriggerObject *f)
   }
 
   if(!l2) {
-#ifdef __DEBUG_CYCLE_COUNTER__
-    cout << "clear_break could not find break point)\n";
-#endif
+    //#ifdef __DEBUG_CYCLE_COUNTER__
+    cout << "WARNING Cycle_Counter::clear_break could not find break point\n  Culprit:\t";
+    f->callback_print();
+    //#endif
     return;
   }
   // at this point l2->next points to our break point
@@ -571,7 +572,13 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
 
     // If the break point was not found, it can't be moved. So let's just create
     // a new break point.
-    cout << " Warning: Cycle_Counter::reassign_break - didn't find the old one\n";
+    cout << "WARNING Cycle_Counter::reassign_break could not find old break point\n";
+    cout << "      a new break will created at cycle: 0x"<<hex<<new_cycle<<endl;
+    if(f) {
+      cout << " Culprit:\t";
+      f->callback_print();
+    }
+
     set_break(new_cycle, f);
   }
   return 1;
