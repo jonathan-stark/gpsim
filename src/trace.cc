@@ -419,9 +419,9 @@ guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_i
   unsigned int i;
   guint64 cycle=0;
   bool 
-    found_instruction = 0,
-    found_pc =0,
-    found_cycle = 0;
+    found_instruction = false,
+    found_pc = false,
+    found_cycle = false;
 
   // -1 means the index wasn't found.
   instruction_index=-1;
@@ -443,9 +443,11 @@ guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_i
   do
   {
     if(is_cycle_trace(i) == 2) {
-      found_cycle = 1;
+      found_cycle = true;
       cycle_index = i;
       int k = (i+1) & TRACE_BUFFER_MASK;
+
+      // extract the ~64bit cycle counter from the trace buffer.
       cycle = trace_buffer[k]&0x3fffffff;
       cycle = (cycle << 32) | 
 	   ((trace_buffer[i]&0x7fffffff) | (trace_buffer[k]&0x80000000 ));
@@ -458,16 +460,15 @@ guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_i
 	instruction_index = i;
 	n--;
 	if(n == 0)
-	  found_instruction = 1;
+	  found_instruction = true;
 	if(found_cycle)
 	  cycle--;
 	break;
 
       case PC_SKIP:
       case PROGRAM_COUNTER:
-	if(found_instruction) {
-	  found_pc = 1;
-	}
+	if(found_instruction)
+	  found_pc = true;           // This will terminate the search
 	pc_index = i;
 
 	break;
@@ -489,6 +490,12 @@ guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_i
   
   } while( (i != trace_index) && (!found_pc));
 
+  /*
+  cout << "find_cycle(): \n found_cycle = "  
+       << found_cycle << " Cycle = " << cycle << "    cycle_index = " << cycle_index 
+       << "\n found_instruction = " << found_instruction << "    instruction_index = " << instruction_index 
+       << "\n found_pc = " << found_pc << "    pc_index = " << pc_index << endl;
+  */
   return cycle;
 }
 

@@ -154,6 +154,19 @@ public:
       value.init = rv.init;
     }
 
+  /* getRV_notrace and putRV_notrace are analogous to getRV and putRV
+   * except that the action (in the derived classes) will not be
+   * traced. The primary reason for this is to allow the gui to
+   * refresh it's windows without having the side effect of filling
+   * up the trace buffer
+   */
+  virtual RegisterValue getRV_notrace(void) { return value;}
+  virtual void putRV_notrace(RegisterValue rv)
+    { 
+      value.data = rv.data;
+      value.init = rv.init;
+    }
+
   // In the Register class, the 'Register *get()' returns a
   // pointer to itself. Derived classes may return something
   // else (e.g. a break point may be pointing to the register
