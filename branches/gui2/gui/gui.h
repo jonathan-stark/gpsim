@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 
 #define SBAW_NRFILES 20 // Max number of source files
 
+#include "gui_object.h"
 
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
@@ -53,38 +54,6 @@ Boston, MA 02111-1307, USA.  */
 //
 // Create structures to generically access the pic-processor
 //
-
-//
-// Here's a list of all the types of windows that are supported
-//
-
-enum window_types {
-  WT_INVALID = 0,
-  WT_opcode_source_window=1,
-  WT_asm_source_window,
-  WT_register_window,
-  WT_eeprom_window,
-  WT_watch_window,
-  WT_symbol_window,
-  WT_breadboard_window,
-  WT_stack_window,
-  WT_trace_window,
-  WT_profile_window,
-  WT_stopwatch_window,
-  WT_scope_window,
-  WT_status_bar,
-  WT_sfr_window,
-  WT_list_source_window
-};
-
-//
-// Here's a list of all the categories of windows that are supported
-//
-enum window_category {
-  WC_misc,
-  WC_source,
-  WC_data
-};
 
 //
 // This structure will cross reference the data in the simulator
@@ -233,8 +202,8 @@ int config_set_string(const char *module, const char *entry, const char *string)
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
 
-void ProfileWindow_notify_start_callback(Profile_Window *pw);
-void ProfileWindow_notify_stop_callback(Profile_Window *pw);
+//void ProfileWindow_notify_start_callback(Profile_Window *pw);
+//void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 int gui_get_value(char *prompt);
 
 

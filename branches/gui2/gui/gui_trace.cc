@@ -218,10 +218,10 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-void Trace_Window::Build(void)
+GtkWidget *Trace_Window::Build(void)
 {
   if(bIsBuilt)
-    return;
+    return window;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
     
@@ -298,6 +298,7 @@ void Trace_Window::Build(void)
   Update();
   UpdateMenuItem();
 
+  return window;
 }
 
 //------------------------------------------------------------------------

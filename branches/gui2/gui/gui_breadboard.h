@@ -173,7 +173,7 @@ class Breadboard_Window : public GUI_Object {
 
 
   Breadboard_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void Update(void);
   virtual void NewModule(Module *module);

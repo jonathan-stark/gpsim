@@ -45,7 +45,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_src.h"
-#include "gui_profile.h"
+//#include "gui_profile.h"
 #include "gui_symbols.h"
 #include "gui_statusbar.h"
 
@@ -55,8 +55,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../xpms/pc.xpm"
 #include "../xpms/break.xpm"
 #include "../xpms/canbreak.xpm"
-#include "../xpms/startp.xpm"
-#include "../xpms/stopp.xpm"
+//#include "../xpms/startp.xpm"
+//#include "../xpms/stopp.xpm"
 
 #define PAGE_BORDER 3
 #define PIXMAP_SIZE 14
@@ -95,8 +95,8 @@ static menu_item menu_items[] = {
     {"Run here",        MENU_RUN_HERE,0},
     {"Move PC here",    MENU_MOVE_PC,0},
     {"Breakpoint here", MENU_BP_HERE,0},
-    {"Profile start here", MENU_PROFILE_START_HERE,0},
-    {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
+    //{"Profile start here", MENU_PROFILE_START_HERE,0},
+    //{"Profile stop here", MENU_PROFILE_STOP_HERE,0},
     {"Select symbol",   MENU_SELECT_SYMBOL,0},
     {"Find text...",    MENU_FIND_TEXT,0},
     {"Settings...",     MENU_SETTINGS,0},
@@ -518,6 +518,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   notify_stop_list.Remove(address);
 
 
+  /*
   if(pma->address_has_profile_start(address))
     notify_start_list.Add(address, 
 			  gtk_pixmap_new(pixmap_profile_start,startp_mask), 
@@ -530,7 +531,9 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 			 pages[id].source_layout,
 			 e->pos);
 
-  else if(pma->address_has_break(address)) {
+  else 
+  */
+  if(pma->address_has_break(address)) {
     e->Set(pages[id].source_layout,pixmap_break, bp_mask);
 
   } else {
@@ -590,6 +593,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
       break;
+      /*
     case MENU_PROFILE_START_HERE:
       line = popup_sbaw->menu_data->line;
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
@@ -606,7 +610,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       popup_sbaw->gp->profile_window->StopExe(address);
 
       break;
-
+      */
     case MENU_SELECT_SYMBOL:
       {
 	gint i, temp;
@@ -1282,6 +1286,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 							   &style->bg[GTK_STATE_NORMAL],
 							   (gchar**)canbreak_xpm);
 
+      /*
       sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							       &sbaw->startp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
@@ -1290,6 +1295,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 							       &sbaw->stopp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
 							       (gchar**)stopp_xpm);
+      */
   }
   sbaw->pages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
@@ -2453,10 +2459,10 @@ static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
 
 }
 
-void SourceBrowserAsm_Window::Build(void)
+GtkWidget *SourceBrowserAsm_Window::Build(void)
 {
   if(bIsBuilt)
-    return;
+    return window;
 
   char *fontstring;
 
@@ -2545,6 +2551,7 @@ void SourceBrowserAsm_Window::Build(void)
     NewSource(gp);
   UpdateMenuItem();
 
+  return window;
 }
 
 void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
@@ -2632,7 +2639,7 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
   children.push_back(new SourceBrowserAsm_Window(_gp));
 }
 
-void SourceBrowserParent_Window::Build(void)
+GtkWidget * SourceBrowserParent_Window::Build(void)
 {
   list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
 
@@ -2640,6 +2647,8 @@ void SourceBrowserParent_Window::Build(void)
        sbaw_iterator != children.end(); 
        sbaw_iterator++)
     (*sbaw_iterator)->Build();
+
+  return 0;
 }
 
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)

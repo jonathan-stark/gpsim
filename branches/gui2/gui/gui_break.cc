@@ -46,16 +46,16 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 #include "gui_breadboard.h"
 #include "gui_processor.h"
-#include "gui_profile.h"
-#include "gui_register.h"
-#include "gui_regwin.h"
-#include "gui_scope.h"
+//#include "gui_profile.h"
+//#include "gui_register.h"
+//#include "gui_regwin.h"
+//#include "gui_scope.h"
 #include "gui_src.h"
-#include "gui_stack.h"
-#include "gui_stopwatch.h"
+//#include "gui_stack.h"
+//#include "gui_stopwatch.h"
 #include "gui_symbols.h"
 #include "gui_trace.h"
-#include "gui_watch.h"
+//#include "gui_watch.h"
 #include "gui_statusbar.h"
 
 extern GUI_Processor *gp;
@@ -71,16 +71,16 @@ void gui_simulation_has_stopped(gpointer callback_data)
     {
       GUI_Processor *gp = (GUI_Processor *) callback_data;
 
-      gp->regwin_ram->Update();
+      //gp->regwin_ram->Update();
       //gp->regwin_eeprom->Update();
       gp->program_memory->Update();
       gp->source_browser->Update();
-      gp->watch_window->Update();
-      gp->stack_window->Update();
+      //gp->watch_window->Update();
+      //gp->stack_window->Update();
       gp->breadboard_window->Update();
       gp->trace_window->Update();
-      gp->profile_window->Update();
-      gp->stopwatch_window->Update();
+      //gp->profile_window->Update();
+      //gp->stopwatch_window->Update();
     }
 
   if(gui_animate_delay!=0)
@@ -143,8 +143,6 @@ void link_src_to_gpsim(GUI_Processor *gp)
       for(i=0; i < pm_size; i++) {
 	
 	cross_reference = new linkXREF();
-	//cross_reference->parent_window_type = WT_asm_source_window;
-	//cross_reference->parent_window = (gpointer) gp;
 	cross_reference-> gp = gp;
 	address = (int *) malloc(sizeof(int *));
 	*address = gp->cpu->map_pm_index2address(i);

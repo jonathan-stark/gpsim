@@ -193,7 +193,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   SourceBrowserParent_Window *parent;
 
   SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
   virtual void CloseSource(void);
@@ -249,7 +249,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   unsigned int *memory;
 
   SourceBrowserOpcode_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
@@ -275,7 +275,7 @@ class SourceBrowserParent_Window : public GUI_Object
   list<SourceBrowserAsm_Window *> children;
 
   SourceBrowserParent_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void Update(void);

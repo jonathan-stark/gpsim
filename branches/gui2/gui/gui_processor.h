@@ -30,13 +30,13 @@ class EEPROM_RegisterWindow;
 class SourceBrowser_Window;
 class SourceBrowserParent_Window;
 class Symbol_Window;
-class Watch_Window;
-class Stack_Window;
+//class Watch_Window;
+//class Stack_Window;
 class Breadboard_Window;
 class Trace_Window;
-class Profile_Window;
-class StopWatch_Window;
-class Scope_Window;
+//class Profile_Window;
+//class StopWatch_Window;
+//class Scope_Window;
 class Processor;
 
 
@@ -54,15 +54,15 @@ class GUI_Processor {
   SourceBrowser_Window *program_memory;
   SourceBrowserParent_Window *source_browser;
   Symbol_Window *symbol_window;
-  Watch_Window *watch_window;
-  Stack_Window *stack_window;
+  //Watch_Window *watch_window;
+  //Stack_Window *stack_window;
   Breadboard_Window *breadboard_window;
   Trace_Window *trace_window;
-  Profile_Window *profile_window;
-  StopWatch_Window *stopwatch_window;
-  Scope_Window *scope_window;
+  //Profile_Window *profile_window;
+  //StopWatch_Window *stopwatch_window;
+  //Scope_Window *scope_window;
 
-  // The pic that's associated with the gui
+  // The processor that's associated with the gui
   Processor *cpu;
 };
 

@@ -22,7 +22,39 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_OBJECT_H__
 #define __GUI_OBJECT_H__
 
-//#include "gui.h"
+#include <string>
+using namespace std;
+//
+// Here's a list of all the types of windows that are supported
+//
+
+enum window_types {
+  WT_INVALID = 0,
+  WT_opcode_source_window=1,
+  WT_asm_source_window,
+  WT_register_window,
+  WT_eeprom_window,
+  WT_watch_window,
+  WT_symbol_window,
+  WT_breadboard_window,
+  WT_stack_window,
+  WT_trace_window,
+  WT_profile_window,
+  WT_stopwatch_window,
+  WT_scope_window,
+  WT_status_bar,
+  WT_sfr_window,
+  WT_list_source_window
+};
+
+//
+// Here's a list of all the categories of windows that are supported
+//
+enum window_category {
+  WC_misc,
+  WC_source,
+  WC_data
+};
 
 
 //
@@ -75,7 +107,7 @@ class GUI_Object {
   char *name(void);
   void set_name(char * new_name);
   void set_name(string &new_name);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
   virtual void Update(void);
