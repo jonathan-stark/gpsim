@@ -978,7 +978,7 @@ unsigned int icd_Register::get(void)
 			case 10:
 			    break;
 			default:
-			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
+			    icd_Register *ifr = static_cast<icd_Register*>(get_cpu()->registers[offset+i]);
 			    assert(ifr!=0);
 			    ifr->value.put(buf[i]);
 			    ifr->is_stale=0;
@@ -996,7 +996,7 @@ unsigned int icd_Register::get(void)
 			case 10:
 			    break;
 			default:
-			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
+			    icd_Register *ifr = static_cast<icd_Register*>(get_cpu()->registers[offset+i]);
 			    assert(ifr!=0);
 			    ifr->replaced->update();
 			    break;
@@ -1022,7 +1022,7 @@ unsigned int icd_Register::get(void)
 			case 10:
 			    break;
 			default:
-			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
+			    icd_Register *ifr = static_cast<icd_Register*>(get_cpu()->registers[offset+i]);
 			    assert(ifr!=0);
 			    ifr->value.put(buf[i]);
 			    ifr->is_stale=0;
@@ -1040,7 +1040,7 @@ unsigned int icd_Register::get(void)
 			case 10:
 			    break;
 			default:
-			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
+			    icd_Register *ifr = static_cast<icd_Register*>(get_cpu()->registers[offset+i]);
 			    assert(ifr!=0);
 			    ifr->replaced->update();
 			    break;

@@ -46,6 +46,11 @@ instruction::instruction(void)
 
 }
 
+void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
+{
+  cpu = new_cpu;
+  opcode = new_opcode;
+}
 
 void invalid_instruction::execute(void)  
 { 
@@ -70,7 +75,7 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
 void instruction::add_line_number_symbol(int address)
 {
 
-  symbol_table.add_line_number(cpu, address);
+  symbol_table.add_line_number(get_cpu(), address);
 
 }
 
@@ -83,13 +88,20 @@ void instruction::update_line_number(int file, int sline, int lline, int hllfile
   hll_file_id = hllfile;
 }
 
-char * Literal_op::name(char *return_str,int len)
+char *Literal_op::name(char *return_str,int len)
 {
 
   snprintf(return_str,len,"%s\t0x%02x",
 	   gpsimValue::name().c_str(),L);
 
   return(return_str);
+}
+
+void Literal_op::decode(Processor *new_cpu, unsigned int new_opcode)
+{
+  opcode = new_opcode;
+  cpu = new_cpu;
+  L = opcode & 0xff;
 }
 
 void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
@@ -161,7 +173,7 @@ char * Bit_op::name(char *return_str,int len)
   //  %%% FIX ME %%% Actually just a slight dilemma - the source register will always be in
   //                 the lower bank of memory...
 
-  reg = cpu->registers[register_address];
+  reg = get_cpu()->registers[register_address];
 
   unsigned int bit;
 
@@ -209,7 +221,7 @@ char * Register_op::name(char *return_str,int len)
   //  %%% FIX ME %%% Actually just a slight dilemma - the source register will always be in
   //                 the lower bank of memory (for the 12 and 14 bit cores).
 
-  source = cpu->registers[register_address];
+  source = get_cpu()->registers[register_address];
 
   if(cpu_pic->base_isa() != _16BIT_PROCESSOR_)
     snprintf(return_str,len,"%s\t%s,%c",
@@ -293,9 +305,9 @@ void ADDWF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (src_value = source->get()) + (w_value = cpu_pic->W->value.get());
 
@@ -354,9 +366,9 @@ void ANDWF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = source->get() & cpu_pic->W->value.get();
 
@@ -391,9 +403,9 @@ void BCF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    reg = cpu->registers[register_address];
+    reg = cpu_pic->registers[register_address];
   else
-    reg = cpu->register_bank[register_address];
+    reg = cpu_pic->register_bank[register_address];
 
   reg->put(reg->get() & mask);
 
@@ -418,9 +430,9 @@ void BSF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    reg = cpu->registers[register_address];
+    reg = cpu_pic->registers[register_address];
   else
-    reg = cpu->register_bank[register_address];
+    reg = cpu_pic->register_bank[register_address];
 
   reg->put(reg->get() | mask);
 
@@ -446,9 +458,9 @@ void BTFSC::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    reg = cpu->registers[register_address];
+    reg = cpu_pic->registers[register_address];
   else
-    reg = cpu->register_bank[register_address];
+    reg = cpu_pic->register_bank[register_address];
 
   unsigned int result = mask & reg->get();
 
@@ -476,9 +488,9 @@ void BTFSS::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    reg = cpu->registers[register_address];
+    reg = cpu_pic->registers[register_address];
   else
-    reg = cpu->register_bank[register_address];
+    reg = cpu_pic->register_bank[register_address];
 
   unsigned int result = mask & reg->get();
 
@@ -545,9 +557,9 @@ void CLRF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    cpu->registers[register_address]->put(0);
+    cpu_pic->registers[register_address]->put(0);
   else
-    cpu->register_bank[register_address]->put(0);
+    cpu_pic->register_bank[register_address]->put(0);
 
   cpu_pic->status->put_Z(1);
 
@@ -559,7 +571,7 @@ char * CLRF::name(char *return_str,int len)
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimValue::name().c_str(),
-	   cpu->registers[register_address]->name().c_str());
+	   get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -640,9 +652,9 @@ void COMF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = source->get() ^ 0xff;
 
@@ -676,9 +688,9 @@ void DECF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (source->get() - 1)&0xff;
 
@@ -712,9 +724,9 @@ void DECFSZ::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (source->get() - 1)&0xff;
 
@@ -788,9 +800,9 @@ void INCF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -827,9 +839,9 @@ void INCFSZ::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (source->get() + 1)&0xff;
 
@@ -890,9 +902,9 @@ void IORWF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = source->get() | cpu_pic->W->value.get();
 
@@ -946,9 +958,9 @@ void MOVF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   source_value = source->get();
 
@@ -988,9 +1000,9 @@ void MOVWF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    cpu->registers[register_address]->put(cpu_pic->W->get());
+    cpu_pic->registers[register_address]->put(cpu_pic->W->get());
   else
-    cpu->register_bank[register_address]->put(cpu_pic->W->get());
+    cpu_pic->register_bank[register_address]->put(cpu_pic->W->get());
 
   cpu_pic->pc->increment();
 }
@@ -1000,7 +1012,7 @@ char * MOVWF::name(char *return_str, int len)
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimValue::name().c_str(),
-	   cpu->registers[register_address]->name().c_str());
+	   get_cpu()->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -1099,9 +1111,9 @@ void RLF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (source->get() << 1) | cpu_pic->status->get_C();
 
@@ -1135,9 +1147,9 @@ void RRF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   old_value = source->get();
   new_value = (old_value >> 1) | (cpu_pic->status->get_C() ? 0x80 : 0);
@@ -1195,9 +1207,9 @@ void SUBWF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value.get());
 
@@ -1234,9 +1246,9 @@ void SWAPF::execute(void)
 
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   src_value = source->get();
 
@@ -1287,7 +1299,7 @@ void TRIS::execute(void)
     {
       // Execute the instruction only if the register is valid.
       if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-	cpu->registers[register_address]->put(cpu_pic->W->get());
+	cpu_pic->registers[register_address]->put(cpu_pic->W->get());
       else
 	cpu_pic->tris_instruction(register_address);
     }
@@ -1300,7 +1312,7 @@ char * TRIS::name(char *return_str,int len)
 
   snprintf(return_str,len,"%s\t%s",
 	   gpsimValue::name().c_str(),
-	   cpu->registers[register_address]->name().c_str());
+	   cpu_pic->registers[register_address]->name().c_str());
 
   return(return_str);
 }
@@ -1350,9 +1362,9 @@ void XORWF::execute(void)
   // trace.instruction(opcode);
 
   if(!access)
-    source = cpu->registers[register_address];
+    source = cpu_pic->registers[register_address];
   else
-    source = cpu->register_bank[register_address];
+    source = cpu_pic->register_bank[register_address];
 
   new_value = source->get() ^ cpu_pic->W->value.get();
 

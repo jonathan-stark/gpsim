@@ -46,7 +46,6 @@ int Value::getAsInt()
 
 double Value::getAsDouble()
 {
-  cout << "Throwing an exception\n";
   throw new Error(showType() +
 		  " cannot be converted to a double ");
 }
@@ -715,13 +714,16 @@ string LiteralString::toString()
 
 
 /*****************************************************************
- * The LiteralSymbol class.
+ * The LiteralSymbol class
+ *
+ * The literal symbol is a thin 'literal' wrapper for the symbol class.
+ * The command line parser uses LiteralSymbol whenever an expression
+ * encounters a symbol. 
  */
 
 LiteralSymbol::LiteralSymbol(symbol *_sym)
   : sym(_sym)
 {
-  value = new Integer(0);
 }
 
 LiteralSymbol::~LiteralSymbol()
@@ -730,10 +732,7 @@ LiteralSymbol::~LiteralSymbol()
 
 Value* LiteralSymbol::evaluate()
 {
-  if(sym)
-    value->put(sym->get_value());
-
-  return  value;
+  return  sym->copy();
 }
 
 string LiteralSymbol::toString()

@@ -151,7 +151,7 @@ void  FSR_12::put(unsigned int new_value)
   value.put(new_value);
 
   /* The 12-bit core selects the register page using the fsr */
-  cpu->register_bank = &cpu->registers[ value.get() & register_page_bits ];
+  cpu_pic->register_bank = &cpu_pic->registers[ value.get() & register_page_bits ];
 }
 
 void  FSR_12::put_value(unsigned int new_value)
@@ -212,7 +212,7 @@ void inline Status_register::put(unsigned int new_value)
 
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     {
-      cpu->register_bank = &cpu->registers[(value.get() & rp_mask) << 2];
+      cpu_pic->register_bank = &cpu_pic->registers[(value.get() & rp_mask) << 2];
     }
 
 }
@@ -283,14 +283,14 @@ void INDF::put(unsigned int new_value)
 
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-  int reg = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
+  int reg = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value + 
 	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
   if(reg & fsr_mask){
-    cpu->registers[reg]->put(new_value);
+    cpu_pic->registers[reg]->put(new_value);
 
-    //(cpu->fsr->value & base_address_mask2) + ((cpu->status->value & base_address_mask1)<<1)
+    //(cpu_pic->fsr->value & base_address_mask2) + ((cpu_pic->status->value & base_address_mask1)<<1)
   }
 
 }
@@ -308,10 +308,10 @@ void INDF::put_value(unsigned int new_value)
   put(new_value);
 
   update();
-  int r = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
+  int r = (cpu_pic->fsr->get_value() + //cpu_pic->fsr->value + 
 	   ((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2);
   if(r & fsr_mask) 
-    cpu->registers[r]->update();
+    cpu_pic->registers[r]->update();
 
 }
 
@@ -324,7 +324,7 @@ unsigned int INDF::get(void)
   int reg = (cpu_pic->fsr->get_value() +
 	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
-    return(cpu->registers[reg]->get());
+    return(cpu_pic->registers[reg]->get());
   else
     return(0);   // avoid infinite loop if fsr points to the indf
 }
@@ -334,7 +334,7 @@ unsigned int INDF::get_value(void)
   int reg = (cpu_pic->fsr->get_value() +
 	       ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
-    return(cpu->registers[reg]->get_value());
+    return(cpu_pic->registers[reg]->get_value());
   else
     return(0);   // avoid infinite loop if fsr points to the indf
 }
@@ -366,7 +366,7 @@ void OPTION_REG::put(unsigned int new_value)
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
   //if( (value ^ old_value) & T0CS)
-  //    cpu->tmr0.new_clock_source();
+  //    cpu_pic->tmr0.new_clock_source();
 
   // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
   // increment if tmr0 is being clocked by an external clock?
@@ -420,7 +420,7 @@ unsigned int PCL::get(void)
 
 unsigned int PCL::get_value(void)
 {
-  value.put(cpu->pc->get_value() & 0xff);
+  value.put(cpu_pic->pc->get_value() & 0xff);
   return(value.get());
 }
 //--------------------------------------------------
@@ -699,7 +699,7 @@ WREG::WREG(Processor *_cpu)
 {
   new_name("W");
   if(cpu) {
-    unsigned int trace_command = trace.allocateTraceType(new WTraceType(cpu,0,1));
+    unsigned int trace_command = trace.allocateTraceType(new WTraceType(get_cpu(),0,1));
     set_write_trace(trace_command);
     set_read_trace(trace_command + (1<<23));
   }

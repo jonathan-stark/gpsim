@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "xref.h"
 #include "registers.h"
+#include "processor.h"
 #include "trace.h"
 
 unsigned int count_bits(unsigned int ui)

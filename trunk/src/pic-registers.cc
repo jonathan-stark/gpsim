@@ -333,7 +333,7 @@ void Program_Counter::new_address(unsigned int new_value)
 unsigned int Program_Counter::get_next(void)
 {
 
-  return( (value + cpu->program_memory[value]->instruction_size()) & memory_size_mask);
+  return( (value + cpu_pic->program_memory[value]->instruction_size()) & memory_size_mask);
 
 }
 

@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 
+#include "processor.h"
 
 #include "value.h"
 
@@ -31,7 +32,7 @@ gpsimValue::gpsimValue(void)
   cpu = 0;
 }
 
-gpsimValue::gpsimValue(Processor *_cpu)
+gpsimValue::gpsimValue(Module *_cpu)
   : cpu(_cpu)
 {
 }
@@ -61,4 +62,14 @@ string gpsimValue::toString()
   snprintf(buff,sizeof(buff), " = 0x%x",get_value());
   string s = name() + string(buff);
   return s;
+}
+
+Processor *gpsimValue::get_cpu()
+{
+  return static_cast<Processor *>(cpu);
+}
+
+void gpsimValue::set_cpu(Processor *new_cpu)
+{
+  cpu = new_cpu;
 }

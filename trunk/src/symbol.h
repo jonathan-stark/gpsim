@@ -63,22 +63,24 @@ class IOPORT;
 class Processor;
 class Register;
 class Module;
+class Expression;
 
 class symbol : public gpsimValue
 {
 public:
-
-  Module *cpu;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
   virtual char * type_name(void) { return "unknown";}
 
   virtual string toString();
   virtual void print();
-  virtual void put_value(unsigned int new_value) {}
-  virtual unsigned int get_value() { return 0; }
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get_value();
+  virtual void assignTo(Expression *);
+  virtual symbol *copy();
 
-  symbol(void);
+  symbol(Module *, char *);
+  symbol(Module *, string &);
   virtual ~symbol();
 };
 
@@ -126,31 +128,42 @@ inline Symbol_Table &get_symbol_table(void)
 
 class constant_symbol : public symbol
 {
+protected:
+  unsigned int val;
 public:
+  virtual symbol *copy();
 
-  int val;
+  constant_symbol(Module *cpu, char *, unsigned int);
+
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
   virtual char * type_name(void) { return "constant";}
   virtual void print(void);
   virtual unsigned int get_value(void){return val;};
+  virtual int getAsInt();
 };
 
 
 class ioport_symbol : public symbol
 {
-public:
-
+protected:
   IOPORT *ioport;
+public:
+  ioport_symbol(Module *, IOPORT *);
+  virtual symbol *copy();
+
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
   virtual char * type_name(void) { return "ioport";}
   virtual void put_value(unsigned int new_value);
+  virtual int getAsInt();
 };
 
 class node_symbol : public symbol
 {
+protected:
+  Stimulus_Node *stimulus_node;
 public:
 
-  Stimulus_Node *stimulus_node;
+  node_symbol(Stimulus_Node *);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS_NODE;};
   virtual char * type_name(void) { return "node";}
   virtual void print(void);
@@ -159,44 +172,49 @@ public:
 
 class register_symbol : public symbol
 {
-public:
-
+protected:
   Register *reg;
+
+public:
+  register_symbol(Module *cpu, char *, Register *);
+
+  virtual symbol *copy();
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual char * type_name(void) { return "register";}
   virtual void print(void);
   virtual unsigned int get_value(void);
   virtual void put_value(unsigned int new_value);
+  virtual int getAsInt();
 };
 
 class stimulus_symbol : public symbol
 {
-public:
-
+protected:
   stimulus *s;
-  virtual string &name(void);
+public:
+  stimulus_symbol(stimulus *);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS;};
 };
 
-class address_symbol : public symbol
+class address_symbol : public constant_symbol
 {
 public:
-  int val;
 
+  address_symbol(Module *cpu, char *, unsigned int);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
   virtual char * type_name(void) { return "address";}
   virtual void print(void);
-  virtual unsigned int get_value(void){return val;};
 
 };
 
-class line_number_symbol : public symbol
+class line_number_symbol : public address_symbol
 {
+protected:
+  int src_id,src_line,lst_id,lst_line,lst_page;
  public:
 
-  int address,src_id,src_line,lst_id,lst_line,lst_page;
-
-  void put_address(int new_address) {address = new_address;}
+  line_number_symbol(Module *cpu, char *, unsigned int);
+  void put_address(int new_address) {val = new_address;}
   void put_src_line(int new_src_line) {src_line = new_src_line;}
   void put_lst_line(int new_lst_line) {lst_line = new_lst_line;}
   void put_lst_page(int new_lst_page) {lst_page = new_lst_page;}
@@ -208,6 +226,7 @@ class line_number_symbol : public symbol
 class module_symbol : public symbol
 {
  public:
+  module_symbol(Module *cpu, char *);
   virtual void print(void);      
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
   virtual char * type_name(void) { return "module";}
@@ -215,19 +234,15 @@ class module_symbol : public symbol
 };
 
 // Place W into the symbol table
-class w_symbol : public symbol
+class w_symbol : public register_symbol
 {
  public:
 
-  WREG *w;
+  w_symbol(Module *cpu, char*, Register *);
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
   virtual char * type_name(void) { return "W";}
-
   virtual void print(void);
-  virtual unsigned int get_value(void);
-  virtual void put_value(unsigned int new_value);
-
 };
 
 class val_symbol : public symbol

@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_object.h"
 #include <glib.h>
 class Processor;
+class Module;
 #include "xref.h"
 
 class ComparisonOperator;
@@ -71,7 +72,7 @@ class gpsimValue : public Value {
  public:
 
   gpsimValue(void);
-  gpsimValue(Processor *);
+  gpsimValue(Module *);
   virtual ~gpsimValue();
 
   // Access functions
@@ -100,15 +101,19 @@ class gpsimValue : public Value {
 
   virtual unsigned int get_value(void) = 0;
 
-  virtual void set_cpu(Processor *new_cpu)
+  virtual void set_module(Module *new_cpu)
     {
       cpu = new_cpu;
     }
 
-  Processor *get_cpu(void)
+  Module *get_module(void)
     {
       return cpu;
     }
+
+  virtual void set_cpu(Processor *new_cpu);
+
+  Processor *get_cpu(void);
 
   // When the value changes, then update() is called 
   // to update all things that are watching this value.
@@ -129,9 +134,8 @@ class gpsimValue : public Value {
   
   XrefObject _xref;
 
-  // A pointer to the processor that owns this value.
-  // FIXME - should this be a Module pointer instead?
-  Processor *cpu;
+  // A pointer to the module that owns this value.
+  Module *cpu;
 
 };
 

@@ -34,6 +34,8 @@ extern "C"{
 #include "lxt_write.h"
 }
 
+#define PCPU ((Processor *)cpu)
+
 extern guint64 simulation_start_cycle;
 extern void redisplay_prompt(void);  // in input.cc
 
@@ -675,11 +677,15 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
   opcode = 0xffffffff;
   bpn = bp;
 
-  replaced = cpu->pma->get(address);
+  replaced = new_cpu->pma->get(address);
 
   set_action(new SimpleTriggerAction(this));
 }
 
+Processor* Breakpoint_Instruction::get_cpu(void)
+{ 
+  return dynamic_cast<Processor *>(cpu);
+}
 //-------------------------------------------------------------------
 void Breakpoint_Instruction::new_message(char *s)
 {
@@ -729,13 +735,13 @@ char * Breakpoint_Instruction::name(char *return_str,int len)
 bool Breakpoint_Instruction::set_break(void)
 {
   if(use_icd)
-    bp.clear_all(cpu);
+    bp.clear_all(get_cpu());
 
-  if(address < cpu->program_memory_size()) {
+  if(address < get_cpu()->program_memory_size()) {
 
-    replaced = cpu->pma->get(address);
+    replaced = get_cpu()->pma->get(address);
 
-    cpu->pma->put(address, this);
+    get_cpu()->pma->put(address, this);
 
     if(use_icd)
       icd_set_break(address);
@@ -758,8 +764,8 @@ void Breakpoint_Instruction::clear(void)
   if(use_icd)
     icd_clear_break();
 
-  cpu->pma->put(address, replaced);
-  (*cpu->pma)[address].update();
+  get_cpu()->pma->put(address, replaced);
+  (*get_cpu()->pma)[address].update();
 
 }
 
@@ -833,8 +839,8 @@ void RegisterAssertion::execute(void)
   // executes if it's a pre-assertion or after it completes if it's a
   // post assertion.
 
-  if( (((cpu->rma[regAddress].get_value()) & regMask) != regValue) &&
-      (cpu->pc->get_phase() == 0) )
+  if( (((PCPU->rma[regAddress].get_value()) & regMask) != regValue) &&
+      (PCPU->pc->get_phase() == 0) )
   {
 
     cout << "Caught Register assertion ";
@@ -844,9 +850,9 @@ void RegisterAssertion::execute(void)
 	 << hex 
 	 << regAddress
 	 << " = 0x"
-	 << cpu->rma[regAddress].get_value() << endl;
+	 << PCPU->rma[regAddress].get_value() << endl;
 
-    cout << "0x" << cpu->rma[regAddress].get_value()
+    cout << "0x" << PCPU->rma[regAddress].get_value()
 	 << " & 0x" << regMask 
 	 << " != 0x" << regValue << endl;
 
@@ -854,7 +860,7 @@ void RegisterAssertion::execute(void)
 	 << " regMask = 0x" << regMask 
 	 << " regValue = 0x" << regValue << endl;
 
-    if( (cpu->simulation_mode == RUNNING) && 
+    if( (PCPU->simulation_mode == RUNNING) && 
 	(simulation_start_cycle != cycles.value)) {
 
       action->evaluate();
@@ -895,7 +901,7 @@ void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
   Register *fr = _cpu->registers[reg];
 
   cpu = _cpu;
-  cpu->registers[reg] = this;
+  _cpu->registers[reg] = this;
   replaced = fr;
   address=fr->address;
   
@@ -926,11 +932,11 @@ void BreakpointRegister::clear(void)
       break;
   }
 
-  cpu->registers[address] = replaced;
+  get_cpu()->registers[address] = replaced;
 
   replaced->replacingWith(0);
 
-  cpu->registers[address]->update();
+  get_cpu()->registers[address]->update();
 
   return;
 }
@@ -957,7 +963,7 @@ BreakpointRegister_Value::BreakpointRegister_Value(Processor *_cpu,
   break_value = bv;
   break_mask = bm;
 
-  int regMask = (0x100 << (cpu->register_size()-1)) - 1;
+  int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
 
   if(break_mask == 0)
     break_mask = regMask;
@@ -1296,7 +1302,7 @@ int TriggerObject::find_free(void)
   if(bpn < MAX_BREAKPOINTS) {
 
     bp.break_status[bpn].type = Breakpoints::BREAK_CLEAR;
-    bp.break_status[bpn].cpu  = get_cpu();
+    bp.break_status[bpn].cpu  = 0; //get_cpu();
     bp.break_status[bpn].arg1 = 0;
     bp.break_status[bpn].arg2 = 0;
     bp.break_status[bpn].bpo  = this;

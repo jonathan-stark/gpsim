@@ -149,6 +149,7 @@ abort_gpsim_now {
    return ABORT;
    }
 
+"="                 {return(recognize(EQU_T, "="));}
 "&&"                {return(recognize(LAND_T, "&&"));}
 "||"                {return(recognize(LOR_T, "||"));}
 
@@ -371,7 +372,7 @@ int handle_identifier(const string &s, cmd_options **op )
     if(cmd) {
       if(verbose&2)
         cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
-                (cmd->get_token()) << "\n *******\n";
+	  (cmd->get_token()) << "\n *******\n";
 	
       *op = cmd->get_op();
       have_parameters = 0;
@@ -394,14 +395,7 @@ int handle_identifier(const string &s, cmd_options **op )
       if(replaced != s)
 	return handle_identifier(  replaced, op);
 
-    if(verbose&2)
-      cout << " returning unknown string: " << s << endl;
-
-    yylval.s = strdup(s.c_str());
-
-    return recognize(STRING," string");
-
- } else {
+  } else {
 
     // If we're invoking a macro, search the parameters
     string replaced;
@@ -412,54 +406,55 @@ int handle_identifier(const string &s, cmd_options **op )
 	yy_scan_string(replaced.c_str());
 	return 0;
       }
-   // We already have the command, so search the options. 
+    // We already have the command, so search the options. 
 
-   struct cmd_options *opt = *op;
+    struct cmd_options *opt = *op;
 
-   // We also have one or more parameters now (though they
-   // may not be correct, but that's the parser's job to determine).
+    // We also have one or more parameters now (though they
+    // may not be correct, but that's the parser's job to determine).
 
-   have_parameters = 1;
+    have_parameters = 1;
 
-   if(verbose&2)
-     cout << "search options\n";
+    if(verbose&2)
+      cout << "search options\n";
 
-   while(opt->name)
-    if(strcmp(opt->name, s.c_str()) == 0) {
-      if(verbose&2)
-        cout << "found option '" << opt->name << "'\n";
-      yylval.co = opt;
-      return recognize(translate_token(opt->token_type),"option");
-    }
-    else
-      opt++;
+    while(opt->name)
+      if(strcmp(opt->name, s.c_str()) == 0) {
+	if(verbose&2)
+	  cout << "found option '" << opt->name << "'\n";
+	yylval.co = opt;
+	return recognize(translate_token(opt->token_type),"option");
+      }
+      else
+	opt++;
 
-   // If we get here, then the option was not found.
-   // So let's check the symbols
-   string s1(s);
-   symbol *sym = get_symbol_table().find(&s1);
-   if(sym) {
-     yylval.Symbol_P = sym;
+  }
 
-      if(verbose&2)
-        cout << "found symbol '" << sym->name() << "'\n";
+  // If we get here, then the option was not found.
+  // So let's check the symbols
+  string s1(s);
+  symbol *sym = get_symbol_table().find(&s1);
+  if(sym) {
+    yylval.Symbol_P = sym;
 
-     return recognize(SYMBOL_T,"symbol");
-   }
+    if(verbose&2)
+      cout << "found symbol '" << sym->name() << "'\n";
 
-   //cout << "didn't find it in the symbol list\n";
+    return recognize(SYMBOL_T,"symbol");
+  }
 
-   // Either 1) there's a typo or 2) the command is creating
-   // a new symbol or node or something along those lines.
-   // In either case, let's let the parser deal with it.
+  //cout << "didn't find it in the symbol list\n";
 
-   if(verbose&2)
-     cout << " returning unknown string: " << s << endl;
-   yylval.s = strdup(s.c_str());
-   return recognize(STRING,"string");
- }
+  // Either 1) there's a typo or 2) the command is creating
+  // a new symbol or node or something along those lines.
+  // In either case, let's let the parser deal with it.
 
- return 0;
+  if(verbose&2)
+    cout << " returning unknown string: " << s << endl;
+  yylval.s = strdup(s.c_str());
+  return recognize(STRING,"string");
+
+  return 0;
 
 }
 

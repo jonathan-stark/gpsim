@@ -546,11 +546,8 @@ Module *module_check_cpu(char *module_name)
 
   symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
 
-  if(mP && mP->cpu) {
-
-//    cout << "Module " << mP->cpu->name() << '\n';
-    return mP->cpu;
-  }
+  if(mP)
+    return mP->get_module();
   else {
     cout << "module `" << module_name << "' wasn't found\n";
     return 0;

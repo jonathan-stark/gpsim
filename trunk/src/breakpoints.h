@@ -114,7 +114,7 @@ class TriggerObject
 
   // This object has no cpu associated with it. However, derived
   // types may and can choose to provide access to it through here:
-  virtual Processor *get_cpu(void) { return 0; }
+  //virtual Processor *get_cpu(void) { return 0; }
 
   // Display the breakpoint - Probably should tie into a stream...
   virtual void print(void);
@@ -152,7 +152,7 @@ public:
   virtual int get_hll_file_id(void);
 
   virtual bool set_break(void);
-  virtual Processor* get_cpu(void) { return cpu; }
+  virtual Processor* get_cpu(void);
   virtual void print(void);
   virtual void clear(void);
   virtual char const * bpName() { return "Execution"; }
