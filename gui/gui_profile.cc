@@ -701,23 +701,33 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     t=time(0);
 
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->number_of_source_files;i++)
+    for(i=0;i<pw->gp->cpu->_files->nsrc_files();i++)
     {
-	struct file_context *gpsim_file;
-        char *file_name;
-	gpsim_file = &(gp->cpu->files[i]);
-	file_name = gpsim_file->name;
+      //struct file_context *gpsim_file;
+      FileContext *fc = (*pw->gp->cpu->_files)[i];
+
+      const char *file_name;
+
+      if(fc)
+	file_name = fc->name().c_str();
+      else
+	continue;
+        
+
+      //gpsim_file = &(gp->cpu->files[i]);
+      //file_name = gpsim_file->name;
 	if(!strcmp(file_name+strlen(file_name)-4,".asm")
 	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
 	   ||!strcmp(file_name+strlen(file_name)-4,".hex")
 	   ||!strcmp(file_name+strlen(file_name)-4,".HEX")
 	  )
 	{
-	    strncpy(filename,gpsim_file->name,strlen(file_name)-4);
+	    strncpy(filename,file_name,strlen(file_name)-4);
 	    filename[strlen(file_name)-4]=0;
             break;
 	}
     }
+
 
     // This information is put at the top of the plot
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
@@ -1148,20 +1158,28 @@ int plot_routine_histogram(Profile_Window *pw)
     // Infostring1
     t=time(0);
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->number_of_source_files;i++)
+    for(i=0;i<pw->gp->cpu->_files->nsrc_files();i++)
     {
-	struct file_context *gpsim_file;
-        char *file_name;
+      //struct file_context *gpsim_file;
+      FileContext *fc = (*pw->gp->cpu->_files)[i];
 
-	gpsim_file = &(gp->cpu->files[i]);
-	file_name = gpsim_file->name;
+      const char *file_name;
+
+      if(fc)
+	file_name = fc->name().c_str();
+      else
+	continue;
+        
+
+      //gpsim_file = &(gp->cpu->files[i]);
+      //file_name = gpsim_file->name;
 	if(!strcmp(file_name+strlen(file_name)-4,".asm")
 	   ||!strcmp(file_name+strlen(file_name)-4,".ASM")
 	   ||!strcmp(file_name+strlen(file_name)-4,".hex")
 	   ||!strcmp(file_name+strlen(file_name)-4,".HEX")
 	  )
 	{
-	    strncpy(filename,gpsim_file->name,strlen(file_name)-4);
+	    strncpy(filename,file_name,strlen(file_name)-4);
 	    filename[strlen(file_name)-4]=0;
             break;
 	}

@@ -1,3 +1,9 @@
+2004-02-13  Scott Dattalo  <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/cod.cc:
+	Support for new file context
+	* gui/gui_src_asm.cc, gui/gui_profile.cc:
+	Use the new file context code.
+	
 2004-02-12  Scott Dattalo  <scott@dattalo.com>
 	* src/interface.cc, src/interface.h:
 	Finally, the C-style interface is gone (or nearly gone).

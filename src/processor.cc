@@ -75,7 +75,11 @@ Processor::Processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
+#if USE_OLD_FILE_CONTEXT == 1
   files = 0;
+#else
+  _files = 0;
+#endif
   pc = 0;
 
   set_frequency(1.0);
@@ -386,6 +390,7 @@ void Processor::set_out_of_range_pm(int address, int value)
 
 void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 {
+#if USE_OLD_FILE_CONTEXT == 1
   if(address < program_memory_size())
     {
       //pma[address].update_line_number(file_id,sline,lst_line,0,0);
@@ -400,7 +405,30 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 	files[lst_file_id].max_line = lst_line+5;
 
     }
+#else
 
+  if(address < program_memory_size()) {
+
+
+    program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
+
+    //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
+
+    FileContext *fc = (*_files)[file_id];
+
+    if(fc && sline > fc->max_line())
+      fc->max_line(sline);
+
+    // FIX ME - what is this '+5' junk?
+
+    fc = (*_files)[_files->list_id()];
+    
+    if(fc && lst_line+5 > fc->max_line())
+      fc->max_line(lst_line+5);
+
+  }
+
+#endif
 }
 
 //-------------------------------------------------------------------
@@ -411,6 +439,8 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
 void Processor::read_src_files(void)
 {
+#if USE_OLD_FILE_CONTEXT == 1
+
   // Are there any src files ?
   for(int i=0; i<number_of_source_files; i++) {
 
@@ -439,7 +469,44 @@ void Processor::read_src_files(void)
 	}
     }
   }
+#else
 
+  // Are there any src files ?
+  for(int i=0; i<_files->nsrc_files(); i++) {
+
+
+    FileContext *fc = (*_files)[i];
+
+    // did this src file generate any code?
+    if(fc && fc->max_line() > 0) {
+      
+      // Create an array whose index corresponds to the
+      // line number of a source file line and whose data
+      // is the offset (in bytes) from the beginning of the 
+      // file. (e.g. files[3].line_seek[20] references the
+      // 20th line of the third source file.)
+
+      fc->ReadSource();
+      /*
+      files[i].line_seek = new int[files[i].max_line+1];
+      if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
+	continue;
+      rewind(files[i].file_ptr);
+
+      char buf[256],*s;
+      files[i].line_seek[0] = 0;
+      for(int j=1; j<=files[i].max_line; j++)
+	{
+	  files[i].line_seek[j] = ftell(files[i].file_ptr);
+	  s = fgets(buf,256,files[i].file_ptr);
+	  if(s != buf)
+	    break;
+	}
+      */
+    }
+  }
+
+#endif
 }
 
 
@@ -1400,6 +1467,93 @@ FileContext::~FileContext(void)
 
 }
 
+//----------------------------------------
+// ReadSource
+//
+// This will open the file for this FileContext
+// and fill the line_seek vector with the file 
+// positions corresponding to the start of every
+// source line in the file.
+//
+// e.g. lineseek[20] describes where the 20'th source
+// line is in the file.
+
+void FileContext::ReadSource(void)
+{
+
+  if( (max_line() < 0) || name_str.length() == 0)
+    return;
+
+  const char *str = name_str.c_str();
+  fptr = fopen_path(str,"r");
+
+  if(!fptr)
+    return;
+
+  if(line_seek)
+    delete line_seek;
+
+  line_seek = new vector<int>(max_line());
+
+
+  std::rewind(fptr);
+
+  char buf[256],*s;
+  (*line_seek)[0] = 0;
+  for(int j=1; j<=max_line(); j++) {
+
+    (*line_seek)[j] = ftell(fptr);
+    s = fgets(buf,256,fptr);
+
+    if(s != buf)
+      break;
+  }
+}
+
+//----------------------------------------
+// ReadLine
+// 
+// Read one line from a source file.
+
+char *FileContext::ReadLine(int line_number, char *buf, int nBytes)
+{
+
+  if(!fptr)
+    return 0;
+
+  fseek(fptr, 
+	(*line_seek)[line_number],
+	SEEK_SET);
+  return fgets(buf, nBytes, fptr);
+
+}
+
+//----------------------------------------
+//
+char *FileContext::gets(char *buf, int nBytes)
+{
+  if(!fptr)
+    return 0;
+
+  return fgets(buf, nBytes, fptr);
+
+}
+
+//----------------------------------------
+void FileContext::rewind(void)
+{
+  if(fptr)
+    fseek(fptr,0,SEEK_SET);
+}
+
+//----------------------------------------
+void FileContext::open(const char *mode)
+{
+  if(!fptr)
+    fptr = fopen_path(name_str.c_str(), mode);
+
+}
+
 //------------------------------------------------------------------------
 
 
@@ -1439,4 +1593,33 @@ FileContext *Files::operator [] (int file_id)
 {
 
   return (*vpfile).at(file_id);
+}
+
+char *Files::ReadLine(int file_id, int line_number, char *buf, int nBytes)
+{
+  FileContext *fc = operator[](file_id);
+  if(fc)
+    return fc->ReadLine(line_number, buf, nBytes);
+
+  return 0;
+}
+
+//----------------------------------------
+//
+char *Files::gets(int file_id, char *buf, int nBytes)
+{
+  FileContext *fc = operator[](file_id);
+  if(fc)
+
+  return fc->gets(buf, nBytes);
+
+}
+
+//----------------------------------------
+void Files::rewind(int file_id)
+{
+  FileContext *fc = operator[](file_id);
+  if(fc)
+    return fc->rewind();
+
 }
