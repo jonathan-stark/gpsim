@@ -309,7 +309,7 @@ The command line interface is fairly straight-forward.
 \added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
 
 \begin_inset  Tabular
-<lyxtabular version="2" rows="20" columns="2">
+<lyxtabular version="2" rows="22" columns="2">
 <features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
 <column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
 <column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
@@ -452,6 +452,29 @@ Display either the RAM or EEPROM
 
 \layout Standard
 
+frequency
+\begin_inset LatexCommand \index{frequency}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Set processor frequency
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 echo
 \begin_inset LatexCommand \index{echo}
 
@@ -489,6 +512,29 @@ help
 \layout Standard
 
 Type help "command" for more help on a command
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+icd
+\begin_inset LatexCommand \index{icd}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+In Circuit Debugger support.
 \end_inset 
 </cell>
 </row>
@@ -956,6 +1002,24 @@ The echo command is used like a print statement within configuration files.
  It just lets you display information about your configuration file.
 \layout Subsection*
 
+frequency
+\begin_inset LatexCommand \index{frequency}
+
+\end_inset 
+
+
+\layout Standard
+
+This command sets the clock frequency.
+ By default gpsim uses 4 MHz as clock.
+ The clock frequency is used to compute time in seconds.
+ Use this command to adjust this value.
+ If no value is provided this command prints the current clock.
+ Note that PICs have an instruction clock that's a forth of the external
+ clock.
+ This value is the external clock.
+\layout Subsection*
+
 help
 \begin_inset LatexCommand \index{help}
 
@@ -967,6 +1031,27 @@ help
 By itself, help will display all of the commands along with a brief description
  on how they work.
  'help <command>' provides more extensive online help.
+\layout Subsection*
+
+icd
+\begin_inset LatexCommand \index{icd}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\emph on 
+icd [open <port>]
+\layout Standard
+
+The open command is used to enable ICD mode and specify the serial port
+ where the ICD is.
+ (e.g.
+ "icd open /dev/ttyS0").
+ Without options (and after the icd is enabled), it will print some information
+ about the ICD.
 \layout Subsection*
 
 list 
@@ -1387,24 +1472,34 @@ Stop Stop execution
 Reset Reset CPU
 \layout Subsection
 
-gui_update
+gui update rate
 \layout Standard
 
-This variable sets the update interval of the gui in the unit of simulated
- instructions.
-\layout Standard
+This variable sets the update interval of the gui.
+\layout List
+\labelwidthstring 0000000.00.0000
 
-Set this variable to 1 in order to have the gui update after each instruction
- during run mode.
- This will slow the simulation down, but also makes it possible to see what
- happens.
-\layout Standard
+Never Don't ever update the gui when simulating.
+ This is the fastest mode.
+ You'll have to stop simulation by pressing Ctrl-C in the command line interface.
+\layout List
+\labelwidthstring 0000000.00.0000
 
-Set this variable to something high in order to get the best simulation
- speed.
- However, if you do this then you should know that the gui will be slow
- to respond.
- You can break simulation with Ctrl-C in the command window.
+x\SpecialChar ~
+cycles Update the gui every x cycles simulated.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+every\SpecialChar ~
+cycle Update the gui every cycle.
+ (you see everything, if you have filled up on coffee :-)
+\layout List
+\labelwidthstring 0000000.00.0000
+
+x\SpecialChar ~
+ms\SpecialChar ~
+animate Here you can slow down simulation with a delay between every
+ cycle.
 \layout Section
 
 Source Browsers
@@ -1528,7 +1623,8 @@ Settings A dialog with which you can change the fonts used.
 \labelwidthstring 00.00.0000.0000
 
 Controls A submenu containing the simulation commands.
- (these are also found as keyboard bindings, or in the main window.)
+ (these are also found as keyboard bindings (recommended), or in the main
+ window.)
 \layout Standard
 
 These are the keyboard bindings:
@@ -1581,7 +1677,7 @@ Double click on a line to toggle breakpoints.
 Use the same keyboard commands as the in the source browser.
 \layout Itemize
 
-Right click to get a menu where you can change the font used.
+Right click to get a menu where you can change the fonts.
 \layout Subsubsection*
 
 The Opcode tab.
@@ -1857,8 +1953,8 @@ If you middle-click on a pin, you'll see how the pin is connected.
 
 once, and "clear traces" to remove all (you'll only remove the graphical
  trace, not the connection!).
- If it doesn't work, try moving the packages so that there are more space
- around the pins.
+ If the tracing doesn't work, try moving the packages so that there are
+ more space around the pins.
 \layout Standard
 
 When you are done, you can save by clicking the "save configuration" button.
@@ -1871,7 +1967,7 @@ gpsim -s mycode.cod -c mynets.stc
 \layout Standard
 
 You can't load only the .stc file since this doesn't contain the processor
- settings.
+ type and code.
  You can create (with an editor) your own .stc file (e.g.
  my_project.stc) and in that file put a command "load c mynets.stc" after
  you have loaded the .cod file.
@@ -3277,6 +3373,242 @@ The target code simulated by gpsim comes from a hex file, or more specifically
  It's recommended that hex files only be used if 1) you suspect there's
  a problem with the way .cod files are generated by your assembler or compiler
  OR 2) your assembler or compiler doesn't generate .cod files.
+\layout Chapter
+
+The ICD
+\layout Standard
+
+gpsim supports (partly) the first version of the ICD (as opposed to ICD2
+ (the round hockey-puck shaped one)).
+ 
+\layout Subsection*
+
+Special configuration of the code
+\layout Standard
+
+Read the MPLAB ICD USER's GUIDE.
+ 
+\layout Standard
+
+Here's the short version:
+\layout Itemize
+
+disable at least: brown out detection, low voltage programming and all code
+ protection.
+ It is probably good to turn of the watchdog too.
+ see the MPLAB ICD USER's GUIDE for more information.
+ 
+\layout Itemize
+
+have a NOP as the first instruction.
+\layout Itemize
+
+Don't touch RB6 or RB7.
+\layout Itemize
+
+Don't use the last stack level.
+\layout Itemize
+
+Don't use these registers and program words:
+\newline 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="4" columns="3">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Processor
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Register
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+Program
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+-870/1/2
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0x70, 0xBB-0xBF
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0x6E0-0x7FF
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+-873/4
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0x6D, 0x1fD, 0xEB-0xF0, 0x1Eb-0x1F0
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0xEE0-0xFFF
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+-876/7
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0x70, 0x1Eb-0x1Ef
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+0x1F00-0x1FFF
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Subsection*
+
+icdprog
+\layout Standard
+
+Download and install icdprog.
+ 
+\layout Standard
+
+Use icdprog to program the target with the hex file (
+\emph on 
+icdprog mycode.hex
+\emph default 
+).
+\layout Subsection*
+
+ICD usage
+\layout Standard
+
+Start gpsim like this:
+\layout Standard
+
+
+\emph on 
+gpsim -d /dev/ttyS0 -s mycode.cod
+\layout Standard
+
+, assuming the ICD is connected to the first serial port.
+\layout Standard
+
+Now you can type 'icd' to see some information:
+\layout Standard
+
+
+\emph on 
+**gpsim> icd 
+\newline 
+ICD version "2.31.00" was found.
+ 
+\newline 
+Target controller is 16F877 rev 13.
+ 
+\newline 
+Vdd: 5.2 Vpp: 13.3 
+\newline 
+Debug module is present
+\layout Standard
+
+2.31 is the firmware version.
+ I have only tried this particular version...
+\layout Standard
+
+You can step, reset, run, halt, set the breakpoint and read file registers.
+ It works both from the gui and the cli.
+\layout Subsection*
+
+ICD TODO
+\layout Itemize
+
+MPLAB has a setting for target cpu frequency, I have only tried with a 20MHz
+ crystal, so there may be adjustments to be made to the serial port timeout
+ settings in gpsim.
+\layout Itemize
+
+The source, disassembly, watch, symbol and RAM windows works.
+ And the rest doesn't.
+ I guess the breadboard should be able to work at least for the pic, but
+ it doesn't.
+ 
+\layout Itemize
+
+eeprom support 
+\layout Itemize
+
+modifying data 
+\layout Itemize
+
+Fix the UI to give more feedback about what's happening during long delays.
+\layout Itemize
+
+Better error detection.
+ gpsim doesn't always see that the target is not functional.
 \layout Chapter
 
 Theory of Operation
