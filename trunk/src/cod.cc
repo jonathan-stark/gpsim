@@ -348,8 +348,7 @@ void read_src_files_from_cod(Processor *cpu)
     for(j=start_block; j<=end_block; j++) {
       read_block(temp_block, j);
       for(i=0; i<FILES_PER_BLOCK; i++) {
-	int	alreadyExists = 0;
-	int	jj;
+
 	char	*filenm;
 
 	offset = i*FILE_SIZE;
@@ -380,24 +379,9 @@ void read_src_files_from_cod(Processor *cpu)
 	}
 #endif
 
-	for (jj = 0; jj < num_files; ++jj) { // check if already opened
-	  // this could be fooled by search paths
+	string s1 = string(filenm);
 
-
-	  string s1 = ((*cpu->files)[jj])->name();
-	  string s2 = string(filenm);
-	  if (s1 == s2) {
-	    alreadyExists = 1;
-	    if (verbose)
-	      printf ("Found redundant source file %s\n", filenm);
-
-	    cpu->files->nsrc_files(cpu->files->nsrc_files() - 1);
-	    break;
-	  }
-
-
-	}
-	if(temp_block[offset] && !alreadyExists) {
+	if(temp_block[offset] && (cpu->files->Find(s1) < 0)) {
 
 	  //
 	  // Add this file to the list

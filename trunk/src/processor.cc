@@ -1552,21 +1552,42 @@ Files::~Files(void)
 
 }
 
-void Files::Add(string &new_name, FILE *fptr)
+
+int Files::Find(string &fname)
+{
+  if(lastFile) {
+
+    for (int i = 0; i < lastFile; i++) {
+
+      if ((*vpfile)[i]->name() == fname)
+	return i;
+
+    }
+  }
+
+  return -1;
+
+}
+
+int Files::Add(string &new_name, FILE *fptr)
 {
 
   (*vpfile)[lastFile] = new FileContext(new_name,fptr);
 
   lastFile++;
+
+  return lastFile-1;
 }
 
 
-void Files::Add(char *new_name, FILE *fptr)
+int Files::Add(char *new_name, FILE *fptr)
 {
 
   (*vpfile)[lastFile] = new FileContext(new_name,fptr);
 
   lastFile++;
+
+  return lastFile-1;
 }
 
 FileContext *Files::operator [] (int file_id)
