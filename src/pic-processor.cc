@@ -925,6 +925,9 @@ void pic_processor::create_symbols (void)
       case Register::SFR_REGISTER:
 	if(!symbol_table.find((char *)registers[i]->name().c_str()))
 	  symbol_table.add_register(this, registers[i]);
+	break;
+      default:
+	break;
       }
     }
 

@@ -399,7 +399,7 @@ list <Module_Library *> :: iterator module_iterator;
 // Each time a new module is instantiated from a module library, the 
 // reference designator counter is incremented. (This will change later
 // to accomodate different reference designator types).
-static int  ref_des_count = 1;
+//static int  ref_des_count = 1;
 
 void module_add_library(const char *library_name, void *library_handle)
 {
@@ -448,7 +448,6 @@ void module_load_library(const char *library_name)
 {
 #ifndef _WIN32
   void *handle;
-  char *error;
 
   handle = dlopen (library_name, RTLD_NOW);
   if (!handle) {
