@@ -278,11 +278,8 @@ void gpsimInterface::simulation_has_stopped (void)
 }
 
 
-// pthread variables.
-pthread_attr_t thAttribute;
-pthread_mutex_t muRunMutex;
-pthread_cond_t  cvRunCondition;
-pthread_t thPrint;
+GMutex *muRunMutex;
+GCond  *cvRunCondition;
 
 static Processor *tcpu=0;
 
@@ -291,17 +288,17 @@ static void *run_thread( void *ptr )
   printf("run thread\n");
   while(1) {
 
-    pthread_mutex_lock(&muRunMutex);
+    g_mutex_lock(muRunMutex);
     printf("running waiting for condition\n");
 
-    pthread_cond_wait(&cvRunCondition, &muRunMutex);
+    g_cond_wait(cvRunCondition, muRunMutex);
     if(tcpu) {
       printf("running\n");
       tcpu->run();
       printf("stopped running\n");
     }
 
-    pthread_mutex_unlock(&muRunMutex);
+    g_mutex_unlock(muRunMutex);
 
   }
 
@@ -312,16 +309,22 @@ void start_run_thread(void)
 {
   std::cout << "starting run thread....\n";
 
-  pthread_mutex_init(&muRunMutex, NULL);
-  pthread_cond_init (&cvRunCondition, NULL);
+  muRunMutex     = g_mutex_new ();
+  cvRunCondition = g_cond_new ();
+  g_mutex_lock (muRunMutex);
 
-  pthread_mutex_lock(&muRunMutex);
+  GError    *err = NULL ;
 
-  pthread_attr_init(&thAttribute);
-  pthread_attr_setdetachstate(&thAttribute, PTHREAD_CREATE_JOINABLE);
-  pthread_create(&thPrint, &thAttribute, run_thread, (void *)0);
+  if( g_thread_create((GThreadFunc)run_thread, 
+		      (void *)0, 
+		      TRUE, 
+		      &err) == NULL)
+  {
+    printf("Thread create failed: %s!!\n", err->message );
+    g_error_free ( err ) ;
+  }
 
-  pthread_mutex_unlock(&muRunMutex);
+  g_mutex_unlock (muRunMutex);
 
   std::cout << " started thread\n";
 }
@@ -343,7 +346,7 @@ void gpsimInterface::start_simulation (void)
       thread_initialized = true;
     }
 
-    pthread_mutex_lock(&muRunMutex);
+    g_mutex_lock (muRunMutex);
 
     tcpu = cpu;
     /*
@@ -354,8 +357,8 @@ void gpsimInterface::start_simulation (void)
       cpu->run(false);
     */
     printf("signalling run thread\n");
-    pthread_cond_signal(&cvRunCondition);
-    pthread_mutex_unlock(&muRunMutex);
+    g_cond_signal  (cvRunCondition);
+    g_mutex_unlock (muRunMutex);
     printf("leaving start_simulation\n");
   }
 

@@ -193,24 +193,18 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 }
 
-// pthread variables.
-pthread_attr_t thSimStopAttr;
-pthread_mutex_t muSimStopMutex;
-pthread_cond_t  cvSimStopCondition;
-pthread_t thSimStop;
+// thread variables.
+static GMutex *muSimStopMutex=0;
+static GCond  *cvSimStopCondition=0;
 
 static GUI_Processor *lgp=0;
 
 static void *SimulationHasStopped( void *ptr )
 {
-  printf("sim stopped thread started\n");
   while(1) {
 
-    pthread_mutex_lock(&muSimStopMutex);
-    printf("waiting for sim stop condition\n");
-
-    pthread_cond_wait(&cvSimStopCondition, &muSimStopMutex);
-    printf("got a  sim stop condition\n");
+    g_mutex_lock(muSimStopMutex);
+    g_cond_wait(cvSimStopCondition, muSimStopMutex);
 
     if(lgp) {
       lgp->regwin_ram->Update();
@@ -225,7 +219,7 @@ static void *SimulationHasStopped( void *ptr )
       lgp->stopwatch_window->Update();
     }
 
-    pthread_mutex_unlock(&muSimStopMutex);
+    g_mutex_unlock(muSimStopMutex);
 
   }
 
@@ -239,46 +233,14 @@ static void *SimulationHasStopped( void *ptr )
 
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
-  //while(gtk_events_pending())
-  //  gtk_main_iteration();
-  printf("%s\n",__FUNCTION__);
-
   if(callback_data) {
     
     lgp = (GUI_Processor *) callback_data;
 
-    printf("signalling gui update thread\n");
-    pthread_mutex_lock(&muSimStopMutex);
-
-    pthread_cond_signal(&cvSimStopCondition);
-    pthread_mutex_unlock(&muSimStopMutex);
-    printf("leaving simulation has stopped\n");
-
-    /*
-    GUI_Processor *gp = (GUI_Processor *) callback_data;
-
-    gp->regwin_ram->Update();
-    gp->regwin_eeprom->Update();
-    gp->program_memory->Update();
-    gp->source_browser->Update();
-    gp->watch_window->Update();
-    gp->stack_window->Update();
-    gp->breadboard_window->Update();
-    gp->trace_window->Update();
-    gp->profile_window->Update();
-    gp->stopwatch_window->Update();
-    //gp->scope_window->Update();
-    */
+    g_mutex_lock(muSimStopMutex);
+    g_cond_signal(cvSimStopCondition);
+    g_mutex_unlock(muSimStopMutex);
   }
-  /*
-  if(gui_animate_delay!=0)
-      usleep(1000*gui_animate_delay);
-
-  while(gtk_events_pending())
-      gtk_main_iteration();
-  */
-
-  gtl ();
 }
 
 
@@ -449,9 +411,9 @@ int gui_init (int argc, char **argv)
       g_error_free ( err1 ) ;
     }
 
-    pthread_mutex_init(&muSimStopMutex, NULL);
-    pthread_cond_init (&cvSimStopCondition, NULL);
-    pthread_mutex_lock(&muSimStopMutex);
+    muSimStopMutex     = g_mutex_new ();
+    cvSimStopCondition = g_cond_new ();
+    g_mutex_lock(muSimStopMutex);
 
     if( (Thread2 = g_thread_create((GThreadFunc)SimulationHasStopped, 
 				   (void *)message2, 
@@ -461,7 +423,7 @@ int gui_init (int argc, char **argv)
       printf("Thread create failed: %s!!\n", err2->message );
       g_error_free ( err2 ) ;
     }
-    pthread_mutex_unlock(&muSimStopMutex);
+    g_mutex_unlock(muSimStopMutex);
 
 
   }
