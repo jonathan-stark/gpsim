@@ -43,15 +43,16 @@ cmd_bus::cmd_bus(void)
 
   brief_doc = string("Add or display node busses");
 
-  long_doc = string ("bus [new_bus1 new_bus2 ...]\
-\n\t If no new_bus is specified then all of the busses that have been\
-\n\tdefined are displayed. If a new_bus is specified then it will be\
-\n\tadded to the bus list. See the \"attach\" and \"stimulus\" commands\
-\n\tto see how stimuli are added to the busses.\
-\n\n\texamples:
-\n\n\tbus              // display the bus list\
-\n\tbus b1 b2 b3     // create and add 3 new busses to the list\
-\n");
+  long_doc = string ("bus [new_bus1 new_bus2 ...]\n"
+    "\t If no new_bus is specified then all of the busses that have been\n"
+    "\tdefined are displayed. If a new_bus is specified then it will be\n"
+    "\tadded to the bus list. See the \"attach\" and \"stimulus\" commands\n"
+    "\tto see how stimuli are added to the busses.\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\tbus              // display the bus list\n"
+    "\tbus b1 b2 b3     // create and add 3 new busses to the list\n");
 
   op = cmd_bus_options; 
 }

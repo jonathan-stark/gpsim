@@ -29,7 +29,7 @@ extern void catch_control_c(int); // In breakpoints.cc
 
 void initialize_signals(void)
 {
-
+#ifndef _WIN32
   static struct sigaction action;
 
   action.sa_handler = catch_control_c;
@@ -37,7 +37,7 @@ void initialize_signals(void)
   action.sa_flags=0;
 
   sigaction(SIGINT, &action, 0);
-
+#endif
 
 }
 

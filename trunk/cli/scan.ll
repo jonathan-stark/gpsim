@@ -22,11 +22,15 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
 
 #include <string>
 #include <unistd.h>
 #include <glib.h>
+#ifdef _WIN32
+/* declaration of isatty() */
+#include <io.h>
+#endif
 
 #include "command.h"
 #include "parse.h"

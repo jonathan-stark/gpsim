@@ -60,27 +60,28 @@ cmd_break::cmd_break(void)
 { 
   name = "break";
 
-    brief_doc = string("Set a break point");
+  brief_doc = string("Set a break point");
 
-    long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value [mask]] ]\n\n\
-\toptions:\n\
-\t\tc   - cycle\n\
-\t\te   - execution\n\
-\t\tw   - write\n\
-\t\tr   - read\n\
-\t\twv  - write value\n\
-\t\trv  - read value\n\
-\t\tso  - stack over flow\n\
-\t\tsu  - stack under flow\n\
-\t\twdt - wdt timeout\n\
-\t\t    - no argument, display the break points that are set.
-\texamples:\n\
-\t\tbreak e 0x20       // set an execution break point at address 0x20\n\
-\t\tbreak wv 0x30 0    // break if a zero is written to register 0x30\n\
-\t\tbreak wv 0x40 0xf0 // break if all ones are written to the upper nibble\n\
-\t\tbreak c 1000000    // break on the one million'th cycle\n\
-\t\tbreak              // display all of the break points\n\
-\n");
+  long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value [mask]] ]\n"
+    "\n"
+    "\toptions:\n"
+    "\t\tc   - cycle\n"
+    "\t\te   - execution\n"
+    "\t\tw   - write\n"
+    "\t\tr   - read\n"
+    "\t\twv  - write value\n"
+    "\t\trv  - read value\n"
+    "\t\tso  - stack over flow\n"
+    "\t\tsu  - stack under flow\n"
+    "\t\twdt - wdt timeout\n"
+    "\t\t    - no argument, display the break points that are set.\n"
+    "\texamples:\n"
+    "\t\tbreak e 0x20       // set an execution break point at address 0x20\n"
+    "\t\tbreak wv 0x30 0    // break if a zero is written to register 0x30\n"
+    "\t\tbreak wv 0x40 0xf0 // break if all ones are written to the upper nibble\n"
+    "\t\tbreak c 1000000    // break on the one million'th cycle\n"
+    "\t\tbreak              // display all of the break points\n"
+    "\n");
 
   op = cmd_break_options; 
 }

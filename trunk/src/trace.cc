@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream>
 #include <iomanip>
+#include <assert.h>
 
 #include "../config.h"
 #include "pic-processor.h"

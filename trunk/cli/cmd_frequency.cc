@@ -39,14 +39,13 @@ cmd_frequency::cmd_frequency(void)
 
   brief_doc = string("Set the clock frequency");
 
-  long_doc = string ("\nfrequency [value]\n\
-\tThis command sets the clock frequency. By default gpsim uses 4 MHz
-\tas clock. The clock frequency is used to compute time in seconds.
-\tUse this command to adjust this value.
-\tIf no value is provided this command prints the current clock.
-\tNote that PICs have an instruction clock that's a forth of the
-\texternal clock. This value is the external clock.
-\n");
+  long_doc = string ("\nfrequency [value]\n"
+    "\tThis command sets the clock frequency. By default gpsim uses 4 MHz\n"
+    "\tas clock. The clock frequency is used to compute time in seconds.\n"
+    "\tUse this command to adjust this value.\n"
+    "\tIf no value is provided this command prints the current clock.\n"
+    "\tNote that PICs have an instruction clock that's a forth of the\n"
+    "\texternal clock. This value is the external clock.\n");
 
   op = cmd_frequency_options;
 }

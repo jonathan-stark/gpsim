@@ -1016,7 +1016,7 @@ void EECON2::put(unsigned int new_value)
     }
   else if ((eestate == EEHAVE_0x55) || (eestate == EEREADY_FOR_WRITE))
     {
-      eestate == EENOT_READY;
+      eestate = EENOT_READY;
     }
 
   trace.register_write(address,new_value);

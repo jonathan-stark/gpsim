@@ -49,11 +49,10 @@ cmd_trace::cmd_trace(void)
 
     brief_doc = string("Dump the trace history");
 
-    long_doc = string ("\ntrace [dump_amount]\n\
-\ttrace will print out the most recent \"dump_amount\" traces.\n\
-\tIf no dump_amount is specified, then the entire trace buffer\n\
-\twill be displayed.
-");
+    long_doc = string ("\ntrace [dump_amount]\n"
+      "\ttrace will print out the most recent \"dump_amount\" traces.\n"
+      "\tIf no dump_amount is specified, then the entire trace buffer\n"
+      "\twill be displayed.\n");
 
   op = cmd_trace_options; 
 }

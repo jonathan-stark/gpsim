@@ -1,4 +1,9 @@
-2003-06-19  Scott Dattalo  <scott@localhost.localdomain>
+2003-08-17  Scott Dattalo  <scott@dattalo.com>
+	* Huge patch from Borut Razem mailto:borut.razem@siol.net that enables
+	gpsim to be compiled with MS Visual C under Windows.
+
+	
+2003-06-19  Scott Dattalo  <scott@dattalo.com>
 
 	* src/gpsim_time.h Multiple breaks at one Cycle were getting clobbered.
 	* src/gpsim_time.cc

@@ -43,15 +43,16 @@ cmd_node::cmd_node(void)
 
   brief_doc = string("Add or display stimulus nodes");
 
-  long_doc = string ("node [new_node1 new_node2 ...]\
-\n\t If no new_node is specified then all of the nodes that have been\
-\n\tdefined are displayed. If a new_node is specified then it will be\
-\n\tadded to the node list. See the \"attach\" and \"stimulus\" commands\
-\n\tto see how stimuli are added to the nodes.\
-\n\n\texamples:
-\n\n\tnode              // display the node list\
-\n\tnode n1 n2 n3     // create and add 3 new nodes to the list\
-\n");
+  long_doc = string ("node [new_node1 new_node2 ...]\n"
+    "\t If no new_node is specified then all of the nodes that have been\n"
+    "\tdefined are displayed. If a new_node is specified then it will be\n"
+    "\tadded to the node list. See the \"attach\" and \"stimulus\" commands\n"
+    "\tto see how stimuli are added to the nodes.\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\tnode              // display the node list\n"
+    "\tnode n1 n2 n3     // create and add 3 new nodes to the list\n");
 
   op = cmd_node_options; 
 }

@@ -115,20 +115,21 @@ cmd_processor::cmd_processor(void)
 
   brief_doc = string("Select & Display processors");
 
-  long_doc = string ("processor [new_processor_type [new_processor_name]] | [list] | [dump]\
-\n\tIf no new processor is specified, then the currently defined processor(s)\
-\n\twill be displayed. To see a list of the processors supported by gpsim,\
-\n\ttype 'processor list'.  To define a new processor, specify the processor\
-\n\ttype and name. To display the state of the I/O processor, type 'processor\
-\n\tdump' (For now, this will display the pin numbers and their current state.\
-\n\n\texamples:
-\n\n\tprocessor               // Display the processors you've already defined.\
-\n\tprocessor list          // Display the list of processors supported.\
-\n\tprocessor pins          // Display the processor package and pin state\
-\n\tprocessor p16cr84 fred  // Create a new processor.\
-\n\tprocessor p16c74 wilma  // and another.\
-\n\tprocessor p16c65        // Create one with no name.\
-\n");
+  long_doc = string ("processor [new_processor_type [new_processor_name]] | [list] | [dump]\n"
+    "\tIf no new processor is specified, then the currently defined processor(s)\n"
+    "\twill be displayed. To see a list of the processors supported by gpsim,\n"
+    "\ttype 'processor list'.  To define a new processor, specify the processor\n"
+    "\ttype and name. To display the state of the I/O processor, type 'processor\n"
+    "\tdump' (For now, this will display the pin numbers and their current state.\n"
+    "\n"
+    "\texamples:\n"
+    "\n"
+    "\tprocessor               // Display the processors you've already defined.\n"
+    "\tprocessor list          // Display the list of processors supported.\n"
+    "\tprocessor pins          // Display the processor package and pin state\n"
+    "\tprocessor p16cr84 fred  // Create a new processor.\n"
+    "\tprocessor p16c74 wilma  // and another.\n"
+    "\tprocessor p16c65        // Create one with no name.\n");
 
   op = cmd_processor_options; 
 }

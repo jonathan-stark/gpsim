@@ -102,6 +102,7 @@ public:
     };
   virtual ~CyclicBreakPoint()
   {
+    if (NULL != pic)
       pic->cycles.clear_break(this);
   }
   void set_delta(guint64 delta)

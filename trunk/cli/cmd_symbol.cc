@@ -39,22 +39,23 @@ cmd_symbol::cmd_symbol(void)
 { 
   name = "symbol";
 
-    brief_doc = string("Add or display symbols");
+  brief_doc = string("Add or display symbols");
 
-    long_doc = string ("symbol [symbol_name [symbol_type value]]\n\
-\n\tIf no options are supplied, the entire symbol table will be\
-\n\tdisplayed. If only the symbol_name is provided, then only\
-\n\tthat symbol will be displayed. If both the symbol_name and\
-\n\tthe symbol_type are supplied, then a new symbol will be\
-\n\tadded to the symbol table.\
-\n\n\tValid symbol types:\
-\n\t  ioport | iop, constant\
-\n\nExamples:\
-\n\tsymbol            // display the symbol table
-\n\tsymbol george constant 42  // create a new constant symbol\
-\n\t                           // named george and equal to 42\
-\n");
-
+  long_doc = string ("symbol [symbol_name [symbol_type value]]\n"
+    "\n"
+    "\tIf no options are supplied, the entire symbol table will be\n"
+    "\tdisplayed. If only the symbol_name is provided, then only\n"
+    "\tthat symbol will be displayed. If both the symbol_name and\n"
+    "\tthe symbol_type are supplied, then a new symbol will be\n"
+    "\tadded to the symbol table.\n"
+    "\n"
+    "\tValid symbol types:\n"
+    "\t  ioport | iop, constant\n"
+    "\n"
+    "Examples:\n"
+    "\tsymbol            // display the symbol table\n"
+    "\tsymbol george constant 42  // create a new constant symbol\n"
+    "\t                           // named george and equal to 42\n");
 
   op = cmd_symbol_options; 
 }

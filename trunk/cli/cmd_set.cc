@@ -57,13 +57,13 @@ cmd_set::cmd_set(void)
 { 
   name = "set";
 
-    brief_doc = string("display and control gpsim behavior flags");
+  brief_doc = string("display and control gpsim behavior flags");
 
-    long_doc = string ("set\n
-\twith no options, set will display the state of all of gpsim's\n\
-\tbehavior flags. Use this to determine the flags that may be\n\
-\tmodified.\n\
-\n");
+  long_doc = string ("set\n"
+    "\twith no options, set will display the state of all of gpsim's\n"
+    "\tbehavior flags. Use this to determine the flags that may be\n"
+    "\tmodified.\n"
+    "\n");
 
   op = cmd_set_options; 
 }

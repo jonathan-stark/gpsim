@@ -271,8 +271,8 @@ public:
   INTCON  *intcon;
   PIE     *pie;
 
-  virtual void set_ccpif(void){cout<<"PIR ccpif\n";};
-  virtual bool interrupt_status(void){cout<<"PIR intstat\n";};
+  virtual void set_ccpif(void){cout<<"PIR ccpif\n";}
+  virtual bool interrupt_status(void){cout<<"PIR intstat\n"; return true;}
 
 };
 

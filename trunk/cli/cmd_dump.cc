@@ -53,15 +53,14 @@ cmd_dump::cmd_dump(void)
 { 
   name = "dump";
 
-    brief_doc = string("Display either the RAM or EEPROM");
+  brief_doc = string("Display either the RAM or EEPROM");
 
-    long_doc = string ("dump [r | e | s]\n
-\tdump r or dump with no options will display all of the file\n\
-\t       registers and special function registers.\n\
-\tdump e will display the contents of the eeprom (if the pic
-\t       being simulated contains any)\n\
-\tdump s will display only the special function registers.
-\n");
+  long_doc = string ("dump [r | e | s]\n"
+    "\tdump r or dump with no options will display all of the file\n"
+    "\t       registers and special function registers.\n"
+    "\tdump e will display the contents of the eeprom (if the pic\n"
+    "\t       being simulated contains any)\n"
+    "\tdump s will display only the special function registers.\n");
 
   op = cmd_dump_options; 
 }
