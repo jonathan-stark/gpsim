@@ -198,7 +198,7 @@ void GUI_Interface::NewProcessor (unsigned int pic_id)
 
   if(gp) {
     gp->pic_id = pic_id;
-    gp->cpu = get_processor(pic_id);
+    gp->cpu = dynamic_cast<Processor *>(get_processor(pic_id));
 
     gui_processors = g_slist_append(gui_processors,gp);
 

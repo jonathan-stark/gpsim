@@ -31,10 +31,6 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol.h"
 
-void DEBUG_print_interrupt_vector(Processor *cpu)
-{
-  cout << " interrupt vector " << ((_16bit_processor *)cpu)->interrupt_vector << endl;
-}
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(void)
 {
@@ -333,13 +329,12 @@ interrupt (void)
   stack->push(pc->value);
 
   // Save W,status, and BSR if this is a high priority interrupt.
-  //if(interrupt_vector == INTERRUPT_VECTOR_HI)
-  cout << "16bit interrupt, vector = 0x" <<hex<<interrupt_vector<<'\n';
+
   fast_stack.push();
 
   intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)
 
-  pc->jump(interrupt_vector);
+  pc->jump(intcon.get_interrupt_vector());
 
 }
 //-------------------------------------------------------------------

@@ -1,3 +1,15 @@
+2004-02-02  Scott Dattalo  <scott@dattalo.com>
+	* src/intcon.*, src/processor.*, src/16bit-processor.*
+	Fixed the weird bug that was discussed in the 2004-01-30 entry. The
+	problem was basically invalid type casting. In the processor class
+	heirarchy, there are about 5 or 6 levels of inheritance. Most of
+	the time gpsim accesses a processor's details through one of the
+	base classes. Sometimes though, an object needs access to somthing
+	specific to a processor. In these cases, gpsim would type cast
+	a pointer to the specific processor. The bug is that you can't
+	safely type cast a base class object into a derived class object
+	in C++.
+
 2004-01-30  Scott Dattalo  <scott@dattalo.com>
 	* almost all source files - still trying to sort out include 
 	dependencies. There's a weird bug where gcc is adding an extra

@@ -162,6 +162,7 @@ class RegisterMemoryAccess
                               // are being managed.
 
 };
+
 //------------------------------------------------------------------------
 //
 // Processor - a generic base class for processors supported by gpsim

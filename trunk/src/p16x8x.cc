@@ -169,6 +169,9 @@ void  P16C8x::create(int ram_top)
   e = new EEPROM;
   e->set_cpu(this);
   e->initialize(EEPROM_SIZE);
+
+  //ema.set_cpu(this);
+  //ema.set_Registers(e->rom, EEPROM_SIZE);
   e->set_intcon(&intcon_reg);
 
   set_eeprom(e);
