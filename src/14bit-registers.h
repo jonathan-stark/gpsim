@@ -311,9 +311,10 @@ class WREG : public sfr_register
 {
 public:
 
-  void put(unsigned int new_value);
-  unsigned int get(void);
+  //void put(unsigned int new_value);
+  //unsigned int get(void);
   WREG(void);
+  WREG(Processor *);
 };
 
 #include "tmr0.h"

@@ -1,3 +1,9 @@
+2004-08-11 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc, src/trace.h, src/processor.cc, src/pic-processors.cc
+	src/value.h, src/value.cc, src/registers.h, src/registers.cc, 
+	14bit-registers.cc:
+	More trace stuff.
+	
 2004-08-10 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: packaging of examples, extras, ...
 	* plat/win32/gpsim.def: updated exports
