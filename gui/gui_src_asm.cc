@@ -582,11 +582,9 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
         else
 	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->gp->profile_window->gui_obj.enabled)
+	if(!popup_sbaw->gp->profile_window->enabled)
 	{
-	  popup_sbaw->gp->profile_window->gui_obj.
-	    change_view(&popup_sbaw->gp->profile_window->gui_obj,
-			    VIEW_SHOW);
+	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
 	if(gpsim_address_has_profile_start(pic_id,address))
 	    gpsim_clear_profile_start_at_address(pic_id,address);
@@ -610,12 +608,10 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
         else
 	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->gp->profile_window->gui_obj.enabled)
+	if(!popup_sbaw->gp->profile_window->enabled)
 	{
 
-	  popup_sbaw->gp->profile_window->gui_obj.
-	    change_view(&popup_sbaw->gp->profile_window->gui_obj,
-			VIEW_SHOW);
+	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
 	if(gpsim_address_has_profile_stop(pic_id,address))
 	    gpsim_clear_profile_stop_at_address(pic_id,address);
@@ -653,7 +649,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	if(!popup_sbaw->gp->symbol_window->enabled)
 	{
 	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
-	  //change_view(&popup_sbaw->gp->symbol_window->gui_obj,
 			    
 	}
 	SymbolWindow_select_symbol_name(popup_sbaw->gp->symbol_window,text);
@@ -798,10 +793,10 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 
         current_page=page_num;
 	id=sbaw->pageindex_to_fileid[current_page];
-	gpsim_set_hll_mode(((GUI_Object*)sbaw)->gp->pic_id,file_id_to_source_mode[id]);
+	gpsim_set_hll_mode(sbaw->gp->pic_id,file_id_to_source_mode[id]);
 
         // Update pc widget
-	address=gpsim_get_pc_value(((GUI_Object*)sbaw)->gp->pic_id);
+	address=gpsim_get_pc_value(sbaw->gp->pic_id);
 	//SourceBrowserAsm_set_pc(sbaw, address);
 	sbaw->SetPC(address);
 
@@ -970,7 +965,7 @@ static void marker_cb(GtkWidget *w1,
 
     int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    int pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
+    int pic_id = sbaw->gp->pic_id;
     
     switch(event->type)
     {
@@ -2456,8 +2451,6 @@ int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
   is_built = 0;
 
   gp->source_browser = this;
-  change_view = NULL; //SourceBrowser_change_view;
-
 
   for(i=0;i<SBAW_NRFILES;i++)
       notebook_child[i]=NULL;
@@ -2479,8 +2472,6 @@ int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
   source_loaded = 0;
     
   load_source=0;
-
-  gp->add_window_to_list(this);
 
   get_config();
 

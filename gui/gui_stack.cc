@@ -132,7 +132,7 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Stack_Window *sw)
 {
-    ((GUI_Object *)sw)->change_view((GUI_Object*)sw,VIEW_HIDE);
+    sw->ChangeView(VIEW_HIDE);
     return TRUE;
 }
 
@@ -346,7 +346,6 @@ int Stack_Window::Create(GUI_Processor *_gp)
   name = "stack_viewer";
   wc = WC_data;
   wt = WT_stack_window;
-  change_view = NULL;
   window = NULL;
   is_built=0;
   gp->stack_window = this;
@@ -354,10 +353,6 @@ int Stack_Window::Create(GUI_Processor *_gp)
   last_stacklen=0;
   current_row=0;
   has_processor=1;
-
-
-  gp->add_window_to_list(this);
-
 
   get_config();
     

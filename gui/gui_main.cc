@@ -117,12 +117,10 @@ void gui_new_processor (unsigned int pic_id)
       gui_processors = g_slist_append(gui_processors,gp);
 
       gp->regwin_ram->NewProcessor(gp);
-      //StatusBar_new_processor(gp->status_bar, gp);
       gp->status_bar->NewProcessor(gp);
       gp->program_memory->NewProcessor(gp);
       SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
-      //WatchWindow_clear_watches(gp->watch_window, gp);
       gp->watch_window->ClearWatches();
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
       StackWindow_new_processor(gp->stack_window,gp);
@@ -177,7 +175,6 @@ void gui_new_program (unsigned int pic_id)
       
       SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
-//      WatchWindow_clear_watches(gp->watch_window, gp);
       SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
       ProfileWindow_new_program(gp->profile_window,gp);
       link_src_to_gpsim( gp);
@@ -192,19 +189,14 @@ void gui_new_source (unsigned int pic_id)
 {
 
   // FIX ME - need to search for *p in the gp list...
-  if(gp)
-  {
+  if(gp) {
 	
-      SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
-      SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
-      SymbolWindow_new_symbols(gp->symbol_window, gp);
-//      WatchWindow_clear_watches(gp->watch_window, gp);
-//      ProfileWindow_new_program(gp->profile_window,gp);
+    SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
+    SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
+    SymbolWindow_new_symbols(gp->symbol_window, gp);
+    link_src_to_gpsim( gp);
 
-      link_src_to_gpsim( gp);
-      //      redisplay_prompt();
-
-    }
+  }
 }
 
 /*------------------------------------------------------------------
@@ -397,6 +389,9 @@ static  Stack_Window *stackw=NULL;
 static  StopWatch_Window *sww=NULL;
 static  Symbol_Window *symbolw=NULL;
 static  Trace_Window *tw=NULL;
+static  Breadboard_Window *bbw=NULL;
+static  Profile_Window *pw=NULL;
+
 
 int gui_init (int argc, char **argv)
 {
@@ -440,17 +435,13 @@ int gui_init (int argc, char **argv)
   gtk_init (&argc, &argv);
 
     
-
-  //  gp = (GUI_Processor *)malloc(sizeof(GUI_Processor));
-  //  gp->windows = g_list_alloc();
-
   gp = new GUI_Processor();
 
   gui_styles_init();
   
   create_dispatcher();
 
-  ram    = new  RAM_RegisterWindow();
+  ram    = new  RAM_RegisterWindow(gp);
   eeprom = new  EEPROM_RegisterWindow();
   sbaw   = new  SourceBrowserAsm_Window();
   sbow   = new  SourceBrowserOpcode_Window();
@@ -459,17 +450,19 @@ int gui_init (int argc, char **argv)
   sww    = new  StopWatch_Window();
   symbolw= new  Symbol_Window();
   tw     = new  Trace_Window();
+  bbw    = new  Breadboard_Window();
+  pw     = new  Profile_Window();
 
-  ram->Create(gp);
+  //  ram->Create(gp);
   eeprom->Create(gp);
   sbaw->Create(gp);
   sbow->Create(gp);
   ww->Create(gp);
   stackw->Create(gp);
   symbolw->Create(gp);
-  CreateBreadboardWindow(gp);
+  bbw->Create(gp);
   tw->Create(gp);
-  CreateProfileWindow(gp);
+  pw->Create(gp);
   sww->Create(gp);
 
 

@@ -42,7 +42,7 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         StopWatch_Window *sww)
 {
-    ((GUI_Object *)sww)->change_view((GUI_Object*)sww,VIEW_HIDE);
+    sww->ChangeView(VIEW_HIDE);
     return TRUE;
 }
 
@@ -400,7 +400,6 @@ int StopWatch_Window::Create(GUI_Processor *_gp)
   name = "stopwatch_viewer";
   wc = WC_data;
   wt = WT_stopwatch_window;
-  change_view = NULL;
   window = NULL;
   is_built=0;
   gp->stopwatch_window = this;
@@ -410,10 +409,6 @@ int StopWatch_Window::Create(GUI_Processor *_gp)
   offset=0;
 
   has_processor=1;
-
-
-  gp->add_window_to_list(this);
-
 
   get_config();
   if(config_get_string(name,"rollover",&string))

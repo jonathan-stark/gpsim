@@ -671,7 +671,6 @@ int Symbol_Window::Create(GUI_Processor *_gp)
   name = "symbol_viewer";
   wc = WC_misc;
   wt = WT_symbol_window;
-  change_view = NULL;
   window = NULL;
   is_built = 0;
   gp->symbol_window = this;
@@ -683,8 +682,6 @@ int Symbol_Window::Create(GUI_Processor *_gp)
 
   load_symbols=0;
   
-  gp->add_window_to_list(this);
-
   get_config();
 
   config_get_variable(name,"filter_addresses",&filter_addresses);
