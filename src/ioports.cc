@@ -86,7 +86,7 @@ int IOPORT::update_stimuli(void)
 
   for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
     if(stimulus_mask & m) {
-      if(pins[i]->snode!=0) {
+      if(pins[i] && pins[i]->snode!=0) {
 	
 	double t = pins[i]->snode->update(time);
 
@@ -110,9 +110,9 @@ int PIC_IOPORT::update_stimuli(void)
   int input = 0;
   unsigned int old_value = value.get();
 
-  for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
+  for(unsigned int i = 0, m=1; i<num_iopins; i++, m <<= 1)
     if(stimulus_mask & m) {
-      if(pins[i]->snode!=0) {
+      if(pins[i] && pins[i]->snode!=0) {
 
 	double t = pins[i]->snode->update(time);
 
@@ -165,7 +165,7 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
 //-------------------------------------------------------------------
 bool IOPORT::get_bit(unsigned int bit_number)
 {
-  //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
+  cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
   return (internal_latch &  (1<<bit_number )) ? true : false;
 
 }
@@ -262,6 +262,13 @@ void PIC_IOPORT::put(unsigned int new_value)
   unsigned int inputs=value.get() & tris->value.get() & ~stimulus_mask;
   unsigned int stim= stimulus_mask ? update_stimuli() : 0;
 
+  /*
+  cout << name() << "::put("<<new_value<<") " 
+       << " outputs=" << outputs
+       << " inputs=" << inputs
+       << " stim=" << stim << endl;
+  */
+
   value.put(stim | outputs | inputs);
 }
 //-------------------------------------------------------------------
@@ -283,9 +290,9 @@ void PIC_IOPORT::put(unsigned int new_value)
 //-------------------------------------------------------------------
 void IOPORT::put_value(unsigned int new_value)
 {
-  int i,j;
-  int old_value = value.get();
-  int diff;
+  unsigned int i,j;
+  unsigned int old_value = value.get();
+  unsigned int diff;
 
  
   value.put(new_value);
@@ -301,9 +308,9 @@ void IOPORT::put_value(unsigned int new_value)
   diff = (old_value ^ value.get()) & valid_iopins;
 
   // Update the cross references for each pin that has changed.
-  for(i=0,j=1; i<8; i++,j<<=1) {
+  for(i=0,j=1; i<num_iopins; i++,j<<=1) {
 
-    if(j & diff )
+    if((j & diff) && pins[i])
       pins[i]->update();
 
   }
@@ -360,7 +367,7 @@ void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
 
   else
     cout << "Warning: iopin pin number ("<<bit_position 
-	 <<") is too large for " << name() << ". Max is " << num_iopins << '\n';
+	 <<") is invalid for " << name() << ". Max iopins " << num_iopins << '\n';
 
   if(verbose)
     cout << "attaching iopin to ioport " << name() << '\n';
@@ -432,17 +439,17 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
       value.put((value.get() & ~diff) | (internal_latch & diff));
 
       // Go through and update the direction of the I/O pins
-      int i,m;
-      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
-	if(m & diff & valid_iopins)
+      unsigned int i,m;
+      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
+	if((m & diff) && pins[i])
 	  pins[i]->update_direction(m & (~new_tris));
 
       // Now, update the nodes to which the(se) pin(s) may be attached
 
       guint64 time = cycles.value;
-      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
+      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
-          if(pins[i]->snode!=0)
+          if(pins[i] && pins[i]->snode!=0)
             pins[i]->snode->update(time);
     }
 }

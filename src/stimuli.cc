@@ -420,7 +420,7 @@ double Stimulus_Node::update(guint64 current_time)
 	  double Zt = Z1 + Z2;
 	  voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / Zt;
 
-	  /*
+	  
 	  cout << " *N1: " <<sptr->name() 
 	       << " V=" << sptr->get_Vth() 
 	       << " Z=" << sptr->get_Zth() << endl;
@@ -429,7 +429,7 @@ double Stimulus_Node::update(guint64 current_time)
 	       << " Z=" << sptr2->get_Zth() << endl;
 	  cout << " * ==>:  V=" << voltage
 	       << " Z=" << Zt << endl;
-	  */
+	  
 
 	  sptr->set_nodeVoltage(voltage);
 	  sptr2->set_nodeVoltage(voltage);
@@ -1015,6 +1015,8 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
   Register *port = get_iop();
 
+  cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
+
   nodeVoltage = new_nodeVoltage;
 
   if( digital_state &&  (nodeVoltage < h2l_threshold)) {
@@ -1036,14 +1038,6 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
       port->setbit(iobit,true);
 
   }
-
-  // If there's a node attached to this pin, but the pin is not
-  // part of an I/O port, then we'll go ahead update the node.
-  //if(snode && !port)
-  //  snode->update(0);
-
-  //else cout << " no change in IO_input state\n";
-
 }
 
 void IOPIN::put_digital_state(bool new_state)
@@ -1215,7 +1209,7 @@ double IO_bi_directional_pu::get_Vth()
 
 }
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-  : IO_bi_directional(i,b,opt_name,_iopp)
+  : IO_bi_directional_pu(i,b,opt_name,_iopp)
 {
 
 }
@@ -1223,13 +1217,29 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
 
 double IO_open_collector::get_Vth()
 {
-  return 0.0;
+  if(iop) 
+    digital_state = iop->get_bit(iobit);
+  
+  cout << name() << "get_Vth "
+       << " digital_state=" << digital_state
+       << " bPullUp=" << bPullUp << endl;
+  
+  if(driving && !digital_state)
+    return 0.0;
+
+  return bPullUp ? Vth : VthIn;
 }
 
 
 double IO_open_collector::get_Zth()
 {
-  return (driving && !digital_state) ? Zth : ZthIn;
+  if(iop) 
+    digital_state = iop->get_bit(iobit);
+
+  if(driving && !digital_state)
+    return Zth;
+
+  return bPullUp ? Zpullup : ZthIn;
 
 }
 
