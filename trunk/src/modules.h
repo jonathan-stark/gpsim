@@ -60,6 +60,7 @@ public:
 
   char *name(void) {return name_str;};
 
+  unsigned int interface_id;
 
   // I/O pin specific
   virtual int get_pin_count(void){return 0;};

@@ -54,6 +54,7 @@ Module::Module(void)
 {
 
   name_str = NULL;
+  interface_id = 0;
 
 }
 

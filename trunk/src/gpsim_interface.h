@@ -36,6 +36,7 @@ class Interface {
  public:
 
   unsigned int interface_id;
+  gpointer objectPTR;
 
   /*
    * update_object - pointer to the function that is invoked when an object changes
@@ -67,10 +68,12 @@ class Interface {
 
   /*
    * simulation_has_stopped - pointer to the function that is invoked when gpsim has
-   *                          stopped simulating.
+   *                          stopped simulating. Some interfaces have more than one
+   *                          instance, so the 'object' parameter allows the interface
+   *                          to uniquely identify the particular one.
    */
 
-  void (*simulation_has_stopped) (void);
+  void (*simulation_has_stopped) (gpointer object);
 
 
   /*
@@ -91,7 +94,8 @@ class Interface {
 
   unsigned int get_id(void) { return interface_id;};
   unsigned int set_id(unsigned int new_id) { interface_id = new_id;};
-  Interface(void);
+  Interface(gpointer new_object=NULL);
+  Interface(void) { Interface(NULL); };
 };
 
 
@@ -100,7 +104,6 @@ class gpsimInterface {
 
   GSList *interfaces;
   unsigned int interface_seq_number;
-
 
   gpsimInterface(void);
 

@@ -1114,66 +1114,6 @@ void pic_processor::init_register_memory (unsigned int memory_size)
 
 
 }
-#if 0
-//-------------------------------------------------------------------
-//
-//
-// create_iopins
-//
-// The purpose of this member function is to create a set of nodes and to
-// map them to the iopins on the processor. If stimuli are created during
-// the simulation, then they are mapped to the iopin nodes that are created
-// here.
-
-void pic_processor::create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins)
-{
-
-  if(num_of_iopins == 0)
-    return;
-
-  iopins = (IOPIN **) new char[sizeof (IOPIN *) * num_of_iopins];
-
-  if(verbose)
-    cout <<"creat iopins " << num_of_iopins << '\n';
-
-  if (iopins  == NULL)
-    {
-      cout << "*** ERROR *** I can't get enough memory for IO nodes\n";
-      exit (1);
-    }
-
-
-  int i;
-  
-
-  for(i=0; i<num_of_iopins; i++)
-    {
-      switch(iopin_map[i].type)
-	{
-	case BI_DIRECTIONAL_PU:
-	  iopins[i] = new IO_bi_directional_pu(iopin_map[i].iop, iopin_map[i].iob);
-	  break;
-
-	case BI_DIRECTIONAL:
-	  iopins[i] = new IO_bi_directional(iopin_map[i].iop, iopin_map[i].iob);
-	  break;
-
-	case INPUT_ONLY:
-	  iopins[i] = new IO_input(iopin_map[i].iop, iopin_map[i].iob);
-	  break;
-
-	case OPEN_COLLECTOR:
-	  iopins[i] = new IO_open_collector(iopin_map[i].iop, iopin_map[i].iob);
-	  break;
-
-	default:
-	  cout << "Error: Invalid pin type in create_iopins.\n";
-	}
-
-    }
-
-}
-#endif
 //-------------------------------------------------------------------
 //
 // Add a symbol table entry for each one of the sfr's

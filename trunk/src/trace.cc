@@ -204,6 +204,12 @@ int Trace::dump1(unsigned index)
 
 	  break;
 
+	case MODULE_TRACE2:
+	  return_value = 2;
+	case MODULE_TRACE1:
+	  printf(" module trace  0x%lx\n",trace_buffer[index]&0xffffff);
+	  break;
+
 	default:
 	  printf("*** INVALID TRACE ***\n");
 	}

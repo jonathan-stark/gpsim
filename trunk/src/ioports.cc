@@ -131,10 +131,6 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
   guint64 time = cpu->cycles.value;
   int v;
 
-  //if(stimulus_mask & one_shifted_left_by_n [bit_number])
-  //  return(pins[bit_number]->snode->update(time));
-  //else {
-
   if(pins[bit_number]) {
     if(pins[bit_number]->snode)
       v = pins[bit_number]->snode->update(time);
@@ -156,28 +152,6 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
 //-------------------------------------------------------------------
 int IOPORT::get_bit(unsigned int bit_number)
 {
-
-  //guint64 time = cpu->cycles.value;
-  /*
-  int pin_voltage = get_bit_voltage(bit_number);
-
-  if(value & one_shifted_left_by_n [bit_number]) {
-    // The pin is currently high. So check and see
-    // if the latest sample is below the high-to-low
-    // threshold
-    return(  (pin_voltage < l2h_threshold[bit_number]) ? 0 : 1);
-
-  } else {
-    // The pin is currently low. So check and see
-    // if the latest sample is above the low-to-high
-    // threshold
-    return(  (pin_voltage > h2l_threshold[bit_number]) ? 1 : 0);
-  }
-  */
-  
-//  if(stimulus_mask & one_shifted_left_by_n [bit_number])
-//    return(pins[bit_number]->snode->update(time));
-//
 
   return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
 
@@ -316,7 +290,7 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
       //cout << " IOPORT::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
       value ^= bit_mask;
 
-      trace.register_write(address,value); // %%% FIX ME %%% give this another trace type.
+      trace_register_write();
     }
   //else cout <<  " IOPORT::set_bit bit did not change\n";
 
@@ -433,11 +407,26 @@ void IOPORT::update_pin_directions(unsigned int new_tris)
 }
 
 //-------------------------------------------------------------------
+// trace_register_write
+//   - a wrapper for trace.register_write
+// This provides an option for IOPORTs derived from the IOPORT class 
+// to override the behavior of IOPORT traces.
 //-------------------------------------------------------------------
-IOPORT::IOPORT(void)
+void IOPORT::trace_register_write(void)
+{
+  trace.register_write(address,value);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+IOPORT::IOPORT(unsigned int _num_iopins=8)
 {
   break_point = 0;
   stimulus_mask = 0;
+  num_iopins = _num_iopins;
+  address = 0;
+
+  pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
 
   tris = NULL;
 
