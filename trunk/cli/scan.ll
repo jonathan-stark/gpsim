@@ -122,6 +122,10 @@ q\n   {
    quit_parse  =1;
    return QUIT;  }
 
+abort_gpsim_now {
+   return ABORT;
+   }
+
 <<EOF>> {
     //cout << "got an <<EOF>> in scan.l\n";
     //quit_parse = 1;

@@ -316,12 +316,17 @@ public:
   int pointer;                     /* the stack pointer */
   unsigned int stack_mask;         /* 1 for 12bit, 7 for 14bit, 31 for 16bit */
   bool stack_warnings_flag;        /* Should over/under flow warnings be printed? */
+  bool break_on_overflow;          /* Should over flow cause a break? */
+  bool break_on_underflow;         /* Should under flow cause a break? */
 
   Stack(void);
   virtual void push(unsigned int);
   virtual unsigned int pop(void);
   virtual void reset(void) {pointer = 0;};  // %%% FIX ME %%% reset may need to change 
   // because I'm not sure how the stack is affected by a reset.
+  virtual bool set_break_on_overflow(bool clear_or_set);
+  virtual bool set_break_on_underflow(bool clear_or_set);
+
 };
 
 

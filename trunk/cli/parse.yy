@@ -62,15 +62,18 @@ void yyerror(char *message)
 }
 
 int yylex(void);
-int quit_parse;
+int quit_parse=0;
+int abort_gpsim=0;
 int parser_warnings;
 int parser_spanning_lines=0;
+extern int use_gui;
+extern int quit_state;
 
 char_list *str_list_head;
 char_list *str_list;
 
 void free_char_list(char_list *);
- 
+
 %}
 
 /* Bison declarations */
@@ -88,6 +91,7 @@ void free_char_list(char_list *);
 
 
 /* gpsim commands: */
+%token <s>  ABORT
 %token <s>  ATTACH
 %token <s>  BREAK
 %token <s>  BUS
@@ -140,6 +144,7 @@ void free_char_list(char_list *);
 /* Grammar rules */
 
 cmd: ignored
+     | aborting
      | attach_cmd
      | break_cmd
      | bus_cmd
@@ -165,9 +170,10 @@ cmd: ignored
      | spanning_lines
      | END_OF_INPUT
      {
-       if((verbose&2) && DEBUG_PARSER)
+       //if((verbose&2) && DEBUG_PARSER)
          cout << "got an END_OF_INPUT\n";
-       quit_parse = 1;
+	//if(use_gui)
+       	  quit_parse = 1;
        YYABORT;
      }
    ;
@@ -198,6 +204,13 @@ spanning_lines:  SPANNING_LINES
           }
           ;
 
+aborting: ABORT
+          {
+       	  abort_gpsim = 1;
+	  quit_parse = 1;
+	  YYABORT;
+	  }
+            
 attach_cmd: ATTACH string_list
           {
             if((verbose&2) && DEBUG_PARSER)
@@ -343,10 +356,16 @@ processor_cmd: PROCESSOR
 
 quit_cmd: QUIT
           { 
-            printf("got a quit\n");
+            //printf("got a quit\n");
             quit_parse = 1;
 	    YYABORT;
           }
+	  | QUIT NUMBER
+	  {
+            quit_parse = 1;
+	    quit_state = $2;
+	    YYABORT;
+	  }
           ;
 
 reset_cmd: RESET

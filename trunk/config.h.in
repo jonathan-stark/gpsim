@@ -52,6 +52,9 @@
 /* Define if you have the strtoul function.  */
 #undef HAVE_STRTOUL
 
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
+
 /* Define if you have the <readline/chardefs.h> header file.  */
 #undef HAVE_READLINE_CHARDEFS_H
 

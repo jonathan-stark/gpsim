@@ -15,7 +15,7 @@ AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=20
-GPSIM_MICRO_VERSION=6
+GPSIM_MICRO_VERSION=7
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -146,6 +146,7 @@ AC_SUBST(LIBREADLINE)
 dnl Checks for header files.
 AC_HEADER_STDC
 dnl AC_CHECK_HEADERS(malloc.h sys/file.h unistd.h)
+AC_CHECK_HEADERS(getopt.h)
 
 dnl move the alloca check here since it doesn't produce valid C++
 dnl code either

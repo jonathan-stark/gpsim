@@ -37,7 +37,9 @@ cmd_break c_break;
 #define READ        4
 #define WRITE_VALUE 5
 #define READ_VALUE  6
-#define WDT         7
+#define STK_OVERFLOW  7
+#define STK_UNDERFLOW 8
+#define WDT           9
 
 static cmd_options cmd_break_options[] =
 {
@@ -47,7 +49,9 @@ static cmd_options cmd_break_options[] =
   "r",   READ,        OPT_TT_BITFLAG,
   "wv",  WRITE_VALUE, OPT_TT_BITFLAG,
   "rv",  READ_VALUE,  OPT_TT_BITFLAG,
-  "wdt", WDT,         OPT_TT_BITFLAG,
+  "so",  STK_OVERFLOW, OPT_TT_BITFLAG,
+  "su",  STK_UNDERFLOW,OPT_TT_BITFLAG,
+  "wdt", WDT,          OPT_TT_BITFLAG,
   NULL,0,0
 };
 
@@ -58,7 +62,7 @@ cmd_break::cmd_break(void)
 
     brief_doc = string("Set a break point");
 
-    long_doc = string ("break [c e | w | r | wv | rv | wdt [location] [value] ]\n\n\
+    long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value] ]\n\n\
 \toptions:\n\
 \t\tc   - cycle\n\
 \t\te   - execution\n\
@@ -66,6 +70,8 @@ cmd_break::cmd_break(void)
 \t\tr   - read\n\
 \t\twv  - write value\n\
 \t\trv  - read value\n\
+\t\tso  - stack over flow\n\
+\t\tsu  - stack under flow\n\
 \t\twdt - wdt timeout\n\
 \t\t    - no argument, display the break points that are set.
 \texamples:\n\
@@ -94,16 +100,42 @@ void cmd_break::set_break(int bit_flag)
   if(cpu==NULL)
     return;
 
-  if(bit_flag != WDT)
-    {
-      cout << TOO_FEW_ARGS;
-      return;
-    }
+  int b;
 
-  int b = bp.set_wdt_break(cpu);
-  if(b < MAX_BREAKPOINTS)
-    cout << "break when wdt times out.  " <<
-      "bp#: " << b << '\n';
+  switch(bit_flag) {
+
+  case STK_OVERFLOW:
+    b = bp.set_stk_overflow_break(cpu);
+
+    if(b < MAX_BREAKPOINTS)
+      cout << "break when stack over flows.  " <<
+	"bp#: " << b << '\n';
+
+    break;
+
+  case STK_UNDERFLOW:
+    b = bp.set_stk_underflow_break(cpu);
+
+    if(b < MAX_BREAKPOINTS)
+      cout << "break when stack under flows.  " <<
+	"bp#: " << b << '\n';
+
+    break;
+
+
+  case WDT:
+    b = bp.set_wdt_break(cpu);
+
+    if(b < MAX_BREAKPOINTS)
+      cout << "break when wdt times out.  " <<
+	"bp#: " << b << '\n';
+
+    break;
+
+  default:
+    cout << TOO_FEW_ARGS;
+  }
+
 
 }
 
@@ -159,6 +191,8 @@ void cmd_break::set_break(int bit_flag, guint64 value)
   case READ_VALUE:
     cout << TOO_FEW_ARGS;
     break;
+  case STK_OVERFLOW:
+  case STK_UNDERFLOW:
   case WDT:
     cout << TOO_MANY_ARGS;
   }
@@ -178,6 +212,8 @@ void cmd_break::set_break(int bit_flag, int reg, int value)
   case EXECUTION:
   case WRITE:
   case READ:
+  case STK_OVERFLOW:
+  case STK_UNDERFLOW:
   case WDT:
     cout << TOO_MANY_ARGS;
     break;
@@ -208,7 +244,7 @@ void cmd_break::set_break(int bit_flag, char *sym, int value)
 {
   int sym_value;
 
-  if(get_symbol_value(sym,&sym_value))
+  if(!get_symbol_value(sym,&sym_value))
     {
       cout << '`' << sym << '\'' << " was not found in the symbol table\n";
       return;
@@ -222,7 +258,7 @@ void cmd_break::set_break(int bit_flag, char *sym)
 {
   int sym_value;
 
-  if(get_symbol_value(sym,&sym_value))
+  if(!get_symbol_value(sym,&sym_value))
     {
       cout << '`' << sym << '\'' << " was not found in the symbol table\n";
       return;

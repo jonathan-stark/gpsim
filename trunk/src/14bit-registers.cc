@@ -662,7 +662,9 @@ void Program_Counter::put_value(unsigned int new_value)
 Stack::Stack(void)
 {
 
-  stack_warnings_flag = 1;   // Display over/under flow stack warnings
+  stack_warnings_flag = 0;   // Do not display over/under flow stack warnings
+  break_on_overflow = 0;     // Do not break if the stack over flows
+  break_on_underflow = 0;    // Do not break if the stack under flows
   stack_mask = 7;            // Assume a 14 bit core.
   pointer = 0;
 
@@ -689,8 +691,12 @@ void Stack::push(unsigned int address)
   // However, some pic programs take advantage of this 'feature', so provide a means
   // for them to ignore the warnings.
 
-  if( (pointer++ >= stack_mask) && stack_warnings_flag)
-    cout << "%%% stack overflow";
+  if(pointer++ >= stack_mask) {
+    if(stack_warnings_flag || break_on_overflow)
+      cout << "stack overflow ";
+    if(break_on_overflow)
+      bp.halt();
+  }
 
 }
 
@@ -703,12 +709,52 @@ unsigned int Stack::pop(void)
 
   // First decrement the stack pointer.
 
-  if((--pointer < 0)  && stack_warnings_flag)
-    cout << "%%% stack underflow";
+  if(--pointer < 0)  {
+    if(stack_warnings_flag || break_on_underflow)
+      cout << "stack underflow ";
+    if(break_on_underflow) 
+      bp.halt();
+  }
+
 
   
   return(contents[pointer & stack_mask]);
 }
+
+//
+//  bool Stack::set_break_on_overflow(bool clear_or_set)
+//
+//  Set or clear the break on overflow flag
+
+
+bool Stack::set_break_on_overflow(bool clear_or_set)
+{
+  if(break_on_overflow == clear_or_set)
+    return 0;
+
+  break_on_overflow = clear_or_set;
+
+  return 1;
+
+}
+
+//
+//  bool Stack::set_break_on_underflow(bool clear_or_set)
+//
+//  Set or clear the break on underflow flag
+
+
+bool Stack::set_break_on_underflow(bool clear_or_set)
+{
+  if(break_on_underflow == clear_or_set)
+    return 0;
+
+  break_on_underflow = clear_or_set;
+
+  return 1;
+
+}
+
 
 
 //--------------------------------------------------

@@ -46,6 +46,8 @@ extern "C" { void gui_new_program (unsigned int); }
 
 #include "fopen-path.h"
 
+extern int use_gui;
+
 static FILE *codefile = NULL;
 static FILE *lstfp = NULL;
 //static char *directory_block_data = NULL;
@@ -521,6 +523,7 @@ void read_symbols( pic_processor *cpu )
 
 	  case COD_ST_ADDRESS:
 	    symbol_table.add_address(cpu,substr(b,&s[1],length), value);
+	    cout << "symbol at address " << value << " name " <<substr(b,&s[1],length) <<'\n';
 	    break;
 	    //COD_ST_CONSTANT:
 	  default:
@@ -737,8 +740,10 @@ int open_cod_file(pic_processor **pcpu, char *filename)
   ccpu->reset(POR_RESET);
 
 #ifdef HAVE_GUI
-  gui_new_program(ccpu->processor_id);
-  gui_new_source(ccpu->processor_id);
+  if(use_gui){
+    gui_new_program(ccpu->processor_id);
+    gui_new_source(ccpu->processor_id);
+  }
 #endif
 
   return error_code;
