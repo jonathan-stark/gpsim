@@ -45,7 +45,7 @@ typedef enum {
     MENU_STEP_OVER,
     MENU_RUN,
     MENU_STOP,
-    MENU_RETURN,
+    MENU_FINISH,
     MENU_RESET
 } menu_id;
 
@@ -71,7 +71,7 @@ static menu_item submenu_items[] = {
     {"Run",             MENU_RUN,NULL},
     {"Stop",            MENU_STOP,NULL},
     {"Reset",           MENU_RESET,NULL},
-    {"Return",          MENU_RETURN,NULL},
+    {"Finish",          MENU_FINISH,NULL},
 };
 
 // this should be in SourceBrowserAsm struct FIXME
@@ -500,7 +500,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_RESET:
 	gpsim_reset(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
-    case MENU_RETURN:
+    case MENU_FINISH:
 	gpsim_finish(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     default:
@@ -1874,6 +1874,8 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
     sbaw->sbw.gui_obj.enabled=1;
 
+    sbaw->sbw.gui_obj.is_built=1;
+
     if(sbaw->load_source)
 	SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
   update_menu_item((GUI_Object*)sbaw);
@@ -1897,6 +1899,7 @@ int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
   sbaw->sbw.gui_obj.name = "source_browser";
   sbaw->sbw.gui_obj.wc = WC_source;
   sbaw->sbw.gui_obj.wt = WT_asm_source_window;
+  sbaw->sbw.gui_obj.is_built = 0;
 
   gp->source_browser = (SourceBrowser_Window*)sbaw;
   sbaw->sbw.gui_obj.change_view = SourceBrowser_change_view;

@@ -55,10 +55,14 @@ key_press(GtkWidget *widget,
       //sbw->gui_obj.gp->p->run();
       gpsim_run(sbw->gui_obj.gp->pic_id);
       break;
+  case GDK_Escape:
+      gpsim_stop(sbw->gui_obj.gp->pic_id);
+      break;
   case 'f':
   case 'F':
       gpsim_finish(sbw->gui_obj.gp->pic_id);
       break;
+      
 // Exit is Ctrl-Q; the dispatcher menu shortcut
 //  case 'q':
 //  case 'Q':
@@ -323,7 +327,7 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	 !GTK_WIDGET_VISIBLE(GTK_WIDGET(_this->window)) )
       )
     {
-      if(!_this->enabled)
+      if(!_this->is_built)
       {
 	  gui_object_get_config(_this);
 	  switch(_this->wt)

@@ -1405,6 +1405,8 @@ BuildRegisterWindow(Register_Window *rw)
   
   rw->gui_obj.enabled=1;
   
+  rw->gui_obj.is_built=1;
+  
   for(i=0;i<MAX_REGISTERS;i++)
       rw->registers[i]=NULL;
   
@@ -1429,6 +1431,7 @@ int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)
   register_window->gui_obj.wc = WC_data;
   register_window->gui_obj.wt = WT_register_window;
   register_window->gui_obj.change_view = change_view;
+  register_window->gui_obj.is_built = 0;
   
   register_window->allow_change_view=1;
   register_window->registers_loaded=0;

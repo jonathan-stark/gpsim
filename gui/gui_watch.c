@@ -724,6 +724,8 @@ int BuildWatchWindow(Watch_Window *ww)
   
   ww->gui_obj.enabled=1;
 
+  ww->gui_obj.is_built=1;
+
   update_menu_item((GUI_Object*)ww);
   
   return 0;
@@ -747,6 +749,7 @@ int CreateWatchWindow(GUI_Processor *gp)
   watch_window->gui_obj.wt = WT_watch_window;
   watch_window->gui_obj.change_view = SourceBrowser_change_view;
   watch_window->gui_obj.window = NULL;
+  watch_window->gui_obj.is_built = 0;
   gp->watch_window = watch_window;
 
   watch_window->watches=NULL;

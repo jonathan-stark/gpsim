@@ -487,6 +487,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
   bbw->gui_obj.enabled=1;
 
+  bbw->gui_obj.is_built=1;
+
   if(bbw->processor)
       BreadboardWindow_new_processor(bbw, ((GUI_Object*)bbw)->gp);
 
@@ -508,6 +510,7 @@ int CreateBreadboardWindow(GUI_Processor *gp)
   bbw->gui_obj.wt = WT_breadboard_window;
   bbw->gui_obj.change_view = SourceBrowser_change_view;
   bbw->gui_obj.window = NULL;
+  bbw->gui_obj.is_built = 0;
 
   gp->breadboard_window = bbw;
 
