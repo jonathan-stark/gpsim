@@ -69,8 +69,8 @@ static void update(StopWatch_Window *sww)
     
     pic_id = ((GUI_Object*)sww)->gp->pic_id;
 
-    while(sww->offset>sww->rollover)
-        sww->offset-=sww->rollover;
+    if(sww->offset>sww->rollover)
+	sww->offset%=sww->rollover;
 
     rollover=sww->rollover;
     offset=sww->offset;
