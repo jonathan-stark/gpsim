@@ -231,15 +231,15 @@ void TraceFrame::add(TraceObject *to)
   traceObjects.push_back(to);
 }
 
-void TraceFrame::print() 
+void TraceFrame::print(FILE *fp) 
 {
   list <TraceObject *> :: iterator toIter;
 
-  printf("=== Trace Frame 0x%016LX\n",cycle_time);
+  //  fprintf(fp,"=== Trace Frame 0x%016LX\n",cycle_time);
   for(toIter = traceObjects.begin();
       toIter != traceObjects.end();
       ++toIter) 
-    (*toIter)->print_frame(this);
+    (*toIter)->print_frame(this,fp);
 }
 
 void TraceFrame::update_state() 
@@ -281,14 +281,14 @@ void Trace::deleteTraceFrame(void)
   current_cycle_time = 0;
 }
 
-void Trace::printTraceFrame(void)
+void Trace::printTraceFrame(FILE *fp)
 {
   list <TraceFrame *> :: reverse_iterator tfIter;
 
   for(tfIter = traceFrames.rbegin();
       tfIter != traceFrames.rend();
       ++tfIter) {
-    (*tfIter)->print();
+    (*tfIter)->print(fp);
   }
 }
 
@@ -308,7 +308,7 @@ TraceObject::TraceObject(Processor *_cpu)
   : cpu(_cpu) 
 {
 }
-void TraceObject::print_frame(TraceFrame *tf)
+void TraceObject::print_frame(TraceFrame *tf,FILE *fp)
 {
   // by default, a trace object doesn't know how to print a frame
   // special trace objects derived from this class will be designated
@@ -339,12 +339,12 @@ void RegisterWriteTraceObject::getState(TraceFrame *tf)
 {
 }
 
-void RegisterWriteTraceObject::print(void)
+void RegisterWriteTraceObject::print(FILE *fp)
 {
   char sFrom[16];
   char sTo[16];
   if(reg)
-    fprintf(stdout, "  Wrote: 0x%s to %s(0x%04X) was 0x%s\n",
+    fprintf(fp, "  Wrote: 0x%s to %s(0x%04X) was 0x%s\n",
 	    to.toString(sTo,sizeof(sTo)),
 	    reg->name().c_str(), reg->address, 
 	    from.toString(sFrom,sizeof(sFrom)));
@@ -360,12 +360,12 @@ RegisterReadTraceObject::RegisterReadTraceObject(Processor *_cpu,
     reg->put_trace_state(from);
   }
 }
-void RegisterReadTraceObject::print(void)
+void RegisterReadTraceObject::print(FILE *fp)
 {
   char sFrom[16];
 
   if(reg)
-    fprintf(stdout, "  Read: 0x%s from %s(0x%04X)\n",
+    fprintf(fp, "  Read: 0x%s from %s(0x%04X)\n",
 	    from.toString(sFrom,sizeof(sFrom)), reg->name().c_str(), reg->address);
 }
 
@@ -379,44 +379,48 @@ PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address)
 {
 }
 
-void PCTraceObject::print(void)
+void PCTraceObject::print(FILE *fp)
 {
   char a_string[50];
 
   unsigned addr = address & 0xffff;
   // ugh - hardcoding the specific program counter trace type 
+  /*
   unsigned int tracetype = (address>>16) & 3;
   switch (tracetype) {
 
   case 1:
-    fprintf(stdout,"branched to: ");
+    fprintf(fp,"branched to: ");
     break;
   case 2:
-    fprintf(stdout,"skipped: ");
+    fprintf(fp,"skipped: ");
     break;
   default:
     break;
   }
-
-  fprintf(stdout,"0x%04X 0x%04X %s\n",
+  */
+  fprintf(fp,"0x%04X 0x%04X %s\n",
 	  address &0xffff,
 	  cpu->pma->get_opcode(addr),
 	  (*cpu->pma)[addr].name(a_string,sizeof(a_string)));
 
 
 }
-void PCTraceObject::print_frame(TraceFrame *tf)
+void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 {
   if(!tf)
     return;
 
-  list <TraceObject *> :: iterator toIter;
+  list <TraceObject *> :: reverse_iterator toIter;
 
-  printf("0x%016LX %s ",tf->cycle_time,cpu->name().c_str());
-  for(toIter = tf->traceObjects.begin();
-      toIter != tf->traceObjects.end();
+  fprintf(fp,"0x%016LX %s ",tf->cycle_time,cpu->name().c_str());
+  print(fp);
+
+  for(toIter = tf->traceObjects.rbegin();
+      toIter != tf->traceObjects.rend();
       ++toIter) 
-    (*toIter)->print();
+    if(*toIter != this)
+      (*toIter)->print(fp);
 
 }
 
@@ -493,8 +497,6 @@ TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
   RegisterValue rv = RegisterValue(tv & 0xff, 0);
   unsigned int address = (tv >> 8) & 0xfff;
 
-  printf(" RegisterWriteTraceType: tv=0x%x\n",tv);
-
   RegisterWriteTraceObject *rto = new RegisterWriteTraceObject(cpu, cpu->rma.get_register(address), rv);
   trace.addToCurrentFrame(rto);
 
@@ -535,8 +537,6 @@ TraceObject *RegisterReadTraceType::decode(unsigned int tbi)
   RegisterValue rv = RegisterValue(tv & 0xff, 0);
   unsigned int address = (tv >> 8) & 0xfff;
 
-  printf(" RegisterReadTraceType: tv=0x%x\n",tv);
-
   RegisterReadTraceObject *rto = new RegisterReadTraceObject(cpu, cpu->rma.get_register(address), rv);
   trace.addToCurrentFrame(rto);
 
@@ -572,7 +572,6 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
 {
 
   unsigned int tv = trace.get(tbi);
-  printf(" PCTraceType: 0x%x\n",tv);
 
   trace.addFrame(new TraceFrame( ));
 
@@ -767,23 +766,14 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
 
 int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
-  //  char a_string[50];
-  //Register *r;
-
   guint64 cycle;
   int return_value = is_cycle_trace(index,&cycle);
 
   if(bufsize)
     buffer[0] = 0;   // 0 terminate just in case no string is created
 
-  if(return_value == 2) {
-    /*
-    if(trace_flag & TRACE_PROGRAM_COUNTER)
-      snprintf(buffer, bufsize," cycle: 0x%llx" , cycle);
-    */
+  if(return_value == 2)
     return(return_value);
-
-  }
   
   return_value = 1;
 
@@ -792,13 +782,6 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
     case NOTHING:
       snprintf(buffer, bufsize,"  empty trace cycle\n");
       break;
-      /*
-    case INSTRUCTION:
-      if(trace_flag & TRACE_INSTRUCTION)
-	snprintf(buffer, bufsize," instruction: 0x%04x",
-		 get(index)&0xffff);
-      break;
-      */
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
@@ -811,11 +794,6 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       snprintf(buffer, bufsize,"BREAK: ");
       bp.dump_traced(get(index) & 0xffffff);
       break;
-      /*
-    case INTERRUPT:
-      snprintf(buffer, bufsize," interrupt");
-      break;
-      */
     case _RESET:
       switch( (RESET_TYPE) (get(index)&0xff))
 	{
@@ -881,16 +859,15 @@ void Trace::disableLogging()
 // int Trace::dump(unsigned int n=0)
 //
 
-int Trace::dump(unsigned int n, FILE *out_stream)
+int Trace::dump(int n, FILE *out_stream)
 {
 
-  //  char a_string[50];
-  //  int  frame_index=-1;
-  //  bool found_pc = false;
-  //  bool found_frame = false;
 
   if(!cpu)
     return 0;
+
+  if(n<0)
+    n = TRACE_BUFFER_SIZE;
 
   if(!n)
     n = 5;
@@ -899,6 +876,8 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   if(!out_stream)
     return 0;
 
+
+  unsigned int frames = n;
 
   unsigned int i = tbi(trace_index-2);
   unsigned int k = tbi(trace_index-1);
@@ -924,9 +903,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 
   current_frame = 0;
 
-  while(traceFrames.size()<n && inRange(k,frame_end,frame_start)) {
-
-    printf("k=%d  ",k);
+  while(traceFrames.size()<frames && inRange(k,frame_end,frame_start)) {
 
     // Look up this trace type in the trace map
     map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(k));
@@ -945,24 +922,22 @@ int Trace::dump(unsigned int n, FILE *out_stream)
     } else if(is_cycle_trace(k,&cycle) == 2) {
 
       current_cycle_time = cycle;
-      printf(" Cycle Trace type 0x%Lx\n",cycle);
-
     } else {
 
       if(type(k) == 0)
 	break;
 
+      /*
       if(is_cycle_trace(tbi(k-1),0) != 2)
-	printf(" could not decode 0x%x\n",get(k));
+	fprintf(out_stream," could not decode 0x%x\n",get(k));
+      */
     }
 
     k = tbi(k-1);
   }
 
 
-  cout <<"Trace frame: " << traceFrames.size() << endl;
-
-  printTraceFrame();
+  printTraceFrame(out_stream);
 
   deleteTraceFrame();
 
@@ -1010,6 +985,8 @@ void Trace::dump_raw(int n)
   if(!n)
     return;
 
+  FILE *out_stream = stdout;
+
   const int BUFFER_SIZE = 50;
 
   char buffer[BUFFER_SIZE];
@@ -1021,19 +998,19 @@ void Trace::dump_raw(int n)
   do {
     printf("%04X: ",i);
     if(is_cycle_trace(i,0))
-      printf("%08X:%08X",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
+      fprintf(out_stream, "%08X:%08X",trace_buffer[i], trace_buffer[(i+1) & TRACE_BUFFER_MASK]);
     else
       printf("%08X         ",trace_buffer[i]);
 
     i = (i + dump1(i,buffer,BUFFER_SIZE)) & TRACE_BUFFER_MASK;
 
     if(buffer[0]) 
-      printf("%s",buffer);
-    putc('\n',stdout);
+      fprintf(out_stream,"%s",buffer);
+    putc('\n',out_stream);
 
   } while((i!=trace_index) && (i!=((trace_index+1)&TRACE_BUFFER_MASK)));
-    putc('\n',stdout);
-    putc('\n',stdout);
+    putc('\n',out_stream);
+    putc('\n',out_stream);
 }
 
 //

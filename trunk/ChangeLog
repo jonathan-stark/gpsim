@@ -1,3 +1,13 @@
+2004-08-25 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_trace.cc, src/14bit-registers.cc, src/trace.cc,
+	  src/trace.h: Removed a stale option to the trace command
+	and added a new option that will allow the decode trace
+	buffer to be saved to a file.
+
+2004-08-25 Manuel Bouyer <bouyer@antioche.eu.org>
+	* src/stimuli.cc: fixed bug in finding the node voltage when
+	3 or more stimuli are attached to a node.
+
 2004-08-24 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: Attaching three or more stimuli to
 	one node caused gpsim to hang.

@@ -48,8 +48,8 @@ public:
 
   TraceObject();
   TraceObject(Processor *_cpu);
-  virtual void print(void)=0;
-  virtual void print_frame(TraceFrame *);
+  virtual void print(FILE *)=0;
+  virtual void print_frame(TraceFrame *,FILE *);
   virtual void getState(TraceFrame *);
 
 };
@@ -59,8 +59,8 @@ class SubTraceObject : public TraceObject
 public:
   SubTraceObject();
   SubTraceObject(Processor *_cpu);
-  virtual void print(void)=0;
-  virtual void print_frame(TraceFrame *);
+  virtual void print(FILE *)=0;
+  virtual void print_frame(TraceFrame *,FILE *);
 
 };
 */
@@ -73,7 +73,7 @@ public:
 
   //RegisterTraceObject();
   RegisterWriteTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
-  virtual void print(void);
+  virtual void print(FILE *);
   virtual void getState(TraceFrame *);
 };
 
@@ -81,7 +81,7 @@ class RegisterReadTraceObject : public RegisterWriteTraceObject
 {
 public:
   RegisterReadTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
-  virtual void print(void);
+  virtual void print(FILE *);
   virtual void getState(TraceFrame *);
 };
 
@@ -91,8 +91,8 @@ public:
   unsigned int address;
 
   PCTraceObject(Processor *_cpu, unsigned int _address);
-  virtual void print(void);
-  virtual void print_frame(TraceFrame *);
+  virtual void print(FILE *);
+  virtual void print_frame(TraceFrame *,FILE *);
 };
 
 //========================================================================
@@ -184,7 +184,7 @@ public:
   TraceFrame(); 
   virtual ~TraceFrame();
   virtual void add(TraceObject *to);
-  virtual void print(void);
+  virtual void print(FILE *);
   virtual void update_state(void);
 };
 
@@ -332,7 +332,7 @@ class Trace
 
   void switch_cpus(Processor *new_cpu) {cpu = new_cpu;};
 
-  int  dump (unsigned int n=0, FILE *out_stream=0);
+  int  dump (int n=0, FILE *out_stream=0);
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
   void dump_raw(int n);
@@ -390,7 +390,7 @@ class Trace
   void addFrame(TraceFrame *newFrame);
   void addToCurrentFrame(TraceObject *to);
   void deleteTraceFrame(void);
-  void printTraceFrame(void);
+  void printTraceFrame(FILE *);
 
 
 };
