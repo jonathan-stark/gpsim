@@ -72,7 +72,7 @@ public:
 
 };
 
-class ControlPort : public Lcd_Port, public BreakpointObject
+class ControlPort : public Lcd_Port, public TriggerObject
 {
 public:
 
@@ -127,7 +127,7 @@ public:
 // and pass the amount of time it wishes the flag to be busy. When
 // this time expires, the flag will get cleared.
 
-class LcdBusy : public BreakpointObject
+class LcdBusy : public TriggerObject
 {
  public:
   LcdBusy(void) {bBusyState=false;}
