@@ -1,3 +1,16 @@
+2004-11-14 Scott Dattalo <scott@dattalo.com>
+	* src/i2c-ee.cc, src/ioports.cc, src/ioports.h, src/stimuli.cc,
+	src/uart.cc: The usart has bitrotted. The relatively recent I/O pin
+	changes broke this and probably other peripherals too.
+	* modules/Makefile.am: added new files.
+	* modules/pthread-wrap.h, modules/ttoken.cc, modules/ttoken.h:
+	The token class provides co-routine support for modules.
+	* modules/bitlog.cc, modules/bitlog.h, modules/bytelog.cc,
+	modules/bytelog.h: Bit and Byte event loggers. bitlog was originally
+	part of the uart module.
+	* modules/usart.cc, modules/usart.h: removed the bit logger class and
+	am now making an attempt to resurrect this code. 
+
 2004-11-10 Scott Dattalo <scott@dattalo.com>
 	* cmd/cmd_break.cc: updated the help description for 'break'
 	* src/operator.cc, src/symbol.h, src/symbol.cc: Allow registers

@@ -49,6 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gtk/gtk.h>
 #endif
 
+#include "usart.h"
 
 
 #include "../src/value.h"
@@ -59,15 +60,11 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol.h"
 #include "../src/interface.h"
 #include "../src/pir.h"
+#include "../src/trace.h"
+#include "../src/uart.h"
 
-#include "usart.h"
+#include "bitlog.h"
 
-
-//void  gpsim_set_break(guint64 next_cycle, TriggerObject *f=NULL);
-//void  gpsim_set_break_delta(guint64 delta, TriggerObject *f=NULL);
-//pic_processor *gpsim_get_active_cpu(void);
-//guint64 gpsim_get_current_time(void);
-//guint64 gpsim_digitize_time(double time);
 
 /**********************************************************************************
 
@@ -92,241 +89,6 @@ confined to the limited number of discrete baud rates.
 
 **********************************************************************************/
 
-
-
-/**********************************************************************
- * boolean event logging
- *
- * The boolean event logger is a simple class for logging the time
- * of boolean (i.e. 0/1) events.
- *
- * The event buffer is an array of 64-bit wide elements. Each element
- * stores the time at which an event occurs. The state of the event
- * is encoded in the position of the array. In other words, "high"
- * events are at the odd indices of the array and "low" ones at the
- * even ones.
- *
- * No effort is made to compress the 64-bit time entries into smaller
- * values. Consequently, a large amount of space is wasted. 
- *
- * Repeated events are not logged. E.g.. if two 1's are logged, the 
- * second one is ignored.
- * 
- * The total number of events is defined when the class is instantiated.
- * The only requirement is that the number of events be an even power
- * of 2. A check for this is made, and 
- */
-
-class BoolEventLogger {
-public:
-
-#define EL_MAX_EVENTS  1024
-
-  guint32  index;               // Index into the buffer
-  guint64  *buffer;             // Where the time is stored
-  guint32  max_events;          // Size of the event buffer
-
-  /*
-    boolean_event(bool state)
-
-    Record a 0/1 event (e.g. the state of an I/O line).
-   */
-
-  inline void event(bool state)
-  {
-    // If the new event is different the most recently logged one
-    // then we need to log this event. (Note that the event is implicitly
-    // logged in the "index". I.e. 1 events are at odd indices.
-    if(state ^ (index & 1))  {
-      index = (index + 1) & max_events;
-      //cout << "New event " << state << "  index = " << index << '\n';
-      buffer[index] = get_cycles().get();
-    }
-
-  }
-
-  void dump(int start_index, int end_index=-1) {
-
-    
-    if((start_index > (int)max_events) || (start_index <= 0 ))
-      start_index = 0;
-
-    if(end_index == -1)
-      end_index = index;
-
-    if(start_index == end_index)
-      return;
-
-    // Loop through and dump events between the start and end points requested
-
-    do {
-      cout << hex << "0x" << start_index << " = 0x" << buffer[start_index];
-
-      if(start_index & 1)
-	cout << ": hi\n";
-      else
-	cout << ": lo\n";
-
-      start_index = (start_index + 1) & max_events;
-
-    }while ( start_index != end_index);
-
-  }
-
-  void dump_ASCII_art(guint64 time_step, int start_index, int end_index=-1) {
-
-    cout << "ascii art\n";
-
-    if((start_index > (int)max_events) || (start_index <= 0 ))
-      start_index = 0;
-
-    if(buffer[start_index] == 0) 
-      start_index = 0;
-
-    if( (end_index > (int)max_events) || (end_index <= 0 ))
-      end_index = index;
-
-    if(start_index == end_index)
-      return;
-
-    if(time_step == 0)
-      time_step = 1;
-
-    // Loop through and dump events between the start and end points requested
-
-    guint64 min_pulse = buffer[end_index] - buffer[start_index];
-    guint32 i = start_index;
-    int j = (start_index+1) & max_events;
-
-    do {
-
-      if(  (buffer[j] - buffer[i]) < min_pulse )
-	min_pulse = (buffer[j] - buffer[i]);
-
-      i = j;
-      j = ++j & max_events; 
-
-    }while (j != end_index);
-
-    cout << "minimum pulse width :" << min_pulse << '\n';
-
-    if(min_pulse == 0) { // bummer - there's an error in the log
-      min_pulse = 1;
-      cout << "log error - minimum pulse width shouldn't be zero\n";
-    }
-
-    int num_chars = 0;
-    guint64 t = buffer[start_index];
-    i = start_index;
-    do {
-      j = get_index(t);
-      switch(j-i) {
-      case 0:
-      case 1:
-	if(i&1)
-	  cout <<'-';
-	else
-	  cout <<'_';
-	break;
-      case 2:
-	cout << '|';
-	break;
-      case 3:
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-      case 8:
-      case 9:
-	cout << (j-i);
-	break;
-      default:
-	cout << '*';
-      }
-      i = j;
-      t += time_step;
-    } while( t<=buffer[end_index] && num_chars++<1000);
-    cout << "\nend of ASCII art\n";
-
-  }
-  /*
-    get_index - return the current index
-
-    This is used by the callers to record where in the event
-    buffer a specific event is stored. (e.g. The start bit
-    of a usart bit stream.)
-   */
-  inline unsigned int get_index(void) {
-    return index;
-  }
-
-  inline unsigned int get_index(guint64 event_time) {
-    guint32 start_index, end_index, search_index, bstep;
-
-    end_index = index;
-    start_index = (index + 1) & max_events;
-
-    bstep = (max_events+1) >> 1;
-    search_index = (start_index + bstep) & max_events;
-    bstep >>= 1;
-
-    // Binary search for the event time:
-    do {
-      if(event_time < buffer[search_index])
-	search_index = (search_index - bstep) & max_events;
-      else
-	search_index = (search_index + bstep) & max_events;
-
-      //cout << hex << "search index "<< search_index << "  buffer[search_index] " << buffer[search_index] << '\n';
-      bstep >>= 1;
-
-    } while(bstep);
-
-    if(event_time >= buffer[search_index])
-      return search_index;
-    else
-      return (--search_index & max_events);
-
-  }
-
-  unsigned int get_event(int index) {
-
-    return index & 1;
-  }
-
-  bool get_state(guint64 event_time) {
-    return get_index(event_time) & 1;
-  }
-
-  int get_edges(guint64 start_time, guint64 end_time) {
-    return ( get_index(end_time) - get_index(start_time) ) & max_events;
-  }
-
-  BoolEventLogger(guint32 _max_events = 4096) {
-
-    max_events = _max_events;
-
-    // Make sure that max_events is an even power of 2
-    if(max_events & (max_events - 1)) {
-      max_events <<= 1;
-      while(1) {
-	if(max_events && (max_events & (max_events-1)))
-	  max_events &= max_events - 1;
-	else
-	  break;
-
-      }
-    } else if(!max_events)
-      max_events = 4096;
-    
-    buffer = new guint64[max_events];
-
-    max_events--;  // make the max_events a mask
-
-    index = 0;
-
-  }
-};
 
 //--------------------------------------------------------------
 //
@@ -427,19 +189,20 @@ public:
 //
 //
 
-class USART_RXPIN : public IO_input
+class USART_RXPIN : public IO_bi_directional_pu
 {
 public:
 
   USART_CORE *usart;
-
+  /*
   USART_RXPIN(void) {
     //cout << "USART_RXPIN constructor - do nothing\n";
   }
+  */
   USART_RXPIN (USART_CORE *_usart,
 	       IOPORT *i, 
 	       unsigned int b, 
-	       char *opt_name=NULL) : IO_input(i,b,opt_name) { 
+	       char *opt_name=NULL) : IO_bi_directional_pu(i,b,opt_name) { 
 
     usart = _usart;
 
@@ -450,37 +213,24 @@ public:
     // has ever been driven at all. This way, we can capture the
     // first edge. Or we could add another parameter to the constructor.
 
-    digital_state = 1;
+    digital_state = true;
+    update_direction(0);   // Make the RX pin an input.
+
+    bPullUp = true;
+    Zpullup = 10e3;
 
   };
-  /*
-  virtual void put_node_state(int new_state) {
 
-    state = new_state;
 
-    if( state < h2l_threshold) {
-      state = l2h_threshold + 1;
-      put_digital_state(0);
-
-    } else {
-
-      if(state > l2h_threshold) {
-	state = h2l_threshold - 1;
-	put_digital_state(1);
-      }
-    }
-
-  }
-  */
-
-  void put_digital_state(bool new_dstate) { 
+  void set_digital_state(bool new_dstate) { 
     bool diff = new_dstate ^ digital_state;
 
+    cout <<"usart rxpin set_digital_state " << (new_dstate ? "high" : "low") << endl;
     if( usart && diff ) {
 
       usart->new_rx_edge(digital_state);
 
-      IOPIN::put_digital_state(digital_state);
+      IOPIN::set_digital_state(new_dstate);
 
     }
 
@@ -511,11 +261,11 @@ public:
 
     usart = _usart;
 
-    digital_state = 1;
+    digital_state = true;
     update_direction(1);   // Make the TX pin an output.
 
   };
-
+#if 0
   virtual void put_node_state(int new_state) {
 
     // cout << "USART_TXPIN put_node_state " << new_state << '\n';
@@ -535,7 +285,7 @@ public:
     }
     */
   }
-
+#endif
   //  void put_digital_state(bool new_dstate) { 
 
     //cout << "usart tx put_digital_state " << new_dstate << '\n';
@@ -554,7 +304,7 @@ public:
     */
 
   //}
-
+#if 0
   virtual void put_digital_state(bool new_digital_state) {
 
     Register *port = get_iop();
@@ -580,7 +330,7 @@ public:
       }
     }
   }
-
+#endif
 
 };
 
@@ -706,9 +456,9 @@ class TXREG : public TriggerObject
 
 
   virtual void callback(void) {
-    if(0) {
+    if(1) {
       cout << "\n\n";
-      cout << "TXREG::" << __FUNCTION__ << "\n";
+      cout << "usart module TXREG::" << __FUNCTION__ << "\n";
       cout << "\n\n";
     }
 
@@ -717,7 +467,7 @@ class TXREG : public TriggerObject
 
     if(txpin) {
       txpin->put_digital_state((txr & 1) ? true : false);
-      //cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
+      cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
     }
 
     if(bit_count) {
@@ -936,7 +686,7 @@ class RCREG : public TriggerObject // : public _RCREG
     
 
   virtual void callback(void) {
-    if(0) {
+    if(1) {
       cout << "\n\n";
       cout << "RCREG::" << __FUNCTION__ << "\n";
       cout << "\n\n";
@@ -962,7 +712,7 @@ class RCREG : public TriggerObject // : public _RCREG
 
     switch(receive_state) {
     case RS_WAITING_FOR_START:
-      //cout << "waiting for start\n";
+      cout << "waiting for start\n";
       break;
     case RS_RECEIVING:
       if(last_bit) {
@@ -978,13 +728,13 @@ class RCREG : public TriggerObject // : public _RCREG
 
       } else {
 	receive_state = RS_OVERRUN;
-	//cout << "Looks like we've overrun\n";
+	cout << "Looks like we've overrun\n";
       }
 
       break;
     case RS_STOPPED:
       receive_state = RS_WAITING_FOR_START;
-      //cout << "received a stop bit\n";
+      cout << "received a stop bit\n";
       break;
     default:
       break;
@@ -1019,8 +769,8 @@ class RCREG : public TriggerObject // : public _RCREG
       get_cycles().set_break(future_time, this);
       //cout << "RCREG::start Setting Break\n";
     }
-    //cout << "RCREG::start   last_cycle = " << 
-    //  hex << last_time << " future_cycle = " << future_time << '\n';
+    cout << "RCREG::start   last_cycle = " << 
+      hex << last_time << " future_cycle = " << future_time << '\n';
 
   }
 
@@ -1101,24 +851,25 @@ class RCREG : public TriggerObject // : public _RCREG
   }
 
   unsigned int decode_byte(guint32 sindex, guint64 bit_time) {
-    //rx_event->buffer[start_bit_index]
   
     guint32 cur_index = rx_event->get_index();
-    if(sindex & 1) {
-      sindex = (sindex + 1) & rx_event->max_events;
+    if(rx_event->get_event(sindex)) {
+      sindex = rx_event->mod_index( sindex + 1);
       if(sindex == cur_index)
 	return 0x400;
     }
 
     guint64 cur_time = get_cycles().get();
-    guint64 t1 = rx_event->buffer[sindex] + bit_time + bit_time/2;
+    guint64 t1 = rx_event->get_time(sindex) + bit_time + bit_time/2;
 
     guint32 index1 = rx_event->get_index(t1);
-    guint32 index2 = (index1 + 1) & rx_event->max_events;
+    guint32 index2 = rx_event->mod_index(index1 + 1);
     bool decoding = 1;
     guint32 b = 0;
 
-    cout << "decode_byte current time 0x"<<hex <<cur_time << " start bit time 0x"<< rx_event->buffer[sindex]<<'\n';
+    cout << "decode_byte current time 0x"<< hex <<cur_time 
+	 << " start bit time 0x"<< rx_event->get_time(sindex) <<'\n';
+
     if(t1 >= cur_time) 
       return 0x800;
 
@@ -1130,9 +881,9 @@ class RCREG : public TriggerObject // : public _RCREG
       t1 += bit_time;
       if(t1>=cur_time)
 	decoding = 0;
-      if(t1 > rx_event->buffer[index2]) {
+      if(t1 > rx_event->get_time(index2)) {
 	index1 = index2;
-	index2 = (index2 + 1) & rx_event->max_events;
+	index2 = rx_event->mod_index(index2 + 1);
 	if(index2 == cur_index) {
 	  decoding = 0;
 	  if(!autobaud)
@@ -1209,7 +960,7 @@ class RCREG : public TriggerObject // : public _RCREG
 
       Only the 64 most recent edges are used to compute the
       pulse widths. So starting with the 65'th edge, old pulse
-      widths are removed from the buffer in away analogous to
+      widths are removed from the buffer in a way analogous to
       the way the new ones are added. That is, the lsb's are
       discarded, the msb's are searched for in the buffer, and
       the pulse width tally is reduced by the amount of the
@@ -1218,7 +969,7 @@ class RCREG : public TriggerObject // : public _RCREG
   */
 
   void new_rx_edge(bool bit) {
-/*
+    /**/
     cout << "USART MODULE RCREG::" << __FUNCTION__ << "\n";
     switch(receive_state) {
     case RS_WAITING_FOR_START:
@@ -1233,9 +984,24 @@ class RCREG : public TriggerObject // : public _RCREG
     case RS_OVERRUN:
       cout << "state = OVERRUN\n";
       break;
+    case RS_0:
+      cout << "state = RS_0\n";
+      break;
+    case RS_1:
+      cout << "state = RS_1\n";
+      break;
+    case RS_2:
+      cout << "state = RS_2\n";
+      break;
+    case RS_3:
+      cout << "state = RS_3\n";
+      break;
+    case RS_4:
+      cout << "state = RS_4\n";
+      break;
 
     }
-*/
+    /**/
     // If this bit is different from the last one we got
     // then save it in the event buffer.
 
@@ -1244,18 +1010,18 @@ class RCREG : public TriggerObject // : public _RCREG
 
       rx_event->event(bit);            // log the event
       if(cur_index != start_index)     // true after first edge
-	add_pulse(rx_event->buffer[cur_index] - 
-		  rx_event->buffer[(cur_index - 1) & rx_event->max_events]);
+	add_pulse(rx_event->get_time(cur_index) - 
+		  rx_event->get_time(cur_index - 1));
 
       // If we have received more than 64 edges, then start removing the
       // old pulses.
 
-      if( ((cur_index - start_index) & rx_event->max_events) > 63) {
+      if(rx_event->mod_index(cur_index - start_index)  > 63) {
 
-	guint32 old_index = (start_index + 1) & rx_event->max_events;
+	guint32 old_index = rx_event->mod_index(start_index + 1);
 
-	del_pulse(rx_event->buffer[old_index] - 
-		  rx_event->buffer[start_index]);
+	del_pulse(rx_event->get_time(old_index) - 
+		  rx_event->get_time(start_index));
 
 	start_index = old_index;
       }
@@ -1279,7 +1045,7 @@ class RCREG : public TriggerObject // : public _RCREG
 	if(bit) {
 	  //guint64 pw[64];  // pulse widths will get stored here.
 	  cur_index = rx_event->get_index();
-	  guint32 edges = (cur_index - start_bit_index) & rx_event->max_events;
+	  guint32 edges = rx_event->mod_index(cur_index - start_bit_index);
 
 
 	  // Don't bother autobauding if we haven't received more than 4 pulses (8 edges)
@@ -1288,11 +1054,13 @@ class RCREG : public TriggerObject // : public _RCREG
 	    cout << "Auto bauding\n";
 
 	    if(edges > 64) {
-	      start_bit_index = (start_bit_index + 8 ) & rx_event->max_events;
-	      start_bit_time = rx_event->buffer[start_bit_index];
+	      start_bit_index = rx_event->mod_index(start_bit_index + 8 );
+	      start_bit_time = rx_event->get_time(start_bit_index);
 	      edges -= 8;
 	    }
-	    rx_event->dump_ASCII_art( pulses[0].width/2, (cur_index - edges+3) & rx_event->max_events, cur_index );
+	    rx_event->dump_ASCII_art( pulses[0].width/2, 
+				      rx_event->mod_index(cur_index - edges+3),
+				      cur_index );
 
 	    // Analyze...
 
@@ -1348,11 +1116,7 @@ class RCREG : public TriggerObject // : public _RCREG
 
 	    suspicious = 0;  // assume all bytes decode correctly
 
-	    //unsigned int b = decode_byte(rx_event->buffer[start_bit_index] + min + min/2, min);
-	    // unsigned int b = decode_byte(start_bit_index, min);
-
-	    //guint32 index1 = rx_event->get_index(rx_event->buffer[cur_index] - min * 11);
-	    guint32 index1 = (rx_event->get_index() - edges)& rx_event->max_events;
+	    guint32 index1 = rx_event->mod_index(rx_event->get_index() - edges);
 
 	    if(index1&1)
 	      index1 &= 0xfffffe;
@@ -1366,10 +1130,10 @@ class RCREG : public TriggerObject // : public _RCREG
 
 	      cout <<j<< ": Decoded byte 0x"<< (b&0xff) << " is ";
 	      if(b >=0x100) {
-		index1 = (index1 + 2) & rx_event->max_events;
+		index1 = rx_event->mod_index(index1 + 2);
 		cout << "invalid b=0x" <<b<<'\n';
 	      } else {
-		index1 = rx_event->get_index(rx_event->buffer[index1] + 11*min);
+		index1 = rx_event->get_index(rx_event->get_time(index1) + 11*min);
 		cout <<"valid\n";
 	      }
 
@@ -1419,7 +1183,7 @@ class RCREG : public TriggerObject // : public _RCREG
       } else {
 
 	cur_index = rx_event->get_index();
-	guint32 edges = (cur_index - start_bit_index) & rx_event->max_events;
+	guint32 edges = rx_event->mod_index(cur_index - start_bit_index);
 
 	/* Not autobauding */ 
 	switch(receive_state) {
@@ -1560,14 +1324,14 @@ public:
 //   stop_bits     1
 //   
 
-
-class BaudRateAttribute : public Float {
+class BaudRateAttribute : public Integer 
+{
 
 public:
   USARTModule *usart;
 
   BaudRateAttribute(USARTModule *pusart, char *_name=NULL)
-    : Float(0.0)
+    : Integer(9600)
   {
 
     usart = pusart;
@@ -1584,20 +1348,20 @@ public:
   };
 
 
-  void set(double b) {
-
+  void set(Value *v) {
 
     cout << "Setting baud rate attribute!\n";
-    double old_value;
+    gint64 old_value;
     get(old_value);
-    cout << " old value: " << old_value << " New value: " << b << endl;
-    Float::set(b);
+    Integer::set(v);
+
+    gint64 new_value;
+    get(new_value);
+    cout << " old value: " << old_value << " New value: " << new_value << endl;
+
   };
 
 
-  void set(int r) {
-    set(double(r));
-  };
 };
 
 
@@ -1618,24 +1382,20 @@ public:
   };
 
 
-  void set(double b) {
+  void set(Value *v) {
 
 
     cout << "Setting Rx baud rate attribute!\n";
-    double old_value;
-    get(old_value);
+    BaudRateAttribute::set(v);
 
-    cout << " old value: " << old_value << " New value: " << b << endl;
-    Float::set(b);
+    gint64 b;
+    get(b);
     if(rcreg)
       rcreg->set_baud_rate(b);
 
   };
 
 
-  void set(int r) {
-    set(double(r));
-  };
 };
 
 class TxBaudRateAttribute : public BaudRateAttribute  {
@@ -1655,24 +1415,17 @@ public:
   };
 
 
-  void set(double b) {
-
-
+  void set(Value *v) 
+  {
     cout << "Setting Tx baud rate attribute!\n";
-    double old_value;
-    get(old_value);
+    BaudRateAttribute::set(v);
 
-    cout << " old value: " << old_value << " New value: " << b << endl;
-    Float::set(b);
+    gint64 b;
+    get(b);
     if(txreg)
       txreg->set_baud_rate(b);
 
-  };
-
-
-  void set(int r) {
-    set(double(r));
-  };
+  }
 };
 //--------------------------------------------------------------
 USART_CORE::USART_CORE(void)
@@ -1837,7 +1590,7 @@ Module * USARTModule::USART_construct(const char *_new_name)
 
   cout << "USART construct \n";
 
-  USARTModule *um = new USARTModule((char *)_new_name);
+  USARTModule *um = new USARTModule(_new_name);
   /*
   if(new_name) {
     um->new_name((char*)new_name);

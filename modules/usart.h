@@ -34,13 +34,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <glib.h>
 
-#include "../src/value.h"
 #include "../src/modules.h"
-#include "../src/packages.h"
-#include "../src/stimuli.h"
-#include "../src/symbol.h"
-#include "../src/trace.h"
-#include "../src/uart.h"
+
 
 class USART_IOPORT;
 class USARTModule;

@@ -89,15 +89,15 @@ start
 	;; TX9D - 0 not used
 	
 	movlw	(1<<BRGH)
-	movwf	TXSTA
+	movwf	TXSTA ^ 0x80
 
 	movlw   129		;9600 baud.
-	movwf   SPBRG
+	movwf   SPBRG ^0x80
 
 	;;clrf	SPBRG		;Highest possible baud rate.
 
 	movlw	0x80		; Make rc6 and rc7 inputs. These are the
-	movwf	TRISC		; the RX and TX pins for the USART
+	movwf	TRISC^0x80	; the RX and TX pins for the USART
 	
 	bcf	STATUS,RP0
 
@@ -120,13 +120,13 @@ start
 
 	;; Enable the transmitter
 	bsf	STATUS,RP0
-	bsf	TXSTA,TXEN
-	bsf	PIE1,RCIE
+	bsf	TXSTA^0x80,TXEN
+	bsf	PIE1^0x80,RCIE
 	bcf	STATUS,RP0
 
 tx_loop:	
 	call	tx_message
-;	movwf	TXREG
+	movwf	TXREG
 
 	bsf	temp2,4
 	call	delay		;; Delay between bytes.
@@ -155,7 +155,7 @@ TX_TABLE
 	 goto	$-1
 
 	bsf	STATUS,RP0
-	btfss	TXSTA,TRMT	;Wait 'til through transmitting
+	btfss	TXSTA^0x80,TRMT	;Wait 'til through transmitting
 	 goto	$-1
 	bcf	STATUS,RP0
 
