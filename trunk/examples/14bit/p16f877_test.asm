@@ -11,6 +11,7 @@ include "p16f877.inc"
 
 	x
 	t1,t2,t3
+	pma_string		; starting here's where a string will be copied from flash
   endc
 
 	;; Take advantage of the upper 16 bytes all banks being aliased
@@ -23,7 +24,9 @@ include "p16f877.inc"
 
   endc
 
-
+DATA14  macro  _a, _b
+	data (_a<<7) | (_b)
+  endm
 	
   org	0
 	goto	main
@@ -66,40 +69,6 @@ main:
 	call	preset_ram
 	movlw	0
 	call	preset_ram
-	
-	;; use the indirect register to increment register 0x70.
-	;; This register is aliased in all four banks.
-	;; Then use direct addressing to verify that the increment
-	;; occurred. Note that bank switching is necessary to access
-	;; 0x70 directly in the other banks (that is to access 0xf0,
-	;; 0x170 and 0x1f0 directly, you need to switch to bank 1,2
-	;; or 3 respectively).
-	
-	bcf	status,rp0
-	movlw	0x70
-	movwf	fsr
-
-	clrf	0x70
-	incf	indf,f
-	btfss	0x70,0
-	 goto	$-1
-
-	bsf	status,rp0	;bank 1
-	incf	indf,f
-	btfsc	0x70,0
-	 goto	$-1
-
-	bsf	status,rp1	;bank 3
-	incf	indf,f
-	btfss	0x70,0
-	 goto	$-1
-
-	bcf	status,rp0	;bank 2
-	incf	indf,f
-	btfsc	0x70,0
-	 goto	$-1
-
-	bcf	status,rp1	;bank 0
 
 
 	;; disable (primarily) global and peripheral interrupts
@@ -107,8 +76,67 @@ main:
 	clrf	intcon
 
 	call	obliterate_data_eeprom
+	call	bank_access_test
+	call	read_program_flash
 
-	goto	pwm_test1
+
+	goto	$
+
+	;; =========================================================
+	;; read_program_flash
+	;;
+	;; Copy a string from program memory to data memory
+	
+read_program_flash
+
+;;;
+;;;
+
+	clrf	status		; Bank 0
+	movlw	pma_string	; Pointer to where we'll copy the string
+	movwf	fsr
+	
+	movlw	pgm_table_end - pgm_table ; Length of the string
+	movwf	adr_cnt			  ; (actually 1/2 string length)
+	
+	bsf	status,rp1	;Point to bank 2
+	bcf	status,rp0	;
+
+	movlw	LOW(pgm_table)	; Start of the string
+	movwf	eeadr		; in program memory
+	movlw	HIGH(pgm_table)
+	movwf	eeadrh
+
+pgm_flash_read_loop1:	
+	bsf	status,rp0	; bank 3
+	
+	bsf	eecon1,eepgd	; program memory (instead of data flash)
+	bsf	eecon1,rd	; start the read.
+	bcf	status,rp0	; two cycle delay to read memory
+	nop
+	
+	rlf	eedata,w	; Copy the 14bit value that was read
+	rlf	eedath,w	; from program memory. It's broken into
+	movwf	indf		; two 7-bit values that are copied to
+	incf	fsr,f		; data memory
+	movf	eedata,w
+	andlw	0x7f
+	movwf	indf
+	incf	fsr,f
+
+	incf	eeadrh,f	; Next program memory location
+	incfsz	eeadr,f
+	 decf	eeadrh,f
+	decfsz	adr_cnt,f
+	 goto	pgm_flash_read_loop1
+
+	return
+
+pgm_table
+
+	DATA14	't','e'
+	DATA14	's','t'
+pgm_table_end
 
 	;;
 	;; TMR1 test
@@ -278,43 +306,86 @@ pwm_test1:
 die:
 
 	goto	$
-
+	;; ======================================================
+	;; preset_ram
+	;;
+	;; copy the contents of w to all of ram
 
 preset_ram
 	clrf	status
 
-	movwf	0x20
-	movlw	0x20
-	movwf	fsr
-	movf	0x20,w
+	movwf	0x20		;save the constant
+	movlw	0x20		;start of ram
+	movwf	fsr		;use indirect addressing to preset
+	movf	0x20,w		;get the constant
 cb0:	
-	movwf	indf
-	incf	fsr,f
-	btfss	fsr,7
+	movwf	indf		;Preset...
+	incf	fsr,f		;next register
+	btfss	fsr,7		;loop until fsr == 0x80
 	 goto	cb0
-	bsf	fsr,5
+	bsf	fsr,5		;fsr = 0xa0
 cb1:	
 	movwf	indf
-	incfsz	fsr,f
+	incfsz	fsr,f		; loop until fsr == 0
 	 goto	cb1
-	bsf	fsr,4
-	bsf	status,7
+	bsf	fsr,4		;fsr =0x10
+	bsf	status,7	;irp=1 ==> fsr =0x110
 cb2:	
 	movwf	indf
 	incf	fsr,f
-	btfss	fsr,7
+	btfss	fsr,7		;loop until fsr == 0x80
 	 goto	cb2
-	bsf	fsr,5
+	bsf	fsr,4		;fsr == 0x90 (but irp is still set)
 cb3:	
 	movwf	indf
 	incfsz	fsr,f
 	 goto	cb3
 
-	clrf	status
+	clrf	status		;clear irp,rp0,rp1
 
 	return
 
 
+	;; =========================================================
+	;; bank_access_test:
+	;; 
+	;; use the indirect register to increment register 0x70.
+	;; This register is aliased in all four banks.
+	;; Then use direct addressing to verify that the increment
+	;; occurred. Note that bank switching is necessary to access
+	;; 0x70 directly in the other banks (that is to access 0xf0,
+	;; 0x170 and 0x1f0 directly, you need to switch to bank 1,2
+	;; or 3 respectively).
+bank_access_test:	
+	
+	bcf	status,rp0
+	movlw	0x70
+	movwf	fsr
+
+	clrf	0x70
+	incf	indf,f
+	btfss	0x70,0
+	 goto	$-1
+
+	bsf	status,rp0	;bank 1
+	incf	indf,f
+	btfsc	0x70,0
+	 goto	$-1
+
+	bsf	status,rp1	;bank 3
+	incf	indf,f
+	btfss	0x70,0
+	 goto	$-1
+
+	bcf	status,rp0	;bank 2
+	incf	indf,f
+	btfsc	0x70,0
+	 goto	$-1
+
+	bcf	status,rp1	;bank 0
+
+	return
+	
 obliterate_data_eeprom
 	
 	clrf	adr_cnt
@@ -362,6 +433,7 @@ l1:
 	return
 
 	
+		
 	org	0x2100
 
 	de	"Linux is cool!",0

@@ -78,6 +78,7 @@ void P16F874::create_sfr_map(void)
 
   add_sfr_register(&eedata,  0x10c);
   add_sfr_register(&eecon1,  0x18c, 0);
+  eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
 
   add_sfr_register(&eeadr,   0x10d);
   add_sfr_register(&eecon2,  0x18d);
