@@ -15,7 +15,7 @@ INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include \
 	-I ../../gtk+/lib/gtk+/include
 
-DEFINES = -DWIN32 -DNDEBUG -D_LIB -DHAVE_GUI
+DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\

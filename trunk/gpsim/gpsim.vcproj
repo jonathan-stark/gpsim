@@ -86,10 +86,7 @@
 				Detect64BitPortabilityProblems="FALSE"
 				DebugInformationFormat="0"/>
 			<Tool
-				Name="VCCustomBuildTool"
-				CommandLine="echo.&gt;dummy.c
-"
-				Outputs="dummy.c"/>
+				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Release/gui.lib ../eXdbm/Release/eXdbm.lib"

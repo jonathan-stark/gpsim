@@ -1,3 +1,10 @@
+2004-08-04 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: packaging of MinGW executables
+	* gpsim/gpsim.vcproj: cleanup
+	* plat/win32/make.mingw, cli/makefile.mingw, gpsim/makefile.mingw,
+	  gui/makefile.mingw, modules/makefile.mingw, src/makefile.mingw:
+	  do not define NDEBUG to enable assertions in release version
+
 2004-08-02 Borut Razem <borut.razem@siol.net>
 	* gui/gui_breadboard.cc, gui/gui_menu.cc, src/hexutils.cc,
 	  src/interface.cc, src/packages.cc, src/xref.cc:

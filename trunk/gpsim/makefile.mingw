@@ -33,7 +33,7 @@ gpsim_LIBS = ../gui/libgui.a ../src/libsrc.a ../cli/libcli.a
 INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0			\
 	-I ../../glib/lib/glib-2.0/include -I ../../popt/include
 
-DEFINES = -DWIN32 -DNDEBUG -D_CONSOLE -DHAVE_GUI
+DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\
