@@ -31,7 +31,7 @@ cmd_quit quit;
 
 static struct cmd_options cmd_quit_options[] = 
 {
-  0,0,0
+  {0,0,0}
 };
 
 

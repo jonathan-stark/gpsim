@@ -598,7 +598,6 @@ static void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-    char *file;
 
     file_selection_name=gtk_file_selection_get_filename (fs);
 
@@ -893,7 +892,7 @@ build_menu(Register_Window *rw)
   gtk_widget_show (item);
   
   
-  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+  for (i=0; i < (int)(sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
@@ -981,11 +980,9 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 {
   GtkSheet *sheet;
   const gchar *text;
-  int justification,n=0;
+  int n=0;
   //int crow, ccol;
 
-  GUI_Processor *gp;
-  
   sheet=GTK_SHEET(widget);
   
   if(widget==0 ||
@@ -1020,7 +1017,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   // n is the value in the sheet cell
 
-  if(n != reg->get_shadow().data)
+  if(n != (int) reg->get_shadow().data)
     {
       printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
       reg->put_value(n&0xff);
@@ -1200,7 +1197,7 @@ int Register_Window::SettingsDialog(void)
   static GtkWidget *normalfontstringentry;   //fixme
   GtkWidget *label;
   int fonts_ok=0;
-  GtkSheet *sheet;
+  GtkSheet *sheet=0;
   GtkSheetRange range;
   int i;
 
@@ -1289,7 +1286,7 @@ int Register_Window::SettingsDialog(void)
 
   if(!LoadStyles())
   {
-    printf("%s - no font is available\n");
+    printf("no font is available\n");
     return 0;
   }
 
@@ -1347,56 +1344,53 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
                                   GtkSheetRange *new_range, 
                                   Register_Window *rw)
 {
-    int i, j, cti, ctj;
-    int from, to;
-    int value;
+  int i, j, cti, ctj;
+  int from, to;
     
   if(widget==0 || old_range==0 || new_range==0 || rw==0)
-  {
+    {
       printf("Warning resize_handler(%p,%p,%p,%p)\n",widget,old_range,new_range,rw);
       return;
-  }
+    }
 
-    cti = new_range->coli - new_range->col0 + 1;
-    ctj = new_range->rowi - new_range->row0 + 1;
+  cti = new_range->coli - new_range->col0 + 1;
+  ctj = new_range->rowi - new_range->row0 + 1;
 
-    // We always copy from this one cell.
-    from = rw->row_to_address[old_range->row0]+old_range->col0;
+  // We always copy from this one cell.
+  from = rw->row_to_address[old_range->row0]+old_range->col0;
     
-    for(j=0;j<ctj;j++)
+  for(j=0;j<ctj;j++)
     {
-	for(i=0;i<cti;i++)
+      for(i=0;i<cti;i++)
 	{
-	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    rw->registers[to]->put_value(rw->registers[from]->get_value());
+	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
+	  rw->registers[to]->put_value(rw->registers[from]->get_value());
 	}
     }
 }
 
 static void 
-move_handler(GtkWidget *widget, GtkSheetRange *old_range, 
-                                  GtkSheetRange *new_range, 
-                                  Register_Window *rw)
+move_handler(GtkWidget *widget, 
+	     GtkSheetRange *old_range, 
+	     GtkSheetRange *new_range, 
+	     Register_Window *rw)
 {
-    int i, j, cti, ctj;
-    int from, to;
-    int value;
+  int i, j, cti, ctj;
+  int from, to;
 
-  if(widget==0 || old_range==0 || new_range==0 || rw==0)
-  {
-      printf("Warning move_handler(%p,%p,%p,%p)\n",widget,old_range,new_range,(unsigned int)rw);
+  if(!widget || !old_range || !new_range || !rw)
       return;
-  }
-    cti = new_range->coli - new_range->col0 + 1;
-    ctj = new_range->rowi - new_range->row0 + 1;
 
-    for(j=0;j<ctj;j++)
+  cti = new_range->coli - new_range->col0 + 1;
+  ctj = new_range->rowi - new_range->row0 + 1;
+
+  for(j=0;j<ctj;j++)
     {
-	for(i=0;i<cti;i++)
+      for(i=0;i<cti;i++)
 	{
-	    from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
-	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    rw->registers[to]->put_value(rw->registers[from]->get_value());
+	  from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
+	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
+	  rw->registers[to]->put_value(rw->registers[from]->get_value());
 	}
     }
 }
@@ -1655,7 +1649,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   
   GUIRegister *greg = registers[reg_number];
 
-  if(reg_number >= greg->rma->get_size())
+  if((int)reg_number >= greg->rma->get_size())
     return 0;
 
   range.row0=registers[reg_number]->row;
@@ -1733,7 +1727,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     retval=TRUE;
   }
 
-  if(reg_number==(row_to_address[register_sheet->active_cell.row]+
+  if((int)reg_number==(row_to_address[register_sheet->active_cell.row]+
 		  register_sheet->active_cell.col))
   {
     // if sheet cursor is standing on a cell that is changed, then
@@ -1886,7 +1880,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     registers[reg_number]->register_size = register_size;
 
 
-    registers[reg_number]->bIsAliased = (*rma)[reg_number].address != reg_number;
+    registers[reg_number]->bIsAliased = (*rma)[reg_number].address != (unsigned int)reg_number;
 
     if(registers[reg_number]->bIsValid()) {
 
@@ -1990,7 +1984,6 @@ void Register_Window::Build(void)
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
     
-  gchar buffer[10];
   gint i;
 
   char *fontstring;
@@ -2184,8 +2177,6 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
 {
   menu = "<main>/Windows/Ram";
   type = REGISTER_RAM;
-
-  int i;
 
   set_name("register_viewer_ram");
   // Add a status bar

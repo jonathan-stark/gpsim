@@ -44,15 +44,15 @@ cmd_module c_module;
 
 static cmd_options cmd_module_options[] =
 {
-  "list",      CMD_MOD_LIST,    OPT_TT_BITFLAG,
-  "load",      CMD_MOD_LOAD,    OPT_TT_STRING,
-  "dump",      CMD_MOD_DUMP,    OPT_TT_BITFLAG,
-  "pins",      CMD_MOD_PINS,    OPT_TT_STRING,
-  "library",   CMD_MOD_LIB ,    OPT_TT_STRING,
-  "lib",       CMD_MOD_LIB ,    OPT_TT_STRING,
-  "set",       CMD_MOD_SET ,    OPT_TT_STRING,
-  "position",  CMD_MOD_POSITION,OPT_TT_STRING,
-  0,0,0
+  {"list",      CMD_MOD_LIST,    OPT_TT_BITFLAG},
+  {"load",      CMD_MOD_LOAD,    OPT_TT_STRING},
+  {"dump",      CMD_MOD_DUMP,    OPT_TT_BITFLAG},
+  {"pins",      CMD_MOD_PINS,    OPT_TT_STRING},
+  {"library",   CMD_MOD_LIB ,    OPT_TT_STRING},
+  {"lib",       CMD_MOD_LIB ,    OPT_TT_STRING},
+  {"set",       CMD_MOD_SET ,    OPT_TT_STRING},
+  {"position",  CMD_MOD_POSITION,OPT_TT_STRING},
+  {0,0,0}
 };
 
 

@@ -33,8 +33,8 @@ cmd_icd c_icd;
 
 static cmd_options cmd_icd_options[] =
 {
-  "open",	ICD_OPEN_CMD,	OPT_TT_STRING,
-  0,0,0
+  {"open",	ICD_OPEN_CMD,	OPT_TT_STRING},
+  {0,0,0}
 };
 
 cmd_icd::cmd_icd(void)

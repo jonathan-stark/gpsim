@@ -588,12 +588,9 @@ void create_dispatcher (void)
       GtkWidget *separator;
       GtkWidget *button;
       GtkWidget *frame;
-      GtkWidget *spinb;
-      GtkAdjustment *spinadj;
       GtkAccelGroup *accel_group;
       
       int x,y,width,height;
-      char version_buffer[100];
 
       GtkWidget *menu;
       GtkWidget *item;
@@ -698,11 +695,6 @@ void create_dispatcher (void)
 	  simulation_mode='R';
       }
       set_simulation_mode(simulation_mode);
-//      spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
-//      spinb = gtk_spin_button_new(spinadj,1,0);
-//      gtk_container_add(GTK_CONTAINER(frame),spinb);
-//      gtk_signal_connect(GTK_OBJECT(spinb),"changed",
-//			 (GtkSignalFunc) spinb_cb, 0);
 	update_rate_menu = gtk_option_menu_new();
         gtk_widget_show(update_rate_menu);
 	gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
@@ -781,7 +773,7 @@ void create_dispatcher (void)
 
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
 
-	int gui_update_index;
+	int gui_update_index=0;
 	switch(simulation_mode) // ugh
 	{
 	case '5':

@@ -64,26 +64,26 @@ TRI_OPTIONS = STIM_TRI | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_
 
 static cmd_options cmd_stimulus_options[] =
 {
-  "asy",                   STIM_ASY,           OPT_TT_SUBTYPE,
-  "asynchronous_stimulus", STIM_ASY,           OPT_TT_SUBTYPE,
-  "period",                STIM_PERIOD,        OPT_TT_NUMERIC,
-  "phase",                 STIM_PHASE,         OPT_TT_NUMERIC,
-  "high_time",             STIM_HIGH_TIME,     OPT_TT_NUMERIC,
-  "initial_state",         STIM_INITIAL_STATE, OPT_TT_NUMERIC,
-  "start_cycle",           STIM_START_CYCLE,   OPT_TT_NUMERIC,
-  "start",                 STIM_START_CYCLE,   OPT_TT_NUMERIC,
-  "name",                  STIM_NAME,          OPT_TT_STRING,
-  "digital",               STIM_DIGITAL,       OPT_TT_BITFLAG,
-  "analog",                STIM_ANALOG,        OPT_TT_BITFLAG,
-  "d",                     STIM_DUMP,          OPT_TT_BITFLAG,
-  "dump",                  STIM_DUMP,          OPT_TT_BITFLAG,
-  "sqw",                   STIM_SQW,           OPT_TT_SUBTYPE,
-  "square_wave",           STIM_SQW,           OPT_TT_SUBTYPE,
-  "tri",                   STIM_TRI,           OPT_TT_SUBTYPE,
-  "triangle_wave",         STIM_TRI,           OPT_TT_SUBTYPE,
-  "port",                  STIM_PORT,          OPT_TT_STRING,
+  {"asy",                   STIM_ASY,           OPT_TT_SUBTYPE},
+  {"asynchronous_stimulus", STIM_ASY,           OPT_TT_SUBTYPE},
+  {"period",                STIM_PERIOD,        OPT_TT_NUMERIC},
+  {"phase",                 STIM_PHASE,         OPT_TT_NUMERIC},
+  {"high_time",             STIM_HIGH_TIME,     OPT_TT_NUMERIC},
+  {"initial_state",         STIM_INITIAL_STATE, OPT_TT_NUMERIC},
+  {"start_cycle",           STIM_START_CYCLE,   OPT_TT_NUMERIC},
+  {"start",                 STIM_START_CYCLE,   OPT_TT_NUMERIC},
+  {"name",                  STIM_NAME,          OPT_TT_STRING},
+  {"digital",               STIM_DIGITAL,       OPT_TT_BITFLAG},
+  {"analog",                STIM_ANALOG,        OPT_TT_BITFLAG},
+  {"d",                     STIM_DUMP,          OPT_TT_BITFLAG},
+  {"dump",                  STIM_DUMP,          OPT_TT_BITFLAG},
+  {"sqw",                   STIM_SQW,           OPT_TT_SUBTYPE},
+  {"square_wave",           STIM_SQW,           OPT_TT_SUBTYPE},
+  {"tri",                   STIM_TRI,           OPT_TT_SUBTYPE},
+  {"triangle_wave",         STIM_TRI,           OPT_TT_SUBTYPE},
+  {"port",                  STIM_PORT,          OPT_TT_STRING},
 
-  0,0,0
+ { 0,0,0}
 };
 
 

@@ -32,9 +32,9 @@ cmd_list c_list;
 
 static cmd_options cmd_list_options[] =
 {
-  "l",1,    OPT_TT_BITFLAG,
-  "s",2,    OPT_TT_BITFLAG,
-  0,0,0
+  {"l",1,    OPT_TT_BITFLAG},
+  {"s",2,    OPT_TT_BITFLAG},
+ { 0,0,0}
 };
 
 

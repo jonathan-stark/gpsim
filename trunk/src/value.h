@@ -43,6 +43,7 @@ class gpsimValue {
  public:
 
   gpsimValue(void);
+  virtual ~gpsimValue();
 
   // Access functions
   virtual unsigned int get(void)

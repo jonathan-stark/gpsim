@@ -66,6 +66,11 @@ GUI_Object::GUI_Object(void)
   height = 100;
 }
 
+GUI_Object::~GUI_Object(void)
+{
+
+}
+
 int GUI_Object::Create(GUI_Processor *_gp)
 {
   printf("GUI_Object::Create  !!! \n");

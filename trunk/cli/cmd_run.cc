@@ -35,7 +35,7 @@ cmd_run c_run;
 
 static cmd_options cmd_run_options[] =
 {
-  0,0,0
+  {0,0,0}
 };
 
 

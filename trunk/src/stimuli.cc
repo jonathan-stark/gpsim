@@ -391,7 +391,7 @@ int Stimulus_Node::update(guint64 current_time)
   return(0);
 
 }
-
+//------------------------------------------------------------------------
 stimulus::stimulus(char *n)
 {
   new_name("stimulus");
@@ -403,6 +403,11 @@ stimulus::stimulus(char *n)
   next = 0;
 
 }
+
+stimulus::~stimulus(void)
+{
+}
+
 
 void stimulus::put_state_value(int new_state)
 {
@@ -1347,6 +1352,11 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_n
   //  sprintf(name_str,"%s%n",iop->name_str,iobit);
   //cout << name_str;
 
+}
+
+IO_bi_directional::~IO_bi_directional(void)
+{
+  delete pull_up_resistor;
 }
 
 int IO_bi_directional::get_voltage(guint64 current_time)

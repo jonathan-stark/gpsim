@@ -40,7 +40,10 @@ XrefObject::~XrefObject()
     ioi=xrefs.begin();
     for(;ioi!=xrefs.end();ioi++) {
       gi.remove_object(*ioi);
-//      delete *ioi;
+      // Fixme - deleting the memory here causes SEGV because
+      // the objects being cross referenced were new'd outside
+      // of the context of this class.
+      // delete *ioi;
     }
 }
 

@@ -43,16 +43,16 @@ cmd_break c_break;
 
 static cmd_options cmd_break_options[] =
 {
-  "c",   CYCLE,       OPT_TT_BITFLAG,
-  "e",   EXECUTION,   OPT_TT_BITFLAG,
-  "w",   WRITE,       OPT_TT_BITFLAG,
-  "r",   READ,        OPT_TT_BITFLAG,
-  "wv",  WRITE_VALUE, OPT_TT_BITFLAG,
-  "rv",  READ_VALUE,  OPT_TT_BITFLAG,
-  "so",  STK_OVERFLOW, OPT_TT_BITFLAG,
-  "su",  STK_UNDERFLOW,OPT_TT_BITFLAG,
-  "wdt", WDT,          OPT_TT_BITFLAG,
-  0,0,0
+  {"c",   CYCLE,       OPT_TT_BITFLAG},
+  {"e",   EXECUTION,   OPT_TT_BITFLAG},
+  {"w",   WRITE,       OPT_TT_BITFLAG},
+  {"r",   READ,        OPT_TT_BITFLAG},
+  {"wv",  WRITE_VALUE, OPT_TT_BITFLAG},
+  {"rv",  READ_VALUE,  OPT_TT_BITFLAG},
+  {"so",  STK_OVERFLOW, OPT_TT_BITFLAG},
+  {"su",  STK_UNDERFLOW,OPT_TT_BITFLAG},
+  {"wdt", WDT,          OPT_TT_BITFLAG},
+  {0,0,0}
 };
 
 

@@ -37,7 +37,7 @@ cmd_x c_x;
 
 static cmd_options cmd_x_options[] =
 {
-  0,0,0
+  {0,0,0}
 };
 
 
@@ -76,7 +76,7 @@ void cmd_x::x(int reg)
   if(!cpu)
     return;
 
-  if(reg<0 || (reg >= cpu->register_memory_size()) )
+  if(reg<0 || (reg >= (int)cpu->register_memory_size()) )
     {
       cout << "bad file register\n";
       return;
@@ -99,7 +99,7 @@ void cmd_x::x(int reg, int val)
   if(!cpu)
     return;
 
-  if(reg<0 || (reg >= cpu->register_memory_size()) )
+  if(reg<0 || (reg >= (int)cpu->register_memory_size()) )
     {
       cout << "bad file register\n";
       return;
