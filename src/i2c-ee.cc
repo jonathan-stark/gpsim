@@ -46,14 +46,14 @@ using namespace std;
 //
 //
 
-class I2C_EE_SCL : public IO_input
+class I2C_EE_SCL : public IOPIN
 {
 public:
 
   I2C_EE *eeprom;
 
   I2C_EE_SCL (I2C_EE *_eeprom, char *opt_name=NULL) 
-    : IO_input((IOPORT *)0,1,opt_name) { 
+    : IOPIN((IOPORT *)0,1,opt_name) { 
 
     eeprom = _eeprom;
 

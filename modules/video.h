@@ -44,25 +44,19 @@ class Video_Interface;
  * class.)
  */
 
-class AnotherPin
+
+class Another_Input : public IOPIN
 {
- public:
+private:
   Video *video;
-
-  void new_logic_gate(class Video *lg) {video=lg;};
-};
-
-class Another_Input : public IO_input, public AnotherPin
-{
 public:
 
   virtual void put_digital_state( bool new_state);
 
-  Another_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) 
-    : IO_input(i,b,opt_name) 
+  Another_Input (Video *v, IOPORT *i, unsigned int b, char *opt_name=NULL) 
+    : IOPIN(i,b,opt_name) , video(v)
     { 
-      video = NULL;
-    };
+    }
 
 };
 

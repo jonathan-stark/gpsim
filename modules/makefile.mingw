@@ -7,6 +7,7 @@ TOP = ../..
 
 include ../plat/win32/make.mingw
 
+
 ################################################################
 
 # Nothing much configurable below
@@ -25,15 +26,15 @@ DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\
-	modules.dll 
+	gpsim_modules.dll 
 
 modules_OBJECTS =		\
+	gpsim_modules.o		\
 	bitlog.o		\
 	bytelog.o		\
 	ttoken.o		\
 	binary_indicator.o	\
 	encoder.o		\
-	gpsim_modules.o		\
 	led.o			\
 	logic.o			\
 	push_button.o		\
@@ -47,5 +48,5 @@ modules_OBJECTS =		\
 
 ################ The modules DLL
 
-modules.dll : $(modules_OBJECTS)
-	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o modules.dll ../plat/win32/modules.def $(modules_OBJECTS) $(LIBS)
+gpsim_modules.dll : $(modules_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o gpsim_modules.dll ../plat/win32/modules.def $(modules_OBJECTS) $(LIBS)

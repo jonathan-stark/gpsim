@@ -32,7 +32,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 /* IN_MODULE should be defined for modules */
-#define IN_MODULE
+//#define IN_MODULE
 
 #include <errno.h>
 #include <stdlib.h>
@@ -226,7 +226,7 @@ void PullupResistor::create_iopin_map(void)
     cout << "voltage " << iop->get_Vth() << '\n';
   }
   */
-  get_symbol_table().add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(iop);
 
 }
 

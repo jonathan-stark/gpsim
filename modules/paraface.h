@@ -69,19 +69,18 @@ public:
 
 };
 
-// Create a class derived from the IO_input class that
+// Create a class derived from the IOPIN class that
 // will allow us to intercept when the I/O input is being
 // driven. (This isn't done for PIC I/O pins because the
 // logic for handling I/O pin changes resides in the IOPORT
 // class.)
 
-class Paraface_Input : public IO_input
+class Paraface_Input : public IOPIN
 {
 public:
 
-  //virtual void put_node_state( int new_state);
-
-    Paraface_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
+  Paraface_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) 
+    : IOPIN(i,b,opt_name) { };
 
 };
 

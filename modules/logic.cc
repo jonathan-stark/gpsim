@@ -213,7 +213,7 @@ void Logic_Input::put_digital_state( bool new_state)
   bool current_state = get_digital_state();
 
 
-  IO_input::put_digital_state(new_state);
+  stimulus::put_digital_state(new_state);
 
   if(current_state != get_digital_state()) {
 //    cout << "logic Input " << name() << " changed to new state: " <<
@@ -301,8 +301,7 @@ void LogicGate::create_iopin_map(void)
 #define OUTPUT_BITPOSITION 0
 #define INPUT_FIRST_BITPOSITION (OUTPUT_BITPOSITION + 1)
 
-  Logic_Output *LOP = new Logic_Output(port, OUTPUT_BITPOSITION, "out");
-  LOP->new_logic_gate(this);
+  Logic_Output *LOP = new Logic_Output(this,port, OUTPUT_BITPOSITION, "out");
   LOP->update_direction(1);                 // make the bidirectional an output
 
   // Position pin on middle right side of package
@@ -316,8 +315,7 @@ void LogicGate::create_iopin_map(void)
 
   for(i=j=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
     p[2] = i-j +'0';
-    LIP = new Logic_Input(port, i,p);
-    LIP->new_logic_gate(this);
+    LIP = new Logic_Input(this,port, i,p);
     if(number_of_pins==2)
       package->set_pin_position(i+1, 0.5); // Left side of package
     else

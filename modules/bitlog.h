@@ -77,7 +77,8 @@ public:
   {
     return unmodded_index & max_events;
   }
-  inline unsigned int get_index(unsigned long long event_time);
+
+  unsigned int get_index(unsigned long long event_time);
 
   void dump(int start_index, int end_index=-1);
   void dump_ASCII_art(unsigned long long time_step, 

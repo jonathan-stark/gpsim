@@ -115,8 +115,8 @@ void _68pins::create_iopin_map(void)
   assign_pin(50, 0);
   assign_pin(51, 0);
 
-  assign_pin(60, new IO_input(porta, 0));
-  assign_pin(44, new IO_input(porta, 1));
+  assign_pin(60, new IOPIN(porta, 0));
+  assign_pin(44, new IOPIN(porta, 1));
   assign_pin(45, new IO_bi_directional_pu(porta, 2));
   assign_pin(46, new IO_bi_directional_pu(porta, 3));
   assign_pin(43, new IO_bi_directional(porta, 4));
