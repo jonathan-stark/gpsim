@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #define MODE "0x" << hex
 
 Trace trace;     // Instantiate the trace buffer class
+TraceLog trace_log;
 
 static unsigned int trace_flag=0xffffffff;  // Trace everything
 
@@ -332,6 +333,7 @@ TraceLog::TraceLog(void)
   log_filename = NULL;
   cpu = NULL;
   log_file = NULL;
+  last_trace_index = 0;
 }
 
 TraceLog::~TraceLog(void)
@@ -345,8 +347,31 @@ TraceLog::~TraceLog(void)
 
 void TraceLog::callback(void)
 {
+  if(log_file) {
+    
+    if(last_trace_index < trace.trace_index) {
+      fwrite(&trace.trace_buffer[last_trace_index],
+	     sizeof(unsigned int),
+	     trace.trace_index - last_trace_index,
+	     log_file);
+    } else {
+      fwrite(&trace.trace_buffer[last_trace_index],
+	     sizeof(unsigned int),
+	     TRACE_BUFFER_MASK - last_trace_index,
+	     log_file);
+      fwrite(&trace.trace_buffer[0],
+	     sizeof(unsigned int),
+	     trace.trace_index,
+	     log_file);
+    }
 
-  return;
+    //for(int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK) 
+    //  fprintf(log_file,"%08x\n",trace.trace_buffer[i]);
+
+    last_trace_index = trace.trace_index;
+    cpu->cycles.set_break(cpu->cycles.value + 1000,this);
+
+  }
 
 }
 
@@ -400,6 +425,8 @@ void TraceLog::enable_logging(char *new_fname)
 
   open_logfile(new_fname);
 
+  last_trace_index = trace.trace_index;
+  cpu->cycles.set_break(cpu->cycles.value + 1000,this);
   logging = 1;
 
 }
