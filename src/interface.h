@@ -179,23 +179,6 @@ typedef struct _sym
   unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id,
 					REGISTER_TYPE type,
 					unsigned int register_number);
-  unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id,
-					     REGISTER_TYPE type,
-					     unsigned int register_number);
-  unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id,
-					      REGISTER_TYPE type,
-					      unsigned int register_number);
-  unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id,
-						   REGISTER_TYPE type,
-						   unsigned int register_number,
-						   unsigned int value);
-  unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id,
-						    REGISTER_TYPE type,
-						    unsigned int register_number,
-						    unsigned int value);
-  unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id,
-					   REGISTER_TYPE type,
-					   unsigned int register_number);
   unsigned int gpsim_set_log_name(unsigned int processor_id, const char *filename, int format);
   unsigned int gpsim_reg_set_read_logging(unsigned int processor_id,
 					  REGISTER_TYPE type,

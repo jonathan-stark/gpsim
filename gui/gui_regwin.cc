@@ -72,6 +72,49 @@ typedef enum {
 } menu_id;
 
 
+/////////////////////
+/////
+/////  Experimental code to test an object oriented way of implementing menus
+/////
+/////////////////////
+class MenuItem {
+
+private:
+  char *name;
+  menu_id id;
+
+public:
+
+  virtual void execute(void)=0;
+
+};
+
+class RegWindowMenuItem : public MenuItem {
+
+private:
+ Register_Window *rw;
+
+};
+
+class Menu_BreakClear : public RegWindowMenuItem {
+public:
+  virtual void execute(void) {
+    printf("BreakClear");
+  }
+
+} BreakClear;
+
+MenuItem *__menu_items[] = {
+  &BreakClear
+};
+
+/////////////////////
+/////
+/////  End of experimental code
+/////
+/////////////////////
+
+
 typedef struct _menu_item {
     char *name;
     menu_id id;
@@ -472,13 +515,17 @@ popup_activated(GtkWidget *widget, gpointer data)
       printf("Warning popup_activated(%p,%p)\n",widget,data);
       return;
     }
+  if(!popup_rw || !popup_rw->gp || !popup_rw->gp->cpu) {
+    printf(" no cpu\n");
+    return;
+  }
     
   item = (menu_item *)data;
   sheet=GTK_SHEET(popup_rw->register_sheet);
   range = sheet->range;
   //pic_id = ((GUI_Object*)popup_rw)->gp->pic_id;
   pic_id = popup_rw->gp->pic_id;
-    
+
   switch(item->id)
     {
     case MENU_BREAK_READ:
@@ -486,7 +533,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_read_breakpoint(pic_id, popup_rw->type, address);
+	    printf("break on read \n");
+	    bp.set_read_break(popup_rw->gp->cpu, address);
 	  }
       break;
     case MENU_BREAK_WRITE:
@@ -494,7 +542,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_write_breakpoint(pic_id, popup_rw->type, address);
+	    bp.set_write_break(popup_rw->gp->cpu, address);
 	  }
       break;
     case MENU_BREAK_READ_VALUE:
@@ -505,7 +553,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_read_value_breakpoint(pic_id, popup_rw->type, address, value);
+	    bp.set_read_value_break(popup_rw->gp->cpu,address,value);
 	  }
       break;
     case MENU_BREAK_WRITE_VALUE:
@@ -516,7 +564,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_set_write_value_breakpoint(pic_id, popup_rw->type, address, value);
+	    bp.set_write_value_break(popup_rw->gp->cpu,address,value);
 	  }
       break;
     case MENU_BREAK_CLEAR:
@@ -524,7 +572,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    gpsim_reg_clear_breakpoints(pic_id, popup_rw->type,address);
+	    bp.clear_all_register(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_ADD_WATCH:
@@ -532,7 +580,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    //WatchWindow_add(popup_rw->gp->watch_window,pic_id, popup_rw->type, address);
 	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address);
 	  }
       break;
@@ -691,11 +738,6 @@ static unsigned long get_number_in_string(const char *number_string)
   if( strlen(bad_position) ) 
     errno = EINVAL;  /* string contains an invalid number */
 
-  /*
-  if(retval > 255)
-    errno = ERANGE;
-  */
-
   return(retval);
 }
 
@@ -722,16 +764,11 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
       return;
   }
 
-  //gp = ((GUI_Object*)rw)->gp;
   gp = rw->gp;
   
   if(gp->pic_id==0)
-      return;
+    return;
   
-  
-  //printf ("set_cell %d %d,  %d %d\n", row, col);
-  
-
   justification=GTK_JUSTIFY_RIGHT;
 
   if(col < REGISTERS_PER_ROW)
@@ -1596,7 +1633,7 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
 	row_created=FALSE;
       }
 	
-    registers[reg_number] = (GUIRegister  *)malloc(sizeof(GUIRegister));
+    registers[reg_number] = new GUIRegister; //(GUIRegister  *)malloc(sizeof(GUIRegister));
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
     registers[reg_number]->value = -1;

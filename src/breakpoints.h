@@ -216,6 +216,7 @@ struct BreakStatus
   void clear(unsigned int b);
   void clear_all(Processor *c);
   void clear_all_set_by_user(Processor *c);
+  void clear_all_register(Processor *c,unsigned int address=-1);
   void initialize_breakpoints(unsigned int memory_size);
   instruction *find_previous(Processor *cpu, unsigned int address, instruction *_this);
 
