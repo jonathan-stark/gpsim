@@ -381,35 +381,22 @@ int gui_init (int argc, char **argv)
 #endif
 
 #if GLIB_MAJOR_VERSION >= 2
-  if( !g_thread_supported() )
+  GThread          *Thread1;
+  GError           *err1 = NULL ;
+  
+  muSimStopMutex     = g_mutex_new ();
+  cvSimStopCondition = g_cond_new ();
+  g_mutex_lock(muSimStopMutex);
+
+  if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
+				 (void *)0, 
+				 TRUE, 
+				 &err1)) == NULL)
   {
-    g_thread_init(NULL);
-    gdk_threads_init();
-    printf("g_thread supported\n");
-
-    GThread          *Thread1;
-    GError           *err1 = NULL ;
-
-    muSimStopMutex     = g_mutex_new ();
-    cvSimStopCondition = g_cond_new ();
-    g_mutex_lock(muSimStopMutex);
-
-    if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
-				   (void *)0, 
-				   TRUE, 
-				   &err1)) == NULL)
-    {
-      printf("Thread create failed: %s!!\n", err1->message );
-      g_error_free ( err1 ) ;
-    }
-    g_mutex_unlock(muSimStopMutex);
-
-
+    printf("Thread create failed: %s!!\n", err1->message );
+    g_error_free ( err1 ) ;
   }
-  else
-  {
-     printf("g_thread NOT supported\n");
-  }
+  g_mutex_unlock(muSimStopMutex);
 
 #endif
 

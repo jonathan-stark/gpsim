@@ -1,7 +1,7 @@
 
 EXTRA_DIST = \
 	gpsim.lyx \
-	gui.lyx
+	gpsim.pdf \
 	gpsim.ps
 
 MOSTLYCLEANFILES =  *~

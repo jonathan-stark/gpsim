@@ -170,6 +170,17 @@ void catch_control_c(int sig)
 
 }
 
+void initialize_threads(void)
+{
+#if GLIB_MAJOR_VERSION >= 2
+  if( !g_thread_supported() )
+  {
+    g_thread_init(NULL);
+    gdk_threads_init();
+  }
+
+#endif
+}
 
 void initialize_signals(void)
 {
@@ -193,7 +204,7 @@ void initialize_signals(void)
 
 void initialize_gpsim(void)
 {
-
+  initialize_threads();
   initialize_signals();
   start_server();
 }

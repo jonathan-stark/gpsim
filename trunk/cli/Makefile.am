@@ -43,7 +43,8 @@ libgpsimcli_la_SOURCES = \
 	 cmd_trace.h cmd_stopwatch.h \
 	input.h cmd_clear.h cmd_help.h cmd_processor.h cmd_set.h cmd_step.h \
 	cmd_version.h misc.h cmd_disasm.h  cmd_list.h  cmd_quit.h \
-	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h cmd_icd.h
+	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h cmd_icd.h \
+	cmd_macro.h
 
 
 YFLAGS = -dvt
