@@ -1234,7 +1234,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   // Was that a bug in gtk? (gtk version 1.2.3)
   if(sbaw->pixmap_pc==NULL)
   {
-      style = gtk_widget_get_style(sbaw->sbw.gui_obj.window);
+      style = gtk_style_new();
       sbaw->pc_mask = NULL;
       sbaw->bp_mask = NULL;
       sbaw->startp_mask = NULL;
