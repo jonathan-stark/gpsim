@@ -176,6 +176,7 @@ public:
   XrefObject xref(void) { return _xref; }
 
   virtual string toString();
+
 protected:
   // If we are linking with a gui, then here are a
   // few declarations that are used to send data to it.
@@ -229,6 +230,11 @@ public:
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
   virtual Value *copy() { return new Boolean(value); }
+
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
+  virtual char *toBitStr(char *, int len);
+
 private:
   bool value;
 };
@@ -266,6 +272,9 @@ public:
   gint64 getVal() { return value; }
 
   virtual Value *copy() { return new Integer(value); }
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
+  virtual char *toBitStr(char *, int len);
 
   static Integer* Integer::typeCheck(Value* val, string valDesc);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
@@ -306,6 +315,8 @@ public:
   double getVal() { return value; }
 
   virtual Value *copy() { return new Float(value); }
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
@@ -336,6 +347,8 @@ public:
   virtual void get(Packet &);
 
   virtual Value *copy();
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
 
 private:
   char *value;
@@ -359,6 +372,8 @@ public:
   virtual void set(Value *);
 
   virtual Value *copy() { return new AbstractRange(left,right); }
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
 
   static AbstractRange* AbstractRange::typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);

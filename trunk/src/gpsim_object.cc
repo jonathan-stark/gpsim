@@ -85,6 +85,21 @@ char *gpsimObject::name(char *return_str, int len)
   return return_str;
 }
 
+char *gpsimObject::toString(char *return_str, int len)
+{
+  if(return_str)
+    *return_str = 0;
+
+  return return_str;
+}
+char *gpsimObject::toBitStr(char *return_str, int len)
+{
+  if(return_str)
+    *return_str = 0;
+
+  return return_str;
+}
+
 string &gpsimObject::name(void)
 {
   return name_str;

@@ -104,6 +104,12 @@ void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
   if(!new_reg)
     return;
 
+  cout << "adding reg to symbol table " << new_reg->name() << " sn " <<symbol_name<<endl;
+  if(new_reg->name() == string(symbol_name)  &&  find(&new_reg->name())) {
+     cout << "ignoring -- symbol is already in the table\n";
+     return;
+  }
+
   register_symbol *rs = new register_symbol(symbol_name, new_reg);
 
   st.push_back(rs);
@@ -392,6 +398,30 @@ string register_symbol::toString()
   return string("");
 }
 
+char *register_symbol::toString(char *return_str, int len)
+{
+  if(!return_str)
+    return 0;
+
+  if(reg)
+    return reg->toString(return_str,len);
+
+  *return_str=0;
+  return return_str;
+}
+char *register_symbol::toBitStr(char *return_str, int len)
+{
+  if(!return_str)
+    return 0;
+
+  if(reg)
+    return reg->toBitStr(return_str,len);
+
+  *return_str=0;
+  return return_str;
+}
+
+
 void  register_symbol::get(int &i)
 {
   if(reg)
@@ -569,6 +599,25 @@ string attribute_symbol::toString()
     return attribute->showType()+": " + attribute->name() + " = " + attribute->toString();
   else
     return string("(null)");
+}
+
+char *attribute_symbol::toString(char *return_str, int len)
+{
+  if(attribute)
+    return attribute->toString(return_str,len);
+  else if(return_str)
+    *return_str=0;
+
+  return return_str;
+}
+char *attribute_symbol::toBitStr(char *return_str, int len)
+{
+  if(attribute)
+    return attribute->toBitStr(return_str,len);
+  else if(return_str)
+    *return_str=0;
+
+  return return_str;
 }
 
 string attribute_symbol::description()

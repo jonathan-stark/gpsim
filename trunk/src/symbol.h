@@ -170,6 +170,9 @@ public:
   virtual void set(Packet &);
 
   Register *getReg();
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
+  virtual char *toBitStr(char *, int len);
 
 };
 
@@ -262,6 +265,10 @@ public:
   virtual void get(double &);
   virtual void get(char *, int len);
   virtual void get(Packet &);
+
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
+  virtual char *toBitStr(char *, int len);
 
   virtual void set_xref(Value *);
   virtual Value *get_xref();
