@@ -89,6 +89,7 @@ class gpsimValue : public gpsimObject {
 
   XrefObject xref(void) { return _xref; }
 
+  virtual string toString();
  protected:
   // If we are linking with a gui, then here are a
   // few declarations that are used to send data to it.

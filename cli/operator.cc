@@ -50,7 +50,8 @@ Value *BinaryOperator::evaluate()
   Value* rVal;
   Value* tmp;
 
-  // Otherwise, we start by evaluating our operands:
+  cout << toString() << endl;
+
   lVal = leftExpr->evaluate();
 
   // If this operator wants to make a short-circuit decision
@@ -73,6 +74,78 @@ Value *BinaryOperator::evaluate()
   //}
 
   return tmp;
+}
+
+/*****************************************************************
+ * The basic unary operator class.
+ */
+UnaryOperator::UnaryOperator(string theOpString, Expression* expr_)
+  : Operator(theOpString)
+{
+  expr = expr_;
+  value = 0;
+}
+
+UnaryOperator::~UnaryOperator()
+{
+}
+
+
+string UnaryOperator::showType()
+{
+  return showOp();
+}
+
+
+string UnaryOperator::show()
+{
+  return string(showType() + " (" + expr->show() + ")");
+}
+
+
+string UnaryOperator::toString()
+{
+  return string("(" + expr->show() + ")");
+}
+
+
+
+Value* UnaryOperator::evaluate()
+{
+  Value* tmp;
+
+  // start evaluating our operand expression:
+  tmp = expr->evaluate();
+
+  // Apply the specific operator to the evaluated operand:
+  tmp = applyOp(tmp);
+
+  // If the result is constant, save the result for future use:
+  //if (tmp->isConstant()) {
+  //  value = tmp;
+  //}
+
+  return tmp;
+}
+
+/*****************************************************************
+ * Comparison operators
+ */
+ComparisonOperator::ComparisonOperator(string opString, 
+				       Expression* leftExpr,
+				       Expression* rightExpr)
+  : BinaryOperator(opString,leftExpr,rightExpr), 
+    bLess(false), bEqual(false), bGreater(false)
+{
+}
+
+ComparisonOperator:: ~ComparisonOperator()
+{
+}
+
+Value* ComparisonOperator::applyOp(Value* leftValue, Value* rightValue)
+{
+  return new Boolean(leftValue->compare(this,rightValue));
 }
 
 /******************************************************************************
@@ -122,7 +195,6 @@ Value *OpAdd::applyOp(Value *lval, Value *rval)
   return new Integer(lval->getAsInt() + rval->getAsInt());
 
 }
-
 //------------------------------------------------------------------------
 
 
@@ -140,6 +212,105 @@ Value *OpAnd::applyOp(Value *lval, Value *rval)
 
   return new Integer(lval->getAsInt() & rval->getAsInt());
 
+}
+
+//------------------------------------------------------------------------
+OpEq::OpEq(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator("==",leftExpr,rightExpr)
+{
+  bEqual = true;
+}
+
+OpEq::~OpEq()
+{
+}
+
+//------------------------------------------------------------------------
+OpGe::OpGe(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator(">=",leftExpr,rightExpr)
+{
+  bEqual = true;
+  bGreater = true;
+}
+
+OpGe::~OpGe()
+{
+}
+
+//------------------------------------------------------------------------
+OpGt::OpGt(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator(">",leftExpr,rightExpr)
+{
+  bGreater = true;
+}
+
+OpGt::~OpGt()
+{
+}
+
+//------------------------------------------------------------------------
+OpLe::OpLe(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator("<=",leftExpr,rightExpr)
+{
+  bLess = true;
+  bEqual = true;
+}
+
+OpLe::~OpLe()
+{
+}
+//------------------------------------------------------------------------
+OpLt::OpLt(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator("<",leftExpr,rightExpr)
+{
+  bLess = true;
+}
+
+OpLt::~OpLt()
+{
+}
+
+//------------------------------------------------------------------------
+OpLogicalAnd::OpLogicalAnd(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("&&",leftExpr,rightExpr)
+{
+}
+
+OpLogicalAnd::~OpLogicalAnd()
+{
+}
+
+Value *OpLogicalAnd::applyOp(Value* leftValue, Value* rightValue)
+{
+  return new Boolean(leftValue && rightValue);
+}
+
+//------------------------------------------------------------------------
+OpLogicalOr::OpLogicalOr(Expression* leftExpr, Expression* rightExpr)
+  : BinaryOperator("||",leftExpr,rightExpr)
+{
+}
+
+OpLogicalOr::~OpLogicalOr()
+{
+}
+
+Value *OpLogicalOr::applyOp(Value* leftValue, Value* rightValue)
+{
+  return new Boolean(leftValue || rightValue);
+}
+
+
+//------------------------------------------------------------------------
+OpNe::OpNe(Expression* leftExpr, Expression* rightExpr)
+  : ComparisonOperator("!=",leftExpr,rightExpr)
+{
+  bLess = true;
+  bGreater = true;
+}
+
+OpNe::~OpNe()
+{
 }
 
 
@@ -178,7 +349,6 @@ Value *OpMpy::applyOp(Value *lval, Value *rval)
 {
 
   return new Integer(lval->getAsInt() * rval->getAsInt());
-
 }
 
 //------------------------------------------------------------------------
@@ -289,3 +459,112 @@ Value *OpShr::applyOp(Value *lval, Value *rval)
   return new Integer(lval->getAsInt() >> i);
 
 }
+
+
+/******************************************************************************
+ The logical NOT operator '!'.
+******************************************************************************/
+OpLogicalNot::OpLogicalNot(Expression* expr)
+  : UnaryOperator("!", expr)
+{
+}
+
+OpLogicalNot::~OpLogicalNot()
+{
+}
+
+Value* OpLogicalNot::applyOp(Value* operand)
+{
+  Boolean* op;
+  bool bVal;
+
+  op = Boolean::typeCheck(operand, showOp());
+  bVal = op->getVal();
+  return new Boolean(!bVal, op->isConstant());
+}
+
+/******************************************************************************
+ The unary 'negate' operator.
+******************************************************************************/
+OpNegate::OpNegate(Expression* expr)
+  : UnaryOperator("-", expr)
+{
+}
+
+OpNegate::~OpNegate()
+{
+}
+
+
+Value* OpNegate::applyOp(Value* operand)
+{
+  Value* rVal=0;
+
+  if (typeid(*operand) == typeid(Integer)) {
+    Integer* iOp = (Integer*)(operand);
+    rVal = new Integer(-(iOp->getVal()));
+  }
+  else if (typeid(*operand) == typeid(Float)) {
+    Float* fOp = (Float*)(operand);
+    rVal = new Float(-(fOp->getVal()));
+  }
+  else {
+    throw new TypeMismatch(showOp(), operand->showType());
+  }
+
+  return rVal;
+}
+
+/******************************************************************************
+ The unary ones complement operator '~'.
+******************************************************************************/
+OpOnescomp::OpOnescomp(Expression* expr)
+  : UnaryOperator("~", expr)
+{
+}
+
+OpOnescomp::~OpOnescomp()
+{
+}
+
+
+Value* OpOnescomp::applyOp(Value* operand)
+{
+  Integer* op;
+  
+  op = Integer::typeCheck(operand, showOp());  
+  return new Integer(~(op->getVal()), op->isConstant());
+}
+
+/******************************************************************************
+ The unary 'plus' operator.
+******************************************************************************/
+OpPlus::OpPlus(Expression* expr)
+  : UnaryOperator("+", expr)
+{
+}
+
+OpPlus::~OpPlus()
+{
+}
+
+
+Value* OpPlus::applyOp(Value* operand)
+{
+  Value* rVal=0;
+
+  if (typeid(*operand) == typeid(Integer)) {
+    Integer* iOp = (Integer*)(operand);
+    rVal = new Integer(iOp->getVal());
+  }
+  else if (typeid(*operand) == typeid(Float)) {
+    Float* fOp = (Float*)(operand);
+    rVal = new Float(fOp->getVal());
+  }
+  else {
+    throw new TypeMismatch(showOp(), operand->showType());
+  }
+
+  return rVal;
+}
+

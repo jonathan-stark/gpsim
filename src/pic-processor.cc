@@ -885,6 +885,8 @@ void pic_processor::create_symbols (void)
   // now add a special symbol for W
   symbol_table.add_w(this, W);
 
+  symbol_table.add(new val_symbol(pc));
+
 }
 
 

@@ -150,6 +150,8 @@ abort_gpsim_now {
    return ABORT;
    }
 
+"&&"                {return(recognize(LAND_T, "&&"));}
+"||"                {return(recognize(LOR_T, "||"));}
 
 ":"                 {return(recognize(COLON_T, ":"));}
 "+"                 {return(recognize(PLUS_T,"+"));}
@@ -161,6 +163,13 @@ abort_gpsim_now {
 "|"                 {return(recognize(OR_T,"^"));}
 "<<"                {return(recognize(SHL_T,"<<"));}
 ">>"                {return(recognize(SHR_T,">>"));}
+
+"=="                {return(recognize(EQ_T, "=="));}
+"!="                {return(recognize(NE_T, "!="));}
+"<"                 {return(recognize(LT_T, "<"));}
+">"                 {return(recognize(GT_T, ">"));}
+"<="                {return(recognize(LE_T, "<="));}
+">="                {return(recognize(GE_T, ">="));}
 
 {BIN1}              {return(process_intLiteral(&yytext[2], 2));}
 {BIN2}              {return(process_intLiteral(&yytext[2], 2));}

@@ -1,4 +1,16 @@
 2004-09-08 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_x.cc, cli/expr.cc, cli/expr.h, cli/operator.cc,
+	cli/operator.h, cli/parse.yy, cli/scan.ll:
+	 - Added command line comparison expressions.
+	* src/pic-processor.cc, src/pic-registers.cc, src/symbol.cc,
+	src/symbol.h, src/value.cc, src/value.h:
+	- Added support for a generic symbol type.
+	- Added the pic PC object to the symbol table.
+	* regression/digital_stim/digital_stim.stc:
+	The new expression parsing introduced a grammer conflict that
+	requires a stimulus data list to be expressed differently.
+
+2004-09-08 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-registers.h, src/14bit-tmrs.h, src/breakpoints.cc,
 	src/breakpoints.h, src/eeprom.h, src/gpsim_interface.h,
 	src/gpsim_time.cc, src/gpsim_time.h, src/i2c-ee.h,

@@ -54,3 +54,11 @@ void gpsimValue::remove_xref(void *an_xref)
 {
   _xref.clear(an_xref);
 }
+
+string gpsimValue::toString()
+{
+  char buff[64];
+  snprintf(buff,sizeof(buff), " = 0x%x",get_value());
+  string s = name() + string(buff);
+  return s;
+}
