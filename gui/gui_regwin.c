@@ -1066,6 +1066,8 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
 	rw->row_to_address[j]=-1;
 
+
+//    gtk_widget_hide(GTK_WIDGET(sheet));
     gtk_sheet_freeze(sheet);
     
     j=0;
@@ -1153,6 +1155,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     RegWindow_update(rw);
 
     gtk_sheet_thaw(sheet);
+//    gtk_widget_show(GTK_WIDGET(sheet));
     
     RegWindow_select_register(rw, 0);
 
