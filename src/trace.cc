@@ -790,6 +790,7 @@ TraceLog::TraceLog(void)
   log_filename = NULL;
   cpu = NULL;
   log_file = NULL;
+  lxtp=NULL;
   last_trace_index = 0;
   items_logged = 0;
   buffer.trace_flag = TRACE_ALL;
@@ -810,7 +811,7 @@ void TraceLog::callback(void)
   int n = 0;
   trace.cycle_counter(cpu->cycles.value);
 
-  if(log_file && logging) {
+  if((log_file||lxtp) && logging) {
     if(last_trace_index < trace.trace_index) { 
       for (int c=last_trace_index; c<trace.trace_index; c++)
         if ((trace.trace_buffer[c] & 0xff000000) == INSTRUCTION)
@@ -825,7 +826,8 @@ void TraceLog::callback(void)
     }
 
     //trace.dump(n, log_file, watch_reg);
-    trace.dump(n, log_file, -1);
+    if(file_format==TRACE_FILE_FORMAT_ASCII)
+	trace.dump(n, log_file, -1);
 
     last_trace_index = trace.trace_index;
     cpu->cycles.set_break(cpu->cycles.value + 1000,this);
@@ -833,11 +835,21 @@ void TraceLog::callback(void)
 
 }
 
-void TraceLog::open_logfile(char *new_fname)
+void TraceLog::open_logfile(char *new_fname, int format)
 {
 
-  if(!new_fname)
-    new_fname = "gpsim.log";
+    if(!new_fname)
+    {
+	switch(format)
+	{
+	case TRACE_FILE_FORMAT_LXT:
+	    new_fname = "gpsim.lxt";
+            break;
+	case TRACE_FILE_FORMAT_ASCII:
+	    new_fname = "gpsim.log";
+	    break;
+	}
+    }
 
   if(log_filename) {
     //
@@ -853,21 +865,45 @@ void TraceLog::open_logfile(char *new_fname)
 
   }
 
-  log_file = fopen(new_fname, "w");
+  file_format=format;
+
+  switch(file_format)
+  {
+  case TRACE_FILE_FORMAT_ASCII:
+      log_file = fopen(new_fname, "w");
+      lxtp=NULL;
+      break;
+  case TRACE_FILE_FORMAT_LXT:
+      lxtp = lt_init(new_fname);
+      lt_set_timescale(lxtp, -8);
+      lt_set_clock_compress(lxtp);
+      lt_set_initial_value(lxtp, 'Z');
+      log_file=NULL;
+      break;
+  }
+
   log_filename = strdup(new_fname);
   items_logged = 0;
-
 }
 
 void TraceLog::close_logfile(void)
 {
 
   if(log_filename) {
-    write_logfile();
-    fclose(log_file);
-    free(log_filename);
-    log_file = NULL;
-    log_filename = NULL;
+      switch(file_format)
+      {
+      case TRACE_FILE_FORMAT_ASCII:
+	  write_logfile();
+	  fclose(log_file);
+	  break;
+      case TRACE_FILE_FORMAT_LXT:
+	  lt_close(lxtp);
+	  break;
+      }
+
+      free(log_filename);
+      log_file = NULL;
+      log_filename = NULL;
   }
 }
 
@@ -902,7 +938,7 @@ void TraceLog::write_logfile(void)
 
 }
 
-void TraceLog::enable_logging(char *new_fname)
+void TraceLog::enable_logging(char *new_fname, int format)
 {
 
   if(logging)
@@ -916,7 +952,7 @@ void TraceLog::enable_logging(char *new_fname)
   }
 
   buffer.cpu = cpu;
-  open_logfile(new_fname);
+  open_logfile(new_fname, format);
 
   last_trace_index = buffer.trace_index;
   // cpu->cycles.set_break(cpu->cycles.value + 1000,this);
@@ -940,7 +976,17 @@ void TraceLog::status(void)
 {
 
   if(logging) {
-    cout << "Logging to file: " << log_filename << endl;
+      cout << "Logging to file: " << log_filename;
+      switch(file_format)
+      {
+      case TRACE_FILE_FORMAT_LXT:
+	  cout << "in LXT mode" << endl;
+	  break;
+      case TRACE_FILE_FORMAT_ASCII:
+      default:
+	  cout << "in ASCII mode" << endl;
+	  break;
+      }
 
     // note that there's the cycle counter is traced for every
     // item that is in the log buffer, so the actual events that
@@ -981,6 +1027,88 @@ void TraceLog::switch_cpus(pic_processor *pcpu)
 {
   cpu = pcpu;
 }
+
+void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
+{
+    char *name;
+
+    name = cpu->registers[address]->name();
+
+    lt_set_time(lxtp, (int)(cpu->cycles.value*4.0e8*cpu->period));
+
+    symp=lt_symbol_find(lxtp, name);
+    if(symp==NULL)
+    {
+	symp=lt_symbol_add(lxtp,
+			   name,         // name
+			   0,            // rows
+			   7,            // msb
+			   0,            // lsb
+			   LT_SYM_F_BITS //flags
+			  );
+        assert(symp!=NULL);
+    }
+    lt_emit_value_int(lxtp, symp, 0, value);
+}
+
+void TraceLog::register_read(unsigned int address, unsigned int value, guint64 cc)
+{
+    switch(file_format)
+    {
+    case TRACE_FILE_FORMAT_ASCII:
+	buffer.cycle_counter(cc);
+	buffer.register_read(address, value);
+	break;
+    case TRACE_FILE_FORMAT_LXT:
+	lxt_trace(address, value, cc);
+	break;
+    }
+}
+
+void TraceLog::register_write(unsigned int address, unsigned int value, guint64 cc)
+{
+    switch(file_format)
+    {
+    case TRACE_FILE_FORMAT_ASCII:
+	buffer.cycle_counter(cc);
+	buffer.register_write(address, value);
+	if(buffer.near_full())
+	    write_logfile();
+	break;
+    case TRACE_FILE_FORMAT_LXT:
+	lxt_trace(address, value, cc);
+	break;
+    }
+}
+
+void TraceLog::register_read_value(unsigned int address, unsigned int value, guint64 cc)
+{
+    switch(file_format)
+    {
+    case TRACE_FILE_FORMAT_ASCII:
+	buffer.cycle_counter(cc);
+	buffer.register_read_value(address, value);
+        break;
+    case TRACE_FILE_FORMAT_LXT:
+	lxt_trace(address, value, cc);
+	break;
+    }
+}
+
+void TraceLog::register_write_value(unsigned int address, unsigned int value, guint64 cc)
+{
+    switch(file_format)
+    {
+    case TRACE_FILE_FORMAT_ASCII:
+	buffer.cycle_counter(cc);
+	buffer.register_write_value(address, value);
+        break;
+    case TRACE_FILE_FORMAT_LXT:
+	lxt_trace(address, value, cc);
+	break;
+    }
+}
+
 
 
 /*****************************************************************
@@ -1108,10 +1236,10 @@ void trace_dump_raw(int numberof)
   trace.dump_raw(numberof);
 }
 //--------------------------------------------
-void trace_enable_logging(char *file=0)
+void trace_enable_logging(char *file=0, int format=TRACE_FILE_FORMAT_ASCII)
 {
   if (file)
-    trace_log.enable_logging(file);
+    trace_log.enable_logging(file, format);
   else
     trace_log.disable_logging();
 }

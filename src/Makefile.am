@@ -46,7 +46,8 @@ libgpsim_la_SOURCES = \
 	tmr0.cc \
 	trace.cc \
 	uart.cc \
-	xref.cc
+	xref.cc \
+	lxt_write.c
 
 gpsiminclude_HEADERS = \
 	12bit-instructions.h \
