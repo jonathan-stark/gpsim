@@ -100,6 +100,32 @@ void Cycle_Counter::preset(guint64 new_value)
   trace.cycle_counter(value);
 }
 
+void Cycle_Counter::set_cycles_per_second(guint64 cps)
+{
+  if(cps)
+  {
+    cycles_per_second = (double)cps;
+    seconds_per_cycle = 1.0/cycles_per_second;
+  }
+
+}
+
+//--------------------------------------------------
+// get(double seconds_from_now)
+//
+// Return the cycle number that corresponds to a time
+// biased from the current time. 
+//
+// INPUT: time in seconds (note that it's a double)
+//
+// OUTPUT: cycle count 
+
+guint64 Cycle_Counter::get(double future_time_from_now)
+{
+  return value + (guint64)(cycles_per_second * future_time_from_now);
+
+}
+
 //--------------------------------------------------
 // set_break
 // set a cycle counter break point. Return 1 if successful.
@@ -623,6 +649,9 @@ Cycle_Counter::Cycle_Counter(void)
 {
   value         = 0;
   break_on_this = END_OF_TIME;
+
+  cycles_per_second = 5.0e6;
+  seconds_per_cycle = 1 / cycles_per_second;
 
   active.next   = 0;
   active.prev   = 0;
