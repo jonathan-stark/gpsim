@@ -81,7 +81,7 @@ extern "C" {
 // The ParafacePort class is derived from the gpsim class "IOPORT".
 // As such, it inherits all of the IOPROT's functionality (like
 // tracing, stimulus interface, etc.). The ParafacePort class extends
-// IOPORT by redirecting changes to the LCD state machine.
+// IOPORT by redirecting changes to the paraface.
 
 Paraface_Port::Paraface_Port (unsigned int _num_iopins=8) : IOPORT(_num_iopins)
 {
@@ -252,7 +252,7 @@ void Paraface::create_iopin_map(void)
     //   name of the logic gate (which is assigned by the user and
     //   obtained with the name() member function call).
 
-    char *pin_name = name();   // Get the name of this LCD
+    char *pin_name = name();   // Get the name of this paraface
     if(pin_name) {
 	output_port->new_name(pin_name);
 	input_port->new_name(pin_name);
