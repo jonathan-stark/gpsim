@@ -47,12 +47,11 @@ int quit_state;
 
 extern "C" {
 #include <popt.h>
-int gui_init (int argc, const char **argv);
-void gui_main(void);
-extern void exit_gpsim(void);
-
 }
 
+extern int gui_init (int argc, char **argv);
+extern void gui_main(void);
+extern void exit_gpsim(void);
 
 void initialize_gpsim(void);
 
@@ -99,7 +98,7 @@ struct poptOption optionsTable[] = {
 };
 
 void 
-helpme (const char *iam)
+helpme (char *iam)
 {
   printf ("\n\nuseage:\n%s [-h] [-p <device> [<hex_file>]] [-c <stc_file>]\n", iam);
   printf ("\t-h             : this help list\n");
@@ -132,7 +131,7 @@ void welcome(void)
 
 
 void 
-main (int argc, const char *argv[])
+main (int argc, char *argv[])
 {
 
   FILE *inputfile = stdin, *startup=NULL;
