@@ -204,8 +204,8 @@ class FileContext
  private:
   string name_str;    
   FILE   *fptr;
-  //int    *line_seek;
   vector<int> *line_seek;
+  vector<int> *pm_address;
   int    _max_line;
 
  public:
@@ -219,6 +219,9 @@ class FileContext
   char *gets(char *buf, int nBytes);
   void rewind(void);
   void open(const char *mode);
+
+  int get_address(int line);
+  void put_address(int line, int address);
 
   string &name(void)
     {

@@ -340,7 +340,7 @@ void Processor::init_program_memory (unsigned int memory_size)
 // init_program_memory(int address, int value)
 //
 // The purpose of this member fucntion is to instantiate an Instruction
-// object in the program memory. The opcode is invalid, then a 'bad_instruction'
+// object in the program memory. If the opcode is invalid, then a 'bad_instruction'
 // is inserted into the program memory instead. If the address is beyond
 // the program memory address space, then it may be that the 'opcode' is
 // is in fact a configuration word.
@@ -459,14 +459,25 @@ void Processor::read_src_files(void)
       // file. (e.g. files[3].line_seek[20] references the
       // 20th line of the third source file.)
       files[i].line_seek = new int[files[i].max_line+1];
+
+      // Create an array whose index is a source file line 
+      // number and whose data is the program memory address
+      // associated with this lines. Note, this array is initalized
+      // to all -1's here, but later will get filled with the
+      // proper addresses.
+
+      files[i].pm_address = new int[files[i].max_line+1];
+
       if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
 	continue;
+
       rewind(files[i].file_ptr);
 
       char buf[256],*s;
       files[i].line_seek[0] = 0;
       for(int j=1; j<=files[i].max_line; j++)
 	{
+	  files[i].pm_address[j] = -1;
 	  files[i].line_seek[j] = ftell(files[i].file_ptr);
 	  s = fgets(buf,256,files[i].file_ptr);
 	  if(s != buf)
@@ -476,8 +487,9 @@ void Processor::read_src_files(void)
   }
 #else
 
+  int i;
   // Are there any src files ?
-  for(int i=0; i<files->nsrc_files(); i++) {
+  for(i=0; i<files->nsrc_files(); i++) {
 
 
     FileContext *fc = (*files)[i];
@@ -492,6 +504,19 @@ void Processor::read_src_files(void)
       // 20th line of the third source file.)
 
       fc->ReadSource();
+    }
+  }
+
+
+  for(i = 0; i<program_memory_size(); i++) {
+
+    if( (program_memory[i]->isa() != instruction::INVALID_INSTRUCTION)) {
+
+      FileContext *fc = (*files)[program_memory[i]->get_file_id()];
+      
+      if(fc)
+	fc->put_address(program_memory[i]->get_src_line(),i);
+
     }
   }
 
@@ -645,6 +670,14 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   if(!cpu)
     return closest_address;
 
+  FileContext *fc = (*cpu->files)[file_id];
+  
+  if(fc)
+    closest_address = fc->get_address(src_line);
+
+  return closest_address;
+
+#if 0
   int distance = cpu->program_memory_size();
 
   for(int i = cpu->program_memory_size()-1; i>=0; i--) {
@@ -664,6 +697,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   }
 
   return cpu->map_pm_index2address(closest_address);
+#endif
 
 }
 //--------------------------------------------------------------------------
@@ -1602,6 +1636,7 @@ FileContext::FileContext(string &new_name, FILE *_fptr)
   fptr = _fptr;
   line_seek = 0;
   _max_line =0;
+  pm_address = 0;
 }
 
 FileContext::FileContext(char *new_name, FILE *_fptr)
@@ -1610,6 +1645,7 @@ FileContext::FileContext(char *new_name, FILE *_fptr)
   fptr = _fptr;
   line_seek = 0;
   _max_line =0;
+  pm_address = 0;
 }
 
 FileContext::~FileContext(void)
@@ -1650,7 +1686,7 @@ void FileContext::ReadSource(void)
     delete line_seek;
 
   line_seek = new vector<int>(max_line()+1);
-
+  pm_address = new vector<int>(max_line()+1);
 
   std::rewind(fptr);
 
@@ -1658,6 +1694,7 @@ void FileContext::ReadSource(void)
   (*line_seek)[0] = 0;
   for(int j=1; j<=max_line(); j++) {
 
+    (*pm_address)[j] = -1;
     (*line_seek)[j] = ftell(fptr);
     s = fgets(buf,256,fptr);
 
@@ -1708,6 +1745,18 @@ void FileContext::open(const char *mode)
   if(!fptr)
     fptr = fopen_path(name_str.c_str(), mode);
 
+}
+//----------------------------------------
+int FileContext::get_address(int line_number)
+{
+  if(line_number < max_line())
+    return (*pm_address)[line_number];
+}
+//----------------------------------------
+void FileContext::put_address(int line_number, int address)
+{
+  if(line_number < max_line())
+    (*pm_address)[line_number] = address;
 }
 
 //------------------------------------------------------------------------
