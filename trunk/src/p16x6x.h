@@ -64,11 +64,13 @@ public:
     }
 
   P16C61(void);
+  void create(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+  static pic_processor *construct(void);
 
 };
 
@@ -109,10 +111,9 @@ class P16C64 : public  _14bit_processor, public _14bit_40pins
 
   virtual PROCESSOR_TYPE isa(void){return _P16C64_;};
   virtual void create_symbols(void);
+  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
-
-  virtual void create_sfr_map(void);
 
   virtual void option_new_bits_6_7(unsigned int bits)
     {
@@ -120,12 +121,15 @@ class P16C64 : public  _14bit_processor, public _14bit_40pins
     }
 
   P16C64(void);
-
+  static pic_processor *construct(void);
+  void create(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+
+
 };
 
 class P16C65 : public  P16C64
@@ -139,14 +143,13 @@ class P16C65 : public  P16C64
   virtual PROCESSOR_TYPE isa(void){return _P16C65_;};
   virtual void create_symbols(void);
 
-  unsigned int program_memory_size(void) const { return 0x800; };
-
-  virtual void create_sfr_map(void);
+  virtual unsigned int program_memory_size(void) const { return 0x1000; };
 
 
   P16C65(void);
-
-
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
 };
 
 

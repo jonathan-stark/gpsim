@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "stimuli.h"
 #include "p16x8x.h"
+#include "p16f87x.h"
 #include "p16x6x.h"
 #include "p16x7x.h"
 #include "p12x.h"
@@ -105,35 +106,99 @@ static  int  cpu_ids = 0;
 
 processor_types available_processors[] =
 {
-  {_PIC_PROCESSOR_, "generic_pic", "generic_pic", "generic_pic", "generic_pic" },
-  {_14BIT_PROCESSOR_,"14bit_pic", "14bit_pic", "14bit_pic", "14bit_pic" },
-  {_12BIT_PROCESSOR_,"12bit_pic", "12bit_pic", "12bit_pic", "12bit_pic" },
-  {_16BIT_PROCESSOR_,"16bit_pic", "16bit_pic", "16bit_pic", "16bit_pic" },
-  {_P12C508_,"__12C508", "pic12c508",  "p12c508", "12c508" },
-  {_P12C509_,"__12C509", "pic12c509",  "p12c509", "12c509" },
-  {_P16C84_, "__16C84",  "pic16c84",   "p16c84",  "16c84"  },
-  {_P16CR83_,"__16CR83", "pic16cr83",  "p16cr83", "16cr83" },
-  {_P16CR84_,"__16CR84", "pic16cr84",  "p16cr84", "16cr84" },
-  {_P16F83_,"__16F83",   "pic16f83",   "p16f83",  "16f83"  },
-  {_P16F84_,"__16F84",   "pic16f84",   "p16f84",  "16f84"  },
-  {_P16C61_,"__16C61",   "pic16c61",   "p16c61",  "16c61"  },
-  {_P16C71_,"__16C71",   "pic16c71",   "p16c71",  "16c71"  },
-  {_P16C62_,"__16C62",   "pic16c62",   "p16c62",  "16c62"  },
-  {_P16C62A_,"__16C62A", "pic16c62a",  "p16c62a", "16c62a" },
-  {_P16CR62_,"__16CR62", "pic16cr62",  "p16cr62", "16cr62" },
-  {_P16C63_,"__16C63",   "pic16c63",   "p16c63",  "16c63"  },
-  {_P16C64_,"__16C64",   "pic16c64",   "p16c64",  "16c64"  },
-  {_P16C64A_,"__16C64A", "pic16c64a",  "p16c64a", "16c64a" },
-  {_P16CR64_,"__16CR64", "pic16cr64",  "p16cr64", "16cr64" },
-  {_P16C65A_,"__16C65A", "pic16c65a",  "p16c65a", "16c65a" },
-  {_P16C65_,"__16C65",   "pic16c65",   "p16c65",  "16c65"  },
-  {_P16C74_,"__16C74",   "pic16c74",   "p16c74",  "16c74"  },
-  {_P18Cxx2_,"__18Cxx2", "pic18cxx2",  "p18cxx2", "18cxx2" },
-  {_P18C2x2_,"__18C2x2", "pic18c2x2",  "p18c2x2", "18c2x2" },
-  {_P18C242_,"__18C242", "pic18c242",  "p18c242", "18c242" },
-  {_P18C252_,"__18C252", "pic18c252",  "p18c252", "18c252" },
-  {_P18C442_,"__18C442", "pic18c442",  "p18c442", "18c442" },
-  {_P18C452_,"__18C452", "pic18c452",  "p18c452", "18c452" }
+  {_PIC_PROCESSOR_, 
+   "generic_pic", "generic_pic", "generic_pic", "generic_pic",
+   pic_processor::construct },
+  {_14BIT_PROCESSOR_,
+   "14bit_pic", "14bit_pic", "14bit_pic", "14bit_pic",
+   pic_processor::construct },
+  {_12BIT_PROCESSOR_,
+   "12bit_pic", "12bit_pic", "12bit_pic", "12bit_pic",
+   pic_processor::construct },
+  {_16BIT_PROCESSOR_,
+   "16bit_pic", "16bit_pic", "16bit_pic", "16bit_pic",
+   pic_processor::construct },
+  {_P12C508_,
+   "__12C508", "pic12c508",  "p12c508", "12c508",
+   P12C508::construct },
+  {_P12C509_,
+   "__12C509", "pic12c509",  "p12c509", "12c509",
+   P12C509::construct },
+  {_P16C84_, 
+   "__16C84",  "pic16c84",   "p16c84",  "16c84",
+   P16C84::construct },
+  {_P16CR83_,
+   "__16CR83", "pic16cr83",  "p16cr83", "16cr83",
+   P16CR83::construct },
+  {_P16CR84_,
+   "__16CR84", "pic16cr84",  "p16cr84", "16cr84",
+   P16CR84::construct },
+  {_P16F83_,
+   "__16F83",   "pic16f83",   "p16f83",  "16f83",
+   P16F83::construct },
+  {_P16F84_,
+   "__16F84",   "pic16f84",   "p16f84",  "16f84",
+   P16F84::construct },
+  {_P16C61_,
+   "__16C61",   "pic16c61",   "p16c61",  "16c61",
+   P16C61::construct },
+  {_P16C71_,
+   "__16C71",   "pic16c71",   "p16c71",  "16c71",
+   P16C71::construct },
+  {_P16C62_,
+   "__16C62",   "pic16c62",   "p16c62",  "16c62",
+   pic_processor::construct },
+  {_P16C62A_,
+   "__16C62A", "pic16c62a",  "p16c62a", "16c62a",
+   pic_processor::construct },
+  {_P16CR62_,
+   "__16CR62", "pic16cr62",  "p16cr62", "16cr62",
+   pic_processor::construct },
+  {_P16C63_,
+   "__16C63",   "pic16c63",   "p16c63",  "16c63",
+   pic_processor::construct },
+  {_P16C64_,
+   "__16C64",   "pic16c64",   "p16c64",  "16c64",
+   P16C64::construct },
+  {_P16C64A_,
+   "__16C64A", "pic16c64a",  "p16c64a", "16c64a",
+   pic_processor::construct },
+  {_P16CR64_,
+   "__16CR64", "pic16cr64",  "p16cr64", "16cr64",
+   pic_processor::construct },
+  {_P16C65A_,
+   "__16C65A", "pic16c65a",  "p16c65a", "16c65a",
+   P16C65::construct },
+  {_P16C65_,
+   "__16C65",   "pic16c65",   "p16c65",  "16c65",
+    P16C65::construct },
+  {_P16C74_,
+   "__16C74",   "pic16c74",   "p16c74",  "16c74",
+   P16C74::construct },
+  {_P16F874_,
+   "__16F874", "pic16f874",  "p16f874", "16f874",
+   P16F874::construct },
+  {_P16F877_,
+   "__16F877", "pic16f877",  "p16f877", "16f877",
+   P16F877::construct },
+  {_P18Cxx2_,
+   "__18Cxx2", "pic18cxx2",  "p18cxx2", "18cxx2",
+   pic_processor::construct },
+  {_P18C2x2_,
+   "__18C2x2", "pic18c2x2",  "p18c2x2", "18c2x2",
+   pic_processor::construct },
+  {_P18C242_,
+   "__18C242", "pic18c242",  "p18c242", "18c242",
+   P18C242::construct },
+  {_P18C252_,
+   "__18C252", "pic18c252",  "p18c252", "18c252",
+   P18C252::construct },
+  {_P18C442_,
+   "__18C442", "pic18c442",  "p18c442", "18c442",
+   pic_processor::construct },
+  {_P18C452_,
+   "__18C452", "pic18c452",  "p18c452", "18c452",
+   pic_processor::construct }
 
 };
 
@@ -282,8 +347,9 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
   if(i>= 0)
     {
 
-      pic_processor *p = NULL;
+      pic_processor *p = available_processors[i].cpu_constructor();
 
+#if 0
       // sigh, I really, really, really hate this section...
       // All it does is instantiate a new pic processor. We already
       // know the name and type of processor we want, however there's no
@@ -344,6 +410,14 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 	  p = new P16C74;
 	  break;
 
+	case _P16F874_:
+	  p = new P16F874;
+	  break;
+
+	case _P16F877_:
+	  p = new P16F877;
+	  break;
+
 	case _P18Cxx2_:
 	  p = new P18Cxx2;
 	  break;
@@ -363,6 +437,8 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 	  cout << "However, a processor named " << available_processors[i].names[1] << " was found\n";
 
 	}
+#endif
+
       if(p)
 	{
 	  processor_list.push_back(p);
@@ -393,6 +469,16 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 }
 
 
+//-------------------------------------------------------------------
+//
+pic_processor * pic_processor::construct(void)
+{
+
+  cout << " Can't create a generic pic processor\n";
+
+  return NULL;
+
+}
 //-------------------------------------------------------------------
 //
 // sleep - Begin sleeping and stay asleep until something causes a wake
@@ -1007,6 +1093,8 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
 void pic_processor::init_program_memory (unsigned int memory_size)
 {
 
+  if(verbose)
+    cout << "Initializing program memory: 0x"<<memory_size<<" words\n";
   pc.memory_size_mask = memory_size - 1;
   if ((pc.memory_size_mask) & memory_size)
     {

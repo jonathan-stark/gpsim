@@ -87,11 +87,7 @@ public:
       return disasm16(this, address, inst);
     }
 
-  // Declare a set of functions that will allow the base class to
-  // get information about the derived classes. NOTE, the values returned here
-  // will cause errors if they are used -- the derived classes must define their
-  // parameters appropriately.
-  virtual void create_sfr_map(void);
+  void create_sfr_map(void);
 
   virtual void create_stack(void) {stack = new Stack16;};
 
@@ -108,6 +104,11 @@ public:
     }
 
   virtual void option_new_bits_6_7(unsigned int);
+
+  // Declare a set of functions that will allow the base class to
+  // get information about the derived classes. NOTE, the values returned here
+  // will cause errors if they are used (in some cases)
+  // -- the derived classes must define their parameters appropriately.
 
   virtual unsigned int register_memory_size () const { return 16*FILE_REGISTERS;};
   virtual int get_pin_count(void){return 0;};

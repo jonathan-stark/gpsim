@@ -120,9 +120,13 @@ void link_src_to_gpsim(GUI_Processor *gp)
 
   if(gp)
     {
-      printf("link_src_to_gpsim\n");
       // Create a cross reference between the pic's program memory and the gui.
       pm_size = gpsim_get_program_memory_size( gp->pic_id);
+
+      if(verbose) {
+	printf("link_src_to_gpsim\n");
+	printf(" processor pma = %d\n",pm_size);
+      }
 
       for(i=0; i < pm_size; i++)
 	{

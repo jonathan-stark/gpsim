@@ -417,7 +417,7 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   snode = NULL;
   next = NULL;
 
-  cout << "duty cycle " << dc << " period " << p << " drive " << drive << '\n';
+  //cout << "duty cycle " << dc << " period " << p << " drive " << drive << '\n';
   // calculate the slope and the intercept for the two lines comprising
   // the triangle wave:
 
@@ -435,8 +435,8 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
 
   b2 = -float(period) * m2;
 
-  cout << "m1 = " << m1 << " b1 = " << b1 << '\n';
-  cout << "m2 = " << m2 << " b2 = " << b2 << '\n';
+  //cout << "m1 = " << m1 << " b1 = " << b1 << '\n';
+  //cout << "m2 = " << m2 << " b2 = " << b2 << '\n';
 
   add_stimulus(this);
 }
@@ -462,7 +462,7 @@ int triangle_wave::get_state(guint64 current_time)
   else
     ret_val = MAX_ANALOG_DRIVE*int(b2 + m2 * t);
   
-  cout << "Triangle wave: t = " << t << " value = " << ret_val << '\n';
+  //  cout << "Triangle wave: t = " << t << " value = " << ret_val << '\n';
   return ret_val;
 
 }
@@ -576,8 +576,10 @@ void asynchronous_stimulus::start(void)
 
       cpu->cycles.set_break(future_cycle, this);
 
-      cout << "Starting asynchronous stimulus\n";
-      cout << "  states = " << max_states << '\n';
+      if(verbose) {
+	cout << "Asynchronous stimulus\n";
+	cout << "  states = " << max_states << '\n';
+      }
       for(int i=0; i<max_states; i++)
 	{
 	  if(digital)
@@ -587,8 +589,10 @@ void asynchronous_stimulus::start(void)
 	      else
 		values[i] = -MAX_DRIVE/2;
 	    }
-	  cout << "    " << transition_cycles[i] <<  '\t' << values[i] << '\n';
+	  if(verbose&2)
+	    cout << "    " << transition_cycles[i] <<  '\t' << values[i] << '\n';
 	}
+
       cout << "period = " << period << '\n'
 	   << "phase = " << phase << '\n'
 	   << "start_cycle = " << start_cycle << '\n'
@@ -661,8 +665,19 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   snode = NULL;
   //  cout << "IOPIN constructor called \n";
 
-  if(iop)
+  if(iop) {
     iop->attach_iopin(this,b);
+
+    strcpy(name_str, iop->name());
+    char bs[2];
+    bs[0] = iobit+'0';
+    bs[1] = 0;
+    strcat(name_str,bs);
+  }
+
+  add_stimulus(this);
+
+
 }
 
 IOPIN::IOPIN(void)
@@ -731,13 +746,6 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
   //sprintf(name_str,"%s%n",iop->name_str,iobit);
   //cout << name_str;
   // cout << "IO_bi_directional\n";
-  strcpy(name_str, iop->name());
-  char bs[2];
-  bs[0] = iobit+'0';
-  bs[1] = 0;
-  strcat(name_str,bs);
-
-  add_stimulus(this);
 }
 
 IO_bi_directional::IO_bi_directional(void)
@@ -936,7 +944,7 @@ source_stimulus *last_stimulus=NULL;
 
 void create_stimulus(int type, char *name)
 {
-  cout << "Got request to create a stimulus \n";
+  //cout << "Got request to create a stimulus \n";
 
   asynchronous_stimulus *asy;
   square_wave *sqw;
@@ -999,17 +1007,17 @@ void stimorb_start_cycle(unsigned int _start_cycle)
 
 void stimorb_name(char *_name)
 {
-  cout << "changing name to " << _name << '\n';
+  //cout << "changing name to " << _name << '\n';
 
-  cout << "before " << last_stimulus->name();
+  //cout << "before " << last_stimulus->name();
   if(last_stimulus)
     strcpy(last_stimulus->name_str,_name);
-  cout << " after " << last_stimulus->name() << '\n';
+  //cout << " after " << last_stimulus->name() << '\n';
 
 }
 
 
-void stimorb_asy(int digital, pic_processor *cpu,vector<int> temp_array )
+void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_array )
 {
   if(!last_stimulus)
     return;
@@ -1027,10 +1035,31 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<int> temp_array )
 
       for(int j=0; j<=2*asy->max_states; j++)
 	{
+	  StimulusDataType dp = temp_array[j];
+	  int new_data;
+
+	  switch(dp.data_type) {
+
+	  case STIMULUS_DPT_INT:
+	    new_data = (dp.data_point.i & 0xfffffff);
+	    break;
+
+	  case STIMULUS_DPT_FLOAT:
+	    if(dp.data_point.f > 0.0)
+	      new_data = new_data = 1;
+	    else 
+	      new_data = 0;
+	    break;
+
+	  default:
+	    new_data = 0;
+	    break;
+	  }
+
 	  if(j&1)
-	    asy->values[j>>1] = temp_array[j];
+	    asy->values[j>>1] = new_data;
 	  else
-	    asy->transition_cycles[j>>1] = temp_array[j];
+	    asy->transition_cycles[j>>1] = new_data;
 	}
 
       asy->cpu = cpu;
@@ -1038,7 +1067,7 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<int> temp_array )
       //      if (options_entered & STIM_IOPORT)
       //	is->ioport->attach_stimulus(asy, bit_pos);
 
-      cout << "Starting asynchronous stimulus\n";
+      //cout << "Starting asynchronous stimulus\n";
       asy->start();
     }
 }
@@ -1053,8 +1082,8 @@ struct char_list {
 
 void stimorb_attach(char *node, char_list *stimuli)
 {
-
-  cout << " doing an attach (stimuli.cc)\n";
+  if(verbose&2)
+    cout << " doing an attach (stimuli.cc) node: " << node << '\n';
 
   string s = string(node);
   Stimulus_Node *sn = find_node (s);
@@ -1068,8 +1097,11 @@ void stimorb_attach(char *node, char_list *stimuli)
 	{
 	  s = string(stimuli->name);
 	  st = find_stimulus(s);
-	  if(st)
+	  if(st) {
 	    sn->attach_stimulus(st);
+	    if(verbose&2)
+	      cout << " attaching stimulus: " << s << '\n';
+	  }
 	  stimuli = stimuli->next;
 	}
     }

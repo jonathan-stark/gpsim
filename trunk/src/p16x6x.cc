@@ -85,26 +85,37 @@ void P16C61::create_symbols(void)
 
 }
 
-//
-// External initialization of the general purpose register map
-//
+void P16C61::create(void)
+{
 
-//const GPR_map P16C61::gpr_map[];
+  create_iopin_map();
 
+  _14bit_processor::create();
+
+  create_sfr_map();
+
+}
+
+pic_processor * P16C61::construct(void)
+{
+
+  P16C61 *p = new P16C61;
+
+  cout << " c61 construct\n";
+
+  p->create();
+
+  p->name_str = "16c61";
+
+  return p;
+
+}
 
 P16C61::P16C61(void)
 {
   if(verbose)
     cout << "c61 constructor, type = " << isa() << '\n';
 
-  create_iopin_map();
-  //create_iopins(iopin_map, num_of_iopins);
-
-  _14bit_processor::create();
-
-  create_sfr_map();
-
-  name_str = "16c61";
 }
 
 
@@ -343,11 +354,11 @@ void P16C64::create_symbols(void)
 }
 
 
-
-P16C64::P16C64(void)
+void  P16C64::create(void)
 {
-  if(verbose)
-    cout << "c64 constructor, type = " << isa() << '\n';
+
+
+  cout << " c64 create \n";
 
   create_iopin_map();
   
@@ -356,15 +367,35 @@ P16C64::P16C64(void)
  
   _14bit_processor::create();
 
-  create_sfr_map();
+  P16C64::create_sfr_map();
 
   // Build the links between the I/O Pins and the internal peripherals
   ccp1con.iopin = portc->pins[2];
 
-  name_str = "16c64";
-
   trace.program_counter (pc.value);
 
+
+}
+
+pic_processor * P16C64::construct(void)
+{
+
+  P16C64 *p = new P16C64;
+
+  cout << " c64 construct\n";
+
+  p->create();
+
+  p->name_str = "16c64";
+
+  return p;
+
+}
+
+P16C64::P16C64(void)
+{
+  if(verbose)
+    cout << "c64 constructor, type = " << isa() << '\n';
 }
 
 //------------------------------------------------------------------------
@@ -432,14 +463,35 @@ P16C65::P16C65(void)
   if(verbose)
     cout << "c65 constructor, type = " << isa() << '\n';
 
-  create_sfr_map();
+}
+
+void P16C65::create(void)
+{
+
+  cout << " c65 create \n";
+
+  P16C64::create();
+
+  P16C65::create_sfr_map();
 
   // Build the links between the I/O Pins and the internal peripherals
   // ccp1con.iopin = portc.pins[2];
   ccp2con.iopin = portc->pins[1];
 
+}
 
-  name_str = "16c65";
+pic_processor * P16C65::construct(void)
+{
+
+  P16C65 *p = new P16C65;
+
+  cout << " c65 construct\n";
+
+  p->create();
+
+  p->name_str = "16c65";
+
+  return p;
 
 }
 

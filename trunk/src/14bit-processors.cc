@@ -32,6 +32,17 @@ Boston, MA 02111-1307, USA.  */
 
 //-------------------------------------------------------------------
 //
+pic_processor * _14bit_processor::construct(void)
+{
+
+  cout << " Can't create a generic 14bit processor\n";
+
+  return NULL;
+
+}
+
+//-------------------------------------------------------------------
+//
 // 
 //    create
 //

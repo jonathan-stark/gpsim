@@ -648,7 +648,7 @@ test "$host_alias" != "$target_alias" &&
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=18
-GPSIM_MICRO_VERSION=0
+GPSIM_MICRO_VERSION=1
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 # Find a good install program.  We prefer a C program (faster),
