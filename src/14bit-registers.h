@@ -331,24 +331,26 @@ public:
   unsigned int pclath_mask;        /* pclath confines PC to banks */
 
   Program_Counter(void);
-  void increment(void);
-  void skip(void);
-  void jump(unsigned int new_value);
-  void interrupt(unsigned int new_value);
-  void computed_goto(unsigned int new_value);
-  void new_address(unsigned int new_value);
+  virtual void increment(void);
+  virtual void skip(void);
+  virtual void jump(unsigned int new_value);
+  virtual void interrupt(unsigned int new_value);
+  virtual void computed_goto(unsigned int new_value);
+  virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+  virtual unsigned int get_value(void) {
+    return value;
+  };
+
   void reset(void)
     { 
       value = reset_address;
       trace.program_counter(value);
     };
 
-  unsigned int get_next(void);
+  virtual unsigned int get_next(void);
 
-  //#ifdef HAVE_GUI
   XrefObject *xref;
-  //  #endif
 
 };
 

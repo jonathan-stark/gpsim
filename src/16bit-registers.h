@@ -260,7 +260,17 @@ class Fast_Stack
 class Program_Counter16 : public Program_Counter
 {
 public:
+  virtual void increment(void);
+  virtual void skip(void);
+  virtual void jump(unsigned int new_value);
+  virtual void interrupt(unsigned int new_value);
+  virtual void computed_goto(unsigned int new_value);
+  virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+  virtual unsigned int get_value(void);
+  virtual unsigned int get_next(void);
+
+  Program_Counter16(void);
 };
 
 
@@ -486,7 +496,8 @@ class T0CON : public OPTION_REG
  public:
 
   enum {
-    T08BIT = 1<<6
+    T08BIT = 1<<6,
+    TMR0ON = 1<<7
   };
 
   T0CON(void);
@@ -539,10 +550,11 @@ class TXREG_16 : public _TXREG
  public:
   PIR1 *pir1;
 
+  TXREG_16(void);
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
+  virtual void assign_pir(PIR1 *new_pir);//{pir1 = new_pir;};
 
 };
 
@@ -550,32 +562,69 @@ class RCREG_16 : public _RCREG
 {
  public:
   PIR1 *pir1;
-
+  RCREG_16(void);
   virtual void push(unsigned int);
-  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
+  virtual void pop(void);
+  virtual void assign_pir(PIR1 *new_pir);//{pir1 = new_pir;};
 
 };
 
 //---------------------------------------------------------
-class USART_MODULE16 : public USART_MODULE
-//class USART_MODULE16
+//class USART_MODULE16 : public USART_MODULE
+// bug in gcc? having problems deriving... vtables are hosed
+class USART_MODULE16
 {
  public:
 
-  _16bit_processor *cpu;
+  _16bit_processor *_cpu16;
 
-  // Serial Port Registers
-  //_TXSTA       txsta;
-  //_RCSTA       rcsta;
-  //_SPBRG       spbrg;
-  // TXREG_16     txreg;
-  // RCREG_16     rcreg;
+  _TXSTA      txsta;
+  _RCSTA      rcsta;
+  _SPBRG      spbrg;
+
+  TXREG_16    txreg;
+  RCREG_16    rcreg;
+  //_TXREG    txreg;
+  //_RCREG    rcreg;
+
 
   USART_MODULE16(void);
 
-  void initialize(_16bit_processor *);
-  virtual void new_rx_edge(unsigned int);
+  void initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+  void init_ioport(IOPORT *);
+  void new_rx_edge(unsigned int);
 
+};
+
+class PORTC16 : public PIC_IOPORT
+{
+public:
+
+enum
+{
+    T1CKI = 1 << 0,
+    T1OSO = 1 << 0,
+    T1OSI = 1 << 1,
+    CCP2  = 1 << 1,
+    CCP1  = 1 << 2,
+    SCK   = 1 << 3,
+    SCL   = 1 << 3,  /* SCL and SCK share the same pin */
+    SDI   = 1 << 4,
+    SDA   = 1 << 4,  /* SDA and SDI share the same pin */
+    SDO   = 1 << 5,
+    TX    = 1 << 6,
+    CK    = 1 << 6,
+    RX    = 1 << 7,
+    DT    = 1 << 7
+};
+
+
+  CCPCON *ccp1con;
+  USART_MODULE16 *usart;
+
+  PORTC16(void);
+  unsigned int get(void);
+  void setbit(unsigned int bit_number, bool new_value);
 };
 
 //-------------------------------------------------------------------
@@ -655,4 +704,113 @@ class TBL_MODULE
 };
 
 
+
+
+//////////////////////////////////////////
+//////////////////////////////////////////
+//   vapid Place holders
+//////////////////////////////////////////
+//////////////////////////////////////////
+
+class OSCCON : public  sfr_register
+{
+ public:
+  unsigned int valid_bits;
+
+  enum {
+    SCS = 1<<0
+  };
+
+  OSCCON(void) {
+    valid_bits = 1;
+  }
+};
+
+class LVDCON : public  sfr_register
+{
+ public:
+  unsigned int valid_bits;
+
+  enum {
+    LVDL0 = 1<<0,
+    LVDL1 = 1<<1,
+    LVDL2 = 1<<2,
+    LVDL3 = 1<<3,
+    LVDEN = 1<<4,
+    IRVST = 1<<5,
+  };
+
+  LVDCON(void) {
+    valid_bits = 0x3f;;
+  }
+};
+
+class WDTCON : public  sfr_register
+{
+ public:
+
+  unsigned int valid_bits;
+
+  enum {
+    SWDTEN = 1<<0
+  };
+
+  WDTCON(void) {
+    valid_bits = 1;
+  }
+
+};
+
+class SSPCON1 : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  SSPCON1(void);
+};
+
+class SSPCON2 : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  SSPCON2(void);
+};
+
+class SSPSTAT : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  SSPSTAT(void);
+};
+
+class SSPBUF : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  SSPBUF(void);
+};
+
+class SSPADD : public sfr_register
+{
+ public:
+
+  void put(unsigned int new_value);
+  SSPADD(void);
+};
+
+class SSPMODULE
+{
+ public:
+
+  SSPCON1  sspcon1;
+  SSPCON2  sspcon2;
+  SSPSTAT  sspstat;
+  SSPADD   sspadd;
+  SSPBUF   sspbuf;
+
+  SSPMODULE(void);
+};
 #endif

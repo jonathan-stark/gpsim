@@ -4,6 +4,12 @@ T. Scott Dattalo
 
 gpsim-0.21.0
 	* Starting with 0.21.0, Changelog will be properly formatted
+	* Added 18f454,18455
+	* Added breakpoint capability on nodes
+	* Added spi Module
+	* Added attributes to external usart module
+	* Ralf rewrote the Breadboard
+	* gui is now in C++
 	* Added 16f627,16f628 processors
 	* log command has been added (Command Line)
 	* Profiling has been added (gui)

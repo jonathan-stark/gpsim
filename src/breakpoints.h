@@ -269,6 +269,20 @@ public:
       return(replaced->get());
     }
 
+  virtual void setbit(unsigned int bit_number, bool new_value)
+    {
+      return(replaced->setbit(bit_number, new_value));
+    }
+
+  virtual int get_bit(unsigned int bit_number)
+    {
+      return(replaced->get_bit(bit_number));
+    }
+
+  virtual int get_bit_voltage(unsigned int bit_number)
+    {
+      return(replaced->get_bit_voltage(bit_number));
+    }
 
   void replace(pic_processor *_cpu, unsigned int reg);
   unsigned int clear(unsigned int bp_num);
@@ -313,6 +327,8 @@ public:
 
 
   unsigned int get(void);
+  int get_bit(unsigned int bit_number);
+  int get_bit_voltage(unsigned int bit_number);
 
 };
 
@@ -325,6 +341,7 @@ public:
   Break_register_write(pic_processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   void put(unsigned int new_value);
+  void setbit(unsigned int bit_number, bool new_value);
 
 };
 
@@ -337,6 +354,8 @@ public:
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   unsigned int get(void);
+  int get_bit(unsigned int bit_number);
+  int get_bit_voltage(unsigned int bit_number);
 
 };
 
@@ -349,6 +368,7 @@ public:
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   void put(unsigned int new_value);
+  void setbit(unsigned int bit_number, bool new_value);
 };
 
 class Log_Register_Write : public Notify_Register
@@ -359,6 +379,7 @@ class Log_Register_Write : public Notify_Register
   Log_Register_Write(pic_processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   void put(unsigned int new_value);
+  void setbit(unsigned int bit_number, bool new_value);
 
 };
 
@@ -371,7 +392,8 @@ public:
   Log_Register_Read(pic_processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   unsigned int get(void);
-
+  int get_bit(unsigned int bit_number);
+  int get_bit_voltage(unsigned int bit_number);
 };
 
 class Log_Register_Read_value : public Notify_Register_Value
@@ -382,6 +404,8 @@ public:
   Log_Register_Read_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
   unsigned int get(void);
+  int get_bit(unsigned int bit_number);
+  int get_bit_voltage(unsigned int bit_number);
 };
 
 class Log_Register_Write_value : public Notify_Register_Value

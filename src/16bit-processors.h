@@ -27,10 +27,9 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 #include "16bit-tmrs.h"
 #include "uart.h"
+#include "pic-packages.h"
 
      // forward references
-class _16bit_processor;
-class IOPIN;
 
 extern instruction *disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst);
 
@@ -58,6 +57,19 @@ public:
 
   //  PCLATH       pclath;
 
+  PIC_IOPORT   porta;      // So far, all 18xxx parts contain ports A,B,C
+  IOPORT_TRIS  trisa;
+  IOPORT_LATCH lata;
+
+  PIC_IOPORT   portb;
+  IOPORT_TRIS  trisb;
+  IOPORT_LATCH latb;
+
+  PORTC16      portc;
+  IOPORT_TRIS  trisc;
+  IOPORT_LATCH latc;
+
+
   INTCON_16    intcon;
   INTCON2      intcon2;
   INTCON3      intcon3;
@@ -67,7 +79,8 @@ public:
   T0CON        t0con;
   RCON         rcon;
   PIR1         pir1;
-
+  sfr_register ipr1;
+  sfr_register ipr2;
   T1CON        t1con;
   PIE          pie1;
   PIR2         pir2;
@@ -84,17 +97,22 @@ public:
   CCPRL        ccpr2l;
   CCPRH        ccpr2h;
 
+  OSCCON       osccon;
+  LVDCON       lvdcon;
+  WDTCON       wdtcon;
+
   sfr_register prodh,prodl;
 
   Fast_Stack   fast_stack;
   Indirect_Addressing  ind0;
   Indirect_Addressing  ind1;
   Indirect_Addressing  ind2;
-  USART_MODULE16       usart;
+  USART_MODULE16       usart16;
   TBL_MODULE           tbl;
   TMR2_MODULE          tmr2_module;
+  SSPMODULE            ssp;
+  //  Package              *package;
 
-  _16bit_processor(void);
 
   virtual void create_symbols(void);
 
@@ -132,11 +150,41 @@ public:
   // -- the derived classes must define their parameters appropriately.
 
   virtual unsigned int register_memory_size () const { return 0x1000;};
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
+
+  virtual int get_pin_count(void){ 
+    if(package) 
+      return package->get_pin_count();
+    else
+      return 0;
+  };
+
+  virtual char *get_pin_name(unsigned int pin_number) {
+    if(package) 
+      return package->get_pin_name(pin_number);
+    else
+      return NULL;
+  };
+
+  virtual int get_pin_state(unsigned int pin_number) {
+    if(package) 
+      return package->get_pin_state(pin_number);
+    else
+      return 0;
+  };
+
+  virtual IOPIN *get_pin(unsigned int pin_number) {
+    if(package)
+      return package->get_pin(pin_number);
+    else
+      return NULL;
+  };
+
   virtual void set_out_of_range_pm(int address, int value);
 
+  virtual void create_iopin_map(void);
+
+  static pic_processor *construct(void);
+  _16bit_processor(void);
 };
 
 #define cpu16 ( (_16bit_processor *)cpu)

@@ -33,9 +33,11 @@ Boston, MA 02111-1307, USA.  */
 
 extern void simulation_cleanup(void);
 extern int use_gui;
-
+#define HAVE_READLINE
+#ifdef HAVE_READLINE
 //#define RALF
 #define SCOTT
+
 
 //#if 0        //tsd removed in 0.20.4
 extern "C" {
@@ -51,6 +53,7 @@ extern "C" {
 
 //#endif
 
+#endif
 
 #include <sys/types.h>
 #include <sys/file.h>
@@ -168,7 +171,7 @@ int parse_string(char *cmd_string)
   if(!cmd_string)
     return 0;
 
-  if(verbose & 2)
+  //if(verbose & 2)
     printf("   %s: %s\n",__FUNCTION__,cmd_string);
 
   cmd_string = strip_cmd(cmd_string);
@@ -185,11 +188,13 @@ int parse_string(char *cmd_string)
   else
     {
 
+#ifdef HAVE_READLINE
       if(strlen(cmd_string)) {
 	add_history (cmd_string);
 
 	strncpy(last_line,cmd_string,256);
       }
+#endif
     }
 
 
@@ -286,24 +291,40 @@ get_user_input (void)
 {
   char *retval = 0;
   int i,len;
+  static char buf[256];
 
   if((verbose&4) && DEBUG_PARSER)
-    cout << __FUNCTION__ <<"()\n";
+    cout << __FUNCTION__ <<"() --- \n";
 
   if( !use_gui && using_readline) {
-
+    //cout << "  1";
+    //#ifdef HAVE_READLINE
+#if 0
     // If we're in cli-only mode and we're not processing a command file
     // then we use readline to get the commands
-    retval = gnu_readline ( "gpsim> ",1);
+    retval = gnu_readline ( "**gpsim> ",1);
+
+#else
+    cout << "__gpsim> ";
+    cout.flush();
+    cin.getline(buf, sizeof(buf));
+    if (cin.eof()) {
+      cout << buf << endl;
+      return NULL;
+    }
+    return buf;
+#endif
 
   } else {
 
+    //cout << "  2";
     // We're either using the gui or we're parsing a command file.
 
     gets_from_cmd_file(&cmd_string_buf);
     retval = cmd_string_buf;
 
   }
+  //cout << "  3 returning " << retval << endl;
 
   return retval;
 }
@@ -322,6 +343,8 @@ gpsim_read (char *buf, unsigned max_size)
   char *input_buf;
   static int chars_left = 0;
   int status = 0;
+
+//cout << __FUNCTION__ << endl;
 
   if((verbose&4) && DEBUG_PARSER)
     cout <<"gpsim_read\n";
@@ -489,17 +512,20 @@ command_generator (const char *text, int state)
 char **
 gpsim_completion (const char *text, int start, int end)
 {
+
   char **matches;
   //char *command_generator (char *, int);
 
   matches = (char **)NULL;
 
+#ifdef HAVE_READLINE
   /* If this word is at the start of the line, then it is a command
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if (start == 0)
     //matches = completion_matches (text, (CPFunction *)command_generator);
     matches = completion_matches (text, command_generator);
+#endif
 
   return (matches);
 }
@@ -509,28 +535,22 @@ gpsim_completion (const char *text, int start, int end)
 
 void myfunc(int data, int fd, GdkInputCondition gdk_cond)
 {
-  //  static int sequence = 0;
-  //  char c=0;
-
-
+#ifdef HAVE_READLINE
   rl_callback_read_char ();
-
-
+#endif
 }
 
 //void test_func(...)
 void test_func(void)
 {
-
+#ifdef HAVE_READLINE
   char *t;
 
   t = rl_copy_text(0,1000);
 
-  if(verbose & 2) {
-    printf(" ()()()   %s  ()()()\n%s\n", __FUNCTION__ , t);
-  }
   parse_string(t);
   free(t);
+#endif
 
 }
 
@@ -546,7 +566,10 @@ void exit_gpsim(void)
 
 #endif
 
+#ifdef HAVE_READLINE
   rl_callback_handler_remove ();
+#endif
+
   simulation_cleanup();
 
   exit(0);
@@ -559,10 +582,12 @@ void exit_gpsim(void)
 
 void redisplay_prompt(void)
 {
+  //cout << __FUNCTION__ << endl;
 
-  //  rl_redisplay();
-  cout << '\n';
+  //cout << '\n';
+#ifdef HAVE_READLINE
   rl_forced_update_display();
+#endif
 }
 
 /* Tell the GNU Readline library how to complete.  We want to try to complete
@@ -570,7 +595,8 @@ void redisplay_prompt(void)
    if not. */
 void initialize_readline (void)
 {
-  //  char **gpsim_completion (char *, int, int);
+  //cout << __FUNCTION__ << endl;
+#ifdef HAVE_READLINE
 
   static char b[100];
 
@@ -604,21 +630,31 @@ void initialize_readline (void)
   rl_attempted_completion_function = &gpsim_completion;
 #endif
 
-}
-/*
-void parser_cleanup(void)
-{
+#else
+  //char buf [256];
 
-  rl_clear_signals();
-}
-*/
-//#ifndef HAVE_GUI
+  //while(1) {
+    cout << "gpsim> ";
+    cout.flush();
 
+    //cin.getline(buf, sizeof(buf));
+    //if (cin.eof()) {
+    //cout << buf << endl;
+    //}
+
+    //parse_string(buf);
+    //}
+
+#endif //HAVE_READLINE
+}
+
+#ifdef HAVE_READLINE
 char *gnu_readline (char *s, unsigned int force_readline)
 {
   static char last_line[256]={0};
   char *retval = 0;
 
+  //cout << __FUNCTION__ << endl;
 
   if(using_readline || force_readline)
     {
@@ -689,6 +725,4 @@ char *gnu_readline (char *s, unsigned int force_readline)
 
   return retval;
 }
-
-
-//#endif
+#endif  // HAVE_READLINE

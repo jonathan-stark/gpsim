@@ -253,7 +253,13 @@ processor_types available_processors[] =
    P18C442::construct },
   {_P18C452_,
    "__18C452", "pic18c452",  "p18c452", "18c452",
-   P18C452::construct }
+   P18C452::construct },
+  {_P18F442_,
+   "__18F442", "pic18f442",  "p18f442", "18f442",
+   P18F442::construct },
+  {_P18F452_,
+   "__18F452", "pic18f452",  "p18f452", "18f452",
+   P18F452::construct }
 
 };
 
@@ -465,7 +471,7 @@ void pic_processor::sleep (void)
     } while(bp.have_sleep() && !bp.have_halt());
 
   if(!bp.have_sleep())
-    pc.increment();
+    pc->increment();
 
   simulation_mode = RUNNING;
 
@@ -507,7 +513,7 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(find_instruction(pc.value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+  if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
     {
       simulation_start_cycle = cycles.value;
     }
@@ -516,7 +522,7 @@ void pic_processor::run (void)
     {
       do
 	{
-	  program_memory[pc.value]->execute();
+	  program_memory[pc->value]->execute();
 	} while(!bp.global_break);
 
       if(bp.have_interrupt())
@@ -543,7 +549,7 @@ void pic_processor::run (void)
 //-------------------------------------------------------------------
 //
 // step - Simulate one (or more) instructions. If a breakpoint is set
-// at the current PC, 'step' will go right through it. (That's supposed
+// at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
 //
 
@@ -577,7 +583,7 @@ void pic_processor::step (unsigned int steps)
       else
 	{
 
-	  program_memory[pc.value]->execute();
+	  program_memory[pc->value]->execute();
 	  trace.cycle_counter(cycles.value);
 	  trace.dump_last_instruction();
 
@@ -603,7 +609,7 @@ void pic_processor::step (unsigned int steps)
 void pic_processor::step_over (void)
 {
 
-  unsigned int saved_pc = pc.value;
+  unsigned int saved_pc = pc->value;
 
   if(simulation_mode != STOPPED) {
     if(verbose)
@@ -613,9 +619,9 @@ void pic_processor::step_over (void)
 
   step(1); // Try one step
 
-  if( ! ( (pc.value >= saved_pc) && (pc.value <= saved_pc+2) ) )
+  if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
     {
-        if(find_instruction(pc.value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+        if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
 	  return;
 	else
 	{
@@ -637,7 +643,7 @@ void pic_processor::step_over (void)
 void pic_processor::run_to_address (unsigned int destination)
 { 
   
-  unsigned int saved_pc = pc.value;
+  unsigned int saved_pc = pc->value;
   
   if(simulation_mode != STOPPED) {
     if(verbose)
@@ -664,7 +670,7 @@ void pic_processor::reset (RESET_TYPE r)
   if(r == SOFT_RESET)
     {
       trace.reset(r);
-      pc.reset();
+      pc->reset();
       gi.simulation_has_stopped();
       cout << " --- Soft Reset (not fully implemented)\n";
       return;
@@ -677,7 +683,7 @@ void pic_processor::reset (RESET_TYPE r)
 
 
   trace.reset(r);
-  pc.reset();
+  pc->reset();
   stack->reset();
   bp.clear_global();
 
@@ -732,13 +738,13 @@ void pic_processor::disassemble (int start_address, int end_address)
   int use_src_to_disasm =0;
 
   if(start_address < 0) start_address = 0;
-  if(end_address >= pc.memory_size_mask) end_address = pc.memory_size_mask;
+  if(end_address >= pc->memory_size_mask) end_address = pc->memory_size_mask;
 
   char str[50];
 
   for(int i = start_address; i<=end_address; i++)
     {
-      if (pc.value == i)
+      if (pc->value == i)
 	cout << "==>";
       else
 	cout << "   ";
@@ -806,13 +812,13 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
     {
       file_id = lst_file_id;
       line = program_memory[pc_val]->get_lst_line();
-      pc_line = program_memory[pc.value]->get_lst_line();
+      pc_line = program_memory[pc->value]->get_lst_line();
     }
   else
     {
       file_id = program_memory[pc_val]->file_id;
       line = program_memory[pc_val]->get_src_line();
-      pc_line = program_memory[pc.value]->get_src_line();
+      pc_line = program_memory[pc->value]->get_src_line();
     }
 
   start_line += line;
@@ -871,6 +877,9 @@ pic_processor::pic_processor(void)
 
   if(verbose)
     cout << "pic_processor constructor\n";
+
+  pc = NULL; //new Program_Counter();
+
   files = NULL;
 
   eeprom = NULL;
@@ -910,7 +919,7 @@ void pic_processor::create (void)
   create_stack();
 
   // Now, initialize the core stuff:
-  pc.cpu = this;
+  pc->cpu = this;
   //  cycles.cpu = this;
   wdt.cpu = this;
 
@@ -929,7 +938,7 @@ void pic_processor::create (void)
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
-  trace.program_counter (pc.value);
+  trace.program_counter (pc->value);
 
 
 }
@@ -1140,7 +1149,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 
   // The memory_size_mask is used by the branching instructions 
 
-  pc.memory_size_mask = memory_size - 1;
+  pc->memory_size_mask = memory_size - 1;
 
   // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
   // pointers of type 'instruction'. This is where the simulated instructions

@@ -267,6 +267,7 @@ void _14bit_40pins::create_iopin_map(void)
   assign_pin(13, NULL);
   assign_pin(14, NULL);
 
+  cout << "Creating portc iopin\n";
   assign_pin(15, new IO_bi_directional(portc, 0));
   assign_pin(16, new IO_bi_directional(portc, 1));
   assign_pin(17, new IO_bi_directional(portc, 2));
@@ -476,7 +477,7 @@ void  P16C62::create(void)
   // Build the links between the I/O Pins and the internal peripherals
   ccp1con.iopin = portc->pins[2];
 
-  trace.program_counter (pc.value);
+  trace.program_counter (pc->value);
 
 
 }
@@ -538,7 +539,21 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize(this,&pir1,portc);
+  usart.initialize_14(this,&pir1,portc);
+
+  cout << "portc HACK \n";
+  int i;
+  for(i=0; i<8; i++) {
+    if(portc->pins[i]) {
+      portc->pins[i]->iopp=&(this->registers[7]);
+    }
+  }
+
+  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  ssp.initialize(this);
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
@@ -679,7 +694,7 @@ void  P16C64::create(void)
   // Build the links between the I/O Pins and the internal peripherals
   ccp1con.iopin = portc->pins[2];
 
-  trace.program_counter (pc.value);
+  trace.program_counter (pc->value);
 
 
 }
@@ -741,7 +756,21 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize(this,&pir1,portc);
+  usart.initialize_14(this,&pir1,portc);
+
+  cout << "portc HACK \n";
+  int i;
+  for(i=0; i<8; i++) {
+    if(portc->pins[i]) {
+      portc->pins[i]->iopp=&(this->registers[7]);
+    }
+  }
+
+  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  ssp.initialize(this);
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");

@@ -84,7 +84,8 @@ void  FSRL::put_value(unsigned int new_value)
     {
 	xref->update();
   
-	cpu->indf->xref->update();
+	if(cpu->indf->xref)
+	  cpu->indf->xref->update();
     }
 
 
@@ -502,7 +503,7 @@ void Fast_Stack::push(void)
 
 void Fast_Stack::pop(void)
 {
-  cout << "popping fast stack\n";
+  //cout << "popping fast stack\n";
   cpu->W.put(w);
   cpu->status.put(status);
   cpu->bsr.put(bsr);
@@ -510,24 +511,196 @@ void Fast_Stack::pop(void)
 }
 
 //--------------------------------------------------
+
+Program_Counter16::Program_Counter16(void)
+{
+  if(verbose)
+    cout << "pc constructor 16\n";
+}
+
+
+//--------------------------------------------------
+// increment - update the program counter. All non-branching instructions pass through here.
+//   
+
+void Program_Counter16::increment(void)
+{
+
+  value = (value + 1) & memory_size_mask;
+  trace.program_counter(value);
+
+  // Update pcl. Note that we don't want to pcl.put() because that 
+  // will trigger a break point if there's one set on pcl. (A read/write
+  // break point on pcl should not be triggered by advancing the program
+  // counter).
+
+  cpu->pcl.value = value & 0xff;
+  cpu->cycles.increment();
+}
+
+//--------------------------------------------------
+// skip - Does the same thing that increment does, except that it records the operation
+// in the trace buffer as a 'skip' instead of a 'pc update'.
+//   
+
+void Program_Counter16::skip(void)
+{
+
+  trace.cycle_increment();
+  value = (value + 1) & memory_size_mask;
+  trace.pc_skip(value);
+
+
+  // Update pcl. Note that we don't want to pcl.put() because that 
+  // will trigger a break point if there's one set on pcl. (A read/write
+  // break point on pcl should not be triggered by advancing the program
+  // counter).
+
+  cpu->pcl.value = value & 0xff;
+  cpu->cycles.increment();
+}
+
+//--------------------------------------------------
+// jump - update the program counter. All branching instructions except computed gotos
+//        and returns go through here.
+
+void Program_Counter16::jump(unsigned int new_address)
+{
+
+  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
+  // to generate the destination address:
+
+  value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+
+  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  
+  cpu->cycles.increment();
+  
+  trace.cycle_increment(); 
+  trace.program_counter(value);
+
+  cpu->cycles.increment();
+
+}
+
+//--------------------------------------------------
+// interrupt - update the program counter. Like a jump, except pclath is ignored.
+//
+
+void Program_Counter16::interrupt(unsigned int new_address)
+{
+
+  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
+  // to generate the destination address:
+
+  value = new_address & memory_size_mask;
+
+  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  
+  cpu->cycles.increment();
+  
+  trace.cycle_increment(); 
+  trace.program_counter(value);
+
+  cpu->cycles.increment();
+
+}
+
+//--------------------------------------------------
+// computed_goto - update the program counter. Anytime the pcl register is written to
+//                 by the source code we'll pass through here.
+//
+
+void Program_Counter16::computed_goto(unsigned int new_address)
+{
+
+  cout << "Program_Counter16::put_value 0x" << hex << new_address << '\n';
+  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
+  // to generate the destination address:
+
+  value = ( (new_address | cpu->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
+
+  trace.cycle_increment();
+  trace.program_counter(value<<1);
+
+  cpu->pcl.value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
+
+  // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
+  // the increment with a decrement:
+  value--;
+  cpu->cycles.increment();
+}
+
+//--------------------------------------------------
+// new_address - write a new value to the program counter. All returns pass through here.
+//
+
+void Program_Counter16::new_address(unsigned int new_value)
+{
+  value = new_value & memory_size_mask;
+  trace.cycle_increment();
+  trace.program_counter(value);
+
+  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->cycles.increment();
+  cpu->cycles.increment();
+}
+//--------------------------------------------------
+// get_next - get the next address that is just pass the current one
+//            (used by 'call' to obtain the return address)
+
+unsigned int Program_Counter16::get_next(void)
+{
+
+  return( (value + cpu->program_memory[value]->instruction_size()) & memory_size_mask);
+
+}
+
+
+//--------------------------------------------------
 // put_value - Change the program counter without affecting the cycle counter
 //             (This is what's called if the user changes the pc.)
 
 void Program_Counter16::put_value(unsigned int new_value)
 {
+  cout << "Program_Counter16::put_value 0x" << hex << new_value << '\n';
+
+  value = (new_value >> 1) & memory_size_mask;
+  cpu->pcl.value = value & 0xff;
+  cpu->pclath.value = (new_value >> 8) & 0xff;
+
+  trace.program_counter(value << 1);
+
+  if(xref)
+    {
+      if(cpu->pcl.xref)
+	cpu->pcl.xref->update();
+      if(cpu->pclath.xref)
+	cpu->pclath.xref->update();
+	xref->update();
+    }
+  
+
+#if 0
   value = new_value & memory_size_mask;
   cpu->pcl.value = value & 0xff;
   cpu->pclath.value = (new_value >> 8) & 0xff;
   //  cpu16->pclatu.value = (new_value >> 16) & 0xff;
 
   if(xref)
-  {
+    {
       cpu->pcl.xref->update();
       cpu->pclath.xref->update();
       //update_object(cpu16->pclatu.gui_xref,cpu->pclatu.value);
       xref->update();
     }
-
+#endif
+}
+//------------------------------------------------
+unsigned int Program_Counter16::get_value(void)
+{
+  cout << "Program_Counter16::get_value 0x" << hex << value << '\n';
+  return value << 1;
 }
 
 //------------------------------------------------
@@ -752,6 +925,17 @@ void T0CON::put(unsigned int new_value)
 
   unsigned int old_value = value;
   value = new_value;
+
+  if( (value ^ old_value) & (T08BIT | TMR0ON)) {
+    cpu->option_new_bits_6_7(value & (BIT6 | BIT7));
+
+    if(value & TMR0ON)
+      cpu16->tmr0l.start(cpu16->tmr0l.value & 0xff);
+    else
+      cpu16->tmr0l.stop();
+
+  } 
+
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
   if( (value ^ old_value) & T0CS)
@@ -764,9 +948,7 @@ void T0CON::put(unsigned int new_value)
   if( (value ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
     cpu16->tmr0l.new_prescale();
 
-  if( (value ^ old_value) & (BIT6 | BIT7))
-    cpu->option_new_bits_6_7(value & (BIT6 | BIT7));
-
+  cout <<"T0CON::put - new val 0x" << hex << value<<'\n';
   trace.register_write(address,value);
 
 }
@@ -870,7 +1052,7 @@ void INTCON_16::put(unsigned int new_value)
 
   value = new_value;
   trace.register_write(address,value);
-  cout << " INTCON_16::put\n";
+  //cout << " INTCON_16::put\n";
   // Now let's see if there's a pending interrupt
   // if IPEN is set in RCON, then interrupt priorities
   // are being used. (In other words, there are two
@@ -903,6 +1085,7 @@ void INTCON_16::put(unsigned int new_value)
 
       if(i1 & ( (intcon2->value & (T0IF | RBIF)) | INTF))
 	{
+	  //cout << " selecting high priority vector\n";
 	  cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
 	  trace.interrupt();
 	  bp.set_interrupt();
@@ -916,6 +1099,7 @@ void INTCON_16::put(unsigned int new_value)
 
       if(i1 & ( (~intcon2->value & (T0IF | RBIF)) | INTF))
 	{
+	  //cout << " selecting low priority vector\n";
 	  cpu16->interrupt_vector = INTERRUPT_VECTOR_LO;
 	  trace.interrupt();
 	  bp.set_interrupt();
@@ -928,6 +1112,7 @@ void INTCON_16::put(unsigned int new_value)
     {
       // ignore interrupt priorities
 
+      //cout << " ignoring interrupt priorities, selecting high priority vector\n";
       cpu16->interrupt_vector = INTERRUPT_VECTOR_HI;
       if(value & GIE) 
 	{
@@ -1060,12 +1245,13 @@ void TMR0_16::increment(void)
 
 unsigned int TMR0_16::get_value(void)
 {
+  //cout << "tmr0_16 get_value\n";
   // If the _TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(cpu->cycles.value <= synchronized_cycle)
     return value;
 
-  if(get_t0cs())
+  if(get_t0cs() ||  ((t0con->value & T0CON::TMR0ON) == 0))
     return(value);
 
   int new_value = (cpu->cycles.value - last_cycle)/ prescale;
@@ -1081,7 +1267,11 @@ unsigned int TMR0_16::get_value(void)
 void TMR0_16::callback(void)
 {
 
-  cout<<"_TMR0 rollover: " << hex << cpu->cycles.value << '\n';
+  //cout<<"_TMR0 rollover: " << hex << cpu->cycles.value << '\n';
+  if((t0con->value & T0CON::TMR0ON) == 0) {
+    cout << " tmr0 isn't turned on\n";
+    return;
+  }
 
   TMR0::callback();   // Let the parent class handle the lower eight bits
 
@@ -1099,19 +1289,52 @@ void TMR0_16::callback(void)
 
 //--------------------------------------------------
 
+TXREG_16::TXREG_16(void)
+{
+
+  cout << "txreg16 constructor\n";
+
+}
+
 bool TXREG_16::is_empty(void)
 {
-  return(pir1->get_txif());
+  cout << "Txreg_16::empty\n";
+  if(pir1)
+    return(pir1->get_txif());
+  return 0;
+
 }
 
 void TXREG_16::empty(void)
 {
-  pir1->set_txif();
+  if(pir1)
+    pir1->set_txif();
+  cout << "Txreg_16::empty\n";
 }
 
 void TXREG_16::full(void)
 {
-  pir1->clear_txif();
+  if(pir1)
+    pir1->clear_txif();
+  cout << "Txreg_16::full\n";
+}
+
+void TXREG_16::assign_pir(PIR1 *new_pir)
+{
+  pir1 = new_pir;
+
+}
+
+
+RCREG_16::RCREG_16(void)
+{
+  cout << "rcreg 16 constructor\n";
+}
+
+void RCREG_16::assign_pir(PIR1 *new_pir)
+{
+  pir1 = new_pir;
+
 }
 
 void RCREG_16::push(unsigned int new_value)
@@ -1119,9 +1342,20 @@ void RCREG_16::push(unsigned int new_value)
 
   _RCREG::push(new_value);
 
-  pir1->set_rcif();
+  if(pir1)
+    pir1->set_rcif();
 
 }
+
+void RCREG_16::pop(void)
+{
+
+  _RCREG::pop();
+  if((fifo_sp == 0) && pir1)
+    pir1->clear_rcif();
+
+}
+
 
 //--------------------------------------------------
 // member functions for the USART
@@ -1129,52 +1363,64 @@ void RCREG_16::push(unsigned int new_value)
 
 USART_MODULE16::USART_MODULE16(void)
 {
+  cout << "usart 16 constructor\n";
+  cout << "USART_MODULE16::constructor txreg => " << txreg.name() << "\n";
+#if 0
+  rcsta = new _RCSTA;
+  txsta = new _TXSTA;
 
   txreg = new TXREG_16;
   rcreg = new RCREG_16;
-
   spbrg = new _SPBRG;
-
+#endif
 }
 
 //--------------------------------------------------
-void USART_MODULE16::initialize(_16bit_processor *new_cpu)
+void USART_MODULE16::initialize_16(_16bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port)
+//void USART_MODULE16::initialize(_16bit_processor *new_cpu)
+
 {
-  cpu = new_cpu;
+  _cpu16 = new_cpu;
 
-  USART_MODULE::initialize(NULL);
-  //spbrg.txsta = &txsta;
-  //spbrg.rcsta = &rcsta;
+  spbrg.txsta = &txsta;
+  spbrg.rcsta = &rcsta;
 
-  if(txreg)
-    txreg->assign_pir(&cpu->pir1);
+  txreg.assign_pir(pir1);
+  txreg.txsta = &txsta;
 
-  //txreg.txsta = &txsta;
+  txsta.txreg = &txreg;
+  txsta.spbrg = &spbrg;
+  txsta.txpin = uart_port->pins[6];
+  txsta.bit_count = 0;
 
-  //txsta.txreg = &txreg;
-  //txsta.spbrg = &spbrg;
-  //txsta.txpin = uart_port->pins[6];
-  //txsta.bit_count = 0;
+  rcsta.rcreg = &rcreg;
+  rcsta.spbrg = &spbrg;
+  rcsta.txsta = &txsta;
+  rcsta.uart_port = uart_port;
+  rcsta.rx_bit = 7;
 
+  rcreg.assign_pir(pir1);
+  rcreg.rcsta = &rcsta;
 
-  //rcsta.rcreg = &rcreg;
-  //rcsta.spbrg = &spbrg;
-  //rcsta.txsta = &txsta;
-  //rcsta.uart_port = uart_port;
-  //rcsta.rx_bit = 7;
-
-  if(rcreg) 
-    rcreg->assign_pir(&cpu->pir1);
-
-  //rcreg.rcsta = &rcsta;
-  //rcreg.pir1 = &cpu->pir1;
 }
 
-void   USART_MODULE16::new_rx_edge(unsigned int bit)
+void   USART_MODULE16::init_ioport(IOPORT *new_ioport)
+{
+  if(!new_ioport)
+    return;
+
+  txsta.txpin = new_ioport->pins[6];
+
+  rcsta.uart_port = new_ioport;
+
+}
+
+void  USART_MODULE16::new_rx_edge(unsigned int bit)
 {
 
-  //  if( (rcsta.state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
-  //    rcsta.receive_start_bit();
+  if( (rcsta.state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
+    rcsta.receive_start_bit();
+  cout << "USART_MODULE16::new_rx_edge\n";
 }
 
 //-------------------------------------------------------------------
@@ -1221,6 +1467,8 @@ void TBL_MODULE::increment(void)
     if(tabptrh.value >= 0xff) {
       tabptrh.put(0);
       tabptru.put(tabptru.value + 1);
+    } else {
+      tabptrh.put(tabptrh.value + 1);
     }
   }
   else
@@ -1299,3 +1547,149 @@ void TBL_MODULE::write(void)
 
 
 }
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  SSPCON1::put(unsigned int new_value)
+{
+
+  cout << "SSPCON1 is not implemented\n";
+
+  sfr_register::put(new_value);
+}
+
+SSPCON1::SSPCON1(void)
+{
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  SSPCON2::put(unsigned int new_value)
+{
+
+  cout << "SSPCON2 is not implemented\n";
+
+  sfr_register::put(new_value);
+}
+
+SSPCON2::SSPCON2(void)
+{
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  SSPSTAT::put(unsigned int new_value)
+{
+
+  cout << "SSPSTAT is not implemented\n";
+
+  sfr_register::put(new_value);
+}
+
+SSPSTAT::SSPSTAT(void)
+{
+
+}
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  SSPADD::put(unsigned int new_value)
+{
+
+  cout << "SSPADD is not implemented\n";
+
+  sfr_register::put(new_value);
+}
+
+SSPADD::SSPADD(void)
+{
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void  SSPBUF::put(unsigned int new_value)
+{
+
+  cout << "SSPBUF is not implemented\n";
+
+  sfr_register::put(new_value);
+}
+
+SSPBUF::SSPBUF(void)
+{
+
+}
+
+
+SSPMODULE::SSPMODULE(void)
+{
+  cout << "Warning SSP Module is not implemented\n";
+}
+
+
+//-------------------------------------------------------------------
+//
+// PORTC16
+//-------------------------------------------------------------------
+
+
+PORTC16::PORTC16(void)
+{
+  usart = NULL;
+  ccp1con = NULL;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+unsigned int PORTC16::get(void)
+{
+  unsigned int old_value;
+
+  old_value = value;
+
+  IOPORT::get();
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  // 
+  if( ccp1con && (diff & CCP1) )
+    ccp1con->new_edge(value & CCP1);
+ 
+  // if this cpu has a usart and there's been a change detected on
+  // the RX pin, then we need to notify the usart
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
+
+  return(value);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTC16::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  cout << "PORTC16::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  if(ccp1con && ( diff & CCP1) )
+    ccp1con->new_edge(value & CCP1);
+
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
+
+}
+

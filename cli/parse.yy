@@ -434,6 +434,14 @@ module_cmd: MODULE
             delete($2);
             YYABORT;
           }
+
+          | MODULE string_option STRING STRING NUMBER
+	  { 
+            c_module.module($2, $3, $4, $5);
+            delete($2);
+            YYABORT;
+          }
+
 /*
           | MODULE string_option STRING STRING STRING
 	  { 

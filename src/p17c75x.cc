@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "p17c75x.h"
 
+#if 0
 void _68pins::create_iopin_map(void)
 {
   // ---- This is probably going to be moved:
@@ -172,6 +173,7 @@ void _68pins::create_iopin_map(void)
   assign_pin(40, new IO_bi_directional(portg, 7));
 
 }
+#endif
 
 
 //========================================================================
@@ -229,7 +231,7 @@ void  P17C7xx::create(int ram_top)
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
-  trace.program_counter (pc.value);
+  trace.program_counter (pc->value);
   tmr0l.initialize();
   intcon.initialize();
 
@@ -332,6 +334,7 @@ void P17C75x::create_symbols(void)
 
 void P17C75x::create_sfr_map(void)
 {
+#if 0 
   if (verbose) 
     cout << "creating p17c75x common registers\n";
   
@@ -470,7 +473,7 @@ void P17C75x::create_sfr_map(void)
   // All of the status bits on the 16bit core are writable
   status.write_mask = 0xff;
 
-
+#endif
 }
 
 

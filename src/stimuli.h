@@ -208,37 +208,38 @@ enum SOURCE_TYPE
 
 class IOPIN : public stimulus
 {
-public:
+ public:
 
-enum IOPIN_TYPE
-{
-  INPUT_ONLY,          // e.g. MCLR
-  BI_DIRECTIONAL,      // most iopins
-  BI_DIRECTIONAL_PU,   // same as bi_directional, but with pullup resistor. e.g. portb
-  OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
+  enum IOPIN_TYPE
+    {
+      INPUT_ONLY,          // e.g. MCLR
+      BI_DIRECTIONAL,      // most iopins
+      BI_DIRECTIONAL_PU,   // same as bi_directional, but with pullup resistor. e.g. portb
+      OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
+    };
 
-};
+  enum IOPIN_DIRECTION
+    {
+      DIR_INPUT,
+      DIR_OUTPUT
+    };
 
-enum IOPIN_DIRECTION
-{
-  DIR_INPUT,
-  DIR_OUTPUT
-};
-
-  IOPORT *iop;
+  IOPORT *iop;    // Two ways to access parent port
+  file_register **iopp;   // this later one is used to set break points.
   unsigned int iobit;
+
   int l2h_threshold;
   int h2l_threshold;
 
   IOPIN(void);
-  IOPIN(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  IOPIN(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iop=NULL);
   ~IOPIN();
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual int get_voltage(guint64 current_time) {return state;};
   virtual int get_state(void);
-
+  virtual file_register *get_iop(void);
   virtual void put_state(int new_state) {state=new_state;}; 
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);
@@ -254,7 +255,7 @@ class IO_input : public IOPIN
 public:
 
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
-  IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iop=NULL);
   IO_input(void);
   virtual int get_voltage(guint64 current_time); //{return drive;};
   virtual void toggle(void);
@@ -274,7 +275,7 @@ public:
   
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
-  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iop=NULL);
   virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
@@ -289,7 +290,7 @@ public:
   resistor *pull_up_resistor;
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
-  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iop=NULL);
   virtual int get_voltage(guint64 current_time);
 
 };
@@ -301,7 +302,7 @@ public:
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
-  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iop=NULL);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);

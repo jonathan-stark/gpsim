@@ -216,7 +216,7 @@ pic_processor * P16C54::construct(void)
 
   cout << " c54 construct\n";
 
-  p->pc.reset_address = 0x1ff;
+  p->pc->reset_address = 0x1ff;
 
   p->create();
 
@@ -319,7 +319,7 @@ pic_processor * P16C55::construct(void)
 
   cout << " c55 construct\n";
 
-  p->pc.reset_address = 0x1ff;
+  p->pc->reset_address = 0x1ff;
 
   p->create();
 

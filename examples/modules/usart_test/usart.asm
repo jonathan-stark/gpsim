@@ -5,6 +5,7 @@
 	list	p=16c74
   __config _WDT_OFF
 
+  radix  dec
 
 include "p16c74.inc"
 
@@ -78,11 +79,22 @@ start
 	clrf	STATUS
 
 	bsf	STATUS,RP0
+
+	;; CSRC - clock source is a don't care
+	;; TX9  - 0 8-bit data
+	;; TXEN - 0 don't enable the transmitter.
+	;; SYNC - 0 Asynchronous
+	;; BRGH - 1 Select high baud rate divisor
+	;; TRMT - x read only
+	;; TX9D - 0 not used
 	
 	movlw	(1<<BRGH)
-
 	movwf	TXSTA
-	clrf	SPBRG		;Highest possible baud rate.
+
+	movlw   129		;9600 baud.
+	movwf   SPBRG
+
+	;;clrf	SPBRG		;Highest possible baud rate.
 
 	movlw	0x80		; Make rc6 and rc7 inputs. These are the
 	movwf	TRISC		; the RX and TX pins for the USART
@@ -100,12 +112,8 @@ start
 	bsf	INTCON,PEIE
 
 	;; Delay for a moment to allow the I/O lines to settle
-	clrf	temp2
-delay2:	
-	decfsz	temp1,f
-	 goto 	$+2
-	decfsz	temp2,f
-	 goto   delay2
+;	clrf	temp2
+;	call	delay
 	
 	movf	RCREG,w          ;Clear RCIF
 	movf	RCREG,w          ;Clear RCIF
@@ -118,13 +126,13 @@ delay2:
 
 tx_loop:	
 	call	tx_message
-	movwf	TXREG
+;	movwf	TXREG
+
+	bsf	temp2,4
+	call	delay		;; Delay between bytes.
 
 	btfss	PIR1,TXIF
 	 goto	$-1
-
-;	decfsz	temp1,f
-;	 goto	$-1
 
 	goto	tx_loop
 
@@ -166,5 +174,13 @@ rx_loop:
 	goto	rx_loop
 
 	goto $
-	
+
+
+delay	
+	decfsz	temp1,f
+	 goto 	$+2
+	decfsz	temp2,f
+	 goto   delay
+	return
+
 	end

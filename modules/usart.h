@@ -45,7 +45,16 @@ class EventLogger;
 
 class TXREG;
 class RCREG;
+class USART_TIMER;
 class USART_IOPORT;
+
+class MSG_BUFFER
+{
+ public:
+
+  guint64 byte;
+
+};
 
 class USART_CORE //: public USART_MODULE
 {
@@ -57,10 +66,11 @@ class USART_CORE //: public USART_MODULE
   /*  receiver stuff **/
   RCREG *rcreg;
 
-
-
   /* Transmitter stuff **/
   TXREG *txreg;
+
+  /* USART timer coordinates tranmission timing */
+  USART_TIMER *utimer;
 
   EventLogger *tx_event;
 
@@ -69,7 +79,7 @@ class USART_CORE //: public USART_MODULE
   USARTModule *um;
 
   virtual void new_rx_edge(unsigned int);
-
+  virtual int get_tx_byte(void);
   void initialize(USART_IOPORT *new_iop=NULL);
 
   USART_CORE(void);
@@ -80,7 +90,7 @@ class USARTModule : public ExternalModule
  public:
 
   USART_IOPORT *port;
-  USART_CORE   *usart;    // Use the PIC usart core 
+  USART_CORE   *usart;
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);

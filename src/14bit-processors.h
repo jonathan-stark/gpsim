@@ -106,7 +106,9 @@ public:
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
   virtual unsigned int program_memory_size(void) const {return 0;};
+
   static pic_processor *construct(void);
+  _14bit_processor(void);
 };
 
 #define cpu14 ( (_14bit_processor *)cpu)

@@ -76,7 +76,7 @@ void cmd_list::list(void)
   if(!have_cpu(1))
     return;
 
-  cpu->list(file_id,cpu->pc.value,starting_line,ending_line);
+  cpu->list(file_id,cpu->pc->value,starting_line,ending_line);
 
 }
 void cmd_list::list(cmd_options *opt)

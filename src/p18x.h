@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P18X_H__
 
 #include "16bit-processors.h"
-#include "p16x6x.h"
+//#include "p16x6x.h"
 
 /*
 class _16bit_28pins
@@ -56,16 +56,15 @@ public:
 
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
-  //  void create_sfr_map(void);
-
+/*
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
-
+*/
 };
 
-class P18C2x2 : public _16bit_processor, public _28pins
+class P18C2x2 : public _16bit_processor//, public _28pins
 {
  public:
 
@@ -79,11 +78,13 @@ class P18C2x2 : public _16bit_processor, public _28pins
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
   void create_sfr_map(void);
-
+/*
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+*/
+  virtual void create_iopin_map(void);
 
 };
 
@@ -119,9 +120,18 @@ class P18C252 : public P18C242
  *  class definitions for the 18C4x2 family
  */
 
-class P18C4x2 : public _16bit_processor, public _14bit_40pins
+class P18C4x2 : public _16bit_processor //, public _14bit_40pins
 {
  public:
+
+
+  PIC_IOPORT   portd;
+  IOPORT_TRIS  trisd;
+  IOPORT_LATCH latd;
+
+  PIC_IOPORT   porte;
+  IOPORT_TRIS  trise;
+  IOPORT_LATCH late;
 
   P18C4x2(void);
   //static pic_processor *construct(void);
@@ -133,12 +143,14 @@ class P18C4x2 : public _16bit_processor, public _14bit_40pins
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
   void create_sfr_map(void);
+  virtual void create_iopin_map(void);
 
+/*
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-
+*/
 };
 
 
@@ -169,4 +181,29 @@ class P18C452 : public P18C442
 
 };
 
+class P18F442 : public P18C442
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F442_;};
+  P18F442(void);
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+
+};
+
+class P18F452 : public P18F442
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F452_;};
+  P18F452(void);
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+
+};
 #endif

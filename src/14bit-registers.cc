@@ -84,6 +84,21 @@ unsigned int file_register::get(void)
   return(value);
 }
 
+int file_register::get_bit(unsigned int bit_number)
+{
+
+  return( (value >>  (bit_number & 0x07)) & 1 );
+
+}
+
+int file_register::get_bit_voltage(unsigned int bit_number)
+{
+  if(get_bit(bit_number))
+    return +1000;
+  else
+    return -1000;
+}
+
 //--------------------------------------------------
 //
 //  Update the contents of the file register.
@@ -98,6 +113,27 @@ void file_register::put(unsigned int new_value)
   trace.register_write(address,value);
 
 }
+
+//--------------------------------------------------
+// set_bit
+//
+//  set a single bit in a register. Note that this
+// is really not intended to be used on the file_register
+// class. Instead, setbit is a place holder for high level
+// classes that overide this function
+void file_register::setbit(unsigned int bit_number, bool new_value)
+{
+  if(bit_number < 8) {
+    value = (value & ~(1<<bit_number)) | (1<<bit_number);
+    trace.register_write(address,value);
+  }
+}
+
+void file_register::setbit_value(unsigned int bit_number, bool new_value)
+{
+  setbit(bit_number,new_value);
+}
+
 
 void file_register::new_name(char *s)
 {
@@ -476,10 +512,10 @@ void PCL::put(unsigned int new_value)
   //  if(break_point) 
   //  {
   //    if(bp.check_write_break(this))
-  //      cpu->pc.computed_goto(new_value);
+  //      cpu->pc->computed_goto(new_value);
   //  }
   //  else
-    cpu->pc.computed_goto(new_value);
+    cpu->pc->computed_goto(new_value);
 
   trace.register_write(address,value);
 }
@@ -488,9 +524,9 @@ void PCL::put_value(unsigned int new_value)
 {
 
   value = new_value;
-  cpu->pc.put_value( (cpu->pc.value & 0xffffff00) | value);
+  cpu->pc->put_value( (cpu->pc->get_value() & 0xffffff00) | value);
 
-  // The gui (if present) will be updated in the pc.put_value call.
+  // The gui (if present) will be updated in the pc->put_value call.
 }
 
 unsigned int PCL::get(void)
@@ -521,9 +557,9 @@ void PCLATH::put_value(unsigned int new_value)
 {
 
   value = new_value & PCLATH_MASK;
-  cpu->pc.put_value( (cpu->pc.value & 0xffff00ff) | (value<<8) );
+  cpu->pc->put_value( (cpu->pc->get_value() & 0xffff00ff) | (value<<8) );
 
-  // The gui (if present) will be updated in the pc.put_value call.
+  // The gui (if present) will be updated in the pc->put_value call.
 }
 
 unsigned int PCLATH::get(void)

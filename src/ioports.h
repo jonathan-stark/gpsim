@@ -68,6 +68,7 @@ class PIC_IOPORT : public IOPORT
 {
 public:
   IOPORT_TRIS * tris;
+  IOPORT_LATCH * latch;   // non-null on 18x parts only
 
   int update_stimuli(void);
   void put(unsigned int new_value);
@@ -91,6 +92,22 @@ public:
   virtual void setbit(unsigned int bit_number, bool new_value);
   unsigned int get(void);
   IOPORT_TRIS(void);
+
+};
+
+class IOPORT_LATCH : public sfr_register  // latch register for 18x cores
+{
+public:
+  PIC_IOPORT * port;
+
+  unsigned int 
+    valid_iopins;   // A mask that for those ports that don't have all 8 io bits.
+
+  void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  unsigned int get(void);
+  IOPORT_LATCH(void);
 
 };
 

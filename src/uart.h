@@ -49,13 +49,13 @@ class _TXREG : public sfr_register
 
   _TXSTA  *txsta;
 
+  _TXREG(void);
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
-  virtual bool is_empty(void)=0;
-  virtual void empty(void)=0;
-  virtual void full(void)=0;
-
-  virtual void assign_pir(PIR1 *new_pir)=0;
+  virtual bool is_empty(void);
+  virtual void empty(void);
+  virtual void full(void);
+  virtual void assign_pir(PIR1 *new_pir);
 };
 
 class _TXSTA : public sfr_register, public BreakCallBack
@@ -77,6 +77,8 @@ public:
     TX9  = 1<<6,
     CSRC = 1<<7
   };
+
+  _TXSTA(void);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -101,12 +103,13 @@ class _RCREG : public sfr_register
 
   unsigned int fifo_sp;       /* fifo stack pointer */
 
+  _RCREG(void);
   virtual unsigned int get(void);
   virtual unsigned int get_value(void);
   virtual void push(unsigned int);
   virtual void pop(void);
 
-  virtual void assign_pir(PIR1 *new_pir)=0;
+  virtual void assign_pir(PIR1 *new_pir);
 
 };
 
@@ -158,8 +161,7 @@ class _RCSTA : public sfr_register, public BreakCallBack
   unsigned int sample,state;
   guint64 future_cycle, last_cycle;
 
-  //  unsigned int new_bit;    //TEST!!!!
-
+  _RCSTA(void);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
@@ -181,6 +183,8 @@ class _SPBRG : public sfr_register, public BreakCallBack
     start_cycle,   // The cycle the SPBRG was started
     last_cycle,    // The cycle when the spbrg clock last changed
     future_cycle;  // The next cycle spbrg is predicted to change
+
+  _SPBRG(void);
 
   virtual void callback(void);
   virtual void start(void);
@@ -230,20 +234,20 @@ public:
   USART_MODULE(void);
   void initialize(IOPORT *uart_port);
 
-  virtual  void  new_rx_edge(unsigned int)=0;
+  virtual void  new_rx_edge(unsigned int);
 };
 
 class USART_MODULE14 : public USART_MODULE
 {
  public:
 
-  _14bit_processor *cpu;
+  _14bit_processor *_cpu14;
 
   //TXREG_14     txreg;
   //RCREG_14     rcreg;
 
   USART_MODULE14(void);
-  virtual void initialize(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+  void initialize_14(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
   virtual void new_rx_edge(unsigned int);
 
 };

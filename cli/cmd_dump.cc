@@ -206,7 +206,7 @@ void cmd_dump::dump(int mem_type)
     dump_sfrs();
 
     printf("\n%s = %02x\n",cpu->W.name(), cpu->W.get_value());
-    printf("pc = 0x%x\n",cpu->pc.value);
+    printf("pc = 0x%x\n",cpu->pc->value);
   }
 
 }
