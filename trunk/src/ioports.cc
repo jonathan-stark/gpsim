@@ -206,8 +206,57 @@ void IOPORT::put(unsigned int new_value)
   trace.register_write(address,value);
 
 }
+//-------------------------------------------------------------------
+// void IOPORT::put_value(unsigned int new_value)
+//
+//  When there's a gui initiated change to the IO port, we'll pass
+// though here. There are three things that we do. First, we update
+// the I/O port the way the gui asks us. Note however, that it's 
+// possible that the gui's requested will go un-honored (if for example,
+// we try to force an output to change states or if there's a stimulus
+// driving the bus already). 
+//   Next, after updating the IO port (and all of it's connected stimuli),
+// we'll call the gui to update its windows. This is done through the
+// xref->update call.
+//   Finally, we'll check all of the I/O pins that have changed as a
+// result of the IO port update and individually call each of their 
+// cross references.
+//
+//-------------------------------------------------------------------
+void IOPORT::put_value(unsigned int new_value)
+{
+  int i,j;
+  int old_value = value;
+  int diff;
+
+  //  cout << "IOPORT::put_value trying to put " << new_value << '\n';
+ 
+  put(new_value);
+
+  //  cout << " IOPORT::put_value just set port value to " << value << '\n';
+
+  if(xref)
+    xref->update();
+
+  // Find the pins that have changed states
+  diff = (old_value ^ value) & valid_iopins;
+
+  // Update the cross references for each pin that has changed.
+  for(i=0,j=1; i<8; i++,j<<=1) {
+
+    if(j & diff ) {
+
+      if(pins[i]->xref) {
+	pins[i]->xref->update();
+	//cout << " IOPORT::put_value updating pin # " << i << '\n';
+      }
+
+    }
+
+  }
 
 
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void IOPORT::setbit(unsigned int bit_number, bool new_value)
@@ -223,7 +272,24 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 
       trace.register_write(address,value); // %%% FIX ME %%% give this another trace type.
     }
-  //else cout <<  " IOPORT::set_bit bit did not change\n";
+  //  else cout <<  " IOPORT::set_bit bit did not change\n";
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
+{
+
+  int diff = (value ^  (new_value << bit_number) ) & valid_iopins;
+
+  //  cout << " IOPORT::setbit_value bit " << bit_number << " to " << new_value << '\n';
+  if(diff) {
+    put_value(value ^ diff);
+    //cout << "     is changing\n";
+    if(xref)
+      xref->update();
+  }
 
 }
 
@@ -362,19 +428,28 @@ void IOPORT_TRIS::put(unsigned int new_value)
 }
 
 //-------------------------------------------------------------------
+// void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
+//
+//  This routine will set the bit, 'bit_number', to the value 'new_value'
+// If the new_value is different than the old one then we will also
+// update the 
+//
 //-------------------------------------------------------------------
 void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
 {
 
-  int diff = ((1<<bit_number) & value) ^ (new_value << bit_number);
+  int diff = port->valid_iopins & (1<<bit_number) & (value ^ (new_value << bit_number));
 
   if(diff) {
-    port->update_pin_directions(new_value ^ diff);
+    port->update_pin_directions(value ^ diff);
 
-    value ^= new_value;
-
+    value ^= diff;
 
     trace.register_write(address,value);
+    if(xref)
+      xref->update();
+    if(port->pins[bit_number]->xref)
+      port->pins[bit_number]->xref->update();
 
   }
 
@@ -384,7 +459,7 @@ IOPORT_TRIS::IOPORT_TRIS(void)
 {
   break_point = 0;
   port = NULL;
-
+  valid_iopins = 0;
   new_name("ioport");
 }
 
@@ -519,7 +594,7 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
 
       if(cpu14->option_reg.get_t0cs())
 	{
-	  //  cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
+	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
 	if( ((value & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
 	  cpu14->tmr0.increment();
 	}

@@ -102,7 +102,7 @@ INCLUDES = @X_CFLAGS@ @Y_CFLAGS@
 
 lib_LTLIBRARIES = libgui.la
 
-libgui_la_SOURCES = gui_break.c gui_callbacks.c gui_dialog.c gui_init.c gui_main.c 	gui_menu.c gui_processor.c gui_regwin.c gui_src.c gui_src_asm.c 	gui_src_opcode.c gui_statusbar.c gui.h gui_callbacks.h gui_interface.h 	gui_symbols.c gui_watch.c
+libgui_la_SOURCES = gui_break.c gui_callbacks.c gui_dialog.c gui_init.c gui_main.c 	gui_menu.c gui_processor.c gui_regwin.c gui_src.c gui_src_asm.c 	gui_src_opcode.c gui_statusbar.c gui.h gui_callbacks.h gui_interface.h 	gui_symbols.c gui_watch.c gui_breadboard.c
 
 
 libgui_la_LDFLAGS = $(shell gtk-config --libs) $(shell gtkextra-config --libs)
@@ -132,7 +132,7 @@ libgui_la_LIBADD =
 libgui_la_OBJECTS =  gui_break.lo gui_callbacks.lo gui_dialog.lo \
 gui_init.lo gui_main.lo gui_menu.lo gui_processor.lo gui_regwin.lo \
 gui_src.lo gui_src_asm.lo gui_src_opcode.lo gui_statusbar.lo \
-gui_symbols.lo gui_watch.lo
+gui_symbols.lo gui_watch.lo gui_breadboard.lo
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -268,37 +268,6 @@ distdir: $(DISTFILES)
 	    || cp -p $$d/$$file $(distdir)/$$file || :; \
 	  fi; \
 	done
-gui_break.lo gui_break.o : gui_break.c gui.h ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h
-gui_callbacks.lo gui_callbacks.o : gui_callbacks.c
-gui_dialog.lo gui_dialog.o : gui_dialog.c
-gui_init.lo gui_init.o : gui_init.c gui.h ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h
-gui_main.lo gui_main.o : gui_main.c ../src/gpsim_def.h \
-	../src/../config.h gui.h ../src/interface.h gui_interface.h
-gui_menu.lo gui_menu.o : gui_menu.c gui.h ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h gui_callbacks.h
-gui_processor.lo gui_processor.o : gui_processor.c gui.h \
-	../src/interface.h ../src/gpsim_def.h ../src/../config.h \
-	gui_callbacks.h
-gui_regwin.lo gui_regwin.o : gui_regwin.c ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h gui.h ../xpms/center.xpm \
-	../xpms/font.xpm ../xpms/left.xpm ../xpms/paint.xpm \
-	../xpms/right.xpm
-gui_src.lo gui_src.o : gui_src.c gui.h ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h
-gui_src_asm.lo gui_src_asm.o : gui_src_asm.c gui.h ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h ../xpms/pc.xpm \
-	../xpms/break.xpm
-gui_src_opcode.lo gui_src_opcode.o : gui_src_opcode.c gui.h \
-	../src/interface.h ../src/gpsim_def.h ../src/../config.h
-gui_statusbar.lo gui_statusbar.o : gui_statusbar.c gui.h \
-	../src/interface.h ../src/gpsim_def.h ../src/../config.h
-gui_symbols.lo gui_symbols.o : gui_symbols.c ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h gui.h
-gui_watch.lo gui_watch.o : gui_watch.c ../src/interface.h \
-	../src/gpsim_def.h ../src/../config.h gui.h
-
 info-am:
 info: info-am
 dvi-am:
