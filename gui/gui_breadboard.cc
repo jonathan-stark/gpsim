@@ -2436,12 +2436,18 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
 
     pin->y-=pin->height/2;
 
+    pin->layout_xpos = 0;
+    pin->layout_ypos = 0;
+
+
     if(iopin!=NULL)
     {
 	pin->value=iopin->get_state();
 	pin->direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 	pin->orientation=orientation;
         pin->type=PIN_DIGITAL;
+    //debug
+    //pin->direction=PIN_INPUT;
     }
     else
     {

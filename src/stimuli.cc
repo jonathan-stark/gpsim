@@ -1454,6 +1454,7 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, f
 {
 
   drive = MAX_DRIVE / 2;
+  driving = 0;
 
   state = 0;
 
