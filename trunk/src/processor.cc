@@ -386,7 +386,7 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
   if(address < program_memory_size())
     {
       program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
-      printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
+      //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
       if(sline > files[file_id].max_line)
 	files[file_id].max_line = sline;
 

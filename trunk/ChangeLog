@@ -1,3 +1,6 @@
+2004-01-05  Scott Dattalo  <scott@dattalo.com>
+	* src/14bit-tmrs.cc - tmr2 bug. PWM period was getting ANDed with 0xff.
+
 2004-01-03  Scott Dattalo  <scott@dattalo.com>
 	* Applied patch from Borut Razem - adds new files to Visual Studio project files.
 	

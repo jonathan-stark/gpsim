@@ -51,7 +51,6 @@ extern DB_ID dbid;
 GUI_Object::GUI_Object(void)
 {
 
-  printf("GUI Object constructor\n");
 
   gp = NULL;
   has_processor = false;
@@ -74,7 +73,6 @@ void GUI_Object::UpdateMenuItem(void)
   GtkWidget *menu_item;
 
   if(menu) {
-  printf("%s getting menu item%s\n",__FUNCTION__,menu);
 
     menu_item = gtk_item_factory_get_item (item_factory,menu);
 
@@ -147,7 +145,7 @@ int GUI_Object::get_config(void)
   if(!config_get_variable(name, "height", &height))
     height=100;
 
-  printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
+  //printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
   check();
 
   return 1;

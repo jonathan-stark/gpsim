@@ -3132,7 +3132,7 @@ void Breadboard_Window::Build(void)
 
 
 
-  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
+  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
 
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -3581,7 +3581,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (layout);
 
 
-  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
+  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
@@ -3703,7 +3703,7 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   if(!get_config())
     printf("warning: %s\n",__FUNCTION__);
 
-  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
+  //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
 
   if(enabled)
     Build();

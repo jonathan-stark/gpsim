@@ -48,6 +48,9 @@ void create_dispatcher (void);
 GUI_Processor::GUI_Processor(void)
 {
 
+  pic_id = 0;
+  cpu = NULL;
+
   create_dispatcher();
 
   status_bar = NULL;
@@ -62,9 +65,6 @@ GUI_Processor::GUI_Processor(void)
   trace_window = new  Trace_Window(this);
   profile_window = new  Profile_Window(this);
   stopwatch_window = new  StopWatch_Window(this);
-
-  pic_id = 0;
-  cpu = NULL;
 }
 
 
