@@ -1,3 +1,10 @@
+2004-09-07 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc, src/stimuli.h, cmd_x.cc, cmd_stimulus.cc:
+	Digital asynchronous stimuli were not getting the proper voltage
+	data values. 
+	Enhanced the asynchronous stimulus by making the data array an
+	array of C++ objects instead of a type casted structured.
+
 2004-09-06 Scott Dattalo <scott@dattalo.com>
 	* examples/14bit/analog_stim2.stc, examples/14bit/ap.stc,
 	examples/14bit/async_pulse.stc, examples/14bit/async_stim2.stc,

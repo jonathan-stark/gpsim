@@ -143,10 +143,12 @@ void cmd_x::x(Expression *expr)
 {
   Value *v = toValue(expr);
 
-  unsigned int i;
+  unsigned int i = v->get_leftVal();
 
-  for(i=v->get_leftVal(); i<v->get_rightVal(); i++)
+  while (i<=v->get_rightVal()) {
     x(i);
+    i++;
+  } 
 
   
   delete v;
