@@ -46,7 +46,7 @@ static cmd_options cmd_dump_options[] =
   "e", DUMP_EEPROM,    OPT_TT_BITFLAG,
   "r", DUMP_RAM,       OPT_TT_BITFLAG,
   "s", DUMP_SFRS,      OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 
@@ -113,7 +113,7 @@ void cmd_dump::dump(int mem_type)
   unsigned int i, j, reg_num,mem_size=0;
   unsigned int v;
   unsigned int previous_row_is_invalid, all_invalid;
-  Register **fr=NULL;
+  Register **fr=0;
 
   if(!have_cpu(1))
     return;

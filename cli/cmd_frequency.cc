@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 
 static cmd_options cmd_frequency_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 cmd_frequency::cmd_frequency(void)

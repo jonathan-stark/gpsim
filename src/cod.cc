@@ -53,13 +53,13 @@ void gui_new_program (unsigned int);
 
 extern int use_gui;
 
-static FILE *codefile = NULL;
-static FILE *lstfp = NULL;
-//static char *directory_block_data = NULL;
-static char *temp_block = NULL;
-static char *lstfilename = NULL;
+static FILE *codefile = 0;
+static FILE *lstfp = 0;
+//static char *directory_block_data = 0;
+static char *temp_block = 0;
+static char *lstfilename = 0;
 
-static pic_processor *ccpu = NULL;
+static pic_processor *ccpu = 0;
 DirBlockInfo main_dir;
 
 // Define a flag that tells whether or not we should care about the
@@ -243,23 +243,23 @@ FILE *open_a_file(char **filename)
   if(verbose)
     cout << "Trying to open a file: " << *filename << '\n';
 
-  if(NULL != (t = fopen_path(*filename,"r")))
+  if(0 != (t = fopen_path(*filename,"r")))
     return t;
 
   if(!ignore_case_in_cod)
-    return NULL;
+    return 0;
 
   strtoupper(*filename);
-  if(NULL != (t = fopen_path(*filename,"r")))
+  if(0 != (t = fopen_path(*filename,"r")))
     return t;
 
   strtolower(*filename);
-  if(NULL != (t = fopen_path(*filename,"r")))
+  if(0 != (t = fopen_path(*filename,"r")))
     return t;
 
   cout << "couldn't open " << *filename << " (or any upper/lower case variation)\n";
 
-  return NULL;
+  return 0;
 
 }
 //-----------------------------------------------------------
@@ -281,7 +281,7 @@ int cod_open_lst(const char *filename)
 
   lstfilename = strdup(filename);
   pc = strrchr(lstfilename, '.');
-  if (pc == NULL) {
+  if (pc == 0) {
     if( (i = strlen(lstfilename)) < (256-4))
       pc = lstfilename + i;
     else
@@ -291,7 +291,7 @@ int cod_open_lst(const char *filename)
   strcpy(pc, ".lst");
 
   // Now, let's see if we can open the file
-  if(NULL == (t = open_a_file(&lstfilename)))
+  if(0 == (t = open_a_file(&lstfilename)))
     return COD_LST_NOT_FOUND;
 
   fclose(t);
@@ -348,7 +348,7 @@ void read_src_files_from_cod(pic_processor *cpu)
     cpu->lst_file_id = num_files;
 
     for(i=0;i<num_files+1+MAX_HLL_FILES;i++)
-    	cpu->files[i].file_ptr = NULL;
+    	cpu->files[i].file_ptr = 0;
 
     num_files = 0;  // now use 'num_files' as a counter.
 
@@ -436,7 +436,7 @@ void read_src_files_from_cod(pic_processor *cpu)
       {
 	cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
 	cpu->files[num_files].name = strdup(lstfilename);
-	//	  cpu->files[cpu->number_of_source_files].file_ptr = NULL;
+	//	  cpu->files[cpu->number_of_source_files].file_ptr = 0;
 	if(verbose)
 	  printf("List file %s wasn't in .cod\n",cpu->files[num_files].name);
 	cpu->files[num_files].file_ptr = 
@@ -577,7 +577,7 @@ void clear_block(Block *b)
 void create_block(Block *b)
 {
 
-  assert(b != NULL);
+  assert(b != 0);
 
   b->block = (char *)malloc(COD_BLOCK_SIZE);
   clear_block(b);
@@ -589,7 +589,7 @@ void delete_block(Block *b)
 
   if(b && b->block) {
     free(b->block);
-    b->block = NULL;
+    b->block = 0;
   }
   else
     assert(0);
@@ -618,7 +618,7 @@ void read_directory(void)
       create_block(&dbi->dir);
       read_block(dbi->dir.block, next_dir_block);
     } else {
-      dbi->next_dir_block_info = NULL;
+      dbi->next_dir_block_info = 0;
       return;
     }
   } while(1);
@@ -704,10 +704,10 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	if(!strcmp(file_name+strlen(file_name)-4,".asm"))
 	{
 	    // Make sure that the file is open
-	    if(gpsim_file->file_ptr == NULL)
+	    if(gpsim_file->file_ptr == 0)
 	    {
 		gpsim_file->file_ptr = fopen_path(file_name,"r");
-		if(gpsim_file->file_ptr == NULL)
+		if(gpsim_file->file_ptr == 0)
 		{
 		    printf("file \"%s\" not found!!!\n",file_name);
 		    return;
@@ -733,7 +733,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     // asmfile_id is index into file context array.
     asmfile_id=i;
 
-    for(i=0;cpu->files[i].file_ptr!=NULL;i++)
+    for(i=0;cpu->files[i].file_ptr!=0;i++)
     	;
     filearray_index=i;
 
@@ -741,7 +741,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     asmsrc_line=0;
 
     // Loop through the whole .asm file and look for any ";#CSRC" markers
-    while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=NULL)
+    while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=0)
     {
         char *ptr2;
 	asmsrc_line++;
@@ -795,12 +795,12 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 
 	    file_index=hll_files_index+cpu->number_of_source_files;
 	    strcpy(hll_source_files[hll_files_index].filename,filename);
-            hll_source_files[hll_files_index].file=NULL;
+            hll_source_files[hll_files_index].file=0;
 	    nr_of_hll_files++;
 
 	    cpu->files[file_index].name=strdup(filename);
 	    file=fopen(cpu->files[file_index].name,"r");
-	    if(file==NULL)
+	    if(file==0)
 	    {
 		puts("file is not found\n");
 		assert(0);
@@ -809,14 +809,14 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 
 	    rewind(cpu->files[file_index].file_ptr);
 	    maxline=0;
-	    while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=NULL)
+	    while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=0)
 		maxline++;
 
 	    // Make a new file context
-	    cpu->files[file_index].line_seek=NULL;//new int[maxline+1];
+	    cpu->files[file_index].line_seek=0;//new int[maxline+1];
 	    cpu->files[file_index].max_line=maxline;
 
-	    cpu->files[file_index+1].file_ptr=NULL; // End of list
+	    cpu->files[file_index+1].file_ptr=0; // End of list
 
 	    line_nr=0;
 //	    cpu->files[file_index].line_seek[line_nr++]=0;
@@ -837,7 +837,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     }
     else
     {
-	cpu->files[i].file_ptr=NULL;
+	cpu->files[i].file_ptr=0;
     }
 
     // Find first valid line number.
@@ -887,7 +887,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 
   dir_path_end = get_dir_delim(filename);
   
-  if(dir_path_end!=NULL)
+  if(dir_path_end!=0)
   {
       strncpy(directory,filename,dir_path_end-filename);
       directory[dir_path_end-filename]=0;
@@ -899,7 +899,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
   
   codefile = fopen(filename,"rb");
 
-  if(codefile == NULL) {
+  if(codefile == 0) {
     printf("Unable to open %s\n",filename);
     return COD_FILE_NOT_FOUND;
   }
@@ -920,7 +920,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 
   // If we get here, then the .cod file is good.
 
-  if(*pcpu == NULL) 
+  if(*pcpu == 0) 
     {
       if(verbose)
 	cout << "ascertaining cpu from the .cod file\n";
@@ -931,7 +931,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 	cout << "found a " << processor_name << " in the .cod file\n";
 
       *pcpu = (pic_processor *)add_processor(processor_name,processor_name);
-      if(*pcpu == NULL) {
+      if(*pcpu == 0) {
 	if(!ignore_case_in_cod)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
 
@@ -939,7 +939,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 	strtolower(processor_name);
 	*pcpu = (pic_processor *)add_processor(processor_name,processor_name);
 
-	if(*pcpu == NULL)
+	if(*pcpu == 0)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
       }
     }

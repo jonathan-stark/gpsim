@@ -185,7 +185,7 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
 {
 //    struct gui_config_winattr winattr;
 
-    if(widget->window==NULL)
+    if(widget->window==0)
 	return 0;
     
     gdk_window_get_root_origin(widget->window,&go->x,&go->y);

@@ -1,4 +1,10 @@
 2004-02-08  Scott Dattalo  <scott@dattalo.com>
+	* all files!
+	'NULL' has been replaced with '0' throughout all of gpsim.
+	The reason is two-fold: 1) MAC users were having trouble compiling
+	2) Stroustrup says NULL shouldn't be used in C++ :).
+	
+2004-02-08  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, gui/gui_src.cc, gui/gui_src_asm.cc,
 	gui/gui_break.cc: Fixed 'ProgramMemoryAccess' class for the 18f devices
 	* src/16bit-processors, src/p18x.cc: Removed some debug stuff

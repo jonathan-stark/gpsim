@@ -34,7 +34,7 @@ static cmd_options cmd_processor_options[] =
 {
   "list",1,    OPT_TT_BITFLAG,
   "pins",2,    OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 

@@ -328,7 +328,7 @@ class Watch_Window : public  GUI_Object
   virtual void ClearWatches(void);
   virtual void ClearWatch(WatchEntry *entry);
   virtual void UpdateWatch(WatchEntry *entry);
-  virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg=NULL);
+  virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg=0);
   virtual void Update(void);
   virtual void UpdateMenus(void);
   

@@ -5,7 +5,7 @@
 //-------------------------------------------------------------------
 XrefObject::XrefObject()
 {
-    data=NULL;
+    data=0;
 }
 XrefObject::XrefObject(unsigned int *value)
 {

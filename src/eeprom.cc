@@ -263,7 +263,7 @@ Register *EEPROM::get_register(unsigned int address)
 
   if(address<rom_size)
     return rom[address];
-  return NULL;
+  return 0;
 
 }
 

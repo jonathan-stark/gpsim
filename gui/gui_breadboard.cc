@@ -151,7 +151,7 @@ static void inline prepend_point_to_path(path **pat, point p)
 
 /*    int add_point=0;
 
-    if(*pat!=NULL)
+    if(*pat!=0)
     {
 	dir = calculate_route_direction_exact(p, (*pat)->p);
 	if(dir==R_NONE)
@@ -159,7 +159,7 @@ static void inline prepend_point_to_path(path **pat, point p)
             // Both X and Y has changed.
 	    add_point=1;
 	}
-	else if(*pat!=NULL && (*pat)->next!=NULL)
+	else if(*pat!=0 && (*pat)->next!=0)
 	{
 	    if((*pat)->p.x == p.x &&
 	       (*pat)->next->p.x == p.x &&
@@ -196,7 +196,7 @@ static void inline prepend_point_to_path(path **pat, point p)
 	new_point = (path*)malloc(sizeof(path));
 	new_point->p=p;
 	new_point->next = *pat;
-	if((*pat)!=NULL)
+	if((*pat)!=0)
 	{
 	    dir = calculate_route_direction(p, (*pat)->p);
 	    if((*pat)->dir==R_NONE)
@@ -212,14 +212,14 @@ static void clear_path(path **pat)
 {
     path *current_path, *next;
 
-    if(*pat==NULL)
+    if(*pat==0)
 	return;
 
     current_path = *pat;
 
-    *pat = NULL;
+    *pat = 0;
 
-    while(current_path!=NULL)
+    while(current_path!=0)
     {
 	next = current_path->next;
 
@@ -241,12 +241,12 @@ static void compress_path(path **pat)
     x=current_path->p.x;
     y=current_path->p.y;
 
-    while(current_path!=NULL)
+    while(current_path!=0)
     {
         path *next_path = current_path->next;
 	path *next2_path = next_path->next;
 
-	if(next_path==NULL || next2_path==NULL)
+	if(next_path==0 || next2_path==0)
             break;
 
 	if(current_path->p.x==next_path->p.x &&
@@ -459,7 +459,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
     if(retval==TRUE)
     {
 	// We found a path to end. Add point p to path.
-/*	if(*pat!=NULL && (*pat)->next!=NULL)
+/*	if(*pat!=0 && (*pat)->next!=0)
 	{
           // If there are point in pat already, then check if
             // we can use that and just change the coords there.
@@ -536,7 +536,7 @@ static void draw_board_matrix(Breadboard_Window *bbw)
 
     // Loop all modules
     mi = bbw->modules;
-    while(mi!=NULL)
+    while(mi!=0)
     {
 	gui_module *p;
 
@@ -607,7 +607,7 @@ static void clear_nodes(Breadboard_Window *bbw)
     path *nodepath;
 
     iter = nodepath_list;
-    while(iter!=NULL)
+    while(iter!=0)
     {
 	nodepath = (path*)iter->data;
 
@@ -637,7 +637,7 @@ static void draw_nodes(Breadboard_Window *bbw)
 
     iter = nodepath_list;
 
-    while(iter!=NULL) {
+    while(iter!=0) {
 
       int last_x, last_y;
       path *current_path;
@@ -655,7 +655,7 @@ static void draw_nodes(Breadboard_Window *bbw)
 
       gdk_gc_set_foreground(bbw->pinline_gc,&black_color);
 
-      while(current_path!=NULL)
+      while(current_path!=0)
 	{
 	  int x,y;
 
@@ -676,7 +676,7 @@ static void draw_nodes(Breadboard_Window *bbw)
     }
 
 
-    layout_adj_changed(NULL,bbw);
+    layout_adj_changed(0,bbw);
 /*    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
 		    ((GUI_Object*)bbw)->window->style->white_gc,
 		    bbw->layout_pixmap,
@@ -720,7 +720,7 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
     // Loop all modules, and put its package and pins to board_matrix
     mi = bbw->modules;
-    while(mi!=NULL)
+    while(mi!=0)
     {
 	gui_module *p;
 
@@ -797,13 +797,13 @@ static void update_board_matrix(Breadboard_Window *bbw)
 static void add_path_to_matrix(path *pat)
 {
     int x=-1, y=-1;
-    if(pat!=NULL)
+    if(pat!=0)
     {
 	x=pat->p.x;
 	y=pat->p.y;
 	pat=pat->next;
     }
-    while(pat!=NULL)
+    while(pat!=0)
     {
 	if(pat->dir==R_LEFT || pat->dir==R_RIGHT)
 	    board_matrix[x][y]|=HMASK;
@@ -833,7 +833,7 @@ static struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin);
 
 #define MAX_PATHS 32
 
-static path *shortest_path[100][100]={NULL};//[MAX_PATHS]=NULL;
+static path *shortest_path[100][100]={0};//[MAX_PATHS]=0;
 static int pathlen[100][100]={0};
 
 static int *permutations;
@@ -843,9 +843,9 @@ static int *shortest_permutation;
 
 static void reverse_path(path **pat)
 {
-    path *next, *last=NULL;
+    path *next, *last=0;
 
-    while(*pat != NULL)
+    while(*pat != 0)
     {
 	// Keep a pointer to next
 	next = (*pat)->next;
@@ -866,13 +866,13 @@ static void reverse_path_if_endpoint(point startpoint, path **pat)
     path *iter, *next, *last;
 
 //    path **input_list;
-//    path *output_list=NULL;
+//    path *output_list=0;
 
     iter = *pat;
 
     pat_start = iter->p;
 
-    while(iter->next!=NULL)
+    while(iter->next!=0)
         iter=iter->next;
 
     pat_end = iter->p;
@@ -895,13 +895,13 @@ static void reverse_path_if_startpoint(point startpoint, path **pat)
     path *iter, *next, *last;
 
 //    path **input_list;
-//    path *output_list=NULL;
+//    path *output_list=0;
 
     iter = *pat;
 
     pat_start = iter->p;
 
-    while(iter->next!=NULL)
+    while(iter->next!=0)
         iter=iter->next;
 
     pat_end = iter->p;
@@ -919,15 +919,15 @@ static void reverse_path_if_startpoint(point startpoint, path **pat)
 
 static void path_copy_and_cat(path **pat, path **source)
 {
-    path *dest, *prev=NULL;
+    path *dest, *prev=0;
 
     dest = *pat;
 
-    if(dest!=NULL)
+    if(dest!=0)
     {
 	reverse_path_if_startpoint((*source)->p, pat);
 
-	while(dest->next!=NULL)
+	while(dest->next!=0)
 	{
 	    dest=dest->next;
 	}
@@ -948,17 +948,17 @@ static void path_copy_and_cat(path **pat, path **source)
 
     path *sourceiter = *source;
 
-    while(sourceiter!=NULL)
+    while(sourceiter!=0)
     {
 
 	dest = (path*) malloc(sizeof(path));
 	memcpy(dest, sourceiter, sizeof(path));
-	dest->next=NULL;
+	dest->next=0;
 
-	if(*pat==NULL)
+	if(*pat==0)
 	    *pat=dest;
 
-	if(prev!=NULL)
+	if(prev!=0)
 	{
 	    prev->next = dest;
 	}
@@ -978,7 +978,7 @@ static void trace_node(struct gui_node *gn)
     struct gui_pin *p;
     Breadboard_Window *bbw;
     stimulus *stimulus;
-    GList *pinlist=NULL;
+    GList *pinlist=0;
     int nr_of_nodes=0;
     int i,j;
     int didnt_work=0;
@@ -992,11 +992,11 @@ static void trace_node(struct gui_node *gn)
     stimulus = gn->node->stimuli;
 
     // Make a glist of all gui_pins in the node
-    while(stimulus!=NULL)
+    while(stimulus!=0)
     {
 	p = find_gui_pin(bbw, stimulus);
 
-	if(p==NULL)
+	if(p==0)
 	{
 	    puts("Not found");
 	    g_list_free(pinlist);
@@ -1027,14 +1027,14 @@ static void trace_node(struct gui_node *gn)
         GList *li, *lj;
 
 	li = g_list_nth(pinlist,i);
-        assert(li!=NULL);
+        assert(li!=0);
         pi = (gui_pin*) li->data;
 	printf(" %s",pi->iopin->name());
 	fflush(stdout);
 	for(j=i+1;j<nr_of_nodes;j++)
 	{
 	    lj = g_list_nth(pinlist,j);
-	    assert(lj!=NULL);
+	    assert(lj!=0);
 	    pj = (gui_pin*) lj->data;
 
 	    start.x=pi->layout_xpos/ROUTE_RES;
@@ -1048,7 +1048,7 @@ static void trace_node(struct gui_node *gn)
 	    maxdepth=maxdepth*2+100; // Twice the distance, and 5 turns
 //	    printf("Trying maxdepth %d\n",maxdepth);
 	    trace_two_points(&shortest_path[i][j], start, end,0,R_UP);
-	    if(shortest_path[i][j]==NULL)
+	    if(shortest_path[i][j]==0)
 	    {
 		printf("\n### Couldn't trace from pin %s to pin %s!\n",
                        pi->iopin->name(),
@@ -1106,7 +1106,7 @@ static void trace_node(struct gui_node *gn)
 //    }
     //puts("");
 
-    path *nodepath=NULL;
+    path *nodepath=0;
     for(i=0;i<nr_of_nodes-1;i++)
     {
 	path_copy_and_cat(&nodepath,&shortest_path[shortest_permutation[i]][shortest_permutation[i+1]]);
@@ -1118,7 +1118,7 @@ static void trace_node(struct gui_node *gn)
     free(permutations);
     free(shortest_permutation);
 
-	if(nodepath!=NULL)
+	if(nodepath!=0)
 	{
 //	    compress_path(&nodepath);
 
@@ -1142,13 +1142,13 @@ struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 
 
     iter = bbw->modules;
-    while(iter!=NULL)
+    while(iter!=0)
     {
 	m = (gui_module *)iter->data;
 
 //	Package *pa;
 //	pa=dynamic_cast<Package*>(m);
-//	assert(pa!=NULL);
+//	assert(pa!=0);
 
 	for(i=1;i<=m->module->get_pin_count();i++)
 	{
@@ -1169,7 +1169,7 @@ struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 	iter = iter->next;
     }
 
-    return NULL;
+    return 0;
 }
 
 
@@ -1256,7 +1256,7 @@ static void draw_pin(struct gui_pin *pin)
     gdk_draw_line(pin->pixmap,pin->gc,
 		  pointx,y,wingx,y-wingheight);
 
-    if(pin->widget->window!=NULL)
+    if(pin->widget->window!=0)
 	gdk_draw_pixmap(pin->widget->window,
 			pin->widget->style->fg_gc[GTK_WIDGET_STATE (pin->widget)],
 			pin->pixmap,
@@ -1269,7 +1269,7 @@ static void expose_pin(GtkWidget *widget,
 		       GdkEventExpose *event,
 		       struct gui_pin *p)
 {
-    if(p->pixmap==NULL)
+    if(p->pixmap==0)
     {
 	puts("bbw.c: no pixmap1!");
 	return;
@@ -1302,7 +1302,7 @@ static void treeselect_stimulus(GtkItem *item, struct gui_pin *pin)
       snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name());
       pString = string;
 
-      if(pin->iopin->snode!=NULL)
+      if(pin->iopin->snode!=0)
 	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name());
       else
 	snprintf(text,sizeof(text),"Not connected");
@@ -1326,7 +1326,7 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
 //    printf("treeselect_node %p\n",gui_node);
 
-    if(gui_node->node!=NULL)
+    if(gui_node->node!=0)
     {
 	snprintf(string,sizeof(string),"Node %s",gui_node->node->name());
 	gtk_frame_set_label(GTK_FRAME(gui_node->bbw->node_frame),string);
@@ -1344,12 +1344,12 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     // Clear node_clist
     gtk_clist_clear(GTK_CLIST(gui_node->bbw->node_clist));
 
-    if(gui_node->node!=NULL)
+    if(gui_node->node!=0)
     {
 	// Add to node_clist
 	stimulus = gui_node->node->stimuli;
 
-	while(stimulus!=NULL)
+	while(stimulus!=0)
 	{
 	    int row;
 
@@ -1415,7 +1415,7 @@ static void position_module(struct gui_module *p, int x, int y)
 
         // Position pins
 	piniter = p->pins;
-	while(piniter!=NULL)
+	while(piniter!=0)
 	{
 	    pin = (struct gui_pin*) piniter->data;
 
@@ -1478,12 +1478,12 @@ static double module_distance(struct gui_module *p, int x, int y)
 static struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
 {
     GList *mi;
-    gui_module *closest=NULL;
+    gui_module *closest=0;
     double distance, min_distance=1000000;
 
     mi = bbw->modules;
 
-    while(mi!=NULL)
+    while(mi!=0)
     {
 	gui_module *p;
 
@@ -1513,10 +1513,10 @@ void grab_module(gui_module *p)
 		     TRUE,
 		     (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
 		     p->bbw->layout->window,
-		     NULL,
+		     0,
                      GDK_CURRENT_TIME);
 
-    treeselect_module(NULL,dragged_module);
+    treeselect_module(0,dragged_module);
     dragging = 1;
     clear_nodes(p->bbw);
     draw_nodes(p->bbw);
@@ -1561,9 +1561,9 @@ static void pointer_cb(GtkWidget *w,
 			     TRUE,
 			     (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
 			     w->window,
-			     NULL,
+			     0,
 			     GDK_CURRENT_TIME);
-	    treeselect_module(NULL,dragged_module);
+	    treeselect_module(0,dragged_module);
 	    dragging = 1;
 	    clear_nodes(bbw);
             draw_nodes(bbw);
@@ -1596,9 +1596,9 @@ static gint button(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
-	if(p->iopin!=NULL)
+	if(p->iopin!=0)
 	{
-	    if(p->iopin->snode!=NULL)
+	    if(p->iopin->snode!=0)
 	    {
 		struct gui_node *gn;
 
@@ -1606,14 +1606,14 @@ static gint button(GtkWidget *widget,
 		    gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
 					p->iopin->snode->name());
 
-		if(gn!=NULL)
+		if(gn!=0)
 		{
-		    treeselect_node(NULL, gn);
+		    treeselect_node(0, gn);
 		    return 1;
 		}
 	    }
 
-	    treeselect_stimulus(NULL, p);
+	    treeselect_stimulus(0, p);
 	}
 	return 1;
     }
@@ -1666,7 +1666,7 @@ static void b_cb(GtkWidget *w, gpointer user_data)
 // used for reading a value from user when break on value is requested
 const char *gui_get_string(char *prompt, char *initial_text)
 {
-    static GtkWidget *dialog=NULL;
+    static GtkWidget *dialog=0;
     static GtkWidget *label;
     static GtkWidget *entry;
     static int retval;
@@ -1678,7 +1678,7 @@ const char *gui_get_string(char *prompt, char *initial_text)
     
     retval=-1;
 
-    if(dialog==NULL)
+    if(dialog==0)
     {
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
@@ -1743,7 +1743,7 @@ const char *gui_get_string(char *prompt, char *initial_text)
     if(retval==TRUE)
 	string=gtk_entry_get_text(GTK_ENTRY(entry));
     else
-        string=NULL;
+        string=0;
     
     return string;
 }
@@ -1752,7 +1752,7 @@ static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 {
     const char *node_name = gui_get_string("Node name","");
 
-    if(node_name !=NULL)
+    if(node_name !=0)
 	new Stimulus_Node(node_name);
 }
 
@@ -1832,13 +1832,13 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 
     cancel=-1;
 
-    Stimulus_Node *snode=NULL;
+    Stimulus_Node *snode=0;
 
 	GtkWidget *vbox;
 	GtkWidget *scrolledwindow;
         GtkWidget *hbox;
 
-    if(dialog==NULL)
+    if(dialog==0)
     {
 
         // Build window
@@ -1847,7 +1847,7 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 
 	vbox = GTK_DIALOG(dialog)->vbox;
 
-	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	scrolledwindow = gtk_scrolled_window_new (0, 0);
 	gtk_widget_show (scrolledwindow);
 	gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -1891,7 +1891,7 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     if(cancel==TRUE)
     {
 	gtk_widget_hide(dialog);
-	return NULL;
+	return 0;
     }
 
     gtk_widget_hide(dialog);
@@ -1917,7 +1917,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
 	cancel=-1;
 	
-    if(dialog==NULL)
+    if(dialog==0)
     {
 
         // Build window
@@ -1926,7 +1926,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
 	vbox = GTK_DIALOG(dialog)->vbox;
 
-	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	scrolledwindow = gtk_scrolled_window_new (0, 0);
 	gtk_widget_show (scrolledwindow);
 	gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
@@ -2003,7 +2003,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     if(cancel==TRUE)
     {
 	gtk_widget_hide(dialog);
-	return NULL;
+	return 0;
     }
 
     gtk_widget_hide(dialog);
@@ -2023,10 +2023,10 @@ static void text_dialog(const char *filename)
         char string[STRING_SIZE];
 
 	FILE *fi=fopen(filename,"r");
-	if(fi==NULL)
+	if(fi==0)
             return;
 
-	if(dialog!=NULL)
+	if(dialog!=0)
 	    gtk_widget_destroy(dialog);
 
 
@@ -2036,12 +2036,12 @@ static void text_dialog(const char *filename)
 
 	vbox = GTK_DIALOG(dialog)->vbox;
 
-	scrolledwindow = gtk_scrolled_window_new (NULL, NULL);
+	scrolledwindow = gtk_scrolled_window_new (0, 0);
 	gtk_widget_show (scrolledwindow);
 	gtk_box_pack_start (GTK_BOX (vbox), scrolledwindow, TRUE, TRUE, 0);
 	gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-	text = gtk_text_new(NULL,NULL);
+	text = gtk_text_new(0,0);
 	gtk_container_add (GTK_CONTAINER(scrolledwindow), text);
         gtk_widget_show(text);
 
@@ -2054,12 +2054,12 @@ static void text_dialog(const char *filename)
 	gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 400);
 
 
-	while(fgets(string, sizeof(string), fi)!=NULL)
+	while(fgets(string, sizeof(string), fi)!=0)
 	{
 	    gtk_text_insert(GTK_TEXT(text),
-			    NULL,
-			    NULL,
-			    NULL,
+			    0,
+			    0,
+			    0,
 			    string,
 			    strlen(string));
 	}
@@ -2079,12 +2079,12 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 
     node = select_node_dialog(bbw);
 
-    if(node!=NULL && bbw->selected_pin!=NULL)
+    if(node!=0 && bbw->selected_pin!=0)
     {
 	node->attach_stimulus(bbw->selected_pin->iopin);
 
         // Update stimulus frame
-	treeselect_stimulus(NULL, bbw->selected_pin);
+	treeselect_stimulus(0, bbw->selected_pin);
     }
 }
 
@@ -2094,7 +2094,7 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 
     library_name = gui_get_string("Module library name (e.g. libgpsim_modules.so)","");
 
-    if(library_name!=NULL)
+    if(library_name!=0)
     {
         module_load_library(library_name);
     }
@@ -2108,11 +2108,11 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 
     module_type = select_module_dialog(bbw);
 
-    if(module_type!=NULL)
+    if(module_type!=0)
     {
 	module_name = gui_get_string("Module name", module_type);
         grab_next_module = 1;
-        if(module_name != NULL)
+        if(module_name != 0)
 	    module_load_module(module_type, module_name);
     }
 }
@@ -2128,7 +2128,7 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
 
     // Remove pins
     pin_iter=bbw->selected_module->pins;
-    while(pin_iter!=NULL)
+    while(pin_iter!=0)
     {
 	struct gui_pin *pin;
 
@@ -2157,7 +2157,7 @@ static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
 
     free(bbw->selected_module);
 
-    bbw->selected_module=NULL;
+    bbw->selected_module=0;
 }
 
 static void node_clist_cb(GtkCList       *clist,
@@ -2184,7 +2184,7 @@ static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
 
     free(bbw->selected_node);
 
-    bbw->selected_node=NULL;
+    bbw->selected_node=0;
 
     gtk_widget_hide(bbw->node_frame);
     gtk_widget_hide(bbw->stimulus_frame);
@@ -2225,13 +2225,13 @@ static void
 file_selection_cancel (GtkWidget        *w,
 		       GtkFileSelection *fs)
 {
-    file_selection_name=NULL;
+    file_selection_name=0;
     fs_done=1;
 }
 
 static const char *gui_get_filename(char *filename)
 {
-    static GtkWidget *window = NULL;
+    static GtkWidget *window = 0;
 
     GtkWidget *hbox, *optionmenu, *label;
 
@@ -2263,11 +2263,11 @@ static const char *gui_get_filename(char *filename)
     gtk_file_selection_set_filename(GTK_FILE_SELECTION (window),
 				    filename);
 
-    file_selection_name=NULL;
+    file_selection_name=0;
     gtk_widget_show_now(window);
 
     fs_done=0;
-    file_selection_name=NULL;
+    file_selection_name=0;
     gtk_grab_add(window);
     while(!fs_done && GTK_WIDGET_VISIBLE(window))
 	gtk_main_iteration();
@@ -2275,9 +2275,9 @@ static const char *gui_get_filename(char *filename)
     
     gtk_widget_hide(window);
 
-    if(file_selection_name==NULL)
+    if(file_selection_name==0)
     {
-	return NULL;
+	return 0;
     }
 
     return file_selection_name;
@@ -2294,7 +2294,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     const char *filename;
 
     filename = gui_get_filename("netlist.stc");
-    if(filename == NULL)
+    if(filename == 0)
         filename="/tmp/foo.stc";
     fo = fopen(filename, "w");
 
@@ -2353,13 +2353,13 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 	fprintf(fo, "node %s\n",node->name());
 
-	if(node->stimuli!=NULL)
+	if(node->stimuli!=0)
 	{
 	    fprintf(fo, "attach %s",node->name());
 
 	    stimulus = node->stimuli;
 
-	    while(stimulus!=NULL)
+	    while(stimulus!=0)
 	    {
 		fprintf(fo, " %s",stimulus->name());
 
@@ -2427,7 +2427,7 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
     pin->layout_ypos = 0;
 
 
-    if(iopin!=NULL)
+    if(iopin!=0)
     {
 	pin->value=iopin->get_state();
 	pin->direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
@@ -2480,7 +2480,7 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
 
 static void name_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
-    if(p->name_pixmap==NULL)
+    if(p->name_pixmap==0)
     {
 	puts("bbw.c: no pixmap2!");
 	return;
@@ -2496,7 +2496,7 @@ static void name_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_mod
 
 static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
-    if(p->module_pixmap==NULL)
+    if(p->module_pixmap==0)
     {
 	puts("bbw.c: no pixmap3!");
 	return;
@@ -2537,7 +2537,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->x=-1;
     p->y=-1;
 
-    p->pins=NULL;
+    p->pins=0;
 
 
 
@@ -2548,7 +2548,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     if(!package)
       package=dynamic_cast<Package*>(p->module);
 
-    assert(package!=NULL);
+    assert(package!=0);
 
     GtkWidget *tree_item;
     tree_item = gtk_tree_item_new_with_label (p->module->name());
@@ -2562,7 +2562,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     package_height=(p->module->get_pin_count()/2+(p->module->get_pin_count()&1)-1)*pinspacing;
 
-    if(p->module_widget==NULL)
+    if(p->module_widget==0)
     {
 	// Create a static representation.
 	int pin_x, pin_y;
@@ -2577,7 +2577,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    int width;
 
 	    name=p->module->get_pin_name(i);
-	    if(name==NULL)
+	    if(name==0)
 		continue;
 	    width = gdk_string_width (bbw->pinnamefont,name)+LABELPAD;
 	    if(width>p->pinnamewidth)
@@ -2643,7 +2643,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	    }
 
 	    name=p->module->get_pin_name(i);
-	    if(name==NULL)
+	    if(name==0)
 		continue;
 	    gdk_draw_text(p->module_pixmap,
 			  p->bbw->pinnamefont,
@@ -2699,7 +2699,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     cross_reference = new BreadBoardXREF();
     cross_reference->parent_window_type = WT_breadboard_window;
     cross_reference->parent_window = (gpointer) bbw;
-    cross_reference->data = (gpointer) NULL;
+    cross_reference->data = (gpointer) 0;
     p->module->xref->add(cross_reference);
 
     gtk_widget_show(p->module_widget);
@@ -2750,13 +2750,13 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
         iopin = p->module->get_pin(i);
 
 
-	if(iopin!=NULL)
+	if(iopin!=0)
 	{
 	    // Create xref
 	  cross_reference = new BreadBoardXREF();
 	  cross_reference->parent_window_type = WT_breadboard_window;
 	  cross_reference->parent_window = (gpointer) bbw;
-	  cross_reference->data = (gpointer) NULL;
+	  cross_reference->data = (gpointer) 0;
 	  iopin->xref->add(cross_reference);
 	}
 
@@ -2801,7 +2801,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
         // Add pin to tree
 	name=p->module->get_pin_name(i);
-	if(name!=NULL)
+	if(name!=0)
 	{
 	    tree_item = gtk_tree_item_new_with_label (name);
 	    gtk_signal_connect(GTK_OBJECT(tree_item),
@@ -2838,7 +2838,7 @@ void Breadboard_Window::Update(void)
   // loop all modules and update their pins
 
   iter=modules;
-  while(iter!=NULL) {
+  while(iter!=0) {
     
     GList *pin_iter;
     struct gui_module *p;
@@ -2862,7 +2862,7 @@ void Breadboard_Window::Update(void)
 
     // Check if pins have changed state
     pin_iter=p->pins;
-    while(pin_iter!=NULL) {
+    while(pin_iter!=0) {
       
       struct gui_pin *pin;
 
@@ -2871,7 +2871,7 @@ void Breadboard_Window::Update(void)
 
       pin = (struct gui_pin *) pin_iter->data;
 
-      if(pin->iopin!=NULL) {
+      if(pin->iopin!=0) {
 	
 	value=pin->iopin->get_state();
 	dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
@@ -2944,7 +2944,7 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
     return;
   }
 
-  struct gui_module *p=create_gui_module(this, PIC_MODULE, get_processor(gp->pic_id),NULL);
+  struct gui_module *p=create_gui_module(this, PIC_MODULE, get_processor(gp->pic_id),0);
 
   Update();
 }
@@ -2956,9 +2956,9 @@ void Breadboard_Window::NewModule(Module *module)
     Build();
 
 
-  GtkWidget *widget=NULL;
+  GtkWidget *widget=0;
 
-  if(module->widget!=NULL)
+  if(module->widget!=0)
     widget=GTK_WIDGET(module->widget);
 
   struct gui_module *p=create_gui_module(this, EXTERNAL_MODULE, module, widget);
@@ -2979,7 +2979,7 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 
   struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name());
 
-  if(gn==NULL) {
+  if(gn==0) {
     GtkWidget *node_item;
 
     gn = (struct gui_node *) malloc(sizeof(*gn));
@@ -3003,10 +3003,10 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 
 static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 {
-    if(GTK_LAYOUT (bbw->layout)->bin_window==NULL)
+    if(GTK_LAYOUT (bbw->layout)->bin_window==0)
 	return;
 
-    if(bbw->layout_pixmap==NULL)
+    if(bbw->layout_pixmap==0)
     {
 	puts("bbw.c: no pixmap4!");
 	return;
@@ -3034,7 +3034,7 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 
 static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
 {
-    if(bbw->layout_pixmap==NULL)
+    if(bbw->layout_pixmap==0)
     {
 	puts("bbw.c: no pixmap5!");
 	return;
@@ -3150,7 +3150,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (vbox13);
   gtk_box_pack_start (GTK_BOX (vbox9), vbox13, TRUE, TRUE, 2);
 
-  scrolledwindow4 = gtk_scrolled_window_new (NULL, NULL);
+  scrolledwindow4 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow4);
   gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow4", scrolledwindow4,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3158,7 +3158,7 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox13), scrolledwindow4, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow4), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  viewport9 = gtk_viewport_new (NULL, NULL);
+  viewport9 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport9);
   gtk_object_set_data_full (GTK_OBJECT (window), "viewport9", viewport9,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3260,7 +3260,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (vbox12);
   gtk_container_add (GTK_CONTAINER (pic_frame), vbox12);
 
-  scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
+  scrolledwindow3 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow3);
   gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow3", scrolledwindow3,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3268,7 +3268,7 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox12), scrolledwindow3, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow3), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  viewport8 = gtk_viewport_new (NULL, NULL);
+  viewport8 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport8);
   gtk_object_set_data_full (GTK_OBJECT (window), "viewport8", viewport8,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3321,7 +3321,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (vbox11);
   gtk_container_add (GTK_CONTAINER (node_frame), vbox11);
 
-  scrolledwindow2 = gtk_scrolled_window_new (NULL, NULL);
+  scrolledwindow2 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow2);
   gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow2", scrolledwindow2,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3329,7 +3329,7 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox11), scrolledwindow2, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow2), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  viewport7 = gtk_viewport_new (NULL, NULL);
+  viewport7 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport7);
   gtk_object_set_data_full (GTK_OBJECT (window), "viewport7", viewport7,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3395,7 +3395,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show(stimulus_settings_label);
   gtk_box_pack_start(GTK_BOX(vbox14), stimulus_settings_label, FALSE,FALSE,0);
   /*
-    scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
+    scrolledwindow6 = gtk_scrolled_window_new (0, 0);
     gtk_widget_ref (scrolledwindow6);
     gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow6", scrolledwindow6,
     (GtkDestroyNotify) gtk_widget_unref);
@@ -3403,7 +3403,7 @@ void Breadboard_Window::Build(void)
     gtk_box_pack_start (GTK_BOX (vbox14), scrolledwindow6, TRUE, TRUE, 0);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-    viewport10 = gtk_viewport_new (NULL, NULL);
+    viewport10 = gtk_viewport_new (0, 0);
     gtk_widget_ref (viewport10);
     gtk_object_set_data_full (GTK_OBJECT (window), "viewport10", viewport10,
     (GtkDestroyNotify) gtk_widget_unref);
@@ -3453,7 +3453,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (vbox10);
   gtk_container_add (GTK_CONTAINER (module_frame), vbox10);
 
-  scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
+  scrolledwindow1 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow1);
   gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow1", scrolledwindow1,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3461,7 +3461,7 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox10), scrolledwindow1, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow1), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  viewport6 = gtk_viewport_new (NULL, NULL);
+  viewport6 = gtk_viewport_new (0, 0);
   gtk_widget_ref (viewport6);
   gtk_object_set_data_full (GTK_OBJECT (window), "viewport6", viewport6,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3526,7 +3526,7 @@ void Breadboard_Window::Build(void)
 		     (GtkSignalFunc) save_stc,
 		     this);
 
-  scrolledwindow5 = gtk_scrolled_window_new (NULL, NULL);
+  scrolledwindow5 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow5);
   gtk_object_set_data_full (GTK_OBJECT (window), "scrolledwindow5", scrolledwindow5,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -3595,7 +3595,7 @@ void Breadboard_Window::Build(void)
   pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
 
   pinline_gc=gdk_gc_new(window->window);
-  g_assert(pinline_gc!=NULL);
+  g_assert(pinline_gc!=0);
   gdk_gc_set_line_attributes(pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
 
   layout_pixmap = gdk_pixmap_new(window->window,
@@ -3620,7 +3620,7 @@ void Breadboard_Window::Build(void)
 
   gn = (struct gui_node *) malloc(sizeof(*gn));
   gn->bbw=this;
-  gn->node=NULL; // indicates that this is the root node.
+  gn->node=0; // indicates that this is the root node.
   tree_item = gtk_tree_item_new_with_label ("nodes");
   //    gtk_signal_connect(GTK_OBJECT(tree_item),
   //		       "select",
@@ -3660,34 +3660,34 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   name = "pinout";
   wc = WC_misc;
   wt = WT_breadboard_window;
-  window = NULL;
+  window = 0;
   is_built = 0;
   enabled = 0;
 
   has_processor=false;
-  pinstatefont = NULL;
-  pinnamefont = NULL;
-  pinname_gc = NULL;
-  pinline_gc = NULL;
-  case_gc = NULL;
-  node_tree = NULL;
+  pinstatefont = 0;
+  pinnamefont = 0;
+  pinname_gc = 0;
+  pinline_gc = 0;
+  case_gc = 0;
+  node_tree = 0;
 
-  modules=NULL;
+  modules=0;
 
-  node_clist=NULL;
+  node_clist=0;
 
-  stimulus_settings_label=NULL;
+  stimulus_settings_label=0;
 
-  stimulus_add_node_button=NULL;
+  stimulus_add_node_button=0;
 
-  selected_node=NULL;
-  selected_pin=NULL;
-  selected_module=NULL;
+  selected_node=0;
+  selected_pin=0;
+  selected_module=0;
 
-  hadj = NULL;
-  vadj = NULL;
+  hadj = 0;
+  vadj = 0;
 
-  layout_pixmap=NULL;
+  layout_pixmap=0;
 
   gp = _gp;
 

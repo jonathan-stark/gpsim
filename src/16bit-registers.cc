@@ -1157,8 +1157,8 @@ void T3CON::put(unsigned int new_value)
 TMR3_MODULE::TMR3_MODULE(void)
 {
 
-  t3con = NULL;
-  pir_set = NULL;
+  t3con = 0;
+  pir_set = 0;
 
 }
 
@@ -1528,8 +1528,8 @@ SSPMODULE::SSPMODULE(void)
 
 PORTC16::PORTC16(void)
 {
-  usart = NULL;
-  ccp1con = NULL;
+  usart = 0;
+  ccp1con = 0;
 }
 
 //-------------------------------------------------------------------

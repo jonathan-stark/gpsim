@@ -76,8 +76,8 @@ void P16C54::create_iopin_map(void)
   package->assign_pin(1, new IO_bi_directional(porta, 2));
   package->assign_pin(2, new IO_bi_directional(porta, 3));
   package->assign_pin(3, new IO_open_collector(porta, 4));
-  package->assign_pin(4, NULL);
-  package->assign_pin(5, NULL);
+  package->assign_pin(4, 0);
+  package->assign_pin(5, 0);
   package->assign_pin(6, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(7, new IO_bi_directional_pu(portb, 1));
   package->assign_pin(8, new IO_bi_directional_pu(portb, 2));
@@ -86,9 +86,9 @@ void P16C54::create_iopin_map(void)
   package->assign_pin(11, new IO_bi_directional_pu(portb, 5));
   package->assign_pin(12, new IO_bi_directional_pu(portb, 6));
   package->assign_pin(13, new IO_bi_directional_pu(portb, 7));
-  package->assign_pin(14, NULL);
-  package->assign_pin(15, NULL);
-  package->assign_pin(16, NULL);
+  package->assign_pin(14, 0);
+  package->assign_pin(15, 0);
+  package->assign_pin(16, 0);
 
 
 
@@ -137,10 +137,10 @@ void P16C55::create_iopin_map(void)
   package->assign_pin(8, new IO_bi_directional(porta, 2));
   package->assign_pin(9, new IO_bi_directional(porta, 3));
   package->assign_pin(1, new IO_open_collector(porta, 4));
-  package->assign_pin(2, NULL);
-  package->assign_pin(3, NULL);
-  package->assign_pin(4, NULL);
-  package->assign_pin(5, NULL);
+  package->assign_pin(2, 0);
+  package->assign_pin(3, 0);
+  package->assign_pin(4, 0);
+  package->assign_pin(5, 0);
   package->assign_pin(10, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(11, new IO_bi_directional_pu(portb, 1));
   package->assign_pin(12, new IO_bi_directional_pu(portb, 2));
@@ -157,9 +157,9 @@ void P16C55::create_iopin_map(void)
   package->assign_pin(23, new IO_bi_directional_pu(portc, 5));
   package->assign_pin(24, new IO_bi_directional_pu(portc, 6));
   package->assign_pin(25, new IO_bi_directional_pu(portc, 7));
-  package->assign_pin(26, NULL);
-  package->assign_pin(27, NULL);
-  package->assign_pin(28, NULL);
+  package->assign_pin(26, 0);
+  package->assign_pin(27, 0);
+  package->assign_pin(28, 0);
 
 }
 
@@ -189,7 +189,7 @@ void P16C54::create_sfr_map(void)
   add_sfr_register(&trisa,  0xffffffff, 0x1f);
   add_sfr_register(&trisb,  0xffffffff, 0xff);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   pic_processor::create_symbols();
@@ -292,7 +292,7 @@ void P16C55::create_sfr_map(void)
   add_sfr_register(&trisb,  0xffffffff, 0xff);
   add_sfr_register(&trisc,  0xffffffff, 0xff);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   pic_processor::create_symbols();

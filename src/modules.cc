@@ -66,11 +66,11 @@ list <Module *> instantiated_modules_list;
 Module::Module(void)
 {
 
-  name_str = NULL;
+  name_str = 0;
   interface_id = 0;
-  widget=NULL;
-  package = NULL;
-  interface = NULL;
+  widget=0;
+  package = 0;
+  interface = 0;
 
   // FIXME - remove these gui references:
   x=-1; // -1 means automatic positioning
@@ -96,7 +96,7 @@ Module * Module::construct(char * name)
 
   cout << " Can't create a generic Module\n";
 
-  return NULL;
+  return 0;
 
 }
 
@@ -111,7 +111,7 @@ void Module::new_name(const char *s)
   if(s)
     name_str = strdup(s);
   else
-    name_str = NULL;
+    name_str = 0;
 
 }
 
@@ -156,7 +156,7 @@ Attribute * Module::get_attribute(char *attribute_name)
 {
 
   if(!attribute_name)
-    return NULL;
+    return 0;
 
   list <Attribute *> :: iterator attribute_iterator;
 
@@ -181,7 +181,7 @@ Attribute * Module::get_attribute(char *attribute_name)
 
   cout << "Could not find attribute named " << attribute_name  << '\n';
 
-  return NULL;
+  return 0;
 }
 
 
@@ -261,17 +261,17 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
     if(new_name)
       _name = strdup(new_name);
     else
-      _name = NULL;
+      _name = 0;
 
     _handle = library_handle;
 
     get_mod_list =   (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
 
-    if ((error = dlerror()) != NULL)  {
+    if ((error = dlerror()) != 0)  {
       cout << "WARNING: non-conforming module library\n"
 	   << "  gpsim libraries should have the mod_list() function defined\n";
       fputs(error, stderr);
-      module_list = NULL;
+      module_list = 0;
     } else {
 
       // Get a pointer to the list of modules that this library supports.
@@ -279,9 +279,9 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
     }
 #else
 
-    module_list = NULL;
-    _name = NULL;
-    _handle = NULL;
+    module_list = 0;
+    _name = 0;
+    _handle = 0;
 
 #endif
 
@@ -309,7 +309,7 @@ void module_add_library(const char *library_name, void *library_handle)
     module_list.push_back(ml);
 
   } else 
-    cout << "BUG: " << __FUNCTION__ << " called with library_name == NULL";
+    cout << "BUG: " << __FUNCTION__ << " called with library_name == 0";
 
 }
 
@@ -372,11 +372,11 @@ void module_load_module(const char *module_type, const char *module_name)
 
 
   if(!module_type) {
-    cout << "WARNING: module type is NULL\n";
+    cout << "WARNING: module type is 0\n";
     return;
   }
 
-  if(module_name==NULL)
+  if(module_name==0)
   {
       char *p = (char*)malloc(128);
       sprintf(p, "%s%d",module_type,module_sequence_number);
@@ -471,7 +471,7 @@ Module *module_check_cpu(char *module_name)
   }
   else {
     cout << "module `" << module_name << "' wasn't found\n";
-    return NULL;
+    return 0;
   }
 
 }

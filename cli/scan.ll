@@ -45,8 +45,8 @@ int state;
 
 static int numeric_base = 0;
 
-static struct cmd_options *op = NULL;
-static command *cmd = NULL;
+static struct cmd_options *op = 0;
+static command *cmd = 0;
 static int have_parameters = 0;
 static int end_of_command = 0;
 extern int quit_parse;
@@ -106,7 +106,7 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 \n  { 
       // Got an eol.
       input_mode = 0;  // assume that this is not a multi-line command.
-      if(cmd != NULL) {
+      if(cmd) {
 	if((verbose) && DEBUG_PARSER)
           cout << "EOL with " << cmd->name << '\n';
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
@@ -138,14 +138,14 @@ abort_gpsim_now {
   }
 
 {DEC} {
-   //yylval.i = strtoul(yytext,NULL,numeric_base);
+   //yylval.i = strtoul(yytext,0,numeric_base);
    sscanf(yytext,"%Ld",&yylval.li);
    // printf("a number: 0x%x\n",yylval.i);
    return NUMBER;
   }
 
 {HEX} { 
-   //yylval.i = strtoul(yytext,NULL,0);
+   //yylval.i = strtoul(yytext,0,0);
    sscanf(yytext,"%Lx",&yylval.li);
    // printf("a hex number: 0x%x\n",yylval.i);
    return NUMBER;
@@ -272,12 +272,12 @@ int handle_identifier(const string &s, cmd_options **op )
   // If no command has been found so far, then the options (*op)
   // haven't been selected either (and consequently *op is null).
 
-  if(*op == NULL) {
+  if(! *op) {
 
     // Search the commands
     
     cmd = search_commands(s);
-    if(cmd != NULL) {
+    if(cmd) {
       if(verbose&2)
         cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
                 (cmd->get_token()) << "\n *******\n";
@@ -309,7 +309,7 @@ int handle_identifier(const string &s, cmd_options **op )
    if((verbose) && DEBUG_PARSER)
      cout << "search options\n";
 
-   while(opt->name != NULL)
+   while(opt->name)
     if(strcmp(opt->name, s.c_str()) == 0) {
       if((verbose) && DEBUG_PARSER)
         cout << "found option '" << opt->name << "'\n";
@@ -369,8 +369,8 @@ void init_parser(void)
 
   // Can't have any options until we get a command.
   if(!parser_spanning_lines) {
-    cmd = NULL;
-    op = NULL;
+    cmd = 0;
+    op = 0;
     input_mode = 0;
     end_of_command = 0;
     if((verbose & 2) && DEBUG_PARSER)

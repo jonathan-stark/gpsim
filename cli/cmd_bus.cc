@@ -33,7 +33,7 @@ extern void add_bus(char *node_name);
 
 static cmd_options cmd_bus_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

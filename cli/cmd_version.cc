@@ -32,7 +32,7 @@ extern void gpsim_version(void);
 
 static cmd_options cmd_version_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

@@ -102,9 +102,9 @@ public:
   // I/O pin specific
 
   virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
+  virtual char *get_pin_name(unsigned int pin_number) {return 0;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return 0;};
 
   void add_attribute(Attribute *);
 
@@ -177,7 +177,7 @@ void module_display_available(void);
 void module_list_modules(void);
 //int find_in_available_module_list(char * module_type);
 void module_load_library(const char *library_name);
-void module_load_module(const char * module_type, const char * module_new_name=NULL);
+void module_load_module(const char * module_type, const char * module_new_name=0);
 void module_pins(char *module_name);
 void module_set_attr(char *module_name,char *attr, char *val);
 void module_set_attr(char *module_name,char *attr, char *val, int val2);

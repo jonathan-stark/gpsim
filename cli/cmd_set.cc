@@ -49,7 +49,7 @@ static cmd_options cmd_set_options[] =
   "v",          SET_VERBOSE,    OPT_TT_BITFLAG,
   "verbose",    SET_VERBOSE,    OPT_TT_BITFLAG,
   "gui_update", SET_GUI_UPDATE, OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 

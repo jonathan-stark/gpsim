@@ -81,8 +81,8 @@ void P16C8x::create_iopin_map(void)
   package->assign_pin(1, new IO_bi_directional(porta, 2));
   package->assign_pin(2, new IO_bi_directional(porta, 3));
   package->assign_pin(3, new IO_open_collector(porta, 4));
-  package->assign_pin(4, NULL);
-  package->assign_pin(5, NULL);
+  package->assign_pin(4, 0);
+  package->assign_pin(5, 0);
   package->assign_pin(6, new IO_bi_directional_pu(portb, 0));
   package->assign_pin(7, new IO_bi_directional_pu(portb, 1));
   package->assign_pin(8, new IO_bi_directional_pu(portb, 2));
@@ -91,9 +91,9 @@ void P16C8x::create_iopin_map(void)
   package->assign_pin(11, new IO_bi_directional_pu(portb, 5));
   package->assign_pin(12, new IO_bi_directional_pu(portb, 6));
   package->assign_pin(13, new IO_bi_directional_pu(portb, 7));
-  package->assign_pin(14, NULL);
-  package->assign_pin(15, NULL);
-  package->assign_pin(16, NULL);
+  package->assign_pin(14, 0);
+  package->assign_pin(15, 0);
+  package->assign_pin(16, 0);
 
 
 
@@ -132,7 +132,7 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
 
-  sfr_map = NULL;
+  sfr_map = 0;
   num_of_sfrs = 0;
 
   intcon = &intcon_reg;
@@ -276,7 +276,7 @@ Processor * P16CR83::construct(void)
 
   cout << " cr83 construct\n";
 
-  return NULL;
+  return 0;
 
 }
 
@@ -285,7 +285,7 @@ Processor * P16CR84::construct(void)
 
   cout << " cr84 construct\n";
 
-  return NULL;
+  return 0;
 
 }
 

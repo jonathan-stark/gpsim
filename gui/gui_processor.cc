@@ -49,11 +49,11 @@ GUI_Processor::GUI_Processor(void)
 {
 
   pic_id = 0;
-  cpu = NULL;
+  cpu = 0;
 
   create_dispatcher();
 
-  status_bar = NULL;
+  status_bar = 0;
   regwin_ram =  new  RAM_RegisterWindow(this);
   regwin_eeprom = new  EEPROM_RegisterWindow(this);
   program_memory = new  SourceBrowserOpcode_Window(this);

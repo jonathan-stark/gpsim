@@ -43,7 +43,7 @@ list <stimulus *> :: iterator stimulus_iterator;
  
 static char num_nodes = 'a';
 static char num_stimuli = 'a';
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
+void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=0);
 
 
 extern Processor *active_cpu;
@@ -80,7 +80,7 @@ Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
 	  return (t);
 	}
     }
-  return ((Stimulus_Node *)NULL);
+  return ((Stimulus_Node *)0);
 }
 
 void add_node(char *node_name)
@@ -180,7 +180,7 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 	}
     }
 
-  return ((stimulus *)NULL);
+  return ((stimulus *)0);
 }
 
 void add_stimulus(stimulus * new_stimulus)
@@ -225,7 +225,7 @@ void dump_stimulus_list(void)
 Stimulus_Node::Stimulus_Node(const char *n)
 {
 
-  stimuli = NULL;
+  stimuli = 0;
   warned  = 0;
 
   if(n)
@@ -280,10 +280,10 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
 	  if(s == sptr)
 	    return;      // The stimulus is already attached to this node.
 
-	  if(sptr->next == NULL)
+	  if(sptr->next == 0)
 	    {
 	      sptr->next = s;
-	      // s->next = NULL;  This is done below
+	      // s->next = 0;  This is done below
 	      searching=0;
 	    }
 	  sptr = sptr->next;
@@ -294,9 +294,9 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
 
   // If we reach this point, then it means that the stimulus that we're
   // trying to attach has just been placed at the end of the the stimulus
-  // list for this node. So we need to NULL terminate the singly-linked list.
+  // list for this node. So we need to 0 terminate the singly-linked list.
 
-  s->next = NULL;
+  s->next = 0;
 
   // Now tell the stimulus to attach itself to the node too
   // (If it hasn't already.)
@@ -359,7 +359,7 @@ int Stimulus_Node::update(unsigned int current_time)
 
   //cout << "getting state of " << name() << '\n';
 
-  if(stimuli != NULL)
+  if(stimuli != 0)
     {
       stimulus *sptr = stimuli;
 
@@ -407,12 +407,12 @@ stimulus::stimulus(char *n)
 {
   strcpy(name_str,"stimulus");
 
-  snode = NULL;
+  snode = 0;
   drive = 0;
   state = 0;
   digital_state = 0;
-  xref = NULL;
-  next = NULL;
+  xref = 0;
+  next = 0;
 
 
   //cout << "stimulus\n";
@@ -454,8 +454,8 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
   phase  = ph;  // phase of the sq wave wrt the cycle counter
   state  = 0;   // output 
   time   = 0;   // simulation time
-  snode = NULL;
-  next = NULL;
+  snode = 0;
+  next = 0;
 
   drive  = MAX_DRIVE / 2;
 
@@ -507,8 +507,8 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   state  = 0;   // output 
   time   = 0;   // simulation time
   drive  = 255*5; // Hard coded for now
-  snode = NULL;
-  next = NULL;
+  snode = 0;
+  next = 0;
 
   //cout << "duty cycle " << dc << " period " << p << " drive " << drive << '\n';
   // calculate the slope and the intercept for the two lines comprising
@@ -934,10 +934,10 @@ void asynchronous_stimulus::put_data(float data_point)
 
 asynchronous_stimulus::asynchronous_stimulus(char *n)
 {
-  cpu = NULL;
+  cpu = 0;
 
-  snode = NULL;
-  next = NULL;
+  snode = 0;
+  next = 0;
 
   period = 0;
   duty   = 0;
@@ -946,9 +946,9 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
   start_cycle    = 0;
 
   digital = 1;
-  current_sample = NULL;
+  current_sample = 0;
   data_flag = 0;
-  samples = NULL;
+  samples = 0;
 
   if(n)
     strcpy(name_str,n);
@@ -966,8 +966,8 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
 dc_supply::dc_supply(char *n)
 {
 
-  snode = NULL;
-  next = NULL;
+  snode = 0;
+  next = 0;
 
   if(n)
     strcpy(name_str,n);
@@ -995,7 +995,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
-  snode = NULL;
+  snode = 0;
 
   if(iop) {
     iop->attach_iopin(this,b);
@@ -1031,14 +1031,14 @@ IOPIN::IOPIN(void)
 
   cout << "IOPIN default constructor\n";
 
-  iop = NULL;
-  iopp = NULL;
+  iop = 0;
+  iopp = 0;
   iobit=0;
   state = 0;
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
-  snode = NULL;
+  snode = 0;
 
   add_stimulus(this);
 

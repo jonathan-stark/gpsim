@@ -75,7 +75,7 @@ static void update_menus(Symbol_Window *sw)
 	{
             sym *entry;
 	    entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
-	    if(entry==NULL)
+	    if(entry==0)
 		gtk_widget_set_sensitive (item, FALSE);
 	    else
 		gtk_widget_set_sensitive (item, TRUE);
@@ -97,7 +97,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     unsigned int pic_id;
     int value;
 
-    if(widget==NULL || data==NULL)
+    if(widget==0 || data==0)
     {
 	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
@@ -108,7 +108,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
 
-    if(entry==NULL)
+    if(entry==0)
 	return;
 
     switch(item->id)
@@ -133,10 +133,10 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
   GtkWidget *item;
   int i;
 
-  if(sheet==NULL || sw==NULL)
+  if(sheet==0 || sw==0)
   {
       printf("Warning build_menu(%p,%p)\n",sheet,sw);
-      return NULL;
+      return 0;
   }
     
   popup_sw = sw;
@@ -171,7 +171,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw)
     GtkWidget *popup;
 //	GdkModifierType mods;
 
-  if(widget==NULL || event==NULL || sw==NULL)
+  if(widget==0 || event==0 || sw==0)
   {
       printf("Warning do_popup(%p,%p,%p)\n",widget,event,sw);
       return 0;
@@ -180,7 +180,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw)
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
-      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+      gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
 		     3, event->time);
     }
     return FALSE;
@@ -213,7 +213,7 @@ void Symbol_Window::Update(void)
   gtk_clist_clear(GTK_CLIST(symbol_clist));
 
   // free all old allocations
-  for(iter=symbols;iter!=NULL;)
+  for(iter=symbols;iter!=0;)
     {
       GList *next=iter->next;
       free(((sym*)iter->data)->name);
@@ -222,13 +222,13 @@ void Symbol_Window::Update(void)
       iter=next;
       //	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }
-  symbols=NULL;
+  symbols=0;
 
   gpsim_symbol_rewind((unsigned int)gp->pic_id);
 
 
   // FIXME memory leaks
-  while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+  while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
     {
       int row;
       sym *e;
@@ -353,7 +353,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
   GList *p;
   sym *s;
     
-  if(symbol_name==NULL)
+  if(symbol_name==0)
     return;
 
   // If window is not displayed, then display it.
@@ -363,7 +363,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
   // See if the type of symbol selected is currently filtered out, and
   // if so we unfilter it.
   gpsim_symbol_rewind((unsigned int)gp->pic_id);
-  while(NULL != (s = gpsim_symbol_iter(gp->pic_id))) {
+  while(0 != (s = gpsim_symbol_iter(gp->pic_id))) {
     
     if(!strcasecmp(s->name,symbol_name)) {
 	
@@ -467,7 +467,7 @@ symbol_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
 
     if (!text2)
 	assert(0);
-    //	return (text1 != NULL);
+    //	return (text1 != 0);
 
     if (!text1)
 	assert(0);
@@ -576,7 +576,7 @@ void Symbol_Window::Build(void)
 			     (GtkCListCompareFunc)symbol_compare_func);
 
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"click_column",
-		     (GtkSignalFunc)symbol_click_column,NULL);
+		     (GtkSignalFunc)symbol_click_column,0);
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"select_row",
 		     (GtkSignalFunc)symbol_list_row_selected,this);
   gtk_signal_connect(GTK_OBJECT(symbol_clist),"unselect_row",
@@ -586,7 +586,7 @@ void Symbol_Window::Build(void)
 		     (GtkSignalFunc) do_popup,
 		     this);
 
-  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+  scrolled_window=gtk_scrolled_window_new(0, 0);
   gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
@@ -664,10 +664,10 @@ Symbol_Window::Symbol_Window(GUI_Processor *_gp)
   name = "symbol_viewer";
   wc = WC_misc;
   wt = WT_symbol_window;
-  window = NULL;
+  window = 0;
   is_built = 0;
 
-  symbols=NULL;
+  symbols=0;
   filter_addresses=0;
   filter_constants=1;
   filter_registers=0;

@@ -167,12 +167,12 @@ static void
 cyclechanged(GtkWidget *widget, StopWatch_Window *sww)
 {
     const char *text;
-    if(widget==NULL|| sww==NULL)
+    if(widget==0|| sww==0)
     {
 	printf("Warning cyclechanged(%p,%p)\n",widget,sww);
 	return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=NULL)
+    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v;
 	v=atoll(text);
@@ -190,12 +190,12 @@ static void
 offsetchanged(GtkWidget *widget, StopWatch_Window *sww)
 {
     const char *text;
-    if(widget==NULL|| sww==NULL)
+    if(widget==0|| sww==0)
     {
 	printf("Warning offsetchanged(%p,%p)\n",widget,sww);
 	return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=NULL)
+    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v;
 	v=atoll(text);
@@ -210,12 +210,12 @@ static void
 rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 {
     const char *text;
-    if(widget==NULL|| sww==NULL)
+    if(widget==0|| sww==0)
     {
 	printf("Warning rolloverchanged(%p,%p)\n",widget,sww);
 	return;
     }
-    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=NULL)
+    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=0)
     {
         long long v;
 	v=atoll(text);
@@ -389,7 +389,7 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   name = "stopwatch_viewer";
   wc = WC_data;
   wt = WT_stopwatch_window;
-  window = NULL;
+  window = 0;
   is_built=0;
 
   count_dir=1;

@@ -147,7 +147,7 @@ public:
 
 	  while(value >= break_on_this)   // Loop in case there are multiple breaks
 	    {
-	      if(active.next->f != NULL)
+	      if(active.next->f)
 		active.next->f->callback();
 	      else
 		bp.check_cycle_break(active.next->breakpoint_number);
@@ -159,10 +159,10 @@ public:
     }
 
   bool set_break(guint64 future_cycle,
-		 BreakCallBack *f=NULL, unsigned int abp = MAX_BREAKPOINTS);
+		 BreakCallBack *f=0, unsigned int abp = MAX_BREAKPOINTS);
   bool set_break_delta(guint64 future_cycle,
-		 BreakCallBack *f=NULL, unsigned int abp = MAX_BREAKPOINTS);
-  bool reassign_break(guint64 old_cycle,guint64 future_cycle, BreakCallBack *f=NULL);
+		 BreakCallBack *f=0, unsigned int abp = MAX_BREAKPOINTS);
+  bool reassign_break(guint64 old_cycle,guint64 future_cycle, BreakCallBack *f=0);
   void clear_current_break(void);
   void dump_breakpoints(void);
 

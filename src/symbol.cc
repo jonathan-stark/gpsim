@@ -99,7 +99,7 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
   node_symbol *ns = new node_symbol();
 
   ns->name_str = s->name();
-  ns->cpu      = NULL;
+  ns->cpu      = 0;
   ns->stimulus_node = s;
   st.push_back(ns);
 
@@ -111,7 +111,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
   stimulus_symbol *ss = new stimulus_symbol();
 
   ss->name_str = s->name();
-  ss->cpu      = NULL;
+  ss->cpu      = 0;
   ss->s        = s;
   st.push_back(ss);
 
@@ -120,7 +120,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 void Symbol_Table::add_register(pic_processor *cpu, Register *new_reg)
 {
 
-  if(new_reg==NULL)
+  if(new_reg==0)
     return;
 
   register_symbol *rs = new register_symbol();
@@ -137,7 +137,7 @@ void Symbol_Table::add_register(pic_processor *cpu, Register *new_reg)
 void Symbol_Table::add_w(pic_processor *cpu, WREG *new_w)
 {
 
-  if(cpu==NULL || new_w==NULL)
+  if(cpu==0 || new_w==0)
     return;
 
   w_symbol *ws = new w_symbol();
@@ -259,7 +259,7 @@ symbol::symbol(void)
 {
   //  cout << " a symbol table\n";
 
-  cpu = NULL;
+  cpu = 0;
 }
 
 void symbol::print(void)
@@ -291,7 +291,7 @@ symbol * Symbol_Table::find(string *s)
       sti++;
     }
 
-  return NULL;
+  return 0;
 
 }
 
@@ -319,7 +319,7 @@ symbol * Symbol_Table::find(SYMBOL_TYPE symt, char *str)
       sti++;
     }
 
-  return NULL;
+  return 0;
 
 }
 

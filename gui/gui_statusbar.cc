@@ -92,7 +92,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
 
-    if(widget==NULL || data==NULL)
+    if(widget==0 || data==0)
     {
 	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
 	return;
@@ -300,7 +300,7 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
 static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
 {
-    if(widget==NULL || event==NULL || sbw==NULL)
+    if(widget==0 || event==0 || sbw==0)
     {
         printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbw);
         return 0;
@@ -310,7 +310,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
     {
 	popup_sbw = sbw;
   
-	gtk_menu_popup(GTK_MENU(sbw->popup_menu), NULL, NULL, NULL, NULL,
+	gtk_menu_popup(GTK_MENU(sbw->popup_menu), 0, 0, 0, 0,
 			   3, event->time);
 	// It looks like we need it to avoid a selection in the entry.
 	// For this we tell the entry to stop reporting this event.
@@ -382,7 +382,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 
   StatusBarXREF *cross_reference;
 
-  if(_gp == NULL)
+  if(_gp == 0)
     return;
 
   gp = _gp;
@@ -407,15 +407,15 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 
 StatusBar_Window::StatusBar_Window(void)
 {
-  gp = NULL;
+  gp = 0;
 
-  popup_menu = NULL;
+  popup_menu = 0;
   
-  status = NULL;
-  W = NULL;
-  pc = NULL;
-  cpu_cycles = NULL;
-  time = NULL;
+  status = 0;
+  W = 0;
+  pc = 0;
+  cpu_cycles = 0;
+  time = 0;
   
 }
 

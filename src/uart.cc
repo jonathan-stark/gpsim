@@ -847,14 +847,14 @@ void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
   }
 
   if(txreg) {
-    txreg->assign_pir_set(NULL);
+    txreg->assign_pir_set(0);
     txreg->txsta = txsta;
   }
 
   if(txsta) {
     txsta->txreg = txreg;
     txsta->spbrg = spbrg;
-    txsta->txpin = NULL; //uart_port->pins[6];
+    txsta->txpin = 0; //uart_port->pins[6];
     txsta->bit_count = 0;
   }
 
@@ -867,7 +867,7 @@ void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
   }
 
   if(rcreg) {
-    rcreg->assign_pir_set(NULL);
+    rcreg->assign_pir_set(0);
     rcreg->rcsta = rcsta;
   }
 
@@ -883,9 +883,9 @@ void   USART_MODULE::new_rx_edge(unsigned int bit)
 USART_MODULE::USART_MODULE(void)
 {
   //cout << "usart module constructor\n";
-  txreg = NULL;
-  rcreg = NULL;
-  spbrg = NULL;
+  txreg = 0;
+  rcreg = 0;
+  spbrg = 0;
 
   rcsta = new _RCSTA;
   txsta = new _TXSTA;

@@ -125,7 +125,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 #endif
 
 
-    if(inactive.next == NULL) {
+    if(inactive.next == 0) {
 
       cout << " too many breaks are set on the cycle counter \n";
       return 0;
@@ -196,7 +196,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 void Cycle_Counter::clear_break(BreakCallBack *f)
 {
 
-  Cycle_Counter_breakpoint_list  *l1 = &active, *l2 = NULL;
+  Cycle_Counter_breakpoint_list  *l1 = &active, *l2 = 0;
 
   bool found = 0;
 
@@ -409,7 +409,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
       // Is this the last one in the list? (or equivalently, is the one after this one 
       // a NULL?)
 
-      if(l1->next->next == NULL) {
+      if(l1->next->next == 0) {
 
 	l1->next->break_value = new_cycle;
 	break_on_this = active.next->break_value;
@@ -551,7 +551,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 void Cycle_Counter::clear_current_break(void)
 {
 
-  if(active.next == NULL)
+  if(active.next == 0)
     return;
 
   if(value == break_on_this)
@@ -577,7 +577,7 @@ void Cycle_Counter::clear_current_break(void)
       active.next = active.next->next;     // The 2nd active bp is now the 1st
       inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
 
-      if(active.next != NULL) {
+      if(active.next != 0) {
 	break_on_this = active.next->break_value;
 	active.next->prev = &active;
       } else
@@ -624,10 +624,10 @@ Cycle_Counter::Cycle_Counter(void)
   value         = 0;
   break_on_this = END_OF_TIME;
 
-  active.next   = NULL;
-  active.prev   = NULL;
-  inactive.next = NULL;
-  inactive.prev = NULL;
+  active.next   = 0;
+  active.prev   = 0;
+  inactive.next = 0;
+  inactive.prev = 0;
 
   Cycle_Counter_breakpoint_list  *l1 = &inactive;
 
@@ -638,7 +638,7 @@ Cycle_Counter::Cycle_Counter(void)
 
       l1 = l1->next;
     }
-  l1->next = NULL;
+  l1->next = 0;
 
 
 }

@@ -36,7 +36,7 @@ cmd_reset reset;
 
 static cmd_options cmd_reset_options[] =
 {
-  NULL,0,0
+  0,0,0
 };
 
 

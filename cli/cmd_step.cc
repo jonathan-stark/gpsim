@@ -33,7 +33,7 @@ cmd_step step;
 static cmd_options cmd_step_options[] =
 {
   "over",1,    OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 

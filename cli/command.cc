@@ -91,22 +91,22 @@ command *command_list[] =
 };
 
 
-pic_processor *command::cpu = NULL;
+pic_processor *command::cpu = 0;
 
 command::command(void)
-    {
-      op = NULL;
-      name = NULL;
-      token_value = 0;
-      cpu = NULL;
-    }
+{
+  op = 0;
+  name = 0;
+  token_value = 0;
+  cpu = 0;
+}
 
 command::command(struct cmd_options *options,int tv) 
-    { 
-      op = options; 
-      token_value = tv;
-      cpu = NULL;
-    };
+{ 
+  op = options; 
+  token_value = tv;
+  cpu = 0;
+}
 
 
 int number_of_commands = sizeof(command_list) / sizeof(command  *);
@@ -115,19 +115,19 @@ int number_of_commands = sizeof(command_list) / sizeof(command  *);
 command *search_commands(const string &s)
 {
 
-   int i=0;
+  int i=0;
 
-   while(i<number_of_commands) {
+  while(i<number_of_commands) {
 
-     if(strcmp(command_list[i]->name, s.c_str()) == 0) {
-       return command_list[i];
-     }
+    if(strcmp(command_list[i]->name, s.c_str()) == 0) {
+      return command_list[i];
+    }
 
-     i++;
+    i++;
 
-   }
+  }
 
-   return NULL;
+  return 0;
 }
 
 void execute_line(char *cmd)
@@ -149,7 +149,7 @@ void command::new_processor(pic_processor *p)
 bool command::have_cpu(bool display_warning)
 {
 
-  if(NULL == cpu)
+  if(!cpu)
     {
       if(display_warning)
 	cout << "No cpu has been selected\n";

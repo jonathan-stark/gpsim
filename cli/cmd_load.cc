@@ -41,7 +41,7 @@ static cmd_options cmd_load_options[] =
   "h",1,    OPT_TT_BITFLAG,
   "c",2,    OPT_TT_BITFLAG,
   "s",3,    OPT_TT_BITFLAG,
-  NULL,0,0
+  0,0,0
 };
 
 

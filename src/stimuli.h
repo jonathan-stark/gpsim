@@ -105,7 +105,7 @@ public:
 
   stimulus *stimuli;            /* Pointer to the first stimulus connected to this node. */
 
-  Stimulus_Node(const char *n = NULL);
+  Stimulus_Node(const char *n = 0);
   ~Stimulus_Node();
   char * name(void){return name_str;};
   int get_voltage(void) { return state; };
@@ -129,7 +129,7 @@ public:
 
   stimulus *next;
 
-  stimulus(char *n=NULL);
+  stimulus(char *n=0);
 
   // Two different ways to obtain the stimulus state.
   // 'get_voltage' is sort of like an analog representation of the stimulus state.
@@ -153,7 +153,7 @@ public:
 
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
-  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = NULL; else cout<<"errrrrrr\n";};
+  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; else cout<<"errrrrrr\n";};
 };
 
 class source_stimulus : public stimulus, public BreakCallBack
@@ -239,7 +239,7 @@ class IOPIN : public stimulus
   int h2l_threshold;
 
   IOPIN(void);
-  IOPIN(IOPORT *i, unsigned int b,char *opt_name=NULL, Register **_iop=NULL);
+  IOPIN(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   ~IOPIN();
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
@@ -262,7 +262,7 @@ class IO_input : public IOPIN
 public:
 
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
-  IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL, Register **_iop=NULL);
+  IO_input(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   IO_input(void);
   virtual int get_voltage(guint64 current_time); //{return drive;};
   virtual void toggle(void);
@@ -282,7 +282,7 @@ public:
   
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
-  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL, Register **_iop=NULL);
+  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
@@ -311,7 +311,7 @@ public:
   resistor *pull_up_resistor;
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
-  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL, Register **_iop=NULL);
+  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   virtual int get_voltage(guint64 current_time);
 
 };
@@ -323,7 +323,7 @@ public:
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
-  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL, Register **_iop=NULL);
+  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);
@@ -335,8 +335,8 @@ class square_wave : public source_stimulus
 {
 public:
 
-  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
-  square_wave(char *n=NULL);
+  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
+  square_wave(char *n=0);
 
   virtual int get_voltage(guint64 current_time);
       
@@ -352,8 +352,8 @@ public:
   float m1,b1,m2,b2;
 
   virtual int get_voltage(guint64 current_time);
-  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
-  triangle_wave(char *n=NULL);
+  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
+  triangle_wave(char *n=0);
 
   virtual SOURCE_TYPE isa(void) {return TRI;};
 
@@ -399,7 +399,7 @@ public:
   virtual void put_data(float data_point);
   virtual void set_digital(void) { digital = 1; };
   virtual void set_analog(void) { digital = 0; };
-  asynchronous_stimulus(char *n=NULL);
+  asynchronous_stimulus(char *n=0);
   virtual SOURCE_TYPE isa(void) {return ASY;};
 
  private:
@@ -410,7 +410,7 @@ public:
 class dc_supply : public source_stimulus {
  public:
 
-  dc_supply(char *n=NULL);
+  dc_supply(char *n=0);
   virtual SOURCE_TYPE isa(void) {return DC;};
   virtual int get_voltage(guint64 current_time) { return drive;};
 

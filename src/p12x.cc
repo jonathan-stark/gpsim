@@ -65,8 +65,8 @@ void P12C508::create_iopin_map(void)
   package->assign_pin(3, new IO_bi_directional(&gpio, 4));
   package->assign_pin(2, new IO_bi_directional(&gpio, 5));
 
-  package->assign_pin(1, NULL);
-  package->assign_pin(8, NULL);
+  package->assign_pin(1, 0);
+  package->assign_pin(8, 0);
 
 
 }

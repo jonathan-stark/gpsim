@@ -151,10 +151,10 @@ Register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsi
   pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
-    return NULL;
+    return 0;
 
   if(!valid_register(pic,type,register_number))
-    return NULL;
+    return 0;
   
   switch(type) {
   case REGISTER_RAM:
@@ -163,9 +163,9 @@ Register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsi
   case REGISTER_EEPROM:
     if(pic->eeprom)
       return pic->eeprom->get_register(register_number);
-    // fall through to return NULL
+    // fall through to return 0
   default:
-    return NULL;
+    return 0;
   }
 
 }
@@ -174,13 +174,13 @@ Register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsi
 char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
   static char buffer[128];
-  char *name = NULL;
+  char *name = 0;
   Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr)
     name = fr->name();
   if(!name)
-    return NULL;
+    return 0;
   
   if(gpsim_register_is_alias(processor_id, type, register_number))
       sprintf(buffer,"alias (%s)", name);
@@ -261,7 +261,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
             continue;
         }
 	//
-	if(s.name!=NULL)
+	if(s.name!=0)
 		free(s.name);
 	s.name=(char*)malloc((*interface_sti)->name()->length()+1);
         strncpy(s.name,
@@ -273,7 +273,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
         interface_sti++;
         return &s;
     }
-    return NULL;
+    return 0;
 }
 
 //--------------------------------------------------------------------------
@@ -391,7 +391,7 @@ guint64 gpsim_digitize_time(double time)
 
 guint64  gpsim_get_update_rate(void)
 {
-    if(gi.gui_update_cbp==NULL)
+    if(gi.gui_update_cbp==0)
 	return(DEFAULT_GUI_UPDATE_RATE);
     return ((CyclicBreakPoint*)gi.gui_update_cbp)->delta_cycles;
 }
@@ -441,7 +441,7 @@ unsigned int gpsim_set_log_name(unsigned int processor_id, const char *filename,
     if(!pic)
 	return 0;
 
-    if(filename!=NULL)
+    if(filename!=0)
 	trace_log.enable_logging(filename, format);
 
     return 0;
@@ -980,7 +980,7 @@ struct file_context * gpsim_get_file_context(unsigned int processor_id, unsigned
   pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
-    return NULL;
+    return 0;
 
   return &pic->files[file_id];
 
@@ -1013,13 +1013,13 @@ gpointer create_interface(unsigned int processor_id,
   io = new InterfaceObject();
 
   if(!io)
-    return NULL;
+    return 0;
 
   io->pic = get_pic_processor(processor_id);
 
   if(!io->pic) {
     delete io;
-    return NULL;
+    return 0;
   }
 
   io->callback_function = interface_callback;
@@ -1039,13 +1039,13 @@ gpointer gpsim_set_cyclic_break_point( unsigned int processor_id,
   CyclicBreakPoint *cbp  = new CyclicBreakPoint();
 
   if(!cbp)
-    return NULL;
+    return 0;
 
   cbp->pic = get_pic_processor(processor_id);
 
   if(!cbp->pic) {
     delete cbp;
-    return NULL;
+    return 0;
   }
 
   cbp->callback_function = interface_callback;
@@ -1070,13 +1070,13 @@ gpointer gpsim_set_cyclic_break_point2(
   CyclicBreakPoint *cbp  = new CyclicBreakPoint();
 
   if(!cbp)
-    return NULL;
+    return 0;
 
   cbp->pic = active_cpu;
 
   if(!cbp->pic) {
     delete cbp;
-    return NULL;
+    return 0;
   }
 
   cbp->callback_function = interface_callback;
@@ -1112,14 +1112,14 @@ guint64 gpsim_get_current_time(void)
   return 0;
 
 }
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL)
+void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=0)
 {
   if(active_cpu)
     cycles.set_break_delta(delta, f);
 
 }
 
-void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL)
+void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=0)
 {
   if(active_cpu)
     cycles.set_break(next_cycle, f);
@@ -1193,7 +1193,7 @@ int gpsim_open(unsigned int processor_id, const char *file)
     pic_processor *pic = get_pic_processor(processor_id);
 
     str = strrchr(file,'.');
-    if(str==NULL)
+    if(str==0)
     {
 //	puts("found no dot in file!");
 	return 0;
@@ -1274,7 +1274,7 @@ Interface *get_interface(unsigned int interface_id)
     interface_list = interface_list->next;
   }
 
-  return NULL;
+  return 0;
 
 }
 
@@ -1324,8 +1324,8 @@ void update_gui(void)
 gpsimInterface::gpsimInterface (void )
 {
 
-  interfaces = NULL;
-  gui_update_cbp  = NULL;
+  interfaces = 0;
+  gui_update_cbp  = 0;
 }
 
 //--------------------------------------------------------------------------
@@ -1504,9 +1504,9 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
 void  gpsimInterface::set_update_rate  (guint64 update_rate)
 {
     gui_update_rate = update_rate;
-    if(active_cpu!=NULL)
+    if(active_cpu!=0)
     {
-	if(gui_update_cbp==NULL)
+	if(gui_update_cbp==0)
 	{
 	    gui_update_cbp = new CyclicBreakPoint();
 	    ((CyclicBreakPoint*)gui_update_cbp)->pic = active_cpu;

@@ -157,16 +157,16 @@ struct BreakStatus
 
 
   Breakpoints(void);
-  unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,unsigned int, unsigned int,BreakCallBack *f = NULL);
+  unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,unsigned int, unsigned int,BreakCallBack *f = 0);
   unsigned int set_execution_break(Processor *cpu, unsigned int address);
   unsigned int set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *cb);
-  unsigned int set_profile_start_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
-  unsigned int set_profile_stop_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
+  unsigned int set_profile_start_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = 0);
+  unsigned int set_profile_stop_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = 0);
   unsigned int set_read_break(Processor *cpu, unsigned int register_number);
   unsigned int set_write_break(Processor *cpu, unsigned int register_number);
   unsigned int set_read_value_break(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
   unsigned int set_write_value_break(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
-  unsigned int set_cycle_break(Processor *cpu, guint64 cycle,BreakCallBack *f = NULL);
+  unsigned int set_cycle_break(Processor *cpu, guint64 cycle,BreakCallBack *f = 0);
   unsigned int set_wdt_break(Processor *cpu);
   unsigned int set_stk_overflow_break(Processor *cpu);
   unsigned int set_stk_underflow_break(Processor *cpu);
@@ -230,7 +230,7 @@ public:
   Notify_Register *next;    // If multiple breaks are set on one register,
 			    // then this will point to the next one. 
 
-  Notify_Register(void){ replaced = NULL; next = NULL;};
+  Notify_Register(void){ replaced = 0; next = 0;};
   Notify_Register(Processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
@@ -307,7 +307,7 @@ public:
 
   Notify_Register_Value(void)
     { 
-      replaced = NULL;
+      replaced = 0;
       break_value = 0;
       break_mask = 0;
       last_value = 0;
@@ -461,7 +461,7 @@ public:
   void (*callback_function)(gpointer);
   gpointer callback_data;
 
-  InterfaceObject(void) {pic = NULL;};
+  InterfaceObject(void) {pic = 0;};
   virtual void callback(void);
 
 };

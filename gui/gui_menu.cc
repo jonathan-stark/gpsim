@@ -52,7 +52,7 @@ typedef struct _note_book_item
   GtkSignalFunc func;
 } NotebookItem;
 
-GtkItemFactory *item_factory=NULL;
+GtkItemFactory *item_factory=0;
 
 extern GUI_Processor *gp;
 extern guint64 gui_update_rate;
@@ -72,7 +72,7 @@ about_cb (GtkWidget *widget, void *data)
 	const gchar *authors[] = {
 		"Scott Dattalo - scott@dattalo.com",
 		"Ralf Forsberg - rfg@home.se",
-		NULL
+		0
 	};
 	
 	about = gnome_about_new ( "The GNUPIC Simulator - ", GPSIM_VERSION,
@@ -80,7 +80,7 @@ about_cb (GtkWidget *widget, void *data)
 				  "(C) 1999 ",
 				  authors,
 				  "A simulator for Microchip PIC microcontrollers.",
-				  NULL);
+				  0);
 	gtk_widget_show (about);
 	
 	return;
@@ -183,14 +183,14 @@ entry_toggle_visibility (GtkWidget *checkbutton,
 static void
 new_processor_dialog (void)
 {
-  static GtkWidget *window = NULL;
+  static GtkWidget *window = 0;
 
   GtkWidget *box1;
   GtkWidget *box2;
   GtkWidget *cb;
   GtkWidget *button;
   GtkWidget *separator;
-  GList *cbitems = NULL;
+  GList *cbitems = 0;
 
   if (!window)
     {
@@ -305,7 +305,7 @@ fileopen_dialog(gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
 {
-  static GtkWidget *window = NULL;
+  static GtkWidget *window = 0;
   GtkWidget *button;
 
   if (!window)
@@ -348,7 +348,7 @@ fileopen_dialog(gpointer             callback_data,
       gtk_widget_show (button);
     }
     gtk_widget_show (window);
-    return NULL;
+    return 0;
 }
 
 
@@ -360,7 +360,7 @@ toggle_window (gpointer             callback_data,
 	      guint                callback_action,
 	      GtkWidget           *widget)
 {
-  GtkWidget *menu_item = NULL;
+  GtkWidget *menu_item = 0;
 
   //    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
 
@@ -409,7 +409,7 @@ toggle_window (gpointer             callback_data,
     }
 
   }
-  return NULL;
+  return 0;
 }
 
 static void 
@@ -569,7 +569,7 @@ static int dispatcher_delete_event(GtkWidget *widget,
 				   GdkEvent  *event,
 				   gpointer data)
 {
-    do_quit_app(NULL);
+    do_quit_app(0);
 
     return 0;
 }
@@ -580,59 +580,59 @@ gtk_ifactory_cb (gpointer             callback_data,
 		 GtkWidget           *widget)
 {
   g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
-    return NULL;
+    return 0;
 }
 
 static GtkItemFactoryEntry menu_items[] =
 {
-  { "/_File",            NULL,         0,                     0, "<Branch>" },
-  { "/File/tearoff1",    NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Tearoff>" },
+  { "/_File",            0,         0,                     0, "<Branch>" },
+  { "/File/tearoff1",    0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Tearoff>" },
   //{ "/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   { "/File/_Open",       "<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
   //{ "/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //{ "/File/Save _As...", NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { "/File/sep1",        NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Separator>" },
+  //{ "/File/Save _As...", 0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  { "/File/sep1",        0,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Separator>" },
   { "/File/_Quit",       "<control>Q", (GtkItemFactoryCallback)do_quit_app,         0 },
 
-  //  { "/_Processor",     	 NULL,       0,               0, "<Branch>" },
-  //  { "/_Processor/New",   NULL,       (GtkItemFactoryCallback)new_processor_dialog,       0 },
-  //  { "/_Processor/Delete",NULL,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { "/_Processor/Switch",NULL,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { "/_Processor",     	 0,       0,               0, "<Branch>" },
+  //  { "/_Processor/New",   0,       (GtkItemFactoryCallback)new_processor_dialog,       0 },
+  //  { "/_Processor/Delete",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { "/_Processor/Switch",0,       (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
 
-  //  { "/_Break",     	 NULL, 0,               0, "<Branch>" },
-  //  { "/_Break/Set",       NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  //  { "/_Break/Clear",     NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { "/_Break",     	 0, 0,               0, "<Branch>" },
+  //  { "/_Break/Set",       0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //  { "/_Break/Clear",     0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
-  { "/_Windows",     NULL, 0,       0, "<Branch>" },
-  { "/Windows/Program _memory", NULL, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
-  { "/Windows/_Source", NULL, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
-  { "/Windows/sep1",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Ram",    NULL, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
-  { "/Windows/_EEPROM", NULL, (GtkItemFactoryCallback)toggle_window,4,"<ToggleItem>" },
-  { "/Windows/_Watch",  NULL, (GtkItemFactoryCallback)toggle_window,5,"<ToggleItem>" },
-  { "/Windows/Sta_ck",  NULL, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
-  { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
-  { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
-  { "/Windows/sep3",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Trace",NULL, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
-  { "/Windows/Pro_file",NULL, (GtkItemFactoryCallback)toggle_window,10,"<ToggleItem>" },
-  { "/Windows/St_opwatch",NULL, (GtkItemFactoryCallback)toggle_window,11,"<ToggleItem>" },
+  { "/_Windows",     0, 0,       0, "<Branch>" },
+  { "/Windows/Program _memory", 0, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
+  { "/Windows/_Source", 0, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
+  { "/Windows/sep1",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/_Ram",    0, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
+  { "/Windows/_EEPROM", 0, (GtkItemFactoryCallback)toggle_window,4,"<ToggleItem>" },
+  { "/Windows/_Watch",  0, (GtkItemFactoryCallback)toggle_window,5,"<ToggleItem>" },
+  { "/Windows/Sta_ck",  0, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
+  { "/Windows/sep2",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/Symbo_ls",0, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
+  { "/Windows/_Breadboard",0, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
+  { "/Windows/sep3",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/_Trace",0, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
+  { "/Windows/Pro_file",0, (GtkItemFactoryCallback)toggle_window,10,"<ToggleItem>" },
+  { "/Windows/St_opwatch",0, (GtkItemFactoryCallback)toggle_window,11,"<ToggleItem>" },
 
-//  { "/_Preferences",          NULL, 0,               0, "<Branch>" },
-//  { "/_Preferences/Windows",  NULL, (GtkItemFactoryCallback)create_notebook,       0 },
+//  { "/_Preferences",          0, 0,               0, "<Branch>" },
+//  { "/_Preferences/Windows",  0, (GtkItemFactoryCallback)create_notebook,       0 },
 
 
-  { "/_Help",            NULL,         0,                     0, "<LastBranch>" },
-  { "/Help/_About",      NULL,         (GtkItemFactoryCallback)about_cb,       0 },
+  { "/_Help",            0,         0,                     0, "<LastBranch>" },
+  { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
 
 };
 
 static int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 
 
-GtkWidget *dispatcher_window = NULL;
+GtkWidget *dispatcher_window = 0;
 
 void create_dispatcher (void)
 {
@@ -677,7 +677,7 @@ void create_dispatcher (void)
 //				 GTK_OBJECT(dispatcher_window));
       gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
 			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
-			  NULL);
+			  0);
       
 #if GTK_MAJOR_VERSION >= 2
       accel_group = gtk_accel_group_new();
@@ -690,7 +690,7 @@ void create_dispatcher (void)
 				item_factory,
 				(GtkDestroyNotify) gtk_object_unref);
 //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
-      gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
+      gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
       gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
 			    gpsim_get_version(version_buffer,100)); //GPSIM_VERSION);
       gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
@@ -713,37 +713,37 @@ void create_dispatcher (void)
       // Buttons
       button = gtk_button_new_with_label ("step");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) stepbutton_cb, NULL);
+			 (GtkSignalFunc) stepbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
       
       button = gtk_button_new_with_label ("over");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) overbutton_cb, NULL);
+			 (GtkSignalFunc) overbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("finish");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) finishbutton_cb, NULL);
+			 (GtkSignalFunc) finishbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("run");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) runbutton_cb, NULL);
+			 (GtkSignalFunc) runbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("stop");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) stopbutton_cb, NULL);
+			 (GtkSignalFunc) stopbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
       button = gtk_button_new_with_label ("reset");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) resetbutton_cb, NULL);
+			 (GtkSignalFunc) resetbutton_cb, 0);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
@@ -758,7 +758,7 @@ void create_dispatcher (void)
 //      spinb = gtk_spin_button_new(spinadj,1,0);
 //      gtk_container_add(GTK_CONTAINER(frame),spinb);
 //      gtk_signal_connect(GTK_OBJECT(spinb),"changed",
-//			 (GtkSignalFunc) spinb_cb, NULL);
+//			 (GtkSignalFunc) spinb_cb, 0);
 	update_rate_menu = gtk_option_menu_new();
         gtk_widget_show(update_rate_menu);
 	gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
@@ -895,7 +895,7 @@ void create_dispatcher (void)
 				 GTK_OBJECT (dispatcher_window));
       */
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) do_quit_app, NULL);
+			 (GtkSignalFunc) do_quit_app, 0);
 
       gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
@@ -924,7 +924,7 @@ build_option_menu (OptionMenuItem items[],
   omenu = gtk_option_menu_new ();
       
   menu = gtk_menu_new ();
-  group = NULL;
+  group = 0;
   
   for (i = 0; i < num_items; i++)
     {
@@ -1104,7 +1104,7 @@ tab_fill (GtkToggleButton *button, GtkWidget *child)
   GtkPackType pack_type;
 
   gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					&expand, NULL, &pack_type);
+					&expand, 0, &pack_type);
   gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
 				      expand, button->active, pack_type);
 }
@@ -1116,7 +1116,7 @@ tab_expand (GtkToggleButton *button, GtkWidget *child)
   GtkPackType pack_type;
 
   gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					NULL, &fill, &pack_type);
+					0, &fill, &pack_type);
   gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
 				      button->active, fill, pack_type);
 }
@@ -1129,7 +1129,7 @@ tab_pack (GtkToggleButton *button, GtkWidget *child)
   gboolean fill;
 
   gtk_notebook_query_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
-					&expand, &fill, NULL);
+					&expand, &fill, 0);
   gtk_notebook_set_tab_label_packing (GTK_NOTEBOOK (sample_notebook), child,
 				      expand, fill, button->active);
 }

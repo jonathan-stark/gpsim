@@ -218,7 +218,7 @@ class Trace
 
   void switch_cpus(pic_processor *new_cpu) {cpu = new_cpu;};
 
-  int  dump (unsigned int n=0, FILE *out_stream=NULL, int watch_reg=-1);
+  int  dump (unsigned int n=0, FILE *out_stream=0, int watch_reg=-1);
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
   int  dump_instruction(unsigned int instruction_index);
@@ -255,7 +255,7 @@ public:
   ~TraceLog(void);
 
   virtual void callback(void);
-  void enable_logging(const char *new_filename=NULL, int format=TRACE_FILE_FORMAT_ASCII);
+  void enable_logging(const char *new_filename=0, int format=TRACE_FILE_FORMAT_ASCII);
   void disable_logging(void);
   void switch_cpus(pic_processor *new_cpu);
   void open_logfile(const char *new_fname, int format);
