@@ -1,4 +1,8 @@
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
+	* extras/lcd/lcd.cc:
+	Bring the LCD module up-to-date with recent gpsim changes
+	
+2004-03-01  Bert Driehuis <driehuis@playbeing.org>
 	* acinclude.m4, cli/input.cc:
 	Fix readline support for BSD 4.9
 	
