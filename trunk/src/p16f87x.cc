@@ -344,6 +344,81 @@ P16F873::P16F873(void)
 
 }
 
+
+
+Processor * P16F876::construct(void)
+{
+
+  P16F876 *p = new P16F876;
+  EEPROM_WIDE *e;
+
+  if(verbose)
+    cout << " f876 construct\n";
+
+  e = new EEPROM_WIDE;
+  e->set_cpu(p);
+  e->initialize(256);
+  e->set_intcon(&p->intcon_reg);
+  p->set_eeprom_wide(e);
+
+  p->create();
+  p->create_invalid_registers ();
+
+  p->pic_processor::create_symbols();
+
+  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
+
+  p->new_name("p16f876");
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+
+}
+
+
+void P16F876::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "creating f876 registers \n";
+
+}
+
+void P16F876::create(void)
+{
+
+  if(verbose)
+    cout << " f876 create \n";
+
+  P16F873::create();
+  add_file_registers(0x110, 0x16f, 0);
+  add_file_registers(0x190, 0x1ef, 0);
+  delete_file_registers(0xf0,0xff);
+  alias_file_registers(0x70,0x7f,0x80);
+  alias_file_registers(0x70,0x7f,0x100);
+  alias_file_registers(0x70,0x7f,0x180);
+
+  P16F876::create_sfr_map();
+
+}
+void P16F876::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "f876 create symbols\n";
+
+}
+
+P16F876::P16F876(void)
+{
+  if(verbose)
+    cout << "f876 constructor, type = " << isa() << '\n';
+
+  init_ssp = true;
+
+}
+
+
 //-------------------------------------------------------
 
 void P16F874::set_out_of_range_pm(unsigned int address, unsigned int value)
