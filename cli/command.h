@@ -76,4 +76,7 @@ extern int number_of_commands;
 extern command *search_commands(const string &s);
 extern int quit_gpsim;
 extern void execute_line(char *);
+
+#define DEBUG_PARSER 0
+
 #endif

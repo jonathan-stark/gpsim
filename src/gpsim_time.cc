@@ -96,7 +96,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
       l1->next->break_value = future_cycle;
       l1->next->f = f;
       l1->next->breakpoint_number = bpn;
-      //cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
+      cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
 
     }
 
@@ -283,7 +283,7 @@ void Cycle_Counter::clear_current_break(void)
 
   if(value == break_on_this)
     {
-      // cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this <<'\n';
+      cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this <<'\n';
       Cycle_Counter_breakpoint_list  *l1;
 
       l1 = inactive.next;                  // ptr to 1st inactive bp
@@ -319,7 +319,12 @@ void Cycle_Counter::dump_breakpoints(void)
     {
       //cout << cpu->name_str << "  " << "internal cycle break  " <<
       cout << "internal cycle break  " <<
-	hex << setw(16) << setfill('0') <<  l1->next->break_value << '\n';
+	hex << setw(16) << setfill('0') <<  l1->next->break_value;
+
+      if(l1->next->f)
+	cout << " has callback\n";
+      else
+	cout << " does not have callback\n";
 
       l1 = l1->next;
     }

@@ -191,7 +191,7 @@ char * gets_from_cmd_file(char **ss)
 
   str[0] = 0;
 
-  if(verbose&4)
+  if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
 
   if(cmd_file) {
@@ -211,7 +211,7 @@ void process_command_file(char * file_name)
   int save_readline_state;
   FILE *save_cmd_file;
 
-  if(verbose&4)
+  if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
 
   save_cmd_file = cmd_file;
@@ -224,7 +224,7 @@ void process_command_file(char * file_name)
 
   if(cmd_file)
     {
-      if(verbose)
+      if((verbose) && DEBUG_PARSER)
         cout << "processing a command file\n";
 
       quit_parse = 0;
@@ -250,7 +250,7 @@ get_user_input (void)
   char *retval = 0;
   int i,len;
 
-  if(verbose&4)
+  if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
 
   #ifndef HAVE_GUI
@@ -289,7 +289,7 @@ gpsim_read (char *buf, unsigned max_size)
   static int chars_left = 0;
   int status = 0;
 
-  if(verbose&4)
+  if((verbose&4) && DEBUG_PARSER)
     cout <<"gpsim_read\n";
 
   input_buf = get_user_input ();
@@ -327,7 +327,7 @@ gpsim_read (char *buf, unsigned max_size)
       //chars_left = 0;
     }
 
-  if(verbose&4)
+  if((verbose&4) && DEBUG_PARSER)
     cout << "leaving gpsim_read\n";
 
   return chars_left;

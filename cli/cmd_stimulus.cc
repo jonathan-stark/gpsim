@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 //GSList *data_array=NULL;
-static source_stimulus *last_stimulus=NULL;
+static asynchronous_stimulus *last_stimulus=NULL;
 cmd_stimulus c_stimulus;
 
 #define ASYNCHRONOUS_STIMULUS    1
@@ -156,7 +156,7 @@ void cmd_stimulus::stimulus(int bit_flag)
 	//create_stimulus(NEW_SQW,stim_name);
 	valid_options = SQW_OPTIONS;
 	options_entered = STIM_SQW;
-	last_stimulus = new square_wave;
+	//last_stimulus = new square_wave;
       } else
 	cout << "warning: ignoring sqw stim creation";
       break;
@@ -180,7 +180,7 @@ void cmd_stimulus::stimulus(int bit_flag)
 
       if(!last_stimulus) {
 	//create_stimulus(NEW_TRI,stim_name);
-	last_stimulus = new triangle_wave;
+	//last_stimulus = new triangle_wave;
 	valid_options = TRI_OPTIONS;
 	options_entered = STIM_TRI;
       } else
@@ -448,6 +448,7 @@ void cmd_stimulus::end(void)
       //stimorb_asy(digital, cpu, temp_array );
       if(verbose)
 	cout << "created asy stimulus\n";
+      last_stimulus->start();
       break;
 
     case STIM_TRI:

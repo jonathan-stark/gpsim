@@ -1,6 +1,7 @@
 
 /*  A Bison parser, made from parse.yy
-    by GNU Bison version 1.28  */
+ by  GNU Bison version 1.27
+  */
 
 #define YYBISON 1  /* Identify Bison output.  */
 
@@ -357,7 +358,7 @@ static const short yycheck[] = {     6,
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/lib/bison.simple"
-/* This file comes from bison-1.28.  */
+/* This file comes from bison-1.27.  */
 
 /* Skeleton output parser for bison,
    Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
@@ -570,7 +571,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 217 "/usr/lib/bison.simple"
+#line 216 "/usr/lib/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -901,7 +902,7 @@ yyreduce:
 case 25:
 #line 166 "parse.yy"
 {
-       if(verbose&2)
+       if((verbose&2) && DEBUG_PARSER)
          cout << "got an END_OF_INPUT\n";
        quit_parse = 1;
        YYABORT;
@@ -911,11 +912,11 @@ case 26:
 #line 175 "parse.yy"
 {
             //if(parser_warnings || (verbose & 2 ))
-            if(verbose & 2)
+            if((verbose & 2) && DEBUG_PARSER)
               cout << "parser is ignoring input\n";
 
             if(!parser_spanning_lines) {
-              if(verbose & 2)
+              if((verbose & 2) && DEBUG_PARSER)
                 cout << "  parser is aborting current input stream\n";
 
 	      YYABORT;
@@ -926,7 +927,7 @@ case 26:
 case 27:
 #line 191 "parse.yy"
 {
-            if(verbose)
+            if((verbose) && DEBUG_PARSER)
               cout << "parser is spanning lines\n";
 
             parser_spanning_lines = 1;
@@ -936,7 +937,7 @@ case 27:
 case 28:
 #line 201 "parse.yy"
 {
-            if(verbose&2)
+            if((verbose&2) && DEBUG_PARSER)
 	      cout << "attach command with a string list\n";
 	    attach.attach(str_list_head);
 	    free_char_list(str_list_head);
@@ -1237,8 +1238,8 @@ case 76:
 case 77:
 #line 445 "parse.yy"
 {
-            if(verbose)
-              cout << "parser is ignoring spanned line in stimulus\n";
+            //if(verbose)
+              //cout << "parser is ignoring spanned line in stimulus\n";
             parser_spanning_lines=1;
             //YYACCEPT;
           ;
@@ -1246,8 +1247,8 @@ case 77:
 case 78:
 #line 452 "parse.yy"
 {
-            if(verbose)
-              cout << "parser is ignoring garbage in stimulus\n";
+            //if(verbose)
+              //cout << "parser is ignoring garbage in stimulus\n";
             //YYACCEPT;
           ;
     break;}
@@ -1444,7 +1445,7 @@ case 103:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 543 "/usr/lib/bison.simple"
+#line 542 "/usr/lib/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;

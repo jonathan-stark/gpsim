@@ -21,14 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_TIME_H__
 #define __GPSIM_TIME_H__
 
-//class invalid_file_register;   // Forward reference
-//class _14bit_processor;
-//class pic_processor;
 
-
-//#include "trace.h"
-
-//#include "breakpoints.h"
+#include <iostream.h>
 
 
 
@@ -105,8 +99,10 @@ public:
 
 	  while(value == break_on_this)   // Loop in case there are multiple breaks
 	    {
-	      if(active.next->f != NULL)
+	      if(active.next->f != NULL) {
 		active.next->f->callback();
+		cout << "calling break callback\n";
+	      }
 	      else
 		bp.check_cycle_break(active.next->breakpoint_number);
 

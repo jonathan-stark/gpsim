@@ -13,13 +13,13 @@ echo Sample asynchronous stimulus file
 
 # Create the processor that's to be simulated
 
-processor p16c84 fred
+# processor p16c84 fred
 
 # Load the .hex file
 
-load h stim_test.hex
+load s stim_test.cod
 
-
+set verbose 0xff
 
 stimulus asynchronous_stimulus   # or we could've used asy
 
@@ -43,7 +43,7 @@ period 5000
 # In this example, the stimulus will go high at cycle 100
 # and then go low at cycle 200, high at 300, and so on
 
-200 0
+203 0
 300 1
 400 0
 600 1
@@ -81,3 +81,5 @@ attach test_node  asy_test portb0
 break wv 0x20 0x10
 
 break c 1000000
+
+set verbose 0
