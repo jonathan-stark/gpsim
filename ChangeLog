@@ -1,4 +1,8 @@
-2004-07-02 Scott Dattalo <scott@dattalo.com>
+2004-07-08  Manuel Bouyer <bouyer@antioche.eu.org>
+	* src/16bit-registers.cc, src/16bit-registers.h: Added put() and
+	update_pin_directions() methods for the PORTC16 class
+
+2004-07-07 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: New file
 	* cli/input.cc: init_gpsim() will now create a socket.
 	Added a Socket class that is capable of creating a socket and
