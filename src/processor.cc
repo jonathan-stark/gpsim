@@ -1050,7 +1050,7 @@ void Processor::run (void)
 // at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
 //
-void Processor::step (unsigned int steps)
+void Processor::step (unsigned int steps, bool refresh)
 {
   if(!steps)
     return;
@@ -1071,7 +1071,8 @@ void Processor::step (unsigned int steps)
 	  // then step one cycle - but don't execute any code  
 
 	  get_cycles().increment();
-	  trace_dump(0,1);
+	  if(refresh)
+	    trace_dump(0,1);
 
 	}
       else if(bp.have_interrupt())
@@ -1081,9 +1082,10 @@ void Processor::step (unsigned int steps)
       else
 	{
 
-	  step_one();
+	  step_one(refresh);
 	  get_trace().cycle_counter(get_cycles().value);
-	  trace_dump(0,1);
+	  if(refresh)
+	    trace_dump(0,1);
 
 	} 
 
@@ -1093,7 +1095,8 @@ void Processor::step (unsigned int steps)
   bp.clear_halt();
   simulation_mode = STOPPED;
 
-  get_interface().simulation_has_stopped();
+  if(refresh)
+    get_interface().simulation_has_stopped();
 }
 
 //-------------------------------------------------------------------
@@ -1104,9 +1107,9 @@ void Processor::step (unsigned int steps)
 // begin 'running'. This is useful for stepping over time-consuming calls.
 //
 
-void Processor::step_over (void)
+void Processor::step_over (bool refresh)
 {
-  step(1); // Try one step
+  step(1,refresh); // Try one step
 }
 
 
@@ -1464,7 +1467,7 @@ void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
 }
 
 //--------------------------------------------------------------------------
-void ProgramMemoryAccess::step(unsigned int steps)
+void ProgramMemoryAccess::step(unsigned int steps,bool refresh)
 {
 
   if(!cpu)
@@ -1473,7 +1476,7 @@ void ProgramMemoryAccess::step(unsigned int steps)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    cpu->step(steps);
+    cpu->step(steps,refresh);
     break;
 
   case HLL_MODE:
@@ -1481,17 +1484,16 @@ void ProgramMemoryAccess::step(unsigned int steps)
       unsigned int initial_line = cpu->pma->get_src_line(cpu->pc->get_value());
       unsigned int initial_pc = cpu->pc->get_value();
 
-      while(1)
-	{
-	  cpu->step(1);
+      while(1) {
+	cpu->step(1,false);
 
-	  if(cpu->pc->get_value()==initial_pc)
-	    break;
-
-	  if(get_src_line(cpu->pc->get_value())
-	     != initial_line)
-	    break;
+	if(( cpu->pc->get_value() == initial_pc) ||
+	   (get_src_line(cpu->pc->get_value()) != initial_line)) {
+	  if(refresh)
+	    get_interface().simulation_has_stopped();
+	  break;
 	}
+      }
 
       break;
     }
@@ -1499,7 +1501,7 @@ void ProgramMemoryAccess::step(unsigned int steps)
 }
 
 //--------------------------------------------------------------------------
-void ProgramMemoryAccess::step_over(void)
+void ProgramMemoryAccess::step_over(bool refresh)
 {
 
   if(!cpu)
@@ -1508,7 +1510,7 @@ void ProgramMemoryAccess::step_over(void)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    cpu->step_over();
+    cpu->step_over(refresh);
     break;
 
   case HLL_MODE:
