@@ -1,0 +1,926 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/errno.h>
+
+#include "../config.h"
+#ifdef HAVE_GUI
+
+#include <unistd.h>
+#include <gtk/gtk.h>
+#include <gdk/gdk.h>
+#include <gdk/gdkkeysyms.h>
+#include <glib.h>
+#include <string.h>
+
+#include <assert.h>
+
+#include "../src/interface.h"
+
+#include "gui.h"
+
+#define PROFILE_COLUMNS    3
+static char *profile_titles[PROFILE_COLUMNS]={"Address", "Count","Instruction"};
+
+#define PROFILE_RANGE_COLUMNS    3
+static char *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End address", "Count"};
+
+struct profile_entry {
+    unsigned int pic_id;
+//    REGISTER_TYPE type;
+    unsigned int address;
+    struct cross_reference_to_gui *xref;
+    int last_count;
+};
+
+struct profile_range_entry {
+    unsigned int pic_id;
+//    REGISTER_TYPE type;
+    char startaddress_text[64];
+    char endaddress_text[64];
+    unsigned int startaddress;
+    unsigned int endaddress;
+    struct cross_reference_to_gui *xref;
+    int last_count;
+};
+
+typedef enum {
+    MENU_REMOVE_GROUP,
+    MENU_ADD_GROUP,
+    MENU_ADD_ALL_LABELS,
+} menu_id;
+
+
+typedef struct _menu_item {
+    char *name;
+    menu_id id;
+    GtkWidget *item;
+} menu_item;
+
+static menu_item menu_items[] = {
+    {"Remove range", MENU_REMOVE_GROUP},
+    {"Add range...", MENU_ADD_GROUP},
+    {"Add all labels", MENU_ADD_ALL_LABELS},
+};
+
+// Used only in popup menus
+Profile_Window *popup_pw;
+
+static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
+{
+    gtk_clist_remove(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+    pw->profile_range_list=g_list_remove(pw->profile_range_list,entry);
+//    gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+    free(entry);
+}
+
+static unsigned int lookup_address_symbol(char *name)
+{
+    sym *s;
+    gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+    while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+    {
+	if(!strcmp(name,s->name))
+            return s->value;
+    }
+    return UINT_MAX;
+}
+
+static void add_range(Profile_Window *pw,
+		      char *startaddress_text,
+		      char *endaddress_text)
+{
+    int cycles;
+    struct profile_range_entry *profile_range_entry;
+    char buf[100];
+    unsigned int startaddress;
+    unsigned int endaddress;
+    char count_string[100];
+    char *entry[PROFILE_COLUMNS]={startaddress_text,endaddress_text,count_string};
+    int row;
+    int i;
+    int pic_id;
+    GUI_Processor *gp;
+    char *end;
+    char msg[128];
+
+    startaddress = strtoul(startaddress_text,&end,0);
+    if(*end!='\0')
+    {
+	// Try to look the address up in symbol table.
+	startaddress=lookup_address_symbol(startaddress_text);
+	if(startaddress==UINT_MAX)
+	{
+	    startaddress=0;
+	    sprintf(msg,"Could not find symbol \"%s\"",startaddress_text);
+	    gui_message(msg);
+	}
+    }
+
+    endaddress = strtoul(endaddress_text,&end,0);
+    if(*end!='\0')
+    {
+	// Try to look the address up in symbol table.
+        endaddress=lookup_address_symbol(endaddress_text);
+	if(endaddress==UINT_MAX)
+	{
+	    endaddress=0;
+	    sprintf(msg,"Could not find symbol \"%s\"",endaddress_text);
+	    gui_message(msg);
+	}
+    }
+
+    gp=pw->gui_obj.gp;
+
+    cycles=0;
+    for(i=startaddress;i<endaddress;i++)
+    {
+	cycles+=gpsim_get_cycles_used(gp->pic_id,i);
+    }
+    sprintf(count_string,"0x%x",cycles);
+
+    row=gtk_clist_append(GTK_CLIST(pw->profile_range_clist), entry);
+
+    // FIXME this memory is never freed?
+    profile_range_entry = malloc(sizeof(struct profile_range_entry));
+    strcpy(profile_range_entry->startaddress_text,startaddress_text);
+    strcpy(profile_range_entry->endaddress_text,endaddress_text);
+    profile_range_entry->startaddress=startaddress;
+    profile_range_entry->endaddress=endaddress;
+    profile_range_entry->pic_id=pic_id;
+    profile_range_entry->last_count=cycles;
+
+    gtk_clist_set_row_data(GTK_CLIST(pw->profile_range_clist), row, (gpointer)profile_range_entry);
+
+    pw->profile_range_list = g_list_append(pw->profile_range_list, (gpointer)profile_range_entry);
+}
+
+static void a_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=TRUE;
+    gtk_main_quit();
+}
+
+static void b_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=FALSE;
+    gtk_main_quit();
+}
+
+static void add_range_dialog(Profile_Window *pw)
+{
+    static GtkWidget *dialog=NULL;
+    GtkWidget *button;
+    GtkWidget *hbox;
+    GtkWidget *label;
+    static GtkWidget *startentry;
+    static GtkWidget *endentry;
+    int i;
+    int retval;
+    unsigned int startaddress, endaddress;
+
+    if(dialog==NULL)
+    {
+	dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(dialog),"Add range");
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+
+	label=gtk_label_new("addresses can be entered either as symbols, or as values. \nValues can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+	
+	hbox = gtk_hbox_new(0,0);
+	gtk_widget_show(hbox);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+
+	button = gtk_button_new_with_label("Add range");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+	
+	button = gtk_button_new_with_label("Cancel");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+
+	label=gtk_label_new("Enter start address");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+
+	startentry=gtk_entry_new();
+	gtk_widget_show(startentry);
+	gtk_box_pack_start(GTK_BOX(hbox), startentry,FALSE,FALSE,20);
+
+	label=gtk_label_new("Enter stop address");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+
+	endentry=gtk_entry_new();
+	gtk_widget_show(endentry);
+	gtk_box_pack_start(GTK_BOX(hbox), endentry,FALSE,FALSE,20);
+
+
+    }
+
+    gtk_widget_show_now(dialog);
+
+    gtk_grab_add(dialog);
+    gtk_main();
+    gtk_grab_remove(dialog);
+    
+    gtk_widget_hide(dialog);
+
+    if(retval)
+    {
+	// Add range.
+
+	gchar *startentry_text;
+	gchar *endentry_text;
+
+	startentry_text = gtk_entry_get_text(GTK_ENTRY(startentry));
+	if(*startentry_text!='\0')
+	{
+	    endentry_text = gtk_entry_get_text(GTK_ENTRY(endentry));
+	    if(*endentry_text!='\0')
+	    {
+                add_range(pw,startentry_text,endentry_text);
+	    }
+	}
+    }
+    
+    return;
+}
+
+/*
+ this function compares sym pointers for g_list_sort()
+ */
+static gint
+symcompare(sym *sym1, sym *sym2)
+{
+    if(sym1->value<sym2->value)
+	return -1;
+    if(sym1->value>sym2->value)
+	return 1;
+    return 0;
+}
+
+// called when user has selected a menu item
+static void
+popup_activated(GtkWidget *widget, gpointer data)
+{
+    char fromaddress_string[32];
+    char toaddress_string[32];
+    menu_item *item;
+    sym *s;
+    GList *symlist=NULL;
+    GList *iter;
+
+    struct profile_entry *entry;
+
+    unsigned int pic_id;
+    int value;
+
+    if(widget==NULL || data==NULL)
+    {
+	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	return;
+    }
+    
+    item = (menu_item *)data;
+    pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
+
+    entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
+
+    switch(item->id)
+    {
+    case MENU_REMOVE_GROUP:
+	remove_entry(popup_pw,entry);
+	break;
+    case MENU_ADD_GROUP:
+        add_range_dialog(popup_pw);
+	break;
+    case MENU_ADD_ALL_LABELS:
+	gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+	while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+	{
+	    sym *data;
+	    if(s->type==SYMBOL_ADDRESS)
+	    {
+		data=malloc(sizeof(sym));
+		memcpy(data,s,sizeof(sym));
+		symlist=g_list_append(symlist,data);
+	    }
+	}
+	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+	strcpy(fromaddress_string,"0");
+	iter=symlist;
+	while(iter!=NULL)
+	{
+	    int row;
+	    sym *s=iter->data;
+
+	    strcpy(toaddress_string,s->name);
+	    add_range(popup_pw,fromaddress_string,toaddress_string);
+	    strcpy(fromaddress_string,toaddress_string);
+	    toaddress_string[0]='\0';
+	    free(s);
+            iter=iter->next;
+	}
+
+	sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	add_range(popup_pw,fromaddress_string,toaddress_string);
+
+	while(symlist!=NULL)
+	    symlist=g_list_remove(symlist,symlist->data);
+
+	break;
+    default:
+	puts("Unhandled menuitem?");
+	break;
+    }
+}
+
+static void update_menus(Profile_Window *pw)
+{
+    GtkWidget *item;
+    struct profile_entry *entry;
+    int i;
+
+    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+	item=menu_items[i].item;
+//	if(menu_items[i].id!=MENU_ADD_GROUP)
+	{
+	    if(pw)
+	    {
+		entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+		if(menu_items[i].id!=MENU_ADD_GROUP &&
+		   menu_items[i].id!=MENU_ADD_ALL_LABELS &&
+		   entry==NULL)
+		    gtk_widget_set_sensitive (item, FALSE);
+		else
+		    gtk_widget_set_sensitive (item, TRUE);
+	    }
+	    else
+	    {
+		gtk_widget_set_sensitive (item, FALSE);
+	    }
+	}
+    }
+}
+
+static gint
+key_press(GtkWidget *widget,
+	  GdkEventKey *key, 
+	  gpointer data)
+{
+
+    struct profile_range_entry *entry;
+    Profile_Window *pw = (Profile_Window *) data;
+
+  if(!pw) return(FALSE);
+  if(!pw->gui_obj.gp) return(FALSE);
+  if(!pw->gui_obj.gp->pic_id) return(FALSE);
+
+  switch(key->keyval) {
+
+  case GDK_Delete:
+      entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+      if(entry!=NULL)
+	  remove_entry(pw,entry);
+      break;
+  }
+  return TRUE;
+}
+
+static gint profile_range_list_row_selected(GtkCList *profilelist,gint row, gint column,GdkEvent *event, Profile_Window *pw)
+{
+    struct profile_range_entry *entry;
+    //    int bit;
+    GUI_Processor *gp;
+    
+    pw->range_current_row=row;
+//    pw->current_column=column;
+
+    gp=pw->gui_obj.gp;
+    
+    entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
+
+    if(!entry)
+	return TRUE;
+
+    update_menus(pw);
+  
+    return 0;
+}
+
+// called from do_popup
+static GtkWidget *
+build_menu(Profile_Window *pw)
+{
+  GtkWidget *menu;
+  GtkWidget *item;
+  int i;
+
+
+  if(pw==NULL)
+  {
+      printf("Warning build_menu(%x)\n",(unsigned int)pw);
+      return NULL;
+  }
+    
+  popup_pw = pw;
+  
+  menu=gtk_menu_new();
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+      menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
+
+      gtk_signal_connect(GTK_OBJECT(item),"activate",
+			 (GtkSignalFunc) popup_activated,
+			 &menu_items[i]);
+      
+      gtk_widget_show(item);
+      gtk_menu_append(GTK_MENU(menu),item);
+  }
+
+  update_menus(pw);
+  
+  return menu;
+}
+
+// button press handler
+static gint
+do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
+{
+
+    GtkWidget *popup;
+
+  if(widget==NULL || event==NULL || pw==NULL)
+  {
+      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)pw);
+      return 0;
+  }
+
+  popup=pw->range_popup_menu;
+    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+
+      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+		     3, event->time);
+    }
+    return FALSE;
+}
+
+/*
+ the function comparing rows of profile list for sorting
+ FIXME this can be improved. When we have equal cells in sort_column
+ of the two rows, compare another column instead of returning 'match'.
+ */
+static gint
+profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
+{
+    char *text1, *text2;
+    long val1, val2;
+    GtkCListRow *row1 = (GtkCListRow *) ptr1;
+    GtkCListRow *row2 = (GtkCListRow *) ptr2;
+//    char *p;
+
+    switch (row1->cell[clist->sort_column].type)
+    {
+    case GTK_CELL_TEXT:
+	text1 = GTK_CELL_TEXT (row1->cell[clist->sort_column])->text;
+	break;
+    case GTK_CELL_PIXTEXT:
+	text1 = GTK_CELL_PIXTEXT (row1->cell[clist->sort_column])->text;
+	break;
+    default:
+	assert(0);
+	break;
+    }
+
+    switch (row2->cell[clist->sort_column].type)
+    {
+    case GTK_CELL_TEXT:
+	text2 = GTK_CELL_TEXT (row2->cell[clist->sort_column])->text;
+	break;
+    case GTK_CELL_PIXTEXT:
+	text2 = GTK_CELL_PIXTEXT (row2->cell[clist->sort_column])->text;
+	break;
+    default:
+	assert(0);
+	break;
+    }
+
+    if (!text2)
+	assert(0);
+    //	return (text1 != NULL);
+
+    if (!text1)
+	assert(0);
+    //	return -1;
+
+    if(1==sscanf(text1,"%li",&val1))
+    {
+	if(1==sscanf(text2,"%li",&val2))
+	{
+//	    printf("Value %d %d\n",val1,val2);
+	    return val1-val2;
+	}
+    }
+    return strcmp(text1,text2);
+}
+
+void ProfileWindow_update(Profile_Window *pw)
+{
+  GUI_Processor *gp;
+  GtkCList *profile_clist;
+  GtkCList *profile_range_clist;
+  char buffer[50];
+  guint64 cycle;
+  guint64 count;
+  int i;
+
+  char count_string[100];
+  struct profile_entry *entry;
+  struct profile_range_entry *range_entry;
+  GList *iter;
+
+  if(  (pw == NULL)  || (!((GUI_Object*)pw)->enabled))
+    return;
+
+  // Get the pointer to the `gui processor' structure
+  gp = ((GUI_Object*)pw)->gp;
+
+  if(gp==NULL || gp->pic_id==0)
+  {
+      puts("Warning gp or gp->pic_id == NULL in ProfileWindow_update");
+      return;
+  }
+
+  profile_clist=GTK_CLIST(pw->profile_clist);
+
+  iter=pw->profile_list;
+
+  gtk_clist_freeze(profile_clist);
+
+  while(iter)
+  {
+      entry=iter->data;
+
+      count=gpsim_get_cycles_used(gp->pic_id,entry->address);
+
+      if(entry->last_count!=count)
+      {
+	  int row;
+
+	  entry->last_count=count;
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_clist),entry);
+	  if(row==-1)
+	  {
+	      puts("\n\nwhooopsie\n");
+	      break;
+	  }
+
+	  sprintf(count_string,"0x%x",count);
+	  gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
+      }
+      iter=iter->next;
+  }
+  gtk_clist_sort(profile_clist);
+  gtk_clist_thaw(profile_clist);
+
+
+  // Update range list
+  profile_range_clist=GTK_CLIST(pw->profile_range_clist);
+
+  iter=pw->profile_range_list;
+
+  gtk_clist_freeze(profile_range_clist);
+
+  while(iter)
+  {
+      range_entry=iter->data;
+
+      count=0;
+      for(i=range_entry->startaddress;i<range_entry->endaddress;i++)
+      {
+	  count+=gpsim_get_cycles_used(gp->pic_id,i);
+      }
+
+      if(range_entry->last_count!=count)
+      {
+	  int row;
+
+	  range_entry->last_count=count;
+	  row=gtk_clist_find_row_from_data(GTK_CLIST(pw->profile_range_clist),range_entry);
+	  if(row==-1)
+	  {
+	      puts("\n\nwhooopsie\n");
+	      break;
+	  }
+
+	  sprintf(count_string,"0x%x",count);
+	  gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
+      }
+      iter=iter->next;
+  }
+  gtk_clist_sort(profile_range_clist);
+  gtk_clist_thaw(profile_range_clist);
+
+}
+
+/*****************************************************************
+ * ProfileWindow_new_program
+ *
+ * 
+ */
+
+void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
+{
+    struct profile_entry *profile_entry;
+    char buf[100];
+    char address_string[100];
+    char instruction_string[100];
+    char count_string[100];
+    char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
+    int row;
+    int i;
+    int pic_id;
+
+    if(pw == NULL || gp == NULL)
+	return;
+
+    pw->program=1;
+    
+    if( !((GUI_Object*)pw)->enabled)
+	return;
+    
+    pic_id = gp->pic_id;
+
+    gpsim_enable_profiling(gp->pic_id);
+    gtk_clist_freeze(pw->profile_clist);
+    for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++)
+    {
+	int cycles;
+	sprintf(address_string,"0x%04x",i);
+	strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
+
+	cycles=gpsim_get_cycles_used(gp->pic_id,i);
+	sprintf(count_string,"0x%x",cycles);
+
+	row=gtk_clist_append(GTK_CLIST(pw->profile_clist), entry);
+
+	// FIXME this memory is never freed?
+	profile_entry = malloc(sizeof(struct profile_entry));
+	profile_entry->address=i;
+	profile_entry->pic_id=pic_id;
+//	profile_entry->type=type;
+	profile_entry->last_count=cycles;
+
+	gtk_clist_set_row_data(GTK_CLIST(pw->profile_clist), row, (gpointer)profile_entry);
+
+	pw->profile_list = g_list_append(pw->profile_list, (gpointer)profile_entry);
+    }
+    gtk_clist_thaw(pw->profile_clist);
+}
+
+/*****************************************************************
+ * ProfileWindow_new_processor
+ *
+ * 
+ */
+
+void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp)
+{
+
+#define NAME_SIZE 32
+
+    gint i,j, border_mask, border_width;
+    GtkCList *clist;
+    struct cross_reference_to_gui *cross_reference;
+    gboolean row_created;
+//    GtkCListRange range;
+    int pic_id;
+    char row_label[50];
+
+
+    if(pw == NULL || gp == NULL)
+	return;
+
+    pw->processor=1;
+    
+    if( !((GUI_Object*)pw)->enabled)
+	return;
+    
+    pw->gui_obj.gp = gp;
+    pic_id = gp->pic_id;
+}
+
+static int delete_event(GtkWidget *widget,
+			GdkEvent  *event,
+                        Register_Window *rw)
+{
+  ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
+  return TRUE;
+}
+
+int
+BuildProfileWindow(Profile_Window *pw)
+{
+  GtkWidget *window;
+  GtkWidget *profile_clist;
+  GtkWidget *profile_range_clist;
+  GtkWidget *label;
+  GtkWidget *main_vbox;
+  GtkWidget *scrolled_window;
+
+    
+  gchar name[10];
+  gint i;
+  gint column_width,char_width;
+
+  int x,y,width,height;
+  
+	
+  if(pw==NULL)
+  {
+      printf("Warning build_profile_viewer(%x)\n",(unsigned int)pw);
+      return;
+  }
+
+	
+  window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+
+  gtk_signal_connect(GTK_OBJECT (window), "delete_event",
+		     GTK_SIGNAL_FUNC(delete_event), pw);
+
+  ((GUI_Object*)pw)->window=window;
+
+  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+
+  main_vbox=gtk_vbox_new(FALSE,1);
+  gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
+  gtk_container_add(GTK_CONTAINER(window), main_vbox);
+  gtk_widget_show(main_vbox);
+
+  gtk_window_set_title(GTK_WINDOW(window), "profile viewer");
+
+  pw->notebook = gtk_notebook_new();
+  gtk_widget_show(pw->notebook);
+
+  gtk_box_pack_start (GTK_BOX (main_vbox), pw->notebook, TRUE, TRUE, 0);
+
+
+  // Instruction profile clist
+  profile_clist=gtk_clist_new_with_titles(PROFILE_COLUMNS,profile_titles);
+  pw->profile_clist = GTK_CLIST(profile_clist);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),0,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_clist),1,TRUE);
+  gtk_clist_set_sort_column (pw->profile_clist,1);
+  gtk_clist_set_sort_type (pw->profile_clist,GTK_SORT_DESCENDING);
+  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_clist),
+			     (GtkCListCompareFunc)profile_compare_func);
+
+  GTK_WIDGET_UNSET_FLAGS(profile_clist,GTK_CAN_DEFAULT);
+    
+
+  width=((GUI_Object*)pw)->width;
+  height=((GUI_Object*)pw)->height;
+  x=((GUI_Object*)pw)->x;
+  y=((GUI_Object*)pw)->y;
+  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
+
+
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_clist);
+  
+  gtk_widget_show(profile_clist);
+
+  gtk_widget_show(scrolled_window);
+
+//  gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
+  label=gtk_label_new("Instruction profile");
+  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+
+  // Instruction range profile clist
+  profile_range_clist=gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,profile_range_titles);
+  pw->profile_range_clist = GTK_CLIST(profile_range_clist);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_range_clist),0,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_range_clist),1,TRUE);
+  gtk_clist_set_sort_column (pw->profile_range_clist,2);
+  gtk_clist_set_sort_type (pw->profile_range_clist,GTK_SORT_DESCENDING);
+  gtk_clist_set_compare_func(GTK_CLIST(pw->profile_range_clist),
+			     (GtkCListCompareFunc)profile_compare_func);
+
+  GTK_WIDGET_UNSET_FLAGS(profile_range_clist,GTK_CAN_DEFAULT);
+    
+
+  width=((GUI_Object*)pw)->width;
+  height=((GUI_Object*)pw)->height;
+  x=((GUI_Object*)pw)->x;
+  y=((GUI_Object*)pw)->y;
+  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
+
+  pw->range_popup_menu=build_menu(pw);
+
+  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup,
+		     pw);
+  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),"key_press_event",
+		     (GtkSignalFunc) key_press,
+		     (gpointer) pw);
+  gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),"select_row",
+		     (GtkSignalFunc)profile_range_list_row_selected,pw);
+
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_range_clist);
+  
+  gtk_widget_show(profile_range_clist);
+
+  gtk_widget_show(scrolled_window);
+
+  label=gtk_label_new("Instruction range profile");
+  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+
+
+  char_width = gdk_string_width (normal_style->font,"9");
+  column_width = 3 * char_width + 6;
+
+  gtk_signal_connect_after(GTK_OBJECT(pw->gui_obj.window), "configure_event",
+  			   GTK_SIGNAL_FUNC(gui_object_configure_event),pw);
+
+
+
+  gtk_widget_show (window);
+
+
+  pw->gui_obj.enabled=1;
+  pw->gui_obj.is_built=1;
+
+  if(pw->processor)
+      ProfileWindow_new_processor(pw, ((GUI_Object*)pw)->gp);
+
+  if(pw->program)
+      ProfileWindow_new_program(pw, ((GUI_Object*)pw)->gp);
+
+  ProfileWindow_update(pw);
+
+  update_menu_item((GUI_Object*)pw);
+
+  return 0;
+}
+
+int CreateProfileWindow(GUI_Processor *gp)
+{
+    int i;
+  Profile_Window *profile_window;
+
+  profile_window = (Profile_Window *)malloc(sizeof(Profile_Window));
+
+  profile_window->gui_obj.gp = gp;
+  profile_window->gui_obj.name = "profile";
+  profile_window->gui_obj.window = NULL;
+  profile_window->gui_obj.wc = WC_data;
+  profile_window->gui_obj.wt = WT_profile_window;
+  profile_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
+  profile_window->gui_obj.is_built = 0;
+  profile_window->profile_list=NULL;
+  profile_window->profile_range_list=NULL;
+  gp->profile_window = profile_window;
+
+  profile_window->processor=0;
+  profile_window->program=0;
+
+  gp_add_window_to_list(gp, (GUI_Object *)profile_window);
+
+  gui_object_get_config((GUI_Object*)profile_window);
+
+  if(profile_window->gui_obj.enabled)
+      BuildProfileWindow(profile_window);
+
+  return 1;
+}
+
+#endif // HAVE_GUI
