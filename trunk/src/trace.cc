@@ -40,6 +40,10 @@ Trace trace;               /* Instantiate the trace buffer class.
 			    * to record program flow that the user may post
 			    * analyze by dumping its contents.
 			    */
+
+// create an instance of inline get_trace() method by taking its address
+static Trace &(*dummy_trace)(void) = get_trace;
+
 /*Trace trace_log_buffer;   * The trace_log_buffer is a special trace
 			    * buffer intended for logging events that will
 			    * ultimately be written to a file. Each logged
@@ -835,19 +839,19 @@ TraceLog::~TraceLog(void)
 void TraceLog::callback(void)
 {
   int n = 0;
-  trace.cycle_counter(cycles.value);
+  get_trace().cycle_counter(get_cycles().value);
 
   if((log_file||lxtp) && logging) {
-    if(last_trace_index < trace.trace_index) { 
-      for (int c=last_trace_index; c<trace.trace_index; c++)
-        if ((trace.trace_buffer[c] & 0xff000000) == INSTRUCTION)
+    if(last_trace_index < get_trace().trace_index) { 
+      for (int c=last_trace_index; c<get_trace().trace_index; c++)
+        if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
     } else {
       for (int c=last_trace_index; c<=TRACE_BUFFER_MASK; c++)
-        if ((trace.trace_buffer[c] & 0xff000000) == INSTRUCTION)
+        if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
-      for (int c=0; c<trace.trace_index; c++)
-        if ((trace.trace_buffer[c] & 0xff000000) == INSTRUCTION)
+      for (int c=0; c<get_trace().trace_index; c++)
+        if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
     }
 
@@ -856,7 +860,7 @@ void TraceLog::callback(void)
 	trace.dump(n, log_file, -1);
 
     last_trace_index = trace.trace_index;
-    cycles.set_break(cycles.value + 1000,this);
+    get_cycles().set_break(get_cycles().value + 1000,this);
   }
 
 }
@@ -971,8 +975,8 @@ void TraceLog::enable_logging(const char *new_fname, int format)
     return;
 
   if(!cpu) {
-    if(active_cpu) {
-      cpu = (pic_processor *)active_cpu;
+    if(get_active_cpu()) {
+      cpu = (pic_processor *)get_active_cpu();
     } else
       cout << "Warning: Logging can't be enabled until a cpu has been selected.";
   }
@@ -1060,7 +1064,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 
     name = cpu->registers[address]->name();
 
-    lt_set_time(lxtp, (int)(cycles.value*4.0e8*cpu->period));
+    lt_set_time(lxtp, (int)(get_cycles().value*4.0e8*cpu->period));
 
     symp=lt_symbol_find(lxtp, name);
     if(symp==0)
@@ -1204,7 +1208,7 @@ void ProfileKeeper::callback(void)
     if(enabled)
     {
         catchup();
-	cycles.set_break(cycles.value + 1000,this);
+	get_cycles().set_break(get_cycles().value + 1000,this);
     }
 }
 
@@ -1215,14 +1219,14 @@ void ProfileKeeper::enable_profiling(void)
 	return;
 
     if(!cpu) {
-	if(active_cpu)
-	    cpu = active_cpu;
+	if(get_active_cpu())
+	    cpu = get_active_cpu();
 	else
 	    cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
     }
 
     last_trace_index = trace.trace_index;
-    cycles.set_break(cycles.value + 1000,this);
+    get_cycles().set_break(get_cycles().value + 1000,this);
     enabled = 1;
 }
 
@@ -1294,7 +1298,7 @@ inline bool BoolEventBuffer::event(bool state)
   if(state ^ (index & 1) ^ ~bInitialState)  {
 
     if(index < max_events) {
-      buffer[index++] = cycles.value - start_time;
+      buffer[index++] = get_cycles().value - start_time;
       return true;
     }
 
@@ -1365,7 +1369,7 @@ void BoolEventBuffer::activate(bool _initial_state)
     return;
 
   // Save the time for this initial event
-  start_time = cycles.value;
+  start_time = get_cycles().value;
   bInitialState = _initial_state;
 
   index = 0;  // next state gets stored at the first position in the buffer.
@@ -1373,7 +1377,7 @@ void BoolEventBuffer::activate(bool _initial_state)
   bActive = true;
 
   future_cycle = start_time + (1<<31);
-  cycles.set_break(future_cycle, this);
+  get_cycles().set_break(future_cycle, this);
 
 }
 //--------------------------------------------------
@@ -1383,7 +1387,7 @@ void BoolEventBuffer::deactivate(void)
   bActive = false;
 
   if(future_cycle)
-    cycles.clear_break(this);
+    get_cycles().clear_break(this);
 
   future_cycle = 0;
 
@@ -1543,8 +1547,3 @@ BoolEventBuffer::~BoolEventBuffer(void)
   }
 
 #endif
-
-
-
-
-

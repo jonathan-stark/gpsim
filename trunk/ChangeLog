@@ -1,3 +1,8 @@
+2004-04-21 Borut Razem <scott@dattalo.com>
+	* src/gpsim_interface.h, src/gpsim_time.h, src/processor.cc, src/symbol.cc,
+	src/trace.cc: create instances of inline methods by taking theirs address,
+	so that they can be accessed from dynamic loadable modules
+
 2004-04-18 Borut Razem <scott@dattalo.com>
 	* src/14bit-registers.h, src/gpsim_interface.h, src/gpsim_time.h,
 	src/processor.h, src/symbol.h, src/trace.h: introduced get_interface(),
