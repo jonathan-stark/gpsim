@@ -46,6 +46,7 @@ Boston, MA 02111-1307, USA.  */
 #include "modules.h"
 #include "processor.h"
 #include "xref.h"
+#include "attributes.h"
 
 #include "fopen-path.h"
 
