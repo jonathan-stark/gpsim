@@ -455,9 +455,10 @@ double Stimulus_Node::update(guint64 current_time)
 	  voltage /= Zt;
 
 	  sptr = stimuli;
-	  while(sptr)
+	  while(sptr) {
 	    sptr->set_nodeVoltage(voltage);
-
+	    sptr = sptr->next;
+	  }
 	}
       }
 

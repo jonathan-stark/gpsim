@@ -1,3 +1,7 @@
+2004-08-24 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc: Attaching three or more stimuli to
+	one node caused gpsim to hang.
+
 2004-08-24 Manuel Bouyer <bouyer@antioche.eu.org>
 	* src/stimuli.cc: Fixed iopin stimulus update. 
 
