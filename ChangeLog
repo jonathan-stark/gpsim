@@ -1,3 +1,7 @@
+2004-04-15 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-tmrs.cc, src/ioports.cc, src/ioports.h: PORTC's T1OSC input
+	can clock TMR1 on some PIC's. I've added some preliminary support for this.
+
 2004-04-14 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_break.cc, gui/gui_menu.cc, gui/gui_profile.cc,
 	gui/gui_src_asm.cc, gui/gui_src_opcode.cc, gui/gui_stack.cc,

@@ -489,7 +489,7 @@ TMRL::TMRL(void)
 
   value=0;
   synchronized_cycle=0;
-  prescale=1;
+  prescale_counter=prescale=1;
   break_value = 0x10000;
   compare_value = 0;
   compare_mode = 0;
@@ -505,17 +505,23 @@ void TMRL::increment(void)
   if(verbose & 4)
     cout << "TMRL increment because of external clock ";
 
-  if(--prescale_counter == 0)
-    {
-      prescale_counter = prescale;
-      if(++value == 256)
-	{
-	  value = 0;
-	  cpu14->intcon->set_t0if();
-	}
-      trace.register_write(address,value);
-    }
-  //  cout << value << '\n';
+  if(--prescale_counter == 0) {
+    prescale_counter = prescale;
+
+    // If TMRH/TMRL have been manually changed, we'll want to 
+    // get the up-to-date values;
+
+    current_value();
+
+    value_16bit = 0xffff & ( value_16bit + 1);
+
+    tmrh->value = (value_16bit >> 8) & 0xff;
+    value = value_16bit & 0xff;
+    if(value_16bit == 0)
+      pir_set->set_tmr1if();
+    trace.register_write(address,value);
+  }
+
 }
 
 //
@@ -570,7 +576,6 @@ void TMRL::update(void)
 	  if(verbose & 0x4)
 	    cout << "Internal clock\n";
 
-	  //value_16bit = ((tmrh->value & 0xff) << 8) | value;
 	  current_value();
 
 
@@ -659,7 +664,10 @@ unsigned int TMRL::get_value(void)
 //%%%FIXME%%% inline this
 void TMRL::current_value(void)
 {
-  value_16bit = ((cycles.value - last_cycle)/ prescale) & 0xffff;
+  if(t1con->get_tmr1cs())
+    value_16bit = tmrh->value * 256 + value;
+  else
+    value_16bit = ((cycles.value - last_cycle)/ prescale) & 0xffff;
 }
 
 unsigned int TMRL::get_low_and_high(void)
@@ -688,10 +696,9 @@ void TMRL::new_clock_source(void)
 {
 
   //cout << "TMRL:new_clock_source changed to the ";
-  if(cpu14->option_reg.get_t0cs())
+  if(t1con->get_tmr1cs())
     {
-      //cout << "external\n";
-      //      cycles.
+      cout << "TMR1::new_clock_source external clock (not implemented)...\n";
     }
   else
     {
