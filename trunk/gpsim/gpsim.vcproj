@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Debug/gui.lib ../eXdbm/Debug/eXdbm.lib ../../pthreads/lib/pthreadVC.lib"
+				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Debug/gui.lib ../eXdbm/Debug/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
@@ -77,7 +77,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include;../../pthreads/include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;HAVE_GUI"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -89,7 +89,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Release/gui.lib ../eXdbm/Release/eXdbm.lib"
+				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Release/gui.lib ../eXdbm/Release/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="1"
 				IgnoreDefaultLibraryNames=""
@@ -144,7 +144,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib"
+				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames=""
@@ -196,7 +196,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib"
+				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib"
 				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="../plat/win32/gpsim.def"
 				SubSystem="1"
