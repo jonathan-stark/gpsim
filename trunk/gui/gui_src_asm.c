@@ -1831,6 +1831,7 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
     if(sbaw->load_source)
 	SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
+  update_menu_item((GUI_Object*)sbaw);
 }
 
 

@@ -419,6 +419,8 @@ int BuildSymbolWindow(Symbol_Window *sw)
   if(sw->load_symbols)
       SymbolWindow_new_symbols(sw, sw->gui_obj.gp);
 
+  update_menu_item((GUI_Object*)sw);
+  
   return 0;
 }
 

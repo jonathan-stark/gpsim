@@ -444,6 +444,7 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
     if(sbow == NULL || gp == NULL)
 	return;
 
+    sbow->current_address=0;
     sbow->program=1;
 
     if(! ((GUI_Object*)sbow)->enabled)
@@ -514,6 +515,8 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
 
     sbow->processor=1;
 
+    sbow->current_address=0;
+    
     if(! ((GUI_Object*)sbow)->enabled)
 	return;
 
@@ -780,6 +783,7 @@ static GdkBitmap *mask;
   if(sbow->program)
       SourceBrowserOpcode_new_program(sbow, sbow->sbw.gui_obj.gp);
   
+  update_menu_item((GUI_Object*)sbow);
 }
 
 int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
@@ -807,6 +811,7 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     sbow->sbw.gui_obj.change_view = SourceBrowser_change_view;
 
     sbow->memory=NULL;
+    sbow->current_address=0;
 
     sbow->processor=0;
     sbow->program=0;
