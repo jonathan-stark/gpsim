@@ -3148,6 +3148,8 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 /* When a module is created */
 void Breadboard_Window::NewModule(Module *module)
 {
+  if(!enabled)
+    return;
 
   GuiModule *p=new GuiModule(module, this);
 
@@ -3164,6 +3166,9 @@ void Breadboard_Window::NewModule(Module *module)
 /* When a stimulus is being connected or disconnected, or a new node is created */
 void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
+
+  if(!enabled)
+    return;
 
   if(!bIsBuilt)
     Build();
@@ -3298,6 +3303,9 @@ GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
 void Breadboard_Window::Build(void)
 {
   if(bIsBuilt)
+    return;
+
+  if(!enabled)
     return;
 
   GtkWidget *hpaned1;
