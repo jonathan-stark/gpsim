@@ -83,11 +83,25 @@ class Interface {
 
   void (*new_processor) (unsigned int processor_id);
 
+
+  /*
+   * new_module - pointer to the function that is invoked when a new module is
+   *              added into gpsim
+   */
+
+  void (*new_module) (Module *module);
+
+  /*
+   * node_configuration_changed - pointer to the function that is invoked when stimulus
+   * configuration are changed
+   */
+
+  void (*node_configuration_changed) (Stimulus_Node *node);
+
   /*
    * new_program - pointer to the function that is invoked when a new program is
    *               loaded into gpsim
    */
-
   /* extern void (*new_program)  (pic_processor *p);*/
 
   void (*new_program)  (unsigned int processor_id);
@@ -114,6 +128,8 @@ class gpsimInterface {
   void remove_object (gpointer xref);
   void simulation_has_stopped (void);
   void new_processor (unsigned int processor_id);
+  void new_module  (Module *module);
+  void node_configuration_changed  (Stimulus_Node *node);
   void new_program  (unsigned int processor_id);
 
   unsigned int add_interface(Interface *new_interface);

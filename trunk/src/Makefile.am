@@ -27,6 +27,7 @@ libgpsim_la_SOURCES = \
 	init.cc \
 	interface.cc \
 	ioports.cc \
+        lxt_write.c \
 	modules.cc \
 	p12x.cc \
 	p16f62x.cc \
@@ -46,8 +47,7 @@ libgpsim_la_SOURCES = \
 	tmr0.cc \
 	trace.cc \
 	uart.cc \
-	xref.cc \
-	lxt_write.c
+	xref.cc
 
 gpsiminclude_HEADERS = \
 	12bit-instructions.h \
@@ -70,6 +70,7 @@ gpsiminclude_HEADERS = \
 	fopen-path.h \
 	interface.h \
 	ioports.h \
+	lxt_write.h \
 	modules.h \
 	p12x.h \
 	p16x5x.h \

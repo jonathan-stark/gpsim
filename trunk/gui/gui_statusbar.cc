@@ -143,7 +143,7 @@ void StatusBar_update(StatusBar_Window *sbw)
 
   if(time_format==MENU_TIME_USECONDS) {
     sbw->time->value.db = gpsim_get_cycles(pic_id)*1e6/(double)gpsim_get_inst_clock(pic_id);
-    sprintf(buffer,"%19.2f µs",sbw->time->value.db);
+    sprintf(buffer,"%19.2f us",sbw->time->value.db);
   }
   else if(time_format==MENU_TIME_MSECONDS) {
     sbw->time->value.db = gpsim_get_cycles(pic_id)*1e3/(double)gpsim_get_inst_clock(pic_id);
