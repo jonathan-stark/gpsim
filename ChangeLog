@@ -1,4 +1,11 @@
 2004-07-29 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-instructions.cc, src/16bit-instructions.cc, src/pic-instructions.cc,
+	src/pic-registers.cc, src/trace.cc, src/trace.h: The newly rewritten
+	trace printing code was broken. The good news is that while fixing
+	it, I found a way to save a little simulation time by not tracing
+	the instruction opcodes.
+
+2004-07-29 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h, src/modules.cc, src/registers.cc,
 	src/registers.h, src/stimuli.cc, src/stimuli.h:
 	Minor stimuli bug fixes, commenting and general cleanup.

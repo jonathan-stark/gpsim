@@ -41,7 +41,7 @@ void ADDLW::execute(void)
 {
   unsigned int old_value,new_value;
 
-  trace.instruction(opcode);
+  // trace.instruction(opcode);
 
   new_value = (old_value = cpu14->W->value.get()) + L;
 
@@ -68,7 +68,7 @@ RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
 void RETFIE::execute(void)
 {
 
-  trace.instruction(opcode);
+  // trace.instruction(opcode);
 
   cpu14->pc->new_address(cpu14->stack->pop());
 
@@ -89,7 +89,7 @@ RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode)
 void RETURN::execute(void)
 {
 
-  trace.instruction(opcode);
+  // trace.instruction(opcode);
 
   cpu14->pc->new_address(cpu14->stack->pop());
 
@@ -110,7 +110,7 @@ void SUBLW::execute(void)
 {
   unsigned int old_value,new_value;
 
-  trace.instruction(opcode);
+  // trace.instruction(opcode);
 
   new_value = L - (old_value = cpu14->W->value.get());
 
