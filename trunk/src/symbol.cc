@@ -194,6 +194,7 @@ Value *Symbol_Table::remove(string &s)
   Value *sym = find(s);
   if(sym)
     st.remove(sym);
+  return sym;
 }
 
 void Symbol_Table::add(const char *new_name, const char *new_type, int value)
@@ -235,6 +236,36 @@ Value * Symbol_Table::find(type_info const &symt, const char *str)
 
   return 0;
 
+}
+
+Register * Symbol_Table::findRegister(unsigned int address)
+{
+  sti = st.begin();
+  while( sti != st.end()) {
+    Value *val = *sti;
+    if(val && typeid(*val) == typeid(register_symbol)) {
+      Register * pReg = ((register_symbol*)val)->getReg();
+      if(pReg->address == address)
+        return(pReg);
+    }
+    sti++;
+  }
+  return NULL;
+}
+
+Register * Symbol_Table::findRegister(const char *s)
+{
+  sti = st.begin();
+  while( sti != st.end()) {
+    Value *val = *sti;
+    if(val && typeid(*val) == typeid(register_symbol)) {
+      if(val->name() == s) {
+        return ((register_symbol*)val)->getReg();
+      }
+    }
+    sti++;
+  }
+  return NULL;
 }
 
 void Symbol_Table::dump_one(string *s)
