@@ -1557,10 +1557,11 @@ void Register_Window::SelectRegister(int regnumber)
   range.row0=range.rowi=row;
   range.col0=range.coli=col;
   gtk_sheet_select_range(GTK_SHEET(register_sheet),&range);
-  if(GTK_SHEET(register_sheet)->view.col0>range.col0 ||
+  if(register_sheet != NULL &&
+     (GTK_SHEET(register_sheet)->view.col0>range.col0 ||
      GTK_SHEET(register_sheet)->view.coli<range.coli ||
      GTK_SHEET(register_sheet)->view.row0>range.row0 ||
-     GTK_SHEET(register_sheet)->view.rowi<range.rowi)
+     GTK_SHEET(register_sheet)->view.rowi<range.rowi))
     gtk_sheet_moveto(GTK_SHEET(register_sheet),row,col,0.5,0.5);
 
   UpdateLabelEntry();
@@ -1568,10 +1569,10 @@ void Register_Window::SelectRegister(int regnumber)
 }
 void Register_Window::SelectRegister(Value *regSym)
 {
-  if(regSym  && typeid(*regSym) == typeid(register_symbol)) {
-    int i;
-    regSym->get(i);
-    SelectRegister(i);
+  if(regSym  && typeid(*regSym) == typeid(register_symbol) &&
+      register_sheet != NULL) {
+    Register* pReg = (Register*)((register_symbol*)regSym)->getReg();
+    SelectRegister(pReg->address);
   }
 
 }
@@ -2157,6 +2158,7 @@ void Register_Window::Build(void)
 //------------------------------------------------------------------------
 Register_Window::Register_Window(void)
 {
+  register_sheet = NULL;
   printf("WARNING: calling default constructor: %s\n",__FUNCTION__);
 
 }
@@ -2172,6 +2174,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   pCellFormat = 0;
   char_width = 0;
   chars_per_column = 3; // assume byte-sized registers
+  register_sheet = NULL;
 
   registers_loaded=0;
   
