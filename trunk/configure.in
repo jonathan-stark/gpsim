@@ -97,7 +97,7 @@ if test "$use_gui" = "no"; then
 
 else
   dnl gtk checks
-  AC_PATH_PROG(GTKCONFIG, gtk-config, no, ${PATH})
+  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
 
   if test $GTKCONFIG = "no"; then
     AC_MSG_ERROR(Cannot find gtk-config)
