@@ -47,7 +47,7 @@ libgpsimcli_la_SOURCES = \
 	cmd_macro.h
 
 
-YFLAGS = -dvt
+AM_YFLAGS = -dvt
 
 libgpsimcli_la_LDFLAGS = @X_LDFLAGS@
 
