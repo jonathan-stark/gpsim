@@ -1,3 +1,7 @@
+2004-08-06 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, src/registers.h, src/trace.cc:
+	Partial implementation of trace reconstruction.
+
 2004-08-04 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-registers.cc, src/16bit-processors.cc, src/16bit-registers.cc
 	  src/p12x.cc, src/p16f62x.cc, src/p16f87x.cc, src/p16x5x.cc, src/p16x6x.cc

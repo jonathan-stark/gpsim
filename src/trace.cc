@@ -566,6 +566,95 @@ bool Trace::find_trace(unsigned int start,
   return false;
 }
 
+
+class TraceObject
+{
+public:
+
+  enum {
+    eTO_Register,
+    eTO_Cycle,
+  };
+  unsigned int type;
+
+  virtual void print(void)=0;
+
+
+};
+
+class RegisterTraceObject : public TraceObject
+{
+public:
+  RegisterValue from;
+  RegisterValue to;
+  Register *reg;
+
+  RegisterTraceObject() : reg(0) {}
+  RegisterTraceObject(Register *_r) : TraceObject(), reg( _r) {}
+  
+  virtual void print(void)
+  {
+    
+  }
+};
+
+class CycleTraceObject : public TraceObject
+{
+public:
+  guint64 cycle;
+
+  virtual void print(void)
+  {
+    
+  }
+};
+
+class PCTraceObject : public TraceObject
+{
+public:
+  unsigned int address;
+
+  virtual void print(void)
+  {
+    
+  }
+};
+
+class TraceFrame
+{
+public:
+
+  list <TraceObject *> traceObjects;
+
+  TraceFrame(unsigned int address)
+  {
+    PCTraceObject *pcto = new PCTraceObject();
+    pcto->address = address;
+
+    traceObjects.push_back(pcto);
+  }
+
+  ~TraceFrame()
+  {
+    list <TraceObject *> :: iterator toIter;
+
+    toIter = traceObjects.begin();
+    while(toIter != traceObjects.end()) {
+      delete *toIter;
+      ++toIter;
+    }
+  }
+
+  void print(void) 
+  {
+    list <TraceObject *> :: iterator toIter;
+    for(toIter = traceObjects.begin();
+	toIter != traceObjects.end();
+	++toIter) 
+      (*toIter)->print();
+  }
+};
+
 //------------------------------------------------------------------
 // int Trace::dump(unsigned int n=0)
 //
@@ -588,6 +677,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   if(!out_stream)
     return 0;
 
+
   unsigned int i = tbi(trace_index-2);
   unsigned int k = tbi(trace_index-1);
   guint64 cycle=0;
@@ -603,6 +693,11 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   // and count up to 'n' trace frames.
 
   unsigned int cycle_delta = 0;
+
+  cpu->save_state();
+
+  TraceFrame *current_frame=0;
+  list <TraceFrame *> traceFrames;
 
   for(i=0;i<n && k!=frame_end;i++) {
 
@@ -625,6 +720,9 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 	cycle_delta++;
 	found_pc = true;
 	found_frame = true;
+	current_frame = new TraceFrame(get(k) & 0xffff);
+	if(current_frame)
+	  traceFrames.push_back(current_frame);
 	break;
       }
     } while (!((k==frame_end) || found_pc));

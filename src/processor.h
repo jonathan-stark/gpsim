@@ -401,6 +401,8 @@ public:
   //
   // copy the entire processor state to a file
   virtual void save_state(FILE *);
+  // take an internal snap shot of the current state.
+  virtual void save_state();
 
   // restore the processor state
   virtual void load_state(FILE *);

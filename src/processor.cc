@@ -723,14 +723,37 @@ void Processor::save_state(FILE *fp)
 
     }
   }
+  if(pc)
+    fprintf(fp,"P:0:PC:%X\n",pc->value);
 }
+
+//-------------------------------------------------------------------
+void Processor::save_state(void)
+{
+
+  unsigned int i;
+
+  for(i=1; i<register_memory_size(); i++) {
+
+    Register *reg = rma.get_register(i);
+
+    if(reg && reg->isa() != Register::INVALID_REGISTER) {
+      reg->put_trace_state(reg->getRV_notrace());
+    }
+  }
+
+  if(pc)
+    pc->put_trace_state(pc->value);
+
+}
+
 //-------------------------------------------------------------------
 void Processor::load_state(FILE *fp)
 {
   if(!fp)
     return;
 
-  
+  cout << "Not implemented\n";
 }
 //-------------------------------------------------------------------
 int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)

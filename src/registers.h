@@ -128,11 +128,16 @@ public:
   unsigned int bit_mask;   // = 7 for 8-bit registers, = 15 for 16-bit registers.
 
   // The read_trace and write_trace variables are used while
-  // tracing register reads and writes.
+  // tracing register reads and writes. Essentially, these are
+  // the trace commands.
 
   RegisterValue write_trace;
   RegisterValue read_trace;
 
+  // The trace_state is used to reconstruct the state of the
+  // register while traversing a trace buffer.
+
+  RegisterValue trace_state;
 
   symbol *symbol_alias;
 
@@ -245,6 +250,10 @@ public:
    */
   virtual void set_write_trace(unsigned int wt);
   virtual void set_read_trace(unsigned int rt);
+  virtual void put_trace_state(RegisterValue rv)
+  {
+    trace_state = rv;
+  }
 
 protected:
 
@@ -321,6 +330,7 @@ public:
   unsigned int memory_size_mask; 
   unsigned int pclath_mask;        /* pclath confines PC to banks */
   unsigned int instruction_phase;
+  unsigned int trace_state;        /* used while reconstructing the trace history */
 
   Program_Counter(void);
   virtual void increment(void);
@@ -364,6 +374,11 @@ public:
   void reset(void);
 
   virtual unsigned int get_next(void);
+
+  virtual void put_trace_state(unsigned int ts)
+  {
+    trace_state = ts;
+  }
 
 private:
   unsigned int reset_address;      /* Value pc gets at reset */
