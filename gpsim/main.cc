@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 
+#include "../config.h"
 #include "../cli/command.h"
 #include "../cli/input.h"
 #include "../src/gpsim_def.h"
@@ -59,7 +60,7 @@ extern int quit_parse;
 
 void gpsim_version(void)
 {
-  cout << GPSIM_VERSION << '\n';
+  cout << VERSION << '\n';
 }
 
 void 
@@ -79,7 +80,7 @@ void welcome(void)
 {
 
   cout << "\ngpsim - the GNUPIC simulator\
-\nversion: " << GPSIM_VERSION << "\n\ntype help for help\n";
+\nversion: " << VERSION << "\n\ntype help for help\n";
 
 }
 
@@ -136,7 +137,7 @@ main (int argc, char *argv[])
 
 	  case 'V':
 	  case 'v':
-	    printf("%s\n",GPSIM_VERSION);
+	    printf("%s\n",VERSION);
 	    break;
 
 	  case 'H':
@@ -177,7 +178,7 @@ main (int argc, char *argv[])
       break;
 
     case 'v':
-      printf("%s\n",GPSIM_VERSION);
+      printf("%s\n",VERSION);
       break;
 
     }
