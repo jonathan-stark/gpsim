@@ -573,7 +573,6 @@ static GIOChannel *channel;
 
 static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer data)
 {
-  cout << "keypressed\n";
   if(simulation_mode == STOPPED) {
 #ifdef HAVE_READLINE
     rl_callback_read_char ();
