@@ -138,7 +138,7 @@ int Package::get_pin_state(unsigned int pin_number)
 {
 
   if(pin_existance(pin_number) == E_PIN_EXISTS)
-    return pins[pin_number-1]->get_state(0);
+    return pins[pin_number-1]->get_voltage(0);
   else
     return 0;
 

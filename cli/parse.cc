@@ -1127,7 +1127,7 @@ case 64:
             if(verbose)
               cout << "parser sees stimulus with number: " << yyvsp[0].li << '\n';
 
-	    //c_stimulus.stimulus($2->value);
+	    c_stimulus.stimulus(yyvsp[0].li);
 	  ;
     break;}
 case 65:
@@ -1136,7 +1136,7 @@ case 65:
             if(verbose)
               cout << "parser sees stimulus with float number: " << yyvsp[0].f << '\n';
 
-	    //c_stimulus.stimulus($2->value);
+	    c_stimulus.stimulus(yyvsp[0].f);
 	  ;
     break;}
 case 66:

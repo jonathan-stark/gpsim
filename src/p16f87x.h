@@ -36,9 +36,11 @@ class P16F873 : public P16C63
 */
 
 
-class P16F874 : public P16C65
+class P16F874 : public P16C74
 {
  public:
+  ADRES  adresl;
+
   virtual void set_out_of_range_pm(int address, int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F874_;};

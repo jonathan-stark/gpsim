@@ -106,7 +106,7 @@ int IOPORT::update_stimuli(void)
 	//cout << " pin " << pins[i]->name();
 	//cout <<  " node "<< pins[i]->snode->name() << " is ";
 
-	if(t  > pins[i]->threshold)
+	if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
 	  {
 	    //cout << "above";
 	     input |= m;
@@ -125,15 +125,59 @@ int IOPORT::update_stimuli(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-int IOPORT::get_bit(unsigned int bit_number)
+int IOPORT::get_bit_voltage(unsigned int bit_number)
 {
 
   guint64 time = cpu->cycles.value;
+  int v;
 
-  if(stimulus_mask & one_shifted_left_by_n [bit_number])
-    return(pins[bit_number]->snode->update(time));
+  //if(stimulus_mask & one_shifted_left_by_n [bit_number])
+  //  return(pins[bit_number]->snode->update(time));
+  //else {
+
+  if(pins[bit_number]) {
+    if(pins[bit_number]->snode)
+      v = pins[bit_number]->snode->update(time);
+    else
+      v = pins[bit_number]->get_voltage(time);
+  }
   else
-    return( (value &  one_shifted_left_by_n [bit_number]) ? 1 : 0);
+    v = (value &  one_shifted_left_by_n [bit_number]) ? 
+	    (MAX_DRIVE / 2) : -(MAX_DRIVE / 2) ;
+
+  cout << __FUNCTION__ << "() for bit " << bit_number << ", voltage = " << v << '\n';
+
+  return v;
+}      
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int IOPORT::get_bit(unsigned int bit_number)
+{
+
+  //guint64 time = cpu->cycles.value;
+  /*
+  int pin_voltage = get_bit_voltage(bit_number);
+
+  if(value & one_shifted_left_by_n [bit_number]) {
+    // The pin is currently high. So check and see
+    // if the latest sample is below the high-to-low
+    // threshold
+    return(  (pin_voltage < l2h_threshold[bit_number]) ? 0 : 1);
+
+  } else {
+    // The pin is currently low. So check and see
+    // if the latest sample is above the low-to-high
+    // threshold
+    return(  (pin_voltage > h2l_threshold[bit_number]) ? 1 : 0);
+  }
+  */
+  
+//  if(stimulus_mask & one_shifted_left_by_n [bit_number])
+//    return(pins[bit_number]->snode->update(time));
+//
+
+  return( (value &  one_shifted_left_by_n [bit_number]) ? 1 : 0);
 
 }
 

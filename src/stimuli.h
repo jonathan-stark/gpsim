@@ -77,7 +77,7 @@ public:
 
   Stimulus_Node(char *n = NULL);
   char * name(void){return name_str;};
-  int get_state(void) { return state; };
+  int get_voltage(void) { return state; };
   int update(unsigned int current_time);
   /*  void put_state(int new_state);*/
   void attach_stimulus(stimulus *);
@@ -98,7 +98,7 @@ public:
   stimulus *next;
 
   stimulus(char *n=NULL);
-  virtual int get_state(guint64 current_time) {return state;};
+  virtual int get_voltage(guint64 current_time) {return state;};
   virtual void put_state(int new_state) {state=new_state;};
   virtual void put_state_value(int new_state);
   virtual char * name(void){return name_str;};
@@ -130,7 +130,7 @@ enum SOURCE_TYPE
     start_cycle,
     time;
 
-  virtual int get_state(guint64 current_time) {return 0;};
+  virtual int get_voltage(guint64 current_time) {return 0;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
   char *name(void) { return(name_str);};
 
@@ -157,14 +157,15 @@ enum IOPIN_DIRECTION
 
   IOPORT *iop;
   unsigned int iobit;
-  int threshold;
+  int l2h_threshold;
+  int h2l_threshold;
 
   IOPIN(void);
   IOPIN(IOPORT *i, unsigned int b);
   attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
-  virtual int get_state(guint64 current_time) {return state;};
+  virtual int get_voltage(guint64 current_time) {return state;};
   virtual void put_state(int new_state) {state=new_state;}; 
   virtual void put_state_value(int new_state);
   virtual void toggle(void) {state = !state;}; 
@@ -181,10 +182,10 @@ public:
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
   IO_input(IOPORT *i, unsigned int b);
   IO_input(void);
-  virtual int get_state(guint64 current_time){return drive;};
+  virtual int get_voltage(guint64 current_time); //{return drive;};
   virtual void toggle(void);
-  virtual void put_state( int new_state) 
-    {
+  virtual void put_state( int new_state);
+    /* {
       if(new_state>threshold) {
 	iop->setbit( iobit, 1);
 	state = 1;
@@ -192,7 +193,8 @@ public:
 	iop->setbit( iobit, 0);
 	state = 0;
       }
-    }; 
+    };
+    */ 
   virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int){return;};
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT;};
@@ -208,7 +210,7 @@ public:
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b);
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
@@ -222,7 +224,7 @@ public:
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
   IO_bi_directional_pu(IOPORT *i, unsigned int b);
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
 
 };
 
@@ -235,7 +237,7 @@ public:
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
   IO_open_collector(IOPORT *i, unsigned int b);
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
@@ -248,7 +250,7 @@ public:
 
   square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
 
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
   /*    {
       if( ((current_time+phase) % period) <= duty)
 	return 1;
@@ -268,7 +270,7 @@ public:
 
   float m1,b1,m2,b2;
 
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
   triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=NULL); 
 
   virtual SOURCE_TYPE isa(void) {return TRI;};
@@ -297,7 +299,7 @@ public:
     
 
   virtual void callback(void);
-  virtual int get_state(guint64 current_time);
+  virtual int get_voltage(guint64 current_time);
   virtual void start(void);
   asynchronous_stimulus(char *n=NULL);
   virtual SOURCE_TYPE isa(void) {return ASY;};
@@ -310,7 +312,7 @@ class dc_supply : public source_stimulus {
 
   dc_supply(char *n=NULL);
   virtual SOURCE_TYPE isa(void) {return DC;};
-  virtual int get_state(guint64 current_time) { return drive;};
+  virtual int get_voltage(guint64 current_time) { return drive;};
 
 };
 
@@ -322,7 +324,7 @@ class resistor : public source_stimulus
 {
 public:
 
-  virtual int get_state(guint64 current_time) {return drive;};
+  virtual int get_voltage(guint64 current_time) {return drive;};
   virtual SOURCE_TYPE isa(void) {return RESISTOR;};
 };
 

@@ -1,15 +1,12 @@
 #
-# Startup commands for testing a p16c74
+# Startup commands for testing a p16f877 a/d converter
 #
 
+# mostly for debugging:
 # set verbose 3
 
-# Define it:
-processor p16c74 big_analog_pic
-
 # Source code:
-#load h p16c74_test.hex
-load s p16c74_test.cod
+load s p16f877_test2.cod
 
 # Stimuli:
 load c dtmf.stc

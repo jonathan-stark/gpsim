@@ -306,7 +306,7 @@ int Stimulus_Node::update(unsigned int current_time)
 
       while(sptr)
 	{
-	  node_voltage += sptr->get_state(current_time);
+	  node_voltage += sptr->get_voltage(current_time);
 	  //cout << sptr->name() << '\n';
 	  sptr = sptr->next;
 	}
@@ -321,6 +321,7 @@ int Stimulus_Node::update(unsigned int current_time)
 	  sptr = sptr->next;
 	}
 
+      state = node_voltage;
       return(node_voltage);
 
     }
@@ -378,7 +379,7 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
   add_stimulus(this);
 }
 
-int square_wave::get_state(guint64 current_time)
+int square_wave::get_voltage(guint64 current_time)
 {
   //  cout << "Getting new state of the square wave.\n";
   if( ((current_time+phase) % period) <= duty)
@@ -441,7 +442,7 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   add_stimulus(this);
 }
 
-int triangle_wave::get_state(guint64 current_time)
+int triangle_wave::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of the triangle wave.\n";
 
@@ -491,7 +492,7 @@ void asynchronous_stimulus::callback(void)
   current_state = next_state;
   guint64 current_cycle = future_cycle;
 
-  //  cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
+  cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
   // If we've passed through all of the states
   // then start over from the beginning.
@@ -509,8 +510,8 @@ void asynchronous_stimulus::callback(void)
       start_cycle += period;
       future_cycle = *transition_cycles + start_cycle;
 
-      //cout << "  stimulus rolled over\n";
-      //cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
+      cout << "  stimulus rolled over\n";
+      cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
   else
     {
@@ -537,9 +538,9 @@ void asynchronous_stimulus::callback(void)
   snode->update(current_cycle);
 }
 
-int asynchronous_stimulus::get_state(guint64 current_time) 
+int asynchronous_stimulus::get_voltage(guint64 current_time) 
 {
-  //cout << "asy getting state "  << current_state << '\n';
+  cout << "asy getting state "  << current_state << '\n';
   
   return current_state;
 }
@@ -660,7 +661,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   iop = i;
   iobit=b;
   state = 0;
-  threshold = 0;
+  l2h_threshold = 100;
+  h2l_threshold = -100;
   drive = 0;
   snode = NULL;
   //  cout << "IOPIN constructor called \n";
@@ -704,6 +706,8 @@ void IOPIN::attach(Stimulus_Node *s)
   snode = s;
 }
 
+//========================================================================
+//
 IO_input::IO_input(IOPORT *i, unsigned int b)
   : IOPIN(i,b)
 {
@@ -734,6 +738,48 @@ void IO_input::toggle(void)
     xref->update();
 }
 
+/*************************************
+ *  int IO_input::get_voltage(guint64 current_time)
+ *
+ *  If this iopin has a stimulus attached to it then
+ * the voltage will be dictated by the stimulus. Otherwise,
+ * the voltage is determined by the state of the ioport register
+ * that is inside the pic. For an input (like this), the pic code
+ * that is being simulated can not change the state of the I/O pin.
+ * However, the user has the ability to modify the state of
+ * this register either by writing directly to it in the cli,
+ * or by clicking in one of many places in the gui.
+ */
+int IO_input::get_voltage(guint64 current_time)
+{
+  // The last time the stimulus to which this node is/maybe attached,
+  // the drive was updated.
+
+  if(snode)
+    return drive;
+  else
+    return ( (iop->value & (1<<iobit)) ? drive : -drive);
+
+}
+
+void IO_input::put_state( int new_state)
+{
+  if(new_state == state)
+    return;
+
+  if(iop->get_bit(iobit)) {
+    if(new_state < h2l_threshold)
+      iop->setbit(iobit,0);
+  } else {
+    if(new_state > h2l_threshold)
+      iop->setbit(iobit,1);
+  }
+
+  state = new_state;
+}
+
+//========================================================================
+//
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
   : IO_input(i,b)
 {
@@ -770,29 +816,30 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b)
 
 }
 
-int IO_bi_directional::get_state(guint64 current_time)
+int IO_bi_directional::get_voltage(guint64 current_time)
 {
-  //cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
+  cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
 
-  if(driving)
+  if(driving || !snode)
     {
       if( iop->value & (1<<iobit))
 	{
-	  //cout << " high\n";
+	  cout << " high\n";
 	  return drive;
 	}
       else
 	{
-	  //cout << " low\n";
+	  cout << " low\n";
 	  return -drive;
 	}
     }
   else
     {
-      if(snode)
-	return 0;
-      else
-	return ( (iop->value & (1<<iobit)) ? 1 : 0);
+      // This node is not driving (because it's configured
+      // as an input). There is a stimulus attached to it, so
+      // don't upset the 'node summing'. I guess we could return
+      // a input leakage value...
+      return 0;
     }
 
 }
@@ -807,7 +854,7 @@ int IO_bi_directional::get_state(guint64 current_time)
 void IO_bi_directional::update_direction(unsigned int new_direction)
 {
 
-  //  cout << "IO_bi_direction::update_direction\n";
+  cout << "IO_bi_direction::update_direction\n";
 
   if(new_direction)
     driving = 1;
@@ -825,7 +872,7 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 void IO_bi_directional::change_direction(unsigned int new_direction)
 {
 
-  //  cout << __FUNCTION__ << '\n';
+  cout << __FUNCTION__ << '\n';
 
   iop->tris->setbit(iobit, new_direction & 1);
 
@@ -833,11 +880,11 @@ void IO_bi_directional::change_direction(unsigned int new_direction)
     xref->update();
 }
 
-int IO_bi_directional_pu::get_state(guint64 current_time)
+int IO_bi_directional_pu::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of a bi-di-pu IO pin "<< iobit;
 
-  if(driving)
+  if(driving | !snode)
     {
       if( iop->value & (1<<iobit))
 	{
@@ -853,10 +900,7 @@ int IO_bi_directional_pu::get_state(guint64 current_time)
   else
     {
       //cout << " pulled up\n";
-      if(snode)
-	return (pull_up_resistor->get_state(current_time));
-      else
-	return ( (iop->value & (1<<iobit)) ? 1 : 0);
+      return (pull_up_resistor->get_voltage(current_time));
     }
 
 }
@@ -881,11 +925,11 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b)
 }
 
 
-int IO_open_collector::get_state(guint64 current_time)
+int IO_open_collector::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of an open collector IO pin port "<< iop->name() << " bit " << iobit<<'\n';
 
-  if(driving)
+  if(driving )
     {
       if( iop->value & (1<<iobit))
 	{
@@ -904,7 +948,7 @@ int IO_open_collector::get_state(guint64 current_time)
       if(snode)
 	return 0;
       else
-	return ( (iop->value & (1<<iobit)) ? 1 : 0);
+	return ( (iop->value & (1<<iobit)) ? drive : (-drive));
     }
 }
 
@@ -1045,10 +1089,7 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_a
 	    break;
 
 	  case STIMULUS_DPT_FLOAT:
-	    if(dp.data_point.f > 0.0)
-	      new_data = new_data = 1;
-	    else 
-	      new_data = 0;
+	    new_data = (int)MAX_ANALOG_DRIVE * 0x100 * dp.data_point.f;
 	    break;
 
 	  default:
