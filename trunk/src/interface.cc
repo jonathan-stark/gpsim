@@ -444,16 +444,29 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type)
 {
 
+  if(verbose & 0x8)
+    printf("%s()\n",__FUNCTION__);
+
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
     return 0;
+
+  if(verbose & 0x8)
+    printf("%s() - valid pic\n",__FUNCTION__);
+
   if(!valid_register(pic,type,0))
       return 0;
   
+  if(verbose & 0x8)
+    printf("%s() - valid register\n",__FUNCTION__);
+
   if(type == REGISTER_EEPROM)
     return pic->eeprom_get_size();
   
+  if(verbose & 0x8)
+    printf("%s(), register memory size 0x%x\n",__FUNCTION__, pic->register_memory_size());
+
   return pic->register_memory_size();
 }
 
