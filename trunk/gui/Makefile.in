@@ -83,6 +83,7 @@ GTKCONFIG = @GTKCONFIG@
 GTKEXTRACONFIG = @GTKEXTRACONFIG@
 LD = @LD@
 LEX = @LEX@
+LIBREADLINE = @LIBREADLINE@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -101,7 +102,7 @@ INCLUDES = @X_CFLAGS@ @Y_CFLAGS@
 
 lib_LTLIBRARIES = libgui.la
 
-libgui_la_SOURCES = gui_break.c gui_callbacks.c gui_dialog.c gui_init.c gui_main.c 	gui_menu.c gui_processor.c gui_regwin.c gui_src.c gui_src_asm.c 	gui_src_opcode.c gui_statusbar.c gui.h gui_callbacks.h gui_interface.h 	gui_symbols.c gui_watch.c gui_breadboard.c
+libgui_la_SOURCES = gui_break.c gui_callbacks.c gui_dialog.c gui_init.c gui_main.c 	gui_menu.c gui_processor.c gui_regwin.c gui_src.c gui_src_asm.c 	gui_src_opcode.c gui_statusbar.c gui.h gui_callbacks.h gui_interface.h 	gui_symbols.c gui_watch.c gui_breadboard.c gui_stack.c
 
 
 #libgui_la_LDFLAGS = $(shell gtk-config --libs) $(shell gtkextra-config --libs)
@@ -132,7 +133,7 @@ libgui_la_LIBADD =
 libgui_la_OBJECTS =  gui_break.lo gui_callbacks.lo gui_dialog.lo \
 gui_init.lo gui_main.lo gui_menu.lo gui_processor.lo gui_regwin.lo \
 gui_src.lo gui_src_asm.lo gui_src_opcode.lo gui_statusbar.lo \
-gui_symbols.lo gui_watch.lo gui_breadboard.lo
+gui_symbols.lo gui_watch.lo gui_breadboard.lo gui_stack.lo
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -148,8 +149,8 @@ DEP_FILES =  .deps/gui_breadboard.P .deps/gui_break.P \
 .deps/gui_callbacks.P .deps/gui_dialog.P .deps/gui_init.P \
 .deps/gui_main.P .deps/gui_menu.P .deps/gui_processor.P \
 .deps/gui_regwin.P .deps/gui_src.P .deps/gui_src_asm.P \
-.deps/gui_src_opcode.P .deps/gui_statusbar.P .deps/gui_symbols.P \
-.deps/gui_watch.P
+.deps/gui_src_opcode.P .deps/gui_stack.P .deps/gui_statusbar.P \
+.deps/gui_symbols.P .deps/gui_watch.P
 SOURCES = $(libgui_la_SOURCES)
 OBJECTS = $(libgui_la_OBJECTS)
 

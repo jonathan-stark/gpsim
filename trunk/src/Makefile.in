@@ -81,6 +81,7 @@ GTKCONFIG = @GTKCONFIG@
 GTKEXTRACONFIG = @GTKEXTRACONFIG@
 LD = @LD@
 LEX = @LEX@
+LIBREADLINE = @LIBREADLINE@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -100,10 +101,10 @@ INCLUDES = @X_CFLAGS@
 lib_LTLIBRARIES = libgpsim.la
 gpsimincludedir = $(includedir)/gpsim
 
-libgpsim_la_SOURCES =  	12bit-hexdecode.cc 	12bit-processors.cc 	14bit-instructions.cc 	14bit-processors.cc 	14bit-registers.cc 	14bit-tmrs.cc 	14bit-hexdecode.cc 	16bit-instructions.cc 	16bit-processors.cc 	16bit-registers.cc 	16bit-hexdecode.cc 	breakpoints.cc 	cod.cc 	gpsim_time.cc 	hexutils.cc 	init.cc 	interface.cc 	ioports.cc 	modules.cc 	p12x.cc 	p16x8x.cc 	p16f87x.cc 	p16x7x.cc 	p16x5x.cc 	p16x6x.cc 	p18x.cc 	packages.cc 	pic-processor.cc 	pic-registers.cc 	pic-instructions.cc 	stimuli.cc 	symbol.cc 	tmr0.cc 	trace.cc 	uart.cc 	xref.cc
+libgpsim_la_SOURCES =  	12bit-hexdecode.cc 	12bit-processors.cc 	14bit-instructions.cc 	14bit-processors.cc 	14bit-registers.cc 	14bit-tmrs.cc 	14bit-hexdecode.cc 	16bit-instructions.cc 	16bit-processors.cc 	16bit-registers.cc 	16bit-hexdecode.cc 	breakpoints.cc 	cod.cc 	fopen-path.cc 	gpsim_time.cc 	hexutils.cc 	init.cc 	interface.cc 	ioports.cc 	modules.cc 	p12x.cc 	p16x8x.cc 	p16f87x.cc 	p16x7x.cc 	p16x5x.cc 	p16x6x.cc 	p18x.cc 	packages.cc 	pic-processor.cc 	pic-registers.cc 	pic-instructions.cc 	stimuli.cc 	symbol.cc 	tmr0.cc 	trace.cc 	uart.cc 	xref.cc
 
 
-gpsiminclude_HEADERS =  	12bit-instructions.h 	12bit-processors.h 	14bit-instructions.h 	14bit-processors.h 	14bit-registers.h 	14bit-tmrs.h 	16bit-instructions.h 	16bit-processors.h 	16bit-registers.h 	breakpoints.h 	cod.h 	gpsim_classes.h 	gpsim_def.h 	gpsim_time.h 	interface.h 	ioports.h 	modules.h 	p12x.h 	p16x5x.h 	p16x6x.h 	p16x7x.h 	p16x8x.h 	p16f87x.h 	p18x.h 	packages.h 	pic-instructions.h 	pic-packages.h 	pic-processor.h 	pic-registers.h 	picdis.h 	stimuli.h 	stimulus_orb.h 	symbol.h 	symbol_orb.h 	tmr0.h 	trace.h 	trace_orb.h 	uart.h 	xref.h
+gpsiminclude_HEADERS =  	12bit-instructions.h 	12bit-processors.h 	14bit-instructions.h 	14bit-processors.h 	14bit-registers.h 	14bit-tmrs.h 	16bit-instructions.h 	16bit-processors.h 	16bit-registers.h 	breakpoints.h 	cod.h 	gpsim_classes.h 	gpsim_def.h 	gpsim_interface.h 	gpsim_time.h 	fopen-path.h 	interface.h 	ioports.h 	modules.h 	p12x.h 	p16x5x.h 	p16x6x.h 	p16x7x.h 	p16x8x.h 	p16f87x.h 	p18x.h 	packages.h 	pic-instructions.h 	pic-packages.h 	pic-processor.h 	pic-registers.h 	picdis.h 	stimuli.h 	stimulus_orb.h 	symbol.h 	symbol_orb.h 	tmr0.h 	trace.h 	trace_orb.h 	uart.h 	xref.h
 
 
 #libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
@@ -123,11 +124,11 @@ libgpsim_la_OBJECTS =  12bit-hexdecode.lo 12bit-processors.lo \
 14bit-instructions.lo 14bit-processors.lo 14bit-registers.lo \
 14bit-tmrs.lo 14bit-hexdecode.lo 16bit-instructions.lo \
 16bit-processors.lo 16bit-registers.lo 16bit-hexdecode.lo \
-breakpoints.lo cod.lo gpsim_time.lo hexutils.lo init.lo interface.lo \
-ioports.lo modules.lo p12x.lo p16x8x.lo p16f87x.lo p16x7x.lo p16x5x.lo \
-p16x6x.lo p18x.lo packages.lo pic-processor.lo pic-registers.lo \
-pic-instructions.lo stimuli.lo symbol.lo tmr0.lo trace.lo uart.lo \
-xref.lo
+breakpoints.lo cod.lo fopen-path.lo gpsim_time.lo hexutils.lo init.lo \
+interface.lo ioports.lo modules.lo p12x.lo p16x8x.lo p16f87x.lo \
+p16x7x.lo p16x5x.lo p16x6x.lo p18x.lo packages.lo pic-processor.lo \
+pic-registers.lo pic-instructions.lo stimuli.lo symbol.lo tmr0.lo \
+trace.lo uart.lo xref.lo
 CXXFLAGS = @CXXFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -147,12 +148,13 @@ DEP_FILES =  .deps/12bit-hexdecode.P .deps/12bit-processors.P \
 .deps/14bit-processors.P .deps/14bit-registers.P .deps/14bit-tmrs.P \
 .deps/16bit-hexdecode.P .deps/16bit-instructions.P \
 .deps/16bit-processors.P .deps/16bit-registers.P .deps/breakpoints.P \
-.deps/cod.P .deps/gpsim_time.P .deps/hexutils.P .deps/init.P \
-.deps/interface.P .deps/ioports.P .deps/modules.P .deps/p12x.P \
-.deps/p16f87x.P .deps/p16x5x.P .deps/p16x6x.P .deps/p16x7x.P \
-.deps/p16x8x.P .deps/p18x.P .deps/packages.P .deps/pic-instructions.P \
-.deps/pic-processor.P .deps/pic-registers.P .deps/stimuli.P \
-.deps/symbol.P .deps/tmr0.P .deps/trace.P .deps/uart.P .deps/xref.P
+.deps/cod.P .deps/fopen-path.P .deps/gpsim_time.P .deps/hexutils.P \
+.deps/init.P .deps/interface.P .deps/ioports.P .deps/modules.P \
+.deps/p12x.P .deps/p16f87x.P .deps/p16x5x.P .deps/p16x6x.P \
+.deps/p16x7x.P .deps/p16x8x.P .deps/p18x.P .deps/packages.P \
+.deps/pic-instructions.P .deps/pic-processor.P .deps/pic-registers.P \
+.deps/stimuli.P .deps/symbol.P .deps/tmr0.P .deps/trace.P .deps/uart.P \
+.deps/xref.P
 SOURCES = $(libgpsim_la_SOURCES)
 OBJECTS = $(libgpsim_la_OBJECTS)
 
