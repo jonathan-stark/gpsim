@@ -82,6 +82,20 @@ Settings *settings;
 
 extern GtkWidget *dispatcher_window;
 
+
+//------------------------------------------------------------------------
+// debug
+static void gtl()
+{
+  printf("gdk_threads_leave\n");
+  gdk_threads_leave ();
+}
+static void gte()
+{
+  printf("gdk_threads_enter\n");
+  gdk_threads_enter ();
+}
+
 //------------------------------------------------------------------------
 void CrossReferenceToGUI::Update(int new_value)
 {
@@ -158,8 +172,11 @@ GUI_Interface::~GUI_Interface()
 void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 {
 
+  printf("%s\n",__FUNCTION__);
+  gte ();
   CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
   xref->Update(new_value);
+  gtl ();
 
 }
 
@@ -176,6 +193,45 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 }
 
+// pthread variables.
+pthread_attr_t thSimStopAttr;
+pthread_mutex_t muSimStopMutex;
+pthread_cond_t  cvSimStopCondition;
+pthread_t thSimStop;
+
+static GUI_Processor *lgp=0;
+
+static void *SimulationHasStopped( void *ptr )
+{
+  printf("sim stopped thread started\n");
+  while(1) {
+
+    pthread_mutex_lock(&muSimStopMutex);
+    printf("waiting for sim stop condition\n");
+
+    pthread_cond_wait(&cvSimStopCondition, &muSimStopMutex);
+    printf("got a  sim stop condition\n");
+
+    if(lgp) {
+      lgp->regwin_ram->Update();
+      lgp->regwin_eeprom->Update();
+      lgp->program_memory->Update();
+      lgp->source_browser->Update();
+      lgp->watch_window->Update();
+      lgp->stack_window->Update();
+      lgp->breadboard_window->Update();
+      lgp->trace_window->Update();
+      lgp->profile_window->Update();
+      lgp->stopwatch_window->Update();
+    }
+
+    pthread_mutex_unlock(&muSimStopMutex);
+
+  }
+
+}
+
+
 /*------------------------------------------------------------------
  * SimulationHasStopped
  *
@@ -185,9 +241,20 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
   //while(gtk_events_pending())
   //  gtk_main_iteration();
+  printf("%s\n",__FUNCTION__);
 
   if(callback_data) {
     
+    lgp = (GUI_Processor *) callback_data;
+
+    printf("signalling gui update thread\n");
+    pthread_mutex_lock(&muSimStopMutex);
+
+    pthread_cond_signal(&cvSimStopCondition);
+    pthread_mutex_unlock(&muSimStopMutex);
+    printf("leaving simulation has stopped\n");
+
+    /*
     GUI_Processor *gp = (GUI_Processor *) callback_data;
 
     gp->regwin_ram->Update();
@@ -201,14 +268,17 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     gp->profile_window->Update();
     gp->stopwatch_window->Update();
     //gp->scope_window->Update();
-
+    */
   }
-
+  /*
   if(gui_animate_delay!=0)
       usleep(1000*gui_animate_delay);
 
   while(gtk_events_pending())
       gtk_main_iteration();
+  */
+
+  gtl ();
 }
 
 
@@ -227,6 +297,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
   // Create a gui representation of the new processor
 
   if(gp) {
+    gte ();
 
     gp->cpu = new_cpu;
 
@@ -246,6 +317,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     //gp->scope_window->NewProcessor(gp);
 
     Dprintf((" New processor has been added"));
+    gtl ();
   }
 
 }
@@ -278,6 +350,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 {
 
   if(gp) {
+    gte ();
 
     gp->regwin_eeprom->NewProcessor(gp);
       
@@ -287,6 +360,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
     gp->program_memory->NewSource(gp);
     gp->profile_window->NewProgram(gp);
     link_src_to_gpsim( gp);
+    gtl ();
 
   }
 }
@@ -324,6 +398,23 @@ void quit_gui(void)
 }
 
 
+void *print_message_function( void *ptr )
+{
+  char *message;
+
+  while(1) {
+    g_usleep(1000000);
+    gdk_threads_enter ();
+    message = (char *) ptr;
+    //printf("%s \n", message);
+    gdk_threads_leave ();
+
+  }
+
+  return 0;
+}
+
+
 /*------------------------------------------------------------------
  * gui_init
  *
@@ -337,22 +428,74 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
+  if( !g_thread_supported() )
+  {
+    g_thread_init(NULL);
+    gdk_threads_init();
+    printf("g_thread supported\n");
+
+    GThread          *Thread1, *Thread2;
+    char *message1 = "Thread 1";
+    char *message2 = "Thread 2";
+    GError           *err1 = NULL ;
+    GError           *err2 = NULL ;
+
+    if( (Thread1 = g_thread_create((GThreadFunc)print_message_function, 
+				   (void *)message1, 
+				   TRUE, 
+				   &err1)) == NULL)
+    {
+      printf("Thread create failed: %s!!\n", err1->message );
+      g_error_free ( err1 ) ;
+    }
+
+    pthread_mutex_init(&muSimStopMutex, NULL);
+    pthread_cond_init (&cvSimStopCondition, NULL);
+    pthread_mutex_lock(&muSimStopMutex);
+
+    if( (Thread2 = g_thread_create((GThreadFunc)SimulationHasStopped, 
+				   (void *)message2, 
+				   TRUE, 
+				   &err2)) == NULL)
+    {
+      printf("Thread create failed: %s!!\n", err2->message );
+      g_error_free ( err2 ) ;
+    }
+    pthread_mutex_unlock(&muSimStopMutex);
+
+
+  }
+  else
+  {
+     printf("g_thread NOT supported\n");
+  }
+
+
   if (!gtk_init_check (&argc, &argv))
   {
       return -1;
   }
 
-    
+
+  gdk_threads_enter ();
   gp = new GUI_Processor();
 
   interface_id = get_interface().add_interface(new GUI_Interface(gp));
+  gdk_threads_leave ();
 
   return(0);
 }
 
 void gui_main(void)
 {
+  gdk_threads_enter ();
+
+  //gp = new GUI_Processor();
+
+  //interface_id = get_interface().add_interface(new GUI_Interface(gp));
+
   gtk_main ();
+  gdk_threads_leave ();
 }
 
 #endif //HAVE_GUI
