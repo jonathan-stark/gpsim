@@ -461,7 +461,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   sprintf(str,"0x%02x",new_value);
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
 
-  if(new_value>=32)
+  if(new_value>=32 && new_value<127)
     sprintf(str,"%c",new_value);
   else
     str[0]=0;
