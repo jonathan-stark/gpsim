@@ -268,7 +268,7 @@ void dump_processor_list(void)
        processor_iterator++) {
 
       Processor *p = *processor_iterator;
-      cout << p->name_str << '\n';
+      cout << p->name() << '\n';
       have_processors = 1;
     }
 

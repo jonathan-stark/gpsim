@@ -356,7 +356,7 @@ bool Breakpoints::dump1(unsigned int bp_num)
   switch (break_type)
     {
     case BREAK_ON_CYCLE:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
+      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
       {
       guint64 cyc =  break_status[bp_num].arg2;
       cyc = (cyc <<32)  | break_status[bp_num].arg1;
@@ -367,13 +367,13 @@ bool Breakpoints::dump1(unsigned int bp_num)
 
     case BREAK_ON_STK_UNDERFLOW:
     case BREAK_ON_STK_OVERFLOW:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
+      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
       cout << "stack " << ((break_type == BREAK_ON_STK_OVERFLOW)?"ov":"und") << "er flow\n";
       set_by_user = 1;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
+      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
       cout << "wdt time out\n";
       set_by_user = 1;
       break;
@@ -708,7 +708,7 @@ bool Breakpoint_Instruction::set_break(void)
 
 void Breakpoint_Instruction::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name_str << "  ";
+  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
   cout << bpName() << " at " << hex << setw(4) << setfill('0') <<  address << '\n';
 
 }
@@ -900,7 +900,7 @@ bool BreakpointRegister::set_break(void)
 
 void BreakpointRegister::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name_str << "  ";
+  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
   cout << bpName() << ": 0x" << hex <<  address << endl;
 
 }
@@ -925,7 +925,7 @@ BreakpointRegister_Value::BreakpointRegister_Value(Processor *_cpu,
 
 void BreakpointRegister_Value::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name_str << "  ";
+  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
   cout << bpName() << ": address=0x" << hex <<  address 
        << "  value=0x" << break_value << "  mask=0x" << break_mask << endl;
   /*

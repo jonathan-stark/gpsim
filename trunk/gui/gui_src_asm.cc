@@ -2479,7 +2479,7 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
     sprintf(buffer,"Source Browser: %s",pma->name().c_str());
     gtk_window_set_title (GTK_WINDOW (window), buffer);
-    
+    printf("new source browser name: %s\n",buffer);
     if(status_bar)
       status_bar->NewProcessor(gp, pma);
 
@@ -2492,6 +2492,7 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
 
   window = 0;
   gp = _gp;
+  pma = 0;
 
   if(new_name)
     set_name(new_name);

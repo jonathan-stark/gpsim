@@ -88,7 +88,6 @@ extern list <Module *> instantiated_modules_list;
 class Module : public gpsimObject {
 public:
 
-  string  name_str;               // A unique name to describe the Module
   list<Attribute *> attributes;   // A list of attributes that pertain to the Module
   Package  *package;              // A package for the module
   ModuleInterface *interface;     // An interface to the module.
@@ -126,9 +125,6 @@ public:
   virtual void *get_widget(void) {return widget;}
 
   const virtual char *type(void) { return (name_str.c_str()); };
-  string &name(void) {return name_str;};
-  virtual void new_name(char *);
-  virtual void new_name(string &);
 
   static Module *construct(char *);
   Module(void);

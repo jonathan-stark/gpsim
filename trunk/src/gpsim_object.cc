@@ -83,6 +83,12 @@ char *gpsimObject::name(char *return_str, int len)
 
   return return_str;
 }
+
+string &gpsimObject::name(void)
+{
+  return name_str;
+}
+
 string gpsimObject::toString()
 {
   return showType();
