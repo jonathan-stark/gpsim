@@ -1,3 +1,7 @@
+2004-07-02 Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc: Emit warning if a user specifies both
+	a .hex file and a .cod file at the command line.
+
 2004-06-30 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: Added additional export definitions.
 	* cli/cmd_clear.cc: type casting fixes.

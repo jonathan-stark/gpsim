@@ -229,26 +229,35 @@ main (int argc, char *argv[])
   quit_parse = 0;
   abort_gpsim = 0;
 
-  if(*processor_name)
-    {
-      snprintf(command_str, sizeof(command_str),
-	       "processor %s\n",processor_name);
-      parse_string(command_str);
-    }
+  if(*cod_name) {
 
-  if(*hex_name)
-    {
-      snprintf(command_str, sizeof(command_str),
-	       "load h %s\n",hex_name);
-      parse_string(command_str);
-    }
+    if(*processor_name)
+      cout << "WARNING: command line processor named \"" << processor_name <<
+	"\" is being ignored\nsince the .cod file specifies the processor\n";
+    if(*hex_name)
+      cout << "WARNING: Ignoring the hex file \"" << hex_name <<
+	"\"  ignored\nsince the .cod file specifies the hex code\n";
 
-  if(*cod_name)
-    {
-      snprintf(command_str, sizeof(command_str),
-	       "load s %s\n",cod_name);
-      parse_string(command_str);
-    }
+    snprintf(command_str, sizeof(command_str),
+	     "load s %s\n",cod_name);
+    parse_string(command_str);
+
+  } else  if(*processor_name) {
+
+    snprintf(command_str, sizeof(command_str),
+	     "processor %s\n",processor_name);
+    parse_string(command_str);
+
+    if(*hex_name)
+      {
+	snprintf(command_str, sizeof(command_str),
+		 "load h %s\n",hex_name);
+	parse_string(command_str);
+      }
+
+  }
+
+
 
   if(*icd_port)
     {
