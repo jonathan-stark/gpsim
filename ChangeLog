@@ -1,4 +1,9 @@
 2003-08-17  Scott Dattalo  <scott@dattalo.com>
+	* regression/* started the regression test directory. Only two
+	tests are performed: instruction validation for the midrange
+	family and a simple node test.
+	
+2003-08-17  Scott Dattalo  <scott@dattalo.com>
 	* Huge patch from Borut Razem mailto:borut.razem@siol.net that enables
 	gpsim to be compiled with MS Visual C under Windows.
 
