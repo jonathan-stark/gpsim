@@ -363,8 +363,13 @@ void read_src_files_from_cod(pic_processor *cpu)
 
 	if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
 	    && (':' == filenm[1]) && ('\\' == filenm[2])) {
+	  char *cp;
 	  filenm += 3;			// strip C:\ from MPLAB files
 					// convert \ to / now???
+	  for (cp = filenm; *cp; ++cp) { // convert DOS slash to Unix slash
+	    if ('\\' == *cp) *cp = '/';
+	  }
+
 	}
 
 	for (jj = 0; jj < num_files; ++jj) { // check if already opened

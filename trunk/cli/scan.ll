@@ -208,7 +208,7 @@ abort_gpsim_now {
 #ifdef yywrap
 #undef yywrap
 #endif
-static int
+ int
 yywrap (void)
 {
   return 1;

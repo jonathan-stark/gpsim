@@ -23,8 +23,8 @@ Boston, MA 02111-1307, USA.  */
 // fopen-path.cc
 //
 // Modified version of fopen, that searches a path.  
-// (Technically this is a c++ file, but it should work in C too.
-//
+// Technically this is a c++ file, but it should work in C too.
+// The functions use a C calling convention for compatibility.
 
 #include <stdio.h>
 #include <iostream.h>
@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_def.h"
 #include "pic-processor.h"
 
+#include "fopen-path.h"
 					// should be command line
 static char **searchPath;
 static int searchPathCount = 0;
@@ -50,6 +51,7 @@ void set_search_path (const char *path)
 
     if (!path || !*path) {		// clear the path
 	searchPathCount = 0;
+	if (verbose) cout << "Clearing Search directory.\n";
 	return;
     }
 					// count colons to figure length
@@ -142,6 +144,15 @@ FILE *fopen_path(const char *filename, const char *perms)
 	  }
       }
   }
-  //if (verbose) printf ("Failed to open %s\n", filename);
+  if (verbose) {
+      printf ("Failed to open %s in path: ", filename);
+      for (pathStr = searchPath, ii=0;
+	   ii < searchPathCount;
+	   ++ii, ++pathStr) {
+	  printf ("%s ", *pathStr);
+      }
+      printf ("\n");
+  }
+
   return NULL;
 }
