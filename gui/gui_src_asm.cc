@@ -838,8 +838,6 @@ static gint sigh_button_event(GtkWidget *widget,
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    printf("button event\n");
-
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
