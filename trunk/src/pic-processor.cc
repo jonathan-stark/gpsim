@@ -148,6 +148,9 @@ processor_types available_processors[] =
   {_P16C54_,
    "__16C54",   "pic16c54",   "p16c54",  "16c54",
    P16C54::construct },
+  {_P16C55_,
+   "__16C55",   "pic16c55",   "p16c55",  "16c55",
+   P16C55::construct },
   {_P16C61_,
    "__16C61",   "pic16c61",   "p16c61",  "16c61",
    P16C61::construct },
@@ -913,7 +916,11 @@ void pic_processor::create (void)
   wdt.cpu = this;
 
   W.new_name("W");
-  fsr.new_name("fsr");
+
+  fsr = new FSR;
+  indf = new INDF;
+
+  fsr->new_name("fsr");
 
   register_bank = &registers[0];  // Define the active register bank 
   W.value = 0;

@@ -6,7 +6,8 @@ gpsim-0.21.0
 	* Starting with 0.21.0, Changelog will be properly formatted
 	* Profiling has been added
 	* Trace viewer has been added
-	* Added 16c62,16c63,16c72,16c73 processors
+	* Source level debugging of C files
+	* Added 16c55,16c62,16c63,16c72,16c73 processors
 	* Added 18c442,18c452 processor
 	* Added module attibutes (attribute.cc) 
 	* breadboard updates when either a tris or port is changed in the register viewer
@@ -27,6 +28,7 @@ gpsim-0.21.0
 	* TXIF was handled improperly (reported by Wojciech Zabolotny <wzab@ise.pw.edu.pl>)
 	* TMR1 was incrementing even when disabled (Reported by Wojciech)
 	* Patch from JG for Suse 7.1. 
+	* Patch from Robert Pearce to add 16C55
 	* Sleep now works for 12c5xx.
 	* Config word now works for 12c5xx
 	* GPIO can wake a sleeping 12c5xx
