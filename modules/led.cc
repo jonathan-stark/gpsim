@@ -72,7 +72,7 @@ Boston, MA 02111-1307, USA.  */
 
 extern "C" {
 
-  static void simulation_has_stopped(gpointer l7s)
+  static void led7_simulation_has_stopped(gpointer l7s)
     {
       if(l7s)
       {
@@ -207,7 +207,7 @@ void Led_7Segments::update(  GtkWidget *widget,
 
 
 static gint
-led_expose_event (GtkWidget *widget,
+led7_expose_event (GtkWidget *widget,
 		  GdkEvent  *event,
 		  gpointer   user_data)
 {
@@ -433,7 +433,7 @@ void Led_7Segments::build_window(void)
 {
   GtkWidget *window;
   GtkWidget *main_vbox;
-  GtkWidget *frame;
+//  GtkWidget *frame;
   GtkWidget *vbox;
   GtkStyle  *style;
 
@@ -469,7 +469,7 @@ void Led_7Segments::build_window(void)
     gtk_widget_show(vbox);
 
 
-    frame =
+/*    frame =
       gtk_widget_new (gtk_frame_get_type (),
 		      "GtkFrame::shadow", GTK_SHADOW_ETCHED_IN,
 		      "GtkFrame::label_xalign", 0.5,
@@ -479,18 +479,18 @@ void Led_7Segments::build_window(void)
 		      "GtkWidget::visible", TRUE,
 		      NULL);
 
-    gtk_widget_show(frame);
+    gtk_widget_show(frame); */
 
     darea = gtk_drawing_area_new ();
 
     gtk_widget_set_usize (darea, 
 			  100, 
 			  100);
-    gtk_container_add (GTK_CONTAINER (frame), darea);
+    gtk_container_add (GTK_CONTAINER (vbox), darea);
 
     gtk_signal_connect (GTK_OBJECT (darea),
 			"expose_event",
-			GTK_SIGNAL_FUNC (led_expose_event),
+			GTK_SIGNAL_FUNC (led7_expose_event),
 			this);
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_signal_connect (GTK_OBJECT (darea),
@@ -546,10 +546,10 @@ Led_7Segments::Led_7Segments(void)
 
   interface_id = gpsim_register_interface((gpointer)this);
 
-  gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
-  gpsim_register_gui_update(interface_id, simulation_has_stopped);
+  gpsim_register_simulation_has_stopped(interface_id, led7_simulation_has_stopped);
+  gpsim_register_gui_update(interface_id, led7_simulation_has_stopped);
 
-  cbp =  gpsim_set_cyclic_break_point2(simulation_has_stopped,
+  cbp =  gpsim_set_cyclic_break_point2(led7_simulation_has_stopped,
 				       (gpointer)this,
 				       10000000);
 
@@ -669,19 +669,261 @@ ExternalModule * Led_7Segments::construct(char *new_name=NULL)
   return l7sP;
 
 }
-/*
-int main( int   argc,
-	  char *argv[] )
-{
-  Led_7Segments *led;
-
-  gtk_init(&argc, &argv);
 
 
-  led = new Led_7Segments;
-  //CreateLCD_display(&_2x20_5x7);
-  gtk_main ();
-         
-  return(0);
+
+
+//-------------------------------------------------------------
+// Led (simple)
+//-------------------------------------------------------------
+extern "C" {
+
+  static void led_simulation_has_stopped(gpointer led)
+    {
+      if(led)
+      {
+	  static int lastport=-1;
+          int portval;
+	  Led *l = (Led*)led;
+	  portval = l->port->get_value();
+	  if(lastport != portval)
+	  {
+	      lastport=portval;
+	      l->update();
+	  }
+	}
+    }
+
 }
-*/
+void Led::update(void)
+{
+  update(darea, w_width,w_height);
+}
+
+void Led::update(  GtkWidget *widget,
+		   guint new_width,
+		   guint new_height)
+{
+
+    guint i,j;
+    static int last_segment_states=-1;
+
+
+  w_width = new_width;
+  w_height = new_height;
+  GdkDrawable *drawable = widget->window;
+
+  if(gc==NULL)
+  {
+      gc = gdk_gc_new(darea->window);
+      gdk_gc_set_line_attributes(gc,
+				 5,
+				 GDK_LINE_SOLID,
+				 GDK_CAP_ROUND,
+				 GDK_JOIN_ROUND);
+      g_assert(gc!=NULL);
+  }
+
+
+  int state = port->get_value();
+
+  gdk_gc_set_foreground(gc,&led_segment_off_color);
+  gdk_draw_rectangle (drawable, gc,
+		      TRUE,
+		      0,
+		      0,
+		      w_width,
+		      w_height);
+
+    if(state)
+    {
+	gdk_gc_set_foreground(gc,&led_segment_on_color);
+	gdk_draw_arc(drawable, gc,
+		     TRUE,
+		     0,
+		     0,
+		     w_width,
+		     w_height,
+                     0,64*360);
+    }
+}
+
+
+static gint
+led_expose_event (GtkWidget *widget,
+		  GdkEvent  *event,
+		  gpointer   user_data)
+{
+
+
+  Led *led;
+  guint max_width;
+  guint max_height;
+
+  g_return_val_if_fail (widget != NULL, TRUE);
+  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+
+  // de-reference the user_data into an led object
+  led = (Led *)user_data;
+
+  max_width = widget->allocation.width;
+  max_height = widget->allocation.height;
+
+  led->update(widget,max_width,max_height);
+
+  return TRUE;
+}
+void Led::build_window(void)
+{
+    GtkWidget *window;
+    GtkWidget *main_vbox;
+//    GtkWidget *vbox;
+    GtkStyle  *style;
+
+    main_vbox = gtk_vbox_new (FALSE, 5);
+    gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
+
+    darea = gtk_drawing_area_new ();
+
+    w_height=20;
+    w_width=20;
+
+    gtk_widget_set_usize (darea, 
+			  w_height,
+			  w_width);
+    gtk_signal_connect (GTK_OBJECT (darea),
+			"expose_event",
+			GTK_SIGNAL_FUNC (led_expose_event),
+			this);
+    gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
+    gtk_widget_show (darea);
+
+    widget = darea;
+
+    gc=NULL;
+
+    // The 'on' color is bright red
+    led_segment_on_color.red = 0xc000;
+    led_segment_on_color.green = 0x0000;
+    led_segment_on_color.blue = 0x0000;
+
+    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_on_color);
+
+    // The `off' color is dark red
+    led_segment_off_color.red = 0x4000;
+    led_segment_off_color.green = 0x0000;
+    led_segment_off_color.blue = 0x0000;
+
+    gdk_color_alloc(gdk_colormap_get_system(), &led_segment_off_color);
+
+}
+
+//--------------------------------------------------------------
+
+Led::Led(void)
+{
+  name_str = strdup("Led");
+
+  build_window();
+
+  interface_id = gpsim_register_interface((gpointer)this);
+
+  gpsim_register_simulation_has_stopped(interface_id, led_simulation_has_stopped);
+  gpsim_register_gui_update(interface_id, led_simulation_has_stopped);
+
+  cbp =  gpsim_set_cyclic_break_point2(led_simulation_has_stopped,
+				       (gpointer)this,
+				       10000000);
+}
+
+Led::~Led(void)
+{
+    //cout << "7-segment led destructor\n";
+
+    gpsim_unregister_interface(interface_id);
+    gpsim_clear_break(cbp);
+    delete port;
+}
+
+//--------------------------------------------------------------
+// create_iopin_map 
+//
+//  This is where the information for the Module's package is defined.
+// Specifically, the I/O pins of the module are created.
+
+void Led::create_iopin_map(void)
+{
+
+
+  // Create an I/O port to which the I/O pins can interface
+  //   The module I/O pins are treated in a similar manner to
+  //   the pic I/O pins. Each pin has a unique pin number that
+  //   describes it's position on the physical package. This
+  //   pin can then be logically grouped with other pins to define
+  //   an I/O port. 
+
+
+  port = new Led_Port(1);
+  port->value = 0;
+
+  // Here, we name the port `pin'. So in gpsim, we will reference
+  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
+  //   name of the logic gate (which is assigned by the user and
+  //   obtained with the name() member function call).
+
+  char *pin_name = name();   // Get the name of this logic gate
+  if(pin_name) {
+    port->new_name(pin_name);
+  }
+  else
+    port->new_name("pin");
+
+
+  // Define the physical package.
+  //   The Package class, which is a parent of all of the modules,
+  //   is responsible for allocating memory for the I/O pins.
+  //
+
+  create_pkg(1);
+
+  // Position pin on left side of package
+  set_pin_position(1,0.5);
+
+  // Define the I/O pins and assign them to the package.
+  //   There are two things happening here. First, there is
+  //   a new I/O pin that is being created. For the binary 
+  //   indicator, both pins are inputs. The second thing is
+  //   that the pins are "assigned" to the package. If we
+  //   need to reference these newly created I/O pins (like
+  //   below) then we can call the member function 'get_pin'.
+
+  // Now, I'd normally put this is loop, but to be explicit...
+  assign_pin(1, new Led_Input(port, 0,"in"));  // cathode
+
+
+
+  // Create an entry in the symbol table for the new I/O pins.
+  // This is how the pins are accessed at the higher levels (like
+  // in the CLI).
+
+  // again, this could be looped (and even combined with the above)
+  symbol_table.add_stimulus(Package::get_pin(1));
+
+}
+
+//--------------------------------------------------------------
+// construct
+
+ExternalModule * Led::construct(char *new_name=NULL)
+{
+
+//  cout << " 7-segment LED display constructor\n";
+
+  Led *ledP = new Led;
+  ledP->new_name(new_name);
+  ledP->create_iopin_map();
+
+  return ledP;
+
+}
+
