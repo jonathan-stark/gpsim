@@ -19,8 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include<stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 
 #include "../config.h"
@@ -54,7 +54,7 @@ void invalid_instruction::execute(void)
 
 };
 
-invalid_instruction::invalid_instruction(pic_processor *new_cpu=NULL,unsigned int new_opcode=0)
+invalid_instruction::invalid_instruction(pic_processor *new_cpu,unsigned int new_opcode)
 {
   cpu=new_cpu;
   opcode=new_opcode;

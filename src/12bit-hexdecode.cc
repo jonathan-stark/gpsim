@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 /* version 0.1				*/
 /* (c) I.King 1994			*/
 
-#include <iostream.h>
+#include <iostream>
 
 #include "../config.h"
 #include "12bit-processors.h"

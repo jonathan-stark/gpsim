@@ -18,8 +18,8 @@ along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 #include "../config.h"
 #include "pic-processor.h"
@@ -603,7 +603,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
 // int Trace::dump(unsigned int n=0)
 //
 
-int Trace::dump(unsigned int n=0, FILE *out_stream=NULL, int watch_reg=-1)
+int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 {
 
   char a_string[50];
@@ -1236,7 +1236,7 @@ void trace_dump_raw(int numberof)
   trace.dump_raw(numberof);
 }
 //--------------------------------------------
-void trace_enable_logging(char *file=0, int format=TRACE_FILE_FORMAT_ASCII)
+void trace_enable_logging(char *file, int format)
 {
   if (file)
     trace_log.enable_logging(file, format);

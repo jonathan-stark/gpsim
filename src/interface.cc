@@ -1733,7 +1733,7 @@ int gpsim_open(unsigned int processor_id, char *file)
 //
 //
 //--------------------------------------------------------------------------
-Interface::Interface(gpointer new_object=NULL)
+Interface::Interface(gpointer new_object)
 {
 
   interface_id = 0;

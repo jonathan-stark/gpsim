@@ -19,7 +19,7 @@ XrefObject::~XrefObject()
     ioi=xrefs.begin();
     for(;ioi!=xrefs.end();ioi++) {
       gi.remove_object(*ioi);
-      delete *ioi;
+//      delete *ioi;
     }
 }
 

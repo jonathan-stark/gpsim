@@ -77,7 +77,7 @@ typedef struct {
 #define BOT_LEFT	4
 #define TOP_LEFT	5
 #define MIDDLE		6
-#define DECIMAL_POINT   7
+//#define DECIMAL_POINT   7
 
 typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 

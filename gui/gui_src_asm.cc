@@ -125,14 +125,14 @@ static struct {
     GtkWidget *case_button;      // togglebutton for case sensitivity
     GList *combo_strings;        // list of strings for combo
     char *string;                // current string, extracted from entry
-} search = {0,0,-1,0,0,0,0,0,0,0};
+} searchdlg = {0,0,-1,0,0,0,0,0,0,0};
 
 
 static int dlg_x=200, dlg_y=200;
 
 static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 
-// all of these gui_xxxx_to_entry() do linear searching.
+// all of these gui_xxxx_to_entry() do linear search.
 // Binary search is possible, the list is sorted. But pic
 // sources don't become large (not mine anyways).
 
@@ -544,8 +544,8 @@ popup_activated(GtkWidget *widget, gpointer data)
         settings_dialog(popup_sbaw);
         break;
     case MENU_FIND_TEXT:
-	gtk_widget_set_uposition(GTK_WIDGET(search.window),dlg_x,dlg_y);
-	gtk_widget_show(search.window);
+	gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
+	gtk_widget_show(searchdlg.window);
 	break;
     case MENU_FIND_PC:
 	pic_id = popup_sbaw->sbw.gui_obj.gp->pic_id;
@@ -1545,7 +1545,7 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	line++;
     } // end while(fgets(...)...)
 
-    // this made the end case of the search dialog simpler once
+    // this made the end case of the search simpler once
     gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
 		    sbaw->default_text_style.font,
 		    &sbaw->default_text_style.fg[GTK_STATE_NORMAL],
@@ -2096,35 +2096,35 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     
   id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    if(id != search.lastid)
-    { //  Changed notebook tab since last search. reset search.
-        search.lastid=id;
-	search.found=0;
-	search.looped=0;
-	search.start=0;
-	search.lastfound=0;
-	search.i=0;
+    if(id != searchdlg.lastid)
+    { //  Changed notebook tab since last search reset search.
+        searchdlg.lastid=id;
+	searchdlg.found=0;
+	searchdlg.looped=0;
+	searchdlg.start=0;
+	searchdlg.lastfound=0;
+	searchdlg.i=0;
     }
     
-    if(GTK_TOGGLE_BUTTON(search.case_button)->active)
+    if(GTK_TOGGLE_BUTTON(searchdlg.case_button)->active)
 	casesensitive=TRUE;
     else
 	casesensitive=FALSE;
 
-    if(GTK_TOGGLE_BUTTON(search.backwards_button)->active)
+    if(GTK_TOGGLE_BUTTON(searchdlg.backwards_button)->active)
 	direction=-1;
     else
 	direction=1;
 
-    p=gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(search.entry)->entry));
+    p=gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry));
 
     if(*p=='\0')
 	return;
 
-    if(search.string==NULL || strcmp(search.string,p))
+    if(searchdlg.string==NULL || strcmp(searchdlg.string,p))
     {  // not same string as last time
 	// search list to prevent duplicates
-	l=search.combo_strings;
+	l=searchdlg.combo_strings;
 	while(l)
 	{
 	    if(!strcmp((char*)l->data,p))
@@ -2132,7 +2132,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 		// the string p already is in list
 		// move it first?, FIXME
 
-		search.string = (char*)l->data;
+		searchdlg.string = (char*)l->data;
 		break;
 	    }
 
@@ -2140,31 +2140,31 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 	}
 	if(l == NULL)
 	{ // we didn't find string in history, create a new one
-	    search.string=(char*)malloc(strlen(p)+1);
-	    strcpy(search.string,p);
-	    search.combo_strings = g_list_prepend(search.combo_strings,search.string);
-	    gtk_combo_set_popdown_strings(GTK_COMBO(search.entry),search.combo_strings);
+	    searchdlg.string=(char*)malloc(strlen(p)+1);
+	    strcpy(searchdlg.string,p);
+	    searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
+	    gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
 	}
 
 	// initialize variables for a new search
-	search.found=0;
-	search.looped=0;
-	search.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->index;
-	search.start = search.i; // remember where we started searching
+	searchdlg.found=0;
+	searchdlg.looped=0;
+	searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->index;
+	searchdlg.start = searchdlg.i; // remember where we started searching
     }
 
     tlen =gtk_text_get_length(GTK_TEXT(sbaw->source_text[id]));
     j=0;
-    for(;search.i>=0 && search.i<tlen;search.i+=direction)
+    for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
     {
-	if(search.string[j]=='\0')
+	if(searchdlg.string[j]=='\0')
 	{  // match! We found the string in text.
 	    int start_i, end_i;
 	    
-	    search.found++;
+	    searchdlg.found++;
 
 	    start_i = k+ (direction==-1);      // comparing backwards means
-	    end_i = search.i+ (direction==-1); // we have to add 1
+	    end_i = searchdlg.i+ (direction==-1); // we have to add 1
 
 	    if(start_i>end_i)
 	    {
@@ -2173,14 +2173,14 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 		start_i=temp;
 	    }
 	    assert(start_i<end_i);
-	    if(start_i==search.lastfound)
+	    if(start_i==searchdlg.lastfound)
 	    {  // we found the same position as last time
                 // happens when searching backwards
 		j=0;
 		if(direction==1)
-		    search.i++; // skip this match
+		    searchdlg.i++; // skip this match
 		else
-		    search.i--; // skip this match
+		    searchdlg.i--; // skip this match
 		last_matched=0;
 	    }
 	    else
@@ -2188,7 +2188,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 		int pixel;
 		float inc;
 
-		search.lastfound=start_i;
+		searchdlg.lastfound=start_i;
 
 		pixel = gui_index_to_entry(id,start_i)->pixel;
 		inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->source_text[id])->vadj)->page_increment;
@@ -2198,31 +2198,31 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 		return;
 	    }
 	}
-	if(search.looped && (search.start == search.i))
+	if(searchdlg.looped && (searchdlg.start == searchdlg.i))
 	{
-	    if(search.found==0)
+	    if(searchdlg.found==0)
 	    {
 		gui_message("Not found");
 		return;
 	    }
-	    else if(search.found==1)
+	    else if(searchdlg.found==1)
 	    {
 		gui_message("Just a single occurance in text");
 
 		// so that the next next call marks text too, we do:
-		search.found=0;
-		search.looped=0;
-		search.lastfound=-1;
+		searchdlg.found=0;
+		searchdlg.looped=0;
+		searchdlg.lastfound=-1;
 		return;
 	    }
 	}
 
 	// get another character
-	char1=GTK_TEXT_INDEX(GTK_TEXT(sbaw->source_text[id]),(unsigned)search.i);
+	char1=GTK_TEXT_INDEX(GTK_TEXT(sbaw->source_text[id]),(unsigned)searchdlg.i);
 	if(direction==1)
-	    char2=search.string[j];
+	    char2=searchdlg.string[j];
 	else
-	    char2=search.string[strlen(search.string)-1-j];
+	    char2=searchdlg.string[strlen(searchdlg.string)-1-j];
 	//FIXME, many calls to strlen
 
 	if(casesensitive==FALSE)
@@ -2240,14 +2240,14 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 	{
 	    if(!last_matched)
 	    {
-		k=search.i;     // remember first matching index for later
+		k=searchdlg.i;     // remember first matching index for later
 		last_matched=1; // char in this loop matched
 	    }
 	    j++;  // forward string index to compare next char
 	}
 	
     }
-    // the string was not found in text between index 'search_start' and
+    // the string was not found in text between index 'search start' and
     // one end of text (index '0' or index 'tlen')
 
     // We ask user it he want to search from other end of file
@@ -2255,31 +2255,31 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     {
 	if(gui_question("I reached end of file\ncontinue from start?","Yes","No")==TRUE)
 	{
-	    search.i=0;
-	    search.looped=1;
+	    searchdlg.i=0;
+	    searchdlg.looped=1;
 	    find_cb(w,sbaw);  // tail recursive, FIXME
 	    return;
 	}
 	else
-	    search.i=tlen-1;
+	    searchdlg.i=tlen-1;
     }
     else
     {
 	if(gui_question("I reached top of file\ncontinue from end?","Yes", "No")==TRUE)
 	{
-	    search.i=tlen-1;
-	    search.looped=1;
+	    searchdlg.i=tlen-1;
+	    searchdlg.looped=1;
 	    find_cb(w,sbaw);  // tail recursive, FIXME
 	    return;
 	}
 	else
-	    search.i=0;
+	    searchdlg.i=0;
     }
 }
 
 static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 {
-    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(search.entry)->entry),"");
+    gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
 
 void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
@@ -2374,49 +2374,49 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     }
 
 
-    search.lastid=-1;  // will reset search
+    searchdlg.lastid=-1;  // will reset search
     
-    search.window = gtk_dialog_new();
+    searchdlg.window = gtk_dialog_new();
 
-    gtk_signal_connect(GTK_OBJECT(search.window),
+    gtk_signal_connect(GTK_OBJECT(searchdlg.window),
 		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(search.window),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(search.window));
+    gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
-    gtk_window_set_title(GTK_WINDOW(search.window),"Find");
+    gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
     
     hbox = gtk_hbox_new(FALSE,15);
     gtk_widget_show(hbox);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(search.window)->vbox),hbox,
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
 		       FALSE,TRUE,5);
     label = gtk_label_new("Find:");
     gtk_widget_show(label);
     gtk_box_pack_start(GTK_BOX(hbox),label,
 		       FALSE,FALSE,5);
-    search.entry = gtk_combo_new();
-    gtk_widget_show(search.entry);
-    gtk_box_pack_start(GTK_BOX(hbox),search.entry,
+    searchdlg.entry = gtk_combo_new();
+    gtk_widget_show(searchdlg.entry);
+    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
 		       TRUE,TRUE,5);
-    gtk_combo_disable_activate(GTK_COMBO(search.entry));
-    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(search.entry)->entry),"activate",
+    gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
+    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
 		       GTK_SIGNAL_FUNC(find_cb),sbaw);
     
     hbox = gtk_hbox_new(FALSE,15);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(search.window)->vbox),hbox,
+    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
 		      FALSE,TRUE,5);
     gtk_widget_show(hbox);
-    search.case_button = gtk_check_button_new_with_label("Case Sensitive");
-    gtk_widget_show(search.case_button);
-    gtk_box_pack_start(GTK_BOX(hbox),search.case_button,
+    searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
+    gtk_widget_show(searchdlg.case_button);
+    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
 		      FALSE,FALSE,5);
-    search.backwards_button = gtk_check_button_new_with_label("Find Backwards");
-    gtk_widget_show(search.backwards_button);
-    gtk_box_pack_start(GTK_BOX(hbox),search.backwards_button,
+    searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
+    gtk_widget_show(searchdlg.backwards_button);
+    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
 		      FALSE,FALSE,5);
     
     button = gtk_button_new_with_label("Find");
     gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(search.window)->action_area),button);
+    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
     gtk_signal_connect(GTK_OBJECT(button),"clicked",
 		       GTK_SIGNAL_FUNC(find_cb),sbaw);
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
@@ -2424,15 +2424,15 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     
     button = gtk_button_new_with_label("Clear");
     gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(search.window)->action_area),button);
+    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
     gtk_signal_connect(GTK_OBJECT(button),"clicked",
 		       GTK_SIGNAL_FUNC(find_clear_cb),NULL);
     
     button = gtk_button_new_with_label("Close");
     gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(search.window)->action_area),button);
+    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
     gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			      GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(search.window));
+			      GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
     gtk_signal_connect_after(GTK_OBJECT(sbaw->sbw.gui_obj.window), "configure_event",
 			     GTK_SIGNAL_FUNC(gui_object_configure_event),sbaw);

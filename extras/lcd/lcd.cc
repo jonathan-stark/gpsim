@@ -52,7 +52,7 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
-#include <iostream.h>
+#include <iostream>
 
 #include <gtk/gtk.h>
 
@@ -88,7 +88,7 @@ extern "C" {
 // tracing, stimulus interface, etc.). The LcdPort class extends
 // IOPORT by redirecting changes to the LCD state machine.
 
-Lcd_Port::Lcd_Port (unsigned int _num_iopins=8) : IOPORT(_num_iopins)
+Lcd_Port::Lcd_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
 
 }
@@ -116,7 +116,7 @@ void Lcd_Port::assert_event(void)
 }
 
 
-DataPort::DataPort (unsigned int _num_iopins=8) : Lcd_Port(_num_iopins)
+DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 {
 
 }
@@ -148,7 +148,7 @@ void Lcd_Port::trace_register_write(void)
 
 //-----------------------------------------------------
 
-ControlPort::ControlPort (unsigned int _num_iopins=8) : Lcd_Port(_num_iopins)
+ControlPort::ControlPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 {
   break_delta = 100000;
 }

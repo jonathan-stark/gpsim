@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 
 
@@ -546,13 +546,13 @@ void IOPORT::trace_register_write(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins=8) : IOPORT(_num_iopins)
+PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
   tris = NULL;
   latch = NULL;
 }
 
-IOPORT::IOPORT(unsigned int _num_iopins=8)
+IOPORT::IOPORT(unsigned int _num_iopins)
 {
   break_point = 0;
   stimulus_mask = 0;

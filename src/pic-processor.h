@@ -23,6 +23,8 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 
+using namespace std;
+
 #include "gpsim_classes.h"
 #include "modules.h"
 

@@ -1681,7 +1681,7 @@ void USART_CORE::new_rx_edge(unsigned int bit)
 }
 
 //--------------------------------------------------------------
-void USART_CORE::initialize(USART_IOPORT *new_iop=NULL)
+void USART_CORE::initialize(USART_IOPORT *new_iop)
 {
 
   port = new_iop;
@@ -1818,7 +1818,7 @@ void USARTModule::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-ExternalModule * USARTModule::USART_construct(char *new_name = NULL)
+ExternalModule * USARTModule::USART_construct(char *new_name)
 {
 
   cout << "USART construct \n";
@@ -1853,7 +1853,7 @@ void USARTModule::set_attribute(char *attr, char *val)
 }
 
 
-USARTModule::USARTModule(char *_name = NULL)
+USARTModule::USARTModule(char *_name)
 {
 
   port = NULL;

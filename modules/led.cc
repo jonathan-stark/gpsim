@@ -64,7 +64,7 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
-#include <iostream.h>
+#include <iostream>
 
 #include <gtk/gtk.h>
 #include <math.h>
@@ -90,7 +90,7 @@ extern "C" {
 
 }
 
-Led_Port::Led_Port (unsigned int _num_iopins=8) : IOPORT(_num_iopins)
+Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
 
 }

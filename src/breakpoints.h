@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "pic-registers.h"
 #include "icd.h"
 
-#include  <iostream.h>
+#include  <iostream>
 
 #include <unistd.h>
 #include <glib.h>

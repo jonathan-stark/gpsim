@@ -19,8 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 //#include "14bit-registers.h"
 //#include "14bit-instructions.h"

@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 
 #include "../config.h"
@@ -54,7 +54,7 @@ void TMR0::stop(void)
   state &= (~1);      // the timer is disabled.
 }
 
-void TMR0::start(int restart_value, int sync=0)
+void TMR0::start(int restart_value, int sync)
 {
 
   state |= 1;          // the timer is on

@@ -219,7 +219,7 @@ void dump_stimulus_list(void)
 
 //========================================================================
 
-Stimulus_Node::Stimulus_Node(char *n=NULL)
+Stimulus_Node::Stimulus_Node(char *n)
 {
 
   stimuli = NULL;
@@ -400,7 +400,7 @@ int Stimulus_Node::update(unsigned int current_time)
 
 }
 
-stimulus::stimulus(char *n = NULL)
+stimulus::stimulus(char *n)
 {
   strcpy(name_str,"stimulus");
 
@@ -432,7 +432,7 @@ void stimulus::put_name(char *n)
 //========================================================================
 
 
-square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n=NULL)
+square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n)
 {
       
   //cout << "creating sqw stimulus\n";
@@ -461,7 +461,7 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
 
 // Create a square wave given only a (possibly) a name
 
-square_wave::square_wave(char *n=NULL)
+square_wave::square_wave(char *n)
 {
   square_wave(0,0,0,n);
 }
@@ -481,7 +481,7 @@ int square_wave::get_voltage(guint64 current_time)
 //
 // triangle_wave
 
-triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n=NULL)
+triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n)
 {
       
   //cout << "creating sqw stimulus\n";
@@ -533,7 +533,7 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
 
 // Create a triangle wave given only a (possibly) a name
 
-triangle_wave::triangle_wave(char *n=NULL)
+triangle_wave::triangle_wave(char *n)
 {
   triangle_wave(0,0,0,n);
 }
@@ -811,7 +811,7 @@ void asynchronous_stimulus::put_data(float data_point)
 // Note that most of the stimulus' initialization must be performed outside
 // of the constructor.
 
-asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
+asynchronous_stimulus::asynchronous_stimulus(char *n)
 {
   cpu = NULL;
 
@@ -865,7 +865,7 @@ dc_supply::dc_supply(char *n)
 //========================================================================
 //
 
-IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp=NULL)
+IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
 {
   iop = i;
   iopp = _iopp;
@@ -990,7 +990,7 @@ file_register *IOPIN::get_iop(void)
 
 //========================================================================
 //
-IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
   : IOPIN(i,b,opt_name,iopp)
 {
 
@@ -1147,7 +1147,7 @@ void IO_input::put_node_state( int new_state)
 
 //========================================================================
 //
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
   : IO_input(i,b,opt_name,iopp)
 {
   //  source = new source_stimulus();
@@ -1219,7 +1219,7 @@ IO_bi_directional::IO_bi_directional(void)
   cout << "IO_bi_directional constructor shouldn't be called\n";
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
   : IO_bi_directional(i, b,opt_name,iopp)
 {
 
@@ -1328,7 +1328,7 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 }
 
 
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL, file_register **_iopp=NULL)
+IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
   : IO_input(i,b,opt_name,iopp)
 {
 

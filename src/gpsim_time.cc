@@ -19,8 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 #include "14bit-processors.h"
 #include "interface.h"
@@ -59,7 +59,7 @@ void Cycle_Counter::preset(guint64 new_value)
 // value of 'future_cycle' is compared against the values in the
 // 'active' list.
 
-bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsigned int bpn=MAX_BREAKPOINTS)
+bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned int bpn)
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
@@ -166,7 +166,7 @@ void Cycle_Counter::clear_break(BreakCallBack *f)
 // set a cycle counter break point relative to the current cpu cycle value. Return 1 if successful.
 //
 
-bool Cycle_Counter::set_break_delta(guint64 delta, BreakCallBack *f=NULL, unsigned int bpn=MAX_BREAKPOINTS)
+bool Cycle_Counter::set_break_delta(guint64 delta, BreakCallBack *f, unsigned int bpn)
 {
 
 #ifdef __DEBUG_CYCLE_COUNTER__
@@ -232,7 +232,7 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 // For example, if tmr0 is set to roll over on a certain cycle and the program changes the
 // pre-scale value, then the break point has to be moved to the new cycle.
 
-bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCallBack *f=NULL)
+bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCallBack *f)
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;

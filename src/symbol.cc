@@ -26,8 +26,8 @@ Boston, MA 02111-1307, USA.  */
 // container class.
 //
 
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 
 #include <string>
 #include <list>
