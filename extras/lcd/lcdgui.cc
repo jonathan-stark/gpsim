@@ -435,7 +435,8 @@ void LcdDisplay::clear_display(void)
 void LcdDisplay::write_data(int data)
 {
   if (debug & LCD_DEBUG_TRACE_DATA)
-    cout << "lcd_write " << data << (in_cgram ? "cgram" : "data") << " mode\n";
+    cout << "lcd_write " << data << " to " << (in_cgram ? "cgram" : "data")
+              << " at " << (in_cgram ? cgram_cursor : cursor.col) << "\n";
   if (in_cgram) {
     cgram[cgram_cursor] = data;
     cgram_cursor = (cgram_cursor + 1) & CGRAM_MASK;
