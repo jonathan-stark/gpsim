@@ -232,6 +232,7 @@ void Logic_Input::put_digital_state( bool new_state)
 
 LogicGate::LogicGate(void)
 {
+	pixmap=0;
 
   //cout << "LogicGate base class constructor\n";
 }
@@ -342,11 +343,32 @@ void LogicGate::create_iopin_map(void)
   //cout << "Iopin map should be created\n";
 }
 
+static gboolean expose(GtkWidget *widget,
+		GdkEventExpose *event,
+		LogicGate *lg)
+{
+	if(lg->pixmap==0)
+	{
+		puts("LogicGate has no pixmap");
+		return 0;
+	}
+
+	gdk_draw_pixmap(widget->window,
+			widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+			lg->pixmap,
+			event->area.x, event->area.y,
+			event->area.x, event->area.y,
+			event->area.width, event->area.height);
+	
+	return 0;
+}
+
 GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 {
     GtkStyle *style;
     GdkBitmap *mask;
-    GdkPixmap *pixmap;
+    GtkWidget *da;
+    int width,height;
 
     style = gtk_style_new();
     
@@ -355,8 +377,16 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 						   &mask,
 						   &style->bg[GTK_STATE_NORMAL],
 						   pixmap_data);
-
-    return gtk_pixmap_new(pixmap,mask);
+#if GTK_MAJOR_VERSION >= 2
+    gdk_drawable_get_size(pixmap,&width,&height);
+#else
+    gdk_window_get_size(pixmap,&width,&height);
+#endif
+    da = gtk_drawing_area_new();
+    gtk_drawing_area_size(GTK_DRAWING_AREA(da),width,height);
+    gtk_signal_connect(GTK_OBJECT(da),"expose_event",
+    		(GtkSignalFunc) expose,this);
+    return da;
 }
 
 //--------------------------------------------------------------
