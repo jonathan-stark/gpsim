@@ -155,7 +155,7 @@ static unsigned int lookup_address_symbol(const char *name)
 
   for(sti = st.begin(); sti != st.end(); sti++) {
     
-    if(!strcmp((*sti)->name()->data(),name)) {
+    if(!strcmp((*sti)->name().data(),name)) {
       return (*sti)->get_value();
     }
   }
@@ -1255,11 +1255,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	if((*sti)->isa() == SYMBOL_ADDRESS) {
 
-	  char *pstr=(char*)malloc((*sti)->name()->length()+1);
+	  char *pstr=(char*)malloc((*sti)->name().length()+1);
 	  strncpy(pstr,
-		  (*sti)->name()->data(),
-		  (*sti)->name()->length());
-	  pstr[(*sti)->name()->length()]=0;
+		  (*sti)->name().data(),
+		  (*sti)->name().length());
+	  pstr[(*sti)->name().length()]=0;
 
 	  sym * data=(sym*)malloc(sizeof(sym));
 	  data->name = pstr;
@@ -1296,14 +1296,14 @@ popup_activated(GtkWidget *widget, gpointer data)
       for(sti = st.begin(); sti != st.end(); sti++) {
 
 	if(((*sti)->isa() == SYMBOL_ADDRESS) &&
-	   !strstr((*sti)->name()->data(),"_DS_")) {
+	   !strstr((*sti)->name().data(),"_DS_")) {
 	 
 
-	  char *pstr=(char*)malloc((*sti)->name()->length()+1);
+	  char *pstr=(char*)malloc((*sti)->name().length()+1);
 	  strncpy(pstr,
-		  (*sti)->name()->data(),
-		  (*sti)->name()->length());
-	  pstr[(*sti)->name()->length()]=0;
+		  (*sti)->name().data(),
+		  (*sti)->name().length());
+	  pstr[(*sti)->name().length()]=0;
 
 	  sym * data=(sym*)malloc(sizeof(sym));
 	  data->name = pstr;

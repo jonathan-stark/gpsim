@@ -1,3 +1,15 @@
+2004-08-26 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc, src/symbol.cc, src/symbol.h,
+	  gui/gui_profile.cc, gui/gui_stack.cc, gui/gui_symbols.cc
+	  cli/scan.ll:
+	The symbol class is now derived from the gpsimValue class.
+	This change allows some of the recent enhancements created
+	for other things to be applied to symbols as well.
+	* examples/14bit/p16c64_pwm.stc, examples/14bit/portc_stim.stc:
+	The PWM module was crashing. I'm not sure why, but I think
+	what actually was happening that the example stc file
+	was just broken.
+
 2004-08-25 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_trace.cc, src/14bit-registers.cc, src/trace.cc,
 	  src/trace.h: Removed a stale option to the trace command

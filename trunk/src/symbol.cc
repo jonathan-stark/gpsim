@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "14bit-processors.h"
+#include "value.h"
 #include "stimuli.h"
 #include "symbol.h"
 #include "symbol_orb.h"
@@ -68,7 +69,7 @@ void Symbol_Table::add_ioport(Processor *cpu, IOPORT *_ioport)
 
   ioport_symbol *is = new ioport_symbol();
 
-  is->name_str = _ioport->name();
+  is->new_name(_ioport->name());
   is->cpu      = _ioport->get_cpu();
   is->ioport   = _ioport;
   st.push_back(is);
@@ -80,7 +81,7 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
 
   node_symbol *ns = new node_symbol();
 
-  ns->name_str = s->name();
+  ns->new_name(s->name());
   ns->cpu      = 0;
   ns->stimulus_node = s;
   st.push_back(ns);
@@ -92,7 +93,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
   stimulus_symbol *ss = new stimulus_symbol();
 
-  ss->name_str = s->name();
+  ss->new_name(s->name());
   ss->cpu      = 0;
   ss->s        = s;
   st.push_back(ss);
@@ -108,9 +109,9 @@ void Symbol_Table::add_register(Processor *cpu, Register *new_reg, char *symbol_
   register_symbol *rs = new register_symbol();
 
   if(symbol_name)
-    rs->name_str = symbol_name;
+    rs->new_name(symbol_name);
   else
-    rs->name_str = new_reg->name();
+    rs->new_name(new_reg->name());
 
   rs->cpu      = cpu;
   rs->reg      = new_reg;
@@ -128,7 +129,7 @@ void Symbol_Table::add_w(Processor *cpu, WREG *new_w)
 
   w_symbol *ws = new w_symbol();
 
-  ws->name_str = new_w->name();
+  ws->new_name(new_w->name());
   ws->cpu      = cpu;
   ws->w        = new_w;
   new_w->symbol_alias = ws;
@@ -143,7 +144,7 @@ void Symbol_Table::add_constant(Processor *cpu, char *new_name, int value)
   constant_symbol *sc = new constant_symbol();
 
   sc->cpu      = cpu;
-  sc->name_str = new_name;
+  sc->new_name(new_name);
   sc->val      = value;
   st.push_back(sc);
 
@@ -155,7 +156,7 @@ void Symbol_Table::add_address(Processor *cpu, char *new_name, int value)
   address_symbol *as = new address_symbol();
 
   as->cpu      = cpu;
-  as->name_str = new_name;
+  as->new_name(new_name);
   as->val      = value;
   st.push_back(as);
 
@@ -167,11 +168,11 @@ void Symbol_Table::add_line_number(Processor *cpu, int address, char *symbol_nam
   line_number_symbol *lns = new line_number_symbol();
 
   if(symbol_name) 
-    lns->name_str = symbol_name;
+    lns->new_name(symbol_name);
   else {
     char buf[64];
     sprintf(buf,"line_%04x",address);  //there's probably a c++ way to do this
-    lns->name_str = buf;
+    lns->new_name(buf);
   }
   lns->cpu      = cpu;
   lns->address  = address;
@@ -179,14 +180,14 @@ void Symbol_Table::add_line_number(Processor *cpu, int address, char *symbol_nam
 
 }
 
-void Symbol_Table::add_module(Module * m, const char *new_name)
+void Symbol_Table::add_module(Module * m, const char *cPname)
 {
 //  cout << "adding module symbol\n";
 
   module_symbol *ms = new module_symbol();
 
   ms->cpu      = m;
-  ms->name_str = new_name;
+  ms->new_name((char*)cPname);
 
   st.push_back(ms);
 
@@ -202,7 +203,7 @@ void Symbol_Table::remove_module(Module * m)
   while( sti != st.end())
     {
       sym = *sti;
-      if(sym->name_str == m->name() &&
+      if(sym->name() == m->name() &&
 	 sym->isa()==SYMBOL_MODULE)
       {
 	  st.remove(sym);
@@ -268,7 +269,7 @@ symbol::~symbol(void)
 void symbol::print(void)
 {
 
-  cout << *name() << " type " << type_name();
+  cout << name() << " type " << type_name();
   
   if(cpu)
     {
@@ -288,7 +289,7 @@ symbol * Symbol_Table::find(string *s)
   while( sti != st.end())
     {
       sym = *sti;
-      if(sym->name_str == *s)
+      if(sym->name() == *s)
 	return(sym);
 
       sti++;
@@ -316,7 +317,7 @@ symbol * Symbol_Table::find(SYMBOL_TYPE symt, char *str)
   while( sti != st.end())
     {
       sym = *sti;
-      if((sym->name_str == s) && (sym->isa() == symt))
+      if((sym->name() == s) && (sym->isa() == symt))
 	return(sym);
 
       sti++;
@@ -487,15 +488,15 @@ void node_symbol::print(void)
 void register_symbol::print(void)
 {
   if(reg)
-    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_value() <<'\n';
+    cout << name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_value() <<'\n';
 }
-int register_symbol::get_value(void)
+unsigned int register_symbol::get_value(void)
 {
   if(reg)
     return reg->address;
   return 0;
 }
-void register_symbol::put_value(int new_value)
+void register_symbol::put_value(unsigned int new_value)
 {
   if(reg)
     reg->put_value(new_value);
@@ -507,18 +508,18 @@ void w_symbol::print(void)
   if(cpu)
     cout << w->name() << hex << " = 0x" << w->get_value() <<'\n';
 }
-int w_symbol::get_value(void) 
+unsigned int w_symbol::get_value(void) 
 {
   return w->value.get();
 }
-void w_symbol::put_value(int new_value) 
+void w_symbol::put_value(unsigned int new_value) 
 {
   if(w)
     w->put_value(new_value);
 }
 
 //------------------------------------------------------------------------
-void ioport_symbol::put_value(int new_value)
+void ioport_symbol::put_value(unsigned int new_value)
 {
   if(ioport)
     ioport->put_value(new_value);
@@ -527,12 +528,12 @@ void ioport_symbol::put_value(int new_value)
 //------------------------------------------------------------------------
 void constant_symbol::print(void)
 {
-  cout << *name() << " = 0x" << hex << val <<'\n';
+  cout << name() << " = 0x" << hex << val <<'\n';
 }
 //------------------------------------------------------------------------
 void address_symbol::print(void)
 {
-  cout << *name() << " at address 0x" << hex << val <<'\n';
+  cout << name() << " at address 0x" << hex << val <<'\n';
 }
 //------------------------------------------------------------------------
 void module_symbol::print(void)
@@ -540,5 +541,14 @@ void module_symbol::print(void)
   if(cpu)
     cout << cpu->type() << "  named ";
 
-  cout << *name() << '\n';
+  cout << name() << '\n';
+}
+
+//------------------------------------------------------------------------
+string &stimulus_symbol::name()
+{
+  if(s)
+    return s->name();
+
+  return gpsimValue::name();
 }

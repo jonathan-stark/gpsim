@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 #include "gpsim_classes.h"
+#include "value.h"
 
 using namespace std;
 
@@ -63,21 +64,20 @@ class Processor;
 class Register;
 class Module;
 
-class symbol
+class symbol : public gpsimValue
 {
 public:
-
-  string name_str;
 
   Module *cpu;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
   virtual char * type_name(void) { return "unknown";}
-  string *name(void) { return &name_str;}
-  void new_name(string *new_name_str) {name_str = *new_name_str;}
+  virtual string &name(void) {return name_str;}
+  //void new_name(string *new_name_str) {name_str = *new_name_str;}
   virtual void print(void);
-  virtual int get_value(void){return 0;}
-  virtual void put_value(int i) { }
+  virtual void put_value(unsigned int new_value) {}
+  virtual unsigned int get_value() { return 0; }
+
   symbol(void);
   virtual ~symbol();
 };
@@ -131,7 +131,7 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
   virtual char * type_name(void) { return "constant";}
   virtual void print(void);
-  virtual int get_value(void){return val;};
+  virtual unsigned int get_value(void){return val;};
 };
 
 
@@ -142,7 +142,7 @@ public:
   IOPORT *ioport;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
   virtual char * type_name(void) { return "ioport";}
-  virtual void put_value(int new_value);
+  virtual void put_value(unsigned int new_value);
 };
 
 class node_symbol : public symbol
@@ -164,8 +164,8 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual char * type_name(void) { return "register";}
   virtual void print(void);
-  virtual int get_value(void);
-  virtual void put_value(int new_value);
+  virtual unsigned int get_value(void);
+  virtual void put_value(unsigned int new_value);
 };
 
 class stimulus_symbol : public symbol
@@ -173,6 +173,7 @@ class stimulus_symbol : public symbol
 public:
 
   stimulus *s;
+  virtual string &name(void);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS;};
 };
 
@@ -184,7 +185,7 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
   virtual char * type_name(void) { return "address";}
   virtual void print(void);
-  virtual int get_value(void){return val;};
+  virtual unsigned int get_value(void){return val;};
 
 };
 
@@ -223,8 +224,8 @@ class w_symbol : public symbol
   virtual char * type_name(void) { return "W";}
 
   virtual void print(void);
-  virtual int get_value(void);
-  virtual void put_value(int new_value);
+  virtual unsigned int get_value(void);
+  virtual void put_value(unsigned int new_value);
 
 };
 #endif  //  __SYMBOL_H__

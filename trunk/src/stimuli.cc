@@ -83,7 +83,7 @@ Stimulus_Node * find_node (symbol *sym)
     {
       Stimulus_Node *t = *node_iterator;
 
-      if ( t->name() == sym->name_str)
+      if ( t->name() == sym->name())
 	{
 	  return (t);
 	}
@@ -196,7 +196,7 @@ stimulus * find_stimulus (symbol *sym)
       {
 	stimulus *t = *stimulus_iterator;
 
-	if ( t->name() == sym->name_str)
+	if ( t->name() == sym->name())
 	  return (t);
       }
   }
@@ -988,6 +988,7 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
     }
 
   add_stimulus(this);
+  symbol_table.add_stimulus(this);
 
 }
 
