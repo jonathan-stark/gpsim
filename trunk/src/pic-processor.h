@@ -237,10 +237,10 @@ public:
   virtual void finish(void);
 
   void sleep(void);
-  void step(unsigned int steps);
-  void step_over(void);
+  void step(unsigned int steps,bool refresh=true);
+  void step_over(bool refresh=true);
 
-  virtual void step_one(void) {
+  virtual void step_one(bool refresh=true) {
     program_memory[pc->value]->execute();
   }
 

@@ -547,7 +547,7 @@ void pic_processor::run (void)
 
   do {
 
-    step(1);
+    step(1,false);
 
     do {
 
@@ -587,7 +587,7 @@ void pic_processor::run (void)
 // to be a feature.)
 //
 
-void pic_processor::step (unsigned int steps)
+void pic_processor::step (unsigned int steps, bool refresh)
 {
 
   if(use_icd)
@@ -604,7 +604,7 @@ void pic_processor::step (unsigned int steps)
   }
 
 
-  Processor::step(steps);
+  Processor::step(steps,refresh);
 }
 
 //-------------------------------------------------------------------
@@ -615,7 +615,7 @@ void pic_processor::step (unsigned int steps)
 // begin 'running'. This is useful for stepping over time-consuming calls.
 //
 
-void pic_processor::step_over (void)
+void pic_processor::step_over (bool refresh)
 {
 
   unsigned int saved_pc = pc->value;
@@ -626,7 +626,7 @@ void pic_processor::step_over (void)
     return;
   }
 
-  step(1); // Try one step
+  step(1,refresh); // Try one step
 
   if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
     {

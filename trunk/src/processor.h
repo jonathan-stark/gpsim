@@ -106,8 +106,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   bool hasValid_opcode(unsigned int address);
 
   // step - step one of more instructions
-  virtual void step(unsigned int steps);
-  virtual void step_over(void);
+  virtual void step(unsigned int steps, bool refresh=true);
+  virtual void step_over(bool refresh=true);
 
   virtual void run(void);
   virtual void stop(void);
@@ -429,9 +429,9 @@ public:
   virtual void finish(void);
 
   virtual void sleep(void) {};
-  virtual void step(unsigned int steps);
-  virtual void step_over(void);
-  virtual void step_one(void) = 0;
+  virtual void step(unsigned int steps,bool refresh=true);
+  virtual void step_over(bool refresh=true);
+  virtual void step_one(bool refresh=true) = 0;
   virtual void interrupt(void) = 0 ;
 
   // Tracing control
