@@ -423,6 +423,7 @@ void Stimulus_Node::update()
     case 1:
       // Only one stimulus is attached.
       voltage = sptr->get_Vth();
+      Zth =  sptr->get_Zth();
       break;
 
     case 2:
@@ -437,8 +438,9 @@ void Stimulus_Node::update()
 	double Z2 = sptr2->get_Zth();
 	double resistance = Z1 + Z2;
 	double final_voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
+	Zth = Z1*Z2/resistance;
+	current_time_constant = (sptr->get_Cth() + sptr2->get_Cth()) * Zth;
 
-	current_time_constant = (sptr->get_Cth() + sptr2->get_Cth()) * Z1 * Z2 / resistance;
 	/*
 	  cout << " *N1: " <<sptr->name() 
 	  << " V=" << sptr->get_Vth() 
@@ -503,8 +505,9 @@ void Stimulus_Node::update()
 	  capacitance += sptr->get_Cth();
 	  sptr = sptr->next;
 	}
-	final_voltage /= conductance;
-	current_time_constant = capacitance/conductance;
+	Zth = 1.0/conductance;
+	final_voltage *= Zth;
+	current_time_constant = capacitance * Zth;
 
 	if(current_time_constant < min_time_constant) {
 	  voltage = final_voltage;
@@ -1230,6 +1233,13 @@ double IOPIN::get_Vth()
 
 }
 
+char IOPIN::getBitChar()
+{
+  if(!snode)
+    return 'Z';  // High impedance - unknown state.
+
+  return get_digital_state() ? '1' : '0';
+}
 
 //========================================================================
 //
@@ -1285,6 +1295,13 @@ double IO_bi_directional::get_Zth()
 
 }
 
+char IO_bi_directional::getBitChar()
+{
+  if(!snode && !driving )
+    return 'Z';
+
+  return get_digital_state() ? '1' : '0';
+}
 
 
 //---------------
@@ -1349,6 +1366,16 @@ double IO_bi_directional_pu::get_Vth()
     return bPullUp ? Vth : VthIn;
 
 }
+
+char IO_bi_directional_pu::getBitChar()
+{
+  if(!snode && !driving )
+    return bPullUp ? 'W' : 'Z';
+
+
+  return get_digital_state() ? '1' : '0';
+}
+
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
 				     const char *opt_name, Register **_iopp)
   : IO_bi_directional_pu(i,b,opt_name,_iopp)

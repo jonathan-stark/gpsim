@@ -91,12 +91,14 @@ extern list <stimulus *> stimulus_list;
 class Stimulus_Node : public gpsimObject, public TriggerObject
 {
 public:
-  bool warned;        // keeps track of node warnings (e.g. floating node, contention)
-  double voltage;     // The most recent target voltage of this node
+  bool warned;         // keeps track of node warnings (e.g. floating node, contention)
+  double voltage;      // The most recent target voltage of this node
+  double capacitance;  // The most recent capacitance (to ground) measured on this node.
+  double Zth;          // The most recent thevenin resistance computed on this node.
+
   double current_time_constant; // The most recent time constant for the attached stimuli.
   double delta_voltage;   // Amplitude of initial change
   double initial_voltage; // node voltage at the instant of change
-
   double min_time_constant; // time constants longer than this induce settling
   bool bSettling;           // true when the voltage is settling 
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
@@ -106,7 +108,10 @@ public:
   Stimulus_Node(const char *n = 0);
   virtual ~Stimulus_Node();
 
-  double get_nodeVoltage(void) { return voltage; }
+  double get_nodeVoltage() { return voltage; }
+  double get_nodeZth() { return Zth;}
+  double get_nodeCapacitance() { return capacitance; }
+
   void update(guint64 current_time);
   void update();
 
@@ -178,6 +183,8 @@ public:
   virtual void set_digital_state(bool new_dstate) { digital_state = new_dstate;};
   virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
 
+  // getBitChar - this complements the Register class' getBitStr function
+  virtual char getBitChar() { return '0'; }
   virtual void attach(Stimulus_Node *s) { snode = s;};
   virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
 
@@ -296,7 +303,7 @@ class IOPIN : public stimulus
 
   virtual double get_Vth();
 
-
+  virtual char getBitChar();
 };
 
 class IO_bi_directional : public IOPIN
@@ -320,6 +327,8 @@ public:
 
   virtual double get_Zth();
   virtual double get_Vth();
+  virtual char getBitChar();
+
   virtual void set_nodeVoltage(double new_nodeVoltage);
 
   virtual void update_direction(unsigned int);
@@ -340,6 +349,7 @@ public:
   ~IO_bi_directional_pu();
   virtual double get_Vth();
   virtual double get_Zth();
+  virtual char getBitChar();
   virtual void update_pullup(bool new_state) { bPullUp = new_state; }
 };
 
@@ -354,6 +364,7 @@ public:
 
   virtual double get_Vth();
   virtual double get_Zth();
+
 
 };
 

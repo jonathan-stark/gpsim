@@ -473,6 +473,17 @@ void IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
 }
 
 //-------------------------------------------------------------------
+// getIO(unsigned int pin_number)
+//  return the I/O pin at the bit position requested.
+//-------------------------------------------------------------------
+IOPIN *IOPORT::getIO(unsigned int pin_number)
+{
+  if(pins && pin_number < num_iopins)
+    return pins[pin_number];
+
+  return 0;
+}
+//-------------------------------------------------------------------
 // attach_iopin
 //   This will store a pointer to the iopin that is associated with
 // one of the bits of the I/O port.
