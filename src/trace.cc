@@ -255,35 +255,40 @@ int Trace::dump1(unsigned index)
 
 }
 
+//------------------------------------------------------------------
+// find_cycle
+//
+//  This routine will search for the n'th cycle BEFORE the last one
+// in the trace buffer. It will then find the instruction and pc indices
+// after this cycle.
+//
+// INPUT
+//    n - number of cycles to search back into the trace buffer.
+//
+// INPUTS/OUTPUTS
+//    instruction_index
+//    pc_index
+//    cycle_index
+//
+// These three input parameters are actually outputs. They are passed by
+// reference and will get assigned the trace buffer index at which they're
+// found. More specifically, they're assigned the trace buffer index after
+// the n'th cycle has been found
 
-int Trace::dump(unsigned int n=0)
+
+guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index)
 {
-
-
-/*
-  do
-    {
-      
-      i = (i + dump1(i)) & TRACE_BUFFER_MASK;
-    } while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK)));
-*/
-
-  char a_string[50];
   unsigned int i;
-  int
-    instruction_index=-1,
-    pc_index=-1,
-    cycle_index=-1;
-  guint64 cycle = 0;
+  guint64 cycle=0;
   bool 
     found_instruction = 0,
     found_pc =0,
     found_cycle = 0;
 
-  file_register *r;
-
-  if(!n)
-    n = 5;
+  // =1 means the index wasn't found.
+  instruction_index=-1;
+  pc_index=-1;
+  cycle_index=-1;
 
   // The trace_index is pointing to the next available slot,
   // but we need to start looking at the last traced thing.
@@ -339,6 +344,35 @@ int Trace::dump(unsigned int n=0)
   
   } while( (i != trace_index) && (!found_pc));
 
+  return cycle;
+}
+
+//------------------------------------------------------------------
+// int Trace::dump(unsigned int n=0)
+//
+
+int Trace::dump(unsigned int n=0)
+{
+
+  char a_string[50];
+  unsigned int i;
+  int
+    instruction_index=-1,
+    pc_index=-1,
+    cycle_index=-1;
+  guint64 cycle = 0;
+  bool 
+    found_instruction = 0,
+    found_pc =0,
+    found_cycle = 0;
+
+  file_register *r;
+
+  if(!n)
+    n = 5;
+
+  cycle = find_cycle(n,instruction_index, pc_index, cycle_index);
+
   if(pc_index>0) {
 
     // We are going to print the cycle (if it was found) along with the
@@ -355,7 +389,7 @@ int Trace::dump(unsigned int n=0)
 
       i = trace_buffer[pc_index]&0xffff;
 
-      if(found_cycle) 
+      if(cycle) 
 	printf("0x%016LX  ",cycle);
 
       printf("%s  0x%04X  0x%04X  %s\n",cpu->name_str,i,
