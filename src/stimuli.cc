@@ -328,7 +328,7 @@ int Stimulus_Node::update(unsigned int current_time)
 
   int node_voltage = 0;
 
-  cout << "getting state of " << name() << '\n';
+  //cout << "getting state of " << name() << '\n';
 
   if(stimuli != NULL)
     {
@@ -344,11 +344,11 @@ int Stimulus_Node::update(unsigned int current_time)
       while(sptr)
 	{
 	  node_voltage += sptr->get_voltage(current_time);
-	  cout << " node " << sptr->name() << " voltage is " << sptr->get_voltage(current_time) <<'\n';
+	  //cout << " node " << sptr->name() << " voltage is " << sptr->get_voltage(current_time) <<'\n';
 
 	  sptr = sptr->next;
 	}
-      cout << "node voltage " << node_voltage << '\n';
+      //cout << "node voltage " << node_voltage << '\n';
 
       // 'node_voltage' now represents the most up-to-date value of this node.
       // Now, tell all of the stimuli that are interested:
@@ -558,7 +558,7 @@ void asynchronous_stimulus::callback(void)
   current_state = next_state;
   guint64 current_cycle = future_cycle;
 
-  //  if(verbose)
+  if(verbose)
     cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
   // If we've passed through all of the states
@@ -851,9 +851,13 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name)
     // otherwise, derive the name from the I/O port to 
     // which this pin is attached.
 
-    if(opt_name)
-      strncpy(name_str,opt_name,STIMULUS_NAME_LENGTH);
-
+    if(opt_name) {
+      strncpy(name_str, 
+	      iop->name(),
+	      STIMULUS_NAME_LENGTH-((strlen(opt_name)>30)?30:strlen(opt_name)));
+      strcat(name_str,".");
+      strcat(name_str,opt_name);
+    }
     else {
 
       strncpy(name_str, iop->name(),STIMULUS_NAME_LENGTH-2);
