@@ -308,7 +308,7 @@ void update_menu_item(struct _gui_object *_this)
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_opcode_source_window:
-	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Disassembly");
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Program memory");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_watch_window:
@@ -316,7 +316,7 @@ void update_menu_item(struct _gui_object *_this)
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_breadboard_window:
-	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Pins");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_stack_window:

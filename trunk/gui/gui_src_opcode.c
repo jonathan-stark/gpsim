@@ -462,23 +462,28 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 
 static void update_label(SourceBrowserOpcode_Window *sbow, int address)
 {
-    char buf[128];
-    char buf2[128];
+    char labeltext[128];
+    char entrytext[128];
     GtkEntry *sheet_entry;
     unsigned int oc;
 
-    printf("%d\n",address);
+    if(address<0)
+    {
+	strcpy(labeltext,"ASCII");
+    }
+    else
+    {
+	oc=gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address);
+	
+	filter(labeltext,gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,entrytext),sizeof(labeltext));
+	sprintf(entrytext, "0x%04X", oc);
+    }
     
-    oc=gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address);
-    
-    // Update entry
     sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet)));
-    filter(buf,gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,buf2),sizeof(buf));
-    gtk_label_set(GTK_LABEL(sbow->label), buf);
+    gtk_label_set(GTK_LABEL(sbow->label), labeltext);
     gtk_entry_set_max_length(GTK_ENTRY(sbow->entry),
 			     GTK_ENTRY(sheet_entry)->text_max_length);
-    sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
-    gtk_entry_set_text(GTK_ENTRY(sbow->entry), row_text[OPCODE_COLUMN]);
+    gtk_entry_set_text(GTK_ENTRY(sbow->entry), entrytext);
 
 }
 
@@ -706,7 +711,10 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
 	return 0;
     }
 
-    update_label(sbow,row*16+column);
+    if(column<16)
+	update_label(sbow,row*16+column);
+    else
+	update_label(sbow,-1);
     
     gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
 			     sheet->active_cell.col, &attributes);
@@ -745,7 +753,6 @@ void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int addr
 
     if(address >= 0)
     {
-	printf("update line %d\n",address);
 	update(sbow,address);
 
     }
@@ -974,7 +981,7 @@ static GdkBitmap *mask;
   CreateSBW((SourceBrowser_Window*)sbow);
 
 
-    gtk_window_set_title (GTK_WINDOW (sbow->sbw.gui_obj.window), "Disassembly");
+    gtk_window_set_title (GTK_WINDOW (sbow->sbw.gui_obj.window), "Program memory");
 
 
 
@@ -1020,7 +1027,7 @@ static GdkBitmap *mask;
 		     (gpointer) sbow);
 
 
-  label=gtk_label_new("clist page");
+  label=gtk_label_new("Assembly");
   gtk_notebook_append_page(GTK_NOTEBOOK(sbow->notebook),scrolled_win,label);
 
   gtk_clist_set_row_height (GTK_CLIST (clist), 18);
@@ -1066,12 +1073,18 @@ static GdkBitmap *mask;
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, TRUE, 0);
   
   sbow->label=gtk_label_new("");
+  style=gtk_widget_get_style(sbow->label);
+  style->font=normal_style->font;
+  gtk_widget_set_style(sbow->label,style);
   gtk_widget_size_request(sbow->label, &request);
   gtk_widget_set_usize(sbow->label, 160, request.height);
   gtk_widget_show(sbow->label);
   gtk_box_pack_start(GTK_BOX(hbox), sbow->label, FALSE, TRUE, 0);
 
   sbow->entry=gtk_entry_new();
+  style=gtk_widget_get_style(sbow->entry);
+  style->font=normal_style->font;
+  gtk_widget_set_style(sbow->entry,style);
   gtk_widget_show(sbow->entry);
   gtk_box_pack_start(GTK_BOX(hbox), sbow->entry, TRUE, TRUE, 0);
   
@@ -1084,7 +1097,7 @@ static GdkBitmap *mask;
   gtk_widget_show(sbow->sheet);
   gtk_container_add(GTK_CONTAINER(scrolled_win), sbow->sheet);
   
-  label=gtk_label_new("sheet page (WARNING: bugs)");
+  label=gtk_label_new("Opcodes");
   gtk_notebook_append_page(GTK_NOTEBOOK(sbow->notebook),vbox,label);
 
   char_width = gdk_string_width (normal_style->font,"9");
@@ -1188,7 +1201,7 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
 
     sbow->sbw.gui_obj.gp = gp;
     gp->program_memory = (SourceBrowser_Window*)sbow;
-    sbow->sbw.gui_obj.name = "disassembly";
+    sbow->sbw.gui_obj.name = "program_memory";
     sbow->sbw.gui_obj.wc = WC_source;
     sbow->sbw.gui_obj.wt = WT_opcode_source_window;
 
