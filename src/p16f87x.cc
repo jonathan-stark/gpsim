@@ -398,13 +398,12 @@ pic_processor * P16F877::construct(void)
   if(verbose)
     cout << " f877 construct\n";
 
-  p->create();
-  p->create_invalid_registers ();
-
   p->eeprom = new EEPROM_87x;
-
   p->eeprom->cpu = p;
   p->eeprom->initialize(128);
+
+  p->create();
+  p->create_invalid_registers ();
 
   p->pic_processor::create_symbols();
 
