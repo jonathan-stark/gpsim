@@ -651,6 +651,7 @@ public:
   virtual void initialize(bool enable, double _timeout);
   void clear(void);
   virtual void callback(void);
+  virtual void start_sleep(void);
 };
 
 //---------------------------------------------------------

@@ -725,7 +725,8 @@ int open_cod_file(pic_processor **pcpu, char *filename)
 
   ccpu = *pcpu;
 
-  ccpu->set_config_word(0x2007,0xffff);  // assume no configuration word is in the cod file.
+  // assume no configuration word is in the cod file.
+  ccpu->set_config_word(ccpu->config_word_address(),0xffff);
 
   read_hex_from_cod(ccpu);
 

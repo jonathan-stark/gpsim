@@ -74,7 +74,8 @@ void CCPRL::capture_tmr(void)
   tmr1l->pir1->set_ccpif();
 
   int c = value + 256*ccprh->value;
-  //cout << "CCPRL captured: " << c << '\n';
+  if(verbose & 4)
+    cout << "CCPRL captured: " << c << '\n';
 }
 
 void CCPRL::start_compare_mode(void)
@@ -144,6 +145,7 @@ unsigned int CCPRH::get(void)
   unsigned int read_value =  (pwm_mode) ? (pwm_value >>2) : value;
 
   trace.register_read(address, read_value);
+  return read_value;
 }
 
 //--------------------------------------------------
@@ -159,8 +161,8 @@ CCPCON::CCPCON(void)
 
 void CCPCON::new_edge(unsigned int level)
 {
-
-  //cout << "CCPCON processing new edge\n";
+  if(verbose &4)
+    cout << "CCPCON processing new edge\n";
 
   switch(value & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -402,7 +404,13 @@ void T1CON::put(unsigned int new_value)
 PIR1::PIR1(void)
 {
 
-  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | PSPIF;
+  //valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | TXIF | RCIF | PSPIF;
+  //
+  // Even though TXIF is a valid bit, it can't be written by the PIC 
+  // source code. Its state reflects whether the usart txreg is full or
+  // not.
+
+  valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | PSPIF;
 
   break_point = 0;
   new_name("pir1");
@@ -505,7 +513,8 @@ TMR1L::TMR1L(void)
 // %%%FIX ME%%% 
 void TMR1L::increment(void)
 {
-  //  cout << "TMR1L increment because of external clock ";
+  if(verbose & 4)
+    cout << "TMR1L increment because of external clock ";
 
   if(--prescale_counter == 0)
     {
@@ -531,6 +540,9 @@ void TMR1L::on_or_off(int new_state)
       // turn on the timer
 
       // Effective last cycle
+      // Compute the "effective last cycle", i.e. the cycle
+      // at which TMR1 was last 0 had it always been counting.
+
       last_cycle = cpu->cycles.value - value_16bit*prescale;
       update();
     }
@@ -633,7 +645,10 @@ unsigned int TMR1L::get(void)
   if(cpu->cycles.value <= synchronized_cycle)
     return value;
 
-  //  int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+  // If TMR1L is not on, then return the current value
+  if(!t1con->get_tmr1on())
+    return value;
+
   current_value();
 
   value = (value_16bit & 0xff);
@@ -651,6 +666,7 @@ unsigned int TMR1L::get_value(void)
 //%%%FIXME%%% inline this
 void TMR1L::current_value(void)
 {
+  //cout << "TMR1L::current_value(void)\n";
   value_16bit = ((cpu->cycles.value - last_cycle)/ prescale) & 0xffff;
 }
 
@@ -711,6 +727,9 @@ void TMR1L::clear_timer(void)
 
 void TMR1L::callback(void)
 {
+
+  if(verbose & 4)
+    cout << "TMR1L::callback\n";
 
   // If TMR1L is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to

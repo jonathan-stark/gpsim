@@ -40,16 +40,13 @@ char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
 #include <readline/readline.h>
 #undef completion_matches
 }
-/*
+
 extern "C" {
 #include <readline/history.h>
 }
-*/
 
 //#endif
 
-//#include <readline/readline.h>
-#include <readline/history.h>
 
 #include <sys/types.h>
 #include <sys/file.h>

@@ -347,10 +347,14 @@ enum
 
   void put(unsigned int new_value)
     {
-      value = new_value;
+      // Only the "valid bits" can be written with put.
+      // The "invalid" ones (such as TXIF) are written
+      // through the set_/clear_ member functions.
+
+      value = new_value & valid_bits | value & ~valid_bits;
       trace.register_write(address,value);
 
-      if( value & valid_bits & pie->value )
+      if( value & pie->value )
 	{
 	  intcon->peripheral_interrupt();
 	}
