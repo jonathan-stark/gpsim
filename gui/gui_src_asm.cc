@@ -50,6 +50,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/fopen-path.h"
 #include "../xpms/pc.xpm"
 #include "../xpms/break.xpm"
+#include "../xpms/canbreak.xpm"
 #include "../xpms/startp.xpm"
 #include "../xpms/stopp.xpm"
 #define PIXMAP_SIZE 14
@@ -434,17 +435,27 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 			 source_layout[id],
 			 PIXMAP_POS(this,e));
 
-  if(pma->address_has_profile_stop(address))
+  else if(pma->address_has_profile_stop(address))
     notify_stop_list.Add(address, 
 			 gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
 			 source_layout[id],
 			 PIXMAP_POS(this,e));
 
-  if(pma->address_has_break(address))
+  else if(pma->address_has_break(address))
     breakpoints.Add(address,
 		    gtk_pixmap_new(pixmap_break,bp_mask),
 		    source_layout[id],
 		    PIXMAP_POS(this,e));
+  else {
+    GtkWidget *widget = gtk_pixmap_new(pixmap_canbreak,canbp_mask);
+    gtk_layout_put(GTK_LAYOUT(source_layout[id]),
+		   widget,
+		   PIXMAP_SIZE*0,
+		   PIXMAP_POS(this,e)
+		   );
+    gtk_widget_show(widget);
+
+  }
 
 }
 
@@ -1156,6 +1167,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
       style = gtk_style_new();
       sbaw->pc_mask = 0;
       sbaw->bp_mask = 0;
+      sbaw->canbp_mask = 0;
       sbaw->startp_mask = 0;
       sbaw->stopp_mask = 0;
       sbaw->pixmap_pc = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
@@ -1166,6 +1178,10 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 							&sbaw->bp_mask,
 							&style->bg[GTK_STATE_NORMAL],
 							(gchar**)break_xpm);
+      sbaw->pixmap_canbreak = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
+							   &sbaw->canbp_mask,
+							   &style->bg[GTK_STATE_NORMAL],
+							   (gchar**)canbreak_xpm);
       sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							       &sbaw->startp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
@@ -1627,6 +1643,12 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
       puts("Warning, PC is invalid?");
   else
       SetPC(address);
+
+  // update breakpoint widgets
+  for(address=0;address<gp->cpu->program_memory_size();address++)
+    UpdateLine(address);
+
+
 }
 
 

@@ -110,6 +110,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
     
   GdkBitmap *pc_mask;
   GdkBitmap *bp_mask;
+  GdkBitmap *canbp_mask;
   GdkBitmap *startp_mask;
   GdkBitmap *stopp_mask;
   GtkWidget *notebook;
@@ -123,6 +124,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
     
   GdkPixmap *pixmap_pc;
   GdkPixmap *pixmap_break;
+  GdkPixmap *pixmap_canbreak;
   GdkPixmap *pixmap_profile_start;
   GdkPixmap *pixmap_profile_stop;
   int source_loaded;

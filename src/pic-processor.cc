@@ -592,28 +592,30 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
-    {
-      simulation_start_cycle = cycles.value;
-    }
+  //if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
+  //  if((*pma)[pc->value]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+    simulation_start_cycle = cycles.value;
 
-  do
-    {
-      do
-	{
-	  program_memory[pc->value]->execute();
-	} while(!bp.global_break);
+  do {
 
-      if(bp.have_interrupt())
-	interrupt();
+    step(1);
 
-      if(bp.have_sleep())
-	sleep();
+    do {
 
-      if(bp.have_pm_write())
-	pm_write();
+      program_memory[pc->value]->execute();
 
     } while(!bp.global_break);
+
+    if(bp.have_interrupt())
+      interrupt();
+
+    if(bp.have_sleep())
+      sleep();
+
+    if(bp.have_pm_write())
+      pm_write();
+
+  } while(!bp.global_break);
 
   if(realtime_mode)
     realtime_cbp.stop();
