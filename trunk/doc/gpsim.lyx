@@ -1,8 +1,7 @@
-#This file was created by <scott> Sat Jan 22 14:12:09 2000
-#LyX 1.0 (C) 1995-1998 Matthias Ettrich and the LyX Team
-\lyxformat 2.15
+#LyX 1.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 218
 \textclass book
-\language default
+\language english
 \inputencoding default
 \fontscheme times
 \graphics default
@@ -40,7 +39,7 @@ T.
 \layout Standard
 
 
-\begin_inset LatexCommand \tableofcontents
+\begin_inset LatexCommand \tableofcontents{}
 
 \end_inset 
 
@@ -52,7 +51,8 @@ Introduction
 
 gpsim is a full-featured software simulator for Microchip PIC microcontrollers
  distributed under the GNU General Public License 
-\begin_inset Info scott2 Wed Sep 30 13:25:58 1998
+\begin_inset Info
+scott2 Wed Sep 30 13:25:58 1998
 \end_inset 
 
 (see the COPYING section).
@@ -102,46 +102,108 @@ Making the executable
 gpsim's executable is create in a manner that's consistant with many of
  the other open source software:
 \layout Standard
-\LyXTable
-multicol5
-5 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-2 1 0 "" ""
-2 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
-0 2 1 0 0 0 0 "" ""
+
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="5" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="left" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 command 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 description
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 tar -xvzf gpsim-0.x.0.tar.gz
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 expand the compressed tar file
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 ./configure
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Create a 'makefile' unique to your system
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 make
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 compile gpsim
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 make install
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="left" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 install gpsim
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 The last step will require root privileges.
@@ -191,71 +253,23 @@ The executable created above is called: gpsim.
 gpsim [-h] [-p<device> [<hex_file>]] [-c<stc_file>] 
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
--h 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- : this help list 
+   -h           : this help list 
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
--p<device> 
-\protected_separator 
- : processor (e.g.
+   -p<device>   : processor (e.g.
  -pp16c84 for the 'c84)
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
-<hex_file> 
-\protected_separator 
- : input file in "intelhex16" format
+   <hex_file>   : input file in "intelhex16" format
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
--c<stc_file> : startup command file
+   -c<stc_file> : startup command file
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
--s<cod_file> : .cod symbol file
+   -s<cod_file> : .cod symbol file
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
--v 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- : gpsim version
+   -v           : gpsim version
 \layout Section
 
 Requirements
@@ -292,246 +306,473 @@ The command line interface is fairly straight-forward.
  with gpsim's cli.
  The table below summarizes the available commands.
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-20 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="20" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 command
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 summary
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 attach
 \begin_inset LatexCommand \index{attach}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Attach stimuli to nodes 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 break
 \begin_inset LatexCommand \index{break}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Set a break point
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 clear
 \begin_inset LatexCommand \index{clear}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Remove a break point
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 disassemble
 \begin_inset LatexCommand \index{disassemble}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Disassemble the current cpu
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 dump
 \begin_inset LatexCommand \index{dump}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Display either the RAM or EEPROM 
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 echo
 \begin_inset LatexCommand \index{echo}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 echo "text"
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 help
 \begin_inset LatexCommand \index{help}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Type help "command" for more help on a command
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 list
 \begin_inset LatexCommand \index{list}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Display source and list files
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 load
 \begin_inset LatexCommand \index{load}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Load either a hex or command file
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 node
 \begin_inset LatexCommand \index{node}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Add or display stimulus nodes
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 processor
 \begin_inset LatexCommand \index{processor}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Add/list processors
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 quit
 \begin_inset LatexCommand \index{quit}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Quit gpsim
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 run
 \begin_inset LatexCommand \index{run}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Execute the pic program
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 step
 \begin_inset LatexCommand \index{step}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Execute one or more instructions
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 stimulus
 \begin_inset LatexCommand \index{stimulus}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Create a stimulus
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 symbol
 \begin_inset LatexCommand \index{symbol}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Add/list symbols
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 trace
 \begin_inset LatexCommand \index{trace}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Dump the trace history
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 version
 \begin_inset LatexCommand \index{version}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Display gpsim's version
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 x
 \begin_inset LatexCommand \index{x}
 
 \end_inset 
 
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 examine and/or modify memory
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 The built in 'help' command provides addtional online information.
@@ -554,53 +795,13 @@ attach is used to define the connections between stimuli and nodes.
  examples:
 \layout LyX-Code
 
-gpsim> node 
-\protected_separator 
-n1
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- # Define a new node.
+gpsim> node  n1                # Define a new node.
 \layout LyX-Code
 
-gpsim> attach n1 porta4 portb0
-\protected_separator 
-# Connect two I/O pins to the node.
+gpsim> attach n1 porta4 portb0 # Connect two I/O pins to the node.
 \layout LyX-Code
 
-gpsim> node 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
-# Display the new "net list".
+gpsim> node                    # Display the new "net list".
 \layout Subsection*
 
 break
@@ -619,234 +820,46 @@ break [c | e | w | r | wv | rv | wdt [location] [value] ]
 
 \layout LyX-Code
 
-
-\protected_separator 
- options:
+  options:
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- c
-\protected_separator 
-
-\protected_separator 
- - cycle
+      c   - cycle
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- e
-\protected_separator 
-
-\protected_separator 
- - execution
+      e   - execution
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- w
-\protected_separator 
-
-\protected_separator 
- - write
+      w   - write
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- r
-\protected_separator 
-
-\protected_separator 
- - read
+      r   - read
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- wv
-\protected_separator 
- - write value
+      wv  - write value
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- rv
-\protected_separator 
- - read value
+      rv  - read value
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- wdt - wdt timeout
+      wdt - wdt timeout
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- - no argument, display the break points that are set.
+          - no argument, display the break points that are set.
 \layout LyX-Code
 
-
-\protected_separator 
- examples:
+  examples:
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- break e 0x20
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- # set an execution break point at address 0x20
+      break e 0x20     # set an execution break point at address 0x20
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- break wv 0x30 0
-\protected_separator 
- # break if zero is written to register 0x30
+      break wv 0x30 0  # break if zero is written to register 0x30
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- break c 1000000
-\protected_separator 
- # break on the one million'th cycle
+      break c 1000000  # break on the one million'th cycle
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- break
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- # display all of the break points
-\protected_separator 
- 
+      break            # display all of the break points  
 \layout Subsection*
 
 clear
@@ -871,8 +884,7 @@ when it was created.
 \layout LyX-Code
 
 display the currently set break points.
-\protected_separator 
- 
+  
 \layout Subsection*
 
 disassemble
@@ -886,30 +898,16 @@ disassemble
 disassemble [[start | length] [end]]
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- no arguments:
-\protected_separator 
- disassembles 10 instructions before and 5 after the pc.
+  no arguments:  disassembles 10 instructions before and 5 after the pc.
 \layout LyX-Code
 
-
-\protected_separator 
- one argument:
-\protected_separator 
- disassemble [length] instructions after the pc.
+  one argument:  disassemble [length] instructions after the pc.
 \layout LyX-Code
 
-
-\protected_separator 
- two arguments:
-\protected_separator 
-disassemble from [start] to [end].
+  two arguments: disassemble from [start] to [end].
 \layout Standard
 
 disasemble does not use symbols.
@@ -928,29 +926,19 @@ dump
 dump [r | e]
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- dump r or dump with no options will display all of the file
+  dump r or dump with no options will display all of the file
 \layout LyX-Code
 
-
-\protected_separator 
- registers and special function registers.
+  registers and special function registers.
 \layout LyX-Code
 
-
-\protected_separator 
- dump e will display the contents of the eeprom (if the pic
+  dump e will display the contents of the eeprom (if the pic
 \layout LyX-Code
 
-
-\protected_separator 
- being simulated contains any)
+  being simulated contains any)
 \layout Standard
 
 See the 'x' command for examining and modifying individual registers.
@@ -1048,109 +1036,33 @@ node
 node [new_node1 new_node2 ...]
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- If no new_node is specified then all of the nodes that have been
+     If no new_node is specified then all of the nodes that have been
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- defined are displayed.
+    defined are displayed.
  If a new_node is specified then it will be
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- added to the node list.
+    added to the node list.
  See the "attach" and "stimulus" commands
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- to see how stimuli are added to the nodes.
+    to see how stimuli are added to the nodes.
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- examples:
+    examples:
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- node
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-// display the node list
+    node           // display the node list
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- node n1 n2 n3
-\protected_separator 
-
-\protected_separator 
-// create and add 3 new nodes to the list
-\protected_separator 
-
+    node n1 n2 n3  // create and add 3 new nodes to the list 
 \layout Subsection*
 
 processor
@@ -1164,9 +1076,7 @@ processor
 processor [new_processor_type [new_processor_name]] | [list] | [dump] 
 \layout LyX-Code
 
-
-\protected_separator 
-If no new processor is specified, then the currently defined processor(s)
+ If no new processor is specified, then the currently defined processor(s)
  will be displayed.
  To see a list of the processors supported by gpsim, type 'processor list'.
  To define a new processor, specify the processor type and name.
@@ -1178,82 +1088,23 @@ examples:
 \layout LyX-Code
 
 processor // Display the processors you've already defined.
- processor list 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
-
-\protected_separator 
-// Display the list of processors supported.
+ processor list                   // Display the list of processors supported.
  processor pins 
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- // Display the processor package and pin state processor p16cr84 fred 
+          // Display the processor package and pin state processor p16cr84
+ fred 
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- // Create a new processor.
+          // Create a new processor.
  processor p16c74 wilma
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- // and another.
+          // and another.
  processor p16c65
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- // Create one with no name.
+          // Create one with no name.
 \layout Subsection*
 
 quit
@@ -1290,34 +1141,16 @@ step
 step [over | n]
 \layout LyX-Code
 
-
-\protected_separator 
-
-\layout LyX-Code
-
-
-\protected_separator 
  
-\protected_separator 
-
-\protected_separator 
- no arguments:
-\protected_separator 
- step one instruction.
 \layout LyX-Code
 
-
-\protected_separator 
-numeric argument:
-\protected_separator 
- step a number of instructions 
+     no arguments:  step one instruction.
 \layout LyX-Code
 
+ numeric argument:  step a number of instructions 
+\layout LyX-Code
 
-\protected_separator 
- "over" argument:
-\protected_separator 
- step over the next instruction
+  "over" argument:  step over the next instruction
 \layout Subsection*
 
 symbol
@@ -1339,283 +1172,98 @@ stimulus
 stimulus [[type] options]
 \layout LyX-Code
 
-
-\protected_separator 
- stimulus will create a signal that can be tied to an io port.
+  stimulus will create a signal that can be tied to an io port.
 \layout LyX-Code
 
-
-\protected_separator 
- Note that in most cases it is easier to create a stimulus
+  Note that in most cases it is easier to create a stimulus
 \layout LyX-Code
 
-
-\protected_separator 
- file then to type all this junk by hand.
+  file then to type all this junk by hand.
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- Supported stimuli:
+      Supported stimuli:
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-square_wave | sqw
-\protected_separator 
- [period p] [high_time h] [phase ph] [initial_state i]
+square_wave | sqw  [period p] [high_time h] [phase ph] [initial_state i]
 \layout LyX-Code
 
-
-\protected_separator 
- port port_name bit_pos end
+  port port_name bit_pos end
 \newline 
 
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- creates a square wave with a period of "p" cpu cycles.
+      creates a square wave with a period of "p" cpu cycles.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- If the high time is specified then that's the number of cycles
+      If the high time is specified then that's the number of cycles
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- the square wave will be high.
+      the square wave will be high.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- The phase is with respect to the cpu's cycle counter.
+      The phase is with respect to the cpu's cycle counter.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- The "port_name" and "bit_pos" describe where the stimulus
+      The "port_name" and "bit_pos" describe where the stimulus
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- will be attached.
+      will be attached.
 \newline 
 
 \layout LyX-Code
 
-asynchronous_stimulus | asy
-\protected_separator 
- [period p] [phase ph]
-\protected_separator 
- [initial_state i]
+asynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
- d0 [d1 d2 ...
+   d0 [d1 d2 ...
  dn] port port_name bit_pos end
 \newline 
 
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- creates an asynchronous square wave with a period of "p" cpu
+      creates an asynchronous square wave with a period of "p" cpu
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- cycles.
-\protected_separator 
- The phase is with respect to the cpu's cycle counter.
+      cycles.
+  The phase is with respect to the cpu's cycle counter.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- The "port_name" and "bit_pos" describe where the stimulus
+      The "port_name" and "bit_pos" describe where the stimulus
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- will be attached.
+      will be attached.
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- examples:
+  examples:
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- stimulus sqw period 200 high_time 20 phase 60 port portb 0 end
+      stimulus sqw period 200 high_time 20 phase 60 port portb 0 end
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- create a square wave stimulus that repeats every 200 cpu cycles,
+      create a square wave stimulus that repeats every 200 cpu cycles,
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- is high for 20 cpu cycles (and low for 200-20=180 cycles).
+      is high for 20 cpu cycles (and low for 200-20=180 cycles).
  The
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- first rising edge will occur at cycle 60, the second at 260,...
+      first rising edge will occur at cycle 60, the second at 260,...
  
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- 
-\protected_separator 
- Bit 0 of portb will receive the stimulus
+      Bit 0 of portb will receive the stimulus
 \layout Subsection*
 
 trace
@@ -1629,43 +1277,13 @@ trace
 trace [dump_amount]
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- trace will print out the most recent "dump_amount" traces.
+      trace will print out the most recent "dump_amount" traces.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- If no dump_amount is specified, then the entire trace buffer
+      If no dump_amount is specified, then the entire trace buffer
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- will be displayed.
+      will be displayed.
 \layout Subsection*
 
 version
@@ -1674,16 +1292,10 @@ version
 version
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
- Display gpsim's version.
+    Display gpsim's version.
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout Subsection*
 
 x
@@ -1697,50 +1309,22 @@ x
 x [file_register] [new_value]
 \layout LyX-Code
 
-
-\protected_separator 
- options:
+  options:
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- file_register - ram location to be examined or modified.
+    file_register - ram location to be examined or modified.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- new_value - the new value written to the file_register.
+    new_value - the new value written to the file_register.
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- if no options are specified, then the entire contents
+    if no options are specified, then the entire contents
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- of the file registers will be displayed (dump).
+    of the file registers will be displayed (dump).
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout Chapter
 
 Graphical User Interface
@@ -1756,9 +1340,71 @@ gpsim also provides a graphical user interface that simplifies some of the
 \layout Section
 
 Main window
+\layout Subsection
+
+Menus
+\layout List
+\labelwidthstring 00000000.00.0000
+
+File->OpenOpen .stc or .cod files.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+File->Quit Quit gpsim
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Windows->* Open/Close the windows.
+\layout Subsection
+
+Buttons
 \layout Standard
 
-Only settings/windows and help/about are usable.
+(These are also found as keyboard bindings in the source windows.)
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Step Step one instruction
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Over Step until pc is after next instruction
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Finish Finish subroutine
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Run Run continuously
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Stop Stop execution
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Reset Reset CPU
+\layout Subsection
+
+gui_update
+\layout Standard
+
+This variable sets the update interval of the gui in the unit of simulated
+ instructions.
+\layout Standard
+
+Set this variable to 1 in order to have the gui update after each instruction
+ during run mode.
+ This will slow the simulation down, but also makes it possible to see what
+ happens.
+\layout Standard
+
+Set this variable to something high in order to get the best simulation
+ speed.
+ However, if you do this then you should know that the gui will be slow
+ to respond.
+ You can break simulation with Ctrl-C in the command window.
 \layout Section
 
 Source Browsers
@@ -1803,14 +1449,36 @@ A right button click on the source pops up a menu with six items (the word
 
 
 \series bold 
-Menu
-\protected_separator 
+Menu\SpecialChar ~
 item Description
 \layout List
 \labelwidthstring 00.00.0000.0000
 
-Select
-\protected_separator 
+Find\SpecialChar ~
+PC This menu item will find the PC and changed page tab and scroll the
+ source view to the current PC.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Run\SpecialChar ~
+here This sets a breakpoint 'here'and starts running until a breakpoint
+ is hit.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Move\SpecialChar ~
+PC\SpecialChar ~
+here This simply changes PC to the address that line 'here'in source
+ has.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Breakpoint\SpecialChar ~
+here Set a breakpoint 'here'.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Select\SpecialChar ~
 symbol.
  This menu item is only available when some text is selected in the text
  widget.
@@ -1834,41 +1502,19 @@ If it's a constant, address, register or ioport, it is selected in the symbol
 \layout List
 \labelwidthstring 00.00.0000.0000
 
-Find
-\protected_separator 
-PC This menu item will find the PC and changed page tab and scroll the source
- view to the current PC.
-\layout List
-\labelwidthstring 00.00.0000.0000
-
-Run
-\protected_separator 
-here This sets a breakpoint 'here'and starts running until a breakpoint
- is hit.
-\layout List
-\labelwidthstring 00.00.0000.0000
-
-Move
-\protected_separator 
-PC
-\protected_separator 
-here This simply changes PC to the address that line 'here'in source has.
-\layout List
-\labelwidthstring 00.00.0000.0000
-
-Breakpoint
-\protected_separator 
-here Set a breakpoint 'here'.
-\layout List
-\labelwidthstring 00.00.0000.0000
-
-Find
-\protected_separator 
-text This opens up a searching dialog.
+Find\SpecialChar ~
+text This opens up a search dialog.
  Every time you hit the 'Find' button, the current notebook page is found
  and the source in that page is used.
- This dialog is similar to the one in netscape navigator, except for a combo
- widget containing previous search strings.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Settings A dialog with which you can change the fonts used.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Controls A submenu containing the simulation commands.
+ (these are also found as keyboard bindings, or in the main window.)
 \layout Standard
 
 These are the keyboard bindings:
@@ -1881,33 +1527,72 @@ Key command
 \layout List
 \labelwidthstring 00.00.0000
 
-s,S,F7 step
+s,S,F7 Step one instruction.
 \layout List
 \labelwidthstring 00.00.0000
 
-o,O,F8 step over
+o,O,F8 Step over instruction
 \layout List
 \labelwidthstring 00.00.0000
 
-r,R,F9 run.
- (currently the only way to stop running is to press Ctrl-C in the terminal
- window where the cli is)
+r,R,F9 Run continously.
 \layout List
 \labelwidthstring 00.00.0000
 
-q,Q quit
+Escape Stop simulation.
+\layout List
+\labelwidthstring 00.00.0000
+
+f,F Finish subroutine.
 \layout Subsection
 
 Opcode view - the .obj Browser
 \layout Standard
 
-This a gui version of the disassemble command.
+This window has two tabs.
+ One with each memory cell on one line and information about address, hexadecima
+l value and decoded instruction.
+ 
+\layout Subsubsection*
+
+The Assembly tab
 \layout Standard
 
 Double click on a line to toggle breakpoints.
 \layout Standard
 
 This window has the same keyboard commands as the source browser.
+\layout Standard
+
+You can right click to get a menu where you can change fonts.
+\layout Subsubsection*
+
+The Opcode tab.
+\layout Standard
+
+Here the program memory is ordered as columns of sixteen memory cells per
+ column and as many row as needed to contain all memory.
+ 
+\layout Standard
+
+The seventeenth column contains an ASCII representation of the program memory.
+ You can configure this column to use three different modes:
+\layout Itemize
+
+One byte per cell
+\layout Itemize
+
+Two bytes per cell, MSB first.
+\layout Itemize
+
+Two bytes per cell, LSB first.
+\layout Standard
+
+You can change fonts with the menu item 'Settings'.
+\layout Standard
+
+You can set breakpoints on one or more (drag the mouse to select more cells)
+ addresses with the right click menu.
 \layout Section
 
 Register views
@@ -1942,10 +1627,11 @@ Copy cells.
 Fill cells.
  Move mouse to lower right corner of the frame of the selected cell(s),
  and drag it.
+ The one cell's contents will be copied to the other cells.
 \layout Itemize
 
 Watch them.
- Select the "Add Watch" menu item
+ Select the "Add Watch" menu item.
 \layout Standard
 
 The cells have different backgroung colors depending on if they represent:
@@ -1974,6 +1660,9 @@ a register with one or more breakpoints:red
 gpsim dynamically updates the registers as the simulation proceeds.
  Registers that change contents between pauses in the simulation are highlighted
  with a blue foreground color.
+\layout Standard
+
+The menu also has a 'settings' item where you can change the font used.
 \layout Section
 
 Symbol view
@@ -2073,7 +1762,86 @@ Bx (bits of word)
 \layout Standard
 
 You can sort the list of watches by clicking on the column buttons.
- Clicking sorts list backwards.
+ Clicking twice sorts the list backwards.
+\layout Section
+
+Stack viewer
+\layout Standard
+
+This window displays current stack.
+ Selecting an entry makes the code windows display the return address.
+\layout Section
+
+Pins view
+\layout Standard
+
+This window shows the cpu and its pin states.
+ The arrows on the pins display the port direction.
+\layout Standard
+
+The colors and letters next to the pins display state high or low.
+ Double clicking on the letter toggles the value.
+ Double clicking on the arrow changes its direction.
+\layout Section
+
+Trace viewer
+\layout Standard
+
+This window shows the trace of instructions executed.
+ See 
+\begin_inset LatexCommand \ref{trace}
+
+\end_inset 
+
+.
+\layout Section
+
+Profile viewer
+\layout Standard
+
+This window show execution count for program memory addresses.
+ The profile window must be opened before starting simulation, because the
+ traceing is not enabled by default.
+\layout Subsubsection
+
+Instruction profile
+\layout Standard
+
+This shows the number of times each instruction are executed.
+\layout Subsubsection
+
+Instruction range profile
+\layout Standard
+
+Here you can group ranges of instruction into one entry.
+ 
+\layout Standard
+
+The right click menu contains:
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Remove\SpecialChar ~
+range Remove an entry.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Add\SpecialChar ~
+range...
+ Open a disalog from where you can add a range of instructions as an entry.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Add\SpecialChar ~
+all\SpecialChar ~
+labels Add all code labels as ranges.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Snapshot\SpecialChar ~
+to\SpecialChar ~
+plot Open a window containing a graph of the data.
+ From this window you can save or print it.
 \layout Chapter
 
 Controlling the Flow: Break Points
@@ -2153,6 +1921,11 @@ There are 4 clock cycles per instruction.
 \layout Chapter
 
 What has happen?: Trace
+\begin_inset LatexCommand \label{trace}
+
+\end_inset 
+
+
 \layout Standard
 
 Inspecting the current state of your program is sometimes insufficient to
@@ -2163,101 +1936,246 @@ Inspecting the current state of your program is sometimes insufficient to
  want it or not - to help you diagnose these otherwise difficult to analyze
  bugs.
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-13 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-1 8 1 1 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="13" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 What's traced
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 notes
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 program counter
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 adresses executed
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 instructions
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 opcode
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 register read
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 value and location
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 register write
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 value and location
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 cycle counter
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 current value
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 skipped instructions
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 addresses skipped
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 status register
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 during implicit modification
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 interrupts
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 break points
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 type
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 resets
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 type
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
 
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
 
-\newline 
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
 
 \layout Standard
 
@@ -2409,46 +2327,108 @@ gpsim models I/O pins as stimuli.
 
 Here's a list of the types of I/O pin stimuli that are supported:
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-5 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 0 0 0
-1 0 0 0
-1 0 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="5" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 I/O Pin Type
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Function
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 INPUT_ONLY
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Only accepts input (like MCLR)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 BI_DIRECTIONAL
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Can be a source or a load (most I/O pins)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="false" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 BI_DIRECTIONAL_PU
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 PU=Pullup resistor (PORTB)
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 OPEN_COLLECTOR
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Can only drive low (RA4 on c84)
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 There is no special pin type for analog I/O pins.
@@ -2473,53 +2453,126 @@ s' stimulus parameters are synchronized to the cpu or are absolute time
 .
  They are defined by the following parameters:
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-6 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-8 1 0 "" ""
-2 1 1 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 2 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="6" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 parameter
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 function
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 phase
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="left" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The # of cycles (after start) before the stimulus starts
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 period
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The # of cycles for one period
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 start
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The cycle the stimulus becomes active
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 initial_state
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The initial state of the stimulus
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 type
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Analog or Digital
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 One cycle of the periodic function can be written like so
@@ -2598,25 +2651,54 @@ The simplest example of a synchronous stimulus is a square wave.
  All of the parameters described above still apply.
  There's one additional parameter for the square wave:
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-2 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
-0 8 1 0 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="2" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 parameter
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 function
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 duty cycle
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="true" bottomline="false" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 'high time' for a square wave
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 The synchronous stimulus begins with the 'initial state' at cycle 0.
@@ -2626,8 +2708,7 @@ The synchronous stimulus begins with the 'initial state' at cycle 0.
 \layout Standard
 
 
-\begin_inset Formula 
-\[
+\begin_inset Formula \[
 f_{sq}=\frac{1}{period}*\frac{f_{osc}}{4}\]
 
 \end_inset 
@@ -2648,8 +2729,7 @@ Where
 \layout Standard
 
 
-\begin_inset Formula 
-\[
+\begin_inset Formula \[
 DutyCycle=\frac{hightime}{period}\]
 
 \end_inset 
@@ -2719,41 +2799,26 @@ Or if you prefer, the state of the square wave can be expressed:
 if(cpu cycle < start)
 \layout LyX-Code
 
-
-\protected_separator 
- state = initial_state;
+  state = initial_state;
 \layout LyX-Code
 
 else {
 \layout LyX-Code
 
-
-\protected_separator 
-cycle_in_period = (cpu cycle - start) % period;
+ cycle_in_period = (cpu cycle - start) % period;
 \layout LyX-Code
 
-
-\protected_separator 
-if( (cycle_in_period > phase) && (cycle_in_period < (phase+high_time)) )
+ if( (cycle_in_period > phase) && (cycle_in_period < (phase+high_time))
+ )
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
-state = 1;
+   state = 1;
 \layout LyX-Code
 
-
-\protected_separator 
-else
+ else
 \layout LyX-Code
 
-
-\protected_separator 
- 
-\protected_separator 
-state = 0;
+   state = 0;
 \layout LyX-Code
 
 }
@@ -2794,53 +2859,126 @@ Asynchronous stimuli are analog or digital stimuli that can change states
  at any given instant (limited to the resolution of the cycle counter).
  They can be defined to be repetitive too.
 \layout Standard
-\added_space_top 0.3cm \added_space_bottom 0.3cm \align center \LyXTable
-multicol5
-6 2 0 0 -1 -1 -1 -1
-1 1 0 0
-1 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-0 1 0 0
-8 1 0 "" ""
-8 1 1 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
-0 8 0 1 0 0 0 "" ""
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="2" rows="6" columns="2">
+<features rotate="false" islongtable="false" endhead="0" endfirsthead="0" endfoot="0" endlastfoot="0">
+<column alignment="center" valignment="top" leftline="true" rightline="false" width="" special="">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="" special="">
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
 
 parameter
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 function
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 start
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The # of cycles before the stimulus starts
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 cycles[]
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 An array of cycle #'s
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 data[]
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 Stimulus state for a cycle
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 period
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The # of cycles for one period
-\newline 
+\end_inset 
+</cell>
+</row>
+<row topline="false" bottomline="true" newpage="false">
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="false" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 initial state
-\newline 
+\end_inset 
+</cell>
+<cell multicolumn="0" alignment="center" valignment="top" topline="false" bottomline="true" leftline="true" rightline="true" rotate="false" usebox="none" width="" special="">
+\begin_inset Text
+
+\layout Standard
+
 The initial state of data[0]
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
 \layout Standard
 
 When the stimulus is first initialized, it will be driven to the 'initial
@@ -3093,29 +3231,13 @@ All file registers are accessed by the virtual functions 'put' and 'get'.
  It also allows the following code sequence to be easily implemented:
 \layout LyX-Code
 
-movlw 
-\protected_separator 
- trisa 
-\protected_separator 
- ;Get the address of tris 
+movlw   trisa   ;Get the address of tris 
 \layout LyX-Code
 
-movwf
-\protected_separator 
-
-\protected_separator 
- fsr 
+movwf   fsr 
 \layout LyX-Code
 
-movf
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- indf,w
-\protected_separator 
- ;Read trisa indirectly
+movf    indf,w  ;Read trisa indirectly
 \layout Section
 
 Example of an instruction
@@ -3142,230 +3264,132 @@ void MOVF::execute(void)
 {
 \layout LyX-Code
 
-
-\protected_separator 
- unsigned int source_value;
+  unsigned int source_value;
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- // All instructions are 'traced' (discussed below).
+  // All instructions are 'traced' (discussed below).
  It's sufficient 
 \layout LyX-Code
 
-
-\protected_separator 
- //to only store the opcode.
+  //to only store the opcode.
  However, even this may be unnecessary since 
 \layout LyX-Code
 
-
-\protected_separator 
- //the progam counter is also traced.
+  //the progam counter is also traced.
  Expect this to disappear in the 
 \layout LyX-Code
 
-
-\protected_separator 
- //future...
+  //future...
  
 \layout LyX-Code
 
-
-\protected_separator 
- trace.instruction(opcode);
+  trace.instruction(opcode);
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- // 'source' is a pointer to a 'file_register' object.
+  // 'source' is a pointer to a 'file_register' object.
  It is initialized 
 \layout LyX-Code
 
-
-\protected_separator 
- //by reading the 'registers' array.
+  //by reading the 'registers' array.
  Note that the index depends on the 
 \layout LyX-Code
 
-
-\protected_separator 
- //'rp' bits (actually just one bit) in the
-\protected_separator 
-status register.
+  //'rp' bits (actually just one bit) in the status register.
  Time is
 \layout LyX-Code
 
-
-\protected_separator 
- // saved by caching rp as opposed to decoding the status register.
+  // saved by caching rp as opposed to decoding the status register.
 \layout LyX-Code
 
-
-\protected_separator 
- source = cpu->registers[cpu->rp | opcode&REG_IN_INSTRUCTION_MASK];
+  source = cpu->registers[cpu->rp | opcode&REG_IN_INSTRUCTION_MASK];
 \layout LyX-Code
 
-
-\protected_separator 
-
-\layout LyX-Code
-
-
-\protected_separator 
- // We have no idea which register we are trying to access and how it 
-\layout LyX-Code
-
-
-\protected_separator 
- //should be
-\protected_separator 
-accessed or if there's a breakpoint set on it.
- No problem,
-\layout LyX-Code
-
-
-\protected_separator 
- //the virtual function 'get' will resolve
-\protected_separator 
-all of those details
-\layout LyX-Code
-
-
-\protected_separator 
- // and 'do the right thing'.
-\layout LyX-Code
-
-
-\protected_separator 
- source_value = source->get();
-\layout LyX-Code
-
-
-\protected_separator 
-
-\layout LyX-Code
-
-
-\protected_separator 
- // If the destination is W, then the constructor has already initialized
  
 \layout LyX-Code
 
+  // We have no idea which register we are trying to access and how it 
+\layout LyX-Code
 
-\protected_separator 
- //'destination'.
+  //should be accessed or if there's a breakpoint set on it.
+ No problem,
+\layout LyX-Code
+
+  //the virtual function 'get' will resolve all of those details
+\layout LyX-Code
+
+  // and 'do the right thing'.
+\layout LyX-Code
+
+  source_value = source->get();
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // If the destination is W, then the constructor has already initialized
+ 
+\layout LyX-Code
+
+  //'destination'.
  Otherwise the destination and source are the same.
 \layout LyX-Code
 
-
-\protected_separator 
- if(opcode&DESTINATION_MASK)
+  if(opcode&DESTINATION_MASK)
 \layout LyX-Code
 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- destination = source;
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
-
-\protected_separator 
- // Result goes to source
+    destination = source;      // Result goes to source
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- // Write the source value to the destination.
+  // Write the source value to the destination.
  Again, we have no idea 
 \layout LyX-Code
 
-
-\protected_separator 
- // where the
-\protected_separator 
-destination may be or
+  // where the destination may be or
 \layout LyX-Code
 
-
-\protected_separator 
- // or how the data should be written there.
+  // or how the data should be written there.
 \layout LyX-Code
 
-
-\protected_separator 
- destination->put(source_value);
+  destination->put(source_value);
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- // The movf instruction will set Z (zero) bit in the status register
+  // The movf instruction will set Z (zero) bit in the status register
 \layout LyX-Code
 
-
-\protected_separator 
- //if the source value was zero.
+  //if the source value was zero.
 \layout LyX-Code
 
-
-\protected_separator 
- cpu->status.put_Z(0==source_value);
+  cpu->status.put_Z(0==source_value);
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
-
-\protected_separator 
- // Finally, advance the pc by one.
+  // Finally, advance the pc by one.
 \layout LyX-Code
 
-
-\protected_separator 
- cpu->pc.increment();
+  cpu->pc.increment();
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout LyX-Code
 
 }
 \layout LyX-Code
 
-
-\protected_separator 
-
+ 
 \layout Section
 
 Trace
@@ -3504,7 +3528,7 @@ You should have received a copy of the GNU General Public License along
 \layout Standard
 \start_of_appendix 
 
-\begin_inset LatexCommand \printindex
+\begin_inset LatexCommand \printindex{}
 
 \end_inset 
 
