@@ -24,12 +24,36 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <gpsim/modules.h>
+#include <gpsim/packages.h>
+#include <gpsim/stimuli.h>
 
-class Binary_Indicator : public Module
+
+// Create a class derived from the IO_input class that
+// will allow us to intercept when the I/O input is being
+// driven. (This isn't done for PIC I/O pins because the
+// logic for handling I/O pin changes resides in the IOPORT
+// class.)
+
+class Binary_Input : public IO_input
 {
 public:
 
+  virtual void put_state( int new_state);
+
+};
+
+class Binary_Indicator : public Module, public Package
+{
+public:
+
+  IOPORT  *port;
+
   Binary_Indicator(void);
+
+  // Inheritances from the Package class
+  virtual void create_iopin_map(void);
+
+  static Module *construct(void);
   void test(void) ;
 };
 

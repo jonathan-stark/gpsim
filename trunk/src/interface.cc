@@ -746,7 +746,7 @@ void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned 
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
-    return 0;
+    return;
 
   return pic->pma.put_opcode(address,opcode);
 

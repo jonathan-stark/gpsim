@@ -137,19 +137,8 @@ void free_char_list(char_list *);
 
 %%
 /* Grammar rules */
-cmd: acmd
-      {
-         //cout << "got something\n";
-      }
-    | acmd IGNORED
-      {
-        //cout << "got something followed by something to ignore\n";
-	
-	YYABORT;
-      }
-      ;
 
-acmd: ignored
+cmd: ignored
      | attach_cmd
      | break_cmd
      | bus_cmd
@@ -193,7 +182,8 @@ ignored: IGNORED
                 cout << "  parser is aborting current input stream\n";
 
 	      YYABORT;
-            }
+            } else
+		YYACCEPT;
           }
           ;
 
@@ -201,7 +191,9 @@ spanning_lines:  SPANNING_LINES
           {
             if(verbose)
               cout << "parser is spanning lines\n";
+
             parser_spanning_lines = 1;
+	    YYACCEPT;
           }
           ;
 
@@ -217,20 +209,20 @@ attach_cmd: ATTACH string_list
           ;
 
 break_cmd: BREAK
-          { c_break.list(); }
+          { c_break.list(); YYABORT;}
           | BREAK bit_flag 
           { 
 	    cmd_options *opt = $2;
-	    c_break.set_break(opt->value); 
+	    c_break.set_break(opt->value); YYABORT;
 	  }
           | BREAK bit_flag _register
-          { c_break.set_break($2->value,$3); }
+          { c_break.set_break($2->value,$3); YYABORT;}
           | BREAK bit_flag _register NUMBER
-          { c_break.set_break($2->value,$3,$4); }
+          { c_break.set_break($2->value,$3,$4); YYABORT;}
           | BREAK bit_flag STRING
-          { c_break.set_break($2->value,$3); }
+          { c_break.set_break($2->value,$3); YYABORT;}
           | BREAK bit_flag STRING NUMBER
-          { c_break.set_break($2->value,$3,$4); }
+          { c_break.set_break($2->value,$3,$4); YYABORT;}
           ;
 
 bus_cmd: BUS
@@ -247,39 +239,39 @@ bus_cmd: BUS
           ;
 
 clear_cmd: CLEAR NUMBER
-          { clear.clear($2); }
+          { clear.clear($2); YYABORT;}
           ;
 
 disassemble_cmd: DISASSEMBLE
-          { disassemble.disassemble(-10, 5)}
+          { disassemble.disassemble(-10, 5); YYABORT; }
           |  DISASSEMBLE NUMBER
-          { disassemble.disassemble(0, $2)}
+          { disassemble.disassemble(0, $2); YYABORT;}
           |  DISASSEMBLE NUMBER NUMBER
-          { disassemble.disassemble(-$2,$3)}
+          { disassemble.disassemble(-$2,$3); YYABORT;}
           ;
 
 dump_cmd: DUMP
-          { dump.dump(2);}
+          { dump.dump(2); YYABORT;}
           | DUMP bit_flag
-          { dump.dump($2->value);}
+          { dump.dump($2->value); YYABORT;}
           ;
 
 
 help_cmd: HELP
-          { help.help(); }
+          { help.help(); YYABORT;}
           | HELP STRING
-          { help.help($2); free($2); }
+          { help.help($2); free($2); YYABORT;}
           ;
 
 list_cmd: LIST
-          { c_list.list();}
+          { c_list.list(); YYABORT;}
           | LIST indirect
-          { printf("got a list with an indirect reference %d\n",$2);}
+          { printf("got a list with an indirect reference %d\n",$2);YYABORT;}
           | LIST bit_flag
           { 
 	    cmd_options *opt = $2;
 	    //cout << "  --- list with bit flag " << opt->name << '\n';
-	    c_list.list($2);
+	    c_list.list($2); YYABORT;
 	  }
            ;
 
@@ -297,7 +289,7 @@ load_cmd: LOAD bit_flag STRING
 
 node_cmd: NODE
           { 
-	    c_node.list_nodes();
+	    c_node.list_nodes(); YYABORT;
 	  }
           | NODE string_list
           {
@@ -343,41 +335,42 @@ quit_cmd: QUIT
           { 
             printf("got a quit\n");
             quit_parse = 1;
+	    YYABORT;
           }
           ;
 
 reset_cmd: RESET
-          { reset.reset(); }
+          { reset.reset(); YYABORT; }
           ;
 
 run_cmd: RUN
-          { c_run.run(); }
+          { c_run.run(); YYABORT;}
           ;
 
 set_cmd:      SET
           { 
-            c_set.set();
+            c_set.set(); YYABORT;
           }
             | SET bit_flag
           {
-            c_set.set($2->value,1);
+            c_set.set($2->value,1); YYABORT;
           }
             | SET bit_flag NUMBER
           {
-            c_set.set($2->value,$3);
+            c_set.set($2->value,$3);YYABORT;
           }
             | SET numeric_option
           {
-	    c_set.set($2);
+	    c_set.set($2); YYABORT;
 	  }
           ;
 
 step_cmd: STEP
-          { step.step(1); }
+          { step.step(1); YYABORT;}
           | STEP NUMBER
-          { step.step($2); }
+          { step.step($2); YYABORT;}
           | STEP bit_flag
-          { step.over(); }
+          { step.over(); YYABORT;}
           ;
 
 stimulus_cmd: STIMULUS
@@ -385,6 +378,7 @@ stimulus_cmd: STIMULUS
             if(verbose)
               cout << "parser sees stimulus\n";
 	    c_stimulus.stimulus();
+	    YYABORT;
 	  }
           | STIMULUS NUMBER
           { 
@@ -392,6 +386,35 @@ stimulus_cmd: STIMULUS
               cout << "parser sees stimulus with number: " << $2 << '\n';
 
 	    c_stimulus.stimulus($2);
+	  }
+          | STIMULUS stimulus_opt SPANNING_LINES
+          { 
+            if(verbose)
+              cout << " stimulus cmd is spanning a line\n";
+
+	    //YYACCEPT;
+	  }
+          | STIMULUS  SPANNING_LINES
+          { 
+            if(verbose)
+              cout << " stimulus cmd is spanning a line\n";
+
+	    //YYACCEPT;
+	  }
+          | STIMULUS stimulus_opt IGNORED
+          { 
+            if(verbose)
+              cout << " stimulus cmd is ignoring stuff\n";
+
+	    //YYACCEPT;
+	  }
+          | STIMULUS  IGNORED
+          { 
+            if(verbose)
+              cout << " stimulus cmd is ignoring stuff\n";
+
+	    c_stimulus.stimulus();
+	    YYABORT;
 	  }
           | STIMULUS FLOAT_NUMBER
           { 
@@ -403,9 +426,11 @@ stimulus_cmd: STIMULUS
 
           | STIMULUS stimulus_opt END_OF_COMMAND
           { 
-	    //cout << " end of stimulus command\n";
+            if(verbose)
+	      cout << " end of stimulus command\n";
 	    c_stimulus.end();
             parser_spanning_lines = 0;
+	    YYACCEPT;
 	  }
           ;
 
@@ -419,7 +444,14 @@ stimulus_opt:
           {
             if(verbose)
               cout << "parser is ignoring spanned line in stimulus\n";
-            //YYABORT;
+            parser_spanning_lines=1;
+            //YYACCEPT;
+          }
+          | stimulus_opt IGNORED
+          {
+            if(verbose)
+              cout << "parser is ignoring garbage in stimulus\n";
+            //YYACCEPT;
           }
           | stimulus_opt bit_flag
           {
@@ -461,32 +493,32 @@ stimulus_opt:
 
 symbol_cmd: SYMBOL
           {
-	    c_symbol.dump_all();
+	    c_symbol.dump_all(); YYABORT;
 	  }
           | SYMBOL STRING
           {
-	    c_symbol.dump_one($2);
+	    c_symbol.dump_one($2); YYABORT;
 	  }
           | SYMBOL STRING STRING NUMBER
           {
-	    c_symbol.add_one($2,$3,$4);
+	    c_symbol.add_one($2,$3,$4); YYABORT;
 	  }
           ;
 
 
 trace_cmd: TRACE
           {
-	    c_trace.trace();
+	    c_trace.trace(); YYABORT;
 	  }
           | TRACE NUMBER
           {
-	    c_trace.trace($2);
+	    c_trace.trace($2); YYABORT;
 	  }
           ;
 
 version_cmd: gpsim_VERSION
           {
-	    version.version();
+	    version.version(); YYABORT;
 	  }
           ;
 
@@ -496,19 +528,19 @@ x_cmd: X
 	  }
           | X NUMBER
           {
-	    c_x.x($2);
+	    c_x.x($2); YYABORT;
 	  }
           | X _register NUMBER
           {
-	    c_x.x($2,$3);
+	    c_x.x($2,$3); YYABORT;
 	  }
           | X STRING
           {
-	    c_x.x($2);
+	    c_x.x($2); YYABORT;
 	  }
           | X STRING NUMBER
           {
-	    c_x.x($2,$3);
+	    c_x.x($2,$3); YYABORT;
 	  }
           ;
 

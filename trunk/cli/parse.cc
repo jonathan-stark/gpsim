@@ -137,11 +137,11 @@ typedef union {
 
 
 
-#define	YYFINAL		113
+#define	YYFINAL		114
 #define	YYFLAG		-32768
 #define	YYNTBASE	36
 
-#define YYTRANSLATE(x) ((unsigned)(x) <= 289 ? yytranslate[x] : 70)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 289 ? yytranslate[x] : 69)
 
 static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -177,62 +177,65 @@ static const char yytranslate[] = {     0,
 
 #if YYDEBUG != 0
 static const short yyprhs[] = {     0,
-     0,     2,     5,     7,     9,    11,    13,    15,    17,    19,
-    21,    23,    25,    27,    29,    31,    33,    35,    37,    39,
-    41,    43,    45,    47,    49,    51,    53,    55,    57,    59,
-    62,    64,    67,    71,    76,    80,    85,    87,    90,    93,
-    95,    98,   102,   104,   107,   109,   112,   114,   117,   120,
-   124,   126,   129,   131,   134,   137,   139,   142,   145,   149,
-   151,   153,   155,   157,   160,   164,   167,   169,   172,   175,
-   177,   180,   183,   187,   188,   191,   194,   197,   200,   203,
-   206,   209,   211,   214,   219,   221,   224,   226,   228,   231,
-   235,   238,   242,   245,   247,   249,   252,   255,   258,   260
+     0,     2,     4,     6,     8,    10,    12,    14,    16,    18,
+    20,    22,    24,    26,    28,    30,    32,    34,    36,    38,
+    40,    42,    44,    46,    48,    50,    52,    54,    57,    59,
+    62,    66,    71,    75,    80,    82,    85,    88,    90,    93,
+    97,    99,   102,   104,   107,   109,   112,   115,   119,   121,
+   124,   126,   129,   132,   134,   137,   140,   144,   146,   148,
+   150,   152,   155,   159,   162,   164,   167,   170,   172,   175,
+   179,   182,   186,   189,   192,   196,   197,   200,   203,   206,
+   209,   212,   215,   218,   221,   223,   226,   231,   233,   236,
+   238,   240,   243,   247,   250,   254,   257,   259,   261,   264,
+   267,   270,   272
 };
 
 static const short yyrhs[] = {    37,
-     0,    37,    26,     0,    38,     0,    40,     0,    41,     0,
-    42,     0,    43,     0,    44,     0,    45,     0,    46,     0,
-    47,     0,    48,     0,    49,     0,    50,     0,    51,     0,
-    52,     0,    53,     0,    54,     0,    55,     0,    56,     0,
-    57,     0,    59,     0,    60,     0,    61,     0,    62,     0,
-    39,     0,    30,     0,    26,     0,    27,     0,     3,    69,
-     0,     4,     0,     4,    65,     0,     4,    65,    64,     0,
-     4,    65,    64,    34,     0,     4,    65,    28,     0,     4,
-    65,    28,    34,     0,     5,     0,     5,    69,     0,     6,
-    34,     0,     7,     0,     7,    34,     0,     7,    34,    34,
-     0,     8,     0,     8,    65,     0,     9,     0,     9,    28,
-     0,    11,     0,    11,    63,     0,    11,    65,     0,    10,
-    65,    28,     0,    12,     0,    12,    69,     0,    13,     0,
-    13,    65,     0,    13,    68,     0,    14,     0,    14,    65,
-     0,    14,    28,     0,    14,    28,    28,     0,    15,     0,
-    16,     0,    17,     0,    18,     0,    18,    65,     0,    18,
-    65,    34,     0,    18,    66,     0,    19,     0,    19,    34,
-     0,    19,    65,     0,    20,     0,    20,    34,     0,    20,
-    35,     0,    20,    58,    25,     0,     0,    58,    27,     0,
-    58,    65,     0,    58,    66,     0,    58,    67,     0,    58,
-    68,     0,    58,    34,     0,    58,    35,     0,    21,     0,
-    21,    28,     0,    21,    28,    28,    34,     0,    22,     0,
-    22,    34,     0,    23,     0,    24,     0,    24,    34,     0,
-    24,    64,    34,     0,    24,    28,     0,    24,    28,    34,
-     0,    29,    64,     0,    34,     0,    31,     0,    32,    34,
-     0,    32,    35,     0,    33,    28,     0,    28,     0,    69,
-    28,     0
+     0,    39,     0,    40,     0,    41,     0,    42,     0,    43,
+     0,    44,     0,    45,     0,    46,     0,    47,     0,    48,
+     0,    49,     0,    50,     0,    51,     0,    52,     0,    53,
+     0,    54,     0,    55,     0,    56,     0,    58,     0,    59,
+     0,    60,     0,    61,     0,    38,     0,    30,     0,    26,
+     0,    27,     0,     3,    68,     0,     4,     0,     4,    64,
+     0,     4,    64,    63,     0,     4,    64,    63,    34,     0,
+     4,    64,    28,     0,     4,    64,    28,    34,     0,     5,
+     0,     5,    68,     0,     6,    34,     0,     7,     0,     7,
+    34,     0,     7,    34,    34,     0,     8,     0,     8,    64,
+     0,     9,     0,     9,    28,     0,    11,     0,    11,    62,
+     0,    11,    64,     0,    10,    64,    28,     0,    12,     0,
+    12,    68,     0,    13,     0,    13,    64,     0,    13,    67,
+     0,    14,     0,    14,    64,     0,    14,    28,     0,    14,
+    28,    28,     0,    15,     0,    16,     0,    17,     0,    18,
+     0,    18,    64,     0,    18,    64,    34,     0,    18,    65,
+     0,    19,     0,    19,    34,     0,    19,    64,     0,    20,
+     0,    20,    34,     0,    20,    57,    27,     0,    20,    27,
+     0,    20,    57,    26,     0,    20,    26,     0,    20,    35,
+     0,    20,    57,    25,     0,     0,    57,    27,     0,    57,
+    26,     0,    57,    64,     0,    57,    65,     0,    57,    66,
+     0,    57,    67,     0,    57,    34,     0,    57,    35,     0,
+    21,     0,    21,    28,     0,    21,    28,    28,    34,     0,
+    22,     0,    22,    34,     0,    23,     0,    24,     0,    24,
+    34,     0,    24,    63,    34,     0,    24,    28,     0,    24,
+    28,    34,     0,    29,    63,     0,    34,     0,    31,     0,
+    32,    34,     0,    32,    35,     0,    33,    28,     0,    28,
+     0,    68,    28,     0
 };
 
 #endif
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   140,   144,   152,   153,   154,   155,   156,   157,   158,   159,
-   160,   161,   162,   163,   164,   165,   166,   167,   168,   169,
-   170,   171,   172,   173,   174,   175,   176,   185,   200,   208,
-   219,   221,   226,   228,   230,   232,   236,   240,   249,   253,
-   255,   257,   261,   263,   268,   270,   274,   276,   278,   286,
-   298,   302,   311,   316,   318,   328,   330,   332,   334,   342,
-   349,   353,   357,   361,   365,   369,   375,   377,   379,   383,
-   389,   396,   404,   412,   418,   424,   430,   436,   442,   448,
-   454,   462,   466,   470,   477,   481,   487,   493,   497,   501,
-   505,   509,   520,   528,   535,   542,   553,   564,   575,   584
+   141,   142,   143,   144,   145,   146,   147,   148,   149,   150,
+   151,   152,   153,   154,   155,   156,   157,   158,   159,   160,
+   161,   162,   163,   164,   165,   174,   190,   200,   211,   213,
+   218,   220,   222,   224,   228,   232,   241,   245,   247,   249,
+   253,   255,   260,   262,   266,   268,   270,   278,   290,   294,
+   303,   308,   310,   320,   322,   324,   326,   334,   342,   346,
+   350,   354,   358,   362,   368,   370,   372,   376,   383,   390,
+   397,   404,   411,   419,   427,   437,   443,   450,   456,   462,
+   468,   474,   480,   486,   494,   498,   502,   509,   513,   519,
+   525,   529,   533,   537,   541,   552,   560,   567,   574,   585,
+   596,   607,   616
 };
 #endif
 
@@ -243,8 +246,8 @@ static const char * const yytname[] = {   "$","error","$undefined.","ATTACH",
 "BREAK","BUS","CLEAR","DISASSEMBLE","DUMP","HELP","LOAD","LIST","NODE","MODULE",
 "PROCESSOR","QUIT","RESET","RUN","SET","STEP","STIMULUS","SYMBOL","TRACE","gpsim_VERSION",
 "X","END_OF_COMMAND","IGNORED","SPANNING_LINES","STRING","INDIRECT","END_OF_INPUT",
-"BIT_FLAG","NUMERIC_OPTION","STRING_OPTION","NUMBER","FLOAT_NUMBER","cmd","acmd",
-"ignored","spanning_lines","attach_cmd","break_cmd","bus_cmd","clear_cmd","disassemble_cmd",
+"BIT_FLAG","NUMERIC_OPTION","STRING_OPTION","NUMBER","FLOAT_NUMBER","cmd","ignored",
+"spanning_lines","attach_cmd","break_cmd","bus_cmd","clear_cmd","disassemble_cmd",
 "dump_cmd","help_cmd","list_cmd","load_cmd","node_cmd","module_cmd","processor_cmd",
 "quit_cmd","reset_cmd","run_cmd","set_cmd","step_cmd","stimulus_cmd","stimulus_opt",
 "symbol_cmd","trace_cmd","version_cmd","x_cmd","indirect","_register","bit_flag",
@@ -253,101 +256,105 @@ static const char * const yytname[] = {   "$","error","$undefined.","ATTACH",
 #endif
 
 static const short yyr1[] = {     0,
-    36,    36,    37,    37,    37,    37,    37,    37,    37,    37,
-    37,    37,    37,    37,    37,    37,    37,    37,    37,    37,
-    37,    37,    37,    37,    37,    37,    37,    38,    39,    40,
-    41,    41,    41,    41,    41,    41,    42,    42,    43,    44,
-    44,    44,    45,    45,    46,    46,    47,    47,    47,    48,
-    49,    49,    50,    50,    50,    51,    51,    51,    51,    52,
-    53,    54,    55,    55,    55,    55,    56,    56,    56,    57,
-    57,    57,    57,    58,    58,    58,    58,    58,    58,    58,
-    58,    59,    59,    59,    60,    60,    61,    62,    62,    62,
-    62,    62,    63,    64,    65,    66,    67,    68,    69,    69
+    36,    36,    36,    36,    36,    36,    36,    36,    36,    36,
+    36,    36,    36,    36,    36,    36,    36,    36,    36,    36,
+    36,    36,    36,    36,    36,    37,    38,    39,    40,    40,
+    40,    40,    40,    40,    41,    41,    42,    43,    43,    43,
+    44,    44,    45,    45,    46,    46,    46,    47,    48,    48,
+    49,    49,    49,    50,    50,    50,    50,    51,    52,    53,
+    54,    54,    54,    54,    55,    55,    55,    56,    56,    56,
+    56,    56,    56,    56,    56,    57,    57,    57,    57,    57,
+    57,    57,    57,    57,    58,    58,    58,    59,    59,    60,
+    61,    61,    61,    61,    61,    62,    63,    64,    65,    66,
+    67,    68,    68
 };
 
 static const short yyr2[] = {     0,
-     1,     2,     1,     1,     1,     1,     1,     1,     1,     1,
      1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
-     1,     1,     1,     1,     1,     1,     1,     1,     1,     2,
-     1,     2,     3,     4,     3,     4,     1,     2,     2,     1,
-     2,     3,     1,     2,     1,     2,     1,     2,     2,     3,
-     1,     2,     1,     2,     2,     1,     2,     2,     3,     1,
-     1,     1,     1,     2,     3,     2,     1,     2,     2,     1,
-     2,     2,     3,     0,     2,     2,     2,     2,     2,     2,
-     2,     1,     2,     4,     1,     2,     1,     1,     2,     3,
-     2,     3,     2,     1,     1,     2,     2,     2,     1,     2
+     1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
+     1,     1,     1,     1,     1,     1,     1,     2,     1,     2,
+     3,     4,     3,     4,     1,     2,     2,     1,     2,     3,
+     1,     2,     1,     2,     1,     2,     2,     3,     1,     2,
+     1,     2,     2,     1,     2,     2,     3,     1,     1,     1,
+     1,     2,     3,     2,     1,     2,     2,     1,     2,     3,
+     2,     3,     2,     2,     3,     0,     2,     2,     2,     2,
+     2,     2,     2,     2,     1,     2,     4,     1,     2,     1,
+     1,     2,     3,     2,     3,     2,     1,     1,     2,     2,
+     2,     1,     2
 };
 
 static const short yydefact[] = {     0,
-     0,    31,    37,     0,    40,    43,    45,     0,    47,    51,
-    53,    56,    60,    61,    62,    63,    67,    74,    82,    85,
-    87,    88,    28,    29,    27,     1,     3,    26,     4,     5,
-     6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-    16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
-    99,    30,    95,    32,    38,    39,    41,    44,    46,     0,
-     0,    48,    49,    52,     0,    54,    55,    58,    57,     0,
-    64,    66,    68,    69,    71,    72,     0,    83,    86,    91,
-    89,     0,     2,   100,    35,    94,    33,    42,    50,    93,
-    98,    59,    96,    65,    73,    75,     0,    80,    81,    76,
-    77,    78,    79,     0,    92,    90,    36,    34,    97,    84,
-     0,     0,     0
+     0,    29,    35,     0,    38,    41,    43,     0,    45,    49,
+    51,    54,    58,    59,    60,    61,    65,    76,    85,    88,
+    90,    91,    26,    27,    25,     1,    24,     2,     3,     4,
+     5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+    15,    16,    17,    18,    19,    20,    21,    22,    23,   102,
+    28,    98,    30,    36,    37,    39,    42,    44,     0,     0,
+    46,    47,    50,     0,    52,    53,    56,    55,     0,    62,
+    64,    66,    67,    73,    71,    69,    74,     0,    86,    89,
+    94,    92,     0,   103,    33,    97,    31,    40,    48,    96,
+   101,    57,    99,    63,    75,    78,    77,     0,    83,    84,
+    79,    80,    81,    82,     0,    95,    93,    34,    32,   100,
+    87,     0,     0,     0
 };
 
-static const short yydefgoto[] = {   111,
+static const short yydefgoto[] = {   112,
     26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
     36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
-    46,    77,    47,    48,    49,    50,    62,    82,    54,    72,
-   102,    67,    52
+    78,    46,    47,    48,    49,    61,    83,    53,    71,   103,
+    66,    51
 };
 
 static const short yypact[] = {    34,
-   -24,   -23,   -24,   -12,    -4,   -23,     5,   -23,     3,   -24,
-    32,    -7,-32768,-32768,-32768,    35,    -3,     1,    31,    28,
--32768,    -8,-32768,-32768,-32768,    42,-32768,-32768,-32768,-32768,
+   -24,    -9,   -24,    -3,    25,    -9,    40,    -9,     3,   -24,
+    32,    -7,-32768,-32768,-32768,    35,    -1,     1,    41,    28,
+-32768,    -8,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
--32768,    41,-32768,    -5,    41,-32768,    36,-32768,-32768,    46,
-    43,-32768,-32768,    41,    47,-32768,-32768,    48,-32768,    44,
-    45,-32768,-32768,-32768,-32768,-32768,   -18,    52,-32768,    49,
-    50,    51,-32768,-32768,    53,-32768,    54,-32768,-32768,-32768,
--32768,-32768,-32768,-32768,-32768,-32768,    38,-32768,-32768,-32768,
--32768,-32768,-32768,    55,-32768,-32768,-32768,-32768,-32768,-32768,
-    81,    82,-32768
+    45,-32768,    -5,    45,-32768,    42,-32768,-32768,    46,    43,
+-32768,-32768,    45,    47,-32768,-32768,    50,-32768,    48,    49,
+-32768,-32768,-32768,-32768,-32768,-32768,-32768,   -18,    51,-32768,
+    52,    53,    54,-32768,    55,-32768,    56,-32768,-32768,-32768,
+-32768,-32768,-32768,-32768,-32768,    80,    81,    36,-32768,-32768,
+-32768,-32768,-32768,-32768,    57,-32768,-32768,-32768,-32768,-32768,
+-32768,    84,    85,-32768
 };
 
 static const short yypgoto[] = {-32768,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
 -32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,-32768,
--32768,-32768,-32768,-32768,-32768,-32768,-32768,   -42,    -6,     9,
--32768,    13,    15
+-32768,-32768,-32768,-32768,-32768,-32768,   -41,    -6,    14,-32768,
+    16,    15
 };
 
 
-#define	YYLAST		90
+#define	YYLAST		94
 
 
-static const short yytable[] = {    58,
-   -70,    60,    63,    51,    66,    69,    95,    53,    96,    71,
-    74,    87,    53,    97,    65,    98,    99,    55,    90,    80,
-    68,    56,    85,    53,    64,    81,   -70,    53,    86,    57,
-    73,    61,    59,    53,    75,    76,     1,     2,     3,     4,
+static const short yytable[] = {    57,
+   -68,    59,    62,    50,    65,    68,    95,    96,    97,    70,
+    73,    87,    52,    98,    64,    99,   100,    54,    90,    81,
+    67,    52,    85,    52,    63,    82,    74,    75,    86,    52,
+    55,    60,    72,    52,    76,    77,     1,     2,     3,     4,
      5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-    15,    16,    17,    18,    19,    20,    21,    22,    78,    23,
-    24,    79,    53,    25,    65,    53,    70,    83,    84,    88,
-   100,    93,   109,    89,    91,    92,    86,    93,    94,   104,
-   112,   113,   105,   -94,   106,   101,   107,   108,   110,   103
+    15,    16,    17,    18,    19,    20,    21,    22,    56,    23,
+    24,    80,    52,    25,    64,    52,    69,    58,    79,    93,
+   110,   101,    84,    89,    91,    88,    86,    92,   105,   -72,
+   -70,    93,    94,   113,   114,   106,   -97,   107,   108,   109,
+   111,   102,     0,   104
 };
 
 static const short yycheck[] = {     6,
-     0,     8,     9,    28,    11,    12,    25,    31,    27,    16,
-    17,    54,    31,    32,    33,    34,    35,     3,    61,    28,
-    28,    34,    28,    31,    10,    34,    26,    31,    34,    34,
-    34,    29,    28,    31,    34,    35,     3,     4,     5,     6,
+     0,     8,     9,    28,    11,    12,    25,    26,    27,    16,
+    17,    53,    31,    32,    33,    34,    35,     3,    60,    28,
+    28,    31,    28,    31,    10,    34,    26,    27,    34,    31,
+    34,    29,    34,    31,    34,    35,     3,     4,     5,     6,
      7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
-    17,    18,    19,    20,    21,    22,    23,    24,    28,    26,
-    27,    34,    31,    30,    33,    31,    32,    26,    28,    34,
-    77,    34,    35,    28,    28,    28,    34,    34,    34,    28,
-     0,     0,    34,    34,    34,    77,    34,    34,    34,    77
+    17,    18,    19,    20,    21,    22,    23,    24,    34,    26,
+    27,    34,    31,    30,    33,    31,    32,    28,    28,    34,
+    35,    78,    28,    28,    28,    34,    34,    28,    28,     0,
+     0,    34,    34,     0,     0,    34,    34,    34,    34,    34,
+    34,    78,    -1,    78
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/lib/bison.simple"
@@ -892,22 +899,8 @@ yyreduce:
 
   switch (yyn) {
 
-case 1:
-#line 141 "parse.yy"
-{
-         //cout << "got something\n";
-      ;
-    break;}
-case 2:
-#line 145 "parse.yy"
-{
-        //cout << "got something followed by something to ignore\n";
-	
-	YYABORT;
-      ;
-    break;}
-case 27:
-#line 177 "parse.yy"
+case 25:
+#line 166 "parse.yy"
 {
        if(verbose&2)
          cout << "got an END_OF_INPUT\n";
@@ -915,8 +908,8 @@ case 27:
        YYABORT;
      ;
     break;}
-case 28:
-#line 186 "parse.yy"
+case 26:
+#line 175 "parse.yy"
 {
             //if(parser_warnings || (verbose & 2 ))
             if(verbose & 2)
@@ -927,19 +920,22 @@ case 28:
                 cout << "  parser is aborting current input stream\n";
 
 	      YYABORT;
-            }
+            } else
+		YYACCEPT;
           ;
     break;}
-case 29:
-#line 201 "parse.yy"
+case 27:
+#line 191 "parse.yy"
 {
             if(verbose)
               cout << "parser is spanning lines\n";
+
             parser_spanning_lines = 1;
+	    YYACCEPT;
           ;
     break;}
-case 30:
-#line 209 "parse.yy"
+case 28:
+#line 201 "parse.yy"
 {
             if(verbose&2)
 	      cout << "attach command with a string list\n";
@@ -949,41 +945,41 @@ case 30:
 
 	  ;
     break;}
-case 31:
-#line 220 "parse.yy"
-{ c_break.list(); ;
+case 29:
+#line 212 "parse.yy"
+{ c_break.list(); YYABORT;;
     break;}
-case 32:
-#line 222 "parse.yy"
+case 30:
+#line 214 "parse.yy"
 { 
 	    cmd_options *opt = yyvsp[0].co;
-	    c_break.set_break(opt->value); 
+	    c_break.set_break(opt->value); YYABORT;
 	  ;
     break;}
+case 31:
+#line 219 "parse.yy"
+{ c_break.set_break(yyvsp[-1].co->value,yyvsp[0].li); YYABORT;;
+    break;}
+case 32:
+#line 221 "parse.yy"
+{ c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].li,yyvsp[0].li); YYABORT;;
+    break;}
 case 33:
-#line 227 "parse.yy"
-{ c_break.set_break(yyvsp[-1].co->value,yyvsp[0].li); ;
+#line 223 "parse.yy"
+{ c_break.set_break(yyvsp[-1].co->value,yyvsp[0].s); YYABORT;;
     break;}
 case 34:
-#line 229 "parse.yy"
-{ c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].li,yyvsp[0].li); ;
+#line 225 "parse.yy"
+{ c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].s,yyvsp[0].li); YYABORT;;
     break;}
 case 35:
-#line 231 "parse.yy"
-{ c_break.set_break(yyvsp[-1].co->value,yyvsp[0].s); ;
-    break;}
-case 36:
-#line 233 "parse.yy"
-{ c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].s,yyvsp[0].li); ;
-    break;}
-case 37:
-#line 237 "parse.yy"
+#line 229 "parse.yy"
 { 
 	    c_bus.list_busses();
 	  ;
     break;}
-case 38:
-#line 241 "parse.yy"
+case 36:
+#line 233 "parse.yy"
 {
 	    //cout << "bus command with a string list\n";
 	    c_bus.add_busses(str_list_head);
@@ -991,56 +987,56 @@ case 38:
             YYABORT;
           ;
     break;}
+case 37:
+#line 242 "parse.yy"
+{ clear.clear(yyvsp[0].li); YYABORT;;
+    break;}
+case 38:
+#line 246 "parse.yy"
+{ disassemble.disassemble(-10, 5); YYABORT; ;
+    break;}
 case 39:
-#line 250 "parse.yy"
-{ clear.clear(yyvsp[0].li); ;
+#line 248 "parse.yy"
+{ disassemble.disassemble(0, yyvsp[0].li); YYABORT;;
     break;}
 case 40:
-#line 254 "parse.yy"
-{ disassemble.disassemble(-10, 5);
+#line 250 "parse.yy"
+{ disassemble.disassemble(-yyvsp[-1].li,yyvsp[0].li); YYABORT;;
     break;}
 case 41:
-#line 256 "parse.yy"
-{ disassemble.disassemble(0, yyvsp[0].li);
+#line 254 "parse.yy"
+{ dump.dump(2); YYABORT;;
     break;}
 case 42:
-#line 258 "parse.yy"
-{ disassemble.disassemble(-yyvsp[-1].li,yyvsp[0].li);
+#line 256 "parse.yy"
+{ dump.dump(yyvsp[0].co->value); YYABORT;;
     break;}
 case 43:
-#line 262 "parse.yy"
-{ dump.dump(2);;
+#line 261 "parse.yy"
+{ help.help(); YYABORT;;
     break;}
 case 44:
-#line 264 "parse.yy"
-{ dump.dump(yyvsp[0].co->value);;
+#line 263 "parse.yy"
+{ help.help(yyvsp[0].s); free(yyvsp[0].s); YYABORT;;
     break;}
 case 45:
-#line 269 "parse.yy"
-{ help.help(); ;
+#line 267 "parse.yy"
+{ c_list.list(); YYABORT;;
     break;}
 case 46:
-#line 271 "parse.yy"
-{ help.help(yyvsp[0].s); free(yyvsp[0].s); ;
+#line 269 "parse.yy"
+{ printf("got a list with an indirect reference %d\n",yyvsp[0].li);YYABORT;;
     break;}
 case 47:
-#line 275 "parse.yy"
-{ c_list.list();;
-    break;}
-case 48:
-#line 277 "parse.yy"
-{ printf("got a list with an indirect reference %d\n",yyvsp[0].li);;
-    break;}
-case 49:
-#line 279 "parse.yy"
+#line 271 "parse.yy"
 { 
 	    cmd_options *opt = yyvsp[0].co;
 	    //cout << "  --- list with bit flag " << opt->name << '\n';
-	    c_list.list(yyvsp[0].co);
+	    c_list.list(yyvsp[0].co); YYABORT;
 	  ;
     break;}
-case 50:
-#line 287 "parse.yy"
+case 48:
+#line 279 "parse.yy"
 {
 	    c_load.load(yyvsp[-1].co->value,yyvsp[0].s);
 	    //cout << "load completed\n\n";
@@ -1051,14 +1047,14 @@ case 50:
 	      }
 	  ;
     break;}
-case 51:
-#line 299 "parse.yy"
+case 49:
+#line 291 "parse.yy"
 { 
-	    c_node.list_nodes();
+	    c_node.list_nodes(); YYABORT;
 	  ;
     break;}
-case 52:
-#line 303 "parse.yy"
+case 50:
+#line 295 "parse.yy"
 {
 	    //cout << "node command with a string list\n";
 	    c_node.add_nodes(str_list_head);
@@ -1066,105 +1062,107 @@ case 52:
             YYABORT;
           ;
     break;}
-case 53:
-#line 312 "parse.yy"
+case 51:
+#line 304 "parse.yy"
 { 
             cout << "module command\n";
             c_module.module(); YYABORT;
           ;
     break;}
-case 54:
-#line 317 "parse.yy"
+case 52:
+#line 309 "parse.yy"
 { c_module.module(yyvsp[0].co->value); YYABORT;;
     break;}
-case 55:
-#line 319 "parse.yy"
+case 53:
+#line 311 "parse.yy"
 { 
             c_module.module(yyvsp[0].cos);
             delete yyvsp[0].cos;
             YYABORT;
           ;
     break;}
-case 56:
-#line 329 "parse.yy"
+case 54:
+#line 321 "parse.yy"
 { c_processor.processor(); YYABORT;;
     break;}
-case 57:
-#line 331 "parse.yy"
+case 55:
+#line 323 "parse.yy"
 { c_processor.processor(yyvsp[0].co->value); YYABORT;;
     break;}
-case 58:
-#line 333 "parse.yy"
+case 56:
+#line 325 "parse.yy"
 { c_processor.processor(yyvsp[0].s,NULL); YYABORT; ;
     break;}
-case 59:
-#line 335 "parse.yy"
+case 57:
+#line 327 "parse.yy"
 { 
             c_processor.processor(yyvsp[-1].s,yyvsp[0].s);
             YYABORT;
           ;
     break;}
-case 60:
-#line 343 "parse.yy"
+case 58:
+#line 335 "parse.yy"
 { 
             printf("got a quit\n");
             quit_parse = 1;
+	    YYABORT;
           ;
     break;}
+case 59:
+#line 343 "parse.yy"
+{ reset.reset(); YYABORT; ;
+    break;}
+case 60:
+#line 347 "parse.yy"
+{ c_run.run(); YYABORT;;
+    break;}
 case 61:
-#line 350 "parse.yy"
-{ reset.reset(); ;
+#line 351 "parse.yy"
+{ 
+            c_set.set(); YYABORT;
+          ;
     break;}
 case 62:
-#line 354 "parse.yy"
-{ c_run.run(); ;
+#line 355 "parse.yy"
+{
+            c_set.set(yyvsp[0].co->value,1); YYABORT;
+          ;
     break;}
 case 63:
-#line 358 "parse.yy"
-{ 
-            c_set.set();
+#line 359 "parse.yy"
+{
+            c_set.set(yyvsp[-1].co->value,yyvsp[0].li);YYABORT;
           ;
     break;}
 case 64:
-#line 362 "parse.yy"
+#line 363 "parse.yy"
 {
-            c_set.set(yyvsp[0].co->value,1);
-          ;
-    break;}
-case 65:
-#line 366 "parse.yy"
-{
-            c_set.set(yyvsp[-1].co->value,yyvsp[0].li);
-          ;
-    break;}
-case 66:
-#line 370 "parse.yy"
-{
-	    c_set.set(yyvsp[0].con);
+	    c_set.set(yyvsp[0].con); YYABORT;
 	  ;
     break;}
+case 65:
+#line 369 "parse.yy"
+{ step.step(1); YYABORT;;
+    break;}
+case 66:
+#line 371 "parse.yy"
+{ step.step(yyvsp[0].li); YYABORT;;
+    break;}
 case 67:
-#line 376 "parse.yy"
-{ step.step(1); ;
+#line 373 "parse.yy"
+{ step.over(); YYABORT;;
     break;}
 case 68:
-#line 378 "parse.yy"
-{ step.step(yyvsp[0].li); ;
-    break;}
-case 69:
-#line 380 "parse.yy"
-{ step.over(); ;
-    break;}
-case 70:
-#line 384 "parse.yy"
+#line 377 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus\n";
 	    c_stimulus.stimulus();
+	    YYABORT;
 	  ;
     break;}
-case 71:
-#line 390 "parse.yy"
+case 69:
+#line 384 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with number: " << yyvsp[0].li << '\n';
@@ -1172,8 +1170,45 @@ case 71:
 	    c_stimulus.stimulus(yyvsp[0].li);
 	  ;
     break;}
+case 70:
+#line 391 "parse.yy"
+{ 
+            if(verbose)
+              cout << " stimulus cmd is spanning a line\n";
+
+	    //YYACCEPT;
+	  ;
+    break;}
+case 71:
+#line 398 "parse.yy"
+{ 
+            if(verbose)
+              cout << " stimulus cmd is spanning a line\n";
+
+	    //YYACCEPT;
+	  ;
+    break;}
 case 72:
-#line 397 "parse.yy"
+#line 405 "parse.yy"
+{ 
+            if(verbose)
+              cout << " stimulus cmd is ignoring stuff\n";
+
+	    //YYACCEPT;
+	  ;
+    break;}
+case 73:
+#line 412 "parse.yy"
+{ 
+            if(verbose)
+              cout << " stimulus cmd is ignoring stuff\n";
+
+	    c_stimulus.stimulus();
+	    YYABORT;
+	  ;
+    break;}
+case 74:
+#line 420 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with float number: " << yyvsp[0].f << '\n';
@@ -1181,168 +1216,179 @@ case 72:
 	    c_stimulus.stimulus(yyvsp[0].f);
 	  ;
     break;}
-case 73:
-#line 405 "parse.yy"
+case 75:
+#line 428 "parse.yy"
 { 
-	    //cout << " end of stimulus command\n";
+            if(verbose)
+	      cout << " end of stimulus command\n";
 	    c_stimulus.end();
             parser_spanning_lines = 0;
+	    YYACCEPT;
 	  ;
     break;}
-case 74:
-#line 413 "parse.yy"
+case 76:
+#line 438 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus(in _opt)\n"; // << $1->value << '\n';
 	    //c_stimulus.stimulus($1->value);
 	  ;
     break;}
-case 75:
-#line 419 "parse.yy"
+case 77:
+#line 444 "parse.yy"
 {
             if(verbose)
               cout << "parser is ignoring spanned line in stimulus\n";
-            //YYABORT;
+            parser_spanning_lines=1;
+            //YYACCEPT;
           ;
     break;}
-case 76:
-#line 425 "parse.yy"
+case 78:
+#line 451 "parse.yy"
+{
+            if(verbose)
+              cout << "parser is ignoring garbage in stimulus\n";
+            //YYACCEPT;
+          ;
+    break;}
+case 79:
+#line 457 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with bit flag: " << yyvsp[0].co->value << '\n';
 	    c_stimulus.stimulus(yyvsp[0].co->value);
 	  ;
     break;}
-case 77:
-#line 431 "parse.yy"
+case 80:
+#line 463 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
 	    c_stimulus.stimulus(yyvsp[0].con);
 	  ;
     break;}
-case 78:
-#line 437 "parse.yy"
+case 81:
+#line 469 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with numeric float option\n";
 	    c_stimulus.stimulus(yyvsp[0].cof);
 	  ;
     break;}
-case 79:
-#line 443 "parse.yy"
+case 82:
+#line 475 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with string option\n";
 	    c_stimulus.stimulus(yyvsp[0].cos);
 	  ;
     break;}
-case 80:
-#line 449 "parse.yy"
+case 83:
+#line 481 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with number\n";
 	    c_stimulus.data_point(yyvsp[0].li);
 	  ;
     break;}
-case 81:
-#line 455 "parse.yy"
+case 84:
+#line 487 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with floating point number\n";
 	    c_stimulus.data_point(yyvsp[0].f);
 	  ;
     break;}
-case 82:
-#line 463 "parse.yy"
-{
-	    c_symbol.dump_all();
-	  ;
-    break;}
-case 83:
-#line 467 "parse.yy"
-{
-	    c_symbol.dump_one(yyvsp[0].s);
-	  ;
-    break;}
-case 84:
-#line 471 "parse.yy"
-{
-	    c_symbol.add_one(yyvsp[-2].s,yyvsp[-1].s,yyvsp[0].li);
-	  ;
-    break;}
 case 85:
-#line 478 "parse.yy"
+#line 495 "parse.yy"
 {
-	    c_trace.trace();
+	    c_symbol.dump_all(); YYABORT;
 	  ;
     break;}
 case 86:
-#line 482 "parse.yy"
+#line 499 "parse.yy"
 {
-	    c_trace.trace(yyvsp[0].li);
+	    c_symbol.dump_one(yyvsp[0].s); YYABORT;
 	  ;
     break;}
 case 87:
-#line 488 "parse.yy"
+#line 503 "parse.yy"
 {
-	    version.version();
+	    c_symbol.add_one(yyvsp[-2].s,yyvsp[-1].s,yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 88:
-#line 494 "parse.yy"
+#line 510 "parse.yy"
+{
+	    c_trace.trace(); YYABORT;
+	  ;
+    break;}
+case 89:
+#line 514 "parse.yy"
+{
+	    c_trace.trace(yyvsp[0].li); YYABORT;
+	  ;
+    break;}
+case 90:
+#line 520 "parse.yy"
+{
+	    version.version(); YYABORT;
+	  ;
+    break;}
+case 91:
+#line 526 "parse.yy"
 {
 	    c_x.x(); YYABORT;
 	  ;
     break;}
-case 89:
-#line 498 "parse.yy"
-{
-	    c_x.x(yyvsp[0].li);
-	  ;
-    break;}
-case 90:
-#line 502 "parse.yy"
-{
-	    c_x.x(yyvsp[-1].li,yyvsp[0].li);
-	  ;
-    break;}
-case 91:
-#line 506 "parse.yy"
-{
-	    c_x.x(yyvsp[0].s);
-	  ;
-    break;}
 case 92:
-#line 510 "parse.yy"
+#line 530 "parse.yy"
 {
-	    c_x.x(yyvsp[-1].s,yyvsp[0].li);
+	    c_x.x(yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 93:
-#line 521 "parse.yy"
+#line 534 "parse.yy"
+{
+	    c_x.x(yyvsp[-1].li,yyvsp[0].li); YYABORT;
+	  ;
+    break;}
+case 94:
+#line 538 "parse.yy"
+{
+	    c_x.x(yyvsp[0].s); YYABORT;
+	  ;
+    break;}
+case 95:
+#line 542 "parse.yy"
+{
+	    c_x.x(yyvsp[-1].s,yyvsp[0].li); YYABORT;
+	  ;
+    break;}
+case 96:
+#line 553 "parse.yy"
 {
 	  if(verbose)
             printf(" indirect register *%d",yyvsp[0].li);
 	  yyval.li = yyvsp[0].li;
         ;
     break;}
-case 94:
-#line 529 "parse.yy"
+case 97:
+#line 561 "parse.yy"
 {
 	if(verbose)
          printf("  --- register %d\n", yyvsp[0].li);
        ;
     break;}
-case 95:
-#line 536 "parse.yy"
+case 98:
+#line 568 "parse.yy"
 {
 	 yyval.co = yyvsp[0].co;
 	 //cout << "  --- bit_flag " << $$->name << '\n';
        ;
     break;}
-case 96:
-#line 543 "parse.yy"
+case 99:
+#line 575 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.con = new cmd_options_num;
@@ -1352,8 +1398,8 @@ case 96:
 	    cout << "name " << yyval.con->co->name << " value " << yyval.con->n << " got a numeric option \n"; 
 	;
     break;}
-case 97:
-#line 554 "parse.yy"
+case 100:
+#line 586 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.cof = new cmd_options_float;
@@ -1363,8 +1409,8 @@ case 97:
 	    cout << "name " << yyval.cof->co->name << " value " << yyval.cof->f << " got a numeric option \n"; 
 	;
     break;}
-case 98:
-#line 565 "parse.yy"
+case 101:
+#line 597 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.cos = new cmd_options_str;
@@ -1374,8 +1420,8 @@ case 98:
 	    cout << " name " << yyval.cos->co->name << " value " << yyval.cos->str << " got a string option \n"; 
 	;
     break;}
-case 99:
-#line 576 "parse.yy"
+case 102:
+#line 608 "parse.yy"
 {
 	  str_list = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list_head = str_list;
@@ -1385,8 +1431,8 @@ case 99:
 	    cout << "got a string. added " << str_list->name << '\n';
 	;
     break;}
-case 100:
-#line 585 "parse.yy"
+case 103:
+#line 617 "parse.yy"
 {
 	  str_list->next = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list = str_list->next;
@@ -1618,7 +1664,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 596 "parse.yy"
+#line 628 "parse.yy"
 
 
        // parsing is over 

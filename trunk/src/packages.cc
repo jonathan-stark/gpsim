@@ -20,7 +20,10 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include <stdio.h>
-#include "packages.h"
+
+#include "pic-processor.h"
+#include "stimuli.h"
+#include "pic-packages.h"
 
 
 Package::Package(void)

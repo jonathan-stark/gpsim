@@ -1,3 +1,4 @@
+set verbose 3
 # gpsim
 
 # Startup command file for stim_test.hex

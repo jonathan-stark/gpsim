@@ -355,8 +355,6 @@ void P16C71::create_sfr_map(void)
     adcon1.configuration_bits[i] = adcon1.configuration_bits[i&3];
   }
 
-  pic_processor::create_symbols();
-
 }
 
 
@@ -388,6 +386,7 @@ pic_processor * P16C71::construct(void)
 
   p->create();
   p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
   p->name_str = "16c71";
 
   return p;

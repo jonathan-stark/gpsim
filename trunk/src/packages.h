@@ -20,19 +20,17 @@ Boston, MA 02111-1307, USA.  */
 
 
 /*
-  packages.h
+  pic-packages.h
 
 Here's where all of the pic packages are defined
 
  */
 
-
 #ifndef __PACKAGES_H__
 #define __PACKAGES_H__
 
-class IOPIN;  // in stimuli.h
-#include "pic-processor.h"
-#include "stimuli.h"
+#include "gpsim_classes.h"
+
 
 enum PACKAGE_TYPE
 {
@@ -44,6 +42,7 @@ enum PACKAGE_TYPE
   DIP_40PIN
 
 };
+
 
 enum PACKAGE_PIN_ERRORS
 {
@@ -82,63 +81,6 @@ public:
   virtual int get_pin_state(unsigned int pin_number);
   int pin_existance(unsigned int pin_number);
   IOPIN *get_pin(unsigned int pin_number);
-};
-
-
-class _18pins  : public Package
-{
-public:
-
-  PORTA        *porta;
-  IOPORT_TRIS  trisa;
-
-  PORTB        *portb;
-  IOPORT_TRIS  trisb;
-
-  virtual void create_iopin_map(void){return;};
-
-};
-
-
-class _28pins  : public _18pins
-{
-public:
-
-  PORTC        *portc;
-  IOPORT_TRIS  trisc;
-
-  /*
-  IOPORT       portd;
-  IOPORT_TRIS  trisd;
-  */
-
-  virtual void create_iopin_map(void); //{return;};
-
-};
-
-class _40pins  : public _28pins
-{
-public:
-
-
-  IOPORT       *portd;
-  IOPORT_TRIS  trisd;
-  IOPORT       *porte;
-  IOPORT_TRIS  trise;
-
-
-  virtual void create_iopin_map(void){return;};
-
-};
-
-class _14bit_18pins  : public _18pins
-{
-public:
-
-  INTCON       intcon_reg;
-
-  virtual void create_iopin_map(void);
-
 };
 
 #endif // __PACKAGES_H__

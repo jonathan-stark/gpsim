@@ -781,8 +781,15 @@ int IO_input::get_voltage(guint64 current_time)
 
   if(snode)
     return drive;
-  else
+  else if(iop)
     return ( (iop->value & (1<<iobit)) ? drive : -drive);
+
+  // this input is not attached to a node or an I/O port
+  // Perhaps it's an I/O pin on a module... It doesn't really
+  // make a whole lot of sense to returning anything, so just
+  // return the value of 'drive'.
+
+  return drive;
 
 }
 
@@ -794,14 +801,17 @@ void IO_input::put_state( int new_digital_state)
 
     //cout << " driving I/O line high \n";
     state = l2h_threshold + 1;
-    iop->setbit(iobit,1);
+
+    if(iop)
+      iop->setbit(iobit,1);
 
   } 
   else if((new_digital_state == 0) && (state > l2h_threshold)) {
 
     //cout << " driving I/O line low \n";
     state = h2l_threshold - 1;
-    iop->setbit(iobit,0);
+    if(iop)
+      iop->setbit(iobit,0);
 
   }
   //else cout << " no change in IO_input state\n";

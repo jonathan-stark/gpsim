@@ -22,6 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __REGISTERS_H__
 #define __REGISTERS_H__
 
+class pic_processor;
+class symbol;
+class XrefObject;
+
 //---------------------------------------------------------
 // Base class for a file register.
 class file_register
@@ -69,16 +73,16 @@ public:
 
   file_register(void);
   ~file_register(void);
-  virtual void put(unsigned int new_value)
-  {
+  virtual void put(unsigned int new_value);
+    /*{
     value = new_value;
     trace.register_write(address,value);
-  }
-  virtual unsigned int get(void)
-    {
+    }*/
+  virtual unsigned int get(void);
+    /*  {
       trace.register_read(address,value);
       return(value);
-    }
+      }*/
 
   /* same as put(), but some extra stuff like interfacing
    * to the gui is done. (It's more efficient than burdening

@@ -689,6 +689,44 @@ unsigned int Breakpoint_Register::clear(unsigned int bp_num)
 }
 
 
+//-------------------------------------------------------------------
+//
+unsigned int Break_register_read::get(void)
+{
+  bp.halt();
+  return(replaced->get());
+  //  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | (replaced->address)  );
+}
+
+void Break_register_write::put(unsigned int new_value)
+{
+  bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
+  replaced->put(new_value);
+  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
+}
+
+unsigned int Break_register_read_value::get(void)
+{
+  unsigned int v = replaced->get();
+  if(v == break_value)
+    {
+      bp.halt();
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ_VALUE>>8) | (break_value <<8) | (replaced->address)  );
+    }
+  return v;
+}
+
+void Break_register_write_value::put(unsigned int new_value)
+{
+  if(new_value == break_value)
+    {
+      bp.halt();
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE_VALUE>>8) | (break_value <<8) | (replaced->address)  );
+    }
+  replaced->put(new_value);
+}
+
+
 //====================================================================================
 //
 // catch_control_c

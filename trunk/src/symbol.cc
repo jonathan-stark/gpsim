@@ -72,7 +72,10 @@ symbol_type symbol_types[] =
   {SYMBOL_LINE_NUMBER,"line_number"},
   {SYMBOL_CONSTANT,"constant"},
   {SYMBOL_REGISTER,"register"},
-  {SYMBOL_ADDRESS,"address"}
+  {SYMBOL_ADDRESS,"address"},
+  {SYMBOL_PROCESSOR,"processor"},
+  {SYMBOL_MODULE,"module"},
+
 };
 
 int num_of_symbol_types = (sizeof(symbol_types))/ (sizeof(symbol_type));
@@ -165,6 +168,17 @@ void Symbol_Table::add_line_number(pic_processor *cpu, int address)
   lns->cpu      = cpu;
   lns->address  = address;
   st.push_back(lns);
+
+}
+
+void Symbol_Table::add_module(Module * m)
+{
+  cout << "add module\n";
+
+  module_symbol *ms = new module_symbol();
+
+  ms->cpu = m;
+  st.push_back(ms);
 
 }
 

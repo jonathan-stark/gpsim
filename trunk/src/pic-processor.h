@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PROCESSORS_H__
 #define __PROCESSORS_H__
 #include "gpsim_def.h"
+#include "gpsim_classes.h"
 #include "modules.h"
 
 #ifdef HAVE_GUI
@@ -118,13 +119,6 @@ extern guint64 gui_update_rate; // The rate (in simulation cycles) at which the 
  * First, forward-declare a few class references
  */
 
-class instruction;
-class file_register;
-class pic_processor;
-class IOPORT;
-class symbol;
-class XrefObject;
-
 #include "trace.h"
 #include "pic-registers.h"
 enum IOPIN_TYPES
@@ -134,31 +128,13 @@ enum IOPIN_TYPES
   BI_DIRECTIONAL_PU,   // same as bi_directional, but with pullup resistor. e.g. portb
   OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
 };
-/*
-class IOPIN_map
-{
-public:
 
-  int pin_number;
-  IOPORT *iop;
-  int iob;
-  IOPIN_TYPES type;
-
-};
-*/
 #include "pic-instructions.h"
 #include "12bit-instructions.h"
 #include "14bit-registers.h"
 #include "14bit-instructions.h"
 #include "interface.h"
-#include "packages.h"
-//struct file_context {
-//  char *name;           /* file name */
-// FILE *file_ptr;
-//  int *line_seek;       /* an array of offsets into the file that point to
-//			 *  the start of the source lines. */
-//  int max_line;
-//};
+#include "pic-packages.h"
 
 class processor_types
 {

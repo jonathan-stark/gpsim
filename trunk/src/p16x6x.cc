@@ -71,8 +71,6 @@ void P16C61::create_sfr_map(void)
 
   intcon = &intcon_reg;
 
-  pic_processor::create_symbols();
-
 }
 
 
@@ -101,10 +99,12 @@ pic_processor * P16C61::construct(void)
 
   P16C61 *p = new P16C61;
 
-  cout << " c61 construct\n";
+  if(verbose)
+    cout << " c61 construct\n";
 
   p->create();
   p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
   p->name_str = "16c61";
 
   return p;
@@ -356,8 +356,8 @@ void P16C64::create_symbols(void)
 void  P16C64::create(void)
 {
 
-
-  cout << " c64 create \n";
+  if(verbose)
+    cout << " c64 create \n";
 
   create_iopin_map();
   
@@ -476,8 +476,8 @@ P16C65::P16C65(void)
 
 void P16C65::create(void)
 {
-
-  cout << " c65 create \n";
+  if(verbose)
+    cout << " c65 create \n";
 
   P16C64::create();
 
@@ -494,7 +494,8 @@ pic_processor * P16C65::construct(void)
 
   P16C65 *p = new P16C65;
 
-  cout << " c65 construct\n";
+  if(verbose)
+    cout << " c65 construct\n";
 
   p->create();
   p->create_invalid_registers ();

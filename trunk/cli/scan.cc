@@ -286,8 +286,8 @@ static void yy_fatal_error YY_PROTO(( yyconst char msg[] ));
 #define YY_END_OF_BUFFER 14
 static yyconst short int yy_accept[48] =
     {   0,
-        0,    0,   14,   12,    2,    3,   12,    9,   11,    5,
-        5,   11,   11,   11,    0,    1,    0,   11,   11,    7,
+        0,    0,   14,   12,    2,    3,   12,    9,   11,   11,
+        5,    5,   11,   11,    0,    1,    0,   11,   11,    7,
         7,    5,    0,    0,   11,   11,    4,    1,   11,    7,
         0,    7,    6,   11,   10,    0,    7,   11,   10,    7,
         0,   11,    8,    0,   11,    8,    0
@@ -299,16 +299,16 @@ static yyconst int yy_ec[256] =
         1,    1,    4,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    2,    1,    1,    5,    1,    1,    1,    1,    1,
-        1,    6,    7,    1,    7,    8,    1,    9,   10,   10,
-       10,   10,   10,   10,   10,   10,   10,    1,    1,    1,
-        1,    1,    1,    1,   11,   11,   11,   12,   12,   11,
-       13,   13,   13,   13,   13,   13,   13,   13,   13,   13,
-       13,   13,   13,   13,   13,   13,   13,   14,   13,   13,
-        1,    1,    1,    1,   13,    1,   11,   11,   15,   16,
+        1,    6,    7,    1,    7,    8,    9,   10,   11,   11,
+       11,   11,   11,   11,   11,   11,   11,    1,    1,    1,
+        1,    1,    1,    1,   12,   12,   12,   13,   13,   12,
+        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
+        9,    9,    9,    9,    9,    9,    9,   14,    9,    9,
+        1,    1,    1,    1,    9,    1,   12,   12,   15,   16,
 
-       17,   11,   13,   18,   13,   13,   13,   13,   13,   19,
-       20,   13,   21,   13,   13,   13,   13,   13,   13,   14,
-       13,   13,    1,    1,    1,    1,    1,    1,    1,    1,
+       17,   12,    9,   18,    9,    9,    9,    9,    9,   19,
+       20,    9,   21,    9,    9,    9,    9,    9,    9,   14,
+        9,    9,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -327,26 +327,26 @@ static yyconst int yy_ec[256] =
 
 static yyconst int yy_meta[22] =
     {   0,
-        1,    2,    1,    1,    1,    1,    1,    2,    3,    3,
-        4,    3,    2,    2,    4,    3,    3,    2,    2,    2,
+        1,    2,    1,    1,    1,    1,    1,    2,    2,    3,
+        3,    4,    3,    2,    4,    3,    3,    2,    2,    2,
         2
     } ;
 
 static yyconst short int yy_base[54] =
     {   0,
-        0,    0,  121,  122,  122,  122,   19,  122,   22,   25,
-      106,  117,   25,   23,   25,  122,   42,  116,  115,   45,
-       39,   58,   43,    0,   41,   49,  122,  122,   64,   54,
-       58,   60,    0,   36,   58,   66,   51,   76,   34,   75,
-       83,   86,  122,   88,   92,  122,  122,   99,  102,   27,
-      104,  108,  112
+        0,    0,  121,  122,  122,  122,   19,  122,   22,  118,
+       26,  105,   26,   23,   26,  122,   43,  116,  115,   46,
+       39,  102,   44,    0,   42,   36,  122,  122,   62,   55,
+       57,   60,    0,   33,   59,   64,   51,   75,   29,   73,
+       82,   85,  122,   87,   91,  122,  122,   98,  101,   24,
+      103,  107,  111
     } ;
 
 static yyconst short int yy_def[54] =
     {   0,
-       47,    1,   47,   47,   47,   47,   48,   47,   49,   47,
-       10,   49,   49,   49,   48,   47,   48,   47,   49,   49,
-       50,   10,   47,   51,   49,   49,   47,   47,   49,   50,
+       47,    1,   47,   47,   47,   47,   48,   47,   49,   49,
+       47,   11,   49,   49,   48,   47,   48,   47,   49,   49,
+       50,   11,   47,   51,   49,   49,   47,   47,   49,   50,
        47,   47,   51,   49,   49,   47,   29,   52,   47,   47,
        53,   53,   47,   53,   52,   47,    0,   47,   47,   47,
        47,   47,   47
@@ -355,18 +355,18 @@ static yyconst short int yy_def[54] =
 static yyconst short int yy_nxt[144] =
     {   0,
         4,    5,    6,    4,    7,    8,    4,    9,   10,   11,
-       12,   12,   12,   12,   12,   12,   13,   12,   12,   12,
-       14,   16,   17,   18,   18,   27,   18,   16,   17,   23,
-       20,   20,   21,   22,   22,   39,   23,   18,   24,   25,
-       23,   23,   18,   26,   28,   17,   18,   30,   30,   31,
-       18,   32,   32,   20,   20,   38,   29,   47,   34,   39,
-       29,   29,   30,   30,   35,   18,   32,   32,   32,   32,
-       36,   47,   37,   37,   40,   40,   41,   42,   43,   44,
-       41,   41,   41,   40,   40,   43,   44,   42,   43,   44,
-       46,   44,   41,   42,   43,   44,   41,   41,   41,   15,
+       12,   10,   10,   10,   10,   10,   13,   10,   10,   10,
+       14,   16,   17,   18,   18,   27,   23,   18,   16,   17,
+       39,   20,   20,   21,   18,   22,   22,   18,   23,   24,
+       25,   23,   23,   18,   26,   28,   17,   18,   30,   30,
+       31,   35,   38,   32,   32,   20,   20,   47,   29,   34,
+       39,   29,   29,   18,   30,   30,   32,   32,   36,   32,
+       32,   37,   37,   40,   40,   41,   42,   43,   44,   41,
+       41,   41,   40,   40,   43,   44,   42,   43,   44,   46,
+       44,   41,   42,   43,   44,   41,   41,   41,   15,   15,
 
-       15,   15,   15,   19,   19,   19,   33,   33,   45,   45,
-       45,   45,   41,   41,   41,   41,   18,   18,   18,   47,
+       15,   15,   19,   19,   19,   33,   33,   45,   45,   45,
+       45,   41,   41,   41,   41,   47,   18,   18,   47,   18,
        47,    3,   47,   47,   47,   47,   47,   47,   47,   47,
        47,   47,   47,   47,   47,   47,   47,   47,   47,   47,
        47,   47,   47
@@ -376,17 +376,17 @@ static yyconst short int yy_chk[144] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    7,    7,    9,   14,   14,   13,   15,   15,   50,
-        9,    9,   10,   10,   10,   39,   10,   34,   10,   13,
-       10,   10,   25,   13,   17,   17,   20,   21,   21,   23,
-       26,   23,   23,   20,   20,   34,   20,   37,   25,   35,
-       20,   20,   30,   30,   26,   29,   31,   31,   32,   32,
-       29,   22,   29,   29,   36,   36,   38,   38,   38,   38,
-       38,   38,   38,   40,   40,   41,   41,   42,   42,   42,
-       44,   44,   45,   45,   45,   45,   45,   45,   45,   48,
+        1,    7,    7,    9,   14,   14,   50,   13,   15,   15,
+       39,    9,    9,   11,   34,   11,   11,   26,   11,   11,
+       13,   11,   11,   25,   13,   17,   17,   20,   21,   21,
+       23,   26,   34,   23,   23,   20,   20,   37,   20,   25,
+       35,   20,   20,   29,   30,   30,   31,   31,   29,   32,
+       32,   29,   29,   36,   36,   38,   38,   38,   38,   38,
+       38,   38,   40,   40,   41,   41,   42,   42,   42,   44,
+       44,   45,   45,   45,   45,   45,   45,   45,   48,   48,
 
-       48,   48,   48,   49,   49,   49,   51,   51,   52,   52,
-       52,   52,   53,   53,   53,   53,   19,   18,   12,   11,
+       48,   48,   49,   49,   49,   51,   51,   52,   52,   52,
+       52,   53,   53,   53,   53,   22,   19,   18,   12,   10,
         3,   47,   47,   47,   47,   47,   47,   47,   47,   47,
        47,   47,   47,   47,   47,   47,   47,   47,   47,   47,
        47,   47,   47
@@ -731,30 +731,33 @@ YY_RULE_SETUP
 #line 100 "scan.ll"
 { 
       // Got an eol.
-
+      input_mode = 0;  // assume that this is not a multi-line command.
       if(cmd != NULL) {
-        //cout << "EOL with " << cmd->name << '\n';
+	if(verbose)
+          cout << "EOL with " << cmd->name << '\n';
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
-          //cout << " spanning lines     \n";
+	  if(verbose)
+            cout << " spanning lines     \n";
           input_mode = CONTINUING_LINE;
           return SPANNING_LINES; //IGNORED; 
         } else
           return IGNORED;
       } else {
-        //cout << "EOL but no pending command\n";
+	if(verbose)
+          cout << "EOL but no pending command\n";
         return IGNORED; 
       }
     }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 117 "scan.ll"
+#line 120 "scan.ll"
 { 
    quit_parse  =1;
    return 0;  }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 121 "scan.ll"
+#line 124 "scan.ll"
 {
     //cout << "got an <<EOF>> in scan.l\n";
     //quit_parse = 1;
@@ -763,7 +766,7 @@ case YY_STATE_EOF(INITIAL):
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 127 "scan.ll"
+#line 130 "scan.ll"
 {
    //yylval.i = strtoul(yytext,NULL,numeric_base);
    sscanf(yytext,"%Ld",&yylval.li);
@@ -773,7 +776,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 134 "scan.ll"
+#line 137 "scan.ll"
 { 
    //yylval.i = strtoul(yytext,NULL,0);
    sscanf(yytext,"%Lx",&yylval.li);
@@ -783,7 +786,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 141 "scan.ll"
+#line 144 "scan.ll"
 {
     sscanf(yytext,"%f",&yylval.f);
     return FLOAT_NUMBER;  
@@ -798,7 +801,7 @@ YY_RULE_SETUP
 
 case 8:
 YY_RULE_SETUP
-#line 154 "scan.ll"
+#line 157 "scan.ll"
 {
    fprintf(yyout,"%s",&yytext[5]);
   }
@@ -808,7 +811,7 @@ YY_RULE_SETUP
 
 case 9:
 YY_RULE_SETUP
-#line 162 "scan.ll"
+#line 165 "scan.ll"
 {
   // printf("got indirect\n");
   return INDIRECT;
@@ -820,7 +823,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 172 "scan.ll"
+#line 175 "scan.ll"
 {
     end_of_command = 1;
     return(END_OF_COMMAND);
@@ -832,7 +835,7 @@ YY_RULE_SETUP
 
 case 11:
 YY_RULE_SETUP
-#line 182 "scan.ll"
+#line 185 "scan.ll"
 {
     string tok = strip_trailing_whitespace (yytext);
     if(strlen(tok.c_str()))
@@ -843,7 +846,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 190 "scan.ll"
+#line 193 "scan.ll"
 {
              printf("ignoring\n"); 
             // ECHO;
@@ -851,10 +854,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 195 "scan.ll"
+#line 198 "scan.ll"
 ECHO;
 	YY_BREAK
-#line 858 "lex.yy.c"
+#line 861 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1738,7 +1741,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 195 "scan.ll"
+#line 198 "scan.ll"
 
 
 // Include these so that we don't have to link to libfl.a.
@@ -1813,12 +1816,13 @@ int handle_identifier(const string &s, cmd_options **op )
 
    have_parameters = 1;
 
-
-   //cout << "search options\n";
+   if(verbose)
+     cout << "search options\n";
 
    while(opt->name != NULL)
     if(strcmp(opt->name, s.c_str()) == 0) {
-      //cout << "found option\n";
+      if(verbose)
+        cout << "found option '" << opt->name << "'\n";
       yylval.co = opt;
       return translate_token(opt->token_type);
     }
@@ -1879,9 +1883,15 @@ void init_parser(void)
     op = NULL;
     input_mode = 0;
     end_of_command = 0;
-  }
+    if(verbose & 2)
+      cout << "not ";
 
-  yyrestart (stdin);
+    yyrestart (stdin);
+
+  }
+  if(verbose & 2)
+    cout << "spanning lines"  << '\n';
+
 }
 
 // Tell us all what the current buffer is.

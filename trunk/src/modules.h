@@ -31,8 +31,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MODULES_H__
 #define __MODULES_H__
 
+#include "gpsim_classes.h"
 
-class IOPIN;
+
 
 /*
 
@@ -70,5 +71,25 @@ public:
   Module(void);
 
 };
+
+
+class Module_Types
+{
+public:
+
+  char *names[2];
+  Module * (*module_constructor) (void);
+};
+
+
+//--------------------------------------
+//
+// non-class helper functions.
+
+//Module *  add_module(char * module_type, char * module_new_name);
+void display_available_modules(void);
+void dump_module_list(void);
+//int find_in_available_module_list(char * module_type);
+void load_module_library(char *library_name);
 
 #endif // __MODULES_H__

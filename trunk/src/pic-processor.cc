@@ -103,9 +103,8 @@ static  int  cpu_ids = 0;
 //
 // this sorta sucks, but everytime a new processor is added to the
 // gpsim source code, another definition needs to be specified here
-// in the 'available_processors' array. Furthermore, a new case 
-// statement is also required in 'add_processor'.
-//
+// in the 'available_processors' array. 
+
 
 processor_types available_processors[] =
 {
@@ -962,6 +961,9 @@ void pic_processor::create_invalid_registers (void)
 {
   int i;
 
+  if(verbose)
+    cout << "Creating invalid registers " << register_memory_size()<<"\n";
+
   // Now, initialize any undefined register as an 'invalid register'
   // Note, each invalid register is given its own object. This enables
   // the simulation code to efficiently capture any invalid register
@@ -1081,6 +1083,9 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 void pic_processor::init_register_memory (unsigned int memory_size)
 {
 
+  if(verbose)
+    cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
+
   // Allocate enough memory for the entire register space (e.g. 256 registers for 14-bit core)
 
   //registers = (file_register **) new char[sizeof (file_register *) * 16*FILE_REGISTERS];
@@ -1175,6 +1180,9 @@ void pic_processor::create_iopins (const IOPIN_map iopin_map[], unsigned int num
 
 void pic_processor::create_symbols (void)
 {
+
+  if(verbose)
+    cout << __FUNCTION__ << " register memory size = " << register_memory_size() << '\n';
 
   for(int i = 0; i<register_memory_size(); i++)
     {

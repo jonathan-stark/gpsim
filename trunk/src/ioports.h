@@ -21,12 +21,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __IOPORTS_H__
 #define __IOPORTS_H__
 
+#include "gpsim_classes.h"
 
 //---------------------------------------------------------
 // IOPORT
-
-class IOPORT_TRIS;  // forward reference
-class USART_MODULE;
 
 class IOPORT : public sfr_register
 {

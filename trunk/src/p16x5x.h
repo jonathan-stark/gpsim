@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P16X5X_H__
 
 #include "12bit-processors.h"
-#include "packages.h"
+#include "pic-packages.h"
 
 
 

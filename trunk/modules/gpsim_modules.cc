@@ -19,20 +19,115 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 /*
+  gpsim_modules.cc
 
+  gpsim supports modules, or thingies, that are not part of gpsim proper.
+This is to say, that the modules are not compiled and linked with the
+core gpsim software. Instead, they are compiled and linked separately and
+then dynamically loaded by gpsim. This approach provides a flexibility
+to the user to create customized objects for simulation purposes. The
+big benefit of course, is that the user doesn't have to get bogged down
+in to the nitty-gritty details of the way gpsim is designed. The templates
+provided here can serve as a relatively simple example of how one may
+go about creating customized modules.
+
+Please see the README.MODULES for more details on how modules are intended
+to be used.
+
+Here are a list of functions that a gpsim compliant module library should
+support:
+
+  void mod_list(void) - Prints a list of the modules in a library
+  Module * getmodule(char *module_type) - creates a new module
  */
+
 #include <iostream.h>
 #include <dlfcn.h>
+#include <stdio.h>
+#include <gpsim/modules.h>
+#include "binary_indicator.h"
+
+/*
+class Module_Types
+{
+public:
+
+  char *names[2];
+  Module * (*module_constructor) (void);
+};
+*/
+Module_Types available_modules[] =
+{
+  { "binary_indicator", "bi", Binary_Indicator::construct}
+};
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+
+/********************************************************************************
+ * mod_list - Display all of the modules in this library.
+ *
+ * This is a required function for gpsim compliant libraries.
+ */
+
+  Module_Types * get_mod_list(void)
+  {
+
+    return available_modules;
+
+  }
+/********************************************************************************
+ * mod_list - Display all of the modules in this library.
+ *
+ * This is a required function for gpsim compliant libraries.
+ */
+
+void mod_list(void)
+{
+
+  int number_of = sizeof(available_modules) / sizeof(Module_Types);
+  int i,j,k,l,longest;
+
+  for(i=0,longest=0; i<number_of; i++)
+    {
+      k = strlen(available_modules[i].names[1]);
+      if(k>longest)
+	longest = k;
+    }
+
+  k=0;
+  do
+    {
+
+      for(i=0; (i<4) && (k<number_of); i++)
+	{
+	  cout << available_modules[k].names[1];
+	  if(i<3)
+	    {
+	      l = longest + 2 - strlen(available_modules[k].names[1]);
+	      for(j=0; j<l; j++)
+		cout << ' ';
+	    }
+	  k++;
+	}
+      cout << '\n';
+    } while (k < number_of);
+
+}
+
 
 /************************************************************
  *
  * _init() - this is called when the library is opened.
  */
 
-_init(void)
+void init(void)
 {
 
-  cout << "gpsim modules has been opened\n";
+  //cout << "gpsim modules has been opened\n";
+  printf("%s\n",__FUNCTION__);
 }
 
 /************************************************************
@@ -40,8 +135,37 @@ _init(void)
  * _fini() - this is called when the library is closed.
  */
 
-_fini(void)
+void fini(void)
 {
 
-  cout << "gpsim modules has been closed\n";
+  //cout << "gpsim modules has been closed\n";
+  printf("%s\n",__FUNCTION__);
 }
+
+void test(void)
+{
+  //cout << "This is a test\n";
+  printf("%s\n",__FUNCTION__);
+
+}
+
+Module * getmodule(void)
+{
+  Module *bi = Binary_Indicator::construct();
+
+  cout << "gpsim_modules created a binary indicator name:  " 
+       << bi->name() <<'\n';
+  return bi;
+}
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+void test2(void)
+{
+  printf("%s - c++ declared\n", __FUNCTION__);
+}
+
+
+

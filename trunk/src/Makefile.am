@@ -55,6 +55,7 @@ gpsiminclude_HEADERS = \
 	16bit-registers.h \
 	breakpoints.h \
 	cod.h \
+	gpsim_classes.h \
 	gpsim_def.h \
 	gpsim_time.h \
 	interface.h \
@@ -69,6 +70,7 @@ gpsiminclude_HEADERS = \
 	p18x.h \
 	packages.h \
 	pic-instructions.h \
+	pic-packages.h \
 	pic-processor.h \
 	pic-registers.h \
 	picdis.h \
