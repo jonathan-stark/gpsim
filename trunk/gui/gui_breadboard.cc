@@ -71,6 +71,12 @@ static int pinspacing = PINLENGTH;
 
 static void treeselect_module(GtkItem *item, struct gui_module *p);
 
+struct gui_module *create_gui_module(Breadboard_Window *bbw,
+                                 enum module_type type,
+				 Module *module,
+				 GtkWidget *widget);
+static void refresh_gui_module(struct gui_module *p);
+
 ///////////////////////////////////////////////////////////////////////
 // Start of autorouting pain 
 ///////////////////////////////////////////////////////////////////////
@@ -756,7 +762,7 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
 	// Draw barriers around pins so the tracker can only get in
         // straigt to the pin and not from the side.
-	for(i=1;i<=p->module->get_pin_count();i++)
+	for(i=1;i<=p->pin_count;i++)
 	{
 //	    struct stimulus *s;
 	    GList *e;
@@ -1430,6 +1436,7 @@ static void settings_set_cb(GtkWidget *button,
 static void treeselect_module(GtkItem *item, struct gui_module *p)
 {
     char buffer[STRING_SIZE];
+  
     snprintf(buffer,sizeof(buffer),"%s settings",p->module->name().c_str());
     switch(p->type)
     {
@@ -2636,6 +2643,56 @@ static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_m
 
 #define PACKAGESPACING 15
 
+static void refresh_gui_module(struct gui_module *p)
+{
+    GList *pin_iter;
+    struct gui_module *new_gui_module;
+
+    gtk_widget_ref(p->module_widget);
+    gtk_container_remove(GTK_CONTAINER(p->bbw->layout),p->module_widget);
+
+    // Delete the static module pixmap if there is no widget
+    // in the module.
+    if(p->module->get_widget()==0)
+    {
+        gdk_pixmap_unref(p->module_pixmap);
+	gtk_widget_destroy(p->module_widget);
+    }
+
+    // Delete the pins
+    pin_iter=p->pins;
+    while(pin_iter!=NULL)
+    {
+        gui_pin *pin;
+
+	pin=(gui_pin*)pin_iter->data;
+    
+        if(pin->xref)
+        	pin->iopin->remove_xref(pin->xref);
+
+	gdk_pixmap_unref(pin->pixmap);
+	gtk_widget_destroy(pin->widget);
+
+        pin_iter=pin_iter->next;
+    }
+    
+    // Destroy name widget
+    gdk_pixmap_unref(p->name_pixmap);
+    gtk_widget_destroy(p->name_widget);
+    
+    // Remove from gtk-tree 
+    gtk_tree_item_remove_subtree(GTK_TREE_ITEM(p->tree_item));
+    gtk_widget_destroy(p->tree_item);
+    
+    // Remove module from list
+    p->bbw->modules=g_list_remove(p->bbw->modules, p);
+
+    // rebuild module
+    new_gui_module=create_gui_module(p->bbw, p->type, p->module, p->module_widget);
+    *p=*new_gui_module;
+    gtk_widget_unref(p->module_widget);
+}
+
 struct gui_module *create_gui_module(Breadboard_Window *bbw,
                                  enum module_type type,
 				 Module *module,
@@ -2662,13 +2719,22 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->y=-1;
 
     p->pins=0;
+    p->pin_count=p->module->get_pin_count();
 
-
-    Attribute *xpos = new FloatAttribute("xpos",-1.0);
-    Attribute *ypos = new FloatAttribute("ypos",-1.0);
-    module->add_attribute(xpos);
-    module->add_attribute(ypos);
-
+    Attribute *xpos = p->module->get_attribute("xpos", false);
+    Attribute *ypos = p->module->get_attribute("ypos", false);
+    if(!xpos || !ypos)
+    {
+        xpos = new FloatAttribute("xpos",-1.0);
+        ypos = new FloatAttribute("ypos",-1.0);
+        module->add_attribute(xpos);
+        module->add_attribute(ypos);
+    }
+    else
+    {
+        x=xpos->nGet();
+        y=ypos->nGet();
+    }
 
     // FIXME. Perhaps the bbw should use Package instead of Module?
     Package *package = p->module->package;
@@ -2688,13 +2754,13 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
     p->tree_item = tree_item;
 
-    package_height=(p->module->get_pin_count()/2+(p->module->get_pin_count()&1)-1)*pinspacing;
+    package_height=(p->pin_count/2+(p->pin_count&1)-1)*pinspacing;
 
     if(p->module_widget==0)
     {
 	// Create a static representation.
 	p->pinnamewidth=0;
-	for(i=1;i<=p->module->get_pin_count();i++)
+	for(i=1;i<=p->pin_count;i++)
 	{
 	    char *name;
 	    int width;
@@ -2749,7 +2815,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 			    p->height-CASEOFFSET);
 
 	// Draw pin names
-	for(i=1;i<=p->module->get_pin_count();i++)
+	for(i=1;i<=p->pin_count;i++)
 	{
 	    char *name;
 	    int label_x, label_y;
@@ -2880,13 +2946,13 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     GtkWidget *subtree = gtk_tree_new();
     gtk_widget_show(subtree);
     gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), subtree);
-    for(i=1;i<=p->module->get_pin_count();i++)
+    for(i=1;i<=p->pin_count;i++)
     {
 	int pin_x, pin_y;
 	struct gui_pin *pin;
 	enum orientation orientation;
         char *name;
-	BreadBoardXREF *cross_reference;
+	BreadBoardXREF *cross_reference=0;
 	IOPIN *iopin;
 
         iopin = p->module->get_pin(i);
@@ -2934,6 +3000,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 			     pin_y,
 			     orientation,
 			     iopin);
+			     
+	pin->xref=cross_reference;
 
 	gtk_layout_put(GTK_LAYOUT(bbw->layout),
 		      pin->widget,0,0);//PINLENGTH+pin->x,PINLENGTH+pin->y);
@@ -2978,7 +3046,7 @@ void Breadboard_Window::Update(void)
   GList *iter;
   int x,y;
 
-  // loop all modules and update their pins
+  // loop all modules and look for changes
 
   iter=modules;
   while(iter!=0) {
@@ -2987,18 +3055,26 @@ void Breadboard_Window::Update(void)
     struct gui_module *p;
 
     p = (struct gui_module*)iter->data;
+    
+    
+    // Check if module has changed number of pins
+    if(p->pin_count!=p->module->get_pin_count())
+    {
+        // If so, refresh the gui widget
+	refresh_gui_module(p);
+    }
 
+    // Check if module has changed its position
     Attribute *xpos = p->module->get_attribute("xpos", false);
     Attribute *ypos = p->module->get_attribute("ypos", false);
-
     if(xpos && ypos)
     {
         x = xpos->nGet();
         y = ypos->nGet();
 
-    // Check if module has changed its position
         if(p->x!=x || p->y!=y)
 	  {
+	    // If so, move the module
 	    position_module(p, x, y);
 	    update_board_matrix(p->bbw);
 	    printf(" Moved module to position %d %d\n",p->x, p->y);
