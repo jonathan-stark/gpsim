@@ -41,6 +41,8 @@ TMR0::TMR0(void)
   break_point = 0;
   value=0;
   synchronized_cycle=0;
+  future_cycle=0;
+  last_cycle=0;
   prescale=1;
   new_name("tmr0");
 }
@@ -54,14 +56,13 @@ void TMR0::start(int restart_value, int sync=0)
 
   synchronized_cycle = cpu->cycles.value + sync;
 
-  prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
-
+  prescale = 1 << get_prescale();
   prescale_counter = prescale;
 
   last_cycle = value * prescale;
   last_cycle = synchronized_cycle - last_cycle;
 
-  unsigned int fc = last_cycle + 256 * prescale;
+  guint64 fc = last_cycle + max_counts() * prescale;
 
   if(future_cycle)
     cpu->cycles.reassign_break(future_cycle, fc, this);
@@ -76,6 +77,10 @@ void TMR0::start(int restart_value, int sync=0)
 
 }
 
+unsigned int TMR0::get_prescale(void)
+{
+  return (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
+}
 
 // %%%FIX ME%%% 
 void TMR0::increment(void)
@@ -88,10 +93,8 @@ void TMR0::increment(void)
       if(++value == 256)
 	{
 	  value = 0;
-	  if(cpu->base_isa() == _14BIT_PROCESSOR_)
-	    {
-	      cpu14->intcon->set_t0if();
-	    }
+	  set_t0if();
+
 	}
       trace.register_write(address,value);
     }
@@ -100,7 +103,7 @@ void TMR0::increment(void)
 
 void TMR0::put(unsigned int new_value)
 {
-  if(cpu->option_reg.get_t0cs())
+  if(get_t0cs())
     {
       cout << "TMR0::put external clock...\n";
     }
@@ -152,7 +155,7 @@ unsigned int TMR0::get_value(void)
   if(cpu->cycles.value <= synchronized_cycle)
     return value;
 
-  if(cpu->option_reg.get_t0cs())
+  if(get_t0cs())
     return(value);
 
   int new_value = (cpu->cycles.value - last_cycle)/ prescale;
@@ -198,15 +201,19 @@ void TMR0::new_prescale(void)
 {
   //cout << "tmr0 new_prescale\n";
 
-  int new_value = (cpu->cycles.value - last_cycle)/prescale;
+  int new_value;
+  if(last_cycle < cpu->cycles.value)
+    new_value = (cpu->cycles.value - last_cycle)/prescale;
+  else
+    new_value = 0;
 
-  if(new_value>255)
-    cout << "TMR0 bug value>255 - new_prescale\n";
+  if(new_value>=max_counts())
+    cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
 
-  prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
+  prescale = 1 << get_prescale();
   prescale_counter = prescale;
 
-  if(cpu->option_reg.get_t0cs())
+  if(get_t0cs())
     {
       //cout << "external clock...\n";
 
@@ -233,7 +240,7 @@ void TMR0::new_prescale(void)
       if(cpu->cycles.value <= synchronized_cycle)
 	last_cycle += (synchronized_cycle - cpu->cycles.value);
 
-      unsigned int fc = last_cycle + 256 * prescale;
+      guint64 fc = last_cycle + max_counts() * prescale;
       //cout << "moving break from " << future_cycle << " to " << fc << '\n';
 
       cpu->cycles.reassign_break(future_cycle, fc, this);
@@ -242,11 +249,23 @@ void TMR0::new_prescale(void)
     }
 }
 
+unsigned int TMR0::get_t0cs(void)
+{
+  return cpu->option_reg.get_t0cs();
+}
+void TMR0::set_t0if(void)
+{
+  if(cpu->base_isa() == _14BIT_PROCESSOR_)
+    {
+      cpu14->intcon->set_t0if();
+    }
+}
+
 void TMR0::new_clock_source(void)
 {
 
   //  cout << "TMR0:new_clock_source changed to the ";
-  if(cpu->option_reg.get_t0cs())
+  if(get_t0cs())
     {
       //cout << "external\n";
       //      cpu->cycles.
@@ -270,7 +289,7 @@ void TMR0::callback(void)
   // If tmr0 is being clocked by the external clock, then at some point
   // the simulate code must have switched from the internal clock to
   // external clock. The cycle break point was still set, so just ignore it.
-  if(cpu->option_reg.get_t0cs())
+  if(get_t0cs())
     {
       future_cycle = 0;  // indicates that tmr0 no longer has a break point
       return;
@@ -279,12 +298,7 @@ void TMR0::callback(void)
   value = 0;
   synchronized_cycle = cpu->cycles.value;
   last_cycle = synchronized_cycle;
-  future_cycle = last_cycle + 256*prescale;
+  future_cycle = last_cycle + max_counts()*prescale;
   cpu->cycles.set_break(future_cycle, this);
-  if(cpu->base_isa() == _14BIT_PROCESSOR_)
-    {
-      cpu14->intcon->set_t0if();
-    }
-
-
+  set_t0if();
 }

@@ -515,6 +515,7 @@ void read_symbols( pic_processor *cpu )
 	  case COD_ST_C_SHORT:
 	    // Change the register name to its symbolic name
 	    cpu->registers[value]->new_name(substr(b,&s[1],length));
+	    cout << cpu->registers[value]->name() << '\n';
 	    symbol_table.add_register(cpu,cpu->registers[value]);
 	    break;
 

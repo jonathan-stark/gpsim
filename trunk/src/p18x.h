@@ -56,7 +56,7 @@ public:
 
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
-  void create_sfr_map(void);
+  //  void create_sfr_map(void);
 
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
@@ -78,7 +78,7 @@ class P18C2x2 : public _16bit_processor, public _28pins
 
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
-  void create_sfr_map(void);
+  //  void create_sfr_map(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};

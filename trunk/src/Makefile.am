@@ -17,6 +17,7 @@ libgpsim_la_SOURCES = \
 	16bit-processors.cc \
 	16bit-registers.cc \
 	16bit-hexdecode.cc \
+	16bit-tmrs.cc \
 	breakpoints.cc \
 	cod.cc \
 	fopen-path.cc \
@@ -54,6 +55,7 @@ gpsiminclude_HEADERS = \
 	16bit-instructions.h \
 	16bit-processors.h \
 	16bit-registers.h \
+	16bit-tmrs.h \
 	breakpoints.h \
 	cod.h \
 	gpsim_classes.h \

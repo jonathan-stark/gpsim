@@ -397,6 +397,13 @@ typedef struct _Breadboard_Window Breadboard_Window;
 //
 // The trace window 
 //
+
+struct TraceMapping {
+
+  guint64 cycle;
+  int simulation_trace_index;
+};
+
 struct _Trace_Window {
   GUI_Object     gui_obj;
 
@@ -414,6 +421,11 @@ struct _Trace_Window {
   int trace_flags;
 
   int processor;    // if non-zero window has processor
+
+  /* trace_map is a pointer to an array of cross references
+   * between the trace window and gpsim trace buffer */
+  struct TraceMapping *trace_map;
+  int trace_map_index;
 };
 
 typedef struct _Trace_Window Trace_Window;

@@ -28,14 +28,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "p18x.h"
 
-
-
-void P18Cxx2::create_sfr_map(void)
-{
-
-  cout << "create_sfr_map P18Cxx2\n";
-}
-
 void P18Cxx2::create_symbols(void)
 {
   cout << "P18Cxx2 create symbols\n";
@@ -53,7 +45,9 @@ P18Cxx2::P18Cxx2(void)
   if(verbose)
     cout << "18c constructor, type = " << isa() << '\n';
 
-  create_sfr_map();
+  //  cout << "PIR " << pir1.name() << '\n';
+
+  //create_sfr_map();
   //  create_iopin_map(&iopin_map, &num_of_iopins);
 
   _16bit_processor::create();
@@ -123,6 +117,9 @@ void _28pins::create_iopin_map(void)
   assign_pin(17, new IO_bi_directional(portc, 6));
   assign_pin(18, new IO_bi_directional(portc, 7));
 
+  assign_pin(19, NULL);
+  assign_pin(20, NULL);
+
   assign_pin(21, new IO_bi_directional_pu(portb, 0));
   assign_pin(22, new IO_bi_directional_pu(portb, 1));
   assign_pin(23, new IO_bi_directional_pu(portb, 2));
@@ -141,25 +138,32 @@ void _28pins::create_iopin_map(void)
 
 void P18C2x2::create(void)
 {
+  if(verbose)
+    cout << "P18C2x2::create\n";
+
+  //  cout << "PIR " << pir1.name() << '\n';
 
   create_iopin_map();
 
 
-  P18C2x2::create_sfr_map();
+  //  cout << "after create_iopin_mapPIR " << pir1.name() << '\n';
+
+  //P18C2x2::create_sfr_map();
   //  create_iopin_map(&iopin_map, &num_of_iopins);
+  //cout << "after create_sfr_map PIR " << pir1.name() << '\n';
 
   _16bit_processor::create();
 
   //  create_iopins(iopin_map, num_of_iopins);
 
 }
-
+/*
 void P18C2x2::create_sfr_map(void)
 {
 
   cout << "create_sfr_map P18C2x2\n";
 }
-
+*/
 void P18C2x2::create_symbols(void)
 {
   cout << "P18C2x2 create symbols\n";
@@ -171,6 +175,7 @@ P18C2x2::P18C2x2(void)
 
   if(verbose)
     cout << "18c2x2 constructor, type = " << isa() << '\n';
+
 
 }
 
@@ -207,10 +212,12 @@ pic_processor * P18C242::construct(void)
   cout << " 18c242 construct\n";
 
   p->create();
-
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
   p->name_str = "18c242";
 
   return p;
+
 
 }
 
@@ -246,6 +253,8 @@ pic_processor * P18C252::construct(void)
   cout << " 18c252 construct\n";
 
   p->create();
+  p->create_invalid_registers();
+  p->pic_processor::create_symbols();
 
   p->name_str = "18c252";
 

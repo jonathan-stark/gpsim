@@ -43,11 +43,14 @@ public:
   virtual void put(unsigned int new_value);
   unsigned int get(void);
   virtual unsigned int get_value(void);
-  void start(int new_value,int sync=0);
+  virtual void start(int new_value,int sync=0);
   virtual void increment(void);   // Used when tmr0 is attached to an external clock
   virtual void new_prescale(void);
+  virtual unsigned int get_prescale(void);
+  virtual unsigned int max_counts(void) {return 256;};
   void new_clock_source(void);
-
+  virtual unsigned int get_t0cs(void);
+  virtual void set_t0if(void);
 };
 
 #endif

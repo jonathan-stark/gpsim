@@ -1,3 +1,5 @@
+        list    p=18c242,t=ON,c=132,n=80
+        radix   dec
 	;; The purpose of this program is to test gpsim's ability to simulate
 	;; TMR0 in the 18cxxx core.
 
@@ -22,17 +24,17 @@ include "p18c242.inc"
 
 	goto	start
 
-	org	4
+	org	8
 	;; Interrupt
 	;; 
-	movwf	w_temp
-	swapf	status,w,0
-	movwf	status_temp
+;	movwf	w_temp
+;	swapf	status,w,0
+;	movwf	status_temp
 
 check_t0:
 	btfsc	intcon,t0if,0
 	 btfss	intcon,t0ie,0
-	  goto	exit_int
+	  bra	exit_int
 
     ;; tmr0 has rolled over
 	
@@ -41,11 +43,13 @@ check_t0:
 		
 exit_int:		
 
-	swapf	status_temp,w,0
-	movwf	status,0
-	swapf	w_temp,f
-	swapf	w_temp,w
-	retfie
+	movlw	0x55 ;test
+;	swapf	status_temp,w,0
+;	movwf	status,0
+;	swapf	w_temp,f
+;	swapf	w_temp,w
+
+	retfie  1		;Restore from `fast stack'
 
 start
 

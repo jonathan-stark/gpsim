@@ -199,7 +199,8 @@ class Trace
   void dump_raw(int n);
 
   int is_cycle_trace(unsigned int index);
-  guint64 find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index);
+  guint64 find_cycle(int n, int in_index, int &instruction_index, 
+		     int &pc_index, int &cycle_index);
   int find_previous_cycle(int index);
 };
 

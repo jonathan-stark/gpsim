@@ -7,6 +7,7 @@ EXTRA_DIST = \
 	p18.asm \
 	p18c242_test.asm
 	sine18.asm \
+	sqrt18.asm \
 	tbl.asm \
 	tmr0_18.asm \
 	usart_18.asm \

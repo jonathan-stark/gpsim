@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include "interface.h"
 #include "xref.h"
 
+
 //--------------------------------------------------
 // member functions for the BSR class
 //--------------------------------------------------
@@ -751,7 +752,6 @@ void T0CON::put(unsigned int new_value)
 
   unsigned int old_value = value;
   value = new_value;
-
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
   if( (value ^ old_value) & T0CS)
@@ -769,18 +769,15 @@ void T0CON::put(unsigned int new_value)
 
   trace.register_write(address,value);
 
-
 }
 
 //--------------------------------------------------
 
 void INTCON_16::initialize(void)
 {
-
   tmr0l = &cpu16->tmr0l;
   rcon  = &cpu16->rcon;
   intcon2  = &cpu16->intcon2;
-
 }
 
 //----------------------------------------------------------------------
@@ -873,7 +870,7 @@ void INTCON_16::put(unsigned int new_value)
 
   value = new_value;
   trace.register_write(address,value);
-
+  cout << " INTCON_16::put\n";
   // Now let's see if there's a pending interrupt
   // if IPEN is set in RCON, then interrupt priorities
   // are being used. (In other words, there are two
@@ -979,7 +976,10 @@ unsigned int TMR0H::get_value(void)
 }
 
 //--------------------------------------------------
-// get_prescale
+// TMR0_16 member functions
+//
+//--------------------------------------------------
+// TMR0_16::get_prescale
 //
 //  If the prescaler is assigned to the WDT (and not TMR0)
 //    then return 0
@@ -988,11 +988,11 @@ unsigned int TMR0H::get_value(void)
 //
 unsigned int TMR0_16::get_prescale(void)
 {
-
   if(t0con->value & (0x8))
     return 0;
   else
     return ((t0con->value & 7) + 1);
+
 }
 
 void TMR0_16::set_t0if(void)
@@ -1010,45 +1010,17 @@ void TMR0_16::initialize(void)
   t0con = &cpu16->t0con;
   intcon = &cpu16->intcon;
   tmr0h  = &cpu16->tmr0h;
-
 }
 
-//--------------------------------------------------
-// member functions for the _TMR0 base class
-//--------------------------------------------------
-/*
-_TMR0::_TMR0(void)
-{
-  break_point = 0;
-  value=0;
-  synchronized_cycle=0;
-  prescale=1;
-  new_name("tmr0");
-}
-*/
-/*
-void _TMR0::start(void)
+unsigned int TMR0_16::max_counts(void)
 {
 
-  value = 0;
-  cout << "TMRO::start\n";
-
-  synchronized_cycle = cpu->cycles.value.lo;    // + 2 ???
-
-  prescale = 1 << get_prescale();
-
-  last_cycle = synchronized_cycle - value * prescale;
-  future_cycle = last_cycle + 256 * prescale;
-
-  cout << "_TMR0::start   last_cycle = " << 
-    hex << last_cycle << " future_cycle = " << future_cycle << '\n';
-
-  cpu->cycles.set_break(future_cycle, 0, this);
-  cpu->cycles.dump_breakpoints();
+  if(t0con->value & T0CON::T08BIT)
+    return 0x100;
+  else
+    return 0x10000;
 
 }
-*/
-
 // %%%FIX ME%%% 
 void TMR0_16::increment(void)
 {
@@ -1085,47 +1057,6 @@ void TMR0_16::increment(void)
   //  cout << value << '\n';
 }
 
-void TMR0_16::put(unsigned int new_value)
-{
-  if(get_t0cs())
-    {
-      cout << "_TMR0::put external clock...\n";
-    }
-
-
-  // Note, anytime something is written to TMR0, the prescaler, if it's
-  // assigned to tmr0, is also cleared. This is implicitly handled by
-  // saving the value of cpu's cycle counter and associating that value
-  // with the tmr rollover.
-
-  value = new_value & 0xff;
-
-  prescale = 1 << get_prescale();
-  prescale_counter = prescale;
-
-  synchronized_cycle = cpu->cycles.value + 2;
-
-  last_cycle = synchronized_cycle - value * prescale;
-
-
-  unsigned int fc;
-
-  if(t0con->value & T0CON::T08BIT)
-    fc = last_cycle + 0x100 * prescale;
-  else
-    fc = last_cycle + 0x10000 * prescale;
-
-
-  if(future_cycle)
-    cpu->cycles.reassign_break(future_cycle, fc, this);
-  else
-    cpu->cycles.set_break(fc, this);
-
-  future_cycle = fc;
-
-  trace.register_write(address,value);
-
-}
 
 unsigned int TMR0_16::get_value(void)
 {
@@ -1146,134 +1077,41 @@ unsigned int TMR0_16::get_value(void)
   return(value);
   
 }
-/*
-//----------------------------------------------
-unsigned int _TMR0::get(void)
-{
-  value = get_value();
-  trace.register_read(address, value);
-}
-*/
-void TMR0_16::new_prescale(void)
-{
-  cout << "_TMR0 new_prescale\n";
-
-  if(get_t0cs())
-    {
-      cout << "external clock...\n";
-
-      //prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
-      prescale = 1 << get_prescale();
-      prescale_counter = prescale;
-    }
-  else
-    {
-      // Get the current value of TMR0
-      int new_value = (cpu->cycles.value - last_cycle)/prescale;
-      cout << "cycles " << cpu->cycles.value  << " old prescale " << prescale;
-
-      //prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
-      prescale = 1 << get_prescale();
-
-      cout << " new prescale " << prescale;
-
-      // Now compute the 'last_cycle' as though if TMR0 had been running on the 
-      // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
-      // cycle counter when tmr0 last rolled over.
-
-      last_cycle = cpu->cycles.value - new_value * prescale;
-      cout << " effective last_cycle " << last_cycle << '\n';
-
-      if(cpu->cycles.value <= synchronized_cycle)
-	last_cycle += (synchronized_cycle - cpu->cycles.value);
-
-      guint64 fc;
-
-      if(t0con->value & T0CON::T08BIT)
-	fc = last_cycle + 0x100 * prescale;
-      else
-	fc = last_cycle + 0x10000 * prescale;
-
-      cout << "moving break from " << future_cycle << " to " << fc << '\n';
-
-      cpu->cycles.reassign_break(future_cycle, fc, this);
-
-    }
-}
-/*
-void _TMR0::new_clock_source(void)
-{
-
-  cout << "_TMR0:new_clock_source changed to the ";
-  if(get_t0cs())
-    {
-      cout << "external\n";
-      //      cpu->cycles.
-    }
-  else
-    {
-      cout << "internal\n";
-      put(value);    // let _TMR0::put() set a cycle counter break point
-    }
-}
-*/
-// TMR0 callback is called when the cycle counter hits the break point that
-// was set in TMR0::put. The cycle counter will clear the break point, so
-// we don't need to worry about it. At this point, TMR0 is rolling over.
 
 void TMR0_16::callback(void)
 {
 
-  //  cout<<"_TMR0 rollover: " << hex << cpu->cycles.value.lo << '\n';
+  cout<<"_TMR0 rollover: " << hex << cpu->cycles.value << '\n';
 
-  // If tmr0 is being clocked by the external clock, then at some point
-  // the simulated code must have switched from the internal clock to
-  // external clock. The cycle break point was still set, so just ignore it.
-  if(get_t0cs())
-    {
-      future_cycle = 0;  // indicates that tmr0 no longer has a break point
-      return;
-    }
+  TMR0::callback();   // Let the parent class handle the lower eight bits
 
-  value = 0;
-  synchronized_cycle = cpu->cycles.value;
-  last_cycle = synchronized_cycle;
+  //Now handle the upper 8 bits:
 
-  if(t0con->value & T0CON::T08BIT)
-    {
-      // 8-bit mode
-      future_cycle = last_cycle + 0x100*prescale;
-
-    }
-  else
+  if(future_cycle &&
+     !(t0con->value & T0CON::T08BIT)) 
     {
       // 16-bit mode
       tmr0h->put_value(0);
-      future_cycle = last_cycle + 0x10000*prescale;
     }
 
-  cpu->cycles.set_break(future_cycle, this);
-  set_t0if();
 
 }
-
-
 
 //--------------------------------------------------
 
 bool TXREG_16::is_empty(void)
 {
-  return(pir1->get_TXIF());
+  return(pir1->get_txif());
 }
 
 void TXREG_16::empty(void)
 {
-  pir1->set_TXIF();
+  pir1->set_txif();
 }
 
 void TXREG_16::full(void)
 {
-  pir1->clear_TXIF();
+  pir1->clear_txif();
 }
 
 void RCREG_16::push(unsigned int new_value)
@@ -1281,7 +1119,7 @@ void RCREG_16::push(unsigned int new_value)
 
   _RCREG::push(new_value);
 
-  pir1->set_RCIF();
+  pir1->set_rcif();
 
 }
 
@@ -1312,7 +1150,6 @@ void USART_MODULE16::initialize(_16bit_processor *new_cpu)
 
   rcreg.rcsta = &rcsta;
   rcreg.pir1 = &cpu->pir1;
-
 }
 
 void   USART_MODULE16::new_rx_edge(unsigned int bit)

@@ -30,6 +30,14 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "stimuli.h"
 
+//-------------------------------------------------------------------
+_16bit_processor::_16bit_processor(void)
+{
+
+  cout << "_16bit processor constructor, type = " << isa() << '\n';
+
+
+}
 
 //-------------------------------------------------------------------
 void _16bit_processor :: create_sfr_map(void)
@@ -38,7 +46,6 @@ void _16bit_processor :: create_sfr_map(void)
     cout << "creating 18cxxx common registers\n";
 
   add_file_registers(0x0, 0xf7f, 0);
-
 
   //add_sfr_register(&porta,	  0xf80,0,"porta");
   //add_sfr_register(&portb,	  0xf81,0,"portb");
@@ -59,7 +66,9 @@ void _16bit_processor :: create_sfr_map(void)
   //add_sfr_register(&trise,	  0xf96,0,"trise");
 
   //add_sfr_register(&pie1,	  0xf9d,0,"pie1");
+  //cout << pir1.name() << '\n';
   add_sfr_register(&pir1,	  0xf9e,0,"pir1");
+
   //add_sfr_register(&ipr1,	  0xf9f,0,"ipr1");
   //add_sfr_register(&pie2,	  0xfa0,0,"pie2");
   //add_sfr_register(&pir2,	  0xfa1,0,"pir2");
@@ -75,6 +84,21 @@ void _16bit_processor :: create_sfr_map(void)
   //add_sfr_register(&t3con,	  0xfb1,0xff,"t3con");
   //add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
   //add_sfr_register(&tmr3h,	  0xfb3,0,"tmr3h");
+
+  add_sfr_register(&ccp2con,	  0xfba,0,"ccp2con");
+  add_sfr_register(&ccpr2l,	  0xfbb,0,"ccpr2l");
+  add_sfr_register(&ccpr2h,	  0xfbc,0,"ccpr2h");
+  add_sfr_register(&ccp1con,	  0xfbd,0,"ccp1con");
+  add_sfr_register(&ccpr1l,	  0xfbe,0,"ccpr1l");
+  add_sfr_register(&ccpr1h,	  0xfbf,0,"ccpr1h");
+
+  add_sfr_register(&t2con,	  0xfca,0,"t2con");
+  add_sfr_register(&pr2,	  0xfcb,0xff,"pr2");
+  add_sfr_register(&tmr2,	  0xfcc,0,"tmr2");
+
+  add_sfr_register(&t1con,	  0xfcd,0,"t1con");
+  add_sfr_register(&tmr1l,	  0xfce,0,"tmr1l");
+  add_sfr_register(&tmr1h,	  0xfcf,0,"tmr1h");
 
   add_sfr_register(&rcon,	  0xfd0,0,"rcon");
   add_sfr_register(&t0con,	  0xfd5,0xff,"t0con");
@@ -132,8 +156,32 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&((Stack16 *)stack)->tosh,    0xffe,0,"tosh");
   add_sfr_register(&((Stack16 *)stack)->tosu,    0xfff,0,"tosu");
 
-  pic_processor::create_symbols();
 
+  // Initialize all of the register cross linkages
+  tmr1l.tmr1h = &tmr1h;
+  tmr1l.t1con = &t1con;
+  tmr1l.pir1  = &pir1;
+  tmr1l.ccpcon = &ccp1con;
+
+  tmr1h.tmr1l = &tmr1l;
+
+  t1con.tmr1l = &tmr1l;
+
+  t2con.tmr2  = &tmr2;
+  tmr2.pir1   = &pir1;
+  tmr2.pr2    = &pr2;
+  tmr2.t2con  = &t2con;
+  tmr2.ccp1con = &ccp1con;
+  tmr2.ccp2con = &ccp2con;
+  pr2.tmr2    = &tmr2;
+
+
+  ccp1con.ccprl = &ccpr1l;
+  ccp1con.pir   = &pir1;
+  ccp1con.tmr2  = &tmr2;
+  ccpr1l.ccprh  = &ccpr1h;
+  ccpr1l.tmr1l  = &tmr1l;
+  ccpr1h.ccprl  = &ccpr1l;
 }
 
 //-------------------------------------------------------------------
@@ -146,6 +194,9 @@ void _16bit_processor :: create_sfr_map(void)
 
 void _16bit_processor :: create (void)
 {
+
+  if(verbose)
+    cout << " _16bit_processor :: create\n" ;
 
   //create_iopin_map(&iopin_map, &num_of_iopins);
   //create_iopins(iopin_map, num_of_iopins);
@@ -163,15 +214,12 @@ void _16bit_processor :: create (void)
   ind1.init(this);
   ind2.init(this);
   trace.program_counter (pc.value);
-
   tmr0l.initialize();
   intcon.initialize();
 
   usart.initialize(this);
   tbl.initialize(this);
-
   tmr0l.start(0);
-
 }
 
 //
@@ -209,6 +257,10 @@ interrupt (void)
   bp.clear_interrupt();
 
   stack->push(pc.value);
+
+  // Save W,status, and BSR if this is a high priority interrupt.
+  if(interrupt_vector == INTERRUPT_VECTOR_HI)
+    fast_stack.push();
 
   intcon.clear_gies();  // The appropriate gie bits get cleared (not just gieh)
 

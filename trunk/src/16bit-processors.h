@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "pic-processor.h"
 #include "16bit-registers.h"
+#include "16bit-tmrs.h"
 #include "uart.h"
 
      // forward references
@@ -56,6 +57,7 @@ public:
   unsigned int interrupt_vector;        // Starting address of the interrupt
 
   //  PCLATH       pclath;
+
   INTCON_16    intcon;
   INTCON2      intcon2;
   INTCON3      intcon3;
@@ -64,7 +66,23 @@ public:
   TMR0H        tmr0h;
   T0CON        t0con;
   RCON         rcon;
-  PIR1_16      pir1;
+  PIR1         pir1;
+
+  T1CON        t1con;
+  PIE          pie1;
+  PIR2         pir2;
+  PIE          pie2;
+  T2CON        t2con;
+  PR2          pr2;
+  TMR2         tmr2;
+  TMR1L        tmr1l;
+  TMR1H        tmr1h;
+  CCPCON       ccp1con;
+  CCPRL        ccpr1l;
+  CCPRH        ccpr1h;
+  CCPCON       ccp2con;
+  CCPRL        ccpr2l;
+  CCPRH        ccpr2h;
 
   sfr_register prodh,prodl;
 
@@ -74,6 +92,9 @@ public:
   Indirect_Addressing  ind2;
   USART_MODULE16       usart;
   TBL_MODULE           tbl;
+  TMR2_MODULE          tmr2_module;
+
+  _16bit_processor(void);
 
   virtual void create_symbols(void);
 
