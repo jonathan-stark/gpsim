@@ -36,15 +36,15 @@ LCD_CONTROL_MASK EQU   (1<<LCD_E) | (1<<LCD_R_W) | (1<<LCD_RS)
 LCD_DATA_MASK    EQU   0xf0
 
 
-  if LCD_DATA_MASK == 0xf0
+;  if LCD_DATA_MASK == 0xf0
 
 LCD_DATA_SHIFT EQU 0         ;Used to shift the LCD constants.
 
-  else
+;  else
 
-LCD_DATA_SHIFT EQU 4
+;LCD_DATA_SHIFT EQU 4
 
-  endif
+;  endif
 
 LCD_CONTROL_TRIS   EQU     LCD_CONTROL_PORT        ;
 LCD_DATA_TRIS      EQU     LCD_DATA_PORT           ;
