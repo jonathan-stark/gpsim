@@ -356,7 +356,7 @@ public:
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
-  virtual void load_hex(const char *hex_file)=0;
+  virtual bool load_hex(const char *hex_file)=0;
 
   //
   // Execution control

@@ -115,6 +115,11 @@ public:
   virtual Attribute *get_attribute(char *attr);
   virtual void dump_attributes(int show_values=1);
 
+  // Version
+  virtual int get_major_version(void) { return major_version;}
+  virtual int get_minor_version(void) { return minor_version;}
+  virtual int get_micro_version(void) { return micro_version;}
+
   // gui
   virtual void set_widget(void * a_widget) {widget = a_widget;}
   virtual void *get_widget(void) {return widget;}
@@ -128,10 +133,14 @@ public:
   Module(void);
   virtual ~Module();
 
+
  private:
   void *widget;   // GtkWidget * that is put in the breadboard.
 
-  //  int x,y;
+ protected:
+  int major_version;
+  int minor_version;
+  int micro_version;
 
 };
 
