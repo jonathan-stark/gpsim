@@ -381,9 +381,18 @@ public:
       replaced->put(new_value);
     }
 
+  virtual void putRV(RegisterValue rv)
+    {
+      replaced->putRV(rv);
+    }
+
   virtual unsigned int get_value(void)
     {
       return(replaced->get_value());
+    }
+  virtual RegisterValue getRV(void)
+    {
+      return replaced->getRV();
     }
   virtual unsigned int get(void)
     {
