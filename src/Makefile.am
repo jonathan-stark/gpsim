@@ -60,6 +60,7 @@ gpsiminclude_HEADERS = \
 	gpsim_def.h \
 	gpsim_interface.h \
 	gpsim_time.h \
+	fopen-path.h \
 	interface.h \
 	ioports.h \
 	modules.h \
