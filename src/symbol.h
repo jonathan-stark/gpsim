@@ -96,13 +96,12 @@ public:
   void add_ioport(Processor *cpu, IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
-  void add_line_number(Processor *cpu, int address);
+  void add_line_number(Processor *cpu, int address, char *symbol_name=0);
   void add_constant(Processor *cpu, char *, int );
-  void add_register(Processor *cpu, Register *reg);
+  void add_register(Processor *cpu, Register *reg, char *symbol_name=0);
   void add_address(Processor *cpu, char *, int );
   void add_w(Processor *cpu, WREG *w );
   void add_module(Module * m, const char *module_name);
-  //void remove_module(Module * m, char *module_name);
   void remove_module(Module * m);
   void add(Processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);

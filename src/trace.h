@@ -50,6 +50,7 @@ public:
   TraceObject(Processor *_cpu);
   virtual void print(void)=0;
   virtual void print_frame(TraceFrame *);
+  virtual void getState(TraceFrame *);
 
 };
 /*
@@ -73,6 +74,7 @@ public:
   //RegisterTraceObject();
   RegisterWriteTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
   virtual void print(void);
+  virtual void getState(TraceFrame *);
 };
 
 class RegisterReadTraceObject : public RegisterWriteTraceObject
@@ -80,6 +82,7 @@ class RegisterReadTraceObject : public RegisterWriteTraceObject
 public:
   RegisterReadTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
   virtual void print(void);
+  virtual void getState(TraceFrame *);
 };
 
 class PCTraceObject : public TraceObject
@@ -179,9 +182,10 @@ public:
   guint64 cycle_time;
 
   TraceFrame(); 
-  ~TraceFrame();
-  void add(TraceObject *to);
-  void print(void);
+  virtual ~TraceFrame();
+  virtual void add(TraceObject *to);
+  virtual void print(void);
+  virtual void update_state(void);
 };
 
 //-----------------------------------------------------------

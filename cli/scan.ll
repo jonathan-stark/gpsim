@@ -39,6 +39,7 @@ Boston, MA 02111-1307, USA.  */
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
+#include "src/symbol.h"
 
 int state;
 
@@ -327,13 +328,15 @@ int handle_identifier(const string &s, cmd_options **op )
 
    // If we get here, then the option was not found.
    // So let's check the symbols
+   string s1(s);
+   symbol *sym = get_symbol_table().find(&s1);
+   if(sym) {
+     yylval.Symbol_P = new gpsimSymbol(sym);
 
-    //cout << "search symbol list\n";
-    //retval = search_symbols(s);
-    //if(retval)
-    //  return retval;
+     return recognize(SYMBOL_T,"symbol");
+   }
 
-    //cout << "didn't find it in the symbol list\n";
+   //cout << "didn't find it in the symbol list\n";
 
    // Either 1) there's a typo or 2) the command is creating
    // a new symbol or node or something along those lines.

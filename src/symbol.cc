@@ -99,7 +99,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 }
 
-void Symbol_Table::add_register(Processor *cpu, Register *new_reg)
+void Symbol_Table::add_register(Processor *cpu, Register *new_reg, char *symbol_name )
 {
 
   if(new_reg==0)
@@ -107,7 +107,11 @@ void Symbol_Table::add_register(Processor *cpu, Register *new_reg)
 
   register_symbol *rs = new register_symbol();
 
-  rs->name_str = new_reg->name();
+  if(symbol_name)
+    rs->name_str = symbol_name;
+  else
+    rs->name_str = new_reg->name();
+
   rs->cpu      = cpu;
   rs->reg      = new_reg;
   new_reg->symbol_alias = rs;
@@ -157,14 +161,18 @@ void Symbol_Table::add_address(Processor *cpu, char *new_name, int value)
 
 }
 
-void Symbol_Table::add_line_number(Processor *cpu, int address)
+void Symbol_Table::add_line_number(Processor *cpu, int address, char *symbol_name)
 {
 
   line_number_symbol *lns = new line_number_symbol();
 
-  char buf[64];
-  sprintf(buf,"line_%04x",address);  //there's probably a c++ way to do this
-  lns->name_str = buf;
+  if(symbol_name) 
+    lns->name_str = symbol_name;
+  else {
+    char buf[64];
+    sprintf(buf,"line_%04x",address);  //there's probably a c++ way to do this
+    lns->name_str = buf;
+  }
   lns->cpu      = cpu;
   lns->address  = address;
   st.push_back(lns);
@@ -479,7 +487,7 @@ void node_symbol::print(void)
 void register_symbol::print(void)
 {
   if(reg)
-    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_cpu()->registers[reg->address]->get_value() <<'\n';
+    cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_value() <<'\n';
 }
 int register_symbol::get_value(void)
 {

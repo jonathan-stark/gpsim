@@ -91,6 +91,11 @@ public:
   }
 
   char * toString(char *str, int len, int regsize=2);
+  char * toBitStr(char *s, int len, unsigned int BitPos, 
+		  char *HiBitNames=0,
+		  char *LoBitNames=0,
+		  char *UndefBitNames=0);
+
 };
 
 
@@ -254,6 +259,11 @@ public:
   virtual void put_trace_state(RegisterValue rv)
   {
     trace_state = rv;
+  }
+
+  virtual RegisterValue get_trace_state()
+  {
+    return trace_state;
   }
 
 protected:

@@ -1,4 +1,13 @@
 2004-08-16 Scott Dattalo <scott@dattalo.com>
+	* src/registers.cc, src/registers.h, src/symbol.cc,
+	  src/symbol.h, src/trace.cc, src/trace.h, cli/cmd_symbol.cc,
+	  cli/cmd_symbol.h, cli/expr.cc, cli/expr.h, cli/parse.yy,
+	  cli/scan.ll:
+	More improvements to tracing.
+	Added some more symbolic command line processing.
+
+
+2004-08-16 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, src/trace.h:
 	CVS was broken.
 

@@ -5,6 +5,7 @@
 
 #include "expr.h"
 #include "errors.h"
+#include "../src/symbol.h"
 
 using namespace std;
 
@@ -301,7 +302,40 @@ Float* Float::typeCheck(Value* val, string valDesc)
 }
 
 
+/*****************************************************************
+ * The gpsimSymbol class.
+ */
+gpsimSymbol::gpsimSymbol(symbol *_sym, bool isConstant)
+  : Value(isConstant), sym(_sym)
+{
+}
 
+gpsimSymbol::gpsimSymbol(symbol *_sym) 
+  : sym(_sym)
+{
+}
+
+gpsimSymbol::~gpsimSymbol()
+{
+}
+
+int gpsimSymbol::getAsInt()
+{
+  return 42;
+}
+
+double gpsimSymbol::getAsDouble()
+{
+  return 42.0;
+}
+
+string gpsimSymbol::toString()
+{
+  if(sym)
+    return sym->name_str;
+
+  return string("");
+}
 /*****************************************************************
  * The String class.
  */
@@ -493,3 +527,27 @@ string LiteralString::toString()
 }
 
 
+/*****************************************************************
+ * The gpsimSymbol class.
+ */
+/*
+LiteralSymbol::LiteralSymbol(gpsimSymbol *_sym)
+  : value(_sym)
+{
+}
+
+LiteralSymbol::~LiteralSymbol()
+{
+}
+
+Value* LiteralSymbol::evaluate()
+{
+  return  value;
+}
+
+string LiteralSymbol::toString()
+{
+  return value->toString();
+}
+
+*/

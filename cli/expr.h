@@ -190,6 +190,44 @@ private:
   unsigned int right;
 };
 
+/*****************************************************************/
+class symbol;
+class gpsimSymbol : public Value {
+
+public:
+	
+  gpsimSymbol(symbol *);
+  gpsimSymbol(symbol *, bool isConstant);
+
+  virtual ~gpsimSymbol();
+
+
+  string toString();
+
+  virtual int getAsInt();
+  virtual double getAsDouble();
+
+  virtual symbol *get_sym() { return sym; }
+private:
+  symbol *sym;
+};
+
+//----------------------------------------------------------------
+/*
+class LiteralSymbol : public Expression {
+
+public:
+
+  LiteralSymbol(gpsimSymbol *);
+  virtual ~LiteralSymbol();
+  virtual Value* evaluate();
+  string toString();
+
+ private:
+  gpsimSymbol *value;
+	
+};
+*/
 //-----------------------------------------------------------------
 class LiteralBoolean : public Expression {
 

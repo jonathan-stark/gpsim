@@ -113,6 +113,7 @@ void yyerror(char *message)
   Float*                    Float_P;
   Integer*                  Integer_P;
   String*                   String_P;
+  gpsimSymbol*              Symbol_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
@@ -176,6 +177,7 @@ void yyerror(char *message)
 %token <Boolean_P>   LITERAL_BOOL_T
 %token <Float_P>     LITERAL_FLOAT_T
 %token <String_P>    LITERAL_STRING_T
+%token <Symbol_P>    SYMBOL_T
 
 
 %token AND_T
@@ -503,6 +505,7 @@ symbol_cmd
           {
 	    c_symbol.add_one($2,$3,$4);
 	  }
+          | SYMBOL SYMBOL_T             {c_symbol.dump_one($2);}
           ;
 
 
