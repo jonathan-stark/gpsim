@@ -46,12 +46,8 @@ int use_gui=0;
 int quit_state;
 
 extern "C" {
-<<<<<<< main.cc
-int gui_init (int argc, const char **argv);
-=======
 #include <popt.h>
-int gui_init (int argc, char **argv);
->>>>>>> 1.7
+int gui_init (int argc, const char **argv);
 void gui_main(void);
 extern void exit_gpsim(void);
 
