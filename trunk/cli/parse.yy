@@ -593,7 +593,7 @@ opt_mdef_arglist
 
 mdef_body
         : /* empty */
-        | mdef_body_
+        | mdef_body_                    {; }
         ;
 
 mdef_body_
