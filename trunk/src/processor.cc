@@ -514,16 +514,7 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_break_at_address(int address)
 {
-  /*
-  int pm_index = cpu->map_pm_address2index(address);
-
-  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
-    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_execution_break(cpu, address);
-  */
-
-  instruction &q = this->operator[](address);
-  if(q.isa() != instruction::INVALID_INSTRUCTION)
+  if(hasValid_opcode(address))
     bp.set_execution_break(cpu, address);
 
 
@@ -532,11 +523,9 @@ void ProgramMemoryAccess::set_break_at_address(int address)
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_notify_at_address(int address, BreakCallBack *cb)
 {
-  int pm_index = cpu->map_pm_address2index(address);
+  if(hasValid_opcode(address))
+    bp.set_notify_break(cpu, address, cb);
 
-  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
-    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_notify_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
@@ -552,11 +541,14 @@ void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBac
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakCallBack *cb)
 {
+/*
   int pm_index = cpu->map_pm_address2index(address);
 
   if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
     if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_profile_stop_break(cpu, address, cb);
+*/
+  if(hasValid_opcode(address))
+    bp.set_profile_stop_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
@@ -790,9 +782,9 @@ void Processor::dump_registers (void)
 //-------------------------------------------------------------------
 instruction &ProgramMemoryAccess::operator [] (int address)
 {
-
+  cout << "pma[0x"<< hex << address << "]\n";
   if(!cpu ||cpu->program_memory_size()<=address  || address<0)
-    throw;
+    return bad_instruction;
 
   return *cpu->program_memory[cpu->map_pm_address2index(address)];
 }
@@ -863,11 +855,25 @@ guint64 Processor::register_write_accesses(unsigned int address)
 void ProgramMemoryAccess::put(int addr, instruction *new_instruction)
 {
 
+  if(!new_instruction)
+    return;
+
+
+  if(hasValid_opcode(address)) {
+
+    (this->operator[](address)) = *new_instruction;
+
+    if(new_instruction->xref)
+      new_instruction->xref->update();
+  }
+
+
+/*
   cpu->program_memory[addr] = new_instruction;
 
   if(cpu->program_memory[addr]->xref)
       cpu->program_memory[addr]->xref->update();
-
+*/
 
 }
 
@@ -1035,12 +1041,14 @@ void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
 
 //--------------------------------------------------------------------------
 
-bool  ProgramMemoryAccess::isValid_opcode(unsigned int address)
+bool  ProgramMemoryAccess::hasValid_opcode(unsigned int address)
 {
 
-  if((address < cpu->program_memory_size()) && 
-     (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION))
+  if((this->operator[](address)).isa() != instruction::INVALID_INSTRUCTION)
     return true;
+
+  //  if((address < cpu->program_memory_size()) && 
+  //     (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION))
 
   return false;
 }

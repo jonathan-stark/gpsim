@@ -93,8 +93,8 @@ class ProgramMemoryAccess :  public BreakCallBack
 
   // Helper functions for querying the program memory
 
-  // isValid_opcode -- returns true if the opcode at the address is valid
-  bool isValid_opcode(unsigned int address);
+  // hasValid_opcode -- returns true if the opcode at the address is valid
+  bool hasValid_opcode(unsigned int address);
 
   // isModified -- returns true if the program at the address has been modified 
   // (this is only valid for those processor capable of writing to their own
