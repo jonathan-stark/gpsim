@@ -399,7 +399,7 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
       text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
 
       errno = 0;
-      if(strlen(text)>0)
+      if(text!=NULL && strlen(text)>0)
 	n = get_number_in_string(text);
       else
 	errno = ERANGE;
