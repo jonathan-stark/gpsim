@@ -1102,12 +1102,12 @@ void IOPIN::attach(Stimulus_Node *s)
 //
 Register *IOPIN::get_iop(void)
 {
-
   if(iopp)
     return *iopp;
-
-  if(iop)
+  else if(iop)
     return iop;
+  else
+    return 0;
 }
 
 //========================================================================
