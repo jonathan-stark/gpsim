@@ -603,8 +603,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 		gpsim_clear_profile_stop_at_address(pic_id,address);
 	    }
 	    gpsim_set_profile_start_at_address(pic_id,
-						  address,
-						  ProfileWindow_notify_start_callback,
+					       address,
+					       (void (*)(gpointer))ProfileWindow_notify_start_callback,
 					       popup_sbaw->sbw.gui_obj.gp->profile_window);
 	}
 	break;
@@ -632,7 +632,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    }
 	    gpsim_set_profile_stop_at_address(pic_id,
 					      address,
-					      ProfileWindow_notify_stop_callback,
+					      (void (*)(gpointer))ProfileWindow_notify_stop_callback,
 					      popup_sbaw->sbw.gui_obj.gp->profile_window);
 	}
 	break;

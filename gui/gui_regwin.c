@@ -62,7 +62,12 @@ typedef enum {
     MENU_BREAK_READ_VALUE,
     MENU_BREAK_WRITE_VALUE,
     MENU_ADD_WATCH,
-    MENU_SETTINGS
+    MENU_SETTINGS,
+    MENU_LOG_FILENAME,
+    MENU_LOG_READ,
+    MENU_LOG_WRITE,
+    MENU_LOG_READ_VALUE,
+    MENU_LOG_WRITE_VALUE,
 } menu_id;
 
 
@@ -77,6 +82,11 @@ static menu_item menu_items[] = {
     {"Set break on write", MENU_BREAK_WRITE},
     {"Set break on read value...", MENU_BREAK_READ_VALUE},
     {"Set break on write value...", MENU_BREAK_WRITE_VALUE},
+    {"Set log filename...", MENU_LOG_FILENAME},
+    {"Set log on read", MENU_LOG_READ},
+    {"Set log on write", MENU_LOG_WRITE},
+    {"Set log on read value...", MENU_LOG_READ_VALUE},
+    {"Set log on write value...", MENU_LOG_WRITE_VALUE},
     {"Add watch", MENU_ADD_WATCH},
     {"Settings...", MENU_SETTINGS}
 };
@@ -184,6 +194,61 @@ int gui_get_value(char *prompt)
     return -1;
 }
 
+
+static char *file_selection_name;
+
+static void
+file_selection_ok (GtkWidget        *w,
+		   GtkFileSelection *fs)
+{
+    char *file;
+
+    file_selection_name=gtk_file_selection_get_filename (fs);
+
+    gtk_widget_hide (GTK_WIDGET (fs));
+}
+
+static char *gui_get_filename(char *prompt)
+{
+    static GtkWidget *window = NULL;
+
+    if (!window)
+    {
+
+	window = gtk_file_selection_new (prompt);
+
+	gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));
+
+	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
+
+	gtk_signal_connect_object(GTK_OBJECT(window),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
+	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+			    (gpointer)&window);
+
+	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
+			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
+			    window);
+	gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+				   "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
+				   GTK_OBJECT (window));
+    }
+
+    file_selection_name=NULL;
+    gtk_widget_show_now(window);
+
+    gtk_grab_add(window);
+    gtk_main();
+    gtk_grab_remove(window);
+    
+    gtk_widget_hide(window);
+
+    return file_selection_name;
+}
+
+extern int gui_question(char *question, char *a, char *b);
+
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
@@ -196,6 +261,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     GtkSheetRange range;
     unsigned int address;
     int value;
+    char *filename;
 
     if(widget==NULL || data==NULL)
     {
@@ -266,6 +332,49 @@ popup_activated(GtkWidget *widget, gpointer data)
 	break;
     case MENU_SETTINGS:
         settings_dialog(popup_rw);
+        break;
+    case MENU_LOG_FILENAME:
+	filename = gui_get_filename("Log file name:");
+        if(filename!=NULL)
+	    gpsim_set_log_name(pic_id,filename);
+        break;
+    case MENU_LOG_READ:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=popup_rw->row_to_address[j]+i;
+		gpsim_reg_set_read_logging(pic_id, popup_rw->type, address);
+	    }
+	break;
+    case MENU_LOG_WRITE:
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=popup_rw->row_to_address[j]+i;
+		gpsim_reg_set_write_logging(pic_id, popup_rw->type, address);
+	    }
+        break;
+    case MENU_LOG_READ_VALUE:
+	value = gui_get_value("value that the read must match for logging it:");
+	if(value<0)
+	    break; // Cancel
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=popup_rw->row_to_address[j]+i;
+		gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, 0xff);
+	    }
+        break;
+    case MENU_LOG_WRITE_VALUE:
+	value = gui_get_value("value that the write must match for logging it:");
+	if(value<0)
+	    break; // Cancel
+	for(j=range.row0;j<=range.rowi;j++)
+	    for(i=range.col0;i<=range.coli;i++)
+	    {
+		address=popup_rw->row_to_address[j]+i;
+		gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, 0xff);
+	    }
         break;
     default:
 	puts("Unhandled menuitem?");
