@@ -62,77 +62,7 @@ file_register::~file_register(void)
 //    delete(xref);
 }
 
-//--------------------------------------------------
-// get
-//
-//  Return the contents of the file register.
-// (note - breakpoints on file register reads
-//  are not checked here. Instead, a breakpoint
-//  object replaces those instances of file 
-//  registers for which we wish to monitor.
-//  So a file_register::get call will invoke
-//  the breakpoint::get member function. Depending
-//  on the type of break point, this get() may
-//  or may not get called).
-//
-//
-// FIXME - should be inlined
-unsigned int file_register::get(void)
-{
-  trace.register_read(address,value);
 
-  return(value);
-}
-
-int file_register::get_bit(unsigned int bit_number)
-{
-
-  return( (value >>  (bit_number & 0x07)) & 1 );
-
-}
-
-int file_register::get_bit_voltage(unsigned int bit_number)
-{
-  if(get_bit(bit_number))
-    return +1000;
-  else
-    return -1000;
-}
-
-//--------------------------------------------------
-//
-//  Update the contents of the file register.
-//  See the comment above in file_register::get()
-//  with respect to break points
-//
-
-void file_register::put(unsigned int new_value)
-{
-
-  value = new_value;
-  trace.register_write(address,value);
-
-}
-
-//--------------------------------------------------
-// set_bit
-//
-//  set a single bit in a register. Note that this
-// is really not intended to be used on the file_register
-// class. Instead, setbit is a place holder for high level
-// classes that overide this function
-void file_register::setbit(unsigned int bit_number, bool new_value)
-{
-  if(bit_number < 8) {
-    value = (value & ~(1<<bit_number)) | (1<<bit_number);
-    trace.register_write(address,value);
-  }
-}
-
-void file_register::setbit_value(unsigned int bit_number, bool new_value)
-{
-  setbit(bit_number,new_value);
-}
 
 
 void file_register::new_name(char *s)
@@ -194,10 +124,10 @@ void file_register::put_value(unsigned int new_value)
     {
       xref->update();
 
-      if(cpu && address == cpu->fsr->value)
+      if(cpu && address == cpu_pic->fsr->value)
 	{
-	  if(cpu->indf->xref)
-	    cpu->indf->xref->update();
+	  if(cpu_pic->indf->xref)
+	    cpu_pic->indf->xref->update();
 	}
     }
 }
@@ -241,13 +171,11 @@ void  FSR::put(unsigned int new_value)
   trace.register_write(address,value);
 
   /* The 12-bit core selects the register page using the fsr */
-  if(cpu->base_isa() == _12BIT_PROCESSOR_)
+  if(cpu_pic->base_isa() == _12BIT_PROCESSOR_)
     {
       cpu->register_bank = &cpu->registers[ value & register_page_bits ];
-      value = cpu->get_fsr_value ( new_value );	// adjust for missing bits
+      value = cpu_pic->get_fsr_value ( new_value );	// adjust for missing bits
     }
-
-
 }
 
 void  FSR::put_value(unsigned int new_value)
@@ -260,8 +188,8 @@ void  FSR::put_value(unsigned int new_value)
   if(xref)
   {
       xref->update();
-      if(cpu->indf->xref)
-	cpu->indf->xref->update();
+      if(cpu_pic->indf->xref)
+	cpu_pic->indf->xref->update();
   }
 
   //#endif
@@ -296,7 +224,7 @@ void inline Status_register::put(unsigned int new_value)
 
   value = (value & ~write_mask) | (new_value & write_mask);
 
-  if(cpu->base_isa() == _14BIT_PROCESSOR_)
+  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     {
       cpu->register_bank = &cpu->registers[(value & rp_mask) << 2];
     }
@@ -344,7 +272,7 @@ INDF::INDF(void)
 void INDF::initialize(void)
 {
 
-  switch(cpu->base_isa()) {
+  switch(cpu_pic->base_isa()) {
 
   _12BIT_PROCESSOR_:
     fsr_mask = 0x1f;
@@ -368,8 +296,8 @@ void INDF::put(unsigned int new_value)
 {
 
   trace.register_write(address,value);
-  int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	     ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+  int reg = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
   if(reg & fsr_mask){
@@ -395,8 +323,8 @@ void INDF::put_value(unsigned int new_value)
   if(xref)
     {
       xref->update();
-      int r = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	       ((cpu->status->value & base_address_mask1)<<1)& base_address_mask2);
+      int r = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+	       ((cpu_pic->status->value & base_address_mask1)<<1)& base_address_mask2);
       if(r & fsr_mask) 
 	{
 	  if(cpu->registers[r]->xref)
@@ -411,8 +339,8 @@ unsigned int INDF::get(void)
 {
 
   trace.register_read(address,value);
-  int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	     ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+  int reg = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get());
   else
@@ -421,8 +349,8 @@ unsigned int INDF::get(void)
 
 unsigned int INDF::get_value(void)
 {
-  int reg = (cpu->fsr->value + 
-	       ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+  int reg = (cpu_pic->fsr->value + 
+	       ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get_value());
   else
@@ -457,15 +385,15 @@ void OPTION_REG::put(unsigned int new_value)
 
   // Now check the rest of the tmr0 bits.
   if( (value ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
-    cpu->tmr0.new_prescale();
+    cpu_pic->tmr0.new_prescale();
 
   if( (value ^ old_value) & (PSA | PS2 | PS1 | PS0))
-    cpu->wdt.new_prescale();
+    cpu_pic->wdt.new_prescale();
 
   if( (value ^ old_value) & (BIT6 | BIT7))
-    cpu->option_new_bits_6_7(value & (BIT6 | BIT7));
+    cpu_pic->option_new_bits_6_7(value & (BIT6 | BIT7));
 
-  if(cpu->base_isa() == _14BIT_PROCESSOR_)
+  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     trace.register_write(address,value);
   else
     trace.write_OPTION(value);
@@ -509,14 +437,8 @@ PCL::PCL(void) : sfr_register()
 // %%% FIX ME %%% breaks are different
 void PCL::put(unsigned int new_value)
 {
-  //  if(break_point) 
-  //  {
-  //    if(bp.check_write_break(this))
-  //      cpu->pc->computed_goto(new_value);
-  //  }
-  //  else
-    cpu->pc->computed_goto(new_value);
 
+  cpu_pic->pc->computed_goto(new_value);
   trace.register_write(address,value);
 }
 
@@ -524,7 +446,7 @@ void PCL::put_value(unsigned int new_value)
 {
 
   value = new_value;
-  cpu->pc->put_value( (cpu->pc->get_value() & 0xffffff00) | value);
+  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffffff00) | value);
 
   // The gui (if present) will be updated in the pc->put_value call.
 }
@@ -562,7 +484,7 @@ void PCLATH::put_value(unsigned int new_value)
 {
 
   value = new_value & PCLATH_MASK;
-  cpu->pc->put_value( (cpu->pc->get_value() & 0xffff00ff) | (value<<8) );
+  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value<<8) );
 
   // The gui (if present) will be updated in the pc->put_value call.
 }
@@ -629,7 +551,7 @@ void Program_Counter::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl->value = value & 0xff;
+  cpu_pic->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -651,7 +573,7 @@ void Program_Counter::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl->value = value & 0xff;
+  cpu_pic->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -665,9 +587,9 @@ void Program_Counter::jump(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+  value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -690,7 +612,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -712,12 +634,12 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = (new_address | cpu->get_pclath_branching_modpcl() ) & memory_size_mask;
+  value = (new_address | cpu_pic->get_pclath_branching_modpcl() ) & memory_size_mask;
 
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -735,7 +657,7 @@ void Program_Counter::new_address(unsigned int new_value)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   cpu->cycles.increment();
   cpu->cycles.increment();
 }
@@ -759,17 +681,17 @@ unsigned int Program_Counter::get_next(void)
 void Program_Counter::put_value(unsigned int new_value)
 {
   value = new_value & memory_size_mask;
-  cpu->pcl->value = value & 0xff;
-  cpu->pclath->value = (new_value >> 8) & PCLATH_MASK;
+  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pclath->value = (new_value >> 8) & PCLATH_MASK;
 
   trace.program_counter(value);
 
   if(xref)
     {
-      if(cpu->pcl->xref)
-	cpu->pcl->xref->update();
-      if(cpu->pclath->xref)
-	cpu->pclath->xref->update();
+      if(cpu_pic->pcl->xref)
+	cpu_pic->pcl->xref->update();
+      if(cpu_pic->pclath->xref)
+	cpu_pic->pclath->xref->update();
 	xref->update();
     }
   
@@ -1141,7 +1063,7 @@ void EEPROM::write_is_complete(void)
 
   eecon1.value = (eecon1.value  & (~eecon1.WR)) | eecon1.EEIF;
 
-  cpu->intcon->peripheral_interrupt();
+  cpu14->intcon->peripheral_interrupt();
 
 
 }
@@ -1223,7 +1145,7 @@ void EEPROM_87x::callback(void)
     if(eecon1.value & EECON1::EEPGD) {
       // read program memory
       
-      int opcode = cpu->pma.get_opcode(eeadr.value | (eeadrh.value << 8));
+      int opcode = cpu_pic->pma.get_opcode(eeadr.value | (eeadrh.value << 8));
       //cout << "read " << i << " from program memory\n";
       eedata.value = opcode & 0xff;
       eedatah.value = (opcode>>8) & 0xff;

@@ -41,7 +41,7 @@ class Breakpoint_Instruction : public instruction
 {
 public:
 
-  pic_processor *cpu;
+  Processor *cpu;
   unsigned int address;
   unsigned int bpn;
   instruction *replaced;
@@ -53,7 +53,7 @@ public:
   virtual int get_file_id(void);
   virtual int get_hll_file_id(void);
 
-  Breakpoint_Instruction(pic_processor *new_cpu, unsigned int new_address, unsigned int bp);
+  Breakpoint_Instruction(Processor *new_cpu, unsigned int new_address, unsigned int bp);
 
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
@@ -95,7 +95,7 @@ class Notify_Instruction : public Breakpoint_Instruction
 {
     BreakCallBack *callback;
 public:
-    Notify_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    Notify_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
     virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
     virtual void execute(void);
 };
@@ -103,14 +103,14 @@ public:
 class Profile_Start_Instruction : public Notify_Instruction
 {
 public:
-    Profile_Start_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    Profile_Start_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
     virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
 };
 
 class Profile_Stop_Instruction : public Notify_Instruction
 {
 public:
-    Profile_Stop_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    Profile_Stop_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
     virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
 };
 
@@ -153,7 +153,7 @@ enum BREAKPOINT_TYPES
 struct BreakStatus
 {
   BREAKPOINT_TYPES type;
-  pic_processor *cpu;
+  Processor *cpu;
   unsigned int arg1;
   unsigned int arg2;
   BreakCallBack *f;
@@ -165,29 +165,29 @@ struct BreakStatus
 
 
   Breakpoints(void);
-  unsigned int set_breakpoint(BREAKPOINT_TYPES,pic_processor *,unsigned int, unsigned int,BreakCallBack *f = NULL);
-  unsigned int set_execution_break(pic_processor *cpu, unsigned int address);
-  unsigned int set_notify_break(pic_processor *cpu, unsigned int address, BreakCallBack *cb);
-  unsigned int set_profile_start_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
-  unsigned int set_profile_stop_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
-  unsigned int set_read_break(pic_processor *cpu, unsigned int register_number);
-  unsigned int set_write_break(pic_processor *cpu, unsigned int register_number);
-  unsigned int set_read_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
-  unsigned int set_write_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
-  unsigned int set_cycle_break(pic_processor *cpu, guint64 cycle,BreakCallBack *f = NULL);
-  unsigned int set_wdt_break(pic_processor *cpu);
-  unsigned int set_stk_overflow_break(pic_processor *cpu);
-  unsigned int set_stk_underflow_break(pic_processor *cpu);
+  unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,unsigned int, unsigned int,BreakCallBack *f = NULL);
+  unsigned int set_execution_break(Processor *cpu, unsigned int address);
+  unsigned int set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *cb);
+  unsigned int set_profile_start_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
+  unsigned int set_profile_stop_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
+  unsigned int set_read_break(Processor *cpu, unsigned int register_number);
+  unsigned int set_write_break(Processor *cpu, unsigned int register_number);
+  unsigned int set_read_value_break(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_write_value_break(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_cycle_break(Processor *cpu, guint64 cycle,BreakCallBack *f = NULL);
+  unsigned int set_wdt_break(Processor *cpu);
+  unsigned int set_stk_overflow_break(Processor *cpu);
+  unsigned int set_stk_underflow_break(Processor *cpu);
   unsigned int check_write_break(file_register *fr);
   unsigned int check_read_break(file_register *fr);
   unsigned int check_break(file_register *fr);
   unsigned int check_invalid_fr_break(invalid_file_register *fr);
   unsigned int check_cycle_break(unsigned int abp);
 
-  unsigned int set_notify_read(pic_processor *cpu, unsigned int register_number);
-  unsigned int set_notify_write(pic_processor *cpu, unsigned int register_number);
-  unsigned int set_notify_read_value(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
-  unsigned int set_notify_write_value(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_notify_read(Processor *cpu, unsigned int register_number);
+  unsigned int set_notify_write(Processor *cpu, unsigned int register_number);
+  unsigned int set_notify_read_value(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
+  unsigned int set_notify_write_value(Processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
 
   inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
   inline void halt(void) {
@@ -214,10 +214,10 @@ struct BreakStatus
   void dump(void);
   void dump_traced(unsigned int b);
   void clear(unsigned int b);
-  void clear_all(pic_processor *c);
-  void clear_all_set_by_user(pic_processor *c);
+  void clear_all(Processor *c);
+  void clear_all_set_by_user(Processor *c);
   void initialize_breakpoints(unsigned int memory_size);
-  instruction *find_previous(pic_processor *cpu, unsigned int address, instruction *_this);
+  instruction *find_previous(Processor *cpu, unsigned int address, instruction *_this);
 
 };
 
@@ -243,7 +243,7 @@ public:
 			      * then this will point to the next one.  */
 
   Notify_Register(void){ replaced = NULL; next = NULL;};
-  Notify_Register(pic_processor *, int, int );
+  Notify_Register(Processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
   virtual char *name(void)
@@ -293,7 +293,7 @@ public:
       return(replaced->get_bit_voltage(bit_number));
     }
 
-  void replace(pic_processor *_cpu, unsigned int reg);
+  void replace(Processor *_cpu, unsigned int reg);
   unsigned int clear(unsigned int bp_num);
 
 };
@@ -312,7 +312,7 @@ public:
       last_value = 0;
     }
 
-  Notify_Register_Value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ):
+  Notify_Register_Value(Processor *_cpu, int _repl, int bp, int bv, int bm ):
     Notify_Register(_cpu,_repl,bp ) 
     { 
       break_value = bv;
@@ -331,7 +331,7 @@ public:
 
 
   Break_register_read(void){ };
-  Break_register_read(pic_processor *_cpu, int _repl, int bp ):
+  Break_register_read(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
 
 
@@ -347,7 +347,7 @@ public:
 
 
   Break_register_write(void){ };
-  Break_register_write(pic_processor *_cpu, int _repl, int bp ):
+  Break_register_write(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   void put(unsigned int new_value);
   void setbit(unsigned int bit_number, bool new_value);
@@ -359,7 +359,7 @@ class Break_register_read_value : public Notify_Register_Value
 public:
 
   Break_register_read_value(void){ };
-  Break_register_read_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Break_register_read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   unsigned int get(void);
@@ -373,7 +373,7 @@ class Break_register_write_value : public Notify_Register_Value
 public:
 
   Break_register_write_value(void){ };
-  Break_register_write_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Break_register_write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   void put(unsigned int new_value);
@@ -385,7 +385,7 @@ class Log_Register_Write : public Notify_Register
  public:
 
   Log_Register_Write(void){ };
-  Log_Register_Write(pic_processor *_cpu, int _repl, int bp ):
+  Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   void put(unsigned int new_value);
   void setbit(unsigned int bit_number, bool new_value);
@@ -398,7 +398,7 @@ public:
 
 
   Log_Register_Read(void){ };
-  Log_Register_Read(pic_processor *_cpu, int _repl, int bp ):
+  Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Notify_Register(_cpu,_repl,bp ) { };
   unsigned int get(void);
   int get_bit(unsigned int bit_number);
@@ -410,7 +410,7 @@ class Log_Register_Read_value : public Notify_Register_Value
 public:
 
   Log_Register_Read_value(void){ };
-  Log_Register_Read_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Log_Register_Read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
   unsigned int get(void);
   int get_bit(unsigned int bit_number);
@@ -422,7 +422,7 @@ class Log_Register_Write_value : public Notify_Register_Value
 public:
 
   Log_Register_Write_value(void){ };
-  Log_Register_Write_value(pic_processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Log_Register_Write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
     Notify_Register_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   void put(unsigned int new_value);
@@ -455,7 +455,7 @@ public:
 class InterfaceObject : public BreakCallBack
 {
 public:
-  pic_processor *pic;
+  Processor *pic;
 
   void (*callback_function)(gpointer);
   gpointer callback_data;

@@ -43,7 +43,7 @@ extern pic_processor *active_cpu;
 
 Breakpoints bp;
 
-unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1)
+unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1)
 {
   file_register *fr;
   int i;
@@ -207,14 +207,14 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
       break;
 
     case BREAK_ON_STK_OVERFLOW:
-      if(cpu->stack->set_break_on_overflow(1))
+      if(((pic_processor *)(cpu))->stack->set_break_on_overflow(1))
 	return (breakpoint_number);
 
       break_status[breakpoint_number].type = BREAK_CLEAR;
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
-      if(cpu->stack->set_break_on_underflow(1))
+      if(((pic_processor *)(cpu))->stack->set_break_on_underflow(1))
 	return (breakpoint_number);
 
       break_status[breakpoint_number].type = BREAK_CLEAR;
@@ -260,37 +260,37 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
 }
 
 
-unsigned int  Breakpoints::set_execution_break(pic_processor *cpu, unsigned int address)
+unsigned int  Breakpoints::set_execution_break(Processor *cpu, unsigned int address)
 {
   return(set_breakpoint (Breakpoints::BREAK_ON_EXECUTION, cpu, address, 0));
 }
 
-unsigned int  Breakpoints::set_notify_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
+unsigned int  Breakpoints::set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = NULL)
 {
   return(set_breakpoint (Breakpoints::NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
-unsigned int  Breakpoints::set_profile_start_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1)
+unsigned int  Breakpoints::set_profile_start_break(Processor *cpu, unsigned int address, BreakCallBack *f1)
 {
   return(set_breakpoint (Breakpoints::PROFILE_START_NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
-unsigned int  Breakpoints::set_profile_stop_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1)
+unsigned int  Breakpoints::set_profile_stop_break(Processor *cpu, unsigned int address, BreakCallBack *f1)
 {
   return(set_breakpoint (Breakpoints::PROFILE_STOP_NOTIFY_ON_EXECUTION, cpu, address, 0, f1));
 }
 
-unsigned int  Breakpoints::set_read_break(pic_processor *cpu, unsigned int register_number)
+unsigned int  Breakpoints::set_read_break(Processor *cpu, unsigned int register_number)
 {
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_READ, cpu, register_number, 0));
 }
 
-unsigned int  Breakpoints::set_write_break(pic_processor *cpu, unsigned int register_number)
+unsigned int  Breakpoints::set_write_break(Processor *cpu, unsigned int register_number)
 {
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE, cpu, register_number, 0));
 }
 
-unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
+unsigned int  Breakpoints::set_read_value_break(Processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;
@@ -302,7 +302,7 @@ unsigned int  Breakpoints::set_read_value_break(pic_processor *cpu, unsigned int
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_READ_VALUE, cpu, register_number, value));
 }
 
-unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
+unsigned int  Breakpoints::set_write_value_break(Processor *cpu, unsigned int register_number,unsigned int value, unsigned int mask)
 {
   if(mask == 0)
     mask = 0xff;
@@ -314,23 +314,23 @@ unsigned int  Breakpoints::set_write_value_break(pic_processor *cpu, unsigned in
   return(set_breakpoint (Breakpoints::BREAK_ON_REG_WRITE_VALUE, cpu, register_number, value));
 }
 
-unsigned int  Breakpoints::set_cycle_break(pic_processor *cpu, guint64 future_cycle, BreakCallBack *f1)
+unsigned int  Breakpoints::set_cycle_break(Processor *cpu, guint64 future_cycle, BreakCallBack *f1)
 {
 
   return(set_breakpoint (Breakpoints::BREAK_ON_CYCLE, cpu, future_cycle & 0xffffffff, future_cycle>>32,f1));    
 }
 
 
-unsigned int Breakpoints::set_stk_overflow_break(pic_processor *cpu)
+unsigned int Breakpoints::set_stk_overflow_break(Processor *cpu)
 {
   return(set_breakpoint (Breakpoints::BREAK_ON_STK_OVERFLOW, cpu, 0, 0));
 }
-unsigned int Breakpoints::set_stk_underflow_break(pic_processor *cpu)
+unsigned int Breakpoints::set_stk_underflow_break(Processor *cpu)
 {
   return(set_breakpoint (Breakpoints::BREAK_ON_STK_UNDERFLOW, cpu, 0, 0));
 }
 
-unsigned int  Breakpoints::set_wdt_break(pic_processor *cpu)
+unsigned int  Breakpoints::set_wdt_break(Processor *cpu)
 {
   // Set a wdt break only if one is not already set.
 
@@ -341,16 +341,16 @@ unsigned int  Breakpoints::set_wdt_break(pic_processor *cpu)
 }
 
 
-unsigned int Breakpoints::set_notify_read(pic_processor *cpu, unsigned int register_number)
+unsigned int Breakpoints::set_notify_read(Processor *cpu, unsigned int register_number)
 {
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ, cpu, register_number, 0));
 }
 
-unsigned int Breakpoints::set_notify_write(pic_processor *cpu, unsigned int register_number)
+unsigned int Breakpoints::set_notify_write(Processor *cpu, unsigned int register_number)
 {
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
 }
-unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int register_number, 
+unsigned int Breakpoints::set_notify_read_value(Processor *cpu, unsigned int register_number, 
 						unsigned int value, unsigned int mask)
 {
   if(mask == 0)
@@ -363,7 +363,7 @@ unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ_VALUE, cpu, register_number, value));
 }
 
-unsigned int Breakpoints::set_notify_write_value(pic_processor *cpu, unsigned int register_number,
+unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int register_number,
 						   unsigned int value, unsigned int mask)
 {
   if(mask == 0)
@@ -576,7 +576,7 @@ void Breakpoints::dump(void)
 }
 
 
-instruction *Breakpoints::find_previous(pic_processor *cpu, unsigned int address, instruction *_this)
+instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, instruction *_this)
 {
     Breakpoint_Instruction *p;
 
@@ -775,16 +775,18 @@ void Breakpoints::clear(unsigned int b)
 	  break;
 
 	case BREAK_ON_STK_OVERFLOW:
+
 	  break_status[b].type = BREAK_CLEAR;
-	  if(bs.cpu->stack->set_break_on_overflow(0))
+	  if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
 	    cout << "Cleared stack overflow break point.\n";
 	  else
 	    cout << "Stack overflow break point is already cleared.\n";
+
 	  break;
 
 	case BREAK_ON_STK_UNDERFLOW:
 	  break_status[b].type = BREAK_CLEAR;
-	  if(bs.cpu->stack->set_break_on_underflow(0))
+	  if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
 	    cout << "Cleared stack underflow break point.\n";
 	  else
 	    cout << "Stack underflow break point is already cleared.\n";
@@ -857,7 +859,7 @@ void Breakpoints::dump_traced(unsigned int b)
 // wants to clear the break points. Otherwise, internal break points like
 // invalid register accesses will get cleared.
 
-void Breakpoints::clear_all(pic_processor *c)
+void Breakpoints::clear_all(Processor *c)
 {
 
   for(int i=0; i<MAX_BREAKPOINTS; i++)
@@ -868,7 +870,7 @@ void Breakpoints::clear_all(pic_processor *c)
 
 }
 
-void Breakpoints::clear_all_set_by_user(pic_processor *c)
+void Breakpoints::clear_all_set_by_user(Processor *c)
 {
 
   for(int i=0; i<MAX_BREAKPOINTS; i++)
@@ -910,7 +912,7 @@ void Breakpoint_Instruction::execute(void)
 
 }
 
-Breakpoint_Instruction::Breakpoint_Instruction(pic_processor *new_cpu, unsigned int new_address,unsigned int bp)
+Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, unsigned int new_address,unsigned int bp)
 {
   cpu = new_cpu;
   address = new_address;
@@ -964,23 +966,23 @@ void Notify_Instruction::execute(void)
     replaced->execute();
 }
 
-Notify_Instruction::Notify_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Breakpoint_Instruction(cpu, address,bp)
+Notify_Instruction::Notify_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Breakpoint_Instruction(cpu, address,bp)
 {
     callback=cb;
     
 }
 //---------------------------------------------------------------------------------------
-Profile_Start_Instruction::Profile_Start_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
+Profile_Start_Instruction::Profile_Start_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
 {
     
 }
 
-Profile_Stop_Instruction::Profile_Stop_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
+Profile_Stop_Instruction::Profile_Stop_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
 {
     
 }
 //---------------------------------------------------------------------------------------
-Notify_Register::Notify_Register(pic_processor *_cpu, int _repl, int bp)
+Notify_Register::Notify_Register(Processor *_cpu, int _repl, int bp)
 {
 
   break_point = bp;
@@ -988,7 +990,7 @@ Notify_Register::Notify_Register(pic_processor *_cpu, int _repl, int bp)
 
 }
 
-void Notify_Register::replace(pic_processor *_cpu, unsigned int reg)
+void Notify_Register::replace(Processor *_cpu, unsigned int reg)
 {
   file_register *fr = _cpu->registers[reg];
 

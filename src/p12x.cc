@@ -107,7 +107,7 @@ void P12C508::create_sfr_map(void)
 void P12C508::create_symbols(void)
 {
 
-  symbol_table.add_ioport(gpio.cpu, &gpio);
+  symbol_table.add_ioport(this, &gpio);
 
 }
 
@@ -267,21 +267,17 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   //    Then wake 
   if( diff & 0x0b)
     {
-      if( ((cpu->option_reg.value & 0x80) == 0) && bp.have_sleep()) {
+      if( ((cpu12->option_reg.value & 0x80) == 0) && bp.have_sleep()) {
 
 	if(verbose)
 	  cout << "IO bit changed while the processor was sleeping,\n\
 so the processor is waking up\n";
 
-	cpu->status->put(cpu->status->get() | 0x80);  // Set GPWUF flag
+	cpu12->status->put(cpu12->status->get() | 0x80);  // Set GPWUF flag
 	bp.clear_sleep();                 // Wake up the processor.
 
-	cpu->pc->reset();
+	cpu12->pc->reset();
 
-	// If the cpu is not running then advance the program counter
-	//if((simulation_mode == STOPPED) ||
-	//   (simulation_mode == SINGLE_STEPPING) )
-	//  cpu->pc->increment();
 
       }
     }

@@ -65,7 +65,7 @@ public:
   void add_ioport(pic_processor *cpu, IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
-  void add_line_number(pic_processor *cpu, int address);
+  void add_line_number(Processor *cpu, int address);
   void add_constant(pic_processor *cpu, char *, int );
   void add_register(pic_processor *cpu, file_register *reg);
   void add_address(pic_processor *cpu, char *, int );
@@ -230,7 +230,7 @@ class w_symbol : public symbol
 
   virtual void print(void) {
     if(cpu)
-      cout << w->name() << hex << " = 0x" << w->cpu->W->get_value() <<'\n';
+      cout << w->name() << hex << " = 0x" << w->get_value() <<'\n';
   }
   virtual int get_value(void) {
     return w->value;

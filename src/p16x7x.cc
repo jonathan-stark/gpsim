@@ -296,7 +296,7 @@ int ADCON1::get_Vref(void)
   if ( Vrefhi_position[value & valid_bits] ==  3)
     vrefhi = analog_port->get_bit_voltage(3);
   else
-    vrefhi = (int)(cpu->Vdd * MAX_ANALOG_DRIVE);
+    vrefhi = (int)(cpu14->Vdd * MAX_ANALOG_DRIVE);
 
 
   if ( Vreflo_position[value & valid_bits] ==  2)
@@ -380,10 +380,9 @@ void P16C71::create_sfr_map(void)
 void P16C71::create_symbols(void)
 {
 
-  //P16C61::create_symbols();
 
-  symbol_table.add_ioport(portb->cpu, portb);
-  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(this, portb);
+  symbol_table.add_ioport(this, porta);
 
 
 }

@@ -42,7 +42,8 @@ libgpsim_la_SOURCES = \
 	pic-processor.cc \
 	pic-registers.cc \
 	pic-instructions.cc \
-	processor.cc
+	processor.cc \
+	registers.cc \
 	stimuli.cc \
 	symbol.cc \
 	tmr0.cc \

@@ -167,9 +167,9 @@ void P18C2x2::create_symbols(void)
   if(verbose)
     cout << "P18C2x2 create symbols\n";
 
-  symbol_table.add_ioport(porta.cpu, &porta);
-  symbol_table.add_ioport(portb.cpu, &portb);
-  symbol_table.add_ioport(portc.cpu, &portc);
+  symbol_table.add_ioport(this, &porta);
+  symbol_table.add_ioport(this, &portb);
+  symbol_table.add_ioport(this, &portc);
 
 }
 
@@ -420,11 +420,11 @@ void P18C4x2::create_symbols(void)
   if(verbose)
     cout << "P18C4x2 create symbols\n";
 
-  symbol_table.add_ioport(porta.cpu, &porta);
-  symbol_table.add_ioport(portb.cpu, &portb);
-  symbol_table.add_ioport(portc.cpu, &portc);
-  symbol_table.add_ioport(portd.cpu, &portd);
-  symbol_table.add_ioport(porte.cpu, &porte);
+  symbol_table.add_ioport(this, &porta);
+  symbol_table.add_ioport(this, &portb);
+  symbol_table.add_ioport(this, &portc);
+  symbol_table.add_ioport(this, &portd);
+  symbol_table.add_ioport(this, &porte);
 
 }
 

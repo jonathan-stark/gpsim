@@ -175,7 +175,7 @@ void Symbol_Table::add_address(pic_processor *cpu, char *new_name, int value)
 
 }
 
-void Symbol_Table::add_line_number(pic_processor *cpu, int address)
+void Symbol_Table::add_line_number(Processor *cpu, int address)
 {
 
   line_number_symbol *lns = new line_number_symbol();

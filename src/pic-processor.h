@@ -194,44 +194,6 @@ public:
 class GUI_Processor;
 
 #endif
-//---------------------------------------------------------
-// The program_memory_access class is the interface used
-// by objects other than the simulator to manipulate the 
-// pic's program memory. For example, the breakpoint class
-// modifies program memory when break points are set or
-// cleared. The modification goes through here.
-//
-class program_memory_access :  public BreakCallBack
-{
- public:
-  pic_processor *cpu;
-
-  unsigned int address, opcode, state;
-
-  // breakpoint instruction pointer. This is used by get_base_instruction().
-  // If an instruction has a breakpoint set on it, then get_base_instruction
-  // will return a pointer to the instruction and will initialize bpi to
-  // the breakpoint instruction that has replaced the one in the pic program
-  // memory.
-  Breakpoint_Instruction *bpi;
-
-  void put(int addr, instruction *new_instruction);
-  instruction *get(int addr);
-  instruction *get_base_instruction(int addr);
-  unsigned int get_opcode(int addr);
-
-  void put_opcode(int addr, unsigned int new_opcode);
-  // When a pic is replacing one of it's own instructions, this routine
-  // is called.
-  void put_opcode_start(int addr, unsigned int new_opcode);
-
-  virtual void callback(void);
-  program_memory_access(void)
-    {
-      address=opcode=state=0;
-    }
-};
-
 
 /*
  * Define a base class processor for the pic processor family
@@ -261,9 +223,6 @@ public:
   INDF         *indf;
   FSR          *fsr;
   Stack         *stack;
-
-  file_register **register_bank;   // a pointer to the currently active register bank
-  program_memory_access pma;
 
   Status_register *status;
   WREG          *W;
@@ -329,6 +288,11 @@ public:
   void sleep(void);
   void step(unsigned int steps);
   void step_over(void);
+
+  virtual void step_one(void) {
+    program_memory[pc->value]->execute();
+  }
+
   virtual void interrupt(void) { return; };
   void pm_write(void);
 
@@ -384,25 +348,12 @@ public:
   pic_processor(void);
 };
 
+#define cpu_pic ( (pic_processor *)cpu)
 
 
 pic_processor *get_processor(unsigned int cpu_id);
 
 
-
-//---------------------------------------------------------
-// define a special 'invalid' register class. Accessess to
-// to this class' value get 0
-
-class invalid_file_register : public file_register
-{
-public:
-
-  void put(unsigned int new_value);
-  unsigned int get(void);
-  invalid_file_register(unsigned int at_address);
-  virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
-};
 
 //----------------------------------------------------------
 // Global definitions:

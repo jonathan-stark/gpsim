@@ -70,7 +70,7 @@ public:
 
   char name_str[20];      /* %%% FIX ME %%% dyanmically allocate? */
   unsigned int opcode;
-  pic_processor *cpu;     /* A pointer to the microcontroller to which this
+  Processor *cpu;     /* A pointer to the microcontroller to which this
                            *  instruction belongs  */
   int file_id;            /* The source file that declared this instruction
 			   * (The file_id is an index into an array of files) */
@@ -91,7 +91,7 @@ public:
   virtual int get_file_id(void) {return(file_id); };
   virtual int get_hll_file_id(void) {return(hll_file_id); };
   virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;};
-  void decode(pic_processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;};
+  void decode(Processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;};
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
@@ -149,7 +149,7 @@ public:
   virtual void debug(void){ };
   virtual char *name(char *);
 
-  void decode(pic_processor *new_cpu, unsigned int new_opcode)
+  void decode(Processor *new_cpu, unsigned int new_opcode)
     {
       opcode = new_opcode;
       cpu = new_cpu;
@@ -170,7 +170,7 @@ public:
   virtual void debug(void){ };
   virtual char *name(char *);
 
-  void decode(pic_processor *new_cpu, unsigned int new_opcode);
+  void decode(Processor *new_cpu, unsigned int new_opcode);
 
 };
 
@@ -190,7 +190,7 @@ public:
   virtual void debug(void){ };
   virtual char *name(char *);
 
-  void decode(pic_processor *new_cpu, unsigned int new_opcode);
+  void decode(Processor *new_cpu, unsigned int new_opcode);
 
 };
 
