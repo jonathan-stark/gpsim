@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "src/gpsim_object.h"
+#include "../src/gpsim_object.h"
 using namespace std;
 
 

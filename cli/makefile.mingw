@@ -58,8 +58,7 @@ cli_OBJECTS =			\
 	operator.o		\
 	parse.o			\
 	scan.o			\
-	uxtime.o		\
-	viewable.o
+	uxtime.o
 
 ../config.h : ../config_win32.h.in
 	$(CP) ../config_win32.h.in ../config.h

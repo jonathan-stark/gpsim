@@ -376,9 +376,6 @@ ren $(InputName).hpp $(InputName).h
 			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
-			<File
-				RelativePath=".\viewable.cc">
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -527,9 +524,6 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath="..\plat\win32\uxtime.h">
-			</File>
-			<File
-				RelativePath=".\viewable.h">
 			</File>
 		</Filter>
 	</Files>
