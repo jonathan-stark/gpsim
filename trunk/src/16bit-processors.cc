@@ -182,6 +182,9 @@ void _16bit_processor :: create_sfr_map(void)
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmr1l  = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
+
+  // All of the status bits on the 16bit core are writable
+  status.write_mask = 0xff;
 }
 
 //-------------------------------------------------------------------

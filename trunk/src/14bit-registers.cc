@@ -236,6 +236,7 @@ Status_register::Status_register(void)
   break_on_c =0;
   address = 3;
   rp_mask = RP_MASK;
+  write_mask = 0xff & ~STATUS_TO & ~STATUS_PD;
   new_name("status");
 }
 //--------------------------------------------------
@@ -243,7 +244,9 @@ Status_register::Status_register(void)
 
 void inline Status_register::put(unsigned int new_value)
 {
-  value = new_value; // & STATUS_WRITABLE_BITS;
+  //value = new_value; // & STATUS_WRITABLE_BITS;
+
+  value = (value & ~write_mask) | (new_value & write_mask);
 
   if(cpu->base_isa() == _14BIT_PROCESSOR_)
     {

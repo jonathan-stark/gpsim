@@ -75,9 +75,14 @@ void WDT::callback(void)
 
   cpu->cycles.set_break(future_cycle, this);
 
+  // The TO bit gets cleared when the WDT times out.
+  cpu->status.put_TO(0);
+
   if(break_point)
     bp.halt();
-  else
+  else if(bp.have_sleep()) {
+    bp.clear_sleep();
+  }else
     cpu->reset(WDT_RESET);
 
 }

@@ -424,7 +424,7 @@ P16X6X_processor::P16X6X_processor(void)
 void P16C62::create_sfr_map(void)
 {
    if(verbose)
-    cout << "creating c64 registers\n";
+    cout << "creating c62 registers\n";
 
 
   add_sfr_register(porta,   0x05);
@@ -444,7 +444,7 @@ void P16C62::create_symbols(void)
 {
 
   if(verbose)
-    cout << "creating c64 symbols\n";
+    cout << "creating c62 symbols\n";
 
   symbol_table.add_ioport(porta->cpu, porta);
   symbol_table.add_ioport(portb->cpu, portb);
@@ -457,7 +457,7 @@ void  P16C62::create(void)
 {
 
   if(verbose)
-    cout << " c64 create \n";
+    cout << " c62 create \n";
 
   create_iopin_map();
   

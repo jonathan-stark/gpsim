@@ -70,7 +70,7 @@ class P18C2x2 : public _16bit_processor, public _28pins
  public:
 
   P18C2x2(void);
-  static pic_processor *construct(void);
+  //static pic_processor *construct(void);
   void create(void);
 
   virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
@@ -78,7 +78,7 @@ class P18C2x2 : public _16bit_processor, public _28pins
 
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
-  //  void create_sfr_map(void);
+  void create_sfr_map(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
@@ -94,7 +94,7 @@ class P18C242 : public P18C2x2
   P18C242(void);
   static pic_processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
+  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
 
@@ -108,10 +108,64 @@ class P18C252 : public P18C242
   P18C252(void);
   static pic_processor *construct(void);
   void create(void);
-  //  void create_sfr_map(void);
+  void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
 
+
+};
+
+/*********************************************************************
+ *  class definitions for the 18C4x2 family
+ */
+
+class P18C4x2 : public _16bit_processor, public _14bit_40pins
+{
+ public:
+
+  P18C4x2(void);
+  //static pic_processor *construct(void);
+  void create(void);
+
+  virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
+  virtual void create_symbols(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x400; };
+
+  void create_sfr_map(void);
+
+  virtual int get_pin_count(void){return Package::get_pin_count();};
+  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
+  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+
+};
+
+
+class P18C442 : public P18C4x2
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18C442_;};
+  P18C442(void);
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+
+};
+
+
+class P18C452 : public P18C442
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18C452_;};
+  P18C452(void);
+  static pic_processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x4000; };
 
 };
 

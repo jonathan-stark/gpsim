@@ -46,6 +46,7 @@ support:
 #include <stdio.h>
 #include "../src/modules.h"
 #include "binary_indicator.h"
+#include "resistor.h"
 
 /*
 class Module_Types
@@ -58,7 +59,8 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { "binary_indicator", "bi", Binary_Indicator::construct }
+  { "binary_indicator", "bi",   Binary_Indicator::construct },
+  //  { "resistor",         "res",  Resistor::construct }
 };
 
 #ifdef __cplusplus

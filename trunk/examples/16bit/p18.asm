@@ -2,7 +2,7 @@
 	;;
 	;; Test the 18c instruction set
 
-	
+  processor	18c452	
 
   cblock  0x0c
 

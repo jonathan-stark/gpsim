@@ -87,6 +87,7 @@ public:
 
   unsigned int break_on_z,break_on_c;
   unsigned int rp_mask;
+  unsigned int write_mask;    // Bits that instructions can modify
 
   Status_register(void);
 

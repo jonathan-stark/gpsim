@@ -945,7 +945,7 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
     range.rowi=GTK_SHEET(sbow->sheet)->maxrow;
     range.coli=GTK_SHEET(sbow->sheet)->maxcol;
     gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &normal_pm_bg_color);
-    gtk_sheet_range_set_font(sbow->sheet, &range, normal_style->font);
+    gtk_sheet_range_set_font(GTK_SHEET(sbow->sheet), &range, normal_style->font);
 
 
     // Clearing and appending is faster than changing
