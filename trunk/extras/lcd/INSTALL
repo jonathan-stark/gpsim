@@ -39,7 +39,7 @@ CVS
 If you're getting the code from CVS, you'll need to generate files
 that are unique to your system. This is done with the script:
 
-$ ./autogen.sh
+$ ./autogen.sh --enable-shared
 
 
 After that, you should be able to 
