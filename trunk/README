@@ -1,0 +1,241 @@
+.
+gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
+
+
+Please see the INSTALL file to get instructions on how to install gpsim.
+Please see the TODO file to get an idea of the current status and a little background on how the code works.
+Please see the HISTORY file to see how gpsim has evolved.
+Please see the README.EXAMPLES file for information about the examples.
+Please see the PROCESSORS file to see a list of supported processors.
+Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
+Please see COPYING for the GPL.
+
+gpsim-0.18.0 new stuff:
+
+03FEB00 gpsim-0.18.0
+ o cli - added 'processor pins' command to display
+         the state of a pic's I/O pins
+ o cli - added 'set' command for modifying gpsim behavior
+         flags. set options supported:
+         -- verbose - if set, diagnostic info will be displayed
+         -- radix - not supported yet
+         -- gui_update - controls the rate at which the gui is refreshed
+ o cli - added 's' option to the dump command to display only the
+         special function registers (and not the rest of ram).
+ o 18cxxx:
+   -- TBLRD & TBLWT instructions are now supported
+   -- MULLW & MULWF instructions are now supported
+   -- configuration word support
+   -- tmr0 interrupt
+ o Cycle counter - 64 bits is now fully supported
+ o config word bug fixed
+ o gui - added Watch window
+ o gui - added more color coding to register window
+ o gui - removed stagnant menu selections
+ o gui - window state is saved between gpsim sessions
+   -- This requires a new package `eXdbm'.
+ o getopt is now used to process invocation options (now you can
+   have spaces between the options and file names).
+ o support >64k object code in .cod files
+ o gtksheet has been removed from the distribution
+   -- This means that you'll have to install gtk+-extra, the
+      package that supports gtk-sheet (see INSTALL)
+ o .cod file format bug fixes (you'll need the latest gpasm)
+ o __config word for 18cxxx family is now supported 
+
+
+
+processor pins
+--------------
+
+A new option, 'pins', has been added to the processor command. This will display the pin out of the pic being simulated and indicate the state of each pin. The pin names shown are those assigned by gpsim (expect an option to have this user editable though). The state of the pins is indicated by 'H' or 'L'. Although I don't currently have plans to, I think that it be neat to see the voltage levels at the pins too. This would be useful when there are stimuli present or perhaps when analog inputs are being simulated.
+
+  +--+---------\/---------+--+
+L | 1| porta2      porta1 |18| L
+L | 2| porta3      porta0 |17| L
+L | 3| porta4             |16|
+  | 4|                    |15|
+  | 5|                    |14|
+H | 6| portb0      portb7 |13| H
+H | 7| portb1      portb6 |12| H
+H | 8| portb2      portb5 |11| H
+H | 9| portb3      portb4 |10| H
+  +--+--------------------+--+
+
+'set' command
+-------------
+A new cli command 'set' has been added. This command is similar to gdb's set command. The purpose is to give you the ability to control gpsim's behavior. So far only two set options are provided:
+  v | verbose  - Making this non-zero will cause gpsim to spew diagnostic information.
+  r | radix - not support yet, but is intended to control the format of both the input and output of numeric data.
+  gui_update - 
+
+New 18cxxx instructions
+-----------------------
+The 18cxxx instruction set is now fully supported. The TBLRD, TBLWRT, MULLW, and MULWF instructions were added.
+
+64-bit cycle counter
+--------------------
+Version 0.17.0 haphazardly added support for a 64-bit cycle counter. This version completes the work started there (actually I totally re-did the work). The cycle counter, as you may recall, is a gpsim register that keeps track of the total tcyc (instruction cycles). It serves as the basis for gpsim's time subsystem. Only 62 of the 64 bits are used (the other two are needed for the trace buffer) thus giving gpsim 2^62 simulation cycles before it will crash. For a 20Mhz pic, it would take about 29,247 years to get through that many cycles! 
+
+config word
+-----------
+I think the config word bug has been fixed once and for all! Recent versions were unable to use the config word supplied by the .cod file (.hex files were okay). In the process of fixing this bug, I also stream lined the way code is read from a file and stored into the simulated cpu's program memory.
+
+
+gui
+---
+
+Ralf has again made numerous enhancements to the gui. Most notably is the Watch Window. The watch window will give you the capability to focus on specific registers. The registers are listed one per line in a watch window list and the register name, address, value (dec and hex and binary) are all displayed. You can click on a bit field to toggle its state. And it probably goes without mentioning, but changes made in the watch window are propogate throughout all of gpsim (even if you change the indirect registers too).
+
+New context coloring has been added to the register window viewer (enhancing the already present context coloring). Special function registers show up in different colors than those for the regular file registers (i.e. the ram).
+
+Stale menu items have mostly been removed. We still have a little work to do here though.
+
+The Help-About window now gives Ralf recognition.
+
+
+.cod files
+----------
+I had to do a major overhaul to gpasm to support the configuration word for the 18cxxx family. I could have (and in fact at one point did) just made a nasty hack, but I decided to do things properly. The issue is that the 18cxxx config word resides at an address beyond the 64k range that was previously supported in gpasm. Now gpasm can handle .cod files that generate up to about a gigabyte of code and gpsim will honor that new address range (it will not accept addresses that are out of range for a given processor...)
+
+What's coming next?
+-------------------
+
+More 18cxxx peripherals. Support for the 16f877. A gui version of the 'processor pins' command. Maybe, and this just maybe, support for external modules (e.g. LCD's, LED's, switches, etc.)
+
+System Requirements:
+--------------------
+
+I've only tested the code on a Intel based Linux boxes (redhat 4.2, 5.1, 5.2, 6.0, 6.1). Much of the software is in C++, so you'll need the standard include files and libraries etc. I tried not to use any gcc specific C++ things (like the operator ?> for example). So I see no reason gpsim wouldn't compile on any system. The g++ compiler and include files are required. The GNU readline library is also required.
+
+The latest C++ compiler doesn't work properly on the PPC Linux distribution, so unfortunately it's not possible to build gpsim there. (Is this still true? Eric Sh.?).
+
+
+If you want the gui support then you'll also need glib and gtk. I'm using version 1.2.3 (the version numbers for these packages track one another). I've also have successfully used 1.2.1. You're also going to need the latest gtk+-extra, eXdbm packages. See INSTALL about these.
+
+
+
+
+Installing:
+----------
+
+See the INSTALL file.
+
+Invoking:
+---------
+
+Run gpsim by typing:
+
+gpsim [-h] [-p<device> [<hex_file>]] [-c<stc_file>]
+        -h            : this help list
+        -p<device>    : processor (e.g. -pp16c84 for the 'c84)
+        <hex_file>    : input file in "intelhex16" format
+        -c<stc_file>  : startup command file
+        -s<cod_file>  : .cod symbol file
+
+        -v            : gpsim version
+
+for example:
+
+gpsim -pp16c61 pichexfile.hex
+
+will start the simulator, select a 'c61 as the target and load the program memory with pichexfile.hex hex file. There are several pic source files in the ./gpsim-0.0.14/examples subdirectory. 
+
+Once started, a very simple command line prompt will process your requests:
+
+gpsim> help
+attach         Attach stimuli to nodes
+break          Set a break point
+clear          Remove a break point
+disassemble    Disassemble the current cpu
+dump           Display either the RAM or EEPROM
+echo           echo "text"
+help           Type help "command" for more help on a command
+list           Display source and list files
+load           Load either a hex,command, or .cod file
+node           Add or display stimulus nodes
+processor      Select & Display processors
+quit           Quit gpsim
+reset          Reset all or parts of the simulation
+run            Execute the pic program
+set            display and control gpsim behavior flags
+step           Execute one or more instructions.
+stimulus       Create a stimulus
+symbol         Add or display symbols
+trace          Dump the trace history
+version        Display the gpsim's version
+x              examine and/or modify memory
+
+
+
+More help is available for each command by typing help "command". For example, help break prints this:
+
+gpsim> help break
+break [c e | w | r | wv | rv | wdt [location] [value] ]
+
+        options:
+                c   - cycle
+                e   - execution
+                w   - write
+                r   - read
+                wv  - write value
+                rv  - read value
+                wdt - wdt timeout
+                    - no argument, display the break points that are set.
+        examples:
+                break e 0x20     // set an execution break point at address 0x20
+                break wv 0x30 0  // break if a zero is written to register 0x30
+                break c 1000000  // break on the one million'th cycle
+                break            // display all of the break points
+
+The cli is available even when the gui is used.
+
+
+Features:
+---------
+
+Standard simulator stuff:
+  o Breakpoints - execution, read and write memory, wdt, <ctrl C>
+  o single stepping
+  o step over
+  o run until break
+  o disassemble 
+  o dump memory/eeprom
+  o Trace
+  o stimulus files - analog and digital
+  o configuration files
+  o symbolic debugging
+
+Gui stuff:
+  o Register viewer
+  o Source file viewer
+  o Symbol viewer
+  o Watch window
+
+gpsim specific (not implemented)
+  o Simulate multiple processors. 
+  o Step backwards
+
+Peripherals supported:
+  o eeprom
+  o WDT
+  o TMR0
+  o I/O Ports
+  o TMR1
+  o TMR2
+  o CCP
+  o PWM
+  o A/D
+  o UART (18cxxx only)
+
+BUGS:
+----
+I'm absolutely certain there are bugs. If you find one, send it to me at either
+scott@dattalo.com
+
+or post it to the gnupic mailing list:
+       mailto:gnupic@linuxhacker.org
+
+Finally, see the file Contributions for people who have submitted suggestions and patches.
+
+Scott
