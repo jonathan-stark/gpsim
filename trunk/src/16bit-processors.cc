@@ -180,10 +180,10 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(pclath, 0xffa);
   //add_sfr_register(&pclatu, 0xffb);
 
-  add_sfr_register(&((Stack16 *)stack)->stkptr,  0xffc,0,"stkptr");
-  add_sfr_register(&((Stack16 *)stack)->tosl,    0xffd,0,"tosl");
-  add_sfr_register(&((Stack16 *)stack)->tosh,    0xffe,0,"tosh");
-  add_sfr_register(&((Stack16 *)stack)->tosu,    0xfff,0,"tosu");
+  add_sfr_register(&stack16.stkptr,  0xffc,0,"stkptr");
+  add_sfr_register(&stack16.tosl,    0xffd,0,"tosl");
+  add_sfr_register(&stack16.tosh,    0xffe,0,"tosh");
+  add_sfr_register(&stack16.tosu,    0xfff,0,"tosu");
 
 
   // Initialize all of the register cross linkages

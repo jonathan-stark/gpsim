@@ -50,7 +50,7 @@ class ProgramMemoryAccess :  public BreakCallBack
  public:
   Processor *cpu;
 
-  unsigned int address, opcode, state;
+  unsigned int _address, _opcode, _state;
 
   // Symbolic debugging
   enum HLL_MODES {
@@ -85,12 +85,8 @@ class ProgramMemoryAccess :  public BreakCallBack
   void assign_xref(unsigned int address, gpointer cross_reference);
 
   virtual void callback(void);
-  ProgramMemoryAccess(void)
-    {
-      address=opcode=state=0;
-      hll_mode = ASM_MODE;
-    }
-
+  ProgramMemoryAccess(void);
+  void init(Processor *);
   // Helper functions for querying the program memory
 
   // hasValid_opcode -- returns true if the opcode at the address is valid

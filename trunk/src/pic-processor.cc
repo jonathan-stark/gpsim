@@ -1048,7 +1048,7 @@ void pic_processor::init_program_memory (unsigned int memory_size)
   // The memory_size_mask is used by the branching instructions 
 
   pc->memory_size_mask = memory_size - 1;
-  pma.cpu = this;
+  pma.init(this);
 
   Processor::init_program_memory(memory_size);
 }
@@ -1263,13 +1263,13 @@ void ConfigMode::print(void)
 void ProgramMemoryAccess::callback(void)
 {
 
-  if(state)
+  if(_state)
     {
-      state = 0;
+      _state = 0;
       //cout << __FUNCTION__ << " address= " << address << ", opcode= " << opcode << '\n';
       //cpu->program_memory[address]->opcode = opcode;
-      put_opcode(address,opcode);
-      trace.opcode_write(address,opcode);
+      put_opcode(_address,_opcode);
+      trace.opcode_write(_address,_opcode);
       bp.clear_pm_write();
     }
 
