@@ -130,7 +130,10 @@ void StatusBar_Window::Update(void)
   sprintf(buffer,"0x%02x",W->value.i32);
   gtk_entry_set_text (GTK_ENTRY (W->entry), buffer);
 
-  pc->value.i32 = gpsim_get_pc_value(gp->pic_id);
+  if(!gp || !gp->cpu)
+    return;
+
+  pc->value.i32 = gp->cpu->pc->get_value();
   sprintf(buffer,"0x%04x",pc->value.i32);
   gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
 
@@ -208,23 +211,24 @@ static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
 static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    char *text;
-    unsigned int value;
-    unsigned int pic_id;
-    char *bad_position;
+  char *text;
+  unsigned int value;
+  unsigned int pic_id;
+  char *bad_position;
 
-    pic_id = sbw->gp->pic_id;
-    text=gtk_entry_get_text (GTK_ENTRY (sbw->pc->entry));
-    
-    value = strtoul(text, &bad_position, 16);
-    if( strlen(bad_position) )
-	return;  /* string contains an invalid number */
-
-    gpsim_put_pc_value(pic_id, value);
-    
-    sbw->Update();
-
+  if(!sbw || !sbw->gp || !sbw->gp->cpu)
     return;
+
+  pic_id = sbw->gp->pic_id;
+  text=gtk_entry_get_text (GTK_ENTRY (sbw->pc->entry));
+    
+  value = strtoul(text, &bad_position, 16);
+  if( strlen(bad_position) )
+    return;  /* string contains an invalid number */
+
+  sbw->gp->cpu->pc->put_value(value);
+    
+  sbw->Update();
 }
 
 

@@ -106,6 +106,11 @@ public:
   instruction   **program_memory;
   program_memory_access pma;
 
+  Program_Counter *pc;
+
+  //
+  // Creation and manipulation of registers
+  //
 
   void create_invalid_registers (void);
   void add_file_registers(unsigned int start_address, 
@@ -117,7 +122,13 @@ public:
 			    unsigned int end_address, 
 			    unsigned int alias_offset);
   virtual void init_register_memory(unsigned int memory_size);
+  virtual unsigned int register_memory_size () const { return 0;};
+  guint64 register_read_accesses(unsigned int address);
+  guint64 register_write_accesses(unsigned int address);
 
+  //
+  // Creation and manipulation of Program Memory
+  //
 
   virtual void init_program_memory(unsigned int memory_size);
   virtual void init_program_memory(int address, int value);
@@ -126,6 +137,8 @@ public:
 
   virtual int  map_pm_address2index(int address) {return address;};
   virtual int  map_pm_index2address(int index) {return index;};
+  virtual void set_out_of_range_pm(int address, int value);
+  guint64 cycles_used(unsigned int address);
 
   //
   // Symbolic debugging
@@ -168,7 +181,11 @@ public:
 
   virtual void load_hex(char *hex_file)=0;
 
-  void run(void);
+  //
+  // Execution control
+  //
+
+  virtual void run(void);
   void run_to_address(unsigned int destination);
   virtual void sleep(void) {};
   void step(unsigned int steps);
@@ -176,24 +193,32 @@ public:
   virtual void step_one(void) = 0;
   virtual void interrupt(void) = 0 ;
 
+  //
+  // Processor Clock control
+  //
+
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
-  virtual void reset(RESET_TYPE r) {};
+
   void disassemble (int start_address, int end_address) {};
   void list(int file_id, int pcval, int start_line, int end_line) {};
 
-  virtual void por(void) = 0;
+  //
+  // Processor reset
+  // 
+  
+  virtual void reset(RESET_TYPE r) {};
+  virtual void por(void) = 0;            // por = Power On Reset
+
+  //
+  // FIXME -- create -- a way of constructing a processor (why not use constructors?)
+  //
+
   virtual void create(void);
-
-  virtual void set_out_of_range_pm(int address, int value);
-  guint64 cycles_used(unsigned int address);
-  guint64 register_read_accesses(unsigned int address);
-  guint64 register_write_accesses(unsigned int address);
-
-  virtual unsigned int register_memory_size () const { return 0;};
-
   static Processor *construct(void);
+
+
 
   Processor(void);
 };

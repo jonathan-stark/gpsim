@@ -555,7 +555,7 @@ void Program_Counter16::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl->value = value & 0xff;
+  cpu_pic->pcl->value = value & 0xff;
   cycles.increment();
 }
 
@@ -577,7 +577,7 @@ void Program_Counter16::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl->value = value & 0xff;
+  cpu_pic->pcl->value = value & 0xff;
   cycles.increment();
 }
 
@@ -594,7 +594,7 @@ void Program_Counter16::jump(unsigned int new_address)
   //value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
   value = new_address & memory_size_mask;
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
@@ -617,7 +617,7 @@ void Program_Counter16::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
@@ -640,12 +640,12 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = ( (new_address | cpu->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
+  value = ( (new_address | cpu_pic->get_pclath_branching_modpcl() )>>1) & memory_size_mask;
 
   trace.cycle_increment();
   trace.program_counter(value<<1);
 
-  cpu->pcl->value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -663,7 +663,7 @@ void Program_Counter16::new_address(unsigned int new_value)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   cycles.increment();
   cycles.increment();
 }
@@ -689,35 +689,21 @@ void Program_Counter16::put_value(unsigned int new_value)
 
   //value = (new_value >> 1) & memory_size_mask;
   value = (new_value) & memory_size_mask;
-  cpu->pcl->value = value & 0xff;
-  cpu->pclath->value = (value >> 8) & 0xff;
+  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pclath->value = (value >> 8) & 0xff;
 
   trace.program_counter(value << 1);
 
   if(xref)
     {
-      if(cpu->pcl->xref)
-	cpu->pcl->xref->update();
-      if(cpu->pclath->xref)
-	cpu->pclath->xref->update();
+      if(cpu_pic->pcl->xref)
+	cpu_pic->pcl->xref->update();
+      if(cpu_pic->pclath->xref)
+	cpu_pic->pclath->xref->update();
 	xref->update();
     }
   
 
-#if 0
-  value = new_value & memory_size_mask;
-  cpu->pcl->value = value & 0xff;
-  cpu->pclath->value = (new_value >> 8) & 0xff;
-  //  cpu16->pclatu.value = (new_value >> 16) & 0xff;
-
-  if(xref)
-    {
-      cpu->pcl->xref->update();
-      cpu->pclath->xref->update();
-      //update_object(cpu16->pclatu.gui_xref,cpu->pclatu.value);
-      xref->update();
-    }
-#endif
 }
 //------------------------------------------------
 unsigned int Program_Counter16::get_value(void)

@@ -226,7 +226,6 @@ public:
 
   Status_register *status;
   WREG          *W;
-  Program_Counter *pc;
   OPTION_REG   option_reg;
   PCL          *pcl;
   PCLATH       *pclath;
@@ -251,12 +250,11 @@ public:
   //  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
-  // %%% FIX ME %%% remove return and added 14bit member.
   virtual void tris_instruction(unsigned int tris_register) {return;};
   virtual void create_symbols(void);
   virtual void create_stack(void) {stack = new Stack;};
   virtual void load_hex(char *hex_file);
-  void run(void);
+  virtual void run(void);
   void sleep(void);
   void step(unsigned int steps);
   void step_over(void);

@@ -522,10 +522,13 @@ popup_activated(GtkWidget *widget, gpointer data)
     int i,start,end, temp;
     int pic_id;
 
+    if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu)
+      return;
+
     item = (menu_item *)data;
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
 
-    pic_id=((GUI_Object*)popup_sbaw)->gp->pic_id;
+    pic_id=popup_sbaw->gp->pic_id;
     
     switch(item->id)
     {
@@ -538,7 +541,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	break;
     case MENU_FIND_PC:
 	pic_id = popup_sbaw->gp->pic_id;
-	address=gpsim_get_pc_value(pic_id);
+	address=popup_sbaw->gp->cpu->pc->get_value();
+	//address=gpsim_get_pc_value(pic_id);
 	//SourceBrowserAsm_set_pc(popup_sbaw, address);
 	popup_sbaw->SetPC(address);
 //	gui_simulation_has_stopped(); // FIXME
@@ -551,7 +555,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         else
 	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
 	if(address!=INVALID_VALUE)
-	   gpsim_put_pc_value(pic_id,address);
+	  popup_sbaw->gp->cpu->pc->put_value(address);
 	break;
     case MENU_RUN_HERE:
 	line = popup_sbaw->menu_data->line;
@@ -780,6 +784,10 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 			   SourceBrowserAsm_Window *sbaw)
 {
     static int current_page=-1;
+    
+    if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
+      return 1;
+
     if(current_page!=page_num)
     {
 	int id;
@@ -790,7 +798,8 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 	gpsim_set_hll_mode(sbaw->gp->pic_id,file_id_to_source_mode[id]);
 
         // Update pc widget
-	address=gpsim_get_pc_value(sbaw->gp->pic_id);
+	address=sbaw->gp->cpu->pc->get_value();
+	//address=gpsim_get_pc_value(sbaw->gp->pic_id);
 	//SourceBrowserAsm_set_pc(sbaw, address);
 	sbaw->SetPC(address);
 
@@ -1105,8 +1114,7 @@ static void marker_cb(GtkWidget *w1,
 	    else
 		address = gpsim_find_closest_address_to_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
 	    if(address!=INVALID_VALUE)
-		gpsim_put_pc_value(pic_id,address);
-	    
+	      sbaw->gp->cpu->pc->put_value(address);
 	}
 	else
 	{
@@ -1621,7 +1629,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   cross_reference->remove = NULL;
   gpsim_assign_pc_xref(pic_id, cross_reference);
 
-  for(i=0;i<gpsim_get_number_of_source_files(pic_id);i++)
+  for(i=0;i<gp->cpu->number_of_source_files;i++)
   {
       gpsim_file = gpsim_get_file_context(pic_id, i);
       file_name = gpsim_file->name;
@@ -1675,7 +1683,8 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   while(gtk_events_pending())
       gtk_main_iteration();
   
-  address = gpsim_get_pc_value(pic_id);
+  address=gp->cpu->pc->get_value();
+  //address = gpsim_get_pc_value(pic_id);
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else

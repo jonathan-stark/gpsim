@@ -1151,7 +1151,10 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
     gtk_sheet_thaw(GTK_SHEET(sheet));
 
-    pc=gpsim_get_pc_value(gp->pic_id);
+    if(!gp || !gp->cpu)
+      return;
+
+    pc=gp->cpu->pc->get_value();
     SetPC(pc);
     update_label(this,pc);
 }

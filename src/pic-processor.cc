@@ -779,6 +779,7 @@ void pic_processor::disassemble (int start_address, int end_address)
 
   for(int i = start_address; i<=end_address; i++)
     {
+      str[0] =0;
       if (pc->value == i)
 	cout << "==>";
       else
@@ -912,7 +913,7 @@ pic_processor::pic_processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
-  pc = NULL; //new Program_Counter();
+  pc = NULL;
 
   files = NULL;
 

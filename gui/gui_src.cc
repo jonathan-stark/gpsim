@@ -152,8 +152,10 @@ void SourceBrowser_Window::UpdateLine(int address)
 }
 void SourceBrowser_Window::Update(void)
 {
+  if(!gp || !gp->cpu)
+    return;
 
-  SetPC(gpsim_get_pc_value(gp->pic_id));
+  SetPC(gp->cpu->pc->get_value());
 }
 
 

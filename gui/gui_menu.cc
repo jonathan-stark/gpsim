@@ -311,8 +311,8 @@ fileopen_dialog(gpointer             callback_data,
   if (!window)
   {
 
-      if(gpsim_processor_get_name(1))
-	  gui_question("This may not work well (yet?), better restart gpsim from command line","OK","OK");
+    //if(gpsim_processor_get_name(1))
+    gui_question("This may not work well (yet?), better restart gpsim from command line","OK","OK");
 
       window = gtk_file_selection_new ("file selection dialog");
 

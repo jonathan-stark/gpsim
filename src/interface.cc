@@ -303,47 +303,6 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
 
 //--------------------------------------------------------------------------
 
-char *gpsim_processor_get_name(unsigned int processor_id)
-{
-  Processor *cpu = get_processor(processor_id);
-
-  if(!cpu)
-      return NULL;
-
-  return cpu->name();
-}
-
-//--------------------------------------------------------------------------
-
-unsigned int gpsim_get_pc_value(unsigned int processor_id)
-{
-
-  Processor *cpu = get_processor(processor_id);
-
-  if(!cpu)
-    return INVALID_VALUE;
-
-  return cpu_pic->pc->value;
-
-}
-
-//--------------------------------------------------------------------------
-
-void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value)
-{
-
-  Processor *cpu = get_processor(processor_id);
-
-  if(!cpu)
-    return;
-
-  cpu_pic->pc->put_value(pc_value);
-
-
-}
-
-//--------------------------------------------------------------------------
-
 unsigned int gpsim_get_status(unsigned int processor_id)
 {
 
@@ -815,16 +774,6 @@ void gpsim_disable_profiling(unsigned int processor_id)
     profile_keeper.disable_profiling();
 }
 
-guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address)
-{
-    pic_processor *pic = get_pic_processor(processor_id);
-
-    if(!pic)
-	return 0;
-
-    return pic->cycles_used(address);
-}
-
 guint64 gpsim_get_register_read_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address)
 {
     pic_processor *pic = get_pic_processor(processor_id);
@@ -882,16 +831,16 @@ void gpsim_hll_step(unsigned int processor_id)
 
     // pic->step(1) until pc==initial_pc, or source line has changed.
 
-    initial_line = gpsim_get_hll_src_line(processor_id,
-					  gpsim_get_pc_value(processor_id));
-    initial_pc = gpsim_get_pc_value(processor_id);
+    initial_line = gpsim_get_hll_src_line(processor_id,pic->pc->get_value());
+
+    initial_pc = pic->pc->get_value();
 
     while(1)
     {
 	pic->step(1);
-	if(gpsim_get_pc_value(processor_id)==initial_pc)
+	if(pic->pc->get_value()==initial_pc)
 	    break;
-	if(gpsim_get_hll_src_line(processor_id, gpsim_get_pc_value(processor_id))
+	if(gpsim_get_hll_src_line(processor_id, pic->pc->get_value())
 	   != initial_line)
 	    break;
     }
@@ -910,12 +859,11 @@ void gpsim_hll_step_over(unsigned int processor_id)
     if(!pic)
 	return;
 
-    initial_line = gpsim_get_hll_src_line(processor_id,
-					  gpsim_get_pc_value(processor_id));
+    initial_pc = pic->pc->get_value();
+    initial_line = gpsim_get_hll_src_line(processor_id, initial_pc);
 
     initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
 
-    initial_pc = gpsim_get_pc_value(processor_id);
     initial_id = gpsim_get_file_id(processor_id, initial_pc);
 
     while(1)
@@ -927,13 +875,13 @@ void gpsim_hll_step_over(unsigned int processor_id)
 	    gpsim_finish(processor_id);
 	}
 
-	if(gpsim_get_pc_value(processor_id)==initial_pc)
+	if(pic->pc->get_value()==initial_pc)
 	    break;
-	if(gpsim_get_hll_src_line(processor_id, gpsim_get_pc_value(processor_id))
+	if(gpsim_get_hll_src_line(processor_id, pic->pc->get_value())
 	   != initial_line)
 	{
-	    if(gpsim_get_file_id(processor_id, gpsim_get_pc_value(processor_id))==initial_id)
-		break;
+	  if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
+	    break;
 	}
     }
 
@@ -1257,18 +1205,6 @@ unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int addr
       return INVALID_VALUE;
 
   return line;
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_get_number_of_source_files(unsigned int processor_id)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-
-  return pic->number_of_source_files;
-
 }
 
 //--------------------------------------------------------------------------

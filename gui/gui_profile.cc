@@ -198,7 +198,7 @@ static void add_range(Profile_Window *pw,
     gcycles=0;
     for(i=startaddress;i<endaddress;i++)
     {
-	gcycles+=gpsim_get_cycles_used(gp->pic_id,i);
+      gcycles+=gp->cpu->cycles_used(i);
     }
     sprintf(count_string,"0x%Lx",gcycles);
 
@@ -673,13 +673,15 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
         tickdelta=1;
 
     
+    if(!pw || !pw->gp || !pw->gp->cpu)
+      return 0;
 
-    pic_id = ((GUI_Object*)pw)->gp->pic_id;
+    pic_id = pw->gp->pic_id;
 
     t=time(NULL);
 
     // Compute module name to put in infostring
-    for(i=0;i<gpsim_get_number_of_source_files(pic_id);i++)
+    for(i=0;i<pw->gp->cpu->number_of_source_files;i++)
     {
 	struct file_context *gpsim_file;
         char *file_name;
@@ -697,11 +699,11 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	}
     }
 
-    // This information is put at top of the plot
+    // This information is put at the top of the plot
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
 	    filename,
             ctime(&t),
-	    gpsim_processor_get_name(pic_id));
+	    pw->gp->cpu->name());
 
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
@@ -894,6 +896,9 @@ int plot_routine_histogram(Profile_Window *pw)
     int numpoints;
     GList *iter;
 
+    if(!pw || !pw->gp || !pw->gp->cpu)
+      return 0;
+
     if(pw->gp->cpu->program_memory_size() <=0)
       return 0;
 
@@ -1000,7 +1005,7 @@ int plot_routine_histogram(Profile_Window *pw)
     else
         minx=0;
 
-    pic_id = ((GUI_Object*)pw)->gp->pic_id;
+    pic_id = pw->gp->pic_id;
 
     page_width = GTK_PLOT_LETTER_W * scale;
     page_height = GTK_PLOT_LETTER_H * scale;
@@ -1109,7 +1114,7 @@ int plot_routine_histogram(Profile_Window *pw)
     // Infostring1
     t=time(NULL);
     // Compute module name to put in infostring
-    for(i=0;i<gpsim_get_number_of_source_files(pic_id);i++)
+    for(i=0;i<pw->gp->cpu->number_of_source_files;i++)
     {
 	struct file_context *gpsim_file;
         char *file_name;
@@ -1130,7 +1135,8 @@ int plot_routine_histogram(Profile_Window *pw)
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
 	    filename,
             ctime(&t),
-	    gpsim_processor_get_name(pic_id));
+	    pw->gp->cpu->name());
+
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
 	if(infostring[i]=='\n')
@@ -1733,7 +1739,7 @@ void Profile_Window::Update()
 
       entry=(struct profile_entry*)iter->data;
 
-      count=gpsim_get_cycles_used(gp->pic_id,entry->address);
+      count=gp->cpu->cycles_used(entry->address);
 
       if(entry->last_count!=count)
       {
@@ -1767,7 +1773,7 @@ void Profile_Window::Update()
       count=0;
       for(i=range_entry->startaddress;i<range_entry->endaddress;i++)
       {
-	  count+=gpsim_get_cycles_used(gp->pic_id,i);
+	  count+=gp->cpu->cycles_used(i);
       }
 
       if(range_entry->last_count!=count)
@@ -1946,64 +1952,71 @@ static unsigned int stopaddress;
 
 void ProfileWindow_notify_start_callback(Profile_Window *pw)
 {
-    if(startcycle==END_OF_TIME)
-    {
-	startcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
-	startaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
-    }
+  if(!pw->gp->cpu)
+    return;
+
+  if(startcycle==END_OF_TIME) {
+    startcycle=gpsim_get_cycles(pw->gp->pic_id);
+    startaddress=pw->gp->cpu->pc->get_value();
+    //gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
+  }
 }
 
 void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 {
-    if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME)
+  if(!pw->gp->cpu)
+    return;
+
+  if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME)
     {
-	stopcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
-	if(startcycle==stopcycle)
+      stopcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
+      if(startcycle==stopcycle)
 	{
-	    // This was probably an attempt to measure the whole loop.
-	    // Set stopcycle to unset, and wait for the next one
-	    stopcycle=END_OF_TIME;
+	  // This was probably an attempt to measure the whole loop.
+	  // Set stopcycle to unset, and wait for the next one
+	  stopcycle=END_OF_TIME;
 	}
-	else
+      else
 	{
-	    guint64 cycles;
-            GList *iter;
-	    stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
-	    // We have a new measurement
-            cycles=(int)stopcycle-(int)startcycle;
+	  guint64 cycles;
+	  GList *iter;
+	  stopaddress=pw->gp->cpu->pc->get_value();
+	  //stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
+	  // We have a new measurement
+	  cycles=(int)stopcycle-(int)startcycle;
 
-	    // Search to see if there are an entry with this startaddress,
-            // stopaddress and cycle count.
-	    iter=pw->histogram_profile_list;
-	    while(iter!=NULL)
+	  // Search to see if there are an entry with this startaddress,
+	  // stopaddress and cycle count.
+	  iter=pw->histogram_profile_list;
+	  while(iter!=NULL)
 	    {
-		struct cycle_histogram_counter *chc;
-		chc=(struct cycle_histogram_counter*)iter->data;
-		if(chc->start_address == startaddress &&
-		   chc->stop_address == stopaddress &&
-		   chc->histo_cycles == cycles)
+	      struct cycle_histogram_counter *chc;
+	      chc=(struct cycle_histogram_counter*)iter->data;
+	      if(chc->start_address == startaddress &&
+		 chc->stop_address == stopaddress &&
+		 chc->histo_cycles == cycles)
 		{
-		    // If so then add 1 to the counter
-		    chc->count++;
-                    break;
+		  // If so then add 1 to the counter
+		  chc->count++;
+		  break;
 		}
-                iter=iter->next;
+	      iter=iter->next;
 	    }
-	    if(iter==NULL)
+	  if(iter==NULL)
 	    {
-		// Else malloc a new struct, fill with values and add (sorted) to list
-		struct cycle_histogram_counter *chc;
+	      // Else malloc a new struct, fill with values and add (sorted) to list
+	      struct cycle_histogram_counter *chc;
 
-		chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
-		chc->start_address=startaddress;
-		chc->stop_address=stopaddress;
-		chc->histo_cycles=cycles;
-		chc->count=1;
+	      chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
+	      chc->start_address=startaddress;
+	      chc->stop_address=stopaddress;
+	      chc->histo_cycles=cycles;
+	      chc->count=1;
 
-		pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
+	      pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
 	    }
 
-	    startcycle=stopcycle=END_OF_TIME;
+	  startcycle=stopcycle=END_OF_TIME;
 	}
     }
 }
@@ -2049,7 +2062,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
       sprintf(address_string,"0x%04x",i);
       strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
 
-      cycles=gpsim_get_cycles_used(gp->pic_id,i);
+      cycles=gp->cpu->cycles_used(i);
       sprintf(count_string,"0x%Lx",cycles);
 
       row=gtk_clist_append(GTK_CLIST(profile_clist), entry);

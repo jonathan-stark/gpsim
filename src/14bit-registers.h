@@ -317,43 +317,6 @@ public:
 };
 
 
-//---------------------------------------------------------
-// Program Counter
-//
-
-class Program_Counter
-{
-public:
-  pic_processor *cpu;
-  unsigned int value;              /* pc's current value */
-  unsigned int memory_size_mask; 
-  unsigned int reset_address;      /* Value pc gets at reset */
-  unsigned int pclath_mask;        /* pclath confines PC to banks */
-
-  Program_Counter(void);
-  virtual void increment(void);
-  virtual void skip(void);
-  virtual void jump(unsigned int new_value);
-  virtual void interrupt(unsigned int new_value);
-  virtual void computed_goto(unsigned int new_value);
-  virtual void new_address(unsigned int new_value);
-  virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value(void) {
-    return value;
-  };
-
-  void reset(void)
-    { 
-      value = reset_address;
-      trace.program_counter(value);
-    };
-
-  virtual unsigned int get_next(void);
-
-  XrefObject *xref;
-
-};
-
 #include "gpsim_time.h"
 
 //---------------------------------------------------------
