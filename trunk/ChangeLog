@@ -1,4 +1,10 @@
-2003-12-32  Scott Dattalo  <scott@dattalo.com>
+
+2004-01-03  Scott Dattalo  <scott@dattalo.com>
+	* Applied patch from Bradley McLean mailto:bradlist@bradm.net that adds support
+	for the 18f1320.
+	* Applied patch from Mike Durian that fixes an 18f SUB instruction.
+
+2003-12-31  Scott Dattalo  <scott@dattalo.com>
 	* Applied patch from Mike Durian. He's added several files to more reasonably
 	group together portions of the simulator. In addition, he's added eeprom support
 	to the 18f devices

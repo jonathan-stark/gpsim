@@ -133,7 +133,7 @@ void StatusBar_Window::Update(void)
   if(!gp || !gp->cpu)
     return;
 
-  pc->value.i32 = gp->cpu->pc->value; // FIXME should use get_value();
+  pc->value.i32 = gp->cpu->pc->get_value();
   sprintf(buffer,"0x%04x",pc->value.i32);
   gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
 

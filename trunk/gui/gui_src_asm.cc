@@ -273,7 +273,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(row==INVALID_VALUE)
     return;
   row--;
-    
+  printf("%s address = 0x%x, row = %d\n",__FUNCTION__,address,row);
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)
@@ -541,7 +541,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	break;
     case MENU_FIND_PC:
 	pic_id = popup_sbaw->gp->pic_id;
-	address=popup_sbaw->gp->cpu->pc->value; // FIXME -- should use get_value()
+	address=popup_sbaw->gp->cpu->pc->get_raw_value();
 	//address=gpsim_get_pc_value(pic_id);
 	//SourceBrowserAsm_set_pc(popup_sbaw, address);
 	popup_sbaw->SetPC(address);
@@ -798,7 +798,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 	gpsim_set_hll_mode(sbaw->gp->pic_id,file_id_to_source_mode[id]);
 
         // Update pc widget
-	address=sbaw->gp->cpu->pc->value; //FIXME should use get_value()
+	address=sbaw->gp->cpu->pc->get_raw_value();
 	//address=gpsim_get_pc_value(sbaw->gp->pic_id);
 	//SourceBrowserAsm_set_pc(sbaw, address);
 	sbaw->SetPC(address);
@@ -1683,7 +1683,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   while(gtk_events_pending())
       gtk_main_iteration();
   
-  address=gp->cpu->pc->value; // FIXME should use get_value
+  address=gp->cpu->pc->get_raw_value();
   //address = gpsim_get_pc_value(pic_id);
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");

@@ -383,11 +383,10 @@ void Processor::set_out_of_range_pm(int address, int value)
 
 void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 {
-
   if(address < program_memory_size())
     {
       program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
-
+      printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
       if(sline > files[file_id].max_line)
 	files[file_id].max_line = sline;
 
@@ -568,8 +567,7 @@ int Processor::clear_profile_stop_at_address(int address)
 
 //-------------------------------------------------------------------
 int Processor::address_has_break(int address, 
-				     enum instruction::INSTRUCTION_TYPES type = 
-				     instruction::BREAKPOINT_INSTRUCTION)
+				     enum instruction::INSTRUCTION_TYPES type)
 {
   if(program_memory_size()<=address)
     return 0;

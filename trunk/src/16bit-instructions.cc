@@ -51,6 +51,8 @@ void Branching::decode(pic_processor *new_cpu, unsigned int new_opcode)
     case  _P18F442_:
     case  _P18F248_:
     case  _P18F452_:
+    case  _P18F1220_:
+    case  _P18F1320_:
       destination = (new_opcode & 0xff)+1;
       absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
  
@@ -1852,7 +1854,7 @@ void SUBLW16::execute(void)
 
   cpu16->W->put(new_value & 0xff);
 
-  cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, old_value, L);
+  cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value, L, old_value);
 
   cpu16->pc->increment();
 

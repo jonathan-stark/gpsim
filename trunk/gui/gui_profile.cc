@@ -1957,7 +1957,7 @@ void ProfileWindow_notify_start_callback(Profile_Window *pw)
 
   if(startcycle==END_OF_TIME) {
     startcycle=gpsim_get_cycles(pw->gp->pic_id);
-    startaddress=pw->gp->cpu->pc->value; // FIXME should use get_value();
+    startaddress=pw->gp->cpu->pc->get_raw_value();
     //gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
   }
 }
@@ -1980,7 +1980,7 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 	{
 	  guint64 cycles;
 	  GList *iter;
-	  stopaddress=pw->gp->cpu->pc->value; // FIXME should use get_value();
+	  stopaddress=pw->gp->cpu->pc->get_raw_value();
 	  //stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
 	  // We have a new measurement
 	  cycles=(int)stopcycle-(int)startcycle;

@@ -229,4 +229,37 @@ class P18F452 : public P18F442
   virtual unsigned int program_memory_size(void) const { return 0x4000; };
 
 };
+
+class P18Fxx20 : public _16bit_processor
+{
+};
+
+class P18F1220 : public P18Fxx20
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F1220_;};
+  P18F1220(void);
+  static Processor *construct(void);
+  void create(void);
+  void create_sfr_map(void);
+  virtual void create_iopin_map(void);
+  virtual void create_symbols(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+
+};
+
+
+class P18F1320 : public P18F1220
+{
+ public:
+  virtual PROCESSOR_TYPE isa(void){return _P18F1320_;};
+  P18F1320(void);
+  static Processor *construct(void);
+  void create(void);
+
+  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+
+};
+
 #endif

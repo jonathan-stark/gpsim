@@ -1150,7 +1150,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     if(!gp || !gp->cpu)
       return;
 
-    pc=gp->cpu->pc->value;// FIXME should use get_value();
+    pc=gp->cpu->pc->get_raw_value();
     SetPC(pc);
     update_label(this,pc);
 }
