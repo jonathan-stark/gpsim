@@ -419,7 +419,7 @@ public:
 
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((cycles.value-cycle_start)*4.0e6*cpu->period);
+    diff = system_time - ((cycles.value-cycle_start)*4.0e6*cpu->get_OSCperiod());
 
     guint64  idiff;
     if( diff < 0 )
@@ -461,7 +461,7 @@ public:
             warntimer=0;
     }
 
-    guint64 delta_cycles= (guint64)(100*period*cpu->frequency/4000000);
+    guint64 delta_cycles= (guint64)(100*period*cpu->get_frequency()/4000000);
     if(delta_cycles<1)
       delta_cycles=1;
 

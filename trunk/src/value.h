@@ -189,7 +189,7 @@ class Boolean : public Value {
 public:
 	
   Boolean(bool newValue);
-  Boolean(const char *_name, bool *newValue, const char *desc=0);
+  Boolean(const char *_name, bool newValue, const char *desc=0);
   virtual ~Boolean();
 
   string toString();
@@ -205,15 +205,14 @@ public:
   virtual void set(Value *);
   virtual void set(char *cP,int len=0);
 
-  bool getVal() { return *value; }
+  bool getVal() { return value; }
 
   static Boolean* Boolean::typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  virtual Value *copy() { return new Boolean(*value); }
+  virtual Value *copy() { return new Boolean(value); }
 private:
-  bool bCanDelete;
-  bool *value;
+  bool value;
 };
 
 
@@ -225,7 +224,7 @@ class Integer : public Value {
 public:
 	
   Integer(gint64 new_value);
-  Integer(const char *_name, gint64 *new_value, const char *desc=0);
+  Integer(const char *_name, gint64 new_value, const char *desc=0);
 
   virtual ~Integer();
 
@@ -244,9 +243,9 @@ public:
   virtual void set(Value *);
   virtual void set(char *cP,int len=0);
 
-  gint64 getVal() { return *value; }
+  gint64 getVal() { return value; }
 
-  virtual Value *copy() { return new Integer(*value); }
+  virtual Value *copy() { return new Integer(value); }
 
   static Integer* Integer::typeCheck(Value* val, string valDesc);
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
@@ -254,8 +253,7 @@ public:
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
-  bool bCanDelete;
-  gint64 *value;
+  gint64 value;
 };
 
 //------------------------------------------------------------------------
@@ -266,7 +264,7 @@ class Float : public Value {
 public:
 	
   Float(double newValue);
-  Float(const char *_name, double *newValue, const char *desc=0);
+  Float(const char *_name, double newValue, const char *desc=0);
   virtual ~Float();
 
   virtual string toString();
@@ -283,16 +281,15 @@ public:
   virtual void set(Value *);
   virtual void set(char *cP,int len=0);
 
-  double getVal() { return *value; }
+  double getVal() { return value; }
 
-  virtual Value *copy() { return new Float(*value); }
+  virtual Value *copy() { return new Float(value); }
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
 private:
-  bool bCanDelete;
-  double *value;
+  double value;
 };
 
 

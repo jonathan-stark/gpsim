@@ -161,7 +161,7 @@ Processor::Processor(void)
   files = 0;
   pc = 0;
 
-  set_frequency(1.0);
+  mFrequency = new Float("frequency",20e6, " oscillator frequency.");
   set_ClockCycles_per_Instruction(1);
   set_Vdd(5.0);
   setWarnMode(true);
@@ -195,7 +195,7 @@ void Processor::initializeAttributes()
   add_attribute(new SafeModeAttribute(this));
   add_attribute(new UnknownModeAttribute(this));
 
-  add_attribute(new Float("frequency",&frequency, " oscillator frequency."));
+  add_attribute(mFrequency);
 }
 
 //-------------------------------------------------------------------
@@ -213,7 +213,33 @@ void Processor::setUnknownMode(bool newUnknownMode)
   bUnknownMode = newUnknownMode;
 }
 
+//------------------------------------------------------------------------
+// Attributes
 
+void Processor::set_frequency(double f)
+{
+  if(mFrequency)
+    mFrequency->set(f);
+}
+double Processor::get_frequency()
+{
+  double d=0.0;
+
+  if(mFrequency)
+    mFrequency->get(d);
+
+  return d;
+}
+
+double  Processor::get_OSCperiod()
+{
+  double f = get_frequency();
+
+  if(f>0.0)
+    return 1/f;
+  else
+    return 0.0;
+}
 
 //-------------------------------------------------------------------
 //

@@ -328,7 +328,7 @@ guint64 Video::cycles_to_us(guint64 cycles)
   double ret = 0;;
 
   if(cpu)
-    ret = cycles*4000000.0/cpu->frequency;
+    ret = cycles*4000000.0/cpu->get_frequency();
   return (guint64) ret;
 }
 
@@ -338,7 +338,7 @@ guint64 Video::us_to_cycles(guint64 us)
   double ret = 0;
 
   if(cpu)
-    ret = us*cpu->frequency/4000000.0;
+    ret = us*cpu->get_frequency()/4000000.0;
 
   return (guint64) ret;
 }

@@ -317,12 +317,6 @@ public:
   /// The source files for this processor.
   Files *files;
 
-  /// Oscillator frequency
-  double frequency;
-
-  /// Oscillator  period
-  double period;
-
   /// Oscillator cycles for 1 instruction
   unsigned int clocks_per_inst;
 
@@ -475,8 +469,8 @@ public:
   // Processor Clock control
   //
 
-  void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
-  virtual double get_frequency() { return frequency; }
+  void set_frequency(double f);
+  virtual double get_frequency();
 
   void set_ClockCycles_per_Instruction(unsigned int cpi) 
   { clocks_per_inst = cpi; }
@@ -485,10 +479,8 @@ public:
     return clocks_per_inst;
   }
 
-  virtual double get_OSCperiod()
-  {
-    return period;
-  }
+  virtual double get_OSCperiod();
+
   virtual double get_InstPeriod()
   {
     return get_OSCperiod() * get_ClockCycles_per_Instruction();
@@ -527,6 +519,8 @@ public:
   virtual ~Processor();
 
 private:
+
+  Float *mFrequency;
 
   // Simulation modes
   bool bSafeMode;

@@ -1273,7 +1273,7 @@ void TraceLog::lxt_trace(unsigned int address, unsigned int value, guint64 cc)
 
     name = (char *)cpu->registers[address]->name().c_str();
 
-    lt_set_time(lxtp, (int)(get_cycles().value*4.0e8*cpu->period));
+    lt_set_time(lxtp, (int)(get_cycles().value*4.0e8*cpu->get_OSCperiod()));
 
     symp=lt_symbol_find(lxtp, name);
     if(symp==0)
