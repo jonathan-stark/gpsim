@@ -33,6 +33,9 @@ Boston, MA 02111-1307, USA.  */
 #include <math.h>
 #include <assert.h>
 
+#include <iostream>
+#include <iomanip>
+
 
 #include "../src/modules.h"
 #include "../src/stimuli.h"
@@ -40,6 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
 #include "../src/value.h"
+#include "../src/errors.h"
 #include "../src/packages.h"
 
 #include <vector>
@@ -1450,17 +1454,28 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
        attribute_iterator != p->module->attributes.end();
        attribute_iterator++) {
 
-    Value *locattr = *attribute_iterator;
-    double d;
-    locattr->get(d);
-    sprintf(attribute_string,"%s = %g",locattr->name().c_str(),d);
+    try {
 
-    row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
+      Value *locattr = *attribute_iterator;
+      double d;
+      locattr->get(d);
+      sprintf(attribute_string,"%s = %g",locattr->name().c_str(),d);
+
+      row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
 			   text);
-    // add the Attribute* as data for the clist rows.
-    gtk_clist_set_row_data(GTK_CLIST(p->bbw->attribute_clist),
-			   row,
-			   (gpointer)locattr);
+      // add the Attribute* as data for the clist rows.
+      gtk_clist_set_row_data(GTK_CLIST(p->bbw->attribute_clist),
+			     row,
+			     (gpointer)locattr);
+    }
+
+    catch (Error *err) {
+
+      if(err)
+	cout << "UpdateModuleFrame:" << err->toString() << endl;
+      delete err;
+    }
+
 				    
   }
 

@@ -253,7 +253,7 @@ Stimulus_Node::Stimulus_Node(const char *n)
   current_time_constant = 0.0;
   delta_voltage = 0.0;
   min_time_constant = 1e6; // by making this large, most stimuli will update instantly.
-
+  bSettling = false;  
   if(n)
     {
       new_name((char *)n);
@@ -582,7 +582,7 @@ stimulus::stimulus(char *n)
 
   Vth = 5.0;   // Volts
   Zth = 250;   // Ohms
-
+  Cth = 0;     // Farads
 }
 
 stimulus::~stimulus(void)
@@ -1247,6 +1247,15 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
 IO_bi_directional::IO_bi_directional(void)
 {
   cout << "IO_bi_directional constructor shouldn't be called\n";
+  driving = false;
+
+  // Thevenin equivalent while configured as an output 
+  Vth = 5.0;
+  Zth = 250;
+
+  // Thevenin equivalent while configured as an input 
+  VthIn = 0.3;
+  ZthIn = 1e8;
 }
 
 
@@ -1296,7 +1305,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_n
 {
 
   Zpullup = 10e3;
-
+  bPullUp = false;
 }
 
 IO_bi_directional_pu::~IO_bi_directional_pu(void)
