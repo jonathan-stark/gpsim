@@ -279,6 +279,10 @@ class IOPIN : public stimulus
   double l2h_threshold;
   double h2l_threshold;
 
+  // When connect to a node, these are thresholds used to determine whether 
+  // we're being driven by a weak driver or not.
+  double ZthWeak;
+  double ZthFloating;
 
   IOPIN(void);
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);

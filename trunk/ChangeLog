@@ -1,3 +1,7 @@
+2005-02-24 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h, src/stimuli.cc: Added impedance thresholds
+	to differentiate strong, weak, and floating drivers.
+
 2005-02-16 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc: experiments in ioport redesign.
 	
