@@ -108,7 +108,7 @@ void Value::set(Expression *expr)
 
 void Value::set(Packet &pb)
 {
-  cout << "Value is ignoring packet buffer for set()\n";
+  cout << "Value,"<<name()<<" is ignoring packet buffer for set()\n";
 }
 
 void Value::get(gint64 &i)
@@ -150,7 +150,7 @@ void Value::get(char *buffer, int buf_size)
 
 void Value::get(Packet &pb)
 {
-  cout << "Value is ignoring packet buffer for get\n";
+  cout << "Value,"<<name()<<" is ignoring packet buffer for get()\n";
 }
 
 bool Value::compare(ComparisonOperator *compOp, Value *rvalue)

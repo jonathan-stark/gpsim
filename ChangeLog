@@ -1,4 +1,9 @@
 2005-01-10 Scott Dattalo <scott@dattalo.com>
+	* cli/sockect.cc, src/value.cc: Added support for 'Socket Sinks'
+	and 'Socket Sources'. These essentially are two ways in which a
+	client can choose to communicate with gpsim. 
+	
+2005-01-10 Scott Dattalo <scott@dattalo.com>
 	* cli/sockect.cc, src/protocol.cc, src/protocol.h,
 	src/symbol.cc, src/symbol.h, src/value.cc,src/value.h:
 	Fixed bugs associated with socket notify links.
