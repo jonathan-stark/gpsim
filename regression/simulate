@@ -8,16 +8,21 @@ if [ $# -lt 2 ] ; then
   exit 1
 fi
 
+[ -f lt-gpsim.core ] && rm lt-gpsim.core
 #GPSIM=g
 GPSIM=../../gpsim/gpsim
 #GPSIM_SCRIPT=$1
 LOGFILE=$2
 touch $2
-echo "Test $1" >> $LOGFILE
-$GPSIM --cli -c $1
-grep "failures " test | grep "= 0x0"
+#echo "Test $1" >> $LOGFILE
+$GPSIM --cli -c $1 >test.out
+grep "failures " test.out | grep "= 0x0"
 if [ $? -eq 0 ] ; then
   echo "PASSED" >> $LOGFILE
 else
   echo "FAILED" >> $LOGFILE
+fi
+rm test.out
+if [ -f lt-gpsim.core ] ; then
+	echo "GPSIM dropped core! Please investigate."
 fi
