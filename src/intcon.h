@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef INTCON_H
 #define INTCON_H
 #include <iostream>		// for cout used in breakpoints.h
-using namespace std;
+//using namespace std;
 #include "pic-registers.h"	// for sfr_register
 #include "breakpoints.h"	// for global bp definition!
 #include "trace.h"		// for global trace definition!

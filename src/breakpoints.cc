@@ -1319,6 +1319,22 @@ void catch_control_c(int sig)
 
 
 //------------------------------------------------------------------------
+void BreakCallBack::callback(void)
+{
+  cout << "generic callback\n";
+}
+
+void BreakCallBack::callback_print(void)
+{
+  cout << " has callback, ID =  " << CallBackID << '\n';
+}
+
+void BreakCallBack::clear_break(void)
+{
+
+}
+
+//------------------------------------------------------------------------
 void InterfaceObject::callback(void)
 {
   if(callback_function)
