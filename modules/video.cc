@@ -295,7 +295,6 @@ Module * Video::construct(const char *_new_name)
 void Video::copy_scanline_to_pixmap(void)
 {
   int i, y;
-  int vbl=0;
   int last=line[0];
 
   // Fill unfilled values
