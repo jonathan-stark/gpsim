@@ -451,6 +451,12 @@ void pic_processor::pm_write (void)
 void pic_processor::run (void)
 {
 
+  if(simulation_mode != STOPPED) {
+    if(verbose)
+      cout << "Ignoring run request because simulation is not stopped\n";
+    return;
+  }
+
   simulation_mode = RUNNING;
 
   // If the first instruction we're simulating is a break point, then ignore it.
@@ -497,6 +503,12 @@ void pic_processor::run (void)
 void pic_processor::step (unsigned int steps)
 {
 
+
+  if(simulation_mode != STOPPED) {
+    if(verbose)
+      cout << "Ignoring step request because simulation is not stopped\n";
+    return;
+  }
 
   simulation_mode = SINGLE_STEPPING;
   do
@@ -545,6 +557,12 @@ void pic_processor::step_over (void)
 
   unsigned int saved_pc = pc.value;
 
+  if(simulation_mode != STOPPED) {
+    if(verbose)
+      cout << "Ignoring step-over request because simulation is not stopped\n";
+    return;
+  }
+
   step(1); // Try one step
 
   if( ! ( (pc.value >= saved_pc) && (pc.value <= saved_pc+2) ) )
@@ -573,6 +591,11 @@ void pic_processor::run_to_address (unsigned int destination)
   
   unsigned int saved_pc = pc.value;
   
+  if(simulation_mode != STOPPED) {
+    if(verbose)
+      cout << "Ignoring run-to-address request because simulation is not stopped\n";
+    return;
+  }
   // Set a temporary break point
   
   unsigned int bp_num = bp.set_execution_break(this, destination);
