@@ -39,6 +39,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
+#include "../src/attribute.h"
 
 #include <vector>
 
@@ -2729,8 +2730,11 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     Attribute *ypos = p->module->get_attribute("ypos", false);
     if(!xpos || !ypos)
     {
-        xpos = new FloatAttribute("xpos",-1.0);
-        ypos = new FloatAttribute("ypos",-1.0);
+      //xpos = new FloatAttribute("xpos",-1.0);
+      //ypos = new FloatAttribute("ypos",-1.0);
+
+      xpos = new FloatAttribute();//"xpos",-1.0);
+      ypos = new FloatAttribute();//"ypos",-1.0);
         module->add_attribute(xpos);
         module->add_attribute(ypos);
     }

@@ -1,3 +1,9 @@
+2004-08-09 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc, gpsim/main.cc: more experimental code
+	* src/attribute.cc, src/attribute.h, gui/gui_breadboard.cc: Some annoying
+	bug with attributes that I can't figure out. Problem appears when shared
+	libraries are disabled.
+	
 2004-08-06 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/registers.h, src/trace.cc:
 	Partial implementation of trace reconstruction.

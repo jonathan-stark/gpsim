@@ -90,8 +90,8 @@ class FloatAttribute : public Attribute
   virtual double fGet(void) { return value; }
   virtual int    nGet(void) { return (int) value; }
   virtual char *sGet(char *buffer, int buf_size);
-  FloatAttribute(char *init_name, double _v) : Attribute(init_name), value(_v) { }
-  FloatAttribute(void) { }
+  FloatAttribute(char *init_name, double v);
+  FloatAttribute(void);
 };
 
 class StringAttribute : public Attribute
