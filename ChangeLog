@@ -1,6 +1,13 @@
+2004-06-24 Borut Razem <borut.razem@siol.net>
+	* plat/win32/fd2raw.cpp, plat/win32/fd2raw.h: funtions to set the WIN32
+	  console to raw mode.
+	* cli/input.cc: call functions to set WIN32 console to raw mode
+	* gui/gui.vcproj: added fd2raw.cpp and fd2raw.h to the project
+	* cli/cli.vcproj: added errors.cc and errors.h to the project
+
 2004-06-16 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, gui/gui_src_asm.cc, src/symbol.cc, src/symbol.h:
-	small fixes to enable compilation on MSVC
+	  small fixes to enable compilation on MSVC
 
 2004-06-15 Scott Dattalo <scott@dattalo.com>
 	* more pedantic fixes 
