@@ -90,7 +90,7 @@ inline unsigned int geti(void)
   {
     init = i;
   }
-  inline void operator = (RegisterValue &rv)
+  inline void operator = (RegisterValue rv)
   {
     data = rv.data;
     init = rv.init;
