@@ -122,7 +122,7 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
       assert_event();
       trace_register_write();
     }
-  //else cout <<  " IOPORT::set_bit bit did not change\n";
+  else cout <<  " IOPORT::set_bit bit did not change\n";
 
 }
 
@@ -140,10 +140,11 @@ DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 
 void DataPort::setbit(unsigned int bit_number, bool new_value)
 {
-  if((lcd->control_port->value & 2) == 1)
+  if((lcd->control_port->value & 6) == 4){  //E is high and R/W is low
+    cout << "DataPort::" << __FUNCTION__ << " setting bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
     Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
-  else
-    cout << "DataPort::" << __FUNCTION__ << " ignoring data\n";
+  } else
+    cout << "DataPort::" << __FUNCTION__ << " ignoring data. bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
 }
 void DataPort::update_pin_directions(unsigned int new_direction)
 {
@@ -151,7 +152,7 @@ void DataPort::update_pin_directions(unsigned int new_direction)
   if((new_direction ^ direction) & 1) {
     direction = new_direction & 1;
 
-    cout << __FUNCTION__ << " new direction " <<new_direction << endl;
+    cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value <<endl;
 
     // Change the directions of the I/O pins
     for(int i=0; i<8; i++) {
@@ -165,6 +166,19 @@ void DataPort::update_pin_directions(unsigned int new_direction)
   }
 }
 
+unsigned int DataPort::get(void)
+{
+
+  for(int i=0; i<8; i++) {
+    if(pins[i]) {
+      value = (value << 1) | (pins[i]->state & 1);
+    }
+
+  }
+
+  cout << "DataPort::get = 0x" << value << endl;
+
+}
 
 void Lcd_Port::trace_register_write(void)
 {
@@ -193,6 +207,13 @@ void ControlPort::put(unsigned int new_value)
   cout << __FUNCTION__ << " new value " << new_value << endl;
 
   Lcd_Port::put(new_value);
+
+  if((old_value ^ value) & 2) {  // R/W bit has changed states
+    if(value & 2)
+      lcd->data_port->update_pin_directions(1);   // It's high, so make data lines outputs
+    else
+      lcd->data_port->update_pin_directions(0);   // make them inputs.
+  }
 
   if( (old_value ^ value) & 0x7) 
     assert_event();
@@ -236,16 +257,45 @@ void DataPort::put(unsigned int new_value)
 void Lcd_Input::put_node_state( int new_state)
 {
 
-  int current_state = state;
+  int diff = state^new_state;
 
+  cout << " " << name() << " Lcd_Input::put_node_state = " << new_state << endl;
 
   IO_input::put_node_state(new_state);
 
-  if(current_state ^ state) {
+  if(diff) {
     cout << "Lcd Input " << name() << " changed to new state: " << state << '\n';
   }
 
 }
+//---------------------------------------------------------------
+Lcd_bi_directional::Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name) :
+  IO_bi_directional(i, b,opt_name)
+{
+  drive = MAX_DRIVE/4;
+}
+
+void Lcd_bi_directional::put_node_state( int new_state)
+{
+
+  int old_state = state;
+
+  if(driving) {
+    
+    cout << " " << name() << " Lcd_bi_directional::put_node_state -- driving, so ignoring new state of " << new_state << endl;
+    return;
+  }
+
+  cout << " " << name() << " Lcd_bi_directional::put_node_state = " << new_state << endl;
+  IO_bi_directional::put_node_state(new_state);
+
+  if(old_state ^ state) {
+    cout << "Lcd bi di " << name() << " changed to new state: " << state << '\n';
+  }
+
+}
+
+//---------------------------------------------------------------
 
 void LcdDisplay::update(void)
 {
@@ -332,14 +382,14 @@ void LcdDisplay::create_iopin_map(void)
   assign_pin(5, new Lcd_Input(control_port, 1,"RW"));
   assign_pin(6, new Lcd_Input(control_port, 2,"E"));
 
-  assign_pin(7, new IO_bi_directional(data_port, 0,"d0"));  // Data bus
-  assign_pin(8, new IO_bi_directional(data_port, 1,"d1"));
-  assign_pin(9, new IO_bi_directional(data_port, 2,"d2"));
-  assign_pin(10, new IO_bi_directional(data_port,3,"d3"));
-  assign_pin(11, new IO_bi_directional(data_port,4,"d4"));
-  assign_pin(12, new IO_bi_directional(data_port,5,"d5"));
-  assign_pin(13, new IO_bi_directional(data_port,6,"d6"));
-  assign_pin(14, new IO_bi_directional(data_port,7,"d7"));
+  assign_pin(7, new Lcd_bi_directional(data_port, 0,"d0"));  // Data bus
+  assign_pin(8, new Lcd_bi_directional(data_port, 1,"d1"));
+  assign_pin(9, new Lcd_bi_directional(data_port, 2,"d2"));
+  assign_pin(10, new Lcd_bi_directional(data_port,3,"d3"));
+  assign_pin(11, new Lcd_bi_directional(data_port,4,"d4"));
+  assign_pin(12, new Lcd_bi_directional(data_port,5,"d5"));
+  assign_pin(13, new Lcd_bi_directional(data_port,6,"d6"));
+  assign_pin(14, new Lcd_bi_directional(data_port,7,"d7"));
 
   data_port->update_pin_directions(0);
 
