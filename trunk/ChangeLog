@@ -1,9 +1,12 @@
+2004-10-17 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: MSVC sync
+	* src/symbol.cc: fixed gpsim crash on WIN32 in remove_module()
+
 2004-10-12 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc: Added diagnostic printf's
 	* src/pic-processor.cc, src/pic-processor.h, src/processor.cc,
 	src/processor.h: add an option to not update the gui while single
 	stepping.
-
 
 2004-10-11 Scott Dattalo <scott@dattalo.com>
 	* src/cod.cc, src/processor.cc: Applied, but modified, patch from
@@ -327,7 +330,6 @@
 	Added support for symbolically viewing registers with the 'x' 
 	command.
 	Added support for viewing a range of registers.
-
 
 2004-08-26 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/symbol.cc, src/symbol.h,
@@ -937,7 +939,6 @@
 	be detected at load time rather than at run time. *** this will break
 	broken modules out there that until now appeared to have worked ***
                                                                                 
-
 2004-04-04  Arthur Peters <amp@singingwizard.org>
 	* src/Makefile.am, src/ssp.cc, src/ssp.h:
 	Added SSP support to gpsim.
@@ -1019,7 +1020,6 @@
 	Finished the gui split started on 03-16. 
 	Added support for multiple source browsers (to be used with context debugging).
 
-	
 2004-03-22 Chris Emerson <gpsim@mail.nosreme.org>
 	* modules/encoder.cc, modules/encoder.h: new files: added an encoder module
 	* modules/Makefile.am: Added the encoder to the list of files.
@@ -1248,7 +1248,6 @@
 	* src/* - whole bunch of other files touched while looking for
 	this bug.
 
-	
 2004-02-04  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc
 	Experimenting with operator [] for the ProgramMemoryAccess class.
@@ -1349,7 +1348,6 @@
 	  modules/resistor.h, modules/switch.cc, modules/switch.h,
 	  modules/usart.cc, modules/usart.h, modules/video.cc, modules/video.h:
 	  char * replaced with const char *,
-
 
 2004-01-06  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_regwin.cc -- valgrind memcheck bug fixes
@@ -1797,4 +1795,3 @@ to simulate: -pp16c61 .)
 
 30JUL98 gpsim-0.0.1
   o initial release - basic stuff
-

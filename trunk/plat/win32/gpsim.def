@@ -186,8 +186,6 @@ EXPORTS
     ?setbit@Register@@UAEXI_N@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_start_cycle@@3_KA
-    ?step@Processor@@UAEXI@Z
-    ?step_over@Processor@@UAEXXZ
     ?stop@ProgramMemoryAccess@@UAEXXZ
     ?toBitStr@Register@@UAEPADPADH@Z
     ?toBitStr@RegisterValue@@QAEPADPADHI000@Z
