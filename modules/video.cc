@@ -251,7 +251,7 @@ void Video::copy_scanline_to_pixmap(void)
 			y=line_nr*2;
 		else
 			y=(line_nr-313)*2+1;
-		if(line[i]>1)
+		if(line[i]>2)
 		{
 			gdk_draw_point(pixmap, white_gc, i, y);
 		}
