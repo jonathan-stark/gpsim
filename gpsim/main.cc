@@ -48,7 +48,7 @@ extern "C" {
 #include <popt.h>
 }
 
-extern int gui_init (int argc, char **argv);
+extern int gui_init (int argc, char **argv,bool);
 extern void gui_main(void);
 extern void cli_main(void);
 
@@ -210,14 +210,11 @@ main (int argc, char *argv[])
   // initialize the gui
   
 #ifdef HAVE_GUI
-  if(bUseGUI)
+  if (gui_init (argc,argv,bUseGUI) != 0)
   {
-    if (gui_init (argc,argv) != 0)
-    {
-	std::cerr << "Error initialising GUI, reverting to cmd-line mode."
-	    	  << std::endl;
-	bUseGUI = false;
-    }
+    std::cerr << "Error initialising GUI, reverting to cmd-line mode."
+	      << std::endl;
+    bUseGUI = false;
   }
 #endif
 
@@ -282,11 +279,10 @@ main (int argc, char *argv[])
   try {
 
 #ifdef HAVE_GUI
-    if(bUseGUI)
       gui_main();
-    else
-#endif
+#else
       cli_main();
+#endif
   }
 
   catch (char * err_message)

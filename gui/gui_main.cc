@@ -385,7 +385,7 @@ void quit_gui(void)
  *
  */
 
-int gui_init (int argc, char **argv)
+int gui_init (int argc, char **argv, bool bUseGui)
 {
 #ifndef _WIN32
   settings = new SettingsEXdbm("gpsim");
@@ -422,7 +422,8 @@ int gui_init (int argc, char **argv)
 
 
   gte();
-  gp = new GUI_Processor();
+  if(bUseGui)
+    gp = new GUI_Processor();
   interface_id = get_interface().add_interface(new GUI_Interface(gp));
   gtl();
 
