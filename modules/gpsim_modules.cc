@@ -81,6 +81,8 @@ Module_Types available_modules[] =
   // Logic
   { "and2", "and2", AND2Gate::construct},
   { "or2",  "or2",  OR2Gate::construct},
+  { "xor2", "xor2", XOR2Gate::construct},
+  { "not",  "not",  NOTGate::construct},
 
   // No more modules
   { NULL,NULL,NULL}

@@ -259,8 +259,11 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
     p->bbw->selected_module = p;
 }
 
-void position_module(Breadboard_Window *bbw, struct gui_module *p, int x, int y)
+void position_module(struct gui_module *p, int x, int y)
 {
+    GList *piniter;
+    struct gui_pin *pin;
+
     if(x != p->x || y != p->y)
     {
 	p->x=x-x%pinspacing;
@@ -269,43 +272,129 @@ void position_module(Breadboard_Window *bbw, struct gui_module *p, int x, int y)
 	p->module->x = p->x;
         p->module->y = p->y;
 
-        gtk_layout_move(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
+	// Position module_widget
+        gtk_layout_move(GTK_LAYOUT(p->bbw->layout), p->module_widget, p->x, p->y);
+
+        // Position pins
+	piniter = p->pins;
+	while(piniter!=NULL)
+	{
+	    pin = (struct gui_pin*) piniter->data;
+
+	    gtk_layout_move(GTK_LAYOUT(p->bbw->layout),
+			    pin->widget,p->x+pin->x,p->y+pin->y);
+
+            piniter = piniter->next;
+	}
     }
+}
+
+int module_distance(struct gui_module *p, int x, int y)
+{
+    double distance;
+    double min_distance=100000000;
+
+    // Upper left
+    distance=sqrt(abs(p->x-x)*abs(p->x-x) +
+		  abs(p->y-y)*abs(p->y-y));
+    if(distance<min_distance)
+        min_distance=distance;
+
+    // Upper right
+    distance=sqrt(abs(p->x+p->width-x)*abs(p->x+p->width-x) +
+		  abs(p->y-y)*abs(p->y-y));
+    if(distance<min_distance)
+        min_distance=distance;
+
+    // Lower left
+    distance=sqrt(abs(p->x-x)*abs(p->x-x) +
+		  abs(p->y+p->height-y)*abs(p->y+p->height-y));
+    if(distance<min_distance)
+        min_distance=distance;
+
+    // Lower right
+    distance=sqrt(abs(p->x+p->width-x)*abs(p->x+p->width-x) +
+		  abs(p->y+p->height-y)*abs(p->y+p->height-y));
+    if(distance<min_distance)
+	min_distance=distance;
+
+    printf("Module %s x=%d, y=%d, width=%d, height %d\n",
+	   p->module->name(),
+	   p->x,
+	   p->y,
+	   p->width,
+	   p->height);
+    printf("distance %f\n\n",min_distance);
+
+    return min_distance;
+}
+
+struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
+{
+    GList *mi;
+    gui_module *closest=NULL;
+    int distance, min_distance=1000000;
+
+    mi = bbw->modules;
+
+    while(mi!=NULL)
+    {
+	gui_module *p;
+
+	p = (struct gui_module*) mi->data;
+
+	if(closest==NULL)
+	{
+            closest=p;
+	}
+	else
+	{
+	    distance = module_distance(p,x,y);
+	    if(distance<min_distance) {
+		closest = p;
+		min_distance = distance;
+	    }
+	}
+
+        mi=mi->next;
+    }
+
+    return closest;
 }
 
 static void marker_cb(GtkWidget *w,
 		      GdkEventButton *event,
-		      struct gui_module *p)
+		     Breadboard_Window *bbw)
 {
-    static int x_offset, y_offset; // Hotspot of module
-
     static int x,y;
 
     static int dragging;
+
+    static struct gui_module *dragged_module;
+
+    x = event->x + bbw->hadj->value;
+    y = event->y + bbw->vadj->value;
 
     switch(event->type)
     {
     case GDK_MOTION_NOTIFY:
 	if(dragging)
 	{
-	    puts("drag");
-	    x = p->x + event->x - x_offset;
-            y = p->y + event->y - y_offset;
-	    position_module(p->bbw, p, x, y);
+            position_module(dragged_module, x, y);
+//            puts("Drag");
 	}
 	break;
     case GDK_BUTTON_PRESS:
-        puts("Press");
-	x_offset = event->x;
-	y_offset = event->y;
-//	gtk_grab_add(w);
+	dragged_module = find_closest_module(bbw, x, y);
+//	printf("Dragging %s\n",dragged_module->module->name());
+	gtk_grab_add(w);
         dragging = 1;
 	break;
     case GDK_2BUTTON_PRESS:
 	break;
     case GDK_BUTTON_RELEASE:
-        puts("Release");
-//	gtk_grab_remove(w);
+//        puts("Release");
+	gtk_grab_remove(w);
         dragging = 0;
 	break;
     default:
@@ -786,8 +875,8 @@ static void text_dialog(char *filename)
 	if(fi==NULL)
             return;
 
-	if(dialog!=NULL && GTK_IS_WIDGET(dialog))
-            gtk_widget_destroy(dialog);
+	if(dialog!=NULL)
+	    gtk_widget_destroy(dialog);
 
 
         // Build window
@@ -809,7 +898,7 @@ static void text_dialog(char *filename)
 	gtk_widget_show (cancelbutton);
 	gtk_box_pack_start (GTK_BOX(GTK_DIALOG(dialog)->action_area), cancelbutton, FALSE, FALSE, 0);
 	gtk_signal_connect_object(GTK_OBJECT(cancelbutton),"clicked",
-				  GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
+				  GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
 	gtk_window_set_default_size(GTK_WINDOW(dialog), 400, 400);
 
@@ -1237,7 +1326,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
         p->height=req.height;
     }
 
-    if(p->y+p->height>LAYOUTSIZE_Y-30)
+    if(y+p->height>LAYOUTSIZE_Y-30)
     {
 	// When we reach the bottom of the layout, we move up again
 	// and to the right of current row of modules.
@@ -1256,31 +1345,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->module->xref->add(cross_reference);
 
 
-
-    p->fixed = gtk_fixed_new();
-
-    gtk_widget_set_events(p->fixed,
-			  gtk_widget_get_events(p->fixed)|
-			  GDK_BUTTON_PRESS_MASK |
-			  GDK_BUTTON_MOTION_MASK |
-			  GDK_BUTTON_RELEASE_MASK);
-    gtk_signal_connect(GTK_OBJECT(p->fixed),"motion-notify-event",
-		       GTK_SIGNAL_FUNC(marker_cb),p);
-    gtk_signal_connect(GTK_OBJECT(p->fixed),"button_press_event",
-		       GTK_SIGNAL_FUNC(marker_cb),p);
-    gtk_signal_connect(GTK_OBJECT(p->fixed),"button_release_event",
-		       GTK_SIGNAL_FUNC(marker_cb),p);
-
-
-
-
-
-
-
-
-
-
-    gtk_fixed_put(GTK_FIXED(p->fixed), p->module_widget,PINLENGTH,PINLENGTH);
 
     gtk_widget_show(p->module_widget);
 
@@ -1360,8 +1424,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 			     orientation,
 			     iopin);
 
-	gtk_fixed_put(GTK_FIXED(p->fixed),
-		      pin->widget,PINLENGTH+pin->x,PINLENGTH+pin->y);
+	gtk_layout_put(GTK_LAYOUT(bbw->layout),
+		      pin->widget,0,0);//PINLENGTH+pin->x,PINLENGTH+pin->y);
 
 
 	p->pins = g_list_append(p->pins, pin);
@@ -1380,12 +1444,9 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	}
     }
 
+    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->module_widget, 0, 0);
 
-    gtk_widget_show(p->fixed);
-
-    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->fixed, 0, 0);
-
-    position_module(p->bbw, p, x, y);
+    position_module(p, x, y);
 
     bbw->modules=g_list_append(bbw->modules, p);
 
@@ -1413,7 +1474,7 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 	// Check if module has changed its position
 	if(p->module->x!=-1 && p->module->y!=-1)
 	{
-            position_module(bbw, p, p->module->x, p->module->y);
+            position_module(p, p->module->x, p->module->y);
 	}
 
         // Check if pins have changed state
@@ -1995,7 +2056,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (scrolledwindow5);
   gtk_paned_pack2 (GTK_PANED (hpaned1), scrolledwindow5, TRUE, TRUE);
 
-  bbw->layout = gtk_layout_new (NULL, NULL);
+  bbw->vadj = gtk_scrolled_window_get_vadjustment(GTK_SCROLLED_WINDOW(scrolledwindow5));
+  bbw->hadj = gtk_scrolled_window_get_hadjustment(GTK_SCROLLED_WINDOW(scrolledwindow5));
+
+  bbw->layout = gtk_layout_new (bbw->hadj, bbw->vadj);
   gtk_widget_ref (bbw->layout);
   gtk_object_set_data_full (GTK_OBJECT (window), "bbw->layout", bbw->layout,
                             (GtkDestroyNotify) gtk_widget_unref);
@@ -2004,6 +2068,17 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_layout_set_size (GTK_LAYOUT (bbw->layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
   GTK_ADJUSTMENT (GTK_LAYOUT (bbw->layout)->hadjustment)->step_increment = 10;
   GTK_ADJUSTMENT (GTK_LAYOUT (bbw->layout)->vadjustment)->step_increment = 10;
+  gtk_widget_set_events(bbw->layout,
+			gtk_widget_get_events(bbw->layout)|
+			GDK_BUTTON_PRESS_MASK |
+			GDK_BUTTON_MOTION_MASK |
+			GDK_BUTTON_RELEASE_MASK);
+  gtk_signal_connect(GTK_OBJECT(bbw->layout),"motion-notify-event",
+		     GTK_SIGNAL_FUNC(marker_cb),bbw);
+  gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_press_event",
+		     GTK_SIGNAL_FUNC(marker_cb),bbw);
+  gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_release_event",
+		     GTK_SIGNAL_FUNC(marker_cb),bbw);
 
 
 
@@ -2113,6 +2188,9 @@ int CreateBreadboardWindow(GUI_Processor *gp)
     bbw->selected_node=NULL;
     bbw->selected_pin=NULL;
     bbw->selected_module=NULL;
+
+    bbw->hadj = NULL;
+    bbw->vadj = NULL;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 
