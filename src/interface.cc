@@ -959,6 +959,7 @@ int gpsim_open(unsigned int processor_id, char *file)
 	    return 0;
 	}
 
+	// FIXME: questionable
 	command_list[0]->cpu=pic;
 	trace.switch_cpus(pic);
       

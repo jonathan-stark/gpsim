@@ -1351,6 +1351,7 @@ BuildRegisterWindow(Register_Window *rw)
   {
       RegWindow_new_processor(rw, ((GUI_Object*)rw)->gp);
   }
+  update_menu_item((GUI_Object*)rw);
 }
 
 int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)

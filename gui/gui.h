@@ -440,6 +440,7 @@ extern GtkItemFactory *item_factory;
 
 void exit_gpsim(void);
 
+void update_menu_item(struct _gui_object *_this);
 
 // gui_symbols.c
 void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber);

@@ -490,6 +490,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   if(bbw->processor)
       BreadboardWindow_new_processor(bbw, ((GUI_Object*)bbw)->gp);
 
+  update_menu_item((GUI_Object*)bbw);
+  
   return 0;
 }
 

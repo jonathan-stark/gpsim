@@ -723,6 +723,8 @@ int BuildWatchWindow(Watch_Window *ww)
   
   ww->gui_obj.enabled=1;
 
+  update_menu_item((GUI_Object*)ww);
+  
   return 0;
 }
 
