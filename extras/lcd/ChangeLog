@@ -1,3 +1,6 @@
+2004-06-14 Scott Dattalo  <scott@dattalo.com>
+	* INSTALL: Updated CVS instructions.
+	
 2004-05-12  Bert Driehuis <driehuis@playbeing.org>
 	* lcd.cc, lcd.h, lcdengine.cc: support CGRAM
 	
