@@ -81,9 +81,9 @@ show_message (char *title, char *message)
 
   button = gtk_button_new_with_label ("close");
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
-//  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-//			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
-//			     GTK_OBJECT (window));
+  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
+			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
+			     GTK_OBJECT (window));
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
   gtk_widget_grab_default(button);

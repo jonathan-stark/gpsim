@@ -64,6 +64,8 @@ static int pinspacing = PINLENGTH;
 
 #define ROUTE_RES (2*PINLINEWIDTH)
 
+static void treeselect_module(GtkItem *item, struct gui_module *p);
+
 ///////////////////////////////////////////////////////////////////////
 // Start of autorouting pain 
 ///////////////////////////////////////////////////////////////////////
@@ -1369,6 +1371,58 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gui_node->bbw->selected_node = gui_node;
 }
 
+static void settings_clist_cb(GtkCList       *clist,
+		gint            row,
+		gint            column,
+		GdkEvent       *event,
+		Breadboard_Window *bbw)
+{
+	// Save the Attribute*
+	Attribute *attr;
+	char attrstr[50];
+	char str[256];
+	attr = (Attribute*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
+			row);
+
+	attr->sGet(attrstr,50);
+	
+	sprintf(str,"%s = %s",attr->get_name(),attrstr);
+	
+	gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
+}
+
+static void settings_set_cb(GtkWidget *button, 
+		Breadboard_Window *bbw)
+{
+	char *entry_string;
+	char attribute_name[256];
+	char attribute_newval[256];
+	// We get here from both the button and entry->enter
+	
+	// Check the entry.
+	entry_string=gtk_entry_get_text(GTK_ENTRY(bbw->attribute_entry));
+	sscanf(entry_string,"%s = %s",attribute_name, attribute_newval);
+
+	printf("change attribute \"%s\" to \"%s\"\n",attribute_name, attribute_newval);
+	
+	Attribute *attr;
+	
+	// Change the Attribute
+	attr = bbw->selected_module->module->get_attribute(attribute_name);
+	if(attr)
+	{
+		// Set attribute
+		attr->set(atoi(attribute_newval));
+
+		// Update clist
+		treeselect_module(0, bbw->selected_module);
+	}
+	else
+	{
+		printf("Could not find attribute \"%s\"\n",attribute_name);
+	}
+}
+
 static void treeselect_module(GtkItem *item, struct gui_module *p)
 {
     char string[STRING_SIZE];
@@ -1387,7 +1441,51 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
 	gtk_widget_hide(p->bbw->node_frame);
 	gtk_widget_hide(p->bbw->pic_frame);
 	gtk_widget_show(p->bbw->module_frame);
-        gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),string);
+	gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),string);
+
+	// freeze
+        gtk_clist_freeze(GTK_CLIST(p->bbw->attribute_clist));
+	// clear clist
+        gtk_clist_clear(GTK_CLIST(p->bbw->attribute_clist));
+	// read attributes and add to clist
+	{
+	    char attribute_string[STRING_SIZE];
+	    char *text[1]={attribute_string};
+            list <Attribute *> :: iterator attribute_iterator;
+	    int row;
+
+	    for (attribute_iterator = p->module->attributes.begin();
+		 attribute_iterator != p->module->attributes.end();
+		 attribute_iterator++) {
+
+		Attribute *locattr = *attribute_iterator;
+
+		//cout << locattr->get_name();
+
+                strcpy(attribute_string,locattr->get_name());
+
+		    char buf[50];
+		    locattr->sGet(buf,50);
+
+                    strcat(attribute_string," = ");
+		    strcat(attribute_string,buf);
+		    row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
+					   text);
+		    // add the Attribute* as data for the clist rows.
+		    gtk_clist_set_row_data(GTK_CLIST(p->bbw->attribute_clist),
+				    row,
+				    (gpointer)locattr);
+				    
+	    }
+	}
+	// thaw
+        gtk_clist_thaw(GTK_CLIST(p->bbw->attribute_clist));
+	
+	gtk_entry_set_text(GTK_ENTRY(p->bbw->attribute_entry), "");
+
+	// Set button callback with Attribute* when selecting clist row.
+        // "resistance = 100"
+
         break;
     }
 
@@ -2302,7 +2400,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     // Save processor command. How?
     m=bbw->gp->cpu;
-    if(m->x>=0 && m->y>=0)
+    if(m && m->x>=0 && m->y>=0)
 	fprintf(fo, "module position %s %d %d\n",
 		m->name(),
 		m->x,
@@ -2326,6 +2424,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	 module_iterator != instantiated_modules_list.end();
 	 module_iterator++)
     {
+	list <Attribute*> :: iterator attribute_iterator;
 	m = *module_iterator;
 
 	fprintf(fo, "module load %s %s\n",
@@ -2337,6 +2436,19 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 		    m->name(),
 		    m->x,
 		    m->y);
+
+	for(attribute_iterator = m->attributes.begin();
+		attribute_iterator != m->attributes.end();
+		attribute_iterator++) {
+		Attribute *locattr = *attribute_iterator;
+		char attrval[50];
+		locattr->sGet(attrval,50);
+		
+		fprintf(fo, "module set %s %s %s\n",
+				m->name(),
+				locattr->get_name(),
+				attrval);
+	}
     }
 
 
@@ -3109,13 +3221,9 @@ void Breadboard_Window::Build(void)
   GtkWidget *viewport6;
   GtkWidget *hbox9;
   GtkWidget *hbox14;
-  GtkWidget *module_settings_entry;
-  GtkWidget *module_settings_button;
   GtkWidget *remove_module_button;
   GtkWidget *save_stc_button;
   GtkWidget *scrolledwindow5;
-  GtkWidget *pic_settings_clist;
-  GtkWidget *module_settings_clist;
 
   GtkWidget *button25, *button26;
 
@@ -3478,12 +3586,16 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (viewport6);
   gtk_container_add (GTK_CONTAINER (scrolledwindow1), viewport6);
 
-  module_settings_clist = gtk_clist_new (1);
-  gtk_widget_ref (module_settings_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "module_settings_clist", module_settings_clist,
+  attribute_clist = gtk_clist_new (1);
+  gtk_widget_ref (attribute_clist);
+  gtk_object_set_data_full (GTK_OBJECT (window), "attribute_clist", attribute_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (module_settings_clist);
-  gtk_container_add (GTK_CONTAINER (viewport6), module_settings_clist);
+  gtk_widget_show (attribute_clist);
+  gtk_container_add (GTK_CONTAINER (viewport6), attribute_clist);
+  gtk_signal_connect(GTK_OBJECT(attribute_clist),
+		  "select_row",
+		  (GtkSignalFunc)settings_clist_cb,
+		  (gpointer)this);
 
   hbox9 = gtk_hbox_new (FALSE, 0);
   gtk_widget_ref (hbox9);
@@ -3492,19 +3604,27 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (hbox9);
   gtk_box_pack_start (GTK_BOX (vbox10), hbox9, FALSE, FALSE, 0);
 
-  module_settings_entry = gtk_entry_new ();
-  gtk_widget_ref (module_settings_entry);
-  gtk_object_set_data_full (GTK_OBJECT (window), "module_settings_entry", module_settings_entry,
+  attribute_entry = gtk_entry_new ();
+  gtk_widget_ref (attribute_entry);
+  gtk_object_set_data_full (GTK_OBJECT (window), "attribute_entry", attribute_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (module_settings_entry);
-  gtk_box_pack_start (GTK_BOX (hbox9), module_settings_entry, FALSE, FALSE, 0);
+  gtk_widget_show (attribute_entry);
+  gtk_box_pack_start (GTK_BOX (hbox9), attribute_entry, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(attribute_entry),
+		  "activate",
+		  (GtkSignalFunc) settings_set_cb,
+		  this);
 
-  module_settings_button = gtk_button_new_with_label ("Set");
-  gtk_widget_ref (module_settings_button);
-  gtk_object_set_data_full (GTK_OBJECT (window), "module_settings_button", module_settings_button,
+  attribute_button = gtk_button_new_with_label ("Set");
+  gtk_widget_ref (attribute_button);
+  gtk_object_set_data_full (GTK_OBJECT (window), "attribute_button", attribute_button,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (module_settings_button);
-  gtk_box_pack_start (GTK_BOX (hbox9), module_settings_button, FALSE, FALSE, 0);
+  gtk_widget_show (attribute_button);
+  gtk_box_pack_start (GTK_BOX (hbox9), attribute_button, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(attribute_button),
+		  "clicked",
+		  (GtkSignalFunc) settings_set_cb,
+		  this);
 
 
   hbox14 = gtk_hbox_new (FALSE, 0);
