@@ -80,7 +80,7 @@ enum PCFG_bits
   unsigned int configuration_bits[16];
 
   //  unsigned int get(void) {return value;};
-  int get_Vref(void);
+  double get_Vref(void);
 
 };
 
@@ -119,8 +119,8 @@ enum AD_states
 
   unsigned int ad_state;
   unsigned int Tad_2;
-  int acquired_value;
-  int reference;
+  double acquired_value;
+  double reference;
   unsigned int channel_mask;
   guint64 future_cycle;
 

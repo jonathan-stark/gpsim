@@ -138,27 +138,6 @@ void Led_Port::trace_register_write(void)
 }
 
 
-//--------------------------------------------------------------
-// Led_Input
-//   This class is a minor extension of a normal IO_input. I may
-// remove it later, but for now it does serve a simple purpose.
-// Specifically, this derivation will intercept when a stimulus
-// is being changed. 
-
-void Led_Input::put_node_state( int new_state)
-{
-
-  int current_state = state;
-
-
-  IO_input::put_node_state(new_state);
-
-  if(current_state ^ state) {
-    //cout << "Led Input " << name() << " changed to new state: " << state << '\n';
-  }
-
-}
-
 void Led_7Segments::update(void)
 {
   update(darea, w_width,w_height);

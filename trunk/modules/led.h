@@ -57,8 +57,6 @@ class Led_Input : public IO_input
 {
 public:
 
-  virtual void put_node_state( int new_state);
-
   Led_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
 
 };

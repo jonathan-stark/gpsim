@@ -1,3 +1,19 @@
+2004-07-22 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-tmrs.cc, src/breakpoints.cc, src/breakpoints.h, 
+	src/i2c-ee.cc, src/ioports.cc, src/ioports.h, src/p16x7x.cc,
+	src/p16x7x.h, src/packages.cc, src/pic-processor.h, src/processor.cc,
+	src/processor.h, src/registers.cc, src/registers.h, src/ssp.cc,
+	src/stimuli.cc, src/stimuli.h, src/uart.cc, modules/binary_indicator.cc,
+	modules/binary_indicator.h, modules/led.cc, modules/led.h,
+	modules/logic.cc, modules/logic.h, modules/paraface.cc,
+	modules/paraface.h, modules/resistor.cc, modules/resistor.h,
+	modules/usart.cc, modules/video.cc, modules/video.h:
+	Rewrote the way stimuli are handled. Before, gpsim only used
+	a single parameter (more or less) to represent the state of
+	an stimulus. Now, two parameters are used. Currently, these
+	parameters are designated as the voltage and impedance. Before,
+	the single parameter was somewhat similar to a current.
+	
 2004-07-20 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: added input leakage modelling 
 	to I/O pins.

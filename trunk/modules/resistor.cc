@@ -66,30 +66,19 @@ public:
     new_name("resistance");
     cout << "Resistance Attribute constructor\n";
 
-    if(pur->res->drive)
-      value = 1000*MAX_DRIVE/(pur->res->drive);
+    value = pur->res->get_Zth();
   }
 
 
   void set(double r) {
-    int res;
-    value = r;
-    cout << "Setting resistance attribute!\n";
-    if(r!= 0.0)
-      res = int(1000*MAX_DRIVE/r);
-    else
-      res = MAX_DRIVE;
 
-    if(res>MAX_DRIVE)
-      res = MAX_DRIVE;
+    cout << "Setting resistance attribute!\n";
+    value = r;
 
     if(!pur)
       return;
 
-    if(pur->res->drive > 0)
-      pur->res->drive = res;
-    else
-      pur->res->drive = -res;
+    pur->res->set_Zth(r);
 
   };
 
@@ -99,33 +88,6 @@ public:
   };
 };
 
-
-//--------------------------------------------------------------
-// Resistor_IO
-//   This class is a minor extension of a normal IO_input. I may
-// remove it later, but for now it does serve a simple purpose.
-// Specifically, this derivation will intercept when a stimulus
-// is being changed. 
-
-void Resistor_IO::put_node_state( int new_state)
-{
-
-  int current_state = state;
-
-  //cout << "void Resistor_IO::put_node_state( int new_state = " << new_state << ")\n";
-  IO_input::put_node_state(new_state);
-
-  if(current_state ^ state)
-    cout << "Resistor " << name() << " changed to new state: " <<
-      state << '\n';
-
-}
-
-int Resistor_IO::get_voltage(guint64 current_time)
-{
-
-  return drive;
-}
 
 //--------------------------------------------------------------
 void Resistor_IOPORT::trace_register_write(void)
@@ -224,28 +186,6 @@ PUResistor_IO::PUResistor_IO(void)
   res = NULL;  // Assigned later.
 }
 
-//--------------------------------------------------------------
-void PUResistor_IO::put_node_state(int new_state)
-{
-
-  //IOPIN::put_node_state(new_state);
-
-  cout << "PUResistor_IO::put_node_state " << name() << '\n';
-
-}
-
-//--------------------------------------------------------------
-int PUResistor_IO::get_voltage(guint64 current_time)
-{
-
-  if (res) {
-    cout << "PUResistor_IO::get_voltage " << res->drive << '\n';
-    return res->drive;
-  }
-  return 0;
-
-}
-
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
@@ -299,7 +239,7 @@ void PullupResistor::create_iopin_map(void)
   IOPIN *iop = get_pin(1);
   if(iop) {
     cout << "pullup resistor pin name: "<<iop->name() << '\n';
-    cout << "voltage " << iop->get_voltage(0) << '\n';
+    cout << "voltage " << iop->get_Vth() << '\n';
   }
   get_symbol_table().add_stimulus(get_pin(1));
 
@@ -323,7 +263,8 @@ Module * PullupResistor::pu_construct(const char *_new_name)
 
   pur->create_iopin_map();
 
-  cout << "Resistance " << pur->res->drive << '\n';
+  pur->res->set_Vth(5.0);
+  cout << "Resistance " << pur->res->get_Zth() << '\n';
 
   return pur;
 
@@ -343,9 +284,9 @@ Module * PullupResistor::pd_construct(const char *_new_name)
   }
   pur->create_iopin_map();
 
-  pur->res->drive = -pur->res->drive;
+  pur->res->set_Vth(0);
 
-  cout << "Resistance " << pur->res->drive << '\n';
+  cout << "Resistance " << pur->res->get_Zth() << '\n';
 
   return pur;
 
@@ -361,14 +302,14 @@ PullupResistor::PullupResistor(const char *init_name)
   // Create the resistor:
 
   res = new resistor;
-  res->drive = MAX_DRIVE/2;
+  res->set_Zth(10e3);
 
   attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
   new_name((char*)init_name);
 
-#ifdef HAVE_GUI
+#ifdef MANAGING_GUI
   pu_window = NULL;
 
   //if(use_gui) {
@@ -384,7 +325,7 @@ PullupResistor::~PullupResistor()
     delete res;
 }
 
-#ifdef HAVE_GUI
+#ifdef MANAGING_GUI
 
 static void pu_cb(GtkWidget *button, gpointer pur_class)
 {

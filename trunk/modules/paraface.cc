@@ -220,7 +220,7 @@ void OutputPort::put(unsigned int new_value)
 // remove it later, but for now it does serve a simple purpose.
 // Specifically, this derivation will intercept when a stimulus
 // is being changed.
-
+/*
 void Paraface_Input::put_node_state( int new_state)
 {
 
@@ -230,11 +230,11 @@ void Paraface_Input::put_node_state( int new_state)
     IO_input::put_node_state(new_state);
 
     if(current_state ^ state) {
-	//    cout << "Paraface_Input (parport output datapins) " << name() << " changed to new state: " << state << '\n';
+
     }
 
 }
-
+*/
 void Paraface::update(void)
 {
     //    cout << "Update" <<endl;

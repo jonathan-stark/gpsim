@@ -96,61 +96,75 @@ extern list <stimulus *> stimulus_list;
 class Stimulus_Node : public gpsimValue
 {
 public:
-  bool warned;   // keeps track of node warnings (e.g. floating node, contentiong)
-  int state;          // The most recent value of this node
+  bool warned;        // keeps track of node warnings (e.g. floating node, contentiong)
+  double voltage;     // The most recent value of this node
 
   stimulus *stimuli;  // Pointer to the first stimulus connected to this node.
+  int nStimuli;       // number of stimuli attached to this node.
 
   Stimulus_Node(const char *n = 0);
   virtual ~Stimulus_Node();
 
-  int get_voltage(void) { return state; }
-  int update(guint64 current_time);
+  double get_nodeVoltage(void) { return voltage; }
+  double update(guint64 current_time);
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
 
-  virtual unsigned int get_value(void) { return state;}
-  virtual void put_value(unsigned int new_value) {}
+  // FIXME: do we need this: ?
+  virtual unsigned int get_value(void) { return 0;}
+  virtual void put_value(unsigned int new_value) { }
 
 };
 
+
+//========================================================================
+//
+// stimulus
+//
+// The stimulus class is the base class for all of the analog interfaces
+// between modules. A stimulus is a 1-node device that has a characteristic
+// impedance and voltage. If you're familiar with circuit analysis, these
+// are the Thevenin voltage and impedance.
+//
+// gpsim is not a spice simulator. So complex devices like transistors or
+// opamps are not modeled. In fact, even simple devices like capacitors and
+// inductors are not modeled.
+//
 class stimulus : public gpsimValue
 {
 public:
 
   Stimulus_Node *snode;      // Node to which this stimulus is attached
-  int drive;                 // This defines the strength of the source or the magnitude of the load.
-  int state;                 // The most recent value of this stimulus
+  //int drive;                 // This defines the strength of the source or the magnitude of the load.
+  //int state;                 // The most recent value of this stimulus
   bool digital_state;        // 0/1 digitization of the analog state
+
+  
+  double Vth;
+  double Zth;
+  double nodeVoltage;
 
   stimulus *next;
 
   stimulus(char *n=0);
   virtual ~stimulus();
 
-  // Two different ways to obtain the stimulus state.
-  // 'get_voltage' is sort of like an analog representation of the stimulus state.
-  // This is what's called when the a node want to fine how much drive this
-  // stimulus is contributing.
-  virtual int get_voltage(guint64 current_time) {return state;};
 
-  // 'get_state' returns up-to-date state of the stimulus. I/O Pins (which
-  // are derived from this class), can be queried through here.
-  virtual int get_state(void) {return state;};
+  virtual double get_Vth() { return Vth; }
+  virtual void   set_Vth(double v) { Vth = v; }
+  virtual double get_Zth() { return Zth; }
+  virtual void   set_Zth(double z) { Zth = z; }
+  virtual double get_nodeVoltage() { return nodeVoltage; }
+  virtual void   set_nodeVoltage(double v) { nodeVoltage = v; }
 
-  // Three different ways the stimulus is changed:
-  virtual void put_state(int new_state) {state=new_state;};      // From simulation
-  virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
-  virtual void put_state_value(int new_state);                   // From the gui
-  // interface to the digital state
   virtual bool get_digital_state(void) {return digital_state;};
   virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
 
   virtual void attach(Stimulus_Node *s) { snode = s;};
   virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
 
-  virtual unsigned int get_value(void) { return state;}
+  virtual unsigned int get_value(void) { return 0;}
   virtual void put_value(unsigned int new_value) {}
 
 };
@@ -176,7 +190,7 @@ enum SOURCE_TYPE
     period,
     duty,
     phase;
-  unsigned int
+  double
     initial_state;
 
 
@@ -189,8 +203,8 @@ enum SOURCE_TYPE
     time = 0;
   };
 
-  virtual int get_voltage(guint64 current_time) {return 0;};
-  virtual int get_state(void) {return state;};
+  //virtual int get_voltage(guint64 current_time) {return 0;};
+  //virtual int get_state(void) {return state;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
 
   virtual void callback(void);
@@ -233,19 +247,8 @@ class IOPIN : public stimulus
   unsigned int iobit;  // 
 
   // These are the low to high and high to low input thresholds.
-  int l2h_threshold;
-  int h2l_threshold;
-
-  // These are the analog levels for a digital high and low
-  // when the I/O pin is configured as an output.
-  int hi_drive;
-  int lo_drive;
-
-  // These are the analog levels the I/O pin will "drive" whenever
-  // is configured as an input and is being driven with either a
-  // logic high or logic low.
-  int hi_leakage;
-  int lo_leakage;
+  double l2h_threshold;
+  double h2l_threshold;
 
 
   IOPIN(void);
@@ -255,18 +258,15 @@ class IOPIN : public stimulus
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
-  virtual int get_voltage(guint64 current_time) {return state;};
-  virtual int get_input_leakage() { return digital_state ? hi_leakage : lo_leakage;}
-  virtual int get_state(void);
+  virtual void set_nodeVoltage(double v);
+  virtual bool get_digital_state(void);
+  virtual void put_digital_state(bool new_dstate);
+
   virtual Register *get_iop(void);
-  virtual void put_state(int new_state) {state=new_state;}; 
-  virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
-  virtual void put_state_value(int new_state);
-  virtual void toggle(void) {state = !state;}; 
+  virtual void toggle(void);
   virtual void attach(Stimulus_Node *s);
   virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int x){return;};
-  virtual void update_pullup(bool new_state){return;}
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
 };
 
@@ -277,12 +277,9 @@ public:
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
   IO_input(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   IO_input(void);
-  virtual int get_voltage(guint64 current_time); //{return drive;};
-  virtual void toggle(void);
-  virtual void put_state( int new_state);
-  virtual void put_node_state(int new_state); // From attached node
-  virtual void change_direction(unsigned int){return;};
-  virtual void update_direction(unsigned int){return;};
+
+  virtual double get_Vth();
+
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT;};
 };
 
@@ -293,16 +290,60 @@ public:
   //  source_stimulus *source;
   bool driving;
 
+  // Impedance of the IOPIN when it's not driving.
+  double ZthIn;
+
+  // Voltage of the IOPIN when it's not driving
+  // (this is the voltage the I/O pin floats to when there's
+  // nothing connected to it)
+  double VthIn;
+
+
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
-  virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time);
+
+  virtual double get_Zth();
+  virtual double get_Vth();
+  virtual void set_nodeVoltage(double new_nodeVoltage);
+
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 };
 
+
+
+
+class IO_bi_directional_pu : public IO_bi_directional
+{
+public:
+
+  bool bPullUp;
+  double Zpullup;
+
+  virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
+  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  ~IO_bi_directional_pu();
+  virtual double get_Vth();
+  virtual double get_Zth();
+  virtual void update_pullup(bool new_state) { bPullUp = new_state; }
+};
+
+
+class IO_open_collector : public IO_bi_directional
+{
+public:
+
+  virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
+  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+
+  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
+
+  virtual double get_Vth();
+  virtual double get_Zth();
+
+};
 
 /* For now, a resistor has one end attached to either ground or vcc and the
 ** other end is attached to a node. As we get more ambitious, this may change.
@@ -312,54 +353,18 @@ class resistor : public source_stimulus
 {
 public:
 
-  virtual int get_voltage(guint64 current_time) {return drive;};
   virtual SOURCE_TYPE isa(void) {return RESISTOR;};
 };
 
-
-class IO_bi_directional_pu : public IO_bi_directional
-{
-public:
-
-  resistor *pull_up_resistor;
-  bool pull_up_enabled;
-
-  virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
-  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
-  ~IO_bi_directional_pu();
-  virtual int get_voltage(guint64 current_time);
-  virtual void update_pullup(bool new_state) { pull_up_enabled = new_state; }
-  virtual void pull_hi()
-  {
-    update_pullup(true);
-    change_direction(DIR_INPUT);
-  }
-};
-
-class IO_open_collector : public IO_input
-{
-public:
-
-  bool driving;
-  
-  virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
-  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
-  virtual int get_voltage(guint64 current_time);
-  virtual void update_direction(unsigned int);
-  virtual void change_direction(unsigned int);
-  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
-
-};
 
 class square_wave : public source_stimulus
 {
 public:
 
   square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
-  square_wave(char *n=0);
 
-  virtual int get_voltage(guint64 current_time);
-      
+  virtual double get_Vth();
+
   virtual SOURCE_TYPE isa(void) {return SQW;};
 
 };
@@ -368,12 +373,11 @@ class triangle_wave : public source_stimulus
 {
 public:
 
-  float m1,b1,m2,b2;
+  double m1,b1,m2,b2;
 
-  virtual int get_voltage(guint64 current_time);
   triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
-  triangle_wave(char *n=0);
 
+  virtual double get_Vth();
   virtual SOURCE_TYPE isa(void) {return TRI;};
 
 };
@@ -381,7 +385,7 @@ public:
 typedef struct StimulusData {
 
   guint64 time;
-  int value;
+  double value;
 
 } StimulusDataType;
 
@@ -392,7 +396,9 @@ public:
   unsigned int
     max_states,
     current_index,
-    digital,
+    digital;
+
+  double
     current_state,
     next_state;
 
@@ -405,11 +411,10 @@ public:
   Processor *cpu;
 
   virtual void callback(void);
-  virtual int get_voltage(guint64 current_time);
+  virtual double get_Vth();
   virtual void start(void);
   virtual void re_start(guint64 new_start_time);
-  virtual void put_data(guint64 data_point);
-  virtual void put_data(float data_point);
+  virtual void put_data(double data_point);
   virtual void set_digital(void) { digital = 1; };
   virtual void set_analog(void) { digital = 0; };
   asynchronous_stimulus(char *n=0);
@@ -425,7 +430,6 @@ class dc_supply : public source_stimulus {
 
   dc_supply(char *n=0);
   virtual SOURCE_TYPE isa(void) {return DC;};
-  virtual int get_voltage(guint64 current_time) { return drive;};
 
 };
 

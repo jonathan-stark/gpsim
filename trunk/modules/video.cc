@@ -101,14 +101,14 @@ public:
 // remove it later, but for now it does serve a simple purpose.
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
-void Another_Input::put_node_state( int new_state)
+void Another_Input::put_digital_state( bool new_state)
 {
 
-  int current_state = state;
+  bool current_state = get_digital_state();
 
-  IO_input::put_node_state(new_state);
+  IOPIN::put_digital_state(new_state);
 
-  if(current_state ^ state) {
+  if(current_state != get_digital_state()) {
 
     if(video)
       video->update_state();

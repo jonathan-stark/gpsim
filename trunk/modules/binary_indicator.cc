@@ -51,6 +51,7 @@ Boston, MA 02111-1307, USA.  */
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
 
+#if 0
 void Binary_Input::put_node_state( int new_state)
 {
 
@@ -64,6 +65,7 @@ void Binary_Input::put_node_state( int new_state)
       state << '\n';
 
 }
+#endif
 
 Binary_Indicator::Binary_Indicator(void)
 {

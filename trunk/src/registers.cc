@@ -90,19 +90,19 @@ void Register::put(unsigned int new_value)
 }
 
 
-int Register::get_bit(unsigned int bit_number)
+bool Register::get_bit(unsigned int bit_number)
 {
 
-  return( (value.get() >>  (bit_number & 0x07)) & 1 );
+  return  (value.get() & (1<<bit_number) ) ? true : false;
 
 }
 
-int Register::get_bit_voltage(unsigned int bit_number)
+double Register::get_bit_voltage(unsigned int bit_number)
 {
   if(get_bit(bit_number))
-    return +1000;
+    return 5.0;
   else
-    return -1000;
+    return 0.0;
 }
 //--------------------------------------------------
 // set_bit

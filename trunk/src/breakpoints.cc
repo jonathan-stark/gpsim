@@ -955,7 +955,7 @@ RegisterValue  Break_register_read::getRV(void)
   return(replaced->getRV());
 }
 
-int Break_register_read::get_bit(unsigned int bit_number)
+bool Break_register_read::get_bit(unsigned int bit_number)
 {
   bp.halt();
   trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
@@ -963,7 +963,7 @@ int Break_register_read::get_bit(unsigned int bit_number)
   return(replaced->get_bit(bit_number));
 }
 
-int Break_register_read::get_bit_voltage(unsigned int bit_number)
+double Break_register_read::get_bit_voltage(unsigned int bit_number)
 {
   return replaced->get_bit_voltage(bit_number);
 }
@@ -1021,7 +1021,7 @@ RegisterValue  Break_register_read_value::getRV(void)
   return(v);
 }
 
-int Break_register_read_value::get_bit(unsigned int bit_number)
+bool Break_register_read_value::get_bit(unsigned int bit_number)
 {
   unsigned int v = replaced->get();
   unsigned int mask = 1<<(bit_number & 7);
@@ -1032,7 +1032,7 @@ int Break_register_read_value::get_bit(unsigned int bit_number)
   return replaced->get_bit(bit_number);
 }
 
-int Break_register_read_value::get_bit_voltage(unsigned int bit_number)
+double Break_register_read_value::get_bit_voltage(unsigned int bit_number)
 {
   return replaced->get_bit_voltage(bit_number);
 }
@@ -1156,14 +1156,14 @@ RegisterValue Log_Register_Read::getRV(void)
 
 }
 
-int Log_Register_Read::get_bit(unsigned int bit_number)
+bool Log_Register_Read::get_bit(unsigned int bit_number)
 {
   int v = replaced->get_bit(bit_number);
   trace_log.register_read(replaced->address, v, cycles.value);
   return v;
 
 }
-int Log_Register_Read::get_bit_voltage(unsigned int bit_number)
+double Log_Register_Read::get_bit_voltage(unsigned int bit_number)
 {
   return replaced->get_bit_voltage(bit_number);
 }
@@ -1192,7 +1192,7 @@ RegisterValue Log_Register_Read_value::getRV(void)
   return rv;
 }
 
-int Log_Register_Read_value::get_bit(unsigned int bit_number)
+bool Log_Register_Read_value::get_bit(unsigned int bit_number)
 {
   unsigned int v = replaced->get();
   unsigned int mask = 1<<(bit_number & 7);
@@ -1203,7 +1203,7 @@ int Log_Register_Read_value::get_bit(unsigned int bit_number)
   return replaced->get_bit(bit_number);
 }
 
-int Log_Register_Read_value::get_bit_voltage(unsigned int bit_number)
+double Log_Register_Read_value::get_bit_voltage(unsigned int bit_number)
 {
   return replaced->get_bit_voltage(bit_number);
 }

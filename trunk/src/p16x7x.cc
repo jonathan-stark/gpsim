@@ -169,7 +169,7 @@ void ADCON0::put_conversion(void)
   if(adresl) {   // non-null for 16f877
 
     if(reference != 0)
-      converted = (4*acquired_value)/reference;
+      converted = (int)((1023*acquired_value)/reference);
     else
       converted = 0xffffffff;  // As close to infinity as possible...
 
@@ -186,7 +186,7 @@ void ADCON0::put_conversion(void)
   } else {
 
     if(reference != 0)
-      converted = acquired_value/reference;
+      converted = (int)(255*acquired_value/reference);
     else
       converted = 0xffffffff;  // As close to infinity as possible...
 
@@ -234,7 +234,7 @@ void ADCON0::callback(void)
 	if(analog_port2)
 	  acquired_value = analog_port2->get_bit_voltage( channel - 5);
 	else
-	  acquired_value = 0;
+	  acquired_value = 0.0;
       }
 
       reference = adcon1->get_Vref();
@@ -287,16 +287,16 @@ void ADCON0_withccp::set_interrupt(void)
 
 //------------------------------------------------------
 
-int ADCON1::get_Vref(void)
+double ADCON1::get_Vref(void)
 {
 
 
-  int vrefhi,vreflo;
+  double vrefhi,vreflo;
 
   if ( Vrefhi_position[value.get() & valid_bits] ==  3)
     vrefhi = analog_port->get_bit_voltage(3);
   else
-    vrefhi = (int)(cpu14->Vdd * MAX_ANALOG_DRIVE);
+    vrefhi = cpu->get_Vdd();
 
 
   if ( Vreflo_position[value.get() & valid_bits] ==  2)
@@ -306,18 +306,8 @@ int ADCON1::get_Vref(void)
 
   //cout << "AD reading ref hi 0x" << hex <<  vrefhi << " low 0x" << vreflo << '\n';
 
-  return ( (vrefhi - vreflo) / 255);
+  return (vrefhi - vreflo);
 
-  /*
-  if(ref_position<8)
-    {
-      return(analog_port->get_bit(ref_position) / 255);
-    }
-  else
-    {
-      return(int(cpu->Vdd * MAX_ANALOG_DRIVE));
-    }
-  */
 }
 
 void P16C71::create_sfr_map(void)
