@@ -1,3 +1,11 @@
+2005-03-23 Scott Dattalo <scott@dattalo.com>
+	* src/value.cc: Fixed write to a null pointer in String::get(char
+	*buf, int len).
+	* src/symbol.cc: Fixed infinite loop in 
+	char *register_symbol::name (char *buf, int len).
+	* regression/ccp/ccp.asm: added more features to the ccp
+	regression test.
+	
 2005-03-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/processor.h: created a notification
 	to Processor when breakpoints are set or cleared. Cleaned up

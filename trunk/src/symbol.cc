@@ -441,7 +441,7 @@ string &register_symbol::name(void) {
 }
 
 char *register_symbol::name(char *buf, int len) {
-  return name(buf, len);
+  return symbol::name(buf, len);
 }
 
 string register_symbol::toString()

@@ -147,7 +147,8 @@ ccp_test1:
 
         call    ccpWaitForCapture
 
-lll:
+ccp_t1:
+
 	movf	CCPR1L,W
 	movwf	capTimeL
 	movf	CCPR1H,W
@@ -163,19 +164,17 @@ lll:
 	 incfsz CCPR1H,W
           subwf	capTimeH,F
 
-  goto lll
-
-ccp_t1:
         call    ccpWaitForCapture
 
-        movlw   7               ;if we just processed the 16th rising edge capture mode
+        movlw   7               ;if we just processed the 16th rising edge
+                                ; capture mode
         xorwf   CCP1CON,W       ;
         skpnz                   ;
          goto   ccp_test2       ;Then go to the next test.
 
-        clrf    temp1
+        clrf    temp1           ;Clear the software interrupt flag.
         incf    CCP1CON,F       ;Next mode
-        goto    ccp_t1          ;clear t1 and t2 too.
+        goto    ccp_t1          ;
 
 ;------------------------------------------------------------------------
 ;ccpWaitForCapture

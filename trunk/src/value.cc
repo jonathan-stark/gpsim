@@ -1026,7 +1026,7 @@ void String::get(char *buf, int len)
   if(buf && value) {
     strncpy(buf,value,len);
   }
-  else {
+  else if(buf) {
     buf[0] = 0;
   }
 }
