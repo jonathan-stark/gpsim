@@ -75,6 +75,7 @@ Processor::Processor(void)
     cout << "pic_processor constructor\n";
 
   files = NULL;
+  pc = NULL;
 
   set_frequency(1.0);
 
