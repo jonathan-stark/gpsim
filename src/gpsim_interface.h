@@ -27,10 +27,15 @@ Boston, MA 02111-1307, USA.  */
 //
 //  struct Interface
 //
-//  Here's a structure containing all of the information for gpsim to
-// interface to the gui and to dynamically loaded modules. Primarily,
-// there are pointers to functions that gpsim will invoke upon certain
-// conditions. 
+//  Here's a structure containing all of the information for gpsim
+// and an external interface like the GUI to communicate. There are
+// two major functions. First, a GUI can provide pointers to callback
+// functions that the simulator can invoke upon certain conditions.
+// For example, if the contents of a register change, the simulator
+// can notify the GUI and thus save the gui having to continuously
+// poll. (This may occur when the command line interface changes
+// something; such changes need to be propogated up to the gui.) 
+
 
 class Interface {
  public:
@@ -39,17 +44,18 @@ class Interface {
   gpointer objectPTR;
 
   /*
-   * update_object - pointer to the function that is invoked when an object changes
+   * UpdateObject - Invoked when an object changes
    *
    * If an object, like the contents of a register, changes then this function
-   * will be called (if it's non-null). There are two parameters:
+   * will be called. There are two parameters:
    *  xref - this is a pointer to some structure in the client's data space.
    *  new_value - this is the new value to which the object has changed.
    *
    *
    */
 
-  void (*update_object) (gpointer xref,int new_value);
+  //void (*update_object) (gpointer xref,int new_value);
+  virtual void UpdateObject (gpointer xref,int new_value){};
 
   /*
    * remove_object - pointer to the function that is invoked when an object is 
@@ -63,7 +69,8 @@ class Interface {
    *
    */
 
-  void (*remove_object) (gpointer xref);
+  //void (*remove_object) (gpointer xref);
+  virtual void RemoveObject (gpointer xref) {};
 
 
   /*
@@ -73,7 +80,8 @@ class Interface {
    *                          to uniquely identify the particular one.
    */
 
-  void (*simulation_has_stopped) (gpointer object);
+  //void (*simulation_has_stopped) (gpointer object);
+  virtual void SimulationHasStopped (gpointer object) {};
 
 
   /*
@@ -81,7 +89,8 @@ class Interface {
    *                 added to gpsim
    */
 
-  void (*new_processor) (unsigned int processor_id);
+  //void (*new_processor) (unsigned int processor_id);
+  virtual void NewProcessor (unsigned int processor_id) {};
 
 
   /*
@@ -89,27 +98,31 @@ class Interface {
    *              added into gpsim
    */
 
-  void (*new_module) (Module *module);
+  //void (*new_module) (Module *module);
+  virtual void NewModule (Module *module) {};
 
   /*
    * node_configuration_changed - pointer to the function that is invoked when stimulus
    * configuration are changed
    */
 
-  void (*node_configuration_changed) (Stimulus_Node *node);
+  //void (*node_configuration_changed) (Stimulus_Node *node);
+  virtual void NodeConfigurationChanged (Stimulus_Node *node) {};
 
   /*
    * new_program - pointer to the function that is invoked when a new program is
    *               loaded into gpsim
    */
 
-  void (*new_program)  (unsigned int processor_id);
+  //void (*new_program)  (unsigned int processor_id);
+  virtual void NewProgram  (unsigned int processor_id) { };
 
   /*
    * gui_update - pointer to the function that is invoked when the gui should update
    */
 
-  void (*gui_update)  (gpointer object);
+  //void (*gui_update)  (gpointer object);
+  virtual void GuiUpdate  (gpointer object) {};
 
   unsigned int get_id(void) { return interface_id;};
   void set_id(unsigned int new_id) { interface_id = new_id;};
