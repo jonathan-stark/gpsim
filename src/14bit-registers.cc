@@ -571,13 +571,14 @@ void Program_Counter::jump(unsigned int new_address)
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
+  //value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
+  value = new_address & memory_size_mask;
 
   cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
-  trace.cycle_increment(); 
+  //trace.cycle_increment(); 
   trace.program_counter(value);
 
   cycles.increment();
