@@ -392,7 +392,6 @@ node_cmd: NODE
 
 module_cmd: MODULE
           { 
-            cout << "module command\n";
             c_module.module(); YYABORT;
           }
           | MODULE bit_flag

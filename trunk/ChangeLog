@@ -1,3 +1,9 @@
+2004-05-12 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc: bi-directional I/O pins were not working properly
+	with modules.
+	* src/processor.cc: removed debug printf stuff
+	* src/ioports.cc: IOPORT class was using a hardcoded number of pins
+
 2004-04-27 Borut Razem <borut.razem@siol.net>
 	* cli/input.cc, gui/gui_main.cc: fixes to make working of CLI & GUI
 	in parallel

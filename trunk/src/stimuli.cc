@@ -1012,15 +1012,28 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
 	      STIMULUS_NAME_LENGTH-((strlen(opt_name)>30)?30:strlen(opt_name)));
       strcat(name_str,".");
       strcat(name_str,opt_name);
-    }
-    else {
 
-      strncpy(name_str, iop->name(),STIMULUS_NAME_LENGTH-2);
-      char bs[2];
-      bs[0] = iobit+'0';
-      bs[1] = 0;
+    } else {
+
+      strncpy(name_str, iop->name(),STIMULUS_NAME_LENGTH-3);
+      char bs[3];
+      if(iobit < 10) {
+	bs[0] = iobit+'0';
+	bs[1] = 0;
+      } else {
+	bs[0] = (iobit / 10) + '0';
+	bs[1] = (iobit % 10) + '0';
+	bs[2] = 0;
+      }
+
       strcat(name_str,bs);
     }
+  } else {
+    // there's no IO port associated with this pin.
+
+    // If a name was provided, use it:
+    if(opt_name) 
+      strncpy(name_str, opt_name,STIMULUS_NAME_LENGTH);
   }
 
   add_stimulus(this);
@@ -1036,6 +1049,7 @@ IOPIN::IOPIN(void)
   iopp = 0;
   iobit=0;
   state = 0;
+  digital_state = false;
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
@@ -1115,7 +1129,6 @@ Register *IOPIN::get_iop(void)
 IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
-
   state = 0;
   drive = 0;
 
@@ -1217,7 +1230,7 @@ void IO_input::put_node_state( int new_state)
   //cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
 
 
-  // No need to proceed if we already in the new_state.
+  // No need to proceed if we already are in the new_state.
 
   if(new_state == state)
     return;
@@ -1246,7 +1259,7 @@ void IO_input::put_node_state( int new_state)
     // Most probably then this is a pin in a Module.
 
     if(get_digital_state()) {
-      if( state < h2l_threshold) {
+      if( new_state < h2l_threshold) {
 
 	//cout << " driving I/O line low \n";
 	state = l2h_threshold + 1;
@@ -1254,7 +1267,7 @@ void IO_input::put_node_state( int new_state)
 
       } 
     } else {
-      if(state > l2h_threshold) {
+      if(new_state > l2h_threshold) {
 
 	//cout << " driving I/O line high \n";
 	state = h2l_threshold - 1;
@@ -1318,8 +1331,10 @@ void IO_bi_directional::put_state( int new_digital_state)
 
 	digital_state = new_digital_state & 1;
 
+	state = digital_state ? drive : -drive;
+
 	if(snode)
-	  snode->update(digital_state);
+	  snode->update(0);
       }
 
     }
@@ -1362,19 +1377,24 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
 
-  if(driving || !snode)
+  if(driving)
     {
+      if(!snode)
+	return 0;
 
-      if( iop->value & (1<<iobit))
-	{
-	  //cout << " high\n";
-	  return drive;
-	}
-      else
-	{
-	  //cout << " low\n";
-	  return -drive;
-	}
+      if(iop) {
+	if( iop->value & (1<<iobit))
+	  {
+	    //cout << " high\n";
+	    return drive;
+	  }
+	else
+	  {
+	    //cout << " low\n";
+	    return -drive;
+	  }
+      } else 
+	return state;
     }
   else
     {
@@ -1430,16 +1450,19 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 
   if(driving | !snode)
     {
-      if( iop->value & (1<<iobit))
-	{
-	  //cout << " high\n";
-	  return drive;
-	}
-      else
-	{
-	  //cout << " low\n";
-	  return -drive;
-	}
+      if(iop) {
+	if( iop->value & (1<<iobit))
+	  {
+	    //cout << " high\n";
+	    return drive;
+	  }
+	else
+	  {
+	    //cout << " low\n";
+	    return -drive;
+	  }
+      } else
+	return state;
     }
   else
     {

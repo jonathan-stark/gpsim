@@ -101,7 +101,7 @@ int IOPORT::update_stimuli(void)
   guint64 time = cycles.value;
   int input = 0;
 
-  for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
+  for(int i = 0, m=1; i<num_iopins; i++, m <<= 1)
     if(stimulus_mask & m)
       {
         if(pins[i]->snode!=0)
