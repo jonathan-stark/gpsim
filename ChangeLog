@@ -1,3 +1,12 @@
+2004-02-06  Scott Dattalo  <scott@dattalo.com>
+	* tons of files changed...
+	Removed 'break_point' member from the Register class
+	Changed the mechanism for checking how a break point is set on
+	a register.
+	* gui/gui.h, gui/gui_watch.cc, gui/gui_regwin.cc: modified GUIRegister
+	class to adopt to changes made in the break point stuff. Also
+	add rma member for getting access to processor registers.
+	
 2004-02-05  Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.h
 	Fixed a nasty, nasty bug. The "GP_Processor" pointer in the

@@ -555,7 +555,6 @@ PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
 
 IOPORT::IOPORT(unsigned int _num_iopins)
 {
-  break_point = 0;
   stimulus_mask = 0;
   num_iopins = _num_iopins;
   address = 0;
@@ -672,7 +671,6 @@ void IOPORT_TRIS::put_value(unsigned int new_value)
 
 IOPORT_TRIS::IOPORT_TRIS(void)
 {
-  break_point = 0;
   port = NULL;
   valid_iopins = 0;
   new_name("ioport");
@@ -745,7 +743,6 @@ void IOPORT_LATCH::put_value(unsigned int new_value)
 
 IOPORT_LATCH::IOPORT_LATCH(void)
 {
-  break_point = 0;
   port = NULL;
   valid_iopins = 0;
   new_name("ioport");

@@ -193,7 +193,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
 
     case BREAK_ON_INVALID_FR:
       fr = cpu->registers[arg1];
-      fr->break_point = BREAK_ON_INVALID_FR | breakpoint_number;
+      //fr->break_point = BREAK_ON_INVALID_FR | breakpoint_number;
       return(breakpoint_number);
       break;
 
@@ -391,8 +391,8 @@ unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int re
 //---------------------------------------------------------------------------------------
 unsigned int Breakpoints::check_write_break(Register *fr)
 {
-  //  cout << "debug   checking for write break point " << fr->name() << " @ " << hex << fr->address << "  cpu addr = " << active_cpu->pc.value <<'\n';
-
+  cout << "debug   checking for write break point " << fr->name() << endl;
+  /*
   if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_REG_WRITE)
   {
     if(simulation_mode == RUNNING)
@@ -408,7 +408,7 @@ unsigned int Breakpoints::check_write_break(Register *fr)
 
     return(1);
   }
-
+  */
   return(0);
 }
 
@@ -417,7 +417,7 @@ unsigned int Breakpoints::check_read_break(Register *fr)
 {
 
   cout << "debug   checking for read break point " << fr->address << '\n';
-
+  /*
   if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_REG_READ)
   {
     if(simulation_mode == RUNNING)
@@ -433,7 +433,7 @@ unsigned int Breakpoints::check_read_break(Register *fr)
 
     return(1);
   }
-
+  */
   return(0);
 }
 
@@ -442,15 +442,14 @@ unsigned int Breakpoints::check_invalid_fr_break(invalid_file_register *fr)
 {
 
   cout << "debug   checking for invalid file register access  break point " << fr->name() << '\n';
-
+  /*  
   if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_INVALID_FR)
   {
-    //global_break |= STOP_RUNNING;
     halt();
     trace.breakpoint(fr->break_point & ~BREAK_MASK);
     return(1);
   }
-
+  */
   return(0);
 }
 
@@ -906,14 +905,28 @@ void Breakpoints::clear_all_set_by_user(Processor *c)
 
 }
 
+//--------------------------------------------------
+// Clear all of the break points that are set on a register
+//
+// FIXME -- this tacitly assumes "register memory". Thus it's
+// not possible to use this function on EEPROM or module registers.
+
 void Breakpoints::clear_all_register(Processor *c,unsigned int address)
 {
 
   if(!c || address<0 || address > c->register_memory_size())
     return;
 
-  while(c->registers[address]->isa()==Register::BP_REGISTER)
-    bp.clear(c->registers[address]->break_point & ~Breakpoints::BREAK_MASK);
+
+  while(c->registers[address]->isa()==Register::BP_REGISTER) {
+
+    Notify_Register *nr = dynamic_cast<Notify_Register *>(c->registers[address]);
+
+    if(!nr)
+      return;
+
+    bp.clear(nr->break_point & ~Breakpoints::BREAK_MASK);
+  }
 }
 
 void Breakpoints::halt(void)
@@ -1063,8 +1076,10 @@ unsigned int Notify_Register::clear(unsigned int bp_num)
   if(bp.break_status[bp_num].type == Breakpoints::BREAK_CLEAR)   // This is a redundant check.
     return 0;
 
+  /*
   if(bp_num != (break_point & ~Breakpoints::BREAK_MASK))
     return 0;
+  */
 
   if(replaced->isa() == Register::BP_REGISTER)
     {

@@ -132,7 +132,6 @@ enum
      // source code.  Its state reflects whether the usart txreg is full
      // or not.
      valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
-     break_point = 0;
    }
 };
 
@@ -216,7 +215,6 @@ public:
       // source code.  Its state reflects whether the usart txreg is full
       // or not.
       valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
-      break_point = 0;
     }
 };
 
@@ -244,7 +242,6 @@ enum
   PIR2v1(void)
     {
       valid_bits = CCP2IF;
-      break_point = 0;
     }
 };
 
@@ -301,7 +298,6 @@ enum
   PIR2v2(void)
     {
       valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
-      break_point = 0;
     }
 };
 
@@ -372,7 +368,6 @@ enum
     {
       valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
                    WAKIF | IRXIF;
-      break_point = 0;
     }
 };
 
