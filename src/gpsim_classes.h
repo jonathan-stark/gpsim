@@ -36,6 +36,7 @@ class PIC_IOPORT;
 
 class instruction;
 class file_register;
+class invalid_file_register;
 class gpsimInterface;
 class pic_processor;
 class symbol;

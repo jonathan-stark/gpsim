@@ -21,19 +21,17 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef  __BREAKPOINTS_H__
 #define  __BREAKPOINTS_H__
-
+#include "gpsim_classes.h"
 #include "pic-instructions.h"
 #include "pic-registers.h"
 
 #include  <iostream.h>
 
-#ifdef HAVE_GUI
 #include <unistd.h>
 #include <glib.h>
-#endif
 
-class pic_processor;
-class invalid_file_register;
+
+
 
 #define MAX_BREAKPOINTS 0x400
 #define BREAKPOINT_MASK (MAX_BREAKPOINTS-1)

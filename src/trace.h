@@ -22,7 +22,11 @@ Boston, MA 02111-1307, USA.  */
 #define  __TRACE_H__
 
 #include <unistd.h>
+#include <stdio.h>
 #include <glib.h>
+
+#include "gpsim_classes.h"
+#include "breakpoints.h"
 
 //---------------------------------------------------------
 // Class for trace buffer
@@ -173,5 +177,23 @@ class Trace
 };
 
 extern Trace trace;
+
+
+//-----------------------------------------------------------
+class TraceLog : public BreakCallBack
+{
+public:
+  bool logging;
+  char *log_filename;
+  FILE log_file;
+
+  TraceLog(void);
+  ~TraceLog(void);
+
+  virtual void callback(void);
+  void enable_logging(char *new_filename=NULL);
+  void disable_logging(void);
+
+};
 
 #endif

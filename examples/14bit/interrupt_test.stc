@@ -7,15 +7,11 @@
 # ioport_stim.stc. 
 
 echo I/O pin Stimulus test with a p16c84
-echo iopin_stim.hex is the source
-
-# Create the processor that's to be simulated
-
-processor p16c84 fred
+echo iopin_stim.asm is the source
 
 # Load the .hex file
 
-load h interrupt_test.hex
+load s interrupt_test.cod
 
 # Load the stimulus file
 

@@ -105,8 +105,25 @@ readihex16 (pic_processor *cpu, FILE * file)
       if (linetype == 1)	/* lets get out of here hit the end */
 	break;
 
-      for (i = 0; i < wordsthisline; i++)
-	cpu->init_program_memory(address++, getword(file));
+      if (0 == linetype) {	// data record
+	  for (i = 0; i < wordsthisline; i++)
+	      cpu->init_program_memory(address++, getword(file));
+      } else if (4 == linetype) {	// Extended linear address
+	  unsigned char b1, b2;
+	  b1 = getbyte (file);		// not sure what these mean
+	  b2 = getbyte (file);
+
+	  if ((0 != address) || (0 != b1) || (0 != b2)) {
+	      printf ("Error! Unhandled Extended linear address! %x %.2x%.2x\n",
+		      address, b1, b2);
+	      break;
+	  }
+	  // Should do something with all this info
+	  // BUG: must fix this for pic18 support
+      } else {
+	  printf ("Error! Unknown record type! %d\n", linetype);
+	  break;
+      }
 
       csby = getbyte (file);	/* get the checksum byte */
       /* this should make the checksum zero */

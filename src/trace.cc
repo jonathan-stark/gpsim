@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 
 #include "../config.h"
+#include "pic-processor.h"
 #include "14bit-processors.h"
 #include "trace.h"
 #include "trace_orb.h"
@@ -320,6 +321,55 @@ void Trace::dump_last_instruction(void)
     }
 }
 
+
+/*****************************************************************
+ *
+ *         Logging
+ */
+TraceLog::TraceLog(void)
+{
+  logging = 0;
+  log_filename = NULL;
+  //  log_file = (FILE)NULL;
+}
+
+TraceLog::~TraceLog(void)
+{
+
+  disable_logging();
+    
+  if(log_filename)
+    free(log_filename);
+
+}
+
+void TraceLog::callback(void)
+{
+
+  return;
+
+}
+
+void TraceLog::enable_logging(char *new_fname)
+{
+
+  if(logging)
+    return;
+
+  logging = 1;
+
+}
+
+void TraceLog::disable_logging(void)
+{
+
+  if(!logging)
+    return;
+
+  logging = 0;
+
+
+}
 //*****************************************************************
 // *** KNOWN CHANGE ***
 //  Support functions that will get replaced by the CORBA interface.
