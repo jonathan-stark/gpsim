@@ -58,8 +58,12 @@ SIMULATION_MODES simulation_mode;
 // 'active' means that it's the one currently being simulated or the one
 // currently being manipulated by the user (e.g. register dumps, break settings)
 
-Processor *active_cpu=0;
+Processor *active_cpu = 0;
 
+// create instances of inline get_active_cpu() and set_active_cpu() methods
+// by taking theirs address
+static Processor *(*dummy_get_active_cpu)(void) = get_active_cpu;
+static void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
 //------------------------------------------------------------------------
 //
@@ -907,8 +911,8 @@ void Processor::step (unsigned int steps)
 	  // If we are sleeping or writing to the program memory (18cxxx only)
 	  // then step one cycle - but don't execute any code  
 
-	  cycles.increment();
-	  trace.dump(1);
+	  get_cycles().increment();
+	  get_trace().dump(1);
 
 	}
       else if(bp.have_interrupt())
@@ -919,8 +923,8 @@ void Processor::step (unsigned int steps)
 	{
 
 	  step_one();
-	  trace.cycle_counter(cycles.value);
-	  trace.dump_last_instruction();
+	  get_trace().cycle_counter(get_cycles().value);
+	  get_trace().dump_last_instruction();
 
 	} 
 
@@ -930,7 +934,7 @@ void Processor::step (unsigned int steps)
   bp.clear_halt();
   simulation_mode = STOPPED;
 
-  gi.simulation_has_stopped();
+  get_interface().simulation_has_stopped();
 }
 
 //-------------------------------------------------------------------
@@ -1199,7 +1203,7 @@ void ProgramMemoryAccess::put_opcode_start(int addr, unsigned int new_opcode)
       _state = 1;
       _address = addr;
       _opcode = new_opcode;
-      cycles.set_break_delta(40000, this);
+      get_cycles().set_break_delta(40000, this);
       bp.set_pm_write();
     }
 

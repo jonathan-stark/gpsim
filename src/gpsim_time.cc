@@ -44,6 +44,10 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 
 Cycle_Counter cycles;
+
+// create an instance of inline get_cycles() method by taking its address
+static Cycle_Counter &(*dummy_cycles)(void) = get_cycles;
+
 StopWatch stop_watch;
 
 //--------------------------------------------------
@@ -97,7 +101,7 @@ StopWatch stop_watch;
 void Cycle_Counter::preset(guint64 new_value)
 {
   value = new_value;
-  trace.cycle_counter(value);
+  get_trace().cycle_counter(value);
 }
 
 void Cycle_Counter::set_cycles_per_second(guint64 cps)
