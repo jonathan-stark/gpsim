@@ -32,14 +32,14 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 
 #include <iostream>
+#include <iomanip>
+
+using namespace std;
+
 #include "../config.h"
 #include "../cli/input.h"
-#include "../src/gpsim_def.h"
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
-
-#include "../src/pic-processor.h"
-#include "../src/icd.h"
 
 bool bUseGUI=false;  // assume that we don't want to use the gui
 int quit_state;
@@ -58,7 +58,6 @@ void initialize_gpsim(void);
 int yyparse(void);
 int parse_string(char *cmd_string);
 extern void init_parser(void);
-//extern void parser_cleanup(void);
 
 extern int yydebug;
 extern int quit_parse;

@@ -1625,7 +1625,7 @@ USARTModule::USARTModule(const char *_name)
   port = NULL;
   usart = NULL;
 
-  new_name((char *)_name);
+  new_name(_name);
 }
 
 USARTModule::~USARTModule()

@@ -157,7 +157,7 @@ Module * Switch::construct(const char *_new_name=0)
 //    cout << " Switch constructor\n";
 
     Switch *switchP = new Switch ;
-    switchP->new_name((char*)_new_name);
+    switchP->new_name(_new_name);
     switchP->create_iopin_map();
 
     switchP->create_widget(switchP);

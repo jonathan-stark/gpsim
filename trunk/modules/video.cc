@@ -284,7 +284,7 @@ Module * Video::construct(const char *_new_name)
 
   Video *video = new Video ;
 
-  video->new_name((char*)_new_name);
+  video->new_name(_new_name);
   video->create_iopin_map();
 
   //cout << "AND2Gate should be constructed\n";

@@ -344,7 +344,7 @@ Module * Paraface::construct(const char *_new_name=0)
 
     Paraface *parafaceP = new Paraface ;
     parafaceP->open_parallel_port();
-    parafaceP->new_name((char*)_new_name);
+    parafaceP->new_name(_new_name);
     parafaceP->create_iopin_map();
 
     return parafaceP;

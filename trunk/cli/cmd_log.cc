@@ -132,7 +132,7 @@ void cmd_log::log(cmd_options *opt)
 void cmd_log::log(cmd_options *opt, char *str, guint64 val, guint64 mask)
 {
 
-  int sym_value;
+  //int sym_value;
 
   if(!cpu)
     cout << "warning, no cpu\n";

@@ -167,9 +167,9 @@ class Breadboard_Window : public GUI_Object {
 
     GtkAdjustment *hadj, *vadj;
 
-    struct GuiPin *selected_pin;
+    GuiPin *selected_pin;
     struct gui_node *selected_node;
-    struct GuiModule *selected_module;
+    GuiModule *selected_module;
 
 
   Breadboard_Window(GUI_Processor *gp);
