@@ -272,7 +272,7 @@ void IOPORT::put(unsigned int new_value)
 
   //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
 
-  trace.register_write(address,value.get());
+  trace.register_write(address,new_value);  // RP - we didn't write the post stimulus value
 
 }
 
@@ -305,15 +305,15 @@ void PIC_IOPORT::put(unsigned int new_value)
 
   value.put((new_value & ~tris->value.get()) | (value.get() & tris->value.get()));
 
-  //cout << " IOPORT::put just set port value to " << value << '\n';
+//  cout << " IOPORT::put just set port value to " << value.get() << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
 
-  //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
+//  cout << " IOPORT::put port value is " << value.get() << " after updating stimuli\n";
 
-  trace.register_write(address,value.get());
+  trace.register_write(address,new_value);  // RP - we actually wrote the pre-masking value
 
 }
 //-------------------------------------------------------------------
@@ -504,6 +504,9 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 
   unsigned int diff = tris->value.get() ^ new_tris;
 
+//  cout << __FUNCTION__ << "new TRIS value " << hex << new_tris <<
+//          "   diff is " << diff << "  valid IO pins " << valid_iopins << "\n";
+ 
   if(diff)
     {
       // Update the I/O port value to that of the internal latch

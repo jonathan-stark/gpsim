@@ -24,8 +24,9 @@ Boston, MA 02111-1307, USA.  */
 #define INTCON_H
 #include <iostream>		// for cout used in breakpoints.h
 
-#include "pic-registers.h"	// for sfr_register
-
+#include "gpsim_classes.h"
+#include "registers.h"
+#include "breakpoints.h"
 
 //---------------------------------------------------------
 // INTCON - Interrupt control register

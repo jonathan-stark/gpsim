@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 
 class RAM_RegisterWindow;
 class EEPROM_RegisterWindow;
-class StatusBar_Window;
 class SourceBrowser_Window;
 class SourceBrowserParent_Window;
 class Symbol_Window;
@@ -52,7 +51,6 @@ class GUI_Processor {
 
   RAM_RegisterWindow *regwin_ram;
   EEPROM_RegisterWindow *regwin_eeprom;
-  StatusBar_Window *status_bar;
   SourceBrowser_Window *program_memory;
   SourceBrowserParent_Window *source_browser;
   Symbol_Window *symbol_window;

@@ -22,12 +22,13 @@ Boston, MA 02111-1307, USA.  */
 #define __P12X_H__
 
 #include "12bit-processors.h"
+#include "i2c-ee.h"
 
 class GPIO : public PIC_IOPORT
 {
 public:
 
-  unsigned int get(void);
+//  unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
 };
 
@@ -102,6 +103,54 @@ class P12C509 : public P12C508
     }
 
   P12C509(void);
+  static Processor *construct(void);
+  void create(void);
+
+
+};
+
+
+// A 12CE518 is like a 12c508
+class P12CE518 : public P12C508
+{
+  public:
+
+  virtual PROCESSOR_TYPE isa(void){return _P12CE518_;};
+  virtual void tris_instruction(unsigned int tris_register);
+  virtual void P12CE518::set_eeprom(I2C_EE *e);
+
+  P12CE518(void);
+  static Processor *construct(void);
+  void create(void);
+  virtual void create_iopin_map(void);
+
+  I2C_EE * eeprom;
+  
+};
+
+
+// A 12ce519 is like a 12ce518
+class P12CE519 : public P12CE518
+{
+  public:
+
+  virtual PROCESSOR_TYPE isa(void){return _P12CE519_;};
+
+  virtual unsigned int program_memory_size(void) const { return 0x400; };
+
+  virtual void create_sfr_map(void);
+
+  virtual unsigned int fsr_valid_bits(void)
+    {
+      return 0x3f;  // 64 registers in all (some are actually aliased)
+    }
+
+  virtual unsigned int fsr_register_page_bits(void)
+    {
+      return 0x20;  // 519 has 2 register banks
+    }
+
+  P12CE519(void);
   static Processor *construct(void);
   void create(void);
 

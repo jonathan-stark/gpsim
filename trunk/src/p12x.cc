@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "packages.h"
 #include "stimuli.h"
+#include "i2c-ee.h"
 
 #include "p12x.h"
 
@@ -75,8 +76,13 @@ void P12C508::create_iopin_map(void)
 void P12C508::reset(RESET_TYPE r)
 {
 
+/*<<<<<<< p12x.cc
+  tris.put ( tris.por_value );
+  option_reg.value = option_reg.por_value;
+=======*/
   tris.value.put(tris.por_value);
   option_reg.value.put(option_reg.por_value);
+/*>>>>>>> 1.22*/
   pic_processor::reset(r);
   
 }
@@ -129,7 +135,7 @@ void P12C508::dump_registers (void)
 
 void P12C508::tris_instruction(unsigned int tris_register)
 {
-  cout << " Tris instruction\n";
+//  cout << " Tris instruction\n";
 
   //tris.value = W.value;
   tris.put(W->value.get());
@@ -190,6 +196,7 @@ P12C508::P12C508(void)
 }
 
 
+
 //--------------------------------------------------------
 
 void P12C509::create_sfr_map(void)
@@ -220,7 +227,8 @@ Processor * P12C509::construct(void)
 void P12C509::create(void)
 {
 
-  cout << " 12c508 create \n";
+  if ( verbose )
+    cout << " 12c509 create \n";
 
   P12C508::create();
 
@@ -228,7 +236,7 @@ void P12C509::create(void)
   add_file_registers(0x30, 0x3f, 0);
 
   pa_bits = PA0;                 // the 509 has two code pages (i.e. PAO in status is used)
-
+  indf->base_address_mask2 = 0x3F;  // RP - need this or INDF won't work right
 
 }
 
@@ -240,21 +248,175 @@ P12C509::P12C509(void)
 
 
 //--------------------------------------------------------
+
+// construct function is identical to 12C508 version ??
+Processor * P12CE518::construct(void)
+{
+
+  P12CE518 *p = new P12CE518;
+
+  if(verbose)
+    cout << " 12ce518 construct\n";
+
+  p->pc->set_reset_address(0x1ff);
+
+  p->create();
+
+  if(verbose)
+    cout << " ... create symbols\n";
+  p->pic_processor::create_symbols();
+
+  p->name_str = "p12ce518";
+  symbol_table.add_module(p,p->name_str.c_str());
+
+  return p;
+
+}
+
+
+void P12CE518::create_iopin_map(void)
+{
+  P12C508::create_iopin_map();
+
+  // Define the valid I/O pins.
+  gpio.valid_iopins = 0xff;
+
+}
+
+void P12CE518::create(void)
+{
+  Stimulus_Node *scl, *sda;
+  I2C_EE * e;
+
+  if(verbose)
+    cout << " 12ce518 create \n";
+
+  P12C508::create();
+
+  if(verbose)
+    cout << "  adding serial EE\n";
+
+  e = new I2C_EE();
+  e->set_cpu(this);
+  e->initialize ( 0x10 );
+
+  if(verbose)
+    cout << " ... create additional (internal) I/O\n";
+  scl = new Stimulus_Node ( "EE_SCL" );
+
+  scl->attach_stimulus ( new IO_bi_directional(&gpio,7) );
+
+  sda = new Stimulus_Node ( "EE_SDA" );
+
+  sda->attach_stimulus ( new IO_open_collector(&gpio,6) );
+
+  e->attach ( scl, sda );
+
+  set_eeprom(e);
+
+  // Kludge to force top two bits to be outputs
+  tris.value.put(0xff);
+  tris.put(0x3f);
+  
+//  tris.put ( tris.por_value );
+}
+
+P12CE518::P12CE518(void)
+{
+  if(verbose)
+    cout << "12CE518 constructor, type = " << isa() << '\n';
+
+  if(config_modes)
+    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
+      config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
+}
+
+void P12CE518::tris_instruction(unsigned int tris_register)
+{
+    unsigned int w_val;
+
+//  cout << " Tris instruction\n";
+
+  //tris.value = W.value;
+  w_val = W->value.get();
+  tris.put ( w_val & 0x3F );     // top two bits always output
+  trace.write_TRIS(w_val);
+
+}
+
+void P12CE518::set_eeprom(I2C_EE *e)
+{
+  eeprom = e; 
+
+  //  eeprom->cpu = this;
+
+  ema.set_cpu(this);
+  ema.set_Registers(e->rom, e->rom_size);
+
+}
+  
+
+//--------------------------------------------------------
+
+void P12CE519::create_sfr_map(void)
+{
+
+}
+
+Processor * P12CE519::construct(void)
+{
+
+  P12CE519 *p = new P12CE519;
+
+  cout << " 12ce519 construct\n";
+
+  p->pc->set_reset_address(0x3ff);
+
+  p->create();
+  p->pic_processor::create_symbols();
+
+  p->name_str = "p12ce519";
+  symbol_table.add_module(p,p->name_str.c_str());
+
+  return p;
+
+}
+
+
+void P12CE519::create(void)
+{
+  if ( verbose )
+    cout << " 12ce519 create \n";
+
+  P12CE518::create();
+
+  alias_file_registers(0x00,0x0f,0x20);
+  add_file_registers(0x30, 0x3f, 0);
+
+  pa_bits = PA0;                 // the 519 has two code pages (i.e. PAO in status is used)
+  indf->base_address_mask2 = 0x3F;  // RP - need this or INDF won't work right
+
+}
+
+
+P12CE519::P12CE519(void)
+{
+  if(verbose)
+    cout << "12ce519 constructor, type = " << isa() << '\n';
+}
+
+
+
+//--------------------------------------------------------
 //
 // GPIO Port
 
-unsigned int GPIO::get(void)
-{
-
-  return(value.get());
-
-}
 
 void GPIO::setbit(unsigned int bit_number, bool new_value)
 {
   unsigned int old_value = value.get();
 
-  if(verbose)
+  if(verbose&2)
     cout << "GPIO::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
@@ -284,3 +446,5 @@ so the processor is waking up\n";
 
 
 }
+
+

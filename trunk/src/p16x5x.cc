@@ -189,9 +189,6 @@ void P16C54::create_sfr_map(void)
   add_sfr_register(&trisa,  0xffffffff, 0x1f);
   add_sfr_register(&trisb,  0xffffffff, 0xff);
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
-
   pic_processor::create_symbols();
 
 }
@@ -291,9 +288,6 @@ void P16C55::create_sfr_map(void)
   add_sfr_register(&trisa,  0xffffffff, 0x0f);
   add_sfr_register(&trisb,  0xffffffff, 0xff);
   add_sfr_register(&trisc,  0xffffffff, 0xff);
-
-  sfr_map = 0;
-  num_of_sfrs = 0;
 
   pic_processor::create_symbols();
 

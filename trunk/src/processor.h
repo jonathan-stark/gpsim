@@ -37,6 +37,29 @@ Boston, MA 02111-1307, USA.  */
 class Processor;
 
 //---------------------------------------------------------
+// MemoryAccess
+// 
+// The MemoryAccess class is a base class designed to support
+// access to memory. For the PIC, this class is extended by
+// the ProgramMemoryAccess and RegisterMemoryAccess classes.
+class MemoryAccess
+{
+public:
+
+  MemoryAccess(Processor *new_cpu);
+
+  Processor *get_cpu(void);
+  void set_cpu(Processor *p);
+
+  list<Register *> SpecialRegisters;
+
+protected:
+
+  string name_str;            // Optional name
+  Processor *cpu;             // The processor to which this object belongs
+};
+
+//---------------------------------------------------------
 // The ProgramMemoryAccess class is the interface used
 // by objects other than the simulator to manipulate the 
 // pic's program memory. For example, the breakpoint class
@@ -44,7 +67,7 @@ class Processor;
 // cleared. The modification goes through here.
 //
 
-class ProgramMemoryAccess :  public BreakpointObject
+class ProgramMemoryAccess :  public BreakpointObject ,  public MemoryAccess
 {
  public:
   // Symbolic debugging
@@ -145,12 +168,8 @@ class ProgramMemoryAccess :  public BreakpointObject
     }
   void name(string &new_name);
   
-  Processor *get_cpu(void);
 
  private:
-  string name_str;            // Optional name if this is one of several pma's
-
-  Processor *cpu;             // The processor to which this pma belongs.
 
   unsigned int
     _address,
@@ -177,14 +196,14 @@ class ProgramMemoryAccess :  public BreakpointObject
 // by objects other than the simulator to manipulate the 
 // cpu's register memory.
 
-class RegisterMemoryAccess
+class RegisterMemoryAccess : public MemoryAccess
 {
  public:
   
-  RegisterMemoryAccess(void);
+  RegisterMemoryAccess(Processor *new_cpu=0);
+  virtual ~RegisterMemoryAccess();
   virtual Register *get_register(unsigned int address);
   unsigned int get_size(void) { return nRegisters; }
-  void set_cpu(Processor *p);
   void set_Registers(Register **_registers, int _nRegisters);
 
   bool hasBreak(unsigned int address);
@@ -196,8 +215,7 @@ class RegisterMemoryAccess
   bool initialized;
   Register **registers;       // Pointer to the array of registers.
                               // 
-  Processor *cpu;             // Pointer to the processor whose registers
-                              // are being managed.
+
 };
 
 //------------------------------------------------------------------------
@@ -249,6 +267,9 @@ class FileContext
 
 };
 
+//------------------------------------------------------------------------
+//
+// Files
 class Files
 {
  public:
@@ -423,7 +444,8 @@ public:
   virtual void create(void);
   static Processor *construct(void);
 
-  Processor(void);
+  Processor();
+  virtual ~Processor();
 };
 
 

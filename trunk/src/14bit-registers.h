@@ -38,6 +38,7 @@ class IOPIN;
 class source_stimulus;
 class Stimulus_Node;
 class PORTB;
+class pic_processor;
 
 #include "ioports.h"
 

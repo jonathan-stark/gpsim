@@ -27,9 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "modules.h"
 #include "processor.h"
 
-//#include "pic-registers.h"
-
-//#include "pic-instructions.h"
 #include "14bit-registers.h"
 
 class EEPROM;
@@ -51,6 +48,8 @@ enum PROCESSOR_TYPE
   _P16C84_,
   _P16CR83_,
   _P16CR84_,
+  _P12CE518_,
+  _P12CE519_,
   _P16F83_,
   _P16F84_,
   _P16C71_,
@@ -185,25 +184,6 @@ enum IOPIN_TYPES
   OPEN_COLLECTOR       // bit4 in porta on the 18 pin midrange devices.
 };
 
-
-class processor_types
-{
-public:
-
-  PROCESSOR_TYPE type;
-  char *names[4];
-  pic_processor * (*cpu_constructor) (void);
-};
-
-#ifdef HAVE_GUI
-//
-// Forward reference
-//
-
-class GUI_Processor;
-
-#endif
-
 /*
  * Define a base class processor for the pic processor family
  *
@@ -239,9 +219,6 @@ public:
   PCL          *pcl;
   PCLATH       *pclath;
 
-  SFR_map*     sfr_map;
-  int          num_of_sfrs;
-  
   TMR0         tmr0;
   int          num_of_gprs;
 

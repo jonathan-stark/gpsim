@@ -70,9 +70,6 @@ void P16C61::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
-
   intcon = &intcon_reg;
 
 }
@@ -368,9 +365,6 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(&ccpr1h,  0x16, 0);
   add_sfr_register(&ccp1con, 0x17, 0);
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
-
   // get_pir_set()->set_pir1(get_pir1());
   pir_set_def.set_pir1(&pir1_reg);
 
@@ -481,9 +475,6 @@ void  P16C62::create(void)
 
   create_iopin_map();
   
-  sfr_map = 0;
-  num_of_sfrs = 0;
- 
   _14bit_processor::create();
 
   P16X6X_processor::create_sfr_map();
@@ -712,9 +703,6 @@ void  P16C64::create(void)
 
   create_iopin_map();
   
-  sfr_map = 0;
-  num_of_sfrs = 0;
- 
   _14bit_processor::create();
 
   P16X6X_processor::create_sfr_map();

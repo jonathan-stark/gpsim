@@ -132,9 +132,6 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);
 
-  sfr_map = 0;
-  num_of_sfrs = 0;
-
   intcon = &intcon_reg;
 
 

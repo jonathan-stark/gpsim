@@ -91,13 +91,13 @@ class Register : public gpsimValue
 public:
 
   enum REGISTER_TYPES
-  {
-    INVALID_REGISTER,
-    GENERIC_REGISTER,
-    FILE_REGISTER,
-    SFR_REGISTER,
-    BP_REGISTER
-  };
+    {
+      INVALID_REGISTER,
+      GENERIC_REGISTER,
+      FILE_REGISTER,
+      SFR_REGISTER,
+      BP_REGISTER
+    };
 
   RegisterValue value;
 
@@ -149,10 +149,10 @@ public:
    */
   virtual RegisterValue getRV(void) { return value;}
   virtual void putRV(RegisterValue rv)
-    { 
-      value.data = rv.data;
-      value.init = rv.init;
-    }
+  { 
+    value.data = rv.data;
+    value.init = rv.init;
+  }
 
   /* getRV_notrace and putRV_notrace are analogous to getRV and putRV
    * except that the action (in the derived classes) will not be
@@ -162,10 +162,10 @@ public:
    */
   virtual RegisterValue getRV_notrace(void) { return value;}
   virtual void putRV_notrace(RegisterValue rv)
-    { 
-      value.data = rv.data;
-      value.init = rv.init;
-    }
+  { 
+    value.data = rv.data;
+    value.init = rv.init;
+  }
 
   // In the Register class, the 'Register *get()' returns a
   // pointer to itself. Derived classes may return something
@@ -173,9 +173,9 @@ public:
   // it replaced and will return that instead).
 
   virtual Register *getReg(void)
-    {
-      return this;
-    }
+  {
+    return this;
+  }
   
 
   virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
@@ -193,29 +193,39 @@ public:
 
   /*
     like setbit, getbit is used mainly for breakpoints.
-   */
+  */
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
 
   /*
     Breakpoint objects will overload this function and return true.
-   */
+  */
 
   virtual bool hasBreak(void)
-    { 
-      return false;
-    }
+  { 
+    return false;
+  }
 
   /*
     When a breakpoint is set on this register, that object (which is derived
     from the register class) will save a pointer to itself here:
   */
   virtual bool replacingWith(Register *replacer)
-    {
-      replacedBy = replacer;
-      return true;
-    }
- protected:
+  {
+    replacedBy = replacer;
+    return true;
+  }
+
+  /*
+    register_size returns the number of bytes required to store the register
+    (this is used primarily by the gui to determine how wide to make text fields)
+   */
+  virtual unsigned int register_size () const
+  { 
+    return 1;
+  }
+
+protected:
 
   /*
     If a breakpoint gets set on a register, then a copy of the pointer to it will

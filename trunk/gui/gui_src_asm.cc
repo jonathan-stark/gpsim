@@ -44,6 +44,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_src.h"
 #include "gui_profile.h"
 #include "gui_symbols.h"
+#include "gui_statusbar.h"
 
 #include <assert.h>
 
@@ -279,7 +280,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   if(!pma)
     return;
-  printf("SetPC to address 0x%x\n",address);
+
   // find notebook page containing address 'address'
   sbawFileId = pma->get_file_id(address);
 
@@ -402,6 +403,8 @@ void SourceBrowserAsm_Window::Update(void)
     return;
 
   SetPC(pma->get_PC());
+  if(status_bar)
+    status_bar->Update();
 }
 
 /*
@@ -2337,7 +2340,6 @@ void SourceBrowserAsm_Window::Build(void)
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
 
-  
   notebook = gtk_notebook_new();
   gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_LEFT);
   gtk_notebook_set_scrollable((GtkNotebook*)notebook,TRUE);
@@ -2453,16 +2455,10 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  if(status_bar)
+    status_bar->Create(vbox);
 
   gtk_widget_show(window);
-
-  /*
-  static GtkStyle *style = gtk_style_new();
-
-  canbreak.CreateFromXPM(window->window,
-			 &style->bg[GTK_STATE_NORMAL],
-			 (gchar**)canbreak_xpm);
-  */
 
   enabled=1;
 
@@ -2484,6 +2480,9 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
     sprintf(buffer,"Source Browser: %s",pma->name().c_str());
     gtk_window_set_title (GTK_WINDOW (window), buffer);
     
+    if(status_bar)
+      status_bar->NewProcessor(gp, pma);
+
   }
 }
 
@@ -2503,7 +2502,7 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   wt = WT_asm_source_window;
   is_built = 0;
 
-  //  gp->source_browser = this;
+  status_bar = new StatusBar_Window();
 
   breakpoints.iter=0;
   notify_start_list.iter=0;
@@ -2578,7 +2577,6 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 	{
 	  child++;
 	  sprintf(child_name,"source_browser%d",child);
-	  printf("Creating child window %s\n",child_name);
 	  sbaw = new SourceBrowserAsm_Window(gp,child_name);
 	  children.push_back(sbaw);
 	}
@@ -2591,7 +2589,9 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 	  pma_iterator++;
 	}
       else
-	sbaw->enabled = false;
+	{
+	  sbaw->set_pma(gp->cpu->pma);
+	}
 
     }
 }

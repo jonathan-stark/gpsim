@@ -1,3 +1,25 @@
+2004-07-14 Scott Dattalo <scott@dattalo.com>
+	* gui_break.cc, gui_main.cc, gui_processor.cc, gui_processor.h,
+	gui_regwin.cc gui_regwin.h, gui_src.h, gui_src_asm.cc, 
+	gui_src_opcode.cc, gui_statusbar.cc, gui_statusbar.h:
+	Finished abstracting the gui status bar. Added a status bar to
+	the source viewer.
+	* 14bit-registers.cc, 14bit-registers.h, 14bit-tmrs.h, 
+	16bit-processors.cc, Makefile.am, eeprom.h, intcon.h, ioports.cc,
+	ioports.h, p12x.cc, p12x.h, p16f62x.cc, p16x5x.cc, p16x6x.cc, 
+	p16x8x.cc, pic-processor.cc, pic-processor.h, pic-registers.cc, 
+	pic-registers.h, pie.h, pir.h, processor.cc, processor.h, registers.h:
+	Cleaned up some stale code.
+	Added a MemoryAccess class and made it the base class to the
+	RegisterMemoryAccess and ProgramMemoryAccess classes.
+
+2004-07-14 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/i2c-ee.cc, src/i2c-ee.h, src/Makefile.am: New files that support
+	an i2c peripheral
+	* src/p12x.cc, src/p12x.h, src/pic-processor.h, src/pic-processor.cc:
+	Added the 12CE518 and 12CE519 processors.
+	* src/ioport.cc: Fixed an ambiguity in the ioport trace logic.
+	
 2004-07-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_statusbar.cc: abstracting the status bar boxes.
 	* src/pic-registers.cc: cross reference to Program Counter was broken.
