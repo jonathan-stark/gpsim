@@ -257,6 +257,9 @@
 				RelativePath=".\hexutils.cc">
 			</File>
 			<File
+				RelativePath=".\i2c-ee.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\icd.cc">
 				<FileConfiguration
 					Name="Debug GUI|Win32">
@@ -467,6 +470,9 @@
 			</File>
 			<File
 				RelativePath=".\gpsim_time.h">
+			</File>
+			<File
+				RelativePath=".\i2c-ee.h">
 			</File>
 			<File
 				RelativePath=".\icd.h">

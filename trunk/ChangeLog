@@ -1,3 +1,7 @@
+2004-07-17 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def, src/src.vcproj, src/i2c-ee.cc:
+	  small fixes for MSVC compilation
+
 2004-07-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_statusbar.h, gui/gui_statusbar.cc: Now the status bar can
 	accept an arbitrary of registers to display.

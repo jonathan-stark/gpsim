@@ -75,7 +75,6 @@ EXPORTS
     ?get_bit_voltage@IOPORT@@UAEHI@Z
     ?get_bit_voltage@Register@@UAEHI@Z
     ?get_bp@@YAAAVBreakpoints@@XZ
-    ?get_cpu@ProgramMemoryAccess@@UAEPAVProcessor@@XZ
     ?get_cycles@@YAAAVCycle_Counter@@XZ
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
