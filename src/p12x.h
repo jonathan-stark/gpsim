@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P12X_H__
 
 #include "12bit-processors.h"
-#include "packages.h"
+#include "pic-packages.h"
 
 class GPIO : public IOPORT
 {

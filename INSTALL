@@ -1,6 +1,21 @@
 
-Installation instructions
--------------------------
+            gpsim Install Instructions
+            --------------------------
+
+TOC
+---
+
+ 1.0  Install instructions
+ 2.0  How to Build gpsim without the gui
+ 3.0  How to Build gpsim without root privileges
+ 4.0  How to create your own gpsim distribution
+ 5.0  Installing gtk+-extra and eXdbm
+ 6.0  How to install gpsim from RPM's
+
+
+
+1.0 Installation instructions
+    -------------------------
 
 
 Starting with gpsim-0.18.0, two probably not so common packages:
@@ -51,8 +66,8 @@ This copies the executable into the /usr/local/bin subdirectory.
 
 
 
-HOW TO BUILD gpsim WITHOUT THE GUI
-----------------------------------
+2.0 HOW TO BUILD gpsim WITHOUT THE GUI
+    ----------------------------------
 
 
 Repeat steps 1,2, and 3 from above.
@@ -63,8 +78,8 @@ Note: if you already had built gpsim with the gui support and then decide you wa
 
 
 
-HOW TO BUILD gpsim WITHOUT ROOT PRIVILEGES
-------------------------------------------
+3.0 HOW TO BUILD gpsim WITHOUT ROOT PRIVILEGES
+    ------------------------------------------
 
 
 If you don't have su privileges, then you can build gpsim and copy it to a directory in your execution path. Please note that you'll need to build gpsim with the shared libraries disabled.
@@ -76,8 +91,8 @@ If you don't have su privileges, then you can build gpsim and copy it to a direc
      >                       # a directory with the same name. Now what kind
      >                       # of idiot would do that?
 
-HOW TO MAKE YOUR OWN gpsim DISTRIBUTION
----------------------------------------
+4.0 HOW TO MAKE YOUR OWN gpsim DISTRIBUTION
+    ---------------------------------------
 Since gpsim uses automake, you get a whole lot of features for free. I won't go into all of them, but sometimes you might want to tweak gpsim and make your own tar ball. All you have to do is:
 
 $ make dist
@@ -89,8 +104,8 @@ $ autoconf
 $ ./configure 
 $ make dist
 
-INSTALLING gtk+-extra and eXdbm
--------------------------------
+5.0 INSTALLING gtk+-extra and eXdbm
+    -------------------------------
 
 First, you're going to need to grab these two packages. gtk+-extra can be obtained from either its own web page or gpsim's (At the time of this writing, I do not know gtk+-extra's home page url). eXdbm, on the other hand, should be grabbed from gpsim's web page. I've fixed a bug in their install logic and changed their static Makefile to an automake type. For each of these packages, you can use the `standard' technique for installing gnu software:
 
@@ -105,7 +120,6 @@ $ exit
 Where package is either gtk+-extra or eXdbm.
 
 
-
-
-
+6.0 INSTALLING RPM's
+    ----------------
 

@@ -63,21 +63,21 @@ file_register::~file_register(void)
 //  Return the contents of the file register. If a
 // 'break on read' break point is set, then set the
 // global break point flag.
-/*
+
 unsigned int file_register::get(void)
 {
   trace.register_read(address,value);
 
   return(value);
 }
-*/
+
 //--------------------------------------------------
 //
 //  Update the contents of the file register. If a
 // 'break on write' break point is set and this write
 // meets the conditions for the break point then set the
 // global break point flag.
-/*
+
 void file_register::put(unsigned int new_value)
 {
 
@@ -85,7 +85,7 @@ void file_register::put(unsigned int new_value)
   trace.register_write(address,value);
 
 }
-*/
+
 void file_register::new_name(char *s)
 {
   if(name_str1)
@@ -209,7 +209,7 @@ void  FSR::put_value(unsigned int new_value)
 
   if(xref)
   {
-      xref->update;
+      xref->update();
       if(cpu->indf.xref)
 	cpu->indf.xref->update();
   }

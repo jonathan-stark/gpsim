@@ -23,10 +23,15 @@ Boston, MA 02111-1307, USA.  */
 #define  __BREAKPOINTS_H__
 
 #include "gpsim_def.h"
+#include "pic-instructions.h"
+#include "pic-registers.h"
 
 #ifdef HAVE_GUI
 #include "glib.h"
 #endif
+
+class pic_processor;
+class invalid_file_register;
 
 #define MAX_BREAKPOINTS 0x400
 #define BREAKPOINT_MASK (MAX_BREAKPOINTS-1)
@@ -176,12 +181,7 @@ public:
     {
       replaced->put(new_value);
     }
-  unsigned int get(void)
-    {
-      bp.halt();
-      return(replaced->get());
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | (replaced->address)  );
-    }
+  unsigned int get(void);
   unsigned int get_value(void)
     {
       return(replaced->get_value());
@@ -200,12 +200,7 @@ public:
 
 
   Break_register_write(void){ replaced = NULL;}
-  void put(unsigned int new_value)
-    {
-      bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
-      replaced->put(new_value);
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
-    }
+  void put(unsigned int new_value);
   unsigned int get(void)
     {
       return(replaced->get());
@@ -232,16 +227,7 @@ public:
     {
       replaced->put(new_value);
     }
-  unsigned int get(void)
-    {
-      unsigned int v = replaced->get();
-      if(v == break_value)
-	{
-	  bp.halt();
-	  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ_VALUE>>8) | (break_value <<8) | (replaced->address)  );
-	}
-      return v;
-    }
+  unsigned int get(void);
   unsigned int get_value(void)
     {
       return(replaced->get_value());
@@ -260,15 +246,7 @@ public:
   unsigned int break_value, break_mask;
 
   Break_register_write_value(void){ replaced = NULL;}
-  void put(unsigned int new_value)
-    {
-      if(new_value == break_value)
-	{
-	  bp.halt();
-	  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE_VALUE>>8) | (break_value <<8) | (replaced->address)  );
-	}
-      replaced->put(new_value);
-    }
+  void put(unsigned int new_value);
   unsigned int get(void)
     {
       return(replaced->get());

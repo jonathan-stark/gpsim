@@ -24,17 +24,10 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 #include <string>
 
+#include "gpsim_classes.h"
 #include "breakpoints.h"
 
 /* forward references: */
-
-class _14bit_processor;
-
-class stimulus;
-class source_stimulus;
-class resistor;
-class open_collector;
-class Stimulus_Node;
 
 /* Support functions */
 extern Stimulus_Node * find_node (string name);
@@ -165,7 +158,7 @@ enum IOPIN_DIRECTION
 
   IOPIN(void);
   IOPIN(IOPORT *i, unsigned int b);
-  attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
+  void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual int get_voltage(guint64 current_time) {return state;};

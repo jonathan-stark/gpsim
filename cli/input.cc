@@ -29,7 +29,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 extern "C" {
+char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
+#define completion_matches completion_matches_oldcdecl
 #include <readline/readline.h>
+#undef completion_matches
 }
 
 extern "C" {
@@ -221,11 +224,13 @@ void process_command_file(char * file_name)
 
   if(cmd_file)
     {
-      // cout << "processing a command file\n";
+      if(verbose)
+        cout << "processing a command file\n";
 
       quit_parse = 0;
       while( !quit_parse )
 	{
+	  cout << "about to re-init the parser\n";
 	  init_parser();
 	  yyparse();
 	}
@@ -253,7 +258,7 @@ get_user_input (void)
   if(using_readline)
     {
 
-      retval = gnu_readline (gpsim,1);
+      retval = gnu_readline (const_cast<char*>(gpsim),1);
     }
   else
     {
@@ -567,7 +572,7 @@ char *gnu_readline (char *s, unsigned int force_readline)
       char *tmp;
 
       if(input_mode == CONTINUING_LINE)
-	retval = ::readline (gpsim_cont);
+        retval = ::readline (const_cast<char*>(gpsim_cont));
       else
 	retval = ::readline (s);
       tmp = retval;

@@ -27,6 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <vector>
 
+#include <dlfcn.h>
+
 #include "modules.h"
 #include "pic-processor.h"
 #include "stimuli.h"
@@ -181,23 +183,114 @@ int Module::get_pin_state(unsigned int pin_number)
  * Helper functions
  *
  *****************************************************************************/
+typedef  Module * (*Module_FPTR)();
+typedef  Module_Types * (*Module_Types_FPTR)();
 
-list <Module *> module_list;
-list <Module *> :: iterator module_iterator;
+//----------------------------------------------------------
+// An instance of the Module_Library class is created each
+// time a library of modules is opened.
 
+class Module_Library {
+  char *_name;
+  void *_handle;
+  Module_Types * (*get_mod_list)(void);
+
+public:
+
+  Module_Types *module_list;
+
+  Module_Library(char *new_name, void *library_handle) {
+    char * error;
+
+    if(new_name)
+      _name = strdup(new_name);
+    else
+      _name = NULL;
+
+    _handle = library_handle;
+
+    get_mod_list =   (Module_Types_FPTR) dlsym(_handle, "get_mod_list");
+
+    if ((error = dlerror()) != NULL)  {
+      cout << "WARNING: non-conforming module library\n"
+	   << "  gpsim libraries should have the mod_list() function defined\n";
+      fputs(error, stderr);
+      module_list = NULL;
+    } else {
+
+      // Get a pointer to the list of modules that this library supports.
+      module_list = get_mod_list();
+    }
+
+
+  };
+
+  ~Module_Library(void) {
+    if(_name)
+      delete _name;
+  };
+
+  char *name(void) {
+    return(_name);
+  }
+
+  void *handle(void) {
+    return _handle;
+  }
+
+};
+
+//------------------------------------------------------------------------
+// As module libraries are loaded, they're placed into the following list:
+list <Module_Library *> module_list;
+list <Module_Library *> :: iterator module_iterator;
+
+//------------------------------------------------------------------------
+// Each time a new module is instantiated from a module library, the 
+// reference designator counter is incremented. (This will change later
+// to accomodate different reference designator types).
+static int  ref_des_count = 1;
+
+void add_module_library(char *library_name, void *library_handle)
+{
+
+
+  if(library_name) {
+
+    Module_Library *ml = new Module_Library(library_name, library_handle);
+
+    module_list.push_back(ml);
+
+  } else 
+    cout << "BUG: " << __FUNCTION__ << " called with library_name == NULL";
+
+}
+
+// dump_available_libraries
+// ...
 
 void display_available_modules(void)
 {
-  cout << "Module List\n";
+
+  cout << "Module Libraries\n";
+  
 
   for (module_iterator = module_list.begin();  
        module_iterator != module_list.end(); 
        module_iterator++) {
 
-    Module *t = *module_iterator;
+    Module_Library *t = *module_iterator;
     cout << t->name() << '\n';
 
+    if(t->module_list) {
+      // Loop through the list and display all of the modules.
+      int i=0;
+
+      while(t->module_list[i].names[0]) {
+	cout << "   " << t->module_list[i++].names[0] << '\n';
+      }
     }
+  }
 }
 
 
@@ -205,4 +298,98 @@ void load_module_library(char *library_name)
 {
 
   cout << __FUNCTION__ << "() " << library_name << '\n';
+
+
+  void *handle;
+  char *error;
+  Module * (*getmodule) (void);
+  Module *testmodule;
+
+  handle = dlopen (library_name, RTLD_LAZY);
+  if (!handle) {
+
+    fputs (dlerror(), stderr);
+    return;
+  }
+
+  add_module_library(library_name,handle);
+
+  display_available_modules();
+
+  /*
+  getmodule = (Module_FPTR) dlsym(handle, "getmodule");
+
+  if ((error = dlerror()) != NULL)  {
+    fputs(error, stderr);
+  }
+  else {
+    testmodule = getmodule();
+    if(testmodule) {
+      cout << " got the module, here's its name:\n  "
+	   << testmodule->name() << '\n';
+    }
+  }
+
+  dlclose(handle);
+  */
+
+}
+
+void load_module(char *module_name)
+{
+
+  cout << __FUNCTION__ << '\n';
+
+  if(!module_name) {
+    cout << "WARNING: module name is NULL\n";
+    return;
+  }
+
+  cout << "Searching for module:  " << module_name << '\n';
+  
+
+  for (module_iterator = module_list.begin();  
+       module_iterator != module_list.end(); 
+       module_iterator++) {
+
+    Module_Library *t = *module_iterator;
+    cout << t->name() << '\n';
+
+    if(t->module_list) {
+      // Loop through the list and search for the module.
+      int i=0,j;
+
+      while(t->module_list[i].names[0]) {
+
+	// Look at all of the possible names for a module
+
+	for(j=0; j<2; j++)
+	  if(strcmp(module_name,t->module_list[i].names[j]) == 0)
+	    {
+	      // We found a module that matches.
+	      // Now, let's create an instance of it and throw it into
+	      // the symbol library
+
+	      cout << " Found it!\n";
+	      Module *new_module = t->module_list[i].module_constructor();
+	      symbol_table.add_module(new_module);
+	      return;
+	    }
+	i++;
+
+      }
+
+    }
+  }
+
+  cout << "NOT FOUND\n";
+
+}
+
+
+void dump_module_list(void)
+{
+
+ cout << __FUNCTION__ << '\n';
+
 }

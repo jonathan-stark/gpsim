@@ -51,6 +51,7 @@ cmd_stimulus c_stimulus;
 #define  STIM_ANALOG          (1 << 12)
 #define  STIM_DIGITAL         (1 << 13)
 #define  STIM_DUMP            (1 << 14)
+#define  STIM_PORT            (1 << 15)
 
 const unsigned int
 SQW_OPTIONS = STIM_SQW | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_CYCLE;
@@ -68,6 +69,7 @@ static cmd_options cmd_stimulus_options[] =
   "high_time",             STIM_HIGH_TIME,     OPT_TT_NUMERIC,
   "initial_state",         STIM_INITIAL_STATE, OPT_TT_NUMERIC,
   "start_cycle",           STIM_START_CYCLE,   OPT_TT_NUMERIC,
+  "start",                 STIM_START_CYCLE,   OPT_TT_NUMERIC,
   "name",                  STIM_NAME,          OPT_TT_STRING,
   "digital",               STIM_DIGITAL,       OPT_TT_BITFLAG,
   "analog",                STIM_ANALOG,        OPT_TT_BITFLAG,
@@ -75,6 +77,7 @@ static cmd_options cmd_stimulus_options[] =
   "dump",                  STIM_DUMP,          OPT_TT_BITFLAG,
   "sqw",                   STIM_SQW,           OPT_TT_BITFLAG,
   "sqare_wave",            STIM_SQW,           OPT_TT_BITFLAG,
+  "port",                  STIM_PORT,          OPT_TT_STRING,
 
   NULL,0,0
 };
@@ -300,6 +303,8 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
 	cout << "stimulus command got the name " << cos->str << '\n';
       stimorb_name(cos->str);
       break;
+    case STIM_PORT:
+      cout << "the port option has been deprecated\n";
     }
 
   options_entered |= cos->co->value;

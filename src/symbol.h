@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 //
 
 #include <string>
+#include "gpsim_classes.h"
 #include "14bit-processors.h"
 
 
@@ -46,9 +47,6 @@ void display_symbol_file_error(int);
 };*/
 
 
-class symbol;
-class Stimulus_Node;
-class stimulus;
 
 class symbol_type
 {
@@ -70,6 +68,7 @@ public:
   void add_constant(pic_processor *cpu, char *, int );
   void add_register(pic_processor *cpu, file_register *reg);
   void add_address(pic_processor *cpu, char *, int );
+  void add_module(Module * );
   void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);
@@ -86,7 +85,8 @@ class symbol
 public:
 
   string name_str;
-  pic_processor *cpu;
+  //pic_processor *cpu;
+  Module *cpu;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
   char * type_name(void) { return symbol_types[isa()].name_str;};
@@ -178,5 +178,18 @@ class line_number_symbol : public symbol
   void put_lst_page(int new_lst_page) {lst_page = new_lst_page;}
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_LINE_NUMBER;};
+};
+
+class module_symbol : public symbol
+{
+ public:
+  virtual void print(void) {
+    if(cpu) {
+      cout << cpu->name() << "  named ";
+    }
+    cout << *name() << '\n';
+  }
+      
+
 };
 #endif  //  __SYMBOL_H__
