@@ -339,7 +339,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("lcd_display"); };
-  static ExternalModule *construct(char *new_name);
+  static ExternalModule *construct(const char *new_name);
 
 
   // State Machine Functions:
@@ -391,7 +391,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("lcd_dt161A"); };
-  static ExternalModule *construct(char *new_name);
+  static ExternalModule *construct(const char *new_name);
 
 };
 

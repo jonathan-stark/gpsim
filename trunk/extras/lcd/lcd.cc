@@ -412,7 +412,7 @@ void LcdDisplay::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * LcdDisplay::construct(char *new_name=NULL)
+ExternalModule * LcdDisplay::construct(const char *new_name=NULL)
 {
 
   cout << " LCD display constructor\n";
@@ -485,7 +485,7 @@ LcdDisplay::~LcdDisplay()
 // Displaytech 161A, added by Salvador E. Tropea <set@computer.org>
 // construct
 
-ExternalModule * LcdDisplayDisplaytech161A::construct(char *new_name=NULL)
+ExternalModule * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
 {
 
   if (verbose)
