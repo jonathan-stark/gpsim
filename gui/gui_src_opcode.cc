@@ -1290,10 +1290,10 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
     
 }
 
-void SourceBrowserOpcode_Window::Build(void)
+GtkWidget *SourceBrowserOpcode_Window::Build(void)
 {
   if(bIsBuilt)
-    return;
+    return window;
 
   GtkWidget *hbox;
   GtkWidget *scrolled_win;
@@ -1540,6 +1540,8 @@ void SourceBrowserOpcode_Window::Build(void)
   clist_popup_menu=build_menu_for_clist(this);
 
   UpdateMenuItem();
+
+  return window;
 }
 
 SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)

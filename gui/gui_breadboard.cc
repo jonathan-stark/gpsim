@@ -2651,7 +2651,7 @@ void GuiModule::Refresh()
   bbw->modules=g_list_remove(bbw->modules, this);
 
   // rebuild module
-  GuiModule *new_gui_module = new GuiModule(module, bbw);
+  new GuiModule(module, bbw);
 
 
   //new_gui_module=create_gui_module(p->bbw, p->type, p->module, p->module_widget);
@@ -3270,10 +3270,10 @@ GtkWidget* Breadboard_Window::add_button(const char *label, const char *name,
   return button;
 }
 
-void Breadboard_Window::Build(void)
+GtkWidget *Breadboard_Window::Build(void)
 {
   if(bIsBuilt)
-    return;
+    return window;
 
   GtkWidget *hpaned1;
   GtkWidget *vbox9;
@@ -3705,6 +3705,7 @@ void Breadboard_Window::Build(void)
 
   gtk_widget_show(window);
 
+  return window;
 }
 
 

@@ -55,7 +55,7 @@ class Trace_Window : public GUI_Object
 
 
   Trace_Window(GUI_Processor *gp);
-  virtual void Build(void);
+  virtual GtkWidget *Build(void);
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);
 

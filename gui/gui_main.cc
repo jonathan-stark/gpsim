@@ -42,17 +42,17 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_breadboard.h"
 #include "gui_interface.h"
 #include "gui_processor.h"
-#include "gui_profile.h"
+//#include "gui_profile.h"
 #include "gui_register.h"
-#include "gui_regwin.h"
-#include "gui_scope.h"
+//#include "gui_regwin.h"
+//#include "gui_scope.h"
 #include "gui_src.h"
-#include "gui_stack.h"
+//#include "gui_stack.h"
 #include "gui_statusbar.h"
-#include "gui_stopwatch.h"
+//#include "gui_stopwatch.h"
 #include "gui_symbols.h"
 #include "gui_trace.h"
-#include "gui_watch.h"
+//#include "gui_watch.h"
 
 #ifndef _WIN32
 #undef TRUE
@@ -132,12 +132,12 @@ GUI_Interface::~GUI_Interface()
     //gp->regwin_eeprom->set_config();
     gp->program_memory->set_config();
     //gp->source_browser->set_config();
-    gp->watch_window->set_config();
-    gp->stack_window->set_config();
+    //gp->watch_window->set_config();
+    //gp->stack_window->set_config();
     gp->breadboard_window->set_config();
     gp->trace_window->set_config();
-    gp->profile_window->set_config();
-    gp->stopwatch_window->set_config();
+    //gp->profile_window->set_config();
+    //gp->stopwatch_window->set_config();
     //gp->scope_window->set_config();
   }
 }
@@ -190,16 +190,16 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     
     GUI_Processor *gp = (GUI_Processor *) callback_data;
 
-    gp->regwin_ram->Update();
+    //gp->regwin_ram->Update();
     //gp->regwin_eeprom->Update();
     gp->program_memory->Update();
     gp->source_browser->Update();
-    gp->watch_window->Update();
-    gp->stack_window->Update();
+    //gp->watch_window->Update();
+    //gp->stack_window->Update();
     gp->breadboard_window->Update();
     gp->trace_window->Update();
-    gp->profile_window->Update();
-    gp->stopwatch_window->Update();
+    //gp->profile_window->Update();
+    //gp->stopwatch_window->Update();
     //gp->scope_window->Update();
 
     dispatch_Update();
@@ -234,17 +234,17 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
 
     gui_processors = g_slist_append(gui_processors,gp);
 
-    gp->regwin_ram->NewProcessor(gp);
+    //gp->regwin_ram->NewProcessor(gp);
     gp->program_memory->NewProcessor(gp);
     gp->source_browser->CloseSource();
     gp->source_browser->NewProcessor(gp);
     gp->symbol_window->NewSymbols();
-    gp->watch_window->ClearWatches();
+    //gp->watch_window->ClearWatches();
     gp->breadboard_window->NewProcessor(gp);
-    gp->stack_window->NewProcessor(gp);
+    //gp->stack_window->NewProcessor(gp);
     gp->trace_window->NewProcessor(gp);
-    gp->profile_window->NewProcessor(gp);
-    gp->stopwatch_window->NewProcessor(gp);
+    //gp->profile_window->NewProcessor(gp);
+    //gp->stopwatch_window->NewProcessor(gp);
     //gp->scope_window->NewProcessor(gp);
 
     Dprintf((" New processor has been added"));
@@ -287,7 +287,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
     gp->source_browser->NewSource(gp);
     gp->symbol_window->NewSymbols();
     gp->program_memory->NewSource(gp);
-    gp->profile_window->NewProgram(gp);
+    //gp->profile_window->NewProgram(gp);
     link_src_to_gpsim( gp);
 
   }

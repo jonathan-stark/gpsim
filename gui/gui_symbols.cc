@@ -38,9 +38,9 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 
 #include "gui.h"
-#include "gui_regwin.h"
+//#include "gui_regwin.h"
 #include "gui_symbols.h"
-#include "gui_watch.h"
+//#include "gui_watch.h"
 #include "gui_processor.h"
 #include "gui_src.h"
 
@@ -124,8 +124,9 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     case MENU_ADD_WATCH:
       {
-	GUIRegister *reg = (*popup_sw->gp->regwin_ram)[entry->value];
-	popup_sw->gp->watch_window->Add(popup_sw->gp->regwin_ram->type, reg);
+	puts("WATCH WINDOW IS NOT IMPLEMENTED...\n");
+	//GUIRegister *reg = (*popup_sw->gp->regwin_ram)[entry->value];
+	//popup_sw->gp->watch_window->Add(popup_sw->gp->regwin_ram->type, reg);
       }
       break;
     default:
@@ -298,7 +299,7 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
     switch(e->type)
     {
     case SYMBOL_REGISTER:
-	sw->gp->regwin_ram->SelectRegister(e->value);
+      //sw->gp->regwin_ram->SelectRegister(e->value);
 	break;
     case SYMBOL_ADDRESS:
 	sw->gp->source_browser->SelectAddress(e->value);
@@ -553,10 +554,10 @@ static char *symbol_titles[3]={"Name","Type","Address/Value"};
 // Build
 //
 
-void Symbol_Window::Build(void)
+GtkWidget * Symbol_Window::Build(void)
 {
   if(bIsBuilt)
-    return;
+    return window;
 
   GtkWidget *vbox;
   GtkWidget *scrolled_window;
@@ -653,6 +654,8 @@ void Symbol_Window::Build(void)
   UpdateMenuItem();
   
   popup_menu=build_menu(window,this);
+
+  return window;
   
 }
 

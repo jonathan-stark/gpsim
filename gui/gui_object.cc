@@ -156,9 +156,10 @@ void GUI_Object::ChangeView (int view_state)
 }
 
 
-void GUI_Object::Build(void)
+GtkWidget *GUI_Object::Build(void)
 {
   cout << " GUI_Object::Build() should not be called\n";
+  return 0;
 }
 
 int GUI_Object::get_config(void)
