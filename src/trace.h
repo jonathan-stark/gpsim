@@ -251,7 +251,7 @@ extern Trace trace;
 //-----------------------------------------------------------
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
-class TraceLog : public BreakCallBack
+class TraceLog : public BreakpointObject
 {
 public:
   bool logging;
@@ -290,7 +290,7 @@ public:
 extern TraceLog trace_log;
 
 //-----------------------------------------------------------
-class ProfileKeeper : public BreakCallBack
+class ProfileKeeper : public BreakpointObject
 {
 public:
   bool enabled;
@@ -357,7 +357,7 @@ extern ProfileKeeper profile_keeper;
  * 
  */
 
-class BoolEventBuffer : public BreakCallBack
+class BoolEventBuffer : public BreakpointObject
 {
 public:
 

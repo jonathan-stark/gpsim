@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 //---------------------------------------------------------
 // TMR0 - Timer
-class TMR0 : public sfr_register, public BreakCallBack
+class TMR0 : public sfr_register, public BreakpointObject
 {
 public:
   unsigned int 

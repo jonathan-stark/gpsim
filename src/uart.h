@@ -58,7 +58,7 @@ class _TXREG : public sfr_register
   virtual void assign_pir_set(PIR_SET *new_pir_set);
 };
 
-class _TXSTA : public sfr_register, public BreakCallBack
+class _TXSTA : public sfr_register, public BreakpointObject
 {
 public:
   _TXREG  *txreg;
@@ -117,7 +117,7 @@ class _RCREG : public sfr_register
 
 };
 
-class _RCSTA : public sfr_register, public BreakCallBack
+class _RCSTA : public sfr_register, public BreakpointObject
 {
 
  public:
@@ -182,7 +182,7 @@ class _RCSTA : public sfr_register, public BreakCallBack
 };
 
 
-class _SPBRG : public sfr_register, public BreakCallBack
+class _SPBRG : public sfr_register, public BreakpointObject
 {
  public:
   _TXSTA *txsta;

@@ -44,7 +44,7 @@ class Processor;
 // cleared. The modification goes through here.
 //
 
-class ProgramMemoryAccess :  public BreakCallBack
+class ProgramMemoryAccess :  public BreakpointObject
 {
  public:
   // Symbolic debugging
@@ -108,9 +108,9 @@ class ProgramMemoryAccess :  public BreakCallBack
 
   // A couple of functions for manipulating  breakpoints
   void set_break_at_address(int address);
-  void set_notify_at_address(int address, BreakCallBack *cb);
-  void set_profile_start_at_address(int address, BreakCallBack *cb);
-  void set_profile_stop_at_address(int address, BreakCallBack *cb);
+  void set_notify_at_address(int address, BreakpointObject *cb);
+  void set_profile_start_at_address(int address, BreakpointObject *cb);
+  void set_profile_stop_at_address(int address, BreakpointObject *cb);
   int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
   int clear_notify_at_address(int address);
   int clear_profile_start_at_address(int address);

@@ -1987,7 +1987,7 @@ static unsigned int stopaddress;
 //
 // ProfileStart class
 //
-class ProfileStart : public BreakCallBack
+class ProfileStart : public BreakpointObject
 {
 
 public:
@@ -2017,7 +2017,7 @@ private:
 //
 // ProfileStop class
 //
-class ProfileStop : public BreakCallBack
+class ProfileStop : public BreakpointObject
 {
 
 public:

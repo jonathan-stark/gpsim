@@ -739,7 +739,7 @@ void ProgramMemoryAccess::set_break_at_address(int address)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_notify_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_notify_at_address(int address, BreakpointObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_notify_break(cpu, address, cb);
@@ -747,7 +747,7 @@ void ProgramMemoryAccess::set_notify_at_address(int address, BreakCallBack *cb)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakpointObject *cb)
 {
   int pm_index = cpu->map_pm_address2index(address);
 
@@ -757,7 +757,7 @@ void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBac
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakCallBack *cb)
+void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakpointObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_profile_stop_break(cpu, address, cb);

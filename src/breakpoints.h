@@ -46,8 +46,8 @@ class BreakpointObject
 
   unsigned int bpn;
 
-  // 
-  virtual void set_break(void) {};
+  // Enable the breakpoint and return true if successful
+  virtual bool set_break(void) {return false;}
 
   // A unique number assigned when the break point is armed.
   int CallBackID;
@@ -71,10 +71,12 @@ class BreakpointObject
   virtual Processor *get_cpu(void) { return 0; }
 
   // Display the breakpoint - Probably should tie into a stream...
-  virtual void dump1(void);
+  virtual void print(void);
 
   // Clear the breakpoint
   virtual void clear(void);
+
+  virtual char const * bpName() { return "Generic"; }
 
 };
 
@@ -92,10 +94,11 @@ public:
   virtual int get_file_id(void);
   virtual int get_hll_file_id(void);
 
-  virtual void set_break(void);
+  virtual bool set_break(void);
   virtual Processor* get_cpu(void) { return cpu; }
-  virtual void dump1(void);
+  virtual void print(void);
   virtual void clear(void);
+  virtual char const * bpName() { return "Execution"; }
 
   Breakpoint_Instruction(Processor *new_cpu, 
 			 unsigned int new_address, 
@@ -108,51 +111,40 @@ public:
 };
 
 
-//
-// BreakCallBack - this object is intended to be one of the classes in
-// in a multiple inheritance class declaration. It's purpose is to provide
-// a mechanism by which a break point can notify an object that the break
-// has occurred.
-// Note that BreakCallBack is typically used in conjunction with Cycle
-// Counter break points (see the Cycle_Counter class). 
-//
-
-class BreakCallBack : public BreakpointObject
-{
-public:
-  void place_holder(void);
-};
-
 class Notify_Instruction : public Breakpoint_Instruction
 {
-    BreakCallBack *callback;
-public:
-    Notify_Instruction(Processor *cpu, 
-		       unsigned int address, 
-		       unsigned int bp, 
-		       BreakCallBack *cb);
-    virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
-    virtual void execute(void);
+  BreakpointObject *callback;
+ public:
+  Notify_Instruction(Processor *cpu, 
+		     unsigned int address, 
+		     unsigned int bp, 
+		     BreakpointObject *cb);
+  virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
+  virtual void execute(void);
+  virtual char const * bpName() { return "Notify Execution"; }
+
 };
 
 class Profile_Start_Instruction : public Notify_Instruction
 {
-public:
-    Profile_Start_Instruction(Processor *cpu, 
-			      unsigned int address, 
-			      unsigned int bp, 
-			      BreakCallBack *cb);
-    virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
+ public:
+  Profile_Start_Instruction(Processor *cpu, 
+			    unsigned int address, 
+			    unsigned int bp, 
+			    BreakpointObject *cb);
+  virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
+  virtual char const * bpName() { return "Profile Start"; }
 };
 
 class Profile_Stop_Instruction : public Notify_Instruction
 {
-public:
-    Profile_Stop_Instruction(Processor *cpu, 
-			     unsigned int address, 
-			     unsigned int bp, 
-			     BreakCallBack *cb);
-    virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
+ public:
+  Profile_Stop_Instruction(Processor *cpu, 
+			   unsigned int address, 
+			   unsigned int bp, 
+			   BreakpointObject *cb);
+  virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
+  virtual char const * bpName() { return "Profile Stop"; }
 };
 
 //
@@ -178,6 +170,8 @@ class RegisterAssertion : public Breakpoint_Instruction
 		    );
 
   virtual void execute(void);
+  virtual void print(void);
+  virtual char const * bpName() { return "Register Assertion"; }
 
 
 };
@@ -234,17 +228,19 @@ public:
   unsigned int set_breakpoint(BREAKPOINT_TYPES,Processor *,
 			      unsigned int, 
 			      unsigned int,
-			      BreakCallBack *f = 0);
+			      BreakpointObject *f = 0);
+  unsigned int set_breakpoint(BreakpointObject *);
+
   unsigned int set_execution_break(Processor *cpu, unsigned int address);
   unsigned int set_notify_break(Processor *cpu, 
 				unsigned int address, 
-				BreakCallBack *cb);
+				BreakpointObject *cb);
   unsigned int set_profile_start_break(Processor *cpu, 
 				       unsigned int address, 
-				       BreakCallBack *f1 = 0);
+				       BreakpointObject *f1 = 0);
   unsigned int set_profile_stop_break(Processor *cpu, 
 				      unsigned int address, 
-				      BreakCallBack *f1 = 0);
+				      BreakpointObject *f1 = 0);
   unsigned int set_read_break(Processor *cpu, unsigned int register_number);
   unsigned int set_write_break(Processor *cpu, unsigned int register_number);
   unsigned int set_read_value_break(Processor *cpu, 
@@ -257,7 +253,7 @@ public:
 				     unsigned int mask=0xff);
   unsigned int set_cycle_break(Processor *cpu,
 			       guint64 cycle,
-			       BreakCallBack *f = 0);
+			       BreakpointObject *f = 0);
   unsigned int set_wdt_break(Processor *cpu);
   unsigned int set_stk_overflow_break(Processor *cpu);
   unsigned int set_stk_underflow_break(Processor *cpu);
@@ -353,7 +349,7 @@ extern Breakpoints bp;
 class BreakpointRegister : public Register, public BreakpointObject
 {
 public:
-  unsigned int break_point; // The number associated with this break point.
+
   Register *replaced;       // A pointer to the register that this break replaces
   BreakpointRegister *next;    // If multiple breaks are set on one register,
 			    // then this will point to the next one. 
@@ -423,7 +419,10 @@ public:
     }
 
   void replace(Processor *_cpu, unsigned int reg);
+  virtual bool set_break(void);
   unsigned int clear(unsigned int bp_num);
+  virtual void print(void);
+  virtual void clear(void);
 
 };
 
@@ -431,25 +430,22 @@ class BreakpointRegister_Value : public BreakpointRegister
 {
 public:
 
-  unsigned int break_value, break_mask, last_value;
+  unsigned int break_value, break_mask;
 
   BreakpointRegister_Value(void)
     { 
       replaced = 0;
       break_value = 0;
       break_mask = 0;
-      last_value = 0;
     }
 
-  BreakpointRegister_Value(Processor *_cpu, int _repl, int bp, int bv, int bm ):
-    BreakpointRegister(_cpu,_repl,bp ) 
-    { 
-      break_value = bv;
-      break_mask = bm;
-      if(replaced)
-	last_value = replaced->get_value();
+  BreakpointRegister_Value(Processor *_cpu, 
+			   int _repl, 
+			   int bp, 
+			   unsigned int bv, 
+			   unsigned int bm=0xffffffff );
 
-    };
+  virtual void print(void);
 
 };
 
@@ -467,6 +463,7 @@ public:
   virtual unsigned int get(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
+  virtual char const * bpName() { return "register read"; }
 
 };
 
@@ -480,6 +477,7 @@ public:
     BreakpointRegister(_cpu,_repl,bp ) { };
   virtual void put(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual char const * bpName() { return "register write"; }
 
 };
 
@@ -488,12 +486,17 @@ class Break_register_read_value : public BreakpointRegister_Value
 public:
 
   Break_register_read_value(void){ };
-  Break_register_read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Break_register_read_value(Processor *_cpu, 
+			    int _repl, 
+			    int bp, 
+			    unsigned int bv, 
+			    unsigned int bm ) :
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual unsigned int get(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
+  virtual char const * bpName() { return "register read value"; }
 
 };
 
@@ -502,36 +505,45 @@ class Break_register_write_value : public BreakpointRegister_Value
 public:
 
   Break_register_write_value(void){ };
-  Break_register_write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Break_register_write_value(Processor *_cpu, 
+			     int _repl, 
+			     int bp, 
+			     unsigned int bv, 
+			     unsigned int bm ) :
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual void put(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual char const * bpName() { return "register write value"; }
+
 };
 
-class Log_Register_Write : public BreakpointRegister
+class Log_Register_Write : public Break_register_write
 {
  public:
 
   Log_Register_Write(void){ };
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,_repl,bp ) { };
+    Break_register_write(_cpu,_repl,bp ) { };
   virtual void put(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual char const * bpName() { return "log register write"; }
 
 };
 
-class Log_Register_Read : public BreakpointRegister
+class Log_Register_Read : public Break_register_read
 {
 public:
 
 
   Log_Register_Read(void){ };
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,_repl,bp ) { };
+    Break_register_read(_cpu,_repl,bp ) { };
   virtual unsigned int get(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
+  virtual char const * bpName() { return "log register read"; }
+
 };
 
 class Log_Register_Read_value : public BreakpointRegister_Value
@@ -539,11 +551,16 @@ class Log_Register_Read_value : public BreakpointRegister_Value
 public:
 
   Log_Register_Read_value(void){ };
-  Log_Register_Read_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Log_Register_Read_value(Processor *_cpu, 
+			  int _repl, 
+			  int bp, 
+			  unsigned int bv, 
+			  unsigned int bm ) :
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
   virtual unsigned int get(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
+  virtual char const * bpName() { return "log register read value"; }
 };
 
 class Log_Register_Write_value : public BreakpointRegister_Value
@@ -551,15 +568,20 @@ class Log_Register_Write_value : public BreakpointRegister_Value
 public:
 
   Log_Register_Write_value(void){ };
-  Log_Register_Write_value(Processor *_cpu, int _repl, int bp, int bv, int bm ) :
+  Log_Register_Write_value(Processor *_cpu, 
+			   int _repl, 
+			   int bp, 
+			   unsigned int bv, 
+			   unsigned int bm ) :
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual void put(unsigned int new_value);
+  virtual char const * bpName() { return "log register write value"; }
 
 };
 
 #ifdef HAVE_GUI
-class GuiCallBack: public BreakCallBack
+class GuiCallBack: public BreakpointObject
 {
 public:
   virtual void callback(void);
@@ -573,39 +595,6 @@ public:
   GuiCallBack(void);
 };
 #endif // HAVE_GUI
-
-//--------------------------------------------------------------------
-// InterfaceObject 
-//
-// This class is used only within interface.cc's scope. It's purpose
-// is to provide a way to call back some function not gpsim's code
-// space.
-
-class InterfaceObject : public BreakCallBack
-{
-public:
-  Processor *pic;
-
-  void (*callback_function)(gpointer);
-  gpointer callback_data;
-
-  InterfaceObject(void) {pic = 0;};
-  virtual void callback(void);
-
-};
-
-//------------------------------------------------------------------------
-// Primarily for interface.cc
-class CyclicBreakPoint : public InterfaceObject
-{
-public:
-  guint64 delta_cycles;
-
-  void set_break(void);
-  virtual void callback(void);
-  ~CyclicBreakPoint(void);
-  void set_delta(guint64 delta);
-};
 
 
 #endif   //  __BREAKPOINTS_H__

@@ -43,7 +43,7 @@ list <stimulus *> :: iterator stimulus_iterator;
  
 static char num_nodes = 'a';
 static char num_stimuli = 'a';
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=0);
+void  gpsim_set_break_delta(guint64 delta, BreakpointObject *f=0);
 
 
 extern Processor *active_cpu;

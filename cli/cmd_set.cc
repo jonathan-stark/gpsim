@@ -75,7 +75,7 @@ void cmd_set::set(void)
 
   cout << "r | radix = " << radix << " (not fully functional)\n";
   cout << "v | verbose =  " << verbose << '\n';
-  cout << "gui_update = " << gui_update_rate << '\n';
+  cout << "gui_update = " << gi.gui_update_rate << '\n';
 }
 
 void cmd_set::set(int bit_flag, int number)
@@ -86,7 +86,6 @@ void cmd_set::set(int bit_flag, int number)
     verbose = number;
     break;
   case SET_GUI_UPDATE:
-    //gpsim_set_update_rate(number);
     gi.set_update_rate(number);
     break;
 

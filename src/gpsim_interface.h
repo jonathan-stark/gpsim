@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __GPSIM_INTERFACE_H__
 
 #include "interface.h"
+#include "breakpoints.h"
 
 class Stimulus;
 class Stimulus_Node;
@@ -121,14 +122,14 @@ class Interface {
 };
 
 
-class gpsimInterface {
+class gpsimInterface : public BreakpointObject {
  public:
 
   GSList *interfaces;
   unsigned int interface_seq_number;
 
-  void *gui_update_cbp;
   guint64 gui_update_rate;
+  guint64 future_cycle;
 
 
   gpsimInterface(void);
@@ -139,6 +140,7 @@ class gpsimInterface {
   void update_object (gpointer xref,int new_value);
   void remove_object (gpointer xref);
   void simulation_has_stopped (void);
+  void update (void);
   void new_processor (Processor *);
   void new_module  (Module *module);
   void node_configuration_changed  (Stimulus_Node *node);
@@ -147,6 +149,14 @@ class gpsimInterface {
 
   unsigned int add_interface(Interface *new_interface);
   void remove_interface(unsigned int interface_id);
+
+
+  virtual bool set_break(void) {return false;}
+  virtual void callback(void);
+  virtual void callback_print(void);
+  virtual void print(void);
+  virtual void clear(void);
+  virtual char const * bpName() { return "gpsim interface"; }
 
 };
 
