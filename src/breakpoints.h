@@ -22,7 +22,6 @@ Boston, MA 02111-1307, USA.  */
 #ifndef  __BREAKPOINTS_H__
 #define  __BREAKPOINTS_H__
 
-#include "gpsim_def.h"
 #include "pic-instructions.h"
 #include "pic-registers.h"
 

@@ -29,7 +29,6 @@ Boston, MA 02111-1307, USA.  */
  *
  */
 #include <stdio.h>
-#include "gpsim_def.h"
 #include <glib.h>
 //#include "symbol.h"
 enum SYMBOL_TYPE
@@ -148,6 +147,7 @@ typedef struct _sym
 					  gpointer interface_callback_data,
 					  guint64 cycle);
   int gpsim_open(unsigned int processor_id, char *file);
+  char *gpsim_get_version(char *dest, int max_len);
   //---------------------------------------------------------------------------
   // pin interface functions
   //---------------------------------------------------------------------------

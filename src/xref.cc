@@ -1,4 +1,4 @@
-
+#include "../config.h"
 #include "xref.h"
 #include "gpsim_interface.h"
 

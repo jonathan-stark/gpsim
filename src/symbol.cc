@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <vector>
 
+#include "../config.h"
 #include "14bit-processors.h"
 #include "stimuli.h"
 #include "symbol.h"

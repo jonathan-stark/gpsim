@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream.h>
 
+#include "../config.h"
 #include "14bit-processors.h"
 
 instruction * disasm14 (_14bit_processor *cpu, unsigned int inst)

@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 
+#include "../config.h"
 #include "16bit-processors.h"
 #include "pic-instructions.h"
 #include "12bit-instructions.h"
