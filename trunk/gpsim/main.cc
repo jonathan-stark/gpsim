@@ -50,6 +50,7 @@ extern "C" {
 
 extern int gui_init (int argc, char **argv);
 extern void gui_main(void);
+extern void cli_main(void);
 
 void initialize_gpsim(void);
 
@@ -145,7 +146,6 @@ int
 main (int argc, char *argv[])
 {
 
-  int i;
   int c,usage=0;
   char command_str[256];
   poptContext optCon;   /* context for parsing command-line options */
@@ -277,13 +277,7 @@ main (int argc, char *argv[])
     gui_main();
   else
 #endif
-    //do
-    {
-      init_parser();
-      i = yyparse();
-
-      }
-  // while(!quit_parse);
+    cli_main();
 
   exit_gpsim();
 
