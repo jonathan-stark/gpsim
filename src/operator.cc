@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "operator.h"
-#include "../cli/errors.h"
+#include "errors.h"
 
 
 BinaryOperator::BinaryOperator(string  opString, 

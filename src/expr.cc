@@ -5,7 +5,7 @@
 
 #include "expr.h"
 #include "operator.h"
-#include "../cli/errors.h"
+#include "errors.h"
 #include "symbol.h"
 
 using namespace std;

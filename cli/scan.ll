@@ -34,7 +34,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "../src/operator.h"
-#include "errors.h"
+//#include "../src/errors.h"
 #include "cmd_macro.h"
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
