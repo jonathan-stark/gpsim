@@ -22,6 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GUI_WATCH_H__
 #define __GUI_WATCH_H__
 
+#include "gui_register.h"
+
 class WatchEntry : public GUIRegister {
 public:
 

@@ -41,6 +41,8 @@ Boston, MA 02111-1307, USA.  */
 extern list <symbol *> st;
 
 #include "gui.h"
+#include "gui_stack.h"
+#include "gui_src.h"
 
 struct stack_entry {
     unsigned int depth;           // index in stack array
@@ -96,10 +98,8 @@ static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,Gd
     if(!entry)
 	return TRUE;
     
-    (((GUI_Object*)sw)->gp->source_browser)->SelectAddress(entry->retaddress);
-    (((GUI_Object*)sw)->gp->program_memory)->SelectAddress(entry->retaddress);
-
-    //SourceBrowser_select_address(((GUI_Object*)sw)->gp->program_memory,entry->retaddress);
+    sw->gp->source_browser->SelectAddress(entry->retaddress);
+    sw->gp->program_memory->SelectAddress(entry->retaddress);
 
     return 0;
 }

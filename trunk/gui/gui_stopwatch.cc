@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 
 #include "gui.h"
+#include "gui_stopwatch.h"
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,

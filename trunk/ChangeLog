@@ -1,3 +1,18 @@
+2004-03-22 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui.h, gui/gui_breadboard.h, gui/gui_object.h, gui/gui_processor.h,
+	* gui/gui_profile.h, gui/gui_register.h, gui/gui_regwin.h, gui/gui_scope.h,
+	* gui/gui_src.h, gui/gui_stack.h, gui/gui_stopwatch.h, gui/gui_symbols.h,
+	* gui/gui_trace.h, gui/gui_watch.h:
+	Finished the gui split started on 03-16. 
+	Added support for multiple source browsers (to be used with context debugging).
+
+	
+2004-03-22 Chris Emerson <gpsim@mail.nosreme.org>
+	* modules/encoder.cc, modules/encoder.h: new files: added an encoder module
+	* modules/Makefile.am: Added the encoder to the list of files.
+	* gpsim/main.cc: gracefully revert to cli if gtk_init fails.
+	* src/ioports.cc: remove PORTA debug message.
+
 2004-03-17 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui.h, gui/gui_breadboard.h, gui/gui_object.h, gui/gui_processor.h,
 	* gui/gui_profile.h, gui/gui_register.h, gui/gui_regwin.h, gui/gui_scope.h,

@@ -42,11 +42,13 @@ Boston, MA 02111-1307, USA.  */
 extern int gui_question(char *question, char *a, char *b);
 
 #include "gui.h"
+#include "gui_src.h"
 
 #include <assert.h>
 
 #define PROGRAM_MEMORY_WINDOW_COLUMNS 4   //yuk
 #define DEFAULT_ROWS  256
+#define OPCODES_PER_ROW 16
 
 #define PROFILE_COLUMN  0
 #define ADDRESS_COLUMN  1
@@ -191,7 +193,7 @@ static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
 	name[i] = 0;
 	break;
     }
-    gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
+    gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,OPCODES_PER_ROW, GTK_JUSTIFY_RIGHT,name);
 
 }
 
@@ -939,7 +941,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
   
   justification=GTK_JUSTIFY_RIGHT;
 
-  if(col < REGISTERS_PER_ROW)
+  if(col < OPCODES_PER_ROW)
     {
 
       int reg = row*16+col;

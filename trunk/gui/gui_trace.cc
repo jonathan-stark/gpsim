@@ -39,7 +39,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/trace.h"
 
 #include "gui.h"
-
+#include "gui_trace.h"
 
 #define MAXTRACES  100
 #define TRACE_COLUMNS    2

@@ -41,6 +41,7 @@ gpsim_la - plug in.
 #include <glib.h>
 
 #include "gui.h"
+#include "gui_scope.h"
 
 // Number of Input Ports:
 #define NUM_PORTS 8

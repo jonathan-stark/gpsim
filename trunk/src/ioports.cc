@@ -1009,7 +1009,7 @@ void PORTA_62x::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  cout << "PORTA_62X::put trying to put " << new_value << "  Tris is " << tris->value <<'\n';
+  //cout << "PORTA_62X::put trying to put " << new_value << "  Tris is " << tris->value <<'\n';
 
   // Bit 4 is an open collector output (it can only drive low)
   // If we're trying to drive bit 4 high and bit 4 is an output
@@ -1026,7 +1026,7 @@ void PORTA_62x::put(unsigned int new_value)
     value &= (0xff & ~( AN0 | AN1 | AN2 | AN3));
 
 
-  cout << " IOPORT::put just set port value to " << value << '\n';
+  //cout << " IOPORT::put just set port value to " << value << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)

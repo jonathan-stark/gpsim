@@ -23,31 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #define __GUI_SRC_H__
 
 
-
-//
-// The Status Bar window 
-//
-
-class StatusBar_Window {
- public:
-  GUI_Processor *gp;
-
-  GtkWidget *popup_menu;
-  
-  labeled_entry *status;
-  labeled_entry *W;
-  labeled_entry *pc;
-  labeled_entry *cpu_cycles;
-  labeled_entry *time;
-  
-  int created;
-
-  StatusBar_Window(void);
-  void NewProcessor(GUI_Processor *_gp);
-  void Create(GtkWidget *vbox_main);
-  void Update(void);
-
-};
+class SourceBrowserAsm_Window;
 
 
 class SourceBrowser_Window : public GUI_Object {
@@ -81,21 +57,7 @@ struct sa_entry{         // entry in the sa_xlate_list
     int font_center;     // from base line
 };
 
-class SourceBrowserAsm_Window;
-
-//
-// The Source Browser Child window.
-// 
-// The gui supports "context" debugging, where a context
-// may be code written for interrupt routines, non-interrupt
-// routines, high versus low interrupt priorities, etc. Each
-// context has a dedicated source browser. The SourceBrowserChild_Window
-// class manages this.
-
-class SourceBrowserChild_Window : public GUI_Object
-{
-  SourceBrowserAsm_Window *parent;
-};
+class SourceBrowserParent_Window;  // forward reference
 //
 // The Source Assembler Browser 
 //
@@ -145,8 +107,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 
   int load_source;
 
-  list<SourceBrowserChild_Window *> children;
-
+  SourceBrowserParent_Window *parent;
 
   SourceBrowserAsm_Window(GUI_Processor *gp);
   virtual void Build(void);
@@ -155,7 +116,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
   virtual void UpdateLine(int address);
-
+  virtual void SetText(int id, int file_id);
 
 };
 
@@ -211,6 +172,32 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 
 };
 
+
+//
+// The Source Browser Child window.
+// 
+// The gui supports "context" debugging, where a context
+// may be code written for interrupt routines, non-interrupt
+// routines, high versus low interrupt priorities, etc. Each
+// context has a dedicated source browser. The SourceBrowserChild_Window
+// class manages this.
+
+class SourceBrowserParent_Window : public GUI_Object
+{
+ public:
+  list<SourceBrowserAsm_Window *> children;
+
+  SourceBrowserParent_Window(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void NewProcessor(GUI_Processor *gp);
+  virtual void SelectAddress(int address);
+  virtual void Update(void);
+  virtual void UpdateLine(int address);
+  virtual void SetPC(int address);
+  virtual void CloseSource(void);
+  virtual void NewSource(GUI_Processor *gp);
+
+};
 
 
 

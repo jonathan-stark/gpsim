@@ -58,6 +58,7 @@ support:
 #include "logic.h"
 #include "led.h"
 #include "video.h"
+#include "encoder.h"
 #endif
 
 /*
@@ -99,6 +100,9 @@ Module_Types available_modules[] =
 
   // Video
   { "PAL_video", "video", Video::construct},
+
+  // Encoder
+  { "Encoder", "encoder", Encoder::construct},
 #endif
 
   // No more modules

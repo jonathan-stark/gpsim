@@ -98,7 +98,7 @@ public:
 
 
 #include "gui_object.h"
-#include "gui_register.h"
+#include "gui_processor.h"
 
 //
 // A 'labeled entry' is an object consisting of gtk entry
@@ -121,20 +121,6 @@ struct _labeled_entry {
 };
 
 typedef struct _labeled_entry labeled_entry;
-
-#include "gui_regwin.h"
-
-#include "gui_watch.h"
-#include "gui_scope.h"
-#include "gui_stack.h"
-#include "gui_stopwatch.h"
-#include "gui_symbols.h"
-#include "gui_breadboard.h"
-#include "gui_src.h"
-#include "gui_trace.h"
-#include "gui_profile.h"
-
-#include "gui_processor.h"
 
 //
 // External references and function prototypes

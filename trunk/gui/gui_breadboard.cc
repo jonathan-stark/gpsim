@@ -20,9 +20,10 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #define GTK_ENABLE_BROKEN
-#include <gui.h>
 
+#include "../config.h"
 #ifdef HAVE_GUI
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,18 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include <math.h>
 #include <assert.h>
+
+
+#include "../src/modules.h"
+#include "../src/stimuli.h"
+#include "../src/pic-processor.h"
+#include "../src/symbol.h"
+#include "../src/stimuli.h"
+
+#include <vector>
+
+#include "gui.h"
+#include "gui_breadboard.h"
 
 #define PINLINEWIDTH 3
 #define CASELINEWIDTH 4
@@ -44,14 +57,6 @@ Boston, MA 02111-1307, USA.  */
 static GdkColor high_output_color;
 static GdkColor low_output_color;
 static GdkColor black_color;
-
-#include "../src/modules.h"
-#include "../src/stimuli.h"
-#include "../src/pic-processor.h"
-#include "../src/symbol.h"
-#include "../src/stimuli.h"
-
-#include <vector>
 
 #define PINLENGTH (4*PINLINEWIDTH)
 

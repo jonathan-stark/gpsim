@@ -23,7 +23,24 @@ Boston, MA 02111-1307, USA.  */
 #define __GUI_PROCESSOR_H__
 
 
-//
+// Forward references to all of the classes.
+
+class RAM_RegisterWindow;
+class EEPROM_RegisterWindow;
+class StatusBar_Window;
+class SourceBrowser_Window;
+class SourceBrowserParent_Window;
+class Symbol_Window;
+class Watch_Window;
+class Stack_Window;
+class Breadboard_Window;
+class Trace_Window;
+class Profile_Window;
+class StopWatch_Window;
+class Scope_Window;
+class Processor;
+
+
 //  The gui_processor structure ties the gui window(s)
 // to a pic that is being simulated.
 //
@@ -37,7 +54,7 @@ class GUI_Processor {
   EEPROM_RegisterWindow *regwin_eeprom;
   StatusBar_Window *status_bar;
   SourceBrowser_Window *program_memory;
-  SourceBrowser_Window *source_browser;
+  SourceBrowserParent_Window *source_browser;
   Symbol_Window *symbol_window;
   Watch_Window *watch_window;
   Stack_Window *stack_window;

@@ -215,7 +215,14 @@ main (int argc, char *argv[])
   
 #ifdef HAVE_GUI
   if(bUseGUI)
-    i = gui_init (argc,argv);
+  {
+    if (gui_init (argc,argv) != 0)
+    {
+	std::cerr << "Error initialising GUI, reverting to cmd-line mode."
+	    	  << std::endl;
+	bUseGUI = false;
+    }
+  }
 #endif
 
 

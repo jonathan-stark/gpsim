@@ -42,6 +42,18 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_callbacks.h"
+#include "gui_breadboard.h"
+#include "gui_processor.h"
+#include "gui_profile.h"
+#include "gui_register.h"
+#include "gui_regwin.h"
+#include "gui_scope.h"
+#include "gui_src.h"
+#include "gui_stack.h"
+#include "gui_stopwatch.h"
+#include "gui_symbols.h"
+#include "gui_trace.h"
+#include "gui_watch.h"
 
 #include "../cli/input.h"  // for gpsim_open()
 
