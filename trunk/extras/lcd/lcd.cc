@@ -376,6 +376,7 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   interface_id = gpsim_register_interface((gpointer)this);
 
   gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
+  gpsim_register_gui_update(interface_id, simulation_has_stopped);
 
 
   CreateGraphics();
