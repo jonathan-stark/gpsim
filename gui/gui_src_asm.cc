@@ -2455,8 +2455,6 @@ void SourceBrowserAsm_Window::Build(void)
   else
     strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
 
-  cout << " source font: " << sourcefont_string << endl;
-
   while(!load_fonts(this)) {
 
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
@@ -2544,7 +2542,6 @@ void SourceBrowserAsm_Window::Build(void)
   enabled=1;
 
   bIsBuilt = true;;
-  cout << name() << " is built" << endl;
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();

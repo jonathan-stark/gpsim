@@ -121,8 +121,10 @@ about_cb (gpointer             callback_data,
 
   show_message(  "The GNUPIC Simulator - " VERSION, "A simulator for Microchip PIC microcontrollers.\n"
 		 "by T. Scott Dattalo - mailto:scott@dattalo.com\n"
-		 "   Ralf Forsberg - mailto:rfg@home.se\n\n"
-		 "gpsim homepage: http://www.dattalo.com/gnupic/gpsim.html\n");
+		 "   Ralf Forsberg - mailto:rfg@home.se\n"
+		 "   Borut Razem - mailto:borut.razem@siol.net\n\n"
+		 "gpsim homepage: http://www.dattalo.com/gnupic/gpsim.html\n"
+		 "gpsimWin32: http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html\n");
 
 }
 
