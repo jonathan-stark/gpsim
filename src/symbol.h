@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
-int load_symbol_file(pic_processor **, char *);
+int load_symbol_file(pic_processor **, const char *);
 void display_symbol_file_error(int);
 
 #include "gpsim_interface.h"
@@ -70,7 +70,7 @@ public:
   void add_register(pic_processor *cpu, file_register *reg);
   void add_address(pic_processor *cpu, char *, int );
   void add_w(pic_processor *cpu, WREG *w );
-  void add_module(Module * m, char *module_name);
+  void add_module(Module * m, const char *module_name);
   void remove_module(Module * m, char *module_name);
   void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);

@@ -97,7 +97,7 @@ public:
   int cycles_to_us(int cycles);
   int us_to_cycles(int cycles);
   void refresh(void);
-  static ExternalModule *construct(char *new_name);
+  static ExternalModule *construct(const char *new_name);
 };
 
 #endif //  __VIDEO_H__

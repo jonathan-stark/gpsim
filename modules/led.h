@@ -144,7 +144,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("led_7segments"); };
-  static ExternalModule *construct(char *new_name);
+  static ExternalModule *construct(const char *new_name);
 
 
 };
@@ -177,7 +177,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("led"); };
-  static ExternalModule *construct(char *new_name);
+  static ExternalModule *construct(const char *new_name);
 
 
 };

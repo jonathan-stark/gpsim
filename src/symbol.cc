@@ -40,7 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol_orb.h"
 
 
-int open_cod_file(pic_processor **, char *);
+int open_cod_file(pic_processor **, const char *);
 
 //
 // ***NOTE*** Ideally, I would like to use a the std container 'map' 
@@ -189,7 +189,7 @@ void Symbol_Table::add_line_number(Processor *cpu, int address)
 
 }
 
-void Symbol_Table::add_module(Module * m, char *new_name)
+void Symbol_Table::add_module(Module * m, const char *new_name)
 {
 //  cout << "adding module symbol\n";
 
@@ -408,7 +408,7 @@ void Symbol_Table::dump_type(SYMBOL_TYPE symt)
 
 //--------------------------------------------
 
-int  load_symbol_file(pic_processor **cpu, char *filename)
+int  load_symbol_file(pic_processor **cpu, const char *filename)
 {
   cout << "Loading " << filename << '\n';
   return open_cod_file(cpu,  filename);

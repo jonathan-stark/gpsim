@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -298,7 +298,11 @@ void Trace_Window::Build(void)
 
 
   normal_style = gtk_style_new ();
-  char_width = gdk_string_width (normal_style->font,"9");
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
+#else
+  char_width = gdk_string_width(normal_style->font, "9");
+#endif
   column_width = 3 * char_width + 6;
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",

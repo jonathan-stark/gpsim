@@ -252,10 +252,10 @@ public:
   ~TraceLog(void);
 
   virtual void callback(void);
-  void enable_logging(char *new_filename=NULL, int format=TRACE_FILE_FORMAT_ASCII);
+  void enable_logging(const char *new_filename=NULL, int format=TRACE_FILE_FORMAT_ASCII);
   void disable_logging(void);
   void switch_cpus(pic_processor *new_cpu);
-  void open_logfile(char *new_fname, int format);
+  void open_logfile(const char *new_fname, int format);
   void close_logfile(void);
   void write_logfile(void);
   void status(void);

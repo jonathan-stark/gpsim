@@ -40,8 +40,6 @@ Boston, MA 02111-1307, USA.  */
 //#include <gtkextra/gtksheetentry.h>
 
 extern int gui_question(char *question, char *a, char *b);
-extern int config_set_string(char *module, char *entry, char *string);
-extern int config_get_string(char *module, char *entry, char **string);
 
 #include "gui.h"
 
@@ -207,8 +205,12 @@ popup_activated(GtkWidget *widget, gpointer data)
     //pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
     
     pm_size = popup_sbow->gp->cpu->program_memory_size();
+#if GTK_MAJOR_VERSION >= 2
+    char_width = gdk_string_width(gtk_style_get_font(popup_sbow->normal_style), "9");
+#else
     char_width = gdk_string_width (popup_sbow->normal_style->font,"9");
-    
+#endif
+
     switch(item->id)
     {
     case MENU_BREAK_READ:
@@ -601,9 +603,14 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->normal_style = gtk_style_new ();
     sbow->normal_style->fg[GTK_STATE_NORMAL] = text_fg;
     sbow->normal_style->base[GTK_STATE_NORMAL] = text_bg;
+#if GTK_MAJOR_VERSION >= 2
+    gtk_style_set_font(sbow->normal_style,
+      gdk_fontset_load(sbow->normalfont_string));
+#else
     gdk_font_unref (sbow->normal_style->font);
     sbow->normal_style->font =
 	gdk_fontset_load (sbow->normalfont_string);
+#endif
 
     text_bg.red   = 30000;
     text_bg.green = 30000;
@@ -612,9 +619,14 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->current_line_number_style = gtk_style_new ();
     sbow->current_line_number_style->fg[GTK_STATE_NORMAL] = text_fg;
     sbow->current_line_number_style->base[GTK_STATE_NORMAL] = text_bg;
+#if GTK_MAJOR_VERSION >= 2
+    gtk_style_set_font(sbow->current_line_number_style,
+      gdk_fontset_load(sbow->pcfont_string));
+#else
     gdk_font_unref (sbow->current_line_number_style->font);
     sbow->current_line_number_style->font =
 	gdk_fontset_load (sbow->pcfont_string);
+#endif
 
     gdk_color_parse("red", &text_bg);
     sbow->breakpoint_color=text_bg;
@@ -622,22 +634,34 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
     sbow->breakpoint_line_number_style = gtk_style_new ();
     sbow->breakpoint_line_number_style->fg[GTK_STATE_NORMAL] = text_fg;
     sbow->breakpoint_line_number_style->base[GTK_STATE_NORMAL] = text_bg;
+#if GTK_MAJOR_VERSION >= 2
+    gtk_style_set_font(sbow->breakpoint_line_number_style,
+      gdk_fontset_load(sbow->breakpointfont_string));
+#else
     gdk_font_unref (sbow->breakpoint_line_number_style->font);
     sbow->breakpoint_line_number_style->font =
 	gdk_fontset_load (sbow->breakpointfont_string);
-
+#endif
 
     gdk_color_parse("white",&sbow->normal_pm_bg_color);
     gdk_colormap_alloc_color(colormap, &sbow->normal_pm_bg_color,FALSE,TRUE);
     gdk_color_parse("light gray",&sbow->pm_has_changed_color);
     gdk_colormap_alloc_color(colormap, &sbow->pm_has_changed_color,FALSE,TRUE);
 
+#if GTK_MAJOR_VERSION >= 2
+    if (gtk_style_get_font(sbow->breakpoint_line_number_style) == NULL ||
+      gtk_style_get_font(sbow->current_line_number_style) == NULL ||
+      gtk_style_get_font(sbow->normal_style) == NULL)
+      return 0;
+#else
     if(sbow->breakpoint_line_number_style->font==NULL)
 	return 0;
     if(sbow->current_line_number_style->font==NULL)
 	return 0;
     if(sbow->normal_style->font==NULL)
 	return 0;
+#endif
+
     return 1;
 }
 
@@ -813,7 +837,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 }
 
 
-static unsigned long get_number_in_string(char *number_string)
+static unsigned long get_number_in_string(const char *number_string)
 {
   unsigned long retval = 0;
   char *bad_position;
@@ -849,7 +873,7 @@ static void
 parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *sbow)
 {
   GtkSheet *sheet;
-  gchar *text;
+  const gchar *text;
   int justification,n=0;
 
   GUI_Processor *gp;
@@ -907,7 +931,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 static void
 show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 {
- char *text;
+ const char *text;
  GtkSheet *sheet;
  GtkEntry *sheet_entry;
 
@@ -964,7 +988,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 static void
 show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 {
- char *text; 
+ const char *text; 
  GtkSheet *sheet;
  GtkWidget * sheet_entry;
   gint row, col;
@@ -1207,7 +1231,11 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   range.rowi=GTK_SHEET(sheet)->maxrow;
   range.coli=GTK_SHEET(sheet)->maxcol;
   gtk_sheet_range_set_background(GTK_SHEET(sheet), &range, &normal_pm_bg_color);
+#if GTK_MAJOR_VERSION >= 2
+  gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font_desc);
+#else
   gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font);
+#endif
 
 
   // Clearing and appending is faster than changing
@@ -1378,7 +1406,11 @@ void SourceBrowserOpcode_Window::Build(void)
   
   label=gtk_label_new("");
   style=gtk_style_new();
+#if GTK_MAJOR_VERSION >= 2
+  gtk_style_set_font(style, gtk_style_get_font(normal_style));
+#else
   style->font=normal_style->font;
+#endif
   gtk_widget_set_style(label,style);
   gtk_widget_size_request(label, &request);
   gtk_widget_set_usize(label, 160, request.height);
@@ -1387,7 +1419,11 @@ void SourceBrowserOpcode_Window::Build(void)
 
   entry=gtk_entry_new();
   style=gtk_style_new();
+#if GTK_MAJOR_VERSION >= 2
+  gtk_style_set_font(style, gtk_style_get_font(normal_style));
+#else
   style->font=normal_style->font;
+#endif
   gtk_widget_set_style(entry,style);
   gtk_widget_show(entry);
   gtk_box_pack_start(GTK_BOX(hbox), entry, TRUE, TRUE, 0);
@@ -1405,7 +1441,11 @@ void SourceBrowserOpcode_Window::Build(void)
 			   vbox,
 			   gtk_label_new("Opcodes"));
 
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gtk_style_get_font(normal_style), "9");
+#else
   char_width = gdk_string_width (normal_style->font,"9");
+#endif
   column_width = 5 * char_width + 6;
 
   for(i=0; i<GTK_SHEET(sheet)->maxcol; i++){

@@ -1147,7 +1147,7 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 //
 extern int readihex16 (pic_processor *cpu, FILE * file);
 
-void pic_processor::load_hex (char *hex_file)
+void pic_processor::load_hex (const char *hex_file)
 {
 
   FILE *inputfile = fopen_path (hex_file, "r");

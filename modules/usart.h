@@ -98,10 +98,10 @@ class USARTModule : public ExternalModule
   // Inheritances from the Module class
   virtual void set_attribute(char *attr, char *val);
 
-  USARTModule(char *new_name = NULL);
+  USARTModule(const char *new_name = NULL);
   ~USARTModule();
 
-  static ExternalModule *USART_construct(char *new_name=NULL);
+  static ExternalModule *USART_construct(const char *new_name=NULL);
 
 };
 #endif //  __USART_MODULE_H__

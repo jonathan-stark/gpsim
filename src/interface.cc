@@ -517,7 +517,7 @@ unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYP
     return 1;
 }
 //--------------------------------------------------------------------------
-unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename, int format)
+unsigned int gpsim_set_log_name(unsigned int processor_id, const char *filename, int format)
 {
     pic_processor *pic = get_pic_processor(processor_id);
     
@@ -1381,11 +1381,11 @@ ProcessorInterface::ProcessorInterface(Processor *new_cpu) : ModuleInterface(new
 //========================================================================
 //========================================================================
 
-extern void process_command_file(char * file_name);
+extern void process_command_file(const char * file_name);
 extern int open_cod_file(pic_processor **, char *);
 #include "../cli/command.h"
 
-int gpsim_open(unsigned int processor_id, char *file)
+int gpsim_open(unsigned int processor_id, const char *file)
 {
     char *str;
     pic_processor *pic = get_pic_processor(processor_id);

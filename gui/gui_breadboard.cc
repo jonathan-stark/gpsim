@@ -19,6 +19,7 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#define GTK_ENABLE_BROKEN
 #include <gui.h>
 
 #ifdef HAVE_GUI
@@ -1659,7 +1660,7 @@ static void b_cb(GtkWidget *w, gpointer user_data)
     *(int*)user_data=FALSE;
 }
 // used for reading a value from user when break on value is requested
-char *gui_get_string(char *prompt, char *initial_text)
+const char *gui_get_string(char *prompt, char *initial_text)
 {
     static GtkWidget *dialog=NULL;
     static GtkWidget *label;
@@ -1669,7 +1670,7 @@ char *gui_get_string(char *prompt, char *initial_text)
     GtkWidget *hbox;
     
 
-    char *string;
+    const char *string;
     
     retval=-1;
 
@@ -1745,7 +1746,7 @@ char *gui_get_string(char *prompt, char *initial_text)
 
 static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 {
-    char *node_name = gui_get_string("Node name","");
+    const char *node_name = gui_get_string("Node name","");
 
     if(node_name !=NULL)
 	new Stimulus_Node(node_name);
@@ -2024,7 +2025,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     return module_type;
 }
 
-static void text_dialog(char *filename)
+static void text_dialog(const char *filename)
 {
     static GtkWidget *dialog;
     GtkWidget *cancelbutton;
@@ -2103,7 +2104,7 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 
 static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 {
-    char *library_name;
+    const char *library_name;
 
     library_name = gui_get_string("Module library name (e.g. libgpsim_modules.so)","");
 
@@ -2117,7 +2118,7 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
 
     char *module_type;
-    char *module_name;
+    const char *module_name;
 
     module_type = select_module_dialog(bbw);
 
@@ -2220,7 +2221,7 @@ static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
 
 //////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////
-static char *file_selection_name;
+static const char *file_selection_name;
 static int fs_done;
 
 static void
@@ -2242,7 +2243,7 @@ file_selection_cancel (GtkWidget        *w,
     fs_done=1;
 }
 
-static char *gui_get_filename(char *filename)
+static const char *gui_get_filename(char *filename)
 {
     static GtkWidget *window = NULL;
 
@@ -2304,7 +2305,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     list <Module_Library *> :: iterator mi;
     list <Module *> :: iterator module_iterator;
     Module *m;
-    char *filename;
+    const char *filename;
 
     filename = gui_get_filename("netlist.stc");
     if(filename == NULL)
@@ -3632,7 +3633,6 @@ void Breadboard_Window::Build(void)
     }
 
 
-
   GtkWidget *tree_item;
   struct gui_node *gn;
 
@@ -3644,7 +3644,10 @@ void Breadboard_Window::Build(void)
   //		       "select",
   //		       (GtkSignalFunc) treeselect_node,
   //		       gn);
+#if GTK_MAJOR_VERSION < 2
+  /* borutr: gpsim crashes if this line is included */
   gtk_widget_show(tree_item);
+#endif
   gtk_tree_append(GTK_TREE(tree), tree_item);
   node_tree= gtk_tree_new();
   gtk_widget_show(node_tree);

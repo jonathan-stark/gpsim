@@ -104,7 +104,7 @@ public:
 
     // Inheritance from Module class
     const virtual char *type(void) { return ("paraface"); };
-    static ExternalModule *construct(char *new_name);
+    static ExternalModule *construct(const char *new_name);
 
 #ifdef linux
     int open_parallel_port(char *device="/dev/parport0");

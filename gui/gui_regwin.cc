@@ -51,8 +51,6 @@ Boston, MA 02111-1307, USA.  */
 #define TRACE_FILE_FORMAT_LXT 1
 
 extern int gui_question(char *question, char *a, char *b);
-extern int config_set_string(char *module, char *entry, char *string);
-extern int config_get_string(char *module, char *entry, char **string);
 
 static void update_ascii(Register_Window *rw, gint row);
 
@@ -186,7 +184,7 @@ int gui_get_value(char *prompt)
     if(retval==TRUE)
     {
 	char *end;
-	gchar *entry_text;
+	const gchar *entry_text;
 	entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
 	value = strtoul(entry_text,&end,0);
 	if(*entry_text!='\0' && *end=='\0')
@@ -288,7 +286,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 	// "Ok"
 
 	char *end;
-	gchar *entry_text;
+	const gchar *entry_text;
 
 	entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
 	value = strtoul(entry_text,&end,0);
@@ -320,7 +318,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 }
 
 
-static char *file_selection_name;
+static const char *file_selection_name;
 static int filemode;
 static int fs_done;
 
@@ -356,7 +354,7 @@ modepopup_activated(GtkWidget *widget, gpointer data)
 	filemode=TRACE_FILE_FORMAT_LXT;
 }
 
-static char *gui_get_log_settings(char **filename, int *mode)
+static char *gui_get_log_settings(const char **filename, int *mode)
 {
     static GtkWidget *window = NULL;
 
@@ -466,7 +464,7 @@ popup_activated(GtkWidget *widget, gpointer data)
   GtkSheetRange range;
   unsigned int address;
   int value, mask;
-  char *filename;
+  const char *filename;
   int mode;
 
   if(widget==NULL || data==NULL)
@@ -672,7 +670,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 // a string to an unsigned long integer. All of the hard work is done
 // in the library function strtoul (string to unsigned long).
 
-static unsigned long get_number_in_string(char *number_string)
+static unsigned long get_number_in_string(const char *number_string)
 {
   unsigned long retval = 0;
   char *bad_position;
@@ -708,7 +706,7 @@ static void
 set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 {
   GtkSheet *sheet;
-  gchar *text;
+  const gchar *text;
   int justification,n=0;
   //int crow, ccol;
 
@@ -841,7 +839,7 @@ void Register_Window::UpdateEntry(void)
 {
   gint row, col;
 
-  char *text; 
+  const char *text; 
   GtkWidget * sheet_entry;
 
   sheet_entry = gtk_sheet_get_entry(register_sheet);
@@ -888,7 +886,11 @@ static int load_styles(Register_Window *rw)
 {
     GdkColormap *colormap = gdk_colormap_get_system();
 
+#if GTK_MAJOR_VERSION >= 2
+    rw->normalfont = pango_font_description_from_string(rw->normalfont_string);
+#else
     rw->normalfont=gdk_fontset_load (rw->normalfont_string);
+#endif
     gdk_color_parse("light cyan", &rw->normal_bg_color);
     gdk_color_parse("black", &rw->normal_fg_color);
     gdk_color_parse("blue", &rw->item_has_changed_color);
@@ -1017,7 +1019,11 @@ static int settings_dialog(Register_Window *rw)
     range.coli=sheet->maxcol;
     gtk_sheet_range_set_font(sheet, &range, rw->normalfont);
 
+#if GTK_MAJOR_VERSION >= 2
+    char_width = gdk_string_width(gdk_font_from_description(rw->normalfont), "9");
+#else
     char_width = gdk_string_width (rw->normalfont,"9");
+#endif
     row_height = 3 * char_width + 6;
     column_width = 3 * char_width + 6;
     for(i=0; i<rw->register_sheet->maxcol; i++){
@@ -1044,8 +1050,14 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
   if(key->state & GDK_CONTROL_MASK || key->keyval==GDK_Control_L ||
      key->keyval==GDK_Control_R){
     if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
-            if(GTK_SHEET_IN_CLIP(sheet)) gtk_sheet_unclip_range(sheet);
-            gtk_sheet_clip_range(sheet, &sheet->range);
+#if GTK_MAJOR_VERSION >= 2
+      if (gtk_sheet_in_clip(sheet))
+        gtk_sheet_unclip_range(sheet);
+#else
+      if(GTK_SHEET_IN_CLIP(sheet))
+        gtk_sheet_unclip_range(sheet);
+#endif
+      gtk_sheet_clip_range(sheet, &sheet->range);
     }
     if(key->keyval=='x' || key->keyval == 'X')
             gtk_sheet_unclip_range(sheet);    
@@ -1119,7 +1131,7 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 static void
 show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
- char *text;
+ const char *text;
  GtkSheet *sheet;
  GtkEntry *sheet_entry;
 
@@ -1568,7 +1580,11 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   gtk_sheet_freeze(register_sheet);
     
   j=0;
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
+#else
   char_width = gdk_string_width (normalfont,"9");
+#endif
   row_height = 3 * char_width + 6;
   gtk_sheet_set_row_height (register_sheet, j, row_height);
   for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, type);reg_number++) {
@@ -1739,7 +1755,11 @@ void Register_Window::Build(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
   /**************************** load fonts *********************************/
+#if GTK_MAJOR_VERSION >= 2
+#define DEFAULT_NORMALFONT "Courier 12"
+#else
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
+#endif
   strcpy(normalfont_string,DEFAULT_NORMALFONT);
   if(config_get_string(name,"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
@@ -1767,7 +1787,11 @@ void Register_Window::Build(void)
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(register_sheet));
   
+#if GTK_MAJOR_VERSION >= 2
+  GTK_SHEET_CLIP_TEXT(register_sheet);
+#else
   GTK_SHEET_SET_FLAGS(register_sheet, GTK_SHEET_CLIP_TEXT);
+#endif
 
   gtk_widget_show(GTK_WIDGET(register_sheet));
 
@@ -1791,7 +1815,11 @@ void Register_Window::Build(void)
 
 //  gtk_widget_realize(window);
 
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
+#else
   char_width = gdk_string_width (normalfont,"9");
+#endif
   column_width = 3 * char_width + 6;
 
   for(i=0; i<register_sheet->maxcol; i++){

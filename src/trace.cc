@@ -836,7 +836,7 @@ void TraceLog::callback(void)
 
 }
 
-void TraceLog::open_logfile(char *new_fname, int format)
+void TraceLog::open_logfile(const char *new_fname, int format)
 {
 
     if(!new_fname)
@@ -939,7 +939,7 @@ void TraceLog::write_logfile(void)
 
 }
 
-void TraceLog::enable_logging(char *new_fname, int format)
+void TraceLog::enable_logging(const char *new_fname, int format)
 {
 
   if(logging)

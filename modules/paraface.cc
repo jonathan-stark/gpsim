@@ -322,7 +322,7 @@ void Paraface::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Paraface::construct(char *new_name=NULL)
+ExternalModule * Paraface::construct(const char *new_name=NULL)
 {
 
 //    cout << " Parport constructor\n";

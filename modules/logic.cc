@@ -356,7 +356,7 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * AND2Gate::construct(char *new_name)
+ExternalModule * AND2Gate::construct(const char *new_name)
 {
 
   //cout << " AND2Gate  construct\n";
@@ -426,7 +426,7 @@ OR2Gate::~OR2Gate(void)
 
 }
 
-ExternalModule * OR2Gate::construct(char *new_name)
+ExternalModule * OR2Gate::construct(const char *new_name)
 {
 
   //cout << " OR2Gate  construct\n";
@@ -467,7 +467,7 @@ void ORGate::update_state(void)
 
 //--------------------------------------------------------------
 // construct NOT
-ExternalModule * NOTGate::construct(char *new_name)
+ExternalModule * NOTGate::construct(const char *new_name)
 {
 
   //cout << " NOTGate  construct\n";
@@ -536,7 +536,7 @@ XOR2Gate::~XOR2Gate(void)
 
 }
 
-ExternalModule * XOR2Gate::construct(char *new_name)
+ExternalModule * XOR2Gate::construct(const char *new_name)
 {
 
   //cout << " XOR2Gate  construct\n";

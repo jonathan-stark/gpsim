@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 extern int parser_warnings;
 
 // instead of including the whole symbol.h file, just get what we need:
-int load_symbol_file(pic_processor **, char *);
+int load_symbol_file(pic_processor **, const char *);
 void display_symbol_file_error(int);
 
 cmd_load c_load;
@@ -69,7 +69,7 @@ cmd_load::cmd_load(void)
 //
 #define MAX_LINE_LENGTH 256  
 int parse_string(char *cmd_string);
-extern void process_command_file(char * file_name);
+extern void process_command_file(const char * file_name);
 
 void cmd_load::load(int bit_flag,char *filename)
 {

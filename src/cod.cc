@@ -272,7 +272,7 @@ FILE *open_a_file(char **filename)
 // file - unfortunately mpasm doesn't ... so gpsim has to assume
 // the list file isn't present
 
-int cod_open_lst(char *filename)
+int cod_open_lst(const char *filename)
 {
   char *pc;
   int i;
@@ -874,13 +874,14 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 // function will attempt to determine the cpu from the .cod file.
 //
 
-int open_cod_file(pic_processor **pcpu, char *filename)
+int open_cod_file(pic_processor **pcpu, const char *filename)
 {
   int buffer_size;
   int suspicions = 0; // count the number of legal but suspicious items in the .cod file
   char processor_name[16],*pc;
   int error_code= COD_SUCCESS;
-  char directory[256], *dir_path_end;
+  char directory[256];
+  const char *dir_path_end;
 
   cout << "processing cod file " << filename << '\n';
 

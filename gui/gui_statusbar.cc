@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -169,7 +169,7 @@ void StatusBar_Window::Update(void)
 
 static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    char *text;
+    const char *text;
     unsigned int value;
     unsigned int pic_id;
     char *bad_position;
@@ -190,7 +190,7 @@ static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
 static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-    char *text;
+    const char *text;
     unsigned int value;
     unsigned int pic_id;
     char *bad_position;
@@ -211,10 +211,10 @@ static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
 static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
-  char *text;
-  unsigned int value;
-  unsigned int pic_id;
-  char *bad_position;
+    const char *text;
+    unsigned int value;
+    unsigned int pic_id;
+    char *bad_position;
 
   if(!sbw || !sbw->gp || !sbw->gp->cpu)
     return;
@@ -260,9 +260,15 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
 
   le->value.i32 = 0;
 
-  gtk_widget_set_usize (le->entry,
+#if GTK_MAJOR_VERSION >= 2
+ gtk_widget_set_usize (le->entry,
+			string_width * gdk_string_width (gtk_style_get_font(le->entry->style), "9") + 6,
+			-1);
+#else
+ gtk_widget_set_usize (le->entry,
 			string_width * gdk_string_width (le->entry->style->font, "9") + 6,
 			-1);
+#endif
   gtk_box_pack_start (GTK_BOX (box), le->entry, FALSE, FALSE, 0);
   gtk_widget_show (le->entry);
 

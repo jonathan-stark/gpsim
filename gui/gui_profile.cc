@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include "../config.h"
 #ifdef HAVE_GUI
@@ -140,7 +140,7 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
     free(entry);
 }
 
-static unsigned int lookup_address_symbol(char *name)
+static unsigned int lookup_address_symbol(const char *name)
 {
     sym *s;
     gpsim_symbol_rewind((unsigned int)gp->pic_id);
@@ -154,15 +154,15 @@ static unsigned int lookup_address_symbol(char *name)
 }
 
 static void add_range(Profile_Window *pw,
-		      char *startaddress_text,
-		      char *endaddress_text)
+		      const char *startaddress_text,
+		      const char *endaddress_text)
 {
     guint64 gcycles;
     struct profile_range_entry *profile_range_entry;
     unsigned int startaddress;
     unsigned int endaddress;
     char count_string[100];
-    char *entry[PROFILE_COLUMNS]={startaddress_text,endaddress_text,count_string};
+    char *entry[PROFILE_COLUMNS]={(char *)startaddress_text,(char *)endaddress_text,count_string};
     int row;
     int i;
 
@@ -307,8 +307,8 @@ static void add_range_dialog(Profile_Window *pw)
     {
 	// Add range.
 
-	gchar *startentry_text;
-	gchar *endentry_text;
+	const gchar *startentry_text;
+	const gchar *endentry_text;
 
 	startentry_text = gtk_entry_get_text(GTK_ENTRY(startentry));
 	if(*startentry_text!='\0')
@@ -316,7 +316,7 @@ static void add_range_dialog(Profile_Window *pw)
 	    endentry_text = gtk_entry_get_text(GTK_ENTRY(endentry));
 	    if(*endentry_text!='\0')
 	    {
-                add_range(pw,startentry_text,endentry_text);
+                add_range(pw, startentry_text, endentry_text);
 	    }
 	}
     }
@@ -341,11 +341,16 @@ static void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-    char *file;
+    const char *file;
 
     file=gtk_file_selection_get_filename (fs);
-    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file, 0, 0,
+#if GTK_MAJOR_VERSION >= 2
+    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), (char *)file,
+                              GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
+#else
+    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), (char *)file, 0, 0,
 			      GTK_PLOT_LETTER);
+#endif
 
     gtk_widget_hide (GTK_WIDGET (fs));
 }
@@ -357,8 +362,13 @@ print_plot (Profile_Window *pw)
     char cmd[200];
 
     file=tempnam("/tmp","gpsimplot");
+#if GTK_MAJOR_VERSION >= 2
+    gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file,
+                              GTK_PLOT_PORTRAIT, 0, GTK_PLOT_LETTER);
+#else
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file, 0, 0,
 			      GTK_PLOT_LETTER);
+#endif
     sprintf(cmd,"lpr %s",file);
     system(cmd);
     remove(file);
@@ -801,9 +811,16 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
 			     0, 4.0, &color1,&color2);
+#if GTK_MAJOR_VERSION >= 2
+    gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
+				      GTK_PLOT_LINE_NONE,
+                                      GDK_CAP_BUTT, GDK_JOIN_MITER,
+				      5, &color2);
+#else
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
 				      GTK_PLOT_LINE_NONE,
 				      5, &color2);
+#endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
@@ -1102,9 +1119,16 @@ int plot_routine_histogram(Profile_Window *pw)
 			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
 			     0, 4.0, &color1,&color2);
+#if GTK_MAJOR_VERSION >= 2
+    gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
+				      GTK_PLOT_LINE_NONE,
+                                      GDK_CAP_BUTT, GDK_JOIN_MITER,
+				      5, &color2);
+#else
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
 				      GTK_PLOT_LINE_NONE,
 				      5, &color2);
+#endif
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
@@ -2331,7 +2355,11 @@ void Profile_Window::Build(void)
   gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
   normal_style = gtk_style_new ();
+#if GTK_MAJOR_VERSION >= 2
+  char_width = gdk_string_width(gtk_style_get_font(normal_style) ,"9");
+#else
   char_width = gdk_string_width (normal_style->font,"9");
+#endif
   column_width = 3 * char_width + 6;
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",

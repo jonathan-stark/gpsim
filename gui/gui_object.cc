@@ -67,6 +67,7 @@ int GUI_Object::Create(GUI_Processor *_gp)
 {
   printf("GUI_Object::Create  !!! \n");
 
+  return 0;
 }
 void GUI_Object::UpdateMenuItem(void)
 {
@@ -201,7 +202,7 @@ int GUI_Object::set_config(void)
 // Helper functions for setting and retrieving variables stored in
 // gpsim configuration file.
 
-int config_set_string(char *module, char *entry, char *string)
+int config_set_string(char *module, char *entry, const char *string)
 {
     int ret;
     DB_LIST list;
@@ -226,10 +227,10 @@ int config_set_string(char *module, char *entry, char *string)
 
     // We have the list
     
-    ret = eXdbmChangeVarString(dbid, list, entry, string);
+    ret = eXdbmChangeVarString(dbid, list, entry, (char *)string);
     if(ret == -1)
     {
-	ret = eXdbmCreateVarString(dbid, list, entry, NULL, string);
+	ret = eXdbmCreateVarString(dbid, list, entry, NULL, (char *)string);
 	if(ret==-1)
 	{
 	    puts("\n\n\n\ndidn't work");

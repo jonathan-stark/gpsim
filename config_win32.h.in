@@ -35,10 +35,6 @@
 /* Define if lex declares yytext as a char * by default, not a char[].  */
 #define YYTEXT_POINTER 1
 
-/* Define if you have the gui   */
-/* #undef HAVE_GUI */
-#define PACKAGE "gpsim"
-#define VERSION "0.20.15"
 /* #undef HAVE_LIBREADLINE */
 
 /* Define if you have the strdup function.  */
@@ -81,16 +77,15 @@
 #define PACKAGE "gpsim"
 
 /* Version number of package */
-#define VERSION "0.20.15"
+#define VERSION "0.21.1"
 
 /* manually added stuff */
 #ifndef __FUNCTION__
 #define __FUNCTION__  __FILE__
 #endif
-#ifndef __PRETTY_FUNCTION__
-#define __PRETTY_FUNCTION__ __FUNCTION__
-#endif
 
 #define snprintf  _snprintf
 #define strcasecmp  stricmp
+#define strncasecmp strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
+#define atoll _atoi64
