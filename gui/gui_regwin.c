@@ -1253,6 +1253,8 @@ BuildRegisterWindow(Register_Window *rw)
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), register_sheet);
   
+  GTK_SHEET_SET_FLAGS(register_sheet, GTK_SHEET_CLIP_TEXT);
+
   gtk_widget_show(register_sheet);
 
   gtk_widget_show(scrolled_window);

@@ -296,7 +296,7 @@ struct _SourceBrowserOpcode_Window {
     SourceBrowser_Window sbw;
 
     GtkWidget *clist;
-    int clist_rows;      // Number of rows in the clist
+//    int clist_rows;      // Number of rows in the clist
     int current_row;     // row number of clist that corresponds
                          // to the PC of the pic.
 
@@ -305,6 +305,13 @@ struct _SourceBrowserOpcode_Window {
 
     int processor;
     int program;
+    
+    GtkWidget *notebook;
+    GtkWidget *sheet;
+    GtkWidget *entry;
+    GtkWidget *label;
+
+    int *memory;
 };
 
 typedef struct _SourceBrowserOpcode_Window SourceBrowserOpcode_Window;

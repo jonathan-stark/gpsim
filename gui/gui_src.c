@@ -114,7 +114,7 @@ button_press(GtkWidget *widget,
       case WT_opcode_source_window:
 	  break_row =  GTK_CLIST (sbow->clist)->focus_row;
 
-	  if(!sbow->clist_rows)
+	  if(!sbow->processor)
 	      return TRUE;      // no code is in this window
 	  //sbow->sbw.gui_obj.gp->p->toggle_break_at_address(break_row);
 	   gpsim_toggle_break_at_address(sbow->sbw.gui_obj.gp->pic_id, break_row);
