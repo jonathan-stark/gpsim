@@ -364,6 +364,10 @@ void update_menu_item(struct _gui_object *_this)
 	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Profile");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
+    case WT_stopwatch_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Stopwatch");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
     default:
 	puts("update_menu_item(): unhandled case");
 	break;
@@ -412,6 +416,9 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	      break;
 	  case WT_profile_window:
 	      BuildProfileWindow((Profile_Window*)_this);
+	      break;
+	  case WT_stopwatch_window:
+	      BuildStopWatchWindow((StopWatch_Window*)_this);
 	      break;
 	  default:
 	      puts("SourceBrowser_change_view(): unhandled case");

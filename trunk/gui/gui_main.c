@@ -133,6 +133,7 @@ void gui_new_processor (unsigned int pic_id)
       StackWindow_new_processor(gp->stack_window,gp);
       TraceWindow_new_processor(gp->trace_window,gp);
       ProfileWindow_new_processor(gp->profile_window,gp);
+      StopWatchWindow_new_processor(gp->stopwatch_window,gp);
 
       init_link_to_gpsim(gp);
       //  redisplay_prompt();
@@ -507,6 +508,7 @@ int gui_init (int argc, char **argv)
   CreateStackWindow(gp);
   CreateTraceWindow(gp);
   CreateProfileWindow(gp);
+  CreateStopWatchWindow(gp);
 
 
   interface_id = gpsim_register_interface((gpointer) gp);
