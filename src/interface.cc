@@ -42,6 +42,9 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 #include "interface.h"
 
+gpointer create_interface(unsigned int processor_id, 
+			  void (*interface_callback)(gpointer), 
+			  gpointer interface_callback_data);
 
 extern pic_processor *active_cpu;
 
@@ -634,14 +637,31 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
 
   if(!pic)
     return 0;
-  if(pic->program_memory_size()<=address)
-      return 0;
-  if(pic->program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-    return 1;
 
-  return 0;
+  return pic->address_has_break(address);
 }
+//--------------------------------------------------------------------------
+unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
+					     unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
 
+    if(!pic)
+	return 0;
+
+    return pic->address_has_profile_start(address);
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
+					    unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0;
+
+    return pic->address_has_profile_stop(address);
+}
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_opcode(unsigned int processor_id, unsigned int address)
 {
@@ -997,6 +1017,83 @@ void gpsim_set_execute_break_at_address(unsigned int processor_id,
     pic->set_break_at_address(address);
 }
 //--------------------------------------------------------------------------
+void gpsim_set_notify_point_at_address(unsigned int processor_id,
+				       unsigned int address,
+				       void (*cb)(gpointer),
+				       gpointer data)
+{
+    BreakCallBack *callback;
+
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+
+    pic->set_notify_at_address(address, callback);
+}
+//--------------------------------------------------------------------------
+void gpsim_set_profile_start_at_address(unsigned int processor_id,
+					unsigned int address,
+					void (*cb)(gpointer),
+					gpointer data)
+{
+    BreakCallBack *callback;
+
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+
+    pic->set_profile_start_at_address(address, callback);
+}
+//--------------------------------------------------------------------------
+void gpsim_set_profile_stop_at_address(unsigned int processor_id,
+				       unsigned int address,
+				       void (*cb)(gpointer),
+				       gpointer data)
+{
+    BreakCallBack *callback;
+
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+
+    pic->set_profile_stop_at_address(address, callback);
+}
+//--------------------------------------------------------------------------
+void gpsim_clear_profile_start_at_address(unsigned int processor_id,
+					  unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    while(gpsim_address_has_profile_start(processor_id,address))
+	pic->clear_profile_start_at_address(address);
+}
+
+//--------------------------------------------------------------------------
+void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
+					 unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return;
+
+    while(gpsim_address_has_profile_stop(processor_id,address))
+	pic->clear_profile_stop_at_address(address);
+}
+
+//--------------------------------------------------------------------------
 void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 					unsigned int address)
 {
@@ -1005,7 +1102,7 @@ void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
     if(!pic)
 	return;
 
-    while(pic->program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+    while(gpsim_address_has_breakpoint(processor_id,address))
 	pic->clear_break_at_address(address);
 }
 //--------------------------------------------------------------------------

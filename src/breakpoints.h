@@ -71,6 +71,30 @@ public:
 
 };
 
+class Notify_Instruction : public Breakpoint_Instruction
+{
+    BreakCallBack *callback;
+public:
+    Notify_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    virtual INSTRUCTION_TYPES isa(void) {return NOTIFY_INSTRUCTION;};
+    virtual void execute(void);
+};
+
+class Profile_Start_Instruction : public Notify_Instruction
+{
+public:
+    Profile_Start_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    virtual INSTRUCTION_TYPES isa(void) {return PROFILE_START_INSTRUCTION;};
+};
+
+class Profile_Stop_Instruction : public Notify_Instruction
+{
+public:
+    Profile_Stop_Instruction(pic_processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb);
+    virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
+};
+
+
 class Breakpoints
 {
 public:
@@ -88,6 +112,9 @@ enum BREAKPOINT_TYPES
   BREAK_ON_WDT_TIMEOUT = 8<<24,
   BREAK_ON_STK_OVERFLOW  = 9<<24,
   BREAK_ON_STK_UNDERFLOW = 10<<24,
+  NOTIFY_ON_EXECUTION   = 11<<24,
+  PROFILE_START_NOTIFY_ON_EXECUTION = 12<<24,
+  PROFILE_STOP_NOTIFY_ON_EXECUTION = 13<<24,
   BREAK_MASK           = 0xff<<24
 };
 
@@ -114,6 +141,9 @@ struct BreakStatus
   Breakpoints(void);
   unsigned int set_breakpoint(BREAKPOINT_TYPES,pic_processor *,unsigned int, unsigned int,BreakCallBack *f = NULL);
   unsigned int set_execution_break(pic_processor *cpu, unsigned int address);
+  unsigned int set_notify_break(pic_processor *cpu, unsigned int address, BreakCallBack *cb);
+  unsigned int set_profile_start_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
+  unsigned int set_profile_stop_break(pic_processor *cpu, unsigned int address, BreakCallBack *f1 = NULL);
   unsigned int set_read_break(pic_processor *cpu, unsigned int register_number);
   unsigned int set_write_break(pic_processor *cpu, unsigned int register_number);
   unsigned int set_read_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
@@ -150,6 +180,7 @@ struct BreakStatus
   void clear_all(pic_processor *c);
   void clear_all_set_by_user(pic_processor *c);
   void initialize_breakpoints(unsigned int memory_size);
+  instruction *find_previous(pic_processor *cpu, unsigned int address, instruction *_this);
 
 };
 
