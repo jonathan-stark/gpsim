@@ -194,7 +194,7 @@ public:
 
 };
 
-class TMRL : public sfr_register, public BreakpointObject
+class TMRL : public sfr_register, public TriggerObject
 {
 public:
 
@@ -317,7 +317,7 @@ enum
 
 //---------------------------------------------------------
 // TMR2 - Timer
-class TMR2 : public sfr_register, public BreakpointObject
+class TMR2 : public sfr_register, public TriggerObject
 {
 public:
   /* Define the way in which the tmr2 callback function may be updated. */

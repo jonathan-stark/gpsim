@@ -58,7 +58,7 @@ extern void stimuli_attach(SymbolList_t *);
  *
  * Include file support stimuli. 
  *
- *       stimulus             BreakpointObject
+ *       stimulus             TriggerObject
  *       |  \                      /
  *       |   -----------------+----
  *       |                    |
@@ -177,7 +177,7 @@ public:
 
 };
 
-class source_stimulus : public stimulus, public BreakpointObject
+class source_stimulus : public stimulus, public TriggerObject
 {
 public:
 

@@ -40,6 +40,48 @@ extern void redisplay_prompt(void);  // in input.cc
 // Global declaration of THE breakpoint object
 Breakpoints bp;
 
+//------------------------------------------------------------------------
+// TriggerAction
+//
+TriggerAction::TriggerAction()
+{
+}
+
+bool TriggerAction::evaluate(void)
+{
+  action();
+  return true;
+}
+
+bool TriggerAction::getTriggerState(void)
+{
+  return false;
+}
+
+void TriggerAction::action(void)
+{
+  cout << "Hit a Breakpoint!\n";
+  bp.halt();
+}
+
+static TriggerAction DefaultTrigger;
+
+//------------------------------------------------------------------------
+// SimpleTriggerAction
+//
+// For most cases... A single trigger action coupled with a single trigger
+// object
+SimpleTriggerAction::SimpleTriggerAction(TriggerObject *_to)
+  : TriggerAction(), to(_to)
+{
+}
+
+void SimpleTriggerAction::action(void)
+{
+  TriggerAction::action();
+  if(to)
+    to->print();
+}
 
 //------------------------------------------------------------------------
 // find_free - search the array that holds the break points for a free slot
@@ -67,7 +109,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 					 Processor *cpu,
 					 unsigned int arg1, 
 					 unsigned arg2, 
-					 BreakpointObject *f1)
+					 TriggerObject *f1)
 {
   Register *fr;
 
@@ -132,7 +174,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 }
 
 
-unsigned int Breakpoints::set_breakpoint(BreakpointObject *bpo)
+unsigned int Breakpoints::set_breakpoint(TriggerObject *bpo)
 {
   int bpn = find_free();
 
@@ -160,7 +202,7 @@ unsigned int  Breakpoints::set_execution_break(Processor *cpu,
 
 unsigned int  Breakpoints::set_notify_break(Processor *cpu,
 					    unsigned int address, 
-					    BreakpointObject *f1 = 0)
+					    TriggerObject *f1 = 0)
 {
   trace_log.enable_logging();
 
@@ -172,7 +214,7 @@ unsigned int  Breakpoints::set_notify_break(Processor *cpu,
 
 unsigned int Breakpoints::set_profile_start_break(Processor *cpu,
 						  unsigned int address,
-						  BreakpointObject *f1)
+						  TriggerObject *f1)
 {
   Profile_Start_Instruction *psi = new Profile_Start_Instruction(cpu,address,0,f1);
 
@@ -182,7 +224,7 @@ unsigned int Breakpoints::set_profile_start_break(Processor *cpu,
 
 unsigned int  Breakpoints::set_profile_stop_break(Processor *cpu, 
 						  unsigned int address, 
-						  BreakpointObject *f1)
+						  TriggerObject *f1)
 {
   Profile_Stop_Instruction *psi = new Profile_Stop_Instruction(cpu,address,0,f1);
 
@@ -237,7 +279,7 @@ unsigned int  Breakpoints::set_write_value_break(Processor *cpu,
 
 unsigned int  Breakpoints::set_cycle_break(Processor *cpu,
 					   guint64 future_cycle,
-					   BreakpointObject *f1)
+					   TriggerObject *f1)
 {
 
   return(set_breakpoint (Breakpoints::BREAK_ON_CYCLE,
@@ -399,10 +441,9 @@ void Breakpoints::dump(void)
 	have_breakpoints = 1;
     }
 
-  //  if(verbose) {
   cout << "Internal Cycle counter break points" << endl;
-    cycles.dump_breakpoints();
-    // }
+  cycles.dump_breakpoints();
+  cout << endl;
 
   if(!have_breakpoints)
     cout << "No user breakpoints are set" << endl;
@@ -609,24 +650,22 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value))
-    {
-      cout << "Hit a breakpoint!\n";
+  if( (simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value)) {
+
+    if(action->evaluate()) {
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
       cout << message() << endl;
-      bp.halt();
     }
-  else
-    {
-      cout << "Ignoring a breakpoint\n";
-      replaced->execute();
-    }
+  } else {
+    replaced->execute();
+  }
 
 }
 
 Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, 
 					       unsigned int new_address,
 					       unsigned int bp)
+  : TriggerObject(0)
 {
   cpu = new_cpu;
   address = new_address;
@@ -635,8 +674,7 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
 
   replaced = cpu->pma->get(address);
 
-  // use the replaced instructions xref object
-  //xref = replaced->xref;
+  set_action(new SimpleTriggerAction(this));
 }
 
 //-------------------------------------------------------------------
@@ -693,7 +731,6 @@ bool Breakpoint_Instruction::set_break(void)
   if(address < cpu->program_memory_size()) {
 
     replaced = cpu->pma->get(address);
-    //xref = replaced->xref;
 
     cpu->pma->put(address, this);
 
@@ -735,7 +772,7 @@ void Notify_Instruction::execute(void)
 Notify_Instruction::Notify_Instruction(Processor *cpu, 
 				       unsigned int address, 
 				       unsigned int bp, 
-				       BreakpointObject *cb) : 
+				       TriggerObject *cb) : 
   Breakpoint_Instruction(cpu, address,bp)
 {
     callback=cb;
@@ -745,7 +782,7 @@ Notify_Instruction::Notify_Instruction(Processor *cpu,
 Profile_Start_Instruction::Profile_Start_Instruction(Processor *cpu, 
 						     unsigned int address, 
 						     unsigned int bp, 
-						     BreakpointObject *cb) : 
+						     TriggerObject *cb) : 
   Notify_Instruction(cpu, address, bp, cb)
 {
     
@@ -754,7 +791,7 @@ Profile_Start_Instruction::Profile_Start_Instruction(Processor *cpu,
 Profile_Stop_Instruction::Profile_Stop_Instruction(Processor *cpu, 
 						   unsigned int address, 
 						   unsigned int bp, 
-						   BreakpointObject *cb) : 
+						   TriggerObject *cb) : 
   Notify_Instruction(cpu, address, bp, cb)
 {
     
@@ -817,8 +854,8 @@ void RegisterAssertion::execute(void)
     if( (simulation_mode == RUNNING) && 
 	(simulation_start_cycle != cycles.value)) {
 
+      action->evaluate();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
-      bp.halt();
 
       return;
     }
@@ -841,6 +878,8 @@ void RegisterAssertion::print(void)
 }
 //------------------------------------------------------------------------------
 BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
+  : TriggerObject(0)
+
 {
 
   bpn = bp;
@@ -940,26 +979,28 @@ void BreakpointRegister_Value::print(void)
 //
 unsigned int Break_register_read::get(void)
 {
-  bp.halt();
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-		    | address);
+
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		      | address);
+
   return(replaced->get());
 
 }
 
 RegisterValue  Break_register_read::getRV(void)
 {
-  bp.halt();
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-		    | address);
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		      | address);
   return(replaced->getRV());
 }
 
 bool Break_register_read::get_bit(unsigned int bit_number)
 {
-  bp.halt();
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-		    | address);
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		      | address);
   return(replaced->get_bit(bit_number));
 }
 
@@ -972,25 +1013,25 @@ double Break_register_read::get_bit_voltage(unsigned int bit_number)
 
 void Break_register_write::put(unsigned int new_value)
 {
-  bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
   replaced->put(new_value);
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-		    | (replaced->address)  );
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		      | (replaced->address)  );
 }
 void Break_register_write::putRV(RegisterValue rv)
 {
-  bp.halt();
   replaced->putRV(rv);
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-		    | (replaced->address)  );
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		      | (replaced->address)  );
 }
 
 void Break_register_write::setbit(unsigned int bit_number, bool new_value)
 {
-  bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
   replaced->setbit(bit_number,new_value);
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-		    | (replaced->address)  );
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		      | (replaced->address)  );
 
 }
 
@@ -999,11 +1040,9 @@ unsigned int Break_register_read_value::get(void)
   unsigned int v = replaced->get();
 
   if( (v & break_mask) == break_value)
-    {
-      bp.halt();
-      //trace_log.buffer.register_read_value(replaced->address, break_value);
-    }
-
+    if(action->evaluate())
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+			| address);
   return v;
 }
 
@@ -1012,12 +1051,9 @@ RegisterValue  Break_register_read_value::getRV(void)
   RegisterValue v = replaced->getRV();
 
   if( (v.data & break_mask) == break_value)
-    {
+    if(action->evaluate())
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 			| address);
-      bp.halt();
-
-    }
   return(v);
 }
 
@@ -1027,7 +1063,9 @@ bool Break_register_read_value::get_bit(unsigned int bit_number)
   unsigned int mask = 1<<(bit_number & 7);
 
   if( (break_mask & mask) && (v & mask) == (break_value&mask))
-    bp.halt();
+    if(action->evaluate())
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+			| address);
 
   return replaced->get_bit(bit_number);
 }
@@ -1043,13 +1081,10 @@ void Break_register_write_value::put(unsigned int new_value)
 {
 
   if((new_value & break_mask) == break_value)
-    {
-      bp.halt();
+    if(action->evaluate())
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 			| address);
 
-      //trace_log.buffer.register_write_value(replaced->address, break_value);
-    }
   replaced->put(new_value);
 }
 
@@ -1057,11 +1092,9 @@ void Break_register_write_value::putRV(RegisterValue rv)
 {
   
   if((rv.data & break_mask) == break_value)
-    {
-      bp.halt();
+    if(action->evaluate())
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 			| (replaced->address)  );
-    }
 
   replaced->putRV(rv);
 }
@@ -1077,14 +1110,12 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
 	 | new_value)                   // set the new bit
 	& break_mask) == break_value)
     {
-      bp.halt();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-			| address);
-
-      //trace_log.buffer.register_write_value(replaced->address, break_value);
+      if(action->evaluate())
+	trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+			  | address);
     }
 
-	replaced->setbit(bit_number,new_value ? true  : false);
+  replaced->setbit(bit_number,new_value ? true  : false);
 
 }
 
@@ -1232,17 +1263,30 @@ void Log_Register_Write_value::putRV(RegisterValue new_rv)
 
 
 //------------------------------------------------------------------------
-void BreakpointObject::callback(void)
+TriggerObject::TriggerObject()
+{
+  set_action(&DefaultTrigger);
+}
+
+TriggerObject::TriggerObject(TriggerAction *ta)
+{
+  if(ta)
+    set_action(ta);
+  else
+    set_action(&DefaultTrigger);
+}
+
+void TriggerObject::callback(void)
 {
   cout << "generic callback\n";
 }
 
-void BreakpointObject::callback_print(void)
+void TriggerObject::callback_print(void)
 {
   cout << " has callback, ID =  " << CallBackID << '\n';
 }
 
-int BreakpointObject::find_free(void)
+int TriggerObject::find_free(void)
 {
   bpn = bp.find_free();
 
@@ -1259,13 +1303,13 @@ int BreakpointObject::find_free(void)
 
 }
 
-void BreakpointObject::print(void)
+void TriggerObject::print(void)
 {
   cout << "Generic breakpoint " << bpn << endl;
 }
 
 
-void BreakpointObject::clear(void)
+void TriggerObject::clear(void)
 {
   cout << "clear Generic breakpoint " << bpn << endl;
 }

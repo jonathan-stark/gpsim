@@ -122,7 +122,7 @@ class Interface {
 };
 
 
-class gpsimInterface : public BreakpointObject {
+class gpsimInterface : public TriggerObject {
  public:
 
   GSList *interfaces;

@@ -121,7 +121,7 @@ class _SSPSTAT : public sfr_register
 };
 
 
-class _SSPBUF : public sfr_register, public BreakpointObject
+class _SSPBUF : public sfr_register, public TriggerObject
 {
  public:
   unsigned int sspsr;

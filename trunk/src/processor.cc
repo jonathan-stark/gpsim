@@ -866,7 +866,7 @@ void ProgramMemoryAccess::set_break_at_address(unsigned int address)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_notify_at_address(unsigned int address, BreakpointObject *cb)
+void ProgramMemoryAccess::set_notify_at_address(unsigned int address, TriggerObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_notify_break(cpu, address, cb);
@@ -875,7 +875,7 @@ void ProgramMemoryAccess::set_notify_at_address(unsigned int address, Breakpoint
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
-						       BreakpointObject *cb)
+						       TriggerObject *cb)
 {
   unsigned int pm_index = cpu->map_pm_address2index(address);
 
@@ -886,7 +886,7 @@ void ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
-						      BreakpointObject *cb)
+						      TriggerObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_profile_stop_break(cpu, address, cb);

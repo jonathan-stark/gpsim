@@ -412,7 +412,7 @@ inline Trace &get_trace(void)
 //-----------------------------------------------------------
 #define TRACE_FILE_FORMAT_ASCII 0
 #define TRACE_FILE_FORMAT_LXT 1
-class TraceLog : public BreakpointObject
+class TraceLog : public TriggerObject
 {
 public:
   bool logging;
@@ -451,7 +451,7 @@ public:
 extern TraceLog trace_log;
 
 //-----------------------------------------------------------
-class ProfileKeeper : public BreakpointObject
+class ProfileKeeper : public TriggerObject
 {
 public:
   bool enabled;
@@ -518,7 +518,7 @@ extern ProfileKeeper profile_keeper;
  * 
  */
 
-class BoolEventBuffer : public BreakpointObject
+class BoolEventBuffer : public TriggerObject
 {
 public:
 

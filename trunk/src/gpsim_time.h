@@ -46,7 +46,7 @@ public:
                                    // when the cycle break is hit. If a peripheral set
                                    // a cycle break, then there is no corresponding 
                                    // system break.)
-  BreakpointObject *f;
+  TriggerObject *f;
 };
 
 class Cycle_Counter
@@ -170,15 +170,15 @@ public:
   guint64 get(double future_time_from_now);
 
   bool set_break(guint64 future_cycle,
-		 BreakpointObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
+		 TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
   bool set_break_delta(guint64 future_cycle,
-		 BreakpointObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
-  bool reassign_break(guint64 old_cycle,guint64 future_cycle, BreakpointObject *f=0);
+		 TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
+  bool reassign_break(guint64 old_cycle,guint64 future_cycle, TriggerObject *f=0);
   void clear_current_break(void);
   void dump_breakpoints(void);
 
   void clear_break(guint64 at_cycle);
-  void clear_break(BreakpointObject *f);
+  void clear_break(TriggerObject *f);
   void set_cycles_per_second(guint64 cps);
 };
 

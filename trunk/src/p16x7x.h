@@ -89,7 +89,7 @@ enum PCFG_bits
 // ADCON0
 //
 
-class ADCON0 : public sfr_register, public BreakpointObject
+class ADCON0 : public sfr_register, public TriggerObject
 {
 public:
   IOPORT *analog_port;

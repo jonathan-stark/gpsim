@@ -49,7 +49,7 @@ public:
 
 };
 
-class InputPort : public Paraface_Port, public BreakpointObject
+class InputPort : public Paraface_Port, public TriggerObject
 {
 public:
     unsigned int direction;

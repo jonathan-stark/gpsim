@@ -1,3 +1,16 @@
+2004-09-08 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-registers.h, src/14bit-tmrs.h, src/breakpoints.cc,
+	src/breakpoints.h, src/eeprom.h, src/gpsim_interface.h,
+	src/gpsim_time.cc, src/gpsim_time.h, src/i2c-ee.h,
+	src/p16x7x.h, src/pic-processor.cc, src/processor.cc,
+	src/processor.h, src/ssp.h, src/stimuli.cc,
+	src/stimuli.h, src/tmr0.h, src/trace.h, src/uart.h
+	gui/gui_profile.cc, modules/encoder.h, modules/paraface.h
+	modules/usart.cc:
+	Started adding Triggers and Actions.
+	* regression/run_regression.sh: Added the digital_stim 
+	regression test to the list of tests to run.
+
 2004-09-07 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/stimuli.h, cmd_x.cc, cmd_stimulus.cc:
 	Digital asynchronous stimuli were not getting the proper voltage
