@@ -1208,18 +1208,15 @@ unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int addr
 }
 
 //--------------------------------------------------------------------------
-char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, char *buffer)
+char *gpsim_get_opcode_name(Processor *cpu, unsigned int address, char *buffer)
 {
-  pic_processor *pic = get_pic_processor(processor_id);
+  if(!cpu)
+    return NULL;
 
-  if(!pic)
-  {
-      return NULL;
-  }
-  if(pic->program_memory_size()<=address)
+  if(cpu->program_memory_size()<=address)
       return NULL;
 
-  return pic->program_memory[address]->name(buffer);
+  return cpu->program_memory[address]->name(buffer);
 
 }
 
