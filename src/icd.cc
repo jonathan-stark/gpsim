@@ -205,7 +205,7 @@ static int icd_write(const char *s)
 {
     if(icd_fd<0) return -1;
 
-    cout << "Command: "<<s<<endl;
+//    cout << "Command: "<<s<<endl;
 
     write(icd_fd,s,  strlen(s));   /* Error checking ... */
 }
@@ -491,9 +491,6 @@ int icd_connect(char *port)
 
     icd_reset();
 
-    pic->pc->get_value(); // FIXME
-    gi.simulation_has_stopped();
-
     return 1;
 }
 
@@ -523,9 +520,15 @@ int icd_reset(void)
 {
     if(icd_fd<0) return 0;
 
+    pic_processor *pic=get_processor(1);
+
     cout << "Reset" << endl;
     icd_cmd("$$700A\r");
     icd_cmd("$$701B\r");
+
+    pic->pc->get_value(); // FIXME
+    gi.simulation_has_stopped();
+
 
     return 1;
 }
@@ -658,6 +661,15 @@ int icd_set_break(int address)
     if(icd_fd<0) return 0;
 
     cout << "Set breakpoint on address " << address << endl;
+
+    icd_cmd("$$1F00\r");
+
+    if(icd_cmd("$$%04X\r",address)!=address)
+    {
+	puts("DEBUG: Set breakpoint failed?");
+        return 0;
+    }
+
     return 1;
 }
 
@@ -666,6 +678,9 @@ int icd_clear_break(void)
     if(icd_fd<0) return 0;
 
     cout << "Clear breakpoints" << endl;
+
+    icd_cmd("$$1F00\r");
+
     return 1;
 }
 

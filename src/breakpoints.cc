@@ -28,6 +28,8 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "xref.h"
 
+#include "icd.h"
+
 extern "C"{
 #include "lxt_write.h"
 }
@@ -48,6 +50,19 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
   Breakpoint_Instruction *abp;
 
   bool found =0;
+
+  if(use_icd)
+  {
+      if(break_type==BREAK_ON_EXECUTION)
+      {
+	  clear_all(cpu);
+      }
+      else
+      {
+	  puts("Can only break on execution with ICD");
+          return MAX_BREAKPOINTS;
+      }
+  }
 
   // First, find a free break point
   i=0;
@@ -97,6 +112,11 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
 
 	  //cpu->program_memory[arg1] =
 	  //  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number);
+
+	  if(use_icd)
+	  {
+	      icd_set_break(arg1);
+	  }
 
 	  return(breakpoint_number);
 	}
@@ -586,6 +606,11 @@ void Breakpoints::clear(unsigned int b)
       switch (bs.type)
 	{
 	case BREAK_ON_EXECUTION:
+
+	    if(use_icd)
+	    {
+                icd_clear_break();
+	    }
 
 	  inst = bs.cpu->find_instruction(bs.arg1, instruction::BREAKPOINT_INSTRUCTION);
 	  abp= (Breakpoint_Instruction *) inst;
