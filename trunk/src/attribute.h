@@ -72,6 +72,8 @@ class IntAttribute : public Attribute
   virtual void set(double f);
   virtual void set(char *s);
   virtual void set(char *s, int i);
+  virtual double fGet(void) { return (double)value; }
+  virtual int    nGet(void) { return value; }
   virtual char *sGet(char *buffer, int buf_size);
 };
 
@@ -85,7 +87,11 @@ class FloatAttribute : public Attribute
   virtual void set(double f);
   virtual void set(char *s);
   virtual void set(char *s, int i);
+  virtual double fGet(void) { return value; }
+  virtual int    nGet(void) { return (int) value; }
   virtual char *sGet(char *buffer, int buf_size);
+  FloatAttribute(char *init_name, double _v) : Attribute(init_name), value(_v) { }
+  FloatAttribute(void) { }
 };
 
 class StringAttribute : public Attribute

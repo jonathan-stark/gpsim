@@ -161,7 +161,7 @@ void  Module::dump_attributes(int show_values)
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
-Attribute * Module::get_attribute(char *attribute_name)
+Attribute * Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
 {
 
   if(!attribute_name)
@@ -175,20 +175,12 @@ Attribute * Module::get_attribute(char *attribute_name)
 
     Attribute *locattr = *attribute_iterator;
 
-    if(attribute_name) {
-      if(strcmp(locattr->get_name(), attribute_name) == 0) {
-	cout << "Found attribute: " << locattr->get_name() << '\n';
-
-	return locattr;
-      }
-    } else {
-      char buf[50];
-
-      cout << locattr->get_name() << " = " << locattr->sGet(buf,50) << '\n';
-    }
+    if(strcmp(locattr->get_name(), attribute_name) == 0)
+      return locattr;
   }
 
-  cout << "Could not find attribute named " << attribute_name  << '\n';
+  if(bWarnIfNotFound)
+    cout << "Could not find attribute named " << attribute_name  << '\n';
 
   return 0;
 }
@@ -637,6 +629,8 @@ void module_set_attr(char *module_name,char *attr, char *val, int val2)
   cpu->set_attribute(attr,val,val2);
 
 }
+
+
 //--------------------------------------------------
 // module_set_attr
 // Set module attribute
@@ -653,24 +647,20 @@ void module_set_attr(char *module_name,char *attr, double val)
 
 }
 
+//--------------------------------------------------
+// module_update
+// calls the update method of the xref object. 
+// The purpose is (most probably) to tell the gui that
+// a module needs to be updated in some way (e.g. an 
+// attribute may've changed and the gui needs to reflect
+// this).
 
-void module_set_position(char *module_name, int x, int y)
+void module_update(char *module_name)
 {
 
   Module *cpu=module_check_cpu(module_name);
 
-  if(!cpu)
-    return;
-
-  // I (scott) removed the x and y member variables from the module class.
-  // These should either be module attributes or they should be handled
-  // with a gui wrapper. 
-
-  /*
-  cpu->x=x;
-  cpu->y=y;
-  */
-  cout << "module_set_position is broken at the moment\n";
-  if(cpu->xref)
+  if(cpu && cpu->xref)
     cpu->xref->_update();
+
 }

@@ -134,19 +134,20 @@ void cmd_module::module(cmd_options_str *cos,
 			list <string> *strs,
 			ExprList_t *eList)
 {
+  const int cMAX_PARAMETERS=2;
+  int nParameters=cMAX_PARAMETERS;
+  guint64 parameters[cMAX_PARAMETERS] = {0,0};
+
+  evaluate(eList, parameters, &nParameters);
+
+  list <string> :: iterator si;
+  string s1, s2;
+  int nStrings = 0;
+
   if (strs) {
+    nStrings = strs->size();
 
-    const int cMAX_PARAMETERS=2;
-    int nParameters=cMAX_PARAMETERS;
-    guint64 parameters[cMAX_PARAMETERS] = {0,0};
-
-    evaluate(eList, parameters, &nParameters);
-
-    list <string> :: iterator si;
     si = strs->begin();
-
-    string s1, s2;
-
     if(strs->size() >= 1) {
       s1 = *si;
     
@@ -156,23 +157,24 @@ void cmd_module::module(cmd_options_str *cos,
       }
     }
 
+  }
 
-    // Now choose the specific set of strings and numbers
-    
-    if(nParameters==0 && strs->size()==1)
-      module(cos, (char*)s1.c_str(), (char*)0);
-    else if(nParameters==0 && strs->size()==2)
-      module(cos, (char*)s1.c_str(), (char*)s2.c_str());
-    else if(nParameters==1 && strs->size()==1)
-      module(cos, (char*)s1.c_str(), parameters[0]);
-    else if(nParameters==2 && strs->size()==0)
-      module(cos, parameters[0], parameters[1]);
-    else if(nParameters==1 && strs->size()==2)
-      module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
-    else
-      cout << "module command error\n";
-  } else
+  // Now choose the specific command based on the input parameters
+  
+  if(nParameters==0 && nStrings==0)
     module(cos);
+  else if(nParameters==0 && nStrings==1)
+    module(cos, (char*)s1.c_str(), (char*)0);
+  else if(nParameters==0 && nStrings==2)
+    module(cos, (char*)s1.c_str(), (char*)s2.c_str());
+  else if(nParameters==1 && nStrings==1)
+    module(cos, (char*)s1.c_str(), parameters[0]);
+  else if(nParameters==2 && nStrings==0)
+    module(cos, parameters[0], parameters[1]);
+  else if(nParameters==1 && nStrings==2)
+    module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
+  else
+    cout << "module command error\n";
 
 }
 
@@ -329,7 +331,7 @@ void cmd_module::module(cmd_options_str *cos, char *op1, char *op2, int op3)
 
 }
 
-void cmd_module::module(cmd_options_str *cos, int op1, int op2)
+void cmd_module::module(cmd_options_str *cos, guint64 op1, guint64 op2)
 {
 
   switch(cos->co->value)
@@ -340,7 +342,10 @@ void cmd_module::module(cmd_options_str *cos, int op1, int op2)
 //      cout << "   x = " << op1 <<'\n';
 //      cout << "   y = " << op2 <<'\n';
 
-      module_set_position(cos->str,op1,op2);
+      module_set_attr(cos->str, "xpos", (double)op1);
+      module_set_attr(cos->str, "ypos", (double)op2);
+      module_update(cos->str);
+      // module_set_position(cos->str,op1,op2);
       break;
 
     default:

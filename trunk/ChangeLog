@@ -1,3 +1,7 @@
+2004-06-28 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_module.cc, src/modules.h, src/modules.cc, gui/gui_breadboard.cc:
+	Module positioning now works again.
+
 2004-06-27 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc: From Ralph, the breadboard was not
 	using module pixmaps.
@@ -22,6 +26,22 @@
 	* cli/input.cc: call functions to set WIN32 console to raw mode
 	* gui/gui.vcproj: added fd2raw.cpp and fd2raw.h to the project
 	* cli/cli.vcproj: added errors.cc and errors.h to the project
+
+2004-06-23 Scott Dattalo <scott@dattalo.com>
+	* cli/Makefile.am, cli/cmd_attach.cc, cli/cmd_attach.h, cli/cmd_bus.cc, cli/cmd_bus.h
+	* cli/cmd_clear.cc, cli/cmd_clear.h, cli/cmd_disasm.cc, cli/cmd_disasm.h, 
+	* cli/cmd_frequency.cc, cli/cmd_frequency.h, cli/cmd_node.cc, cli/cmd_node.h,
+	* cli/cmd_set.cc, cli/cmd_set.h, cli/cmd_step.cc, cli/cmd_step.h, 
+	* cli/cmd_stimulus.cc, cli/cmd_stimulus.h, cli/cmd_trace.cc, cli/cmd_trace.h,
+	* cli/cmd_x.cc, cli/command.cc, cli/command.h, cli/expr.cc, cli/expr.h, 
+	* cli/input.cc, cli/misc.h, cli/operator.cc, cli/operator.h, cli/parse.h, 
+	* cli/parse.yy, cli/scan.ll
+	* gpsim/main.cc, gui/gui_breadboard.cc, src/processor.cc,
+	* src/processor.h, src/stimuli.cc
+	Rewrote the command parser and added expression parsing.
+	* cli/errors.cc, cli/expr.cc, cli/operator.cc, cli/viewable.cc,
+	  cli/errors.h, cli/expr.h, cli/operator.h, cli/viewable.h: 
+	New files for expression parsing.
 
 2004-06-16 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, gui/gui_src_asm.cc, src/symbol.cc, src/symbol.h:

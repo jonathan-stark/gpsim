@@ -23,8 +23,7 @@ Boston, MA 02111-1307, USA.  */
 //
 // interface.cc provides a layer of code on top of the simulator 
 // portion of gpsim. It's purpose is to provide an abstract interface
-// that hides the details of the simulator. In addition, the interface
-// is written with 'C' callable functions. Currently only the gui
+// that hides the details of the simulator. Currently only the gui
 // interfaces to gpsim through this layer. However, since the simulator
 // 'engine' is built as a library, it's possible for other code to
 // interface through here as well.
@@ -255,6 +254,7 @@ void gpsimInterface::remove_object (gpointer xref)
 
 
 }
+
 void gpsimInterface::simulation_has_stopped (void)
 {
 

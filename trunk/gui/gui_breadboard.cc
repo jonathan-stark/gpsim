@@ -2636,7 +2636,7 @@ static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_m
 
 struct gui_module *create_gui_module(Breadboard_Window *bbw,
                                  enum module_type type,
-				 class Module *module,
+				 Module *module,
 				 GtkWidget *widget)
 {
     static int x=80;
@@ -2662,6 +2662,10 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->pins=0;
 
 
+    Attribute *xpos = new FloatAttribute("xpos",-1.0);
+    Attribute *ypos = new FloatAttribute("ypos",-1.0);
+    module->add_attribute(xpos);
+    module->add_attribute(ypos);
 
 
     // FIXME. Perhaps the bbw should use Package instead of Module?
@@ -2981,21 +2985,22 @@ void Breadboard_Window::Update(void)
 
     p = (struct gui_module*)iter->data;
 
-    /*
-    // Check if module has changed its position
-    if(p->module->x!=p->x || p->module->y!=p->y)
-      {
-	if(p->module->x>=0 && p->module->y>=0)
-	  {
-	    // printf(" to position %d %d",p->module->x, p->module->y);
+    Attribute *xpos = p->module->get_attribute("xpos", false);
+    Attribute *ypos = p->module->get_attribute("ypos", false);
 
-	    position_module(p, p->module->x, p->module->y);
-	    p->module->x = p->x;
-	    p->module->y = p->y;
+    // Check if module has changed its position
+    if(xpos && ypos && (p->x!=xpos->nGet() || p->y!=ypos->nGet()))
+      {
+	p->x = xpos->nGet();
+	p->y = ypos->nGet();
+	if(p->x>=0 && p->y>=0)
+	  {
+	    position_module(p, p->x, p->y);
 	    update_board_matrix(p->bbw);
+	    printf(" Moved module to position %d %d\n",p->x, p->y);
+
 	  }
       }
-    */
 
     // Check if pins have changed state
     pin_iter=p->pins;
