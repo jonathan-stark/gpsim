@@ -476,7 +476,7 @@ bool Breakpoints::dump1(unsigned int bp_num)
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
       cout << "reg write. " << ( (break_type == BREAK_ON_REG_WRITE_VALUE) ?  "Break" : "Log") 
 	   << " when 0x" << hex  
-	   <<  break_status[bp_num].arg2 
+	   <<  (break_status[bp_num].arg2 & 0xff)
 	   << " is written to register 0x" << break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;
@@ -494,7 +494,7 @@ bool Breakpoints::dump1(unsigned int bp_num)
     case BREAK_ON_REG_READ_VALUE:
       cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
       cout << "reg read. " << ( (break_type == BREAK_ON_REG_READ_VALUE) ?  "Break" : "Log") 
-	   << " when 0x" << hex <<  break_status[bp_num].arg2 << 
+	   << " when 0x" << hex <<  (break_status[bp_num].arg2 & 0xff) << 
 	" is read from register 0x" << break_status[bp_num].arg1 << '\n';
       set_by_user = 1;
       break;

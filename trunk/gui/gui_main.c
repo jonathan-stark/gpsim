@@ -44,7 +44,7 @@ Boston, MA 02111-1307, USA.  */
 
 #undef TRUE
 #undef FALSE
-#include "eXdbm/eXdbm.h"
+#include "../eXdbm/eXdbm.h"
 // #include <eXdbm.h>
 
 /*

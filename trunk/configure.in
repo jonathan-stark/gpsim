@@ -175,6 +175,7 @@ AC_OUTPUT( src/Makefile cli/Makefile Makefile \
 	gpsim/Makefile examples/Makefile \
 	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
+	examples/modules/Makefile examples/projects/Makefile
 	doc/Makefile \
 	rpm/Makefile )
 

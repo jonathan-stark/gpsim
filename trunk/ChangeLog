@@ -8,6 +8,7 @@ gpsim-0.21.0
 	* log command has been added (Command Line)
 	* Profiling has been added (gui)
 	* Trace viewer has been added
+	* Added parport - parallel port loadable module
 	* Source level debugging of C files
 	* Added 16c55,16c62,16c63,16c72,16c73 processors
 	* Added 18c442,18c452 processor
