@@ -82,9 +82,6 @@ public:
   void Update(int new_value)
   {
 
-    //guint64 cycle;
-    int trace_index;
-
 #define TRACE_STRING 100
 
     GtkCList *clist;

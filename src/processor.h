@@ -56,19 +56,19 @@ class ProgramMemoryAccess :  public BreakpointObject
 
   ProgramMemoryAccess(Processor *new_cpu=0);
 
-  instruction &operator [] (int address);
+  instruction &operator [] (unsigned int address);
 
-  void put(int addr, instruction *new_instruction);
-  instruction *get(int addr);
-  instruction *get_base_instruction(int addr);
-  unsigned int get_opcode(int addr);
-  char *get_opcode_name(int addrr, char *buffer, int size);
+  void put(unsigned int addr, instruction *new_instruction);
+  instruction *get(unsigned int addr);
+  instruction *get_base_instruction(unsigned int addr);
+  unsigned int get_opcode(unsigned int addr);
+  char *get_opcode_name(unsigned int addr, char *buffer, unsigned int size);
   virtual unsigned int get_PC(void);
 
-  void put_opcode(int addr, unsigned int new_opcode);
+  void put_opcode(unsigned int addr, unsigned int new_opcode);
   // When a pic is replacing one of it's own instructions, this routine
   // is called.
-  void put_opcode_start(int addr, unsigned int new_opcode);
+  void put_opcode_start(unsigned int addr, unsigned int new_opcode);
 
   // Assign a cross reference object to an instruction 
   void assign_xref(unsigned int address, gpointer cross_reference);
@@ -108,25 +108,33 @@ class ProgramMemoryAccess :  public BreakpointObject
   unsigned int get_file_id(unsigned int address);
 
   // A couple of functions for manipulating  breakpoints
-  virtual void set_break_at_address(int address);
-  virtual void set_notify_at_address(int address, BreakpointObject *cb);
-  virtual void set_profile_start_at_address(int address, BreakpointObject *cb);
-  virtual void set_profile_stop_at_address(int address, BreakpointObject *cb);
-  virtual int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
-  virtual int clear_notify_at_address(int address);
-  virtual int clear_profile_start_at_address(int address);
-  virtual int clear_profile_stop_at_address(int address);
-  virtual int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
-  virtual int address_has_notify(int address);
-  virtual int address_has_profile_start(int address);
-  virtual int address_has_profile_stop(int address);
-  virtual instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
-  virtual void toggle_break_at_address(int address);
-  virtual void set_break_at_line(int file_id, int src_line);
-  virtual void clear_break_at_line(int file_id, int src_line);
-  virtual void toggle_break_at_line(int file_id, int src_line);
+  virtual void set_break_at_address(unsigned int address);
+  virtual void set_notify_at_address(unsigned int address,
+				     BreakpointObject *cb);
+  virtual void set_profile_start_at_address(unsigned int address,
+					    BreakpointObject *cb);
+  virtual void set_profile_stop_at_address(unsigned int address,
+					   BreakpointObject *cb);
+  virtual int clear_break_at_address(unsigned int address,
+				     enum instruction::INSTRUCTION_TYPES type);
+  virtual int clear_notify_at_address(unsigned int address);
+  virtual int clear_profile_start_at_address(unsigned int address);
+  virtual int clear_profile_stop_at_address(unsigned int address);
+  virtual int address_has_break(unsigned int address,
+				enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
+  virtual int address_has_notify(unsigned int address);
+  virtual int address_has_profile_start(unsigned int address);
+  virtual int address_has_profile_stop(unsigned int address);
+  virtual instruction *find_instruction(unsigned int address,
+					enum instruction::INSTRUCTION_TYPES type);
+  virtual void toggle_break_at_address(unsigned int address);
+  virtual void set_break_at_line(unsigned int file_id, unsigned int src_line);
+  virtual void clear_break_at_line(unsigned int file_id, 
+				   unsigned int src_line);
+  virtual void toggle_break_at_line(unsigned int file_id, 
+				    unsigned int src_line);
 
-  void set_hll_mode(int);
+  void set_hll_mode(unsigned int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
   bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
 
@@ -174,16 +182,16 @@ class RegisterMemoryAccess
   
   RegisterMemoryAccess(void);
   virtual Register *get_register(unsigned int address);
-  int get_size(void) { return nRegisters; }
+  unsigned int get_size(void) { return nRegisters; }
   void set_cpu(Processor *p);
   void set_Registers(Register **_registers, int _nRegisters);
 
-  bool hasBreak(int address);
+  bool hasBreak(unsigned int address);
 
-  Register &operator [] (int address);
+  Register &operator [] (unsigned int address);
 
  private:
-  int nRegisters;
+  unsigned int nRegisters;
   bool initialized;
   Register **registers;       // Pointer to the array of registers.
                               // 
@@ -206,7 +214,7 @@ class FileContext
   FILE   *fptr;
   vector<int> *line_seek;
   vector<int> *pm_address;
-  int    _max_line;
+  unsigned int _max_line;
 
  public:
 
@@ -215,25 +223,25 @@ class FileContext
   ~FileContext(void);
 
   void ReadSource(void);
-  char *ReadLine(int line_number, char *buf, int nBytes);
-  char *gets(char *buf, int nBytes);
+  char *ReadLine(unsigned int line_number, char *buf, unsigned int nBytes);
+  char *gets(char *buf, unsigned int nBytes);
   void rewind(void);
   void open(const char *mode);
 
-  int get_address(int line);
-  void put_address(int line, int address);
+  int get_address(unsigned int line);
+  void put_address(unsigned int line, unsigned int address);
 
   string &name(void)
     {
       return name_str;
     }
 
-  void max_line(int new_max_line)
+  void max_line(unsigned int new_max_line)
     {
       _max_line = new_max_line;
     }
 
-  int max_line(void)
+  unsigned int max_line(void)
     {
       return _max_line;
     }
@@ -338,13 +346,15 @@ public:
   //
 
   virtual void init_program_memory(unsigned int memory_size);
-  virtual void init_program_memory(int address, int value);
+  virtual void init_program_memory(unsigned int address, unsigned int value);
   virtual unsigned int program_memory_size(void) const {return 0;};
-  void build_program_memory(int *memory,int minaddr, int maxaddr);
+  void build_program_memory(unsigned int *memory,
+			    unsigned int minaddr, 
+			    unsigned int maxaddr);
 
   virtual int  map_pm_address2index(int address) {return address;};
   virtual int  map_pm_index2address(int index) {return index;};
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   guint64 cycles_used(unsigned int address);
 
   //
@@ -352,7 +362,10 @@ public:
   //
   // First the source files:
 
-  void attach_src_line(int address,int file_id,int sline,int lst_line);
+  void attach_src_line(unsigned int address,
+		       unsigned int file_id,
+		       unsigned int sline,
+		       unsigned int lst_line);
   void read_src_files(void);
 
 
@@ -383,8 +396,12 @@ public:
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
 
-  virtual void disassemble (int start_address, int end_address);
-  virtual void list(int file_id, int pcval, int start_line, int end_line);
+  virtual void disassemble (unsigned int start_address, 
+			    unsigned int end_address);
+  virtual void list(unsigned int file_id, 
+		    unsigned int pcval, 
+		    unsigned int start_line, 
+		    unsigned int end_line);
 
   // Configuration control
 

@@ -271,11 +271,12 @@ void icd_hw_reset()
 
 static int icd_write(const char *s)
 {
-    if(icd_fd<0) return -1;
+  if(icd_fd<0)
+    return -1;
 
-//    cout << "Command: "<<s<<endl;
+  write(icd_fd,s,  strlen(s));   /* Error checking ... */
 
-    write(icd_fd,s,  strlen(s));   /* Error checking ... */
+  return 1;  
 }
 
 static int icd_read(unsigned char *p, int len)
@@ -481,7 +482,7 @@ static void create_dumb_register_file(void)
   if(!cpu)
     return;
 
-    for(int i=0;i<cpu->register_memory_size();i++)
+    for(unsigned int i=0;i<cpu->register_memory_size();i++)
     {
 	put_dumb_register(&cpu->registers[i], i);
     }
@@ -590,7 +591,7 @@ static void make_stale(void)
   if(!cpu)
     return;
 
-    for(int i=0;i<cpu->register_memory_size();i++)
+    for(unsigned int i=0;i<cpu->register_memory_size();i++)
     {
 	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
 	assert(ir!=0);
@@ -1011,7 +1012,7 @@ unsigned int icd_Register::get(void)
 			puts("DDDDDDDDDDDDDDDDDDD");
 		    icd_write("$$7D40\r");
 		    int n_read = icd_read(buf,0x40);
-		    for(int i=0;i<0x40;i++)
+		    for(unsigned int i=0;i<0x40;i++)
 		    {
 			switch(offset+i)
 			{

@@ -300,6 +300,7 @@ public:
   bool break_on_underflow;         /* Should under flow cause a break? */
 
   Stack(void);
+  virtual ~Stack() {}
   virtual void push(unsigned int);
   virtual unsigned int pop(void);
   virtual void reset(void) {pointer = 0;};  // %%% FIX ME %%% reset may need to change 

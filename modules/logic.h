@@ -109,7 +109,7 @@ public:
 
   int number_of_pins;
   int output_bit_mask;
-  int input_bit_mask;
+  unsigned int input_bit_mask;
 
   IOPORT  *port;
 

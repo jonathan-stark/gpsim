@@ -281,7 +281,6 @@ public:
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
-  virtual ~IO_bi_directional();
   virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);

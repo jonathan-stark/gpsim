@@ -34,7 +34,7 @@ struct cycle_histogram_counter{
     unsigned int stop_address; // Stop profile address
     guint64 histo_cycles; // The number of cycles that this counter counts.
 
-    int count; // The number of time 'cycles' cycles are used.
+    unsigned int count; // The number of time 'cycles' cycles are used.
 };
 
 class Profile_Window : public GUI_Object

@@ -137,7 +137,6 @@ main (int argc, char *argv[])
 {
 
   int i;
-  int j;
   int c,usage=0;
   char command_str[256];
   poptContext optCon;   /* context for parsing command-line options */

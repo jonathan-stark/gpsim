@@ -47,7 +47,6 @@ Boston, MA 02111-1307, USA.  */
 
 
 static FILE *codefile = 0;
-static FILE *lstfp = 0;
 //static char *directory_block_data = 0;
 static char *temp_block = 0;
 static char *lstfilename = 0;
@@ -443,9 +442,9 @@ void read_src_files_from_cod(Processor *cpu)
 void read_line_numbers_from_cod(Processor *cpu)
 {
   int lst_line_number = 0;
-  int last_src_line = 0;
   int j,start_block,end_block,offset;
-  int address,file_id, sline,smod;
+  int file_id, sline,smod;
+  unsigned int address;
 
   //  start_block = get_short_int(&directory_block_data[COD_DIR_LSTTAB]);
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB]);
@@ -875,7 +874,6 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
 
 int open_cod_file(Processor **pcpu, const char *filename)
 {
-  int suspicions = 0; // count the number of legal but suspicious items in the .cod file
   char processor_name[16];
   int error_code= COD_SUCCESS;
   char directory[256];

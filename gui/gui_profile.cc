@@ -174,7 +174,7 @@ static void add_range(Profile_Window *pw,
     char count_string[100];
     char *entry[PROFILE_COLUMNS]={(char *)startaddress_text,(char *)endaddress_text,count_string};
     int row;
-    int i;
+    unsigned int i;
 
     char *end;
     char msg[128];
@@ -479,7 +479,7 @@ plot_build_menu(Profile_Window *pw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
 
   if(pw==0)
@@ -516,7 +516,7 @@ exestats_build_menu(Profile_Window *pw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
 
   if(pw==0)
@@ -723,7 +723,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     sprintf(infostring,"\\BFile:\\N\"%s\" \\BDate:\\N%s \\BProcessor:\\N\"%s\"",
 	    filename,
             ctime(&t),
-	    pw->gp->cpu->name());
+	    pw->gp->cpu->name().c_str());
 
     // ctime adds a newline. Remove it.
     for(i=0;infostring[i];i++)
@@ -955,7 +955,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	numpoints++;
 	iter=iter->next;
     }
-//    numpoints=10;
+
     px2=(double*)malloc(numpoints*sizeof(double));
     py2=(double*)malloc(numpoints*sizeof(double));
 
@@ -964,23 +964,20 @@ int plot_routine_histogram(Profile_Window *pw)
     // Find values, and put them in the point arrays
     j=0;
     iter=pw->histogram_profile_list;
-    puts("");
+
     while(iter!=0)
-//    for(j=0;j<10;j++)
     {
 	struct cycle_histogram_counter *chc;
         chc=(struct cycle_histogram_counter*)iter->data;
 
-//	px2[j]=i;
-//	py2[j]=i*4;
-	px2[j]=chc->histo_cycles;
-	py2[j]=chc->count;
-	if(maxy<py2[j])
-	    maxy=py2[j];
-	if(maxx<px2[j])
-	    maxx=px2[j];
-	if(minx>px2[j])
-	    minx=px2[j];
+	px2[j]=(double)chc->histo_cycles;
+	py2[j]=(double)chc->count;
+	if(maxy<chc->count)
+	    maxy=chc->count;
+	if(maxx<chc->histo_cycles)
+	    maxx=chc->histo_cycles;
+	if(minx>chc->histo_cycles)
+	    minx=chc->histo_cycles;
 
 	totalcycles+=chc->histo_cycles*chc->count;
         totalcount+=chc->count;
@@ -988,7 +985,6 @@ int plot_routine_histogram(Profile_Window *pw)
         j++;
 	iter=iter->next;
     }
-    puts("");
 
     mincycles=minx;
     maxcycles=maxx;
@@ -1023,8 +1019,9 @@ int plot_routine_histogram(Profile_Window *pw)
         tickdelta_x=1;
 
 
-    maxy=maxy*1.1+1;
-    margin=((int)(maxx-minx))*.15+1;
+    maxy=maxy +(maxy>>3)+1;
+    margin = maxx-minx;
+    margin= margin + (margin>>3) + (margin>>5)+1;
     maxx=maxx+margin;
     if(minx>margin)
 	minx=minx-margin;
@@ -1044,9 +1041,6 @@ int plot_routine_histogram(Profile_Window *pw)
 
 	gtk_signal_connect_object(GTK_OBJECT(window1),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
-//	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
-//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-//				   GTK_OBJECT(window1));
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -1399,7 +1393,7 @@ static void update_menus(Profile_Window *pw)
 {
     GtkWidget *item;
     struct profile_entry *entry;
-    int i;
+    unsigned int i;
 
     for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
 	item=range_menu_items[i].item;
@@ -1473,13 +1467,13 @@ build_menu(Profile_Window *pw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
 
-  if(pw==0)
+  if(!pw)
   {
-      printf("Warning build_menu(%p)\n",pw);
-      return 0;
+    printf("Warning profile window is null\n");
+    return 0;
   }
     
   popup_pw = pw;
@@ -1681,28 +1675,28 @@ double calculate_median(GList *start, GList *stop)
 	}
     }
 
-    if(count_sum>chc_start->count)
+    if(count_sum>(int)chc_start->count)
     {
         start=start->next;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
 	return chc_start->histo_cycles;
     }
-    if(count_sum<-chc_start->count)
+    if(-count_sum>(int)chc_start->count)
     {
         start=start->prev;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
 	return chc_start->histo_cycles;
     }
-    if(-count_sum==chc_start->count)
+    if(-count_sum==(int)chc_start->count)
     {
         stop=stop->prev;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
 	g_list_free(sorted_list);
 	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
-    if(count_sum==chc_start->count)
+    if(count_sum==(int)chc_start->count)
     {
         stop=stop->next;
 	chc_stop=(struct cycle_histogram_counter*)stop->data;
@@ -1762,7 +1756,7 @@ float calculate_stddev(GList *start, GList *stop, float average)
 void Profile_Window::Update()
 {
 
-  int i;
+  unsigned int i;
 
   char count_string[100];
   GList *iter;
@@ -1772,8 +1766,7 @@ void Profile_Window::Update()
 
   if(!gp || !gp->cpu)
   {
-      puts("Warning gp or gp->pic_id == 0 in ProfileWindow_update");
-      return;
+    return;
   }
 
   // Update profile list
@@ -1795,7 +1788,6 @@ void Profile_Window::Update()
 	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_clist),entry);
 	  if(row==-1)
 	  {
-	      puts("\n\nwhooopsie\n");
 	      break;
 	  }
 
@@ -1830,7 +1822,6 @@ void Profile_Window::Update()
 	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_range_clist),range_entry);
 	  if(row==-1)
 	  {
-	      puts("\n\nwhooopsie\n");
 	      break;
 	  }
 
@@ -1864,7 +1855,6 @@ void Profile_Window::Update()
 	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_register_clist),register_entry);
 	  if(row==-1)
 	  {
-	      puts("\n\nwhooopsie\n");
 	      break;
 	  }
 
@@ -2156,7 +2146,7 @@ void Profile_Window::StopExe(int address)
 void Profile_Window::NewProgram(GUI_Processor *_gp)
 {
   int row;
-  int i;
+  unsigned int i;
 
   if(!_gp)
     return;

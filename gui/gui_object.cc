@@ -81,7 +81,7 @@ int GUI_Object::Create(GUI_Processor *_gp)
 char *GUI_Object::name(void)
 {
   static char p[128];
-  int len = string::npos;
+  unsigned int len = string::npos;
   if(len > (1+sizeof(p)))
     len = sizeof(p)-1;
   

@@ -68,10 +68,10 @@ class BreakPointList {
 
 // the prefix 'sa' doesn't make sense anymore, FIXME.
 struct sa_entry {      // entry in the sa_xlate_list
-  int index;           // gtktext index to start of line
-  int line;            // line number, first line eq. 0
-  int pixel;           // pixels from top of text
-  int font_center;     // from base line
+  unsigned int index;           // gtktext index to start of line
+  unsigned int line;            // line number, first line eq. 0
+  unsigned int pixel;           // pixels from top of text
+  unsigned int font_center;     // from base line
   GtkWidget *bpwidget; // breakpoint widget on this line.
   
 };
@@ -106,7 +106,7 @@ class SourcePage
   GtkAdjustment *source_layout_adj;
   GtkWidget *source_layout;
   GtkWidget *source_text;
-  int pageindex_to_fileid;
+  unsigned int pageindex_to_fileid;
   GtkWidget *source_pcwidget;
   GtkWidget *notebook;   // parent
   GtkWidget *notebook_child;
@@ -115,7 +115,7 @@ class SourcePage
     source_layout_adj = 0;
     source_layout = 0;
     source_text = 0;
-    pageindex_to_fileid = -1;
+    pageindex_to_fileid = INVALID_VALUE;
     source_pcwidget = 0;
     notebook_child = 0;
     notebook = 0;
@@ -200,7 +200,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 
   GtkWidget *clist;
 
-  int current_address;   // current PC
+  unsigned int current_address;   // current PC
 
   // Font strings
   char normalfont_string[256];
@@ -226,12 +226,12 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   GtkWidget *sheet_popup_menu;
   GtkWidget *clist_popup_menu;
 
-  int ascii_mode; // 0, 1 or 2 equals
+  unsigned int ascii_mode; // 0, 1 or 2 equals
   // one byte/cell,
   // two bytes/cell MSB first
   // two bytes/cell LSB first
     
-  int *memory;
+  unsigned int *memory;
 
   SourceBrowserOpcode_Window(GUI_Processor *gp);
   virtual void Build(void);

@@ -253,7 +253,7 @@ class Trace
   int is_cycle_trace(unsigned int index);
   guint64 find_cycle(int n, int in_index, int &instruction_index, 
 		     int &pc_index, int &cycle_index);
-  int find_previous_cycle(int index);
+  int find_previous_cycle(unsigned int index);
 };
 
 #ifdef IN_MODULE

@@ -1649,7 +1649,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   
   GUIRegister *greg = registers[reg_number];
 
-  if((int)reg_number >= greg->rma->get_size())
+  if(reg_number >= greg->rma->get_size())
     return 0;
 
   range.row0=registers[reg_number]->row;
@@ -1832,7 +1832,8 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
 
 #define NAME_SIZE 32
-  gint i,j,reg_number, border_mask, border_width;
+  gint i,j, border_mask, border_width;
+  unsigned int reg_number;
   CrossReferenceToGUI *cross_reference;
   gboolean row_created;
   GtkSheetRange range;

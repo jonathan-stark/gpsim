@@ -71,8 +71,6 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 {
   Register *fr;
 
-  bool found =0;
-
   breakpoint_number = find_free();
   if(breakpoint_number >= MAX_BREAKPOINTS)
     return breakpoint_number;
@@ -379,6 +377,8 @@ bool Breakpoints::dump1(unsigned int bp_num)
       cout << "wdt time out\n";
       set_by_user = 1;
       break;
+    default:
+      break;
 
     }
 
@@ -476,6 +476,9 @@ void Breakpoints::clear(unsigned int b)
       cout << "Cleared wdt timeout breakpoint number " << b << '\n';
       ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
 
+      break;
+
+    default:
       break;
 
     }

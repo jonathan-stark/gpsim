@@ -177,7 +177,7 @@ build_menu(void)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
   menu=gtk_menu_new();
 
@@ -266,7 +266,6 @@ static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 {
   const char *text;
   unsigned int value;
-  unsigned int pic_id;
   char *bad_position;
 
   if(!gp || !gp->cpu)

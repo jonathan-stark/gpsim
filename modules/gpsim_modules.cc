@@ -76,43 +76,43 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { "binary_indicator", "bi",   Binary_Indicator::construct },
+  { {"binary_indicator", "bi"},   Binary_Indicator::construct },
 
   //  { "resistor",         "res",  Resistor::construct }
-  { "pullup",           "pu",   PullupResistor::pu_construct },
-  { "pulldown",         "pd",   PullupResistor::pd_construct },
+  { {"pullup",           "pu"},   PullupResistor::pu_construct },
+  { {"pulldown",         "pd"},   PullupResistor::pd_construct },
 
   // USART
-  { "usart",            "usart", USARTModule::USART_construct},
+  { {"usart",            "usart"}, USARTModule::USART_construct},
 
 #ifdef HAVE_GUI
 #ifndef _WIN32
   // Parallel port interface
-  { "parallel_interface",         "paraface", Paraface::construct},
+  { {"parallel_interface",         "paraface"}, Paraface::construct},
 #endif
 
   // Switch
-  { "switch",         "sw", Switch::construct},
+  { {"switch",         "sw"}, Switch::construct},
 
   // Logic
-  { "and2", "and2", AND2Gate::construct},
-  { "or2",  "or2",  OR2Gate::construct},
-  { "xor2", "xor2", XOR2Gate::construct},
-  { "not",  "not",  NOTGate::construct},
+  { {"and2", "and2"}, AND2Gate::construct},
+  { {"or2",  "or2"},  OR2Gate::construct},
+  { {"xor2", "xor2"}, XOR2Gate::construct},
+  { {"not",  "not"},  NOTGate::construct},
 
   // Leds
-  { "led_7segments", "led7s", Led_7Segments::construct},
-  { "led", "led", Led::construct},
+  { {"led_7segments", "led7s"}, Led_7Segments::construct},
+  { {"led", "led"}, Led::construct},
 
   // Video
-  { "PAL_video", "video", Video::construct},
+  { {"PAL_video", "video"}, Video::construct},
 
   // Encoder
-  { "Encoder", "encoder", Encoder::construct},
+  { {"Encoder", "encoder"}, Encoder::construct},
 #endif
 
   // No more modules
-  { NULL,NULL,NULL}
+  { {0,0},0}
 };
 
 #ifdef __cplusplus
@@ -141,8 +141,8 @@ extern "C" {
 void mod_list(void)
 {
 
-  int number_of = sizeof(available_modules) / sizeof(Module_Types);
-  int i,j,l;
+  unsigned int number_of = sizeof(available_modules) / sizeof(Module_Types);
+  unsigned int i,j,l;
   size_t k,
 	  longest;
 
