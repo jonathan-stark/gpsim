@@ -129,7 +129,8 @@ static GtkStyle *normal_style;
 
 int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpoints);
 int plot_routine_histogram(Profile_Window *pw);
-
+float calculate_stddev(GList *start, GList *stop, float average);
+double calculate_median(GList *start, GList *stop);
 
 // Used only in popup menus
 Profile_Window *popup_pw;
@@ -767,6 +768,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM,0);
+	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
 	gtk_plot_axis_set_visible(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP, TRUE);
 	gtk_plot_grids_set_visible(GTK_PLOT(active_plot), TRUE, TRUE, TRUE, TRUE);
 	gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
@@ -788,7 +790,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
 				     GTK_PLOT_AXIS_LEFT,
-				     0,
+				     maxy<10000?0:GTK_PLOT_LABEL_EXP,
                                      0);
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, dx2, NULL, numpoints);
@@ -825,7 +827,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     }
 
     infotext=gtk_plot_put_text(GTK_PLOT(active_plot),
-			       PLOTXPOS,
+			       PLOTXPOS-0.05,
 			       PLOTYPOS-0.05,
 			       NULL,
 			       20,
@@ -868,9 +870,13 @@ int plot_routine_histogram(Profile_Window *pw)
     int i,j;
 
     guint64 i64, x, y;
+    guint64 mincycles, maxcycles, totalcycles, totalcount;
+    double averagecycles, mediancycles, stddevcycles;
 
     guint64 maxy=0;
     guint64 maxx=0;
+    guint64 minx=0xffffffffffffffffull;
+    guint64 margin;
 
     static double *px2;//[] = {.1, .2, .3, .4, .5, .6, .7, .8};
     static double *py2;//[] = {.012*1000, .067*1000, .24*1000, .5*1000, .65*1000, .5*1000, .24*1000, .067*1000};
@@ -886,16 +892,16 @@ int plot_routine_histogram(Profile_Window *pw)
     int numpoints;
     GList *iter;
 
-/*    if(gpsim_get_program_memory_size(((GUI_Object*)pw)->gp->pic_id)<=0)
+    if(gpsim_get_program_memory_size(((GUI_Object*)pw)->gp->pic_id)<=0)
 	return 0;
 
     if(pw->histogram_profile_list==NULL)
         return 0;
-  */
+
     if(has_old_graph)
     {
 	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext1);
-//	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext2);
+	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext2);
         free(px2);
         free(py2);
 	free(dx2);
@@ -922,6 +928,8 @@ int plot_routine_histogram(Profile_Window *pw)
     py2=malloc(numpoints*sizeof(double));
     dx2=malloc(numpoints*sizeof(double));
 
+    totalcycles=0;
+    totalcount=0;
     // Find values, and put them in the point arrays
     j=0;
     iter=pw->histogram_profile_list;
@@ -938,16 +946,29 @@ int plot_routine_histogram(Profile_Window *pw)
 	if(maxy<py2[j])
 	    maxy=py2[j];
 	if(maxx<px2[j])
-            maxx=px2[j];
+	    maxx=px2[j];
+	if(minx>px2[j])
+	    minx=px2[j];
+
+	totalcycles+=chc->cycles*chc->count;
+        totalcount+=chc->count;
 
         j++;
 	iter=iter->next;
     }
 
+    mincycles=minx;
+    maxcycles=maxx;
+    averagecycles=totalcycles/(float)totalcount;
+    mediancycles=calculate_median(pw->histogram_profile_list,NULL);
+    stddevcycles=calculate_stddev(pw->histogram_profile_list,NULL,averagecycles);
+
     barwidth=PLOTWIDTH/(numpoints);
 
     maxy=maxy*1.1;
-    maxx=maxx*1.1;
+    margin=(maxx-minx)*.15;
+    maxx=maxx+margin;
+    minx=minx-margin;
 
 
     // Compute tickdelta for easy reading.
@@ -963,7 +984,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	tickdelta_y=1;
 
     // Compute tickdelta for easy reading.
-    x=maxx;
+    x=maxx-minx;
     i64=1;
     while(x>=10L)
     {
@@ -1059,10 +1080,10 @@ int plot_routine_histogram(Profile_Window *pw)
     gtk_plot_axis_set_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM, "Cycles");
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
 				     GTK_PLOT_AXIS_BOTTOM,
-				     0,
+				     maxx<10000?0:GTK_PLOT_LABEL_EXP,
 				     0);
 
-    gtk_plot_set_range(GTK_PLOT(active_plot), 0., (gdouble)maxx, 0., (gdouble)maxy);
+    gtk_plot_set_range(GTK_PLOT(active_plot), minx, (gdouble)maxx, 0., (gdouble)maxy);
 
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, NULL, NULL, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
@@ -1108,7 +1129,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	if(infostring[i]=='\n')
 	    infostring[i]=' ';
     infotext1=gtk_plot_put_text(GTK_PLOT(active_plot),
-				PLOTXPOS,
+				PLOTXPOS-0.05,
 				PLOTYPOS-0.05,
 				NULL,
 				20,
@@ -1121,13 +1142,14 @@ int plot_routine_histogram(Profile_Window *pw)
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext1);
 
     // Infostring2
-/*    sprintf(infostring,"\\BMax:\\N\%d \\BMin:\\N%d \\BAverage:\\N%f \\BMedian:\\N%f",
-	    2,
-	    4,
-	    3.0,
-	    3.0);
+    sprintf(infostring,"\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.2f \\BStandard deviation:\\N%.2f",
+	    mincycles,
+	    maxcycles,
+	    averagecycles,
+	    mediancycles,
+	    stddevcycles);
     infotext2=gtk_plot_put_text(GTK_PLOT(active_plot),
-				PLOTXPOS,
+				PLOTXPOS-0.05,
 				PLOTYPOS-0.03,
 				NULL,
 				20,
@@ -1138,7 +1160,7 @@ int plot_routine_histogram(Profile_Window *pw)
 				GTK_JUSTIFY_LEFT,
 				infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext2);
-  */
+
     gtk_widget_queue_draw(window1);
 
     gtk_widget_show(window1);
@@ -1534,6 +1556,16 @@ double calculate_median(GList *start, GList *stop)
 //    GList *result;
     int count_sum=0;
 
+    if(start==NULL)
+	return -4.2;
+
+    if(stop==NULL)
+    {
+        stop=start;
+	while(stop->next!=NULL)
+	    stop=stop->next;
+    }
+
     chc_start=(struct cycle_histogram_counter*)start->data;
     chc_stop=(struct cycle_histogram_counter*)stop->data;
 
@@ -1600,7 +1632,12 @@ float calculate_stddev(GList *start, GList *stop, float average)
     if(start==stop)
 	return 0.0;
 
-    stop=stop->next;
+    if(stop==NULL)
+    {
+        stop=start;
+	while(stop->next!=NULL)
+	    stop=stop->next;
+    }
 
     while(start!=stop)
     {
