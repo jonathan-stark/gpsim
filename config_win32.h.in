@@ -11,6 +11,7 @@
    This function is required for alloca.c support on those systems.  */
 /* #undef CRAY_STACKSEG_END */
 
+#ifndef __CONFIG_H__
 /* Define if you have alloca, as a function or macro.  */
 #define HAVE_ALLOCA 1
 
@@ -98,6 +99,12 @@
 
 /* Version number of package */
 #undef VERSION
+#ifdef _MSC_VER
+#define PRINTF_INT64_MODIFIER "I64"
+#else
+#define PRINTF_INT64_MODIFIER "ll"
+#endif
+
 
 #ifdef _MSC_VER
 #ifndef __FUNCTION__
@@ -105,8 +112,30 @@
 #endif
 
 #define snprintf  _snprintf
+#ifndef strcasecmp
 #define strcasecmp  stricmp
+#endif
 #define strncasecmp strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
 #define strtoll _strtoi64
+
 #endif
+
+#if 0 // _WIN32
+// Microsoft Visual C DLL export and import macros
+// for classes exported from gpsim.exe.
+// Supported by GCC on Windows.
+// Each DLL will need its own versions with xxx_DLL_EXPORT
+// defined for the modules that contain the code.
+# if defined(GPSIM_DLL_EXPORT)
+# define GPSIM_EXT_CLASS __declspec( dllexport )
+// #pragma message ("dllexport")
+# else
+# define GPSIM_EXT_CLASS __declspec( dllimport )
+// #pragma message ("dllimport")
+# endif
+#else
+# define GPSIM_EXT_CLASS
+// #pragma message ("GPSIM_EXT_CLASS defined a nothing")
+#endif
+#endif // __CONFIG_H__

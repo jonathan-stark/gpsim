@@ -1202,9 +1202,12 @@ int plot_routine_histogram(Profile_Window *pw)
 				GTK_JUSTIFY_CENTER,
 				infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext1);
-
+    static char * pInfoStringFormat = 
+      "\\BMin:\\N\%" PRINTF_INT64_MODIFIER
+      "d \\BMax:\\N%" PRINTF_INT64_MODIFIER
+      "d \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f";
     // Infostring2
-    sprintf(infostring,"\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f",
+    sprintf(infostring,pInfoStringFormat, // "\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f",
 	    mincycles,
 	    maxcycles,
 	    averagecycles,
