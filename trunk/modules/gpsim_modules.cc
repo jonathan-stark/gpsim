@@ -142,7 +142,9 @@ void mod_list(void)
 {
 
   int number_of = sizeof(available_modules) / sizeof(Module_Types);
-  int i,j,k,l,longest;
+  int i,j,l;
+  size_t k,
+	  longest;
 
   for(i=0,longest=0; i<number_of; i++)
     {

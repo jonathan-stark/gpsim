@@ -575,9 +575,10 @@ public:
 
       if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
 
-	port->setbit(iobit,new_digital_state);
+	    bool bNewState = new_digital_state ? true : false;
+	port->setbit(iobit,bNewState);
 
-	digital_state = new_digital_state;
+	digital_state = bNewState;
 	// If this stimulus is attached to a node, then let the node be updated
 	// with the new state as well.
 	if(snode)
@@ -627,7 +628,7 @@ class TXREG : public BreakpointObject
   guint64 start_time;
   guint64 future_time;
 
-  unsigned int start_bit_time;
+  guint64 start_bit_time;
   unsigned int start_bit_index;
   bool last_bit;
   int bits_per_byte;
@@ -826,7 +827,7 @@ class RCREG : public BreakpointObject // : public _RCREG
   guint64 start_time;
   guint64 future_time;
 
-  unsigned int start_bit_time;
+  guint64 start_bit_time;
   unsigned int start_bit_index;
   bool last_bit;
   int bits_per_byte;
@@ -1288,7 +1289,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 
 
 	if(bit) {
-	  guint64 pw[64];  // pulse widths will get stored here.
+	  //guint64 pw[64];  // pulse widths will get stored here.
 	  cur_index = rx_event->get_index();
 	  guint32 edges = (cur_index - start_bit_index) & rx_event->max_events;
 
@@ -1698,7 +1699,7 @@ USART_CORE::USART_CORE(void)
 void USART_CORE::new_rx_edge(unsigned int bit)
 {
   if(rcreg)
-    rcreg->new_rx_edge(bit);
+	  rcreg->new_rx_edge(bit ? true : false);
 
 }
 
@@ -1716,8 +1717,7 @@ void USART_CORE::initialize(USART_IOPORT *new_iop)
 //--------------------------------------------------------------
 static int _tx_index=0;
 static char Test_Hello[] = {
-  0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L',
-  'O', 0x17, 0x55
+  0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
 };
 int USART_CORE::get_tx_byte(void)
 {

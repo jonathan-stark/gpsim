@@ -254,18 +254,18 @@ void INDF::initialize(void)
 
   switch(cpu_pic->base_isa()) {
 
-  _12BIT_PROCESSOR_:
+  case _12BIT_PROCESSOR_:
     fsr_mask = 0x1f;
     base_address_mask1 = 0x1f;
     base_address_mask2 = 0x0;
 
     break;
 
-  _14BIT_PROCESSOR_:
+  case _14BIT_PROCESSOR_:
     fsr_mask = 0x7f;
     break;
 
-  _16BIT_PROCESSOR_:
+  case _16BIT_PROCESSOR_:
     cout << "BUG: INDF::"<<__FUNCTION__<<". 16bit core uses a different class for indf.";
     break;
   }

@@ -497,7 +497,7 @@ void BZ::execute(void)
 CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
-  fast = new_opcode & 0x100;
+  fast = (new_opcode & 0x100) ? true : false;
   cpu = new_cpu;
   address = cpu16->current_disasm_address;
   initialized = false;
@@ -537,7 +537,7 @@ char *CALL16::name(char  *return_str,int len)
 //--------------------------------------------------
 void COMF16::execute(void)
 {
-  unsigned int new_value,src_value,w_value;
+  unsigned int new_value;
 
   trace.instruction(opcode);
 
@@ -1228,8 +1228,6 @@ MOVLB::MOVLB (Processor *new_cpu, unsigned int new_opcode)
 
 void MOVLB::execute(void)
 {
-  unsigned int source_value;
-
   trace.instruction(opcode);
 
   cpu16->bsr.put(L);
@@ -1482,26 +1480,7 @@ NEGW::NEGW (Processor *new_cpu, unsigned int new_opcode)
 
 void NEGW::execute(void)
 {
-  unsigned int new_value,src_value;
-
-//    trace.instruction(opcode);
-
-//    source = ((!access) ?
-//  	    cpu->registers[register_address] 
-//  	    :
-//  	    cpu->register_bank[register_address] );
-
-//    new_value = -(src_value = source->get());
-
-
-//    if(destination)
-//      source->put(new_value&0xff);      // Result goes to source
-//    else
-//      cpu->W->put(new_value&0xff);
-
-//    cpu->status->put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
-
-//    cpu->pc->increment();
+	cout << "negw is not implemented???";
 
 }
 
@@ -1990,8 +1969,6 @@ char *TBLRD::name(char *return_str,int len)
 
 void TBLRD::execute(void)
 {
-  unsigned int pm_opcode;
-
   trace.instruction(opcode);
 
   if((opcode & 3)==3)
@@ -2033,8 +2010,6 @@ char *TBLWT::name(char *return_str,int len)
 
 void TBLWT::execute(void)
 {
-  unsigned int pm_opcode;
-
   trace.instruction(opcode);
 
   if((opcode & 3)==3)

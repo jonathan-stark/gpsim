@@ -169,7 +169,7 @@ void Led_7Segments::update(  GtkWidget *widget,
 			     guint new_height)
 {
 
-    guint i,j;
+    guint i;
     static int last_segment_states=-1;
 
 
@@ -467,32 +467,13 @@ void Led_7Segments::build_segments( int w, int h)
 
 void Led_7Segments::build_window(void)
 {
-  GtkWidget *window;
   GtkWidget *main_vbox;
-//  GtkWidget *frame;
   GtkWidget *vbox;
-  GtkStyle  *style;
+  gint q='A';
 
 
-  gint i,j,q='A';
-  char buf[30];
-
-
-//  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-//  if(window) {
-
-
-//    gtk_widget_realize (window);
-
-//    gtk_window_set_title(GTK_WINDOW(window), name_str);
-
-//    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-//			GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
-      
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
-//    gtk_container_add (GTK_CONTAINER (window), main_vbox);
 
     vbox =
       gtk_widget_new (gtk_vbox_get_type (),
@@ -504,18 +485,6 @@ void Led_7Segments::build_window(void)
 		      NULL);
     gtk_widget_show(vbox);
 
-
-/*    frame =
-      gtk_widget_new (gtk_frame_get_type (),
-		      "GtkFrame::shadow", GTK_SHADOW_ETCHED_IN,
-		      "GtkFrame::label_xalign", 0.5,
-		      "GtkFrame::label", name_str,
-		      //"GtkContainer::border_width", 10,
-		      "GtkWidget::parent", vbox,
-		      "GtkWidget::visible", TRUE,
-		      NULL);
-
-    gtk_widget_show(frame); */
 
     darea = gtk_drawing_area_new ();
 
@@ -535,8 +504,6 @@ void Led_7Segments::build_window(void)
 			NULL);
 
     gtk_widget_show (darea);
-
-    //gtk_widget_show_all (window);
 
     set_widget(main_vbox);
 
@@ -711,7 +678,6 @@ void Led::update(  GtkWidget *widget,
 		   guint new_height)
 {
 
-    guint i,j;
     static int last_segment_states=-1;
 
 
@@ -781,10 +747,7 @@ led_expose_event (GtkWidget *widget,
 }
 void Led::build_window(void)
 {
-    GtkWidget *window;
     GtkWidget *main_vbox;
-//    GtkWidget *vbox;
-    GtkStyle  *style;
 
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);

@@ -65,17 +65,12 @@ extern Processor *active_cpu;
 //------------------------------------------------------------------
 Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
 {
-  register int i;
-
-  //cout << "searching for " << name << '\n';
-
   for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
     {
       Stimulus_Node *t = *node_iterator;
 
       if ( t->name() == name)
 	{
-	  //cout << "found it\n";
 	  return (t);
 	}
     }
@@ -163,9 +158,6 @@ void add_bus(Stimulus_Node * new_node)
 
 stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 {
-  register int i;
-
-
   for (stimulus_iterator = stimulus_list.begin();
        stimulus_iterator != stimulus_list.end(); 
        stimulus_iterator++)
@@ -174,7 +166,6 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 
       if ( t->name() == name)
 	{
-	  //cout << "found it\n";
 	  return (t);
 	}
     }
@@ -350,7 +341,7 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 }
 
 
-int Stimulus_Node::update(unsigned int current_time)
+int Stimulus_Node::update(guint64 current_time)
 {
 
   int node_voltage = 0;
@@ -537,7 +528,7 @@ int triangle_wave::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of the triangle wave.\n";
 
-  int t = (current_time+phase) % period;
+  guint64 t = (current_time+phase) % period;
 
   /*
   if( t <= duty)
@@ -580,16 +571,15 @@ void Event::callback(void)
   if(snode)
     snode->update(cycles.value);
 
-  //
   // If the event is inactive.
+
   if(current_state == 0) {
     cycles.set_break_delta(1,this);
-    //gpsim_set_break_delta(1,this);
     current_state = 1;
     state = drive;
   } else {
     current_state = 0;
-    -drive;
+    state = -drive;
   }
 
 }
@@ -913,7 +903,7 @@ void asynchronous_stimulus::put_data(guint64 data_point)
 void asynchronous_stimulus::put_data(float data_point)
 {
   ((StimulusDataType *)(current_sample->data))->value =
-    ((guint64)(MAX_ANALOG_DRIVE * data_point));
+    ((int)(MAX_ANALOG_DRIVE * data_point));
 
   data_flag ^= 1;
 
@@ -1142,7 +1132,7 @@ void IO_input::toggle(void)
 
   if(port) {
 
-    port->setbit(iobit, 1^port->get_bit(iobit));
+	port->setbit(iobit, port->get_bit(iobit) ? false : true);
     port->update();
     state = port->get_bit(iobit);
 
@@ -1285,6 +1275,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
 void IO_bi_directional::put_state( int new_digital_state)
 {
   //cout << "IO_bi_directional::put_state() new_state = " << new_digital_state <<'\n';
+  bool bNewState = new_digital_state ? true : false;
 
   // If the bi-directional pin is an output then driving is TRUE.
   if(driving) {
@@ -1295,10 +1286,10 @@ void IO_bi_directional::put_state( int new_digital_state)
       // If the new state to which the stimulus is being set is different than
       // the current state of the bit in the ioport (to which this stimulus is
       // mapped), then we need to update the ioport.
+		bool bOldState = (port->value.get() & (1<<iobit)) ? true : false;
+      if(bNewState != bOldState) {
 
-      if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
-
-	port->setbit(iobit,new_digital_state);
+	port->setbit(iobit,bNewState);
 
 	// If this stimulus is attached to a node, then let the node be updated
 	// with the new state as well.
@@ -1311,8 +1302,8 @@ void IO_bi_directional::put_state( int new_digital_state)
     } else {
 
       // a port-less pin, probably an external module
-
-      if((new_digital_state ^ digital_state) & 1) {
+		int temp_state = digital_state ? 1 : 0;
+      if((new_digital_state ^ temp_state) & 1) {
 
 	digital_state = new_digital_state & 1;
 

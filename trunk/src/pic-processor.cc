@@ -410,7 +410,7 @@ public:
   guint64 cycle_start;
   guint64 future_cycle;
   int warntimer;
-  int period;
+  guint64 period;
 
   RealTimeBreakPoint(void)
   {
@@ -737,7 +737,7 @@ void pic_processor::reset (RESET_TYPE r)
 
   cout << " --- Reset\n";
 
-  for(int i=0; i<register_memory_size(); i++)
+  for(unsigned int i=0; i<register_memory_size(); i++)
     registers[i]->reset(r);
 
 
@@ -919,7 +919,7 @@ void pic_processor::create_symbols (void)
   if(verbose)
     cout << __FUNCTION__ << " register memory size = " << register_memory_size() << '\n';
 
-  for(int i = 0; i<register_memory_size(); i++)
+  for(unsigned int i = 0; i<register_memory_size(); i++)
     {
       switch (registers[i]->isa()) {
       case Register::SFR_REGISTER:

@@ -123,7 +123,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   // Make all of the file registers 'undefined' (each processor derived from this base
   // class defines its own register mapping).
 
-  for (int i = 0; i < memory_size; i++)
+  for (unsigned int i = 0; i < memory_size; i++)
     registers[i] = 0;
 
 
@@ -143,7 +143,7 @@ void Processor::init_register_memory (unsigned int memory_size)
 
 void Processor::create_invalid_registers (void)
 {
-  int i;
+  unsigned int i;
 
   if(verbose)
     cout << "Creating invalid registers " << register_memory_size()<<"\n";
@@ -183,7 +183,7 @@ void Processor::create_invalid_registers (void)
 void Processor::add_file_registers(unsigned int start_address, unsigned int end_address, unsigned int alias_offset)
 {
 
-  int j;
+  unsigned int j;
 
   // Initialize the General Purpose Registers:
 
@@ -225,7 +225,7 @@ void Processor::delete_file_registers(unsigned int start_address, unsigned int e
   // can tell at what addresses a register is aliased.
 
 #define SMALLEST_ALIAS_DISTANCE  32
-  int i,j;
+  unsigned int i,j;
 
 
   for (j = start_address; j <= end_address; j++) {
@@ -258,7 +258,7 @@ void Processor::delete_file_registers(unsigned int start_address, unsigned int e
 void Processor::alias_file_registers(unsigned int start_address, unsigned int end_address, unsigned int alias_offset)
 {
 
-  int j;
+  unsigned int j;
 
   // FIXME -- it'd probably make better sense to keep a list of register addresses at
   // which a particular register appears.
@@ -319,7 +319,7 @@ void Processor::init_program_memory (unsigned int memory_size)
     }
 
 
-  for (int i = 0; i < memory_size; i++)
+  for (unsigned int i = 0; i < memory_size; i++)
     {
       program_memory[i] = &bad_instruction;
       program_memory[i]->set_cpu(this);
@@ -502,16 +502,16 @@ void Processor::read_src_files(void)
     }
   }
 
+  unsigned int addr;
+  for(addr = 0; addr<program_memory_size(); addr++) {
 
-  for(i = 0; i<program_memory_size(); i++) {
+    if( (program_memory[addr]->isa() != instruction::INVALID_INSTRUCTION)) {
 
-    if( (program_memory[i]->isa() != instruction::INVALID_INSTRUCTION)) {
-
-      FileContext *fc = (*files)[program_memory[i]->get_file_id()];
+      FileContext *fc = (*files)[program_memory[addr]->get_file_id()];
       
       if(fc)
-	fc->put_address(program_memory[i]->get_src_line(),
-			map_pm_index2address(i));
+	fc->put_address(program_memory[addr]->get_src_line(),
+			map_pm_index2address(addr));
 
     }
   }
@@ -1745,6 +1745,7 @@ int FileContext::get_address(int line_number)
 {
   if(line_number < max_line())
     return (*pm_address)[line_number];
+  return 0;
 }
 //----------------------------------------
 void FileContext::put_address(int line_number, int address)
@@ -1842,9 +1843,9 @@ char *Files::gets(int file_id, char *buf, int nBytes)
 {
   FileContext *fc = operator[](file_id);
   if(fc)
-
   return fc->gets(buf, nBytes);
 
+  return 0;
 }
 
 //----------------------------------------

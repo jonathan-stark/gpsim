@@ -95,7 +95,6 @@ const int NUM_OP_16CXX	= sizeof(op_16cxx) / sizeof(op_16cxx[0]);
 instruction * disasm14 (_14bit_processor *cpu, unsigned int inst)
 {
   instruction *pi;
-  char buf[50];
 
   pi = 0;
   for(int i =0; i<NUM_OP_16CXX; i++)

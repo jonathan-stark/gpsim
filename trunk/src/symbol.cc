@@ -347,8 +347,6 @@ void Symbol_Table::dump_all(void)
 
 void Symbol_Table::dump_type(SYMBOL_TYPE symt)
 {
-  int i;
-
   // Now loop through the whole table and display all instances of the type of interest
 
   int first=1;     // On the first encounter of one, display the title
@@ -477,6 +475,7 @@ int register_symbol::get_value(void)
 {
   if(reg)
     return reg->address;
+  return 0;
 }
 void register_symbol::put_value(int new_value)
 {

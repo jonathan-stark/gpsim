@@ -371,7 +371,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
   // Initialize the rom
 
   char str[100];
-  for (int i = 0; i < rom_size; i++)
+  for (unsigned int i = 0; i < rom_size; i++)
     {
 
       rom[i] = new Register;

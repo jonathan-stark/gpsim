@@ -47,7 +47,7 @@ void _SSPSTAT::put(unsigned int new_value)
 	value = new_value & (CKE|SMP); // these are the only writable bits and they are only availiable on SSP and MSSP, and not on BSSP
 	*/
 
-  if( ssptype == SSP_TYPE_BSSP && (diff & ~(CKE|SMP) != 0) )
+  if( (ssptype == SSP_TYPE_BSSP) && ((diff & ~(CKE|SMP)) != 0) )
 	cout << "Write to invalid bits in SSPSTAT!!" << endl;
 
 }
@@ -359,7 +359,9 @@ void _SSPBUF::clock( unsigned int new_value )
 	cout << "SSP: Sent bit = " << ((sspsr & (1<<7))>>7) << "." << endl;
   }
 
-  if( (bool)(sspcon->value.get() & _SSPCON::CKP) == (bool)new_value ) {
+  bool bNewValue = new_value ? true : false;
+  bool bSSPCONValue = (sspcon->value.get() & _SSPCON::CKP) ? true : false;
+  if(bSSPCONValue == bNewValue) {
 	bits_transfered++;
 	if( bits_transfered == 8 ) {
 	  if( (sspstat->value.get() & _SSPSTAT::SMP) && !(sspstat->value.get() & _SSPSTAT::CKE) ) {

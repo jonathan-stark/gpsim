@@ -146,7 +146,8 @@ instruction * disasm12 (pic_processor *cpu, unsigned int inst)
     case 0x0f:
       return(new XORLW(cpu,inst));
     }
-
+    // shouldn't get here
+	return 0;
 }
 
 /* ... The End ... */

@@ -105,7 +105,7 @@ public:
   ~Stimulus_Node();
 
   int get_voltage(void) { return state; }
-  int update(unsigned int current_time);
+  int update(guint64 current_time);
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
@@ -169,16 +169,15 @@ enum SOURCE_TYPE
   EVENT
 };
 
-  unsigned int 
-    period,
-    duty,
-    phase,
-    initial_state;
-
-
   guint64
     start_cycle,
-    time;
+    time,
+    period,
+    duty,
+    phase;
+  unsigned int
+    initial_state;
+
 
   source_stimulus(void) {
     period = 0;
@@ -196,11 +195,11 @@ enum SOURCE_TYPE
   virtual void callback(void);
   virtual void callback_print(void);
 
-  void put_period(unsigned new_period) { period = new_period; };
-  void put_duty(unsigned new_duty) { duty = new_duty; };
-  void put_phase(unsigned new_phase) { phase = new_phase; };
-  void put_initial_state(unsigned new_initial_state) { initial_state = new_initial_state; };
-  void put_start_cycle(unsigned new_start_cycle) { 
+  void put_period(guint64 new_period) { period = new_period; };
+  void put_duty(guint64 new_duty) { duty = new_duty; };
+  void put_phase(guint64 new_phase) { phase = new_phase; };
+  void put_initial_state(int new_initial_state) { initial_state = new_initial_state; };
+  void put_start_cycle(guint64 new_start_cycle) { 
     phase = start_cycle = new_start_cycle; };
   virtual void put_data(guint64 data_point) {};
   virtual void put_data(float data_point) {};

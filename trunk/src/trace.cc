@@ -224,7 +224,6 @@ int Trace::is_cycle_trace(unsigned int index)
 int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
   char a_string[50];
-  unsigned int i;
   Register *r;
 
   int return_value = is_cycle_trace(index);
@@ -509,7 +508,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
   instruction_index &= TRACE_BUFFER_MASK;
 
   // make sure the instruction index really does point to a traced instruction.
-  if(INSTRUCTION != trace_buffer[instruction_index] & 0xff000000)
+  if(INSTRUCTION != (trace_buffer[instruction_index] & 0xff000000))
     return -1;
 
   int i = (instruction_index + 1) & TRACE_BUFFER_MASK;
@@ -631,7 +630,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
 
   } while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK)));
 
-
+  return 0;
 }
 
 //------------------------------------------------------------------
@@ -651,8 +650,6 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
     found_instruction = 0,
     found_pc =0,
     found_cycle = 0;
-
-  Register *r;
 
   if(!cpu)
       return 0;
@@ -852,14 +849,14 @@ void TraceLog::callback(void)
 
   if((log_file||lxtp) && logging) {
     if(last_trace_index < get_trace().trace_index) { 
-      for (int c=last_trace_index; c<get_trace().trace_index; c++)
+      for (unsigned int c=last_trace_index; c<get_trace().trace_index; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
     } else {
-      for (int c=last_trace_index; c<=TRACE_BUFFER_MASK; c++)
+      for (unsigned int c=last_trace_index; c<=TRACE_BUFFER_MASK; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
-      for (int c=0; c<get_trace().trace_index; c++)
+      for (unsigned int c=0; c<get_trace().trace_index; c++)
         if ((get_trace().trace_buffer[c] & 0xff000000) == INSTRUCTION)
 	  n++;
     }
@@ -949,7 +946,7 @@ void TraceLog::close_logfile(void)
 void TraceLog::write_logfile(void)
 {
 
-  int i,j;
+  unsigned int i,j;
   char buf[256];
 
   if(log_file) {
@@ -1304,7 +1301,7 @@ inline bool BoolEventBuffer::event(bool state)
   // then we need to log this event. (Note that the event is implicitly
   // logged in the "index". I.e. 1 events are at odd indices.
 
-  if(state ^ (index & 1) ^ ~bInitialState)  {
+  if(state ^ (index & 1) ^ !bInitialState)  {
 
     if(index < max_events) {
       buffer[index++] = get_cycles().value - start_time;
@@ -1329,7 +1326,7 @@ inline bool BoolEventBuffer::event(bool state)
 unsigned int BoolEventBuffer::get_index(guint64 event_time) 
 {
   guint32 start_index, end_index, search_index, bstep;
-  guint32 time_offset;
+  guint64 time_offset;
 
   end_index = index;
   start_index = 0;
@@ -1437,7 +1434,7 @@ BoolEventBuffer::BoolEventBuffer(bool _initial_state, guint32 _max_events)
     
   max_events--;  // make the max_events a mask
 
-  buffer = new guint32[max_events];
+  buffer = new guint64[max_events];
 
   activate(_initial_state);
 }
