@@ -29,6 +29,7 @@ class Module;
 
 class Expression;
 class ComparisonOperator;
+class Packet;
 
 //------------------------------------------------------------------------
 //
@@ -65,6 +66,7 @@ public:
   virtual void set(bool);
   virtual void set(Value *);
   virtual void set(Expression *);
+  virtual void set(Packet &);
 
   /// Value 'get' methods provide a mechanism of casting Value objects
   /// to other value types. If the type cast is not supported in a
@@ -204,6 +206,7 @@ public:
   virtual void set(bool);
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
+  virtual void set(Packet &);
 
   bool getVal() { return value; }
 
@@ -242,6 +245,7 @@ public:
   virtual void set(double d);
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
+  virtual void set(Packet &);
 
   gint64 getVal() { return value; }
 
@@ -280,6 +284,7 @@ public:
   virtual void set(double d);
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
+  virtual void set(Packet &);
 
   double getVal() { return value; }
 
@@ -308,6 +313,8 @@ public:
 
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
+  virtual void set(Packet &);
+
   virtual void get(char *, int len);
 
   virtual Value *copy();

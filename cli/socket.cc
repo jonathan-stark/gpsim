@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 //#include "../src/processor.h"
 #include "../src/symbol.h"
+#include "../src/protocol.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -134,36 +135,6 @@ bool winsockets_init(void)
 #endif
 
 
-unsigned int a2i(char b)
-{
-
-  if( b>='0'  && b<='9')
-    return b-'0';
-
-  if( b>='A' && b<='F')
-    return b-'A'+10;
-
-  if( b>='a' && b<='f')
-    return b-'a'+10;
-
-  return 0;
-
-}
-
-
-unsigned int ascii2uint(char **buffer, int digits)
-{
-
-  unsigned int ret = 0;
-  char *b = *buffer;
-
-  for(int i=0; i<digits; i++)
-    ret = (ret << 4) + a2i(*b++);
-
-  *buffer = b;
-
-  return ret;
-}
 //
 
 /*
@@ -199,56 +170,6 @@ enum eGPSIMSocketCommands
   };
 
 
-#if 0
-    // Basic types
-
-    GPSIM_OBJTYP_CONTAINER = 1,
-    GPSIM_OBJTYP_STRING    = 2,
-    GPSIM_OBJTYP_INT32     = 3,
-    GPSIM_OBJTYP_COMMAND   = 4,
-
-    // commands:
-
-    GPSIM_CMD_BREAK              = 0x80, // Query # of breaks
-    GPSIM_CMD_BREAK_EXEC         = 0x81, // Set execution break
-    GPSIM_CMD_BREAK_REGWRITE     = 0x82, // Set reg write break
-    GPSIM_CMD_BREAK_REGREAD      = 0x83, // Set reg read break
-    GPSIM_CMD_BREAK_REGWRITE_VAL = 0x84, // Set reg write val break
-    GPSIM_CMD_BREAK_REGREAD_VAL  = 0x85, // Set reg read val break
-    GPSIM_CMD_BREAK_STKOV        = 0x86, // Set break on stack overflow
-    GPSIM_CMD_BREAK_STKUN        = 0x87, // Set break on stack underflow
-    GPSIM_CMD_BREAK_WDT          = 0x88, // Set break on Watch Dog timer
-
-    GPSIM_CMD_CLEAR       = 0x90,
-    GPSIM_CMD_EXAMINE_RAM = 0x91,
-    GPSIM_CMD_EXAMINE_ROM = 0x92,
-    GPSIM_CMD_STEPOVER   = 0x93,
-    GPSIM_CMD_RUN        = 0x94,
-    GPSIM_CMD_SET        = 0x95,
-    GPSIM_CMD_STEP       = 0x96,
-    GPSIM_CMD_SYMBOL     = 0x97, // Query the value of a symbol
-    GPSIM_CMD_VERSION    = 0x98,
-    GPSIM_CMD_ASSIGN_RAM = 0x99,
-
-    GPSIM_CMD_TEST_BINARY = 0xa0,
-#endif
-
-//--------------------
-int ParseInt(char **buffer, unsigned int &retInt)
-{
-
-  char *b = *buffer;
-
-  if(ascii2uint(&b,2) == GPSIM_OBJTYP_INT32) {
-    retInt = ascii2uint(&b,8);
-    *buffer = b;
-    return 2+8;
-  }
-
-  return 0;
-}
-
-
 //--------------------
 int ParseString(char **buffer, char *retStr, int maxLen)
 {
@@ -273,7 +194,7 @@ int ParseString(char **buffer, char *retStr, int maxLen)
 }
 
 //------------------------------------------------------------------------
-int ParseSocketLink(char **buffer, SocketLink **);
+bool ParseSocketLink(Packet *buffer, SocketLink **);
 
 //------------------------------------------------------------------------
 // Socket wrapper class
@@ -312,9 +233,8 @@ public:
   void Recv();
   void Send(char *);
 
-  void ParseObject(char *);
+  void ParseObject();
 
-  void receive();
   void respond(char *);
 
   bool bHaveClient()
@@ -323,8 +243,9 @@ public:
   }
 
 
-  //private:
-  char     buffer[BUFSIZE];
+
+  Packet     *packet;
+
   SocketBase *my_socket;
   SocketBase *client;
   struct   sockaddr_in addr;
@@ -337,10 +258,9 @@ class SocketLink
 {
 public:
   SocketLink(unsigned int _handle, Socket *);
-  void receive(char *);
   void send(char *);
 
-  virtual void set(char *s, int i=0)=0;
+  virtual void set(Packet &)=0;
   virtual void get(char *, int)=0;
   unsigned int getHandle() { return handle; }
 private:
@@ -353,7 +273,7 @@ class AttributeLink : public SocketLink
 public:
   AttributeLink(unsigned int _handle, Socket *, Value *);
 
-  void set(char *s, int i=0);
+  void set(Packet &);
   void get(char *, int);
 
 private:
@@ -364,7 +284,7 @@ private:
 
 SocketLink *links[nSOCKET_LINKS];
 
-SocketLink *gCreateSocketLink(unsigned int, Socket *, char**);
+SocketLink *gCreateSocketLink(unsigned int, Socket *, char*);
 
 unsigned int FindFreeHandle()
 {
@@ -397,28 +317,30 @@ void SocketBase::Close()
 }
 
 //========================================================================
-int ParseSocketLink(char **buffer, SocketLink **sl)
+//int ParseSocketLink(char **buffer, SocketLink **sl)
+bool ParseSocketLink(Packet *buffer, SocketLink **sl)
 {
   if(!sl)
     return 0;
 
-  char *b = *buffer;
-  int ret = 0;
+  std::cout << "ParseSocketLink:" << buffer->rxBuff() << endl;
 
   unsigned int handle;
 
-  ret += ParseInt(&b,handle);
-
-  if(ret) {
+  if(buffer->DecodeUInt32(handle)) {
     //unsigned int sequence = (handle>>16) & 0xffff;
     unsigned int index    = handle & 0xffff;
+
+    std::cout << "ParseSocketLink: handle " << handle << " buffer" << buffer->rxBuff() << endl;
 
     *sl = links[index&0x0f];
     if( (*sl) && (*sl)->getHandle() != handle)
       *sl = 0;
+
+    return true;
   }
 
-  return ret;
+  return false;
 
 }
 
@@ -438,6 +360,8 @@ Socket::Socket()
 {
   my_socket = 0;
   client = 0;
+
+  packet = new Packet(BUFSIZE,BUFSIZE);
 
   for(int i=0; i<nSOCKET_LINKS; i++)
     links[i] = 0;
@@ -528,6 +452,7 @@ void Socket::Accept()
 void Socket::Recv()
 {
 
+  char *buffer = packet->rxBuff();
   memset(buffer, 0, sizeof(buffer));
 
   if(!client)
@@ -561,30 +486,6 @@ void Socket::Send(char *b)
 }
 
 
-void Socket::receive(void)
-{
-  if (!bHaveClient()) {
-    init();
-    Accept();
-  }
-
-  Recv();
-
-  // Process the string that was just received.
-
-  if(strlen(buffer)) {
-    printf("received %s\n",buffer);
-
-    if (*buffer == '$')
-      ParseObject(&buffer[1]);
-    else {
-      parse_string(buffer);
-      respond("ACK");
-    }
-  }
-}
-
-
 void Socket::respond(char *buf)
 {
   if (bHaveClient() && buf)
@@ -603,16 +504,19 @@ void Socket::respond(char *buf)
 // This code will change. 
 //
 
-void Socket::ParseObject(char *buffer)
+void Socket::ParseObject()
 {
 
-  int buffer_len = strlen(buffer);
+  //int buffer_len = strlen(buffer);
+  //char *b = buffer;
+  //unsigned int ObjectType = ascii2uint(&b,2);
+  //buffer_len -= 2;
 
-  char *b = buffer;
-
-
-  unsigned int ObjectType = ascii2uint(&b,2);
-  buffer_len -= 2;
+  std::cout << "ParseObject " << packet->rxBuff() <<endl;
+  unsigned int ObjectType;
+  if(!packet->DecodeObjectType(ObjectType))
+    return;
+  std::cout << "ParseObject " << packet->rxBuff() <<endl;
 
   switch (ObjectType) {
 
@@ -620,7 +524,7 @@ void Socket::ParseObject(char *buffer)
     {
       unsigned int handle = FindFreeHandle();
 
-      links[handle&0x0f] = gCreateSocketLink(handle, this, &b);
+      links[handle&0x0f] = gCreateSocketLink(handle, this, packet->rxBuff());
     }
     break;
 
@@ -628,7 +532,8 @@ void Socket::ParseObject(char *buffer)
     {
       SocketLink *sl=0;
 
-      ParseSocketLink(&b, &sl);
+      //ParseSocketLink(&b, &sl);
+      ParseSocketLink(packet, &sl);
 
       if(sl)
 	CloseSocketLink(sl);
@@ -640,7 +545,10 @@ void Socket::ParseObject(char *buffer)
     {
       SocketLink *sl=0;
 
-      ParseSocketLink(&b, &sl);
+      //ParseSocketLink(&b, &sl);
+      ParseSocketLink(packet, &sl);
+
+      std::cout << "ParseObject - query socket " << packet->rxBuff() <<endl;
 
       if(sl) {
 	char buf[256];
@@ -655,12 +563,12 @@ void Socket::ParseObject(char *buffer)
     {
       SocketLink *sl=0;
 
-      int bl = ParseSocketLink(&b, &sl);
-      //buffer_len -= bl;
-      b += bl;
+      ParseSocketLink(packet, &sl);
 
       if(sl) {
-	sl->set(b);
+	//sl->set(packet->rxBuff());
+	std::cout << "writing to socket link:" << packet->rxBuff() << endl;
+	sl->set(*packet);
 	sl->send("+");
       }
 
@@ -670,15 +578,16 @@ void Socket::ParseObject(char *buffer)
   case GPSIM_CMD_QUERY_SYMBOL:
     {
       char tmp[256];
-      int bl = ParseString(&b,tmp,256);
+      bool bl = packet->DecodeString(tmp,256);
+
       if(bl) {
-	buffer_len -= bl;
-	printf("Symbol command with string %s\n",tmp);
+	//buffer_len -= bl;
+	printf("Symbol query %s\n",tmp);
 	Value *sym = get_symbol_table().find(tmp);
 	if(sym) {
 	  tmp[0]='+';
 	  sym->get(&tmp[1], sizeof(tmp));
-	  //snprintf(tmp,sizeof(tmp),"$03%08x",i);
+
 	  printf("responding with %s\n",tmp);
 	  respond(tmp);
 	} else
@@ -691,17 +600,18 @@ void Socket::ParseObject(char *buffer)
   case GPSIM_CMD_WRITE_TO_SYMBOL:
     {
       char tmp[256];
-      int bl = ParseString(&b,tmp,256);
+      bool bl = packet->DecodeString(tmp,256);
+
       if(bl) {
-	buffer_len -= bl;
+	//buffer_len -= bl;
 	printf("Symbol write command with string %s\n",tmp);
 	Value *sym = get_symbol_table().find(tmp);
 
 	if(sym) {
 
-	  sym->set(b);
+	  sym->set(packet->rxBuff());
 
-	  printf("writing %s to %s\n",b,tmp);
+	  printf("writing %s to %s\n",packet->rxBuff(),tmp);
 	  respond(tmp);
 	} else
 	  respond("-");
@@ -729,11 +639,12 @@ SocketLink::SocketLink(unsigned int _handle, Socket *s)
   sprintf(buf, "+%08X:LINK",handle);
   send(buf);
 }
-
+/*
 void SocketLink::receive(char *m)
 {
   std::cout<< "SocketLink::receive:" << m;
 }
+*/
 void SocketLink::send(char *m)
 {
   if(sock)
@@ -746,10 +657,10 @@ AttributeLink::AttributeLink(unsigned int _handle, Socket *s, Value *_v)
 {
 }
 
-void AttributeLink::set(char *b, int len)
+void AttributeLink::set(Packet &p)
 {
   if(v)
-    v->set(b,len);
+    v->set(p);
 }
 
 void AttributeLink::get(char *b, int len)
@@ -760,13 +671,13 @@ void AttributeLink::get(char *b, int len)
 
 //========================================================================
 
-SocketLink *gCreateSocketLink(unsigned int handle, Socket *s, char **type)
+SocketLink *gCreateSocketLink(unsigned int handle, Socket *s, char *type)
 {
-  if(type && *type) {
-    cout << "creating socket link of type:" << *type << endl;
+  if(type) {
+    cout << "creating socket link of type:" << type << endl;
 
     char tmp[256];
-    char *b = *type;
+    char *b = type;
 
     int bl = ParseString(&b,tmp,256);
 
@@ -878,7 +789,8 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   if(condition & G_IO_IN) {
     unsigned int bytes_read=0;
 
-    memset(s->buffer, 0, 256);
+    s->packet->prepare();
+    memset(s->packet->rxBuff(), 0, 256);
 
 #if GLIB_MAJOR_VERSION >= 2
 
@@ -899,7 +811,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
     } while(G_IO_STATUS_NORMAL == stat);
 #else
     //GIOStatus stat = g_io_channel_read_chars(channel, s->buffer, BUFSIZE, &bytes_read, &err);
-    g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+    g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
 #endif
 
     if(err) {
@@ -908,16 +820,16 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 
 
 #else
-    g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+    g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
 #endif
-    std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
+    std::cout << "Read " << bytes_read << " bytes: " << s->packet->rxBuff() << endl;
 
     if(bytes_read) {
-      if (*s->buffer == '$') {
-	s->buffer[bytes_read-1] = 0;
-	s->ParseObject(&s->buffer[1]);
+      if (s->packet->DecodeHeader()) {
+	//s->packet->rxBuff()[bytes_read-1] = 0;
+	s->ParseObject();
       } else {
-	parse_string(s->buffer);
+	parse_string(s->packet->rxBuff());
 	s->respond("ACK");
       }
     } else

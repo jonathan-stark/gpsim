@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol_orb.h"
 #include "expr.h"
 #include "errors.h"
+#include "protocol.h"
 
 int open_cod_file(Processor **, const char *);
 
@@ -456,6 +457,19 @@ void register_symbol::set(const char *buffer, int buf_size)
   }
 
 }
+
+void register_symbol::set(Packet &p)
+{
+  unsigned int i;
+  if(p.DecodeUInt32(i)) {
+
+    RegisterValue rv(i,0);
+
+    reg->putRV_notrace(rv);
+  }
+
+}
+
 symbol *register_symbol::copy()
 {
   return new register_symbol((char *)0,reg);
@@ -590,6 +604,11 @@ void attribute_symbol::set(Expression *e)
 {
   if(attribute)
     attribute->set(e);
+}
+void attribute_symbol::set(Packet &p)
+{
+  if(attribute)
+    attribute->set(p);
 }
 
 void attribute_symbol::get(int &i)
