@@ -73,21 +73,11 @@ static int pinspacing = PINLENGTH;
 
 #define STRING_SIZE 128
 
-#define ROUTE_RES (2*PINLINEWIDTH)
+#define ROUTE_RES (2*PINLINEWIDTH) // grid spacing
 
 static void treeselect_module(GtkItem *item, GuiModule *p);
 
-/*
-struct gui_module *create_gui_module(Breadboard_Window *bbw,
-                                 enum module_type type,
-				 Module *module,
-				 GtkWidget *widget);
-static void refresh_gui_module(struct gui_module *p);
-*/
-///////////////////////////////////////////////////////////////////////
-// Start of autorouting pain 
-///////////////////////////////////////////////////////////////////////
-#define XSIZE LAYOUTSIZE_X/ROUTE_RES 
+#define XSIZE LAYOUTSIZE_X/ROUTE_RES // grid size
 #define YSIZE LAYOUTSIZE_Y/ROUTE_RES
 
 
@@ -117,6 +107,8 @@ public:
 };
 //========================================================================
 
+/* Check the flags in board_matrix to see if we are allowed to 
+   route horizontally here */
 static inline int allow_horiz(point &p)
 {
   if(board_matrix[p.x][p.y] & HMASK)
@@ -124,6 +116,8 @@ static inline int allow_horiz(point &p)
   return TRUE;
 }
 
+/* Check the flags in board_matrix to see if we are allowed to 
+   route vertically here */
 static inline int allow_vert(point &p)
 {
   if(board_matrix[p.x][p.y] & VMASK)
@@ -132,7 +126,7 @@ static inline int allow_vert(point &p)
   return TRUE;
 }
 
-// Find the birds direction of choice to get to from s to e.
+// Find the direction to go to get from s to e if there are no obstacles.
 static inline route_direction calculate_route_direction(point s, point e)
 {
     if(abs(s.x-e.x) > abs(s.y-e.y))
@@ -147,6 +141,7 @@ static inline route_direction calculate_route_direction(point s, point e)
     return R_DOWN;
 }
 
+// Return right/left/up/down if the endpoint is straight ahead in that dir.
 static inline route_direction calculate_route_direction_exact(point s, point e)
 {
     if(s.x!=e.x && s.y!=e.y)
@@ -169,6 +164,8 @@ static void inline prepend_point_to_path(path **pat, point p)
     path *new_point;
     route_direction dir=R_NONE;
 
+/* This commented-out code were supposed to just move the closest
+   point instead of adding points all the time. FIXME, bug. */
 /*    int add_point=0;
 
     if(*pat!=0)
@@ -227,7 +224,7 @@ static void inline prepend_point_to_path(path **pat, point p)
 //    }
 }
 
-// Free all of pat
+// Free all memory in pat
 static void clear_path(path **pat)
 {
 
@@ -251,6 +248,7 @@ static void clear_path(path **pat)
 }
 
 #if 0
+/* failed attempt to remove unnessessary points in paths. FIXME bug*/
 // Compress sequences with same x or y to one sequence
 static void compress_path(path **pat)
 {
@@ -485,7 +483,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
     if(retval==TRUE)
     {
 	// We found a path to end. Add point p to path.
-/*	if(*pat!=0 && (*pat)->next!=0)
+/* bug ahead, FIXME:	if(*pat!=0 && (*pat)->next!=0)
 	{
           // If there are point in pat already, then check if
             // we can use that and just change the coords there.
@@ -527,6 +525,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
     return FALSE; 
 }
     /*
+// print huge ascii picture of the board_matrix for debugging
 void print_matrix(void)
 {
     int x,y;
@@ -627,7 +626,7 @@ static void draw_board_matrix(Breadboard_Window *bbw)
 
 static GList *nodepath_list;
 
-// Draw node in nodepath_list to layout_pixmap
+// Draw nodes in nodepath_list to layout_pixmap
 static void clear_nodes(Breadboard_Window *bbw)
 {
 
@@ -1140,9 +1139,6 @@ static void trace_node(struct gui_node *gn)
 }
 
 
-///////////////////////////////////////////////////////////////////////
-// Pain is over!
-///////////////////////////////////////////////////////////////////////
 
 GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 {
@@ -1542,6 +1538,7 @@ void GuiModule::SetPosition(int nx, int ny)
     }
 }
 
+/* FIXME: calculate distance to the edges instead of the corners. */
 double GuiModule::Distance(int px, int py)
 {
   double distance;
@@ -2114,6 +2111,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 }
 
 #if 0
+// Display a file in a text widget.
 static void text_dialog(const char *filename)
 {
     static GtkWidget *dialog;
@@ -3681,7 +3679,7 @@ void Breadboard_Window::Build(void)
 		     GTK_SIGNAL_FUNC(pointer_cb),this);
   gtk_signal_connect(GTK_OBJECT(layout),"button_release_event",
 		     GTK_SIGNAL_FUNC(pointer_cb),this);
-  gtk_signal_connect_after(GTK_OBJECT(layout),"expose_event",
+  gtk_signal_connect(GTK_OBJECT(layout),"expose_event",
 		     (GtkSignalFunc) layout_expose,this);
 
   GtkAdjustment *xadj, *yadj;

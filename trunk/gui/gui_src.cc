@@ -149,7 +149,7 @@ key_press(GtkWidget *widget,
       return TRUE;
     }
 
-  return TRUE;
+  return FALSE;
 }
 
 static int delete_event(GtkWidget *widget,
