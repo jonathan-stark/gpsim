@@ -454,6 +454,9 @@ static void filter(char *clean, char *dirty, int max)
 
     int i=0,j;
 
+    if(dirty==NULL)
+        return;
+
     do {
 
 
@@ -859,6 +862,9 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
       printf("Warning parse_numbers(%p,%x,%x,%p)\n",widget,row,col,sbow);
       return;
   }
+
+  if(sbow->memory==NULL)
+      return;
 
   gp = ((GUI_Object*)sbow)->gp;
   

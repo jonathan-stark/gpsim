@@ -504,6 +504,9 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     static int has_old_graph=0;
     static int last_numpoints=0;
 
+    if(gpsim_get_program_memory_size(((GUI_Object*)pw)->gp->pic_id)<=0)
+        return 0;
+
     if(has_old_graph)
     {
         free(px2);
