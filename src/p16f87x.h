@@ -39,6 +39,7 @@ class P16F873 : public P16C63
 class P16F874 : public P16C65
 {
  public:
+  virtual void set_out_of_range_pm(int address, int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F874_;};
   virtual unsigned int program_memory_size(void) const { return 0x1000; };
@@ -46,6 +47,12 @@ class P16F874 : public P16C65
   void create_sfr_map(void);
   void create(void);
   virtual unsigned int register_memory_size () const { return 0x200;};
+
+  virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
+  virtual unsigned int eeprom_get_value(unsigned int address) ;
+  virtual void eeprom_put_value(unsigned int value,
+				unsigned int address);
+  virtual file_register *eeprom_get_register(unsigned int address);
 
   P16F874(void);
   static pic_processor *construct(void);

@@ -13,6 +13,16 @@ include "p16f877.inc"
 	t1,t2,t3
   endc
 
+	;; Take advantage of the upper 16 bytes all banks being aliased
+  cblock 0x70
+
+	adr_cnt
+	data_cnt
+	w_temp
+	status_temp
+
+  endc
+
 
 	
   org	0
@@ -20,7 +30,32 @@ include "p16f877.inc"
 
 
   org	4
+	;; Interrupt
+	;; 
+	movwf	w_temp
+	swapf	status,w
+	movwf	status_temp
+	
+	btfss	intcon,peie
+	 goto	exit_int
+
+	bcf	status,rp1
+	bcf	status,rp0
+
+	btfss	(pir2 & 0x7f),eeif
+	 goto	exit_int
+
+;;; eeprom has interrupted
+	bcf	(pir2 & 0x7f),eeif
+
+exit_int:
+	swapf	status_temp,w
+	movwf	status
+	swapf	w_temp,f
+	swapf	w_temp,w
 	retfie
+
+
 
 main:
 	
@@ -70,6 +105,8 @@ main:
 	;; disable (primarily) global and peripheral interrupts
 	
 	clrf	intcon
+
+	call	obliterate_data_eeprom
 
 	goto	pwm_test1
 
@@ -220,6 +257,7 @@ tt3:
 	goto	tt3
 
 pwm_test1:
+	clrf	status
 	bsf	status,rp0
 
  	bsf	portc,2		;CCP bit is an input
@@ -275,5 +313,61 @@ cb3:
 	clrf	status
 
 	return
+
+
+obliterate_data_eeprom
 	
+	clrf	adr_cnt
+	clrf	data_cnt
+	incf    data_cnt,f
+	bsf	intcon,eeie
+
+l1:	
+
+
+	bsf	status,rp1	;Point to bank 2
+	bcf	status,rp0	;
+
+	movf	adr_cnt,w
+	movwf	eeadr
+	movf	data_cnt,W
+	movwf	eedata
+
+	bsf	status,rp0
+	bcf	intcon,gie	;Disable interrupts while enabling write
+
+	bcf	(eecon1 & 0x7f),eepgd	;Point to data and not program mem.
+	bsf	(eecon1 & 0x7f),wren	;Enable eeprom writes
+
+	movlw	0x55		;Magic sequence to enable eeprom write
+	movwf	(eecon2 & 0x7f)
+	movlw	0xaa
+	movwf	(eecon2 & 0x7f)
+
+	bsf	(eecon1 & 0x7f),wr	;Begin eeprom write
+
+	bsf	intcon,gie	;Re-enable interrupts
+	
+	btfsc	(eecon1 & 0x7f),wr	;Wait for the write to complete 
+	 goto	$-1
+
+;; 	bcf	status,rp0
+	
+	incfsz	adr_cnt,f
+	 goto	l1
+
+	incfsz	data_cnt,F
+	 goto	l1
+
+	return
+
+	
+	org	0x2100
+
+	de	"Linux is cool!",0
+	de	0xaa,0x55,0xf0,0x0f
+	de	'g','p','s','i','m'
+	de	"p16f877_test.asm - a program to test "
+	de	"eveything an 'f877 can possibly do."
+		
 	end

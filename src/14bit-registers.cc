@@ -806,8 +806,6 @@ void EECON1::put(unsigned int new_value)
 
 unsigned int EECON1::get(void)
 {
-  //  if(break_point) 
-  //    bp.check_read_break(this);
 
   trace.register_read(address,value);
 
@@ -826,9 +824,6 @@ EECON1::EECON1(void)
 
 void EECON2::put(unsigned int new_value)
 {
-
-  //  if(break_point) 
-  //    bp.check_write_break(this);
 
 
   if( (eestate == NOT_READY) && (0x55 == new_value))
@@ -850,8 +845,6 @@ void EECON2::put(unsigned int new_value)
 
 unsigned int EECON2::get(void)
 {
-  //  if(break_point) 
-  //    bp.check_read_break(this);
 
   trace.register_read(address,0);
 
@@ -870,9 +863,6 @@ EECON2::EECON2(void)
 
 unsigned int EEDATA::get(void)
 {
-  if(break_point) 
-    bp.check_read_break(this);
-
   trace.register_read(address,value);
 
   return(value);
@@ -880,9 +870,6 @@ unsigned int EEDATA::get(void)
 
 void EEDATA::put(unsigned int new_value)
 {
-
-  //  if(break_point) 
-  //    bp.check_write_break(this);
 
   value = new_value;
   trace.register_write(address,value);
@@ -900,8 +887,6 @@ EEDATA::EEDATA(void)
 
 unsigned int EEADR::get(void)
 {
-  //  if(break_point) 
-  //    bp.check_read_break(this);
 
   trace.register_read(address,value);
 
@@ -910,9 +895,6 @@ unsigned int EEADR::get(void)
 
 void EEADR::put(unsigned int new_value)
 {
-
-  //  if(break_point) 
-  //    bp.check_write_break(this);
 
   value = new_value;
   trace.register_write(address,value);
@@ -939,10 +921,12 @@ EEPROM::EEPROM(void)
 {
 
   rom_size = 0;
-  eecon1 = NULL;
-  eecon2 = NULL;
-  eedata = NULL;
-  eeadr  = NULL;
+  eecon1  = NULL;
+  eecon2  = NULL;
+  eedata  = NULL;
+  eedatah = NULL;
+  eeadr   = NULL;
+  eeadrh  = NULL;
 
 
 }
@@ -953,13 +937,18 @@ void EEPROM::start_write(void)
   cpu->cycles.set_break(cpu->cycles.value + EPROM_WRITE_TIME, this);
 
   wr_adr = eeadr->value;
+  if(eeadrh)
+    wr_adr = (eeadrh->value << 8) + wr_adr;
+
   wr_data = eedata->value;
+  if(eedatah)
+    wr_data = (eedatah->value << 8) + wr_data;
 
 }
 
 void EEPROM::callback(void)
 {
-
+  //cout << "eeprom call back\n";
   if(wr_adr < rom_size)
     rom[wr_adr]->value = wr_data;
   else
@@ -992,7 +981,10 @@ void EEPROM::reset(RESET_TYPE by)
 
 }
 
-void EEPROM::initialize(unsigned int new_rom_size, EECON1 *con1, EECON2 *con2, EEDATA *data, EEADR *adr)
+void EEPROM::initialize(unsigned int new_rom_size, 
+			EECON1 *con1,  EECON2 *con2, 
+			EEDATA *data,  EEADR *adr,
+			EEDATA *datah=NULL, EEADR *adrh=NULL)
 {
 
   rom_size = new_rom_size;
@@ -1000,10 +992,12 @@ void EEPROM::initialize(unsigned int new_rom_size, EECON1 *con1, EECON2 *con2, E
 
   // Save the pointers to all of the control registers
   
-  eecon1 = con1;
-  eecon2 = con2;
-  eedata = data;
-  eeadr  = adr;
+  eecon1  = con1;
+  eecon2  = con2;
+  eedata  = data;
+  eeadr   = adr;
+  eedatah = datah;
+  eeadrh  = adrh;
 
   // Let the control registers have a pointer to the peripheral in which they belong.
 
@@ -1011,6 +1005,10 @@ void EEPROM::initialize(unsigned int new_rom_size, EECON1 *con1, EECON2 *con2, E
   eecon2->eeprom = this;
   eedata->eeprom = this;
   eeadr->eeprom  = this;
+  if(eedatah)
+    eedatah->eeprom = this;
+  if(eeadrh)
+    eeadrh->eeprom  = this;
 
 
   // Create the rom
@@ -1035,6 +1033,7 @@ void EEPROM::initialize(unsigned int new_rom_size, EECON1 *con1, EECON2 *con2, E
 
     }
 
+  //??? FIXME:
   reset(POR_RESET);
 
 }

@@ -678,11 +678,13 @@ public:
   _14bit_processor *cpu;
 
   EECON1 *eecon1;            // The EEPROM consists of 4 control registers
-  EECON2 *eecon2;
+  EECON2 *eecon2;            // on the F84 and 6 on the F877
   EEDATA *eedata;
   EEADR  *eeadr;
+  EEDATA *eedatah;
+  EEADR  *eeadrh;
 
-  file_register **rom;       //  and the data area.
+  file_register **rom;          //  and the data area.
   unsigned int rom_size;
   unsigned int wr_adr,wr_data;  // latched adr and data for eewrites.
   unsigned int abp;             // break point number that's set during eewrites
@@ -691,7 +693,10 @@ public:
   void reset(RESET_TYPE);
   virtual void callback(void);
   void start_write(void);
-  void initialize(unsigned int new_rom_size,EECON1 *con1, EECON2 *con2, EEDATA *data, EEADR *adr);
+  void initialize(unsigned int new_rom_size,
+		  EECON1 *con1, EECON2 *con2, 
+		  EEDATA *data, EEADR *adr,
+		  EEDATA *datah=NULL, EEADR *adrh=NULL);
   void dump(void);
 
 };

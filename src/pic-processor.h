@@ -341,6 +341,7 @@ public:
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address)
     {return;};
+  virtual file_register *eeprom_get_register(unsigned int address) { return NULL; }
 
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};

@@ -135,7 +135,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   bool found_old = 0;
   bool break_set = 0;
 
-  //  cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle << '\n';
+  //cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle << '\n';
 
   //dump_breakpoints();
   while( (l1->next) && !found_old)
@@ -295,8 +295,14 @@ void Cycle_Counter::clear_current_break(void)
     }
   else
     {
-      cout << "debug::Didn't clear the current cycle break because != break_on_this\n";
-      cout << "value = " << value << "\nbreak_on_this = " << break_on_this <<'\n';
+      // If 'value' doesn't equal 'break_on_this' then what's most probably
+      // happened is that the breakpoint associated with 'break_on_this'
+      // has invoked a callback function that then did a ::reassign_break().
+      // There's a slight chance that we have a bug - but very slight...
+      if(verbose & 4) {
+	cout << "debug::Didn't clear the current cycle break because != break_on_this\n";
+	cout << "value = " << value << "\nbreak_on_this = " << break_on_this <<'\n';
+      }
     }
 }
 

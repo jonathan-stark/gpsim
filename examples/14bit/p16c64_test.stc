@@ -9,6 +9,6 @@ processor p16c64 big_pic
 load h p16c64_test.hex
 
 # Stimuli:
-# load c portc_stim.stc
+load c portc_stim.stc
 
 break c 1000
