@@ -126,7 +126,7 @@ static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
 
     if(sbow == NULL || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
     {
-	printf("Warning update_ascii(%x,%x)\n",(unsigned int)sbow,row);
+	printf("Warning update_ascii(%p,%x)\n",sbow,row);
 	return;
     }
 
@@ -199,7 +199,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	printf("Warning popup_activated(%p,%p)\n",widget,(unsigned int)data);
 	return;
     }
     
@@ -299,7 +299,7 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
 
   if(sbow==NULL)
   {
-      printf("Warning build_menu_for_sheet(%x)\n",(unsigned int)sbow);
+      printf("Warning build_menu_for_sheet(%p)\n",sbow);
       return NULL;
   }
 
@@ -366,7 +366,7 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
 
   if(sbow==NULL)
   {
-      printf("Warning build_menu_for_sheet(%x)\n",(unsigned int)sbow);
+      printf("Warning build_menu_for_sheet(%p)\n",sbow);
       return NULL;
   }
 
@@ -408,7 +408,7 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 
     if(widget==NULL || event==NULL || sbow==NULL)
     {
-	printf("Warning button_press(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbow);
+	printf("Warning button_press(%p,%p,%p)\n",widget,event,sbow);
 	return 0;
     }
   
@@ -817,7 +817,7 @@ static unsigned long get_number_in_string(char *number_string)
   
   if(number_string==NULL)
   {
-      printf("Warning get_number_in_string(%x)\n",(unsigned int)number_string);
+      printf("Warning get_number_in_string(%p)\n",number_string);
       errno = EINVAL;
       return -1;
   }
@@ -856,7 +856,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || sbow==NULL)
   {
-      printf("Warning parse_numbers(%x,%x,%x,%x)\n",(unsigned int)widget,row,col,(unsigned int)sbow);
+      printf("Warning parse_numbers(%p,%x,%x,%p)\n",widget,row,col,sbow);
       return;
   }
 
@@ -908,7 +908,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
  
  if(widget==NULL|| sbow==NULL)
   {
-      printf("Warning show_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)sbow);
+      printf("Warning show_sheet_entry(%p,%p)\n",widget,sbow);
       return;
   }
 
@@ -938,7 +938,7 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 
   if(widget==NULL|| sbow==NULL)
   {
-      printf("Warning activate_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)sbow);
+      printf("Warning activate_sheet_entry(%p,%p)\n",widget,sbow);
       return;
   }
 
@@ -964,7 +964,7 @@ show_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 
   if(widget==NULL|| sbow==NULL)
   {
-      printf("Warning show_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)sbow);
+      printf("Warning show_entry(%p,%p)\n",widget,sbow);
       return;
   }
   
@@ -992,7 +992,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
     if(widget==NULL || row>sheet->maxrow || row<0||
        column>sheet->maxcol || column<0 || sbow==NULL)
     {
-	printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,column,(unsigned int)sbow);
+	printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,sbow);
 	return 0;
     }
 

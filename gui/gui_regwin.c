@@ -199,7 +199,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
     }
     
@@ -284,7 +284,7 @@ build_menu(Register_Window *rw)
 
   if(rw==NULL)
   {
-      printf("Warning build_menu(%x)\n",(unsigned int)rw);
+      printf("Warning build_menu(%p)\n",rw);
       return NULL;
   }
     
@@ -336,7 +336,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
     
   if(widget==NULL || event==NULL || rw==NULL)
   {
-      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)rw);
+      printf("Warning do_popup(%p,%p,%p)\n",widget,event,rw);
       return 0;
   }
   
@@ -372,7 +372,7 @@ static unsigned long get_number_in_string(char *number_string)
   
   if(number_string==NULL)
   {
-      printf("Warning get_number_in_string(%x)\n",(unsigned int)number_string);
+      printf("Warning get_number_in_string(%p)\n",number_string);
       errno = EINVAL;
       return -1;
   }
@@ -412,7 +412,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || rw==NULL)
   {
-      printf("Warning set_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,col,(unsigned int)rw);
+      printf("Warning set_cell(%p,%x,%x,%p)\n",widget,row,col,rw);
       return;
   }
 
@@ -696,8 +696,8 @@ static int settings_dialog(Register_Window *rw)
     row_height = 3 * char_width + 6;
     column_width = 3 * char_width + 6;
     for(i=0; i<rw->register_sheet->maxcol; i++){
-	gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
-	gtk_sheet_set_row_height (rw->register_sheet, i, row_height);
+        gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
+        gtk_sheet_set_row_height (rw->register_sheet, i, row_height);
     }
     gtk_sheet_set_column_width (rw->register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
     gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
@@ -738,7 +738,7 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
     
   if(widget==NULL || old_range==NULL || new_range==NULL || rw==NULL)
   {
-      printf("Warning resize_handler(%x,%x,%x,%x)\n",(unsigned int)widget,(unsigned int)old_range,(unsigned int)new_range,(unsigned int)rw);
+      printf("Warning resize_handler(%p,%p,%p,%p)\n",widget,old_range,new_range,rw);
       return;
   }
 
@@ -770,7 +770,7 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 
   if(widget==NULL || old_range==NULL || new_range==NULL || rw==NULL)
   {
-      printf("Warning move_handler(%x,%x,%x,%x)\n",(unsigned int)widget,(unsigned int)old_range,(unsigned int)new_range,(unsigned int)rw);
+      printf("Warning move_handler(%p,%p,%p,%p)\n",widget,old_range,new_range,(unsigned int)rw);
       return;
   }
     cti = new_range->coli - new_range->col0 + 1;
@@ -802,7 +802,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
  
  if(widget==NULL|| rw==NULL)
   {
-      printf("Warning show_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
+      printf("Warning show_sheet_entry(%p,%p)\n",widget,rw);
       return;
   }
 
@@ -836,7 +836,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 
   if(widget==NULL|| rw==NULL)
   {
-      printf("Warning activate_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
+      printf("Warning activate_sheet_entry(%p,%p)\n",widget,rw);
       return;
   }
   
@@ -861,7 +861,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 {
     if(widget==NULL|| rw==NULL)
     {
-	printf("Warning show_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
+	printf("Warning show_entry(%p,%p)\n",widget,rw);
 	return;
     }
     
@@ -887,7 +887,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
     if(widget==NULL || row>sheet->maxrow || row<0||
        column>sheet->maxcol || column<0 || rw==NULL)
     {
-	printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,column,(unsigned int)rw);
+	printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,rw);
 	return 0;
     }
 
@@ -922,7 +922,7 @@ void RegWindow_select_register(Register_Window *rw, int regnumber)
     
   if(rw == NULL || regnumber > MAX_REGISTERS || regnumber<0)
   {
-      printf("Warning RegWindow_select_register(%x,%x)\n",(unsigned int)rw,regnumber);
+      printf("Warning RegWindow_select_register(%p,%x)\n",rw,regnumber);
       return;
   }
   
@@ -984,7 +984,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   
   if(main_vbox == NULL || rw==NULL)
   {
-      printf("Warning build_entry_bar(%x,%x)\n",(unsigned int)main_vbox,(unsigned int)rw);
+      printf("Warning build_entry_bar(%p,%p)\n",main_vbox,rw);
       return;
   }
   
@@ -1014,7 +1014,7 @@ static void update_ascii(Register_Window *rw, gint row)
 
   if(rw == NULL || row<0 || row > rw->register_sheet->maxrow)
   {
-      printf("Warning update_ascii(%x,%x)\n",(unsigned int)rw,row);
+      printf("Warning update_ascii(%p,%x)\n",rw,row);
       return;
   }
 
@@ -1054,7 +1054,7 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
   
   if(rw == NULL || reg_number<0 || reg_number>MAX_REGISTERS)
   {
-      printf("Warning update_register_cell(%x,%x)\n",(unsigned int)rw,reg_number);
+      printf("Warning update_register_cell(%p,%x)\n",rw,reg_number);
       return 0;
   }
   
@@ -1175,7 +1175,7 @@ void RegWindow_update(Register_Window *rw)
     
   if(rw == NULL)
   {
-      printf("Warning RegWindow_update(%x)\n",(unsigned int)rw);
+      printf("Warning RegWindow_update(%p)\n",rw);
       return;
   }
 
@@ -1229,7 +1229,7 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
 
   if(xref == NULL)
   {
-      printf("Warning update_register_cell: xref=%x\n",(unsigned int)xref);
+      printf("Warning update_register_cell: xref=%p\n",xref);
 /*      if(xref->data == NULL || xref->parent_window==NULL)
       {
 	  printf("Warning update_register_cell: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
@@ -1466,7 +1466,7 @@ BuildRegisterWindow(Register_Window *rw)
 	
   if(rw==NULL)
   {
-      printf("Warning build_register_viewer(%x)\n",(unsigned int)rw);
+      printf("Warning build_register_viewer(%p)\n",rw);
       return;
   }
 

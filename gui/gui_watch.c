@@ -159,7 +159,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
     }
     
@@ -274,7 +274,7 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
 
   if(sheet==NULL || ww==NULL)
   {
-      printf("Warning build_menu(%x,%x)\n",(unsigned int)sheet,(unsigned int)ww);
+      printf("Warning build_menu(%p,%p)\n",sheet,ww);
       return NULL;
   }
     
@@ -343,7 +343,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 
   if(widget==NULL || event==NULL || ww==NULL)
   {
-      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)ww);
+      printf("Warning do_popup(%p,%p,%p)\n",widget,event,ww);
       return 0;
   }
   popup=ww->popup_menu;
@@ -575,7 +575,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     if(xref == NULL)
     {
-	printf("Warning gui_watch.c: xref_update: xref=%x\n",(unsigned int)xref);
+	printf("Warning gui_watch.c: xref_update: xref=%p\n",xref);
 /*	if(xref->data == NULL || xref->parent_window==NULL)
 	{
 	    printf("Warning gui_watch.c: xref_update: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);

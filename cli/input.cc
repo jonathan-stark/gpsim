@@ -504,7 +504,7 @@ void myfunc(int data, int fd, GdkInputCondition gdk_cond)
 }
 
 //void test_func(...)
-void test_func(char *x)
+void test_func(void)
 {
 
   char *t;

@@ -385,7 +385,7 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning plot_popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	printf("Warning plot_popup_activated(%p,%p)\n",widget,data);
 	return;
     }
     
@@ -419,7 +419,7 @@ plot_build_menu(Profile_Window *pw)
 
   if(pw==NULL)
   {
-      printf("Warning build_menu(%x)\n",(unsigned int)pw);
+      printf("Warning build_menu(%p)\n",pw);
       return NULL;
   }
     
@@ -454,7 +454,7 @@ plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 
     if(widget==NULL || event==NULL || pw==NULL)
     {
-	printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)pw);
+	printf("Warning do_popup(%p,%p,%p)\n",widget,event,pw);
 	return 0;
     }
 
@@ -751,7 +751,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	printf("Warning popup_activated(%p,%p)\n",widget,data);
 	return;
     }
     
@@ -933,7 +933,7 @@ build_menu(Profile_Window *pw)
 
   if(pw==NULL)
   {
-      printf("Warning build_menu(%x)\n",(unsigned int)pw);
+      printf("Warning build_menu(%p)\n",pw);
       return NULL;
   }
     
@@ -970,7 +970,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 
   if(widget==NULL || event==NULL || pw==NULL)
   {
-      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)pw);
+      printf("Warning do_popup(%p,%p,%p)\n",widget,event,pw);
       return 0;
   }
 
@@ -1258,7 +1258,7 @@ BuildProfileWindow(Profile_Window *pw)
 	
   if(pw==NULL)
   {
-      printf("Warning build_profile_viewer(%x)\n",(unsigned int)pw);
+      printf("Warning build_profile_viewer(%p)\n",pw);
       return 0;
   }
 
