@@ -146,15 +146,19 @@ class LcdBusy : public BreakCallBack
 
 };
 
+typedef char _5X7 [7][6];
+
 class LcdFont 
 {
 public:
   gint num_elements;
   GdkPixmap **pixmaps;
+  GdkWindow *mywindow;	// stashed to allow font regenaration
 
   //CreateFont(GtkWidget *, LcdDisplay *);
 
   LcdFont(gint, GtkWidget *, LcdDisplay *);
+  void update_pixmap(int, _5X7 *, LcdDisplay *);
 };
 
 
@@ -295,6 +299,16 @@ public:
   GdkColor
     *dot_color;     // LCD pixel color (controlled by contrast)
 
+  // Memory in a HD44780U is organized in 2x40 bytes of display RAM,
+  // and 64 bytes of character RAM
+#define CGRAM_ADDR_BITS 6
+#define CGRAM_SIZE (1 << CGRAM_ADDR_BITS)
+#define CGRAM_MASK (CGRAM_SIZE - 1)
+  gchar cgram_cursor;
+  gchar cgram[CGRAM_SIZE];
+  bool in_cgram;
+  bool cgram_updated;
+
   gint **ch_data;
   gchar *title;
   GtkWidget *window;
@@ -335,6 +349,7 @@ public:
   void clear_display(void);
   void write_data(int new_data);
   void write_ddram_address(int data);
+  void write_cgram_address(int data);
 
   // Here's the logic portion
 
@@ -355,6 +370,7 @@ public:
   void update( GtkWidget *drawable,   
 	       guint max_width,
 	       guint max_height);
+  void update_cgram_pixmaps(void);
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
@@ -416,4 +432,8 @@ public:
 
 };
 
+// bit flags that can be set in the GPSIM_LCD_DEBUG environment variable
+#define LCD_DEBUG_ENABLE	0x01	// Enable debug printfs
+#define LCD_DEBUG_DUMP_PINS	0x02	// Dump changes in the LCD pins
+#define LCD_DEBUG_TRACE_DATA	0x04	// Trace changes in CGRAM/DDRAM
 #endif //  __LCD_H__
