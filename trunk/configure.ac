@@ -111,6 +111,8 @@ else
 
 fi
 
+wi_LIB_READLINE
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -129,7 +131,7 @@ AC_LANG([C++])
 #AC_CHECK_LIB([gpsim], [main])
 AC_CHECK_LIB([popt], [main])
 AC_CHECK_LIB([pthread], [main])
-wi_LIB_READLINE
+
 
 # Checks for header files.
 AC_HEADER_STDC
