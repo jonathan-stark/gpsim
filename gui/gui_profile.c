@@ -1154,7 +1154,7 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
     for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++)
     {
 	guint64 cycles;
-	if(gpsim_get_opcode( gp->pic_id, i)!=0x0000)
+	if(gpsim_address_has_opcode( gp->pic_id, i))
 	{
 	    sprintf(address_string,"0x%04x",i);
 	    strcpy(instruction_string,gpsim_get_opcode_name( gp->pic_id, i,buf));
