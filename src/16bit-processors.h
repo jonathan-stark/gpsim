@@ -43,7 +43,7 @@ public:
   // The 18cxxx has two address to which interrupts may be vectored. The '>> 1'
   // is because gpsim represents the program memory addresses the way the pic does
   // (and not the way the data sheet or the assembler does).
-#define INTERRUPT_VECTOR_LO       (0x10 >> 1)
+#define INTERRUPT_VECTOR_LO       (0x18 >> 1)
 #define INTERRUPT_VECTOR_HI       (0x08 >> 1)
 
   // Configuration memory addresses. Again, like the interrupt vectors, the '>>1'
