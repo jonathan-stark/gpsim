@@ -106,6 +106,30 @@ public:
     virtual INSTRUCTION_TYPES isa(void) {return PROFILE_STOP_INSTRUCTION;};
 };
 
+//
+// Assertions
+// 
+// Assertions are like breakpoints except that they're conditional.
+// For example, a user may wish to verify that the proper register
+// bank is selected while a variable is accessed.
+//
+class RegisterAssertion : public Breakpoint_Instruction
+{
+ public:
+  int regAddress;
+  int regMask;
+  int regValue;
+
+  RegisterAssertion(Processor *new_cpu, 
+		    unsigned int instAddress, 
+		    unsigned int bp,
+		    unsigned int _regAddress,
+		    int _regMask,
+		    int _regValue
+		    );
+
+
+};
 
 class Breakpoints
 {

@@ -51,8 +51,8 @@ public:
 
   //virtual SOURCE_TYPE isa(void) {return RESISTOR;};
 
-  Resistor_IO(void);
-  Resistor_IO(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  Resistor_IO(IOPORT *i, unsigned int b,char *opt_name=NULL) :
+    IO_bi_directional( i, b, opt_name) {}
 
   // put_node_state is called when the node to which this
   // IO pin is attached is updated. We'll intercept this call
@@ -100,7 +100,7 @@ public:
 
   virtual void trace_register_write(void);
 
-  Resistor_IOPORT (unsigned int _num_iopins=2);
+  Resistor_IOPORT (unsigned int _num_iopins=2) : IOPORT(_num_iopins) {}
 
 };
 
