@@ -91,7 +91,7 @@ gpsiminclude_HEADERS = \
 	pic-registers.h \
 	picdis.h \
 	processor.h \
-	register.h \
+	registers.h \
 	stimuli.h \
 	stimulus_orb.h \
 	symbol.h \

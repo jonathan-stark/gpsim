@@ -1595,14 +1595,6 @@ Interface::Interface(gpointer new_object)
   interface_id = 0;
   objectPTR = new_object;
 
-  update_object = NULL;
-  simulation_has_stopped = NULL;
-  new_processor = NULL;
-  new_module = NULL;
-  new_program = NULL;
-  remove_object = NULL;
-  node_configuration_changed = NULL;
-  gui_update = NULL;
 }
 
 Interface *get_interface(unsigned int interface_id)
@@ -1627,7 +1619,7 @@ Interface *get_interface(unsigned int interface_id)
   return NULL;
 
 }
-
+/*
 unsigned int gpsim_register_interface(gpointer new_object)
 {
   Interface *an_interface = new Interface(new_object);
@@ -1635,7 +1627,8 @@ unsigned int gpsim_register_interface(gpointer new_object)
   return gi.add_interface(an_interface);
 
 }
-
+*/
+#if 0
 void gpsim_unregister_interface(unsigned int interface_id)
 {
   gi.remove_interface(interface_id);
@@ -1717,7 +1710,7 @@ void gpsim_register_gui_update(unsigned int interface_id,
     an_interface->gui_update = gui_update;
   
 }
-
+#endif
 
 //--------------------------------------------------------------------------
 //
@@ -1750,8 +1743,7 @@ static void gui_update_callback  (gpointer p)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->gui_update)
-	an_interface->gui_update(an_interface->objectPTR);
+      an_interface->GuiUpdate(an_interface->objectPTR);
     }
 
     interface_list = interface_list->next;
@@ -1789,8 +1781,7 @@ void gpsimInterface::update_object (gpointer xref,int new_value)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->update_object)
-	an_interface->update_object(xref, new_value);
+      an_interface->UpdateObject(xref, new_value);
     }
 
     interface_list = interface_list->next;
@@ -1809,8 +1800,7 @@ void gpsimInterface::remove_object (gpointer xref)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->remove_object)
-	an_interface->remove_object(xref);
+      an_interface->RemoveObject(xref);
     }
 
     interface_list = interface_list->next;
@@ -1830,8 +1820,7 @@ void gpsimInterface::simulation_has_stopped (void)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->simulation_has_stopped)
-	an_interface->simulation_has_stopped(an_interface->objectPTR);
+      an_interface->SimulationHasStopped(an_interface->objectPTR);
     }
 
     interface_list = interface_list->next;
@@ -1850,8 +1839,7 @@ void gpsimInterface::new_processor (unsigned int processor_id)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->new_processor)
-	an_interface->new_processor(processor_id);
+      an_interface->NewProcessor(processor_id);
     }
 
     interface_list = interface_list->next;
@@ -1869,8 +1857,7 @@ void gpsimInterface::new_module (Module *module)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->new_module)
-	an_interface->new_module(module);
+      an_interface->NewModule(module);
     }
 
     interface_list = interface_list->next;
@@ -1888,8 +1875,7 @@ void gpsimInterface::node_configuration_changed (Stimulus_Node *node)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->node_configuration_changed)
-	an_interface->node_configuration_changed(node);
+      an_interface->NodeConfigurationChanged(node);
     }
 
     interface_list = interface_list->next;
@@ -1907,8 +1893,7 @@ void gpsimInterface::new_program  (unsigned int processor_id)
     if(interface_list->data) {
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
-      if(an_interface->new_program)
-	an_interface->new_program(processor_id);
+      an_interface->NewProgram(processor_id);
     }
 
     interface_list = interface_list->next;
