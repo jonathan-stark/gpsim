@@ -301,7 +301,7 @@ int eXdbmOpenDatabase(char *filename,  DB_ID *dbid)
 
 int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
 {
-  FILE *f;
+  /* FILE *f; */
   DB_ID temp_id;
   int ret;
   int i;
@@ -338,7 +338,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
     DbmDbList->dblist = (TDbmDatabase *) realloc( DbmDbList->dblist, sizeof(TDbmDatabase) * DbmDbList->array_size);
     if(DbmDbList->dblist==NULL) {
       RaiseError(DBM_ALLOC);
-      fclose(f);
+      /* fclose(f); */
       return -1;
     }
     
@@ -362,7 +362,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
   DbmDbList->dblist[temp_id].root = (TDbmListEntry *) malloc (sizeof(TDbmListEntry));
   if(DbmDbList->dblist[temp_id].root == NULL) {
     RaiseError(DBM_ALLOC);
-    fclose(f);
+    /* fclose(f); */
     return -1;
   }
 
@@ -377,7 +377,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
   DbmDbList->dblist[temp_id].root->order = (TDbmListEntry **) malloc(sizeof(TDbmListEntry *) * MIN_ORDER_SIZE);
   if(DbmDbList->dblist[temp_id].root->order == NULL) {
     RaiseError(DBM_ALLOC);
-    fclose(f);
+    /* fclose(f); */
     return(-1);
   }
 
@@ -388,7 +388,7 @@ int eXdbmNewDatabase(char *filename,  DB_ID *dbid)
   
   if(DbmDbList->dblist[temp_id].root->child == NULL) {
     RaiseError(DBM_ALLOC);
-    fclose(f);
+    /* fclose(f); */
     return(-1);
   }
 
@@ -1496,7 +1496,7 @@ int eXdbmCreateVarReal(DB_ID dbid, DB_LIST list, char *entryname, char *comment,
 
   if (node==NULL) return(-1);
 
-  node->value.int_val = ceil(value);
+  node->value.int_val = (int)ceil(value);
   node->value.real_val = value;
 
   return (1);
