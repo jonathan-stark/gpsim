@@ -508,7 +508,7 @@ void read_symbols( pic_processor *cpu )
 	  break;
 
 	length = *s;
-	type  = *(short *)&s[length+1];
+	type  = get_short_int(&s[length+1]);
 	if(type>128)
 	  type = COD_ST_CONSTANT;
 	value = get_be_int(&s[length+3]);
@@ -545,7 +545,7 @@ void clear_block(Block *b)
 {
 
   if(b && b->block)
-    bzero(b->block, COD_BLOCK_SIZE);
+    memset(b->block, 0, COD_BLOCK_SIZE);
   else
     assert(0);
 }

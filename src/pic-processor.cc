@@ -695,17 +695,6 @@ void pic_processor::run (void)
 
   simulation_mode = RUNNING;
 
-  // Start the cyclic breakpoint
-#if 0
-  realtime_callback(NULL); // initialize system_time_at_start
-  realtime_cbp.pic = active_cpu;
-  realtime_cbp.callback_function = realtime_callback;
-  realtime_cbp.callback_data = &realtime_cbp;
-  realtime_cbp.delta_cycles = 100;
-  if(realtime_mode)
-      realtime_cbp.set_break();
-#endif
-
   if(realtime_mode)
     realtime_cbp.start(active_cpu);
 

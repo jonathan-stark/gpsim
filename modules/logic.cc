@@ -30,6 +30,7 @@ In here you'll find some simple logic devices:
 
 */
 
+#ifdef HAVE_GUI
 
 /* XPM */
 static char * and2_pixmap[] = {
@@ -582,3 +583,5 @@ void XORGate::update_state(void)
   }
 
 }
+
+#endif // HAVE_GUI

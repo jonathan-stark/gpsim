@@ -1,3 +1,11 @@
+2003-10-26  Scott Dattalo  <scott@dattalo.com>
+	* modules/* removed all references to gui if not building with the gui
+
+2003-09-24  Scott Dattalo  <scott@dattalo.com> (patches from Steve Tell)
+	* modules/paraface.h - Solaris patch for bogus device
+	* src/cod.cc - Endian bug
+	* gui/gui_processor.cc - use memset instead of bzero.
+	
 2003-09-14  Scott Dattalo  <scott@dattalo.com>
  	* src/gpsim_time.h - changed cycle counter break point from a Singly linked
 	list to a doubly linked list. This is in preparation for separating module

@@ -31,31 +31,31 @@ Boston, MA 02111-1307, USA.  */
 //-----------------------------------------------------------
 _RCSTA::_RCSTA(void)
 {
-  cout << "_RCSTA constructor\n";
+  //cout << "_RCSTA constructor\n";
 }
 
 //-----------------------------------------------------------
 _TXSTA::_TXSTA(void)
 {
-  cout << "_TXSTA constructor\n";
+  //cout << "_TXSTA constructor\n";
 }
 
 //-----------------------------------------------------------
 _RCREG::_RCREG(void)
 {
-  cout << "_RCREG constructor\n";
+  //cout << "_RCREG constructor\n";
 }
 
 _TXREG::_TXREG(void)
 {
-  cout << "_TXREG constructor\n";
+  //cout << "_TXREG constructor\n";
   new_name("txhello");
 }
 
 
 _SPBRG::_SPBRG(void)
 {
-  cout << "_SPBRG constructor\n";
+  //cout << "_SPBRG constructor\n";
 }
 
 //-----------------------------------------------------------
@@ -881,7 +881,7 @@ void   USART_MODULE::new_rx_edge(unsigned int bit)
 //--------------------------------------------------
 USART_MODULE::USART_MODULE(void)
 {
-  cout << "usart module constructor\n";
+  //cout << "usart module constructor\n";
   txreg = NULL;
   rcreg = NULL;
   spbrg = NULL;

@@ -92,7 +92,7 @@ GUI_Processor *new_GUI_Processor(void)
   GUI_Processor *gp;
 
   gp = (GUI_Processor *)malloc(sizeof(GUI_Processor));
-  bzero(gp, sizeof(GUI_Processor));
+  memset(gp, 0, sizeof(GUI_Processor));
   gp->source_windows = g_list_alloc();
   gp->data_windows = g_list_alloc();
   gp->misc_windows = g_list_alloc();

@@ -56,6 +56,9 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 
 #include "paraface.h"
@@ -499,3 +502,5 @@ int Paraface::write_parallel_data(int newdata)
 //    nanosleep (&ts, NULL);
     return 0;
 }
+
+#endif //  HAVE_GUI

@@ -44,15 +44,19 @@ support:
 #include <iostream>
 #include <dlfcn.h>
 #include <stdio.h>
+
 #include "../src/modules.h"
 #include "binary_indicator.h"
 #include "resistor.h"
 #include "usart.h"
+
+#ifdef HAVE_GUI
 #include "paraface.h"
 #include "switch.h"
 #include "logic.h"
 #include "led.h"
 #include "video.h"
+#endif
 
 /*
 class Module_Types
@@ -74,6 +78,7 @@ Module_Types available_modules[] =
   // USART
   { "usart",            "usart", USARTModule::USART_construct},
 
+#ifdef _HAVE_GUI
   // Parallel port interface
   { "parallel_interface",         "paraface", Paraface::construct},
 
@@ -92,6 +97,7 @@ Module_Types available_modules[] =
 
   // Video
   { "PAL_video", "video", Video::construct},
+#endif
 
   // No more modules
   { NULL,NULL,NULL}

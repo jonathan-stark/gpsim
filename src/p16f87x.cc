@@ -144,8 +144,8 @@ void P16F873::create_sfr_map(void)
 
 void P16F873::create(void)
 {
-
-  cout << " f873 create \n";
+  if(verbose)
+    cout << " f873 create \n";
 
   P16C73::create();
 
@@ -307,8 +307,8 @@ void P16F874::create_sfr_map(void)
 
 void P16F874::create(void)
 {
-
-  cout << " f874 create \n";
+  if(verbose)
+    cout << " f874 create \n";
 
   P16C74::create();
 
@@ -375,7 +375,8 @@ void P16F877::create_sfr_map(void)
 void P16F877::create(void)
 {
 
-  cout << " f877 create \n";
+  if(verbose)
+    cout << " f877 create \n";
 
   P16F874::create();
   add_file_registers(0x110, 0x16f, 0);

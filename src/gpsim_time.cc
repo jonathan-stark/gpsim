@@ -65,7 +65,8 @@ Boston, MA 02111-1307, USA.  */
   the obvious thing: the number that corresponds to the cycle at which
   we wish to break. This is a 64-bit integer and thus should cover a
   fairly significant simulation interval! A 32-bit integer only covers
-  about 7 minutes of simulation time for a pic running at 20MHz.
+  about 7 minutes of simulation time for a pic running at 20MHz. 64-bits
+  provides over 100,000 years of simulation time!
 
   The next component is the call back function. This is a pointer to a
   function, or actually a class that contains a function, that is 
@@ -116,44 +117,54 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 #endif
 
 
-    if(inactive.next == NULL)
-    {
+    if(inactive.next == NULL) {
+
       cout << " too many breaks are set on the cycle counter \n";
-     return 0;
-    }
-    else if(future_cycle <= value)
-    {
+      return 0;
+
+    } else if(future_cycle <= value) {
+
       cout << "Cycle break point was ignored because cycle " << future_cycle << " has already gone by\n";
       cout << "current cycle is " << value << '\n';
       return 0;
-    }
-  else
-    {
-      // place the future cycle at which we intend to break into the
-      // sorted break list
+
+    } else {
+
+      // place the break point into the sorted break list
 
       bool break_set = 0;
 
-      while( (l1->next) && !break_set)
-	{
+      while( (l1->next) && !break_set) {
 
-	  // If the next break point is at a cycle greater than the
-	  // one we wish to set, then we found the insertion point.
-	  // Otherwise 
-	  if(l1->next->break_value >= future_cycle)
-	    break_set = 1;
-	  else
-	    l1 = l1->next;
+	// If the next break point is at a cycle greater than the
+	// one we wish to set, then we found the insertion point.
+	// Otherwise 
+	if(l1->next->break_value >= future_cycle)
+	  break_set = 1;
+	else
+	  l1 = l1->next;
 
-	}
+      }
+
+      // At this point, we have the position where we need to insert the 
+      // break point: it's at l1->next.
 
       l2 = l1->next;
       l1->next = inactive.next;
+
+      // remove the break point from the 'inactive' list
       inactive.next = inactive.next->next;
+
       l1->next->next = l2;
+      l1->next->prev = l1;
+      if(l2)
+	l2->prev = l1->next;
+
       l1->next->break_value = future_cycle;
       l1->next->f = f;
       l1->next->breakpoint_number = bpn;
+
+
 
       if(f)
 	f->CallBackID = ++CallBackID_Sequence;
@@ -199,11 +210,13 @@ void Cycle_Counter::clear_break(BreakCallBack *f)
     return;
   }
   // at this point l2->next points to our break point
-  // It needs to be removed from the 'active' list to the 'inactive' list.
+  // It needs to be removed from the 'active' list and put onto the 'inactive' list.
 
   l1 = l2;
-  l2 = l1->next;  // save a copy for a moment
+  l2 = l1->next;              // save a copy for a moment
   l1->next = l1->next->next;  // remove the break
+  if(l1->next)
+    l1->next->prev = l1;        // fix the backwards link.
 
   if(l2->f)
     l2->f->clear_break();
@@ -262,9 +275,9 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
   while( l1->next && !found) {
       
-    // If the next break point is at a cycle greater than the
-    // one we wish to set, then we found the insertion point.
-    // Otherwise 
+    // If the next break point is at the same cycle as the
+    // one we wish to clear, then we found the deletion point.
+    // Otherwise keep searching.
 
     if(l1->next->break_value ==  at_cycle)
       found = 1;
@@ -280,6 +293,7 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
   l2 = l1->next;  // save a copy for a moment
   l1->next = l1->next->next;  // remove the break
+  l1->next->prev = l2;
 
   if(l2->f)
     l2->f->clear_break();
@@ -299,14 +313,15 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
 
 
-
+//------------------------------------------------------------------------
 // reassign_break
 //   change the cycle of an existing break point.
 //
-//  This is only called by the internal peripherals and not (directly) by the user. It's
-// purpose is to accommodate the dynamic and unpredictable needs of the internal cpu timing.
-// For example, if tmr0 is set to roll over on a certain cycle and the program changes the
-// pre-scale value, then the break point has to be moved to the new cycle.
+//  This is only called by the internal peripherals and not (directly) by 
+// the user. It's purpose is to accommodate the dynamic and unpredictable
+// needs of the internal cpu timing. For example, if tmr0 is set to roll 
+// over on a certain cycle and the program changes the pre-scale value, 
+// then the break point has to be moved to the new cycle.
 
 bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCallBack *f)
 {
@@ -415,22 +430,27 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 #endif
       l2 = l1->next;                        // l2 now points to this break point
       l1->next = l1->next->next;            // Unlink this break point
+      l1->next->prev = l1;
 
-      while( (l1->next) && !break_set)
-	{
+      while( l1->next && !break_set) {
 
-	  // If the next break point is at a cycle greater than the
-	  // one we wish to set, then we found the insertion point.
-	  // Otherwise 
-	  if(l1->next->break_value > new_cycle)
-	    break_set = 1;
-	  else
-	    l1 = l1->next;
+	// If the next break point is at a cycle greater than the
+	// one we wish to set, then we found the insertion point.
+	// Otherwise, continue searching.
 
-	}
+	if(l1->next->break_value > new_cycle)
+	  break_set = 1;
+	else
+	  l1 = l1->next;
 
+      }
+
+      // At this point, we know that our breakpoint needs to be
+      // moved to the position just after l1
       l2->next = l1->next;
       l1->next = l2;
+      l2->prev = l1;
+      l2->next->prev = l2;
 
       break_on_this = active.next->break_value;
 
@@ -473,6 +493,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
       l2 = l1->next;                        // l2 now points to this break point
 
       l1->next = l1->next->next;            // Unlink this break point
+      l1->next->prev = l1;
 
       l1 = &active;                         // Start searching from the beginning of the list
 
@@ -490,7 +511,9 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 	}
 
       l2->next = l1->next;
+      l2->next->prev = l2;
       l1->next = l2;
+      l2->prev = l1;
 
       l2->break_value = new_cycle;
 
@@ -542,6 +565,7 @@ void Cycle_Counter::clear_current_break(void)
       l1 = inactive.next;                  // ptr to 1st inactive bp
       inactive.next = active.next;         // let the 1st active bp become the 1st inactive one
       active.next = active.next->next;     // The 2nd active bp is now the 1st
+      active.next->prev = &active;
       inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
 
       if(active.next != NULL)
@@ -589,7 +613,6 @@ Cycle_Counter::Cycle_Counter(void)
 {
   value         = 0;
   break_on_this = END_OF_TIME;
-  time_step     = 1;
 
   active.next   = NULL;
   active.prev   = NULL;

@@ -438,7 +438,8 @@ void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
     cout << "Warning: iopin pin number ("<<bit_position 
 	 <<") is too large for " << name() << ". Max is " << num_iopins << '\n';
 
-  cout << "attaching iopin to ioport " << name() << '\n';
+  if(verbose)
+    cout << "attaching iopin to ioport " << name() << '\n';
 }
 
 //-------------------------------------------------------------------
