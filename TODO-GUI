@@ -22,21 +22,24 @@ displaying useful information.
 The source browser is the main focus of the simulator. Here are a list
 of features to improve it:
 
- - Move the dispatch windows Menu to the source browser and get rid of
-   the dispatch window.
+ - Move the Dispatch Window's Menu to the source browser and get rid of
+   the Dispatch Window.
 
- - Optionally hide the tabs that display file names
+ - Optionally hide the tabs that display file names. They take up
+   valuable GUI real estate and are only used to switch between files.
 
- - Add a cursor
+ - Add a cursor as an alternative means of aiming focus.
 
- - Change all operations that were pointer focused to cursor
-   focused. E.g. the MOVE PC, Set/clear Break, Execute to here, etc
-   will all apply to the line associated with the cursor. 
+ - Change all operations that were pointer-focused to cursor-focused.
+   E.g. the MOVE PC, Set/clear Break, Execute to here, etc
+   will all apply to the line associated with the cursor and not the
+   mouse pointer.
 
  - Dynamic tool tips will display information about objects beneath
    the mouse pointer.
 
- - Add a horizontal scroll bar for files that don't fit.
+ - Add a horizontal scroll bar for files that don't fit in the
+   horizontal space provided.
 
  - Add a status line field indicating the active source file.
 
@@ -78,7 +81,8 @@ Here are ways to improve it:
 
   - Merge the program memory window into the source browser window by
     creating new tabs. E.g. it would be as though if two new files are
-    added to the source browser.
+    added to the source browser. One file would be the disassembly and
+    the other the opcode map.
 
   - Add a source line column to the disassembly window:
 
@@ -87,7 +91,7 @@ Here are ways to improve it:
    -- If more one source line produces multiple opcodes (e.g. a macro
       expansion) then only the first address will display the source
       line. This is somewhat similar to the way the high level
-      language (JAL and C) currently work.
+      language (JAL and C) are currently parsed by gpsim's source browser.
 
   - Symbolic labels occupy a whole new line (as opposed to creating a
     separate column for just labels).
@@ -146,6 +150,8 @@ state of I/O pins (this feature exists already) or internal state
 
  - provide a method for loading an external library (this sort of
    exists, but needs improving).
+
+ - It may make sense to make the bread board viewer a separate application.
 
 7) Trace Window.
 

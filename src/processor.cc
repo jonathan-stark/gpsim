@@ -409,25 +409,7 @@ void Processor::attach_src_line(unsigned int address,
 				unsigned int sline,
 				unsigned int lst_line)
 {
-#if USE_OLD_FILE_CONTEXT == 1
-  if(address < program_memory_size())
-    {
-      //pma[address].update_line_number(file_id,sline,lst_line,0,0);
-      program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
-      //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
-      if(sline > files[file_id].max_line)
-	files[file_id].max_line = sline;
-
-      // FIX ME - what is this '+5' junk?
-
-      if(lst_line+5 > files[lst_file_id].max_line)
-	files[lst_file_id].max_line = lst_line+5;
-
-    }
-#else
-
   if(address < program_memory_size()) {
-
 
     program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
@@ -439,17 +421,16 @@ void Processor::attach_src_line(unsigned int address,
       fc->max_line(sline);
 
     // If there's a listing file then handle it as well
-	if(files->list_id() >=0 && lst_line != 0) {
+    if(files->list_id() >=0 && lst_line != 0) {
       fc = (*files)[files->list_id()];
     
       // FIX ME - what is this '+5' junk?
       if(fc && lst_line+5 > fc->max_line())
         fc->max_line(lst_line+5);
-	}
+    }
 
   }
 
-#endif
 }
 
 //-------------------------------------------------------------------
