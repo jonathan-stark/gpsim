@@ -496,6 +496,6 @@ int Paraface::write_parallel_data(int newdata)
     /* Delay for a bit */
     ts.tv_sec = 0;
     ts.tv_nsec = 1000;
-    nanosleep (&ts, NULL);
+//    nanosleep (&ts, NULL);
     return 0;
 }

@@ -91,28 +91,28 @@ public:
 
   void set_break(void)
     {
-      // FIXME - This overrides what the gui specifies
-      //   for now this is okay, but if we ever want to have different
-      //   update rates for various gui objects (e.g. update the ram window
-      //   more frequently than the source window) then we'll need to change
-      //   this.
-      delta_cycles = gui_update_rate;
-
       pic->cycles.set_break(pic->cycles.value + delta_cycles, this);
     }
       
   virtual void callback(void)
     {
-//      trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
+      set_break();
       profile_keeper.catchup();
       InterfaceObject::callback();
-      set_break();
     };
   virtual ~CyclicBreakPoint()
   {
       pic->cycles.clear_break(this);
   }
+  void set_delta(guint64 delta)
+  {
+      pic->cycles.clear_break(this);
+
+      delta_cycles = delta;
+      set_break();
+  }
 };
+
 
 //
 // interface.cc
@@ -516,21 +516,17 @@ guint64 gpsim_digitize_time(double time)
 }
 
 //--------------------------------------------------------------------------
-//
-// gui_update_rate - a global variable defining how many simulation cycles
-//                   to wait between calls to updating the gui.
 
 guint64  gpsim_get_update_rate(void)
 {
-  return(gui_update_rate);
+    if(gi.gui_update_cbp==NULL)
+	return(DEFAULT_GUI_UPDATE_RATE);
+    return ((CyclicBreakPoint*)gi.gui_update_cbp)->delta_cycles;
 }
 
 void  gpsim_set_update_rate(guint64 new_rate)
 {
-  if(new_rate == 0)
-    new_rate = DEFAULT_GUI_UPDATE_RATE;
-
-  gui_update_rate = new_rate;
+    gi.set_update_rate(new_rate);
 }
 
 
@@ -1738,7 +1734,7 @@ Interface::Interface(gpointer new_object=NULL)
   new_program = NULL;
   remove_object = NULL;
   node_configuration_changed = NULL;
-
+  gui_update = NULL;
 }
 
 Interface *get_interface(unsigned int interface_id)
@@ -1844,6 +1840,15 @@ void gpsim_register_new_program(unsigned int interface_id,
     an_interface->new_program = new_program;
   
 }
+void gpsim_register_gui_update(unsigned int interface_id, 
+					   void (*gui_update) (gpointer new_object))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->gui_update = gui_update;
+  
+}
 
 
 //--------------------------------------------------------------------------
@@ -1867,11 +1872,29 @@ void gpsim_register_new_program(unsigned int interface_id,
 //--------------------------------------------------------------------------
 
 
+static void gui_update_callback  (gpointer *p)
+{
+  gpsimInterface *gpsiminterface = (gpsimInterface *)p;
+  GSList *interface_list = gpsiminterface->interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->gui_update)
+	an_interface->gui_update(an_interface->objectPTR);
+    }
+
+    interface_list = interface_list->next;
+  }
+}
+
 gpsimInterface::gpsimInterface (void )
 {
 
   interfaces = NULL;
-
+  gui_update_cbp  = NULL;
 }
 
 //--------------------------------------------------------------------------
@@ -1894,7 +1917,7 @@ void gpsimInterface::update_object (gpointer xref,int new_value)
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
       if(an_interface->update_object)
-	an_interface->update_object(xref,new_value);
+	an_interface->update_object(xref, new_value);
     }
 
     interface_list = interface_list->next;
@@ -1945,6 +1968,7 @@ void gpsimInterface::simulation_has_stopped (void)
 
 void gpsimInterface::new_processor (unsigned int processor_id)
 {
+    set_update_rate  (gui_update_rate);
 
   GSList *interface_list = interfaces;
 
@@ -2051,4 +2075,22 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
     interface_list = interface_list->next;
   }
   return;
+}
+
+void  gpsimInterface::set_update_rate  (guint64 update_rate)
+{
+    gui_update_rate = update_rate;
+    if(active_cpu!=NULL)
+    {
+	if(gui_update_cbp==NULL)
+	{
+	    gui_update_cbp = new CyclicBreakPoint();
+	    ((CyclicBreakPoint*)gui_update_cbp)->pic = active_cpu;
+	    ((CyclicBreakPoint*)gui_update_cbp)->callback_function = gui_update_callback;
+	    ((CyclicBreakPoint*)gui_update_cbp)->callback_data = this;
+	    ((CyclicBreakPoint*)gui_update_cbp)->delta_cycles = DEFAULT_GUI_UPDATE_RATE;
+	    ((CyclicBreakPoint*)gui_update_cbp)->set_break();
+	}
+	((CyclicBreakPoint*)gui_update_cbp)->set_delta(update_rate);
+    }
 }

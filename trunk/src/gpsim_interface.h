@@ -102,9 +102,14 @@ class Interface {
    * new_program - pointer to the function that is invoked when a new program is
    *               loaded into gpsim
    */
-  /* extern void (*new_program)  (pic_processor *p);*/
 
   void (*new_program)  (unsigned int processor_id);
+
+  /*
+   * gui_update - pointer to the function that is invoked when the gui should update
+   */
+
+  void (*gui_update)  (gpointer object);
 
   unsigned int get_id(void) { return interface_id;};
   unsigned int set_id(unsigned int new_id) { interface_id = new_id;};
@@ -119,6 +124,10 @@ class gpsimInterface {
   GSList *interfaces;
   unsigned int interface_seq_number;
 
+  void *gui_update_cbp;
+  guint64 gui_update_rate;
+
+
   gpsimInterface(void);
 
   // gpsim will call these functions to notify gui and/or modules
@@ -131,6 +140,7 @@ class gpsimInterface {
   void new_module  (Module *module);
   void node_configuration_changed  (Stimulus_Node *node);
   void new_program  (unsigned int processor_id);
+  void set_update_rate(guint64 rate);
 
   unsigned int add_interface(Interface *new_interface);
   void remove_interface(unsigned int interface_id);

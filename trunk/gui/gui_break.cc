@@ -47,8 +47,13 @@ Boston, MA 02111-1307, USA.  */
 
 extern GUI_Processor *gp;
 
+extern int gui_animate_delay; // in milliseconds
+
 void gui_simulation_has_stopped(gpointer callback_data)
 {
+    while(gtk_events_pending())
+	gtk_main_iteration();
+
   if(callback_data)
     {
       GUI_Processor *gp = (GUI_Processor *) callback_data;
@@ -64,6 +69,12 @@ void gui_simulation_has_stopped(gpointer callback_data)
       ProfileWindow_update(gp->profile_window);
       StopWatchWindow_update(gp->stopwatch_window);
     }
+
+  if(gui_animate_delay!=0)
+      usleep(1000*gui_animate_delay);
+
+  while(gtk_events_pending())
+      gtk_main_iteration();
 }
 
 
@@ -77,21 +88,11 @@ void gui_simulation_has_stopped(gpointer callback_data)
  * that break point, this is the routine that is called.
  */
 
-void  gui_cycle_callback (gpointer callback_data)
+/*void  gui_cycle_callback (gpointer callback_data)
 {
 
   if(callback_data)
     {
-      /*
-      GUI_Processor *gp = (GUI_Processor *) callback_data;
-      RegWindow_update(gp->regwin_ram);
-      RegWindow_update(gp->regwin_eeprom);
-      StatusBar_update(gp->status_bar);
-      SourceBrowser_update(gp->program_memory);
-      SourceBrowser_update(gp->source_browser);
-      WatchWindow_update(gp->watch_window);
-      BreadboardWindow_update(gp->breadboard_window);
-      */
 
       // Update all of the windows in the gui
       gui_simulation_has_stopped(callback_data);
@@ -105,7 +106,7 @@ void  gui_cycle_callback (gpointer callback_data)
       printf("*** warning - the gui got an unkown break point (gui_break.c)\n");
     }
 
-}
+}*/
 
 /*
  * init_link_to_gpsim
@@ -114,7 +115,7 @@ void  gui_cycle_callback (gpointer callback_data)
  * Its purpose is to establish a communication link between the
  * simulator and the gui. 
  */
-
+/*
 void init_link_to_gpsim(GUI_Processor *gp)
 {
 
@@ -127,9 +128,7 @@ void init_link_to_gpsim(GUI_Processor *gp)
 
       //      cycle = gp->p->cycles.value_lo + 0x100000;
 
-      //      gui_set_cycle_break_point(cycle, gui_cycle_callback, (gpointer) gp);
-
-      gpsim_set_cyclic_break_point( gp->pic_id, 
+      gpsim_set_cyclic_break_point( gp->pic_id,
 				   gui_cycle_callback, 
 				   (gpointer) gp,
 				   gpsim_get_update_rate());
@@ -141,7 +140,7 @@ void init_link_to_gpsim(GUI_Processor *gp)
 
 
 
-}
+}*/
 /*
  * link_src_to_gpsim
  *

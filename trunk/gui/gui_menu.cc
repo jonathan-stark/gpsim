@@ -54,6 +54,9 @@ typedef struct _note_book_item
 
 GtkItemFactory *item_factory;
 
+extern GUI_Processor *gp;
+extern guint64 gui_update_rate;
+
 static void 
 do_quit_app(GtkWidget *widget) 
 {
@@ -470,8 +473,56 @@ resetbutton_cb(GtkWidget *widget)
     if(gp)
 	gpsim_reset(gp->pic_id);
 }
+
+int gui_animate_delay; // in milliseconds
     
-static void 
+static void
+gui_update_cb(GtkWidget *widget, gpointer data)
+{
+    char *s = (char*)data;
+
+    guint64 value=1;
+
+    gui_animate_delay=0;
+
+    switch(*s)
+    {
+    case 'b':
+	value=1;
+        gui_animate_delay=100;
+        break;
+    case 'c':
+	value=1;
+        gui_animate_delay=300;
+        break;
+    case 'd':
+	value=1;
+        gui_animate_delay=600;
+        break;
+    case '1':
+        value=1;
+        break;
+    case '2':
+        value=1000;
+        break;
+    case '3':
+        value=100000;
+        break;
+    case '4':
+        value=2000000;
+        break;
+    case '5':
+        value=0;
+        break;
+    }
+
+    gpsim_set_update_rate(value);
+    config_set_variable("dispatcher", "gui_update_rate", value);
+    config_set_variable("dispatcher", "gui_animate_delay", gui_animate_delay);
+}
+
+
+/*static void
 spinb_cb(GtkWidget *widget)
 {
     guint64 value;
@@ -479,7 +530,7 @@ spinb_cb(GtkWidget *widget)
     gpsim_set_update_rate(value);
     config_set_variable("dispatcher", "gui_update", value);
 }
-
+*/
 static int dispatcher_delete_event(GtkWidget *widget,
 				   GdkEvent  *event,
 				   gpointer data)
@@ -564,6 +615,11 @@ void create_dispatcher (void)
       int x,y,width,height;
       int update_rate;
       char version_buffer[100];
+
+      GtkWidget *menu;
+      GtkWidget *item;
+
+      GtkWidget *update_rate_menu;
       
       dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -651,8 +707,8 @@ void create_dispatcher (void)
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
 
-      frame = gtk_frame_new("gui_update");
-      if(config_get_variable("dispatcher", "gui_update", &update_rate))
+      frame = gtk_frame_new("gui update rate");
+      if(config_get_variable("dispatcher", "gui_update_rate", &update_rate))
       {
 	  //printf("set update rate %d from file\n",update_rate);
 	  gpsim_set_update_rate(update_rate);
@@ -662,11 +718,108 @@ void create_dispatcher (void)
 	//printf("using default update rate\n");
 	  update_rate=gpsim_get_update_rate();
       }
-      spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
-      spinb = gtk_spin_button_new(spinadj,1,0);
-      gtk_container_add(GTK_CONTAINER(frame),spinb);
-      gtk_signal_connect(GTK_OBJECT(spinb),"changed",
-			 (GtkSignalFunc) spinb_cb, NULL);
+      if(config_get_variable("dispatcher", "gui_animate_delay", &gui_animate_delay))
+      {
+	  //printf("set animate delay %d from file\n",gui_animate_delay);
+      }
+      else
+      {
+	//printf("using default update rate\n");
+          gui_animate_delay=0;
+      }
+//      spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
+//      spinb = gtk_spin_button_new(spinadj,1,0);
+//      gtk_container_add(GTK_CONTAINER(frame),spinb);
+//      gtk_signal_connect(GTK_OBJECT(spinb),"changed",
+//			 (GtkSignalFunc) spinb_cb, NULL);
+	update_rate_menu = gtk_option_menu_new();
+        gtk_widget_show(update_rate_menu);
+	gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
+
+	menu=gtk_menu_new();
+
+	item=gtk_menu_item_new_with_label("Never (fastest simulation)");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"5");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("2000000 cycles");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"4");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("100000 cycles");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"3");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("1000 cycles");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"2");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("Every cycle");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"1");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("100ms animate");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"b");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("300ms animate");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"c");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("700ms animate");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"d");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
+
+	int gui_update_index;
+	if(gui_animate_delay==0)
+	{
+	    gui_update_index=4;
+	    if(update_rate<4000000)
+		gui_update_index=1;
+	    if(update_rate<400000)
+		gui_update_index=2;
+	    if(update_rate<4000)
+		gui_update_index=3;
+	    if(update_rate==0)
+		gui_update_index=0;
+	}
+	else
+	{
+	    gui_update_index=7;
+            if(gui_animate_delay<500)
+		gui_update_index=6;
+	    if(gui_animate_delay<200)
+		gui_update_index=5;
+	}
+    gtk_option_menu_set_history(GTK_OPTION_MENU(update_rate_menu), gui_update_index);
+
+
       gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
 
 

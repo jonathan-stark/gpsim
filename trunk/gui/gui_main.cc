@@ -139,7 +139,7 @@ void gui_new_processor (unsigned int pic_id)
       ProfileWindow_new_processor(gp->profile_window,gp);
       StopWatchWindow_new_processor(gp->stopwatch_window,gp);
 
-      init_link_to_gpsim(gp);
+      //init_link_to_gpsim(gp);
       //  redisplay_prompt();
     }
 
@@ -549,6 +549,7 @@ int gui_init (int argc, char **argv)
   gpsim_register_new_program(interface_id, gui_new_program);
   gpsim_register_new_module(interface_id, gui_new_module);
   gpsim_register_node_configuration_changed(interface_id, gui_node_configuration_changed);
+  gpsim_register_gui_update(interface_id, gui_simulation_has_stopped);
 
   return(0);
 }
