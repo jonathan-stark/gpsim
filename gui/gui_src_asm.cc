@@ -273,7 +273,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(row==INVALID_VALUE)
     return;
   row--;
-  printf("%s address = 0x%x, row = %d\n",__FUNCTION__,address,row);
+  //printf("%s address = 0x%x, row = %d\n",__FUNCTION__,address,row);
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)

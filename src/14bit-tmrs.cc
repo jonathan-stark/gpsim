@@ -976,7 +976,7 @@ void TMR2::update(int ut)
 	  else
 	    break_value = pwm_break_value;
 
-	  guint64 fc = last_cycle + (((break_value>>2) - value) & 0xff) * prescale;
+	  guint64 fc = last_cycle + ((break_value>>2) - value)  * prescale;
 
 	  if(fc <= future_cycle)
 	    {
