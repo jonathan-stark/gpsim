@@ -1640,8 +1640,10 @@ static void pointer_cb(GtkWidget *w,
 	if(dragging)
 	{
             position_module(dragged_module, x+pinspacing, y+pinspacing);
-	    //dragged_module->module->x = dragged_module->x;
-	    //dragged_module->module->y = dragged_module->y;
+	    Attribute *xpos = dragged_module->module->get_attribute("xpos", false);
+	    Attribute *ypos = dragged_module->module->get_attribute("ypos", false);
+	    xpos->set(dragged_module->x);
+	    ypos->set(dragged_module->y);
 	}
 	break;
     case GDK_BUTTON_PRESS:
