@@ -75,7 +75,13 @@ public:
     data = d;
   }
 
-  inline unsigned int geti(void)
+  inline void put(unsigned int d, unsigned int i)
+  {
+    data = d;
+    init = i;
+  }
+
+inline unsigned int geti(void)
   {
     return init;
   }
@@ -84,12 +90,24 @@ public:
   {
     init = i;
   }
-  inline void operator = (RegisterValue rv)
+  inline void operator = (RegisterValue &rv)
   {
     data = rv.data;
     init = rv.init;
   }
 
+  bool operator == (const RegisterValue &rv) const {
+    return data == rv.data && init == rv.init;
+  }
+
+  bool operator != (const RegisterValue &rv) const {
+    return data != rv.data || init != rv.init;
+  }
+
+  void operator >>= (unsigned int val) {
+      data >>= val;
+      init >>= val;
+  }
   char * toString(char *str, int len, int regsize=2);
   char * toBitStr(char *s, int len, unsigned int BitPos, 
 		  const char *ByteSeparator="_",
@@ -190,8 +208,7 @@ public:
 
   virtual void putRV(RegisterValue rv)
   { 
-    value.data = rv.data;
-    value.init = rv.init;
+    value = rv;
   }
 
   /// getRV_notrace and putRV_notrace are analogous to getRV and putRV
@@ -203,8 +220,7 @@ public:
   virtual RegisterValue getRV_notrace(void) { return value;}
   virtual void putRV_notrace(RegisterValue rv)
   { 
-    value.data = rv.data;
-    value.init = rv.init;
+    value = rv;
   }
 
   /// In the Register class, the 'Register *get()' returns a
@@ -366,6 +382,9 @@ public:
   {
     return value;
   }
+  virtual unsigned int get_PC() {
+    return value;
+  }
 
   // initialize the dynamically allocated trace type
   virtual void set_trace_command(unsigned int);
@@ -397,6 +416,7 @@ public:
   }
 
   void reset();
+  // JRH void reset(int reset_address);
 
   virtual unsigned int get_next();
 
@@ -405,7 +425,7 @@ public:
     trace_state = ts;
   }
 
-private:
+protected:
   unsigned int reset_address;      /* Value pc gets at reset */
   
 };
