@@ -302,7 +302,8 @@ void SourceBrowser_change_view (GUI_Object *_this, int view_state)
 	    //BuildStackWindow((Stack_Window*)_this);
 	      break;
 	  case WT_trace_window:
-	      BuildTraceWindow((Trace_Window*)_this);
+	    _this->Build();
+	    //BuildTraceWindow((Trace_Window*)_this);
 	      break;
 	  case WT_profile_window:
 	      BuildProfileWindow((Profile_Window*)_this);

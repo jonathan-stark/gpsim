@@ -67,7 +67,7 @@ void gui_simulation_has_stopped(gpointer callback_data)
       gp->watch_window->Update();
       StackWindow_update(gp->stack_window);
       BreadboardWindow_update(gp->breadboard_window);
-      TraceWindow_update(gp->trace_window);
+      gp->trace_window->Update();
       ProfileWindow_update(gp->profile_window);
       StopWatchWindow_update(gp->stopwatch_window);
     }

@@ -680,8 +680,9 @@ struct TraceMapping {
   int simulation_trace_index;
 };
 
-struct _Trace_Window {
-  GUI_Object     gui_obj;
+class Trace_Window : public GUI_Object
+{
+ public:
 
   GtkCList *trace_clist;
   guint64   last_cycle;   // The cycle of the last trace in the window.
@@ -702,9 +703,16 @@ struct _Trace_Window {
    * between the trace window and gpsim trace buffer */
   struct TraceMapping *trace_map;
   int trace_map_index;
+
+
+  Trace_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
 };
 
-typedef struct _Trace_Window Trace_Window;
+
 
 
 //

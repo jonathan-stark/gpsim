@@ -173,17 +173,13 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
  * INPUTS: *tw a pointer to a Trace_Window structure.
  */
 
-void TraceWindow_update(Trace_Window *tw)
+void Trace_Window::Update(void)
 {
-  GUI_Processor *gp;
-  GtkCList *trace_clist;
+
   guint64 cycle;
 
-  if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
+  if(!enabled)
     return;
-
-  // Get the pointer to the `gui processor' structure
-  gp = ((GUI_Object*)tw)->gp;
 
   if(gp==NULL || gp->pic_id==0)
   {
@@ -192,25 +188,25 @@ void TraceWindow_update(Trace_Window *tw)
   }
 
   // Get a convenient pointer to the gtk_clist that the trace is in.
-  trace_clist=GTK_CLIST(tw->trace_clist);
+  trace_clist=GTK_CLIST(trace_clist);
 
   gtk_clist_freeze(trace_clist);
 
   cycle = gpsim_get_cycles(gp->pic_id);
 
-  tw->trace_flags |= GTF_ENABLE_XREF_UPDATES;
-  if(cycle-tw->last_cycle>=MAXTRACES) {
+  trace_flags |= GTF_ENABLE_XREF_UPDATES;
+  if(cycle-last_cycle>=MAXTRACES) {
     // redraw the whole thing
     gpsim_trace_dump_to_file(MAXTRACES, NULL);
 
   } else {
-    gpsim_trace_dump_to_file(cycle-tw->last_cycle, NULL);
+    gpsim_trace_dump_to_file(cycle-last_cycle, NULL);
 
 
   }
 
-  tw->trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
-  tw->last_cycle = cycle;
+  trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
+  last_cycle = cycle;
   gtk_clist_thaw(trace_clist);
 
 }
@@ -239,7 +235,7 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     if( !((GUI_Object*)tw)->enabled)
 	return;
     
-    tw->gui_obj.gp = gp;
+    tw->gp = gp;
     pic_id = gp->pic_id;
 
 
@@ -254,40 +250,22 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
-                        Register_Window *rw)
+                        Trace_Window *rw)
 {
-  ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
+  rw->ChangeView(VIEW_HIDE);
   return TRUE;
 }
 
-int
-BuildTraceWindow(Trace_Window *tw)
+void Trace_Window::Build(void)
 {
-  GtkWidget *window;
-  GtkWidget *trace_clist;
+
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
-
     
   gint i;
   gint column_width,char_width;
 
-  int x,y,width,height;
-  
-	
-  if(tw==NULL)
-  {
-      printf("Warning build_trace_viewer(%p)\n",tw);
-      return 0;
-  }
-
-	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-  ((GUI_Object*)tw)->window=window;
-
-//  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-//		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
@@ -297,30 +275,24 @@ BuildTraceWindow(Trace_Window *tw)
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
 
   // Trace clist
-  trace_clist=gtk_clist_new_with_titles(TRACE_COLUMNS,trace_titles);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(trace_clist),0,TRUE);
+  trace_clist=GTK_CLIST(gtk_clist_new_with_titles(TRACE_COLUMNS,trace_titles));
+  gtk_clist_set_column_auto_resize(trace_clist,0,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);
     
-  tw->trace_clist = GTK_CLIST(trace_clist);
-
-  width=((GUI_Object*)tw)->width;
-  height=((GUI_Object*)tw)->height;
-  x=((GUI_Object*)tw)->x;
-  y=((GUI_Object*)tw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(tw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(tw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(tw->gui_obj.window),tw->gui_obj.name,"Gpsim");
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), tw);
+		     GTK_SIGNAL_FUNC(delete_event), this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), trace_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(trace_clist));
   
-  gtk_widget_show(trace_clist);
+  gtk_widget_show(GTK_WIDGET(trace_clist));
   gtk_widget_show(scrolled_window);
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
@@ -333,64 +305,71 @@ BuildTraceWindow(Trace_Window *tw)
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 
-  gtk_signal_connect_after(GTK_OBJECT(tw->gui_obj.window), "configure_event",
-  			   GTK_SIGNAL_FUNC(gui_object_configure_event),tw);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+  			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
 
 
   gtk_widget_show (window);
 
-  if(!tw->trace_map) { 
-    tw->trace_map = (struct TraceMapping *)malloc(MAXTRACES * sizeof(struct TraceMapping));
+  if(!trace_map) { 
+    trace_map = (struct TraceMapping *)malloc(MAXTRACES * sizeof(struct TraceMapping));
     
     for(i=0; i<MAXTRACES; i++) {
-      tw->trace_map[i].cycle = 0;
-      tw->trace_map[i].simulation_trace_index = 0;
+      trace_map[i].cycle = 0;
+      trace_map[i].simulation_trace_index = 0;
     }
-    tw->trace_map_index = 0;
+    trace_map_index = 0;
   }
 
-  tw->gui_obj.enabled=1;
-  tw->gui_obj.is_built=1;
-  tw->last_cycle = 0;
+  enabled=1;
+  is_built=1;
+  last_cycle = 0;
 
-  if(tw->processor)
-      TraceWindow_new_processor(tw, ((GUI_Object*)tw)->gp);
+  if(processor)
+    TraceWindow_new_processor(this, gp);
 
-  TraceWindow_update(tw);
+  Update();
+  UpdateMenuItem();
 
-  update_menu_item((GUI_Object*)tw);
-
-  return 0;
 }
 
-int CreateTraceWindow(GUI_Processor *gp)
+//------------------------------------------------------------------------
+// Create
+//
+//
+
+int Trace_Window::Create(GUI_Processor *_gp)
 {
-  Trace_Window *trace_window;
 
-  trace_window = (Trace_Window *)malloc(sizeof(Trace_Window));
+  gp = _gp;
+  name = "trace";
+  window = NULL;
+  wc = WC_data;
+  wt = WT_trace_window;
+  change_view = NULL;
+  is_built = 0;
+  trace_map = NULL;
+  gp->trace_window = this;
 
-  trace_window->gui_obj.gp = gp;
-  trace_window->gui_obj.name = "trace";
-  trace_window->gui_obj.window = NULL;
-  trace_window->gui_obj.wc = WC_data;
-  trace_window->gui_obj.wt = WT_trace_window;
-  trace_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
-  trace_window->gui_obj.is_built = 0;
-  trace_window->trace_map = NULL;
-  gp->trace_window = trace_window;
+  trace_flags = 0;
+  processor=0;
 
-  trace_window->trace_flags = 0;
-  trace_window->processor=0;
+  gp->add_window_to_list(this);
 
-  gp->add_window_to_list((GUI_Object *)trace_window);
+  get_config();
 
-  trace_window->gui_obj.get_config();
-
-  if(trace_window->gui_obj.enabled)
-      BuildTraceWindow(trace_window);
+  if(enabled)
+      Build();
 
   return 1;
+}
+
+Trace_Window::Trace_Window(void)
+{
+
+  menu = "<main>/Windows/Trace";
+
 }
 
 #endif // HAVE_GUI
