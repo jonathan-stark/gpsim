@@ -292,8 +292,8 @@ Processor * P16F627::construct(void)
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16f627";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f627");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -321,8 +321,8 @@ Processor * P16F628::construct(void)
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16f628";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f628");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -352,8 +352,8 @@ pic_processor * P16F648::construct(void)
   p->create_sfr_map();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16f648";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f648");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 

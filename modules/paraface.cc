@@ -285,7 +285,7 @@ void Paraface::create_iopin_map(void)
     //   name of the logic gate (which is assigned by the user and
     //   obtained with the name() member function call).
 
-    char *pin_name = name();   // Get the name of this paraface
+    char *pin_name = (char*)name().c_str();   // Get the name of this paraface
     if(pin_name) {
 	output_port->new_name(pin_name);
 	input_port->new_name(pin_name);
@@ -352,7 +352,7 @@ Module * Paraface::construct(const char *new_name=NULL)
 
     Paraface *parafaceP = new Paraface ;
     parafaceP->open_parallel_port();
-    parafaceP->new_name(new_name);
+    parafaceP->new_name((char*)new_name);
     parafaceP->create_iopin_map();
 
     return parafaceP;

@@ -161,8 +161,8 @@ Processor * P16F871::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16F871";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f871");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -312,8 +312,8 @@ Processor * P16F873::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16F873";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f873");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -456,8 +456,8 @@ Processor * P16F874::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16F874";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f874");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -529,8 +529,8 @@ Processor * P16F877::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16F877";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16f877");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 

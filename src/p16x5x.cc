@@ -229,8 +229,8 @@ Processor * P16C54::construct(void)
 
   p->create();
 
-  p->name_str = "p16c54";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16c54");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -326,14 +326,15 @@ Processor * P16C55::construct(void)
 
   P16C55 *p = new P16C55;
 
-  cout << " c55 construct\n";
+  if(verbose)
+    cout << " c55 construct\n";
 
   p->pc->set_reset_address(0x1ff);
 
   p->create();
 
-  p->name_str = "p16c55";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16c55");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 

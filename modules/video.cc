@@ -230,7 +230,7 @@ void Video::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this logic gate
+  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
   if(pin_name) {
     port->new_name(pin_name);
   }
@@ -281,7 +281,7 @@ Module * Video::construct(const char *new_name)
 
   Video *video = new Video ;
 
-  video->new_name(new_name);
+  video->new_name((char*)new_name);
   video->create_iopin_map();
 
   //cout << "AND2Gate should be constructed\n";

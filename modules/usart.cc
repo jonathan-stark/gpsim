@@ -60,11 +60,11 @@ Boston, MA 02111-1307, USA.  */
 #include "usart.h"
 
 
-void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL);
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
-pic_processor *gpsim_get_active_cpu(void);
-guint64 gpsim_get_current_time(void);
-guint64 gpsim_digitize_time(double time);
+//void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL);
+//void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
+//pic_processor *gpsim_get_active_cpu(void);
+//guint64 gpsim_get_current_time(void);
+//guint64 gpsim_digitize_time(double time);
 
 /**********************************************************************************
 
@@ -137,7 +137,7 @@ public:
     if(state ^ (index & 1))  {
       index = (index + 1) & max_events;
       //cout << "New event " << state << "  index = " << index << '\n';
-      buffer[index] = gpsim_get_current_time();
+      buffer[index] = cycles.get();
     }
 
   }
@@ -354,7 +354,7 @@ public:
     cout << "SPBRG::" << __FUNCTION__ << " is not implemented\n";
 
     //pic_processor *cpu = gpsim_get_active_cpu();
-    last_time = gpsim_get_current_time();
+    last_time = cycles.get();
 
     cout << "SPBRG rollover at cycle " << last_time << '\n';
 
@@ -370,7 +370,7 @@ public:
 
   virtual void start(void) {
 
-    last_time = gpsim_get_current_time();
+    last_time = cycles.get();
     start_time = last_time;
 
     //future_time = last_time + time_per_bit;
@@ -389,7 +389,7 @@ public:
   virtual void get_next_cycle_break(void) {
     future_time = last_time + time_per_bit;
 
-    gpsim_set_break(future_time, this);
+    cycles.set_break(future_time, this);
 
 
   };
@@ -400,10 +400,10 @@ public:
 
     baud = new_baud;
 
-    pic_processor *cpu = gpsim_get_active_cpu();
-    if(cpu && baud>0.0) {
+    //pic_processor *cpu = gpsim_get_active_cpu();
+    if(active_cpu && baud>0.0) {
 
-      time_per_bit = cpu->time_to_cycles(1.0/baud);
+      time_per_bit = active_cpu->time_to_cycles(1.0/baud);
 
     }
   };
@@ -679,13 +679,16 @@ class TXREG : public BreakCallBack
     /*
       Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
     */
+    if(active_cpu) {
+      time_per_packet = active_cpu->time_to_cycles( (1.0 +             // start bit
+						     bits_per_byte +   // data bits
+						     stop_bits  +      // stop bit(s)
+						     use_parity)       //
+						    /baud);
+      time_per_bit = active_cpu->time_to_cycles( 1.0/baud );
+    } else
+      time_per_packet = time_per_bit = 0;
 
-    time_per_packet = gpsim_digitize_time( (1.0 +                 // start bit
-					    bits_per_byte +       // data bits
-					    stop_bits  +          // stop bit(s)
-					    use_parity)           //
-					    /baud);
-    time_per_bit = gpsim_digitize_time( 1.0/baud );
     //cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
   }
 
@@ -721,7 +724,7 @@ class TXREG : public BreakCallBack
       cout << "\n\n";
     }
 
-    last_time = gpsim_get_current_time();
+    last_time = cycles.get();
     start_time = last_time;
 
     if(txpin) {
@@ -745,7 +748,7 @@ class TXREG : public BreakCallBack
       
     }
 
-    gpsim_set_break(future_time, this);
+    cycles.set_break(future_time, this);
   }
 
   void build_tx_packet(unsigned int tb) {
@@ -770,9 +773,9 @@ class TXREG : public BreakCallBack
     }
 
     build_tx_packet(tx_byte);
-    last_time = gpsim_get_current_time();
+    last_time = cycles.get();
     future_time = last_time + time_per_bit;
-    gpsim_set_break(future_time, this);
+    cycles.set_break(future_time, this);
   }
 };
 
@@ -894,12 +897,16 @@ class RCREG : public BreakCallBack // : public _RCREG
       Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
     */
 
-    time_per_packet = gpsim_digitize_time( (1.0 +                 // start bit
-					    bits_per_byte +       // data bits
-					    stop_bits  +          // stop bit(s)
-					    use_parity)           //
-					    /baud);
-    time_per_bit = gpsim_digitize_time( 1.0/baud );
+    if(active_cpu) {
+      time_per_packet = active_cpu->time_to_cycles( (1.0 +             // start bit
+						     bits_per_byte +   // data bits
+						     stop_bits  +      // stop bit(s)
+						     use_parity)       //
+						    /baud);
+      time_per_bit = active_cpu->time_to_cycles( 1.0/baud );
+    } else
+      time_per_packet = time_per_bit = 0;
+
     //cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
   }
 
@@ -950,7 +957,7 @@ class RCREG : public BreakCallBack // : public _RCREG
     //rx_event->dump(-1);  // dump all events
     rx_event->dump_ASCII_art( time_per_bit/4, start_bit_index );  // time_per_packet/10,-1);
 
-    guint64 current_time =  gpsim_get_current_time();
+    guint64 current_time =  cycles.get();
     int edges = rx_event->get_edges(start_time, current_time);
     //cout << " gpsim time is " << current_time << "\n";
     //cout << " # of edges for one byte time " << edges << '\n';
@@ -1006,7 +1013,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 
   void start(void) {
 
-    last_time = gpsim_get_current_time();
+    last_time = cycles.get();
     start_time = last_time;
 
     receive_state = RS_RECEIVING;
@@ -1017,7 +1024,7 @@ class RCREG : public BreakCallBack // : public _RCREG
     future_time = last_time + time_per_packet;
 
     if(!autobaud) {
-      gpsim_set_break(future_time, this);
+      cycles.set_break(future_time, this);
       //cout << "RCREG::start Setting Break\n";
     }
     //cout << "RCREG::start   last_cycle = " << 
@@ -1111,7 +1118,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 	return 0x400;
     }
 
-    guint64 cur_time = gpsim_get_current_time();
+    guint64 cur_time = cycles.get();
     guint64 t1 = rx_event->buffer[sindex] + bit_time + bit_time/2;
 
     guint32 index1 = rx_event->get_index(t1);
@@ -1271,7 +1278,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 
 	if(!bit && receive_state == RS_WAITING_FOR_START) {
 	  // Looks like we just got a start bit.
-	  start_bit_time = gpsim_get_current_time();
+	  start_bit_time = cycles.get();
 	  cout  << "Start bit at t = 0x" << start_bit_time << '\n';
 	  receive_state = RS_RECEIVING;
 	}
@@ -1339,7 +1346,10 @@ class RCREG : public BreakCallBack // : public _RCREG
 	    if(suspicious)
 	      cout << "Unable to determine the baud rate.\n";
 
-	    cout << "Minimum pulse width " << hex << min << " Baud = " << (gpsim_digitize_time(1.0)/w) <<'\n';
+	    cout << "Minimum pulse width " 
+		 << hex << min 
+		 << " Baud = " 
+		 << (active_cpu->time_to_cycles((1.0)/w)) <<'\n';
 
 	    // Assume the baud rate is correct.
 	    // use it to decode the bit stream.
@@ -1424,7 +1434,7 @@ class RCREG : public BreakCallBack // : public _RCREG
 	case RS_WAITING_FOR_START:
 	  if(!bit) {
 	    // Looks like we just got a start bit.
-	    start_bit_time = gpsim_get_current_time();
+	    start_bit_time = cycles.get();
 
 	    cout  << "Start bit at t = 0x" << start_bit_time << '\n';
 
@@ -1751,7 +1761,7 @@ void USARTModule::create_iopin_map(void)
   //   name of the usart (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this usart
+  char *pin_name = (char*)name().c_str();   // Get the name of this usart
   if(pin_name) 
     port->new_name(pin_name);
   else
@@ -1835,7 +1845,7 @@ Module * USARTModule::USART_construct(const char *new_name)
   USARTModule *um = new USARTModule(new_name);
 
   if(new_name) {
-    um->new_name(new_name);
+    um->new_name((char*)new_name);
     //um->res->put_name(new_name);
   }
 
@@ -1900,7 +1910,7 @@ public:
     if(++event_index >= EVENT_BUFFER_SIZE) {
       // This buffer is full
       event_index--;
-      end_time = gpsim_get_current_time();
+      end_time = cycles.get();
       return 1;
     }
     return 0;
@@ -1908,7 +1918,7 @@ public:
 
   void start(void) {
     event_index = 0;
-    start_time = gpsim_get_current_time();
+    start_time = cycles.get();
   }
 
   unsigned int get_event(int index) {
@@ -1973,7 +1983,7 @@ public:
 
   inline void boolean_event(guint64 not_used_event_time, bool state)
   {
-    guint64 event_time = gpsim_get_current_time();
+    guint64 event_time = cycles.get();
     guint64 delta  = event_time - latest_event_time;
 
     latest_event_time = event_time;

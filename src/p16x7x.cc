@@ -405,8 +405,9 @@ Processor * P16C71::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16c71";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p16c71");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -517,8 +518,9 @@ Processor * P16C712::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16c712";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p16c712");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -544,8 +546,9 @@ Processor * P16C716::construct(void)
   p->create();
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p16c716";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p16c716");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -669,8 +672,8 @@ Processor * P16C72::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16c72";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16c72");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -799,8 +802,8 @@ Processor * P16C73::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16c73";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16c73");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -931,8 +934,8 @@ Processor * P16C74::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->name_str = "p16c74";
-  symbol_table.add_module(p,p->name_str);
+  p->new_name("p16c74");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 

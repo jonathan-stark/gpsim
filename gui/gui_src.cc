@@ -57,9 +57,9 @@ public:
   void action(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    if(sbw && sbw->gp && sbw->gp->cpu)
+    if(sbw && sbw->pma)
       {
-	sbw->gp->cpu->pma.step(1);
+	sbw->pma->step(1);
       }
   }
 };
@@ -70,10 +70,10 @@ public:
   void action(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    if(sbw && sbw->gp && sbw->gp->cpu)
+    if(sbw && sbw->pma)
       {
 	// Step Over Next instruction, or hll statement
-	sbw->gp->cpu->pma.step_over();
+	sbw->pma->step_over();
       }
   }
 };
@@ -84,9 +84,9 @@ public:
   void action(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    if(sbw && sbw->gp && sbw->gp->cpu)
+    if(sbw && sbw->pma)
       {
-	sbw->gp->cpu->pma.run();
+	sbw->pma->run();
       }
   }
 };
@@ -97,9 +97,9 @@ public:
   void action(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    if(sbw && sbw->gp && sbw->gp->cpu)
+    if(sbw && sbw->pma)
       {
-	sbw->gp->cpu->pma.stop();
+	sbw->pma->stop();
       }
   }
 };
@@ -110,9 +110,9 @@ public:
   void action(gpointer data)
   {
     SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
-    if(sbw && sbw->gp && sbw->gp->cpu)
+    if(sbw && sbw->pma)
       {
-	sbw->gp->cpu->pma.finish();
+	sbw->pma->finish();
       }
   }
 };

@@ -172,7 +172,7 @@ Processor * P12C508::construct(void)
   p->pic_processor::create_symbols();
 
   p->name_str = "p12c508";
-  symbol_table.add_module(p,p->name_str);
+  symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
 
@@ -210,7 +210,7 @@ Processor * P12C509::construct(void)
   p->pic_processor::create_symbols();
 
   p->name_str = "p12c509";
-  symbol_table.add_module(p,p->name_str);
+  symbol_table.add_module(p,p->name_str.c_str());
 
   return p;
 

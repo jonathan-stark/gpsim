@@ -383,7 +383,7 @@ void LcdDisplay::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this LCD
+  char *pin_name = (char*)name().c_str();   // Get the name of this LCD
   if(pin_name) {
     data_port->new_name(pin_name);
     control_port->new_name(pin_name);
@@ -443,7 +443,7 @@ Module * LcdDisplay::construct(const char *new_name=NULL)
   cout << " LCD display constructor\n";
 
   LcdDisplay *lcdP = new LcdDisplay(2,20);
-  lcdP->new_name(new_name);
+  lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
 
 
@@ -527,7 +527,7 @@ Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
      cout << " LCD 161A display constructor\n";
 
   LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(2,8,TWO_ROWS_IN_ONE);
-  lcdP->new_name(new_name);
+  lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
 
   // Are these really needed? the constructor already does it.

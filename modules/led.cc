@@ -535,7 +535,7 @@ void Led_7Segments::build_window(void)
 
     //gtk_widget_show_all (window);
 
-    widget = main_vbox;
+    set_widget(main_vbox);
 
     segment_gc=NULL;
 
@@ -579,25 +579,11 @@ Led_7Segments::Led_7Segments(void)
 
   interface = new LED_Interface(this);
   gi.add_interface(interface);
-  /*
-  interface_id = gpsim_register_interface((gpointer)this);
-
-  gpsim_register_simulation_has_stopped(interface_id, led7_simulation_has_stopped);
-  gpsim_register_gui_update(interface_id, led7_simulation_has_stopped);
-
-  cbp =  gpsim_set_cyclic_break_point2(led7_simulation_has_stopped,
-				       (gpointer)this,
-				       10000000);
-  */
 }
 
 Led_7Segments::~Led_7Segments(void)
 {
-    //cout << "7-segment led destructor\n";
-
-    //gpsim_unregister_interface(interface_id);
-    //gpsim_clear_break(cbp);
-    delete port;
+  delete port;
 }
 
 //--------------------------------------------------------------
@@ -626,7 +612,7 @@ void Led_7Segments::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this logic gate
+  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
   if(pin_name) {
     port->new_name(pin_name);
   }
@@ -693,13 +679,13 @@ void Led_7Segments::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Led_7Segments::construct(const char *new_name=NULL)
+Module * Led_7Segments::construct(const char *new_name=0)
 {
 
 //  cout << " 7-segment LED display constructor\n";
 
   Led_7Segments *l7sP = new Led_7Segments ;
-  l7sP->new_name(new_name);
+  l7sP->new_name((char*)new_name);
   l7sP->create_iopin_map();
 
   return l7sP;
@@ -815,7 +801,7 @@ void Led::build_window(void)
     gtk_widget_set_events (darea, GDK_EXPOSURE_MASK | GDK_BUTTON_PRESS_MASK);
     gtk_widget_show (darea);
 
-    widget = darea;
+    set_widget(darea);
 
     gc=NULL;
 
@@ -845,16 +831,6 @@ Led::Led(void)
 
   interface = new LED_Interface(this);
   gi.add_interface(interface);
-
-  /*
-  interface_id = gpsim_register_interface((gpointer)this);
-
-  gpsim_register_simulation_has_stopped(interface_id, led_simulation_has_stopped);
-  gpsim_register_gui_update(interface_id, led_simulation_has_stopped);
-  cbp =  gpsim_set_cyclic_break_point2(led_simulation_has_stopped,
-				       (gpointer)this,
-				       10000000);
-  */
 }
 
 Led::~Led(void)
@@ -892,7 +868,7 @@ void Led::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this logic gate
+  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
   if(pin_name) {
     port->new_name(pin_name);
   }
@@ -935,13 +911,13 @@ void Led::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-Module * Led::construct(const char *new_name=NULL)
+Module * Led::construct(const char *new_name=0)
 {
 
 //  cout << " 7-segment LED display constructor\n";
 
   Led *ledP = new Led;
-  ledP->new_name(new_name);
+  ledP->new_name((char*)new_name);
   ledP->create_iopin_map();
 
   return ledP;

@@ -47,24 +47,12 @@ class Processor;
 class ProgramMemoryAccess :  public BreakCallBack
 {
  public:
-  Processor *cpu;
-
-  unsigned int _address, _opcode, _state;
-
   // Symbolic debugging
   enum HLL_MODES {
     ASM_MODE,      // Source came from plain old .asm files
     HLL_MODE       // Source came from a high level language like C or JAL.
   };
 
-  enum HLL_MODES hll_mode;
-
-  // breakpoint instruction pointer. This is used by get_base_instruction().
-  // If an instruction has a breakpoint set on it, then get_base_instruction
-  // will return a pointer to the instruction and will initialize bpi to
-  // the breakpoint instruction that has replaced the one in the processor's
-  // program memory.
-  Breakpoint_Instruction *bpi;
 
   instruction &operator [] (int address);
 
@@ -73,7 +61,7 @@ class ProgramMemoryAccess :  public BreakCallBack
   instruction *get_base_instruction(int addr);
   unsigned int get_opcode(int addr);
   char *get_opcode_name(int addrr, char *buffer, int size);
-  unsigned int get_PC(void);
+  virtual unsigned int get_PC(void);
 
   void put_opcode(int addr, unsigned int new_opcode);
   // When a pic is replacing one of it's own instructions, this routine
@@ -140,6 +128,36 @@ class ProgramMemoryAccess :  public BreakCallBack
   void set_hll_mode(int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
   bool isHLLmode(void) {return get_hll_mode() == HLL_MODE;}
+
+  string &name(void)
+    {
+      return name_str;
+    }
+  void name(string &new_name);
+  
+
+ private:
+  string name_str;            // Optional name if this is one of several pma's
+
+  Processor *cpu;             // The processor to which this pma belongs.
+
+  unsigned int
+    _address,
+    _opcode, 
+    _state;
+
+
+  enum HLL_MODES hll_mode;
+
+
+  // breakpoint instruction pointer. This is used by get_base_instruction().
+  // If an instruction has a breakpoint set on it, then get_base_instruction
+  // will return a pointer to the instruction and will initialize bpi to
+  // the breakpoint instruction that has replaced the one in the processor's
+  // program memory.
+  Breakpoint_Instruction *bpi;
+
+
 };
 
 
@@ -169,7 +187,6 @@ class RegisterMemoryAccess
                               // 
   Processor *cpu;             // Pointer to the processor whose registers
                               // are being managed.
-
 };
 
 //------------------------------------------------------------------------
@@ -344,12 +361,12 @@ public:
   //
 
   virtual void run(void);
-  void run_to_address(unsigned int destination);
+  virtual void run_to_address(unsigned int destination);
   virtual void finish(void);
 
   virtual void sleep(void) {};
-  void step(unsigned int steps);
-  void step_over(void);
+  virtual void step(unsigned int steps);
+  virtual void step_over(void);
   virtual void step_one(void) = 0;
   virtual void interrupt(void) = 0 ;
 
@@ -361,8 +378,8 @@ public:
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
 
-  void disassemble (int start_address, int end_address);
-  void list(int file_id, int pcval, int start_line, int end_line);
+  virtual void disassemble (int start_address, int end_address);
+  virtual void list(int file_id, int pcval, int start_line, int end_line);
 
   // Configuration control
 
@@ -441,6 +458,11 @@ public:
 
 
 };
+
+//----------------------------------------------------------
+// Global definitions:
+
+extern Processor *active_cpu;
 
 
 #endif

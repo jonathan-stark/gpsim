@@ -312,11 +312,6 @@ public:
 #define cpu_pic ( (pic_processor *)cpu)
 
 
-//----------------------------------------------------------
-// Global definitions:
-
-extern Processor *active_cpu;
-
 //--------------------------------------
 //
 // non-class helper functions.

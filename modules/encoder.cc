@@ -79,7 +79,7 @@ void Encoder::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = name();   // Get the name of this switch
+  char *pin_name = (char*)name().c_str();   // Get the name of this switch
   if(pin_name) {
     enc_port->new_name(pin_name);
   }
@@ -174,7 +174,7 @@ void Encoder::create_widget(Encoder *enc)
 	
 	
   // Tell gpsim which widget to use in breadboard.
-  enc->widget=box1;
+  enc->set_widget(box1);
 }
 
 //--------------------------------------------------------------
@@ -183,7 +183,7 @@ Module * Encoder::construct(const char *new_name=NULL)
 {
 
   Encoder *enc_p = new Encoder ;
-  enc_p->new_name(new_name);
+  enc_p->new_name((char*)new_name);
   enc_p->create_iopin_map();
 
   enc_p->create_widget(enc_p);

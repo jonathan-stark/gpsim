@@ -102,7 +102,8 @@ public:
   void add_address(Processor *cpu, char *, int );
   void add_w(Processor *cpu, WREG *w );
   void add_module(Module * m, const char *module_name);
-  void remove_module(Module * m, char *module_name);
+  //void remove_module(Module * m, char *module_name);
+  void remove_module(Module * m);
   void add(Processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);

@@ -1,3 +1,13 @@
+2004-03-30 Scott Dattalo  <scott@dattalo.com>
+	* numeous files throughout gpsim: The Module class now uses 
+	a string type instead of a 'char *' for the module name. Also,
+	the gui x and y coordinate were removed from the module class (I
+	still want to remove the 'widget' member too).
+	* modules/usart.cc: calls to the old gpsim api were still lingering
+	around here.
+	* gui/gui_src_asm.cc, gui/gui_src.h, src/processor.h: more browser
+	splitting stuff.
+
 2004-03-29  Borut Razem  <borut.razem@siol.net>
 	* src/modules.cc: support of external modules on WIN32
 

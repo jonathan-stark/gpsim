@@ -192,8 +192,9 @@ Processor * P17C7xx::construct(void)
   p->create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c7xx";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c7xx");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -275,15 +276,13 @@ Processor * P17C75x::construct(void)
   cout << " 17c75x construct\n";
 
   P17C75x *p = new P17C75x;
-  cout << "1\n";
+
   p->create(0x1fff);
-  cout << "2\n";
   p->create_invalid_registers ();
-  cout << "3\n";
   p->pic_processor::create_symbols();
-  cout << "4\n";
-  p->name_str = "p17c75x";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c75x");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -492,8 +491,9 @@ Processor * P17C756::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c756";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c756");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -550,8 +550,9 @@ Processor * P17C756A::construct(void)
   p->P17C7xx::create(0x1fff);
   //p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c756a";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c756a");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -611,8 +612,9 @@ Processor * P17C752::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c752";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c752");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -668,8 +670,9 @@ Processor * P17C762::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c762";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c762");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -725,8 +728,9 @@ Processor * P17C766::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "p17c766";
-  symbol_table.add_module(p,p->name_str);
+
+  p->new_name("p17c766");
+  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
