@@ -61,8 +61,8 @@ extern int gui_question(char *question, char *a, char *b);
 
 static GList *sa_xlate_list[SBAW_NRFILES]={0};  // lists containing sa_entry pointers
 
-static struct sa_entry *gui_line_to_entry(int id,int line);
-static struct sa_entry *gui_index_to_entry(int id, int index);
+static struct sa_entry *gui_line_to_entry(int id,unsigned int line);
+static struct sa_entry *gui_index_to_entry(int id, unsigned int index);
 
 typedef enum {
     MENU_FIND_TEXT,
@@ -174,7 +174,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 //pixel is 0 -> maxfont-1 for line zero.
 //         maxfont -> maxfont*2-1 for line one
 //         ...
-static struct sa_entry *gui_pixel_to_entry(int id, int pixel)
+static struct sa_entry *gui_pixel_to_entry(int id, unsigned int pixel)
 {
     struct sa_entry *e;      // to simplify expressions
     GList *p;                // iterator
@@ -200,7 +200,7 @@ static struct sa_entry *gui_pixel_to_entry(int id, int pixel)
     return e;
 }
 
-static struct sa_entry *gui_line_to_entry(int id, int line)
+static struct sa_entry *gui_line_to_entry(int id, unsigned int line)
 {
     struct sa_entry *e;
     GList *p;
@@ -232,7 +232,7 @@ static struct sa_entry *gui_line_to_entry(int id, int line)
     return e;
 }
 
-static struct sa_entry *gui_index_to_entry(int id, int index)
+static struct sa_entry *gui_index_to_entry(int id, unsigned int index)
 {
     struct sa_entry *e;
     GList *p;
@@ -269,8 +269,8 @@ void SourceBrowserAsm_Window::SetPC(int address)
   int row; 
   unsigned int pixel; 
   float inc; 
-  int i;
-  int sbawFileId;
+  unsigned int i;
+  unsigned int sbawFileId;
 
   GtkWidget *new_pcw;
   int id=-1;
@@ -356,9 +356,9 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 {
   struct sa_entry *e;
   int id=-1, i;
-  int pixel;
+  unsigned int pixel;
   float inc;
-  int line;
+  unsigned int line;
     
   if(!source_loaded)
     return;
@@ -410,7 +410,7 @@ void SourceBrowserAsm_Window::Update(void)
  */
 void SourceBrowserAsm_Window::UpdateLine(int address)
 {
-  int row;
+  unsigned int row;
 
   int i,id=-1;
   struct sa_entry *e;
@@ -489,9 +489,9 @@ static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
-    int id, address, line;
+    unsigned int id, address, line;
     char text[256];
-    int i,start,end, temp;
+    unsigned int i,start,end, temp;
 
     if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
       return;
@@ -619,7 +619,7 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
   GtkWidget *menu;
   GtkWidget *submenu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
   int id;
 
   popup_sbaw=sbaw;
@@ -736,7 +736,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 			   guint            page_num,
 			   SourceBrowserAsm_Window *sbaw)
 {
-    static int current_page=-1;
+    static unsigned int current_page=INVALID_VALUE;
     
     if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
       return 1;
@@ -774,7 +774,7 @@ static gint sigh_button_event(GtkWidget *widget,
 		       SourceBrowserAsm_Window *sbaw)
 {
     int id;
-    int i;
+    unsigned int i;
     GtkWidget *item;
 
     assert(event&&sbaw);
@@ -920,7 +920,7 @@ static void marker_cb(GtkWidget *w1,
   static int dragwidget_oldy;
   int pixel;
   int line;
-  unsigned int address;
+  //  unsigned int address=0;
     
   static GtkWidget *dragwidget;
   static int dragwidget_x;
@@ -1075,7 +1075,7 @@ static void marker_cb(GtkWidget *w1,
 	
     if(dragwidget == sbaw->pages[id].source_pcwidget) {
       
-      sbaw->pma->find_closest_address_to_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
+      unsigned int address = sbaw->pma->find_closest_address_to_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
 
       if(address!=INVALID_VALUE)
 	sbaw->gp->cpu->pc->put_value(address);
@@ -1293,7 +1293,6 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
   int line=0;
   struct sa_entry *entry;
   GList *iter;
-  breakpoint_info *bpi;
 
   // get a manageable pointer to the processor
   Processor *cpu = gp->cpu;
@@ -1570,14 +1569,12 @@ void SourcePage::Close(void)
       notebook_child=0;
     }
   source_pcwidget=0;
-  pageindex_to_fileid=-1;
+  pageindex_to_fileid=INVALID_VALUE;
   
 }
 
 void SourceBrowserAsm_Window::CloseSource(void)
 {
-  int i;
-
     
   load_source=0;
   source_loaded = 0;
@@ -1604,7 +1601,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   //struct file_context *gpsim_file;
   int file_id;
 
-  int address;
+  unsigned int address;
 
   if(!gp || !gp->cpu || !gp->cpu->pma)
     return;
@@ -2328,8 +2325,6 @@ void SourceBrowserAsm_Window::Build(void)
   GtkWidget *button;
 
   GtkWidget *label;
-  GdkColor text_fg;
-  GdkColor text_bg;
   char *fontstring;
 
 
@@ -2493,8 +2488,6 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
 {
-  gint i;
-
   menu = "<main>/Windows/Source";
 
   window = 0;

@@ -210,11 +210,8 @@ popup_activated(GtkWidget *widget, gpointer data)
   int pm_size;
   gint char_width;
 
-  if(widget==0 || data==0)
-    {
-      printf("Warning popup_activated(%p,%p)\n",widget,(unsigned int)data);
-      return;
-    }
+  if(!widget || !data)
+    return;
     
   if(!popup_sbow || !popup_sbow->gp || !popup_sbow->gp->cpu) {
     printf("%s:%d - 0 pointer \n",__FILE__,__LINE__);
@@ -312,7 +309,7 @@ build_menu_for_sheet(SourceBrowserOpcode_Window *sbow)
     
     GtkWidget *submenu;
 
-  int i;
+  unsigned int i;
 
   if(sbow==0)
   {
@@ -379,7 +376,7 @@ build_menu_for_clist(SourceBrowserOpcode_Window *sbow)
     GtkWidget *menu;
     GtkWidget *item;
 
-  int i;
+  unsigned int i;
 
   if(sbow==0)
   {
@@ -924,7 +921,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 
   GtkSheet *sheet;
   const gchar *text;
-  int justification,n=0;
+  int justification;
 
   sheet=GTK_SHEET(widget);
   
@@ -945,6 +942,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
     {
 
       int reg = row*16+col;
+      unsigned int n=0;
 
       text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
 
@@ -957,7 +955,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
       if(errno != 0)
       {
 	  n = sbow->gp->cpu->pma->get_opcode(reg);
-	  sbow->memory[reg] = -1;
+	  sbow->memory[reg] = INVALID_VALUE;
       }
 
       if(n != sbow->memory[reg])
@@ -1141,7 +1139,7 @@ void SourceBrowserOpcode_Window::SetPC(int address)
 void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 {
   char buf[128];
-  int opcode;
+  unsigned int opcode;
   gint i;
   int pm_size;
   int pc;
@@ -1244,7 +1242,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   if(memory!=0)
     free(memory);
-  memory=(int*)malloc(pm_size*sizeof(*memory));
+  memory=(unsigned int*)malloc(pm_size*sizeof(*memory));
 
   gtk_clist_freeze (GTK_CLIST (clist));
   gtk_sheet_freeze(GTK_SHEET(sheet));
@@ -1594,7 +1592,9 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   program=0;
 
   ascii_mode=1; /// default, two bytes/cell, MSB first
-  config_get_variable(name(),"ascii_mode",&ascii_mode);
+  int tmp=0;
+  config_get_variable(name(),"ascii_mode",&tmp);
+  ascii_mode = tmp;
 
   get_config();
 

@@ -80,7 +80,7 @@ Symbol_Window *popup_sw;
 static void update_menus(Symbol_Window *sw)
 {
     GtkWidget *item;
-    int i;
+    unsigned int i;
 
     for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
 	item=menu_items[i].item;
@@ -106,8 +106,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
     sym *entry;
-
-    int value;
 
     if(widget==0 || data==0)
     {
@@ -142,7 +140,7 @@ build_menu(GtkWidget *sheet, Symbol_Window *sw)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
   if(sheet==0 || sw==0)
   {
@@ -210,9 +208,7 @@ extern list <symbol *> st;
 void Symbol_Window::Update(void)
 {
 
-  char buffer[256];
-
-  char **entry; // 'name', 'type', 'typedata'
+  char **entry;
 
   GList *iter;
 
@@ -232,7 +228,7 @@ void Symbol_Window::Update(void)
       GList *next=iter->next;
       free(((sym*)iter->data)->name);
       free((sym*)iter->data);
-      g_list_remove(iter,iter->data); // FIXME. I really need a tutorial
+      g_list_remove(iter,iter->data);
       iter=next;
       //	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }

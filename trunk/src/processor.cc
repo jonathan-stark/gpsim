@@ -341,7 +341,7 @@ void Processor::init_program_memory (unsigned int memory_size)
 // is in fact a configuration word.
 //
 
-void Processor::init_program_memory(int address, int value)
+void Processor::init_program_memory(unsigned int address, unsigned int value)
 {
 
   if(address < program_memory_size())
@@ -364,17 +364,19 @@ void Processor::init_program_memory(int address, int value)
 // simulated program memory.
 //
 
-void Processor::build_program_memory(int *memory,int minaddr, int maxaddr)
+void Processor::build_program_memory(unsigned int *memory,
+				     unsigned int minaddr, 
+				     unsigned int maxaddr)
 {
 
-  for (int i = minaddr; i <= maxaddr; i++)
+  for (unsigned int i = minaddr; i <= maxaddr; i++)
     if(memory[i] != 0xffffffff)
       init_program_memory(i, memory[i]);
 
 }
 
 //-------------------------------------------------------------------
-void Processor::set_out_of_range_pm(int address, int value)
+void Processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   cout << "Warning::Out of range address " << address << " value " << value << endl;
@@ -388,7 +390,10 @@ void Processor::set_out_of_range_pm(int address, int value)
 // attach_src_line - This member function establishes the one-to-one link
 // between instructions and the source code that create them.
 
-void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
+void Processor::attach_src_line(unsigned int address,
+				unsigned int file_id,
+				unsigned int sline,
+				unsigned int lst_line)
 {
 #if USE_OLD_FILE_CONTEXT == 1
   if(address < program_memory_size())
@@ -526,7 +531,10 @@ void Processor::read_src_files(void)
 //
 // Display the contents of either a source or list file
 //
-void Processor::list(int file_id, int pc_val, int start_line, int end_line)
+void Processor::list(unsigned int file_id, 
+		     unsigned int pc_val, 
+		     unsigned int start_line, 
+		     unsigned int end_line)
 {
 
 
@@ -542,7 +550,7 @@ void Processor::list(int file_id, int pc_val, int start_line, int end_line)
       return;
     }
 
-  int line,pc_line;
+  unsigned int line,pc_line;
   if(file_id)
     {
       file_id = files->list_id();
@@ -572,7 +580,7 @@ void Processor::list(int file_id, int pc_val, int start_line, int end_line)
        << " Ending line " << end_line << '\n';
 
 
-  for(int i=start_line; i<=end_line; i++)
+  for(unsigned int i=start_line; i<=end_line; i++)
   {
 
     char buf[256];
@@ -605,17 +613,16 @@ void Processor::list(int file_id, int pc_val, int start_line, int end_line)
 // is not implemented.
 //
 
-void Processor::disassemble (int start_address, int end_address)
+void Processor::disassemble (unsigned int start_address, unsigned int end_address)
 {
   instruction *inst;
   int use_src_to_disasm =0;
 
-  if(start_address < 0) start_address = 0;
   if(end_address >= pc->memory_size_mask) end_address = pc->memory_size_mask;
 
   char str[50];
 
-  for(int i = start_address; i<=end_address; i++)
+  for(unsigned int i = start_address; i<=end_address; i++)
     {
       str[0] =0;
       if (pc->value == i)
@@ -701,7 +708,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 // temporary - this could is going to get deleted as soon as file related 
 // stuff gets put into its own object/class.
 
-void ProgramMemoryAccess::set_hll_mode(int new_hll_mode)
+void ProgramMemoryAccess::set_hll_mode(unsigned int new_hll_mode)
 {
   switch(new_hll_mode) {
   case ASM_MODE:
@@ -714,7 +721,7 @@ void ProgramMemoryAccess::set_hll_mode(int new_hll_mode)
 //--------------------------------------------------------------------------
 unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 {
-  unsigned int line;
+  unsigned int line=0;
     
   if(!cpu || cpu->program_memory_size()<=address)
     return INVALID_VALUE;
@@ -730,9 +737,6 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
     break;
   }
 
-  // line 1 is first line (?), so zero or less means invalid line
-  if(line<=0)
-    return INVALID_VALUE;
 
   return line;
 }
@@ -760,7 +764,7 @@ unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_break_at_address(int address)
+void ProgramMemoryAccess::set_break_at_address(unsigned int address)
 {
   if(hasValid_opcode(address))
     bp.set_execution_break(cpu, address);
@@ -769,7 +773,7 @@ void ProgramMemoryAccess::set_break_at_address(int address)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_notify_at_address(int address, BreakpointObject *cb)
+void ProgramMemoryAccess::set_notify_at_address(unsigned int address, BreakpointObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_notify_break(cpu, address, cb);
@@ -777,26 +781,28 @@ void ProgramMemoryAccess::set_notify_at_address(int address, BreakpointObject *c
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakpointObject *cb)
+void ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
+						       BreakpointObject *cb)
 {
-  int pm_index = cpu->map_pm_address2index(address);
+  unsigned int pm_index = cpu->map_pm_address2index(address);
 
-  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
+  if(pm_index<cpu->program_memory_size()) 
     if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_profile_start_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakpointObject *cb)
+void ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
+						      BreakpointObject *cb)
 {
   if(hasValid_opcode(address))
     bp.set_profile_stop_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_break_at_address(int address, 
-				       enum instruction::INSTRUCTION_TYPES type = 
-				       instruction::BREAKPOINT_INSTRUCTION)
+int ProgramMemoryAccess::clear_break_at_address(unsigned int address, 
+						enum instruction::INSTRUCTION_TYPES type = 
+						instruction::BREAKPOINT_INSTRUCTION)
 {
 
   if( address >= 0  && address<cpu->program_memory_size()) {
@@ -814,26 +820,26 @@ int ProgramMemoryAccess::clear_break_at_address(int address,
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_notify_at_address(int address)
+int ProgramMemoryAccess::clear_notify_at_address(unsigned int address)
 {
   return clear_break_at_address(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_profile_start_at_address(int address)
+int ProgramMemoryAccess::clear_profile_start_at_address(unsigned int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::clear_profile_stop_at_address(int address)
+int ProgramMemoryAccess::clear_profile_stop_at_address(unsigned int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::address_has_break(int address, 
-					     enum instruction::INSTRUCTION_TYPES type)
+int ProgramMemoryAccess::address_has_break(unsigned int address, 
+					   enum instruction::INSTRUCTION_TYPES type)
 {
   if(find_instruction(address,type)!=0)
     return 1;
@@ -842,26 +848,26 @@ int ProgramMemoryAccess::address_has_break(int address,
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::address_has_notify(int address)
+int ProgramMemoryAccess::address_has_notify(unsigned int address)
 {
   return address_has_break(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::address_has_profile_start(int address)
+int ProgramMemoryAccess::address_has_profile_start(unsigned int address)
 {
   return address_has_break(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::address_has_profile_stop(int address)
+int ProgramMemoryAccess::address_has_profile_stop(unsigned int address)
 {
   return address_has_break(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::toggle_break_at_address(int address)
+void ProgramMemoryAccess::toggle_break_at_address(unsigned int address)
 {
   if(address_has_break(address))
     clear_break_at_address(address);
@@ -870,7 +876,7 @@ void ProgramMemoryAccess::toggle_break_at_address(int address)
 }
 //-------------------------------------------------------------------
 
-void ProgramMemoryAccess::set_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::set_break_at_line(unsigned int file_id, unsigned int src_line)
 {
   int address;
 
@@ -878,7 +884,7 @@ void ProgramMemoryAccess::set_break_at_line(int file_id, int src_line)
       set_break_at_address(address);
 }
 
-void ProgramMemoryAccess::clear_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::clear_break_at_line(unsigned int file_id, unsigned int src_line)
 {
 
   int address;
@@ -887,7 +893,7 @@ void ProgramMemoryAccess::clear_break_at_line(int file_id, int src_line)
       clear_break_at_address(address);
 }
 
-void ProgramMemoryAccess::toggle_break_at_line(int file_id, int src_line)
+void ProgramMemoryAccess::toggle_break_at_line(unsigned int file_id, unsigned int src_line)
 {
   toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
 }
@@ -1034,7 +1040,7 @@ void Processor::dump_registers (void)
 
 
 //-------------------------------------------------------------------
-instruction &ProgramMemoryAccess::operator [] (int address)
+instruction &ProgramMemoryAccess::operator [] (unsigned int address)
 {
   //cout << "pma[0x"<< hex << address << "]\n";
   if(!cpu ||cpu->program_memory_size()<=address  || address<0)
@@ -1044,10 +1050,11 @@ instruction &ProgramMemoryAccess::operator [] (int address)
 }
 
 //-------------------------------------------------------------------
-instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
+instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
+						   enum instruction::INSTRUCTION_TYPES type)
 {
 
-  if(cpu->program_memory_size()<=address  || address<0)
+  if(cpu->program_memory_size()<=address)
     return 0;
 
   instruction &q = this->operator[](address);
@@ -1072,6 +1079,7 @@ instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction
 	case instruction::NOTIFY_INSTRUCTION:
 	case instruction::PROFILE_START_INSTRUCTION:
 	case instruction::PROFILE_STOP_INSTRUCTION:
+	case instruction::ASSERTION_INSTRUCTION:
 	  p=((Breakpoint_Instruction *)p)->replaced;
 	  break;
 	}
@@ -1102,7 +1110,7 @@ ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu)
 void ProgramMemoryAccess::init(Processor *new_cpu)
 {
 
-  _address, _opcode, _state = 0;
+  _address = _opcode = _state = 0;
   hll_mode = ASM_MODE;
 
   cpu = new_cpu;
@@ -1129,7 +1137,7 @@ void ProgramMemoryAccess::name(string & new_name)
   name_str = new_name;
 }
 
-void ProgramMemoryAccess::put(int address, instruction *new_instruction)
+void ProgramMemoryAccess::put(unsigned int address, instruction *new_instruction)
 {
 
   if(!new_instruction)
@@ -1145,7 +1153,7 @@ void ProgramMemoryAccess::put(int address, instruction *new_instruction)
 
 }
 
-instruction *ProgramMemoryAccess::get(int address)
+instruction *ProgramMemoryAccess::get(unsigned int address)
 {
   if(address < cpu->program_memory_size())
     return &(this->operator[](address));
@@ -1155,7 +1163,7 @@ instruction *ProgramMemoryAccess::get(int address)
 }
 
 // like get, but will ignore instruction break points 
-instruction *ProgramMemoryAccess::get_base_instruction(int address)
+instruction *ProgramMemoryAccess::get_base_instruction(unsigned int address)
 {
     instruction *p;
 
@@ -1176,6 +1184,7 @@ instruction *ProgramMemoryAccess::get_base_instruction(int address)
 	case instruction::NOTIFY_INSTRUCTION:
 	case instruction::PROFILE_START_INSTRUCTION:
 	case instruction::PROFILE_STOP_INSTRUCTION:
+	case instruction::ASSERTION_INSTRUCTION:
 	    p=((Breakpoint_Instruction *)p)->replaced;
             break;
 	}
@@ -1188,7 +1197,7 @@ instruction *ProgramMemoryAccess::get_base_instruction(int address)
 // get_opcode - return an opcode from program memory.
 //              If the address is out of range return 0.
 
-unsigned int ProgramMemoryAccess::get_opcode(int addr)
+unsigned int ProgramMemoryAccess::get_opcode(unsigned int addr)
 {
 
   if(addr < cpu->program_memory_size())
@@ -1202,7 +1211,7 @@ unsigned int ProgramMemoryAccess::get_opcode(int addr)
 // get_opcode_name - return an opcode name from program memory.
 //                   If the address is out of range return 0;
 
-char *ProgramMemoryAccess::get_opcode_name(int addr, char *buffer, int size)
+char *ProgramMemoryAccess::get_opcode_name(unsigned int addr, char *buffer, unsigned int size)
 {
 
   if(addr < cpu->program_memory_size())
@@ -1222,7 +1231,7 @@ unsigned int ProgramMemoryAccess::get_PC(void)
   return 0;
 }
 
-void ProgramMemoryAccess::put_opcode_start(int addr, unsigned int new_opcode)
+void ProgramMemoryAccess::put_opcode_start(unsigned int addr, unsigned int new_opcode)
 {
 
   if( (addr < cpu->program_memory_size()) && (_state == 0))
@@ -1236,11 +1245,10 @@ void ProgramMemoryAccess::put_opcode_start(int addr, unsigned int new_opcode)
 
 }
 
-void ProgramMemoryAccess::put_opcode(int addr, unsigned int new_opcode)
+void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 {
-  int i;
 
-  if( !(addr>=0) && (addr < cpu->program_memory_size()))
+  if(addr >= cpu->program_memory_size())
     return;
 
 
@@ -1487,7 +1495,7 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
   registers = _registers;
 }
 //-------------------------------------------------------------------
-bool RegisterMemoryAccess::hasBreak(int address)
+bool RegisterMemoryAccess::hasBreak(unsigned int address)
 {
 
   if(!cpu || !registers || nRegisters<=address)
@@ -1500,10 +1508,10 @@ bool RegisterMemoryAccess::hasBreak(int address)
 static InvalidRegister AnInvalidRegister;
 
 //-------------------------------------------------------------------
-Register &RegisterMemoryAccess::operator [] (int address)
+Register &RegisterMemoryAccess::operator [] (unsigned int address)
 {
 
-  if(!registers || get_size()<=address  || address<0)
+  if(!registers || get_size()<=address)
     return AnInvalidRegister;
 
   return *registers[address];
@@ -1686,7 +1694,7 @@ void FileContext::ReadSource(void)
 
   char buf[256],*s;
   (*line_seek)[0] = 0;
-  for(int j=1; j<=max_line(); j++) {
+  for(unsigned int j=1; j<=max_line(); j++) {
 
     (*pm_address)[j] = -1;
     (*line_seek)[j] = ftell(fptr);
@@ -1702,7 +1710,7 @@ void FileContext::ReadSource(void)
 // 
 // Read one line from a source file.
 
-char *FileContext::ReadLine(int line_number, char *buf, int nBytes)
+char *FileContext::ReadLine(unsigned int line_number, char *buf, unsigned int nBytes)
 {
 
   if(!fptr)
@@ -1717,7 +1725,7 @@ char *FileContext::ReadLine(int line_number, char *buf, int nBytes)
 
 //----------------------------------------
 //
-char *FileContext::gets(char *buf, int nBytes)
+char *FileContext::gets(char *buf, unsigned int nBytes)
 {
   if(!fptr)
     return 0;
@@ -1741,14 +1749,14 @@ void FileContext::open(const char *mode)
 
 }
 //----------------------------------------
-int FileContext::get_address(int line_number)
+int FileContext::get_address(unsigned int line_number)
 {
   if(line_number < max_line())
     return (*pm_address)[line_number];
   return 0;
 }
 //----------------------------------------
-void FileContext::put_address(int line_number, int address)
+void FileContext::put_address(unsigned int line_number, unsigned int address)
 {
   if(line_number < max_line())
     (*pm_address)[line_number] = address;

@@ -268,6 +268,8 @@ void INDF::initialize(void)
   case _16BIT_PROCESSOR_:
     cout << "BUG: INDF::"<<__FUNCTION__<<". 16bit core uses a different class for indf.";
     break;
+  default:
+    cout << " BUG - invalid processor type INDF::initialize\n";
   }
     
 
@@ -493,7 +495,7 @@ void Stack::push(unsigned int address)
   // However, some pic programs take advantage of this 'feature', so provide a means
   // for them to ignore the warnings.
 
-  if(pointer++ >= stack_mask) {
+  if(pointer++ >= (int)stack_mask) {
     if(stack_warnings_flag || break_on_overflow)
       cout << "stack overflow ";
     if(break_on_overflow)

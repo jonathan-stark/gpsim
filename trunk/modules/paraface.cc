@@ -146,12 +146,7 @@ InputPort::InputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 
 void InputPort::put(unsigned int new_value)
 {
-
-    unsigned int old_value = value.get();
-
-    //  cout << "InputPort = " << value << endl;
-
-    Paraface_Port::put(new_value);
+  Paraface_Port::put(new_value);
 }
 
 // FIXME. Move to Paraface::callback
@@ -216,13 +211,7 @@ void InputPort::update_pin_directions(unsigned int new_direction)
 
 void OutputPort::put(unsigned int new_value)
 {
-
-    unsigned int old_value = value.get();
-
-    //  cout << "OutputPort = " << value << endl;
-
-    Paraface_Port::put(new_value);
-
+  Paraface_Port::put(new_value);
 }
 
 //--------------------------------------------------------------
@@ -424,6 +413,7 @@ int Paraface::open_parallel_port(char *device)
 #endif // linux
 
     cout << "Parallel port was successfully opened.\n";
+    return 1;
 }
 
 // Return low five bits containing:

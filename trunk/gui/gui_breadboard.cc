@@ -236,6 +236,7 @@ static void clear_path(path **pat)
     }
 }
 
+#if 0
 // Compress sequences with same x or y to one sequence
 static void compress_path(path **pat)
 {
@@ -278,6 +279,7 @@ static void compress_path(path **pat)
 	current_path = current_path->next;
     }
 }
+#endif
 
 // mask_matrix is used by trace_two_poins to know where is has been, and
 // how quickly it came here. (depth is stored here if lower)
@@ -459,6 +461,9 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
 	    retval|=trace_two_points(pat,left,end,depth+1+turnq(lastdir,R_LEFT),R_LEFT);
 	}
 	break;
+
+    case R_NONE:
+      break;
     }
 
 
@@ -534,6 +539,7 @@ void print_matrix(void)
     }
 } */
 
+#if 0
 // Debug. Draw routing constraints. FIXME draw from board_matrix instead.
 static void draw_board_matrix(Breadboard_Window *bbw)
 {
@@ -604,6 +610,7 @@ static void draw_board_matrix(Breadboard_Window *bbw)
         mi=mi->next;
     }
 }
+#endif
 
 static GList *nodepath_list;
 
@@ -840,8 +847,8 @@ static struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin);
 
 #define MAX_PATHS 32
 
-static path *shortest_path[100][100]={0};//[MAX_PATHS]=0;
-static int pathlen[100][100]={0};
+static path *shortest_path[100][100];//[MAX_PATHS]=0;
+static int pathlen[100][100];
 
 static int *permutations;
 static int *shortest_permutation;
@@ -870,10 +877,7 @@ static void reverse_path_if_endpoint(point startpoint, path **pat)
 {
     point pat_start, pat_end;
     int dist_start, dist_end;
-    path *iter, *next, *last;
-
-//    path **input_list;
-//    path *output_list=0;
+    path *iter;
 
     iter = *pat;
 
@@ -899,10 +903,7 @@ static void reverse_path_if_startpoint(point startpoint, path **pat)
 {
     point pat_start, pat_end;
     int dist_start, dist_end;
-    path *iter, *next, *last;
-
-//    path **input_list;
-//    path *output_list=0;
+    path *iter;
 
     iter = *pat;
 
@@ -989,8 +990,6 @@ static void trace_node(struct gui_node *gn)
     int nr_of_nodes=0;
     int i,j;
     int didnt_work=0;
-
-    path *pat;
 
     point start={-1,-1},end;
 
@@ -1929,7 +1928,6 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
     static GtkWidget *node_clist;
-    GtkWidget *okbutton;
     GtkWidget *cancelbutton;
     static int cancel;
 
@@ -1937,9 +1935,8 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 
     Stimulus_Node *snode=0;
 
-	GtkWidget *vbox;
-	GtkWidget *scrolledwindow;
-        GtkWidget *hbox;
+    GtkWidget *vbox;
+    GtkWidget *scrolledwindow;
 
     if(dialog==0)
     {
@@ -2006,19 +2003,17 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
     static GtkWidget *module_clist;
-    GtkWidget *okbutton;
     GtkWidget *cancelbutton;
     static int cancel;
     list <Module_Library *> :: iterator mi;
     static char module_type[STRING_SIZE];
 
-	GtkWidget *vbox;
-	GtkWidget *scrolledwindow;
-        GtkWidget *hbox;
+    GtkWidget *vbox;
+    GtkWidget *scrolledwindow;
 
-	char *module_clist_titles[]={"Name","Library"};
+    char *module_clist_titles[]={"Name","Library"};
 
-	cancel=-1;
+    cancel=-1;
 	
     if(dialog==0)
     {
@@ -2114,6 +2109,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     return module_type;
 }
 
+#if 0
 static void text_dialog(const char *filename)
 {
     static GtkWidget *dialog;
@@ -2173,6 +2169,7 @@ static void text_dialog(const char *filename)
 
     return;
 }
+#endif
 
 static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 {
@@ -2317,11 +2314,9 @@ static void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-    char *file;
+  file_selection_name=gtk_file_selection_get_filename (fs);
 
-    file_selection_name=gtk_file_selection_get_filename (fs);
-
-    fs_done=1;
+  fs_done=1;
 }
 
 static void
@@ -2335,11 +2330,6 @@ file_selection_cancel (GtkWidget        *w,
 static const char *gui_get_filename(char *filename)
 {
     static GtkWidget *window = 0;
-
-    GtkWidget *hbox, *optionmenu, *label;
-
-    GtkWidget *menu;
-    GtkWidget *item;
 
     char *prompt="Log settings";
 
@@ -2389,7 +2379,6 @@ static const char *gui_get_filename(char *filename)
 //////////////////////////////////////////////////////////////////
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 {
-    GList *iter;
     FILE *fo;
     list <Module_Library *> :: iterator mi;
     list <Module *> :: iterator module_iterator;
@@ -2698,8 +2687,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     if(p->module_widget==0)
     {
 	// Create a static representation.
-	int pin_x, pin_y;
-
 	p->pinnamewidth=0;
 	for(i=1;i<=p->module->get_pin_count();i++)
 	{
@@ -3049,7 +3036,7 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-
+#if 0
 static void check_for_modules(Breadboard_Window *bbw)
 {
     list <Module *> :: iterator module_iterator;
@@ -3077,7 +3064,7 @@ static void check_for_nodes(Breadboard_Window *bbw)
 	bbw->NodeConfigurationChanged(node);
     }
 }
-
+#endif
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {

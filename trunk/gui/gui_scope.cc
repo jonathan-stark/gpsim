@@ -62,9 +62,9 @@ gpsim_la - plug in.
 #define DELAY_MAX_VALUE 100
 
 
-static GtkObject *bit_adjust,*delay_adjust;
+static GtkObject *bit_adjust; // ,*delay_adjust;
 static GdkColor signal_line_color,grid_line_color,grid_v_line_color;
-static int bit_left,bit_right,bit_points,update_delay;
+//static int bit_left,bit_right,bit_points,update_delay;
 
 
 /*
@@ -240,13 +240,15 @@ void Waveform::Resize(int w, int h)
 
 void Waveform::Update(void)
 {
+  int x,y;
+  GdkRectangle update_rect;
+#if 0
 
   int line_separation,pin_number;
-  int point,x,y,y_text,y_0,y_1;
+  int point,y_text,y_0,y_1;
   float x_scale,y_scale;
   int max_str,new_str,br_length;
   char *s,ss[10];
-  GdkRectangle update_rect;
 
   if(!isBuilt || isUpToDate)
     return;
@@ -269,7 +271,6 @@ void Waveform::Update(void)
     
 
   
-#if 0
   char ntest[] = "test0";
   // Draw pin name:
   max_str = 0;
@@ -468,6 +469,7 @@ analyzer_update_scale (GtkAdjustment *adj,gpointer user_data)
   return(FALSE);
 }
 
+/*
 static gint
 analyzer_update_delay (GtkAdjustment *adj,gpointer user_data)
 {
@@ -475,7 +477,7 @@ analyzer_update_delay (GtkAdjustment *adj,gpointer user_data)
   cout <<  "function:" << __FUNCTION__ << "\n";    
   return(FALSE);
 }
-
+*/
 
 static gint Scope_Window_expose_event (GtkWidget *widget,
 				   GdkEventExpose  *event,
@@ -509,9 +511,8 @@ void Scope_Window::Build(void)
 {
 
   GtkWidget *table;
-  GtkWidget *button,*scroll_bar,*vbox,*spin_button;
+  GtkWidget *scroll_bar,*button;
   GtkTooltips *tooltips;    
-  //    cout <<  "function:" << __FUNCTION__ << "\n";
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   if (!window)
@@ -553,6 +554,7 @@ void Scope_Window::Build(void)
 		      this);
 
 #if 0
+  GtkWidget *spin_button;
   button = gtk_button_new_with_label ("Zoom In");
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
 		      GTK_SIGNAL_FUNC (analyzer_zoom_in_callback),this);    

@@ -346,6 +346,9 @@ void EEPROM::reset(RESET_TYPE by)
     case POR_RESET:
       eecon1.value.put(0);          // eedata & eeadr are undefined at power up
       eecon2.unarm();
+      break;
+    default:
+      break;
     }
 
 }

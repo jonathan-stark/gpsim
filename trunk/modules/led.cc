@@ -169,9 +169,7 @@ void Led_7Segments::update(  GtkWidget *widget,
 			     guint new_height)
 {
 
-    guint i;
-    static int last_segment_states=-1;
-
+  guint i;
 
   w_width = new_width;
   w_height = new_height;
@@ -469,8 +467,6 @@ void Led_7Segments::build_window(void)
 {
   GtkWidget *main_vbox;
   GtkWidget *vbox;
-  gint q='A';
-
 
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);
@@ -677,9 +673,6 @@ void Led::update(  GtkWidget *widget,
 		   guint new_width,
 		   guint new_height)
 {
-
-    static int last_segment_states=-1;
-
 
   w_width = new_width;
   w_height = new_height;

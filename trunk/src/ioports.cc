@@ -1250,13 +1250,7 @@ PORTD::PORTD(void)
 //-------------------------------------------------------------------
 void PORTD::setbit(unsigned int bit_number, bool new_value)
 {
-
-  unsigned int old_value = value.get();
-
-  //cout << "PORTD::setbit() bit " << bit_number << " to " << new_value << '\n';
-
   IOPORT::setbit( bit_number,  new_value);
-
 }
 
 //-------------------------------------------------------------------
@@ -1273,13 +1267,7 @@ PORTE::PORTE(void)
 //-------------------------------------------------------------------
 void PORTE::setbit(unsigned int bit_number, bool new_value)
 {
-
-  unsigned int old_value = value.get();
-
-  //cout << "PORTE::setbit() bit " << bit_number << " to " << new_value << '\n';
-
   IOPORT::setbit( bit_number,  new_value);
-
 }
 
 //-------------------------------------------------------------------
@@ -1296,13 +1284,7 @@ PORTF::PORTF(void)
 //-------------------------------------------------------------------
 void PORTF::setbit(unsigned int bit_number, bool new_value)
 {
-
-  unsigned int old_value = value.get();
-
-  //cout << "PORTF::setbit() bit " << bit_number << " to " << new_value << '\n';
-
   IOPORT::setbit( bit_number,  new_value);
-
 }
 
 //-------------------------------------------------------------------
@@ -1319,13 +1301,7 @@ PORTG::PORTG(void)
 //-------------------------------------------------------------------
 void PORTG::setbit(unsigned int bit_number, bool new_value)
 {
-
-  unsigned int old_value = value.get();
-
-  //cout << "PORTG::setbit() bit " << bit_number << " to " << new_value << '\n';
-
   IOPORT::setbit( bit_number,  new_value);
-
 }
 
 

@@ -124,7 +124,7 @@ void Watch_Window::UpdateMenus(void)
   GtkWidget *item;
   WatchEntry *entry;
 
-  int i;
+  unsigned int i;
 
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
     item=menu_items[i].item;
@@ -280,7 +280,7 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
 {
   GtkWidget *menu;
   GtkWidget *item;
-  int i;
+  unsigned int i;
 
 
   if(sheet==0 || ww==0)
@@ -532,7 +532,6 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
   char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
   int row;
   WatchWindowXREF *cross_reference;
-  char *regname;
 
   WatchEntry *watch_entry;
     

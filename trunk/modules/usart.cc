@@ -148,7 +148,7 @@ public:
   void dump(int start_index, int end_index=-1) {
 
     
-    if((start_index > max_events) || (start_index <= 0 ))
+    if((start_index > (int)max_events) || (start_index <= 0 ))
       start_index = 0;
 
     if(end_index == -1)
@@ -177,13 +177,13 @@ public:
 
     cout << "ascii art\n";
 
-    if((start_index > max_events) || (start_index <= 0 ))
+    if((start_index > (int)max_events) || (start_index <= 0 ))
       start_index = 0;
 
     if(buffer[start_index] == 0) 
       start_index = 0;
 
-    if( (end_index > max_events) || (end_index <= 0 ))
+    if( (end_index > (int)max_events) || (end_index <= 0 ))
       end_index = index;
 
     if(start_index == end_index)
@@ -196,7 +196,7 @@ public:
 
     guint64 min_pulse = buffer[end_index] - buffer[start_index];
     guint32 i = start_index;
-    guint32 j = (start_index+1) & max_events;
+    int j = (start_index+1) & max_events;
 
     do {
 
@@ -961,8 +961,8 @@ class RCREG : public BreakpointObject // : public _RCREG
     //rx_event->dump(-1);  // dump all events
     rx_event->dump_ASCII_art( time_per_bit/4, start_bit_index );  // time_per_packet/10,-1);
 
-    guint64 current_time =  get_cycles().get();
-    int edges = rx_event->get_edges(start_time, current_time);
+    //guint64 current_time =  get_cycles().get();
+    //int edges = rx_event->get_edges(start_time, current_time);
     //cout << " gpsim time is " << current_time << "\n";
     //cout << " # of edges for one byte time " << edges << '\n';
 
@@ -987,7 +987,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 	//cout << "Looks like we've definitely received a stop bit\n";
 	receive_state = RS_WAITING_FOR_START;
 
-	unsigned int b = decode_byte(start_bit_index, time_per_bit);
+	//unsigned int b = decode_byte(start_bit_index, time_per_bit);
 	//cout << "RCREG: decoded to 0x" << b << "\n";
 
       } else {
@@ -999,6 +999,8 @@ class RCREG : public BreakpointObject // : public _RCREG
     case RS_STOPPED:
       receive_state = RS_WAITING_FOR_START;
       //cout << "received a stop bit\n";
+      break;
+    default:
       break;
     }
 
@@ -1208,7 +1210,7 @@ class RCREG : public BreakpointObject // : public _RCREG
       If there's a whole lot of jitter in the data, one would
       expect many pulses of approximately the same width will
       occupy adjacent positions in the pulse width buffer. To
-      get around this, a trunctated version of the pulse is
+      get around this, a truncated version of the pulse is
       actually stored. The truncation is simply a shift right
       N bits (compile time selected). Consequently, the lsb's
       are discarded and the msb's are lumped together. The
@@ -1457,6 +1459,8 @@ class RCREG : public BreakpointObject // : public _RCREG
 	    cout << "Clearing overrun condition\n";
 	    receive_state = RS_WAITING_FOR_START;
 	  }
+	  break;
+	default:
 	  break;
 	}
 
@@ -1715,7 +1719,7 @@ void USART_CORE::initialize(USART_IOPORT *new_iop)
 
 }
 //--------------------------------------------------------------
-static int _tx_index=0;
+static unsigned int _tx_index=0;
 static char Test_Hello[] = {
   0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
 };
