@@ -71,7 +71,7 @@ public:
 
   virtual void option_new_bits_6_7(unsigned int bits)
     {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
+      // ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
 
   P16C54(void);
@@ -107,7 +107,7 @@ public:
 
   virtual void option_new_bits_6_7(unsigned int bits)
     {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
+      // ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
 
   P16C55(void);

@@ -40,7 +40,8 @@ void _12bit_18pins::create_iopin_map(void)
 {
   // ---- This is probably going to be moved:
   porta = new PORTA;
-  portb = new PORTB;
+  portb = new PIC_IOPORT;	// just a straight IO port, no fancy bits
+  portb->new_name("portb");	// but we need to set the name
 
   // ---- Complete the initialization for the I/O Ports
 
@@ -92,8 +93,10 @@ void _12bit_28pins::create_iopin_map(void)
 {
   // ---- This is probably going to be moved:
   porta = new PORTA;
-  portb = new PORTB;
-  portc = new PORTC;
+  portb = new PIC_IOPORT;	// just a straight IO port, no fancy bits
+  portb->new_name("portb");	// but we need to set the name
+  portc = new PIC_IOPORT;	// just a straight IO port, no fancy bits
+  portc->new_name("portc");	// but we need to set the name
 
   // ---- Complete the initialization for the I/O Ports
 
