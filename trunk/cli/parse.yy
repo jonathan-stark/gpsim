@@ -45,6 +45,7 @@ using namespace std;
 #include "cmd_load.h"
 #include "cmd_log.h"
 #include "cmd_node.h"
+#include "cmd_macro.h"
 #include "cmd_module.h"
 #include "cmd_processor.h"
 #include "cmd_quit.h"
@@ -131,48 +132,43 @@ void yyerror(char *message)
 
 
 /* gpsim commands: */
-%token <s>  ABORT
-%token <s>  ATTACH
-%token <s>  BREAK
-%token <s>  BUS
-%token <s>  CLEAR
-%token <s>  DISASSEMBLE
-%token <s>  DUMP
-%token <s>  ENDM
-%token <s>  FREQUENCY
-%token <s>  HELP
-%token <s>  LOAD
-%token <s>  LOG
-%token <s>  LIST
-%token <s>  NODE
-%token <s>  MACRO
-%token <s>  MODULE
-%token <s>  PROCESSOR
-%token <s>  QUIT
-%token <s>  RESET
-%token <s>  RUN
-%token <s>  SET
-%token <s>  STEP
-%token <s>  STIMULUS
-%token <s>  STOPWATCH
-%token <s>  SYMBOL
-%token <s>  TRACE
-%token <s>  gpsim_VERSION
-%token <s>  X
-%token <s>  ICD
-%token <s>  END_OF_COMMAND
+%token   ABORT
+%token   ATTACH
+%token   BREAK
+%token   BUS
+%token   CLEAR
+%token   DISASSEMBLE
+%token   DUMP
+%token   ENDM
+%token   FREQUENCY
+%token   HELP
+%token   LOAD
+%token   LOG
+%token   LIST
+%token   NODE
+%token   MACRO
+%token   MODULE
+%token   PROCESSOR
+%token   QUIT
+%token   RESET
+%token   RUN
+%token   SET
+%token   STEP
+%token   STIMULUS
+%token   STOPWATCH
+%token   SYMBOL
+%token   TRACE
+%token   gpsim_VERSION
+%token   X
+%token   ICD
+%token   END_OF_COMMAND
 
-%token MACRODEF_T
-%token MACRODEF_ARG_T
-%type <s>    mdef_arglist opt_mdef_arglist
 %type <s>    mdef_body_
 %type <s>    mdef_end
 
 %token <s>   MACROBODY_T
-%token ENDM_T
 
 %token <s>  STRING
-%token <s>  UNQ_ID_T
 
 %token <li>  INDIRECT
 
@@ -217,17 +213,6 @@ void yyerror(char *message)
 %token XOR_T
 
 
-
-%token OPT_DEFAULT_T
-%token OPT_LABEL_T
-%token OPT_NAMED_T
-%token OPT_NUM_T
-%token OPT_OPT_T
-%token OPT_POS_T
-%token OPT_REQ_T
-%token OPT_TEXT_T
-%token OPT_VARARG_T
-%token OPT_VAL_T
 
 //%type  <li>   _register
 %type  <co>  bit_flag
@@ -586,44 +571,39 @@ icd_cmd:
 //
 
 macro_cmd:
-	  MACRODEF_T                    { cout << "display currently defined macros\n";};
-         | macrodef_directive           { cout << " defining new macro\n";}
+	  MACRO                         { c_macro.list();}
+         | macrodef_directive           { }
          ;
 
 macrodef_directive
-        : STRING MACRODEF_T
-                                        {cout << "macro definition" << endl;}
+        : STRING MACRO
+                                        {c_macro.define($1);}
           opt_mdef_arglist rol
-                                        {cout << "have the macro arg list" << endl;
-                                                 lexer_setMacroBodyMode();}
+                                        {lexer_setMacroBodyMode();}
 
-          mdef_body mdef_end            { cout << "macro has been defined" << endl;}
+          mdef_body mdef_end            
         ;
 
 opt_mdef_arglist
-        : /* empty */                   { cout << " empty macro arg list\n";}
-        | mdef_arglist                  {$$=$1;}
-        ;
-
-mdef_arglist
-        : STRING                        {cout << "mdef_arg list " << $$ << endl; }
-        | mdef_arglist ',' STRING       {cout << "macro arg:" << $3 << endl;}
+        : /* empty */
+        | STRING                        {c_macro.add_parameter($1); free($1);}
+        | opt_mdef_arglist ',' STRING   {c_macro.add_parameter($3); free($3);}
         ;
 
 
 mdef_body
-        : /* empty */                   {cout << "empty macro body \n"; }
+        : /* empty */
         | mdef_body_
         ;
 
 mdef_body_
-        : MACROBODY_T                   {cout << " macro body:" << $$ << endl;}
-        | mdef_body_ MACROBODY_T        {cout << $2;}
+        : MACROBODY_T                   {c_macro.add_body($1);}
+        | mdef_body_ MACROBODY_T        {c_macro.add_body($2);}
         ;
 
 mdef_end
-        : ENDM_T                        { cout << "ending the macro definition\n"; }
-        | STRING ENDM_T                 { cout << "ending the macro definition\n"; }
+        : ENDM                          {c_macro.end_define();}
+        | STRING ENDM                   {c_macro.end_define($1); free($1);}
         ;
 
 
@@ -762,6 +742,7 @@ void initialize_commands(void)
   c_list.token_value = LIST;
   c_load.token_value = LOAD;
   c_log.token_value = LOG;
+  c_macro.token_value = MACRO;
   c_module.token_value = MODULE;
   c_node.token_value = NODE;
   c_processor.token_value = PROCESSOR;

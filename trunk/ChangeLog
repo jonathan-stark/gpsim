@@ -1,4 +1,10 @@
 2004-08-31 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_macro.cc, cli/cmd_macro.h:
+	Added the 'macro' command.
+	* cli/Makefile.am, cli/parse.yy, cli/command.cc, cli/scan.ll:
+	Parser now calls the gpsim command cmd_macro.
+	
+2004-08-31 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/parse.yy:
 	Added language support for macro definitions. (although,
 	macros are not yet supported).

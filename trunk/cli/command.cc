@@ -38,8 +38,9 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_list.h"
 #include "cmd_load.h"
 #include "cmd_log.h"
-#include "cmd_node.h"
+#include "cmd_macro.h"
 #include "cmd_module.h"
+#include "cmd_node.h"
 #include "cmd_processor.h"
 #include "cmd_quit.h"
 #include "cmd_reset.h"
@@ -77,8 +78,9 @@ command *command_list[] =
   &c_list,
   &c_load,
   &c_log,
-  &c_node,
+  &c_macro,
   &c_module,
+  &c_node,
   &c_processor,
   &quit,
   &reset,
