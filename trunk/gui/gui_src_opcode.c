@@ -710,7 +710,7 @@ static GdkBitmap *mask;
   gtk_widget_show(sbow->sheet);
   gtk_container_add(GTK_CONTAINER(scrolled_win), sbow->sheet);
   
-  label=gtk_label_new("sheet page");
+  label=gtk_label_new("sheet page (WARNING: bugs)");
   gtk_notebook_append_page(GTK_NOTEBOOK(sbow->notebook),vbox,label);
 
   char_width = gdk_string_width (normal_style->font,"9");
