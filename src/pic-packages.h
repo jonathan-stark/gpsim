@@ -82,8 +82,6 @@ class _14bit_18pins  : public _18pins
 {
 public:
 
-  INTCON       intcon_reg;
-
   virtual void create_iopin_map(void);
 
 };

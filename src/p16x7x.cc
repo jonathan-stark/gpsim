@@ -131,13 +131,16 @@ void ADCON0::put(unsigned int new_value)
       Tad_2 = 3;   // %%% FIX ME %%% I really need to implement 'absolute time'
 
     }
-
+    
+  unsigned int old_value=value;
+  // SET: Reflect it first!
+  value = new_value;
   if(new_value & ADON)
     {
       // The A/D converter is being turned on (or maybe left on)
 
       //if(((new_value ^ value) & GO) == GO)
-      if((new_value & ~value) & GO)
+      if((new_value & ~old_value) & GO)
 	{
 	  // The 'GO' bit is being turned on, which is request to initiate
 	  // and A/D conversion
@@ -148,8 +151,6 @@ void ADCON0::put(unsigned int new_value)
     {
       stop_conversion();
     }
-
-  value = new_value;
 
   trace.register_write(address,value);
 
@@ -224,7 +225,7 @@ void ADCON0::callback(void)
       }
 
       reference = adcon1->get_Vref();
-      //cout << "A/D acquiring ==> converting channel " << channel << " voltage " 
+      //cout << "A/D acquiring ==> converting channel " << channel << " voltage "
       //   << acquired_value << ", Vref = " << reference << '\n';
 
       future_cycle = cpu->cycles.value + 5*Tad_2;
@@ -399,6 +400,143 @@ P16C71::P16C71(void)
 {
   if(verbose)
     cout << "c71 constructor, type = " << isa() << '\n';
+}
+
+
+//--------------------------------------
+
+void P16C712::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "creating c712/6 registers \n";
+
+  /* Extra timers and Capture/Compare are like in 16x63 => 16X6X code */
+  P16X6X_processor::create_sfr_map();
+
+  /* Input/Output ports */
+  add_sfr_register(porta,   0x05);
+  add_sfr_register(&trisa,  0x85, 0x1f);
+
+  add_sfr_register(portb,   0x06);
+  add_sfr_register(&trisb,  0x86, 0xff);
+
+  /* The A/D section is similar to 16x71, but not equal */
+  add_sfr_register(&adcon0, 0x1F, 0);
+  add_sfr_register(&adcon1, 0x9F, 0);
+
+  add_sfr_register(&adres,  0x1E, 0);
+
+  adcon0.analog_port = porta;
+  adcon0.adres = &adres;
+  adcon0.adresl = NULL;
+  adcon0.adcon1 = &adcon1;
+  adcon0.intcon = &intcon_reg;
+  adcon0.channel_mask = 3;
+  intcon = &intcon_reg;
+
+  adcon1.analog_port = porta;
+  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+
+  adcon0.new_name("adcon0");
+  adcon1.new_name("adcon1");
+  adres.new_name("adres");
+
+  adcon1.Vrefhi_position[0] = 8;
+  adcon1.Vrefhi_position[1] = 3;
+  adcon1.Vrefhi_position[2] = 8;
+  adcon1.Vrefhi_position[3] = 3;
+  adcon1.Vrefhi_position[4] = 8;
+  adcon1.Vrefhi_position[5] = 3;
+  adcon1.Vrefhi_position[6] = 8;
+  adcon1.Vrefhi_position[7] = 8;
+
+  int i;
+  for (i=0; i<8; i++)
+      adcon1.Vreflo_position[i] = 8;
+
+  adcon1.configuration_bits[0] = 0xf;
+  adcon1.configuration_bits[1] = 0xf;
+  adcon1.configuration_bits[2] = 0xf;
+  adcon1.configuration_bits[3] = 0xf;
+  adcon1.configuration_bits[4] = 0xB;
+  adcon1.configuration_bits[5] = 0xB;
+  adcon1.configuration_bits[6] = 0;
+  adcon1.configuration_bits[7] = 0;
+
+  // c712 only has 8 analog configurations. The gpsim analog module
+  // supports 16 different configurations, so modulo duplicate the first
+  // 8 positions to the remaining 8.
+
+  for(int i=8; i<16; i++) {
+    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
+    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
+    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
+  }
+
+}
+
+
+
+void P16C712::create(void)
+{
+
+  if(verbose)
+    cout << " c712/6 create \n";
+  create_iopin_map(); /* 14 bits 18 pins connections */
+  _14bit_processor::create();
+  create_sfr_map();
+  ccp1con.iopin = portb->pins[2];
+
+}
+
+pic_processor * P16C712::construct(void)
+{
+
+  P16C712 *p = new P16C712;
+
+  cout << " c712 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
+  p->name_str = "16c712";
+
+  return p;
+
+}
+
+
+P16C712::P16C712(void)
+{
+  if(verbose)
+    cout << "c712 constructor, type = " << isa() << '\n';
+}
+
+
+//--------------------------------------
+
+pic_processor * P16C716::construct(void)
+{
+
+  P16C716 *p = new P16C716;
+
+  cout << " c716 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
+  p->name_str = "16c716";
+
+  return p;
+
+}
+
+
+P16C716::P16C716(void)
+{
+  if(verbose)
+    cout << "c716 constructor, type = " << isa() << '\n';
 }
 
 

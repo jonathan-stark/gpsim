@@ -1319,6 +1319,7 @@ BuildRegisterWindow(Register_Window *rw)
   y=((GUI_Object*)rw)->y;
   gtk_window_set_default_size(GTK_WINDOW(rw->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(rw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(rw->gui_obj.window),rw->gui_obj.name,"Gpsim");
 
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",

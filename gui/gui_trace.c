@@ -296,6 +296,7 @@ BuildTraceWindow(Trace_Window *tw)
   y=((GUI_Object*)tw)->y;
   gtk_window_set_default_size(GTK_WINDOW(tw->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(tw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(tw->gui_obj.window),tw->gui_obj.name,"Gpsim");
 
 
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",

@@ -173,6 +173,38 @@ class P16C71 :  public P16C61
 
 };
 
+class P16C712 :  public P16X6X_processor, public _14bit_18pins
+{
+ public:
+
+  ADCON0 adcon0;
+  ADCON1 adcon1;
+  ADRES  adres;
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C716_;};
+
+  virtual void create_sfr_map(void);
+
+
+  P16C712(void);
+  void create(void);
+  static pic_processor *construct(void);
+
+};
+
+class P16C716 :  public P16C712
+{
+ public:
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C712_;};
+
+  virtual unsigned int program_memory_size(void) const { return 0x800; };
+
+  P16C716(void);
+  static pic_processor *construct(void);
+
+};
+
 class P16C72 : public P16C62 
 {
  public:
