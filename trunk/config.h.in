@@ -42,6 +42,8 @@
 
 /* Define if you have the gui   */
 #undef HAVE_GUI
+#undef PACKAGE
+#undef VERSION
 
 /* Define if you have the strdup function.  */
 #undef HAVE_STRDUP

@@ -33,10 +33,14 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "binary_indicator.h"
+/*
 #include <gpsim/stimuli.h>
 #include <gpsim/ioports.h>
 #include <gpsim/symbol.h>
-
+*/
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/symbol.h"
 
 //--------------------------------------------------------------
 // Binary_Input

@@ -44,7 +44,7 @@ support:
 #include <iostream.h>
 #include <dlfcn.h>
 #include <stdio.h>
-#include <gpsim/modules.h>
+#include "../src/modules.h"
 #include "binary_indicator.h"
 
 /*

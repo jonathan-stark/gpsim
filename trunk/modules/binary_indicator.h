@@ -23,9 +23,9 @@ Boston, MA 02111-1307, USA.  */
 #define __BINARY_INDICATOR_H__
 
 
-#include <gpsim/modules.h>
-#include <gpsim/packages.h>
-#include <gpsim/stimuli.h>
+#include "../src/modules.h"
+#include "../src/packages.h"
+#include "../src/stimuli.h"
 
 
 // Create a class derived from the IO_input class that
