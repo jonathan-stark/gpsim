@@ -417,7 +417,7 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
     program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
-    printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
+    //printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
 
     FileContext *fc = (*files)[file_id];
 
