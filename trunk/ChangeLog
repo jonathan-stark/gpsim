@@ -1,8 +1,11 @@
+2005-03-03 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: MSVC sync
+
 2005-03-10 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: Added an 'X' state to getBitChar method
 	of the IO_open_collector class.
 
-2005-04-08 Borut Razem <borut.razem@siol.net>
+2005-03-09 Borut Razem <borut.razem@siol.net>
 	* modules/makefile.mingw: pthreads upgrade
 
 2005-03-08 Scott Dattalo <scott@dattalo.com>
