@@ -43,9 +43,9 @@ INTCON::INTCON(void)
 void INTCON::set_T0IF(void)
 {
 
-  value.put(value.get() | T0IF);
-
   trace.register_write(address,value.get());
+
+  value.put(value.get() | T0IF);
 
   if (value.get() & (GIE | T0IE))
   {
@@ -56,8 +56,8 @@ void INTCON::set_T0IF(void)
 void INTCON::put(unsigned int new_value)
 {
 
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
 
   // Now let's see if there's a pending interrupt
   // The INTCON bits are:
@@ -212,8 +212,8 @@ void INTCON_16::set_gies(void)
 void INTCON_16::put(unsigned int new_value)
 {
 
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
   //cout << " INTCON_16::put\n";
   // Now let's see if there's a pending interrupt
   // if IPEN is set in RCON, then interrupt priorities

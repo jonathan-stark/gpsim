@@ -52,6 +52,8 @@ void EECON1::put(unsigned int new_value)
 {
 
 
+  trace.register_write(address,value.get());
+
   new_value &= valid_bits;
   
   //cout << "EECON1::put new_value " << new_value << "  valid_bits " << valid_bits << '\n';
@@ -104,9 +106,6 @@ void EECON1::put(unsigned int new_value)
       }
     }
   
-
-  trace.register_write(address,value.get());
-
 }
 
 unsigned int EECON1::get(void)
@@ -127,6 +126,9 @@ void EECON2::put(unsigned int new_value)
 {
 
 
+  trace.register_write(address,new_value);
+  value.put(new_value);
+
   if( (eestate == EENOT_READY) && (0x55 == new_value))
     {
       eestate = EEHAVE_0x55;
@@ -140,7 +142,6 @@ void EECON2::put(unsigned int new_value)
       eestate = EENOT_READY;
     }
 
-  trace.register_write(address,new_value);
 
 }
 
@@ -172,8 +173,8 @@ unsigned int EEDATA::get(void)
 void EEDATA::put(unsigned int new_value)
 {
 
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
 
 }
 
@@ -196,8 +197,8 @@ unsigned int EEADR::get(void)
 void EEADR::put(unsigned int new_value)
 {
 
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
 
 }
 

@@ -115,8 +115,8 @@ double Register::get_bit_voltage(unsigned int bit_number)
 void Register::setbit(unsigned int bit_number, bool new_value)
 {
   if(bit_number < bit_mask) {
-    value.put((value.get() & ~(1<<bit_number)) | (1<<bit_number));
     trace.register_write(address,value.get());
+    value.put((value.get() & ~(1<<bit_number)) | (1<<bit_number));
   }
 }
 

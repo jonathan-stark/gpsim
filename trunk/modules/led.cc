@@ -134,7 +134,8 @@ Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 void Led_Port::trace_register_write(void)
 {
 
-  get_trace().module1(value.get());
+  //get_trace().module1(value.get());
+  get_trace().raw(value.get());
 }
 
 

@@ -2698,6 +2698,7 @@ static void refresh_gui_module(struct gui_module *p)
     gtk_widget_unref(p->module_widget);
 }
 
+extern FloatAttribute *newFloatAttribute(char * , double);
 struct gui_module *create_gui_module(Breadboard_Window *bbw,
                                  enum module_type type,
 				 Module *module,
@@ -2730,11 +2731,11 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     Attribute *ypos = p->module->get_attribute("ypos", false);
     if(!xpos || !ypos)
     {
+      xpos = newFloatAttribute("xpos",-1.0);
+      ypos = newFloatAttribute("xpos",-1.0);
       //xpos = new FloatAttribute("xpos",-1.0);
       //ypos = new FloatAttribute("ypos",-1.0);
 
-      xpos = new FloatAttribute();//"xpos",-1.0);
-      ypos = new FloatAttribute();//"ypos",-1.0);
         module->add_attribute(xpos);
         module->add_attribute(ypos);
     }

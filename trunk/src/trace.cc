@@ -236,7 +236,7 @@ public:
     throw "RegisterTraceObject";
   }
   RegisterTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv) 
-    : TraceObject(_cpu), reg(reg), from(trv)
+    : TraceObject(_cpu), reg(_reg), from(trv)
   {
 
     if(reg) {
@@ -281,16 +281,37 @@ public:
   }
 };
 
+class WTraceObject : public TraceObject
+{
+public:
+  RegisterValue from;
+  RegisterValue to;
+
+  WTraceObject(Processor *_cpu, RegisterValue trv) 
+    : TraceObject(_cpu), from(trv)
+  {
+    to = cpu_pic->W->trace_state;
+    cpu_pic->W->trace_state = from;
+
+  }
+
+  virtual void print(void)
+  {
+    fprintf(stdout, " W: was (0x%04X,0x%04X) is (0x%04X,0x%04X)\n",
+	      from.data,from.init, to.data, to.init);
+
+  }
+};
+
 class TraceFrame
 {
 public:
-  Processor *cpu;
   list <TraceObject *> traceObjects;
 
-  TraceFrame(Processor *_cpu, unsigned int address) : cpu(_cpu)
+  TraceFrame( ) 
   {
-    PCTraceObject *pcto = new PCTraceObject(_cpu, address);
-    traceObjects.push_back(pcto);
+    //PCTraceObject *pcto = new PCTraceObject(_cpu, address);
+    //traceObjects.push_back(pcto);
   }
 
   ~TraceFrame()
@@ -323,6 +344,43 @@ public:
 TraceFrame *current_frame=0;
 list <TraceFrame *> traceFrames;
 
+void addFrame(TraceFrame *newFrame)
+{
+  current_frame = newFrame;
+  traceFrames.push_back(newFrame);
+}
+
+void addToCurrentFrame(TraceObject *to)
+{
+
+  if(current_frame)
+    current_frame->add(to);
+
+}
+void deleteTraceFrame(void)
+{
+  list <TraceFrame *> :: iterator tfIter;
+
+  for(tfIter = traceFrames.begin();
+      tfIter != traceFrames.end();
+      ++tfIter) {
+    TraceFrame *tf = *tfIter;
+    delete tf;
+  }
+  traceFrames.clear();
+  current_frame = 0;
+}
+
+void printTraceFrame(void)
+{
+  list <TraceFrame *> :: iterator tfIter;
+
+  for(tfIter = traceFrames.begin();
+      tfIter != traceFrames.end();
+      ++tfIter) {
+    (*tfIter)->print();
+  }
+}
 
 class TraceType
 {
@@ -371,6 +429,7 @@ public:
 		    unsigned int s)
     : ProcessorTraceType(_cpu,t,s)
   {
+    
   }
 
   TraceObject *decode(unsigned int tbi) {
@@ -379,10 +438,38 @@ public:
     RegisterValue rv = RegisterValue(tv & 0xff, 0);
     unsigned int address = (tv >> 8) & 0xfff;
 
-    Register *reg = cpu->registers[address];
-    printf(" TraceRegisterType: %s 0x%02X",reg->name().c_str(), rv.data);
+    printf(" RegisterTraceType: tv=0x%x\n",tv);
 
-    return new RegisterTraceObject(cpu, reg, rv);
+    RegisterTraceObject *rto = new RegisterTraceObject(cpu, cpu->rma.get_register(address), rv);
+    addToCurrentFrame(rto);
+
+    return rto;
+  }
+
+};
+
+class WTraceType : public ProcessorTraceType
+{
+public:
+  WTraceType(Processor *_cpu, 
+		    unsigned int t,
+		    unsigned int s)
+    : ProcessorTraceType(_cpu,t,s)
+  {
+
+
+  }
+
+  TraceObject *decode(unsigned int tbi) {
+
+    unsigned int tv = trace.get(tbi);
+    printf(" WTraceType: 0x%x\n",tv);
+
+    RegisterValue rv = RegisterValue(tv & 0xff,0);
+    WTraceObject *wto = new WTraceObject(cpu, rv);
+    addToCurrentFrame(wto);
+
+    return wto;
   }
 
 };
@@ -395,13 +482,22 @@ public:
 		    unsigned int s)
     : ProcessorTraceType(_cpu,t,s)
   {
+
+
   }
 
   TraceObject *decode(unsigned int tbi) {
 
     unsigned int tv = trace.get(tbi);
-    printf(" PCTraceType: 0x%x\n",tv & 0xffff);
-    return new PCTraceObject(cpu, tv & 0xffff);
+    printf(" PCTraceType: 0x%x\n",tv);
+
+
+    TraceFrame *tf = new TraceFrame( );
+    addFrame(tf);
+    PCTraceObject *pcto = new PCTraceObject(cpu, tv & 0xffff);
+    addToCurrentFrame(pcto);
+
+    return pcto;
   }
 };
 
@@ -830,6 +926,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   if(!bMapIsInitialized) {
     trace_map[PROGRAM_COUNTER] = new PCTraceType(cpu,PROGRAM_COUNTER,1);
     trace_map[REGISTER_WRITE] = new RegisterTraceType(cpu,REGISTER_WRITE,1);
+    trace_map[WRITE_W] = new WTraceType(cpu,WRITE_W,1);
 
     bMapIsInitialized = true;
   }
@@ -844,30 +941,38 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 
   current_frame = 0;
 
-  for(i=0;i<n && k!=frame_end;i++) {
+  while(traceFrames.size()<n && !(k==frame_end || k==tbi(frame_end+1))) {
 
+    printf("k=%d\n",k);
     map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(k));
     if(tti != trace_map.end()) {
       TraceType *tt = (*tti).second;
 
       if(tt) {
-	k = tbi(k - tt->size);
 	TraceObject *to = tt->decode(k);
-
-	if(to){
-
-	  to->print();
-	}
+	k = tbi(k - tt->size);
       } else
 	k = tbi(k-1);
 
 
-    } else
+    } else {
+
       k = tbi(k-1);
+      if(type(k) == 0)
+	break;
+      if(is_cycle_trace(k,0) == 2) {
+	printf(" ignoring cycle trace\n");
+	k = tbi(k-1);
+      } else
+	printf(" could not decode 0x%x\n",get(k+1));
+
+    }
   }
 
 
-
+  cout <<"Trace frame: " << traceFrames.size() << endl;
+  printTraceFrame();
+  deleteTraceFrame();
 
   try {
     for(i=0;i<n && k!=frame_end;i++) {
@@ -891,20 +996,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 	  cycle_delta++;
 	  found_pc = true;
 	  found_frame = true;
-	  //current_frame = new TraceFrame(cpu,get(k) & 0xffff);
-	  //if(current_frame)
-	  //  traceFrames.push_back(current_frame);
 	  break;
-	case REGISTER_WRITE:
-	  {
-	    /*
-	      if(current_frame)
-	      {
-	      current_frame->add(new RegisterTraceObject(cpu,get(k)));
-	      }
-	    */
-	  }
-
 	}
       } while (!((k==frame_end) || found_pc));
 
@@ -922,18 +1014,6 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   if(!found_frame)
     return 0;
 
-
-  /*
-  list <TraceFrame *> :: iterator tfIter;
-
-  for(tfIter = traceFrames.begin();
-      tfIter != traceFrames.end();
-      ++tfIter) 
-    (*tfIter)->print();
-  */
-
-
-  //printf("Trace frame start: 0x%x\n",frame_start);
 
   trace_flag = TRACE_ALL & ~(TRACE_CYCLE_INCREMENT | 
 			     CYCLE_COUNTER_LO      | 
@@ -1342,7 +1422,7 @@ void TraceLog::register_read_value(unsigned int address, unsigned int value, gui
     {
     case TRACE_FILE_FORMAT_ASCII:
 	buffer.cycle_counter(cc);
-	buffer.register_read_value(address, value);
+	//buffer.register_read_value(address, value);
         break;
     case TRACE_FILE_FORMAT_LXT:
 	lxt_trace(address, value, cc);
@@ -1356,7 +1436,7 @@ void TraceLog::register_write_value(unsigned int address, unsigned int value, gu
     {
     case TRACE_FILE_FORMAT_ASCII:
 	buffer.cycle_counter(cc);
-	buffer.register_write_value(address, value);
+	//buffer.register_write_value(address, value);
         break;
     case TRACE_FILE_FORMAT_LXT:
 	lxt_trace(address, value, cc);

@@ -123,6 +123,7 @@ void TMR0::increment(void)
 
   if(--prescale_counter == 0)
     {
+      trace.register_write(address,value.get());
       prescale_counter = prescale;
       if(value.get() == 255)
 	{
@@ -132,8 +133,6 @@ void TMR0::increment(void)
 	}
       else
 	value.put(value.get() + 1);
-
-      trace.register_write(address,value.get());
     }
   //  cout << value << '\n';
 }
@@ -145,12 +144,12 @@ void TMR0::put(unsigned int new_value)
       cout << "TMR0::put external clock...\n";
     }
 
+  trace.register_write(address,value.get());
+
   // If tmr0 is enabled, then start it up.
 
   if(state & 1)
     start(new_value,2);
-
-  trace.register_write(address,value.get());
 
 }
 
