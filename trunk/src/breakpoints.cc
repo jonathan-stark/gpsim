@@ -28,8 +28,12 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "xref.h"
 
+extern int last_command_is_repeatable;
 extern unsigned int simulation_start_cycle;
 extern pic_processor *active_cpu;
+extern "C" {
+  extern void redisplay_prompt(void);  // in input.cc
+}
 
 Breakpoints bp;
 
@@ -1162,9 +1166,12 @@ void catch_control_c(int sig)
       cout << "<CTRL C> break\n";
       bp.halt();
     }
-  else
+  else {
     cout << "caught control c, but it doesn't seem gpsim was simulating\n";
+    last_command_is_repeatable=0;
+    redisplay_prompt();
 
+  }
 
 }
 

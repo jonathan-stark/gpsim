@@ -86,6 +86,7 @@ char *gnu_readline (char *s, unsigned int force_readline);
 bool using_readline=1;
 int input_mode = 0;
 int allocs = 0;
+int last_command_is_repeatable=0;
 /* When non-zero, this global means the user is done using this program. */
 int done = 0;
 
@@ -93,6 +94,11 @@ int done = 0;
 //const char *gpsim_cont = "> ";  // command continuation prompt
 
 extern int quit_parse;
+
+/* Command file reference counter. This global variable keeps track
+ * of the nesting level of loaded command files */
+
+int Gcmd_file_ref_count=0;
 
 // COMMAND_MODES command_mode;
 
@@ -172,7 +178,7 @@ int parse_string(char *cmd_string)
 
   if( strlen (cmd_string) == 0)
     {
-      if(*last_line)
+      if(*last_line && last_command_is_repeatable)
 	cmd_string_buf = strdup(last_line);
 
     }
@@ -254,12 +260,17 @@ void process_command_file(char * file_name)
         cout << "processing a command file\n";
 
       quit_parse = 0;
+      Gcmd_file_ref_count++;
       while( !quit_parse )
 	{
 	  //cout << "about to re-init the parser\n";
 	  init_parser();
 	  yyparse();
 	}
+
+      // decrement the reference counter if it's greater than 0.
+      if(Gcmd_file_ref_count>0)
+	Gcmd_file_ref_count--;
 
       fclose(cmd_file);
       cmd_file = save_cmd_file;

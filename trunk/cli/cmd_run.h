@@ -27,7 +27,7 @@ public:
 
   cmd_run(void);
   void run(void);
-
+  virtual int is_repeatable(void) { return 1; };
 
 };
 

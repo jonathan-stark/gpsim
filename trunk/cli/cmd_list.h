@@ -30,7 +30,7 @@ public:
   void list(void);
 
   void list(cmd_options *opt);
-
+  virtual int is_repeatable(void) { return 1; };
 
 };
 

@@ -29,7 +29,7 @@ public:
 
   void help(void);
   void help(char *cmd);
-
+  virtual int is_repeatable(void) { return 1; };
 
 };
 

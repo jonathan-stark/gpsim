@@ -27,7 +27,7 @@ public:
 
   cmd_version(void);
   void version(void);
-
+  virtual int is_repeatable(void) { return 1; };
 };
 
 extern cmd_version version;

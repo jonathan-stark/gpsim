@@ -33,7 +33,7 @@ public:
   void x(char *reg_name, int val);
   void x(char *reg_name);
 
-
+  virtual int is_repeatable(void) { return 1; };
 };
 
 extern cmd_x c_x;

@@ -72,6 +72,9 @@ public:
   int get_token(void) {return token_value;};
 
   bool have_cpu(bool display_warning);
+
+  // Assume command is not repeatable
+  virtual int is_repeatable(void) { return 0; };
 };
 
 extern command *command_list[];
