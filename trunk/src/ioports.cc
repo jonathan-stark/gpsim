@@ -540,6 +540,19 @@ PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
   tris = 0;
   latch = 0;
+
+
+  latch_data_out = 0;
+  peripheral_data_out = 0;
+  data_out_select = 0;
+
+  latch_tris_out = 0;
+  peripheral_tris_out = 0;
+  tris_out_select = 0;
+
+  data_in = 0;
+  peripheral_data_in = 0;
+
 }
 
 //-------------------------------------------------------------------
@@ -589,7 +602,6 @@ unsigned int IOPORT_TRIS::get(void)
 {
 
   trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
 
   return(value.get());
 }

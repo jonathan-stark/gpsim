@@ -47,12 +47,14 @@ class TMRL;
 //                   |--> PORTE
 //
 
+/// IOPORT - Base class for I/O ports
+
 class IOPORT : public sfr_register
 {
 public:
 
-#define IOPINS 8
-
+  /// The I/O pins associated with this I/O port.
+  /// This could be anything (or nothing.)
   IOPIN  **pins;
 
 
@@ -72,12 +74,16 @@ public:
 
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
+
   virtual unsigned int get(void);
   virtual unsigned int get_value(void);
+
+  /// Stimuli 
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);
   void attach_node(Stimulus_Node *new_node, unsigned int bit_position);
+
   virtual void trace_register_write(void);
   virtual void change_pin_direction(unsigned int bit_number, bool new_direction);
 
@@ -104,7 +110,17 @@ public:
   virtual bool get_bit(unsigned int bit_number);
   virtual void setbit(unsigned int bit_number, bool new_value);
   PIC_IOPORT(unsigned int _num_iopins=8);
+private:
+  unsigned int latch_data_out;
+  unsigned int peripheral_data_out;
+  unsigned int data_out_select;
 
+  unsigned int latch_tris_out;
+  unsigned int peripheral_tris_out;
+  unsigned int tris_out_select;
+
+  unsigned int data_in;
+  unsigned int peripheral_data_in;
 };
 
 class IOPORT_TRIS : public sfr_register

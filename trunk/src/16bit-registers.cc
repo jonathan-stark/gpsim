@@ -1644,7 +1644,7 @@ void PORTC16::update_pin_directions(unsigned int new_tris)
 
       // Go through and update the direction of the I/O pins
       int i,m;
-      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
+      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(m & diff & valid_iopins)
 	  {
 	  pins[i]->update_direction(m & (~new_tris));
@@ -1653,7 +1653,7 @@ void PORTC16::update_pin_directions(unsigned int new_tris)
       // Now, update the nodes to which the(se) pin(s) may be attached
 
       guint64 time = cycles.value;
-      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
+      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
           if(pins[i]->snode!=0)
             pins[i]->snode->update(time);
