@@ -73,23 +73,31 @@
 /* Define if you have the <readline/tilde.h> header file.  */
 /* #undef HAVE_READLINE_TILDE_H */
 
-/* Name of package */
-#define PACKAGE "gpsim"
-
 /* manually added stuff */
 /*
-  the version nuber values should be replaced with values from configure.in
+  the version number and package values should be replaced with values from configure.ac
   during the generation of config.h from config_win32.h.in
 */
-#define GPSIM_MAJOR_VERSION 0
-#define GPSIM_MINOR_VERSION 0
-#define GPSIM_MICRO_VERSION 0
+/* Name of package */
+#undef PACKAGE
 
-#define QUOTIZE_DO(x) #x
-#define QUOTIZE(x) QUOTIZE_DO(x)
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
 
 /* Version number of package */
-#define VERSION QUOTIZE(GPSIM_MAJOR_VERSION.GPSIM_MINOR_VERSION.GPSIM_MICRO_VERSION)
+#undef VERSION
 
 #ifdef _MSC_VER
 #ifndef __FUNCTION__
