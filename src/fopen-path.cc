@@ -51,15 +51,15 @@ void set_search_path (const char *path)
     char **pathStr;
 
     if (!path || !*path) {		// clear the path
-	searchPathCount = 0;
-	if (verbose) cout << "Clearing Search directory.\n";
-	return;
+        searchPathCount = 0;
+        if (verbose) cout << "Clearing Search directory.\n";
+            return;
     }
 					// count colons to figure length
     for (cp = path, pathLen = 0;
-	 *cp;
-	 ++cp) {
-	if (':' == *cp) ++pathLen;
+         *cp;
+         ++cp) {
+        if (':' == *cp) ++pathLen;
     }
     ++pathLen;				// always one more segments than colons
     // searchPath = (char *[])calloc (pathLen, sizeof (char *));
@@ -67,30 +67,30 @@ void set_search_path (const char *path)
     assert (0 != searchPath);
 
     for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');
-	 (0 != tp) && (ii < pathLen);
-	 ++ii) {
+	       (0 != tp) && (ii < pathLen);
+	       ++ii) {
 	
-	assert ((0 != cp) && (0 != tp));
-	if (tp == cp) {			// treat empty path as "."
-	    *pathStr = strdup (".");	// allocate, in case we free later
-	} else {			// copy out the string section
-	    const char *sp;
-	    char *dp;
-	    *pathStr = (char *)malloc (tp - cp + 1);
-	    assert (0 != *pathStr);
-	    for (dp = *pathStr, sp = cp; sp < tp; *dp++ = *sp++);
-	    *dp = 0;			// NULL terminate
-	}
-	if (verbose) cout << "Search directory: " << *pathStr << '\n';
-	
-	++pathStr;
-	cp = tp+1;
-	tp = strchr (cp, ':');
+      assert ((0 != cp) && (0 != tp));
+      if (tp == cp) {               // treat empty path as "."
+	        *pathStr = strdup (".");  // allocate, in case we free later
+      } else {                      // copy out the string section
+	        const char *sp;
+	        char *dp;
+	        *pathStr = (char *)malloc (tp - cp + 1);
+	        assert (0 != *pathStr);
+	        for (dp = *pathStr, sp = cp; sp < tp; *dp++ = *sp++);
+	        *dp = 0;                  // NULL terminate
+      }
+      if (verbose) cout << "Search directory: " << *pathStr << '\n';
+
+      ++pathStr;
+      cp = tp+1;
+      tp = strchr (cp, ':');
     }
     if (*cp) {
-	*pathStr = strdup (cp);		// get last one
+        *pathStr = strdup (cp);   // get last one
     } else {
-	*pathStr = strdup (".");	// allocate, in case we free later
+        *pathStr = strdup (".");  // allocate, in case we free later
     }
     if (verbose) cout << "Search directory: " << *pathStr << '\n';
     searchPathCount = pathLen;
