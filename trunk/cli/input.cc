@@ -586,6 +586,7 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 
   return TRUE;
 }
+#endif
 
 //============================================================================
 //
@@ -621,8 +622,6 @@ void have_line(char *s)
 
   free(s);
 }
-
-#endif
 
 /**********************************************************************
  **/

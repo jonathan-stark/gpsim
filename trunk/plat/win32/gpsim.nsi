@@ -319,10 +319,11 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\examples\projects\stack_test\stack_test.stc"
 
   SetOutPath "$INSTDIR\examples\scripts"
-  File "${GPSIM_ROOT}\examples\scripts\gensquares.asm"
-  File "${GPSIM_ROOT}\examples\scripts\testgensquares.py"
-  File "${GPSIM_ROOT}\examples\scripts\testgensquares_init.py"
-  File "${GPSIM_ROOT}\examples\scripts\testsocket.py"
+  File "${GPSIM_ROOT}\examples\scripts\makefile"
+  File "${GPSIM_ROOT}\examples\scripts\README"
+  File "${GPSIM_ROOT}\examples\scripts\*.cc"
+  File "${GPSIM_ROOT}\examples\scripts\*.asm"
+  File "${GPSIM_ROOT}\examples\scripts\*.py"
 
   SetOutPath "$INSTDIR\extras\lcd\examples"
   File "${GPSIM_ROOT}\extras\lcd\examples\Makefile.am"

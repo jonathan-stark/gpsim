@@ -182,7 +182,7 @@ Register * I2C_EE::get_register(unsigned int address)
 void I2C_EE::start_write(void)
 {
 
-    cycles.set_break(cycles.value + I2C_EE_WRITE_TIME, this);
+    get_cycles().set_break(get_cycles().value + I2C_EE_WRITE_TIME, this);
 
     rom[xfr_addr]->put ( xfr_data );
     ee_busy = true;

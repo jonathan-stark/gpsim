@@ -274,7 +274,7 @@ Register *EEPROM::get_register(unsigned int address)
 void EEPROM::start_write(void)
 {
 
-  cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
+  get_cycles().set_break(get_cycles().value + EPROM_WRITE_TIME, this);
 
   wr_adr = eeadr.value.get();
   wr_data = eedata.value.get();
@@ -472,7 +472,7 @@ void EEPROM::dump(void)
 void EEPROM_WIDE::start_write(void)
 {
 
-  cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
+  get_cycles().set_break(get_cycles().value + EPROM_WRITE_TIME, this);
 
   wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
   wr_data = eedata.value.get() + (eedatah.value.get() << 8);
@@ -484,7 +484,7 @@ void EEPROM_WIDE::start_program_memory_read(void)
 
   rd_adr = eeadr.value.get() | (eeadrh.value.get() << 8);
 
-  cycles.set_break(cycles.value + 2, this);
+  get_cycles().set_break(get_cycles().value + 2, this);
 
 }
 

@@ -168,15 +168,15 @@ void Trace_Window::Update(void)
   gtk_clist_freeze(trace_clist);
 
   trace_flags |= GTF_ENABLE_XREF_UPDATES;
-  if(cycles.value-last_cycle>=MAXTRACES)
+  if(get_cycles().value-last_cycle>=MAXTRACES)
     // redraw the whole thing
     trace.dump(MAXTRACES, 0);
   else 
-    trace.dump(cycles.value-last_cycle, 0);
+    trace.dump(get_cycles().value-last_cycle, 0);
 
 
   trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
-  last_cycle = cycles.value;
+  last_cycle = get_cycles().value;
   gtk_clist_thaw(trace_clist);
 
 }

@@ -324,7 +324,7 @@ CyclesLabeledEntry::CyclesLabeledEntry()
 void CyclesLabeledEntry::Update(void)
 {
   char buffer[32];
-  sprintf(buffer,"0x%016Lx",cycles.value);
+  sprintf(buffer,"0x%016Lx",get_cycles().value);
   gtk_entry_set_text (GTK_ENTRY (entry), buffer);
 }
 
@@ -338,7 +338,7 @@ void TimeLabeledEntry::Update()
 {
   char buffer[32];
 
-  double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+  double time_db = gp->cpu->get_InstPeriod() * get_cycles().value;
 
 
   switch(time_format) {

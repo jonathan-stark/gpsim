@@ -39,18 +39,18 @@ void WDT::update(void)
 
     if(future_cycle) {
 
-      guint64 fc = cycles.value + value * (1<<prescale);
+      guint64 fc = get_cycles().value + value * (1<<prescale);
 
       //cout << "WDT::update:  moving break from " << future_cycle << " to " << fc << '\n';
 
-      cycles.reassign_break(future_cycle, fc, this);
+      get_cycles().reassign_break(future_cycle, fc, this);
       future_cycle = fc;
 
     } else {
     
-      future_cycle = cycles.value + value * (1<<prescale);
+      future_cycle = get_cycles().value + value * (1<<prescale);
 
-      cycles.set_break(future_cycle, this);
+      get_cycles().set_break(future_cycle, this);
     }
   }
 
@@ -84,9 +84,9 @@ void WDT::initialize(bool enable, double _timeout)
       value = (unsigned int) (cpu->get_frequency()*timeout);
       prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
-      future_cycle = cycles.value + value * (1<<prescale);
+      future_cycle = get_cycles().value + value * (1<<prescale);
 
-      cycles.set_break(future_cycle, this);
+      get_cycles().set_break(future_cycle, this);
 
     }
 
@@ -97,7 +97,7 @@ void WDT::callback(void)
 
 
   if(wdte) {
-    cout<<"WDT timeout: " << hex << cycles.value << '\n';
+    cout<<"WDT timeout: " << hex << get_cycles().value << '\n';
 
     future_cycle = 0;
     update();
@@ -136,11 +136,11 @@ void WDT::start_sleep(void)
   if(wdte) {
     prescale = 0;
 
-    guint64 fc = cycles.value + value * (1<<prescale);
+    guint64 fc = get_cycles().value + value * (1<<prescale);
 
     //cout << "WDT::start_sleep:  moving break from " << future_cycle << " to " << fc << '\n';
 
-    cycles.reassign_break(future_cycle, fc, this);
+    get_cycles().reassign_break(future_cycle, fc, this);
 
     future_cycle = fc;
   }
@@ -213,7 +213,7 @@ void Program_Counter::increment(void)
   // counter).
 
   cpu_pic->pcl->value.put(value & 0xff);
-  cycles.increment();
+  get_cycles().increment();
 }
 
 //--------------------------------------------------
@@ -235,7 +235,7 @@ void Program_Counter::skip(void)
   // counter).
 
   cpu_pic->pcl->value.put( value & 0xff);
-  cycles.increment();
+  get_cycles().increment();
 }
 
 //--------------------------------------------------
@@ -257,8 +257,8 @@ void Program_Counter::jump(unsigned int new_address)
 
   cpu_pic->pcl->value.put(value & 0xff);
   
-  cycles.increment();
-  cycles.increment();
+  get_cycles().increment();
+  get_cycles().increment();
 
 }
 
@@ -279,8 +279,8 @@ void Program_Counter::interrupt(unsigned int new_address)
 
   cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
   
-  cycles.increment();
-  cycles.increment();
+  get_cycles().increment();
+  get_cycles().increment();
 
 }
 
@@ -309,7 +309,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // The instruction modifying the PCL will also increment the program counter.
   // So, pre-compensate the increment with a decrement:
   value--;
-  cycles.increment();
+  get_cycles().increment();
 }
 
 //--------------------------------------------------
@@ -326,8 +326,8 @@ void Program_Counter::new_address(unsigned int new_value)
   // see Update pcl comment in Program_Counter::increment()
 
   cpu_pic->pcl->value.put(value & 0xff);
-  cycles.increment();
-  cycles.increment();
+  get_cycles().increment();
+  get_cycles().increment();
 }
 
 //--------------------------------------------------
