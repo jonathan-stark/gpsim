@@ -44,6 +44,15 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #endif
 
+#include "../src/gpsim_def.h"
+#include "../src/gpsim_classes.h"
+#include "../src/icd.h"
+#include "../src/pic-processor.h"
+#include "../src/breakpoints.h"
+#include "../config.h"
+#include "command.h"
+#include "input.h"
+
 #ifdef HAVE_LIBREADLINE
 #define HAVE_READLINE
 #endif
@@ -59,15 +68,6 @@ extern "C" {
 #include <readline/history.h>
 }
 #endif /* HAVE_READLINE */
-
-#include "../src/gpsim_def.h"
-#include "../src/gpsim_classes.h"
-#include "../src/icd.h"
-#include "../src/pic-processor.h"
-#include "../src/breakpoints.h"
-#include "../config.h"
-#include "command.h"
-#include "input.h"
 
 // Defined in ../src/pic-processors.cc
 extern SIMULATION_MODES simulation_mode;
