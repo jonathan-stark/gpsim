@@ -457,11 +457,14 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 
 
 	  i = (i + dump1(i,string_buffer, sizeof(string_buffer))) & TRACE_BUFFER_MASK;
-	  if(string_buffer[0] && out_stream)
-	    fprintf(out_stream,"%s\n",string_buffer);
 
-	  if(xref)
-	    xref->update();
+	  if(string_buffer[0]) {
+	    if(out_stream)
+	      fprintf(out_stream,"%s\n",string_buffer);
+
+	    if(xref)
+	      xref->update();
+	  }
 
 	} while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK))
 		 &&
