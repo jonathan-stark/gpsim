@@ -580,7 +580,9 @@ void create_dispatcher (void)
 
 
       frame = gtk_frame_new("gui_update");
-      if(!config_get_variable("dispatcher", "gui_update", &update_rate))
+      if(config_get_variable("dispatcher", "gui_update", &update_rate))
+	  gpsim_set_update_rate(update_rate);
+      else
 	  update_rate=gpsim_get_update_rate();
       spinadj = gtk_adjustment_new(update_rate,1,2000000,1,100,100);
       spinb = gtk_spin_button_new(spinadj,1,0);
