@@ -93,9 +93,8 @@ int last_command_is_repeatable=0;
 
 extern int quit_parse;
 
-#ifndef _WIN32
 extern void start_server(void);
-#endif
+extern void stop_server(void);
 
 /*
   temporary --- linked list input buffer
@@ -195,9 +194,7 @@ void initialize_gpsim(void)
 {
 
   initialize_signals();
-#ifndef _WIN32
   start_server();
-#endif
 }
 
 
@@ -639,6 +636,8 @@ void exit_gpsim(void)
   rl_callback_handler_remove();
   g_io_channel_unref(channel);
 #endif
+
+  stop_server();
 
   exit(0);
 }

@@ -22,23 +22,73 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#ifndef _WIN32
 #include <pthread.h>
+#endif
 
 #include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/types.h>
 
-
-#include "../src/breakpoints.h"
 #include "../src/processor.h"
+
+
+#ifndef _WIN32
+#include <sys/socket.h>
+#include <netinet/in.h>
+#else
+#include <winsock2.h>
+#endif
+
+
 
 // in input.cc -- parse_string sends a string through the command parser
 extern int parse_string(char * str);
 
-#ifndef _WIN32
+#ifdef WIN32
+#define snprintf  _snprintf
+#define socklen_t int
+
+bool server_started = false;
+
+
+void psocketerror(const char *str)
+{
+  fprintf (stderr, "%s: %s\n", str, g_win32_error_message(WSAGetLastError()));
+}
+
+
+bool winsockets_init(void)
+{
+  WSADATA wsaData;
+  int err;
+
+  if (0 != (err = WSAStartup( MAKEWORD( 2, 2 ), &wsaData )))
+    return false;
+
+  /* Confirm that the WinSock DLL supports 2.2.*/
+  /* Note that if the DLL supports versions greater    */
+  /* than 2.2 in addition to 2.2, it will still return */
+  /* 2.2 in wVersion since that is the version we      */
+  /* requested.                                        */
+
+  if (LOBYTE( wsaData.wVersion ) != 2 || HIBYTE( wsaData.wVersion ) != 2 ) {
+    /* Tell the user that we could not find a usable */
+    /* WinSock DLL.                                  */
+    WSACleanup( );
+    return false;
+  }
+
+  return true;
+}
+#else
+#define psocketerror(s) perror(s)
+#define closesocket(s)  close(s)
+#define SOCKET          int
+#define INVALID_SOCKET  -1
+#endif
+
 
 unsigned int a2i(char b)
 {
@@ -55,6 +105,7 @@ unsigned int a2i(char b)
   return 0;
 
 }
+
 
 unsigned int ascii2uint(char **buffer, int digits)
 {
@@ -119,8 +170,6 @@ enum eGPSIMObjectTypes
     GPSIM_CMD_SYMBOL     = 0x97, // Query the value of a symbol
     GPSIM_CMD_VERSION    = 0x98,
     GPSIM_CMD_ASSIGN_RAM = 0x99,
-
-
   };
 
 
@@ -139,8 +188,9 @@ int ParseInt(char **buffer, unsigned int &retInt)
   return 0;
 }
 
+
 //--------------------
-bool ParseString(char **buffer, char *retStr, int maxLen)
+int ParseString(char **buffer, char *retStr, int maxLen)
 {
 
   char *b = *buffer;
@@ -162,6 +212,7 @@ bool ParseString(char **buffer, char *retStr, int maxLen)
   return 0;
 }
 
+
 //------------------------------------------------------------------------
 // Socket wrapper class
 // 
@@ -179,7 +230,7 @@ public:
 
   void init();
 
-  void Close(int &);
+  void Close(SOCKET &);
   void Bind();
   void Listen();
   void Accept();
@@ -193,27 +244,23 @@ public:
 
   bool bHaveClient()
   {
-    return (client_socket != -1);
+    return (client_socket != INVALID_SOCKET);
   }
 
   //private:
   char     buffer[BUFSIZE];
-  int 	   my_socket, client_socket;
+  SOCKET   my_socket, client_socket;
   struct   sockaddr_in addr;
 };
 
 
-
-
-
-
-
 Socket::Socket()
 {
-  my_socket = -1;
-  client_socket = -1;
+  my_socket = INVALID_SOCKET;
+  client_socket = INVALID_SOCKET;
 
 }
+
 
 Socket::~Socket()
 {
@@ -226,16 +273,16 @@ Socket::~Socket()
 void Socket::init(void)
 {
  
-  if ((my_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("socket");
+  if ((my_socket = socket(AF_INET, SOCK_STREAM, 0)) == INVALID_SOCKET) {
+    psocketerror("socket");
     exit(1);
   }
 
   std::cout << "initializing socket\n";
 
   int on = 1;
-  if ( setsockopt ( my_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
-    perror("setsockopt");
+  if ( setsockopt ( my_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) != 0 ) {
+    psocketerror("setsockopt");
     exit(1);
   }
 
@@ -248,38 +295,43 @@ void Socket::init(void)
   Listen();
 }
 
-void Socket::Close(int &sock)
-{
-  if(sock != -1)
-    close(sock);
 
-  sock = -1;
+void Socket::Close(SOCKET &sock)
+{
+  if (sock != INVALID_SOCKET)
+    closesocket(sock);
+
+  sock = INVALID_SOCKET;
 
 }
+
 
 void Socket::Bind()
 {
-  if (bind(my_socket, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
-    perror("bind");
+  if (bind(my_socket, (struct sockaddr *) &addr, sizeof(addr)) != 0) {
+    psocketerror("bind");
   }
 }
 
+
 void Socket::Listen()
 {
-  if (listen(my_socket, 5) == -1) {
-    perror("listen");
+  if (listen(my_socket, 5) != 0) {
+    psocketerror("listen");
   }
 }
+
 
 void Socket::Accept()
 {
   socklen_t addrlen = sizeof(addr);
-  if ((client_socket = accept(my_socket, (struct sockaddr *)  &addr, &addrlen)) == -1) {
-    perror("accept");
+  if ((client_socket = accept(my_socket, (struct sockaddr *)  &addr, &addrlen)) == INVALID_SOCKET) {
+    psocketerror("accept");
     exit(1);
   }
 
 }
+
 
 void Socket::Recv()
 {
@@ -287,36 +339,36 @@ void Socket::Recv()
   memset(buffer, 0, sizeof(buffer));
 
   int ret = recv(client_socket, buffer, sizeof(buffer), 0);
-  if (ret == -1) {
-    perror("recv");
-    close(my_socket);
-    close(client_socket);
-    client_socket = -1;
-    my_socket = -1;
+  if (ret < 0) {
+    psocketerror("recv");
+    closesocket(my_socket);
+    closesocket(client_socket);
+    client_socket = INVALID_SOCKET;
+    my_socket = INVALID_SOCKET;
   }
   
   if (ret == 0) {
     printf("recv: 0 bytes received\n");
-    close(my_socket);
-    close(client_socket);
+    closesocket(my_socket);
+    closesocket(client_socket);
   }
 }
+
 
 void Socket::Send(char *b)
 {
   //printf("socket-sending %s",buffer);
-  if (send(client_socket, b, strlen(b), 0) == -1) {
-    perror("send");
-    close(my_socket);
-    close(client_socket);
+  if (send(client_socket, b, strlen(b), 0) < 0) {
+    psocketerror("send");
+    closesocket(my_socket);
+    closesocket(client_socket);
   }
 }
 
 
-
 void Socket::receive(void)
 {
-  if(!bHaveClient()) {
+  if (!bHaveClient()) {
     init();
     Accept();
   }
@@ -340,9 +392,10 @@ void Socket::receive(void)
 
 void Socket::respond(char *buf)
 {
-  if(bHaveClient() && buf)
+  if (bHaveClient() && buf)
     Send(buf);
 }
+
 
 //------------------------------------------------------------------------
 // ParseObject
@@ -502,6 +555,7 @@ void Socket::ParseObject(char *buffer)
   }
 }
 
+
 #ifdef USE_THREADS_BUT_NOT_RECOMMENDED_BECAUSE_OF_CROSS_PLATFORM_ISSUES
 void *server_thread(void *ignored)
 {
@@ -518,12 +572,11 @@ void *server_thread(void *ignored)
 }
 
 
-
 pthread_t thSocketServer;
 pthread_attr_t thAttribute;
 int something=1;
 
-int start_server(void)
+void start_server(void)
 {
   std::cout << "starting server....\n";
 
@@ -532,7 +585,6 @@ int start_server(void)
   pthread_create(&thSocketServer, &thAttribute, server_thread, (void *)&something);
 
   std::cout << " started server\n";
-  return 0;
 }
 #else   // if USE_THREADS
 
@@ -589,6 +641,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   return FALSE;
 }
 
+
 gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 {
   Socket *s = (Socket *)d;
@@ -611,12 +664,22 @@ gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
   return true;
 }
 
-int start_server(void)
+
+void start_server(void)
 {
 
   static Socket s;
 
   std::cout << "starting server....\n";
+
+#ifdef _WIN32
+  if (!winsockets_init()) {
+    fprintf(stderr, "Could not find a usable WinSock DLL, sockets are disabled.\n");
+    server_started = false;
+    return;
+  }
+  server_started = true;
+#endif
 
   s.init();
 
@@ -635,9 +698,14 @@ int start_server(void)
   }
 
   std::cout << " started server\n";
-  return 0;
-
 }
 
+
+void stop_server(void)
+{
+#ifdef _WIN32
+  if (server_started)
+    WSACleanup();
+#endif
+}
 #endif   // if USE_THREADS
-#endif   // if !_WIN32

@@ -36,6 +36,7 @@ cli_OBJECTS =			\
 	cmd_list.o		\
 	cmd_load.o		\
 	cmd_log.o		\
+	cmd_macro.o		\
 	cmd_module.o		\
 	cmd_node.o		\
 	cmd_processor.o		\
@@ -58,6 +59,7 @@ cli_OBJECTS =			\
 	operator.o		\
 	parse.o			\
 	scan.o			\
+	socket.o		\
 	uxtime.o
 
 ../config.h : ../config_win32.h.in
