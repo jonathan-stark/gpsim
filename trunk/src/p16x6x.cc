@@ -95,7 +95,7 @@ void P16C61::create(void)
 
 }
 
-pic_processor * P16C61::construct(void)
+Processor * P16C61::construct(void)
 {
 
   P16C61 *p = new P16C61;
@@ -482,7 +482,7 @@ void  P16C62::create(void)
 
 }
 
-pic_processor * P16C62::construct(void)
+Processor * P16C62::construct(void)
 {
 
   P16C62 *p = new P16C62;
@@ -610,7 +610,7 @@ void P16C63::create(void)
 
 }
 
-pic_processor * P16C63::construct(void)
+Processor * P16C63::construct(void)
 {
 
   P16C63 *p = new P16C63;
@@ -699,7 +699,7 @@ void  P16C64::create(void)
 
 }
 
-pic_processor * P16C64::construct(void)
+Processor * P16C64::construct(void)
 {
 
   P16C64 *p = new P16C64;
@@ -827,7 +827,7 @@ void P16C65::create(void)
 
 }
 
-pic_processor * P16C65::construct(void)
+Processor * P16C65::construct(void)
 {
 
   P16C65 *p = new P16C65;

@@ -69,7 +69,7 @@ class P12C508 : public  _12bit_processor, public _12bit_8pins
   virtual void reset(RESET_TYPE r);
 
   P12C508(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
@@ -97,7 +97,7 @@ class P12C509 : public P12C508
 
 
   P12C509(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
 
 

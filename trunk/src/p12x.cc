@@ -158,7 +158,7 @@ void P12C508::create(void)
 }
 
 
-pic_processor * P12C508::construct(void)
+Processor * P12C508::construct(void)
 {
 
   P12C508 *p = new P12C508;
@@ -196,7 +196,7 @@ void P12C509::create_sfr_map(void)
 
 }
 
-pic_processor * P12C509::construct(void)
+Processor * P12C509::construct(void)
 {
 
   P12C509 *p = new P12C509;

@@ -47,35 +47,16 @@ gpointer create_interface(unsigned int processor_id,
 			  void (*interface_callback)(gpointer), 
 			  gpointer interface_callback_data);
 
-extern pic_processor *active_cpu;
+extern Processor *active_cpu;
 
 unsigned int gpsim_is_initialized = 0;  // Flag to tell us when all of the init stuff is done.
 
 int hll_mode=0; // 0 - asm, 1 - HLL
 
-//extern "C" {
+
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
-//}
-//extern "C" {
-  extern void redisplay_prompt(void);  // in input.cc
-//}
 
-//
-// interface.cc
-//
-// This routine provides helper functions for accessing gpsim internals.
-// Its ultimate purpose is to be replaced with some kind of dynamically
-// linked thing like CORBA or sockets...
-//
-
-/*
-void (*update_object) (gpointer xref,int new_value);
-void (*remove_object) (gpointer xref);
-void (*simulation_has_stopped) (void);
-void (*new_processor) (unsigned int processor_id);
-void (*new_program)  (unsigned int p);
-*/
-
+extern void redisplay_prompt(void);  // in input.cc
 
 /**************************************************************************
  *
@@ -86,6 +67,14 @@ void (*new_program)  (unsigned int p);
 
 gpsimInterface gi;
 
+
+//--------------------------------------------------------------------------
+// 
+// hack...
+pic_processor *get_pic_processor(unsigned int processor_id)
+{
+  return (pic_processor *)get_processor(processor_id);
+}
 
 //--------------------------------------------------------------------------
 
@@ -159,7 +148,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 
 file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
     return NULL;
@@ -232,7 +221,7 @@ gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, 
 
 gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
     if(!valid_register(pic,type,register_number))
 	return FALSE;
@@ -250,7 +239,7 @@ gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, un
 
 gboolean gpsim_register_is_valid(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
     if(!valid_register(pic,type,register_number))
 	return FALSE;
@@ -316,12 +305,12 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
 
 char *gpsim_processor_get_name(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  Processor *cpu = get_processor(processor_id);
 
-  if(!pic)
+  if(!cpu)
       return NULL;
 
-  return pic->name();
+  return cpu->name();
 }
 
 //--------------------------------------------------------------------------
@@ -329,12 +318,12 @@ char *gpsim_processor_get_name(unsigned int processor_id)
 unsigned int gpsim_get_pc_value(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  Processor *cpu = get_processor(processor_id);
 
-  if(!pic)
+  if(!cpu)
     return INVALID_VALUE;
 
-  return pic->pc->value;
+  return cpu_pic->pc->value;
 
 }
 
@@ -343,12 +332,12 @@ unsigned int gpsim_get_pc_value(unsigned int processor_id)
 void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  Processor *cpu = get_processor(processor_id);
 
-  if(!pic)
+  if(!cpu)
     return;
 
-  pic->pc->put_value(pc_value);
+  cpu_pic->pc->put_value(pc_value);
 
 
 }
@@ -358,7 +347,7 @@ void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value)
 unsigned int gpsim_get_status(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -371,7 +360,7 @@ unsigned int gpsim_get_status(unsigned int processor_id)
 void gpsim_put_status(unsigned int processor_id, unsigned int status_value)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
       return;
@@ -387,7 +376,7 @@ void gpsim_put_status(unsigned int processor_id, unsigned int status_value)
 unsigned int gpsim_get_w(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -399,7 +388,7 @@ unsigned int gpsim_get_w(unsigned int processor_id)
 
 void gpsim_put_w(unsigned int processor_id, unsigned int w_value)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
       return;
@@ -414,7 +403,7 @@ void gpsim_put_w(unsigned int processor_id, unsigned int w_value)
 unsigned int gpsim_get_cycles_lo(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -428,7 +417,7 @@ unsigned int gpsim_get_cycles_lo(unsigned int processor_id)
 guint64 gpsim_get_cycles(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -442,7 +431,7 @@ guint64 gpsim_get_cycles(unsigned int processor_id)
 double gpsim_get_inst_clock(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -483,7 +472,7 @@ void  gpsim_set_update_rate(guint64 new_rate)
 unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -494,7 +483,7 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -525,7 +514,7 @@ unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, REGISTER_TYPE t
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -535,7 +524,7 @@ unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id, REGISTER_T
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -544,7 +533,7 @@ unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id, REGISTER_
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -554,7 +543,7 @@ unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id, REGI
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -564,7 +553,7 @@ unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id, REG
 unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
     unsigned int breakpoint_number;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -583,7 +572,7 @@ unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYP
 //--------------------------------------------------------------------------
 unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename, int format)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -599,7 +588,7 @@ unsigned int gpsim_reg_set_read_logging(unsigned int processor_id,
 					unsigned int register_number)
 {
     int b;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -617,7 +606,7 @@ unsigned int gpsim_reg_set_write_logging(unsigned int processor_id,
 					 unsigned int register_number)
 {
     int b;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -637,7 +626,7 @@ unsigned int gpsim_reg_set_read_value_logging(unsigned int processor_id,
 					      unsigned int mask)
 {
     int b;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -657,7 +646,7 @@ unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
 					       unsigned int mask)
 {
     int b;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     
     if(!pic)
 	return 0;
@@ -672,7 +661,7 @@ unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned int address)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -683,7 +672,7 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
 unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
 					     unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -694,7 +683,7 @@ unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
 unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
 					    unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -704,7 +693,7 @@ unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_opcode(unsigned int processor_id, unsigned int address)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -720,7 +709,7 @@ unsigned int gpsim_address_has_opcode(unsigned int processor_id, unsigned int ad
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int address)
 {
- pic_processor *pic = get_processor(processor_id);
+ pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -735,7 +724,7 @@ unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int a
 void  gpsim_assign_program_xref(unsigned int processor_id, unsigned int address, gpointer xref)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -773,7 +762,7 @@ void  gpsim_assign_register_xref(unsigned int processor_id, REGISTER_TYPE type, 
 void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -844,7 +833,7 @@ void gpsim_disable_profiling(unsigned int processor_id)
 
 guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -854,7 +843,7 @@ guint64 gpsim_get_cycles_used(unsigned int processor_id, unsigned int address)
 
 guint64 gpsim_get_register_read_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -864,7 +853,7 @@ guint64 gpsim_get_register_read_accesses(unsigned int processor_id, REGISTER_TYP
 
 guint64 gpsim_get_register_write_accesses(unsigned int processor_id, REGISTER_TYPE type, unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -875,7 +864,7 @@ guint64 gpsim_get_register_write_accesses(unsigned int processor_id, REGISTER_TY
 //--------------------------------------------------------------------------
 void gpsim_step(unsigned int processor_id, unsigned int steps)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic || (steps==0))
     return;
@@ -887,7 +876,7 @@ void gpsim_step(unsigned int processor_id, unsigned int steps)
 //--------------------------------------------------------------------------
 void gpsim_step_over(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -902,7 +891,7 @@ void gpsim_hll_step(unsigned int processor_id)
     unsigned int initial_line;
     unsigned int initial_pc;
 
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -932,7 +921,7 @@ void gpsim_hll_step_over(unsigned int processor_id)
     unsigned int initial_pc;
     unsigned int initial_id;
 
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -968,7 +957,7 @@ void gpsim_hll_step_over(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_run(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -980,7 +969,7 @@ void gpsim_run(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_stop(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -990,7 +979,7 @@ void gpsim_stop(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_reset(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1004,7 +993,7 @@ void gpsim_reset(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_finish(unsigned int processor_id)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
     unsigned int return_address;
 
   if(!pic)
@@ -1017,7 +1006,7 @@ void gpsim_finish(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1030,7 +1019,7 @@ void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_stack_size(unsigned int processor_id)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0;
@@ -1040,7 +1029,7 @@ unsigned int gpsim_get_stack_size(unsigned int processor_id)
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_stack_value(unsigned int processor_id, unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return 0xffff;
@@ -1065,7 +1054,7 @@ void gpsim_set_write_break_at_address(unsigned int processor_id,
 void gpsim_set_execute_break_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1080,7 +1069,7 @@ void gpsim_set_notify_point_at_address(unsigned int processor_id,
 {
     BreakCallBack *callback;
 
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1097,7 +1086,7 @@ void gpsim_set_profile_start_at_address(unsigned int processor_id,
 {
     BreakCallBack *callback;
 
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1114,7 +1103,7 @@ void gpsim_set_profile_stop_at_address(unsigned int processor_id,
 {
     BreakCallBack *callback;
 
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1127,7 +1116,7 @@ void gpsim_set_profile_stop_at_address(unsigned int processor_id,
 void gpsim_clear_profile_start_at_address(unsigned int processor_id,
 					  unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1140,7 +1129,7 @@ void gpsim_clear_profile_start_at_address(unsigned int processor_id,
 void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
 					 unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1153,7 +1142,7 @@ void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
 void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     if(!pic)
 	return;
@@ -1165,7 +1154,7 @@ void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1175,7 +1164,7 @@ void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int addre
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1185,7 +1174,7 @@ void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id,
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1195,7 +1184,7 @@ void gpsim_toggle_break_at_hll_line(unsigned int processor_id, unsigned int file
 //--------------------------------------------------------------------------
 unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -1205,7 +1194,7 @@ unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsi
 //--------------------------------------------------------------------------
 unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -1215,7 +1204,7 @@ unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id, 
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -1234,7 +1223,7 @@ unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address)
 struct file_context * gpsim_get_file_context(unsigned int processor_id, unsigned int file_id)
 {
 
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return NULL;
@@ -1249,7 +1238,7 @@ unsigned int gpsim_get_src_line(unsigned int processor_id, unsigned int address)
 {
     unsigned int line;
     
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -1270,7 +1259,7 @@ unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int addr
 {
     unsigned int line;
     
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return INVALID_VALUE;
@@ -1289,7 +1278,7 @@ unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int addr
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_number_of_source_files(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1301,7 +1290,7 @@ unsigned int gpsim_get_number_of_source_files(unsigned int processor_id)
 //--------------------------------------------------------------------------
 char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, char *buffer)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
   {
@@ -1317,7 +1306,7 @@ char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, cha
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1332,7 +1321,7 @@ unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address)
 //--------------------------------------------------------------------------
 void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1358,7 +1347,7 @@ gpointer create_interface(unsigned int processor_id,
   if(!io)
     return NULL;
 
-  io->pic = get_processor(processor_id);
+  io->pic = get_pic_processor(processor_id);
 
   if(!io->pic) {
     delete io;
@@ -1384,7 +1373,7 @@ gpointer gpsim_set_cyclic_break_point( unsigned int processor_id,
   if(!cbp)
     return NULL;
 
-  cbp->pic = get_processor(processor_id);
+  cbp->pic = get_pic_processor(processor_id);
 
   if(!cbp->pic) {
     delete cbp;
@@ -1443,7 +1432,7 @@ void gpsim_clear_break(gpointer b)
 
 pic_processor *gpsim_get_active_cpu(void)
 {
-  return active_cpu;
+  return (pic_processor *)active_cpu;
 }
 
 guint64 gpsim_get_current_time(void)
@@ -1516,7 +1505,7 @@ void gpsim_set_bulk_mode(int flag)
 //---------------------------------------------------------------------------
 void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointer xref)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1536,7 +1525,7 @@ void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointe
 
 unsigned int  gpsim_package_pin_count(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1547,7 +1536,7 @@ unsigned int  gpsim_package_pin_count(unsigned int processor_id)
 
 char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1557,7 +1546,7 @@ char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin)
 
 unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1572,7 +1561,7 @@ unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
 }
 void  gpsim_pin_toggle(unsigned int processor_id, unsigned int pin)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1588,7 +1577,7 @@ void  gpsim_pin_toggle(unsigned int processor_id, unsigned int pin)
 
 unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return 0;
@@ -1606,7 +1595,7 @@ unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin)
 }
 void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned int new_dir)
 {
-  pic_processor *pic = get_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
   if(!pic)
     return;
@@ -1626,7 +1615,7 @@ extern int open_cod_file(pic_processor **, char *);
 int gpsim_open(unsigned int processor_id, char *file)
 {
     char *str;
-    pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_pic_processor(processor_id);
 
     str = strrchr(file,'.');
     if(str==NULL)

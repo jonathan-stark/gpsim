@@ -305,7 +305,7 @@ void  P16F62x::create(int ram_top)
 // Pic 16F627 
 //
 
-pic_processor * P16F627::construct(void)
+Processor * P16F627::construct(void)
 {
 
   P16F627 *p = new P16F627;
@@ -334,7 +334,7 @@ P16F627::P16F627(void)
 // Pic 16F628 
 //
 
-pic_processor * P16F628::construct(void)
+Processor * P16F628::construct(void)
 {
 
   P16F628 *p = new P16F628;

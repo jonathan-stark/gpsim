@@ -46,7 +46,7 @@ static char num_stimuli = 'a';
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 
 
-extern pic_processor *active_cpu;
+extern Processor *active_cpu;
 /*
  * stimulus.cc
  *
@@ -734,7 +734,7 @@ void asynchronous_stimulus::start(void)
   //   (a cpu is only needed for the cycle counter)
 
   if(!cpu)
-    cpu = active_cpu;
+    cpu = (pic_processor*)active_cpu;
 
   if(cpu && samples) //  && transition_cycles)
     {
@@ -805,7 +805,7 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
   //   (a cpu is only needed for the cycle counter)
 
   if(!cpu)
-    cpu = active_cpu;
+    cpu = (pic_processor *)active_cpu;
 
   if(cpu && samples) //  && transition_cycles)
     {

@@ -33,7 +33,7 @@ public:
   
   P17C7xx(void);
 
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   virtual PROCESSOR_TYPE isa(void){return _P17C7xx_;};
   virtual void create_symbols(void);
   virtual void create(int ram_top);
@@ -55,7 +55,7 @@ class P17C75x : public P17C7xx
  public:
 
   P17C75x(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   virtual void create(int ram_top);
   virtual void create_sfr_map(void);
   
@@ -78,7 +78,7 @@ class P17C752 : public P17C75x
  public:
   virtual PROCESSOR_TYPE isa(void){return _P17C752_;};
   P17C752(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   //  void create_sfr_map(void);
 
@@ -98,7 +98,7 @@ class P17C756 : public P17C75x
   void create_symbols(void);
 
   P17C756(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   //  void create_sfr_map(void);
 
@@ -117,7 +117,7 @@ class P17C756A : public P17C75x
   void create_symbols(void);
 
   P17C756A(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   //  void create_sfr_map(void);
 
@@ -136,7 +136,7 @@ class P17C762 : public P17C75x
   void create_symbols(void);
 
   P17C762(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   //  void create_sfr_map(void);
 
@@ -155,7 +155,7 @@ class P17C766 : public P17C75x
   void create_symbols(void);
 
   P17C766(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   //  void create_sfr_map(void);
 

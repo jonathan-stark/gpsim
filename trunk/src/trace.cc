@@ -947,7 +947,7 @@ void TraceLog::enable_logging(char *new_fname, int format)
 
   if(!cpu) {
     if(active_cpu) {
-      cpu = active_cpu;
+      cpu = (pic_processor *)active_cpu;
     } else
       cout << "Warning: Logging can't be enabled until a cpu has been selected.";
   }
@@ -1191,7 +1191,7 @@ void ProfileKeeper::enable_profiling(void)
 
     if(!cpu) {
 	if(active_cpu)
-	    cpu = active_cpu;
+	    cpu = (pic_processor *)active_cpu;
 	else
 	    cout << "Warning: Profiling can't be enabled until a cpu has been selected.";
     }

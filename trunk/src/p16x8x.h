@@ -89,7 +89,7 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
   P16C84(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 class P16F84 : public P16C8x
@@ -101,7 +101,7 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x400; };
 
   P16F84(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 class P16CR84 : public P16F84
@@ -111,7 +111,7 @@ public:
   virtual PROCESSOR_TYPE isa(void){return _P16CR84_;};
 
   P16CR84(void) {  name_str = "p16cr84"; };
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 
@@ -125,7 +125,7 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x200; };
 
   P16F83(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 class P16CR83 : public P16F83
@@ -135,7 +135,7 @@ public:
   virtual PROCESSOR_TYPE isa(void){return _P16CR83_;};
 
   P16CR83(void) {  name_str = "p16cr83"; };
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 

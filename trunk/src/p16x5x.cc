@@ -209,7 +209,7 @@ void P16C54::create(void)
 
 }
 
-pic_processor * P16C54::construct(void)
+Processor * P16C54::construct(void)
 {
 
   P16C54 *p = new P16C54;
@@ -312,7 +312,7 @@ void P16C55::create(void)
 
 }
 
-pic_processor * P16C55::construct(void)
+Processor * P16C55::construct(void)
 {
 
   P16C55 *p = new P16C55;

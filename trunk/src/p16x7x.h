@@ -169,7 +169,7 @@ class P16C71 :  public P16C61
 
   P16C71(void);
   void create(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -188,7 +188,7 @@ class P16C712 :  public P16X6X_processor, public _14bit_18pins
 
   P16C712(void);
   void create(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
@@ -205,7 +205,7 @@ class P16C716 :  public P16C712
   virtual unsigned int program_memory_size(void) const { return 0x800; };
 
   P16C716(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -226,7 +226,7 @@ class P16C72 : public P16C62
 
   P16C72(void);
   void create(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -247,7 +247,7 @@ class P16C73 : public P16C63
 
   P16C73(void);
   void create(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -272,7 +272,7 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
 
   P16C74(void);
   void create(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 

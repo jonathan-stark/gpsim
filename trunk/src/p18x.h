@@ -69,7 +69,7 @@ class P18C2x2 : public _16bit_processor//, public _28pins
  public:
 
   P18C2x2(void);
-  //static pic_processor *construct(void);
+  //static Processor *construct(void);
   void create(void);
 
   virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
@@ -93,7 +93,7 @@ class P18C242 : public P18C2x2
  public:
   virtual PROCESSOR_TYPE isa(void){return _P18C242_;};
   P18C242(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 
@@ -107,7 +107,7 @@ class P18C252 : public P18C242
 
   virtual PROCESSOR_TYPE isa(void){return _P18C252_;};
   P18C252(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 
@@ -134,7 +134,7 @@ class P18C4x2 : public _16bit_processor //, public _14bit_40pins
   IOPORT_LATCH late;
 
   P18C4x2(void);
-  //static pic_processor *construct(void);
+  //static Processor *construct(void);
   void create(void);
 
   virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
@@ -159,7 +159,7 @@ class P18C442 : public P18C4x2
  public:
   virtual PROCESSOR_TYPE isa(void){return _P18C442_;};
   P18C442(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 
@@ -173,7 +173,7 @@ class P18C452 : public P18C442
  public:
   virtual PROCESSOR_TYPE isa(void){return _P18C452_;};
   P18C452(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 
@@ -186,7 +186,7 @@ class P18F442 : public P18C442
  public:
   virtual PROCESSOR_TYPE isa(void){return _P18F442_;};
   P18F442(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 
@@ -199,7 +199,7 @@ class P18F452 : public P18F442
  public:
   virtual PROCESSOR_TYPE isa(void){return _P18F452_;};
   P18F452(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 

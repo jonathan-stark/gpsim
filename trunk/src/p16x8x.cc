@@ -201,7 +201,7 @@ void  P16C8x::create(int ram_top)
 // Pic 16C84 
 //
 
-pic_processor * P16C84::construct(void)
+Processor * P16C84::construct(void)
 {
 
   P16C84 *p = new P16C84;
@@ -233,7 +233,7 @@ P16C84::P16C84(void)
 //
 
 
-pic_processor * P16F84::construct(void)
+Processor * P16F84::construct(void)
 {
 
   P16F84 *p = new P16F84;
@@ -269,7 +269,7 @@ P16F83::P16F83(void)
   name_str = "p16f83";
 }
 
-pic_processor * P16F83::construct(void)
+Processor * P16F83::construct(void)
 {
 
   P16F83 *p = new P16F83;
@@ -286,7 +286,7 @@ pic_processor * P16F83::construct(void)
 
 }
 
-pic_processor * P16CR83::construct(void)
+Processor * P16CR83::construct(void)
 {
 
   cout << " cr83 construct\n";
@@ -295,7 +295,7 @@ pic_processor * P16CR83::construct(void)
 
 }
 
-pic_processor * P16CR84::construct(void)
+Processor * P16CR84::construct(void)
 {
 
   cout << " cr84 construct\n";

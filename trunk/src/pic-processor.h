@@ -255,7 +255,7 @@ public:
   virtual void tris_instruction(unsigned int tris_register) {return;};
   virtual void create_symbols(void);
   virtual void create_stack(void) {stack = new Stack;};
-  void load_hex(char *hex_file);
+  virtual void load_hex(char *hex_file);
   void run(void);
   void sleep(void);
   void step(unsigned int steps);
@@ -305,29 +305,29 @@ public:
     }
 
 
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   pic_processor(void);
 };
 
 #define cpu_pic ( (pic_processor *)cpu)
 
 
-pic_processor *get_processor(unsigned int cpu_id);
-
 
 
 //----------------------------------------------------------
 // Global definitions:
 
-extern pic_processor *active_cpu;
+extern Processor *active_cpu;
 
 //--------------------------------------
 //
 // non-class helper functions.
 
-pic_processor *  add_processor(char * processor_type, char * processor_new_name);
+Processor *  add_processor(char * processor_type, char * processor_new_name);
 void display_available_processors(void);
 void dump_processor_list(void);
 int find_in_available_processor_list(char * processor_type);
+Processor *get_processor(unsigned int cpu_id);
+
 
 #endif

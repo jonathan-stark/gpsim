@@ -166,17 +166,15 @@ public:
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
-  virtual void load_hex(char *hex_file){}
+  virtual void load_hex(char *hex_file)=0;
 
   void run(void);
   void run_to_address(unsigned int destination);
   virtual void sleep(void) {};
   void step(unsigned int steps);
   void step_over(void);
-  virtual void step_one(void) {
-
-  }
-  virtual void interrupt(void) { return; };
+  virtual void step_one(void) = 0;
+  virtual void interrupt(void) = 0 ;
 
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
   unsigned int time_to_cycles( double t) 
@@ -185,7 +183,7 @@ public:
   void disassemble (int start_address, int end_address) {};
   void list(int file_id, int pcval, int start_line, int end_line) {};
 
-  virtual void por(void) {};
+  virtual void por(void) = 0;
   virtual void create(void);
 
   virtual void set_out_of_range_pm(int address, int value);
@@ -200,6 +198,61 @@ public:
   Processor(void);
 };
 
+
+//-------------------------------------------------------------------
+//
+// ProcessorConstructor -- a class to handle all of gpsim's supported
+// processors
+//
+// gpsim supports dozens of processors. All of these processors are
+// grouped together in the ProcessConstructor class. Within the class
+// is a static STL list<> object that holds an instance of a
+// ProcessorConstructor for each gpsim supported processor. Whenever
+// the user selects a processor to simulate, the find() member 
+// function will search through the list and find the one that matches
+// the user supplied ASCII string.
+//
+// Why have this class?
+// The idea behind this class is that a ProcessorConstructor object 
+// can be instantiated for each processor and that instantiation will
+// place the object into list of processors. Prior to gpsim-0.21, a
+// giant array held the list of all available processors. However,
+// there were two problems with this: it was painful to look at and
+// it precluded processors that were defined outside of the gpsim
+// core library.
+
+
+
+class ProcessorConstructor
+{
+public:
+  // THE list of all of gpsim's processors:
+
+  static list <ProcessorConstructor *> processor_list;
+
+  // A pointer to a function that when called will construct a processor
+  Processor * (*cpu_constructor) (void);
+
+  // The processor name (plus upto three aliases).
+  #define nProcessorNames 4
+  char *names[nProcessorNames];
+
+
+  //------------------------------------------------------------
+  // contructor -- 
+  //
+  ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
+			 char *name1, 
+			 char *name2, 
+			 char *name3=NULL,
+			 char *name4=NULL);
+
+
+  ProcessorConstructor * find(char *name);
+  void dump(void);
+
+
+};
 
 
 #endif
