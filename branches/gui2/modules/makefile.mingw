@@ -1,0 +1,48 @@
+## Makefile for building the gpsim with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+TOP = ../..
+
+include ../plat/win32/make.mingw
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib \
+	../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib \
+	../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib \
+	../gpsim/gpsim.lib
+
+INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
+	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
+	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0 \
+	-I ../../atk/include/atk-1.0
+
+DEFINES += -DHAVE_GUI
+
+all :				\
+	../config.h		\
+	modules.dll 
+
+modules_OBJECTS =		\
+	binary_indicator.o	\
+	encoder.o		\
+	gpsim_modules.o		\
+	led.o			\
+	logic.o			\
+	push_button.o		\
+	resistor.o		\
+	switch.o		\
+	usart.o			\
+	video.o
+
+../config.h : ../config_win32.h.in
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
+
+################ The modules DLL
+
+modules.dll : $(modules_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o modules.dll ../plat/win32/modules.def $(modules_OBJECTS) $(LIBS)

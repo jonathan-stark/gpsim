@@ -1,0 +1,250 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(cli/cmd_attach.cc)
+AM_CONFIG_HEADER(config.h)
+
+dnl option for setting exdbm path prefix
+dnl exdbm must be lowercase in --with option. sorry.
+dnl this check must be done very early otherwise internal
+dnl configure shell variables are set too late (CPPFLAGS)
+dnl AC_ARG_WITH(exdbm,
+dnl    [  --with-exdbm=PREFIX     where is exdbm installed],
+dnl    [CPPFLAGS="$CPPFLAGS -I$with_exdbm/include"
+dnl     LDFLAGS="$LDFLAGS -L$with_exdbm/lib"])
+
+AC_CANONICAL_SYSTEM
+
+GPSIM_MAJOR_VERSION=0
+GPSIM_MINOR_VERSION=21
+GPSIM_MICRO_VERSION=3
+GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
+
+AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
+
+AC_SUBST(GPSIM_MAJOR_VERSION)
+AC_SUBST(GPSIM_MINOR_VERSION)
+AC_SUBST(GPSIM_MICRO_VERSION)
+AC_SUBST(GPSIM_VERSION)
+
+AC_DEFINE_UNQUOTED(GPSIM_MAJOR_VERSION, $GPSIM_MAJOR_VERSION, [major version])
+AC_DEFINE_UNQUOTED(GPSIM_MINOR_VERSION, $GPSIM_MINOR_VERSION, [minor version])
+AC_DEFINE_UNQUOTED(GPSIM_MICRO_VERSION, $GPSIM_MICRO_VERSION, [micro version])
+
+dnl Checks for programs.
+AC_PROG_YACC
+
+dnl compilers
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+
+dnl AC_PROG_LEX
+AM_PROG_LEX
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+dnl library tools
+AM_PROG_LIBTOOL
+
+dnl --disable-gui : turn off gui support (cli only)
+dnl    The default is to have the gui. 
+
+AC_ARG_ENABLE(gui,
+     [  --disable-gui           Only use the cli and not the gui],
+     [case "${enableval}" in
+       yes) use_gui=yes ;;
+       no)  use_gui=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --disable-gui) ;;
+     esac],[use_gui=yes])
+
+if test "$use_gui" = "no"; then
+	echo disabling gui support
+else
+	echo enabling gui support
+	[
+	 use_gui=yes
+	]
+	AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
+fi
+
+dnl --enable-gtk1 : link with GTK+ 1.x
+dnl    The default is to link with GTK+ 2.x
+
+AC_ARG_ENABLE(gtk1,
+     [  --enable-gtk1           Use GTK+ 1.x for the gui (deprecated)],
+     [case "${enableval}" in
+       yes) use_gtk1=yes ;;
+       no)  use_gtk1=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-gtk1) ;;
+     esac],[use_gtk1=no])
+
+if test "$use_gtk1" = "no"; then
+        echo linking with GTK+ 2.x
+else
+        echo linking with GTK+ 1.x
+        [
+         use_gtk1=yes
+        ]
+fi
+
+dnl - FIXME add a proper check for the pthread library and don't just assume
+dnl it exists
+
+LIBPTHREAD=-lpthread
+
+dnl Checks for libraries.
+dnl Replace `main' with a function in -lfl:
+dnl AC_CHECK_LIB(fl, main)
+dnl Replace `main' with a function in -lreadline:
+wi_LIB_READLINE
+dnl AC_CHECK_LIB(readline, readline)
+dnl AC_CHECK_LIB(ncurses, main)
+
+dnl Replace `main' with a function in -ltermcap:
+dnl AC_CHECK_LIB(termcap, main)
+
+CFLAGS="-g -O2 -Wall"
+CXXFLAGS="-g -O2 -Wall"
+dnl CFLAGS="-g -O2"
+dnl CXXFLAGS="-g -O2"
+
+if test "$use_gui" = "no"; then
+  dnl glib checks
+  AC_PATH_PROG(GLIBCONFIG, glib-config, no, ${PATH})
+
+  if test $GLIBCONFIG = "no"; then
+    AC_MSG_ERROR(Cannot find glib-config: glib is needed even for non-gui version.)
+  fi
+
+  LDEXTRA=
+  CFEXTRA=
+  GTK=
+  GDK=
+  GLIB=
+  X_LDFLAGS=`$GLIBCONFIG --libs`
+  X_CFLAGS=`$GLIBCONFIG --cflags`
+  Y_LDFLAGS=
+  Y_CFLAGS=
+else
+  if test "$use_gtk1" = "yes"; then
+    dnl gtk checks
+    dnl note that the gtk12-config is the name of gtk-config on BSD
+    AC_PATH_PROG(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
+    dnl  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
+
+    if test $GTKCONFIG = "no"; then
+      AC_MSG_ERROR(Cannot find gtk-config)
+    fi
+
+    AC_PATH_PROG(GTKEXTRACONFIG, gtkextra-config, no, ${PATH})
+
+    if test $GTKEXTRACONFIG = "no"; then
+      AC_MSG_ERROR(Cannot find gtkextra-config)
+    fi
+
+    LDEXTRA=
+    CFEXTRA=
+    GTK=
+    GDK=
+    GLIB=
+    X_LDFLAGS=`$GTKCONFIG --libs gthread`
+    X_CFLAGS=`$GTKCONFIG --cflags`
+    Y_LDFLAGS=`$GTKEXTRACONFIG --libs`
+    Y_CFLAGS=`$GTKEXTRACONFIG --cflags`
+  else
+    dnl gtk2 checks
+    AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
+
+    if test $PKGCONFIG = "no"; then
+      AC_MSG_ERROR(Cannot find pkg-config)
+    fi
+
+    $PKGCONFIG --exists gtkextra-2.0
+    if test $? != 0; then
+      AC_MSG_ERROR(Cannot find gtkextra-2.0 package)
+    fi
+
+    LDEXTRA=
+    CFEXTRA=
+    GTK=
+    GDK=
+    GLIB=
+    X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
+    X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
+    Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
+    Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`
+  fi
+
+  dnl check that the eXdbm header can be found
+  dnl AC_CHECK_HEADER(eXdbm/eXdbm.h,,[
+  dnl AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  dnl see ./configure --help for instructions])
+  dnl ])
+
+  dnl check that the eXdbm library can be linked, and add the link command
+  dnl to the LIBS variable.
+  dnl AC_CHECK_LIB(eXdbm,eXdbmInit,,[
+  dnl AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  dnl see ./configure --help for instructions])
+  dnl ],-lm)
+fi
+
+AC_SUBST(Y_CFLAGS)
+AC_SUBST(Y_LDFLAGS)
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_LDFLAGS)
+AC_SUBST(GTK)
+AC_SUBST(GDK)
+AC_SUBST(GLIB)
+AC_SUBST(LIBREADLINE)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+dnl AC_CHECK_HEADERS(malloc.h sys/file.h unistd.h)
+AC_CHECK_HEADERS(getopt.h)
+
+dnl move the alloca check here since it doesn't produce valid C++
+dnl code either
+AC_FUNC_ALLOCA
+
+dnl Set lang to C++ after checking for C Gtk; checks after this will use CXX 
+dnl  instead of CC
+AC_LANG_CPLUSPLUS
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+dnl the const and inline checks produce illegal C++ code, skip them,
+dnl C++ is required to have both, a working const and a working inline
+dnl AC_C_CONST
+dnl AC_C_INLINE
+dnl AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+dnl AC_FUNC_ALLOCA
+AC_TYPE_SIGNAL
+
+AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
+
+AC_OUTPUT( src/Makefile cli/Makefile Makefile \
+	gui/Makefile  xpms/Makefile eXdbm/Makefile \
+	gpsim/Makefile examples/Makefile \
+	modules/Makefile \
+	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
+	examples/modules/Makefile examples/projects/Makefile
+	doc/Makefile \
+	rpm/Makefile )
+
+
+AC_MSG_RESULT([
+
+gpsim-$GPSIM_VERSION is now configured for $canonical_host_type
+
+  Source directory:     $srcdir
+  Installation prefix:  $prefix
+  C compiler:           $CC $CPPFLAGS $XTRA_CFLAGS $CFLAGS
+  C++ compiler:         $CXX $CPPFLAGS $XTRA_CXXFLAGS $CXXFLAGS
+
+  gui:                  $use_gui
+  GTK+ 1.x              $use_gtk1
+
+])
