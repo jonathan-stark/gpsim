@@ -60,212 +60,13 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
-
-#include <stdlib.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <stdlib.h>
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <string.h>
-
-#ifdef putc 
-#undef putc
-#endif
-
-#include <gpsim/protocol.h>
-
-
-
-/*
-  The makefile in this directory should build the executable just
-  fine, however here are the commands you'd enter from the command
-  line:
-
-  g++ -c  client.cc `pkg-config --cflags glib-2.0`
-  g++ -o client client.o protocol.o -lstdc++ `pkg-config --libs glib-2.0`
-
-*/
+#include "client_interface.h"
 
 #define PORT        0x1234
 
-int Send(int sd, const char *msg, int msgLength,
-	 char *response, int respLength)
-{
-
-  if(!msg || !msgLength ||  !response || !respLength)
-    return 0;
-
-  if (send(sd, msg, msgLength, 0) == -1) {
-    perror("send");
-    exit(1);
-  }
-
-  int bytes = recv(sd, response, respLength, 0);
-  if (bytes == -1) {
-    perror("recv");
-    exit(1);
-  }
-
-  return bytes;
-}
-
-//========================================================================
-bool SendCmd(int sock, const char *cmd)
-{
-  if(cmd) {
-
-    char response[256];
-
-    int len = Send(sock, cmd, strlen(cmd), response, sizeof(response));
-
-    if(len && len <sizeof(response)) {
-      response[len] = 0;
-    }
-
-
-    return true;
-  }
-
-  return false;
-}
-//========================================================================
-int Send(int sd, Packet &p)
-{
-
-  //printf("Send packet sending %s\n", p.txBuff());
-  if (send(sd, p.txBuff(), p.txBytesBuffered(), 0) == -1) {
-    perror("send");
-    exit(1);
-  }
-  int bytes= recv(sd, p.rxBuff(), p.rxSize(), 0);
-  if (bytes  == -1) {
-    perror("recv");
-    exit(1);
-  }
-  p.rxTerminate(bytes);
-  //printf("Send packet response %s\n", p.rxBuff());
-
-}
-
-//========================================================================
-int CreateSocket(const char *hostname)
-{
-
-  struct  sockaddr_in sin;
-  struct  sockaddr_in pin;
-  struct  hostent *hp;
-  int	  sd;
-
-  char        hname_buff[256];
-  const char *hname;
-
-  if(!hostname) {
-    gethostname(hname_buff, sizeof(hname_buff));
-    hname = hname_buff;
-  } else
-    hname = hostname;
-
-  if ((hp = gethostbyname(hname)) == 0) {
-    perror("gethostbyname");
-    exit(1);
-  }
-
-  /* fill in the socket structure with host information */
-  memset(&pin, 0, sizeof(pin));
-  pin.sin_family = AF_INET;
-  pin.sin_addr.s_addr = ((struct in_addr *)(hp->h_addr))->s_addr;
-  pin.sin_port = htons(PORT);
-
-  /* grab an Internet domain socket */
-  if ((sd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("socket");
-    exit(1);
-  }
-
-  /* connect to PORT on HOST */
-  if (connect(sd,(struct sockaddr *)  &pin, sizeof(pin)) == -1) {
-    perror("connect");
-    exit(1);
-  }
-
-  return sd;
-}
-
-//========================================================================
-//
-unsigned int CreateLink(int sock, const char *sym_name, Packet &p)
-{
-  p.prepare();
-
-  p.EncodeObjectType(GPSIM_CMD_CREATE_SOCKET_LINK);
-  p.EncodeString(sym_name);
-
-  Send(sock, p);
-
-  unsigned int handle=0;
-
-  if(p.DecodeHeader() && p.DecodeUInt32(handle) )
-    return handle;
-
-  return 0;
-}
-
-void RemoveLink(int sock, unsigned int  handle, Packet &p)
-{
-  p.prepare();
-
-  p.EncodeObjectType(GPSIM_CMD_REMOVE_SOCKET_LINK);
-  p.EncodeUInt32(handle);
-
-  Send(sock,p);
-
-
-}
-
-void QueryLink(int sock, unsigned int  handle, Packet &p)
-{
-  p.prepare();
-
-  p.EncodeObjectType(GPSIM_CMD_QUERY_SOCKET_LINK);
-  p.EncodeUInt32(handle);
-
-  Send(sock,p);
-}
-
-void WriteToLink(int sock, unsigned int  handle, Packet &p, unsigned int val)
-{
-  p.prepare();
-  p.EncodeObjectType(GPSIM_CMD_WRITE_TO_SOCKET_LINK);
-  p.EncodeUInt32(handle);
-  p.EncodeUInt32(val);
-}
-
-bool QuerySymbolUInt32(int sock, const char *sym_name, Packet &p, unsigned int &i)
-{
-  p.prepare();
-  p.EncodeObjectType(GPSIM_CMD_QUERY_SYMBOL);
-  p.EncodeString(sym_name);
-  p.txTerminate();
-  Send(sock,p);
-
-  if(p.DecodeHeader() && p.DecodeUInt32(i))
-    return true;
-
-  return false;
-}
-
-bool WriteSymbolUInt32(int sock, const char *sym_name, Packet &p, unsigned int v)
-{
-  p.prepare();
-  p.EncodeObjectType(GPSIM_CMD_WRITE_TO_SYMBOL);
-  p.EncodeString(sym_name);
-  p.EncodeUInt32(v);
-  p.txTerminate();
-  Send(sock,p);
-}
 
 //========================================================================
 //
@@ -276,35 +77,32 @@ int main(int argc, char **argv)
 
   bool bPassed = true;  // regression test results - assume we pass
 
-  int	  sd;
-  sd = CreateSocket( argc>2 ? argv[2] : 0);
-
-  Packet p(8192,8192);
+  ClientSocketInterface *sock = new ClientSocketInterface(argc>2 ? argv[2] : 0, PORT);
 
 
   /*
     Set up.
 
-    Since we contrrlling the simulator entirely from a script, there really is
+    Since we are controlling the simulator entirely from a script, there really is
     not much need for the command line output it provides. So we'll turn it off
     by setting the simulator attribute 'sim.verbosity' to zero.
 
   */
 
-  WriteSymbolUInt32(sd, "sim.verbosity",p,0);
+  sock->WriteSymbolUInt32("sim.verbosity",0);
 
 
   /*
     The simulator's command line parser is still available for us to use.
     So we'll use it to load the source code and to set a break point.
   */
-  SendCmd(sd,"load s gensquares.cod\n");
-  SendCmd(sd,"break e start\n");
+  sock->SendCmd("load s gensquares.cod\n");
+  sock->SendCmd("break e start\n");
 
   /*
     There's a break point set at the label 'start'. Run to it.
   */
-  SendCmd(sd,"run\n");
+  sock->SendCmd("run\n");
 
 
   /*
@@ -312,13 +110,13 @@ int main(int argc, char **argv)
     interested in. These links are called 'handles'.
   */
 
-  unsigned int h_count = CreateLink(sd,"count",p);
-  unsigned int h_x_lo = CreateLink(sd,"x_lo",p);
-  unsigned int h_x_hi = CreateLink(sd,"x_hi",p);
+  unsigned int h_count = sock->CreateLinkUInt32("count");
+  unsigned int h_x_lo = sock->CreateLinkUInt32("x_lo");
+  unsigned int h_x_hi = sock->CreateLinkUInt32("x_hi");
 
   if(!h_count || !h_x_lo || !h_x_hi) {
     printf("unable to create handles\n");
-    close(sd);
+    delete sock;
     exit(1);
   }
 
@@ -333,21 +131,17 @@ int main(int argc, char **argv)
 
   for(count=0; count < 128; count++) {
 
-    WriteToLink(sd,h_count, p, count);
+    sock->WriteToLinkUInt32(h_count, count);
 
-    Send(sd,p);
+    sock->SendCmd("run\n");
 
-    SendCmd(sd,"run\n");
-
-    QueryLink(sd,h_x_lo,p);
-    if(! (p.DecodeHeader() && p.DecodeUInt32(x_lo))) {
+    
+    if(! sock->QueryLinkUInt32(h_x_lo,x_lo) )
       printf("failed to decode x_lo");
-    }
 
-    QueryLink(sd,h_x_hi,p);
-    if(! (p.DecodeHeader() && p.DecodeUInt32(x_hi))) {
+    if(! sock->QueryLinkUInt32(h_x_hi,x_hi) )
       printf("failed to decode x_hi");
-    }
+
 
     /*
       Check the results.
@@ -365,14 +159,14 @@ int main(int argc, char **argv)
     release the handles created above.
   */
 
-  RemoveLink(sd,h_count,p);
-  RemoveLink(sd,h_x_lo,p);
-  RemoveLink(sd,h_x_hi,p);
+  sock->RemoveLink(h_count);
+  sock->RemoveLink(h_x_lo);
+  sock->RemoveLink(h_x_hi);
 
   
-  WriteSymbolUInt32(sd, "sim.verbosity",p,1);
+  sock->WriteSymbolUInt32("sim.verbosity",1);
 
-  close(sd);
+  delete sock;
 
   if(bPassed) 
     printf("The simulation passed!\n");
