@@ -707,11 +707,14 @@ void stimulus::show()
   if(snode)
     cout << " attached to " << snode->name();
   cout << endl
-    << "  Vth=" << Vth << "V"
-    << "  Zth=" << Zth << " ohms"
-    << "  Cth=" << Cth << " F"
-    << "  nodeVoltage= " << nodeVoltage << "V"
-    << endl;
+       << "  Vth=" << get_Vth() << "V"
+       << "  Zth=" << get_Zth() << " ohms"
+       << "  Cth=" << get_Cth() << " F"
+       << "  nodeVoltage= " << get_nodeVoltage() << "V"
+       << endl << " drivingState=" << getDrivingState()
+       << " drivenState=" << getDrivenState()
+       << " bitState=" << getBitChar()
+       << endl;
 }
 //========================================================================
 
@@ -1103,7 +1106,7 @@ void IOPIN::setDrivenState(bool new_state)
   //setDrivingState(new_state);
 
   if(verbose)
-    cout << name()<< " setDrivingState= " 
+    cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
 
   Register *port = get_iop();
@@ -1224,7 +1227,27 @@ char IO_bi_directional::getBitChar()
 
   }
 
-  return getDrivingState() ? '1' : '0';
+  if(driving) {
+    if(getDrivingState()) {
+      if(nodeVoltage < 4.5)
+	return 'X';
+    } else {
+      if(nodeVoltage > 0.5)
+	return 'X';
+    }
+
+    //if(nodeVoltage > 1.5  && nodeVoltage < 3.0) {
+    //  cout << "conflict on pin: " << name() << " nodeVoltage=" << nodeVoltage << endl;
+    //  return 'X';
+    //}
+    //if (getDrivingState() != getDrivenState()) {
+    //  cout << "apparent driving conflict " << name() << endl;
+    //}
+  }
+
+
+
+  return getDrivenState() ? '1' : '0';
 }
 
 
@@ -1307,10 +1330,14 @@ char IO_bi_directional_pu::getBitChar()
 
   }
 
-  if(nodeVoltage > 2.0  && nodeVoltage < 3.0)
+  if(nodeVoltage > 1.5  && nodeVoltage < 3.0)
     return 'X';
 
-  return getDrivingState() ? '1' : '0';
+  if(driving)
+    return getDrivingState() ? '1' : '0';
+  else
+    return getDrivenState() ? '1' : '0';
+
 }
 
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
