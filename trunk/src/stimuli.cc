@@ -250,6 +250,9 @@ Stimulus_Node::Stimulus_Node(const char *n)
   nStimuli = 0;
   voltage = 0;
   warned  = 0;
+  current_time_constant = 0.0;
+  delta_voltage = 0.0;
+  min_time_constant = 1e6; // by making this large, most stimuli will update instantly.
 
   if(n)
     {
@@ -384,8 +387,14 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
     }
 }
 
+//------------------------------------------------------------------------
+//
+// Stimulus_Node::update(guint64 current_time)
+//
+// update() is called whenever a stimulus attached to this node changes
+// states. 
 
-double Stimulus_Node::update(guint64 current_time)
+void Stimulus_Node::update(guint64 current_time)
 {
 
   //cout << "getting state of Node " << name() << " " << nStimuli << " stim are attached\n";
@@ -394,8 +403,9 @@ double Stimulus_Node::update(guint64 current_time)
 
     stimulus *sptr = stimuli;
 
-    voltage = 0.0;
-    capacitance = 0.0;
+    initial_voltage = get_nodeVoltage();
+
+    delta_voltage = 0.0;
 
     switch (nStimuli) {
 
@@ -406,8 +416,6 @@ double Stimulus_Node::update(guint64 current_time)
     case 1:
       // Only one stimulus is attached.
       voltage = sptr->get_Vth();
-      resistance = sptr->get_Zth();
-      capacitance = sptr->get_Cth();
       break;
 
     case 2:
@@ -420,10 +428,10 @@ double Stimulus_Node::update(guint64 current_time)
 
 	double Z1 = sptr->get_Zth();
 	double Z2 = sptr2->get_Zth();
-	resistance = Z1 + Z2;
-	voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
-	capacitance = sptr->get_Cth() + sptr2->get_Cth();
+	double resistance = Z1 + Z2;
+	double final_voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
 
+	current_time_constant = (sptr->get_Cth() + sptr2->get_Cth()) * Z1 * Z2 / resistance;
 	/*
 	  cout << " *N1: " <<sptr->name() 
 	  << " V=" << sptr->get_Vth() 
@@ -431,12 +439,25 @@ double Stimulus_Node::update(guint64 current_time)
 	  cout << " *N2: " <<sptr2->name() 
 	  << " V=" << sptr2->get_Vth() 
 	  << " Z=" << sptr2->get_Zth() << endl;
-	  cout << " * ==>:  V=" << voltage
-	  << " Z=" << Zt << endl;
+	  cout << " * ==>:  V=" << final_voltage
+	  << " Z=" << resistance << endl;
 	*/
 
-	sptr->set_nodeVoltage(voltage);
-	sptr2->set_nodeVoltage(voltage);
+	if(current_time_constant < min_time_constant) {
+	  voltage = final_voltage;
+	  sptr->set_nodeVoltage(final_voltage);
+	  sptr2->set_nodeVoltage(final_voltage);
+	} else {
+
+	  delta_voltage = final_voltage - initial_voltage;
+
+	  if(bSettling) 
+	    cycles.reassign_break(future_cycle,cycles.value + 1,this);
+	  else
+	    cycles.set_break(cycles.value +1,this);
+
+	  bSettling = true;
+	}
       }
       break;
 
@@ -458,20 +479,37 @@ double Stimulus_Node::update(guint64 current_time)
 	*/
 
 	double conductance=0.0;	// Thevenin conductance.
+	double capacitance=0.0; // total capacitance on the node.
+	double final_voltage=0.0; 
 
 	while(sptr) {
 	  double Cs = 1 / sptr->get_Zth();
-	  capacitance += sptr->get_Cth();
-	  voltage += sptr->get_Vth() * Cs;
+	  final_voltage += sptr->get_Vth() * Cs;
 	  conductance += Cs;
+	  capacitance += sptr->get_Cth();
 	  sptr = sptr->next;
 	}
-	voltage /= conductance;
+	final_voltage /= conductance;
+	current_time_constant = capacitance/conductance;
 
-	sptr = stimuli;
-	while(sptr) {
-	  sptr->set_nodeVoltage(voltage);
-	  sptr = sptr->next;
+	if(current_time_constant < min_time_constant) {
+	  voltage = final_voltage;
+	  sptr = stimuli;
+	  while(sptr) {
+	    sptr->set_nodeVoltage(voltage);
+	    sptr = sptr->next;
+	  }
+	} else {
+
+	  // Capacitive loading must be relatively large.
+	  delta_voltage = final_voltage - initial_voltage;
+
+	  if(bSettling) 
+	    cycles.reassign_break(future_cycle,cycles.value + 1,this);
+	  else
+	    cycles.set_break(cycles.value +1,this);
+
+	  bSettling = true;
 	}
       }
     }
@@ -483,13 +521,27 @@ double Stimulus_Node::update(guint64 current_time)
     warned = 1;
   }
 
-  return(voltage);
+
+     //  return(voltage);
 
 }
 
 //------------------------------------------------------------------------
 void Stimulus_Node::callback()
 {
+  voltage = initial_voltage + delta_voltage;
+
+  callback_print();
+  cout << " - updating voltage from " 
+       << initial_voltage << "V to "
+       << voltage << "V\n";
+
+  stimulus *sptr = stimuli;
+
+  while(sptr) {
+    sptr->set_nodeVoltage(voltage);
+    sptr = sptr->next;
+  }
 
 }
 
@@ -498,6 +550,11 @@ void Stimulus_Node::callback_print()
 {
   cout << "Node: " << name() ;
   TriggerObject::callback_print();
+}
+//------------------------------------------------------------------------
+void Stimulus_Node::time_constant(double new_tc)
+{
+  min_time_constant = new_tc;
 }
 
 //------------------------------------------------------------------------
@@ -1032,7 +1089,7 @@ Register *IOPIN::get_iop(void)
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
 
-  // cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
+  //cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
   
   nodeVoltage = new_nodeVoltage;
 
@@ -1041,11 +1098,14 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
     // The voltage is below the low threshold
     set_digital_state(false);
 
+    //cout << " setting to low \n";
   } 
   else if(nodeVoltage > l2h_threshold) {
 
     // The voltage is above the high threshold
     set_digital_state(true);
+
+    //cout << " setting to high \n";
 
   }  else {
     // The voltage is between the low and high thresholds,

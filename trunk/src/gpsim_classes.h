@@ -75,9 +75,11 @@ class ProcessorInterface;
 
 enum RESET_TYPE
 {
-  POR_RESET,
-  WDT_RESET,
-  SOFT_RESET
+  POR_RESET,          // Power-on reset
+  WDT_RESET,          // Watch Dog timer timeout reset
+  EXTERNAL_RESET,     // I/O pin (e.g. MCLR going low) reset
+  SOFT_RESET,         // Software initiated reset
+  BOD_RESET           // Brown out detection reset
 };
 
 

@@ -93,21 +93,26 @@ class Stimulus_Node : public gpsimValue, public TriggerObject
 public:
   bool warned;        // keeps track of node warnings (e.g. floating node, contention)
   double voltage;     // The most recent target voltage of this node
-  double current_voltage; // voltage as node settles (updated by callbacks)
-  double capacitance; // Most recent capacitance on this node.
-  double resistance;  
+  double current_time_constant; // The most recent time constant for the attached stimuli.
+  double delta_voltage;   // Amplitude of initial change
+  double initial_voltage; // node voltage at the instant of change
 
-  stimulus *stimuli;  // Pointer to the first stimulus connected to this node.
-  int nStimuli;       // number of stimuli attached to this node.
+  double min_time_constant; // time constants longer than this induce settling
+  bool bSettling;           // true when the voltage is settling 
+  stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
+  int nStimuli;             // number of stimuli attached to this node.
+  guint64 future_cycle;     // next simulation cycle for updating the node voltage
 
   Stimulus_Node(const char *n = 0);
   virtual ~Stimulus_Node();
 
   double get_nodeVoltage(void) { return voltage; }
-  double update(guint64 current_time);
+  void update(guint64 current_time);
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
+
+  void time_constant(double new_tc);
 
   // When the node is settling (due to RC charging/discharging)
   // it's voltage is periodically updated by invoking callback()
