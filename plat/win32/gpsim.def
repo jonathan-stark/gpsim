@@ -107,12 +107,15 @@ EXPORTS
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
     ?get@Float@@UAEXAAN@Z
+    ?get@Float@@UAEXAAVPacket@@@Z
     ?get@Float@@UAEXAA_J@Z
     ?get@Float@@UAEXPADH@Z
     ?get@IOPORT@@UAEIXZ
     ?get@Integer@@UAEXAAN@Z
+    ?get@Integer@@UAEXAAVPacket@@@Z
     ?get@Integer@@UAEXAA_J@Z
     ?get@Integer@@UAEXPADH@Z
+    ?get@Module@@UAEXPADH@Z
     ?get@Value@@UAEXAAH@Z
     ?get@Value@@UAEXAAN@Z
     ?get@Value@@UAEXAA_J@Z
@@ -191,13 +194,16 @@ EXPORTS
     ?save_state@Processor@@UAEXXZ
     ?set@Float@@UAEXN@Z
     ?set@Float@@UAEXPBDH@Z
+    ?set@Float@@UAEXAAVPacket@@@Z
     ?set@Float@@UAEXPAVValue@@@Z
     ?set@Float@@UAEX_J@Z
     ?set@Integer@@UAEXH@Z
     ?set@Integer@@UAEXN@Z
     ?set@Integer@@UAEXPBDH@Z
+    ?set@Integer@@UAEXAAVPacket@@@Z
     ?set@Integer@@UAEXPAVValue@@@Z
     ?set@Integer@@UAEX_J@Z
+    ?set@Module@@UAEXPBDH@Z
     ?set@Value@@UAEXH@Z
     ?set@Value@@UAEXN@Z
     ?set@Value@@UAEXPAVExpression@@@Z
@@ -207,9 +213,6 @@ EXPORTS
     ?setUnknownMode@Processor@@UAEX_N@Z
     ?setWarnMode@Processor@@UAEX_N@Z
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
-    ?set_attribute@Module@@UAEXPAD0@Z
-    ?set_attribute@Module@@UAEXPAD0H@Z
-    ?set_attribute@Module@@UAEXPADN@Z
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_break_at_address@ProgramMemoryAccess@@UAEXI@Z
