@@ -10,6 +10,7 @@ EXPORTS
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IO_input@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0Interface@@QAE@PAX@Z
+    ??0Integer@@QAE@_J@Z
     ??0Module@@QAE@XZ
     ??0PCTraceObject@@QAE@PAVProcessor@@I@Z
     ??0PCTraceType@@QAE@PAVProcessor@@II@Z
@@ -31,6 +32,8 @@ EXPORTS
     ??1Float@@UAE@XZ
     ??1IOPIN@@UAE@XZ
     ??1IOPORT@@UAE@XZ
+    ??1IO_bi_directional_pu@@UAE@XZ
+    ??1Integer@@UAE@XZ
     ??1Module@@UAE@XZ
     ??1Processor@@UAE@XZ
     ??1Register@@UAE@XZ
@@ -74,11 +77,14 @@ EXPORTS
     ?clear_profile_start_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?clear_profile_stop_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?compare@Float@@UAE_NPAVComparisonOperator@@PAVValue@@@Z
+    ?compare@Integer@@UAE_NPAVComparisonOperator@@PAVValue@@@Z
     ?compare@Value@@UAE_NPAVComparisonOperator@@PAV1@@Z
     ?computed_goto@Program_Counter@@UAEXI@Z
+    ?copy@Integer@@UAEPAVValue@@XZ
     ?create@Processor@@UAEXXZ
     ?create_invalid_registers@Processor@@QAEXXZ
     ?create_pkg@Module@@UAEXI@Z
+    ?description@Value@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?disassemble@Processor@@UAEXHH@Z
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
     ?dump_attributes@Module@@UAEXH@Z
@@ -93,7 +99,11 @@ EXPORTS
     ?finish@ProgramMemoryAccess@@UAEXXZ
     ?get@Float@@UAEXAAN@Z
     ?get@Float@@UAEXAA_J@Z
+    ?get@Float@@UAEXPADH@Z
     ?get@IOPORT@@UAEIXZ
+    ?get@Integer@@UAEXAAN@Z
+    ?get@Integer@@UAEXAA_J@Z
+    ?get@Integer@@UAEXPADH@Z
     ?get@Value@@UAEXAAH@Z
     ?get@Value@@UAEXPADH@Z
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
@@ -101,7 +111,9 @@ EXPORTS
     ?getState@TraceObject@@UAEXPAVTraceFrame@@@Z
     ?get_Vth@IO_bi_directional@@UAENXZ
     ?get_Vth@IO_input@@UAENXZ
+    ?get_Vth@IO_bi_directional_pu@@UAENXZ
     ?get_Zth@IO_bi_directional@@UAENXZ
+    ?get_Zth@IO_bi_directional_pu@@UAENXZ
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
     ?get_bit@IOPORT@@UAE_NI@Z
@@ -135,7 +147,7 @@ EXPORTS
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?new_name@gpsimObject@@UAEXPAD@Z
+    ?new_name@gpsimObject@@UAEXPBD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
@@ -152,9 +164,17 @@ EXPORTS
     ?save_state@Processor@@UAEXPAU_iobuf@@@Z
     ?save_state@Processor@@UAEXXZ
     ?set@Float@@UAEXN@Z
+    ?set@Float@@UAEXPADH@Z
     ?set@Float@@UAEXPAVValue@@@Z
     ?set@Float@@UAEX_J@Z
+    ?set@Integer@@UAEXH@Z
+    ?set@Integer@@UAEXN@Z
+    ?set@Integer@@UAEXPADH@Z
+    ?set@Integer@@UAEXPAVValue@@@Z
+    ?set@Integer@@UAEX_J@Z
+    ?set@Value@@UAEX_N@Z
     ?set@Value@@UAEXPADH@Z
+    ?set@Value@@UAEXPAVExpression@@@Z
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_attribute@Module@@UAEXPAD0@Z
     ?set_attribute@Module@@UAEXPAD0H@Z
@@ -184,6 +204,7 @@ EXPORTS
     ?toBitStr@Register@@UAEPADPADH@Z
     ?toBitStr@RegisterValue@@QAEPADPADHI000@Z
     ?toString@Float@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@Integer@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Register@@UAEPADPADH@Z
     ?toString@RegisterValue@@QAEPADPADHH@Z
     ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ

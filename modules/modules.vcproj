@@ -138,6 +138,12 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\bitlog.cc">
+			</File>
+			<File
+				RelativePath=".\bytelog.cc">
+			</File>
+			<File
 				RelativePath=".\dummy.c">
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -334,6 +340,12 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
 				RelativePath=".\binary_indicator.h">
+			</File>
+			<File
+				RelativePath=".\bitlog.h">
+			</File>
+			<File
+				RelativePath=".\bytelog.h">
 			</File>
 			<File
 				RelativePath=".\encoder.h">
