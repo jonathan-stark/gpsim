@@ -310,80 +310,49 @@ attach_cmd: ATTACH string_list
 	  }
           ;
 
-break_cmd: BREAK
-          { c_break.list();}
-          | BREAK bit_flag 
-          { 
-	    cmd_options *opt = $2;
-	    c_break.set_break(opt->value);
-	  }
-          | BREAK bit_flag _register
-          { 
-             c_break.set_break($2->value,$3);
-          }
-          | BREAK bit_flag _register NUMBER
-          { 
-	     c_break.set_break($2->value,$3,$4,0);
-	  }
-          | BREAK bit_flag _register NUMBER NUMBER
-          { 
-	    c_break.set_break($2->value,$3,$4,$5);
-          }
-          | BREAK bit_flag STRING
-          { 
-            c_break.set_break($2->value,$3);
-          }
-          | BREAK bit_flag STRING NUMBER
-          { 
-	    c_break.set_break($2->value,$3,$4, 0);
-          }
-          | BREAK bit_flag STRING NUMBER NUMBER
-          { 
-	    c_break.set_break($2->value,$3,$4,$5);
-          }
+break_cmd
+          : BREAK                       {c_break.list();}
+          | BREAK bit_flag              {c_break.set_break($2);}
+          | BREAK bit_flag expr_list    {c_break.set_break($2,$3);}
           ;
 
-bus_cmd: BUS
-          { 
-	    c_bus.list_busses();
-	  }
-          | BUS string_list
-          {
-	    c_bus.add_busses($2);
-	    delete $2;
-          }
+bus_cmd
+          : BUS                         {c_bus.list_busses();}
+          | BUS string_list             {c_bus.add_busses($2); delete $2;}
           ;
 
-clear_cmd: CLEAR expr                   { clear.clear($2); }
+clear_cmd: CLEAR expr                   {clear.clear($2);}
           ;
 
-disassemble_cmd:
-          DISASSEMBLE                   {disassemble.disassemble(0);}
-          |  DISASSEMBLE expr           {disassemble.disassemble($2);}
+disassemble_cmd
+          : DISASSEMBLE                 {disassemble.disassemble(0);}
+          | DISASSEMBLE expr            {disassemble.disassemble($2);}
           ;
 
 dump_cmd: 
-          DUMP                          { dump.dump(2); }
-          | DUMP bit_flag               { dump.dump($2->value); }
+          DUMP                          {dump.dump(2);}
+          | DUMP bit_flag               {dump.dump($2->value);}
           ;
 
-frequency_cmd: 
-          FREQUENCY                     { frequency.print(); }
-          | FREQUENCY expr              { frequency.set($2); }
+frequency_cmd
+          : FREQUENCY                   {frequency.print();}
+          | FREQUENCY expr              {frequency.set($2);}
           ;
 
-help_cmd: HELP                          { help.help(); }
-          | HELP STRING                 { help.help($2); free($2); }
+help_cmd
+          : HELP                        {help.help(); }
+          | HELP STRING                 {help.help($2); free($2);}
           ;
 
-list_cmd: 
-          LIST                          { c_list.list(); }
-          | LIST bit_flag               { c_list.list($2); }
+list_cmd
+          : LIST                        {c_list.list();}
+          | LIST bit_flag               {c_list.list($2);}
           ;
 
 load_cmd: LOAD bit_flag STRING
           {
 	    c_load.load($2->value,$3);
+            delete $3;
 
 	    if(quit_parse)
 	      {
@@ -393,10 +362,15 @@ load_cmd: LOAD bit_flag STRING
 	  }
           ;
 
-log_cmd: LOG
-          {
-	    c_log.log();
-	  }
+log_cmd
+          : LOG                         {c_log.log();}
+          | LOG bit_flag                {c_log.log($2,0,0);}
+          | LOG bit_flag STRING         {c_log.log($2,$3,0);}
+          | LOG bit_flag STRING expr_list {c_log.log($2,$3,$4);}
+          | LOG bit_flag expr_list      {c_log.log($2,0,$3);}
+          ;
+
+/*
           | LOG NUMBER
           {
 	    c_log.log($2);
@@ -430,6 +404,7 @@ log_cmd: LOG
 	    c_log.log($2,$3,$4,$5);
 	  }
           ;
+*/
 
 node_cmd: NODE
           { 
@@ -611,34 +586,12 @@ stimulus_opt:
               cout << "parser sees stimulus with bit flag: " << $2->value << '\n';
 	    c_stimulus.stimulus($2->value);
 	  }
-/*          | stimulus_opt numeric_option
-          {
-            if(verbose)
-              cout << "parser sees stimulus with numeric option\n";
-	    c_stimulus.stimulus($2);
-	  }
-
-          | stimulus_opt numeric_float_option
-          {
-            if(verbose)
-              cout << "parser sees stimulus with numeric float option\n";
-	    c_stimulus.stimulus($2);
-	  }
-*/
           | stimulus_opt string_option
           {
             if(verbose)
               cout << "parser sees stimulus with string option\n";
 	    c_stimulus.stimulus($2);
 	  }
-/*
-          | stimulus_opt expr
-          { 
-            if(verbose)
-              cout << "parser sees stimulus with number\n";
-	    //c_stimulus.data_point($2);
-	  }
-*/
           | stimulus_opt array
           { 
             if(verbose)
@@ -763,7 +716,7 @@ expr    : binary_expr                   {$$=$1;}
         | unary_expr                    {$$=$1;}
         ;
 
-array   : '(' expr_list ')'             {$$=$2;}
+array   : '{' expr_list '}'             {$$=$2;}
         ;
 
 expr_list

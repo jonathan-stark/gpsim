@@ -26,6 +26,7 @@ using namespace std;
 #include <unistd.h>
 #include <glib.h>
 #include "misc.h"
+#include "expr.h"
 #include "../config.h"
 #include "../src/gpsim_def.h"
 
@@ -50,7 +51,6 @@ enum COMMAND_MODES
                             // that is being created).
 
 void init_parser(void);
-class Expression;
 
 class command
 {
@@ -84,6 +84,7 @@ public:
   // Assume command is not repeatable
   virtual int is_repeatable(void) { return 0; };
   virtual double evaluate(Expression *);
+  virtual void evaluate(ExprList_t *eList,guint64 *, int *);
 
 };
 

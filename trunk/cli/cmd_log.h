@@ -21,20 +21,22 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_LOG_H__
 #define __CMD_LOG_H__
 
+#include <glib.h>
+#include "expr.h"
+
 class cmd_log : public command
 {
 public:
 
   cmd_log(void);
   void log(void);
+  void log(cmd_options *opt, ExprList_t *el);
+  void log(cmd_options *opt, char *, ExprList_t *el);
 
-  //void log(int bit_flag, guint64 value);
-  //void log(int bit_flag, int reg, int value,int mask);
-  void log(int number);
-
+private:
   void log(cmd_options *opt);
-  void log(cmd_options *opt, char *str,int,int);
-  void log(cmd_options *opt, int,int,int);
+  void log(cmd_options *opt, char *str,guint64,guint64);
+  void log(cmd_options *opt, guint64,guint64,guint64);
 
 };
 

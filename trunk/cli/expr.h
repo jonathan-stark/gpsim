@@ -20,8 +20,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <list>
 #include <string>
+#include <glib.h>
 #include "viewable.h"
-
 
 #if !defined(__EXPR_H__)
 #define __EXPR_H__
@@ -98,26 +98,26 @@ class Integer : public Value {
 
 public:
 	
-  Integer(int new_value) : Value() { value = new_value;};
-  Integer(int newValue, bool isConstant);
+  Integer(gint64 new_value) : Value() { value = new_value;};
+  Integer(gint64 newValue, bool isConstant);
   virtual ~Integer() {}
 
   string toString();
   string toString(char* format);
-  static string toString(int value);
-  static string toString(char* format, int value);
-  int getVal();
+  static string toString(gint64 value);
+  static string toString(char* format, gint64 value);
+  gint64 getVal();
 
   virtual int getAsInt() { return value; }
   virtual double getAsDouble() { return (double)value;}
-  virtual void put(int v) {value = v; }
+  virtual void put(gint64 v) {value = v; }
 
   static Integer* Integer::typeCheck(Value* val, string valDesc);
-  static Integer* Integer::assertValid(Value* val, string valDesc, int valMin);
-  static Integer* Integer::assertValid(Value* val, string valDesc, int valMin, int valMax);
+  static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin);
+  static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
 
 private:
-  int value;
+  gint64 value;
 };
 
 /*****************************************************************/

@@ -348,8 +348,8 @@ int handle_identifier(const string &s, cmd_options **op )
 static int process_intLiteral(char *buffer, int conversionBase)
 {
   char c;
-  int literalValue=0;
-  int nxtDigit;
+  gint64 literalValue=0;
+  gint64 nxtDigit;
 
   while (*buffer) {
     c = toupper(*buffer++);
