@@ -539,7 +539,7 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portc);
+  usart.initialize_14(this,&pir1,portc,7);
 
   cout << "portc HACK \n";
   int i;
@@ -756,7 +756,7 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portc);
+  usart.initialize_14(this,&pir1,portc,7);
 
   cout << "portc HACK \n";
   int i;
