@@ -8,7 +8,6 @@ EXPORTS
     ??0IO_bi_directional@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IO_bi_directional@@QAE@XZ
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
-    ??0IO_input@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0IO_open_collector@@QAE@PAVIOPORT@@IPADPAPAVRegister@@@Z
     ??0Integer@@QAE@_J@Z
     ??0Interface@@QAE@PAX@Z
@@ -124,9 +123,9 @@ EXPORTS
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@RegisterWriteTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@TraceObject@@UAEXPAVTraceFrame@@@Z
+    ?get_Vth@IOPIN@@UAENXZ
     ?get_Vth@IO_bi_directional@@UAENXZ
     ?get_Vth@IO_bi_directional_pu@@UAENXZ
-    ?get_Vth@IO_input@@UAENXZ
     ?get_Vth@IO_open_collector@@UAENXZ
     ?get_Zth@IO_bi_directional@@UAENXZ
     ?get_Zth@IO_bi_directional_pu@@UAENXZ
