@@ -1,0 +1,43 @@
+#
+# Startup commands for testing a p16c74 usart in conjunction
+# with the gpsim usart module.
+#
+
+# uncomment for debugging gpsim
+# set verbose 3
+
+
+# Load the source code:
+load s usart.cod
+
+# load the gpsim module library. Not that this is a 'shared library'.
+# If the library fails to load then 1) it's not installed (try installing
+# gpsim) 2) or the path to library is not available (see the documentation
+# on modules). 
+
+module library libgpsim_modules.so
+
+# load the usart module from the module library and give it a name
+
+module load usart   U1
+
+# Stimuli:
+# Tie rx and tx together to create a loop back.
+# This will cause whatever is transmitted to be received...
+
+node loop_back
+attach loop_back portc6 portc7
+
+# Attach the usart module to the PIC
+
+# usart pin out:
+#    1 - Tx - Transmit
+#    2 - Rx - Receive
+#    3 - CTS - Clear To Send
+#    4 - RTS - Request To Send
+
+# Let the usart receiver monitor the data flow.
+
+attach loop_back U1.RX
+
+break c 1000
