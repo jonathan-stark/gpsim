@@ -1,3 +1,8 @@
+2004-09-02 Borut Razem <borut.razem@siol.net>
+	* cli/socket.cc: read complete line before procesing,
+	  support for different line endings (LF, CR-FL)
+	* cli/cmd_macro.cc: enable compilation on VS 7.1
+
 2004-09-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc:
 	Clarified the help description for the macro command.

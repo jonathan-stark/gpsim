@@ -211,7 +211,7 @@ Macro *gCurrentMacro = 0;     // Used during macro invocation
 Macro *isMacro(const string &s)
 {
 
-  map<string, Macro *>::iterator mi = macro_map.find(s);
+  map<const string, Macro *>::iterator mi = macro_map.find(s);
 
   if(mi != macro_map.end())
     return (*mi).second;
@@ -259,7 +259,7 @@ cmd_macro::cmd_macro(void)
 void cmd_macro::list(void)
 {
   if(macro_map.size()) {
-    map<string, Macro *>::iterator mi;
+    map<const string, Macro *>::iterator mi;
     for (mi=macro_map.begin(); mi!=macro_map.end(); ++mi) 
 
       mi->second->print();

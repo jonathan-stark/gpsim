@@ -598,19 +598,23 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   switch(condition) {
   case G_IO_IN:
     {
-      unsigned int bytes_read=0;
-
-      memset(s->buffer, 0, 256);
+      GString *line = g_string_sized_new(512);
+      gsize terminator_pos;
 
       std::cout << "Reading bytes\n";
-      g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
-      std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
 
-      if(bytes_read) {
-	if (*s->buffer == '$')
-	  s->ParseObject(&s->buffer[1]);
+      g_io_channel_read_line_string(channel, line, &terminator_pos, NULL);
+      g_string_truncate(line, terminator_pos);
+      g_string_append_c(line, '\n');
+
+      // g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+      std::cout << "Read " << line->len << " bytes: " << line->str << endl;
+
+      if (0 != line->len) {
+	if (line->str[0] == '$')
+	  s->ParseObject(&line->str[1]);
 	else {
-	  parse_string(s->buffer);
+	  parse_string(line->str);
 	  s->respond("ACK");
 	}
       } else
