@@ -1202,7 +1202,7 @@ int plot_routine_histogram(Profile_Window *pw)
 				GTK_JUSTIFY_CENTER,
 				infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext1);
-#define PRINTF_INT64_MODIFIER "L"
+
     static char * pInfoStringFormat = 
       "\\BMin:\\N\%" PRINTF_INT64_MODIFIER
       "d \\BMax:\\N%" PRINTF_INT64_MODIFIER

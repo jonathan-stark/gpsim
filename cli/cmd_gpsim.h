@@ -10,6 +10,9 @@
 #define CMD_ERR_PROCESSORDEFINED      3
 #define CMD_ERR_PROCESSORNOTDEFINED   4
 #define CMD_ERR_COMMANDNOTDEFINED     5
+#if defined(putc)
+#undef putc
+#endif
 
 class ISimConsole {
 public:
