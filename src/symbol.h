@@ -60,15 +60,15 @@ class IOPORT;
 class Processor;
 class Register;
 class Module;
-
+/*
 class symbol_type
 {
 public:
   SYMBOL_TYPE type;
   char * name_str;
 };
-
-extern symbol_type symbol_types[];
+*/
+//extern symbol_type symbol_types[];
 
 class symbol
 {
@@ -79,12 +79,12 @@ public:
   Module *cpu;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
-  char * type_name(void) { return symbol_types[isa()].name_str;};
-  string *name(void) { return &name_str;};
-  void new_name(string *new_name_str) {name_str = *new_name_str;};
+  virtual char * type_name(void) { return "unknown";}
+  string *name(void) { return &name_str;}
+  void new_name(string *new_name_str) {name_str = *new_name_str;}
   virtual void print(void);
-  virtual int get_value(void){return 0;};
-  virtual void put_value(int i) {;};
+  virtual int get_value(void){return 0;}
+  virtual void put_value(int i) { }
   symbol(void);
 
 };
@@ -124,6 +124,7 @@ public:
 
   int val;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
+  virtual char * type_name(void) { return "constant";}
   virtual void print(void);
   virtual int get_value(void){return val;};
 };
@@ -135,6 +136,7 @@ public:
 
   IOPORT *ioport;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
+  virtual char * type_name(void) { return "ioport";}
   virtual void put_value(int new_value);
 };
 
@@ -144,6 +146,7 @@ public:
 
   Stimulus_Node *stimulus_node;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS_NODE;};
+  virtual char * type_name(void) { return "node";}
   virtual void print(void);
 
 };
@@ -154,6 +157,7 @@ public:
 
   Register *reg;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
+  virtual char * type_name(void) { return "register";}
   virtual void print(void);
   virtual int get_value(void);
   virtual void put_value(int new_value);
@@ -173,6 +177,7 @@ public:
   int val;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
+  virtual char * type_name(void) { return "address";}
   virtual void print(void);
   virtual int get_value(void){return val;};
 
@@ -190,6 +195,7 @@ class line_number_symbol : public symbol
   void put_lst_page(int new_lst_page) {lst_page = new_lst_page;}
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_LINE_NUMBER;};
+  virtual char * type_name(void) { return "line_number";}
 };
 
 class module_symbol : public symbol
@@ -197,6 +203,7 @@ class module_symbol : public symbol
  public:
   virtual void print(void);      
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
+  virtual char * type_name(void) { return "module";}
 
 };
 
@@ -208,6 +215,7 @@ class w_symbol : public symbol
   WREG *w;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
+  virtual char * type_name(void) { return "W";}
 
   virtual void print(void);
   virtual int get_value(void);

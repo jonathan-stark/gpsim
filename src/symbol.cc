@@ -60,27 +60,6 @@ list <symbol *>::iterator sti;
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
-// Define an array for the types of symbols:
-symbol_type symbol_types[] =
-{
-
-  // SYMBOL_TYPE type;  char * name_str;
-
-  {SYMBOL_BASE_CLASS,"symbol_base"},
-  {SYMBOL_IOPORT,"ioport"},
-  {SYMBOL_STIMULUS_NODE,"node"},
-  {SYMBOL_STIMULUS,"stimulus"},
-  {SYMBOL_LINE_NUMBER,"line_number"},
-  {SYMBOL_CONSTANT,"constant"},
-  {SYMBOL_REGISTER,"register"},
-  {SYMBOL_ADDRESS,"address"},
-  {SYMBOL_PROCESSOR,"processor"},
-  {SYMBOL_MODULE,"module"},
-
-};
-
-const int num_of_symbol_types = (sizeof(symbol_types))/ (sizeof(symbol_type));
-
 void Symbol_Table::add_ioport(pic_processor *cpu, IOPORT *_ioport)
 {
 
@@ -227,10 +206,11 @@ void Symbol_Table::remove_module(Module * m, char *name)
 void Symbol_Table::add(pic_processor *cpu, char *new_name, char *new_type, int value)
 {
 
-  cout << "Adding new symbol " << new_name << " of type " << new_type << '\n';
+  cout << "NOT SUPPORTED-->Adding new symbol " << new_name << " of type " << new_type << '\n';
+
+#if 0
 
   int i;
-
   for(i=0; i<num_of_symbol_types; i++)
     {
 
@@ -251,6 +231,8 @@ void Symbol_Table::add(pic_processor *cpu, char *new_name, char *new_type, int v
 	    }
 	}
     }
+#endif
+
 }
 
 // default base constructor for a symbol is not used
@@ -364,19 +346,6 @@ void Symbol_Table::dump_type(SYMBOL_TYPE symt)
 {
   int i;
 
-  // Search for the type of symbole we wish to display
-
-  for(i=0; i<num_of_symbol_types; i++) {
-    if(symbol_types[i].type == symt)
-      break;
-  }
-
-  // Was it found?
-  if(i>=num_of_symbol_types) {
-    cout << "? Bad symbol type in " << __FUNCTION__ << "()\n";
-    return;
-  }
-
   // Now loop through the whole table and display all instances of the type of interest
 
   int first=1;     // On the first encounter of one, display the title
@@ -392,7 +361,7 @@ void Symbol_Table::dump_type(SYMBOL_TYPE symt)
 	if(sym->isa() == symt) {
 	  if(first) {
 	    first = 0;
-	    cout << "Symbol Table for \"" << symbol_types[i].name_str << "\"\n";
+	    cout << "Symbol Table for \"" << sym->type_name() << "\"\n";
 	  }
 
 	  sym->print();
@@ -402,7 +371,7 @@ void Symbol_Table::dump_type(SYMBOL_TYPE symt)
     }
   
   if(first)
-    cout << "No \"" << symbol_types[i].name_str <<  "\" symbols found\n";
+    cout << "No symbols found\n";
 
 }
 

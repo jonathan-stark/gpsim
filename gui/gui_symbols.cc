@@ -61,6 +61,15 @@ static menu_item menu_items[] = {
 };
 
 
+class GUISymbol
+{
+public:
+  symbol *s;
+
+  virtual void select(void);
+
+};
+
 // Used only in popup menus
 Symbol_Window *popup_sw;
 
@@ -199,10 +208,10 @@ extern list <symbol *> st;
 void Symbol_Window::Update(void)
 {
 
-  static list <symbol *>::iterator interface_sti;
+  char buffer[256];
 
   char **entry; // 'name', 'type', 'typedata'
-  sym *s;
+
   GList *iter;
 
   load_symbols=1;
@@ -227,73 +236,57 @@ void Symbol_Window::Update(void)
     }
   symbols=0;
 
-  gpsim_symbol_rewind((unsigned int)gp->pic_id);
+  list <symbol *>::iterator sti = st.begin();
 
+  while(sti != st.end()) {
 
-  // FIXME memory leaks
-  while(0 != (s = gpsim_symbol_iter(gp->pic_id)))
-    {
-      int row;
-      sym *e;
-	
-      if( (filter_addresses && s->type == SYMBOL_ADDRESS) ||
-	  (filter_constants && s->type == SYMBOL_CONSTANT) ||
-	  (filter_registers && s->type == SYMBOL_REGISTER) )
-	continue;
+    // ignore line numbers
+    if(  ((*sti)->isa() == SYMBOL_LINE_NUMBER)            ||
+	 (filter_addresses && (*sti)->isa() == SYMBOL_ADDRESS)  ||
+	 (filter_constants && (*sti)->isa() == SYMBOL_CONSTANT) ||
+	 (filter_registers && (*sti)->isa() == SYMBOL_REGISTER) ) {
+      sti++;
+      continue;
+    }
 
 #define SYMBOL_NR_COLUMNS 3
-      entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
+    entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
+    char *pstr=(char*)malloc((*sti)->name()->length()+1);
+    strncpy(pstr,
+	    (*sti)->name()->data(),
+	    (*sti)->name()->length());
+    pstr[(*sti)->name()->length()]=0;
+    entry[0] = pstr;
+
+    int row;
+    sym *e;
+
+    entry[1] = strndup((*sti)->type_name(), strlen((*sti)->type_name()));
+
+    entry[2]=(char*)malloc(32);
+    if((*sti)->isa()==SYMBOL_ADDRESS||
+       (*sti)->isa()==SYMBOL_CONSTANT||
+       (*sti)->isa()==SYMBOL_REGISTER)
+      sprintf(entry[2],"0x%X",(*sti)->get_value());
+    else
+      strcpy(entry[2],"");
 	
-      entry[0]=(char*)malloc(strlen(s->name)+1);
-      strcpy(entry[0],s->name);
+    e=(sym*)malloc(sizeof(sym));
+    e->name = entry[0];
+    e->type = (*sti)->isa();
+    e->value=(*sti)->get_value();
 
-      strdup(entry[1],s->type_name());
+    symbols=g_list_append(symbols,e);
 
-#if 0
-      entry[1]=(char*)malloc(64);
-      switch(s->type)
-	{
-	case SYMBOL_ADDRESS:
-	  strcpy(entry[1],"address");
-	  break;
-	case SYMBOL_CONSTANT:
-	  strcpy(entry[1],"constant");
-	  break;
-	case SYMBOL_REGISTER:
-	  strcpy(entry[1],"register");
-	  break;
-	case SYMBOL_IOPORT:
-	  strcpy(entry[1],"ioport");
-	  break;
-	case SYMBOL_STIMULUS:
-	  strcpy(entry[1],"stimulus");
-	  break;
-	case SYMBOL_BASE_CLASS:
-	  strcpy(entry[1],"symbol base class");
-	  break;
-	default:
-	  strcpy(entry[1],"unknown symbol type");
-	  break;
-	}
-#endif
-      entry[2]=(char*)malloc(32);
-      if(s->type==SYMBOL_ADDRESS||
-	 s->type==SYMBOL_CONSTANT||
-	 s->type==SYMBOL_REGISTER)
-	sprintf(entry[2],"0x%X",s->value);
-      else
-	strcpy(entry[2],"");
-	
-      e=(sym*)malloc(sizeof(sym));
-      memcpy(e,s,sizeof(sym));
-      e->name=(char*)malloc(strlen(s->name)+1);
-      strcpy(e->name,s->name);
-      symbols=g_list_append(symbols,e);
+    row=gtk_clist_append(GTK_CLIST(symbol_clist),entry);
+    gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,e);
 
-      row=gtk_clist_append(GTK_CLIST(symbol_clist),entry);
-      gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,e);
-    }
+    sti++;
+
+  }
+
   gtk_clist_thaw(GTK_CLIST(symbol_clist));
+
 }
 
 static void do_symbol_select(Symbol_Window *sw, sym *e)
@@ -359,9 +352,9 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 void Symbol_Window::SelectSymbolName(char *symbol_name)
 {
   GList *p;
-  sym *s;
+  //sym *s;
     
-  if(symbol_name==0)
+  if(!symbol_name)
     return;
 
   // If window is not displayed, then display it.
@@ -370,12 +363,15 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
 
   // See if the type of symbol selected is currently filtered out, and
   // if so we unfilter it.
-  gpsim_symbol_rewind((unsigned int)gp->pic_id);
-  while(0 != (s = gpsim_symbol_iter(gp->pic_id))) {
+
+  list <symbol *>::iterator sti = st.begin();
+
+  for(sti = st.begin(); sti != st.end(); sti++) {
     
-    if(!strcasecmp(s->name,symbol_name)) {
+    if(!strcasecmp((*sti)->name()->data(),symbol_name)) {
 	
-      switch(s->type) {
+      //switch(s->type) {
+      switch((*sti)->isa()) {
 	    
       case SYMBOL_ADDRESS:
 	if(filter_addresses) {
@@ -445,7 +441,6 @@ symbol_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
     long val1, val2;
     GtkCListRow *row1 = (GtkCListRow *) ptr1;
     GtkCListRow *row2 = (GtkCListRow *) ptr2;
-//    char *p;
 
     switch (row1->cell[clist->sort_column].type)
     {
@@ -475,19 +470,15 @@ symbol_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
 
     if (!text2)
 	assert(0);
-    //	return (text1 != 0);
 
     if (!text1)
 	assert(0);
-    //	return -1;
 
     if(1==sscanf(text1,"%li",&val1))
     {
-	if(1==sscanf(text2,"%li",&val2))
-	{
-//	    printf("Value %d %d\n",val1,val2);
-	    return val1-val2;
-	}
+      if(1==sscanf(text2,"%li",&val2))
+	return val1-val2;
+
     }
     return strcmp(text1,text2);
 }
