@@ -280,13 +280,20 @@ main (int argc, char *argv[])
 
   // Now enter the event loop and start processing user
   // commands.
+  try {
 
 #ifdef HAVE_GUI
-  if(bUseGUI)
-    gui_main();
-  else
+    if(bUseGUI)
+      gui_main();
+    else
 #endif
-    cli_main();
+      cli_main();
+  }
+
+  catch (char * err_message)
+    {
+      cout << "FATAL ERROR: " << err_message << endl;
+    }
 
   exit_gpsim();
 

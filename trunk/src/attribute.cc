@@ -182,10 +182,17 @@ void FloatAttribute::set(double f)
 }
 
 
+FloatAttribute::FloatAttribute(char *init_name, double v)
+  : Attribute(init_name), value(v)
+{ 
 
+}
 
-
-
+FloatAttribute::FloatAttribute(void)
+  : Attribute()
+{ 
+  value = -1;
+}
 
 //-------------------------------------------------------------------
 char * StringAttribute::sGet(char *buffer, int buf_size)
