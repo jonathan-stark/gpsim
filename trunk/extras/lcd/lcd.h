@@ -28,10 +28,35 @@ Boston, MA 02111-1307, USA.  */
 #include <gpsim/ioports.h>
 #include <gpsim/symbol.h>
 #include <gpsim/trace.h>
+#include <gpsim/gpsim_interface.h>
 
 #include <gtk/gtk.h>
 
 class LcdDisplay;
+
+
+// Create an interface to the simulator
+
+class LCD_Interface : public Interface
+{
+private:
+  LcdDisplay *lcd;
+
+public:
+
+  //virtual void UpdateObject (gpointer xref,int new_value);
+  //virtual void RemoveObject (gpointer xref);
+  virtual void SimulationHasStopped (gpointer object);
+  //virtual void NewProcessor (unsigned int processor_id);
+  //virtual void NewModule (Module *module);
+  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
+  //virtual void NewProgram  (unsigned int processor_id);
+  virtual void GuiUpdate  (gpointer object);
+
+
+  LCD_Interface(LcdDisplay *_gp);
+};
+
 
 // Create a few classes from which an LCD may be constructed
 
@@ -192,6 +217,8 @@ public:
 #define DISPLAY_ON_FLAG         (1<<3)
 #define CURSOR_ON_FLAG          (1<<4)
 #define BLINK_ON_FLAG           (1<<5)
+
+  LCD_Interface *interface;
 
   State current_state, previous_state;
   ControlLineEvent last_event;

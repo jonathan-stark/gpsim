@@ -60,25 +60,39 @@ Boston, MA 02111-1307, USA.  */
 pic_processor *gpsim_get_active_cpu(void);
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 void gpsim_clear_break(gpointer b);
-void gpsim_unregister_interface(unsigned int interface_id);
 
 
-extern "C" {
 
-  // This function is registerd with gpsim when a module
-  // is instantiated. It gets invoke when gpsim has stopped
-  // simulating. 
 
-  static void simulation_has_stopped(gpointer lcd)
-    {
-      if(lcd)
-	{
-	  ((LcdDisplay *)lcd)->update();
-	}
-    }
+
+//------------------------------------------------------------------------
+//
+// LCD interface to the simulator
+//
+LCD_Interface::LCD_Interface(LcdDisplay *_lcd) : Interface ( (gpointer *) _lcd)
+{
+
+  lcd = _lcd;
 
 }
 
+//--------------------------------------------------
+// SimulationHasStopped (gpointer)
+//
+// gpsim will call this function when the simulation
+// has halt (e.g. a break point was hit.)
+
+void LCD_Interface::SimulationHasStopped (gpointer)
+{
+  if(lcd)
+    ((LcdDisplay *)lcd)->update();
+}
+
+void LCD_Interface::GuiUpdate (gpointer)
+{
+  if(lcd)
+    ((LcdDisplay *)lcd)->update();
+}
 
 //--------------------------------------------------------------
 // LcdPort class
@@ -373,11 +387,15 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   // If you want to get diagnostic info, change debug to non-zero.
   debug = 0;
 
+  interface = new LCD_Interface(this);
+  gi.add_interface(interface);
+
+/*
   interface_id = gpsim_register_interface((gpointer)this);
 
   gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
   gpsim_register_gui_update(interface_id, simulation_has_stopped);
-
+*/
 
   CreateGraphics();
 
@@ -389,10 +407,11 @@ LcdDisplay::~LcdDisplay()
   if (verbose)
       cout << "LcdDisplay destructor\n";
 
-  gpsim_unregister_interface(interface_id);
+  //gpsim_unregister_interface(interface_id);
   delete data_port;
   gpsim_clear_break(control_port); // Hmmmm. FIXME.
   delete control_port;
+  delete interface;
 
   gtk_widget_destroy(window);
 
