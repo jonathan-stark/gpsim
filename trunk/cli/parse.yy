@@ -104,7 +104,6 @@ void yyerror(char *message)
   char                *s;
   cmd_options        *co;
   cmd_options_num   *con;
-  cmd_options_float *cof;
   cmd_options_str   *cos;
   cmd_options_expr  *coe;
 
@@ -164,9 +163,6 @@ void yyerror(char *message)
 %token <co>  STRING_OPTION
 %token <co>  CMD_SUBTYPE
 
-%token <li>  NUMBER
-%token <f>   FLOAT_NUMBER
-
 /* Expression parsing stuff */
 %type <BinaryOperator_P>        binary_expr
 %type <Expression_P>            expr
@@ -189,12 +185,11 @@ void yyerror(char *message)
 
 
 
-%type  <li>   _register
+//%type  <li>   _register
 %type  <co>  bit_flag
 %type  <co>  cmd_subtype
 
 %type  <con> numeric_option
-%type  <cof> numeric_float_option
 %type  <cos> string_option
 %type  <coe> expression_option
 %type  <StringList_P>              string_list
@@ -382,47 +377,6 @@ module_cmd
                                         {c_module.module($2, 0, $3);}
           | MODULE string_option string_list expr_list 
                                         {c_module.module($2, $3, $4);}
-/*
-          | MODULE string_option STRING
-	  { 
-            c_module.module($2, $3);
-            delete($2);
-            free($3);
-          }
-
-          | MODULE string_option STRING STRING
-	  { 
-            c_module.module($2, $3, $4);
-            delete($2);
-            free($3);
-            free($4);
-          }
-          | MODULE string_option STRING NUMBER
-	  { 
-            c_module.module($2, $3, double($4));
-            delete($2);
-            free($3);
-          }
-
-          | MODULE string_option STRING FLOAT_NUMBER
-	  { 
-            c_module.module($2, $3, $4);
-            delete($2);
-            free($3);
-          }
-
-          | MODULE string_option NUMBER NUMBER
-	  { 
-            c_module.module($2, $3, $4);
-            delete($2);
-          }
-
-          | MODULE string_option STRING STRING NUMBER
-	  { 
-            c_module.module($2, $3, $4, $5);
-            delete($2);
-          }
-*/
           ;
 
 
@@ -450,10 +404,10 @@ quit_cmd: QUIT
             quit_parse = 1;
 	    YYABORT;
           }
-	  | QUIT NUMBER
+	  | QUIT expr
 	  {
             quit_parse = 1;
-	    quit_state = $2;
+	    //quit_state = $2;  // FIXME need to evaluate expr
 	    YYABORT;
 	  }
           ;
@@ -466,43 +420,21 @@ run_cmd:
           RUN                           { c_run.run();}
           ;
 
-set_cmd: SET
-          { 
-            c_set.set();
-          }
-          | SET bit_flag
-          {
-            c_set.set($2->value,0);
-          }
-            | SET bit_flag expr
-          {
-            c_set.set($2->value,$3);
-          }
+set_cmd
+          : SET                         {c_set.set();}
+          | SET bit_flag                {c_set.set($2->value,0);}
+          | SET bit_flag expr           {c_set.set($2->value,$3);}
           ;
 
-step_cmd: STEP
-          {
-	    step.step(1);
-	  }
-          | STEP expr
-          {
-	    step.step($2);
-	  }
-          | STEP bit_flag
-          {
-	    step.over();
-	  }
+step_cmd
+          : STEP                        {step.step(1);}
+          | STEP expr                   {step.step($2);}
+          | STEP bit_flag               {step.over();}
           ;
 
-stopwatch_cmd: STOPWATCH
-          {
-	    stopwatch.set();
-          }
-          | STOPWATCH bit_flag
-	  {
-	    cmd_options *opt = $2;
-	    stopwatch.set(opt->value);
-          }
+stopwatch_cmd
+          : STOPWATCH                   {stopwatch.set();}
+          | STOPWATCH bit_flag          {stopwatch.set($2->value);}
           ;
 
 stimulus_cmd: STIMULUS
@@ -554,17 +486,12 @@ stimulus_opt:
           ;
 
 
-symbol_cmd: SYMBOL
+symbol_cmd
+          : SYMBOL                      {c_symbol.dump_all();}
+          | SYMBOL STRING               {c_symbol.dump_one($2);}
+          | SYMBOL STRING STRING expr
           {
-	    c_symbol.dump_all();
-	  }
-          | SYMBOL STRING
-          {
-	    c_symbol.dump_one($2);
-	  }
-          | SYMBOL STRING STRING NUMBER
-          {
-	    c_symbol.add_one($2,$3,(int)$4);
+	    c_symbol.add_one($2,$3,$4);
 	  }
           ;
 
@@ -577,14 +504,11 @@ trace_cmd:
           | TRACE bit_flag              { c_trace.trace($2); }
           ;
 
-version_cmd: gpsim_VERSION
-          {
-	    version.version();
-	  }
+version_cmd: gpsim_VERSION              {version.version();}
           ;
 
-x_cmd: 
-          X                             { c_x.x();}
+x_cmd
+          : X                           { c_x.x();}
           | X expr                      { c_x.x($2); }
           ;
 
@@ -606,13 +530,13 @@ icd_cmd:
 //	  $$ = $2;
 //        }
 //        ;
-
-_register: NUMBER
-      {
-	if(verbose)
-         printf("  --- register %d\n", (int)$1);
-      }
-      ;
+//
+//_register: NUMBER
+//      {
+//	if(verbose)
+//         printf("  --- register %d\n", (int)$1);
+//      }
+//      ;
 
 bit_flag: BIT_FLAG
       {
@@ -634,17 +558,6 @@ numeric_option: NUMERIC_OPTION expr
 
 	  $$ = new cmd_options_num;
 	  $$->co = $1;
-	  //$$->n = $2;
-	}
-        ;
-
-numeric_float_option:  NUMERIC_OPTION FLOAT_NUMBER
-        { 
-	  $$ = new cmd_options_float;
-	  $$->co = $1;
-	  $$->f  = $2;
-          if(verbose&2)
-	    cout << "name " << $$->co->name << " value " << $$->f << " got a numeric option \n"; 
 	}
         ;
 

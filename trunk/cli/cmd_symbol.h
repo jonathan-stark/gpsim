@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_SYMBOL_H__
 #define __CMD_SYMBOL_H__
 
+class Expression;
+
 class cmd_symbol : public command
 {
 public:
@@ -29,9 +31,8 @@ public:
 
   void dump_all(void);
   void dump_one(char *sym_name);
-  void add_one(char *sym_name, char *sym_type, int value);
 
-
+  void add_one(char *sym_name, char *sym_type, Expression *);
 };
 
 extern cmd_symbol c_symbol;

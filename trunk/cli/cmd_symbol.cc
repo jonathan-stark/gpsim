@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_symbol.h"
 #include "../src/symbol_orb.h"
+#include "expr.h"
 
 cmd_symbol c_symbol;
 
@@ -71,8 +72,8 @@ void cmd_symbol::dump_one(char *sym_name)
   symbol_dump_one(sym_name);
 }
 
-void cmd_symbol::add_one(char *sym_name, char *sym_type, int value)
+void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)
 {
-  symbol_add_one(cpu, sym_name,sym_type,value);
+  symbol_add_one(cpu, sym_name,sym_type,(int)evaluate(expr));
 }
 

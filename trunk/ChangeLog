@@ -1,4 +1,10 @@
 2004-06-28 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/misc.h, cli/cmd_symbol.cc, src/symbol.cc:
+	Removed 'NUMBER' and 'FLOATING_NUMBER' types from the CLI parser. Now
+	all numbers are represented by expressions. All commands that used to
+	numbers have been converted over to use expressions.
+	
+2004-06-28 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_module.cc, src/modules.h, src/modules.cc, gui/gui_breadboard.cc:
 	Module positioning now works again.
 
