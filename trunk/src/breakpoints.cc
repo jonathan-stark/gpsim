@@ -1330,10 +1330,9 @@ CyclicBreakPoint::~CyclicBreakPoint(void)
 
 void CyclicBreakPoint::set_delta(guint64 delta)
 {
-  if(pic) {
-    cycles.clear_break(this);
+  cycles.clear_break(this);
 
-    delta_cycles = delta;
-    set_break();
-  }
+  delta_cycles = delta;
+  set_break();
+
 }

@@ -26,8 +26,6 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 
 
-#include "../config.h"
-
 class symbol;
 class XrefObject;
 

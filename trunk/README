@@ -11,118 +11,18 @@ Please see the PROCESSORS file to see a list of supported processors.
 Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
 Please see COPYING for the GPL.
 
-gpsim-0.20.0 new stuff:
+gpsim-0.21.1 new stuff:
 
-28JUL00 gpsim-0.20.0
-  o Modules - gpsim now supports dynamically loaded modules
-    -- module command
-  o gui - upgraded to latest versions of gtk & gtkextra
-  o gui - Menu items now work
-  o gui - button bar
-  o gui - now refreshes while simulating
-  o gui - Stack Window has been added
-  o BSD is now supported
-  o numerous bug fixes
+04JAN04 gpsim-0.21.1
+  o Added the stopwatch command.
+  o 18f1220 and 18f1320 added by Bradly McLean
+  o EEPROM added to 18F devices by Mike Durian
 
 *note:
 eXdbm and gtk+extra are needed by gpsim.
 With version gpsim-0.20.0 you'll need to upgrade to gtk+extra-0.99.9.
 Please see the gpsim web page.
 
-
-Modules
--------
-One of big features in this release is Modules. gpsim now has a way to allow you to create specific simulation environments without having to learn everything about gpsim. This has been a major overhaul of the infrastructure of gpsim. 
-
-The idea is that you'll be able to create your own custom modules, package these into a library, and then load them from gpsim.
-
-There are two example modules: an LED one and a Logic one. These are somewhat experimental, but can serve as templates for creating your own modules. The LED module consists of a single digit, 7-segment, common-anode display. The Logic module contains a two-input AND gate and a two-input OR gate. Both libraries are available from the gpsim web page:
-
-  http://www.dattalo.com/gnupic/led-0.0.3.tar.gz
-  http://www.dattalo.com/gnupic/logic-0.0.1.tar.gz
-
-(Note, the version number may change, so it would be best to go to the gpsim web page and look for the latest version there).
-
-The README.modules file explains in more detail how to create/use modules.
-
-`module' command
-----------------
-
-A new command has been added to gpsim to support modules:
-
-gpsim> help module
-module [ [load module_type [module_name]] | [lib lib_name] | [list] | 
-[[dump | pins] module_name] ]
-        If no options are specified, then the currently defined module(s)
-        will be displayed. This is the same as the `module list' command.
-        The `module load lib_name' tells gpsim to search for the module
-        library called `lib_name' and to load it. (Note that the format of
-        module libraries is exactly the same as a Linux shared library. This
-        means that the module library should reside in a path available to
-        dlopen(). Please see the README.MODULES in the gpsim distribution.
-        To instantiate a new module, then type
-          module module_type module_name
-        where module_type refers to a specific module in a module library
-        and module_name is the user name assigned to it.
-        Information about a module can be displayed by the commad
-          module module_name [dump | pins]
-
-        where module_name is the name that you assigned when the module
-        was instantiated. The optional dump and pins identifiers specify
-        the information you wish to display (dump is the default).
-
-        examples:
-
-
-        module                      // Display the modules you've already defined.
-        module lib my_mods.so       // Load the module library called my_mods.
-        module list                 // Display the list of modules supported.
-        module load lcd my_lcd      // Create an instance of an 'lcd'
-        module pins my_lcd          // Display the pin states of an instantiated module
-        module load lcd lcd2x20     // Create a new module.
-        module load led start_light // and another.
-
--------
-
-It's fairly tedious to memorize all of the details of this command. So your best bet is to copy the configuration scripts in the example libraries. 
-
-
-gui - Menu items now work
--------------------------
-Before Ralf joined the gpsim development, I had created a rough outline of the gui interface. There were numerous menus that were not fully implemented. Ralf has fixed that. Now gpsim can load files by navigating through the menus. In addition, the various windows were enabled/disabled with this cumbersome tabbed notebook window. Ralf has gotten rid of that and provided a <windows> menu item that will allow you to open and close windows.
-
-gui - button bar
-----------------
-Ralf has added a button bar to the gui control panel. This allows you to perform simple commands like step, run, stop, etc. with a simple click. These complement the hot-keys that were already present.
-
-
-gui - now refreshes while simulating
-------------------------------------
-The gui now can be refreshed will the simulation is running. Before, the simulation engine would hog all of the cpu and would ignore the gui until the simulation completed (e.g. when  a break point was encountered). Also, the rate at which the gui is updated is controlled directly from the gui control window.
-
-gui - Stack Viewer
-------------------
-Ralf has added a stack viewer that will display the contents of the PIC stack. You can double click on entries in the Stack Viewer to set breakpoints on the addresses.
-
-BSD supported:
---------------
-Joerg Wunsch <joerg_wunsch@interface-business.de>, a BSD guy, has taken the time to  get gpsim to compile under BSD.In the process he has fixed a few system dependcy bugs that have plagued gpsim for a really long time.
-
-bug fixes
----------
-There were literally so many bug fixes that I lost track.
-  -- core dumps for instantiating several processors
-  -- TMR0 rollover bug (actually in the breakpoint code)
-  -- stimuli -> there are ALWAYS bugs here
-  -- multi-line stimuli weren't working
-
-
-What's coming next?
--------------------
-
-Register Stimuli.
-More Modules
-Begin research into a schematic capture front end.
 
 System Requirements:
 --------------------
@@ -147,35 +47,55 @@ Invoking:
 
 Run gpsim by typing:
 
-gpsim [-h] [-p<device> [<hex_file>]] [-c<stc_file>]
-        -h            : this help list
-        -p<device>    : processor (e.g. -pp16c84 for the 'c84)
-        <hex_file>    : input file in "intelhex16" format
-        -c<stc_file>  : startup command file
-        -s<cod_file>  : .cod symbol file
+$ gpsim --help
 
-        -v            : gpsim version
+gpsim - the GNUPIC simulator
+version: 0.21.1
+
+
+type help for help
+Usage: gpsim [-h] [-p <device> [<hex_file>]] [-c <stc_file>]
+  -p, --processor=<processor name>     processor (e.g. -pp16c84 for the 'c84)
+  -c, --command=STRING                 startup command file
+  -s, --symbol=STRING                  .cod symbol file
+  -L, --                               colon separated list of directories to
+                                       search.
+  -v, --version                        gpsim version
+  -i, --cli                            command line mode only
+  -d, --icd=STRING                     use ICD (e.g. -d /dev/ttyS0).
+
+Help options:
+  -?, --help                           Show this help message
+  --usage                              Display brief usage message
 
 for example:
 
-gpsim -pp16c61 pichexfile.hex
+$gpsim -pp16c61 pichexfile.hex
 
-will start the simulator, select a 'c61 as the target and load the program memory with pichexfile.hex hex file. There are several pic source files in the ./gpsim-0.0.14/examples subdirectory. 
+will start the simulator, select a 'c61 as the target and load the program memory with pichexfile.hex hex file. There are several pic source files in the /examples subdirectory. 
+
+or (preferred)
+
+$gpsim -s piccodfile.cod     # note, you don't need to specify the processor for .cod files
+
 
 Once started, a very simple command line prompt will process your requests:
 
 gpsim> help
 attach         Attach stimuli to nodes
 break          Set a break point
+bus            Add or display node busses
 clear          Remove a break point
 disassemble    Disassemble the current cpu
 dump           Display either the RAM or EEPROM
-echo           echo "text"
+frequency      Set the clock frequency
 help           Type help "command" for more help on a command
+icd            ICD command.
 list           Display source and list files
 load           Load either a hex,command, or .cod file
-module         Select & Display modules
+log            Log/record events to a file
 node           Add or display stimulus nodes
+module         Select & Display modules
 processor      Select & Display processors
 quit           Quit gpsim
 reset          Reset all or parts of the simulation
@@ -183,6 +103,7 @@ run            Execute the pic program
 set            display and control gpsim behavior flags
 step           Execute one or more instructions.
 stimulus       Create a stimulus
+stopwatch      Measure time between events
 symbol         Add or display symbols
 trace          Dump the trace history
 version        Display the gpsim's version
