@@ -56,7 +56,8 @@ void TMR0::start(void)
 
   prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
 
-  last_cycle = synchronized_cycle - value * prescale;
+  last_cycle = value * prescale;
+  last_cycle = synchronized_cycle - last_cycle;
 
   future_cycle = last_cycle + 256 * prescale;
 
@@ -110,7 +111,8 @@ void TMR0::put(unsigned int new_value)
 
   synchronized_cycle = cpu->cycles.value + 2;
 
-  last_cycle = synchronized_cycle - value * prescale;
+  last_cycle = value * prescale;
+  last_cycle = synchronized_cycle - last_cycle;
 
   unsigned int fc = last_cycle + 256 * prescale;
 
@@ -122,6 +124,13 @@ void TMR0::put(unsigned int new_value)
   future_cycle = fc;
 
   trace.register_write(address,value);
+
+  /*
+  cout << "TMR0::put\n";
+  cout << " value " << value << '\n';
+  cout << " future_cycle " << future_cycle << '\n';
+  cout << " last_cycle " << last_cycle << '\n';
+  */
 
 }
 
@@ -153,7 +162,7 @@ unsigned int TMR0::get_value(void)
 	"  last_cycle = " << last_cycle <<
 	"  prescale = "  << prescale << 
 	"  calculated value = " << new_value << '\n';
-      return 0;
+      new_value &= 0xff;
     }
 
   value = new_value;
@@ -165,6 +174,7 @@ unsigned int TMR0::get(void)
 {
   value = get_value();
   trace.register_read(address, value);
+  return value;
 }
 void TMR0::new_prescale(void)
 {
@@ -191,7 +201,9 @@ void TMR0::new_prescale(void)
       // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
       // cycle counter when tmr0 last rolled over.
 
-      last_cycle = cpu->cycles.value - new_value * prescale;
+      last_cycle = value * prescale;
+      last_cycle = synchronized_cycle - last_cycle;
+
       //cout << " effective last_cycle " << last_cycle << '\n';
 
       if(cpu->cycles.value <= synchronized_cycle)
@@ -202,6 +214,7 @@ void TMR0::new_prescale(void)
 
       cpu->cycles.reassign_break(future_cycle, fc, this);
 
+      future_cycle = fc;
     }
 }
 
