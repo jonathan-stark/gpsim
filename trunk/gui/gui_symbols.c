@@ -425,6 +425,8 @@ int BuildSymbolWindow(Symbol_Window *sw)
   
   sw->gui_obj.enabled=1;
 
+  sw->gui_obj.is_built=1;
+
   if(sw->load_symbols)
       SymbolWindow_new_symbols(sw, sw->gui_obj.gp);
 
@@ -451,6 +453,7 @@ int CreateSymbolWindow(GUI_Processor *gp)
   symbol_window->gui_obj.wt = WT_symbol_window;
   symbol_window->gui_obj.change_view = SourceBrowser_change_view;
   symbol_window->gui_obj.window = NULL;
+  symbol_window->gui_obj.is_built = 0;
   gp->symbol_window = symbol_window;
 
   symbol_window->symbols=NULL;

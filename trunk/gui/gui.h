@@ -102,7 +102,8 @@ struct _gui_object {
   // with this gui object is hidden. Note: gtk saves the window origin
   // (x,y) but doesn't save the size (width,height).
   int x,y,width,height;
-  int enabled;
+  int enabled;   // Whether or not the window is up on the screen
+  int is_built;  // Whether or not the window is built
 
   // A pointer to a function that will allow the window associated
   // with this gui object to be viewable or hidden.
@@ -210,6 +211,8 @@ struct _Stack_Window {
     
     int current_row;
     int current_column;
+
+    int has_processor;
     
     GtkWidget *stack_clist;
 //    GtkWidget *popup_menu;

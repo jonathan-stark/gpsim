@@ -35,6 +35,10 @@ static gint sigh_button_event(GtkWidget *widget,
 {
     struct stack_entry *entry;
     assert(event&&sw);
+    
+    if(!sw->has_processor)
+	return 0;
+    
 
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
@@ -44,7 +48,10 @@ static gint sigh_button_event(GtkWidget *widget,
 	
 	entry = gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
-	gpsim_set_execute_break_at_address(((GUI_Object*)sw)->gp->pic_id, entry->retaddress);
+	if(entry!=NULL)
+	    gpsim_toggle_break_at_address(((GUI_Object*)sw)->gp->pic_id, entry->retaddress);
+	
+	return 1;
 	
     }
 
@@ -155,6 +162,9 @@ static void update(Stack_Window *sw)
     char *entry[COLUMNS]={depth_string,retaddress_string};
     unsigned int retaddress;
     struct stack_entry *stack_entry;
+
+    if(!sw->has_processor)
+	return;
     
     pic_id = ((GUI_Object*)sw)->gp->pic_id;
 
@@ -238,7 +248,7 @@ static void update(Stack_Window *sw)
 
 void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp)
 {
-    update(sw);
+    sw->has_processor=1;
 }
 
 void StackWindow_update(Stack_Window *sw)
@@ -310,8 +320,12 @@ int BuildStackWindow(Stack_Window *sw)
 
     sw->gui_obj.enabled=1;
 
+    sw->gui_obj.is_built=1;
+    
     update_menu_item((GUI_Object*)sw);
 
+    update(sw);
+    
     return 0;
 }
 
@@ -333,10 +347,12 @@ int CreateStackWindow(GUI_Processor *gp)
     stack_window->gui_obj.wt = WT_stack_window;
     stack_window->gui_obj.change_view = SourceBrowser_change_view;
     stack_window->gui_obj.window = NULL;
+    stack_window->gui_obj.is_built=0;
     gp->stack_window = stack_window;
 
     stack_window->last_stacklen=0;
     stack_window->current_row=0;
+    stack_window->has_processor=1;
 
 
     gp_add_window_to_list(gp, (GUI_Object *)stack_window);

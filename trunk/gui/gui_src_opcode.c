@@ -988,6 +988,8 @@ static GdkBitmap *mask;
 
   sbow->sbw.gui_obj.enabled=1;
 
+  sbow->sbw.gui_obj.is_built=1;
+
 
   
   style = gtk_widget_get_style(sbow->sbw.gui_obj.window);
@@ -1032,6 +1034,7 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     sbow->sbw.gui_obj.wt = WT_opcode_source_window;
 
     sbow->sbw.gui_obj.change_view = SourceBrowser_change_view;
+    sbow->sbw.gui_obj.is_built = 0;
 
     sbow->memory=NULL;
     sbow->current_address=0;
