@@ -137,18 +137,7 @@ void * load_library(const char *library_name, char **pszError)
       itSearchPath != asDllSearchPath.end();
       itSearchPath++) {
      sPath = *itSearchPath + sFile;
-#if 0
-#ifndef _WIN32
-    // According to the man page for dlopen, the RTLD_GLOBAL flag can
-    // be or'd with the second pararmeter of the function call. However,
-    // under Linux at least, this apparently cause *all* symbols to
-    // disappear.
 
-    handle = dlopen (sPath.c_str(), RTLD_NOW); // | RTLD_GLOBAL);
-#else
-    handle = (void *)LoadLibrary((LPCSTR)sPath.c_str());
-#endif
-#endif
     handle = sLoad(sPath.c_str());
 
     if (NULL != handle) {
@@ -183,20 +172,17 @@ void free_error_message(char * pszError)
 #endif
 }
 
-void * get_library_export(const char *name, void *library_handle)
+void * get_library_export(const char *name, void *library_handle, char **pszError)
 {
   void * pExport;
-  char *pszError;
 #ifndef _WIN32
   dlerror();	// Clear possible previous errors
   pExport = dlsym(library_handle, name);
 #else
   pExport = (void*)GetProcAddress((HMODULE)library_handle, name);
 #endif
-  if (NULL == pExport) {
-    pszError = get_error_message();
-    fprintf(stderr, "%s\n", pszError);
-    free_error_message(pszError);
+  if (NULL == pExport && pszError != NULL) {
+    *pszError = get_error_message();
   }
   return pExport;
 }
