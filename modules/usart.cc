@@ -453,10 +453,8 @@ public:
     digital_state = 1;
 
   };
-
+  /*
   virtual void put_node_state(int new_state) {
-
-    //cout << "USART_RXPIN put_node_state " << new_state << '\n';
 
     state = new_state;
 
@@ -473,28 +471,21 @@ public:
     }
 
   }
+  */
 
   void put_digital_state(bool new_dstate) { 
     bool diff = new_dstate ^ digital_state;
-    digital_state = new_dstate;
 
-    //cout << "usart rx put_digital_state " << digital_state << '\n';
     if( usart && diff ) {
 
       usart->new_rx_edge(digital_state);
 
-      if(iop) // this check should not be necessary...
-	iop->setbit(iobit,digital_state);
-
+      IOPIN::put_digital_state(digital_state);
 
     }
 
   }
 
-  //virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time) {
-    return 42;
-  }
 };
 
 
@@ -545,7 +536,7 @@ public:
     */
   }
 
-  void put_digital_state(bool new_dstate) { 
+  //  void put_digital_state(bool new_dstate) { 
 
     //cout << "usart tx put_digital_state " << new_dstate << '\n';
     /*
@@ -562,9 +553,9 @@ public:
     }
     */
 
-  }
+  //}
 
-  void put_state( int new_digital_state) {
+  virtual void put_digital_state(bool new_digital_state) {
 
     Register *port = get_iop();
 
@@ -575,7 +566,7 @@ public:
 
       if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
 
-	    bool bNewState = new_digital_state ? true : false;
+	bool bNewState = new_digital_state ? true : false;
 	port->setbit(iobit,bNewState);
 
 	digital_state = bNewState;
@@ -590,14 +581,6 @@ public:
     }
   }
 
-  virtual int get_voltage(guint64 current_time) {
-    //cout << "USART_TXPIN::" <<__FUNCTION__ <<  " digital state=" << digital_state << '\n';
-    
-    if(digital_state)
-      return drive;
-    else
-      return -drive;
-  }
 
 };
 
@@ -733,7 +716,7 @@ class TXREG : public BreakpointObject
     start_time = last_time;
 
     if(txpin) {
-      txpin->put_state(txr & 1);
+      txpin->put_digital_state((txr & 1) ? true : false);
       //cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
     }
 
@@ -1487,14 +1470,6 @@ public:
   }
   USART_IO (IOPORT *i, unsigned int b, char *opt_name=NULL) : IOPIN(i,b,opt_name) { };
 
-  virtual void put_node_state(int new_state) {
-    cout << "USART_IO put_node_state\n";
-  }
-
-  //virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time) {
-    return 42;
-  }
 };
 
 

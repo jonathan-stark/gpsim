@@ -47,7 +47,6 @@ class Resistor_IO : public IO_bi_directional
 {
 public:
 
-  bool driving;
   class Resistor *res;
 
   //virtual SOURCE_TYPE isa(void) {return RESISTOR;};
@@ -55,17 +54,8 @@ public:
   Resistor_IO(IOPORT *i, unsigned int b,char *opt_name=NULL) :
     IO_bi_directional( i, b, opt_name) {}
 
-  // put_node_state is called when the node to which this
-  // IO pin is attached is updated. We'll intercept this call
-  // and adjust the current through the resistor.
-  virtual void put_node_state(int new_state); // From attached node
-
-
-  //virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time);
-  //virtual void update_direction(unsigned int);
-  //virtual void change_direction(unsigned int);
-  //virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
+  virtual double get_Vth();
+  virtual double get_Zth();
 };
 
 class PUResistor_IO : public IOPIN
@@ -75,20 +65,10 @@ public:
   resistor *res;
 
   PUResistor_IO(void);
-  //  PUResistor_IO(resistor *res);
-  //PUResistor_IO(IOPORT *i, unsigned int b,char *opt_name=NULL);
 
-  // put_node_state is called when the node to which this
-  // IO pin is attached is updated. We'll intercept this call
-  // and adjust the current through the resistor.
-  virtual void put_node_state(int new_state); // From attached node
+  virtual double get_Vth();
+  virtual double get_Zth();
 
-
-  //virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time);
-  //virtual void update_direction(unsigned int);
-  //virtual void change_direction(unsigned int);
-  //virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 };
 
 
@@ -128,7 +108,7 @@ class PullupResistor : public Module
 {
 public:
   resistor *res;
-#ifdef HAVE_GUI
+#ifdef MANAGING_GUI
 
   GtkWidget *pu_window;
 
@@ -146,7 +126,7 @@ public:
   static Module *pu_construct(const char *new_name=NULL);
   static Module *pd_construct(const char *new_name=NULL);
 
-#ifdef HAVE_GUI
+#ifdef MANAGING_GUI
   void build_window(void);
 #endif
 

@@ -57,8 +57,8 @@ public:
   virtual void put_value(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void setbit_value(unsigned int bit_number, bool new_value);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual unsigned int get(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);

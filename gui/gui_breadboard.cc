@@ -1222,7 +1222,7 @@ static void draw_pin(struct gui_pin *pin)
     if(pin->type==PIN_OTHER)
 	gdk_gc_set_foreground(pin->gc,&black_color);
     else
-	gdk_gc_set_foreground(pin->gc,pin->value>0?&high_output_color:&low_output_color);
+	gdk_gc_set_foreground(pin->gc,pin->value ? &high_output_color:&low_output_color);
 
     // Draw actual pin
     gdk_draw_line(pin->pixmap,pin->gc,
@@ -1743,15 +1743,8 @@ static gint button(GtkWidget *widget,
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
-	if(p->direction==PIN_OUTPUT)
-	{
-	    p->iopin->put_state_value(p->value<0?1:0);
-	}
-	else
-	{
-	    p->iopin->toggle();
-	}
-	return 1;
+      p->iopin->toggle();
+      return 1;
     }
 
     if(event->type==GDK_BUTTON_PRESS &&
@@ -2571,7 +2564,7 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
 
     if(iopin!=0)
     {
-	pin->value=iopin->get_state();
+	pin->value=iopin->get_digital_state();
 	pin->direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 	pin->orientation=orientation;
         pin->type=PIN_DIGITAL;
@@ -2580,7 +2573,7 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
     }
     else
     {
-	pin->value=0;
+	pin->value=false;
 	pin->direction=PIN_INPUT;
         pin->orientation=orientation;
 	pin->type=PIN_OTHER;
@@ -3097,14 +3090,14 @@ void Breadboard_Window::Update(void)
       
       struct gui_pin *pin;
 
-      int value;
+      bool value;
       direction dir;
 
       pin = (struct gui_pin *) pin_iter->data;
 
       if(pin->iopin!=0) {
 	
-	value=pin->iopin->get_state();
+	value=pin->iopin->get_digital_state();
 	dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 
 	if(value!=pin->value || dir!=pin->direction) {

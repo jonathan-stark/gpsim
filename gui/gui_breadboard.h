@@ -66,7 +66,7 @@ struct gui_pin
 
     int layout_xpos, layout_ypos;
 
-    int value;
+    bool value;
     enum direction direction;
     enum orientation orientation;
     pintype type;

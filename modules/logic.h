@@ -58,7 +58,7 @@ class Logic_Input : public IO_input, public LogicPin
 {
 public:
 
-  virtual void put_node_state( int new_state);
+  virtual void put_digital_state( bool new_state);
 
   Logic_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) 
     : IO_input(i,b,opt_name) 

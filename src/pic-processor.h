@@ -204,7 +204,6 @@ public:
   unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
                                  // to the instruction execution rate.
 
-  double Vdd;
   double nominal_wdt_timeout;
 
   WDT          wdt;

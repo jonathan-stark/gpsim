@@ -41,7 +41,7 @@ class Binary_Input : public IO_input
 {
 public:
 
-  virtual void put_node_state( int new_state);
+  // virtual void put_node_state( int new_state);
   Binary_Input (IOPORT *i, unsigned int b) : IO_input(i,b) { };
 };
 

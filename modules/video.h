@@ -56,7 +56,7 @@ class Another_Input : public IO_input, public AnotherPin
 {
 public:
 
-  virtual void put_node_state( int new_state);
+  virtual void put_digital_state( bool new_state);
 
   Another_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) 
     : IO_input(i,b,opt_name) 

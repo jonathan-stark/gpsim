@@ -328,6 +328,7 @@ public:
 
   double frequency,period;    // Oscillator frequency and period.
   unsigned int clocks_per_inst;	// Osc cycles for 1 instruction
+  double Vdd;
 
   Register **registers;       // 
   Register **register_bank;   //
@@ -452,6 +453,9 @@ public:
   
   virtual void reset(RESET_TYPE r) {};
   virtual void por(void) = 0;            // por = Power On Reset
+
+  virtual double get_Vdd() { return Vdd; }
+  virtual void set_Vdd(double v) { Vdd = v; }
 
   //
   // FIXME -- create -- a way of constructing a processor (why not use constructors?)

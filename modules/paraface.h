@@ -79,7 +79,7 @@ class Paraface_Input : public IO_input
 {
 public:
 
-    virtual void put_node_state( int new_state);
+  //virtual void put_node_state( int new_state);
 
     Paraface_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
 

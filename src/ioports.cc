@@ -108,7 +108,7 @@ int IOPORT::update_stimuli(void)
       {
         if(pins[i]->snode!=0)
 	{
-	    int t = pins[i]->snode->update(time);
+	    double t = pins[i]->snode->update(time);
 
 	    //cout << name() << ' ' << i;
 	    //cout << " pin " << pins[i]->name();
@@ -147,7 +147,7 @@ int PIC_IOPORT::update_stimuli(void)
       {
         if(pins[i]->snode!=0)
 	{
-	    int t = pins[i]->snode->update(time);
+	    double t = pins[i]->snode->update(time);
 
 	    //cout << name() << ' ' << i;
 	    //cout << " pin " << pins[i]->name();
@@ -173,17 +173,17 @@ int PIC_IOPORT::update_stimuli(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-int IOPORT::get_bit_voltage(unsigned int bit_number)
+double IOPORT::get_bit_voltage(unsigned int bit_number)
 {
 
   guint64 time = cycles.value;
-  int v;
+  double v;
 
   if(pins[bit_number]) {
     if(pins[bit_number]->snode)
       v = pins[bit_number]->snode->update(time);
     else
-      v = pins[bit_number]->get_voltage(time);
+      v = pins[bit_number]->get_Vth();
   }
   else
     v = (value.get() &  one_shifted_left_by_n [bit_number]) ? 
@@ -198,11 +198,10 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-int IOPORT::get_bit(unsigned int bit_number)
+bool IOPORT::get_bit(unsigned int bit_number)
 {
 
-  //return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
-  return (value.get() >>  (bit_number % num_iopins)) & 1;
+  return (value.get() &  (1<<bit_number )) ? true : false;
 
 }
 
@@ -339,14 +338,20 @@ void IOPORT::put_value(unsigned int new_value)
   int old_value = value.get();
   int diff;
 
-  //  cout << "IOPORT::put_value trying to put " << new_value << '\n';
+  cout << "IOPORT::put_value trying to put " << new_value << '\n';
  
-  put(new_value);
+  value.put(new_value);
 
-  //  cout << " IOPORT::put_value just set port value to " << value << '\n';
 
+  cout << " IOPORT::put_value just set port value to " << value.get() << '\n';
+
+  // Update the stimuli - if there are any
+  if(stimulus_mask)
+    update_stimuli();
+
+  
   update();
-
+  
   // Find the pins that have changed states
   diff = (old_value ^ value.get()) & valid_iopins;
 
@@ -358,25 +363,21 @@ void IOPORT::put_value(unsigned int new_value)
 
   }
 
-
 }
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void IOPORT::setbit(unsigned int bit_number, bool new_value)
 {
 
-  int bit_mask = one_shifted_left_by_n[bit_number];
-  //cout << name();
+  int bit_mask = 1<<bit_number;
+  bool current_value = (value.get() & bit_mask) ? true : false;
 
-  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
+  if( current_value != new_value)
     {
-      //if(verbose)
-      //cout << " IOPORT::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
       value.put(value.get() ^ bit_mask);
-
       trace_register_write();
     }
-  //else cout <<  " IOPORT::set_bit bit did not change\n";
 
 }
 
@@ -385,10 +386,10 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
 {
 
-  int bit_mask = one_shifted_left_by_n[bit_number];
-  //cout << name();
+  int bit_mask = 1<<bit_number;
+  bool current_value = (value.get() & bit_mask) ? true : false;
 
-  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
+  if( current_value != new_value)
   {
     put_value(value.get() ^ bit_mask);
     update();
@@ -771,11 +772,13 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
   if((new_configuration ^ rbpu) & rbpu_MASK )
     {
       rbpu = new_configuration & rbpu_MASK;
-      int drive = rbpu ? 0 : MAX_DRIVE/2;
+      bool pullup = rbpu ? false : true;
 
-      for(i=0; i<8; i++)
-	( (IO_bi_directional_pu *)pins[i]) ->pull_up_resistor->drive = drive;
-
+      for(i=0; i<8; i++) {
+	IO_bi_directional_pu *p = dynamic_cast<IO_bi_directional_pu *>(pins[i]);
+	if(p)
+	  p->update_pullup(pullup);
+      }
 
       // Update each pin that has a stimulus connect:
 
@@ -787,7 +790,7 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
       // inputs, and there are no stimuli attached, then drive I/O's high.
 
       temp_value &= stimulus_mask;
-      if(drive)
+      if(pullup)
 	temp_value = (tris->value.get() & ~stimulus_mask);
 
       if(temp_value ^ value.get()) {

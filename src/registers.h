@@ -194,8 +194,8 @@ public:
   /*
     like setbit, getbit is used mainly for breakpoints.
   */
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
 
   /*
     Breakpoint objects will overload this function and return true.

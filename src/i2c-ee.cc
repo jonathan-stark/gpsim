@@ -65,35 +65,16 @@ public:
     // has ever been driven at all. This way, we can capture the
     // first edge. Or we could add another parameter to the constructor.
 
-    digital_state = 1;
+    digital_state = true;
 
   };
 
-  virtual void put_node_state(int new_state) {
-
-//    cout << "I2C_EE_SCL put_node_state " << new_state << '\n';
-
-    state = new_state;
-
-    if( state < h2l_threshold) {
-      state = l2h_threshold + 1;
-      put_digital_state(0);
-
-    } else {
-
-      if(state > l2h_threshold) {
-	state = h2l_threshold - 1;
-	put_digital_state(1);
-      }
-    }
-
-  }
-
+  
   void put_digital_state(bool new_dstate) { 
     bool diff = new_dstate ^ digital_state;
     digital_state = new_dstate;
 
-//    cout << "eeprom scl put_digital_state " << digital_state << '\n';
+    //    cout << "eeprom scl put_digital_state " << digital_state << '\n';
     if( eeprom && diff ) {
 
       //  cout << "      ... that's an edge, so call handler\n";
@@ -106,11 +87,8 @@ public:
     }
 
   }
+  
 
-  //virtual void put_state( int new_state);
-  virtual int get_voltage(guint64 current_time) {
-    return 42;
-  }
 };
 
 
@@ -133,35 +111,12 @@ public:
 
     eeprom = _eeprom;
 
-    digital_state = 1;
+    digital_state = true;
     read_state = 1;
     update_direction(0);   // Make the pin an output.
 
   };
-
-  virtual void put_node_state(int new_state) {
-
-//    cout << "I2C_EE_SDA put_node_state " << new_state << '\n';
-
-    state = new_state;
-
-    if ( state < h2l_threshold )
-    {
-      state = l2h_threshold + 1;
-      put_digital_state(0);
-
-    }
-    else if(state > l2h_threshold)
-    {
-	state = h2l_threshold - 1;
-	put_digital_state(1);
-    }
-//    else
-//        cout << "     no change, l2h = " << l2h_threshold << 
-//                "  h2l = " << h2l_threshold << "\n";
-
-  }
-
+  /*
   void put_digital_state(bool new_dstate) { 
 
 
@@ -180,8 +135,9 @@ public:
 
 
   }
+  */
 
-  void put_state( bool new_digital_state) {
+  void put_digital_state( bool new_digital_state) {
 
     Register *port = get_iop();
 
@@ -206,16 +162,6 @@ public:
 
       }
     }
-  }
-
-  virtual int get_voltage(guint64 current_time) {
-//    cout << "I2C_EE_SDA::" <<__FUNCTION__ <<  
-//            " digital state=" << digital_state << '\n';
-    
-    if(digital_state)
-      return l2h_threshold * 5; // BODGE ALERT !!!  should be a pull-up resistor
-    else
-      return -drive;
   }
 
 };
@@ -337,11 +283,11 @@ void I2C_EE::new_scl_edge ( bool direction )
         switch ( bus_state )
         {
             case I2C_EE::IDLE :
-                sda->put_state ( true );
+                sda->put_digital_state ( true );
                 break;
 
             case I2C_EE::START :
-                sda->put_state ( true );
+                sda->put_digital_state ( true );
                 bus_state = I2C_EE::RX_CMD;
                 break;
 
@@ -355,7 +301,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                         bus_state = I2C_EE::ACK_CMD;
                         if ( verbose )
                             cout << " - OK\n";
-                        sda->put_state ( false );
+                        sda->put_digital_state ( false );
                     }
                     else
                     {
@@ -368,14 +314,14 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
                 
             case I2C_EE::ACK_CMD :
-                sda->put_state ( true );
+                sda->put_digital_state ( true );
                 if ( xfr_data & 0x01 )
                 {
                     // it's a read command
                     bus_state = I2C_EE::TX_DATA;
                     bit_count = 8;
                     xfr_data = rom[xfr_addr]->get();
-                    sda->put_state ( shift_write_bit() );
+                    sda->put_digital_state ( shift_write_bit() );
                 }
                 else
                 {
@@ -389,7 +335,7 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::RX_ADDR :
                 if ( shift_read_bit ( sda->read_state ) )
                 {
-                    sda->put_state ( false );
+                    sda->put_digital_state ( false );
                     bus_state = I2C_EE::ACK_ADDR;
                     xfr_addr = xfr_data % rom_size;
                     if ( verbose )
@@ -399,7 +345,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             case I2C_EE::ACK_ADDR :
-                sda->put_state ( true );
+                sda->put_digital_state ( true );
                 bus_state = I2C_EE::RX_DATA;
                 bit_count = 0;
                 xfr_data = 0;
@@ -410,13 +356,13 @@ void I2C_EE::new_scl_edge ( bool direction )
                 {
                     if ( verbose )
                         cout << "I2C_EE : data set to " << hex << xfr_data << "\n";
-                    sda->put_state ( false );
+                    sda->put_digital_state ( false );
                     bus_state = I2C_EE::ACK_WR;
                 }
                 break;
 
             case I2C_EE::ACK_WR :
-                sda->put_state ( true );
+                sda->put_digital_state ( true );
                 bus_state = I2C_EE::WRPEND;
                 break;
 
@@ -433,14 +379,14 @@ void I2C_EE::new_scl_edge ( bool direction )
             case I2C_EE::TX_DATA :
                 if ( bit_count == 0 )
                 {
-                    sda->put_state ( true );     // Release the bus
+                    sda->put_digital_state ( true );     // Release the bus
                     xfr_addr++;
                     xfr_addr %= rom_size;
                     bus_state = I2C_EE::ACK_RD;
                 }
                 else
                 {
-                    sda->put_state ( shift_write_bit() );
+                    sda->put_digital_state ( shift_write_bit() );
                 }
                 break;
 
@@ -457,7 +403,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
 
             default :
-                sda->put_state ( true );     // Release the bus
+                sda->put_digital_state ( true );     // Release the bus
                 break;
         }
     }
@@ -514,6 +460,9 @@ void I2C_EE::reset(RESET_TYPE by)
     case POR_RESET:
         bus_state = IDLE;
         ee_busy = false;
+	break;
+    default:
+      break;
     }
 
 }

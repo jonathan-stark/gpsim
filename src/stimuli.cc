@@ -138,7 +138,7 @@ void add_bus(char *bus_name)
   else
     sn = new Stimulus_Node(node_name);
   */
-  cout << "add_bus\n";
+  cout << "add_bus -- not supported\n";
 }
 /*
 void add_bus(Stimulus_Node * new_node)
@@ -215,6 +215,8 @@ Stimulus_Node::Stimulus_Node(const char *n)
 {
 
   stimuli = 0;
+  nStimuli = 0;
+  voltage = 0;
   warned  = 0;
 
   if(n)
@@ -264,11 +266,14 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
     {
       sptr = stimuli;
       bool searching=1;
+      int nTotalStimuliConnected = 1;
+
       while(searching)
 	{
 	  if(s == sptr)
 	    return;      // The stimulus is already attached to this node.
 
+	  nTotalStimuliConnected++;
 	  if(sptr->next == 0)
 	    {
 	      sptr->next = s;
@@ -276,10 +281,15 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
 	      searching=0;
 	    }
 	  sptr = sptr->next;
-	} 
+	}
+
+      nStimuli = nTotalStimuliConnected;
     }
   else
-    stimuli = s;     // This is the first stimulus attached to this node.
+    {
+      stimuli = s;     // This is the first stimulus attached to this node.
+      nStimuli = 1;
+    }
 
   // If we reach this point, then it means that the stimulus that we're
   // trying to attach has just been placed at the end of the the stimulus
@@ -329,6 +339,7 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 		{
 		  sptr->next = s->next;
 		  s->detach(this);
+		  nStimuli--;
 		  //gi.node_configuration_changed(this);
 		  return;
 		}
@@ -341,10 +352,8 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 }
 
 
-int Stimulus_Node::update(guint64 current_time)
+double Stimulus_Node::update(guint64 current_time)
 {
-
-  int node_voltage = 0;
 
   //cout << "getting state of " << name() << '\n';
 
@@ -352,33 +361,61 @@ int Stimulus_Node::update(guint64 current_time)
     {
       stimulus *sptr = stimuli;
 
-      // gpsim assumes that there may be multiple sources attached to
-      // the node. Usually  one will be dominant. This works well for
-      // pullup resistors, open collector drivers, and bi-directional
-      // I/O lines. However, if there is more than one source, then
-      // the contention is resolved through ohm's law. This works well
-      // for analog stuff too.
 
-      while(sptr)
+      voltage = 0.0;
+
+      switch (nStimuli) {
+
+      case 0:
+	// hmm, strange nStimuli is 0, but the stimuli pointer is non null.
+	break;
+
+      case 1:
+	// Only one stimulus is attached.
+	voltage = 0;
+	break;
+
+      case 2:
+	// 2 stimuli are attached to the node. This is the typical case
+	// and we'll optimize for it.
 	{
-	  node_voltage += sptr->get_voltage(current_time);
-	  //cout << " node " << sptr->name() << " voltage is " << sptr->get_voltage(current_time) <<'\n';
+	  stimulus *sptr2 = sptr ? sptr->next : 0;
+	  if(!sptr2)
+	    break;     // error, nStimuli is two, but there aren't two stimuli
 
-	  sptr = sptr->next;
+	  double Z1 = sptr->get_Zth();
+	  double Z2 = sptr2->get_Zth();
+	  double Zt = Z1 + Z2;
+	  voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / Zt;
+	  sptr->set_nodeVoltage(voltage);
+	  sptr2->set_nodeVoltage(voltage);
 	}
-      //cout << "node voltage " << node_voltage << '\n';
+	break;
 
-      // 'node_voltage' now represents the most up-to-date value of this node.
-      // Now, tell all of the stimuli that are interested:
-      sptr = stimuli;
-      while(sptr)
+      default:
 	{
-	  sptr->put_node_state(node_voltage);
-	  sptr = sptr->next;
-	}
+	  double Zt=0.0;
 
-      state = node_voltage;
-      return(node_voltage);
+	  while(sptr) {
+	    Zt += sptr->get_Zth();
+	    sptr = sptr->next;
+	  }
+
+	  sptr = stimuli;
+
+	  while(sptr) {
+	    voltage += sptr->get_Vth() * (Zt - sptr->get_Zth());
+	    sptr = sptr->next;
+	  }
+
+	  voltage /= Zt;
+
+	  sptr = stimuli;
+	  while(sptr)
+	    sptr->set_nodeVoltage(voltage);
+
+	}
+      }
 
     }
   else
@@ -388,7 +425,7 @@ int Stimulus_Node::update(guint64 current_time)
 	warned = 1;
       }
 
-  return(0);
+  return(voltage);
 
 }
 //------------------------------------------------------------------------
@@ -397,22 +434,16 @@ stimulus::stimulus(char *n)
   new_name("stimulus");
 
   snode = 0;
-  drive = 0;
-  state = 0;
   digital_state = 0;
   next = 0;
+
+  Vth = 5.0;   // Volts
+  Zth = 250;   // Ohms
 
 }
 
 stimulus::~stimulus(void)
 {
-}
-
-
-void stimulus::put_state_value(int new_state)
-{
-  put_state(new_state);
-  update();
 }
 
 //========================================================================
@@ -437,33 +468,26 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
   period = p;   // cycles
   duty   = dc;  // # of cycles over the period for which the sq wave is high
   phase  = ph;  // phase of the sq wave wrt the cycle counter
-  state  = 0;   // output 
   time   = 0;   // simulation time
   snode = 0;
   next = 0;
 
-  drive  = MAX_DRIVE / 2;
-
   add_stimulus(this);
 }
 
-// Create a square wave given only a (possibly) a name
-
-square_wave::square_wave(char *n)
+double square_wave::get_Vth()
 {
-  square_wave(0,0,0,n);
-}
+  guint64 current_time = cycles.value;
 
-
-int square_wave::get_voltage(guint64 current_time)
-{
   if(verbose)
     cout << "Getting new state of the square wave.\n";
+
   if( ((current_time+phase) % period) <= duty)
-    return drive;
+    return  Vth;
   else
-    return -drive;
+    return  0.0;
 }
+
 
 //========================================================================
 //
@@ -491,29 +515,28 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   period = p;   // cycles
   duty   = dc;  // # of cycles over the period for which the sq wave is high
   phase  = ph;  // phase of the sq wave wrt the cycle counter
-  state  = 0;   // output 
   time   = 0;   // simulation time
-  drive  = 255*5; // Hard coded for now
   snode = 0;
   next = 0;
 
   //cout << "duty cycle " << dc << " period " << p << " drive " << drive << '\n';
+
   // calculate the slope and the intercept for the two lines comprising
   // the triangle wave:
 
   if(duty)
-    m1 = float(drive)/duty;
+    m1 = Vth/duty;
   else
-    m1 = float(drive)/period;   // m1 will not be used if the duty cycle is zero
+    m1 = Vth/period;   // m1 will not be used if the duty cycle is zero
 
   b1 = 0;
 
   if(period != duty)
-    m2 = float(drive)/(float(duty) - float(period));
+    m2 = Vth/(duty - period);
   else
-    m2 = float(drive);
+    m2 = Vth;
 
-  b2 = -float(period) * m2;
+  b2 = -m2 * period;
 
   //cout << "m1 = " << m1 << " b1 = " << b1 << '\n';
   //cout << "m2 = " << m2 << " b2 = " << b2 << '\n';
@@ -521,34 +544,20 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   add_stimulus(this);
 }
 
-// Create a triangle wave given only a (possibly) a name
-
-triangle_wave::triangle_wave(char *n)
+double triangle_wave::get_Vth()
 {
-  triangle_wave(0,0,0,n);
-}
+  guint64 current_time = cycles.value;
 
-
-int triangle_wave::get_voltage(guint64 current_time)
-{
   //cout << "Getting new state of the triangle wave.\n";
 
   guint64 t = (current_time+phase) % period;
 
-  /*
-  if( t <= duty)
-    return int(b1 + m1 * t);
-  else
-    return int(b2 + m2 * t);
-  */
-
-  // debug stuff:
-  int ret_val;
+  double ret_val;
 
   if( t <= duty)
-    ret_val = MAX_ANALOG_DRIVE*int(b1 + m1 * t);
+    ret_val = b1 + m1 * t;
   else
-    ret_val = MAX_ANALOG_DRIVE*int(b2 + m2 * t);
+    ret_val = b2 + m2 * t;
   
   //  cout << "Triangle wave: t = " << t << " value = " << ret_val << '\n';
   return ret_val;
@@ -562,8 +571,6 @@ int triangle_wave::get_voltage(guint64 current_time)
 Event::Event(void)
 {
   current_state = 0;
-  drive = MAX_DRIVE/2;
-  state = -drive;
 }
 
 //========================================================================
@@ -581,10 +588,8 @@ void Event::callback(void)
   if(current_state == 0) {
     cycles.set_break_delta(1,this);
     current_state = 1;
-    state = drive;
   } else {
     current_state = 0;
-    state = -drive;
   }
 
 }
@@ -654,7 +659,7 @@ void asynchronous_stimulus::callback(void)
     {
       // If the period is zero then we don't want to 
       // regenerate the pulse stream. Also, if the 
-      // samples somehow got wiped out, we can't want
+      // samples somehow got wiped out, ???
 
 
       if( (period == 0) || (!samples)) {
@@ -697,7 +702,7 @@ void asynchronous_stimulus::callback(void)
 
 }
 
-int asynchronous_stimulus::get_voltage(guint64 current_time) 
+double asynchronous_stimulus::get_Vth() 
 {
   //cout << "asy getting state "  << current_state << '\n';
   
@@ -727,10 +732,10 @@ void asynchronous_stimulus::start(void)
     {
 
       current_index = 0;
-
+      /*
       if(digital)
 	initial_state = initial_state ? (MAX_DRIVE / 2) : -(MAX_DRIVE / 2);
-
+      */
 
       current_state = initial_state;
 
@@ -801,9 +806,10 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
       current_index = 0;
       start_cycle = new_start_time;
 
+      /*
       if(digital)
 	initial_state = initial_state ? (MAX_DRIVE / 2) : -(MAX_DRIVE / 2);
-
+      */
 
       current_state = initial_state;
 
@@ -865,24 +871,12 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
 //
 // Place the next integer into the 'samples' linked list.
 // 
-void asynchronous_stimulus::put_data(guint64 data_point)
+void asynchronous_stimulus::put_data(double data_point)
 {
-  // On the very first call, create the samples linked list.
-
-  /*  if(!samples) {
-      samples = g_slist_append(samples, (void *)(new StimulusDataType) );
-      current_sample = samples;
-      cout << "  creating samples link list\n";
-  }
-  */
 
   if(data_flag) {
 
-    // put data
-    if(data_point)
-      ((StimulusDataType *)(current_sample->data))->value = MAX_DRIVE/2;
-    else
-      ((StimulusDataType *)(current_sample->data))->value = -MAX_DRIVE/2;
+    ((StimulusDataType *)(current_sample->data))->value = data_point;
 
 
   } else {
@@ -898,21 +892,13 @@ void asynchronous_stimulus::put_data(guint64 data_point)
     else
       current_sample = current_sample->next;
 
-    ((StimulusDataType *)(current_sample->data))->time = data_point;
+    ((StimulusDataType *)(current_sample->data))->time = (guint64) data_point;
 
   }
 
   data_flag ^= 1;
 }
 
-void asynchronous_stimulus::put_data(float data_point)
-{
-  ((StimulusDataType *)(current_sample->data))->value =
-    ((int)(MAX_ANALOG_DRIVE * data_point));
-
-  data_flag ^= 1;
-
-}
 
 // Create an asynchronous stimulus. If invoked with a non-null name, then
 // give the stimulus that name, other wise create one.
@@ -929,7 +915,7 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
   period = 0;
   duty   = 0;
   phase  = 0;
-  initial_state  = 0;
+  initial_state  = 0.0;
   start_cycle    = 0;
 
   digital = 1;
@@ -968,8 +954,6 @@ dc_supply::dc_supply(char *n)
       new_name(name_str);
     }
 
-
-  drive = MAX_DRIVE / 2;
   add_stimulus(this);
 
 }
@@ -982,12 +966,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   iop = i;
   iopp = _iopp;
   iobit=b;
-  state = 0;
-  l2h_threshold = 100;
-  h2l_threshold = -100;
-  drive = 0;
-  hi_drive = 0;
-  lo_drive = 0;
+  l2h_threshold = 2.0;
+  h2l_threshold = 1.0;
   snode = 0;
 
   if(iop) {
@@ -1042,15 +1022,11 @@ IOPIN::IOPIN(void)
   iop = 0;
   iopp = 0;
   iobit=0;
-  state = 0;
   digital_state = false;
-  l2h_threshold = 100;
-  h2l_threshold = -100;
-  drive = 0;
-  hi_drive = 0;
-  lo_drive = 0;
-  hi_leakage = 0;
-  lo_leakage = 0;
+  l2h_threshold = 2.0;
+  h2l_threshold = 1.0;
+  Vth = 0.3;
+  Zth = 1e8;
   snode = 0;
 
   add_stimulus(this);
@@ -1063,38 +1039,6 @@ IOPIN::~IOPIN()
     snode->detach_stimulus(this);
 
   remove_stimulus(this);
-}
-
-void IOPIN::put_state_value(int new_state)
-{
-  Register *port = get_iop();
-  if(port)
-    port->setbit_value(iobit, new_state &1);
-
-  update();
-}
-
-int IOPIN::get_state(void)
-{
-  Register *port = get_iop();
-
-  if(snode) {
-
-    if(state>l2h_threshold) 
-      return +1;
-    else
-      return -1;
-    
-  } else if(port) {
-
-    if(port->get_bit(iobit))
-      return +1;
-    else
-      return -1;
-  } 
-
-  // No I/O pin or node is associated with this I/O pin
-  return 0;
 }
 
 
@@ -1121,12 +1065,79 @@ Register *IOPIN::get_iop(void)
     return 0;
 }
 
+//--------------------
+
+void IOPIN::set_nodeVoltage(double new_nodeVoltage)
+{
+  //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
+  Register *port = get_iop();
+
+  nodeVoltage = new_nodeVoltage;
+
+  if( digital_state &&  (nodeVoltage < h2l_threshold)) {
+
+    // the input is currently high, but the voltage being applied is lower
+    // than the switching threshold
+  
+    digital_state = false;
+
+    if(port)
+      port->setbit(iobit,false);
+
+  } 
+  else if(!digital_state && (nodeVoltage > l2h_threshold)) {
+
+    digital_state = true;
+
+    if(port)
+      port->setbit(iobit,true);
+
+  }
+
+  // If there's a node attached to this pin, but the pin is not
+  // part of an I/O port, then we'll go ahead update the node.
+  if(snode && !port)
+    snode->update(0);
+
+  //else cout << " no change in IO_input state\n";
+
+}
+
+void IOPIN::put_digital_state(bool new_state)
+{
+  Register *port = get_iop();
+  if(port)
+    port->setbit_value(iobit, new_state);
+  else {
+
+    if(new_state != digital_state) {
+      digital_state = new_state;
+      Vth = digital_state ? 5.0 : 0.3;
+      if(snode)
+	snode->update(0);
+    }
+  }
+}
+
+bool IOPIN::get_digital_state(void)
+{
+  Register *port = get_iop();
+
+  if(port)
+    digital_state = port->get_bit(iobit);
+
+  return digital_state;
+}
+
+void IOPIN::toggle(void)
+{
+  put_digital_state(get_digital_state() ^ true);
+}
 //========================================================================
 //
 IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
-  state = 0;
 }
 
 IO_input::IO_input(void)
@@ -1135,13 +1146,14 @@ IO_input::IO_input(void)
 
 
 }
+/*
 void IO_input::toggle(void)
 {
   Register *port = get_iop();
 
   if(port) {
 
-	port->setbit(iobit, port->get_bit(iobit) ? false : true);
+    port->setbit(iobit, port->get_bit(iobit) ? false : true);
     port->update();
     state = port->get_bit(iobit);
 
@@ -1151,6 +1163,8 @@ void IO_input::toggle(void)
 
   update();
 }
+*/
+
 
 /*************************************
  *  int IO_input::get_voltage(guint64 current_time)
@@ -1164,236 +1178,64 @@ void IO_input::toggle(void)
  * this register either by writing directly to it in the cli,
  * or by clicking in one of many places in the gui.
  */
-int IO_input::get_voltage(guint64 current_time)
+double IO_input::get_Vth()
 {
   if(!snode && iop)
-    return ( (iop->value.get() & (1<<iobit)) ? hi_drive : lo_drive);
+    return ( (iop->value.get() & (1<<iobit)) ? Vth : 0.0);
 
-  return get_input_leakage();
-
-}
-
-void IO_input::put_state( int new_digital_state)
-{
-  //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
-  Register *port = get_iop();
-
-  if( (new_digital_state != 0) && (state < h2l_threshold)) {
-
-    //cout << " driving I/O line high \n";
-    state = l2h_threshold + 1;
-
-    if(port)
-      port->setbit(iobit,1);
-
-  } 
-  else if((new_digital_state == 0) && (state > l2h_threshold)) {
-
-    //cout << " driving I/O line low \n";
-    state = h2l_threshold - 1;
-    if(port)
-      port->setbit(iobit,0);
-
-  }
-
-  // If there's a node attached to this pin, but the pin is not
-  // part of an I/O port, then we'll go ahead update the node.
-  if(snode && !port)
-    snode->update(0);
-
-  //else cout << " no change in IO_input state\n";
+  return Vth;
 
 }
 
-// this IO_input is attached to a node that has just been updated.
-// The node is now trying to update this stimulus.
-
-void IO_input::put_node_state( int new_state)
-{
-  //cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
-
-
-  // No need to proceed if we already are in the new_state.
-
-  if(new_state == state)
-    return;
-
-  Register *port = get_iop();
-
-  if(port) {
-
-    // If the I/O pin to which this stimulus is mapped is at a logic 
-    // high AND the new state is below the high-to-low threshold
-    // then we need to drive the I/O line low.
-    //
-    // Similarly, if the I/O line is low and the new_state is above
-    // the low-to-high threshold, we need to drive it low.
-
-    if(port->get_bit(iobit)) {
-      if(new_state < h2l_threshold)
-	port->setbit(iobit,0);
-    } else {
-      if(new_state > l2h_threshold)
-	port->setbit(iobit,1);
-    }
-  } else {
-
-    // No I/O port is associated with this I/O pin.
-    // Most probably then this is a pin in a Module.
-
-    if(get_digital_state()) {
-      if( new_state < h2l_threshold) {
-
-	//cout << " driving I/O line low \n";
-	state = l2h_threshold + 1;
-	put_digital_state(0);
-
-      } 
-    } else {
-      if(new_state > l2h_threshold) {
-
-	//cout << " driving I/O line high \n";
-	state = h2l_threshold - 1;
-	put_digital_state(1);
-      }
-    }
-  }
-
-
-  state = new_state;
-}
 
 //========================================================================
 //
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IO_input(i,b,opt_name,_iopp)
 {
-  //  source = new source_stimulus();
 
-  state = 0;
-  hi_drive = MAX_DRIVE / 2;
-  lo_drive = -hi_drive;
-  drive = hi_drive;
   driving = 0;
 
-}
+  // Thevenin equivalent while configured as an output 
+  Vth = 5.0;
+  Zth = 250;
 
-
-void IO_bi_directional::put_state( int new_digital_state)
-{
-  //cout << "IO_bi_directional::put_state() new_state = " << new_digital_state <<'\n';
-  bool bNewState = new_digital_state ? true : false;
-
-  // If the bi-directional pin is an output then driving is TRUE.
-  if(driving) {
-
-    Register *port = get_iop();
-
-    if(port) {
-      // If the new state to which the stimulus is being set is different than
-      // the current state of the bit in the ioport (to which this stimulus is
-      // mapped), then we need to update the ioport.
-		bool bOldState = (port->value.get() & (1<<iobit)) ? true : false;
-      if(bNewState != bOldState) {
-
-	port->setbit(iobit,bNewState);
-
-	// If this stimulus is attached to a node, then let the node be updated
-	// with the new state as well.
-	if(snode)
-	  snode->update(0);
-	// Note that this will auto magically update
-	// the io port.
-
-      }
-    } else {
-
-      // a port-less pin, probably an external module
-      int temp_state = digital_state ? 1 : 0;
-      if((new_digital_state ^ temp_state) & 1) {
-
-	digital_state = new_digital_state & 1;
-
-	state = digital_state ? hi_drive : lo_drive;
-
-	if(snode)
-	  snode->update(0);
-      }
-
-    }
-
-  }
-  else {
-
-    // The bi-directional pin is configured as an input. So let the parent
-    // input class handle it.
-    IO_input::put_state(new_digital_state);
-
-  }
+  // Thevenin equivalent while configured as an input 
+  VthIn = 0.3;
+  ZthIn = 1e8;
 
 }
-
 
 IO_bi_directional::IO_bi_directional(void)
 {
   cout << "IO_bi_directional constructor shouldn't be called\n";
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-  : IO_bi_directional(i, b,opt_name,_iopp)
+
+void IO_bi_directional::set_nodeVoltage( double new_nodeVoltage)
 {
-
-  pull_up_resistor = new resistor();
-  pull_up_resistor->drive = 10;    // %%% FIX ME %%%
-  pull_up_enabled = true;
-
-  state = 0;
-  hi_drive = MAX_DRIVE / 2;
-  lo_drive = - hi_drive;
-  drive  = hi_drive;;
-  driving = 0;
-
-  //  sprintf(name_str,"%s%n",iop->name_str,iobit);
-  //cout << name_str;
-
+  IOPIN::set_nodeVoltage(new_nodeVoltage);
 }
 
-IO_bi_directional_pu::~IO_bi_directional_pu(void)
+double IO_bi_directional::get_Vth()
 {
-  delete pull_up_resistor;
-}
-
-int IO_bi_directional::get_voltage(guint64 current_time)
-{
-  //cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
+  if(iop) 
+    digital_state = (iop->value.get() & (1<<iobit)) ? true : false;
 
   if(driving)
-    {
-      if(!snode)
-	return 0;
-
-      if(iop) {
-	if( iop->value.get() & (1<<iobit))
-	  {
-	    //cout << " high\n";
-	    return hi_drive;
-	  }
-	else
-	  {
-	    //cout << " low\n";
-	    return lo_drive;
-	  }
-      } else 
-	return state;
-    }
+    return digital_state ? Vth : 0;
   else
-    {
-      // This node is not driving (because it's configured
-      // as an input).
-      return get_input_leakage();
-    }
+    return digital_state ? VthIn : 0;
 
 }
+
+
+double IO_bi_directional::get_Zth()
+{
+  return driving ? Zth : ZthIn;
+
+}
+
 
 
 //---------------
@@ -1405,12 +1247,7 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 void IO_bi_directional::update_direction(unsigned int new_direction)
 {
 
-  //cout << "IO_bi_direction::update_direction\n";
-
-  if(new_direction)
-    driving = 1;
-  else
-    driving = 0;
+  driving = new_direction ? true : false;
 
 }
 
@@ -1430,111 +1267,68 @@ void IO_bi_directional::change_direction(unsigned int new_direction)
   update();
 }
 
-int IO_bi_directional_pu::get_voltage(guint64 current_time)
+
+
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+  : IO_bi_directional(i, b,opt_name,_iopp)
 {
-  //cout << "Getting new state of a bi-di-pu IO pin "<< iobit;
 
-  if(driving | !snode)
-    {
-      if(iop) {
-	if( iop->value.get() & (1<<iobit))
-	  {
-	    //cout << " high\n";
-	    return hi_drive;
-	  }
-	else
-	  {
-	    //cout << " low\n";
-	    return lo_drive;
-	  }
-      } else
-	return state;
-    }
-  else
-    {
-      //cout << " pulled up\n";
-      if(pull_up_enabled)
-	return (pull_up_resistor->get_voltage(current_time));
-
-      return get_input_leakage();
-    }
+  Zpullup = 10e3;
 
 }
 
+IO_bi_directional_pu::~IO_bi_directional_pu(void)
+{
 
+}
+
+double IO_bi_directional_pu::get_Zth()
+{
+  return driving ? Zth : (bPullUp ? Zpullup : ZthIn);
+
+}
+
+double IO_bi_directional_pu::get_Vth()
+{
+  if(iop) 
+    digital_state = (iop->value.get() & (1<<iobit)) ? true : false;
+
+  // If the pin is configured as an output, then the driving voltage
+  // depends on the pin state. If the pin is an input, and the pullup resistor
+  // is enabled, then the pull-up resistor will 'drive' the output. The
+  // open circuit voltage in this case will be Vth (the thevenin voltage, 
+  // which is assigned to be same as the processor's supply voltage).
+
+  if(driving)
+    return digital_state ? Vth : 0;
+  else
+    return bPullUp ? Vth : VthIn;
+
+}
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-  : IO_input(i,b,opt_name,_iopp)
+  : IO_bi_directional(i,b,opt_name,_iopp)
 {
 
-  hi_drive = 0;
-  lo_drive = -MAX_DRIVE / 2;
-  drive = hi_drive;
-  driving = 0;
-
-  state = 0;
-
-  add_stimulus(this);
 }
 
 
-int IO_open_collector::get_voltage(guint64 current_time)
+double IO_open_collector::get_Vth()
 {
-  //cout << "Getting new state of an open collector IO pin port "<< iop->name() << " bit " << iobit<<'\n';
-
-  if(driving )
-    {
-      if(iop) {
-	if( iop->value.get() & (1<<iobit))
-	  {
-	    //cout << "high\n";
-	    return hi_drive;
-	  }
-	else
-	  {
-	    //cout << "low\n";
-	    return lo_drive;
-	  }
-      }
-      else
-	return state;
-    }
-  else
-    {
-
-      return IO_input::get_voltage(current_time);
-    }
-
-  return 0;
+  return 0.0;
 }
 
-void IO_open_collector::update_direction(unsigned int new_direction)
+
+double IO_open_collector::get_Zth()
 {
-  //cout << "IO_open_collector::" << __FUNCTION__ << " to new direction " << new_direction << '\n';
-  if(new_direction)
-    driving = 1;
-  else
-    driving = 0;
+  return (driving && !digital_state) ? Zth : ZthIn;
 
 }
 
-//---------------
-//void IO_open_collector::change_direction(unsigned int new_direction)
-//
-//  This is called by the gui to change the direction of an 
-// io pin. 
 
-void IO_open_collector::change_direction(unsigned int new_direction)
-{
+//========================================================================
+// 
+// helper functions follow here
 
-  //cout << "IO_open_collector::" << __FUNCTION__ << '\n';
-
-  if(iop)
-    iop->change_pin_direction(iobit, new_direction & 1);
-
-  //iop->tris->setbit(iobit, new_direction & 1);
-
-  update();
-}
 
 //--------------------------------------------------------
 // Char list.

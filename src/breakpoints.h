@@ -458,12 +458,12 @@ public:
       replaced->setbit(bit_number, new_value);
     }
 
-  virtual int get_bit(unsigned int bit_number)
+  virtual bool get_bit(unsigned int bit_number)
     {
       return(replaced->get_bit(bit_number));
     }
 
-  virtual int get_bit_voltage(unsigned int bit_number)
+  virtual double get_bit_voltage(unsigned int bit_number)
     {
       return(replaced->get_bit_voltage(bit_number));
     }
@@ -535,8 +535,8 @@ public:
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
 
 };
@@ -570,8 +570,8 @@ public:
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
 
 };
@@ -619,8 +619,8 @@ public:
     Break_register_read(_cpu,_repl,bp ) { };
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read"; }
 
 };
@@ -638,8 +638,8 @@ public:
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
-  virtual int get_bit(unsigned int bit_number);
-  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual bool get_bit(unsigned int bit_number);
+  virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read value"; }
 };
 

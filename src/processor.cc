@@ -80,6 +80,7 @@ Processor::Processor(void)
 
   set_frequency(1.0);
   set_ClockCycles_per_Instruction(1);
+  set_Vdd(5.0);
 
   interface = new ProcessorInterface(this);
 

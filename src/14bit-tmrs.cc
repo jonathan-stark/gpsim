@@ -265,12 +265,12 @@ void CCPCON::compare_match(void)
       break;
 
     case COM_SET_OUT:
-      iopin->put_state(1);
+      iopin->put_digital_state(true);
       pir_set->set_ccpif();
       break;
 
     case COM_CLEAR_OUT:
-      iopin->put_state(0);
+      iopin->put_digital_state(false);
       pir_set->set_ccpif();
       break;
 
@@ -303,7 +303,7 @@ void CCPCON::pwm_match(int level)
 
   if( (value.get() & PWM0) == PWM0)
     {
-      iopin->put_state(level);
+      iopin->put_digital_state(level ? true : false);
 
       // if the level is 'high', then tmr2 == pr2 and the pwm cycle
       // is starting over. In which case, we need to update the duty
