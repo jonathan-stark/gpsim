@@ -1164,7 +1164,7 @@ struct gui_pin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 
 	for(i=1;i<=m->module->get_pin_count();i++)
 	{
-	    struct stimulus *p;
+	    stimulus *p;
 
 	    p=m->module->get_pin(i);
 
@@ -1435,8 +1435,11 @@ static void settings_set_cb(GtkWidget *button,
 
 static void treeselect_module(GtkItem *item, struct gui_module *p)
 {
-    char buffer[STRING_SIZE];
-  
+  char buffer[STRING_SIZE];
+
+  assert(0 != p);
+  if (0 != p)
+  {
     snprintf(buffer,sizeof(buffer),"%s settings",p->module->name().c_str());
     switch(p->type)
     {
@@ -1501,13 +1504,17 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
     }
 
     p->bbw->selected_module = p;
+  }
 }
 
 static void position_module(struct gui_module *p, int x, int y)
 {
-    GList *piniter;
-    struct gui_pin *pin;
+  GList *piniter;
+  struct gui_pin *pin;
 
+  assert(0 != p);
+  if (0 != p)
+  {
     x=x-x%pinspacing;
     y=y-y%pinspacing;
 
@@ -1542,6 +1549,7 @@ static void position_module(struct gui_module *p, int x, int y)
             piniter = piniter->next;
 	}
     }
+  }
 }
 
 static double module_distance(struct gui_module *p, int x, int y)
@@ -1644,7 +1652,7 @@ static void pointer_cb(GtkWidget *w,
     switch(event->type)
     {
     case GDK_MOTION_NOTIFY:
-	if(dragging)
+	if(dragging && 0 != dragged_module)
 	{
             position_module(dragged_module, x+pinspacing, y+pinspacing);
 	    Attribute *xpos = dragged_module->module->get_attribute("xpos", false);
@@ -1668,17 +1676,20 @@ static void pointer_cb(GtkWidget *w,
 	else
 	{
 	    dragged_module = find_closest_module(bbw, x, y);
-	    gdk_pointer_grab(w->window,
-			     TRUE,
-			     (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
-			     w->window,
-			     0,
-			     GDK_CURRENT_TIME);
-	    treeselect_module(0,dragged_module);
-	    dragging = 1;
-	    clear_nodes(bbw);
-            draw_nodes(bbw);
-	    gtk_widget_set_app_paintable(bbw->layout, FALSE);
+            if (0 != dragged_module)
+            {
+	      gdk_pointer_grab(w->window,
+			      TRUE,
+			      (GdkEventMask)(GDK_POINTER_MOTION_MASK|GDK_BUTTON_PRESS_MASK),
+			      w->window,
+			      0,
+			      GDK_CURRENT_TIME);
+	      treeselect_module(0,dragged_module);
+	      dragging = 1;
+	      clear_nodes(bbw);
+              draw_nodes(bbw);
+	      gtk_widget_set_app_paintable(bbw->layout, FALSE);
+            }
 	}
 	break;
     case GDK_2BUTTON_PRESS:
@@ -2183,7 +2194,7 @@ static void text_dialog(const char *filename)
 static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 {
 
-    struct Stimulus_Node *node;
+    Stimulus_Node *node;
 
 
     node = select_node_dialog(bbw);
