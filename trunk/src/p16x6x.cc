@@ -483,9 +483,6 @@ void  P16C62::create(void)
   // Build the links between the I/O Pins and the internal peripherals
   ccp1con.iopin = portc->pins[2];
 
-  trace.program_counter (pc->value);
-
-
 }
 
 Processor * P16C62::construct(void)
@@ -710,9 +707,6 @@ void  P16C64::create(void)
 
   // Build the links between the I/O Pins and the internal peripherals
   ccp1con.iopin = portc->pins[2];
-
-  trace.program_counter (pc->value);
-
 
 }
 

@@ -38,6 +38,131 @@ class Processor;
 class Trace;
 
 
+
+class TraceFrame;
+//========================================================================
+class TraceObject
+{
+public:
+  Processor *cpu;
+
+  TraceObject();
+  TraceObject(Processor *_cpu);
+  virtual void print(void)=0;
+  virtual void print_frame(TraceFrame *);
+
+};
+
+class RegisterTraceObject : public TraceObject
+{
+public:
+  Register *reg;
+  RegisterValue from;
+  RegisterValue to;
+
+  RegisterTraceObject();
+  RegisterTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
+  virtual void print(void);
+};
+
+
+class PCTraceObject : public TraceObject
+{
+public:
+  unsigned int address;
+
+  PCTraceObject(Processor *_cpu, unsigned int _address);
+  virtual void print(void);
+  virtual void print_frame(TraceFrame *);
+};
+
+//========================================================================
+class TraceType
+{
+public:
+
+  unsigned int type;		// The integer type is dynamically
+				// assigned by the Trace class.
+  unsigned int size;		// The number of positions this
+				// type occupies
+
+  TraceType(unsigned int t, unsigned int s);
+
+  // Given an index into the trace buffer, decode()
+  // will fetch traced items at that trace buffer index
+  // and attempt to decode them.
+
+  virtual TraceObject *decode(unsigned int tbi) = 0;
+
+  virtual bool isFrameBoundary() { return false;}
+};
+
+class ProcessorTraceType : public TraceType
+{
+public:
+  Processor *cpu;
+
+  ProcessorTraceType(Processor *_cpu, 
+		     unsigned int t,
+		     unsigned int s)
+    : TraceType(t,s), cpu(_cpu)
+  {
+  }
+
+  virtual TraceObject *decode(unsigned int tbi) = 0;
+
+};
+
+class PCTraceType : public ProcessorTraceType
+{
+public:
+  PCTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  TraceObject *decode(unsigned int tbi);
+  virtual bool isFrameBoundary() { return true; }
+};
+
+class WTraceType : public ProcessorTraceType
+{
+public:
+  WTraceType(Processor *_cpu, 
+		    unsigned int t,
+		    unsigned int s)
+    : ProcessorTraceType(_cpu,t,s)
+  {}
+
+  TraceObject *decode(unsigned int tbi);
+};
+
+
+class RegisterTraceType : public ProcessorTraceType
+{
+public:
+
+  RegisterTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+
+  TraceObject *decode(unsigned int tbi);
+
+};
+
+//========================================================================
+// TraceFrame
+//
+// A trace frame collects all trace items that occurred at the same instant
+// of time. When the trace buffer is decoded, markers will be examined
+// to determine the frame boundaries.
+
+class TraceFrame
+{
+public:
+  list <TraceObject *> traceObjects;
+  guint64 cycle_time;
+
+  TraceFrame(); 
+  ~TraceFrame();
+  void add(TraceObject *to);
+  void print(void);
+};
+
 //-----------------------------------------------------------
 class TraceRawLog
 {
@@ -72,8 +197,8 @@ class Trace
   enum eTraceTypes {
     NOTHING =  0,
     INSTRUCTION        = (1<<24),
-    PROGRAM_COUNTER    = (2<<24),
-    PROGRAM_COUNTER_2C = (3<<24),
+    //PROGRAM_COUNTER    = (2<<24),
+    //PROGRAM_COUNTER_2C = (3<<24),
     REGISTER_READ      = (4<<24),
     REGISTER_READ_INIT = (5<<24),
     REGISTER_WRITE     = (6<<24),
@@ -83,7 +208,7 @@ class Trace
     READ_W             = (0x0a<<24),
     WRITE_W            = (0x0b<<24),
     _RESET             = (0x0c<<24),
-    PC_SKIP            = (0x0d<<24),
+    //PC_SKIP            = (0x0d<<24),
     WRITE_TRIS         = (0x0e<<24),
     WRITE_OPTION       = (0x0f<<24),
     OPCODE_WRITE       = (0x10<<24),
@@ -125,6 +250,11 @@ class Trace
 
   Processor *cpu;
 
+  TraceFrame *current_frame;
+  guint64 current_cycle_time;      // used when decoding the trace buffer.
+  list <TraceFrame *> traceFrames;
+  unsigned int lastTraceType;
+
   Trace (void);
   ~Trace(void);
 
@@ -143,81 +273,17 @@ class Trace
     trace_buffer[trace_index] = INSTRUCTION | opcode;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
-  inline void program_counter (unsigned int pc)
-  {
-    trace_buffer[trace_index] = PROGRAM_COUNTER | pc;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void program_counter_2Cycles (unsigned int pc)
-  {
-    trace_buffer[trace_index] = PROGRAM_COUNTER_2C | pc;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void pc_skip (unsigned int pc)
-  {
-    trace_buffer[trace_index] = PC_SKIP | pc;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
   inline void register_read (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_READ | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
-  /*
-  inline void register_readRV (unsigned int address, RegisterValue rv)
-  {
-    trace_buffer[trace_index] = REGISTER_READ | (address << 8) | rv.data;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    trace_buffer[trace_index] = REGISTER_READ_INIT | (address << 8) | rv.init;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
   inline void register_write (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  /*
-  inline void register_writeRV (unsigned int address, RegisterValue rv)
-  {
-    trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | rv.data;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    trace_buffer[trace_index] = REGISTER_WRITE_INIT | (address << 8) | rv.init;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
-
-  /*
-  inline void register_read_16bits (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_READ_16BITS | (address << 16) | (value & 0xffff);
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void register_write_16bits (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_WRITE_16BITS | (address << 16) | (value & 0xffff);
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
-  /*
-  inline void register_read_value (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_READ_VAL | (address << 8) | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void register_write_value (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_WRITE_VAL | (address << 8) | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
   inline void opcode_write (unsigned int address, unsigned int opcode)
   {
     trace_buffer[trace_index] = OPCODE_WRITE | (address & 0xffffff);
@@ -287,22 +353,6 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
-  /*
-  inline void module1(unsigned int value)
-  {
-    trace_buffer[trace_index] = MODULE_TRACE1 | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void module2(unsigned int value1,unsigned int value2)
-  {
-    trace_buffer[trace_index] = MODULE_TRACE2 | value1;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    trace_buffer[trace_index] = MODULE_TRACE2 | value2;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
-
   inline bool near_full(void) {
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
   }
@@ -328,9 +378,9 @@ class Trace
     i = tbi(i);
 
     if( low < high) 
-      return (i > low && i < high);
+      return (i >= low && i <= high);
     // Looks like the range straddles the roll over boundary.
-    return (i > low || i < high);
+    return (i >= low || i <= high);
   }
 
 
@@ -357,15 +407,19 @@ class Trace
   // a cycle trace.
   int is_cycle_trace(unsigned int index, guint64 *cvt_cycle);
 
-  bool find_trace(unsigned int start,
-		  unsigned int stop,
-		  bool direction,
-		  int type,
-		  int &ret);
-
   // When logging is enabled, the entire trace buffer will be copied to a file.
   void enableLogging(char *fname);
   void disableLogging();
+
+  unsigned int allocateTraceType(TraceType *);
+
+  // Trace frame manipulation
+  void addFrame(TraceFrame *newFrame);
+  void addToCurrentFrame(TraceObject *to);
+  void deleteTraceFrame(void);
+  void printTraceFrame(void);
+
+
 };
 
 #ifdef IN_MODULE

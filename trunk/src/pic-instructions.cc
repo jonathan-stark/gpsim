@@ -47,7 +47,7 @@ void invalid_instruction::execute(void)
   debug();
 #endif
 
-  /* Don't know what to do, so just plow thorugh like nothing happened */
+  /* Don't know what to do, so just plow through like nothing happened */
   if(cpu_pic)
     cpu_pic->pc->increment();
 

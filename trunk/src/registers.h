@@ -332,6 +332,13 @@ public:
   unsigned int instruction_phase;
   unsigned int trace_state;        /* used while reconstructing the trace history */
 
+
+  // Trace commands
+  unsigned int trace_increment;
+  unsigned int trace_branch;
+  unsigned int trace_skip;
+  unsigned int trace_other;
+
   Program_Counter(void);
   virtual void increment(void);
   virtual void skip(void);
@@ -344,6 +351,9 @@ public:
     {
       return value;
     }
+
+  // initialize the dynamically allocated trace type
+  virtual void set_trace_command(unsigned int);
 
   // get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
   // whereas get_raw_value isn't. The raw value of the program counter

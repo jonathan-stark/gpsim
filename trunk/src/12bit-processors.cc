@@ -35,6 +35,9 @@ extern unsigned int config_word;
 _12bit_processor::_12bit_processor(void)
 {
   pc = new Program_Counter();
+
+  pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
+
 }
 
 void _12bit_processor::create_symbols(void)

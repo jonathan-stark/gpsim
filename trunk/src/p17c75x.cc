@@ -232,7 +232,6 @@ void  P17C7xx::create(int ram_top)
   ind0.init(this);
   ind1.init(this);
   ind2.init(this);
-  trace.program_counter (pc->value);
   tmr0l.initialize();
   intcon.initialize();
 

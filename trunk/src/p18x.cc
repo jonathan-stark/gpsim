@@ -74,8 +74,6 @@ void P18C2x2::create(void)
 
   _16bit_processor::create();
 
-  trace.program_counter (pc->value);
-
 }
 
 //------------------------------------------------------------------------
@@ -326,8 +324,6 @@ void P18C4x2::create(void)
   create_iopin_map();
 
   _16bit_processor::create();
-
-  trace.program_counter (pc->value);
 
 }
 //------------------------------------------------------------------------

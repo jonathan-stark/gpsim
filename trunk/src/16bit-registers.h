@@ -273,15 +273,15 @@ public:
 class Program_Counter16 : public Program_Counter
 {
 public:
-  virtual void increment(void);
-  virtual void skip(void);
-  virtual void jump(unsigned int new_value);
-  virtual void interrupt(unsigned int new_value);
+  //virtual void increment(void);
+  //virtual void skip(void);
+  //virtual void jump(unsigned int new_value);
+  //virtual void interrupt(unsigned int new_value);
   virtual void computed_goto(unsigned int new_value);
-  virtual void new_address(unsigned int new_value);
+  //virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   virtual unsigned int get_value(void);
-  virtual unsigned int get_next(void);
+  //virtual unsigned int get_next(void);
 
   Program_Counter16(void);
 };

@@ -572,8 +572,8 @@ unsigned int WREG::get(void)
 void WREG::put(unsigned int new_value)
 {
 
-  value.put(new_value);
   trace.write_W(value.get());
+  value.put(new_value);
 
 }
 

@@ -785,8 +785,6 @@ void pic_processor::create (void)
 
   Vdd = 5.0;                      // Assume 5.0 volt power supply
 
-  trace.program_counter (pc->value);
-
   if(pma) {
     
     rma.SpecialRegisters.push_back(new PCHelper(pma));
