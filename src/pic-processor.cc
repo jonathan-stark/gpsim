@@ -54,8 +54,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 
-int parse_string(char *cmd_string);
-
 SIMULATION_MODES simulation_mode;
 guint64 simulation_start_cycle;
 
@@ -67,11 +65,6 @@ guint64 simulation_start_cycle;
 // don't print out a bunch of garbage while initializing
 int     verbose=0;
 
-#ifdef HAVE_GUI
-#include <gtk/gtk.h>
-extern int use_gui;
-extern void gui_refresh(void);
-#endif
 
 // Number of simulation cycles between calls to refresh the gui
 guint64 gui_update_rate = DEFAULT_GUI_UPDATE_RATE;
@@ -568,14 +561,17 @@ void pic_processor::run (void)
 {
   if(use_icd)
   {
+    cout  << "WARNING: gui_refresh is not being called " 
+	  <<  __FILE__<<':'<<__LINE__<<endl;
+
       simulation_mode=RUNNING;
       icd_run();
       while(!icd_stopped())
       {
-#ifdef HAVE_GUI
-	  if(use_gui)
-	      gui_refresh();
-#endif
+	//#ifdef HAVE_GUI
+	//	  if(use_gui)
+	//	      gui_refresh();
+	//#endif
       }
       simulation_mode=STOPPED;
       disassemble(pc->get_value(), pc->get_value());

@@ -89,66 +89,6 @@ void  initialization_is_complete(void)
 //========================================================================
 //========================================================================
 
-extern void process_command_file(const char * file_name);
-extern int open_cod_file(pic_processor **, char *);
-#include "../cli/command.h"
-
-int gpsim_open(unsigned int processor_id, const char *file)
-{
-    char *str;
-    pic_processor *pic = get_pic_processor(processor_id);
-
-    str = strrchr(file,'.');
-    if(str==0)
-    {
-//	puts("found no dot in file!");
-	return 0;
-    }
-    str++;
-    if(!strcmp(str,"hex"))
-    {
-
-	if(!pic)
-	{
-	    puts("No pic selected!");
-	    return 0;
-	}
-	pic->load_hex(file);
-    
-    }
-    else if(!strcmp(str,"cod"))
-    {
-
-	int i;
-	i=load_symbol_file(&pic, file);
-
-	if(i)
-	{
-	    cout << "found a fatal error in the symbol file " << file <<'\n';
-	    return 0;
-	}
-
-	// FIXME: questionable
-	command_list[0]->cpu=pic;
-	trace.switch_cpus(pic);
-      
-    }
-    else if(!strcmp(str,"stc"))
-    {
-
-	process_command_file(file);
-    }
-    else
-    {
-      cout << "Unknown file extension \"" << str <<"\" \n";
-	return 0;
-    }
-
-    return 1;
-}
-
-
-
 
 
 
@@ -341,7 +281,7 @@ void gpsimInterface::simulation_has_stopped (void)
 
 void gpsimInterface::new_processor (unsigned int processor_id)
 {
-    set_update_rate  (gui_update_rate);
+  set_update_rate  (gui_update_rate);
 
   GSList *interface_list = interfaces;
 
@@ -467,3 +407,21 @@ void  gpsimInterface::set_update_rate  (guint64 update_rate)
 
 
 
+
+const char *get_dir_delim(const char *path)
+{
+#ifdef _WIN32
+  const char *p = path + strlen(path);
+
+  do
+  {
+    if (--p < path)
+      return 0;
+  }
+  while (*p != '/' && *p != '\\');
+
+  return p;
+#else
+  return strrchr(path, '/');
+#endif
+}

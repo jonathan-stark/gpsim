@@ -28,6 +28,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/pic-processor.h"
 
+extern void redisplay_prompt(void);  // in input.cc
+
+
 cmd_run c_run;
 
 static cmd_options cmd_run_options[] =
@@ -62,5 +65,6 @@ void cmd_run::run(void)
 
   cpu->run();
 
+  redisplay_prompt();
 
 }

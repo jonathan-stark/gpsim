@@ -50,18 +50,16 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 
-int parse_string(char *cmd_string);
-extern void redisplay_prompt(void);  // in input.cc
+//int use_gui=0;
 
-#ifdef HAVE_GUI
-#include <gtk/gtk.h>
-extern int use_gui;
-void gui_refresh(void)
-{
-	while(gtk_events_pending())
-		gtk_main_iteration();
-}
-#endif
+//#ifdef HAVE_GUI
+//#include <gtk/gtk.h>
+//void gui_refresh(void)
+//{
+//	while(gtk_events_pending())
+//		gtk_main_iteration();
+//}
+//#endif
 
 //------------------------------------------------------------------------
 //
@@ -855,7 +853,7 @@ void Processor::create (void)
 //-------------------------------------------------------------------
 void Processor::dump_registers (void)
 {
-  parse_string("dump");
+  //  parse_string("dump");
 
 }
 
@@ -1200,7 +1198,6 @@ void ProgramMemoryAccess::step_over(void)
     }
   }
 
-  redisplay_prompt();
 }
 
 //--------------------------------------------------------------------------
@@ -1208,15 +1205,12 @@ void ProgramMemoryAccess::run(void)
 {
   cpu->run();
 
-  redisplay_prompt();
 }
 
 //--------------------------------------------------------------------------
 void ProgramMemoryAccess::stop(void)
 {
   bp.halt();
-
-  redisplay_prompt();
 }
 
 //--------------------------------------------------------------------------

@@ -34,7 +34,6 @@ extern "C"{
 #include "lxt_write.h"
 }
 
-extern int last_command_is_repeatable;
 extern guint64 simulation_start_cycle;
 //extern Processor *active_cpu;
 //extern "C" {
@@ -1334,28 +1333,6 @@ void Log_Register_Write_value::put(unsigned int new_value)
     }
   last_value = new_value;
   replaced->put(new_value);
-}
-
-//====================================================================================
-//
-// catch_control_c
-//
-//  
-void catch_control_c(int sig)
-{
-
-  if(simulation_mode != STOPPED)
-    {
-      cout << "<CTRL C> break\n";
-      bp.halt();
-    }
-  else {
-    cout << "caught control c, but it doesn't seem gpsim was simulating\n";
-    last_command_is_repeatable=0;
-    redisplay_prompt();
-
-  }
-
 }
 
 

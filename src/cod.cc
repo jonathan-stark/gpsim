@@ -42,16 +42,9 @@ Boston, MA 02111-1307, USA.  */
 #include "picdis.h"
 #include "symbol.h"
 #include "cod.h"
-#include "../cli/input.h"
-
-#ifdef HAVE_GUI
-#include "../gui/gui_interface.h"
-void gui_new_program (unsigned int);
-#endif
-
+#include "interface.h"
 #include "fopen-path.h"
 
-extern int use_gui;
 
 static FILE *codefile = 0;
 static FILE *lstfp = 0;
@@ -996,12 +989,9 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 
   ccpu->reset(POR_RESET);
 
-#ifdef HAVE_GUI
-  if(use_gui){
-    gui_new_program(ccpu->processor_id);
-    gui_new_source(ccpu->processor_id);
-  }
-#endif
+  // Tell all of the interfaces that a new program exists.
+
+  gi.new_program(ccpu->processor_id);
 
   return error_code;
 

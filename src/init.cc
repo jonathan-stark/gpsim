@@ -19,42 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include <csignal>
-#include "pic-processor.h"
 #include "trace.h"
 
-//==============================================================
-
-extern void catch_control_c(int); // In breakpoints.cc
-
-void initialize_signals(void)
-{
-#ifndef _WIN32
-  static struct sigaction action;
-
-  action.sa_handler = catch_control_c;
-  sigemptyset(&action.sa_mask);
-  action.sa_flags=0;
-
-  sigaction(SIGINT, &action, 0);
-#endif
-
-}
-
-
-//==============================================================
-// initialize_gpsim 
-//
-// Not much initialization is needed now. However, the CORBA 
-// calls needed later will change this...
-//
-
-void initialize_gpsim(void)
-{
-
-  initialize_signals();
-
-}
 
 
 //==============================================================

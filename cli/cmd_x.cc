@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_x.h"
+#include "cmd_dump.h"
 
 #include "../src/pic-processor.h"
 #include "../src/symbol_orb.h"
@@ -60,8 +61,11 @@ cmd_x::cmd_x(void)
 void cmd_x::x(void)
 {
 
+  dump.dump(cmd_dump::DUMP_RAM);
+  dump.dump(cmd_dump::DUMP_SFRS);
   if(cpu)
     cpu->dump_registers();
+
 }
 
 void cmd_x::x(int reg)
