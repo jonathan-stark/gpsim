@@ -29,8 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #include <time.h>
 #include <stdio.h>
 
-#include <sys/ioctl.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -39,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <string>
 #include <iostream>
+#include <assert.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI

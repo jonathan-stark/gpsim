@@ -35,6 +35,7 @@ in1	in2	result
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
+#include <assert.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
 #ifdef HAVE_GUI

@@ -42,7 +42,6 @@ support:
  */
 
 #include <iostream>
-#include <dlfcn.h>
 #include <stdio.h>
 
 #include "../config.h"    // get the definition for HAVE_GUI
@@ -53,7 +52,9 @@ support:
 #include "usart.h"
 
 #ifdef HAVE_GUI
+#ifndef _WIN32
 #include "paraface.h"
+#endif
 #include "switch.h"
 #include "logic.h"
 #include "led.h"
@@ -82,8 +83,10 @@ Module_Types available_modules[] =
   { "usart",            "usart", USARTModule::USART_construct},
 
 #ifdef HAVE_GUI
+#ifndef _WIN32
   // Parallel port interface
   { "parallel_interface",         "paraface", Paraface::construct},
+#endif
 
   // Switch
   { "switch",         "sw", Switch::construct},
@@ -214,6 +217,3 @@ void test2(void)
 {
   printf("%s - c++ declared\n", __FUNCTION__);
 }
-
-
-
