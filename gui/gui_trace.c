@@ -33,8 +33,18 @@ typedef enum {
     MENU_ADD_WATCH,
 } menu_id;
 
+// gui trace flags:
+#define GTF_ENABLE_XREF_UPDATES    (1<<0)
 
 guint64 row_to_cycle[MAXTRACES];
+
+struct TraceMapping {
+
+  guint64 cycle;
+  int simulation_trace_index;
+};
+
+struct TraceMapping trace_map[MAXTRACES];
 
 /*****************************************************************
  * xref_update
@@ -72,6 +82,10 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
       return;
     }
 
+  // If we're not allowing xref updates then exit
+  if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
+    return;
+
   str[0] = 0;  // Assume that the trace is empty.
   gpsim_get_current_trace(&cycle, str, TRACE_STRING);
 
@@ -86,7 +100,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     // and then add a row at the end for the new trace data
     gtk_sheet_add_row(sheet,1);
-
+    
     gtk_sheet_set_cell(sheet,
 		       sheet->maxrow,
 		       1,  // column
@@ -94,6 +108,9 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     sprintf(str,"%016x", cycle);
 
+    //trace_map[trace_index].cycle = cycle;
+    //trace_map[trace_index].simulation_trace_index = gpsim_get;
+    
     gtk_sheet_set_cell(sheet,
 		       sheet->maxrow,
 		       0,  // column
@@ -147,34 +164,19 @@ void TraceWindow_update(Trace_Window *tw)
 
   cycle = gpsim_get_cycles(gp->pic_id);
 
+  tw->trace_flags |= GTF_ENABLE_XREF_UPDATES;
   if(tw->last_cycle +(MAXTRACES/4) <  cycle) {
     // redraw the whole thing
+    gpsim_trace_dump_to_file(MAXTRACES/2, NULL);
 
-    
-    gtk_sheet_set_cell(sheet,
-		       sheet->maxrow,
-		       0,  // column
-		       GTK_JUSTIFY_RIGHT,"need to do a big update");
   } else {
 
-    // update the most recent cycles
-    
-    //gtk_sheet_delete_rows(sheet,0,1);
-
-    //gtk_sheet_add_row(sheet,1);
-    //sprintf(buffer,"%016x", cycle);
-
-    //gtk_sheet_row_button_add_label(sheet, sheet->maxrow, buffer);
-    //gtk_sheet_set_row_title(sheet, sheet->maxrow, buffer);
-
-    //gtk_sheet_set_cell(sheet,
-    //	       sheet->maxrow,
-    //	       0,  // column
-    //	       GTK_JUSTIFY_RIGHT,buffer);
+    gpsim_trace_dump_to_file(2, NULL);
 
 
   }
 
+  tw->trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
   tw->last_cycle = cycle;
   gtk_sheet_thaw(sheet);
 }
@@ -216,20 +218,6 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 
     gtk_sheet_freeze(sheet);
 
-/*    
-    for(i=0; i<MAXTRACES; i++) {
-      row_to_cycle[i] = 0;
-      gtk_sheet_add_row(sheet,1);
-      sprintf(row_label,"%x0",i);
-      gtk_sheet_row_button_add_label(sheet, 0, row_label);
-      gtk_sheet_set_row_title(sheet, 0, row_label);
-    }
-*/
-/*
-    if(j < sheet->maxrow)
-	gtk_sheet_delete_rows(sheet,j,sheet->maxrow-j);
-*/
-
     
     range.row0=0;
     range.rowi=sheet->maxrow;
@@ -255,8 +243,7 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 
     gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
 
-    // set values in the sheet
-    //    RegWindow_update(rw);
+
 
     gtk_sheet_thaw(sheet);
 
@@ -275,9 +262,8 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
 {
-//    puts("Delete");
-    ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
-    return TRUE;
+  ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
+  return TRUE;
 }
 
 int
@@ -317,17 +303,10 @@ BuildTraceWindow(Trace_Window *tw)
 
   trace_sheet=gtk_sheet_new(MAXTRACES,MAXCOLS-1,"gpsim Trace Viewer");
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
-  // Add a status bar
-  //StatusBar_create(main_vbox,gp->status_bar);
 
   GTK_WIDGET_UNSET_FLAGS(trace_sheet,GTK_CAN_DEFAULT);
     
   tw->trace_sheet = GTK_SHEET(trace_sheet);
-
-  /* create popupmenu */
-  //rw->popup_menu=build_menu(rw);
-
-  //build_entry_bar(main_vbox, rw);
 
   width=((GUI_Object*)tw)->width;
   height=((GUI_Object*)tw)->height;
@@ -352,66 +331,17 @@ BuildTraceWindow(Trace_Window *tw)
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
 
-/*
-  gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(trace_sheet))),
-		     "changed", (GtkSignalFunc)show_entry, tw);
-
-  gtk_signal_connect(GTK_OBJECT(trace_sheet),
-		     "activate", (GtkSignalFunc)activate_sheet_cell,
-		     (gpointer) tw);
-
-  gtk_signal_connect(GTK_OBJECT(tw->entry),
-		     "changed", (GtkSignalFunc)show_sheet_entry, tw);
-
-  gtk_signal_connect(GTK_OBJECT(tw->entry),
-		     "activate", (GtkSignalFunc)activate_sheet_entry,
-		     tw);
-*/
-
-//  gtk_widget_realize(window);
-
-
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 
   gtk_sheet_column_button_add_label(tw->trace_sheet, 0, "cycle");
   gtk_sheet_column_button_add_label(tw->trace_sheet, 1, "trace");
-  //gtk_sheet_set_column_title(tw->trace_sheet, 1, "cycle");
-  //gtk_sheet_set_column_title(tw->trace_sheet, 1, "trace");
+
   gtk_sheet_set_column_width (tw->trace_sheet, 0, char_width*16);
   gtk_sheet_set_column_width (tw->trace_sheet, 1, char_width*50);
   gtk_sheet_set_row_titles_width(tw->trace_sheet, char_width*16);
 
-  //gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
-
-/*	
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "key_press_event",
-			   (GtkSignalFunc) clipboard_handler, 
-			   NULL);
-
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "resize_range",
-			   (GtkSignalFunc) resize_handler, 
-			   rw);
-
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "move_range",
-			   (GtkSignalFunc) move_handler, 
-			   rw);
-	
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "button_press_event",
-			   (GtkSignalFunc) do_popup, 
-			   rw);
-
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "set_cell",
-			   (GtkSignalFunc) set_cell,
-			   rw);
-	
-*/
-
+  gtk_sheet_hide_row_titles(tw->trace_sheet);
   gtk_signal_connect_after(GTK_OBJECT(tw->gui_obj.window), "configure_event",
   			   GTK_SIGNAL_FUNC(gui_object_configure_event),tw);
 
@@ -419,9 +349,14 @@ BuildTraceWindow(Trace_Window *tw)
 
   gtk_widget_show (window);
 
+  for(i=0; i<MAXTRACES; i++)
+     trace_map[i].cycle = 0;
+
   tw->gui_obj.enabled=1;
   tw->gui_obj.is_built=1;
   tw->last_cycle = 0;
+
+  update_menu_item((GUI_Object*)tw);
 
   return 0;
 }
@@ -444,7 +379,7 @@ int CreateTraceWindow(GUI_Processor *gp)
 
   gp->trace_window = trace_window;
 
-
+  trace_window->trace_flags = 0;
   trace_window->processor=0;
 
   gp_add_window_to_list(gp, (GUI_Object *)trace_window);

@@ -1356,7 +1356,7 @@ void    pic_processor::set_out_of_range_pm(int address, int value)
 //-------------------------------------------------------------------
 void pic_processor::init_program_memory(int address, int value)
 {
-  cout << hex <<  "address 0x" << address << "  value = 0x" << value << '\n';
+
   if(address < program_memory_size())
     {
       program_memory[address] = disasm(address,value);

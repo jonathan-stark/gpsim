@@ -655,7 +655,9 @@ void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref)
 }
 
 //--------------------------------------------------------------------------
-
+//
+// Trace buffer interface routines
+//
 void gpsim_assign_trace_xref(gpointer xref)
 {
 
@@ -663,6 +665,7 @@ void gpsim_assign_trace_xref(gpointer xref)
       trace.xref->add(xref);
 
 }
+
 //--------------------------------------------------------------------------
 
 void gpsim_get_current_trace(guint64 *current_cycle, char *current_trace, int bufsize)
@@ -672,6 +675,23 @@ void gpsim_get_current_trace(guint64 *current_cycle, char *current_trace, int bu
     *current_cycle = trace.string_cycle;
   if(current_trace)
     strncpy(current_trace,trace.string_buffer,bufsize);
+}
+
+int gpsim_move_to_last_trace(void)
+{
+
+  return( (trace.trace_index - 1) & TRACE_BUFFER_MASK);
+}
+
+int gpsim_get_previous_trace(int current_trace)
+{
+  return trace.find_previous_cycle(current_trace);
+}
+
+void gpsim_trace_dump_to_file(int number_of_instructions, FILE *f)
+{
+  trace.dump(number_of_instructions, f);
+
 }
 //--------------------------------------------------------------------------
 void gpsim_step(unsigned int processor_id, unsigned int steps)

@@ -394,15 +394,22 @@ typedef struct _Breadboard_Window Breadboard_Window;
 // The trace window 
 //
 struct _Trace_Window {
-    GUI_Object     gui_obj;
+  GUI_Object     gui_obj;
 
-    GtkSheet *trace_sheet;
+  GtkSheet *trace_sheet;
   guint64   last_cycle;   // The cycle of the last trace in the window.
 
-    GtkWidget *location;
-    GtkWidget *popup_menu;
+  GtkWidget *location;
+  GtkWidget *popup_menu;
 
-    int processor; // if non-zero window has processor
+  /* trace_flags bit definitions
+     bit0 - enable xref updates to refresh the display
+            0 disables, 1 enables
+     bit1-bit31 are unused.
+   */
+  int trace_flags;
+
+  int processor;    // if non-zero window has processor
 };
 
 typedef struct _Trace_Window Trace_Window;
