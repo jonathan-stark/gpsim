@@ -419,6 +419,7 @@ spinb_cb(GtkWidget *widget)
     guint64 value;
     value=gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(widget));
     gpsim_set_update_rate(value);
+    config_set_variable("dispatcher", "gui_update", value);
 }
     
 static GtkItemFactoryCallback
@@ -491,6 +492,7 @@ void create_dispatcher (void)
       GtkAccelGroup *accel_group;
       
       int x,y,width,height;
+      int update_rate;
       
       dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -578,7 +580,9 @@ void create_dispatcher (void)
 
 
       frame = gtk_frame_new("gui_update");
-      spinadj = gtk_adjustment_new(gpsim_get_update_rate(),1,2000000,1,100,100);
+      if(!config_get_variable("dispatcher", "gui_update", &update_rate))
+	  update_rate=gpsim_get_update_rate();
+      spinadj = gtk_adjustment_new(update_rate,1,2000000,1,100,100);
       spinb = gtk_spin_button_new(spinadj,1,0);
       gtk_container_add(GTK_CONTAINER(frame),spinb);
       gtk_signal_connect(GTK_OBJECT(spinb),"changed",
