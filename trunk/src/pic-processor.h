@@ -341,6 +341,7 @@ public:
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
+  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
   pic_processor(void);
 };

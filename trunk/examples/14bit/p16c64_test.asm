@@ -1,7 +1,7 @@
 
 	;; gpasm bug --- c64 is not recognized...
 	
-	list	p=16c84
+	list	p=16c64
   __config _wdt_off
 
 	;; The purpose of this program is to test gpsim's ability to simulate a pic 16c64.

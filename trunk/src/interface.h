@@ -127,7 +127,16 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
 				   gpointer interface_callback_data,
 				   guint64 cycle);
 
-
+  //---------------------------------------------------------------------------
+  // pin interface functions
+  //---------------------------------------------------------------------------
+  void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointer xref);
+  unsigned int  gpsim_package_pin_count(unsigned int processor_id);
+  char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin);
+  unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin);
+  void  gpsim_pin_set_value(unsigned int processor_id, unsigned int pin);
+  unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin);
+  void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned int new_dir);
 
 
   //---------------------------------------------------------------------------

@@ -39,7 +39,7 @@ GUI_Processor *gp=NULL;
 GSList *gui_processors=NULL;
 
 
-DB_ID dbid;
+DB_ID dbid=-1;
 
 extern GtkWidget *dispatcher_window;
 
@@ -235,6 +235,9 @@ int config_set_variable(char *module, char *entry, int value)
 
 int gui_object_set_config(GUI_Object *obj)
 {
+  if(!obj)
+    return 0;
+
     config_set_variable(obj->name, "enabled", obj->enabled);
     config_set_variable(obj->name, "x", obj->x);
     config_set_variable(obj->name, "y", obj->y);
@@ -263,6 +266,9 @@ int config_get_variable(char *module, char *entry, int *value)
 
 int gui_object_get_config(GUI_Object *obj)
 {
+  if(!obj)
+    return 0;
+
     if(!config_get_variable(obj->name, "enabled", &obj->enabled))
 	obj->enabled=0;
     if(!config_get_variable(obj->name, "x", &obj->x))

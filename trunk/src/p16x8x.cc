@@ -94,19 +94,7 @@ void _14bit_18pins::create_iopin_map(void)
 
 }
 
-/*
-char *P16C8x::get_pin_name(unsigned int pin_number)
-{
 
-  return _18pins::get_pinname(pin_number);
-}
-
-
-int P16C8x::get_pin_state(unsigned int pin_number)
-{
- return 0;
-}
-*/
 void P16C8x::create_sfr_map(void)
 {
  

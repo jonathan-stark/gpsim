@@ -93,12 +93,13 @@ public:
   Stimulus_Node *snode;      /* Node to which this stimulus is attached */
   unsigned int drive;        /* This defines the strength of the source or the magnitude of the load. */
   int state;                 /* The most recent value of this stimulus */
+  XrefObject *xref;          /* A link to the gui. */
 
   stimulus *next;
 
   stimulus(char *n=NULL);
   virtual int get_state(guint64 current_time) {return state;};
-  virtual void put_state(int new_state) {return;}; 
+  virtual void put_state(int new_state) {state=new_state;};
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
 };
@@ -109,6 +110,7 @@ public:
 
 enum SOURCE_TYPE
 {
+  DC,
   SQW,
   ASY,
   TRI,
@@ -146,6 +148,12 @@ enum IOPIN_TYPE
 
 };
 
+enum IOPIN_DIRECTION
+{
+  DIR_INPUT,
+  DIR_OUTPUT
+};
+
   IOPORT *iop;
   unsigned int iobit;
   int threshold;
@@ -156,9 +164,11 @@ enum IOPIN_TYPE
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual int get_state(guint64 current_time) {return state;};
-  virtual void put_state(int new_state) {return;}; 
+  virtual void put_state(int new_state) {state=new_state;}; 
   virtual void attach(Stimulus_Node *s);
+  virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int x){return;};
+  virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
 };
 
 class IO_input : public IOPIN
@@ -171,16 +181,24 @@ public:
   virtual int get_state(guint64 current_time){return drive;};
   virtual void put_state( int new_state) 
     {
-      iop->setbit( iobit, (new_state>threshold) ? 1 : 0);
+      if(new_state>threshold) {
+	iop->setbit( iobit, 1);
+	state = 1;
+      }	else {
+	iop->setbit( iobit, 0);
+	state = 0;
+      }
     }; 
+  virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int){return;};
+  virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT;};
 };
 
 class IO_bi_directional : public IO_input
 {
 public:
 
-  source_stimulus *source;
+  //  source_stimulus *source;
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
@@ -188,7 +206,8 @@ public:
   IO_bi_directional(IOPORT *i, unsigned int b);
   virtual int get_state(guint64 current_time);
   virtual void update_direction(unsigned int);
-
+  virtual void change_direction(unsigned int);
+  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 };
 
 class IO_bi_directional_pu : public IO_bi_directional
@@ -207,7 +226,7 @@ class IO_open_collector : public IO_input
 {
 public:
 
-  source_stimulus *source;
+  //  source_stimulus *source;
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
@@ -279,6 +298,15 @@ public:
 
 };
 
+
+class dc_supply : public source_stimulus {
+ public:
+
+  dc_supply(char *n=NULL);
+  virtual SOURCE_TYPE isa(void) {return DC;};
+  virtual int get_state(guint64 current_time) { return drive;};
+
+};
 
 /* For now, a resistor has one end attached to either ground or vcc and the
 ** other end is attached to a node. As we get more ambitious, this may change.

@@ -119,6 +119,8 @@ void _14bit_40pins::create_iopin_map(void)
   porta = new PORTA;
   portb = new PORTB;
   portc = new PORTC;
+  portd = new PORTD;
+  porte = new PORTE;
 
   // ---- Complete the initialization for the I/O Ports
 
@@ -132,15 +134,26 @@ void _14bit_40pins::create_iopin_map(void)
   portc->tris = &trisc;
   trisc.port = portc;
 
+  portd->tris = &trisd;
+  trisd.port = portd;
+
+  porte->tris = &trise;
+  trise.port = porte;
+
+
   // And give them a more meaningful name.
   trisa.new_name("trisa");
   trisb.new_name("trisb");
   trisc.new_name("trisc");
+  trisd.new_name("trisd");
+  trise.new_name("trise");
 
   // Define the valid I/O pins.
   porta->valid_iopins = 0x1f;
   portb->valid_iopins = 0xff;
   portc->valid_iopins = 0xff;
+  portd->valid_iopins = 0xff;
+  porte->valid_iopins = 0x07;
 
 
   // Now Create the package and place the I/O pins
@@ -157,11 +170,11 @@ void _14bit_40pins::create_iopin_map(void)
 
   assign_pin(7, NULL);
 
-  /*
+
   assign_pin(8, new IO_bi_directional(porte, 0));
   assign_pin(9, new IO_bi_directional(porte, 1));
   assign_pin(10, new IO_bi_directional(porte, 2));
-  */
+
 
   assign_pin(11, NULL);
   assign_pin(12, NULL);
@@ -177,7 +190,7 @@ void _14bit_40pins::create_iopin_map(void)
   assign_pin(25, new IO_bi_directional(portc, 6));
   assign_pin(26, new IO_bi_directional(portc, 7));
 
-  /*
+
   assign_pin(19, new IO_bi_directional(portd, 0));
   assign_pin(20, new IO_bi_directional(portd, 1));
   assign_pin(21, new IO_bi_directional(portd, 2));
@@ -186,7 +199,7 @@ void _14bit_40pins::create_iopin_map(void)
   assign_pin(28, new IO_bi_directional(portd, 5));
   assign_pin(29, new IO_bi_directional(portd, 6));
   assign_pin(30, new IO_bi_directional(portd, 7));
-  */
+
   assign_pin(31, NULL);
   assign_pin(32, NULL);
 
@@ -203,7 +216,7 @@ void _14bit_40pins::create_iopin_map(void)
 
 void P16C64::create_sfr_map(void)
 {
-  if(verbose)
+   if(verbose)
     cout << "creating c64 registers\n";
 
   add_file_registers(0x20, 0x7f, 0);
@@ -230,11 +243,11 @@ void P16C64::create_sfr_map(void)
   add_sfr_register(portc,   0x07);
   add_sfr_register(&trisc,  0x87, 0x1f);
 
-  //add_sfr_register(portd,   0x08);
-  //add_sfr_register(&trisd,  0x88, 0xff);
+  add_sfr_register(portd,   0x08);
+  add_sfr_register(&trisd,  0x88, 0xff);
 
-  //add_sfr_register(porte,   0x09);
-  //add_sfr_register(&trise,  0x89, 0x07);
+  add_sfr_register(porte,   0x09);
+  add_sfr_register(&trise,  0x89, 0x07);
 
   add_sfr_register(&pclath, 0x8a, 0);
   add_sfr_register(&pclath, 0x0a, 0);
@@ -324,6 +337,8 @@ void P16C64::create_symbols(void)
   symbol_table.add_ioport(porta->cpu, porta);
   symbol_table.add_ioport(portb->cpu, portb);
   symbol_table.add_ioport(portc->cpu, portc);
+  symbol_table.add_ioport(portd->cpu, portd);
+  symbol_table.add_ioport(porte->cpu, porte);
 
 }
 
