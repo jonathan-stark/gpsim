@@ -364,8 +364,7 @@ public:
 
   virtual double get_Vth();
   virtual double get_Zth();
-
-
+  virtual char getBitChar();
 };
 
 class square_wave : public source_stimulus

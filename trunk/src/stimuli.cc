@@ -1401,6 +1401,14 @@ double IO_open_collector::get_Zth()
   return bPullUp ? Zpullup : ZthIn;
 
 }
+char IO_open_collector::getBitChar()
+{
+  if(!snode && !driving )
+    return bPullUp ? 'W' : 'Z';
+
+
+  return get_digital_state() ? 'W' : '0';
+}
 
 //========================================================================
 //
