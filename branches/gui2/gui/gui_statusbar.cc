@@ -40,6 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_statusbar.h"
 #include "../src/processor.h"
 
+extern GtkWidget *StatusBarExperiment;
 
 //========================================================================
 
@@ -287,15 +288,18 @@ void StatusBar_Window::Update(void)
 
 void StatusBar_Window::Create(GtkWidget *vbox_main)
 {
+
   if(created)
     return;
   Dprintf((" %s",__FUNCTION__));
 
   /* --- Put up h-box --- */
-  gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
-  gtk_widget_show (hbox);
+  //gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
+  gtk_widget_show (StatusBarExperiment);
 
   created=1;
+
+
 }
 
 /*  NewProcessor
@@ -306,7 +310,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 {
 
 
-  if(!_gp  || !_gp->cpu || !_ma || !hbox)
+  if(!_gp  || !_gp->cpu || !_ma)
     return;
 
   if(ma)
@@ -322,7 +326,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
       iReg != ma->SpecialRegisters.end();
       ++iReg) {
 
-    entries.push_back(new RegisterLabeledEntry(hbox, *iReg));
+    entries.push_back(new RegisterLabeledEntry(StatusBarExperiment, *iReg));
   }
 
 
@@ -356,7 +360,9 @@ StatusBar_Window::StatusBar_Window(void)
   created = false;
 
   /* --- Create h-box for holding the status line --- */
-  hbox = gtk_hbox_new (FALSE, 0);
+  //hbox = gtk_hbox_new (FALSE, 0);
+
+  hbox = StatusBarExperiment;
 
 }
 

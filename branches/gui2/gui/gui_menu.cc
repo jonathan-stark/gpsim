@@ -60,6 +60,7 @@ Boston, MA 02111-1307, USA.  */
 
 GtkWidget *SourceBrowserExperiment=0;
 GtkWidget *RegisterWindowExperiment=0;
+GtkWidget *StatusBarExperiment=0;
 
 typedef struct _note_book_item
 {
@@ -230,22 +231,6 @@ toggle_window (gpointer             callback_data,
     int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
 			
     switch(callback_action) {
-      /*
-    case WT_opcode_source_window:
-      gp->program_memory->ChangeView(view_state);
-      break;
-    case WT_asm_source_window:
-      gp->source_browser->ChangeView(view_state);
-      break;
-      */
-      /*
-    case WT_register_window:
-      gp->regwin_ram->ChangeView(view_state);
-      break;
-    case WT_eeprom_window:
-      gp->regwin_eeprom->ChangeView(view_state);
-      break;
-      */
     case WT_watch_window:
       gp->watch_window->ChangeView(view_state);
       break;
@@ -758,6 +743,36 @@ void dispatch_Update()
   }
 }
 
+//========================================================================
+//========================================================================
+// experimental register window replacement
+static gint
+do_popup(GtkWidget *widget, GdkEventButton *event, MainWindow *mw)
+{
+
+  GtkWidget *popup;
+    
+  if(widget==0 || event==0 || mw==0) {
+    
+    printf("Warning do_popup(%p,%p,%p)\n",widget,event,mw);
+    return FALSE;
+  }
+  printf("event\n");
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+      printf("button 3 pressed\n");
+
+      /*
+      popup_rw = rw;
+  
+      gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
+		     3, event->time);
+      */
+      return TRUE;
+    }
+  return FALSE;
+}
+
 
 //========================================================================
 //========================================================================
@@ -907,6 +922,10 @@ void MainWindow::Create (void)
   timeW = new TimeWidget();
   timeW->Create(frame);
 
+  //
+  // Source Browser and Register Windows
+  //
+
   separator = gtk_hseparator_new ();
   gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
 
@@ -918,7 +937,6 @@ void MainWindow::Create (void)
   gtk_frame_set_shadow_type (GTK_FRAME (SourceBrowserExperiment), GTK_SHADOW_IN);
   gtk_frame_set_shadow_type (GTK_FRAME (RegisterWindowExperiment), GTK_SHADOW_IN);
 
-  //gtk_widget_set_size_request (vpane, 200 + GTK_PANED (vpane)->gutter_size, -1);
 
   gtk_paned_pack1 (GTK_PANED (vpane), SourceBrowserExperiment, TRUE, TRUE);
   gtk_widget_set_size_request (SourceBrowserExperiment, 50, -1);
@@ -927,9 +945,56 @@ void MainWindow::Create (void)
   gtk_widget_set_size_request (RegisterWindowExperiment, 50, -1);
 
 
-  //gtk_box_pack_start (GTK_BOX (box1), SourceBrowserExperiment, TRUE, TRUE, 5);
 
 
+  // Status Bar
+
+  separator = gtk_hseparator_new ();
+  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
+
+  frame = gtk_frame_new("Status Bar");
+  gtk_box_pack_start (GTK_BOX (box1), frame, FALSE, FALSE, 5);
+
+  StatusBarExperiment = gtk_hbox_new (FALSE, 0);
+  gtk_container_add(GTK_CONTAINER(frame),StatusBarExperiment);
+
+  // experimental table
+  separator = gtk_hseparator_new ();
+  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
+
+  frame = gtk_frame_new("Table");
+  gtk_box_pack_start (GTK_BOX (box1), frame, TRUE, TRUE, 0);
+
+  GtkAdjustment *hadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  GtkAdjustment *vadj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+  GtkWidget *scrolled_window = gtk_scrolled_window_new(hadj,vadj);
+  gtk_widget_show(scrolled_window);
+  gtk_container_add(GTK_CONTAINER(frame),scrolled_window);
+  GtkWidget *table = gtk_table_new (5,18,TRUE);
+  gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),table);
+
+  int row,col;
+  for(row=0; row<5; row++)
+    for(col=0; col<18;col++) {
+      char buf[32];
+      snprintf(buf,sizeof(buf),"%02X%02X",row,col);
+      GtkWidget *entry = gtk_entry_new ();
+      gtk_widget_set_usize (entry,36,-1);
+      gtk_entry_set_text (GTK_ENTRY (entry), buf);
+
+      //GtkWidget *label = gtk_label_new(buf);
+      gtk_table_attach_defaults(GTK_TABLE(table),entry, col, col+1, row, row+1);
+
+      gtk_signal_connect(GTK_OBJECT(entry),
+			 "button_press_event",
+			 (GtkSignalFunc) do_popup, 
+			 this);
+    }
+
+  gtk_signal_connect(GTK_OBJECT(table),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup, 
+		     this);
 
   gtk_widget_show_all (dispatcher_window);
       
@@ -939,4 +1004,13 @@ void create_dispatcher (void)
 {
   TheWindow.Create();
 }
+
+
+
+
+
+
+
+
+
 #endif // HAVE_GUI
