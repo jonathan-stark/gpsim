@@ -221,6 +221,9 @@
 				RelativePath=".\16bit-tmrs.cc">
 			</File>
 			<File
+				RelativePath=".\attributes.cc">
+			</File>
+			<File
 				RelativePath=".\breakpoints.cc">
 			</File>
 			<File
@@ -413,6 +416,9 @@
 			</File>
 			<File
 				RelativePath=".\16bit-tmrs.h">
+			</File>
+			<File
+				RelativePath=".\attributes.h">
 			</File>
 			<File
 				RelativePath=".\breakpoints.h">
