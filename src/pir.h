@@ -164,7 +164,7 @@ enum
       // or not.
       valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
       break_point = 0;
-      new_name("pir1v1");
+      new_name("pir1");
     }
 };
 
@@ -284,7 +284,7 @@ enum
       // or not.
       valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
       break_point = 0;
-      new_name("pir1v2");
+      new_name("pir1");
     }
 };
 
@@ -337,7 +337,7 @@ enum
     {
       valid_bits = CCP2IF;
       break_point = 0;
-      new_name("pir2v1");
+      new_name("pir2");
     }
 };
 
@@ -418,7 +418,7 @@ enum
     {
       valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
       break_point = 0;
-      new_name("pir2v2");
+      new_name("pir2");
     }
 };
 
@@ -513,7 +513,7 @@ enum
       valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
                    WAKIF | IRXIF;
       break_point = 0;
-      new_name("pir3v2");
+      new_name("pir3");
     }
 };
 

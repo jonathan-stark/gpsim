@@ -79,6 +79,28 @@ void gui_simulation_has_stopped(gpointer callback_data)
 }
 
 
+class linkXREF : public CrossReferenceToGUI
+{
+public:
+
+  GUI_Processor *gp;
+  
+  void Update(int new_value)
+  {
+    int address;
+
+    if(!gp) { printf("gp == null in linkXREF\n"); return;}
+
+    address = *(int *)data;
+
+    if(gp->source_browser)
+      gp->source_browser->UpdateLine(address);
+
+    if(gp->program_memory)
+      gp->program_memory->UpdateLine(address);
+
+  }
+};
 
 /*
  * link_src_to_gpsim
@@ -93,7 +115,7 @@ void gui_simulation_has_stopped(gpointer callback_data)
 void link_src_to_gpsim(GUI_Processor *gp)
 {
   int i,*address,pm_size;
-  struct cross_reference_to_gui *cross_reference;
+  linkXREF *cross_reference;
 
 
   if(gp) {
@@ -108,16 +130,14 @@ void link_src_to_gpsim(GUI_Processor *gp)
 
       for(i=0; i < pm_size; i++) {
 	
-	cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-	cross_reference->parent_window_type =   WT_asm_source_window;
-	cross_reference->parent_window = (gpointer) gp;
+	cross_reference = new linkXREF();
+	//cross_reference->parent_window_type = WT_asm_source_window;
+	//cross_reference->parent_window = (gpointer) gp;
+	cross_reference-> gp = gp;
 	address = (int *) malloc(sizeof(int));
 	*address = i;
 
 	cross_reference->data = (gpointer) address;
-	cross_reference->update = SourceBrowser_update_line;
-	cross_reference->remove = NULL;
-
 	gp->cpu->pma.assign_xref(i,(gpointer) cross_reference);
       }
     }

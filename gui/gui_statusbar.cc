@@ -66,6 +66,26 @@ static menu_id time_format=MENU_TIME_USECONDS;
 // Used only in popup menus
 static StatusBar_Window *popup_sbw;
 
+//========================================================================
+
+class StatusBarXREF : public CrossReferenceToGUI
+{
+public:
+
+  void Update(int new_value)
+  {
+
+    StatusBar_Window *sbw;
+
+    sbw  = (StatusBar_Window *) (parent_window);
+    sbw->Update();
+
+  }
+};
+
+//========================================================================
+
+
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
@@ -357,18 +377,10 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
   
 }
 
-void StatusBar_update_xref(struct cross_reference_to_gui *xref, int new_value)
-{
-  StatusBar_Window *sbw;
-
-  sbw  = (StatusBar_Window *) (xref->parent_window);
-  sbw->Update();
-}
-
 void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 {
 
-  struct cross_reference_to_gui  *cross_reference;
+  StatusBarXREF *cross_reference;
 
   if(_gp == NULL)
     return;
@@ -382,12 +394,10 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
    * send information back to the gui
    */
 
-  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference = new StatusBarXREF();
   cross_reference->parent_window_type =   WT_status_bar;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = (gpointer) this;
-  cross_reference->update = StatusBar_update_xref;
-  cross_reference->remove = NULL;
   
   gpsim_assign_pc_xref(gp->pic_id, (gpointer) cross_reference);
 

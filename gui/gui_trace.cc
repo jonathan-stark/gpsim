@@ -65,98 +65,80 @@ static GtkStyle *normal_style;
 //struct TraceMapping trace_map[MAXTRACES];
 
 
-/*****************************************************************
- * xref_update
- *
- * This is called by the simulator when it has been determined that
- * that the trace buffer has changed and needs to be updated
- */
-static void xref_update(struct cross_reference_to_gui *xref, int new_value)
-{
+//========================================================================
 
-  GUI_Processor *gp;
-  guint64 cycle;
-  int trace_index;
+class TraceXREF : public CrossReferenceToGUI
+{
+public:
+
+  /*****************************************************************
+   * Update
+   *
+   * This is called by the simulator when it has been determined that
+   * that the trace buffer has changed and needs to be updated
+   */
+
+  void Update(int new_value)
+  {
+
+    GUI_Processor *gp;
+    guint64 cycle;
+    int trace_index;
 
 #define TRACE_STRING 100
-//  char str[TRACE_STRING];
-  GtkCList *clist;
 
-  char cycle_string[TRACE_STRING];
-  char trace_string[TRACE_STRING];
-  char *entry[TRACE_COLUMNS]={cycle_string,trace_string};
+    GtkCList *clist;
 
-  Trace_Window *tw;
+    char cycle_string[TRACE_STRING];
+    char trace_string[TRACE_STRING];
+    char *entry[TRACE_COLUMNS]={cycle_string,trace_string};
 
-  if(xref == NULL)
-    {
-      printf("Warning gui_trace.c: xref_update: xref=%p\n",xref);
+    Trace_Window *tw  = (Trace_Window *) (parent_window);
+
+    if(  (tw == NULL) || !tw->enabled)
       return;
-    }
 
-  tw  = (Trace_Window *) (xref->parent_window);
-  if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
-    return;
+    // Get the pointer to the `gui processor' structure
+    gp = tw->gp;
 
-  // Get the pointer to the `gui processor' structure
-  gp = ((GUI_Object*)tw)->gp;
+    if(gp==NULL || gp->pic_id==0)
+      {
+	puts("Warning gp or gp->pic_id == NULL in TraceWindow_update");
+	return;
+      }
 
-  if(gp==NULL || gp->pic_id==0)
-    {
-      puts("Warning gp or gp->pic_id == NULL in TraceWindow_update");
+    // If we're not allowing xref updates then exit
+    if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
       return;
-    }
 
-  // If we're not allowing xref updates then exit
-  if( !(tw->trace_flags & GTF_ENABLE_XREF_UPDATES))
-    return;
+    trace_string[0] = 0;  // Assume that the trace is empty.
+    gpsim_get_current_trace(&cycle, &trace_index, trace_string, TRACE_STRING);
 
-  trace_string[0] = 0;  // Assume that the trace is empty.
-  gpsim_get_current_trace(&cycle, &trace_index, trace_string, TRACE_STRING);
+    if(trace_string[0] && (cycle>=tw->last_cycle)) {
+      tw->last_cycle = cycle;
+      tw->trace_map[tw->trace_map_index].cycle = cycle;
+      tw->trace_map[tw->trace_map_index].simulation_trace_index = trace_index;
 
-  if(trace_string[0] && (cycle>=tw->last_cycle)) {
-    tw->last_cycle = cycle;
-    tw->trace_map[tw->trace_map_index].cycle = cycle;
-    tw->trace_map[tw->trace_map_index].simulation_trace_index = trace_index;
+      // Advance the trace_map_index using rollover arithmetic
+      if(++tw->trace_map_index >= MAXTRACES)
+	tw->trace_map_index = 0;
 
-    // Advance the trace_map_index using rollover arithmetic
-    if(++tw->trace_map_index >= MAXTRACES)
-      tw->trace_map_index = 0;
+      clist=GTK_CLIST(tw->trace_clist);
 
-    clist=GTK_CLIST(tw->trace_clist);
-//    gtk_clist_freeze(clist);
+      sprintf(cycle_string,"0x%016llx", cycle); // how do you specify 'unsigned'?
 
-    // Delete the first row in the clist
-//    gtk_clist_delete_rows(clist,0,1);
-
-    // and then add a row at the end for the new trace data
-//    gtk_clist_add_row(clist,1);
-    
-/*    gtk_clist_set_cell(clist,
-		       clist->maxrow,
-		       1,  // column
-		       GTK_JUSTIFY_LEFT,str);*/
-
-    sprintf(cycle_string,"0x%016llx", cycle); // how do you specify 'unsigned'?
-
-    //trace_map[trace_index].cycle = cycle;
-    //trace_map[trace_index].simulation_trace_index = gpsim_get;
-    
-/*    gtk_clist_set_cell(clist,
-		       clist->maxrow,
-		       0,  // column
-		       GTK_JUSTIFY_LEFT,str);*/
-    gtk_clist_append  (clist, entry);
-
-    if(clist->rows>MAXTRACES)
+      gtk_clist_append  (clist, entry);
+      
+      if(clist->rows>MAXTRACES)
         gtk_clist_remove(clist,0);
 
-//    gtk_clist_thaw(clist);
+    }
+
   }
 
+};
 
-  //update(tw,entry,new_value);
-}
+//========================================================================
 
 /*****************************************************************
  * TraceWindow_update
@@ -223,7 +205,7 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
 
 #define NAME_SIZE 32
 
-  struct cross_reference_to_gui *cross_reference;
+  TraceXREF *cross_reference;
 
   if(gp == NULL)
     return;
@@ -235,12 +217,10 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
     
   gp = _gp;
 
-  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference = new TraceXREF();
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = NULL;
-  cross_reference->update = xref_update;
-  cross_reference->remove = NULL;
   gpsim_assign_trace_xref((gpointer) cross_reference);
 }
 

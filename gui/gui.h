@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1998,1999,2000,2001
+   Copyright (C) 1998,1999,2000,2001,2002,2003,2004
    T. Scott Dattalo and Ralf Forsberg
 
 This file is part of gpsim.
@@ -85,14 +85,13 @@ enum window_category {
 // to reference it. The simulator keeps a linked listed of pointers
 // to all instances of these graphical representations
 
-struct cross_reference_to_gui {
+class CrossReferenceToGUI {
+public:
   enum window_types parent_window_type;
   gpointer     parent_window;
   gpointer     data;
-  void         (*update)  
-       (struct cross_reference_to_gui  *_this,int new_value);
-  void         (*remove)  
-       (struct cross_reference_to_gui  *_this);
+  virtual void Update(int new_value);
+  virtual void Remove(void);
 };
 
 
@@ -160,15 +159,45 @@ class GUI_Object {
 // A 'register' has two attributes as far as the gui is concerned:
 //   1) its location and 2) value that is being displayed
 //
+// FIXME -- why not just derive from the Register base class?
 
 class GUIRegister {
  public:
+  Register *reg;  // Pointer to the real register.
+  
   int row;        // row & col in register window
   int col;
-  int value;      // value displayed in register window
+  int shadow_value; // value displayed in register window.
+                    // This shadows the real register value. It's used
+                    // to monitor if register has changed between gui updates
+
   gboolean update_full;
+
+  CrossReferenceToGUI *xref;
+
+
+  void put_value(unsigned int new_value);
+  unsigned int get_value(void);
+
+  // put and get for update the shadow
+  void put_shadow(unsigned int new_value);
+  unsigned int get_shadow(void);
+
+
+  void Clear_xref(void);
+  void Assign_xref(CrossReferenceToGUI *);
+
 };
 
+class WatchEntry : public GUIRegister {
+public:
+
+  unsigned int pic_id;
+  Processor *cpu;
+  REGISTER_TYPE type;
+  unsigned int address;
+
+};
 
 //
 // A 'labeled entry' is an object consisting of gtk entry
@@ -282,8 +311,11 @@ class Watch_Window : public  GUI_Object
   Watch_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void ClearWatches(void);
-  virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address);
+  virtual void ClearWatch(WatchEntry *entry);
+  virtual void UpdateWatch(WatchEntry *entry);
+  virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg=NULL);
   virtual void Update(void);
+  virtual void UpdateMenus(void);
   
 };
 
