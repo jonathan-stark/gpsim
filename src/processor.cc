@@ -163,6 +163,7 @@ void Processor::set(const char *cP,int len)
 
 void Processor::get(char *cP, int len)
 {
+  cP[0] = 0;
 }
 
 //-------------------------------------------------------------------
