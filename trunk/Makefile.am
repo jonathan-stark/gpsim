@@ -1,0 +1,4 @@
+
+SUBDIRS = cli xpms gui src gpsim examples doc
+
+EXTRA_DIST = PROCESSORS HISTORY README.EXAMPLES ANNOUNCE
