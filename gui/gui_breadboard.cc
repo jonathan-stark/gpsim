@@ -80,25 +80,30 @@ static int pinspacing = PINLENGTH;
 static unsigned char board_matrix[XSIZE][YSIZE];
 
 
-static inline int allow_horiz(point p)
+//#define allow_horiz(p) (!(board_matrix[p.x][p.y]&HMASK))
+//#define allow_vert(p) (!(board_matrix[p.x][p.y]&VMASK))
+
+static inline int allow_horiz(point &p)
 {
-    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
-	return FALSE;
+//    assert(p.x>=0 && p.y>=0 && p.x<XSIZE && p.y<YSIZE);
+//    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
+//	return FALSE;
     if(board_matrix[p.x][p.y] & HMASK)
 	return FALSE;
-    if(board_matrix[p.x][p.y] & 0xF0)
-	return FALSE;
+//    if(board_matrix[p.x][p.y] & 0xF0)
+//	return FALSE;
     return TRUE;
 }
 
-static inline int allow_vert(point p)
+static inline int allow_vert(point &p)
 {
-    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
-	return FALSE;
+//    assert(p.x>=0 && p.y>=0 && p.x<XSIZE && p.y<YSIZE);
+//    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
+//	return FALSE;
     if(board_matrix[p.x][p.y] & VMASK)
 	return FALSE;
-    if(board_matrix[p.x][p.y] & 0xF0)
-	return FALSE;
+//    if(board_matrix[p.x][p.y] & 0xF0)
+//	return FALSE;
     return TRUE;
 }
 
@@ -145,7 +150,10 @@ static void inline prepend_point_to_path(path **pat, point p)
     {
 	dir = calculate_route_direction_exact(p, (*pat)->p);
 	if(dir==R_NONE)
-            add_point=1;
+	{
+            // Both X and Y has changed.
+	    add_point=1;
+	}
 	else if(*pat!=NULL && (*pat)->next!=NULL)
 	{
 	    if((*pat)->p.x == p.x &&
@@ -178,8 +186,8 @@ static void inline prepend_point_to_path(path **pat, point p)
     }
 
     if(add_point)*/
-
-    {
+//    {
+	// Lots and lots of mallocs, FIXME
 	new_point = (path*)malloc(sizeof(path));
 	new_point->p=p;
 	new_point->next = *pat;
@@ -191,7 +199,7 @@ static void inline prepend_point_to_path(path **pat, point p)
 	}
 	new_point->dir=dir;
 	*pat = new_point;
-    }
+//    }
 }
 
 // Free all of pat
@@ -608,6 +616,8 @@ static void clear_nodes(Breadboard_Window *bbw)
 
 }
 
+static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw);
+
 // Draw node in nodepath_list to layout_pixmap
 static void draw_nodes(Breadboard_Window *bbw)
 {
@@ -618,8 +628,8 @@ static void draw_nodes(Breadboard_Window *bbw)
 //			((GUI_Object*)bbw)->window->style->white_gc,
 			TRUE,
 			0, 0,
-			bbw->layout->allocation.width,
-			bbw->layout->allocation.height);
+			LAYOUTSIZE_X,
+			LAYOUTSIZE_Y);
 
     iter = nodepath_list;
 
@@ -650,8 +660,8 @@ static void draw_nodes(Breadboard_Window *bbw)
 
 		gdk_draw_line(bbw->layout_pixmap,
 			      bbw->pinline_gc,
-			      last_x-(int)bbw->hadj->value,last_y-(int)bbw->vadj->value,
-			      x-(int)bbw->hadj->value,y-(int)bbw->vadj->value);
+			      last_x,last_y,
+			      x,y);
 	    //    printf("(%d, %d) - (%d, %d)\n",last_x,last_y,x,y);
 
 		last_x=x;
@@ -662,15 +672,17 @@ static void draw_nodes(Breadboard_Window *bbw)
             iter=iter->next;
     }
 
-    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
+
+    layout_adj_changed(NULL,bbw);
+/*    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
 		    ((GUI_Object*)bbw)->window->style->white_gc,
 		    bbw->layout_pixmap,
 		    0, 0,
 		    0, 0,
-		    bbw->layout->allocation.width,
-		    bbw->layout->allocation.height);
+		    LAYOUTSIZE_X,
+		    LAYOUTSIZE_Y);
 
-    gtk_widget_queue_draw(bbw->layout);
+    gtk_widget_queue_draw(bbw->layout);*/
 }
 
 
@@ -688,6 +700,18 @@ static void update_board_matrix(Breadboard_Window *bbw)
     {
 	for(x=0;x<XSIZE;x++)
 	    board_matrix[x][y]=0;
+    }
+
+    // Mark board outline, so we limit traces here
+    for(x=0;x<XSIZE;x++)
+    {
+	board_matrix[x][0]=(HMASK|VMASK);
+	board_matrix[x][YSIZE-1]=(HMASK|VMASK);
+    }
+    for(y=0;y<YSIZE;y++)
+    {
+	board_matrix[0][y]=(HMASK|VMASK);
+	board_matrix[XSIZE-1][y]=(HMASK|VMASK);
     }
 
 
@@ -782,9 +806,6 @@ static void add_path_to_matrix(path *pat)
 	    board_matrix[x][y]|=HMASK;
 	if(pat->dir==R_DOWN || pat->dir==R_UP)
 	    board_matrix[x][y]|=VMASK;
-//	printf("xi %d yi %d\n",x,y);
-//	printf("patx %d paty %d\n",pat->p.x,pat->p.y);
-//        printf("patdir %d\n",pat->dir);
 	while(x!=pat->p.x || y!=pat->p.y)
 	{
 	    if(x<pat->p.x)
@@ -799,7 +820,6 @@ static void add_path_to_matrix(path *pat)
 		board_matrix[x][y]|=HMASK;
 	    if(pat->dir==R_DOWN || pat->dir==R_UP)
 		board_matrix[x][y]|=VMASK;
-//            printf("x %d y %d\n",x,y);
 	}
 
 	pat = pat->next;
@@ -824,15 +844,11 @@ static void reverse_path(path **pat)
 
     while(*pat != NULL)
     {
-//	    output_list=*pat;
-
 	// Keep a pointer to next
 	next = (*pat)->next;
 
 	// New next poins to last (reversing the list)
 	(*pat)->next = last;
-//	if(last!=NULL)
-//	    last->next=*pat;
 
 	last = *pat;
 	*pat = next;
@@ -984,7 +1000,8 @@ static void trace_node(struct gui_node *gn)
 	if(p==NULL)
 	{
 	    puts("Not found");
-	    assert(0);
+	    g_list_free(pinlist);
+            return;
 	}
 
 	pinlist = g_list_append(pinlist, p);
@@ -1024,7 +1041,7 @@ static void trace_node(struct gui_node *gn)
 
 	    printf("Tracing from %d,%d to %d,%d\n",start.x,start.y,end.x,end.y);
 	    maxdepth=abs(start.x-end.x)+abs(start.y-end.y);
-	    maxdepth=maxdepth*2+100;
+	    maxdepth=maxdepth*2+100; // Twice the distance, and 5 turns
 	    printf("Trying maxdepth %d\n",maxdepth);
 	    trace_two_points(&shortest_path[i][j], start, end,0,R_UP);
 	    if(shortest_path[i][j]==NULL)
@@ -1051,6 +1068,7 @@ static void trace_node(struct gui_node *gn)
 		clear_path(&shortest_path[i][j]);
 	free(permutations);
 	free(shortest_permutation);
+	g_list_free(pinlist);
 	return;
     }
 
@@ -1414,6 +1432,8 @@ static void position_module(struct gui_module *p, int x, int y)
             piniter = piniter->next;
 	}
     }
+
+    update_board_matrix(p->bbw);
 }
 
 static double module_distance(struct gui_module *p, int x, int y)
@@ -1629,12 +1649,11 @@ static gint button(GtkWidget *widget,
 		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
 				    p->iopin->snode->name());
 
-            update_board_matrix(p->bbw);
+            //update_board_matrix(p->bbw);
 	    trace_node(gn);
             draw_nodes(gn->bbw);
-
-	    return 1;
 	}
+	return 1;
     }
 
     return 0;
@@ -2902,8 +2921,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     if(x+p->width>max_x)
 	max_x=x+p->width;
 
-    update_board_matrix(p->bbw);
-
     return p;
 }
 
@@ -3089,23 +3106,34 @@ void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus
     }
 }
 
-static gint layout_configure_event (GtkWidget *widget,
-				    GdkEventConfigure *event,
-				    Breadboard_Window *bbw)
+// It feels like I'm doing something wrong when I have to do this... FIXME
+static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 {
+    if(bbw->layout_pixmap==NULL)
+    {
+	puts("bbw.c: no pixmap!");
+	return;
+    }
 
-    puts("Configure");
+    int xoffset, yoffset;
+    GtkAdjustment *xadj, *yadj;
 
-    if (bbw->layout_pixmap)
-	gdk_pixmap_unref(bbw->layout_pixmap);
+    xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(bbw->layout));
+    yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(bbw->layout));
 
-    bbw->layout_pixmap = gdk_pixmap_new(widget->window,
-					widget->allocation.width,
-					widget->allocation.height,
-					-1);
+    xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
+    yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
 
-    draw_nodes(bbw);
-    return TRUE;
+
+    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
+		    ((GUI_Object*)bbw)->window->style->white_gc,
+		    bbw->layout_pixmap,
+		    xoffset, yoffset,
+		    0, 0,
+		    bbw->layout->allocation.width,
+		    bbw->layout->allocation.height);
+
+    gtk_widget_queue_draw(bbw->layout);
 }
 
 static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
@@ -3116,12 +3144,26 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
 	return;
     }
 
+    layout_adj_changed(widget, bbw);
+
+    int xoffset, yoffset;
+    GtkAdjustment *xadj, *yadj;
+
+    xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(widget));
+    yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(widget));
+
+    xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
+    yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
+
+
     gdk_draw_pixmap(GTK_LAYOUT (widget)->bin_window,
 			    ((GUI_Object*)bbw)->window->style->white_gc,
 		    bbw->layout_pixmap,
-		    event->area.x, event->area.y,
+		    event->area.x+xoffset, event->area.y+yoffset,
 		    event->area.x, event->area.y,
 		    event->area.width, event->area.height);
+
+    gtk_widget_queue_draw(widget);
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
@@ -3631,10 +3673,19 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_release_event",
 		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
-  gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",
-			   GTK_SIGNAL_FUNC(layout_configure_event),bbw);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"expose_event",
 		     (GtkSignalFunc) layout_expose,bbw);
+
+  draw_nodes(bbw);
+
+  GtkAdjustment *xadj, *yadj;
+  xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(bbw->layout));
+  yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(bbw->layout));
+  gtk_signal_connect(GTK_OBJECT(xadj),"value_changed",
+		     (GtkSignalFunc) layout_adj_changed,bbw);
+  gtk_signal_connect(GTK_OBJECT(yadj),"value_changed",
+		     (GtkSignalFunc) layout_adj_changed,bbw);
+
   gtk_widget_set_app_paintable(bbw->layout, TRUE);
   gtk_widget_show (bbw->layout);
 
@@ -3675,6 +3726,11 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 	bbw->pinline_gc=gdk_gc_new(bbw->gui_obj.window->window);
 	g_assert(bbw->pinline_gc!=NULL);
 	gdk_gc_set_line_attributes(bbw->pinline_gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+  bbw->layout_pixmap = gdk_pixmap_new(window->window,
+				      LAYOUTSIZE_X,
+				      LAYOUTSIZE_Y,
+				      -1);
 
   bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y");
 
