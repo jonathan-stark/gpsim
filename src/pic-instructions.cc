@@ -422,12 +422,12 @@ void BTFSC::execute(void)
   else
     reg = cpu->register_bank[register_address];
 
+  cpu->pc.increment();
+
   if( 0 == (mask & reg->get()) )
     {
       cpu->pc.skip();                  // Skip next instruction
     }
-
-  cpu->pc.increment();
 
 }
 
@@ -452,13 +452,12 @@ void BTFSS::execute(void)
   else
     reg = cpu->register_bank[register_address];
 
+  cpu->pc.increment();
 
   if( 0 != (mask & reg->get()) )
     {
       cpu->pc.skip();                  // Skip next instruction
     }
-
-  cpu->pc.increment();
 
 }
 

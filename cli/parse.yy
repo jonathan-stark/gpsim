@@ -41,6 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_help.h"
 #include "cmd_list.h"
 #include "cmd_load.h"
+#include "cmd_log.h"
 #include "cmd_node.h"
 #include "cmd_module.h"
 #include "cmd_processor.h"
@@ -102,6 +103,7 @@ void free_char_list(char_list *);
 %token <s>  FREQUENCY
 %token <s>  HELP
 %token <s>  LOAD
+%token <s>  LOG
 %token <s>  LIST
 %token <s>  NODE
 %token <s>  MODULE
@@ -156,6 +158,7 @@ cmd: ignored
      | frequency_cmd
      | help_cmd
      | list_cmd
+     | log_cmd
      | load_cmd
      | node_cmd
      | module_cmd
@@ -233,21 +236,28 @@ break_cmd: BREAK
 	    c_break.set_break(opt->value); YYABORT;
 	  }
           | BREAK bit_flag _register
-          { c_break.set_break($2->value,$3); YYABORT;}
+          { 
+             c_break.set_break($2->value,$3); YYABORT;
+          }
           | BREAK bit_flag _register NUMBER
-          { cout <<"break 1 number\n";
+          { 
 	     c_break.set_break($2->value,$3,$4,0); YYABORT;}
           | BREAK bit_flag _register NUMBER NUMBER
-          { cout <<"break 2 number\n";
-	    c_break.set_break($2->value,$3,$4,$5); YYABORT;}
+          { 
+	    c_break.set_break($2->value,$3,$4,$5); YYABORT;
+          }
           | BREAK bit_flag STRING
-          { c_break.set_break($2->value,$3); YYABORT;}
+          { 
+            c_break.set_break($2->value,$3); YYABORT;
+          }
           | BREAK bit_flag STRING NUMBER
-          { cout <<"break 1 number string\n";
-	    c_break.set_break($2->value,$3,$4, 0); YYABORT;}
+          { 
+	    c_break.set_break($2->value,$3,$4, 0); YYABORT;
+          }
           | BREAK bit_flag STRING NUMBER NUMBER
-          { cout <<"break 1 number string\n";
-	    c_break.set_break($2->value,$3,$4,$5); YYABORT;}
+          { 
+	    c_break.set_break($2->value,$3,$4,$5); YYABORT;
+          }
           ;
 
 bus_cmd: BUS
@@ -315,6 +325,44 @@ load_cmd: LOAD bit_flag STRING
 		YYABORT;
 	      }
 	     YYABORT;
+	  }
+          ;
+
+log_cmd: LOG
+          {
+	    c_log.log(); YYABORT;
+	  }
+          | LOG NUMBER
+          {
+	    c_log.log($2); YYABORT;
+	  }
+          | LOG bit_flag
+          {
+	    c_log.log($2); YYABORT;
+	  }
+          | LOG bit_flag STRING 
+          {
+	    c_log.log($2,$3,-1,-1); YYABORT;
+	  }
+          | LOG bit_flag STRING NUMBER
+          {
+	    c_log.log($2,$3,$4,0); YYABORT;
+	  }
+          | LOG bit_flag STRING NUMBER NUMBER
+          {
+	    c_log.log($2,$3,$4,$5); YYABORT;
+	  }
+          | LOG bit_flag NUMBER 
+          {
+	    c_log.log($2,$3,-1,-1); YYABORT;
+	  }
+          | LOG bit_flag NUMBER NUMBER 
+          {
+	    c_log.log($2,$3,$4,0); YYABORT;
+	  }
+          | LOG bit_flag NUMBER NUMBER NUMBER
+          {
+	    c_log.log($2,$3,$4,$5); YYABORT;
 	  }
           ;
 
@@ -597,6 +645,14 @@ trace_cmd: TRACE
           {
 	    c_trace.trace($2); YYABORT;
 	  }
+          | TRACE string_option
+          {
+	    c_trace.trace($2); YYABORT;
+	  }
+          | TRACE bit_flag
+          {
+	    c_trace.trace($2); YYABORT;
+	  }
           ;
 
 version_cmd: gpsim_VERSION
@@ -739,6 +795,7 @@ void initialize_commands(void)
   help.token_value = HELP;
   c_list.token_value = LIST;
   c_load.token_value = LOAD;
+  c_log.token_value = LOG;
   c_module.token_value = MODULE;
   c_node.token_value = NODE;
   c_processor.token_value = PROCESSOR;

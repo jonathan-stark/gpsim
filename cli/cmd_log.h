@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1999 T. Scott Dattalo
+   Copyright (C) 1999,2000,2001,2002 T. Scott Dattalo
 
 This file is part of gpsim.
 
@@ -18,23 +18,26 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#ifndef __CMD_TRACE_H__
-#define __CMD_TRACE_H__
+#ifndef __CMD_LOG_H__
+#define __CMD_LOG_H__
 
-class cmd_trace : public command
+class cmd_log : public command
 {
 public:
 
-  cmd_trace(void);
-  void trace(void);
+  cmd_log(void);
+  void log(void);
 
-  void trace(int numberof);
-  void trace(cmd_options *opt);
-  void trace(cmd_options_num *con);
-  void trace(cmd_options_str *cos);
-  void trace(int bit_flag, int force_bit_test);
+  //void log(int bit_flag, guint64 value);
+  //void log(int bit_flag, int reg, int value,int mask);
+  void log(int number);
+
+  void log(cmd_options *opt);
+  void log(cmd_options *opt, char *str,int,int);
+  void log(cmd_options *opt, int,int,int);
+
 };
 
-extern cmd_trace c_trace;
+extern cmd_log c_log;
 #endif
 

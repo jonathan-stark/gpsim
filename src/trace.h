@@ -52,13 +52,16 @@ class Trace
 #define    OPCODE_WRITE     (0x0d<<24)
 #define    MODULE_TRACE1    (0x0e<<24)
 #define    MODULE_TRACE2    (0x0f<<24)
-#define    CYCLE_INCREMENT  (0x10<<24)
-#define    CYCLE_COUNTER_LO (0x80<<24)
-#define    CYCLE_COUNTER_HI (0x40<<24)
+#define    CYCLE_INCREMENT    (0x10<<24)
+#define    REGISTER_READ_VAL  (0x11<<24)
+#define    REGISTER_WRITE_VAL (0x12<<24)
+#define    CYCLE_COUNTER_LO   (0x80<<24)
+#define    CYCLE_COUNTER_HI   (0x40<<24)
 
 
 #define    TRACE_BUFFER_SIZE  (1<<12)
 #define    TRACE_BUFFER_MASK  (TRACE_BUFFER_SIZE-1)
+#define    TRACE_BUFFER_NEAR_FULL  (TRACE_BUFFER_SIZE * 3 /4)
 #define    TRACE_STRING_BUFFER 50
 
   unsigned int trace_buffer[TRACE_BUFFER_SIZE];
@@ -106,6 +109,18 @@ class Trace
   inline void register_write (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | value;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void register_read_value (unsigned int address, unsigned int value)
+  {
+    trace_buffer[trace_index] = REGISTER_READ_VAL | (address << 8) | value;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void register_write_value (unsigned int address, unsigned int value)
+  {
+    trace_buffer[trace_index] = REGISTER_WRITE_VAL | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
@@ -190,9 +205,13 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
+  inline bool near_full(void) {
+    return (trace_index > TRACE_BUFFER_NEAR_FULL);
+  }
+
   void switch_cpus(pic_processor *new_cpu) {cpu = new_cpu;};
 
-  int  dump (unsigned int n=0, FILE *out_stream=NULL);
+  int  dump (unsigned int n=0, FILE *out_stream=NULL, int watch_reg=-1);
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
   int  dump_instruction(unsigned int instruction_index);
@@ -212,10 +231,12 @@ class TraceLog : public BreakCallBack
 {
 public:
   bool logging;
+  bool lograw;
   char *log_filename;
   FILE *log_file;
   pic_processor *cpu;
   unsigned int last_trace_index;
+  Trace buffer;
 
   TraceLog(void);
   ~TraceLog(void);
@@ -226,7 +247,7 @@ public:
   void switch_cpus(pic_processor *new_cpu);
   void open_logfile(char *new_fname);
   void close_logfile(void);
-
+  void write_logfile(void);
 };
 
 extern TraceLog trace_log;

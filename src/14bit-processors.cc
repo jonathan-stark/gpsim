@@ -89,6 +89,8 @@ interrupt (void)
   stack->push(pc.value);
   intcon->clear_gie();
 
+  trace.cycle_increment();
+
   pc.jump(INTERRUPT_VECTOR);
 
 }
