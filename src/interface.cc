@@ -1905,6 +1905,11 @@ static void gui_update_callback  (gpointer p)
   }
 }
 
+void update_gui(void)
+{
+    gui_update_callback(&gi);
+}
+
 gpsimInterface::gpsimInterface (void )
 {
 
