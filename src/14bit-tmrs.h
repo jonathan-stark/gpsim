@@ -540,6 +540,7 @@ public:
   void update(int ut = TMR2_DONTCARE_UPDATE);
   void pwm_dc(unsigned int dc, unsigned int ccp_address);
   void stop_pwm(unsigned int ccp_address);
+  virtual unsigned int get_value(void);
 
 };
 

@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "ioports.h"
 #include "interface.h"
 #include "p16x6x.h"
+#include "p16f62x.h"
 
 #include "stimuli.h"
 
@@ -687,7 +688,9 @@ unsigned int PORTB::get(void)
 
 
   // If any of the upper 4 bits of port b changed states then set RBIF
-  if(diff & 0xf0)
+  // Note, that the interrupt on change feature only works for I/O's
+  // configured as inputs.
+  if(diff & 0xf0 & tris->value)
     cpu14->intcon->set_rbif();
 
   return value;
@@ -722,10 +725,225 @@ void PORTB::setbit(unsigned int bit_number, bool new_value)
 
 
   // If any of the upper 4 bits of port b changed states then set RBIF
-  if(diff & 0xf0)
+  // Note, that the interrupt on change feature only works for I/O's
+  // configured as inputs.
+  if(diff & 0xf0 & tris->value)
     cpu14->intcon->set_rbif();
 }
 
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+PORTB_62x::PORTB_62x(void)
+{
+  //new_name("portb");
+}
+
+unsigned int PORTB_62x::get(void)
+{
+  unsigned int old_value;
+
+  old_value = value;
+
+  //  cout << "PORTB_62x::get()\n";
+
+  IOPORT::get();
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  // If portb bit 0 changed states, check to see if an interrupt should occur
+  if( diff & 1)
+    {
+      // If the option register is selecting 'interrupt on rising edge' AND
+      // the old_value was low (and hence the new high) then set  INTF
+      //                    OR
+      // If the option register is selecting 'interrupt on falling edge' AND
+      // the old_value was high (and hence the new low) then set  INTF
+
+      // These two statements can be combined into an exclusive or:
+
+      if( (intedg &  intedg_MASK) ^ (old_value & 1))
+	cpu14->intcon->set_intf();
+    }
+
+
+  // If any of the upper 4 bits of port b changed states then set RBIF
+  // Note, that the interrupt on change feature only works for I/O's
+  // configured as inputs.
+  if(diff & 0xf0 & tris->value)
+    cpu14->intcon->set_rbif();
+
+  if(ccp1con && ( diff & CCP1) )
+    ccp1con->new_edge(value & CCP1);
+
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
+
+  return value;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
+{
+  unsigned int old_value = value;
+
+  //cout << "PORTB_62x::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  // If portb bit 0 changed states, check to see if an interrupt should occur
+  if( diff & 1)
+    {
+      // If the option register is selecting 'interrupt on rising edge' AND
+      // the old_value was low (and hence the new high) then set  INTF
+      //                    OR
+      // If the option register is selecting 'interrupt on falling edge' AND
+      // the old_value was high (and hence the new low) then set  INTF
+
+      // These two statements can be combined into an exclusive or:
+      //cout << "PORTB_62x::setbit() - bit changed states\n";
+      if( (intedg &  intedg_MASK) ^ (old_value & 1))
+	cpu14->intcon->set_intf();
+    }
+
+
+  // If any of the upper 4 bits of port b changed states then set RBIF
+  // Note, that the interrupt on change feature only works for I/O's
+  // configured as inputs.
+  if(diff & 0xf0 & tris->value)
+    cpu14->intcon->set_rbif();
+
+  if(ccp1con && ( diff & CCP1) )
+    ccp1con->new_edge(value & CCP1);
+
+  if( usart && (diff & RX))
+    usart->new_rx_edge(value & RX);
+
+}
+
+
+
+//-------------------------------------------------------------------
+//  PORTA_62x::put(unsigned int new_value)
+//
+//  inputs:  new_value - here's where the I/O port is written (e.g.
+//                       gpsim is executing a MOVWF IOPORT,F instruction.)
+//  returns: none
+//
+//  The I/O Port is updated with the new value. If there are any stimuli
+// attached to the I/O pins then they will be updated as well.
+// Note that for the 62x device, the comparator module overides the
+// tris output control.
+//
+//-------------------------------------------------------------------
+
+void PORTA_62x::put(unsigned int new_value)
+{
+
+  if(new_value > 255)
+    cout << "PIC_IOPORT::put value >255\n";
+  // The I/O Ports have an internal latch that holds the state of the last
+  // write, even if the I/O pins are configured as inputs. If the tris port
+  // changes an I/O pin from an input to an output, then the contents of this
+  // internal latch will be placed onto the external I/O pin.
+
+  internal_latch = new_value;
+
+  // update only those bits that are really outputs
+  //cout << "IOPORT::put trying to put " << new_value << '\n';
+
+  value = (new_value & ~tris->value) | (value & tris->value);
+
+  //cout << " IOPORT::put just set port value to " << value << '\n';
+
+  // Update the stimuli - if there are any
+  if(stimulus_mask)
+    update_stimuli();
+
+  //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
+
+  trace.register_write(address,value);
+
+}
+
+
+//-------------------------------------------------------------------
+//  unsigned int PORTA_62x::get(void)
+//
+//  inputs:  none
+//
+//  returns: 
+//
+//-------------------------------------------------------------------
+
+unsigned int PORTA_62x::get(void)
+{
+  unsigned int old_value;
+
+  old_value = pin_value;
+
+  if(stimulus_mask) {
+    pin_value = ( (pin_value & ~stimulus_mask) | update_stimuli());
+  }
+
+
+  // If the comparator is enabled, then all of the "analog" pins are
+  // read as zero.
+
+  if(comparator && comparator->enabled()) {
+
+    value = pin_value & (0xff & ~( AN0 | AN1 | AN2 | AN3));
+
+  } else {
+
+    value = pin_value;
+
+    //int diff = old_value ^ value; // The difference between old and new
+
+
+  }
+
+  
+  return value;
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  //cout << "PORTA::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  // If porta bit 4 changed states, check to see if tmr0 should increment
+  if( diff & 0x10)
+    {
+      //cout << "bit 4 changed\n";
+
+      if(cpu14->option_reg.get_t0cs())
+	{
+	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
+	if( ((value & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
+	  cpu14->tmr0.increment();
+	}
+    }
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+PORTA_62x::PORTA_62x(void)
+{
+  //new_name("portb");
+}
 
 //-------------------------------------------------------------------
 //
@@ -816,7 +1034,7 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
   int diff = old_value ^ value; // The difference between old and new
 
-  if( diff & CCP1)
+  if(ccp1con && ( diff & CCP1) )
     ccp1con->new_edge(value & CCP1);
 
   if( usart && (diff & RX))

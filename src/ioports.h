@@ -109,6 +109,38 @@ public:
   void setbit(unsigned int bit_number, bool new_value);
 };
 
+// PORTB on the 62x devices is totally different than PORTB on
+// other PICs.
+class CCPCON;
+class PORTB_62x : public PORTB
+{
+ public:
+  enum
+    {
+
+      RX    = 1 << 1,
+      DT    = 1 << 1,
+      TX    = 1 << 2,
+      CK    = 1 << 2,
+      CCP1  = 1 << 3,
+      T1CKI = 1 << 6,
+      T1OSO = 1 << 6,
+      T1OSI = 1 << 7,
+      //SCK   = 1 << 3,
+      //SCL   = 1 << 3,  /* SCL and SCK share the same pin */
+      //SDI   = 1 << 4,
+      //SDA   = 1 << 4,  /* SDA and SDI share the same pin */
+      //SDO   = 1 << 5
+    };
+
+  CCPCON *ccp1con;
+  USART_MODULE *usart;
+
+  PORTB_62x(void);
+  unsigned int get(void);
+  void setbit(unsigned int bit_number, bool new_value);
+};
+
 class PORTA : public PIC_IOPORT
 {
 public:
@@ -119,8 +151,44 @@ public:
 
 };
 
+class COMPARATOR_MODULE;
+class PORTA_62x : public PIC_IOPORT
+{
+ public:
 
-class CCPCON;
+  // The 62x PORT A can have a different state on the I/O pins
+  // then what is obtained via a "MOVF  PORTA,W" reading of the
+  // I/O Port. 'pin_value' reflects the digital states on the I/O
+  // pins. The normal 'value' reflects the state when PORTA
+  // is read.
+
+  unsigned int pin_value;
+
+  // auxillary functions of the port bits:
+  enum
+    {
+      AN0 = 1 << 0,
+      AN1 = 1 << 1,
+      AN2 = 1 << 2,
+      AN3 = 1 << 3,
+      VREF = 1 << 2,
+      CMP1 = 1 << 3,
+      CMP2 = 1 << 4,
+      TOCKI = 1 << 4,
+      THV = 1 << 5,
+
+    };
+
+  COMPARATOR_MODULE *comparator;
+
+  PORTA_62x(void);
+
+  void setbit(unsigned int bit_number, bool new_value);
+  unsigned int get(void);
+  virtual void put(unsigned int new_value);
+
+};
+
 class PORTC : public PIC_IOPORT
 {
 public:
