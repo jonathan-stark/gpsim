@@ -1,3 +1,7 @@
+2003-11-20  Scott Dattalo  <scott@dattalo.com>
+	* src/ioports.cc - PORT B pullups were not working 
+	* regression/* - Added some more regression tests
+	
 2003-11-16  Scott Dattalo  <scott@dattalo.com>
 	* gui/* More conversions to C++
 
