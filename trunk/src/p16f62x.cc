@@ -156,6 +156,8 @@ void P16F62x::create_sfr_map(void)
   num_of_sfrs = 0;
 
   intcon = &intcon_reg;
+  intcon_reg.pir1 = &pir1;
+  intcon_reg.pir2 = NULL;
 
   // Link the usart and portb
   ((PORTB_62x*)portb)->usart = &usart;
