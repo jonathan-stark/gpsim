@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 //--------------------------------------------------
 
-ADDLW::ADDLW (pic_processor *new_cpu, unsigned int new_opcode)
+ADDLW::ADDLW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -56,7 +56,7 @@ void ADDLW::execute(void)
 
 //--------------------------------------------------
 
-RETFIE::RETFIE (pic_processor *new_cpu, unsigned int new_opcode)
+RETFIE::RETFIE (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -77,7 +77,7 @@ void RETFIE::execute(void)
 
 //--------------------------------------------------
 
-RETURN::RETURN (pic_processor *new_cpu, unsigned int new_opcode)
+RETURN::RETURN (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);
@@ -97,7 +97,7 @@ void RETURN::execute(void)
 
 //--------------------------------------------------
 
-SUBLW::SUBLW (pic_processor *new_cpu, unsigned int new_opcode)
+SUBLW::SUBLW (Processor *new_cpu, unsigned int new_opcode)
 {
 
   decode(new_cpu, new_opcode);

@@ -1,3 +1,8 @@
+2004-03-09 Scott Dattalo  <scott@dattalo.com>
+	* src/pic-instructions.h, src/12bit-instructions.h, src/stimuli.h,
+	src/14bit-instructions.h, src/14bit-instructions.h, src/16bit-instructions.h,
+	src/16bit-instructions.cc: changed references of pic-processor to Processor.
+
 2004-03-08 Scott Dattalo  <scott@dattalo.com>
 	* modules/push_button.cc, modules/push_button.h: new module
 	from Carlos Ghirardelli.

@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 class XrefObject;
-class pic_processor;
+class Processor;
 class Register;
 class Processor;
 
@@ -129,10 +129,10 @@ public:
     //cout << "*** INVALID INSTRUCTION ***\n";
   };
 
-  invalid_instruction(pic_processor *new_cpu=0,unsigned int new_opcode=0);
+  invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
   virtual INSTRUCTION_TYPES isa(void) {return INVALID_INSTRUCTION;};
   virtual char *name(char *str){return("INVALID");};
-  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+  static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new invalid_instruction(new_cpu,new_opcode);}
 
 };
@@ -222,7 +222,7 @@ extern invalid_instruction bad_instruction;
 struct instruction_constructor {
   unsigned int inst_mask;
   unsigned int opcode;
-  instruction * (*inst_constructor) (pic_processor *cpu, unsigned int inst);
+  instruction * (*inst_constructor) (Processor *cpu, unsigned int inst);
 };
 
 

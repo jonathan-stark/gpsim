@@ -378,18 +378,12 @@ public:
     next_state;
 
   guint64
-    //*transition_cycles,
     future_cycle;
 
   GSList *current_sample;
   GSList *samples;
 
-  //int
-  //*values;
-
-
-  pic_processor *cpu;
-    
+  Processor *cpu;
 
   virtual void callback(void);
   virtual int get_voltage(guint64 current_time);

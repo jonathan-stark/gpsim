@@ -735,7 +735,7 @@ void asynchronous_stimulus::start(void)
   //   (a cpu is only needed for the cycle counter)
 
   if(!cpu)
-    cpu = (pic_processor*)active_cpu;
+    cpu = active_cpu;
 
   if(cpu && samples) //  && transition_cycles)
     {
@@ -806,7 +806,7 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
   //   (a cpu is only needed for the cycle counter)
 
   if(!cpu)
-    cpu = (pic_processor *)active_cpu;
+    cpu = active_cpu;
 
   if(cpu && samples) //  && transition_cycles)
     {
