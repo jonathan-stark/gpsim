@@ -479,7 +479,7 @@ class PIR_SET_1 : public PIR_SET
     pir1->set_tmr2if();
   }
 
- private:
+  // private:
   PIR1v1	*pir1;
   PIR2v1	*pir2;
 };
@@ -555,7 +555,7 @@ class PIR_SET_2 : public PIR_SET
     pir1->set_adif();
   }
 
- private:
+  // private:
   PIR1v2	*pir1;
   PIR2v2	*pir2;
   PIR3v2	*pir3;

@@ -63,7 +63,7 @@ enum
   inline void clear_bits(unsigned int b) { valid_bits &= ~b; }
 
 
-private:
+  //private:
   unsigned int valid_bits;
   EEPROM *eeprom;
 };
@@ -106,7 +106,7 @@ enum EE_STATES
     return (eestate == EEREADY_FOR_WRITE);
   }
 
-private:
+  //private:
   EEPROM *eeprom;
   enum EE_STATES eestate;
 };
@@ -125,7 +125,7 @@ public:
   unsigned int get(void);
   virtual void set_eeprom(EEPROM *ee) { eeprom = ee; }
 
-private:
+  //private:
   EEPROM *eeprom;
 
 };
@@ -145,7 +145,7 @@ public:
 
   virtual void set_eeprom(EEPROM *ee) { eeprom = ee; }
 
-private:
+  //private:
   EEPROM *eeprom;
 };
 
@@ -187,7 +187,7 @@ public:
 
   void dump(void);
 
-protected:
+  //protected:
   char *name_str;
   pic_processor *cpu;
   INTCON *intcon;
@@ -218,7 +218,7 @@ public:
 
   virtual void write_is_complete(void);
 
-protected:
+  //protected:
   PIR_SET *pir_set;
 
 
@@ -237,7 +237,7 @@ public:
   inline virtual EEDATA *get_reg_eedatah(void) { return (&eedatah); }
   inline virtual EEADR *get_reg_eeadrh(void) { return (&eeadrh); }
 
-protected:
+  //protected:
   EEDATA eedatah;
   EEADR  eeadrh;
 };

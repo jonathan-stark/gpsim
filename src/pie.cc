@@ -3,7 +3,6 @@
 using namespace std;
 //#include "breakpoints.h"
 #include "trace.h"
-#include "gpsim_classes.h"	// for RESET_TYPE
 
 #include "intcon.h"
 #include "pie.h"
