@@ -396,6 +396,14 @@ register_symbol::register_symbol(const char *_name, Register *_reg)
 {
 }
 
+string &register_symbol::name(void) {
+  return reg->name();
+}
+
+char *register_symbol::name(char *buf, int len) {
+  return reg->name(buf, len);
+}
+
 string register_symbol::toString()
 {
   if(reg) {

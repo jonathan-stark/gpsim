@@ -157,6 +157,8 @@ public:
   register_symbol(const char *, Register *);
 
   virtual symbol *copy();
+  virtual string &name(void);
+  virtual char *name(char *, int len);
   virtual string toString();
 
   virtual void get(int &);
