@@ -1,3 +1,8 @@
+2004-02-25 Hans-Juergen Dorn <hans.dorn@apl-landau.de>
+	* src/16bit-registers.cc: gpsim was pushing onto
+	the stack before decrementing the stack pointer. Also,
+	the gpsim internally formatted address was being pushed.
+	
 2004-02-17  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_scope.cc: expose and resizing kind of work.
 

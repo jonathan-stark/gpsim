@@ -871,7 +871,6 @@ Stack16::Stack16(void)
 
 void Stack16::push(unsigned int address)
 {
-  contents[stkptr.value & Stack16_MASK] = address;
 
   stkptr.value++;
 
@@ -879,8 +878,12 @@ void Stack16::push(unsigned int address)
     {
       // check the STVREN bit
       // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value |= 0x80;
+      stkptr.value |= 0x9f;
     }
+
+  // Push 21-bit address onto the stack
+
+  contents[stkptr.value & Stack16_MASK] = address << 1;
 
   stkptr.value &= 0xdf;
 
@@ -888,15 +891,22 @@ void Stack16::push(unsigned int address)
 
 unsigned int Stack16::pop(void)
 {
-
   if(stkptr.value & Stack16_MASK)
-    return(contents[ (--stkptr.value) & Stack16_MASK]);
+    {
+      // read 21-bit address from stack
+      unsigned int ret = (contents[stkptr.value & Stack16_MASK]) >> 1;
+      stkptr.value--;
+      stkptr.value &= 0x5f;
+      return(ret);
+
+    }
+    // return(contents[ (--stkptr.value) & Stack16_MASK]);
   else
     {
       // check the STVREN bit
       // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value |= 0x5f;
-      return(contents[0]);
+      stkptr.value = 0x40; // don't decrement past 0, signalize STKUNF
+      return(0); // return 0 if underflow
     }
 }
 
