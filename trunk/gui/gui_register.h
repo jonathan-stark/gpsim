@@ -54,11 +54,11 @@ class GUIRegister {
 
   bool hasBreak(void); // True if there's a breakpoint set on this register.
 
-  bool hasChanged(void); // True if register has changed values since last updated.
+  bool hasChanged(RegisterValue &current_value) const;  // True if register has changed values since last updated.
 
   CrossReferenceToGUI *xref;
 
-  char *getValueAsString(char *, int, char *format);
+  char *getValueAsString(char *, int, char *format, RegisterValue &value);
 
   void put_value(unsigned int new_value);
   unsigned int get_value(void);

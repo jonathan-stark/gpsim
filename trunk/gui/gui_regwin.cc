@@ -70,6 +70,7 @@ typedef enum {
     MENU_LOG_WRITE,
     MENU_LOG_READ_VALUE,
     MENU_LOG_WRITE_VALUE,
+    MENU_REGWIN_REFRESH,
 } menu_id;
 
 
@@ -133,6 +134,7 @@ static menu_item menu_items[] = {
     {"Set log on read value...", MENU_LOG_READ_VALUE},
     {"Set log on write value...", MENU_LOG_WRITE_VALUE},
     {"Add watch", MENU_ADD_WATCH},
+    {"Refresh", MENU_REGWIN_REFRESH},
     {"Settings...", MENU_SETTINGS}
 };
 
@@ -199,7 +201,8 @@ RegisterValue GUIRegister::getRV(void)
   return RegisterValue(0,0);
 }
 
-char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
+char * GUIRegister::getValueAsString(char *str, int len, char *pFormat,
+                                     RegisterValue &value)
 {
 
   if(!str || !len)
@@ -211,9 +214,6 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
   if(reg && bIsValid()) {
 
     char hex2ascii[] = "0123456789ABCDEF";
-
-    RegisterValue value = reg->getRV_notrace();
-
     int i;
     int min = (len < register_size*2) ? len : register_size*2;
 
@@ -236,16 +236,9 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
   return str;
 
 }
-bool GUIRegister::hasChanged(void)
+
+bool GUIRegister::hasChanged(RegisterValue &current_value) const
 {
-
-  Register *reg = get_register();
-
-  if(!reg)
-    return false;
-
-  RegisterValue current_value = reg->getRV_notrace();
-
   if( (shadow.data != current_value.data)  ||
       (shadow.init != current_value.init) )
     return true;
@@ -335,8 +328,8 @@ public:
 
     if(reg->row > GTK_SHEET(rw->register_sheet)->maxrow)
       {
-	puts("Warning reg->row > maxrow in xref_update_cell");
-	return;
+      puts("Warning reg->row > maxrow in xref_update_cell");
+      return;
       }
 
     address = rw->row_to_address[reg->row]+reg->col;
@@ -400,50 +393,47 @@ int gui_get_value(char *prompt)
 
     int value;
     
-    if(dialog==0)
-    {
-	dialog = gtk_dialog_new();
-	gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
-//	gtk_signal_connect(GTK_OBJECT(dialog),
-//			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
+    if(dialog==0) {
+      dialog = gtk_dialog_new();
+      gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
+      //	gtk_signal_connect(GTK_OBJECT(dialog),
+      //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+      gtk_signal_connect_object(GTK_OBJECT(dialog),
+				      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(dialog));
 
-	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
-	
-	hbox = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+      label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+      gtk_widget_show(label);
+      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
 
-	button = gtk_button_new_with_label("OK");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-	
-	button = gtk_button_new_with_label("Cancel");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
-			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+      hbox = gtk_hbox_new(0,0);
+      gtk_widget_show(hbox);
+      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-	label=gtk_label_new(prompt);
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label,
-			   FALSE,FALSE, 20);
+      button = gtk_button_new_with_label("OK");
+      gtk_widget_show(button);
+      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			        FALSE,FALSE,10);
+      gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			        GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
 
-	entry=gtk_entry_new();
-	gtk_widget_show(entry);
-	gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
+      button = gtk_button_new_with_label("Cancel");
+      gtk_widget_show(button);
+      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			        FALSE,FALSE,10);
+      gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			        GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
+      label=gtk_label_new(prompt);
+      gtk_widget_show(label);
+      gtk_box_pack_start(GTK_BOX(hbox), label,
+			        FALSE,FALSE, 20);
+
+      entry=gtk_entry_new();
+      gtk_widget_show(entry);
+      gtk_box_pack_start(GTK_BOX(hbox), entry,FALSE,FALSE,20);
     }
-    else
-    {
-	gtk_label_set_text(GTK_LABEL(label),prompt);
+    else {
+      gtk_label_set_text(GTK_LABEL(label),prompt);
     }
     
 //    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
@@ -451,21 +441,21 @@ int gui_get_value(char *prompt)
 
     gtk_grab_add(dialog);
     while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-	gtk_main_iteration();
+      gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
     if(retval==TRUE)
     {
-	char *end;
-	const gchar *entry_text;
-	entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
-	value = strtoul(entry_text,&end,0);
-	if(*entry_text!='\0' && *end=='\0')
-	    return value;
-	else
-	    return -1;
+      char *end;
+      const gchar *entry_text;
+      entry_text = gtk_entry_get_text(GTK_ENTRY(entry));
+      value = strtoul(entry_text,&end,0);
+      if(*entry_text!='\0' && *end=='\0')
+        return value;
+      else
+        return -1;
     }
     
     return -1;
@@ -551,38 +541,38 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 
     gtk_grab_add(dialog);
     while(retval==-1 && GTK_WIDGET_VISIBLE(dialog))
-	gtk_main_iteration();
+      gtk_main_iteration();
     gtk_grab_remove(dialog);
     
     gtk_widget_hide(dialog);
 
     if(retval==TRUE)
     {
-	// "Ok"
+      // "Ok"
 
-	char *end;
-	const gchar *entry_text;
+      char *end;
+      const gchar *entry_text;
 
-	entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
-	value = strtoul(entry_text,&end,0);
-	if(*entry_text=='\0' || *end!='\0')
-	{
-	    *value1=-1;
-            *value2=-1;
-	    return;
-	}
-        *value1=value;
+      entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
+      value = strtoul(entry_text,&end,0);
+      if(*entry_text=='\0' || *end!='\0')
+      {
+          *value1=-1;
+          *value2=-1;
+          return;
+      }
+      *value1=value;
 
-	entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
-	value = strtoul(entry_text,&end,0);
-	if(*entry_text=='\0' || *end!='\0')
-	{
-	    *value1=-1;
-            *value2=-1;
-	    return;
-	}
-        *value2=value;
+      entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
+      value = strtoul(entry_text,&end,0);
+      if(*entry_text=='\0' || *end!='\0')
+      {
+        *value1=-1;
+        *value2=-1;
         return;
+      }
+      *value2=value;
+      return;
     }
 
     // "Cancel"
@@ -857,13 +847,16 @@ popup_activated(GtkWidget *widget, gpointer data)
       gui_get_2values("Value that the write must match for logging it:", &value,
 		      "Bitmask that specifies the bits to bother about:", &mask);
       if(value<0)
-	break; // Cancel
+        break; // Cancel
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
-	  }
+        for(i=range.col0;i<=range.coli;i++)
+          {
+          address=popup_rw->row_to_address[j]+i;
+          bp.set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
+          }
+      break;
+    case MENU_REGWIN_REFRESH:
+      popup_rw->Update();
       break;
     default:
       puts("Unhandled menuitem?");
@@ -1688,7 +1681,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
     if(registers[reg_number]->row<=register_sheet->maxrow) {
 
-      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat);
+      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat, new_value);
     
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
 			 registers[reg_number]->row,
@@ -1699,7 +1692,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
  
 
     //if(new_value != last_value) {
-    if(greg->hasChanged()) {
+    if(greg->hasChanged(new_value)) {
 
       registers[reg_number]->put_shadow(new_value);
       registers[reg_number]->bUpdateFull=true;
@@ -1720,7 +1713,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
    
 
     retval=TRUE;
-  } else if(greg->hasChanged()) { //new_value!=last_value) {
+  } else if(greg->hasChanged(new_value)) { //new_value!=last_value) {
 
     if(new_value.data==INVALID_VALUE) {
       
@@ -1730,7 +1723,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
       // the register has changed since last update
       registers[reg_number]->put_shadow(new_value);
-      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat);
+      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat, new_value);
       //sprintf (name, pCellFormat, new_value.data);
     }
 
@@ -1774,7 +1767,7 @@ void Register_Window::Update(void)
   if(!registers_loaded)
     return;
   
-  if(!gp || !gp->cpu || !register_sheet) {
+  if(!gp || !gp->cpu || !register_sheet || !gp->cpu->isHardwareOnline()) {
     puts("Warning can't update register window");
     return;
   }
@@ -1788,10 +1781,11 @@ void Register_Window::Update(void)
     bRowChanged = false;
     for(i = 0; i<REGISTERS_PER_ROW; i++) {
       address = row_to_address[j]+i;
-      if(registers[address]->get_shadow().data!=INVALID_VALUE || registers[address]->bUpdateFull) {
+      if(registers[address]->get_shadow().data!=INVALID_VALUE ||
+        registers[address]->bUpdateFull) {
 
-	if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
-	  bRowChanged = true;
+        if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
+          bRowChanged = true;
       }
     }
     if(bRowChanged)
@@ -1856,7 +1850,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   gboolean row_created;
   GtkSheetRange range;
 
-  if(!gp || !gp->cpu || !rma)
+  if(!gp || !gp->cpu || !rma || !gp->cpu->isHardwareOnline())
     return;
 
   if( !enabled)
