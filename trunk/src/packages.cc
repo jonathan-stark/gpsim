@@ -32,6 +32,7 @@ Package::Package(void)
 
   pins = NULL;
   number_of_pins = 0;
+  pin_position = NULL;
 
 }
 
@@ -54,8 +55,24 @@ void Package::create_pkg(unsigned int _number_of_pins)
 
   pins = (IOPIN **) new char[sizeof( IOPIN *) * number_of_pins];
 
+  pin_position = (float *) new float[number_of_pins];
+
   for(int i=0; i<number_of_pins; i++)
+  {
+    int pins_per_side;
     pins[i] = NULL;
+
+    pins_per_side = number_of_pins/2;
+    if(number_of_pins&1) // If odd number of pins
+        pins_per_side++;
+
+    // Positions for DIL package
+    if(i<pins_per_side)
+      pin_position[i]=(i)/((float)(pins_per_side-0.9999));
+    else
+      pin_position[i]=(i-pins_per_side)/((float)(pins_per_side-0.9999))+2.0;
+  }
+
 
 }
 
@@ -89,12 +106,33 @@ int Package::pin_existance(unsigned int pin_number)
 //-------------------------------------------------------------------
 IOPIN *Package::get_pin(unsigned int pin_number)
 {
-
   if(E_PIN_EXISTS == pin_existance(pin_number))
     return pins[pin_number-1];
   else
     return NULL;
 
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+float Package::get_pin_position(unsigned int pin_number)
+{
+    if(number_of_pins==0 ||
+       pin_number<=0 ||
+       pin_number>number_of_pins)
+	return 0.0;
+
+    return pin_position[pin_number-1];
+}
+
+void Package::set_pin_position(unsigned int pin_number, float position)
+{
+    if(number_of_pins==0 ||
+       pin_number<=0 ||
+       pin_number>number_of_pins)
+	return;
+
+    pin_position[pin_number-1]=position;
 }
 
 //-------------------------------------------------------------------
@@ -110,6 +148,7 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
 
   case E_NO_PIN:
     pins[pin_number-1] = pin;
+
     // Tell the I/O pin its number
     //pin->new_pin_number(pin_number);
     break;

@@ -492,7 +492,7 @@ struct gui_module
 {
     enum module_type type;
     Breadboard_Window *bbw;
-    class Module *module;
+    Module *module;
     GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
     int x;    // Position in layout widget
     int y;    // Position in layout widget
