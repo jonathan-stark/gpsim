@@ -137,11 +137,10 @@ about_cb (gpointer             callback_data,
 
   gpsim_get_version(&version[strlen(version)], (100 - strlen(version)) );
 
-  show_message(  version, "A simulator for Microchip PIC microcontrollers.
-by T. Scott Dattalo - mailto:scott@dattalo.com
-   Ralf Forsberg - mailto:rfg@home.se
-\ngpsim homepage: http://www.dattalo.com/gnupic/gpsim.html
-");
+  show_message(  version, "A simulator for Microchip PIC microcontrollers.\n"
+		 "by T. Scott Dattalo - mailto:scott@dattalo.com\n"
+		 "   Ralf Forsberg - mailto:rfg@home.se\n\n"
+		 "gpsim homepage: http://www.dattalo.com/gnupic/gpsim.html\n");
 
 }
 
@@ -541,7 +540,8 @@ static void set_simulation_mode(char m)
 
     gpsim_set_update_rate(value);
 
-    gpsim_stop(gp->pic_id);
+    if(gp)
+      gpsim_stop(gp->pic_id);
 
     config_set_variable("dispatcher", "simulation_mode", m);
 }
@@ -637,7 +637,7 @@ void create_dispatcher (void)
   if (!dispatcher_window)
     {
       GtkWidget *box1;
-//      GtkWidget *box2;
+
       GtkWidget *buttonbox;
       GtkWidget *separator;
       GtkWidget *button;

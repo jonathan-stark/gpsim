@@ -2904,9 +2904,9 @@ void Breadboard_Window::Update(void)
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
-                        Watch_Window *ww)
+                        Breadboard_Window *bww)
 {
-  ww->ChangeView(VIEW_HIDE);
+  bww->ChangeView(VIEW_HIDE);
   return TRUE;
 }
 
@@ -3132,6 +3132,7 @@ void Breadboard_Window::Build(void)
 
 
 
+  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
 
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -3580,7 +3581,7 @@ void Breadboard_Window::Build(void)
   gtk_widget_show (layout);
 
 
-
+  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
@@ -3656,29 +3657,12 @@ void Breadboard_Window::Build(void)
   if(enabled)
     gtk_widget_show(window);
 
+  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
 
 }
 
 
-int Breadboard_Window::Create(GUI_Processor *_gp)
-{
-
-  gp = _gp;
-
-  gp->breadboard_window = this;
-
-
-  if(!get_config())
-    printf("warning: %s\n",__FUNCTION__);
-    
-  if(enabled)
-    Build();
-  
-  return 0;
-}
-
-
-Breadboard_Window::Breadboard_Window(void)
+Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
 {
   menu = "<main>/Windows/Breadboard";
 
@@ -3713,6 +3697,17 @@ Breadboard_Window::Breadboard_Window(void)
   vadj = NULL;
 
   layout_pixmap=NULL;
+
+  gp = _gp;
+
+  if(!get_config())
+    printf("warning: %s\n",__FUNCTION__);
+
+  printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
+
+  if(enabled)
+    Build();
+
 }
 
 #endif // HAVE_GUI

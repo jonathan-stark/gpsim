@@ -1,3 +1,9 @@
+2003-11-28  Scott Dattalo  <scott@dattalo.com>
+	* gui/* - More C to C++ conversions
+	* gui/gui_menu.cc - Patch from Alex Holden to enable compilation on a MAC
+	* src/icd.cc
+	* INSTALL - added instructions for MAC OS
+	
 2003-11-24  Scott Dattalo  <scott@dattalo.com>
 	* gui/* First round of struct to class conversion is now completed
 

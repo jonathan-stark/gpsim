@@ -248,8 +248,6 @@ class RAM_RegisterWindow : public Register_Window
  public:
   RAM_RegisterWindow(GUI_Processor *gp);
 
-  //  virtual int Create();
-  
 };
 
 class EEPROM_RegisterWindow : public Register_Window
@@ -274,8 +272,7 @@ class Watch_Window : public  GUI_Object
   GtkWidget *watch_clist;
   GtkWidget *popup_menu;
 
-  Watch_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Watch_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void ClearWatches(void);
   virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address);
@@ -298,8 +295,7 @@ class Stack_Window : public GUI_Object
   GtkWidget *stack_clist;
 
 
-  Stack_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Stack_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
 
@@ -325,8 +321,7 @@ class StopWatch_Window : public GUI_Object
   GtkWidget *offsetentry;
   GtkWidget *rolloverentry;
 
-  StopWatch_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  StopWatch_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
 
@@ -357,8 +352,7 @@ class Symbol_Window : public GUI_Object
 
   int load_symbols;
 
-  Symbol_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Symbol_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
   void NewSymbols(void);
@@ -472,8 +466,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 
   int load_source;
 
-  SourceBrowserAsm_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  SourceBrowserAsm_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
@@ -525,8 +518,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
     
   int *memory;
 
-  SourceBrowserOpcode_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  SourceBrowserOpcode_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
@@ -639,8 +631,6 @@ class Breadboard_Window : public GUI_Object {
     GdkGC *pinline_gc;
     GdkGC *case_gc;
 
-    int width, height;
-
     GList *modules;
 
     GtkWidget *tree;
@@ -667,8 +657,7 @@ class Breadboard_Window : public GUI_Object {
     struct gui_module *selected_module;
 
 
-  Breadboard_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Breadboard_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void Update(void);
@@ -710,8 +699,7 @@ class Trace_Window : public GUI_Object
   int trace_map_index;
 
 
-  Trace_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Trace_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);
@@ -759,11 +747,11 @@ class Profile_Window : public GUI_Object
   // List of cycle_count structs
   GList *histogram_profile_list;
 
-  Profile_Window(void);
-  virtual int Create(GUI_Processor *gp);
+  Profile_Window(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *gp);
+  virtual void NewProgram(GUI_Processor *gp);
 
 };
 
@@ -773,7 +761,15 @@ class Profile_Window : public GUI_Object
 //  The gui_processor structure ties the gui window(s)
 // to a pic that is being simulated.
 //
+/*
+class WindowList{
+ public:
+  GUI_Object *gui_object;
+  WindowList *next;
 
+  Add
+};
+*/
 class GUI_Processor {
  public:
 

@@ -1479,12 +1479,14 @@ void SourceBrowserOpcode_Window::Build(void)
   UpdateMenuItem();
 }
 
-int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
+SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 {
   static char *titles[] =
     {
       "profile", "address", "opcode", "instruction"
     };
+
+  menu = "<main>/Windows/Program memory";
 
   window = NULL;
 
@@ -1493,7 +1495,7 @@ int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
 
 
   gp = _gp;
-  gp->program_memory = this;
+  //  gp->program_memory = this;
   name = "program_memory";
   wc = WC_source;
   wt = WT_opcode_source_window;
@@ -1514,11 +1516,6 @@ int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
   if(enabled)
     Build();
 
-  return 1;
 }
 
-SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(void)
-{
-  menu = "<main>/Windows/Program memory";
-}
 #endif // HAVE_GUI

@@ -40,6 +40,11 @@ extern void gui_refresh(void);
 extern int use_gui;
 #endif
 
+// Not all OSs support the O_SYNC open flag
+#ifndef O_SYNC
+#define O_SYNC 0
+#endif
+
 int use_icd;
 int bulk_flag;
 

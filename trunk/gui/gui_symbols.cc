@@ -660,12 +660,16 @@ void Symbol_Window::Build(void)
   
 }
 
-int Symbol_Window::Create(GUI_Processor *_gp)
+
+Symbol_Window::Symbol_Window(GUI_Processor *_gp)
 {
+
 
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
+
+  menu = "<main>/Windows/Symbols";
 
   gp = _gp;
   name = "symbol_viewer";
@@ -673,7 +677,6 @@ int Symbol_Window::Create(GUI_Processor *_gp)
   wt = WT_symbol_window;
   window = NULL;
   is_built = 0;
-  gp->symbol_window = this;
 
   symbols=NULL;
   filter_addresses=0;
@@ -691,14 +694,6 @@ int Symbol_Window::Create(GUI_Processor *_gp)
   if(enabled)
     Build();
   
-  return 1;
-}
-
-Symbol_Window::Symbol_Window(void)
-{
-
-  menu = "<main>/Windows/Symbols";
-
 }
 
 #endif // HAVE_GUI

@@ -331,12 +331,15 @@ void Trace_Window::Build(void)
 }
 
 //------------------------------------------------------------------------
-// Create
+// 
 //
 //
 
-int Trace_Window::Create(GUI_Processor *_gp)
+
+Trace_Window::Trace_Window(GUI_Processor *_gp)
 {
+
+  menu = "<main>/Windows/Trace";
 
   gp = _gp;
   name = "trace";
@@ -345,7 +348,6 @@ int Trace_Window::Create(GUI_Processor *_gp)
   wt = WT_trace_window;
   is_built = 0;
   trace_map = NULL;
-  gp->trace_window = this;
 
   trace_flags = 0;
   has_processor=false;
@@ -354,15 +356,6 @@ int Trace_Window::Create(GUI_Processor *_gp)
 
   if(enabled)
       Build();
-
-  return 1;
-}
-
-Trace_Window::Trace_Window(void)
-{
-
-  menu = "<main>/Windows/Trace";
-
 }
 
 #endif // HAVE_GUI

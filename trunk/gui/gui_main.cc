@@ -56,9 +56,6 @@ extern "C" {
  */
 void redisplay_prompt(void);
 
-void gui_styles_init(void);
-void create_dispatcher (void);
-
 void init_link_to_gpsim(GUI_Processor *gp);
 void link_src_to_gpsim(GUI_Processor *gp);
 
@@ -169,7 +166,7 @@ void gui_new_program (unsigned int pic_id)
       gp->source_browser->CloseSource();
       gp->symbol_window->NewSymbols();
       gp->program_memory->NewSource(gp);
-      ProfileWindow_new_program(gp->profile_window,gp);
+      gp->profile_window->NewProgram(gp);
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
     }
@@ -373,19 +370,6 @@ int config_get_string(char *module, char *entry, char **string)
  *
  */
 
-static  RAM_RegisterWindow *ram=NULL;
-static  EEPROM_RegisterWindow *eeprom=NULL;
-static  SourceBrowserAsm_Window *sbaw=NULL;
-static  SourceBrowserOpcode_Window *sbow=NULL;
-static  Watch_Window *ww=NULL;
-static  Stack_Window *stackw=NULL;
-static  StopWatch_Window *sww=NULL;
-static  Symbol_Window *symbolw=NULL;
-static  Trace_Window *tw=NULL;
-static  Breadboard_Window *bbw=NULL;
-static  Profile_Window *pw=NULL;
-
-
 int gui_init (int argc, char **argv)
 {
     int ret;
@@ -429,35 +413,6 @@ int gui_init (int argc, char **argv)
 
     
   gp = new GUI_Processor();
-
-  gui_styles_init();
-  
-  create_dispatcher();
-
-  ram    = new  RAM_RegisterWindow(gp);
-  eeprom = new  EEPROM_RegisterWindow(gp);
-  sbaw   = new  SourceBrowserAsm_Window();
-  sbow   = new  SourceBrowserOpcode_Window();
-  ww     = new  Watch_Window();
-  stackw = new  Stack_Window();
-  sww    = new  StopWatch_Window();
-  symbolw= new  Symbol_Window();
-  tw     = new  Trace_Window();
-  bbw    = new  Breadboard_Window();
-  pw     = new  Profile_Window();
-
-  //  ram->Create(gp);
-  //  eeprom->Create(gp);
-  sbaw->Create(gp);
-  sbow->Create(gp);
-  ww->Create(gp);
-  stackw->Create(gp);
-  symbolw->Create(gp);
-  bbw->Create(gp);
-  tw->Create(gp);
-  pw->Create(gp);
-  sww->Create(gp);
-
 
   interface_id = gpsim_register_interface((gpointer) gp);
   gpsim_register_update_object(interface_id,gui_update_object);

@@ -2424,10 +2424,11 @@ void SourceBrowserAsm_Window::Build(void)
   UpdateMenuItem();
 }
 
-
-int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
+SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp)
 {
   gint i;
+
+  menu = "<main>/Windows/Source";
 
   window = NULL;
   gp = _gp;
@@ -2436,7 +2437,7 @@ int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
   wt = WT_asm_source_window;
   is_built = 0;
 
-  gp->source_browser = this;
+  //  gp->source_browser = this;
 
   for(i=0;i<SBAW_NRFILES;i++)
       notebook_child[i]=NULL;
@@ -2464,12 +2465,7 @@ int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
   if(enabled)
     Build();
 
-  return 1;
 }
 
-SourceBrowserAsm_Window::SourceBrowserAsm_Window(void)
-{
-  menu = "<main>/Windows/Source";
-}
 
 #endif // HAVE_GUI
