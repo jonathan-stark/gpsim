@@ -895,7 +895,24 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   FileContext *fc = (*cpu->files)[file_id];
   
   if(fc)
-    closest_address = fc->get_address(src_line);
+  {
+  	int offset=0;
+  	while(src_line+offset<fc->max_line())
+	{
+		closest_address = fc->get_address(src_line+offset);
+		if(closest_address>=0)
+			return closest_address;
+		offset++;
+	}
+	offset=-1;
+  	while(src_line+offset>=0)
+	{
+		closest_address = fc->get_address(src_line+offset);
+		if(closest_address>=0)
+			return closest_address;
+		offset--;
+	}
+  }
 
   return closest_address;
 
@@ -921,6 +938,18 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   return cpu->map_pm_index2address(closest_address);
 #endif
 
+}
+//-------------------------------------------------------------------
+int ProgramMemoryAccess::find_address_from_line(int file_id, int src_line)
+{
+  if(!cpu)
+    return -1;
+
+  FileContext *fc = (*cpu->files)[file_id];
+  
+  if(fc)
+    return fc->get_address(src_line);
+  return -1;
 }
 //--------------------------------------------------------------------------
 //
@@ -2048,7 +2077,7 @@ int FileContext::get_address(unsigned int line_number)
 {
   if(line_number < max_line()  && pm_address)
     return (*pm_address)[line_number];
-  return 0;
+  return -1;
 }
 //----------------------------------------
 void FileContext::put_address(unsigned int line_number, unsigned int address)
