@@ -51,19 +51,22 @@ Boston, MA 02111-1307, USA.  */
 //
 
 enum window_types {
-  WT_register_window,
-  WT_status_bar,
-  WT_sfr_window,
-  WT_watch_window,
-  WT_stack_window,
-  WT_symbol_window,
+  WT_INVALID = 0,
+  WT_opcode_source_window=1,
   WT_asm_source_window,
-  WT_opcode_source_window,
-  WT_list_source_window,
+  WT_register_window,
+  WT_eeprom_window,
+  WT_watch_window,
+  WT_symbol_window,
   WT_breadboard_window,
+  WT_stack_window,
   WT_trace_window,
   WT_profile_window,
-  WT_stopwatch_window
+  WT_stopwatch_window,
+  WT_scope_window,
+  WT_status_bar,
+  WT_sfr_window,
+  WT_list_source_window
 };
 
 //
@@ -113,7 +116,6 @@ class GUI_Object {
  public:
 
   GUI_Processor *gp;
-  bool has_processor;
 
   GtkWidget *window;
   enum window_category wc;
@@ -149,7 +151,7 @@ class GUI_Object {
   virtual void UpdateMenuItem(void);
   virtual void NewProcessor(GUI_Processor *_gp)
     {
-      has_processor = true;
+      gp = _gp;
     }
 
 };
@@ -341,6 +343,20 @@ class Watch_Window : public  GUI_Object
   virtual void Update(void);
   virtual void UpdateMenus(void);
   
+};
+
+//
+// The Scope Window
+//
+
+class Scope_Window : public GUI_Object
+{
+ public:
+
+  Scope_Window(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
 };
 
 //
@@ -856,7 +872,7 @@ class GUI_Processor {
   Trace_Window *trace_window;
   Profile_Window *profile_window;
   StopWatch_Window *stopwatch_window;
-
+  Scope_Window *scope_window;
 
   // The pic that's associated with the gui
   unsigned int pic_id;

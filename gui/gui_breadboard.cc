@@ -2931,18 +2931,12 @@ static void check_for_nodes(Breadboard_Window *bbw)
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
-  unsigned int pic_id;
-
-  has_processor=1;
 
   if(!is_built)
     return;
 
-  if(!gp->pic_id)
-  {
-    puts("BreadboardWindow_new_processor(): pic_id==0");
+  if(!gp || !gp->cpu || !gp->pic_id)
     return;
-  }
 
   struct gui_module *p=create_gui_module(this, PIC_MODULE, get_processor(gp->pic_id),0);
 
@@ -3638,8 +3632,8 @@ void Breadboard_Window::Build(void)
 
   is_built=1;
   enabled = 1;
-  if(has_processor)
-    NewProcessor(gp);
+
+  NewProcessor(gp);
 
   UpdateMenuItem();
 
@@ -3664,7 +3658,6 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   is_built = 0;
   enabled = 0;
 
-  has_processor=false;
   pinstatefont = 0;
   pinnamefont = 0;
   pinname_gc = 0;

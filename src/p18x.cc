@@ -101,6 +101,11 @@ void P18C2x2::create_sfr_map(void)
   if(verbose)
     cout << "create_sfr_map P18C2x2\n";
 
+  package = new Package(28);
+
+  if(!package)
+    return;
+
   add_sfr_register(&porta,	  0xf80,0,"porta");
   add_sfr_register(&portb,	  0xf81,0,"portb");
   add_sfr_register(&portc,	  0xf82,0,"portc");
@@ -120,6 +125,46 @@ void P18C2x2::create_sfr_map(void)
   add_sfr_register(&trisa,	  0xf92,0x7f,"trisa");
   add_sfr_register(&trisb,	  0xf93,0xff,"trisb");
   add_sfr_register(&trisc,	  0xf94,0xff,"trisc");
+
+
+  package->assign_pin(1, 0);  // /MCLR
+
+  package->assign_pin(2, new IO_bi_directional(&porta, 0));
+  package->assign_pin(3, new IO_bi_directional(&porta, 1));
+  package->assign_pin(4, new IO_bi_directional(&porta, 2));
+  package->assign_pin(5, new IO_bi_directional(&porta, 3));
+  package->assign_pin(6, new IO_open_collector(&porta, 4));
+  package->assign_pin(7, new IO_bi_directional(&porta, 5));
+
+
+
+  package->assign_pin(8, 0);  // Vss
+  package->assign_pin(9, 0);  // OSC1
+
+  package->assign_pin(10, new IO_bi_directional(&porta, 6));
+
+  package->assign_pin(11, new IO_bi_directional(&portc, 0));
+  package->assign_pin(12, new IO_bi_directional(&portc, 1));
+  package->assign_pin(13, new IO_bi_directional(&portc, 2));
+  package->assign_pin(14, new IO_bi_directional(&portc, 3));
+  package->assign_pin(15, new IO_bi_directional(&portc, 4));
+  package->assign_pin(16, new IO_bi_directional(&portc, 5));
+  package->assign_pin(17, new IO_bi_directional(&portc, 6));
+  package->assign_pin(18, new IO_bi_directional(&portc, 7));
+
+
+  package->assign_pin(19, 0);  // Vss
+  package->assign_pin(20, 0);  // Vdd
+
+  package->assign_pin(21, new IO_bi_directional_pu(&portb, 0));
+  package->assign_pin(22, new IO_bi_directional_pu(&portb, 1));
+  package->assign_pin(23, new IO_bi_directional_pu(&portb, 2));
+  package->assign_pin(24, new IO_bi_directional_pu(&portb, 3));
+  package->assign_pin(25, new IO_bi_directional_pu(&portb, 4));
+  package->assign_pin(26, new IO_bi_directional_pu(&portb, 5));
+  package->assign_pin(27, new IO_bi_directional_pu(&portb, 6));
+  package->assign_pin(28, new IO_bi_directional_pu(&portb, 7));
+
 
 }
 
@@ -335,7 +380,6 @@ void P18C4x2::create_iopin_map(void)
   package->assign_pin(13, 0);
   package->assign_pin(14, 0);
 
-  cout << "Creating portc iopin\n";
   package->assign_pin(15, new IO_bi_directional(&portc, 0));
   package->assign_pin(16, new IO_bi_directional(&portc, 1));
   package->assign_pin(17, new IO_bi_directional(&portc, 2));

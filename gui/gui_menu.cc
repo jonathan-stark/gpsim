@@ -316,38 +316,41 @@ toggle_window (gpointer             callback_data,
     int view_state =  GTK_CHECK_MENU_ITEM(menu_item)->active ? VIEW_SHOW : VIEW_HIDE;
 			
     switch(callback_action) {
-    case 1:
+    case WT_opcode_source_window:
       gp->program_memory->ChangeView(view_state);
       break;
-    case 2:
+    case WT_asm_source_window:
       gp->source_browser->ChangeView(view_state);
       break;
-    case 3:
+    case WT_register_window:
       gp->regwin_ram->ChangeView(view_state);
       break;
-    case 4:
+    case WT_eeprom_window:
       gp->regwin_eeprom->ChangeView(view_state);
       break;
-    case 5:
+    case WT_watch_window:
       gp->watch_window->ChangeView(view_state);
       break;
-    case 6:
+    case WT_symbol_window:
       gp->symbol_window->ChangeView(view_state);
       break;
-    case 7:
+    case WT_breadboard_window:
       gp->breadboard_window->ChangeView(view_state);
       break;
-    case 8:
+    case WT_stack_window:
       gp->stack_window->ChangeView(view_state);
       break;
-    case 9:
+    case WT_trace_window:
       gp->trace_window->ChangeView(view_state);
       break;
-    case 10:
+    case WT_profile_window:
       gp->profile_window->ChangeView(view_state);
       break;
-    case 11:
+    case WT_stopwatch_window:
       gp->stopwatch_window->ChangeView(view_state);
+      break;
+    case WT_scope_window:
+      gp->scope_window->ChangeView(view_state);
       break;
     default:
       puts("unknown menu action");
@@ -509,6 +512,8 @@ gtk_ifactory_cb (gpointer             callback_data,
     return 0;
 }
 
+#define TOGGLE_WINDOW (GtkItemFactoryCallback)toggle_window
+
 static GtkItemFactoryEntry menu_items[] =
 {
   { "/_File",            0,         0,                     0, "<Branch>" },
@@ -531,20 +536,21 @@ static GtkItemFactoryEntry menu_items[] =
   //  { "/_Break/Clear",     0, (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
 
   { "/_Windows",     0, 0,       0, "<Branch>" },
-  { "/Windows/Program _memory", 0, (GtkItemFactoryCallback)toggle_window,1,"<ToggleItem>" },
-  { "/Windows/_Source", 0, (GtkItemFactoryCallback)toggle_window,2,"<ToggleItem>" },
-  { "/Windows/sep1",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Ram",    0, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
-  { "/Windows/_EEPROM", 0, (GtkItemFactoryCallback)toggle_window,4,"<ToggleItem>" },
-  { "/Windows/_Watch",  0, (GtkItemFactoryCallback)toggle_window,5,"<ToggleItem>" },
-  { "/Windows/Sta_ck",  0, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
-  { "/Windows/sep2",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/Symbo_ls",0, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
-  { "/Windows/_Breadboard",0, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
-  { "/Windows/sep3",   0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
-  { "/Windows/_Trace",0, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
-  { "/Windows/Pro_file",0, (GtkItemFactoryCallback)toggle_window,10,"<ToggleItem>" },
-  { "/Windows/St_opwatch",0, (GtkItemFactoryCallback)toggle_window,11,"<ToggleItem>" },
+  { "/Windows/Program _memory", 0, TOGGLE_WINDOW,WT_opcode_source_window,"<ToggleItem>" },
+  { "/Windows/_Source",         0, TOGGLE_WINDOW,WT_asm_source_window,"<ToggleItem>" },
+  { "/Windows/sep1",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/_Ram",            0, TOGGLE_WINDOW,WT_register_window,"<ToggleItem>" },
+  { "/Windows/_EEPROM",         0, TOGGLE_WINDOW,WT_eeprom_window,"<ToggleItem>" },
+  { "/Windows/_Watch",          0, TOGGLE_WINDOW,WT_watch_window,"<ToggleItem>" },
+  { "/Windows/Sta_ck",          0, TOGGLE_WINDOW,WT_stack_window,"<ToggleItem>" },
+  { "/Windows/sep2",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/Symbo_ls",        0, TOGGLE_WINDOW,WT_symbol_window,"<ToggleItem>" },
+  { "/Windows/_Breadboard",     0, TOGGLE_WINDOW,WT_breadboard_window,"<ToggleItem>" },
+  { "/Windows/sep3",            0, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
+  { "/Windows/_Trace",          0, TOGGLE_WINDOW,WT_trace_window,"<ToggleItem>" },
+  { "/Windows/Pro_file",        0, TOGGLE_WINDOW,WT_profile_window,"<ToggleItem>" },
+  { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
+  { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
 
 //  { "/_Preferences",          0, 0,               0, "<Branch>" },
 //  { "/_Preferences/Windows",  0, (GtkItemFactoryCallback)create_notebook,       0 },

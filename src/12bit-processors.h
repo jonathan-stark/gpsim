@@ -101,14 +101,16 @@ enum _12BIT_DEFINITIONS
       return ((status->value & pa_bits) << 4);
     }
 
-  virtual unsigned int get_fsr_value ( unsigned int load_value )
+  // The valid bits in the FSR register vary across the various 12-bit devices
+
+  virtual unsigned int fsr_valid_bits(void)
     {
-      return ( load_value | 0x80 );
+      return 0x1f;  // Assume only 32 register addresses 
     }
 
-  virtual unsigned int map_fsr_indf ( void )
+  virtual unsigned int fsr_register_page_bits(void)
     {
-      return ( this->fsr->value & 0x1F );
+      return 0;     // Assume only one register page.
     }
 
   virtual void option_new_bits_6_7(unsigned int);

@@ -2290,16 +2290,11 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 void Profile_Window::NewProcessor(GUI_Processor *_gp)
 {
 
-  if(_gp == 0)
+  if(!gp)
     return;
 
-  has_processor=true;
-    
   if(!enabled)
     return;
-    
-  gp = _gp;
-
 }
 
 static int delete_event(GtkWidget *widget,
@@ -2493,8 +2488,7 @@ void Profile_Window::Build(void)
   enabled=1;
   is_built=1;
 
-  if(has_processor)
-    NewProcessor(gp);
+  NewProcessor(gp);
 
   if(program)
     NewProgram(gp);
@@ -2521,7 +2515,6 @@ Profile_Window::Profile_Window(GUI_Processor *_gp)
   profile_register_list=0;
   histogram_profile_list=0;
 
-  has_processor=false;
   program=0;
 
   get_config();

@@ -1451,9 +1451,10 @@ void Register_Window::SelectRegister(int regnumber)
     return;
   }
   
-  if(registers[regnumber] == 0)
-      return;
-  
+  if(!gp || !gp->cpu ||!registers || !registers[regnumber]) {
+    printf("SelectRegister is not ready yet\n");
+    return;
+  }
   row=registers[regnumber]->row;
   col=registers[regnumber]->col;
   range.row0=range.rowi=row;
@@ -1706,11 +1707,9 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   int row_height, char_width;
     
-  if(gp == 0 || rma == 0)
+  if(!gp || !rma)
     return;
 
-  has_processor=true;
-    
   if( !enabled)
     return;
     
@@ -2033,10 +2032,7 @@ void Register_Window::Build(void)
   for(i=0;i<MAX_REGISTERS;i++)
       registers[i]=0;
   
-  if(has_processor)
-  {
-    NewProcessor(gp);
-  }
+  NewProcessor(gp);
 
   UpdateMenuItem();
 }
@@ -2060,7 +2056,6 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   enabled = 0;
 
   registers_loaded=0;
-  has_processor=false;
   
   registers = (GUIRegister  **)malloc(MAX_REGISTERS*sizeof(GUIRegister *));
   for(i=0;i<MAX_REGISTERS;i++)

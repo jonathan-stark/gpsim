@@ -299,7 +299,7 @@ public:
   virtual unsigned int get_pclath_branching_modpcl(void)=0;
 
   virtual void option_new_bits_6_7(unsigned int)=0;
-
+/*
   virtual unsigned int get_fsr_value ( unsigned int load_value )
     {
       return load_value;
@@ -309,7 +309,7 @@ public:
     {
       return ( fsr->value );
     }
-
+*/
 
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom(void) { return (eeprom); }

@@ -64,6 +64,17 @@ class P12C508 : public  _12bit_processor
   void create(void);
   virtual void create_iopin_map(void);
 
+  virtual unsigned int fsr_valid_bits(void)
+    {
+      return 0x1f;  // Assume only 32 register addresses 
+    }
+
+  virtual unsigned int fsr_register_page_bits(void)
+    {
+      return 0;     // Assume only one register page.
+    }
+
+
   virtual void option_new_bits_6_7(unsigned int);
 
 };
@@ -80,6 +91,15 @@ class P12C509 : public P12C508
 
   virtual void create_sfr_map(void);
 
+  virtual unsigned int fsr_valid_bits(void)
+    {
+      return 0x3f;  // 64 registers in all (some are actually aliased)
+    }
+
+  virtual unsigned int fsr_register_page_bits(void)
+    {
+      return 0x20;  // 509 has 2 register banks
+    }
 
   P12C509(void);
   static Processor *construct(void);

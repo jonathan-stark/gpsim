@@ -172,6 +172,8 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     gp->trace_window->Update();
     gp->profile_window->Update();
     gp->stopwatch_window->Update();
+    gp->scope_window->Update();
+
   }
 
   if(gui_animate_delay!=0)
@@ -213,6 +215,7 @@ void GUI_Interface::NewProcessor (unsigned int pic_id)
     gp->trace_window->NewProcessor(gp);
     gp->profile_window->NewProcessor(gp);
     gp->stopwatch_window->NewProcessor(gp);
+    gp->scope_window->NewProcessor(gp);
 
 
   }

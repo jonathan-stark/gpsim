@@ -1592,7 +1592,12 @@ void Files::Add(char *new_name, FILE *fptr)
 FileContext *Files::operator [] (int file_id)
 {
 
+#define GCC_VERSION 296
+#if GCC_VERSION == 296
+  return (*vpfile)[file_id];   // sigh...
+#else
   return (*vpfile).at(file_id);
+#endif
 }
 
 char *Files::ReadLine(int file_id, int line_number, char *buf, int nBytes)

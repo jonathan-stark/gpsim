@@ -49,11 +49,30 @@ class FSR : public sfr_register
 {
 public:
 
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
+
+};
+
+
+//---------------------------------------------------------
+// FSR_12 register - FSR for the 12-bit core processors.
+//
+//
+class FSR_12 : public FSR
+{
+public:
+  unsigned int valid_bits;
   unsigned int register_page_bits;   /* Only used by the 12-bit core to define
                                         the valid paging bits in the FSR. */
+  FSR_12(unsigned int _register_page_bits, unsigned int _valid_bits);
 
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
 
 };
 

@@ -53,7 +53,7 @@ GUI_Object::GUI_Object(void)
 
 
   gp = 0;
-  has_processor = false;
+
   window = 0;
   name = 0;
   menu = 0;

@@ -1023,10 +1023,10 @@ void pic_processor::create (void)
   
   W->new_name("W");
   
-  fsr = new FSR;
   indf = new INDF;
 
-  fsr->new_name("fsr");
+  //  fsr = new FSR;
+  //  fsr->new_name("fsr");
 
   register_bank = &registers[0];  // Define the active register bank 
   W->value = 0;

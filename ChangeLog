@@ -1,4 +1,16 @@
 2004-02-13  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_scope.cc: - new file that will support a simple waveform viewer.
+	* gui/Makefile.am: add the gui_scope.cc to the list
+	* gui/gui_regwin.cc: Check for null pointers
+	* gui/gui_symbols.cc: Check for null pointers
+	* src/pic-processor.cc, src/p16x5x.h, src/p12x.h, src/p12x.cc,
+	src/14bit-registers.h, src/14bit-registers.cc, src/14bit-processors.cc,
+	src/12bit-processors.h, src/12bit-processors.cc
+	Added FSR_12 - a new class for the 12-bit core. I also redesigned the
+	way FSR and INDF interact.
+	* src/p18x.cc - the 18f252 package pins weren't defined.
+	
+2004-02-13  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc, src/processor.h, src/pic-processor.cc, src/cod.cc:
 	Support for new file context
 	* gui/gui_src_asm.cc, gui/gui_profile.cc:

@@ -1,19 +1,23 @@
 # test Script
 
-USAGE="Usage: `basename $0` BASENAME"
+USAGE="Usage: `basename $0` DIRECTORY ASMFILE"
 
-if [ $# -lt 1 ] ; then
+if [ $# -lt 2 ] ; then
   echo "$USAGE"
   exit 1
 fi
 
+# this is where the test will be performed
+cd $1
+
 # assemble
-gpasm  $1.asm
+gpasm  $2.asm
 
 # create the executable
 
-./create_stc $1 temp.stc
+../create_stc $2 temp.stc
 
-./simulate temp.stc garbage.log
+../simulate temp.stc garbage.log
 cat garbage.log
 rm garbage.log
+rm temp.stc

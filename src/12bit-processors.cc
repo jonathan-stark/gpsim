@@ -81,7 +81,10 @@ void _12bit_processor::create(void)
   pa_bits = 0;                 // Assume only one code page (page select bits in status)
 
   pic_processor::create();
-  fsr->register_page_bits = 0;  // Assume only one register page (e.g. 12c508)
+
+  fsr = new FSR_12(fsr_register_page_bits(), fsr_valid_bits());
+  fsr->new_name("fsr");
+
 
   // Sigh. Hack, hack,... manually assign indf bits
   indf->fsr_mask = 0x1f;
