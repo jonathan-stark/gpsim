@@ -69,7 +69,7 @@ void SafeModeAttribute::set(Value *v)
 {
   Boolean::set(v);
   bool currentVal;
-  get(currentVal);
+  Boolean::get(currentVal);
   cpu->setSafeMode(currentVal);
 }
 void SafeModeAttribute::get(bool &b)
@@ -93,7 +93,7 @@ void UnknownModeAttribute::set(Value *v)
 {
   Boolean::set(v);
   bool currentVal;
-  get(currentVal);
+  Boolean::get(currentVal);
   cpu->setUnknownMode(currentVal);
 }
 void UnknownModeAttribute::get(bool &b)
