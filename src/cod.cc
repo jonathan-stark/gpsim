@@ -653,7 +653,6 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     char text_buffer[256];
     int line_number;
     char *srcptrbegin;
-    char src_line[256];
     char *ptr;
     FILE *file;
     int maxline;
@@ -663,6 +662,8 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     int asmsrc_line;
     int found_line_numbers=0;
 
+    // Find the file context that contain the .asm file.
+    // This assumes 'there can be only one'.
     for(i=0;i<cpu->number_of_source_files;i++)
     {
 	gpsim_file = &cpu->files[i];
@@ -689,14 +690,14 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	return;
     }
 
-    // Reset hll_file_id and hll_src_line
+    // Reset hll_file_id and hll_src_line throughout cpu memory
     for(address=0;cpu->program_memory_size()>address;address++)
     {
 	cpu->program_memory[address]->hll_file_id=0;
 	cpu->program_memory[address]->hll_src_line=0;
     }
 
-
+    // asmfile_id is index into file context array.
     asmfile_id=i;
 
     // source line strings are ignored, and the file with
@@ -705,10 +706,10 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     for(i=0;cpu->files[i].file_ptr!=NULL;i++)
 	;
 
-    // i is our place
+    // 'i' is where we can put the ".c" file entry.
 
     strcpy(cfilename,file_name);
-    ptr=strchr(cfilename,'.');
+    ptr=strrchr(cfilename,'.');
     if(ptr==NULL)
     {
         puts("ptr is NULL\n");
@@ -716,6 +717,8 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     }
     *ptr='\0';
     strcat(cfilename,".c");
+
+    // cfilename contains the full .c path
 
     cpu->files[i].name=strdup(cfilename);
     file=fopen(cfilename,"r");
@@ -740,30 +743,38 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 
     rewind(gpsim_file->file_ptr);
     asmsrc_line=0;
-    // asm file is opened in gpsim_file->file_ptr
+
+    // Loop through the whole .asm file and look for any ";#CSRC" markers
     while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=NULL)
     {
 	asmsrc_line++;
-	if(strncmp(text_buffer,";#CSRC#",7))
-            continue;
-	srcptrbegin=strchr(text_buffer,'\"');
-	if(srcptrbegin==NULL)
-            continue;
-	strcpy(src_line,srcptrbegin+1);
-	*srcptrbegin='\0';
-	ptr=strrchr(src_line,'\"');
-	if(ptr==NULL)
+	if(strncmp(text_buffer,";#CSRC",6))
 	    continue;
-        found_line_numbers=1;
-        *ptr='\0';
-	line_number=atoi(text_buffer+13);
+
+        // Found a line marker
+
+	ptr=text_buffer+6;
+	for(;*ptr!='\0';ptr++)
+	    if(*ptr==' '||*ptr=='\t')
+		break;
+	if(*ptr=='\0')
+	    continue; // Syntax error
+	for(;*ptr!='\0';ptr++)
+	    if(isdigit(*ptr))
+                break;
+	if(*ptr=='\0')
+	    continue; // Syntax error
+
+	found_line_numbers=1; // The .asm file contains line numbers.
+
+	line_number=atoi(ptr);
 
 	cpu->files[i].line_seek[line_nr++]=line_number;
         address=cpu->find_closest_address_to_line(asmfile_id, asmsrc_line);
 	cpu->program_memory[address]->hll_src_line=line_number;
 	cpu->program_memory[address]->hll_file_id=i;
 
-	printf("Found line=%d address=%d source=%s\n",line_number, address, src_line);
+	printf("Found line=%d address=%d\n",line_number, address);
     }
     if(found_line_numbers)
     {
@@ -782,6 +793,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	    line_number=cpu->program_memory[address]->hll_src_line;
     }
 
+    // Fill the addresses in the gaps.
     for(address=0;cpu->program_memory_size()>address;address++)
     {
 	if(cpu->program_memory[address]->hll_src_line)
