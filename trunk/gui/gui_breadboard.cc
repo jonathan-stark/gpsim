@@ -576,6 +576,7 @@ static void draw_board_matrix(Breadboard_Window *bbw)
 	gdk_draw_rectangle(bbw->layout_pixmap,
 			   bbw->case_gc,0,
 			   x,y,width,height);
+	//printf("%dx%d @ %d,%d with %d pins\n",width,height,x,y,p->module->get_pin_count());
 
 	// Draw barriers around pins so the tracker can only get in
         // straigt to the pin and not from the side.
@@ -1269,7 +1270,7 @@ static void draw_pin(GuiPin *pin)
 			pin->width, pin->height);
 }
 
-static void expose_pin(GtkWidget *widget,
+static gboolean expose_pin(GtkWidget *widget,
 		       GdkEventExpose *event,
 		       GuiPin *p)
 {
@@ -1277,7 +1278,7 @@ static void expose_pin(GtkWidget *widget,
     if(p->pixmap==0)
     {
 	puts("bbw.c: no pixmap1!");
-	return;
+	return 0;
     }
 
     gdk_draw_pixmap(widget->window,
@@ -1286,6 +1287,7 @@ static void expose_pin(GtkWidget *widget,
 		    event->area.x, event->area.y,
 		    event->area.x, event->area.y,
 		    event->area.width, event->area.height);
+    return 0;
 }
 
 static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
@@ -1623,8 +1625,16 @@ static void pointer_cb(GtkWidget *w,
 {
     static int x,y;
 
-    x = (int) (event->x + bbw->hadj->value);
-    y = (int) (event->y + bbw->vadj->value);
+    x = (int) (event->x 
+#if GTK_MAJOR_VERSION < 2
+    	+ bbw->hadj->value
+#endif
+	);
+    y = (int) (event->y 
+#if GTK_MAJOR_VERSION < 2
+    	+ bbw->vadj->value
+#endif
+	);
 
     switch(event->type)
     {
@@ -1695,7 +1705,6 @@ static gint button(GtkWidget *widget,
 		   GdkEventButton *event,
 		   GuiPin *p)
 {
-
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
@@ -1712,20 +1721,21 @@ static gint button(GtkWidget *widget,
 		if(gn!=0)
 		{
 		    treeselect_node(0, gn);
-		    return 1;
+		    return GTKSIGNAL_DONE;
 		}
 	    }
 
 	    treeselect_stimulus(0, p);
+	    puts("Stimulus should now be selected");
 	}
-	return 1;
+	return GTKSIGNAL_DONE;
     }
 
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
       p->iopin->toggle();
-      return 1;
+      return GTKSIGNAL_DONE;
     }
 
     if(event->type==GDK_BUTTON_PRESS &&
@@ -1742,10 +1752,10 @@ static gint button(GtkWidget *widget,
 	    trace_node(gn);
             draw_nodes(gn->bbw);
 	}
-	return 1;
+	return GTKSIGNAL_DONE;
     }
 
-    return 0;
+    return GTKSIGNAL_CONTINUE;
 }
 
 
@@ -2587,12 +2597,12 @@ GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientatio
 
 }
 
-static void name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
+static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
     if(p->name_pixmap==0)
     {
 	puts("bbw.c: no pixmap2!");
-	return;
+	return 0;
     }
 
     gdk_draw_pixmap(widget->window,
@@ -2601,15 +2611,16 @@ static void name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 		    event->area.x, event->area.y,
 		    event->area.x, event->area.y,
 		    event->area.width, event->area.height);
+    return 0;
 }
 
-static void module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
+static gboolean module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
 
     if(p->module_pixmap==0)
     {
 	puts("bbw.c: no pixmap3!");
-	return;
+	return 0;
     }
 
     gdk_draw_pixmap(widget->window,
@@ -2618,6 +2629,7 @@ static void module_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p
 		    event->area.x, event->area.y,
 		    event->area.x, event->area.y,
 		    event->area.width, event->area.height);
+    return 0;
 }
 
 #define PACKAGESPACING 15
@@ -2665,6 +2677,7 @@ void GuiModule::Refresh()
   bbw->modules=g_list_remove(bbw->modules, this);
 
   // rebuild module
+  // FIXME maybe just Build()?
   new GuiModule(module, bbw);
 
   gtk_widget_unref(module_widget);
@@ -2720,7 +2733,7 @@ void GuiModule::Build()
   int i;
   BreadBoardXREF *cross_reference;
   GtkWidget *da;
-  int width=50, height=18;
+  /*int*/ width=50, height=18;
 
   Package *package = module->package;
   if(!package)
@@ -3239,12 +3252,11 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 	return;
     }
 
-    int xoffset, yoffset;
+    int xoffset=0, yoffset=0;
+    
     GtkAdjustment *xadj, *yadj;
-
     xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(bbw->layout));
     yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(bbw->layout));
-
     xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
     yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
 
@@ -3252,23 +3264,29 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 		    bbw->window->style->white_gc,
 		    bbw->layout_pixmap,
 		    xoffset, yoffset,
+#if GTK_MAJOR_VERSION >= 2
+		    xoffset, yoffset,
+#else
 		    0, 0,
+#endif
 		    bbw->layout->allocation.width,
 		    bbw->layout->allocation.height);
 
     //04oct04  gtk_widget_queue_draw(bbw->layout);
 }
 
-static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
+static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
 {
 
     if(bbw->layout_pixmap==0)
     {
 	puts("bbw.c: no pixmap5!");
-	return;
+	return 0;
     }
 
     layout_adj_changed(widget, bbw);
+
+	//draw_board_matrix(bbw);
 
   /*
     int xoffset, yoffset;
@@ -3289,6 +3307,7 @@ static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_W
 
     gtk_widget_queue_draw(widget);
   */
+    return 0;
 }
 
 static GtkWidget *bb_vbox(GtkWidget *window, const char *name)
@@ -3631,7 +3650,7 @@ void Breadboard_Window::Build(void)
   gtk_box_pack_start (GTK_BOX (vbox10), hbox14, FALSE, FALSE, 0);
 
   add_button("Remove module","remove_module_button", (GtkSignalFunc) remove_module, hbox14);
-  add_button("Save Configuration ...","save_stc_button", (GtkSignalFunc) save_stc, hbox9);
+  add_button("Save Configuration ...","save_stc_button", (GtkSignalFunc) save_stc, vbox9);
 
   scrolledwindow5 = gtk_scrolled_window_new (0, 0);
   gtk_widget_ref (scrolledwindow5);
@@ -3662,7 +3681,7 @@ void Breadboard_Window::Build(void)
 		     GTK_SIGNAL_FUNC(pointer_cb),this);
   gtk_signal_connect(GTK_OBJECT(layout),"button_release_event",
 		     GTK_SIGNAL_FUNC(pointer_cb),this);
-  gtk_signal_connect(GTK_OBJECT(layout),"expose_event",
+  gtk_signal_connect_after(GTK_OBJECT(layout),"expose_event",
 		     (GtkSignalFunc) layout_expose,this);
 
   GtkAdjustment *xadj, *yadj;

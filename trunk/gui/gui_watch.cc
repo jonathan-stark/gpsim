@@ -331,7 +331,30 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
     gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
 		   3, event->time);
 
-  return FALSE;
+
+  WatchEntry *entry;
+
+  if(event->type==GDK_2BUTTON_PRESS &&
+     event->button==1)
+    {
+      int column=ww->current_column;
+      int row=ww->current_row;
+	
+      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+    
+      if(column>=MSBCOL && column<=LSBCOL) {
+	
+	int value;  // , bit;
+	    
+	// Toggle the bit.
+	value = entry->get_value();
+
+	value ^= (1<< (7-(column-MSBCOL)));
+	entry->put_value(value);
+      }
+    }
+
+  return 0;
 }
 
 static gint
@@ -356,38 +379,6 @@ key_press(GtkWidget *widget,
       break;
   }
   return TRUE;
-}
-
-/*
- */
-static gint sigh_button_event(GtkWidget *widget,
-		       GdkEventButton *event,
-		       Watch_Window *ww)
-{
-  WatchEntry *entry;
-  assert(event&&ww);
-
-  if(event->type==GDK_2BUTTON_PRESS &&
-     event->button==1)
-    {
-      int column=ww->current_column;
-      int row=ww->current_row;
-	
-      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
-    
-      if(column>=MSBCOL && column<=LSBCOL) {
-	
-	int value;  // , bit;
-	    
-	// Toggle the bit.
-	value = entry->get_value();
-
-	value ^= (1<< (7-(column-MSBCOL)));
-	entry->put_value(value);
-      }
-    }
-
-  return 0;
 }
 
 static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,GdkEvent *event, Watch_Window *ww)
@@ -650,8 +641,6 @@ void Watch_Window::Build(void)
 		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
-  gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
-		     GTK_SIGNAL_FUNC(sigh_button_event), this);
   
   watch_clist = gtk_clist_new_with_titles(COLUMNS,watch_titles);
   gtk_widget_show(watch_clist);
