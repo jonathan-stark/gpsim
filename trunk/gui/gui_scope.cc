@@ -61,25 +61,309 @@ gpsim_la - plug in.
 #define DELAY_MAX_VALUE 100
 
 
-static GdkGC *drawing_gc=0;
-static GdkPixmap *pixmap=0;    
-static GtkWidget *drawing_area;    
 static GtkObject *bit_adjust,*delay_adjust;
 static GdkColor signal_line_color,grid_line_color,grid_v_line_color;
 static int bit_left,bit_right,bit_points,update_delay;
 
 
+/*
+  Waveform class
 
+  This holds the gui information related with a gpsim waveform
+*/
 class Waveform
 {
 public:
-  GtkWidget *drawing_area;   // 
-  Scope_Window *sw;          // Parent
+  int width, height;
 
-  Waveform(void);
+  GtkWidget *drawing_area;   // 
+  GdkGC *drawing_gc;
+  Scope_Window *sw;          // Parent
+  char *name;
+  bool isBuilt;
+
+  GdkPixmap *pixmap;         // The Waveform is rendered in this pixmap.
+
+  Waveform(Scope_Window *parent);
+
+  void Build(GtkWidget *parent_table, int row);
+  void Update(void);
 
 };
 
+
+Waveform::Waveform(Scope_Window *parent)
+{
+  isBuilt = false;
+  name = 0;
+  drawing_area = 0;
+  pixmap =0;
+  drawing_gc =0;
+
+  sw = parent;
+}
+
+
+static gint Waveform_expose_event (GtkWidget *widget,
+				   GdkEventExpose  *event,
+				   gpointer   user_data)
+{
+  cout <<  "function:" << __FUNCTION__ << "\n";    
+
+  g_return_val_if_fail (widget != NULL, TRUE);
+  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+
+  Waveform *wf = (Waveform *)(user_data);
+  if(!wf)
+    return 0;
+
+  cout << " event  "
+       << ':' << event->area.x << ':' << event->area.y 
+       << ':' << event->area.x << ':' <<  event->area.y
+       << ':' << event->area.width << ':' << event->area.height
+       << endl;
+
+  gdk_draw_pixmap(widget->window,
+		  widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+		  wf->pixmap,
+		  event->area.x, event->area.y,
+		  event->area.x, event->area.y,
+		  event->area.width, event->area.height);
+
+  gtk_widget_show(widget);
+  return FALSE;
+}
+
+
+static gint Waveform_configure_event (GtkWidget *widget, GdkEventConfigure *event,
+				      gpointer user_data)
+{
+  cout <<  "function:" << __FUNCTION__ << "\n";
+
+  g_return_val_if_fail (widget != NULL, TRUE);
+  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+
+
+  Waveform *wf = (Waveform *)(user_data);
+  if(!wf)
+    return 0;
+
+  return TRUE;
+}
+
+void Waveform::Build(GtkWidget *parent_table, int row)
+{
+  cout << "Waveform::" << __FUNCTION__ << "  row " << row << endl;
+
+  drawing_area = gtk_drawing_area_new ();
+  gtk_widget_set_usize (drawing_area,400,25);    
+  gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK );    
+  gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,0,10,row,row+1);
+
+  width  = 400;//drawing_area->allocation.width;
+  height = 25; //drawing_area->allocation.height;
+  cout <<  "Waveform::" << __FUNCTION__ 
+       << "  width " << width
+       << "  height " << height << endl;
+
+  if (pixmap)
+    gdk_pixmap_unref(pixmap);
+    
+  pixmap = gdk_pixmap_new(drawing_area->window,
+			  width,
+			  height,
+			  -1);
+
+  gtk_signal_connect (GTK_OBJECT (drawing_area),
+		      "expose_event",
+		      GTK_SIGNAL_FUNC (Waveform_expose_event),
+		      this);
+  gtk_signal_connect (GTK_OBJECT(drawing_area),"configure_event",
+		      (GtkSignalFunc) Waveform_configure_event,
+		      this);
+
+
+  // Graphics Context:
+  drawing_gc = gdk_gc_new(drawing_area->window);
+  gdk_gc_set_line_attributes(drawing_gc,1,GDK_LINE_SOLID,
+			     GDK_CAP_ROUND,GDK_JOIN_ROUND);
+
+  name = strdup("test");
+
+  isBuilt = true;
+
+  Update();
+}
+
+//----------------------------------------
+//
+// Waveform Update
+//
+
+void Waveform::Update(void)
+{
+
+  int line_separation,pin_number;
+  int point,x,y,y_text,y_0,y_1;
+  float x_scale,y_scale;
+  int max_str,new_str,br_length;
+  char *s,ss[10];
+  GdkRectangle update_rect;
+
+  if(!isBuilt)
+    return;
+
+  if(!pixmap) {
+    cout << __FUNCTION__ << " pixmap is NULL\n";
+    return;
+  }
+
+  cout << "Waveform::" << __FUNCTION__ << endl;
+
+
+  gdk_draw_rectangle (pixmap,
+		      drawing_area->style->black_gc,
+		      TRUE,
+		      0, 0,
+		      width,
+		      height);
+  y_scale = (float)height / (float)(NUM_PORTS);
+    
+
+  
+#if 0
+  char ntest[] = "test0";
+  // Draw pin name:
+  max_str = 0;
+  for (pin_number=1;pin_number<=NUM_PORTS;pin_number++)
+    {
+      y = (int)((float)y_scale*(float)(pin_number)-(float)(y_scale/4));
+      //s = Package::get_pin_name(pin_number);
+      ntest[4] = pin_number + '0';
+      gdk_draw_text (pixmap,drawing_area->style->font,
+		     drawing_area->style->white_gc,0,y,ntest,strlen(ntest));
+      new_str = gdk_text_width (drawing_area->style->font,ntest,strlen(ntest));
+      if (new_str>max_str)
+	max_str=new_str;
+    }
+  y_text = y;
+#endif
+
+  //
+  // Draw Vertical Grid Lines:
+  //
+
+  gdk_gc_set_foreground(drawing_gc,&grid_line_color);
+
+  for(x=0; x<width; x+= width/20)
+    gdk_draw_line(pixmap,drawing_gc,x,1,x,height-1);
+
+  //
+  // Draw Horizontal Grid Lines:
+  //
+
+  gdk_gc_set_foreground(drawing_gc,&grid_line_color);    
+  gdk_draw_line(pixmap,drawing_gc,0,height-1,width,height-1);
+  
+
+#if 0
+  // Draw Vertical Grid Lines:
+  gdk_gc_set_foreground(drawing_gc,&grid_v_line_color);
+  x_scale = (float)(width-max_str)/(float)bit_points;
+  //    cout << "x_scale:" << x_scale << "\n";
+  //    cout << "y_scale:" << y_scale << "\n";    
+    
+  for (point=0;point<bit_points;point++)
+    {
+      x = (int)(((float)point)*x_scale+max_str);
+      gdk_draw_line(pixmap,drawing_gc,x,0,x,height);
+    }
+  // Draw Horizontal Grid Lines:
+  gdk_gc_set_foreground(drawing_gc,&grid_line_color);    
+  for (pin_number=0;pin_number<(NUM_PORTS-1);pin_number++)
+    {
+      y = (int)(y_scale*(float)(pin_number+1));
+      gdk_draw_line(pixmap,drawing_gc,0,y,width,y;)
+    }
+
+#endif
+
+
+  // Draw Signals:
+  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
+
+  x = 0;
+  y = 0;
+  int nextx;
+  int nexty;
+
+  int h = height-1;
+
+  while(x <width) {
+    nextx = x + (rand() % 10);
+    if(nextx >= width)
+      nextx = width;
+
+    gdk_draw_line(pixmap,drawing_gc,x,h-y*10,nextx,h-y*10);
+
+    x = nextx;
+    nexty = y ^ 1;
+    gdk_draw_line(pixmap,drawing_gc,x,h-y*10,x,h-nexty*10);
+    y = nexty;
+
+  }
+
+#if 0
+  // Draw Signals:
+  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
+  for (pin_number=1;pin_number<=NUM_PORTS;pin_number++)
+    {
+      y_0 = (int)(y_scale*(float)(pin_number)-y_scale/4.0);
+      y_1 = (int)(y_scale*(float)(pin_number)-y_scale*3.0/4.0);
+      //        cout << "Name:" << Package::get_pin_name(pin_number) << "\n";
+      for (point=0;point<bit_points;point++)
+        {
+	  x = (int)((float)point*x_scale+max_str);
+	  ///if (port->get_pin_bit_value(bit_left+point,pin_number)==0)
+	  if(y & 1)
+	    y = y_0;
+	  else
+	    y = y_1;
+	  gdk_draw_line(pixmap,drawing_gc,x,y,(int)(x+(float)x_scale),y);
+        }
+    }
+#endif
+
+#if 0
+  // Draw bit positions:
+  sprintf (ss,"[%d]",bit_left);
+  gdk_draw_text (pixmap,drawing_area->style->font,
+		 drawing_area->style->white_gc,
+		 max_str,(int)y,ss,strlen(ss));
+  sprintf (ss,"[%d]",bit_right);
+  br_length = gdk_text_width (drawing_area->style->font,ss,strlen(ss));
+  gdk_draw_text (pixmap,drawing_area->style->font,
+		 drawing_area->style->white_gc,
+		 width-br_length,(int)y,ss,strlen(ss));
+
+#endif
+
+  update_rect.x = 0;
+  update_rect.y = 0;
+  update_rect.width = width;
+  update_rect.height = height;
+  gtk_widget_draw (drawing_area,&update_rect);
+
+}
+//------------------------------------------------------------------------
+// Signals
+
+
+//----------------------------------------
+//
+// When a user clicks on the "X" in the window managers border of the
+// scope window, we'll capture that event and hide the scope.
+//
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Scope_Window *sw)
@@ -120,78 +404,32 @@ analyzer_update_delay (GtkAdjustment *adj,gpointer user_data)
   cout <<  "function:" << __FUNCTION__ << "\n";    
   return(FALSE);
 }
-static gint
-analyzer_screen_configure_event (GtkWidget *widget, GdkEventConfigure *event,
-                                 gpointer user_data)
-{
-  cout <<  "function:" << __FUNCTION__ << "\n";
 
-  Scope_Window *sw = (Scope_Window *)user_data;    
-  guint max_width;
-  guint max_height;
 
-  g_return_val_if_fail (widget != NULL, TRUE);
-  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
-  //as = (Analyzer_Screen*)user_data;
-  max_width = widget->allocation.width;
-  max_height = widget->allocation.height;
-    
-  if (pixmap!=NULL)
-    gdk_pixmap_unref(pixmap);
-    
-  pixmap = gdk_pixmap_new(widget->window,
-			  max_width,
-			  max_height,
-			  -1);
-  sw->Update();
-//    cout <<  "end of function:" << __FUNCTION__ << "\n";        
-
-    return TRUE;
-}
-
-static gint
-analyzer_screen_expose_event (GtkWidget *widget,
-                              GdkEventExpose  *event,
-                              gpointer   user_data)
+static gint Scope_Window_expose_event (GtkWidget *widget,
+				   GdkEventExpose  *event,
+				   gpointer   user_data)
 {
   cout <<  "function:" << __FUNCTION__ << "\n";    
 
-  //Analyzer_Screen *as;
-  guint max_width;
-  guint max_height;
-
   g_return_val_if_fail (widget != NULL, TRUE);
   g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
-  //as = (Analyzer_Screen*)user_data;
-  gdk_draw_pixmap(widget->window,
-		  widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-		  pixmap,
-		  event->area.x, event->area.y,
-		  event->area.x, event->area.y,
-		  event->area.width, event->area.height);
-  //    cout <<  "end of function:" << __FUNCTION__ << "\n";        
 
-  return FALSE;
+  Scope_Window *sw = (Scope_Window *)user_data;
+  if(sw)
+    sw->Update();
+
+  return TRUE;
 }
+//------------------------------------------------------------------------
+//
+// Scope_Window member functions
+//
+//
 
 
-void Scope_Window__AddSignal(Scope_Window *_this, GtkWidget *table,int row)
-{
+Waveform *signals[8];   // hack
 
-  drawing_area = gtk_drawing_area_new ();
-  gtk_widget_set_usize (drawing_area,400,25);    
-  gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK );    
-  gtk_table_attach_defaults (GTK_TABLE(table),drawing_area,0,10,row,row+1);
-
-  gtk_signal_connect (GTK_OBJECT (drawing_area),
-		      "expose_event",
-		      GTK_SIGNAL_FUNC (analyzer_screen_expose_event),
-		      _this);
-  gtk_signal_connect (GTK_OBJECT(drawing_area),"configure_event",
-		      (GtkSignalFunc) analyzer_screen_configure_event,
-		      _this);
-
-}
 
 //------------------------------------------------------------------------
 
@@ -215,9 +453,17 @@ void Scope_Window::Build(void)
 
 
   tooltips = gtk_tooltips_new();
-    
+
+  //
+  // The Scope window is built on top of a 10X10 packing table
+  //
+
   table = gtk_table_new (10,10,TRUE);
   gtk_table_set_col_spacings(GTK_TABLE(table),5);
+
+  //
+  // Control buttons
+  // (this is changing...)
 
   gtk_container_add (GTK_CONTAINER (window),table);
   button = gtk_button_new_with_label ("Clear");
@@ -229,6 +475,10 @@ void Scope_Window::Build(void)
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), this);
 
+  gtk_signal_connect (GTK_OBJECT (window),
+		      "expose_event",
+		      GTK_SIGNAL_FUNC (Scope_Window_expose_event),
+		      this);
 
 #if 0
   button = gtk_button_new_with_label ("Zoom In");
@@ -259,6 +509,9 @@ void Scope_Window::Build(void)
   gtk_table_attach_defaults (GTK_TABLE(table),scroll_bar,0,10,8,9);
 
 
+#if 0
+
+  // do we really want to have an update delay?
 
   delay_adjust = gtk_adjustment_new(update_delay,
 				    DELAY_MIN_VALUE,
@@ -271,17 +524,13 @@ void Scope_Window::Build(void)
   gtk_spin_button_set_snap_to_ticks(GTK_SPIN_BUTTON(spin_button),TRUE);
   gtk_table_attach_defaults (GTK_TABLE(table),spin_button,8,10,9,10);
   gtk_tooltips_set_tip(tooltips,spin_button,"Set Update Delay",NULL);
+#endif
+
+  //
+  // Define the drawing colors
+  //
 
 
-
-  for(int i=0; i<8; i++)
-    Scope_Window__AddSignal(this,table,i);
-    
-
-  // Graphics Context:
-  drawing_gc = gdk_gc_new(drawing_area->window);
-  gdk_gc_set_line_attributes(drawing_gc,1,GDK_LINE_SOLID,
-			     GDK_CAP_ROUND,GDK_JOIN_ROUND);
   // The signal color is bright red
   signal_line_color.red = 0xff00;
   signal_line_color.green = 0x0000;
@@ -297,6 +546,19 @@ void Scope_Window::Build(void)
   grid_v_line_color.green = 0x2200;
   grid_v_line_color.blue = 0x0000;
   gdk_color_alloc(gdk_colormap_get_system(), &grid_v_line_color);
+
+
+  //
+  // Create the signals for the scope window.
+  //
+
+  for(int i=0; i<8; i++) {
+
+    signals[i] = new Waveform(this);
+    signals[i]->Build(table, i);
+  }
+
+
   
   gtk_widget_show_all (window);
     
@@ -307,102 +569,22 @@ void Scope_Window::Build(void)
 
 void Scope_Window::Update(void)
 {
-  gint w_width;
-  gint w_height;
-  int line_separation,pin_number;
-  int point,x,y,y_text,y_0,y_1;
-  float x_scale,y_scale;
-  int max_str,new_str,br_length;
-  char *s,ss[10];
-  GdkRectangle update_rect;
 
-  w_width = drawing_area->allocation.width;
-  w_height = drawing_area->allocation.height;
+  if(!is_built)
+    Build();
 
-    
   cout <<  "function:" << __FUNCTION__ << "\n";
-  //    cout << "bit_left:" << bit_left << ", bit_right:" << bit_right << "\n";
-  //    cout << "bit_points:" << bit_points << "\n";    
 
-  gdk_draw_rectangle (pixmap,
-		      drawing_area->style->black_gc,
-		      TRUE,
-		      0, 0,
-		      w_width,
-		      w_height);
-  y_scale = (float)w_height / (float)(NUM_PORTS);
+  for(int i=0; i<8; i++) {
+
+    if(signals[i])
+      signals[i]->Update();
+
+  }
+
+  gtk_widget_show_all(window);
+
     
-
-  char ntest[] = "test0";
-  // Draw pin name:
-  max_str = 0;
-  for (pin_number=1;pin_number<=NUM_PORTS;pin_number++)
-    {
-      y = (int)((float)y_scale*(float)(pin_number)-(float)(y_scale/4));
-      //s = Package::get_pin_name(pin_number);
-      ntest[4] = pin_number + '0';
-      gdk_draw_text (pixmap,drawing_area->style->font,
-		     drawing_area->style->white_gc,0,y,ntest,strlen(ntest));
-      new_str = gdk_text_width (drawing_area->style->font,ntest,strlen(ntest));
-      if (new_str>max_str)
-	max_str=new_str;
-    }
-  y_text = y;
-
-
-  // Draw Vertical Grid Lines:
-  gdk_gc_set_foreground(drawing_gc,&grid_v_line_color);
-  x_scale = (float)(w_width-max_str)/(float)bit_points;
-  //    cout << "x_scale:" << x_scale << "\n";
-  //    cout << "y_scale:" << y_scale << "\n";    
-    
-  for (point=0;point<bit_points;point++)
-    {
-      x = (int)(((float)point)*x_scale+max_str);
-      gdk_draw_line(pixmap,drawing_gc,x,0,x,w_height);
-    }
-  // Draw Horizontal Grid Lines:
-  gdk_gc_set_foreground(drawing_gc,&grid_line_color);    
-  for (pin_number=0;pin_number<(NUM_PORTS-1);pin_number++)
-    {
-      y = (int)(y_scale*(float)(pin_number+1));
-      gdk_draw_line(pixmap,drawing_gc,0,y,w_width,y);
-    }    
-  // Draw Signals:
-  gdk_gc_set_foreground(drawing_gc,&signal_line_color);    
-  for (pin_number=1;pin_number<=NUM_PORTS;pin_number++)
-    {
-      y_0 = (int)(y_scale*(float)(pin_number)-y_scale/4.0);
-      y_1 = (int)(y_scale*(float)(pin_number)-y_scale*3.0/4.0);
-      //        cout << "Name:" << Package::get_pin_name(pin_number) << "\n";
-      for (point=0;point<bit_points;point++)
-        {
-	  x = (int)((float)point*x_scale+max_str);
-	  ///if (port->get_pin_bit_value(bit_left+point,pin_number)==0)
-	  if(y & 1)
-	    y = y_0;
-	  else
-	    y = y_1;
-	  gdk_draw_line(pixmap,drawing_gc,x,y,(int)(x+(float)x_scale),y);
-        }
-    }
-
-  // Draw bit positions:
-  sprintf (ss,"[%d]",bit_left);
-  gdk_draw_text (pixmap,drawing_area->style->font,
-		 drawing_area->style->white_gc,
-		 max_str,(int)y,ss,strlen(ss));
-  sprintf (ss,"[%d]",bit_right);
-  br_length = gdk_text_width (drawing_area->style->font,ss,strlen(ss));
-  gdk_draw_text (pixmap,drawing_area->style->font,
-		 drawing_area->style->white_gc,
-		 w_width-br_length,(int)y,ss,strlen(ss));
-    
-  update_rect.x = 0;
-  update_rect.y = 0;
-  update_rect.width = w_width;
-  update_rect.height = w_height;
-  gtk_widget_draw (drawing_area,&update_rect);
 }
 
 Scope_Window::Scope_Window(GUI_Processor *_gp)

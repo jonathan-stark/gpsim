@@ -412,7 +412,7 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
     program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
-    //printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
+    printf("%s address=%x, sline=%d, lst_li ne=%d\n", __FUNCTION__,address,sline,lst_line);
 
     FileContext *fc = (*_files)[file_id];
 
@@ -487,22 +487,6 @@ void Processor::read_src_files(void)
       // 20th line of the third source file.)
 
       fc->ReadSource();
-      /*
-      files[i].line_seek = new int[files[i].max_line+1];
-      if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
-	continue;
-      rewind(files[i].file_ptr);
-
-      char buf[256],*s;
-      files[i].line_seek[0] = 0;
-      for(int j=1; j<=files[i].max_line; j++)
-	{
-	  files[i].line_seek[j] = ftell(files[i].file_ptr);
-	  s = fgets(buf,256,files[i].file_ptr);
-	  if(s != buf)
-	    break;
-	}
-      */
     }
   }
 
@@ -1485,11 +1469,17 @@ void FileContext::ReadSource(void)
     return;
 
   const char *str = name_str.c_str();
-  fptr = fopen_path(str,"r");
 
+  // If the file is not open yet, then try to open it.
   if(!fptr)
-    return;
+    fptr = fopen_path(str,"r");
 
+  // If the file still isn't open, then we have a problem
+  // FIXME - should some corrective action be taken?
+  if(!fptr) {
+    cout << "Unable to open " << str << endl;
+    return;
+  }
   if(line_seek)
     delete line_seek;
 

@@ -240,7 +240,7 @@ FILE *open_a_file(char **filename)
 {
   FILE *t;
 
-  if(verbose)
+  //if(verbose)
     cout << "Trying to open a file: " << *filename << '\n';
 
   if(0 != (t = fopen_path(*filename,"r")))
