@@ -119,13 +119,6 @@ void Register::setbit(unsigned int bit_number, bool new_value)
   }
 }
 
-void Register::setbit_value(unsigned int bit_number, bool new_value)
-{
-  setbit(bit_number,new_value);
-}
-
-
-
 //-----------------------------------------------------------
 //  void Register::put_value(unsigned int new_value)
 //

@@ -950,27 +950,6 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
 }
 
 //========================================================================
-dc_supply::dc_supply(char *n)
-{
-
-  snode = 0;
-  next = 0;
-
-  if(n)
-    new_name(n);
-  else
-    {
-      char name_str[100];
-      snprintf(name_str,sizeof(name_str),"v%d_supply",num_stimuli);
-      num_stimuli++;
-      new_name(name_str);
-    }
-
-  add_stimulus(this);
-
-}
-
-//========================================================================
 //
 
 IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
@@ -1082,7 +1061,9 @@ Register *IOPIN::get_iop(void)
 }
 
 //--------------------
-
+// set_nodeVoltage()
+//
+// 
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
   Register *port = get_iop();
@@ -1094,7 +1075,7 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
     // the input is currently high, but the voltage being applied is lower
     // than the switching threshold
   
-    digital_state = false;
+    set_digital_state(false);
 
     if(port)
       port->setbit(iobit,false);
@@ -1102,7 +1083,7 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
   } 
   else if(!digital_state && (nodeVoltage > l2h_threshold)) {
 
-    digital_state = true;
+    set_digital_state(true);
 
     if(port)
       port->setbit(iobit,true);
@@ -1111,8 +1092,8 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 
   // If there's a node attached to this pin, but the pin is not
   // part of an I/O port, then we'll go ahead update the node.
-  if(snode && !port)
-    snode->update(0);
+  //if(snode && !port)
+  //  snode->update(0);
 
   //else cout << " no change in IO_input state\n";
 
@@ -1122,7 +1103,7 @@ void IOPIN::put_digital_state(bool new_state)
 {
   Register *port = get_iop();
   if(port)
-    port->setbit_value(iobit, new_state);
+    port->setbit(iobit, new_state);
   else {
 
     if(new_state != digital_state) {
@@ -1246,24 +1227,11 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 
   driving = new_direction ? true : false;
 
+  // If this pin is not associated with an IO Port, but it's tied
+  // to a stimulus, then we need to update the stimulus.
+  if(!iop && snode)
+    snode->update(0);
 }
-
-//---------------
-//void IO_bi_directional::change_direction(unsigned int new_direction)
-//
-//  This is called by the gui to change the direction of an 
-// io pin. 
-
-void IO_bi_directional::change_direction(unsigned int new_direction)
-{
-
-  //cout << __FUNCTION__ << '\n';
-  if(iop)
-    iop->change_pin_direction(iobit, new_direction & 1);
-
-  update();
-}
-
 
 
 IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)

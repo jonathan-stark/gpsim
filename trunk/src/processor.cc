@@ -89,6 +89,8 @@ Processor::Processor(void)
   minor_version = GPSIM_MINOR_VERSION;
   micro_version = GPSIM_MICRO_VERSION;
 
+  get_trace().cycle_counter(get_cycles().value);
+
 }
 
 
@@ -938,6 +940,12 @@ Processor * Processor::construct(void)
 
 
 
+
+//-------------------------------------------------------------------
+void Processor::trace_dump(int type, int amount)
+{
+  trace.dump(amount, stdout);
+}
 
 //-------------------------------------------------------------------
 //

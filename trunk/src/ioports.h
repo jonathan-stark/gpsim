@@ -35,7 +35,17 @@ class Stimulus_Node;
 class TMRL;
 
 //---------------------------------------------------------
-// IOPORT
+// IOPORT - Base class for all I/O ports
+//
+//  Register
+//    |-> sfr_register
+//            |--> IOPORT
+//                   |--> PORTA
+//                   |--> PORTB
+//                   |--> PORTC
+//                   |--> PORTD
+//                   |--> PORTE
+//
 
 class IOPORT : public sfr_register
 {
@@ -43,7 +53,7 @@ public:
 
 #define IOPINS 8
 
-  IOPIN  **pins; // [IOPINS];
+  IOPIN  **pins;
 
 
 
@@ -55,8 +65,11 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
+
+  // setbit() is called when a stimulus writes a value to one
+  // of the I/O pins in this Port.
   virtual void setbit(unsigned int bit_number, bool new_value);
-  virtual void setbit_value(unsigned int bit_number, bool new_value);
+
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual unsigned int get(void);
