@@ -76,9 +76,7 @@ Module::Module(void)
   interface = 0;
 
   // Derived modules should assign more reasonable values for this.
-  major_version = 0;
-  minor_version = 0;
-  micro_version = 0;
+  version = 0;
 
   xref = new XrefObject;
 

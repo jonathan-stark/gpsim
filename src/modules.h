@@ -136,9 +136,7 @@ public:
   virtual void reset(RESET_TYPE r);
 
   /// Version
-  virtual int get_major_version(void) { return major_version;}
-  virtual int get_minor_version(void) { return minor_version;}
-  virtual int get_micro_version(void) { return micro_version;}
+  virtual char *get_version(void) { return version;}
 
   /// gui
   virtual void set_widget(void * a_widget) {widget = a_widget;}
@@ -155,9 +153,7 @@ public:
   void *widget;   // GtkWidget * that is put in the breadboard.
 
  protected:
-  int major_version;
-  int minor_version;
-  int micro_version;
+  char *version;
 
 };
 
