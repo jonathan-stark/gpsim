@@ -26,4 +26,4 @@ module load binary_indicator bi1
 
 node n1
 
-attach n1 portb0 bi1.2
+attach n1 portb0 bin_port0
