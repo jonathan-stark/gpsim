@@ -120,17 +120,17 @@ popup_activated(GtkWidget *widget, gpointer data)
     if(entry==0)
 	return;
 
-    switch(item->id)
-    {
-    case MENU_ADD_WATCH:
+    switch(item->id) {
 
-      popup_sw->gp->watch_window->Add(pic_id,
-				      REGISTER_RAM,
-				      entry->value);
-	break;
+    case MENU_ADD_WATCH:
+      {
+	GUIRegister *reg = (*popup_sw->gp->regwin_ram)[entry->value];
+	popup_sw->gp->watch_window->Add(popup_sw->gp->regwin_ram->type, reg);
+      }
+      break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+      puts("Unhandled menuitem?");
+      break;
     }
 }
 

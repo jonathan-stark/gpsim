@@ -23,6 +23,8 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 
+#include <vector>
+
 #include "gpsim_classes.h"
 #include "modules.h"
 #include "trace.h"
@@ -175,6 +177,86 @@ class RegisterMemoryAccess
 
 //------------------------------------------------------------------------
 //
+/// FileContext - Maintain state information about files.
+/// The state of each source file for a processor is recorded in the 
+/// FileContext class. Clients can query information like the name
+/// of the source file or the line number responsible for generating
+/// a specific instruction.
+
+class FileContext
+{
+ private:
+  string name_str;    
+  FILE   *fptr;
+  //int    *line_seek;
+  vector<int> *line_seek;
+  int    _max_line;
+
+ public:
+
+  FileContext(string &new_name, FILE *_fptr);
+  FileContext(char *new_name, FILE *_fptr);
+  ~FileContext(void);
+  string &name(void)
+    {
+      return name_str;
+    }
+
+  void max_line(int new_max_line)
+    {
+      _max_line = new_max_line;
+    }
+
+  int max_line(void)
+    {
+      return _max_line;
+    }
+
+};
+
+class Files
+{
+ public:
+
+  Files(int nFiles);
+  ~Files(void);
+
+  void Add(string& new_name, FILE *fptr);
+  void Add(char *new_name, FILE *fptr);
+
+  FileContext *operator [] (int file_number);
+
+  void list_id(int new_list_id) 
+    {
+      list_file_id = new_list_id;
+    }
+
+  int list_id(void)
+    {
+      return list_file_id;
+    }
+
+  void nsrc_files(int _num_src_files) 
+    {
+      num_src_files = _num_src_files;
+    }
+
+  int nsrc_files(void) 
+    {
+      return num_src_files;
+    }
+
+
+
+ private:
+  vector<FileContext *> *vpfile;
+  int lastFile;
+  int num_src_files;
+  int list_file_id;
+};
+
+//------------------------------------------------------------------------
+//
 // Processor - a generic base class for processors supported by gpsim
 //
 
@@ -185,6 +267,9 @@ public:
   struct file_context *files;  // A dynamically allocated array for src file info
   int number_of_source_files;  // The number of elements allocated to that array
   int lst_file_id;
+
+
+  Files *_files;        // The source files for this processor.
 
   int processor_id;              // An identifier to differentiate this instantiation from others
 

@@ -525,69 +525,6 @@ void Watch_Window::Update(void)
   if(clist_frozen)
     gtk_clist_thaw(GTK_CLIST(watch_clist));
 }
-
-extern file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-
-void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg)
-{
-  char name[50], addressstring[50], typestring[30];
-  char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
-  int row;
-  WatchWindowXREF *cross_reference;
-  char *regname;
-
-  WatchEntry *watch_entry;
-    
-  if(!enabled)
-    Build();
-
-  if(!gp || !gp->cpu)
-    return;
-  if(!reg) {
-    reg = gpsim_get_register(pic_id,type,address);
-    if(!reg)
-      return;
-  }
-
-  regname = gpsim_get_register_name(pic_id,type,address);
-
-  if(!regname)
-    return;  // INVALID_REGISTER
-
-  strncpy(name,regname,50);
-  sprintf(addressstring,"0x%02x",address);
-  strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
-
-  row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
-
-  watch_entry = new WatchEntry();
-  watch_entry->address=address;
-
-  watch_entry->cpu = gp->cpu;
-
-  watch_entry->type=type;
-
-  if(type == REGISTER_RAM)
-    watch_entry->rma = &gp->cpu->rma;
-  else 
-    watch_entry->rma = &gp->cpu->ema;
-
-  gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
-    
-  watches = g_list_append(watches, (gpointer)watch_entry);
-
-  UpdateWatch(watch_entry);
-
-  cross_reference = new WatchWindowXREF();
-  cross_reference->parent_window_type = WT_watch_window;
-  cross_reference->parent_window = (gpointer) this;
-  cross_reference->data = (gpointer) watch_entry;
-
-  watch_entry->Assign_xref(cross_reference);
-
-  UpdateMenus();
-}
-
 //------------------------------------------------------------------------
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 {

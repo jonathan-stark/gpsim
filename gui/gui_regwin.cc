@@ -1431,6 +1431,16 @@ GUIRegister *Register_Window::getRegister(int row, int col)
 
 }
 
+//-------------------------------------------------------------------
+GUIRegister *Register_Window::operator [] (int address)
+{
+
+  if(!registers || address>=MAX_REGISTERS  || address<0)
+    return 0;
+
+  return registers[address];
+}
+
 void Register_Window::SelectRegister(int regnumber)
 {
   GtkSheetRange range;

@@ -1375,3 +1375,68 @@ void ProcessorConstructor::dump(void)
   } 
 
 }
+
+
+//------------------------------------------------------------------------
+
+FileContext::FileContext(string &new_name, FILE *_fptr)
+{
+  name_str = new_name;
+  fptr = _fptr;
+  line_seek = 0;
+  _max_line =0;
+}
+
+FileContext::FileContext(char *new_name, FILE *_fptr)
+{
+  name_str = string(new_name);
+  fptr = _fptr;
+  line_seek = 0;
+  _max_line =0;
+}
+
+FileContext::~FileContext(void)
+{
+
+}
+
+//------------------------------------------------------------------------
+
+
+Files::Files(int nFiles)
+{
+
+  vpfile = new vector<FileContext *>(nFiles);
+  lastFile=0;
+
+}
+
+Files::~Files(void)
+{
+
+  //  for(int i=0; i<vpfile->size(); i++
+
+}
+
+void Files::Add(string &new_name, FILE *fptr)
+{
+
+  (*vpfile)[lastFile] = new FileContext(new_name,fptr);
+
+  lastFile++;
+}
+
+
+void Files::Add(char *new_name, FILE *fptr)
+{
+
+  (*vpfile)[lastFile] = new FileContext(new_name,fptr);
+
+  lastFile++;
+}
+
+FileContext *Files::operator [] (int file_id)
+{
+
+  return (*vpfile).at(file_id);
+}
