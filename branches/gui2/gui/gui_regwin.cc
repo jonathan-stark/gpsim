@@ -1310,14 +1310,15 @@ int Register_Window::SettingsDialog(void)
   // FIXME - this code doesn't look right. 'i' iterates over both
   // the columns and rows. If there are more rows then columns, then
   // this code breaks.
-
+  /*
   for(i=0; i<=register_sheet->maxcol; i++){
     gtk_sheet_set_column_width (register_sheet, i, column_width(i));
     //gtk_sheet_set_row_height (register_sheet, i, row_height(i));
   }
+  */
 
   gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
-  gtk_sheet_set_column_titles_height(register_sheet, row_height(0));
+  //gtk_sheet_set_column_titles_height(register_sheet, row_height(0));
   gtk_sheet_thaw(register_sheet);
 
   gtk_widget_hide(dialog);
@@ -1760,7 +1761,7 @@ void Register_Window::Update(void)
   if(!enabled)
     return;
     
-  if(!GTK_WIDGET_VISIBLE(window))
+  if(!window || !GTK_WIDGET_VISIBLE(window))
     return;
 
   if(!registers_loaded)
@@ -1873,7 +1874,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   j=0;
   i=0;
 
-  gtk_sheet_set_row_height (register_sheet, j, row_height(i));
+  //gtk_sheet_set_row_height (register_sheet, j, row_height(i));
 
   SetRegisterSize();
 
@@ -1923,7 +1924,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 	  if(register_sheet->maxrow<j)
 	    {
 	      gtk_sheet_add_row(register_sheet,1);
-	      gtk_sheet_set_row_height (register_sheet, j, row_height(0));
+	      //gtk_sheet_set_row_height (register_sheet, j, row_height(0));
 	    }
 
 	  sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
@@ -2028,6 +2029,8 @@ void Register_Window::Build(void)
 
   */
   window = RegisterWindowExperiment;
+  if(window == 0)
+    return;
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
