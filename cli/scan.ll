@@ -120,7 +120,7 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 
 q\n   { 
    quit_parse  =1;
-   return 0;  }
+   return QUIT;  }
 
 <<EOF>> {
     //cout << "got an <<EOF>> in scan.l\n";
@@ -157,6 +157,7 @@ q\n   {
 
 "echo".*{NL} {
    fprintf(yyout,"%s",&yytext[5]);
+   return IGNORED;
   }
 
 %{
