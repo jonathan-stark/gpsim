@@ -1,3 +1,9 @@
+2005-01-15 Scott Dattalo <scott@dattalo.com>
+	* src/attributes.cc, src/attributes.h: New files to support gpsim
+	attributes.
+	* src/Makefile.am, src/makefile.mingw: added the new files to the
+	make files.
+	
 2005-01-14 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, gui/gui_main.cc: The gtk main loop is now started
 	even if the command line option --cli is specified. This way, the

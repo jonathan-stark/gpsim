@@ -34,6 +34,7 @@ src_OBJECTS =			\
 	16bit-processors.o	\
 	16bit-registers.o	\
 	16bit-tmrs.o		\
+	attributes.o		\
 	breakpoints.o		\
 	cod.o			\
 	eeprom.o		\
