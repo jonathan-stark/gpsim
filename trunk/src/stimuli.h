@@ -108,6 +108,7 @@ public:
 
   double get_nodeVoltage(void) { return voltage; }
   void update(guint64 current_time);
+  void update();
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);

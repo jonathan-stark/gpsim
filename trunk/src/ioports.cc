@@ -75,6 +75,12 @@ Boston, MA 02111-1307, USA.  */
 int IOPORT::update_stimuli(void)
 {
 
+  unsigned int v = value.get();
+
+  return v ^ get_value();
+}
+
+#if 0
   guint64 time = cycles.value;
   int input = 0;
   int m;
@@ -101,11 +107,14 @@ int IOPORT::update_stimuli(void)
     }
 
   return input;
+#endif
 
-}
 
+
+#if 0
 int PIC_IOPORT::update_stimuli(void)
 {
+
   // Loop through the io pins and determine if there are
   // any sources attached to the same node
 
@@ -143,15 +152,14 @@ int PIC_IOPORT::update_stimuli(void)
     }
 
   return input;
-
 }
+#endif
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 double IOPORT::get_bit_voltage(unsigned int bit_number)
 {
 
-  guint64 time = cycles.value;
   double v;
 
   if(pins[bit_number]) {
@@ -179,7 +187,7 @@ bool IOPORT::get_bit(unsigned int bit_number)
 }
 
 //-------------------------------------------------------------------
-//  IOPORT::get(void)
+//  IOPORT::get_value(void)
 //
 //   inputs:  none
 //  returns:  the current state of the ioport
@@ -190,8 +198,9 @@ bool IOPORT::get_bit(unsigned int bit_number)
 //
 //-------------------------------------------------------------------
 
-unsigned int IOPORT::get(void)
+unsigned int IOPORT::get_value(void)
 {
+
   // Update the stimuli - if there are any
 
   if(stimulus_mask) {
@@ -220,8 +229,23 @@ unsigned int IOPORT::get(void)
 
   }
 
-  trace.raw(read_trace.get() | value.get());
   return(value.get());
+}
+//-------------------------------------------------------------------
+//  IOPORT::get(void)
+//
+//   inputs:  none
+//  returns:  the current state of the ioport
+//
+// get is identical to get_value except that tracing is performed.
+//
+//-------------------------------------------------------------------
+
+unsigned int IOPORT::get(void)
+{
+
+  trace.raw(read_trace.get() | value.get());
+  return get_value();
 }
 
 //-------------------------------------------------------------------
@@ -735,45 +759,48 @@ void PORTB::reset(RESET_TYPE r)
 //-------------------------------------------------------------------
 void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 {
-  int i;
 
   // Set the state of the interrupt bit first.
   // The reason is because it may be that the pullups will cause a
   // an i/o to toggle and hence cause an interrupt.
 
   if((new_configuration ^ intedg) & intedg_MASK )
-    {
-      intedg = new_configuration & intedg_MASK;
+    intedg = new_configuration & intedg_MASK;
+
+  if((new_configuration ^ rbpu) & rbpu_MASK ){
+
+    // Save the state of the I/O pins before any (potential) changes
+    // are made.
+
+    unsigned int old_value = value.get();
+
+    rbpu = new_configuration & rbpu_MASK;
+    bool pullup = rbpu ? false : true;
+
+    // Update each I/O pin's pullup resistor.
+    for(unsigned int i=0; i<num_iopins; i++) {
+      pins[i]->update_pullup(pullup);
+      if(pins[i]->snode)
+	pins[i]->snode->update();
     }
 
-  if((new_configuration ^ rbpu) & rbpu_MASK )
-    {
-      rbpu = new_configuration & rbpu_MASK;
-      bool pullup = rbpu ? false : true;
+    // Get the new state of each I/O pin 
 
-      for(i=0; i<8; i++) {
-	pins[i]->update_pullup(pullup);
-      }
+    unsigned int temp_value = get_value();
 
-      // Update each pin that has a stimulus connect:
+    // If the pullup resistors are being turned on, and the I/O's are
+    // inputs, and there are no stimuli attached, then drive I/O's high.
 
-      int temp_value = value.get();
-      if(stimulus_mask)
-	temp_value = ( (temp_value & ~stimulus_mask) | update_stimuli());
+    temp_value &= stimulus_mask;
+    if(pullup)
+      temp_value |= (tris->value.get() & ~stimulus_mask);
 
-      // If the pullup resistors are being turned on, and the I/O's are
-      // inputs, and there are no stimuli attached, then drive I/O's high.
-
-      temp_value &= stimulus_mask;
-      if(pullup)
-	temp_value = (tris->value.get() & ~stimulus_mask);
-
-      if(temp_value ^ value.get()) {
-	trace.raw(write_trace.get() | value.get());
-	//trace.register_write(address,value.get());
-	value.put(temp_value);
-      }
+    // If anything changed, then we record the new state.
+    if(temp_value ^ old_value) {
+      trace.raw(write_trace.get() | old_value);
+      value.put(temp_value);
     }
+  }
 
 }
 

@@ -73,6 +73,7 @@ public:
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);
@@ -94,7 +95,7 @@ public:
   IOPORT_TRIS * tris;
   IOPORT_LATCH * latch;   // non-null on 18x parts only
 
-  int update_stimuli(void);
+  // int update_stimuli(void);
   void put(unsigned int new_value);
   void update_pin_directions(unsigned int new_tris);
   void change_pin_direction(unsigned int bit_number, bool new_direction);
