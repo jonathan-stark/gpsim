@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 
 
-class invalid_file_register;   // Forward reference
+class InvalidRegister;   // Forward reference
 
 
 #ifndef __SSP_H__

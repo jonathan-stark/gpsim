@@ -239,6 +239,20 @@ char *GUIRegister::name(void)
   return buffer;
 }
 
+bool GUIRegister::bIsValid(void)
+{
+  if(rma && (*rma)[address].getReg())
+    return true;
+  return false;
+}
+
+bool GUIRegister::bIsSFR(void)
+{
+  if(rma && (*rma)[address].isa() == Register::SFR_REGISTER)
+    return true;
+  return false;
+}
+
 GUIRegister:: GUIRegister(void)
 {
   rma = 0;
@@ -738,7 +752,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address,popup_rw->registers[address]->get_register());
+	    popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers[address]);
 	  }
       break;
     case MENU_SETTINGS:
@@ -778,7 +792,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    //gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
 	    bp.set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
 
 	  }
@@ -792,7 +805,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    //gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
 	    bp.set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
 	  }
       break;
@@ -1008,11 +1020,13 @@ void Register_Window::UpdateEntry(void)
   
   // ******************************** update entry:
   if(row_to_address[row] < 0) {
-    printf("row_to_address[%d]=0x%x",row,row_to_address[row]);
+    //printf("row_to_address[%d]=0x%x",row,row_to_address[row]);
     return;
   }
 
-  if(gpsim_get_register_name(gp->pic_id,type, row_to_address[row]+col))
+  GUIRegister *reg = getRegister(row,col);
+
+  if(reg && reg->bIsValid() )
     {
       if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
 	gtk_entry_set_text(GTK_ENTRY(entry), text);
@@ -1288,30 +1302,30 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 static void
 show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
- const char *text;
- GtkSheet *sheet;
- GtkEntry *sheet_entry;
+  const char *text;
+  GtkSheet *sheet;
+  GtkEntry *sheet_entry;
 
- int row,col;
+  int row,col;
  
- if(widget==0|| rw==0)
-  {
+  if(!widget || !rw)
+    {
       printf("Warning show_sheet_entry(%p,%p)\n",widget,rw);
       return;
-  }
+    }
 
- if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
+  if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
  
- sheet=GTK_SHEET(rw->register_sheet);
- sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
+  sheet=GTK_SHEET(rw->register_sheet);
+  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
- row=sheet->active_cell.row; col=sheet->active_cell.col;
+  row=sheet->active_cell.row; col=sheet->active_cell.col;
 
- if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
- {
-     if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))))
-	 gtk_entry_set_text(sheet_entry, text);
- }
+  GUIRegister *reg = rw->getRegister(row,col);
+
+  if(reg && reg->bIsValid() )
+    if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))))
+      gtk_entry_set_text(sheet_entry, text);
 
 }
 
@@ -1372,33 +1386,29 @@ static gint
 activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
 {
 
-    GtkSheet *sheet=0;
-    int regnumber;
+  GtkSheet *sheet=0;
     
-    if(rw)
-	sheet=rw->register_sheet;
+  if(rw)
+    sheet=rw->register_sheet;
 
-    if(widget==0 || row>sheet->maxrow || row<0||
-       column>sheet->maxcol || column<0 || rw==0)
+  if(widget==0 || row>sheet->maxrow || row<0||
+     column>sheet->maxcol || column<0 || rw==0)
     {
-	printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,rw);
-	return 0;
+      printf("Warning activate_sheet_cell(%p,%x,%x,%p)\n",widget,row,column,rw);
+      return 0;
     }
 
-    regnumber = rw->row_to_address[row]+column;
+  GUIRegister *reg = rw->getRegister(row,column);
 
-    if(!gpsim_get_register_name(rw->gp->pic_id, rw->type, regnumber))
-    {
-	// disable editing invalid cells
-	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
-    }
-    else
-    {
-	// enable editing valid cells
-	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 1);
-    }
+  if(reg && reg->bIsValid() )
+    // enable editing valid cells
+    gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 1);
+  else
+    // disable editing invalid cells
+    gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
+
     
-    rw->UpdateLabelEntry();
+  rw->UpdateLabelEntry();
 
   return TRUE;
 }
@@ -1523,9 +1533,8 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   int new_value;
   int last_value;
-  int valid_register=0;
   
-  if(reg_number<0 || reg_number>MAX_REGISTERS)
+  if(reg_number<0 || reg_number>=MAX_REGISTERS)
   {
       printf("Warning update_register_cell(%x)\n",reg_number);
       return 0;
@@ -1535,8 +1544,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     return 0;	   // Don't read registers when hidden. Esp with ICD.
   
   
-  if((reg_number >= MAX_REGISTERS) || 
-     (reg_number >= gpsim_get_register_memory_size(gp->pic_id,type)))
+  if(reg_number >= registers[reg_number]->rma->get_size())
     return 0;
 
   range.row0=registers[reg_number]->row;
@@ -1551,14 +1559,11 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   last_value=registers[reg_number]->get_shadow();
 
-  if(gpsim_get_register_name(gp->pic_id, type,reg_number))
-      valid_register=1;
-  
   if(registers[reg_number]->update_full) {
 
     registers[reg_number]->update_full=FALSE;
       
-    if(valid_register) {
+    if(registers[reg_number]->bIsValid()) {
 
       if(new_value==INVALID_VALUE)
 	sprintf (name, "??");
@@ -1588,19 +1593,17 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     } else
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
 
-    //if(gpsim_reg_has_breakpoint(gp->pic_id, type, reg_number))
     if(registers[reg_number]->hasBreak())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &breakpoint_color);
-    else if(!valid_register)
+    else if(!registers[reg_number]->bIsValid())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &invalid_color);
-    else if(gpsim_register_is_alias(gp->pic_id, type, reg_number))
+    else if(registers[reg_number]->bIsAliased)
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &alias_color);
-    else {
-      if(gpsim_register_is_sfr(gp->pic_id, type, reg_number))
-	gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &sfr_bg_color);
-      else
-	gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &normal_bg_color);
-    }
+    else if(registers[reg_number]->bIsSFR())
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &sfr_bg_color);
+    else
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &normal_bg_color);
+   
 
     retval=TRUE;
   } else if(new_value!=last_value) {
@@ -1724,7 +1727,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   gtk_sheet_set_row_height (register_sheet, j, row_height);
 
 
-  for(reg_number=0;reg_number<rma->nRegisters;reg_number++) {
+  for(reg_number=0;reg_number<rma->get_size();reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
 	
     if(i==0 && row_created) {
@@ -1741,9 +1744,9 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
     registers[reg_number]->address = reg_number;
 
 
-    registers[reg_number]->bIsAliased = rma->registers[reg_number]->address != reg_number;
+    registers[reg_number]->bIsAliased = (*rma)[reg_number].address != reg_number;
 
-    if(rma->registers[reg_number]->name()) {
+    if(registers[reg_number]->bIsValid()) {
 
       gpsim_set_bulk_mode(1);
       registers[reg_number]->put_shadow(registers[reg_number]->get_value());

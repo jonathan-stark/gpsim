@@ -437,8 +437,8 @@ unsigned int Breakpoints::check_read_break(Register *fr)
   return(0);
 }
 
-//---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_invalid_fr_break(invalid_file_register *fr)
+//------------------------------------------------------------------------
+unsigned int Breakpoints::check_invalid_fr_break(InvalidRegister *fr)
 {
 
   cout << "debug   checking for invalid file register access  break point " << fr->name() << '\n';
@@ -472,7 +472,7 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
   return(1);
 
 }
-//---------------------------------------------------------------------------------------
+//------------------------------------------------------------------------
 unsigned int Breakpoints::check_break(Register *fr)
 {
   cout << "checking for a bp doesn't do anything...\n";

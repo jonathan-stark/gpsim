@@ -111,29 +111,6 @@ void file_register::put_value(unsigned int new_value)
     }
 }
 
-//--------------------------------------------------
-// member functions for the invalid_file_register class
-//--------------------------------------------------
-void invalid_file_register::put(unsigned int new_value)
-{
-  cout << "attempt write to invalid file register: address 0x" << 
-    hex << address<< ", value 0x" << new_value << '\n';
-
-  bp.halt();
-  trace.register_write(address,value);
-
-  return;
-}
-
-unsigned int invalid_file_register::get(void)
-{
-  cout << "attempt read from invalid file register\n";
-
-  trace.register_read(address,value);
-
-  return(0);
-}
-
 
 
 //

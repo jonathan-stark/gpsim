@@ -154,7 +154,7 @@ void Processor::create_invalid_registers (void)
     {
       if (0 == registers[i])
       {
-	  registers[i] = new invalid_file_register(i);
+	  registers[i] = new InvalidRegister(i);
 	  registers[i]->address = 0;    // BAD_REGISTER;
 	  registers[i]->alias_mask = 0;
 	  registers[i]->value = 0;	// unimplemented registers are read as 0
@@ -1220,7 +1220,7 @@ void RegisterMemoryAccess::set_Registers(Register **_registers, int _nRegisters)
   nRegisters = _nRegisters; 
   registers = _registers;
 }
-
+//-------------------------------------------------------------------
 bool RegisterMemoryAccess::hasBreak(int address)
 {
 
@@ -1229,6 +1229,18 @@ bool RegisterMemoryAccess::hasBreak(int address)
 
   return registers[address]->isa() == Register::BP_REGISTER;
 
+}
+
+static InvalidRegister AnInvalidRegister;
+
+//-------------------------------------------------------------------
+Register &RegisterMemoryAccess::operator [] (int address)
+{
+
+  if(!registers || get_size()<=address  || address<0)
+    return AnInvalidRegister;
+
+  return *registers[address];
 }
 
 //========================================================================

@@ -28,7 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <glib.h>
 
-class invalid_file_register;
+class InvalidRegister;
 
 
 #define MAX_BREAKPOINTS 0x400
@@ -173,7 +173,7 @@ struct BreakStatus
   unsigned int check_write_break(Register *fr);
   unsigned int check_read_break(Register *fr);
   unsigned int check_break(Register *fr);
-  unsigned int check_invalid_fr_break(invalid_file_register *fr);
+  unsigned int check_invalid_fr_break(InvalidRegister *fr);
   unsigned int check_cycle_break(unsigned int abp);
 
   unsigned int set_notify_read(Processor *cpu, unsigned int register_number);
