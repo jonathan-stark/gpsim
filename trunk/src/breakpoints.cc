@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with gpasm; see the file COPYING.  If not, write to
+along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
@@ -37,6 +37,7 @@ extern "C"{
 #define PCPU ((Processor *)cpu)
 
 extern guint64 simulation_start_cycle;
+extern Integer *verbosity;  // in ../src/init.cc
 
 // Global declaration of THE breakpoint object
 // create an instance of inline get_trace() method by taking its address
@@ -63,7 +64,8 @@ bool TriggerAction::getTriggerState(void)
 
 void TriggerAction::action(void)
 {
-  cout << "Hit a Breakpoint!\n";
+  if(verbosity && verbosity->getVal())
+    cout << "Hit a Breakpoint!\n";
   bp.halt();
 }
 
@@ -82,7 +84,7 @@ SimpleTriggerAction::SimpleTriggerAction(TriggerObject *_to)
 void SimpleTriggerAction::action(void)
 {
   TriggerAction::action();
-  if(to)
+  if(to && verbosity && verbosity->getVal())
     to->print();
 }
 
@@ -658,7 +660,7 @@ void Breakpoint_Instruction::execute(void)
 
     if(action->evaluate()) {
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
-      cout << message() << endl;
+      // cout << message() << endl;
     }
   } else {
     replaced->execute();

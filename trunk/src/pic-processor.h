@@ -234,7 +234,7 @@ public:
   virtual void create_symbols(void);
   virtual void create_stack(void) {stack = new Stack;};
   virtual bool load_hex(const char *hex_file);
-  virtual void run(void);
+  virtual void run(bool refresh=true);
   virtual void finish(void);
 
   void sleep(void);

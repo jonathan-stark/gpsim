@@ -107,7 +107,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   virtual void step(unsigned int steps, bool refresh=true);
   virtual void step_over(bool refresh=true);
 
-  virtual void run(void);
+  virtual void run(bool refresh=true);
   virtual void stop(void);
   virtual void finish(void);
 
@@ -432,7 +432,7 @@ public:
   // Execution control
   //
 
-  virtual void run(void);
+  virtual void run(bool refresh=true);
   virtual void run_to_address(unsigned int destination);
   virtual void finish(void);
 
