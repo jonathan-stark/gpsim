@@ -250,7 +250,8 @@ void IOPORT::put(unsigned int new_value)
 void PIC_IOPORT::put(unsigned int new_value)
 {
 
-
+  if(new_value > 255)
+    cout << "PIC_IOPORT::put value >255\n";
   // The I/O Ports have an internal latch that holds the state of the last
   // write, even if the I/O pins are configured as inputs. If the tris port
   // changes an I/O pin from an input to an output, then the contents of this
@@ -515,6 +516,8 @@ IOPORT::IOPORT(unsigned int _num_iopins=8)
   stimulus_mask = 0;
   num_iopins = _num_iopins;
   address = 0;
+  value = 0;
+  internal_latch = 0;
 
   pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
 

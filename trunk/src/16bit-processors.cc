@@ -170,7 +170,7 @@ void _16bit_processor :: create (void)
   usart.initialize(this);
   tbl.initialize(this);
 
-  tmr0l.start();
+  tmr0l.start(0);
 
 }
 
