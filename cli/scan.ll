@@ -45,6 +45,10 @@ Boston, MA 02111-1307, USA.  */
 
 int state;
 
+/* This is the max length of a line within a macro definition */
+static char macroBody[65536], *macroBodyPtr=0;
+static char* max_bodyPtr = &macroBody[0] + sizeof(macroBody)-1;
+
 // gpsim uses base '0' for the base of the numbers that are read from stdin.
 // This means that unless the number is prefixed with '0x' for hex or
 // '0' (zero) for octal it is assumed to be base 10.
@@ -63,8 +67,10 @@ static string strip_trailing_whitespace (char *s);
 static int handle_identifier(const string &tok, cmd_options **op );
 static int process_intLiteral(char *buffer, int conversionBase);
 static int process_booleanLiteral(bool value);
+static int process_macroBody(const char *text);
 static int process_floatLiteral(char *buffer);
 static int recognize(int token,const char *);
+ static void SetMode(int newmode);
 
 int cli_corba_init (char *ior_id);
 
@@ -92,7 +98,15 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
 
-%x MULTILINE_MODE
+%{
+/* Lexer States */
+%}
+%x MACROBODY
+
+%{
+//************************************************************************
+//************************************************************************
+%}
 
 %%
 
@@ -108,7 +122,7 @@ BIN2    ([bB]\'[01]+\')
 
 {S}+      {   /* ignore white space */ }
 
-\n  { 
+<INITIAL>\n  { 
       // Got an eol.
       if(verbose)
           cout << "got EOL\n";
@@ -153,6 +167,33 @@ abort_gpsim_now {
 "true"              {return(process_booleanLiteral(true));}
 "false"             {return(process_booleanLiteral(false));}
 
+"macro"             {return(recognize(MACRODEF_T,"macro"));}
+
+
+%{
+//========================================================================
+// Macro processing
+%}
+
+<MACROBODY>^[ \t]?+"endm" {SetMode(INITIAL); return(recognize(ENDM_T,"endm")); }
+
+<MACROBODY>\r            {/*discard CR's*/}
+<MACROBODY>\n            {*macroBodyPtr++ = '\n';
+                          *macroBodyPtr = 0;
+                           macroBodyPtr = macroBody;
+                           return(process_macroBody(macroBody));}
+
+
+<MACROBODY>.             {  *macroBodyPtr++ = *yytext;
+                            printf("adding [%c]\n", *yytext);
+                            if (macroBodyPtr > max_bodyPtr) {
+			      exit(0);
+                            }
+                         }
+
+
+
+
 %{
 
 // The 'echo' command is handled by the lexer instead of the
@@ -171,7 +212,7 @@ abort_gpsim_now {
 
 
 %{
-// Indirect register access
+// Indirect register access.... this should be an expression operator.
 %}
 
 %{
@@ -201,14 +242,6 @@ abort_gpsim_now {
 // Identifiers. These are either gpsim commands or user macros.
 %}
 
-{IDENT}"[" {
-  cout << "macro starting\n";
-}
-
-"]" {
-  cout << "macro end\n";
-}
-
 {IDENT} {
   string tok = strip_trailing_whitespace (yytext);
 
@@ -225,13 +258,11 @@ abort_gpsim_now {
 
 %%
 
-// Include these so that we don't have to link to libfl.a.
 
 #ifdef yywrap
 #undef yywrap
 #endif
- int
-yywrap (void)
+int yywrap (void)
 {
   return 1;
 }
@@ -318,9 +349,14 @@ int handle_identifier(const string &s, cmd_options **op )
       return recognize(retval,"good command");
 
     } else {
-      cout << " command: \"" << s << "\" was not found\n";
+      //cout << " command: \"" << s << "\" was not found\n";
 
-      return recognize(COMMENT_T,"ignoring command");
+      if(verbose&2)
+	cout << " returning unknown string: " << s << endl;
+
+      yylval.s = strdup(s.c_str());
+
+      return recognize(STRING," string");
 
     }
 
@@ -367,6 +403,8 @@ int handle_identifier(const string &s, cmd_options **op )
    // a new symbol or node or something along those lines.
    // In either case, let's let the parser deal with it.
 
+   if(verbose&2)
+     cout << " returning unknown string: " << s << endl;
    yylval.s = strdup(s.c_str());
    return recognize(STRING,"string");
  }
@@ -411,12 +449,11 @@ static int process_intLiteral(char *buffer, int conversionBase)
 /*****************************************************************
  *
  */
-//static int process_stringLiteral(char *stringValue)
-//{
-//  yylval.String_P = new String(stringValue, true);
-//  return(recognize(LITERAL_STRING_T, "string literal"));
-//}
-
+static int process_macroBody(const char *text)
+{
+  yylval.s = strdup(text);
+  return recognize(MACROBODY_T,"macro body");
+}
 
 /*****************************************************************
  *
@@ -463,6 +500,13 @@ strip_trailing_whitespace (char *s)
   return retval;
 }
 
+
+//------------------------------------------------------------------------
+static void SetMode(int newmode)
+{
+  BEGIN(newmode);
+}
+
 void initialize_commands(void);
 
 void init_cmd_state(void)
@@ -480,7 +524,7 @@ void init_parser(void)
   initialize_commands();
 
   // Start off in a known state.
-  BEGIN 0;
+  SetMode(INITIAL);
 
   // Can't have any options until we get a command.
   if(!parser_spanning_lines) {
@@ -546,3 +590,17 @@ delete_input_buffer (void *buf)
   delete_buffer ((YY_BUFFER_STATE) buf);
 }
 
+//----------------------------------------
+//
+void lexer_setMacroBodyMode(void)
+{
+  macroBodyPtr = &macroBody[0];
+  cout << "setting lexer MACROBODY mode\n";
+  SetMode(MACROBODY);
+}
+
+void lexer_setInitialMode(void)
+{
+  cout << "setting lexer INITIAL mode\n";
+  SetMode(INITIAL);
+}
