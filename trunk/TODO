@@ -1,14 +1,5 @@
-gpsim-0.17.0
 
 
-The 'c84 and all of its derivatives are done.
-The 'c6x is mostly done.
-The 12c508 & 509 are done
-The c71 is done.
-The c74 is mostly done
-The 18Cxxx is partially supported.
-
-Gui is coming along
 
 TODO - In no particular order:
 
@@ -25,9 +16,7 @@ TODO - In no particular order:
   o Boolean Breakpoints
     - This allows multiple conditions to initiate a break. For example, you might want to set a break point such that if register 0x20 is cleared while the program counter is between 0x04 and 0x100.
   o Enhance internal gpsim diagnostics/debugging. Right now there are numerous print statements embedded within gpsim that provide useful diagnostic information on gpsim's internals. These usually get commented out just before each release. So what I'd like to do is:
-    - Create a #define GPSIM_DEBUG mode.
-    - Create a bit mask that will selectively allow internal gpsim diagnostic information to be displayed. (e.g. if you suspect a problem with gpsim's eeprom simulation, you could rebuild gpsim with GPSIM_DEBUG enabled and then either modify the code to enable eeprom diagnostics to be displayed [ gpsim_debug |= debug_eeprom;] or [better] I can added a new command that allows you to specify the gpsim_debug mode.)
     - Documentation. What can I say?
     - Memory management. gpsim is very cavalier with memory. In a few instances, I check for insufficient memory, however I need to be more thorough. Fortunately, gpsim very seldom deletes instantiated objects. So I suspect there are no leaks...
-  o Add CORBA
-    - This will supposedly make it easier for gpsim users to create their own stimuli. The idea is that gpsim will define how it wishes to interface to a stimulus and the user can supply the guts. For example, I envision an LCD module being created that will interface to gpsim through the ORB, but I couldn't imagine adding an LCD module to the simulator engine.
+
+  o Support more symbolic types like bit fields and floating point.
