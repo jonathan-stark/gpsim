@@ -312,6 +312,8 @@ struct _Breadboard_Window {
 
     GtkWidget *da;
     
+    GdkPixmap *pixmap;
+    
     GdkFont *pinstatefont;
     int pinstateheight;
     int pinstatewidth;
