@@ -121,6 +121,7 @@ typedef struct _sym
   void gpsim_run_to_address(unsigned int processor_id, unsigned int address);
   unsigned int gpsim_get_stack_size(unsigned int processor_id);
   unsigned int gpsim_get_stack_value(unsigned int processor_id, unsigned int address);
+  guint64 gpsim_get_current_time(void);
 
 
   //---------------------------------------------------------------------------

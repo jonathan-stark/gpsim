@@ -1079,6 +1079,7 @@ pic_processor::pic_processor(void)
   eeprom = NULL;
   config_modes = create_ConfigMode();
   set_frequency(DEFAULT_PIC_CLOCK);
+  pll_factor = 0;
   // Test code for logging to disk:
   trace_log.switch_cpus(this);
 }
@@ -1542,7 +1543,7 @@ int pic_processor::find_closest_address_to_hll_line(int file_id, int src_line)
 	}
     }
 
-    return closest_address;
+    return  map_pm_index2address(closest_address);
 
 }
 

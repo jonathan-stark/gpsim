@@ -63,7 +63,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
-
+  static unsigned int CallBackID_Sequence=1;
 
 #ifdef __DEBUG_CYCLE_COUNTER__
   cout << "Cycle_Counter::set_break  cycle = 0x" << hex<<future_cycle;
@@ -114,8 +114,13 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f, unsigned i
       l1->next->f = f;
       l1->next->breakpoint_number = bpn;
 
+      if(f)
+	f->CallBackID = ++CallBackID_Sequence;
+
 #ifdef __DEBUG_CYCLE_COUNTER__
       cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
+      if(f)
+	cout << "call back sequence number = "<< f->CallBackID <<'\n';
 #endif
 
     }
@@ -148,6 +153,11 @@ void Cycle_Counter::clear_break(BreakCallBack *f)
 
 	  if(l2->f)
 	      l2->f->clear_break();
+#ifdef __DEBUG_CYCLE_COUNTER__
+	  if (f) 
+	    cout << "Clearing break call back sequence number = "<< f->CallBackID <<'\n';
+#endif
+
       }
       else
 	  l1=l1->next;
@@ -240,166 +250,175 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   bool found_old = 0;
   bool break_set = 0;
 
+  reassigned = 1;   // assume that the break point does actually get reassigned.
+
 #ifdef __DEBUG_CYCLE_COUNTER__
-  cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle << '\n';
+  cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle;
+  if(f) 
+    cout << " Call back ID = " << f->CallBackID;
+
+  cout << '\n';
+
   dump_breakpoints();
 #endif
 
-  while( (l1->next) && !found_old)
-    {
+  while( (l1->next) && !found_old) {
       
-      // If the next break point is at a cycle greater than the
-      // one we wish to set, then we found the insertion point.
-      // Otherwise 
-	  if(l1->next->break_value ==  old_cycle)
-	    {
+    // If the next break point is at a cycle greater than the
+    // one we wish to set, then we found the insertion point.
+
+    if(l1->next->break_value == old_cycle) {
 #ifdef __DEBUG_CYCLE_COUNTER__
-	      cout << " cycle match ";
+      cout << " cycle match ";
+      if(f && l1->next->f && (f->CallBackID == l1->next->f->CallBackID))
+	cout << " Call Back IDs match = " << f->CallBackID << ' ';
 #endif
-	      if(l1->next->f == f)
-		found_old = 1;
-	      else
-		l1 = l1->next;
-	    }
+	
+      if(l1->next->f == f)
+	found_old = 1;
+      else
+	l1 = l1->next;
+    }
+    else
+      l1 = l1->next;
+
+  }
+
+  if(found_old) {
+
+    // Now move the break point
+#ifdef __DEBUG_CYCLE_COUNTER__
+    cout << " found old ";
+#endif
+
+    if(new_cycle > old_cycle) {
+
+      // First check to see if we can stay in the same relative position within the list
+      // Is this the last one in the list? (or equivalently, is the one after this one 
+      // a NULL?)
+
+      if(l1->next->next == NULL) {
+
+	l1->next->break_value = new_cycle;
+	break_on_this = active.next->break_value;
+#ifdef __DEBUG_CYCLE_COUNTER__
+	cout << " replaced at current position (next is NULL)\n";
+	dump_breakpoints();   // debug
+#endif
+	return 1;
+      }
+
+      // Is the next one in the list still beyond this one?
+      if(l1->next->next->break_value >= new_cycle) {
+	l1->next->break_value = new_cycle;
+	break_on_this = active.next->break_value;
+#ifdef __DEBUG_CYCLE_COUNTER__
+	cout << " replaced at current position (next is greater)\n";
+	dump_breakpoints();   // debug
+#endif
+	return 1;
+      }
+
+      // Darn. Looks like we have to move it.
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+      cout << " moving \n";
+#endif
+      l2 = l1->next;                        // l2 now points to this break point
+      l1->next = l1->next->next;            // Unlink this break point
+
+      while( (l1->next) && !break_set)
+	{
+
+	  // If the next break point is at a cycle greater than the
+	  // one we wish to set, then we found the insertion point.
+	  // Otherwise 
+	  if(l1->next->break_value > new_cycle)
+	    break_set = 1;
 	  else
 	    l1 = l1->next;
 
-    }
+	}
 
-  if(found_old)
-    {
-      // Now move the break point
+      l2->next = l1->next;
+      l1->next = l2;
+
+      break_on_this = active.next->break_value;
+
+      l2->break_value = new_cycle;
+
 #ifdef __DEBUG_CYCLE_COUNTER__
-      cout << " found old ";
+      dump_breakpoints();   // debug
 #endif
+    } else {      // old_cycle < new_cycle
 
-      if(new_cycle > old_cycle)
+      // First check to see if we can stay in the same relative position within the list
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+      cout << " old cycle is less than new one\n";
+#endif
+      // Is this the first one in the list?
+      if(l1 == &active)
 	{
-	  // First check to see if we can stay in the same relative position within the list
-
-	  // Is this the last one in the list? (or equivalently, is the one after this one a NULL)
-	  if(l1->next->next == NULL)
-	    {
-
-	      l1->next->break_value = new_cycle;
-	      break_on_this = active.next->break_value;
+	  l1->next->break_value = new_cycle;
+	  break_on_this = new_cycle;
 #ifdef __DEBUG_CYCLE_COUNTER__
-	      cout << " replaced at current position (next is NULL)\n";
-	      dump_breakpoints();   // debug
-#endif
-	      return 1;
-	    }
-
-	  // Is the next one in the list still beyond this one?
-	  if(l1->next->next->break_value >= new_cycle)
-	    {
-	      l1->next->break_value = new_cycle;
-	      break_on_this = active.next->break_value;
-#ifdef __DEBUG_CYCLE_COUNTER__
-	      cout << " replaced at current position (next is greater)\n";
-	      dump_breakpoints();   // debug
-#endif
-	      return 1;
-	    }
-
-	  // Darn. Looks like we have to move it.
-
-#ifdef __DEBUG_CYCLE_COUNTER__
-	  cout << " moving \n";
-#endif
-
-	  l2 = l1->next;                        // l2 now points to this break point
-
-	  l1->next = l1->next->next;            // Unlink this break point
-
-	  while( (l1->next) && !break_set)
-	    {
-
-	      // If the next break point is at a cycle greater than the
-	      // one we wish to set, then we found the insertion point.
-	      // Otherwise 
-	      if(l1->next->break_value > new_cycle)
-		break_set = 1;
-	      else
-		l1 = l1->next;
-
-	    }
-
-	  l2->next = l1->next;
-	  l1->next = l2;
-
-	  break_on_this = active.next->break_value;
-
-	  l2->break_value = new_cycle;
-
-#ifdef __DEBUG_CYCLE_COUNTER__
+	  cout << " replaced at current position\n";
 	  dump_breakpoints();   // debug
 #endif
+	  return 1;
 	}
-      else      // old_cycle < new_cycle
+
+      // Is the previous one in the list still before this one?
+      if(l1->break_value < new_cycle)
 	{
-	  // First check to see if we can stay in the same relative position within the list
-
+	  l1->next->break_value = new_cycle;
 #ifdef __DEBUG_CYCLE_COUNTER__
-	  cout << " old cycle is less than new one\n";
-#endif
-	  // Is this the first one in the list?
-	  if(l1 == &active)
-	    {
-	      l1->next->break_value = new_cycle;
-	      break_on_this = new_cycle;
-#ifdef __DEBUG_CYCLE_COUNTER__
-	      cout << " replaced at current position\n";
-	      dump_breakpoints();   // debug
-#endif
-	      return 1;
-	    }
-
-	  // Is the previous one in the list still before this one?
-	  if(l1->break_value < new_cycle)
-	    {
-	      l1->next->break_value = new_cycle;
-#ifdef __DEBUG_CYCLE_COUNTER__
-	      cout << " replaced at current position\n";
-	      dump_breakpoints();   // debug
-#endif
-	      return 1;
-	    }
-
-	  // Darn. Looks like we have to move it.
-
-	  l2 = l1->next;                        // l2 now points to this break point
-
-	  l1->next = l1->next->next;            // Unlink this break point
-
-	  l1 = &active;                         // Start searching from the beginning of the list
-
-	  while( (l1->next) && !break_set)
-	    {
-
-	      // If the next break point is at a cycle greater than the
-	      // one we wish to set, then we found the insertion point.
-	      // Otherwise 
-	      if(l1->next->break_value > new_cycle)
-		break_set = 1;
-	      else
-		l1 = l1->next;
-
-	    }
-
-	  l2->next = l1->next;
-	  l1->next = l2;
-
-	  l2->break_value = new_cycle;
-
-	  break_on_this = active.next->break_value;
-
-#ifdef __DEBUG_CYCLE_COUNTER__
+	  cout << " replaced at current position\n";
 	  dump_breakpoints();   // debug
 #endif
+	  return 1;
 	}
+
+      // Darn. Looks like we have to move it.
+      l2 = l1->next;                        // l2 now points to this break point
+
+      l1->next = l1->next->next;            // Unlink this break point
+
+      l1 = &active;                         // Start searching from the beginning of the list
+
+      while( (l1->next) && !break_set)
+	{
+
+	  // If the next break point is at a cycle greater than the
+	  // one we wish to set, then we found the insertion point.
+	  // Otherwise 
+	  if(l1->next->break_value > new_cycle)
+	    break_set = 1;
+	  else
+	    l1 = l1->next;
+
+	}
+
+      l2->next = l1->next;
+      l1->next = l2;
+
+      l2->break_value = new_cycle;
+
+      break_on_this = active.next->break_value;
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+      dump_breakpoints();   // debug
+#endif
     }
+  }
   else {
+
+    // oops our assumption was wrong, we were unable to reassign the break point 
+    // to another cycle.
+
+    reassigned = 0;
+
     // If the break point was not found, it can't be moved. So let's just create
     // a new break point.
     cout << " Warning: Cycle_Counter::reassign_break - didn't find the old one\n";
@@ -416,9 +435,18 @@ void Cycle_Counter::clear_current_break(void)
   if(value == break_on_this)
     {
 #ifdef __DEBUG_CYCLE_COUNTER__
-      cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this <<'\n';
-      if(active.next->next)
-	cout << "  but there's one pending at the same cycle\n";
+      cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this;
+      if(active.next->f)
+	cout << " Call Back ID  = " << active.next->f->CallBackID;
+      cout <<'\n';
+
+      if(active.next->next) {
+	cout << "  but there's one pending at the same cycle";
+	if(active.next->next->f)
+	  cout << " With ID = " << active.next->next->f->CallBackID;
+	cout << '\n';
+      }
+
 #endif
       Cycle_Counter_breakpoint_list  *l1;
 

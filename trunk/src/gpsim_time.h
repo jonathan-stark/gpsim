@@ -60,6 +60,8 @@ public:
   guint64 break_on_this;  // If there's a pending cycle break point, then it'll be this
   guint64 time_step;      // Amount of "real time" for each cycle
 
+  bool reassigned;        // Set true when a break point is reassigned (or deleted)
+
   Cycle_Counter_breakpoint_list
     active,     // Head of the active breakpoint linked list
     inactive;   // Head of the inactive one.
@@ -91,12 +93,16 @@ public:
 	  while(value >= break_on_this && active.next)   // Loop in case there are multiple breaks
 	    {
 
+	      reassigned = 0;    // This flag will get set true if the call back
+	                         // function moves the break point to another cycle.
+
 	      if(active.next->f)
 		active.next->f->callback();
-	      else
+	      else 
 		bp.check_cycle_break(active.next->breakpoint_number);
 
-	      clear_current_break();
+	      if(!reassigned)    // don't try to clear if the break point was reassigned.
+		clear_current_break();
 	    }
 	}
 

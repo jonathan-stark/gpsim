@@ -533,6 +533,11 @@ unsigned int PCL::get(void)
 {
   return((value+1) & 0xff);
 }
+
+unsigned int PCL::get_value(void)
+{
+  return((value+1) & 0xff);
+}
 //--------------------------------------------------
 // member functions for the PCLATH base class
 //--------------------------------------------------

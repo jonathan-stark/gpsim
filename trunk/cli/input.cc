@@ -20,8 +20,12 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "../src/gpsim_def.h"
+#include "../src/gpsim_classes.h"
 #include "../src/icd.h"
 #include "../config.h"
+
+// Defined in ../src/pic-processors.cc
+extern SIMULATION_MODES simulation_mode;
 
 #ifdef HAVE_GUI
 #include <unistd.h>
@@ -533,19 +537,41 @@ gpsim_completion (const char *text, int start, int end)
 
 
 #ifdef HAVE_GUI
+//============================================================================ 
+//
+// keypressed().
+//
+// When the user presses a key, this function will get called.
+// If a simulation is running, then we'll pass the key to
+// the stimulus engine.
 
-void myfunc(int data, int fd, GdkInputCondition gdk_cond)
+void keypressed(int data, int fd, GdkInputCondition gdk_cond)
 {
+  if(simulation_mode == STOPPED) {
 #ifdef HAVE_READLINE
   rl_callback_read_char ();
 #endif
+  } else { 
+
+    // We're either running, sleeping, single stepping...
+  }
+
 }
 
-//void test_func(...)
-void test_func(void)
+//============================================================================
+//
+// have_line
+// When <cr> is press at the command line, the text string on the command
+// is copied into a buffer and passed to the command parser.
+//
+
+void have_line(void)
 {
 #ifdef HAVE_READLINE
   char *t;
+  if(simulation_mode != STOPPED) {
+    return;
+  }
 
   t = rl_copy_text(0,1000);
 
@@ -610,16 +636,16 @@ void initialize_readline (void)
 
 #ifdef HAVE_GUI
   gdk_input_add (fileno(stdin), GDK_INPUT_READ, 
-                 (GdkInputFunction) myfunc, b);
+                 (GdkInputFunction) keypressed, b);
 
   // Sigh - the readline library has changed again (and again...)
   // I don't have an automated way to choose between the following
   // two lines
   #ifdef RALF
-  rl_callback_handler_install ("gpsim> ", test_func);
+  rl_callback_handler_install ("gpsim> ", have_line);
   #endif
   #ifdef SCOTT
-  rl_callback_handler_install ("gpsim> ", (void(*)(char*))test_func);
+  rl_callback_handler_install ("gpsim> ", (void(*)(char*))have_line);
   #endif
 #endif
 

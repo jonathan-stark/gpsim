@@ -87,6 +87,10 @@ public:
   virtual void start_transmitting(void);
   virtual void stop_transmitting(void);
   void callback(void);
+  virtual void callback_print(void) {
+    cout << "_TXSTA " << name() << " CallBack ID " << CallBackID << '\n';
+  }
+
 
 };
 
@@ -171,8 +175,13 @@ class _RCSTA : public sfr_register, public BreakCallBack
   virtual void stop_receiving(void);
   void set_callback_break(unsigned int spbrg_edge);
   void callback(void);
+  virtual void callback_print(void) {
+    cout << "_RCSTA " << name() << " CallBack ID " << CallBackID << '\n';
+  }
 
 };
+
+
 class _SPBRG : public sfr_register, public BreakCallBack
 {
  public:
@@ -187,6 +196,9 @@ class _SPBRG : public sfr_register, public BreakCallBack
   _SPBRG(void);
 
   virtual void callback(void);
+  virtual void callback_print(void) {
+    cout << "_SPBRG " << name() << " CallBack ID " << CallBackID << '\n';
+  }
   virtual void start(void);
   virtual void get_next_cycle_break(void);
   virtual guint64 get_cpu_cycle(unsigned int edges_from_now);

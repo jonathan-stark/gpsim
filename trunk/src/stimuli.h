@@ -164,7 +164,8 @@ enum SOURCE_TYPE
   ASY,
   TRI,
   RESISTOR,
-  OPEN_COLLECTOR
+  OPEN_COLLECTOR,
+  EVENT
 };
 
   unsigned int 
@@ -193,6 +194,8 @@ enum SOURCE_TYPE
   char *name(void) { return(name_str);};
 
   virtual void callback(void);
+  virtual void callback_print(void);
+
   void put_period(unsigned new_period) { period = new_period; };
   void put_duty(unsigned new_duty) { duty = new_duty; };
   void put_phase(unsigned new_phase) { phase = new_phase; };
@@ -374,6 +377,7 @@ public:
   virtual void callback(void);
   virtual int get_voltage(guint64 current_time);
   virtual void start(void);
+  virtual void re_start(guint64 new_start_time);
   virtual void put_data(guint64 data_point);
   virtual void put_data(float data_point);
   virtual void set_digital(void) { digital = 1; };
@@ -416,6 +420,24 @@ public:
 
 };
 
+/*
+ * An "Event" is a special stimulus that will assert for a single clock
+ * cycle.
+ *
+ * Since Events are derived from the source_stimulus class, they can
+ * be either single shot or repetitive.
+ *
+ */
+
+class Event : public source_stimulus
+{
+public:
+
+  unsigned int current_state;
+  virtual SOURCE_TYPE isa(void) {return EVENT;};
+  virtual void callback(void);
+  Event(void);
+};
 //--------------------------------------------------------------------------
 /*
 class BUS : public Stimulus_Node

@@ -29,11 +29,19 @@ class IOPIN;
 
 class PIR;
 class PIR1;
-class TMR1L;
-class TMR1H;
+class TMRL;
+class TMRH;
 class TMR2;
 class CCPRL;
 class ADCON0;
+
+//---------------------------------------------------------
+// Todo
+// 
+// The timer base classes need to be abstracted one more 
+// layer. The 18fxxx parts have a new timer, TMR3, that's
+// almost but not quite, identical to the 16fxx's TMR1.
+
 
 //---------------------------------------------------------
 // CCPCON - Capture and Compare registers
@@ -58,13 +66,14 @@ class CCPRL : public sfr_register
 public:
 
   CCPRH  *ccprh;
-  TMR1L  *tmr1l;
+  TMRL   *tmrl;
 
   void put(unsigned int new_value);
   void capture_tmr(void);
   void start_compare_mode(void);
   void stop_compare_mode(void);
   void start_pwm_mode(void);
+  void assign_tmr(TMRL *ptmr);
   CCPRL(void);
 };
 
@@ -136,10 +145,11 @@ enum
   T1SYNC  = 1<<2,
   T1OSCEN = 1<<3,
   T1CKPS0 = 1<<4,
-  T1CKPS1 = 1<<5
+  T1CKPS1 = 1<<5,
+  T1RD16  = 1<<6
 };
 
-  TMR1L  *tmr1l;
+  TMRL  *tmrl;
 
   T1CON(void);
 
@@ -149,9 +159,16 @@ enum
       return(value);
     }
 
-  unsigned int get_prescale(void)
+  // For (at least) the 18f family, there's a 4X PLL that effects the
+  // the relative timing between gpsim's cycle counter (which is equivalent
+  // to the cumulative instruction count) and the external oscillator. In
+  // all parts, the clock source for the timer is fosc, the external oscillator.
+  // However, for the 18f parts, the instructions execute 4 times faster when
+  // the PLL is selected.
+
+  virtual unsigned int get_prescale(void)
     {
-      return( (value &(T1CKPS0 | T1CKPS1)) >> 4);
+      return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu->pll_factor);
     }
   unsigned int get_tmr1cs(void)
     {
@@ -161,32 +178,32 @@ enum
     {
       return(value & TMR1ON);
     }
-  void put(unsigned int new_value);
+  virtual void put(unsigned int new_value);
 
 };
 
 
 //---------------------------------------------------------
-// TMR1L & TMR1H - Timer 1
-class TMR1H : public sfr_register
+// TMRL & TMRH - Timer 1
+class TMRH : public sfr_register
 {
 public:
 
-  TMR1L *tmr1l;
+  TMRL *tmrl;
 
   void put(unsigned int new_value);
   unsigned int get(void);
   virtual unsigned int get_value(void);
 
-  TMR1H(void);
+  TMRH(void);
 
 };
 
-class TMR1L : public sfr_register, public BreakCallBack
+class TMRL : public sfr_register, public BreakCallBack
 {
 public:
 
-  TMR1H *tmr1h;
+  TMRH  *tmrh;
   T1CON *t1con;
   PIR1  *pir1;
   CCPCON *ccpcon;
@@ -206,8 +223,9 @@ public:
   bool compare_mode;
 
   virtual void callback(void);
+  virtual void callback_print(void);
 
-  TMR1L(void);
+  TMRL(void);
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get(void);
@@ -540,6 +558,9 @@ public:
   CCPCON *ccp2con;
 
   virtual void callback(void);
+  virtual void callback_print(void) {
+    cout << "TMR2 " << name() << " CallBack ID " << CallBackID << '\n';
+  }
 
   TMR2(void);
 
