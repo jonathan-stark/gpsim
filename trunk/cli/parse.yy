@@ -51,7 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_version.h"
 #include "cmd_x.h"
 
-
+#define YYERROR_VERBOSE
 void yyerror(char *message)
 {
   printf("***ERROR: %s\n",message);
@@ -60,6 +60,8 @@ void yyerror(char *message)
 
 int yylex(void);
 int quit_parse;
+int parser_warnings;
+int parser_spanning_lines=0;
 
 char_list *str_list_head;
 char_list *str_list;
@@ -71,12 +73,14 @@ void free_char_list(char_list *);
 /* Bison declarations */
 
 %union {
-  guint32            i;
-  guint64           li;
-  char              *s;
-  cmd_options      *co;
-  cmd_options_num *con;
-  cmd_options_str *cos;
+  guint32              i;
+  guint64             li;
+  float                f;
+  char                *s;
+  cmd_options        *co;
+  cmd_options_num   *con;
+  cmd_options_float *cof;
+  cmd_options_str   *cos;
 }
 
 
@@ -102,6 +106,8 @@ void free_char_list(char_list *);
 %token <s>  gpsim_VERSION
 %token <s>  X
 %token <s>  END_OF_COMMAND
+%token <s>  IGNORED
+%token <s>  SPANNING_LINES
 
 /*%token <i>  NODE_SYM STIMULUS_SYM*/
 
@@ -115,17 +121,32 @@ void free_char_list(char_list *);
 %token <co>  NUMERIC_OPTION
 %token <co>  STRING_OPTION
 
-%token <li>   NUMBER
+%token <li>  NUMBER
+%token <f>   FLOAT_NUMBER
 
 %type  <li>   _register
 %type  <co>  bit_flag
 %type  <li>   indirect
 %type  <con> numeric_option
+%type  <cof> numeric_float_option
 %type  <cos> string_option
 
 %%
 /* Grammar rules */
-cmd:   attach_cmd
+cmd: acmd
+      {
+         //cout << "got something\n";
+      }
+    | acmd IGNORED
+      {
+        //cout << "got something followed by something to ignore\n";
+	
+	YYABORT;
+      }
+      ;
+
+acmd: ignored
+     | attach_cmd
      | break_cmd
      | clear_cmd
      | disassemble_cmd
@@ -145,19 +166,47 @@ cmd:   attach_cmd
      | trace_cmd
      | version_cmd
      | x_cmd
+     | spanning_lines
      | END_OF_INPUT
      {
-	     //cout << "bug? got an END_OF_INPUT\n";
+       if(verbose&2)
+         cout << "got an END_OF_INPUT\n";
        quit_parse = 1;
        YYABORT;
      }
    ;
 
+ignored: IGNORED
+          {
+            //if(parser_warnings || (verbose & 2 ))
+            if(verbose & 2)
+              cout << "parser is ignoring input\n";
+
+            if(!parser_spanning_lines) {
+              if(verbose & 2)
+                cout << "  parser is aborting current input stream\n";
+
+	      YYABORT;
+            }
+          }
+          ;
+
+spanning_lines:  SPANNING_LINES
+          {
+            if(verbose)
+              cout << "parser is spanning lines\n";
+            parser_spanning_lines = 1;
+          }
+          ;
+
 attach_cmd: ATTACH string_list
           {
-	    //cout << "attach command with a string list\n";
+            if(verbose&2)
+	      cout << "attach command with a string list\n";
 	    attach.attach(str_list_head);
 	    free_char_list(str_list_head);
+            YYABORT;
+
 	  }
           ;
 
@@ -236,17 +285,21 @@ node_cmd: NODE
 	    //cout << "node command with a string list\n";
 	    c_node.add_nodes(str_list_head);
 	    free_char_list(str_list_head);
+            YYABORT;
           }
           ;
 
 processor_cmd: PROCESSOR
-          { c_processor.processor(); }
+          { c_processor.processor(); YYABORT;}
           | PROCESSOR bit_flag
-	  { c_processor.processor($2->value); }
+	  { c_processor.processor($2->value); YYABORT;}
           | PROCESSOR STRING
-	  { c_processor.processor($2,NULL); }
+	  { c_processor.processor($2,NULL); YYABORT; }
           | PROCESSOR STRING STRING
-	  { c_processor.processor($2,$3); }
+	  { 
+            c_processor.processor($2,$3);
+            YYABORT;
+          }
 
           ;
 
@@ -293,38 +346,79 @@ step_cmd: STEP
 
 stimulus_cmd: STIMULUS
           {
+            if(verbose)
+              cout << "parser sees stimulus\n";
 	    c_stimulus.stimulus();
 	  }
-/*          | STIMULUS bit_flag
+          | STIMULUS NUMBER
           { 
-	    c_stimulus.stimulus($2->value);
+            if(verbose)
+              cout << "parser sees stimulus with number: " << $2 << '\n';
+
+	    //c_stimulus.stimulus($2->value);
 	  }
-*/
+          | STIMULUS FLOAT_NUMBER
+          { 
+            if(verbose)
+              cout << "parser sees stimulus with float number: " << $2 << '\n';
+
+	    //c_stimulus.stimulus($2->value);
+	  }
+
           | STIMULUS stimulus_opt END_OF_COMMAND
           { 
-	    printf(" end of stimulus command\n");
+	    //cout << " end of stimulus command\n";
 	    c_stimulus.end();
+            parser_spanning_lines = 0;
 	  }
           ;
 
-stimulus_opt: bit_flag
+stimulus_opt: 
           {
-	    c_stimulus.stimulus($1->value);
+            if(verbose)
+              cout << "parser sees stimulus(in _opt)\n"; // << $1->value << '\n';
+	    //c_stimulus.stimulus($1->value);
 	  }
+          | stimulus_opt SPANNING_LINES
+          {
+            if(verbose)
+              cout << "parser is ignoring spanned line in stimulus\n";
+            //YYABORT;
+          }
           | stimulus_opt bit_flag
           {
+            if(verbose)
+              cout << "parser sees stimulus with bit flag: " << $2->value << '\n';
 	    c_stimulus.stimulus($2->value);
 	  }
           | stimulus_opt numeric_option
           {
+            if(verbose)
+              cout << "parser sees stimulus with numeric option\n";
+	    c_stimulus.stimulus($2);
+	  }
+          | stimulus_opt numeric_float_option
+          {
+            if(verbose)
+              cout << "parser sees stimulus with numeric float option\n";
 	    c_stimulus.stimulus($2);
 	  }
           | stimulus_opt string_option
           {
+            if(verbose)
+              cout << "parser sees stimulus with string option\n";
 	    c_stimulus.stimulus($2);
 	  }
           | stimulus_opt NUMBER
           { 
+            if(verbose)
+              cout << "parser sees stimulus with number\n";
+	    c_stimulus.data_point($2);
+	  }
+          | stimulus_opt FLOAT_NUMBER
+          { 
+            if(verbose)
+              cout << "parser sees stimulus with floating point number\n";
 	    c_stimulus.data_point($2);
 	  }
           ;
@@ -362,7 +456,7 @@ version_cmd: gpsim_VERSION
 
 x_cmd: X
           {
-	    c_x.x();
+	    c_x.x(); YYABORT;
 	  }
           | X NUMBER
           {
@@ -415,7 +509,19 @@ numeric_option: NUMERIC_OPTION NUMBER
 	  $$ = new cmd_options_num;
 	  $$->co = $1;
 	  $$->n  = $2;
-	  //cout << "name " << $$->co->name << " value " << $$->n << " got a numeric option \n"; 
+          if(verbose&2)
+	    cout << "name " << $$->co->name << " value " << $$->n << " got a numeric option \n"; 
+	}
+        ;
+
+numeric_float_option:  NUMERIC_OPTION FLOAT_NUMBER
+        { 
+	  //cout << $1->name;
+	  $$ = new cmd_options_float;
+	  $$->co = $1;
+	  $$->f  = $2;
+          if(verbose&2)
+	    cout << "name " << $$->co->name << " value " << $$->f << " got a numeric option \n"; 
 	}
         ;
 
@@ -425,25 +531,28 @@ string_option: STRING_OPTION STRING
 	  $$ = new cmd_options_str;
 	  $$->co  = $1;
 	  $$->str = strdup($2);
-	  //cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
+          if(verbose&2)
+	    cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
 	}
         ;
 
 string_list: STRING
         {
-	  //cout << "got a string \n";
-	  str_list = new(char_list);
+	  str_list = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list_head = str_list;
 	  str_list->name = strdup($1);
 	  str_list->next = NULL;
+	  if(verbose&2)
+	    cout << "got a string. added " << str_list->name << '\n';
 	}
         | string_list STRING
         {
-	  //cout << " -- have a list of strings \n";
-	  str_list->next = new(char_list);
+	  str_list->next = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list = str_list->next;
 	  str_list->name = strdup($2);
 	  str_list->next = NULL;
+	  if(verbose&2)
+	    cout << " -- have a list of strings. added " << str_list->name << '\n';
 	}
         ;
 
@@ -465,6 +574,9 @@ void initialize_commands(void)
 
   if(initialized)
     return;
+
+  if(verbose)
+    cout << __FUNCTION__ << "()\n";
 
   attach.token_value = ATTACH;
   c_break.token_value = BREAK;
@@ -489,6 +601,8 @@ void initialize_commands(void)
 
   initialized = 1;
 
+  parser_spanning_lines = 0;
+  parser_warnings = 1; // display parser warnings.
 }
 
 void free_char_list(char_list *chl)
@@ -501,8 +615,9 @@ void free_char_list(char_list *chl)
       old_node = chl;
       chl = chl->next;
 
-      free(old_node->name);
-      free(old_node);
+      free (old_node->name);
+      free (old_node);
 
     }
+
 }

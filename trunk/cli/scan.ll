@@ -44,6 +44,8 @@ static struct cmd_options *op = NULL;
 static command *cmd = NULL;
 static int have_parameters = 0;
 static int end_of_command = 0;
+extern int quit_parse;
+extern int parser_spanning_lines;
 
 static string strip_trailing_whitespace (char *s);
 int handle_identifier(const string &tok, cmd_options **op );
@@ -78,8 +80,21 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 %}
 
 {COMMENT} { 
-  //cout << "ignoring comment\n";
-  //return 0;
+   unput('\n');
+   return IGNORED;
+   }
+
+{S} { 
+   int c;
+   do {
+    c = yyinput();
+   } while(c == ' ');
+
+   if(c == '\n')
+     return IGNORED;
+
+   unput(c);
+
    }
 
 \n  { 
@@ -90,18 +105,22 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
           //cout << " spanning lines     \n";
           input_mode = CONTINUING_LINE;
+          return SPANNING_LINES; //IGNORED; 
         } else
-          return 0;
+          return IGNORED;
       } else {
         //cout << "EOL but no pending command\n";
-        //return 0; 
+        return IGNORED; 
       }
     }
 
-q\n   { return 0;  }
+q\n   { 
+   quit_parse  =1;
+   return 0;  }
 
 <<EOF>> {
     //cout << "got an <<EOF>> in scan.l\n";
+    //quit_parse = 1;
     return END_OF_INPUT;
   }
 
@@ -117,6 +136,11 @@ q\n   { return 0;  }
    sscanf(yytext,"%Lx",&yylval.li);
    // printf("a hex number: 0x%x\n",yylval.i);
    return NUMBER;
+  }
+
+{FLOAT} {
+    sscanf(yytext,"%f",&yylval.f);
+    return FLOAT_NUMBER;  
   }
 
 %{
@@ -157,11 +181,14 @@ q\n   { return 0;  }
 
 {IDENT}{S}* {
     string tok = strip_trailing_whitespace (yytext);
-    return handle_identifier (tok,&op);
+    if(strlen(tok.c_str()))
+      return handle_identifier (tok,&op);
+    else
+      return 0;
   }
 
 .         {
-            // printf("ignoring\n"); 
+             printf("ignoring\n"); 
             // ECHO;
           }
 
@@ -183,13 +210,16 @@ int translate_token(int tt)
   switch(tt)
   {
     case OPT_TT_BITFLAG:
-      //cout << " tt bit flag\n";
+      if(verbose & 0x2)
+        cout << " tt bit flag\n";
       return BIT_FLAG;
      case OPT_TT_NUMERIC:
-      //cout << " tt numeric\n";
+      if(verbose & 0x2)
+        cout << " tt numeric\n";
       return NUMERIC_OPTION;
      case OPT_TT_STRING:
-      //cout << " tt string\n";
+      if(verbose & 0x2)
+        cout << " tt string\n";
       return STRING_OPTION;
   }
 
@@ -207,18 +237,21 @@ int handle_identifier(const string &s, cmd_options **op )
   if(*op == NULL) {
 
     // Search the commands
-
+    
     cmd = search_commands(s);
     if(cmd != NULL) {
-      //cout << "\n  *******\nprocessing command " << cmd->name << "\n  *******\n";
+      if(verbose&2)
+        cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
+                (cmd->get_token()) << "\n *******\n";
+	
       *op = cmd->get_op();
       have_parameters = 0;
       return cmd->get_token();
 
     } else {
-
-      cout << " command: " << s << " was not found\n";
-      return 0;
+      cout << " command: \"" << s << "\" was not found\n";
+      //cout << " command: was not found\n";
+      return IGNORED;
 
     }
 
@@ -271,6 +304,7 @@ int handle_identifier(const string &s, cmd_options **op )
 static string
 strip_trailing_whitespace (char *s)
 {
+
   string retval = s;
 
   size_t pos = retval.find_first_of (" \t");
@@ -285,17 +319,20 @@ void initialize_commands(void);
 
 void init_parser(void)
 {
-
+  if(verbose & 2)
+    cout << __FUNCTION__  << "()\n";
   initialize_commands();
 
   // Start off in a known state.
   BEGIN 0;
 
   // Can't have any options until we get a command.
-  cmd = NULL;
-  op = NULL;
-  input_mode = 0;
-  end_of_command = 0;
+  if(!parser_spanning_lines) {
+    cmd = NULL;
+    op = NULL;
+    input_mode = 0;
+    end_of_command = 0;
+  }
 
   yyrestart (stdin);
 }

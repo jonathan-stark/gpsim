@@ -38,6 +38,13 @@ struct cmd_options_num {
   int n;
 };
 
+   /* Command option with a float numeric parameter */
+
+struct cmd_options_float {
+  cmd_options *co;
+  float f;
+};
+
    /* Command option with a string parameter */
 
 struct cmd_options_str {

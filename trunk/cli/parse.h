@@ -1,10 +1,12 @@
 typedef union {
-  guint32            i;
-  guint64           li;
-  char              *s;
-  cmd_options      *co;
-  cmd_options_num *con;
-  cmd_options_str *cos;
+  guint32              i;
+  guint64             li;
+  float                f;
+  char                *s;
+  cmd_options        *co;
+  cmd_options_num   *con;
+  cmd_options_float *cof;
+  cmd_options_str   *cos;
 } YYSTYPE;
 #define	ATTACH	257
 #define	BREAK	258
@@ -27,13 +29,16 @@ typedef union {
 #define	gpsim_VERSION	275
 #define	X	276
 #define	END_OF_COMMAND	277
-#define	STRING	278
-#define	INDIRECT	279
-#define	END_OF_INPUT	280
-#define	BIT_FLAG	281
-#define	NUMERIC_OPTION	282
-#define	STRING_OPTION	283
-#define	NUMBER	284
+#define	IGNORED	278
+#define	SPANNING_LINES	279
+#define	STRING	280
+#define	INDIRECT	281
+#define	END_OF_INPUT	282
+#define	BIT_FLAG	283
+#define	NUMERIC_OPTION	284
+#define	STRING_OPTION	285
+#define	NUMBER	286
+#define	FLOAT_NUMBER	287
 
 
 extern YYSTYPE yylval;

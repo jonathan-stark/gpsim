@@ -68,7 +68,7 @@ void redisplay_prompt(void);
 
 bool using_readline=1;
 int input_mode = 0;
-
+int allocs = 0;
 /* When non-zero, this global means the user is done using this program. */
 int done = 0;
 
@@ -101,6 +101,30 @@ void initialize_signals(void)
 char *cmd_string_buf = NULL;
 FILE *cmd_file = NULL;
 
+
+/*******************************************************
+ */
+char * strip_cmd(char *buff)
+{
+  char *comment;
+
+  if(!buff)
+    return buff;
+
+  // Strip leading spaces
+  while(*buff == ' ') 
+    *buff++;
+
+  comment = strchr(buff, '#');
+
+  // If there's a comment, remove it.
+  if(comment) {
+    *comment = '\0';
+  }
+
+  return buff;
+}
+
 /*******************************************************
  * parse_string
  * 
@@ -110,39 +134,51 @@ FILE *cmd_file = NULL;
  */
 int parse_string(char *cmd_string)
 {
-	static int save_readline_state = 0;
-	static char last_line[256] = {0};
+  static int save_readline_state = 0;
+  static char last_line[256] = {0};
 
-	int retval;
+  int retval;
 
-	save_readline_state = using_readline;
-	using_readline = 0;
+  save_readline_state = using_readline;
+  using_readline = 0;
 
-	cmd_string_buf = strdup(cmd_string); // free'd by gpsim_read
+  if(!cmd_string)
+    return 0;
 
-	if( strlen (cmd_string) == 0)
-	{
-		if(*last_line)
-			cmd_string_buf = strdup(last_line);
+  if(verbose & 2)
+    printf("   %s: %s\n",__FUNCTION__,cmd_string);
 
-	}
-	else
-	{
-		add_history (cmd_string);
+  cmd_string = strip_cmd(cmd_string);
 
-		strncpy(last_line,cmd_string,256);
-	}
+  cmd_string_buf = strdup(cmd_string); // free'd by gpsim_read
 
 
-	init_parser();
-	retval = yyparse();
+  if( strlen (cmd_string) == 0)
+    {
+      if(*last_line)
+	cmd_string_buf = strdup(last_line);
 
-	using_readline = save_readline_state;
+    }
+  else
+    {
 
-	if(quit_parse)
-		exit_gpsim();
+      if(strlen(cmd_string)) {
+	add_history (cmd_string);
 
-	return retval;
+	strncpy(last_line,cmd_string,256);
+      }
+    }
+
+
+  init_parser();
+  retval = yyparse();
+
+  using_readline = save_readline_state;
+
+  if(quit_parse)
+    exit_gpsim();
+
+  return retval;
 
 }
 
@@ -150,19 +186,17 @@ char * gets_from_cmd_file(char **ss)
 {
   char str[MAX_LINE_LENGTH];
 
-//  cout << "\n*** gets_from_cmd_file ***\n";
   str[0] = 0;
-  if(cmd_file)
-    {
-      fgets(str, MAX_LINE_LENGTH, cmd_file);
 
-      *ss = strdup(str); // free'd by gpsim_read
-//       cout << " got:" << *ss << '\n';
-    }
-/*
-  else if(ss && *ss)
-    cout << " no cmd_file, returning" << *ss << '\n';
-*/
+  if(verbose&4)
+    cout << __FUNCTION__ <<"()\n";
+
+  if(cmd_file) {
+    fgets(str, MAX_LINE_LENGTH, cmd_file);
+    *ss= strdup(str); // free'd by gpsim_read
+    allocs++;
+    //cout << "allocs++" << allocs << '\n';
+  }
 
   return *ss;
 
@@ -170,11 +204,12 @@ char * gets_from_cmd_file(char **ss)
 
 void process_command_file(char * file_name)
 {
-  char *ss;
-  char xx[256];
+
   int save_readline_state;
   FILE *save_cmd_file;
-  ss = xx;
+
+  if(verbose&4)
+    cout << __FUNCTION__ <<"()\n";
 
   save_cmd_file = cmd_file;
 
@@ -186,7 +221,7 @@ void process_command_file(char * file_name)
 
   if(cmd_file)
     {
-      //cout << "processing a command file\n";
+      // cout << "processing a command file\n";
 
       quit_parse = 0;
       while( !quit_parse )
@@ -197,7 +232,6 @@ void process_command_file(char * file_name)
 
       fclose(cmd_file);
       cmd_file = save_cmd_file;
-      //cout << "finished processing a command file\n";
     }
 
 
@@ -205,104 +239,93 @@ void process_command_file(char * file_name)
 
 }
 
-// Read a line from the input stream.
-
 static char *
 get_user_input (void)
 {
   char *retval = 0;
-  
-  //	cout << "\n*** get_user_input ***  ";
+  int i,len;
+
+  if(verbose&4)
+    cout << __FUNCTION__ <<"()\n";
 
   #ifndef HAVE_GUI
 
   if(using_readline)
     {
-      //cout<<"getting string while using readline\n";
+
       retval = gnu_readline (gpsim,1);
     }
   else
     {
-      //	cout<<"getting string from cmd file\n";
   #endif
 
       gets_from_cmd_file(&cmd_string_buf);
+
       retval = cmd_string_buf;
   #ifndef HAVE_GUI
     }
   #endif
 
-	return retval;
+  return retval;
 }
 
-// gpsim_read was obtained from octave (octave_read)
+//*********************************************
+// gpsim_read
+//
+//  This function is called from the parser. It will either read
+// a line of text from a command file or from stdin -- depending
+// on the current source for data. Once a string is obtained, it
+// is copied into a buffer that the parser has passed to us.
 
 int
 gpsim_read (char *buf, unsigned max_size)
 {
-  static char *input_buf = 0;
-  static char *cur_pos = 0;
+  char *input_buf;
   static int chars_left = 0;
-
   int status = 0;
 
+  if(verbose&4)
+    cout <<"gpsim_read\n";
 
-  if (! input_buf)
-    {
-      cur_pos = input_buf = get_user_input ();
-
-      chars_left = input_buf ? strlen (input_buf) : 0;
-    }
+  input_buf = get_user_input ();
+  chars_left = input_buf ? strlen (input_buf) : 0;
 
   if (chars_left > 0)
     {
       buf[0] = '\0';
 
-      int len = max_size - 2;
+      chars_left = ( (chars_left < max_size) ? chars_left : max_size);
 
-      strncpy (buf, cur_pos, len);
+      strncpy (buf, input_buf, chars_left);
 
-      if (chars_left > len)
-	{
-	  chars_left -= len;
+      // If the input string does not have a carriage return, then add one.
+      if (buf[chars_left-1] != '\n')
+	buf[chars_left++] = '\n';
+      buf[chars_left] = 0;
 
-	  cur_pos += len;
+      //cout << "chars_left > 0, copied cur_pos into buff\n";
+      //cout << "buf[]  " << buf << '\n';
 
-	  buf[len] = '\0';
+      // If we are reading from a command file (and not stdin), then
+      // the string that was read copied into a dynamically allocated
+      // buffer that we need to delete.
 
-	  status = len;
-	}
-      else
-	{
-	  //cout << "freeing input_buf (chars_left>0):" << input_buf <<'\n';
-	  free (input_buf);
-	  input_buf = 0;
+      if(allocs) {
+	allocs--;
 
-	  len = chars_left;
+	//cout << "freeing input_buf " <<input_buf <<'\n';
+	//cout << "allocs--" << allocs << '\n';
 
-	  if (buf[len-1] != '\n')
-	    buf[len++] = '\n';
-
-	  buf[len] = '\0';
-
-	  status = len;
-	}
+	free (input_buf);
+      }
+      //status = len;
+      //chars_left = 0;
     }
-  else if (chars_left == 0)
-    {
-      if (input_buf)
-	{
-	  //cout << "freeing input_buf (chars_left==0):" << input_buf <<'\n';
-	  free (input_buf);
-	  input_buf = 0;
-	}
 
-      status = 0;
-    }
-  else    
-    status = -1;
+  if(verbose&4)
+    cout << "leaving gpsim_read\n";
 
-  return status;
+  return chars_left;
 }
 
 #if 0
@@ -348,7 +371,7 @@ ___main_input (void)
 	  /* Remove leading and trailing whitespace from the line.
 	     Then, if there is anything left, add it to the history list
 	     and execute it. */
-	  // stripwhite (line);
+	  //stripwhite (line);
 
 	  if (*line)
 	    {
@@ -366,7 +389,7 @@ ___main_input (void)
 
       if (line)
 	free (line);
-      line = (char *)NULL;
+      line = NULL;
 
     }
   exit (0);
@@ -404,7 +427,7 @@ command_generator (char *text, int state)
 	  n = (char *) malloc(strlen(command_list[i]->name));
 	  if(n == NULL)
 	    {
-	      fprintf (stderr, "malloc: Out of virtual memory!\n");
+	      //fprintf (stderr, "malloc: Out of virtual memory!\n");
 	      abort ();
 	    }
 	  strcpy(n,command_list[i]->name);
@@ -458,7 +481,11 @@ void test_func(void)
 
   char *t;
 
-  t = rl_copy_text(0,100);
+  t = rl_copy_text(0,1000);
+
+  if(verbose & 2) {
+    printf(" ()()()   %s  ()()()\n%s\n", __FUNCTION__ , t);
+  }
   parse_string(t);
   free(t);
 
