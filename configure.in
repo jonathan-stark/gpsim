@@ -2,11 +2,20 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(cli/cmd_attach.cc)
 AM_CONFIG_HEADER(config.h)
 
+dnl option for setting exdbm path prefix
+dnl exdbm must be lowercase in --with option. sorry.
+dnl this check must be done very early otherwise internal
+dnl configure shell variables are set too late (CPPFLAGS)
+AC_ARG_WITH(exdbm,
+    [  --with-exdbm=PREFIX     where is exdbm installed],
+    [CPPFLAGS="$CPPFLAGS -I$with_exdbm/include"
+    LDFLAGS="$LDFLAGS -L$with_exdbm/lib"])
+
 AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=20
-GPSIM_MICRO_VERSION=0
+GPSIM_MICRO_VERSION=1
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -107,7 +116,18 @@ else
   Y_LDFLAGS=`$GTKEXTRACONFIG --libs`
   Y_CFLAGS=`$GTKEXTRACONFIG --cflags`
 
-  AC_CHECK_LIB(eXdbm,main)
+  dnl check that the eXdbm header can be found
+  AC_CHECK_HEADER(eXdbm/eXdbm.h,,[
+  AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  see ./configure --help for instructions])
+  ])
+
+  dnl check that the eXdbm library can be linked, and add the link command
+  dnl to the LIBS variable.
+  AC_CHECK_LIB(eXdbm,eXdbmInit,,[
+  AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  see ./configure --help for instructions])
+  ])
 
 fi
 
@@ -158,8 +178,8 @@ gpsim-$GPSIM_VERSION is now configured for $canonical_host_type
 
   Source directory:     $srcdir
   Installation prefix:  $prefix
-  C compiler:           $CC $XTRA_CFLAGS $CFLAGS
-  C++ compiler:         $CXX $XTRA_CXXFLAGS $CXXFLAGS
+  C compiler:           $CC $CPPFLAGS $XTRA_CFLAGS $CFLAGS
+  C++ compiler:         $CXX $CPPFLAGS $XTRA_CXXFLAGS $CXXFLAGS
 
   gui:			$use_gui
 
