@@ -370,46 +370,72 @@ toggle_window (gpointer             callback_data,
   return 0;
 }
 
+static bool bButtonHandler = false;
+static bool bStopButtonHandler = false;
+
 static void 
 runbutton_cb(GtkWidget *widget)
 {
-  get_interface().start_simulation();
+  if (!bButtonHandler) {
+    bButtonHandler = true;
+    get_interface().start_simulation();
+    bButtonHandler = false;
+  }
 }
 
 static void 
 stopbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->pma->stop();
+  if (!bStopButtonHandler) {
+    bStopButtonHandler = true;
+    if(gp && gp->cpu)
+      gp->cpu->pma->stop();
+    bStopButtonHandler = false;
+  }
 }
     
 static void 
 stepbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->step(1);
+  if (!bButtonHandler) {
+    bButtonHandler = true;
+    if(gp && gp->cpu) 
+      gp->cpu->pma->step(1);
+    bButtonHandler = false;
+  }
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->step_over();
-
+  if (!bButtonHandler) {
+    bButtonHandler = true;
+    if(gp && gp->cpu) 
+      gp->cpu->pma->step_over();
+    bButtonHandler = false;
+  }
 }
     
 static void 
 finishbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu) 
-    gp->cpu->pma->finish();
+  if (!bButtonHandler) {
+    bButtonHandler = true;
+    if(gp && gp->cpu) 
+      gp->cpu->pma->finish();
+    bButtonHandler = false;
+  }
 }
 
 static void 
 resetbutton_cb(GtkWidget *widget)
 {
-  if(gp && gp->cpu)
-    gp->cpu->reset(POR_RESET);
+  if (!bButtonHandler) {
+    bButtonHandler = true;
+    if(gp && gp->cpu)
+      gp->cpu->reset(POR_RESET);
+    bButtonHandler = false;
+  }
 }
 
 int gui_animate_delay; // in milliseconds
@@ -429,24 +455,24 @@ static void set_simulation_mode(char m)
     case 'r':
         value=0;
         gui_animate_delay=0;
-	realtime_mode=1;
-	break;
+        realtime_mode=1;
+        break;
     case 'R':
         value=0;
         gui_animate_delay=0;
-	realtime_mode=1;
+        realtime_mode=1;
         realtime_mode_with_gui=1;
         break;
     case 'b':
-	value=1;
+        value=1;
         gui_animate_delay=100;
         break;
     case 'c':
-	value=1;
+        value=1;
         gui_animate_delay=300;
         break;
     case 'd':
-	value=1;
+        value=1;
         gui_animate_delay=600;
         break;
     case '1':
