@@ -595,7 +595,7 @@ void create_dispatcher (void)
       frame = gtk_frame_new("gui_update");
       if(config_get_variable("dispatcher", "gui_update", &update_rate))
       {
-	  printf("set update rate %d from file\n",update_rate);
+	  //printf("set update rate %d from file\n",update_rate);
 	  gpsim_set_update_rate(update_rate);
       }
       else

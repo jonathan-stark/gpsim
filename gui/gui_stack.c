@@ -127,6 +127,10 @@ static int get_closest_label(Stack_Window *sw,
     GUI_Processor *gp;
     sym *s;
 
+    unsigned int minimum_delta=0x2000000;
+    unsigned int delta;
+    int retval=0;
+
     gp = ((GUI_Object*)sw)->gp;
     
     gpsim_symbol_rewind((unsigned int)gp->pic_id);
@@ -140,14 +144,20 @@ static int get_closest_label(Stack_Window *sw,
 	case SYMBOL_ADDRESS:
 	    if(s->value<=address)
 	    {
-		strcpy(name,s->name);
-		*offset=address-s->value;
-		return 1; // found a label
+		delta = address-s->value;
+		if( delta < minimum_delta)
+		{
+		    strcpy(name,s->name);
+		    *offset=address-s->value;
+		    retval=1;
+		    
+		    minimum_delta=delta;
+		}
 	    }
 	    break;
 	}
     }
-    return 0; // found no label
+    return retval;
 }
 
 static void update(Stack_Window *sw)
