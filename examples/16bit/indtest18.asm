@@ -7,8 +7,10 @@
 	;; indtest.asm tests indirect addressing. See it18.asm
 	;; for a program that tests the instructions
 
-	
-include "p18c242.inc"
+        list    p=18f452,t=ON,c=132,n=80
+        radix   dec
+
+ include "p18f452.inc"
 
 fast	equ	1
 	
@@ -22,12 +24,13 @@ fast	equ	1
 
 	movlb	0		;Point to bank 0
 
+	rcall	negative_indexing
 
 	lfsr	0,temp		;Point FSR 0 at the address of temp
 
 	movlw	0x55
-	movwf	indf0,0		;Write 0x55 to address 0
-	xorwf	temp
+	movwf	INDF0,0		;Write 0x55 to address 0
+	xorwf	temp,F
 	skpz
 	 bra	$
 
@@ -39,7 +42,7 @@ fast	equ	1
 	movwf	temp
 
 l1:
-	movff	temp,preinc0
+	movff	temp,PREINC0
 	decfsz	temp,f
 	 bra	l1
 
@@ -51,8 +54,8 @@ l1:
 	movwf	temp
 
 l2:
-	movf	temp,w
-	subwf	postinc0,f,0
+	movf	temp,W
+	subwf	POSTINC0,F,0
 	skpz
 	 bra	$
 	
@@ -68,7 +71,7 @@ l2:
 	movwf	temp
 
 l3:
-	movff	temp,postdec0
+	movff	temp,POSTDEC0
 	decfsz	temp,f
 	 bra	l3
 
@@ -77,33 +80,33 @@ l3:
 	movlw	0x10
 
 l4:
-	subwf	plusw0,f,0
+	subwf	PLUSW0,f,0
 	skpz
 	 bra	$
-	decfsz	wreg,f,0
+	decfsz	WREG,F,0
 	 bra	l4
 	
 
 	;; test indirect accesses of indirect registers
-	lfsr	0,indf0
+	lfsr	0,INDF0
 	call	indf_access
 
-	lfsr	0,preinc0
+	lfsr	0,PREINC0
 	call	indf_access
 
-	lfsr	0,postinc0
+	lfsr	0,POSTINC0
 	call	indf_access
 
-	lfsr	0,postdec0
+	lfsr	0,POSTDEC0
 	call	indf_access
 
-	lfsr	0,plusw0
+	lfsr	0,PLUSW0
 	call	indf_access
 
 	movlw	0x55
 	movwf	temp2
 	lfsr	0,temp2
-	movff	postdec0,preinc0
+	movff	POSTDEC0,PREINC0
 	
 	bra	$
 
@@ -111,12 +114,20 @@ indf_access:
 	movlw	0x55
 	movwf	temp
 	
-	movff	indf0,temp	;Should write 0 to temp
+	movff	INDF0,temp	;Should write 0 to temp
 	tstfsz	temp
 	 bra	$
 
-	movff	wreg,indf0	;This write should fail
+	movff	WREG,INDF0	;This write should fail
 
 	return
-		
+
+negative_indexing:
+        movlw   1
+        movwf   0x080
+        lfsr    FSR0, 0x081
+        movlw   -1 ; 0xff
+        movff   PLUSW0, 0xc0
+
+	
 	end

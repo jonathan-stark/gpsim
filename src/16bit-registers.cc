@@ -478,8 +478,8 @@ int Indirect_Addressing::plusw_fsr_value(void)
 
   fsr_value += fsr_delta;
   fsr_delta = 0;
-
-  unsigned int destination = (fsr_value + cpu->W->value) & _16BIT_REGISTER_MASK;
+  int signExtendedW = cpu->W->value | ((cpu->W->value > 127) ? 0xf00 : 0);
+  unsigned int destination = (fsr_value + signExtendedW) & _16BIT_REGISTER_MASK;
   if(is_indirect_register(destination))
     return -1;
   else
