@@ -893,6 +893,12 @@ RegCell::RegCell(int _address, const char *initialText, int _cell_width)
   pango_font_description_set_family_static(pfd, "Monospace");
   gtk_widget_modify_font(entry, pfd);
 
+  GdkColor color;
+  gdk_color_parse("light cyan", &color);
+  //gtk_widget_modify_bg(entry, state, &color);
+  gtk_widget_modify_base (entry, GTK_STATE_NORMAL, &color);
+  //gtk_widget_modify_text(entry,state, &color);
+
   gtk_entry_set_width_chars(GTK_ENTRY (entry), cell_width);
   gtk_entry_set_text (GTK_ENTRY (entry), initialText);
 
@@ -931,7 +937,30 @@ static void debugFont(PangoContext *pc)
   }
   g_free(families);
 
+
 }
+
+static void debugWidget(GtkWidget *widget)
+{
+  guint i;
+  guint n_prop=0;
+  if(!widget)
+    return;
+
+  printf("getting widget style properties\n");
+  GParamSpec **gparams = gtk_widget_class_list_style_properties( (GtkWidgetClass *)widget, &n_prop);
+  if(gparams) {
+    printf("There are %d parameters\n",n_prop);
+
+    for(i=0;i<n_prop;i++) {
+      if(gparams[i])
+	printf(" %s\n",gparams[i]->name);
+    }
+    g_free(gparams);
+  } else
+    printf("There are no parameters\n");
+}
+
 gint RegCell::ButtonPressEvent(GtkWidget *widget, GdkEventButton *event)
 {
   if(!event || !widget)
@@ -941,9 +970,53 @@ gint RegCell::ButtonPressEvent(GtkWidget *widget, GdkEventButton *event)
   if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) ) {
     printf("button 3 pressed\n");
 
-    //PangoLayout *pl = gtk_entry_get_layout(GTK_ENTRY(entry));
-    //PangoContext *pc = pango_layout_get_context(pl);
-    debugFont(gtk_widget_get_pango_context(entry));
+    //debugFont(gtk_widget_get_pango_context(entry));
+    //debugWidget(entry);
+
+    /*
+    GdkColormap *cmap = gdk_colormap_get_system();
+    GdkColor color;
+    gdk_color_parse("blue", &color);
+    gboolean bWriteable=FALSE, bBestMatch=FALSE;
+    gdk_colormap_alloc_color(cmap,&color, bWriteable, bBestMatch);
+
+    GtkRcStyle *pWidgetRCStyle = gtk_widget_get_modifier_style(GTK_WIDGET(entry));
+    GtkRcStyle *styleCopy = gtk_rc_style_copy(pWidgetRCStyle);
+
+    styleCopy->base[GTK_STATE_NORMAL] = color;
+    gtk_widget_modify_style(GTK_WIDGET(entry),styleCopy);
+    */
+
+
+    static GtkStateType state = GTK_STATE_NORMAL;
+    switch(state) {
+    case GTK_STATE_NORMAL:
+      state = GTK_STATE_ACTIVE;
+      break;
+    case GTK_STATE_ACTIVE:
+      state = GTK_STATE_PRELIGHT;
+      break;
+    case GTK_STATE_PRELIGHT:
+      state = GTK_STATE_SELECTED;
+      break;
+    case GTK_STATE_SELECTED:
+      state = GTK_STATE_INSENSITIVE;
+      break;
+    case GTK_STATE_INSENSITIVE:
+    default:
+      state = GTK_STATE_NORMAL;
+      break;
+    }
+
+    GdkColor color;
+    gdk_color_parse("blue", &color);
+    //gtk_widget_modify_bg(entry, state, &color);
+
+    gtk_widget_modify_base (entry, state, &color);
+
+    //gtk_widget_modify_text(entry,state, &color);
+
+
     return TRUE;
   }
   return FALSE;
