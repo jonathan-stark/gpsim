@@ -139,9 +139,9 @@ static void update_menus(Watch_Window *ww)
 }
 
 static void unselect_row(GtkCList *clist,
-//			 gint row,
-//			 gint column,
-//			 GdkEvent *event,
+			 gint row,
+			 gint column,
+			 GdkEvent *event,
 			 Watch_Window *ww)
 {
     update_menus(NULL);

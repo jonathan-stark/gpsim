@@ -266,6 +266,10 @@ struct _Symbol_Window {
     GtkWidget *symbol_clist;
     GList *symbols;
     
+    GtkWidget *popup_menu;
+  
+    int current_row;
+
     int filter_addresses;
     int filter_constants;
     int filter_registers;

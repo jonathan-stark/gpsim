@@ -39,11 +39,167 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
+struct symbol_entry {
+    unsigned int pic_id;
+    unsigned int value; // symbol value
+    struct cross_reference_to_gui *xref;
+};
+
+typedef enum {
+    MENU_ADD_WATCH,
+} menu_id;
+
+
+typedef struct _menu_item {
+    char *name;
+    menu_id id;
+    GtkWidget *item;
+} menu_item;
+
+static menu_item menu_items[] = {
+    {"Add to watch window", MENU_ADD_WATCH},
+};
+
+
+// Used only in popup menus
+Symbol_Window *popup_sw;
 
 /*
 unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, unsigned int register_number);
 void  gpsim_assign_register_xref(unsigned int processor_id, unsigned int reg_number, gpointer xref);
 */
+
+
+static void update_menus(Symbol_Window *sw)
+{
+    GtkWidget *item;
+    int i;
+
+    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+	item=menu_items[i].item;
+	if(sw)
+	{
+            sym *entry;
+	    entry = gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
+	    if(entry==NULL)
+		gtk_widget_set_sensitive (item, FALSE);
+	    else
+		gtk_widget_set_sensitive (item, TRUE);
+	}
+	else
+	{
+	    gtk_widget_set_sensitive (item, FALSE);
+	}
+    }
+}
+
+// called when user has selected a menu item
+static void
+popup_activated(GtkWidget *widget, gpointer data)
+{
+    menu_item *item;
+    sym *entry;
+
+    unsigned int pic_id;
+    int value;
+
+    if(widget==NULL || data==NULL)
+    {
+	printf("Warning popup_activated(%p,%p)\n",widget,data);
+	return;
+    }
+    
+    item = (menu_item *)data;
+    pic_id = ((GUI_Object*)popup_sw)->gp->pic_id;
+
+    entry = gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
+
+    if(entry==NULL)
+	return;
+
+    switch(item->id)
+    {
+    case MENU_ADD_WATCH:
+	WatchWindow_add(popup_sw->gui_obj.gp->watch_window,
+			pic_id,
+			REGISTER_RAM,
+			entry->value);
+	break;
+    default:
+	puts("Unhandled menuitem?");
+	break;
+    }
+}
+
+// helper function, called from do_popup
+static GtkWidget *
+build_menu(GtkWidget *sheet, Symbol_Window *sw)
+{
+  GtkWidget *menu;
+  GtkWidget *item;
+  int i;
+
+  if(sheet==NULL || sw==NULL)
+  {
+      printf("Warning build_menu(%p,%p)\n",sheet,sw);
+      return NULL;
+  }
+    
+  popup_sw = sw;
+  
+  menu=gtk_menu_new();
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+      menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
+
+      gtk_signal_connect(GTK_OBJECT(item),"activate",
+			 (GtkSignalFunc) popup_activated,
+			 &menu_items[i]);
+
+      gtk_widget_show(item);
+      gtk_menu_append(GTK_MENU(menu),item);
+  }
+
+  update_menus(sw);
+  
+  return menu;
+}
+
+// button press handler
+static gint
+do_popup(GtkWidget *widget, GdkEventButton *event, Symbol_Window *sw)
+{
+
+    GtkWidget *popup;
+//	GdkModifierType mods;
+
+  if(widget==NULL || event==NULL || sw==NULL)
+  {
+      printf("Warning do_popup(%p,%p,%p)\n",widget,event,sw);
+      return 0;
+  }
+  popup=sw->popup_menu;
+    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+
+      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+		     3, event->time);
+    }
+    return FALSE;
+}
+
+static void unselect_row(GtkCList *clist,
+			 gint row,
+			 gint column,
+			 GdkEvent *event,
+			 Symbol_Window *sw)
+{
+    update_menus(sw);
+}
 
 static void update_symbols(Symbol_Window *sw, GUI_Processor *gp)
 {
@@ -157,7 +313,9 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
 static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,GdkEvent *event, Symbol_Window *sw)
 {
     sym *e=(sym*)gtk_clist_get_row_data(symlist,row);
+    sw->current_row=row;
     do_symbol_select(sw,e);
+    update_menus(sw);
     return 0;
 }
 
@@ -438,6 +596,12 @@ int BuildSymbolWindow(Symbol_Window *sw)
 		     (GtkSignalFunc)symbol_click_column,NULL);
   gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"select_row",
 		     (GtkSignalFunc)symbol_list_row_selected,sw);
+  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"unselect_row",
+		     /*(GtkSignalFunc)*/unselect_row,sw);
+  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup,
+		     sw);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
   gtk_widget_show(scrolled_window);
@@ -497,6 +661,8 @@ int BuildSymbolWindow(Symbol_Window *sw)
       SymbolWindow_new_symbols(sw, sw->gui_obj.gp);
 
   update_menu_item((GUI_Object*)sw);
+  
+  sw->popup_menu=build_menu(window,sw);
   
   return 0;
 }
