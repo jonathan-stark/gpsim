@@ -689,10 +689,10 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     t=time(0);
 
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->_files->nsrc_files();i++)
+    for(i=0;i<pw->gp->cpu->files->nsrc_files();i++)
     {
       //struct file_context *gpsim_file;
-      FileContext *fc = (*pw->gp->cpu->_files)[i];
+      FileContext *fc = (*pw->gp->cpu->files)[i];
 
       const char *file_name;
 
@@ -1143,10 +1143,10 @@ int plot_routine_histogram(Profile_Window *pw)
     // Infostring1
     t=time(0);
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->_files->nsrc_files();i++)
+    for(i=0;i<pw->gp->cpu->files->nsrc_files();i++)
     {
       //struct file_context *gpsim_file;
-      FileContext *fc = (*pw->gp->cpu->_files)[i];
+      FileContext *fc = (*pw->gp->cpu->files)[i];
 
       const char *file_name;
 

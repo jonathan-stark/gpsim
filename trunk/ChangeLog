@@ -1,3 +1,9 @@
+2004-03-03 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_profile.cc, gui/gui_src_asm.cc, src/cod.cc,
+	src/icd.cc, src/pic-processor.cc, src/processor.cc, src/processor.h
+	Removed references to "processor_id". Changed name of _Files to Files
+	in the Processor class.
+
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
 	* regression/run_regression.sh, regression/simulate:
 	Fixes to allow regression tests to run on BSD 4.9.

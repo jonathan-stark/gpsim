@@ -1110,7 +1110,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
     // FIXME - there's a chance of buffer overflow & there's a chance of index overflow...
-    FileContext *fc = (*sbaw->gp->cpu->_files)[file_id];
+    FileContext *fc = (*sbaw->gp->cpu->files)[file_id];
     
     //strcpy(str,(gp->cpu->files[file_id]).name);
     strcpy(str,fc->name().c_str());
@@ -1285,9 +1285,9 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	  SEEK_SET);
     */
     //while(fgets(text_buffer, 256, cpu->files[file_id].file_ptr)!=0)
-    cpu->_files->rewind(file_id);
+    cpu->files->rewind(file_id);
 
-    while(cpu->_files->gets(file_id, text_buffer, 256))
+    while(cpu->files->gets(file_id, text_buffer, 256))
     {
 	char *end, *q;
 
@@ -1729,10 +1729,10 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   }
 
-  //for(i=0;i<gp->cpu->number_of_source_files;i++)
-  for(i=0;i<gp->cpu->_files->nsrc_files();i++)
+  //for(i=0;i<gp->cpu->number_of_sourcefiles;i++)
+  for(i=0;i<gp->cpu->files->nsrc_files();i++)
   {
-    FileContext *fc = (*gp->cpu->_files)[i];
+    FileContext *fc = (*gp->cpu->files)[i];
     file_name = fc->name().c_str();
 
     //gpsim_file = &(gp->cpu->files[i]);

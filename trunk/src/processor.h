@@ -273,9 +273,9 @@ class Processor : public Module
 {
 public:
 
-  Files *_files;              // The source files for this processor.
+  Files *files;               // The source files for this processor.
 
-  int processor_id;           // An identifier to differentiate this instantiation from others
+  //int processor_id;           // An identifier to differentiate this instantiation from others
 
   double frequency,period;    // Oscillator frequency and period.
 

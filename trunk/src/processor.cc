@@ -73,11 +73,7 @@ Processor::Processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
-#if USE_OLD_FILE_CONTEXT == 1
   files = 0;
-#else
-  _files = 0;
-#endif
   pc = 0;
 
   set_frequency(1.0);
@@ -412,14 +408,14 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
     // printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
 
-    FileContext *fc = (*_files)[file_id];
+    FileContext *fc = (*files)[file_id];
 
     if(fc && sline > fc->max_line())
       fc->max_line(sline);
 
     // FIX ME - what is this '+5' junk?
 
-    fc = (*_files)[_files->list_id()];
+    fc = (*files)[files->list_id()];
     
     if(fc && lst_line+5 > fc->max_line())
       fc->max_line(lst_line+5);
@@ -470,10 +466,10 @@ void Processor::read_src_files(void)
 #else
 
   // Are there any src files ?
-  for(int i=0; i<_files->nsrc_files(); i++) {
+  for(int i=0; i<files->nsrc_files(); i++) {
 
 
-    FileContext *fc = (*_files)[i];
+    FileContext *fc = (*files)[i];
 
     // did this src file generate any code?
     if(fc && fc->max_line() > 0) {

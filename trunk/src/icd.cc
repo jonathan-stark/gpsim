@@ -17,6 +17,21 @@ You should have received a copy of the GNU General Public License
 along with gpasm; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
+
+
+/*
+
+  FIXME - the design of this code needs to be revisited. Instead
+          of making the icd a separate entity that "controls" a 
+	  a processor, it makes MUCH more sense to derive the Icd
+	  class from the Processor class and let it effectively
+	  intercept and re-direct calls to the processor being
+	  debugged. This way, the gui and cli (and even external
+	  regression testing scripts) can treat the Icd just
+	  like it's another processor - no special circumstances
+	  are required.
+
+*/
    
 #include <assert.h>
 #include <stdio.h>
@@ -45,6 +60,8 @@ Boston, MA 02111-1307, USA.  */
 
 int use_icd;
 int bulk_flag;
+
+extern Processor *active_cpu;
 
 static int icd_fd;  /* file descriptor for serial port */
 
@@ -436,7 +453,10 @@ void put_dumb_fsr_register(FSR **frp)
 
 static void create_dumb_register_file(void)
 {
-    pic_processor *cpu=(pic_processor *)get_processor(1);
+  pic_processor *cpu=dynamic_cast<pic_processor *>(active_cpu);
+  if(!cpu)
+    return;
+
     for(int i=0;i<cpu->register_memory_size();i++)
     {
 	put_dumb_register(&cpu->registers[i], i);
@@ -451,9 +471,9 @@ static void create_dumb_register_file(void)
 
 int icd_connect(char *port)
 {
-    pic_processor *pic=(pic_processor*)get_processor(1);
+  pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
 
-    if(pic==0)
+    if(!pic)
     {
 	cout << "You have to load the .cod file (or .hex and processor)" << endl;
 	return 0;
@@ -542,7 +562,10 @@ static void make_stale(void)
 {
     if(icd_fd<0) return;
 
-    pic_processor *cpu=(pic_processor*)get_processor(1);
+  pic_processor *cpu=dynamic_cast<pic_processor *>(active_cpu);
+  if(!cpu)
+    return;
+
     for(int i=0;i<cpu->register_memory_size();i++)
     {
 	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
@@ -581,7 +604,10 @@ int icd_reset(void)
 
     make_stale();
 
-    pic_processor *pic=(pic_processor *)get_processor(1);
+  pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
+  if(!pic)
+    return 0;
+
     pic->pc->get_value();
     gi.simulation_has_stopped();
     return 1;
@@ -729,7 +755,9 @@ void icd_set_bulk(int flag)
 	
 	value = buf[address%8];
 	
-	pic_processor *pic=get_processor(1);
+  pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
+  if(!pic)
+    return;
 
 		    //if(gpsim_register_is_valid(1,REGISTER_RAM,address) &&
 		    //   !gpsim_register_is_alias(1,REGISTER_RAM,address))
@@ -796,7 +824,10 @@ int icd_get_state()
 	pclath=icd_cmd("$$7018\r")&0x00ff;
 	fsr=icd_cmd("$$7019\r")&0x00ff;
 
-	pic_processor *pic = get_processor(1);
+	pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
+	if(!pic)
+	  return;
+
 	pic->pc->put_value(pc);
 	pic->status->put_value(status);
 	pic->W->put_value(w);
@@ -817,7 +848,9 @@ int icd_get_state()
 
 	cout << "Get file" << endl;
 
-	pic_processor *pic=get_processor(1);
+	pic_processor *pic=dynamic_cast<pic_processor *>(active_cpu);
+	if(!pic)
+	  return;
 	
 	for(int i=0;i<pic->register_memory_size()/0x40;i++)
 	{
