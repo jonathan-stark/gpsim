@@ -54,6 +54,8 @@ class ProgramMemoryAccess :  public BreakpointObject
   };
 
 
+  ProgramMemoryAccess(Processor *new_cpu=0);
+
   instruction &operator [] (int address);
 
   void put(int addr, instruction *new_instruction);
@@ -72,7 +74,6 @@ class ProgramMemoryAccess :  public BreakpointObject
   void assign_xref(unsigned int address, gpointer cross_reference);
 
   virtual void callback(void);
-  ProgramMemoryAccess(void);
   void init(Processor *);
   // Helper functions for querying the program memory
 
@@ -107,23 +108,23 @@ class ProgramMemoryAccess :  public BreakpointObject
   unsigned int get_file_id(unsigned int address);
 
   // A couple of functions for manipulating  breakpoints
-  void set_break_at_address(int address);
-  void set_notify_at_address(int address, BreakpointObject *cb);
-  void set_profile_start_at_address(int address, BreakpointObject *cb);
-  void set_profile_stop_at_address(int address, BreakpointObject *cb);
-  int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
-  int clear_notify_at_address(int address);
-  int clear_profile_start_at_address(int address);
-  int clear_profile_stop_at_address(int address);
-  int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
-  int address_has_notify(int address);
-  int address_has_profile_start(int address);
-  int address_has_profile_stop(int address);
-  instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
-  void toggle_break_at_address(int address);
-  void set_break_at_line(int file_id, int src_line);
-  void clear_break_at_line(int file_id, int src_line);
-  void toggle_break_at_line(int file_id, int src_line);
+  virtual void set_break_at_address(int address);
+  virtual void set_notify_at_address(int address, BreakpointObject *cb);
+  virtual void set_profile_start_at_address(int address, BreakpointObject *cb);
+  virtual void set_profile_stop_at_address(int address, BreakpointObject *cb);
+  virtual int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
+  virtual int clear_notify_at_address(int address);
+  virtual int clear_profile_start_at_address(int address);
+  virtual int clear_profile_stop_at_address(int address);
+  virtual int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
+  virtual int address_has_notify(int address);
+  virtual int address_has_profile_start(int address);
+  virtual int address_has_profile_stop(int address);
+  virtual instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
+  virtual void toggle_break_at_address(int address);
+  virtual void set_break_at_line(int file_id, int src_line);
+  virtual void clear_break_at_line(int file_id, int src_line);
+  virtual void toggle_break_at_line(int file_id, int src_line);
 
   void set_hll_mode(int);
   enum HLL_MODES get_hll_mode(void) { return hll_mode;}
@@ -299,7 +300,7 @@ public:
 
   instruction   **program_memory;  // THE program memory
 
-  ProgramMemoryAccess  pma;   // Program memory interface
+  ProgramMemoryAccess  *pma;  // Program memory interface
   RegisterMemoryAccess rma;   // register memory interface
   RegisterMemoryAccess ema;   // eeprom memory interface (if present).
 

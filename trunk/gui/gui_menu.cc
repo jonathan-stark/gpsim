@@ -376,28 +376,28 @@ static void
 runbutton_cb(GtkWidget *widget)
 {
   if(gp && gp->cpu)
-    gp->cpu->pma.run();
+    gp->cpu->pma->run();
 }
 
 static void 
 stopbutton_cb(GtkWidget *widget)
 {
   if(gp && gp->cpu)
-    gp->cpu->pma.stop();
+    gp->cpu->pma->stop();
 }
     
 static void 
 stepbutton_cb(GtkWidget *widget)
 {
   if(gp && gp->cpu) 
-    gp->cpu->pma.step(1);
+    gp->cpu->pma->step(1);
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
   if(gp && gp->cpu) 
-    gp->cpu->pma.step_over();
+    gp->cpu->pma->step_over();
 
 }
     
@@ -405,7 +405,7 @@ static void
 finishbutton_cb(GtkWidget *widget)
 {
   if(gp && gp->cpu) 
-    gp->cpu->pma.finish();
+    gp->cpu->pma->finish();
 }
 
 static void 
@@ -491,7 +491,7 @@ static void set_simulation_mode(char m)
     gi.set_update_rate(value);
 
     if(gp && gp->cpu)
-      gp->cpu->pma.stop();
+      gp->cpu->pma->stop();
 
     config_set_variable("dispatcher", "simulation_mode", m);
 }

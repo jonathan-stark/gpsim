@@ -248,7 +248,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
 	snprintf(buffer, bufsize,"  pc: 0x%04x %s", 
 		 address ,
-		 cpu->pma[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string));
       }
       break;
     case PC_SKIP:
@@ -256,7 +256,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
 	snprintf(buffer, bufsize,"  skipped: %04x %s",
 		 address ,
-		 cpu->pma[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string));
       }
       break;
     case REGISTER_READ_VAL:
@@ -554,7 +554,7 @@ int Trace::dump_instruction(unsigned int instruction_index)
 	     "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 	     address,
 	     trace_buffer[instruction_index]&0xffff,
-	     cpu->pma[address].name(a_string));
+	     (*cpu->pma)[address].name(a_string));
 
     if(out_stream)
       fprintf(out_stream,"%s\n",string_buffer);
@@ -675,7 +675,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
 		 "%s  0x%04X  0x%04X  %s",cpu->name().c_str(),
 		 address,
 		 trace_buffer[instruction_index]&0xffff,
-		 cpu->pma[address].name(a_string));
+		 (*cpu->pma)[address].name(a_string));
 
 
 	if(out_stream)

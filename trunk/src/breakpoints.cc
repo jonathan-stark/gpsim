@@ -419,7 +419,7 @@ instruction *Breakpoints::find_previous(Processor *cpu,
   Breakpoint_Instruction *p;
 
 
-  p = (Breakpoint_Instruction*) cpu->pma.get(address);
+  p = (Breakpoint_Instruction*) cpu->pma->get(address);
 
   if(!_this || p==_this)
     return 0;
@@ -635,7 +635,7 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
   opcode = 0xffffffff;
   bpn = bp;
 
-  replaced = cpu->pma.get(address);
+  replaced = cpu->pma->get(address);
 
   // use the replaced instructions xref object
   xref = replaced->xref;
@@ -680,10 +680,10 @@ bool Breakpoint_Instruction::set_break(void)
 
   if(address < cpu->program_memory_size()) {
 
-    replaced = cpu->pma.get(address);
+    replaced = cpu->pma->get(address);
     xref = replaced->xref;
 
-    cpu->pma.put(address, this);
+    cpu->pma->put(address, this);
 
     if(use_icd)
       icd_set_break(address);
@@ -706,8 +706,8 @@ void Breakpoint_Instruction::clear(void)
   if(use_icd)
     icd_clear_break();
 
-  cpu->pma.put(address, replaced);
-  cpu->pma[address].xref->update();
+  cpu->pma->put(address, replaced);
+  (*cpu->pma)[address].xref->update();
 
 }
 
@@ -765,31 +765,38 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 //------------------------------------------------------------------------------
 void RegisterAssertion::execute(void)
 {
+  if( ((cpu->rma[regAddress].get_value()) & regMask) != regValue) {
 
-  if(cpu->rma[regAddress].get_value() & regMask != regValue) {
+    cout << "Caught Register assertion ";
+    cout << "while excuting at address " << address << endl;
+
+    cout << "register 0x" 
+	 << hex 
+	 << regAddress
+	 << " = 0x"
+	 << cpu->rma[regAddress].get_value() << endl;
+
+    cout << "0x" << cpu->rma[regAddress].get_value()
+	 << " & 0x" << regMask 
+	 << " != 0x" << regValue << endl;
+
+    cout << " regAddress =0x" << regAddress
+	 << " regMask = 0x" << regMask 
+	 << " regValue = 0x" << regValue << endl;
 
     if( (simulation_mode == RUNNING) && 
 	(simulation_start_cycle != cycles.value)) {
 
-      cout << "Register assertion ";
-      cout << "register 0x" 
-	   << hex 
-	   << regAddress
-	   << " = 0x"
-	   << cpu->rma[regAddress].get_value() << endl;
-      cout << "0x" << cpu->rma[regAddress].get_value()
-	   << " & 0x" << regMask 
-	   << " != 0x" << regValue << endl;
-      cout << "while excuting at address " << address << endl;
-
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
       bp.halt();
 
-    } else {
-      cout << "Ignoring assertion\n";
-      replaced->execute();
+      return;
     }
   }
+  
+  if(replaced)
+    replaced->execute();
+
 }
 
 //------------------------------------------------------------------------------

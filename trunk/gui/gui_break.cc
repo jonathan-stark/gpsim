@@ -150,7 +150,7 @@ void link_src_to_gpsim(GUI_Processor *gp)
 	*address = gp->cpu->map_pm_index2address(i);
 
 	cross_reference->data = (gpointer) address;
-	gp->cpu->pma.assign_xref(*address,(gpointer) cross_reference);
+	gp->cpu->pma->assign_xref(*address,(gpointer) cross_reference);
       }
     }
 }

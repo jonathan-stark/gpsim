@@ -74,7 +74,7 @@ static gint sigh_button_event(GtkWidget *widget,
     entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
     if(entry)
-      sw->gp->cpu->pma.toggle_break_at_address(entry->retaddress);
+      sw->gp->cpu->pma->toggle_break_at_address(entry->retaddress);
 
     return 1;
 	

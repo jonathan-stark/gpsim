@@ -51,12 +51,12 @@ public:
     num_iopins;     // Number of I/O pins attached to this port
 
   virtual void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void setbit_value(unsigned int bit_number, bool new_value);
-  int get_bit(unsigned int bit_number);
-  int get_bit_voltage(unsigned int bit_number);
-  unsigned int get(void);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
+  virtual unsigned int get(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);

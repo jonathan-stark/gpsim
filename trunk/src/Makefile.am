@@ -110,7 +110,8 @@ gpsiminclude_HEADERS = \
 	trace_orb.h \
 	uart.h \
 	xref.h \
-	icd.h
+	icd.h \
+	ssp.h
 
 
 #libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
