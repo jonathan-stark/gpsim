@@ -8,6 +8,8 @@
 # tone frequencies = 697, 1209
 
 
+#  t          v
+#---   -----------
 stimulus asynchronous_stimulus
 
 analog
@@ -17,8 +19,6 @@ start_cycle 1
 
 period 28694
 
-#  t          v
-#---   -----------
 1793    3.42388
 3586    3.20711
 5380    2.88268

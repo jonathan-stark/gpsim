@@ -3,6 +3,8 @@ EXTRA_DIST = \
 	gpio_stim.stc \
 	it_12bit.asm \
 	p12_it.asm \
+	p12c508_test.asm \
+	p12c509_test.asm \
 	p12c508_test.stc \
 	p12x.inc \
 	pcl_test_12bit.asm
