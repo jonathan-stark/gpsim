@@ -24,9 +24,9 @@ module load lcd_display lcd1
 
 # create nodes that can connect the Pic and the module.
 
-node E
-node RW
-node DC
+node nE
+node nRW
+node nDC
 
 #  Define the data bus nodes.
 # since we'll only use '4-bit' we won't need all 8 data lines
@@ -41,9 +41,9 @@ node d6
 node d7
 
 
-attach E portb3 lcd1.E
-attach RW portb2 lcd1.RW
-attach DC portb1 lcd1.DC
+attach nE portb3 lcd1.E
+attach nRW portb2 lcd1.RW
+attach nDC portb1 lcd1.DC
 
 # 4-bit mode - only the upper half of the data
 # bus needs to be connected.

@@ -1,4 +1,10 @@
 2004-07-23 Scott Dattalo  <scott@dattalo.com>
+	* lcd.cc, lcd.h: updated the LCD module with the current gpsim trace
+	implementation.
+	* examples/lcd_mod.stc: The node name 'DC' conflicts with the status
+	flag DC bit name. (They're both symbols).
+
+2004-07-23 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc, lcd.h, lcdengine.cc: updated the LCD I/O pins to the
 	current gpsim implementation.
 
