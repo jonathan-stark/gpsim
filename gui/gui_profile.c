@@ -1303,7 +1303,8 @@ BuildProfileWindow(Profile_Window *pw)
       return;
   }
 
-  gui_message("There are bugs here. Please help them get fixed.");
+  gui_message("There are bugs here in the profile viewer.\n\
+	      Please help them get reported and/or fixed.");
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
