@@ -522,9 +522,10 @@ command_generator (const char *text, int state)
   // then return a copy of the input text. (Note, it was emperically determined
   // that 'something' must be returned if there are no matches at all - 
   // otherwise readline crashes on windows.)
-
+#ifdef _WIN32
   if(state == 0)
     return _strndup(text,cMaxStringLen);
+#endif
 
   return 0;
 }
@@ -537,8 +538,12 @@ char **
 gpsim_completion (const char *text, int start, int end)
 {
   char **matches;
+#ifdef _WIN32
   static char *empty="";
   matches = &empty;
+#else
+  matches = 0;
+#endif
 
 #ifdef HAVE_READLINE
   /* If this word is at the start of the line, then it is a command

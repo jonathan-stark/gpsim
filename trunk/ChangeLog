@@ -1,4 +1,8 @@
 2004-11-23 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc: The tab completion fix for window's now causes
+	a crash on Linux. Sigh. Now both oses are supported (without crashes)
+	
+2004-11-23 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: Fixed tab completion related window's crash
 	* gui/gui_symbols.cc: Windows doesn't support strndup()
 	
