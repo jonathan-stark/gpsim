@@ -1677,6 +1677,9 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   else
     cpu->program_memory[addr] = new_inst;
 
+  if(cpu->program_memory[addr]->xref)
+      cpu->program_memory[addr]->xref->update();
+  
   delete(old_inst);
 }
 

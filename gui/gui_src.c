@@ -50,9 +50,10 @@ key_press(GtkWidget *widget,
       //sbw->gui_obj.gp->p->run();
       gpsim_run(sbw->gui_obj.gp->pic_id);
       break;
-  case 'q':
-  case 'Q':
-      exit_gpsim();
+// Exit is Ctrl-Q; the dispatcher menu shortcut
+//  case 'q':
+//  case 'Q':
+//      exit_gpsim();
   }
 
   return TRUE;
