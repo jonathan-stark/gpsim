@@ -287,6 +287,25 @@ static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 	new Stimulus_Node(node_name);
 }
 
+static void xref_update(struct cross_reference_to_gui *xref, int new_value)
+{
+    Breadboard_Window *bbw;
+
+    if(xref == NULL)
+    {
+	printf("Warning gui_breadboard.c: xref_update: xref=%p\n",xref);
+	if(xref->data == NULL || xref->parent_window==NULL)
+	{
+	    printf("Warning gui_breadboard.c: xref_update: xref->data=%p, xref->parent_window=%p\n",xref->data,xref->parent_window);
+	}
+	return;
+    }
+
+    bbw  = (Breadboard_Window *) (xref->parent_window);
+
+    BreadboardWindow_update(bbw);
+}
+
 
 ////////////////////////////////////////////////////////////////////
 /*static void ok_cb(GtkWidget *w, gpointer user_data)
@@ -706,11 +725,6 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 
 	gtk_drawing_area_size(GTK_DRAWING_AREA(da),p->width,p->height);
 
-	gtk_widget_show(da);
-
-	gtk_layout_put(GTK_LAYOUT(bbw->layout),
-		       da,p->x,p->y);
-
 
 
 	p->pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
@@ -721,14 +735,14 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 
 
 	gdk_draw_rectangle (p->pixmap,
-			    da->style->bg_gc[GTK_WIDGET_STATE (da)],
+			    ((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],
 			    TRUE,
 			    0, 0,
 			    p->width,
 			    p->height);
 
 	gdk_draw_rectangle (p->pixmap,
-			    da->style->white_gc,
+			    ((GUI_Object*)bbw)->window->style->white_gc,
 			    TRUE,
 			    CASEOFFSET, CASEOFFSET,
 			    p->width-CASEOFFSET,
@@ -775,13 +789,13 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 	gdk_draw_line(p->pixmap,p->bbw->case_gc,p->width-CASEOFFSET,CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
 	gdk_draw_line(p->pixmap,p->bbw->case_gc,CASEOFFSET,p->height-CASEOFFSET,p->width-CASEOFFSET,p->height-CASEOFFSET);
 	gdk_draw_line(p->pixmap,p->bbw->case_gc,CASEOFFSET,CASEOFFSET,CASEOFFSET,p->height-CASEOFFSET);
-	gdk_draw_arc(p->pixmap,da->style->bg_gc[GTK_WIDGET_STATE (da)],TRUE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
+	gdk_draw_arc(p->pixmap,((GUI_Object*)bbw)->window->style->bg_gc[GTK_WIDGET_STATE (da)],TRUE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 	gdk_draw_arc(p->pixmap,p->bbw->case_gc,FALSE,p->width/2-FOORADIUS,CASEOFFSET-FOORADIUS,2*FOORADIUS,2*FOORADIUS,180*64,180*64);
 
 
 
 /*	gdk_draw_pixmap(da->window,
-			da->style->fg_gc[GTK_WIDGET_STATE (da)],
+			((GUI_Object*)bbw)->window->style->fg_gc[GTK_WIDGET_STATE (da)],
 			p->pixmap,
 			0, 0,
 		    0, 0,
@@ -792,7 +806,15 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 			   "expose_event",
 			   (GtkSignalFunc) expose,
 			   p);
+
+        p->module_widget=da;
     }
+
+    gtk_layout_put(GTK_LAYOUT(bbw->layout),
+		   p->module_widget,p->x,p->y);
+
+    gtk_widget_show(p->module_widget);
+
 
     // Create pins
     GtkWidget *subtree = gtk_tree_new();
@@ -804,7 +826,25 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 	struct gui_pin *pin;
 	enum orientation orientation;
         char *name;
+	struct cross_reference_to_gui *cross_reference;
+        IOPIN *iopin;
 
+        iopin = p->module->get_pin(i);
+
+	if(iopin!=NULL)
+	{
+	    // Create xref
+	    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+	    cross_reference->parent_window_type = WT_breadboard_window;
+	    cross_reference->parent_window = (gpointer) bbw;
+	    cross_reference->data = (gpointer) NULL;
+	    cross_reference->update = xref_update;
+	    cross_reference->remove = NULL;
+	    //gpsim_assign_pin_xref(pic_id,pin, cross_reference);
+	    iopin->xref->add(cross_reference);
+	}
+
+        // Put pin in layout
 	if(i<=p->module->get_pin_count()/2 || i<=p->module->get_pin_count()%2)
 	{
 	    pin_x=0;
@@ -822,7 +862,7 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 			   pin_x,
 			   pin_y,
 			   orientation,
-			   p->module->get_pin(i));
+			   iopin);
 
 	gtk_layout_put(GTK_LAYOUT(bbw->layout),
 		       pin->widget,p->x+pin->x,p->y+pin->y);
@@ -830,6 +870,7 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 
 	p->pins = g_list_append(p->pins, pin);
 
+        // Add pin to tree
 	name=p->module->get_pin_name(i);
 	if(name!=NULL)
 	{
@@ -902,27 +943,6 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
     }
 }
 
-
-
-static void xref_update(struct cross_reference_to_gui *xref, int new_value)
-{
-    Breadboard_Window *bbw;
-
-    if(xref == NULL)
-    {
-	printf("Warning gui_breadboard.c: xref_update: xref=%p\n",xref);
-	if(xref->data == NULL || xref->parent_window==NULL)
-	{
-	    printf("Warning gui_breadboard.c: xref_update: xref->data=%p, xref->parent_window=%p\n",xref->data,xref->parent_window);
-	}
-	return;
-    }
-
-    bbw  = (Breadboard_Window *) (xref->parent_window);
-
-    BreadboardWindow_update(bbw);
-}
-
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Watch_Window *ww)
@@ -937,7 +957,6 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
     char buf[128];
     int i;
     unsigned int pic_id;
-    struct cross_reference_to_gui *cross_reference;
     int pin;
 
     bbw->processor=1;
@@ -954,18 +973,6 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	return;
     }
 
-
-    for(pin=1;pin<=get_processor(pic_id)->get_pin_count();pin++)
-    {
-	cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-	cross_reference->parent_window_type = WT_breadboard_window;
-	cross_reference->parent_window = (gpointer) bbw;
-	cross_reference->data = (gpointer) NULL;
-	cross_reference->update = xref_update;
-	cross_reference->remove = NULL;
-	gpsim_assign_pin_xref(pic_id,pin, cross_reference);
-    }
-
     struct gui_module *p=create_module(bbw, PIC_MODULE, get_processor(pic_id),NULL);
 //    draw_pins(p);
 
@@ -975,7 +982,11 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 /* When a module is created */
 void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
 {
-    struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, NULL);
+    GtkWidget *widget=NULL;
+
+    if(module->widget!=NULL)
+        widget=GTK_WIDGET(module->widget);
+    struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, widget);
 }
 
 
@@ -1211,7 +1222,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
 
 
-  bbw->node_frame = gtk_frame_new ("Node settings");
+  bbw->node_frame = gtk_frame_new ("Node connections");
   gtk_widget_ref (bbw->node_frame);
   gtk_object_set_data_full (GTK_OBJECT (window), "node_frame", bbw->node_frame,
                             (GtkDestroyNotify) gtk_widget_unref);

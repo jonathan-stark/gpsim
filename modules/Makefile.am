@@ -9,7 +9,8 @@ libgpsim_modules_la_SOURCES = \
 	binary_indicator.cc binary_indicator.h \
 	resistor.cc resistor.h \
 	usart.cc usart.h \
-	paraface.cc paraface.h 
+	paraface.cc paraface.h \
+	switch.cc switch.h 
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@
