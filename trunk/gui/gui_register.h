@@ -58,7 +58,7 @@ class GUIRegister {
 
   CrossReferenceToGUI *xref;
 
-  char *getValueAsString(char *, int, char *format, RegisterValue &value);
+  char *getValueAsString(char *, int, char *format, RegisterValue value);
 
   void put_value(unsigned int new_value);
   unsigned int get_value(void);

@@ -202,16 +202,13 @@ RegisterValue GUIRegister::getRV(void)
 }
 
 char * GUIRegister::getValueAsString(char *str, int len, char *pFormat,
-                                     RegisterValue &value)
+                                     RegisterValue value)
 {
 
   if(!str || !len)
     return 0;
 
-  Register *reg = get_register();
-
-
-  if(reg && bIsValid()) {
+  if(bIsValid()) {
 
     char hex2ascii[] = "0123456789ABCDEF";
     int i;

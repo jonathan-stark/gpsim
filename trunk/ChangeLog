@@ -1,3 +1,9 @@
+2005-03-14 Scott Dattalo <scott@dattalo.com>
+	* plat/win32/gpsim.def: MSVC sync.
+	* modules/modules.vcproj: Use new pthread library.
+	* gui/gui_register.h, gui/gui_regwin.cc: pass registerValue by
+	value in getValueAsString() method.
+
 2005-03-03 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 
