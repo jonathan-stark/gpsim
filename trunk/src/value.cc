@@ -1026,6 +1026,9 @@ void String::get(char *buf, int len)
   if(buf && value) {
     strncpy(buf,value,len);
   }
+  else {
+    buf[0] = 0;
+  }
 }
 
 void String::get(Packet &p)
