@@ -21,6 +21,29 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_MACRO_H__
 #define __CMD_MACRO_H__
 
+#include <string>
+
+#include "../src/gpsim_object.h"
+
+typedef list<string> StringList_t;
+
+class Macro :public gpsimObject {
+public:
+  Macro(char *new_name);
+  StringList_t arguments;     // declared when macro is defined
+  StringList_t body;          // what the macro contains.
+  StringList_t parameters;    // passed to macro during invocation
+
+  void invoke();
+  void prepareForInvocation();
+  int substituteParameter(string &s);
+  int nParameters();
+  void add_argument(char *new_arg);
+  void add_parameter(char *s);
+  void add_body(char *new_line);
+  void print(void);
+};
+
 
 class cmd_macro : public command
 {

@@ -21,32 +21,20 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream>
 #include <iomanip>
-#include <string>
+#include <map>
 
 #include "command.h"
-#include "../src/gpsim_object.h"
 #include "cmd_macro.h"
 #include "expr.h"
 
 extern int parse_string(char * str);
-extern void add_string_to_input_buffer(char *s);
+extern void add_string_to_input_buffer(char *s,Macro *);
 extern void start_new_input_stream(void);
 class MacroLine {
   string text;
 };
 
-class Macro :public gpsimObject {
-public:
-  Macro(char *new_name);
-  StringList_t arguments;
-  StringList_t body;
-
-  void invoke(StringList_t *);
-  void add_argument(char *new_arg);
-  void add_body(char *new_line);
-  void print(void);
-};
-
+map <const string, Macro *> macro_map;
 
 Macro::Macro(char *_name)
 {
@@ -77,7 +65,7 @@ void Macro::add_body(char *new_line)
 
 }
 
-void Macro::invoke(StringList_t *parameters)
+void Macro::invoke()
 {
   list <string> :: iterator si;
 
@@ -88,10 +76,48 @@ void Macro::invoke(StringList_t *parameters)
     for(si = body.begin();
 	si != body.end();
 	++si)
-      add_string_to_input_buffer((char *) ((*si).c_str()));
+      add_string_to_input_buffer((char *) ((*si).c_str()), this);
 
   }
 
+}
+
+int Macro::substituteParameter(string &s)
+{
+
+  if(arguments.size()) {
+
+    list <string> :: iterator asi;
+    list <string> :: iterator psi;
+
+    for(asi = arguments.begin(), psi = parameters.begin();
+	asi != arguments.end();
+	++asi, ++psi)
+      if(*asi == s) {
+	
+	start_new_input_stream();
+	add_string_to_input_buffer((char *) ((*psi).c_str()), 0);
+	cout << "Found match, replacing "<<*asi << " with " << *psi<<endl;
+	return 1;
+      }
+  }
+
+  return 0;
+}
+
+int Macro::nParameters()
+{
+  return arguments.size();
+}
+
+void Macro::prepareForInvocation()
+{
+  parameters.clear();
+}
+
+void Macro::add_parameter(char *s)
+{
+  parameters.push_back(string(s));
 }
 
 void Macro::print()
@@ -125,7 +151,22 @@ void Macro::print()
 
 }
 
-Macro *theMacro = 0;
+// hack....
+static Macro *theMacro = 0;   // Used during macro definition
+Macro *gCurrentMacro = 0;     // Used during macro invocation
+
+
+Macro *isMacro(const string &s)
+{
+
+  map<string, Macro *>::iterator mi = macro_map.find(s);
+
+  if(mi != macro_map.end())
+    return (*mi).second;
+
+  return 0;
+}
+//========================================================================
 
 cmd_macro c_macro;
 
@@ -160,7 +201,7 @@ void cmd_macro::list(void)
   if(theMacro) {
     theMacro->print();
     cout << "invoking\n";
-    theMacro->invoke(0);
+    theMacro->invoke();
     cout << "invoked\n";
   } else
     cout << "No macros have been defined.\n";
@@ -172,8 +213,16 @@ void cmd_macro::define(char *name)
   if(!name)
     return;
 
+  map<const string, Macro *>::iterator mi = macro_map.find(string(name));
+
+  if(mi != macro_map.end()) {
+    cout << "macro '" << name << "' is already defined\n";
+    return;
+  }
+
   theMacro = new Macro(name);
 
+  macro_map[theMacro->name()] = theMacro;
 }
 
 void cmd_macro::add_parameter(char *parameter)
