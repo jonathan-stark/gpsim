@@ -153,10 +153,10 @@ void LcdDisplay::start_data(void)
 {
 
   if(in_8bit_mode())
-    data_latch = data_port->value & 0xff;
+    data_latch = data_port->get() & 0xff;
   else {
     // 4-bit mode.
-    data_latch = ( (data_latch << 4) | ((data_port->value & 0xf0)>>4) ) & 0xff;
+    data_latch = ( (data_latch << 4) | ((data_port->get() & 0xf0)>>4) ) & 0xff;
     data_latch_phase ^= 1;
   }
 
@@ -172,17 +172,17 @@ void LcdDisplay::send_status(void)
 
   status = ( cursor.row * 0x40 ) + cursor.col; // FIXME - No busy yet
 
-  cout << __FUNCTION__ << "status = " << status << endl;
+  cout << __FUNCTION__ << " status = " << status << endl;
 
   if(in_8bit_mode()) {
     data_port->put ( status );
-    data_port->update_pin_directions(0xFF);
+    //data_port->update_pin_directions(0xFF);
   } else {
     if (data_latch_phase & 1 )
       data_port->put ( status );
     else
       data_port->put ( status << 4 );
-    data_port->update_pin_directions(0xF0);
+    //data_port->update_pin_directions(0xF0);
     data_latch_phase ^= 1;
   }
 
@@ -191,7 +191,7 @@ void LcdDisplay::send_status(void)
 
 void LcdDisplay::release_port(void)
 {
-  data_port->update_pin_directions(0);
+  //data_port->update_pin_directions(0);
   newState(ST_INITIALIZED);
 }
 
@@ -367,37 +367,88 @@ void LcdDisplay::advanceState( ControlLineEvent e)
   switch(current_state) {
   case ST_INITIALIZED:
   case POWERON:
-    if(e == EWC)
-      start_data();
-
-    if(e == EWD)
-      start_data();
-
-    if(e == ERC)
+    switch(e) {
+    case  ERC:
       send_status();
+      break;
+    case  EWD:
+      start_data();
+      break;
+    case  EWC:
+      start_data();
+      break;
+
+    case  eRD:
+    case  eRC:
+    case  eWD:
+    case  eWC:
+    case  ERD:
+      cout << "?? unhandled state transition\n";
+    }
+
     break;
 
   case ST_COMMAND_PH0:
-    if(e == eWC)
+    switch(e) {
+    case  eWD:
+      new_data();
+      break;
+    case  eWC:
       new_command();
+      break;
+    case  eRD:
+    case  eRC:
+    case  ERD:
+    case  ERC:
+    case  EWD:
+    case  EWC:
+      cout << "?? unhandled state transition\n";
+      break;
+    }
+
+
+    if(e == eWC)
 
     if(e == eWD)
-      new_data();
 
     break;
 
   case ST_DATA_PH0:
-    if(e == eWD)
+    switch(e) {
+    case  eWD:
       new_data();
-    else
-      ;
+      break;
+
+    case  eRD:
+    case  eRC:
+    case  eWC:
+    case  ERD:
+    case  ERC:
+    case  EWD:
+    case  EWC:
+      cout << "?? unhandled state transition\n";
+      break;
+    }
+
 
     break;
 
   case ST_STATUS_READ:
-    if(e == eRC)
+    switch(e) {
+    case  eRD:
+    case  eRC:
+    case  eWD:
+    case  eWC:
       release_port();
-    break;
+      break;
+
+    case  ERD:
+    case  ERC:
+    case  EWD:
+    case  EWC:
+      cout << "?? unhandled state transition\n";
+      break;
+    }
     
   default:
     

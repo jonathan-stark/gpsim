@@ -95,7 +95,8 @@ public:
   virtual void setbit(unsigned int bit_number, bool new_value);
   DataPort (unsigned int _num_iopins=8);
   void update_pin_directions(unsigned int );
- 
+
+  unsigned int get(void);
 };
 
 // Create a class derived from the IO_input class that
@@ -114,6 +115,15 @@ public:
 
 };
 
+class Lcd_bi_directional : public IO_bi_directional
+{
+public:
+
+  virtual void put_node_state( int new_state);
+
+  Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL);
+
+};
 
 class LcdFont 
 {
