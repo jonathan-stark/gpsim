@@ -253,7 +253,7 @@ class ProcessorConstructor
 public:
   // THE list of all of gpsim's processors:
 
-  static list <ProcessorConstructor *> processor_list;
+  static list <ProcessorConstructor *> *processor_list;
 
   // A pointer to a function that when called will construct a processor
   Processor * (*cpu_constructor) (void);

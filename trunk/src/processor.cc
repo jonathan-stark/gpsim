@@ -1013,7 +1013,7 @@ void  program_memory_access::assign_xref(unsigned int address, gpointer xref)
 //========================================================================
 // Processor Constructor
 
-list <ProcessorConstructor *> ProcessorConstructor::processor_list;
+list <ProcessorConstructor *> *ProcessorConstructor::processor_list;
 
 ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
 			 char *name1, 
@@ -1021,6 +1021,8 @@ ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (vo
 			 char *name3,
 			 char *name4) 
 {
+  if (processor_list == NULL)
+    processor_list = new list <ProcessorConstructor *>;
 
   cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
   names[0] = name1;                    // First name
@@ -1030,7 +1032,7 @@ ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (vo
 
   // Add the processor to the list of supported processors:
 
-  processor_list.push_back(this);
+  processor_list->push_back(this);
 
 }
 
@@ -1046,8 +1048,8 @@ ProcessorConstructor *ProcessorConstructor::find(char *name)
 
   list <ProcessorConstructor *> :: iterator processor_iterator;
 
-  for (processor_iterator = processor_list.begin();  
-       processor_iterator != processor_list.end(); 
+  for (processor_iterator = processor_list->begin();
+       processor_iterator != processor_list->end(); 
        processor_iterator++) {
 
     ProcessorConstructor *p = *processor_iterator;
@@ -1082,8 +1084,8 @@ void ProcessorConstructor::dump(void)
 
   longest = 0;
 
-  for (processor_iterator = processor_list.begin();  
-       processor_iterator != processor_list.end(); 
+  for (processor_iterator = processor_list->begin();  
+       processor_iterator != processor_list->end(); 
        processor_iterator++) {
 
     p = *processor_iterator;
@@ -1097,10 +1099,10 @@ void ProcessorConstructor::dump(void)
 
   // Print the name of each processor.
 
-  for (processor_iterator = processor_list.begin();  
-       processor_iterator != processor_list.end(); ) {
+  for (processor_iterator = processor_list->begin();  
+       processor_iterator != processor_list->end(); ) {
 
-    for(i=0; i<nPerRow && processor_iterator != processor_list.end(); i++) {
+    for(i=0; i<nPerRow && processor_iterator != processor_list->end(); i++) {
 
       p = *processor_iterator++;
       cout << p->names[1];

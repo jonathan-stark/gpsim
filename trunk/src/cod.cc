@@ -42,6 +42,7 @@ Boston, MA 02111-1307, USA.  */
 #include "picdis.h"
 #include "symbol.h"
 #include "cod.h"
+#include "../cli/input.h"
 
 #ifdef HAVE_GUI
 #include "../gui/gui_interface.h"
@@ -77,14 +78,18 @@ enum cod_errors
   COD_BAD_FILE
 };
 
-char * substr(char *a, char *b, int n)
+static char *get_string(char *dest, char *src, size_t len)
 {
-    char *temp;
-  *a = 0;
-  temp=strncat(a,b,n);
-  assert(strlen(a)<=n);
-  return temp;
+  size_t n = *src++;
+
+  assert(n < len);
+  n = min(n, len - 1);
+  strncpy(dest, src, n);
+  dest[n] = '\0';
+
+  return dest;
 }
+
 
 // Capitalize a string (there must be a library function that does this!
 
@@ -355,9 +360,22 @@ void read_src_files_from_cod(pic_processor *cpu)
 	char	*filenm;
 
 	offset = i*FILE_SIZE;
-	substr(b,&temp_block[offset+1],FILE_SIZE);
+	get_string(b,&temp_block[offset],sizeof b);
 	filenm = b;
 
+#ifdef _WIN32
+        // convert to DOS style file name
+        {
+          char *cp;
+
+          // convert Unix slash to DOS slash
+	  for (cp = filenm; *cp; ++cp) { // convert Unix slash to DOS slash
+	    if ('/' == *cp)
+              *cp = '\\';
+          }
+        }
+#else
+        // convert to Unix style file name
 	if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
 	    && (':' == filenm[1]) && ('\\' == filenm[2])) {
 	  char *cp;
@@ -366,8 +384,8 @@ void read_src_files_from_cod(pic_processor *cpu)
 	  for (cp = filenm; *cp; ++cp) { // convert DOS slash to Unix slash
 	    if ('\\' == *cp) *cp = '/';
 	  }
-
 	}
+#endif
 
 	for (jj = 0; jj < num_files; ++jj) { // check if already opened
 	  // this could be fooled by search paths
@@ -515,20 +533,25 @@ void read_symbols( pic_processor *cpu )
 
 	switch(type) 
 	  {
-	  case COD_ST_C_SHORT:
+          case COD_ST_C_SHORT:
 	    // Change the register name to its symbolic name
-	    cpu->registers[value]->new_name(substr(b,&s[1],length));
+	    cpu->registers[value]->new_name(get_string(b, s, sizeof b));
 	    cout << cpu->registers[value]->name() << '\n';
 	    symbol_table.add_register(cpu,cpu->registers[value]);
 	    break;
 
 	  case COD_ST_ADDRESS:
-	    symbol_table.add_address(cpu,substr(b,&s[1],length), value);
-	    cout << "symbol at address " << value << " name " <<substr(b,&s[1],length) <<'\n';
+            {
+              char *symbol;
+
+              symbol = get_string(b, s, sizeof b);
+	      symbol_table.add_address(cpu, symbol, value);
+	      cout << "symbol at address " << value << " name " << symbol <<'\n';
+            }
 	    break;
 	    //COD_ST_CONSTANT:
 	  default:
-	    symbol_table.add_constant(cpu,substr(b,&s[1],length),value);
+	    symbol_table.add_constant(cpu,get_string(b,s,sizeof b),value);
 	  }
 
 
@@ -611,14 +634,14 @@ void check_for_gpasm(char *block)
   char buffer[256];
   int have_gpasm = 0;
 
-  substr(buffer,&block[COD_DIR_COMPILER],12);
+  get_string(buffer,&block[COD_DIR_COMPILER - 1],12);
 
   if(strcmp("gpasm",buffer) == 0) {
     if(verbose)
       cout << "Have gpasm\n";
     have_gpasm = 1;
 
-    substr(buffer,&block[COD_DIR_VERSION],19);
+    get_string(buffer,&block[COD_DIR_VERSION - 1],19);
 
     // Extract gpasm's version numbers
     int major=0, minor=0, micro=0;
@@ -861,7 +884,7 @@ int open_cod_file(pic_processor **pcpu, char *filename)
 
   cout << "processing cod file " << filename << '\n';
 
-  dir_path_end=strrchr(filename,'/');
+  dir_path_end = get_dir_delim(filename);
   
   if(dir_path_end!=NULL)
   {
@@ -873,7 +896,7 @@ int open_cod_file(pic_processor **pcpu, char *filename)
       printf("filename is \"%s\"\n",filename);
   }
   
-  codefile = fopen(filename,"r");
+  codefile = fopen(filename,"rb");
 
   if(codefile == NULL) {
     printf("Unable to open %s\n",filename);
@@ -901,9 +924,7 @@ int open_cod_file(pic_processor **pcpu, char *filename)
       if(verbose)
 	cout << "ascertaining cpu from the .cod file\n";
       //substr(processor_name,&directory_block_data[COD_DIR_PROCESSOR],8);
-      substr(processor_name,&main_dir.dir.block[COD_DIR_PROCESSOR],8);
-
-      processor_name[8] = 0;
+      get_string(processor_name,&main_dir.dir.block[COD_DIR_PROCESSOR - 1], sizeof processor_name);
 
       if(verbose)
 	cout << "found a " << processor_name << " in the .cod file\n";

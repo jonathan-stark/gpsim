@@ -241,6 +241,24 @@ char * gets_from_cmd_file(char **ss)
 
 }
 
+char *get_dir_delim(char *path)
+{
+#ifdef _WIN32
+  char *p = path + strlen(path);
+
+  do
+  {
+    if (--p < path)
+      return NULL;
+  }
+  while (*p != '/' && *p != '\\');
+
+  return p;
+#else
+  return strrchr(path, '/');
+#endif
+}
+
 void process_command_file(char * file_name)
 {
 
@@ -253,7 +271,7 @@ void process_command_file(char * file_name)
 
   save_cmd_file = cmd_file;
 
-  dir_path_end=strrchr(file_name,'/');
+  dir_path_end = get_dir_delim(file_name);
   if(dir_path_end!=NULL)
   {
       strncpy(directory,file_name,dir_path_end-file_name);
@@ -301,7 +319,6 @@ static char *
 get_user_input (void)
 {
   char *retval = 0;
-  int i,len;
   static char buf[256];
 
   if((verbose&4) && DEBUG_PARSER)
@@ -309,8 +326,7 @@ get_user_input (void)
 
   if( !use_gui && using_readline) {
     //cout << "  1";
-    #ifdef HAVE_READLINE
-// #if 0
+#ifdef HAVE_READLINE
     // If we're in cli-only mode and we're not processing a command file
     // then we use readline to get the commands
     retval = gnu_readline ( "**gpsim> ",1);
@@ -352,7 +368,7 @@ int
 gpsim_read (char *buf, unsigned max_size)
 {
   char *input_buf;
-  static int chars_left = 0;
+  static unsigned chars_left = 0;
   int status = 0;
 
 //cout << __FUNCTION__ << endl;
@@ -361,7 +377,7 @@ gpsim_read (char *buf, unsigned max_size)
     cout <<"gpsim_read\n";
 
   input_buf = get_user_input ();
-  chars_left = input_buf ? strlen (input_buf) : 0;
+  chars_left = input_buf ? (unsigned)strlen (input_buf) : 0;
 
   if (chars_left > 0)
     {
@@ -378,22 +394,21 @@ gpsim_read (char *buf, unsigned max_size)
 
       //cout << "chars_left > 0, copied cur_pos into buff\n";
       //cout << "buf[]  " << buf << '\n';
-
-      // If we are reading from a command file (and not stdin), then
-      // the string that was read copied into a dynamically allocated
-      // buffer that we need to delete.
-
-      if(allocs) {
-	allocs--;
-
-	//cout << "freeing input_buf " <<input_buf <<'\n';
-	//cout << "allocs--" << allocs << '\n';
-
-	free (input_buf);
-      }
-      //status = len;
-      //chars_left = 0;
     }
+    // If we are reading from a command file (and not stdin), then
+    // the string that was read copied into a dynamically allocated
+    // buffer that we need to delete.
+
+  if(allocs) {
+    allocs--;
+
+    //cout << "freeing input_buf " <<input_buf <<'\n';
+    //cout << "allocs--" << allocs << '\n';
+
+    free (input_buf);
+  }
+  //status = len;
+  //chars_left = 0;
 
   if((verbose&4) && DEBUG_PARSER)
     cout << "leaving gpsim_read\n";

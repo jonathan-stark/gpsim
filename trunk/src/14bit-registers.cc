@@ -55,9 +55,6 @@ file_register::file_register(void)
 
 file_register::~file_register(void)
 {
-  if(name_str1)
-    delete(name_str1);
-
 //  if(xref)
 //    delete(xref);
 }

@@ -32,10 +32,12 @@ Boston, MA 02111-1307, USA.  */
 instruction::instruction(void)
 {
 #ifdef HAVE_GUI
-    xref = new XrefObject;
+  xref = new XrefObject;
+#else
+  xref = NULL;
 #endif
-    is_modified=0;
-    cycle_count=0;
+  is_modified = 0;
+  cycle_count = 0;
   hll_file_id = 0;
   hll_src_line = -1;
 }
