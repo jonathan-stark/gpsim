@@ -507,6 +507,8 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     int i;
 
+    guint64 i64, x;
+
     guint64 maxy=0;
 
     static double *px2;//[] = {.1, .2, .3, .4, .5, .6, .7, .8};
@@ -544,14 +546,21 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	py2[i]=cyclearray[i];
     }
 
-    if(maxy<20)
-        maxy=20;
-
     maxy=maxy*1.1;
 
-    tickdelta=maxy/20;
 
-    tickdelta-=(int)tickdelta%20;
+    // Compute tickdelta for easy reading.
+    x=maxy;
+    i64=1;
+    while(x>=10L)
+    {
+	x/=10L;
+        i64*=10L;
+    }
+    tickdelta=x*i64/10;
+
+    if(tickdelta<1)
+        tickdelta=1;
 
     
 
@@ -647,7 +656,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color);
 	gtk_plot_set_background(GTK_PLOT(active_plot), &color);
 
-	gdk_color_parse("red", &color);
+	gdk_color_parse("black", &color);
 	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color);
 
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
@@ -668,18 +677,20 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
 
 
-	dataset = gtk_plot_data_new();
+	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
     gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_ORIENTATION_VERTICAL, tickdelta, 1);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
 
+    printf("maxy %f, barwidth %f, tickdelta %f\n",(float)maxy,barwidth,tickdelta);
+
     gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, dx2, NULL, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
-			     GTK_PLOT_SYMBOL_IMPULSE,
+			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
-			     15, (int)(((double)WINDOWWIDTH/2)*barwidth)+1, &color,&color);
+			     15, 2/*(int)(((double)WINDOWWIDTH/2)*barwidth)*/+1, &color,&color);
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
 				      GTK_PLOT_LINE_SOLID,
 				      5, &color);
