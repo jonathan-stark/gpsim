@@ -450,7 +450,8 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
       l2->next = l1->next;
       l1->next = l2;
       l2->prev = l1;
-      l2->next->prev = l2;
+      if(l2->next)
+	l2->next->prev = l2;
 
       break_on_this = active.next->break_value;
 
@@ -493,7 +494,8 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
       l2 = l1->next;                        // l2 now points to this break point
 
       l1->next = l1->next->next;            // Unlink this break point
-      l1->next->prev = l1;
+      if(l1->next)
+        l1->next->prev = l1;
 
       l1 = &active;                         // Start searching from the beginning of the list
 

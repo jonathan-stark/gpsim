@@ -1,4 +1,7 @@
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
+	* src/gpsim-time.cc linked-list bug fixes.
+
+2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* eXdbm/* applied patch from  Borut Razem mailto:borut.razem@siol.net to
 	fix an uninitialized pointer bug.
 	
