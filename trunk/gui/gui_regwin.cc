@@ -222,9 +222,9 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
 
     for(i=0; i < min; i++) {
       if(value.init & 0x0f)
-	str[min-i-1] = '?';
+        str[min-i-1] = '?';
       else
-	str[min-i-1] = hex2ascii[value.data & 0x0f];
+        str[min-i-1] = hex2ascii[value.data & 0x0f];
       value.init >>= 4;
       value.data >>= 4;
     }
