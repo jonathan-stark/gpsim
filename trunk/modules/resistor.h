@@ -42,12 +42,12 @@ Boston, MA 02111-1307, USA.  */
 class Resistor;
 
 // Resistor_IO - IO pin definition for a resistor.
-
+#if 0
 class Resistor_IO : public IO_bi_directional
 {
 public:
 
-  class Resistor *res;
+  //Resistor *res;
 
   //virtual SOURCE_TYPE isa(void) {return RESISTOR;};
 
@@ -62,7 +62,7 @@ class PUResistor_IO : public IOPIN
 {
 public:
 
-  resistor *res;
+  //resistor *res;
 
   PUResistor_IO(void);
 
@@ -70,10 +70,7 @@ public:
   virtual double get_Zth();
 
 };
-
-
-
-// Create a few classes from which an LED may be constructed
+#endif
 
 class Resistor_IOPORT : public IOPORT
 {
@@ -107,7 +104,9 @@ public:
 class PullupResistor : public Module 
 {
 public:
-  resistor *res;
+
+  IO_bi_directional res;
+
 #ifdef MANAGING_GUI
 
   GtkWidget *pu_window;

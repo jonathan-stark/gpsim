@@ -387,6 +387,18 @@ double Stimulus_Node::update(guint64 current_time)
 	  double Z2 = sptr2->get_Zth();
 	  double Zt = Z1 + Z2;
 	  voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / Zt;
+
+	  /*
+	  cout << " *N1: " <<sptr->name() 
+	       << " V=" << sptr->get_Vth() 
+	       << " Z=" << sptr->get_Zth() << endl;
+	  cout << " *N2: " <<sptr2->name() 
+	       << " V=" << sptr2->get_Vth() 
+	       << " Z=" << sptr2->get_Zth() << endl;
+	  cout << " * ==>:  V=" << voltage
+	       << " Z=" << Zt << endl;
+	  */
+
 	  sptr->set_nodeVoltage(voltage);
 	  sptr2->set_nodeVoltage(voltage);
 	}
@@ -968,6 +980,10 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   iobit=b;
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
+
+  Zth = 1e8;
+  Vth = 5.0;
+
   snode = 0;
 
   if(iop) {
@@ -1069,7 +1085,6 @@ Register *IOPIN::get_iop(void)
 
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
-  //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
   Register *port = get_iop();
 
   nodeVoltage = new_nodeVoltage;
@@ -1146,24 +1161,6 @@ IO_input::IO_input(void)
 
 
 }
-/*
-void IO_input::toggle(void)
-{
-  Register *port = get_iop();
-
-  if(port) {
-
-    port->setbit(iobit, port->get_bit(iobit) ? false : true);
-    port->update();
-    state = port->get_bit(iobit);
-
-  }
-  else
-    state ^= 1;
-
-  update();
-}
-*/
 
 
 /*************************************
@@ -1194,7 +1191,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
   : IO_input(i,b,opt_name,_iopp)
 {
 
-  driving = 0;
+  driving = false;
 
   // Thevenin equivalent while configured as an output 
   Vth = 5.0;
@@ -1285,7 +1282,6 @@ IO_bi_directional_pu::~IO_bi_directional_pu(void)
 double IO_bi_directional_pu::get_Zth()
 {
   return driving ? Zth : (bPullUp ? Zpullup : ZthIn);
-
 }
 
 double IO_bi_directional_pu::get_Vth()

@@ -66,7 +66,7 @@ public:
     new_name("resistance");
     cout << "Resistance Attribute constructor\n";
 
-    value = pur->res->get_Zth();
+    value = pur->res.get_Zth();
   }
 
 
@@ -78,7 +78,7 @@ public:
     if(!pur)
       return;
 
-    pur->res->set_Zth(r);
+    pur->res.set_Zth(r);
 
   };
 
@@ -148,8 +148,8 @@ void Resistor::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
 
-  assign_pin(1, new Resistor_IO(port, 0));
-  assign_pin(2, new Resistor_IO(port, 1));
+  assign_pin(1, new IO_bi_directional(port, 0));
+  assign_pin(2, new IO_bi_directional(port, 1));
 
 
   // Create an entry in the symbol table for the new I/O pins.
@@ -179,13 +179,6 @@ Module * Resistor::construct(const char *_new_name)
 
 }
 
-//--------------------------------------------------------------
-PUResistor_IO::PUResistor_IO(void)
-{
-
-  res = NULL;  // Assigned later.
-}
-
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
@@ -211,8 +204,6 @@ void PullupResistor::set_attribute(char *attr, char *val)
 void PullupResistor::create_iopin_map(void)
 {
 
-  PUResistor_IO *pur;
-
   cout << "PullupResistor::create_iopin_map\n";
 
   //   The PullupResistor has only one pin.
@@ -227,10 +218,8 @@ void PullupResistor::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  pur = new PUResistor_IO();
-  pur->res = res;
-  pur->new_name(name_str);
-  assign_pin(1, pur);
+
+  assign_pin(1, &res);
 
 
   // Create an entry in the symbol table for the new I/O pins.
@@ -258,13 +247,13 @@ Module * PullupResistor::pu_construct(const char *_new_name)
 
   if(_new_name) {
     pur->new_name((char*)_new_name);
-    pur->res->new_name((char*)_new_name);
+    pur->res.new_name((char*)_new_name);
   }
 
   pur->create_iopin_map();
 
-  pur->res->set_Vth(5.0);
-  cout << "Resistance " << pur->res->get_Zth() << '\n';
+  pur->res.set_Vth(5.0);
+  cout << "Resistance " << pur->res.get_Zth() << '\n';
 
   return pur;
 
@@ -280,13 +269,13 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 
   if(_new_name) {
     pur->new_name((char*)_new_name);
-    pur->res->new_name((char*)_new_name);
+    pur->res.new_name((char*)_new_name);
   }
   pur->create_iopin_map();
 
-  pur->res->set_Vth(0);
+  pur->res.set_Vth(0);
 
-  cout << "Resistance " << pur->res->get_Zth() << '\n';
+  cout << "Resistance " << pur->res.get_Zth() << '\n';
 
   return pur;
 
@@ -300,9 +289,7 @@ PullupResistor::PullupResistor(const char *init_name)
   cout << "Pull up resistor constructor\n";
 
   // Create the resistor:
-
-  res = new resistor;
-  res->set_Zth(10e3);
+  res.set_Zth(10e3);
 
   attr = new ResistanceAttribute(this);
   add_attribute(attr);
@@ -322,7 +309,7 @@ PullupResistor::PullupResistor(const char *init_name)
 
 PullupResistor::~PullupResistor()
 {
-    delete res;
+
 }
 
 #ifdef MANAGING_GUI
