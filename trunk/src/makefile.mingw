@@ -38,6 +38,7 @@ src_OBJECTS =			\
 	breakpoints.o		\
 	cod.o			\
 	eeprom.o		\
+	expr.o			\
 	fopen-path.o		\
 	gpsim_object.o		\
 	gpsim_time.o		\
@@ -50,6 +51,7 @@ src_OBJECTS =			\
 	ioports.o		\
 	lxt_write.o		\
 	modules.o		\
+	operator.o		\
 	p12x.o			\
 	p16f62x.o		\
 	p16f87x.o		\

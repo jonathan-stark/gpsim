@@ -1,3 +1,6 @@
+2004-09-12 Borut Razem <borut.razem@siol.net>
+	* cli/cli.cvproj, src/src.vcproj, plat/win32/gpsim.def: MSVC sync
+	* cli/makefile.mingw, src/makefile.mingw, gpsim/makefile.mignw: MinGW sync
 
 2004-09-11 Scott Dattalo <scott@dattalo.com>
 	* configure.in: Bumped the Revision up to 0.22.3 since there
@@ -88,7 +91,6 @@
 	* cli/cmd_macro.cc, cli/cmd_macro.h, cli/input.cc,
 	cli/parse.yy, cli/scan.ll: Added support for parameterized
 	macros. This is not completed
-
 
 2004-09-02 Borut Razem <borut.razem@siol.net>
 	* cli/input.cc, cli/socket.cc: socket port to WIN32

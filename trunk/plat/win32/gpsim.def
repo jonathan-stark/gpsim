@@ -14,18 +14,19 @@ EXPORTS
     ??0Module@@QAE@XZ
     ??0Processor@@QAE@XZ
     ??0ProcessorConstructor@@QAE@P6APAVProcessor@@XZPAD111@Z
-    ??0Program_Counter@@QAE@XZ
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
+    ??0Program_Counter@@QAE@XZ
     ??0Register@@QAE@XZ
     ??0RegisterAssertion@@QAE@PAVProcessor@@IIIII_N@Z
+    ??0TriggerObject@@QAE@XZ
     ??0instruction@@QAE@XZ
     ??0invalid_instruction@@QAE@PAVProcessor@@I@Z
     ??0stimulus@@QAE@PAD@Z
-    ??1gpsimValue@@UAE@XZ
     ??1IOPIN@@UAE@XZ
     ??1IOPORT@@UAE@XZ
     ??1Module@@UAE@XZ
     ??1Register@@UAE@XZ
+    ??1gpsimValue@@UAE@XZ
     ??1stimulus@@UAE@XZ
     ?Add@Files@@QAEHPADPAU_iobuf@@@Z
     ?Find@Files@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -41,34 +42,39 @@ EXPORTS
     ?assign_pin@Module@@UAEXIPAVIOPIN@@@Z
     ?attach@IOPIN@@UAEXPAVStimulus_Node@@@Z
     ?attach_src_line@Processor@@QAEXIIII@Z
-    ?callback@BreakpointObject@@UAEXXZ
     ?callback@ProgramMemoryAccess@@UAEXXZ
+    ?callback@TriggerObject@@UAEXXZ
     ?callback@source_stimulus@@UAEXXZ
-    ?callback_print@BreakpointObject@@UAEXXZ
+    ?callback_print@TriggerObject@@UAEXXZ
     ?callback_print@source_stimulus@@UAEXXZ
     ?change_pin_direction@IOPORT@@UAEXI_N@Z
     ?check_cycle_break@Breakpoints@@QAEII@Z
-    ?clear@BreakpointObject@@UAEXXZ
-    ?clear_break@Cycle_Counter@@QAEXPAVBreakpointObject@@@Z
+    ?clear@TriggerObject@@UAEXXZ
     ?clear_break_at_address@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?clear_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?clear_current_break@Cycle_Counter@@QAEXXZ
     ?clear_notify_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?clear_profile_start_at_address@ProgramMemoryAccess@@UAEHI@Z
     ?clear_profile_stop_at_address@ProgramMemoryAccess@@UAEHI@Z
+    ?compare@Value@@UAE_NPAVComparisonOperator@@PAV1@@Z
     ?computed_goto@Program_Counter@@UAEXI@Z
-    ?create_pkg@Module@@UAEXI@Z
     ?create_invalid_registers@Processor@@QAEXXZ
+    ?create_pkg@Module@@UAEXI@Z
     ?disassemble@Processor@@UAEXHH@Z
     ?dump_attributes@Module@@UAEXH@Z
     ?dump_last_instruction@Trace@@QAEXXZ
     ?dump_registers@Processor@@UAEXXZ
     ?find_closest_address_to_line@ProgramMemoryAccess@@UAEHHH@Z
-    ?find_free@BreakpointObject@@UAEHXZ
+    ?find_free@TriggerObject@@UAEHXZ
     ?find_instruction@ProgramMemoryAccess@@UAEPAVinstruction@@IW4INSTRUCTION_TYPES@2@@Z
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
     ?get@IOPORT@@UAEIXZ
+    ?getAsDouble@Value@@UAENXZ
+    ?getAsInt@Value@@UAEHXZ
+    ?get_Vth@IO_bi_directional@@UAENXZ
+    ?get_Vth@IO_input@@UAENXZ
+    ?get_Zth@IO_bi_directional@@UAENXZ
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVAttribute@@PAD_N@Z
     ?get_bit@IOPORT@@UAE_NI@Z
@@ -84,9 +90,6 @@ EXPORTS
     ?get_pin_state@Module@@UAEHI@Z
     ?get_symbol_table@@YAAAVSymbol_Table@@XZ
     ?get_trace@@YAAAVTrace@@XZ
-    ?get_Vth@IO_bi_directional@@UAENXZ
-    ?get_Vth@IO_input@@UAENXZ
-    ?get_Zth@IO_bi_directional@@UAENXZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
@@ -94,24 +97,23 @@ EXPORTS
     ?init_register_memory@Processor@@UAEXI@Z
     ?interrupt@Program_Counter@@UAEXI@Z
     ?list@Processor@@UAEXIIII@Z
+    ?name@ProgramMemoryAccess@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?name@gpsimObject@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
-    ?name@ProgramMemoryAccess@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_address@Program_Counter@@UAEXI@Z
     ?new_name@Attribute@@UAEXPAD@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPAD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
-    ?print@BreakpointObject@@UAEXXZ
+    ?print@TriggerObject@@UAEXXZ
     ?put@IOPORT@@UAEXI@Z
     ?put_digital_state@IOPIN@@UAEX_N@Z
     ?put_value@IOPORT@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
-    ?reassign_break@Cycle_Counter@@QAE_N_K0PAVBreakpointObject@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
-    ?run_to_address@Processor@@UAEXI@Z
     ?run@ProgramMemoryAccess@@UAEXXZ
+    ?run_to_address@Processor@@UAEXI@Z
     ?sGet@FloatAttribute@@UAEPADPADH@Z
     ?sGet@IntAttribute@@UAEPADPADH@Z
     ?set@FloatAttribute@@UAEXH@Z
@@ -125,17 +127,13 @@ EXPORTS
     ?set_attribute@Module@@UAEXPAD0@Z
     ?set_attribute@Module@@UAEXPAD0H@Z
     ?set_attribute@Module@@UAEXPADN@Z
-    ?set_break@Cycle_Counter@@QAE_N_KPAVBreakpointObject@@I@Z
+    ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
-    ?set_break_delta@Cycle_Counter@@QAE_N_KPAVBreakpointObject@@I@Z
-    ?set_breakpoint@Breakpoints@@QAEIPAVBreakpointObject@@@Z
-    ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
+    ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_nodeVoltage@IOPIN@@UAEXN@Z
-    ?set_notify_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
+    ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
     ?set_out_of_range_pm@Processor@@UAEXII@Z
-    ?set_profile_start_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
-    ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEXIPAVBreakpointObject@@@Z
     ?set_read_trace@Register@@UAEXI@Z
     ?set_write_trace@Register@@UAEXI@Z
     ?setbit@IOPORT@@UAEXI_N@Z
@@ -147,13 +145,14 @@ EXPORTS
     ?step_over@Processor@@UAEXXZ
     ?stop@ProgramMemoryAccess@@UAEXXZ
     ?toBitStr@Register@@UAEPADPADH@Z
+    ?toString@Register@@UAEPADPADH@Z
+    ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@gpsimValue@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
-    ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
-    ?toString@Register@@UAEPADPADH@Z
-    ?update@gpsimValue@@UAEXXZ
     ?update@Stimulus_Node@@QAEN_K@Z
+    ?update@gpsimValue@@UAEXXZ
     ?update_direction@IO_bi_directional@@UAEXI@Z
     ?update_stimuli@IOPORT@@UAEHXZ
     ?verbose@@3HA
