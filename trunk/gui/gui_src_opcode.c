@@ -120,9 +120,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    }
 	break;
     case MENU_BREAK_EXECUTE:
-	value = gui_get_value("value to read for breakpoint:");
-	if(value<0)
-	    break; // Cancel
 	for(j=range.row0;j<=range.rowi;j++)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
@@ -140,11 +137,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    }
 	break;
     case MENU_ADD_WATCH:
+	puts("not implemented");
 	for(j=range.row0;j<=range.rowi;j++)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
 		address=j*16+i;
-		puts("not implemented");
 //		WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
 	    }
 	break;

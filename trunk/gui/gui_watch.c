@@ -84,7 +84,7 @@ static void remove_entry(Watch_Window *ww, struct watch_entry *entry)
     free(entry);
 }
 
-void update_menus(Watch_Window *ww)
+static void update_menus(Watch_Window *ww)
 {
     GtkWidget *item;
     struct watch_entry *entry;
@@ -191,7 +191,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     }
 }
 
-void set_column(GtkCheckButton *button, struct _coldata *coldata)
+static void set_column(GtkCheckButton *button, struct _coldata *coldata)
 {
     char str[256];
     if(button->toggle_button.active)

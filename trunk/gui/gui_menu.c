@@ -362,6 +362,9 @@ toggle_window (gpointer             callback_data,
 	case 7:
 	    gui_object=(GUI_Object*)gp->breadboard_window;
             break;
+	case 8:
+	    gui_object=(GUI_Object*)gp->stack_window;
+            break;
 	default:
 	    puts("unknown menu action");
 	}
@@ -407,10 +410,10 @@ overbutton_cb(GtkWidget *widget)
 }
     
 static void 
-returnbutton_cb(GtkWidget *widget)
+finishbutton_cb(GtkWidget *widget)
 {
     if(gp)
-	gpsim_return(gp->pic_id);
+	gpsim_finish(gp->pic_id);
 }
 
 static void 
@@ -466,6 +469,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/_Ram",    NULL, (GtkItemFactoryCallback)toggle_window,3,"<ToggleItem>" },
   { "/Windows/_EEPROM", NULL, (GtkItemFactoryCallback)toggle_window,4,"<ToggleItem>" },
   { "/Windows/_Watch",  NULL, (GtkItemFactoryCallback)toggle_window,5,"<ToggleItem>" },
+  { "/Windows/Sta_ck",  NULL, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
   { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
   { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
@@ -563,9 +567,9 @@ void create_dispatcher (void)
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
-      button = gtk_button_new_with_label ("return");
+      button = gtk_button_new_with_label ("finish");
       gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) returnbutton_cb, NULL);
+			 (GtkSignalFunc) finishbutton_cb, NULL);
       gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 

@@ -678,15 +678,17 @@ void gpsim_reset(unsigned int processor_id)
     pic->reset(POR_RESET);
 }
 //--------------------------------------------------------------------------
-void gpsim_return(unsigned int processor_id)
+void gpsim_finish(unsigned int processor_id)
 {
-  pic_processor *pic = get_processor(processor_id);
+    pic_processor *pic = get_processor(processor_id);
+    unsigned int return_address;
 
   if(!pic)
     return;
 
-  // this should exit current subroutine (like 'finish' in gdb)
-  puts("Return not implemented");
+  return_address = pic->stack->contents[pic->stack->pointer-1 & pic->stack->stack_mask];
+
+  gpsim_run_to_address(processor_id, return_address);
 }
 //--------------------------------------------------------------------------
 void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
@@ -697,6 +699,26 @@ void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
     return;
 
   pic->run_to_address(address);
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_get_stack_size(unsigned int processor_id)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0;
+
+    return pic->stack->pointer&pic->stack->stack_mask;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_get_stack_value(unsigned int processor_id, unsigned int address)
+{
+    pic_processor *pic = get_processor(processor_id);
+
+    if(!pic)
+	return 0xffff;
+
+    return pic->stack->contents[address & pic->stack->stack_mask];
 }
 //--------------------------------------------------------------------------
 void gpsim_set_read_break_at_address(unsigned int processor_id,

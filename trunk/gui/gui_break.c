@@ -36,6 +36,7 @@ void gui_simulation_has_stopped(gpointer callback_data)
       SourceBrowser_update(gp->program_memory);
       SourceBrowser_update(gp->source_browser);
       WatchWindow_update(gp->watch_window);
+      StackWindow_update(gp->stack_window);
       BreadboardWindow_update(gp->breadboard_window);
     }
 }
