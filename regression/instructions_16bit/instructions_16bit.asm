@@ -132,63 +132,53 @@ start:
         clrf    temp
         
         addwf   temp,w          ; 0+0
-        skpnc
-         bra    failed
-        skpz
-         bra    failed
+        bc      failed1
+        bnz     failed1
         skpndc
          bra    failed
 
         movlw   1               ; 0+1
         addwf   temp,w
-        
-        skpc
-         skpnz
-          bra   failed
+
+        bc      failed1
+        bz      failed1
+        bn      failed1
+        bov     failed1
         skpndc
          bra    failed
-        skpn
-         skpnov
-          bra   failed
 
         movlw   8               ; 8+8 , test dc
         movwf   temp
         addwf   temp,w
         
-        skpc
-         skpnz
-          bra   failed
+        bc      failed1
+        bz      failed1
         skpdc
          bra    failed
-        skpn
-         skpnov
-          bra   failed
+        bn      failed1
+        bov     failed1
 
         movlw   0x88            ; 0x88+0x88
         movwf   temp
         addwf   temp,w
-        
-        skpnc
-         skpnz
-          bra   failed
+
+        bnc     failed1
+        bz      failed1        
         skpdc
          bra    failed
-        skpn
-         skpov
-          bra   failed
+        bn      failed1
+        bnov    failed1
 
         movlw   0x80            ; 0x80+0x80
         movwf   temp
         addwf   temp,w
-        
-        skpnc
-         skpz
-          bra   failed
+
+        bnc     failed1
+        bnz      failed1
         skpndc
          bra    failed
-        skpn
-         skpov
-          bra   failed
+        bn      failed1
+        bnov    failed1
 
         clrw
         addwf   temp,w          ; 0x80+0
@@ -542,14 +532,11 @@ start:
         skpc
          skpndc
           bra   failed
-
-        skpnz
-         bra    failed
+        bz      failed
 
         xorwf   temp,f
 
-        skpz
-         bra    failed
+        bnz     failed
 
         xorwf   temp,f
         incfsz  temp,f

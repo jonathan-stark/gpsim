@@ -80,7 +80,7 @@ class gpsimValue {
       return cpu;
     }
 
-  string &name(void) {return name_str;};
+  virtual string &name(void) {return name_str;};
   virtual char *name(char *, int len);
   virtual void new_name(char *);
   virtual void new_name(string &);
