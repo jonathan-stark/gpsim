@@ -444,24 +444,32 @@
 					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="copy ..\config_win32.h.in ..\config.h
-"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="copy ..\config_win32.h.in ..\config.h
-"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="copy ..\config_win32.h.in ..\config.h
-"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+						Outputs="../config.h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 			</File>

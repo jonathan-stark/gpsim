@@ -10,4 +10,5 @@ all :
 	for D in $(PARTS); do (cd $$D && $(MAKE) -f makefile.mingw all); done
 
 clean :
+	rm config.h
 	for D in $(CLEAN_PARTS); do (cd $$D && $(MAKE) -f makefile.mingw clean); done
