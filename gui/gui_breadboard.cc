@@ -1143,7 +1143,7 @@ static void trace_node(struct gui_node *gn)
 // Pain is over!
 ///////////////////////////////////////////////////////////////////////
 
-struct GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
+GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 {
 
   GList *iter = bbw->modules;
