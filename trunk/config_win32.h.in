@@ -77,7 +77,7 @@
 #define PACKAGE "gpsim"
 
 /* Version number of package */
-#define VERSION "0.21.1"
+#define VERSION "0.21.2"
 
 /* manually added stuff */
 #ifndef __FUNCTION__
@@ -88,4 +88,4 @@
 #define strcasecmp  stricmp
 #define strncasecmp strnicmp
 #define bzero(dest, count)  memset(dest, 0, count)
-#define atoll _atoi64
+#define strtoll _strtoi64
