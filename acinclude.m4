@@ -178,6 +178,36 @@ if test "$wi_cv_lib_readline" = yes ; then
 		AC_DEFINE_UNQUOTED(HAVE_LIBREADLINE, $rlver)
 	fi
 fi
+	dnl Check to see if we have a namespace clean version of readline
+	dnl or not. At least FreeBSD 4.9 ships with non-ns-clean readline.
+	if test "$wi_cv_lib_readline" = "yes" ; then
+		ac_save_LIBS="$LIBS"
+		LIBS="$ac_save_LIBS $LIBREADLINE"
+		AC_CHECK_FUNCS(rl_completion_matches completion_matches)
+		# restore LIBS
+		LIBS="$ac_save_LIBS"
+	fi
+	dnl Check to see if rl_callback_handler_install takes a cast
+	AC_MSG_CHECKING([to see if readline callbacks take a cast])
+	ac_save_LIBS="$LIBS"
+	LIBS="$ac_save_LIBS $LIBREADLINE"
+	ac_save_CC="$CC"
+	CC="$CXX"
+	AC_TRY_LINK([
+#include <stdio.h>
+#include <readline/readline.h>
+void func(void) { return; }
+	],[
+		rl_callback_handler_install(">", (void(*)(char*))func);
+	],[
+		AC_DEFINE(READLINE_CB_TAKES_CAST, 1, [callbacks take a cast])
+		AC_MSG_RESULT([yes])
+	],[
+		AC_MSG_RESULT([no])
+	])
+	# restore LIBS
+	LIBS="$ac_save_LIBS"
+	CC="$ac_save_CC"
 ])
 dnl
 dnl

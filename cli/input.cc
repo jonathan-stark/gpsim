@@ -36,33 +36,25 @@ extern SIMULATION_MODES simulation_mode;
 
 #include <stdio.h>
 
+#ifdef HAVE_LIBREADLINE
+#define HAVE_READLINE
+#endif
+
 extern void simulation_cleanup(void);
 extern const char *get_dir_delim(const char *path);
 extern bool bUseGUI;
 
-#ifndef _WIN32
-#define HAVE_READLINE
-#endif
 #ifdef HAVE_READLINE
-//#define RALF
-#define SCOTT
+/* See if we have namespace-clean readline or not */
+#ifdef HAVE_RL_COMPLETION_MATCHES
+#define HAVE_NSCLEAN_READLINE
+#endif
 
-
-//#if 0        //tsd removed in 0.20.4
 extern "C" {
-char** completion_matches(const char* txt, char* (*cmdgen)(const char* text, int state));
-#define completion_matches completion_matches_oldcdecl
 #include <readline/readline.h>
-#undef completion_matches
-}
-
-extern "C" {
 #include <readline/history.h>
 }
-
-//#endif
-
-#endif
+#endif /* HAVE_READLINE */
 
 #include <sys/types.h>
 #ifdef _WIN32
@@ -630,8 +622,11 @@ gpsim_completion (const char *text, int start, int end)
      to complete.  Otherwise it is the name of a file in the current
      directory. */
   if (start == 0)
-    //matches = completion_matches (text, (CPFunction *)command_generator);
+#ifdef HAVE_NSCLEAN_READLINE
     matches = rl_completion_matches (text, command_generator);
+#else
+    matches = completion_matches ((char *)text, (CPFunction *)command_generator);
+#endif
 #endif
 
   return (matches);
@@ -743,23 +738,21 @@ void initialize_readline (void)
   // Sigh - the readline library has changed again (and again...)
   // I don't have an automated way to choose between the following
   // two lines
-  #ifdef RALF
-  rl_callback_handler_install ("gpsim> ", have_line);
-  #endif
-  #ifdef SCOTT
+#ifdef READLINE_CB_TAKES_CAST
   rl_callback_handler_install ("gpsim> ", (void(*)(char*))have_line);
-  #endif
+#else
+  rl_callback_handler_install ("gpsim> ", have_line);
+#endif
 #endif
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   //  rl_readline_name = "gpsim";
 
   /* Tell the completer that we want a crack first. */
-#ifdef RALF
+#ifdef HAVE_NSCLEAN_READLINE
+    rl_attempted_completion_function = &gpsim_completion;
+#else
     rl_attempted_completion_function = (CPPFunction *)gpsim_completion;
-#endif
-#ifdef SCOTT
-  rl_attempted_completion_function = &gpsim_completion;
 #endif
 
 #else
