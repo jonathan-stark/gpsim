@@ -81,7 +81,7 @@ public:
   virtual char *get_pin_name(unsigned int pin_number);
   virtual int get_pin_state(unsigned int pin_number);
   int pin_existance(unsigned int pin_number);
-
+  IOPIN *get_pin(unsigned int pin_number);
 };
 
 
@@ -120,10 +120,12 @@ class _40pins  : public _28pins
 {
 public:
 
-  /*
-  IOPORT       portd;
+
+  IOPORT       *portd;
   IOPORT_TRIS  trisd;
-  */
+  IOPORT       *porte;
+  IOPORT_TRIS  trise;
+
 
   virtual void create_iopin_map(void){return;};
 

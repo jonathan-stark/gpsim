@@ -61,7 +61,7 @@ public:
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
-
+  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
 };
 
@@ -81,7 +81,7 @@ class P18C2x2 : public _16bit_processor, public _28pins
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
 
 };
 

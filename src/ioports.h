@@ -68,6 +68,7 @@ public:
     valid_iopins;   // A mask that for those ports that don't have all 8 io bits.
 
   void put(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
   unsigned int get(void);
   IOPORT_TRIS(void);
 
@@ -148,5 +149,24 @@ enum
 };
 
 
+class PORTD : public IOPORT
+{
+public:
+
+  PORTD(void);
+
+  void setbit(unsigned int bit_number, bool new_value);
+
+};
+
+class PORTE : public IOPORT
+{
+public:
+
+  PORTE(void);
+
+  void setbit(unsigned int bit_number, bool new_value);
+
+};
 
 #endif  // __IOPORTS_H__

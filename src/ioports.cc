@@ -361,6 +361,25 @@ void IOPORT_TRIS::put(unsigned int new_value)
 
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
+{
+
+  int diff = ((1<<bit_number) & value) ^ (new_value << bit_number);
+
+  if(diff) {
+    port->update_pin_directions(new_value ^ diff);
+
+    value ^= new_value;
+
+
+    trace.register_write(address,value);
+
+  }
+
+}
+
 IOPORT_TRIS::IOPORT_TRIS(void)
 {
   break_point = 0;
@@ -556,3 +575,50 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
 
 
 }
+
+//-------------------------------------------------------------------
+//
+//  PORTD
+//-------------------------------------------------------------------
+
+PORTD::PORTD(void)
+{
+  new_name("portd");
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTD::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  //cout << "PORTD::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+}
+
+//-------------------------------------------------------------------
+//
+//  PORTE
+//-------------------------------------------------------------------
+
+PORTE::PORTE(void)
+{
+  new_name("porte");
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTE::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  //cout << "PORTE::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+}
+

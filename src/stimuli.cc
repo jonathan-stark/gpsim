@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "stimulus_orb.h"
 #include "symbol.h"
+#include "xref.h"
 
 list <Stimulus_Node *> node_list;
 list <Stimulus_Node *> :: iterator node_iterator;
@@ -337,6 +338,8 @@ int Stimulus_Node::update(unsigned int current_time)
 stimulus::stimulus(char *n = NULL)
 {
   strcpy(name_str,"stimulus");
+  cout << "stimulus\n";
+  xref = new XrefObject((unsigned int *)&state);
 }
 
 //========================================================================
@@ -618,6 +621,27 @@ asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
 }
 
 //========================================================================
+dc_supply::dc_supply(char *n)
+{
+
+  snode = NULL;
+  next = NULL;
+
+  if(n)
+    strcpy(name_str,n);
+  else
+    {
+      strcpy(name_str,"v1_supply");
+      name_str[1] = num_stimuli++;
+    }
+
+
+  drive = MAX_DRIVE / 2;
+  add_stimulus(this);
+
+}
+
+//========================================================================
 //
 
 
@@ -629,7 +653,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   threshold = 0;
   drive = 0;
   snode = NULL;
-  //  cout << "IOPIN constructor called \n";
+    cout << "IOPIN constructor called \n";
 
   if(iop)
     iop->attach_iopin(this,b);
@@ -669,7 +693,7 @@ IO_input::IO_input(void)
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
   : IO_input(i,b)
 {
-  source = new source_stimulus();
+  //  source = new source_stimulus();
 
   state = 0;
   drive = MAX_DRIVE / 2;
@@ -677,7 +701,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
 
   //sprintf(name_str,"%s%n",iop->name_str,iobit);
   //cout << name_str;
-
+  cout << "IO_bi_directional\n";
   strcpy(name_str, iop->name());
   char bs[2];
   bs[0] = iobit+'0';
@@ -733,6 +757,12 @@ int IO_bi_directional::get_state(guint64 current_time)
     }
 }
 
+//---------------
+//::update_direction(unsigned int new_direction)
+//
+//  This is called when a new value is written to the tris register
+// with which this bi-direction pin is associated.
+
 void IO_bi_directional::update_direction(unsigned int new_direction)
 {
 
@@ -743,6 +773,20 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
   else
     driving = 0;
 
+}
+
+//---------------
+//::change_direction(unsigned int new_direction)
+//
+//  This is called by the gui to change the direction of an 
+// io pin. 
+
+void IO_bi_directional::change_direction(unsigned int new_direction)
+{
+
+  cout << __FUNCTION__ << '\n';
+
+  iop->tris->setbit(iobit, new_direction & 1);
 }
 
 int IO_bi_directional_pu::get_state(guint64 current_time)
@@ -776,8 +820,6 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b)
 {
 
   drive = MAX_DRIVE / 2;
-
-  source = new open_collector();
 
   state = 0;
 

@@ -83,6 +83,18 @@ int Package::pin_existance(unsigned int pin_number)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
+IOPIN *Package::get_pin(unsigned int pin_number)
+{
+
+  if(E_PIN_EXISTS == pin_existance(pin_number))
+    return pins[pin_number];
+  else
+    return NULL;
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
 {
 

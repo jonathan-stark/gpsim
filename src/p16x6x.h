@@ -68,7 +68,7 @@ public:
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
 
 };
 
@@ -125,7 +125,7 @@ class P16C64 : public  _14bit_processor, public _14bit_40pins
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-
+  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
 };
 
 class P16C65 : public  P16C64

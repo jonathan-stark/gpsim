@@ -834,6 +834,97 @@ gpointer gpsim_set_cyclic_break_point( unsigned int processor_id,
   
 }
 
+//---------------------------------------------------------------------------
+// pin interface functions
+//---------------------------------------------------------------------------
+void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointer xref)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  IOPIN *iopin = pic->get_pin(pin);
+
+  if(!iopin)
+    return 0;
+
+  if(iopin->xref)
+    iopin->xref->add(xref);
+
+}
+
+
+unsigned int  gpsim_package_pin_count(unsigned int processor_id)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  return pic->get_pin_count();
+
+}
+
+char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  return pic->get_pin_name( pin );
+}
+
+unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  return pic->get_pin_state( pin );
+}
+void  gpsim_pin_set_value(unsigned int processor_id, unsigned int pin)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+}
+unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  IOPIN *iopin = pic->get_pin(pin);
+
+  if(!iopin)
+    return 0;
+
+  if(iopin->get_direction() == IOPIN::DIR_INPUT)
+    return 0;
+  else
+    return 1;
+
+}
+void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned int new_dir)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return;
+
+  IOPIN *iopin = pic->get_pin(pin);
+
+  if(!pin)
+    return;
+
+  iopin->change_direction( ( (new_dir) ?  IOPIN::DIR_OUTPUT :  IOPIN::DIR_INPUT));
+}
 
 //--------------------------------------------------------------------------
 //
