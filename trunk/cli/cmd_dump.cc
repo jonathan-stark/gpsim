@@ -35,17 +35,11 @@ Boston, MA 02111-1307, USA.  */
 
 cmd_dump dump;
 
-enum {
-  DUMP_EEPROM = 1,
-  DUMP_RAM,
-  DUMP_SFRS
-};
-
 static cmd_options cmd_dump_options[] =
 {
-  "e", DUMP_EEPROM,    OPT_TT_BITFLAG,
-  "r", DUMP_RAM,       OPT_TT_BITFLAG,
-  "s", DUMP_SFRS,      OPT_TT_BITFLAG,
+  "e", cmd_dump::DUMP_EEPROM,    OPT_TT_BITFLAG,
+  "r", cmd_dump::DUMP_RAM,       OPT_TT_BITFLAG,
+  "s", cmd_dump::DUMP_SFRS,      OPT_TT_BITFLAG,
   0,0,0
 };
 

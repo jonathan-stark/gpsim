@@ -41,11 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "../src/icd.h"
 
-#ifdef HAVE_GUI
-int use_gui=1;
-#else
-int use_gui=0;
-#endif 
+bool bUseGUI=false;  // assume that we don't want to use the gui
 int quit_state;
 
 extern "C" {
@@ -147,6 +143,10 @@ main (int argc, char *argv[])
   poptContext optCon;   /* context for parsing command-line options */
 
 
+#ifdef HAVE_GUI
+  bUseGUI=true;
+#endif 
+
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
@@ -189,7 +189,7 @@ main (int argc, char *argv[])
 	break;
 
       case 'i':
-	use_gui = 0;
+	bUseGUI = false;
 	printf("not using gui");
       }
       if (usage)
@@ -214,7 +214,7 @@ main (int argc, char *argv[])
   // initialize the gui
   
 #ifdef HAVE_GUI
-  if(use_gui)
+  if(bUseGUI)
     i = gui_init (argc,argv);
 #endif
 
@@ -271,7 +271,7 @@ main (int argc, char *argv[])
   // commands.
 
 #ifdef HAVE_GUI
-  if(use_gui)
+  if(bUseGUI)
     gui_main();
   else
 #endif

@@ -1,3 +1,13 @@
+2004-02-27 Scott Dattalo  <scott@dattalo.com>
+	* src/pic-processor.cc, src/interface.cc, src/interface.h, 
+	src/init.cc, src/icd.cc, src/cod.cc, src/breakpoints.cc,
+	gui/gui_main.cc, gpsim/main.cc, cli/input.h, cli/input.cc,
+	cli/cmd_x.cc, cli/cmd_run.cc, cli/cmd_dump.h, cli/cmd_dump.cc:
+	The gpsim library, which is the code comprised of everything
+	in the src/ subdirectory, now has no dependencies on the gui
+	or cli code base. This makes it possible to link against
+	just libgpsim. 
+
 2004-02-25 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_stopwatch.cc, extras/rs232-gen/rs232-gen.c:
 	changed all references of atoll to strtoll. bug 820326

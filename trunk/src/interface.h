@@ -74,8 +74,9 @@ typedef struct _sym
 
 
 
-  int gpsim_open(unsigned int processor_id, const char *file);
-  void gpsim_set_bulk_mode(int flag);
+int gpsim_open(unsigned int processor_id, const char *file);
+void gpsim_set_bulk_mode(int flag);
+extern const char *get_dir_delim(const char *path);
   
 
 

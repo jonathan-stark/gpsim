@@ -36,10 +36,6 @@ Boston, MA 02111-1307, USA.  */
 
 #define BAUDRATE B57600
 
-#ifdef HAVE_GUI
-extern void gui_refresh(void);
-extern int use_gui;
-#endif
 
 // Not all OSs support the O_SYNC open flag
 #ifndef O_SYNC

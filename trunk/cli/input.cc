@@ -37,7 +37,9 @@ extern SIMULATION_MODES simulation_mode;
 #include <stdio.h>
 
 extern void simulation_cleanup(void);
-extern int use_gui;
+extern const char *get_dir_delim(const char *path);
+extern bool bUseGUI;
+
 #ifndef _WIN32
 #define HAVE_READLINE
 #endif
@@ -80,6 +82,8 @@ extern "C" {
 
 #include "command.h"
 #include "input.h"
+#include "../src/pic-processor.h"
+#include "../src/breakpoints.h"
 
 #define MAX_LINE_LENGTH 256  
 
@@ -113,15 +117,34 @@ extern int quit_parse;
 
 int Gcmd_file_ref_count=0;
 
-// COMMAND_MODES command_mode;
 
 
-//==========================================================================
-//extern void catch_control_c(int); // In breakpoints.cc
-/*
-void initialize_signals(void)
+//====================================================================================
+//
+// catch_control_c
+//
+//  
+void catch_control_c(int sig)
 {
 
+  if(simulation_mode != STOPPED)
+    {
+      cout << "<CTRL C> break\n";
+      bp.halt();
+    }
+  else {
+    cout << "caught control c, but it doesn't seem gpsim was simulating\n";
+    last_command_is_repeatable=0;
+    redisplay_prompt();
+
+  }
+
+}
+
+
+void initialize_signals(void)
+{
+#ifndef _WIN32
   static struct sigaction action;
 
   action.sa_handler = catch_control_c;
@@ -129,10 +152,24 @@ void initialize_signals(void)
   action.sa_flags=0;
 
   sigaction(SIGINT, &action, 0);
-
+#endif
 
 }
-*/
+
+//==============================================================
+// initialize_gpsim 
+//
+// Not much initialization is needed now. However, the CORBA 
+// calls needed later will change this...
+//
+
+void initialize_gpsim(void)
+{
+
+  initialize_signals();
+
+}
+
 
 char *cmd_string_buf = 0;
 FILE *cmd_file = 0;
@@ -242,24 +279,6 @@ char * gets_from_cmd_file(char **ss)
 
 }
 
-const char *get_dir_delim(const char *path)
-{
-#ifdef _WIN32
-  const char *p = path + strlen(path);
-
-  do
-  {
-    if (--p < path)
-      return 0;
-  }
-  while (*p != '/' && *p != '\\');
-
-  return p;
-#else
-  return strrchr(path, '/');
-#endif
-}
-
 void process_command_file(const char * file_name)
 {
 
@@ -326,7 +345,7 @@ get_user_input (void)
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"() --- \n";
 
-  if( !use_gui && using_readline) {
+  if( !bUseGUI && using_readline) {
     //cout << "  1";
 #ifdef HAVE_READLINE
     // If we're in cli-only mode and we're not processing a command file
@@ -357,6 +376,69 @@ get_user_input (void)
 
   return retval;
 }
+
+extern int open_cod_file(pic_processor **, char *);
+pic_processor *get_pic_processor(unsigned int processor_id);
+
+//*********************************************
+
+int gpsim_open(unsigned int processor_id, const char *file)
+{
+    char *str;
+    pic_processor *pic = get_pic_processor(processor_id);
+
+    str = strrchr(file,'.');
+    if(str==0)
+    {
+//	puts("found no dot in file!");
+	return 0;
+    }
+    str++;
+    if(!strcmp(str,"hex"))
+    {
+
+	if(!pic)
+	{
+	    puts("No pic selected!");
+	    return 0;
+	}
+	pic->load_hex(file);
+    
+    }
+    else if(!strcmp(str,"cod"))
+    {
+
+	int i;
+	i=load_symbol_file(&pic, file);
+
+	if(i)
+	{
+	    cout << "found a fatal error in the symbol file " << file <<'\n';
+	    return 0;
+	}
+
+	// FIXME: questionable
+	command_list[0]->cpu=pic;
+	trace.switch_cpus(pic);
+      
+    }
+    else if(!strcmp(str,"stc"))
+    {
+
+	process_command_file(file);
+    }
+    else
+    {
+      cout << "Unknown file extension \"" << str <<"\" \n";
+	return 0;
+    }
+
+    return 1;
+}
+
+
+
+
 
 //*********************************************
 // gpsim_read
@@ -614,7 +696,7 @@ void exit_gpsim(void)
     icd_disconnect();
   
 #ifdef HAVE_GUI
-  if(use_gui)
+  if(bUseGUI)
     quit_gui();
 
 #endif

@@ -257,6 +257,7 @@ void GUI_Interface::NewProgram (unsigned int pic_id)
     gp->regwin_eeprom->NewProcessor(gp);
       
     gp->source_browser->CloseSource();
+    gp->source_browser->NewSource(gp);
     gp->symbol_window->NewSymbols();
     gp->program_memory->NewSource(gp);
     gp->profile_window->NewProgram(gp);

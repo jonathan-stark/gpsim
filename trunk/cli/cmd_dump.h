@@ -25,6 +25,13 @@ class cmd_dump : public command
 {
 public:
 
+  enum {
+    DUMP_EEPROM = 1,
+    DUMP_RAM,
+    DUMP_SFRS
+  };
+
+
   cmd_dump(void);
   //  void dump(void);
 
