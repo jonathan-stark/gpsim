@@ -499,7 +499,6 @@ void Watch_Window::Update(void)
   GList *iter;
   WatchEntry *entry;
   int clist_frozen=0;
-  int value;
 
   iter=watches;
 
@@ -507,9 +506,9 @@ void Watch_Window::Update(void)
    
     entry=(WatchEntry*)iter->data;
 
-    value = entry->get_value();
+    RegisterValue value = entry->getRV();
 	
-    if(entry->get_shadow() != value) {
+    if(entry->get_shadow().data != value.data) {
       // The register has changed since the last update.
 
       if(clist_frozen==0) {

@@ -616,6 +616,7 @@ void Breakpoint_Instruction::execute(void)
     {
       cout << "Hit a breakpoint!\n";
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
+      cout << message() << endl;
       bp.halt();
     }
   else
@@ -640,6 +641,20 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
   // use the replaced instructions xref object
   xref = replaced->xref;
 }
+
+//-------------------------------------------------------------------
+void Breakpoint_Instruction::new_message(char *s)
+{
+
+  message_str = string(s);
+}
+
+
+void Breakpoint_Instruction::new_message(string &new_message)
+{
+  message_str = new_message;
+}
+
 
 unsigned int Breakpoint_Instruction::get_opcode(void)
 { 

@@ -22,11 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef  __BREAKPOINTS_H__
 #define  __BREAKPOINTS_H__
 
-#include "pic-instructions.h"
-#include "registers.h"
 #include  <iostream>
+#include <iomanip>
 #include <unistd.h>
 #include <glib.h>
+#include <string>
+#include "pic-instructions.h"
+#include "registers.h"
+
+using namespace std;
 
 class InvalidRegister;
 
@@ -82,6 +86,9 @@ class BreakpointObject
 
 class Breakpoint_Instruction : public instruction , public BreakpointObject
 {
+private:
+  string  message_str;               // printed when break occurs.
+
 public:
 
   unsigned int address;
@@ -107,6 +114,12 @@ public:
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
   virtual char *name(char *);
+
+  string &message(void) {return message_str;}
+  virtual void new_message(char *);
+  virtual void new_message(string &);
+
+
 
 };
 

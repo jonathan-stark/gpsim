@@ -45,25 +45,23 @@ class Processor;
 class RegisterValue {
  public:
 
-  unsigned int data;
-  unsigned int init;
-  unsigned int valid;
+  unsigned int data;  // The actual numeric value of the register.
+  unsigned int init;  // bit mask of initialized bits.
 
   RegisterValue(void)
     {
       data = 0;
-      init = 0xff;
-      valid = 0xff;
+      init = 0xff;  // assume 8-bit wide, unitialized registers
     }
 
-  RegisterValue(unsigned int d, unsigned int i, unsigned int v) : 
-    data(d), init(i), valid(v)
+  RegisterValue(unsigned int d, unsigned int i) : 
+    data(d), init(i)
     {
     }
 
   bool initialized(void)
     {
-      return (init & valid) == 0;
+      return init == 0;
     }
 
   unsigned int get(void)

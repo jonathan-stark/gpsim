@@ -35,15 +35,14 @@ class GUIRegister {
   RegisterMemoryAccess *rma;  // Pointer to the rma that controls this register.
   int address;                // index in rma register array.
   
-  int row;        // row & col in register window
+  int row;             // row & col in register window
   int col;
-  int shadow_value; // value displayed in register window.
-                    // This shadows the real register value. It's used
-                    // to monitor if register has changed between gui updates
+  RegisterValue shadow;// value displayed in register window.
+                       // This shadows the real register value. It's used
+                       // to monitor if register has changed between gui updates
 
-  gboolean update_full;
-
-  CrossReferenceToGUI *xref;
+  int register_size;   // The size (in bytes) of a single register
+  bool bUpdateFull;    // true if a full update needs to be performed
 
   bool bIsAliased;     // true if this register is aliased 
                        // and this instance is not the base.
@@ -53,18 +52,29 @@ class GUIRegister {
 
   bool bIsSFR(void);   // true if this register is a special function register
 
+  bool hasBreak(void); // True if there's a breakpoint set on this register.
+
+  bool hasChanged(void); // True if register has changed values since last updated.
+
+  CrossReferenceToGUI *xref;
+
+  char *getValueAsString(char *, int, char *format);
+
   void put_value(unsigned int new_value);
   unsigned int get_value(void);
+  RegisterValue getRV(void);
+
   Register *get_register();
 
   // put and get for updating the shadow
-  void put_shadow(unsigned int new_value);
-  unsigned int get_shadow(void);
+  void put_shadow(RegisterValue new_value);
+  RegisterValue get_shadow(void)
+    {
+      return shadow;
+    }
 
   void Clear_xref(void);
   void Assign_xref(CrossReferenceToGUI *);
-
-  bool hasBreak(void);
 
   char *name(void);
 

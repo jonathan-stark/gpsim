@@ -202,7 +202,6 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
       registers[j]->alias_mask = 0;
 
     registers[j]->address = j;
-    registers[j]->value.put(0);
     registers[j]->symbol_alias = 0;
 
     //The default register name is simply its address
