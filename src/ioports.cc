@@ -179,7 +179,7 @@ int IOPORT::get_bit(unsigned int bit_number)
 //    return(pins[bit_number]->snode->update(time));
 //
 
-  return( (value &  one_shifted_left_by_n [bit_number]) ? 1 : 0);
+  return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
 
 }
 

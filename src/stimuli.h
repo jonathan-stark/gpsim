@@ -93,7 +93,17 @@ public:
   stimulus *next;
 
   stimulus(char *n=NULL);
+
+  // Two different ways to obtain the stimulus state.
+  // 'get_voltage' is sort of like an analog representation of the stimulus state.
+  // This is what's called when the a node want to fine how much drive this
+  // stimulus is contributing.
   virtual int get_voltage(guint64 current_time) {return state;};
+
+  // 'get_state' returns up-to-date state of the stimulus. I/O Pins (which
+  // are derived from this class), can be queried through here.
+  virtual int get_state(void) {return state;};
+
   // Three different ways the stimulus is changed:
   virtual void put_state(int new_state) {state=new_state;};      // From simulation
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
@@ -139,6 +149,7 @@ enum SOURCE_TYPE
   };
 
   virtual int get_voltage(guint64 current_time) {return 0;};
+  virtual int get_state(void) {return state;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
   char *name(void) { return(name_str);};
 
@@ -186,6 +197,8 @@ enum IOPIN_DIRECTION
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual int get_voltage(guint64 current_time) {return state;};
+  virtual int get_state(void);
+
   virtual void put_state(int new_state) {state=new_state;}; 
   virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);

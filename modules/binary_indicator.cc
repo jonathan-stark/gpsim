@@ -49,12 +49,13 @@ Boston, MA 02111-1307, USA.  */
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
 
-void Binary_Input::put_state( int new_state)
+void Binary_Input::put_node_state( int new_state)
 {
 
   int current_state = state;
 
-  IO_input::put_state(new_state);
+  //cout << "void Binary_Input::put_node_state( int new_state = " << new_state << ")\n";
+  IO_input::put_node_state(new_state);
 
   if(current_state ^ state)
     cout << "Binary Input " << name() << " changed to new state: " <<
@@ -115,8 +116,8 @@ void Binary_Indicator::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
 
-  assign_pin(1, new IO_input(port, 0));
-  assign_pin(2, new IO_input(port, 1));
+  assign_pin(1, new Binary_Input(port, 0));
+  assign_pin(2, new Binary_Input(port, 1));
 
 
   // Create an entry in the symbol table for the new I/O pins.
