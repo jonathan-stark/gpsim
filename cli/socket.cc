@@ -848,12 +848,14 @@ static gboolean server_accept(GIOChannel *channel, GIOCondition condition, void 
   GIOChannel *new_channel = g_io_channel_unix_new(s->client->getSocket());
   GIOCondition new_condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
+#if GLIB_MAJOR_VERSION >= 2
   GError *err = NULL;
   GIOStatus stat;
 
   stat = g_io_channel_set_encoding (channel, NULL, &err);
   //stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
   stat = g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+#endif
 
   g_io_add_watch(new_channel, 
 		 new_condition,
@@ -889,6 +891,7 @@ void start_server(void)
     GIOChannel *channel = g_io_channel_unix_new(s.my_socket->getSocket());
     GIOCondition condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
 
+#if GLIB_MAJOR_VERSION >= 2
     GError *err = NULL;
     GIOStatus stat;
 
@@ -897,7 +900,7 @@ void start_server(void)
     //int flags = g_io_channel_get_flags(channel);
     //flags |= G_IO_FLAG_NONBLOCK;
     stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
-
+#endif
 
     g_io_add_watch(channel, 
 		   condition,

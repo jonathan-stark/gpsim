@@ -87,13 +87,15 @@ extern GtkWidget *dispatcher_window;
 // debug
 static void gtl()
 {
-  printf("gdk_threads_leave\n");
+#if GLIB_MAJOR_VERSION >= 2
   gdk_threads_leave ();
+#endif
 }
 static void gte()
 {
-  printf("gdk_threads_enter\n");
+#if GLIB_MAJOR_VERSION >= 2
   gdk_threads_enter ();
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -193,19 +195,22 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 }
 
+#if GLIB_MAJOR_VERSION >= 2
 // thread variables.
 static GMutex *muSimStopMutex=0;
 static GCond  *cvSimStopCondition=0;
+#endif
 
 static GUI_Processor *lgp=0;
 
 static void *SimulationHasStopped( void *ptr )
 {
-  while(1) {
 
+#if GLIB_MAJOR_VERSION >= 2
+  while(1) {
     g_mutex_lock(muSimStopMutex);
     g_cond_wait(cvSimStopCondition, muSimStopMutex);
-
+#endif
     if(lgp) {
       lgp->regwin_ram->Update();
       lgp->regwin_eeprom->Update();
@@ -218,10 +223,10 @@ static void *SimulationHasStopped( void *ptr )
       lgp->profile_window->Update();
       lgp->stopwatch_window->Update();
     }
-
+#if GLIB_MAJOR_VERSION >= 2
     g_mutex_unlock(muSimStopMutex);
-
   }
+#endif
 
 }
 
@@ -236,10 +241,13 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
   if(callback_data) {
     
     lgp = (GUI_Processor *) callback_data;
-
+#if GLIB_MAJOR_VERSION >= 2
     g_mutex_lock(muSimStopMutex);
     g_cond_signal(cvSimStopCondition);
     g_mutex_unlock(muSimStopMutex);
+#else
+    ::SimulationHasStopped(0);
+#endif
   }
 }
 
@@ -359,24 +367,6 @@ void quit_gui(void)
     gtk_main_quit();
 }
 
-
-void *print_message_function( void *ptr )
-{
-  char *message;
-
-  while(1) {
-    g_usleep(1000000);
-    gdk_threads_enter ();
-    message = (char *) ptr;
-    //printf("%s \n", message);
-    gdk_threads_leave ();
-
-  }
-
-  return 0;
-}
-
-
 /*------------------------------------------------------------------
  * gui_init
  *
@@ -390,6 +380,7 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
+#if GLIB_MAJOR_VERSION >= 2
   if( !g_thread_supported() )
   {
     g_thread_init(NULL);
@@ -397,19 +388,8 @@ int gui_init (int argc, char **argv)
     printf("g_thread supported\n");
 
     GThread          *Thread1, *Thread2;
-    char *message1 = "Thread 1";
-    char *message2 = "Thread 2";
     GError           *err1 = NULL ;
     GError           *err2 = NULL ;
-
-    if( (Thread1 = g_thread_create((GThreadFunc)print_message_function, 
-				   (void *)message1, 
-				   TRUE, 
-				   &err1)) == NULL)
-    {
-      printf("Thread create failed: %s!!\n", err1->message );
-      g_error_free ( err1 ) ;
-    }
 
     muSimStopMutex     = g_mutex_new ();
     cvSimStopCondition = g_cond_new ();
@@ -432,6 +412,7 @@ int gui_init (int argc, char **argv)
      printf("g_thread NOT supported\n");
   }
 
+#endif
 
   if (!gtk_init_check (&argc, &argv))
   {
@@ -439,25 +420,19 @@ int gui_init (int argc, char **argv)
   }
 
 
-  gdk_threads_enter ();
+  gte();
   gp = new GUI_Processor();
-
   interface_id = get_interface().add_interface(new GUI_Interface(gp));
-  gdk_threads_leave ();
+  gtl();
 
   return(0);
 }
 
 void gui_main(void)
 {
-  gdk_threads_enter ();
-
-  //gp = new GUI_Processor();
-
-  //interface_id = get_interface().add_interface(new GUI_Interface(gp));
-
+  gte ();
   gtk_main ();
-  gdk_threads_leave ();
+  gtl ();
 }
 
 #endif //HAVE_GUI
