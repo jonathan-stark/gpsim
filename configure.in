@@ -67,23 +67,23 @@ else
 	AC_DEFINE([HAVE_GUI],[],[True if GUI is being used])
 fi
 
-dnl --enable-gtk2 : link with GTK+ 2.x
-dnl    The default is to link with GTK+ 1.x
+dnl --enable-gtk1 : link with GTK+ 1.x
+dnl    The default is to link with GTK+ 2.x
 
-AC_ARG_ENABLE(gtk2,
-     [  --enable-gtk2           Use GTK+ 2.x for the gui],
+AC_ARG_ENABLE(gtk1,
+     [  --enable-gtk1           Use GTK+ 1.x for the gui (deprecated)],
      [case "${enableval}" in
-       yes) use_gtk2=yes ;;
-       no)  use_gtk2=no ;;
-       *) AC_MSG_ERROR(bad value ${enableval} for --enable-gtk2) ;;
-     esac],[use_gtk2=no])
+       yes) use_gtk1=yes ;;
+       no)  use_gtk1=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-gtk1) ;;
+     esac],[use_gtk1=no])
 
-if test "$use_gtk2" = "no"; then
-        echo linking with GTK+ 1.x
-else
+if test "$use_gtk1" = "no"; then
         echo linking with GTK+ 2.x
+else
+        echo linking with GTK+ 1.x
         [
-         use_gtk2=yes
+         use_gtk1=yes
         ]
 fi
 
@@ -126,7 +126,7 @@ if test "$use_gui" = "no"; then
   Y_LDFLAGS=
   Y_CFLAGS=
 else
-  if test "$use_gtk2" = "no"; then
+  if test "$use_gtk1" = "yes"; then
     dnl gtk checks
     dnl note that the gtk12-config is the name of gtk-config on BSD
     AC_PATH_PROG(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
@@ -157,6 +157,11 @@ else
 
     if test $PKGCONFIG = "no"; then
       AC_MSG_ERROR(Cannot find pkg-config)
+    fi
+
+    $PKGCONFIG --exists gtkextra-2.0
+    if test $? != 0; then
+      AC_MSG_ERROR(Cannot find gtkextra-2.0 package)
     fi
 
     LDEXTRA=
@@ -240,6 +245,6 @@ gpsim-$GPSIM_VERSION is now configured for $canonical_host_type
   C++ compiler:         $CXX $CPPFLAGS $XTRA_CXXFLAGS $CXXFLAGS
 
   gui:                  $use_gui
-  GTK+ 2.x              $use_gtk2
+  GTK+ 1.x              $use_gtk1
 
 ])

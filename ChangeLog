@@ -1,3 +1,7 @@
+2004-09-19 Borut Razem <borut.razem@siol.net>
+	* configure.in: gpsim is configured to link with GTK+ 2.x by default.
+	  Use --enable-gtk1 for linking with GTK+ 1.x (deprecated).
+
 2004-09-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc, gui/gui_src_asm.cc: Fixed ranging checks.
 
