@@ -47,14 +47,15 @@ struct watch_entry {
     int last_value;
 };
 
-#define COLUMNS 14
+#define COLUMNS 15
 #define BPCOL 0
 #define NAMECOL 2
 #define DECIMALCOL 4
 #define HEXCOL 5
-#define MSBCOL 6
-#define LSBCOL 13
-static char *watch_titles[COLUMNS]={"BP", "type", "Name","Address","dec","hex","b7","b6","b5","b4","b3","b2","b1","b0"};
+#define ASCIICOL 6
+#define MSBCOL 7
+#define LSBCOL 14
+static char *watch_titles[COLUMNS]={"bp?", "type", "name","address","dec","hex","ascii","b7","b6","b5","b4","b3","b2","b1","b0"};
 
 struct _coldata{
     GtkWidget *clist;
@@ -517,6 +518,12 @@ static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
     sprintf(str,"0x%02x",new_value);
     gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, HEXCOL, str);
 
+    if(new_value>=32)
+	sprintf(str,"%c",new_value);
+    else
+        str[0]=0;
+    gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, ASCIICOL, str);
+
     for(i=7;i>=0;i--)
     {
       //int bit; 
@@ -530,9 +537,9 @@ static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
 	//new_value%=(1<<i);
     }
     if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
-	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "Y");
+	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "yes");
     else
-	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "N");
+	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "no");
 }
 
 void WatchWindow_update(Watch_Window *ww)
@@ -593,7 +600,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address)
 {
     char name[50], addressstring[50], typestring[30];
-    char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","",""};
+    char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
     int row;
     struct cross_reference_to_gui *cross_reference;
     char *regname;
