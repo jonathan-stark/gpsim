@@ -62,13 +62,21 @@ void cmd_clear::clear(Expression *expr)
     Value *v = expr->evaluate();
     if(v) {
 
-      /* for now, assume that the expression evaluates to an integer
-	 (later, things like 'clear all' will be add)
-      */
-      gint64 i;
-      v->get(i);
-      bp.clear((unsigned int)i);
-
+      if (typeid(*v) == typeid(String)) {
+        char szParam[20];
+        ((String*)v)->get(szParam, 20);
+        if(strcmp(szParam, "all") == 0) {
+          bp.clear_all(NULL);
+        }
+      }
+      else if (typeid(*v) == typeid(Integer)) {
+        /* for now, assume that the expression evaluates to an integer
+	         (later, things like 'clear all' will be add)
+        */
+        gint64 i;
+        v->get(i);
+        bp.clear((unsigned int)i);
+      }
       delete v;
     }
     delete expr;
