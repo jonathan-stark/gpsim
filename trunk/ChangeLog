@@ -1,3 +1,8 @@
+2004-06-09 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/scan.ll, cli/misc.h, cli/cmd_stimulus.cc, cli/command.h
+	Cleaned up the parser by removing the explicit YYABORT and YYACCEPT macros.
+	Also, redesigned the parser implementation of the stimulus command.
+	
 2004-06-03 Scott Dattalo <scott@dattalo.com>
 	* examples/12bit/it_12bit.asm: removed
 	* regressions/instructions_12bit/instructions_12bit.asm: added
