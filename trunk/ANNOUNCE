@@ -8,47 +8,28 @@
 
 I've just uploaded a new release of gpsim to
 
-http://www.dattalo.com/gnupic/gpsim-0.18.0.tar.gz
+http://www.dattalo.com/gnupic/gpsim-0.19.0.tar.gz
 or goto the webpage:
 http://www.dattalo.com/gnupic/gpsim.html
 
 Also, you'll probably want to grab the latest release of gpasm
-http://www.dattalo.com/gnupic/gpasm-0.8.7.tar.gz
-(This is [still] an unofficial interim release of gpasm.)
+http://www.dattalo.com/gnupic/gpasm-0.8.9.tar.gz
 
 New features:
 
-03FEB00 gpsim-0.18.0
- o cli - added 'processor pins' command to display
-         the state of a pic's I/O pins
- o cli - added 'set' command for modifying gpsim behavior
-         flags. set options supported:
-         -- verbose - if set, diagnostic info will be displayed
-         -- radix - not supported yet
-         -- gui_update - controls the rate at which the gui is refreshed
- o cli - added 's' option to the dump command to display only the
-         special function registers (and not the rest of ram).
- o 18cxxx:
-   -- TBLRD & TBLWT instructions are now supported
-   -- MULLW & MULWF instructions are now supported
-   -- configuration word support
-   -- tmr0 interrupt
- o Cycle counter - 64 bits is now fully supported
- o config word bug fixed
- o gui - added Watch window
- o gui - added more color coding to register window
- o gui - removed stagnant menu selections
- o gui - window state is saved between gpsim sessions
-   -- This requires a new package `eXdbm'.
- o getopt is now used to process invocation options (now you can
-   have spaces between the options and file names).
- o support >64k object code in .cod files
- o gtksheet has been removed from the distribution
-   -- This means that you'll have to install gtk+-extra, the
-      package that supports gtk-sheet (see INSTALL)
- o .cod file format bug fixes (you'll need the latest gpasm)
- o __config word for 18cxxx family is now supported 
 
+05APR00 gpsim-0.19.0
+ o Daniel Schudel joins gpsim development.
+   -- Added support for the 16x5x family
+ o Added 16f87x family
+ o gui - Added Program Memory sheet
+    --  Added support for program memory writes
+ o gui - Added Breadboard window (graphical pinout)
+ o Asynchronous mode of the usart fixed.
+ o A/D converter enhanced
+ o Analog Stimuli revisited.
+ o Scripting was fixed.
+ o cli - Once again, gpsim can be built without the gui.
 
 
 README:
@@ -59,22 +40,23 @@ INSTALL:
 -------
 install gpsim the standard way:
 
-tar -xvzf gpsim-0.18.0.tar.gz
+tar -xvzf gpsim-0.19.0.tar.gz
 ./configure
-cd gpsim-0.18.0/
+cd gpsim-0.19.0/
 make
 su root
 make install
 
-this will expand into a child directory named gpsim-0.17.0 . From there you
+this will expand into a child directory named gpsim-0.19.0 . From there you
 can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
 files for more information. The rest of the steps will build gpsim and place
 the executable into /usr/local/bin . If you don't have root privileges then
-you can copy the executable at gpsim-0.18.0/gpsim/gpsim to a directory in the
+you can copy the executable at gpsim-0.19.0/gpsim/gpsim to a directory in the
 execution path .
 
 Special Thanks (still) goes out to Ralf Forsberg for his major contributions
-to the gui interface.
+to the gui interface. New thanks go out to Daniel Schudel for contributing
+the 16C5X family.
 
 
 If you have any questions, you can reach me:
