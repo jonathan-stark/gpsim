@@ -735,7 +735,20 @@ unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address)
   if(!pic)
     return 0;
 
-  return pic->program_memory[address]->get_opcode();
+  //  return pic->program_memory[address]->get_opcode();
+  return pic->pma.get_opcode(address);
+
+}
+
+//--------------------------------------------------------------------------
+void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+  return pic->pma.put_opcode(address,opcode);
 
 }
 

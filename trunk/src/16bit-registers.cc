@@ -1422,7 +1422,7 @@ void TBL_MODULE::write(void)
     {
       // Long write
       internal_latch = (internal_latch & 0x00ff) | ((tablat.value<<8) & 0xff00);
-      cpu->pma.put_opcode(tabptr>>1, internal_latch);
+      cpu->pma.put_opcode_start(tabptr>>1, internal_latch);
     }
   else
     {

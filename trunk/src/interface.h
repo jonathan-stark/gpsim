@@ -123,6 +123,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
   unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
   char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, char *buffer);
   unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address);
+  void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode);
   gpointer gpsim_set_cyclic_break_point( unsigned int processor_id, 
 				   void (*interface_callback)(gpointer), 
 				   gpointer interface_callback_data,
