@@ -134,7 +134,7 @@ unsigned int TMR0::get_value(void)
   if(cpu->option_reg.get_t0cs())
     return(value);
 
-  int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+  unsigned int new_value = 0xFF & ((cpu->cycles.value - last_cycle)/ prescale);
 
   if (new_value > 255)
     {
