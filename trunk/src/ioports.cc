@@ -59,6 +59,105 @@ Boston, MA 02111-1307, USA.  */
 //
 //-------------------------------------------------------------------
 
+class SignalSource
+{
+};
+
+class SignalSink
+{
+};
+
+class SignalControl
+{
+};
+
+/// PortModule
+///
+///    Data
+///    Select  ======+
+///                +-|-+  Outgoing
+///    Source1 ===>| M |  data
+///    Source2 ===>| U |=============+    
+///    SourceN ===>| X |             |    
+///                +---+             |    +-------+
+///    Control                       +===>| IOPIN |
+///    Select  ======+                    |       |
+///                +-|-+  I/O Pin         |       |
+///   Control1 ===>| M |  Direction       |       |<======> Physical
+///   Control2 ===>| U |=================>|       |         Interface
+///   ControlN ===>| X |                  |       |
+///                +---+                  |       |
+///    Sink Decode                   +===<|       |
+///    Select  ======+               |    +-------+
+///                +-|-+   Incoming  |
+///    Sink1  <====| D |   data      |
+///    Sink2  <====| E |<============|
+///    SinkN  <====| C |
+///                +---+
+///
+/// The PortModule models a Processor's I/O Ports. The schematic illustrates
+/// the abstract description of the PortModule. Its job is to merge together
+/// all of the Processor's peripherals that can control the processor's pins.
+/// For example, a UART peripheral may be shared with a general purpose I/O
+/// pin. The UART may have a transmit and receive pin and select whether it's
+/// in control of the I/O pins. For the transmit pin, there are two data sources
+/// one of which can get mapped onto the outgoing data bus. Similarly, there
+/// are two control sources. The muxes select which one of these is directed
+/// to the I/O pin. Similarly, if an I/O pin's state changes (either because
+/// the out going data is driving it or some other device is connected to the
+/// I/O pin's physical interface) then the incoming data can be directed by
+/// the Decoder.
+///
+/// Each one of the sources can have one or more bits associated with it. So
+/// all of the signal paths in the schematic can be assumed to be busses. The
+/// PortModule handles most of these paths in parallel. However, the I/O pins
+/// are bit-specific.
+///
+
+class PortModule
+{
+public:
+
+  /// The SignalSource list is a list of all sources that can drive data
+  list <SignalSource *> sources;
+
+  /// The SignalSink list is a list of all sinks that can receive data
+  list <SignalSink *> sinks;
+
+  /// The SignalControl list is a list of all objects that control the output
+  /// data direction.
+  list <SignalControl *> controls;
+
+
+  void add(SignalSource *);
+  void add(SignalSink *);
+  void add(SignalControl *);
+
+  /// The iopins are the physical pins associated with the port.
+  IOPIN **iopins;
+
+private:
+  unsigned int sourceState;
+  unsigned int sinkState;
+  unsigned int controlState;
+};
+
+class PortRegister : public Register
+{
+public:
+
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get(unsigned int new_value);
+
+};
+
+class PortLatch : public Register
+{
+public:
+
+private:
+  PortRegister *port_register;
+};
 
 //-------------------------------------------------------------------
 //

@@ -80,7 +80,7 @@ bool ClientSocketInterface::SendCmd(const char *cmd)
 //========================================================================
 void ClientSocketInterface::Send()
 {
-
+  printf("Send sock=%d data:%s\n",sd,p->txBuff());
   if (send(sd, p->txBuff(), p->txBytesBuffered(), 0) == -1) {
     perror("send");
     exit(1);
@@ -94,10 +94,57 @@ void ClientSocketInterface::Send()
   }
 
   p->rxTerminate(bytes);
+
+  printf("Send sock=%d rx data:%s\n",sd,p->rxBuff());
+
+}
+
+//========================================================================
+const char *ClientSocketInterface::Receive()
+{
+  printf("Receive sock=%d data:%s\n",sd,p->txBuff());
+  p->prepare();
+
+  /*
+  if (send(sd, p->txBuff(), p->txBytesBuffered(), 0) == -1) {
+    perror("send");
+    exit(1);
+  }
+  */
+
+  int bytes= recv(sd, p->rxBuff(), p->rxSize(), 0);
+
+  if (bytes  == -1) {
+    perror("recv");
+    exit(1);
+  }
+
+  p->rxTerminate(bytes);
+
+  printf("Receive sock=%d rx data:%s\n",sd,p->rxBuff());
+
+  return p->rxBuff();
 }
 
 //========================================================================
 //
+unsigned int ClientSocketInterface::CreateCallbackLink(guint64 interval)
+{
+  p->prepare();
+
+  p->EncodeObjectType(GPSIM_CMD_CREATE_CALLBACK_LINK);
+  p->EncodeUInt64(interval);
+
+  Send();
+
+  unsigned int handle=0;
+
+  if(p->DecodeHeader() && p->DecodeUInt32(handle) )
+    return handle;
+
+  return 0;
+}
+
 unsigned int ClientSocketInterface::CreateLinkUInt32(const char *sym_name)
 {
   p->prepare();
@@ -219,7 +266,7 @@ ClientSocketInterface::ClientSocketInterface(const char *hostname, int port)
     perror("connect");
     exit(1);
   }
-
+  printf("connected with socket %d\n",sd);
   p = new Packet(8192,8192);
 }
 

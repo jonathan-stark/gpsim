@@ -215,7 +215,7 @@ public:
 
   SOCKET getSocket();
   void Close();
-  void Send(char *);
+  bool Send(char *);
   void Service();
   void ParseObject();
 
@@ -256,7 +256,7 @@ class SocketLink
 public:
   SocketLink(unsigned int _handle, SocketBase *);
 
-  void Send();
+  bool Send();
 
   virtual void set(Packet &)=0;
   virtual void get(Packet &)=0;
@@ -302,6 +302,25 @@ public:
   NotifyLink(AttributeLink *);
 private:
   AttributeLink *sl;
+};
+
+///========================================================================
+/// CyclicCallBackLink
+/// A cyclic call back link is a link that periodically sends a message
+/// to the client.
+
+class CyclicCallBackLink : public TriggerObject
+{
+public:
+
+  CyclicCallBackLink(guint64 , SocketBase *);
+
+  virtual void callback();
+  virtual void callback_print(void);
+private:
+  guint64 interval;
+  SocketBase *sb;
+
 };
 
 //========================================================================
@@ -473,38 +492,40 @@ SocketBase *Socket::Accept()
 }
 
 
-void SocketBase::Send(char *b)
+bool SocketBase::Send(char *b)
 {
   if(!socket)
-    return;
+    return false;
+
+  //std::cout << "Sending sock="<<socket << " data " << b << endl;
 
   if (send(socket, b, strlen(b), 0) < 0) {
     psocketerror("send");
     closesocket(socket);
+    return false;
   }
+
+  return true;
 }
 
 //------------------------------------------------------------------------
 // ParseObject
 //
-// Given a pointer to a string, this routine will extract gpsim 
-// objects from it. These objects essentially tell gpsim how to
+// A client socket has sent data to gpsim that ParseObject has now been
+// given the job to interpret. ParseObject will decode the data using
+// the gpsim protocol (described in ../src/protocol.h).
 //
-//   * * * W A R N I N G * * *
-//
-// This code will change. 
-//
+// The protocol generally consists of a command/data pair. Each command
+// has a unique identifier and specifies the type of object. ParseObject
+// extracts this information and then uses a large switch statement to
+// perform the operation for this type.
 
 void SocketBase::ParseObject()
 {
 
-  std::cout << "ParseObject: " << packet->rxBuff() << endl;
-
   unsigned int ObjectType;
   if(!packet->DecodeObjectType(ObjectType))
     return;
-
-  std::cout << "ParseObject: " << packet->rxBuff() << endl;
 
   switch (ObjectType) {
 
@@ -512,8 +533,6 @@ void SocketBase::ParseObject()
     {
       unsigned int handle = FindFreeHandle();
       AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
-
-  std::cout << "ParseObject: " << packet->rxBuff() << endl;
 
       if(sl) {
 	links[handle&0x0f] = sl;
@@ -530,12 +549,30 @@ void SocketBase::ParseObject()
       unsigned int handle = FindFreeHandle();
       AttributeLink *sl = gCreateSocketLink(handle, *packet, this);
 
-      std::cout << "ParseObject notify link create: " << packet->rxBuff() << endl;
-
       if(sl) {
 	NotifyLink *nl = new NotifyLink(sl);
 
 	links[handle&0x0f] = sl;
+	packet->EncodeHeader();
+	packet->EncodeUInt32(handle);
+	packet->txTerminate();
+      	Send(packet->txBuff());
+      }
+    }
+    break;
+
+  case GPSIM_CMD_CREATE_CALLBACK_LINK:
+    {
+      unsigned int handle = FindFreeHandle();
+      guint64 interval=0;
+      std::cout << "Creating callback link\n";
+      if(packet->DecodeUInt64(interval) && interval) {
+
+	std::cout << "Creating callback link interval=" << interval << endl;
+
+	CyclicCallBackLink *cl = new CyclicCallBackLink(interval,this);
+
+	//links[handle&0x0f] = sl;
 	packet->EncodeHeader();
 	packet->EncodeUInt32(handle);
 	packet->txTerminate();
@@ -681,10 +718,22 @@ void SocketBase::ParseObject()
 
 }
 //------------------------------------------------------------------------
+// Service()
 //
+// A client has sent data to gpsim through the socket interface. It is here
+// where we validate that data and decide how to handle it.
+
 void SocketBase::Service()
 {
   if(packet->brxHasData()) {
+
+    // If the data is a 'pure socket command', which is to say it begins
+    // with a header as defined in ../src/protocol.h, then the data
+    // will be further parsed by ParseObject(). If the data has an
+    // invalid header, then we assume that the data is for the command
+    // line and we let the CLI parse_string() function handle it.
+    // FIXME gpsim poorly handles this CLI interface. We should send
+    // the output of the CLI back to the client socket.
 
     if (packet->DecodeHeader()) {
       ParseObject();
@@ -732,15 +781,17 @@ SocketLink::SocketLink(unsigned int _handle, SocketBase *sb)
 {
 }
 
-void SocketLink::Send()
+bool SocketLink::Send()
 {
   if(parent) {
     parent->packet->prepare();
     parent->packet->EncodeHeader();
     get(*parent->packet);
     parent->packet->txTerminate();
-    parent->Send(parent->packet->txBuff());
+    return parent->Send(parent->packet->txBuff());
   }
+
+  return false;
 }
 
 //========================================================================
@@ -774,6 +825,47 @@ void NotifyLink::set(gint64 i)
     sl->Send();
 }
 
+//========================================================================
+
+CyclicCallBackLink::CyclicCallBackLink(guint64 i, SocketBase *_sb)
+  : interval(i), sb(_sb)
+{
+  std::cout << " cyclic callback object\n ";
+  get_cycles().set_break(get_cycles().value + interval, this);
+}
+
+void CyclicCallBackLink::callback(void)
+{
+  std::cout << " cyclic callback\n ";
+  if(sb) {
+    static bool bfirst = true;
+    static char st[5];
+    static int seq=0;
+    if(bfirst) {
+      bfirst = false;
+      st[0] = 'h';
+      st[1] = 'e';
+      st[2] = 'y';
+      st[3] = '0';
+      st[4] = 0;
+    }
+
+    if(++st[3] > '9')
+      st[3] = '0';
+
+    if(sb->Send(st))
+      get_cycles().set_break(get_cycles().value + interval, this);
+    else
+      std::cout << "socket callback failed seq:" << seq++ << endl;
+  }
+
+}
+
+void CyclicCallBackLink::callback_print(void)
+{
+  std::cout << " cyclic callback\n ";
+
+}
 //========================================================================
 
 AttributeLink *gCreateSocketLink(unsigned int handle, Packet &p, SocketBase *sb)
@@ -867,17 +959,25 @@ static void debugPrintCondition(GIOCondition cond)
   server_callback ()
 
   This call back function is invoked from the GTK main loop whenever a client
-  socket has sent something to gpsim.
+  socket has sent something to send to gpsim. This callback will only be 
+  invoked for those clients that have already connected to gpsim. Those 
+  connected clients have associated with them a 'SocketBase' object. A pointer
+  to that object is passed in the server_callback parameters.
+
+  This function essentially will respond to the messages that clients send
+  in much the same way the BSD socket command recv() does. Which is to say,
+  the data that the clients send is read from the socket. The actual parsing
+  of the data is done by the routine 'SocketBase::Service()'.
 
  */
 
 static gboolean server_callback(GIOChannel *channel, 
 				GIOCondition condition, 
-				void *d )
+				void *pSocketBase )
 {
 
 
-  SocketBase *s = (SocketBase *)d;
+  SocketBase *s = (SocketBase *)pSocketBase;
 
   if(condition & G_IO_HUP) {
     std::cout<< "client has gone away\n";
@@ -947,7 +1047,9 @@ static gboolean server_callback(GIOChannel *channel,
   of this function is to accept a socket connection and to create a GLIB
   GIOChannel associated with it. This GIOChannel will listen to the client
   socket and will invoke the server_callback() callback whenever the client
-  sends data.
+  sends data. In addition, a new 'SocketBase' object will be created when
+  the connection is accepted. This SocketBase object wraps the BSD socket
+  and provides additional support for simplifying the socket communication.
 
  */
 
