@@ -1,4 +1,9 @@
 2004-01-06  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_regwin.cc -- valgrind memcheck bug fixes
+	* src/cod.cc
+	* src/registers.cc
+
+2004-01-06  Scott Dattalo  <scott@dattalo.com>
 	* src/p16x5x.cc - patch from Rob Pearce that fixes the 16C5X tris writes.
 
 2004-01-05  Scott Dattalo  <scott@dattalo.com>

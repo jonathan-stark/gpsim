@@ -966,7 +966,7 @@ int open_cod_file(pic_processor **pcpu, char *filename)
 
   //delete directory_block_data;
   delete_directory();
-  delete temp_block;
+  delete [] temp_block;
   fclose(codefile);
 
   ccpu->reset(POR_RESET);
