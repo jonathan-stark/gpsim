@@ -225,7 +225,7 @@ void Video::create_iopin_map(void)
   //   an I/O port. 
 
   port = new IOPORT;
-  port->value = 0;
+  port->value.put(0);
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
@@ -360,7 +360,7 @@ void Video::update_state(void)
   guint64 cycletime;
   int index;
   static int last_port_value=0;
-  int val=port->value;
+  int val=port->value.get();
   static int shortsync_counter, last_shortsync_counter;
 
   // get the current simulation cycle time from gpsim.
@@ -386,7 +386,7 @@ void Video::update_state(void)
     memset(line,0x80,XRES); // clear line buffer
   }
   
-  if(last_port_value!=0 && port->value==0) // Start of sync
+  if(last_port_value!=0 && port->value.get()==0) // Start of sync
   {
     // Every 32 or 64us there should be a sync.
 	  
@@ -443,7 +443,7 @@ void Video::update_state(void)
 	shortsync_counter++;
       }
   }
-  if(last_port_value==0 && port->value!=0) // End of sync
+  if(last_port_value==0 && port->value.get()!=0) // End of sync
   {
     int us_time;
 	  
@@ -467,7 +467,7 @@ void Video::update_state(void)
 	  index=XRES-1;
   
   line[index]=val;
-  last_port_value=port->value;
+  last_port_value=port->value.get();
 }
 
 #endif // HAVE_GUI

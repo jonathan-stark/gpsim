@@ -69,7 +69,7 @@ void Switch::create_iopin_map(void)
 
 
     switch_port = new IOPORT(1);
-    switch_port->value = 0;
+    switch_port->value.put(0);
     switch_port->valid_iopins = 0x01;
 
 

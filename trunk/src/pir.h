@@ -42,7 +42,7 @@ public:
 
   virtual bool interrupt_status(void)
     {
-      if( value & valid_bits & pie->value)
+      if( value.get() & valid_bits & pie->value.get())
 	return true;
 
       return false;
@@ -111,19 +111,19 @@ enum
 
   unsigned int get_sspif(void)
   {
-	return value & SSPIF;
+	return value.get() & SSPIF;
   }
   void clear_sspif(void);
 
  unsigned int get_txif(void)
    {
-     return value & TXIF;
+     return value.get() & TXIF;
    }
  void clear_txif(void);
 
  unsigned int get_rcif(void)
    {
-     return value & RCIF;
+     return value.get() & RCIF;
    }
  void clear_rcif(void);
  
@@ -182,7 +182,7 @@ public:
 
   unsigned int get_sspif(void)
     {
-      return value & SSPIF;
+      return value.get() & SSPIF;
     }
   void clear_sspif(void);
 
@@ -204,12 +204,12 @@ public:
 
   unsigned int get_txif(void)
     {
-      return value & TXIF;
+      return value.get() & TXIF;
     }
   void clear_txif(void);
   unsigned int get_rcif(void)
     {
-      return value & RCIF;
+      return value.get() & RCIF;
     }
   void clear_rcif(void);
  

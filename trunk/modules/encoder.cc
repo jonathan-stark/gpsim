@@ -72,7 +72,7 @@ void Encoder::create_iopin_map(void)
 
 
   enc_port = new IOPORT(2);
-  enc_port->value = 0;
+  enc_port->value.put(0);
   enc_port->valid_iopins = 0x03;
 
 
@@ -238,13 +238,13 @@ Encoder::send_ccw(void)
 void
 Encoder::toggle_a()
 {
-    enc_port->put_value(enc_port->value^PIN_A);
+    enc_port->put_value(enc_port->value.get()^PIN_A);
 }
 
 void
 Encoder::toggle_b()
 {
-    enc_port->put_value(enc_port->value^PIN_B);
+    enc_port->put_value(enc_port->value.get()^PIN_B);
 }
 
 void
@@ -265,14 +265,14 @@ Encoder::callback()
 	    break;
 	case rot_moving_cw:
 	    toggle_b();
-	    assert(!(enc_port->value & PIN_A) ==
-		   !(enc_port->value & PIN_B));
+	    assert(!(enc_port->value.get() & PIN_A) ==
+		   !(enc_port->value.get() & PIN_B));
 	    rs = rot_detent;
 	    break;
 	case rot_moving_ccw:
 	    toggle_a();
-	    assert(!(enc_port->value & PIN_A) ==
-		   !(enc_port->value & PIN_B));
+	    assert(!(enc_port->value.get() & PIN_A) ==
+		   !(enc_port->value.get() & PIN_B));
 	    rs = rot_detent;
 	    break;
 	default:

@@ -60,7 +60,7 @@ void EECON1::put(unsigned int new_value)
       if(eeprom->get_reg_eecon2()->is_unarmed())
 	{
           eeprom->get_reg_eecon2()->unready();
-	  value |= WREN;
+	  value.put(value.get() | WREN);
 
 	}
 
@@ -71,7 +71,7 @@ void EECON1::put(unsigned int new_value)
       else if( (new_value & WR) && !(new_value & RD) &&
         (eeprom->get_reg_eecon2()->is_ready_for_write()))
 	{
-	  value |= WR;
+	  value.put(value.get() | WR);
 	  eeprom->start_write();
 	}
 
@@ -87,11 +87,11 @@ void EECON1::put(unsigned int new_value)
 
     }
 
-  value = (value & (RD | WR)) | new_value;
+  value.put((value.get() & (RD | WR)) | new_value);
 
-  if ( (value & RD) && !( value & WR) )
+  if ( (value.get() & RD) && !( value.get() & WR) )
     {
-      if(value & EEPGD) {
+      if(value.get() & EEPGD) {
         eeprom->get_reg_eecon2()->read();
 	eeprom->start_program_memory_read();
 	//cout << "eestate " << eeprom->eecon2->eestate << '\n';
@@ -100,21 +100,21 @@ void EECON1::put(unsigned int new_value)
 	//eeprom->eedata->value = eeprom->rom[eeprom->eeadr->value]->get();
         eeprom->get_reg_eecon2()->read();
 	eeprom->callback();
-	value &= ~RD;
+	value.put(value.get() & ~RD);
       }
     }
   
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
 unsigned int EECON1::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
-  return(value);
+  return(value.get());
 }
 
 EECON1::EECON1(void)
@@ -164,16 +164,16 @@ EECON2::EECON2(void)
 
 unsigned int EEDATA::get(void)
 {
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
-  return(value);
+  return(value.get());
 }
 
 void EEDATA::put(unsigned int new_value)
 {
 
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -188,16 +188,16 @@ EEDATA::EEDATA(void)
 unsigned int EEADR::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
-  return(value);
+  return(value.get());
 }
 
 void EEADR::put(unsigned int new_value)
 {
 
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -217,7 +217,7 @@ void EEPROM_PIR::write_is_complete(void)
 
   assert(pir_set != 0);
 
-  eecon1.value = (eecon1.value  & (~eecon1.WR));
+  eecon1.value.put( eecon1.value.get()  & (~eecon1.WR));
 
   pir_set->set_eeif();
 }
@@ -274,8 +274,8 @@ void EEPROM::start_write(void)
 
   cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
 
-  wr_adr = eeadr.value;
-  wr_data = eedata.value;
+  wr_adr = eeadr.value.get();
+  wr_data = eedata.value.get();
 
 }
 
@@ -286,7 +286,7 @@ void EEPROM::write_is_complete(void)
 
   assert(intcon != 0);
 
-  eecon1.value = (eecon1.value  & (~eecon1.WR)) | eecon1.EEIF;
+  eecon1.value.put((eecon1.value.get()  & (~eecon1.WR)) | eecon1.EEIF);
 
   intcon->peripheral_interrupt();
 
@@ -311,26 +311,26 @@ void EEPROM::callback(void)
     //cout << "eeread\n";
 
     eecon2.unarm();
-    eedata.value = rom[eeadr.value]->get();
-    eecon1.value &= (~EECON1::RD);
+    eedata.value.put(rom[eeadr.value.get()]->get());
+    eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
     break;
   case EECON2::EEREADY_FOR_WRITE:
     //cout << "eewrite\n";
 
     if(wr_adr < rom_size)
-      rom[wr_adr]->value = wr_data;
+      rom[wr_adr]->value.put(wr_data);
     else
       cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
 
     write_is_complete();
 
-    if (eecon1.value & eecon1.WREN)
+    if (eecon1.value.get() & eecon1.WREN)
       eecon2.unready();
     else
       eecon2.unarm();
     break;
 
-    eecon1.value &= (~EECON1::WR);
+    eecon1.value.put(eecon1.value.get() & (~EECON1::WR));
   default:
     cout << "EEPROM::callback() bad eeprom state " <<
       eecon2.get_eestate() << '\n';
@@ -344,7 +344,7 @@ void EEPROM::reset(RESET_TYPE by)
   switch(by)
     {
     case POR_RESET:
-      eecon1.value = 0;          // eedata & eeadr are undefined at power up
+      eecon1.value.put(0);          // eedata & eeadr are undefined at power up
       eecon2.unarm();
     }
 
@@ -376,7 +376,7 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
       rom[i] = new Register;
       rom[i]->address = i;
-      rom[i]->value = 0;
+      rom[i]->value.put(0);
       rom[i]->alias_mask = 0;
 
       sprintf (str, "eeprom reg 0x%02x", i);
@@ -449,15 +449,15 @@ void EEPROM_WIDE::start_write(void)
 
   cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
 
-  wr_adr = eeadr.value + (eeadrh.value << 8);
-  wr_data = eedata.value + (eedatah.value << 8);
+  wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
+  wr_data = eedata.value.get() + (eedatah.value.get() << 8);
 
 }
 
 void EEPROM_WIDE::start_program_memory_read(void)
 {
 
-  rd_adr = eeadr.value | (eeadrh.value << 8);
+  rd_adr = eeadr.value.get() | (eeadrh.value.get() << 8);
 
   cycles.set_break(cycles.value + 2, this);
 
@@ -473,37 +473,37 @@ void EEPROM_WIDE::callback(void)
     //cout << "eeread\n";
 
     eecon2.unarm();
-    if(eecon1.value & EECON1::EEPGD) {
+    if(eecon1.value.get() & EECON1::EEPGD) {
       // read program memory
       
-      int opcode = cpu->pma->get_opcode(eeadr.value | (eeadrh.value << 8));
+      int opcode = cpu->pma->get_opcode(eeadr.value.get() | (eeadrh.value.get() << 8));
       //cout << "read " << i << " from program memory\n";
-      eedata.value = opcode & 0xff;
-      eedatah.value = (opcode>>8) & 0xff;
+      eedata.value.put(opcode & 0xff);
+      eedatah.value.put((opcode>>8) & 0xff);
 
     } else {
-      eedata.value = rom[eeadr.value]->get();
+      eedata.value.put(rom[eeadr.value.get()]->get());
     }
 
-    eecon1.value &= (~EECON1::RD);
+    eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
     break;
   case EECON2::EEREADY_FOR_WRITE:
     //cout << "eewrite\n";
 
     if(wr_adr < rom_size)
-      rom[wr_adr]->value = wr_data;
+      rom[wr_adr]->value.put(wr_data);
     else
       cout << "EEPROM wr_adr is out of range " << wr_adr << '\n';
 
     write_is_complete();
 
-    if (eecon1.value & eecon1.WREN)
+    if (eecon1.value.get() & eecon1.WREN)
       eecon2.unready();
     else
       eecon2.unarm();
     break;
 
-    eecon1.value &= (~EECON1::WR);
+    eecon1.value.put(eecon1.value.get() & (~EECON1::WR));
   default:
     cout << "EEPROM::callback() bad eeprom state " << eecon2.get_eestate() << '\n';
   }

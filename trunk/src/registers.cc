@@ -39,7 +39,7 @@ Register::Register(void)
   cpu = 0;
   name_str1 = 0;
   new_name("file_register");
-  xref = new XrefObject(&value);
+  xref = new XrefObject(&value.data);
   read_access_count=0;
   write_access_count=0;
   bit_mask = 7;
@@ -72,8 +72,8 @@ Register::~Register(void)
 
 unsigned int Register::get(void)
 {
-  trace.register_read(address,value);
-  return(value);
+  trace.register_read(address,value.get());
+  return(value.get());
 }
 
 //------------------------------------------------------------
@@ -86,15 +86,15 @@ unsigned int Register::get(void)
 
 void Register::put(unsigned int new_value)
 {
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 }
 
 
 int Register::get_bit(unsigned int bit_number)
 {
 
-  return( (value >>  (bit_number & 0x07)) & 1 );
+  return( (value.get() >>  (bit_number & 0x07)) & 1 );
 
 }
 
@@ -115,8 +115,8 @@ int Register::get_bit_voltage(unsigned int bit_number)
 void Register::setbit(unsigned int bit_number, bool new_value)
 {
   if(bit_number < bit_mask) {
-    value = (value & ~(1<<bit_number)) | (1<<bit_number);
-    trace.register_write(address,value);
+    value.put((value.get() & ~(1<<bit_number)) | (1<<bit_number));
+    trace.register_write(address,value.get());
   }
 }
 
@@ -204,7 +204,7 @@ void InvalidRegister::put(unsigned int new_value)
     hex << address<< ", value 0x" << new_value << '\n';
 
   bp.halt();
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
   return;
 }
@@ -213,7 +213,7 @@ unsigned int InvalidRegister::get(void)
 {
   cout << "attempt read from invalid file register\n";
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
   return(0);
 }

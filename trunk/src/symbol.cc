@@ -492,7 +492,7 @@ void w_symbol::print(void)
 }
 int w_symbol::get_value(void) 
 {
-  return w->value;
+  return w->value.get();
 }
 void w_symbol::put_value(int new_value) 
 {

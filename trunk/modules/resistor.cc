@@ -131,7 +131,7 @@ int Resistor_IO::get_voltage(guint64 current_time)
 void Resistor_IOPORT::trace_register_write(void)
 {
 
-  get_trace().module1(value);
+  get_trace().module1(value.get());
 }
 
 //--------------------------------------------------------------

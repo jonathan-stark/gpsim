@@ -115,7 +115,7 @@ void _12bit_processor::dump_registers (void)
 
   pic_processor::dump_registers();
 
-  cout << "option = " << option_reg.value << '\n';
+  cout << "option = " << option_reg.value.get() << '\n';
 
 }
 

@@ -1185,7 +1185,7 @@ int IO_input::get_voltage(guint64 current_time)
   if(snode)
     return drive;
   else if(iop)
-    return ( (iop->value & (1<<iobit)) ? drive : -drive);
+    return ( (iop->value.get() & (1<<iobit)) ? drive : -drive);
 
   // this input is not attached to a node or an I/O port
   // Perhaps it's an I/O pin on a module... It doesn't really
@@ -1311,7 +1311,7 @@ void IO_bi_directional::put_state( int new_digital_state)
       // the current state of the bit in the ioport (to which this stimulus is
       // mapped), then we need to update the ioport.
 
-      if((new_digital_state!=0) ^ ( port->value & (1<<iobit))) {
+      if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
 
 	port->setbit(iobit,new_digital_state);
 
@@ -1383,7 +1383,7 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 	return 0;
 
       if(iop) {
-	if( iop->value & (1<<iobit))
+	if( iop->value.get() & (1<<iobit))
 	  {
 	    //cout << " high\n";
 	    return drive;
@@ -1451,7 +1451,7 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
   if(driving | !snode)
     {
       if(iop) {
-	if( iop->value & (1<<iobit))
+	if( iop->value.get() & (1<<iobit))
 	  {
 	    //cout << " high\n";
 	    return drive;
@@ -1501,7 +1501,7 @@ int IO_open_collector::get_voltage(guint64 current_time)
 
   if(driving )
     {
-      if( iop->value & (1<<iobit))
+      if( iop->value.get() & (1<<iobit))
 	{
 	  //cout << "high\n";
 	  return 0;
@@ -1518,7 +1518,7 @@ int IO_open_collector::get_voltage(guint64 current_time)
       if(snode)
 	return 0;
       else
-	return ( (iop->value & (1<<iobit)) ? drive : (-drive));
+	return ( (iop->value.get() & (1<<iobit)) ? drive : (-drive));
     }
 }
 

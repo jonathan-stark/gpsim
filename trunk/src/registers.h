@@ -35,6 +35,58 @@ class Processor;
 
 
 //---------------------------------------------------------
+// RegisterValue class
+//
+// This class is used to represent the value of registers.
+// It also defines which bits have been initialized and which
+// are valid.
+//
+
+class RegisterValue {
+ public:
+
+  unsigned int data;
+  unsigned int init;
+  unsigned int valid;
+
+  RegisterValue(void)
+    {
+      data = 0;
+      init = 0xff;
+      valid = 0xff;
+    }
+
+  RegisterValue(unsigned int d, unsigned int i, unsigned int v) : 
+    data(d), init(i), valid(v)
+    {
+    }
+
+  bool initialized(void)
+    {
+      return (init & valid) == 0;
+    }
+
+  unsigned int get(void)
+    {
+      return data;
+    }
+
+  void put(unsigned int d)
+    {
+      data = d;
+    }
+
+  void operator = (RegisterValue rv)
+    {
+      data = rv.data;
+      init = rv.init;
+    }
+
+
+};
+
+
+//---------------------------------------------------------
 // Base class for a file register.
 class Register
 {
@@ -50,7 +102,9 @@ public:
   };
 
   char *name_str1;
-  unsigned int value;
+
+  RegisterValue value;
+
   unsigned int address;
 
   // If non-zero, the alias_mask describes all address at which
@@ -107,13 +161,13 @@ public:
   /* put_value is the same as put(), but some extra stuff like
    * interfacing to the gui is done. (It's more efficient than
    * burdening the run time performance with (unnecessary) gui
-   * crap.)
+   * calls.)
    */
 
   virtual void put_value(unsigned int new_value);
 
   /* same as get(), but no trace is performed */
-  virtual unsigned int get_value(void) { return(value); }
+  virtual unsigned int get_value(void) { return(value.get()); }
 
 
   virtual char *name(void) { return(name_str1);};
@@ -166,20 +220,6 @@ public:
 };
 
 
-//------------------------------------------------------------
-// Do we really need this class ?
-#if 0
-class file_register : public Register
-{
- public:
-
-  file_register(void);
-  ~file_register(void);
-  virtual void put_value(unsigned int new_value);
-
-};
-#endif
-
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to
 // to this class' value get 0
@@ -218,11 +258,11 @@ public:
     switch (r) {
 
     case POR_RESET:
-      value = por_value;
+      value.put(por_value);
       break;
 
     case WDT_RESET:
-      value = wdtr_value;
+      value.put(wdtr_value);
       break;
     case SOFT_RESET:
       break;

@@ -261,7 +261,7 @@ void LogicGate::create_iopin_map(void)
   //   an I/O port. 
 
   port = new IOPORT;
-  port->value = 0;
+  port->value.put(0);
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
@@ -390,15 +390,15 @@ AND2Gate::~AND2Gate(void)
 
 void ANDGate::update_state(void)
 {
-  unsigned int old_value = port->value;
+  unsigned int old_value = port->value.get();
 
   //cout << "update_state of ANDGate\n";
-  if((port->value & input_bit_mask) == input_bit_mask)
-    port->value |= output_bit_mask;
+  if((port->value.get() & input_bit_mask) == input_bit_mask)
+    port->value.put(port->value.get() | output_bit_mask);
   else
-    port->value &= ~output_bit_mask;
+    port->value.put(port->value.get() & ~output_bit_mask);
 
-  if( (old_value ^ port->value) & output_bit_mask) {
+  if( (old_value ^ port->value.get()) & output_bit_mask) {
 
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
@@ -440,15 +440,15 @@ Module * OR2Gate::construct(const char *_new_name)
 
 void ORGate::update_state(void)
 {
-  unsigned int old_value = port->value;
+  unsigned int old_value = port->value.get();
 
   //cout << "update_state of ORGate\n";
-  if(port->value & input_bit_mask) 
-    port->value |= output_bit_mask;
+  if(port->value.get() & input_bit_mask) 
+    port->value.put(port->value.get() | output_bit_mask);
   else
-    port->value &= ~output_bit_mask;
+    port->value.put(port->value.get() & ~output_bit_mask);
 
-  if( (old_value ^ port->value) & output_bit_mask) {
+  if( (old_value ^ port->value.get()) & output_bit_mask) {
 
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
@@ -488,15 +488,15 @@ NOTGate::~NOTGate(void)
 
 void NOTGate::update_state(void)
 {
-  unsigned int old_value = port->value;
+  unsigned int old_value = port->value.get();
 
   //cout << "update_state of NOTGate\n";
-  if((port->value & input_bit_mask) == input_bit_mask)
-    port->value &= ~output_bit_mask;
+  if((port->value.get() & input_bit_mask) == input_bit_mask)
+    port->value.put(port->value.get() & ~output_bit_mask);
   else
-    port->value |= output_bit_mask;
+    port->value.put(port->value.get() | output_bit_mask);
 
-  if( (old_value ^ port->value) & output_bit_mask) {
+  if( (old_value ^ port->value.get()) & output_bit_mask) {
 
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
@@ -536,25 +536,25 @@ Module * XOR2Gate::construct(const char *_new_name)
 
 void XORGate::update_state(void)
 {
-  unsigned int old_value = port->value;
+  unsigned int old_value = port->value.get();
   int i;
   int out_value=0;
 
   //cout << "update_state of XORGate\n";
 
   for(i=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
-      if(port->value & (1<<i))
+      if(port->value.get() & (1<<i))
 	  out_value++;
   }
 
   //printf("out_value %d\n",out_value);
 
   if(out_value&1)
-    port->value |= output_bit_mask;
+    port->value.put(port->value.get() | output_bit_mask);
   else
-    port->value &= ~output_bit_mask;
+    port->value.put(port->value.get() & ~output_bit_mask);
 
-  if( (old_value ^ port->value) & output_bit_mask) {
+  if( (old_value ^ port->value.get()) & output_bit_mask) {
 
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);

@@ -67,7 +67,7 @@ void PushButton::create_iopin_map(void)
 
 
   pshb_port = new IOPORT(1);
-  pshb_port->value = 0;
+  pshb_port->value.put(0);
   pshb_port->valid_iopins = 0x01;
 
 
@@ -125,7 +125,7 @@ press_cb (GtkButton *button, PushButton *pb)
 
 {
 
-  if(pb->pshb_port->value == 0)
+  if(pb->pshb_port->value.get() == 0)
     pb->pshb_port->put_value(TRUE);
   else
     pb->pshb_port->put_value(FALSE);
@@ -136,7 +136,7 @@ static void
 released_cb (GtkButton *button, PushButton *pb)
 {
   //    int state = gtk_toggle_button_get_active(button);
-  if(pb->pshb_port->value == 0)
+  if(pb->pshb_port->value.get() == 0)
     pb->pshb_port->put_value(TRUE);
   else
     pb->pshb_port->put_value(FALSE);

@@ -117,7 +117,7 @@ int IOPORT::update_stimuli(void)
 		//cout << "above";
 		input |= m;
 	    } else //if(!(tris->value & m))
-		input |= (value & m);
+		input |= (value.get() & m);
 	    //else cout << "below";
 
 	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
@@ -155,8 +155,8 @@ int PIC_IOPORT::update_stimuli(void)
 	    {
 		//cout << "above";
 		input |= m;
-	    } else if(!(tris->value & m))
-		input |= (value & m);
+	    } else if(!(tris->value.get() & m))
+		input |= (value.get() & m);
 	    //else cout << "below";
 
 	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
@@ -184,7 +184,7 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
       v = pins[bit_number]->get_voltage(time);
   }
   else
-    v = (value &  one_shifted_left_by_n [bit_number]) ? 
+    v = (value.get() &  one_shifted_left_by_n [bit_number]) ? 
 	    (MAX_DRIVE / 2) : -(MAX_DRIVE / 2) ;
 
   float vf = v;
@@ -200,7 +200,7 @@ int IOPORT::get_bit(unsigned int bit_number)
 {
 
   //return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
-  return (value >>  (bit_number % num_iopins)) & 1;
+  return (value.get() >>  (bit_number % num_iopins)) & 1;
 
 }
 
@@ -225,13 +225,13 @@ unsigned int IOPORT::get(void)
 
   if(stimulus_mask)
     {
-      value = ( (value & ~stimulus_mask) | update_stimuli());
+      value.put( (value.get() & ~stimulus_mask) | update_stimuli());
     }
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -260,7 +260,7 @@ void IOPORT::put(unsigned int new_value)
   // update only those bits that are really outputs
   //cout << "IOPORT::put trying to put " << new_value << '\n';
 
-  value = new_value;
+  value.put(new_value);
 
   //cout << " IOPORT::put just set port value to " << value << '\n';
 
@@ -270,7 +270,7 @@ void IOPORT::put(unsigned int new_value)
 
   //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -301,7 +301,7 @@ void PIC_IOPORT::put(unsigned int new_value)
   // update only those bits that are really outputs
   //cout << "IOPORT::put trying to put " << new_value << '\n';
 
-  value = (new_value & ~tris->value) | (value & tris->value);
+  value.put((new_value & ~tris->value.get()) | (value.get() & tris->value.get()));
 
   //cout << " IOPORT::put just set port value to " << value << '\n';
 
@@ -311,7 +311,7 @@ void PIC_IOPORT::put(unsigned int new_value)
 
   //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 //-------------------------------------------------------------------
@@ -334,7 +334,7 @@ void PIC_IOPORT::put(unsigned int new_value)
 void IOPORT::put_value(unsigned int new_value)
 {
   int i,j;
-  int old_value = value;
+  int old_value = value.get();
   int diff;
 
   //  cout << "IOPORT::put_value trying to put " << new_value << '\n';
@@ -347,7 +347,7 @@ void IOPORT::put_value(unsigned int new_value)
     xref->update();
 
   // Find the pins that have changed states
-  diff = (old_value ^ value) & valid_iopins;
+  diff = (old_value ^ value.get()) & valid_iopins;
 
   // Update the cross references for each pin that has changed.
   for(i=0,j=1; i<8; i++,j<<=1) {
@@ -373,11 +373,11 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
   int bit_mask = one_shifted_left_by_n[bit_number];
   //cout << name();
 
-  if( ((bit_mask & value) != 0) ^ (new_value==1))
+  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
     {
       //if(verbose)
       //cout << " IOPORT::set_bit bit changed due to a stimulus. new_value = " << new_value <<'\n';
-      value ^= bit_mask;
+      value.put(value.get() ^ bit_mask);
 
       trace_register_write();
     }
@@ -393,10 +393,10 @@ void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
   int bit_mask = one_shifted_left_by_n[bit_number];
   //cout << name();
 
-  if( ((bit_mask & value) != 0) ^ (new_value==1))
+  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
   {
   //  cout << " IOPORT::setbit_value bit " << bit_number << " to " << new_value << '\n';
-    put_value(value ^= bit_mask);
+    put_value(value.get() ^ bit_mask);
     //cout << "     is changing\n";
     if(xref)
       xref->update();
@@ -510,12 +510,12 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
   if(!tris)
     return;
 
-  unsigned int diff = tris->value ^ new_tris;
+  unsigned int diff = tris->value.get() ^ new_tris;
 
   if(diff)
     {
       // Update the I/O port value to that of the internal latch
-      value = (value & ~diff) | (internal_latch & diff);
+      value.put((value.get() & ~diff) | (internal_latch & diff));
 
       // Go through and update the direction of the I/O pins
       int i,m;
@@ -543,7 +543,7 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 //-------------------------------------------------------------------
 void IOPORT::trace_register_write(void)
 {
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 }
 
 //-------------------------------------------------------------------
@@ -559,7 +559,7 @@ IOPORT::IOPORT(unsigned int _num_iopins)
   stimulus_mask = 0;
   num_iopins = _num_iopins;
   address = 0;
-  value = 0;
+  value.put(0);
   internal_latch = 0;
 
   pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
@@ -588,9 +588,9 @@ IOPORT::~IOPORT()
 unsigned int IOPORT_TRIS::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -603,11 +603,11 @@ void IOPORT_TRIS::put(unsigned int new_value)
     cout << "IOPORT_TRIS::put 0x"<<hex<<new_value<<'\n';
   port->update_pin_directions(new_value);
 
-  value = new_value;
+  value.put(new_value);
 
   port->put(save_port_latch);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -622,14 +622,14 @@ void IOPORT_TRIS::put(unsigned int new_value)
 void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
 {
 
-  int diff = port->valid_iopins & (1<<bit_number) & (value ^ (new_value << bit_number));
+  int diff = port->valid_iopins & (1<<bit_number) & (value.get() ^ (new_value << bit_number));
 
   if(diff) {
-    port->update_pin_directions(value ^ diff);
+    port->update_pin_directions(value.get() ^ diff);
 
-    value ^= diff;
+    value.put(value.get() ^ diff);
 
-    trace.register_write(address,value);
+    trace.register_write(address,value.get());
     if(xref)
       xref->update();
     if(port->pins[bit_number]->xref)
@@ -685,9 +685,9 @@ IOPORT_TRIS::IOPORT_TRIS(void)
 unsigned int IOPORT_LATCH::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -698,11 +698,11 @@ void IOPORT_LATCH::put(unsigned int new_value)
   if(verbose)
     cout << "IOPORT_LATCH::put 0x"<<hex<<new_value<<'\n';
 
-  value = new_value;
+  value.put(new_value);
 
-  port->put(value);
+  port->put(value.get());
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -795,7 +795,7 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 
       // Update each pin that has a stimulus connect:
 
-      int temp_value = value;
+      int temp_value = value.get();
       if(stimulus_mask)
 	temp_value = ( (temp_value & ~stimulus_mask) | update_stimuli());
 
@@ -804,11 +804,11 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 
       temp_value &= stimulus_mask;
       if(drive)
-	temp_value = (tris->value & ~stimulus_mask);
+	temp_value = (tris->value.get() & ~stimulus_mask);
 
-      if(temp_value ^ value) {
-	value = temp_value;
-	trace.register_write(address,value);
+      if(temp_value ^ value.get()) {
+	value.put(temp_value);
+	trace.register_write(address,value.get());
       }
     }
 
@@ -821,12 +821,12 @@ unsigned int PORTB::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   //  cout << "PORTB::get()\n";
   IOPORT::get();
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If portb bit 0 changed states, check to see if an interrupt should occur
   if( diff & 1)
@@ -847,23 +847,23 @@ unsigned int PORTB::get(void)
   // If any of the upper 4 bits of port b changed states then set RBIF
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
-  if(diff & 0xf0 & tris->value)
+  if(diff & 0xf0 & tris->value.get())
     cpu14->intcon->set_rbif();
 
-  return value;
+  return value.get();
 }
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void PORTB::setbit(unsigned int bit_number, bool new_value)
 {
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTB::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If portb bit 0 changed states, check to see if an interrupt should occur
   if( diff & 1)
@@ -884,7 +884,7 @@ void PORTB::setbit(unsigned int bit_number, bool new_value)
   // If any of the upper 4 bits of port b changed states then set RBIF
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
-  if(diff & 0xf0 & tris->value)
+  if(diff & 0xf0 & tris->value.get())
     cpu14->intcon->set_rbif();
 }
 
@@ -900,13 +900,13 @@ unsigned int PORTB_62x::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   //  cout << "PORTB_62x::get()\n";
 
   IOPORT::get();
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If portb bit 0 changed states, check to see if an interrupt should occur
   if( diff & 1)
@@ -927,29 +927,29 @@ unsigned int PORTB_62x::get(void)
   // If any of the upper 4 bits of port b changed states then set RBIF
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
-  if(diff & 0xf0 & tris->value)
+  if(diff & 0xf0 & tris->value.get())
     cpu14->intcon->set_rbif();
 
   if(ccp1con && ( diff & CCP1) )
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
 
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
-  return value;
+  return value.get();
 }
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
 {
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTB_62x::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If portb bit 0 changed states, check to see if an interrupt should occur
   if( diff & 1)
@@ -970,14 +970,14 @@ void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
   // If any of the upper 4 bits of port b changed states then set RBIF
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
-  if(diff & 0xf0 & tris->value)
+  if(diff & 0xf0 & tris->value.get())
     cpu14->intcon->set_rbif();
 
   if(ccp1con && ( diff & CCP1) )
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
 
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
 }
 
@@ -1020,11 +1020,11 @@ void PORTA_62x::put(unsigned int new_value)
   //  pin_value = value = (((new_value & 0xcf) | (new_value & value & 0x10)) & ~tris->value) 
   //    | (value & (tris->value | 0x20));
 
-  value = ((new_value & ~tris->value) | (value & tris->value)) & valid_iopins ;
+  value.put(((new_value & ~tris->value.get()) | (value.get() & tris->value.get())) & valid_iopins);
 
   // FIXME - this is obviously wrong
   if(comparator && comparator->enabled()) 
-    value &= (0xff & ~( AN0 | AN1 | AN2 | AN3));
+    value.put(value.get() & (0xff & ~( AN0 | AN1 | AN2 | AN3)));
 
 
   //cout << " IOPORT::put just set port value to " << value << '\n';
@@ -1035,7 +1035,7 @@ void PORTA_62x::put(unsigned int new_value)
 
   //cout << " PORTA_62X::put port value is " << value << " after updating stimuli\n";
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -1053,10 +1053,10 @@ unsigned int PORTA_62x::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   if(stimulus_mask) {
-    value = ( (value & ~stimulus_mask) | update_stimuli());
+    value.put(  (value.get() & ~stimulus_mask) | update_stimuli());
   }
 
   // If the comparator is enabled, then all of the "analog" pins are
@@ -1064,18 +1064,18 @@ unsigned int PORTA_62x::get(void)
 
   if(comparator && comparator->enabled()) {
 
-    value = value & (0xff & ~( AN0 | AN1 | AN2 | AN3));
+    value.put(value.get() & (0xff & ~( AN0 | AN1 | AN2 | AN3)));
 
   }
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
   
   if( ssp && (diff & SS))
-    ssp->new_ss_edge(value & SS);
+    ssp->new_ss_edge(value.get() & SS);
   
   // cout << " PORTA_62X::get port value is " << value << " \n";
 
-  return value;
+  return value.get();
 }
 
 //-------------------------------------------------------------------
@@ -1083,13 +1083,13 @@ unsigned int PORTA_62x::get(void)
 void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTA::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If porta bit 4 changed states, check to see if tmr0 should increment
   if( diff & 0x10)
@@ -1099,7 +1099,7 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
       if(cpu14->option_reg.get_t0cs())
 	{
 	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
-	if( ((value & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
+	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
 	  cpu14->tmr0.increment();
 	}
     }
@@ -1136,17 +1136,17 @@ unsigned int PORTA::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   // cout << "PORTC::get()\n";
   IOPORT::get();
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   if( ssp && (diff & SS))
-    ssp->new_ss_edge(value & SS);
+    ssp->new_ss_edge(value.get() & SS);
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -1154,13 +1154,13 @@ unsigned int PORTA::get(void)
 void PORTA::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTA::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If porta bit 4 changed states, check to see if tmr0 should increment
   if( diff & 0x10)
@@ -1170,7 +1170,7 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
       if(cpu14->option_reg.get_t0cs())
 	{
 	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
-	if( ((value & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
+	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
 	  cpu14->tmr0.increment();
 	}
     }
@@ -1202,32 +1202,32 @@ unsigned int PORTC::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   // cout << "PORTC::get()\n";
   IOPORT::get();
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // ugh. go through and check each bit and see if we need to propogate
   // info to a peripheral.
 
   // 
   if( ccp1con && (diff & CCP1) )
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
  
   // if this cpu has a usart and there's been a change detected on
   // the RX pin, then we need to notify the usart
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
   if( ssp && (diff & SCK))
-    ssp->new_sck_edge(value & SCK);
+    ssp->new_sck_edge(value.get() & SCK);
 
   if(tmrl && (diff & T1CKI))
     tmrl->increment();
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -1235,23 +1235,23 @@ unsigned int PORTC::get(void)
 void PORTC::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   if(verbose)
     cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   if(ccp1con && ( diff & CCP1) )
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
 
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
   if( ssp && (diff & SCK))
-    ssp->new_sck_edge(value & SCK);
+    ssp->new_sck_edge(value.get() & SCK);
 
 }
 
@@ -1270,7 +1270,7 @@ PORTD::PORTD(void)
 void PORTD::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTD::setbit() bit " << bit_number << " to " << new_value << '\n';
 
@@ -1293,7 +1293,7 @@ PORTE::PORTE(void)
 void PORTE::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTE::setbit() bit " << bit_number << " to " << new_value << '\n';
 
@@ -1316,7 +1316,7 @@ PORTF::PORTF(void)
 void PORTF::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTF::setbit() bit " << bit_number << " to " << new_value << '\n';
 
@@ -1339,7 +1339,7 @@ PORTG::PORTG(void)
 void PORTG::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTG::setbit() bit " << bit_number << " to " << new_value << '\n';
 

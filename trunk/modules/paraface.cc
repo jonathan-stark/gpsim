@@ -135,7 +135,7 @@ OutputPort::OutputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 void Paraface_Port::trace_register_write(void)
 {
 
-    get_trace().module1(value);
+    get_trace().module1(value.get());
 }
 
 //-----------------------------------------------------
@@ -147,7 +147,7 @@ InputPort::InputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 void InputPort::put(unsigned int new_value)
 {
 
-    unsigned int old_value = value;
+    unsigned int old_value = value.get();
 
     //  cout << "InputPort = " << value << endl;
 
@@ -165,15 +165,15 @@ void InputPort::callback(void)
     get_cycles().set_break_delta(1, this);
 
 
-    if(paraface->output_port->value!=
+    if(paraface->output_port->value.get() !=
        paraface->data)
     {
-	paraface->write_parallel_data(paraface->output_port->value);
+	paraface->write_parallel_data(paraface->output_port->value.get());
     }
 
     parallel_input = paraface->read_parallel_status();
 
-    if(value!=parallel_input)
+    if(value.get()!=parallel_input)
     {
 	//        cout << "value = "<<value<<endl;
 	put(parallel_input);
@@ -217,7 +217,7 @@ void InputPort::update_pin_directions(unsigned int new_direction)
 void OutputPort::put(unsigned int new_value)
 {
 
-    unsigned int old_value = value;
+    unsigned int old_value = value.get();
 
     //  cout << "OutputPort = " << value << endl;
 
@@ -272,12 +272,12 @@ void Paraface::create_iopin_map(void)
 
 
     input_port = new InputPort(5);
-    input_port->value = 0;
+    input_port->value.put(0);
     input_port->valid_iopins=0x1f;
     input_port->paraface = this;
 
     output_port = new OutputPort(8);
-    output_port->value = 0;
+    output_port->value.put(0);
     input_port->valid_iopins=0xff;
     output_port->paraface = this;
 
@@ -339,7 +339,7 @@ void Paraface::create_iopin_map(void)
 	    get_symbol_table().add_stimulus(p);
     }
 
-    write_parallel_data(output_port->value);
+    write_parallel_data(output_port->value.get());
     input_port->callback();
 
 }

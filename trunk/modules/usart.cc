@@ -573,7 +573,7 @@ public:
       // the current state of the bit in the ioport (to which this stimulus is
       // mapped), then we need to update the ioport.
 
-      if((new_digital_state!=0) ^ ( port->value & (1<<iobit))) {
+      if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
 
 	port->setbit(iobit,new_digital_state);
 
@@ -1511,11 +1511,11 @@ public:
   void setbit(unsigned int bit_number, bool new_value) {
     int mask = 1<<bit_number;
 
-    value = (value & ~mask) | (new_value ? mask : 0);
+    value.put( (value.get() & ~mask) | (new_value ? mask : 0));
 
     if(usart)
       //get_trace()->module1( (usart->interface_id << 4 ) | (value & 0xf));
-      get_trace().module1( value & 0xf);
+      get_trace().module1( value.get() & 0xf);
   }
 };
 

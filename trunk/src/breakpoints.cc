@@ -1023,7 +1023,7 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
   int new_value = ((int)new_bit) << bit_number;
 
   if( (val_mask & break_mask) &&
-      ( ((replaced->value & ~val_mask)  // clear the old bit
+      ( ((replaced->value.get() & ~val_mask)  // clear the old bit
 	 | new_value)                   // set the new bit
 	& break_mask) == break_value)
     {

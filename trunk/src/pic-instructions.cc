@@ -287,7 +287,7 @@ void ADDWF::execute(void)
   else
     source = cpu->register_bank[register_address];
 
-  new_value = (src_value = source->get()) + (w_value = cpu_pic->W->value);
+  new_value = (src_value = source->get()) + (w_value = cpu_pic->W->value.get());
 
   // Store the result
 
@@ -318,7 +318,7 @@ void ANDLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu_pic->W->value & L;
+  new_value = cpu_pic->W->value.get() & L;
 
   cpu_pic->W->put(new_value);
   cpu_pic->status->put_Z(0==new_value);
@@ -348,7 +348,7 @@ void ANDWF::execute(void)
   else
     source = cpu->register_bank[register_address];
 
-  new_value = source->get() & cpu_pic->W->value;
+  new_value = source->get() & cpu_pic->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source
@@ -847,7 +847,7 @@ void IORLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu_pic->W->value | L;
+  new_value = cpu_pic->W->value.get() | L;
 
   cpu_pic->W->put(new_value);
   cpu_pic->status->put_Z(0==new_value);
@@ -879,7 +879,7 @@ void IORWF::execute(void)
   else
     source = cpu->register_bank[register_address];
 
-  new_value = source->get() | cpu_pic->W->value;
+  new_value = source->get() | cpu_pic->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source
@@ -1184,7 +1184,7 @@ void SUBWF::execute(void)
   else
     source = cpu->register_bank[register_address];
 
-  new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value);
+  new_value = (src_value = source->get()) - (w_value = cpu_pic->W->value.get());
 
   // Store the result
 
@@ -1306,7 +1306,7 @@ void XORLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu_pic->W->value ^ L;
+  new_value = cpu_pic->W->value.get() ^ L;
 
   cpu_pic->W->put(new_value);
   cpu_pic->status->put_Z(0==new_value);
@@ -1337,7 +1337,7 @@ void XORWF::execute(void)
   else
     source = cpu->register_bank[register_address];
 
-  new_value = source->get() ^ cpu_pic->W->value;
+  new_value = source->get() ^ cpu_pic->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source

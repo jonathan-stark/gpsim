@@ -36,28 +36,6 @@ Boston, MA 02111-1307, USA.  */
 
 
 pic_processor *temp_cpu;
-#if 0
-//--------------------------------------------------
-// Member functions for the file_register base class
-//--------------------------------------------------
-//
-
-file_register::file_register(void)
-{
-  cpu = 0;
-  name_str1 = 0;
-  new_name("file_register");
-  xref = new XrefObject(&value);
-  read_access_count=0;
-  write_access_count=0;
-}
-
-file_register::~file_register(void)
-{
-  //delete(xref);
-}
-#endif
-
 // FIXME file_register::put_value has a useful feature...
 
 //
@@ -124,8 +102,8 @@ void file_register::put_value(unsigned int new_value)
 //
 void  FSR::put(unsigned int new_value)
 {
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -152,13 +130,13 @@ void  FSR::put_value(unsigned int new_value)
 unsigned int FSR::get(void)
 {
 
-  trace.register_read(address,value);
-  return(value);
+  trace.register_read(address,value.get());
+  return(value.get());
 }
 
 unsigned int FSR::get_value(void)
 {
-  return(value);
+  return(value.get());
 }
 
 
@@ -174,11 +152,11 @@ FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
 }
 void  FSR_12::put(unsigned int new_value)
 {
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 
   /* The 12-bit core selects the register page using the fsr */
-  cpu->register_bank = &cpu->registers[ value & register_page_bits ];
+  cpu->register_bank = &cpu->registers[ value.get() & register_page_bits ];
 }
 
 void  FSR_12::put_value(unsigned int new_value)
@@ -212,7 +190,7 @@ unsigned int FSR_12::get_value(void)
 {
   // adjust for missing bits
   cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
-  return ((value & valid_bits) | (~valid_bits & 0xff));
+  return ((value.get() & valid_bits) | (~valid_bits & 0xff));
 
 }
 
@@ -242,14 +220,14 @@ void inline Status_register::put(unsigned int new_value)
 {
   //value = new_value; // & STATUS_WRITABLE_BITS;
 
-  value = (value & ~write_mask) | (new_value & write_mask);
+  value.put((value.get() & ~write_mask) | (new_value & write_mask));
 
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     {
-      cpu->register_bank = &cpu->registers[(value & rp_mask) << 2];
+      cpu->register_bank = &cpu->registers[(value.get() & rp_mask) << 2];
     }
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 }
 
 
@@ -314,9 +292,9 @@ void INDF::initialize(void)
 void INDF::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
   int reg = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
-	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
   if(reg & fsr_mask){
@@ -343,7 +321,7 @@ void INDF::put_value(unsigned int new_value)
     {
       xref->update();
       int r = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
-	       ((cpu_pic->status->value & base_address_mask1)<<1)& base_address_mask2);
+	       ((cpu_pic->status->value.get() & base_address_mask1)<<1)& base_address_mask2);
       if(r & fsr_mask) 
 	{
 	  if(cpu->registers[r]->xref)
@@ -357,9 +335,9 @@ void INDF::put_value(unsigned int new_value)
 unsigned int INDF::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
   int reg = (cpu_pic->fsr->get_value() +
-	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get());
   else
@@ -369,7 +347,7 @@ unsigned int INDF::get(void)
 unsigned int INDF::get_value(void)
 {
   int reg = (cpu_pic->fsr->get_value() +
-	       ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
+	       ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get_value());
   else
@@ -383,15 +361,15 @@ OPTION_REG::OPTION_REG(void)
 {
   por_value = 0xff;
   wdtr_value = 0xff;
-  value = 0xff;
+  value.put(0xff);
   new_name("option");
 }
 
 void OPTION_REG::put(unsigned int new_value)
 {
 
-  unsigned int old_value = value;
-  value = new_value;
+  unsigned int old_value = value.get();
+  value.put(new_value);
 
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
@@ -402,19 +380,19 @@ void OPTION_REG::put(unsigned int new_value)
   // increment if tmr0 is being clocked by an external clock?
 
   // Now check the rest of the tmr0 bits.
-  if( (value ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
+  if( (value.get() ^ old_value) & (T0CS | T0SE | PSA | PS2 | PS1 | PS0))
     cpu_pic->tmr0.new_prescale();
 
-  if( (value ^ old_value) & (PSA | PS2 | PS1 | PS0))
+  if( (value.get() ^ old_value) & (PSA | PS2 | PS1 | PS0))
     cpu_pic->wdt.new_prescale();
 
-  if( (value ^ old_value) & (BIT6 | BIT7))
-    cpu_pic->option_new_bits_6_7(value & (BIT6 | BIT7));
+  if( (value.get() ^ old_value) & (BIT6 | BIT7))
+    cpu_pic->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-    trace.register_write(address,value);
+    trace.register_write(address,value.get());
   else
-    trace.write_OPTION(value);
+    trace.write_OPTION(value.get());
 
 }
 
@@ -434,27 +412,27 @@ void PCL::put(unsigned int new_value)
 {
 
   cpu_pic->pc->computed_goto(new_value);
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 }
 
 void PCL::put_value(unsigned int new_value)
 {
 
-  value = new_value & 0xff;
-  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffffff00) | value);
+  value.put(new_value & 0xff);
+  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffffff00) | value.get());
 
   // The gui (if present) will be updated in the pc->put_value call.
 }
 
 unsigned int PCL::get(void)
 {
-  return((value+1) & 0xff);
+  return((value.get()+1) & 0xff);
 }
 
 unsigned int PCL::get_value(void)
 {
-  value = cpu->pc->get_value() & 0xff;
-  return(value);
+  value.put(cpu->pc->get_value() & 0xff);
+  return(value.get());
 }
 //--------------------------------------------------
 // member functions for the PCLATH base class
@@ -467,24 +445,24 @@ PCLATH::PCLATH(void)
 
 void PCLATH::put(unsigned int new_value)
 {
-  value = new_value & PCLATH_MASK;
+  value.put(new_value & PCLATH_MASK);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 }
 
 void PCLATH::put_value(unsigned int new_value)
 {
 
-  value = new_value & PCLATH_MASK;
-  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value<<8) );
+  value.put(new_value & PCLATH_MASK);
+  cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffff00ff) | (value.get()<<8) );
 
   // The gui (if present) will be updated in the pc->put_value call.
 }
 
 unsigned int PCLATH::get(void)
 {
-  trace.register_read(address,value);
-  return(value & PCLATH_MASK);
+  trace.register_read(address,value.get());
+  return(value.get() & PCLATH_MASK);
 }
 
 //--------------------------------------------------
@@ -499,8 +477,8 @@ PCON::PCON(void)
 void PCON::put(unsigned int new_value)
 {
 
-  value = (new_value&valid_bits);
-  trace.register_write(address,value);
+  value.put(new_value&valid_bits);
+  trace.register_write(address,value.get());
 
 }
 
@@ -610,16 +588,16 @@ bool Stack::set_break_on_underflow(bool clear_or_set)
 
 unsigned int WREG::get(void)
 {
-  trace.read_W(value);
+  trace.read_W(value.get());
 
-  return(value);
+  return(value.get());
 }
 
 void WREG::put(unsigned int new_value)
 {
 
-  value = new_value;
-  trace.write_W(value);
+  value.put(new_value);
+  trace.write_W(value.get());
 
 }
 

@@ -75,8 +75,8 @@ void P12C508::create_iopin_map(void)
 void P12C508::reset(RESET_TYPE r)
 {
 
-  tris.value = tris.por_value;
-  option_reg.value = option_reg.por_value;
+  tris.value.put(tris.por_value);
+  option_reg.value.put(option_reg.por_value);
   pic_processor::reset(r);
   
 }
@@ -121,8 +121,8 @@ void P12C508::dump_registers (void)
 
   _12bit_processor::dump_registers();
 
-  cout << "tris = 0x" << hex << tris.value << '\n';
-  cout << "osccal = 0x" << osccal.value  << '\n';
+  cout << "tris = 0x" << hex << tris.value.get() << '\n';
+  cout << "osccal = 0x" << osccal.value.get()  << '\n';
 
 }
 
@@ -132,8 +132,8 @@ void P12C508::tris_instruction(unsigned int tris_register)
   cout << " Tris instruction\n";
 
   //tris.value = W.value;
-  tris.put(W->value);
-  trace.write_TRIS(tris.value);
+  tris.put(W->value.get());
+  trace.write_TRIS(tris.value.get());
 
 }
   
@@ -246,20 +246,20 @@ P12C509::P12C509(void)
 unsigned int GPIO::get(void)
 {
 
-  return(value);
+  return(value.get());
 
 }
 
 void GPIO::setbit(unsigned int bit_number, bool new_value)
 {
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   if(verbose)
     cout << "GPIO::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // If gpio bit 0,1 or 3 changed states AND
   // ~GPWU is low (wake up on change is enabled) AND
@@ -267,7 +267,7 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   //    Then wake 
   if( diff & 0x0b)
     {
-      if( ((cpu12->option_reg.value & 0x80) == 0) && bp.have_sleep()) {
+      if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
 
 	if(verbose)
 	  cout << "IO bit changed while the processor was sleeping,\n\

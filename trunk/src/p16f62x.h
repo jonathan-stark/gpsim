@@ -53,7 +53,7 @@ class CMCON : public sfr_register
       C2OUT = 1<<7,
     };
 
-  bool enabled(void) { return ((value & (CM0|CM1|CM2)) != (CM0|CM1|CM2)); };
+  bool enabled(void) { return ((value.get() & (CM0|CM1|CM2)) != (CM0|CM1|CM2)); };
 
   CMCON(void);
 };

@@ -200,7 +200,7 @@ void Program_Counter::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
   cycles.increment();
 }
 
@@ -222,7 +222,7 @@ void Program_Counter::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put( value & 0xff);
   cycles.increment();
 }
 
@@ -241,7 +241,7 @@ void Program_Counter::jump(unsigned int new_address)
 
     // see Update pcl comment in Program_Counter::increment()
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
   
   cycles.increment();
   trace.program_counter(value);
@@ -261,7 +261,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
@@ -290,7 +290,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
 
   // see Update pcl comment in Program_Counter::increment()
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
 
   // The instruction modifying the PCL will also increment the program counter.
   // So, pre-compensate the increment with a decrement:
@@ -310,7 +310,7 @@ void Program_Counter::new_address(unsigned int new_value)
 
   // see Update pcl comment in Program_Counter::increment()
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
   cycles.increment();
   cycles.increment();
 }
@@ -337,8 +337,8 @@ void Program_Counter::put_value(unsigned int new_value)
 #define PCLATH_MASK              0x1f
 
   value = new_value & memory_size_mask;
-  cpu_pic->pcl->value = value & 0xff;
-  cpu_pic->pclath->value = (new_value >> 8) & PCLATH_MASK;
+  cpu_pic->pcl->value.put(value & 0xff);
+  cpu_pic->pclath->value.put((new_value >> 8) & PCLATH_MASK);
 
   trace.program_counter(value);
 

@@ -886,7 +886,7 @@ int icd_get_state()
 icd_Register::icd_Register()
 {
     replaced=0;
-    value=0x42;
+    value.put(0x42);
     is_stale=1;
 };
 
@@ -910,28 +910,28 @@ unsigned int icd_Register::get(void)
 	switch(address)
 	{
 	case 2:
-	    value = icd_cmd("$$701F\r");
-	    cpu_pic->pcl->value = value & 0xff;
-	    cpu_pic->pclath->value = value >> 8;
+	    value.put(icd_cmd("$$701F\r"));
+	    cpu_pic->pcl->value.put(value.get() & 0xff);
+	    cpu_pic->pclath->value.put(value.get() >> 8);
 
 	    is_stale=0;
 	    break;
 	case 3:
-	    value = icd_cmd("$$7016\r")&0x00ff;
+	    value.put(icd_cmd("$$7016\r")&0x00ff);
 	    is_stale=0;
 	    if(xref)
 		xref->update();
 	    break;
 	case 4:
-	    value = icd_cmd("$$7019\r")&0x00ff;
+	    value.put(icd_cmd("$$7019\r")&0x00ff);
 	    is_stale=0;
 	    if(xref)
 		xref->update();
 	    break;
 	case 10:
-	    value = icd_cmd("$$701F\r");
-	    cpu_pic->pcl->value = value & 0xff;
-	    cpu_pic->pclath->value = value >> 8;
+	    value.put(icd_cmd("$$701F\r"));
+	    cpu_pic->pcl->value.put(value.get() & 0xff);
+	    cpu_pic->pclath->value.put(value.get() >> 8);
 
 	    is_stale=0;
 	    break;
@@ -957,7 +957,7 @@ unsigned int icd_Register::get(void)
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
 			    assert(ifr!=0);
-			    ifr->value=buf[i];
+			    ifr->value.put(buf[i]);
 			    ifr->is_stale=0;
 			    break;
 
@@ -1002,7 +1002,7 @@ unsigned int icd_Register::get(void)
 			default:
 			    icd_Register *ifr = static_cast<icd_Register*>(cpu->registers[offset+i]);
 			    assert(ifr!=0);
-			    ifr->value=buf[i];
+			    ifr->value.put(buf[i]);
 			    ifr->is_stale=0;
 			    break;
 
@@ -1030,13 +1030,13 @@ unsigned int icd_Register::get(void)
 	    break;
 	}
     }
-    return(value);
+    return(value.get());
 }
 
 icd_WREG::icd_WREG()
 {
     replaced=0;
-    value=0x42;
+    value.put(0x42);
     is_stale=1;
 };
 
@@ -1057,18 +1057,18 @@ unsigned int icd_WREG::get(void)
 {
     if(is_stale)
     {
-	value = icd_cmd("$$7017\r")&0x00ff;
+	value.put(icd_cmd("$$7017\r")&0x00ff);
 	is_stale=0;
 	if(xref)
 	    xref->update();
     }
-    return(value);
+    return(value.get());
 }
 
 icd_StatusReg::icd_StatusReg()
 {
     replaced=0;
-    value=0x42;
+    value.put(0x42);
     is_stale=1;
 };
 
@@ -1091,19 +1091,19 @@ unsigned int icd_StatusReg::get(void)
 {
     if(is_stale)
     {
-	value = icd_cmd("$$7016\r")&0x00ff;
+	value.put(icd_cmd("$$7016\r")&0x00ff);
 	is_stale=0;
 	if(xref)
 	    xref->update();
     }
-    return(value);
+    return(value.get());
 }
 
 
 icd_FSR::icd_FSR()
 {
     replaced=0;
-    value=0x42;
+    value.put(0x42);
     is_stale=1;
 };
 
@@ -1124,17 +1124,17 @@ unsigned int icd_FSR::get_value(void)
 
     if(is_stale)
     {
-	value = icd_cmd("$$7019\r")&0x00ff;
+	value.put(icd_cmd("$$7019\r")&0x00ff);
 	is_stale=0;
 	if(xref)
 	    xref->update();
     }
-    return(value);
+    return(value.get());
 }
 icd_PCLATH::icd_PCLATH()
 {
     replaced=0;
-    value=0x42;
+    value.put(0x42);
     is_stale=1;
 };
 
@@ -1157,12 +1157,12 @@ unsigned int icd_PCLATH::get_value(void)
 
     if(is_stale)
     {
-	value=(icd_cmd("$$701F\r")&0xff00)>>8;
+	value.put((icd_cmd("$$701F\r")&0xff00)>>8);
 	is_stale=0;
 	if(xref)
 	    xref->update();
     }
-    return(value);
+    return(value.get());
 }
 icd_PC::icd_PC()
 {
@@ -1182,8 +1182,8 @@ unsigned int icd_PC::get_value(void)
     if(is_stale)
     {
 	value = icd_cmd("$$701F\r");
-	cpu_pic->pcl->value = value & 0xff;
-	cpu_pic->pclath->value = value >> 8;
+	cpu_pic->pcl->value.put(value & 0xff);
+	cpu_pic->pclath->value.put(value >> 8);
 
 	is_stale=0;
     }

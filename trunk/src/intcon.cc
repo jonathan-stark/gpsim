@@ -43,11 +43,11 @@ INTCON::INTCON(void)
 void INTCON::set_T0IF(void)
 {
 
-  value |= T0IF;
+  value.put(value.get() | T0IF);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
-  if (value & (GIE | T0IE))
+  if (value.get() & (GIE | T0IE))
   {
     trace.interrupt();
   }
@@ -56,8 +56,8 @@ void INTCON::set_T0IF(void)
 void INTCON::put(unsigned int new_value)
 {
 
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
 
   // Now let's see if there's a pending interrupt
   // The INTCON bits are:
@@ -70,15 +70,15 @@ void INTCON::put(unsigned int new_value)
   // note: bit6 is not handled here because it is processor
   // dependent (e.g. EEIE for x84 and ADIE for x7x).
 
-  if(value & GIE)
+  if(value.get() & GIE)
     {
 
-      if( (((value>>3)&value) & (T0IF | INTF | RBIF)) )
+      if( (((value.get()>>3)&value.get()) & (T0IF | INTF | RBIF)) )
 	{
 	  trace.interrupt();
 	  bp.set_interrupt();
 	}
-      else if(value & XXIE)
+      else if(value.get() & XXIE)
 	{
 	  if(check_peripheral_interrupt())
 	    {
@@ -91,7 +91,7 @@ void INTCON::put(unsigned int new_value)
 
 void INTCON::peripheral_interrupt(void)
 {
-  if(  (value & (GIE | XXIE)) == (GIE | XXIE) )
+  if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
     bp.set_interrupt();
 }
 
@@ -160,15 +160,15 @@ void INTCON_16::set_gies(void)
   get();   // Update the current value of intcon
            // (and emit 'register read' trace).
 
-  if(rcon->value & RCON::IPEN)
+  if(rcon->value.get() & RCON::IPEN)
     {
       // Interrupt priorities are being used.
 
-      if(0 == (value & GIEH))
+      if(0 == (value.get() & GIEH))
 	{
 	  // GIEH is cleared, so we need to set it
 
-	  put(value | GIEH);
+	  put(value.get() | GIEH);
 	  return;
 
 	}
@@ -181,7 +181,7 @@ void INTCON_16::set_gies(void)
 	  // So we'll just blindly re-enable giel, and continue with the
 	  // simulation.
 
-	  put(value | GIEL);
+	  put(value.get() | GIEL);
 	  return;
 
 	}
@@ -192,7 +192,7 @@ void INTCON_16::set_gies(void)
       // Interrupt priorities are not used, so re-enable GIEH (which is in
       // the same bit-position as GIE on the mid-range core).
 
-      put(value | GIEH);
+      put(value.get() | GIEH);
       return;
 
     }
@@ -212,8 +212,8 @@ void INTCON_16::set_gies(void)
 void INTCON_16::put(unsigned int new_value)
 {
 
-  value = new_value;
-  trace.register_write(address,value);
+  value.put(new_value);
+  trace.register_write(address,value.get());
   //cout << " INTCON_16::put\n";
   // Now let's see if there's a pending interrupt
   // if IPEN is set in RCON, then interrupt priorities
@@ -222,13 +222,13 @@ void INTCON_16::put(unsigned int new_value)
   // low priority interrupt is being serviced, it's
   // possible for a high priority interrupt to interject.
 
-  if(rcon->value & RCON::IPEN)
+  if(rcon->value.get() & RCON::IPEN)
     {
       unsigned int i1;
 
       // Use interrupt priorities
 
-      if( 0 == (value & GIEH))
+      if( 0 == (value.get() & GIEH))
 	return;    // Interrupts are disabled
 
       // Now we just go through the interrupt logic of the 18cxxx
@@ -243,9 +243,9 @@ void INTCON_16::put(unsigned int new_value)
       // i1 will reflect this. Note that INTF does NOT have an
       // associated priority bit!
 
-      i1 =  ( (value>>3)&value) & (T0IF | INTF | RBIF);
+      i1 =  ( (value.get()>>3)&value.get()) & (T0IF | INTF | RBIF);
 
-      if(i1 & ( (intcon2->value & (T0IF | RBIF)) | INTF))
+      if(i1 & ( (intcon2->value.get() & (T0IF | RBIF)) | INTF))
 	{
 	  //cout << " selecting high priority vector\n";
 	  set_interrupt_vector(INTERRUPT_VECTOR_HI);
@@ -259,7 +259,7 @@ void INTCON_16::put(unsigned int new_value)
       // interrupts pending. So let's check for the low priority
       // ones.
 
-      if(i1 & ( (~intcon2->value & (T0IF | RBIF)) | INTF))
+      if(i1 & ( (~intcon2->value.get() & (T0IF | RBIF)) | INTF))
 	{
 	  //cout << " selecting low priority vector\n";
 	  set_interrupt_vector(INTERRUPT_VECTOR_LO);
@@ -276,14 +276,14 @@ void INTCON_16::put(unsigned int new_value)
 
       set_interrupt_vector(INTERRUPT_VECTOR_HI);
 
-      if(value & GIE) 
+      if(value.get() & GIE) 
 	{
-	  if( ( (value>>3)&value) & (T0IF | INTF | RBIF) )
+	  if( ( (value.get()>>3)&value.get()) & (T0IF | INTF | RBIF) )
 	    {
 	      trace.interrupt();
 	      bp.set_interrupt();
 	    }
-	  else if(value & XXIE)
+	  else if(value.get() & XXIE)
 	    {
 	      if(check_peripheral_interrupt())
 		{
