@@ -404,6 +404,258 @@ P16C71::P16C71(void)
 
 //--------------------------------------
 
+void P16C72::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "creating c72 registers \n";
+
+  add_sfr_register(&adcon0, 0x1f, 0);
+  add_sfr_register(&adcon1, 0x9f, 0);
+
+  add_sfr_register(&adres,  0x1e, 0);
+
+  adcon0.analog_port = porta;
+  adcon0.analog_port2 = NULL;
+  adcon0.adres = &adres;
+  adcon0.adresl = NULL;
+  adcon0.adcon1 = &adcon1;
+  adcon0.intcon = &intcon_reg;
+  adcon0.pir = &pir1;
+  adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+
+  pir1.valid_bits = 0xff;  // All 8-bits are valid interrupt sources.
+
+  intcon = &intcon_reg;
+
+  adcon1.analog_port = porta;
+  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+
+
+  adcon0.new_name("adcon0");
+  adcon1.new_name("adcon1");
+  adres.new_name("adres");
+
+  adcon1.Vrefhi_position[0] = 8;
+  adcon1.Vrefhi_position[1] = 3;
+  adcon1.Vrefhi_position[2] = 8;
+  adcon1.Vrefhi_position[3] = 8;
+  adcon1.Vrefhi_position[4] = 8;
+  adcon1.Vrefhi_position[5] = 3;
+  adcon1.Vrefhi_position[6] = 8;
+  adcon1.Vrefhi_position[7] = 8;
+
+  adcon1.Vreflo_position[0] = 8;
+  adcon1.Vreflo_position[1] = 8;
+  adcon1.Vreflo_position[2] = 8;
+  adcon1.Vreflo_position[3] = 8;
+  adcon1.Vreflo_position[4] = 8;
+  adcon1.Vreflo_position[5] = 8;
+  adcon1.Vreflo_position[6] = 8;
+  adcon1.Vreflo_position[7] = 8;
+
+  adcon1.configuration_bits[0] = 0xff;
+  adcon1.configuration_bits[1] = 0xff;
+  adcon1.configuration_bits[2] = 0x1f;
+  adcon1.configuration_bits[3] = 0x1f;
+  adcon1.configuration_bits[4] = 0x0b;
+  adcon1.configuration_bits[5] = 0x0b;
+  adcon1.configuration_bits[6] = 0;
+  adcon1.configuration_bits[7] = 0;
+
+  // c72 only has 8 analog configurations. The gpsim analog module
+  // supports 16 different configurations, so duplicate the first
+  // 8 positions to the remaining 8.
+
+  for(int i=8; i<16; i++) {
+    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
+    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
+    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
+  }
+
+  // Link the A/D converter to the Capture Compare Module
+  ccp2con.adcon0 = &adcon0;
+
+
+}
+
+
+void P16C72::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "c72 create symbols\n";
+
+}
+
+
+void P16C72::create(void)
+{
+
+  P16C62::create();
+
+  P16C72::create_sfr_map();
+
+}
+
+pic_processor * P16C72::construct(void)
+{
+
+  P16C72 *p = new P16C72;
+
+  cout << " c72 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
+
+  p->name_str = "16c72";
+
+  return p;
+
+}
+
+
+P16C72::P16C72(void)
+{
+  if(verbose)
+    cout << "c72 constructor, type = " << isa() << '\n';
+
+  //  create_sfr_map();
+  //  name_str = "16c72";
+
+}
+
+
+//--------------------------------------
+
+void P16C73::create_sfr_map(void)
+{
+
+  if(verbose)
+    cout << "creating c73 registers \n";
+
+  add_sfr_register(&adcon0, 0x1f, 0);
+  add_sfr_register(&adcon1, 0x9f, 0);
+
+  add_sfr_register(&adres,  0x1e, 0);
+
+  adcon0.analog_port = porta;
+  adcon0.analog_port2 = NULL;
+  adcon0.adres = &adres;
+  adcon0.adresl = NULL;
+  adcon0.adcon1 = &adcon1;
+  adcon0.intcon = &intcon_reg;
+  adcon0.pir = &pir1;
+  adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+
+  pir1.valid_bits = 0xff;  // All 8-bits are valid interrupt sources.
+
+  intcon = &intcon_reg;
+
+  adcon1.analog_port = porta;
+  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+
+
+  adcon0.new_name("adcon0");
+  adcon1.new_name("adcon1");
+  adres.new_name("adres");
+
+  adcon1.Vrefhi_position[0] = 8;
+  adcon1.Vrefhi_position[1] = 3;
+  adcon1.Vrefhi_position[2] = 8;
+  adcon1.Vrefhi_position[3] = 8;
+  adcon1.Vrefhi_position[4] = 8;
+  adcon1.Vrefhi_position[5] = 3;
+  adcon1.Vrefhi_position[6] = 8;
+  adcon1.Vrefhi_position[7] = 8;
+
+  adcon1.Vreflo_position[0] = 8;
+  adcon1.Vreflo_position[1] = 8;
+  adcon1.Vreflo_position[2] = 8;
+  adcon1.Vreflo_position[3] = 8;
+  adcon1.Vreflo_position[4] = 8;
+  adcon1.Vreflo_position[5] = 8;
+  adcon1.Vreflo_position[6] = 8;
+  adcon1.Vreflo_position[7] = 8;
+
+  adcon1.configuration_bits[0] = 0xff;
+  adcon1.configuration_bits[1] = 0xff;
+  adcon1.configuration_bits[2] = 0x1f;
+  adcon1.configuration_bits[3] = 0x1f;
+  adcon1.configuration_bits[4] = 0x0b;
+  adcon1.configuration_bits[5] = 0x0b;
+  adcon1.configuration_bits[6] = 0;
+  adcon1.configuration_bits[7] = 0;
+
+  // c73 only has 8 analog configurations. The gpsim analog module
+  // supports 16 different configurations, so duplicate the first
+  // 8 positions to the remaining 8.
+
+  for(int i=8; i<16; i++) {
+    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
+    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
+    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
+  }
+
+  // Link the A/D converter to the Capture Compare Module
+  ccp2con.adcon0 = &adcon0;
+
+
+}
+
+
+void P16C73::create_symbols(void)
+{
+
+  if(verbose)
+    cout << "c73 create symbols\n";
+
+}
+
+
+void P16C73::create(void)
+{
+
+  P16C63::create();
+
+  P16C73::create_sfr_map();
+
+}
+
+pic_processor * P16C73::construct(void)
+{
+
+  P16C73 *p = new P16C73;
+
+  cout << " c73 construct\n";
+
+  p->create();
+  p->create_invalid_registers ();
+  p->pic_processor::create_symbols();
+
+  p->name_str = "16c73";
+
+  return p;
+
+}
+
+
+P16C73::P16C73(void)
+{
+  if(verbose)
+    cout << "c73 constructor, type = " << isa() << '\n';
+
+  //  create_sfr_map();
+  //  name_str = "16c73";
+
+}
+
+//------------------------------------------------------------
+//
+//           16C74
+//
+
 void P16C74::create_sfr_map(void)
 {
 
@@ -429,7 +681,7 @@ void P16C74::create_sfr_map(void)
   intcon = &intcon_reg;
 
   adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG1 | ADCON1::PCFG2 | ADCON1::PCFG3;
+  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
 
 
   adcon0.new_name("adcon0");

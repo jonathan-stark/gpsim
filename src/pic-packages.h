@@ -59,12 +59,7 @@ public:
   PORTC        *portc;
   IOPORT_TRIS  trisc;
 
-  /*
-  IOPORT       portd;
-  IOPORT_TRIS  trisd;
-  */
-
-  virtual void create_iopin_map(void); //{return;};
+  virtual void create_iopin_map(void);
 
 };
 
@@ -72,7 +67,7 @@ class _40pins  : public _28pins
 {
 public:
 
-  //cvs has a bug?
+
   PIC_IOPORT   *portd;
   IOPORT_TRIS  trisd;
   PIC_IOPORT   *porte;

@@ -160,8 +160,6 @@ class P16C71 :  public P16C61
   ADCON1 adcon1;
   ADRES  adres;
 
-  //  const int PROGRAM_MEMORY_SIZE = 0x400;
-
   virtual PROCESSOR_TYPE isa(void){return _P16C71_;};
   virtual void create_symbols(void);
 
@@ -170,6 +168,48 @@ class P16C71 :  public P16C61
 
 
   P16C71(void);
+  void create(void);
+  static pic_processor *construct(void);
+
+};
+
+class P16C72 : public P16C62 
+{
+ public:
+
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
+  ADRES  adres;
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C72_;};
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+
+  //virtual unsigned int program_memory_size(void) const { return 0x800; };
+
+
+  P16C72(void);
+  void create(void);
+  static pic_processor *construct(void);
+
+};
+
+class P16C73 : public P16C63
+{
+ public:
+
+  ADCON0_withccp adcon0;
+  ADCON1 adcon1;
+  ADRES  adres;
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C73_;};
+  virtual void create_symbols(void);
+  void create_sfr_map(void);
+
+  //virtual unsigned int program_memory_size(void) const { return 0x800; };
+
+
+  P16C73(void);
   void create(void);
   static pic_processor *construct(void);
 

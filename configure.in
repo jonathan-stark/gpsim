@@ -136,8 +136,8 @@ AC_LANG_CPLUSPLUS
 dnl Checks for typedefs, structures, and compiler characteristics.
 dnl the const and inline checks produce illegal C++ code, skip them,
 dnl C++ is required to have both, a working const and a working inline
-AC_C_CONST
-AC_C_INLINE
+dnl AC_C_CONST
+dnl AC_C_INLINE
 dnl AC_TYPE_SIZE_T
 
 dnl Checks for library functions.
