@@ -588,7 +588,7 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
+  if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
     {
       simulation_start_cycle = cycles.value;
     }
@@ -675,7 +675,7 @@ void pic_processor::step_over (void)
 
   if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
     {
-        if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
+      if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
 	  return;
 	else
 	{
@@ -902,8 +902,6 @@ void pic_processor::init_program_memory (unsigned int memory_size)
   // The memory_size_mask is used by the branching instructions 
 
   pc->memory_size_mask = memory_size - 1;
-  pma.init(this);
-  pma.name();
 
   Processor::init_program_memory(memory_size);
 }

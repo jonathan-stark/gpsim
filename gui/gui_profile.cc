@@ -2104,17 +2104,17 @@ void Profile_Window::StartExe(int address)
   if(!enabled)
     ChangeView(VIEW_SHOW);
 
-  if(gp->cpu->pma.address_has_profile_start(address))
-    gp->cpu->pma.clear_profile_start_at_address(address);
+  if(gp->cpu->pma->address_has_profile_start(address))
+    gp->cpu->pma->clear_profile_start_at_address(address);
   else {
 
-    if(gp->cpu->pma.address_has_profile_stop(address))
+    if(gp->cpu->pma->address_has_profile_stop(address))
       // Can't have both start and stop at the same address
       // ..it becomes difficult to calculate the cycles
-      gp->cpu->pma.clear_profile_stop_at_address(address);
+      gp->cpu->pma->clear_profile_stop_at_address(address);
 
     // FIXME -- memory leak...
-    gp->cpu->pma.set_profile_start_at_address(address,
+    gp->cpu->pma->set_profile_start_at_address(address,
 					      new ProfileStart(this,address));
 
   }
@@ -2132,17 +2132,17 @@ void Profile_Window::StopExe(int address)
   if(enabled)
     ChangeView(VIEW_SHOW);
       
-  if(gp->cpu->pma.address_has_profile_stop(address))
-    gp->cpu->pma.clear_profile_stop_at_address(address);
+  if(gp->cpu->pma->address_has_profile_stop(address))
+    gp->cpu->pma->clear_profile_stop_at_address(address);
   else {
 	
-    if(gp->cpu->pma.address_has_profile_start(address))
+    if(gp->cpu->pma->address_has_profile_start(address))
       // Can't have both start and stop at the same address
       // ..it becomes difficult to calculate the cycles
-      gp->cpu->pma.clear_profile_start_at_address(address);
+      gp->cpu->pma->clear_profile_start_at_address(address);
 	
     // FIXME -- memory leak...
-    gp->cpu->pma.set_profile_stop_at_address(address,
+    gp->cpu->pma->set_profile_stop_at_address(address,
 					      new ProfileStop(this,address));
   }
 }
@@ -2186,10 +2186,10 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
     char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     guint64 cycles;
 
-    if(gp->cpu->pma.hasValid_opcode(i)) {
+    if(gp->cpu->pma->hasValid_opcode(i)) {
 	
       sprintf(address_string,"0x%04x",i);
-      strcpy(instruction_string,gp->cpu->pma.get_opcode_name(i,buf,sizeof(buf)));
+      strcpy(instruction_string,gp->cpu->pma->get_opcode_name(i,buf,sizeof(buf)));
 
       cycles=gp->cpu->cycles_used(i);
       sprintf(count_string,"0x%Lx",cycles);

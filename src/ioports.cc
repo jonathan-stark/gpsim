@@ -199,7 +199,8 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
 int IOPORT::get_bit(unsigned int bit_number)
 {
 
-  return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
+  //return( (value &  one_shifted_left_by_n [bit_number & 0x07]) ? 1 : 0);
+  return (value >>  (bit_number % num_iopins)) & 1;
 
 }
 

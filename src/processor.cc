@@ -78,17 +78,6 @@ Processor::Processor(void)
 
   set_frequency(1.0);
 
-  // add the 'main' pma to the list pma context's. Processors may
-  // choose to add multiple pma's to the context list. The gui
-  // will build a source browser for each one of these. The purpose
-  // is to provide more than one way of debugging the code. (e.g.
-  // this is useful for debugging interrupt versus non-interrupt code).
-
-  pma_context.push_back(&pma);
-
-  // Uncomment this to get two identical source browsers in the gui:
-  //  pma_context.push_back(&pma);
-
   interface = new ProcessorInterface(this);
 
 }
@@ -315,7 +304,6 @@ void Processor::init_program_memory (unsigned int memory_size)
 
     }
 
-
   // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
   // pointers of type 'instruction'. This is where the simulated instructions
   // are stored.
@@ -334,6 +322,11 @@ void Processor::init_program_memory (unsigned int memory_size)
       program_memory[i] = &bad_instruction;
       program_memory[i]->cpu = this;     // %%% FIX ME %%% 
     }
+
+  pma = new ProgramMemoryAccess(this);
+  pma->name();
+
+
 }
 
 //-------------------------------------------------------------------
@@ -1063,16 +1056,30 @@ guint64 Processor::cycles_used(unsigned int address)
 //-------------------------------------------------------------------
 //
 
-ProgramMemoryAccess::ProgramMemoryAccess(void)
+
+ProgramMemoryAccess::ProgramMemoryAccess(Processor *new_cpu)
 {
-  _address, _opcode, _state = 0;
-  hll_mode = ASM_MODE;
+  init(new_cpu);
 }
 
 void ProgramMemoryAccess::init(Processor *new_cpu)
 {
+
+  _address, _opcode, _state = 0;
+  hll_mode = ASM_MODE;
+
   cpu = new_cpu;
-  
+
+  // add the 'main' pma to the list pma context's. Processors may
+  // choose to add multiple pma's to the context list. The gui
+  // will build a source browser for each one of these. The purpose
+  // is to provide more than one way of debugging the code. (e.g.
+  // this is useful for debugging interrupt versus non-interrupt code).
+
+  if(cpu)
+    cpu->pma_context.push_back(this);
+
+
 }
 
 Processor *ProgramMemoryAccess::get_cpu(void)
@@ -1282,7 +1289,7 @@ void ProgramMemoryAccess::step(unsigned int steps)
 
   case HLL_MODE:
     {
-      unsigned int initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
+      unsigned int initial_line = cpu->pma->get_src_line(cpu->pc->get_value());
       unsigned int initial_pc = cpu->pc->get_value();
 
       while(1)

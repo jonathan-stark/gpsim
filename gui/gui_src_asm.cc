@@ -1189,9 +1189,9 @@ int hll_source_line_represents_code(Processor *cpu,
 				    unsigned int line)
 {
     int address;
-    address = cpu->pma.find_closest_address_to_line(file_id,line);
+    address = cpu->pma->find_closest_address_to_line(file_id,line);
 
-    return line==cpu->pma.get_src_line(address);
+    return line==cpu->pma->get_src_line(address);
 }
 
 static GdkFont *_gtk_style_get_font(GtkStyle *style)
@@ -1541,7 +1541,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   int address;
 
-  if(!gp || !gp->cpu)
+  if(!gp || !gp->cpu || !gp->cpu->pma)
     return;
 
   if(!enabled)
@@ -1551,7 +1551,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   }
   
   if(!pma)
-    pma = &(gp->cpu->pma);
+    pma = gp->cpu->pma;
 
   assert(wt==WT_asm_source_window);
 

@@ -476,7 +476,7 @@ void EEPROM_WIDE::callback(void)
     if(eecon1.value & EECON1::EEPGD) {
       // read program memory
       
-      int opcode = cpu->pma.get_opcode(eeadr.value | (eeadrh.value << 8));
+      int opcode = cpu->pma->get_opcode(eeadr.value | (eeadrh.value << 8));
       //cout << "read " << i << " from program memory\n";
       eedata.value = opcode & 0xff;
       eedatah.value = (opcode>>8) & 0xff;

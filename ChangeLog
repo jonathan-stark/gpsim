@@ -1,4 +1,14 @@
 2004-04-14 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_break.cc, gui/gui_menu.cc, gui/gui_profile.cc,
+	gui/gui_src_asm.cc, gui/gui_src_opcode.cc, gui/gui_stack.cc,
+	src/16bit-registers.cc, src/breakpoints.cc,
+	src/cod.cc, src/eeprom.cc, src/ioports.cc, src/ioports.h, 
+	src/pic-processor.cc, src/processor.cc, src/processor.h,
+	src/trace.cc:
+	Made the processor's ProgramMemoryAccess class dynamically allocated.
+	* src/Makefile.am: ssp.h was not part of the install.
+
+2004-04-14 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-tmrs.cc: The TMR2 peripheral failed to properly clear
 	its breakpoint whenever it was being turned off.
 	*src/modules.h: string.h was not getting included.

@@ -1397,7 +1397,7 @@ void TBL_MODULE::read(void)
     ( (tabptrh.value & 0xff) << 8 )  |
     ( (tabptrl.value & 0xff) << 0 );
 
-  opcode = cpu->pma.get_opcode(tabptr>>1);
+  opcode = cpu->pma->get_opcode(tabptr>>1);
 
   //  cout << __FUNCTION__ << "() tabptr: 0x" << hex << tabptr << "opcode: 0x" << opcode << '\n';
 
@@ -1425,13 +1425,11 @@ void TBL_MODULE::write(void)
     ( (tabptrh.value & 0xff) << 8 )  |
     ( (tabptrl.value & 0xff) << 0 );
 
-  //  opcode = cpu->pma->get_opcode(tabptr);
-
   if(tabptr & 1)
     {
       // Long write
       internal_latch = (internal_latch & 0x00ff) | ((tablat.value<<8) & 0xff00);
-      cpu->pma.put_opcode_start(tabptr>>1, internal_latch);
+      cpu->pma->put_opcode_start(tabptr>>1, internal_latch);
     }
   else
     {
