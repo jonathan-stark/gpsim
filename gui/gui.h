@@ -449,6 +449,8 @@ struct _Profile_Window {
   GtkWidget *notebook;
   gint range_current_row;
   GtkWidget *range_popup_menu;
+  GtkWidget *plot_popup_menu;
+  GtkWidget *plot_canvas;
 
 };
 
