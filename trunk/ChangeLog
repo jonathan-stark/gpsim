@@ -1,4 +1,9 @@
 2004-09-15 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, src/pic-processor.cc:
+	getWriteTT and getReadTT used to return TraceType objects,
+	but now they return unsigned ints.
+
+2004-09-15 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/trace.cc, gui/gui_src_opcode.cc:
 	- 18f processors' addresses were off by a factor of two in
 	disassembly operations.
