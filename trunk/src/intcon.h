@@ -26,7 +26,6 @@ Boston, MA 02111-1307, USA.  */
 //using namespace std;
 #include "pic-registers.h"	// for sfr_register
 #include "breakpoints.h"	// for global bp definition!
-#include "trace.h"		// for global trace definition!
 
 //---------------------------------------------------------
 // INTCON - Interrupt control register
@@ -58,10 +57,7 @@ enum
   // which bit 6 enables becomes true. (e.g. for the c84, this
   // routine is called when EEIF goes high.)
   */
-  inline void peripheral_interrupt(void)
-    {
-      if(  (value & (GIE | XXIE)) == (GIE | XXIE) ) bp.set_interrupt();
-    };
+  inline void peripheral_interrupt(void);
 
   inline void set_gie(void)
     {
@@ -109,45 +105,7 @@ enum
       return 0;
     }
 
-  virtual void put(unsigned int new_value)
-    {
-
-//      if(break_point) 
-//	bp.check_write_break(this);
-
-
-      value = new_value;
-      trace.register_write(address,value);
-
-  // Now let's see if there's a pending interrupt
-  // The INTCON bits are:
-  // GIE | ---- | TOIE | INTE | RBIE | TOIF | INTF | RBIF
-  // There are 3 sources for interrupts, TMR0, RB0/INTF
-  // and RBIF (RB7:RB4 change). If the corresponding interrupt
-  // flag is set AND the corresponding interrupt enable bit
-  // is set AND global interrupts (GIE) are enabled, THEN
-  // there's an interrupt pending.
-  // note: bit6 is not handled here because it is processor
-  // dependent (e.g. EEIE for x84 and ADIE for x7x).
-
-      if(value & GIE)
-        {
-
-          if( (((value>>3)&value) & (T0IF | INTF | RBIF)) )
-            {
-              trace.interrupt();
-              bp.set_interrupt();
-            }
-          else if(value & XXIE)
-            {
-              if(check_peripheral_interrupt())
-                {
-                  trace.interrupt();
-                  bp.set_interrupt();
-                }
-            }
-        }
-    }
+  virtual void put(unsigned int new_value);
 
 };
 
