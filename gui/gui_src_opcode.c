@@ -44,6 +44,9 @@ typedef enum {
     MENU_BREAK_WRITE,
     MENU_BREAK_EXECUTE,
     MENU_ADD_WATCH,
+    MENU_ASCII_1BYTE,
+    MENU_ASCII_2BYTELSB,
+    MENU_ASCII_2BYTEMSB,
 } menu_id;
 
 
@@ -62,6 +65,11 @@ static menu_item menu_items[] = {
     {"Add watch", MENU_ADD_WATCH},
 };
 
+static menu_item submenu_items[] = {
+    {"One byte per cell",             MENU_ASCII_1BYTE},
+    {"Two bytes per cell, MSB first", MENU_ASCII_2BYTEMSB},
+    {"Two bytes per cell, LSB first", MENU_ASCII_2BYTELSB},
+};
 
 // Used only in popup menus
 SourceBrowserOpcode_Window *popup_sbow;
@@ -77,6 +85,72 @@ static char *row_text[PROGRAM_MEMORY_WINDOW_COLUMNS]={
 static GtkStyle *row_default_style;
 
 
+// update ascii column in sheet
+static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
+{
+    gint i;
+    gchar name[45];
+    unsigned char byte;
+
+    if(sbow == NULL || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
+    {
+	printf("Warning update_ascii(%x,%x)\n",(unsigned int)sbow,row);
+	return;
+    }
+
+    if(row<0 || row>GTK_SHEET(sbow->sheet)->maxrow)
+	return;
+
+    switch(popup_sbow->ascii_mode)
+    {
+    case 0:
+	for(i=0; i<16; i++)
+	{
+	    byte = sbow->memory[row*16 + i]&0xff;
+
+	    name[i] = byte;
+	    
+	    if( (name[i] < ' ') || (name[i]>'z'))
+		name[i] = '.';
+	}
+	name[i] = 0;
+	break;
+    case 1: // two bytes, MSB first
+	for(i=0; i<32; i++)
+	{
+	    if(i%2)
+		byte = sbow->memory[row*16 + i/2]&0xff;
+	    else
+		byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
+
+	    name[i] = byte;
+	    
+	    if( (name[i] < ' ') || (name[i]>'z'))
+		name[i] = '.';
+	}
+	name[i] = 0;
+	break;
+    case 2: // two bytes, LSB first
+	for(i=0; i<32; i++)
+	{
+
+	    if(i%2)
+		byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
+	    else
+		byte = sbow->memory[row*16 + i/2]&0xff;
+
+	    name[i] = byte;
+	    
+	    if( (name[i] < ' ') || (name[i]>'z'))
+		name[i] = '.';
+	}
+	name[i] = 0;
+	break;
+    }
+    gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
+
+}
+
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
@@ -89,6 +163,8 @@ popup_activated(GtkWidget *widget, gpointer data)
     GtkSheetRange range;
     unsigned int address;
     int value;
+    int pm_size;
+    gint char_width;
 
     if(widget==NULL || data==NULL)
     {
@@ -100,6 +176,9 @@ popup_activated(GtkWidget *widget, gpointer data)
     sheet=GTK_SHEET(popup_sbow->sheet);
     range = sheet->range;
     pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
+    
+    pm_size = gpsim_get_program_memory_size(popup_sbow->sbw.gui_obj.gp->pic_id);
+    char_width = gdk_string_width (normal_style->font,"9");
     
     switch(item->id)
     {
@@ -133,7 +212,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    {
 		address=j*16+i;
 		gpsim_clear_breakpoints_at_address(popup_sbow->sbw.gui_obj.gp->pic_id, address);
-//		gpsim_reg_clear_breakpoints(pic_id, popup_sbow->type,address);
 	    }
 	break;
     case MENU_ADD_WATCH:
@@ -145,6 +223,27 @@ popup_activated(GtkWidget *widget, gpointer data)
 //		WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
 	    }
 	break;
+    case MENU_ASCII_1BYTE:
+	popup_sbow->ascii_mode=0;
+	config_set_variable(popup_sbow->sbw.gui_obj.name,"ascii_mode",popup_sbow->ascii_mode);
+	gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 16*char_width + 6);
+	for(i=0;i<pm_size/16;i++)
+	    update_ascii(popup_sbow,i);
+	break;
+    case MENU_ASCII_2BYTEMSB:
+	popup_sbow->ascii_mode=1;
+	config_set_variable(popup_sbow->sbw.gui_obj.name,"ascii_mode",popup_sbow->ascii_mode);
+	gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
+	for(i=0;i<pm_size/16;i++)
+	    update_ascii(popup_sbow,i);
+	break;
+    case MENU_ASCII_2BYTELSB:
+	popup_sbow->ascii_mode=2;
+	config_set_variable(popup_sbow->sbw.gui_obj.name,"ascii_mode",popup_sbow->ascii_mode);
+	gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
+	for(i=0;i<pm_size/16;i++)
+	    update_ascii(popup_sbow,i);
+	break;
     default:
 	puts("Unhandled menuitem?");
 	break;
@@ -155,9 +254,13 @@ popup_activated(GtkWidget *widget, gpointer data)
 static GtkWidget *
 build_menu(SourceBrowserOpcode_Window *sbow)
 {
-  GtkWidget *menu;
-  GtkWidget *item;
-//  GtkAccelGroup *accel_group;
+    GtkWidget *menu;
+    GtkWidget *item;
+
+    GSList *group=NULL;
+    
+    GtkWidget *submenu;
+    //  GtkAccelGroup *accel_group;
   int i;
 
   if(sbow==NULL)
@@ -165,7 +268,9 @@ build_menu(SourceBrowserOpcode_Window *sbow)
       printf("Warning build_menu(%x)\n",(unsigned int)sbow);
       return NULL;
   }
-    
+
+  popup_sbow=sbow;
+  
   menu=gtk_menu_new();
 
 /*  accel_group = gtk_accel_group_new ();
@@ -195,6 +300,36 @@ build_menu(SourceBrowserOpcode_Window *sbow)
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
+  
+    submenu=gtk_menu_new();
+    for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
+	item=gtk_radio_menu_item_new_with_label(group, submenu_items[i].name);
+
+	group=gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(item));
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) popup_activated,
+			   &submenu_items[i]);
+	
+	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+
+/*	if(submenu_items[i].id==MENU_STOP)
+	{
+	    GTK_WIDGET_UNSET_FLAGS (item,
+				    GTK_SENSITIVE | GTK_CAN_FOCUS);
+	}*/
+      
+	gtk_widget_show(item);
+	
+	if(i==sbow->ascii_mode)
+	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item),1);
+	
+	gtk_menu_append(GTK_MENU(submenu),item);
+    }
+    item = gtk_menu_item_new_with_label ("ASCII mode");
+    gtk_menu_append (GTK_MENU (menu), item);
+    gtk_widget_show (item);
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+
   
   return menu;
 }
@@ -330,12 +465,19 @@ static void update_label(SourceBrowserOpcode_Window *sbow, int address)
     char buf[128];
     char buf2[128];
     GtkEntry *sheet_entry;
+    unsigned int oc;
+
+    printf("%d\n",address);
+    
+    oc=gpsim_get_opcode(sbow->sbw.gui_obj.gp->pic_id  ,address);
+    
     // Update entry
     sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet)));
     filter(buf,gpsim_get_opcode_name( sbow->sbw.gui_obj.gp->pic_id, address,buf2),sizeof(buf));
     gtk_label_set(GTK_LABEL(sbow->label), buf);
     gtk_entry_set_max_length(GTK_ENTRY(sbow->entry),
 			     GTK_ENTRY(sheet_entry)->text_max_length);
+    sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
     gtk_entry_set_text(GTK_ENTRY(sbow->entry), row_text[OPCODE_COLUMN]);
 
 }
@@ -404,42 +546,6 @@ static unsigned long get_number_in_string(char *number_string)
   */
 
   return(retval);
-}
-
-
-static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
-{
-  gint i;
-  gchar name[45];
-
-  if(sbow == NULL || row<0 || row > GTK_SHEET(sbow->sheet)->maxrow)
-  {
-      printf("Warning update_ascii(%x,%x)\n",(unsigned int)sbow,row);
-      return;
-  }
-
-  if(row<0 || row>GTK_SHEET(sbow->sheet)->maxrow)
-      return;
-  
-  for(i=0; i<32; i++)
-  {
-      unsigned char byte;
-
-      if(i%2)
-	  byte = sbow->memory[row*16 + i/2]&0xff;
-      else
-	  byte = (sbow->memory[row*16 + i/2]&0xff00) >>8;
-      
-      name[i] = byte;
-
-	if( (name[i] < ' ') || (name[i]>'z'))
-	    name[i] = '.';
-    }
-
-  name[REGISTERS_PER_ROW*2] = 0;
-
-  gtk_sheet_set_cell(GTK_SHEET(sbow->sheet), row,REGISTERS_PER_ROW, GTK_JUSTIFY_RIGHT,name);
-
 }
 
 
@@ -993,7 +1099,6 @@ static GdkBitmap *mask;
   sprintf(name,"ASCII");
   gtk_sheet_column_button_add_label(GTK_SHEET(sbow->sheet), i, name);
   gtk_sheet_set_column_title(GTK_SHEET(sbow->sheet), i, name);
-  gtk_sheet_set_column_width (GTK_SHEET(sbow->sheet), i, REGISTERS_PER_ROW*char_width + 6);
   gtk_sheet_set_row_titles_width(GTK_SHEET(sbow->sheet), column_width);
 
   /* create popupmenu */
@@ -1080,6 +1185,7 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     sbow->column_titles = titles;
     sbow->columns = 4;
 
+
     sbow->sbw.gui_obj.gp = gp;
     gp->program_memory = (SourceBrowser_Window*)sbow;
     sbow->sbw.gui_obj.name = "disassembly";
@@ -1096,6 +1202,9 @@ int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp)
     sbow->program=0;
 
     gp_add_window_to_list(gp, (GUI_Object *)sbow);
+
+    sbow->ascii_mode=1; /// default, two bytes/cell, MSB first
+    config_get_variable(sbow->sbw.gui_obj.name,"ascii_mode",&sbow->ascii_mode);
 
     gui_object_get_config((GUI_Object*)sbow);
 

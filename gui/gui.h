@@ -345,7 +345,11 @@ struct _SourceBrowserOpcode_Window {
 //    GtkWidget *pcwidget;
     GtkWidget *popup_menu;
 
-
+    int ascii_mode; // 0, 1 or 2 equals
+                    // one byte/cell,
+                    // two bytes/cell MSB first
+                    // two bytes/cell LSB first
+    
     int *memory;
 };
 
