@@ -86,10 +86,10 @@ public:
 //
 // non-class helper functions.
 
-//Module *  add_module(char * module_type, char * module_new_name);
 void display_available_modules(void);
 void dump_module_list(void);
 //int find_in_available_module_list(char * module_type);
 void load_module_library(char *library_name);
+void load_module(char * module_type, char * module_new_name=NULL);
 
 #endif // __MODULES_H__

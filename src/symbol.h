@@ -68,7 +68,7 @@ public:
   void add_constant(pic_processor *cpu, char *, int );
   void add_register(pic_processor *cpu, file_register *reg);
   void add_address(pic_processor *cpu, char *, int );
-  void add_module(Module * );
+  void add_module(Module * m, char *module_name);
   void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);

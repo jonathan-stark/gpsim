@@ -171,13 +171,15 @@ void Symbol_Table::add_line_number(pic_processor *cpu, int address)
 
 }
 
-void Symbol_Table::add_module(Module * m)
+void Symbol_Table::add_module(Module * m, char *new_name)
 {
   cout << "add module\n";
 
   module_symbol *ms = new module_symbol();
 
-  ms->cpu = m;
+  ms->cpu      = m;
+  ms->name_str = new_name;
+
   st.push_back(ms);
 
 }
