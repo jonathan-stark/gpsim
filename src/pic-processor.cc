@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "picdis.h"
 #include "symbol.h"
 #include "stimuli.h"
+#include "p16x5x.h"
 #include "p16x8x.h"
 #include "p16f87x.h"
 #include "p16x6x.h"
@@ -141,6 +142,9 @@ processor_types available_processors[] =
   {_P16F84_,
    "__16F84",   "pic16f84",   "p16f84",  "16f84",
    P16F84::construct },
+  {_P16C54_,
+   "__16C54",   "pic16c54",   "p16c54",  "16c54",
+   P16C54::construct },
   {_P16C61_,
    "__16C61",   "pic16c61",   "p16c61",  "16c61",
    P16C61::construct },
@@ -1443,7 +1447,7 @@ void pic_processor::toggle_break_at_line(int file_id, int src_line)
 void    pic_processor::set_out_of_range_pm(int address, int value)
 {
 
-  cout << "Warning::Out of range address " << address << '\n';
+  cout << "Warning::Out of range address " << address << " value " << value << endl;
   cout << "Max allowed address is " << (program_memory_size()-1) << '\n';
 
 }
