@@ -1,3 +1,18 @@
+2004-04-07 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc, src/breakpoints.h: 
+	Redesigned breakpoints so that a) they're more object oriented and b) more
+	easily extensible.
+	* src/interface.cc, src/gpsim_interface.h: Removed the CyclicBreakPoint class
+	and moved the functionality it was providing into the gpsimInterface class
+	* src/14bit-registers.h, src/14bit-tmrs.h, modules/usart.cc, cli/cmd_set.cc,
+	src/eeprom.h, src/gpsim_time.cc, src/gpsim_time.h, 
+	src/p16x7x.h, src/pic-processor.cc, src/processor.cc,
+	src/processor.h, src/ssp.h, src/stimuli.cc, src/stimuli.h, src/tmr0.h,
+	src/trace.h, src/uart.h, gui/gui_profile.cc, modules/encoder.h, modules/paraface.h,:
+	Removed the BreakCallBack class. The functionality it was providing is now
+	implemented by the BreakpointObject class.
+
+
 2004-04-11  Borut Razem  <borut.razem@siol.net>
 	* src/interface.cc: added initialization of interface_seq_number in
 	gpsimInterface constructor.

@@ -49,7 +49,7 @@ extern void dump_stimulus_list(void);
  *
  * Include file support stimuli. 
  *
- *       stimulus             BreakCallBack
+ *       stimulus             BreakpointObject
  *       |  \                      /
  *       |   -----------------+----
  *       |                    |
@@ -156,7 +156,7 @@ public:
   virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; else cout<<"errrrrrr\n";};
 };
 
-class source_stimulus : public stimulus, public BreakCallBack
+class source_stimulus : public stimulus, public BreakpointObject
 {
 public:
 

@@ -46,7 +46,7 @@ public:
 
 };
 
-class InputPort : public Paraface_Port, public BreakCallBack
+class InputPort : public Paraface_Port, public BreakpointObject
 {
 public:
     unsigned int direction;

@@ -131,30 +131,6 @@ Interface::Interface(gpointer new_object)
 
 }
 
-#if 0
-Interface *get_interface(unsigned int interface_id)
-{
-
-  GSList *interface_list = gi.interfaces;
-
-  while(interface_list) {
-
-    if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
-
-
-      if(an_interface->get_id() == interface_id)
-	return an_interface;
-
-    }
-
-    interface_list = interface_list->next;
-  }
-
-  return 0;
-
-}
-#endif
 
 //--------------------------------------------------------------------------
 //
@@ -177,32 +153,57 @@ Interface *get_interface(unsigned int interface_id)
 //--------------------------------------------------------------------------
 
 
-static void gui_update_callback  (gpointer p)
+void gpsimInterface::update  (void)
 {
-  gpsimInterface *gpsiminterface = (gpsimInterface *)p;
-  GSList *interface_list = gpsiminterface->interfaces;
 
-  while(interface_list) {
+  GSList *external_interfaces = interfaces;
 
-    if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+  while(external_interfaces) {
+
+    if(external_interfaces->data) {
+      Interface *an_interface = (struct Interface *)(external_interfaces->data);
 
       an_interface->GuiUpdate(an_interface->objectPTR);
     }
 
-    interface_list = interface_list->next;
+    external_interfaces = external_interfaces->next;
   }
+}
+
+void gpsimInterface::callback(void)
+{
+  if(gui_update_rate) {
+    future_cycle = cycles.value + gui_update_rate;
+    cycles.set_break(future_cycle, this);
+
+  }
+
+  update();
+}
+void gpsimInterface::clear(void)
+{
+
+}
+
+void gpsimInterface::print(void)
+{
+  cout << "Interface update rate " << gui_update_rate << endl;
+}
+
+void gpsimInterface::callback_print(void)
+{
+
 }
 
 void update_gui(void)
 {
-    gui_update_callback(&gi);
+  gi.update();
 }
 
 gpsimInterface::gpsimInterface (void )
 {
   interfaces = 0;
-  gui_update_cbp  = 0;
+  future_cycle = 0;
   interface_seq_number = 0;
 }
 
@@ -381,20 +382,15 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
 
 void  gpsimInterface::set_update_rate  (guint64 update_rate)
 {
-    gui_update_rate = update_rate;
-    if(active_cpu!=0)
-    {
-	if(gui_update_cbp==0)
-	{
-	    gui_update_cbp = new CyclicBreakPoint();
-	    ((CyclicBreakPoint*)gui_update_cbp)->pic = active_cpu;
-	    ((CyclicBreakPoint*)gui_update_cbp)->callback_function = gui_update_callback;
-	    ((CyclicBreakPoint*)gui_update_cbp)->callback_data = this;
-	    ((CyclicBreakPoint*)gui_update_cbp)->delta_cycles = DEFAULT_GUI_UPDATE_RATE;
-	    ((CyclicBreakPoint*)gui_update_cbp)->set_break();
-	}
-	((CyclicBreakPoint*)gui_update_cbp)->set_delta(update_rate);
-    }
+  guint64 fc = cycles.value + update_rate;
+
+  if(future_cycle)
+    cycles.reassign_break(future_cycle, fc, this);
+  else
+    cycles.set_break(fc, this);
+  
+  gui_update_rate = update_rate;
+  future_cycle = fc;
 }
 
 

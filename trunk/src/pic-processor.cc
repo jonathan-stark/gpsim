@@ -66,9 +66,6 @@ guint64 simulation_start_cycle;
 int     verbose=0;
 
 
-// Number of simulation cycles between calls to refresh the gui
-guint64 gui_update_rate = DEFAULT_GUI_UPDATE_RATE;
-
 //================================================================================
 //
 // pic_processor
@@ -405,7 +402,7 @@ int realtime_mode=0;
 int realtime_mode_with_gui=0;
 extern void update_gui(void);
 
-class RealTimeBreakPoint : public BreakCallBack
+class RealTimeBreakPoint : public BreakpointObject
 {
 public:
   Processor *cpu;
