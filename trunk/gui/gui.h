@@ -407,7 +407,7 @@ struct TraceMapping {
 struct _Trace_Window {
   GUI_Object     gui_obj;
 
-  GtkSheet *trace_sheet;
+  GtkCList *trace_clist;
   guint64   last_cycle;   // The cycle of the last trace in the window.
 
   GtkWidget *location;
