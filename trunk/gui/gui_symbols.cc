@@ -264,9 +264,9 @@ void Symbol_Window::Update(void)
     entry[2] = (char*)malloc(cMaxLength);
     if (typeid(*sym) == typeid(register_symbol)) {
       Register * pReg = ((register_symbol*)sym)->getReg();
-      char sValue[cMaxLength];
-      sym->get(sValue,cMaxLength);
-      snprintf(entry[2], cMaxLength, "%02x / %s", pReg->address, sValue);
+      int iValue;
+      sym->get(iValue);
+      snprintf(entry[2], cMaxLength, "%02x / %d (0x%02x)", pReg->address, iValue, iValue);
     }
     else {
       sym->get(entry[2],cMaxLength);
