@@ -43,6 +43,8 @@ class Trace
 #define    WRITE_TRIS       (0x0b<<24)
 #define    WRITE_OPTION     (0x0c<<24)
 #define    OPCODE_WRITE     (0x0d<<24)
+#define    MODULE_TRACE1    (0x0e<<24)
+#define    MODULE_TRACE2    (0x0f<<24)
 #define    CYCLE_COUNTER_LO (0x80<<24)
 #define    CYCLE_COUNTER_HI (0x40<<24)
 
@@ -142,6 +144,20 @@ class Trace
   inline void write_OPTION (unsigned int value)
   {
     trace_buffer[trace_index] = WRITE_OPTION | value;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void module1(unsigned int value)
+  {
+    trace_buffer[trace_index] = MODULE_TRACE1 | value;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void module2(unsigned int value1,unsigned int value2)
+  {
+    trace_buffer[trace_index] = MODULE_TRACE2 | value1;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+    trace_buffer[trace_index] = MODULE_TRACE2 | value2;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 

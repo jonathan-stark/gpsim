@@ -32,18 +32,16 @@ public:
 
 #define IOPINS 8
 
-  IOPIN  *pins[IOPINS];
+  IOPIN  **pins; // [IOPINS];
 
-  // Specify the pin low to high and high to low thresholds.
-  int l2h_threshold[IOPINS];
-  int h2l_threshold[IOPINS];
 
   IOPORT_TRIS * tris;
 
   unsigned int 
     valid_iopins,   // A mask that for those ports that don't have all 8 io bits.
     stimulus_mask,  // A mask indicating which io bits have a stimulus.
-    internal_latch; // 
+    internal_latch, // 
+    num_iopins;     // Number of I/O pins attached to this port
 
   void put(unsigned int new_value);
   void put_value(unsigned int new_value);
@@ -57,8 +55,9 @@ public:
   void attach_iopin(IOPIN * new_pin, unsigned int bit_position);
   void attach_node(Stimulus_Node *new_node, unsigned int bit_position);
   void update_pin_directions(unsigned int new_tris);
+  virtual void trace_register_write(void);
 
-  IOPORT(void);
+  IOPORT(unsigned int _num_iopins=8);
 
 };
 

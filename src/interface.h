@@ -70,9 +70,24 @@ void  initialization_is_complete(void);
 
 #define INVALID_VALUE 0xffffffff
 
-char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-void  gpsim_put_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int register_value);
+  /*********************************************************************
+   * 
+   * What follows is a whole bunch of functions that provide access to
+   * gpsim's innards. This is what the gui uses to interface to gpsim.
+   * All of the functions here have "C" signatures, which is to say
+   * they may be called from "C" code as well as from C++
+   */
+
+char *gpsim_get_register_name(unsigned int processor_id, 
+			      REGISTER_TYPE type, 
+			      unsigned int register_number);
+unsigned int gpsim_get_register_value(unsigned int processor_id, 
+				      REGISTER_TYPE type, 
+				      unsigned int register_number);
+void  gpsim_put_register_value(unsigned int processor_id, 
+			       REGISTER_TYPE type, 
+			       unsigned int register_number, 
+			       unsigned int register_value);
 
 #define SYMBOL_NAME_LEN 32
 typedef struct _sym
@@ -82,14 +97,10 @@ typedef struct _sym
     int value;
 } sym;
 
-gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-void gpsim_symbol_rewind(unsigned int processor_id);
-sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
-
-//  char *gpsim_get_register_name(unsigned int processor_id, unsigned int register_number);
-//  unsigned int gpsim_get_register_value(unsigned int processor_id, unsigned int register_number);
-//  void  gpsim_put_register_value(unsigned int processor_id, unsigned int register_number, unsigned int register_value);
+  gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
+  gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
+  void gpsim_symbol_rewind(unsigned int processor_id);
+  sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
   char *gpsim_processor_get_name(unsigned int processor_id);
   unsigned int gpsim_get_pc_value(unsigned int processor_id);
   void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value);
@@ -133,6 +144,9 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
 				   void (*interface_callback)(gpointer), 
 				   gpointer interface_callback_data,
 				   guint64 cycle);
+  gpointer gpsim_set_cyclic_break_point2( void (*interface_callback)(gpointer), 
+					  gpointer interface_callback_data,
+					  guint64 cycle);
   int gpsim_open(unsigned int processor_id, char *file);
   //---------------------------------------------------------------------------
   // pin interface functions
@@ -151,7 +165,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
   //          callback function registration
   //
   //---------------------------------------------------------------------------
-  unsigned int gpsim_register_interface(void);
+  unsigned int gpsim_register_interface(gpointer _new_object);
   void gpsim_register_update_object(unsigned int interface_id,
 				    void (*update_object) (gpointer xref,int new_value) );
   void gpsim_register_remove_object(unsigned int interface_id, 
@@ -159,7 +173,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
   void gpsim_register_new_processor(unsigned int interface_id, 
 				    void (*new_processor) (unsigned int processor_id));
   void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
-					     void (*simulation_has_stopped) (void));
+					     void (*simulation_has_stopped) (gpointer));
   void gpsim_register_new_program(unsigned int interface_id, 
 				  void (*new_program)  (unsigned int processor_id));
 

@@ -368,7 +368,7 @@ int gui_init (int argc, char **argv)
   CreateBreadboardWindow(gp);
 
 
-  interface_id = gpsim_register_interface();
+  interface_id = gpsim_register_interface((gpointer) gp);
   gpsim_register_update_object(interface_id,gui_update_object);
   gpsim_register_remove_object(interface_id, gui_remove_object);
   gpsim_register_new_processor(interface_id, gui_new_processor);

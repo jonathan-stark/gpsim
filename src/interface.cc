@@ -40,6 +40,9 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 #include "interface.h"
 
+
+extern pic_processor *active_cpu;
+
 unsigned int gpsim_is_initialized = 0;  // Flag to tell us when all of the init stuff is done.
 
 
@@ -877,6 +880,38 @@ gpointer gpsim_set_cyclic_break_point( unsigned int processor_id,
   cbp->delta_cycles = cycle;
   cbp->set_break();
   
+  return((gpointer)cbp);
+}
+
+//---------------------------------------------------------------------------
+//  gpsim_set_cyclic_break_point2 same as gpsim_set_cyclic_break_point (no '2')
+// except that it's assumed the active_pic is the one that will supply the
+// cycle counter for the break point
+
+gpointer gpsim_set_cyclic_break_point2(
+				   void (*interface_callback)(gpointer), 
+				   gpointer interface_callback_data,
+				   guint64 cycle)
+{
+
+  CyclicBreakPoint *cbp  = new CyclicBreakPoint();
+
+  if(!cbp)
+    return NULL;
+
+  cbp->pic = active_cpu;
+
+  if(!cbp->pic) {
+    delete cbp;
+    return NULL;
+  }
+
+  cbp->callback_function = interface_callback;
+  cbp->callback_data = interface_callback_data;
+  cbp->delta_cycles = cycle;
+  cbp->set_break();
+  
+  return((gpointer)cbp);
 }
 
 //---------------------------------------------------------------------------
@@ -1051,10 +1086,11 @@ int gpsim_open(unsigned int processor_id, char *file)
 //
 //
 //--------------------------------------------------------------------------
-Interface::Interface(void)
+Interface::Interface(gpointer new_object=NULL)
 {
 
   interface_id = 0;
+  objectPTR = new_object;
 
   update_object = NULL;
   simulation_has_stopped = NULL;
@@ -1086,9 +1122,9 @@ Interface *get_interface(unsigned int interface_id)
 
 }
 
-unsigned int gpsim_register_interface(void)
+unsigned int gpsim_register_interface(gpointer new_object)
 {
-  Interface *an_interface = new Interface();
+  Interface *an_interface = new Interface(new_object);
 
   return gi.add_interface(an_interface);
 
@@ -1125,7 +1161,7 @@ void gpsim_register_new_processor(unsigned int interface_id,
   
 }
 void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
-					   void (*simulation_has_stopped) (void))
+					   void (*simulation_has_stopped) (gpointer new_object))
 {
   Interface *an_interface = get_interface(interface_id);
 
@@ -1231,7 +1267,7 @@ void gpsimInterface::simulation_has_stopped (void)
       Interface *an_interface = (struct Interface *)(interface_list->data);
 
       if(an_interface->simulation_has_stopped)
-	an_interface->simulation_has_stopped();
+	an_interface->simulation_has_stopped(an_interface->objectPTR);
     }
 
     interface_list = interface_list->next;

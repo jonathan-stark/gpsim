@@ -24,10 +24,11 @@
 
 extern GUI_Processor *gp;
 
-void gui_simulation_has_stopped(void)
+void gui_simulation_has_stopped(gpointer callback_data)
 {
-  if(gp)
+  if(callback_data)
     {
+      GUI_Processor *gp = (GUI_Processor *) callback_data;
       RegWindow_update(gp->regwin_ram);
       RegWindow_update(gp->regwin_eeprom);
       StatusBar_update(gp->status_bar);
@@ -54,6 +55,7 @@ void  gui_cycle_callback (gpointer callback_data)
 
   if(callback_data)
     {
+      /*
       GUI_Processor *gp = (GUI_Processor *) callback_data;
       RegWindow_update(gp->regwin_ram);
       RegWindow_update(gp->regwin_eeprom);
@@ -62,6 +64,10 @@ void  gui_cycle_callback (gpointer callback_data)
       SourceBrowser_update(gp->source_browser);
       WatchWindow_update(gp->watch_window);
       BreadboardWindow_update(gp->breadboard_window);
+      */
+
+      // Update all of the windows in the gui
+      gui_simulation_has_stopped(callback_data);
 
       // update gui
       while(gtk_events_pending())
