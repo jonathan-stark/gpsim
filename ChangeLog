@@ -1,3 +1,6 @@
+2005-03-17 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc: tweaking of I/O thresholds.
+
 2005-03-16 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, src/stimuli.h, src/stimuli.cc, src/symbol.cc,
 	src/symbol.h: Added/enhanced methods for searching, adding, and
