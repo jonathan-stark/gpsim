@@ -26,7 +26,11 @@ of features to improve it:
    the Dispatch Window.
 
  - Optionally hide the tabs that display file names. They take up
-   valuable GUI real estate and are only used to switch between files.
+   valuable GUI real estate and are only used to switch between
+   files. As an alternative to tabs, a file can be placed into a
+   framed box whose title is the name of the file. Clicking on the
+   title will pop up the list of files that can be viewed and clicking
+   on one of those will bring it to focus.
 
  - Add a cursor as an alternative means of aiming focus.
 
@@ -46,6 +50,48 @@ of features to improve it:
  - Add a status line field indicating the simulation state. The
    simulation states can be: RUNNING, BREAK (stopped), ASSERTION
    (stopped), ANIMATE, 
+
+1b) Context Debugging
+
+At the moment gpsim supports a programming paradigm called 'context
+debugging'. Context Debugging allows a user to simulate a program
+while it is running in a specific context. For PIC processors, there
+are only two defined contexts: the interrupt context and the
+non-interrupt context. So for context debugging the user can select to
+say single step only in the interrupt routine. When ever the interrupt
+completes (e.g. by executing an RETFIE) the simulation will run full
+speed until the interrupt occurs again.
+
+ - User defined contexts: provide a mechanism whereby a user can
+   define regions of code that are associated with a given context.
+
+ - Allow contexts to be named
+
+ - At the moment, gpsim spawns a separate source browser for each
+   context. Instead, provide a mechanism whereby a user can select a
+   specific context in the (one and only) source browser window.
+
+1c) Status Bar
+
+At the moment, the Register Window and Source Browser Window have a
+status bar. Both of these show the current execution time. The Source
+Browser in addition shows a set of registers that are unique to the
+displayed context (e.g. on a PIC, the STATUS, W, and PC are shown [on
+the 18F family, the BSR is shown too]).
+
+Currently, execution time is shown in two ways: cumulative cycles and
+one of several time formats (e.g. time in microseconds, milliseconds,
+HH:MM:SS.mmmm, etc.).
+
+ - The status bar will be placed at the very bottom of the main
+   window.
+
+ - A set of processor-specific registers will be displayed.
+
+ - The user can select the mode in which the registers are displayed.
+
+ - If a register has symbolic bit names (e.g. the STATUS register)
+   then those can also be displayed.
 
 
 2) Watch window
@@ -121,7 +167,11 @@ the amount of time that have transpired since it was last told to
 start timing. In addition, the cycles can be displayed modulo some
 number.
 
+Since the stop watch and the total time are so similar, combine them
+into one.
+
  - Make the stop watch window a tool bar item.
+
 
 6) Bread board window
 
