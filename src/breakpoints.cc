@@ -70,8 +70,6 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
 					 BreakpointObject *f1)
 {
   Register *fr;
-  int i;
-  Breakpoint_Instruction *abp;
 
   bool found =0;
 
@@ -433,12 +431,8 @@ instruction *Breakpoints::find_previous(Processor *cpu,
 
 void Breakpoints::clear(unsigned int b)
 {
-  Breakpoint_Instruction *abp;
-  instruction *inst;
-  instruction *previous;
-  Register *fr;
 
-  if(b<MAX_BREAKPOINTS) {
+	if(b<MAX_BREAKPOINTS) {
 
     BreakStatus bs = break_status[b];   // 
 
@@ -1044,7 +1038,7 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
       //trace_log.buffer.register_write_value(replaced->address, break_value);
     }
 
-  replaced->setbit(bit_number,new_value);
+	replaced->setbit(bit_number,new_value ? true  : false);
 
 }
 

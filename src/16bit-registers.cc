@@ -1063,7 +1063,7 @@ unsigned int TMR0_16::get_value(void)
   if(get_t0cs() ||  ((t0con->value.get() & T0CON::TMR0ON) == 0))
     return(value.get());
 
-  int new_value = (cycles.value - last_cycle)/ prescale;
+  int new_value = (int) ((cycles.value - last_cycle)/ prescale);
 
   value.put(new_value & 0xff);
 
@@ -1384,7 +1384,7 @@ void TBL_MODULE::read(void)
 void TBL_MODULE::write(void)
 {
 
-  unsigned int tabptr,opcode;
+  unsigned int tabptr;
 
   tabptr = 
     ( (tabptru.value.get() & 0xff) << 16 ) |

@@ -189,7 +189,6 @@ const int NUM_OP_17CXX	= sizeof(op_17cxx) / sizeof(op_17cxx[0]);
 instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst)
 {
   instruction *pi;
-  char buf[50];
 
   cpu16->current_disasm_address = address;
 

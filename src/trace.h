@@ -169,9 +169,9 @@ class Trace
   inline void cycle_counter (guint64 cc)
   {
     // The 64 bit cycle counter requires two 32 bit traces.
-    trace_buffer[trace_index] = CYCLE_COUNTER_LO | cc & 0xffffffff;
+    trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_LO | (cc & 0xffffffff));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-    trace_buffer[trace_index] = CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO);
+    trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
   inline void cycle_increment (void)
@@ -385,7 +385,7 @@ class BoolEventBuffer : public BreakpointObject
 public:
 
   guint32  index;               // Index into the buffer
-  guint32  *buffer;             // Where the time is stored
+  guint64  *buffer;             // Where the time is stored
   guint32  max_events;          // Size of the event buffer
   guint64  start_time;          // time of the first event
   guint64  future_cycle;        // time at which the buffer can store no more data.

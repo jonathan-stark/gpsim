@@ -109,7 +109,7 @@ void Bit_op::decode(Processor *new_cpu, unsigned int new_opcode)
 	case  _P18F1320_:
           mask = 1 << ((opcode >> 9) & 7);
           register_address = opcode & REG_MASK_16BIT;
-          access = opcode & ACCESS_MASK_16BIT;
+		  access = (opcode & ACCESS_MASK_16BIT) ? true : false;
           if((!access) && (opcode & 0x80))
 	    register_address |= 0xf00;
 
@@ -236,8 +236,8 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
   switch(cpu_pic->base_isa())
     {
     case _16BIT_PROCESSOR_:
-      destination = opcode & DESTINATION_MASK_16BIT;
-      access = opcode & ACCESS_MASK_16BIT;
+		destination = (opcode & DESTINATION_MASK_16BIT) ? true : false;
+		access = (opcode & ACCESS_MASK_16BIT) ? true : false;
       register_address = opcode & REG_MASK_16BIT;
       if((!access) && (opcode & 0x80))
 	register_address |= 0xf00;
@@ -246,13 +246,13 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
 
     case _14BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_14BIT;
-      destination = opcode & DESTINATION_MASK_14BIT;
+	  destination = (opcode & DESTINATION_MASK_14BIT) ? true : false;
       access = 1;
       break;
 
     case _12BIT_PROCESSOR_:
       register_address = opcode & REG_MASK_12BIT;
-      destination = opcode & DESTINATION_MASK_12BIT;
+	  destination = (opcode & DESTINATION_MASK_12BIT) ? true : false;
       access = 1;
       break;
 
@@ -913,8 +913,6 @@ MOVLW::MOVLW (Processor *new_cpu, unsigned int new_opcode)
 
 void MOVLW::execute(void)
 {
-  unsigned int source_value;
-
   trace.instruction(opcode);
 
   cpu_pic->W->put(L);

@@ -309,8 +309,6 @@ void read_src_files_from_cod(Processor *cpu)
       return;
     }
 
-  FILE *t;
-
   num_files = 0;
   end_block = 0;			// eliminates a (spurious) warning
   //start_block = get_short_int(&directory_block_data[COD_DIR_NAMTAB]);
@@ -446,8 +444,7 @@ void read_line_numbers_from_cod(Processor *cpu)
 {
   int lst_line_number = 0;
   int last_src_line = 0;
-  char buf[256];
-  int i,j,start_block,end_block,offset;
+  int j,start_block,end_block,offset;
   int address,file_id, sline,smod;
 
   //  start_block = get_short_int(&directory_block_data[COD_DIR_LSTTAB]);
@@ -663,6 +660,8 @@ void check_for_gpasm(char *block)
 // Read .c line numbers from special .asm files.
 void read_hll_line_numbers_from_asm(Processor *cpu)
 {
+#if USE_OLD_FILE_CONTEXT == 1
+
   int i;
   struct file_context *gpsim_file;
   char *file_name;
@@ -687,7 +686,6 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
   int file_index;
   int filearray_index;
 
-#if USE_OLD_FILE_CONTEXT == 1
 
   // Find the file context that contain the .asm file.
   // This assumes 'there can be only one'.
@@ -877,9 +875,8 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
 
 int open_cod_file(Processor **pcpu, const char *filename)
 {
-  int buffer_size;
   int suspicions = 0; // count the number of legal but suspicious items in the .cod file
-  char processor_name[16],*pc;
+  char processor_name[16];
   int error_code= COD_SUCCESS;
   char directory[256];
   const char *dir_path_end;

@@ -576,6 +576,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Breakpo
     cout << " Warning: Cycle_Counter::reassign_break - didn't find the old one\n";
     set_break(new_cycle, f);
   }
+  return 1;
 }
 
 void Cycle_Counter::clear_current_break(void)

@@ -100,8 +100,10 @@ int IOPORT::update_stimuli(void)
   //cout << "updating the stimuli\n";
   guint64 time = cycles.value;
   int input = 0;
+  int m;
+  unsigned int i;
 
-  for(int i = 0, m=1; i<num_iopins; i++, m <<= 1)
+  for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
     if(stimulus_mask & m)
       {
         if(pins[i]->snode!=0)
@@ -554,7 +556,7 @@ IOPORT::IOPORT(unsigned int _num_iopins)
 
   pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
 
-  for(int i=0; i<num_iopins; i++)
+  for(unsigned int i=0; i<num_iopins; i++)
     pins[i] = 0;
 
   new_name("ioport");
@@ -562,7 +564,7 @@ IOPORT::IOPORT(unsigned int _num_iopins)
 
 IOPORT::~IOPORT()
 {
-    for(int i=0; i<num_iopins; i++)
+    for(unsigned int i=0; i<num_iopins; i++)
     {
 	if(pins[i] != 0)
 	    delete pins[i];
@@ -646,7 +648,7 @@ void IOPORT_TRIS::put_value(unsigned int new_value)
 
   port->update();
 
-  for(int i=0; i<port->num_iopins; i++)
+  for(unsigned int i=0; i<port->num_iopins; i++)
     port->pins[i]->update();
 
 }
@@ -1084,7 +1086,7 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
     }
 
   if( ssp && (diff & SS) ) {
-	ssp->new_ss_edge(new_value & SS);
+	  ssp->new_ss_edge(new_value ? SS : 0);
   }
   
 }
@@ -1155,7 +1157,7 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
     }
 
   if( ssp && (diff & SS) ) {
-	ssp->new_ss_edge(new_value & SS);
+	  ssp->new_ss_edge(new_value ? SS : 0);
   }
   
 }

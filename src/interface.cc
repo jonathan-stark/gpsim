@@ -163,7 +163,7 @@ void gpsimInterface::update  (void)
   while(external_interfaces) {
 
     if(external_interfaces->data) {
-      Interface *an_interface = (struct Interface *)(external_interfaces->data);
+      Interface *an_interface = (Interface *)(external_interfaces->data);
 
       an_interface->GuiUpdate(an_interface->objectPTR);
     }
@@ -226,7 +226,7 @@ void gpsimInterface::update_object (gpointer xref,int new_value)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->UpdateObject(xref, new_value);
     }
@@ -245,7 +245,7 @@ void gpsimInterface::remove_object (gpointer xref)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->RemoveObject(xref);
     }
@@ -265,7 +265,7 @@ void gpsimInterface::simulation_has_stopped (void)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->SimulationHasStopped(an_interface->objectPTR);
     }
@@ -284,7 +284,7 @@ void gpsimInterface::new_processor (Processor *new_cpu)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->NewProcessor(new_cpu);
     }
@@ -302,7 +302,7 @@ void gpsimInterface::new_module (Module *module)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->NewModule(module);
     }
@@ -320,7 +320,7 @@ void gpsimInterface::node_configuration_changed (Stimulus_Node *node)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->NodeConfigurationChanged(node);
     }
@@ -338,7 +338,7 @@ void gpsimInterface::new_program  (Processor *cpu)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       an_interface->NewProgram(cpu);
     }
@@ -368,7 +368,7 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
   while(interface_list) {
 
     if(interface_list->data) {
-      Interface *an_interface = (struct Interface *)(interface_list->data);
+      Interface *an_interface = (Interface *)(interface_list->data);
 
       if(an_interface->get_id()==interface_id)
       {

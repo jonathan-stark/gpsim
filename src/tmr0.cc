@@ -166,7 +166,7 @@ unsigned int TMR0::get_value(void)
   if(get_t0cs() || ((state & 1)==0))
     return(value.get());
 
-  int new_value = (cycles.value - last_cycle)/ prescale;
+  int new_value = (int )((cycles.value - last_cycle)/ prescale);
 
   //  if(new_value == 256) {
     // tmr0 is about to roll over. However, the user code
@@ -209,7 +209,7 @@ void TMR0::new_prescale(void)
 {
   //cout << "tmr0 new_prescale\n";
 
-  int new_value;
+  unsigned int new_value;
 
   int option_diff = old_option ^ cpu_pic->option_reg.value.get();
 
@@ -240,10 +240,10 @@ void TMR0::new_prescale(void)
 
     } else {
 
-      if(last_cycle < cycles.value)
-	new_value = (cycles.value - last_cycle)/prescale;
-      else
-	new_value = 0;
+    if(last_cycle < cycles.value)
+	  new_value = (unsigned int)((cycles.value - last_cycle)/prescale);
+    else
+	  new_value = 0;
 
       if(new_value>=max_counts()) {
 	cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
@@ -352,7 +352,7 @@ void  TMR0::reset(RESET_TYPE r)
 {
 
   switch(r) {
-  POR_RESET:
+  case POR_RESET:
     cout << "TMR0::reset - por\n";
     value.put(por_value);
     break;
