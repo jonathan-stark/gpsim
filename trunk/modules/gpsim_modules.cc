@@ -50,6 +50,7 @@ support:
 #include "usart.h"
 #include "paraface.h"
 #include "switch.h"
+#include "logic.h"
 
 /*
 class Module_Types
@@ -76,6 +77,10 @@ Module_Types available_modules[] =
 
   // Switch
   { "switch",         "sw", Switch::construct},
+
+  // Logic
+  { "and2", "and2", AND2Gate::construct},
+  { "or2",  "or2",  OR2Gate::construct},
 
   // No more modules
   { NULL,NULL,NULL}

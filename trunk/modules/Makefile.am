@@ -10,7 +10,8 @@ libgpsim_modules_la_SOURCES = \
 	resistor.cc resistor.h \
 	usart.cc usart.h \
 	paraface.cc paraface.h \
-	switch.cc switch.h 
+	switch.cc switch.h \
+	logic.cc logic.h 
 
 
 libgpsim_modules_la_LDFLAGS =  @X_LDFLAGS@

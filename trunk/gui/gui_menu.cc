@@ -527,7 +527,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/Sta_ck",  NULL, (GtkItemFactoryCallback)toggle_window,8,"<ToggleItem>" },
   { "/Windows/sep2",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/Symbo_ls",NULL, (GtkItemFactoryCallback)toggle_window,6,"<ToggleItem>" },
-  { "/Windows/_Pins",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
+  { "/Windows/_Breadboard",NULL, (GtkItemFactoryCallback)toggle_window,7,"<ToggleItem>" },
   { "/Windows/sep3",   NULL, (GtkItemFactoryCallback)gtk_ifactory_cb,0,"<Separator>"  },
   { "/Windows/_Trace",NULL, (GtkItemFactoryCallback)toggle_window,9,"<ToggleItem>" },
   { "/Windows/Pro_file",NULL, (GtkItemFactoryCallback)toggle_window,10,"<ToggleItem>" },
