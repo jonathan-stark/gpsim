@@ -194,10 +194,9 @@ class GUIRegister {
   unsigned int get_value(void);
   Register *get_register();
 
-  // put and get for update the shadow
+  // put and get for updating the shadow
   void put_shadow(unsigned int new_value);
   unsigned int get_shadow(void);
-
 
   void Clear_xref(void);
   void Assign_xref(CrossReferenceToGUI *);
@@ -286,7 +285,11 @@ class Register_Window : public GUI_Object
 
 
   virtual void Build(void);
+  int LoadStyles(void);
+  int SettingsDialog(void);
+  void SetRegisterSize(void);
   virtual void Update(void);
+  virtual void UpdateASCII(int row);
   virtual void UpdateLabel(void);
   virtual void UpdateEntry(void);
   virtual void UpdateLabelEntry(void);
@@ -295,9 +298,18 @@ class Register_Window : public GUI_Object
   virtual GUIRegister *getRegister(int row, int col);
   virtual gboolean UpdateRegisterCell(unsigned int reg_number);
   GUIRegister *operator [] (int address);
+  int column_width(int col);
+  int row_height(int row);
 
   Register_Window(GUI_Processor *gp);
   Register_Window(void);
+
+ private:
+  // Formatting
+  int register_size;    // The size (in bytes) of a single register
+  char *pCellFormat;    // dynamically created format string
+  int char_width;       // nominal character width.
+  int chars_per_column; // width of 1 column
 };
 
 

@@ -406,7 +406,7 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
     program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
-    // printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
+    printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
 
     FileContext *fc = (*files)[file_id];
 
@@ -1690,7 +1690,6 @@ Files::~Files(void)
 
 }
 
-
 int Files::Find(string &fname)
 {
   if(lastFile) {
@@ -1714,9 +1713,11 @@ int Files::Add(string &new_name, FILE *fptr)
 
   lastFile++;
 
+  cout << "Added new file named: " << new_name 
+       << "  id = " << lastFile << endl;
+
   return lastFile-1;
 }
-
 
 int Files::Add(char *new_name, FILE *fptr)
 {
@@ -1725,11 +1726,17 @@ int Files::Add(char *new_name, FILE *fptr)
 
   lastFile++;
 
+  cout << "Added new file named: " << new_name 
+       << "  id = " << lastFile << endl;
+
   return lastFile-1;
 }
 
 FileContext *Files::operator [] (int file_id)
 {
+
+  if(file_id >= lastFile)
+    return 0;
 
 #define GCC_VERSION 296
 #if GCC_VERSION == 296

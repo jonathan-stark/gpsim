@@ -19,6 +19,8 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
+//extern void simulation_cleanup(void);
+
 #include "../src/gpsim_def.h"
 #include "../src/gpsim_classes.h"
 #include "../src/icd.h"
@@ -40,7 +42,6 @@ extern SIMULATION_MODES simulation_mode;
 #define HAVE_READLINE
 #endif
 
-extern void simulation_cleanup(void);
 extern const char *get_dir_delim(const char *path);
 extern bool bUseGUI;
 
@@ -697,7 +698,7 @@ void exit_gpsim(void)
   rl_callback_handler_remove ();
 #endif
 
-  simulation_cleanup();
+  //  simulation_cleanup();
 
   exit(0);
 }
