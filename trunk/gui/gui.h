@@ -329,10 +329,9 @@ struct _SourceBrowserAsm_Window {
     SourceBrowser_Window sbw;
 
     GList *breakpoints;
-//    struct breakpoint_info breakpoint[MAX_BREAKPOINTS];
     int layout_offset;
 
-    // We need one of theese for each source file
+    // We need one of these for each source file
     GtkAdjustment *source_layout_adj[SBAW_NRFILES];
     GtkWidget *source_layout[SBAW_NRFILES];
     GtkWidget *source_text[SBAW_NRFILES];
@@ -346,7 +345,7 @@ struct _SourceBrowserAsm_Window {
 
     GtkWidget *popup_menu;
 
-    struct sa_entry *menu_data;  // used by men callbacks
+    struct sa_entry *menu_data;  // used by menu callbacks
     
     GdkBitmap *mask;
     GtkWidget *notebook;

@@ -103,6 +103,8 @@ static menu_item submenu_items[] = {
     {"Finish",          MENU_FINISH,NULL},
 };
 
+static int file_id_to_source_mode[100];
+
 // this should be in SourceBrowserAsm struct FIXME
 static struct {
     int found;                   //
@@ -219,13 +221,8 @@ static struct sa_entry *gui_index_to_entry(int id, int index)
 }
 
 void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
-{
-    struct sa_entry *e;
-    int row;
-    unsigned int pixel;
-    float inc;
-    int i;
-    int sbawFileId;
+{ struct sa_entry *e; int row; unsigned int pixel; float inc; int i;
+int sbawFileId;
 
 //    static GtkWidget *old_pcw=NULL;
 
@@ -256,13 +253,16 @@ void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
 
     if(id==-1)
     {
-	puts("SourceBrowserAsm_update_line(): could not find notebook page");
+	puts("SourceBrowserAsm_set_pc(): could not find notebook page");
 	return;
     }
     
     new_pcw = sbaw->source_pcwidget[id];
 
-    row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+    if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
+	row = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+    else
+	row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
     if(row==INVALID_VALUE)
 	return;
     row--;
@@ -340,13 +340,16 @@ void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address
 
     if(id==-1)
     {
-	puts("SourceBrowserAsm_update_line(): could not find notebook page");
+	puts("SourceBrowserAsm_select_address(): could not find notebook page");
 	return;
     }
 
     gtk_notebook_set_page(GTK_NOTEBOOK(sbaw->notebook),id);
-    
-    line = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+
+    if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
+	line = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+    else
+	line = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
     if(line==INVALID_VALUE)
 	return;
     
@@ -397,12 +400,14 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
       return;
   }
   
-  row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
-  //row = ((GUI_Object*)sbaw)->gp->p->program_memory[address]->get_src_line();
-
+  if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
+      row = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+  else
+      row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
   if(row==INVALID_VALUE)
       return;
   row--;
+
 
   e = gui_line_to_entry(id,row);
 
@@ -428,19 +433,15 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 	      free( (struct breakpoint_info*)iter->data );
 	      sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
 	  }
-
 	  // We found the address, and removed the
 	  // breakpoint if it's not still there
-
-	  // we can return
 	  return;
       }
       iter=iter->next;
   }
 
-  // We didn't find a breakpoint widget for this address
-  
-  if( gpsim_address_has_breakpoint( ((GUI_Object*)sbaw)->gp->pic_id, address))
+  // Create a new breakpoint widget
+  if(gpsim_address_has_breakpoint( ((GUI_Object*)sbaw)->gp->pic_id, address))
   {
       // There has appeared a new breakpoint, so we
       // append it to sbaw->breakpoints;
@@ -492,20 +493,29 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_MOVE_PC:
 	line = popup_sbaw->menu_data->line;
 
-	address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
+	if(gpsim_get_hll_mode(pic_id))
+	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
+        else
+	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
 	if(address!=INVALID_VALUE)
 	   gpsim_put_pc_value(pic_id,address);
 	break;
     case MENU_RUN_HERE:
 	line = popup_sbaw->menu_data->line;
 
-	address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
+	if(gpsim_get_hll_mode(pic_id))
+	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
+        else
+	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
         if(address!=INVALID_VALUE)
 	    gpsim_run_to_address(pic_id, address);
 	break;
     case MENU_BP_HERE:
 	line = popup_sbaw->menu_data->line;
-	gpsim_toggle_break_at_line(pic_id,popup_sbaw->pageindex_to_fileid[id] ,line+1);
+	if(gpsim_get_hll_mode(pic_id))
+	    gpsim_toggle_break_at_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id] ,line+1);
+        else
+	    gpsim_toggle_break_at_line(pic_id,popup_sbaw->pageindex_to_fileid[id] ,line+1);
 	break;
     case MENU_SELECT_SYMBOL:
         start=GTK_EDITABLE(popup_sbaw->source_text[id])->selection_start_pos;
@@ -608,6 +618,50 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
     gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
     return menu;
+}
+
+static gint switch_page_cb(GtkNotebook     *notebook,
+			   GtkNotebookPage *page,
+			   guint            page_num,
+			   SourceBrowserAsm_Window *sbaw)
+{
+    static int current_page=-1;
+    if(current_page!=page_num)
+    {
+	int id;
+	unsigned int address;
+	GList *iter;
+	struct breakpoint_info *bpi;
+
+        current_page=page_num;
+	id=sbaw->pageindex_to_fileid[current_page];
+	gpsim_set_hll_mode(((GUI_Object*)sbaw)->gp->pic_id,file_id_to_source_mode[id]);
+
+        // Update pc widget
+	address=gpsim_get_pc_value(((GUI_Object*)sbaw)->gp->pic_id);
+	SourceBrowserAsm_set_pc(sbaw, address);
+
+	// remove all breakpoints
+	while(sbaw->breakpoints!=NULL)
+	{
+	    iter=sbaw->breakpoints;
+	    bpi=(struct breakpoint_info*)iter->data;
+
+	    // remove the breakpoint
+	    gtk_widget_destroy(bpi->widget);
+	    free( (struct breakpoint_info*)iter->data );
+	    sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
+
+	    iter=iter->next;
+	}
+
+	// update breakpoint widgets
+	for(address=0;address<gpsim_get_program_memory_size(sbaw->sbw.gui_obj.gp->pic_id);address++)
+	{
+	    SourceBrowserAsm_update_line(sbaw, address);
+	}
+    }
+    return 1;
 }
 
 /*
@@ -875,7 +929,10 @@ static void marker_cb(GtkWidget *w1,
 	    line = gui_pixel_to_entry(id, (int)event->y -
 				      sbaw->layout_offset +
 				      (int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->line;
-	    gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
+            if(gpsim_get_hll_mode(pic_id))
+		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
+	    else
+		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
 	}
 	break;
     case GDK_BUTTON_RELEASE:
@@ -902,15 +959,25 @@ static void marker_cb(GtkWidget *w1,
 	
 	if(dragwidget == sbaw->source_pcwidget[id])
 	{
-	    address = gpsim_find_closest_address_to_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
+            if(gpsim_get_hll_mode(pic_id))
+		address = gpsim_find_closest_address_to_hll_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
+	    else
+		address = gpsim_find_closest_address_to_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
 	    if(address!=INVALID_VALUE)
 		gpsim_put_pc_value(pic_id,address);
 	    
 	}
 	else
 	{
-	    gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,dragstartline+1);
-	    gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
+            if(gpsim_get_hll_mode(pic_id))
+		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,dragstartline+1);
+            else
+		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,dragstartline+1);
+
+	    if(gpsim_get_hll_mode(pic_id))
+		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
+            else
+		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
 	}
 	break;
     default:
@@ -932,8 +999,6 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
     int pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
 
-//    printf("%d\n",file_id);
-    
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
@@ -1026,6 +1091,19 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     
 }
 
+// Return true of there are instructions corresponding to the source line
+int hll_source_line_represents_code(unsigned int processor_id,
+				    unsigned int file_id,
+				    unsigned int line)
+{
+    int address;
+    address = gpsim_find_closest_address_to_hll_line(processor_id,
+						     file_id,
+						     line);
+
+    return line==gpsim_get_hll_src_line(processor_id, address);
+}
+
 /*
  Fills sbaw->source_text[id] with text from
  file pointer sbaw->sbw.gui_obj.gp->p->files[file_id].file_ptr
@@ -1072,9 +1150,9 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     sa_xlate_list[id]=NULL;
 
     // remove all breakpoints
-    iter=sbaw->breakpoints;
-    while(iter!=NULL)
+    while(sbaw->breakpoints!=NULL)
     {
+	iter=sbaw->breakpoints;
 	bpi=(struct breakpoint_info*)iter->data;
       
 	// remove the breakpoint
@@ -1085,6 +1163,11 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	iter=iter->next;
     }
 
+    // Check the type of file (ASM och C), and seperate the pattern matching
+    // into set_text_asm() and set_text_c().
+    // These functions fill the page with the colored source, and also fills
+    // the sa_xlate_list[id] structure list with values, so that the pixmaps
+    // are put on the right place.
 
     totallinesheight=0;
 
@@ -1108,45 +1191,47 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	/* gtksctext could be a option, but then i guess gtksctext would
 	 have to be extended with some gtk_sctext_get_pixel_of_line(int line)
 	 or similar funtionality
-         There is also a gtkextext widget...
+	 There is also a gtkextext widget... and scintilla...
 	 */
-
-	if(*p=='#' || !strncmp(p,"include",7))
-	{ // not a label
-	    q=p;
-	    q++;
-	    while(isalnum(*q) || *q=='_')
+	if(file_id_to_source_mode[file_id]==0)
+	{
+	    if(*p=='#' || !strncmp(p,"include",7))
+	    { // not a label
+		q=p;
 		q++;
-	    gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-			    sbaw->default_text_style.font,
-			    &sbaw->default_text_style.fg[GTK_STATE_NORMAL],
-			    &sbaw->default_text_style.base[GTK_STATE_NORMAL],
-			    p,
-			    q-p);
+		while(isalnum(*q) || *q=='_')
+		    q++;
+		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+				sbaw->default_text_style.font,
+				&sbaw->default_text_style.fg[GTK_STATE_NORMAL],
+				&sbaw->default_text_style.base[GTK_STATE_NORMAL],
+				p,
+				q-p);
 
-	    p=q;
-	    instruction_done=1; // well, varable misnamed
-	}
-	else if( (isalnum(*p) || *p=='_'))
-	{ // a label
-	    // locate end of label
-	    q=p;
-	    while(isalnum(*q) || *q=='_')
-		q++;
+		p=q;
+		instruction_done=1; // well, varable misnamed
+	    }
+	    else if( (isalnum(*p) || *p=='_'))
+	    { // a label
+		// locate end of label
+		q=p;
+		while(isalnum(*q) || *q=='_')
+		    q++;
 
-	    if(lineascent<sbaw->label_text_style.font->ascent)
-		lineascent=sbaw->label_text_style.font->ascent;
-	    if(linedescent<sbaw->label_text_style.font->descent)
-		linedescent=sbaw->label_text_style.font->descent;
-	    gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-			    sbaw->label_text_style.font,
-			    &sbaw->label_text_style.fg[GTK_STATE_NORMAL],
-			    &sbaw->label_text_style.base[GTK_STATE_NORMAL],
-			    text_buffer,
-			    q-p);
+		if(lineascent<sbaw->label_text_style.font->ascent)
+		    lineascent=sbaw->label_text_style.font->ascent;
+		if(linedescent<sbaw->label_text_style.font->descent)
+		    linedescent=sbaw->label_text_style.font->descent;
+		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+				sbaw->label_text_style.font,
+				&sbaw->label_text_style.fg[GTK_STATE_NORMAL],
+				&sbaw->label_text_style.base[GTK_STATE_NORMAL],
+				text_buffer,
+				q-p);
 
-	    // advance the pointer p
-	    p=q;
+		// advance the pointer p
+		p=q;
+	    }
 	}
 
 	// 'end' is end of line
@@ -1155,7 +1240,37 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	// loop through the rest of the line
 	while( p < end )
 	{
-	    if( *p == ';')
+	    if(file_id_to_source_mode[file_id]==1)
+	    {
+		if(hll_source_line_represents_code(pic_id,file_id,line+1))
+		{
+		    if(lineascent<sbaw->default_text_style.font->ascent)
+			lineascent=sbaw->default_text_style.font->ascent;
+		    if(linedescent<sbaw->default_text_style.font->descent)
+			linedescent=sbaw->default_text_style.font->descent;
+		    gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+				    sbaw->default_text_style.font,
+				    &sbaw->default_text_style.fg[GTK_STATE_NORMAL],
+				    &sbaw->default_text_style.base[GTK_STATE_NORMAL],
+				    p,
+				    -1);
+		}
+		else
+		{
+		    if(lineascent<sbaw->instruction_text_style.font->ascent)
+			lineascent=sbaw->instruction_text_style.font->ascent;
+		    if(linedescent<sbaw->instruction_text_style.font->descent)
+			linedescent=sbaw->instruction_text_style.font->descent;
+		    gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+				    sbaw->instruction_text_style.font,
+				    &sbaw->comment_text_style.base[GTK_STATE_NORMAL],
+				    &sbaw->instruction_text_style.base[GTK_STATE_NORMAL],
+				    p,
+				    -1);
+		}
+                break;
+	    }
+	    else if( *p == ';')
 	    { // comment
 		if(lineascent<sbaw->comment_text_style.font->ascent)
 		    lineascent=sbaw->comment_text_style.font->ascent;
@@ -1318,9 +1433,9 @@ void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor 
 //    sbaw->notebook
 
     // remove all breakpoints
-    iter=sbaw->breakpoints;
-    while(iter!=NULL)
+    while(sbaw->breakpoints!=NULL)
     {
+	iter=sbaw->breakpoints;
 	bpi=(struct breakpoint_info*)iter->data;
       
 	// remove the breakpoint
@@ -1388,8 +1503,18 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	 ||!strcmp(file_name+strlen(file_name)-4,".ASM")
 	 ||!strcmp(file_name+strlen(file_name)-4,".INC")
 	 ||!strcmp(file_name+strlen(file_name)-2,".h")
+	 ||!strcmp(file_name+strlen(file_name)-2,".c")
+	 ||!strcmp(file_name+strlen(file_name)-2,".C")
 	)
       {
+	  if(!strcmp(file_name+strlen(file_name)-2,".c")
+	     ||!strcmp(file_name+strlen(file_name)-2,".C")
+	    )
+	  {
+	      file_id_to_source_mode[i]=1; // These are HLL sources
+              gpsim_set_hll_mode(pic_id,1);
+	  }
+
 	  // FIXME, gpsim may change sometime making this fail
 	  file_id = i;
 
@@ -2024,6 +2149,8 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
   
     sbaw->notebook = gtk_notebook_new();
+    gtk_signal_connect(GTK_OBJECT(sbaw->notebook),
+		       "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),sbaw);
     gtk_widget_show(sbaw->notebook);
 
     sbaw->popup_menu=build_menu(sbaw->notebook,sbaw);
