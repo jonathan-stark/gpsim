@@ -1,3 +1,9 @@
+2003-08-18  Scott Dattalo  <scott@dattalo.com>
+	* src/ioports.cc - Port A on the F62x devices was named "ioport"
+	* src/p16f62x.cc - intcon was not declared at 0x8b (bug 566165)
+	* regression/p16f628.asm  - Added a regression test for the f68
+	* regression/p16f628.stc
+
 2003-08-17  Scott Dattalo  <scott@dattalo.com>
 	* regression/* started the regression test directory. Only two
 	tests are performed: instruction validation for the midrange
