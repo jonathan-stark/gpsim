@@ -149,7 +149,6 @@ AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
 AC_OUTPUT( src/Makefile cli/Makefile Makefile \
 	gui/Makefile  xpms/Makefile \
 	gpsim/Makefile examples/Makefile \
-	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
 	doc/Makefile )
 

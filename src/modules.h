@@ -32,7 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #define __MODULES_H__
 
 #include "gpsim_classes.h"
-
+#include "packages.h"
 
 
 /*
@@ -79,12 +79,46 @@ public:
 };
 
 
+/**************************************************************
+* External Modules
+*  The class for external modules is a combination of the internal
+* module class and the package class. 
+*
+*/
+class ExternalModule : public Module, public Package
+{
+ public:
+
+  // Define a set of virtual functions to redirect overloaded functions
+  // to the proper place. There probably is a better way to do this...
+
+  virtual int get_pin_count(void)
+    {
+      return Package::get_pin_count();
+    };
+
+  virtual char *get_pin_name(unsigned int pin_number) 
+    {
+      return Package::get_pin_name(pin_number);
+    };
+
+  virtual int get_pin_state(unsigned int pin_number) 
+    {
+      return Package::get_pin_state(pin_number);
+    };
+
+  virtual IOPIN *get_pin(unsigned int pin_number) 
+    {
+      return Package::get_pin(pin_number);
+    };
+
+};
 class Module_Types
 {
 public:
 
   char *names[2];
-  Module * (*module_constructor) (char *module_name=NULL);
+  ExternalModule * (*module_constructor) (char *module_name=NULL);
 };
 
 

@@ -415,10 +415,33 @@ void module_list_modules(void)
  symbol_table.dump_type( SYMBOL_MODULE);
 }
 
+//--------------------------------------------------
+// module_pins
+// Display the states of the pins of a module
+
 void module_pins(char *module_name)
 {
 
- symbol_table.dump_type( SYMBOL_MODULE);
+  Module *cpu;
+  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+
+
+  if(mP && mP->cpu) {
+
+    cpu = mP->cpu;
+    cout << "Module " << cpu->name() << '\n';
+
+  }
+  else {
+    cout << "module `" << module_name << "' wasn't found\n";
+    return;
+  }
+
+  for(int i=1; i<cpu->get_pin_count(); i++) {
+
+    cout << " Pin number " << i << " named " << cpu->get_pin_name(i) 
+	 << " is " << ( (cpu->get_pin_state(i)>0) ? "high\n" : "low\n");
+  }
 
 }
 

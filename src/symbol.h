@@ -73,10 +73,11 @@ public:
   void dump_all(void);
   void dump_one(char *s);
   void dump_one(string *s);
-  void dump_type(SYMBOL_TYPE st);
+  void dump_type(SYMBOL_TYPE symt);
+  
   symbol * find(char *s);
   symbol * find(string *s);
-
+  symbol * find(SYMBOL_TYPE symt, char *s);
 };
 
 extern Symbol_Table symbol_table;

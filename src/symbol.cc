@@ -262,6 +262,27 @@ symbol * Symbol_Table::find(char *str)
 
 }
 
+symbol * Symbol_Table::find(SYMBOL_TYPE symt, char *str)
+{
+
+  string s =  string(str);
+  symbol *sym;
+
+  sti = st.begin();
+
+  while( sti != st.end())
+    {
+      sym = *sti;
+      if((sym->name_str == s) && (sym->isa() == symt))
+	return(sym);
+
+      sti++;
+    }
+
+  return NULL;
+
+}
+
 void Symbol_Table::dump_one(string *s)
 {
 
