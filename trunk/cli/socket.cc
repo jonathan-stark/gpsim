@@ -876,6 +876,9 @@ void start_server(void)
 }
 #else   // if USE_THREADS
 
+
+#if GLIB_MAJOR_VERSION >= 2
+
 static void debugPrintChannelStatus(GIOStatus stat)
 {
   switch (stat) {
@@ -909,6 +912,7 @@ static void debugPrintCondition(GIOCondition cond)
   if(cond & G_IO_NVAL)
     std::cout << "  G_IO_NVAL\n";
 }
+#endif
 
 gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 {
@@ -922,10 +926,12 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 
   if(condition & G_IO_HUP) {
     std::cout<< "client has gone away\n";
+
+#if GLIB_MAJOR_VERSION >= 2
     GIOStatus stat = g_io_channel_shutdown(channel, TRUE, &err);
     std::cout << "channel status " << hex << stat << "  " ;
     debugPrintChannelStatus(stat);
-
+#endif
     return FALSE;
   }
 
