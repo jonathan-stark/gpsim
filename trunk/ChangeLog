@@ -4,7 +4,8 @@
 	Also Fixed the original memory leak by properly removing chained 
 	Breakpoint_Instruction objects from the instruction chain when clearing a
 	break object. When the chain is properly maintained the object may be
-	deleted.
+	deleted. Perhaps this should be a temporary fix until a base class
+	for Breakpoint_Instruction all have a replaced member.
 
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: changed the comment text color to 'dim gray'
