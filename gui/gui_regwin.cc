@@ -1801,9 +1801,9 @@ void Register_Window::SetRegisterSize(void)
   chars_per_column = 1 + 2*register_size;
 
   if(pCellFormat)
-    delete pCellFormat;
+    free(pCellFormat);
 
-  pCellFormat = new char[10];
+  pCellFormat = (char *) malloc(10 * sizeof(char));
   sprintf(pCellFormat,"%%0%dx",register_size*2);
 
   if(register_sheet) {

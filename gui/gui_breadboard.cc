@@ -748,7 +748,7 @@ static void update_board_matrix(Breadboard_Window *bbw)
 
       GuiModule *p = static_cast<GuiModule*>(mi->data);
 
-      if(p->bIsBuilt) {
+      if(p && p->bIsBuilt) {
         x=p->x;
 	y=p->y;
 	width=p->width;
@@ -3036,6 +3036,22 @@ void GuiModule::Build()
 GuiModule::GuiModule(Module *_module, Breadboard_Window *_bbw)
   :   bIsBuilt(false), module(_module), bbw(_bbw)
 {
+  module_widget=0;
+  name_widget=0;
+  x=0;
+  y=0;
+  width=0;
+  height=0;
+  pinnamewidth=0;
+  pin_count=0;
+
+  module_pixmap=0;
+  name_pixmap=0;
+
+  tree_item=0;
+
+  pins=0;
+
   if(bbw)
     bbw->modules=g_list_append(bbw->modules, this);
 
@@ -3131,10 +3147,10 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
   // Create a Gui representation (note that this memory is
   // placed onto the 'modules' list.
 
-  new GuiModule(gp->cpu, this);
-
   if(!enabled)
     return;
+
+  new GuiModule(gp->cpu, this);
 
   if(!gp || !gp->cpu)
     return;
