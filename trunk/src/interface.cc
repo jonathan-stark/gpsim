@@ -358,24 +358,28 @@ void gpsimInterface::start_simulation (void)
       g_mutex_lock (muRunMutex);
 
       tcpu = cpu;
-      /*
-	if(verbosity && verbosity->getVal()) {
-	cout << "running...\n";
-	cpu->run(true);
-	} else
-	cpu->run(false);
-      */
       printf("signalling run thread\n");
       g_cond_signal  (cvRunCondition);
       g_mutex_unlock (muRunMutex);
       printf("leaving start_simulation\n");
     } else
 #endif
-      cpu->run();
+      {
 
+	if(verbosity && verbosity->getVal()) {
+	  cout << "running...\n";
+	  cpu->run(true);
+	} else
+	  cpu->run(false);
+      }
   }
 
   mbSimulating = false;
+}
+
+void gpsimInterface::reset (void)
+{
+  module_reset_all(SIM_RESET);
 }
 
 bool gpsimInterface::bSimulating()

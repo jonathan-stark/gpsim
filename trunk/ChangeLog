@@ -1,3 +1,11 @@
+2005-01-05 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc, src/gpsim_classes.h, src/gpsim_interface.h,
+	src/interface.cc, src/modules.cc, src/modules.h,
+	src/pic-processor.cc, src/protocol.cc, src/protocol.h,
+	cli/command.cc, cli/socket.cc:
+	Enhancements to support the socket interface. Added a run command
+	and a reset command and made them invocable via the interface class.
+
 2005-01-02 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, cli/input.cc, src/interface.cc: Added function
 	'gUseThreads()' and use it to run-time select the usage of threads.

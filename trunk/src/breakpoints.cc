@@ -451,7 +451,7 @@ void Breakpoints::clear(unsigned int b)
 
     case BREAK_ON_CYCLE:
       break_status[b].type = BREAK_CLEAR;
-      cout << "Cleared cycle breakpoint number " << b << '\n';
+      //cout << "Cleared cycle breakpoint number " << b << '\n';
 
       break;
 

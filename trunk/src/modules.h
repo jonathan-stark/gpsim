@@ -35,16 +35,9 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 
 #include "gpsim_object.h"
-//#include "gpsim_classes.h"
-//#include "packages.h"
+#include "gpsim_classes.h"
 
 
-
-/*****************************************************************************
- *
- * Helper functions
- *
- *****************************************************************************/
 class Module;
 class Module_Types;
 class ModuleInterface;
@@ -135,13 +128,12 @@ public:
 
   virtual void set(const char *cP,int len=0);
   virtual void get(char *, int len);
-
-  //virtual void set_attribute(char *attr, char *val, int val2);
-  //virtual void set_attribute(char *attr, char *val);
-  //virtual void set_attribute(char *attr, double val);
-
   virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual void dump_attributes(int show_values=1);
+
+  /// Reset 
+
+  virtual void reset(RESET_TYPE r);
 
   /// Version
   virtual int get_major_version(void) { return major_version;}
@@ -178,17 +170,18 @@ public:
 };
 
 
-//--------------------------------------
-//
-// non-class helper functions.
+/*****************************************************************************
+ *
+ * Helper functions
+ *
+ *****************************************************************************/
 
 void module_display_available(void);
 void module_list_modules(void);
 void module_load_library(const char *library_name);
 void module_load_module(const char * module_type, const char * module_new_name=0);
+void module_reset_all(RESET_TYPE r);
+
 void module_pins(char *module_name);
-//void module_set_attr(char *module_name,char *attr, char *val);
-//void module_set_attr(char *module_name,char *attr, char *val, int val2);
-//void module_set_attr(char *module_name,char *attr, double val);
 void module_update(char *module_name);
 #endif // __MODULES_H__
