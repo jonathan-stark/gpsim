@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 // Largest cycle counter value
 
-#define END_OF_TIME 0xFFFFFFFFFFFFFFFF
+#define END_OF_TIME 0xFFFFFFFFFFFFFFFFULL
 
 //--------------------------------------------------
 // member functions for the Cycle_Counter class
