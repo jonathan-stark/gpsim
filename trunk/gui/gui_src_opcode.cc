@@ -1208,7 +1208,7 @@ void SourceBrowserOpcode_Window::Fill()
     
   gtk_clist_set_row_style (GTK_CLIST (clist), 0, current_line_number_style);
 
-  pc=gp->cpu->pc->get_raw_value();
+  pc=gp->cpu->pma->get_PC();
   SetPC(pc);
   update_label(this,pc);
 
