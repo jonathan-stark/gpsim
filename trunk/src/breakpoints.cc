@@ -819,6 +819,8 @@ void RegisterAssertion::execute(void)
 	 << " regMask = 0x" << regMask 
 	 << " regValue = 0x" << regValue << endl;
 
+    PCPU->Debug();
+
     if( (PCPU->simulation_mode == RUNNING) && 
 	(simulation_start_cycle != get_cycles().value)) {
 

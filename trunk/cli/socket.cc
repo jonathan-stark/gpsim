@@ -671,7 +671,6 @@ void SocketBase::ParseObject()
       SocketLink *sl=0;
 
       ParseSocketLink(packet, &sl);
-
       if(sl) {
 	sl->set(*packet);
 	Send("$");
