@@ -45,17 +45,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/processor.h"
 //#include "gui_regwin.h"
 
-typedef enum {
-    MENU_TIME_USECONDS,
-    MENU_TIME_MSECONDS,
-    MENU_TIME_SECONDS,
-    MENU_TIME_HHMMSS
-} menu_id;
-
-typedef struct _menu_item {
-    char *name;
-    menu_id id;
-} menu_item;
 
 
 
@@ -102,18 +91,21 @@ public:
   virtual void Update(void);
 };
 
-class PCLabeledEntry : public LabeledEntry {
-public:
 
-  PCLabeledEntry();
-  virtual void Update(void);
-  virtual void put_value(unsigned int);
-  void AssignPma(ProgramMemoryAccess *new_pma) { pma = new_pma;}
+typedef enum {
+  MENU_TIME_USECONDS,
+  MENU_TIME_MSECONDS,
+  MENU_TIME_SECONDS,
+  MENU_TIME_HHMMSS
+} menu_id;
 
-  ProgramMemoryAccess *pma;
-};
+typedef struct _menu_item {
+  char *name;
+  menu_id id;
+} menu_item;
 
-class TimeLabeledEntry : public LabeledEntry {
+class TimeLabeledEntry : public LabeledEntry 
+{
 public:
   TimeLabeledEntry();
   virtual void Update(void);
@@ -128,6 +120,7 @@ public:
   menu_id time_format;
 
 };
+
 struct popup_data {
   TimeLabeledEntry *tle;
   menu_id id;
@@ -436,28 +429,6 @@ GtkWidget * TimeLabeledEntry::build_menu(void)
 }
 
 //------------------------------------------------------------------------
-PCLabeledEntry::PCLabeledEntry()
-{
-  pma = 0;
-}
-
-void PCLabeledEntry::Update()
-{
-  char buffer[32];
-
-  if(pma) {
-    sprintf(buffer,"0x%04x",pma->get_PC());
-    gtk_entry_set_text (GTK_ENTRY (entry), buffer);
-  }
-
-}
-
-void PCLabeledEntry::put_value(unsigned int value)
-{
-  if(pma)
-    pma->set_PC(value);
-}
-
 void StatusBar_Window::Update(void)
 {
 
@@ -469,11 +440,22 @@ void StatusBar_Window::Update(void)
   if(!gp || !gp->cpu)
     return;
 
+
+  list<RegisterLabeledEntry *>::iterator iRLE;
+
+  for(iRLE = entries.begin();
+      iRLE != entries.end();
+      ++iRLE)
+
+    (*iRLE)->Update();
+
+  /*
   status->Update();
   W->Update();
   pc->Update();
-  cpu_cycles->Update();
+  */
 
+  cpu_cycles->Update();
   time->Update();
 }
 
@@ -535,8 +517,13 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 
   list<Register *>::iterator iReg;
 
-  iReg = ma->SpecialRegisters.begin();
+  for(iReg = ma->SpecialRegisters.begin();
+      iReg != ma->SpecialRegisters.end();
+      ++iReg)
 
+    entries.push_back(new RegisterLabeledEntry(hbox, *iReg));
+
+  /*  
   pc = new RegisterLabeledEntry(hbox, *iReg);
 
   ++iReg;
@@ -544,6 +531,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
 
   ++iReg;
   W = new RegisterLabeledEntry(hbox, *iReg);
+  */
 
   cpu_cycles = new CyclesLabeledEntry();
   cpu_cycles->Create(hbox,"Cycles:", 18,false);
@@ -586,9 +574,6 @@ StatusBar_Window::StatusBar_Window(void)
   gp = 0;
   ma = 0;
 
-  status = 0;
-  W = 0;
-  pc = 0;
   cpu_cycles = 0;
   time = 0;
   hbox = 0;

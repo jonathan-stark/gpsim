@@ -26,8 +26,10 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 
 
-class LabeledEntry;    // in gui_statusbar.cc
-class MemoryAccess;    // in src/processor.h
+class RegisterLabeledEntry;	// in gui_statusbar.cc
+class CyclesLabeledEntry;	// in gui_statusbar.cc
+class TimeLabeledEntry;		// in gui_statusbar.cc
+class MemoryAccess;		// in src/processor.h
 
 //
 // The Status Bar window 
@@ -37,21 +39,20 @@ class StatusBar_Window {
  public:
   GUI_Processor *gp;
 
-  LabeledEntry *status;
-  LabeledEntry *W;
-  LabeledEntry *pc;
-  LabeledEntry *cpu_cycles;
-  LabeledEntry *time;
+  CyclesLabeledEntry *cpu_cycles;
+  TimeLabeledEntry *time;
+  list<RegisterLabeledEntry *> entries;
   
-  bool created;
 
   StatusBar_Window(void);
   void NewProcessor(GUI_Processor *_gp, MemoryAccess *);
   void Create(GtkWidget *vbox_main);
   void Update(void);
 
+
 private:
   MemoryAccess *ma;
+  bool created;
   GtkWidget *hbox;
 
 };
