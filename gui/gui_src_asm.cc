@@ -2499,9 +2499,10 @@ int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
     
     sbaw->load_source=0;
 
-    gp_add_window_to_list(gp, (GUI_Object *)sbaw);
+    gp->add_window_to_list((GUI_Object *)sbaw);
 
-    gui_object_get_config((GUI_Object*)sbaw);
+    sbaw->sbw.gui_obj.get_config();
+    //gui_object_get_config((GUI_Object*)sbaw);
 
     if(sbaw->sbw.gui_obj.enabled)
 	BuildSourceBrowserAsmWindow(sbaw);

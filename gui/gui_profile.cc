@@ -594,7 +594,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     static GdkColor color2;
     static GdkColor bg_color;
     gint page_width, page_height;
-    gfloat scale = 1.;
+    int scale = 1;
     static GtkPlotText *infotext;
     static GtkPlotText **bartext;
     GtkWidget *plot;
@@ -656,7 +656,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	py2[i]=cyclearray[i];
     }
 
-    maxy=maxy*1.1;
+    maxy=maxy + (maxy/10);
 
 
     // Compute tickdelta for easy reading.
@@ -862,7 +862,7 @@ int plot_routine_histogram(Profile_Window *pw)
     static GdkColor color2;
     static GdkColor bg_color;
     gint page_width, page_height;
-    gfloat scale = 1.;
+    int scale = 1;
     static GtkPlotText *infotext1;
     static GtkPlotText *infotext2;
     GtkWidget *plot;
@@ -2405,9 +2405,9 @@ int CreateProfileWindow(GUI_Processor *gp)
   profile_window->processor=0;
   profile_window->program=0;
 
-  gp_add_window_to_list(gp, (GUI_Object *)profile_window);
+  gp->add_window_to_list((GUI_Object *)profile_window);
 
-  gui_object_get_config((GUI_Object*)profile_window);
+  profile_window->gui_obj.get_config();
 
   if(profile_window->gui_obj.enabled)
       BuildProfileWindow(profile_window);

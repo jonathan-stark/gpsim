@@ -3742,10 +3742,10 @@ int CreateBreadboardWindow(GUI_Processor *gp)
 
     bbw->layout_pixmap=NULL;
 
-    gp_add_window_to_list(gp, (GUI_Object *)bbw);
+    gp->add_window_to_list((GUI_Object *)bbw);
 
     
-    if(!gui_object_get_config((GUI_Object*)bbw))
+    if(!bbw->gui_obj.get_config())
       printf("warning: %s\n",__FUNCTION__);
     
     if(bbw->gui_obj.enabled)

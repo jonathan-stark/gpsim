@@ -301,7 +301,7 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
     switch(e->type)
     {
     case SYMBOL_REGISTER:
-	RegWindow_select_register(((GUI_Object*)sw)->gp->regwin_ram,e->value);
+	((GUI_Object*)sw)->gp->regwin_ram->SelectRegister(e->value);
 	break;
     case SYMBOL_ADDRESS:
 	SourceBrowser_select_address(((GUI_Object*)sw)->gp->source_browser,e->value);
@@ -698,9 +698,11 @@ int CreateSymbolWindow(GUI_Processor *gp)
 
   symbol_window->load_symbols=0;
   
-  gp_add_window_to_list(gp, (GUI_Object *)symbol_window);
+  gp->add_window_to_list((GUI_Object *)symbol_window);
 
-  gui_object_get_config((GUI_Object*)symbol_window);
+  //gui_object_get_config((GUI_Object*)symbol_window);
+  symbol_window->gui_obj.get_config();
+
   config_get_variable(symbol_window->gui_obj.name,"filter_addresses",&symbol_window->filter_addresses);
   config_get_variable(symbol_window->gui_obj.name,"filter_constants",&symbol_window->filter_constants);
   config_get_variable(symbol_window->gui_obj.name,"filter_registers",&symbol_window->filter_registers);

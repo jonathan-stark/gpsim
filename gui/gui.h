@@ -98,16 +98,9 @@ struct cross_reference_to_gui {
 // Forward reference
 //
 
-struct _gui_processor;
+class GUI_Processor;
 
-
-//
-// Make the declarations pretty
-//
-
-typedef struct _gui_processor GUI_Processor;
-
-//
+//========================================================================
 // GUI_Object 
 //  All window attributes that are common are placed into the GUI_Object
 // structure. This structure is then include in each of the other structures.
@@ -115,13 +108,16 @@ typedef struct _gui_processor GUI_Processor;
 // pointer to one object may be type cast into another. 
 //
 
-struct _gui_object {
+class GUI_Object {
+ public:
+
   GUI_Processor *gp;
   GtkWidget *window;
   enum window_category wc;
   enum window_types wt;
 
   char *name;
+  char *menu;
 
   // Window geometry. This info is saved when the window associated
   // with this gui object is hidden. Note: gtk saves the window origin
@@ -136,10 +132,21 @@ struct _gui_object {
 #define VIEW_HIDE 0
 #define VIEW_SHOW 1
 #define VIEW_TOGGLE 2
-  void (* change_view) (struct _gui_object *_this, int view_state);
+  void (* change_view) (GUI_Object *_this, int view_state);
+
+  GUI_Object(void);
+  virtual void ChangeView(int view_state);
+
+  int get_config(void);
+  void check(void);
+  int set_default_config(void);
+  int set_config(void);
+  virtual void Build(void);
+  virtual int Create(GUI_Processor *_gp);
+  virtual void UpdateMenuItem(void);
+
 };
 
-typedef struct _gui_object GUI_Object;
 
 //
 // A 'register' has two attributes as far as the gui is concerned:
@@ -178,49 +185,78 @@ struct _labeled_entry {
 typedef struct _labeled_entry labeled_entry;
 
 
-//
+//======================================================================
 // The register window 
 //
 #define MAX_REGISTERS      4096
 #define REGISTERS_PER_ROW    16
 #define MAX_ROWS ((MAX_REGISTERS)/(REGISTERS_PER_ROW))
 
-struct _Register_Window {
-    GUI_Object     gui_obj;
+class Register_Window : public GUI_Object
+{
+ public:
 
-    // This array is indexed with row, and gives the address of the
-    // first cell in the given row.
-    int row_to_address[MAX_ROWS];
+  // This array is indexed with row, and gives the address of the
+  // first cell in the given row.
+  int row_to_address[MAX_ROWS];
 
-    char normalfont_string[256];
-    GdkFont *normalfont;
-    GtkStyle *current_line_number_style;
-    GtkStyle *breakpoint_line_number_style;
-    GdkColor breakpoint_color;
-    GdkColor item_has_changed_color;
-    GdkColor normal_fg_color;
-    GdkColor normal_bg_color;
-    GdkColor sfr_bg_color;
-    GdkColor alias_color;
-    GdkColor invalid_color;
+  char normalfont_string[256];
+  GdkFont *normalfont;
+  GtkStyle *current_line_number_style;
+  GtkStyle *breakpoint_line_number_style;
+  GdkColor breakpoint_color;
+  GdkColor item_has_changed_color;
+  GdkColor normal_fg_color;
+  GdkColor normal_bg_color;
+  GdkColor sfr_bg_color;
+  GdkColor alias_color;
+  GdkColor invalid_color;
 
-    REGISTER_TYPE type;
-    Register **registers;
-    GtkSheet *register_sheet;
+  REGISTER_TYPE type;
+  Register **registers;
+  GtkSheet *register_sheet;
     
-    GtkWidget *entry;
-    GtkWidget *location;
-    GtkWidget *popup_menu;
+  GtkWidget *entry;
+  GtkWidget *location;
+  GtkWidget *popup_menu;
 
-//    int allow_change_view;
+  //    int allow_change_view;
 
-    int registers_loaded; // non zero when registers array is loaded
+  int registers_loaded; // non zero when registers array is loaded
 
-    int processor; // if non-zero window has processor
+  int processor; // if non-zero window has processor
+
+  virtual void Build(void);
+  virtual void Update(void);
+  virtual void UpdateLabel(void);
+  virtual void UpdateEntry(void);
+  virtual void UpdateLabelEntry(void);
+  virtual void SelectRegister(int reg_number);
+  virtual void NewProcessor(GUI_Processor *gp);
+  virtual gboolean UpdateRegisterCell(unsigned int reg_number);
+
+  virtual int Create(GUI_Processor *gp);
 };
 
-typedef struct _Register_Window Register_Window;
 
+
+class RAM_RegisterWindow : public Register_Window
+{
+ public:
+  RAM_RegisterWindow(void);
+
+  virtual int Create(GUI_Processor *gp);
+  
+};
+
+class EEPROM_RegisterWindow : public Register_Window
+{
+ public:
+  EEPROM_RegisterWindow(void);
+
+  virtual int Create(GUI_Processor *gp);
+  
+};
 
 //
 // The watch window
@@ -694,7 +730,12 @@ struct watch_window {
 // to a pic that is being simulated.
 //
 
-struct _gui_processor {
+class GUI_Processor {
+ public:
+
+  GUI_Processor(void);
+  void add_window_to_list(GUI_Object *go);
+
   Register_Window *regwin_ram;
   Register_Window *regwin_eeprom;
   StatusBar_Window *status_bar;
@@ -726,30 +767,12 @@ struct _gui_processor {
 //
 // External references and function prototypes
 //
-/*
-extern GdkColor item_has_changed_color;
-extern GdkColor normal_fg_color;
-extern GdkColor normal_bg_color;
-extern GdkColor breakpoint_color;
-extern GdkColor alias_color;
-extern GdkColor invalid_color;
-extern GdkColor sfr_bg_color;
-extern GdkColor high_output_color;
-extern GdkColor low_output_color;
-extern GdkColor black_color;
-extern GdkColor pm_has_changed_color;
-extern GdkColor normal_pm_bg_color;
-  */
-/*extern GtkStyle *normal_style;
-extern GtkStyle *current_line_number_style;
-extern GtkStyle *breakpoint_line_number_style;
-*/
 
 extern GtkItemFactory *item_factory;
 
 void exit_gpsim(void);
 
-void update_menu_item(struct _gui_object *_this);
+void update_menu_item(GUI_Object *_this);
 
 // gui_symbols.c
 void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber);
@@ -786,7 +809,7 @@ void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address);
 void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value);
 void SourceBrowser_update(SourceBrowser_Window *sbw);
 void CreateSBW(SourceBrowser_Window *sbw);
-void SourceBrowser_change_view (struct _gui_object *_this, int view_state);
+void SourceBrowser_change_view (GUI_Object *_this, int view_state);
 
 // gui_regwin.c
 int gui_get_value(char *prompt);
@@ -794,20 +817,13 @@ void RegWindow_update(Register_Window *rw);
 void RegWindow_select_symbol_name(Register_Window *rw, char *name);
 void RegWindow_select_symbol_regnumber(Register_Window *rw, int n);
 void RegWindow_select_register(Register_Window *rw, int regnumber);
-int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type);
-void BuildRegisterWindow(Register_Window *rw);
 void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp);
 
 // gui_processor.c
 extern GUI_Processor *gp;
-GUI_Processor *new_GUI_Processor(void);
-void gp_add_window_to_list(GUI_Processor *gp, GUI_Object *go);
 
 int config_get_variable(char *module, char *entry, int *value);
 int config_set_variable(char *module, char *entry, int value);
-int gui_object_set_default_config(GUI_Object *obj);
-int gui_object_set_config(GUI_Object *obj);
-int gui_object_get_config(GUI_Object *obj);
 int config_get_string(char *module, char *entry, char **string);
 int config_set_string(char *module, char *entry, char *string);
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);

@@ -383,9 +383,9 @@ int CreateTraceWindow(GUI_Processor *gp)
   trace_window->trace_flags = 0;
   trace_window->processor=0;
 
-  gp_add_window_to_list(gp, (GUI_Object *)trace_window);
+  gp->add_window_to_list((GUI_Object *)trace_window);
 
-  gui_object_get_config((GUI_Object*)trace_window);
+  trace_window->gui_obj.get_config();
 
   if(trace_window->gui_obj.enabled)
       BuildTraceWindow(trace_window);

@@ -433,10 +433,10 @@ int CreateStopWatchWindow(GUI_Processor *gp)
     stopwatch_window->has_processor=1;
 
 
-    gp_add_window_to_list(gp, (GUI_Object *)stopwatch_window);
+    gp->add_window_to_list((GUI_Object *)stopwatch_window);
 
 
-    gui_object_get_config((GUI_Object*)stopwatch_window);
+    stopwatch_window->gui_obj.get_config();
     if(config_get_string(stopwatch_window->gui_obj.name,"rollover",&string))
 	stopwatch_window->rollover=atoll(string);
     config_get_variable(stopwatch_window->gui_obj.name,"count_dir",&stopwatch_window->count_dir);

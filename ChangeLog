@@ -1,3 +1,7 @@
+2003-11-15  Scott Dattalo  <scott@dattalo.com>
+	* gui/* started converting gui struct's into C++ classes. Started with 
+	Register Window.
+	
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* src/gpsim-time.cc linked-list bug fixes.
 

@@ -458,135 +458,137 @@ extern int gui_question(char *question, char *a, char *b);
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
-    GtkSheet *sheet;
+  GtkSheet *sheet;
 
-    menu_item *item;
-    int i,j;
-    unsigned int pic_id;
-    GtkSheetRange range;
-    unsigned int address;
-    int value, mask;
-    char *filename;
-    int mode;
+  menu_item *item;
+  int i,j;
+  unsigned int pic_id;
+  GtkSheetRange range;
+  unsigned int address;
+  int value, mask;
+  char *filename;
+  int mode;
 
-    if(widget==NULL || data==NULL)
+  if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%p,%p)\n",widget,data);
-	return;
+      printf("Warning popup_activated(%p,%p)\n",widget,data);
+      return;
     }
     
-    item = (menu_item *)data;
-    sheet=GTK_SHEET(popup_rw->register_sheet);
-    range = sheet->range;
-    pic_id = ((GUI_Object*)popup_rw)->gp->pic_id;
+  item = (menu_item *)data;
+  sheet=GTK_SHEET(popup_rw->register_sheet);
+  range = sheet->range;
+  //pic_id = ((GUI_Object*)popup_rw)->gp->pic_id;
+  pic_id = popup_rw->gp->pic_id;
     
-    switch(item->id)
+  switch(item->id)
     {
     case MENU_BREAK_READ:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_read_breakpoint(pic_id, popup_rw->type, address);
-	    }
-	break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_read_breakpoint(pic_id, popup_rw->type, address);
+	  }
+      break;
     case MENU_BREAK_WRITE:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_write_breakpoint(pic_id, popup_rw->type, address);
-	    }
-	break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_write_breakpoint(pic_id, popup_rw->type, address);
+	  }
+      break;
     case MENU_BREAK_READ_VALUE:
-	value = gui_get_value("value to read for breakpoint:");
-	if(value<0)
-	    break; // Cancel
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_read_value_breakpoint(pic_id, popup_rw->type, address, value);
-	    }
-	break;
+      value = gui_get_value("value to read for breakpoint:");
+      if(value<0)
+	break; // Cancel
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_read_value_breakpoint(pic_id, popup_rw->type, address, value);
+	  }
+      break;
     case MENU_BREAK_WRITE_VALUE:
-	value = gui_get_value("value to write for breakpoint:");
-	if(value<0)
-	    break; // Cancel
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_write_value_breakpoint(pic_id, popup_rw->type, address, value);
-	    }
-	break;
+      value = gui_get_value("value to write for breakpoint:");
+      if(value<0)
+	break; // Cancel
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_write_value_breakpoint(pic_id, popup_rw->type, address, value);
+	  }
+      break;
     case MENU_BREAK_CLEAR:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_clear_breakpoints(pic_id, popup_rw->type,address);
-	    }
-	break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_clear_breakpoints(pic_id, popup_rw->type,address);
+	  }
+      break;
     case MENU_ADD_WATCH:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		WatchWindow_add(popup_rw->gui_obj.gp->watch_window,pic_id, popup_rw->type, address);
-	    }
-	break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    // WatchWindow_add(popup_rw->gui_obj.gp->watch_window,pic_id, popup_rw->type, address);
+	    WatchWindow_add(popup_rw->gp->watch_window,pic_id, popup_rw->type, address);
+	  }
+      break;
     case MENU_SETTINGS:
-        settings_dialog(popup_rw);
-        break;
+      settings_dialog(popup_rw);
+      break;
     case MENU_LOG_SETTINGS:
-        gui_get_log_settings(&filename, &mode);
-	if(filename!=NULL)
-	    gpsim_set_log_name(pic_id,filename,mode);
-        break;
+      gui_get_log_settings(&filename, &mode);
+      if(filename!=NULL)
+	gpsim_set_log_name(pic_id,filename,mode);
+      break;
     case MENU_LOG_READ:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_read_logging(pic_id, popup_rw->type, address);
-	    }
-	break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_read_logging(pic_id, popup_rw->type, address);
+	  }
+      break;
     case MENU_LOG_WRITE:
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_write_logging(pic_id, popup_rw->type, address);
-	    }
-        break;
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_write_logging(pic_id, popup_rw->type, address);
+	  }
+      break;
     case MENU_LOG_READ_VALUE:
-	gui_get_2values("Value that the read must match for logging it:", &value,
-			"Bitmask that specifies the bits to bother about:", &mask);
-	if(value<0)
-	    break; // Cancel
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
-	    }
-        break;
+      gui_get_2values("Value that the read must match for logging it:", &value,
+		      "Bitmask that specifies the bits to bother about:", &mask);
+      if(value<0)
+	break; // Cancel
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
+	  }
+      break;
     case MENU_LOG_WRITE_VALUE:
-	gui_get_2values("Value that the write must match for logging it:", &value,
-			"Bitmask that specifies the bits to bother about:", &mask);
-	if(value<0)
-	    break; // Cancel
-	for(j=range.row0;j<=range.rowi;j++)
-	    for(i=range.col0;i<=range.coli;i++)
-	    {
-		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
-	    }
-        break;
+      gui_get_2values("Value that the write must match for logging it:", &value,
+		      "Bitmask that specifies the bits to bother about:", &mask);
+      if(value<0)
+	break; // Cancel
+      for(j=range.row0;j<=range.rowi;j++)
+	for(i=range.col0;i<=range.coli;i++)
+	  {
+	    address=popup_rw->row_to_address[j]+i;
+	    gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
+	  }
+      break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+      puts("Unhandled menuitem?");
+      break;
     }
 }
 
@@ -599,6 +601,7 @@ build_menu(Register_Window *rw)
 //  GtkAccelGroup *accel_group;
   int i;
 
+
   if(rw==NULL)
   {
       printf("Warning build_menu(%p)\n",rw);
@@ -607,11 +610,6 @@ build_menu(Register_Window *rw)
     
   menu=gtk_menu_new();
 
-/*  accel_group = gtk_accel_group_new ();
-  gtk_accel_group_attach (accel_group, GTK_OBJECT (rw->gui_obj.window));
-  
-  gtk_menu_set_accel_group (GTK_MENU (menu), accel_group);
-  */
 
   item = gtk_tearoff_menu_item_new ();
   gtk_menu_append (GTK_MENU (menu), item);
@@ -662,13 +660,6 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
-/*	if (event->window == sheet->column_title_window )
-	    //printf("popup column window\n");
-	    return TRUE;
-	else if (event->window == sheet->row_title_window )
-	    //printf("popup  window\n");
-	    return TRUE;
-	else*/
 	popup_rw = rw;
   
 	gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
@@ -733,7 +724,8 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
       return;
   }
 
-  gp = ((GUI_Object*)rw)->gp;
+  //gp = ((GUI_Object*)rw)->gp;
+  gp = rw->gp;
   
   if(gp->pic_id==0)
       return;
@@ -788,93 +780,108 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
 }
 
-static void update_label(Register_Window *rw)
-{
-    gint row, col;
-    GtkSheet *sheet;
-    int regnumber;
-    char cell[100],*n;
+//------------------------------------------------------------------------
+// UpdateLabel
+//
+//
 
-    sheet=GTK_SHEET(rw->register_sheet);
-    row=sheet->active_cell.row; col=sheet->active_cell.col;
+void Register_Window::UpdateLabel(void)
+{
+  gint row, col;
+
+  int regnumber;
+  char cell[100],*n;
+
+
+  row=register_sheet->active_cell.row;
+  col=register_sheet->active_cell.col;
 
   
-    if(rw->row_to_address[row] < 0) {
-	printf("row_to_address[%d]=0x%x\n",row,rw->row_to_address[row]);
-	return;
-    }
+  if(row_to_address[row] < 0) {
+    printf("row_to_address[%d]=0x%x\n",row,row_to_address[row]);
+    return;
+  }
 
-    regnumber = rw->row_to_address[row]+col;
+  regnumber = row_to_address[row]+col;
 
-    // get the string to put in label
-    cell[0] = 0;
-    if(((GUI_Object*)rw)->gp)
-    {
-	if(col < REGISTERS_PER_ROW) {
-	    if(((GUI_Object*)rw)->gp->pic_id != 0)
-	    {
-		n = gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber);
-		if(n==NULL)
-		    n="INVALID REGISTER";
-	    }
-	    else
-	    {
-		n = "00"; // FIXME
-	    }
+  // get the string to put in label
+  cell[0] = 0;
 
-	    strncpy(cell,n,100);
-	}
-	else
-	    sprintf(cell,"  ascii  ");
+  if(gp) {
+    if(col < REGISTERS_PER_ROW) {
+
+      if(gp->pic_id != 0) {
+	n = gpsim_get_register_name(gp->pic_id, type, regnumber);
+	if(n==NULL)
+	  n="INVALID REGISTER";
+      }  else
+	n = "00"; // FIXME
+
+      strncpy(cell,n,100);
     }
     else
+      sprintf(cell,"  ascii  ");
+  }
+  else
     {
-	puts("**************** Warning not gp?");
-	sprintf(cell," 0x%02x  ", regnumber);
+      puts("**************** Warning not gp?");
+      sprintf(cell," 0x%02x  ", regnumber);
     }
-    // cell is now the string we want. Set the label
-    gtk_label_set(GTK_LABEL(rw->location), cell);
+  // cell is now the string we want. Set the label
+  gtk_label_set(GTK_LABEL(location), cell);
 
 }
 
-static void update_entry(Register_Window *rw)
-{
-    gint row, col;
-    GtkSheet *sheet;
-    char *text; 
-    GtkWidget * sheet_entry;
+//------------------------------------------------------------------------
+// UpdateEntry
+//
+//
 
-    sheet=GTK_SHEET(rw->register_sheet);
-    sheet_entry = gtk_sheet_get_entry(sheet);
-    row=sheet->active_cell.row; col=sheet->active_cell.col;
+void Register_Window::UpdateEntry(void)
+{
+  gint row, col;
+
+  char *text; 
+  GtkWidget * sheet_entry;
+
+  sheet_entry = gtk_sheet_get_entry(register_sheet);
+  row=register_sheet->active_cell.row;
+  col=register_sheet->active_cell.col;
 
   
-    // ******************************** update entry:
-    if(rw->row_to_address[row] < 0) {
-	printf("row_to_address[%d]=0x%x",row,rw->row_to_address[row]);
-	return;
-    }
+  // ******************************** update entry:
+  if(row_to_address[row] < 0) {
+    printf("row_to_address[%d]=0x%x",row,row_to_address[row]);
+    return;
+  }
 
-    if(gpsim_get_register_name(gp->pic_id,rw->type, rw->row_to_address[row]+col))
+  if(gpsim_get_register_name(gp->pic_id,type, row_to_address[row]+col))
     {
-	if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
-	    gtk_entry_set_text(GTK_ENTRY(rw->entry), text);
+      if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
+	gtk_entry_set_text(GTK_ENTRY(entry), text);
     }
 }
 
-static void update_labelentry(Register_Window *rw)
+//------------------------------------------------------------------------
+// UpdateLabelEntry
+//
+//
+
+void Register_Window::UpdateLabelEntry(void)
 {
-    update_label(rw);
-    update_entry(rw);
+  UpdateLabel();
+  UpdateEntry();
 }
 
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
-    if(widget->window==NULL)
-	return 0;
+
+
+  if(widget->window==NULL)
+    return 0;
     
-    gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
-    return 0; // what should be returned?, FIXME
+  gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
+  return 0; // what should be returned?, FIXME
 }
 
 static int load_styles(Register_Window *rw)
@@ -996,7 +1003,7 @@ static int settings_dialog(Register_Window *rw)
 	{
             gdk_font_unref(font);
 	    strcpy(rw->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	    config_set_string(rw->gui_obj.name,"normalfont",rw->normalfont_string);
+	    config_set_string(rw->name,"normalfont",rw->normalfont_string);
             fonts_ok++;
 	}
     }
@@ -1071,8 +1078,8 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	for(i=0;i<cti;i++)
 	{
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    value=gpsim_get_register_value(((GUI_Object*)rw)->gp->pic_id,rw->type,from);
-	    gpsim_put_register_value(((GUI_Object*)rw)->gp->pic_id, rw->type, to, value);
+	    value=gpsim_get_register_value(rw->gp->pic_id,rw->type,from);
+	    gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1100,8 +1107,8 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	{
 	    from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    value=gpsim_get_register_value(((GUI_Object*)rw)->gp->pic_id, rw->type, from);
-	    gpsim_put_register_value(((GUI_Object*)rw)->gp->pic_id, rw->type, to, value);
+	    value=gpsim_get_register_value(rw->gp->pic_id, rw->type, from);
+	    gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1185,7 +1192,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
     
     if(!GTK_WIDGET_HAS_FOCUS(widget)) return;
     
-    update_entry(rw);
+    rw->UpdateEntry();
 
 }
 
@@ -1211,7 +1218,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 
     regnumber = rw->row_to_address[row]+column;
 
-    if(!gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber))
+    if(!gpsim_get_register_name(rw->gp->pic_id, rw->type, regnumber))
     {
 	// disable editing invalid cells
 	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 0);
@@ -1222,76 +1229,38 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 	gtk_entry_set_editable(GTK_ENTRY(gtk_sheet_get_entry(rw->register_sheet)), 1);
     }
     
-    update_labelentry(rw);
+    rw->UpdateLabelEntry();
 
   return TRUE;
 }
-/*
-static void
-do_quit_app(GtkWidget *widget) 
+
+
+void Register_Window::SelectRegister(int regnumber)
 {
-	exit_gpsim();
-}
-*/
-void RegWindow_select_register(Register_Window *rw, int regnumber)
-{
-    GtkSheetRange range;
-    int row, col;
+  GtkSheetRange range;
+  int row, col;
     
-  if(rw == NULL || regnumber > MAX_REGISTERS || regnumber<0)
-  {
-      printf("Warning RegWindow_select_register(%p,%x)\n",rw,regnumber);
-      return;
+  if(regnumber > MAX_REGISTERS || regnumber<0) {
+    printf("Warning: %s - regnumber = %x\n",__FUNCTION__,regnumber);
+    return;
   }
   
-  if(rw->registers[regnumber] == NULL)
+  if(registers[regnumber] == NULL)
       return;
   
-    row=rw->registers[regnumber]->row;
-    col=rw->registers[regnumber]->col;
-    range.row0=range.rowi=row;
-    range.col0=range.coli=col;
-    gtk_sheet_select_range(GTK_SHEET(rw->register_sheet),&range);
-    if(GTK_SHEET(rw->register_sheet)->view.col0>range.col0 ||
-       GTK_SHEET(rw->register_sheet)->view.coli<range.coli ||
-       GTK_SHEET(rw->register_sheet)->view.row0>range.row0 ||
-       GTK_SHEET(rw->register_sheet)->view.rowi<range.rowi)
-	gtk_sheet_moveto(GTK_SHEET(rw->register_sheet),row,col,0.5,0.5);
+  row=registers[regnumber]->row;
+  col=registers[regnumber]->col;
+  range.row0=range.rowi=row;
+  range.col0=range.coli=col;
+  gtk_sheet_select_range(GTK_SHEET(register_sheet),&range);
+  if(GTK_SHEET(register_sheet)->view.col0>range.col0 ||
+     GTK_SHEET(register_sheet)->view.coli<range.coli ||
+     GTK_SHEET(register_sheet)->view.row0>range.row0 ||
+     GTK_SHEET(register_sheet)->view.rowi<range.rowi)
+    gtk_sheet_moveto(GTK_SHEET(register_sheet),row,col,0.5,0.5);
 
-    update_labelentry(rw);
+  UpdateLabelEntry();
     
-/*  sheet=rw->register_sheet;
-  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
-    
-  cell[0] = 0;
-  if(((GUI_Object*)rw)->gp)
-    {
-	n = gpsim_get_register_name(((GUI_Object*)rw)->gp->pic_id, rw->type, regnumber);
-	if(n==NULL)
-	    puts("Warning n==NULL in RegWindow_select_register");
-	else
-	    strncpy(cell,n,100);
-    }
-
-  gtk_label_set(GTK_LABEL(rw->location), cell);
-
-  gtk_entry_set_max_length(GTK_ENTRY(rw->entry),
-	GTK_ENTRY(sheet_entry)->text_max_length);
-
-  if((text=gtk_entry_get_text(GTK_ENTRY(gtk_sheet_get_entry(sheet)))))
-    gtk_entry_set_text(GTK_ENTRY(rw->entry), text);
-  else
-    gtk_entry_set_text(GTK_ENTRY(rw->entry), "");
-
-
-  gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
-			   sheet->active_cell.col, &attributes);
-
-  gtk_entry_set_editable(GTK_ENTRY(rw->entry), attributes.is_editable);
-
-
-  gtk_sheet_range_set_justification(sheet, sheet->range, GTK_JUSTIFY_RIGHT);
-*/
 }
 
 static void
@@ -1358,189 +1327,167 @@ static void update_ascii(Register_Window *rw, gint row)
 
 }
 
-static gboolean update_register_cell(Register_Window *rw, unsigned int reg_number)
+gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
+
 {
   gchar name[16];
-//  gint new_value;
-  unsigned int pic_id;
+
   GtkSheetRange range;
   gboolean retval=FALSE;
-  GUI_Processor *gp;
+
   int new_value;
   int last_value;
   int valid_register=0;
   
-  if(rw == NULL || reg_number<0 || reg_number>MAX_REGISTERS)
+  if(reg_number<0 || reg_number>MAX_REGISTERS)
   {
-      printf("Warning update_register_cell(%p,%x)\n",rw,reg_number);
+      printf("Warning update_register_cell(%x)\n",reg_number);
       return 0;
   }
   
-  if(!rw->gui_obj.enabled) 
-	  return 0;	   // Don't read registers when hidden. Esp with ICD.
+  if(!enabled) 
+    return 0;	   // Don't read registers when hidden. Esp with ICD.
   
-  pic_id = rw->gui_obj.gp->pic_id;
   
-  if((reg_number >= MAX_REGISTERS) || (reg_number >= gpsim_get_register_memory_size(pic_id,rw->type)))
-      return 0;
+  if((reg_number >= MAX_REGISTERS) || 
+     (reg_number >= gpsim_get_register_memory_size(gp->pic_id,type)))
+    return 0;
 
-  gp=((GUI_Object*)rw)->gp;
-
-  range.row0=rw->registers[reg_number]->row;
-  range.rowi=rw->registers[reg_number]->row;
-  range.col0=rw->registers[reg_number]->col;
-  range.coli=rw->registers[reg_number]->col;
+  range.row0=registers[reg_number]->row;
+  range.rowi=registers[reg_number]->row;
+  range.col0=registers[reg_number]->col;
+  range.coli=registers[reg_number]->col;
 
   gpsim_set_bulk_mode(1);
-  new_value=gpsim_get_register_value(pic_id, rw->type,reg_number);
+  new_value=gpsim_get_register_value(gp->pic_id, type,reg_number);
   gpsim_set_bulk_mode(0);
-  last_value=rw->registers[reg_number]->value;
-  if(gpsim_get_register_name(pic_id, rw->type,reg_number))
+  last_value=registers[reg_number]->value;
+  if(gpsim_get_register_name(gp->pic_id, type,reg_number))
       valid_register=1;
   
-  if(rw->registers[reg_number]->update_full)
-  {
-      rw->registers[reg_number]->update_full=FALSE;
+  if(registers[reg_number]->update_full) {
+
+    registers[reg_number]->update_full=FALSE;
       
-      if(valid_register)
-      {
-	  if(new_value==INVALID_VALUE)
-	      sprintf (name, "??");
-	  else
-	      sprintf (name, "%02x", new_value);
-      }
+    if(valid_register) {
+
+      if(new_value==INVALID_VALUE)
+	sprintf (name, "??");
       else
-      {
-	  new_value=-1; // magic value
-	  strcpy(name, "");
-      }
-      if(rw->registers[reg_number]->row<=rw->register_sheet->maxrow)
-      {
-	  gtk_sheet_set_cell(GTK_SHEET(rw->register_sheet),
-			     rw->registers[reg_number]->row,
-			     rw->registers[reg_number]->col,
-			     GTK_JUSTIFY_RIGHT,name);
-      }
-      // else the register is invalid and out of the register sheet
+	sprintf (name, "%02x", new_value);
+    }
+    else {
+      new_value=-1; // magic value
+      strcpy(name, "");
+    }
+
+    if(registers[reg_number]->row<=register_sheet->maxrow) {
+
+      gtk_sheet_set_cell(GTK_SHEET(register_sheet),
+			 registers[reg_number]->row,
+			 registers[reg_number]->col,
+			 GTK_JUSTIFY_RIGHT,name);
+    }
+    // else the register is invalid and out of the register sheet
  
 
-      if(new_value != last_value)
-      {
-	  rw->registers[reg_number]->value = new_value;
-	  rw->registers[reg_number]->update_full=TRUE;
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->item_has_changed_color);
-      }
+    if(new_value != last_value) {
+
+      registers[reg_number]->value = new_value;
+      registers[reg_number]->update_full=TRUE;
+      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
+    } else
+      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
+
+    if(gpsim_reg_has_breakpoint(gp->pic_id, type, reg_number))
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &breakpoint_color);
+    else if(!valid_register)
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &invalid_color);
+    else if(gpsim_register_is_alias(gp->pic_id, type, reg_number))
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &alias_color);
+    else {
+      if(gpsim_register_is_sfr(gp->pic_id, type, reg_number))
+	gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &sfr_bg_color);
       else
-      {
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->normal_fg_color);
-      }
+	gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &normal_bg_color);
+    }
 
-      if(gpsim_reg_has_breakpoint(pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->breakpoint_color);
-      else if(!valid_register)
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->invalid_color);
-      else if(gpsim_register_is_alias(((GUI_Object*)rw)->gp->pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->alias_color);
-      else
-      {
-	  if(gpsim_register_is_sfr(pic_id, rw->type, reg_number))
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->sfr_bg_color);
-	  else
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->normal_bg_color);
-      }
+    retval=TRUE;
+  } else if(new_value!=last_value) {
 
-      retval=TRUE;
-  }
-  else if(new_value!=last_value)
-  {
-      if(new_value==INVALID_VALUE)
-      {
-	  rw->registers[reg_number]->value = -1;
-	  sprintf (name, "??");
-      }
-      else
-      {
-	  // the register is changed since last update
-	  rw->registers[reg_number]->value = new_value;
-	  sprintf (name, "%02x", new_value);
-      }
-      gtk_sheet_set_cell(GTK_SHEET(rw->register_sheet),
-			 rw->registers[reg_number]->row,
-			 rw->registers[reg_number]->col,
-			 GTK_JUSTIFY_RIGHT,name);
+    if(new_value==INVALID_VALUE) {
+      
+      registers[reg_number]->value = -1;
+      sprintf (name, "??");
+    } else {
 
-      rw->registers[reg_number]->update_full=TRUE;
-      gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->item_has_changed_color);
+      // the register is changed since last update
+      registers[reg_number]->value = new_value;
+      sprintf (name, "%02x", new_value);
+    }
 
-      retval=TRUE;
+    gtk_sheet_set_cell(GTK_SHEET(register_sheet),
+		       registers[reg_number]->row,
+		       registers[reg_number]->col,
+		       GTK_JUSTIFY_RIGHT,name);
+
+    registers[reg_number]->update_full=TRUE;
+    gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
+
+    retval=TRUE;
   }
 
-  if(reg_number==(rw->row_to_address[rw->register_sheet->active_cell.row]+
-		  rw->register_sheet->active_cell.col))
+  if(reg_number==(row_to_address[register_sheet->active_cell.row]+
+		  register_sheet->active_cell.col))
   {
-      // if sheet cursor is standing on a cell that is changed, then
-      // we update the entry above the sheet
-      if(new_value!=last_value)
-	  update_entry(rw);
+    // if sheet cursor is standing on a cell that is changed, then
+    // we update the entry above the sheet
+    if(new_value!=last_value)
+      UpdateEntry();
   }
 
   return retval;
 }
 
 
-void RegWindow_update(Register_Window *rw)
+void Register_Window::Update(void)
 {
-    GUI_Processor *gp;
 
-    int address;
-    gboolean row_changed;
-    int j, i;
+  int address;
+  gboolean row_changed;
+  int j, i;
+
+  if(!enabled)
+    return;
     
-  if(rw == NULL)
-  {
-      printf("Warning RegWindow_update(%p)\n",rw);
-      return;
-  }
+  if(!GTK_WIDGET_VISIBLE(window))
+    return;
 
-    if( !((GUI_Object*)rw)->enabled)
-	return;
-    
-  if(!GTK_WIDGET_VISIBLE(((GUI_Object*)rw)->window))
-  {
-      puts("ASHFSDHHFDHFD");
-      return;
-  }
-
-  if(!rw->registers_loaded)
-      return;
+  if(!registers_loaded)
+    return;
   
-  gp = ((GUI_Object*)rw)->gp;
-
-  if(gp==NULL || gp->pic_id==0)
-  {
-      puts("Warning gp or gp->pic_id == NULL in RegWindow_update");
-      return;
+  if(gp==NULL || gp->pic_id==0 || register_sheet==NULL) {
+    puts("Warning gp or gp->pic_id == NULL in RegWindow_update");
+    return;
   }
 
-//  gtk_sheet_freeze(rw->register_sheet);
-  
-    for(j = 0; j<=GTK_SHEET(rw->register_sheet)->maxrow; j++)
-    {
-	if(rw->row_to_address[j]==-1)
-	    continue;
-	row_changed = FALSE;
-	for(i = 0; i<REGISTERS_PER_ROW; i++)
-	{
-	    address = rw->row_to_address[j]+i;
-	    if(rw->registers[address]->value!=-1 || rw->registers[address]->update_full)
-	    {
-		if(update_register_cell(rw, rw->row_to_address[j]+i) == TRUE)
-		    row_changed = TRUE;
-	    }
-	}
-	if(row_changed)
-	   update_ascii(rw,j);
+
+  for(j = 0; j<=GTK_SHEET(register_sheet)->maxrow; j++) {
+
+    if(row_to_address[j]==-1)
+      continue;
+    row_changed = FALSE;
+    for(i = 0; i<REGISTERS_PER_ROW; i++) {
+      address = row_to_address[j]+i;
+      if(registers[address]->value!=-1 || registers[address]->update_full) {
+
+	if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
+	  row_changed = TRUE;
+      }
     }
+    if(row_changed)
+      update_ascii(this,j);
+  }
 }
 
 
@@ -1553,11 +1500,6 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
   if(xref == NULL)
   {
       printf("Warning update_register_cell: xref=%p\n",xref);
-/*      if(xref->data == NULL || xref->parent_window==NULL)
-      {
-	  printf("Warning update_register_cell: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
-      }
-*/
       return;
   }
   
@@ -1573,7 +1515,7 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
   address = rw->row_to_address[reg->row]+reg->col;
 
   rw->registers[address]->update_full=TRUE;
-  update_register_cell(rw, address);
+  rw->UpdateRegisterCell(address);
   
   update_ascii(rw,reg->row);
 }
@@ -1587,450 +1529,460 @@ static void xref_remove_cell(struct cross_reference_to_gui *xref)
     printf("%s() doesn't do anything\n", __FUNCTION__);
 
 }
-/*
-static void change_view (struct _gui_object *_this, int view_state)
-{
-    Register_Window *rw;
 
-    if(_this == (GUI_Object*)_this->gp->regwin_eeprom) {
-	rw = _this->gp->regwin_eeprom;
-
-//	if(!_this->gp->regwin_eeprom->allow_change_view)
-//	  return;
-    }
-    else if(_this == (GUI_Object*)_this->gp->regwin_ram)
-	rw = _this->gp->regwin_ram;
-    else
-        assert(0);
-
-    SourceBrowser_change_view(_this,view_state);
-    
-    RegWindow_update(rw);
-
-    return;
-}*/
-
-void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
+void Register_Window::NewProcessor(GUI_Processor *gp)
 {
 
 
 #define NAME_SIZE 32
-    gint i,j,reg_number, border_mask, border_width;
-    GtkSheet *sheet;
-    struct cross_reference_to_gui *cross_reference;
-    gboolean row_created;
-    GtkSheetRange range;
-    int pic_id;
-    int row_height, char_width;
+  gint i,j,reg_number, border_mask, border_width;
+  struct cross_reference_to_gui *cross_reference;
+  gboolean row_created;
+  GtkSheetRange range;
+  int pic_id;
+  int row_height, char_width;
     
-    if(rw == NULL || gp == NULL)
-	return;
+  if(gp == NULL)
+    return;
 
-    rw->processor=1;
+  processor=1;
     
-    if( !((GUI_Object*)rw)->enabled)
-	return;
+  if( !enabled)
+    return;
     
-    rw->gui_obj.gp = gp;
-    pic_id = gp->pic_id;
+  pic_id = gp->pic_id;
 
-    for(i=0;i<MAX_REGISTERS;i++)
-    {
-	if(rw->registers[i]!=NULL)
-	    free(rw->registers[i]);
-	rw->registers[i]=NULL;
-    }
+  for(i=0;i<MAX_REGISTERS;i++){
+    if(registers[i]!=NULL)
+      free(registers[i]);
+    registers[i]=NULL;
+  }
 
-    sheet=GTK_SHEET(rw->register_sheet);
+  if(register_sheet == NULL){
+    printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
+    return;
+  }
+      
+  row_created=FALSE;
 
-    row_created=FALSE;
+  for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
+    row_to_address[j]=-1;
 
-    for(j=0;j<MAX_REGISTERS/REGISTERS_PER_ROW;j++)
-	rw->row_to_address[j]=-1;
-
-//    gtk_widget_hide(GTK_WIDGET(sheet));
-    gtk_sheet_freeze(sheet);
+  gtk_sheet_freeze(register_sheet);
     
-    j=0;
-    char_width = gdk_string_width (rw->normalfont,"9");
-    row_height = 3 * char_width + 6;
-    gtk_sheet_set_row_height (rw->register_sheet, j, row_height);
-    for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, rw->type);reg_number++)
-    {
-	i=reg_number%REGISTERS_PER_ROW;
+  j=0;
+  char_width = gdk_string_width (normalfont,"9");
+  row_height = 3 * char_width + 6;
+  gtk_sheet_set_row_height (register_sheet, j, row_height);
+  for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, type);reg_number++) {
+    i=reg_number%REGISTERS_PER_ROW;
 	
-	if(i==0 && row_created)
-	{
-	    j++;
-	    row_created=FALSE;
-	}
+    if(i==0 && row_created)
+      {
+	j++;
+	row_created=FALSE;
+      }
 	
-	rw->registers[reg_number] = (Register  *)malloc(sizeof(Register));
-	rw->registers[reg_number]->row = j;
-	rw->registers[reg_number]->col = i;
-	rw->registers[reg_number]->value = -1;
-	rw->registers[reg_number]->update_full=TRUE;
-	if(gpsim_get_register_name (pic_id, rw->type,reg_number))
+    registers[reg_number] = (Register  *)malloc(sizeof(Register));
+    registers[reg_number]->row = j;
+    registers[reg_number]->col = i;
+    registers[reg_number]->value = -1;
+    registers[reg_number]->update_full=TRUE;
+    if(gpsim_get_register_name (pic_id, type,reg_number)) {
+
+      gpsim_set_bulk_mode(1);
+      registers[reg_number]->value = gpsim_get_register_value(pic_id, type,reg_number);
+      gpsim_set_bulk_mode(0);
+
+      /* Now create a cross-reference link that the simulator can use to
+       * send information back to the gui
+       */
+
+      cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+      cross_reference->parent_window_type =   WT_register_window;
+      cross_reference->parent_window = (gpointer) this;
+      cross_reference->data = (gpointer) registers[reg_number];
+      cross_reference->update = xref_update_cell;
+      cross_reference->remove = xref_remove_cell;
+      gpsim_assign_register_xref(pic_id, type, reg_number, (gpointer) cross_reference);
+
+      if(!row_created)
 	{
-	    gpsim_set_bulk_mode(1);
-	    rw->registers[reg_number]->value = gpsim_get_register_value(pic_id, rw->type,reg_number);
-	    gpsim_set_bulk_mode(0);
-
-	    /* Now create a cross-reference link that the simulator can use to
-	     * send information back to the gui
-	     */
-
-	    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-	    cross_reference->parent_window_type =   WT_register_window;
-	    cross_reference->parent_window = (gpointer) rw;
-	    cross_reference->data = (gpointer) rw->registers[reg_number];
-	    cross_reference->update = xref_update_cell;
-	    cross_reference->remove = xref_remove_cell;
-	    gpsim_assign_register_xref(pic_id, rw->type, reg_number, (gpointer) cross_reference);
-
-	    if(!row_created)
+	  char row_label[100];
+	  if(register_sheet->maxrow<j)
 	    {
-		char row_label[100];
-		if(sheet->maxrow<j)
-		{
-		    gtk_sheet_add_row(sheet,1);
-		    gtk_sheet_set_row_height (rw->register_sheet, j, row_height);
-		}
-
-		sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
-		gtk_sheet_row_button_add_label(sheet, j, row_label);
-		gtk_sheet_set_row_title(sheet, j, row_label);
-
-		rw->row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
-		row_created=TRUE;
+	      gtk_sheet_add_row(register_sheet,1);
+	      gtk_sheet_set_row_height (register_sheet, j, row_height);
 	    }
+
+	  sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
+	  gtk_sheet_row_button_add_label(register_sheet, j, row_label);
+	  gtk_sheet_set_row_title(register_sheet, j, row_label);
+
+	  row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
+	  row_created=TRUE;
 	}
     }
-    if(j < sheet->maxrow)
-    {
-//      printf(">>>>>>>%d %d %d\n",j,sheet->maxrow,sheet->maxrow+1-j);
-	gtk_sheet_delete_rows(sheet,j,sheet->maxrow-j);
-    }
+  }
 
-    rw->registers_loaded = 1;
+  if(j < register_sheet->maxrow)
+    gtk_sheet_delete_rows(register_sheet,j,register_sheet->maxrow-j);
+
+  registers_loaded = 1;
     
-    range.row0=0;
-    range.rowi=sheet->maxrow;
-    range.col0=0;
-    range.coli=sheet->maxcol;
+  range.row0=0;
+  range.rowi=register_sheet->maxrow;
+  range.col0=0;
+  range.coli=register_sheet->maxcol;
 
-    gtk_sheet_range_set_font(sheet, &range, rw->normalfont);
+  gtk_sheet_range_set_font(register_sheet, &range, normalfont);
 
-    border_mask = GTK_SHEET_RIGHT_BORDER |
-	GTK_SHEET_LEFT_BORDER |
-	GTK_SHEET_BOTTOM_BORDER |
-	GTK_SHEET_TOP_BORDER;
+  border_mask = GTK_SHEET_RIGHT_BORDER |
+    GTK_SHEET_LEFT_BORDER |
+    GTK_SHEET_BOTTOM_BORDER |
+    GTK_SHEET_TOP_BORDER;
 
-    border_width = 1;
+  border_width = 1;
 
-    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
+  gtk_sheet_range_set_border(register_sheet, &range, border_mask, border_width, 0);
 
-    border_mask = GTK_SHEET_LEFT_BORDER;
-    border_width = 3;
+  border_mask = GTK_SHEET_LEFT_BORDER;
+  border_width = 3;
 
-    range.col0=REGISTERS_PER_ROW;
-    range.coli=REGISTERS_PER_ROW;
+  range.col0=REGISTERS_PER_ROW;
+  range.coli=REGISTERS_PER_ROW;
 
-    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
+  gtk_sheet_range_set_border(register_sheet, &range, border_mask, border_width, 0);
 
-    // set values in the sheet
-    RegWindow_update(rw);
+  // set values in the sheet
+  Update();
 
-    gtk_sheet_thaw(sheet);
-//    gtk_widget_show(GTK_WIDGET(sheet));
+  gtk_sheet_thaw(register_sheet);
     
-    RegWindow_select_register(rw, 0);
+  SelectRegister(0);
 
-/*    if(gpsim_get_register_memory_size(pic_id,rw->type)==0)
-    {
-	((GUI_Object*)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
-//        rw->allow_change_view=0;
-    }
-    else if(!GTK_WIDGET_VISIBLE(((GUI_Object*)rw)->window))
-    {
-//	rw->allow_change_view=1;
-	((GUI_Object*)rw)->change_view((GUI_Object*)rw,VIEW_SHOW);
-    }
-*/
 }
 
 static int show_event(GtkWidget *widget,
                         Register_Window *rw)
 {
-	RegWindow_update(rw);
-    return TRUE;
+  rw->Update();
+  return TRUE;
 }
 
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
 {
-//    puts("Delete");
-    ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
-    return TRUE;
+
+  rw->ChangeView(VIEW_HIDE);
+  return TRUE;
 }
 
-void
-BuildRegisterWindow(Register_Window *rw)
+//------------------------------------------------------------------------
+// Build
+//
+//
+
+void Register_Window::Build(void)
 {
-        GtkWidget *window;
-    GtkWidget *register_sheet;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
 
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
-
-
     
-	gchar name[10];
-	gint i;
-	gint column_width,char_width;
+  gchar name[10];
+  gint i;
+  gint column_width,char_width;
 
-  int x,y,width,height;
   char *fontstring;
-  
-	
-  if(rw==NULL)
-  {
-      printf("Warning build_register_viewer(%p)\n",rw);
-      return;
-  }
 
-    if(rw->gui_obj.window!=NULL)
-    {
-        gtk_widget_destroy(rw->gui_obj.window);
-	for(i=0;i<MAX_REGISTERS;i++)
-	{
-	    if(rw->registers[i]!=NULL)
-		free(rw->registers[i]);
-	    rw->registers[i]=NULL;
-	}
-    }
+  if(window!=NULL) {
+
+    gtk_widget_destroy(window);
+    for(i=0;i<MAX_REGISTERS;i++)
+      {
+	if(registers[i]!=NULL)
+	  free(registers[i]);
+	registers[i]=NULL;
+      }
+  }
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-
-  ((GUI_Object*)rw)->window=window;
-
-//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
-  //GTK_SIGNAL_FUNC (quit), NULL);
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
-    if(rw->type==REGISTER_RAM)
+  if(type==REGISTER_RAM)
   {
-      register_sheet=gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]");
-      gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
-      // Add a status bar
-      StatusBar_create(main_vbox,gp->status_bar);
+    register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]"));
+    gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
+    // Add a status bar
+    StatusBar_create(main_vbox,gp->status_bar);
   }
   else
   {
-      register_sheet=gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [EEPROM]");
-      gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
+    register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [EEPROM]"));
+    gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
   }
     
-    GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
-    
-  rw->register_sheet = GTK_SHEET(register_sheet);
+  GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
 
   /* create popupmenu */
-  rw->popup_menu=build_menu(rw);
+  popup_menu=build_menu(this);
 
-  build_entry_bar(main_vbox, rw);
+  build_entry_bar(main_vbox,this);
 
-  width=((GUI_Object*)rw)->width;
-  height=((GUI_Object*)rw)->height;
-  x=((GUI_Object*)rw)->x;
-  y=((GUI_Object*)rw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(rw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(rw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(rw->gui_obj.window),rw->gui_obj.name,"Gpsim");
-
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
   /**************************** load fonts *********************************/
 #define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
-  strcpy(rw->normalfont_string,DEFAULT_NORMALFONT);
-  if(config_get_string(rw->gui_obj.name,"normalfont",&fontstring))
-      strcpy(rw->normalfont_string,fontstring);
+  strcpy(normalfont_string,DEFAULT_NORMALFONT);
+  if(config_get_string(name,"normalfont",&fontstring))
+      strcpy(normalfont_string,fontstring);
 
-  while(!load_styles(rw))
+  while(!load_styles(this))
   {
-      if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
+    if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
-	  strcpy(rw->normalfont_string,DEFAULT_NORMALFONT);
-	  config_set_string(rw->gui_obj.name,"normalfont",rw->normalfont_string);
+	strcpy(normalfont_string,DEFAULT_NORMALFONT);
+	config_set_string(name,"normalfont",normalfont_string);
       }
       else
       {
-	  settings_dialog(rw);
+	settings_dialog(this);
       }
   }
 
-
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
-		     GTK_SIGNAL_FUNC(delete_event), rw);
+		     GTK_SIGNAL_FUNC(delete_event), this);
 
   gtk_signal_connect(GTK_OBJECT (window), "show",
-		  GTK_SIGNAL_FUNC(show_event), rw);
+		  GTK_SIGNAL_FUNC(show_event), this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
-  gtk_container_add(GTK_CONTAINER(scrolled_window), register_sheet);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), GTK_WIDGET(register_sheet));
   
   GTK_SHEET_SET_FLAGS(register_sheet, GTK_SHEET_CLIP_TEXT);
 
-  gtk_widget_show(register_sheet);
+  gtk_widget_show(GTK_WIDGET(register_sheet));
 
   gtk_widget_show(scrolled_window);
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
 
   gtk_signal_connect(GTK_OBJECT(gtk_sheet_get_entry(GTK_SHEET(register_sheet))),
-		     "changed", (GtkSignalFunc)show_entry, rw);
+		     "changed", (GtkSignalFunc)show_entry, this);
 
   gtk_signal_connect(GTK_OBJECT(register_sheet),
 		     "activate", (GtkSignalFunc)activate_sheet_cell,
-		     (gpointer) rw);
+		     this);
 
-  gtk_signal_connect(GTK_OBJECT(rw->entry),
-		     "changed", (GtkSignalFunc)show_sheet_entry, rw);
+  gtk_signal_connect(GTK_OBJECT(entry),
+		     "changed", (GtkSignalFunc)show_sheet_entry, this);
 
-  gtk_signal_connect(GTK_OBJECT(rw->entry),
+  gtk_signal_connect(GTK_OBJECT(entry),
 		     "activate", (GtkSignalFunc)activate_sheet_entry,
-		     rw);
+		     this);
 
 //  gtk_widget_realize(window);
 
-                         	char_width = gdk_string_width (rw->normalfont,"9");
-	column_width = 3 * char_width + 6;
+  char_width = gdk_string_width (normalfont,"9");
+  column_width = 3 * char_width + 6;
 
-	for(i=0; i<rw->register_sheet->maxcol; i++){
-	  //sprintf(name,"0x%02x",i);
-		sprintf(name,"%02x",i);
-		gtk_sheet_column_button_add_label(rw->register_sheet, i, name);
-		gtk_sheet_set_column_title(rw->register_sheet, i, name);
-		gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
-	}
+  for(i=0; i<register_sheet->maxcol; i++){
 
-	sprintf(name,"ASCII");
-	gtk_sheet_column_button_add_label(rw->register_sheet, i, name);
-	gtk_sheet_set_column_title(rw->register_sheet, i, name);
-	gtk_sheet_set_column_width (rw->register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
+    sprintf(name,"%02x",i);
+    gtk_sheet_column_button_add_label(register_sheet, i, name);
+    gtk_sheet_set_column_title(register_sheet, i, name);
+    gtk_sheet_set_column_width (register_sheet, i, column_width);
+  }
 
-	gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
+  i = REGISTERS_PER_ROW;
+  sprintf(name,"ASCII");
+  gtk_sheet_column_button_add_label(register_sheet, i, name);
+  gtk_sheet_set_column_title(register_sheet, i, name);
 
+  gtk_sheet_set_column_width (register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
+
+  gtk_sheet_set_row_titles_width(register_sheet, column_width);
+
+  gtk_signal_connect(GTK_OBJECT(register_sheet),
+		     "key_press_event",
+		     (GtkSignalFunc) clipboard_handler, 
+		     NULL);
+
+  gtk_signal_connect(GTK_OBJECT(register_sheet),
+		     "resize_range",
+		     (GtkSignalFunc) resize_handler, 
+		     this);
+
+  gtk_signal_connect(GTK_OBJECT(register_sheet),
+		     "move_range",
+		     (GtkSignalFunc) move_handler, 
+		     this);
 	
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "key_press_event",
-			   (GtkSignalFunc) clipboard_handler, 
-			   NULL);
+  gtk_signal_connect(GTK_OBJECT(register_sheet),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup, 
+		     this);
 
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "resize_range",
-			   (GtkSignalFunc) resize_handler, 
-			   rw);
+  gtk_signal_connect(GTK_OBJECT(register_sheet),
+		     "set_cell",
+		     (GtkSignalFunc) set_cell,
+		     this);
 
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "move_range",
-			   (GtkSignalFunc) move_handler, 
-			   rw);
-	
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "button_press_event",
-			   (GtkSignalFunc) do_popup, 
-			   rw);
-
-	gtk_signal_connect(GTK_OBJECT(rw->register_sheet),
-			   "set_cell",
-			   (GtkSignalFunc) set_cell,
-			   rw);
-	
-//  rw->gui_obj.window = window;
-	
-	gtk_signal_connect_after(GTK_OBJECT(rw->gui_obj.window), "configure_event",
-				 GTK_SIGNAL_FUNC(gui_object_configure_event),rw);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+			   GTK_SIGNAL_FUNC(gui_object_configure_event),
+			   this);
 
 
   gtk_widget_show (window);
 
-  gtk_widget_grab_default(rw->location);
+  gtk_widget_grab_default(location);
   
-  rw->gui_obj.enabled=1;
+
+  enabled=1;
   
-  rw->gui_obj.is_built=1;
+  is_built=1;
   
   for(i=0;i<MAX_REGISTERS;i++)
-      rw->registers[i]=NULL;
+      registers[i]=NULL;
   
-  if(rw->processor)
+  if(processor)
   {
-      RegWindow_new_processor(rw, ((GUI_Object*)rw)->gp);
+    NewProcessor(gp);
   }
-  update_menu_item((GUI_Object*)rw);
+
+  UpdateMenuItem();
 }
 
-int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type)
+int Register_Window::Create(GUI_Processor *_gp)
 {
-    int i;
-  Register_Window *register_window;
+  int i;
 
-  register_window = (Register_Window *)malloc(sizeof(Register_Window));
+  gp = _gp;
+  window = NULL;
+  wc = WC_data;
+  wt = WT_register_window;
+  change_view = NULL;
+  is_built = 0;
+  enabled = 0;
 
-  register_window->type=type;
+  registers_loaded=0;
+  processor=0;
   
-  register_window->gui_obj.gp = gp;
-  register_window->gui_obj.window = NULL;
-  register_window->gui_obj.wc = WC_data;
-  register_window->gui_obj.wt = WT_register_window;
-  register_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
-  register_window->gui_obj.is_built = 0;
-  register_window->gui_obj.enabled = 0;
-
-//  register_window->allow_change_view=1;
-  register_window->registers_loaded=0;
-  register_window->processor=0;
-
-  if(type==REGISTER_RAM)
-  {
-      gp->regwin_ram = register_window;
-      
-      register_window->gui_obj.name = "register_viewer_ram";
-      // Add a status bar
-      gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
-      gp->status_bar->created=0;
-  }
-  else
-  {
-      gp->regwin_eeprom = register_window;
-      
-      register_window->gui_obj.name = "register_viewer_eeprom";
-  }
-  
-  
-  //  register_window->gui_obj.gp = NULL;
-  register_window->registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
+  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
   for(i=0;i<MAX_REGISTERS;i++)
-      register_window->registers[i]=NULL;
+    registers[i]=NULL;
 
-  gp_add_window_to_list(gp, (GUI_Object *)register_window);
+  gp->add_window_to_list(this);
 
-  if(!gui_object_get_config((GUI_Object*)register_window))
+  if(!get_config())
     printf("warning %s\n",__FUNCTION__);
 
-  if(register_window->gui_obj.enabled)
-      BuildRegisterWindow(register_window);
+  if(enabled)
+      Build();
 
   return 1;
 }
+
+
+RAM_RegisterWindow::RAM_RegisterWindow(void)
+{
+  menu = "<main>/Windows/Ram";
+  type = REGISTER_RAM;
+
+}
+
+int RAM_RegisterWindow::Create(GUI_Processor *_gp)
+{
+  int i;
+
+  gp = _gp;
+  window = NULL;
+  wc = WC_data;
+  wt = WT_register_window;
+  change_view = NULL;
+  is_built = 0;
+  enabled = 0;
+
+  registers_loaded=0;
+  processor=0;
+
+  gp->regwin_ram = this;
+      
+  name = "register_viewer_ram";
+  // Add a status bar
+  gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
+  gp->status_bar->created=0;
+  
+  
+  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
+  for(i=0;i<MAX_REGISTERS;i++)
+    registers[i]=NULL;
+
+  gp->add_window_to_list(this);
+
+  if(!get_config())
+    printf("warning %s\n",__FUNCTION__);
+
+  if(enabled)
+      Build();
+  printf(__FUNCTION__);
+
+  return 1;
+}
+
+
+
+
+EEPROM_RegisterWindow::EEPROM_RegisterWindow(void)
+{
+  menu = "<main>/Windows/EEPROM";
+  type = REGISTER_EEPROM;
+
+}
+
+int EEPROM_RegisterWindow::Create(GUI_Processor *_gp)
+{
+  int i;
+
+  gp = _gp;
+  window = NULL;
+  wc = WC_data;
+  wt = WT_register_window;
+  change_view = NULL;
+  is_built = 0;
+  enabled = 0;
+
+  registers_loaded=0;
+  processor=0;
+
+  gp->regwin_eeprom = this;
+  name = "register_viewer_eeprom";
+  
+  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
+  for(i=0;i<MAX_REGISTERS;i++)
+    registers[i]=NULL;
+
+  gp->add_window_to_list(this);
+
+  if(!get_config())
+    printf("warning %s\n",__FUNCTION__);
+
+  if(enabled)
+      Build();
+
+  return 1;
+}
+
+
 
 #endif // HAVE_GUI

@@ -52,7 +52,7 @@ typedef struct _note_book_item
   GtkSignalFunc func;
 } NotebookItem;
 
-GtkItemFactory *item_factory;
+GtkItemFactory *item_factory=NULL;
 
 extern GUI_Processor *gp;
 extern guint64 gui_update_rate;
@@ -408,13 +408,19 @@ toggle_window (gpointer             callback_data,
 	default:
 	    puts("unknown menu action");
 	}
+  printf("%s\n",__FUNCTION__);
 	
 	if(gui_object!=NULL)
 	{
+	  if(gui_object->change_view) {
+
 	    if(GTK_CHECK_MENU_ITEM(menu_item)->active)
 		gui_object->change_view(gui_object,VIEW_SHOW);
 	    else
 		gui_object->change_view(gui_object,VIEW_HIDE);
+	  } else
+	    gui_object->ChangeView( (GTK_CHECK_MENU_ITEM(menu_item)->active) ? 
+				    VIEW_SHOW : VIEW_HIDE);
 	}
 
 //	printf("%s\n",gtk_widget_get_name(widget));

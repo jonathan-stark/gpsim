@@ -191,8 +191,7 @@ public:
 // Forward reference
 //
 
-struct _gui_processor;
-typedef struct _gui_processor GUI_Processor;
+class GUI_Processor;
 
 #endif
 //---------------------------------------------------------

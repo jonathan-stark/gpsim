@@ -110,24 +110,13 @@ void gui_new_processor (unsigned int pic_id)
   // printf("gui is adding a new processor\n");
 
   // Create an gui representation of the new processor
-  /*
-  pic_processor *p;
-
-  p = get_processor(pic_id);
-
-  gp->p = p;
-  p->gp = gp;
-
-  gp->pic_id = pic_id;
-  */
-  // Add it to the list 
 
   if(gp)
     {
       gp->pic_id = pic_id;
       gui_processors = g_slist_append(gui_processors,gp);
 
-      RegWindow_new_processor(gp->regwin_ram, gp);
+      gp->regwin_ram->NewProcessor(gp);
       StatusBar_new_processor(gp->status_bar, gp);
       SourceBrowserOpcode_new_processor((SourceBrowserOpcode_Window*)gp->program_memory, gp);
       SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
@@ -139,8 +128,7 @@ void gui_new_processor (unsigned int pic_id)
       ProfileWindow_new_processor(gp->profile_window,gp);
       StopWatchWindow_new_processor(gp->stopwatch_window,gp);
 
-      //init_link_to_gpsim(gp);
-      //  redisplay_prompt();
+
     }
 
 }
@@ -183,8 +171,7 @@ void gui_new_program (unsigned int pic_id)
 
       // this is here because the eeprom is not set to values in cod
       // when gui_new_processor is run. eeprom is with program memory data
-      RegWindow_new_processor(gp->regwin_eeprom, gp);
-
+      gp->regwin_eeprom->NewProcessor(gp);
       
       SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
@@ -358,62 +345,6 @@ int config_set_variable(char *module, char *entry, int value)
     return 1;
 }
 
-void gui_check_object(GUI_Object *obj)
-{
-#define MAX_REASONABLE   2000
-
-  if(!obj) {
-    printf("Warning %s\n",__FUNCTION__);
-    return;
-  }
-
-  if((obj->x < 0 || obj->x > MAX_REASONABLE) ||
-     (obj->y < 0 || obj->y > MAX_REASONABLE) ||
-     (obj->width < 0 || obj->width > MAX_REASONABLE) ||
-     (obj->height < 0 || obj->height > MAX_REASONABLE) )
-
-    gui_object_set_default_config(obj);
-
-}
-
-int gui_object_set_default_config(GUI_Object *obj)
-{
-  static int x = 100;
-  static int y = 100;
-
-  if(!obj) {
-    printf("Warning %s\n",__FUNCTION__);
-    return 0;
-  }
-
-
-  obj->enabled = 0;
-  obj->x = x;
-  obj->y = y;
-  x += 100;
-  y += 100;
-
-  obj->width = 100;
-  obj->height = 100;
-
-  return 1;
-}
-
-int gui_object_set_config(GUI_Object *obj)
-{
-  if(!obj)
-    return 0;
-
-  gui_check_object(obj);
-
-    config_set_variable(obj->name, "enabled", ((obj->enabled) ? 1 : 0) );
-    config_set_variable(obj->name, "x", obj->x);
-    config_set_variable(obj->name, "y", obj->y);
-    config_set_variable(obj->name, "width", obj->width);
-    config_set_variable(obj->name, "height", obj->height);
-    return 1;
-}
-
 int config_get_variable(char *module, char *entry, int *value)
 {
     int ret;
@@ -450,32 +381,13 @@ int config_get_string(char *module, char *entry, char **string)
     return 1;
 }
 
-int gui_object_get_config(GUI_Object *obj)
-{
-  if(!obj || !obj->name)
-    return 0;
-
-    if(!config_get_variable(obj->name, "enabled", &obj->enabled))
-	obj->enabled=0;
-    if(!config_get_variable(obj->name, "x", &obj->x))
-	obj->x=10;
-    if(!config_get_variable(obj->name, "y", &obj->y))
-	obj->y=10;
-    if(!config_get_variable(obj->name, "width", &obj->width))
-	obj->width=300;
-    if(!config_get_variable(obj->name, "height", &obj->height))
-	obj->height=100;
-
-  gui_check_object(obj);
-
-    return 1;
-}
-
-
 /*------------------------------------------------------------------
  * gui_init
  *
  */
+
+static  RAM_RegisterWindow *ram=NULL;
+static  EEPROM_RegisterWindow *eeprom=NULL;
 
 int gui_init (int argc, char **argv)
 {
@@ -523,14 +435,19 @@ int gui_init (int argc, char **argv)
   //  gp = (GUI_Processor *)malloc(sizeof(GUI_Processor));
   //  gp->windows = g_list_alloc();
 
-  gp = new_GUI_Processor();
+  gp = new GUI_Processor();
 
   gui_styles_init();
   
   create_dispatcher();
 
-  CreateRegisterWindow(gp, REGISTER_RAM);
-  CreateRegisterWindow(gp, REGISTER_EEPROM);
+  ram    = new  RAM_RegisterWindow();
+  eeprom = new  EEPROM_RegisterWindow();
+  ram->Create(gp);
+  eeprom->Create(gp);
+  printf("%s \n",__FUNCTION__);
+  //CreateRegisterWindow(gp, REGISTER_RAM);
+  //CreateRegisterWindow(gp, REGISTER_EEPROM);
   CreateSourceBrowserOpcodeWindow(gp);
   CreateSourceBrowserAsmWindow(gp);
   CreateSymbolWindow(gp);
