@@ -39,12 +39,12 @@ digital
 # specified. The initial cycle was specified above. 
 
 
-{ 0x200 1
-0x300 0
-0x400 1
-0x600 0
-0x700 1
-0x800 0}
+{ 0x200, 1,
+0x300, 0,
+0x400, 1,
+0x600, 0,
+0x700, 1,
+0x800, 0}
 
 # Give the stimulus a name:
 
