@@ -104,6 +104,9 @@ public:
 
   void *widget; // GtkWidget * that is put in the breadboard.
 
+  int x,y;
+  XrefObject *xref; // Updated when the module changes position
+
   // I/O pin specific
 
   virtual int get_pin_count(void){return 0;};
@@ -183,4 +186,5 @@ void module_load_module(char * module_type, char * module_new_name=NULL);
 void module_pins(char *module_name);
 void module_set_attr(char *module_name,char *attr, char *val);
 void module_set_attr(char *module_name,char *attr, double val);
+void module_set_position(char *module_name, int x, int y);
 #endif // __MODULES_H__
