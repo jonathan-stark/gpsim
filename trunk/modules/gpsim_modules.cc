@@ -20,32 +20,28 @@ Boston, MA 02111-1307, USA.  */
 
 /*
 
-  binary_indicator.c
+ */
+#include <iostream.h>
+#include <dlfcn.h>
 
-  This is an example module illustrating how modules may be created 
+/************************************************************
+ *
+ * _init() - this is called when the library is opened.
+ */
 
-*/
-
-
-#include <errno.h>
-#include <stdlib.h>
-#include <string>
-
-#include "binary_indicator.h"
-
-
-Binary_Indicator::Binary_Indicator(void)
+_init(void)
 {
 
-  cout << "binary indicator constructor\n";
-
+  cout << "gpsim modules has been opened\n";
 }
 
-void Binary_Indicator::test(void)
+/************************************************************
+ *
+ * _fini() - this is called when the library is closed.
+ */
+
+_fini(void)
 {
 
-  cout << "test";
-
+  cout << "gpsim modules has been closed\n";
 }
-
-

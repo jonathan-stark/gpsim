@@ -355,96 +355,6 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 
       pic_processor *p = available_processors[i].cpu_constructor();
 
-#if 0
-      // sigh, I really, really, really hate this section...
-      // All it does is instantiate a new pic processor. We already
-      // know the name and type of processor we want, however there's no
-      // really clean way of indirectly instantiating an object.
-      switch(available_processors[i].type)
-	{
-	case _PIC_PROCESSOR_:
-	case _14BIT_PROCESSOR_:
-	case _12BIT_PROCESSOR_:
-	  cout << "gpsim doesn't support generic processors (should it?).\n";
-	  break;
-
-	case _P12C508_:
-	  p = new P12C508;
-	  break;
-
-	case _P12C509_:
-	  p = new P12C509;
-	  break;
-
-	case _P16C84_:
-	  p = new P16C84;
-	  break;
-
-	case _P16CR83_:
-	  p = new P16CR83;
-	  break;
-
-	case _P16CR84_:
-	  p = new P16CR84;
-	  break;
-
-	case _P16F83_:
-	  p = new P16F83;
-	  break;
-
-	case _P16F84_:
-	  p = new P16F84;
-	  break;
-
-	case _P16C71_:
-	  p = new P16C71;
-	  break;
-
-	case _P16C61_:
-	  p = new P16C61;
-	  break;
-
-	case _P16C64_:
-	  p = new P16C64;
-	  break;
-
-	case _P16C65_:
-	  p = new P16C65;
-	  break;
-
-	case _P16C74_:
-	  p = new P16C74;
-	  break;
-
-	case _P16F874_:
-	  p = new P16F874;
-	  break;
-
-	case _P16F877_:
-	  p = new P16F877;
-	  break;
-
-	case _P18Cxx2_:
-	  p = new P18Cxx2;
-	  break;
-
-	case _P18C242_:
-	case _P18C252_:
-	case _P18C442_:
-	case _P18C452_:
-	  cout << "Warning my programmer has been too lazy to implement a " 
-	       << available_processors[i].names[1] << '\n';
-	case _P18C2x2_:
-	  p = new P18C2x2;
-	  break;
-
-	default:
-	  cout << "error: (BUG) add_processor doesn't have a " << processor_type << " in it's switch block\n";
-	  cout << "However, a processor named " << available_processors[i].names[1] << " was found\n";
-
-	}
-#endif
-
       if(p)
 	{
 	  processor_list.push_back(p);
@@ -1198,7 +1108,7 @@ void pic_processor::init_register_memory (unsigned int memory_size)
 
 
 }
-
+#if 0
 //-------------------------------------------------------------------
 //
 //
@@ -1257,7 +1167,7 @@ void pic_processor::create_iopins (const IOPIN_map iopin_map[], unsigned int num
     }
 
 }
-
+#endif
 //-------------------------------------------------------------------
 //
 // Add a symbol table entry for each one of the sfr's

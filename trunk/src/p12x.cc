@@ -39,35 +39,7 @@ Boston, MA 02111-1307, USA.  */
 
 void _12bit_8pins::create_iopin_map(void)
 {
-#if 0
-  IOPIN_map im[] =
-  {
-    // pin, port, bit in port, type
-    {7, &gpio, 0, BI_DIRECTIONAL_PU},
-    {6, &gpio, 1, BI_DIRECTIONAL_PU},
-    {5, &gpio, 2, BI_DIRECTIONAL},
-    {4, &gpio, 3, INPUT_ONLY},
-    {3, &gpio, 4, BI_DIRECTIONAL},
-    {2, &gpio, 5, BI_DIRECTIONAL},
 
-  };
-
-  // Create a place for permanently storing the I/O pin mapping.
-
-  IOPIN_map *iopin_map = (IOPIN_map *) new char[sizeof (im)];
-
-  int num_of_iopins = sizeof (im) / sizeof (IOPIN_map);
-
-  *iopin_map_ptr = iopin_map;
-  *num_of_iopins_ptr = num_of_iopins;
-
-  // Save the map.
-  for(int i=0; i<num_of_iopins; i++)
-    iopin_map[i] = im[i];
-
-#endif
-
-       // ---- Complete the initialization for the I/O Ports
 
   // Build the links between the gpio and tris registers.
   gpio.tris = &tris;

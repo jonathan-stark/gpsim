@@ -153,7 +153,7 @@ void cmd_dump::dump(int mem_type)
     all_invalid = 1;
     for (j = 0; j < REGISTERS_PER_ROW; j++)
 
-      if(fr[i+j]->address != BAD_REGISTER) {
+      if(fr[i+j]->address) {
 	all_invalid = 0;
 	break;
       }
@@ -167,14 +167,14 @@ void cmd_dump::dump(int mem_type)
 	{
 	  reg_num = i  + j;
 
-	  if(fr[reg_num]->address == BAD_REGISTER)
-	    printf("-- ");
-	  else
-	    {
-	      v = fr[reg_num]->get_value();
-	      printf("%02x ",v);
+	  if(reg_num || fr[reg_num]->address) {
 
-	    }
+	    v = fr[reg_num]->get_value();
+	    printf("%02x ",v);
+
+	  } else
+	    printf("-- ");
+
 	}
       printf("   ");
 
