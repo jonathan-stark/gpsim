@@ -1,3 +1,10 @@
+2004-08-02 Borut Razem <borut.razem@siol.net>
+	* gui/gui_breadboard.cc, gui/gui_menu.cc, src/hexutils.cc,
+	  src/interface.cc, src/packages.cc, src/xref.cc:
+	  reverted unneeded changes
+	* config_win32.h.in, plat/win32/fd2raw.cpp: ifdefed MSVC specifics
+	* cli/input.cc, src/pic_processor.cc: corrected the sequence of includes
+
 2004-08-01 Borut Razem <borut.razem@siol.net>
 	* makefile.mingw, cli/makefile.mingw, gpsim/makefile.mingw,
 	  gui/makefile.mingw, modules/makefile.mingw, src/makefile.mingw,
@@ -10,7 +17,6 @@
 	  compilation
 	* src/modules.cc: added initialization of widget Module class member
 	* plat/win32/glist.cpp: corrected line formatting
-
 
 2004-07-31 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: updated exports

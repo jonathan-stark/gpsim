@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA. */
 #include "fd2raw.h"
 
 
+#if defined _MSC_VER && _MSC_VER >= 1300
 /*
  * a hack to call _setmode() from MSVCRT.DLL:
  * glib runtime uses MSVCRT.DLL, while gpsim executable uses MSVCR71.DLL.
@@ -61,6 +62,7 @@ static int win32_setmode(int fd, int mode)
 
   return ret;
 }
+#endif
 
 
 /*
@@ -79,7 +81,11 @@ bool win32_fd_to_raw(int fd)
       /* set it to raw mode */
       GetConsoleMode(handle, &orig_mode);
       SetConsoleMode(handle, orig_mode & ~(ENABLE_LINE_INPUT | ENABLE_ECHO_INPUT));
+#if defined _MSC_VER && _MSC_VER >= 1300
       win32_setmode(0, _O_BINARY);
+#else
+      setmode(0, _O_BINARY);
+#endif
 
       return true;
     }
