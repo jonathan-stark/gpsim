@@ -319,7 +319,7 @@ ren $(InputName).hpp $(InputName).h
 					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
+						CommandLine="flex -o$(InputName).cpp $(InputFileName)
 "
 						AdditionalDependencies="parse.h"
 						Outputs="$(InputName).cpp"/>
@@ -328,7 +328,7 @@ ren $(InputName).hpp $(InputName).h
 					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
+						CommandLine="flex -o$(InputName).cpp $(InputFileName)
 "
 						AdditionalDependencies="parse.h"
 						Outputs="$(InputName).cpp"/>
@@ -337,7 +337,16 @@ ren $(InputName).hpp $(InputName).h
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="flex  -o$(InputName).cpp $(InputFileName)
+						CommandLine="flex -o$(InputName).cpp $(InputFileName)
+"
+						AdditionalDependencies="parse.h"
+						Outputs="$(InputName).cpp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="flex -o$(InputName).cpp $(InputFileName)
 "
 						AdditionalDependencies="parse.h"
 						Outputs="$(InputName).cpp"/>
@@ -451,7 +460,8 @@ ren $(InputName).hpp $(InputName).h
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -459,7 +469,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -467,7 +478,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -475,7 +487,8 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h"
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
 						Outputs="../config.h"/>
 				</FileConfiguration>
 			</File>

@@ -277,6 +277,11 @@ abort_gpsim_now {
 
 %%
 
+/* make it work with flex 2.4.31 */
+#ifndef yytext_ptr
+#define yytext_ptr yytext
+#endif
+
 #define MAX_STACK_LEVELS  16
 static int input_stack_index=0;
 YY_BUFFER_STATE input_stack[MAX_STACK_LEVELS];
