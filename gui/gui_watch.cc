@@ -221,7 +221,7 @@ static void set_column(GtkCheckButton *button, struct _coldata *coldata)
     else
 	gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,0);
     sprintf(str,"show_column%d",coldata->column);
-    config_set_variable(coldata->ww->gui_obj.name,str,button->toggle_button.active);
+    config_set_variable(coldata->ww->name,str,button->toggle_button.active);
 }
 
 static void select_columns(Watch_Window *ww, GtkWidget *clist)
@@ -367,8 +367,8 @@ key_press(GtkWidget *widget,
     Watch_Window *ww = (Watch_Window *) data;
 
   if(!ww) return(FALSE);
-  if(!ww->gui_obj.gp) return(FALSE);
-  if(!ww->gui_obj.gp->pic_id) return(FALSE);
+  if(!ww->gp) return(FALSE);
+  if(!ww->gp->pic_id) return(FALSE);
 
   switch(key->keyval) {
 
@@ -429,7 +429,7 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
     ww->current_row=row;
     ww->current_column=column;
 
-    gp=ww->gui_obj.gp;
+    gp=ww->gp;
     
     entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
 
@@ -494,8 +494,8 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Watch_Window *ww)
 {
-    ((GUI_Object *)ww)->change_view((GUI_Object*)ww,VIEW_HIDE);
-    return TRUE;
+  ww->ChangeView(VIEW_HIDE);
+  return TRUE;
 }
 
 static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
@@ -542,37 +542,42 @@ static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
 	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "no");
 }
 
-void WatchWindow_update(Watch_Window *ww)
+//------------------------------------------------------------------------
+// Update
+//
+//
+
+void Watch_Window::Update(void)
 {
-    GList *iter;
-    struct watch_entry *entry;
-    int clist_frozen=0;
-    int value;
+  GList *iter;
+  struct watch_entry *entry;
+  int clist_frozen=0;
+  int value;
 
-    iter=ww->watches;
+  iter=watches;
 
-    while(iter)
-    {
-	entry=(struct watch_entry*)iter->data;
+  while(iter) {
+   
+    entry=(struct watch_entry*)iter->data;
 
-	value = gpsim_get_register_value(entry->pic_id,entry->type,entry->address);
+    value = gpsim_get_register_value(entry->pic_id,entry->type,entry->address);
 	
-	if(entry->last_value != value)
-	{
-	    if(clist_frozen==0)
-	    {
-		gtk_clist_freeze(GTK_CLIST(ww->watch_clist));
-		clist_frozen=1;
-	    }
+    if(entry->last_value != value)
+      {
+	if(clist_frozen==0)
+	  {
+	    gtk_clist_freeze(GTK_CLIST(watch_clist));
+	    clist_frozen=1;
+	  }
 
-	    // Update value in clist
-	    update(ww,entry,value);
-	    entry->last_value=value;
-	}
-	iter=iter->next;
-    }
-    if(clist_frozen)
-	gtk_clist_thaw(GTK_CLIST(ww->watch_clist));
+	// Update value in clist
+	update(this,entry,value);
+	entry->last_value=value;
+      }
+    iter=iter->next;
+  }
+  if(clist_frozen)
+    gtk_clist_thaw(GTK_CLIST(watch_clist));
 }
 
 static void xref_update(struct cross_reference_to_gui *xref, int new_value)
@@ -595,145 +600,137 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
     ww  = (Watch_Window *) (xref->parent_window);
 
     //    update(ww,entry,new_value);
-    WatchWindow_update(ww);
+    ww->Update();
 }
 
-void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address)
+void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
 {
-    char name[50], addressstring[50], typestring[30];
-    char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
-    int row;
-    struct cross_reference_to_gui *cross_reference;
-    char *regname;
+  char name[50], addressstring[50], typestring[30];
+  char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
+  int row;
+  struct cross_reference_to_gui *cross_reference;
+  char *regname;
 
-    struct watch_entry *watch_entry;
+  struct watch_entry *watch_entry;
     
-    if(!ww->gui_obj.enabled)
-	BuildWatchWindow(ww);
+  if(!enabled)
+    Build();
 
-    regname = gpsim_get_register_name(pic_id,type,address);
+  regname = gpsim_get_register_name(pic_id,type,address);
 
-    if(!regname)
-	return;  // INVALID_REGISTER
+  if(!regname)
+    return;  // INVALID_REGISTER
 
-    strncpy(name,regname,50);
-    sprintf(addressstring,"0x%02x",address);
-    strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
+  strncpy(name,regname,50);
+  sprintf(addressstring,"0x%02x",address);
+  strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 
-    row=gtk_clist_append(GTK_CLIST(ww->watch_clist), entry);
+  row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
 
-    // FIXME this memory is never freed?
-    watch_entry = (struct watch_entry*) malloc(sizeof(struct watch_entry));
-    watch_entry->address=address;
-    watch_entry->pic_id=pic_id;
-    watch_entry->type=type;
-    watch_entry->last_value=-1; // non-normal value to force first update
+  // FIXME this memory is never freed?
+  watch_entry = (struct watch_entry*) malloc(sizeof(struct watch_entry));
+  watch_entry->address=address;
+  watch_entry->pic_id=pic_id;
+  watch_entry->type=type;
+  watch_entry->last_value=-1; // non-normal value to force first update
 
-    gtk_clist_set_row_data(GTK_CLIST(ww->watch_clist), row, (gpointer)watch_entry);
+  gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
     
-    ww->watches = g_list_append(ww->watches, (gpointer)watch_entry);
+  watches = g_list_append(watches, (gpointer)watch_entry);
 
-    update(ww, watch_entry,gpsim_get_register_value(watch_entry->pic_id,watch_entry->type,watch_entry->address) );
+  update(this, watch_entry,gpsim_get_register_value(watch_entry->pic_id,watch_entry->type,watch_entry->address) );
 
-    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-    cross_reference->parent_window_type = WT_watch_window;
-    cross_reference->parent_window = (gpointer) ww;
-    cross_reference->data = (gpointer) watch_entry;
-    cross_reference->update = xref_update;
-    cross_reference->remove = NULL;
-    gpsim_assign_register_xref(pic_id, type, address, (gpointer) cross_reference);
+  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference->parent_window_type = WT_watch_window;
+  cross_reference->parent_window = (gpointer) this;
+  cross_reference->data = (gpointer) watch_entry;
+  cross_reference->update = xref_update;
+  cross_reference->remove = NULL;
+  gpsim_assign_register_xref(pic_id, type, address, (gpointer) cross_reference);
 
-    watch_entry->xref=cross_reference;
+  watch_entry->xref=cross_reference;
     
-    update_menus(ww);
+  update_menus(this);
 }
 
+//------------------------------------------------------------------------
+// ClearWatches
+//
+//
 
-void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp)
+void Watch_Window::ClearWatches(void)
 {
-    GList *iter;
-    struct watch_entry *entry;
-    int row;
+  GList *iter;
+  struct watch_entry *entry;
+  int row;
 
-    iter=ww->watches;
+  iter=watches;
 
-    while(iter)
-    {
-	entry=(struct watch_entry*)iter->data;
-	row=gtk_clist_find_row_from_data(GTK_CLIST(ww->watch_clist),entry);
-	gtk_clist_remove(GTK_CLIST(ww->watch_clist),row);
-	gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
-	free(entry);
-	iter=iter->next;
-    }
+  while(iter) {
 
-    while( (ww->watches=g_list_remove_link(ww->watches,ww->watches))!=NULL)
-	;
+    entry=(struct watch_entry*)iter->data;
+    row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
+    gtk_clist_remove(GTK_CLIST(watch_clist),row);
+    gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+    free(entry);
+    iter=iter->next;
+  }
+
+  while( (watches=g_list_remove_link(watches,watches))!=NULL)
+    ;
 }
 
+//------------------------------------------------------------------------
+// Build
+//
+//
 
-int BuildWatchWindow(Watch_Window *ww)
+void Watch_Window::Build(void)
 {
-    GtkWidget *window;
-//    GtkWidget *register_sheet;
-    GtkWidget *vbox;
+  GtkWidget *vbox;
   GtkWidget *scrolled_window;
-//  GtkWidget *separator;
 
   int i;
 
-  int x,y,width,height;
-  
-  window=ww->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  ww->gui_obj.window = window;
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-  gtk_window_set_title(GTK_WINDOW(ww->gui_obj.window), "Watch Viewer");
+  gtk_window_set_title(GTK_WINDOW(window), "Watch Viewer");
 
-  width=((GUI_Object*)ww)->width;
-  height=((GUI_Object*)ww)->height;
-  x=((GUI_Object*)ww)->x;
-  y=((GUI_Object*)ww)->y;
-  gtk_window_set_default_size(GTK_WINDOW(ww->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(ww->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(ww->gui_obj.window),ww->gui_obj.name,"Gpsim");
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
   
-//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
-  gtk_signal_connect (GTK_OBJECT (ww->gui_obj.window), "delete_event",
-			    GTK_SIGNAL_FUNC(delete_event), (gpointer)ww);
-  gtk_signal_connect_after(GTK_OBJECT(ww->gui_obj.window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),ww);
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
   gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
-		     GTK_SIGNAL_FUNC(sigh_button_event), ww);
+		     GTK_SIGNAL_FUNC(sigh_button_event), this);
   
-  ww->watch_clist=gtk_clist_new_with_titles(COLUMNS,watch_titles);
-  gtk_widget_show(ww->watch_clist);
+  watch_clist = gtk_clist_new_with_titles(COLUMNS,watch_titles);
+  gtk_widget_show(watch_clist);
 
-  for(i=0;i<MSBCOL;i++)
-  {
-      gtk_clist_set_column_auto_resize(GTK_CLIST(ww->watch_clist),i,TRUE);
-      gtk_clist_set_column_visibility(GTK_CLIST(ww->watch_clist),i,coldata[i].visible);
+  for(i=0;i<MSBCOL;i++) {
+    gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
+    gtk_clist_set_column_visibility(GTK_CLIST(watch_clist),i,coldata[i].visible);
   }
   
-  gtk_clist_set_selection_mode (GTK_CLIST(ww->watch_clist), GTK_SELECTION_BROWSE);
-//  gtk_clist_set_auto_sort(GTK_CLIST(ww->watch_clist),TRUE);
-//  gtk_clist_set_compare_func(GTK_CLIST(ww->watch_clist),
-//			     (GtkCListCompareFunc)watch_compare_func);
+  gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);
 
-  gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"click_column",
+  gtk_signal_connect(GTK_OBJECT(watch_clist),"click_column",
 		     (GtkSignalFunc)watch_click_column,NULL);
-  gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"select_row",
-		     (GtkSignalFunc)watch_list_row_selected,ww);
-  gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"unselect_row",
-		     (GtkSignalFunc)unselect_row,ww);
+  gtk_signal_connect(GTK_OBJECT(watch_clist),"select_row",
+		     (GtkSignalFunc)watch_list_row_selected,this);
+  gtk_signal_connect(GTK_OBJECT(watch_clist),"unselect_row",
+		     (GtkSignalFunc)unselect_row,this);
   
-  gtk_signal_connect(GTK_OBJECT(ww->watch_clist),
+  gtk_signal_connect(GTK_OBJECT(watch_clist),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
-		     ww);
+		     this);
   gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
 		     (GtkSignalFunc) key_press,
-		     (gpointer) ww);
+		     (gpointer) this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
   gtk_widget_show(scrolled_window);
@@ -741,67 +738,67 @@ int BuildWatchWindow(Watch_Window *ww)
   vbox = gtk_vbox_new(FALSE,1);
   gtk_widget_show(vbox);
   
-  gtk_container_add(GTK_CONTAINER(scrolled_window), ww->watch_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), watch_clist);
   
-  gtk_container_add(GTK_CONTAINER(ww->gui_obj.window),vbox);
+  gtk_container_add(GTK_CONTAINER(window),vbox);
 
   gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
   
-  ww->popup_menu=build_menu(window,ww);
+  popup_menu=build_menu(window,this);
   
   gtk_widget_show (window);
   
   
-  ww->gui_obj.enabled=1;
+  enabled=1;
 
-  ww->gui_obj.is_built=1;
+  is_built=1;
 
-  update_menu_item((GUI_Object*)ww);
-  
-  return 0;
+  //update_menu_item((GUI_Object*)ww);
+  UpdateMenuItem();
+
 }
 
-int CreateWatchWindow(GUI_Processor *gp)
+int Watch_Window::Create(GUI_Processor *_gp)
 {
-    Watch_Window *watch_window;
-
-    int i;
+  int i;
     
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-  watch_window = (Watch_Window *) malloc(sizeof(Watch_Window));
-  
-  watch_window->gui_obj.gp = gp;
-  watch_window->gui_obj.name = "watch_viewer";
-  watch_window->gui_obj.wc = WC_data;
-  watch_window->gui_obj.wt = WT_watch_window;
-  watch_window->gui_obj.change_view = SourceBrowser_change_view;
-  watch_window->gui_obj.window = NULL;
-  watch_window->gui_obj.is_built = 0;
-  gp->watch_window = watch_window;
+  gp = _gp;
+  name = "watch_viewer";
+  wc = WC_data;
+  wt = WT_watch_window;
+  change_view = NULL;
+  window = NULL;
+  is_built = 0;
+  gp->watch_window = this;
 
-  watch_window->watches=NULL;
-  watch_window->current_row=0;
+  watches=NULL;
+  current_row=0;
 
   
-  gp->add_window_to_list((GUI_Object *)watch_window);
+  gp->add_window_to_list(this);
 
-  watch_window->gui_obj.get_config();
+  get_config();
 
-  for(i=0;i<COLUMNS;i++)
-  {
-      char str[128];
-      sprintf(str,"show_column%d",i);
-      coldata[i].visible=1; // default
-      config_get_variable(watch_window->gui_obj.name,str,&coldata[i].visible);
+  for(i=0;i<COLUMNS;i++) {
+    char str[128];
+    sprintf(str,"show_column%d",i);
+    coldata[i].visible=1; // default
+    config_get_variable(name,str,&coldata[i].visible);
   }
 
-  if(watch_window->gui_obj.enabled)
-      BuildWatchWindow(watch_window);
+  if(enabled)
+    Build();
   
   return 1;
+}
+
+Watch_Window::Watch_Window(void)
+{
+  menu = "<main>/Windows/Watch";
 }
 
 #endif // HAVE_GUI

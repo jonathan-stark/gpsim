@@ -117,11 +117,13 @@ void gui_new_processor (unsigned int pic_id)
       gui_processors = g_slist_append(gui_processors,gp);
 
       gp->regwin_ram->NewProcessor(gp);
-      StatusBar_new_processor(gp->status_bar, gp);
-      SourceBrowserOpcode_new_processor((SourceBrowserOpcode_Window*)gp->program_memory, gp);
+      //StatusBar_new_processor(gp->status_bar, gp);
+      gp->status_bar->NewProcessor(gp);
+      gp->program_memory->NewProcessor(gp);
       SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
-      WatchWindow_clear_watches(gp->watch_window, gp);
+      //WatchWindow_clear_watches(gp->watch_window, gp);
+      gp->watch_window->ClearWatches();
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
       StackWindow_new_processor(gp->stack_window,gp);
       TraceWindow_new_processor(gp->trace_window,gp);
@@ -388,6 +390,12 @@ int config_get_string(char *module, char *entry, char **string)
 
 static  RAM_RegisterWindow *ram=NULL;
 static  EEPROM_RegisterWindow *eeprom=NULL;
+static  SourceBrowserAsm_Window *sbaw=NULL;
+static  SourceBrowserOpcode_Window *sbow=NULL;
+static  Watch_Window *ww=NULL;
+static  Stack_Window *stackw=NULL;
+static  StopWatch_Window *sww=NULL;
+static  Symbol_Window *symbolw=NULL;
 
 int gui_init (int argc, char **argv)
 {
@@ -443,20 +451,24 @@ int gui_init (int argc, char **argv)
 
   ram    = new  RAM_RegisterWindow();
   eeprom = new  EEPROM_RegisterWindow();
+  sbaw   = new  SourceBrowserAsm_Window();
+  sbow   = new  SourceBrowserOpcode_Window();
+  ww     = new  Watch_Window();
+  stackw = new  Stack_Window();
+  sww    = new  StopWatch_Window();
+  symbolw= new  Symbol_Window();
+
   ram->Create(gp);
   eeprom->Create(gp);
-  printf("%s \n",__FUNCTION__);
-  //CreateRegisterWindow(gp, REGISTER_RAM);
-  //CreateRegisterWindow(gp, REGISTER_EEPROM);
-  CreateSourceBrowserOpcodeWindow(gp);
-  CreateSourceBrowserAsmWindow(gp);
-  CreateSymbolWindow(gp);
-  CreateWatchWindow(gp);
+  sbaw->Create(gp);
+  sbow->Create(gp);
+  ww->Create(gp);
+  stackw->Create(gp);
+  symbolw->Create(gp);
   CreateBreadboardWindow(gp);
-  CreateStackWindow(gp);
   CreateTraceWindow(gp);
   CreateProfileWindow(gp);
-  CreateStopWatchWindow(gp);
+  sww->Create(gp);
 
 
   interface_id = gpsim_register_interface((gpointer) gp);

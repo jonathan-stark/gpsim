@@ -120,10 +120,10 @@ popup_activated(GtkWidget *widget, gpointer data)
     switch(item->id)
     {
     case MENU_ADD_WATCH:
-	WatchWindow_add(popup_sw->gui_obj.gp->watch_window,
-			pic_id,
-			REGISTER_RAM,
-			entry->value);
+      //WatchWindow_add(popup_sw->gui_obj.gp->watch_window,
+      popup_sw->gp->watch_window->Add(pic_id,
+				      REGISTER_RAM,
+				      entry->value);
 	break;
     default:
 	puts("Unhandled menuitem?");
@@ -201,97 +201,97 @@ static void unselect_row(GtkCList *clist,
     update_menus(sw);
 }
 
-static void update_symbols(Symbol_Window *sw, GUI_Processor *gp)
+void Symbol_Window::Update(void)
 {
 
-    char **entry; // 'name', 'type', 'typedata'
-    sym *s;
-    GList *iter;
+  char **entry; // 'name', 'type', 'typedata'
+  sym *s;
+  GList *iter;
 
-    sw->load_symbols=1;
+  load_symbols=1;
     
-    if(!sw->gui_obj.enabled)
-	return;
+  if(!enabled)
+    return;
     
 
-    gtk_clist_freeze(GTK_CLIST(sw->symbol_clist));
+  gtk_clist_freeze(GTK_CLIST(symbol_clist));
     
-    gtk_clist_clear(GTK_CLIST(sw->symbol_clist));
+  gtk_clist_clear(GTK_CLIST(symbol_clist));
 
-    // free all old allocations
-    for(iter=sw->symbols;iter!=NULL;)
+  // free all old allocations
+  for(iter=symbols;iter!=NULL;)
     {
-	GList *next=iter->next;
-        free(((sym*)iter->data)->name);
-	free((sym*)iter->data);
-	g_list_remove(iter,iter->data); // FIXME. I really need a tutorial
-	iter=next;
-	//	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
+      GList *next=iter->next;
+      free(((sym*)iter->data)->name);
+      free((sym*)iter->data);
+      g_list_remove(iter,iter->data); // FIXME. I really need a tutorial
+      iter=next;
+      //	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }
-    sw->symbols=NULL;
+  symbols=NULL;
 
-    gpsim_symbol_rewind((unsigned int)gp->pic_id);
+  gpsim_symbol_rewind((unsigned int)gp->pic_id);
 
 
-    // FIXME memory leaks
-    while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+  // FIXME memory leaks
+  while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
     {
-	int row;
-	sym *e;
+      int row;
+      sym *e;
 	
-	if( (sw->filter_addresses && s->type == SYMBOL_ADDRESS) ||
-	    (sw->filter_constants && s->type == SYMBOL_CONSTANT) ||
-	    (sw->filter_registers && s->type == SYMBOL_REGISTER) )
-            continue;
+      if( (filter_addresses && s->type == SYMBOL_ADDRESS) ||
+	  (filter_constants && s->type == SYMBOL_CONSTANT) ||
+	  (filter_registers && s->type == SYMBOL_REGISTER) )
+	continue;
 
 #define SYMBOL_NR_COLUMNS 3
-	entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
+      entry=(char**)malloc(sizeof(char*)*SYMBOL_NR_COLUMNS);
 	
-	entry[0]=(char*)malloc(strlen(s->name)+1);
-	strcpy(entry[0],s->name);
-	entry[1]=(char*)malloc(64);
-	switch(s->type)
+      entry[0]=(char*)malloc(strlen(s->name)+1);
+      strcpy(entry[0],s->name);
+      entry[1]=(char*)malloc(64);
+      switch(s->type)
 	{
 	case SYMBOL_ADDRESS:
-	    strcpy(entry[1],"address");
-	    break;
+	  strcpy(entry[1],"address");
+	  break;
 	case SYMBOL_CONSTANT:
-	    strcpy(entry[1],"constant");
-	    break;
+	  strcpy(entry[1],"constant");
+	  break;
 	case SYMBOL_REGISTER:
-	    strcpy(entry[1],"register");
-	    break;
+	  strcpy(entry[1],"register");
+	  break;
 	case SYMBOL_IOPORT:
-	    strcpy(entry[1],"ioport");
-	    break;
+	  strcpy(entry[1],"ioport");
+	  break;
 	case SYMBOL_STIMULUS:
-	    strcpy(entry[1],"stimulus");
-	    break;
+	  strcpy(entry[1],"stimulus");
+	  break;
 	case SYMBOL_BASE_CLASS:
-	    strcpy(entry[1],"symbol base class");
-	    break;
+	  strcpy(entry[1],"symbol base class");
+	  break;
 	default:
-	    strcpy(entry[1],"unknown symbol type");
-            break;
+	  strcpy(entry[1],"unknown symbol type");
+	  break;
 	}
-	entry[2]=(char*)malloc(32);
-	if(s->type==SYMBOL_ADDRESS||
-	   s->type==SYMBOL_CONSTANT||
-	   s->type==SYMBOL_REGISTER)
-	    sprintf(entry[2],"0x%X",s->value);
-	else
-            strcpy(entry[2],"");
+      entry[2]=(char*)malloc(32);
+      if(s->type==SYMBOL_ADDRESS||
+	 s->type==SYMBOL_CONSTANT||
+	 s->type==SYMBOL_REGISTER)
+	sprintf(entry[2],"0x%X",s->value);
+      else
+	strcpy(entry[2],"");
 	
-	e=(sym*)malloc(sizeof(sym));
-	memcpy(e,s,sizeof(sym));
-	e->name=(char*)malloc(strlen(s->name)+1);
-	strcpy(e->name,s->name);
-	sw->symbols=g_list_append(sw->symbols,e);
+      e=(sym*)malloc(sizeof(sym));
+      memcpy(e,s,sizeof(sym));
+      e->name=(char*)malloc(strlen(s->name)+1);
+      strcpy(e->name,s->name);
+      symbols=g_list_append(symbols,e);
 
-	row=gtk_clist_append(GTK_CLIST(sw->symbol_clist),entry);
-	gtk_clist_set_row_data(GTK_CLIST(sw->symbol_clist),row,e);
+      row=gtk_clist_append(GTK_CLIST(symbol_clist),entry);
+      gtk_clist_set_row_data(GTK_CLIST(symbol_clist),row,e);
     }
-    gtk_clist_thaw(GTK_CLIST(sw->symbol_clist));
+  gtk_clist_thaw(GTK_CLIST(symbol_clist));
 }
 
 static void do_symbol_select(Symbol_Window *sw, sym *e)
@@ -304,8 +304,8 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
 	((GUI_Object*)sw)->gp->regwin_ram->SelectRegister(e->value);
 	break;
     case SYMBOL_ADDRESS:
-	SourceBrowser_select_address(((GUI_Object*)sw)->gp->source_browser,e->value);
-	SourceBrowser_select_address(((GUI_Object*)sw)->gp->program_memory,e->value);
+	(((GUI_Object*)sw)->gp->source_browser)->SelectAddress(e->value);
+	(((GUI_Object*)sw)->gp->program_memory)->SelectAddress(e->value);
 	break;
     default:
 	// symbols that can't be 'selected' (e.g constants)
@@ -329,7 +329,7 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 {
     GList *p;
     
-    if(!sw->gui_obj.enabled)
+    if(!sw->enabled)
 	return;
     
     p=sw->symbols;
@@ -363,9 +363,9 @@ void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
 	return;
 
     // If window is not displayed, then display it.
-    if(!sw->gui_obj.enabled)
+    if(!sw->enabled)
     {
-	sw->gui_obj.change_view((GUI_Object*)sw,VIEW_SHOW);
+	sw->ChangeView(VIEW_SHOW);
     }
 
     // See if the type of symbol selected is currently filtered out, and
@@ -433,7 +433,7 @@ void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
 
 void SymbolWindow_new_symbols(Symbol_Window *sw, GUI_Processor *gp)
 {
-    update_symbols(sw,gp);
+  sw->Update();
 }
 
 /*
@@ -526,7 +526,7 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Symbol_Window *sw)
 {
-    ((GUI_Object *)sw)->change_view((GUI_Object*)sw,VIEW_HIDE);
+    sw->ChangeView(VIEW_HIDE);
     return TRUE;
 }
 
@@ -534,86 +534,77 @@ static void
 toggle_addresses (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_addresses = !sw->filter_addresses;
-    config_set_variable(sw->gui_obj.name, "filter_addresses", sw->filter_addresses);
-    update_symbols(sw, ((GUI_Object*)sw)->gp);
+    config_set_variable(sw->name, "filter_addresses", sw->filter_addresses);
+    sw->Update();
 }
 
 static void
 toggle_constants (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_constants = !sw->filter_constants;
-    config_set_variable(sw->gui_obj.name, "filter_constants", sw->filter_constants);
-    update_symbols(sw, ((GUI_Object*)sw)->gp);
+    config_set_variable(sw->name, "filter_constants", sw->filter_constants);
+    sw->Update();
 }
 
 static void
 toggle_registers (GtkToggleButton *button, Symbol_Window *sw)
 {
     sw->filter_registers = !sw->filter_registers;
-    config_set_variable(sw->gui_obj.name, "filter_registers", sw->filter_registers);
-    update_symbols(sw, ((GUI_Object*)sw)->gp);
+    config_set_variable(sw->name, "filter_registers", sw->filter_registers);
+    sw->Update();
 }
 
 static char *symbol_titles[3]={"Name","Type","Address/Value"};
 
-int BuildSymbolWindow(Symbol_Window *sw)
+//------------------------------------------------------------------------
+// Build
+//
+
+void Symbol_Window::Build(void)
 {
-    GtkWidget *window;
-//    GtkWidget *register_sheet;
-    GtkWidget *vbox;
+  GtkWidget *vbox;
   GtkWidget *scrolled_window;
-//  GtkWidget *separator;
   GtkWidget *hbox;
 
-  int x,y,width,height;
-  
-  window=sw->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-  sw->gui_obj.window = window;
-
-  gtk_window_set_title(GTK_WINDOW(sw->gui_obj.window), "Symbol Viewer");
+  gtk_window_set_title(GTK_WINDOW(window), "Symbol Viewer");
   
-  width=((GUI_Object*)sw)->width;
-  height=((GUI_Object*)sw)->height;
-  x=((GUI_Object*)sw)->x;
-  y=((GUI_Object*)sw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(sw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(sw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(sw->gui_obj.window),sw->gui_obj.name,"Gpsim");
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
   
-//  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-//		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
-  gtk_signal_connect (GTK_OBJECT (sw->gui_obj.window), "delete_event",
-			    GTK_SIGNAL_FUNC(delete_event), (gpointer)sw);
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
 
-  sw->symbol_clist=gtk_clist_new_with_titles(3,symbol_titles);
-  gtk_widget_show(sw->symbol_clist);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(sw->symbol_clist),0,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(sw->symbol_clist),1,TRUE);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(sw->symbol_clist),2,TRUE);
-  gtk_clist_set_auto_sort(GTK_CLIST(sw->symbol_clist),TRUE);
-  gtk_clist_set_compare_func(GTK_CLIST(sw->symbol_clist),
+  symbol_clist=gtk_clist_new_with_titles(3,symbol_titles);
+  gtk_widget_show(symbol_clist);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),0,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),1,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(symbol_clist),2,TRUE);
+  gtk_clist_set_auto_sort(GTK_CLIST(symbol_clist),TRUE);
+  gtk_clist_set_compare_func(GTK_CLIST(symbol_clist),
 			     (GtkCListCompareFunc)symbol_compare_func);
 
-  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"click_column",
+  gtk_signal_connect(GTK_OBJECT(symbol_clist),"click_column",
 		     (GtkSignalFunc)symbol_click_column,NULL);
-  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"select_row",
-		     (GtkSignalFunc)symbol_list_row_selected,sw);
-  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"unselect_row",
-		     (GtkSignalFunc)unselect_row,sw);
-  gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),
+  gtk_signal_connect(GTK_OBJECT(symbol_clist),"select_row",
+		     (GtkSignalFunc)symbol_list_row_selected,this);
+  gtk_signal_connect(GTK_OBJECT(symbol_clist),"unselect_row",
+		     (GtkSignalFunc)unselect_row,this);
+  gtk_signal_connect(GTK_OBJECT(symbol_clist),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
-		     sw);
+		     this);
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
   gtk_widget_show(scrolled_window);
 
   vbox = gtk_vbox_new(FALSE,1);
   
-  gtk_container_add(GTK_CONTAINER(scrolled_window), sw->symbol_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), symbol_clist);
   
-  gtk_container_add(GTK_CONTAINER(sw->gui_obj.window),vbox);
+  gtk_container_add(GTK_CONTAINER(window),vbox);
 
 
 
@@ -621,96 +612,96 @@ int BuildSymbolWindow(Symbol_Window *sw)
   gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE,FALSE,0);
   gtk_box_pack_start(GTK_BOX(vbox), scrolled_window, TRUE, TRUE, 0);
 
-  sw->addressesbutton = gtk_check_button_new_with_label ("addresses");
-  gtk_box_pack_start (GTK_BOX (hbox), sw->addressesbutton, TRUE, TRUE, 5);
-  if(sw->filter_addresses)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), FALSE);
+  addressesbutton = gtk_check_button_new_with_label ("addresses");
+  gtk_box_pack_start (GTK_BOX (hbox), addressesbutton, TRUE, TRUE, 5);
+  if(filter_addresses)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (sw->addressesbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)sw);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (addressesbutton), "toggled",
+		      GTK_SIGNAL_FUNC (toggle_addresses), (gpointer)this);
 
   
-  sw->constantsbutton = gtk_check_button_new_with_label ("constants");
-  gtk_box_pack_start (GTK_BOX (hbox), sw->constantsbutton, TRUE, TRUE, 5);
-  if(sw->filter_constants)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), FALSE);
+  constantsbutton = gtk_check_button_new_with_label ("constants");
+  gtk_box_pack_start (GTK_BOX (hbox), constantsbutton, TRUE, TRUE, 5);
+  if(filter_constants)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (sw->constantsbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)sw);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (constantsbutton), "toggled",
+		      GTK_SIGNAL_FUNC (toggle_constants), (gpointer)this);
 
   
-  sw->registersbutton = gtk_check_button_new_with_label ("registers");
-  gtk_box_pack_start (GTK_BOX (hbox), sw->registersbutton, TRUE, TRUE, 5);
-  if(sw->filter_registers)
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), FALSE);
+  registersbutton = gtk_check_button_new_with_label ("registers");
+  gtk_box_pack_start (GTK_BOX (hbox), registersbutton, TRUE, TRUE, 5);
+  if(filter_registers)
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), FALSE);
   else
-      gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), TRUE);
-  gtk_signal_connect (GTK_OBJECT (sw->registersbutton), "toggled",
-		      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)sw);
+    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
+  gtk_signal_connect (GTK_OBJECT (registersbutton), "toggled",
+		      GTK_SIGNAL_FUNC (toggle_registers), (gpointer)this);
 
-  gtk_signal_connect_after(GTK_OBJECT(sw->gui_obj.window), "configure_event",
-			   GTK_SIGNAL_FUNC(gui_object_configure_event),sw);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
   
   gtk_widget_show_all (window);
   
-  sw->gui_obj.enabled=1;
+  enabled=1;
 
-  sw->gui_obj.is_built=1;
+  is_built=1;
 
-  if(sw->load_symbols)
-      SymbolWindow_new_symbols(sw, sw->gui_obj.gp);
+  if(load_symbols)
+    SymbolWindow_new_symbols(this, gp);
 
-  update_menu_item((GUI_Object*)sw);
+  UpdateMenuItem();
   
-  sw->popup_menu=build_menu(window,sw);
+  popup_menu=build_menu(window,this);
   
-  return 0;
 }
 
-int CreateSymbolWindow(GUI_Processor *gp)
+int Symbol_Window::Create(GUI_Processor *_gp)
 {
-//    int i;
-
-  Symbol_Window *symbol_window;
 
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-  symbol_window = (Symbol_Window *) malloc(sizeof(Symbol_Window));
+  gp = _gp;
+  name = "symbol_viewer";
+  wc = WC_misc;
+  wt = WT_symbol_window;
+  change_view = NULL;
+  window = NULL;
+  is_built = 0;
+  gp->symbol_window = this;
+
+  symbols=NULL;
+  filter_addresses=0;
+  filter_constants=1;
+  filter_registers=0;
+
+  load_symbols=0;
   
-  symbol_window->gui_obj.gp = gp;
-  symbol_window->gui_obj.name = "symbol_viewer";
-  symbol_window->gui_obj.wc = WC_misc;
-  symbol_window->gui_obj.wt = WT_symbol_window;
-  symbol_window->gui_obj.change_view = SourceBrowser_change_view;
-  symbol_window->gui_obj.window = NULL;
-  symbol_window->gui_obj.is_built = 0;
-  gp->symbol_window = symbol_window;
+  gp->add_window_to_list(this);
 
-  symbol_window->symbols=NULL;
-  symbol_window->filter_addresses=0;
-  symbol_window->filter_constants=1;
-  symbol_window->filter_registers=0;
+  get_config();
 
-  symbol_window->load_symbols=0;
-  
-  gp->add_window_to_list((GUI_Object *)symbol_window);
+  config_get_variable(name,"filter_addresses",&filter_addresses);
+  config_get_variable(name,"filter_constants",&filter_constants);
+  config_get_variable(name,"filter_registers",&filter_registers);
 
-  //gui_object_get_config((GUI_Object*)symbol_window);
-  symbol_window->gui_obj.get_config();
-
-  config_get_variable(symbol_window->gui_obj.name,"filter_addresses",&symbol_window->filter_addresses);
-  config_get_variable(symbol_window->gui_obj.name,"filter_constants",&symbol_window->filter_constants);
-  config_get_variable(symbol_window->gui_obj.name,"filter_registers",&symbol_window->filter_registers);
-
-  if(symbol_window->gui_obj.enabled)
-      BuildSymbolWindow(symbol_window);
+  if(enabled)
+    Build();
   
   return 1;
+}
+
+Symbol_Window::Symbol_Window(void)
+{
+
+  menu = "<main>/Windows/Symbols";
+
 }
 
 #endif // HAVE_GUI

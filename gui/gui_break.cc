@@ -59,10 +59,12 @@ void gui_simulation_has_stopped(gpointer callback_data)
       GUI_Processor *gp = (GUI_Processor *) callback_data;
       gp->regwin_ram->Update();
       gp->regwin_eeprom->Update();
-      StatusBar_update(gp->status_bar);
-      SourceBrowser_update(gp->program_memory);
-      SourceBrowser_update(gp->source_browser);
-      WatchWindow_update(gp->watch_window);
+      //StatusBar_update(gp->status_bar);
+      gp->status_bar->Update();
+      gp->program_memory->Update();
+      gp->source_browser->Update();
+      //WatchWindow_update(gp->watch_window);
+      gp->watch_window->Update();
       StackWindow_update(gp->stack_window);
       BreadboardWindow_update(gp->breadboard_window);
       TraceWindow_update(gp->trace_window);

@@ -86,15 +86,17 @@ static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,Gd
     sw->current_row=row;
     sw->current_column=column;
 
-    gp=sw->gui_obj.gp;
+    gp=sw->gp;
     
     entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
     if(!entry)
 	return TRUE;
     
-    SourceBrowser_select_address(((GUI_Object*)sw)->gp->source_browser,entry->retaddress);
-    SourceBrowser_select_address(((GUI_Object*)sw)->gp->program_memory,entry->retaddress);
+    (((GUI_Object*)sw)->gp->source_browser)->SelectAddress(entry->retaddress);
+    (((GUI_Object*)sw)->gp->program_memory)->SelectAddress(entry->retaddress);
+
+    //SourceBrowser_select_address(((GUI_Object*)sw)->gp->program_memory,entry->retaddress);
 
     return 0;
 }
@@ -180,100 +182,81 @@ static int get_closest_label(Stack_Window *sw,
     return retval;
 }
 
-static void update(Stack_Window *sw)
+void Stack_Window::Update(void)
 {
-    int i=0;
-    int nrofentries;
-    unsigned int pic_id;
-    char depth_string[64];
-    char retaddress_string[64];
-    char labelname[64];
-    int labeloffset;
-    char *entry[COLUMNS]={depth_string,retaddress_string};
-    unsigned int retaddress;
-    struct stack_entry *stack_entry;
+  int i=0;
+  int nrofentries;
+  unsigned int pic_id;
+  char depth_string[64];
+  char retaddress_string[64];
+  char labelname[64];
+  int labeloffset;
+  char *entry[COLUMNS]={depth_string,retaddress_string};
+  unsigned int retaddress;
+  struct stack_entry *stack_entry;
 
-    if(!sw->has_processor)
-	return;
+  if(!has_processor)
+    return;
     
-    pic_id = ((GUI_Object*)sw)->gp->pic_id;
+  pic_id = gp->pic_id;
 
-    nrofentries=gpsim_get_stack_size(pic_id);
+  nrofentries=gpsim_get_stack_size(pic_id);
 
-    if(sw->last_stacklen!=nrofentries)
-    {
-	// stack has changed, update stack clist
+  if(last_stacklen!=nrofentries) {
+    
+    // stack has changed, update stack clist
 	
-	gtk_clist_freeze (GTK_CLIST (sw->stack_clist));
+    gtk_clist_freeze (GTK_CLIST (stack_clist));
 
-	while(sw->last_stacklen!=nrofentries)
-	{
+    while(last_stacklen!=nrofentries) {
+	
 	    
-	    if(sw->last_stacklen>nrofentries)
-	    {
-		// Stack has shrunk
+      if(last_stacklen>nrofentries) {
+	    
+	// Stack has shrunk
 
-		// remove row 0
-		stack_entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), 0);
-		free(stack_entry);
-		gtk_clist_remove(GTK_CLIST(sw->stack_clist),0);
+	// remove row 0
+	stack_entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(stack_clist), 0);
+	free(stack_entry);
+	gtk_clist_remove(GTK_CLIST(stack_clist),0);
 		
-		sw->last_stacklen--;
-	    }
-	    else
-	    {
-		// stack has grown
+	last_stacklen--;
+      } else {
 
-		//	    sprintf(depth_string,"#%d",i);
-		strcpy(depth_string,"");
-		retaddress=gpsim_get_stack_value(pic_id,sw->last_stacklen);
+	// stack has grown
+
+	strcpy(depth_string,"");
+	retaddress=gpsim_get_stack_value(pic_id,last_stacklen);
 		
-		if(get_closest_label(sw,retaddress,labelname,&labeloffset))
-		    sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
-		else
-		    sprintf(retaddress_string,"0x%04x",retaddress);
+	if(get_closest_label(this,retaddress,labelname,&labeloffset))
+	  sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
+	else
+	  sprintf(retaddress_string,"0x%04x",retaddress);
 		
-		gtk_clist_insert (GTK_CLIST(sw->stack_clist),
-				  0,
-				  entry);
+	gtk_clist_insert (GTK_CLIST(stack_clist),
+			  0,
+			  entry);
 
-		// FIXME this memory is never freed?
-		stack_entry = (struct stack_entry*) malloc(sizeof(struct stack_entry));
-		stack_entry->retaddress=retaddress;
-		stack_entry->depth=i;
+	// FIXME this memory is never freed?
+	stack_entry = (struct stack_entry*) malloc(sizeof(struct stack_entry));
+	stack_entry->retaddress=retaddress;
+	stack_entry->depth=i;
 
-		gtk_clist_set_row_data(GTK_CLIST(sw->stack_clist), 0, (gpointer)stack_entry);
-		sw->last_stacklen++;
-	    }
-	    /*	for(i=0;i<nrofentries;i++)
-	     {
-	     int row;
-	     sprintf(depth_string,"#%d",i);
-	     retaddress=gpsim_get_stack_value(pic_id,nrofentries-i-1);
-	     get_closest_label(retaddress,labelname,&labeloffset);
-	     sprintf(retaddress_string,"0x%04x (%s+%d)",retaddress,labelname,labeloffset);
-	     row=gtk_clist_append(GTK_CLIST(sw->stack_clist), entry);
-
-	     // FIXME this memory is never freed?
-	     stack_entry = malloc(sizeof(struct stack_entry));
-	     stack_entry->retaddress=retaddress;
-	     stack_entry->depth=i;
-
-	     gtk_clist_set_row_data(GTK_CLIST(sw->stack_clist), row, (gpointer)stack_entry);
-	     }*/
-
-	}
-	
-	// update depth column
-	for(i=0;i<nrofentries;i++)
-	{
-	    sprintf(depth_string,"#%d",i);
-	    gtk_clist_set_text (GTK_CLIST(sw->stack_clist),i,0,depth_string);
-	}
-
-	gtk_clist_thaw (GTK_CLIST (sw->stack_clist));
-	
+	gtk_clist_set_row_data(GTK_CLIST(stack_clist), 0, (gpointer)stack_entry);
+	last_stacklen++;
+      }
     }
+	
+    // update depth column
+    for(i=0;i<nrofentries;i++)
+      {
+	sprintf(depth_string,"#%d",i);
+	gtk_clist_set_text (GTK_CLIST(stack_clist),i,0,depth_string);
+      }
+
+    gtk_clist_thaw (GTK_CLIST (stack_clist));
+	
+  }
 }
 
 void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp)
@@ -283,112 +266,110 @@ void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp)
 
 void StackWindow_update(Stack_Window *sw)
 {
-    if( !((GUI_Object*)sw)->enabled)
+    if( !sw->enabled)
 	return;
 
-    update(sw);
+    sw->Update();
 }
 
-int BuildStackWindow(Stack_Window *sw)
+void Stack_Window::Build(void)
 {
-    GtkWidget *window;
-    GtkWidget *vbox;
-    GtkWidget *scrolled_window;
 
-    int x,y,width,height;
+  GtkWidget *vbox;
+  GtkWidget *scrolled_window;
 
-    window=sw->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    sw->gui_obj.window = window;
+  window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
-    gtk_window_set_title(GTK_WINDOW(sw->gui_obj.window), "Stack Viewer");
+  gtk_window_set_title(GTK_WINDOW(window), "Stack Viewer");
 
-    width=((GUI_Object*)sw)->width;
-    height=((GUI_Object*)sw)->height;
-    x=((GUI_Object*)sw)->x;
-    y=((GUI_Object*)sw)->y;
-    gtk_window_set_default_size(GTK_WINDOW(sw->gui_obj.window), width,height);
-    gtk_widget_set_uposition(GTK_WIDGET(sw->gui_obj.window),x,y);
-    gtk_window_set_wmclass(GTK_WINDOW(sw->gui_obj.window),sw->gui_obj.name,"Gpsim");
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
-    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
-    gtk_signal_connect (GTK_OBJECT (sw->gui_obj.window), "delete_event",
-			GTK_SIGNAL_FUNC(delete_event), (gpointer)sw);
-    gtk_signal_connect_after(GTK_OBJECT(sw->gui_obj.window), "configure_event",
-			     GTK_SIGNAL_FUNC(gui_object_configure_event),sw);
-    gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
-			     GTK_SIGNAL_FUNC(sigh_button_event), sw);
+  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+  gtk_signal_connect (GTK_OBJECT (window), "delete_event",
+		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
+  gtk_signal_connect_after(GTK_OBJECT(window), "button_press_event",
+			   GTK_SIGNAL_FUNC(sigh_button_event), this);
 
-    sw->stack_clist=gtk_clist_new_with_titles(COLUMNS,stack_titles);
-    gtk_widget_show(sw->stack_clist);
+  stack_clist=gtk_clist_new_with_titles(COLUMNS,stack_titles);
+  gtk_widget_show(stack_clist);
 
 
-    gtk_clist_set_selection_mode (GTK_CLIST(sw->stack_clist), GTK_SELECTION_BROWSE);
+  gtk_clist_set_selection_mode (GTK_CLIST(stack_clist), GTK_SELECTION_BROWSE);
 
-    gtk_signal_connect(GTK_OBJECT(sw->stack_clist),"click_column",
-		       (GtkSignalFunc)stack_click_column,NULL);
-    gtk_signal_connect(GTK_OBJECT(sw->stack_clist),"select_row",
-		       (GtkSignalFunc)stack_list_row_selected,sw);
+  gtk_signal_connect(GTK_OBJECT(stack_clist),"click_column",
+		     (GtkSignalFunc)stack_click_column,NULL);
+  gtk_signal_connect(GTK_OBJECT(stack_clist),"select_row",
+		     (GtkSignalFunc)stack_list_row_selected,this);
 
-    scrolled_window=gtk_scrolled_window_new(NULL, NULL);
-    gtk_widget_show(scrolled_window);
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+  gtk_widget_show(scrolled_window);
 
-    vbox = gtk_vbox_new(FALSE,1);
-    gtk_widget_show(vbox);
+  vbox = gtk_vbox_new(FALSE,1);
+  gtk_widget_show(vbox);
 
-    gtk_container_add(GTK_CONTAINER(scrolled_window), sw->stack_clist);
+  gtk_container_add(GTK_CONTAINER(scrolled_window), stack_clist);
 
-    gtk_container_add(GTK_CONTAINER(sw->gui_obj.window),vbox);
+  gtk_container_add(GTK_CONTAINER(window),vbox);
 
-    gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
+  gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
 
-    gtk_widget_show (window);
+  gtk_widget_show (window);
 
 
-    sw->gui_obj.enabled=1;
+  enabled=1;
 
-    sw->gui_obj.is_built=1;
+  is_built=1;
     
-    update_menu_item((GUI_Object*)sw);
+  UpdateMenuItem();
 
-    update(sw);
+  Update();
     
-    return 0;
 }
 
-int CreateStackWindow(GUI_Processor *gp)
-{
-    Stack_Window *stack_window;
+//------------------------------------------------------------------------
+// Create
+//
+//
 
+int Stack_Window::Create(GUI_Processor *_gp)
+{
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-    stack_window = (Stack_Window *) malloc(sizeof(Stack_Window));
+  gp = _gp;
+  name = "stack_viewer";
+  wc = WC_data;
+  wt = WT_stack_window;
+  change_view = NULL;
+  window = NULL;
+  is_built=0;
+  gp->stack_window = this;
 
-    stack_window->gui_obj.gp = gp;
-    stack_window->gui_obj.name = "stack_viewer";
-    stack_window->gui_obj.wc = WC_data;
-    stack_window->gui_obj.wt = WT_stack_window;
-    stack_window->gui_obj.change_view = SourceBrowser_change_view;
-    stack_window->gui_obj.window = NULL;
-    stack_window->gui_obj.is_built=0;
-    gp->stack_window = stack_window;
-
-    stack_window->last_stacklen=0;
-    stack_window->current_row=0;
-    stack_window->has_processor=1;
+  last_stacklen=0;
+  current_row=0;
+  has_processor=1;
 
 
-    gp->add_window_to_list((GUI_Object *)stack_window);
+  gp->add_window_to_list(this);
 
 
-    stack_window->gui_obj.get_config();
+  get_config();
     
-    if(stack_window->gui_obj.enabled)
-	BuildStackWindow(stack_window);
+  if(enabled)
+    Build();
 
-    return 1;
+  return 0;
 }
 
+
+Stack_Window::Stack_Window(void)
+{
+  menu = "<main>/Windows/Stack";
+}
 #endif // HAVE_GUI
