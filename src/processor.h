@@ -228,8 +228,10 @@ class Files
   Files(int nFiles);
   ~Files(void);
 
-  void Add(string& new_name, FILE *fptr);
-  void Add(char *new_name, FILE *fptr);
+  int Add(string& new_name, FILE *fptr);
+  int Add(char *new_name, FILE *fptr);
+
+  int Find(string &fname);
 
   FileContext *operator [] (int file_number);
 
