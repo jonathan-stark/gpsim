@@ -151,61 +151,49 @@ main (int argc, const char *argv[])
   poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
 
-  if (argc < 2) {
-    poptPrintUsage(optCon, stderr, 0);
-    exit(1);
-  }
-
   welcome();
 
-  //while ((c = getopt(argc, argv, "h?p:c:s:L:v")) != EOF) {
-  while ((c = poptGetNextOpt(optCon)) >= 0) {
-    switch (c) {
+  if(argc>=2) {
+    while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
+      switch (c) {
 
-    default:
-      printf("'%c' is an unrecognized option\n",c);
-    case '?':
-    case 'h':
-      usage = 1;
-      break;
+      default:
+	printf("'%c' is an unrecognized option\n",c);
+      case '?':
+      case 'h':
+	usage = 1;
+	break;
 
-      //case 'p':
-      //strncpy(pic_name, optarg,FILE_STRING_LENGTH);
-      //break;
+	//case 'p':
+	//strncpy(pic_name, optarg,FILE_STRING_LENGTH);
+	//break;
 
-      //case 'c':
-      //strncpy(startup_name, optarg,FILE_STRING_LENGTH);
-      //break;
+	//case 'c':
+	//strncpy(startup_name, optarg,FILE_STRING_LENGTH);
+	//break;
 
-      //case 's':
-      //strncpy(cod_name, optarg,FILE_STRING_LENGTH);
-      //break;
+	//case 's':
+	//strncpy(cod_name, optarg,FILE_STRING_LENGTH);
+	//break;
 
-    case 'L':
+      case 'L':
 	set_search_path (search_path);
-      break;
+	break;
 
-    case 'v':
-      printf("%s\n",VERSION);
-      break;
+      case 'v':
+	printf("%s\n",VERSION);
+	break;
 
-    case 'i':
-      use_gui = 0;
-      printf("not using gui");
+      case 'i':
+	use_gui = 0;
+	printf("not using gui");
+      }
+      if (usage)
+	break;
     }
-    if (usage)
-      break;
+
   }
 
-  
-  //if (optind < argc)
-  //  strncpy(hex_name, argv[optind],FILE_STRING_LENGTH);
-/*
-  hex_name = poptGetArg(optCon);
-
-  if((hex_name == NULL) || !(poptPeekArg(optCon) == NULL))
-    usage(optCon, 1, "Specify a hex file", ".e.g., /dev/cua0");
-*/
   if (usage) {
     helpme(argv[0]);
     exit (1);

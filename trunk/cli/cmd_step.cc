@@ -56,20 +56,19 @@ cmd_step::cmd_step(void)
 
 void cmd_step::step(int instructions)
 {
+  if(!have_cpu(1))
+    return;
 
-  if(cpu)
-    {
-      cpu->step(instructions);
-    }
+  cpu->step(instructions);
 
 }
 
 void cmd_step::over(void)
 {
 
-  if(cpu)
-    {
-      cpu->step_over();
-    }
+  if(!have_cpu(1))
+    return;
+
+  cpu->step_over();
 
 }
