@@ -598,16 +598,16 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   switch(condition) {
   case G_IO_IN:
     {
-      GString *line = g_string_sized_new(512);
+#if GTK_MAJOR_VERSION >= 2
       gsize terminator_pos;
 
       std::cout << "Reading bytes\n";
 
+      GString *line = g_string_sized_new(512);
       g_io_channel_read_line_string(channel, line, &terminator_pos, NULL);
       g_string_truncate(line, terminator_pos);
       g_string_append_c(line, '\n');
 
-      // g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
       std::cout << "Read " << line->len << " bytes: " << line->str << endl;
 
       if (0 != line->len) {
@@ -621,6 +621,27 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 	return FALSE;
 
       return TRUE;
+#else
+      unsigned int bytes_read=0;
+
+      memset(s->buffer, 0, 256);
+
+      std::cout << "Reading bytes\n";
+      g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+      std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
+
+      if(bytes_read) {
+	if (*s->buffer == '$')
+	  s->ParseObject(&s->buffer[1]);
+	else {
+	  parse_string(s->buffer);
+	  s->respond("ACK");
+	}
+      } else
+	return FALSE;
+
+      return TRUE;
+#endif
     }
     break;
   case G_IO_HUP:
