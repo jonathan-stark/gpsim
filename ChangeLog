@@ -1,3 +1,9 @@
+2004-01-26  Scott Dattalo  <scott@dattalo.com>
+	* src/register.h, src/register.cc, src/pic-register.h, src/pic-processor.h,
+	  src/14bit-registers.cc
+	cleaned up some include file dependencies.
+	moved the program counter class.
+	
 2004-01-23  Scott Dattalo  <scott@dattalo.com>
 	* src/trace.cc, src/trace.h: added boolean event logger
 	* src/intcon.cc, src/16bit-*: Debugging an interrupt problem

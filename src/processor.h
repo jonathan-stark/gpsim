@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "modules.h"
 #include "trace.h"
-#include "pic-registers.h"
+#include "registers.h"
 #include "gpsim_time.h"
 #include "gpsim_interface.h"
 

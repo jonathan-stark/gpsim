@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <iostream>
 #include <iomanip>
-
+#include <glib.h>
 
 class symbol;
 class XrefObject;
@@ -135,6 +135,40 @@ public:
    */
 
   virtual bool hasBreak(void) { return isa() == BP_REGISTER; }
+};
+
+
+//------------------------------------------------------------
+class file_register : public Register
+{
+ public:
+
+  file_register(void);
+  ~file_register(void);
+  virtual void put_value(unsigned int new_value);
+
+/*
+  virtual void put(unsigned int new_value);
+  virtual void new_name(char *);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit_value(unsigned int bit_number, bool new_value);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
+*/
+};
+
+//---------------------------------------------------------
+// define a special 'invalid' register class. Accessess to
+// to this class' value get 0
+
+class invalid_file_register : public file_register
+{
+public:
+
+  void put(unsigned int new_value);
+  unsigned int get(void);
+  invalid_file_register(unsigned int at_address);
+  virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
 };
 
 
