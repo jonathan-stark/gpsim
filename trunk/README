@@ -18,22 +18,15 @@ gpsim-0.21.1 new stuff:
   o 18f1220 and 18f1320 added by Bradly McLean
   o EEPROM added to 18F devices by Mike Durian
 
-*note:
-eXdbm and gtk+extra are needed by gpsim.
-With version gpsim-0.20.0 you'll need to upgrade to gtk+extra-0.99.9.
-Please see the gpsim web page.
-
-
 System Requirements:
 --------------------
 
-I've only tested the code on a Intel based Linux boxes (redhat 4.2, 5.1, 5.2, 6.0, 6.1).
+gpsim runs under Linux and Windows. 
 
- Much of the software is in C++, so you'll need the standard include files and libraries etc. I tried not to use any gcc specific C++ things (like the operator ?> for example). So I see no reason gpsim wouldn't compile on any system. The g++ compiler and include files are required. The GNU readline library is also required.
+For Windows, all non-standard dll's are packaged with gpsim. So the
+standard install should run. Only Windows XP has been tested. 
 
-
-If you want the gui support then you'll also need glib and gtk. I'm using version 1.2.3 (the version numbers for these packages track one another). I've also have successfully used 1.2.1. You're also going to need the latest gtk+-extra, eXdbm packages. See INSTALL about these.
-
+For Linux, it's assumed that you have GTK+ 2.x and gtk-extra+ installed.
 
 
 
@@ -95,7 +88,9 @@ list           Display source and list files
 load           Load either a hex,command, or .cod file
 log            Log/record events to a file
 node           Add or display stimulus nodes
+macro          macro definition and listing
 module         Select & Display modules
+node           Add or display stimulus nodes
 processor      Select & Display processors
 quit           Quit gpsim
 reset          Reset all or parts of the simulation
@@ -134,8 +129,8 @@ break [c e | w | r | wv | rv | wdt [location] [value] ]
 The cli is available even when the gui is used.
 
 
-Features:
----------
+Major Features:
+--------------
 
 Standard simulator stuff:
   o Breakpoints - execution, read and write memory, wdt, <ctrl C>
@@ -184,5 +179,13 @@ or post it to the gnupic mailing list:
        mailto:gnupic@linuxhacker.org
 
 Finally, see the file Contributions for people who have submitted suggestions and patches.
+
+NOTES:
+-----
+eXdbm and gtk+extra are needed by gpsim.
+With version gpsim-0.20.0 you'll need to upgrade to gtk+extra-0.99.9.
+Please see the gpsim web page.
+
+
 
 Scott
