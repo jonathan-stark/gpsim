@@ -193,16 +193,17 @@ Value *OpAdd::applyOp(Value *lval, Value *rval)
     return new Float(d1+d2);
   }
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  // Try to add as integers. (An exception is thrown if the values
+  // cannot be type casted.
 
-    lval->get(i1);
-    rval->get(i2);
+  gint64 i1,i2;
 
-    return new Integer(i1+i2);
-  }
+  lval->get(i1);
+  rval->get(i2);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  return new Integer(i1+i2);
+
+  //throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
 
 //------------------------------------------------------------------------
@@ -220,16 +221,15 @@ OpAnd::~OpAnd()
 Value *OpAnd::applyOp(Value *lval, Value *rval)
 {
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  if(isFloat(lval) || isFloat(rval))
+    throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
-    lval->get(i1);
-    rval->get(i2);
+  gint64 i1,i2;
 
-    return new Integer(i1 & i2);
-  }
+  lval->get(i1);
+  rval->get(i2);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  return new Integer(i1 & i2);
 
 }
 
@@ -372,16 +372,14 @@ Value *OpSub::applyOp(Value *lval, Value *rval)
     return new Float(d1-d2);
   }
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  gint64 i1,i2;
 
-    lval->get(i1);
-    rval->get(i2);
+  lval->get(i1);
+  rval->get(i2);
 
-    return new Integer(i1-i2);
-  }
+  return new Integer(i1-i2);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  //  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
 }
 
@@ -408,14 +406,12 @@ Value *OpMpy::applyOp(Value *lval, Value *rval)
     return new Float(d1*d2);
   }
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  gint64 i1,i2;
 
-    lval->get(i1);
-    rval->get(i2);
+  lval->get(i1);
+  rval->get(i2);
 
-    return new Integer(i1*i2);
-  }
+  return new Integer(i1*i2);
 
   throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 }
@@ -434,17 +430,15 @@ OpOr::~OpOr()
 
 Value *OpOr::applyOp(Value *lval, Value *rval)
 {
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  if(isFloat(lval) || isFloat(rval))
+    throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
-    lval->get(i1);
-    rval->get(i2);
+  gint64 i1,i2;
 
-    return new Integer(i1 | i2);
-  }
+  lval->get(i1);
+  rval->get(i2);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
-
+  return new Integer(i1 | i2);
 }
 
 //------------------------------------------------------------------------
@@ -462,16 +456,15 @@ OpXor::~OpXor()
 Value *OpXor::applyOp(Value *lval, Value *rval)
 {
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  if(isFloat(lval) || isFloat(rval))
+    throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
-    lval->get(i1);
-    rval->get(i2);
+  gint64 i1,i2;
 
-    return new Integer(i1 ^ i2);
-  }
+  lval->get(i1);
+  rval->get(i2);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  return new Integer(i1 ^ i2);
 }
 
 //------------------------------------------------------------------------
@@ -501,19 +494,15 @@ Value *OpDiv::applyOp(Value *lval, Value *rval)
     return new Float(d1/d2);
   }
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1,i2;
+  gint64 i1,i2;
 
-    lval->get(i1);
-    rval->get(i2);
+  lval->get(i1);
+  rval->get(i2);
 
-    if(i2 == 0)
-      throw new Error("Divide by zero");
+  if(i2 == 0)
+    throw new Error("Divide by zero");
 
-    return new Integer(i1+i2);
-  }
-
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  return new Integer(i1/i2);
 
 }
 
@@ -532,22 +521,20 @@ OpShl::~OpShl()
 Value *OpShl::applyOp(Value *lval, Value *rval)
 {
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1;
-    gint64 i2;
+  if(isFloat(lval) || isFloat(rval))
+    throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
-    rval->get(i2);
+  gint64 i1;
+  gint64 i2;
 
-    if(i2 < 0  || i2 > 63)
-      throw new Error("Operator " + showOp() + " bad shift count");
+  rval->get(i2);
 
-    lval->get(i1);
+  if(i2 < 0  || i2 > 63)
+    throw new Error("Operator " + showOp() + " bad shift count");
 
-    return new Integer(i1<<i2);
-  }
+  lval->get(i1);
 
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
-
+  return new Integer(i1<<i2);
 }
 
 //------------------------------------------------------------------------
@@ -565,22 +552,20 @@ OpShr::~OpShr()
 Value *OpShr::applyOp(Value *lval, Value *rval)
 {
 
+  if(isFloat(lval) || isFloat(rval))
+    throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
 
-  if(isInteger(lval) && isInteger(rval)) {
-    gint64 i1;
-    gint64 i2;
+  gint64 i1;
+  gint64 i2;
 
-    rval->get(i2);
+  rval->get(i2);
 
-    if(i2 < 0  || i2 > 63)
-      throw new Error("Operator " + showOp() + " bad shift count");
+  if(i2 < 0  || i2 > 63)
+    throw new Error("Operator " + showOp() + " bad shift count");
 
-    lval->get(i1);
+  lval->get(i1);
 
-    return new Integer(i1>>i2);
-  }
-
-  throw new TypeMismatch(showOp(), lval->showType(), rval->showType());
+  return new Integer(i1>>i2);
 }
 
 

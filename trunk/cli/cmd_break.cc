@@ -62,7 +62,7 @@ cmd_break::cmd_break(void)
 
   brief_doc = string("Set a break point");
 
-  long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value [mask]] ]\n"
+  long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [,value [,mask]] ]\n"
     "\n"
     "\toptions:\n"
     "\t\tc   - cycle\n"
@@ -77,8 +77,8 @@ cmd_break::cmd_break(void)
     "\t\t    - no argument, display the break points that are set.\n"
     "\texamples:\n"
     "\t\tbreak e 0x20       // set an execution break point at address 0x20\n"
-    "\t\tbreak wv 0x30 0    // break if a zero is written to register 0x30\n"
-    "\t\tbreak wv 0x40 0xf0 // break if all ones are written to the upper nibble\n"
+    "\t\tbreak wv 8,0       // break if a zero is written to register 8\n"
+    "\t\tbreak wv 9,0x30,0xf0 // break if '3' is written to the upper nibble or reg 9\n"
     "\t\tbreak c 1000000    // break on the one million'th cycle\n"
     "\t\tbreak              // display all of the break points\n"
     "\n");

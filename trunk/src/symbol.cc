@@ -403,6 +403,13 @@ void  register_symbol::get(int &i)
   else
     i = 0;
 }
+void  register_symbol::get(gint64 &i)
+{
+  if(reg)
+    i = reg->get_value();
+  else
+    i = 0;
+}
 
 void register_symbol::set(int new_value)
 {
@@ -465,6 +472,14 @@ void ioport_symbol::set(Value *v)
 }
 
 void  ioport_symbol::get(int &i)
+{
+  if(ioport)
+    i = ioport->get_value();
+  else
+    i = 0;
+}
+
+void  ioport_symbol::get(gint64 &i)
 {
   if(ioport)
     i = ioport->get_value();

@@ -1,4 +1,9 @@
 2004-11-10 Scott Dattalo <scott@dattalo.com>
+	* cmd/cmd_break.cc: updated the help description for 'break'
+	* src/operator.cc, src/symbol.h, src/symbol.cc: Allow registers
+	to be type-cast into integers.
+
+2004-11-10 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc:
 	* src/breakpoints.cc, src/gpsim_object.cc, src/gpsim_object.h,
 	src/modules.cc, src/processor.cc, src/registers.cc, src/registers.h,
