@@ -94,8 +94,8 @@ Module_Types available_modules[] =
   { "not",  "not",  NOTGate::construct},
 
   // Leds
-  //{ "led_7segments", "led7s", Led_7Segments::construct},
-  //{ "led", "led", Led::construct},
+  { "led_7segments", "led7s", Led_7Segments::construct},
+  { "led", "led", Led::construct},
 
   // Video
   { "PAL_video", "video", Video::construct},

@@ -1,3 +1,11 @@
+2004-03-02 Scott Dattalo  <scott@dattalo.com>
+	* src/pic-processor.cc: fixed a memory allocation bug in the
+	FileContext class; an array was one element too small.
+	* examples/modules/led_test, examples/modules/led_test/led_mod.asm, examples/modules/led_test/led_mod.asm:
+	Added the LED test code to CVS.
+	* modules/gpsim_modules.cc, modules/led.cc:
+	LED module now works.
+	
 2004-03-01  Bert Driehuis <driehuis@playbeing.org>
 	* src/icd.cc: include time.h for BSD 
 

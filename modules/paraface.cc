@@ -107,18 +107,6 @@ public:
 
 };
 
-#if 0
-static void simulation_has_stopped(gpointer paraface)
-{
-  cout << "stopped" << endl;
-  if(paraface)
-    {
-      ((Paraface *)paraface)->update();
-    }
-}
-#endif
-
-
 //--------------------------------------------------------------
 // ParafacePort class
 //
