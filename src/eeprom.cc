@@ -30,7 +30,8 @@ using namespace std;
 #include "trace.h"
 #include "pic-processor.h"
 #include "eeprom.h"
-
+#include "pir.h"
+#include "intcon.h"
 
 
 // EEPROM - Peripheral
@@ -224,6 +225,11 @@ void EEPROM_PIR::write_is_complete(void)
 }
 
 
+void EEPROM_PIR::set_pir_set(PIR_SET *p)
+{ 
+  pir_set = p;
+}
+
 
 
 //----------------------------------------------------------
@@ -390,6 +396,11 @@ void EEPROM::initialize(unsigned int new_rom_size)
   cpu->ema.set_Registers(rom, rom_size);
 }
 
+
+void EEPROM::set_intcon(INTCON *ic)
+{ 
+  intcon = ic; 
+}
 
 void EEPROM::dump(void)
 {

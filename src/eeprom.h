@@ -24,13 +24,13 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
-#include "breakpoints.h"
-#include "intcon.h"
-#include "pir.h"
-//#include "pic-processor.h"
+#include "pic-registers.h"
+
 
 class pic_processor;
 class EEPROM;
+class PIR_SET;
+class INTCON;
 
 //---------------------------------------------------------
 // EECON1 - EE control register 1
@@ -162,7 +162,7 @@ public:
   EEPROM(void);
   void reset(RESET_TYPE);
   virtual void set_cpu(pic_processor *p) { cpu = p; }
-  virtual void set_intcon(INTCON *ic) { intcon = ic; }
+  virtual void set_intcon(INTCON *ic);
 
   virtual void callback(void);
   virtual void start_write(void);
@@ -209,7 +209,7 @@ class EEPROM_PIR : public EEPROM
 {
 public:
 
-  inline virtual void set_pir_set(PIR_SET *p) { pir_set = p; }
+  virtual void set_pir_set(PIR_SET *p);
 
   // the 16f628 eeprom is identical to the 16f84 eeprom except
   // for the size and the location of EEIF. The size is taken
