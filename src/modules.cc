@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef _WIN32
 #include <dlfcn.h>
 #else
+#include <direct.h>
 #include <windows.h>
 /*
  * interface is a Module class member variable in gpsim,
@@ -371,18 +372,23 @@ void module_display_available(void)
 
 void module_load_library(const char *library_name)
 {
-#ifndef _WIN32
   void *handle;
+  char *pszError;
 
-  // According to the man page for dlopen, the RTLD_GLOBAL flag can
-  // be or'd with the second pararmeter of the function call. However,
-  // under Linux at least, this apparently cause *all* symbols to
-  // disappear.
-
-  handle = dlopen (library_name, RTLD_NOW); // | RTLD_GLOBAL);
-  if (!handle) {
-
-    fprintf(stderr, "%s in dlopen(%s)\n", dlerror(), library_name);
+  if ((handle = load_library(library_name, &pszError)) == NULL) {
+    char cw[_MAX_PATH];
+//    GetCurrentDirectory(_MAX_PATH, cw);
+    getcwd(cw, _MAX_PATH);
+    //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
+    cerr << "failed to open library module ";
+    cerr << library_name;
+    cerr << ": ";
+    cerr << pszError;
+    cerr << endl;
+    cerr << "current working directory is ";
+    cerr << cw;
+    cerr << endl;
+    free_error_message(pszError);
     return;
   }
 
@@ -390,24 +396,6 @@ void module_load_library(const char *library_name)
 
   if(verbose)
     module_display_available();
-#else
-//  cout << "  -- gpsim on WIN32 doesn't support modules yet\n";
-  void *handle;
-
-  handle = (void *)LoadLibrary(library_name);
-  if (NULL == handle) {
-    char *error = g_win32_error_message(GetLastError());
-
-    fprintf (stderr, "%s\n", error);
-    g_free(error);
-    return;
-  }
-
-  module_add_library(library_name,handle);
-
-  if(verbose)
-    module_display_available();
-#endif
 }
 
 void module_load_module(const char *module_type, const char *module_name)
