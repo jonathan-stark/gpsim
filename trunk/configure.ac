@@ -126,7 +126,7 @@ AM_PROG_LIBTOOL
 
 # Checks for libraries.
 AC_LANG([C++])
-AC_CHECK_LIB([gpsim], [main])
+#AC_CHECK_LIB([gpsim], [main])
 AC_CHECK_LIB([popt], [main])
 AC_CHECK_LIB([pthread], [main])
 wi_LIB_READLINE
