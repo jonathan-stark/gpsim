@@ -1,4 +1,8 @@
-2004-02-08  Scott Dattalo  <scott@dattalo.com>
+2004-02-10  Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_symbol.cc, src/symbol.h, src/symbol.cc
+	Cleaned up symbol api.
+	
+2004-02-09  Scott Dattalo  <scott@dattalo.com>
 	* all files!
 	'NULL' has been replaced with '0' throughout all of gpsim.
 	The reason is two-fold: 1) MAC users were having trouble compiling
