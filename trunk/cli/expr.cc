@@ -301,7 +301,7 @@ Float* Float::typeCheck(Value* val, string valDesc)
   return((Float*)(val));
 }
 
-
+#if 0
 /*****************************************************************
  * The gpsimSymbol class.
  */
@@ -336,6 +336,7 @@ string gpsimSymbol::toString()
 
   return string("");
 }
+#endif
 /*****************************************************************
  * The String class.
  */

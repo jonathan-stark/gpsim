@@ -1,3 +1,11 @@
+2004-08-24 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_attach.cc, cli/cmd_attach.h, cli/cmd_symbol.cc,
+	  cli/cmd_symbol.h, cli/expr.cc, cli/expr.h, cli/parse.yy,
+	  cli/scan.ll, src/stimuli.cc, src/stimuli.h, src/symbol.h:
+	The attach command can now accept a list of symbols. Also,
+	Nodes and stimuli are now added to the symbol table whenever
+	they're constructed.
+
 2004-08-19 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc: writeTT and readTT were not initialized
 	in Processor constructor.

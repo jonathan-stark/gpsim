@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_SYMBOL_H__
 
 class Expression;
-class gpsimSymbol;
+class symbol;
 
 class cmd_symbol : public command
 {
@@ -32,7 +32,7 @@ public:
 
   void dump_all(void);
   void dump_one(char *sym_name);
-  void dump_one(gpsimSymbol *);
+  void dump_one(symbol *);
 
   void add_one(char *sym_name, char *sym_type, Expression *);
 };

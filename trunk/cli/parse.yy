@@ -62,6 +62,10 @@ using namespace std;
 #include "expr.h"
 #include "operator.h"
 #include "errors.h"
+
+#include "../src/symbol.h"
+#include "../src/stimuli.h"
+
 #define YYERROR_VERBOSE
 
 extern char *yytext; 
@@ -113,10 +117,11 @@ void yyerror(char *message)
   Float*                    Float_P;
   Integer*                  Integer_P;
   String*                   String_P;
-  gpsimSymbol*              Symbol_P;
+  symbol*                   Symbol_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
+  SymbolList_t             *SymbolList_P;
 
 }
 
@@ -171,6 +176,8 @@ void yyerror(char *message)
 %type <Expression_P>            unary_expr
 %type <ExprList_P>              expr_list
 %type <ExprList_P>              array
+
+%type  <SymbolList_P>           symbol_list
 
 
 %token <Integer_P>   LITERAL_INT_T
@@ -309,7 +316,9 @@ aborting: ABORT
 	  }
 	  ;
             
-attach_cmd: ATTACH string_list          {attach.attach($2); delete $2;}
+attach_cmd
+          : ATTACH string_list          {attach.attach($2); delete $2;}
+          | ATTACH symbol_list          {attach.attach($2); delete $2;}
           ;
 
 break_cmd
@@ -588,6 +597,11 @@ string_list
         : STRING                        {$$ = new StringList_t(); $$->push_back($1);}
         | string_list STRING            {$1->push_back($2);}
         ;
+
+symbol_list
+  : SYMBOL_T {$$ = new SymbolList_t(); $$->push_back($1); }
+  | symbol_list SYMBOL_T {$1->push_back($2);}
+  ;
 
 //----------------------------------------
 // Expression parsing
