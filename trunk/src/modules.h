@@ -62,10 +62,14 @@ public:
   unsigned int interface_id;
 
   // I/O pin specific
+
   virtual int get_pin_count(void){return 0;};
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
+
+
+  const virtual char *type(void) { return (name_str); };
   char *name(void) {return name_str;};
   virtual void new_name(char *);
 
@@ -88,10 +92,10 @@ public:
 //
 // non-class helper functions.
 
-void display_available_modules(void);
-void dump_module_list(void);
+void module_display_available(void);
+void module_list_modules(void);
 //int find_in_available_module_list(char * module_type);
-void load_module_library(char *library_name);
-void load_module(char * module_type, char * module_new_name=NULL);
-
+void module_load_library(char *library_name);
+void module_load_module(char * module_type, char * module_new_name=NULL);
+void module_pins(char *module_name);
 #endif // __MODULES_H__

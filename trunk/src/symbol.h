@@ -73,6 +73,7 @@ public:
   void dump_all(void);
   void dump_one(char *s);
   void dump_one(string *s);
+  void dump_type(SYMBOL_TYPE st);
   symbol * find(char *s);
   symbol * find(string *s);
 
@@ -85,7 +86,7 @@ class symbol
 public:
 
   string name_str;
-  //pic_processor *cpu;
+
   Module *cpu;
 
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
@@ -185,11 +186,12 @@ class module_symbol : public symbol
  public:
   virtual void print(void) {
     if(cpu) {
-      cout << cpu->name() << "  named ";
+      cout << cpu->type() << "  named ";
     }
     cout << *name() << '\n';
   }
       
+  virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
 
 };
 #endif  //  __SYMBOL_H__

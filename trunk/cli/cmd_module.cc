@@ -37,6 +37,7 @@ cmd_module c_module;
 #define CMD_MOD_LOAD    2
 #define CMD_MOD_DUMP    3
 #define CMD_MOD_LIB     4
+#define CMD_MOD_PINS    5
 
 
 static cmd_options cmd_module_options[] =
@@ -44,6 +45,7 @@ static cmd_options cmd_module_options[] =
   "list",      CMD_MOD_LIST,    OPT_TT_BITFLAG,
   "load",      CMD_MOD_LOAD,    OPT_TT_STRING,
   "dump",      CMD_MOD_DUMP,    OPT_TT_BITFLAG,
+  "pins",      CMD_MOD_PINS,    OPT_TT_STRING,
   "library",   CMD_MOD_LIB ,    OPT_TT_STRING,
   "lib",       CMD_MOD_LIB ,    OPT_TT_STRING,
   NULL,0,0
@@ -94,7 +96,7 @@ void cmd_module::module(void)
 
   if(verbose)
     cout << "cmd_module: display modules\n";
-  dump_module_list();
+  module_list_modules();
 
 }
 
@@ -105,7 +107,7 @@ void cmd_module::module(int bit_flag)
     {
 
     case CMD_MOD_LIST:
-      display_available_modules();
+      module_display_available();
       break;
 
     default:
@@ -122,20 +124,24 @@ void cmd_module::module(cmd_options_str *cos)
   switch(cos->co->value)
     {
     case CMD_MOD_LIB:
-      //if(verbose)
+      if(verbose)
 	cout << "module command got the library " << cos->str << '\n';
-	load_module_library(cos->str);
+      module_load_library(cos->str);
       break;
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library and let
       // gpsim assign the name.
-      //if(verbose)
+      if(verbose)
 	cout << "module command got the module " << cos->str << '\n';
-	load_module(cos->str);
-	break;
+      module_load_module(cos->str);
+      break;
 
     case CMD_MOD_DUMP:
       cout <<  " is not supported yet\n";
+      break;
+
+    case CMD_MOD_PINS:
+      module_pins(cos->str);
       break;
 
     default:
@@ -154,12 +160,13 @@ void cmd_module::module(cmd_options_str *cos, char * module_new_name)
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library 
 
-      //if(verbose)
-	cout << "module command got the module " << cos->str << 
-	  " named " << module_new_name << '\n';
-	//load_module(cos->str);
-	load_module( cos->str,  module_new_name);
-	break;
+      if(verbose)
+	cout << "module command got the module " << cos->str << " named " 
+	     << module_new_name << '\n';
+
+      module_load_module( cos->str,  module_new_name);
+
+      break;
 
     default:
       cout << "cmd_module error\n";

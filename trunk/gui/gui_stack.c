@@ -258,6 +258,9 @@ void StackWindow_update(Stack_Window *sw)
     int clist_frozen=0;
     int value;
 
+    if( !((GUI_Object*)sw)->enabled)
+	return;
+
     update(sw);
 }
 
