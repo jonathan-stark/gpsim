@@ -65,11 +65,10 @@ class Lcd_Port : public IOPORT
 public:
 
   LcdDisplay *lcd;
-  virtual void trace_register_write(void);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void assert_event(void);
 
-  Lcd_Port (unsigned int _num_iopins=8);
+  Lcd_Port (LcdDisplay *_lcd,unsigned int _num_iopins=8);
 
 };
 
@@ -80,7 +79,7 @@ public:
   guint64 break_delta;
   void put(unsigned int new_value);
   virtual void assert_event(void);
-  ControlPort (unsigned int _num_iopins=8);
+  ControlPort (LcdDisplay *_lcd,unsigned int _num_iopins=8);
   virtual void callback(void);
 };
 
@@ -93,7 +92,7 @@ public:
   void put(unsigned int new_value);
   virtual void assert_event(void);
   virtual void setbit(unsigned int bit_number, bool new_value);
-  DataPort (unsigned int _num_iopins=8);
+  DataPort (LcdDisplay *_lcd,unsigned int _num_iopins=8);
   void update_pin_directions(bool);
 
   unsigned int get(void);
@@ -157,6 +156,65 @@ public:
   void update_pixmap(int, _5X7 *, LcdDisplay *);
 };
 
+//------------------------------------------------------------------------
+//
+// lcd tracing
+//
+class LcdDisplay;
+class LcdTraceType : public TraceType {
+public:
+  LcdDisplay *lcd;
+
+  LcdTraceType(LcdDisplay *_lcd, 
+	       unsigned int t,
+	       unsigned int s)
+    : TraceType(t,s), lcd(_lcd)
+  {
+  }
+
+  virtual TraceObject *decode(unsigned int tbi) = 0;
+};
+
+class LcdWriteTT : public LcdTraceType {
+public:
+  LcdWriteTT(LcdDisplay *lcd, unsigned int t, unsigned int s);
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+
+};
+
+class LcdReadTT : public LcdTraceType {
+public:
+  LcdReadTT(LcdDisplay *lcd, unsigned int t, unsigned int s);
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+
+};
+
+class LcdTraceObject : public TraceObject {
+public:
+  LcdDisplay *lcd;
+
+  LcdTraceObject(LcdDisplay *_lcd) : TraceObject() , lcd(_lcd)
+  {
+  }
+
+  virtual void print(FILE *)=0;
+};
+
+class LcdWriteTO : public LcdTraceObject {
+public:
+  LcdWriteTO(LcdDisplay *_lcd);
+  virtual void print(FILE *);
+};
+
+class LcdReadTO : public LcdTraceObject {
+public:
+  LcdReadTO(LcdDisplay *_lcd);
+  virtual void print(FILE *);
+};
 
 //
 //     State Machine Events
@@ -311,6 +369,14 @@ public:
   GtkWidget *window;
   GtkWidget *darea;
   gint w_width,w_height;
+
+  //
+  // Tracing
+  //
+  TraceType *readTT, *writeTT;
+  TraceType *getWriteTT();
+  TraceType *getReadTT();
+
 
   //
   // Graphics member functions

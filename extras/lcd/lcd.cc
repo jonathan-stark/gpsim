@@ -63,6 +63,100 @@ Boston, MA 02111-1307, USA.  */
 #include <gpsim/gpsim_time.h>
 
 
+Trace *gTrace=0;                // Points to gpsim's global trace object.
+
+//------------------------------------------------------------------------
+// Tracing
+//
+
+LcdWriteTO::LcdWriteTO(LcdDisplay *_lcd)
+  : LcdTraceObject(_lcd)
+{
+}
+
+void LcdWriteTO::print(FILE *fp)
+{
+  fprintf(fp, "  Wrote: LCD");
+}
+
+LcdReadTO::LcdReadTO(LcdDisplay *_lcd)
+  : LcdTraceObject(_lcd)
+{
+}
+
+void LcdReadTO::print(FILE *fp)
+{
+  fprintf(fp, "  Read: LCD");
+}
+
+//----------------------------------------
+LcdWriteTT::LcdWriteTT(LcdDisplay *_lcd, unsigned int t, unsigned int s)
+  : LcdTraceType(_lcd,t,s)
+{
+}
+
+
+TraceObject *LcdWriteTT::decode(unsigned int tbi)
+{
+
+  unsigned int tv = gTrace->get(tbi);
+
+  LcdWriteTO *lto = new LcdWriteTO(lcd);
+  gTrace->addToCurrentFrame(lto);
+
+  return lto;
+
+}
+int LcdWriteTT::dump_raw(unsigned tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int tv = gTrace->get(tbi);
+  
+  int m = snprintf(buf, bufsize," LCD Write 0x%08x", tv);
+  if(m>0)
+    n += m;
+
+  return n;
+}
+//----------------------------------------
+LcdReadTT::LcdReadTT(LcdDisplay *_lcd, unsigned int t, unsigned int s)
+  : LcdTraceType(_lcd,t,s)
+{
+}
+
+
+TraceObject *LcdReadTT::decode(unsigned int tbi)
+{
+
+  unsigned int tv = gTrace->get(tbi);
+
+  LcdReadTO *lto = new LcdReadTO(lcd);
+  gTrace->addToCurrentFrame(lto);
+
+  return lto;
+
+}
+int LcdReadTT::dump_raw(unsigned tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int tv = gTrace->get(tbi);
+  
+  int m = snprintf(buf, bufsize," LCD Read 0x%08x", tv);
+  if(m>0)
+    n += m;
+
+  return n;
+}
+
+
 //------------------------------------------------------------------------
 //
 // LCD interface to the simulator
@@ -121,8 +215,13 @@ void LcdBusy::callback(void)
 // tracing, stimulus interface, etc.). The LcdPort class extends
 // IOPORT by redirecting changes to the LCD state machine.
 
-Lcd_Port::Lcd_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
+Lcd_Port::Lcd_Port (LcdDisplay *_lcd, unsigned int _num_iopins)
+  : IOPORT(_num_iopins), lcd(_lcd)
 {
+  if(lcd) {
+    set_write_trace(lcd->getWriteTT()->type);
+    set_read_trace(lcd->getReadTT()->type);
+  }
 
 }
 void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
@@ -136,6 +235,7 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
       assert_event();
       trace_register_write();
     }
+  gTrace->raw(write_trace.get() | value.get());
 
 }
 
@@ -145,10 +245,10 @@ void Lcd_Port::assert_event(void)
 }
 
 
-DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
+DataPort::DataPort (LcdDisplay *_lcd, unsigned int _num_iopins) 
+  : Lcd_Port(_lcd, _num_iopins)
 {
   value.put(0);
-
 }
 
 void DataPort::setbit(unsigned int bit_number, bool new_value)
@@ -191,19 +291,16 @@ unsigned int DataPort::get(void)
 
   value.put(v);
 
+  gTrace->raw(read_trace.get() | value.get());
+
   return value.get();
 
 }
 
-void Lcd_Port::trace_register_write(void)
-{
-
-  get_trace().module1(value.get());
-}
-
 //-----------------------------------------------------
 
-ControlPort::ControlPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
+ControlPort::ControlPort (LcdDisplay *_lcd, unsigned int _num_iopins) 
+  : Lcd_Port(_lcd, _num_iopins)
 {
   break_delta = 100000;
 }
@@ -220,6 +317,7 @@ void ControlPort::put(unsigned int new_value)
   unsigned int old_value = value.get();
 
   Lcd_Port::put(new_value);
+  gTrace->raw(write_trace.get() | value.get());
 
   if((old_value ^ value.get()) & 2) {  // R/W bit has changed states
     if(value.get() & 2)
@@ -252,6 +350,7 @@ void DataPort::put(unsigned int new_value)
   unsigned int old_value = value.get();
 
   Lcd_Port::put(new_value);
+  gTrace->raw(write_trace.get() | value.get());
 
   if( (old_value ^ value.get()) & 0xff)
     lcd->advanceState(DataChange);
@@ -309,16 +408,13 @@ void LcdDisplay::create_iopin_map(void)
   //   an I/O port. 
 
 
-  control_port = new ControlPort(8);
+  control_port = new ControlPort(this,8);
   control_port->value.put(0);
-  control_port->lcd = this;
 
   get_cycles().set_break_delta(1000, control_port);
 
-  data_port = new DataPort(8);
+  data_port = new DataPort(this, 8);
   data_port->value.put(0);
-  data_port->lcd = this;
-
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
@@ -377,6 +473,27 @@ void LcdDisplay::create_iopin_map(void)
 }
 
 //--------------------------------------------------------------
+TraceType *LcdDisplay::getWriteTT()
+{
+  if(!writeTT) {
+    writeTT = new LcdWriteTT(this,0,1);
+    gTrace->allocateTraceType(writeTT);
+  }
+
+  return writeTT;
+
+}
+
+TraceType *LcdDisplay::getReadTT()
+{
+  if(!readTT) {
+    readTT = new LcdReadTT(this,0,1);
+    gTrace->allocateTraceType(readTT);
+  }
+  return readTT;
+}
+
+//--------------------------------------------------------------
 // construct
 
 Module * LcdDisplay::construct(const char *new_name=NULL)
@@ -430,6 +547,10 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
   debug = 0;
   if (getenv("GPSIM_LCD_DEBUG"))
     debug = atoi(getenv("GPSIM_LCD_DEBUG"));
+
+  gTrace = &get_trace();
+  writeTT = new LcdWriteTT(this,0,1);
+  readTT = new LcdReadTT(this,0,1);
 
   interface = new LCD_Interface(this);
   get_interface().add_interface(interface);
