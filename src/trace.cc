@@ -615,6 +615,7 @@ Trace::Trace(void)
   string_cycle = 0;
 
   lastTraceType = LAST_TRACE_TYPE;
+  lastSubTraceType = 1<<16;
 
   xref = new XrefObject(&trace_value);
 
@@ -949,11 +950,24 @@ unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
   if(tt) {
     int i;
 
-    tt->type = lastTraceType;
+    unsigned int *ltt = &lastTraceType;
+    unsigned int n = 1<<24;
+
+    if(tt->bitsTraced() < 24) {
+      if(lastSubTraceType == 0) {
+	lastSubTraceType = lastTraceType;
+	lastTraceType += n;
+      }
+
+      ltt = &lastSubTraceType;
+      n = 1<<16;
+    }
+
+    tt->type = *ltt;;
 
     for(i=0; i<nSlots; i++) {
-      trace_map[lastTraceType] = tt;
-      lastTraceType += (1<<24);
+      trace_map[*ltt] = tt;
+      *ltt += n;
     }
 
     return tt->type;

@@ -52,17 +52,17 @@ public:
   virtual void print_frame(TraceFrame *);
 
 };
-
+/*
 class SubTraceObject : public TraceObject
 {
 public:
   SubTraceObject();
-  TraceObject(Processor *_cpu);
+  SubTraceObject(Processor *_cpu);
   virtual void print(void)=0;
   virtual void print_frame(TraceFrame *);
 
 };
-
+*/
 class RegisterWriteTraceObject : public TraceObject
 {
 public:
@@ -114,6 +114,7 @@ public:
   // Returns true if the trace record starting at index 'tbi' is of the same
   // type as this TraceType
   virtual bool isValid(unsigned int tbi);
+  virtual int bitsTraced(void) { return 24; }
   virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
 };
 
@@ -164,16 +165,6 @@ public:
 
 };
 
-class SubTraceType : public ProcessorTraceType
-{
-public:
-  static map <unsigned int, TraceType *> subTrace_map;
-
-  SubTraceType(Processor *_cpu, unsigned int t, unsigned int s);
-  virtual TraceObject *decode(unsigned int tbi);
-  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
-
-};
 //========================================================================
 // TraceFrame
 //
@@ -268,6 +259,7 @@ class Trace
   guint64 current_cycle_time;      // used when decoding the trace buffer.
   list <TraceFrame *> traceFrames;
   unsigned int lastTraceType;
+  unsigned int lastSubTraceType;
 
   Trace (void);
   ~Trace(void);
