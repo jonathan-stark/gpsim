@@ -1519,6 +1519,8 @@ void grab_module(gui_module *p)
 
     treeselect_module(NULL,dragged_module);
     dragging = 1;
+    clear_nodes(p->bbw);
+    draw_nodes(p->bbw);
     gtk_widget_set_app_paintable(p->bbw->layout, FALSE);
 }
 
@@ -1571,6 +1573,8 @@ static void pointer_cb(GtkWidget *w,
 			     GDK_CURRENT_TIME);
 	    treeselect_module(NULL,dragged_module);
 	    dragging = 1;
+	    clear_nodes(bbw);
+            draw_nodes(bbw);
 	    gtk_widget_set_app_paintable(bbw->layout, FALSE);
 	}
 	break;
