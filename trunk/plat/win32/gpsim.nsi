@@ -262,7 +262,6 @@ Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR\examples\14bit"
   File "${GPSIM_ROOT}\examples\14bit\*.asm"
-  File "${GPSIM_ROOT}\examples\14bit\*.inc"
   File "${GPSIM_ROOT}\examples\14bit\*.stc"
 
   SetOutPath "$INSTDIR\examples\16bit"
