@@ -35,6 +35,8 @@ public:
 
   void module(cmd_options_str *cos, char *name);
 
+  void module(cmd_options_str *cos, char *op1, char *op2);
+
 };
 
 extern cmd_module c_module;

@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_clear.h"
 #include "cmd_disasm.h"
 #include "cmd_dump.h"
+#include "cmd_frequency.h"
 #include "cmd_help.h"
 #include "cmd_list.h"
 #include "cmd_load.h"
@@ -98,6 +99,7 @@ void free_char_list(char_list *);
 %token <s>  CLEAR
 %token <s>  DISASSEMBLE
 %token <s>  DUMP
+%token <s>  FREQUENCY
 %token <s>  HELP
 %token <s>  LOAD
 %token <s>  LIST
@@ -151,6 +153,7 @@ cmd: ignored
      | clear_cmd
      | disassemble_cmd
      | dump_cmd
+     | frequency_cmd
      | help_cmd
      | list_cmd
      | load_cmd
@@ -270,6 +273,11 @@ dump_cmd: DUMP
           { dump.dump($2->value); YYABORT;}
           ;
 
+frequency_cmd: FREQUENCY
+          { frequency.print(); YYABORT;}
+          | FREQUENCY NUMBER
+          { frequency.set($2); YYABORT;}
+          ;
 
 help_cmd: HELP
           { help.help(); YYABORT;}
@@ -337,6 +345,24 @@ module_cmd: MODULE
             YYABORT;
           }
 
+          | MODULE string_option STRING STRING
+	  { 
+            c_module.module($2, $3, $4);
+            delete($2);
+            free($3);
+            free($4);
+            YYABORT;
+          }
+/*
+          | MODULE string_option STRING STRING STRING
+	  { 
+            c_module.module($2, $3, $4);
+            delete($2);
+            free($3);
+            free($4);
+            YYABORT;
+          }
+*/
           ;
 
 
@@ -685,6 +711,7 @@ void initialize_commands(void)
   clear.token_value = CLEAR;
   disassemble.token_value = DISASSEMBLE;
   dump.token_value = DUMP;
+  frequency.token_value = FREQUENCY;
   help.token_value = HELP;
   c_list.token_value = LIST;
   c_load.token_value = LOAD;

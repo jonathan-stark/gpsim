@@ -1318,7 +1318,10 @@ void stimorb_attach(char *node, char_list *stimuli)
 	    if(verbose&2)
 	      cout << " attaching stimulus: " << s << '\n';
 	  }
-	  stimuli = stimuli->next;
+	  else
+	    cout << "Warning, stimulus: " << s << " not attached\n";
+
+  	  stimuli = stimuli->next;
 	}
 
       sn->update(0);

@@ -198,6 +198,23 @@ void Module::new_name(char *s)
 }
 
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void Module::set_attribute(char *attr, char *val)
+{
+
+  cout << " warning " << name_str << " does not have any changable attributes\n";
+  if(attr) {
+    cout << "(attr = " << attr;
+    if(val)
+      cout << " , val = " << val;
+    cout << ")\n";
+
+  }
+
+}
+
 /*****************************************************************************
  *
  * Helper functions
@@ -444,3 +461,28 @@ void module_pins(char *module_name)
 
 }
 
+//--------------------------------------------------
+// module_set_attr
+// Display the states of the pins of a module
+
+void module_set_attr(char *module_name,char *attr, char *val)
+{
+
+  Module *cpu;
+  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+
+
+  if(mP && mP->cpu) {
+
+    cpu = mP->cpu;
+    cout << "Module " << cpu->name() << '\n';
+
+  }
+  else {
+    cout << "module `" << module_name << "' wasn't found\n";
+    return;
+  }
+
+  cpu->set_attribute(attr,val);
+
+}

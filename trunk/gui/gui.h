@@ -166,6 +166,7 @@ struct _labeled_entry {
   union {
     gint32    i32;
     guint64   ui64;
+    double    db;
   } value;           // value displayed
 
   gpointer parent;   // a pointer to the owner
@@ -270,10 +271,13 @@ typedef struct _Symbol_Window Symbol_Window;
 struct _StatusBar_Window {
   GUI_Processor *gp;
 
+  GtkWidget *popup_menu;
+  
   labeled_entry *status;
   labeled_entry *W;
   labeled_entry *pc;
   labeled_entry *cycles;
+  labeled_entry *time;
   
   int created;
 

@@ -60,7 +60,11 @@ public:
 Module_Types available_modules[] =
 {
   { "binary_indicator", "bi",   Binary_Indicator::construct },
-  //  { "resistor",         "res",  Resistor::construct }
+/*
+  { "resistor",         "res",  Resistor::construct }
+  { "pullup",           "pu",   Resistor::pu_construct }
+  { "pulldown",         "pd",   Resistor::pd_construct }
+*/
 };
 
 #ifdef __cplusplus

@@ -37,11 +37,11 @@ Boston, MA 02111-1307, USA.  */
 
 #define LABELPAD 10 // increase this so wide lines doesn't clutter labels
 
-static enum _pintype {PIN_OUTPUT, PIN_INPUT, PIN_OTHER};
+typedef enum {PIN_OUTPUT, PIN_INPUT, PIN_OTHER} pintype;
 
 static void draw_pin(GdkDrawable  *drawable,
 	      GdkGC *gc,
-	      enum _pintype type,
+	      pintype type,
 	      Breadboard_Window *bbw,
 	      int casex, int endx,
 	      int y)

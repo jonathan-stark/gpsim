@@ -3,25 +3,27 @@ gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 T. Scott Dattalo
 
 gpsim-0.21.0
-  o Profiling has been added
-  o Trace viewer has been added
-  o Added 16c62,16c63,16c72,16c73 processors
-  o Added 18c442,18c452 processor
-  o breadboard updates when either a tris or port is changed in the register viewer
-  o Enhanced module interface - now LCD module works with gpsim
-  o Patch from Rudy Moore to fix TMR0 bug
-  o Beautified the Single Step and Trace dump outputs
-  o Added break on stack overflow and underflow
-  o Added "abort_gpsim_now" command. This will unconditionally abort gpsim.
-  o Added "--cli" command line option. Invokes gpsim in command line mode
-    even if it has been configured to use the gui.
-  o Program viewer can now display ASCII encode text in "dt" tables
-  o Symbolic setting of execution breaks was not working.
-  o C++ bugs fixed
-
-Patches from Salvador  mailto:salvador@inti.gov.ar to A2D,window management, and miscellaneous. 
-Patch from JG for Suse 7.1. 
-Fixed WDT during SLEEP bug reported by Tor Fredrik Aas mailto:tfa@abn.hibu.no
+	- Starting with 0.21.0, Changelog will be properly formatted
+	- Profiling has been added
+	- Trace viewer has been added
+	- Added 16c62,16c63,16c72,16c73 processors
+	- Added 18c442,18c452 processor
+	- breadboard updates when either a tris or port is changed in the register viewer
+	- Enhanced module interface - now LCD module works with gpsim
+	- Patch from Rudy Moore to fix TMR0 bug
+	- Beautified the Single Step and Trace dump outputs
+	- Added break on stack overflow and underflow
+	- Added "abort_gpsim_now" command. This will unconditionally abort gpsim.
+	- Added "--cli" command line option. Invokes gpsim in command line mode even if it has been configured to use the gui.
+	- Program viewer can now display ASCII encode text in "dt" tables
+	- Symbolic setting of execution breaks was not working.
+	- C++ bugs fixed
+	- Fixed WDT during SLEEP bug reported by Tor Fredrik Aas mailto:tfa@abn.hibu.no
+	- Patch from JG for Suse 7.1. 
+  	- Added pullup/pulldown resistors to the gpsim modules (idea from SET)
+	- Numerous patches from from (SET) Salvador mailto:salvador@inti.gov.ar
+	- SET - added "frequency" command
+	- SET - Added time field to the gui status bar.
 
 From Salvador Eduardo Tropea mailto:salvador@inti.gov.ar
 * Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps

@@ -38,6 +38,7 @@ cmd_module c_module;
 #define CMD_MOD_DUMP    3
 #define CMD_MOD_LIB     4
 #define CMD_MOD_PINS    5
+#define CMD_MOD_SET     6
 
 
 static cmd_options cmd_module_options[] =
@@ -48,6 +49,7 @@ static cmd_options cmd_module_options[] =
   "pins",      CMD_MOD_PINS,    OPT_TT_STRING,
   "library",   CMD_MOD_LIB ,    OPT_TT_STRING,
   "lib",       CMD_MOD_LIB ,    OPT_TT_STRING,
+  "set",       CMD_MOD_SET ,    OPT_TT_STRING,
   NULL,0,0
 };
 
@@ -60,7 +62,7 @@ cmd_module::cmd_module(void)
 
   long_doc = string (
 "module [ [load module_type [module_name]] | [lib lib_name] | [list] | \n\
-[[dump | pins] module_name] ]\
+[[dump | pins] module_name] ] | [set module_name attribute value]\
 \n\tIf no options are specified, then the currently defined module(s)\
 \n\twill be displayed. This is the same as the `module list' command.\
 \n\tThe `module load lib_name' tells gpsim to search for the module\
@@ -72,7 +74,7 @@ cmd_module::cmd_module(void)
 \n\t  module module_type module_name\
 \n\twhere module_type refers to a specific module in a module library\
 \n\tand module_name is the user name assigned to it.\
-\n\tInformation about a module can be displayed by the commad\
+\n\tInformation about a module can be displayed by the command\
 \n\t  module module_name [dump | pins]
 \n\twhere module_name is the name that you assigned when the module\
 \n\twas instantiated. The optional dump and pins identifiers specify\
@@ -84,7 +86,8 @@ cmd_module::cmd_module(void)
 \n\tmodule load lcd my_lcd      // Create an instance of an 'lcd'\
 \n\tmodule pins my_lcd          // Display the pin states of an instantiated module\
 \n\tmodule load lcd lcd2x20     // Create a new module.\
-\n\tmodule load led start_light // and another.\
+\n\tmodule load pullup R1       // and another.\
+\n\tmodule set R1 resistance 10e3 // change an attribute.
 \n");
 
   op = cmd_module_options; 
@@ -151,7 +154,7 @@ void cmd_module::module(cmd_options_str *cos)
 }
 
 
-void cmd_module::module(cmd_options_str *cos, char * module_new_name)
+void cmd_module::module(cmd_options_str *cos, char * op1)
 {
 
   switch(cos->co->value)
@@ -162,10 +165,18 @@ void cmd_module::module(cmd_options_str *cos, char * module_new_name)
 
       if(verbose)
 	cout << "module command got the module " << cos->str << " named " 
-	     << module_new_name << '\n';
+	     << op1 << '\n';
 
-      module_load_module( cos->str,  module_new_name);
+      module_load_module( cos->str,  op1);
 
+      break;
+
+    case CMD_MOD_SET:
+      cout << "module set command :  module name = " << cos->str <<'\n';
+      if(op1)
+	cout << "   option1 = " << op1 <<'\n';
+
+      module_set_attr(cos->str,op1,NULL);
       break;
 
     default:
@@ -173,5 +184,27 @@ void cmd_module::module(cmd_options_str *cos, char * module_new_name)
     }
 
 
+}
+
+void  cmd_module::module(cmd_options_str *cos, char *op1, char *op2)
+{
+
+  switch(cos->co->value)
+    {
+
+    case CMD_MOD_SET:
+      cout << "module set command :  module name = " << cos->str <<'\n';
+      if(op1)
+	cout << "   option1 = " << op1 <<'\n';
+
+      if(op2)
+	cout << "   option2 = " << op2 <<'\n';
+
+      module_set_attr(cos->str,op1,op2);
+      break;
+
+    default:
+      cout << "Warning, ignoring module command\n";
+    }
 }
 

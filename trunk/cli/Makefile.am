@@ -14,6 +14,7 @@ libgpsimcli_la_SOURCES = \
 	cmd_disasm.cc \
 	cmd_dump.cc \
 	cmd_echo.cc \
+	cmd_frequency.cc \
 	cmd_help.cc \
 	cmd_list.cc \
 	cmd_load.cc \
@@ -36,7 +37,7 @@ libgpsimcli_la_SOURCES = \
 	command.h cmd_break.h cmd_echo.h cmd_module.h cmd_node.h cmd_run.h cmd_trace.h \
 	input.h cmd_clear.h cmd_help.h cmd_processor.h cmd_set.h cmd_step.h \
 	cmd_version.h misc.h cmd_disasm.h  cmd_list.h  cmd_quit.h \
-	cmd_stimulus.h cmd_x.h symbol_t.h
+	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h
 
 
 YFLAGS = -dvt
