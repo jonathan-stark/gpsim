@@ -1,4 +1,8 @@
 2004-09-02 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_macro.cc:
+	Clarified the help description for the macro command.
+	
+2004-09-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc, cli/cmd_macro.h, cli/scan.h, cli/scan.ll: 
 	Completed support for parameterized macros
 

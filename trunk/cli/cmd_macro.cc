@@ -248,7 +248,8 @@ cmd_macro::cmd_macro(void)
 		       "x regs\n"
 		       "endm\n\n"
 		       "Invoke by\n\n"
-		       "gpsim> s 5 1:10\n"
+		       "gpsim> s 5, 1:10\n"
+		       " (note that the parameters must be separated by commas)\n"
 );
 
   op = cmd_macro_options; 
