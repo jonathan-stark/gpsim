@@ -145,6 +145,9 @@
 				RelativePath=".\cod.cc">
 			</File>
 			<File
+				RelativePath=".\eeprom.cc">
+			</File>
+			<File
 				RelativePath=".\fopen-path.cc">
 			</File>
 			<File
@@ -173,6 +176,9 @@
 			</File>
 			<File
 				RelativePath=".\init.cc">
+			</File>
+			<File
+				RelativePath=".\intcon.cc">
 			</File>
 			<File
 				RelativePath=".\interface.cc">
@@ -224,6 +230,9 @@
 			</File>
 			<File
 				RelativePath=".\pic-registers.cc">
+			</File>
+			<File
+				RelativePath=".\pie.cc">
 			</File>
 			<File
 				RelativePath=".\processor.cc">
@@ -317,6 +326,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\eeprom.h">
+			</File>
+			<File
 				RelativePath=".\fopen-path.h">
 			</File>
 			<File
@@ -333,6 +345,9 @@
 			</File>
 			<File
 				RelativePath=".\icd.h">
+			</File>
+			<File
+				RelativePath=".\intcon.h">
 			</File>
 			<File
 				RelativePath=".\interface.h">
@@ -390,6 +405,12 @@
 			</File>
 			<File
 				RelativePath=".\picdis.h">
+			</File>
+			<File
+				RelativePath=".\pie.h">
+			</File>
+			<File
+				RelativePath=".\pir.h">
 			</File>
 			<File
 				RelativePath=".\processor.h">
