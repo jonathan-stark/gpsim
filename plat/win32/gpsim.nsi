@@ -369,8 +369,7 @@ Function CreateBatFile
   FileOpen $0 "$INSTDIR\${PRODUCT_NAME}.bat$\r$\n" w
   FileWrite $0 "@echo off$\r$\n"
   FileWrite $0 "set PATH=$INSTDIR\bin;%PATH$\r$\n"
-  FileWrite $0 "cd $INSTDIR$\r$\n"
-  FileWrite $0 "bin\${PRODUCT_NAME}$\r$\n"
+  FileWrite $0 "$INSTDIR\bin\${PRODUCT_NAME}$\r$\n"
   FileClose $0
 
   Pop $0
