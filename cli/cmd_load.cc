@@ -78,13 +78,13 @@ void cmd_load::load(int bit_flag,const char *filename)
     {
     case 1:
       if(have_cpu(1))
-	{
-	  if(verbose)
-	    cout << "cmd_load::load hex file " << filename << '\n';
-	  cpu->load_hex(filename);
-	}
+      {
+	      if(verbose)
+	        cout << "cmd_load::load hex file " << filename << '\n';
+	      cpu->load_hex(filename);
+      }
       else
-	cout << " No cpu has been selected\n";
+        cout << " No cpu has been selected\n";
       break;
 
     case 2:
