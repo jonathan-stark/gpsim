@@ -77,16 +77,6 @@ void  initialization_is_complete(void);
    * they may be called from "C" code as well as from C++
    */
 
-char *gpsim_get_register_name(unsigned int processor_id, 
-			      REGISTER_TYPE type, 
-			      unsigned int register_number);
-unsigned int gpsim_get_register_value(unsigned int processor_id, 
-				      REGISTER_TYPE type, 
-				      unsigned int register_number);
-void  gpsim_put_register_value(unsigned int processor_id, 
-			       REGISTER_TYPE type, 
-			       unsigned int register_number, 
-			       unsigned int register_value);
 
 #define SYMBOL_NAME_LEN 32
 typedef struct _sym
@@ -96,10 +86,9 @@ typedef struct _sym
     int value;
 } sym;
 
-  gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  void gpsim_symbol_rewind(unsigned int processor_id);
-  sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
+  //---------------------------------------------------------------------------
+  // processor functions
+  //---------------------------------------------------------------------------
   char *gpsim_processor_get_name(unsigned int processor_id);
   unsigned int gpsim_get_pc_value(unsigned int processor_id);
   void  gpsim_put_pc_value(unsigned int processor_id, unsigned int pc_value);
@@ -109,18 +98,6 @@ typedef struct _sym
   guint64  gpsim_get_cycles(unsigned int processor_id);
   guint64  gpsim_get_update_rate(void);
   void     gpsim_set_update_rate(guint64);
-  unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
-  unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
-  unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value);
-  unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int value);
-  unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
-  unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned int address);
-  void  gpsim_assign_program_xref(unsigned int processor_id, unsigned int address, gpointer xref);
-  void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int reg_number, gpointer xref);
-  void  gpsim_assign_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int reg_number, gpointer xref);
   void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref);
   void gpsim_step(unsigned int processor_id, unsigned int steps);
   void gpsim_step_over(unsigned int processor_id);
@@ -129,16 +106,11 @@ typedef struct _sym
   void gpsim_reset(unsigned int processor_id);
   void gpsim_return(unsigned int processor_id);
   void gpsim_run_to_address(unsigned int processor_id, unsigned int address);
-  void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address);
-  void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id, unsigned int line);
-  unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsigned int file_id, unsigned int line);
-  unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address);
-  struct file_context * gpsim_get_file_context(unsigned int processor_id, unsigned int file_id);
-  unsigned int gpsim_get_src_line(unsigned int processor_id, unsigned int address);
-  unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
-  char *gpsim_get_opcode_name(unsigned int processor_id, unsigned int address, char *buffer);
-  unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address);
-  void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode);
+
+
+  //---------------------------------------------------------------------------
+  // misc gpsim functions
+  //---------------------------------------------------------------------------
   gpointer gpsim_set_cyclic_break_point( unsigned int processor_id, 
 				   void (*interface_callback)(gpointer), 
 				   gpointer interface_callback_data,
@@ -147,17 +119,129 @@ typedef struct _sym
 					  gpointer interface_callback_data,
 					  guint64 cycle);
   int gpsim_open(unsigned int processor_id, char *file);
+  unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
+  unsigned int gpsim_get_file_id(unsigned int processor_id,
+				 unsigned int address);
+  struct file_context * gpsim_get_file_context(unsigned int processor_id,
+					       unsigned int file_id);
   char *gpsim_get_version(char *dest, int max_len);
+
+  
+  //---------------------------------------------------------------------------
+  // symbol functions
+  //---------------------------------------------------------------------------
+  void gpsim_symbol_rewind(unsigned int processor_id);
+  sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
+
+
+  //---------------------------------------------------------------------------
+  // RAM/EEPROM memory functions
+  //---------------------------------------------------------------------------
+  unsigned int gpsim_get_register_memory_size(unsigned int processor_id,
+					      REGISTER_TYPE type);
+  char *gpsim_get_register_name(unsigned int processor_id,
+				REGISTER_TYPE type,
+				unsigned int register_number);
+  unsigned int gpsim_get_register_value(unsigned int processor_id,
+					REGISTER_TYPE type,
+					unsigned int register_number);
+  void  gpsim_put_register_value(unsigned int processor_id,
+				 REGISTER_TYPE type,
+				 unsigned int register_number,
+				 unsigned int register_value);
+  unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id,
+					REGISTER_TYPE type,
+					unsigned int register_number);
+  unsigned int gpsim_reg_set_read_breakpoint(unsigned int processor_id,
+					     REGISTER_TYPE type,
+					     unsigned int register_number);
+  unsigned int gpsim_reg_set_write_breakpoint(unsigned int processor_id,
+					      REGISTER_TYPE type,
+					      unsigned int register_number);
+  unsigned int gpsim_reg_set_read_value_breakpoint(unsigned int processor_id,
+						   REGISTER_TYPE type,
+						   unsigned int register_number,
+						   unsigned int value);
+  unsigned int gpsim_reg_set_write_value_breakpoint(unsigned int processor_id,
+						    REGISTER_TYPE type,
+						    unsigned int register_number,
+						    unsigned int value);
+  unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id,
+					   REGISTER_TYPE type,
+					   unsigned int register_number);
+  gboolean gpsim_register_is_alias(unsigned int processor_id,
+				   REGISTER_TYPE type,
+				   unsigned int register_number);
+  gboolean gpsim_register_is_sfr(unsigned int processor_id,
+				 REGISTER_TYPE type,
+				 unsigned int register_number);
+  void  gpsim_clear_register_xref(unsigned int processor_id,
+				  REGISTER_TYPE type,
+				  unsigned int reg_number,
+				  gpointer xref);
+  void  gpsim_assign_register_xref(unsigned int processor_id,
+				   REGISTER_TYPE type,
+				   unsigned int reg_number,
+				   gpointer xref);
+
+  
+  //---------------------------------------------------------------------------
+  // program memory functions
+  //---------------------------------------------------------------------------
+  unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
+  unsigned int gpsim_address_has_breakpoint(unsigned int processor_id,
+					    unsigned int address);
+  unsigned int gpsim_address_has_changed(unsigned int processor_id,
+					 unsigned int address);
+  void  gpsim_assign_program_xref(unsigned int processor_id,
+				  unsigned int address,
+				  gpointer xref);
+  void gpsim_set_read_break_at_address(unsigned int processor_id,
+					  unsigned int address);
+  void gpsim_set_write_break_at_address(unsigned int processor_id,
+					  unsigned int address);
+  void gpsim_set_execute_break_at_address(unsigned int processor_id,
+					  unsigned int address);
+  void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
+					  unsigned int address);
+  void gpsim_toggle_break_at_address(unsigned int processor_id,
+				     unsigned int address);
+  void gpsim_toggle_break_at_line(unsigned int processor_id,
+				  unsigned int file_id,
+				  unsigned int line);
+  unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id,
+						   unsigned int file_id,
+						   unsigned int line);
+  char *gpsim_get_opcode_name(unsigned int processor_id,
+			      unsigned int address,
+			      char *buffer);
+  unsigned int gpsim_get_opcode(unsigned int processor_id,
+				unsigned int address);
+  void gpsim_put_opcode(unsigned int processor_id,
+			unsigned int address,
+			unsigned int opcode);
+  unsigned int gpsim_get_src_line(unsigned int processor_id,
+				  unsigned int address);
+
+
   //---------------------------------------------------------------------------
   // pin interface functions
   //---------------------------------------------------------------------------
-  void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointer xref);
+  void  gpsim_assign_pin_xref(unsigned int processor_id,
+			      unsigned int pin,
+			      gpointer xref);
   unsigned int  gpsim_package_pin_count(unsigned int processor_id);
-  char *gpsim_pin_get_name(unsigned int processor_id, unsigned int pin);
-  unsigned int  gpsim_pin_get_value(unsigned int processor_id, unsigned int pin);
-  void  gpsim_pin_toggle(unsigned int processor_id, unsigned int pin);
-  unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin);
-  void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned int new_dir);
+  char *gpsim_pin_get_name(unsigned int processor_id,
+			   unsigned int pin);
+  unsigned int  gpsim_pin_get_value(unsigned int processor_id,
+				    unsigned int pin);
+  void  gpsim_pin_toggle(unsigned int processor_id,
+			 unsigned int pin);
+  unsigned int  gpsim_pin_get_dir(unsigned int processor_id,
+				  unsigned int pin);
+  void  gpsim_pin_set_dir(unsigned int processor_id,
+			  unsigned int pin,
+			  unsigned int new_dir);
 
 
   //---------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 #include "../src/gpsim_def.h"
 
 #define SBAW_NRFILES 8 // Max number of source files
-#define MAX_BREAKPOINTS 32
+//#define MAX_BREAKPOINTS 32
 
 //------------------------------------------------------------
 //
@@ -264,7 +264,8 @@ struct sa_entry{         // entry in the sa_xlate_list
 struct _SourceBrowserAsm_Window {
     SourceBrowser_Window sbw;
 
-    struct breakpoint_info breakpoint[MAX_BREAKPOINTS];
+    GList *breakpoints;
+//    struct breakpoint_info breakpoint[MAX_BREAKPOINTS];
     int layout_offset;
 
     // We need one of theese for each source file
@@ -320,6 +321,7 @@ struct _SourceBrowserOpcode_Window {
     GtkWidget *entry;
     GtkWidget *label;
     GtkWidget *pcwidget;
+    GtkWidget *popup_menu;
 
 
     int *memory;
@@ -432,6 +434,8 @@ extern GdkColor sfr_bg_color;
 extern GdkColor high_output_color;
 extern GdkColor low_output_color;
 extern GdkColor black_color;
+extern GdkColor pm_has_changed_color;
+extern GdkColor normal_pm_bg_color;
 
 extern GtkStyle *normal_style;
 extern GtkStyle *current_line_number_style;

@@ -241,16 +241,16 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 
 static GtkWidget *
-build_menu(GtkWidget *sheet, Register_Window *rw)
+build_menu(Register_Window *rw)
 {
   GtkWidget *menu;
   GtkWidget *item;
 //  GtkAccelGroup *accel_group;
   int i;
 
-  if(sheet==NULL || rw==NULL)
+  if(rw==NULL)
   {
-      printf("Warning build_menu(%x,%x)\n",(unsigned int)sheet,(unsigned int)rw);
+      printf("Warning build_menu(%x)\n",(unsigned int)rw);
       return NULL;
   }
     
@@ -1304,8 +1304,8 @@ BuildRegisterWindow(Register_Window *rw)
     
   rw->register_sheet = GTK_SHEET(register_sheet);
 
-    /* create popupmenu */
-    rw->popup_menu=build_menu(GTK_WIDGET(register_sheet),rw);
+  /* create popupmenu */
+  rw->popup_menu=build_menu(rw);
 
   build_entry_bar(main_vbox, rw);
 

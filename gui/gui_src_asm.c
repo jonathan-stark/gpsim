@@ -327,6 +327,8 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 
   int i,id=-1;
   struct sa_entry *e;
+  struct breakpoint_info *bpi;
+  GList *iter;
   
   assert(sbaw);
 
@@ -335,7 +337,7 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
   assert(address>=0);
 
   if(!sbaw->source_loaded) return;
-  
+
   for(i=0;i<SBAW_NRFILES;i++)
   {
       if(sbaw->pageindex_to_fileid[i]==gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address))
@@ -364,42 +366,50 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
       puts("This is odd!?");
       return;
   }
-  
-  for(i=0;i<MAX_BREAKPOINTS;i++)
-  {  // FIXME, reuse pixmaps or not?
-      if(sbaw->breakpoint[i].widget==NULL)
-	  break;
-      if(sbaw->breakpoint[i].address==address)
-	  break;
+
+  // Find widget from address, and remove if found
+  iter=sbaw->breakpoints;
+  while(iter!=NULL)
+  {
+      bpi=(struct breakpoint_info*)iter->data;
+      
+      if(bpi->address==address)
+      {
+	  // found one
+	  if(!gpsim_address_has_breakpoint( ((GUI_Object*)sbaw)->gp->pic_id, address))
+	  {
+	      // remove the breakpoint
+	      gtk_widget_destroy(bpi->widget);
+	      free( (struct breakpoint_info*)iter->data );
+	      sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
+	  }
+
+	  // We found the address, and removed the
+	  // breakpoint if it's not still there
+
+	  // we can return
+	  return;
+      }
+      iter=iter->next;
   }
-  if(i>=MAX_BREAKPOINTS)
-      return;
+
+  // We didn't find a breakpoint widget for this address
   
   if( gpsim_address_has_breakpoint( ((GUI_Object*)sbaw)->gp->pic_id, address))
   {
-      if(sbaw->breakpoint[i].widget==NULL)
-      {
-	  sbaw->breakpoint[i].widget = gtk_pixmap_new(sbaw->pixmap_break,sbaw->mask);
-	  gtk_layout_put(GTK_LAYOUT(sbaw->source_layout[id]),
-			 sbaw->breakpoint[i].widget,
-			 0,
-			 PIXMAP_POS(sbaw,e)
-			);
-      }
-      else
-      {
-	  gtk_layout_move(GTK_LAYOUT(sbaw->source_layout[id]),
-			  sbaw->breakpoint[i].widget,
-			  0,
-			  PIXMAP_POS(sbaw,e)
-			 );
-      }
-      sbaw->breakpoint[i].address=address;
-      gtk_widget_show(sbaw->breakpoint[i].widget);
-  }
-  else if(sbaw->breakpoint[i].widget!=NULL)
-  {
-      gtk_widget_hide(sbaw->breakpoint[i].widget);
+      // There has appeared a new breakpoint, so we
+      // append it to sbaw->breakpoints;
+
+      bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
+      bpi->address=address;
+      bpi->widget = gtk_pixmap_new(sbaw->pixmap_break,sbaw->mask);
+      gtk_layout_put(GTK_LAYOUT(sbaw->source_layout[id]),
+		     bpi->widget,
+		     0,
+		     PIXMAP_POS(sbaw,e)
+		    );
+      gtk_widget_show(bpi->widget);
+      sbaw->breakpoints=g_list_append(sbaw->breakpoints,bpi);
   }
 }
 
@@ -684,7 +694,8 @@ static void marker_cb(GtkWidget *w1,
 {
     static int dragbreak=0;
     static int dragstartline;
-    static int dragindex;
+    struct breakpoint_info *bpi;
+    struct breakpoint_info *dragbpi;
     static int button_pressed;
     static int button_pressed_y;
     static int button_pressed_x;
@@ -700,6 +711,8 @@ static void marker_cb(GtkWidget *w1,
     int mindiff;
     int i;
     int diff;
+    
+    GList *iter;
 
     static int timeout_tag=-1;
 
@@ -722,24 +735,31 @@ static void marker_cb(GtkWidget *w1,
 		// find out if we want to start drag of a breakpoint
 		i=0;
 		mindiff=1000000; // large distance
-		dragindex=-1;   // start with invalid index
-		while(sbaw->breakpoint[i].widget != NULL)
+		dragbpi=NULL;   // start with invalid index
+
+		// loop all breakpoints, and save the one that is closest as dragbpi
+		iter=sbaw->breakpoints;
+		while(iter!=NULL)
 		{
-		    diff = button_pressed_y - (sbaw->breakpoint[i].widget->allocation.y+PIXMAP_SIZE/2);
+		    bpi=(struct breakpoint_info*)iter->data;
+		    
+		    diff = button_pressed_y - (bpi->widget->allocation.y+PIXMAP_SIZE/2);
 		    if(abs(diff) < abs(mindiff))
 		    {
 			mindiff=diff;
-			dragindex=i;
+			dragbpi=(struct breakpoint_info *)iter->data;
 		    }
-		    i++;
+		    
+		    iter=iter->next;
 		}
-		if(mindiff<PIXMAP_SIZE/2)
-		{  // mouse hit breakpoint pixmap with index dragindex
+		
+		if(dragbpi!=NULL && mindiff<PIXMAP_SIZE/2)
+		{  // mouse hit breakpoint pixmap in dragbpi
 
 		    // pixel = (position of pixmap in window)
 		    //         - (constant) + (constant)
 		    //         + (top of window, counting from top of text)
-		    pixel = sbaw->breakpoint[dragindex].widget->allocation.y-
+		    pixel = dragbpi->widget->allocation.y-
 			sbaw->layout_offset+PIXMAP_SIZE/2+
 			(int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
 
@@ -749,7 +769,7 @@ static void marker_cb(GtkWidget *w1,
 		    dragstartline = gui_pixel_to_entry(id,pixel)->line;
 
 		    dragbreak=1;  // start drag
-		    dragwidget = sbaw->breakpoint[dragindex].widget;
+		    dragwidget = dragbpi->widget;
 		    dragwidget_x = 0;
 		    dragwidget_oldy=dragwidget->allocation.y+
 			    (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
@@ -981,6 +1001,7 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     int line=0;
     struct sa_entry *entry;
     GList *iter;
+    struct breakpoint_info *bpi;
     
     // get a manageable pointer to the processor
     pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
@@ -1004,15 +1025,20 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	//	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }
     sa_xlate_list[id]=NULL;
-    
 
-    for(i=0;i<MAX_BREAKPOINTS;i++)
-	if(sbaw->breakpoint[i].widget!=NULL)
-	{
-	    sbaw->breakpoint[i].address=-1;
-	    gtk_widget_hide(sbaw->breakpoint[i].widget);
-	    sbaw->breakpoint[i].widget=NULL;
-	}
+    // remove all breakpoints
+    iter=sbaw->breakpoints;
+    while(iter!=NULL)
+    {
+	bpi=(struct breakpoint_info*)iter->data;
+      
+	// remove the breakpoint
+	gtk_widget_destroy(bpi->widget);
+	free( (struct breakpoint_info*)iter->data );
+	sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
+
+	iter=iter->next;
+    }
 
 
     totallinesheight=0;
@@ -1218,6 +1244,8 @@ void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor 
     int i;
 
     struct breakpoint_info breakpoint_false={-1,NULL};
+    GList *iter;
+    struct breakpoint_info *bpi;
     
     
     sbaw->load_source=0;
@@ -1245,9 +1273,21 @@ void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor 
 //    gtk_widget_remove(sbaw->notebook);
 //    sbaw->notebook
 
-  for(i=0;i<MAX_BREAKPOINTS;i++)
-      sbaw->breakpoint[i] = breakpoint_false;
-  sbaw->layout_offset=-1;
+    // remove all breakpoints
+    iter=sbaw->breakpoints;
+    while(iter!=NULL)
+    {
+	bpi=(struct breakpoint_info*)iter->data;
+      
+	// remove the breakpoint
+	gtk_widget_destroy(bpi->widget);
+	free( (struct breakpoint_info*)iter->data );
+	sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
+
+	iter=iter->next;
+    }
+
+    sbaw->layout_offset=-1;
 }
 
 void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp)
@@ -1863,9 +1903,9 @@ int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
 
   for(i=0;i<SBAW_NRFILES;i++)
       sbaw->notebook_child[i]=NULL;
+
+  sbaw->breakpoints=NULL;
   
-  for(i=0;i<MAX_BREAKPOINTS;i++)
-      sbaw->breakpoint[i] = breakpoint_false;
   sbaw->layout_offset=-1;
 
     
