@@ -589,7 +589,7 @@ static void realtime_callback  (void *p)
 	// we are simulating too fast
 
 	if(-diff/4>1000)
-	    period-=500;
+	    period-=-diff/4/500;
 	if(period<1)
             period=1;
 
@@ -600,14 +600,14 @@ static void realtime_callback  (void *p)
     {
 
 	if(diff/4>1000)
-	    period+=50;
-	if(period>1000)
-            period=1000;
+	    period+=diff/4/500;
+	if(period>10000)
+            period=10000;
 
-	if(diff/4>100000)
+	if(diff/4>1000000)
 	{
 	    // we are simulating too slow
-	    if(warntimer<10)
+	    if(warntimer<20)
 		warntimer++;
 	    else
 	    {
@@ -619,7 +619,9 @@ static void realtime_callback  (void *p)
             warntimer=0;
     }
 
-    rtcbp->delta_cycles=100*period;
+    rtcbp->delta_cycles=100*period*rtcbp->pic->frequency/4000000;
+    if(rtcbp->delta_cycles<1)
+	    rtcbp->delta_cycles=1;
 
     // Look at realtime_mode_with_gui and update the gui if true
     if(realtime_mode_with_gui)
