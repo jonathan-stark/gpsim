@@ -43,12 +43,12 @@ void ADDLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = (old_value = cpu->W->value) + L;
+  new_value = (old_value = cpu14->W->value) + L;
 
-  cpu->W->put(new_value & 0xff);
-  cpu->status->put_Z_C_DC(new_value, old_value, L);
+  cpu14->W->put(new_value & 0xff);
+  cpu14->status->put_Z_C_DC(new_value, old_value, L);
 
-  cpu->pc->increment();
+  cpu14->pc->increment();
 
 }
 
@@ -70,7 +70,7 @@ void RETFIE::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->pc->new_address(cpu->stack->pop());
+  cpu14->pc->new_address(cpu14->stack->pop());
 
   cpu14->intcon->set_gie();
 }
@@ -91,7 +91,7 @@ void RETURN::execute(void)
 
   trace.instruction(opcode);
 
-  cpu->pc->new_address(cpu->stack->pop());
+  cpu14->pc->new_address(cpu14->stack->pop());
 
 }
 
@@ -112,13 +112,13 @@ void SUBLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = L - (old_value = cpu->W->value);
+  new_value = L - (old_value = cpu14->W->value);
 
-  cpu->W->put(new_value & 0xff);
+  cpu14->W->put(new_value & 0xff);
 
-  cpu->status->put_Z_C_DC_for_sub(new_value, old_value, L);
+  cpu14->status->put_Z_C_DC_for_sub(new_value, old_value, L);
 
-  cpu->pc->increment();
+  cpu14->pc->increment();
 
 }
 

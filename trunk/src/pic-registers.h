@@ -26,15 +26,21 @@ class pic_processor;
 class symbol;
 class XrefObject;
 
+#include "gpsim_classes.h"
+#include "breakpoints.h"
+#include "trace.h"
+
+
 //---------------------------------------------------------
 // Base class for a file register.
-class file_register
+class Register
 {
 public:
 
   enum REGISTER_TYPES
   {
     INVALID_REGISTER,
+    GENERIC_REGISTER,
     FILE_REGISTER,
     SFR_REGISTER,
     BP_REGISTER
@@ -54,13 +60,16 @@ public:
   unsigned int alias_mask;
 
   unsigned int por_value;  // power on reset value
+
+  unsigned int bit_mask;   // = 7 for 8-bit registers, = 15 for 16-bit registers.
+
   symbol *symbol_alias;
-  pic_processor *cpu;
+  Processor *cpu;
 
   guint64 read_access_count;
   guint64 write_access_count;
 
-  //  #ifdef HAVE_GUI
+
   // If we are linking with a gui, then here are a
   // few declarations that are used to send data to it.
   // This is essentially a singly-linked list of pointers
@@ -70,41 +79,34 @@ public:
   
   XrefObject *xref;
 
-//    GSList *gui_xref;
-//    void assign_xref(gpointer);
-  //  #endif
 
-  file_register(void);
-  ~file_register(void);
-  virtual void put(unsigned int new_value);
-    /*{
-    value = new_value;
-    trace.register_write(address,value);
-    }*/
+  Register(void);
+  ~Register(void);
+
+
+  // Register access functions
   virtual unsigned int get(void);
-    /*  {
-      trace.register_read(address,value);
-      return(value);
-      }*/
+  virtual void put(unsigned int new_value);
 
-  /* same as put(), but some extra stuff like interfacing
-   * to the gui is done. (It's more efficient than burdening
-   * the run time performance with (unnecessary) gui crap.)
+  
+
+  /* put_value is the same as put(), but some extra stuff like
+   * interfacing to the gui is done. (It's more efficient than
+   * burdening the run time performance with (unnecessary) gui
+   * crap.)
    */
 
   virtual void put_value(unsigned int new_value);
 
   /* same as get(), but no trace is performed */
-  virtual unsigned int get_value(void)
-    {
-      return(value);
-    }
+  virtual unsigned int get_value(void) { return(value); }
 
 
   virtual char *name(void) { return(name_str1);};
   virtual void new_name(char *);
-  virtual REGISTER_TYPES isa(void) {return FILE_REGISTER;};
+  virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
   virtual void reset(RESET_TYPE r) { return; };
+
   /* 
      setbit functions are not really intended for general purpose
      registers (although they can be). Instead, they provide place
@@ -121,6 +123,41 @@ public:
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
 };
+
+//------------------------------------------------------------
+class file_register : public Register
+{
+ public:
+
+  file_register(void);
+  ~file_register(void);
+
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual char *name(void) { return(name_str1);};
+  virtual void new_name(char *);
+  virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
+  virtual void reset(RESET_TYPE r) { return; };
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit_value(unsigned int bit_number, bool new_value);
+  virtual int get_bit(unsigned int bit_number);
+  virtual int get_bit_voltage(unsigned int bit_number);
+
+};
+//---------------------------------------------------------
+// define a special 'invalid' register class. Accessess to
+// to this class' value get 0
+
+class invalid_file_register : public file_register
+{
+public:
+
+  void put(unsigned int new_value);
+  unsigned int get(void);
+  invalid_file_register(unsigned int at_address);
+  virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
+};
+
 
 //---------------------------------------------------------
 // Base class for a special function register.

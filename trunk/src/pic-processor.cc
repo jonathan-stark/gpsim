@@ -155,7 +155,7 @@ public:
   pic_processor * (*cpu_constructor) (void);
 
   // The processor name (plus upto three aliases).
-  const int nProcessorNames;
+  #define nProcessorNames 4
   char *names[nProcessorNames];
 
 
@@ -698,79 +698,6 @@ RealTimeBreakPoint realtime_cbp;
 
 //-------------------------------------------------------------------
 //
-// run  -- Begin simulating and don't stop until there is a break.
-//
-void pic_processor::run (void)
-{
-  if(use_icd)
-  {
-      simulation_mode=RUNNING;
-      icd_run();
-      while(!icd_stopped())
-      {
-#ifdef HAVE_GUI
-	  if(use_gui)
-	      gui_refresh();
-#endif
-      }
-      simulation_mode=STOPPED;
-      disassemble(pc->get_value(), pc->get_value());
-      gi.simulation_has_stopped();
-      return;
-  }
-
-
-  if(simulation_mode != STOPPED) {
-    if(verbose)
-      cout << "Ignoring run request because simulation is not stopped\n";
-    return;
-  }
-
-  simulation_mode = RUNNING;
-
-  if(realtime_mode)
-    realtime_cbp.start(active_cpu);
-
-  // If the first instruction we're simulating is a break point, then ignore it.
-
-  if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
-    {
-      simulation_start_cycle = cycles.value;
-    }
-
-  do
-    {
-      do
-	{
-	  program_memory[pc->value]->execute();
-	} while(!bp.global_break);
-
-      if(bp.have_interrupt())
-	interrupt();
-
-      if(bp.have_sleep())
-	sleep();
-
-      if(bp.have_pm_write())
-	pm_write();
-
-    } while(!bp.global_break);
-
-  if(realtime_mode)
-    realtime_cbp.stop();
-
-  bp.clear_global();
-  trace.cycle_counter(cycles.value);
-  trace.dump_last_instruction();
-
-  simulation_mode = STOPPED;
-
-  gi.simulation_has_stopped();
-
-}
-
-//-------------------------------------------------------------------
-//
 // step - Simulate one (or more) instructions. If a breakpoint is set
 // at the current PC-> 'step' will go right through it. (That's supposed
 // to be a feature.)
@@ -792,45 +719,8 @@ void pic_processor::step (unsigned int steps)
       return;
   }
 
-  if(simulation_mode != STOPPED) {
-    if(verbose)
-      cout << "Ignoring step request because simulation is not stopped\n";
-    return;
-  }
 
-  simulation_mode = SINGLE_STEPPING;
-  do
-    {
-
-      if(bp.have_sleep() || bp.have_pm_write())
-	{
-	  // If we are sleeping or writing to the program memory (18cxxx only)
-	  // then step one cycle - but don't execute any code  
-
-	  cycles.increment();
-	  trace.dump(1);
-
-	}
-      else if(bp.have_interrupt())
-	{
-	  interrupt();
-	}
-      else
-	{
-
-	  program_memory[pc->value]->execute();
-	  trace.cycle_counter(cycles.value);
-	  trace.dump_last_instruction();
-
-	} 
-
-    }
-  while(!bp.have_halt() && --steps>0);
-
-  bp.clear_halt();
-  simulation_mode = STOPPED;
-
-  gi.simulation_has_stopped();
+  Processor::step(steps);
 }
 
 //-------------------------------------------------------------------
@@ -872,26 +762,6 @@ void pic_processor::step_over (void)
 
 }
 
-
-//-------------------------------------------------------------------
-
-void pic_processor::run_to_address (unsigned int destination)
-{ 
-  
-  unsigned int saved_pc = pc->value;
-  
-  if(simulation_mode != STOPPED) {
-    if(verbose)
-      cout << "Ignoring run-to-address request because simulation is not stopped\n";
-    return;
-  }
-  // Set a temporary break point
-  
-  unsigned int bp_num = bp.set_execution_break(this, destination);
-  run();
-  bp.clear(bp_num);
-     
-}    
 
 
 //-------------------------------------------------------------------
@@ -1195,149 +1065,6 @@ void pic_processor::create (void)
 }
 
 //-------------------------------------------------------------------
-//    add_file_registers
-//
-//  The purpose of this member function is to allocate memory for the
-// general purpose registers.
-//
-
-void pic_processor::add_file_registers(unsigned int start_address, unsigned int end_address, unsigned int alias_offset)
-{
-
-  int j;
-
-  // Initialize the General Purpose Registers:
-
-  char str[100];
-  for (j = start_address; j <= end_address; j++)
-    {
-      registers[j] = new file_register;
-      if (alias_offset) {
-	registers[j + alias_offset] = registers[j];
-	registers[j]->alias_mask = alias_offset;
-      } else
-	registers[j]->alias_mask = 0;
-
-      registers[j]->address = j;
-      registers[j]->break_point = 0;
-      registers[j]->value = 0;
-      registers[j]->symbol_alias = NULL;
-
-      //The default register name is simply its address
-      sprintf (str, "0x%02x", j);
-      registers[j]->new_name(str);
-
-      registers[j]->cpu = this;
-
-    }
-
-}
-
-//-------------------------------------------------------------------
-//    delete_file_registers
-//
-//  The purpose of this member function is to delete file registers
-//
-
-void pic_processor::delete_file_registers(unsigned int start_address, unsigned int end_address)
-{
-
-#define SMALLEST_ALIAS_DISTANCE  32
-  int i,j;
-
-
-  for (j = start_address; j <= end_address; j++) {
-    if(registers[j]) {
-
-      if(registers[j]->alias_mask) {
-	// This registers appears in more than one place. Let's find all
-	// of its aliases.
-	for(i=SMALLEST_ALIAS_DISTANCE; i<register_memory_size(); i+=SMALLEST_ALIAS_DISTANCE)
-	  if(registers[j] == registers[i])
-	    registers[i] = NULL;
-      }
-
-      delete registers[j];
-      registers[j] = NULL;
-    }
-  }
-
-}
-
-//-------------------------------------------------------------------
-//
-// 
-//    alias_file_registers
-//
-//  The purpose of this member function is to alias the
-// general purpose registers.
-//
-
-void pic_processor::alias_file_registers(unsigned int start_address, unsigned int end_address, unsigned int alias_offset)
-{
-
-  int j;
-
-  for (j = start_address; j <= end_address; j++)
-    {
-      if (alias_offset)
-	{
-	  registers[j + alias_offset] = registers[j];
-	  registers[j]->alias_mask = alias_offset;
-	}
-    }
-
-}
-
-//-------------------------------------------------------------------
-//
-//
-// create_invalid_registers
-//
-//   The purpose of this function is to complete the initialization
-// of the file register memory by placing an instance of an 'invalid
-// file register' at each 'invalid' memory location. Most of PIC's
-// do not use the entire address space available, so this routine
-// fills the voids.
-//
-
-void pic_processor::create_invalid_registers (void)
-{
-  int i;
-
-  if(verbose)
-    cout << "Creating invalid registers " << register_memory_size()<<"\n";
-
-  // Now, initialize any undefined register as an 'invalid register'
-  // Note, each invalid register is given its own object. This enables
-  // the simulation code to efficiently capture any invalid register
-  // access. Furthermore, it's possible to set break points on
-  // individual invalid file registers. By default, gpsim halts whenever
-  // there is an invalid file register access.
-
-  for (i = 0; i < register_memory_size(); i++)
-    {
-      if (NULL == registers[i])
-      {
-	  registers[i] = new invalid_file_register(i);
-	  registers[i]->address = 0;    // BAD_REGISTER;
-	  registers[i]->alias_mask = 0;
-	  registers[i]->value = 0;	// unimplemented registers are read as 0
-	  registers[i]->symbol_alias = NULL;
-
-	  registers[i]->cpu = this;
-	  //If we are linking with a gui, then initialize a cross referencing
-	  //pointer. This pointer is used to keep track of which gui window(s)
-	  //display the register. For invalid registers this should always be null.
-	  registers[i]->xref = NULL;
-
-	}
-    }
-
-}
-
-
-//-------------------------------------------------------------------
 //
 // add_sfr_register
 //
@@ -1388,40 +1115,12 @@ void pic_processor::init_program_memory (unsigned int memory_size)
   if(verbose)
     cout << "Initializing program memory: 0x"<<memory_size<<" words\n";
 
-  if ((memory_size-1) & memory_size)
-    {
-      cout << "*** WARNING *** memory_size should be of the form 2^N\n";
-
-      memory_size = (memory_size + ~memory_size) & MAX_PROGRAM_MEMORY;
-
-      cout << "gpsim is rounding up to memory_size = " << memory_size << '\n';
-
-    }
-
   // The memory_size_mask is used by the branching instructions 
 
   pc->memory_size_mask = memory_size - 1;
-
-  // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
-  // pointers of type 'instruction'. This is where the simulated instructions
-  // are stored.
-
-  program_memory = (instruction **) new char[sizeof (instruction *) * memory_size];
-
   pma.cpu = this;
 
-  if (program_memory == NULL)
-    {
-      cout << "*** ERROR *** I can't get enough memory for the PIC program space\n";
-      exit (1);
-    }
-
-
-  for (int i = 0; i < memory_size; i++)
-    {
-      program_memory[i] = &bad_instruction;
-      program_memory[i]->cpu = this;     // %%% FIX ME %%% 
-    }
+  Processor::init_program_memory(memory_size);
 }
 
 //-------------------------------------------------------------------
@@ -1484,70 +1183,6 @@ void pic_processor::create_symbols (void)
 
 }
 
-//-------------------------------------------------------------------
-void pic_processor::dump_registers (void)
-{
-  parse_string("dump");
-
-}
-
-//-------------------------------------------------------------------
-void pic_processor::attach_src_line(int address,int file_id,int sline,int lst_line)
-{
-
-  if(address < program_memory_size())
-    {
-      program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
-
-      if(sline > files[file_id].max_line)
-	files[file_id].max_line = sline;
-
-      if(lst_line+5 > files[lst_file_id].max_line)
-	files[lst_file_id].max_line = lst_line+5;
-
-    }
-
-}
-
-//-------------------------------------------------------------------
-// read_src_files - this routine will open all of the source files 
-//   associated with the project and associate their line numbers
-//   with the addresses of the opcodes they generated.
-//
-
-void pic_processor::read_src_files(void)
-{
-  // Are there any src files ?
-  for(int i=0; i<number_of_source_files; i++)
-    {
-
-      // did this src file generate any code?
-      if(files[i].max_line > 0)
-	{
-	  // Create an array whose index corresponds to the
-	  // line number of a source file line and whose data
-	  // is the offset (in bytes) from the beginning of the 
-	  // file. (e.g. files[3].line_seek[20] references the
-	  // 20th line of the third source file.)
-	  files[i].line_seek = new int[files[i].max_line+1];
-	  if( NULL == (files[i].file_ptr = fopen_path(files[i].name,"r")))
-	    continue;
-	  rewind(files[i].file_ptr);
-
-	  char buf[256],*s;
-	  files[i].line_seek[0] = 0;
-	  for(int j=1; j<=files[i].max_line; j++)
-	    {
-	      files[i].line_seek[j] = ftell(files[i].file_ptr);
-	      s = fgets(buf,256,files[i].file_ptr);
-	      if(s != buf)
-		break;
-	    }
-	}
-    }
-
-}
-
 
 //-------------------------------------------------------------------
 int pic_processor::find_closest_address_to_line(int file_id, int src_line)
@@ -1596,51 +1231,6 @@ int pic_processor::find_closest_address_to_hll_line(int file_id, int src_line)
 
 }
 
-//-------------------------------------------------------------------
-void pic_processor::set_break_at_address(int address)
-{
-  if( address >= 0)
-    {
-	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-	    bp.set_execution_break(this, address);
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::set_notify_at_address(int address, BreakCallBack *cb)
-{
-  if( address >= 0)
-    {
-	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-	{
-	    bp.set_notify_break(this, address, cb);
-	}
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::set_profile_start_at_address(int address, BreakCallBack *cb)
-{
-  if( address >= 0)
-    {
-	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-	{
-	    bp.set_profile_start_break(this, address, cb);
-	}
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::set_profile_stop_at_address(int address, BreakCallBack *cb)
-{
-  if( address >= 0)
-    {
-	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-	{
-	    bp.set_profile_stop_break(this, address, cb);
-	}
-    }
-}
 
 //-------------------------------------------------------------------
 instruction *pic_processor::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
@@ -1682,202 +1272,6 @@ instruction *pic_processor::find_instruction(int address, enum instruction::INST
     return NULL;
 }
 
-void pic_processor::clear_break_at_address(int address)
-{
-    instruction *instr;
-    int b;
-
-    if(program_memory_size()<=address)
-	return;
-
-    instr=find_instruction(address,instruction::BREAKPOINT_INSTRUCTION);
-    if(instr!=NULL)
-    {
-	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
-	bp.clear( b );
-    }
-    else
-    {
-	cout << "failed to clear execution break\n";
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::clear_notify_at_address(int address)
-{
-    instruction *instr;
-    int b;
-
-    if(program_memory_size()<=address)
-	return;
-
-    instr=find_instruction(address,instruction::NOTIFY_INSTRUCTION);
-    if(instr!=NULL)
-    {
-	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
-	bp.clear( b );
-    }
-    else
-    {
-	cout << "failed to clear execution break\n";
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::clear_profile_start_at_address(int address)
-{
-    instruction *instr;
-    int b;
-
-    if(program_memory_size()<=address)
-	return;
-
-    instr=find_instruction(address,instruction::PROFILE_START_INSTRUCTION);
-    if(instr!=NULL)
-    {
-	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
-	bp.clear( b );
-    }
-    else
-    {
-	cout << "failed to clear execution break\n";
-    }
-}
-
-//-------------------------------------------------------------------
-void pic_processor::clear_profile_stop_at_address(int address)
-{
-    instruction *instr;
-    int b;
-
-    if(program_memory_size()<=address)
-	return;
-
-    instr=find_instruction(address,instruction::PROFILE_STOP_INSTRUCTION);
-    if(instr!=NULL)
-    {
-	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
-	bp.clear( b );
-    }
-    else
-    {
-	cout << "failed to clear execution break\n";
-    }
-}
-
-//-------------------------------------------------------------------
-int pic_processor::address_has_break(int address)
-{
-    instruction *instr;
-    if(program_memory_size()<=address)
-	return 0;
-    instr=find_instruction(address,instruction::BREAKPOINT_INSTRUCTION);
-    if(instr!=NULL)
-        return 1;
-    return 0;
-}
-
-//-------------------------------------------------------------------
-int pic_processor::address_has_notify(int address)
-{
-    instruction *instr;
-    if(program_memory_size()<=address)
-	return 0;
-    instr=find_instruction(address,instruction::NOTIFY_INSTRUCTION);
-    if(instr!=NULL)
-        return 1;
-    return 0;
-}
-
-//-------------------------------------------------------------------
-int pic_processor::address_has_profile_start(int address)
-{
-    instruction *instr;
-    if(program_memory_size()<=address)
-	return 0;
-    instr=find_instruction(address,instruction::PROFILE_START_INSTRUCTION);
-    if(instr!=NULL)
-        return 1;
-    return 0;
-}
-
-//-------------------------------------------------------------------
-int pic_processor::address_has_profile_stop(int address)
-{
-    instruction *instr;
-    if(program_memory_size()<=address)
-	return 0;
-    instr=find_instruction(address,instruction::PROFILE_STOP_INSTRUCTION);
-    if(instr!=NULL)
-        return 1;
-    return 0;
-}
-
-
-//-------------------------------------------------------------------
-void pic_processor::toggle_break_at_address(int address)
-{
-    if(address_has_break(address))
-	clear_break_at_address(address);
-    else
-        set_break_at_address(address);
-}
-//-------------------------------------------------------------------
-
-void pic_processor::set_break_at_line(int file_id, int src_line)
-{
-  int address;
-
-  if( (address = find_closest_address_to_line(file_id, src_line)) >= 0)
-      set_break_at_address(address);
-}
-
-void pic_processor::clear_break_at_line(int file_id, int src_line)
-{
-
-  int address;
-
-  if( (address = find_closest_address_to_line(file_id, src_line)) >= 0)
-      clear_break_at_address(address);
-}
-
-void pic_processor::toggle_break_at_line(int file_id, int src_line)
-{
-
-
-  toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
-
-
-}
-
-//-------------------------------------------------------------------
-
-void pic_processor::set_break_at_hll_line(int file_id, int src_hll_line)
-{
-  int address;
-
-  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-      set_break_at_address(address);
-}
-
-void pic_processor::clear_break_at_hll_line(int file_id, int src_hll_line)
-{
-
-  int address;
-
-  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-      clear_break_at_address(address);
-}
-
-void pic_processor::toggle_break_at_hll_line(int file_id, int src_hll_line)
-{
-
-
-  toggle_break_at_address(find_closest_address_to_hll_line(file_id, src_hll_line));
-
-
-}
-
 //-------------------------------------------------------------------
 void    pic_processor::set_out_of_range_pm(int address, int value)
 {
@@ -1888,63 +1282,20 @@ void    pic_processor::set_out_of_range_pm(int address, int value)
 }
 
 //-------------------------------------------------------------------
-guint64 pic_processor::cycles_used(unsigned int address)
-{
-    return program_memory[address]->cycle_count;
-}
-
-//-------------------------------------------------------------------
-guint64 pic_processor::register_read_accesses(unsigned int address)
-{
-    return registers[address]->read_access_count;
-}
-
-//-------------------------------------------------------------------
-guint64 pic_processor::register_write_accesses(unsigned int address)
-{
-    return registers[address]->write_access_count;
-}
-
-//-------------------------------------------------------------------
 void pic_processor::init_program_memory(int address, int value)
 {
 
-  if(address < program_memory_size())
-    {
-      program_memory[address] = disasm(address,value);
-      if(program_memory[address] == NULL)
-	program_memory[address] = &bad_instruction;
-      program_memory[address]->add_line_number_symbol(address);
-    }
-  else if(address == config_word_address())
+
+  if(address == config_word_address())
     {
       cout << "** SETTING CONFIG address = 0x"<<hex<< address << "  value = 0x"<<value<<'\n';
       set_config_word(address, value);
     }
   else
-    set_out_of_range_pm(address,value);  // could be e2prom
+    Processor::init_program_memory(address,value);
 
 }
 
-//-------------------------------------------------------------------
-void pic_processor::build_program_memory(int *memory,int minaddr, int maxaddr)
-{
-
-  /*  if(maxaddr > program_memory_size()) {
-    cout << "pic_processor::build_program_memory - maxaddr is tooooo big\n";
-    cout << hex << maxaddr << "  " << program_memory_size() << '\n';
-    return;
-  }
-  */
-
-  for (int i = minaddr; i <= maxaddr; i++)
-    {
-      if(memory[i] != 0xffffffff)
-	init_program_memory(i, memory[i]);
-
-    }
-
-}
 //-------------------------------------------------------------------
 
 void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
@@ -2021,150 +1372,6 @@ void pic_processor::load_hex (char *hex_file)
 
       //  delete(memory);
 
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-//
-void program_memory_access::put(int addr, instruction *new_instruction)
-{
-
-  cpu->program_memory[addr] = new_instruction;
-
-  if(cpu->program_memory[addr]->xref)
-      cpu->program_memory[addr]->xref->update();
-
-
-}
-
-instruction *program_memory_access::get(int addr)
-{
-  if(addr < cpu->program_memory_size())
-    return(cpu->program_memory[addr]);
-  else
-    return NULL;
-
-}
-
-// like get, but will ignore instruction break points 
-instruction *program_memory_access::get_base_instruction(int addr)
-{
-    instruction *p;
-
-    p=get(addr);
-
-    if(p==NULL)
-        return NULL;
-
-    for(;;)
-    {
-	switch(p->isa())
-	{
-	case instruction::MULTIWORD_INSTRUCTION:
-	case instruction::INVALID_INSTRUCTION:
-	case instruction::NORMAL_INSTRUCTION:
-            return p;
-	case instruction::BREAKPOINT_INSTRUCTION:
-	case instruction::NOTIFY_INSTRUCTION:
-	case instruction::PROFILE_START_INSTRUCTION:
-	case instruction::PROFILE_STOP_INSTRUCTION:
-	    p=((Breakpoint_Instruction *)p)->replaced;
-            break;
-	}
-
-    }
-    return NULL;
-}
-
-unsigned int program_memory_access::get_opcode(int addr)
-{
-
-  //  cout << __FUNCTION__ << "  get_opcode: 0x" << cpu->program_memory[addr]->get_opcode() <<
-  //  " opcode (direct): 0x" << cpu->program_memory[addr]->opcode << '\n';
-
-  if(addr < cpu->program_memory_size())
-    return(cpu->program_memory[addr]->get_opcode());
-  else
-    return 0;
-}
-
-void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
-{
-
-  if( (addr < cpu->program_memory_size()) && (state == 0))
-    {
-      state = 1;
-      address = addr;
-      opcode = new_opcode;
-      cpu->cycles.set_break_delta(40000, this);
-      bp.set_pm_write();
-    }
-
-}
-
-void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
-{
-  int i;
-
-  if( !(addr>=0) && (addr < cpu->program_memory_size()))
-    return;
-
-
-  instruction *old_inst = get_base_instruction(addr);
-  instruction *new_inst = cpu->disasm(addr,new_opcode);
-
-  if(new_inst==NULL)
-  {
-      puts("FIXME, in program_memory_access::put_opcode");
-      return;
-  }
-  
-  if(!old_inst) {
-    put(addr,new_inst);
-    return;
-  }
-
-  if(old_inst->isa() == instruction::INVALID_INSTRUCTION) {
-    put(addr,new_inst);
-    return;
-  }
-
-  // Now we need to make sure that the instruction we are replacing is
-  // not a multi-word instruction. The 12 and 14 bit cores don't have
-  // multi-word instructions, but the 16 bit cores do. If we are replacing
-  // the second word of a multiword instruction, then we only need to
-  // 'uninitialize' it. 
-
-  // if there was a breakpoint set at addr, save a pointer to the breakpoint.
-  Breakpoint_Instruction *b=bpi;
-  instruction *prev = get_base_instruction(addr-1);
-
-  if(prev) {
-    if(prev->isa() == instruction::MULTIWORD_INSTRUCTION) {
-      ((multi_word_instruction *)prev)->initialized = 0;
-    }
-  }
-  
-
-  new_inst->update_line_number(old_inst->get_file_id(), 
-			       old_inst->get_src_line(), 
-			       old_inst->get_lst_line(),
-			       old_inst->get_hll_src_line(),
-			       old_inst->get_hll_file_id());
-
-  new_inst->xref = old_inst->xref;
-
-  if(b) 
-    b->replaced = new_inst;
-  else
-    cpu->program_memory[addr] = new_inst;
-
-  cpu->program_memory[addr]->is_modified=1;
-  
-  if(cpu->program_memory[addr]->xref)
-      cpu->program_memory[addr]->xref->update();
-  
-  delete(old_inst);
 }
 
 //-------------------------------------------------------------------

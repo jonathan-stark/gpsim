@@ -192,8 +192,8 @@ void P16C54::create_sfr_map(void)
 void P16C54::create_symbols(void)
 {
 
-  symbol_table.add_ioport(portb->cpu, portb);
-  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(this, portb);
+  symbol_table.add_ioport(this, porta);
 
 
 }
@@ -294,9 +294,9 @@ void P16C55::create_sfr_map(void)
 void P16C55::create_symbols(void)
 {
 
-  symbol_table.add_ioport(portc->cpu, portc);
-  symbol_table.add_ioport(portb->cpu, portb);
-  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(this, portc);
+  symbol_table.add_ioport(this, portb);
+  symbol_table.add_ioport(this, porta);
 
 
 }

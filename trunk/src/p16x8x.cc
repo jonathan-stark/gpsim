@@ -141,8 +141,8 @@ void P16C8x::create_symbols(void)
   if(verbose)
     cout << "8x create symbols\n";
 
-  symbol_table.add_ioport(portb->cpu, portb);
-  symbol_table.add_ioport(porta->cpu, porta);
+  symbol_table.add_ioport(this, portb);
+  symbol_table.add_ioport(this, porta);
 
 }
 

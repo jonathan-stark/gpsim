@@ -38,6 +38,7 @@ class instruction;
 class file_register;
 class invalid_file_register;
 class gpsimInterface;
+class Processor;
 class pic_processor;
 class symbol;
 class XrefObject;

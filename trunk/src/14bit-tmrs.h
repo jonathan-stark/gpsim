@@ -168,7 +168,7 @@ enum
 
   virtual unsigned int get_prescale(void)
     {
-      return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu->pll_factor);
+      return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
     }
   unsigned int get_tmr1cs(void)
     {

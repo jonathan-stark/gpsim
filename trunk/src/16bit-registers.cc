@@ -51,9 +51,9 @@ void  BSR::put_value(unsigned int new_value)
 
   if(xref)
   {
-      xref->update();
-      cpu->indf->xref->update();
-    }
+    xref->update();
+    cpu16->indf->xref->update();
+  }
 
 
 
@@ -84,8 +84,8 @@ void  FSRL::put_value(unsigned int new_value)
     {
 	xref->update();
   
-	if(cpu->indf->xref)
-	  cpu->indf->xref->update();
+	if(cpu16->indf->xref)
+	  cpu16->indf->xref->update();
     }
 
 
@@ -111,8 +111,8 @@ void  FSRH::put_value(unsigned int new_value)
 
 	xref->update();
   
-	if(cpu->indf->xref)
-	  cpu->indf->xref->update();
+	if(cpu16->indf->xref)
+	  cpu16->indf->xref->update();
 
     }
 }
@@ -950,7 +950,7 @@ void T0CON::put(unsigned int new_value)
   value = new_value;
 
   if( (value ^ old_value) & (T08BIT | TMR0ON)) {
-    cpu->option_new_bits_6_7(value & (BIT6 | BIT7));
+    cpu16->option_new_bits_6_7(value & (BIT6 | BIT7));
 
     if(value & TMR0ON)
       cpu16->tmr0l.start(cpu16->tmr0l.value & 0xff);
