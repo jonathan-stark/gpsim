@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 
-#if 0        //tsd removed in 0.20.4
+//#if 0        //tsd removed in 0.20.4
 extern "C" {
 char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
 #define completion_matches completion_matches_oldcdecl
@@ -43,10 +43,10 @@ extern "C" {
 #include <readline/history.h>
 }
 
-#endif
+//#endif
 
-#include <readline/readline.h>
-#include <readline/history.h>
+//#include <readline/readline.h>
+//#include <readline/history.h>
 
 #include <sys/types.h>
 #include <sys/file.h>
