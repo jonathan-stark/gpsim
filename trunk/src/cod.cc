@@ -753,7 +753,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 
         // Found a line marker
 
-	ptr=text_buffer+6;
+	ptr=text_buffer+7;
 	for(;*ptr!='\0';ptr++)
 	    if(*ptr==' '||*ptr=='\t')
 		break;
