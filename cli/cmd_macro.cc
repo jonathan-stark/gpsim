@@ -40,9 +40,16 @@ Macro::Macro(char *_name)
 {
   new_name(_name);
 
-  cout << "defining a new macro named: " << name() << endl;
+  if(verbose & 4)
+    cout << "defining a new macro named: " << name() << endl;
 
 }
+
+//----------------------------------------
+//add_argument(char *new_arg)
+//
+// Add a new argument to the macro. This is called when
+// the macro is being defined.
 
 void Macro::add_argument(char *new_arg)
 {
@@ -53,6 +60,14 @@ void Macro::add_argument(char *new_arg)
   cout << "defining a paramter named: " << new_arg << endl;
 
 }
+
+//----------------------------------------
+//add_body(char *new_line)
+//
+// Add a new line to the macro body. This is called when
+// the macro is being defined. These same lines will get
+// redirected to the lexer input stream when the macro
+// is invoked.
 
 void Macro::add_body(char *new_line)
 {
@@ -65,6 +80,11 @@ void Macro::add_body(char *new_line)
 
 }
 
+//----------------------------------------
+// invoke()
+//
+// Invoke a macro by copying its body to the lexer input 
+// stream. 
 void Macro::invoke()
 {
   list <string> :: iterator si;
@@ -81,8 +101,19 @@ void Macro::invoke()
   }
 
 }
+//----------------------------------------
+// substituteParameter(const string &s, string &replaced)
+//
+// Given a string 's', this function will search to see if
+// this is the name of one of the macro parameters. If it
+// is, then the text that should replace that parameter is
+// is returned in the string 'replaced'.
+//
+// This routine gets called when the lexer comes across an
+// undefined identifier while it is trying to expand a macro.
+//
 
-int Macro::substituteParameter(string &s)
+int Macro::substituteParameter(const string &s, string &replaced)
 {
 
   if(arguments.size()) {
@@ -95,9 +126,10 @@ int Macro::substituteParameter(string &s)
 	++asi, ++psi)
       if(*asi == s) {
 	
-	start_new_input_stream();
-	add_string_to_input_buffer((char *) ((*psi).c_str()), 0);
-	cout << "Found match, replacing "<<*asi << " with " << *psi<<endl;
+	replaced = *psi;
+
+	if(verbose&4)
+	  cout << "Found match, replacing "<<*asi << " with " << *psi<<endl;
 	return 1;
       }
   }
@@ -105,21 +137,41 @@ int Macro::substituteParameter(string &s)
   return 0;
 }
 
+//----------------------------------------
 int Macro::nParameters()
 {
   return arguments.size();
 }
+
+//----------------------------------------
+// prepareForInvocation()
+//
+// If this macro has been invoked before, then
+// there is some historical garbage sitting in the parameter
+// list. (Recall, the parameters will substitute the macro
+// arguments).
 
 void Macro::prepareForInvocation()
 {
   parameters.clear();
 }
 
+//----------------------------------------
+// add_parameter(char *s)
+//
+// Add a new macro parameter. This is called when a macro
+// is invoked. The parameters are matched up with the macro
+// arguments (i.e. the first parameter will substitute the
+// first argument).
+
 void Macro::add_parameter(char *s)
 {
   parameters.push_back(string(s));
 }
 
+//----------------------------------------
+// print()
+//
 void Macro::print()
 {
   cout << name() << " macro ";
@@ -182,14 +234,21 @@ cmd_macro::cmd_macro(void)
 
     brief_doc = string("macro definition and listing");
 
-    long_doc = string ("\nMacro listing:"
-		       "macro\n\n"
+    long_doc = string ("\nListing Macros:\n\n"
 		       "\tmacro -- display the names of the currently defined macros\n"
 		       "\t         (use the symbol command to see a particular macro definition)\n"
-		       "\nMacro defining:"
+		       "\nDefining Macros:\n"
 		       "\nname macro [arg1, arg2, ...]\n"
 		       "macro body\n"
 		       "endm\n\n"
+		       "Example:\n\n"
+		       "s macro n regs\n"
+		       "echo Step and Show\n"
+		       "step n"
+		       "x regs\n"
+		       "endm\n\n"
+		       "Invoke by\n\n"
+		       "gpsim> s 5 1:10\n"
 );
 
   op = cmd_macro_options; 
@@ -198,11 +257,11 @@ cmd_macro::cmd_macro(void)
 
 void cmd_macro::list(void)
 {
-  if(theMacro) {
-    theMacro->print();
-    cout << "invoking\n";
-    theMacro->invoke();
-    cout << "invoked\n";
+  if(macro_map.size()) {
+    map<string, Macro *>::iterator mi;
+    for (mi=macro_map.begin(); mi!=macro_map.end(); ++mi) 
+
+      mi->second->print();
   } else
     cout << "No macros have been defined.\n";
 }

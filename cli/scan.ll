@@ -76,6 +76,7 @@ static void SetMode(int newmode);
 int cli_corba_init (char *ior_id);
 
 extern Macro *isMacro(const string &s);
+extern Macro *gCurrentMacro;
 
 #define YYDEBUG 1
 //#define YY_NO_UNPUT
@@ -186,10 +187,12 @@ abort_gpsim_now {
 
 
 <MACROBODY>.             {  *macroBodyPtr++ = *yytext;
-                            printf("adding [%c]\n", *yytext);
-                            if (macroBodyPtr > max_bodyPtr) {
-			      exit(0);
-                            }
+                             if(verbose&4)
+                               printf("adding [%c]\n", *yytext);
+                             if (macroBodyPtr > max_bodyPtr) {
+                               cout << "buffer overflow in macro definition\n";
+			       exit(0);
+                             }
                          }
 
 
@@ -264,15 +267,29 @@ abort_gpsim_now {
 
 %%
 
+#define MAX_STACK_LEVELS  16
+static int input_stack_index=0;
+YY_BUFFER_STATE input_stack[MAX_STACK_LEVELS];
 
 #ifdef yywrap
 #undef yywrap
 #endif
 int yywrap (void)
 {
+  if(input_stack_index) {
+    yy_delete_buffer(YY_CURRENT_BUFFER);
+    yy_switch_to_buffer(input_stack[--input_stack_index]);
+    return 0;
+  }
+
   return 1;
 }
 
+void push_input_stack(void)
+{
+  if(input_stack_index<MAX_STACK_LEVELS)
+    input_stack[input_stack_index++] = YY_CURRENT_BUFFER;
+}
 
 /*****************************************************************
  * 
@@ -363,6 +380,12 @@ int handle_identifier(const string &s, cmd_options **op )
       return MACROINVOCATION_T;
     }
 
+    // If we're invoking a macro, search the parameters
+    string replaced;
+    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
+      if(replaced != s)
+	return handle_identifier(  replaced, op);
+
     if(verbose&2)
       cout << " returning unknown string: " << s << endl;
 
@@ -372,6 +395,15 @@ int handle_identifier(const string &s, cmd_options **op )
 
  } else {
 
+    // If we're invoking a macro, search the parameters
+    string replaced;
+    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
+      if(replaced != s) {
+	//yy_delete_buffer(yy_scan_string(replaced.c_str()));
+	push_input_stack();
+	yy_scan_string(replaced.c_str());
+	return 0;
+      }
    // We already have the command, so search the options. 
 
    struct cmd_options *opt = *op;
@@ -605,13 +637,15 @@ delete_input_buffer (void *buf)
 void lexer_setMacroBodyMode(void)
 {
   macroBodyPtr = &macroBody[0];
-  cout << "setting lexer MACROBODY mode\n";
+  if(verbose&4)
+    cout << "setting lexer MACROBODY mode\n";
   SetMode(MACROBODY);
 }
 
 void lexer_setInitialMode(void)
 {
-  cout << "setting lexer INITIAL mode\n";
+  if(verbose&4)
+    cout << "setting lexer INITIAL mode\n";
   SetMode(INITIAL);
 }
 
@@ -622,11 +656,31 @@ static bool isWhiteSpace(char c)
   return (c==' ' || c == '\t');
 }
 
+//----------------------------------------
+// getNextMacroParameter(char *s, int l)
+// 
+// returns true if a macro parameter can be extracted
+// from yyinput buffer.If does return true, then the
+// extracted macro parameter will get copied to
+// the string 's'. 
+//
+// This routine will lexically analyze a character string
+// and split it up into chunks that can be passed to a 
+// macro invocation. It might be possible to add a new
+// lex state and do this work in the lexer...
+//
+// If input stream may looks something like
+//  expression1, expression2, expression3, ...
+//
+// This function will return true and copy 'expression1'
+// to 's'.
+
 static bool getNextMacroParameter(char *s, int l)
 {
 
   char c;
 
+  // delete all leading white space.
   do {
     c = yyinput();
   } while(isWhiteSpace(c));
@@ -647,7 +701,8 @@ static bool getNextMacroParameter(char *s, int l)
     do {
       c = yyinput();
 
-      cout << "[" << c << "]\n";
+      //cout << "[" << c << "]\n";
+
       if(c == '(')
 	nParen++;
       if(c == ')' && --nParen < 0 )
@@ -688,7 +743,9 @@ void lexer_InvokeMacro(class Macro *m)
     
     if(bValidParameter) {
       m->add_parameter(s);
-    cout << "macro param: " << s << endl;
+
+      if(verbose &4)
+	cout << "macro param: " << s << endl;
     }
   } while (bValidParameter && i<m->nParameters());
 
