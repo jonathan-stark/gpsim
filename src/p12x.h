@@ -24,7 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "12bit-processors.h"
 #include "pic-packages.h"
 
-class GPIO : public IOPORT
+class GPIO : public PIC_IOPORT
 {
 public:
 

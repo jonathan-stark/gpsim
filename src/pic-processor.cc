@@ -364,9 +364,10 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 	    cout << "Program Memory size " <<  p->program_memory_size() << '\n';
 	    cout << "Register Memory size " <<  p->register_memory_size() << '\n';
 	  }
-	  //p->dump_registers();
-	  if(new_processor)
-	    new_processor(p->processor_id);
+
+	  // Tell the gui or any modules that are interfaced to gpsim
+	  // that a new processor has been declared.
+	  gi.new_processor(p->processor_id);
 
 	  return p;
 	}
@@ -470,8 +471,7 @@ void pic_processor::run (void)
 
   simulation_mode = STOPPED;
 
-  if(simulation_has_stopped)
-    simulation_has_stopped();
+  gi.simulation_has_stopped();
 
 }
 
@@ -517,8 +517,7 @@ void pic_processor::step (unsigned int steps)
   bp.clear_halt();
   simulation_mode = STOPPED;
 
-  if(simulation_has_stopped)
-    simulation_has_stopped();
+  gi.simulation_has_stopped();
 }
 
 //-------------------------------------------------------------------
@@ -583,8 +582,7 @@ void pic_processor::reset (RESET_TYPE r)
     {
       trace.reset(r);
       pc.reset();
-      if(simulation_has_stopped)
-	  simulation_has_stopped();
+      gi.simulation_has_stopped();
       cout << " --- Soft Reset (not fully implemented)\n";
       return;
     }
@@ -613,15 +611,18 @@ void pic_processor::reset (RESET_TYPE r)
     {
       status.put_TO(1);
       status.put_PD(1);
-      cout << "POR\n";
-      cout << "config_modes = " << config_modes << '\n';
+
+      if(verbose) {
+	cout << "POR\n";
+	cout << "config_modes = " << config_modes << '\n';
+      }
+
       wdt.initialize( (config_modes & CM_WDTE) != 0, nominal_wdt_timeout);
     }
   else if (r==WDT_RESET)
     status.put_TO(0);
 
-  if(simulation_has_stopped)
-    simulation_has_stopped();
+  gi.simulation_has_stopped();
 }
 
 //-------------------------------------------------------------------
@@ -1459,8 +1460,7 @@ void pic_processor::load_hex (char *hex_file)
       //build_program_memory(memory, minaddr, maxaddr);
 
       // Tell the gui that we've got some code.
-      if(new_program)
-        new_program(processor_id);
+      gi.new_program(processor_id);
 
       //disassemble(minaddr, maxaddr);
       if(verbose)

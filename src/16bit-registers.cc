@@ -103,12 +103,13 @@ void  FSRH::put_value(unsigned int new_value)
 
   put(new_value);
 
-  if(update_object)
+  if(xref)
     {
 
 	xref->update();
   
-	cpu->indf.xref->update();
+	if(cpu->indf.xref)
+	  cpu->indf.xref->update();
 
     }
 }

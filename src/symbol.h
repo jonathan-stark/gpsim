@@ -33,7 +33,7 @@ Boston, MA 02111-1307, USA.  */
 int load_symbol_file(pic_processor **, char *);
 void display_symbol_file_error(int);
 
-#include "interface.h"
+#include "gpsim_interface.h"
 /*enum SYMBOL_TYPE
 {
   SYMBOL_BASE_CLASS,

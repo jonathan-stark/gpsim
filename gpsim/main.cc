@@ -42,7 +42,6 @@ Boston, MA 02111-1307, USA.  */
 extern "C" {
 int gui_init (int argc, char **argv);
 void gui_main(void);
-void gpsim_interface_init(void);
 
 }
 
@@ -158,6 +157,9 @@ main (int argc, char *argv[])
 
   while ((c = getopt(argc, argv, "h?p:c:s:v")) != EOF) {
     switch (c) {
+
+    default:
+      printf("'%c' is an unrecognized option\n",c);
     case '?':
     case 'h':
       usage = 1;
@@ -185,9 +187,6 @@ main (int argc, char *argv[])
   
   if (optind < argc)
     strncpy(hex_name, argv[optind],FILE_STRING_LENGTH);
-  else
-    usage = 1;
-
 
   if (usage) 
     helpme(argv[0]);
@@ -195,7 +194,6 @@ main (int argc, char *argv[])
   initialize_gpsim();
   init_parser();
   initialize_readline();
-  gpsim_interface_init();
 
   // initialize the gui
 #ifdef HAVE_GUI

@@ -40,7 +40,7 @@ void link_src_to_gpsim(GUI_Processor *gp);
 
 GUI_Processor *gp=NULL;
 GSList *gui_processors=NULL;
-
+unsigned int interface_id=0;
 
 DB_ID dbid=-1;
 
@@ -367,12 +367,13 @@ int gui_init (int argc, char **argv)
   CreateWatchWindow(gp);
   CreateBreadboardWindow(gp);
 
-  
-  update_object = gui_update_object;
-  remove_object = gui_remove_object;
-  new_processor = gui_new_processor;
-  simulation_has_stopped = gui_simulation_has_stopped;
-  new_program = gui_new_program;
+
+  interface_id = gpsim_register_interface();
+  gpsim_register_update_object(interface_id,gui_update_object);
+  gpsim_register_remove_object(interface_id, gui_remove_object);
+  gpsim_register_new_processor(interface_id, gui_new_processor);
+  gpsim_register_simulation_has_stopped(interface_id, gui_simulation_has_stopped);
+  gpsim_register_new_program(interface_id, gui_new_program);
 
   return(0);
 }

@@ -133,7 +133,7 @@ enum IOPIN_TYPES
 #include "12bit-instructions.h"
 #include "14bit-registers.h"
 #include "14bit-instructions.h"
-#include "interface.h"
+#include "gpsim_interface.h"
 #include "pic-packages.h"
 
 class processor_types

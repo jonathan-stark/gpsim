@@ -148,61 +148,22 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
 
   //---------------------------------------------------------------------------
   //
-  //          callback functions
+  //          callback function registration
   //
   //---------------------------------------------------------------------------
-void gpsim_interface_init(void);
-
-/*
- * update_object - pointer to the function that is invoked when an object changes
- *
- * If an object, like the contents of a register, changes then this function
- * will be called (if it's non-null). There are two parameters:
- *  xref - this is a pointer to some structure in the client's data space.
- *  new_value - this is the new value to which the object has changed.
- *
- *
- */
-
-extern void (*update_object) (gpointer xref,int new_value);
-
-/*
- * remove_object - pointer to the function that is invoked when an object is removed.
- *                 Its purpose is to notify the client when gpsim has removed something.
- *
- * If an object, like a register, is deleted then this function 
- * will be called (if it's non-null). There is one parameter:
- *  xref - this is a pointer to some structure in the client's data space.
- *
- *
- */
-
-extern void (*remove_object) (gpointer xref);
+  unsigned int gpsim_register_interface(void);
+  void gpsim_register_update_object(unsigned int interface_id,
+				    void (*update_object) (gpointer xref,int new_value) );
+  void gpsim_register_remove_object(unsigned int interface_id, 
+				    void (*remove_object) (gpointer xref));
+  void gpsim_register_new_processor(unsigned int interface_id, 
+				    void (*new_processor) (unsigned int processor_id));
+  void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
+					     void (*simulation_has_stopped) (void));
+  void gpsim_register_new_program(unsigned int interface_id, 
+				  void (*new_program)  (unsigned int processor_id));
 
 
-/*
- * simulation_has_stopped - pointer to the function that is invoked when gpsim has
- *                          stopped simulating.
- */
-
-extern void (*simulation_has_stopped) (void);
-
-
-/*
- * new_processor - pointer to the function that is invoked when a new processor is
- *                 added to gpsim
- */
-
-extern void (*new_processor) (unsigned int processor_id);
-
-/*
- * new_program - pointer to the function that is invoked when a new program is
- *               loaded into gpsim
- */
-
-  /* extern void (*new_program)  (pic_processor *p);*/
-
-extern void (*new_program)  (unsigned int processor_id);
 
 #ifdef __cplusplus
 }

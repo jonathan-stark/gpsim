@@ -47,6 +47,13 @@ extern "C" {
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
   }
 
+//--------------------------------------------------------------------
+// InterfaceObject 
+//
+// This class is used only within interface.cc's scope. It's purpose
+// is to provide a way to call back some function not gpsim's code
+// space.
+
 class InterfaceObject : public BreakCallBack
 {
 public:
@@ -97,12 +104,26 @@ public:
 // linked thing like CORBA or sockets...
 //
 
+/*
 void (*update_object) (gpointer xref,int new_value);
 void (*remove_object) (gpointer xref);
 void (*simulation_has_stopped) (void);
 void (*new_processor) (unsigned int processor_id);
-//void (*new_program)  (pic_processor *p);
 void (*new_program)  (unsigned int p);
+*/
+
+
+/**************************************************************************
+ *
+ *  Here's the gpsim interface class instantiation. It's through this class
+ * that gpsim will notify the gui and/or modules of internal gpsim changes.
+ *
+ **************************************************************************/
+
+gpsimInterface gi;
+
+
+//--------------------------------------------------------------------------
 
 pic_processor *get_processor(unsigned int cpu_id);
 
@@ -1030,11 +1051,240 @@ int gpsim_open(unsigned int processor_id, char *file)
 //
 //
 //--------------------------------------------------------------------------
-void gpsim_interface_init(void)
+Interface::Interface(void)
 {
+
+  interface_id = 0;
 
   update_object = NULL;
   simulation_has_stopped = NULL;
   new_processor = NULL;
   new_program = NULL;
+
+}
+
+Interface *get_interface(unsigned int interface_id)
+{
+
+  GSList *interface_list = gi.interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+
+      if(an_interface->get_id() == interface_id)
+	return an_interface;
+
+    }
+
+    interface_list = interface_list->next;
+  }
+
+  return NULL;
+
+}
+
+unsigned int gpsim_register_interface(void)
+{
+  Interface *an_interface = new Interface();
+
+  return gi.add_interface(an_interface);
+
+}
+
+
+void gpsim_register_update_object(unsigned int interface_id,
+				  void (*update_object) (gpointer xref,int new_value) )
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->update_object = update_object;
+  
+}
+
+void gpsim_register_remove_object(unsigned int interface_id, 
+				  void (*remove_object) (gpointer xref))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->remove_object = remove_object;
+
+}
+
+void gpsim_register_new_processor(unsigned int interface_id, 
+				  void (*new_processor) (unsigned int processor_id))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->new_processor = new_processor;
+  
+}
+void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
+					   void (*simulation_has_stopped) (void))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->simulation_has_stopped = simulation_has_stopped;
+  
+}
+void gpsim_register_new_program(unsigned int interface_id, 
+				void (*new_program)  (unsigned int processor_id))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->new_program = new_program;
+  
+}
+
+
+//--------------------------------------------------------------------------
+//
+// gpsimInterface
+//
+// Here are where the member functions for the gpsimInterface class are
+// defined.
+//
+// The gpsimInterface class contains a singly-linked-list of Interface objects.
+// Interface objects are structures that primarily contain pointers to a whole
+// bunch of functions. The purpose is to have some external entity, like the 
+// gui code, define where these functions point. gpsim will then use these
+// functions as a means of notifying the gui when something has changed.
+// In addition to the gui, this class also provides the support for interfacing
+// to modules. When a module is loaded from a module library, a new Interface
+// object is created for it. The module will be given the opportunity to
+// register functions (e.g. provide pointers to functions) that gpsim can
+// then call.
+//
+//--------------------------------------------------------------------------
+
+
+gpsimInterface::gpsimInterface (void )
+{
+
+  interfaces = NULL;
+
+}
+
+//--------------------------------------------------------------------------
+//
+// A xref, or cross reference, object is an arbitrary thing that gpsim
+// will pass back to the gui or module. The gui (or module) will then
+// interpret the contents of the xref and possibly update some state
+// with 'new_value'. An example is when one of the pic registers changes;
+// if there's a xref object associated with the register gpsim will
+// then notify the gui (or module) through the xref.
+
+void gpsimInterface::update_object (gpointer xref,int new_value)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->update_object)
+	an_interface->update_object(xref,new_value);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+
+void gpsimInterface::remove_object (gpointer xref)
+{
+
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->remove_object)
+	an_interface->remove_object(xref);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+
+}
+void gpsimInterface::simulation_has_stopped (void)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->simulation_has_stopped)
+	an_interface->simulation_has_stopped();
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+void gpsimInterface::new_processor (unsigned int processor_id)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->new_processor)
+	an_interface->new_processor(processor_id);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+
+void gpsimInterface::new_program  (unsigned int processor_id)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->new_program)
+	an_interface->new_program(processor_id);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+
+unsigned int  gpsimInterface::add_interface  (Interface *new_interface)
+{
+
+  interface_seq_number++;
+
+  new_interface->set_id(interface_seq_number);
+
+  gi.interfaces = g_slist_append(gi.interfaces, new_interface);
+
+
+  return interface_seq_number;
 }
