@@ -186,8 +186,11 @@ Program_Counter::Program_Counter(void)
 void Program_Counter::increment(void)
 {
 
-  value = (value + 1) & memory_size_mask;
+  // Trace the value of the program counter before it gets changed.
   trace.program_counter(value);
+  value = (value + 1) & memory_size_mask;
+
+  // trace.program_counter(value);
 
   // Update pcl. Note that we don't want to pcl.put() because that 
   // will trigger a break point if there's one set on pcl. (A read/write
@@ -206,9 +209,11 @@ void Program_Counter::increment(void)
 void Program_Counter::skip(void)
 {
 
-  trace.cycle_increment();
-  value = (value + 1) & memory_size_mask;
+  // Trace the value of the program counter before it gets changed.
   trace.pc_skip(value);
+
+  //trace.cycle_increment();
+  value = (value + 1) & memory_size_mask;
 
 
   // Update pcl. Note that we don't want to pcl.put() because that 
@@ -227,18 +232,19 @@ void Program_Counter::skip(void)
 void Program_Counter::jump(unsigned int new_address)
 {
 
+  // Trace the value of the program counter before it gets changed.
+  trace.program_counter(value);
+
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
-  //value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
   value = new_address & memory_size_mask;
 
-    // see Update pcl comment in Program_Counter::increment()
+  // see Update pcl comment in Program_Counter::increment()
 
   cpu_pic->pcl->value.put(value & 0xff);
   
   cycles.increment();
-  trace.program_counter(value);
   cycles.increment();
 
 }
@@ -250,6 +256,9 @@ void Program_Counter::jump(unsigned int new_address)
 void Program_Counter::interrupt(unsigned int new_address)
 {
 
+  // Trace the value of the program counter before it gets changed.
+  trace.program_counter(value);
+
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
@@ -259,8 +268,8 @@ void Program_Counter::interrupt(unsigned int new_address)
   
   cycles.increment();
   
-  trace.cycle_increment(); 
-  trace.program_counter(value);
+  //trace.cycle_increment(); 
+  //trace.program_counter(value);
 
   cycles.increment();
 
@@ -274,13 +283,15 @@ void Program_Counter::interrupt(unsigned int new_address)
 void Program_Counter::computed_goto(unsigned int new_address)
 {
 
+  // Trace the value of the program counter before it gets changed.
+  trace.program_counter(value);
+
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
   value = (new_address | cpu_pic->get_pclath_branching_modpcl() ) & memory_size_mask;
 
-  trace.cycle_increment();
-  trace.program_counter(value);
+  //trace.cycle_increment();
 
   // see Update pcl comment in Program_Counter::increment()
 
@@ -298,9 +309,13 @@ void Program_Counter::computed_goto(unsigned int new_address)
 
 void Program_Counter::new_address(unsigned int new_value)
 {
-  value = new_value & memory_size_mask;
-  trace.cycle_increment();
+  // Trace the value of the program counter before it gets changed.
   trace.program_counter(value);
+
+  value = new_value & memory_size_mask;
+
+  //trace.cycle_increment();
+  //trace.program_counter(value);
 
   // see Update pcl comment in Program_Counter::increment()
 

@@ -69,20 +69,6 @@ extern void dump_stimulus_list(void);
  * outputs. The stimulus base class defines the basic functionality of
  * a stimulus and how this interface to the outside world is to occur.
  *
- * The 'drive levels' are loosely related to the source impedance 
- * a stimulus has. Large positive drive levels mean that the source
- * has a very low output impedance while driving high. Similarly,
- * a large negative drive level corresponds to a very low output
- * impedance while driving low. An I/O pin is a good example of
- * a stimulus that has low source impedance while driving high and
- * low. An open-collector is a good example of a stimulus that has
- * low output impedance while driving low and high output impedance
- * while 'driving' or floating high.
- *
- * Analog stimuli will generally have higher output impedances than
- * digital stimuli. So for example, if you inadvertantly misconfigure
- * the TRIS bits on an analog port as outputs, then the digital outputs
- * will overwhelm the analog inputs. 
  */
 
 #define MAX_DRIVE        0x100000
@@ -136,21 +122,23 @@ class stimulus : public gpsimValue
 public:
 
   Stimulus_Node *snode;      // Node to which this stimulus is attached
-  //int drive;                 // This defines the strength of the source or the magnitude of the load.
-  //int state;                 // The most recent value of this stimulus
+
   bool digital_state;        // 0/1 digitization of the analog state
-
   
-  double Vth;
-  double Zth;
-  double nodeVoltage;
+  double Vth;                // Open-circuit or Thevenin voltage
+  double Zth;                // Input or Thevenin resistance
 
-  stimulus *next;
+  double nodeVoltage;        // The voltage driven on to this stimulus by the snode
+
+  stimulus *next;            // next stimulus that's on the snode
 
   stimulus(char *n=0);
   virtual ~stimulus();
 
 
+  // Functions for accessing/manipulating the thevenin voltage and resistance.
+  // note that these are virtual so that derived classes can manipulate these
+  // in an abstract manner.
   virtual double get_Vth() { return Vth; }
   virtual void   set_Vth(double v) { Vth = v; }
   virtual double get_Zth() { return Zth; }
@@ -158,12 +146,23 @@ public:
   virtual double get_nodeVoltage() { return nodeVoltage; }
   virtual void   set_nodeVoltage(double v) { nodeVoltage = v; }
 
+  // A way of writing digital values to the stimulus.
+  // The difference between the 'put' and the 'set' methods is that
+  // a stimulus that wants to drive it's own digital state will
+  // call 'put' where as when an external node wishes to drive this
+  // stimulus it'll call set.
   virtual bool get_digital_state(void) {return digital_state;};
+  virtual void set_digital_state(bool new_dstate) { digital_state = new_dstate;};
   virtual void put_digital_state(bool new_dstate) { digital_state = new_dstate;};
 
   virtual void attach(Stimulus_Node *s) { snode = s;};
   virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
 
+  // If a stimulus changes its state, it can signal this change to
+  // any other stimuli that are connected to it.
+  virtual void updateNode(void) { if(snode) snode->update(0);}
+
+  // These are only here because they're pure virtual functions in the parent class.
   virtual unsigned int get_value(void) { return 0;}
   virtual void put_value(unsigned int new_value) {}
 
@@ -203,8 +202,6 @@ enum SOURCE_TYPE
     time = 0;
   };
 
-  //virtual int get_voltage(guint64 current_time) {return 0;};
-  //virtual int get_state(void) {return state;};
   virtual SOURCE_TYPE isa(void) {return SQW;};
 
   virtual void callback(void);
@@ -246,7 +243,8 @@ class IOPIN : public stimulus
   Register **iopp;     // this second one is used to set break points.
   unsigned int iobit;  // 
 
-  // These are the low to high and high to low input thresholds.
+  // These are the low to high and high to low input thresholds. The
+  // units are volts.
   double l2h_threshold;
   double h2l_threshold;
 
@@ -265,9 +263,13 @@ class IOPIN : public stimulus
   virtual Register *get_iop(void);
   virtual void toggle(void);
   virtual void attach(Stimulus_Node *s);
-  virtual void change_direction(unsigned int){return;};
-  virtual void update_direction(unsigned int x){return;};
+
+  // These functions don't apply to Inputs, but provide an
+  // interface for the derived classes.
+  virtual void update_direction(unsigned int x){ };
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
+  virtual void update_pullup(bool new_state) { }
+
 };
 
 class IO_input : public IOPIN
@@ -280,14 +282,13 @@ public:
 
   virtual double get_Vth();
 
-  virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT;};
 };
 
 class IO_bi_directional : public IO_input
 {
 public:
 
-  //  source_stimulus *source;
+  // True when the bi-directional pin is configured as an output
   bool driving;
 
   // Impedance of the IOPIN when it's not driving.
@@ -308,7 +309,6 @@ public:
   virtual void set_nodeVoltage(double new_nodeVoltage);
 
   virtual void update_direction(unsigned int);
-  virtual void change_direction(unsigned int);
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 };
 
@@ -319,8 +319,8 @@ class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
 
-  bool bPullUp;
-  double Zpullup;
+  bool bPullUp;    // True when pullup is enable
+  double Zpullup;  // resistance of the pullup
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
   IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
@@ -344,18 +344,6 @@ public:
   virtual double get_Zth();
 
 };
-
-/* For now, a resistor has one end attached to either ground or vcc and the
-** other end is attached to a node. As we get more ambitious, this may change.
-**/
-
-class resistor : public source_stimulus
-{
-public:
-
-  virtual SOURCE_TYPE isa(void) {return RESISTOR;};
-};
-
 
 class square_wave : public source_stimulus
 {
@@ -425,23 +413,6 @@ public:
 };
 
 
-class dc_supply : public source_stimulus {
- public:
-
-  dc_supply(char *n=0);
-  virtual SOURCE_TYPE isa(void) {return DC;};
-
-};
-
-class open_collector : public source_stimulus
-{
-public:
-
-  unsigned int current_state;
-  virtual SOURCE_TYPE isa(void) {return OPEN_COLLECTOR;};
-
-};
-
 /*
  * An "Event" is a special stimulus that will assert for a single clock
  * cycle.
@@ -460,13 +431,4 @@ public:
   virtual void callback(void);
   Event(void);
 };
-//--------------------------------------------------------------------------
-/*
-class BUS : public Stimulus_Node
-{
-public:
-
-
-};
-*/
 #endif  // __STIMULI_H__

@@ -59,26 +59,10 @@ Boston, MA 02111-1307, USA.  */
 //
 //-------------------------------------------------------------------
 
-//-------------------------------------------------------------------
-// IOPORT
-//
-
-const int one_shifted_left_by_n [8] = 
-{
-  1 << 0,
-  1 << 1,
-  1 << 2,
-  1 << 3,
-  1 << 4,
-  1 << 5,
-  1 << 6,
-  1 << 7
-};
-
 
 //-------------------------------------------------------------------
 //
-// PICIOPORT::update_stimuli
+// IOPORT::update_stimuli
 //
 //   input: none
 //  return: the states of the stimuli that are driving this ioport
@@ -89,83 +73,55 @@ const int one_shifted_left_by_n [8] =
 //
 //-------------------------------------------------------------------
 int IOPORT::update_stimuli(void)
-
 {
 
-  // ??? cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
-
-  // Loop through the io pins and determine if there are
-  // any sources attached to the same node
-
-  //cout << "updating the stimuli\n";
   guint64 time = cycles.value;
   int input = 0;
   int m;
   unsigned int i;
 
+  // Loop through the io pins and determine if there are
+  // any sources attached to the same node
+
+
   for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-    if(stimulus_mask & m)
-      {
-        if(pins[i]->snode!=0)
-	{
-	    double t = pins[i]->snode->update(time);
+    if(stimulus_mask & m) {
+      if(pins[i]->snode!=0) {
+	
+	double t = pins[i]->snode->update(time);
 
-	    //cout << name() << ' ' << i;
-	    //cout << " pin " << pins[i]->name();
-	    //cout <<  " node "<< pins[i]->snode->name() << " is ";
-
-	    if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
-	    {
-		//cout << "above";
-		input |= m;
-	    } else //if(!(tris->value & m))
-		input |= (value.get() & m);
-	    //else cout << "below";
-
-	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
-	}
+	if(t  > pins[i]->l2h_threshold)
+	  input |= m;
+	else
+	  input |= (value.get() & m);
       }
-
-  // cout << " returning " << hex << input << '\n';
+    }
 
   return input;
 
 }
 
 int PIC_IOPORT::update_stimuli(void)
-
 {
   // Loop through the io pins and determine if there are
   // any sources attached to the same node
 
-  //cout << "updating the stimuli\n";
   guint64 time = cycles.value;
   int input = 0;
 
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
-    if(stimulus_mask & m)
-      {
-        if(pins[i]->snode!=0)
-	{
-	    double t = pins[i]->snode->update(time);
+    if(stimulus_mask & m) {
+      if(pins[i]->snode!=0) {
 
-	    //cout << name() << ' ' << i;
-	    //cout << " pin " << pins[i]->name();
-	    //cout <<  " node "<< pins[i]->snode->name() << " is ";
+	double t = pins[i]->snode->update(time);
 
-	    if(t  > pins[i]->l2h_threshold)  // %%% FIXME %%%
-	    {
-		//cout << "above";
-		input |= m;
-	    } else if(!(tris->value.get() & m))
-		input |= (value.get() & m);
-	    //else cout << "below";
+	if(t  > pins[i]->l2h_threshold)
+	  input |= m;
+	else if(!(tris->value.get() & m))
+	  input |= (value.get() & m);
 
-	    //cout << " threshold. node " << t  << " threshold " << pins[i]->threshold << '\n';
-	}
       }
-
-  // cout << " returning " << hex << input << '\n';
+    }
 
   return input;
 
@@ -186,12 +142,8 @@ double IOPORT::get_bit_voltage(unsigned int bit_number)
       v = pins[bit_number]->get_Vth();
   }
   else
-    v = (value.get() &  one_shifted_left_by_n [bit_number]) ? 
-	    (MAX_DRIVE / 2) : -(MAX_DRIVE / 2) ;
+    v = (value.get() &  (1<<bit_number)) ?  5.0 : 0.0;
 
-  float vf = (float)v;
-  vf = vf / MAX_ANALOG_DRIVE;
-  //cout << __FUNCTION__ << "() for bit " << bit_number << ", voltage = " << v << ", vf = " << vf << " volts\n";
 
   return v;
 }      
@@ -219,9 +171,6 @@ bool IOPORT::get_bit(unsigned int bit_number)
 
 unsigned int IOPORT::get(void)
 {
-
-  //cout << "IOPORT::get()\n";
-
   // Update the stimuli - if there are any
 
   if(stimulus_mask)
@@ -259,19 +208,14 @@ void IOPORT::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  //cout << "IOPORT::put trying to put " << new_value << '\n';
 
   value.put(new_value);
-
-  //cout << " IOPORT::put just set port value to " << value << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
 
-  //cout << " IOPORT::put port value is " << value << " after updating stimuli\n";
-
-  trace.register_write(address,new_value);  // RP - we didn't write the post stimulus value
+  trace.register_write(address,new_value);
 
 }
 
@@ -300,17 +244,12 @@ void PIC_IOPORT::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  //cout << "IOPORT::put trying to put " << new_value << '\n';
 
   value.put((new_value & ~tris->value.get()) | (value.get() & tris->value.get()));
-
-//  cout << " IOPORT::put just set port value to " << value.get() << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
-
-//  cout << " IOPORT::put port value is " << value.get() << " after updating stimuli\n";
 
   trace.register_write(address,new_value);  // RP - we actually wrote the pre-masking value
 
@@ -338,12 +277,8 @@ void IOPORT::put_value(unsigned int new_value)
   int old_value = value.get();
   int diff;
 
-  cout << "IOPORT::put_value trying to put " << new_value << '\n';
  
   value.put(new_value);
-
-
-  cout << " IOPORT::put_value just set port value to " << value.get() << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
@@ -371,29 +306,14 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 {
 
   int bit_mask = 1<<bit_number;
-  bool current_value = (value.get() & bit_mask) ? true : false;
+  unsigned int current_value = value.get();
+  bool current_bit_value = (current_value & bit_mask) ? true : false;
 
-  if( current_value != new_value)
+  if( current_bit_value != new_value)
     {
-      value.put(value.get() ^ bit_mask);
+      value.put(current_value ^ bit_mask);
       trace_register_write();
     }
-
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
-{
-
-  int bit_mask = 1<<bit_number;
-  bool current_value = (value.get() & bit_mask) ? true : false;
-
-  if( current_value != new_value)
-  {
-    put_value(value.get() ^ bit_mask);
-    update();
-  }
 
 }
 
@@ -440,10 +360,6 @@ void IOPORT::attach_iopin(IOPIN * new_pin, unsigned int bit_position)
 //-------------------------------------------------------------------
 void IOPORT::attach_stimulus(stimulus *new_stimulus, unsigned int bit_position)
 {
-  //  cout << "trying to attach " << name() << " to " << new_stimulus->name() <<  '\n';
-
-  //cout << bit_position  << "  " << (1<<bit_position) << '\n';
-
 
   if(pins  && (bit_position < num_iopins) && pins[bit_position]) {
 
@@ -463,17 +379,12 @@ void IOPORT::attach_stimulus(stimulus *new_stimulus, unsigned int bit_position)
     pins[bit_position]->snode->attach_stimulus(new_stimulus);
   }
 
-  //cout << "IOPORT attached new stimulus to " << pins[bit_position]->snode->name() << " named " <<
-  //  pins[bit_position]->snode->name() << '\n';
-
-
 }
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 {
-  //  cout << "trying to attach " << new_node->name() << " to " << name() << " bit " << bit_position << '\n';
 
   if(pins[bit_position])
     {
@@ -505,9 +416,6 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 
   unsigned int diff = tris->value.get() ^ new_tris;
 
-//  cout << __FUNCTION__ << "new TRIS value " << hex << new_tris <<
-//          "   diff is " << diff << "  valid IO pins " << valid_iopins << "\n";
- 
   if(diff)
     {
       // Update the I/O port value to that of the internal latch
@@ -517,10 +425,8 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
       int i,m;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(m & diff & valid_iopins)
-	  {
 	  pins[i]->update_direction(m & (~new_tris));
-	  //cout << __FUNCTION__ << " name " << pins[i]->name() << " pin number " << i << '\n';
-	  }
+
       // Now, update the nodes to which the(se) pin(s) may be attached
 
       guint64 time = cycles.value;
@@ -775,9 +681,7 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
       bool pullup = rbpu ? false : true;
 
       for(i=0; i<8; i++) {
-	IO_bi_directional_pu *p = dynamic_cast<IO_bi_directional_pu *>(pins[i]);
-	if(p)
-	  p->update_pullup(pullup);
+	pins[i]->update_pullup(pullup);
       }
 
       // Update each pin that has a stimulus connect:
@@ -846,8 +750,6 @@ void PORTB::setbit(unsigned int bit_number, bool new_value)
 {
   unsigned int old_value = value.get();
 
-  //cout << "PORTB::setbit() bit " << bit_number << " to " << new_value << '\n';
-
   IOPORT::setbit( bit_number,  new_value);
 
   int diff = old_value ^ value.get(); // The difference between old and new
@@ -862,7 +764,7 @@ void PORTB::setbit(unsigned int bit_number, bool new_value)
       // the old_value was high (and hence the new low) then set  INTF
 
       // These two statements can be combined into an exclusive or:
-      //cout << "PORTB::setbit() - bit changed states\n";
+
       if( (intedg &  intedg_MASK) ^ (old_value & 1))
 	cpu14->intcon->set_intf();
     }
@@ -888,8 +790,6 @@ unsigned int PORTB_62x::get(void)
   unsigned int old_value;
 
   old_value = value.get();
-
-  //  cout << "PORTB_62x::get()\n";
 
   IOPORT::get();
 
@@ -931,8 +831,6 @@ unsigned int PORTB_62x::get(void)
 void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
 {
   unsigned int old_value = value.get();
-
-  //cout << "PORTB_62x::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
@@ -1004,9 +902,6 @@ void PORTA_62x::put(unsigned int new_value)
   // then don't change the value on the I/O pin in the same state.
   // Also, bit 5 is an input regardless of the TRIS setting
 
-  //  pin_value = value = (((new_value & 0xcf) | (new_value & value & 0x10)) & ~tris->value) 
-  //    | (value & (tris->value | 0x20));
-
   value.put(((new_value & ~tris->value.get()) | (value.get() & tris->value.get())) & valid_iopins);
 
   // FIXME - this is obviously wrong
@@ -1014,13 +909,9 @@ void PORTA_62x::put(unsigned int new_value)
     value.put(value.get() & (0xff & ~( AN0 | AN1 | AN2 | AN3)));
 
 
-  //cout << " IOPORT::put just set port value to " << value << '\n';
-
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
-
-  //cout << " PORTA_62X::put port value is " << value << " after updating stimuli\n";
 
   trace.register_write(address,value.get());
 
@@ -1072,7 +963,6 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value.get();
 
-  //cout << "PORTA::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
@@ -1081,11 +971,10 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
   // If porta bit 4 changed states, check to see if tmr0 should increment
   if( diff & 0x10)
     {
-      //cout << "bit 4 changed\n";
 
       if(cpu14->option_reg.get_t0cs())
 	{
-	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
+
 	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
 	  cpu14->tmr0.increment();
 	}
@@ -1125,7 +1014,6 @@ unsigned int PORTA::get(void)
 
   old_value = value.get();
 
-  // cout << "PORTC::get()\n";
   IOPORT::get();
 
   int diff = old_value ^ value.get(); // The difference between old and new
@@ -1143,7 +1031,6 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value.get();
 
-  //cout << "PORTA::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
@@ -1152,11 +1039,10 @@ void PORTA::setbit(unsigned int bit_number, bool new_value)
   // If porta bit 4 changed states, check to see if tmr0 should increment
   if( diff & 0x10)
     {
-      //cout << "bit 4 changed\n";
 
       if(cpu14->option_reg.get_t0cs())
 	{
-	  //   cout << "tmr 0 external clock, porta new value " << value << " t0se "<<cpu14->option_reg.get_t0se()<< '\n';
+
 	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
 	  cpu14->tmr0.increment();
 	}
@@ -1191,7 +1077,6 @@ unsigned int PORTC::get(void)
 
   old_value = value.get();
 
-  // cout << "PORTC::get()\n";
   IOPORT::get();
 
   int diff = old_value ^ value.get(); // The difference between old and new
@@ -1309,6 +1194,3 @@ void PORTG::setbit(unsigned int bit_number, bool new_value)
 {
   IOPORT::setbit( bit_number,  new_value);
 }
-
-
-

@@ -412,6 +412,8 @@ public:
   virtual void step_one(void) = 0;
   virtual void interrupt(void) = 0 ;
 
+  virtual void trace_dump(int type, int amount);
+
   //
   // Processor Clock control
   //

@@ -1,3 +1,11 @@
+2004-07-29 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h, src/modules.cc, src/registers.cc,
+	src/registers.h, src/stimuli.cc, src/stimuli.h:
+	Minor stimuli bug fixes, commenting and general cleanup.
+	* cli/cmd_trace.cc, src/trace.cc, src/trace.h, src/trace_orb.h,
+	src/pic-registers.cc, src/processor.cc, src/processor.h:
+	Rewrote the trace printing code.
+
 2004-07-24 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: updated exports
 	* plat/win32/gpsim.nsi: don't cd when running gpsim

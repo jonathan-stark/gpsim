@@ -38,6 +38,23 @@ class Processor;
 class Trace;
 
 
+//-----------------------------------------------------------
+class TraceRawLog
+{
+public:
+
+  char *log_filename;
+  FILE *log_file;
+
+  void log();
+  void enable(char*);
+  void disable();
+
+  TraceRawLog();
+  ~TraceRawLog();
+
+};
+//------------------------------------------------------------
 class traceValue : public gpsimValue
 {
  public:
@@ -52,31 +69,33 @@ class Trace
 {
   public:
 
+  enum eTraceTypes {
+    NOTHING =  0,
+    INSTRUCTION      = (1<<24),
+    PROGRAM_COUNTER  = (2<<24),
+    REGISTER_READ    = (3<<24),
+    REGISTER_WRITE   = (4<<24),
+    BREAKPOINT       = (5<<24),
+    INTERRUPT        = (6<<24),
+    READ_W           = (7<<24),
+    WRITE_W          = (8<<24),
+    _RESET           = (9<<24),
+    PC_SKIP          = (0x0a<<24),
+    WRITE_TRIS       = (0x0b<<24),
+    WRITE_OPTION     = (0x0c<<24),
+    OPCODE_WRITE     = (0x0d<<24),
+    MODULE_TRACE1    = (0x0e<<24),
+    MODULE_TRACE2    = (0x0f<<24),
+    CYCLE_INCREMENT    = (0x10<<24),
+    REGISTER_READ_VAL  = (0x11<<24),
+    REGISTER_WRITE_VAL = (0x12<<24),
+    REGISTER_READ_16BITS  = (0x13<<24),
+    REGISTER_WRITE_16BITS = (0x14<<24),
+    LAST_TRACE_TYPE       = (0x15<<24),
 
-#define    NOTHING          0
-#define    INSTRUCTION      (1<<24)
-#define    PROGRAM_COUNTER  (2<<24)
-#define    REGISTER_READ    (3<<24)
-#define    REGISTER_WRITE   (4<<24)
-#define    BREAKPOINT       (5<<24)
-#define    INTERRUPT        (6<<24)
-#define    READ_W           (7<<24)
-#define    WRITE_W          (8<<24)
-#define    _RESET           (9<<24)
-#define    PC_SKIP          (0x0a<<24)
-#define    WRITE_TRIS       (0x0b<<24)
-#define    WRITE_OPTION     (0x0c<<24)
-#define    OPCODE_WRITE     (0x0d<<24)
-#define    MODULE_TRACE1    (0x0e<<24)
-#define    MODULE_TRACE2    (0x0f<<24)
-#define    CYCLE_INCREMENT    (0x10<<24)
-#define    REGISTER_READ_VAL  (0x11<<24)
-#define    REGISTER_WRITE_VAL (0x12<<24)
-#define    REGISTER_READ_16BITS  (0x13<<24)
-#define    REGISTER_WRITE_16BITS (0x14<<24)
-
-#define    CYCLE_COUNTER_LO   (0x80<<24)
-#define    CYCLE_COUNTER_HI   (0x40<<24)
+    CYCLE_COUNTER_LO   = (0x80<<24),
+    CYCLE_COUNTER_HI   = (0x40<<24)
+  };
 
 
 #define    TRACE_BUFFER_SIZE  (1<<12)
@@ -87,6 +106,9 @@ class Trace
   unsigned int trace_buffer[TRACE_BUFFER_SIZE];
   unsigned int trace_index;
   unsigned int trace_flag;
+  bool bLogging;
+  TraceRawLog logger;
+
   traceValue trace_value;
 
   // When interfaced with a gui, the contents of the trace
@@ -102,6 +124,16 @@ class Trace
 
   Trace (void);
   ~Trace(void);
+
+  // trace raw allows any value to be written to the trace buffer.
+  // This is useful for modules that wish to trace things, but do
+  // not wish to modify the Trace class.
+
+  inline void raw (unsigned int ui)
+  {
+    trace_buffer[trace_index] = ui;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
 
   inline void instruction (unsigned int opcode)
   {
@@ -173,6 +205,8 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
     trace_buffer[trace_index] = (unsigned int)(CYCLE_COUNTER_HI | (cc>>32) | (cc & CYCLE_COUNTER_LO));
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+    if(bLogging && near_full()) 
+      logger.log();
   }
   inline void cycle_increment (void)
   {
@@ -244,16 +278,22 @@ class Trace
 
   void switch_cpus(Processor *new_cpu) {cpu = new_cpu;};
 
-  int  dump (unsigned int n=0, FILE *out_stream=0, int watch_reg=-1);
+  int  dump (unsigned int n=0, FILE *out_stream=0);
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
-  int  dump_instruction(unsigned int instruction_index);
   void dump_raw(int n);
 
   int is_cycle_trace(unsigned int index);
-  guint64 find_cycle(int n, int in_index, int &instruction_index, 
-		     int &pc_index, int &cycle_index);
-  int find_previous_cycle(unsigned int index);
+
+  bool find_trace(unsigned int start,
+		  unsigned int stop,
+		  bool direction,
+		  int type,
+		  int &ret);
+
+  // When logging is enabled, the entire trace buffer will be copied to a file.
+  void enableLogging(char *fname);
+  void disableLogging();
 };
 
 #ifdef IN_MODULE

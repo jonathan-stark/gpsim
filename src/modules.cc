@@ -108,15 +108,6 @@ Module * Module::construct(char * name)
 //-------------------------------------------------------------------
 void Module::new_name(char *s)
 {
-  //  if(name_str)
-  //    delete name_str;
-  /*
-  if(s)
-    name_str = strdup(s);
-  else
-    name_str = 0;
-  */
-
   name_str = string(s);
 }
 
