@@ -381,52 +381,40 @@ void process_command_file(const char * file_name)
 
 }
 
-
-extern int open_cod_file(pic_processor **, char *);
-
+extern int load_symbol_file(Processor **, const char *);
 //*********************************************
 
 int gpsim_open(Processor *cpu, const char *file)
 {
-  char *str;
-  char command_str[256];
-  char type =0;
-
-  str = strrchr(file,'.');
-  if(str==0)
-  {
-    //	puts("found no dot in file!");
+  if(!file)
     return 0;
-  }
+
+  char *str = strrchr(file,'.');
+  if(!str)
+    return 0;
+
   str++;
 
+  // Check for the acceptible file extensions.
 
-  if(!strcmp(str,"hex"))
-  {
+  if(!strcmp(str,"hex") || !strcmp(str,"HEX")) {
 
-    if(!cpu)
-    {
+    if(!cpu) {
       puts("gpsim_open::No processor has been selected!");
       return 0;
     }
 
-    type = 'h';
-
-
+    cpu->load_hex(file);
   }
-  else if(!strcmp(str,"cod"))
-    type = 's';
-  else if(!strcmp(str,"stc"))
-    type = 'c';
+  else if(!strcmp(str,"cod") || !strcmp(str,"COD"))
+    load_symbol_file(&command::cpu, file);
+  else if(!strcmp(str,"stc") || !strcmp(str,"STC"))
+    process_command_file(file);
   else
   {
     cout << "Unknown file extension \"" << str <<"\" \n";
     return 0;
   }
-
-  snprintf(command_str, sizeof(command_str),
-	   "load %c %s\n",type,file);
-  parse_string(command_str);
 
   return 1;
 }

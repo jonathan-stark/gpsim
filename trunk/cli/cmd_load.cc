@@ -26,12 +26,12 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_load.h"
 
-#include "../src/pic-processor.h"
+#include "../src/processor.h"
 
 extern int parser_warnings;
 
 // instead of including the whole symbol.h file, just get what we need:
-int load_symbol_file(pic_processor **, const char *);
+int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
 cmd_load c_load;

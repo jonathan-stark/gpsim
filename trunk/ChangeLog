@@ -1,4 +1,9 @@
 2004-09-28 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_load.cc, cmd/input.cc:
+	Allow loading of filenames with spaces. (note, gpsim's
+	command line interface still does not support this).
+	
+2004-09-28 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_menu.cc, gui/gui_object.cc, 
 	gui/gui_object.h, gui/gui_regwin.cc, gui/gui_src.h,
 	gui/gui_src_asm.cc, src/gpsim_interface.h, M src/interface.cc:
