@@ -82,19 +82,24 @@ Settings *settings;
 
 extern GtkWidget *dispatcher_window;
 
+//------------------------------------------------------------------------
+// 
+extern bool gUsingThreads(); // in ../src/interface.cc
 
 //------------------------------------------------------------------------
 // debug
 static void gtl()
 {
 #if GLIB_MAJOR_VERSION >= 2
-  gdk_threads_leave ();
+  if(gUsingThreads())
+    gdk_threads_leave ();
 #endif
 }
 static void gte()
 {
 #if GLIB_MAJOR_VERSION >= 2
-  gdk_threads_enter ();
+  if(gUsingThreads())
+    gdk_threads_enter ();
 #endif
 }
 
@@ -208,8 +213,10 @@ static void *SimulationHasStopped( void *ptr )
 
 #if GLIB_MAJOR_VERSION >= 2
   while(1) {
-    g_mutex_lock(muSimStopMutex);
-    g_cond_wait(cvSimStopCondition, muSimStopMutex);
+    if(gUsingThreads()) {
+      g_mutex_lock(muSimStopMutex);
+      g_cond_wait(cvSimStopCondition, muSimStopMutex);
+    }
 #endif
     if(lgp) {
       lgp->regwin_ram->Update();
@@ -224,7 +231,10 @@ static void *SimulationHasStopped( void *ptr )
       lgp->stopwatch_window->Update();
     }
 #if GLIB_MAJOR_VERSION >= 2
-    g_mutex_unlock(muSimStopMutex);
+    if(gUsingThreads()) 
+      g_mutex_unlock(muSimStopMutex);
+    else
+      return 0;
   }
 #endif
 
@@ -242,12 +252,15 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     
     lgp = (GUI_Processor *) callback_data;
 #if GLIB_MAJOR_VERSION >= 2
-    g_mutex_lock(muSimStopMutex);
-    g_cond_signal(cvSimStopCondition);
-    g_mutex_unlock(muSimStopMutex);
-#else
-    ::SimulationHasStopped(0);
+
+    if(gUsingThreads()) {
+      g_mutex_lock(muSimStopMutex);
+      g_cond_signal(cvSimStopCondition);
+      g_mutex_unlock(muSimStopMutex);
+    } else
 #endif
+    ::SimulationHasStopped(0);
+
   }
 }
 
@@ -381,23 +394,25 @@ int gui_init (int argc, char **argv)
 #endif
 
 #if GLIB_MAJOR_VERSION >= 2
-  GThread          *Thread1;
-  GError           *err1 = NULL ;
+  if(gUsingThreads()) {
+
+    GThread          *Thread1;
+    GError           *err1 = NULL ;
   
-  muSimStopMutex     = g_mutex_new ();
-  cvSimStopCondition = g_cond_new ();
-  g_mutex_lock(muSimStopMutex);
+    muSimStopMutex     = g_mutex_new ();
+    cvSimStopCondition = g_cond_new ();
+    g_mutex_lock(muSimStopMutex);
 
-  if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
-				 (void *)0, 
-				 TRUE, 
-				 &err1)) == NULL)
-  {
-    printf("Thread create failed: %s!!\n", err1->message );
-    g_error_free ( err1 ) ;
+    if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
+				   (void *)0, 
+				   TRUE, 
+				   &err1)) == NULL)
+      {
+	printf("Thread create failed: %s!!\n", err1->message );
+	g_error_free ( err1 ) ;
+      }
+    g_mutex_unlock(muSimStopMutex);
   }
-  g_mutex_unlock(muSimStopMutex);
-
 #endif
 
   if (!gtk_init_check (&argc, &argv))

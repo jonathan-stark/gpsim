@@ -75,6 +75,10 @@ extern "C" {
 extern const char *get_dir_delim(const char *path);
 extern bool bUseGUI;
 
+//------------------------------------------------------------------------
+// 
+extern bool gUsingThreads(); // in ../src/interface.cc
+
 int yyparse(void);
 void initialize_readline (void);
 
@@ -204,7 +208,8 @@ void initialize_signals(void)
 
 void initialize_gpsim(void)
 {
-  initialize_threads();
+  if(gUsingThreads()) 
+    initialize_threads();
   initialize_signals();
   start_server();
 }

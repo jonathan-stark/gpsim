@@ -61,6 +61,12 @@ gpsimInterface gi;
 // create an instance of inline get_interface() method by taking its address
 static gpsimInterface &(*dummy_gi)(void) = get_interface;
 
+//------------------------------------------------------------------------
+// Temporary -- provide a flag to inihibit multithreaded support.
+bool gUsingThreads()
+{
+  return false;
+}
 //---------------------------------------------------------------------------
 //   void gpsim_set_bulk_mode(int flag)
 //---------------------------------------------------------------------------
@@ -340,31 +346,33 @@ void gpsimInterface::start_simulation (void)
   if(cpu) {
 #if GLIB_MAJOR_VERSION >= 2
 
-    static bool thread_initialized=false;
+    if(gUsingThreads()) {
+      static bool thread_initialized=false;
 
-    if(!thread_initialized) {
-      start_run_thread();
-      g_usleep(10000);
-      thread_initialized = true;
-    }
+      if(!thread_initialized) {
+	start_run_thread();
+	g_usleep(10000);
+	thread_initialized = true;
+      }
 
-    g_mutex_lock (muRunMutex);
+      g_mutex_lock (muRunMutex);
 
-    tcpu = cpu;
-    /*
-    if(verbosity && verbosity->getVal()) {
-      cout << "running...\n";
-      cpu->run(true);
+      tcpu = cpu;
+      /*
+	if(verbosity && verbosity->getVal()) {
+	cout << "running...\n";
+	cpu->run(true);
+	} else
+	cpu->run(false);
+      */
+      printf("signalling run thread\n");
+      g_cond_signal  (cvRunCondition);
+      g_mutex_unlock (muRunMutex);
+      printf("leaving start_simulation\n");
     } else
-      cpu->run(false);
-    */
-    printf("signalling run thread\n");
-    g_cond_signal  (cvRunCondition);
-    g_mutex_unlock (muRunMutex);
-    printf("leaving start_simulation\n");
-#else
-    cpu->run();
 #endif
+      cpu->run();
+
   }
 
   mbSimulating = false;

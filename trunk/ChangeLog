@@ -1,3 +1,7 @@
+2005-01-02 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, cli/input.cc, src/interface.cc: Added function
+	'gUseThreads()' and use it to run-time select the usage of threads.
+	
 2005-01-02 Borut Razem <borut.razem@siol.net>
 	* gui/gui_break.cc, gui/dialog.cc, gui/gui_init.cc, gui/gui_menu.cc,
 	  gui/gui_processor.cc, gui/gui_src.cc, gui/gui_src_asm.cc
