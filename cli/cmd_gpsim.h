@@ -4,12 +4,6 @@
 
 #include <stdarg.h>
 
-#define CMD_ERR_OK                    0
-#define CMD_ERR_ABORTED               1
-#define CMD_ERR_ERROR                 2
-#define CMD_ERR_PROCESSORDEFINED      3
-#define CMD_ERR_PROCESSORNOTDEFINED   4
-#define CMD_ERR_COMMANDNOTDEFINED     5
 #if defined(putc)
 #undef putc
 #endif
