@@ -598,7 +598,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
   switch(condition) {
   case G_IO_IN:
     {
-#if GTK_MAJOR_VERSION >= 2
+#if GLIB_MAJOR_VERSION >= 2
       gsize terminator_pos;
 
       std::cout << "Reading bytes\n";
