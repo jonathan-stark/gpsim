@@ -91,6 +91,7 @@ public:
   list<Attribute *> attributes;   // A list of attributes that pertain to the Module
   Package  *package;              // A package for the module
   ModuleInterface *interface;     // An interface to the module.
+  SIMULATION_MODES simulation_mode; // describes the simulation state for this module
 
 
   XrefObject *xref;               // Updated when the module changes

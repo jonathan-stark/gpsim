@@ -201,10 +201,52 @@
 				RelativePath=".\gui.h">
 			</File>
 			<File
+				RelativePath=".\gui_breadboard.h">
+			</File>
+			<File
 				RelativePath=".\gui_callbacks.h">
 			</File>
 			<File
 				RelativePath=".\gui_interface.h">
+			</File>
+			<File
+				RelativePath=".\gui_object.h">
+			</File>
+			<File
+				RelativePath=".\gui_processor.h">
+			</File>
+			<File
+				RelativePath=".\gui_profile.h">
+			</File>
+			<File
+				RelativePath=".\gui_register.h">
+			</File>
+			<File
+				RelativePath=".\gui_regwin.h">
+			</File>
+			<File
+				RelativePath=".\gui_scope.h">
+			</File>
+			<File
+				RelativePath=".\gui_src.h">
+			</File>
+			<File
+				RelativePath=".\gui_stack.h">
+			</File>
+			<File
+				RelativePath=".\gui_statusbar.h">
+			</File>
+			<File
+				RelativePath=".\gui_stopwatch.h">
+			</File>
+			<File
+				RelativePath=".\gui_symbols.h">
+			</File>
+			<File
+				RelativePath=".\gui_trace.h">
+			</File>
+			<File
+				RelativePath=".\gui_watch.h">
 			</File>
 			<File
 				RelativePath=".\settings.h">

@@ -3,8 +3,8 @@
 
 ## Use: make -f makefile.mingw
 
-PARTS=gpsim modules
-CLEAN_PARTS=$(PARTS) cli src gui
+PARTS=cli src gui gpsim modules
+CLEAN_PARTS=$(PARTS)
 
 all :
 	for D in $(PARTS); do (cd $$D && $(MAKE) -f makefile.mingw all); done

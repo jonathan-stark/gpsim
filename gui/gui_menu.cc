@@ -491,7 +491,7 @@ static void set_simulation_mode(char m)
     if(gp && gp->cpu)
       gp->cpu->pma->stop();
 
-    config_set_variable("dispatcher", "simulation_mode", m);
+    config_set_variable("dispatcher", "SimulationMode", m);
 }
 
 static void
@@ -595,7 +595,7 @@ void create_dispatcher (void)
 
       GtkWidget *update_rate_menu;
 
-      int simulation_mode;
+      int SimulationMode;
       
       dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -679,11 +679,11 @@ void create_dispatcher (void)
 
 
       frame = gtk_frame_new("Simulation mode");
-      if(!config_get_variable("dispatcher", "simulation_mode", &simulation_mode))
+      if(!config_get_variable("dispatcher", "SimulationMode", &SimulationMode))
       {
-	  simulation_mode='R';
+	  SimulationMode='R';
       }
-      set_simulation_mode(simulation_mode);
+      set_simulation_mode(SimulationMode);
 	update_rate_menu = gtk_option_menu_new();
         gtk_widget_show(update_rate_menu);
 	gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
@@ -763,7 +763,7 @@ void create_dispatcher (void)
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
 
 	int gui_update_index=0;
-	switch(simulation_mode) // ugh
+	switch(SimulationMode) // ugh
 	{
 	case '5':
             gui_update_index=0;

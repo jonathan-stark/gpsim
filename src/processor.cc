@@ -49,9 +49,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 
-
-SIMULATION_MODES simulation_mode;
-
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
 // 'active' means that it's the one currently being simulated or the one

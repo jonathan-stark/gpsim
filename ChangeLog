@@ -1,5 +1,12 @@
 2004-09-29 Scott Dattalo <scott@dattalo.com>
-	* gui/gui_src_asm.cc, src/pic-instructions.cc: Uninitialed variables
+	* cli/input.cc, gui/gui_menu.cc, gui/gui_src_asm.cc, 
+	src/modules.h, src/modules.cc, src/processor.cc,
+	src/pic-processor.cc, src/pic-processor.h, src/trace.h
+	plat/win32/gpsim.def: Clean ups to get the Windows
+	port to compile.
+	
+2004-09-29 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc, src/pic-instructions.cc: Uninitialized variables
 	in the instruction class were causing the source browser to
 	place objects beyond the range allocated to the source browser.
 	This confused GTK+ 2.x.

@@ -35,8 +35,6 @@ class Register;
 class sfr_register;
 class pic_register;
 
-extern SIMULATION_MODES simulation_mode;
-
 enum PROCESSOR_TYPE
 {
   _PIC_PROCESSOR_,

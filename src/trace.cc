@@ -1374,9 +1374,9 @@ void ProfileKeeper::catchup(void)
         return;
     for(unsigned int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK)
     {
+	  /*
 	switch (trace.trace_buffer[i] & 0xff000000)
 	{
-	  /*
 	case Trace::INSTRUCTION:
 	    instruction_address=trace_pc_value;
 	    cpu->program_memory[instruction_address]->cycle_count++;
@@ -1404,9 +1404,9 @@ void ProfileKeeper::catchup(void)
 		r->write_access_count++;
 	    }
 	    break;
-	    */
 		break;
 	}
+	    */
     }
 
     last_trace_index = trace.trace_index;

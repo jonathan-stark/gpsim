@@ -84,6 +84,7 @@ Module::Module(void)
 
   xref = new XrefObject;
 
+  simulation_mode = STOPPED;
   widget = 0;
 }
 
