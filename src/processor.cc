@@ -365,6 +365,15 @@ void Processor::build_program_memory(int *memory,int minaddr, int maxaddr)
 
 }
 
+//-------------------------------------------------------------------
+void Processor::set_out_of_range_pm(int address, int value)
+{
+
+  cout << "Warning::Out of range address " << address << " value " << value << endl;
+  cout << "Max allowed address is " << (program_memory_size()-1) << '\n';
+
+}
+
 
 //-------------------------------------------------------------------
 //
@@ -748,7 +757,6 @@ void Processor::step_over (void)
 void Processor::run_to_address (unsigned int destination)
 { 
   
-  unsigned int saved_pc = pc->value;
   
   if(simulation_mode != STOPPED) {
     if(verbose)
@@ -762,17 +770,6 @@ void Processor::run_to_address (unsigned int destination)
   bp.clear(bp_num);
      
 }    
-
-//------------------------------------------------------------------------
-// What is this doing here???
-// FIXME
-invalid_file_register::invalid_file_register(unsigned int at_address)
-{
-
-  char name_str[100];
-  sprintf (name_str, "invalid fr  0x%02x", at_address);
-  new_name(name_str);
-}
 
 //-------------------------------------------------------------------
 //
@@ -975,12 +972,8 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   Breakpoint_Instruction *b=bpi;
   instruction *prev = get_base_instruction(addr-1);
 
-  if(prev) {
-    if(prev->isa() == instruction::MULTIWORD_INSTRUCTION) {
-      ((multi_word_instruction *)prev)->initialized = 0;
-    }
-  }
-  
+  if(prev)
+    prev->initialize(false);
 
   new_inst->update_line_number(old_inst->get_file_id(), 
 			       old_inst->get_src_line(), 

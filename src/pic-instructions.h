@@ -95,26 +95,23 @@ public:
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
-  //#ifdef HAVE_GUI
-  // If we are linking with a gui, then here are a
-  // few declarations that are used to send data to it.
-  // This is essentially a singly-linked list of pointers
-  // to structures. The structures provide information
-  // such as where the instruction is located (in the gui), 
-  // the type of window it's in, and also the way in which
-  // the data is presented
+  // Some instructions require special initialization after they've
+  // been instantiated. For those that do, the instruction base class
+  // provides a way to control the initialization state (see the 16-bit
+  // PIC instructions).
+  virtual void initialize(bool init_state) {};
 
   int is_modified; // flag indicating if this instruction has
                    // changed since start.
 
   guint64 cycle_count; // Nr of cycles used up by this instruction
 
+
+  // xref - a Cross reference object.
+  // External applications like the gui can register call back functions
+  // through the xref object. 
+
   XrefObject *xref;
-  
-//    GSList *gui_xref;
-//    virtual void assign_xref(gpointer);
-//    virtual GSList *get_gui_xref(void) {return gui_xref;};
-  //#endif
 
 };
 

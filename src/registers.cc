@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 //#include "stimuli.h"
 
 #include "xref.h"
+#include "pic-registers.h"
 
 //--------------------------------------------------
 // Member functions for the file_register base class
@@ -50,7 +51,7 @@ Register::Register(void)
 
 }
 
-Rregister::~Register(void)
+Register::~Register(void)
 {
   if(name_str1)
     delete(name_str1);
@@ -187,3 +188,14 @@ void Register::put_value(unsigned int new_value)
     xref->update();
 
 }
+
+
+//------------------------------------------------------------------------
+invalid_file_register::invalid_file_register(unsigned int at_address)
+{
+
+  char name_str[100];
+  sprintf (name_str, "invalid fr  0x%02x", at_address);
+  new_name(name_str);
+}
+

@@ -63,7 +63,7 @@ void TMR0::start(int restart_value, int sync)
   //if(verbose)
     cout << "TMRO::start\n";
 
-  old_option = cpu->option_reg.value;
+  old_option = cpu_pic->option_reg.value;
 
   prescale = 1 << get_prescale();
   prescale_counter = prescale;
@@ -111,7 +111,7 @@ void TMR0::clear_break(void)
 
 unsigned int TMR0::get_prescale(void)
 {
-  return (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
+  return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
 }
 
 // %%%FIX ME%%% 
@@ -209,7 +209,7 @@ void TMR0::new_prescale(void)
 
   int new_value;
 
-  int option_diff = old_option ^ cpu->option_reg.value;
+  int option_diff = old_option ^ cpu_pic->option_reg.value;
 
   old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
 
@@ -218,7 +218,7 @@ void TMR0::new_prescale(void)
     if(verbose)
       cout << "T0CS has changed to ";
 
-    if(cpu->option_reg.get_t0cs()) {
+    if(cpu_pic->option_reg.get_t0cs()) {
       // External clock
       if(verbose)
 	cout << "external clock\n";
@@ -287,11 +287,11 @@ void TMR0::new_prescale(void)
 
 unsigned int TMR0::get_t0cs(void)
 {
-  return cpu->option_reg.get_t0cs();
+  return cpu_pic->option_reg.get_t0cs();
 }
 void TMR0::set_t0if(void)
 {
-  if(cpu->base_isa() == _14BIT_PROCESSOR_)
+  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
     {
       cpu14->intcon->set_t0if();
     }

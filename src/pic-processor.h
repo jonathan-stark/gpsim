@@ -244,38 +244,11 @@ public:
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
-  virtual int  map_pm_address2index(int address) {return address;};
-  virtual int  map_pm_index2address(int index) {return index;};
-  void attach_src_line(int address,int file_id,int sline,int lst_line);
-  void read_src_files(void);
 
   // A couple of functions for manipulating  breakpoints
-  virtual int  find_closest_address_to_line(int file_id, int src_line);
-  virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
-  void set_break_at_address(int address);
-  void set_notify_at_address(int address, BreakCallBack *cb);
-  void set_profile_start_at_address(int address, BreakCallBack *cb);
-  void set_profile_stop_at_address(int address, BreakCallBack *cb);
-  void clear_break_at_address(int address);
-  void clear_notify_at_address(int address);
-  void clear_profile_start_at_address(int address);
-  void clear_profile_stop_at_address(int address);
-  int address_has_break(int address);
-  int address_has_notify(int address);
-  int address_has_profile_start(int address);
-  int address_has_profile_stop(int address);
-  instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
-  void toggle_break_at_address(int address);
-  void set_break_at_line(int file_id, int src_line);
-  void clear_break_at_line(int file_id, int src_line);
-  void toggle_break_at_line(int file_id, int src_line);
-  void set_break_at_hll_line(int file_id, int src_line);
-  void clear_break_at_hll_line(int file_id, int src_line);
-  void toggle_break_at_hll_line(int file_id, int src_line);
 
   void init_register_memory(unsigned int memory_size);
   //  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
-  virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
   // %%% FIX ME %%% remove return and added 14bit member.
@@ -284,7 +257,6 @@ public:
   virtual void create_stack(void) {stack = new Stack;};
   void load_hex(char *hex_file);
   void run(void);
-  void run_to_address(unsigned int destination);
   void sleep(void);
   void step(unsigned int steps);
   void step_over(void);
@@ -310,16 +282,10 @@ public:
   virtual void por(void);
   virtual void create(void);
 
-  virtual unsigned int program_memory_size(void) const {return 0;};
   void init_program_memory(int address, int value);
-  virtual void set_out_of_range_pm(int address, int value);
-  guint64 cycles_used(unsigned int address);
-  guint64 register_read_accesses(unsigned int address);
-  guint64 register_write_accesses(unsigned int address);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};
-  virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
 
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */
@@ -335,14 +301,9 @@ public:
   
   virtual unsigned int map_fsr_indf ( void )
     {
-      return ( this->fsr->value );
+      return ( fsr->value );
     }
 
-
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
   static pic_processor *construct(void);
   pic_processor(void);

@@ -677,7 +677,7 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
   if(!pic)
     return 0;
 
-  return pic->address_has_break(address);
+  return pic->address_has_break(address,instruction::BREAKPOINT_INSTRUCTION);
 }
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
@@ -1159,7 +1159,8 @@ void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 	return;
 
     while(gpsim_address_has_breakpoint(processor_id,address))
-	pic->clear_break_at_address(address);
+	pic->clear_break_at_address(address,
+				    instruction::BREAKPOINT_INSTRUCTION);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address)
