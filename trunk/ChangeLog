@@ -1,3 +1,7 @@
+2005-03-08 Scott Dattalo <scott@dattalo.com>
+	* src/value.cc, gui/gui_profile.cc, gui/gui_statusbar.cc,
+	gui/gui_trace.cc: Corrected temporary hack regarding PRINTF_INT64_MODIFIER
+
 2005-03-08 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: removed examples\14bit\*.inc
 	* cli/cmd_manager.h: added newline at the end of file

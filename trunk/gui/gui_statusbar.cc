@@ -324,8 +324,7 @@ CyclesLabeledEntry::CyclesLabeledEntry()
 void CyclesLabeledEntry::Update(void)
 {
   char buffer[32];
-  //sprintf(buffer,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
-  sprintf(buffer,"0x%016Lx",get_cycles().value);
+  sprintf(buffer,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
   gtk_entry_set_text (GTK_ENTRY (entry), buffer);
 }
 
