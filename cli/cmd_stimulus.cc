@@ -372,7 +372,7 @@ void cmd_stimulus::end(void)
     return;
   }
 
-  switch( options_entered & (STIM_SQW | STIM_TRI | STIM_ASY))
+  switch( options_entered & (STIM_SQW | STIM_TRI | STIM_ASY | STIM_ATTRIBUTE))
     {
     case STIM_SQW:
       if(verbose)

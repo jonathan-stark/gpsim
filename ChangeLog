@@ -1,4 +1,10 @@
 2004-11-29 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_stimulus.cc: register stim were not getting started.
+	* regression/register_stim/register_stim.[asm|stc], 
+	regression/run_regression.sh:
+	Added a regression test for register stimuli.
+	
+2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc, src/value.cc, src/value.h: Redesigned
 	the 'asynchronous_stimulus' to be a 'ValueStimulus'.
 	Added a new stimulus type: AttributeStimulus. An attribute stimulus
