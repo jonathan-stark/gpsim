@@ -267,9 +267,12 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 	  //dump_breakpoints();   // debug
 	}
     }
-  else
-    cout << " Cycle_Counter::reassign_break - didn't find the old one\n";
-
+  else {
+    // If the break point was not found, it can't be moved. So let's just create
+    // a new break point.
+    cout << " Warning: Cycle_Counter::reassign_break - didn't find the old one\n";
+    set_break(new_cycle, f);
+  }
 }
 
 void Cycle_Counter::clear_current_break(void)

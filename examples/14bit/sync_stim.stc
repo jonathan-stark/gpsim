@@ -1,4 +1,4 @@
-set verbose 3
+# set verbose 3
 # gpsim
 
 # Startup command file for stim_test.hex
@@ -9,7 +9,7 @@ processor p16c84 fred
 
 # Load the .hex file
 
-load h stim_test.hex
+load s stim_test.cod
 
 # Create a stimulus node:
 node test_node
@@ -30,11 +30,13 @@ high_time 300
 
 phase 100
 
-port portb 0
+# port portb 0
 
 end
 
 echo stimulus created
+
+attach test_node portb0 sa_square_wave
 
 # Set a cycle break point on the One hundred thousand'th
 # execution cycle

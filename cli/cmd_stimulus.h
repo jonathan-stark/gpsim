@@ -27,7 +27,7 @@ class cmd_stimulus : public command
 public:
   int valid_options,options_entered;
   int have_data;
-
+  /*
   unsigned int period,
     phase,
     high_time,
@@ -41,7 +41,7 @@ public:
   char *stim_name;
 
   vector<StimulusDataType>  temp_array;
-
+  */
   cmd_stimulus(void);
   void stimulus(void);
 

@@ -1,7 +1,7 @@
 
 	;; gpasm bug --- c64 is not recognized...
 	
-	list	p=16c84
+	list	p=16c64
   __config _wdt_off
 
 	;; The purpose of this program is to test gpsim's ability to simulate a pic 16c64's
@@ -104,6 +104,15 @@ main:
 	;; Test rollover
 	;;  the following block of code will test tmr1's rollover for
 	;; each of the 4 prescale values.
+	;;
+	;; The way it works is by starting the timer and waiting for it
+	;; to rollover. When the timer rolls over, it will generate an
+	;; interrupt. The interrupt routine will see the least significant
+	;; bit in 'temp1'. So we just monitor this bit until it goes hign.
+	;;
+	;; After tmr1 rolls over 4 times, we increment the prescaler and
+	;; wait for more rollovers. We repeat this for each one of the
+	;; prescale values.
 	
 	clrf	x
 
@@ -122,12 +131,12 @@ tmr1_test1:
 	bcf	temp1,0
 	
 	incf	x,f
-	btfss	x,2
+	btfss	x,2		; check for x mod 4 == 0
 	 goto   tmr1_test1
 
 	clrf	x
 
-	movf	t1con,w
+	movf	t1con,w		; Increment the prescaler.
 	addlw   (1<<t1ckps0)
 	movwf   t1con
 	andlw	0x40

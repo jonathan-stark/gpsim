@@ -373,6 +373,12 @@ void stimulus::put_state_value(int new_state)
   if(xref) xref->update();
 }
 
+void stimulus::put_name(char *n)
+{
+
+  strncpy(name_str,n, STIMULUS_NAME_LENGTH);
+    
+}
 //========================================================================
 
 
@@ -403,9 +409,18 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char 
   add_stimulus(this);
 }
 
+// Create a square wave given only a (possibly) a name
+
+square_wave::square_wave(char *n=NULL)
+{
+  square_wave(0,0,0,n);
+}
+
+
 int square_wave::get_voltage(guint64 current_time)
 {
-  //  cout << "Getting new state of the square wave.\n";
+  if(verbose)
+    cout << "Getting new state of the square wave.\n";
   if( ((current_time+phase) % period) <= duty)
     return drive;
   else
@@ -466,6 +481,14 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   add_stimulus(this);
 }
 
+// Create a triangle wave given only a (possibly) a name
+
+triangle_wave::triangle_wave(char *n=NULL)
+{
+  triangle_wave(0,0,0,n);
+}
+
+
 int triangle_wave::get_voltage(guint64 current_time)
 {
   //cout << "Getting new state of the triangle wave.\n";
@@ -521,7 +544,9 @@ void asynchronous_stimulus::callback(void)
   // If we've passed through all of the states
   // then start over from the beginning.
 
-  if( (++current_index) >= max_states)
+  //  if( (++current_index) >= max_states)
+  current_sample = current_sample->next;
+  if(!current_sample)
     {
       if(period == 0)     // If the period is zero then we don't want to 
 	return;           // regenerate the pulse stream.
@@ -530,20 +555,24 @@ void asynchronous_stimulus::callback(void)
       // we've rolled over, so let's start from the beginning.
       // The start cycle for this next set of pulses is shifted over 
       // by 'period' cycles.
-      current_index = 0;
+      //current_index = 0;
+      if(!samples)
+	return;
+      current_sample = samples;
       start_cycle += period;
-      future_cycle = *transition_cycles + start_cycle;
+      //future_cycle = *transition_cycles + start_cycle;
 
       //cout << "  stimulus rolled over\n";
       //cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
-  else
-    {
-      // toggle the next state and get the cycle at which it will change
+  //  else
 
-      future_cycle = *(transition_cycles + current_index) + start_cycle;
+      // get the cycle at which it will change
+      
+      //future_cycle = *(transition_cycles + current_index) + start_cycle;
+      future_cycle = ((StimulusDataType *)(current_sample->data))->time + start_cycle;
+      
 
-    }
 
   if(future_cycle <= current_cycle)
     {
@@ -552,7 +581,8 @@ void asynchronous_stimulus::callback(void)
       future_cycle = current_cycle+1;
     }
   else
-      next_state = *(values + current_index);
+    next_state = ((StimulusDataType *)(current_sample->data))->value;
+  // next_state = *(values + current_index);
 
   cpu->cycles.set_break(future_cycle, this);
 
@@ -579,11 +609,12 @@ int asynchronous_stimulus::get_voltage(guint64 current_time)
 void asynchronous_stimulus::start(void)
 {
 
-  if(cpu  && transition_cycles)
+  if(cpu && samples) //  && transition_cycles)
     {
 
       if(max_states == 0)
 	return;
+
 
       current_index = 0;
 
@@ -593,10 +624,11 @@ void asynchronous_stimulus::start(void)
       current_state = initial_state;
 
       start_cycle = cpu->cycles.value + phase;
-      future_cycle = *(transition_cycles + current_index) + start_cycle;
+      //future_cycle = *(transition_cycles + current_index) + start_cycle;
+      future_cycle = ((StimulusDataType *)(samples->data))->time + start_cycle;
 
-      if( (period!=0) && (period<transition_cycles[max_states-1]))
-	cout << "Warning: Asynchronous Stimulus has a period shorter than its last event.\n";
+      //if( (period!=0) && (period<transition_cycles[max_states-1]))
+      //  cout << "Warning: Asynchronous Stimulus has a period shorter than its last event.\n";
       // This means that the stimulus will not rollover.\n";
 
       cpu->cycles.set_break(future_cycle, this);
@@ -605,6 +637,7 @@ void asynchronous_stimulus::start(void)
 	cout << "Asynchronous stimulus\n";
 	cout << "  states = " << max_states << '\n';
       }
+      /*
       for(int i=0; i<max_states; i++)
 	{
 	  if(digital)
@@ -617,14 +650,47 @@ void asynchronous_stimulus::start(void)
 	  if(verbose&2)
 	    cout << "    " << transition_cycles[i] <<  '\t' << values[i] << '\n';
 	}
-
+      */
       cout << "period = " << period << '\n'
 	   << "phase = " << phase << '\n'
 	   << "start_cycle = " << start_cycle << '\n'
 	   << "Next break cycle = " << future_cycle << '\n';
 
-      next_state = *values;
+      //next_state = *values;
+      next_state = ((StimulusDataType *)(samples->data))->value;
+
     }
+
+  if(verbose)
+    cout << "asy should've been started\n";
+}
+
+//-------------------------------------------------------------
+// put_data
+//
+// FIXME - this sucks, but as it stands now (0.19.0) gpsim doesn't
+// allow you to specify any kind of typing info with asy stimuli data. So 
+// it's easy to get the time and value mixed up.
+//
+// Place the next integer into the 'samples' linked list.
+// 
+void asynchronous_stimulus::put_data(guint64 data_point)
+{
+  if(data_flag) {
+    if(samples) {
+      ((StimulusDataType *)(samples->data))->value = data_point;
+    } else {
+      samples = g_slist_append(samples, (void *)(new StimulusDataType) );
+
+      ((StimulusDataType *)(samples->data))->time = data_point;
+    }
+  }
+  data_flag ^= 1;
+}
+
+void asynchronous_stimulus::put_data(float data_point)
+{
+  put_data( ((guint64)(MAX_ANALOG_DRIVE * data_point))) ;
 
 }
 
@@ -636,10 +702,20 @@ void asynchronous_stimulus::start(void)
 asynchronous_stimulus::asynchronous_stimulus(char *n=NULL)
 {
   cpu = NULL;
-  transition_cycles = NULL;
-  values = NULL;
+  //transition_cycles = NULL;
+  //values = NULL;
   snode = NULL;
   next = NULL;
+
+  period = 0;
+  duty   = 0;
+  phase  = 0;
+  initial_state  = 0;
+  start_cycle    = 0;
+
+  current_sample = NULL;
+  data_flag = 0;
+  samples = NULL;
 
   if(n)
     strcpy(name_str,n);
@@ -1097,8 +1173,9 @@ void IO_open_collector::change_direction(unsigned int new_direction)
 //  Support functions that will get replaced by the CORBA interface.
 //  
 
-source_stimulus *last_stimulus=NULL;
+//source_stimulus *last_stimulus=NULL;
 
+/*
 void create_stimulus(int type, char *name)
 {
   //cout << "Got request to create a stimulus \n";
@@ -1131,7 +1208,8 @@ void create_stimulus(int type, char *name)
   last_stimulus->start_cycle    = 0;
 
 }
-
+*/
+/*
 void stimorb_period(unsigned int _period)
 {
   if(last_stimulus)
@@ -1172,10 +1250,12 @@ void stimorb_name(char *_name)
   //cout << " after " << last_stimulus->name() << '\n';
 
 }
+*/
 
-
+/*
 void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_array )
 {
+
   if(!last_stimulus)
     return;
   asynchronous_stimulus *asy;
@@ -1202,7 +1282,7 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_a
 	    break;
 
 	  case STIMULUS_DPT_FLOAT:
-	    new_data = (int)MAX_ANALOG_DRIVE * dp.data_point.f;
+	    new_data = (int)(MAX_ANALOG_DRIVE * dp.data_point.f);
 	    break;
 
 	  default:
@@ -1223,8 +1303,11 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_a
 
       //cout << "Starting asynchronous stimulus\n";
       asy->start();
+      if(verbose)
+	cout << __FUNCTION__ << "()\n";
     }
 }
+  */
 
 // Char list.
 // Here's a singly linked-list of char *'s.

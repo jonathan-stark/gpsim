@@ -227,7 +227,7 @@ break_cmd: BREAK
 
 bus_cmd: BUS
           { 
-	    c_bus.list_busses();
+	    c_bus.list_busses(); YYABORT;
 	  }
           | BUS string_list
           {
@@ -284,6 +284,7 @@ load_cmd: LOAD bit_flag STRING
 		quit_parse = 0;
 		YYABORT;
 	      }
+	     YYABORT;
 	  }
           ;
 
