@@ -125,6 +125,8 @@ void GUI_Object::ChangeView (int view_state)
 	printf("warning %s\n",__FUNCTION__);
 	set_default_config();
       }
+      
+      enabled=1;
 
       Build();
 
@@ -133,18 +135,24 @@ void GUI_Object::ChangeView (int view_state)
       // in GTK+ 2.2.1 under Linux that it is.
       gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
       gtk_widget_show(window);
+      
+      enabled=1;
+
+      // Update the config database
+      set_config();
 
     }
 
-    enabled=1;
   }
   else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window))) {
+
     enabled=0;
+    
+    // Update the config database
+    set_config();
+
     gtk_widget_hide(window);
   }
-
-  // Update the config database
-  set_config();
 
   // Update menu item
   UpdateMenuItem();
@@ -188,8 +196,8 @@ void GUI_Object::check(void)
 {
 #define MAX_REASONABLE   2000
 
-  if((x < 0 || x > MAX_REASONABLE) ||
-     (y < 0 || y > MAX_REASONABLE) ||
+  if((x+width < 0 || x > MAX_REASONABLE) ||
+     (y+height < 0 || y > MAX_REASONABLE) ||
      (width < 0 || width > MAX_REASONABLE) ||
      (height < 0 || height > MAX_REASONABLE) )
 

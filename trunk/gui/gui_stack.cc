@@ -160,8 +160,8 @@ static int get_closest_label(Stack_Window *sw,
 
     Value *s = *sti;
 
-    if(  (typeid(*s) == typeid(address_symbol)) ||
-	 (typeid(*s) == typeid(line_number_symbol))) {
+    if(  (typeid(*s) == typeid(address_symbol)) /*||
+	 (typeid(*s) == typeid(line_number_symbol))*/) {
       int i;
       (*sti)->get(i);
       delta = abs( i - address);
@@ -316,8 +316,6 @@ void Stack_Window::Build(void)
 
   gtk_widget_show (window);
 
-
-  enabled=1;
 
   bIsBuilt = true;
     

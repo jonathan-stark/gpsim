@@ -705,15 +705,6 @@ static void draw_nodes(Breadboard_Window *bbw)
 
 
     layout_adj_changed(0,bbw);
-/*    gdk_draw_pixmap(GTK_LAYOUT (bbw->layout)->bin_window,
-		    ((GUI_Object*)bbw)->window->style->white_gc,
-		    bbw->layout_pixmap,
-		    0, 0,
-		    0, 0,
-		    LAYOUTSIZE_X,
-		    LAYOUTSIZE_Y);
-
-    gtk_widget_queue_draw(bbw->layout);*/
 }
 
 
@@ -2440,22 +2431,25 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	list <Value *> :: iterator attribute_iterator;
 	m = p->module;
 
-	fprintf(fo, "module load %s %s\n",
-		m->type(),
-		m->name().c_str());
+    	Processor *cpu;
+	cpu=dynamic_cast<Processor*>(m);
+	if(cpu==0)
+	{ // Module, not a processor, so add the load command
+		fprintf(fo, "module load %s %s\n",
+			m->type(),
+			m->name().c_str());
+	}
 
 	for(attribute_iterator = m->attributes.begin();
 		attribute_iterator != m->attributes.end();
 		attribute_iterator++) {
 
 		Value *locattr = *attribute_iterator;
-		//char attrval[50];
-		//locattr->getAsStr(attrval,50);
 		
-		fprintf(fo, "module set %s %s %s\n",
+		fprintf(fo, "%s.%s=%s\n",
 			m->name().c_str(),
 			locattr->name().c_str(),
-			"broken" ); //attrval);
+			locattr->toString().c_str());
 	}
 	fprintf(fo, "\n");
 	module_iterator=module_iterator->next;
@@ -2676,7 +2670,8 @@ void GuiModule::Refresh()
 
   // rebuild module
   // FIXME maybe just Build()?
-  new GuiModule(module, bbw);
+  Build();
+  //new GuiModule(module, bbw);
 
   gtk_widget_unref(module_widget);
 }
@@ -3181,9 +3176,6 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
   if(!gp || !gp->cpu)
     return;
 
-  if(!bIsBuilt)
-    Build();
-
   Update();
 }
 
@@ -3194,9 +3186,6 @@ void Breadboard_Window::NewModule(Module *module)
     return;
 
   GuiModule *p=new GuiModule(module, this);
-
-  if(!bIsBuilt)
-    Build();
 
   if(grab_next_module)
     grab_module(p);
@@ -3211,9 +3200,6 @@ void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 
   if(!enabled)
     return;
-
-  if(!bIsBuilt)
-    Build();
 
   struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name().c_str());
 
@@ -3270,7 +3256,6 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 		    bbw->layout->allocation.width,
 		    bbw->layout->allocation.height);
 
-    //04oct04  gtk_widget_queue_draw(bbw->layout);
 }
 
 static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
@@ -3284,27 +3269,6 @@ static gboolean layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboa
 
     layout_adj_changed(widget, bbw);
 
-	//draw_board_matrix(bbw);
-
-  /*
-    int xoffset, yoffset;
-    GtkAdjustment *xadj, *yadj;
-
-    xadj = gtk_layout_get_hadjustment (GTK_LAYOUT(widget));
-    yadj = gtk_layout_get_vadjustment (GTK_LAYOUT(widget));
-
-    xoffset = (int) GTK_ADJUSTMENT(xadj)->value;
-    yoffset = (int) GTK_ADJUSTMENT(yadj)->value;
-
-    gdk_draw_pixmap(GTK_LAYOUT (widget)->bin_window,
-			    bbw->window->style->white_gc,
-		    bbw->layout_pixmap,
-		    event->area.x+xoffset, event->area.y+yoffset,
-		    event->area.x, event->area.y,
-		    event->area.width, event->area.height);
-
-    gtk_widget_queue_draw(widget);
-  */
     return 0;
 }
 
@@ -3765,27 +3729,32 @@ void Breadboard_Window::Build(void)
   gtk_object_set_data(GTK_OBJECT(node_tree), "root_of_nodes", gn);
 
   bIsBuilt = true;
-  enabled = 1;
 
   UpdateMenuItem();
 
   draw_nodes(this);
 
-  GList *mi = modules;
-
-  while(mi) {
-
-    GuiModule *p = static_cast<GuiModule *>(mi->data);
-
-    if(p)
-      p->Build();
-
-    mi=mi->next;
+  // Look module list
+  list <Module *>::iterator mi;
+  for(mi = instantiated_modules_list.begin();
+  	mi!=instantiated_modules_list.end();
+	mi++)
+  {
+  	NewModule(*mi);
   }
 
+  // Loop node list
+  list <Stimulus_Node *>::iterator ni;
+  for(ni = node_list.begin();
+  	ni!=node_list.end();
+	ni++)
+  {
+  	NodeConfigurationChanged(*ni);
+  }
 
   gtk_widget_show(window);
 
+  Update();
 }
 
 
@@ -3797,7 +3766,6 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
   wc = WC_misc;
   wt = WT_breadboard_window;
   window = 0;
-  enabled = 0;
 
   pinstatefont = 0;
   pinnamefont = 0;
