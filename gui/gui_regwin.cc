@@ -1173,7 +1173,16 @@ int Register_Window::LoadStyles(void)
   }
 
 #if GTK_MAJOR_VERSION >= 2
-  char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
+  //char_width = gdk_string_width(gdk_font_from_description(normalfont), "9");
+  //printf("%s\npango size %d, char_width %d\n",normalfont_string,
+  //	 pango_font_description_get_size(normalfont),char_width);
+  // FIXME - this clearly is not correct.
+  // what is wanted is a way to determine the width of a 'typical' character.
+  // We have the 'Font Description', but not the 'Font'. There is a way 
+  // to get the width of a character given the font by calling:
+  // pango_font_metrics_get_approximate_digit_width(PangoFontMetrics *)
+  char_width =pango_font_description_get_size(normalfont)*2/(3*1024);
+
 #else
   char_width = gdk_string_width (normalfont,"9");
 #endif
@@ -1185,11 +1194,8 @@ int Register_Window::LoadStyles(void)
 static int settings_active;
 static void settingsok_cb(GtkWidget *w, gpointer user_data)
 {
-    if(settings_active)
-    {
-        settings_active=0;
-//	gtk_main_quit();
-    }
+  if(settings_active)
+    settings_active=0;
 }
 
 int Register_Window::SettingsDialog(void)
@@ -1298,7 +1304,7 @@ int Register_Window::SettingsDialog(void)
   range.rowi=sheet->maxrow;
   range.col0=0;
   range.coli=sheet->maxcol;
-  gtk_sheet_range_set_font(sheet, &range, normalfont);
+  //gtk_sheet_range_set_font(sheet, &range, normalfont);
 
   // FIXME - this code doesn't look right. 'i' iterates over both
   // the columns and rows. If there are more rows then columns, then
@@ -1306,7 +1312,7 @@ int Register_Window::SettingsDialog(void)
 
   for(i=0; i<=register_sheet->maxcol; i++){
     gtk_sheet_set_column_width (register_sheet, i, column_width(i));
-    gtk_sheet_set_row_height (register_sheet, i, row_height(i));
+    //gtk_sheet_set_row_height (register_sheet, i, row_height(i));
   }
 
   gtk_sheet_set_row_titles_width(register_sheet, column_width(-1));
@@ -1935,7 +1941,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   range.col0=0;
   range.coli=register_sheet->maxcol;
 
-  gtk_sheet_range_set_font(register_sheet, &range, normalfont);
+  //gtk_sheet_range_set_font(register_sheet, &range, normalfont);
 
   border_mask = GTK_SHEET_RIGHT_BORDER |
     GTK_SHEET_LEFT_BORDER |

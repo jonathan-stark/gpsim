@@ -175,30 +175,36 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 //pixel is 0 -> maxfont-1 for line zero.
 //         maxfont -> maxfont*2-1 for line one
 //         ...
-static struct sa_entry *gui_pixel_to_entry(int id, unsigned int pixel)
+static struct sa_entry *gui_pixel_to_entry(SourceBrowserAsm_Window *sbaw, int id, unsigned int pixel)
 {
-    struct sa_entry *e;      // to simplify expressions
-    GList *p;                // iterator
 
-    assert(sa_xlate_list[id]!=0);
+  struct sa_entry *e;      // to simplify expressions
+  GList *p;                // iterator
 
-    if(pixel<0)
-	return (struct sa_entry*)sa_xlate_list[id]->data;
+  assert(sa_xlate_list[id]!=0);
+
+  if(pixel<0)
+    return (struct sa_entry*)sa_xlate_list[id]->data;
     
-    p=sa_xlate_list[id];
+  /*
+  int vadj = GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+  pixel += vadj;
+  */
 
-    // find listentry with address larger than argument
-    while(p->next!=0)
+  p=sa_xlate_list[id];
+
+  // find listentry with address larger than argument
+  while(p->next!=0)
     {
-        e = (struct sa_entry*)p->data;
-	if(e->pixel > pixel)
-	    break;
-	p=p->next;
+      e = (struct sa_entry*)p->data;
+      if(e->pixel > pixel)
+	break;
+      p=p->next;
     }
     
-    e=(struct sa_entry*)p->data;
+  e=(struct sa_entry*)p->data;
 
-    return e;
+  return e;
 }
 
 static struct sa_entry *gui_line_to_entry(int id, unsigned int line)
@@ -275,7 +281,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
   GtkWidget *new_pcw;
   int id=-1;
-    
+
   if(!source_loaded)
     return;
   if(!pma)
@@ -345,7 +351,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
     gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj),
 			     pixel-inc/2);
 
-    
   gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
 		  new_pcw,
 		  PIXMAP_SIZE,
@@ -470,17 +475,17 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 			 pages[id].source_layout,
 			 PIXMAP_POS(this,e));
 
-  else if(pma->address_has_break(address))
+  else if(pma->address_has_break(address)) {
+    printf("UpdateLine has break: row %d --- index:%d, line:%d, pixel:%d, font_center:%d\n",row,
+	   e->index,e->line,e->pixel,e->font_center);
     breakpoints.Add(address,
 		    gtk_pixmap_new(pixmap_break,bp_mask),
 		    pages[id].source_layout,
 		    PIXMAP_POS(this,e));
-  else {
+  } else {
 
     if(!e->bpwidget) {
       e->bpwidget = gtk_pixmap_new(pixmap_canbreak, canbp_mask);
-      //canbreak_widget = gtk_check_button_new (  );
-
 
       gtk_layout_put(GTK_LAYOUT(pages[id].source_layout),
 		     e->bpwidget,
@@ -702,6 +707,7 @@ void BreakPointList::Remove(int address = -1)
     {
       iter = g_list_remove(li,li->data);
       if(bpi) {
+	printf("removing break at address:%d\n",address);
 	if(bpi->widget)
 	  gtk_widget_destroy(bpi->widget);
 
@@ -732,6 +738,8 @@ void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int
 		 );
   gtk_widget_show(bpi->widget);
   iter=g_list_append(iter,bpi);
+
+  printf("Adding break at pos:%d\n",pos);
 }
 
 
@@ -748,7 +756,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 			   SourceBrowserAsm_Window *sbaw)
 {
     static unsigned int current_page=INVALID_VALUE;
-    
+    printf("switch_page_cb\n");
     if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
       return 1;
 
@@ -792,13 +800,15 @@ static gint sigh_button_event(GtkWidget *widget,
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    
+      printf("button event\n");
+
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
 	popup_sbaw=sbaw;
 
-	sbaw->menu_data = gui_pixel_to_entry(id, (int) (event->y + GTK_TEXT(sbaw->pages[id].source_text)->vadj->value));
+	//sbaw->menu_data = gui_pixel_to_entry(id, (int) (event->y + GTK_TEXT(sbaw->pages[id].source_text)->vadj->value));
+	sbaw->menu_data = gui_pixel_to_entry(sbaw, id, (int) (event->y));
 
 	
 	for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
@@ -851,6 +861,7 @@ static gint sigh_button_event(GtkWidget *widget,
 
     if(event->type==GDK_BUTTON_PRESS && event->button==4)
     { // wheel scroll up
+      printf("scroll up\n");
 	GTK_TEXT(sbaw->pages[id].source_text)->vadj->value-=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
@@ -859,6 +870,7 @@ static gint sigh_button_event(GtkWidget *widget,
     }
     if(event->type==GDK_BUTTON_PRESS && event->button==5)
     { // wheel scroll down
+      printf("scroll down\n");
 	GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment/4.0;
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
@@ -947,7 +959,7 @@ static void marker_cb(GtkWidget *w1,
 
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
     return;
-
+  printf("marker_cb\n");
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
   switch(event->type) {
@@ -989,14 +1001,19 @@ static void marker_cb(GtkWidget *w1,
 		// pixel = (position of pixmap in window)
 		//         - (constant) + (constant)
 		//         + (top of window, counting from top of text)
+		/*
 		pixel = dragbpi->widget->allocation.y-
 		  sbaw->layout_offset+PIXMAP_SIZE/2+
 		  (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+		*/
+		pixel = dragbpi->widget->allocation.y-
+		  sbaw->layout_offset+PIXMAP_SIZE/2;
 
 		// we want to remember which line drag started on
 		// to be able to disable this breakpoint later
 		// FIXME: perhaps we should simply disable bp now?
-		dragstartline = gui_pixel_to_entry(id,pixel)->line;
+		//dragstartline = gui_pixel_to_entry(id,pixel)->line;
+		dragstartline = gui_pixel_to_entry(sbaw,id,pixel)->line;
 
 		dragbreak=1;  // start drag
 		dragwidget = dragbpi->widget;
@@ -1055,10 +1072,18 @@ static void marker_cb(GtkWidget *w1,
     break;
   case GDK_2BUTTON_PRESS:
     if(event->button == 1) {
+      int pos = (int)event->y -	sbaw->layout_offset /*+ (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value */ ;
+      //sa_entry *e = gui_pixel_to_entry(id, pos);
+      sa_entry *e = gui_pixel_to_entry(sbaw, id, pos);
+      line = e->line;
       
-      line = gui_pixel_to_entry(id, (int)event->y -
-				sbaw->layout_offset +
-				(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value)->line;
+      printf("Toggling break: line:%d pos: (%d,%d), id=%d\n",line,(int)event->x,(int)event->y,id);
+      printf("                sa_entry -- index:%d, line:%d, pixel:%d, font_center:%d\n",
+	     e->index,e->line,e->pixel,e->font_center);
+      printf("                layout_offset:%d, vadj->value=%d\n",
+	     sbaw->layout_offset,
+	     (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value);
+      
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
     }
     break;
@@ -1079,10 +1104,14 @@ static void marker_cb(GtkWidget *w1,
     // pixel = (position of pixmap in window)
     //         + (constant) - (constant)
     //         + (top of window, counting from top of text)
-    pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
+    /*pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
       sbaw->layout_offset+
       (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-    line = gui_pixel_to_entry(id,pixel)->line;
+    */
+    pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
+      sbaw->layout_offset;
+    //line = gui_pixel_to_entry(id,pixel)->line;
+    line = gui_pixel_to_entry(sbaw,id,pixel)->line;
 	
     if(dragwidget == sbaw->pages[id].source_pcwidget) {
       
@@ -1102,6 +1131,13 @@ static void marker_cb(GtkWidget *w1,
   }
 }
 
+static void find_char_and_skip(char **str, char c)
+{
+  char *res = strrchr(*str,c);
+  if(res) {
+    *str = ++res;
+  }
+}
 /*
  Adds a page to the notebook, and returns notebook-id for that page.
  */
@@ -1122,13 +1158,18 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     //strcpy(str,(gp->cpu->files[file_id]).name);
     strcpy(str,fc->name().c_str());
 
-    label_string=strrchr(str,'/');
+    label_string=str;
 
+    find_char_and_skip(&label_string,'/');
+    find_char_and_skip(&label_string,'\\');
+    /*
+    label_string=strrchr(str,'/');
     if(label_string!=0)
       label_string++; // Skip the '/'
     else
       label_string=str;
-    
+    */
+
     label=gtk_label_new(label_string);
 
     gtk_notebook_append_page(GTK_NOTEBOOK(sbaw->notebook),hbox,label);
@@ -1195,8 +1236,8 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
     
-//    while(gtk_events_pending()) // display everything, so that
-//	gtk_main_iteration();  // gtk_notebook_get_current_page() works
+    while(gtk_events_pending()) // display everything, so that
+	gtk_main_iteration();  // gtk_notebook_get_current_page() works
 
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
@@ -2183,7 +2224,8 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
       // initialize variables for a new search
       searchdlg.found=0;
       searchdlg.looped=0;
-      searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value)->index;
+      //searchdlg.i = gui_pixel_to_entry(id,(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value)->index;
+      searchdlg.i = gui_pixel_to_entry(sbaw,id,0)->index;
       searchdlg.start = searchdlg.i; // remember where we started searching
     }
 
@@ -2672,6 +2714,18 @@ void SourceBrowserParent_Window::ChangeView(int view_state)
        sbaw_iterator != children.end(); 
        sbaw_iterator++)
    (*sbaw_iterator)->ChangeView(view_state);
+}
+
+int SourceBrowserParent_Window::set_config()
+{
+  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
+
+  for (sbaw_iterator = children.begin();  
+       sbaw_iterator != children.end(); 
+       sbaw_iterator++)
+   (*sbaw_iterator)->set_config();
+
+  return 0;
 }
 
 #endif // HAVE_GUI

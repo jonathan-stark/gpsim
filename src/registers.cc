@@ -166,9 +166,9 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
   const char *UndefNames[32];
 
 
-  char *cHi = strdup(HiBitNames);
-  char *cLo = strdup(LoBitNames);
-  char *cUn = strdup(UndefBitNames);
+  char *cHi = HiBitNames ? strdup(HiBitNames) : 0;
+  char *cLo = LoBitNames ? strdup(LoBitNames) : 0;
+  char *cUn = UndefBitNames ? strdup(UndefBitNames) : 0;
 
   SplitBitString(nBits, HiNames, cHi, "1");
   SplitBitString(nBits, LoNames, cLo, "0");

@@ -372,8 +372,10 @@ void  gpsimInterface::remove_interface  (unsigned int interface_id)
 
       if(an_interface->get_id()==interface_id)
       {
-	  gi.interfaces = g_slist_remove(gi.interfaces, an_interface);
-          return;
+
+	gi.interfaces = g_slist_remove(gi.interfaces, an_interface);
+	delete an_interface;
+	return;
       }
     }
 

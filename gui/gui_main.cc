@@ -112,6 +112,7 @@ public:
   virtual void NewProgram  (Processor *);
   virtual void GuiUpdate  (gpointer object);
 
+  virtual ~GUI_Interface();
 
   GUI_Interface(GUI_Processor *_gp);
 };
@@ -122,6 +123,23 @@ GUI_Interface::GUI_Interface(GUI_Processor *_gp) : Interface ( (gpointer *) _gp)
 
   gp = _gp;
 
+}
+
+GUI_Interface::~GUI_Interface()
+{
+  if(gp) {
+    gp->regwin_ram->set_config();
+    gp->regwin_eeprom->set_config();
+    gp->program_memory->set_config();
+    gp->source_browser->set_config();
+    gp->watch_window->set_config();
+    gp->stack_window->set_config();
+    gp->breadboard_window->set_config();
+    gp->trace_window->set_config();
+    gp->profile_window->set_config();
+    gp->stopwatch_window->set_config();
+    //gp->scope_window->set_config();
+  }
 }
 
 
@@ -285,10 +303,6 @@ void GUI_Interface::GuiUpdate(gpointer object)
 
 
 
-
-
-
-
 /*------------------------------------------------------------------
  * quit_gui
  *
@@ -305,6 +319,8 @@ void quit_gui(void)
     config_set_variable("dispatcher", "y", y);
     config_set_variable("dispatcher", "width", width);
     config_set_variable("dispatcher", "height", height);
+
+    get_interface().remove_interface(interface_id);
 
     gtk_main_quit();
 }
@@ -323,16 +339,6 @@ int gui_init (int argc, char **argv)
   settings = new SettingsReg("gpsim");
 #endif
 
-  // gtk is thread aware but not thread safe.
-  // Under certain circumstances, it is possible for
-  // gpsim to send commands to the gui from multiple 
-  // threads (e.g. when communicating to an external
-  // module or communicating across a socket).
-  //#if GTK_MAJOR_VERSION >= 2
-  //  gdk_threads_init();
-  //#endif
-  //  g_thread_init (NULL);
-
   if (!gtk_init_check (&argc, &argv))
   {
       return -1;
@@ -341,15 +347,14 @@ int gui_init (int argc, char **argv)
     
   gp = new GUI_Processor();
 
-  get_interface().add_interface(new GUI_Interface(gp));
+  interface_id = get_interface().add_interface(new GUI_Interface(gp));
+
   return(0);
 }
 
 void gui_main(void)
 {
-  //  GDK_THREADS_ENTER ();
   gtk_main ();
-  //  GDK_THREADS_LEAVE ();
 }
 
 #endif //HAVE_GUI
