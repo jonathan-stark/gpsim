@@ -440,7 +440,7 @@ void PCL::put(unsigned int new_value)
 void PCL::put_value(unsigned int new_value)
 {
 
-  value = new_value;
+  value = new_value & 0xff;
   cpu_pic->pc->put_value( (cpu_pic->pc->get_value() & 0xffffff00) | value);
 
   // The gui (if present) will be updated in the pc->put_value call.
@@ -453,7 +453,8 @@ unsigned int PCL::get(void)
 
 unsigned int PCL::get_value(void)
 {
-  return((value+1) & 0xff);
+  value = cpu->pc->get_value() & 0xff;
+  return(value);
 }
 //--------------------------------------------------
 // member functions for the PCLATH base class
