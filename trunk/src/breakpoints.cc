@@ -38,6 +38,8 @@ extern guint64 simulation_start_cycle;
 extern void redisplay_prompt(void);  // in input.cc
 
 // Global declaration of THE breakpoint object
+// create an instance of inline get_trace() method by taking its address
+static Breakpoints &(*dummy_bp)(void) = get_bp;
 Breakpoints bp;
 
 //------------------------------------------------------------------------
@@ -650,7 +652,7 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value)) {
+  if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value)) {
 
     if(action->evaluate()) {
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
@@ -851,7 +853,7 @@ void RegisterAssertion::execute(void)
 	 << " regMask = 0x" << regMask 
 	 << " regValue = 0x" << regValue << endl;
 
-    if( (simulation_mode == RUNNING) && 
+    if( (cpu->simulation_mode == RUNNING) && 
 	(simulation_start_cycle != cycles.value)) {
 
       action->evaluate();

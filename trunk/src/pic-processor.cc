@@ -51,7 +51,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 
-extern SIMULATION_MODES simulation_mode;
 guint64 simulation_start_cycle;
 
 

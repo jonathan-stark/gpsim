@@ -2567,7 +2567,7 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
     char buffer[256];
 
-    sprintf(buffer,"Source Browser: %s",pma->name().c_str());
+	sprintf(buffer,"Source Browser: %s",pma->name().c_str());
     gtk_window_set_title (GTK_WINDOW (window), buffer);
     printf("new source browser name: %s\n",buffer);
     if(status_bar)

@@ -71,8 +71,6 @@ extern "C" {
 }
 #endif /* HAVE_READLINE */
 
-// Defined in ../src/pic-processors.cc
-extern SIMULATION_MODES simulation_mode;
 
 extern const char *get_dir_delim(const char *path);
 extern bool bUseGUI;
@@ -158,17 +156,17 @@ static LLStack Stack;
 void catch_control_c(int sig)
 {
 
-  if(simulation_mode != STOPPED)
-    {
+  //if(simulation_mode != STOPPED)
+  //  {
       cout << "<CTRL C> break\n";
       bp.halt();
-    }
-  else {
-    cout << "caught control c, but it doesn't seem gpsim was simulating\n";
-    last_command_is_repeatable=0;
-    redisplay_prompt();
+  //  }
+  //else {
+  //  cout << "caught control c, but it doesn't seem gpsim was simulating\n";
+  //  last_command_is_repeatable=0;
+  //  redisplay_prompt();
 
-  }
+  //}
 
 }
 
@@ -458,6 +456,8 @@ gpsim_read (char *buf, unsigned max_size)
 
 }
 
+void have_line(char *);
+
 //**************************************************
 void cli_main(void)
 {
@@ -565,14 +565,14 @@ static GIOChannel *channel;
 
 static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer data)
 {
-  if(simulation_mode == STOPPED) {
+  //if(simulation_mode == STOPPED) {
 #ifdef HAVE_READLINE
     rl_callback_read_char ();
 #endif
-  } else { 
+  //} else { 
 
     // We're either running, sleeping, single stepping...
-  }
+  //}
 
   return TRUE;
 }
@@ -587,8 +587,8 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 void have_line(char *s)
 {
 
-  if(simulation_mode != STOPPED)
-    return;
+  //if(simulation_mode != STOPPED)
+  //  return;
 
   static char last_line[256] = {0};
 
