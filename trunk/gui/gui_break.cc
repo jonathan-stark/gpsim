@@ -56,6 +56,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_symbols.h"
 #include "gui_trace.h"
 #include "gui_watch.h"
+#include "gui_statusbar.h"
 
 extern GUI_Processor *gp;
 

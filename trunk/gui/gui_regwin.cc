@@ -44,6 +44,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 #include "gui_register.h"
+#include "gui_statusbar.h"
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
