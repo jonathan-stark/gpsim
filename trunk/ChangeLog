@@ -1,3 +1,9 @@
+2005-04-02 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cpp: Reverted the change J.R. made on 2005-03-31
+	because it breaks the gui for the 18F family of PICs. We'll need
+	to come up with another way of solving the initial PC value
+	problem.
+	
 2005-03-31 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cpp: Changed call ProgramCounter->get_PC() to
 	ProgramCounter->get_value() to fix a problem where the initial

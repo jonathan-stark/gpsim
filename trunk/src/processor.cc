@@ -1506,7 +1506,7 @@ char *ProgramMemoryAccess::get_opcode_name(unsigned int addr, char *buffer, unsi
 unsigned int ProgramMemoryAccess::get_PC(void)
 {
   if(cpu && cpu->pc)
-    return cpu->pc->get_PC();
+    return cpu->pc->get_value();
 
   return 0;
 }

@@ -118,6 +118,12 @@ class PortModule
 {
 public:
 
+  PortModule();
+
+  /// Whenever anything about the port changes, update() will refresh the
+  /// state.
+  void update();
+
   /// The SignalSource list is a list of all sources that can drive data
   list <SignalSource *> sources;
 
@@ -145,10 +151,29 @@ private:
 class PortRegister : public Register
 {
 public:
-
+  PortRegister()
+    : mPortModule(0)
+  {
+  }
   virtual void put(unsigned int new_value);
   virtual unsigned int get(unsigned int new_value);
 
+  void setEnableMask(unsigned int nEnableMask)
+  {
+    mEnableMask = nEnableMask;
+  }
+  unsigned int getEnableMask()
+  {
+    return mEnableMask;
+  }
+  void update()
+  {
+    if(mPortModule)
+      mPortModule->update();
+  }
+private:
+  unsigned int mEnableMask;
+  PortModule *mPortModule;
 };
 
 class PortLatch : public Register
@@ -215,6 +240,19 @@ private:
   DecoderControl *control;
   unsigned int valid_bits;
 };
+
+//========================================================================
+//========================================================================
+
+PortModule::PortModule()
+  : iopins(0)
+{
+}
+
+void PortModule::update()
+{
+
+}
 
 
 //-------------------------------------------------------------------
