@@ -1,4 +1,8 @@
 2004-09-01 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy: Fixed a bug that caused old versions of bison
+	to choke.
+	
+2004-09-01 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_macro.cc, cli/input.cc:
 	Converted the LLInput struct into a class. Now, the macro
 	command can invoke a macro and redirect it's output to the
