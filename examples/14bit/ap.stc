@@ -34,11 +34,11 @@ digital
 # Now the cycles at which stimulus changes states are
 # specified. The initial cycle was specified above. 
 
-
+{
 0x20  1
 0x40  0
 0x60  1
-
+}
 # Give the stimulus a name:
 
 name asy1

@@ -38,7 +38,7 @@ period 0x1000
 # the first cycle specified below will toggle this state.
 # In this example, the stimulus will go high at cycle 100
 # and then go low at cycle 200, high at 300, and so on
-
+{
 0x200 0
 0x300 1
 0x400 0
@@ -46,7 +46,7 @@ period 0x1000
 0x700 0
 0x800 1
 0x900 0
-
+}
 
 # Give the stimulus a name:
 

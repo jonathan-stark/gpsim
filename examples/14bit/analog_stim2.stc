@@ -24,8 +24,6 @@ load s p16c71_test.cod
 
 stimulus asynchronous_stimulus   # or we could've used asy
 
-analog  # gpsim assumes digital data by default
-
 # Specify the initial state of the stimulus. Note that this
 # is the value the stimulus is BEFORE start_cycle.
 
@@ -40,6 +38,8 @@ start_cycle 100
 
 period 5000
 
+analog  # gpsim assumes digital data by default
+
 # Now specify the data points. Each point needs two values:
 # the time at which it changes and the value to which it
 # changes. (NOTE: starting with version 0.0.10 gpsim requires
@@ -51,13 +51,14 @@ period 5000
 
 # t        v
 #---    ----------
+{
   3     4.0
  300    1.2
  400    3.14159265
  600    1.61803399
  1000   0.5772156649
  3000   2.71828183
-
+}
 # specify the ioport that this stimulus drives
 
 #                  starting with 0.0.5
@@ -78,7 +79,7 @@ end
 # stimulus:
 
 stimulus asynchronous_stimulus
-analog
+
 initial_state 4.096
 start_cycle 1
 
@@ -87,10 +88,12 @@ start_cycle 1
 
 period 0
 
+analog
 # t        v
 #---    -------
+{
   1      4.096
-
+}
 name vref
 
 end

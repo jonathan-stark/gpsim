@@ -38,8 +38,9 @@ digital
 # Now the cycles at which stimulus changes states are
 # specified. The initial cycle was specified above. 
 
-0x40  0
+{ 0x40  0
 0x80  1
+}
 
 
 # Give the stimulus a name:
