@@ -479,7 +479,14 @@ spinb_cb(GtkWidget *widget)
     gpsim_set_update_rate(value);
     config_set_variable("dispatcher", "gui_update", value);
 }
-    
+
+static int dispatcher_delete_event(GtkWidget *widget,
+				   GdkEvent  *event,
+				   gpointer data)
+{
+    do_quit_app(NULL);
+}
+
 static GtkItemFactoryCallback
 gtk_ifactory_cb (gpointer             callback_data,
 		 guint                callback_action,
@@ -576,7 +583,7 @@ void create_dispatcher (void)
 			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 			  &dispatcher_window);
       gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
-			  GTK_SIGNAL_FUNC (gtk_true),
+			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
 			  NULL);
       
       accel_group = gtk_accel_group_get_default ();
