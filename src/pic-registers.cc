@@ -239,6 +239,15 @@ void Program_Counter::skip(void)
 }
 
 //--------------------------------------------------
+// start_skip - The next instruction is going to be skipped
+//   
+
+void Program_Counter::start_skip(void)
+{
+
+}
+
+//--------------------------------------------------
 // jump - update the program counter. All branching instructions except computed gotos
 //        and returns go through here.
 

@@ -350,18 +350,19 @@ public:
   unsigned int trace_skip;
   unsigned int trace_other;
 
-  Program_Counter(void);
-  virtual void increment(void);
-  virtual void skip(void);
+  Program_Counter();
+  virtual void increment();
+  virtual void start_skip();
+  virtual void skip();
   virtual void jump(unsigned int new_value);
   virtual void interrupt(unsigned int new_value);
   virtual void computed_goto(unsigned int new_value);
   virtual void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual unsigned int get_value(void)
-    {
-      return value;
-    }
+  virtual unsigned int get_value()
+  {
+    return value;
+  }
 
   // initialize the dynamically allocated trace type
   virtual void set_trace_command(unsigned int);
@@ -369,32 +370,32 @@ public:
   // get_raw_value -- on the 16-bit cores, get_value is multiplied by 2
   // whereas get_raw_value isn't. The raw value of the program counter
   // is used as an index into the program memory.
-  virtual unsigned int get_raw_value(void)
-    {
-      return value;
-    }
+  virtual unsigned int get_raw_value()
+  {
+    return value;
+  }
 
   virtual void set_phase(int phase)
-    { 
-      instruction_phase = phase;
-    }
-  virtual int get_phase(void) 
-    {
-      return instruction_phase; 
-    }
+  { 
+    instruction_phase = phase;
+  }
+  virtual int get_phase() 
+  {
+    return instruction_phase; 
+  }
   
   void set_reset_address(unsigned int _reset_address)
-    {
-      reset_address = _reset_address;
-    }
-  unsigned int get_reset_address(void) 
-    {
-      return reset_address;
-    }
+  {
+    reset_address = _reset_address;
+  }
+  unsigned int get_reset_address() 
+  {
+    return reset_address;
+  }
 
-  void reset(void);
+  void reset();
 
-  virtual unsigned int get_next(void);
+  virtual unsigned int get_next();
 
   virtual void put_trace_state(unsigned int ts)
   {
