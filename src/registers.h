@@ -266,6 +266,12 @@ public:
     return trace_state;
   }
 
+  /*
+    convert value to a string:
+   */
+  virtual char * toString(char *str, int len);
+  virtual char * toBitStr(char *s, int len); 
+
 protected:
 
   /*

@@ -85,6 +85,7 @@ public:
   virtual int is_repeatable(void) { return 0; };
   virtual double evaluate(Expression *);
   virtual void evaluate(ExprList_t *eList,guint64 *, int *);
+  virtual Value *toValue(Expression *expr);
 
 };
 

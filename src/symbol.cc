@@ -487,9 +487,16 @@ void node_symbol::print(void)
 //------------------------------------------------------------------------
 void register_symbol::print(void)
 {
-  if(reg)
-    cout << name() << hex << " [0x" << reg->address << "] = 0x" << reg->get_value() <<'\n';
+  if(reg) {
+    char str[33];
+
+    cout << name() << hex << " [0x" << reg->address << "] = 0x" 
+	 << reg->get_value()
+	 << " = 0b" << (reg->toBitStr(str,sizeof(str)))
+	 << endl;
+  }
 }
+
 unsigned int register_symbol::get_value(void)
 {
   if(reg)
