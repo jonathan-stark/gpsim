@@ -169,7 +169,7 @@ void GUIRegister::put_value(unsigned int new_value)
   // Shadow a copy of the register value so that we can tell if it has changed
   // when we go to perform an update in the future.
 
-  shadow = reg->getRV();
+  shadow = reg->getRV_notrace();
 }
 
 void GUIRegister::put_shadow(RegisterValue new_value)
@@ -194,7 +194,7 @@ RegisterValue GUIRegister::getRV(void)
   Register *reg = get_register();
 
   if(reg)
-    return reg->getRV();
+    return reg->getRV_notrace();
 
   return RegisterValue(0,0);
 }
@@ -213,7 +213,7 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat)
     //snprintf(str,len,pCellFormat,reg->get_value());
 
     //unsigned int value = reg->get_value();
-    RegisterValue value = reg->getRV();
+    RegisterValue value = reg->getRV_notrace();
 
     if(value.data==INVALID_VALUE || !value.initialized() ) {
 
@@ -241,7 +241,7 @@ bool GUIRegister::hasChanged(void)
   if(!reg)
     return false;
 
-  RegisterValue current_value = reg->getRV();
+  RegisterValue current_value = reg->getRV_notrace();
 
   if( (shadow.data != current_value.data)  ||
       (shadow.init != current_value.init) )

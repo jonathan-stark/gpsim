@@ -87,6 +87,10 @@ else
         ]
 fi
 
+dnl - FIXME add a proper check for the pthread library and don't just assume
+dnl it exists
+
+LIBPTHREAD=-lpthread
 
 dnl Checks for libraries.
 dnl Replace `main' with a function in -lfl:

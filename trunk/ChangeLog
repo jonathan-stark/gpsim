@@ -1,3 +1,11 @@
+2004-07-02 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc: New file
+	* cli/input.cc: init_gpsim() will now create a socket.
+	Added a Socket class that is capable of creating a socket and
+	accepting commands.
+	* src/registers.h: added an option to fetch the RegisterValue object
+	without causing a trace to be emitted.
+
 2004-07-06 Borut Razem <borut.razem@siol.net>
 	* gui/settings.h, gui/settings_exdbm.h, gui/settings_exdbm.cc,
 	  gui/gui.h, plat/win32/settings_reg.h, plat/win32/settings_reg.cpp,
