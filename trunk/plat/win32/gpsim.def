@@ -77,6 +77,7 @@ EXPORTS
     ?clear@Breakpoints@@QAEXI@Z
     ?clear@TriggerObject@@UAEXXZ
     ?clear_break@Cycle_Counter@@QAEXPAVTriggerObject@@@Z
+    ?clear_break@Value@@UAEXXZ
     ?clear_break_at_address@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?clear_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?clear_current_break@Cycle_Counter@@QAEXXZ
@@ -120,6 +121,7 @@ EXPORTS
     ?get@Value@@UAEXAAN@Z
     ?get@Value@@UAEXAA_J@Z
     ?get@Value@@UAEXAA_K@Z
+    ?get@Value@@UAEXAA_N@Z
     ?get@Value@@UAEXPADH@Z
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
     ?getState@RegisterWriteTraceObject@@UAEXPAVTraceFrame@@@Z
@@ -157,6 +159,7 @@ EXPORTS
     ?get_symbol_table@@YAAAVSymbol_Table@@XZ
     ?get_trace@@YAAAVTrace@@XZ
     ?get_value@IOPORT@@UAEIXZ
+    ?get_xref@Value@@UAEPAV1@XZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
@@ -214,6 +217,7 @@ EXPORTS
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
+    ?set_break@Value@@UAEXXZ
     ?set_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
@@ -231,6 +235,7 @@ EXPORTS
     ?set_read_trace@Register@@UAEXI@Z
     ?set_trace_command@Program_Counter@@UAEXI@Z
     ?set_write_trace@Register@@UAEXI@Z
+    ?set_xref@Value@@UAEXPAV1@@Z
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
@@ -239,13 +244,17 @@ EXPORTS
     ?step@Processor@@UAEXI_N@Z
     ?step_over@Processor@@UAEX_N@Z
     ?stop@ProgramMemoryAccess@@UAEXXZ
+    ?toBitStr@Integer@@UAEPADPADH@Z
     ?toBitStr@Register@@UAEPADPADH@Z
-    ?toBitStr@RegisterValue@@QAEPADPADHI000@Z
     ?toString@Float@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@Float@@UAEPADPADH@Z
     ?toString@Integer@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@Integer@@UAEPADPADH@Z
     ?toString@Register@@UAEPADPADH@Z
     ?toString@RegisterValue@@QAEPADPADHH@Z
     ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toBitStr@gpsimObject@@UAEPADPADH@Z
+    ?toString@gpsimObject@@UAEPADPADH@Z
     ?toString@gpsimValue@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@symbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
