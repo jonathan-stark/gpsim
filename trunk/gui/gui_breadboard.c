@@ -421,6 +421,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	cross_reference->parent_window = (gpointer) bbw;
 	cross_reference->data = (gpointer) NULL;
 	cross_reference->update = xref_update;
+	cross_reference->remove = NULL;
 	gpsim_assign_pin_xref(pic_id,pin, cross_reference);
     }
     

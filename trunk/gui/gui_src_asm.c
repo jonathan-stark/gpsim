@@ -1211,6 +1211,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   cross_reference->parent_window = (gpointer) sbaw;
   cross_reference->data = (gpointer) NULL;
   cross_reference->update = pc_changed;
+  cross_reference->remove = NULL;
   gpsim_assign_pc_xref(pic_id, cross_reference);
 
   for(i=0;i<gpsim_get_number_of_source_files(pic_id);i++)

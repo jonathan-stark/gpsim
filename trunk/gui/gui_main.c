@@ -173,18 +173,27 @@ void update_program_memory(GUI_Processor *gp, unsigned int reg_number)
 
 void gui_update_object(gpointer gui_xref,int new_value)
 {
-//  GSList *gp;
+
   struct cross_reference_to_gui *xref;
 
-//  if(gui_xref)
-//    for(gp= (GSList *)gui_xref; gp; gp = gp->next)
-//      {
-//	if(gp->data)
-//	  {
   xref = (struct cross_reference_to_gui *)gui_xref;
   xref->update(xref,new_value);
-//	  }
-  //    }
+
+}
+
+/*------------------------------------------------------------------
+ * gui_remove_object
+ *
+ */
+
+void gui_remove_object(gpointer gui_xref)
+{
+
+  struct cross_reference_to_gui *xref;
+
+  xref = (struct cross_reference_to_gui *)gui_xref;
+  if(xref->remove)
+    xref->remove(xref);
 
 }
 
@@ -354,6 +363,7 @@ int gui_init (int argc, char **argv)
   CreateBreadboardWindow(gp);
 
   update_object = gui_update_object;
+  remove_object = gui_remove_object;
   new_processor = gui_new_processor;
   simulation_has_stopped = gui_simulation_has_stopped;
   new_program = gui_new_program;

@@ -1006,6 +1006,15 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
   update_ascii(rw,reg->row);
 }
 
+static void xref_remove_cell(struct cross_reference_to_gui *xref)
+{
+  if(xref == NULL)
+    return;
+
+  if(verbose)
+    printf("%s() doesn't do anything\n", __FUNCTION__);
+
+}
 static int change_view (struct _gui_object *_this, int view_state)
 {
     Register_Window *rw;
@@ -1099,6 +1108,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 	    cross_reference->parent_window = (gpointer) rw;
 	    cross_reference->data = (gpointer) rw->registers[reg_number];
 	    cross_reference->update = xref_update_cell;
+	    cross_reference->remove = xref_remove_cell;
 	    gpsim_assign_register_xref(pic_id, rw->type, reg_number, (gpointer) cross_reference);
 
 	    if(!row_created)

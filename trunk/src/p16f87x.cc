@@ -66,6 +66,9 @@ void P16F874::create(void)
 
   P16C65::create();
 
+  status.rp_mask = 0x60;  // rp0 and rp1 are valid.
+  indf.base_address_mask = 0x80; // used for indirect accesses above 0x100
+
   P16F874::create_sfr_map();
 
 }
@@ -119,6 +122,12 @@ void P16F877::create(void)
   cout << " f877 create \n";
 
   P16F874::create();
+  add_file_registers(0x110, 0x16f, 0);
+  add_file_registers(0x190, 0x1ef, 0);
+  delete_file_registers(0xf0,0xff);
+  alias_file_registers(0x70,0x7f,0x80);
+  alias_file_registers(0x70,0x7f,0x100);
+  alias_file_registers(0x70,0x7f,0x180);
 
   P16F877::create_sfr_map();
 

@@ -57,6 +57,8 @@ struct cross_reference_to_gui {
   gpointer     data;
   void         (*update)  
        (struct cross_reference_to_gui  *_this,int new_value);
+  void         (*remove)  
+       (struct cross_reference_to_gui  *_this);
 };
 
 

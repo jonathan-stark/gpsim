@@ -160,6 +160,18 @@ void gpsim_interface_init(void);
 
 extern void (*update_object) (gpointer xref,int new_value);
 
+/*
+ * remove_object - pointer to the function that is invoked when an object is removed.
+ *                 Its purpose is to notify the client when gpsim has removed something.
+ *
+ * If an object, like a register, is deleted then this function 
+ * will be called (if it's non-null). There is one parameter:
+ *  xref - this is a pointer to some structure in the client's data space.
+ *
+ *
+ */
+
+extern void (*remove_object) (gpointer xref);
 
 
 /*

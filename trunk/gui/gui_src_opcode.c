@@ -178,6 +178,7 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
   cross_reference->parent_window = (gpointer) sbow;
   cross_reference->data = (gpointer) NULL;
   cross_reference->update = pc_changed;
+  cross_reference->remove = NULL;
   gpsim_assign_pc_xref(pic_id, cross_reference);
 
   gtk_clist_freeze (GTK_CLIST (sbow->clist));

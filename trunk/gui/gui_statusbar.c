@@ -151,6 +151,7 @@ void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp)
   cross_reference->parent_window = (gpointer) sbw;
   cross_reference->data = (gpointer) sbw;
   cross_reference->update = StatusBar_update_xref;
+  cross_reference->remove = NULL;
   
   gpsim_assign_pc_xref(sbw->gp->pic_id, (gpointer) cross_reference);
 

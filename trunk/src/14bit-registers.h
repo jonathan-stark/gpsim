@@ -86,6 +86,7 @@ public:
 #define RP_MASK        0x20
 
   unsigned int break_on_z,break_on_c;
+  unsigned int rp_mask;
 
   Status_register(void);
 
@@ -466,6 +467,7 @@ class INDF : public sfr_register
 {
 public:
   unsigned int fsr_mask;
+  unsigned int base_address_mask;
 
   INDF(void);
   void put(unsigned int new_value);

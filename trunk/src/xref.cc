@@ -17,8 +17,10 @@ XrefObject::~XrefObject()
     list<void*>::iterator ioi;
 
     ioi=xrefs.begin();
-    for(;ioi!=xrefs.end();ioi++)
-	delete *ioi;
+    for(;ioi!=xrefs.end();ioi++) {
+      remove_object(*ioi);
+      delete *ioi;
+    }
 }
 
 void XrefObject::add(void *xref)
@@ -43,9 +45,8 @@ void XrefObject::update()
 	
 	if(data)
 	    new_value=*data;
-	xref=*ioi;
+	xref=(gpointer *) *ioi;
 
 	update_object(xref,new_value);
     }
 }
-

@@ -138,6 +138,7 @@ void link_src_to_gpsim(GUI_Processor *gp)
 
 	  cross_reference->data = (gpointer) address;
 	  cross_reference->update = SourceBrowser_update_line;
+	  cross_reference->remove = NULL;
 
 	  //gp->p->program_memory[i]->assign_xref((gpointer) cross_reference);
 	  gpsim_assign_program_xref(gp->pic_id, i,(gpointer) cross_reference);

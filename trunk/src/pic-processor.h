@@ -269,6 +269,8 @@ public:
   void add_file_registers(unsigned int start_address, 
 			  unsigned int end_address, 
 			  unsigned int alias_offset);
+  void delete_file_registers(unsigned int start_address, 
+			     unsigned int end_address);
   void alias_file_registers(unsigned int start_address, 
 			    unsigned int end_address, 
 			    unsigned int alias_offset);
