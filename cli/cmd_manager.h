@@ -48,6 +48,9 @@ public:
   static CCommandManager m_CommandManger;
   static CCommandManager &GetManager();
   ICommandHandler * find(const char *name);
+  ISimConsole &GetConsole() {
+    return m_Console;
+  }
 
 private:
   struct lessThan : binary_function<ICommandHandler*, ICommandHandler*, bool> {

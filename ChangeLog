@@ -1,3 +1,13 @@
+2005-04-05 J.R. Heisey <jrheisey@sourceforge.com>
+	* gpsim/main.cc, src/interface.cc, src/gpsim_interface.h,
+	cli/cmd_manager.h: Added code to support for an external module to
+	access the global ISimConsole object from the Interface class.
+
+2005-04-04 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cc,h: Added the function Processor::IsAddressInRange().
+	Use IsAddressInRange() in ProgramMemoryAccess::get_src_line() and
+	ProgramMemoryAccess::operator [](unsigned int address)
+
 2005-04-02 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cpp: Reverted the change J.R. made on 2005-03-31
 	because it breaks the gui for the 18F family of PICs. We'll need
