@@ -1,3 +1,9 @@
+2005-01-20 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc: Trigger actions were not printing
+	execution breakpoint messages.
+	* src/registers.h, src/registers.cc: Added a skip_start function to
+	the program counter.
+	
 2005-01-19 Scott Dattalo <scott@dattalo.com>
 	* src/registers.cc, src/registers.h, src/gpsim_object.cc,
 	  src/gpsim_object.h, src/symbol.cc, src/symbol.h,

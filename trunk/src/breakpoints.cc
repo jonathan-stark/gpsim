@@ -713,6 +713,8 @@ void Breakpoint_Instruction::print(void)
 {
   cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
   cout << bpName() << " at " << hex << setw(4) << setfill('0') <<  address << '\n';
+  if(message_str.size())
+    cout << "   " << message_str << endl;
 
 }
 
