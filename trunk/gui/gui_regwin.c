@@ -441,8 +441,6 @@ static void update_label(Register_Window *rw)
     int regnumber;
     char cell[100],*n;
 
-    puts("update label");
-    
     sheet=GTK_SHEET(rw->register_sheet);
     row=sheet->active_cell.row; col=sheet->active_cell.col;
 
@@ -492,8 +490,6 @@ static void update_entry(Register_Window *rw)
     char *text; 
     GtkWidget * sheet_entry;
 
-    puts("update entry");
-    
     sheet=GTK_SHEET(rw->register_sheet);
     sheet_entry = gtk_sheet_get_entry(sheet);
     row=sheet->active_cell.row; col=sheet->active_cell.col;
@@ -529,7 +525,7 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
      key->keyval==GDK_Control_R){
     if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
             if(GTK_SHEET_IN_CLIP(sheet)) gtk_sheet_unclip_range(sheet);
-            gtk_sheet_clip_range(sheet, sheet->range);
+            gtk_sheet_clip_range(sheet, &sheet->range);
     }
     if(key->keyval=='x' || key->keyval == 'X')
             gtk_sheet_unclip_range(sheet);    
@@ -688,8 +684,6 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 
     GtkSheet *sheet;
     int regnumber;
-    
-    printf("Activate sheet cell %d,%d",row,column);
     
     if(rw)
 	sheet=rw->register_sheet;
@@ -920,34 +914,31 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       {
 	  rw->registers[reg_number]->value = new_value;
 	  rw->registers[reg_number]->update_full=TRUE;
-	  printf("%x is now hilighted\n",reg_number);
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), range, &item_has_changed_color);
+	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &item_has_changed_color);
       }
       else
       {
-	  printf("%x is now normal\n",reg_number);
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), range, &normal_fg_color);
+	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &normal_fg_color);
       }
 
       if(gpsim_reg_has_breakpoint(pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &breakpoint_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &breakpoint_color);
       else if(!valid_register)
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &invalid_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &invalid_color);
       else if(gpsim_register_is_alias(((GUI_Object*)rw)->gp->pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &alias_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &alias_color);
       else
       {
 	  if(gpsim_register_is_sfr(pic_id, rw->type, reg_number))
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &sfr_bg_color);
+	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &sfr_bg_color);
 	  else
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), range, &normal_bg_color);
+	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &normal_bg_color);
       }
 
       retval=TRUE;
   }
   else if(new_value!=last_value)
   {
-      printf("%x is now changed\n",reg_number);
       if(new_value==INVALID_VALUE)
       {
 	  rw->registers[reg_number]->value = -1;
@@ -965,7 +956,7 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
 			 GTK_JUSTIFY_RIGHT,name);
 
       rw->registers[reg_number]->update_full=TRUE;
-      gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), range, &item_has_changed_color);
+      gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &item_has_changed_color);
 
       retval=TRUE;
   }
@@ -1017,8 +1008,6 @@ void RegWindow_update(Register_Window *rw)
       return;
   }
 
-  puts("\n\n\n*************************update");
-  
 //  gtk_sheet_freeze(rw->register_sheet);
   
     for(j = 0; j<=GTK_SHEET(rw->register_sheet)->maxrow; j++)
@@ -1208,7 +1197,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     range.col0=0;
     range.coli=sheet->maxcol;
 
-    gtk_sheet_range_set_font(sheet, range, normal_style->font);
+    gtk_sheet_range_set_font(sheet, &range, normal_style->font);
 
     border_mask = GTK_SHEET_RIGHT_BORDER |
 	GTK_SHEET_LEFT_BORDER |
@@ -1217,7 +1206,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 
     border_width = 1;
 
-    gtk_sheet_range_set_border(sheet, range, border_mask, border_width, 0);
+    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
 
     border_mask = GTK_SHEET_LEFT_BORDER;
     border_width = 3;
@@ -1225,7 +1214,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     range.col0=REGISTERS_PER_ROW;
     range.coli=REGISTERS_PER_ROW;
 
-    gtk_sheet_range_set_border(sheet, range, border_mask, border_width, 0);
+    gtk_sheet_range_set_border(sheet, &range, border_mask, border_width, 0);
 
     // set values in the sheet
     RegWindow_update(rw);
