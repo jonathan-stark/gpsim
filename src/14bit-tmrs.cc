@@ -492,10 +492,14 @@ unsigned int TMRH::get(void)
 
   // If the TMR1 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
+
   if(cpu->cycles.value <= tmrl->synchronized_cycle)
     return value;
 
-  //  int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+  // If he TMR is not running then return.
+  if(!tmrl->t1con->get_tmr1on())
+    return value;
+
   tmrl->current_value();
 
   value = (((tmrl->value_16bit)>>8) & 0xff);
