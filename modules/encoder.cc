@@ -186,7 +186,7 @@ Module * Encoder::construct(const char *_new_name=NULL)
 {
 
   Encoder *enc_p = new Encoder ;
-  enc_p->new_name((char*)_new_name);
+  enc_p->new_name(_new_name);
   enc_p->create_iopin_map();
 
   enc_p->create_widget(enc_p);

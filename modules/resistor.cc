@@ -167,7 +167,7 @@ Module * Resistor::construct(const char *_new_name)
 
   Resistor *resP = new Resistor;
 
-  resP->new_name((char*)_new_name);
+  resP->new_name(_new_name);
   resP->create_iopin_map();
 
 
@@ -240,8 +240,8 @@ Module * PullupResistor::pu_construct(const char *_new_name)
   PullupResistor *pur = new PullupResistor(_new_name);
 
   if(_new_name) {
-    pur->new_name((char*)_new_name);
-    pur->res.new_name((char*)_new_name);
+    pur->new_name(_new_name);
+    pur->res.new_name(_new_name);
   }
 
   pur->create_iopin_map();
@@ -257,8 +257,8 @@ Module * PullupResistor::pd_construct(const char *_new_name)
   PullupResistor *pur = new PullupResistor(_new_name);
 
   if(_new_name) {
-    pur->new_name((char*)_new_name);
-    pur->res.new_name((char*)_new_name);
+    pur->new_name(_new_name);
+    pur->res.new_name(_new_name);
   }
   pur->create_iopin_map();
 
@@ -280,7 +280,7 @@ PullupResistor::PullupResistor(const char *init_name)
   attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
-  new_name((char*)init_name);
+  new_name(init_name);
 
 #ifdef MANAGING_GUI
   pu_window = NULL;

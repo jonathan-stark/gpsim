@@ -256,7 +256,7 @@ Stimulus_Node::Stimulus_Node(const char *n)
   bSettling = false;  
   if(n)
     {
-      new_name((char *)n);
+      new_name(n);
       symbol_table.add_stimulus_node(this);
     }
   else

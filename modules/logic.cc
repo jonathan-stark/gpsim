@@ -370,7 +370,7 @@ Module * AND2Gate::construct(const char *_new_name)
 
   AND2Gate *a2gP = new AND2Gate ;
 
-  a2gP->new_name((char*)_new_name);
+  a2gP->new_name(_new_name);
   a2gP->set_number_of_pins(3);
   a2gP->create_iopin_map();
 
@@ -431,7 +431,7 @@ Module * OR2Gate::construct(const char *_new_name)
 
   OR2Gate *o2gP = new OR2Gate ;
 
-  o2gP->new_name((char*)_new_name);
+  o2gP->new_name(_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 
@@ -468,7 +468,7 @@ Module * NOTGate::construct(const char *_new_name)
 
   NOTGate *a2gP = new NOTGate ;
 
-  a2gP->new_name((char*)_new_name);
+  a2gP->new_name(_new_name);
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
 
@@ -527,7 +527,7 @@ Module * XOR2Gate::construct(const char *_new_name)
 
   XOR2Gate *o2gP = new XOR2Gate ;
 
-  o2gP->new_name((char*)_new_name);
+  o2gP->new_name(_new_name);
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 

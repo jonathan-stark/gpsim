@@ -1,3 +1,11 @@
+2004-11-23 Scott Dattalo <scott@dattalo.com>
+	* plat/win32/gpsim.def, modules/modules.vcproj: MSVC sync
+	* modules/*.cc: removed (char *) casts in calls to new_name()
+	* gpsim/main.cc: removed some unnecessary includes.
+	* gpsim/gpsim.vcproj: MSVC sync
+	* cli/input.cc: removed some debug stuff
+	* cli/cmd_log.cc: removed unreferenced variable.
+
 2004-11-23 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, modules/modules.vcproj: MSVC sync
 

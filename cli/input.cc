@@ -650,7 +650,6 @@ void exit_gpsim(void)
 void redisplay_prompt(void)
 {
 #ifdef HAVE_READLINE
-  cout << "new prompt\n";
   rl_forced_update_display();
 #endif
 }

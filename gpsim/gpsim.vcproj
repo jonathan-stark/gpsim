@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../popt/include;../../pthreads/include"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_GUI"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -35,7 +35,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Debug/gui.lib ../eXdbm/Debug/eXdbm.lib"
+				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Debug/gui.lib ../eXdbm/Debug/eXdbm.lib ../../pthreads/lib/pthreadVC.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
@@ -274,7 +274,13 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath=".\resource.h">
+			</File>
 		</Filter>
+		<File
+			RelativePath=".\gpsim.rc">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

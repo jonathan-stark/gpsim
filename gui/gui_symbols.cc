@@ -356,13 +356,33 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
 
   // See if the type of symbol selected is currently filtered out, and
   // if so we unfilter it.
+  Value *sym=0;
+  Symbol_Table_Iterator sti;
 
+
+  for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
+
+    // ignore line numbers
+    if(typeid(*sym) == typeid(line_number_symbol))
+		  continue;
+    
+    if(!strcasecmp((*sti)->name().data(),symbol_name)) {
+
+       if(filter_addresses && (typeid(*sym) == typeid(address_symbol)))
+         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
+       else if (filter_constants && (typeid(*sym) == typeid(Integer)))
+         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
+       else if (filter_registers && (typeid(*sym) == typeid(register_symbol)))
+         gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
+    }
+
+    
+/*
   list <symbol *>::iterator sti = st.begin();
 
   for(sti = st.begin(); sti != st.end(); sti++) {
     
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
-	
 
       switch((*sti)->isa()) {
 	    
@@ -393,23 +413,24 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
       break;
     }
   }
+*/
 
-  // Find the symbol and select it in the clist
+  // Find the symbol and select it from the clist
   p=symbols;
   while(p) {
     
-    sym *e;
+    Value *e;
     e=(sym*)p->data;
     if(!strcasecmp(e->name,symbol_name)) {
       
       int row;
       row=gtk_clist_find_row_from_data(GTK_CLIST(symbol_clist),e);
       if(row!=-1) {
-
-	gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
-	gtk_clist_moveto(GTK_CLIST(symbol_clist),row,0,0.5,0.5);
-		
-	do_symbol_select(this,e);
+        
+				gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
+        gtk_clist_moveto(GTK_CLIST(symbol_clist),row,0,0.5,0.5);
+        
+				do_symbol_select(this,e);
 		
       }
     }
