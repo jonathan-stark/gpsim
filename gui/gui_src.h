@@ -31,16 +31,18 @@ class Value;
 
 class SourceBrowser_Window : public GUI_Object {
  public:
-
   GtkWidget *vbox;               // for children to put widgets in
 
   ProgramMemoryAccess *pma;      // pointer to the processor's pma.
   StatusBar_Window *status_bar;  // display's PC, status, etc.
+  SIMULATION_MODES last_simulation_mode;
+  string sLastPmaName;
 
   void set_pma(ProgramMemoryAccess *new_pma);
 
   void Create(void);
   virtual void NewProcessor(GUI_Processor *gp);
+  virtual void SetTitle();
   virtual void SelectAddress(int address);
   virtual void SelectAddress(Value *);
   virtual void Update(void);
