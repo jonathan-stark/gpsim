@@ -1006,6 +1006,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 
   Zth = 1e8;
   Vth = 5.0;
+  ZthWeak = 1e3;
+  ZthFloating = 1e6;
 
   snode = 0;
 
@@ -1066,6 +1068,8 @@ IOPIN::IOPIN(void)
   h2l_threshold = 1.0;
   Vth = 0.3;
   Zth = 1e8;
+  ZthWeak = 1e3;
+  ZthFloating = 1e6;
   snode = 0;
 
   add_stimulus(this);
@@ -1119,15 +1123,11 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 
     // The voltage is below the low threshold
     set_digital_state(false);
-
-    //cout << " setting to low \n";
   } 
   else if(nodeVoltage > l2h_threshold) {
 
     // The voltage is above the high threshold
     set_digital_state(true);
-
-    //cout << " setting to high \n";
 
   }  else {
     // The voltage is between the low and high thresholds,
@@ -1142,12 +1142,6 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 
 void IOPIN::put_digital_state(bool new_state)
 {
-  /*
-  Register *port = get_iop();
-  if(port)
-    port->setbit(iobit, new_state);
-  */
-
   if(new_state != digital_state) {
     digital_state = new_state;
     Vth = digital_state ? 5.0 : 0.3;
@@ -1176,6 +1170,10 @@ void IOPIN::set_digital_state(bool new_state)
 { 
   digital_state = new_state;
 
+  if(verbose)
+    cout << name()<< " set_digital_state= " 
+	 << (new_state ? "high" : "low") << endl;
+
   Register *port = get_iop();
   if(port)
     port->setbit(iobit, new_state);
@@ -1198,22 +1196,8 @@ void IOPIN::toggle(void)
   put_digital_state(get_digital_state() ^ true);
 }
 
-//========================================================================
-//
-// IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-//   : IOPIN(i,b,opt_name,_iopp)
-// {
-// }
-
-// IO_input::IO_input(void)
-// {
-//   if(verbose)
-//     cout << "IO_input default constructor\n";
-// }
-
-
 /*************************************
- *  int IO_input::get_voltage(guint64 current_time)
+ *  int IOPIN::get_Vth()
  *
  * If this iopin has a stimulus attached to it then
  * the voltage will be dictated by the stimulus. Otherwise,
@@ -1237,6 +1221,12 @@ char IOPIN::getBitChar()
 {
   if(!snode)
     return 'Z';  // High impedance - unknown state.
+
+  if(snode->get_nodeZth() > ZthFloating)
+    return 'Z';
+
+  if(snode->get_nodeZth() > ZthWeak)
+    return get_digital_state() ? 'W' : 'w';
 
   return get_digital_state() ? '1' : '0';
 }
@@ -1299,6 +1289,16 @@ char IO_bi_directional::getBitChar()
 {
   if(!snode && !driving )
     return 'Z';
+
+  if(snode) {
+
+    if(snode->get_nodeZth() > ZthFloating)
+      return 'Z';
+
+    if(snode->get_nodeZth() > ZthWeak)
+      return get_digital_state() ? 'W' : 'w';
+
+  }
 
   return get_digital_state() ? '1' : '0';
 }
@@ -1372,6 +1372,18 @@ char IO_bi_directional_pu::getBitChar()
   if(!snode && !driving )
     return bPullUp ? 'W' : 'Z';
 
+  if(snode) {
+
+    if(snode->get_nodeZth() > ZthFloating)
+      return 'Z';
+
+    if(snode->get_nodeZth() > ZthWeak)
+      return get_digital_state() ? 'W' : 'w';
+
+  }
+
+  if(nodeVoltage > 2.0  && nodeVoltage < 3.0)
+    return 'X';
 
   return get_digital_state() ? '1' : '0';
 }
@@ -1406,6 +1418,16 @@ char IO_open_collector::getBitChar()
   if(!snode && !driving )
     return bPullUp ? 'W' : 'Z';
 
+  if(snode) {
+
+    if(snode->get_nodeZth() > ZthFloating)
+      return bPullUp ? 'W' : 'Z';
+
+    if(snode->get_nodeZth() > ZthWeak)
+      return get_digital_state() ? 'W' : 'w';
+    else
+      return get_digital_state() ? '1' : '0';
+  }
 
   return get_digital_state() ? 'W' : '0';
 }
