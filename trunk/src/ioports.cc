@@ -466,7 +466,10 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 
   if(diff)
     {
-      // First go through and update the direction of the I/O pins
+      // Update the I/O port value to that of the internal latch
+      value = (value & ~diff) | (internal_latch & diff);
+
+      // Go through and update the direction of the I/O pins
       int i,m;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(m & diff & valid_iopins)
@@ -534,12 +537,13 @@ unsigned int IOPORT_TRIS::get(void)
 //-------------------------------------------------------------------
 void IOPORT_TRIS::put(unsigned int new_value)
 {
+  int save_port_latch = port->internal_latch;
 
   port->update_pin_directions(new_value);
 
   value = new_value;
 
-  // %%%FIX ME%%% - Should we update the I/O Port here too?
+  port->put(save_port_latch);
 
   trace.register_write(address,value);
 
@@ -569,6 +573,37 @@ void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
     if(port->pins[bit_number]->xref)
       port->pins[bit_number]->xref->update();
 
+  }
+
+}
+
+//-------------------------------------------------------------------
+// void IOPORT_TRIS::put_value(unsigned int new_value)
+//
+//  When the gui tries to change the tris register, we'll pass
+// though here. There are three things that we do. First, we update
+// the tris port the way the gui asks us. Next, we'll update any cross
+// references, and finally we'll update any cross references for the
+// I/O port associated with this tris register.
+//-------------------------------------------------------------------
+
+void IOPORT_TRIS::put_value(unsigned int new_value)
+{
+ 
+  put(new_value);
+
+
+  if(xref)
+    xref->update();
+
+  //port->put_value(port->internal_latch);
+
+  if(port->xref)           // The I/O pins have changed states
+    port->xref->update();  // so tell the gui.
+
+  for(int i=0; i<port->num_iopins; i++) {
+    if(port->pins[i] && port->pins[i]->xref)
+      port->pins[i]->xref->update();
   }
 
 }
