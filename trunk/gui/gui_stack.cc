@@ -58,7 +58,7 @@ static gint sigh_button_event(GtkWidget *widget,
     assert(event&&sw);
     
     if(!sw->has_processor)
-	return 0;
+      return 0;
     
 
     if(event->type==GDK_2BUTTON_PRESS &&
@@ -259,19 +259,6 @@ void Stack_Window::Update(void)
   }
 }
 
-void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp)
-{
-    sw->has_processor=1;
-}
-
-void StackWindow_update(Stack_Window *sw)
-{
-    if( !sw->enabled)
-	return;
-
-    sw->Update();
-}
-
 void Stack_Window::Build(void)
 {
 
@@ -352,7 +339,7 @@ int Stack_Window::Create(GUI_Processor *_gp)
 
   last_stacklen=0;
   current_row=0;
-  has_processor=1;
+  has_processor=true;
 
   get_config();
     

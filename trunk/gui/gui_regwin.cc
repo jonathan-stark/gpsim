@@ -1545,7 +1545,7 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   if(gp == NULL)
     return;
 
-  processor=1;
+  has_processor=true;
     
   if( !enabled)
     return;
@@ -1856,7 +1856,7 @@ void Register_Window::Build(void)
   for(i=0;i<MAX_REGISTERS;i++)
       registers[i]=NULL;
   
-  if(processor)
+  if(has_processor)
   {
     NewProcessor(gp);
   }
@@ -1882,7 +1882,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   enabled = 0;
 
   registers_loaded=0;
-  processor=0;
+  has_processor=false;
   
   registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
   for(i=0;i<MAX_REGISTERS;i++)

@@ -45,6 +45,7 @@ GUI_Object::GUI_Object(void)
   printf("GUI Object constructor\n");
 
   gp = NULL;
+  has_processor = false;
   window = NULL;
   name = NULL;
   menu = NULL;

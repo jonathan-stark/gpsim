@@ -431,9 +431,9 @@ void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
     }
 }
 
-void SymbolWindow_new_symbols(Symbol_Window *sw, GUI_Processor *gp)
+void Symbol_Window::NewSymbols(void)
 {
-  sw->Update();
+  Update();
 }
 
 /*
@@ -652,7 +652,7 @@ void Symbol_Window::Build(void)
   is_built=1;
 
   if(load_symbols)
-    SymbolWindow_new_symbols(this, gp);
+    NewSymbols();
 
   UpdateMenuItem();
   

@@ -1767,7 +1767,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     bbw  = (Breadboard_Window *) (xref->parent_window);
 
-    BreadboardWindow_update(bbw);
+    bbw->Update();
 }
 
 
@@ -2842,67 +2842,64 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     return p;
 }
 
-void BreadboardWindow_update(Breadboard_Window *bbw)
+void Breadboard_Window::Update(void)
 {
-    GList *iter;
+  GList *iter;
 
-    // loop all modules and update their pins
+  // loop all modules and update their pins
 
-    iter=bbw->modules;
-    while(iter!=NULL)
-    {
-	GList *pin_iter;
-	struct gui_module *p;
+  iter=modules;
+  while(iter!=NULL) {
+    
+    GList *pin_iter;
+    struct gui_module *p;
 
-        p = (struct gui_module*)iter->data;
+    p = (struct gui_module*)iter->data;
 
-	// printf("update module %s", p->module->name());
+    // Check if module has changed its position
+    if(p->module->x!=p->x || p->module->y!=p->y)
+      {
+	if(p->module->x>=0 && p->module->y>=0)
+	  {
+	    // printf(" to position %d %d",p->module->x, p->module->y);
 
-	// Check if module has changed its position
-	if(p->module->x!=p->x || p->module->y!=p->y)
-	{
-	    if(p->module->x>=0 && p->module->y>=0)
-	    {
-		// printf(" to position %d %d",p->module->x, p->module->y);
+	    position_module(p, p->module->x, p->module->y);
+	    p->module->x = p->x;
+	    p->module->y = p->y;
+	    update_board_matrix(p->bbw);
+	  }
+      }
 
-		position_module(p, p->module->x, p->module->y);
-		p->module->x = p->x;
-		p->module->y = p->y;
-		update_board_matrix(p->bbw);
-	    }
+
+    // Check if pins have changed state
+    pin_iter=p->pins;
+    while(pin_iter!=NULL) {
+      
+      struct gui_pin *pin;
+
+      int value;
+      direction dir;
+
+      pin = (struct gui_pin *) pin_iter->data;
+
+      if(pin->iopin!=NULL) {
+	
+	value=pin->iopin->get_state();
+	dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
+
+	if(value!=pin->value || dir!=pin->direction) {
+	  
+	  pin->value=value;
+	  pin->direction=dir;
+
+	  draw_pin(pin);
 	}
-
-        // printf("\n");
-
-        // Check if pins have changed state
-	pin_iter=p->pins;
-	while(pin_iter!=NULL)
-	{
-	    struct gui_pin *pin;
-
-	    int value;
-            direction dir;
-
-	    pin = (struct gui_pin *) pin_iter->data;
-
-	    if(pin->iopin!=NULL)
-	    {
-		value=pin->iopin->get_state();
-		dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
-
-		if(value!=pin->value || dir!=pin->direction)
-		{
-		    pin->value=value;
-		    pin->direction=dir;
-
-		    draw_pin(pin);
-		}
-	    }
-            pin_iter = pin_iter->next;
-	}
-
-        iter = iter->next;
+      }
+      pin_iter = pin_iter->next;
     }
+
+    iter = iter->next;
+  }
 }
 
 static int delete_event(GtkWidget *widget,
@@ -2924,7 +2921,7 @@ static void check_for_modules(Breadboard_Window *bbw)
     {
 	Module *m = *module_iterator;
 
-        BreadboardWindow_new_module(bbw, m);
+        bbw->NewModule(m);
     }
 }
 
@@ -2938,92 +2935,81 @@ static void check_for_nodes(Breadboard_Window *bbw)
     {
 	Stimulus_Node *node = *node_iterator;
 
-	BreadboardWindow_node_configuration_changed(bbw, node);
+	bbw->NodeConfigurationChanged(node);
     }
 }
 
 /* When a processor is created */
-void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
+void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
-    char buf[STRING_SIZE];
-    int i;
-    unsigned int pic_id;
-    int pin;
+  unsigned int pic_id;
 
-    bbw->processor=1;
+  has_processor=1;
 
-    if(!bbw->is_built)
-	return;
+  if(!is_built)
+    return;
 
-    
-    pic_id = bbw->gp->pic_id;
+  if(!gp->pic_id)
+  {
+    puts("BreadboardWindow_new_processor(): pic_id==0");
+    return;
+  }
 
-    if(!pic_id)
-    {
-	puts("BreadboardWindow_new_processor(): pic_id==0");
-	return;
-    }
+  struct gui_module *p=create_gui_module(this, PIC_MODULE, get_processor(gp->pic_id),NULL);
 
-    struct gui_module *p=create_gui_module(bbw, PIC_MODULE, get_processor(pic_id),NULL);
-
-    BreadboardWindow_update(bbw);
+  Update();
 }
 
 /* When a module is created */
-void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
+void Breadboard_Window::NewModule(Module *module)
 {
-    if(!bbw->is_built)
-    {
-      bbw->Build();
-    }
+  if(!is_built)
+    Build();
 
 
-    GtkWidget *widget=NULL;
+  GtkWidget *widget=NULL;
 
-    if(module->widget!=NULL)
-	widget=GTK_WIDGET(module->widget);
-    struct gui_module *p=create_gui_module(bbw, EXTERNAL_MODULE, module, widget);
+  if(module->widget!=NULL)
+    widget=GTK_WIDGET(module->widget);
 
-    if(grab_next_module)
-    {
-        grab_module(p);
-    }
+  struct gui_module *p=create_gui_module(this, EXTERNAL_MODULE, module, widget);
 
-    BreadboardWindow_update(bbw);
+  if(grab_next_module)
+    grab_module(p);
+
+
+  Update();
 }
 
 
 /* When a stimulus is being connected or disconnected, or a new node is created */
-void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node)
+void Breadboard_Window::NodeConfigurationChanged(Stimulus_Node *node)
 {
-    if(!bbw->is_built)
-    {
-      bbw->Build();
-    }
+  if(!is_built)
+    Build();
 
-    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
+  struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(node_tree), node->name());
 
-    if(gn==NULL)
-    {
-	GtkWidget *node_item;
+  if(gn==NULL) {
+    GtkWidget *node_item;
 
-	gn = (struct gui_node *) malloc(sizeof(*gn));
+    gn = (struct gui_node *) malloc(sizeof(*gn));
 
-	gn->bbw=bbw;
-	gn->node=node;
+    gn->bbw=this;
+    gn->node=node;
 
-	node_item = gtk_tree_item_new_with_label (node->name());
-	gn->tree_item = node_item;
-	gtk_signal_connect(GTK_OBJECT(node_item),
-			   "select",
-			   (GtkSignalFunc) treeselect_node,
-			   gn);
-	gtk_widget_show(node_item);
-	gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
-	gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
-	gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
+    node_item = gtk_tree_item_new_with_label (node->name());
+    gn->tree_item = node_item;
+    gtk_signal_connect(GTK_OBJECT(node_item),
+		       "select",
+		       (GtkSignalFunc) treeselect_node,
+		       gn);
+    gtk_widget_show(node_item);
+    gtk_tree_append(GTK_TREE(node_tree), node_item);
+    gtk_object_set_data(GTK_OBJECT(node_tree), node->name(), gn);
+    gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
 
-    }
+  }
 }
 
 static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
@@ -3660,8 +3646,8 @@ void Breadboard_Window::Build(void)
 
   is_built=1;
   enabled = 1;
-  if(processor)
-    BreadboardWindow_new_processor(this, gp);
+  if(has_processor)
+    NewProcessor(gp);
 
   UpdateMenuItem();
 
@@ -3703,7 +3689,7 @@ Breadboard_Window::Breadboard_Window(void)
   is_built = 0;
   enabled = 0;
 
-  processor=0;
+  has_processor=false;
   pinstatefont = NULL;
   pinnamefont = NULL;
   pinname_gc = NULL;

@@ -112,6 +112,8 @@ class GUI_Object {
  public:
 
   GUI_Processor *gp;
+  bool has_processor;
+
   GtkWidget *window;
   enum window_category wc;
   enum window_types wt;
@@ -143,6 +145,10 @@ class GUI_Object {
   virtual void Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
+  virtual void NewProcessor(GUI_Processor *_gp)
+    {
+      has_processor = true;
+    }
 
 };
 
@@ -221,7 +227,6 @@ class Register_Window : public GUI_Object
 
   int registers_loaded; // non zero when registers array is loaded
 
-  int processor; // if non-zero window has processor
 
   virtual void Build(void);
   virtual void Update(void);
@@ -290,8 +295,6 @@ class Stack_Window : public GUI_Object
   int current_row;
   int current_column;
 
-  int has_processor;
-    
   GtkWidget *stack_clist;
 
 
@@ -321,8 +324,6 @@ class StopWatch_Window : public GUI_Object
   GtkWidget *frequencyentry;
   GtkWidget *offsetentry;
   GtkWidget *rolloverentry;
-
-  int has_processor;
 
   StopWatch_Window(void);
   virtual int Create(GUI_Processor *gp);
@@ -360,6 +361,7 @@ class Symbol_Window : public GUI_Object
   virtual int Create(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+  void NewSymbols(void);
 
 
 };
@@ -401,6 +403,8 @@ class SourceBrowser_Window : public GUI_Object {
   virtual void SelectAddress(int address);
   virtual void Update(void);
   virtual void SetPC(int address);
+  virtual void CloseSource(void){};
+  virtual void NewSource(GUI_Processor *gp){};
 
 };
 
@@ -473,6 +477,10 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void Build(void);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
+  virtual void CloseSource(void);
+  virtual void NewSource(GUI_Processor *gp);
+
+
 };
 
 //
@@ -500,7 +508,6 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   char **column_titles; //
   int  columns;         //
 
-  int processor;
   int program;
     
   GtkWidget *notebook;
@@ -524,7 +531,7 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
-
+  virtual void NewSource(GUI_Processor *gp);
 };
 
 
@@ -655,8 +662,6 @@ class Breadboard_Window : public GUI_Object {
 
     GtkAdjustment *hadj, *vadj;
 
-    int processor;
-
     struct gui_pin *selected_pin;
     struct gui_node *selected_node;
     struct gui_module *selected_module;
@@ -665,7 +670,10 @@ class Breadboard_Window : public GUI_Object {
   Breadboard_Window(void);
   virtual int Create(GUI_Processor *gp);
   virtual void Build(void);
-
+  virtual void NewProcessor(GUI_Processor *gp);
+  virtual void Update(void);
+  virtual void NewModule(Module *module);
+  virtual void NodeConfigurationChanged(Stimulus_Node *node);
 };
 
 
@@ -696,8 +704,6 @@ class Trace_Window : public GUI_Object
    */
   int trace_flags;
 
-  int processor;    // if non-zero window has processor
-
   /* trace_map is a pointer to an array of cross references
    * between the trace window and gpsim trace buffer */
   struct TraceMapping *trace_map;
@@ -708,6 +714,7 @@ class Trace_Window : public GUI_Object
   virtual int Create(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+  virtual void NewProcessor(GUI_Processor *gp);
 
 };
 
@@ -732,7 +739,6 @@ class Profile_Window : public GUI_Object
 {
  public:
 
-  int processor;    // if non-zero window has processor
   int program;    // if non-zero window has program
 
   GtkCList *profile_clist;
@@ -757,6 +763,7 @@ class Profile_Window : public GUI_Object
   virtual int Create(GUI_Processor *gp);
   virtual void Build(void);
   virtual void Update(void);
+  virtual void NewProcessor(GUI_Processor *gp);
 
 };
 

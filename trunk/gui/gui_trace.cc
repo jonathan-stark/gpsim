@@ -218,34 +218,30 @@ void Trace_Window::Update(void)
  * 
  */
 
-void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
+void Trace_Window::NewProcessor(GUI_Processor *_gp)
 {
 
 #define NAME_SIZE 32
 
-    struct cross_reference_to_gui *cross_reference;
-    int pic_id;
+  struct cross_reference_to_gui *cross_reference;
 
+  if(gp == NULL)
+    return;
 
-    if(tw == NULL || gp == NULL)
-	return;
-
-    tw->processor=1;
+  has_processor=true;
     
-    if( !((GUI_Object*)tw)->enabled)
-	return;
+  if(!enabled)
+    return;
     
-    tw->gp = gp;
-    pic_id = gp->pic_id;
+  gp = _gp;
 
-
-    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-    cross_reference->parent_window_type =  WT_trace_window;
-    cross_reference->parent_window = (gpointer) tw;
-    cross_reference->data = NULL;
-    cross_reference->update = xref_update;
-    cross_reference->remove = NULL;
-    gpsim_assign_trace_xref((gpointer) cross_reference);
+  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference->parent_window_type =  WT_trace_window;
+  cross_reference->parent_window = (gpointer) this;
+  cross_reference->data = NULL;
+  cross_reference->update = xref_update;
+  cross_reference->remove = NULL;
+  gpsim_assign_trace_xref((gpointer) cross_reference);
 }
 
 static int delete_event(GtkWidget *widget,
@@ -326,8 +322,8 @@ void Trace_Window::Build(void)
   is_built=1;
   last_cycle = 0;
 
-  if(processor)
-    TraceWindow_new_processor(this, gp);
+  if(has_processor)
+    NewProcessor(gp);
 
   Update();
   UpdateMenuItem();
@@ -352,7 +348,7 @@ int Trace_Window::Create(GUI_Processor *_gp)
   gp->trace_window = this;
 
   trace_flags = 0;
-  processor=0;
+  has_processor=false;
 
   get_config();
 

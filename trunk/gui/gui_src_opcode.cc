@@ -438,7 +438,7 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 	{
 	    break_row =  GTK_CLIST (sbow->clist)->focus_row;
 
-	    if(!sbow->processor)
+	    if(!sbow->has_processor)
 		return TRUE;      // no code is in this window
 
 	    gpsim_toggle_break_at_address(sbow->gp->pic_id, break_row);
@@ -1081,7 +1081,7 @@ static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
 
 }
 
-void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp)
+void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 {
     char buf[128];
     int opcode;
@@ -1092,71 +1092,71 @@ void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Proce
 
     struct cross_reference_to_gui *cross_reference;
 
-    if(sbow == NULL || gp == NULL)
-	return;
+    if(gp == NULL)
+      return;
 
-    sbow->current_address=0;
-    sbow->program=1;
+    current_address=0;
+    program=1;
 
-    if(! ((GUI_Object*)sbow)->enabled)
-	return;
+    if(!enabled)
+      return;
 
-    assert(sbow->wt==WT_opcode_source_window);
+    assert(wt==WT_opcode_source_window);
 
-    pic_id = sbow->gp->pic_id;
-    sbow->gp = gp;
-    gp->program_memory = (SourceBrowser_Window*)sbow;
+    pic_id = gp->pic_id;
+    gp = _gp;
+    gp->program_memory = this;
 
     /* Now create a cross-reference link that the
      * simulator can use to send information back to the gui
      */
     cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
     cross_reference->parent_window_type =   WT_opcode_source_window;
-    cross_reference->parent_window = (gpointer) sbow;
+    cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) NULL;
     cross_reference->update = pc_changed;
     cross_reference->remove = NULL;
     gpsim_assign_pc_xref(pic_id, cross_reference);
 
-    gtk_clist_freeze (GTK_CLIST (sbow->clist));
+    gtk_clist_freeze (GTK_CLIST (clist));
 
     // Clearing and appending is faster than changing
-    gtk_clist_clear(GTK_CLIST(sbow->clist));
+    gtk_clist_clear(GTK_CLIST(clist));
 
-    pm_size = gpsim_get_program_memory_size(sbow->gp->pic_id);
+    pm_size = gpsim_get_program_memory_size(gp->pic_id);
 
-    gtk_sheet_freeze(GTK_SHEET(sbow->sheet));
+    gtk_sheet_freeze(GTK_SHEET(sheet));
 
 
     for(i=0; i < pm_size; i++)
     {
-	opcode = gpsim_get_opcode(sbow->gp->pic_id  ,i);
-	sbow->memory[i]=opcode;
+	opcode = gpsim_get_opcode(gp->pic_id  ,i);
+	memory[i]=opcode;
 	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
 	sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->gp->pic_id, i,buf), 128);
+	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->pic_id, i,buf), 128);
 
-	gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
+	gtk_sheet_set_cell(GTK_SHEET(sheet),
 			   i/16,
 			   i%16,
 			   GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
 
-	gtk_clist_append (GTK_CLIST (sbow->clist), row_text);
-	update_styles(sbow,i);
+	gtk_clist_append (GTK_CLIST (clist), row_text);
+	update_styles(this,i);
     }
 
     for(i=0;i<pm_size/16;i++)
-	update_ascii(sbow,i);
+	update_ascii(this,i);
     
-    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), 0, sbow->current_line_number_style);
+    gtk_clist_set_row_style (GTK_CLIST (clist), 0, current_line_number_style);
 
-    gtk_clist_thaw (GTK_CLIST (sbow->clist));
+    gtk_clist_thaw (GTK_CLIST (clist));
 
-    gtk_sheet_thaw(GTK_SHEET(sbow->sheet));
+    gtk_sheet_thaw(GTK_SHEET(sheet));
 
-    pc=gpsim_get_pc_value(sbow->gp->pic_id);
-    sbow->SetPC(pc);
-    update_label(sbow,pc);
+    pc=gpsim_get_pc_value(gp->pic_id);
+    SetPC(pc);
+    update_label(this,pc);
 }
 
 void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
@@ -1171,7 +1171,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   gp = _gp;
 
-  processor=1;
+  has_processor=true;
 
   current_address=0;
     
@@ -1465,10 +1465,10 @@ void SourceBrowserOpcode_Window::Build(void)
 
 
   
-  if(processor)
+  if(has_processor)
       NewProcessor(gp);
   if(program)
-      SourceBrowserOpcode_new_program(this, gp);
+    NewSource(gp);
   
   /* create popupmenu for sheet */
   sheet_popup_menu=build_menu_for_sheet(this);
@@ -1503,7 +1503,7 @@ int SourceBrowserOpcode_Window::Create(GUI_Processor *_gp)
   memory=NULL;
   current_address=0;
 
-  processor=0;
+  has_processor=false;
   program=0;
 
   ascii_mode=1; /// default, two bytes/cell, MSB first

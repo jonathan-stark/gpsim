@@ -116,14 +116,14 @@ void gui_new_processor (unsigned int pic_id)
       gp->regwin_ram->NewProcessor(gp);
       gp->status_bar->NewProcessor(gp);
       gp->program_memory->NewProcessor(gp);
-      SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
-      SymbolWindow_new_symbols(gp->symbol_window, gp);
+      gp->source_browser->CloseSource();
+      gp->symbol_window->NewSymbols();
       gp->watch_window->ClearWatches();
-      BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
-      StackWindow_new_processor(gp->stack_window,gp);
-      TraceWindow_new_processor(gp->trace_window,gp);
-      ProfileWindow_new_processor(gp->profile_window,gp);
-      StopWatchWindow_new_processor(gp->stopwatch_window,gp);
+      gp->breadboard_window->NewProcessor(gp);
+      gp->stack_window->NewProcessor(gp);
+      gp->trace_window->NewProcessor(gp);
+      gp->profile_window->NewProcessor(gp);
+      gp->stopwatch_window->NewProcessor(gp);
 
 
     }
@@ -138,9 +138,7 @@ void gui_new_module (Module *module)
 
   // FIX ME - need to search for *p in the gp list...
   if(gp)
-  {
-      BreadboardWindow_new_module(gp->breadboard_window, module);
-  }
+    gp->breadboard_window->NewModule(module);
 }
 
 /*------------------------------------------------------------------
@@ -151,9 +149,7 @@ void gui_node_configuration_changed (Stimulus_Node *node)
 
   // FIX ME - need to search for *p in the gp list...
   if(gp)
-  {
-      BreadboardWindow_node_configuration_changed((Breadboard_Window*)gp->breadboard_window, node);
-  }
+    gp->breadboard_window->NodeConfigurationChanged(node);
 }
 
 /*------------------------------------------------------------------
@@ -170,9 +166,9 @@ void gui_new_program (unsigned int pic_id)
       // when gui_new_processor is run. eeprom is with program memory data
       gp->regwin_eeprom->NewProcessor(gp);
       
-      SourceBrowserAsm_close_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
-      SymbolWindow_new_symbols(gp->symbol_window, gp);
-      SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
+      gp->source_browser->CloseSource();
+      gp->symbol_window->NewSymbols();
+      gp->program_memory->NewSource(gp);
       ProfileWindow_new_program(gp->profile_window,gp);
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
@@ -188,9 +184,9 @@ void gui_new_source (unsigned int pic_id)
   // FIX ME - need to search for *p in the gp list...
   if(gp) {
 	
-    SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
-    SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
-    SymbolWindow_new_symbols(gp->symbol_window, gp);
+    gp->program_memory->NewSource(gp);
+    gp->source_browser->NewSource(gp);
+    gp->symbol_window->NewSymbols();
     link_src_to_gpsim( gp);
 
   }
