@@ -167,15 +167,13 @@ abort_gpsim_now {
 "true"              {return(process_booleanLiteral(true));}
 "false"             {return(process_booleanLiteral(false));}
 
-"macro"             {return(recognize(MACRODEF_T,"macro"));}
-
 
 %{
 //========================================================================
 // Macro processing
 %}
 
-<MACROBODY>^[ \t]?+"endm" {SetMode(INITIAL); return(recognize(ENDM_T,"endm")); }
+<MACROBODY>^[ \t]?+"endm" {SetMode(INITIAL); return(recognize(ENDM,"endm")); }
 
 <MACROBODY>\r            {/*discard CR's*/}
 <MACROBODY>\n            {*macroBodyPtr++ = '\n';
