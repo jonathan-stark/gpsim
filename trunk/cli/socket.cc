@@ -196,7 +196,7 @@ public:
     return (client_socket != -1);
   }
 
-private:
+  //private:
   char     buffer[BUFSIZE];
   int 	   my_socket, client_socket;
   struct   sockaddr_in addr;
@@ -502,7 +502,7 @@ void Socket::ParseObject(char *buffer)
   }
 }
 
-
+#ifdef USE_THREADS_BUT_NOT_RECOMMENDED_BECAUSE_OF_CROSS_PLATFORM_ISSUES
 void *server_thread(void *ignored)
 {
   std::cout << "running....\n";
@@ -534,17 +534,110 @@ int start_server(void)
   std::cout << " started server\n";
   return 0;
 }
+#else   // if USE_THREADS
 
-/*
+
+gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
+{
+  std::cout << " Server callback\n";
+
+  Socket *s = (Socket *)d;
+
+  switch(condition) {
+  case G_IO_IN:
+    {
+      unsigned int bytes_read=0;
+
+      memset(s->buffer, 0, 256);
+
+      std::cout << "Reading bytes\n";
+      g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
+      std::cout << "Read " << bytes_read << " bytes: " << s->buffer << endl;
+
+      if(bytes_read) {
+	if (*s->buffer == '$')
+	  s->ParseObject(&s->buffer[1]);
+	else {
+	  parse_string(s->buffer);
+	  s->respond("ACK");
+	}
+      } else
+	return FALSE;
+
+      return TRUE;
+    }
+    break;
+  case G_IO_HUP:
+    std::cout << "client sent HUP\n";
+    return FALSE;
+  case G_IO_OUT:
+    std::cout << "OUT\n";
+    break;
+  case G_IO_PRI:
+    std::cout << "PRI\n";
+    break;
+  case G_IO_ERR:
+    std::cout << "ERR\n";
+    break;
+  case G_IO_NVAL:
+    std::cout << "NVAL\n";
+    break;
+  default:
+    std::cout << "Unrecognized condition\n";
+  }
+
+  return FALSE;
+}
+
+gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
+{
+  Socket *s = (Socket *)d;
+
+
+  s->Accept();
+
+
+  GIOChannel *new_channel = g_io_channel_unix_new(s->client_socket);
+  GIOCondition new_condition = (GIOCondition)( G_IO_IN | G_IO_HUP |
+					   G_IO_ERR );
+
+
+
+  g_io_add_watch(new_channel, 
+		 new_condition,
+		 server_callback,
+		 (void*)s);
+
+  return true;
+}
+
 int start_server(void)
 {
 
   static Socket s;
 
+  std::cout << "starting server....\n";
+
   s.init();
 
+  if(s.my_socket > 0) {
+
+    GIOChannel *channel = g_io_channel_unix_new(s.my_socket);
+    GIOCondition condition = (GIOCondition)( G_IO_IN | G_IO_HUP |
+					     G_IO_ERR );
+
+
+
+    g_io_add_watch(channel, 
+		   condition,
+		   server_accept,
+		   (void*)&s);
+  }
+
+  std::cout << " started server\n";
+  return 0;
 
 }
-*/
 
-#endif
+#endif   // if USE_THREADS
+#endif   // if !_WIN32

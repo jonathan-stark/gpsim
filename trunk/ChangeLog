@@ -1,3 +1,7 @@
+2004-07-15 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc, cli/socket.cc, gui/gui_main.cc: The newly created
+	gpsim socket interface now uses GLib GIOChannels instead of Pthreads.
+	
 2004-07-14 Scott Dattalo <scott@dattalo.com>
 	* gui_break.cc, gui_main.cc, gui_processor.cc, gui_processor.h,
 	gui_regwin.cc gui_regwin.h, gui_src.h, gui_src_asm.cc, 
