@@ -317,28 +317,8 @@ void Module::add_attribute(Attribute *new_attribute)
 
 }
 
-/*****************************************************************************
- *
- * Helper functions
- *
- *****************************************************************************/
-typedef  Module * (*Module_FPTR)();
-typedef  Module_Types * (*Module_Types_FPTR)();
-
-//----------------------------------------------------------
-// An instance of the Module_Library class is created each
-// time a library of modules is opened.
-
-class Module_Library {
-  char *_name;
-  void *_handle;
-  Module_Types * (*get_mod_list)(void);
-
-public:
-
-  Module_Types *module_list;
-
-  Module_Library(char *new_name, void *library_handle) {
+Module_Library::Module_Library(char *new_name, void *library_handle)
+{
     #ifdef HAVE_GUI
     const char * error;
 
@@ -369,22 +349,7 @@ public:
 
     #endif
 
-  };
-
-  ~Module_Library(void) {
-    if(_name)
-      delete _name;
-  };
-
-  char *name(void) {
-    return(_name);
-  }
-
-  void *handle(void) {
-    return _handle;
-  }
-
-};
+}
 
 //------------------------------------------------------------------------
 // As module libraries are loaded, they're placed into the following list:
