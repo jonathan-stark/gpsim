@@ -1699,18 +1699,10 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   cout << " ram " << gp->cpu->rma.get_size() << endl;
   cout << " eeprom " << gp->cpu->ema.get_size() << endl;
 
-  Register **cpu_regs = NULL;
-  int reg_size =0;
 
-  if(type == REGISTER_RAM) {
-    cpu_regs = gp->cpu->rma.registers;
-    reg_size = gp->cpu->rma.nRegisters;
-  } else {
-    cpu_regs = gp->cpu->ema.registers;
-    reg_size = gp->cpu->ema.nRegisters;
-  }
+  RegisterMemoryAccess *rma = (type == REGISTER_RAM) ? &gp->cpu->rma : &gp->cpu->ema;
 
-  for(reg_number=0;reg_number<reg_size;reg_number++) {
+  for(reg_number=0;reg_number<rma->nRegisters;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;
 	
     if(i==0 && row_created)
@@ -1724,13 +1716,8 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
     registers[reg_number]->col = i;
     registers[reg_number]->put_shadow(INVALID_VALUE);
     registers[reg_number]->update_full=TRUE;
-    registers[reg_number]->reg = cpu_regs[reg_number];
+    registers[reg_number]->reg = rma->registers[reg_number];
 
-      /*
-      gpsim_get_register(gp->cpu->processor_id,
-			 type,
-			 reg_number);
-      */
     if(gpsim_get_register_name (pic_id, type,reg_number)) {
 
       gpsim_set_bulk_mode(1);

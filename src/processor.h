@@ -177,8 +177,6 @@ public:
 
   int processor_id;              // An identifier to differentiate this instantiation from others
 
-  GUI_Processor *gp;
-
   double frequency,period;     // Oscillator frequency and period.
 
   Register **registers;       // 
