@@ -145,6 +145,24 @@ public:
     { 
       return false;
     }
+
+  /*
+    When a breakpoint is set on this register, that object (which is derived
+    from the register class) will save a pointer to itself here:
+  */
+  virtual bool replacingWith(Register *replacer)
+    {
+      replacedBy = replacer;
+      return true;
+    }
+ protected:
+
+  /*
+    If a breakpoint gets set on a register, then a copy of the pointer to it will
+    get stored here.
+  */
+
+  Register *replacedBy;
 };
 
 

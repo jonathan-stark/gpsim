@@ -181,11 +181,11 @@ void Encoder::create_widget(Encoder *enc)
 
 //--------------------------------------------------------------
 // construct
-Module * Encoder::construct(const char *new_name=NULL)
+Module * Encoder::construct(const char *_new_name=NULL)
 {
 
   Encoder *enc_p = new Encoder ;
-  enc_p->new_name((char*)new_name);
+  enc_p->new_name((char*)_new_name);
   enc_p->create_iopin_map();
 
   enc_p->create_widget(enc_p);

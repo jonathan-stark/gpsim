@@ -1840,18 +1840,17 @@ void USARTModule::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-Module * USARTModule::USART_construct(const char *new_name)
+Module * USARTModule::USART_construct(const char *_new_name)
 {
 
   cout << "USART construct \n";
 
-  USARTModule *um = new USARTModule(new_name);
-
+  USARTModule *um = new USARTModule((char *)_new_name);
+  /*
   if(new_name) {
     um->new_name((char*)new_name);
-    //um->res->put_name(new_name);
   }
-
+  */
   um->create_iopin_map();
 
   RxBaudRateAttribute *rxattr = new RxBaudRateAttribute(um);
@@ -1881,6 +1880,7 @@ USARTModule::USARTModule(const char *_name)
   port = NULL;
   usart = NULL;
 
+  new_name((char *)_name);
 }
 
 USARTModule::~USARTModule()

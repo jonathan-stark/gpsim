@@ -160,13 +160,15 @@ class RegisterAssertion : public Breakpoint_Instruction
   int regAddress;
   int regMask;
   int regValue;
+  bool bPostAssertion; // True if assertion is checked after instruction simulates.
 
   RegisterAssertion(Processor *new_cpu, 
 		    unsigned int instAddress, 
 		    unsigned int bp,
 		    unsigned int _regAddress,
 		    int _regMask,
-		    int _regValue
+		    int _regValue,
+		    bool bPostAssertion=false
 		    );
 
   virtual void execute(void);
@@ -351,10 +353,8 @@ class BreakpointRegister : public Register, public BreakpointObject
 public:
 
   Register *replaced;       // A pointer to the register that this break replaces
-  BreakpointRegister *next;    // If multiple breaks are set on one register,
-			    // then this will point to the next one. 
 
-  BreakpointRegister(void){ replaced = 0; next = 0;};
+  BreakpointRegister(void){ replaced = 0;};
   BreakpointRegister(Processor *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};

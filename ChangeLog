@@ -14,6 +14,16 @@
 	src/trace.cc: create instances of inline methods by taking theirs address,
 	so that they can be accessed from dynamic loadable modules
 
+2004-04-19 Scott Dattalo <scott@dattalo.com>
+	* modules/binary_indicator.cc, modules/encoder.cc,
+	modules/gpsim_modules.cc, modules/led.cc, modules/logic.cc,
+	modules/paraface.cc, modules/push_button.cc, modules/resistor.cc,
+	modules/switch.cc, modules/usart.cc, modules/video.cc:
+	Fixed ambiguous (to read, but still syntactically correct)
+	references to "new_name".
+	* src/breakpoints.h, src/breakpoints.cc:
+	added a post assertion option to the register assertions.
+
 2004-04-18 Borut Razem <borut.razem@siol.net>
 	* src/14bit-registers.h, src/gpsim_interface.h, src/gpsim_time.h,
 	src/processor.h, src/symbol.h, src/trace.h: introduced get_interface(),

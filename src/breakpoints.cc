@@ -753,11 +753,13 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 				     unsigned int bp,
 				     unsigned int _regAddress,
 				     int _regMask,
-				     int _regValue) :
+				     int _regValue,
+				     bool _bPostAssertion) :
   Breakpoint_Instruction(cpu, address,bp),
   regAddress(_regAddress),
   regMask(_regMask),
-  regValue(_regValue)
+  regValue(_regValue),
+  bPostAssertion(_bPostAssertion)
 {
 
 }
@@ -765,7 +767,23 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 //------------------------------------------------------------------------------
 void RegisterAssertion::execute(void)
 {
-  if( ((cpu->rma[regAddress].get_value()) & regMask) != regValue) {
+  // For "post" assertions, the instruction is simulated first
+  // and then the register assertion is checked.
+
+  if(bPostAssertion && replaced)
+    replaced->execute();
+
+  // If the assertion is true, and the "phase" of the instruction is
+  // '0' then halt the simulation. Note, the reason for checking "phase"
+  // is to ensure the assertion applies to the the proper cycle of a 
+  // multi-cycle instruction. For example, an assertion applied to a
+  // a "GOTO" instruction should only get checked before the instruction
+  // executes if it's a pre-assertion or after it completes if it's a
+  // post assertion.
+
+  if( (((cpu->rma[regAddress].get_value()) & regMask) != regValue) &&
+      (cpu->pc->get_phase() == 0) )
+  {
 
     cout << "Caught Register assertion ";
     cout << "while excuting at address " << address << endl;
@@ -794,7 +812,10 @@ void RegisterAssertion::execute(void)
     }
   }
   
-  if(replaced)
+  // If this is not a post assertion, then the instruction executes after
+  // the instruction simulates.
+
+  if(!bPostAssertion && replaced)
     replaced->execute();
 
 }
@@ -822,9 +843,11 @@ void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
   cpu = _cpu;
   cpu->registers[reg] = this;
   replaced = fr;
-  next = 0;
   address=fr->address;
   
+  if(replaced)
+    replaced->replacingWith(this);
+
   // use the replaced registers xref object
   xref=fr->xref;
 
@@ -854,6 +877,8 @@ void BreakpointRegister::clear(void)
   }
 
   cpu->registers[address] = replaced;
+
+  replaced->replacingWith(0);
 
   if(cpu->registers[address]->xref)
     cpu->registers[address]->xref->update();
