@@ -198,9 +198,16 @@ abort_gpsim_now {
   }
 
 %{
-// Identifiers.  Truncate the token at the first space or tab but
-// don't write directly on yytext.
+// Identifiers. These are either gpsim commands or user macros.
 %}
+
+{IDENT}"[" {
+  cout << "macro starting\n";
+}
+
+"]" {
+  cout << "macro end\n";
+}
 
 {IDENT} {
   string tok = strip_trailing_whitespace (yytext);
