@@ -146,7 +146,6 @@ void InputPort::callback(void)
 
 	for(int i=0; i<5; i++) {
 	    if(pins[i]) {
-		pins[i]->update_direction(direction);
 
 		//                cout << "Update stimuli pin = "<<i<<endl;
 
