@@ -224,6 +224,9 @@
 				RelativePath=".\cmd_log.cc">
 			</File>
 			<File
+				RelativePath=".\cmd_macro.cc">
+			</File>
+			<File
 				RelativePath=".\cmd_module.cc">
 			</File>
 			<File
@@ -374,6 +377,9 @@ ren $(InputName).hpp $(InputName).h
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\socket.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 		</Filter>
@@ -419,6 +425,9 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\cmd_log.h">
+			</File>
+			<File
+				RelativePath=".\cmd_macro.h">
 			</File>
 			<File
 				RelativePath=".\cmd_module.h">

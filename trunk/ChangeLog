@@ -1,3 +1,9 @@
+2004-09-02 Borut Razem <borut.razem@siol.net>
+	* cli/input.cc, cli/socket.cc: socket port to WIN32
+	* gpsim/gpsim.vcproj, cli/cli.vcproj, cli/makefile.mingw,
+	  gpsim/makefile.mingw: added cmd_macro.* and socket.cc to
+	  the project, wsock32.lib dependency
+
 2004-09-01 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy: Fixed a bug that caused old versions of bison
 	to choke.

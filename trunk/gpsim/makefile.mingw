@@ -20,7 +20,7 @@ READLINE_PATH = ../../readline
 
 # Nothing much configurable below
 
-LIBS = \
+LIBS = -l wsock32 \
      -L $(READLINE_PATH)/win32/shlib -l readline \
      -L $(POPT_PATH)/lib -l popt \
      -L $(GTKEXTRA_PATH)/lib -l libgtkextra-win32-2.0 \
