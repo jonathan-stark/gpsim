@@ -1,3 +1,12 @@
+2004-12-02 Scott Dattalo <scott@dattalo.com>
+	* src/socket.cc: More additions to SocketLinks. It's now possible
+	to tie a socket to a gpsim attribute. This allows an external
+	application to directly control gpsim's behavior.
+
+2004-12-02 Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.h, src/pic-processor.cc, src/p16f87x.h,
+	src/p16f87x.cc: Added the PIC 16f876
+	
 2004-12-01 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: Fixed the socket interface for issues related
 	to gtk 2.x. Began adding the SockeLink class. This class will

@@ -466,10 +466,10 @@ void register_symbol::set(const char *buffer, int buf_size)
 
     // if a straight decimal conversion fails, then try hexadecimal.
 
-    converted = sscanf(buffer, "%d",  &i);
+    converted = sscanf(buffer, "0x%x",  &i);
 
     if(!converted)
-      converted = sscanf(buffer, "0x%x",  &i);
+      converted = sscanf(buffer, "%d",  &i);
 
     if(!converted)
       converted = sscanf(buffer, "$%x",  &i);
