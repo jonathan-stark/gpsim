@@ -1219,11 +1219,11 @@ double IO_open_collector::get_Vth()
 {
   if(iop) 
     digital_state = iop->get_bit(iobit);
-  
+  /*
   cout << name() << "get_Vth "
        << " digital_state=" << digital_state
        << " bPullUp=" << bPullUp << endl;
-  
+  */
   if(driving && !digital_state)
     return 0.0;
 
