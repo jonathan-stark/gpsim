@@ -1,6 +1,6 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p4 from Makefile.am
 
-# Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
 # gives unlimited permission to copy and/or distribute it,
 # with or without modifications, as long as this notice is preserved.
@@ -103,18 +103,14 @@ INCLUDES = @X_CFLAGS@
 lib_LTLIBRARIES = libgpsim_eXdbm.la
 gpsim_eXdbmincludedir = $(includedir)/eXdbm
 
-libgpsim_eXdbm_la_SOURCES = hash.c parse.c misc.c eXdbm.c \
-	hash.h parse.h  misc.h
+libgpsim_eXdbm_la_SOURCES = hash.c parse.c misc.c eXdbm.c 	hash.h parse.h  misc.h
 
 
 gpsim_eXdbminclude_HEADERS = eXdbm.h eXdbmErrors.h eXdbmTypes.h
 
 libgpsim_eXdbm_la_LDFLAGS = @X_LDFLAGS@
 
-EXTRA_DIST = \
-	Makefile.orig README LICENSE COPYING.LIB eXdbm.txt \
-	test1.c test2.c test3.c test1.cfg.orig test2.cfg \
-	README.gpsim
+EXTRA_DIST =  	Makefile.orig README LICENSE COPYING.LIB eXdbm.txt 	test1.c test2.c test3.c test1.cfg.orig test2.cfg 	README.gpsim
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -141,7 +137,7 @@ Makefile.am Makefile.in NEWS
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = gtar
+TAR = tar
 GZIP_ENV = --best
 DEP_FILES =  .deps/eXdbm.P .deps/hash.P .deps/misc.P .deps/parse.P
 SOURCES = $(libgpsim_eXdbm_la_SOURCES)
