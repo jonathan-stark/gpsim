@@ -654,7 +654,7 @@ void P18F242::create_sfr_map(void)
 
 }
 
-void P18F242::set_out_of_range_pm(int address, int value)
+void P18F242::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0xf00000) && (address < 0xf00000 +
@@ -784,7 +784,7 @@ void P18F442::create_sfr_map(void)
 
 }
 
-void P18F442::set_out_of_range_pm(int address, int value)
+void P18F442::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0xf00000) && (address < 0xf00000 +

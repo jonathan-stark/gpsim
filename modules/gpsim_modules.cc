@@ -143,12 +143,11 @@ void mod_list(void)
 
   unsigned int number_of = sizeof(available_modules) / sizeof(Module_Types);
   unsigned int i,j,l;
-  size_t k,
-	  longest;
+  unsigned int k,longest;
 
   for(i=0,longest=0; i<number_of; i++)
     {
-      k = strlen(available_modules[i].names[1]);
+      k = (unsigned int)strlen(available_modules[i].names[1]);
       if(k>longest)
 	longest = k;
     }
@@ -162,7 +161,7 @@ void mod_list(void)
 	  cout << available_modules[k].names[1];
 	  if(i<3)
 	    {
-	      l = longest + 2 - strlen(available_modules[k].names[1]);
+	      l = longest + 2 - (unsigned int)strlen(available_modules[k].names[1]);
 	      for(j=0; j<l; j++)
 		cout << ' ';
 	    }

@@ -242,8 +242,8 @@ unsigned int  Breakpoints::set_cycle_break(Processor *cpu,
 
   return(set_breakpoint (Breakpoints::BREAK_ON_CYCLE,
 			 cpu, 
-			 future_cycle & 0xffffffff, 
-			 future_cycle>>32,
+			 (unsigned int)(future_cycle & 0xffffffff), 
+			 (unsigned int)(future_cycle>>32),
 			 f1));    
 }
 

@@ -496,7 +496,7 @@ public:
 
 	// Then sleep for a while
 	if(idiff)
-	  usleep(idiff);
+	  usleep((unsigned int)idiff);
     }
     else
     {
@@ -935,7 +935,7 @@ void pic_processor::create_symbols (void)
 
 
 //-------------------------------------------------------------------
-void pic_processor::init_program_memory(int address, int value)
+void pic_processor::init_program_memory(unsigned int address, unsigned int value)
 {
 
 

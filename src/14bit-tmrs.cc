@@ -667,7 +667,7 @@ void TMRL::current_value(void)
   if(t1con->get_tmr1cs())
     value_16bit = tmrh->value.get() * 256 + value.get();
   else
-    value_16bit = ((cycles.value - last_cycle)/ prescale) & 0xffff;
+    value_16bit = (unsigned int)((cycles.value - last_cycle)/ prescale) & 0xffff;
 }
 
 unsigned int TMRL::get_low_and_high(void)
@@ -1168,7 +1168,7 @@ void TMR2::new_pr2(void)
       // Get the current value of the prescale counter (because
       // writing to pr2 doesn't affect the pre/post scale counters).
 
-      int curr_prescale = value.get() * prescale - (cycles.value - last_cycle);
+      guint64 curr_prescale = value.get() * prescale - (cycles.value - last_cycle);
 
       guint64 fc = cycles.value + curr_prescale;
 
@@ -1190,7 +1190,7 @@ void TMR2::new_pr2(void)
 
 void TMR2::current_value(void)
 {
-  value.put((cycles.value - last_cycle)/ prescale);
+  value.put((unsigned int)((cycles.value - last_cycle)/ prescale));
 
   if(value.get()>0xff)
     cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";

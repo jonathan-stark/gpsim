@@ -59,7 +59,7 @@ class Package
 {
 public:
 
-  int number_of_pins;
+  unsigned int number_of_pins;
 
 
   IOPIN **pins;  /* An array containing all of the package's pins. The index

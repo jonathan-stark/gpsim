@@ -189,7 +189,7 @@ int IOPORT::get_bit_voltage(unsigned int bit_number)
     v = (value.get() &  one_shifted_left_by_n [bit_number]) ? 
 	    (MAX_DRIVE / 2) : -(MAX_DRIVE / 2) ;
 
-  float vf = v;
+  float vf = (float)v;
   vf = vf / MAX_ANALOG_DRIVE;
   //cout << __FUNCTION__ << "() for bit " << bit_number << ", voltage = " << v << ", vf = " << vf << " volts\n";
 

@@ -320,7 +320,7 @@ void LogicGate::create_iopin_map(void)
     if(number_of_pins==2)
       package->set_pin_position(i+1, 0.5); // Left side of package
     else
-      package->set_pin_position(i+1, (i-INPUT_FIRST_BITPOSITION)*0.9999); // Left side of package
+      package->set_pin_position(i+1, (float)((i-INPUT_FIRST_BITPOSITION)*0.9999)); // Left side of package
     assign_pin(i+1, LIP );       //  Pin numbers begin at 1
   }
 

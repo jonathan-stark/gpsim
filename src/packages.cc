@@ -56,9 +56,9 @@ void Package::create_pkg(unsigned int _number_of_pins)
 
   pin_position = (float *) new float[number_of_pins];
 
-  for(int i=0; i<number_of_pins; i++)
+  for(unsigned int i=0; i<number_of_pins; i++)
   {
-    int pins_per_side;
+    unsigned int pins_per_side;
     pins[i] = 0;
 
     pins_per_side = number_of_pins/2;
@@ -69,7 +69,7 @@ void Package::create_pkg(unsigned int _number_of_pins)
     if(i<pins_per_side)
       pin_position[i]=(i)/((float)(pins_per_side-0.9999));
     else
-      pin_position[i]=(i-pins_per_side)/((float)(pins_per_side-0.9999))+2.0;
+      pin_position[i]=(i-pins_per_side)/((float)(pins_per_side-0.9999))+(float)2.0;
   }
 
 

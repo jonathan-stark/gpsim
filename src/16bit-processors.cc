@@ -368,7 +368,7 @@ void _16bit_processor::option_new_bits_6_7(unsigned int bits)
 
 #define STVREN  1<<0
 //-------------------------------------------------------------------
-void _16bit_processor::set_out_of_range_pm(int address, int value)
+void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
   cout << hex << "16bit proc setting config address 0x" <<(address<<1) << " to 0x"<<value<<'\n';
   switch (address) {

@@ -240,7 +240,7 @@ void TMR0::new_prescale(void)
 
     } else {
 
-    if(last_cycle < cycles.value)
+    if(last_cycle < (gint64)cycles.value)
 	  new_value = (unsigned int)((cycles.value - last_cycle)/prescale);
     else
 	  new_value = 0;

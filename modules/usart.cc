@@ -1720,7 +1720,7 @@ void USART_CORE::initialize(USART_IOPORT *new_iop)
 }
 //--------------------------------------------------------------
 static unsigned int _tx_index=0;
-static char Test_Hello[] = {
+static unsigned char Test_Hello[] = {
   0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
 };
 int USART_CORE::get_tx_byte(void)

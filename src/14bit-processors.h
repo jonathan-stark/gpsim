@@ -133,7 +133,7 @@ public:
   IOPORT_TRIS  trisb;
 
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
   virtual void create_symbols(void);
