@@ -318,6 +318,17 @@ enum
       put(get() | PSPIF);
     }
 
+ unsigned int get_txif(void)
+   {
+     return value & TXIF;
+   }
+ void clear_txif(void)
+   {
+     value &= ~TXIF;
+     trace.register_write(address,value);
+   }
+ 
+
   bool interrupt_status(void)
     {
       if( value & valid_bits & pie->value)

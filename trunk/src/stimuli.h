@@ -63,7 +63,7 @@ extern void add_stimulus(stimulus * );
  */
 
 #define MAX_DRIVE        0x100000
-#define MAX_ANALOG_DRIVE 0x10
+#define MAX_ANALOG_DRIVE 0x1000
 
 class Stimulus_Node
 {
@@ -91,7 +91,7 @@ class stimulus
 public:
   char name_str[30];
   Stimulus_Node *snode;      /* Node to which this stimulus is attached */
-  unsigned int drive;        /* This defines the strength of the source or the magnitude of the load. */
+  int drive;        /* This defines the strength of the source or the magnitude of the load. */
   int state;                 /* The most recent value of this stimulus */
   XrefObject *xref;          /* A link to the gui. */
 
@@ -99,8 +99,11 @@ public:
 
   stimulus(char *n=NULL);
   virtual int get_voltage(guint64 current_time) {return state;};
-  virtual void put_state(int new_state) {state=new_state;};
-  virtual void put_state_value(int new_state);
+  // Three different ways the stimulus is changed:
+  virtual void put_state(int new_state) {state=new_state;};      // From simulation
+  virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
+  virtual void put_state_value(int new_state);                   // From the gui
+
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
 };
@@ -123,8 +126,8 @@ enum SOURCE_TYPE
     period,
     duty,
     phase,
-    initial_state,
-    state;
+    initial_state;
+
 
   guint64
     start_cycle,
@@ -167,6 +170,7 @@ enum IOPIN_DIRECTION
 
   virtual int get_voltage(guint64 current_time) {return state;};
   virtual void put_state(int new_state) {state=new_state;}; 
+  virtual void put_node_state(int new_state) {state=new_state;}; // From attached node
   virtual void put_state_value(int new_state);
   virtual void toggle(void) {state = !state;}; 
   virtual void attach(Stimulus_Node *s);
@@ -185,16 +189,7 @@ public:
   virtual int get_voltage(guint64 current_time); //{return drive;};
   virtual void toggle(void);
   virtual void put_state( int new_state);
-    /* {
-      if(new_state>threshold) {
-	iop->setbit( iobit, 1);
-	state = 1;
-      }	else {
-	iop->setbit( iobit, 0);
-	state = 0;
-      }
-    };
-    */ 
+  virtual void put_node_state(int new_state); // From attached node
   virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int){return;};
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT;};
@@ -210,6 +205,7 @@ public:
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
   IO_bi_directional(IOPORT *i, unsigned int b);
+  virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);

@@ -564,16 +564,17 @@ class RCREG_16 : public _RCREG
 };
 
 //---------------------------------------------------------
-class USART_MODULE
+class USART_MODULE16 : public USART_MODULE
+//class USART_MODULE16
 {
  public:
 
   _16bit_processor *cpu;
 
   // Serial Port Registers
-  _TXSTA       txsta;
-  _RCSTA       rcsta;
-  _SPBRG       spbrg;
+  //_TXSTA       txsta;
+  //_RCSTA       rcsta;
+  //_SPBRG       spbrg;
   TXREG_16     txreg;
   RCREG_16     rcreg;
 

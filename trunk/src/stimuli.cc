@@ -317,7 +317,7 @@ int Stimulus_Node::update(unsigned int current_time)
       sptr = stimuli;
       while(sptr)
 	{
-	  sptr->put_state(node_voltage);
+	  sptr->put_node_state(node_voltage);
 	  sptr = sptr->next;
 	}
 
@@ -492,7 +492,7 @@ void asynchronous_stimulus::callback(void)
   current_state = next_state;
   guint64 current_cycle = future_cycle;
 
-  cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
+  //cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
   // If we've passed through all of the states
   // then start over from the beginning.
@@ -510,8 +510,8 @@ void asynchronous_stimulus::callback(void)
       start_cycle += period;
       future_cycle = *transition_cycles + start_cycle;
 
-      cout << "  stimulus rolled over\n";
-      cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
+      //cout << "  stimulus rolled over\n";
+      //cout << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
   else
     {
@@ -540,7 +540,7 @@ void asynchronous_stimulus::callback(void)
 
 int asynchronous_stimulus::get_voltage(guint64 current_time) 
 {
-  cout << "asy getting state "  << current_state << '\n';
+  //cout << "asy getting state "  << current_state << '\n';
   
   return current_state;
 }
@@ -762,17 +762,58 @@ int IO_input::get_voltage(guint64 current_time)
 
 }
 
-void IO_input::put_state( int new_state)
+void IO_input::put_state( int new_digital_state)
 {
+  //cout << "IO_input::put_state() new_state = " << new_digital_state <<'\n';
+
+  if( (new_digital_state != 0) && (state < h2l_threshold)) {
+
+    //cout << " driving I/O line high \n";
+    state = l2h_threshold + 1;
+    iop->setbit(iobit,1);
+
+  } 
+  else if((new_digital_state == 0) && (state > l2h_threshold)) {
+
+    //cout << " driving I/O line low \n";
+    state = h2l_threshold - 1;
+    iop->setbit(iobit,0);
+
+  }
+  //else cout << " no change in IO_input state\n";
+
+}
+
+// this IO_input is attached to a node that has just been updated.
+// The node is now trying to update this stimulus.
+
+void IO_input::put_node_state( int new_state)
+{
+  //cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
+
+
+  // No need to proceed if we already in the new_state.
+
   if(new_state == state)
     return;
 
-  if(iop->get_bit(iobit)) {
-    if(new_state < h2l_threshold)
-      iop->setbit(iobit,0);
-  } else {
-    if(new_state > h2l_threshold)
-      iop->setbit(iobit,1);
+
+  if(iop) {
+
+    // If the I/O pin to which this stimulus is mapped is at a logic 
+    // high AND the new state is below the high-to-low threshold
+    // then we need to drive the I/O line low.
+    //
+    // Similarly, if the I/O line is low and the new_state is above
+    // the low-to-high threshold, we need to drive it low.
+
+    if(iop->get_bit(iobit)) {
+      if(new_state < h2l_threshold)
+	iop->setbit(iobit,0);
+    } else {
+      if(new_state > l2h_threshold)
+	iop->setbit(iobit,1);
+    }
   }
 
   state = new_state;
@@ -793,6 +834,44 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
   //cout << name_str;
   // cout << "IO_bi_directional\n";
 }
+
+
+void IO_bi_directional::put_state( int new_digital_state)
+{
+  //cout << "IO_bi_directional::put_state() new_state = " << new_digital_state <<'\n';
+
+  // If the bi-directional pin is an output then driving is TRUE.
+  if(driving) {
+
+    // If the new state to which the stimulus is being set is different than
+    // the current state of the bit in the ioport (to which this stimulus is
+    // mapped), then we need to update the ioport.
+
+    if((new_digital_state!=0) ^ ( iop->value & (1<<iobit))) {
+
+      iop->setbit(iobit,new_digital_state);
+
+      // If this stimulus is attached to a node, then let the node be updated
+      // with the new state as well.
+      if(snode)
+	snode->update(0);
+      // Note that this will auto magically update
+      // the io port.
+
+
+    }
+
+  }
+  else {
+
+    // The bi-directional pin is configured as an input. So let the parent
+    // input class handle it.
+    IO_input::put_state(new_digital_state);
+
+  }
+
+}
+
 
 IO_bi_directional::IO_bi_directional(void)
 {
@@ -818,18 +897,18 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b)
 
 int IO_bi_directional::get_voltage(guint64 current_time)
 {
-  cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
+  //cout << "Getting new state of a bi-di IO pin "<< iobit<<'\n';
 
   if(driving || !snode)
     {
       if( iop->value & (1<<iobit))
 	{
-	  cout << " high\n";
+	  //cout << " high\n";
 	  return drive;
 	}
       else
 	{
-	  cout << " low\n";
+	  //cout << " low\n";
 	  return -drive;
 	}
     }
@@ -854,7 +933,7 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 void IO_bi_directional::update_direction(unsigned int new_direction)
 {
 
-  cout << "IO_bi_direction::update_direction\n";
+  //cout << "IO_bi_direction::update_direction\n";
 
   if(new_direction)
     driving = 1;
@@ -872,7 +951,7 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 void IO_bi_directional::change_direction(unsigned int new_direction)
 {
 
-  cout << __FUNCTION__ << '\n';
+  //cout << __FUNCTION__ << '\n';
 
   iop->tris->setbit(iobit, new_direction & 1);
 
@@ -1089,7 +1168,7 @@ void stimorb_asy(int digital, pic_processor *cpu,vector<StimulusDataType> temp_a
 	    break;
 
 	  case STIMULUS_DPT_FLOAT:
-	    new_data = (int)MAX_ANALOG_DRIVE * 0x100 * dp.data_point.f;
+	    new_data = (int)MAX_ANALOG_DRIVE * dp.data_point.f;
 	    break;
 
 	  default:

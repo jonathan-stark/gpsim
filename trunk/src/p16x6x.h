@@ -49,8 +49,6 @@ class P16C61 : public  _14bit_processor, public _14bit_18pins
 {
 public:
 
-  //  const int PROGRAM_MEMORY_SIZE = 0x400;
-
   virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
   virtual void create_symbols(void);
 
@@ -105,10 +103,7 @@ class P16C64 : public  _14bit_processor, public _14bit_40pins
   public:
 
 
-  //  const int PROGRAM_MEMORY_SIZE = 0x800;
-
   TMR2_MODULE tmr2_module;
-
   virtual PROCESSOR_TYPE isa(void){return _P16C64_;};
   virtual void create_symbols(void);
   void create_sfr_map(void);
@@ -136,9 +131,7 @@ class P16C65 : public  P16C64
 {
   public:
 
-
-  //  const int PROGRAM_MEMORY_SIZE = 0x800;
-
+  USART_MODULE14 usart;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C65_;};
   virtual void create_symbols(void);

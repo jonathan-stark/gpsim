@@ -72,7 +72,7 @@ public:
   Indirect_Addressing  ind0;
   Indirect_Addressing  ind1;
   Indirect_Addressing  ind2;
-  USART_MODULE         usart;
+  USART_MODULE16       usart;
   TBL_MODULE           tbl;
 
   virtual void create_symbols(void);

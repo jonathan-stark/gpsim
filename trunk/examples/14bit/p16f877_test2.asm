@@ -13,7 +13,7 @@ include "p16f877.inc"
   cblock  0x20
 
 	x
-	t1,t2
+	t1,t2,t3
 	avg_lo,avg_hi
 	w_temp,status_temp,interrupt_temp
   endc
@@ -148,10 +148,18 @@ main:
 	
 
 loop_and_convert
-	decfsz	t1,f
+	decfsz	t2,f
 	 goto	loop_and_convert
 	call	do_some_conversions
+	decfsz	t3,f
+	 goto	loop_and_convert
+	clrf	status
+	bsf	status,rp0	; bank 1
+	movlw	(1<<ADFM)
+	xorwf	adcon1,f	; toggle ADFM (result format) for a/d
+	clrf	status
 	goto	loop_and_convert
+	
 
 	;;
 	;; Now use the capture compare module to initiate the conversions
