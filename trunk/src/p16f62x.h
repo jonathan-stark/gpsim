@@ -94,7 +94,7 @@ class P16F62x : public P16X6X_processor,  public _14bit_18pins
 {
 public:
 
-  INTCON       intcon_reg;
+  //INTCON       intcon_reg;
   USART_MODULE14 usart;
   COMPARATOR_MODULE comparator;
 

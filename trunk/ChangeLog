@@ -1,4 +1,7 @@
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
+	* src/p16f62x.h - duplicate declaration of intcon register
+	
+2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/breakpoints.cc - this time the 'Too many cycle counter breakpoints' was
 	fixed. BTW the problem was that 'clear_break' was not putting the cleared
 	breakpoint back into the 'inactive' list
