@@ -1,3 +1,13 @@
+2005-02-25 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h, src/stimuli.cc: Added methods to the IOPIN class
+	to differentiate between a pin driving a node and one being driven
+	by a node.
+	* src/14bit-tmrs.cc, src/i2c-ee.cc, src/packages.cc, src/ssp.cc,
+	src/stimuli.cc, src/stimuli.h, src/uart.cc, extras/lcd/lcd.cc,
+	gui/gui_breadboard.cc, modules/logic.cc, modules/logic.h,
+	modules/usart.cc, modules/video.cc, modules/video.h: Propogate
+	IOPIN change to all consumers.
+
 2005-02-24 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added impedance thresholds
 	to differentiate strong, weak, and floating drivers.

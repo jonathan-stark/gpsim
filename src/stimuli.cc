@@ -581,7 +581,8 @@ stimulus::stimulus(const char *n)
   new_name("stimulus");
 
   snode = 0;
-  digital_state = 0;
+  bDrivenState = false;
+  bDrivingState = false;
   next = 0;
 
   Vth = 5.0;   // Volts
@@ -1063,7 +1064,8 @@ IOPIN::IOPIN(void)
   iop = 0;
   iopp = 0;
   iobit=0;
-  digital_state = false;
+  bDrivingState = false;
+  bDrivenState = false;
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   Vth = 0.3;
@@ -1122,12 +1124,12 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
   if( nodeVoltage < h2l_threshold) {
 
     // The voltage is below the low threshold
-    set_digital_state(false);
+    setDrivenState(false);
   } 
   else if(nodeVoltage > l2h_threshold) {
 
     // The voltage is above the high threshold
-    set_digital_state(true);
+    setDrivenState(true);
 
   }  else {
     // The voltage is between the low and high thresholds,
@@ -1137,17 +1139,17 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 }
 
 //------------------------------------------------------------
-// put_digital_state - called by peripherals when they wish to
+// putDrivingState - called by peripherals when they wish to
 // drive an I/O pin to a new state.
 
-void IOPIN::put_digital_state(bool new_state)
+void IOPIN::putDrivingState(bool new_state)
 {
-  if(new_state != digital_state) {
-    digital_state = new_state;
-    Vth = digital_state ? 5.0 : 0.3;
+  if(new_state != bDrivingState) {
+    bDrivingState = new_state;
+    Vth = bDrivingState ? 5.0 : 0.3;
     
     if(verbose)
-      cout << name()<< " put_digital_state= " 
+      cout << name()<< " putDrivingState= " 
 	   << (new_state ? "high" : "low") << endl;
     
     // If this pin is tied to a node, then update the node.
@@ -1166,34 +1168,49 @@ void IOPIN::put_digital_state(bool new_state)
   }
 }
 
-void IOPIN::set_digital_state(bool new_state)
+void IOPIN::setDrivingState(bool new_state)
 { 
-  digital_state = new_state;
+  bDrivingState = new_state;
 
   if(verbose)
-    cout << name()<< " set_digital_state= " 
+    cout << name()<< " setDrivingState= " 
+	 << (new_state ? "high" : "low") << endl;
+}
+
+bool IOPIN::getDrivingState(void)
+{
+  Register *port = get_iop();
+
+  if(port)
+    bDrivingState = port->get_bit(iobit);
+
+  return bDrivingState;
+}
+
+
+bool IOPIN::getDrivenState()
+{
+  return bDrivenState;
+}
+void IOPIN::setDrivenState(bool new_state)
+{
+  bDrivenState = new_state;
+  //setDrivingState(new_state);
+
+  if(verbose)
+    cout << name()<< " setDrivingState= " 
 	 << (new_state ? "high" : "low") << endl;
 
   Register *port = get_iop();
   if(port)
     port->setbit(iobit, new_state);
+
 }
 
-bool IOPIN::get_digital_state(void)
-{
-  /**/
-  Register *port = get_iop();
-
-  if(port)
-    digital_state = port->get_bit(iobit);
-  /**/
-  //cout << "get_digital_state -- changed 14NOV04\n";
-  return digital_state;
-}
 
 void IOPIN::toggle(void)
 {
-  put_digital_state(get_digital_state() ^ true);
+  putDrivingState(getDrivingState() ^ true);
 }
 
 /*************************************
@@ -1226,9 +1243,9 @@ char IOPIN::getBitChar()
     return 'Z';
 
   if(snode->get_nodeZth() > ZthWeak)
-    return get_digital_state() ? 'W' : 'w';
+    return getDrivingState() ? 'W' : 'w';
 
-  return get_digital_state() ? '1' : '0';
+  return getDrivingState() ? '1' : '0';
 }
 
 //========================================================================
@@ -1272,9 +1289,11 @@ void IO_bi_directional::set_nodeVoltage( double new_nodeVoltage)
 double IO_bi_directional::get_Vth()
 {
   if(driving)
-    return get_digital_state() ? Vth : 0;
-  else
-    return get_digital_state() ? VthIn : 0;
+    return getDrivingState() ? Vth : 0;
+
+  
+  //return getDrivingState() ? VthIn : 0;
+  return VthIn;
 
 }
 
@@ -1296,11 +1315,11 @@ char IO_bi_directional::getBitChar()
       return 'Z';
 
     if(snode->get_nodeZth() > ZthWeak)
-      return get_digital_state() ? 'W' : 'w';
+      return getDrivingState() ? 'W' : 'w';
 
   }
 
-  return get_digital_state() ? '1' : '0';
+  return getDrivingState() ? '1' : '0';
 }
 
 
@@ -1348,7 +1367,8 @@ double IO_bi_directional_pu::get_Vth()
   if(verbose)
     cout << name() << "get_Vth "
 	 << " driving=" << driving
-	 << " digital_state=" << digital_state
+	 << " bDrivingState=" << bDrivingState
+	 << " bDrivenState=" << bDrivenState
 	 << " Vth=" << Vth
 	 << " VthIn=" << VthIn
 	 << " bPullUp=" << bPullUp << endl;
@@ -1361,7 +1381,7 @@ double IO_bi_directional_pu::get_Vth()
   // which is assigned to be same as the processor's supply voltage).
 
   if(driving)
-    return get_digital_state() ? Vth : 0;
+    return getDrivingState() ? Vth : 0;
   else
     return bPullUp ? Vth : VthIn;
 
@@ -1378,14 +1398,14 @@ char IO_bi_directional_pu::getBitChar()
       return 'Z';
 
     if(snode->get_nodeZth() > ZthWeak)
-      return get_digital_state() ? 'W' : 'w';
+      return getDrivingState() ? 'W' : 'w';
 
   }
 
   if(nodeVoltage > 2.0  && nodeVoltage < 3.0)
     return 'X';
 
-  return get_digital_state() ? '1' : '0';
+  return getDrivingState() ? '1' : '0';
 }
 
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
@@ -1398,7 +1418,7 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
 
 double IO_open_collector::get_Vth()
 {
-  if(driving && !get_digital_state())
+  if(driving && !getDrivingState())
     return 0.0;
 
   return bPullUp ? Vth : VthIn;
@@ -1407,7 +1427,7 @@ double IO_open_collector::get_Vth()
 
 double IO_open_collector::get_Zth()
 {
-  if(driving && !get_digital_state())
+  if(driving && !getDrivingState())
     return Zth;
 
   return bPullUp ? Zpullup : ZthIn;
@@ -1424,12 +1444,12 @@ char IO_open_collector::getBitChar()
       return bPullUp ? 'W' : 'Z';
 
     if(snode->get_nodeZth() > ZthWeak)
-      return get_digital_state() ? 'W' : 'w';
+      return getDrivingState() ? 'W' : 'w';
     else
-      return get_digital_state() ? '1' : '0';
+      return getDrivingState() ? '1' : '0';
   }
 
-  return get_digital_state() ? 'W' : '0';
+  return getDrivingState() ? 'W' : '0';
 }
 
 //========================================================================

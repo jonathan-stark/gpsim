@@ -213,7 +213,7 @@ public:
     // has ever been driven at all. This way, we can capture the
     // first edge. Or we could add another parameter to the constructor.
 
-    digital_state = true;
+    bDrivingState = true;
     update_direction(0);   // Make the RX pin an input.
 
     bPullUp = true;
@@ -222,15 +222,15 @@ public:
   };
 
 
-  void set_digital_state(bool new_dstate) { 
-    bool diff = new_dstate ^ digital_state;
+  void setDrivingState(bool new_dstate) { 
+    bool diff = new_dstate ^ bDrivingState;
 
-    cout <<"usart rxpin set_digital_state " << (new_dstate ? "high" : "low") << endl;
+    cout <<"usart rxpin setDrivingState " << (new_dstate ? "high" : "low") << endl;
     if( usart && diff ) {
 
-      usart->new_rx_edge(digital_state);
+      usart->new_rx_edge(bDrivingState);
 
-      IOPIN::set_digital_state(new_dstate);
+      IOPIN::setDrivingState(new_dstate);
 
     }
 
@@ -261,7 +261,7 @@ public:
 
     usart = _usart;
 
-    digital_state = true;
+    bDrivingState = true;
     update_direction(1);   // Make the TX pin an output.
 
   };
@@ -274,38 +274,38 @@ public:
 
     if( state < h2l_threshold) {
       state = l2h_threshold + 1;
-      put_digital_state(0);
+      putDrivingState(0);
 
     } else {
 
       if(state > l2h_threshold) {
 	state = h2l_threshold - 1;
-	put_digital_state(1);
+	putDrivingState(1);
       }
     }
     */
   }
 #endif
-  //  void put_digital_state(bool new_dstate) { 
+  //  void putDrivingState(bool new_dstate) { 
 
-    //cout << "usart tx put_digital_state " << new_dstate << '\n';
+    //cout << "usart tx putDrivingState " << new_dstate << '\n';
     /*
-    bool diff = new_dstate ^ digital_state;
-    digital_state = new_dstate;
+    bool diff = new_dstate ^ bDrivingState;
+    bDrivingState = new_dstate;
 
-    cout << "usart tx put_digital_state " << digital_state << '\n';
+    cout << "usart tx putDrivingState " << bDrivingState << '\n';
     if( usart && diff ) {
 
-      usart->new_rx_edge(digital_state);
+      usart->new_rx_edge(bDrivingState);
 
       if(iop) // this check should not be necessary...
-	iop->setbit(iobit,digital_state);
+	iop->setbit(iobit,bDrivingState);
     }
     */
 
   //}
 #if 0
-  virtual void put_digital_state(bool new_digital_state) {
+  virtual void putDrivingState(bool newDrivingState) {
 
     Register *port = get_iop();
 
@@ -314,12 +314,12 @@ public:
       // the current state of the bit in the ioport (to which this stimulus is
       // mapped), then we need to update the ioport.
 
-      if((new_digital_state!=0) ^ ( port->value.get() & (1<<iobit))) {
+      if((newDrivingState!=0) ^ ( port->value.get() & (1<<iobit))) {
 
-	bool bNewState = new_digital_state ? true : false;
+	bool bNewState = newDrivingState ? true : false;
 	port->setbit(iobit,bNewState);
 
-	digital_state = bNewState;
+	bDrivingState = bNewState;
 	// If this stimulus is attached to a node, then let the node be updated
 	// with the new state as well.
 	if(snode)
@@ -466,7 +466,7 @@ class TXREG : public TriggerObject
     start_time = last_time;
 
     if(txpin) {
-      txpin->put_digital_state((txr & 1) ? true : false);
+      txpin->putDrivingState((txr & 1) ? true : false);
       cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
     }
 

@@ -53,7 +53,7 @@ private:
 
 public:
 
-  virtual void put_digital_state( bool new_state);
+  virtual void putDrivingState( bool new_state);
 
   Logic_Input (LogicGate *parent, IOPORT *i, unsigned int b, char *opt_name=NULL) 
     : IOPIN(i,b,opt_name), LGParent(parent)

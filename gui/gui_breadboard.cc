@@ -2543,7 +2543,7 @@ GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientatio
 
 
     if(iopin) {
-      value=iopin->get_digital_state();
+      value=iopin->getDrivingState();
       direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
       orientation=_orientation;
       type=PIN_DIGITAL;
@@ -3103,7 +3103,7 @@ void Breadboard_Window::Update(void)
 
 	if(pin->iopin!=0) {
 	
-	  value=pin->iopin->get_digital_state();
+	  value=pin->iopin->getDrivingState();
 	  dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 
 	  if(value!=pin->value || dir!=pin->direction) {

@@ -79,7 +79,7 @@ void _SSPCON::put(unsigned int new_value)
 	case SSPM_SPImaster16:
 	case SSPM_SPImaster64:
 	  //case SSPM_SPImasterTMP2:
-	  sckpin->put_digital_state( (value.get() & CKP) ? true : false );
+	  sckpin->putDrivingState( (value.get() & CKP) ? true : false );
 	}
 	
 	if(verbose)
@@ -138,7 +138,7 @@ void _SSPBUF::enable()
   case _SSPCON::SSPM_SPImaster16:
   case _SSPCON::SSPM_SPImaster64:
 	//case _SSPCON::SSPM_SPImasterTMP2:
-	sckpin->put_digital_state( (sspcon->value.get() & _SSPCON::CKP) ? true : false );
+	sckpin->putDrivingState( (sspcon->value.get() & _SSPCON::CKP) ? true : false );
 	break;
   }
   
@@ -209,7 +209,7 @@ void _SSPBUF::start_transfer()
   case _SSPCON::SSPM_SPIslaveSS:
 	// The SS pin was pulled low
 	if( sspstat->value.get() & _SSPSTAT::CKE ) {
-	  sdopin->put_digital_state((sspsr & (1<<7))?true:false); // MSb of shift reg. out
+	  sdopin->putDrivingState((sspsr & (1<<7))?true:false); // MSb of shift reg. out
 	  cout << "SSP: Sent bit = " << ((sspsr & (1<<7))>>7) << ". (SS)" << endl;
 	}
 	break;
@@ -251,7 +251,7 @@ void _SSPBUF::stop_transfer()
 	cout << "SSP: Stoping transfer. State != ACTIVE." << endl;
   }
 
-  sckpin->put_digital_state( (sspcon->value.get() & _SSPCON::CKP) ? true : false );
+  sckpin->putDrivingState( (sspcon->value.get() & _SSPCON::CKP) ? true : false );
   
   state = IDLE;
   
@@ -351,7 +351,7 @@ void _SSPBUF::clock( unsigned int new_value )
 	  cout << "SSP: Received bit = " << (sspsr & 1) << ". (SMP=1)" << endl;
 	}
 	
-	sdopin->put_digital_state((sspsr & (1<<7))?true:false); // MSb of shift reg. out
+	sdopin->putDrivingState((sspsr & (1<<7))?true:false); // MSb of shift reg. out
 	cout << "SSP: Sent bit = " << ((sspsr & (1<<7))>>7) << "." << endl;
   }
 
