@@ -275,6 +275,8 @@ file_selection_ok (GtkWidget        *w,
     gtk_widget_destroy (GTK_WIDGET (fs));
 }
 
+extern int gui_question(char *question, char *a, char *b);
+
 static GtkItemFactoryCallback 
 fileopen_dialog(gpointer             callback_data,
 	      guint                callback_action,
@@ -284,7 +286,10 @@ fileopen_dialog(gpointer             callback_data,
   GtkWidget *button;
 
   if (!window)
-    {
+  {
+
+      gui_question("This may not work well (yet?), better restart gpsim from command line","OK","OK");
+
       window = gtk_file_selection_new ("file selection dialog");
 
       gtk_file_selection_hide_fileop_buttons (GTK_FILE_SELECTION (window));

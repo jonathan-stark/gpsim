@@ -1481,7 +1481,7 @@ static void b_cb(GtkWidget *w, gpointer user_data)
 }
 
 // modal dialog, asking a yes/no question
-static int gui_question(char *question, char *a, char *b)
+int gui_question(char *question, char *a, char *b)
 {
     static GtkWidget *dialog=NULL;
     static GtkWidget *label;
