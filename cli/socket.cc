@@ -489,7 +489,7 @@ void Socket::ParseObject(char *buffer)
 	if(bl) {
 	  buffer_len -= bl;
 	  printf("Symbol command with string %s\n",tmp);
-	  symbol *sym = get_symbol_table().find(tmp);
+	  Value *sym = get_symbol_table().find(tmp);
 	  if(sym) {
 	    int i;
 	    sym->get(i);

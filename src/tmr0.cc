@@ -49,7 +49,6 @@ TMR0::TMR0(void)
 
 void TMR0::stop(void)
 {
-  cout << "TMR0 stop\n";
   state &= (~1);      // the timer is disabled.
 }
 
@@ -59,7 +58,7 @@ void TMR0::start(int restart_value, int sync)
   state |= 1;          // the timer is on
 
   value.put(restart_value);
-  //if(verbose)
+  if(verbose)
     cout << "TMRO::start\n";
 
   old_option = cpu_pic->option_reg.value.get();
@@ -352,7 +351,6 @@ void  TMR0::reset(RESET_TYPE r)
 
   switch(r) {
   case POR_RESET:
-    cout << "TMR0::reset - por\n";
     value = por_value;
     break;
   default:

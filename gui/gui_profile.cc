@@ -1223,6 +1223,7 @@ int plot_routine_histogram(Profile_Window *pw)
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
+#if 0
     char fromaddress_string[256];
     char toaddress_string[256];
     menu_item *item;
@@ -1389,6 +1390,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	puts("Unhandled menuitem?");
 	break;
     }
+#endif
 }
 
 static void update_menus(Profile_Window *pw)

@@ -198,6 +198,31 @@ double command::evaluate(Expression *expr)
 }
 
 
+static gint64 evaluateToInt(Expression *expr)
+{
+  gint64 value = 0;
+
+  try {
+    if(expr) {
+
+      Value *v = expr->evaluate();
+      
+      v->get(value);
+
+      delete v;
+      delete expr;
+    }
+
+  }
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
+  return value;
+}
 void command::evaluate(ExprList_t *eList,
 		       guint64 *parameters, 
 		       int *nParameters)
@@ -218,7 +243,7 @@ void command::evaluate(ExprList_t *eList,
       (ei != eList->end()) && (n < *nParameters); 
       ++ei, n++)
     {
-      parameters[n] = (guint64) evaluate(*ei);
+      parameters[n] = evaluateToInt(*ei);
       cout << "p" << n << " = " << parameters[n] << endl;
 
     }

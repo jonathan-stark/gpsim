@@ -122,12 +122,8 @@ void  Module::dump_attributes(int show_values)
     Value *locattr = *attribute_iterator;
 
     cout << locattr->name();
-    if(show_values) {
-
-      char buf[50];
-
+    if(show_values)
       cout << " = " << locattr->toString();
-    }
     cout << endl;
   }
 
@@ -228,6 +224,8 @@ void Module::add_attribute(Value *new_attribute)
 {
 
   attributes.push_back(new_attribute);
+
+  symbol_table.add(new attribute_symbol(this,new_attribute));
 
   cout << "add_attribute  name = " << new_attribute->name() << '\n';
 
@@ -527,7 +525,7 @@ void module_load_module(const char *module_type, const char *module_name)
 void module_list_modules(void)
 {
 
- symbol_table.dump_type( SYMBOL_MODULE);
+ symbol_table.dump_type( typeid(module_symbol));
 }
 
 //--------------------------------------------------
@@ -539,7 +537,7 @@ void module_list_modules(void)
 Module *module_check_cpu(char *module_name)
 {
 
-  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+  Value *mP = symbol_table.find(typeid(module_symbol),module_name);
 
   module_symbol *ms = dynamic_cast<module_symbol *>(mP);
 

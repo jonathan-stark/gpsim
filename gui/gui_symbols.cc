@@ -239,10 +239,10 @@ void Symbol_Window::Update(void)
   while(sti != st.end()) {
 
     // ignore line numbers
-    if(  ((*sti)->isa() == SYMBOL_LINE_NUMBER)            ||
-	 (filter_addresses && (*sti)->isa() == SYMBOL_ADDRESS)  ||
-	 (filter_constants && (*sti)->isa() == SYMBOL_CONSTANT) ||
-	 (filter_registers && (*sti)->isa() == SYMBOL_REGISTER) ) {
+    if(  (typeid(**sti) == typeid(line_number_symbol) )            ||
+	 (filter_addresses && (typeid(**sti) == typeid(address_symbol)))  ||
+	 (filter_constants && (typeid(**sti) == typeid(Integer))) ||
+	 (filter_registers && (typeid(**sti) == typeid(register_symbol)))) {
       sti++;
       continue;
     }
@@ -259,25 +259,23 @@ void Symbol_Window::Update(void)
     int row;
     sym *e;
 
-    int len = strlen((*sti)->type_name());
+    int len = strlen("FIXME"); //(*sti)->type_name());
     pstr=(char*)malloc(len+1);
-    strncpy(pstr,(*sti)->type_name(),len);
+    strncpy(pstr,"FIXME", len); //(*sti)->type_name(),len);
     pstr[len]=0;
     entry[1] = pstr;
 
-    entry[2]=(char*)malloc(32);
-    if((*sti)->isa()==SYMBOL_ADDRESS||
-       (*sti)->isa()==SYMBOL_CONSTANT||
-       (*sti)->isa()==SYMBOL_REGISTER) {
+    {
+      entry[2]=(char*)malloc(32);
       int i;
       (*sti)->get(i);
-      sprintf(entry[2],"0x%X",i);
-    } else
-      strcpy(entry[2],"");
+      snprintf(entry[2],32,"0x%X",i);
+    }
+
 	
     e=(sym*)malloc(sizeof(sym));
     e->name = entry[0];
-    e->type = (*sti)->isa();
+    //e->type = (*sti)->isa();
     (*sti)->get(e->value);
 
     symbols=g_list_append(symbols,e);
@@ -358,6 +356,8 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
 
 void Symbol_Window::SelectSymbolName(char *symbol_name)
 {
+  cout << "SelectSymbolName is broken\n";
+#if 0
   GList *p;
   //sym *s;
     
@@ -377,7 +377,7 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
     
     if(!strcasecmp((*sti)->name().data(),symbol_name)) {
 	
-      //switch(s->type) {
+
       switch((*sti)->isa()) {
 	    
       case SYMBOL_ADDRESS:
@@ -429,6 +429,8 @@ void Symbol_Window::SelectSymbolName(char *symbol_name)
     }
     p=p->next;
   }
+
+#endif //0
 }
 
 void Symbol_Window::NewSymbols(void)

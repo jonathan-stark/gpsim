@@ -122,7 +122,7 @@ void yyerror(char *message)
   Float*                    Float_P;
   Integer*                  Integer_P;
   String*                   String_P;
-  symbol*                   Symbol_P;
+  Value*                    Symbol_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
@@ -384,7 +384,7 @@ dump_cmd:
 
 eval_cmd:
 	  SYMBOL_T {c_symbol.dump_one($1);}
-          | SYMBOL_T EQU_T expr { $1->assignTo($3);}
+          | SYMBOL_T EQU_T expr { $1->set($3);}
           ;
 
 frequency_cmd

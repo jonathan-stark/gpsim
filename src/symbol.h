@@ -33,12 +33,22 @@ using namespace std;
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
+
+
+class stimulus;
+class Stimulus_Node;
+class WREG;
+class IOPORT;
 class Processor;
+class Register;
+class Module;
+class Expression;
+class symbol;
 
 int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
-//#include "gpsim_interface.h"
+
 enum SYMBOL_TYPE
 {
   SYMBOL_INVALID,
@@ -54,17 +64,6 @@ enum SYMBOL_TYPE
   SYMBOL_PROCESSOR,
   SYMBOL_MODULE
 };
-
-
-class stimulus;
-class Stimulus_Node;
-class WREG;
-class IOPORT;
-class Processor;
-class Register;
-class Module;
-class Expression;
-class symbol;
 
 
 class Symbol_Table
@@ -86,11 +85,11 @@ public:
   void dump_all(void);
   void dump_one(char *s);
   void dump_one(string *s);
-  void dump_type(SYMBOL_TYPE symt);
-  
-  symbol * find(char *s);
-  symbol * find(string *s);
-  symbol * find(SYMBOL_TYPE symt, char *s);
+  void dump_type(type_info const&t);
+
+  Value *find(char *s);
+  Value *find(string *s);
+  Value *find(type_info const&t, char *s);
 };
 
 
@@ -111,53 +110,21 @@ inline Symbol_Table &get_symbol_table(void)
 
 
 //------------------------------------------------------------------------
-/// symbol - base class for symbols.
+/// symbol - base class for gpsim symbols. gpsim symbols are 'Value' objects
+/// that are typically associated with a Typed object that has been defined
+/// by a Module. Eg. a register_symbol is a symbol that is associtated with
+/// a processor's registers.
 
 class symbol : public Value
 {
 public:
 
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_BASE_CLASS;};
-  virtual char * type_name(void) { return "unknown";}
-
   virtual string toString();
-  virtual void print();
-
-  virtual void assignTo(Expression *);
-
-  virtual void get(int &);
-
-  virtual void set(Value *);
-  virtual void set(int);
-
-  virtual symbol *copy();
 
   symbol(char *);
   symbol(string &);
   virtual ~symbol();
 };
-
-// Do we need this? a constant_symbol is identical to an Integer!
-class constant_symbol : public symbol
-{
-protected:
-  unsigned int val;
-public:
-  virtual symbol *copy();
-
-  constant_symbol(char *, unsigned int);
-
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_CONSTANT;};
-  virtual char * type_name(void) { return "constant";}
-  virtual void print(void);
-
-  virtual void get(int &);
-
-  virtual void set(int);
-  virtual void set(Value *);
-
-};
-
 
 class ioport_symbol : public symbol
 {
@@ -167,14 +134,12 @@ public:
   ioport_symbol(IOPORT *);
   virtual symbol *copy();
 
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
-  virtual char * type_name(void) { return "ioport";}
-
   virtual void get(int &);
 
   virtual void set(int);
   virtual void set(Value *);
 
+  virtual string toString();
 };
 
 class node_symbol : public symbol
@@ -184,10 +149,7 @@ protected:
 public:
 
   node_symbol(Stimulus_Node *);
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS_NODE;};
-  virtual char * type_name(void) { return "node";}
-  virtual void print(void);
-
+  virtual string toString();
 };
 
 class register_symbol : public symbol
@@ -199,9 +161,7 @@ public:
   register_symbol(char *, Register *);
 
   virtual symbol *copy();
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
-  virtual char * type_name(void) { return "register";}
-  virtual void print(void);
+  virtual string toString();
 
   virtual void get(int &);
 
@@ -217,18 +177,16 @@ protected:
 public:
   stimulus_symbol(stimulus *);
   virtual string &name(void);
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS;};
+  virtual string toString();
+
 };
 
-class address_symbol : public constant_symbol
+class address_symbol : public Integer
 {
 public:
 
   address_symbol(char *, unsigned int);
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_ADDRESS;};
-  virtual char * type_name(void) { return "address";}
-  virtual void print(void);
-
+  virtual string toString();
 };
 
 class line_number_symbol : public address_symbol
@@ -238,37 +196,57 @@ protected:
  public:
 
   line_number_symbol(char *, unsigned int);
-  void put_address(int new_address) {val = new_address;}
+  void put_address(int new_address) {set(new_address);}
   void put_src_line(int new_src_line) {src_line = new_src_line;}
   void put_lst_line(int new_lst_line) {lst_line = new_lst_line;}
   void put_lst_page(int new_lst_page) {lst_page = new_lst_page;}
-
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_LINE_NUMBER;};
-  virtual char * type_name(void) { return "line_number";}
 };
 
+/// module_symbol - a symbol table entry for a gpsim module.
 class module_symbol : public symbol
 {
 protected:
   Module *module;
 public:
   module_symbol(Module *, char *);
-  virtual void print(void);      
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
-  virtual char * type_name(void) { return "module";}
+  virtual string toString();
   Module *get_module() { return module;}
+};
+
+/// attribute_symbol - a symbol that is associated with a specific
+/// instance of a module. This class provides a mechanism for wrapping
+/// Values (or symbols) and associating them with processors or
+/// modules.
+
+class attribute_symbol : public module_symbol
+{
+protected:
+  /// The attribute wrapped by this symbol.
+  Value *attribute;
+public:
+  attribute_symbol(Module *, Value *);
+  virtual string toString();
+
+  /// The get and set methods will call the attribute's get and
+  /// set methods.
+
+  virtual void set(double);
+  virtual void set(gint64);
+  virtual void set(int);
+  virtual void set(Value *);
+  virtual void set(Expression *);
+
+  virtual void get(int &);
+  virtual void get(gint64 &);
+  virtual void get(double &);
+
 };
 
 // Place W into the symbol table
 class w_symbol : public register_symbol
 {
  public:
-
   w_symbol(char*, Register *);
-
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
-  virtual char * type_name(void) { return "W";}
-  virtual void print(void);
 };
 
 
@@ -280,11 +258,7 @@ class val_symbol : public symbol
 
   gpsimValue *val;
 
-  virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;}
-  virtual char * type_name(void);
-
   virtual string toString();
-  virtual void print(void);
 
   virtual void get(int &);
   virtual void set(int);

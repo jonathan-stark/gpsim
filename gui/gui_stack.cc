@@ -157,8 +157,11 @@ static int get_closest_label(Stack_Window *sw,
   list <symbol *>::iterator sti;
 
   for(sti = st.begin(); sti != st.end(); sti++) {
-    
-    if((*sti)->isa() == SYMBOL_ADDRESS) {
+
+    symbol *s = *sti;
+
+    if(  (typeid(*s) == typeid(address_symbol)) ||
+	 (typeid(*s) == typeid(line_number_symbol))) {
       int i;
       (*sti)->get(i);
       delta = abs( i - address);

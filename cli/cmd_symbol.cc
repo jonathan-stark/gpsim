@@ -72,10 +72,10 @@ void cmd_symbol::dump_one(char *sym_name)
   get_symbol_table().dump_one(sym_name);
 }
 
-void cmd_symbol::dump_one(symbol *s)
+void cmd_symbol::dump_one(Value *s)
 {
   if(s)
-    s->print();
+    cout << s->toString() << endl;
 }
 
 void cmd_symbol::add_one(char *sym_name, char *sym_type, Expression *expr)

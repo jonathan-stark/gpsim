@@ -34,7 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 
 
-#define DEBUG
+//#define DEBUG
 
 #include "gui.h"
 #include "gui_statusbar.h"
@@ -243,7 +243,7 @@ RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
   reg = new_reg;
 
   if(reg) {
-    printf("RegisterLabeledEntry\n");
+
     pCellFormat = new char[10];
     sprintf(pCellFormat,"0x%%0%dx",reg->register_size()*2);
 
@@ -489,6 +489,7 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
 {
   if(created)
     return;
+
   Dprintf((" %s",__FUNCTION__));
 
   /* --- Put up h-box --- */

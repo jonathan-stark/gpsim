@@ -27,6 +27,7 @@ class Processor;
 class Module;
 #include "xref.h"
 
+class Expression;
 class ComparisonOperator;
 
 //------------------------------------------------------------------------
@@ -61,6 +62,7 @@ public:
   virtual void set(gint64);
   virtual void set(int);
   virtual void set(Value *);
+  virtual void set(Expression *);
 
   /// Value 'get' methods provide a mechanism of casting Value objects
   /// to other value types. If the type cast is not supported in a
@@ -211,7 +213,7 @@ public:
   Integer(gint64 new_value) : Value() { value = new_value;};
   virtual ~Integer() {}
 
-  string toString();
+  virtual string toString();
   string toString(char* format);
   static string toString(gint64 value);
   static string toString(char* format, gint64 value);
@@ -220,6 +222,7 @@ public:
   virtual void get(double &d);
 
   virtual void set(gint64 v);
+  virtual void set(int);
   virtual void set(double d);
   virtual void set(Value *);
 
@@ -246,7 +249,7 @@ public:
   Float(double newValue);
   virtual ~Float();
 
-  string toString();
+  virtual string toString();
   string toString(char* format);
   static string toString(double value);
   static string toString(char* format, double value);
@@ -282,7 +285,7 @@ public:
   String(string newValue);
   virtual ~String();
 
-  string toString();
+  virtual string toString();
   string toString(char* format);
   static string toString(string value);
   static string toString(char* format, string value);
@@ -306,7 +309,7 @@ public:
   AbstractRange(unsigned int leftVal, unsigned int rightVal);
   virtual ~AbstractRange();
 
-  string toString();
+  virtual string toString();
   string toString(char* format);
 
   virtual unsigned int get_leftVal();

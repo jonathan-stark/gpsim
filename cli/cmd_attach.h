@@ -31,7 +31,7 @@ public:
 
   cmd_attach(void);
   void attach(list <string> *);
-  void attach(list <symbol*> *);
+  void attach(list <Value*> *);
 
 };
 
