@@ -62,6 +62,9 @@ class Trace
 #define    CYCLE_INCREMENT    (0x10<<24)
 #define    REGISTER_READ_VAL  (0x11<<24)
 #define    REGISTER_WRITE_VAL (0x12<<24)
+#define    REGISTER_READ_16BITS  (0x13<<24)
+#define    REGISTER_WRITE_16BITS (0x14<<24)
+
 #define    CYCLE_COUNTER_LO   (0x80<<24)
 #define    CYCLE_COUNTER_HI   (0x40<<24)
 
@@ -116,6 +119,18 @@ class Trace
   inline void register_write (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | value;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void register_read_16bits (unsigned int address, unsigned int value)
+  {
+    trace_buffer[trace_index] = REGISTER_READ_16BITS | (address << 16) | (value & 0xffff);
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void register_write_16bits (unsigned int address, unsigned int value)
+  {
+    trace_buffer[trace_index] = REGISTER_WRITE_16BITS | (address << 16) | (value & 0xffff);
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 

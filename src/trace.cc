@@ -271,6 +271,16 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       snprintf(buffer, bufsize,"  wrote: 0x%02x to %s",
 	       trace_buffer[index]&0xff, r->name());
       break;
+    case REGISTER_READ_16BITS:
+      r = cpu->registers[(trace_buffer[index]>>16) & 0xff];
+      snprintf(buffer, bufsize,"   read: 0x%04x from %s",
+	       trace_buffer[index]&0xffff, r->name());
+      break;
+    case REGISTER_WRITE_16BITS:
+      r = cpu->registers[(trace_buffer[index]>>16) & 0xff];
+      snprintf(buffer, bufsize,"  wrote: 0x%04x to %s",
+	       trace_buffer[index]&0xffff, r->name());
+      break;
     case READ_W:
       snprintf(buffer, bufsize,"   read: 0x%02x from W",
 	       trace_buffer[index]&0xff);
@@ -302,6 +312,9 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	  break;
 	case WDT_RESET:
 	  snprintf(buffer, bufsize,"WDT reset");
+	  break;
+	case SOFT_RESET:
+	  snprintf(buffer, bufsize,"SOFT reset");
 	  break;
 	default:
 	  snprintf(buffer, bufsize,"unknown reset");
