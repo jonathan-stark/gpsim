@@ -534,6 +534,10 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   else if(pma->address_has_break(address)) {
     e->Set(pages[id].source_layout,pixmap_break, bp_mask);
+    breakpoints.Add(address,
+    	gtk_pixmap_new(pixmap_break,bp_mask),
+	pages[id].source_layout,
+	e->pos);
 
   } else {
 
@@ -738,7 +742,6 @@ BreakPointList::BreakPointList(void)
 
 void BreakPointList::Remove(int address = -1)
 {
-
   GList *li = iter;
 
   while(li)
@@ -821,7 +824,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
     for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
       sbaw->UpdateLine(address);
   }
-  return 0;
+  return 1;
 }
 
 /*
@@ -891,12 +894,16 @@ static gint sigh_button_event(GtkWidget *widget,
 	gtk_menu_popup(GTK_MENU(sbaw->popup_menu), 0, 0, 0, 0,
 		       3, event->time);
 
+#if GTK_MAJOR_VERSION < 2
 	// override pages[id].source_text's handler
 	// is there a better way? FIXME
 	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
-	return 0;
+#endif
+	return 1;
     }
 
+    // FIXME, doesn't get button4/5 in gtk2???
+    //printf("event->type %d, event->button %d\n",event->type,event->button);
     if(event->type==GDK_BUTTON_PRESS && event->button==4)
     { // wheel scroll up
       printf("scroll up\n");
@@ -904,7 +911,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
 	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return 0;
+	return 1;
     }
     if(event->type==GDK_BUTTON_PRESS && event->button==5)
     { // wheel scroll down
@@ -913,7 +920,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
 	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return 0;
+	return 1;
     }
     return 0;
 }
@@ -944,7 +951,9 @@ static gint drag_scroll_cb(gpointer data)
     SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)data;
 	
     int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
-    
+  
+  puts("scroll");
+  
     GTK_TEXT(sbaw->pages[id].source_text)->vadj->value+=
 	GTK_TEXT(sbaw->pages[id].source_text)->vadj->step_increment*drag_scroll_speed;
     
@@ -959,7 +968,7 @@ static gint drag_scroll_cb(gpointer data)
     
     gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
     
-    return 0;
+    return TRUE; // refresh timer
 }
 
 /*
@@ -988,6 +997,7 @@ static gint marker_cb(GtkWidget *w1,
     
   static GtkWidget *dragwidget;
   static int dragwidget_x;
+  static gdouble vadj_value=0.0;
     
 
   int mindiff;
@@ -1003,6 +1013,10 @@ static gint marker_cb(GtkWidget *w1,
   //printf("marker_cb\n");
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
+#if GTK_MAJOR_VERSION >= 2
+  vadj_value=GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+#endif
+
   switch(event->type) {
     
   case GDK_MOTION_NOTIFY:
@@ -1012,7 +1026,6 @@ static gint marker_cb(GtkWidget *w1,
 	// actually button is pressed, but setting
 	// this to zero makes this block of code
 	// execute exactly once for each drag motion
-	    
 	if(button_pressed_x<PIXMAP_SIZE)
 	  {
 	    // find out if we want to start drag of a breakpoint
@@ -1072,28 +1085,32 @@ static gint marker_cb(GtkWidget *w1,
       }
     else if(dragbreak==1)
       {  // drag is in progress
-	if((event->y/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) >0.9
-	   ||(event->y/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1)
+	if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) >0.9
+	   ||((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1)
 	  {
 	    if(timeout_tag==-1)
 	      {
 		timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
 	      }
-	    if((event->y/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
-	      drag_scroll_speed = ((event->y/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
+	    if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
+	      drag_scroll_speed = (((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
 	    else
-	      drag_scroll_speed = -(0.1-(event->y/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
+	      drag_scroll_speed = -(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
 	  }
 	else if(timeout_tag!=-1)
 	  {
+	  puts("remove timeout");
 	    gtk_timeout_remove(timeout_tag);
 	    timeout_tag=-1;
 	  }
 	    
 	// update position of dragged pixmap
 	gtk_layout_move(GTK_LAYOUT(sbaw->pages[id].source_layout),
-			dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2+
-			(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value);
+			dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2
+#if GTK_MAJOR_VERSION < 2
+			+ (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value
+#endif
+			);
       }
     break;
   case GDK_BUTTON_PRESS:
@@ -1771,7 +1788,7 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 	return 0;
     
     gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
-    return 0; // what should be returned?, FIXME
+    return 0;
 }
 
 static int load_fonts(SourceBrowserAsm_Window *sbaw)
