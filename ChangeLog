@@ -1,4 +1,7 @@
 2004-10-04 Scott Dattalo <scott@dattalo.com>
+	* README, INSTALL: Cleaned up stale documentation.
+	
+2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: Send an extra CR to the parser when loading a
 	command file. Turns out that when the gui loads a file, the
 	parser doesn't process it until another CR is seen.

@@ -12,7 +12,8 @@ TOC
  5.0  Installing gtk+-extra and eXdbm
  6.0  How to install gpsim from RPM's
  7.0  MAC OS
- 8.0  CVS 
+ 8.0  Windows
+ 9.0  CVS 
 
 1.0 Installation instructions
     -------------------------
@@ -21,7 +22,6 @@ TOC
 Starting with gpsim-0.18.0, two probably not so common packages:
 
 gtk+-extra
-eXdbm
 
 are going to be needed. Please see the end of this file for instructions 
 on their installation.
@@ -50,16 +50,27 @@ $ cd ~/gnupic
 $ mv the_path_of_where_ever_the_tarball_is/gpsim-0.x.y.tar.gz .
 $ tar -xvzf gpsim-0.x.y.tar.gz
 
-(Where 'x.y' is the release number.) This will create a subdirectory called gpsim-0.x.y . All of gpsim's source code will be untarred to here.
+(Where 'x.y' is the release number.) This will create a subdirectory
+called gpsim-0.x.y . All of gpsim's source code will be untarred to
+here.
 
 3) cd gpsim-0.x.y
 
 4) ./configure
-This will check your system for the proper tools necessary to build gpsim and then it will create Makefiles.
+
+This will check your system for the proper tools necessary to build
+gpsim and then it will create Makefiles.
 
 ***NOTE TO HACKERS***
 
-As of version gpsim-0.17.0, gpsim use the GNU Libtool for making shared libraries. This is good in that it helps make gpsim usable on more platforms. It's bad in that it does not create an executable until the 'make install' step. (It instead creates a script after the make step. This script may be invoked the same way gpsim was invoked prior to 0.17.0 .) Consequently, this makes gpsim difficult to debug. If you want to debug gpsim without having to install it, then you can disable the shared libraries feature:
+As of version gpsim-0.17.0, gpsim use the GNU Libtool for making
+shared libraries. This is good in that it helps make gpsim usable on
+more platforms. It's bad in that it does not create an executable
+until the 'make install' step. (It instead creates a script after the
+make step. This script may be invoked the same way gpsim was invoked
+prior to 0.17.0 .) Consequently, this makes gpsim difficult to
+debug. If you want to debug gpsim without having to install it, then
+you can disable the shared libraries feature:
 
 ./configure  --disable-shared
 
@@ -67,7 +78,10 @@ As of version gpsim-0.17.0, gpsim use the GNU Libtool for making shared librarie
 
 This will create the executable.
 
-6) su root . You'll need su privileges to complete the install. If you don't have root privileges or don't wish to install gpsim in the /usr/local/bin directory, then see the steps below on building without root privileges.
+6) su root . You'll need su privileges to complete the install. If you
+   don't have root privileges or don't wish to install gpsim in the
+   /usr/local/bin directory, then see the steps below on building
+   without root privileges.
 
 7) make install
 This copies the executable into the /usr/local/bin subdirectory. 
@@ -83,8 +97,10 @@ Repeat steps 1,2, and 3 from above.
 
 4) ./configure --disable-gui
 
-Note: if you already had built gpsim with the gui support and then decide you want to take it out, then you'll also needed to do a 'make clean' before you do the 'make' in step 5. The make clean will remove all of the old object files.
-
+Note: if you already have built gpsim with the gui support and then
+decide you want to take it out, then you'll also needed to do a 'make
+clean' before you do the 'make' in step 5. The make clean will remove
+all of the old object files.
 
 
 3.0 HOW TO BUILD gpsim WITHOUT ROOT PRIVILEGES
@@ -213,7 +229,21 @@ There's a conflict with shared libraries and gpsim on the new MAC OS's. So for t
 
 $ ./configure --disable-shared
 
-8.0 CVS
+8.0 Windows
+    -------
+
+Borut Razem has ported gpsim to windows. See 
+
+http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
+
+for details on how to build and install gpsim Under Windows.
+
+
+
+9.0 CVS
     ---
 
-See 
+See http://www.dattalo.com/gnupic/gpsim_cvs.html for instructions on
+how to retrieve gpsim from CVS.
+
+
