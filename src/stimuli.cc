@@ -438,21 +438,30 @@ double Stimulus_Node::update(guint64 current_time)
 
       default:
 	{
-	  double Zt=0.0;
+	  /*
+	    There are 3 or more stimuli connected to this node. Recall
+	    that these are all in parallel. The Thevenin voltage and 
+	    impedance for this is:
+
+	    Thevenin impedance:
+	      Zt = 1 / sum(1/Zi)
+                                                                                                 
+	    Thevenin voltage:
+                                                                                                 
+	    Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
+	       = sum( Vi * Zt /Zi)
+	       = Zt * sum(Vi/Zi)
+	  */
+
+	  double Ct=0.0;	// Thevenin conductance.
 
 	  while(sptr) {
-	    Zt += sptr->get_Zth();
+	    double Cs = 1 / sptr->get_Zth();
+	    voltage += sptr->get_Vth() * Cs;
+	    Ct += Cs;
 	    sptr = sptr->next;
 	  }
-
-	  sptr = stimuli;
-
-	  while(sptr) {
-	    voltage += sptr->get_Vth() * (Zt - sptr->get_Zth());
-	    sptr = sptr->next;
-	  }
-
-	  voltage /= Zt;
+	  voltage /= Ct;
 
 	  sptr = stimuli;
 	  while(sptr) {
