@@ -7,6 +7,7 @@
 #include "../config.h"
 #ifdef HAVE_GUI
 
+#include <unistd.h>
 #include <gtk/gtk.h>
 
 #include <gdk/gdktypes.h>
@@ -57,6 +58,7 @@ void quit_gui(void)
     gdk_window_get_root_origin(dispatcher_window->window,&x,&y);
     gdk_window_get_size(dispatcher_window->window,&width,&height);
 
+    config_set_variable("dispatcher", "enable", 1);
     config_set_variable("dispatcher", "x", x);
     config_set_variable("dispatcher", "y", y);
     config_set_variable("dispatcher", "width", width);

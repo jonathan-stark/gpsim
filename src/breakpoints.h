@@ -28,7 +28,8 @@ Boston, MA 02111-1307, USA.  */
 #include  <iostream.h>
 
 #ifdef HAVE_GUI
-#include "glib.h"
+#include <unistd.h>
+#include <glib.h>
 #endif
 
 class pic_processor;

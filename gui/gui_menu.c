@@ -5,6 +5,7 @@
 #include <gnome.h>
 #endif
 
+#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>
@@ -595,7 +596,7 @@ void create_dispatcher (void)
       }
       else
       {
-	  printf("using default update rate\n");
+	//printf("using default update rate\n");
 	  update_rate=gpsim_get_update_rate();
       }
       spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);

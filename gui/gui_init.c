@@ -7,6 +7,7 @@
 #include "../config.h"
 #ifdef HAVE_GUI
 
+#include <unistd.h>
 #include <gtk/gtk.h>
 
 #include <gdk/gdktypes.h>
@@ -134,7 +135,7 @@ void gui_styles_init(void)
 	gdk_colormap_alloc_color(colormap, &pm_has_changed_color,FALSE,TRUE);
 
 	
-	puts("Initialized");
+	//puts("Initialized");
 
 }
 #endif // HAVE_GUI

@@ -6,6 +6,7 @@
 
 #ifdef HAVE_GUI
 
+#include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
 #include <gdk/gdkkeysyms.h>

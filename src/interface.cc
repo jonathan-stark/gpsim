@@ -32,8 +32,6 @@ Boston, MA 02111-1307, USA.  */
 //-------------------------------------------------------------------
 
 #include <stdio.h>
-#include <unistd.h>
-#include <glib.h>
 
 #include "../config.h"
 #define GPSIM_VERSION VERSION 
@@ -185,7 +183,9 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 	return 1;
     }
   else
-    printf("Warning: Request for register 0x%x in processor %s is out of range\n",register_number,pic->name());
+    cout << "Warning: Request for register 0x " << hex << register_number
+	 << " in processor " << pic->name()
+	 << " is out of range\n";
 
 
   return 0;
@@ -473,28 +473,19 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
 {
 
   if(verbose & 0x8)
-    printf("%s()\n",__FUNCTION__);
+    cout << __FUNCTION__ << "()\n";
 
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
     return 0;
 
-  if(verbose & 0x8)
-    printf("%s() - valid pic\n",__FUNCTION__);
-
   if(!valid_register(pic,type,0))
       return 0;
   
-  if(verbose & 0x8)
-    printf("%s() - valid register\n",__FUNCTION__);
-
   if(type == REGISTER_EEPROM)
     return pic->eeprom_get_size();
   
-  if(verbose & 0x8)
-    printf("%s(), register memory size 0x%x\n",__FUNCTION__, pic->register_memory_size());
-
   return pic->register_memory_size();
 }
 
@@ -981,7 +972,7 @@ void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointe
   if(iopin->xref)
       iopin->xref->add(xref);
   else
-      printf("no xref on %d\n",pin);
+    cout << "no xref on " << pin << '\n';
 
 }
 
@@ -1089,7 +1080,7 @@ int gpsim_open(unsigned int processor_id, char *file)
     str++;
     if(!strcmp(str,"hex"))
     {
-//	printf("load hex file \"%s\"\n",file);
+
 	if(!pic)
 	{
 	    puts("No pic selected!");
@@ -1100,7 +1091,7 @@ int gpsim_open(unsigned int processor_id, char *file)
     }
     else if(!strcmp(str,"cod"))
     {
-//	printf("load symbol file \"%s\"\n",file);
+
 	int i;
 	i=load_symbol_file(&pic, file);
 
@@ -1117,12 +1108,12 @@ int gpsim_open(unsigned int processor_id, char *file)
     }
     else if(!strcmp(str,"stc"))
     {
-//	printf("load command file \"%s\"\n",file);
+
 	process_command_file(file);
     }
     else
     {
-	printf("Unknown file extension \"%s\" \n",str);
+      cout << "Unknown file extension \"" << str <<"\" \n";
 	return 0;
     }
 

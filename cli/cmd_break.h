@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_BREAK_H__
 #define __CMD_BREAK_H__
 
+#include <unistd.h>
 #include <glib.h>
 
 class cmd_break : public command
