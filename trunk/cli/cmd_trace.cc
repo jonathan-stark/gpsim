@@ -103,7 +103,7 @@ void cmd_trace::trace(cmd_options_str *cos)
 {
   switch(cos->co->value) {
   case TRACE_LOGON_CMD:
-	trace_enable_logging(cos->str);
+	trace_enable_logging(cos->str, TRACE_FILE_FORMAT_ASCII);
 	cout << "Logging to file enabled" << endl;
 	break;
   default:
