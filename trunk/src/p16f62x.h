@@ -111,6 +111,10 @@ public:
     {
       ((PORTB *)portb)->rbpu_intedg_update(bits);
     }
+
+  // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
+  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
+
 #if 0
   virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
   virtual unsigned int eeprom_get_value(unsigned int address) ;
@@ -144,7 +148,7 @@ class P16F628 : public P16F627
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16F627_;};
+  virtual PROCESSOR_TYPE isa(void){return _P16F628_;};
 
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
 
