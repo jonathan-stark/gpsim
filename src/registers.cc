@@ -146,9 +146,10 @@ static void SplitBitString(int n, const char **out, char *in, const char *in2)
 //
 
 char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos, 
-			     char *HiBitNames,
-			     char *LoBitNames,
-			     char *UndefBitNames)
+			       const char *cByteSeparator,
+			       const char *HiBitNames,
+			       const char *LoBitNames,
+			       const char *UndefBitNames)
 {
   unsigned int i,mask,max;
 
@@ -177,7 +178,8 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 
   char *dest = s;
 
-  for(i=0,mask=1<<31; mask; mask>>=1) {
+  int bitNumber=31;
+  for(i=0,mask=1<<31; mask; mask>>=1,bitNumber--) {
 
     if(BitPos & mask) {
 
@@ -196,6 +198,16 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 
       if(i++>nBits || len < 0)
 	break;
+
+      if(cByteSeparator && bitNumber && ((bitNumber%8)==0)) {
+	strncpy(dest, cByteSeparator, len);
+	int l = strlen(cByteSeparator);
+	len -= l;
+	dest += l;
+	*dest = 0;
+	if(len < 0)
+	  break;
+      }
 
     }
 
@@ -385,14 +397,14 @@ void Register::set_read_trace(unsigned int rt)
 
 char * Register::toString(char *str, int len)
 {
-  return value.toString(str, len, register_size()*2);
+  return getRV_notrace().toString(str, len, register_size()*2);
 }
 char * Register::toBitStr(char *s, int len)
 {
   unsigned int bit_length = register_size() * 8;
   unsigned int bits = (1<<bit_length) - 1;
 
-  return value.toBitStr(s,len,bits);
+  return getRV_notrace().toBitStr(s,len,bits);
 }
 
 

@@ -38,7 +38,14 @@ class gpsimObject {
   virtual ~gpsimObject();
 
   virtual string &name(void);
+
+  /// copy the name to a user char array
   virtual char *name(char *, int len);
+
+  /// copy the object value to a user char array
+  virtual char *toString(char *, int len);
+  virtual char *toBitStr(char *, int len);
+
   virtual void new_name(const char *);
   virtual void new_name(string &);
 

@@ -272,10 +272,12 @@ AbstractRange::~AbstractRange()
 
 string AbstractRange::toString()
 {
+  char buff[256];
+
   string str = "";
   
-  str = Integer::toString("%02d", left) + ":" + Integer::toString("%02d", right);
-  return (str);
+  snprintf(buff,sizeof(buff),"%d:%d",left,right);
+  return (string(buff));
 }
 
 string AbstractRange::toString(char* format)
@@ -284,6 +286,16 @@ string AbstractRange::toString(char* format)
 
   sprintf(cvtBuf, format, left, right);
   return (string(&cvtBuf[0]));
+}
+
+char *AbstractRange::toString(char *return_str, int len)
+{
+  if(return_str) {
+
+    snprintf(return_str,len,"%d:%d",left,right);
+  }
+
+  return return_str;
 }
 
 unsigned int AbstractRange::get_leftVal()
@@ -354,6 +366,27 @@ string Boolean::toString()
 string Boolean::toString(bool value)
 {
   return (string(value ? "true" : "false"));
+}
+
+char *Boolean::toString(char *return_str, int len)
+{
+  if(return_str) {
+    bool b;
+    get(b);
+    snprintf(return_str,len,"%s",(b ? "true" : "false"));
+  }
+
+  return return_str;
+}
+char *Boolean::toBitStr(char *return_str, int len)
+{
+  if(return_str) {
+    bool b;
+    get(b);
+    snprintf(return_str,len,"%d",(b ? 1 : 0));
+  }
+
+  return return_str;
 }
 
 string Boolean::toString(char* format)
@@ -638,6 +671,34 @@ string Integer::toString(gint64 value)
   return (string(&cvtBuf[0]));  
 }
 
+char *Integer::toString(char *return_str, int len)
+{
+  if(return_str) {
+    gint64 i;
+    get(i);
+    snprintf(return_str,len,"%d",i);
+  }
+
+  return return_str;
+}
+char *Integer::toBitStr(char *return_str, int len)
+{
+  if(return_str) {
+    gint64 i;
+    get(i);
+    int j=0;
+    int mask=1<<31;
+    for( ; mask ; mask>>=1, j++)
+      if(j<len)
+	return_str[j] = ( (i & mask) ? 1 : 0);
+
+    if(j<len)
+      return_str[j]=0;
+  }
+
+  return return_str;
+}
+
 Integer* Integer::typeCheck(Value* val, string valDesc)
 {
   if (typeid(*val) != typeid(Integer)) {
@@ -838,6 +899,18 @@ string Float::toString(char* format)
   return (string(&cvtBuf[0]));
 }
 
+char *Float::toString(char *return_str, int len)
+{
+  if(return_str) {
+
+    double d;
+    get(d);
+    snprintf(return_str,len,"%g",d);
+  }
+
+  return return_str;
+}
+
 Float* Float::typeCheck(Value* val, string valDesc)
 {
   if (typeid(*val) != typeid(Float)) {
@@ -907,6 +980,19 @@ string String::toString()
     return string(value);
   else 
     return string("");
+}
+
+char *String::toString(char *return_str, int len)
+{
+  if(return_str) {
+
+    if(value)
+      snprintf(return_str,len,"%s",value);
+    else
+      *return_str = 0;
+  }
+
+  return return_str;
 }
 
 void String::set(Value *v)

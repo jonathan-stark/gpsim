@@ -1,4 +1,13 @@
-2005-01-15 Scott Dattalo <scott@dattalo.com>
+2005-01-19 Scott Dattalo <scott@dattalo.com>
+	* src/registers.cc, src/registers.h, src/gpsim_object.cc,
+	  src/gpsim_object.h, src/symbol.cc, src/symbol.h,
+	  src/value.cc, src/value.h: Added the 'toBitStr' method
+	to gpsim_object and propopogated the change through the
+	derived classes. Also, the register class now calls get() to 
+	obtain the value printed with toString and toBitStr instead
+	of directly using its value object.
+
+2005-01-17 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.h, src/gpsim_time.cc: Finished the StopWatch
 	class.
 	* src/value.cc, src/value.h, src/attributes.cc, src/attributes.h:

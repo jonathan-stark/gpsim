@@ -92,9 +92,10 @@ public:
 
   char * toString(char *str, int len, int regsize=2);
   char * toBitStr(char *s, int len, unsigned int BitPos, 
-		  char *HiBitNames=0,
-		  char *LoBitNames=0,
-		  char *UndefBitNames=0);
+		  const char *ByteSeparator="_",
+		  const char *HiBitNames=0,
+		  const char *LoBitNames=0,
+		  const char *UndefBitNames=0);
 
 };
 
