@@ -36,6 +36,37 @@ extern int parse_string(char * str);
 
 #ifndef _WIN32
 
+unsigned int a2i(char b)
+{
+
+  if( b>='0'  && b<='9')
+    return b-'0';
+
+  if( b>='A' && b<='F')
+    return b-'A'+10;
+
+  if( b>='a' && b<='f')
+    return b-'a'+10;
+
+  return 0;
+
+}
+
+unsigned int ascii2uint(char **buffer, int digits)
+{
+
+  unsigned int ret = 0;
+  char *b = *buffer;
+
+  for(int i=0; i<digits; i++)
+    ret = (ret << 4) + a2i(*b++);
+
+  *buffer = b;
+
+  return ret;
+}
+//
+
 /*
 
   gpsim sockets.
@@ -52,6 +83,27 @@ extern int parse_string(char * str);
 #define PORT 		0x1234
 #define BUFSIZE 	8192
 
+enum eGPSIMObjectTypes
+  {
+    GPSIM_OBJTYP_CONTAINER = 1,
+    GPSIM_OBJTYP_STRING = 2,
+    GPSIM_OBJTYP_INT32 = 3,
+    GPSIM_OBJTYP_COMMAND = 4
+
+  };
+
+enum eGPSIMCommands
+  {
+    GPSIM_CMD_BREAK = 1,
+    GPSIM_CMD_CLEAR = 2,
+    GPSIM_CMD_EXAMINE = 3,
+    GPSIM_CMD_STEPOVER = 4,
+    GPSIM_CMD_RUN = 5,
+    GPSIM_CMD_SET = 6,
+    GPSIM_CMD_STEP = 7,
+    GPSIM_CMD_VERSION = 8
+
+  }
 
 class Socket
 {
@@ -69,10 +121,17 @@ public:
   void Listen();
   void Accept();
   void Recv();
-  void Send();
+  void Send(char *);
+
+  void ParseObject(char *);
 
   void receive();
-  void respond();
+  void respond(char *);
+
+  bool bHaveClient()
+  {
+    return (client_socket != -1);
+  }
 
 private:
   char     buffer[BUFSIZE];
@@ -109,6 +168,7 @@ void Socket::init(void)
     exit(1);
   }
 
+  std::cout << "initializing socket\n";
 
   int on = 1;
   if ( setsockopt ( my_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) == -1 ) {
@@ -150,8 +210,6 @@ void Socket::Listen()
 
 void Socket::Accept()
 {
-  buffer[0] = 0;
-
   socklen_t addrlen = sizeof(addr);
   if ((client_socket = accept(my_socket, (struct sockaddr *)  &addr, &addrlen)) == -1) {
     perror("accept");
@@ -165,40 +223,127 @@ void Socket::Recv()
 
   memset(buffer, 0, sizeof(buffer));
 
-  if (recv(client_socket, buffer, sizeof(buffer), 0) == -1) {
+  int ret = recv(client_socket, buffer, sizeof(buffer), 0);
+  if (ret == -1) {
     perror("recv");
-    exit(1);
+    close(my_socket);
+    close(client_socket);
+    client_socket = -1;
+    my_socket = -1;
   }
-
+  
+  if (ret == 0) {
+    printf("recv: 0 bytes received\n");
+    close(my_socket);
+    close(client_socket);
+  }
 }
 
-void Socket::Send()
+void Socket::Send(char *b)
 {
-  printf("socket-sending %s",buffer);
-  if (send(client_socket, buffer, strlen(buffer), 0) == -1) {
+  //printf("socket-sending %s",buffer);
+  if (send(client_socket, b, strlen(b), 0) == -1) {
     perror("send");
-    exit(1);
+    close(my_socket);
+    close(client_socket);
   }
 }
+
+
 
 void Socket::receive(void)
 {
-  Accept();
+  if(!bHaveClient()) {
+    init();
+    Accept();
+  }
+
   Recv();
+
+  // Process the string that was just received.
+
   if(strlen(buffer)) {
     printf("received %s\n",buffer);
 
-    parse_string(buffer);
+    if (*buffer == '$')
+      ParseObject(&buffer[1]);
+    else {
+      parse_string(buffer);
+      respond("ACK");
+    }
   }
 }
 
 
-void Socket::respond(void)
+void Socket::respond(char *buf)
 {
-  Send();
+  if(bHaveClient() && buf)
+    Send(buf);
 }
 
 
+
+
+void Socket::ParseObject(char *buffer)
+{
+
+  int buffer_len = strlen(buffer);
+
+  char *b = buffer;
+
+  while(buffer_len > 0) {
+
+    unsigned int ObjectType = ascii2uint(&b,2);
+    buffer_len -= 2;
+
+    switch (ObjectType) {
+
+    case GPSIM_OBJTYP_CONTAINER:
+      printf("Container of %d objects\n",ascii2uint(&b,2));
+      buffer_len -= 2;
+      respond("Container");
+      
+      break;
+
+    case GPSIM_OBJTYP_STRING:
+      {
+	char tmp[256];
+	int length = ascii2uint(&b,2);
+
+  	length = (255 < length) ? 255  : length;
+
+	strncpy(tmp, b, length);
+	tmp[length] = 0;
+
+	printf("String %s\n",tmp);
+	buffer_len -= (length+2);
+	respond("String");
+      }
+      break;
+
+    case GPSIM_OBJTYP_INT32:
+      {
+	int i = ascii2uint(&b,8);
+	printf("Integer %d\n",i);
+	buffer_len -= 8;
+	respond("Integer");
+      }
+      break;
+
+    case GPSIM_OBJTYP_COMMAND:
+      {
+	int command = ascii2uint(&b,2);
+
+	printf("Command %d\n", command);
+	buffer_len -= 8;
+
+      }
+    default:
+      printf("Invalid object type: %d\n",ObjectType);
+    }
+
+  }
+}
 
 
 void *server_thread(void *ignored)
@@ -207,16 +352,15 @@ void *server_thread(void *ignored)
 
   Socket s;
 
-  s.init();
-
   while ( true )
     {
       s.receive();
-      s.respond();
     }
 
   return 0;
 }
+
+
 
 pthread_t thSocketServer;
 pthread_attr_t thAttribute;
@@ -233,5 +377,17 @@ int start_server(void)
   std::cout << " started server\n";
   return 0;
 }
+
+/*
+int start_server(void)
+{
+
+  static Socket s;
+
+  s.init();
+
+
+}
+*/
 
 #endif

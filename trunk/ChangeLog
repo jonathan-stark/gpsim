@@ -1,3 +1,9 @@
+2004-07-09 Scott Dattalo <scott@dattalo.com>
+	* cli/socket.cc: Added a very thin object layer to the socket interface
+	* examples/scripts/testsocket.py: added to the repository. This is
+	a simple python script that will exercise all of the commands that
+	gpsim will accept through a socket interface.
+
 2004-07-08 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, cli/socket.cc, cli/input.cc, configure.in: Added
 	support for multithreading.
