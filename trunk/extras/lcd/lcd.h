@@ -125,6 +125,23 @@ public:
 
 };
 
+// LcdBusy - a class to handle the LCD's busy flag
+//
+// This class is essentially a timer. When the LCD requests that the
+// busy flag be set for a period of time, it will call the set() method
+// and pass the amount of time it wishes the flag to be busy. When
+// this time expires, the flag will get cleared.
+
+class LcdBusy : public BreakCallBack
+{
+  void set(double waitTime);
+  void clear(void);
+  inline bool isBusy(void) { return bBusyState; }
+ private:
+  bool bBusyState;
+
+};
+
 class LcdFont 
 {
 public:
@@ -238,6 +255,8 @@ public:
   int data_latch;
   int data_latch_phase;
   int debug;
+
+  guint64  busy_until_time;
 
   SMEvent ControlEvents[8];
 
@@ -370,6 +389,7 @@ public:
   void set_blink_off(void) { mode_flag &= ~BLINK_ON_FLAG;};
   void set_cursor_on(void) { mode_flag |= CURSOR_ON_FLAG;};
   void set_cursor_off(void) { mode_flag &= ~CURSOR_ON_FLAG;};
+  void set_busy ( int time );
 
   bool in_8bit_mode(void) {return ((mode_flag & _8BIT_MODE_FLAG) != 0);};
   bool in_4bit_mode(void) {return ((mode_flag & _8BIT_MODE_FLAG) == 0);};
@@ -379,6 +399,7 @@ public:
   bool in_small_font_mode(void) {return ((mode_flag & LARGE_FONT_MODE_FLAG) == 0);};
   bool display_is_on(void) {return ((mode_flag & DISPLAY_ON_FLAG) != 0);};
   bool display_is_off(void) {return ((mode_flag & DISPLAY_ON_FLAG) == 0);};
+  bool is_busy(void);
 
 
 };
