@@ -319,5 +319,13 @@ public:
   Value* applyOp(Value* value);
 };
 
+// -----------------------------------------------------------------
+class OpIndirect : public UnaryOperator {
+
+public:
+  OpIndirect(Expression* expr);
+  virtual ~OpIndirect();
+  Value* applyOp(Value* value);
+};
 
 #endif // __OPERATOR_H__

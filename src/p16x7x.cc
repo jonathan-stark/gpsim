@@ -294,7 +294,7 @@ double ADCON1::get_Vref(void)
   if ( Vrefhi_position[value.get() & valid_bits] ==  3)
     vrefhi = analog_port->get_bit_voltage(3);
   else
-    vrefhi = cpu->get_Vdd();
+    vrefhi = get_cpu()->get_Vdd();
 
 
   if ( Vreflo_position[value.get() & valid_bits] ==  2)

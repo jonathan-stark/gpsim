@@ -92,7 +92,7 @@ public:
   virtual int get_file_id(void) {return(file_id); }
   virtual int get_hll_file_id(void) {return(hll_file_id); }
   virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;}
-  void decode(Processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;}
+  void decode(Processor *new_cpu, unsigned int new_opcode);
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
@@ -141,12 +141,7 @@ public:
   virtual void debug(void){ };
   virtual char *name(char *,int);
 
-  void decode(Processor *new_cpu, unsigned int new_opcode)
-    {
-      opcode = new_opcode;
-      cpu = new_cpu;
-      L = opcode & 0xff;
-    }
+  void decode(Processor *new_cpu, unsigned int new_opcode);
 };
 
 

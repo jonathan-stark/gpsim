@@ -40,7 +40,7 @@ void  BSR::put(unsigned int new_value)
   //trace.register_write(address,value.get());
 
   value.put(new_value & 0x0f);
-  cpu->register_bank = &cpu->registers[ value.get() << 8 ];
+  cpu_pic->register_bank = &cpu_pic->registers[ value.get() << 8 ];
 
 
 }
@@ -252,7 +252,7 @@ unsigned int PLUSW::get(void)
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
-    return(cpu->registers[destination]->get());
+    return(cpu_pic->registers[destination]->get());
   else
     return 0;
 
@@ -263,7 +263,7 @@ unsigned int PLUSW::get_value(void)
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
-    return(cpu->registers[destination]->get_value());
+    return(cpu_pic->registers[destination]->get_value());
   else
     return 0;
 
@@ -276,19 +276,19 @@ void PLUSW::put(unsigned int new_value)
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
-    cpu->registers[destination]->put(new_value);
+    cpu_pic->registers[destination]->put(new_value);
 }
 
 void PLUSW::put_value(unsigned int new_value)
 {
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
-    cpu->registers[destination]->put_value(new_value);
+    cpu_pic->registers[destination]->put_value(new_value);
 
 
   update();
   if(destination > 0)
-    cpu->registers[destination]->update();
+    cpu_pic->registers[destination]->update();
 
 }
 
@@ -328,7 +328,7 @@ void Indirect_Addressing::put(unsigned int new_value)
   if(is_indirect_register(fsr_value))
     return;
 
-  cpu->registers[get_fsr_value()]->put(new_value);
+  cpu_pic->registers[get_fsr_value()]->put(new_value);
 
 }
 
@@ -354,7 +354,7 @@ unsigned int Indirect_Addressing::get(void)
     }
     */
 
-  return cpu->registers[get_fsr_value()]->get();
+  return cpu_pic->registers[get_fsr_value()]->get();
 
 }
 
@@ -380,7 +380,7 @@ unsigned int Indirect_Addressing::get_value(void)
   if(is_indirect_register(fsr_value))
     return 0;
   else
-    return cpu->registers[get_fsr_value()]->get_value();
+    return cpu_pic->registers[get_fsr_value()]->get_value();
 
 }
 
@@ -462,7 +462,7 @@ int Indirect_Addressing::plusw_fsr_value(void)
 
   fsr_value += fsr_delta;
   fsr_delta = 0;
-  int signExtendedW = cpu->W->value.get() | ((cpu->W->value.get() > 127) ? 0xf00 : 0);
+  int signExtendedW = cpu_pic->W->value.get() | ((cpu_pic->W->value.get() > 127) ? 0xf00 : 0);
   unsigned int destination = (fsr_value + signExtendedW) & _16BIT_REGISTER_MASK;
   if(is_indirect_register(destination))
     return -1;
@@ -575,7 +575,7 @@ void Program_Counter16::jump(unsigned int new_address)
   // Unlike the 12 and 14 bit cores, the 18fxxx parts do not use
   // PCLATH for jumps
 
-  //value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+  //value = (new_address | cpu_pic->get_pclath_branching_jump() ) & memory_size_mask;
   value = new_address & memory_size_mask;
 
   cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
@@ -654,7 +654,7 @@ void Program_Counter16::new_address(unsigned int new_value)
 unsigned int Program_Counter16::get_next(void)
 {
 
-  return( (value + cpu->program_memory[value]->instruction_size()) & memory_size_mask);
+  return( (value + cpu_pic->program_memory[value]->instruction_size()) & memory_size_mask);
 
 }
 */
@@ -1383,7 +1383,7 @@ void TBL_MODULE::read(void)
     ( (tabptrh.value.get() & 0xff) << 8 )  |
     ( (tabptrl.value.get() & 0xff) << 0 );
 
-  opcode = cpu->pma->get_opcode(tabptr>>1);
+  opcode = cpu_pic->pma->get_opcode(tabptr>>1);
 
   //  cout << __FUNCTION__ << "() tabptr: 0x" << hex << tabptr << "opcode: 0x" << opcode << '\n';
 
@@ -1415,7 +1415,7 @@ void TBL_MODULE::write(void)
     {
       // Long write
       internal_latch = (internal_latch & 0x00ff) | ((tablat.value.get()<<8) & 0xff00);
-      cpu->pma->put_opcode_start(tabptr>>1, internal_latch);
+      cpu_pic->pma->put_opcode_start(tabptr>>1, internal_latch);
     }
   else
     {

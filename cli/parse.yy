@@ -201,6 +201,8 @@ void yyerror(char *message)
 %token <Symbol_P>    SYMBOL_T
 
 
+%token EQU_T
+
 %token AND_T
 %token COLON_T
 %token COMMENT_T
@@ -287,6 +289,7 @@ cmd:
      | clear_cmd
      | disassemble_cmd
      | dump_cmd
+     | eval_cmd
      | frequency_cmd
      | help_cmd
      | list_cmd
@@ -377,6 +380,11 @@ disassemble_cmd
 dump_cmd: 
           DUMP                          {dump.dump(2);}
           | DUMP bit_flag               {dump.dump($2->value);}
+          ;
+
+eval_cmd:
+	  SYMBOL_T {c_symbol.dump_one($1);}
+          | SYMBOL_T EQU_T expr { $1->assignTo($3);}
           ;
 
 frequency_cmd
@@ -734,6 +742,7 @@ unary_expr
         | MINUS_T     unary_expr   %prec UNARYOP_PREC   {$$ = new OpNegate($2);}
         | ONESCOMP_T  unary_expr   %prec UNARYOP_PREC   {$$ = new OpOnescomp($2);}
         | LNOT_T      unary_expr   %prec UNARYOP_PREC   {$$ = new OpLogicalNot($2);}
+        | MPY_T       unary_expr   %prec UNARYOP_PREC   {$$ = new OpIndirect($2);}
         | '(' expr ')'                                  {$$=$2;}
 
         ;

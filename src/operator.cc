@@ -50,8 +50,6 @@ Value *BinaryOperator::evaluate()
   Value* rVal;
   Value* tmp;
 
-  cout << toString() << endl;
-
   lVal = leftExpr->evaluate();
 
   // If this operator wants to make a short-circuit decision
@@ -568,3 +566,34 @@ Value* OpPlus::applyOp(Value* operand)
   return rVal;
 }
 
+/******************************************************************************
+ The unary '*' operator - indirect access
+******************************************************************************/
+OpIndirect::OpIndirect(Expression* expr)
+  : UnaryOperator("*", expr)
+{
+}
+
+OpIndirect::~OpIndirect()
+{
+}
+
+
+Value* OpIndirect::applyOp(Value* operand)
+{
+  Value* rVal=0;
+
+  if (typeid(*operand) == typeid(Integer)) {
+    Integer* iOp = (Integer*)(operand);
+    rVal = new Integer(iOp->getVal());
+  }
+  else if (typeid(*operand) == typeid(Float)) {
+    Float* fOp = (Float*)(operand);
+    rVal = new Float(fOp->getVal());
+  }
+  else {
+    throw new TypeMismatch(showOp(), operand->showType());
+  }
+
+  return rVal;
+}
