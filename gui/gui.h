@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtksheet.h>
 #include "../src/interface.h"
 #include "../src/gpsim_def.h"
+#include "../src/modules.h"
 
 #define SBAW_NRFILES 20 // Max number of source files
 //#define MAX_BREAKPOINTS 32
@@ -474,7 +475,15 @@ struct _Breadboard_Window {
 
     int width, height;
 
-    GList *packages;
+    GList *modules;
+
+    GtkWidget *tree;
+
+    GtkWidget *pic_frame;
+    GtkWidget *node_frame;
+    GtkWidget *module_frame;
+
+    GtkWidget *node_tree;
 
     int processor;
 };
@@ -720,6 +729,9 @@ void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp);
 
 // gui_breadboard.c
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);
+void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module);
+void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node);
+
 int BuildBreadboardWindow(Breadboard_Window *bbw);
 int CreateBreadboardWindow(GUI_Processor *gp);
 void BreadboardWindow_update(Breadboard_Window *bbw);

@@ -148,6 +148,32 @@ void gui_new_processor (unsigned int pic_id)
 /*------------------------------------------------------------------
  *
  */
+void gui_new_module (Module *module)
+{
+
+  // FIX ME - need to search for *p in the gp list...
+  if(gp)
+  {
+      BreadboardWindow_new_module((Breadboard_Window*)gp->breadboard_window, module);
+  }
+}
+
+/*------------------------------------------------------------------
+ *
+ */
+void gui_node_configuration_changed (Stimulus_Node *node)
+{
+
+  // FIX ME - need to search for *p in the gp list...
+  if(gp)
+  {
+      BreadboardWindow_node_configuration_changed((Breadboard_Window*)gp->breadboard_window, node);
+  }
+}
+
+/*------------------------------------------------------------------
+ *
+ */
 void gui_new_program (unsigned int pic_id)
 {
 
@@ -521,6 +547,8 @@ int gui_init (int argc, char **argv)
   gpsim_register_new_processor(interface_id, gui_new_processor);
   gpsim_register_simulation_has_stopped(interface_id, gui_simulation_has_stopped);
   gpsim_register_new_program(interface_id, gui_new_program);
+  gpsim_register_new_module(interface_id, gui_new_module);
+  gpsim_register_node_configuration_changed(interface_id, gui_node_configuration_changed);
 
   return(0);
 }

@@ -1719,7 +1719,9 @@ Interface::Interface(gpointer new_object=NULL)
   update_object = NULL;
   simulation_has_stopped = NULL;
   new_processor = NULL;
+  new_module = NULL;
   new_program = NULL;
+  node_configuration_changed = NULL;
 
 }
 
@@ -1782,6 +1784,25 @@ void gpsim_register_new_processor(unsigned int interface_id,
 
   if(an_interface)
     an_interface->new_processor = new_processor;
+  
+}
+
+void gpsim_register_new_module(unsigned int interface_id,
+			       void (*new_module) (Module *module))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->new_module = new_module;
+  
+}
+void gpsim_register_node_configuration_changed(unsigned int interface_id,
+					       void (*node_configuration_changed) (Stimulus_Node *node))
+{
+  Interface *an_interface = get_interface(interface_id);
+
+  if(an_interface)
+    an_interface->node_configuration_changed = node_configuration_changed;
   
 }
 void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
@@ -1900,6 +1921,7 @@ void gpsimInterface::simulation_has_stopped (void)
   }
 
 }
+
 void gpsimInterface::new_processor (unsigned int processor_id)
 {
 
@@ -1912,6 +1934,44 @@ void gpsimInterface::new_processor (unsigned int processor_id)
 
       if(an_interface->new_processor)
 	an_interface->new_processor(processor_id);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+
+void gpsimInterface::new_module (Module *module)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->new_module)
+	an_interface->new_module(module);
+    }
+
+    interface_list = interface_list->next;
+  }
+
+}
+
+void gpsimInterface::node_configuration_changed (Stimulus_Node *node)
+{
+
+  GSList *interface_list = interfaces;
+
+  while(interface_list) {
+
+    if(interface_list->data) {
+      Interface *an_interface = (struct Interface *)(interface_list->data);
+
+      if(an_interface->node_configuration_changed)
+	an_interface->node_configuration_changed(node);
     }
 
     interface_list = interface_list->next;

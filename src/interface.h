@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <unistd.h>
 #include <glib.h>
+#include "modules.h"
 //#include "symbol.h"
 enum SYMBOL_TYPE
 {
@@ -333,6 +334,10 @@ typedef struct _sym
 				    void (*remove_object) (gpointer xref));
   void gpsim_register_new_processor(unsigned int interface_id, 
 				    void (*new_processor) (unsigned int processor_id));
+  void gpsim_register_new_module(unsigned int interface_id,
+				 void (*new_module) (Module *module));
+  void gpsim_register_node_configuration_changed(unsigned int interface_id,
+						 void (*node_configuration_changed) (Stimulus_Node *node));
   void gpsim_register_simulation_has_stopped(unsigned int interface_id, 
 					     void (*simulation_has_stopped) (gpointer));
   void gpsim_register_new_program(unsigned int interface_id, 

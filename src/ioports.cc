@@ -353,11 +353,13 @@ void IOPORT::setbit(unsigned int bit_number, bool new_value)
 void IOPORT::setbit_value(unsigned int bit_number, bool new_value)
 {
 
-  int diff = (value ^  (new_value << bit_number) ) & valid_iopins;
+  int bit_mask = one_shifted_left_by_n[bit_number];
+  //cout << name();
 
+  if( ((bit_mask & value) != 0) ^ (new_value==1))
+  {
   //  cout << " IOPORT::setbit_value bit " << bit_number << " to " << new_value << '\n';
-  if(diff) {
-    put_value(value ^ diff);
+    put_value(value ^= bit_mask);
     //cout << "     is changing\n";
     if(xref)
       xref->update();

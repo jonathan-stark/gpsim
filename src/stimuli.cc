@@ -229,6 +229,7 @@ Stimulus_Node::Stimulus_Node(char *n=NULL)
 
   add_node(this);
 
+  gi.node_configuration_changed(this);
 }
 
 //
@@ -273,6 +274,7 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
 
   s->attach(this);
   
+  gi.node_configuration_changed(this);
 
 }
 
@@ -309,6 +311,7 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 		{
 		  sptr->next = s->next;
 		  //  s->detach(this);
+		  gi.node_configuration_changed(this);
 		  return;
 		}
 
@@ -317,9 +320,6 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 
 	} 
     }
-
-  
-
 }
 
 

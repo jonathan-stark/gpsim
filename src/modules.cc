@@ -470,6 +470,12 @@ void module_load_module(char *module_type, char *module_name=NULL)
     return;
   }
 
+  if(module_name==NULL)
+  {
+      module_name = (char*)malloc(128);
+      sprintf(module_name, "%s%d",module_type,module_sequence_number);
+  }
+
   {
     cout << "Searching for module:  " << module_type;
 
@@ -506,6 +512,12 @@ void module_load_module(char *module_type, char *module_name=NULL)
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
 	      new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
 	      symbol_table.add_module(new_module,module_name);
+
+	      // Tell the gui or any modules that are interfaced to gpsim
+	      // that a new module has been added.
+	      gi.new_module(new_module);
+
+
 	      return;
 	    }
 	i++;

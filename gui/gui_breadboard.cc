@@ -49,10 +49,16 @@ GdkColor black_color;
 #include "../src/modules.h"
 #include "../src/stimuli.h"
 #include "../src/pic-processor.h"
+#include "../src/symbol.h"
+
+#include <vector>
 
 #define PINLENGTH (4*PINLINEWIDTH)
 
 static int pinspacing = PINLENGTH;
+
+#define LAYOUTSIZE_X 800
+#define LAYOUTSIZE_Y 800
 
 enum orientation {LEFT, RIGHT, UP, DOWN};
 enum direction {PIN_INPUT, PIN_OUTPUT};
@@ -189,71 +195,96 @@ static void expose_pin(GtkWidget *widget,
 		    event->area.width, event->area.height);
 }
 
-struct gui_pin *create_iopin(Breadboard_Window *bbw, int x, int y, orientation orientation, IOPIN *iopin)
+static gint button(GtkWidget *widget,
+		   GdkEventButton *event,
+		   struct gui_pin *p)
 {
-    struct gui_pin *gs;
+    if(event->type==GDK_BUTTON_PRESS &&
+       event->button==1)
+    {
+	if(p->direction==PIN_OUTPUT)
+	{
+	    p->iopin->put_state_value(p->value<0?1:0);
+	}
+	else
+	{
+	    p->iopin->toggle();
+	}
+	return 1;
+    }
+    return 0;
+}
 
-    gs=(struct gui_pin *)malloc(sizeof(*gs));
 
-    gs->iopin = iopin;
-    gs->x=x;
-    gs->y=y;
-    gs->width=pinspacing;
-    gs->height=pinspacing;
-    gs->bbw=bbw;
+static struct gui_pin *create_iopin(Breadboard_Window *bbw, int x, int y, orientation orientation, IOPIN *iopin)
+{
+    struct gui_pin *pin;
+
+    pin=(struct gui_pin *)malloc(sizeof(*pin));
+
+    pin->iopin = iopin;
+    pin->x=x;
+    pin->y=y;
+    pin->width=pinspacing;
+    pin->height=pinspacing;
+    pin->bbw=bbw;
     if(iopin!=NULL)
     {
-	gs->value=iopin->get_state();
-	gs->direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
-	gs->orientation=orientation;
-        gs->type=PIN_DIGITAL;
+	pin->value=iopin->get_state();
+	pin->direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
+	pin->orientation=orientation;
+        pin->type=PIN_DIGITAL;
     }
     else
     {
-	gs->value=0;
-	gs->direction=PIN_INPUT;
-        gs->orientation=orientation;
-	gs->type=PIN_OTHER;
+	pin->value=0;
+	pin->direction=PIN_INPUT;
+        pin->orientation=orientation;
+	pin->type=PIN_OTHER;
     }
 
-    if(gs->orientation==LEFT)
-        gs->x-=gs->width;
+    if(pin->orientation==LEFT)
+        pin->x-=pin->width;
 
     // Create widget
-    gs->widget = gtk_drawing_area_new();
-//	gtk_widget_set_events(gs->widget,
-//			      gtk_widget_get_events(gs->widget)|
-//			      GDK_BUTTON_PRESS_MASK);
+    pin->widget = gtk_drawing_area_new();
+    gtk_widget_set_events(pin->widget,
+			  gtk_widget_get_events(pin->widget)|
+			  GDK_BUTTON_PRESS_MASK);
+    gtk_signal_connect(GTK_OBJECT(pin->widget),
+		       "button_press_event",
+		       (GtkSignalFunc) button,
+		       pin);
 
-    gtk_drawing_area_size(GTK_DRAWING_AREA(gs->widget),gs->width,gs->height);
-    gtk_signal_connect(GTK_OBJECT(gs->widget),
+    gtk_drawing_area_size(GTK_DRAWING_AREA(pin->widget),pin->width,pin->height);
+    gtk_signal_connect(GTK_OBJECT(pin->widget),
 		       "expose_event",
 		       (GtkSignalFunc) expose_pin,
-		       gs);
-
-
+		       pin);
 
     // Create pixmap
-    gs->pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
-				gs->width,
-				gs->height,
+    pin->pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
+				pin->width,
+				pin->height,
 				-1);
 
-
     // Draw pin
-    gs->gc=gdk_gc_new(bbw->gui_obj.window->window);
-    g_assert(gs->gc!=NULL);
-    gdk_gc_set_line_attributes(gs->gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
-    draw_pin(gs);
-//    gdk_draw_line(gs->pixmap,gs->gc,0,0,3,gs->height);
+    pin->gc=gdk_gc_new(bbw->gui_obj.window->window);
+    g_assert(pin->gc!=NULL);
+    gdk_gc_set_line_attributes(pin->gc,PINLINEWIDTH,GDK_LINE_SOLID,GDK_CAP_ROUND,GDK_JOIN_ROUND);
+    draw_pin(pin);
+//    gdk_draw_line(pin->pixmap,pin->gc,0,0,3,pin->height);
 
-    gtk_widget_show(gs->widget);
+    gtk_widget_show(pin->widget);
 
-    return gs;
+    return pin;
 }
 
-struct package
+enum module_type {PIC_MODULE, EXTERNAL_MODULE};
+
+struct gui_module
 {
+    enum module_type type;
     Breadboard_Window *bbw;
     class Module *module;
     GtkWidget *module_widget;  // As returned from module. If NULL, it becomes a static GtkPixmap.
@@ -272,7 +303,7 @@ struct package
     GList *pins;
 };
 
-static void expose(GtkWidget *widget, GdkEventExpose *event, struct package *p)
+static void expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
     if(p->pixmap==NULL)
     {
@@ -288,27 +319,88 @@ static void expose(GtkWidget *widget, GdkEventExpose *event, struct package *p)
 		    event->area.width, event->area.height);
 }
 
-
-struct package *create_package(Breadboard_Window *bbw, class Module *module, GtkWidget *widget)
+static void treeselect_stimuli(GtkItem *item, struct gui_pin *pin)
 {
-    struct package *p;
+    gtk_widget_hide(pin->bbw->node_frame);
+    gtk_widget_hide(pin->bbw->module_frame);
+    gtk_widget_hide(pin->bbw->pic_frame);
+}
+
+struct gui_node
+{
+    Breadboard_Window *bbw;
+    Stimulus_Node *node;
+};
+
+
+static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
+{
+    gtk_widget_show(gui_node->bbw->node_frame);
+    gtk_widget_hide(gui_node->bbw->module_frame);
+    gtk_widget_hide(gui_node->bbw->pic_frame);
+}
+
+static void treeselect_module(GtkItem *item, struct gui_module *p)
+{
+    char string[128];
+    snprintf(string,sizeof(string),"%s settings",p->module->name());
+    switch(p->type)
+    {
+    case PIC_MODULE:
+	gtk_widget_hide(p->bbw->node_frame);
+	gtk_widget_hide(p->bbw->module_frame);
+	gtk_widget_show(p->bbw->pic_frame);
+        gtk_frame_set_label(GTK_FRAME(p->bbw->pic_frame),string);
+        break;
+    case EXTERNAL_MODULE:
+	gtk_widget_hide(p->bbw->node_frame);
+	gtk_widget_hide(p->bbw->pic_frame);
+	gtk_widget_show(p->bbw->module_frame);
+        gtk_frame_set_label(GTK_FRAME(p->bbw->module_frame),string);
+        break;
+    }
+}
+
+#define PACKAGESPACING 50
+
+struct gui_module *create_module(Breadboard_Window *bbw,
+                                 enum module_type type,
+				 class Module *module,
+				 GtkWidget *widget)
+{
+    static int x=30;
+    static int y=30;
+    static int max_y;
+
+    struct gui_module *p;
     int i;
 
-    p = (struct package*) malloc(sizeof(*p));
+    p = (struct gui_module*) malloc(sizeof(*p));
 
     p->bbw=bbw;
     p->module=module;
-    p->x=50;
-    p->y=50;
     p->module_widget = widget;
+    p->x=x;
+    p->y=y;
+    p->type=type;
+
 
     p->pins=NULL;
+
+
+    GtkWidget *tree_item;
+    tree_item = gtk_tree_item_new_with_label (p->module->name());
+    gtk_signal_connect(GTK_OBJECT(tree_item),
+		       "select",
+		       (GtkSignalFunc) treeselect_module,
+		       p);
+    gtk_widget_show(tree_item);
+    gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
 
     if(p->module_widget==NULL)
     {
 	// Create a static representation.
 	int pin_x, pin_y;
-        int x,y;
 	int pic_id;
 	GtkWidget *da;
 	
@@ -320,7 +412,7 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 	    char *name;
 	    int width;
 
-	    name=gpsim_pin_get_name(pic_id,i);
+	    name=p->module->get_pin_name(i);
 	    if(name==NULL)
 		continue;
 	    width = gdk_string_width (bbw->pinnamefont,name)+LABELPAD;
@@ -328,20 +420,35 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 		p->pinnamewidth=width;
 	}
 
-        p->pinnamewidth+=FOORADIUS; // The 'U' at the top of the DIL package
+        p->pinnamewidth+=FOORADIUS; // The 'U' at the top of the DIL module
 
 	p->width=p->pinnamewidth*2; // pin name widthts
 	p->width+=2*CASELINEWIDTH+2*LABELPAD;
 
 	p->height=module->get_pin_count()/2*pinspacing; // pin name height
+	if(module->get_pin_count()%2)
+            p->height+=pinspacing;
         p->height+=2*CASELINEWIDTH+2*LABELPAD;
 
 
+	if(p->x+p->width>LAYOUTSIZE_X-30)
+	{
+	    x=30;
+	    y=max_y+PACKAGESPACING;
+	}
+
+	p->x=x;
+	p->y=y;
 
 	da = gtk_drawing_area_new();
-	gtk_widget_set_events(da,
+/*	gtk_widget_set_events(da,
 			      gtk_widget_get_events(da)|
 			      GDK_BUTTON_PRESS_MASK);
+	gtk_signal_connect(GTK_OBJECT(bbw->da),
+			   "button_press_event",
+			   (GtkSignalFunc) button,
+			   p);
+  */
 
 	gtk_drawing_area_size(GTK_DRAWING_AREA(da),p->width,p->height);
 
@@ -379,7 +486,7 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 	    char *name;
 	    int label_x, label_y;
 
-	    if(i<=p->module->get_pin_count()/2)
+	    if(i<=p->module->get_pin_count()/2 || i<=p->module->get_pin_count()%2)
 	    {
 		label_x=LABELPAD+CASELINEWIDTH;
 		label_y=LABELPAD+CASELINEWIDTH-bbw->pinnameheight/3+(i-1)*pinspacing+pinspacing/2;
@@ -390,7 +497,7 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 		label_y=LABELPAD+CASELINEWIDTH-bbw->pinnameheight/3+(p->module->get_pin_count()-i)*pinspacing+pinspacing/2;
 	    }
 
-	    name=gpsim_pin_get_name(pic_id,i);
+	    name=p->module->get_pin_name(i);
 	    if(name==NULL)
 		continue;
 	    gdk_draw_text(p->pixmap,
@@ -431,21 +538,20 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 			   "expose_event",
 			   (GtkSignalFunc) expose,
 			   p);
-	/*  gtk_signal_connect(GTK_OBJECT(bbw->da),
-	 "button_press_event",
-	 (GtkSignalFunc) button,
-	 bbw);
-	 */
     }
 
     // Create pins
+    GtkWidget *subtree = gtk_tree_new();
+    gtk_widget_show(subtree);
+    gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), subtree);
     for(i=1;i<=p->module->get_pin_count();i++)
     {
 	int pin_x, pin_y;
 	struct gui_pin *pin;
-        enum orientation orientation;
+	enum orientation orientation;
+        char *name;
 
-	if(i<=p->module->get_pin_count()/2)
+	if(i<=p->module->get_pin_count()/2 || i<=p->module->get_pin_count()%2)
 	{
 	    pin_x=0;
 	    pin_y=(i-1)*pinspacing+pinspacing/2;
@@ -470,6 +576,17 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 
 	p->pins = g_list_append(p->pins, pin);
 
+	name=p->module->get_pin_name(i);
+	if(name!=NULL)
+	{
+	    tree_item = gtk_tree_item_new_with_label (name);
+	    gtk_signal_connect(GTK_OBJECT(tree_item),
+			       "select",
+			       (GtkSignalFunc) treeselect_stimuli,
+			       pin);
+	    gtk_widget_show(tree_item);
+	    gtk_tree_append(GTK_TREE(subtree), tree_item);
+	}
     }
 
 
@@ -478,24 +595,12 @@ struct package *create_package(Breadboard_Window *bbw, class Module *module, Gtk
 
 
 
+    bbw->modules=g_list_append(bbw->modules, p);
 
+    x+=p->width+PACKAGESPACING;
 
-
-    
-//  bbw->pinstatewidth = gdk_string_width (bbw->pinstatefont,"H")+LABELPAD;
-//  bbw->pinstateheight = gdk_string_height (bbw->pinstatefont,"H")+LABELPAD;
-
-//  bbw->pinnamewidth = gdk_string_width (bbw->pinnamefont,gpsim_processor_get_name(pic_id))+LABELPAD;
-//  bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
-
-    
-  /*      bbw->case_x = bbw->pinstatewidth+PINLENGTH;
-	bbw->case_y = 0;
-	bbw->case_width = 2*bbw->pinnamewidth+2*FOORADIUS;
-	bbw->case_height = bbw->height;
-        */
-
-    bbw->packages=g_list_append(bbw->packages, p);
+    if(y+p->height>max_y)
+	max_y=y+p->height;
 }
 
 
@@ -504,15 +609,15 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
     GList *iter;
 
 
-    // loop all packages and update their pins
+    // loop all modules and update their pins
 
-    iter=bbw->packages;
+    iter=bbw->modules;
     while(iter!=NULL)
     {
 	GList *pin_iter;
-	struct package *p;
+	struct gui_module *p;
 
-        p = (struct package*)iter->data;
+        p = (struct gui_module*)iter->data;
 
 	pin_iter=p->pins;
 	while(pin_iter!=NULL)
@@ -617,53 +722,6 @@ static int hit_state(Breadboard_Window *bbw, int x, int y)
 //    return TRUE;
 }
 
-static gint button(GtkWidget *widget,
-		   GdkEventButton *event,
-		   Breadboard_Window *bbw)
-{
-    assert(event&&bbw);
-
-    if(!bbw->processor)
-        return 0;
-
-/*    if(event->type==GDK_2BUTTON_PRESS &&
-       event->button==1)
-    {
-	int x,y;
-	int pin;
-	int value, dir;
-	int pic_id;
-	
-	pic_id = ((GUI_Object*)bbw)->gp->pic_id;
-
-	x=event->x;
-	y=event->y;
-
-	pin = get_pin(bbw,x,y);
-	if(pin>0)
-	{
-	    printf("\nPin nr %d, ",pin);
-	    if(hit_state(bbw,x,y))
-	    {
-		printf("hit state\n");
-		value = p->get_value(p, pin);
-		value = !value;
-		gpsim_pin_toggle(pic_id, pin);
-	    }
-	    else//if(hit_direction(bbw,x,y))
-	    {
-		dir = p->get_dir(p, pin);
-		dir = !dir;
-		gpsim_pin_set_dir(pic_id, pin, dir);
-		printf("hit direction, %d\n",dir);
-	    }
-	}
-	
-	return 1;
-    }*/
-    return 0;
-}
-
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 {
     char buf[128];
@@ -698,11 +756,45 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	gpsim_assign_pin_xref(pic_id,pin, cross_reference);
     }
 
-
-    struct package *p=create_package(bbw, get_processor(pic_id),NULL);
+    struct gui_module *p=create_module(bbw, PIC_MODULE, get_processor(pic_id),NULL);
 //    draw_pins(p);
 
 //    BreadboardWindow_update(bbw);
+}
+
+void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
+{
+    struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, NULL);
+}
+
+void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node)
+{
+    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
+
+    if(gn==NULL)
+    {
+	GtkWidget *node_item;
+
+	gn = (struct gui_node *) malloc(sizeof(*gn));
+
+	gn->bbw=bbw;
+        gn->node=node;
+
+	node_item = gtk_tree_item_new_with_label (node->name());
+	gtk_signal_connect(GTK_OBJECT(node_item),
+			   "select",
+			   (GtkSignalFunc) treeselect_node,
+			   gn);
+	gtk_widget_show(node_item);
+	gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
+        gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
+    }
+
+/*    delete gn->stimuli_list;
+
+    loop node->stimuli, and add them to gn->stimuli_list
+
+    update_tree();*/
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
@@ -719,31 +811,28 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   GtkWidget *hbox12;
   GtkWidget *button5;
   GtkWidget *button6;
-  GtkWidget *pic_frame;
   GtkWidget *vbox12;
   GtkWidget *scrolledwindow3;
   GtkWidget *viewport8;
-  GtkWidget *pic_settings_clist;
   GtkWidget *hbox11;
   GtkWidget *pic_settings_entry;
   GtkWidget *pic_settings_button;
-  GtkWidget *node_frame;
   GtkWidget *vbox11;
   GtkWidget *scrolledwindow2;
   GtkWidget *viewport7;
-  GtkWidget *node_settings_clist;
   GtkWidget *hbox10;
   GtkWidget *node_add_stimuli_button;
-  GtkWidget *module_frame;
   GtkWidget *vbox10;
   GtkWidget *scrolledwindow1;
   GtkWidget *viewport6;
-  GtkWidget *module_settings_clist;
   GtkWidget *hbox9;
   GtkWidget *module_settings_entry;
   GtkWidget *module_settings_button;
   GtkWidget *save_stc_button;
   GtkWidget *scrolledwindow5;
+  GtkWidget *pic_settings_clist;
+  GtkWidget *node_settings_clist;
+  GtkWidget *module_settings_clist;
 
     int x,y,width,height;
 
@@ -804,8 +893,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
   window = bbw->gui_obj.window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_object_set_data (GTK_OBJECT (window), "window", window);
-  gtk_window_set_title (GTK_WINDOW (window), "Breadboard");
-  gtk_window_set_default_size (GTK_WINDOW (window), 500, 400);
+  gtk_window_set_title (GTK_WINDOW (window), "Breadboard [Currently in development]");
 
   hpaned1 = gtk_hpaned_new ();
   gtk_widget_ref (hpaned1);
@@ -844,10 +932,11 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (viewport9);
   gtk_container_add (GTK_CONTAINER (scrolledwindow4), viewport9);
 
-  tree1 = gtk_tree_new ();
+  bbw->tree = tree1 = gtk_tree_new ();
   gtk_widget_ref (tree1);
   gtk_object_set_data_full (GTK_OBJECT (window), "tree1", tree1,
                             (GtkDestroyNotify) gtk_widget_unref);
+  gtk_tree_set_selection_mode (GTK_TREE(bbw->tree),GTK_SELECTION_BROWSE);
   gtk_widget_show (tree1);
   gtk_container_add (GTK_CONTAINER (viewport9), tree1);
 
@@ -872,19 +961,19 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (button6);
   gtk_box_pack_start (GTK_BOX (hbox12), button6, FALSE, FALSE, 0);
 
-  pic_frame = gtk_frame_new ("PIC settings");
-  gtk_widget_ref (pic_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "pic_frame", pic_frame,
+  bbw->pic_frame = gtk_frame_new ("PIC settings");
+  gtk_widget_ref (bbw->pic_frame);
+  gtk_object_set_data_full (GTK_OBJECT (window), "pic_frame", bbw->pic_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (pic_frame);
-  gtk_box_pack_start (GTK_BOX (vbox9), pic_frame, TRUE, TRUE, 0);
+//  gtk_widget_show (pic_frame);
+  gtk_box_pack_start (GTK_BOX (vbox9), bbw->pic_frame, TRUE, TRUE, 0);
 
   vbox12 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox12);
   gtk_object_set_data_full (GTK_OBJECT (window), "vbox12", vbox12,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox12);
-  gtk_container_add (GTK_CONTAINER (pic_frame), vbox12);
+  gtk_container_add (GTK_CONTAINER (bbw->pic_frame), vbox12);
 
   scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_ref (scrolledwindow3);
@@ -913,7 +1002,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_object_set_data_full (GTK_OBJECT (window), "hbox11", hbox11,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (hbox11);
-  gtk_box_pack_start (GTK_BOX (vbox12), hbox11, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox12), hbox11, FALSE, FALSE, 0);
 
   pic_settings_entry = gtk_entry_new ();
   gtk_widget_ref (pic_settings_entry);
@@ -929,19 +1018,19 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (pic_settings_button);
   gtk_box_pack_start (GTK_BOX (hbox11), pic_settings_button, FALSE, FALSE, 0);
 
-  node_frame = gtk_frame_new ("Node settings");
-  gtk_widget_ref (node_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "node_frame", node_frame,
+  bbw->node_frame = gtk_frame_new ("Node settings");
+  gtk_widget_ref (bbw->node_frame);
+  gtk_object_set_data_full (GTK_OBJECT (window), "node_frame", bbw->node_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (node_frame);
-  gtk_box_pack_start (GTK_BOX (vbox9), node_frame, TRUE, TRUE, 0);
+//  gtk_widget_show (node_frame);
+  gtk_box_pack_start (GTK_BOX (vbox9), bbw->node_frame, TRUE, TRUE, 0);
 
   vbox11 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox11);
   gtk_object_set_data_full (GTK_OBJECT (window), "vbox11", vbox11,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox11);
-  gtk_container_add (GTK_CONTAINER (node_frame), vbox11);
+  gtk_container_add (GTK_CONTAINER (bbw->node_frame), vbox11);
 
   scrolledwindow2 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_ref (scrolledwindow2);
@@ -979,19 +1068,19 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (node_add_stimuli_button);
   gtk_box_pack_start (GTK_BOX (hbox10), node_add_stimuli_button, FALSE, FALSE, 0);
 
-  module_frame = gtk_frame_new ("Module settings");
-  gtk_widget_ref (module_frame);
-  gtk_object_set_data_full (GTK_OBJECT (window), "module_frame", module_frame,
+  bbw->module_frame = gtk_frame_new ("Module settings");
+  gtk_widget_ref (bbw->module_frame);
+  gtk_object_set_data_full (GTK_OBJECT (window), "module_frame", bbw->module_frame,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (module_frame);
-  gtk_box_pack_start (GTK_BOX (vbox9), module_frame, TRUE, TRUE, 0);
+//  gtk_widget_show (module_frame);
+  gtk_box_pack_start (GTK_BOX (vbox9), bbw->module_frame, TRUE, TRUE, 0);
 
   vbox10 = gtk_vbox_new (FALSE, 0);
   gtk_widget_ref (vbox10);
   gtk_object_set_data_full (GTK_OBJECT (window), "vbox10", vbox10,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (vbox10);
-  gtk_container_add (GTK_CONTAINER (module_frame), vbox10);
+  gtk_container_add (GTK_CONTAINER (bbw->module_frame), vbox10);
 
   scrolledwindow1 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_ref (scrolledwindow1);
@@ -1020,7 +1109,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_object_set_data_full (GTK_OBJECT (window), "hbox9", hbox9,
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (hbox9);
-  gtk_box_pack_start (GTK_BOX (vbox10), hbox9, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox10), hbox9, FALSE, FALSE, 0);
 
   module_settings_entry = gtk_entry_new ();
   gtk_widget_ref (module_settings_entry);
@@ -1056,7 +1145,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (bbw->layout);
   gtk_container_add (GTK_CONTAINER (scrolledwindow5), bbw->layout);
-  gtk_layout_set_size (GTK_LAYOUT (bbw->layout), 500, 500);
+  gtk_layout_set_size (GTK_LAYOUT (bbw->layout), LAYOUTSIZE_X, LAYOUTSIZE_Y);
   GTK_ADJUSTMENT (GTK_LAYOUT (bbw->layout)->hadjustment)->step_increment = 10;
   GTK_ADJUSTMENT (GTK_LAYOUT (bbw->layout)->vadjustment)->step_increment = 10;
 
@@ -1082,11 +1171,6 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
 
 
-  bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y");
-
-  if(pinspacing<bbw->pinnameheight)
-      pinspacing=bbw->pinnameheight+2;
-
   gtk_widget_show_now(window);
 
 	bbw->pinname_gc=gdk_gc_new(bbw->gui_obj.window->window);
@@ -1097,6 +1181,32 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 	bbw->pinstatefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
 
 	bbw->pinnamefont = gdk_fontset_load ("-adobe-courier-bold-r-*-*-*-80-*-*-*-*-*-*");
+
+  bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y");
+
+  if(pinspacing<bbw->pinnameheight)
+      pinspacing=bbw->pinnameheight+2;
+
+
+
+    GtkWidget *tree_item;
+    struct gui_node *gn;
+
+    gn = (struct gui_node *) malloc(sizeof(*gn));
+    gn->bbw=bbw;
+    gn->node=NULL; // indicates that this is the root node.
+    tree_item = gtk_tree_item_new_with_label ("nodes");
+    gtk_signal_connect(GTK_OBJECT(tree_item),
+		       "select",
+		       (GtkSignalFunc) treeselect_node,
+		       gn);
+    gtk_widget_show(tree_item);
+    gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
+    bbw->node_tree= gtk_tree_new();
+    gtk_widget_show(bbw->node_tree);
+    gtk_tree_item_set_subtree(GTK_TREE_ITEM(tree_item), bbw->node_tree);
+    gtk_object_set_data(GTK_OBJECT(bbw->node_tree), "root_of_nodes", gn);
+
 
   bbw->gui_obj.enabled=1;
 
@@ -1134,8 +1244,9 @@ int CreateBreadboardWindow(GUI_Processor *gp)
     bbw->pinname_gc = NULL;
     bbw->case_gc = NULL;
     bbw->gui_obj.enabled = 0;
+    bbw->node_tree = NULL;
 
-    bbw->packages=NULL;
+    bbw->modules=NULL;
 
     gp_add_window_to_list(gp, (GUI_Object *)bbw);
 
