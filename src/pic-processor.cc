@@ -122,165 +122,293 @@ static  int  cpu_ids = 0;
 
 //-------------------------------------------------------------------
 //
+// ProcessorConstructor -- a class to handle all of gpsim's supported
+// processors
 //
-// this sorta sucks, but everytime a new processor is added to the
-// gpsim source code, another definition needs to be specified here
-// in the 'available_processors' array. 
+// gpsim supports dozens of processors. All of these processors are
+// grouped together in the ProcessConstructor class. Within the class
+// is a static STL list<> object that holds an instance of a
+// ProcessorConstructor for each gpsim supported processor. Whenever
+// the user selects a processor to simulate, the find() member 
+// function will search through the list and find the one that matches
+// the user supplied ASCII string.
+//
+// Why have this class?
+// The idea behind this class is that a ProcessorConstructor object 
+// can be instantiated for each processor and that instantiation will
+// place the object into list of processors. Prior to gpsim-0.21, a
+// giant array held the list of all available processors. However,
+// there were two problems with this: it was painful to look at and
+// it precluded processors that were defined outside of the gpsim
+// core library.
 
 
-processor_types available_processors[] =
+
+class ProcessorConstructor
 {
-  {_PIC_PROCESSOR_, 
-   "generic_pic", "generic_pic", "generic_pic", "generic_pic",
-   pic_processor::construct },
-  {_14BIT_PROCESSOR_,
-   "14bit_pic", "14bit_pic", "14bit_pic", "14bit_pic",
-   pic_processor::construct },
-  {_12BIT_PROCESSOR_,
-   "12bit_pic", "12bit_pic", "12bit_pic", "12bit_pic",
-   pic_processor::construct },
-  {_16BIT_PROCESSOR_,
-   "16bit_pic", "16bit_pic", "16bit_pic", "16bit_pic",
-   pic_processor::construct },
-  {_P12C508_,
-   "__12C508", "pic12c508",  "p12c508", "12c508",
-   P12C508::construct },
-  {_P12C509_,
-   "__12C509", "pic12c509",  "p12c509", "12c509",
-   P12C509::construct },
-  {_P16C84_, 
-   "__16C84",  "pic16c84",   "p16c84",  "16c84",
-   P16C84::construct },
-  {_P16CR83_,
-   "__16CR83", "pic16cr83",  "p16cr83", "16cr83",
-   P16CR83::construct },
-  {_P16CR84_,
-   "__16CR84", "pic16cr84",  "p16cr84", "16cr84",
-   P16CR84::construct },
-  {_P16F83_,
-   "__16F83",   "pic16f83",   "p16f83",  "16f83",
-   P16F83::construct },
-  {_P16F84_,
-   "__16F84",   "pic16f84",   "p16f84",  "16f84",
-   P16F84::construct },
-  {_P16C54_,
-   "__16C54",   "pic16c54",   "p16c54",  "16c54",
-   P16C54::construct },
-  {_P16C55_,
-   "__16C55",   "pic16c55",   "p16c55",  "16c55",
-   P16C55::construct },
-  {_P16C61_,
-   "__16C61",   "pic16c61",   "p16c61",  "16c61",
-   P16C61::construct },
-  {_P16C71_,
-   "__16C71",   "pic16c71",   "p16c71",  "16c71",
-   P16C71::construct },
-  {_P16C712_,
-   "__16C712",  "pic16c712",  "p16c712", "16c712",
-   P16C712::construct },
-  {_P16C716_,
-   "__16C716",  "pic16c716",  "p16c716", "16c716",
-   P16C716::construct },
-  {_P16C62_,
-   "__16C62",   "pic16c62",   "p16c62",  "16c62",
-   P16C62::construct },
-  {_P16C62A_,
-   "__16C62A", "pic16c62a",  "p16c62a", "16c62a",
-   P16C62::construct },
-  {_P16CR62_,
-   "__16CR62", "pic16cr62",  "p16cr62", "16cr62",
-   P16C62::construct },
-  {_P16C63_,
-   "__16C63",   "pic16c63",   "p16c63",  "16c63",
-   P16C63::construct },
-  {_P16C64_,
-   "__16C64",   "pic16c64",   "p16c64",  "16c64",
-   P16C64::construct },
-  {_P16C64A_,
-   "__16C64A", "pic16c64a",  "p16c64a", "16c64a",
-   pic_processor::construct },
-  {_P16CR64_,
-   "__16CR64", "pic16cr64",  "p16cr64", "16cr64",
-   pic_processor::construct },
-  {_P16C65A_,
-   "__16C65A", "pic16c65a",  "p16c65a", "16c65a",
-   P16C65::construct },
-  {_P16C65_,
-   "__16C65",   "pic16c65",   "p16c65",  "16c65",
-    P16C65::construct },
-  {_P16C72_,
-   "__16C72",   "pic16c72",   "p16c72",  "16c72",
-   P16C72::construct },
-  {_P16C73_,
-   "__16C73",   "pic16c73",   "p16c73",  "16c73",
-   P16C73::construct },
-  {_P16C74_,
-   "__16C74",   "pic16c74",   "p16c74",  "16c74",
-   P16C74::construct },
-  {_P16F627_,
-   "__16F627", "pic16f627",  "p16f627", "16f627",
-   P16F627::construct },
-  {_P16F628_,
-   "__16F628", "pic16f628",  "p16f628", "16f628",
-   P16F628::construct },
-  {_P16F873_,
-   "__16F873", "pic16f873",  "p16f873", "16f873",
-   P16F873::construct },
-  {_P16F874_,
-   "__16F874", "pic16f874",  "p16f874", "16f874",
-   P16F874::construct },
-  {_P16F877_,
-   "__16F877", "pic16f877",  "p16f877", "16f877",
-   P16F877::construct },
-  {_P17C7xx_,
-   "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx",
-   P17C7xx::construct },
-  {_P17C75x_,
-   "__17C75x", "pic17c75x",  "p17c75x", "17c75x",
-   P17C75x::construct },
-  {_P17C752_,
-   "__17C752", "pic17c752",  "p17c752", "17c752",
-   P17C752::construct },
-  {_P17C756_,
-   "__17C756", "pic17c756",  "p17c756", "17c756",
-   P17C756::construct },
-  {_P17C756A_,
-   "__17C756A", "pic17c756a",  "p17c756a", "17c756a",
-   P17C756A::construct },
-  {_P17C762_,
-   "__17C762", "pic17c762",  "p17c762", "17c762",
-   P17C762::construct },
-  {_P17C766_,
-   "__17C766", "pic17c766",  "p17c766", "17c766",
-   P17C766::construct },
-  {_P18Cxx2_,
-   "__18Cxx2", "pic18cxx2",  "p18cxx2", "18cxx2",
-   pic_processor::construct },
-  {_P18C2x2_,
-   "__18C2x2", "pic18c2x2",  "p18c2x2", "18c2x2",
-   pic_processor::construct },
-  {_P18C242_,
-   "__18C242", "pic18c242",  "p18c242", "18c242",
-   P18C242::construct },
-  {_P18C252_,
-   "__18C252", "pic18c252",  "p18c252", "18c252",
-   P18C252::construct },
-  {_P18C442_,
-   "__18C442", "pic18c442",  "p18c442", "18c442",
-   P18C442::construct },
-  {_P18C452_,
-   "__18C452", "pic18c452",  "p18c452", "18c452",
-   P18C452::construct },
-  {_P18F442_,
-   "__18F442", "pic18f442",  "p18f442", "18f442",
-   P18F442::construct },
-  {_P18F452_,
-   "__18F452", "pic18f452",  "p18f452", "18f452",
-   P18F452::construct }
+public:
+  // THE list of all of gpsim's processors:
+
+  static list <ProcessorConstructor *> processor_list;
+
+  // A pointer to a function that when called will construct a processor
+  pic_processor * (*cpu_constructor) (void);
+
+  // The processor name (plus upto three aliases).
+  const int nProcessorNames;
+  char *names[nProcessorNames];
+
+
+  //------------------------------------------------------------
+  // contructor -- 
+  //
+  ProcessorConstructor(  pic_processor * (*_cpu_constructor) (void),
+			 char *name1, 
+			 char *name2, 
+			 char *name3=NULL,
+			 char *name4=NULL) {
+
+    cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
+    names[0] = name1;                    // First name
+    names[1] = name2;                    //  and three aliases...
+    names[2] = name3;
+    names[3] = name4;
+
+    // Add the processor to the list of supported processors:
+
+    processor_list.push_back(this);
+
+  }
+
+  //------------------------------------------------------------
+  // find -- search through the list of supported processors for
+  //         the one matching 'name'.
+
+  ProcessorConstructor * find(char *name)
+  {
+
+
+    list <ProcessorConstructor *> :: iterator processor_iterator;
+
+    for (processor_iterator = processor_list.begin();  
+	 processor_iterator != processor_list.end(); 
+	 processor_iterator++) {
+
+      ProcessorConstructor *p = *processor_iterator;
+
+      for(int j=0; j<nProcessorNames; j++)
+	if(p->names[j] && strcmp(name,p->names[j]) == 0)
+	  return p;
+    }
+
+    return NULL;
+
+  }
+
+  //------------------------------------------------------------
+  // dump() --  Print out a list of all of the processors
+  //
+
+  void dump(void)
+  {
+
+    list <ProcessorConstructor *> :: iterator processor_iterator;
+
+    const int nPerRow = 4;   // Number of names to print per row.
+
+    int i,j,k,longest;
+
+    ProcessorConstructor *p;
+
+
+    // loop through all of the processors and find the 
+    // one with the longest name
+
+    longest = 0;
+
+    for (processor_iterator = processor_list.begin();  
+	 processor_iterator != processor_list.end(); 
+	 processor_iterator++) {
+
+      p = *processor_iterator;
+
+      k = strlen(p->names[1]);
+      if(k>longest)
+	longest = k;
+
+    }
+
+
+    // Print the name of each processor.
+
+    for (processor_iterator = processor_list.begin();  
+	 processor_iterator != processor_list.end(); ) {
+
+      for(i=0; i<nPerRow && processor_iterator != processor_list.end(); i++) {
+
+	p = *processor_iterator++;
+	cout << p->names[1];
+
+	if(i<nPerRow-1) {
+
+	  // if this is not the last processor in the column, then
+	  // pad a few spaces to align the columns.
+
+	  k = longest + 2 - strlen(p->names[1]);
+	  for(j=0; j<k; j++)
+	    cout << ' ';
+	}
+      }
+      cout << '\n';
+    } 
+
+  }
 
 };
 
-int number_of_available_processors = sizeof(available_processors) / sizeof(processor_types);
+list <ProcessorConstructor *> ProcessorConstructor::processor_list;
+
+ProcessorConstructor Generic(pic_processor::construct,
+			     "generic_pic", "generic_pic");
+
+ProcessorConstructor pP12C508(P12C508::construct ,
+			      "__12C508", "pic12c508",  "p12c508", "12c508");
+ProcessorConstructor pP12C509(P12C509::construct ,
+			      "__12C509", "pic12c509",  "p12c509", "12c509");
+ProcessorConstructor pP16C84(P16C84::construct ,
+			     "__16C84",  "pic16c84",   "p16c84", "16c84");
+ProcessorConstructor pP16CR83(P16CR83::construct ,
+			      "__16CR83", "pic16cr83",  "p16cr83", "16cr83");
+ProcessorConstructor pP16CR84(P16CR84::construct ,
+			      "__16CR84", "pic16cr84",  "p16cr84", "16cr84");
+ProcessorConstructor pP16F83(P16F83::construct ,
+			     "__16F83",   "pic16f83",   "p16f83", "16f83");
+ProcessorConstructor pP16F84(P16F84::construct ,
+			     "__16F84",   "pic16f84",   "p16f84", "16f84");
+ProcessorConstructor pP16C54(P16C54::construct ,
+			     "__16C54",   "pic16c54",   "p16c54", "16c54");
+ProcessorConstructor pP16C55(P16C55::construct ,
+			     "__16C55",   "pic16c55",   "p16c55", "16c55");
+ProcessorConstructor pP16C61(P16C61::construct ,
+			     "__16C61",   "pic16c61",   "p16c61", "16c61");
+ProcessorConstructor pP16C71(P16C71::construct ,
+			     "__16C71",   "pic16c71",   "p16c71", "16c71");
+ProcessorConstructor pP16C712(P16C712::construct ,
+			      "__16C712",  "pic16c712",  "p16c712", "16c712");
+ProcessorConstructor pP16C716(P16C716::construct ,
+			      "__16C716",  "pic16c716",  "p16c716", "16c716");
+ProcessorConstructor pP16C62(P16C62::construct ,
+			     "__16C62",   "pic16c62",   "p16c62", "16c62");
+ProcessorConstructor pP16C62A(P16C62::construct ,
+			      "__16C62A", "pic16c62a",  "p16c62a", "16c62a");
+ProcessorConstructor pP16CR62(P16C62::construct ,
+			      "__16CR62", "pic16cr62",  "p16cr62", "16cr62");
+ProcessorConstructor pP16C63(P16C63::construct ,
+			     "__16C63",   "pic16c63",   "p16c63", "16c63");
+ProcessorConstructor pP16C64(P16C64::construct ,
+			     "__16C64",   "pic16c64",   "p16c64", "16c64");
+ProcessorConstructor pP16C65A(P16C65::construct ,
+			     "__16C65A", "pic16c65a",  "p16c65a", "16c65a");
+ProcessorConstructor pP16C65(P16C65::construct ,
+			     "__16C65",   "pic16c65",   "p16c65", "16c65");
+ProcessorConstructor pP16C72(P16C72::construct ,
+			     "__16C72",   "pic16c72",   "p16c72", "16c72");
+ProcessorConstructor pP16C73(P16C73::construct ,
+			     "__16C73",   "pic16c73",   "p16c73", "16c73");
+ProcessorConstructor pP16C74(P16C74::construct ,
+			     "__16C74",   "pic16c74",   "p16c74", "16c74");
+ProcessorConstructor pP16F627(P16F627::construct ,
+			      "__16F627", "pic16f627",  "p16f627", "16f627");
+ProcessorConstructor pP16F628(P16F628::construct ,
+			      "__16F628", "pic16f628",  "p16f628", "16f628");
+ProcessorConstructor pP16F873(P16F873::construct ,
+			      "__16F873", "pic16f873",  "p16f873", "16f873");
+ProcessorConstructor pP16F874(P16F874::construct ,
+			      "__16F874", "pic16f874",  "p16f874", "16f874");
+ProcessorConstructor pP16F877(P16F877::construct ,
+			      "__16F877", "pic16f877",  "p16f877", "16f877");
+ProcessorConstructor pP17C7xx(P17C7xx::construct ,
+			      "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx");
+ProcessorConstructor pP17C75x(P17C75x::construct ,
+			      "__17C75x", "pic17c75x",  "p17c75x", "17c75x");
+ProcessorConstructor pP17C752(P17C752::construct ,
+			      "__17C752", "pic17c752",  "p17c752", "17c752");
+ProcessorConstructor pP17C756(P17C756::construct ,
+			      "__17C756", "pic17c756",  "p17c756", "17c756");
+ProcessorConstructor pP17C756A(P17C756A::construct ,
+			       "__17C756A", "pic17c756a",  "p17c756a", "17c756a");
+ProcessorConstructor pP17C762(P17C762::construct ,
+			      "__17C762", "pic17c762",  "p17c762", "17c762");
+ProcessorConstructor pP17C766(P17C766::construct ,
+			      "__17C766", "pic17c766",  "p17c766", "17c766");
+ProcessorConstructor pP18C242(P18C242::construct ,
+			      "__18C242", "pic18c242",  "p18c242", "18c242");
+ProcessorConstructor pP18C252(P18C252::construct ,
+			      "__18C252", "pic18c252",  "p18c252", "18c252");
+ProcessorConstructor pP18C442(P18C442::construct ,
+			      "__18C442", "pic18c442",  "p18c442", "18c442");
+ProcessorConstructor pP18C452(P18C452::construct ,
+			      "__18C452", "pic18c452",  "p18c452", "18c452");
+ProcessorConstructor pP18F442(P18F442::construct ,
+			      "__18F442", "pic18f442",  "p18f442", "18f442");
+ProcessorConstructor pP18F452(P18F452::construct,
+			      "__18F452", "pic18f452",  "p18f452", "18f452");
+
+
+//-------------------------------------------------------------------
+//
+// display_available_processors - list all of the processors gpsim supports.
+
+void display_available_processors(void)
+{
+  Generic.dump();  // any ProcessorConstructor object could've been called.
+}
+
+//-------------------------------------------------------------------
+pic_processor * add_processor(char * processor_type, char * processor_new_name)
+{
+  if(verbose)
+    cout << "Trying to add new processor '" << processor_type << "' named '" 
+	 << processor_new_name << "'\n";
+
+  ProcessorConstructor *pc = Generic.find(processor_type);
+  if(pc)
+    cout << "Found " << pc->names[1] << endl;
+
+  if(pc) {
+
+    pic_processor *p = pc->cpu_constructor();
+
+    if(p) {
+
+      processor_list.push_back(p);
+      active_cpu = p;
+      p->processor_id = active_cpu_id = ++cpu_ids;
+      if(verbose) {
+	cout << processor_type << '\n';
+	cout << "Program Memory size " <<  p->program_memory_size() << '\n';
+	cout << "Register Memory size " <<  p->register_memory_size() << '\n';
+      }
+
+      // Tell the gui or any modules that are interfaced to gpsim
+      // that a new processor has been declared.
+      gi.new_processor(p->processor_id);
+
+      return p;
+    }
+    else
+      cout << " unable to add a processor (BUG?)\n";
+
+  } else
+    cout << processor_type << " is not a valid processor.\n(try 'processor list' to see a list of valid processors.\n";
+
+  return(NULL);
+}
+
+
+//------------------------------------------------------------------------
+// dump_processor_list - print out all of the processors a user is 
+//                       simulating.
 
 void dump_processor_list(void)
 {
@@ -289,8 +417,10 @@ void dump_processor_list(void)
 
   bool have_processors = 0;
 
-  for (processor_iterator = processor_list.begin();  processor_iterator != processor_list.end(); processor_iterator++)
-    {
+  for (processor_iterator = processor_list.begin();
+       processor_iterator != processor_list.end(); 
+       processor_iterator++) {
+
       pic_processor *p = *processor_iterator;
       cout << p->name_str << '\n';
       have_processors = 1;
@@ -298,6 +428,7 @@ void dump_processor_list(void)
 
   if(!have_processors)
     cout << "(empty)\n";
+
 }
 
 //---------------------------------------------------------------
@@ -307,7 +438,9 @@ void switch_active_cpu(int cpu_id)
 
   bool have_processors = 0;
 
-  for (processor_iterator = processor_list.begin();  processor_iterator != processor_list.end(); processor_iterator++)
+  for (processor_iterator = processor_list.begin();
+       processor_iterator != processor_list.end(); 
+       processor_iterator++)
     {
       have_processors = 1;
       pic_processor *p = *processor_iterator;
@@ -323,62 +456,6 @@ void switch_active_cpu(int cpu_id)
   if(!have_processors)
     cout << "(empty)\n";
 }
-
-//-------------------------------------------------------------------
-//
-//
-
-void display_available_processors(void)
-{
-
-  int number_of = sizeof(available_processors) / sizeof(processor_types);
-  int i,j,k,l,longest;
-
-  for(i=0,longest=0; i<number_of; i++)
-    {
-      k = strlen(available_processors[i].names[1]);
-      if(k>longest)
-	longest = k;
-    }
-
-  k=0;
-  do
-    {
-
-      for(i=0; (i<4) && (k<number_of); i++)
-	{
-	  cout << available_processors[k].names[1];
-	  if(i<3)
-	    {
-	      l = longest + 2 - strlen(available_processors[k].names[1]);
-	      for(j=0; j<l; j++)
-		cout << ' ';
-	    }
-	  k++;
-	}
-      cout << '\n';
-    } while (k < number_of);
-
-}
-
-//-------------------------------------------------------------------
-int find_in_available_processor_list(char * processor_type)
-{
-
-  int number_of = sizeof(available_processors) / sizeof(processor_types);
-  int i,j;
-
-  for(i=0; i<number_of; i++)
-    for(j=0; j<4; j++)
-      if(strcmp(processor_type,available_processors[i].names[j]) == 0)
-	{
-	  return(i);
-	}
-
-  return(-1);
-
-}
-
 
 //-------------------------------------------------------------------
 
@@ -414,50 +491,6 @@ pic_processor *get_processor(unsigned int cpu_id)
   return active_cpu;
 }
 
-
-//-------------------------------------------------------------------
-pic_processor * add_processor(char * processor_type, char * processor_new_name)
-{
-  if(verbose)
-    cout << "Trying to add new processor '" << processor_type << "' named '" 
-	 << processor_new_name << "'\n";
-
-  int i = find_in_available_processor_list(processor_type);
-
-  if(i>= 0)
-    {
-
-      pic_processor *p = available_processors[i].cpu_constructor();
-
-      if(p)
-	{
-	  processor_list.push_back(p);
-	  active_cpu = p;
-	  p->processor_id = active_cpu_id = ++cpu_ids;
-	  if(verbose) {
-	    cout << processor_type << '\n';
-	    cout << "Program Memory size " <<  p->program_memory_size() << '\n';
-	    cout << "Register Memory size " <<  p->register_memory_size() << '\n';
-	  }
-
-	  // Tell the gui or any modules that are interfaced to gpsim
-	  // that a new processor has been declared.
-	  gi.new_processor(p->processor_id);
-
-	  return p;
-	}
-      else
-	{
-	  cout << " unable to add a processor (BUG?)\n";
-	}
-    }
-  else
-    {
-      cout << processor_type << " is not a valid processor.\n(try 'processor list' to see a list of valid processors.\n";
-    }
-
-  return(NULL);
-}
 
 
 //-------------------------------------------------------------------
