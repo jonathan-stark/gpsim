@@ -191,10 +191,22 @@ class program_memory_access :  public BreakCallBack
 
   unsigned int address, opcode, state;
 
+  // breakpoint instruction pointer. This is used by get_base_instruction().
+  // If an instruction has a breakpoint set on it, then get_base_instruction
+  // will return a pointer to the instruction and will initialize bpi to
+  // the breakpoint instruction that has replaced the one in the pic program
+  // memory.
+  Breakpoint_Instruction *bpi;
+
   void put(int addr, instruction *new_instruction);
   instruction *get(int addr);
+  instruction *get_base_instruction(int addr);
   unsigned int get_opcode(int addr);
+
   void put_opcode(int addr, unsigned int new_opcode);
+  // When a pic is replacing one of it's own instructions, this routine
+  // is called.
+  void put_opcode_start(int addr, unsigned int new_opcode);
 
   virtual void callback(void);
   program_memory_access(void)

@@ -37,6 +37,8 @@ Boston, MA 02111-1307, USA.  */
 #include "p12x.h"
 #include "p18x.h"
 
+#include "16bit-instructions.h" // this is only needed for pma class
+
 #include "xref.h"
 
 int parse_string(char *cmd_string);
@@ -1576,6 +1578,30 @@ instruction *program_memory_access::get(int addr)
 
 }
 
+// like get, but will ignore instruction break points 
+instruction *program_memory_access::get_base_instruction(int addr)
+{
+  instruction *inst;
+
+  inst = get(addr);
+
+  if(!inst)
+    return inst;
+
+  if(inst->isa() != instruction::BREAKPOINT_INSTRUCTION)
+    return inst;
+
+  int i = 0;
+
+  do {
+    i++;
+    bpi = (Breakpoint_Instruction *) inst;
+    inst = bpi->replaced;
+  } while( (inst->isa() == instruction::BREAKPOINT_INSTRUCTION) && (i<10));
+
+  return inst;
+}
+
 unsigned int program_memory_access::get_opcode(int addr)
 {
 
@@ -1588,7 +1614,7 @@ unsigned int program_memory_access::get_opcode(int addr)
     return 0;
 }
 
-void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
+void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
 {
 
   if( (addr < cpu->program_memory_size()) && (state == 0))
@@ -1602,6 +1628,58 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
 
 }
 
+void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
+{
+  int i;
+
+  if( !(addr>=0) && (addr < cpu->program_memory_size()))
+    return;
+
+
+  instruction *old_inst = get_base_instruction(addr);
+  instruction *new_inst = cpu->disasm(addr,new_opcode);
+
+  if(!old_inst) {
+    put(addr,new_inst);
+    return;
+  }
+
+  if(old_inst->isa() == instruction::INVALID_INSTRUCTION) {
+    put(addr,new_inst);
+    return;
+  }
+
+  // Now we need to make sure that the instruction we are replacing is
+  // not a multi-word instruction. The 12 and 14 bit cores don't have
+  // multi-word instructions, but the 16 bit cores do. If we are replacing
+  // the second word of a multiword instruction, then we only need to
+  // 'uninitialize' it. 
+
+  // if there was a breakpoint set at addr, save a pointer to the breakpoint.
+  Breakpoint_Instruction *b=bpi;
+  instruction *prev = get_base_instruction(addr-1);
+
+  if(prev) {
+    if(prev->isa() == instruction::MULTIWORD_INSTRUCTION) {
+      ((multi_word_instruction *)prev)->initialized = 0;
+    }
+  }
+  
+
+  new_inst->update_line_number(old_inst->get_file_id(), 
+			       old_inst->get_src_line(), 
+			       old_inst->get_lst_line());
+
+  new_inst->xref = old_inst->xref;
+
+  if(b) 
+    b->replaced = new_inst;
+  else
+    cpu->program_memory[addr] = new_inst;
+
+  delete(old_inst);
+}
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void program_memory_access::callback(void)
@@ -1611,7 +1689,8 @@ void program_memory_access::callback(void)
     {
       state = 0;
       //cout << __FUNCTION__ << " address= " << address << ", opcode= " << opcode << '\n';
-      cpu->program_memory[address]->opcode = opcode;
+      //cpu->program_memory[address]->opcode = opcode;
+      put_opcode(address,opcode);
       trace.opcode_write(address,opcode);
       bp.clear_pm_write();
     }
