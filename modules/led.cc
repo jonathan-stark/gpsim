@@ -547,6 +547,7 @@ Led_7Segments::Led_7Segments(void)
   interface_id = gpsim_register_interface((gpointer)this);
 
   gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
+  gpsim_register_gui_update(interface_id, simulation_has_stopped);
 
   cbp =  gpsim_set_cyclic_break_point2(simulation_has_stopped,
 				       (gpointer)this,
@@ -605,6 +606,16 @@ void Led_7Segments::create_iopin_map(void)
 
   create_pkg(8);
 
+  // Position pins on left side of package
+  float pos=0.0;
+  set_pin_position(1,pos);pos+=0.9999/7.0;
+  set_pin_position(2,pos);pos+=0.9999/7.0;
+  set_pin_position(3,pos);pos+=0.9999/7.0;
+  set_pin_position(4,pos);pos+=0.9999/7.0;
+  set_pin_position(5,pos);pos+=0.9999/7.0;
+  set_pin_position(6,pos);pos+=0.9999/7.0;
+  set_pin_position(7,pos);pos+=0.9999/7.0;
+  set_pin_position(8,pos);pos+=0.9999/7.0;
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is

@@ -344,6 +344,8 @@ typedef struct _sym
 					     void (*simulation_has_stopped) (gpointer));
   void gpsim_register_new_program(unsigned int interface_id, 
 				  void (*new_program)  (unsigned int processor_id));
+  void gpsim_register_gui_update(unsigned int interface_id,
+				 void (*gui_update) (gpointer));
 
 
 

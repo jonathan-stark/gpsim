@@ -328,7 +328,6 @@ unsigned int Breakpoints::set_notify_read(pic_processor *cpu, unsigned int regis
 
 unsigned int Breakpoints::set_notify_write(pic_processor *cpu, unsigned int register_number)
 {
-  cout << "in breakpoints.cc\n";
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
 }
 unsigned int Breakpoints::set_notify_read_value(pic_processor *cpu, unsigned int register_number, 
@@ -1188,7 +1187,7 @@ void catch_control_c(int sig)
 
 //-------------------------------------------------------------------
 //
-GuiCallBack gcb;
+/*GuiCallBack gcb;
 
 GuiCallBack::GuiCallBack(void)
 {
@@ -1235,7 +1234,7 @@ void GuiCallBack::set_break(int cycle,
 
   new_gui_callback(new_gui_callback_data);
 
-}
+}*/
 
 //-------------------------------------------------------------------
 //

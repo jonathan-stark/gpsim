@@ -2642,7 +2642,10 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	gtk_widget_size_request(p->module_widget, &req);
 
 	p->width=req.width;
-        p->height=req.height;
+	p->height=req.height;
+
+	if(package_height<p->height-pinspacing)
+            package_height=p->height-pinspacing;
     }
 
     if(y+p->height>LAYOUTSIZE_Y-30)
