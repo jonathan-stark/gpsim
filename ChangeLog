@@ -1,4 +1,8 @@
 2004-11-24 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: operator[] for FileContext was not checking
+	negative indices.
+
+2004-11-24 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc: yet another attempt to fix tab completion.
 	* modules/binary_indicator.cc, modules/binary_indicator.h
 	modules/bitlog.h, modules/led.h, modules/logic.cc, modules/logic.h,
