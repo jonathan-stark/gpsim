@@ -372,12 +372,9 @@ void SourceBrowserAsm_Window::SetPC(int address)
     gdouble nvalue = pixel - inc/2;
     gtk_adjustment_set_value(adj, nvalue);
 
-    printf(" SetPC: %s , setting adjustment to %g\n", 
-       name(),  nvalue );
   }
   
   if(!GTK_WIDGET_VISIBLE(new_pcw)) {
-    //cout << "showing the widget\n";
     gtk_widget_show(new_pcw);
   }
   gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
@@ -386,10 +383,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
 		  PIXMAP_POS(this,e)
 		  );
 
-  printf(" SetPC: %s , moving to %d\n", 
-   name(), PIXMAP_POS(this,e));
-
-  //  GTKWAIT;
 }
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
@@ -523,7 +516,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     if(!e->bpwidget) {
       e->bpwidget = gtk_pixmap_new(pixmap_canbreak, canbp_mask);
 
-      printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
+      //printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
       gtk_layout_put(GTK_LAYOUT(pages[id].source_layout),
 		     e->bpwidget,
 		     PIXMAP_SIZE*0,
@@ -795,7 +788,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 
   if(sbaw->current_page!=page_num) {
     
-    printf("switch_page_cb: %s, from:%d to%d\n",sbaw->name(),sbaw->current_page,page_num);
+    //printf("switch_page_cb: %s, from:%d to%d\n",sbaw->name(),sbaw->current_page,page_num);
     int id;
     unsigned int address;
 
@@ -993,7 +986,7 @@ static void marker_cb(GtkWidget *w1,
 
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
     return;
-  printf("marker_cb\n");
+  //printf("marker_cb\n");
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
   switch(event->type) {
@@ -1110,14 +1103,14 @@ static void marker_cb(GtkWidget *w1,
       //sa_entry *e = gui_pixel_to_entry(id, pos);
       sa_entry *e = gui_pixel_to_entry(sbaw, id, pos);
       line = e->line;
-      
+      /*
       printf("Toggling break: line:%d pos: (%d,%d), id=%d\n",line,(int)event->x,(int)event->y,id);
       printf("                sa_entry -- index:%d, line:%d, pixel:%d, font_center:%d\n",
 	     e->index,e->line,e->pixel,e->font_center);
       printf("                layout_offset:%d, vadj->value=%d\n",
 	     sbaw->layout_offset,
 	     (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value);
-      
+      */
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
     }
     break;
@@ -1635,7 +1628,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 		  &default_text_style->base[GTK_STATE_NORMAL],
 		  " ",
 		  1);
-  printf("SetText: height=%d\n",totallinesheight);
+  //printf("SetText: height=%d\n",totallinesheight);
   gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
 		      2*PIXMAP_SIZE,
 		      totallinesheight+5*PIXMAP_SIZE);
@@ -2685,8 +2678,6 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 	}
 
     }
-
-  Dprintf(("built source browser children\n"));
 }
 
 void SourceBrowserParent_Window::SelectAddress(int address)

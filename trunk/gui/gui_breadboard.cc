@@ -224,7 +224,6 @@ static void inline prepend_point_to_path(path **pat, point p)
 // Free all of pat
 static void clear_path(path **pat)
 {
-  printf("%s\n",__FUNCTION__);
 
     path *current_path, *next;
 
@@ -625,7 +624,6 @@ static GList *nodepath_list;
 // Draw node in nodepath_list to layout_pixmap
 static void clear_nodes(Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     GList *iter;
     path *nodepath;
@@ -649,7 +647,6 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw);
 // Draw node in nodepath_list to layout_pixmap
 static void draw_nodes(Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     GList *iter;
 
@@ -720,8 +717,6 @@ static void draw_nodes(Breadboard_Window *bbw)
 // know not to trace over them.
 static void update_board_matrix(Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
-
     int x,y, width, height;
     GList *mi;
     int i;
@@ -819,8 +814,6 @@ static void update_board_matrix(Breadboard_Window *bbw)
 // at its place. It can trace over it when in straight angle.
 static void add_path_to_matrix(path *pat)
 {
-  printf("%s\n",__FUNCTION__);
-
     int x=-1, y=-1;
     if(pat!=0)
     {
@@ -994,7 +987,6 @@ static void path_copy_and_cat(path **pat, path **source)
  */
 static void trace_node(struct gui_node *gn)
 {
-  printf("%s\n",__FUNCTION__);
     GuiPin *p;
     Breadboard_Window *bbw;
     stimulus *stimulus;
@@ -1153,7 +1145,6 @@ static void trace_node(struct gui_node *gn)
 
 struct GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 {
-  printf("%s\n",__FUNCTION__);
 
     GList *iter;
     int i;
@@ -1199,7 +1190,6 @@ struct GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 
 static void draw_pin(GuiPin *pin)
 {
-  printf("%s\n",__FUNCTION__);
 
     int pointx;
     int wingheight, wingx;
@@ -1291,7 +1281,6 @@ static void expose_pin(GtkWidget *widget,
 		       GdkEventExpose *event,
 		       GuiPin *p)
 {
-  printf("%s\n",__FUNCTION__);
 
     if(p->pixmap==0)
     {
@@ -1309,7 +1298,6 @@ static void expose_pin(GtkWidget *widget,
 
 static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
 {
-  printf("%s\n",__FUNCTION__);
 
     char text[STRING_SIZE];
     char string[STRING_SIZE];
@@ -1343,7 +1331,6 @@ static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
 
 static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 {
-  printf("%s\n",__FUNCTION__);
 
     char name[STRING_SIZE];
     char *text[1];
@@ -1403,7 +1390,6 @@ static void settings_clist_cb(GtkCList       *clist,
 		GdkEvent       *event,
 		Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
 	// Save the Attribute*
 	Attribute *attr;
@@ -1422,7 +1408,6 @@ static void settings_clist_cb(GtkCList       *clist,
 static void settings_set_cb(GtkWidget *button, 
 		Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
 	const char *entry_string;
 	char attribute_name[256];
@@ -1456,7 +1441,6 @@ static void settings_set_cb(GtkWidget *button,
 static void treeselect_module(GtkItem *item, struct gui_module *p)
 {
   
-  printf("%s\n",__FUNCTION__);
 char buffer[STRING_SIZE];
 
   if (p)
@@ -1532,8 +1516,6 @@ static void position_module(struct gui_module *p, int x, int y)
 {
   GList *piniter;
 
-  printf("%s\n",__FUNCTION__);
-
   if (p)
   {
     x=x-x%pinspacing;
@@ -1575,8 +1557,6 @@ static void position_module(struct gui_module *p, int x, int y)
 
 static double module_distance(struct gui_module *p, int x, int y)
 {
-  printf("%s\n",__FUNCTION__);
-
     double distance;
     double min_distance=100000000;
 
@@ -1648,8 +1628,6 @@ static int grab_next_module;
 
 void grab_module(gui_module *p)
 {
-  printf("%s\n",__FUNCTION__);
-
     dragged_module = p;
     gdk_pointer_grab(p->bbw->layout->window,
 		     TRUE,
@@ -1669,8 +1647,6 @@ static void pointer_cb(GtkWidget *w,
 		      GdkEventButton *event,
 		     Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
-
     static int x,y;
 
     x = (int) (event->x + bbw->hadj->value);
@@ -1744,7 +1720,6 @@ static gint button(GtkWidget *widget,
 		   GdkEventButton *event,
 		   GuiPin *p)
 {
-  printf("%s\n",__FUNCTION__);
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
@@ -2217,8 +2192,6 @@ static void text_dialog(const char *filename)
 
 static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
-
 
     Stimulus_Node *node;
 
@@ -2236,7 +2209,6 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 
 static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     const char *library_name;
 
@@ -2248,7 +2220,6 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 
 static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     char *module_type;
     const char *module_name;
@@ -2266,7 +2237,6 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 
 static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
     GList *pin_iter;
 
     delete(bbw->selected_module->module);
@@ -2547,14 +2517,12 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
 static void clear_traces(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     update_board_matrix(bbw);
 }
 
 static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
 {
-  printf("%s\n",__FUNCTION__);
     Stimulus_Node *node;
     Breadboard_Window *bbw = (Breadboard_Window*)bbw_gpointer;
 
@@ -2567,7 +2535,6 @@ static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
 
 static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     update_board_matrix(bbw);
 
@@ -2582,8 +2549,6 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
 
 GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientation, IOPIN *_iopin)
 {
-  printf("%s\n",__FUNCTION__);
-
 
     iopin = _iopin;
     x=_x;
@@ -2648,7 +2613,6 @@ GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientatio
 
 static void name_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
-  printf("%s\n",__FUNCTION__);
     if(p->name_pixmap==0)
     {
 	puts("bbw.c: no pixmap2!");
@@ -2665,7 +2629,6 @@ static void name_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_mod
 
 static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_module *p)
 {
-  printf("%s\n",__FUNCTION__);
 
     if(p->module_pixmap==0)
     {
@@ -2685,7 +2648,6 @@ static void module_expose(GtkWidget *widget, GdkEventExpose *event, struct gui_m
 
 static void refresh_gui_module(struct gui_module *p)
 {
-  printf("%s\n",__FUNCTION__);
 
     GList *pin_iter;
     struct gui_module *new_gui_module;
@@ -2739,7 +2701,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 				 Module *module,
 				 GtkWidget *widget)
 {
-  printf("%s\n",__FUNCTION__);
 
     static int x=80;
     static int y=80;
@@ -3094,7 +3055,6 @@ void Breadboard_Window::Update(void)
   if(!enabled)
     return;
 
-  printf("%s\n",__FUNCTION__);
     
   if(!GTK_WIDGET_VISIBLE(window))
     return;
@@ -3167,7 +3127,6 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Breadboard_Window *bww)
 {
-  printf("%s\n",__FUNCTION__);
   bww->ChangeView(VIEW_HIDE);
   return TRUE;
 }
@@ -3277,7 +3236,6 @@ static void layout_adj_changed(GtkWidget *widget, Breadboard_Window *bbw)
 
 static void layout_expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
 {
-  printf("%s\n",__FUNCTION__);
 
     if(bbw->layout_pixmap==0)
     {

@@ -2039,7 +2039,7 @@ void Register_Window::Build(void)
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
   }
     
-  GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
+  //  GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
 
   /* create popupmenu */
   popup_menu=build_menu(this);
@@ -2152,7 +2152,7 @@ void Register_Window::Build(void)
   for(i=0;i<MAX_REGISTERS;i++)
       registers[i]=0;
   
-  //NewProcessor(gp);
+  NewProcessor(gp);
 
   UpdateMenuItem();
   Dprintf((" regwin is built\n"));
