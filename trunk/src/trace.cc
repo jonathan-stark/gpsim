@@ -567,12 +567,15 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 
   file_register *r;
 
+  if(!cpu)
+      return 0;
+
   if(!n)
     n = 5;
 
   string_cycle = find_cycle(n,-1,instruction_index, pc_index, cycle_index);
 
-  if(pc_index>0) {
+  if(pc_index>=0) {
 
     // We are going to print the cycle (if it was found) along with the
     // instruction so turn off the trace flags associated with the cycle
@@ -692,6 +695,8 @@ void Trace::dump_raw(int n)
     putc('\n',stdout);
 
   } while((i!=trace_index) && (i!=((trace_index+1)&TRACE_BUFFER_MASK)));
+    putc('\n',stdout);
+    putc('\n',stdout);
 }
 
 //
@@ -875,23 +880,11 @@ void ProfileKeeper::catchup(void)
 
 void ProfileKeeper::callback(void)
 {
-    //for(int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK) 
-    //  fprintf(log_file,"%08x\n",trace.trace_buffer[i]);
-
-    puts("Profile callback!");
-
-    // last_trace_index is pointing at start of unread buffer.
-
-    // read trace buffer until we are at trace.trace_index;
-
-    // in loop, update cpu->program_memory[address].cycle_count.
-
     if(enabled)
     {
         catchup();
 	cpu->cycles.set_break(cpu->cycles.value + 1000,this);
     }
-
 }
 
 void ProfileKeeper::enable_profiling(void)
@@ -899,8 +892,6 @@ void ProfileKeeper::enable_profiling(void)
 
     if(enabled)
 	return;
-
-    puts("Profiling enabled!");
 
     if(!cpu) {
 	if(active_cpu)

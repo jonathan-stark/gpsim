@@ -20,7 +20,7 @@
 
 
 #define MAXTRACES  100
-#define COLUMNS    2
+#define TRACE_COLUMNS    2
 
 typedef enum {
     MENU_BREAK_CLEAR,
@@ -31,7 +31,7 @@ typedef enum {
     MENU_ADD_WATCH,
 } menu_id;
 
-static char *trace_titles[COLUMNS]={"Cycle", "Trace"};
+static char *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
 
 // gui trace flags:
 #define GTF_ENABLE_XREF_UPDATES    (1<<0)
@@ -40,6 +40,7 @@ guint64 row_to_cycle[MAXTRACES];
 
 
 //struct TraceMapping trace_map[MAXTRACES];
+
 
 /*****************************************************************
  * xref_update
@@ -60,7 +61,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
   char cycle_string[TRACE_STRING];
   char trace_string[TRACE_STRING];
-  char *entry[COLUMNS]={cycle_string,trace_string};
+  char *entry[TRACE_COLUMNS]={cycle_string,trace_string};
 
   Trace_Window *tw;
 
@@ -152,9 +153,11 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 void TraceWindow_update(Trace_Window *tw)
 {
   GUI_Processor *gp;
-  GtkCList *clist;
+  GtkCList *trace_clist;
   char buffer[50];
   guint64 cycle;
+  guint64 count;
+  int i;
 
   if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
     return;
@@ -169,9 +172,9 @@ void TraceWindow_update(Trace_Window *tw)
   }
 
   // Get a convenient pointer to the gtk_clist that the trace is in.
-  clist=GTK_CLIST(tw->trace_clist);
+  trace_clist=GTK_CLIST(tw->trace_clist);
 
-  gtk_clist_freeze(clist);
+  gtk_clist_freeze(trace_clist);
 
   cycle = gpsim_get_cycles(gp->pic_id);
 
@@ -188,13 +191,8 @@ void TraceWindow_update(Trace_Window *tw)
 
   tw->trace_flags &= ~GTF_ENABLE_XREF_UPDATES;
   tw->last_cycle = cycle;
-  gtk_clist_thaw(clist);
+  gtk_clist_thaw(trace_clist);
 
-/*  {
-      int i;
-      for(i=0;i<10;i++)
-	  printf("Cycles used %d=%d\n",i,gpsim_get_cycles_used(gp->pic_id,i));
-  }*/
 }
 
 
@@ -209,13 +207,14 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
 
 #define NAME_SIZE 32
 
-    gint i,j,reg_number, border_mask, border_width;
+    gint i,j, border_mask, border_width;
     GtkCList *clist;
     struct cross_reference_to_gui *cross_reference;
     gboolean row_created;
 //    GtkCListRange range;
     int pic_id;
     char row_label[50];
+
 
     if(tw == NULL || gp == NULL)
 	return;
@@ -228,40 +227,6 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     tw->gui_obj.gp = gp;
     pic_id = gp->pic_id;
 
-    
-    clist=GTK_CLIST(tw->trace_clist);
-
-/*    gtk_clist_freeze(clist);
-
-    
-    range.row0=0;
-    range.rowi=clist->maxrow;
-    range.col0=0;
-    range.coli=clist->maxcol;
-
-    gtk_clist_range_set_font(clist, &range, normal_style->font);
-
-    border_mask = GTK_CLIST_RIGHT_BORDER |
-	GTK_CLIST_LEFT_BORDER |
-	GTK_CLIST_BOTTOM_BORDER |
-	GTK_CLIST_TOP_BORDER;
-
-    border_width = 1;
-
-    gtk_clist_range_set_border(clist, &range, border_mask, border_width, 0);
-
-    border_mask = GTK_CLIST_LEFT_BORDER;
-    border_width = 3;
-
-    range.col0=REGISTERS_PER_ROW;
-    range.coli=REGISTERS_PER_ROW;
-
-    gtk_clist_range_set_border(clist, &range, border_mask, border_width, 0);
-
-
-
-    gtk_clist_thaw(clist);*/
-
 
     cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
     cross_reference->parent_window_type =  WT_trace_window;
@@ -270,8 +235,6 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     cross_reference->update = xref_update;
     cross_reference->remove = NULL;
     gpsim_assign_trace_xref((gpointer) cross_reference);
-
-//    gpsim_enable_profiling(gp->pic_id);
 }
 
 static int delete_event(GtkWidget *widget,
@@ -317,9 +280,11 @@ BuildTraceWindow(Trace_Window *tw)
   gtk_container_add(GTK_CONTAINER(window), main_vbox);
   gtk_widget_show(main_vbox);
 
-  trace_clist=gtk_clist_new_with_titles(COLUMNS,trace_titles);
-  gtk_clist_set_column_auto_resize(GTK_CLIST(trace_clist),0,TRUE);
   gtk_window_set_title(GTK_WINDOW(window), "trace viewer");
+
+  // Trace clist
+  trace_clist=gtk_clist_new_with_titles(TRACE_COLUMNS,trace_titles);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(trace_clist),0,TRUE);
 
   GTK_WIDGET_UNSET_FLAGS(trace_clist,GTK_CAN_DEFAULT);
     
@@ -340,25 +305,18 @@ BuildTraceWindow(Trace_Window *tw)
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), trace_clist);
   
-//  GTK_CLIST_SET_FLAGS(trace_clist, GTK_CLIST_CLIP_TEXT);
-
   gtk_widget_show(trace_clist);
-
   gtk_widget_show(scrolled_window);
 
   gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
+  ///////////////////////////////////////////////////
+  ///////////////////////////////////////////////////
+
+
 
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 
-//  gtk_clist_column_button_add_label(tw->trace_clist, 0, "cycle");
-//  gtk_clist_column_button_add_label(tw->trace_clist, 1, "trace");
-
-//  gtk_clist_set_column_width (tw->trace_clist, 0, char_width*16);
-//  gtk_clist_set_column_width (tw->trace_clist, 1, char_width*50);
-//  gtk_clist_set_row_titles_width(tw->trace_clist, char_width*16);
-
-//  gtk_clist_hide_row_titles(tw->trace_clist);
   gtk_signal_connect_after(GTK_OBJECT(tw->gui_obj.window), "configure_event",
   			   GTK_SIGNAL_FUNC(gui_object_configure_event),tw);
 
@@ -405,7 +363,6 @@ int CreateTraceWindow(GUI_Processor *gp)
   trace_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
   trace_window->gui_obj.is_built = 0;
   trace_window->trace_map = NULL;
-
   gp->trace_window = trace_window;
 
   trace_window->trace_flags = 0;

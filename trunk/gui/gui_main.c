@@ -109,6 +109,7 @@ void gui_new_processor (unsigned int pic_id)
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
       StackWindow_new_processor(gp->stack_window,gp);
       TraceWindow_new_processor(gp->trace_window,gp);
+      ProfileWindow_new_processor(gp->profile_window,gp);
 
       init_link_to_gpsim(gp);
       //  redisplay_prompt();
@@ -154,6 +155,7 @@ void gui_new_source (unsigned int pic_id)
       SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
 //      WatchWindow_clear_watches(gp->watch_window, gp);
+      ProfileWindow_new_program(gp->profile_window,gp);
 
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
@@ -418,6 +420,7 @@ int gui_init (int argc, char **argv)
   CreateBreadboardWindow(gp);
   CreateStackWindow(gp);
   CreateTraceWindow(gp);
+  CreateProfileWindow(gp);
 
 
   interface_id = gpsim_register_interface((gpointer) gp);

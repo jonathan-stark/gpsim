@@ -37,7 +37,8 @@ enum window_types {
   WT_opcode_source_window,
   WT_list_source_window,
   WT_breadboard_window,
-  WT_trace_window
+  WT_trace_window,
+  WT_profile_window
 };
 
 //
@@ -430,6 +431,29 @@ struct _Trace_Window {
 
 typedef struct _Trace_Window Trace_Window;
 
+
+//
+// The profile window
+//
+
+struct _Profile_Window {
+  GUI_Object     gui_obj;
+
+  int processor;    // if non-zero window has processor
+  int program;    // if non-zero window has program
+
+  GtkCList *profile_clist;
+  GtkCList *profile_range_clist;
+  GList *profile_list;
+  GList *profile_range_list;
+  GtkWidget *notebook;
+  gint range_current_row;
+  GtkWidget *range_popup_menu;
+
+};
+
+typedef struct _Profile_Window Profile_Window;
+
 //
 // Future Items that will be declared.
 //
@@ -469,6 +493,7 @@ struct _gui_processor {
   Stack_Window *stack_window;
   Breadboard_Window *breadboard_window;
   Trace_Window *trace_window;
+  Profile_Window *profile_window;
   // GtkWidget *stack_window;
   // GtkWidget *sfr_window;
   // GtkWidget *watch_window;
@@ -594,6 +619,13 @@ void TraceWindow_new_processor(Trace_Window *bbw, GUI_Processor *gp);
 int BuildTraceWindow(Trace_Window *bbw);
 int CreateTraceWindow(GUI_Processor *gp);
 void TraceWindow_update(Trace_Window *bbw);
+
+// gui_profile.c
+void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp);
+void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp);
+int BuildProfileWindow(Profile_Window *pw);
+int CreateProfileWindow(GUI_Processor *gp);
+void ProfileWindow_update(Profile_Window *pw);
 
 #endif // __GUI_H__
 
