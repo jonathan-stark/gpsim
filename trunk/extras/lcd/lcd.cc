@@ -228,15 +228,18 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
 {
 
   int bit_mask = 1<<bit_number;
+  unsigned int current_value = value.get();
+  bool current_bit_value = (current_value & bit_mask) ? true : false;
 
-  if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
-    {
-      value.put(value.get() ^ bit_mask);
-      assert_event();
-      trace_register_write();
-    }
-  gTrace->raw(write_trace.get() | value.get());
+  if( current_bit_value != new_value) {
 
+    gTrace->raw(write_trace.get() | value.get());
+  
+    value.put(value.get() ^ bit_mask);
+    assert_event();
+
+    internal_latch = (current_value & bit_mask) | (internal_latch & ~bit_mask);
+  }
 }
 
 void Lcd_Port::assert_event(void)
@@ -280,6 +283,10 @@ void DataPort::update_pin_directions(bool new_direction)
 
 unsigned int DataPort::get(void)
 {
+
+  return IOPORT::get();
+
+#if 0
   unsigned int v=0;
 
 #ifdef BROKEN_GET_METHOD
@@ -308,7 +315,7 @@ unsigned int DataPort::get(void)
   gTrace->raw(read_trace.get() | value.get());
 
   return value.get();
-
+#endif
 }
 
 //-----------------------------------------------------
@@ -331,7 +338,6 @@ void ControlPort::put(unsigned int new_value)
   unsigned int old_value = value.get();
 
   Lcd_Port::put(new_value);
-  gTrace->raw(write_trace.get() | value.get());
 
   if((old_value ^ value.get()) & 2) {  // R/W bit has changed states
     if(value.get() & 2)
@@ -364,7 +370,6 @@ void DataPort::put(unsigned int new_value)
   unsigned int old_value = value.get();
 
   Lcd_Port::put(new_value);
-  gTrace->raw(write_trace.get() | value.get());
 
   if( (old_value ^ value.get()) & 0xff)
     lcd->advanceState(DataChange);
