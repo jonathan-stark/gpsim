@@ -323,6 +323,7 @@ extern Processor *active_cpu;
 //
 // non-class helper functions.
 
+void initialize_processor_constructor(void);
 Processor *  add_processor(char * processor_type, char * processor_new_name);
 void display_available_processors(void);
 void dump_processor_list(void);

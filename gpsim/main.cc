@@ -54,7 +54,6 @@ extern "C" {
 
 extern int gui_init (int argc, char **argv);
 extern void gui_main(void);
-extern void exit_gpsim(void);
 
 void initialize_gpsim(void);
 

@@ -1,3 +1,33 @@
+2003-12-28  Scott Dattalo  <scott@dattalo.com>
+	* another patch from Borut Razem:
+	* README.WIN32:
+	    - some additional changes. I think that you can add it to CVS now ;-)
+	* cli/input.cc:
+	    - added function get_dir_delim(), which searches for both /
+	      and \ delimiters on WIN32 systems.
+	    - fixed bug in gpsim_read(): logic for deallocating input_buf
+	      was moved out of 'if (chars_left > 0)' block.
+	    - some code cleaning, some compiler warnings fixed
+	* cli/input.h:
+	    - added declarations of exit_gpsim() and get_dir_delim()
+	* gpsim/main.cc:
+	    - removed declaration of exit_gpsim(), now included in cli/input.h
+	* src/14bit-registers.cc:
+	    - deallocation of name_str1 is already done in ~Register().
+	* cod.cc:
+	    - included cli/input.h for declaration of get_dir_delim()
+	    - substr() replaced with get_string(), which gets the string from .cod
+	      file. strings in .cod file are represented as:
+	      - first byte defines the string length
+	      - the string starts at the second byte.
+	    - read_src_files_from_cod(): conversion to DOS file name
+	    - open_cod_file() opens .cod file in binary mode
+	* src/pic-instructions.cc:
+	    - initialize xref to NULL if HAVE_GUI not defined
+	* src/processor.cc,
+	* src/processor.h:
+	    - static pointer to the processor_list
+
 2003-12-27  Scott Dattalo  <scott@dattalo.com>
 	* patch from Borut Razem for Visual Studio projects
 	
