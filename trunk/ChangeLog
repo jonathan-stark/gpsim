@@ -1,3 +1,16 @@
+2004-11-24 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc: yet another attempt to fix tab completion.
+	* modules/binary_indicator.cc, modules/binary_indicator.h
+	modules/bitlog.h, modules/led.h, modules/logic.cc, modules/logic.h,
+	modules/paraface.h, modules/resistor.cc, modules/video.cc,
+	modules/video.h: Changed IO_input to IOPIN for all pins. This
+	is an attempt to remove a warning message regarding IO_input that
+	is generated while building under CygWin.
+	* modules/makefile.mingw, plat/win32/gpsim.nsi: Renamed modules.dll
+	to a slightly more descriptive gpsim_modules.dll 
+	* src/i2c-ee.cc, src/p12.cc, src/p16f62x.cc, src/p17c75x.cc, 
+	src/stimuli.h: exchanged references to IO_input to IOPIN.
+
 2004-11-23 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def, modules/modules.vcproj: MSVC sync
 	* modules/*.cc: removed (char *) casts in calls to new_name()

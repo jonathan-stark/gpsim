@@ -46,39 +46,33 @@ class AND2Gate;
  * class.)
  */
 
-class LogicPin
+class Logic_Input : public IOPIN
 {
- public:
+private:
   LogicGate *LGParent;
 
-  void new_logic_gate(class LogicGate *lg) {LGParent=lg;};
-};
-
-class Logic_Input : public IO_input, public LogicPin
-{
 public:
 
   virtual void put_digital_state( bool new_state);
 
-  Logic_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) 
-    : IO_input(i,b,opt_name) 
+  Logic_Input (LogicGate *parent, IOPORT *i, unsigned int b, char *opt_name=NULL) 
+    : IOPIN(i,b,opt_name), LGParent(parent)
     { 
-      LGParent = NULL;
-    };
+    }
 
 };
 
-class Logic_Output : public IO_bi_directional, public LogicPin
+class Logic_Output : public IO_bi_directional
 {
+private:
+  LogicGate *LGParent;
+
 public:
 
-  //virtual void put_node_state( int new_state);
-
-  Logic_Output (IOPORT *i, unsigned int b,char *opt_name=NULL) 
-    : IO_bi_directional(i,b,opt_name)
+  Logic_Output (LogicGate *parent, IOPORT *i, unsigned int b,char *opt_name=NULL) 
+    : IO_bi_directional(i,b,opt_name), LGParent(parent)
     { 
-      LGParent = NULL;
-    };
+    }
 
 };
 

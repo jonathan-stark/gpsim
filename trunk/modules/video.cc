@@ -258,11 +258,9 @@ void Video::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
   Another_Input *vi;
-  vi=new Another_Input(port, 0, "in1");
-  vi->new_logic_gate(this);
+  vi=new Another_Input(this, port, 0, "in1");
   assign_pin(1, vi);
-  vi=new Another_Input(port, 1, "in2");
-  vi->new_logic_gate(this);
+  vi=new Another_Input(this, port, 1, "in2");
   assign_pin(2, vi);
   
   // Create an entry in the symbol table for the new I/O pins.

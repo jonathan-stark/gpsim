@@ -1190,18 +1190,19 @@ void IOPIN::toggle(void)
 {
   put_digital_state(get_digital_state() ^ true);
 }
+
 //========================================================================
 //
-IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-  : IOPIN(i,b,opt_name,_iopp)
-{
-}
+// IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+//   : IOPIN(i,b,opt_name,_iopp)
+// {
+// }
 
-IO_input::IO_input(void)
-{
-  if(verbose)
-    cout << "IO_input default constructor\n";
-}
+// IO_input::IO_input(void)
+// {
+//   if(verbose)
+//     cout << "IO_input default constructor\n";
+// }
 
 
 /*************************************
@@ -1216,7 +1217,7 @@ IO_input::IO_input(void)
  * this register either by writing directly to it in the cli,
  * or by clicking in one of many places in the gui.
  */
-double IO_input::get_Vth()
+double IOPIN::get_Vth()
 {
   if(!snode && iop)
     return ( (iop->value.get() & (1<<iobit)) ? Vth : 0.0);
@@ -1229,7 +1230,7 @@ double IO_input::get_Vth()
 //========================================================================
 //
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
-  : IO_input(i,b,opt_name,_iopp)
+  : IOPIN(i,b,opt_name,_iopp)
 {
 
   driving = false;

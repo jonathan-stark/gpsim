@@ -37,12 +37,13 @@ Boston, MA 02111-1307, USA.  */
 // logic for handling I/O pin changes resides in the IOPORT
 // class.)
 
-class Binary_Input : public IO_input
+class Binary_Input : public IOPIN
 {
 public:
-
-  // virtual void put_node_state( int new_state);
-  Binary_Input (IOPORT *i, unsigned int b) : IO_input(i,b) { };
+  Binary_Input (IOPORT *i, unsigned int b,char *n=0)
+    : IOPIN(i,b,n)
+    {
+    }
 };
 
 class Binary_Indicator : public Module

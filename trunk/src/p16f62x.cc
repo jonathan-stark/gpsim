@@ -87,7 +87,7 @@ void P16F62x::create_iopin_map(void)
   package->assign_pin(1, new IO_bi_directional(porta, 2));
   package->assign_pin(2, new IO_bi_directional(porta, 3));
   package->assign_pin(3, new IO_open_collector(porta, 4));
-  package->assign_pin(4, new IO_input(porta, 5));
+  package->assign_pin(4, new IOPIN(porta, 5));
   package->assign_pin(15, new IO_bi_directional(porta, 6));  // Assume RC mode
   package->assign_pin(16, new IO_bi_directional(porta, 7));  //   "        "
 

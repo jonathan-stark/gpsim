@@ -538,12 +538,7 @@ char **
 gpsim_completion (const char *text, int start, int end)
 {
   char **matches;
-#ifdef _WIN32
-  static char *empty="";
-  matches = &empty;
-#else
   matches = 0;
-#endif
 
 #ifdef HAVE_READLINE
   /* If this word is at the start of the line, then it is a command
@@ -555,6 +550,15 @@ gpsim_completion (const char *text, int start, int end)
 #else
     matches = completion_matches ((char *)text, (CPFunction *)command_generator);
 #endif
+#endif
+
+#if defined(_WIN32) || defined(WIN32)
+	if (start) {
+		char *empty = strdup("");
+		matches = (char **) malloc(2 * (sizeof(&empty)));
+		matches[0] = empty;
+		matches[1] = 0;
+	}
 #endif
 
   return (matches);

@@ -53,11 +53,13 @@ public:
 // logic for handling I/O pin changes resides in the IOPORT
 // class.)
 
-class Led_Input : public IO_input
+class Led_Input : public IOPIN
 {
 public:
 
-  Led_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
+  Led_Input (IOPORT *i, unsigned int b, char *opt_name) 
+    : IOPIN(i,b,opt_name,(Register **)0)
+    { }
 
 };
 

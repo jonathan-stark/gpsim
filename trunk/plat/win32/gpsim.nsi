@@ -120,6 +120,8 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
   File "${GPSIM_ROOT}\gpsim\gpsim.exe"
+  File "${GPSIM_ROOT}\modules\gpsim_modules.dll"
+  File "${GPSIM_ROOT}\plat\win32\modules.def"
   File "${PKG_ROOT}\bin\asprintf.dll"
   File "${PKG_ROOT}\bin\charset.dll"
   File "${PKG_ROOT}\bin\iconv.dll"
@@ -189,10 +191,6 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-win32.dll"
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-basic-fc.dll"
   File "${PKG_ROOT}\lib\pango\1.4.0\modules\pango-arabic-fc.dll"
-
-  SetOutPath "$INSTDIR\modules"
-  File "${GPSIM_ROOT}\modules\modules.dll"
-  File "${GPSIM_ROOT}\plat\win32\modules.def"
 
   SetOutPath "$INSTDIR\"
   File /oname="ChangeLog.txt" "${GPSIM_ROOT}\ChangeLog"
@@ -426,8 +424,8 @@ Section Uninstall
   Delete "$INSTDIR\gpsim.ico"
   Delete "$INSTDIR\ChangeLog.txt"
 
-  Delete "$INSTDIR\modules\modules.dll"
-  Delete "$INSTDIR\modules\modules.def"
+  Delete "$INSTDIR\bin\gpsim_modules.dll"
+  Delete "$INSTDIR\bin\modules.def"
 
   Delete "$INSTDIR\examples\12bit\*.*"
   Delete "$INSTDIR\examples\14bit\*.*"
@@ -526,6 +524,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\msvcr71.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\readline.dll"
+  Delete "$INSTDIR\bin\pthreadVC.dll"
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"

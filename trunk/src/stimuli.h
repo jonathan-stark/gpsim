@@ -303,8 +303,11 @@ class IOPIN : public stimulus
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
   virtual void update_pullup(bool new_state) { }
 
-};
+  virtual double get_Vth();
 
+
+};
+/*
 class IO_input : public IOPIN
 {
 public:
@@ -313,11 +316,10 @@ public:
   IO_input(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   IO_input(void);
 
-  virtual double get_Vth();
-
 };
+*/
 
-class IO_bi_directional : public IO_input
+class IO_bi_directional : public IOPIN
 {
 public:
 
