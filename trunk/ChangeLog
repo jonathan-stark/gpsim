@@ -1,3 +1,7 @@
+2004-10-11 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc, src/processor.cc: Applied, but modified, patch from
+	Craig Franklin that brings gpsim up to date with new gputils release.
+
 2004-10-07 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, gui/gui_breadboard.h, gui/gui_menu.cc:
 	Cleaned up the gui breadboard code a little by making the gui_module

@@ -58,7 +58,7 @@ DirBlockInfo main_dir;
 // case of text strings in the .cod file. 
 static int ignore_case_in_cod = 1;
 
-static int gpasm_recent = 0;
+static int gputils_recent = 0;
 
 enum cod_errors
 {
@@ -468,6 +468,7 @@ void read_line_numbers_from_cod(Processor *cpu)
 	  lst_line_number++;
 	  file_id = temp_block[offset+COD_LS_SFILE];
 	  address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
+	  address = cpu->map_pm_address2index(address);
 	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
 	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
@@ -617,41 +618,45 @@ void delete_directory(void)
   //write me.
 }
 
-void check_for_gpasm(char *block)
+void check_for_gputils(char *block)
 {
   char buffer[256];
-  int have_gpasm = 0;
+  int have_gputils = 0;
 
   get_string(buffer,&block[COD_DIR_COMPILER - 1],12);
 
-  if(strcmp("gpasm",buffer) == 0) {
+  if ((strcmp("gpasm",buffer) == 0) || (strcmp("gplink",buffer) == 0)) {
     if(verbose)
-      cout << "Have gpasm\n";
-    have_gpasm = 1;
+      cout << "Have gputils\n";
+    have_gputils = 1;
 
     get_string(buffer,&block[COD_DIR_VERSION - 1],19);
 
-    // Extract gpasm's version numbers
     int major=0, minor=0, micro=0;
-    sscanf(&buffer[6],"%d.%d.%d",&major,&minor,&micro);
+    if (isdigit(buffer[0])) {
+      // Extract version numbers in new gputils format
+      sscanf(&buffer[0],"%d.%d.%d",&major,&minor,&micro);
+  
+      if(verbose)
+        cout << "gputils version major "<< major << " minor " << minor << " micro " << micro << endl;
 
-    if(verbose)
-      cout << "gpasm version major "<< major << " minor " << minor << " micro " << micro << endl;
+      // if gputils version is greater than or equal to 0.13.0, then gputils 
+      // is considered "recent"
+      if ((major >= 1) || ( minor >= 13))
+        gputils_recent = 1;
 
-    // if gpasm version is greater than or equal to 0.8.5, then gpasm 
-    // is considered "recent"
-    if( (major >= 1) || ( minor > 8) || ( (minor == 8) && (micro >= 5)))
-      gpasm_recent = 1;
+    } else {
+      // version number in old gputils format, so it can't be recent
+      gputils_recent = 0;
+    } 
 
   }
 
-
-
-  if(have_gpasm && gpasm_recent) {
+  if(have_gputils && gputils_recent) {
     if(verbose)
-      cout << "good, you have a recent version of gpasm\n";
+      cout << "good, you have a recent version of gputils\n";
   }  else {
-    cout << "Warning, you need to upgrade to gpasm-0.8.5 or higher\n";
+    cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
     cout << "(You're assembler version is  " << buffer << ")\n";
   }
 }
@@ -912,7 +917,7 @@ int open_cod_file(Processor **pcpu, const char *filename)
 
   // Perform a series of integrity checks
 
-  check_for_gpasm(main_dir.dir.block);
+  check_for_gputils(main_dir.dir.block);
 
   // If we get here, then the .cod file is good.
 
