@@ -90,14 +90,14 @@ guint64 gui_update_rate = DEFAULT_GUI_UPDATE_RATE;
 // Define a list for keeping track of the processors being simulated.
 // (Recall, gpsim can simultaneously simulate more than one processor.)
 
-list <pic_processor *> processor_list;
-list <pic_processor *> :: iterator processor_iterator;
+list <Processor *> processor_list;
+list <Processor *> :: iterator processor_iterator;
 
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
 // 'active' means that it's the one currently being simulated or the one
 // currently being manipulated by the user (e.g. register dumps, break settings)
 
-pic_processor *active_cpu=NULL;
+Processor *active_cpu=NULL;
 
 // active_cpu_id is the id of the currently active cpu. In other words:
 //  active_cpu_id == active_cpu->processor_id
@@ -115,154 +115,6 @@ static  int  active_cpu_id = 0;
 // processors.
 
 static  int  cpu_ids = 0;
-
-//-------------------------------------------------------------------
-//
-// ProcessorConstructor -- a class to handle all of gpsim's supported
-// processors
-//
-// gpsim supports dozens of processors. All of these processors are
-// grouped together in the ProcessConstructor class. Within the class
-// is a static STL list<> object that holds an instance of a
-// ProcessorConstructor for each gpsim supported processor. Whenever
-// the user selects a processor to simulate, the find() member 
-// function will search through the list and find the one that matches
-// the user supplied ASCII string.
-//
-// Why have this class?
-// The idea behind this class is that a ProcessorConstructor object 
-// can be instantiated for each processor and that instantiation will
-// place the object into list of processors. Prior to gpsim-0.21, a
-// giant array held the list of all available processors. However,
-// there were two problems with this: it was painful to look at and
-// it precluded processors that were defined outside of the gpsim
-// core library.
-
-
-
-class ProcessorConstructor
-{
-public:
-  // THE list of all of gpsim's processors:
-
-  static list <ProcessorConstructor *> processor_list;
-
-  // A pointer to a function that when called will construct a processor
-  pic_processor * (*cpu_constructor) (void);
-
-  // The processor name (plus upto three aliases).
-  #define nProcessorNames 4
-  char *names[nProcessorNames];
-
-
-  //------------------------------------------------------------
-  // contructor -- 
-  //
-  ProcessorConstructor(  pic_processor * (*_cpu_constructor) (void),
-			 char *name1, 
-			 char *name2, 
-			 char *name3=NULL,
-			 char *name4=NULL) {
-
-    cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
-    names[0] = name1;                    // First name
-    names[1] = name2;                    //  and three aliases...
-    names[2] = name3;
-    names[3] = name4;
-
-    // Add the processor to the list of supported processors:
-
-    processor_list.push_back(this);
-
-  }
-
-  //------------------------------------------------------------
-  // find -- search through the list of supported processors for
-  //         the one matching 'name'.
-
-  ProcessorConstructor * find(char *name)
-  {
-
-
-    list <ProcessorConstructor *> :: iterator processor_iterator;
-
-    for (processor_iterator = processor_list.begin();  
-	 processor_iterator != processor_list.end(); 
-	 processor_iterator++) {
-
-      ProcessorConstructor *p = *processor_iterator;
-
-      for(int j=0; j<nProcessorNames; j++)
-	if(p->names[j] && strcmp(name,p->names[j]) == 0)
-	  return p;
-    }
-
-    return NULL;
-
-  }
-
-  //------------------------------------------------------------
-  // dump() --  Print out a list of all of the processors
-  //
-
-  void dump(void)
-  {
-
-    list <ProcessorConstructor *> :: iterator processor_iterator;
-
-    const int nPerRow = 4;   // Number of names to print per row.
-
-    int i,j,k,longest;
-
-    ProcessorConstructor *p;
-
-
-    // loop through all of the processors and find the 
-    // one with the longest name
-
-    longest = 0;
-
-    for (processor_iterator = processor_list.begin();  
-	 processor_iterator != processor_list.end(); 
-	 processor_iterator++) {
-
-      p = *processor_iterator;
-
-      k = strlen(p->names[1]);
-      if(k>longest)
-	longest = k;
-
-    }
-
-
-    // Print the name of each processor.
-
-    for (processor_iterator = processor_list.begin();  
-	 processor_iterator != processor_list.end(); ) {
-
-      for(i=0; i<nPerRow && processor_iterator != processor_list.end(); i++) {
-
-	p = *processor_iterator++;
-	cout << p->names[1];
-
-	if(i<nPerRow-1) {
-
-	  // if this is not the last processor in the column, then
-	  // pad a few spaces to align the columns.
-
-	  k = longest + 2 - strlen(p->names[1]);
-	  for(j=0; j<k; j++)
-	    cout << ' ';
-	}
-      }
-      cout << '\n';
-    } 
-
-  }
-
-};
-
-list <ProcessorConstructor *> ProcessorConstructor::processor_list;
 
 ProcessorConstructor Generic(pic_processor::construct,
 			     "generic_pic", "generic_pic");
@@ -361,7 +213,7 @@ void display_available_processors(void)
 }
 
 //-------------------------------------------------------------------
-pic_processor * add_processor(char * processor_type, char * processor_new_name)
+Processor * add_processor(char * processor_type, char * processor_new_name)
 {
   if(verbose)
     cout << "Trying to add new processor '" << processor_type << "' named '" 
@@ -373,7 +225,7 @@ pic_processor * add_processor(char * processor_type, char * processor_new_name)
 
   if(pc) {
 
-    pic_processor *p = pc->cpu_constructor();
+    Processor *p = pc->cpu_constructor();
 
     if(p) {
 
@@ -417,7 +269,7 @@ void dump_processor_list(void)
        processor_iterator != processor_list.end(); 
        processor_iterator++) {
 
-      pic_processor *p = *processor_iterator;
+      Processor *p = *processor_iterator;
       cout << p->name_str << '\n';
       have_processors = 1;
     }
@@ -439,7 +291,7 @@ void switch_active_cpu(int cpu_id)
        processor_iterator++)
     {
       have_processors = 1;
-      pic_processor *p = *processor_iterator;
+      Processor *p = *processor_iterator;
       if(p->processor_id == cpu_id) 
 	{
 	  active_cpu = p;
@@ -455,7 +307,7 @@ void switch_active_cpu(int cpu_id)
 
 //-------------------------------------------------------------------
 
-pic_processor *get_processor(unsigned int cpu_id)
+Processor *get_processor(unsigned int cpu_id)
 {
 
   if(cpu_id)
@@ -469,7 +321,7 @@ pic_processor *get_processor(unsigned int cpu_id)
       // Search the cpu list
       for (processor_iterator = processor_list.begin();  processor_iterator != processor_list.end(); processor_iterator++)
 	{
-	  pic_processor *p = *processor_iterator;
+	  Processor *p = *processor_iterator;
 	  if(p->processor_id == cpu_id) 
 	    return(p);
 	}
@@ -491,7 +343,7 @@ pic_processor *get_processor(unsigned int cpu_id)
 
 //-------------------------------------------------------------------
 //
-pic_processor * pic_processor::construct(void)
+Processor * pic_processor::construct(void)
 {
 
   cout << " Can't create a generic pic processor\n";
@@ -548,7 +400,7 @@ extern void update_gui(void);
 class RealTimeBreakPoint : public BreakCallBack
 {
 public:
-  pic_processor *cpu;
+  Processor *cpu;
   struct timeval tv_start;
   guint64 cycle_start;
   guint64 future_cycle;
@@ -563,7 +415,7 @@ public:
     future_cycle = 0;
   }
 
-  void start(pic_processor *active_cpu) 
+  void start(Processor *active_cpu) 
   {
     if(!active_cpu)
       return;

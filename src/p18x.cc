@@ -215,7 +215,7 @@ void P18C242::create_sfr_map(void)
 
 }
 
-pic_processor * P18C242::construct(void)
+Processor * P18C242::construct(void)
 {
 
   P18C242 *p = new P18C242;
@@ -268,7 +268,7 @@ void P18C252::create_sfr_map(void)
 
 
 
-pic_processor * P18C252::construct(void)
+Processor * P18C252::construct(void)
 {
 
   P18C252 *p = new P18C252;
@@ -516,7 +516,7 @@ void P18C442::create_sfr_map(void)
 
 }
 
-pic_processor * P18C442::construct(void)
+Processor * P18C442::construct(void)
 {
 
   P18C442 *p = new P18C442;
@@ -570,7 +570,7 @@ void P18C452::create_sfr_map(void)
 }
 
 
-pic_processor * P18C452::construct(void)
+Processor * P18C452::construct(void)
 {
 
   P18C452 *p = new P18C452;
@@ -622,7 +622,7 @@ void P18F442::create_sfr_map(void)
 
 }
 
-pic_processor * P18F442::construct(void)
+Processor * P18F442::construct(void)
 {
 
   P18F442 *p = new P18F442;
@@ -674,7 +674,7 @@ void P18F452::create_sfr_map(void)
 
 }
 
-pic_processor * P18F452::construct(void)
+Processor * P18F452::construct(void)
 {
 
   P18F452 *p = new P18F452;

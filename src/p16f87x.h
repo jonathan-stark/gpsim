@@ -51,7 +51,7 @@ class P16F873 : public P16C73
 #endif
 
   P16F873(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -80,7 +80,7 @@ class P16F874 : public P16C74
 #endif
 
   P16F874(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 class P16F877 : public P16F874
@@ -93,7 +93,7 @@ class P16F877 : public P16F874
   void create(void);
 
   P16F877(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 #endif

@@ -160,7 +160,7 @@ void P16F873::create(void)
 
 
 
-pic_processor * P16F873::construct(void)
+Processor * P16F873::construct(void)
 {
 
   P16F873 *p = new P16F873;
@@ -323,7 +323,7 @@ void P16F874::create(void)
 
 
 
-pic_processor * P16F874::construct(void)
+Processor * P16F874::construct(void)
 {
 
   P16F874 *p = new P16F874;
@@ -393,7 +393,7 @@ void P16F877::create(void)
 
 
 
-pic_processor * P16F877::construct(void)
+Processor * P16F877::construct(void)
 {
 
   P16F877 *p = new P16F877;

@@ -141,7 +141,7 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x1000; };
 
   P16F627(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 class P16F628 : public P16F627
@@ -153,7 +153,7 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
 
   P16F628(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 };
 
 #endif

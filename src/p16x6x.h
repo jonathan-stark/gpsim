@@ -70,7 +70,7 @@ public:
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  static pic_processor *construct(void);
+  static Processor *construct(void);
 
 };
 
@@ -155,7 +155,7 @@ class P16C62 : public  P16X6X_processor, public _14bit_28pins
     }
 
   P16C62(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
@@ -181,7 +181,7 @@ class P16C63 : public  P16C62
 
 
   P16C63(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 };
@@ -205,7 +205,7 @@ class P16C64 : public  P16X6X_processor, public _14bit_40pins
     }
 
   P16C64(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
 
   virtual int get_pin_count(void){return Package::get_pin_count();};
@@ -230,7 +230,7 @@ class P16C65 : public  P16C64
 
 
   P16C65(void);
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   void create(void);
   void create_sfr_map(void);
 };

@@ -81,7 +81,7 @@ public:
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
   virtual unsigned int get_fsr_value ( unsigned int load_value )
     {
@@ -117,7 +117,7 @@ public:
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  static pic_processor *construct(void);
+  static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
 
   virtual unsigned int get_fsr_value ( unsigned int load_value )

@@ -438,7 +438,7 @@ void put_dumb_fsr_register(FSR **frp)
 
 static void create_dumb_register_file(void)
 {
-    pic_processor *cpu=get_processor(1);
+    pic_processor *cpu=(pic_processor *)get_processor(1);
     for(int i=0;i<cpu->register_memory_size();i++)
     {
 	put_dumb_register(&cpu->registers[i], i);
@@ -453,7 +453,7 @@ static void create_dumb_register_file(void)
 
 int icd_connect(char *port)
 {
-    pic_processor *pic=get_processor(1);
+    pic_processor *pic=(pic_processor*)get_processor(1);
 
     if(pic==NULL)
     {
@@ -544,7 +544,7 @@ static void make_stale(void)
 {
     if(icd_fd<0) return;
 
-    pic_processor *cpu=get_processor(1);
+    pic_processor *cpu=(pic_processor*)get_processor(1);
     for(int i=0;i<cpu->register_memory_size();i++)
     {
 	icd_Register *ir = dynamic_cast<icd_Register*>(cpu->registers[i]);
@@ -583,7 +583,7 @@ int icd_reset(void)
 
     make_stale();
 
-    pic_processor *pic=get_processor(1);
+    pic_processor *pic=(pic_processor *)get_processor(1);
     pic->pc->get_value();
     gi.simulation_has_stopped();
     return 1;

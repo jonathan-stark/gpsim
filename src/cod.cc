@@ -908,14 +908,14 @@ int open_cod_file(pic_processor **pcpu, char *filename)
       if(verbose)
 	cout << "found a " << processor_name << " in the .cod file\n";
 
-      *pcpu = add_processor(processor_name,processor_name);
+      *pcpu = (pic_processor *)add_processor(processor_name,processor_name);
       if(*pcpu == NULL) {
 	if(!ignore_case_in_cod)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
 
 	// Could be that there's a case sensitivity issue:
 	strtolower(processor_name);
-	*pcpu = add_processor(processor_name,processor_name);
+	*pcpu = (pic_processor *)add_processor(processor_name,processor_name);
 
 	if(*pcpu == NULL)
 	  return(COD_UNRECOGNIZED_PROCESSOR);

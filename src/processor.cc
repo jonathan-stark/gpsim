@@ -995,3 +995,114 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   
   delete(old_inst);
 }
+
+
+//========================================================================
+// Processor Constructor
+
+list <ProcessorConstructor *> ProcessorConstructor::processor_list;
+
+ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
+			 char *name1, 
+			 char *name2, 
+			 char *name3,
+			 char *name4) 
+{
+
+  cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
+  names[0] = name1;                    // First name
+  names[1] = name2;                    //  and three aliases...
+  names[2] = name3;
+  names[3] = name4;
+
+  // Add the processor to the list of supported processors:
+
+  processor_list.push_back(this);
+
+}
+
+
+//------------------------------------------------------------
+// find -- search through the list of supported processors for
+//         the one matching 'name'.
+
+
+ProcessorConstructor *ProcessorConstructor::find(char *name)
+{
+
+
+  list <ProcessorConstructor *> :: iterator processor_iterator;
+
+  for (processor_iterator = processor_list.begin();  
+       processor_iterator != processor_list.end(); 
+       processor_iterator++) {
+
+    ProcessorConstructor *p = *processor_iterator;
+
+    for(int j=0; j<nProcessorNames; j++)
+      if(p->names[j] && strcmp(name,p->names[j]) == 0)
+	return p;
+  }
+
+  return NULL;
+
+}
+
+//------------------------------------------------------------
+// dump() --  Print out a list of all of the processors
+//
+
+void ProcessorConstructor::dump(void)
+{
+
+  list <ProcessorConstructor *> :: iterator processor_iterator;
+
+  const int nPerRow = 4;   // Number of names to print per row.
+
+  int i,j,k,longest;
+
+  ProcessorConstructor *p;
+
+
+  // loop through all of the processors and find the 
+  // one with the longest name
+
+  longest = 0;
+
+  for (processor_iterator = processor_list.begin();  
+       processor_iterator != processor_list.end(); 
+       processor_iterator++) {
+
+    p = *processor_iterator;
+
+    k = strlen(p->names[1]);
+    if(k>longest)
+      longest = k;
+
+  }
+
+
+  // Print the name of each processor.
+
+  for (processor_iterator = processor_list.begin();  
+       processor_iterator != processor_list.end(); ) {
+
+    for(i=0; i<nPerRow && processor_iterator != processor_list.end(); i++) {
+
+      p = *processor_iterator++;
+      cout << p->names[1];
+
+      if(i<nPerRow-1) {
+
+	// if this is not the last processor in the column, then
+	// pad a few spaces to align the columns.
+
+	k = longest + 2 - strlen(p->names[1]);
+	for(j=0; j<k; j++)
+	  cout << ' ';
+      }
+    }
+    cout << '\n';
+  } 
+
+}
