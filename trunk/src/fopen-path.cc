@@ -1,0 +1,147 @@
+/* -*- Mode: C++; c-file-style: "bsd"; comment-column: 40 -*- */
+/*
+   Copyright (C) 2000 Daniel Christian, T. Scott Dattalo
+
+This file is part of gpsim.
+
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gpsim; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+//
+// fopen-path.cc
+//
+// Modified version of fopen, that searches a path.  
+// (Technically this is a c++ file, but it should work in C too.
+//
+
+#include <stdio.h>
+#include <iostream.h>
+#include <string>
+#include <string.h>
+
+#include "../config.h"
+#include "gpsim_def.h"
+#include "pic-processor.h"
+
+					// should be command line
+static char **searchPath;
+static int searchPathCount = 0;
+
+// Given a colon separated path, setup searchPath and searchPathCount
+// Fix:: Any old values are lost (and the memory leaked).
+void set_search_path (const char *path)
+{
+    const char *cp, *tp;
+    int	pathLen;
+    int ii;
+    char **pathStr;
+
+    if (!path || !*path) {		// clear the path
+	searchPathCount = 0;
+	return;
+    }
+					// count colons to figure length
+    for (cp = path, pathLen = 0;
+	 *cp;
+	 ++cp) {
+	if (':' == *cp) ++pathLen;
+    }
+    ++pathLen;				// always one more segments than colons
+    searchPath = (char *[])calloc (pathLen, sizeof (char *));
+    assert (NULL != searchPath);
+
+    for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');
+	 (NULL != tp) && (ii < pathLen);
+	 ++ii) {
+	
+	assert ((NULL != cp) && (NULL != tp));
+	if (tp == cp) {			// treat empty path as "."
+	    *pathStr = strdup (".");	// allocate, in case we free later
+	} else {			// copy out the string section
+	    const char *sp;
+	    char *dp;
+	    *pathStr = (char *)malloc (tp - cp + 1);
+	    assert (NULL != *pathStr);
+	    for (dp = *pathStr, sp = cp; sp < tp; *dp++ = *sp++);
+	    *dp = 0;			// NULL terminate
+	}
+	if (verbose) cout << "Search directory: " << *pathStr << '\n';
+	
+	++pathStr;
+	cp = tp+1;
+	tp = strchr (cp, ':');
+    }
+    if (*cp) {
+	*pathStr = strdup (cp);		// get last one
+    } else {
+	*pathStr = strdup (".");	// allocate, in case we free later
+    }
+    if (verbose) cout << "Search directory: " << *pathStr << '\n';
+    searchPathCount = pathLen;
+}
+
+//-----------------------------------------------------------
+// Try to open a file on a series of paths.  First try as an absolute path.
+// This tries to keep as much of the original file path as possible.
+// for example: fopen_path ("src/pic/foo.inc", "r"), will try
+//	src/pic/foo.inc,
+//	PATH1/src/pic/foo.inc, PATH1/pic/foo.inc, PATH1/foo.inc
+//	PATH2/src/pic/foo.inc, PATH2/pic/foo.inc, PATH2/foo.inc
+//	...
+// It also converts back slashes to forward slashes (for MPLAB compatibility)
+FILE *fopen_path(const char *filename, const char *perms)
+{
+  FILE *fp;
+  const char *fileStr;			// filename walker
+  char **pathStr;			// path pointer
+  int	ii;				// loop counter
+  char	*cp;				// for string walking
+  char	nameBuff[256];			// where to build new filename
+
+  assert (strlen (filename) <= (sizeof (nameBuff) - 1));
+  strcpy (nameBuff, filename);
+  for (cp = nameBuff; *cp; ++cp) {	// convert DOS slash to Unix slash
+      if ('\\' == *cp) *cp = '/';
+  }
+
+  fp = fopen (nameBuff, perms);		// first try absolute path
+  if (NULL != fp) {
+      if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
+      return fp;
+  }
+					// check along each directory
+  for (pathStr = searchPath, ii=0;
+       ii < searchPathCount;
+       ++ii, ++pathStr) {
+					// check each subdir in path
+      for (fileStr = filename;
+	   fileStr && *fileStr;
+	   fileStr = strpbrk (fileStr+1, "/\\")) {
+	  strcpy (nameBuff, *pathStr);
+	  strcat (nameBuff, fileStr);
+	  assert (strlen (nameBuff) <= (sizeof (nameBuff) - 1));
+	  for (cp = nameBuff; *cp; ++cp) { // convert DOS slash to Unix slash
+	      if ('\\' == *cp) *cp = '/';
+	  }
+	  fp = fopen (nameBuff, perms);	// try it
+	  if (NULL != fp) {
+	      if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
+	      return fp;
+	  }
+      }
+  }
+  //if (verbose) printf ("Failed to open %s\n", filename);
+  return NULL;
+}

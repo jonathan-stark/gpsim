@@ -12,7 +12,7 @@
 #include "../src/interface.h"
 #include "../src/gpsim_def.h"
 
-#define SBAW_NRFILES 8 // Max number of source files
+#define SBAW_NRFILES 20 // Max number of source files
 //#define MAX_BREAKPOINTS 32
 
 //------------------------------------------------------------
