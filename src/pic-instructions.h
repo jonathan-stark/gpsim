@@ -71,8 +71,10 @@ public:
                            *  instruction belongs  */
   int file_id;            /* The source file that declared this instruction
 			   * (The file_id is an index into an array of files) */
+  int hll_file_id;        /* The hll source file that declared this instruction */
   int src_line;           /* The line number within the source file */
   int lst_line;           /* The line number within the list file */
+  int hll_src_line;       /* The line number within the HLL source file */
 
   instruction(void);
   virtual void execute(void){ };
@@ -81,12 +83,14 @@ public:
   virtual int instruction_size(void) { return 1;};
   virtual unsigned int get_opcode(void) { return opcode; };
   virtual int get_src_line(void) { return(src_line); };
+  virtual int get_hll_src_line(void) { return(hll_src_line); };
   virtual int get_lst_line(void) { return(lst_line); };
   virtual int get_file_id(void) {return(file_id); };
+  virtual int get_hll_file_id(void) {return(hll_file_id); };
   virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;};
   void decode(pic_processor *new_cpu, unsigned int new_opcode){cpu = new_cpu;opcode=new_opcode;};
   void add_line_number_symbol(int address);
-  void update_line_number(int file, int sline, int lline);
+  void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
   //#ifdef HAVE_GUI
   // If we are linking with a gui, then here are a

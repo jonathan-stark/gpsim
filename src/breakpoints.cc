@@ -681,6 +681,10 @@ int Breakpoint_Instruction::get_src_line(void)
 {
   return(replaced->get_src_line());
 }
+int Breakpoint_Instruction::get_hll_src_line(void)
+{
+  return(replaced->get_hll_src_line());
+}
 int Breakpoint_Instruction::get_lst_line(void)
 {
   return(replaced->get_lst_line());
@@ -689,6 +693,10 @@ int Breakpoint_Instruction::get_lst_line(void)
 int Breakpoint_Instruction::get_file_id(void)
 {
   return(replaced->get_file_id());
+}
+int Breakpoint_Instruction::get_hll_file_id(void)
+{
+  return(replaced->get_hll_file_id());
 }
 
 char * Breakpoint_Instruction::name(char *return_str)

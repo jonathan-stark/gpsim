@@ -99,7 +99,7 @@ void multi_word_branch::runtime_initialize(void)
 	  return;
 	}
 
-      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line);
+      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       destination = ( (word2_opcode & 0xfff)<<8) | (opcode & 0xff);
       initialized = 1;
     }
@@ -995,7 +995,7 @@ void LFSR::runtime_initialize(void)
 	  return;
 	}
 
-      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line);
+      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       k = ( (opcode & 0xf)<<8) | (word2_opcode & 0xff);
       initialized = 1;
     }
@@ -1089,7 +1089,7 @@ void MOVFF::runtime_initialize(void)
 	  return;
 	}
 
-      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line);
+      cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       destination = word2_opcode & 0xfff;
       initialized = 1;
     }
