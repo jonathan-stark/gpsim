@@ -1,3 +1,11 @@
+2004-12-15 Scott Dattalo <scott@dattalo.com>
+	* src/init.cc, src/gpsim_time.cc:
+	Delayed creation of the cycle counter attribute. It turns out that
+	this attribute was created in the Cycle_Counter constructor which
+	is called by the globally instantiated 'cycles' object. On
+	Windows, this call happened before the symbol table was
+	inititialized .
+	
 2004-12-14 Scott Dattalo <scott@dattalo.com>
 	* src/init.cc: added new function for initialization. Also added
 	new attribute 'sim.verbosity' that will control the simulator's
