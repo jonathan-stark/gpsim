@@ -1,3 +1,10 @@
+2004-12-10 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_time.cc: Added a "cycles" attribute for interfacing
+	with the cycle counter class.
+	* src/protocol.cc, src/protocol.h, src/symbol.cc, src/symbol.h,
+	src/value.cc, src/value.h, cli/socket.cc: 
+	More improvements to the protocol stuff.
+
 2004-12-09 Scott Dattalo <scott@dattalo.com>
 	* src/protocol.h, src/protocol.cc, src/Makefile.am: New files to
 	support a communication protocol for gpsim.
@@ -13,7 +20,6 @@
 	src/pic-processor.h, src/processor.h, src/trace.h, src/xref.h:
 	fixed typo in GPL disclaimer.
 
-	
 2004-12-07 Scott Dattalo <scott@dattalo.com>
 	* cli/socket.cc: More socket clean up
 	* src/modules.cc, src/modules.h, src/processor.cc,

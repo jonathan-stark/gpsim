@@ -52,6 +52,20 @@ enum eGPSIMObjectTypes
     eGPSIM_TYPE_CUSTOM,
   };
 
+/// Socket Commands
+///
+enum eGPSIMSocketCommands
+  {
+
+    GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
+    GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
+    GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
+    GPSIM_CMD_WRITE_TO_SOCKET_LINK  = 0xF3,
+
+    GPSIM_CMD_QUERY_SYMBOL          = 0xF4,
+    GPSIM_CMD_WRITE_TO_SYMBOL       = 0xF5,
+
+  };
 
 
 /// PacketBuffer
@@ -77,10 +91,17 @@ public:
     return size;
   }
 
+  void terminate();
+
   void putc(char c)
   {
     if(index < size)
       buffer[index++] = c;
+  }
+  void putAt(int pos, char c)
+  {
+    if(pos >=0 && pos < (int) size) 
+      buffer[pos] = c;
   }
 
   void puts(const char *, int);
@@ -105,9 +126,13 @@ public:
   bool DecodeBool(bool &);
   bool DecodeFloat(double &);
 
+  bool EncodeHeader();
   bool EncodeUInt32(unsigned int);
+  bool EncodeUInt64(unsigned long long);
   bool EncodeObjectType(unsigned int);
   bool EncodeString(const char *str, int len=-1);
+  bool EncodeBool(bool);
+  bool EncodeFloat(double);
 
   char *rxBuff()
   {
@@ -116,6 +141,10 @@ public:
   unsigned int rxSize()
   {
     return rxBuffer->size;
+  }
+  void rxTerminate(int pos)
+  {
+    rxBuffer->putAt(pos,0);
   }
 
   char *txBuff()
@@ -126,7 +155,10 @@ public:
   {
     return txBuffer->index;
   }
-
+  void txTerminate()
+  {
+    txBuffer->terminate();
+  }
   void prepare()
   {
     rxBuffer->index = 0;
@@ -139,7 +171,5 @@ private:
 
 };
 
-extern unsigned int a2i(char b);
-extern unsigned int ascii2uint(char **buffer, int digits);
 
 #endif

@@ -30,7 +30,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "xref.h"
-//#include "gpsim_time.h"
+
+#include "protocol.h"
 
 //#define __DEBUG_CYCLE_COUNTER__
 
@@ -49,6 +50,43 @@ Cycle_Counter cycles;
 static Cycle_Counter &(*dummy_cycles)(void) = get_cycles;
 
 StopWatch stop_watch;
+
+
+//========================================================================
+//
+// Cycle_Counter attribute
+//
+// The Cycle_counter attribute exposes the cycle counter through the 
+// gpsim attribute interface. This allows for it to be queried from
+// the command line or sockets.
+
+class CycleCounterAttribute : public Integer
+{
+protected:
+public:
+  CycleCounterAttribute() :
+    Integer(0) 
+  {
+    new_name("cycles");
+    set_description(" Simulation time in terms of cycles.");
+  }
+  void set(gint64 i)
+  {
+    static bool warned = false;
+    if(!warned)
+      cout << "cycle counter is read only\n";
+    warned = true;
+  }
+  void get(gint64 &i)
+  {
+    i = cycles.get();
+  }
+  void get(Packet &p)
+  {
+    p.EncodeUInt64(cycles.get());
+  }
+};
+
 
 //--------------------------------------------------
 // member functions for the Cycle_Counter class
@@ -750,7 +788,7 @@ Cycle_Counter::Cycle_Counter(void)
     }
   l1->next = 0;
 
-
+  symbol_table.add(new CycleCounterAttribute());
 }
 
 

@@ -22,7 +22,12 @@ Boston, MA 02111-1307, USA.  */
 #include "protocol.h"
 
 #include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+
+#ifdef putc
+#undef putc
+#endif
 
 unsigned int a2i(char b)
 {
@@ -63,7 +68,7 @@ unsigned int ascii2uint(char **buffer, int digits)
 }
 
 
-static unsigned int ascii2uint(char *buffer, int digits)
+static unsigned int ascii2uint64(char *buffer, int digits)
 {
 
   unsigned int ret = 0;
@@ -73,6 +78,14 @@ static unsigned int ascii2uint(char *buffer, int digits)
     ret = (ret << 4) + a2i(*b++);
 
   return ret;
+}
+
+static unsigned int ascii2uint(char *buffer, int digits)
+{
+
+  unsigned long long i = ascii2uint64(buffer,digits);
+
+  return (unsigned int) i;
 }
 
 //========================================================================
@@ -104,6 +117,12 @@ void PacketBuffer::puts(const char *s, int len)
     memcpy(&buffer[index],s, ulen);
     index += ulen;
   }
+}
+
+void PacketBuffer::terminate()
+{
+  if(index < size)
+    buffer[index]=0;
 }
 //========================================================================
 Packet::Packet(unsigned int rxsize, unsigned int txsize)
@@ -143,7 +162,7 @@ bool Packet::DecodeUInt64(unsigned long long  &i)
 
   if(ascii2uint(&b,2) == eGPSIM_TYPE_UINT64) {
 
-    i = ascii2uint(b,16);
+    i = ascii2uint64(b,16);
     rxBuffer->index += 2+16;
 
     return true;
@@ -178,7 +197,7 @@ bool Packet::DecodeFloat(double  &d)
   if(ascii2uint(&b,2) == eGPSIM_TYPE_FLOAT) {
 
     double dtry = strtod(b, &b);
-    int len = b - rxBuffer->buffer; 
+    unsigned int len = b - rxBuffer->buffer; 
     if( len < rxBuffer->size - rxBuffer->index) {
 
       rxBuffer->index += len;
@@ -221,6 +240,15 @@ bool Packet::DecodeString(char *retStr, int maxLen)
   return false;
 }
 
+bool Packet::EncodeHeader()
+{
+
+  txBuffer->putc('$');
+  txBuffer->terminate();
+
+  return true;
+}
+
 bool Packet::EncodeUInt32(unsigned int i)
 {
 
@@ -233,10 +261,22 @@ bool Packet::EncodeUInt32(unsigned int i)
   return true;
 }
 
+bool Packet::EncodeUInt64(unsigned long long  i)
+{
+
+  txBuffer->putc(i2a(eGPSIM_TYPE_UINT64 /16));
+  txBuffer->putc(i2a(eGPSIM_TYPE_UINT64 ));
+
+  for(int j=15; j>=0; j--)
+    txBuffer->putc ( i2a ( i>> (4*j)));
+
+  return true;
+}
+
 
 bool Packet::EncodeObjectType(unsigned int i)
 {
-  txBuffer->putc('$');
+  EncodeHeader();
 
   //txBuffer->putc(i2a(eGPSIM_TYPE_OBJECT /16));
   //txBuffer->putc(i2a(eGPSIM_TYPE_OBJECT ));
@@ -247,6 +287,36 @@ bool Packet::EncodeObjectType(unsigned int i)
   return true;
 
 }
+
+bool Packet::EncodeBool(bool b)
+{
+
+  txBuffer->putc(i2a(eGPSIM_TYPE_BOOLEAN /16));
+  txBuffer->putc(i2a(eGPSIM_TYPE_BOOLEAN ));
+
+  if(b)
+    txBuffer->putc('1');
+  else
+    txBuffer->putc('0');
+
+
+  return true;
+}
+
+bool Packet::EncodeFloat(double  d)
+{
+  txBuffer->putc(i2a(eGPSIM_TYPE_FLOAT /16));
+  txBuffer->putc(i2a(eGPSIM_TYPE_FLOAT ));
+
+  char buff[256];
+
+  snprintf(buff,sizeof(buff),"%8E~",d);
+
+  txBuffer->puts(buff,strlen(buff));
+
+  return true;
+}
+
 
 bool Packet::EncodeString(const char *str, int len)
 {

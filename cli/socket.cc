@@ -143,56 +143,11 @@ bool winsockets_init(void)
 
   The purpose of a socket interface into the simulator is to provide an
   external interface that only loosely depends upon gpsim's internals.
-
-  Phase 1:
-
-  receive commands over a socket and execute them
 */
 
 
 #define PORT 		0x1234
 #define BUFSIZE 	8192
-
-enum eGPSIMSocketCommands
-  {
-
-    GPSIM_OBJTYP_STRING    = 2,
-    GPSIM_OBJTYP_INT32     = 3,
-
-    GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
-    GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
-    GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
-    GPSIM_CMD_WRITE_TO_SOCKET_LINK  = 0xF3,
-
-    GPSIM_CMD_QUERY_SYMBOL          = 0xF4,
-    GPSIM_CMD_WRITE_TO_SYMBOL       = 0xF5,
-
-  };
-
-
-//--------------------
-int ParseString(char **buffer, char *retStr, int maxLen)
-{
-
-  char *b = *buffer;
-
-  if(ascii2uint(&b,2) == GPSIM_OBJTYP_STRING) {
-    int length = ascii2uint(&b,2);
-
-    maxLen--;   // reserve space for a terminating 0.
-
-    length = (maxLen < length) ? maxLen  : length;
-
-    strncpy(retStr, b, length);
-    retStr[length] = 0;
-
-    *buffer = b + length;
-    return 2+2+length;
-  }
-
-  return 0;
-}
-
 //------------------------------------------------------------------------
 bool ParseSocketLink(Packet *buffer, SocketLink **);
 
@@ -257,24 +212,23 @@ public:
 class SocketLink
 {
 public:
-  SocketLink(unsigned int _handle, Socket *);
-  void send(char *);
+  SocketLink(unsigned int _handle);
+  //  void send(char *);
 
   virtual void set(Packet &)=0;
-  virtual void get(char *, int)=0;
+  virtual void get(Packet &)=0;
   unsigned int getHandle() { return handle; }
 private:
   unsigned int handle;
-  Socket *sock;
 };
 
 class AttributeLink : public SocketLink
 {
 public:
-  AttributeLink(unsigned int _handle, Socket *, Value *);
+  AttributeLink(unsigned int _handle, Value *);
 
   void set(Packet &);
-  void get(char *, int);
+  void get(Packet &);
 
 private:
   Value *v;
@@ -284,7 +238,7 @@ private:
 
 SocketLink *links[nSOCKET_LINKS];
 
-SocketLink *gCreateSocketLink(unsigned int, Socket *, char*);
+SocketLink *gCreateSocketLink(unsigned int, Packet &);
 
 unsigned int FindFreeHandle()
 {
@@ -317,21 +271,16 @@ void SocketBase::Close()
 }
 
 //========================================================================
-//int ParseSocketLink(char **buffer, SocketLink **sl)
 bool ParseSocketLink(Packet *buffer, SocketLink **sl)
 {
   if(!sl)
     return 0;
 
-  std::cout << "ParseSocketLink:" << buffer->rxBuff() << endl;
-
   unsigned int handle;
 
   if(buffer->DecodeUInt32(handle)) {
-    //unsigned int sequence = (handle>>16) & 0xffff;
-    unsigned int index    = handle & 0xffff;
 
-    std::cout << "ParseSocketLink: handle " << handle << " buffer" << buffer->rxBuff() << endl;
+    unsigned int index    = handle & 0xffff;
 
     *sl = links[index&0x0f];
     if( (*sl) && (*sl)->getHandle() != handle)
@@ -507,24 +456,25 @@ void Socket::respond(char *buf)
 void Socket::ParseObject()
 {
 
-  //int buffer_len = strlen(buffer);
-  //char *b = buffer;
-  //unsigned int ObjectType = ascii2uint(&b,2);
-  //buffer_len -= 2;
-
-  std::cout << "ParseObject " << packet->rxBuff() <<endl;
   unsigned int ObjectType;
   if(!packet->DecodeObjectType(ObjectType))
     return;
-  std::cout << "ParseObject " << packet->rxBuff() <<endl;
 
   switch (ObjectType) {
 
   case GPSIM_CMD_CREATE_SOCKET_LINK:
     {
       unsigned int handle = FindFreeHandle();
+      SocketLink *sl = gCreateSocketLink(handle, *packet);
 
-      links[handle&0x0f] = gCreateSocketLink(handle, this, packet->rxBuff());
+
+      if(sl) {
+	links[handle&0x0f] = sl;
+	packet->EncodeHeader();
+	packet->EncodeUInt32(handle);
+	packet->txTerminate();
+	respond(packet->txBuff());
+      }
     }
     break;
 
@@ -532,12 +482,11 @@ void Socket::ParseObject()
     {
       SocketLink *sl=0;
 
-      //ParseSocketLink(&b, &sl);
       ParseSocketLink(packet, &sl);
 
       if(sl)
 	CloseSocketLink(sl);
-      Send("+");
+      Send("$");
     }
     break;
 
@@ -545,16 +494,13 @@ void Socket::ParseObject()
     {
       SocketLink *sl=0;
 
-      //ParseSocketLink(&b, &sl);
       ParseSocketLink(packet, &sl);
 
-      std::cout << "ParseObject - query socket " << packet->rxBuff() <<endl;
-
       if(sl) {
-	char buf[256];
-	buf[0]='+';
-	sl->get(&buf[1], sizeof(buf)-1);
-	sl->send(buf);
+	packet->EncodeHeader();
+	sl->get(*packet);
+	packet->txTerminate();
+	respond(packet->txBuff());
       }
     }
     break;
@@ -566,10 +512,8 @@ void Socket::ParseObject()
       ParseSocketLink(packet, &sl);
 
       if(sl) {
-	//sl->set(packet->rxBuff());
-	std::cout << "writing to socket link:" << packet->rxBuff() << endl;
 	sl->set(*packet);
-	sl->send("+");
+	respond("$");
       }
 
     }
@@ -578,18 +522,16 @@ void Socket::ParseObject()
   case GPSIM_CMD_QUERY_SYMBOL:
     {
       char tmp[256];
-      bool bl = packet->DecodeString(tmp,256);
 
-      if(bl) {
-	//buffer_len -= bl;
-	printf("Symbol query %s\n",tmp);
+      if(packet->DecodeString(tmp,256)) {
+
 	Value *sym = get_symbol_table().find(tmp);
 	if(sym) {
-	  tmp[0]='+';
-	  sym->get(&tmp[1], sizeof(tmp));
+	  packet->EncodeHeader();
+	  sym->get(*packet);
+	  packet->txTerminate();
+	  respond(packet->txBuff());
 
-	  printf("responding with %s\n",tmp);
-	  respond(tmp);
 	} else
 	  respond("-");
       }
@@ -599,20 +541,31 @@ void Socket::ParseObject()
 
   case GPSIM_CMD_WRITE_TO_SYMBOL:
     {
-      char tmp[256];
-      bool bl = packet->DecodeString(tmp,256);
 
-      if(bl) {
-	//buffer_len -= bl;
-	printf("Symbol write command with string %s\n",tmp);
+      // The client has requested to write directly to a symbol
+      // (without using a SocketLink). So, we'll extract the symbol
+      // name from the packet and look it up in the symbol table.
+      // If the symbol is found then, it will get assigned the 
+      // value that's stored in the packet.
+
+      char tmp[256];
+
+      if(packet->DecodeString(tmp,256)) {
+
 	Value *sym = get_symbol_table().find(tmp);
 
 	if(sym) {
 
-	  sym->set(packet->rxBuff());
+	  // We'll define the response header before we decode
+	  // the rest of the packet. The reason for this is that
+	  // some symbols may wish to generate a response.
 
-	  printf("writing %s to %s\n",packet->rxBuff(),tmp);
-	  respond(tmp);
+	  packet->EncodeHeader();
+	  sym->set(*packet);
+	  packet->txTerminate();
+
+	  respond(packet->txBuff());
+
 	} else
 	  respond("-");
       }
@@ -631,29 +584,20 @@ void Socket::ParseObject()
 
 //========================================================================
 
-SocketLink::SocketLink(unsigned int _handle, Socket *s)
-  : handle(_handle), sock(s)
+SocketLink::SocketLink(unsigned int _handle)
+  : handle(_handle)
 {
-  char  buf[256];
-
-  sprintf(buf, "+%08X:LINK",handle);
-  send(buf);
 }
 /*
-void SocketLink::receive(char *m)
-{
-  std::cout<< "SocketLink::receive:" << m;
-}
-*/
 void SocketLink::send(char *m)
 {
   if(sock)
     sock->respond(m);
 }
-
+*/
 //========================================================================
-AttributeLink::AttributeLink(unsigned int _handle, Socket *s, Value *_v)
-  : SocketLink(_handle,s), v(_v)
+AttributeLink::AttributeLink(unsigned int _handle, Value *_v)
+  : SocketLink(_handle), v(_v)
 {
 }
 
@@ -663,33 +607,24 @@ void AttributeLink::set(Packet &p)
     v->set(p);
 }
 
-void AttributeLink::get(char *b, int len)
+void AttributeLink::get(Packet &p)
 {
   if(v)
-    v->get(b,len);
+    v->get(p);
 }
 
 //========================================================================
 
-SocketLink *gCreateSocketLink(unsigned int handle, Socket *s, char *type)
+SocketLink *gCreateSocketLink(unsigned int handle, Packet &p)
 {
-  if(type) {
-    cout << "creating socket link of type:" << type << endl;
 
-    char tmp[256];
-    char *b = type;
+  char tmp[256];
 
-    int bl = ParseString(&b,tmp,256);
+  if(p.DecodeString(tmp,256)) {
 
-    if(bl) {
-
-      printf("Creating socket link for  %s\n",tmp);
-      Value *sym = get_symbol_table().find(tmp);
-      if(sym)
-	return new AttributeLink(handle,s,sym);
-      else
-	s->respond("-symcmd failed");
-    }
+    Value *sym = get_symbol_table().find(tmp);
+    if(sym)
+      return new AttributeLink(handle,sym);
   }
 
   return 0; 
@@ -822,7 +757,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 #else
     g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
 #endif
-    std::cout << "Read " << bytes_read << " bytes: " << s->packet->rxBuff() << endl;
+    //std::cout << "Read " << bytes_read << " bytes: " << s->packet->rxBuff() << endl;
 
     if(bytes_read) {
       if (s->packet->DecodeHeader()) {
