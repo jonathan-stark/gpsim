@@ -320,6 +320,14 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
 #endif
 }
 
+ICommandHandler *Module_Library::GetCli() {
+  PFNGETCOMMANDHANDLER pGetCli = (PFNGETCOMMANDHANDLER)get_library_export(GPSIM_GETCOMMANDHANDLER, _handle);
+  if (pGetCli != NULL)
+    return pGetCli();
+  return NULL;
+}
+
+
 //------------------------------------------------------------------------
 // As module libraries are loaded, they're placed into the following list:
 list <Module_Library *> module_list;
@@ -476,6 +484,26 @@ void module_load_module(const char *module_type, const char *module_name)
   
   cout << "Warning: Module '" << module_type <<  "' was not found\n";
 
+}
+
+Module_Library * module_get_library(const char* name) {
+
+  for (module_iterator = module_list.begin();  
+       module_iterator != module_list.end(); 
+       ++module_iterator) {
+
+    Module_Library *t = *module_iterator;
+    if (strcmp(t->name(), name) == 0)
+      return t;
+  }
+  return NULL;
+}
+
+ICommandHandler * module_get_command_handler(const char *name) {
+  Module_Library * lib = module_get_library(name);
+  if (lib != NULL)
+    return lib->GetCli();
+  return NULL;
 }
 
 //------------------------------------------------------------------------
