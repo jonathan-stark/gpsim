@@ -153,7 +153,9 @@ public:
 
   bool bDrivingState;        // 0/1 digitization of the analog state we're driving
   bool bDrivenState;         // 0/1 digitization of the state we're being driven to
-  
+  bool bDriving;             // True if this stimulus is a driver
+
+
   double Vth;                // Open-circuit or Thevenin voltage
   double Zth;                // Input or Thevenin resistance
   double Cth;                // Stimulus capacitance.
@@ -175,6 +177,9 @@ public:
 
   virtual double get_nodeVoltage() { return nodeVoltage; }
   virtual void   set_nodeVoltage(double v) { nodeVoltage = v; }
+
+  virtual bool getDriving() { return bDriving; }
+  virtual void setDriving(bool bNewDriving) { bDriving=bNewDriving; }
 
   // A way of writing digital values to the stimulus.
   // The difference between the 'put' and the 'set' methods is that
@@ -331,9 +336,6 @@ class IO_bi_directional : public IOPIN
 {
 public:
 
-  // True when the bi-directional pin is configured as an output
-  bool driving;
-
   // Impedance of the IOPIN when it's not driving.
   double ZthIn;
 
@@ -353,7 +355,8 @@ public:
   virtual void set_nodeVoltage(double new_nodeVoltage);
 
   virtual void update_direction(unsigned int);
-  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
+  virtual IOPIN_DIRECTION  get_direction(void)
+  {return ((getDriving()) ? DIR_OUTPUT : DIR_INPUT);}
 };
 
 
@@ -380,8 +383,6 @@ class IO_open_collector : public IO_bi_directional_pu
 public:
 
   IO_open_collector(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
-
-  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 
   virtual double get_Vth();
   virtual double get_Zth();

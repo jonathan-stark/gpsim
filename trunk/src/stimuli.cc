@@ -688,8 +688,9 @@ stimulus::stimulus(const char *n)
   new_name("stimulus");
 
   snode = 0;
-  bDrivenState = false;
   bDrivingState = false;
+  bDrivenState = false;
+  bDriving = false;
   next = 0;
 
   Vth = 5.0;   // Volts
@@ -711,7 +712,9 @@ void stimulus::show()
        << "  Zth=" << get_Zth() << " ohms"
        << "  Cth=" << get_Cth() << " F"
        << "  nodeVoltage= " << get_nodeVoltage() << "V"
-       << endl << " drivingState=" << getDrivingState()
+       << endl 
+       << " Driving=" << getDriving()
+       << " drivingState=" << getDrivingState()
        << " drivenState=" << getDrivenState()
        << " bitState=" << getBitChar()
        << endl;
@@ -950,8 +953,6 @@ IOPIN::IOPIN(void)
   iop = 0;
   iopp = 0;
   iobit=0;
-  bDrivingState = false;
-  bDrivenState = false;
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   Vth = 0.3;
@@ -1162,8 +1163,6 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_n
   : IOPIN(i,b,opt_name,_iopp)
 {
 
-  driving = false;
-
   // Thevenin equivalent while configured as an output 
   Vth = 5.0;
   Zth = 250;
@@ -1176,8 +1175,6 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_n
 
 IO_bi_directional::IO_bi_directional(void)
 {
-
-  driving = false;
 
   // Thevenin equivalent while configured as an output 
   Vth = 5.0;
@@ -1196,7 +1193,7 @@ void IO_bi_directional::set_nodeVoltage( double new_nodeVoltage)
 
 double IO_bi_directional::get_Vth()
 {
-  if(driving)
+  if(getDriving())
     return getDrivingState() ? Vth : 0;
 
   
@@ -1208,13 +1205,13 @@ double IO_bi_directional::get_Vth()
 
 double IO_bi_directional::get_Zth()
 {
-  return driving ? Zth : ZthIn;
+  return getDriving() ? Zth : ZthIn;
 
 }
 
 char IO_bi_directional::getBitChar()
 {
-  if(!snode && !driving )
+  if(!snode && !getDriving() )
     return 'Z';
 
   if(snode) {
@@ -1225,27 +1222,35 @@ char IO_bi_directional::getBitChar()
     if(snode->get_nodeZth() > ZthWeak)
       return getDrivingState() ? 'W' : 'w';
 
+    // There's at least one strong driver tied to the node
+    if(!getDriving()) {
+      if(getDrivenState()) {
+	if(nodeVoltage < 4.5)
+	  return 'X';
+	else
+	  return '1';
+      } else {
+	if(nodeVoltage > 0.5)
+	  return 'X';
+	else
+	  return '0';
+      }
+    }
   }
 
-  if(driving) {
+  if(getDriving()) {
     if(getDrivingState()) {
       if(nodeVoltage < 4.5)
 	return 'X';
+      else
+	return '1';
     } else {
       if(nodeVoltage > 0.5)
 	return 'X';
+      else
+	return '0';
     }
-
-    //if(nodeVoltage > 1.5  && nodeVoltage < 3.0) {
-    //  cout << "conflict on pin: " << name() << " nodeVoltage=" << nodeVoltage << endl;
-    //  return 'X';
-    //}
-    //if (getDrivingState() != getDrivenState()) {
-    //  cout << "apparent driving conflict " << name() << endl;
-    //}
   }
-
-
 
   return getDrivenState() ? '1' : '0';
 }
@@ -1260,7 +1265,7 @@ char IO_bi_directional::getBitChar()
 void IO_bi_directional::update_direction(unsigned int new_direction)
 {
 
-  driving = new_direction ? true : false;
+  setDriving(new_direction ? true : false);
 
   // If this pin is not associated with an IO Port, but it's tied
   // to a stimulus, then we need to update the stimulus.
@@ -1285,7 +1290,7 @@ IO_bi_directional_pu::~IO_bi_directional_pu(void)
 
 double IO_bi_directional_pu::get_Zth()
 {
-  return driving ? Zth : (bPullUp ? Zpullup : ZthIn);
+  return getDriving() ? Zth : (bPullUp ? Zpullup : ZthIn);
 }
 
 double IO_bi_directional_pu::get_Vth()
@@ -1294,7 +1299,7 @@ double IO_bi_directional_pu::get_Vth()
   /**/
   if(verbose)
     cout << name() << "get_Vth "
-	 << " driving=" << driving
+	 << " driving=" << getDriving()
 	 << " bDrivingState=" << bDrivingState
 	 << " bDrivenState=" << bDrivenState
 	 << " Vth=" << Vth
@@ -1308,7 +1313,7 @@ double IO_bi_directional_pu::get_Vth()
   // open circuit voltage in this case will be Vth (the thevenin voltage, 
   // which is assigned to be same as the processor's supply voltage).
 
-  if(driving)
+  if(getDriving())
     return getDrivingState() ? Vth : 0;
   else
     return bPullUp ? Vth : VthIn;
@@ -1317,7 +1322,7 @@ double IO_bi_directional_pu::get_Vth()
 
 char IO_bi_directional_pu::getBitChar()
 {
-  if(!snode && !driving )
+  if(!snode && !getDriving() )
     return bPullUp ? 'W' : 'Z';
 
   if(snode) {
@@ -1328,15 +1333,40 @@ char IO_bi_directional_pu::getBitChar()
     if(snode->get_nodeZth() > ZthWeak)
       return getDrivingState() ? 'W' : 'w';
 
+    // There's at least one strong driver tied to the node
+    if(!getDriving()) {
+      if(getDrivenState()) {
+	if(nodeVoltage < 4.5)
+	  return 'X';
+	else
+	  return '1';
+      } else {
+	if(nodeVoltage > 0.5)
+	  return 'X';
+	else
+	  return '0';
+      }
+    }
+
   }
 
-  if(nodeVoltage > 1.5  && nodeVoltage < 3.0)
-    return 'X';
+  if(getDriving()) {
+    if(getDrivingState()) {
+      if(nodeVoltage < 4.5)
+	return 'X';
+      else
+	return '1';
+    } else {
+      if(nodeVoltage > 0.5)
+	return 'X';
+      else
+	return '0';
+    }
+  }
 
-  if(driving)
-    return getDrivingState() ? '1' : '0';
-  else
-    return getDrivenState() ? '1' : '0';
+
+
+  return getDrivenState() ? '1' : '0';
 
 }
 
@@ -1350,7 +1380,7 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
 
 double IO_open_collector::get_Vth()
 {
-  if(driving && !getDrivingState())
+  if(getDriving() && !getDrivingState())
     return 0.0;
 
   return bPullUp ? Vth : VthIn;
@@ -1359,7 +1389,7 @@ double IO_open_collector::get_Vth()
 
 double IO_open_collector::get_Zth()
 {
-  if(driving && !getDrivingState())
+  if(getDriving() && !getDrivingState())
     return Zth;
 
   return bPullUp ? Zpullup : ZthIn;
@@ -1367,7 +1397,7 @@ double IO_open_collector::get_Zth()
 }
 char IO_open_collector::getBitChar()
 {
-  if(!snode && !driving )
+  if(!snode && !getDriving() )
     return bPullUp ? 'W' : 'Z';
 
   if(snode) {
@@ -1375,7 +1405,7 @@ char IO_open_collector::getBitChar()
     if(snode->get_nodeZth() > ZthFloating)
       return bPullUp ? 'W' : 'Z';
 
-    if(driving && getDrivenState() && !getDrivingState())
+    if(getDriving() && getDrivenState() && !getDrivingState())
       return 'X';
 
     if(snode->get_nodeZth() > ZthWeak)
