@@ -1,11 +1,16 @@
-2004-06-15 Scott Dattalo <scott@dattalo.com>
+2004-06-27 Borut Razem <borut.razem@siol.net>
+	* gpsim.sln: set project dependency - modules depends on gpsim
+	* gpsim/gpsim.vcproj: corrected Ignore Specific Library settings
+	* doc/gpsimWin32.html: added to CVS
+
+2004-06-24 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, cli/cmd_break.h, cli/cmd_log.cc,
 	cli/cmd_log.h, cli/cmd_stimulus.h, cli/command.cc, 
 	cli/command.h, cli/expr.cc, cli/expr.h, cli/parse.yy,cli/scan.ll:
 	The 'break' and 'log' commands now accept expressions
 	
 2004-06-24 Borut Razem <borut.razem@siol.net>
-	* plat/win32/fd2raw.cpp, plat/win32/fd2raw.h: funtions to set the WIN32
+	* plat/win32/fd2raw.cpp, plat/win32/fd2raw.h: functions to set the WIN32
 	  console to raw mode.
 	* cli/input.cc: call functions to set WIN32 console to raw mode
 	* gui/gui.vcproj: added fd2raw.cpp and fd2raw.h to the project
