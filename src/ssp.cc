@@ -37,9 +37,9 @@ Boston, MA 02111-1307, USA.  */
 
 void _SSPSTAT::put(unsigned int new_value)
 {
-  unsigned int diff = value ^ new_value;
+  unsigned int diff = value.get() ^ new_value;
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
   // FIX: How can I protect the lower six bits from being changed? They are read only.
   /*
@@ -57,7 +57,7 @@ void _SSPSTAT::put_value(unsigned int new_value)
 
   put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -67,31 +67,31 @@ void _SSPSTAT::put_value(unsigned int new_value)
 
 void _SSPCON::put(unsigned int new_value)
 {
-  unsigned int diff = value ^ new_value;
+  unsigned int diff = value.get() ^ new_value;
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
-  if( (diff & CKP) && (value & SSPEN) ) {
+  if( (diff & CKP) && (value.get() & SSPEN) ) {
 	if( sspbuf && sspbuf->state != _SSPBUF::IDLE )
-	  cout << "SSP: You just changed CKP in the middle of a transfer. You're stupid!" << endl;
+	  cout << "SSP: You just changed CKP in the middle of a transfer." << endl;
 	
-	switch( value & SSPM_mask ) {
+	switch( value.get() & SSPM_mask ) {
 	case SSPM_SPImaster4:
 	case SSPM_SPImaster16:
 	case SSPM_SPImaster64:
 	  //case SSPM_SPImasterTMP2:
-	  sckpin->put_state( (value & CKP) ? 1 : 0 );
+	  sckpin->put_state( (value.get() & CKP) ? 1 : 0 );
 	}
 	
 	if(verbose)
 	  cout << "SSP: CKP changed" << endl;
   }
 
-  if( (diff & SSPEN) && (value & SSPEN) ) {
+  if( (diff & SSPEN) && (value.get() & SSPEN) ) {
 	sspbuf->enable();
   }
   
-  if( (diff & SSPEN) && !(value & SSPEN) ) {
+  if( (diff & SSPEN) && !(value.get() & SSPEN) ) {
 	if( sspbuf && sspbuf->state != _SSPBUF::IDLE )
 	  sspbuf->stop_transfer();
 	cout << "SSP: Disabled" << endl;
@@ -104,7 +104,7 @@ void _SSPCON::put_value(unsigned int new_value)
 
   put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -135,12 +135,12 @@ void _SSPBUF::enable()
   cout << "SSP: Make sure the TRIS bits are correct." << endl;   
 
   
-  switch( sspcon->value & _SSPCON::SSPM_mask ) {
+  switch( sspcon->value.get() & _SSPCON::SSPM_mask ) {
   case _SSPCON::SSPM_SPImaster4:
   case _SSPCON::SSPM_SPImaster16:
   case _SSPCON::SSPM_SPImaster64:
 	//case _SSPCON::SSPM_SPImasterTMP2:
-	sckpin->put_state( (sspcon->value & _SSPCON::CKP) ? 1 : 0 );
+	sckpin->put_state( (sspcon->value.get() & _SSPCON::CKP) ? 1 : 0 );
 	break;
   }
   
@@ -154,11 +154,11 @@ void _SSPBUF::enable()
 void _SSPBUF::put(unsigned int new_value)
 {
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
-  if( sspcon->value & _SSPCON::SSPEN ) {
+  if( sspcon->value.get() & _SSPCON::SSPEN ) {
 	if( state == IDLE ) {
-	  switch( sspcon->value & _SSPCON::SSPM_mask ) {
+	  switch( sspcon->value.get() & _SSPCON::SSPM_mask ) {
 	  case _SSPCON::SSPM_SPImaster4:
 	  case _SSPCON::SSPM_SPImaster16:
 	  case _SSPCON::SSPM_SPImaster64:
@@ -173,7 +173,7 @@ void _SSPBUF::put(unsigned int new_value)
 	  }
 	} else {
 	  // Collision
-	  sspcon->value &= _SSPCON::WCOL;
+	  sspcon->value.put(sspcon->value.get() & _SSPCON::WCOL);
 	}
   }
 
@@ -184,25 +184,25 @@ void _SSPBUF::put_value(unsigned int new_value)
 
   put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
 void _SSPBUF::start_transfer()
 {
   // load the shift register
-  sspsr = value;
+  sspsr = value.get();
   state = ACTIVE;
   bits_transfered = 0;
 
   if( !sspcon ) {
-	cout << "SSP: I don't have important registers!!" << endl;
+	cout << "SSP: sspbuf is not properly initialized\n" << endl;
 	return;
   }	
 
   cout << "SSP: Starting transfer." << endl;
 
-  switch( sspcon->value & _SSPCON::SSPM_mask ) {
+  switch( sspcon->value.get() & _SSPCON::SSPM_mask ) {
   case _SSPCON::SSPM_SPImaster4:
   case _SSPCON::SSPM_SPImaster16:
   case _SSPCON::SSPM_SPImaster64:
@@ -212,7 +212,7 @@ void _SSPBUF::start_transfer()
 	break;
   case _SSPCON::SSPM_SPIslaveSS:
 	// The SS pin was pulled low
-	if( sspstat->value & _SSPSTAT::CKE ) {
+	if( sspstat->value.get() & _SSPSTAT::CKE ) {
 	  sdopin->put_state(sspsr & (1<<7)); // MSb of shift reg. out
 	  cout << "SSP: Sent bit = " << ((sspsr & (1<<7))>>7) << ". (SS)" << endl;
 	}
@@ -233,7 +233,7 @@ void _SSPBUF::stop_transfer()
 	if( bits_transfered == 8 && !unread ) {
 	  cout << "SSP: Stoping transfer. Normal finish." << endl;
 	  
-	  value = sspsr & 0xff;
+	  value.put(sspsr & 0xff);
 
 	  unread = true;
 	  
@@ -241,12 +241,12 @@ void _SSPBUF::stop_transfer()
 		pirset->set_sspif();
 	  if( sspstat ) {
 		cout << "SSP: Setting SSPSTAT BF." << endl;
-		sspstat->value |= _SSPSTAT::BF;
+		sspstat->value.put(sspstat->value.get() | _SSPSTAT::BF);
 	  }
 	} else if( bits_transfered == 8 && unread ) {
 	  cout << "SSP: Stoping transfer. Overflow finish." << endl;
 	  
-	  sspcon->value |= _SSPCON::SSPOV;	  
+	  sspcon->value.put(sspcon->value.get() | _SSPCON::SSPOV);	  
 	} else {
 	  cout << "SSP: Stoping transfer. Cancel finish." << endl;
 	  // The transfer was canceled in some way
@@ -255,7 +255,7 @@ void _SSPBUF::stop_transfer()
 	cout << "SSP: Stoping transfer. State != ACTIVE." << endl;
   }
 
-  sckpin->put_state( (sspcon->value & _SSPCON::CKP) ? 1 : 0 );
+  sckpin->put_state( (sspcon->value.get() & _SSPCON::CKP) ? 1 : 0 );
   
   state = IDLE;
   
@@ -270,7 +270,7 @@ void _SSPBUF::set_halfclock_break( unsigned int clocks )
 	return;
   }	
 
-  switch( sspcon->value & _SSPCON::SSPM_mask ) {
+  switch( sspcon->value.get() & _SSPCON::SSPM_mask ) {
   case _SSPCON::SSPM_SPImaster4:
 	clock_in_cycles = 1;
 	cout << "SPI Master Mode at Fosc/4, cannot be implemented at full speed because of an internal design choice! It will run at Fosc/8." << endl;
@@ -300,22 +300,22 @@ void _SSPBUF::clock( unsigned int new_value )
   
   if( new_value ) {
 	// rising edge
-	if( ( (sspcon->value & _SSPCON::CKP) && !(sspstat->value & _SSPSTAT::CKE) )
-		|| ( !(sspcon->value & _SSPCON::CKP) && (sspstat->value & _SSPSTAT::CKE) ) )
+	if( ( (sspcon->value.get() & _SSPCON::CKP) && !(sspstat->value.get() & _SSPSTAT::CKE) )
+		|| ( !(sspcon->value.get() & _SSPCON::CKP) && (sspstat->value.get() & _SSPSTAT::CKE) ) )
 	  onbeat = true;
 	else
 	  onbeat = false;
   } else {
 	// falling edge
-	if( ( !(sspcon->value & _SSPCON::CKP) && !(sspstat->value & _SSPSTAT::CKE) )
-		|| ( (sspcon->value & _SSPCON::CKP) && (sspstat->value & _SSPSTAT::CKE) ) )
+	if( ( !(sspcon->value.get() & _SSPCON::CKP) && !(sspstat->value.get() & _SSPSTAT::CKE) )
+		|| ( (sspcon->value.get() & _SSPCON::CKP) && (sspstat->value.get() & _SSPSTAT::CKE)))
 	  onbeat = true;
 	else
 	  onbeat = false;
   }
 
   if( state == IDLE ){
-	if( sspstat->value & _SSPSTAT::CKE ) {
+	if( sspstat->value.get() & _SSPSTAT::CKE ) {
 	  // FIX: I have NOT verified that PICs actually behave like this.
 	  cout << "SSP: I can't handle a non-started transfer with CKE = 1." << endl;
 	  return;
@@ -330,7 +330,7 @@ void _SSPBUF::clock( unsigned int new_value )
  
   if( onbeat ) {
 	// on beat: data is read in if SMP = 0
-	if( !(sspstat->value & _SSPSTAT::SMP) ) {
+	if( !(sspstat->value.get() & _SSPSTAT::SMP) ) {
 	  sspsr <<= 1;
 	  
 	  if( ssp_port->get_bit(sdipin) )
@@ -343,7 +343,7 @@ void _SSPBUF::clock( unsigned int new_value )
   } else {
 	// off beat: data is shifted out, data is read in if SMP = 1
 
-	if( sspstat->value & _SSPSTAT::SMP ) {
+	if( sspstat->value.get() & _SSPSTAT::SMP ) {
 	  sspsr <<= 1;
 	  sspsr &= 0xff;
 	  
@@ -359,10 +359,10 @@ void _SSPBUF::clock( unsigned int new_value )
 	cout << "SSP: Sent bit = " << ((sspsr & (1<<7))>>7) << "." << endl;
   }
 
-  if( (bool)(sspcon->value & _SSPCON::CKP) == (bool)new_value ) {
+  if( (bool)(sspcon->value.get() & _SSPCON::CKP) == (bool)new_value ) {
 	bits_transfered++;
 	if( bits_transfered == 8 ) {
-	  if( (sspstat->value & _SSPSTAT::SMP) && !(sspstat->value & _SSPSTAT::CKE) ) {
+	  if( (sspstat->value.get() & _SSPSTAT::SMP) && !(sspstat->value.get() & _SSPSTAT::CKE) ) {
 		state = WAITING_FOR_LAST_SMP;
 		set_halfclock_break( 1 );
 	  } else {
@@ -394,7 +394,7 @@ void _SSPBUF::callback(void)
 	set_halfclock_break( 1 );
 	break;
   case WAITING_FOR_LAST_SMP:
-	if( sspstat && sspstat->value & _SSPSTAT::SMP ) {
+	if( sspstat && sspstat->value.get() & _SSPSTAT::SMP ) {
 	  sspsr <<= 1;
 	  
 	  if( ssp_port->get_bit(sdipin) )
@@ -426,13 +426,13 @@ unsigned int _SSPBUF::get(void)
   
   unread = false;
 
-  return value;
+  return value.get();
 }
   
 unsigned int _SSPBUF::get_value(void)
 {
   trace.register_read(address, get());
-  return value;
+  return value.get();
 }
 
 
@@ -444,7 +444,7 @@ void _SSPADD::put(unsigned int new_value)
 {
   cout << "SSPADD in unimplemented, as is all of I2C." << endl;
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
 }
 
@@ -454,7 +454,7 @@ void _SSPADD::put_value(unsigned int new_value)
 
   put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -468,7 +468,7 @@ SSP_MODULE::SSP_MODULE(void)
 }
 
 void SSP_MODULE::initialize(PIR_SET *ps, IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin,
-							IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type)
+			    IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type)
 {
   sspbuf->ssp_port = ssp_port;
   sspbuf->sdipin = sdi_pin;
@@ -513,7 +513,7 @@ void SSP_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR_SET *ps, IOPORT 
 void SSP_MODULE14::new_sck_edge(unsigned int value)
 {
 
-  if( sspcon && sspcon->value & _SSPCON::SSPEN ) {
+  if( sspcon && sspcon->value.get() & _SSPCON::SSPEN ) {
 	sspbuf->clock( value );
   }
 
@@ -522,7 +522,7 @@ void SSP_MODULE14::new_sck_edge(unsigned int value)
 void SSP_MODULE14::new_ss_edge(unsigned int value)
 {
 
-  if( sspcon && sspcon->value & _SSPCON::SSPEN ) {
+  if( sspcon && sspcon->value.get() & _SSPCON::SSPEN ) {
 	sspbuf->start_transfer();
   }
 

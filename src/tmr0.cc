@@ -38,7 +38,7 @@ Boston, MA 02111-1307, USA.  */
 //--------------------------------------------------
 TMR0::TMR0(void)
 {
-  value=0;
+  value.put(0);
   synchronized_cycle=0;
   future_cycle=0;
   last_cycle=0;
@@ -58,11 +58,11 @@ void TMR0::start(int restart_value, int sync)
 
   state |= 1;          // the timer is on
 
-  value = restart_value;
+  value.put(restart_value);
   //if(verbose)
     cout << "TMRO::start\n";
 
-  old_option = cpu_pic->option_reg.value;
+  old_option = cpu_pic->option_reg.value.get();
 
   prescale = 1 << get_prescale();
   prescale_counter = prescale;
@@ -75,7 +75,7 @@ void TMR0::start(int restart_value, int sync)
 
     synchronized_cycle = cycles.value + sync;
   
-    last_cycle = value * prescale;
+    last_cycle = value.get() * prescale;
     last_cycle = synchronized_cycle - last_cycle;
 
     guint64 fc = last_cycle + max_counts() * prescale;
@@ -124,13 +124,16 @@ void TMR0::increment(void)
   if(--prescale_counter == 0)
     {
       prescale_counter = prescale;
-      if(++value == 256)
+      if(value.get() == 255)
 	{
-	  value = 0;
+	  value.put(0);
 	  set_t0if();
 
 	}
-      trace.register_write(address,value);
+      else
+	value.put(value.get() + 1);
+
+      trace.register_write(address,value.get());
     }
   //  cout << value << '\n';
 }
@@ -147,7 +150,7 @@ void TMR0::put(unsigned int new_value)
   if(state & 1)
     start(new_value,2);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -156,12 +159,12 @@ unsigned int TMR0::get_value(void)
   // If the TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(cycles.value <= synchronized_cycle)
-    return value;
+    return value.get();
 
   // If we're running off the external clock or the tmr is disabled
   // then just return the register value.
   if(get_t0cs() || ((state & 1)==0))
-    return(value);
+    return(value.get());
 
   int new_value = (cycles.value - last_cycle)/ prescale;
 
@@ -191,16 +194,16 @@ unsigned int TMR0::get_value(void)
       synchronized_cycle = last_cycle;
     }
 
-  value = new_value;
-  return(value);
+  value.put(new_value);
+  return(value.get());
   
 }
 
 unsigned int TMR0::get(void)
 {
-  value = get_value();
-  trace.register_read(address, value);
-  return value;
+  value.put(get_value());
+  trace.register_read(address, value.get());
+  return value.get();
 }
 void TMR0::new_prescale(void)
 {
@@ -208,7 +211,7 @@ void TMR0::new_prescale(void)
 
   int new_value;
 
-  int option_diff = old_option ^ cpu_pic->option_reg.value;
+  int option_diff = old_option ^ cpu_pic->option_reg.value.get();
 
   old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
 
@@ -226,7 +229,7 @@ void TMR0::new_prescale(void)
       if(verbose)
 	cout << "internal clock\n";
       // Internal Clock
-      start(value);
+      start(value.get());
     }
 
   } else {
@@ -265,7 +268,7 @@ void TMR0::new_prescale(void)
       // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
       // cycle counter when tmr0 last rolled over.
 
-      last_cycle = value * prescale;
+      last_cycle = value.get() * prescale;
       last_cycle = synchronized_cycle - last_cycle;
 
       // cout << " effective last_cycle " << last_cycle << '\n';
@@ -309,7 +312,7 @@ void TMR0::new_clock_source(void)
   else
     {
       //cout << "internal\n";
-      put(value);    // let TMR0::put() set a cycle counter break point
+      put(value.get());    // let TMR0::put() set a cycle counter break point
     }
 #endif
 }
@@ -337,7 +340,7 @@ void TMR0::callback(void)
       return;
     }
 
-  value = 0;
+  value.put(0);
   synchronized_cycle = cycles.value;
   last_cycle = synchronized_cycle;
   future_cycle = last_cycle + max_counts()*prescale;
@@ -351,7 +354,7 @@ void  TMR0::reset(RESET_TYPE r)
   switch(r) {
   POR_RESET:
     cout << "TMR0::reset - por\n";
-    value = por_value;
+    value.put(por_value);
     break;
   default:
     break;

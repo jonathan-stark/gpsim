@@ -162,7 +162,7 @@ void Processor::create_invalid_registers (void)
 	  registers[i] = new InvalidRegister(i);
 	  registers[i]->address = 0;    // BAD_REGISTER;
 	  registers[i]->alias_mask = 0;
-	  registers[i]->value = 0;	// unimplemented registers are read as 0
+	  registers[i]->value.put(0);	// unimplemented registers are read as 0
 	  registers[i]->symbol_alias = 0;
 
 	  registers[i]->cpu = this;
@@ -202,7 +202,7 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
       registers[j]->alias_mask = 0;
 
     registers[j]->address = j;
-    registers[j]->value = 0;
+    registers[j]->value.put(0);
     registers[j]->symbol_alias = 0;
 
     //The default register name is simply its address

@@ -31,10 +31,10 @@ void PIR::put(unsigned int new_value)
   // The "invalid" ones (such as TXIF) are written
   // through the set_/clear_ member functions.
 
-  value = new_value & valid_bits | value & ~valid_bits;
-  trace.register_write(address,value);
+  value.put(new_value & valid_bits | value.get() & ~valid_bits);
+  trace.register_write(address,value.get());
 
-  if( value & pie->value )
+  if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 
 }
@@ -42,58 +42,54 @@ void PIR::put(unsigned int new_value)
 
 void PIR1v1::clear_sspif(void)
 {
-  value &= ~SSPIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~SSPIF);
+  trace.register_write(address,value.get());
 }
 
 void PIR1v1::set_txif(void)
 {
-  trace.register_write(address,value);
-  value |= TXIF;
-  if( value & pie->value )
+  trace.register_write(address,value.get());
+  value.put(value.get() | TXIF);
+  if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }
 
 void PIR1v1::clear_txif(void)
 {
-  value &= ~TXIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~TXIF);
+  trace.register_write(address,value.get());
 }
 
 void PIR1v1::clear_rcif(void)
 {
-  value &= ~RCIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~RCIF);
+  trace.register_write(address,value.get());
 }
-
-
-
-
 
 void PIR1v2::clear_sspif(void)
 {
-  value &= ~SSPIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~SSPIF);
+  trace.register_write(address,value.get());
 }
 
 void PIR1v2::set_txif(void)
 {
-  trace.register_write(address,value);
-  value |= TXIF;
-  if( value & pie->value )
+  trace.register_write(address,value.get());
+  value.put(value.get() | TXIF);
+  if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
 }
 
 void PIR1v2::clear_txif(void)
 {
-  value &= ~TXIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~TXIF);
+  trace.register_write(address,value.get());
 }
 
 void PIR1v2::clear_rcif(void)
 {
-  value &= ~RCIF;
-  trace.register_write(address,value);
+  value.put(value.get() & ~RCIF);
+  trace.register_write(address,value.get());
 }
 
 

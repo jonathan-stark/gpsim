@@ -129,7 +129,7 @@ void ADDLW16::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = (old_value = cpu16->W->value) + L;
+  new_value = (old_value = cpu16->W->value.get()) + L;
 
   cpu16->W->put(new_value & 0xff);
   cpu16->status->put_Z_C_DC_OV_N(new_value, old_value, L);
@@ -150,7 +150,7 @@ void ADDWF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (src_value = source->get()) + (w_value = cpu16->W->value);
+  new_value = (src_value = source->get()) + (w_value = cpu16->W->value.get());
 
   // Store the result
 
@@ -191,8 +191,8 @@ void ADDWFC::execute(void)
 	    cpu->register_bank[register_address] );
 
   new_value = (src_value = source->get()) + 
-    (w_value = cpu16->W->value) +
-    ((cpu16->status->value & STATUS_C) ? 1 : 0);
+    (w_value = cpu16->W->value.get()) +
+    ((cpu16->status->value.get() & STATUS_C) ? 1 : 0);
 
   // Store the result
 
@@ -215,7 +215,7 @@ void ANDLW16::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu16->W->value & L;
+  new_value = cpu16->W->value.get() & L;
 
   cpu16->W->put(new_value);
   cpu16->status->put_N_Z(new_value);
@@ -237,7 +237,7 @@ void ANDWF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = source->get() & cpu16->W->value;
+  new_value = source->get() & cpu16->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source
@@ -265,7 +265,7 @@ void BC::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_C)
+  if(cpu16->status->value.get() & STATUS_C)
     cpu16->pc->jump(absolute_destination);
   else
     cpu16->pc->increment();
@@ -287,7 +287,7 @@ void BN::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_N)
+  if(cpu16->status->value.get() & STATUS_N)
     cpu16->pc->jump(absolute_destination);
   else
     cpu16->pc->increment();
@@ -309,7 +309,7 @@ void BNC::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_C)
+  if(cpu16->status->value.get() & STATUS_C)
     cpu16->pc->increment();
   else
     cpu16->pc->jump(absolute_destination);
@@ -331,7 +331,7 @@ void BNN::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_N)
+  if(cpu16->status->value.get() & STATUS_N)
     cpu16->pc->increment();
   else
     cpu16->pc->jump(absolute_destination);
@@ -353,7 +353,7 @@ void BNOV::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_OV)
+  if(cpu16->status->value.get() & STATUS_OV)
     cpu16->pc->increment();
   else
     cpu16->pc->jump(absolute_destination);
@@ -375,7 +375,7 @@ void BNZ::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_Z)
+  if(cpu16->status->value.get() & STATUS_Z)
     cpu16->pc->increment();
   else
     cpu16->pc->jump(absolute_destination);
@@ -397,7 +397,7 @@ void BOV::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_OV)
+  if(cpu16->status->value.get() & STATUS_OV)
     cpu16->pc->jump(absolute_destination);
   else
     cpu16->pc->increment();
@@ -484,7 +484,7 @@ void BZ::execute(void)
 {
   trace.instruction(opcode);
 
-  if(cpu16->status->value & STATUS_Z)
+  if(cpu16->status->value.get() & STATUS_Z)
     cpu16->pc->jump(absolute_destination);
   else
     cpu16->pc->increment();
@@ -579,7 +579,7 @@ void CPFSEQ::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  if(source->get() == cpu16->W->value)
+  if(source->get() == cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
 
   cpu16->pc->increment();
@@ -606,7 +606,7 @@ void CPFSGT::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  if(source->get() > cpu16->W->value)
+  if(source->get() > cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
 
   cpu16->pc->increment();
@@ -633,7 +633,7 @@ void CPFSLT::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  if(source->get() < cpu16->W->value)
+  if(source->get() < cpu16->W->value.get())
     cpu16->pc->skip();                  // Skip next instruction
 
   cpu16->pc->increment();
@@ -657,11 +657,11 @@ void DAW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu16->W->value;
-  if(((new_value & 0x0f) > 0x9) || (cpu16->status->value & STATUS_DC))
+  new_value = cpu16->W->value.get();
+  if(((new_value & 0x0f) > 0x9) || (cpu16->status->value.get() & STATUS_DC))
     new_value += 0x6;
 
-  if(((new_value & 0xf0) > 0x90) || (cpu16->status->value & STATUS_C))
+  if(((new_value & 0xf0) > 0x90) || (cpu16->status->value.get() & STATUS_C))
     new_value += 0x60;
 
   cpu16->W->put(new_value & 0xff);
@@ -894,7 +894,7 @@ void IORLW16::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu16->W->value | L;
+  new_value = cpu16->W->value.get() | L;
 
   cpu16->W->put(new_value);
   cpu16->status->put_N_Z(new_value);
@@ -916,7 +916,7 @@ void IORWF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = source->get() | cpu16->W->value;
+  new_value = source->get() | cpu16->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source
@@ -1852,7 +1852,7 @@ void SUBLW16::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = L - (old_value = cpu16->W->value);
+  new_value = L - (old_value = cpu16->W->value.get());
 
   cpu16->W->put(new_value & 0xff);
 
@@ -1885,7 +1885,7 @@ void SUBFWB::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (w_value = cpu16->W->value) - (src_value = source->get()) -
+  new_value = (w_value = cpu16->W->value.get()) - (src_value = source->get()) -
     (1 - cpu16->status->get_C());
 
   if(destination)
@@ -1913,7 +1913,7 @@ void SUBWF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (src_value = source->get()) - (w_value = cpu16->W->value);
+  new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get());
 
   if(destination)
     source->put(new_value & 0xff);
@@ -1948,7 +1948,7 @@ void SUBWFB::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = (src_value = source->get()) - (w_value = cpu16->W->value) -
+  new_value = (src_value = source->get()) - (w_value = cpu16->W->value.get()) -
     (1 - cpu16->status->get_C());
 
   if(destination)
@@ -2173,7 +2173,7 @@ void XORLW16::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = cpu16->W->value ^ L;
+  new_value = cpu16->W->value.get() ^ L;
 
   cpu16->W->put(new_value);
   cpu16->status->put_N_Z(new_value);
@@ -2195,7 +2195,7 @@ void XORWF16::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = source->get() ^ cpu16->W->value;
+  new_value = source->get() ^ cpu16->W->value.get();
 
   if(destination)
     source->put(new_value);      // Result goes to source

@@ -43,7 +43,7 @@ void ADDLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = (old_value = cpu14->W->value) + L;
+  new_value = (old_value = cpu14->W->value.get()) + L;
 
   cpu14->W->put(new_value & 0xff);
   cpu14->status->put_Z_C_DC(new_value, old_value, L);
@@ -112,7 +112,7 @@ void SUBLW::execute(void)
 
   trace.instruction(opcode);
 
-  new_value = L - (old_value = cpu14->W->value);
+  new_value = L - (old_value = cpu14->W->value.get());
 
   cpu14->W->put(new_value & 0xff);
 

@@ -165,11 +165,11 @@ enum
 
   unsigned int get_tmr1cs(void)
     {
-      return(value & TMR1CS);
+      return(value.get() & TMR1CS);
     }
   unsigned int get_tmr1on(void)
     {
-      return(value & TMR1ON);
+      return(value.get() & TMR1ON);
     }
   virtual void put(unsigned int new_value);
 
@@ -272,22 +272,22 @@ enum
 
   inline unsigned int get_t2ckps0(void)
     {
-      return(value & T2CKPS0);
+      return(value.get() & T2CKPS0);
     }
 
   inline unsigned int get_t2ckps1(void)
     {
-      return(value & T2CKPS1);
+      return(value.get() & T2CKPS1);
     }
 
   inline unsigned int get_tmr2on(void)
     {
-      return(value & TMR2ON);
+      return(value.get() & TMR2ON);
     }
 
   inline unsigned int get_post_scale(void)
     {
-      return( (value & (TOUTPS0 | TOUTPS1 | TOUTPS2 | TOUTPS3)) >> 3 );
+      return( (value.get() & (TOUTPS0 | TOUTPS1 | TOUTPS2 | TOUTPS3)) >> 3 );
     }
 
   inline unsigned int get_pre_scale(void)
@@ -297,10 +297,10 @@ enum
       //   0   1     4
       //   1   x     16
 
-      if(value & T2CKPS1)
+      if(value.get() & T2CKPS1)
 	return 16;
       else
-	if(value & T2CKPS0)
+	if(value.get() & T2CKPS0)
 	  return 4;
 	else
 	  return 1;

@@ -36,10 +36,10 @@ Boston, MA 02111-1307, USA.  */
 //
 void  BSR::put(unsigned int new_value)
 {
-  value = new_value & 0x0f;
-  trace.register_write(address,value);
+  value.put(new_value & 0x0f);
+  trace.register_write(address,value.get());
 
-  cpu->register_bank = &cpu->registers[ value << 8 ];
+  cpu->register_bank = &cpu->registers[ value.get() << 8 ];
 
 
 }
@@ -66,8 +66,8 @@ void  BSR::put_value(unsigned int new_value)
 //
 void  FSRL::put(unsigned int new_value)
 {
-  value = new_value & 0xff;
-  trace.register_write(address,value);
+  value.put(new_value & 0xff);
+  trace.register_write(address,value.get());
 
   //  iam->fsr_delta = 0;
   iam->update_fsr_value();
@@ -93,8 +93,8 @@ void  FSRL::put_value(unsigned int new_value)
 
 void  FSRH::put(unsigned int new_value)
 {
-  value = new_value & 0x0f;
-  trace.register_write(address,value);
+  value.put(new_value & 0x0f);
+  trace.register_write(address,value.get());
 
   //  iam->fsr_delta = 0;
   iam->update_fsr_value();
@@ -141,7 +141,7 @@ void INDF16::put_value(unsigned int new_value)
 unsigned int INDF16::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
   iam->fsr_value += iam->fsr_delta;
   iam->fsr_delta = 0;
@@ -159,7 +159,7 @@ unsigned int INDF16::get_value(void)
 unsigned int PREINC::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
   iam->preinc_fsr_value();
 
   return(iam->get());
@@ -192,7 +192,7 @@ void PREINC::put_value(unsigned int new_value)
 unsigned int POSTINC::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
   iam->postinc_fsr_value();
 
   return(iam->get());
@@ -228,7 +228,7 @@ void POSTINC::put_value(unsigned int new_value)
 unsigned int POSTDEC::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
   iam->postdec_fsr_value();
 
   return(iam->get());
@@ -262,7 +262,7 @@ void POSTDEC::put_value(unsigned int new_value)
 unsigned int PLUSW::get(void)
 {
 
-  trace.register_read(address,value);
+  trace.register_read(address,value.get());
 
   int destination = iam->plusw_fsr_value();
   if(destination > 0)
@@ -421,7 +421,7 @@ void Indirect_Addressing::update_fsr_value(void)
 
   if(current_cycle != cycles.value)
     {
-      fsr_value = (fsrh.value << 8) |  fsrl.value;
+      fsr_value = (fsrh.value.get() << 8) |  fsrl.value.get();
       fsr_delta = 0;
     }
 }
@@ -478,7 +478,7 @@ int Indirect_Addressing::plusw_fsr_value(void)
 
   fsr_value += fsr_delta;
   fsr_delta = 0;
-  int signExtendedW = cpu->W->value | ((cpu->W->value > 127) ? 0xf00 : 0);
+  int signExtendedW = cpu->W->value.get() | ((cpu->W->value.get() > 127) ? 0xf00 : 0);
   unsigned int destination = (fsr_value + signExtendedW) & _16BIT_REGISTER_MASK;
   if(is_indirect_register(destination))
     return -1;
@@ -495,9 +495,9 @@ void Fast_Stack::init(_16bit_processor *new_cpu)
 
 void Fast_Stack::push(void)
 {
-  w = cpu->W->value;
-  status = cpu->status->value;
-  bsr = cpu->bsr.value;
+  w = cpu->W->value.get();
+  status = cpu->status->value.get();
+  bsr = cpu->bsr.value.get();
 
 }
 
@@ -520,12 +520,12 @@ PCL16::PCL16(void) : PCL()
 
 unsigned int PCL16::get(void)
 {
-  return(((value+1)<<1) & 0xff);
+  return(((value.get()+1)<<1) & 0xff);
 }
 
 unsigned int PCL16::get_value(void)
 {
-  return((value<<1) & 0xff);
+  return((value.get()<<1) & 0xff);
 
 }
 
@@ -554,7 +554,7 @@ void Program_Counter16::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
   cycles.increment();
 }
 
@@ -576,7 +576,7 @@ void Program_Counter16::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu_pic->pcl->value = value & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
   cycles.increment();
 }
 
@@ -593,7 +593,7 @@ void Program_Counter16::jump(unsigned int new_address)
   //value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
   value = new_address & memory_size_mask;
 
-  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
@@ -616,7 +616,7 @@ void Program_Counter16::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put(value & 0xff);  // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
   
@@ -644,7 +644,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   trace.cycle_increment();
   trace.program_counter(value<<1);
 
-  cpu_pic->pcl->value = (value<<1) & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put((value<<1) & 0xff);    // see Update pcl comment in Program_Counter::increment()
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -662,7 +662,7 @@ void Program_Counter16::new_address(unsigned int new_value)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
   cycles.increment();
   cycles.increment();
 }
@@ -688,8 +688,8 @@ void Program_Counter16::put_value(unsigned int new_value)
 
   //value = (new_value >> 1) & memory_size_mask;
   value = (new_value) & memory_size_mask;
-  cpu_pic->pcl->value = value & 0xff;
-  cpu_pic->pclath->value = (value >> 8) & 0xff;
+  cpu_pic->pcl->value.put(value & 0xff);
+  cpu_pic->pclath->value.put((value >> 8) & 0xff);
 
   trace.program_counter(value << 1);
 
@@ -717,17 +717,17 @@ unsigned int Program_Counter16::get_value(void)
 // TOSL
 unsigned int TOSL::get(void)
 {
-  value = stack->get_tos() & 0xff;
-  trace.register_read(address,value);
-  return(value);
+  value.put(stack->get_tos() & 0xff);
+  trace.register_read(address,value.get());
+  return(value.get());
 
 }
 
 unsigned int TOSL::get_value(void)
 {
 
-  value = stack->get_tos() & 0xff;
-  return(value);
+  value.put(stack->get_tos() & 0xff);
+  return(value.get());
 
 }
 
@@ -753,17 +753,17 @@ void TOSL::put_value(unsigned int new_value)
 // TOSH
 unsigned int TOSH::get(void)
 {
-  value = (stack->get_tos() >> 8) & 0xff;
-  trace.register_read(address,value);
-  return(value);
+  value.put((stack->get_tos() >> 8) & 0xff);
+  trace.register_read(address,value.get());
+  return(value.get());
 
 }
 
 unsigned int TOSH::get_value(void)
 {
 
-  value = (stack->get_tos() >> 8) & 0xff;
-  return(value);
+  value.put((stack->get_tos() >> 8) & 0xff);
+  return(value.get());
 
 }
 
@@ -789,17 +789,17 @@ void TOSH::put_value(unsigned int new_value)
 // TOSU
 unsigned int TOSU::get(void)
 {
-  value = (stack->get_tos() >> 16) & 0x1f;
-  trace.register_read(address,value);
-  return(value);
+  value.put((stack->get_tos() >> 16) & 0x1f);
+  trace.register_read(address,value.get());
+  return(value.get());
 
 }
 
 unsigned int TOSU::get_value(void)
 {
 
-  value = (stack->get_tos() >> 16) & 0x1f;
-  return(value);
+  value.put((stack->get_tos() >> 16) & 0x1f);
+  return(value.get());
 
 }
 
@@ -828,15 +828,15 @@ void TOSU::put_value(unsigned int new_value)
 unsigned int STKPTR::get(void)
 {
 
-  trace.register_read(address,value);
-  return(value);
+  trace.register_read(address,value.get());
+  return(value.get());
 
 }
 
 unsigned int STKPTR::get_value(void)
 {
 
-  return(value);
+  return(value.get());
 
 }
 
@@ -844,13 +844,13 @@ void STKPTR::put(unsigned int new_value)
 {
   trace.register_write(address,new_value);
 
-  value = new_value;
+  value.put(new_value);
 }
 
 void STKPTR::put_value(unsigned int new_value)
 {
 
-  value = new_value;
+  value.put(new_value);
 
   if(xref)
       xref->update();
@@ -872,31 +872,31 @@ Stack16::Stack16(void)
 void Stack16::push(unsigned int address)
 {
 
-  stkptr.value++;
+  stkptr.value.put(1+stkptr.value.get());
 
-  if((stkptr.value & Stack16_MASK) == 0)
+  if((stkptr.value.get() & Stack16_MASK) == 0)
     {
       // check the STVREN bit
       // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value |= 0x9f;
+      stkptr.value.put( stkptr.value.get() | 0x9f);
     }
 
   // Push 21-bit address onto the stack
 
-  contents[stkptr.value & Stack16_MASK] = address << 1;
+  contents[stkptr.value.get() & Stack16_MASK] = address << 1;
 
-  stkptr.value &= 0xdf;
+  stkptr.value.put(stkptr.value.get() & 0xdf);
 
 }
 
 unsigned int Stack16::pop(void)
 {
-  if(stkptr.value & Stack16_MASK)
+  if(stkptr.value.get() & Stack16_MASK)
     {
       // read 21-bit address from stack
-      unsigned int ret = (contents[stkptr.value & Stack16_MASK]) >> 1;
-      stkptr.value--;
-      stkptr.value &= 0x5f;
+      unsigned int ret = (contents[stkptr.value.get() & Stack16_MASK]) >> 1;
+      stkptr.value.put(stkptr.value.get()-1);
+      stkptr.value.put(stkptr.value.get() & 0x5f);
       return(ret);
 
     }
@@ -905,27 +905,27 @@ unsigned int Stack16::pop(void)
     {
       // check the STVREN bit
       // if(STVREN) {reset(stack_over_flow); return;}
-      stkptr.value = 0x40; // don't decrement past 0, signalize STKUNF
+      stkptr.value.put(0x40); // don't decrement past 0, signalize STKUNF
       return(0); // return 0 if underflow
     }
 }
 
 void Stack16::reset(void)
 {
-  stkptr.value = 0;
+  stkptr.value.put( 0);
 }
 
 unsigned int Stack16::get_tos(void)
 {
 
-  return (contents[stkptr.value & Stack16_MASK]);
+  return (contents[stkptr.value.get() & Stack16_MASK]);
 
 }
 
 void Stack16::put_tos(unsigned int new_tos)
 {
 
-  contents[stkptr.value & Stack16_MASK] = new_tos;
+  contents[stkptr.value.get() & Stack16_MASK] = new_tos;
 
 }
 
@@ -942,14 +942,14 @@ T0CON::T0CON(void)
 void T0CON::put(unsigned int new_value)
 {
 
-  unsigned int old_value = value;
-  value = new_value;
+  unsigned int old_value = value.get();
+  value.put(new_value);
 
-  if( (value ^ old_value) & (T08BIT | TMR0ON)) {
-    cpu16->option_new_bits_6_7(value & (BIT6 | BIT7));
+  if( (value.get() ^ old_value) & (T08BIT | TMR0ON)) {
+    cpu16->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
-    if(value & TMR0ON)
-      cpu16->tmr0l.start(cpu16->tmr0l.value & 0xff);
+    if(value.get() & TMR0ON)
+      cpu16->tmr0l.start(cpu16->tmr0l.value.get() & 0xff);
     else
       cpu16->tmr0l.stop();
 
@@ -957,18 +957,18 @@ void T0CON::put(unsigned int new_value)
 
   // First, check the tmr0 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
-  if( (value ^ old_value) & T0CS)
+  if( (value.get() ^ old_value) & T0CS)
     cpu16->tmr0l.new_clock_source();
 
   // %%%FIX ME%%% - can changing the state of TOSE cause the timer to
   // increment if tmr0 is being clocked by an external clock?
 
   // Now check the rest of the tmr0 bits.
-  if( (value ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
+  if( (value.get() ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
     cpu16->tmr0l.new_prescale();
 
-  cout <<"T0CON::put - new val 0x" << hex << value<<'\n';
-  trace.register_write(address,value);
+  cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';
+  trace.register_write(address,value.get());
 
 }
 
@@ -978,26 +978,26 @@ void T0CON::put(unsigned int new_value)
 //--------------------------------------------------
 void TMR0H::put(unsigned int new_value)
 {
-  value = new_value & 0xff;
-  trace.register_write(address,value);
+  value.put(new_value & 0xff);
+  trace.register_write(address,value.get());
 
 }
 
 //--------------------------------------------------
 void TMR0H::put_value(unsigned int new_value)
 {
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 }
 
 unsigned int TMR0H::get(void)
 {
-  trace.register_read(address,value);
-  return(value);
+  trace.register_read(address,value.get());
+  return(value.get());
 }
 
 unsigned int TMR0H::get_value(void)
 {
-  return(value);
+  return(value.get());
 }
 
 //--------------------------------------------------
@@ -1013,10 +1013,10 @@ unsigned int TMR0H::get_value(void)
 //
 unsigned int TMR0_16::get_prescale(void)
 {
-  if(t0con->value & (0x8))
+  if(t0con->value.get() & 0x8)
     return 0;
   else
-    return ((t0con->value & 7) + 1);
+    return ((t0con->value.get() & 7) + 1);
 
 }
 
@@ -1027,7 +1027,7 @@ void TMR0_16::set_t0if(void)
 
 unsigned int TMR0_16::get_t0cs(void)
 {
- return t0con->value & 0x20;
+ return t0con->value.get() & 0x20;
 }
 
 void TMR0_16::initialize(void)
@@ -1040,7 +1040,7 @@ void TMR0_16::initialize(void)
 unsigned int TMR0_16::max_counts(void)
 {
 
-  if(t0con->value & T0CON::T08BIT)
+  if(t0con->value.get() & T0CON::T08BIT)
     return 0x100;
   else
     return 0x10000;
@@ -1055,29 +1055,37 @@ void TMR0_16::increment(void)
     {
       prescale_counter = prescale;
 
-      if(t0con->value & T0CON::T08BIT)
+      if(t0con->value.get() & T0CON::T08BIT)
 	{
-	  if(++value == 256)
+	  if(value.get() == 255)
 	    {
-	      value = 0;
+	      value.put(0);
 	      set_t0if();
 	    }
+	  else
+	    value.put(value.get()+1);
 	}
       else
 	{
-	  if(++value == 256)
+	  if(value.get() == 255)
 	    {
-	      value = 0;
-	      if(tmr0h->value++ == 256)
+	      value.put(0);
+	      if(tmr0h->value.get() == 255)
 		{
 		  tmr0h->put(0);
 		  set_t0if();
 		}
+	      else
+		tmr0h->value.put(tmr0h->value.get()+1);
 
+	    }
+	  else
+	    {
+	      value.put(value.get()+1);
 	    }
 	}
 
-      trace.register_write(address,value);
+      trace.register_write(address,value.get());
     }
   //  cout << value << '\n';
 }
@@ -1089,18 +1097,18 @@ unsigned int TMR0_16::get_value(void)
   // If the _TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(cycles.value <= synchronized_cycle)
-    return value;
+    return value.get();
 
-  if(get_t0cs() ||  ((t0con->value & T0CON::TMR0ON) == 0))
-    return(value);
+  if(get_t0cs() ||  ((t0con->value.get() & T0CON::TMR0ON) == 0))
+    return(value.get());
 
   int new_value = (cycles.value - last_cycle)/ prescale;
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
   tmr0h->put_value((new_value >> 8)&0xff);
 
-  return(value);
+  return(value.get());
   
 }
 
@@ -1108,7 +1116,7 @@ void TMR0_16::callback(void)
 {
 
   //cout<<"_TMR0 rollover: " << hex << cycles.value << '\n';
-  if((t0con->value & T0CON::TMR0ON) == 0) {
+  if((t0con->value.get() & T0CON::TMR0ON) == 0) {
     cout << " tmr0 isn't turned on\n";
     return;
   }
@@ -1118,7 +1126,7 @@ void TMR0_16::callback(void)
   //Now handle the upper 8 bits:
 
   if(future_cycle &&
-     !(t0con->value & T0CON::T08BIT)) 
+     !(t0con->value.get() & T0CON::T08BIT)) 
     {
       // 16-bit mode
       tmr0h->put_value(0);
@@ -1136,7 +1144,7 @@ void TMR0_16::callback_print(void)
 // T3CON
 void T3CON::put(unsigned int new_value)
 {
-  int diff = (value ^ new_value);
+  int diff = (value.get() ^ new_value);
 
   if(diff & (T3CCP1 |  T3CCP2)) {
     switch(new_value & (T3CCP1 |  T3CCP2)) {
@@ -1353,17 +1361,17 @@ void TBL_MODULE::initialize(_16bit_processor *new_cpu)
 void TBL_MODULE::increment(void)
 {
 
-  if(tabptrl.value >= 0xff) {
+  if(tabptrl.value.get() >= 0xff) {
     tabptrl.put(0);
-    if(tabptrh.value >= 0xff) {
+    if(tabptrh.value.get() >= 0xff) {
       tabptrh.put(0);
-      tabptru.put(tabptru.value + 1);
+      tabptru.put(tabptru.value.get() + 1);
     } else {
-      tabptrh.put(tabptrh.value + 1);
+      tabptrh.put(tabptrh.value.get() + 1);
     }
   }
   else
-    tabptrl.put(tabptrl.value + 1);
+    tabptrl.put(tabptrl.value.get() + 1);
 
 
 }
@@ -1372,15 +1380,15 @@ void TBL_MODULE::increment(void)
 void TBL_MODULE::decrement(void)
 {
 
-  if(tabptrl.value == 0) {
+  if(tabptrl.value.get() == 0) {
     tabptrl.put(0xff);
-    if(tabptrh.value = 0) {
+    if(tabptrh.value.get() == 0) {
       tabptrh.put(0xff);
-      tabptru.put(tabptru.value - 1);
+      tabptru.put(tabptru.value.get() - 1);
     }
   }
   else
-    tabptrl.put(tabptrl.value - 1);
+    tabptrl.put(tabptrl.value.get() - 1);
 
 }
 //-------------------------------------------------------------------
@@ -1390,9 +1398,9 @@ void TBL_MODULE::read(void)
   unsigned int tabptr,opcode;
 
   tabptr = 
-    ( (tabptru.value & 0xff) << 16 ) |
-    ( (tabptrh.value & 0xff) << 8 )  |
-    ( (tabptrl.value & 0xff) << 0 );
+    ( (tabptru.value.get() & 0xff) << 16 ) |
+    ( (tabptrh.value.get() & 0xff) << 8 )  |
+    ( (tabptrl.value.get() & 0xff) << 0 );
 
   opcode = cpu->pma->get_opcode(tabptr>>1);
 
@@ -1418,20 +1426,20 @@ void TBL_MODULE::write(void)
   unsigned int tabptr,opcode;
 
   tabptr = 
-    ( (tabptru.value & 0xff) << 16 ) |
-    ( (tabptrh.value & 0xff) << 8 )  |
-    ( (tabptrl.value & 0xff) << 0 );
+    ( (tabptru.value.get() & 0xff) << 16 ) |
+    ( (tabptrh.value.get() & 0xff) << 8 )  |
+    ( (tabptrl.value.get() & 0xff) << 0 );
 
   if(tabptr & 1)
     {
       // Long write
-      internal_latch = (internal_latch & 0x00ff) | ((tablat.value<<8) & 0xff00);
+      internal_latch = (internal_latch & 0x00ff) | ((tablat.value.get()<<8) & 0xff00);
       cpu->pma->put_opcode_start(tabptr>>1, internal_latch);
     }
   else
     {
       // Short Write
-      internal_latch = (internal_latch & 0xff00) | (tablat.value & 0x00ff);
+      internal_latch = (internal_latch & 0xff00) | (tablat.value.get() & 0x00ff);
     }
 
 
@@ -1543,22 +1551,22 @@ unsigned int PORTC16::get(void)
 {
   unsigned int old_value;
 
-  old_value = value;
+  old_value = value.get();
 
   IOPORT::get();
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   // 
   if( ccp1con && (diff & CCP1) ) {
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
   }
   // if this cpu has a usart and there's been a change detected on
   // the RX pin, then we need to notify the usart
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
-  return(value);
+  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -1566,20 +1574,20 @@ unsigned int PORTC16::get(void)
 void PORTC16::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value;
+  unsigned int old_value = value.get();
 
   //cout << "PORTC16::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value; // The difference between old and new
+  int diff = old_value ^ value.get(); // The difference between old and new
 
   if(ccp1con && ( diff & CCP1) ) {
-    ccp1con->new_edge(value & CCP1);
+    ccp1con->new_edge(value.get() & CCP1);
   }
 
   if( usart && (diff & RX))
-    usart->new_rx_edge(value & RX);
+    usart->new_rx_edge(value.get() & RX);
 
 }
 

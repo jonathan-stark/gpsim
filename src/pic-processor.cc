@@ -843,7 +843,7 @@ void pic_processor::create (void)
   //  fsr->new_name("fsr");
 
   register_bank = &registers[0];  // Define the active register bank 
-  W->value = 0;
+  W->value.put(0);
 
   //set_frequency(10e6);            // 
   nominal_wdt_timeout = 18e-3;    // 18ms according to the data sheet (no prescale)
@@ -879,7 +879,7 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
 
     }
 
-  reg->value       = por_value;
+  reg->value.put(por_value);
   reg->por_value   = por_value;
   reg->wdtr_value  = por_value;
   reg->initialize();

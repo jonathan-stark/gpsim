@@ -51,12 +51,12 @@ void CCPRL::put(unsigned int new_value)
 
   //cout << "CCPRL put \n";
 
-  value = new_value;
+  value.put(new_value);
 
   if(tmrl->compare_mode)
     start_compare_mode();   // Actually, re-start with new capture value.
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -65,15 +65,15 @@ void CCPRL::capture_tmr(void)
 
   tmrl->get_low_and_high();
 
-  value = tmrl->value;
-  trace.register_write(address,value);
+  value.put(tmrl->value.get());
+  trace.register_write(address,value.get());
 
-  ccprh->value = tmrl->tmrh->value;
-  trace.register_write(ccprh->address,ccprh->value);
+  ccprh->value.put(tmrl->tmrh->value.get());
+  trace.register_write(ccprh->address,ccprh->value.get());
 
   tmrl->pir_set->set_ccpif();
 
-  int c = value + 256*ccprh->value;
+  int c = value.get() + 256*ccprh->value.get();
   if(verbose & 4)
     cout << "CCPRL captured: " << c << '\n';
 }
@@ -83,7 +83,7 @@ void CCPRL::start_compare_mode(void)
 
   tmrl->compare_mode = 1;
 
-  int capture_value = value + 256*ccprh->value;
+  int capture_value = value.get() + 256*ccprh->value.get();
   //cout << "start compare mode with capture value = " << capture_value << '\n';
   tmrl->compare_value = capture_value;
   tmrl->update();
@@ -145,12 +145,12 @@ void CCPRH::put(unsigned int new_value)
 
   if(pwm_mode == 0)   // In pwm_mode, CCPRH is a read-only register.
     {
-      value = new_value;
+      value.put(new_value);
 
       if(ccprl->tmrl->compare_mode)
 	ccprl->start_compare_mode();   // Actually, re-start with new capture value.
 
-      trace.register_write(address,value);
+      trace.register_write(address,value.get());
     }
 }
 
@@ -158,7 +158,7 @@ unsigned int CCPRH::get(void)
 {
   //cout << "CCPRH get\n";
 
-  unsigned int read_value =  (pwm_mode) ? (pwm_value >>2) : value;
+  unsigned int read_value =  (pwm_mode) ? (pwm_value >>2) : value.get();
 
   trace.register_read(address, read_value);
   return read_value;
@@ -180,7 +180,7 @@ void CCPCON::new_edge(unsigned int level)
   if(verbose &4)
     cout << "CCPCON processing new edge\n";
 
-  switch(value & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
+  switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
     case ALL_OFF0:
     case ALL_OFF1:
@@ -248,7 +248,7 @@ void CCPCON::compare_match(void)
 
   //cout << name() << " compare match\n";
 
-  switch(value & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
+  switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
     case ALL_OFF0:
     case ALL_OFF1:
@@ -301,7 +301,7 @@ void CCPCON::pwm_match(int level)
 {
   //cout << name() << " CCPCON PWM match\n";
 
-  if( (value & PWM0) == PWM0)
+  if( (value.get() & PWM0) == PWM0)
     {
       iopin->put_state(level);
 
@@ -312,7 +312,7 @@ void CCPCON::pwm_match(int level)
 
       if(level)
 	{
-	  ccprl->ccprh->pwm_value =  ((value>>4) & 3) | 4*ccprl->value;
+	  ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
 	  tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
 	}
 
@@ -328,8 +328,8 @@ void CCPCON::put(unsigned int new_value)
 {
 
   //cout << name() << " new value " << new_value << '\n';
-  value = new_value;
-  switch(value & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
+  value.put(new_value);
+  switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
     case ALL_OFF0:
     case ALL_OFF1:
@@ -381,7 +381,7 @@ void CCPCON::put(unsigned int new_value)
 
     }
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -398,8 +398,8 @@ T1CON::T1CON(void)
 void T1CON::put(unsigned int new_value)
 {
 
-  unsigned int diff = value ^ new_value;
-  value = new_value;
+  unsigned int diff = value.get() ^ new_value;
+  value.put(new_value);
   
   // First, check the tmr1 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
@@ -407,23 +407,23 @@ void T1CON::put(unsigned int new_value)
     tmrl->new_clock_source();
 
   if( diff & TMR1ON)
-    tmrl->on_or_off(value & TMR1ON);
+    tmrl->on_or_off(value.get() & TMR1ON);
   else  if( diff & (T1CKPS0 | T1CKPS1))
     tmrl->update();
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
 unsigned int T1CON::get(void)
 {
-  trace.register_read(address,value);
-  return(value);
+  trace.register_read(address,value.get());
+  return(value.get());
 }
 
 unsigned int T1CON::get_prescale(void)
 {
-  return( ((value &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
+  return( ((value.get() &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
 }
 
 
@@ -434,7 +434,7 @@ unsigned int T1CON::get_prescale(void)
 TMRH::TMRH(void)
 {
 
-  value=0;
+  value.put(0);
   new_name("TMRH");
 
 }
@@ -442,14 +442,14 @@ TMRH::TMRH(void)
 void TMRH::put(unsigned int new_value)
 {
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
   tmrl->synchronized_cycle = cycles.value;
-  tmrl->last_cycle = tmrl->synchronized_cycle - ( tmrl->value + (value<<8))*tmrl->prescale;
+  tmrl->last_cycle = tmrl->synchronized_cycle - (tmrl->value.get() + (value.get()<<8))*tmrl->prescale;
 
   if(tmrl->t1con->get_tmr1on())
     tmrl->update();
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -460,17 +460,17 @@ unsigned int TMRH::get(void)
   // it hasn't had enough time to synchronize with the PIC's clock.
 
   if(cycles.value <= tmrl->synchronized_cycle)
-    return value;
+    return value.get();
 
   // If he TMR is not running then return.
   if(!tmrl->t1con->get_tmr1on())
-    return value;
+    return value.get();
 
   tmrl->current_value();
 
-  value = (((tmrl->value_16bit)>>8) & 0xff);
-  trace.register_read(address, value);
-  return(value);
+  value.put(((tmrl->value_16bit)>>8) & 0xff);
+  trace.register_read(address, value.get());
+  return(value.get());
   
 }
 
@@ -487,7 +487,7 @@ unsigned int TMRH::get_value(void)
 TMRL::TMRL(void)
 {
 
-  value=0;
+  value.put(0);
   synchronized_cycle=0;
   prescale_counter=prescale=1;
   break_value = 0x10000;
@@ -515,11 +515,11 @@ void TMRL::increment(void)
 
     value_16bit = 0xffff & ( value_16bit + 1);
 
-    tmrh->value = (value_16bit >> 8) & 0xff;
-    value = value_16bit & 0xff;
+    tmrh->value.put((value_16bit >> 8) & 0xff);
+    value.put(value_16bit & 0xff);
     if(value_16bit == 0)
       pir_set->set_tmr1if();
-    trace.register_write(address,value);
+    trace.register_write(address,value.get());
   }
 
 }
@@ -548,8 +548,8 @@ void TMRL::on_or_off(int new_state)
 
       // turn off the timer and save the current value
       current_value();
-      value = value_16bit & 0xff;
-      tmrh->value = (value_16bit>>8) & 0xff;
+      value.put(value_16bit & 0xff);
+      tmrh->value.put((value_16bit>>8) & 0xff);
     }
 
 }
@@ -624,14 +624,14 @@ void TMRL::update(void)
 void TMRL::put(unsigned int new_value)
 {
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
   synchronized_cycle = cycles.value;
-  last_cycle = synchronized_cycle - ( value + (tmrh->value<<8)) * prescale;
+  last_cycle = synchronized_cycle - ( value.get() + (tmrh->value.get()<<8)) * prescale;
 
   if(t1con->get_tmr1on())
     update();
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -641,17 +641,17 @@ unsigned int TMRL::get(void)
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(cycles.value <= synchronized_cycle)
-    return value;
+    return value.get();
 
   // If TMRL is not on, then return the current value
   if(!t1con->get_tmr1on())
-    return value;
+    return value.get();
 
   current_value();
 
-  value = (value_16bit & 0xff);
-  trace.register_read(address, value);
-  return(value);
+  value.put(value_16bit & 0xff);
+  trace.register_read(address, value.get());
+  return(value.get());
   
 }
 
@@ -665,7 +665,7 @@ unsigned int TMRL::get_value(void)
 void TMRL::current_value(void)
 {
   if(t1con->get_tmr1cs())
-    value_16bit = tmrh->value * 256 + value;
+    value_16bit = tmrh->value.get() * 256 + value.get();
   else
     value_16bit = ((cycles.value - last_cycle)/ prescale) & 0xffff;
 }
@@ -676,17 +676,17 @@ unsigned int TMRL::get_low_and_high(void)
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
   if(cycles.value <= synchronized_cycle)
-    return value;
+    return value.get();
 
   //  value_16bit = (cycles.value.lo - last_cycle)/ prescale;
 
   current_value();
 
-  value = (value_16bit & 0xff);
-  trace.register_read(address, value);
+  value.put(value_16bit & 0xff);
+  trace.register_read(address, value.get());
 
-  tmrh->value = (value_16bit>>8) & 0xff;
-  trace.register_read(tmrh->address, tmrh->value);
+  tmrh->value.put((value_16bit>>8) & 0xff);
+  trace.register_read(tmrh->address, tmrh->value.get());
 
   return(value_16bit);
   
@@ -703,7 +703,7 @@ void TMRL::new_clock_source(void)
   else
     {
       //cout << "internal\n";
-      put(value);    // let TMRL::put() set a cycle counter break point
+      put(value.get());    // let TMRL::put() set a cycle counter break point
     }
 }
 
@@ -793,15 +793,15 @@ PR2::PR2(void)
 void PR2::put(unsigned int new_value)
 {
 
-  if(value != new_value)
+  if(value.get() != new_value)
     {
-      value = new_value;
+      value.put(new_value);
       tmr2->new_pr2();
     }
   else
-    value = new_value;
+    value.put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -818,9 +818,9 @@ T2CON::T2CON(void)
 
 void T2CON::put(unsigned int new_value)
 {
-  value = new_value;
+  value.put(new_value);
   tmr2->new_pre_post_scale();
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -833,7 +833,7 @@ TMR2::TMR2(void)
 {
   update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
   pwm_mode = 0;
-  value=0;
+  value.put(0);
   synchronized_cycle=0;
   future_cycle = 0;
   prescale=1;
@@ -848,7 +848,7 @@ void TMR2::callback_print(void)
 void TMR2::start(void)
 {
 
-  value = 0;
+  value.put(0);
   prescale = 0;
   last_cycle = 0;
   future_cycle = 0;
@@ -952,7 +952,7 @@ void TMR2::update(int ut)
 	  // Assume that we are not in pwm mode (and hence the next break will
 	  // be due to tmr2 matching pr2)
 
-	  break_value = (1 + pr2->value) << 2;
+	  break_value = (1 + pr2->value.get()) << 2;
 	  unsigned int pwm_break_value = break_value;
 
 	  last_update = TMR2_PR2_UPDATE;
@@ -962,7 +962,7 @@ void TMR2::update(int ut)
 	      // We are in pwm mode... So let's see what happens first: a pr2 compare
 	      // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	      if( (duty_cycle1 > (value*4*prescale) ) && (duty_cycle1 < break_value))
+	      if( (duty_cycle1 > (value.get()*4*prescale) ) && (duty_cycle1 < break_value))
 		{
 		  pwm_break_value = duty_cycle1;
 		  last_update = TMR2_PWM1_UPDATE;
@@ -975,7 +975,7 @@ void TMR2::update(int ut)
 	      // We are in pwm mode... So let's see what happens first: a pr2 compare
 	      // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	      if( (duty_cycle2 > (value*4*prescale) ) && (duty_cycle2 < break_value))
+	      if( (duty_cycle2 > (value.get()*4*prescale) ) && (duty_cycle2 < break_value))
 		{
 		  pwm_break_value = duty_cycle2;
 		  last_update = TMR2_PWM2_UPDATE;
@@ -997,7 +997,7 @@ void TMR2::update(int ut)
 	  else
 	    break_value = pwm_break_value;
 
-	  guint64 fc = last_cycle + ((break_value>>2) - value)  * prescale;
+	  guint64 fc = last_cycle + ((break_value>>2) - value.get())  * prescale;
 
 	  if(fc <= future_cycle)
 	    {
@@ -1027,7 +1027,7 @@ void TMR2::put(unsigned int new_value)
 {
 
 
-  value = new_value & 0xff;
+  value.put(new_value & 0xff);
 
   if(future_cycle)
     {
@@ -1036,7 +1036,7 @@ void TMR2::put(unsigned int new_value)
       // be moved to a new cycle.
 
       last_cycle = cycles.value;
-      guint64 fc = last_cycle + ((pr2->value - value) & 0xff) * prescale;
+      guint64 fc = last_cycle + ((pr2->value.get() - value.get()) & 0xff) * prescale;
 
       cycles.reassign_break(future_cycle, fc, this);
 
@@ -1048,7 +1048,7 @@ void TMR2::put(unsigned int new_value)
       post_scale = t2con->get_post_scale();
     }
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -1064,8 +1064,8 @@ unsigned int TMR2::get(void)
       current_value();
     }
 
-  trace.register_read(address, value);
-  return(value);
+  trace.register_read(address, value.get());
+  return(value.get());
   
 }
 
@@ -1081,7 +1081,7 @@ unsigned int TMR2::get_value(void)
       current_value();
     }
 
-  return(value);
+  return(value.get());
   
 }
 void TMR2::new_pre_post_scale(void)
@@ -1119,17 +1119,17 @@ void TMR2::new_pre_post_scale(void)
       // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
       // cycle counter when TMR2 last rolled over.
 
-      last_cycle = cycles.value - value * prescale;
+      last_cycle = cycles.value - value.get() * prescale;
       //cout << " effective last_cycle " << last_cycle << '\n';
 
       //cout << "tmr2's current value " << value << '\n';
 
       guint64 fc = cycles.value;
 
-      if(pr2->value == value)
+      if(pr2->value.get() == value.get())
 	fc += 0x100 * prescale;
       else
-	fc +=  ((pr2->value - value) & 0xff) * prescale;
+	fc +=  ((pr2->value.get() - value.get()) & 0xff) * prescale;
 
       //cout << "moving break from " << future_cycle << " to " << fc << '\n';
 
@@ -1142,10 +1142,10 @@ void TMR2::new_pre_post_scale(void)
       //cout << "TMR2 was off, but now it's on.\n";
 
       prescale = t2con->get_pre_scale();
-      if(pr2->value == value)
+      if(pr2->value.get() == value.get())
 	future_cycle = 0x100 * prescale;
       else
-	future_cycle =  ((pr2->value - value) & 0xff) * prescale;
+	future_cycle =  ((pr2->value.get() - value.get()) & 0xff) * prescale;
 
       last_cycle = cycles.value;
       future_cycle += cycles.value;
@@ -1168,17 +1168,17 @@ void TMR2::new_pr2(void)
       // Get the current value of the prescale counter (because
       // writing to pr2 doesn't affect the pre/post scale counters).
 
-      int curr_prescale = value * prescale - (cycles.value - last_cycle);
+      int curr_prescale = value.get() * prescale - (cycles.value - last_cycle);
 
       guint64 fc = cycles.value + curr_prescale;
 
-      if(pr2->value == value)
+      if(pr2->value.get() == value.get())
 	{  // May wanta ignore the == case and instead allow the cycle break handle it...
 	  fc += 0x100 * prescale;
 	  last_cycle += 0x100 * prescale;
 	}
       else
-	fc +=  ((pr2->value - value) & 0xff) * prescale;
+	fc +=  ((pr2->value.get() - value.get()) & 0xff) * prescale;
 
       cycles.reassign_break(future_cycle, fc, this);
 
@@ -1190,10 +1190,10 @@ void TMR2::new_pr2(void)
 
 void TMR2::current_value(void)
 {
-  value = ((cycles.value - last_cycle)/ prescale ); // & 0xff;
+  value.put((cycles.value - last_cycle)/ prescale);
 
-  if(value>0xff)
-    cout << "TMR2 BUG!! value = " << value << " which is greater than 0xff\n";
+  if(value.get()>0xff)
+    cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";
 }
 
 // TMR2 callback is called when the cycle counter hits the break point that

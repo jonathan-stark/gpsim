@@ -91,14 +91,14 @@ enum _12BIT_DEFINITIONS
 
   virtual unsigned int get_pclath_branching_jump(void)
     {
-      return ((status->value & pa_bits) << 4);
+      return ((status->value.get() & pa_bits) << 4);
     }
 
   // The modify pcl type instructions execute exactly like call instructions
 
   virtual unsigned int get_pclath_branching_modpcl(void)
     {
-      return ((status->value & pa_bits) << 4);
+      return ((status->value.get() & pa_bits) << 4);
     }
 
   // The valid bits in the FSR register vary across the various 12-bit devices

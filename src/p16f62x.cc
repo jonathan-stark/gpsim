@@ -42,12 +42,12 @@ Boston, MA 02111-1307, USA.  */
 
 CMCON::CMCON(void)
 {
-  value = 0;
+  value.put(0);
 }
 
 VRCON::VRCON(void)
 {
-  value = 0;
+  value.put(0);
 }
 
 

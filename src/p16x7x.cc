@@ -46,13 +46,13 @@ void ADRES::put(int new_value)
 {
 
   if(new_value > 255)
-    value = 255;
+    value.put(255);
   else if (new_value < 0)
-    value = 0;
+    value.put(0);
   else
-    value = new_value;
+    value.put(new_value);
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 
 }
@@ -69,7 +69,7 @@ void ADCON0::start_conversion(void)
   cout << "starting A/D conversion\n";
   #endif
 
-  if(!(value & ADON) ) {
+  if(!(value.get() & ADON) ) {
     //cout << " A/D converter is disabled\n";
     stop_conversion();
     return;
@@ -136,9 +136,9 @@ void ADCON0::put(unsigned int new_value)
 
     }
     
-  unsigned int old_value=value;
+  unsigned int old_value=value.get();
   // SET: Reflect it first!
-  value = new_value;
+  value.put(new_value);
   if(new_value & ADON)
     {
       // The A/D converter is being turned on (or maybe left on)
@@ -156,7 +156,7 @@ void ADCON0::put(unsigned int new_value)
       stop_conversion();
     }
 
-  trace.register_write(address,value);
+  trace.register_write(address,value.get());
 
 }
 
@@ -175,7 +175,7 @@ void ADCON0::put_conversion(void)
 
     if(verbose)
       cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
-    if(adcon1->value & ADCON1::ADFM) {
+    if(adcon1->value.get() & ADCON1::ADFM) {
       adresl->put(converted & 0xff);
       adres->put( (converted >> 8) & 0x3);
     } else {
@@ -221,9 +221,9 @@ void ADCON0::callback(void)
       break;
 
     case AD_ACQUIRING:
-      channel = (value >> 3) & channel_mask;
+      channel = (value.get() >> 3) & channel_mask;
       #ifdef DEBUG_AD
-      printf("Valor: 0x%02X >>3 0x%02X máscara: 0x%02X => 0x%02X\n",value,value>>3,channel_mask,channel);
+      printf("Valor: 0x%02X >>3 0x%02X máscara: 0x%02X => 0x%02X\n",value.get(),value.get()>>3,channel_mask,channel);
       #endif
 
       if(channel <= 4) {
@@ -259,7 +259,7 @@ void ADCON0::callback(void)
       put_conversion();
 
       // Clear the GO/!DONE flag.
-      value &= (~GO);
+      value.put(value.get() & (~GO));
       set_interrupt();
 
       ad_state = AD_IDLE;
@@ -271,7 +271,7 @@ void ADCON0::callback(void)
 //
 void ADCON0::set_interrupt(void)
 {
-  value |= ADIF;
+  value.put(value.get() | ADIF);
   intcon->peripheral_interrupt();
 
 }
@@ -293,13 +293,13 @@ int ADCON1::get_Vref(void)
 
   int vrefhi,vreflo;
 
-  if ( Vrefhi_position[value & valid_bits] ==  3)
+  if ( Vrefhi_position[value.get() & valid_bits] ==  3)
     vrefhi = analog_port->get_bit_voltage(3);
   else
     vrefhi = (int)(cpu14->Vdd * MAX_ANALOG_DRIVE);
 
 
-  if ( Vreflo_position[value & valid_bits] ==  2)
+  if ( Vreflo_position[value.get() & valid_bits] ==  2)
     vreflo = analog_port->get_bit_voltage(2);
   else
     vreflo = 0;

@@ -173,7 +173,7 @@ public:
 
   inline virtual void change_rom(unsigned int offset, unsigned int val) {
     assert(offset < rom_size);
-    rom[offset]->value = val;
+    rom[offset]->value.put(val);
   }
 
   inline virtual unsigned int get_rom_size(void) { return (rom_size); }

@@ -61,8 +61,8 @@ enum
 
   inline void set_gie(void)
     {
-      value |= GIE;
-      put(value);
+      value.put(value.get() | GIE);
+      put(value.get());
     }
 
   inline void set_rbif(void)

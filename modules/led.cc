@@ -134,7 +134,7 @@ Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 void Led_Port::trace_register_write(void)
 {
 
-  get_trace().module1(value);
+  get_trace().module1(value.get());
 }
 
 
@@ -608,7 +608,7 @@ void Led_7Segments::create_iopin_map(void)
 
 
   port = new Led_Port(8);
-  port->value = 0;
+  port->value.put(0);
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
@@ -864,7 +864,7 @@ void Led::create_iopin_map(void)
 
 
   port = new Led_Port(1);
-  port->value = 0;
+  port->value.put(0);
 
   // Here, we name the port `pin'. So in gpsim, we will reference
   //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
