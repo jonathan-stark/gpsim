@@ -2342,7 +2342,7 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
 
     strcpy(sbaw->commentfont_string,DEFAULT_COMMENTFONT);
     if(config_get_string(sbaw->sbw.gui_obj.name,"commentfont",&fontstring))
-	strcpy(sbaw->sourcefont_string,fontstring);
+	strcpy(sbaw->commentfont_string,fontstring);
 
     strcpy(sbaw->sourcefont_string,DEFAULT_SOURCEFONT);
     if(config_get_string(sbaw->sbw.gui_obj.name,"sourcefont",&fontstring))
