@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with gpasm; see the file COPYING.  If not, write to
+along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
@@ -986,6 +986,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
+  hi_drive = 0;
+  lo_drive = 0;
   snode = 0;
 
   if(iop) {
@@ -1045,6 +1047,10 @@ IOPIN::IOPIN(void)
   l2h_threshold = 100;
   h2l_threshold = -100;
   drive = 0;
+  hi_drive = 0;
+  lo_drive = 0;
+  hi_leakage = 0;
+  lo_leakage = 0;
   snode = 0;
 
   add_stimulus(this);
@@ -1121,8 +1127,6 @@ IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
   state = 0;
-  drive = 0;
-
 }
 
 IO_input::IO_input(void)
@@ -1151,7 +1155,7 @@ void IO_input::toggle(void)
 /*************************************
  *  int IO_input::get_voltage(guint64 current_time)
  *
- *  If this iopin has a stimulus attached to it then
+ * If this iopin has a stimulus attached to it then
  * the voltage will be dictated by the stimulus. Otherwise,
  * the voltage is determined by the state of the ioport register
  * that is inside the pic. For an input (like this), the pic code
@@ -1162,20 +1166,10 @@ void IO_input::toggle(void)
  */
 int IO_input::get_voltage(guint64 current_time)
 {
-  // The last time the stimulus to which this node is/maybe attached,
-  // the drive was updated.
+  if(!snode && iop)
+    return ( (iop->value.get() & (1<<iobit)) ? hi_drive : lo_drive);
 
-  if(snode)
-    return drive;
-  else if(iop)
-    return ( (iop->value.get() & (1<<iobit)) ? drive : -drive);
-
-  // this input is not attached to a node or an I/O port
-  // Perhaps it's an I/O pin on a module... It doesn't really
-  // make a whole lot of sense to returning anything, so just
-  // return the value of 'drive'.
-
-  return drive;
+  return get_input_leakage();
 
 }
 
@@ -1201,6 +1195,12 @@ void IO_input::put_state( int new_digital_state)
       port->setbit(iobit,0);
 
   }
+
+  // If there's a node attached to this pin, but the pin is not
+  // part of an I/O port, then we'll go ahead update the node.
+  if(snode && !port)
+    snode->update(0);
+
   //else cout << " no change in IO_input state\n";
 
 }
@@ -1271,7 +1271,9 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, R
   //  source = new source_stimulus();
 
   state = 0;
-  drive = MAX_DRIVE / 2;
+  hi_drive = MAX_DRIVE / 2;
+  lo_drive = -hi_drive;
+  drive = hi_drive;
   driving = 0;
 
 }
@@ -1307,12 +1309,12 @@ void IO_bi_directional::put_state( int new_digital_state)
     } else {
 
       // a port-less pin, probably an external module
-		int temp_state = digital_state ? 1 : 0;
+      int temp_state = digital_state ? 1 : 0;
       if((new_digital_state ^ temp_state) & 1) {
 
 	digital_state = new_digital_state & 1;
 
-	state = digital_state ? drive : -drive;
+	state = digital_state ? hi_drive : lo_drive;
 
 	if(snode)
 	  snode->update(0);
@@ -1346,7 +1348,9 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_n
   pull_up_enabled = true;
 
   state = 0;
-  drive  = MAX_DRIVE / 2;
+  hi_drive = MAX_DRIVE / 2;
+  lo_drive = - hi_drive;
+  drive  = hi_drive;;
   driving = 0;
 
   //  sprintf(name_str,"%s%n",iop->name_str,iobit);
@@ -1372,12 +1376,12 @@ int IO_bi_directional::get_voltage(guint64 current_time)
 	if( iop->value.get() & (1<<iobit))
 	  {
 	    //cout << " high\n";
-	    return drive;
+	    return hi_drive;
 	  }
 	else
 	  {
 	    //cout << " low\n";
-	    return -drive;
+	    return lo_drive;
 	  }
       } else 
 	return state;
@@ -1385,11 +1389,8 @@ int IO_bi_directional::get_voltage(guint64 current_time)
   else
     {
       // This node is not driving (because it's configured
-      // as an input). There is a stimulus attached to it, so
-      // don't upset the 'node summing'. I guess we could return
-      // a input leakage value...
-      //cout << " not driving\n";
-      return 0;
+      // as an input).
+      return get_input_leakage();
     }
 
 }
@@ -1439,12 +1440,12 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 	if( iop->value.get() & (1<<iobit))
 	  {
 	    //cout << " high\n";
-	    return drive;
+	    return hi_drive;
 	  }
 	else
 	  {
 	    //cout << " low\n";
-	    return -drive;
+	    return lo_drive;
 	  }
       } else
 	return state;
@@ -1454,9 +1455,10 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
       //cout << " pulled up\n";
       if(pull_up_enabled)
 	return (pull_up_resistor->get_voltage(current_time));
+
+      return get_input_leakage();
     }
 
-  return 0;
 }
 
 
@@ -1464,7 +1466,9 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
   : IO_input(i,b,opt_name,_iopp)
 {
 
-  drive = MAX_DRIVE / 2;
+  hi_drive = 0;
+  lo_drive = -MAX_DRIVE / 2;
+  drive = hi_drive;
   driving = 0;
 
   state = 0;
@@ -1479,25 +1483,28 @@ int IO_open_collector::get_voltage(guint64 current_time)
 
   if(driving )
     {
-      if( iop->value.get() & (1<<iobit))
-	{
-	  //cout << "high\n";
-	  return 0;
-	}
+      if(iop) {
+	if( iop->value.get() & (1<<iobit))
+	  {
+	    //cout << "high\n";
+	    return hi_drive;
+	  }
+	else
+	  {
+	    //cout << "low\n";
+	    return lo_drive;
+	  }
+      }
       else
-	{
-	  //cout << "low\n";
-	  return (-MAX_DRIVE/2);
-	}
+	return state;
     }
   else
     {
-      //cout << "open collector is configured as an input\n";
-      if(snode)
-	return 0;
-      else
-	return ( (iop->value.get() & (1<<iobit)) ? drive : (-drive));
+
+      return IO_input::get_voltage(current_time);
     }
+
+  return 0;
 }
 
 void IO_open_collector::update_direction(unsigned int new_direction)

@@ -119,10 +119,10 @@ class stimulus : public gpsimValue
 {
 public:
 
-  Stimulus_Node *snode;      /* Node to which this stimulus is attached */
-  int drive;        /* This defines the strength of the source or the magnitude of the load. */
-  int state;                 /* The most recent value of this stimulus */
-  bool digital_state;        /* 0/1 digitization of the analog state */
+  Stimulus_Node *snode;      // Node to which this stimulus is attached
+  int drive;                 // This defines the strength of the source or the magnitude of the load.
+  int state;                 // The most recent value of this stimulus
+  bool digital_state;        // 0/1 digitization of the analog state
 
   stimulus *next;
 
@@ -228,20 +228,35 @@ class IOPIN : public stimulus
       DIR_OUTPUT
     };
 
-  IOPORT *iop;    // Two ways to access parent port
-  Register **iopp;   // this later one is used to set break points.
-  unsigned int iobit;
+  IOPORT *iop;         // Two ways to access parent port
+  Register **iopp;     // this second one is used to set break points.
+  unsigned int iobit;  // 
 
+  // These are the low to high and high to low input thresholds.
   int l2h_threshold;
   int h2l_threshold;
+
+  // These are the analog levels for a digital high and low
+  // when the I/O pin is configured as an output.
+  int hi_drive;
+  int lo_drive;
+
+  // These are the analog levels the I/O pin will "drive" whenever
+  // is configured as an input and is being driven with either a
+  // logic high or logic low.
+  int hi_leakage;
+  int lo_leakage;
+
 
   IOPIN(void);
   IOPIN(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
   ~IOPIN();
+
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual int get_voltage(guint64 current_time) {return state;};
+  virtual int get_input_leakage() { return digital_state ? hi_leakage : lo_leakage;}
   virtual int get_state(void);
   virtual Register *get_iop(void);
   virtual void put_state(int new_state) {state=new_state;}; 
@@ -314,6 +329,11 @@ public:
   ~IO_bi_directional_pu();
   virtual int get_voltage(guint64 current_time);
   virtual void update_pullup(bool new_state) { pull_up_enabled = new_state; }
+  virtual void pull_hi()
+  {
+    update_pullup(true);
+    change_direction(DIR_INPUT);
+  }
 };
 
 class IO_open_collector : public IO_input
