@@ -29,6 +29,8 @@ Boston, MA 02111-1307, USA.  */
 #include "errors.h"
 #include "operator.h"
 
+#include "protocol.h"
+
 //------------------------------------------------------------------------
 Value::Value()
   : cpDescription(0)
@@ -103,6 +105,10 @@ void Value::set(Expression *expr)
 
 }
 
+void Value::set(Packet &pb)
+{
+  cout << "Value is ignoring packet buffer\n";
+}
 
 void Value::get(gint64 &i)
 {
@@ -453,6 +459,13 @@ void Boolean::set(const char *buffer, int buf_size)
   }
 }
 
+void Boolean::set(Packet &p)
+{
+  bool b;
+  if(p.DecodeBool(b))
+    set(b);
+}
+
 /*
 bool Boolean::operator&&(Value *rv)
 {
@@ -516,6 +529,24 @@ void Integer::set(Value *v)
   Integer *iv = typeCheck(v,string("set "));
   set(iv->getVal());
 }
+
+void Integer::set(Packet &p)
+{
+  unsigned int i;
+  if(p.DecodeUInt32(i)) {
+
+    set((int)i);
+    return;
+  }
+
+  guint64 i64;
+  if(p.DecodeUInt64(i64)) {
+
+    set((gint64)i64);
+    return;
+  }
+}
+
 void Integer::set(const char *buffer, int buf_size)
 {
   if(buffer) {
@@ -732,6 +763,16 @@ void Float::set(const char *buffer, int buf_size)
   }
 }
 
+void Float::set(Packet &p)
+{
+  double d;
+  if(p.DecodeFloat(d)) {
+
+    set(d);
+  }
+
+}
+
 void Float::get(gint64 &i)
 { 
   double d;
@@ -850,6 +891,11 @@ void String::set(Value *v)
     v->get(buf, sizeof(buf));
     set(buf);
   }
+}
+
+void String::set(Packet &p)
+{
+  cout << " fixme String::set(Packet &) is not implemented\n";
 }
 
 void String::set(const char *s,int len)

@@ -49,6 +49,7 @@ libgpsim_la_SOURCES = \
 	pie.cc \
 	pir.cc \
 	processor.cc \
+	protocol.cc \
 	registers.cc \
 	stimuli.cc \
 	symbol.cc \
@@ -106,6 +107,7 @@ gpsiminclude_HEADERS = \
 	pie.h \
 	pir.h \
 	processor.h \
+	protocol.h \
 	registers.h \
 	stimuli.h \
 	stimulus_orb.h \
