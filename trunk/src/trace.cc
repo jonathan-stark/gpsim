@@ -98,6 +98,32 @@ unsigned int traceValue::get_value(void)
    information we wish to trace. For example, for register reads and
    writes, there are 8-bits of data and (upto) 16-bits of address.
 
+
+   Details
+
+   Each trace takes exactly one 32-bit word. The upper 8-bits define
+   the trace type and the lower 24 are the trace value. For example,
+   a register write will get traced with a 32 bit encoded like:
+
+      TTAAAAVV
+
+   TT - Register write trace type
+   AAAA - 4-hexdigit address
+   VV - 2-hexdigit (8-bit) value
+  
+   The cycle counter is treated slightly differently. Since it is a
+   64-bit object, it has to be split across at least two trace
+   entries. The upper few bits of the cycle counter aren't
+   traced. (This is a bug for simulations that run for several
+   centuries!) The trace member function is_cycle_trace() describes
+   the cycle counter encoding in detail.
+
+   Trace frames.
+
+   A trace frame is defined to be the contents of the trace buffer
+   corresponding to a single time quantum. 
+
+
 ****************************************************************************/
 
 
@@ -328,6 +354,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	snprintf(buffer, bufsize," instruction: 0x%04x",
 		 trace_buffer[index]&0xffff);
       break;
+    case PROGRAM_COUNTER_2C:
     case PROGRAM_COUNTER:
       if(trace_flag & TRACE_PROGRAM_COUNTER) {
 	int address  = cpu->map_pm_index2address(trace_buffer[index]&0xffff);
@@ -554,61 +581,6 @@ bool Trace::find_trace(unsigned int start,
 }
 
 //------------------------------------------------------------------
-// find_cycle
-//
-//  This routine will search for the n'th cycle in the trace buffer
-// BEFORE the one at "in_index". It will then find the instruction 
-// and pc indices after this cycle.
-//
-// INPUT
-//    n - number of cycles to search back into the trace buffer.
-//
-// INPUTS/OUTPUTS
-//    instruction_index
-//    pc_index
-//    cycle_index
-//
-// These three input parameters are actually outputs. They are passed by
-// reference and will get assigned the trace buffer index at which they're
-// found. More specifically, they're assigned the trace buffer index after
-// the n'th cycle has been found
-
-#if 0
-guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_index, int &cycle_index)
-{
-  unsigned int i;
-  guint64 cycle=0;
-
-  if(in_index>0) {
-    i = in_index & TRACE_BUFFER_MASK;
-  } else {
-
-    // The trace_index is pointing to the next available slot,
-    // but we need to start looking at the last traced thing.
-    i = (trace_index-1) & TRACE_BUFFER_MASK;
-
-  }
-
-  if(find_trace(i, i-20, false, CYCLE_COUNTER_LO, cycle_index)) {
-
-    find_trace(cycle_index, i, true, PROGRAM_COUNTER, pc_index);
-    find_trace(cycle_index, i, true, INSTRUCTION, instruction_index);
-
-    int k = (cycle_index+1) & TRACE_BUFFER_MASK;
-
-    // extract the ~64bit cycle counter from the trace buffer.
-    cycle = trace_buffer[k]&0x3fffffff;
-    cycle = (cycle << 32) | 
-      ((trace_buffer[cycle_index]&0x7fffffff) | (trace_buffer[k]&0x80000000 ));
-
-  }
-
-
-  return cycle;
-}
-#endif
-
-//------------------------------------------------------------------
 // int Trace::dump(unsigned int n=0)
 //
 
@@ -616,101 +588,129 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 {
 
   char a_string[50];
-  unsigned int i;
-  int
-    instruction_index=-1,
-    pc_index=-1,
-    cycle_index=-1;
-  bool 
-    found_instruction = false,
-    found_pc = false,
-    found_cycle = false;
+  int  frame_index=-1;
+  bool found_pc = false;
+  bool found_frame = false;
 
   if(!cpu)
     return 0;
 
   if(!n)
     n = 5;
+  n++;
 
   if(!out_stream)
     return 0;
 
-  int cycle_start = trace_index-2;
-  int cycle_end = trace_index;;
+  unsigned int i = tbi(trace_index-2);
+  unsigned int k = tbi(trace_index-1);
 
-  for(i=0;i<n;i++) {
+  if(trace.is_cycle_trace(i) !=  2)
+    return 0;
 
-    if(find_trace(cycle_start-1, cycle_end, false, CYCLE_COUNTER_LO, cycle_index)) {
+  // extract the ~64bit cycle counter from the trace buffer.
+  guint64 cycle = trace_buffer[k]&0x3fffffff;
+  cycle = (cycle << 32) | 
+    ((trace_buffer[i]&0x7fffffff) | (trace_buffer[k]&0x80000000 ));
 
-      cycle_start = cycle_index;
-      found_cycle = true;
-    } else 
-      i=n;  // break the loop
+  unsigned int frame_start = tbi(trace_index-2);
+  unsigned int frame_end = trace_index;
+  k = frame_start;
 
-  }
+  // Starting at the end of the trace buffer, step backwards
+  // and count up to 'n' trace frames.
 
-  if(found_cycle) {
+  unsigned int cycle_delta = 0;
 
-    trace_flag = TRACE_ALL & ~(TRACE_CYCLE_INCREMENT | 
-			       CYCLE_COUNTER_LO      | 
-			       CYCLE_COUNTER_HI      |
-			       TRACE_INSTRUCTION     |
-			       TRACE_PROGRAM_COUNTER);
+  for(i=0;i<n && k!=frame_end;i++) {
 
-    for(i=0; i<n; i++) {
-
-      if(find_trace(cycle_start+1, cycle_end, true, CYCLE_COUNTER_LO, cycle_index)) {
-
-	//printf("Trace frame: 0x%x - 0x%x\n",cycle_start,cycle_index);
-
-	found_pc = find_trace(cycle_start, cycle_index, true, PROGRAM_COUNTER, pc_index);
-	found_instruction = find_trace(cycle_start,cycle_index, true, INSTRUCTION, instruction_index);
-
-	int k = (cycle_index+1) & TRACE_BUFFER_MASK;
-
-	// extract the ~64bit cycle counter from the trace buffer.
-	guint64 cycle = trace_buffer[k]&0x3fffffff;
-	cycle = (cycle << 32) | 
-	  ((trace_buffer[cycle_start]&0x7fffffff) | (trace_buffer[k]&0x80000000 ));
-
-	if(found_pc && found_instruction) {
-
-	  int address  = cpu->map_pm_index2address(trace_buffer[pc_index]&0xffff);
-
-	  fprintf(out_stream,"0x%016LX  %s  0x%04X  0x%04X  %s\n",
-		  cycle,
-		  cpu->name().c_str(),
-		  address,
-		  trace_buffer[instruction_index]&0xffff,
-		  (*cpu->pma)[address].name(a_string,sizeof(a_string))
-		  );
-
-	  int j = cycle_start + 1;
-
-	  do {
-	    j = (j + dump1(j,string_buffer, sizeof(string_buffer))) & TRACE_BUFFER_MASK;
-	    if(*string_buffer)
-	      printf("%s\n",string_buffer);
-	  } while (j != cycle_index);
-
-	}
+    found_pc = false;
 
 
+    cycle -= cycle_delta;
+    cycle_delta = 0;
 
-	cycle_start = cycle_index;
+    do {
+
+      k = tbi(k-1);
+      switch (type(k)) {
+      case PROGRAM_COUNTER_2C:
+	cycle_delta++;
+
+	// fall through
+
+      case PROGRAM_COUNTER:
+	cycle_delta++;
+	found_pc = true;
+	found_frame = true;
+	break;
       }
-      else 
-	i = n; // abort the loop.
-    }
+    } while (!((k==frame_end) || found_pc));
+
+
+    if(found_pc)
+      frame_start = k;
 
   }
 
+  if(!found_frame)
+    return 0;
+
+  //printf("Trace frame start: 0x%x\n",frame_start);
+
+  trace_flag = TRACE_ALL & ~(TRACE_CYCLE_INCREMENT | 
+			     CYCLE_COUNTER_LO      | 
+			     CYCLE_COUNTER_HI      |
+			     TRACE_INSTRUCTION     |
+			     TRACE_PROGRAM_COUNTER);
+
+  for(i=0; i<n; i++) {
+
+    unsigned int j = tbi(frame_start + 1);
+    found_pc = false;
+
+    while (!((j==frame_end) || found_pc)) {
+      if( type(j) == PROGRAM_COUNTER   || type(j) == PROGRAM_COUNTER_2C) {
+	frame_index = j;
+	break;
+      }
+      j = tbi(j+1);
+    }
+    
+    if(j != frame_end) {
+
+      printf("Trace frame: 0x%x - 0x%x\n",frame_start,frame_index);
+
+      int address  = cpu->map_pm_index2address(trace_buffer[frame_index]&0xffff);
+
+      fprintf(out_stream,"0x%016LX  %s  0x%04X  0x%04X  %s\n",
+	      cycle,
+	      cpu->name().c_str(),
+	      address,
+	      cpu->pma->get_opcode(address), //trace_buffer[instruction_index]&0xffff,
+	      (*cpu->pma)[address].name(a_string,sizeof(a_string))
+	      );
+
+      cycle++;
+      if( type(j) == PROGRAM_COUNTER_2C) 
+	cycle++;
+
+      int j = tbi(frame_start + 1);
+
+      while (j != frame_index) {
+	dump1(j,string_buffer, sizeof(string_buffer));
+	if(*string_buffer)
+	  printf("%s\n",string_buffer);
+	j = tbi(j + 1);
+      }
+
+      frame_start = frame_index;
+    }
+    else 
+      i = n; // abort the loop.
+  }
 
   return n;
-
-
-
-
 }
 
 //---------------------------------------------------------

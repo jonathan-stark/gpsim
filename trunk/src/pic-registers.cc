@@ -190,8 +190,6 @@ void Program_Counter::increment(void)
   trace.program_counter(value);
   value = (value + 1) & memory_size_mask;
 
-  // trace.program_counter(value);
-
   // Update pcl. Note that we don't want to pcl.put() because that 
   // will trigger a break point if there's one set on pcl. (A read/write
   // break point on pcl should not be triggered by advancing the program
@@ -212,9 +210,7 @@ void Program_Counter::skip(void)
   // Trace the value of the program counter before it gets changed.
   trace.pc_skip(value);
 
-  //trace.cycle_increment();
   value = (value + 1) & memory_size_mask;
-
 
   // Update pcl. Note that we don't want to pcl.put() because that 
   // will trigger a break point if there's one set on pcl. (A read/write
@@ -233,7 +229,7 @@ void Program_Counter::jump(unsigned int new_address)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter(value);
+  trace.program_counter_2Cycles(value);
 
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
@@ -257,7 +253,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 {
 
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter(value);
+  trace.program_counter_2Cycles(value);
 
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
@@ -267,10 +263,6 @@ void Program_Counter::interrupt(unsigned int new_address)
   cpu_pic->pcl->value.put(value & 0xff);    // see Update pcl comment in Program_Counter::increment()
   
   cycles.increment();
-  
-  //trace.cycle_increment(); 
-  //trace.program_counter(value);
-
   cycles.increment();
 
 }
@@ -310,12 +302,9 @@ void Program_Counter::computed_goto(unsigned int new_address)
 void Program_Counter::new_address(unsigned int new_value)
 {
   // Trace the value of the program counter before it gets changed.
-  trace.program_counter(value);
+  trace.program_counter_2Cycles(value);
 
   value = new_value & memory_size_mask;
-
-  //trace.cycle_increment();
-  //trace.program_counter(value);
 
   // see Update pcl comment in Program_Counter::increment()
 
@@ -358,8 +347,8 @@ void Program_Counter::put_value(unsigned int new_value)
 
 void Program_Counter::reset(void)
 { 
+  //trace.program_counter(value);  //FIXME
   value = reset_address;
-  trace.program_counter(value);
 }
 
 

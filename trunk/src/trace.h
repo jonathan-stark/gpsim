@@ -71,27 +71,28 @@ class Trace
 
   enum eTraceTypes {
     NOTHING =  0,
-    INSTRUCTION      = (1<<24),
-    PROGRAM_COUNTER  = (2<<24),
-    REGISTER_READ    = (3<<24),
-    REGISTER_WRITE   = (4<<24),
-    BREAKPOINT       = (5<<24),
-    INTERRUPT        = (6<<24),
-    READ_W           = (7<<24),
-    WRITE_W          = (8<<24),
-    _RESET           = (9<<24),
-    PC_SKIP          = (0x0a<<24),
-    WRITE_TRIS       = (0x0b<<24),
-    WRITE_OPTION     = (0x0c<<24),
-    OPCODE_WRITE     = (0x0d<<24),
-    MODULE_TRACE1    = (0x0e<<24),
-    MODULE_TRACE2    = (0x0f<<24),
-    CYCLE_INCREMENT    = (0x10<<24),
-    REGISTER_READ_VAL  = (0x11<<24),
-    REGISTER_WRITE_VAL = (0x12<<24),
-    REGISTER_READ_16BITS  = (0x13<<24),
-    REGISTER_WRITE_16BITS = (0x14<<24),
-    LAST_TRACE_TYPE       = (0x15<<24),
+    INSTRUCTION        = (1<<24),
+    PROGRAM_COUNTER    = (2<<24),
+    PROGRAM_COUNTER_2C = (3<<24),
+    REGISTER_READ      = (4<<24),
+    REGISTER_WRITE     = (5<<24),
+    BREAKPOINT         = (6<<24),
+    INTERRUPT          = (7<<24),
+    READ_W             = (8<<24),
+    WRITE_W            = (9<<24),
+    _RESET             = (0x0a<<24),
+    PC_SKIP            = (0x0b<<24),
+    WRITE_TRIS         = (0x0c<<24),
+    WRITE_OPTION       = (0x0d<<24),
+    OPCODE_WRITE       = (0x0e<<24),
+    MODULE_TRACE1      = (0x0f<<24),
+    MODULE_TRACE2      = (0x10<<24),
+    CYCLE_INCREMENT    = (0x11<<24),
+    REGISTER_READ_VAL  = (0x12<<24),
+    REGISTER_WRITE_VAL = (0x13<<24),
+    REGISTER_READ_16BITS  = (0x14<<24),
+    REGISTER_WRITE_16BITS = (0x15<<24),
+    LAST_TRACE_TYPE       = (0x16<<24),
 
     CYCLE_COUNTER_LO   = (0x80<<24),
     CYCLE_COUNTER_HI   = (0x40<<24)
@@ -144,6 +145,12 @@ class Trace
   inline void program_counter (unsigned int pc)
   {
     trace_buffer[trace_index] = PROGRAM_COUNTER | pc;
+    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
+  }
+
+  inline void program_counter_2Cycles (unsigned int pc)
+  {
+    trace_buffer[trace_index] = PROGRAM_COUNTER_2C | pc;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
@@ -282,6 +289,16 @@ class Trace
   void dump_last_instruction(void);
   int  dump1(unsigned int,char *, int);
   void dump_raw(int n);
+
+  inline unsigned int tbi(unsigned int index)
+  {
+    return index & TRACE_BUFFER_MASK;
+  }
+  unsigned int type(unsigned int index)
+  {
+    return trace_buffer[index & TRACE_BUFFER_MASK] & 0xff000000;
+  }
+
 
   int is_cycle_trace(unsigned int index);
 
