@@ -81,31 +81,35 @@ static int pinspacing = PINLENGTH;
 static unsigned char board_matrix[XSIZE][YSIZE];
 
 
-//#define allow_horiz(p) (!(board_matrix[p.x][p.y]&HMASK))
-//#define allow_vert(p) (!(board_matrix[p.x][p.y]&VMASK))
+//========================================================================
+
+class BreadBoardXREF : public CrossReferenceToGUI
+{
+public:
+
+  void Update(int new_value)
+  {
+    Breadboard_Window *bbw  = (Breadboard_Window *) (parent_window);
+
+    bbw->Update();
+
+  }
+};
+//========================================================================
 
 static inline int allow_horiz(point &p)
 {
-//    assert(p.x>=0 && p.y>=0 && p.x<XSIZE && p.y<YSIZE);
-//    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
-//	return FALSE;
-    if(board_matrix[p.x][p.y] & HMASK)
-	return FALSE;
-//    if(board_matrix[p.x][p.y] & 0xF0)
-//	return FALSE;
-    return TRUE;
+  if(board_matrix[p.x][p.y] & HMASK)
+    return FALSE;
+  return TRUE;
 }
 
 static inline int allow_vert(point &p)
 {
-//    assert(p.x>=0 && p.y>=0 && p.x<XSIZE && p.y<YSIZE);
-//    if(p.x<0 || p.y<0 || p.x>=XSIZE || p.y>=YSIZE)
-//	return FALSE;
-    if(board_matrix[p.x][p.y] & VMASK)
-	return FALSE;
-//    if(board_matrix[p.x][p.y] & 0xF0)
-//	return FALSE;
-    return TRUE;
+  if(board_matrix[p.x][p.y] & VMASK)
+    return FALSE;
+
+  return TRUE;
 }
 
 // Find the birds direction of choice to get to from s to e.
@@ -1752,24 +1756,6 @@ static void add_new_snode(GtkWidget *button, Breadboard_Window *bbw)
 	new Stimulus_Node(node_name);
 }
 
-static void xref_update(struct cross_reference_to_gui *xref, int new_value)
-{
-    Breadboard_Window *bbw;
-
-    if(xref == NULL)
-    {
-	printf("Warning gui_breadboard.c: xref_update: xref=%p\n",xref);
-	if(xref->data == NULL || xref->parent_window==NULL)
-	{
-	    printf("Warning gui_breadboard.c: xref_update: xref->data=%p, xref->parent_window=%p\n",xref->data,xref->parent_window);
-	}
-	return;
-    }
-
-    bbw  = (Breadboard_Window *) (xref->parent_window);
-
-    bbw->Update();
-}
 
 
 ////////////////////////////////////////////////////////////////////
@@ -2538,7 +2524,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     struct gui_module *p;
     int i;
-    struct cross_reference_to_gui *cross_reference;
+    BreadBoardXREF *cross_reference;
     GtkWidget *da;
     int width=50, height=18;
 
@@ -2710,12 +2696,10 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     }
 
     // Create xref
-    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+    cross_reference = new BreadBoardXREF();
     cross_reference->parent_window_type = WT_breadboard_window;
     cross_reference->parent_window = (gpointer) bbw;
     cross_reference->data = (gpointer) NULL;
-    cross_reference->update = xref_update;
-    cross_reference->remove = NULL;
     p->module->xref->add(cross_reference);
 
     gtk_widget_show(p->module_widget);
@@ -2760,7 +2744,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	struct gui_pin *pin;
 	enum orientation orientation;
         char *name;
-	struct cross_reference_to_gui *cross_reference;
+	BreadBoardXREF *cross_reference;
 	IOPIN *iopin;
 
         iopin = p->module->get_pin(i);
@@ -2769,13 +2753,11 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	if(iopin!=NULL)
 	{
 	    // Create xref
-	    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-	    cross_reference->parent_window_type = WT_breadboard_window;
-	    cross_reference->parent_window = (gpointer) bbw;
-	    cross_reference->data = (gpointer) NULL;
-	    cross_reference->update = xref_update;
-	    cross_reference->remove = NULL;
-	    iopin->xref->add(cross_reference);
+	  cross_reference = new BreadBoardXREF();
+	  cross_reference->parent_window_type = WT_breadboard_window;
+	  cross_reference->parent_window = (gpointer) bbw;
+	  cross_reference->data = (gpointer) NULL;
+	  iopin->xref->add(cross_reference);
 	}
 
 	pin_position=package->get_pin_position(i);

@@ -64,12 +64,6 @@ static menu_item menu_items[] = {
 // Used only in popup menus
 Symbol_Window *popup_sw;
 
-/*
-unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, unsigned int register_number);
-void  gpsim_assign_register_xref(unsigned int processor_id, unsigned int reg_number, gpointer xref);
-*/
-
-
 static void update_menus(Symbol_Window *sw)
 {
     GtkWidget *item;

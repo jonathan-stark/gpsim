@@ -65,7 +65,6 @@ static char *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", 
 struct profile_entry {
     unsigned int pic_id;
     unsigned int address;
-    struct cross_reference_to_gui *xref;
     guint64 last_count;
 };
 
@@ -75,14 +74,12 @@ struct profile_range_entry {
     char endaddress_text[64];
     unsigned int startaddress;
     unsigned int endaddress;
-    struct cross_reference_to_gui *xref;
     guint64 last_count;
 };
 
 struct profile_register_entry {
     unsigned int pic_id;
     unsigned int address;
-    struct cross_reference_to_gui *xref;
     guint64 last_count_read;
     guint64 last_count_write;
 };
@@ -133,6 +130,19 @@ double calculate_median(GList *start, GList *stop);
 // Used only in popup menus
 Profile_Window *popup_pw;
 
+
+//========================================================================
+class ProfileEntry : public GUIRegister {
+public:
+
+  Processor *cpu;
+  unsigned int pic_id;
+  unsigned int address;
+  guint64 last_count;
+
+};
+
+//========================================================================
 static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 {
     gtk_clist_remove(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
@@ -1949,21 +1959,6 @@ void Profile_Window::Update()
       sprintf(total_string,"%d",(int)cycles_sum);
       gtk_clist_append(GTK_CLIST(profile_exestats_clist),entry);
   }
-
-  // print debug info:
-/*  iter=pw->histogram_profile_list;
-  while(iter!=NULL)
-  {
-      struct cycle_histogram_counter *chc;
-      chc=(struct cycle_histogram_counter*)iter->data;
-      printf("start %d, stop %d, cycles %d, count %d\n",
-	     (int)chc->start_address,
-	     (int)chc->stop_address,
-	     (int)chc->histo_cycles,
-	     (int)chc->count);
-      iter=iter->next;
-  }*/
-
   gtk_clist_thaw(GTK_CLIST(profile_exestats_clist));
 
 }

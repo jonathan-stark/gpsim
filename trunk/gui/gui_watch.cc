@@ -39,15 +39,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
-struct watch_entry {
-  unsigned int pic_id;
-  Processor *cpu;
-  REGISTER_TYPE type;
-  unsigned int address;
-  struct cross_reference_to_gui *xref;
-  int last_value;
-};
-
 #define COLUMNS 15
 #define BPCOL 0
 #define NAMECOL 2
@@ -99,45 +90,58 @@ static menu_item menu_items[] = {
 // Used only in popup menus
 Watch_Window *popup_ww;
 
-static void remove_entry(Watch_Window *ww, struct watch_entry *entry)
+//========================================================================
+
+class WatchWindowXREF : public CrossReferenceToGUI
 {
-    gtk_clist_remove(GTK_CLIST(ww->watch_clist),ww->current_row);
-    ww->watches=g_list_remove(ww->watches,entry);
-    gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
-    free(entry);
+public:
+
+  void Update(int new_value)
+  {
+
+    Watch_Window *ww  = (Watch_Window *) (parent_window);
+
+    ww->Update();
+
+  }
+};
+
+//========================================================================
+
+void Watch_Window::ClearWatch(WatchEntry *entry)
+{
+  gtk_clist_remove(GTK_CLIST(watch_clist),current_row);
+  watches=g_list_remove(watches,entry);
+  //gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+  entry->Clear_xref();
+  free(entry);
 }
 
-static void update_menus(Watch_Window *ww)
+void Watch_Window::UpdateMenus(void)
 {
-    GtkWidget *item;
-    struct watch_entry *entry;
-    int i;
+  GtkWidget *item;
+  WatchEntry *entry;
 
-    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-	item=menu_items[i].item;
-	if(menu_items[i].id!=MENU_COLUMNS)
-	{
-	    if(ww)
-	    {
-		entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
-		if(menu_items[i].id!=MENU_COLUMNS && 
-		   (entry==NULL ||
-		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
-		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
-		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
-		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
-		    (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
-		    ))
-		    gtk_widget_set_sensitive (item, FALSE);
-		else
-		    gtk_widget_set_sensitive (item, TRUE);
-	    }
-	    else
-	    {
-		gtk_widget_set_sensitive (item, FALSE);
-	    }
-	}
+  int i;
+
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++) {
+    item=menu_items[i].item;
+    if(menu_items[i].id!=MENU_COLUMNS) {
+
+      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(watch_clist),current_row);
+      if(menu_items[i].id!=MENU_COLUMNS && 
+	 (entry==NULL ||
+	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
+	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
+	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
+	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
+	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
+	  ))
+	gtk_widget_set_sensitive (item, FALSE);
+      else
+	gtk_widget_set_sensitive (item, TRUE);
     }
+  }
 }
 
 static void unselect_row(GtkCList *clist,
@@ -146,48 +150,50 @@ static void unselect_row(GtkCList *clist,
 			 GdkEvent *event,
 			 Watch_Window *ww)
 {
-    update_menus(NULL);
+  ww->UpdateMenus();
 }
 
 // called when user has selected a menu item
 static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
-    menu_item *item;
+  menu_item *item;
 
-    struct watch_entry *entry;
+  WatchEntry *entry;
 
-    unsigned int pic_id;
-    int value;
+  unsigned int pic_id;
+  int value;
 
-    if(widget==NULL || data==NULL)
+  if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%p,%p)\n",widget,data);
-	return;
+      printf("Warning popup_activated(%p,%p)\n",widget,data);
+      return;
     }
     
-    item = (menu_item *)data;
-    pic_id = ((GUI_Object*)popup_ww)->gp->pic_id;
+  item = (menu_item *)data;
+  pic_id = popup_ww->gp->pic_id;
 
-    entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
+  entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
 
-    if(entry==NULL && item->id!=MENU_COLUMNS)
-	return;
+  if(entry==NULL && item->id!=MENU_COLUMNS)
+    return;
 
-    if(!entry || !entry->cpu)
-      return;
+  if(!entry || !entry->cpu)
+    return;
 
-    switch(item->id)
+  switch(item->id)
     {
     case MENU_REMOVE:
-	remove_entry(popup_ww,entry);
-	break;
+      popup_ww->ClearWatch(entry);
+      //remove_entry(popup_ww,entry);
+      break;
     case MENU_SET_VALUE:
-	value = gui_get_value("value:");
-	if(value<0)
-	    break; // Cancel
-	gpsim_put_register_value(entry->pic_id,entry->type,entry->address, value);
-	break;
+      value = gui_get_value("value:");
+      if(value<0)
+	break; // Cancel
+      //gpsim_put_register_value(entry->pic_id,entry->type,entry->address, value);
+      entry->put_value(value);
+      break;
     case MENU_BREAK_READ:
       bp.set_read_break(entry->cpu,entry->address);
       break;
@@ -210,11 +216,11 @@ popup_activated(GtkWidget *widget, gpointer data)
       bp.clear_all_register(entry->cpu,entry->address);
       break;
     case MENU_COLUMNS:
-        select_columns(popup_ww, popup_ww->watch_clist);
-	break;
+      select_columns(popup_ww, popup_ww->watch_clist);
+      break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+      puts("Unhandled menuitem?");
+      break;
     }
 }
 
@@ -298,43 +304,11 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
       gtk_signal_connect(GTK_OBJECT(item),"activate",
 			 (GtkSignalFunc) popup_activated,
 			 &menu_items[i]);
-//      GTK_WIDGET_UNSET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-
-/*      entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
-
-      if(menu_items[i].id!=MENU_COLUMNS && (
-	 entry==NULL ||
-	 (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
-	 (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
-	 (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
-	 (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
-	 (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
-	))
-	  GTK_WIDGET_UNSET_FLAGS (item,
-				  GTK_SENSITIVE | GTK_CAN_FOCUS);
-*/
-      
-/*      if(ww->type == REGISTER_EEPROM)
-      {
-	  GTK_WIDGET_UNSET_FLAGS (item,
-				  GTK_SENSITIVE | GTK_CAN_FOCUS);
-      }*/
-/*      switch(menu_items[i].id){
-      case MENU_BREAK_READ:
-      case MENU_BREAK_WRITE:
-      case MENU_BREAK_CLEAR:
-	  break;
-      default:
-          GTK_WIDGET_UNSET_FLAGS (item,
-             GTK_SENSITIVE | GTK_CAN_FOCUS);
-	  break;
-      }*/
-      
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
 
-  update_menus(ww);
+  ww->UpdateMenus();
   
   return menu;
 }
@@ -344,22 +318,21 @@ static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 {
 
-    GtkWidget *popup;
-//	GdkModifierType mods;
+  GtkWidget *popup;
 
   if(widget==NULL || event==NULL || ww==NULL)
-  {
+    {
       printf("Warning do_popup(%p,%p,%p)\n",widget,event,ww);
       return 0;
-  }
-  popup=ww->popup_menu;
-    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
-    {
-
-      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
-		     3, event->time);
     }
-    return FALSE;
+
+  popup=ww->popup_menu;
+
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+		   3, event->time);
+
+  return FALSE;
 }
 
 static gint
@@ -368,8 +341,8 @@ key_press(GtkWidget *widget,
 	  gpointer data)
 {
 
-    struct watch_entry *entry;
-    Watch_Window *ww = (Watch_Window *) data;
+  WatchEntry *entry;
+  Watch_Window *ww = (Watch_Window *) data;
 
   if(!ww) return(FALSE);
   if(!ww->gp) return(FALSE);
@@ -378,9 +351,9 @@ key_press(GtkWidget *widget,
   switch(key->keyval) {
 
   case GDK_Delete:
-      entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
+      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
       if(entry!=NULL)
-	  remove_entry(ww,entry);
+	  ww->ClearWatch(entry);
       break;
   }
   return TRUE;
@@ -392,67 +365,57 @@ static gint sigh_button_event(GtkWidget *widget,
 		       GdkEventButton *event,
 		       Watch_Window *ww)
 {
-    struct watch_entry *entry;
-    assert(event&&ww);
+  WatchEntry *entry;
+  assert(event&&ww);
 
-    if(event->type==GDK_2BUTTON_PRESS &&
-       event->button==1)
+  if(event->type==GDK_2BUTTON_PRESS &&
+     event->button==1)
     {
-	int column=ww->current_column;
-	int row=ww->current_row;
+      int column=ww->current_column;
+      int row=ww->current_row;
 	
-	entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+      entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
     
-	if(column>=MSBCOL && column<=LSBCOL)
-	{
-	  int value;  // , bit;
+      if(column>=MSBCOL && column<=LSBCOL) {
+	
+	int value;  // , bit;
 	    
-	    // Toggle the bit.
-	    value = gpsim_get_register_value(entry->pic_id,entry->type, entry->address);
-	    //bit = (value &(1<< (7-(column-MSBCOL)) ))?1:0;
-	    //bit=!bit;
-	    //
-	    //if(bit)
-	    //    value |= (1<< (7-(column-MSBCOL)) );
-	    //else
-	    //    value &= ~(value &(1<< (7-(column-MSBCOL)) ));
+	// Toggle the bit.
+	value = entry->get_value();//gpsim_get_register_value(entry->pic_id,entry->type, entry->address);
 
-	    value ^= (1<< (7-(column-MSBCOL)));
-	    gpsim_put_register_value(entry->pic_id,entry->type, entry->address,value);
-	}
+	value ^= (1<< (7-(column-MSBCOL)));
+	entry->put_value(value);
+	//gpsim_put_register_value(entry->pic_id,entry->type, entry->address,value);
+      }
     }
 
-    return 0;
+  return 0;
 }
 
 static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,GdkEvent *event, Watch_Window *ww)
 {
-    struct watch_entry *entry;
-    //    int bit;
-    GUI_Processor *gp;
+  WatchEntry *entry;
+  GUI_Processor *gp;
     
-    ww->current_row=row;
-    ww->current_column=column;
+  ww->current_row=row;
+  ww->current_column=column;
 
-    gp=ww->gp;
+  gp=ww->gp;
     
-    entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+  entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
 
-    if(!entry)
-	return TRUE;
+  if(!entry)
+    return TRUE;
     
-    if(entry->type==REGISTER_RAM)
-    {
-	gp->regwin_ram->SelectRegister(entry->address);
-    }
-    else if(entry->type==REGISTER_EEPROM)
-    {
-	gp->regwin_eeprom->SelectRegister(entry->address);
-    }
+  if(entry->type==REGISTER_RAM)
+    gp->regwin_ram->SelectRegister(entry->address);
+  else if(entry->type==REGISTER_EEPROM)
+    gp->regwin_eeprom->SelectRegister(entry->address);
 
-    update_menus(ww);
+
+  ww->UpdateMenus();
     
-    return 0;
+  return 0;
 }
 
 static void watch_click_column(GtkCList *clist, int column)
@@ -490,48 +453,42 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
+//static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
+void Watch_Window::UpdateWatch(WatchEntry *entry)
 {
-    char str[80];
-    int i;
+  char str[80];
+  int i;
 
-    int row;
+  int row;
 
-    row=gtk_clist_find_row_from_data(GTK_CLIST(ww->watch_clist),entry);
-    if(row==-1)
-    {
-	puts("\n\nwhooopsie\n");
-	return;
-    }
+  row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
+  if(row==-1)
+    return;
 
-    sprintf(str,"%d",new_value);
-    gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, DECIMALCOL, str);
+  int new_value = entry->get_value();
+  sprintf(str,"%d", new_value);
+  gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
 
-    sprintf(str,"0x%02x",new_value);
-    gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, HEXCOL, str);
+  sprintf(str,"0x%02x",new_value);
+  gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
 
-    if(new_value>=32)
-	sprintf(str,"%c",new_value);
-    else
-        str[0]=0;
-    gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, ASCIICOL, str);
+  if(new_value>=32)
+    sprintf(str,"%c",new_value);
+  else
+    str[0]=0;
+  gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
 
-    for(i=7;i>=0;i--)
-    {
-      //int bit; 
+  for(i=7;i>=0;i--) {
 
-	//bit=new_value/(1<<i);
+    gtk_clist_set_text(GTK_CLIST(watch_clist), row, MSBCOL+ i,
+			 ((new_value&1) ? "1" : "0"));
+    new_value >>= 1;
+  }
 
-	//sprintf(str, "%d", bit);
-        gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, MSBCOL+ i, //(7-i), str);
-			   ((new_value&1) ? "1" : "0"));
-	new_value >>= 1;
-	//new_value%=(1<<i);
-    }
-    if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
-	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "yes");
-    else
-	gtk_clist_set_text(GTK_CLIST(ww->watch_clist), row, BPCOL, "no");
+  if(gpsim_reg_has_breakpoint(entry->pic_id, entry->type, entry->address))
+    gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "yes");
+  else
+    gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "no");
 }
 
 //------------------------------------------------------------------------
@@ -542,7 +499,7 @@ static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
 void Watch_Window::Update(void)
 {
   GList *iter;
-  struct watch_entry *entry;
+  WatchEntry *entry;
   int clist_frozen=0;
   int value;
 
@@ -550,61 +507,50 @@ void Watch_Window::Update(void)
 
   while(iter) {
    
-    entry=(struct watch_entry*)iter->data;
+    entry=(WatchEntry*)iter->data;
 
-    value = gpsim_get_register_value(entry->pic_id,entry->type,entry->address);
+    value = entry->get_value();
 	
-    if(entry->last_value != value)
-      {
-	if(clist_frozen==0)
-	  {
-	    gtk_clist_freeze(GTK_CLIST(watch_clist));
-	    clist_frozen=1;
-	  }
+    if(entry->get_shadow() != value) {
+      // The register has changed since the last update.
 
-	// Update value in clist
-	update(this,entry,value);
-	entry->last_value=value;
+      if(clist_frozen==0) {
+	gtk_clist_freeze(GTK_CLIST(watch_clist));
+	clist_frozen=1;
       }
+
+      // Update value in clist
+      entry->put_shadow(value);
+      UpdateWatch(entry);
+    }
     iter=iter->next;
   }
   if(clist_frozen)
     gtk_clist_thaw(GTK_CLIST(watch_clist));
 }
 
-static void xref_update(struct cross_reference_to_gui *xref, int new_value)
-{
-  //struct watch_entry *entry;
-    Watch_Window *ww;
+extern file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
 
-    if(xref == NULL)
-    {
-      printf("Warning gui_watch.c: xref_update: xref=%p\n",xref);
-      return;
-    }
-
-    //entry = (struct watch_entry*) xref->data;
-    ww  = (Watch_Window *) (xref->parent_window);
-
-    //    update(ww,entry,new_value);
-    ww->Update();
-}
-
-void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
+void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address, Register *reg)
 {
   char name[50], addressstring[50], typestring[30];
   char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
   int row;
-  struct cross_reference_to_gui *cross_reference;
+  WatchWindowXREF *cross_reference;
   char *regname;
 
-  struct watch_entry *watch_entry;
+  WatchEntry *watch_entry;
     
   if(!enabled)
     Build();
 
   if(!gp || !gp->cpu)
     return;
+  if(!reg) {
+    reg = gpsim_get_register(pic_id,type,address);
+    if(!reg)
+      return;
+  }
 
   regname = gpsim_get_register_name(pic_id,type,address);
 
@@ -617,31 +563,28 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
 
   row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
 
-  // FIXME this memory is never freed?
-  watch_entry = (struct watch_entry*) malloc(sizeof(struct watch_entry));
+  watch_entry = new WatchEntry();
   watch_entry->address=address;
   watch_entry->pic_id=pic_id;
   watch_entry->cpu = gp->cpu;
   watch_entry->type=type;
-  watch_entry->last_value=-1; // non-normal value to force first update
+
+  watch_entry->reg = reg;
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
     
   watches = g_list_append(watches, (gpointer)watch_entry);
 
-  update(this, watch_entry,gpsim_get_register_value(watch_entry->pic_id,watch_entry->type,watch_entry->address) );
+  UpdateWatch(watch_entry);
 
-  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference = new WatchWindowXREF();
   cross_reference->parent_window_type = WT_watch_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = (gpointer) watch_entry;
-  cross_reference->update = xref_update;
-  cross_reference->remove = NULL;
-  gpsim_assign_register_xref(pic_id, type, address, (gpointer) cross_reference);
 
-  watch_entry->xref=cross_reference;
-    
-  update_menus(this);
+  watch_entry->Assign_xref(cross_reference);
+
+  UpdateMenus();
 }
 
 //------------------------------------------------------------------------
@@ -652,17 +595,18 @@ void Watch_Window::Add(unsigned int pic_id, REGISTER_TYPE type, int address)
 void Watch_Window::ClearWatches(void)
 {
   GList *iter;
-  struct watch_entry *entry;
+  WatchEntry *entry;
   int row;
 
   iter=watches;
 
   while(iter) {
 
-    entry=(struct watch_entry*)iter->data;
+    entry=(WatchEntry*)iter->data;
     row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
     gtk_clist_remove(GTK_CLIST(watch_clist),row);
-    gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+    //gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+    entry->Clear_xref();
     free(entry);
     iter=iter->next;
   }
@@ -744,7 +688,6 @@ void Watch_Window::Build(void)
 
   is_built=1;
 
-  //update_menu_item((GUI_Object*)ww);
   UpdateMenuItem();
 
 }

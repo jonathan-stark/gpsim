@@ -128,6 +128,25 @@ static struct {
 
 static int dlg_x=200, dlg_y=200;
 
+//========================================================================
+
+class SourceXREF : public CrossReferenceToGUI
+{
+public:
+
+  void Update(int new_value)
+  {
+    SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)(parent_window);
+
+    if(sbaw->source_loaded)
+    {
+      sbaw->SetPC(new_value);
+    }
+  }
+};
+
+//========================================================================
+
 static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 
 // all of these gui_xxxx_to_entry() do linear search.
@@ -308,19 +327,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
   if(!GTK_WIDGET_VISIBLE(new_pcw))
     gtk_widget_show(new_pcw);
-}
-
-static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
-{
-    SourceBrowserAsm_Window *sbaw;
-
-    sbaw = (SourceBrowserAsm_Window*)(xref->parent_window);
-
-    if(sbaw->source_loaded)
-    {
-      //SourceBrowserAsm_set_pc(sbaw, new_address);
-      sbaw->SetPC(new_address);
-    }
 }
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
@@ -1762,7 +1768,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   struct file_context *gpsim_file;
   int file_id;
 
-  struct cross_reference_to_gui *cross_reference;
+  CrossReferenceToGUI *cross_reference;
   int address;
 
   if(gp == NULL)
@@ -1785,12 +1791,10 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
-  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+  cross_reference = new CrossReferenceToGUI();
   cross_reference->parent_window_type =   WT_asm_source_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = (gpointer) NULL;
-  cross_reference->update = pc_changed;
-  cross_reference->remove = NULL;
   gpsim_assign_pc_xref(pic_id, cross_reference);
 
   for(i=0;i<gp->cpu->number_of_source_files;i++)

@@ -143,6 +143,109 @@ static int dlg_x=200, dlg_y=200;
 // Used only in popup menus
 Register_Window *popup_rw;
 
+//========================================================================
+
+void GUIRegister::put_value(unsigned int new_value)
+{
+  if(reg)
+    reg->put_value(new_value);
+
+  // Shadow a copy of the register value so that we can tell if it has changed
+  // when we go to perform an update in the future.
+
+  shadow_value = new_value;
+}
+
+void GUIRegister::put_shadow(unsigned int new_value)
+{
+  // Update the shadow copy of the register without updating the register.
+  shadow_value = new_value;
+}
+
+unsigned int GUIRegister::get_value(void)
+{
+  if(reg)
+    return reg->get_value();
+
+  return 0;
+}
+
+unsigned int GUIRegister::get_shadow(void)
+{
+  return shadow_value;
+}
+
+void GUIRegister::Clear_xref(void)
+{
+  if(reg && reg->xref)
+    reg->xref->clear((gpointer *)xref);
+}
+
+void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
+{
+
+  if(reg && reg->xref)
+    reg->xref->add( (gpointer *)new_xref);
+
+  xref = new_xref;
+}
+
+
+//========================================================================
+
+class RegisterWindowXREF : public CrossReferenceToGUI
+{
+public:
+
+  void Update(int new_value)
+  {
+    GUIRegister *reg;
+    Register_Window *rw;
+    int address;
+
+  
+    reg = (GUIRegister *) (data);
+    rw  = (Register_Window *) (parent_window);
+
+    if(reg->row > GTK_SHEET(rw->register_sheet)->maxrow)
+      {
+	puts("Warning reg->row > maxrow in xref_update_cell");
+	return;
+      }
+
+    address = rw->row_to_address[reg->row]+reg->col;
+
+    rw->registers[address]->update_full=TRUE;
+    rw->UpdateRegisterCell(address);
+  
+    update_ascii(rw,reg->row);
+  }
+
+};
+
+
+//========================================================================
+//
+// Create a class for an invalid register and instantiate a single instance
+// of it. The purpose of this is to provide a place holder for the gui
+// register array.
+//
+
+class InvalidGuiRegister : public GUIRegister {
+public:
+  void put_value(unsigned int new_value) { };
+  unsigned int get_value(void) { return 0;};
+
+  InvalidGuiRegister(void) {
+    reg = NULL;
+  }
+private:
+  void operator delete(void *ignore) {};
+};
+
+static InvalidGuiRegister THE_invalid_register;
+
+//========================================================================
 
 // get_value
 static void a_cb(GtkWidget *w, gpointer user_data)
@@ -580,7 +683,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address);
+	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address,popup_rw->registers[address]->reg);
 	  }
       break;
     case MENU_SETTINGS:
@@ -793,8 +896,9 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
       if(errno != 0)
 	{
-	  n = gpsim_get_register_value(gp->pic_id, rw->type, reg);
-	  rw->registers[reg]->value = -1;
+	  //n = gpsim_get_register_value(gp->pic_id, rw->type, reg);
+	  n = rw->registers[reg]->get_value();
+	  rw->registers[reg]->put_shadow(INVALID_VALUE);
 	}
 
       // n=value in sheet cell
@@ -802,12 +906,13 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
       // check if value has changed, and write if so
       if(gpsim_get_register_name(gp->pic_id,rw->type, reg))
       {
-	  if(n != rw->registers[reg]->value)
-	  {
-	      //puts("Writing new value");
-	      gpsim_put_register_value(gp->pic_id, rw->type, reg, n&0xff);
-	      update_ascii(rw,row);
-	  }
+	if(n != rw->registers[reg]->get_shadow())//rw->registers[reg]->value)
+	{
+	  printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
+	  rw->registers[reg]->put_value(n&0xff);
+	  //gpsim_put_register_value(gp->pic_id, rw->type, reg, n&0xff);
+	  update_ascii(rw,row);
+	}
       }
     }
   else
@@ -1127,8 +1232,9 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	for(i=0;i<cti;i++)
 	{
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    value=gpsim_get_register_value(rw->gp->pic_id,rw->type,from);
-	    gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
+	    rw->registers[to]->put_value(rw->registers[from]->get_value());
+	    //value=gpsim_get_register_value(rw->gp->pic_id,rw->type,from);
+	    //gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1156,8 +1262,9 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	{
 	    from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	    value=gpsim_get_register_value(rw->gp->pic_id, rw->type, from);
-	    gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
+	    rw->registers[to]->put_value(rw->registers[from]->get_value());
+	    //value=gpsim_get_register_value(rw->gp->pic_id, rw->type, from);
+	    //gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1363,7 +1470,7 @@ static void update_ascii(Register_Window *rw, gint row)
   for(i=0; i<REGISTERS_PER_ROW; i++)
     {
 
-	name[i] = rw->registers[rw->row_to_address[row] + i]->value;
+      name[i] = rw->registers[rw->row_to_address[row] + i]->get_shadow(); //->value;
 
 	if( (name[i] < ' ') || (name[i]>'z'))
 	    name[i] = '.';
@@ -1407,10 +1514,14 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   range.col0=registers[reg_number]->col;
   range.coli=registers[reg_number]->col;
 
+  // bulk mode stuff is for the ICD.
   gpsim_set_bulk_mode(1);
-  new_value=gpsim_get_register_value(gp->pic_id, type,reg_number);
+  //new_value=gpsim_get_register_value(gp->pic_id, type,reg_number);
+  new_value=registers[reg_number]->get_value();
   gpsim_set_bulk_mode(0);
-  last_value=registers[reg_number]->value;
+
+  last_value=registers[reg_number]->get_shadow(); // registers[reg_number]->value;
+
   if(gpsim_get_register_name(gp->pic_id, type,reg_number))
       valid_register=1;
   
@@ -1426,7 +1537,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 	sprintf (name, "%02x", new_value);
     }
     else {
-      new_value=-1; // magic value
+      new_value=INVALID_VALUE; // magic value
       strcpy(name, "");
     }
 
@@ -1442,7 +1553,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
     if(new_value != last_value) {
 
-      registers[reg_number]->value = new_value;
+      registers[reg_number]->put_shadow(new_value);
       registers[reg_number]->update_full=TRUE;
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
     } else
@@ -1466,12 +1577,12 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
     if(new_value==INVALID_VALUE) {
       
-      registers[reg_number]->value = -1;
+      registers[reg_number]->put_shadow(INVALID_VALUE);
       sprintf (name, "??");
     } else {
 
-      // the register is changed since last update
-      registers[reg_number]->value = new_value;
+      // the register has changed since last update
+      registers[reg_number]->put_shadow(new_value);
       sprintf (name, "%02x", new_value);
     }
 
@@ -1528,7 +1639,7 @@ void Register_Window::Update(void)
     row_changed = FALSE;
     for(i = 0; i<REGISTERS_PER_ROW; i++) {
       address = row_to_address[j]+i;
-      if(registers[address]->value!=-1 || registers[address]->update_full) {
+      if(registers[address]->get_shadow()!=INVALID_VALUE || registers[address]->update_full) {
 
 	if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
 	  row_changed = TRUE;
@@ -1539,45 +1650,7 @@ void Register_Window::Update(void)
   }
 }
 
-
-static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
-{
-  GUIRegister *reg;
-  Register_Window *rw;
-  int address;
-
-  if(xref == NULL)
-  {
-      printf("Warning update_register_cell: xref=%p\n",xref);
-      return;
-  }
-  
-  reg = (GUIRegister *) (xref->data);
-  rw  = (Register_Window *) (xref->parent_window);
-
-  if(reg->row > GTK_SHEET(rw->register_sheet)->maxrow)
-  {
-      puts("Warning reg->row > maxrow in xref_update_cell");
-      return;
-  }
-
-  address = rw->row_to_address[reg->row]+reg->col;
-
-  rw->registers[address]->update_full=TRUE;
-  rw->UpdateRegisterCell(address);
-  
-  update_ascii(rw,reg->row);
-}
-
-static void xref_remove_cell(struct cross_reference_to_gui *xref)
-{
-  if(xref == NULL)
-    return;
-
-  if(verbose)
-    printf("%s() doesn't do anything\n", __FUNCTION__);
-
-}
+extern file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number);
 
 void Register_Window::NewProcessor(GUI_Processor *gp)
 {
@@ -1585,7 +1658,7 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
 
 #define NAME_SIZE 32
   gint i,j,reg_number, border_mask, border_width;
-  struct cross_reference_to_gui *cross_reference;
+  CrossReferenceToGUI *cross_reference;
   gboolean row_created;
   GtkSheetRange range;
   int pic_id;
@@ -1602,9 +1675,7 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
   pic_id = gp->pic_id;
 
   for(i=0;i<MAX_REGISTERS;i++){
-    if(registers[i]!=NULL)
-      free(registers[i]);
-    registers[i]=NULL;
+    registers[i]=&THE_invalid_register;
   }
 
   if(register_sheet == NULL){
@@ -1636,25 +1707,29 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
     registers[reg_number] = new GUIRegister; //(GUIRegister  *)malloc(sizeof(GUIRegister));
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
-    registers[reg_number]->value = -1;
+    registers[reg_number]->put_shadow(INVALID_VALUE);
     registers[reg_number]->update_full=TRUE;
+    //registers[reg_number]->reg = gp->cpu->registers[reg_number];
+    registers[reg_number]->reg = gpsim_get_register(gp->cpu->processor_id,
+						    type,
+						    reg_number);
+
     if(gpsim_get_register_name (pic_id, type,reg_number)) {
 
       gpsim_set_bulk_mode(1);
-      registers[reg_number]->value = gpsim_get_register_value(pic_id, type,reg_number);
+      registers[reg_number]->put_shadow(registers[reg_number]->get_value());
       gpsim_set_bulk_mode(0);
 
       /* Now create a cross-reference link that the simulator can use to
        * send information back to the gui
        */
 
-      cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+      cross_reference = new RegisterWindowXREF();
       cross_reference->parent_window_type =   WT_register_window;
       cross_reference->parent_window = (gpointer) this;
       cross_reference->data = (gpointer) registers[reg_number];
-      cross_reference->update = xref_update_cell;
-      cross_reference->remove = xref_remove_cell;
-      gpsim_assign_register_xref(pic_id, type, reg_number, (gpointer) cross_reference);
+      registers[reg_number]->Assign_xref(cross_reference);
+      //gpsim_assign_register_xref(pic_id, type, reg_number, (gpointer) cross_reference);
 
       if(!row_created)
 	{
@@ -1753,9 +1828,8 @@ void Register_Window::Build(void)
     gtk_widget_destroy(window);
     for(i=0;i<MAX_REGISTERS;i++)
       {
-	if(registers[i]!=NULL)
-	  free(registers[i]);
-	registers[i]=NULL;
+	delete registers[i];
+	registers[i]=&THE_invalid_register;
       }
   }
 	
@@ -1948,7 +2022,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   
   registers = (GUIRegister  **)malloc(MAX_REGISTERS*sizeof(GUIRegister *));
   for(i=0;i<MAX_REGISTERS;i++)
-    registers[i]=NULL;
+    registers[i]=&THE_invalid_register;
 
   for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
     row_to_address[i]=-1;

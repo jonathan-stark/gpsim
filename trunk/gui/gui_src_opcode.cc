@@ -109,6 +109,26 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow);
 extern int font_dialog_browse(GtkWidget *w, gpointer user_data);
 
 
+//========================================================================
+
+class SourceOpcodeXREF : public CrossReferenceToGUI
+{
+public:
+
+  void Update(int new_value)
+  {
+
+    SourceBrowserOpcode_Window *sbow;
+
+    sbow = (SourceBrowserOpcode_Window*)(parent_window);
+    
+    sbow->SetPC(new_value);
+
+  }
+};
+
+//========================================================================
+
 // update ascii column in sheet
 static void update_ascii( SourceBrowserOpcode_Window *sbow, gint row)
 {
@@ -1088,16 +1108,6 @@ void SourceBrowserOpcode_Window::SetPC(int address)
     }
 }
 
-static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
-{
-    SourceBrowserOpcode_Window *sbow;
-
-    sbow = (SourceBrowserOpcode_Window*)(xref->parent_window);
-    
-    sbow->SetPC(new_address);
-
-}
-
 void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 {
     char buf[128];
@@ -1107,7 +1117,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     int pm_size;
     int pc;
 
-    struct cross_reference_to_gui *cross_reference;
+    SourceOpcodeXREF *cross_reference;
 
     if(gp == NULL)
       return;
@@ -1127,12 +1137,10 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     /* Now create a cross-reference link that the
      * simulator can use to send information back to the gui
      */
-    cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-    cross_reference->parent_window_type =   WT_opcode_source_window;
+    cross_reference = new SourceOpcodeXREF();
+    cross_reference->parent_window_type = WT_opcode_source_window;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) NULL;
-    cross_reference->update = pc_changed;
-    cross_reference->remove = NULL;
     gpsim_assign_pc_xref(pic_id, cross_reference);
 
     gtk_clist_freeze (GTK_CLIST (clist));
@@ -1151,7 +1159,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 	memory[i]=opcode;
 	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
 	sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), 128);
+	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), sizeof(buf));
 
 	gtk_sheet_set_cell(GTK_SHEET(sheet),
 			   i/16,

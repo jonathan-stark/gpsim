@@ -72,6 +72,17 @@ DB_ID dbid=-1;
 extern GtkWidget *dispatcher_window;
 
 //------------------------------------------------------------------------
+void CrossReferenceToGUI::Update(int new_value)
+{
+  printf("CrossReferenceToGUI::Update shouldn't be called!\n");
+}
+
+void CrossReferenceToGUI::Remove(void)
+{
+  printf("CrossReferenceToGUI::Remove shouldn't be called!\n");
+}
+
+//------------------------------------------------------------------------
 //
 
 class GUI_Interface : public Interface
@@ -118,10 +129,8 @@ GUI_Interface::GUI_Interface(GUI_Processor *_gp) : Interface ( (gpointer *) _gp)
 void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 {
 
-  struct cross_reference_to_gui *xref;
-
-  xref = (struct cross_reference_to_gui *)gui_xref;
-  xref->update(xref,new_value);
+  CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
+  xref->Update(new_value);
 
 }
 
@@ -133,11 +142,8 @@ void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 void GUI_Interface::RemoveObject(gpointer gui_xref)
 {
 
-  struct cross_reference_to_gui *xref;
-
-  xref = (struct cross_reference_to_gui *)gui_xref;
-  if(xref->remove)
-    xref->remove(xref);
+  CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
+  xref->Remove();
 
 }
 
@@ -328,27 +334,6 @@ void gui_new_processor (unsigned int pic_id)
 
 }
 
-/*------------------------------------------------------------------
- *
- */
-void gui_new_module (Module *module)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp)
-    gp->breadboard_window->NewModule(module);
-}
-
-/*------------------------------------------------------------------
- *
- */
-void gui_node_configuration_changed (Stimulus_Node *node)
-{
-
-  // FIX ME - need to search for *p in the gp list...
-  if(gp)
-    gp->breadboard_window->NodeConfigurationChanged(node);
-}
 
 /*------------------------------------------------------------------
  *
@@ -389,6 +374,30 @@ void gui_new_source (unsigned int pic_id)
 
   }
 }
+
+#if 0
+/*------------------------------------------------------------------
+ *
+ */
+void gui_new_module (Module *module)
+{
+
+  // FIX ME - need to search for *p in the gp list...
+  if(gp)
+    gp->breadboard_window->NewModule(module);
+}
+
+/*------------------------------------------------------------------
+ *
+ */
+void gui_node_configuration_changed (Stimulus_Node *node)
+{
+
+  // FIX ME - need to search for *p in the gp list...
+  if(gp)
+    gp->breadboard_window->NodeConfigurationChanged(node);
+}
+
 
 /*------------------------------------------------------------------
  * update_program_memory
@@ -437,6 +446,8 @@ void gui_remove_object(gpointer gui_xref)
     xref->remove(xref);
 
 }
+#endif //  0
+
 
 /*------------------------------------------------------------------
  * gui_init
@@ -488,18 +499,6 @@ int gui_init (int argc, char **argv)
   gp = new GUI_Processor();
 
   gi.add_interface(new GUI_Interface(gp));
-  /*
-  interface_id = gpsim_register_interface((gpointer) gp);
-  gpsim_register_update_object(interface_id,gui_update_object);
-  gpsim_register_remove_object(interface_id, gui_remove_object);
-  gpsim_register_new_processor(interface_id, gui_new_processor);
-  gpsim_register_simulation_has_stopped(interface_id, gui_simulation_has_stopped);
-  gpsim_register_new_program(interface_id, gui_new_program);
-  gpsim_register_new_module(interface_id, gui_new_module);
-  gpsim_register_node_configuration_changed(interface_id, gui_node_configuration_changed);
-  gpsim_register_gui_update(interface_id, gui_simulation_has_stopped);
-  */
-
   return(0);
 }
 

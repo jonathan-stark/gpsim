@@ -120,25 +120,6 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
-void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value)
-{
-  GUI_Processor *gp;
-  int address;
-
-  gp = (GUI_Processor *)xref->parent_window;
-  if(!gp) { printf("gp == null\n"); return;}
-
-  assert(xref && xref->data);
-
-  address = *(int *)xref->data;
-
-  if(gp->source_browser)
-      gp->source_browser->UpdateLine(address);
-
-  if(gp->program_memory)
-      gp->program_memory->UpdateLine(address);
-
-}
 
 void SourceBrowser_Window::SetPC(int address)
 {
