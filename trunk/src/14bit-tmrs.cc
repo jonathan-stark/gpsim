@@ -193,13 +193,13 @@ void CCPCON::new_edge(unsigned int level)
       if (level == 0)
 	ccprl->capture_tmr();
 
-      if(level==0) cout << "CCPCON caught falling edge\n";
+      //if(level==0) cout << "CCPCON caught falling edge\n";
       break;
 
     case CAP_RISING_EDGE:
       if (level)
 	ccprl->capture_tmr();
-      if(level)cout << "CCPCON caught rising edge\n";
+      //if(level)cout << "CCPCON caught rising edge\n";
       break;
 
     case CAP_RISING_EDGE4:
@@ -1081,6 +1081,16 @@ void TMR2::new_pre_post_scale(void)
 {
 
   //cout << "T2CON was written to, so update TMR2\n";
+
+  if(!t2con->get_tmr2on()) {
+    // TMR2 is not on. If has just been turned off, clear the callback breakpoint.
+
+    if(future_cycle) {
+      cycles.clear_break(this);
+      future_cycle = 0;
+      return;
+    }
+  }
 
   if(future_cycle)
     {

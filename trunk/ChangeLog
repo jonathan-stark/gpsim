@@ -1,4 +1,9 @@
-2004-04-07 Scott Dattalo <scott@dattalo.com>
+2004-04-14 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-tmrs.cc: The TMR2 peripheral failed to properly clear
+	its breakpoint whenever it was being turned off.
+	*src/modules.h: string.h was not getting included.
+	
+2004-04-13 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/breakpoints.h: 
 	Redesigned breakpoints so that a) they're more object oriented and b) more
 	easily extensible.
