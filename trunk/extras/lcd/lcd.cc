@@ -49,6 +49,9 @@ Boston, MA 02111-1307, USA.  */
 */
 
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
@@ -94,7 +97,7 @@ void LcdBusy::set(double waitTime)
 {
   if(!bBusyState) {
     bBusyState = true;
-    cycles.set_break(cycles.get(waitTime), this);
+    get_cycles().set_break(get_cycles().get(waitTime), this);
   }
 }
 
@@ -195,7 +198,7 @@ unsigned int DataPort::get(void)
 void Lcd_Port::trace_register_write(void)
 {
 
-  trace.module1(value.get());
+  get_trace().module1(value.get());
 }
 
 //-----------------------------------------------------
@@ -234,7 +237,7 @@ void ControlPort::callback(void)
   if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
     cout << "ControlPort::callback(void)\n";
 
-  cycles.set_break_delta(break_delta, this);
+  get_cycles().set_break_delta(break_delta, this);
 
 }
 
@@ -310,7 +313,7 @@ void LcdDisplay::create_iopin_map(void)
   control_port->value.put(0);
   control_port->lcd = this;
 
-  cycles.set_break_delta(1000, control_port);
+  get_cycles().set_break_delta(1000, control_port);
 
   data_port = new DataPort(8);
   data_port->value.put(0);
@@ -369,7 +372,7 @@ void LcdDisplay::create_iopin_map(void)
   for(int i =1; i<get_pin_count(); i++) {
     IOPIN *p = get_pin(i);
     if(p)
-      symbol_table.add_stimulus(p);
+      get_symbol_table().add_stimulus(p);
   }
 }
 
@@ -429,7 +432,7 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
     debug = atoi(getenv("GPSIM_LCD_DEBUG"));
 
   interface = new LCD_Interface(this);
-  gi.add_interface(interface);
+  get_interface().add_interface(interface);
 
   CreateGraphics();
 
@@ -443,7 +446,7 @@ LcdDisplay::~LcdDisplay()
 
   //gpsim_unregister_interface(interface_id);
   delete data_port;
-  cycles.clear_break(control_port); // Hmmmm. FIXME.
+  get_cycles().clear_break(control_port); // Hmmmm. FIXME.
   delete control_port;
   delete interface;
 

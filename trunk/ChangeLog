@@ -1,3 +1,12 @@
+2004-08-10 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: packaging of examples, extras, ...
+	* plat/win32/gpsim.def: updated exports
+	* extras/lcd/lcd.cc, extras/lcd/lcdengine.cc, extras/lcd/lcdgui.cc,
+	  extras/lcd/module_manager.cc: define IN_MODULE for modules, calling
+	  accessor methods for global objects
+	* modules/makefile.mingw, modules/modules.vcproj: removed unneeded
+	  define MODULES_EXPORTS
+
 2004-08-09 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-registers.cc, src/14bit-registers.h, src/14bit-tmrs.cc,
 	src/16bit-registers.cc, src/attribute.cc, src/eeprom.cc, src/intcon.cc
@@ -27,7 +36,6 @@
 	Two categories of changes have been made: First, the unitialized register
 	concept has been propogated to all of the register constructions. Second,
 	tracing has been improved yet again.
-
 
 2004-08-04 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: packaging of MinGW executables

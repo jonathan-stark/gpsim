@@ -39,10 +39,13 @@ support:
 
   void mod_list(void) - Prints a list of the modules in a library
   Module * getmodule(char *module_type) - creates a new module
- */
+*/
+
+
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
 
 #include <iostream>
-#include <dlfcn.h>
 #include <stdio.h>
 #include <glib.h>
 #include <gpsim/modules.h>
@@ -87,4 +90,3 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
