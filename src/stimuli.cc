@@ -561,11 +561,28 @@ void asynchronous_stimulus::callback(void)
   if(verbose)
     cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
+  // If there's a node attached to this stimulus, then update it.
+  if(snode)
+    snode->update(current_cycle);
+
+#if 0
+  // Get the next data point.
+  if(current_sample) 
+    current_sample = current_sample->next;
+  else {
+
+    // Either there never was data or the period is 0 
+    // and we've already used it up.
+
+    return;
+  }
+
+#endif
+
   // If we've passed through all of the states
   // then start over from the beginning.
-
-  //  if( (++current_index) >= max_states)
   current_sample = current_sample->next;
+
   if(!current_sample)
     {
       if(period == 0)     // If the period is zero then we don't want to 
@@ -611,8 +628,6 @@ void asynchronous_stimulus::callback(void)
     cout <<"  next value = " << next_state << '\n';
   }
 
-  if(snode)
-    snode->update(current_cycle);
 }
 
 int asynchronous_stimulus::get_voltage(guint64 current_time) 
@@ -995,7 +1010,7 @@ void IO_input::put_state( int new_digital_state)
 
 void IO_input::put_node_state( int new_state)
 {
-  cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
+  // cout << "IO_input::put_node_state() " << " node = " << name() << " new_state = " << new_state <<'\n';
 
 
   // No need to proceed if we already in the new_state.
