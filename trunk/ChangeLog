@@ -1,3 +1,6 @@
+2004-03-01  Bert Driehuis <driehuis@playbeing.org>
+	* src/icd.cc: include time.h for BSD 
+
 2004-03-01 Scott Dattalo  <scott@dattalo.com>
 	* modules/* - 
 	Updated the (internal) modules to comply with the new gpsim interface standard

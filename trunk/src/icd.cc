@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <time.h>
 #include <assert.h>
 
 #include "../config.h"
