@@ -1,3 +1,10 @@
+2004-06-27 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc: From Ralph, the breadboard was not
+	using module pixmaps.
+	* cli/cmd_module.cc, cli/cmd_module.h, cli/command.cc,
+	cli/parse.yy: cli module command now supports expressions.
+
+
 2004-06-27 Borut Razem <borut.razem@siol.net>
 	* gpsim.sln: set project dependency - modules depends on gpsim
 	* gpsim/gpsim.vcproj: corrected Ignore Specific Library settings

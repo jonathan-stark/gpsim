@@ -52,6 +52,7 @@ static cmd_options cmd_module_options[] =
   {"lib",       CMD_MOD_LIB ,    OPT_TT_STRING},
   {"set",       CMD_MOD_SET ,    OPT_TT_STRING},
   {"position",  CMD_MOD_POSITION,OPT_TT_STRING},
+  {"pos",       CMD_MOD_POSITION,OPT_TT_STRING},
   {0,0,0}
 };
 
@@ -91,7 +92,9 @@ cmd_module::cmd_module(void)
     "\tmodule pins my_lcd          // Display the pin states of an instantiated module\n"
     "\tmodule load lcd lcd2x20     // Create a new module.\n"
     "\tmodule load pullup R1       // and another.\n"
-    "\tmodule set R1 resistance 10e3 // change an attribute.\n");
+    "\tmodule set R1 resistance 10e3 // change an attribute.\n"
+    "\tmodule pos R1 200 300       // Move R1 in the breadboard window\n"
+);
 
   op = cmd_module_options; 
 }
@@ -106,10 +109,12 @@ void cmd_module::module(void)
 
 }
 
-void cmd_module::module(int bit_flag)
+void cmd_module::module(cmd_options *opt)
 {
+  if(!opt)
+    return;
 
-  switch(bit_flag)
+  switch(opt->value)
     {
 
     case CMD_MOD_LIST:
@@ -117,8 +122,57 @@ void cmd_module::module(int bit_flag)
       break;
 
     default:
-      cout << "cmd_module error\n";
+      cout << "cmd_module error:";
+      if(opt->name)
+	cout << " no parameters with option: " << opt->name;
+      cout << endl;
     }
+
+}
+
+void cmd_module::module(cmd_options_str *cos, 
+			list <string> *strs,
+			ExprList_t *eList)
+{
+  if (strs) {
+
+    const int cMAX_PARAMETERS=2;
+    int nParameters=cMAX_PARAMETERS;
+    guint64 parameters[cMAX_PARAMETERS] = {0,0};
+
+    evaluate(eList, parameters, &nParameters);
+
+    list <string> :: iterator si;
+    si = strs->begin();
+
+    string s1, s2;
+
+    if(strs->size() >= 1) {
+      s1 = *si;
+    
+      if(strs->size() >= 2) {
+	++si;
+	s2 = *si;
+      }
+    }
+
+
+    // Now choose the specific set of strings and numbers
+    
+    if(nParameters==0 && strs->size()==1)
+      module(cos, (char*)s1.c_str(), (char*)0);
+    else if(nParameters==0 && strs->size()==2)
+      module(cos, (char*)s1.c_str(), (char*)s2.c_str());
+    else if(nParameters==1 && strs->size()==1)
+      module(cos, (char*)s1.c_str(), parameters[0]);
+    else if(nParameters==2 && strs->size()==0)
+      module(cos, parameters[0], parameters[1]);
+    else if(nParameters==1 && strs->size()==2)
+      module(cos, (char*)s1.c_str(), (char*)s2.c_str(), parameters[0]);
+    else
+      cout << "module command error\n";
+  } else
+    module(cos);
 
 }
 
@@ -126,6 +180,8 @@ void cmd_module::module(int bit_flag)
 void cmd_module::module(cmd_options_str *cos)
 {
 
+  if(!cos)
+    return;
 
   switch(cos->co->value)
     {
@@ -160,9 +216,11 @@ void cmd_module::module(cmd_options_str *cos)
       cout << "cmd_module error\n";
     }
 
+  delete cos;
+
 }
 
-
+/*
 void cmd_module::module(cmd_options_str *cos, char * op1)
 {
 
@@ -171,10 +229,6 @@ void cmd_module::module(cmd_options_str *cos, char * op1)
 
     case CMD_MOD_LOAD:
       // Load a module from (an already loaded) library 
-
-      if(verbose)
-	cout << "module command got the module " << cos->str << " named " 
-	     << op1 << '\n';
 
       module_load_module( cos->str,  op1);
 
@@ -194,12 +248,20 @@ void cmd_module::module(cmd_options_str *cos, char * op1)
 
 
 }
+*/
 
 void  cmd_module::module(cmd_options_str *cos, char *op1, char *op2)
 {
 
   switch(cos->co->value)
     {
+
+    case CMD_MOD_LOAD:
+      // Load a module from (an already loaded) library 
+
+      module_load_module( cos->str,  op1);
+
+      break;
 
     case CMD_MOD_SET:
       cout << "module set command :  module name = " << cos->str <<'\n';

@@ -303,11 +303,7 @@ aborting: ABORT
 	  }
 	  ;
             
-attach_cmd: ATTACH string_list
-          {
-	    attach.attach($2);
-	    delete $2;
-	  }
+attach_cmd: ATTACH string_list          {attach.attach($2); delete $2;}
           ;
 
 break_cmd
@@ -370,67 +366,21 @@ log_cmd
           | LOG bit_flag expr_list      {c_log.log($2,0,$3);}
           ;
 
+
+node_cmd
+          : NODE                        {c_node.list_nodes();}
+          | NODE string_list            {c_node.add_nodes($2);  delete $2;}
+          ;
+
+module_cmd
+          : MODULE                      {c_module.module();}
+          | MODULE bit_flag             {c_module.module($2);}
+          | MODULE string_option        {c_module.module($2,(list <string> *)0,0);}
+          | MODULE string_option string_list
+                                        {c_module.module($2, $3, 0);}
+          | MODULE string_option string_list expr_list 
+                                        {c_module.module($2, $3, $4);}
 /*
-          | LOG NUMBER
-          {
-	    c_log.log($2);
-	  }
-          | LOG bit_flag
-          {
-	    c_log.log($2);
-	  }
-          | LOG bit_flag STRING 
-          {
-	    c_log.log($2,$3,-1,-1);
-	  }
-          | LOG bit_flag STRING NUMBER
-          {
-	    c_log.log($2,$3,$4,0);
-	  }
-          | LOG bit_flag STRING NUMBER NUMBER
-          {
-	    c_log.log($2,$3,$4,$5);
-	  }
-          | LOG bit_flag NUMBER 
-          {
-	    c_log.log($2,$3,-1,-1);
-	  }
-          | LOG bit_flag NUMBER NUMBER 
-          {
-	    c_log.log($2,$3,$4,0);
-	  }
-          | LOG bit_flag NUMBER NUMBER NUMBER
-          {
-	    c_log.log($2,$3,$4,$5);
-	  }
-          ;
-*/
-
-node_cmd: NODE
-          { 
-	    c_node.list_nodes();
-	  }
-          | NODE string_list
-          {
-	    c_node.add_nodes($2);
-	    delete $2;
-          }
-          ;
-
-module_cmd: MODULE
-          { 
-            c_module.module();
-          }
-          | MODULE bit_flag
-	  {
-	    c_module.module($2->value);
-	  }
-          | MODULE string_option
-	  { 
-            c_module.module($2);
-            delete $2;
-          }
-
           | MODULE string_option STRING
 	  { 
             c_module.module($2, $3);
@@ -470,6 +420,7 @@ module_cmd: MODULE
             c_module.module($2, $3, $4, $5);
             delete($2);
           }
+*/
           ;
 
 
