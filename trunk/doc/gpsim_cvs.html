@@ -49,10 +49,10 @@ couple of extra steps to build it. But those steps are really simple. In the
 directory you downloaded gpsim from CVS, enter these commands:
 </p>
 <pre>
-$ libtoolize
+$ libtoolize --force
 $ aclocal
 $ autoheader
-$ automake --add-missing
+$ automake --force-missing --add-missing
 $ autoconf
 $ ./configure
 $ make
