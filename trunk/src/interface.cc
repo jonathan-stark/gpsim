@@ -53,12 +53,12 @@ unsigned int gpsim_is_initialized = 0;  // Flag to tell us when all of the init 
 
 int hll_mode=0; // 0 - asm, 1 - HLL
 
-extern "C" {
+//extern "C" {
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
-}
-extern "C" {
+//}
+//extern "C" {
   extern void redisplay_prompt(void);  // in input.cc
-}
+//}
 
 //--------------------------------------------------------------------
 // InterfaceObject 
@@ -139,8 +139,6 @@ gpsimInterface gi;
 
 
 //--------------------------------------------------------------------------
-
-pic_processor *get_processor(unsigned int cpu_id);
 
 unsigned int processor_has_eeprom(pic_processor *pic)
 {

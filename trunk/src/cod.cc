@@ -41,7 +41,7 @@ Boston, MA 02111-1307, USA.  */
 
 #ifdef HAVE_GUI
 #include "../gui/gui_interface.h"
-extern "C" { void gui_new_program (unsigned int); }
+void gui_new_program (unsigned int);
 #endif
 
 #include "fopen-path.h"

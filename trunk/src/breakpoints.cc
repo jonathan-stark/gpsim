@@ -35,9 +35,9 @@ extern "C"{
 extern int last_command_is_repeatable;
 extern unsigned int simulation_start_cycle;
 extern pic_processor *active_cpu;
-extern "C" {
+//extern "C" {
   extern void redisplay_prompt(void);  // in input.cc
-}
+//}
 
 Breakpoints bp;
 

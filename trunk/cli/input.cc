@@ -72,7 +72,7 @@ extern "C" {
 
 int yyparse(void);
 void initialize_readline (void);
-extern "C" {
+//extern "C" {
 void exit_gpsim(void);
 #ifdef HAVE_GUI
   void quit_gui(void);
@@ -80,7 +80,7 @@ void exit_gpsim(void);
 #endif
 
 void redisplay_prompt(void);
-}
+//}
 
 char *gnu_readline (char *s, unsigned int force_readline);
 bool using_readline=1;
