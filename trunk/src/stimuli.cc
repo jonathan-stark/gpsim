@@ -1102,8 +1102,8 @@ Register *IOPIN::get_iop(void)
 // 
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
-
-  //cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
+  if(verbose)
+    cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
   
   nodeVoltage = new_nodeVoltage;
 
@@ -1128,17 +1128,39 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 
 }
 
+//------------------------------------------------------------
+// put_digital_state - called by peripherals when they wish to
+// drive an I/O pin to a new state.
+
 void IOPIN::put_digital_state(bool new_state)
 {
+  /*
   Register *port = get_iop();
   if(port)
     port->setbit(iobit, new_state);
+  */
 
   if(new_state != digital_state) {
     digital_state = new_state;
     Vth = digital_state ? 5.0 : 0.3;
+    
+    if(verbose)
+      cout << name()<< " put_digital_state= " 
+	   << (new_state ? "high" : "low") << endl;
+    
+    // If this pin is tied to a node, then update the node.
+    // Note that when the node is updated, then the I/O port
+    // (if there is one) holding this I/O pin will get updated.
+    // If this pin is not tied to a node, then try to update
+    // the I/O port directly.
+
     if(snode)
       snode->update(0);
+    else {
+      Register *port = get_iop();
+      if(port)
+	port->setbit(iobit, new_state);
+    }
   }
 }
 
@@ -1153,11 +1175,13 @@ void IOPIN::set_digital_state(bool new_state)
 
 bool IOPIN::get_digital_state(void)
 {
+  /*
   Register *port = get_iop();
 
   if(port)
     digital_state = port->get_bit(iobit);
-
+  */
+  //cout << "get_digital_state -- changed 14NOV04\n";
   return digital_state;
 }
 
@@ -1288,12 +1312,15 @@ double IO_bi_directional_pu::get_Zth()
 double IO_bi_directional_pu::get_Vth()
 {
   
-  /*
-  cout << name() << "get_Vth "
-       << " driving=" << driving
-       << " digital_state=" << digital_state
-       << " bPullUp=" << bPullUp << endl;
-  */  
+  /**/
+  if(verbose)
+    cout << name() << "get_Vth "
+	 << " driving=" << driving
+	 << " digital_state=" << digital_state
+	 << " Vth=" << Vth
+	 << " VthIn=" << VthIn
+	 << " bPullUp=" << bPullUp << endl;
+  /**/  
 
   // If the pin is configured as an output, then the driving voltage
   // depends on the pin state. If the pin is an input, and the pullup resistor

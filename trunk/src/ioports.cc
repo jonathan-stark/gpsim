@@ -300,26 +300,6 @@ void IOPORT::put(unsigned int new_value)
 }
 
 //-------------------------------------------------------------------
-//  PIC_IOPORT::put(unsigned int new_value)
-//
-//  inputs:  new_value - here's where the I/O port is written (e.g.
-//                       gpsim is executing a MOVWF IOPORT,F instruction.)
-//  returns: none
-//
-//  The I/O Port is updated with the new value. If there are any stimuli
-// attached to the I/O pins then they will be updated as well.
-//
-//-------------------------------------------------------------------
-
-void PIC_IOPORT::put(unsigned int new_value)
-{
-  //cout << name() << "::put 0x" << hex << new_value << endl;
-
-  RegisterValue oldValue = value;
-  IOPORT::put(new_value);
-  check_peripherals(oldValue);
-}
-//-------------------------------------------------------------------
 // void IOPORT::put_value(unsigned int new_value)
 //
 //  When there's a gui initiated change to the IO port, we'll pass
@@ -394,15 +374,6 @@ void IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
 }
 
 //-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PIC_IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
-{
-
-  if(tris)
-    tris->setbit(bit_number, new_direction);
-}
-
-//-------------------------------------------------------------------
 // attach_iopin
 //   This will store a pointer to the iopin that is associated with
 // one of the bits of the I/O port.
@@ -464,6 +435,35 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 }
 
 //-------------------------------------------------------------------
+//  PIC_IOPORT::put(unsigned int new_value)
+//
+//  inputs:  new_value - here's where the I/O port is written (e.g.
+//                       gpsim is executing a MOVWF IOPORT,F instruction.)
+//  returns: none
+//
+//  The I/O Port is updated with the new value. If there are any stimuli
+// attached to the I/O pins then they will be updated as well.
+//
+//-------------------------------------------------------------------
+
+void PIC_IOPORT::put(unsigned int new_value)
+{
+  //cout << name() << "::put 0x" << hex << new_value << endl;
+
+  RegisterValue oldValue = value;
+  IOPORT::put(new_value);
+  check_peripherals(oldValue);
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PIC_IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
+{
+
+  if(tris)
+    tris->setbit(bit_number, new_direction);
+}
+
+//-------------------------------------------------------------------
 // PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 //
 //  Whenever a new value is written to a tris register, then we need
@@ -509,13 +509,12 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 unsigned int PIC_IOPORT::get(void)
 {
   RegisterValue oldValue = value;
-
   IOPORT::get();
-
   check_peripherals(oldValue);
 
   return value.get();
 }
+
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -524,6 +523,23 @@ bool PIC_IOPORT::get_bit(unsigned int bit_number)
   //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
   return (internal_latch &  (1<<bit_number )) ? true : false;
 
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PIC_IOPORT::setbit(unsigned int bit_number, bool new_value)
+{
+  RegisterValue oldValue = value;
+  IOPORT::setbit( bit_number,  new_value);
+  check_peripherals(oldValue);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
+{
+  tris = 0;
+  latch = 0;
 }
 
 //-------------------------------------------------------------------
@@ -536,14 +552,6 @@ void IOPORT::trace_register_write(void)
 {
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
-{
-  tris = 0;
-  latch = 0;
 }
 
 IOPORT::IOPORT(unsigned int _num_iopins)
@@ -968,6 +976,9 @@ void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
 }
 
 
+void PORTB_62x::check_peripherals(RegisterValue oldValue)
+{
+}
 
 //-------------------------------------------------------------------
 //  PORTA_62x::put(unsigned int new_value)
@@ -1088,6 +1099,10 @@ void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
   }
   
 }
+void PORTA_62x::check_peripherals(RegisterValue oldValue)
+{
+}
+
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -1180,18 +1195,18 @@ PORTC::PORTC(void)
 //-------------------------------------------------------------------
 unsigned int PORTC::get(void)
 {
-  unsigned int old_value;
-
-  old_value = value.get();
-
+  RegisterValue oldValue = value;
   IOPORT::get();
+  check_peripherals(oldValue);
 
-  int diff = old_value ^ value.get(); // The difference between old and new
+  return(value.get());
 
-  // ugh. go through and check each bit and see if we need to propogate
-  // info to a peripheral.
+}
 
-  // 
+void PORTC::check_peripherals(RegisterValue oldValue)
+{
+  int diff = oldValue.get() ^ value.get(); // The difference between old and new
+
   if( ccp1con && (diff & CCP1) )
     ccp1con->new_edge(value.get() & CCP1);
  
@@ -1206,7 +1221,6 @@ unsigned int PORTC::get(void)
   if(tmrl && (diff & T1CKI))
     tmrl->increment();
 
-  return(value.get());
 }
 
 //-------------------------------------------------------------------
@@ -1214,24 +1228,16 @@ unsigned int PORTC::get(void)
 void PORTC::setbit(unsigned int bit_number, bool new_value)
 {
 
-  unsigned int old_value = value.get();
-
   if(verbose)
     cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
 
-  IOPORT::setbit( bit_number,  new_value);
+  PIC_IOPORT::setbit( bit_number,  new_value);
 
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  if(ccp1con && ( diff & CCP1) )
-    ccp1con->new_edge(value.get() & CCP1);
-
-  if( usart && (diff & RX))
-    usart->new_rx_edge(value.get() & RX);
-
-  if( ssp && (diff & SCK))
-    ssp->new_sck_edge(value.get() & SCK);
-
+  cout << "PORTC::setbit() bit " 
+       << bit_number << " is done new value is "
+       << ( (value.get() & (1<<bit_number)) ? "high" : "low")
+       << endl;
+  
 }
 
 //-------------------------------------------------------------------
@@ -1246,9 +1252,8 @@ PORTD::PORTD(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void PORTD::setbit(unsigned int bit_number, bool new_value)
+void PORTD::check_peripherals(RegisterValue oldValue)
 {
-  IOPORT::setbit( bit_number,  new_value);
 }
 
 //-------------------------------------------------------------------
@@ -1260,12 +1265,8 @@ PORTE::PORTE(void)
 {
   new_name("porte");
 }
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTE::setbit(unsigned int bit_number, bool new_value)
+void PORTE::check_peripherals(RegisterValue oldValue)
 {
-  IOPORT::setbit( bit_number,  new_value);
 }
 
 //-------------------------------------------------------------------
@@ -1280,10 +1281,10 @@ PORTF::PORTF(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void PORTF::setbit(unsigned int bit_number, bool new_value)
+void PORTF::check_peripherals(RegisterValue oldValue)
 {
-  IOPORT::setbit( bit_number,  new_value);
 }
+
 
 //-------------------------------------------------------------------
 //
@@ -1297,7 +1298,7 @@ PORTG::PORTG(void)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
-void PORTG::setbit(unsigned int bit_number, bool new_value)
+void PORTG::check_peripherals(RegisterValue oldValue)
 {
-  IOPORT::setbit( bit_number,  new_value);
 }
+

@@ -82,6 +82,10 @@ public:
 
   }
   
+  bool get_digital_state(void)
+  {
+    return digital_state;
+  }
 
 };
 

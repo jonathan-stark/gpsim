@@ -102,6 +102,7 @@ public:
   virtual void check_peripherals(RegisterValue rv) {}
   virtual unsigned int get(void);
   virtual bool get_bit(unsigned int bit_number);
+  virtual void setbit(unsigned int bit_number, bool new_value);
   PIC_IOPORT(unsigned int _num_iopins=8);
 
 };
@@ -189,6 +190,7 @@ class PORTB_62x : public PORTB
   PORTB_62x(void);
   unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 };
 
 class PORTA : public PIC_IOPORT
@@ -246,8 +248,9 @@ class PORTA_62x : public PIC_IOPORT
   PORTA_62x(void);
 
   void setbit(unsigned int bit_number, bool new_value);
-  unsigned int get(void);
+  virtual unsigned int get(void);
   virtual void put(unsigned int new_value);
+  virtual void check_peripherals(RegisterValue rv);
 
 };
 
@@ -296,8 +299,9 @@ class PORTC : public PIC_IOPORT
   TMRL *tmrl;
 
   PORTC(void);
-  unsigned int get(void);
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual unsigned int get(void);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 };
 
 
@@ -307,7 +311,7 @@ public:
 
   PORTD(void);
 
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 
 };
 
@@ -317,7 +321,7 @@ public:
 
   PORTE(void);
 
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 
 };
 
@@ -327,7 +331,7 @@ public:
 
   PORTF(void);
 
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 
 };
 
@@ -337,7 +341,7 @@ public:
 
   PORTG(void);
 
-  void setbit(unsigned int bit_number, bool new_value);
+  virtual void check_peripherals(RegisterValue rv);
 
 };
 

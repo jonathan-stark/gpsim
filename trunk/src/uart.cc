@@ -136,15 +136,14 @@ void _TXSTA::put(unsigned int new_value)
       cout << "TXSTA - enabling transmitter\n";
       if(txreg) {
 	cout << " TXSTA - does have a txreg\n";
-	  txreg->empty();
-#if 0
+	//txreg->empty();
+
 	if(txreg->is_empty()) {
 	  txreg->empty();
 	} else {
           cout << "start_transmitting1" << endl;
 	  start_transmitting();
       }
-#endif
       }
     } else 
       stop_transmitting();
@@ -257,8 +256,8 @@ void _TXSTA::transmit_a_bit(void)
 
   if(bit_count)
     {
-
-      //cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
+      if(verbose)
+        cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
       if(txpin)
 	txpin->put_digital_state((tsr&1) ? true : false);
 
@@ -272,8 +271,8 @@ void _TXSTA::transmit_a_bit(void)
 
 void _TXSTA::callback(void)
 {
-
-  //cout << "RCSTA callback " << (cycles.value) << '\n';
+  if(verbose)
+    cout << "TXSTA callback " << (cycles.value) << '\n';
 
   transmit_a_bit();
 

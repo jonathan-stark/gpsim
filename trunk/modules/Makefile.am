@@ -6,6 +6,9 @@ lib_LTLIBRARIES = libgpsim_modules.la
 
 libgpsim_modules_la_SOURCES = \
 	gpsim_modules.cc \
+	ttoken.cc ttoken.h pthread-wrapper.h \
+	bitlog.cc bitlog.h \
+	bytelog.cc bytelog.h \
 	binary_indicator.cc binary_indicator.h \
 	resistor.cc resistor.h \
 	usart.cc usart.h \
