@@ -1670,6 +1670,9 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   if(registers[reg_number]->bUpdateFull) {
 
+    // A 'Full Update' means that the foreground and background colors
+    // need to be repainted.
+
     registers[reg_number]->bUpdateFull=false;
 
     if(registers[reg_number]->row<=register_sheet->maxrow) {
