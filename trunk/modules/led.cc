@@ -156,6 +156,9 @@ void Led_7Segments::update(  GtkWidget *widget,
   w_height = new_height;
   GdkDrawable *drawable = widget->window;
 
+  if(!GTK_WIDGET_REALIZED(widget))
+    return;
+
   if(segment_gc==NULL)
   {
       segment_gc = gdk_gc_new(darea->window);
@@ -659,6 +662,9 @@ void Led::update(  GtkWidget *widget,
   w_width = new_width;
   w_height = new_height;
   GdkDrawable *drawable = widget->window;
+
+  if(!GTK_WIDGET_REALIZED(widget))
+    return;
 
   if(gc==NULL)
   {
