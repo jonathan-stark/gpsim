@@ -190,7 +190,13 @@ void GUIRegister::Assign_xref(CrossReferenceToGUI *new_xref)
   xref = new_xref;
 }
 
+bool GUIRegister::hasBreak(void)
+{
+  if(reg)
+    return reg->hasBreak();
 
+  return false;
+}
 //========================================================================
 
 class RegisterWindowXREF : public CrossReferenceToGUI
@@ -896,7 +902,6 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
       if(errno != 0)
 	{
-	  //n = gpsim_get_register_value(gp->pic_id, rw->type, reg);
 	  n = rw->registers[reg]->get_value();
 	  rw->registers[reg]->put_shadow(INVALID_VALUE);
 	}
@@ -906,11 +911,10 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
       // check if value has changed, and write if so
       if(gpsim_get_register_name(gp->pic_id,rw->type, reg))
       {
-	if(n != rw->registers[reg]->get_shadow())//rw->registers[reg]->value)
+	if(n != rw->registers[reg]->get_shadow())
 	{
 	  printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
 	  rw->registers[reg]->put_value(n&0xff);
-	  //gpsim_put_register_value(gp->pic_id, rw->type, reg, n&0xff);
 	  update_ascii(rw,row);
 	}
       }
@@ -1233,8 +1237,6 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	{
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
 	    rw->registers[to]->put_value(rw->registers[from]->get_value());
-	    //value=gpsim_get_register_value(rw->gp->pic_id,rw->type,from);
-	    //gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1263,8 +1265,6 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 	    from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
 	    to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
 	    rw->registers[to]->put_value(rw->registers[from]->get_value());
-	    //value=gpsim_get_register_value(rw->gp->pic_id, rw->type, from);
-	    //gpsim_put_register_value(rw->gp->pic_id, rw->type, to, value);
 	}
     }
 }
@@ -1516,11 +1516,10 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
   // bulk mode stuff is for the ICD.
   gpsim_set_bulk_mode(1);
-  //new_value=gpsim_get_register_value(gp->pic_id, type,reg_number);
   new_value=registers[reg_number]->get_value();
   gpsim_set_bulk_mode(0);
 
-  last_value=registers[reg_number]->get_shadow(); // registers[reg_number]->value;
+  last_value=registers[reg_number]->get_shadow();
 
   if(gpsim_get_register_name(gp->pic_id, type,reg_number))
       valid_register=1;
@@ -1559,7 +1558,8 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     } else
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
 
-    if(gpsim_reg_has_breakpoint(gp->pic_id, type, reg_number))
+    //if(gpsim_reg_has_breakpoint(gp->pic_id, type, reg_number))
+    if(registers[reg_number]->hasBreak())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &breakpoint_color);
     else if(!valid_register)
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &invalid_color);
@@ -1704,12 +1704,11 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
 	row_created=FALSE;
       }
 	
-    registers[reg_number] = new GUIRegister; //(GUIRegister  *)malloc(sizeof(GUIRegister));
+    registers[reg_number] = new GUIRegister;
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
     registers[reg_number]->put_shadow(INVALID_VALUE);
     registers[reg_number]->update_full=TRUE;
-    //registers[reg_number]->reg = gp->cpu->registers[reg_number];
     registers[reg_number]->reg = gpsim_get_register(gp->cpu->processor_id,
 						    type,
 						    reg_number);
@@ -1729,7 +1728,6 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
       cross_reference->parent_window = (gpointer) this;
       cross_reference->data = (gpointer) registers[reg_number];
       registers[reg_number]->Assign_xref(cross_reference);
-      //gpsim_assign_register_xref(pic_id, type, reg_number, (gpointer) cross_reference);
 
       if(!row_created)
 	{

@@ -124,6 +124,17 @@ public:
    */
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
+
+  /*
+    Provide a way to query whether or not there is a break point set
+    on this register. This code works by taking advantage of the 
+    fact that isa() is a virtual function. Register breakpoints
+    are implemented with "breakpoint objects" that are derived
+    from the register class. These objects will replace the real
+    register objects that exist in the register memory.
+   */
+
+  virtual bool hasBreak(void) { return isa() == BP_REGISTER; }
 };
 
 

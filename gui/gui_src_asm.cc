@@ -467,7 +467,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new profile start widget if address has notify start
-  if(gp->cpu->address_has_profile_start(address))
+  if(gp->cpu->pma.address_has_profile_start(address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
@@ -482,7 +482,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new profile stop widget if address has notify start
-  if(gp->cpu->address_has_profile_stop(address))
+  if(gp->cpu->pma.address_has_profile_stop(address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
@@ -497,7 +497,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   }
 
   // Create a new breakpoint widget if address has breakpoint
-  if(gp->cpu->address_has_break(address))
+  if(gp->cpu->pma.address_has_break(address))
   {
       // There has appeared a new breakpoint, so we
       // append it to sbaw->breakpoints;
@@ -588,11 +588,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 	{
 	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
-	if(popup_sbaw->gp->cpu->address_has_profile_start(address))
+	if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
 	    gpsim_clear_profile_start_at_address(pic_id,address);
 	else
 	{
-	    if(popup_sbaw->gp->cpu->address_has_profile_stop(address))
+	    if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
 	    {
 		// Can't have both start and stop at the same address
 		// ..it becomes difficult to calculate the cycles
@@ -615,11 +615,11 @@ popup_activated(GtkWidget *widget, gpointer data)
 
 	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
 	}
-	if(popup_sbaw->gp->cpu->address_has_profile_stop(address))
+	if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
 	    gpsim_clear_profile_stop_at_address(pic_id,address);
 	else
 	{
-	    if(popup_sbaw->gp->cpu->address_has_profile_start(address))
+	    if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
 	    {
 		// Can't have both start and stop at the same address
 		// ..it becomes difficult to calculate the cycles

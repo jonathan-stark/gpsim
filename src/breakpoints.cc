@@ -619,7 +619,7 @@ void Breakpoints::clear(unsigned int b)
                 icd_clear_break();
 	    }
 
-	  inst = bs.cpu->find_instruction(bs.arg1, instruction::BREAKPOINT_INSTRUCTION);
+	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::BREAKPOINT_INSTRUCTION);
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
@@ -644,7 +644,7 @@ void Breakpoints::clear(unsigned int b)
 	  break;
 
 	case NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->find_instruction(bs.arg1, instruction::NOTIFY_INSTRUCTION);
+	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::NOTIFY_INSTRUCTION);
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
@@ -668,7 +668,7 @@ void Breakpoints::clear(unsigned int b)
 
 	  break;
 	case PROFILE_START_NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->find_instruction(bs.arg1, instruction::PROFILE_START_INSTRUCTION);
+	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_START_INSTRUCTION);
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);
@@ -692,7 +692,7 @@ void Breakpoints::clear(unsigned int b)
 
 	  break;
 	case PROFILE_STOP_NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->find_instruction(bs.arg1, instruction::PROFILE_STOP_INSTRUCTION);
+	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_STOP_INSTRUCTION);
 	  abp= (Breakpoint_Instruction *) inst;
 
 	  previous = find_previous(bs.cpu, bs.arg1, inst);

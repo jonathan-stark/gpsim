@@ -2078,7 +2078,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
     if(gp->cpu->pma.isValid_opcode(i)) {
 	
       sprintf(address_string,"0x%04x",i);
-      strcpy(instruction_string,gpsim_get_opcode_name( gp->cpu, i,buf));
+      strcpy(instruction_string,gp->cpu->pma.get_opcode_name(i,buf,sizeof(buf)));
 
       cycles=gp->cpu->cycles_used(i);
       sprintf(count_string,"0x%Lx",cycles);

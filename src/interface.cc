@@ -847,12 +847,12 @@ void gpsim_set_write_break_at_address(unsigned int processor_id,
 void gpsim_set_execute_break_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    pic->set_break_at_address(address);
+  pic->pma.set_break_at_address(address);
 }
 //--------------------------------------------------------------------------
 void gpsim_set_notify_point_at_address(unsigned int processor_id,
@@ -860,16 +860,16 @@ void gpsim_set_notify_point_at_address(unsigned int processor_id,
 				       void (*cb)(gpointer),
 				       gpointer data)
 {
-    BreakCallBack *callback;
+  BreakCallBack *callback;
 
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+  callback = (BreakCallBack*)create_interface(processor_id, cb, data);
 
-    pic->set_notify_at_address(address, callback);
+  pic->pma.set_notify_at_address(address, callback);
 }
 //--------------------------------------------------------------------------
 void gpsim_set_profile_start_at_address(unsigned int processor_id,
@@ -877,16 +877,16 @@ void gpsim_set_profile_start_at_address(unsigned int processor_id,
 					void (*cb)(gpointer),
 					gpointer data)
 {
-    BreakCallBack *callback;
+  BreakCallBack *callback;
 
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+  callback = (BreakCallBack*)create_interface(processor_id, cb, data);
 
-    pic->set_profile_start_at_address(address, callback);
+  pic->pma.set_profile_start_at_address(address, callback);
 }
 //--------------------------------------------------------------------------
 void gpsim_set_profile_stop_at_address(unsigned int processor_id,
@@ -894,55 +894,55 @@ void gpsim_set_profile_stop_at_address(unsigned int processor_id,
 				       void (*cb)(gpointer),
 				       gpointer data)
 {
-    BreakCallBack *callback;
+  BreakCallBack *callback;
 
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    callback = (BreakCallBack*)create_interface(processor_id, cb, data);
+  callback = (BreakCallBack*)create_interface(processor_id, cb, data);
 
-    pic->set_profile_stop_at_address(address, callback);
+  pic->pma.set_profile_stop_at_address(address, callback);
 }
 //--------------------------------------------------------------------------
 void gpsim_clear_profile_start_at_address(unsigned int processor_id,
 					  unsigned int address)
 {
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    while(pic->address_has_profile_start(address))
-	pic->clear_profile_start_at_address(address);
+  while(pic->pma.address_has_profile_start(address))
+    pic->pma.clear_profile_start_at_address(address);
 }
 
 //--------------------------------------------------------------------------
 void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
 					 unsigned int address)
 {
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    while(pic->address_has_profile_stop(address))
-	pic->clear_profile_stop_at_address(address);
+  while(pic->pma.address_has_profile_stop(address))
+    pic->pma.clear_profile_stop_at_address(address);
 }
 
 //--------------------------------------------------------------------------
 void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 					unsigned int address)
 {
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    while(pic->address_has_break(address))
-	pic->clear_break_at_address(address,
-				    instruction::BREAKPOINT_INSTRUCTION);
+  while(pic->pma.address_has_break(address))
+    pic->pma.clear_break_at_address(address,
+				instruction::BREAKPOINT_INSTRUCTION);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address)
@@ -952,7 +952,7 @@ void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int addre
   if(!pic)
     return;
 
-  pic->toggle_break_at_address(address);
+  pic->pma.toggle_break_at_address(address);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
@@ -962,7 +962,7 @@ void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id,
   if(!pic)
     return;
 
-  pic->toggle_break_at_line(file_id, line);
+  pic->pma.toggle_break_at_line(file_id, line);
 }
 //--------------------------------------------------------------------------
 void gpsim_toggle_break_at_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
@@ -972,7 +972,7 @@ void gpsim_toggle_break_at_hll_line(unsigned int processor_id, unsigned int file
   if(!pic)
     return;
 
-  pic->toggle_break_at_hll_line(file_id, line);
+  pic->pma.toggle_break_at_hll_line(file_id, line);
 }
 //--------------------------------------------------------------------------
 unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
@@ -982,7 +982,7 @@ unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsi
   if(!pic)
     return INVALID_VALUE;
 
-  return pic->find_closest_address_to_line(file_id, line);
+  return pic->pma.find_closest_address_to_line(file_id, line);
 }
 //--------------------------------------------------------------------------
 unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
@@ -992,7 +992,7 @@ unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id, 
   if(!pic)
     return INVALID_VALUE;
 
-  return pic->find_closest_address_to_hll_line(file_id, line);
+  return pic->pma.find_closest_address_to_hll_line(file_id, line);
 }
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address)
@@ -1067,7 +1067,7 @@ unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int addr
 
   return line;
 }
-
+#if 0
 //--------------------------------------------------------------------------
 char *gpsim_get_opcode_name(Processor *cpu, unsigned int address, char *buffer)
 {
@@ -1095,7 +1095,7 @@ unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address)
   return pic->pma.get_opcode(address);
 
 }
-
+#endif
 //--------------------------------------------------------------------------
 void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode)
 {
