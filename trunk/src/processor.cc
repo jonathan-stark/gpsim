@@ -424,12 +424,14 @@ void Processor::attach_src_line(unsigned int address,
     if(fc && sline > fc->max_line())
       fc->max_line(sline);
 
-    // FIX ME - what is this '+5' junk?
-
-    fc = (*files)[files->list_id()];
+    // If there's a listing file then handle it as well
+	if(files->list_id() >=0 && lst_line != 0) {
+      fc = (*files)[files->list_id()];
     
-    if(fc && lst_line+5 > fc->max_line())
-      fc->max_line(lst_line+5);
+      // FIX ME - what is this '+5' junk?
+      if(fc && lst_line+5 > fc->max_line())
+        fc->max_line(lst_line+5);
+	}
 
   }
 
@@ -1771,14 +1773,14 @@ void FileContext::open(const char *mode)
 //----------------------------------------
 int FileContext::get_address(unsigned int line_number)
 {
-  if(line_number < max_line())
+  if(line_number < max_line()  && pm_address)
     return (*pm_address)[line_number];
   return 0;
 }
 //----------------------------------------
 void FileContext::put_address(unsigned int line_number, unsigned int address)
 {
-  if(line_number < max_line())
+  if(line_number < max_line()  && pm_address)
     (*pm_address)[line_number] = address;
 }
 
@@ -1790,7 +1792,7 @@ Files::Files(int nFiles)
 
   vpfile = new vector<FileContext *>(nFiles);
   lastFile=0;
-
+  list_file_id = -1;  // assume that no list file is present.
 }
 
 Files::~Files(void)

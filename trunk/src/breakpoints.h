@@ -366,7 +366,19 @@ public:
   int find_free(void);
 };
 
+#ifdef IN_MODULE
+// we are in a module: don't access the Breakpoints object directly!
+Breakpoints &get_bp(void);
+#else
+// we are in gpsim: use of get_bp() is recommended,
+// even if the bp object can be accessed directly.
 extern Breakpoints bp;
+
+inline Breakpoints &get_bp(void)
+{
+  return bp;
+}
+#endif
 
 //
 // BreakPointRegister 
