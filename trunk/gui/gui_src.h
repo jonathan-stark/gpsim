@@ -67,11 +67,61 @@ class BreakPointList {
 };
 
 // the prefix 'sa' doesn't make sense anymore, FIXME.
-struct sa_entry{         // entry in the sa_xlate_list
-    int index;           // gtktext index to start of line
-    int line;            // line number, first line eq. 0
-    int pixel;           // pixels from top of text
-    int font_center;     // from base line
+struct sa_entry {      // entry in the sa_xlate_list
+  int index;           // gtktext index to start of line
+  int line;            // line number, first line eq. 0
+  int pixel;           // pixels from top of text
+  int font_center;     // from base line
+  GtkWidget *bpwidget; // breakpoint widget on this line.
+  
+};
+
+class PixmapObject {
+public:
+  PixmapObject(void)
+   { 
+     mask = 0;
+     pixmap = 0;
+     widget = 0;
+   }
+
+  void CreateFromXPM(GdkWindow *window,
+		      GdkColor *transparent_color,
+		      gchar **data);
+
+  GdkBitmap *mask;
+  GdkPixmap *pixmap;
+  GtkWidget *widget;
+};
+
+//
+// Source page
+//
+
+class SourcePage
+{
+ public:
+
+
+  GtkAdjustment *source_layout_adj;
+  GtkWidget *source_layout;
+  GtkWidget *source_text;
+  int pageindex_to_fileid;
+  GtkWidget *source_pcwidget;
+  GtkWidget *notebook;   // parent
+  GtkWidget *notebook_child;
+
+  SourcePage(void) {
+    source_layout_adj = 0;
+    source_layout = 0;
+    source_text = 0;
+    pageindex_to_fileid = -1;
+    source_pcwidget = 0;
+    notebook_child = 0;
+    notebook = 0;
+  }
+    
+  void Close(void);
 };
 
 //
@@ -86,19 +136,12 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   BreakPointList notify_start_list;
   BreakPointList notify_stop_list;
 
-  //GList *breakpoints;       // List of breakpoint info structs
-  //GList *notify_start_list; // List of breakpoint info structs
-  //GList *notify_stop_list;  // List of breakpoint info structs
+  // Where the source is stored:
+
+  SourcePage pages[SBAW_NRFILES];
 
   int layout_offset;
 
-  // We need one of these for each source file
-  GtkAdjustment *source_layout_adj[SBAW_NRFILES];
-  GtkWidget *source_layout[SBAW_NRFILES];
-  GtkWidget *source_text[SBAW_NRFILES];
-  int pageindex_to_fileid[SBAW_NRFILES];
-  GtkWidget *source_pcwidget[SBAW_NRFILES];
-  GtkWidget *notebook_child[SBAW_NRFILES];
 
   // Font strings
   char commentfont_string[256];
@@ -127,6 +170,9 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GdkPixmap *pixmap_canbreak;
   GdkPixmap *pixmap_profile_start;
   GdkPixmap *pixmap_profile_stop;
+
+  PixmapObject canbreak;
+
   int source_loaded;
 
   int load_source;
