@@ -328,11 +328,13 @@ public:
   unsigned int value;              /* pc's current value */
   unsigned int memory_size_mask; 
   unsigned int reset_address;      /* Value pc gets at reset */
+  unsigned int pclath_mask;        /* pclath confines PC to banks */
 
   Program_Counter(void);
   void increment(void);
   void skip(void);
   void jump(unsigned int new_value);
+  void interrupt(unsigned int new_value);
   void computed_goto(unsigned int new_value);
   void new_address(unsigned int new_value);
   virtual void put_value(unsigned int new_value);

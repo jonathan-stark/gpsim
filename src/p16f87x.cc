@@ -402,7 +402,7 @@ pic_processor * P16F877::construct(void)
 
   p->eeprom = new EEPROM_87x;
   p->eeprom->cpu = p;
-  p->eeprom->initialize(128);
+  p->eeprom->initialize(256);
 
   p->create();
   p->create_invalid_registers ();

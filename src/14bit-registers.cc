@@ -566,6 +566,7 @@ Program_Counter::Program_Counter(void)
 
   reset_address = 0;
   value = 0;
+  pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
 
   xref = new XrefObject(&value);
 
@@ -624,6 +625,29 @@ void Program_Counter::jump(unsigned int new_address)
   // to generate the destination address:
 
   value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+
+  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  
+  cpu->cycles.increment();
+  
+  trace.cycle_increment(); 
+  trace.program_counter(value);
+
+  cpu->cycles.increment();
+
+}
+
+//--------------------------------------------------
+// interrupt - update the program counter. Like a jump, except pclath is ignored.
+//
+
+void Program_Counter::interrupt(unsigned int new_address)
+{
+
+  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
+  // to generate the destination address:
+
+  value = new_address & memory_size_mask;
 
   cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   

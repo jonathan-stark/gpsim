@@ -200,6 +200,32 @@ public:
 //---------------------------------------------------------
 extern invalid_instruction bad_instruction;
 
+//-----------------------------------------------------------------
+//
+// instruction_constructor - a class used to create the PIC instructions
+//
+// The way it works is the 'instruction_constructor' structure
+// contains three pieces of info for each instruction:
+//   inst_mask - a bit mask indicating which bits uniquely
+//               identify an instruction
+//   opcode    - What those unique bits should be
+//   inst_constructor - A pointer to the static member function
+//                      'construct' in the instruction class.
+//
+// An instruction is decoded by finding a matching entry in
+// the instruction_constructor array. A match is defined to
+// be:
+//    inst_mask & passed_opcode == opcode
+// which means that the opcode that is passed to the decoder
+// is ANDed with the instruction mask bits and compared to
+// the base bits of the opcode. If this test passes, then the
+// 'inst_constructor' will be called.
+
+struct instruction_constructor {
+  unsigned int inst_mask;
+  unsigned int opcode;
+  instruction * (*inst_constructor) (pic_processor *cpu, unsigned int inst);
+};
 
 
 #endif  /*  __PIC_INSTRUCTIONS_H__ */

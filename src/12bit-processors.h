@@ -83,6 +83,7 @@ enum _12BIT_DEFINITIONS
   // will cause errors if they are used -- the derived classes must define their
   // parameters appropriately.
   virtual unsigned int program_memory_size(void){ return 3; }; // A bogus value that will cause errors if used
+  // The size of a program memory bank is 2^11 bytes for the 12-bit core
   virtual void create_sfr_map(void) { return;};
 
   // Return the portion of pclath that is used during branching instructions

@@ -805,13 +805,12 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	}
 
 
-//        printf("filename %s line number %d (eq file id %d)\n",filename,line_number,file_index);
-
         address=cpu->find_closest_address_to_line(asmfile_id, asmsrc_line);
-	cpu->program_memory[address]->hll_src_line=line_number;
-	cpu->program_memory[address]->hll_file_id=file_index;
+	if(address >= 0) {
+	  cpu->program_memory[address]->hll_src_line=line_number;
+	  cpu->program_memory[address]->hll_file_id=file_index;
+	}
 
-//	printf("Found line=%d address=%d\n",line_number, address);
     }
     if(found_line_numbers)
     {

@@ -91,7 +91,7 @@ interrupt (void)
 
   trace.cycle_increment();
 
-  pc.jump(INTERRUPT_VECTOR);
+  pc.interrupt(INTERRUPT_VECTOR);
 
 }
 
