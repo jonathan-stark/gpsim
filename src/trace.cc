@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "trace.h"
 #include "trace_orb.h"
+#include "xref.h"
 
 #define MODE "0x" << hex
 
@@ -45,6 +46,16 @@ Trace::Trace(void)
     trace_buffer[trace_index] = NOTHING;
 
   trace_index = 0;
+  string_cycle = 0;
+
+  xref = new XrefObject(&trace_index);
+
+}
+
+Trace::~Trace(void)
+{
+  if(xref)
+    delete xref;
 
 }
 
@@ -145,7 +156,7 @@ int Trace::is_cycle_trace(unsigned int index)
   return 1;
 }
 
-int Trace::dump1(unsigned index)
+int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
   char a_string[50];
   unsigned int i;
@@ -153,11 +164,14 @@ int Trace::dump1(unsigned index)
 
   int return_value = is_cycle_trace(index);
 
+  if(bufsize)
+    buffer[0] = 0;   // NULL terminate just in case no string is created
+
   if(return_value == 2) {
     
     int k = (index + 1) & TRACE_BUFFER_MASK;
     if(trace_flag & (CYCLE_COUNTER_LO | CYCLE_COUNTER_HI))
-      printf("  cycle: 0x%x%x\n" ,
+      snprintf(buffer, bufsize,"  cycle: 0x%x%x" ,
 	     (trace_buffer[k]&0x3fffffff),
 	     ((trace_buffer[index]&0x7fffffff) | (trace_buffer[k]&0x80000000 )));
 
@@ -171,67 +185,75 @@ int Trace::dump1(unsigned index)
   switch (trace_buffer[index] & 0xff000000)
     {
     case NOTHING:
-      //printf("  empty trace cycle\n");
+      //snprintf("  empty trace cycle\n");
       break;
     case INSTRUCTION:
       if(trace_flag & TRACE_INSTRUCTION)
-	printf("instruction: 0x%04x\n", trace_buffer[index]&0xffff);
+	snprintf(buffer, bufsize,"instruction: 0x%04x",
+		 trace_buffer[index]&0xffff);
       break;
     case PROGRAM_COUNTER:
       if(trace_flag & TRACE_PROGRAM_COUNTER) {
 	i = trace_buffer[index]&0xffff;
-	printf("  pc: 0x%04x %s\n", i ,cpu->program_memory[i]->name(a_string));
+	snprintf(buffer, bufsize,"  pc: 0x%04x %s", 
+		 i ,cpu->program_memory[i]->name(a_string));
       }
       break;
     case PC_SKIP:
       i = trace_buffer[index]&0xffff;
-      printf("  skipped: %04x %s\n", i, cpu->program_memory[i]->name(a_string));
+      snprintf(buffer, bufsize,"  skipped: %04x %s",
+	       i, cpu->program_memory[i]->name(a_string));
       break;
     case REGISTER_READ:
       r = cpu->registers[(trace_buffer[index]>>8) & 0xfff];
-      printf("   read: 0x%02x from %s\n",trace_buffer[index]&0xff, r->name());
+      snprintf(buffer, bufsize,"   read: 0x%02x from %s",
+	       trace_buffer[index]&0xff, r->name());
       break;
     case REGISTER_WRITE:
       r = cpu->registers[(trace_buffer[index]>>8) & 0xfff];
-      printf("  wrote: 0x%02x to %s\n",trace_buffer[index]&0xff, r->name());
+      snprintf(buffer, bufsize,"  wrote: 0x%02x to %s",
+	       trace_buffer[index]&0xff, r->name());
       break;
     case READ_W:
-      printf("   read: 0x%02x from W\n",trace_buffer[index]&0xff);
+      snprintf(buffer, bufsize,"   read: 0x%02x from W",
+	       trace_buffer[index]&0xff);
       break;
     case WRITE_W:
-      printf("  wrote: 0x%02x to W\n",trace_buffer[index]&0xff);
+      snprintf(buffer, bufsize,"  wrote: 0x%02x to W",
+	       trace_buffer[index]&0xff);
       break;
     case WRITE_TRIS:
-      printf("  wrote: 0x%02x to TRIS\n",trace_buffer[index]&0xff);
+      snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
+	       trace_buffer[index]&0xff);
       break;
     case WRITE_OPTION:
-      printf("  wrote: 0x%02x to OPTION\n",trace_buffer[index]&0xff);
+      snprintf(buffer, bufsize,"  wrote: 0x%02x to OPTION",
+	       trace_buffer[index]&0xff);
       break;
     case BREAKPOINT:
-      printf("BREAK: ");
+      snprintf(buffer, bufsize,"BREAK: ");
       bp.dump_traced(trace_buffer[index] & 0xffffff);
       break;
     case INTERRUPT:
-      printf("interrupt:\n");
+      snprintf(buffer, bufsize,"interrupt");
       break;
     case _RESET:
       switch( (RESET_TYPE) (trace_buffer[index]&0xff))
 	{
 	case POR_RESET:
-	  printf("POR");
+	  snprintf(buffer, bufsize,"POR");
 	  break;
 	case WDT_RESET:
-	  printf("WDT");
+	  snprintf(buffer, bufsize,"WDT reset");
 	  break;
 	default:
-	  printf("unknown");
+	  snprintf(buffer, bufsize,"unknown reset");
 	}
-      printf(" reset\n");
       break;
 
     case OPCODE_WRITE:
       if((trace_buffer[(index-1)&TRACE_BUFFER_MASK] & 0xff000000) == OPCODE_WRITE)
-	printf("wrote opcode: 0x%04 to pgm memory: 0x%05x\n",
+	snprintf(buffer, bufsize,"wrote opcode: 0x%04 to pgm memory: 0x%05x",
 	       trace_buffer[index]&0xffff,
 	       trace_buffer[(index-1)&TRACE_BUFFER_MASK] & 0xffffff);
 
@@ -239,16 +261,17 @@ int Trace::dump1(unsigned index)
 
     case CYCLE_INCREMENT:
       if(trace_flag & TRACE_CYCLE_INCREMENT)
-	printf("cycle increment\n");
+	snprintf(buffer, bufsize,"cycle increment");
       break;
     case MODULE_TRACE2:
       return_value = 2;
     case MODULE_TRACE1:
-      printf(" module trace  0x%lx\n",trace_buffer[index]&0xffffff);
+      snprintf(buffer, bufsize," module trace  0x%lx",
+	       trace_buffer[index]&0xffffff);
       break;
 
       //default:
-      //printf("*** INVALID TRACE ***\n");
+      //snprintf("*** INVALID TRACE ***\n");
     }
 
   return return_value;
@@ -351,7 +374,7 @@ guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cyc
 // int Trace::dump(unsigned int n=0)
 //
 
-int Trace::dump(unsigned int n=0)
+int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
 {
 
   char a_string[50];
@@ -360,7 +383,6 @@ int Trace::dump(unsigned int n=0)
     instruction_index=-1,
     pc_index=-1,
     cycle_index=-1;
-  guint64 cycle = 0;
   bool 
     found_instruction = 0,
     found_pc =0,
@@ -371,7 +393,7 @@ int Trace::dump(unsigned int n=0)
   if(!n)
     n = 5;
 
-  cycle = find_cycle(n,instruction_index, pc_index, cycle_index);
+  string_cycle = find_cycle(n,instruction_index, pc_index, cycle_index);
 
   if(pc_index>0) {
 
@@ -389,12 +411,18 @@ int Trace::dump(unsigned int n=0)
 
       i = trace_buffer[pc_index]&0xffff;
 
-      if(cycle) 
-	printf("0x%016LX  ",cycle);
+      if(string_cycle && out_stream) 
+	fprintf(out_stream,"0x%016LX  ",string_cycle);
 
-      printf("%s  0x%04X  0x%04X  %s\n",cpu->name_str,i,
-	     trace_buffer[instruction_index]&0xffff,
-	     cpu->program_memory[i]->name(a_string) );
+      snprintf(string_buffer, sizeof(string_buffer),
+	       "%s  0x%04X  0x%04X  %s",cpu->name_str,i,
+	       trace_buffer[instruction_index]&0xffff,
+	       cpu->program_memory[i]->name(a_string) );
+      if(out_stream)
+	fprintf(out_stream,"%s\n",string_buffer);
+
+      if(xref)
+	xref->update();
 
       found_pc = 0;
       found_instruction = 0;
@@ -411,7 +439,7 @@ int Trace::dump(unsigned int n=0)
 
 	  case INSTRUCTION:
 	    instruction_index = i;
-	    cycle++;
+	    string_cycle++;
 	    found_instruction = 1;
 	    break;
 
@@ -422,13 +450,19 @@ int Trace::dump(unsigned int n=0)
 	    break;
 
 	  case CYCLE_INCREMENT:
-	    cycle++;
+	    string_cycle++;
 	    break;
 	
 	  }
 
 
-	  i = (i + dump1(i)) & TRACE_BUFFER_MASK;
+	  i = (i + dump1(i,string_buffer, sizeof(string_buffer))) & TRACE_BUFFER_MASK;
+	  if(string_buffer[0] && out_stream)
+	    fprintf(out_stream,"%s\n",string_buffer);
+
+	  if(xref)
+	    xref->update();
+
 	} while( (i != trace_index) && (i != ( (trace_index+1) & TRACE_BUFFER_MASK))
 		 &&
 		 (!found_pc || !found_instruction)
@@ -443,18 +477,6 @@ int Trace::dump(unsigned int n=0)
 
   return n;
 
-/*
-      else
-	{
-	  printf("nothing past the instruction   trace_index %x  inst index %x\n ",trace_index, instruction_index);
-	}
-*/
-
-/*
-  else {
-    printf("Error while dumping the trace (couldn't find any instructions)\n");
-  }
-*/
 }
 
 
@@ -463,7 +485,7 @@ int Trace::dump(unsigned int n=0)
 
 void Trace::dump_last_instruction(void)
 {
-  dump(1);
+  dump(1,stdout);
 }
 
 
@@ -605,5 +627,5 @@ void trace_dump_all(void)
 //--------------------------------------------
 void trace_dump_n(int numberof)
 {
-  trace.dump(numberof);
+  trace.dump(numberof,stdout);
 }

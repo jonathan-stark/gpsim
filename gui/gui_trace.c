@@ -44,19 +44,68 @@ guint64 row_to_cycle[MAXTRACES];
  */
 static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 {
-  //struct watch_entry *entry;
-    Trace_Window *tw;
 
-    if(xref == NULL)
+  GUI_Processor *gp;
+  guint64 cycle;
+#define TRACE_STRING 100
+  char str[TRACE_STRING];
+  GtkSheet *sheet;
+
+
+  //struct watch_entry *entry;
+  Trace_Window *tw;
+
+  //  printf("trace update in gui\n");
+  if(xref == NULL)
     {
-	printf("Warning gui_trace.c: xref_update: xref=%x\n",(unsigned int)xref);
-	return;
+      printf("Warning gui_trace.c: xref_update: xref=%x\n",(unsigned int)xref);
+      return;
     }
 
-    //entry = (struct watch_entry*) xref->data;
-    tw  = (Trace_Window *) (xref->parent_window);
+  //entry = (struct watch_entry*) xref->data;
+  tw  = (Trace_Window *) (xref->parent_window);
+  if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
+    return;
 
-    //update(tw,entry,new_value);
+  // Get the pointer to the `gui processor' structure
+  gp = ((GUI_Object*)tw)->gp;
+
+  if(gp==NULL || gp->pic_id==0)
+    {
+      puts("Warning gp or gp->pic_id == NULL in TraceWindow_update");
+      return;
+    }
+
+  gpsim_get_current_trace(&cycle, str, TRACE_STRING);
+
+  if(str[0] && (cycle>=tw->last_cycle)) {
+    tw->last_cycle = cycle;
+
+    //printf("Gui trace %s\n",str);
+
+    sheet=GTK_SHEET(tw->trace_sheet);
+    gtk_sheet_freeze(sheet);
+
+    gtk_sheet_delete_rows(sheet,0,1);
+
+    gtk_sheet_add_row(sheet,1);
+
+    gtk_sheet_set_cell(sheet,
+		       sheet->maxrow,
+		       1,  // column
+		       GTK_JUSTIFY_RIGHT,str);
+
+    sprintf(str,"%016x", cycle);
+
+    gtk_sheet_set_cell(sheet,
+		       sheet->maxrow,
+		       0,  // column
+		       GTK_JUSTIFY_RIGHT,str);
+    gtk_sheet_thaw(sheet);
+  }
+
+
+  //update(tw,entry,new_value);
 }
 
 /*****************************************************************
@@ -221,7 +270,7 @@ void TraceWindow_new_processor(Trace_Window *tw, GUI_Processor *gp)
     cross_reference->data = NULL;
     cross_reference->update = xref_update;
     cross_reference->remove = NULL;
-    //gpsim_assign_trace_xref(pic_id, (gpointer) cross_reference);
+    gpsim_assign_trace_xref((gpointer) cross_reference);
 
 }
 

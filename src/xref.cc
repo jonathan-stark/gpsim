@@ -38,7 +38,7 @@ void XrefObject::update()
     list<void*>::iterator ioi;
 
     ioi=xrefs.begin();
-    for(;ioi!=xrefs.end();ioi++)
+    for(;ioi!=xrefs.end();++ioi)
     {
 	int new_value=0;
 	gpointer *xref;
