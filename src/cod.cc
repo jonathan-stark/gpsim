@@ -303,7 +303,7 @@ void read_src_files_from_cod(Processor *cpu)
   int i,j,start_block,end_block,offset,num_files;
   char b[FILE_SIZE];
 
-  if(cpu->_files) 
+  if(cpu->files) 
     {
       cout << "This cpu already has source files\n";
       return;
@@ -337,9 +337,9 @@ void read_src_files_from_cod(Processor *cpu)
 
   if(num_files) {
 
-    cpu->_files = new Files(num_files+1+MAX_HLL_FILES);
-    cpu->_files->nsrc_files(num_files);
-    cpu->_files->list_id(num_files);
+    cpu->files = new Files(num_files+1+MAX_HLL_FILES);
+    cpu->files->nsrc_files(num_files);
+    cpu->files->list_id(num_files);
 
 
 
@@ -384,14 +384,14 @@ void read_src_files_from_cod(Processor *cpu)
 	  // this could be fooled by search paths
 
 
-	  string s1 = ((*cpu->_files)[jj])->name();
+	  string s1 = ((*cpu->files)[jj])->name();
 	  string s2 = string(filenm);
 	  if (s1 == s2) {
 	    alreadyExists = 1;
 	    if (verbose)
 	      printf ("Found redundant source file %s\n", filenm);
 
-	    cpu->_files->nsrc_files(cpu->_files->nsrc_files() - 1);
+	    cpu->files->nsrc_files(cpu->files->nsrc_files() - 1);
 	    break;
 	  }
 
@@ -403,14 +403,14 @@ void read_src_files_from_cod(Processor *cpu)
 	  // Add this file to the list
 	  //
 	  FILE *fp  = open_a_file(&filenm);
-	  cpu->_files->Add(filenm, fp);
+	  cpu->files->Add(filenm, fp);
 
 	  if((strncmp(lstfilename, filenm,256) == 0) && 
-	     (cpu->_files->list_id() >= cpu->_files->nsrc_files()) )
+	     (cpu->files->list_id() >= cpu->files->nsrc_files()) )
 	    {
 	      if(verbose)
-		cout << "Found list file " << ((*cpu->_files)[num_files])->name() << endl;
-	      cpu->_files->list_id(num_files);
+		cout << "Found list file " << ((*cpu->files)[num_files])->name() << endl;
+	      cpu->files->list_id(num_files);
 	      found_lst_in_cod = 1;
 	    }
 
@@ -425,14 +425,14 @@ void read_src_files_from_cod(Processor *cpu)
 
 
 
-    if(num_files != cpu->_files->nsrc_files())
+    if(num_files != cpu->files->nsrc_files())
       cout << "warning, number of sources changed from " << num_files << " to " 
-	   << cpu->_files->nsrc_files() << " while reading code (gpsim bug)\n";
+	   << cpu->files->nsrc_files() << " while reading code (gpsim bug)\n";
 
     if(!found_lst_in_cod) {
-      cpu->_files->nsrc_files(num_files + 1);
+      cpu->files->nsrc_files(num_files + 1);
 
-      cpu->_files->Add(lstfilename, open_a_file(&lstfilename));
+      cpu->files->Add(lstfilename, open_a_file(&lstfilename));
 
 
       // if(verbose)
@@ -446,11 +446,11 @@ void read_src_files_from_cod(Processor *cpu)
     // Debug code 
     int i;
 
-    cout << " new file stuff: " << cpu->_files->nsrc_files() << " new files\n";
+    cout << " new file stuff: " << cpu->files->nsrc_files() << " new files\n";
 
-    for(i=0; i<cpu->_files->nsrc_files(); i++) {
+    for(i=0; i<cpu->files->nsrc_files(); i++) {
 
-      cout << ((*cpu->_files)[i])->name() << endl;
+      cout << ((*cpu->files)[i])->name() << endl;
     }
     cout << " end of new file stuff\n";
   }
@@ -491,7 +491,7 @@ void read_line_numbers_from_cod(Processor *cpu)
 	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
 	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
-	  if( (file_id <= cpu->_files->nsrc_files()) &&
+	  if( (file_id <= cpu->files->nsrc_files()) &&
 	      (address <= cpu->program_memory_size()) &&
 	      (smod == 0x80) )
 

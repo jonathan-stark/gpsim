@@ -230,7 +230,8 @@ Processor * add_processor(char * processor_type, char * processor_new_name)
 
       processor_list.push_back(p);
       active_cpu = p;
-      p->processor_id = active_cpu_id = ++cpu_ids;
+      //p->processor_id = 
+      active_cpu_id = ++cpu_ids;
       if(verbose) {
 	cout << processor_type << '\n';
 	cout << "Program Memory size " <<  p->program_memory_size() << '\n';
@@ -279,7 +280,7 @@ void dump_processor_list(void)
 }
 
 //---------------------------------------------------------------
-
+#if 0
 void switch_active_cpu(int cpu_id)
 {
 
@@ -303,9 +304,10 @@ void switch_active_cpu(int cpu_id)
   if(!have_processors)
     cout << "(empty)\n";
 }
+#endif
 
 //-------------------------------------------------------------------
-
+#if 0
 Processor *get_processor(unsigned int cpu_id)
 {
 
@@ -337,7 +339,7 @@ Processor *get_processor(unsigned int cpu_id)
 
   return active_cpu;
 }
-
+#endif
 
 
 //-------------------------------------------------------------------
@@ -828,11 +830,11 @@ void pic_processor::disassemble (int start_address, int end_address)
 	}
 
       //if((files != 0) && (use_src_to_disasm))
-      if(_files && use_src_to_disasm)
+      if(files && use_src_to_disasm)
 	{
 	  char buf[256];
 
-	  _files->ReadLine(program_memory[i]->file_id,
+	  files->ReadLine(program_memory[i]->file_id,
 			   program_memory[i]->src_line - 1,
 			   buf,
 			   sizeof(buf));
@@ -867,7 +869,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
 {
 
 
-  if(!_files || _files->nsrc_files())
+  if(!files || files->nsrc_files())
     return;
 
   if(pc_val > program_memory_size())
@@ -882,7 +884,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
   int line,pc_line;
   if(file_id)
     {
-      file_id = _files->list_id();
+      file_id = files->list_id();
       line = program_memory[pc_val]->get_lst_line();
       pc_line = program_memory[pc->value]->get_lst_line();
     }
@@ -896,7 +898,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
   start_line += line;
   end_line += line;
 
-  FileContext *fc = (*_files)[file_id];
+  FileContext *fc = (*files)[file_id];
   if(fc)
     return;
 
@@ -942,7 +944,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
 
       char buf[256];
 
-      _files->ReadLine(program_memory[i]->file_id,
+      files->ReadLine(program_memory[i]->file_id,
 		       program_memory[i]->src_line - 1,
 		       buf,
 		       sizeof(buf));
@@ -975,7 +977,7 @@ pic_processor::pic_processor(void)
 
   pc = 0;
 
-  _files = 0;
+  files = 0;
 
   eeprom = 0;
   config_modes = create_ConfigMode();

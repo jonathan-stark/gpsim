@@ -60,14 +60,6 @@ gpsimInterface gi;
 
 
 
-//--------------------------------------------------------------------------
-// 
-// hack...
-pic_processor *get_pic_processor(unsigned int processor_id)
-{
-  return (pic_processor *)get_processor(processor_id);
-}
-
 //---------------------------------------------------------------------------
 //   void gpsim_set_bulk_mode(int flag)
 //---------------------------------------------------------------------------
