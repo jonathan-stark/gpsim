@@ -1,0 +1,530 @@
+# Makefile.in generated automatically by automake 1.4a from Makefile.am
+
+# Copyright (C) 1994, 1995-8, 1999 Free Software Foundation, Inc.
+# This Makefile.in is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+
+SHELL = @SHELL@
+
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH = @srcdir@
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+
+bindir = @bindir@
+sbindir = @sbindir@
+libexecdir = @libexecdir@
+datadir = @datadir@
+sysconfdir = @sysconfdir@
+sharedstatedir = @sharedstatedir@
+localstatedir = @localstatedir@
+libdir = @libdir@
+infodir = @infodir@
+mandir = @mandir@
+includedir = @includedir@
+oldincludedir = /usr/include
+
+DESTDIR =
+
+pkgdatadir = $(datadir)/@PACKAGE@
+pkglibdir = $(libdir)/@PACKAGE@
+pkgincludedir = $(includedir)/@PACKAGE@
+
+top_builddir = ..
+
+ACLOCAL = @ACLOCAL@
+AUTOCONF = @AUTOCONF@
+AUTOMAKE = @AUTOMAKE@
+AUTOHEADER = @AUTOHEADER@
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_STRIP_FLAG =
+transform = @program_transform_name@
+
+NORMAL_INSTALL = :
+PRE_INSTALL = :
+POST_INSTALL = :
+NORMAL_UNINSTALL = :
+PRE_UNINSTALL = :
+POST_UNINSTALL = :
+build_alias = @build_alias@
+build_triplet = @build@
+host_alias = @host_alias@
+host_triplet = @host@
+target_alias = @target_alias@
+target_triplet = @target@
+AS = @AS@
+CC = @CC@
+CPP = @CPP@
+CXX = @CXX@
+CXXCPP = @CXXCPP@
+DLLTOOL = @DLLTOOL@
+GDK = @GDK@
+GLIB = @GLIB@
+GLIBCONFIG = @GLIBCONFIG@
+GPSIM_MAJOR_VERSION = @GPSIM_MAJOR_VERSION@
+GPSIM_MICRO_VERSION = @GPSIM_MICRO_VERSION@
+GPSIM_MINOR_VERSION = @GPSIM_MINOR_VERSION@
+GPSIM_VERSION = @GPSIM_VERSION@
+GTK = @GTK@
+GTKCONFIG = @GTKCONFIG@
+GTKEXTRACONFIG = @GTKEXTRACONFIG@
+LD = @LD@
+LEX = @LEX@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
+MAKEINFO = @MAKEINFO@
+NM = @NM@
+PACKAGE = @PACKAGE@
+RANLIB = @RANLIB@
+USE_SYMBOL_UNDERSCORE = @USE_SYMBOL_UNDERSCORE@
+VERSION = @VERSION@
+X_CFLAGS = @X_CFLAGS@
+X_LDFLAGS = @X_LDFLAGS@
+YACC = @YACC@
+Y_CFLAGS = @Y_CFLAGS@
+Y_LDFLAGS = @Y_LDFLAGS@
+
+INCLUDES = @X_CFLAGS@
+
+lib_LTLIBRARIES = libgpsim.la
+
+libgpsim_la_SOURCES =  	12bit-hexdecode.cc 	12bit-processors.cc 	14bit-instructions.cc 	14bit-processors.cc 	14bit-registers.cc 	14bit-tmrs.cc 	14bit-hexdecode.cc 	16bit-instructions.cc 	16bit-processors.cc 	16bit-registers.cc 	16bit-hexdecode.cc 	breakpoints.cc 	cod.cc 	gpsim_time.cc 	hexutils.cc 	init.cc 	interface.cc 	ioports.cc 	p12x.cc 	p16x8x.cc 	p16x7x.cc 	p16x6x.cc 	p18x.cc 	packages.cc 	pic-processor.cc 	pic-registers.cc 	pic-instructions.cc 	stimuli.cc 	symbol.cc 	tmr0.cc 	trace.cc 	uart.cc 	xref.cc 	12bit-instructions.h 	12bit-processors.h 	14bit-instructions.h 	14bit-processors.h 	14bit-registers.h 	14bit-tmrs.h 	16bit-instructions.h 	16bit-processors.h 	16bit-registers.h 	breakpoints.h 	cod.h 	gpsim_def.h 	gpsim_time.h 	interface.h 	ioports.h 	p12x.h 	p16x6x.h 	p16x7x.h 	p16x8x.h 	p18x.h 	packages.h 	pic-instructions.h 	pic-processor.h 	pic-registers.h 	picdis.h 	stimuli.h 	stimulus_orb.h 	symbol.h 	symbol_orb.h 	tmr0.h 	trace.h 	trace_orb.h 	uart.h 	xref.h
+
+
+libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
+mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = ../config.h
+CONFIG_CLEAN_FILES = 
+LTLIBRARIES =  $(lib_LTLIBRARIES)
+
+
+DEFS = @DEFS@ -I. -I$(srcdir) -I..
+CPPFLAGS = @CPPFLAGS@
+LDFLAGS = @LDFLAGS@
+LIBS = @LIBS@
+libgpsim_la_LIBADD = 
+libgpsim_la_OBJECTS =  12bit-hexdecode.lo 12bit-processors.lo \
+14bit-instructions.lo 14bit-processors.lo 14bit-registers.lo \
+14bit-tmrs.lo 14bit-hexdecode.lo 16bit-instructions.lo \
+16bit-processors.lo 16bit-registers.lo 16bit-hexdecode.lo \
+breakpoints.lo cod.lo gpsim_time.lo hexutils.lo init.lo interface.lo \
+ioports.lo p12x.lo p16x8x.lo p16x7x.lo p16x6x.lo p18x.lo packages.lo \
+pic-processor.lo pic-registers.lo pic-instructions.lo stimuli.lo \
+symbol.lo tmr0.lo trace.lo uart.lo xref.lo
+CXXFLAGS = @CXXFLAGS@
+CXXCOMPILE = $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
+COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DIST_COMMON =  Makefile.am Makefile.in
+
+
+DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
+
+TAR = gtar
+GZIP_ENV = --best
+SOURCES = $(libgpsim_la_SOURCES)
+OBJECTS = $(libgpsim_la_OBJECTS)
+
+all: all-redirect
+.SUFFIXES:
+.SUFFIXES: .S .c .cc .lo .o .s
+$(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
+	cd $(top_srcdir) && $(AUTOMAKE) --gnu --include-deps src/Makefile
+
+Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
+	cd $(top_builddir) \
+	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
+
+
+mostlyclean-libLTLIBRARIES:
+
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+
+distclean-libLTLIBRARIES:
+
+maintainer-clean-libLTLIBRARIES:
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+mostlyclean-compile:
+	-rm -f *.o core *.core
+
+clean-compile:
+
+distclean-compile:
+	-rm -f *.tab.c
+
+maintainer-clean-compile:
+
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libgpsim.la: $(libgpsim_la_OBJECTS) $(libgpsim_la_DEPENDENCIES)
+	$(CXXLINK) -rpath $(libdir) $(libgpsim_la_LDFLAGS) $(libgpsim_la_OBJECTS) $(libgpsim_la_LIBADD) $(LIBS)
+.cc.o:
+	$(CXXCOMPILE) -c $<
+.cc.lo:
+	$(LTCXXCOMPILE) -c $<
+
+tags: TAGS
+
+ID: $(HEADERS) $(SOURCES) $(LISP)
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	here=`pwd` && cd $(srcdir) \
+	  && mkid -f$$here/ID $$unique $(LISP)
+
+TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) $(LISP)
+	tags=; \
+	here=`pwd`; \
+	list='$(SOURCES) $(HEADERS)'; \
+	unique=`for i in $$list; do echo $$i; done | \
+	  awk '    { files[$$0] = 1; } \
+	       END { for (i in files) print i; }'`; \
+	test -z "$(ETAGS_ARGS)$$unique$(LISP)$$tags" \
+	  || (cd $(srcdir) && etags $(ETAGS_ARGS) $$tags  $$unique $(LISP) -o $$here/TAGS)
+
+mostlyclean-tags:
+
+clean-tags:
+
+distclean-tags:
+	-rm -f TAGS ID
+
+maintainer-clean-tags:
+
+distdir = $(top_builddir)/$(PACKAGE)-$(VERSION)/$(subdir)
+
+subdir = src
+
+distdir: $(DISTFILES)
+	@for file in $(DISTFILES); do \
+	  d=$(srcdir); \
+	  if test -d $$d/$$file; then \
+	    cp -pr $$d/$$file $(distdir)/$$file; \
+	  else \
+	    test -f $(distdir)/$$file \
+	    || ln $$d/$$file $(distdir)/$$file 2> /dev/null \
+	    || cp -p $$d/$$file $(distdir)/$$file || :; \
+	  fi; \
+	done
+12bit-hexdecode.lo 12bit-hexdecode.o : 12bit-hexdecode.cc \
+	12bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+12bit-processors.lo 12bit-processors.o : 12bit-processors.cc \
+	12bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+14bit-hexdecode.lo 14bit-hexdecode.o : 14bit-hexdecode.cc \
+	14bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+14bit-instructions.lo 14bit-instructions.o : 14bit-instructions.cc \
+	14bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+14bit-processors.lo 14bit-processors.o : 14bit-processors.cc \
+	14bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+14bit-registers.lo 14bit-registers.o : 14bit-registers.cc \
+	14bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h xref.h
+14bit-tmrs.lo 14bit-tmrs.o : 14bit-tmrs.cc 14bit-tmrs.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h \
+	14bit-processors.h p16x7x.h p16x6x.h
+16bit-hexdecode.lo 16bit-hexdecode.o : 16bit-hexdecode.cc \
+	16bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h \
+	16bit-registers.h uart.h 16bit-instructions.h picdis.h p16x8x.h \
+	14bit-processors.h p16x6x.h 14bit-tmrs.h p16x7x.h p12x.h \
+	12bit-processors.h
+16bit-instructions.lo 16bit-instructions.o : 16bit-instructions.cc \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h symbol.h \
+	14bit-processors.h 16bit-instructions.h 16bit-registers.h \
+	uart.h 16bit-processors.h
+16bit-processors.lo 16bit-processors.o : 16bit-processors.cc \
+	16bit-processors.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h \
+	16bit-registers.h uart.h
+16bit-registers.lo 16bit-registers.o : 16bit-registers.cc \
+	16bit-registers.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h uart.h \
+	16bit-processors.h xref.h
+breakpoints.lo breakpoints.o : breakpoints.cc pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h \
+	14bit-processors.h xref.h
+cod.lo cod.o : cod.cc gpsim_def.h ../config.h pic-processor.h trace.h \
+	pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h picdis.h \
+	symbol.h 14bit-processors.h cod.h ../gui/gui_interface.h
+gpsim_time.lo gpsim_time.o : gpsim_time.cc 14bit-processors.h \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h xref.h
+hexutils.lo hexutils.o : hexutils.cc picdis.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+init.lo init.o : init.cc
+interface.lo interface.o : interface.cc gpsim_def.h ../config.h \
+	pic-processor.h trace.h pic-registers.h pic-instructions.h \
+	12bit-instructions.h 14bit-registers.h breakpoints.h ioports.h \
+	gpsim_time.h tmr0.h 14bit-instructions.h interface.h packages.h \
+	stimuli.h p16x8x.h 14bit-processors.h xref.h symbol.h
+ioports.lo ioports.o : ioports.cc pic-processor.h gpsim_def.h \
+	../config.h trace.h pic-registers.h pic-instructions.h \
+	12bit-instructions.h 14bit-registers.h breakpoints.h ioports.h \
+	gpsim_time.h tmr0.h 14bit-instructions.h interface.h packages.h \
+	stimuli.h 14bit-processors.h p16x6x.h 14bit-tmrs.h xref.h
+main.lo main.o : main.cc ../cli/command.h ../cli/misc.h \
+	../cli/../src/gpsim_def.h ../cli/../src/../config.h \
+	../cli/input.h gpsim_def.h
+p12x.lo p12x.o : p12x.cc symbol.h 14bit-processors.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h p12x.h \
+	12bit-processors.h
+p16x6x.lo p16x6x.o : p16x6x.cc symbol.h 14bit-processors.h \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h p16x6x.h \
+	14bit-tmrs.h
+p16x7x.lo p16x7x.o : p16x7x.cc symbol.h 14bit-processors.h \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h p16x7x.h \
+	p16x6x.h 14bit-tmrs.h
+p16x8x.lo p16x8x.o : p16x8x.cc symbol.h 14bit-processors.h \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h p16x8x.h
+p18x.lo p18x.o : p18x.cc symbol.h 14bit-processors.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h p18x.h \
+	16bit-processors.h 16bit-registers.h uart.h p16x6x.h \
+	14bit-tmrs.h
+packages.lo packages.o : packages.cc packages.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h stimuli.h
+pic-instructions.lo pic-instructions.o : pic-instructions.cc \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h symbol.h \
+	14bit-processors.h xref.h
+pic-processor.lo pic-processor.o : pic-processor.cc gpsim_def.h \
+	../config.h pic-processor.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h picdis.h \
+	symbol.h 14bit-processors.h p16x8x.h p16x6x.h 14bit-tmrs.h \
+	p16x7x.h p12x.h 12bit-processors.h p18x.h 16bit-processors.h \
+	16bit-registers.h uart.h xref.h
+pic-registers.lo pic-registers.o : pic-registers.cc 14bit-processors.h \
+	pic-processor.h gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h xref.h
+stimuli.lo stimuli.o : stimuli.cc pic-processor.h gpsim_def.h \
+	../config.h trace.h pic-registers.h pic-instructions.h \
+	12bit-instructions.h 14bit-registers.h breakpoints.h ioports.h \
+	gpsim_time.h tmr0.h 14bit-instructions.h interface.h packages.h \
+	stimuli.h stimulus_orb.h symbol.h 14bit-processors.h
+symbol.lo symbol.o : symbol.cc 14bit-processors.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h symbol.h \
+	symbol_orb.h
+tmr0.lo tmr0.o : tmr0.cc 14bit-processors.h pic-processor.h gpsim_def.h \
+	../config.h trace.h pic-registers.h pic-instructions.h \
+	12bit-instructions.h 14bit-registers.h breakpoints.h ioports.h \
+	gpsim_time.h tmr0.h 14bit-instructions.h interface.h packages.h \
+	stimuli.h xref.h
+trace.lo trace.o : trace.cc 14bit-processors.h pic-processor.h \
+	gpsim_def.h ../config.h trace.h pic-registers.h \
+	pic-instructions.h 12bit-instructions.h 14bit-registers.h \
+	breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h \
+	trace_orb.h
+uart.lo uart.o : uart.cc uart.h pic-processor.h gpsim_def.h ../config.h \
+	trace.h pic-registers.h pic-instructions.h 12bit-instructions.h \
+	14bit-registers.h breakpoints.h ioports.h gpsim_time.h tmr0.h \
+	14bit-instructions.h interface.h packages.h stimuli.h
+xref.lo xref.o : xref.cc xref.h interface.h gpsim_def.h ../config.h
+
+info-am:
+info: info-am
+dvi-am:
+dvi: dvi-am
+check-am: all-am
+check: check-am
+installcheck-am:
+installcheck: installcheck-am
+install-exec-am: install-libLTLIBRARIES
+install-exec: install-exec-am
+
+install-data-am:
+install-data: install-data-am
+
+install-am: all-am
+	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
+install: install-am
+uninstall-am: uninstall-libLTLIBRARIES
+uninstall: uninstall-am
+all-am: Makefile $(LTLIBRARIES)
+all-redirect: all-am
+install-strip:
+	$(MAKE) $(AM_MAKEFLAGS) INSTALL_STRIP_FLAG=-s install
+installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(libdir)
+
+
+mostlyclean-generic:
+
+clean-generic:
+
+distclean-generic:
+	-rm -f Makefile $(CONFIG_CLEAN_FILES)
+	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
+
+maintainer-clean-generic:
+mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags \
+		mostlyclean-generic
+
+mostlyclean: mostlyclean-am
+
+clean-am:  clean-libLTLIBRARIES clean-compile clean-libtool clean-tags \
+		clean-generic mostlyclean-am
+
+clean: clean-am
+
+distclean-am:  distclean-libLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-generic \
+		clean-am
+	-rm -f libtool
+
+distclean: distclean-am
+
+maintainer-clean-am:  maintainer-clean-libLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
+	@echo "This command is intended for maintainers to use;"
+	@echo "it deletes files that may require special tools to rebuild."
+
+maintainer-clean: maintainer-clean-am
+
+.PHONY: mostlyclean-libLTLIBRARIES distclean-libLTLIBRARIES \
+clean-libLTLIBRARIES maintainer-clean-libLTLIBRARIES \
+uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
+distclean-compile clean-compile maintainer-clean-compile \
+mostlyclean-libtool distclean-libtool clean-libtool \
+maintainer-clean-libtool tags mostlyclean-tags distclean-tags \
+clean-tags maintainer-clean-tags distdir info-am info dvi-am dvi check \
+check-am installcheck-am installcheck install-exec-am install-exec \
+install-data-am install-data install-am install uninstall-am uninstall \
+all-redirect all-am all installdirs mostlyclean-generic \
+distclean-generic clean-generic maintainer-clean-generic clean \
+mostlyclean distclean maintainer-clean
+
+
+# Tell versions [3.59,3.63) of GNU make to not export all variables.
+# Otherwise a system limit (for SysV at least) may be exceeded.
+.NOEXPORT:
