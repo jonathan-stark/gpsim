@@ -1,3 +1,5 @@
+	list	p=12c508
+
 	;; it.asm
 	;;
 	;; The purpose of this program is to test how well gpsim can simulate

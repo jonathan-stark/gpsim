@@ -33,8 +33,7 @@ public:
 
   void module(cmd_options_str *cos);
 
-  void module(char *proc, char *name);
-
+  void module(cmd_options_str *cos, char *name);
 
 };
 

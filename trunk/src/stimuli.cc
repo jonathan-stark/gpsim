@@ -711,7 +711,6 @@ void asynchronous_stimulus::start(void)
 void asynchronous_stimulus::put_data(guint64 data_point)
 {
   // On the very first call, create the samples linked list.
-  cout << __FUNCTION__ << " value " << data_point << '\n';
 
   /*  if(!samples) {
       samples = g_slist_append(samples, (void *)(new StimulusDataType) );
@@ -721,7 +720,6 @@ void asynchronous_stimulus::put_data(guint64 data_point)
   */
 
   if(data_flag) {
-    cout << "  sample is data\n";
 
     // put data
     if(data_point)
@@ -731,7 +729,6 @@ void asynchronous_stimulus::put_data(guint64 data_point)
 
 
   } else {
-    cout << "  sample is time\n";
 
     // put time
     current_sample = g_slist_append(current_sample, (void *)(new StimulusDataType) );
@@ -744,8 +741,6 @@ void asynchronous_stimulus::put_data(guint64 data_point)
       current_sample = current_sample->next;
 
     ((StimulusDataType *)(current_sample->data))->time = data_point;
-
-    cout << "  sample is time\n";
 
   }
 

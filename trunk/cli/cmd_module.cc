@@ -29,7 +29,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/pic-processor.h"
 #include "../src/modules.h"
 
-void load_module(char *module_name);
 
 //void display_available_modules(void);
 //void load_module_library(char *library_name);
@@ -130,9 +129,12 @@ void cmd_module::module(cmd_options_str *cos)
 	load_module_library(cos->str);
       break;
     case CMD_MOD_LOAD:
+      // Load a module from (an already loaded) library and let
+      // gpsim assign the name.
       //if(verbose)
 	cout << "module command got the module " << cos->str << '\n';
 	load_module(cos->str);
+	break;
 
     case CMD_MOD_DUMP:
       cout <<  " is not supported yet\n";
@@ -144,15 +146,27 @@ void cmd_module::module(cmd_options_str *cos)
 
 }
 
-/*
-void cmd_module::module(char * module_type, char * module_new_name)
+
+void cmd_module::module(cmd_options_str *cos, char * module_new_name)
 {
 
-  //new_module(add_module( module_type,  module_new_name));
+  switch(cos->co->value)
+    {
 
-  if(!cpu)
-    cout << "Unable to add module\n";
-  if(have_cpu(1) && verbose)
-     cout <<"seems like cmd_module worked\n";
+    case CMD_MOD_LOAD:
+      // Load a module from (an already loaded) library 
+
+      //if(verbose)
+	cout << "module command got the module " << cos->str << 
+	  " named " << module_new_name << '\n';
+	//load_module(cos->str);
+	load_module( cos->str,  module_new_name);
+	break;
+
+    default:
+      cout << "cmd_module error\n";
+    }
+
+
 }
-*/
+

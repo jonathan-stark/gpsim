@@ -335,18 +335,25 @@ void load_module_library(char *library_name)
 
 }
 
-void load_module(char *module_name)
+void load_module(char *module_type, char *module_name=NULL)
 {
 
   cout << __FUNCTION__ << '\n';
 
-  if(!module_name) {
-    cout << "WARNING: module name is NULL\n";
+  if(!module_type) {
+    cout << "WARNING: module type is NULL\n";
     return;
   }
 
-  cout << "Searching for module:  " << module_name << '\n';
-  
+  {
+    cout << "Searching for module:  " << module_type;
+
+    if(module_name)
+      cout << " named " << module_name;
+
+    cout  << '\n';
+  }
+
 
   for (module_iterator = module_list.begin();  
        module_iterator != module_list.end(); 
@@ -364,7 +371,7 @@ void load_module(char *module_name)
 	// Look at all of the possible names for a module
 
 	for(j=0; j<2; j++)
-	  if(strcmp(module_name,t->module_list[i].names[j]) == 0)
+	  if(strcmp(module_type,t->module_list[i].names[j]) == 0)
 	    {
 	      // We found a module that matches.
 	      // Now, let's create an instance of it and throw it into
@@ -372,7 +379,7 @@ void load_module(char *module_name)
 
 	      cout << " Found it!\n";
 	      Module *new_module = t->module_list[i].module_constructor();
-	      symbol_table.add_module(new_module);
+	      symbol_table.add_module(new_module,module_name);
 	      return;
 	    }
 	i++;

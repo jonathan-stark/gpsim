@@ -3,12 +3,16 @@
 #
 
 # Define it:
-processor p12c508 tiny_pic
+#processor p12c508 tiny_pic
 
 # Source code:
-load h it_12bit.hex
+load s it_12bit.cod
+
+set verbose 0xff
 
 # Stimuli:
 load c gpio_stim.stc
+
+set verbose 0
 
 break c 1000

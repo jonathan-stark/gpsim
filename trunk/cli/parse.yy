@@ -315,6 +315,14 @@ module_cmd: MODULE
             YYABORT;
           }
 
+          | MODULE string_option STRING
+	  { 
+            c_module.module($2, $3);
+            delete($2);
+            free($3);
+            YYABORT;
+          }
+
           ;
 
 

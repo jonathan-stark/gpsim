@@ -85,7 +85,6 @@ void P12C508::create_sfr_map(void)
 
   osccal.new_name("osccal");
 
-  pic_processor::create_symbols();
 
 }
 
@@ -129,6 +128,8 @@ void P12C508::create(void)
 
   add_file_registers(0x07, 0x1f, 0);
   P12C508::create_sfr_map();
+  create_invalid_registers ();
+
   tmr0.start();
 
   fsr.register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
@@ -146,6 +147,7 @@ pic_processor * P12C508::construct(void)
   cout << " 12c508 construct\n";
 
   p->create();
+  p->pic_processor::create_symbols();
 
   p->name_str = "12c508";
 
@@ -176,6 +178,7 @@ pic_processor * P12C509::construct(void)
   cout << " 12c508 construct\n";
 
   p->create();
+  p->pic_processor::create_symbols();
 
   p->name_str = "12c509";
 

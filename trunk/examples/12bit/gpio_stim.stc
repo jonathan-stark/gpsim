@@ -39,12 +39,14 @@ period 0x1000
 # In this example, the stimulus will go high at cycle 100
 # and then go low at cycle 200, high at 300, and so on
 
-0x200
-0x300
-0x400
-0x600
-0x700
-0x800
+0x200 0
+0x300 1
+0x400 0
+0x600 1
+0x700 0
+0x800 1
+0x900 0
+
 
 # Give the stimulus a name:
 

@@ -1,0 +1,27 @@
+
+INTRODUCTION
+------------
+Starting with version gpsim-0.20.0, support for external modules has been added. This allows gpsim to create a full simulation environment that extends beyond just a PIC. It also provides for users to create their own simulation modules without having to be aware of the detailed internals of gpsim. Several example modules have been created and serve as example templates. These are found in the ./modules/ subdirectory. In addition, examples may also be found in the ./examples/14bit/ subdirectory that illustrate how the modules can be used.
+
+HOW DO I LOAD A MODULE?
+-----------------------
+A new command called 'module' has been added to gpsim.
+
+(help for module)
+
+(examples of loading modules)
+
+HOW DO I CREATE MY OWN MODULE?
+------------------------------
+Probably the best place to begin is to find a pre-existing module that is close to the one you wish to create and then make copy it and make changes. 
+
+(basic structure of modules)
+
+HOW DO I CREATE A LIBRARY FOR MY MODULES?
+-----------------------------------------
+Without a doubt, the best thing to do is copy the way gpsim does it. 
+
+(format is a shared library)
+(ldconfig)
+(/etc/ld.so.conf)
+
