@@ -476,8 +476,6 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 			 PIXMAP_POS(this,e));
 
   else if(pma->address_has_break(address)) {
-    printf("UpdateLine has break: row %d --- index:%d, line:%d, pixel:%d, font_center:%d\n",row,
-	   e->index,e->line,e->pixel,e->font_center);
     breakpoints.Add(address,
 		    gtk_pixmap_new(pixmap_break,bp_mask),
 		    pages[id].source_layout,
@@ -738,8 +736,6 @@ void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int
 		 );
   gtk_widget_show(bpi->widget);
   iter=g_list_append(iter,bpi);
-
-  printf("Adding break at pos:%d\n",pos);
 }
 
 
