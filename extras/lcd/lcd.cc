@@ -93,7 +93,6 @@ void LCD_Interface::GuiUpdate (gpointer)
 void LcdBusy::set(double waitTime)
 {
   if(!bBusyState) {
-    //cout << "busy start\n";
     bBusyState = true;
     cycles.set_break(cycles.get(waitTime), this);
   }
@@ -108,7 +107,6 @@ void LcdBusy::clear(void)
 //--------------------------------------------------------------
 void LcdBusy::callback(void)
 {
-  //cout << "busy stop\n";
   bBusyState = false;
 }
 
@@ -131,15 +129,10 @@ void Lcd_Port::setbit(unsigned int bit_number, bool new_value)
 
   if( ((bit_mask & value.get()) != 0) ^ (new_value==1))
     {
-      if(lcd && lcd->debug & LCD_DEBUG_ENABLE)
-	cout << " Lcd+Port::set_bit bit " << bit_number << " changed due to a stimulus. new_value = " << new_value <<'\n';
-
       value.put(value.get() ^ bit_mask);
-
       assert_event();
       trace_register_write();
     }
-  //else cout <<  " IOPORT::set_bit bit did not change\n";
 
 }
 
@@ -158,17 +151,15 @@ DataPort::DataPort (unsigned int _num_iopins) : Lcd_Port(_num_iopins)
 void DataPort::setbit(unsigned int bit_number, bool new_value)
 {
   if((lcd->control_port->value.get() & 6) == 4){  //E is high and R/W is low
-    //cout << "DataPort::" << __FUNCTION__ << " setting bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
+
     Lcd_Port::setbit(bit_number, new_value);  // RW bit is low-> write
   } 
-  //else cout << "DataPort::" << __FUNCTION__ << " ignoring data. bit:"<<bit_number<<"  new_val" <<new_value<< "\n";
+
 }
 void DataPort::update_pin_directions(bool new_direction)
 {
 
   if(new_direction != direction) {
-
-    //cout << __FUNCTION__ << " new direction " <<new_direction << "  current value = 0x" << hex<<value.get() <<endl;
 
     direction = new_direction;
 
@@ -186,18 +177,16 @@ void DataPort::update_pin_directions(bool new_direction)
 
 unsigned int DataPort::get(void)
 {
+  unsigned int v=0;
 
   for(int i=7; i>=0; i--) {
     if(pins[i]) {
-      value.put((value.get() << 1) | ((pins[i]->state > 0) ? 1 : 0));
-      //cout << "   Pin[" << i << "] = " << pins[i]->state << endl;
+      v = (v << 1) | ((pins[i]->get_digital_state()) ? 1 : 0);
     }
 
   }
 
-  value.put(value.get() & 0xff);
-
-  //cout << "DataPort::get = 0x" << value.get() << endl;
+  value.put(v);
 
   return value.get();
 
@@ -227,15 +216,13 @@ void ControlPort::put(unsigned int new_value)
 
   unsigned int old_value = value.get();
 
-  //cout << __FUNCTION__ << " new value " << new_value << endl;
-
   Lcd_Port::put(new_value);
 
   if((old_value ^ value.get()) & 2) {  // R/W bit has changed states
     if(value.get() & 2)
-      lcd->data_port->update_pin_directions(1);   // It's high, so make data lines outputs
+      lcd->data_port->update_pin_directions(true);   // It's high, so make data lines outputs
     else
-      lcd->data_port->update_pin_directions(0);   // make them inputs.
+      lcd->data_port->update_pin_directions(false);  // make them inputs.
   }
 
   if( (old_value ^ value.get()) & 0x7) 
@@ -261,8 +248,6 @@ void DataPort::put(unsigned int new_value)
 
   unsigned int old_value = value.get();
 
-  //cout << "DataPort::" <<__FUNCTION__ << " new value " << new_value << endl;
-
   Lcd_Port::put(new_value);
 
   if( (old_value ^ value.get()) & 0xff)
@@ -270,54 +255,13 @@ void DataPort::put(unsigned int new_value)
 
 }
 
-//--------------------------------------------------------------
-// Lcd_Input
-//   This class is a minor extension of a normal IO_input. I may
-// remove it later, but for now it does serve a simple purpose.
-// Specifically, this derivation will intercept when a stimulus
-// is being changed. 
-
-void Lcd_Input::put_node_state( int new_state)
-{
-
-  int diff = state^new_state;
-
-  //cout << " " << name() << " Lcd_Input::put_node_state = " << new_state << endl;
-
-  IO_input::put_node_state(new_state);
-/*
-  if(diff)
-    cout << "Lcd Input " << name() << " changed to new state: " << state << '\n';
-  else
-    cout << "Lcd Input " << name() << " didn't change states\n";
-*/
-}
 //---------------------------------------------------------------
 Lcd_bi_directional::Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name) :
   IO_bi_directional(i, b,opt_name)
 {
-  drive = MAX_DRIVE/4;
+  // FIXME - we may want to readjust the Pin impedances
 }
 
-void Lcd_bi_directional::put_node_state( int new_state)
-{
-
-  int old_state = state;
-
-  if(driving) {
-    
-    //cout << " " << name() << " Lcd_bi_directional::put_node_state -- driving, so ignoring new state of " << new_state << endl;
-    return;
-  }
-
-  //cout << " " << name() << " Lcd_bi_directional::put_node_state = " << new_state << endl;
-  IO_bi_directional::put_node_state(new_state);
-/*
-  if(old_state ^ state) {
-    cout << "Lcd bi di " << name() << " changed to new state: " << state << '\n';
-  }
-*/
-}
 
 //---------------------------------------------------------------
 
@@ -416,7 +360,7 @@ void LcdDisplay::create_iopin_map(void)
   assign_pin(13, new Lcd_bi_directional(data_port,6,"d6"));
   assign_pin(14, new Lcd_bi_directional(data_port,7,"d7"));
 
-  data_port->update_pin_directions(0);
+  data_port->update_pin_directions(false);
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
@@ -434,8 +378,6 @@ void LcdDisplay::create_iopin_map(void)
 
 Module * LcdDisplay::construct(const char *new_name=NULL)
 {
-
-  cout << " LCD display constructor\n";
 
   LcdDisplay *lcdP = new LcdDisplay(2,20);
   lcdP->new_name((char*)new_name);
@@ -524,11 +466,6 @@ Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
   LcdDisplayDisplaytech161A *lcdP = new LcdDisplayDisplaytech161A(2,8,TWO_ROWS_IN_ONE);
   lcdP->new_name((char*)new_name);
   lcdP->create_iopin_map();
-
-  // Are these really needed? the constructor already does it.
-  //lcdP->set_pixel_resolution(5,7);
-  //lcdP->set_crt_resolution(3,3);
-  //lcdP->set_contrast(1.0);
 
   lcdP->InitStateMachine();
 

@@ -109,8 +109,6 @@ class Lcd_Input : public IO_input
 {
 public:
 
-  virtual void put_node_state( int new_state);
-
   Lcd_Input (IOPORT *i, unsigned int b, char *opt_name=NULL) : IO_input(i,b,opt_name) { };
 
 };
@@ -118,8 +116,6 @@ public:
 class Lcd_bi_directional : public IO_bi_directional
 {
 public:
-
-  virtual void put_node_state( int new_state);
 
   Lcd_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL);
 
