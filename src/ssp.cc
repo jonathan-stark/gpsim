@@ -55,9 +55,8 @@ void _SSPSTAT::put(unsigned int new_value)
 void _SSPSTAT::put_value(unsigned int new_value)
 {
 
-  put(new_value);
-
   trace.register_write(address,value.get());
+  put(new_value);
 
 }
 
@@ -102,9 +101,8 @@ void _SSPCON::put(unsigned int new_value)
 void _SSPCON::put_value(unsigned int new_value)
 {
 
-  put(new_value);
-
   trace.register_write(address,value.get());
+  put(new_value);
 
 }
 
@@ -182,10 +180,8 @@ void _SSPBUF::put(unsigned int new_value)
 void _SSPBUF::put_value(unsigned int new_value)
 {
 
-  put(new_value);
-
   trace.register_write(address,value.get());
-
+  put(new_value);
 }
 
 void _SSPBUF::start_transfer()
@@ -454,9 +450,8 @@ void _SSPADD::put_value(unsigned int new_value)
 {
   cout << "SSPADD in unimplemented, as is all of I2C." << endl;
 
-  put(new_value);
-
   trace.register_write(address,value.get());
+  put(new_value);
 
 }
 

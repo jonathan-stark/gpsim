@@ -48,6 +48,10 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "xref.h"
 
+FloatAttribute *newFloatAttribute(char * n, double v)
+{
+  return new FloatAttribute(n,v);
+}
 
 static int module_sequence_number = 0;
 

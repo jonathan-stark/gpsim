@@ -102,9 +102,8 @@ void file_register::put_value(unsigned int new_value)
 //
 void  FSR::put(unsigned int new_value)
 {
-  value.put(new_value);
   trace.register_write(address,value.get());
-
+  value.put(new_value);
 }
 
 void  FSR::put_value(unsigned int new_value)
@@ -145,8 +144,8 @@ FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
 
 void  FSR_12::put(unsigned int new_value)
 {
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
 
   /* The 12-bit core selects the register page using the fsr */
   cpu->register_bank = &cpu->registers[ value.get() & register_page_bits ];
@@ -202,7 +201,7 @@ Status_register::Status_register(void)
 
 void inline Status_register::put(unsigned int new_value)
 {
-  //value = new_value; // & STATUS_WRITABLE_BITS;
+  trace.register_write(address,value.get());
 
   value.put((value.get() & ~write_mask) | (new_value & write_mask));
 
@@ -211,7 +210,6 @@ void inline Status_register::put(unsigned int new_value)
       cpu->register_bank = &cpu->registers[(value.get() & rp_mask) << 2];
     }
 
-  trace.register_write(address,value.get());
 }
 
 
@@ -369,8 +367,9 @@ void OPTION_REG::put(unsigned int new_value)
   if( (value.get() ^ old_value) & (BIT6 | BIT7))
     cpu_pic->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
+  //FIXME trace OPTION for 12bit processors is broken.
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-    trace.register_write(address,value.get());
+    trace.register_write(address,old_value);
   else
     trace.write_OPTION(value.get());
 
@@ -425,9 +424,8 @@ PCLATH::PCLATH(void)
 
 void PCLATH::put(unsigned int new_value)
 {
-  value.put(new_value & PCLATH_MASK);
-
   trace.register_write(address,value.get());
+  value.put(new_value & PCLATH_MASK);
 }
 
 void PCLATH::put_value(unsigned int new_value)
@@ -456,10 +454,8 @@ PCON::PCON(void)
 
 void PCON::put(unsigned int new_value)
 {
-
-  value.put(new_value&valid_bits);
   trace.register_write(address,value.get());
-
+  value.put(new_value&valid_bits);
 }
 
 

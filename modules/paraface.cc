@@ -135,7 +135,8 @@ OutputPort::OutputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 void Paraface_Port::trace_register_write(void)
 {
 
-    get_trace().module1(value.get());
+  //get_trace().module1(value.get());
+    get_trace().raw(value.get());
 }
 
 //-----------------------------------------------------

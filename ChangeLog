@@ -1,4 +1,13 @@
 2004-08-09 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-registers.cc, src/14bit-registers.h, src/14bit-tmrs.cc,
+	src/16bit-registers.cc, src/attribute.cc, src/eeprom.cc, src/intcon.cc
+	src/ioports.cc, src/modules.cc, src/p16x7x.cc, src/pie.cc, src/pir.cc
+	src/registers.cc, src/ssp.cc, src/tmr0.cc, src/trace.cc, src/trace.h
+	src/uart.cc, gui/gui_breadboard.cc, modules/led.cc, modules/paraface.cc
+	modules/resistor.cc,modules/usart.cc:
+	 Continuing this ongoing trace experiment.
+
+2004-08-09 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc, gpsim/main.cc: more experimental code
 	* src/attribute.cc, src/attribute.h, gui/gui_breadboard.cc: Some annoying
 	bug with attributes that I can't figure out. Problem appears when shared

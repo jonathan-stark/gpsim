@@ -45,16 +45,14 @@ Boston, MA 02111-1307, USA.  */
 void ADRES::put(int new_value)
 {
 
+  trace.register_write(address,value.get());
+
   if(new_value > 255)
     value.put(255);
   else if (new_value < 0)
     value.put(0);
   else
     value.put(new_value);
-
-  trace.register_write(address,value.get());
-
-
 }
 
 
@@ -108,6 +106,8 @@ void ADCON0::stop_conversion(void)
 void ADCON0::put(unsigned int new_value)
 {
 
+  trace.register_write(address,value.get());
+
   // Get the A/D Conversion Clock Select bits
   // 
   // This switch case will get the ADCS bits and set the Tad, or The A/D
@@ -155,8 +155,6 @@ void ADCON0::put(unsigned int new_value)
     {
       stop_conversion();
     }
-
-  trace.register_write(address,value.get());
 
 }
 

@@ -10,8 +10,8 @@ using namespace std;
 
 void PIE::put(unsigned int new_value)
 {
-  value.put(new_value);
   trace.register_write(address,value.get());
+  value.put(new_value);
 
   if( pir->interrupt_status())
     {

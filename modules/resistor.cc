@@ -93,7 +93,8 @@ public:
 void Resistor_IOPORT::trace_register_write(void)
 {
 
-  get_trace().module1(value.get());
+  //get_trace().module1(value.get());
+  get_trace().raw(value.get());
 }
 
 //--------------------------------------------------------------

@@ -36,9 +36,9 @@ Boston, MA 02111-1307, USA.  */
 //
 void  BSR::put(unsigned int new_value)
 {
-  value.put(new_value & 0x0f);
   trace.register_write(address,value.get());
 
+  value.put(new_value & 0x0f);
   cpu->register_bank = &cpu->registers[ value.get() << 8 ];
 
 
@@ -61,13 +61,10 @@ void  BSR::put_value(unsigned int new_value)
 //
 void  FSRL::put(unsigned int new_value)
 {
-  value.put(new_value & 0xff);
   trace.register_write(address,value.get());
-
+  value.put(new_value & 0xff);
   //  iam->fsr_delta = 0;
   iam->update_fsr_value();
-
-
 }
 
 void  FSRL::put_value(unsigned int new_value)
@@ -82,8 +79,8 @@ void  FSRL::put_value(unsigned int new_value)
 
 void  FSRH::put(unsigned int new_value)
 {
-  value.put(new_value & 0x0f);
   trace.register_write(address,value.get());
+  value.put(new_value & 0x0f);
 
   //  iam->fsr_delta = 0;
   iam->update_fsr_value();
@@ -905,6 +902,8 @@ void T0CON::put(unsigned int new_value)
 {
 
   unsigned int old_value = value.get();
+
+  trace.register_write(address,value.get());
   value.put(new_value);
 
   if( (value.get() ^ old_value) & (T08BIT | TMR0ON)) {
@@ -930,8 +929,6 @@ void T0CON::put(unsigned int new_value)
     cpu16->tmr0l.new_prescale();
 
   cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';
-  trace.register_write(address,value.get());
-
 }
 
 //--------------------------------------------------
@@ -940,8 +937,8 @@ void T0CON::put(unsigned int new_value)
 //--------------------------------------------------
 void TMR0H::put(unsigned int new_value)
 {
-  value.put(new_value & 0xff);
   trace.register_write(address,value.get());
+  value.put(new_value & 0xff);
 
 }
 
@@ -1012,6 +1009,7 @@ unsigned int TMR0_16::max_counts(void)
 void TMR0_16::increment(void)
 {
   //  cout << "_TMR0 increment because of external clock ";
+  trace.register_write(address,value.get());
 
   if(--prescale_counter == 0)
     {
@@ -1047,7 +1045,6 @@ void TMR0_16::increment(void)
 	    }
 	}
 
-      trace.register_write(address,value.get());
     }
   //  cout << value << '\n';
 }
@@ -1579,21 +1576,16 @@ void PORTC16::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  //cout << "PORTC16::put trying to put " << new_value << '\n';
   int mack_value = tris->value.get();
   if (usart && usart->txsta.get() & _TXSTA::TXEN)
       mack_value |= 1 << 6;
-  value.put((new_value & ~mack_value) | (value.get() & mack_value));
 
-  //cout << " PORTC16::put just set port value to " << value << '\n';
+  trace.register_write(address,value.get());
+  value.put((new_value & ~mack_value) | (value.get() & mack_value));
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
-
-  //cout << " PORTC16::put port value is " << value << " after updating stimuli\n";
-
-  trace.register_write(address,value.get());
 
 }
 

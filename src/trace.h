@@ -167,6 +167,7 @@ class Trace
     trace_buffer[trace_index] = REGISTER_READ | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
+
   /*
   inline void register_readRV (unsigned int address, RegisterValue rv)
   {
@@ -191,6 +192,7 @@ class Trace
   }
   */
 
+  /*
   inline void register_read_16bits (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_READ_16BITS | (address << 16) | (value & 0xffff);
@@ -202,7 +204,8 @@ class Trace
     trace_buffer[trace_index] = REGISTER_WRITE_16BITS | (address << 16) | (value & 0xffff);
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  */
+  /*
   inline void register_read_value (unsigned int address, unsigned int value)
   {
     trace_buffer[trace_index] = REGISTER_READ_VAL | (address << 8) | value;
@@ -214,7 +217,7 @@ class Trace
     trace_buffer[trace_index] = REGISTER_WRITE_VAL | (address << 8) | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  */
   inline void opcode_write (unsigned int address, unsigned int opcode)
   {
     trace_buffer[trace_index] = OPCODE_WRITE | (address & 0xffffff);
@@ -284,6 +287,7 @@ class Trace
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
 
+  /*
   inline void module1(unsigned int value)
   {
     trace_buffer[trace_index] = MODULE_TRACE1 | value;
@@ -297,6 +301,7 @@ class Trace
     trace_buffer[trace_index] = MODULE_TRACE2 | value2;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
+  */
 
   inline bool near_full(void) {
     return (trace_index > TRACE_BUFFER_NEAR_FULL);
