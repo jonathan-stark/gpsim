@@ -41,6 +41,8 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 
 #include "switch.h"
@@ -180,3 +182,4 @@ Switch::~Switch(void)
     delete switch_port;
 
 }
+#endif // HAVE_GUI

@@ -653,10 +653,10 @@ void DAW::execute(void)
   trace.instruction(opcode);
 
   new_value = cpu->W->value;
-  if((new_value > 0x9) || (cpu->status->value & STATUS_DC))
+  if(((new_value & 0x0f) > 0x9) || (cpu->status->value & STATUS_DC))
     new_value += 0x6;
 
-  if((new_value > 0x90) || (cpu->status->value & STATUS_C))
+  if(((new_value & 0xf0) > 0x90) || (cpu->status->value & STATUS_C))
     new_value += 0x60;
 
   cpu->W->put(new_value & 0xff);
@@ -1789,7 +1789,7 @@ void RRNCF::execute(void)
   else
     cpu->W->put(new_value&0xff);
 
-  cpu->status->put_Z_C_N(new_value | ((src_value & 1) ? 0x100 : 0) );
+  cpu->status->put_N_Z(new_value | ((src_value & 1) ? 0x100 : 0) );
 
   cpu->pc->increment();
 

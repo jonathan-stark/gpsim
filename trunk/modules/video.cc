@@ -36,6 +36,8 @@ in1	in2	result
 #include <stdlib.h>
 #include <string>
 
+#ifdef HAVE_GUI
+
 #include <gtk/gtk.h>
 
 #include "video.h"
@@ -402,3 +404,4 @@ void Video::update_state(void)
   last_port_value=port->value;
 }
 
+#endif // HAVE_GUI

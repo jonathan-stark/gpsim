@@ -368,9 +368,9 @@ PullupResistor::PullupResistor(char *init_name)
 
   new_name(init_name);
 
+#ifdef HAVE_GUI
   pu_window = NULL;
 
-#ifdef HAVE_GUI
   if(use_gui) {
     build_window();
     cout << "Creating resistor window\n";

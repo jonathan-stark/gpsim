@@ -66,6 +66,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#ifdef _HAVE_GUI
 #include <gtk/gtk.h>
 #include <math.h>
 #include "led.h"
@@ -927,3 +928,4 @@ ExternalModule * Led::construct(char *new_name=NULL)
 
 }
 
+#endif //HAVE_GUI

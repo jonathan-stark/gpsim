@@ -112,6 +112,9 @@ public:
 #ifdef __FreeBSD__
     int open_parallel_port(char *device="/dev/ppi0");
 #endif // __FreeBSD__
+#if !defined(linux) && !defined(__FreeBSD__)
+    int open_parallel_port(char *device="/dev/bogus-device");
+#endif
     int read_parallel_status(void);
     int write_parallel_data(int data);
 

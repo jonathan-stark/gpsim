@@ -1322,7 +1322,6 @@ void T3CON::put(unsigned int new_value)
   int diff = (value ^ new_value);
 
   if(diff & (T3CCP1 |  T3CCP2)) {
-    cout << "T3CON changing CCP capture source\n";
     switch(new_value & (T3CCP1 |  T3CCP2)) {
     case 0:
       ccpr1l->assign_tmr(tmr1l);   // Both CCP modules use TMR1 as their source
@@ -1739,7 +1738,6 @@ unsigned int PORTC16::get(void)
 
   // 
   if( ccp1con && (diff & CCP1) ) {
-    cout << "Saw an event on CCP1!";
     ccp1con->new_edge(value & CCP1);
   }
   // if this cpu has a usart and there's been a change detected on
@@ -1764,7 +1762,6 @@ void PORTC16::setbit(unsigned int bit_number, bool new_value)
   int diff = old_value ^ value; // The difference between old and new
 
   if(ccp1con && ( diff & CCP1) ) {
-    cout << "Saw an event on CCP1!";
     ccp1con->new_edge(value & CCP1);
   }
 
