@@ -587,9 +587,9 @@ instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, in
 {
   Breakpoint_Instruction *p;
 
-  p=(Breakpoint_Instruction*)cpu->program_memory[address];
+  p=(Breakpoint_Instruction*) &(cpu->pma[address]); //cpu->program_memory[address];
 
-  if(p==_this)
+  if(!_this || p==_this)
     return NULL;
 
   while(p->replaced!=_this)
@@ -634,7 +634,9 @@ void Breakpoints::clear(unsigned int b)
 	      // Set the ->replaced of this instruction to our
 	      // ->replaced
 	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->program_memory[bs.arg1]->xref->update();
+
+	      //bs.cpu->program_memory[bs.arg1]->xref->update();
+	      bs.cpu->pma[bs.arg1].xref->update();
 	  }
 
 	  delete abp;
@@ -659,7 +661,8 @@ void Breakpoints::clear(unsigned int b)
 	      // Set the ->replaced of this instruction to our
 	      // ->replaced
 	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->program_memory[bs.arg1]->xref->update();
+	      bs.cpu->pma[bs.arg1].xref->update();
+	      //bs.cpu->program_memory[bs.arg1]->xref->update();
 	  }
 
 	  delete abp;
@@ -683,7 +686,8 @@ void Breakpoints::clear(unsigned int b)
 	      // Set the ->replaced of this instruction to our
 	      // ->replaced
 	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->program_memory[bs.arg1]->xref->update();
+	      bs.cpu->pma[bs.arg1].xref->update();
+	      //bs.cpu->program_memory[bs.arg1]->xref->update();
 	  }
 
 	  delete abp;
@@ -707,7 +711,8 @@ void Breakpoints::clear(unsigned int b)
 	      // Set the ->replaced of this instruction to our
 	      // ->replaced
 	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->program_memory[bs.arg1]->xref->update();
+	      bs.cpu->pma[bs.arg1].xref->update();
+	      //bs.cpu->program_memory[bs.arg1]->xref->update();
 	  }
 
 	  delete abp;
@@ -942,10 +947,10 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, unsigned int 
   address = new_address;
   opcode = 0xffffffff;
   bpn = bp;
-  replaced = cpu->program_memory[address];
+  replaced = &(cpu->pma[address]);//cpu->program_memory[address];
 
   // use the replaced instructions xref object
-  xref=cpu->program_memory[address]->xref;
+  xref = replaced->xref; //cpu->program_memory[address]->xref;
 }
 
 unsigned int Breakpoint_Instruction::get_opcode(void)

@@ -2075,7 +2075,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
     char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     guint64 cycles;
 
-    if(gp->cpu->pma.isValid_opcode(i)) {
+    if(gp->cpu->pma.hasValid_opcode(i)) {
 	
       sprintf(address_string,"0x%04x",i);
       strcpy(instruction_string,gp->cpu->pma.get_opcode_name(i,buf,sizeof(buf)));
