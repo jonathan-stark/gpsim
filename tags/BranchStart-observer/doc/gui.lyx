@@ -1,0 +1,326 @@
+#This file was created by <ralf> Thu Jan 20 21:43:02 2000
+#LyX 1.0 (C) 1995-1999 Matthias Ettrich and the LyX Team
+\lyxformat 2.15
+\textclass article
+\language default
+\inputencoding default
+\fontscheme default
+\graphics default
+\paperfontsize default
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\paperorientation portrait
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\defskip medskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Subsection
+
+Main window
+\layout Standard
+
+Only Preferences/windows and help/about are usable.
+\layout Subsection
+
+Sourcebrowser
+\layout Standard
+
+When a .cod file with source is loaded, there should be something in this
+ display.
+\layout Standard
+
+There is an area to the left of the source, where symbols representing the
+ program counter and breakpoints are displayed.
+ Double clicking in this area toggle breakpoints.
+ You can drag these symbols up or down in order to move them and change
+ the PC or move a breakpoint.
+\layout Standard
+
+A right button click on the source pops up a menu with six items (the word
+ 'here' in some menu items denote the line in source the mouse pointer was
+ on when right mouse button was clicked.):
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+
+\series bold 
+Menu
+\protected_separator 
+item Description
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Select
+\protected_separator 
+symbol.
+ This menu item is only available when some text is selected in the text
+ widget.
+ What it does is search the list of symbols for the selected word, and if
+ it is found it is selected in the symbol window.
+ Depending of type of symbol other things are also done, the same thing
+ as when selecting a symbol in the symbol window: 
+\begin_deeper 
+\layout Itemize
+
+If it is an address, then the opcode and source views display the address.
+ 
+\layout Itemize
+
+If it's a register, the register viewer selects the cell.
+\layout Itemize
+
+If it's a constant, address, register or ioport, it is selected in the symbol
+ window.
+\end_deeper 
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Find
+\protected_separator 
+PC This menu item find the PC and changed page tab and scroll the source
+ view to the current PC.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Run
+\protected_separator 
+here This sets a breakpoint 'here'and starts running until a breakpoint
+ is hit.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Move
+\protected_separator 
+PC
+\protected_separator 
+here This simply changes PC to the address that line 'here'in source has.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Breakpoint
+\protected_separator 
+here Set a breakpoint 'here'.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Find
+\protected_separator 
+text This opens up a searching dialog.
+ Every time you hit the 'Find' button, the current notebook page is found
+ and the source in that page is used.
+ This dialog is similar to the one in netscape navigator, except for a combo
+ widget containing previous search strings.
+\layout Standard
+
+These are the keyboard bindings:
+\layout List
+\labelwidthstring 00.00.0000
+
+
+\series bold 
+Key command
+\layout List
+\labelwidthstring 00.00.0000
+
+s,S,F7 step
+\layout List
+\labelwidthstring 00.00.0000
+
+o,O,F8 step over
+\layout List
+\labelwidthstring 00.00.0000
+
+r,R,F9 run.
+ (currently the only way to stop running is to press Ctrl-C in the terminal
+ window where the cli is)
+\layout List
+\labelwidthstring 00.00.0000
+
+q,Q quit
+\layout Subsection
+
+Opcode view
+\layout Standard
+
+This a gui verstion of the disassemble command.
+\layout Standard
+
+Double click on a line to toggle breakpoints.
+\layout Standard
+
+This window has the same keyboard commands as the source browser.
+\layout Subsection
+
+Register views
+\layout Standard
+
+There are two similar register windows.
+ One for the RAM and one for the EEPROM data, when available.
+\layout Standard
+
+Here you see all registers in the current processor.
+ Clicking on a cell displays it's name and value above the sheet of registers.
+ You can change values by entering it in the entry (or in the cell).
+\layout Standard
+
+The following things can be done on one register, or a range of registers.
+ (Selecting a range of registers is done by holding down left mouse button,
+ moving cursor, and releasing button.)
+\layout Itemize
+
+Set and clear breakpoints.
+ Use the right mousebutton menu to pop up a menu where you can select set
+ read, write, read value and write value breakpoints.
+ You can also "clear breakpoints", notice the s in "clear breakpoints",
+ every breakpoint on the registers are cleared.
+ 
+\layout Itemize
+
+Copy cells.
+ You copy cells by dragging the border of the selected cell(s).
+\layout Itemize
+
+Fill cells.
+ Move mouse to lower right corner of the frame of the selected cell(s),
+ and drag it.
+\layout Itemize
+
+Watch them.
+ Select the "Add Watch" menu item
+\layout Standard
+
+The cells have different colors depending on if they represent:
+\layout Itemize
+
+real register.
+ These have a cyan background color.
+\layout Itemize
+
+alias register.
+ These have gray background color.
+\layout Itemize
+
+invalid register.
+ These have black background color.
+ If all sixteen cells are invalid registers, then the row is not shown.
+\layout Itemize
+
+a register with one or more breakpoints.
+ These has red background.
+\layout Standard
+
+The cells that are changed (,for example when hitting 's' for step and the
+ instruction changes things in some registers,) have blue foreground color.
+ The cells that didn't change has black foreground.
+\layout Subsection
+
+Symbol view
+\layout Standard
+
+This window shows symbols (doh), but there won't be so many until a .cod
+ file is loaded
+\layout Standard
+
+You can filter out some symbol types using the buttons in the top of the
+ window, and you can sort the rows by clicking on the column buttons (the
+ ones reading 'symbol', 'type' and 'address').
+\layout Standard
+
+If you click on a line, one of these things are done depending of the type
+ of symbol:
+\layout Itemize
+
+If it is an address, then the opcode and source views display the address.
+\layout Itemize
+
+If it's a register, the register viewer selects the cell.
+\layout Subsection
+
+Watch view
+\layout Standard
+
+This is not a output-only window as the name suggests (change name?).
+ You can both view and change data.
+ Double-clicking on a bit toggles the bit.
+\layout Standard
+
+You add variables here by marking them in a register viewer and select 
+\begin_inset Quotes eld
+\end_inset 
+
+Add watch
+\begin_inset Quotes erd
+\end_inset 
+
+ from menu.
+ 
+\layout Standard
+
+The right-click menu has the following items:
+\layout Itemize
+
+Remove watch
+\layout Itemize
+
+Set register value
+\layout Itemize
+
+Clear Breakpoints
+\layout Itemize
+
+Set break on read
+\layout Itemize
+
+Set break on write
+\layout Itemize
+
+Set break on read value
+\layout Itemize
+
+Set break on write value
+\layout Itemize
+
+Columns...
+ 
+\layout Standard
+
+"Columns...
+\begin_inset Quotes erd
+\end_inset 
+
+ opens up a window where you can select which of the following data to display:
+\layout Itemize
+
+BP
+\layout Itemize
+
+Type
+\layout Itemize
+
+Name
+\layout Itemize
+
+Address
+\layout Itemize
+
+Dec
+\layout Itemize
+
+Hex
+\layout Itemize
+
+Bx (bits of word)
+\layout Standard
+
+You can sort the list of watches by clicking on the column buttons.
+ Clicking sorts list backwards.
+\the_end

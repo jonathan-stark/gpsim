@@ -1,0 +1,69 @@
+
+
+                    gpsim
+
+      GNU Pic Simulator, a simulator for 
+      Microchip's PIC microcontrollers.
+
+
+I've just uploaded a new release of gpsim to
+
+http://www.dattalo.com/gnupic/gpsim-0.19.0.tar.gz
+or goto the webpage:
+http://www.dattalo.com/gnupic/gpsim.html
+
+Also, you'll probably want to grab the latest release of gpasm
+http://www.dattalo.com/gnupic/gpasm-0.8.9.tar.gz
+
+New features:
+
+
+05APR00 gpsim-0.19.0
+ o Daniel Schudel joins gpsim development.
+   -- Added support for the 16x5x family
+ o Added 16f87x family
+ o gui - Added Program Memory sheet
+    --  Added support for program memory writes
+ o gui - Added Breadboard window (graphical pinout)
+ o Asynchronous mode of the usart fixed.
+ o A/D converter enhanced
+ o Analog Stimuli revisited.
+ o Scripting was fixed.
+ o cli - Once again, gpsim can be built without the gui.
+
+
+README:
+------
+Please see the README file for all of the details on the new features.
+
+INSTALL:
+-------
+install gpsim the standard way:
+
+tar -xvzf gpsim-0.19.0.tar.gz
+./configure
+cd gpsim-0.19.0/
+make
+su root
+make install
+
+this will expand into a child directory named gpsim-0.19.0 . From there you
+can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
+files for more information. The rest of the steps will build gpsim and place
+the executable into /usr/local/bin . If you don't have root privileges then
+you can copy the executable at gpsim-0.19.0/gpsim/gpsim to a directory in the
+execution path .
+
+Special Thanks (still) goes out to Ralf Forsberg for his major contributions
+to the gui interface. New thanks go out to Daniel Schudel for contributing
+the 16C5X family.
+
+
+If you have any questions, you can reach me:
+mailto:scott@dattalo.com
+or subscribe to the gnupic mailing list: subscribe-gnupic@linuxhacker.org 
+(that address may be wrong...) and send a post there.
+
+Have fun!
+
+Scott

@@ -1,0 +1,56 @@
+/*
+   Copyright (C) 1999 T. Scott Dattalo
+
+This file is part of gpsim.
+
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gpsim; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+
+#include <iostream.h>
+#include <iomanip.h>
+#include <string>
+
+#include "command.h"
+#include "cmd_version.h"
+
+cmd_version version;
+
+extern void gpsim_version(void);
+
+static cmd_options cmd_version_options[] =
+{
+  NULL,0,0
+};
+
+
+cmd_version::cmd_version(void)
+{ 
+  name = "version";
+
+
+  brief_doc = string("Display the gpsim's version");
+
+  long_doc = string("Display the gpsim's version");
+
+  op = cmd_version_options; 
+}
+
+
+void cmd_version::version(void)
+{
+  gpsim_version();
+}
+

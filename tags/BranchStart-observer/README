@@ -1,0 +1,221 @@
+.
+gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
+
+
+Please see the INSTALL file to get instructions on how to install gpsim.
+Please see the TODO file to get an idea of the current status and a little background on how the code works.
+Please see the HISTORY file to see how gpsim has evolved.
+Please see the README.EXAMPLES file for information about the examples.
+Please see the PROCESSORS file to see a list of supported processors.
+Please see doc/gpsim.lyx or doc/gpsim.ps for the latest documentation
+Please see COPYING for the GPL.
+
+gpsim-0.19.0 new stuff:
+
+05APR00 gpsim-0.19.0
+ o Daniel Schudel joins gpsim development.
+   -- Added support for the 16x5x family
+ o Added 16f87x family
+ o gui - Added Program Memory sheet
+    --  Added support for program memory writes
+ o gui - Added Breadboard window (graphical pinout)
+ o Asynchronous mode of the usart fixed.
+ o A/D converter enhanced
+ o Analog Stimuli revisited.
+ o Scripting was fixed.
+ o cli - Once again, gpsim can be built without the gui.
+
+
+New Developer
+-------------
+Daniel Schudel joins Ralf and myself. He has added support for the 16x5x devices and in particularly the 16c54.
+
+16f87x
+------
+
+The 16f87x series is rapidly proving to be a popular processor. So naturally, gpsim needs to support it. The major changes needed to accomodate were in the program memory writes for the 14bit core and greater than two register memory banks support. Minor changes included abstracting the data eeprom/flash logic somewhat (it was hardcoded for the 16x84 devices).
+
+Program Memory sheet
+--------------------
+
+Now the program memory may displayed like register memory. Ralf has modified the disassembly window into a notebook window with two tabs. One tab is like the previous disassembly window ( a listing of the disassembled hex file (no symbols)). The other tab is a matrix that contains the instruction opcodes. This window allows you to modify the program memory opcodes. Like before, Ralf has done great work!
+
+"Breadboard" window (or pinout window)
+--------------------------------------
+Ralf has added a new window that displays the pin out of the pic. All of the pins along with their names, states (high or low), and directions (in or out) are shown. The pin directions are shown with a arrow. If the arrow is pointing toward the pic then the pin is an input other wise it's an output. The states of the pins are shown in two ways. First the color of the arrows reflect the states, a green is low and a red is high. Additionally, an 'L' or an 'H' is placed next to the pin. The 'L' and 'H' are hot - if you double click these the pins will toggle states. The pin directions are hot too; double clicking on the arrows will toggle the pin directions.
+
+Limitations:
+1) Pin numbers are not shown
+2) Packages are shown as dip packages only (gpsim doesn't support quad packages).
+
+USART fix
+---------
+
+The newly added usart peripheral had several bugs. For example, the receive pin was taking only one sample and that sample was occuring synchronous to the tx pin driving. This version better mimicks a real usart. The receiver will not sample until a start bit is received, and then when it does sample it takes three samples in the center of each bit and uses majority waiting to determine the bit state.
+
+A new example illustrates the usart behavior fairly well:
+
+examples/14bit/usart-14.asm
+examples/14bit/usart.stc
+
+Run this example (after gpsim has been installed) by:
+
+$ cd examples/14bit
+$ gpasm usart-14.asm
+$ gpsim -c usart.stc
+
+The usart.stc is a command file that will load the usart-14.cod file and added a node that ties the usart RX and TX pins together. In other words, the node configures the serial port for loop back (realize that this is OUTside of the simulated pic; this is analogous to configuring a real RS232 port for loop back). When the simulated software runs, it will configure the usart TX pin for asynchronous transmissions and repeatedly send the string "0123456789ABCDEF". The RX pin is configured such that an interrupt routine is invoked when the receive register fills up with data. The interrupt routine copies the received data into a circular buffer 16 bytes long. 
+
+Limitations:
+1) Only the asynchronous mode is supported.
+
+A/D converter enhanced
+----------------------
+
+The 16f87x devices have an A/D converter with 10-bits of resolution. Previous versions of gpsim supported the A/D in the 16c74 which is only 8-bits. This version has enhanced the A/D peripheral so that both resolutions are supported. In addition, if analog stimuli (see below) are attached to the A/D inputs, then the analog values are scaled properly regardless of whether the 8-bit or 10-bit A/D is used.
+
+What's coming next?
+-------------------
+
+Modules.
+Register Stimuli.
+
+
+System Requirements:
+--------------------
+
+I've only tested the code on a Intel based Linux boxes (redhat 4.2, 5.1, 5.2, 6.0, 6.1). Much of the software is in C++, so you'll need the standard include files and libraries etc. I tried not to use any gcc specific C++ things (like the operator ?> for example). So I see no reason gpsim wouldn't compile on any system. The g++ compiler and include files are required. The GNU readline library is also required.
+
+The latest C++ compiler doesn't work properly on the PPC Linux distribution, so unfortunately it's not possible to build gpsim there. (Is this still true? Eric Sh.?).
+
+
+If you want the gui support then you'll also need glib and gtk. I'm using version 1.2.3 (the version numbers for these packages track one another). I've also have successfully used 1.2.1. You're also going to need the latest gtk+-extra, eXdbm packages. See INSTALL about these.
+
+
+
+
+Installing:
+----------
+
+See the INSTALL file.
+
+Invoking:
+---------
+
+Run gpsim by typing:
+
+gpsim [-h] [-p<device> [<hex_file>]] [-c<stc_file>]
+        -h            : this help list
+        -p<device>    : processor (e.g. -pp16c84 for the 'c84)
+        <hex_file>    : input file in "intelhex16" format
+        -c<stc_file>  : startup command file
+        -s<cod_file>  : .cod symbol file
+
+        -v            : gpsim version
+
+for example:
+
+gpsim -pp16c61 pichexfile.hex
+
+will start the simulator, select a 'c61 as the target and load the program memory with pichexfile.hex hex file. There are several pic source files in the ./gpsim-0.0.14/examples subdirectory. 
+
+Once started, a very simple command line prompt will process your requests:
+
+gpsim> help
+attach         Attach stimuli to nodes
+break          Set a break point
+clear          Remove a break point
+disassemble    Disassemble the current cpu
+dump           Display either the RAM or EEPROM
+echo           echo "text"
+help           Type help "command" for more help on a command
+list           Display source and list files
+load           Load either a hex,command, or .cod file
+node           Add or display stimulus nodes
+processor      Select & Display processors
+quit           Quit gpsim
+reset          Reset all or parts of the simulation
+run            Execute the pic program
+set            display and control gpsim behavior flags
+step           Execute one or more instructions.
+stimulus       Create a stimulus
+symbol         Add or display symbols
+trace          Dump the trace history
+version        Display the gpsim's version
+x              examine and/or modify memory
+
+
+
+More help is available for each command by typing help "command". For example, help break prints this:
+
+gpsim> help break
+break [c e | w | r | wv | rv | wdt [location] [value] ]
+
+        options:
+                c   - cycle
+                e   - execution
+                w   - write
+                r   - read
+                wv  - write value
+                rv  - read value
+                wdt - wdt timeout
+                    - no argument, display the break points that are set.
+        examples:
+                break e 0x20     // set an execution break point at address 0x20
+                break wv 0x30 0  // break if a zero is written to register 0x30
+                break c 1000000  // break on the one million'th cycle
+                break            // display all of the break points
+
+The cli is available even when the gui is used.
+
+
+Features:
+---------
+
+Standard simulator stuff:
+  o Breakpoints - execution, read and write memory, wdt, <ctrl C>
+  o single stepping
+  o step over
+  o run until break
+  o disassemble 
+  o dump memory/eeprom
+  o Trace
+  o stimulus files - analog and digital
+  o configuration files
+  o symbolic debugging
+
+Gui stuff:
+  o Register viewer
+  o Source file viewer
+  o Program opcode window
+  o Symbol viewer
+  o Watch window
+  o Pinout/breadboard window
+
+gpsim specific (not implemented)
+  o Simulate multiple processors. 
+  o Step backwards
+
+Peripherals supported:
+  o eeprom
+  o WDT
+  o TMR0
+  o I/O Ports
+  o TMR1
+  o TMR2
+  o CCP
+  o PWM
+  o A/D
+  o UART 
+
+BUGS:
+----
+I'm absolutely certain there are bugs. If you find one, send it to me at either
+scott@dattalo.com
+
+or post it to the gnupic mailing list:
+       mailto:gnupic@linuxhacker.org
+
+Finally, see the file Contributions for people who have submitted suggestions and patches.
+
+Scott
