@@ -250,8 +250,6 @@ public:
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
 
-  // A couple of functions for manipulating  breakpoints
-
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;
 
   virtual void tris_instruction(unsigned int tris_register) {return;};
@@ -280,8 +278,6 @@ public:
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
   virtual void reset(RESET_TYPE r);
-  void disassemble (int start_address, int end_address);
-  void list(int file_id, int pcval, int start_line, int end_line);
 
   virtual void por(void);
   virtual void create(void);
@@ -299,17 +295,6 @@ public:
   virtual unsigned int get_pclath_branching_modpcl(void)=0;
 
   virtual void option_new_bits_6_7(unsigned int)=0;
-/*
-  virtual unsigned int get_fsr_value ( unsigned int load_value )
-    {
-      return load_value;
-    };
-  
-  virtual unsigned int map_fsr_indf ( void )
-    {
-      return ( fsr->value );
-    }
-*/
 
   virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom(void) { return (eeprom); }
