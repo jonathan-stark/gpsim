@@ -2,6 +2,12 @@
 	* gui/gui_break.cc, gui/dialog.cc, gui/gui_init.cc, gui/gui_menu.cc,
 	  gui/gui_processor.cc, gui/gui_src.cc, gui/gui_src_asm.cc
 	  gui/gui_src_opcode.cc: removed unneeded include gtkcombobox.h
+	* gui/gui_breadboard.cc: fixed compiler warnings
+	* cli/Makefile.am, gui/Makefile.am: added AM_ preffix to CFLAGS,
+	  CXXFLAGS, CPPFLAGS and YFLAGS
+	* doc/gpsimWin32.html: gtk+ version 2.4.14, XHTML 1.0 Transitional compliant,
+	  gtk+extra-2-1.1.0-20050102
+	* doc/gpsim_cvs.html: changed first build instructions
 
 2004-12-17 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, src/interface.cc, cli/socket.cc: removed
