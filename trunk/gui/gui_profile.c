@@ -589,7 +589,9 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     GtkWidget *scrollw1;
     static GtkWidget *active_plot;
     static GtkWidget *canvas;
-    static GdkColor color;
+    static GdkColor color1;
+    static GdkColor color2;
+    static GdkColor bg_color;
     gint page_width, page_height;
     gfloat scale = 1.;
     static GtkPlotText *infotext;
@@ -607,7 +609,6 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
     static double *px2;//[] = {.1, .2, .3, .4, .5, .6, .7, .8};
     static double *py2;//[] = {.012*1000, .067*1000, .24*1000, .5*1000, .65*1000, .5*1000, .24*1000, .067*1000};
-    static double *dx2;//[] = {.1, .1, .1, .1, .1, .1, .1, .1};
     gdouble tickdelta;
     gdouble barwidth;
     int pic_id;
@@ -629,13 +630,11 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	}
         free(px2);
         free(py2);
-	free(dx2);
         free(bartext);
     }
 
     px2=malloc(numpoints*sizeof(double));
     py2=malloc(numpoints*sizeof(double));
-    dx2=malloc(numpoints*sizeof(double));
     bartext=malloc(numpoints*sizeof(GtkPlotText*));
 
 #define WINDOWWIDTH 550
@@ -651,7 +650,6 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     for(i=0;i<numpoints;i++)
     {
 	px2[i]=(i+1)*barwidth*2;
-        dx2[i]=barwidth;
 	if(maxy<cyclearray[i])
             maxy=cyclearray[i];
 	py2[i]=cyclearray[i];
@@ -758,12 +756,14 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
 	active_plot=plot;
 
-	gdk_color_parse("light yellow", &color);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color);
-	gtk_plot_set_background(GTK_PLOT(active_plot), &color);
+	gdk_color_parse("light yellow", &bg_color);
+	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+	gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
-	gdk_color_parse("black", &color);
-	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color);
+	gdk_color_parse("black", &color1);
+	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+	gdk_color_parse("black", &color2);
+	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
@@ -786,21 +786,21 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
-    gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta, 1);
+    gtk_plot_axis_set_ticks(GTK_PLOT(active_plot), GTK_PLOT_AXIS_Y, tickdelta, 0);
     gtk_plot_set_range(GTK_PLOT(active_plot), 0., 1., 0., (gdouble)maxy);
     gtk_plot_axis_set_labels_numbers(GTK_PLOT(active_plot),
 				     GTK_PLOT_AXIS_LEFT,
 				     maxy<10000?0:GTK_PLOT_LABEL_EXP,
                                      0);
 
-    gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, dx2, NULL, numpoints);
+    gtk_plot_data_set_points(GTK_PLOT_DATA(dataset), px2, py2, NULL, NULL, numpoints);
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
 			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
-			     4, 0/*(int)(((double)WINDOWWIDTH/2)*barwidth)*/+1, &color,&color);
+			     0, 4.0, &color1,&color2);
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_SOLID,
-				      5, &color);
+				      GTK_PLOT_LINE_NONE,
+				      5, &color2);
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
@@ -827,7 +827,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     }
 
     infotext=gtk_plot_put_text(GTK_PLOT(active_plot),
-			       PLOTXPOS-0.05,
+			       0.5,
 			       PLOTYPOS-0.05,
 			       NULL,
 			       20,
@@ -835,7 +835,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 			       NULL,
 			       NULL,
 			       TRUE,
-			       GTK_JUSTIFY_LEFT,
+			       GTK_JUSTIFY_CENTER,
 			       infostring);
 
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext);
@@ -857,7 +857,9 @@ int plot_routine_histogram(Profile_Window *pw)
     GtkWidget *scrollw1;
     static GtkWidget *active_plot;
     static GtkWidget *canvas;
-    static GdkColor color;
+    static GdkColor color1;
+    static GdkColor color2;
+    static GdkColor bg_color;
     gint page_width, page_height;
     gfloat scale = 1.;
     static GtkPlotText *infotext1;
@@ -880,7 +882,6 @@ int plot_routine_histogram(Profile_Window *pw)
 
     static double *px2;//[] = {.1, .2, .3, .4, .5, .6, .7, .8};
     static double *py2;//[] = {.012*1000, .067*1000, .24*1000, .5*1000, .65*1000, .5*1000, .24*1000, .067*1000};
-    static double *dx2;//[] = {.1, .1, .1, .1, .1, .1, .1, .1};
     gdouble tickdelta_x;
     gdouble tickdelta_y;
     gdouble barwidth;
@@ -904,7 +905,6 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_plot_remove_text(GTK_PLOT(active_plot),infotext2);
         free(px2);
         free(py2);
-	free(dx2);
     }
 
 #define WINDOWWIDTH 550
@@ -926,7 +926,6 @@ int plot_routine_histogram(Profile_Window *pw)
 //    numpoints=10;
     px2=malloc(numpoints*sizeof(double));
     py2=malloc(numpoints*sizeof(double));
-    dx2=malloc(numpoints*sizeof(double));
 
     totalcycles=0;
     totalcount=0;
@@ -963,13 +962,7 @@ int plot_routine_histogram(Profile_Window *pw)
     mediancycles=calculate_median(pw->histogram_profile_list,NULL);
     stddevcycles=calculate_stddev(pw->histogram_profile_list,NULL,averagecycles);
 
-    barwidth=PLOTWIDTH/(numpoints);
-
-    maxy=maxy*1.1;
-    margin=(maxx-minx)*.15;
-    maxx=maxx+margin;
-    minx=minx-margin;
-
+    barwidth=PLOTWIDTH/(1.3*(maxx-minx/*numpoints*/));
 
     // Compute tickdelta for easy reading.
     y=maxy;
@@ -994,6 +987,15 @@ int plot_routine_histogram(Profile_Window *pw)
     tickdelta_x=x*i64/5;
     if(tickdelta_x<1)
         tickdelta_x=1;
+
+
+    maxy=maxy*1.1+1;
+    margin=((int)(maxx-minx))*.15+1;
+    maxx=maxx+margin;
+    if(minx>margin)
+	minx=minx-margin;
+    else
+        minx=0;
 
     pic_id = ((GUI_Object*)pw)->gp->pic_id;
 
@@ -1044,12 +1046,14 @@ int plot_routine_histogram(Profile_Window *pw)
 
 	active_plot=plot;
 
-	gdk_color_parse("light yellow", &color);
-	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color);
-	gtk_plot_set_background(GTK_PLOT(active_plot), &color);
+	gdk_color_parse("light yellow", &bg_color);
+	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &bg_color);
+	gtk_plot_set_background(GTK_PLOT(active_plot), &bg_color);
 
-	gdk_color_parse("black", &color);
-	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color);
+	gdk_color_parse("black", &color1);
+	gdk_color_alloc(gtk_widget_get_colormap(active_plot), &color1);
+	gdk_color_parse("black", &color2);
+	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
@@ -1089,10 +1093,10 @@ int plot_routine_histogram(Profile_Window *pw)
     gtk_plot_data_set_symbol(GTK_PLOT_DATA(dataset),
 			     GTK_PLOT_SYMBOL_NONE,
 			     GTK_PLOT_SYMBOL_FILLED,
-			     4, (int)(((double)WINDOWWIDTH)*barwidth), &color,&color);
+			     0, 4.0, &color1,&color2);
     gtk_plot_data_set_line_attributes(GTK_PLOT_DATA(dataset),
-				      GTK_PLOT_LINE_SOLID,
-				      5, &color);
+				      GTK_PLOT_LINE_NONE,
+				      5, &color2);
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
@@ -1129,7 +1133,7 @@ int plot_routine_histogram(Profile_Window *pw)
 	if(infostring[i]=='\n')
 	    infostring[i]=' ';
     infotext1=gtk_plot_put_text(GTK_PLOT(active_plot),
-				PLOTXPOS-0.05,
+				0.5,
 				PLOTYPOS-0.05,
 				NULL,
 				20,
@@ -1137,19 +1141,19 @@ int plot_routine_histogram(Profile_Window *pw)
 				NULL,
 				NULL,
 				TRUE,
-				GTK_JUSTIFY_LEFT,
+				GTK_JUSTIFY_CENTER,
 				infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext1);
 
     // Infostring2
-    sprintf(infostring,"\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.2f \\BStandard deviation:\\N%.2f",
+    sprintf(infostring,"\\BMin:\\N\%lld \\BMax:\\N%lld \\BAverage:\\N%.1f \\BMedian:\\N%.1f \\BStandard deviation:\\N%.1f",
 	    mincycles,
 	    maxcycles,
 	    averagecycles,
 	    mediancycles,
 	    stddevcycles);
     infotext2=gtk_plot_put_text(GTK_PLOT(active_plot),
-				PLOTXPOS-0.05,
+				0.5,
 				PLOTYPOS-0.03,
 				NULL,
 				20,
@@ -1157,7 +1161,7 @@ int plot_routine_histogram(Profile_Window *pw)
 				NULL,
 				NULL,
 				TRUE,
-				GTK_JUSTIFY_LEFT,
+				GTK_JUSTIFY_CENTER,
 				infostring);
     gtk_plot_draw_text(GTK_PLOT(active_plot),*infotext2);
 
@@ -1844,9 +1848,9 @@ void ProfileWindow_update(Profile_Window *pw)
 		  sprintf(executions_string,"%d",count_sum);
 		  sprintf(min_string,"%ld",(long)min);
 		  sprintf(max_string,"%ld",(long)max);
-		  sprintf(median_string,"%.2f", calculate_median(list_start,list_end));
-                  sprintf(average_string,"%.2f",((float)cycles_sum)/count_sum);
-		  sprintf(stddev_string,"%.2f",calculate_stddev(list_start,list_end,cycles_sum/count_sum));
+		  sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
+                  sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
+		  sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
                   sprintf(total_string,"%d",(int)cycles_sum);
 		  gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
 	      }
@@ -1871,9 +1875,9 @@ void ProfileWindow_update(Profile_Window *pw)
       sprintf(executions_string,"%d",count_sum);
       sprintf(min_string,"%ld",(long)min);
       sprintf(max_string,"%ld",(long)max);
-      sprintf(median_string,"%.2f", calculate_median(list_start,list_end));
-      sprintf(average_string,"%.2f",((float)cycles_sum)/count_sum);
-      sprintf(stddev_string,"%.2f",calculate_stddev(list_start,list_end,cycles_sum/count_sum));
+      sprintf(median_string,"%.1f", calculate_median(list_start,list_end));
+      sprintf(average_string,"%.1f",cycles_sum/(float)count_sum);
+      sprintf(stddev_string,"%.1f",calculate_stddev(list_start,list_end,cycles_sum/(float)count_sum));
       sprintf(total_string,"%d",(int)cycles_sum);
       gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
   }
