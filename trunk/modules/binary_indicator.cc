@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
 
 #include <errno.h>
 #include <stdlib.h>
@@ -132,8 +134,8 @@ void Binary_Indicator::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(get_pin(1));
-  symbol_table.add_stimulus(get_pin(2));
+  get_symbol_table().add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(2));
 
 }
 

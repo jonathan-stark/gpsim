@@ -31,9 +31,13 @@ Boston, MA 02111-1307, USA.  */
 */
 
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
+
 #include "../config.h"
 
 #ifdef HAVE_GUI
@@ -127,7 +131,7 @@ int Resistor_IO::get_voltage(guint64 current_time)
 void Resistor_IOPORT::trace_register_write(void)
 {
 
-  trace.module1(value);
+  get_trace().module1(value);
 }
 
 //--------------------------------------------------------------
@@ -190,8 +194,8 @@ void Resistor::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(get_pin(1));
-  symbol_table.add_stimulus(get_pin(2));
+  get_symbol_table().add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(2));
 
 }
 
@@ -297,7 +301,7 @@ void PullupResistor::create_iopin_map(void)
     cout << "pullup resistor pin name: "<<iop->name() << '\n';
     cout << "voltage " << iop->get_voltage(0) << '\n';
   }
-  symbol_table.add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(1));
 
 }
 

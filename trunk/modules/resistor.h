@@ -22,7 +22,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __RESISTOR_H__
 #define __RESISTOR_H__
 
-#include "../config.h"
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>

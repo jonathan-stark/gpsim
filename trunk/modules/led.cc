@@ -61,6 +61,9 @@ Boston, MA 02111-1307, USA.  */
 */
 
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
@@ -131,7 +134,7 @@ Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 void Led_Port::trace_register_write(void)
 {
 
-  trace.module1(value);
+  get_trace().module1(value);
 }
 
 
@@ -578,7 +581,7 @@ Led_7Segments::Led_7Segments(void)
   build_window();
 
   interface = new LED_Interface(this);
-  gi.add_interface(interface);
+  get_interface().add_interface(interface);
 }
 
 Led_7Segments::~Led_7Segments(void)
@@ -664,14 +667,14 @@ void Led_7Segments::create_iopin_map(void)
   // in the CLI).
 
   // again, this could be looped (and even combined with the above)
-  symbol_table.add_stimulus(get_pin(1));
-  symbol_table.add_stimulus(get_pin(2));
-  symbol_table.add_stimulus(get_pin(3));
-  symbol_table.add_stimulus(get_pin(4));
-  symbol_table.add_stimulus(get_pin(5));
-  symbol_table.add_stimulus(get_pin(6));
-  symbol_table.add_stimulus(get_pin(7));
-  symbol_table.add_stimulus(get_pin(8));
+  get_symbol_table().add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(2));
+  get_symbol_table().add_stimulus(get_pin(3));
+  get_symbol_table().add_stimulus(get_pin(4));
+  get_symbol_table().add_stimulus(get_pin(5));
+  get_symbol_table().add_stimulus(get_pin(6));
+  get_symbol_table().add_stimulus(get_pin(7));
+  get_symbol_table().add_stimulus(get_pin(8));
 
 
 }
@@ -830,7 +833,7 @@ Led::Led(void)
   build_window();
 
   interface = new LED_Interface(this);
-  gi.add_interface(interface);
+  get_interface().add_interface(interface);
 }
 
 Led::~Led(void)
@@ -904,7 +907,7 @@ void Led::create_iopin_map(void)
   // in the CLI).
 
   // again, this could be looped (and even combined with the above)
-  symbol_table.add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(1));
 
 }
 

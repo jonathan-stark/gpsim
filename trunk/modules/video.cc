@@ -32,6 +32,9 @@ in1	in2	result
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
@@ -47,8 +50,6 @@ in1	in2	result
 #include "../src/processor.h"
 
 #include "video.h"
-
-extern Processor *active_cpu;
 
 //--------------------------------------------------------------
 //
@@ -143,10 +144,10 @@ Video::Video(void)
   memset(line,0x80,XRES);
 
   //  cpu = get_processor(1);
-  cpu = active_cpu;  //FIXME
+  cpu = get_active_cpu();  //FIXME
 
   interface = new Video_Interface(this);
-  gi.add_interface(interface);
+  get_interface().add_interface(interface);
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_window_set_default_size(GTK_WINDOW(window), XRES,YRES);
@@ -268,7 +269,7 @@ void Video::create_iopin_map(void)
   // in the CLI).
 
   for(i= 1; i<=package->get_pin_count(); i++)
-    symbol_table.add_stimulus(get_pin(i));
+    get_symbol_table().add_stimulus(get_pin(i));
 
 }
 
@@ -364,7 +365,7 @@ void Video::update_state(void)
 
   // get the current simulation cycle time from gpsim.
 
-  cycletime = cycles.get();
+  cycletime = get_cycles().get();
 
   if(sync_time>cycletime)
   {

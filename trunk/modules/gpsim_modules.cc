@@ -41,6 +41,9 @@ support:
   Module * getmodule(char *module_type) - creates a new module
  */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <iostream>
 #include <stdio.h>
 

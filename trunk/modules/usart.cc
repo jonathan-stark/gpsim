@@ -35,6 +35,9 @@ Boston, MA 02111-1307, USA.  */
 */
 
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
@@ -137,7 +140,7 @@ public:
     if(state ^ (index & 1))  {
       index = (index + 1) & max_events;
       //cout << "New event " << state << "  index = " << index << '\n';
-      buffer[index] = cycles.get();
+      buffer[index] = get_cycles().get();
     }
 
   }
@@ -354,7 +357,7 @@ public:
     cout << "SPBRG::" << __FUNCTION__ << " is not implemented\n";
 
     //pic_processor *cpu = gpsim_get_active_cpu();
-    last_time = cycles.get();
+    last_time = get_cycles().get();
 
     cout << "SPBRG rollover at cycle " << last_time << '\n';
 
@@ -370,7 +373,7 @@ public:
 
   virtual void start(void) {
 
-    last_time = cycles.get();
+    last_time = get_cycles().get();
     start_time = last_time;
 
     //future_time = last_time + time_per_bit;
@@ -389,7 +392,7 @@ public:
   virtual void get_next_cycle_break(void) {
     future_time = last_time + time_per_bit;
 
-    cycles.set_break(future_time, this);
+    get_cycles().set_break(future_time, this);
 
 
   };
@@ -401,9 +404,9 @@ public:
     baud = new_baud;
 
     //pic_processor *cpu = gpsim_get_active_cpu();
-    if(active_cpu && baud>0.0) {
+    if(get_active_cpu() && baud>0.0) {
 
-      time_per_bit = active_cpu->time_to_cycles(1.0/baud);
+      time_per_bit = get_active_cpu()->time_to_cycles(1.0/baud);
 
     }
   };
@@ -679,13 +682,13 @@ class TXREG : public BreakpointObject
     /*
       Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
     */
-    if(active_cpu) {
-      time_per_packet = active_cpu->time_to_cycles( (1.0 +             // start bit
+    if(get_active_cpu()) {
+      time_per_packet = get_active_cpu()->time_to_cycles( (1.0 +             // start bit
 						     bits_per_byte +   // data bits
 						     stop_bits  +      // stop bit(s)
 						     use_parity)       //
 						    /baud);
-      time_per_bit = active_cpu->time_to_cycles( 1.0/baud );
+      time_per_bit = get_active_cpu()->time_to_cycles( 1.0/baud );
     } else
       time_per_packet = time_per_bit = 0;
 
@@ -724,7 +727,7 @@ class TXREG : public BreakpointObject
       cout << "\n\n";
     }
 
-    last_time = cycles.get();
+    last_time = get_cycles().get();
     start_time = last_time;
 
     if(txpin) {
@@ -748,7 +751,7 @@ class TXREG : public BreakpointObject
       
     }
 
-    cycles.set_break(future_time, this);
+    get_cycles().set_break(future_time, this);
   }
 
   void build_tx_packet(unsigned int tb) {
@@ -773,9 +776,9 @@ class TXREG : public BreakpointObject
     }
 
     build_tx_packet(tx_byte);
-    last_time = cycles.get();
+    last_time = get_cycles().get();
     future_time = last_time + time_per_bit;
-    cycles.set_break(future_time, this);
+    get_cycles().set_break(future_time, this);
   }
 };
 
@@ -897,13 +900,13 @@ class RCREG : public BreakpointObject // : public _RCREG
       Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
     */
 
-    if(active_cpu) {
-      time_per_packet = active_cpu->time_to_cycles( (1.0 +             // start bit
+    if(get_active_cpu()) {
+      time_per_packet = get_active_cpu()->time_to_cycles( (1.0 +             // start bit
 						     bits_per_byte +   // data bits
 						     stop_bits  +      // stop bit(s)
 						     use_parity)       //
 						    /baud);
-      time_per_bit = active_cpu->time_to_cycles( 1.0/baud );
+      time_per_bit = get_active_cpu()->time_to_cycles( 1.0/baud );
     } else
       time_per_packet = time_per_bit = 0;
 
@@ -957,7 +960,7 @@ class RCREG : public BreakpointObject // : public _RCREG
     //rx_event->dump(-1);  // dump all events
     rx_event->dump_ASCII_art( time_per_bit/4, start_bit_index );  // time_per_packet/10,-1);
 
-    guint64 current_time =  cycles.get();
+    guint64 current_time =  get_cycles().get();
     int edges = rx_event->get_edges(start_time, current_time);
     //cout << " gpsim time is " << current_time << "\n";
     //cout << " # of edges for one byte time " << edges << '\n';
@@ -1013,7 +1016,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 
   void start(void) {
 
-    last_time = cycles.get();
+    last_time = get_cycles().get();
     start_time = last_time;
 
     receive_state = RS_RECEIVING;
@@ -1024,7 +1027,7 @@ class RCREG : public BreakpointObject // : public _RCREG
     future_time = last_time + time_per_packet;
 
     if(!autobaud) {
-      cycles.set_break(future_time, this);
+      get_cycles().set_break(future_time, this);
       //cout << "RCREG::start Setting Break\n";
     }
     //cout << "RCREG::start   last_cycle = " << 
@@ -1118,7 +1121,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 	return 0x400;
     }
 
-    guint64 cur_time = cycles.get();
+    guint64 cur_time = get_cycles().get();
     guint64 t1 = rx_event->buffer[sindex] + bit_time + bit_time/2;
 
     guint32 index1 = rx_event->get_index(t1);
@@ -1278,7 +1281,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 
 	if(!bit && receive_state == RS_WAITING_FOR_START) {
 	  // Looks like we just got a start bit.
-	  start_bit_time = cycles.get();
+	  start_bit_time = get_cycles().get();
 	  cout  << "Start bit at t = 0x" << start_bit_time << '\n';
 	  receive_state = RS_RECEIVING;
 	}
@@ -1349,7 +1352,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 	    cout << "Minimum pulse width " 
 		 << hex << min 
 		 << " Baud = " 
-		 << (active_cpu->time_to_cycles((1.0)/w)) <<'\n';
+		 << (get_active_cpu()->time_to_cycles((1.0)/w)) <<'\n';
 
 	    // Assume the baud rate is correct.
 	    // use it to decode the bit stream.
@@ -1434,7 +1437,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 	case RS_WAITING_FOR_START:
 	  if(!bit) {
 	    // Looks like we just got a start bit.
-	    start_bit_time = cycles.get();
+	    start_bit_time = get_cycles().get();
 
 	    cout  << "Start bit at t = 0x" << start_bit_time << '\n';
 
@@ -1511,8 +1514,8 @@ public:
     value = (value & ~mask) | (new_value ? mask : 0);
 
     if(usart)
-      //trace.module1( (usart->interface_id << 4 ) | (value & 0xf));
-      trace.module1( value & 0xf);
+      //get_trace()->module1( (usart->interface_id << 4 ) | (value & 0xf));
+      get_trace().module1( value & 0xf);
   }
 };
 
@@ -1804,10 +1807,10 @@ void USARTModule::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(get_pin(1));
-  symbol_table.add_stimulus(get_pin(2));
-  symbol_table.add_stimulus(get_pin(3));
-  symbol_table.add_stimulus(get_pin(4));
+  get_symbol_table().add_stimulus(get_pin(1));
+  get_symbol_table().add_stimulus(get_pin(2));
+  get_symbol_table().add_stimulus(get_pin(3));
+  get_symbol_table().add_stimulus(get_pin(4));
 
 
   // Complete the usart initialization
@@ -1910,7 +1913,7 @@ public:
     if(++event_index >= EVENT_BUFFER_SIZE) {
       // This buffer is full
       event_index--;
-      end_time = cycles.get();
+      end_time = get_cycles().get();
       return 1;
     }
     return 0;
@@ -1918,7 +1921,7 @@ public:
 
   void start(void) {
     event_index = 0;
-    start_time = cycles.get();
+    start_time = get_cycles().get();
   }
 
   unsigned int get_event(int index) {
@@ -1983,7 +1986,7 @@ public:
 
   inline void boolean_event(guint64 not_used_event_time, bool state)
   {
-    guint64 event_time = cycles.get();
+    guint64 event_time = get_cycles().get();
     guint64 delta  = event_time - latest_event_time;
 
     latest_event_time = event_time;
