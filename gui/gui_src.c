@@ -34,6 +34,16 @@ key_press(GtkWidget *widget,
   if(!sbw->gui_obj.gp) return(FALSE);
   if(!sbw->gui_obj.gp->pic_id) return(FALSE);
 
+  // fix this
+  if(sbw->gui_obj.wt == WT_opcode_source_window)
+  {
+      SourceBrowserOpcode_Window *sbow =sbw;
+
+      if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
+	  return FALSE;
+  }
+
+  
   switch(key->keyval) {
 
   case 's':  // Single Step

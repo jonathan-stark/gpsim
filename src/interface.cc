@@ -602,7 +602,12 @@ unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned in
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int address)
 {
-    return (rand()%10==0);
+ pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return 0;
+
+    return pic->program_memory[address]->is_modified;
 }
 
 //--------------------------------------------------------------------------
