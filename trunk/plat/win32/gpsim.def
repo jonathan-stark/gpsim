@@ -33,6 +33,7 @@ EXPORTS
     ??0TriggerObject@@QAE@XZ
     ??0instruction@@QAE@XZ
     ??0invalid_instruction@@QAE@PAVProcessor@@I@Z
+    ??0register_symbol@@QAE@PAVRegister@@@Z
     ??0register_symbol@@QAE@PBDPAVRegister@@@Z
     ??0symbol@@QAE@PBD@Z
     ??1Boolean@@UAE@XZ
