@@ -30,20 +30,24 @@ Boston, MA 02111-1307, USA.  */
 #include "pir.h"
 #include "uart.h"
 
-     // forward references
+// forward references
 
 extern instruction *disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst);
 
 
+
+//------------------------------------------------------------------------
+//
+//    pic_processor
+//        |
+//        \__ _16bit_processor
+//
+// Base class for the 16bit PIC processors
+//
 class _16bit_processor : public pic_processor
 {
 
 public:
-  // The 18cxxx has two address to which interrupts may be vectored. The '>> 1'
-  // is because gpsim represents the program memory addresses the way the pic does
-  // (and not the way the data sheet or the assembler does).
-#define INTERRUPT_VECTOR_LO       (0x18 >> 1)
-#define INTERRUPT_VECTOR_HI       (0x08 >> 1)
 
   // Configuration memory addresses. Again, like the interrupt vectors, the '>>1'
   // is because of gpsim's representation of the addresses
@@ -54,7 +58,6 @@ public:
 #define DEVID     (0x3ffffe >> 1)
 
   unsigned int current_disasm_address;  // Used only when .hex/.cod files are loaded
-  unsigned int interrupt_vector;        // Starting address of the interrupt
 
   PIC_IOPORT   porta;      // So far, all 18xxx parts contain ports A,B,C
   IOPORT_TRIS  trisa;
@@ -130,8 +133,16 @@ public:
       return disasm16(this, address, inst);
     }
   /*
-    GCC doesn't like this for some damn reason. there's a 4-byte offset
-    in the pointer.
+    There's a flaw with this approach. While this code compiles
+    just fine, the callee's have trouble with it. The reason is
+    that most of the callees think they're dealing with either
+    a "Processor" or "pic_processor". However, as Scott Meyers
+    (author of "More Effective C++") writes, we lie to the compiler.
+    In most cases, we'll type cast a pic_processor object to a
+    _16bit_processor when the fact of the matter is that we have
+    a P18F452 or whatever. The vtables for these different classes
+    pretty much gurantees that an offset into them are different.
+
   virtual PIR1v2 *get_pir1(void) { return (&pir1); }
   virtual PIR2v2 *get_pir2(void) { return (&pir2); }
   virtual PIR_SET_2 *get_pir_set(void) { return (&pir_set_def); }
@@ -169,6 +180,9 @@ public:
 
   static pic_processor *construct(void);
   _16bit_processor(void);
+
+
+
 };
 
 #define cpu16 ( (_16bit_processor *)cpu)

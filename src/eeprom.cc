@@ -387,14 +387,6 @@ void EEPROM::initialize(unsigned int new_rom_size)
 
     }
 
-  //??? FIXME:
-  //reset(POR_RESET);
-
-
-  if(cpu) {
-    cpu->ema.set_cpu(cpu);
-    cpu->ema.set_Registers(rom, rom_size);
-  }
 }
 
 

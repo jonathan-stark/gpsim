@@ -178,7 +178,10 @@ enum
 {
   GIEH = GIE,
   GIEL = XXIE
+
 };
+#define INTERRUPT_VECTOR_LO       (0x18 >> 1)
+#define INTERRUPT_VECTOR_HI       (0x08 >> 1)
 
   INTCON_16();
 
@@ -190,7 +193,21 @@ enum
   void clear_gies(void);
   void set_gies(void);
 
-  //private:
+  unsigned int get_interrupt_vector(void) 
+    {
+      return interrupt_vector;
+    }
+  bool haveHighPriorityInterrupt(void) 
+    { 
+      return  true;
+    }
+  void set_interrupt_vector(unsigned int new_int_vect)
+    {
+      interrupt_vector = new_int_vect;
+    }
+
+ private:
+  unsigned int interrupt_vector;        // Starting address of the interrupt
   RCON *rcon;
   INTCON2 *intcon2;
 };

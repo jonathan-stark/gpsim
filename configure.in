@@ -95,8 +95,8 @@ dnl AC_CHECK_LIB(ncurses, main)
 dnl Replace `main' with a function in -ltermcap:
 dnl AC_CHECK_LIB(termcap, main)
 
-CFLAGS="-g -O3"
-CXXFLAGS="-g -O3"
+CFLAGS="-g -O2"
+CXXFLAGS="-g -O2"
 
 if test "$use_gui" = "no"; then
   dnl glib checks

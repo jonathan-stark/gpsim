@@ -305,7 +305,7 @@ public:
     }
 
 
-  virtual void set_eeprom(EEPROM *e) { eeprom = e; }
+  virtual void set_eeprom(EEPROM *e);
   virtual EEPROM *get_eeprom(void) { return (eeprom); }
 
   virtual int get_pin_count(void);

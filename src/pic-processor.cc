@@ -357,6 +357,17 @@ Processor * pic_processor::construct(void)
   return NULL;
 
 }
+
+void pic_processor::set_eeprom(EEPROM *e)
+{ 
+  eeprom = e; 
+
+  //  eeprom->cpu = this;
+
+  ema.set_cpu(this);
+  ema.set_Registers(e->rom, e->rom_size);
+
+}
 //-------------------------------------------------------------------
 //
 // sleep - Begin sleeping and stay asleep until something causes a wake
