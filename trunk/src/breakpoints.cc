@@ -539,7 +539,7 @@ void Breakpoints::clear_all(Processor *c)
 {
   for(int i=0; i<MAX_BREAKPOINTS; i++)
     {
-      if(c == break_status[i].cpu && break_status[i].type != BREAK_CLEAR)
+      if(break_status[i].type != BREAK_CLEAR)
       	clear(i);
     }
 }
@@ -712,7 +712,7 @@ void Breakpoint_Instruction::clear(void)
   if(use_icd)
     icd_clear_break();
 
-  get_cpu()->pma->put(address, replaced);
+  get_cpu()->pma->remove(address, this);
   (*get_cpu()->pma)[address].update();
 
 }
