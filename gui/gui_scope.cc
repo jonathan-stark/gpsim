@@ -74,20 +74,25 @@ static int bit_left,bit_right,bit_points,update_delay;
 class Waveform
 {
 public:
-  int width, height;
 
-  GtkWidget *drawing_area;   // 
-  GdkGC *drawing_gc;
-  Scope_Window *sw;          // Parent
-  char *name;
-  bool isBuilt;
-
+  GtkWidget *drawing_area;   // The drawing container that holds the pixmap
   GdkPixmap *pixmap;         // The Waveform is rendered in this pixmap.
+  int width, height;         // Pixmap size
+  GdkGC *drawing_gc;         // Line styles, etc.
+  Scope_Window *sw;          // Parent
+  char *name;                // Name of the waveform. (FIXME)
+  bool isBuilt;              // True after the gui has been built.
+  bool isUpToDate;           // False when the waveform needs updating.
+
+  GtkWidget *parent_table;
+  int row;
 
   Waveform(Scope_Window *parent);
 
-  void Build(GtkWidget *parent_table, int row);
+  void Build(GtkWidget *_parent_table, int _row);
   void Update(void);
+  void Expose(void);
+  void Resize(int width, int height);
 
 };
 
@@ -95,10 +100,16 @@ public:
 Waveform::Waveform(Scope_Window *parent)
 {
   isBuilt = false;
+  isUpToDate = false;
   name = 0;
   drawing_area = 0;
   pixmap =0;
   drawing_gc =0;
+  parent_table = 0;
+
+  //Default pixmap size
+  width  = 400;
+  height = 25;
 
   sw = parent;
 }
@@ -108,7 +119,7 @@ static gint Waveform_expose_event (GtkWidget *widget,
 				   GdkEventExpose  *event,
 				   gpointer   user_data)
 {
-  cout <<  "function:" << __FUNCTION__ << "\n";    
+  // cout <<  "function:" << __FUNCTION__ << "\n";    
 
   g_return_val_if_fail (widget != NULL, TRUE);
   g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
@@ -116,21 +127,14 @@ static gint Waveform_expose_event (GtkWidget *widget,
   Waveform *wf = (Waveform *)(user_data);
   if(!wf)
     return 0;
-
+  /*
   cout << " event  "
        << ':' << event->area.x << ':' << event->area.y 
        << ':' << event->area.x << ':' <<  event->area.y
        << ':' << event->area.width << ':' << event->area.height
        << endl;
-
-  gdk_draw_pixmap(widget->window,
-		  widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
-		  wf->pixmap,
-		  event->area.x, event->area.y,
-		  event->area.x, event->area.y,
-		  event->area.width, event->area.height);
-
-  gtk_widget_show(widget);
+  */
+  wf->Expose();
   return FALSE;
 }
 
@@ -151,17 +155,19 @@ static gint Waveform_configure_event (GtkWidget *widget, GdkEventConfigure *even
   return TRUE;
 }
 
-void Waveform::Build(GtkWidget *parent_table, int row)
+void Waveform::Build(GtkWidget *_parent_table, int _row)
 {
+
+  parent_table = _parent_table;
+  row = _row;
+
   cout << "Waveform::" << __FUNCTION__ << "  row " << row << endl;
 
   drawing_area = gtk_drawing_area_new ();
-  gtk_widget_set_usize (drawing_area,400,25);    
+  gtk_widget_set_usize (drawing_area,width,height);    
   gtk_widget_set_events (drawing_area, GDK_EXPOSURE_MASK );    
   gtk_table_attach_defaults (GTK_TABLE(parent_table),drawing_area,0,10,row,row+1);
 
-  width  = 400;//drawing_area->allocation.width;
-  height = 25; //drawing_area->allocation.height;
   cout <<  "Waveform::" << __FUNCTION__ 
        << "  width " << width
        << "  height " << height << endl;
@@ -178,10 +184,10 @@ void Waveform::Build(GtkWidget *parent_table, int row)
 		      "expose_event",
 		      GTK_SIGNAL_FUNC (Waveform_expose_event),
 		      this);
+
   gtk_signal_connect (GTK_OBJECT(drawing_area),"configure_event",
 		      (GtkSignalFunc) Waveform_configure_event,
 		      this);
-
 
   // Graphics Context:
   drawing_gc = gdk_gc_new(drawing_area->window);
@@ -191,10 +197,41 @@ void Waveform::Build(GtkWidget *parent_table, int row)
   name = strdup("test");
 
   isBuilt = true;
+  isUpToDate = false;
 
   Update();
 }
 
+//----------------------------------------
+void Waveform::Resize(int w, int h)
+{
+
+  if(pixmap && w==width && h==height)
+    return;
+
+  if(w<100 || h<5)
+    return;
+
+  cout << "Waveform::" << __FUNCTION__ << endl;
+
+    
+  width = w;
+  height = h;
+
+
+  if (pixmap)
+    gdk_pixmap_unref(pixmap);
+  pixmap = gdk_pixmap_new(drawing_area->window,
+			  width,
+			  height,
+			  -1);
+  //Build(row);
+
+  isUpToDate = false;
+
+  Update();
+
+}
 //----------------------------------------
 //
 // Waveform Update
@@ -210,7 +247,7 @@ void Waveform::Update(void)
   char *s,ss[10];
   GdkRectangle update_rect;
 
-  if(!isBuilt)
+  if(!isBuilt || isUpToDate)
     return;
 
   if(!pixmap) {
@@ -348,13 +385,46 @@ void Waveform::Update(void)
 
 #endif
 
+  isUpToDate = true;
+
   update_rect.x = 0;
   update_rect.y = 0;
   update_rect.width = width;
   update_rect.height = height;
   gtk_widget_draw (drawing_area,&update_rect);
 
+  Expose();
 }
+
+//----------------------------------------
+//
+// Waveform Expose
+//
+
+void Waveform::Expose(void)
+{
+
+  if(!isBuilt || !pixmap || !drawing_area)
+    return;
+
+  if(!isUpToDate)
+    Update();
+
+  cout <<  "function:" << __FUNCTION__ << "\n";    
+
+
+  gdk_draw_pixmap(drawing_area->window,
+		  drawing_area->style->fg_gc[GTK_WIDGET_STATE (drawing_area)],
+		  pixmap,
+		  0,0,   // x,y
+		  0,0,
+		  width,height);
+
+  gtk_widget_show(drawing_area);
+
+}
+
+
 //------------------------------------------------------------------------
 // Signals
 
@@ -413,7 +483,7 @@ static gint Scope_Window_expose_event (GtkWidget *widget,
   cout <<  "function:" << __FUNCTION__ << "\n";    
 
   g_return_val_if_fail (widget != NULL, TRUE);
-  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
+  //  g_return_val_if_fail (GTK_IS_DRAWING_AREA (widget), TRUE);
 
   Scope_Window *sw = (Scope_Window *)user_data;
   if(sw)
@@ -429,7 +499,8 @@ static gint Scope_Window_expose_event (GtkWidget *widget,
 
 
 Waveform *signals[8];   // hack
-
+int aw=0;
+int ah=0;
 
 //------------------------------------------------------------------------
 
@@ -537,9 +608,9 @@ void Scope_Window::Build(void)
   signal_line_color.blue = 0x0000;
   gdk_color_alloc(gdk_colormap_get_system(), &signal_line_color);
   // The grid color is bright green
-  grid_line_color.red = 0x0000;
-  grid_line_color.green = 0xff00;
-  grid_line_color.blue = 0x0000;
+  grid_line_color.red = 0x4000;
+  grid_line_color.green = 0x4000;
+  grid_line_color.blue = 0x4000;
   gdk_color_alloc(gdk_colormap_get_system(), &grid_line_color);
   // The vertical grid color is dark green
   grid_v_line_color.red = 0x0000;
@@ -564,18 +635,44 @@ void Scope_Window::Build(void)
     
   //    cout <<  "end function:" << __FUNCTION__ << "\n";
   is_built = 1;
+
+
+  aw = window->allocation.width;
+  ah = window->allocation.height;
+
 }
 
 
 void Scope_Window::Update(void)
 {
-
+  int i;
   if(!is_built)
     Build();
 
-  cout <<  "function:" << __FUNCTION__ << "\n";
+  cout << "function:" << __FUNCTION__ << "\n";
+  cout << " a  x "  << window->allocation.x
+       << " a y "  << window->allocation.y
+       << " a  width "  << window->allocation.width
+       << " a height "  << window->allocation.height
+       << endl;
+  cout << " r  width "  << window->requisition.width
+       << " r height "  << window->requisition.height
+       << endl;
 
-  for(int i=0; i<8; i++) {
+  if(aw != window->allocation.width ||
+     ah != window->allocation.height) {
+    
+    aw = window->allocation.width;
+    ah = window->allocation.height;
+
+    for(i=0; i<8; i++) {
+      if(signals[i])
+	signals[i]->Resize(aw-15,(ah-10)/10);
+    }
+
+  }
+
+  for(i=0; i<8; i++) {
 
     if(signals[i])
       signals[i]->Update();

@@ -1,3 +1,4 @@
+#!/bin/sh
 # gpsim Regression test script
 # 
 USAGE="Usage: `basename $0` GPSIM_SCRIPT OUTPUT"
@@ -9,11 +10,11 @@ fi
 
 #GPSIM=g
 GPSIM=../../gpsim/gpsim
-GPSIM_SCRIPT=$1
+#GPSIM_SCRIPT=$1
 LOGFILE=$2
 touch $2
-echo "Test $GPSIM_SCRIPT" >> $LOGFILE
-$GPSIM --cli -c $GPSIM_SCRIPT $2> test
+echo "Test $1" >> $LOGFILE
+$GPSIM --cli -c $1
 grep "failures " test | grep "= 0x0"
 if [ $? -eq 0 ] ; then
   echo "PASSED" >> $LOGFILE
