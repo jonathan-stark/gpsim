@@ -12,6 +12,7 @@ EXPORTS
     ??0IO_bi_directional@@QAE@XZ
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0Integer@@QAE@_J@Z
+    ??0Integer@@QAE@PBD_J0@Z
     ??0Interface@@QAE@PAX@Z
     ??0Module@@QAE@XZ
     ??0PCTraceObject@@QAE@PAVProcessor@@I@Z
