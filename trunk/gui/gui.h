@@ -749,6 +749,11 @@ class Breadboard_Window : public GUI_Object {
     GtkWidget *module_frame;
     GtkWidget *stimulus_frame;
 
+    GtkWidget *pic_settings_clist;
+    GtkWidget *attribute_clist;
+    GtkWidget *attribute_entry;
+    GtkWidget *attribute_button;
+
     GtkWidget *node_tree;
 
     GtkWidget *node_clist;

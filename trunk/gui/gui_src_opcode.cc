@@ -1548,7 +1548,8 @@ void SourceBrowserOpcode_Window::Build(void)
 
 
   
-  NewProcessor(gp);
+  if(gp->cpu)
+    NewProcessor(gp);
   if(program)
     NewSource(gp);
   
