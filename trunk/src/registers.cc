@@ -51,7 +51,25 @@ Register::Register(void)
   replacedBy = 0;
 
 }
+//ugh duplication in constructors...
+Register::Register(Processor *_cpu)
+  : gpsimValue(_cpu)
+{
 
+  new_name("file_register");
+
+  // For now, initialize the register with valid data and set that data equal to 0.
+  // Eventually, the initial value will be marked as 'uninitialized.
+
+  por_value = RegisterValue(0,0);
+  putRV(por_value);
+  _xref.assign_data(this);
+  read_access_count=0;
+  write_access_count=0;
+  bit_mask = 7;
+  replacedBy = 0;
+
+}
 Register::~Register(void)
 {
 
@@ -181,6 +199,15 @@ void Register::set_read_trace(unsigned int rt)
 {
   read_trace.data = rt;
   read_trace.init = rt + (Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
+}
+
+//--------------------------------------------------
+//--------------------------------------------------
+//--------------------------------------------------
+sfr_register::sfr_register(Processor *_cpu)
+  : Register(_cpu)
+{
+
 }
 
 //--------------------------------------------------

@@ -767,8 +767,9 @@ void pic_processor::create (void)
   //  cycles.cpu = this;
   wdt.cpu = this;
 
-  W = new WREG;
-  W->set_cpu(this);
+  W = new WREG(this);
+  //  W->set_cpu(this);
+
   pcl = new PCL;
   pclath = new PCLATH;
   status = new Status_register;

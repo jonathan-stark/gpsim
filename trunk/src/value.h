@@ -43,6 +43,7 @@ class gpsimValue {
  public:
 
   gpsimValue(void);
+  gpsimValue(Processor *);
   virtual ~gpsimValue();
 
   // Access functions

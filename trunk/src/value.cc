@@ -31,6 +31,11 @@ gpsimValue::gpsimValue(void)
   cpu = 0;
 }
 
+gpsimValue::gpsimValue(Processor *_cpu)
+  : cpu(_cpu)
+{
+}
+
 gpsimValue::~gpsimValue(void)
 {
 }

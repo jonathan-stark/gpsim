@@ -561,10 +561,11 @@ bool Stack::set_break_on_underflow(bool clear_or_set)
 //--------------------------------------------------
 // WREG
 //
-
+/*
 unsigned int WREG::get(void)
 {
-  trace.read_W(value.get());
+  //  trace.read_W(value.get());
+  trace.raw(read_trace.get() | value.get());
 
   return(value.get());
 }
@@ -572,14 +573,118 @@ unsigned int WREG::get(void)
 void WREG::put(unsigned int new_value)
 {
 
-  trace.write_W(value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(new_value);
 
 }
+*/
+
+
+//========================================================================
+class WReadTraceObject : public RegisterTraceObject
+{
+public:
+  WReadTraceObject(Processor *_cpu, RegisterValue trv);
+  virtual void print(void);
+};
+
+class WWriteTraceObject : public RegisterTraceObject
+{
+public:
+  WWriteTraceObject(Processor *_cpu, RegisterValue trv);
+  virtual void print(void);
+};
+
+
+class WTraceType : public ProcessorTraceType
+{
+public:
+  WTraceType(Processor *_cpu, 
+		    unsigned int t,
+		    unsigned int s)
+    : ProcessorTraceType(_cpu,t,s)
+  {}
+
+  TraceObject *decode(unsigned int tbi);
+};
+
+
+
+//========================================================================
+WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv) 
+  : RegisterTraceObject(_cpu,0,trv)
+{
+  pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
+
+  if(pcpu) {
+    to = cpu_pic->W->trace_state;
+    cpu_pic->W->trace_state = from;
+  }
+
+}
+
+void WWriteTraceObject::print(void)
+{
+  fprintf(stdout, " Wrote (0x%04X,0x%04X) to W was (0x%04X,0x%04X) is \n",
+	   to.data, to.init, from.data,from.init);
+
+}
+
+//========================================================================
+WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv) 
+  : RegisterTraceObject(_cpu,0,trv)
+{
+  pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
+
+  if(pcpu) {
+    to = cpu_pic->W->trace_state;
+    cpu_pic->W->trace_state = from;
+  }
+
+}
+
+void WReadTraceObject::print(void)
+{
+  fprintf(stdout, " Read (0x%04X,0x%04X) from W\n",
+	  from.data,from.init);
+
+}
+
+//========================================================================
+TraceObject * WTraceType::decode(unsigned int tbi)
+{
+
+  unsigned int tv = trace.get(tbi);
+  printf(" WTraceType: 0x%x\n",tv);
+
+  RegisterValue rv = RegisterValue(tv & 0xff,0);
+  RegisterTraceObject *wto;
+
+  if (tbi & (1<<23)) 
+    wto = new WReadTraceObject(cpu, rv);
+  else
+    wto = new WWriteTraceObject(cpu, rv);
+
+  trace.addToCurrentFrame(wto);
+
+  return wto;
+}
+
 
 WREG::WREG(void)
 {
   new_name("W");
 }
 
+WREG::WREG(Processor *_cpu) 
+  : sfr_register(_cpu)
+{
+  new_name("W");
+  if(cpu) {
+    unsigned int trace_command = trace.allocateTraceType(new WTraceType(cpu,0,1));
+    set_write_trace(trace_command);
+    set_read_trace(trace_command + (1<<23));
+  }
+
+}
 

@@ -65,7 +65,6 @@ public:
   virtual void print(void);
 };
 
-
 class PCTraceObject : public TraceObject
 {
 public:
@@ -120,19 +119,6 @@ public:
   TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary() { return true; }
 };
-
-class WTraceType : public ProcessorTraceType
-{
-public:
-  WTraceType(Processor *_cpu, 
-		    unsigned int t,
-		    unsigned int s)
-    : ProcessorTraceType(_cpu,t,s)
-  {}
-
-  TraceObject *decode(unsigned int tbi);
-};
-
 
 class RegisterTraceType : public ProcessorTraceType
 {
@@ -205,8 +191,8 @@ class Trace
     REGISTER_WRITE_INIT= (7<<24),
     BREAKPOINT         = (8<<24),
     INTERRUPT          = (9<<24),
-    READ_W             = (0x0a<<24),
-    WRITE_W            = (0x0b<<24),
+    //READ_W             = (0x0a<<24),
+    //WRITE_W            = (0x0b<<24),
     _RESET             = (0x0c<<24),
     //PC_SKIP            = (0x0d<<24),
     WRITE_TRIS         = (0x0e<<24),
@@ -322,7 +308,7 @@ class Trace
     trace_buffer[trace_index] = INTERRUPT;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  /*
   inline void read_W (unsigned int value)
   {
     trace_buffer[trace_index] = READ_W | value;
@@ -334,6 +320,7 @@ class Trace
     trace_buffer[trace_index] = WRITE_W | value;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
+  */
 
   inline void reset (RESET_TYPE r)
     {
@@ -411,7 +398,7 @@ class Trace
   void enableLogging(char *fname);
   void disableLogging();
 
-  unsigned int allocateTraceType(TraceType *);
+  unsigned int allocateTraceType(TraceType *,int nSlots=1);
 
   // Trace frame manipulation
   void addFrame(TraceFrame *newFrame);

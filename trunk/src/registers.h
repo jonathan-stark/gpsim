@@ -147,6 +147,7 @@ public:
 
 
   Register(void);
+  Register(Processor *);
   virtual ~Register(void);
 
 
@@ -295,6 +296,7 @@ class sfr_register : public Register
 {
 public:
   sfr_register() : Register(){}
+  sfr_register(Processor *);
   RegisterValue wdtr_value; // wdt or mclr reset value
 
   virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};

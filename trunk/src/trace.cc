@@ -208,29 +208,6 @@ void TraceRawLog::disable(void)
 //========================================================================
 // Experimental trace code
 
-class WTraceObject : public TraceObject
-{
-public:
-  RegisterValue from;
-  RegisterValue to;
-
-  WTraceObject(Processor *_cpu, RegisterValue trv) 
-    : TraceObject(_cpu), from(trv)
-  {
-    to = cpu_pic->W->trace_state;
-    cpu_pic->W->trace_state = from;
-
-  }
-
-  virtual void print(void)
-  {
-    fprintf(stdout, " W: was (0x%04X,0x%04X) is (0x%04X,0x%04X)\n",
-	      from.data,from.init, to.data, to.init);
-
-  }
-};
-
-
 //========================================================================
 // TraceFrame
 TraceFrame::TraceFrame( ) 
@@ -354,6 +331,8 @@ void RegisterTraceObject::print(void)
 	    to.data, to.init, reg->name().c_str(), reg->address, from.data,from.init);
 }
 
+
+
 //========================================================================
 PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address) 
   : TraceObject(_cpu), address(_address)
@@ -425,20 +404,6 @@ TraceObject *RegisterTraceType::decode(unsigned int tbi)
 
 
 //========================================================================
-TraceObject * WTraceType::decode(unsigned int tbi)
-{
-
-  unsigned int tv = trace.get(tbi);
-  printf(" WTraceType: 0x%x\n",tv);
-
-  RegisterValue rv = RegisterValue(tv & 0xff,0);
-  WTraceObject *wto = new WTraceObject(cpu, rv);
-  trace.addToCurrentFrame(wto);
-
-  return wto;
-}
-
-//========================================================================
 PCTraceType::PCTraceType(Processor *_cpu, 
 			 unsigned int t,
 			 unsigned int s)
@@ -470,8 +435,8 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
 //========================================================================
 
 #define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
-#define TRACE_PROGRAM_COUNTER   (1<< (PROGRAM_COUNTER >> 24))
-#define TRACE_CYCLE_INCREMENT   (1<< (CYCLE_INCREMENT >> 24))
+//#define TRACE_PROGRAM_COUNTER   (1<< (PROGRAM_COUNTER >> 24))
+//#define TRACE_CYCLE_INCREMENT   (1<< (CYCLE_INCREMENT >> 24))
 #define TRACE_ALL (0xffffffff)
 
 //
@@ -629,7 +594,7 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
 
 int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
-  char a_string[50];
+  //  char a_string[50];
   Register *r;
 
   guint64 cycle;
@@ -700,6 +665,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       snprintf(buffer, bufsize,"  wrote: 0x%04x to %s",
 	       get(index)&0xffff, r->name().c_str());
       break;
+      /*
     case READ_W:
       snprintf(buffer, bufsize,"   read: 0x%02x from W",
 	       get(index)&0xff);
@@ -707,7 +673,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
     case WRITE_W:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to W",
 	       get(index)&0xff);
-      break;
+	       break; */
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
@@ -747,12 +713,12 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	       get(index - 1) & 0xffffff);
 
       break;
-
+      /*
     case CYCLE_INCREMENT:
       if(trace_flag & TRACE_CYCLE_INCREMENT)
 	snprintf(buffer, bufsize," cycle increment");
       break;
-
+      */
     case MODULE_TRACE2:
       return_value = 2;
     case MODULE_TRACE1:
@@ -789,10 +755,10 @@ void Trace::disableLogging()
 int Trace::dump(unsigned int n, FILE *out_stream)
 {
 
-  char a_string[50];
-  int  frame_index=-1;
-  bool found_pc = false;
-  bool found_frame = false;
+  //  char a_string[50];
+  //  int  frame_index=-1;
+  //  bool found_pc = false;
+  //  bool found_frame = false;
 
   if(!cpu)
     return 0;
@@ -816,7 +782,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   unsigned int frame_end = trace_index;
   k = frame_start;
 
-  unsigned int cycle_delta = 0;
+  //  unsigned int cycle_delta = 0;
 
   static bool bMapIsInitialized = false;
 
@@ -824,7 +790,7 @@ int Trace::dump(unsigned int n, FILE *out_stream)
     //trace_map[PROGRAM_COUNTER] = new PCTraceType(cpu,PROGRAM_COUNTER,1);
     //cpu->pc->set_trace_command(PROGRAM_COUNTER);
     trace_map[REGISTER_WRITE] = new RegisterTraceType(cpu,REGISTER_WRITE,1);
-    trace_map[WRITE_W] = new WTraceType(cpu,WRITE_W,1);
+    //trace_map[WRITE_W] = new WTraceType(cpu,WRITE_W,1);
 
     bMapIsInitialized = true;
   }
@@ -876,8 +842,11 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 
 
   cout <<"Trace frame: " << traceFrames.size() << endl;
+
   printTraceFrame();
+
   deleteTraceFrame();
+
   /*
   try {
     for(i=0;i<n && k!=frame_end;i++) {
@@ -977,13 +946,13 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   return n;
 }
 //------------------------------------------------------------------------
-unsigned int Trace::allocateTraceType(TraceType *tt)
+unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
 {
-
+  
   if(tt) {
     trace_map[lastTraceType] = tt;
     tt->type = lastTraceType;
-    lastTraceType += (1<<24);
+    lastTraceType += (nSlots<<24);
 
     return tt->type;
   }
