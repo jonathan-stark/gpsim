@@ -1,7 +1,17 @@
+2005-03-21 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cc: Copy a null string to input parameter
+	Processor::get(char *cP, int len) because not value is
+	associate with a Processor object. Fixes trace errors from
+	pango when the symbol window is scrolled to some symbol objects.
+	* src/value.cc: Copy a null string to input parameter
+	String::get(char *buf, int len) when not value string is
+	allocated. Fixes trace errors from pango when symbol window
+	is scrolled to some symbol objects.
+
 2005-03-18 J.R. Heisey <jrheisey@sourceforge.com>
-  * cli/cmd_load.cc/h, src/cod.cc/h, cli/input.cc, cli/parse.yy:
-  added error checking for opening cod, hex and stc files.
-  Particularily when opened from the GUI.
+	* cli/cmd_load.cc/h, src/cod.cc/h, cli/input.cc, cli/parse.yy:
+	added error checking for opening cod, hex and stc files.
+	Particularily when opened from the GUI.
 
 2005-03-17 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: tweaking of I/O thresholds.
@@ -12,11 +22,11 @@
 	removing symbols and stimuli.
 
 2005-03-14 J.R. Heisey <jrheisey@sourceforge.com>
-  * src/modules.h, modules.cc, os_dependent.cc: Elimaticated
-  undesired error message on failure to load a function of a
-  module.
-  Simplified Module_Library() constructor to use os independent
-  api call get_library_export()
+	* src/modules.h, modules.cc, os_dependent.cc: Elimaticated
+	undesired error message on failure to load a function of a
+	module.
+	Simplified Module_Library() constructor to use os independent
+	api call get_library_export()
 
 2005-03-14 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: MSVC sync.
