@@ -75,8 +75,16 @@ extern "C" {
   static void simulation_has_stopped(gpointer l7s)
     {
       if(l7s)
-	{
-	  ((Led_7Segments *)l7s)->update();
+      {
+	  static int lastport=-1;
+          int portval;
+	  Led_7Segments *l = (Led_7Segments*)l7s;
+	  portval = l->port->get_value();
+	  if(lastport != portval)
+	  {
+	      lastport=portval;
+	      ((Led_7Segments *)l7s)->update();
+	  }
 	}
     }
 
@@ -149,9 +157,6 @@ void Led_7Segments::update(  GtkWidget *widget,
   // to the I/O port and get the values of the segments
   int segment_states = port->get_value();
 
-  if(last_segment_states!=segment_states)
-  {
-
   GdkGC *gc = segment_gc;
 
   gdk_gc_set_foreground(gc,
@@ -197,8 +202,6 @@ void Led_7Segments::update(  GtkWidget *widget,
 			   segments[i].p,
 			   6);
 
-  }
-  last_segment_states=segment_states;
   }
 }
 
