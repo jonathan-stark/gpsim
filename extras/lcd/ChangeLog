@@ -1,0 +1,24 @@
+0.2.0	Robert Pearce
+	Fixed bug with 4-bit/8-bit startup mode.
+?.?.?
+	Salvador Eduardo Tropea:
+	Added support for DisplayTech 161A displays,
+	these displays are 2x8 displays but externally
+	looks like a 1x16. Name: lcd_dt161A.
+0.1.1
+	2nd line offset bug
+0.1.0
+	Major overhaul. Now the LCD works as a 
+	gpsim module.
+0.0.3	
+	extra_dist should have been EXTRA_DIST in
+	Makefile.am. 
+	caps.pl will now also generate a file that may
+	be included in a pic microcontroller program.
+0.0.2
+	Added the rest of the 5x7 font.
+	Added caps.pl (Cheesy-ass perl script) that 
+	will read a specially formatted .xpm of the
+	LCD's font and convert it to form usable by
+	lcd.c
+	
