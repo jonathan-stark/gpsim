@@ -219,7 +219,7 @@ void LcdDisplay::update(  GtkWidget *widget,
 
 
   drawable = widget->window;
-  lcd_gc = widget->style->bg_gc[GTK_STATE_NORMAL];
+  lcd_gc = gdk_gc_new(widget->window);
   gdk_gc_set_foreground(lcd_gc,dot_color);
 
   w_width = new_width;
