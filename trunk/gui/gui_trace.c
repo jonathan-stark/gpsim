@@ -137,7 +137,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 		       1,  // column
 		       GTK_JUSTIFY_LEFT,str);*/
 
-    sprintf(cycle_string,"0x%016ullx", (unsigned int) cycle);
+    sprintf(cycle_string,"0x%016llx", cycle); // how do you specify 'unsigned'?
 
     //trace_map[trace_index].cycle = cycle;
     //trace_map[trace_index].simulation_trace_index = gpsim_get;
