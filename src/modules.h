@@ -52,6 +52,46 @@ struct Module_Pin {
 } 
 */
 
+/*****************************************************************************
+ *
+ * Helper functions
+ *
+ *****************************************************************************/
+typedef  Module * (*Module_FPTR)();
+typedef  Module_Types * (*Module_Types_FPTR)();
+
+//----------------------------------------------------------
+// An instance of the Module_Library class is created each
+// time a library of modules is opened.
+
+class Module_Library {
+  char *_name;
+  void *_handle;
+  Module_Types * (*get_mod_list)(void);
+
+public:
+
+  Module_Types *module_list;
+
+  Module_Library(char *new_name, void *library_handle);
+
+  ~Module_Library(void) {
+    if(_name)
+      delete _name;
+  };
+
+  char *name(void) {
+    return(_name);
+  }
+
+  void *handle(void) {
+    return _handle;
+  }
+
+};
+
+extern list <Module_Library *> module_list;
+
 extern list <Module *> instantiated_modules_list;
 
 class Module {
