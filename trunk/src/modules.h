@@ -171,7 +171,10 @@ public:
  * Helper functions
  *
  *****************************************************************************/
-
+void * load_library(const char *library_name, char **pszError);
+void * get_library_export(const char *name, void *library_handle);
+void free_library(void *handle);
+void free_error_message(char * pszError);
 void module_display_available(void);
 void module_list_modules(void);
 void module_load_library(const char *library_name);
