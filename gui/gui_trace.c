@@ -60,6 +60,8 @@ static char *trace_titles[TRACE_COLUMNS]={"Cycle", "Trace"};
 guint64 row_to_cycle[MAXTRACES];
 
 
+static GtkStyle *normal_style;
+
 //struct TraceMapping trace_map[MAXTRACES];
 
 
@@ -336,6 +338,7 @@ BuildTraceWindow(Trace_Window *tw)
 
 
 
+  normal_style = gtk_style_new ();
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 

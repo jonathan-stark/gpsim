@@ -58,9 +58,8 @@ typedef enum {
     MENU_BREAK_READ_VALUE,
     MENU_BREAK_WRITE_VALUE,
     MENU_ADD_WATCH,
+    MENU_SETTINGS
 } menu_id;
-
-
 
 
 typedef struct _menu_item {
@@ -75,7 +74,12 @@ static menu_item menu_items[] = {
     {"Set break on read value...", MENU_BREAK_READ_VALUE},
     {"Set break on write value...", MENU_BREAK_WRITE_VALUE},
     {"Add watch", MENU_ADD_WATCH},
+    {"Settings...", MENU_SETTINGS}
 };
+
+static int settings_dialog(Register_Window *rw);
+extern int font_dialog_browse(GtkWidget *w, gpointer user_data);
+static int dlg_x=200, dlg_y=200;
 
 
 // Used only in popup menus
@@ -256,6 +260,9 @@ popup_activated(GtkWidget *widget, gpointer data)
 		WatchWindow_add(popup_rw->gui_obj.gp->watch_window,pic_id, popup_rw->type, address);
 	    }
 	break;
+    case MENU_SETTINGS:
+        settings_dialog(popup_rw);
+        break;
     default:
 	puts("Unhandled menuitem?");
 	break;
@@ -298,7 +305,9 @@ build_menu(Register_Window *rw)
 			 &menu_items[i]);
       GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
-      if(rw->type == REGISTER_EEPROM && menu_items[i].id!=MENU_ADD_WATCH)
+      if(rw->type == REGISTER_EEPROM
+	 && menu_items[i].id!=MENU_ADD_WATCH
+	 &&menu_items[i].id!=MENU_SETTINGS)
       {
 	  GTK_WIDGET_UNSET_FLAGS (item,
 				  GTK_SENSITIVE | GTK_CAN_FOCUS);
@@ -536,6 +545,140 @@ static void update_labelentry(Register_Window *rw)
 {
     update_label(rw);
     update_entry(rw);
+}
+
+static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
+{
+    if(widget->window==NULL)
+	return 0;
+    
+    gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
+    return 0; // what should be returned?, FIXME
+}
+
+static int load_styles(Register_Window *rw)
+{
+    GdkColormap *colormap = gdk_colormap_get_system();
+
+    rw->normalfont=gdk_font_load (rw->normalfont_string);
+    gdk_color_parse("light cyan", &rw->normal_bg_color);
+    gdk_color_parse("black", &rw->normal_fg_color);
+    gdk_color_parse("blue", &rw->item_has_changed_color);
+    gdk_color_parse("red", &rw->breakpoint_color);
+    gdk_color_parse("light gray", &rw->alias_color);
+    gdk_color_parse("black", &rw->invalid_color);
+    gdk_color_parse("cyan", &rw->sfr_bg_color);
+
+    gdk_colormap_alloc_color(colormap, &rw->normal_bg_color,FALSE,TRUE );
+    gdk_colormap_alloc_color(colormap, &rw->normal_fg_color,FALSE,TRUE );
+    gdk_colormap_alloc_color(colormap, &rw->item_has_changed_color,FALSE,TRUE);
+    gdk_colormap_alloc_color(colormap, &rw->breakpoint_color,FALSE,TRUE);
+    gdk_colormap_alloc_color(colormap, &rw->alias_color,FALSE,TRUE);
+    gdk_colormap_alloc_color(colormap, &rw->invalid_color,FALSE,TRUE);
+    gdk_colormap_alloc_color(colormap, &rw->sfr_bg_color,FALSE,TRUE);
+
+    if(rw->normalfont==NULL)
+	return 0;
+    return 1;
+}
+
+/********************** Settings dialog ***************************/
+int settings_active;
+static void settingsok_cb(GtkWidget *w, gpointer user_data)
+{
+    if(settings_active)
+    {
+        settings_active=0;
+	gtk_main_quit();
+    }
+}
+static int settings_dialog(Register_Window *rw)
+{
+    static GtkWidget *dialog=NULL;
+    GtkWidget *button;
+    static int retval;
+    GtkWidget *hbox;
+    GtkWidget *vbox;
+    static GtkWidget *normalfontstringentry;
+    GtkWidget *label;
+    int fonts_ok=0;
+    
+    if(dialog==NULL)
+    {
+	dialog = gtk_dialog_new();
+	gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+
+
+	// Normal font
+	hbox = gtk_hbox_new(0,0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+	gtk_widget_show(hbox);
+	label=gtk_label_new("Normal font:");
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+	gtk_widget_show(label);
+	normalfontstringentry=gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), normalfontstringentry,
+			   TRUE, TRUE, 0);
+	gtk_widget_show(normalfontstringentry);
+	button = gtk_button_new_with_label("Browse...");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(hbox), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)normalfontstringentry);
+
+
+	// OK button
+	button = gtk_button_new_with_label("OK");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
+    }
+    
+    gtk_entry_set_text(GTK_ENTRY(normalfontstringentry), rw->normalfont_string);
+
+    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+    gtk_widget_show_now(dialog);
+
+
+
+    while(fonts_ok!=1)
+    {
+	char fontname[256];
+	GdkFont *font;
+
+        settings_active=1;
+	gtk_main();
+
+	fonts_ok=0;
+
+	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+	if((font=gdk_font_load(fontname))==NULL)
+	{
+	    if(gui_question("Font did not load!","Try again","Ignore/Cancel")==FALSE)
+		break;
+	}
+	else
+	{
+            gdk_font_unref(font);
+	    strcpy(rw->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
+	    config_set_string(rw->gui_obj.name,"normalfont",rw->normalfont_string);
+            fonts_ok++;
+	}
+    }
+
+    BuildRegisterWindow(rw);
+
+    gtk_widget_hide(dialog);
+
+    return retval;
 }
 
 static void
@@ -939,25 +1082,25 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
       {
 	  rw->registers[reg_number]->value = new_value;
 	  rw->registers[reg_number]->update_full=TRUE;
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &item_has_changed_color);
+	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->item_has_changed_color);
       }
       else
       {
-	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &normal_fg_color);
+	  gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->normal_fg_color);
       }
 
       if(gpsim_reg_has_breakpoint(pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &breakpoint_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->breakpoint_color);
       else if(!valid_register)
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &invalid_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->invalid_color);
       else if(gpsim_register_is_alias(((GUI_Object*)rw)->gp->pic_id, rw->type, reg_number))
-	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &alias_color);
+	  gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->alias_color);
       else
       {
 	  if(gpsim_register_is_sfr(pic_id, rw->type, reg_number))
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &sfr_bg_color);
+	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->sfr_bg_color);
 	  else
-	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &normal_bg_color);
+	      gtk_sheet_range_set_background(GTK_SHEET(rw->register_sheet), &range, &rw->normal_bg_color);
       }
 
       retval=TRUE;
@@ -981,7 +1124,7 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
 			 GTK_JUSTIFY_RIGHT,name);
 
       rw->registers[reg_number]->update_full=TRUE;
-      gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &item_has_changed_color);
+      gtk_sheet_range_set_foreground(GTK_SHEET(rw->register_sheet), &range, &rw->item_has_changed_color);
 
       retval=TRUE;
   }
@@ -1224,7 +1367,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     range.col0=0;
     range.coli=sheet->maxcol;
 
-    gtk_sheet_range_set_font(sheet, &range, normal_style->font);
+    gtk_sheet_range_set_font(sheet, &range, rw->normalfont);
 
     border_mask = GTK_SHEET_RIGHT_BORDER |
 	GTK_SHEET_LEFT_BORDER |
@@ -1291,6 +1434,7 @@ BuildRegisterWindow(Register_Window *rw)
 	gint column_width,char_width;
 
   int x,y,width,height;
+  char *fontstring;
   
 	
   if(rw==NULL)
@@ -1299,6 +1443,16 @@ BuildRegisterWindow(Register_Window *rw)
       return;
   }
 
+    if(rw->gui_obj.window!=NULL)
+    {
+        gtk_widget_destroy(rw->gui_obj.window);
+	for(i=0;i<MAX_REGISTERS;i++)
+	{
+	    if(rw->registers[i]!=NULL)
+		free(rw->registers[i]);
+	    rw->registers[i]=NULL;
+	}
+    }
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -1344,6 +1498,26 @@ BuildRegisterWindow(Register_Window *rw)
   gtk_window_set_wmclass(GTK_WINDOW(rw->gui_obj.window),rw->gui_obj.name,"Gpsim");
 
 
+  /**************************** load fonts *********************************/
+#define DEFAULT_NORMALFONT "-adobe-courier-*-r-*-*-*-140-*-*-*-*-*-*"
+  strcpy(rw->normalfont_string,DEFAULT_NORMALFONT);
+  if(config_get_string(rw->gui_obj.name,"normalfont",&fontstring))
+      strcpy(rw->normalfont_string,fontstring);
+
+  while(!load_styles(rw))
+  {
+      if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
+      {
+	  strcpy(rw->normalfont_string,DEFAULT_NORMALFONT);
+	  config_set_string(rw->gui_obj.name,"normalfont",rw->normalfont_string);
+      }
+      else
+      {
+	  settings_dialog(rw);
+      }
+  }
+
+
   gtk_signal_connect(GTK_OBJECT (window), "delete_event",
 		     GTK_SIGNAL_FUNC(delete_event), rw);
 
@@ -1375,7 +1549,7 @@ BuildRegisterWindow(Register_Window *rw)
 
 //  gtk_widget_realize(window);
 
-                         	char_width = gdk_string_width (normal_style->font,"9");
+                         	char_width = gdk_string_width (rw->normalfont,"9");
 	column_width = 3 * char_width + 6;
 
 	for(i=0; i<rw->register_sheet->maxcol; i++){

@@ -100,6 +100,10 @@ static menu_item plot_menu_items[] = {
     {"Print", MENU_PRINT},
 };
 
+extern int gui_message(char *message);
+
+static GtkStyle *normal_style;
+
 // Used only in popup menus
 Profile_Window *popup_pw;
 
@@ -310,8 +314,6 @@ symcompare(sym *sym1, sym *sym2)
 	return 1;
     return 0;
 }
-
-extern int gui_message(char *message);
 
 static void save_plot(Profile_Window *pw, char *filename)
 {
@@ -1301,6 +1303,7 @@ BuildProfileWindow(Profile_Window *pw)
       return;
   }
 
+  gui_message("There are bugs here. Please help them get fixed.");
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
@@ -1407,6 +1410,7 @@ BuildProfileWindow(Profile_Window *pw)
   ///////////////////////////////////////////////////
 
 
+  normal_style = gtk_style_new ();
   char_width = gdk_string_width (normal_style->font,"9");
   column_width = 3 * char_width + 6;
 

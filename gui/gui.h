@@ -189,7 +189,19 @@ struct _Register_Window {
     // This array is indexed with row, and gives the address of the
     // first cell in the given row.
     int row_to_address[MAX_ROWS];
-    
+
+    char normalfont_string[256];
+    GdkFont *normalfont;
+    GtkStyle *current_line_number_style;
+    GtkStyle *breakpoint_line_number_style;
+    GdkColor breakpoint_color;
+    GdkColor item_has_changed_color;
+    GdkColor normal_fg_color;
+    GdkColor normal_bg_color;
+    GdkColor sfr_bg_color;
+    GdkColor alias_color;
+    GdkColor invalid_color;
+
     REGISTER_TYPE type;
     Register **registers;
     GtkSheet *register_sheet;
@@ -366,6 +378,17 @@ struct _SourceBrowserOpcode_Window {
 //    int clist_rows;      // Number of rows in the clist
     int current_address;   // current PC
 
+    // Font strings
+    char normalfont_string[256];
+    char breakpointfont_string[256];
+    char pcfont_string[256];
+    GtkStyle *normal_style;
+    GtkStyle *current_line_number_style;
+    GtkStyle *breakpoint_line_number_style;
+    GdkColor pm_has_changed_color;
+    GdkColor normal_pm_bg_color;
+    GdkColor breakpoint_color;
+
     char **column_titles; //
     int  columns;         //
 
@@ -377,7 +400,8 @@ struct _SourceBrowserOpcode_Window {
     GtkWidget *entry;
     GtkWidget *label;
 //    GtkWidget *pcwidget;
-    GtkWidget *popup_menu;
+    GtkWidget *sheet_popup_menu;
+    GtkWidget *clist_popup_menu;
 
     int ascii_mode; // 0, 1 or 2 equals
                     // one byte/cell,

@@ -117,6 +117,8 @@ static struct {
 
 static int dlg_x=200, dlg_y=200;
 
+static int settings_dialog(SourceBrowserAsm_Window *sbaw);
+
 // all of these gui_xxxx_to_entry() do linear searching.
 // Binary search is possible, the list is sorted. But pic
 // sources don't become large (not mine anyways).
@@ -470,7 +472,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     switch(item->id)
     {
     case MENU_SETTINGS:
-        font_dialog(popup_sbaw);
+        settings_dialog(popup_sbaw);
         break;
     case MENU_FIND_TEXT:
 	gtk_widget_set_uposition(GTK_WIDGET(search.window),dlg_x,dlg_y);
@@ -1438,20 +1440,6 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
     return 0; // what should be returned?, FIXME
 }
 
-/*************** Font dialog *********************/
-
-
-int font_dialog_browse(GtkWidget *w, gpointer user_data)
-{
-    GtkEntry *entry=GTK_ENTRY(user_data);
-    gtk_entry_set_text(entry,"Hej");
-}
-
-static void fontok_cb(GtkWidget *w, gpointer user_data)
-{
-    gtk_main_quit();
-}
-
 static int load_fonts(SourceBrowserAsm_Window *sbaw)
 {
     sbaw->comment_text_style.font=
@@ -1471,7 +1459,71 @@ static int load_fonts(SourceBrowserAsm_Window *sbaw)
     return 1;
 }
 
-int font_dialog(SourceBrowserAsm_Window *sbaw)
+/*************** Font selection dialog *********************/
+static void fontselok_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=FALSE; // cancel=FALSE;
+    gtk_main_quit();
+}
+static void fontselcancel_cb(GtkWidget *w, gpointer user_data)
+{
+    *(int*)user_data=TRUE; // cancel=TRUE;
+    gtk_main_quit();
+}
+int font_dialog_browse(GtkWidget *w, gpointer user_data)
+{
+    gchar *spacings[] = { "c", "m", NULL };
+    GtkWidget *fontsel;
+    GtkEntry *entry=GTK_ENTRY(user_data);
+    char *fontstring;
+    gchar *fontname;
+    int cancel;
+
+
+    fontsel=gtk_font_selection_dialog_new("Select font");
+
+    fontstring=gtk_entry_get_text(entry);
+    gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontsel),fontstring);
+    gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (fontsel),
+					  GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
+					  NULL, NULL, NULL, NULL, spacings, NULL);
+
+    gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->ok_button),"clicked",
+		       GTK_SIGNAL_FUNC(fontselok_cb),(gpointer)&cancel);
+    gtk_signal_connect(GTK_OBJECT(GTK_FONT_SELECTION_DIALOG(fontsel)->cancel_button),"clicked",
+		       GTK_SIGNAL_FUNC(fontselcancel_cb),(gpointer)&cancel);
+
+    gtk_widget_show(fontsel);
+
+    gtk_grab_add(fontsel);
+    gtk_main();
+    gtk_grab_remove(fontsel);
+
+
+    if(cancel)
+    {
+	gtk_widget_destroy(fontsel);
+	return 0;
+    }
+
+    fontname=gtk_font_selection_dialog_get_font_name(GTK_FONT_SELECTION_DIALOG(fontsel));
+    gtk_widget_destroy(fontsel);
+    gtk_entry_set_text(entry,fontname);
+    g_free(fontname);
+    return 1;
+}
+
+/********************** Settings dialog ***************************/
+int settings_active;
+static void settingsok_cb(GtkWidget *w, gpointer user_data)
+{
+    if(settings_active)
+    {
+        settings_active=0;
+	gtk_main_quit();
+    }
+}
+static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 {
     static GtkWidget *dialog=NULL;
     GtkWidget *button;
@@ -1481,7 +1533,7 @@ int font_dialog(SourceBrowserAsm_Window *sbaw)
     static GtkWidget *commentfontstringentry;
     static GtkWidget *sourcefontstringentry;
     GtkWidget *label;
-    int fonts_ok;
+    int fonts_ok=0;
     
     if(dialog==NULL)
     {
@@ -1539,7 +1591,7 @@ int font_dialog(SourceBrowserAsm_Window *sbaw)
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
 			   FALSE,FALSE,10);
 	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(fontok_cb),(gpointer)dialog);
+			   GTK_SIGNAL_FUNC(settingsok_cb),(gpointer)dialog);
     }
     
     gtk_entry_set_text(GTK_ENTRY(sourcefontstringentry), sbaw->sourcefont_string);
@@ -1548,13 +1600,14 @@ int font_dialog(SourceBrowserAsm_Window *sbaw)
     gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
     gtk_widget_show_now(dialog);
 
-    gtk_grab_add(dialog);
 
 
     while(fonts_ok!=2)
     {
 	char fontname[256];
-        GdkFont *font;
+	GdkFont *font;
+
+        settings_active=1;
 	gtk_main();
 
 	fonts_ok=0;
@@ -1589,14 +1642,15 @@ int font_dialog(SourceBrowserAsm_Window *sbaw)
     }
 
     load_fonts(sbaw);
-    SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
+    if(sbaw->load_source)
+	SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
 
-    gtk_grab_remove(dialog);
     gtk_widget_hide(dialog);
 
     return retval;
 }
 
+/*********************** gui message dialog *************************/
 static gboolean
 message_close_cb(GtkWidget *widget, gpointer d)
 {
@@ -1653,6 +1707,7 @@ int gui_message(char *message)
     return 0;
 }
 
+/****************** gui question dialog **************************/
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
@@ -2005,12 +2060,14 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     sbaw->comment_text_style.base[GTK_STATE_NORMAL] = text_bg;
     sbaw->comment_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
+#define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
+#define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
 
-    strcpy(sbaw->commentfont_string,"-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*");
+    strcpy(sbaw->commentfont_string,DEFAULT_COMMENTFONT);
     if(config_get_string(sbaw->sbw.gui_obj.name,"commentfont",&fontstring))
 	strcpy(sbaw->sourcefont_string,fontstring);
 
-    strcpy(sbaw->sourcefont_string,"-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*");
+    strcpy(sbaw->sourcefont_string,DEFAULT_SOURCEFONT);
     if(config_get_string(sbaw->sbw.gui_obj.name,"sourcefont",&fontstring))
 	strcpy(sbaw->sourcefont_string,fontstring);
 
@@ -2018,14 +2075,14 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     {
 	if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
 	{
-	    strcpy(sbaw->sourcefont_string,"-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*");
-	    strcpy(sbaw->commentfont_string,"-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*");
+	    strcpy(sbaw->sourcefont_string,DEFAULT_SOURCEFONT);
+	    strcpy(sbaw->commentfont_string,DEFAULT_COMMENTFONT);
 	    config_set_string(sbaw->sbw.gui_obj.name,"sourcefont",sbaw->sourcefont_string);
 	    config_set_string(sbaw->sbw.gui_obj.name,"commentfont",sbaw->commentfont_string);
 	}
 	else
 	{
-	    font_dialog(sbaw);
+	    settings_dialog(sbaw);
 	}
     }
 
