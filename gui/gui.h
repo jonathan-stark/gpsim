@@ -263,6 +263,19 @@ typedef struct _Stack_Window Stack_Window;
 struct _StopWatch_Window {
     GUI_Object     gui_obj;
 
+    int count_dir;
+
+    long long rollover;
+    long long cyclecounter;
+    long frequency;
+    long long offset;
+
+    GtkWidget *cycleentry;
+    GtkWidget *timeentry;
+    GtkWidget *frequencyentry;
+    GtkWidget *offsetentry;
+    GtkWidget *rolloverentry;
+
     int has_processor;
 };
 

@@ -47,31 +47,86 @@ static int delete_event(GtkWidget *widget,
 }
 
 
-static void zero_cb(GtkWidget *w, gpointer user_data)
-{
-    puts("Zero");
-}
-
-
 static void update(StopWatch_Window *sww)
 {
     unsigned int pic_id;
+
+    long long cyclecounter;
+    static long long cyclecounter_last;
+    long frequency;
+    long long offset;
+    long long rollover;
+    long long timevalue;
+
+    char frequencystring[100];
+    char cyclestring[100];
+    char timestring[100];
+    char offsetstring[100];
+    char rolloverstring[100];
 
     if(!sww->has_processor)
 	return;
     
     pic_id = ((GUI_Object*)sww)->gp->pic_id;
 
+    while(sww->offset>sww->rollover)
+        sww->offset-=sww->rollover;
+
+    rollover=sww->rollover;
+    offset=sww->offset;
+    frequency = gpsim_get_inst_clock(pic_id)*4;
+    cyclecounter=sww->cyclecounter;
+
+    ////////////////////////
+
+    if(sww->count_dir<0)
+	cyclecounter -= gpsim_get_cycles(pic_id)-cyclecounter_last;
+    else
+	cyclecounter += gpsim_get_cycles(pic_id)-cyclecounter_last;
+
+    cyclecounter_last=gpsim_get_cycles(pic_id);
 
 
+    while(cyclecounter<offset)
+        cyclecounter+=rollover;
 
 
+    sww->cyclecounter=cyclecounter;
 
+    cyclecounter=(cyclecounter-offset)%rollover;
+    ////////////////////////
 
+    timevalue = (cyclecounter*4000000)/frequency;
 
+    sprintf(frequencystring, "%Ld Hz", frequency);
+    sprintf(cyclestring, "%Ld", cyclecounter);
+    if(timevalue<1000)
+	sprintf(timestring, "%.2f us", timevalue/1.0);
+    else if(timevalue<1000000)
+	sprintf(timestring, "%.3f ms", timevalue/1000.0);
+    else
+	sprintf(timestring, "%.3f s", timevalue/1000000.0);
+    sprintf(offsetstring, "%Ld", offset);
+    sprintf(rolloverstring, "%Ld", rollover);
 
+    gtk_entry_set_text (GTK_ENTRY (sww->frequencyentry), frequencystring);
+    gtk_entry_set_text (GTK_ENTRY (sww->cycleentry), cyclestring);
+    gtk_entry_set_text (GTK_ENTRY (sww->timeentry), timestring);
+    gtk_entry_set_text (GTK_ENTRY (sww->offsetentry), offsetstring);
+    gtk_entry_set_text (GTK_ENTRY (sww->rolloverentry), rolloverstring);
 
+}
 
+static void zero_cb(GtkWidget *w, gpointer user_data)
+{
+    unsigned int pic_id;
+    StopWatch_Window *sww=(StopWatch_Window *)user_data;
+
+    pic_id = ((GUI_Object*)sww)->gp->pic_id;
+
+    sww->offset = sww->cyclecounter;
+
+    update(sww);
 }
 
 void StopWatchWindow_new_processor(StopWatch_Window *sww, GUI_Processor *gp)
@@ -87,6 +142,98 @@ void StopWatchWindow_update(StopWatch_Window *sww)
     update(sww);
 }
 
+static void
+modepopup_activated(GtkWidget *widget, gpointer data)
+{
+    StopWatch_Window *sww;
+
+    unsigned int pic_id;
+
+    unsigned char dir = *(unsigned char*)data;
+
+    sww = gtk_object_get_data(GTK_OBJECT(widget),"sww");
+
+    pic_id = ((GUI_Object*)sww)->gp->pic_id;
+
+    switch(dir)
+    {
+    case '+':
+	sww->count_dir=1;
+	break;
+    case '-':
+	sww->count_dir=-1;
+        break;
+    default:
+	assert(0);
+        break;
+    }
+
+
+    update(sww);
+}
+
+static void
+cycleactivate(GtkWidget *widget, StopWatch_Window *sww)
+{
+    if(widget==NULL|| sww==NULL)
+    {
+	printf("Warning cycleactivate(%p,%p)\n",widget,sww);
+	return;
+    }
+    puts("cycle");
+}
+static void
+timeactivate(GtkWidget *widget, StopWatch_Window *sww)
+{
+    if(widget==NULL|| sww==NULL)
+    {
+	printf("Warning timeactivate(%p,%p)\n",widget,sww);
+	return;
+    }
+    puts("time");
+}
+static void
+frequencyactivate(GtkWidget *widget, StopWatch_Window *sww)
+{
+    if(widget==NULL|| sww==NULL)
+    {
+	printf("Warning frequencyactivate(%p,%p)\n",widget,sww);
+	return;
+    }
+    puts("frequency");
+}
+static void
+offsetactivate(GtkWidget *widget, StopWatch_Window *sww)
+{
+    char *text;
+    if(widget==NULL|| sww==NULL)
+    {
+	printf("Warning offsetactivate(%p,%p)\n",widget,sww);
+	return;
+    }
+    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=NULL)
+    {
+	sww->offset=atoll(text);
+    }
+    update(sww);
+}
+static void
+rolloveractivate(GtkWidget *widget, StopWatch_Window *sww)
+{
+    char *text;
+    if(widget==NULL|| sww==NULL)
+    {
+	printf("Warning rolloveractivate(%p,%p)\n",widget,sww);
+	return;
+    }
+    if((text=gtk_entry_get_text (GTK_ENTRY(widget)))!=NULL)
+    {
+	sww->rollover=atoll(text);
+    }
+    update(sww);
+}
+
+
 int BuildStopWatchWindow(StopWatch_Window *sww)
 {
     GtkWidget *window;
@@ -98,7 +245,7 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
     window=sww->gui_obj.window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
     sww->gui_obj.window = window;
 
-    gtk_window_set_title(GTK_WINDOW(sww->gui_obj.window), "StopWatch (not yet implemented)");
+    gtk_window_set_title(GTK_WINDOW(sww->gui_obj.window), "StopWatch");
 
     width=((GUI_Object*)sww)->width;
     height=((GUI_Object*)sww)->height;
@@ -128,42 +275,42 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-//  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
   label = gtk_label_new ("Time");
   gtk_widget_show (label);
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-//  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
   label = gtk_label_new ("Processor frequency");
   gtk_widget_show (label);
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-//  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
-  entry = gtk_entry_new ();
+  sww->cycleentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_text (GTK_ENTRY (entry), "0");
+  gtk_signal_connect(GTK_OBJECT(entry), "activate",
+		     (GtkSignalFunc)cycleactivate,sww);
 
-  entry = gtk_entry_new ();
+  sww->timeentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_text (GTK_ENTRY (entry), "0.000 ms");
+  gtk_signal_connect(GTK_OBJECT(entry), "activate",
+		     (GtkSignalFunc)timeactivate,sww);
 
-  entry = gtk_entry_new ();
+  sww->frequencyentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_text (GTK_ENTRY (entry), "4 MHz");
+  gtk_signal_connect(GTK_OBJECT(entry), "activate",
+		     (GtkSignalFunc)frequencyactivate,sww);
 
   label = gtk_label_new ("Count direction");
   gtk_widget_show (label);
@@ -180,9 +327,17 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
   menuitem = gtk_menu_item_new_with_label ("Up");
   gtk_widget_show (menuitem);
   gtk_menu_append (GTK_MENU (optionmenu_menu), menuitem);
+  gtk_object_set_data(GTK_OBJECT(menuitem), "sww", sww);
+  gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
+		     (GtkSignalFunc) modepopup_activated,
+		     "+");
   menuitem = gtk_menu_item_new_with_label ("Down");
   gtk_widget_show (menuitem);
   gtk_menu_append (GTK_MENU (optionmenu_menu), menuitem);
+  gtk_object_set_data(GTK_OBJECT(menuitem), "sww", sww);
+  gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
+		     (GtkSignalFunc) modepopup_activated,
+		     "-");
   gtk_option_menu_set_menu (GTK_OPTION_MENU (optionmenu), optionmenu_menu);
 
   label = gtk_label_new ("Cycle offset");
@@ -190,77 +345,34 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 3, 4,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-//  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
-  entry = gtk_entry_new ();
+  sww->offsetentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 3, 4,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_text (GTK_ENTRY (entry), "0");
+  gtk_signal_connect(GTK_OBJECT(entry), "activate",
+		     (GtkSignalFunc)offsetactivate,sww);
 
   label = gtk_label_new ("Rollover");
   gtk_widget_show (label);
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 5, 6,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-//  gtk_misc_set_alignment (GTK_MISC (label), 0, 0.5);
 
-  entry = gtk_entry_new ();
+  sww->rolloverentry = entry = gtk_entry_new ();
   gtk_widget_show (entry);
   gtk_table_attach (GTK_TABLE (table), entry, 1, 2, 5, 6,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_entry_set_text (GTK_ENTRY (entry), "0");
+  gtk_signal_connect(GTK_OBJECT(entry), "activate",
+		     (GtkSignalFunc)rolloveractivate,sww);
 
   button = gtk_button_new_with_label ("Zero");
   gtk_widget_show (button);
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 4);
   gtk_signal_connect(GTK_OBJECT(button),"clicked",
 		     GTK_SIGNAL_FUNC(zero_cb),sww);
-/*	vbox = gtk_vbox_new(0,0);
-	gtk_widget_show(vbox);
-
-	gtk_container_add(GTK_CONTAINER(sww->gui_obj.window), vbox);
-
-        hbox = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE,FALSE,2);
-	label=gtk_label_new("Cycles:");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE,FALSE, 2);
-	entry=gtk_entry_new();
-        gtk_widget_show(entry);
-	gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE,FALSE, 2);
-
-        hbox = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE,FALSE,2);
-	label=gtk_label_new("Time:");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE,FALSE, 2);
-	entry=gtk_entry_new();
-        gtk_widget_show(entry);
-	gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE,FALSE, 2);
-	
-
-        hbox = gtk_hbox_new(0,0);
-	gtk_widget_show(hbox);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox,FALSE,FALSE,2);
-	label=gtk_label_new("Processor frequency:");
-	gtk_widget_show(label);
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE,FALSE, 2);
-	entry=gtk_entry_new();
-        gtk_widget_show(entry);
-	gtk_box_pack_start(GTK_BOX(hbox), entry, FALSE,FALSE, 2);
-	
-	button = gtk_button_new_with_label("Zero");
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE,FALSE,2);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
-			   GTK_SIGNAL_FUNC(zero_cb),sww);
-
-  */
 
 
 
@@ -292,6 +404,11 @@ int CreateStopWatchWindow(GUI_Processor *gp)
     stopwatch_window->gui_obj.window = NULL;
     stopwatch_window->gui_obj.is_built=0;
     gp->stopwatch_window = stopwatch_window;
+    stopwatch_window->count_dir=1;
+    stopwatch_window->rollover=10;
+    stopwatch_window->cyclecounter=0;
+    stopwatch_window->frequency=0;
+    stopwatch_window->offset=5;
 
     stopwatch_window->has_processor=1;
 
