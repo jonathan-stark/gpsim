@@ -96,6 +96,29 @@ StopWatch stop_watch;
 
 */
 
+
+Cycle_Counter_breakpoint_list *Cycle_Counter_breakpoint_list::getNext()
+{
+  return next;
+}
+Cycle_Counter_breakpoint_list *Cycle_Counter_breakpoint_list::getPrev()
+{
+  return prev;
+}
+
+void Cycle_Counter_breakpoint_list::clear()
+{
+  bActive = false;
+  if(f)
+    f->clear_break();
+}
+
+void Cycle_Counter_breakpoint_list::invoke()
+{
+  if(f)
+    f->callback();
+}
+
 //--------------------------------------------------
 
 void Cycle_Counter::preset(guint64 new_value)
@@ -216,6 +239,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
     }
 
   break_on_this = active.next->break_value;
+  active.next->bActive = true;
 
   return 1;
 }
@@ -255,8 +279,8 @@ void Cycle_Counter::clear_break(TriggerObject *f)
   if(l1->next)
     l1->next->prev = l1;        // fix the backwards link.
 
-  if(l2->f)
-    l2->f->clear_break();
+  l2->clear();
+
 #ifdef __DEBUG_CYCLE_COUNTER__
   if (f) 
     cout << "Clearing break call back sequence number = "<< f->CallBackID <<'\n';
@@ -330,10 +354,10 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
   l2 = l1->next;  // save a copy for a moment
   l1->next = l1->next->next;  // remove the break
-  l1->next->prev = l2;
+  if(l1->next)
+    l1->next->prev = l2;
 
-  if(l2->f)
-    l2->f->clear_break();
+  l2->clear();
 
   // Now move the break to the inactive list.
 

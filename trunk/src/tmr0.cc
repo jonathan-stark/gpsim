@@ -113,7 +113,6 @@ unsigned int TMR0::get_prescale(void)
   return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
 }
 
-// %%%FIX ME%%% 
 void TMR0::increment(void)
 {
   //  cout << "TMR0 increment because of external clock ";
@@ -134,7 +133,7 @@ void TMR0::increment(void)
       else
 	value.put(value.get() + 1);
     }
-  //  cout << value << '\n';
+  //  cout << "TMR0 value ="<<value.get() << '\n';
 }
 
 void TMR0::put(unsigned int new_value)
@@ -224,12 +223,13 @@ void TMR0::new_prescale(void)
       if(verbose)
 	cout << "external clock\n";
       cycles.clear_break(future_cycle);
+      future_cycle = 0;
     } else {
+      // Internal Clock
       if(verbose)
 	cout << "internal clock\n";
-      // Internal Clock
-      start(value.get());
     }
+    start(value.get());
 
   } else {
 
