@@ -148,7 +148,7 @@ void LcdDisplay::STPowerON( Event e)
 }
 */
 
-void LcdDisplay::start_data(void)
+void LcdDisplay::latch_data(void)
 {
 
   if(in_8bit_mode())
@@ -158,6 +158,10 @@ void LcdDisplay::start_data(void)
     data_latch = ( (data_latch << 4) | ((data_port->get() & 0xf0)>>4) ) & 0xff;
     data_latch_phase ^= 1;
   }
+}
+
+void LcdDisplay::start_data(void)
+{
 
   newState(ST_COMMAND_PH0);
 }
@@ -267,12 +271,17 @@ void LcdDisplay::execute_command(void)
       set_blink_off();
   }
   else if( (data_latch & LCD_MASK_ENTRY_MODE) == LCD_CMD_ENTRY_MODE) {
-    cout << "LCD_CMD_ENTRY_MODE\n";
-    cout << "NOT SUPPORTED\n";
+    if ((data_latch & ~LCD_MASK_ENTRY_MODE) != LCD_INC_CURSOR_POS) {
+      cout << "LCD_CMD_ENTRY_MODE\n";
+      cout << "NOT SUPPORTED\n";
+    } else if(debug) {
+      cout << "LCD_CMD_ENTRY_MODE cursorpos=inc scroll=no\n";
+    }
   }
   else if( (data_latch & LCD_MASK_CURSOR_HOME) ==  LCD_CMD_CURSOR_HOME) {
-    cout << "LCD_CMD_CURSOR_HOME\n";
-    cout << "NOT SUPPORTED\n";
+    if(debug)
+      cout << "LCD_CMD_CURSOR_HOME\n";
+    move_cursor(0,0);
   }
   else if( (data_latch & LCD_MASK_CLEAR_DISPLAY) == LCD_CMD_CLEAR_DISPLAY) {
     if(debug)
@@ -429,9 +438,11 @@ void LcdDisplay::advanceState( ControlLineEvent e)
   case ST_COMMAND_PH0:
     switch(e) {
     case  eWD:
+      latch_data();
       new_data();
       break;
     case  eWC:
+      latch_data();
       new_command();
       break;
     case  eRD:
