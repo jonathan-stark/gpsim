@@ -63,7 +63,7 @@ pic_processor *gpsim_get_active_cpu(void);
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
 
 
-extern "C" {
+//extern "C" {
 
     // This function is registerd with gpsim when a module
     // is instantiated. It gets invoke when gpsim has stopped
@@ -78,7 +78,7 @@ extern "C" {
 	}
     }
 
-}
+//}
 
 
 //--------------------------------------------------------------

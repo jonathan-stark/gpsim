@@ -400,6 +400,10 @@ public:
 
 
 
+pic_processor *get_processor(unsigned int cpu_id);
+
+
+
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to
 // to this class' value get 0

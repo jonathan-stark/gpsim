@@ -55,7 +55,7 @@ typedef enum _REGISTER_TYPE
 } REGISTER_TYPE;
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif /* __cplusplus */
 
 struct file_context {
@@ -341,7 +341,7 @@ typedef struct _sym
 
 
 #ifdef __cplusplus
-}
+//}
 #endif /* __cplusplus */
 
 
