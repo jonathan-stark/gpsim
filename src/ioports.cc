@@ -91,7 +91,7 @@ int IOPORT::update_stimuli(void)
 
 {
 
-  cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
+  //cout << "IOPORT::"<<__FUNCTION__ << "() is deprecated\n";
 
   return 0;
 }
