@@ -52,6 +52,7 @@ struct Module_Pin {
 } 
 */
 
+extern list <Module *> instantiated_modules_list;
 
 class Module {
 public:

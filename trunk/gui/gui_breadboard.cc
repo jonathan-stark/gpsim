@@ -815,6 +815,9 @@ struct gui_module *create_module(Breadboard_Window *bbw,
 
     gtk_widget_show(p->module_widget);
 
+    while(gtk_events_pending())
+        gtk_main_iteration();
+
 
     // Create pins
     GtkWidget *subtree = gtk_tree_new();
@@ -951,6 +954,35 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
+
+static void check_for_modules(Breadboard_Window *bbw)
+{
+    list <Module *> :: iterator module_iterator;
+
+    for (module_iterator = instantiated_modules_list.begin();
+	 module_iterator != instantiated_modules_list.end();
+	 module_iterator++)
+    {
+	Module *m = *module_iterator;
+
+        BreadboardWindow_new_module(bbw, m);
+    }
+}
+
+static void check_for_nodes(Breadboard_Window *bbw)
+{
+    list <Stimulus_Node *> :: iterator node_iterator;
+
+    for (node_iterator = node_list.begin();
+	 node_iterator != node_list.end();
+	 node_iterator++)
+    {
+	Stimulus_Node *node = *node_iterator;
+
+	BreadboardWindow_node_configuration_changed(bbw, node);
+    }
+}
+
 /* When a processor is created */
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 {
@@ -977,49 +1009,52 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 //    draw_pins(p);
 
 //    BreadboardWindow_update(bbw);
+
+    check_for_modules(bbw);
+    check_for_nodes(bbw);
 }
 
 /* When a module is created */
 void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
 {
-    GtkWidget *widget=NULL;
+    if(bbw->gui_obj.enabled)
+    {
+	GtkWidget *widget=NULL;
 
-    if(module->widget!=NULL)
-        widget=GTK_WIDGET(module->widget);
-    struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, widget);
+	if(module->widget!=NULL)
+	    widget=GTK_WIDGET(module->widget);
+	struct gui_module *p=create_module(bbw, EXTERNAL_MODULE, module, widget);
+    }
 }
 
 
 /* When a stimuli is being connected or disconnected, or a new node is created */
 void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node)
 {
-    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
-
-    if(gn==NULL)
+    if(bbw->gui_obj.enabled)
     {
-	GtkWidget *node_item;
+	struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
 
-	gn = (struct gui_node *) malloc(sizeof(*gn));
+	if(gn==NULL)
+	{
+	    GtkWidget *node_item;
 
-	gn->bbw=bbw;
-        gn->node=node;
+	    gn = (struct gui_node *) malloc(sizeof(*gn));
 
-	node_item = gtk_tree_item_new_with_label (node->name());
-	gtk_signal_connect(GTK_OBJECT(node_item),
-			   "select",
-			   (GtkSignalFunc) treeselect_node,
-			   gn);
-	gtk_widget_show(node_item);
-	gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
-	gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
-        gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
+	    gn->bbw=bbw;
+	    gn->node=node;
+
+	    node_item = gtk_tree_item_new_with_label (node->name());
+	    gtk_signal_connect(GTK_OBJECT(node_item),
+			       "select",
+			       (GtkSignalFunc) treeselect_node,
+			       gn);
+	    gtk_widget_show(node_item);
+	    gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
+	    gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
+	    gtk_object_set_data(GTK_OBJECT(node_item), "snode", node);
+	}
     }
-
-/*    delete gn->stimuli_list;
-
-    loop node->stimuli, and add them to gn->stimuli_list
-
-    update_tree();*/
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)
