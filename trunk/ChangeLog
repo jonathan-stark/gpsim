@@ -1,3 +1,9 @@
+2005-03-23 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-instructions.cc: The NEGF instruction for the 18f
+	family was erroneously writing the negated result to W.
+	* regression/instructions_16bit/instructions_16bit.asm: added a
+	regression test for the NEGF instruction.
+
 2005-03-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc: Copy a null string to input parameter
 	Processor::get(char *cP, int len) because not value is

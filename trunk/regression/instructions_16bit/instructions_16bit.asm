@@ -576,6 +576,16 @@ start:
         incfsz  temp,f
          bra    failed
 
+        ;;
+
+        clrf    temp
+        negf    temp
+        bnz     failed
+        incf    temp,f
+        negf    temp
+        bz      failed
+        incfsz  temp,f
+         bra    failed
         
 done:
         bra     $

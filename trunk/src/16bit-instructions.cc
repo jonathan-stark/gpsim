@@ -1454,11 +1454,7 @@ void NEGF::execute(void)
   src_value = source->get();
   new_value = 1 + ~src_value;        // two's complement
 
-
-  if(destination)
-    source->put(new_value&0xff);      // Result goes to source
-  else
-    cpu16->W->put(new_value&0xff);
+  source->put(new_value&0xff);
 
   cpu16->status->put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
 
