@@ -3060,7 +3060,7 @@ void BreadboardWindow_new_module(Breadboard_Window *bbw, Module *module)
 /* When a stimulus is being connected or disconnected, or a new node is created */
 void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus_Node *node)
 {
-    if(bbw->gui_obj.enabled)
+//    if(bbw->gui_obj.enabled)
     {
 	struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
 
