@@ -510,7 +510,8 @@ void Processor::read_src_files(void)
       FileContext *fc = (*files)[program_memory[i]->get_file_id()];
       
       if(fc)
-	fc->put_address(program_memory[i]->get_src_line(),i);
+	fc->put_address(program_memory[i]->get_src_line(),
+			map_pm_index2address(i));
 
     }
   }

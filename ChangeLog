@@ -1,3 +1,8 @@
+2004-06-02 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc, src/processor.cc: 18fxxx addressing was broken.
+	(the divide by 2 issue for the 18f addressess was not being handled
+	correctly.)
+	
 2004-05-31 Scott Dattalo <scott@dattalo.com>
 	* almost all files: Since the Register class and the Instruction class
 	are now derived from gpsimValue, all objects that use registers
