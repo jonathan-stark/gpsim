@@ -31,8 +31,9 @@ public:
     prescale_counter;
   guint64
     synchronized_cycle,
-    last_cycle,
     future_cycle;
+  gint64
+    last_cycle;   // can be negative ...
 
 
   virtual void callback(void);
