@@ -1,3 +1,6 @@
+2003-11-29  Scott Dattalo  <scott@dattalo.com>
+	* src/16bit-registers.cc - Access to PLUSWx are now signed.
+	
 2003-11-28  Scott Dattalo  <scott@dattalo.com>
 	* gui/* - More C to C++ conversions
 	* gui/gui_menu.cc - Patch from Alex Holden to enable compilation on a MAC
