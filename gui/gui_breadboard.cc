@@ -3056,6 +3056,11 @@ void Breadboard_Window::Update(void)
   int x,y;
 
   // loop all modules and look for changes
+  if(!enabled)
+    return;
+    
+  if(!GTK_WIDGET_VISIBLE(window))
+    return;
 
   iter=modules;
   while(iter!=0) {
@@ -3131,8 +3136,7 @@ static int delete_event(GtkWidget *widget,
 /* When a processor is created */
 void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
-
-  if(!is_built)
+  if(!enabled || !is_built)
     return;
 
   if(!gp || !gp->cpu)
@@ -3845,6 +3849,9 @@ void Breadboard_Window::Build(void)
   is_built=1;
   enabled = 1;
 
+  while(gtk_events_pending())
+    gtk_main_iteration(); 
+  
   NewProcessor(gp);
 
   UpdateMenuItem();
