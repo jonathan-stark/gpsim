@@ -36,8 +36,10 @@ GdkColor sfr_bg_color;
 GdkColor breakpoint_color;
 GdkColor alias_color;
 GdkColor invalid_color;
+GdkColor black_color;
 
-
+GdkColor high_output_color;
+GdkColor low_output_color;
 
 void gui_styles_init(void)
 {
@@ -106,6 +108,11 @@ void gui_styles_init(void)
   gdk_color_parse("blue", &item_has_changed_color);
   gdk_color_parse("light gray", &alias_color);
   invalid_color=normal_fg_color;
+
+  gdk_color_parse("red",&high_output_color);
+  gdk_color_parse("green",&low_output_color);
+  
+  gdk_color_parse("black",&black_color);
   
 	gdk_colormap_alloc_color(colormap, &normal_bg_color,FALSE,TRUE );
 	gdk_colormap_alloc_color(colormap, &normal_fg_color,FALSE,TRUE );
@@ -114,9 +121,11 @@ void gui_styles_init(void)
 	gdk_colormap_alloc_color(colormap, &alias_color,FALSE,TRUE);
 	gdk_colormap_alloc_color(colormap, &invalid_color,FALSE,TRUE);
 	gdk_colormap_alloc_color(colormap, &sfr_bg_color,FALSE,TRUE);
+	gdk_colormap_alloc_color(colormap, &high_output_color,FALSE,TRUE);
+	gdk_colormap_alloc_color(colormap, &low_output_color,FALSE,TRUE);
+	gdk_colormap_alloc_color(colormap, &black_color,FALSE,TRUE);
 
-
-
+	
 	puts("Initialized");
 
 }

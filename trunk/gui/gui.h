@@ -28,7 +28,8 @@ enum window_types {
   WT_symbol_window,
   WT_asm_source_window,
   WT_opcode_source_window,
-  WT_list_source_window
+  WT_list_source_window,
+  WT_breadboard_window
 };
 
 //
@@ -306,6 +307,42 @@ struct _SourceBrowserOpcode_Window {
 
 typedef struct _SourceBrowserOpcode_Window SourceBrowserOpcode_Window;
 
+struct _Breadboard_Window {
+    GUI_Object gui_obj;
+
+    GtkWidget *da;
+    
+    GdkFont *pinstatefont;
+    int pinstateheight;
+    int pinstatewidth;
+
+    GdkFont *pinnamefont;
+    int pinnameheight;
+    int pinnamewidth;
+
+    GdkFont *picnamefont;
+    int picnameheight;
+    int picnamewidth;
+
+    int pinlength;
+    int pinspacing;
+    int nrofpins;
+    GdkGC *pinline_gc;
+    GdkGC *pinname_gc;
+    GdkGC *case_gc;
+
+    int picname_x, picname_y;
+
+    int width, height;
+
+    int case_x, case_y;
+    int case_height, case_width;
+
+    int processor;
+};
+
+typedef struct _Breadboard_Window Breadboard_Window;
+
 
 //
 // Future Items that will be declared.
@@ -343,6 +380,7 @@ struct _gui_processor {
   SourceBrowser_Window *source_browser;
   Symbol_Window *symbol_window;
   Watch_Window *watch_window;
+  Breadboard_Window *breadboard_window;
   // GtkWidget *stack_window;
   // GtkWidget *sfr_window;
   // GtkWidget *watch_window;
@@ -369,6 +407,9 @@ extern GdkColor breakpoint_color;
 extern GdkColor alias_color;
 extern GdkColor invalid_color;
 extern GdkColor sfr_bg_color;
+extern GdkColor high_output_color;
+extern GdkColor low_output_color;
+extern GdkColor black_color;
 
 extern GtkStyle *normal_style;
 extern GtkStyle *current_line_number_style;

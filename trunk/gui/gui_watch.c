@@ -388,7 +388,7 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 	RegWindow_select_register(gp->regwin_eeprom, entry->address);
     }
 	
-    if(column>=MSBCOL && column<=LSBCOL)
+/*    if(column>=MSBCOL && column<=LSBCOL)
     {
 	// Toggle the bit.
 	value = gpsim_get_register_value(entry->pic_id,entry->type, entry->address);
@@ -400,7 +400,7 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 	//else
 	//    value &= ~(value &(1<< (7-(column-MSBCOL)) ));
 	gpsim_put_register_value(entry->pic_id,entry->type, entry->address,value);
-    }
+    }*/
     return 0;
 }
 
