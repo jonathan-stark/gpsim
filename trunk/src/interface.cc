@@ -325,6 +325,18 @@ sym *gpsim_symbol_iter(unsigned int processor_id)
 
 //--------------------------------------------------------------------------
 
+char *gpsim_processor_get_name(unsigned int processor_id)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+      return NULL;
+
+  return pic->name();
+}
+
+//--------------------------------------------------------------------------
+
 unsigned int gpsim_get_pc_value(unsigned int processor_id)
 {
 
@@ -842,15 +854,17 @@ void  gpsim_assign_pin_xref(unsigned int processor_id, unsigned int pin, gpointe
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
-    return 0;
+    return;
 
   IOPIN *iopin = pic->get_pin(pin);
 
   if(!iopin)
-    return 0;
+    return;
 
   if(iopin->xref)
-    iopin->xref->add(xref);
+      iopin->xref->add(xref);
+  else
+      printf("no xref on %d\n",pin);
 
 }
 
@@ -890,7 +904,7 @@ void  gpsim_pin_set_value(unsigned int processor_id, unsigned int pin)
   pic_processor *pic = get_processor(processor_id);
 
   if(!pic)
-    return 0;
+    return;
 
 }
 unsigned int  gpsim_pin_get_dir(unsigned int processor_id, unsigned int pin)
