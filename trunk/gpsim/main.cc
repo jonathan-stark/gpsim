@@ -40,6 +40,7 @@ using namespace std;
 #include "../cli/input.h"
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
+#include "../cli/cmd_manager.h"
 
 bool bUseGUI=false;  // assume that we don't want to use the gui
 int quit_state;
@@ -165,30 +166,30 @@ main (int argc, char *argv[])
       switch (c) {
 
       default:
-	printf("'%c' is an unrecognized option\n",c);
+        printf("'%c' is an unrecognized option\n",c);
       case '?':
       case 'h':
-	usage = 1;
-	break;
+        usage = 1;
+        break;
 
       case 'L':
-	set_search_path (search_path);
-	break;
+        set_search_path (search_path);
+        break;
 
       case 'd':
-	printf("Use ICD with serial port \"%s\".\n", icd_port);
-	break;
+        printf("Use ICD with serial port \"%s\".\n", icd_port);
+        break;
 	
       case 'v':
-	printf("%s\n",VERSION);
-	break;
+        printf("%s\n",VERSION);
+        break;
 
       case 'i':
-	bUseGUI = false;
-	printf("not using gui");
+        bUseGUI = false;
+        printf("not using gui\n");
       }
       if (usage)
-	break;
+        break;
     }
 
   }
@@ -210,14 +211,14 @@ main (int argc, char *argv[])
   // initialize the gui
   
 #ifdef HAVE_GUI
-  if (gui_init (argc,argv,bUseGUI) != 0)
-  {
+  if (gui_init (argc,argv,bUseGUI) != 0) {
     std::cerr << "Error initialising GUI, reverting to cmd-line mode."
 	      << std::endl;
     bUseGUI = false;
   }
 #endif
 
+  CCommandManager::GetManager().SetFileStream(stdout);
 
   initialization_is_complete();
 
@@ -230,45 +231,37 @@ main (int argc, char *argv[])
 
     if(*processor_name)
       cout << "WARNING: command line processor named \"" << processor_name <<
-	"\" is being ignored\nsince the .cod file specifies the processor\n";
+        "\" is being ignored\nsince the .cod file specifies the processor\n";
     if(*hex_name)
       cout << "WARNING: Ignoring the hex file \"" << hex_name <<
-	"\"  ignored\nsince the .cod file specifies the hex code\n";
+        "\"  ignored\nsince the .cod file specifies the hex code\n";
 
     snprintf(command_str, sizeof(command_str),
 	     "load s %s\n",cod_name);
     parse_string(command_str);
 
   } else  if(*processor_name) {
-
     snprintf(command_str, sizeof(command_str),
 	     "processor %s\n",processor_name);
     parse_string(command_str);
 
-    if(*hex_name)
-      {
-	snprintf(command_str, sizeof(command_str),
-		 "load h %s\n",hex_name);
-	parse_string(command_str);
-      }
-
+    if(*hex_name){
+      snprintf(command_str, sizeof(command_str),
+        "load h %s\n",hex_name);
+      parse_string(command_str);
+    }
   }
-
-
-
-  if(*icd_port)
-    {
+  if(*icd_port) {
       snprintf(command_str, sizeof(command_str),
 	       "icd open %s\n",icd_port);
       parse_string(command_str);
-    }
+  }
   
-  if(*startup_name)
-    {
+  if(*startup_name) {
       snprintf(command_str, sizeof(command_str),
 	       "load c %s\n",startup_name);
       parse_string(command_str);
-    }
+  }
 
   if(abort_gpsim)
     exit_gpsim();

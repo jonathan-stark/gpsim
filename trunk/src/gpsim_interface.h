@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 
 class Stimulus;
 class Stimulus_Node;
+class ISimConsole;
 
 //---------------------------------------------------------------------------
 //
@@ -165,6 +166,7 @@ class gpsimInterface : public TriggerObject {
   virtual void print(void);
   virtual void clear(void);
   virtual char const * bpName() { return "gpsim interface"; }
+  virtual ISimConsole &GetConsole();
 
 private:
   GSList *interfaces;

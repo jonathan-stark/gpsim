@@ -43,6 +43,8 @@ Boston, MA 02111-1307, USA.  */
 #include "eeprom.h"
 #include "icd.h"
 
+#include "../cli/cmd_manager.h"
+
 
 extern Integer *verbosity;  // in ../src/init.cc
 
@@ -213,6 +215,15 @@ gpsimInterface::gpsimInterface (void )
   interface_seq_number = 0;
   socket_interface = 0;
   mbSimulating = false;
+}
+
+ISimConsole & gpsimInterface::GetConsole()
+{
+  // The static ISimConsole object is currently in the
+  // CCommandManger class because it initially was used
+  // to enable external modules to write to the console.
+  // We may want to put it somewhere else someday.
+  return CCommandManager::m_CommandManger.GetConsole();
 }
 
 //--------------------------------------------------------------------------
