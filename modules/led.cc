@@ -125,7 +125,8 @@ void Led_7Segments::update(  GtkWidget *widget,
 			     guint new_height)
 {
 
-  guint i,j;
+    guint i,j;
+    static int last_segment_states=-1;
 
 
   w_width = new_width;
@@ -143,6 +144,14 @@ void Led_7Segments::update(  GtkWidget *widget,
       g_assert(segment_gc!=NULL);
   }
 
+
+  // not a very O-O way of doing it... but here we go directly
+  // to the I/O port and get the values of the segments
+  int segment_states = port->get_value();
+
+  if(last_segment_states!=segment_states)
+  {
+
   GdkGC *gc = segment_gc;
 
   gdk_gc_set_foreground(gc,
@@ -155,11 +164,6 @@ void Led_7Segments::update(  GtkWidget *widget,
 		      w_width,
 		      w_height);
 
-
-
-  // not a very O-O way of doing it... but here we go directly
-  // to the I/O port and get the values of the segments
-  int segment_states = port->get_value();
 
   // cout << "expose led, segment states = " << segment_states << '\n';
 
@@ -194,7 +198,8 @@ void Led_7Segments::update(  GtkWidget *widget,
 			   6);
 
   }
-
+  last_segment_states=segment_states;
+  }
 }
 
 

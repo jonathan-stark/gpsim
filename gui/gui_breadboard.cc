@@ -1432,8 +1432,6 @@ static void position_module(struct gui_module *p, int x, int y)
             piniter = piniter->next;
 	}
     }
-
-    update_board_matrix(p->bbw);
 }
 
 static double module_distance(struct gui_module *p, int x, int y)
@@ -1557,6 +1555,7 @@ static void pointer_cb(GtkWidget *w,
 		dragging = 0;
 		gtk_widget_set_app_paintable(bbw->layout, TRUE);
 		grab_next_module=0;
+		update_board_matrix(bbw);
 	    }
 	}
 	else
@@ -1586,6 +1585,7 @@ static void pointer_cb(GtkWidget *w,
 	    update_board_matrix(bbw);
 	    dragging = 0;
 	    gtk_widget_set_app_paintable(bbw->layout, TRUE);
+	    update_board_matrix(bbw);
 	}
 	break;
     default:
@@ -2547,6 +2547,23 @@ static struct gui_pin *create_gui_pin(Breadboard_Window *bbw, int x, int y, orie
 		       (GtkSignalFunc) expose_pin,
 		       pin);
 
+/*    if(pin->iopin!=NULL)
+    {
+	GtkTooltips* tt;
+	GtkWidget *eb;
+	eb = gtk_event_box_new();
+//        gtk_widget_show(eb);
+	gtk_container_add(GTK_CONTAINER(eb),GTK_WIDGET(pin->widget));
+        pin->widget=eb;
+	tt = gtk_tooltips_new();
+	gtk_tooltips_set_tip(tt,
+			     GTK_WIDGET(eb),
+			     pin->iopin->name(),
+			     "what's this");
+        gtk_tooltips_enable(tt);
+    }*/
+
+
     // Create pixmap
     pin->pixmap = gdk_pixmap_new(bbw->gui_obj.window->window,
 				pin->width,
@@ -2596,8 +2613,8 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 				 class Module *module,
 				 GtkWidget *widget)
 {
-    static int x=30;
-    static int y=30;
+    static int x=80;
+    static int y=80;
     static int max_x;
     float package_height;
 
@@ -2907,12 +2924,10 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     gtk_layout_put(GTK_LAYOUT(bbw->layout), p->module_widget, 0, 0);
 
-//    if(p->module->x!=-1 && p->module->y!=-1)
-//	position_module(p, p->module->x, p->module->y);
-//    else
     position_module(p, x, y);
     p->module->x = p->x;
     p->module->y = p->y;
+    update_board_matrix(p->bbw);
 
     bbw->modules=g_list_append(bbw->modules, p);
 
@@ -2938,19 +2953,20 @@ void BreadboardWindow_update(Breadboard_Window *bbw)
 
         p = (struct gui_module*)iter->data;
 
-//	printf("update module %s", p->module->name());
+	// printf("update module %s", p->module->name());
 
 	// Check if module has changed its position
-	if(p->module->x!=p->x && p->module->y!=p->y)
+	if(p->module->x!=p->x || p->module->y!=p->y)
 	{
-//	    printf(" to position %d %d",p->module->x, p->module->y);
+	    // printf(" to position %d %d",p->module->x, p->module->y);
 
             position_module(p, p->module->x, p->module->y);
 	    p->module->x = p->x;
 	    p->module->y = p->y;
+	    update_board_matrix(p->bbw);
 	}
 
-//        printf("\n");
+        // printf("\n");
 
         // Check if pins have changed state
 	pin_iter=p->pins;
