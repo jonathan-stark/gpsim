@@ -13,5 +13,5 @@ echo "load s $1.cod" > $2
 echo "load c $1.stc">> $2
 echo "break e done" >> $2
 echo "run" >> $2
-echo "x failures" >> $2
+echo "failures" >> $2
 echo "abort_gpsim_now" >> $2

@@ -140,6 +140,8 @@ public:
   virtual void print(void);
   virtual unsigned int get_value(void){return val;};
   virtual int getAsInt();
+  virtual double getAsDouble();
+
 };
 
 
@@ -193,6 +195,7 @@ protected:
   stimulus *s;
 public:
   stimulus_symbol(stimulus *);
+  virtual string &name(void);
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS;};
 };
 

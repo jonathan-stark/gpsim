@@ -1,3 +1,8 @@
+2004-11-04 Scott Dattalo <scott@dattalo.com>
+	* regression/create_stc, regression/simulate, src/expr.cc,
+	src/symbol.cc, src/symbol.h, src/value.cc:
+	Regression tests were failing due to recent parser changes.
+
 2004-11-03 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/scan.ll, src/14bit-registers.cc, src/16bit-instructions.cc,
 	src/16bit-registers.cc, src/breakpoints.cc, src/breakpoints.h, src/expr.cc,

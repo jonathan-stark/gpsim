@@ -658,6 +658,12 @@ int constant_symbol::getAsInt()
   return val;
 }
 
+double constant_symbol::getAsDouble()
+{
+  double dVal = val;
+  return dVal;
+}
+
 //------------------------------------------------------------------------
 address_symbol::address_symbol(Module *_cpu, char *_name, unsigned int _val)
   :  constant_symbol(_cpu,_name,_val)
@@ -699,6 +705,16 @@ stimulus_symbol::stimulus_symbol(stimulus *_s)
     new_name(s->name());
 
 }
+
+//------------------------------------------------------------------------
+string &stimulus_symbol::name()
+{
+  if(s)
+    return s->name();
+
+  return gpsimValue::name();
+}
+
 //------------------------------------------------------------------------
 val_symbol::val_symbol(gpsimValue *v)
   : symbol(0,(char*)0)
