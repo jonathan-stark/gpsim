@@ -114,7 +114,6 @@ void GUI_Object::UpdateMenuItem(void)
 
 void GUI_Object::ChangeView (int view_state)
 {
-  printf("ChangeView\n");
   if( (view_state==VIEW_SHOW) || (window==0) ||
       ((view_state==VIEW_TOGGLE) &&
        !GTK_WIDGET_VISIBLE(GTK_WIDGET(window)) )
@@ -128,20 +127,21 @@ void GUI_Object::ChangeView (int view_state)
       }
 
       Build();
+
     } else {
-     
-      enabled=1;
+      // hmm, this call shouldn't be necessary, but I (Scott) found that
+      // in GTK+ 2.2.1 under Linux that it is.
+      gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
       gtk_widget_show(window);
+
     }
 
+    enabled=1;
   }
-  else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window)))
-    {
-      enabled=0;
-      gtk_widget_hide(window);
-    }
-
-
+  else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(window))) {
+    enabled=0;
+    gtk_widget_hide(window);
+  }
 
   // Update the config database
   set_config();
@@ -153,7 +153,7 @@ void GUI_Object::ChangeView (int view_state)
 
 void GUI_Object::Build(void)
 {
-
+  cout << " GUI_Object::Build() should not be called\n";
 }
 
 int GUI_Object::get_config(void)
@@ -211,6 +211,7 @@ int GUI_Object::set_default_config(void)
   width = 100;
   height = 100;
 
+  printf("set_default_config\n");
   return 1;
 }
 
@@ -223,11 +224,12 @@ int GUI_Object::set_config(void)
 
   if(!pName)
     return 0;
-  printf("%s\n",name());
+
   if(window) {
     gdk_window_get_root_origin(window->window,&x,&y);
     gdk_window_get_size(window->window,&width,&height);
-  printf("set_config: %s enabled:%d x:%d y:%d w:%d h:%d\n",name(),enabled,x,y,width,height);
+    //printf("%s  ",name());
+    //printf("set_config: %s enabled:%d x:%d y:%d w:%d h:%d\n",name(),enabled,x,y,width,height);
   }
 
   config_set_variable(pName, "enabled", ((enabled) ? 1 : 0) );
