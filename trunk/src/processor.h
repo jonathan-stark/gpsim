@@ -68,6 +68,9 @@ class program_memory_access :  public BreakCallBack
   // is called.
   void put_opcode_start(int addr, unsigned int new_opcode);
 
+  // Assign a cross reference object to an instruction 
+  void assign_xref(unsigned int address, gpointer cross_reference);
+
   virtual void callback(void);
   program_memory_access(void)
     {
@@ -116,11 +119,11 @@ public:
   void alias_file_registers(unsigned int start_address, 
 			    unsigned int end_address, 
 			    unsigned int alias_offset);
-  void init_register_memory(unsigned int memory_size);
+  virtual void init_register_memory(unsigned int memory_size);
 
 
-  void init_program_memory(unsigned int memory_size);
-  void init_program_memory(int address, int value);
+  virtual void init_program_memory(unsigned int memory_size);
+  virtual void init_program_memory(int address, int value);
   virtual unsigned int program_memory_size(void) const {return 0;};
   void build_program_memory(int *memory,int minaddr, int maxaddr);
 

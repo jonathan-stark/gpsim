@@ -133,14 +133,19 @@ void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_valu
   address = *(int *)xref->data;
 
   if(gp->source_browser)
-      SourceBrowserAsm_update_line( (SourceBrowserAsm_Window*)gp->source_browser,  address);
+      gp->source_browser->UpdateLine(address);
 
   if(gp->program_memory)
-      SourceBrowserOpcode_update_line( (SourceBrowserOpcode_Window*)gp->program_memory,  address, address);
+      gp->program_memory->UpdateLine(address);
 
 }
 
 void SourceBrowser_Window::SetPC(int address)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+
+}
+void SourceBrowser_Window::UpdateLine(int address)
 {
   printf("%s shouldn't be called \n",__FUNCTION__);
 

@@ -132,14 +132,6 @@ static void zero_cb(GtkWidget *w, gpointer user_data)
     sww->Update();
 }
 
-void StopWatchWindow_update(StopWatch_Window *sww)
-{
-  if( !sww->enabled)
-    return;
-
-  sww->Update();
-}
-
 static void
 modepopup_activated(GtkWidget *widget, gpointer data)
 {

@@ -467,7 +467,7 @@ void  gpsim_set_update_rate(guint64 new_rate)
     gi.set_update_rate(new_rate);
 }
 
-
+/*
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
 {
@@ -478,7 +478,7 @@ unsigned int gpsim_get_program_memory_size(unsigned int processor_id)
     return 0;
   return pic->program_memory_size();
 }
-
+*/
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type)
 {
@@ -719,22 +719,6 @@ unsigned int gpsim_address_has_changed(unsigned int processor_id, unsigned int a
     return pic->program_memory[address]->is_modified;
 }
 
-//--------------------------------------------------------------------------
-
-void  gpsim_assign_program_xref(unsigned int processor_id, unsigned int address, gpointer xref)
-{
-
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return;
-  if(pic->program_memory_size()<=address)
-      return;
-
-  if(pic->program_memory[address]->xref)
-      pic->program_memory[address]->xref->add(xref);
-
-}
  //--------------------------------------------------------------------------
 void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {

@@ -41,6 +41,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
+#include "../src/symbol.h"
+
 #include <gtkextra/gtkplot.h>
 #include <gtkextra/gtkplotdata.h>
 #include <gtkextra/gtkplotcanvas.h>
@@ -616,7 +618,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     static int has_old_graph=0;
     static int last_numpoints=0;
 
-    if(gpsim_get_program_memory_size(((GUI_Object*)pw)->gp->pic_id)<=0)
+    if(pw->gp->cpu->program_memory_size() <=0)
         return 0;
 
     if(has_old_graph)
@@ -892,8 +894,8 @@ int plot_routine_histogram(Profile_Window *pw)
     int numpoints;
     GList *iter;
 
-    if(gpsim_get_program_memory_size(((GUI_Object*)pw)->gp->pic_id)<=0)
-	return 0;
+    if(pw->gp->cpu->program_memory_size() <=0)
+      return 0;
 
     if(pw->histogram_profile_list==NULL)
         return 0;
@@ -1241,7 +1243,7 @@ popup_activated(GtkWidget *widget, gpointer data)
             iter=iter->next;
 	}
 
-	sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
 	add_range(popup_pw,fromaddress_string,toaddress_string);
 
 	while(symlist!=NULL)
@@ -1287,7 +1289,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 		iter=iter->next;
 	    }
 
-	    sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	    sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
 	    add_range(popup_pw,fromaddress_string,toaddress_string);
 
 	}
@@ -2032,7 +2034,7 @@ void Profile_Window::NewProgram(GUI_Processor *gp)
   // Instruction clist
   gtk_clist_freeze(profile_clist);
 
-  for(i=0; i < gpsim_get_program_memory_size(gp->pic_id); i++) {
+  for(i=0; i < gp->cpu->program_memory_size(); i++) {
     
     struct profile_entry *profile_entry;
     char buf[100];

@@ -287,6 +287,8 @@ public:
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};
 
+  virtual unsigned int register_memory_size () const { return FILE_REGISTERS;};
+
   /* The program_counter class calls these two functions to get the upper bits of the PC
    * for branching (e.g. goto) or modify PCL instructions (e.g. addwf pcl,f) */
   virtual unsigned int get_pclath_branching_jump(void)=0;

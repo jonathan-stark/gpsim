@@ -238,7 +238,7 @@ Processor * P16F84::construct(void)
 
   P16F84 *p = new P16F84;
 
-  cout << " c84 construct\n";
+  cout << " f84 construct\n";
 
   p->P16C8x::create(0x4f);
   p->create_invalid_registers ();

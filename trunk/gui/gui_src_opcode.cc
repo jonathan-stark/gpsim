@@ -208,7 +208,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     range = sheet->range;
     pic_id = ((GUI_Object*)popup_sbow)->gp->pic_id;
     
-    pm_size = gpsim_get_program_memory_size(popup_sbow->gp->pic_id);
+    pm_size = popup_sbow->gp->cpu->program_memory_size();
     char_width = gdk_string_width (popup_sbow->normal_style->font,"9");
     
     switch(item->id)
@@ -1030,22 +1030,15 @@ void SourceBrowserOpcode_Window::SelectAddress(int address)
 
 }
 
-void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int address, int row)
+void SourceBrowserOpcode_Window::UpdateLine(int address)
 {
 
     
-    if(!sbow) return;
+  if(!enabled)
+    return;
 
-    if(! ((GUI_Object*)sbow)->enabled)
-	return;
-
-    assert(sbow->wt == WT_opcode_source_window);
-
-    if(address >= 0)
-    {
-	update(sbow,address);
-
-    }
+  if(address >= 0)
+    update(this,address);
 }
 
 void SourceBrowserOpcode_Window::SetPC(int address)
@@ -1060,7 +1053,7 @@ void SourceBrowserOpcode_Window::SetPC(int address)
 
   if(address != last_address)
     {
-      SourceBrowserOpcode_update_line( this, last_address, address);
+      UpdateLine(address);
       gtk_clist_set_row_style (GTK_CLIST (clist), address, current_line_number_style);
     }
     
@@ -1123,7 +1116,7 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
     // Clearing and appending is faster than changing
     gtk_clist_clear(GTK_CLIST(clist));
 
-    pm_size = gpsim_get_program_memory_size(gp->pic_id);
+    pm_size = gp->cpu->program_memory_size();
 
     gtk_sheet_freeze(GTK_SHEET(sheet));
 
@@ -1180,7 +1173,8 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   assert(wt==WT_opcode_source_window);
 
-  pm_size = gpsim_get_program_memory_size(gp->pic_id);
+
+  pm_size = gp->cpu->program_memory_size();
 
   if(memory!=NULL)
     free(memory);
