@@ -380,10 +380,11 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
       return;
   }
 
+  gp = ((GUI_Object*)rw)->gp;
+  
   if(gp->pic_id==0)
       return;
   
-  gp = ((GUI_Object*)rw)->gp;
   
   //printf ("set_cell %d %d,  %d %d\n", row, col);
   
@@ -646,6 +647,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
   }
   
   sheet=GTK_SHEET(rw->register_sheet);
+  row=sheet->active_cell.row; col=sheet->active_cell.col;
 
   // if there are text written in the entry above the sheet, then
   // the same data is in the sheet cell (because of show_sheet_entry())
