@@ -34,6 +34,7 @@ libgpsim_la_SOURCES = \
 	p16x7x.cc \
 	p16x5x.cc \
 	p16x6x.cc \
+	p17c75x.cc \
 	p18x.cc \
 	packages.cc \
 	pic-processor.cc \
@@ -74,6 +75,7 @@ gpsiminclude_HEADERS = \
 	p16x7x.h \
 	p16x8x.h \
 	p16f87x.h \
+	p17c75x.h \
 	p18x.h \
 	packages.h \
 	pic-instructions.h \

@@ -866,3 +866,51 @@ void PORTE::setbit(unsigned int bit_number, bool new_value)
 
 }
 
+//-------------------------------------------------------------------
+//
+//  PORTF
+//-------------------------------------------------------------------
+
+PORTF::PORTF(void)
+{
+  new_name("portf");
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTF::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  //cout << "PORTF::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+}
+
+//-------------------------------------------------------------------
+//
+//  PORTG
+//-------------------------------------------------------------------
+
+PORTG::PORTG(void)
+{
+  new_name("portg");
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTG::setbit(unsigned int bit_number, bool new_value)
+{
+
+  unsigned int old_value = value;
+
+  //cout << "PORTG::setbit() bit " << bit_number << " to " << new_value << '\n';
+
+  IOPORT::setbit( bit_number,  new_value);
+
+}
+
+
+

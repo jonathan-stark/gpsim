@@ -33,7 +33,42 @@ Boston, MA 02111-1307, USA.  */
 Trace trace;     // Instantiate the trace buffer class
 TraceLog trace_log;
 ProfileKeeper profile_keeper;
+/****************************************************************************
+ *
+ *   gpsim Trace
+ *
+ 
+   General:
+  
+   gpsim traces almost everything simulated: instructions executed,
+   register reads/writes, clock cycles, special reigster accesses
+   break points, instruction skips, external modules, and a few
+   other miscellaneous things. 
 
+   The tracing subsystem is implemented as a C++ class. In theory,
+   multiple traces could be instantiated, but (currently) there is
+   one global trace instantiated and all the pieces of gpsim make
+   direct references to it.
+
+   How can gpsim trace every thing and still be the faster
+   microcontroller simulator? Well, gpsim writes trace
+   information into a giant circular buffer. So one optimization
+   is that there are no array bounds to check. Another optimization
+   is that most of the trace operations are C++ inline functions.
+   A third optimization is that the trace operations are efficiently
+   encoded into 32-bit words. The one exception is the cycle counter
+   trace, it takes two 32-bit words (see the cycle counter trace 
+   comment below).
+
+   The upper 8-bits of the trace word are reserved for describing
+   the trace type. The upper two bits of these 8-bits are reservered
+   for encoding the cycle counter. The lower 6-bits allow 64 enumerated
+   types to be encoded. Only a small portion of these are currently
+   used. The lower 24-bits of the 32-bit trace word store the 
+   information we wish to trace. For example, for register reads and
+   writes, there are 8-bits of data and (upto) 16-bits of address.
+
+****************************************************************************/
 
 #define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
 #define TRACE_PROGRAM_COUNTER   (1<< (PROGRAM_COUNTER >> 24))

@@ -149,8 +149,71 @@ struct instruction_constructor op_18cxx[] = {
   { 0xfc00,  0x1800,  XORWF16::construct },
 };
 
+struct instruction_constructor op_17cxx[] = {
+  { 0xff00,  0xb100,  ADDLW16::construct  },
+  { 0xfe00,  0x0e00,  ADDWF16::construct  },
+  { 0xfe00,  0x1000,  ADDWFC::construct  },
+  { 0xff00,  0xb500,  ANDLW16::construct  },
+  { 0xfe00,  0x0a00,  ANDWF16::construct  },
+  { 0xf800,  0x8800,  BCF::construct  },
+  { 0xf800,  0x8000,  BSF::construct  },
+  { 0xf800,  0x9800,  BTFSC::construct  },
+  { 0xf800,  0x9000,  BTFSS::construct  },
+  { 0xf800,  0x3800,  BTG::construct  },
+  { 0xe000,  0xe000,  CALL16::construct  },
+  { 0xfe00,  0x2800,  CLRF::construct  },
+  { 0xffff,  0x0004,  CLRWDT::construct  },
+  { 0xfe00,  0x1200,  COMF16::construct  },
+  { 0xff00,  0x3100,  CPFSEQ::construct  },
+  { 0xff00,  0x3200,  CPFSGT::construct  },
+  { 0xff00,  0x3000,  CPFSLT::construct  },
+  { 0xfe00,  0x2e00,  DAW::construct  },
+  { 0xfe00,  0x0600,  DECF16::construct  },
+  { 0xfe00,  0x1600,  DECFSZ16::construct  },
+  { 0xfe00,  0x2600,  DCFSNZ::construct  },
+  { 0xe000,  0xc000,  GOTO16::construct  },
+  { 0xfe00,  0x1400,  INCF16::construct  },
+  { 0xfe00,  0x1e00,  INCFSZ16::construct  },
+  { 0xfe00,  0x2400,  INFSNZ::construct  },
+  { 0xff00,  0xb300,  IORLW16::construct  },
+  { 0xfe00,  0x0800,  IORWF16::construct  },
+  { 0xff00,  0xb700,  LCALL16::construct  },
+  { 0xe000,  0x6000,  MOVFP::construct  },
+  { 0xe000,  0x4000,  MOVPF::construct  },
+  { 0xff00,  0xb800,  MOVLB::construct  },
+  { 0xfe00,  0xba00,  MOVLR::construct  },
+  { 0xff00,  0xb000,  MOVLW::construct  },
+  { 0xff00,  0x0100,  MOVWF16::construct  },
+  { 0xff00,  0xbc00,  MULLW::construct  },
+  { 0xff00,  0x3400,  MULWF::construct  },
+  { 0xfe00,  0x2c00,  NEGW::construct  },
+  { 0xffff,  0x0000,  NOP::construct  },
+  { 0xffff,  0x0005,  RETFIE16::construct  },
+  { 0xff00,  0xb600,  RETLW::construct  },
+  { 0xffff,  0x0002,  RETURN16::construct  },
+  { 0xfe00,  0x1a00,  RLCF::construct  },
+  { 0xfe00,  0x2200,  RLNCF::construct  },
+  { 0xfe00,  0x1800,  RRCF::construct  },
+  { 0xfe00,  0x2000,  RRNCF::construct  },
+  { 0xfe00,  0x2a00,  SETF::construct  },
+  { 0xffff,  0x0003,  SLEEP16::construct  },
+  { 0xff00,  0xb200,  SUBLW16::construct  },
+  { 0xfe00,  0x0400,  SUBWF16::construct  },
+  { 0xfe00,  0x0200,  SUBWFB::construct  },
+  { 0xfe00,  0x1c00,  SWAPF::construct  },
+  { 0xfc00,  0xa800,  TBLRD::construct  },
+  { 0xfc00,  0xac00,  TBLWT::construct  },
+  { 0xfc00,  0xa000,  TLRD::construct  },
+  { 0xfc00,  0xa400,  TLWT::construct  },
+  { 0xff00,  0x3300,  TSTFSZ::construct  },
+  { 0xff00,  0xb400,  XORLW16::construct  },
+  { 0xfe00,  0x0c00,  XORWF16::construct  }
+};
+
 
 const int NUM_OP_18CXX	= sizeof(op_18cxx) / sizeof(op_18cxx[0]);
+const int NUM_OP_17CXX	= sizeof(op_17cxx) / sizeof(op_17cxx[0]);
+
 
 instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst)
 {

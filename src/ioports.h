@@ -189,4 +189,24 @@ public:
 
 };
 
+class PORTF : public PIC_IOPORT
+{
+public:
+
+  PORTF(void);
+
+  void setbit(unsigned int bit_number, bool new_value);
+
+};
+
+class PORTG : public PIC_IOPORT
+{
+public:
+
+  PORTG(void);
+
+  void setbit(unsigned int bit_number, bool new_value);
+
+};
+
 #endif  // __IOPORTS_H__

@@ -86,4 +86,41 @@ public:
 
 };
 
+class _68pins : public Package 
+{
+public:
+
+  PORTA        *porta;
+  IOPORT_TRIS  ddra;
+
+  PORTB        *portb;
+  IOPORT_TRIS  ddrb;
+
+  PORTC        *portc;
+  IOPORT_TRIS  ddrc;
+
+  PIC_IOPORT   *portd;
+  IOPORT_TRIS  ddrd;
+
+  PIC_IOPORT   *porte;
+  IOPORT_TRIS  ddre;
+
+  PIC_IOPORT   *portf;
+  IOPORT_TRIS  ddrf;
+
+  PIC_IOPORT   *portg;
+  IOPORT_TRIS  ddrg;
+
+  virtual void create_iopin_map(void);
+
+};
+
+class _16bit_68pins  : public _68pins
+{
+public:
+
+  virtual void create_iopin_map(void) {return;};
+
+};
+
 #endif // __PIC_PACKAGES_H__

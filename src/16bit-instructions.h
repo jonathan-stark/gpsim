@@ -448,6 +448,20 @@ public:
 };
 
 //---------------------------------------------------------
+class LCALL16 : public multi_word_branch
+{
+public:
+  bool fast;
+
+  LCALL16(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new LCALL16(new_cpu,new_opcode);}
+  char *name(char *str);
+
+};
+
+//---------------------------------------------------------
 class LFSR : public multi_word_instruction
 {
 public:
@@ -493,6 +507,22 @@ public:
 
 
 //---------------------------------------------------------
+class MOVFP : public multi_word_instruction
+{
+public:
+  unsigned int source,destination;
+
+  MOVFP(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  char *name(char *return_str);
+  void runtime_initialize(void);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVFP(new_cpu,new_opcode);}
+};
+
+
+//---------------------------------------------------------
 
 class MOVLB : public Literal_op
 {
@@ -503,6 +533,34 @@ public:
     {return new MOVLB(new_cpu,new_opcode);}
 
 };
+
+//---------------------------------------------------------
+
+class MOVLR : public Literal_op
+{
+public:
+  MOVLR(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVLR(new_cpu,new_opcode);}
+
+};
+
+//---------------------------------------------------------
+class MOVPF : public multi_word_instruction
+{
+public:
+  unsigned int source,destination;
+
+  MOVPF(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  char *name(char *return_str);
+  void runtime_initialize(void);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVPF(new_cpu,new_opcode);}
+};
+
 
 //---------------------------------------------------------
 class MOVWF16 : public MOVWF
@@ -551,6 +609,18 @@ public:
   virtual void execute(void);
   static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
     {return new NEGF(new_cpu,new_opcode);}
+
+};
+
+//---------------------------------------------------------
+class NEGW : public Register_op
+{
+public:
+
+  NEGW(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new NEGW(new_cpu,new_opcode);}
 
 };
 
@@ -808,6 +878,34 @@ public:
 
   static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
     {return new TBLWT(new_cpu,new_opcode);}
+
+};
+
+//---------------------------------------------------------
+class TLRD : public instruction
+{
+public:
+
+  TLRD(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  virtual char *name(char *);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new TLRD(new_cpu,new_opcode);}
+
+};
+
+//---------------------------------------------------------
+class TLWT : public instruction
+{
+public:
+
+  TLWT(pic_processor *new_cpu, unsigned int new_opcode);
+  virtual void execute(void);
+  virtual char *name(char *);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new TLWT(new_cpu,new_opcode);}
 
 };
 

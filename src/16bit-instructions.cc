@@ -41,15 +41,36 @@ void Branching::decode(pic_processor *new_cpu, unsigned int new_opcode)
 
   cpu = new_cpu;
 
-  destination = (new_opcode & 0xff)+1;
-  absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
+  switch(cpu->isa()) {
+    case  _P18Cxx2_:
+    case  _P18C2x2_:
+    case  _P18C242_:
+    case  _P18C252_:
+    case  _P18C442_:
+    case  _P18C452_:
+      destination = (new_opcode & 0xff)+1;
+      absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
+ 
+      if(new_opcode & 0x80)
+        {
+          absolute_destination -= 0x100;
+          destination = 0x100 - destination;
+        }
+      break;
 
-  if(new_opcode & 0x80)
-    {
-      absolute_destination -= 0x100;
-      destination = 0x100 - destination;
-    }
+    case _P17C7xx_:
+    case _P17C75x_:
+    case _P17C756_:
+    case _P17C756A_:
+    case _P17C762_:
+    case _P17C766_:
+      cout << "Which instructions go here?\n";
+      break;
 
+    default:
+      cout << "ERROR: (Branching) the processor is not defined\n";
+      break;
+  }
 }
 
 char *Branching::name(char *return_str)
@@ -889,6 +910,47 @@ void IORWF16::execute(void)
 }
 
 //--------------------------------------------------
+LCALL16::LCALL16 (pic_processor *new_cpu, unsigned int new_opcode)
+{
+//    opcode = new_opcode;
+//    fast = new_opcode & 0x100;
+//    cpu = new_cpu;
+//    address = cpu16->current_disasm_address;
+//    initialized = 0;
+
+  sprintf(name_str,"lcall");
+
+}
+
+void LCALL16::execute(void)
+{
+//    trace.instruction(opcode);
+
+//    if(!initialized)
+//      runtime_initialize();
+
+//    cpu->stack->push(cpu->pc.get_next());
+//    if(fast)
+//      cpu16->fast_stack.push();
+
+//    cpu->pc.jump(destination);
+
+}
+
+char *LCALL16::name(char  *return_str)
+{
+
+//    if(!initialized)
+//      runtime_initialize();
+
+  sprintf(return_str,"lcall\t0x%05x%s",
+	  destination,
+	  ((fast) ? ",f" : " "));
+
+  return(return_str);
+}
+
+//--------------------------------------------------
 
 LFSR::LFSR (pic_processor *new_cpu, unsigned int new_opcode)
 {
@@ -1065,6 +1127,72 @@ void MOVFF::execute(void)
   cpu->pc.increment();
 
 }
+
+//--------------------------------------------------
+
+MOVFP::MOVFP (pic_processor *new_cpu, unsigned int new_opcode)
+{
+//    opcode = new_opcode;
+//    cpu = new_cpu;
+//    address = cpu16->current_disasm_address;
+//    initialized = 0;
+//    destination = 0;
+//    source = opcode & 0xfff;
+
+  sprintf(name_str,"movfp");
+}
+
+void MOVFP::runtime_initialize(void)
+{
+//    if(cpu->program_memory[address+1])
+//      {
+//        word2_opcode = cpu->program_memory[address+1]->get_opcode();
+
+//        if((word2_opcode & 0xf000) != 0xf000) 
+//  	{
+//  	  cout << "16bit-instructions.cc MOVFP error\n";
+//  	  return;
+//  	}
+
+//        cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line);
+//        destination = word2_opcode & 0xfff;
+//        initialized = 1;
+//      }
+
+}
+
+char *MOVFP::name(char *return_str)
+{
+
+//    if(!initialized)
+//      runtime_initialize();
+
+  sprintf(return_str,"%s\t%s,%s",
+	  name_str,
+	  cpu->registers[source]->name(),
+	  cpu->registers[destination]->name());
+
+
+  return(return_str);
+}
+
+
+void MOVFP::execute(void)
+{
+//    trace.instruction(opcode);
+
+//    if(!initialized)
+//      runtime_initialize();
+
+//    unsigned int r =  cpu->registers[source]->get();
+//    cpu->pc.skip();
+
+//    cpu->registers[destination]->put(r);
+
+//    cpu->pc.increment();
+
+}
+
 //--------------------------------------------------
 
 MOVLB::MOVLB (pic_processor *new_cpu, unsigned int new_opcode)
@@ -1085,6 +1213,94 @@ void MOVLB::execute(void)
   cpu16->bsr.put(L);
 
   cpu->pc.increment();
+
+}
+
+//--------------------------------------------------
+
+MOVLR::MOVLR (pic_processor *new_cpu, unsigned int new_opcode)
+{
+
+//    decode(new_cpu, new_opcode);
+
+  sprintf(name_str,"movlb");
+
+}
+
+void MOVLR::execute(void)
+{
+//    unsigned int source_value;
+
+//    trace.instruction(opcode);
+
+//    cpu16->bsr.put(L);
+
+//    cpu->pc.increment();
+
+}
+
+//--------------------------------------------------
+
+MOVPF::MOVPF (pic_processor *new_cpu, unsigned int new_opcode)
+{
+//    opcode = new_opcode;
+//    cpu = new_cpu;
+//    address = cpu16->current_disasm_address;
+//    initialized = 0;
+//    destination = 0;
+//    source = opcode & 0xfff;
+
+  sprintf(name_str,"movpf");
+}
+
+void MOVPF::runtime_initialize(void)
+{
+//    if(cpu->program_memory[address+1])
+//      {
+//        word2_opcode = cpu->program_memory[address+1]->get_opcode();
+
+//        if((word2_opcode & 0xf000) != 0xf000) 
+//  	{
+//  	  cout << "16bit-instructions.cc MOVFP error\n";
+//  	  return;
+//  	}
+
+//        cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line);
+//        destination = word2_opcode & 0xfff;
+//        initialized = 1;
+//      }
+
+}
+
+char *MOVPF::name(char *return_str)
+{
+
+//    if(!initialized)
+//      runtime_initialize();
+
+  sprintf(return_str,"%s\t%s,%s",
+	  name_str,
+	  cpu->registers[source]->name(),
+	  cpu->registers[destination]->name());
+
+
+  return(return_str);
+}
+
+
+void MOVPF::execute(void)
+{
+//    trace.instruction(opcode);
+
+//    if(!initialized)
+//      runtime_initialize();
+
+//    unsigned int r =  cpu->registers[source]->get();
+//    cpu->pc.skip();
+
+//    cpu->registers[destination]->put(r);
+
+//    cpu->pc.increment();
 
 }
 
@@ -1197,6 +1413,43 @@ void NEGF::execute(void)
   cpu->status.put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
 
   cpu->pc.increment();
+
+}
+
+
+//--------------------------------------------------
+
+NEGW::NEGW (pic_processor *new_cpu, unsigned int new_opcode)
+{
+
+//    decode(new_cpu, new_opcode);
+
+  sprintf(name_str,"negw");
+
+}
+
+void NEGW::execute(void)
+{
+  unsigned int new_value,src_value;
+
+//    trace.instruction(opcode);
+
+//    source = ((!access) ?
+//  	    cpu->registers[register_address] 
+//  	    :
+//  	    cpu->register_bank[register_address] );
+
+//    new_value = -(src_value = source->get());
+
+
+//    if(destination)
+//      source->put(new_value&0xff);      // Result goes to source
+//    else
+//      cpu->W.put(new_value&0xff);
+
+//    cpu->status.put_Z_C_DC_OV_N_for_sub(new_value,0,src_value);
+
+//    cpu->pc.increment();
 
 }
 
@@ -1743,6 +1996,93 @@ void TBLWT::execute(void)
     cpu16->tbl.decrement();
 
   cpu->pc.increment();
+
+}
+
+
+//--------------------------------------------------
+
+TLRD::TLRD (pic_processor *new_cpu, unsigned int new_opcode)
+{
+
+//    decode(new_cpu, new_opcode);
+
+  sprintf(name_str,"tlrd");
+
+}
+
+char *TLRD::name(char *return_str)
+{
+  char *index_modes[4] = {"*","*+","*-","+*"};
+
+  sprintf(return_str,"%s\t%s",
+	  name_str,
+	  index_modes[opcode&0x3]);
+
+
+  return(return_str);
+}
+
+void TLRD::execute(void)
+{
+//    unsigned int pm_opcode;
+
+//    trace.instruction(opcode);
+
+//    if((opcode & 3)==3)
+//      cpu16->tbl.increment();
+
+//    cpu16->tbl.read();
+
+//    if((opcode & 3)==1)
+//      cpu16->tbl.increment();
+//    else if((opcode & 3)==2)
+//      cpu16->tbl.decrement();
+
+//    cpu->pc.increment();
+
+}
+
+//--------------------------------------------------
+
+TLWT::TLWT (pic_processor *new_cpu, unsigned int new_opcode)
+{
+
+  decode(new_cpu, new_opcode);
+
+  sprintf(name_str,"tlwt");
+
+}
+
+char *TLWT::name(char *return_str)
+{
+  char *index_modes[4] = {"*","*+","*-","+*"};
+
+  sprintf(return_str,"%s\t%s",
+	  name_str,
+	  index_modes[opcode&0x3]);
+
+
+  return(return_str);
+}
+
+void TLWT::execute(void)
+{
+//    unsigned int pm_opcode;
+
+//    trace.instruction(opcode);
+
+//    if((opcode & 3)==3)
+//      cpu16->tbl.increment();
+
+//    cpu16->tbl.write();
+
+//    if((opcode & 3)==1)
+//      cpu16->tbl.increment();
+//    else if((opcode & 3)==2)
+//      cpu16->tbl.decrement();
+
+//    cpu->pc.increment();
 
 }
 
