@@ -346,7 +346,9 @@ void read_src_files_from_cod(pic_processor *cpu)
     cpu->files = new file_context[num_files+1+MAX_HLL_FILES];
     cpu->number_of_source_files = num_files;
     cpu->lst_file_id = num_files;
-    cpu->files[num_files].file_ptr = NULL;
+
+    for(i=0;i<num_files+1+MAX_HLL_FILES;i++)
+    	cpu->files[i].file_ptr = NULL;
 
     num_files = 0;  // now use 'num_files' as a counter.
 

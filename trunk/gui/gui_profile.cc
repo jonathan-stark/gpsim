@@ -1222,6 +1222,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    {
 		data=(sym*)malloc(sizeof(sym));
 		memcpy(data,s,sizeof(sym));
+		data->name=(char*)malloc(strlen(s->name)+1);
+                strcpy(data->name,s->name);
 		symlist=g_list_append(symlist,data);
 	    }
 	}
@@ -1236,6 +1238,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    add_range(popup_pw,fromaddress_string,toaddress_string);
 	    strcpy(fromaddress_string,toaddress_string);
 	    toaddress_string[0]='\0';
+            free(s->name);
 	    free(s);
             iter=iter->next;
 	}
@@ -1259,6 +1262,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 		    sym *data;
 		    data=(sym*)malloc(sizeof(sym));
 		    memcpy(data,s,sizeof(sym));
+		    data->name=(char*)malloc(strlen(s->name)+1);
+		    strcpy(data->name,s->name);
 		    symlist=g_list_append(symlist,data);
 		}
 	    }
@@ -1270,6 +1275,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	{
 	    s=(sym*)iter->data;
 	    strcpy(fromaddress_string,s->name);
+            free(s->name);
 	    free(s);
 	    iter=iter->next;
 	    while(iter!=NULL)

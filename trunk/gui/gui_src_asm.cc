@@ -1757,7 +1757,9 @@ int font_dialog_browse(GtkWidget *w, gpointer user_data)
     GtkEntry *entry=GTK_ENTRY(user_data);
     char *fontstring;
     gchar *fontname;
-    int cancel=-1;
+    static int cancel;
+
+    cancel=-1;
 
     if(fontsel==NULL)
     {
