@@ -364,6 +364,7 @@ int SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	      break;
 	  case WT_watch_window:
 	      BuildWatchWindow(_this);
+	      break;
 	  case WT_breadboard_window:
 	      BuildBreadboardWindow(_this);
 	      break;
