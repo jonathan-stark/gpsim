@@ -2,6 +2,9 @@
 	* plat/win32/gpsim.def: MSVC sync
 	* src/14bit-registers.h: declare void
 	  Status_register::put(unsigned int new_value) as virtual, not inline
+	* gui/gui_src_opcode.cc: removed definition of unused variable pm_size
+	  in method SourceBrowserOpcode_Window::NewProcessor()
+	* extras/lcd/makefile.mingw: added
 
 2004-12-15 Scott Dattalo <scott@dattalo.com>
 	* src/init.cc, src/gpsim_time.cc:

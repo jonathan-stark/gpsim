@@ -1,0 +1,50 @@
+## Makefile for building the libgpsim_lcd with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+ifdef DEBUG
+  OPTIMIZE = -O2 -g
+else
+  OPTIMIZE = -O2
+  CLDFLAGS = -Wl,--strip-all
+endif
+
+CFLAGS = $(OPTIMIZE) $(INCLUDES) $(DEFINES) -Wall
+
+CXX = c++ -mno-cygwin -mcpu=pentium -mms-bitfields
+
+.cc.o:
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+################################################################
+
+# Nothing much configurable below
+
+LIBS = ../../../glib/lib/glib-2.0.lib ../../../glib/lib/gobject-2.0.lib \
+	../../../gtk+/lib/gdk-win32-2.0.lib ../../../gtk+/lib/gtk-win32-2.0.lib \
+	../../gpsim/gpsim.lib
+
+INCLUDES = -I ../../include \
+	-I ../../../glib/include/glib-2.0 -I ../../../glib/lib/glib-2.0/include \
+	-I ../../../gtk+/include/gtk-2.0 -I ../../../gtk+/lib/gtk-2.0/include \
+	-I ../../../pango/include/pango-1.0 -I ../../../atk/include/atk-1.0
+
+DEFINES += -DHAVE_GUI
+
+all :				\
+	libgpsim_lcd.dll 
+
+libgpsim_lcd_OBJECTS =		\
+	lcdgui.o		\
+	module_manager.o	\
+	lcd.o			\
+	lcdengine.o
+
+################ The modules DLL
+
+libgpsim_lcd.dll : $(libgpsim_lcd_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_lcd.dll ../../plat/win32/modules.def $(libgpsim_lcd_OBJECTS) $(LIBS)
+
+clean :
+	-rm -f *.o *.dll
