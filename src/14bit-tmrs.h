@@ -327,8 +327,12 @@ enum
      value &= ~TXIF;
      trace.register_write(address,value);
    }
+ void clear_rcif(void)
+   {
+     value &= ~RCIF;
+     trace.register_write(address,value);
+   }
  
-
   bool interrupt_status(void)
     {
       if( value & valid_bits & pie->value)

@@ -579,6 +579,7 @@ class USART_MODULE16 : public USART_MODULE
   RCREG_16     rcreg;
 
   void initialize(_16bit_processor *);
+  virtual void new_rx_edge(unsigned int);
 
 };
 

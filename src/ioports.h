@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 // IOPORT
 
 class IOPORT_TRIS;  // forward reference
+class USART_MODULE;
 
 class IOPORT : public sfr_register
 {
@@ -149,6 +150,7 @@ enum
   bool t1oso_order;
 
   CCPCON *ccp1con;
+  USART_MODULE *usart;
 
   PORTC(void);
   unsigned int get(void);

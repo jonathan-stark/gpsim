@@ -39,6 +39,10 @@ class  _14bit_processor;
 class IOPORT;
 
 
+#define TOTAL_BRGH_STATES      16
+#define TOTAL_BRGL_STATES      64
+
+
 class _TXREG : public sfr_register
 {
  public:
@@ -53,10 +57,11 @@ class _TXREG : public sfr_register
 
 };
 
-class _TXSTA : public sfr_register
+class _TXSTA : public sfr_register, public BreakCallBack
 {
 public:
   _TXREG  *txreg;
+  _SPBRG  *spbrg;
   IOPIN   *txpin;
 
   unsigned int tsr;
@@ -77,6 +82,7 @@ public:
 
   virtual void transmit_a_bit(void);
   virtual void start_transmitting(void);
+  void callback(void);
 
 };
 
@@ -101,8 +107,9 @@ class _RCREG : public sfr_register
 
 };
 
-class _RCSTA : public sfr_register
+class _RCSTA : public sfr_register, public BreakCallBack
 {
+
  public:
   enum {
     RX9D = 1<<0,
@@ -115,6 +122,27 @@ class _RCSTA : public sfr_register
     SPEN = 1<<7
   };
 
+  enum {
+    RCSTA_DISABLED,
+    RCSTA_WAITING_FOR_START,
+    RCSTA_WAITING_MID1,
+    RCSTA_WAITING_MID2,
+    RCSTA_WAITING_MID3,
+    RCSTA_RECEIVING
+  };
+
+  // The usart samples the middle of the bit three times and
+  // produces a sample based on majority averaging. 
+  // 
+
+#define BRGH_FIRST_MID_SAMPLE  7
+#define BRGH_SECOND_MID_SAMPLE 8
+#define BRGH_THIRD_MID_SAMPLE  9
+
+#define BRGL_FIRST_MID_SAMPLE  30
+#define BRGL_SECOND_MID_SAMPLE 32
+#define BRGL_THIRD_MID_SAMPLE  34
+
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
   _TXSTA  *txsta;
@@ -124,14 +152,19 @@ class _RCSTA : public sfr_register
   unsigned int rsr;
   unsigned int bit_count;
   unsigned int rx_bit;
+  unsigned int sample,state;
+  guint64 future_cycle, last_cycle;
 
   //  unsigned int new_bit;    //TEST!!!!
 
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  void receive_a_bit(void);
+  void receive_a_bit(unsigned);
+  void receive_start_bit(void);
   virtual void start_receiving(void);
+  void set_callback_break(unsigned int spbrg_edge);
+  void callback(void);
 
 };
 class _SPBRG : public sfr_register, public BreakCallBack
@@ -141,12 +174,14 @@ class _SPBRG : public sfr_register, public BreakCallBack
   _RCSTA *rcsta;
 
   guint64 
+    start_cycle,   // The cycle the SPBRG was started
     last_cycle,    // The cycle when the spbrg clock last changed
     future_cycle;  // The next cycle spbrg is predicted to change
 
   virtual void callback(void);
   void start(void);
   void get_next_cycle_break(void);
+  guint64 get_cpu_cycle(unsigned int edges_from_now);
 };
 
 //---------------------------------------------------------------
@@ -167,6 +202,7 @@ class RCREG_14 : public _RCREG
   PIR1 *pir1;
 
   virtual void push(unsigned int);
+  virtual void pop(void);
 
 };
 
@@ -183,6 +219,7 @@ public:
 
   //  USART_MODULE(void);
 
+  virtual  void  new_rx_edge(unsigned int)=0;
 };
 
 class USART_MODULE14 : public USART_MODULE
@@ -195,6 +232,7 @@ class USART_MODULE14 : public USART_MODULE
   RCREG_14     rcreg;
 
   virtual void initialize(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+  virtual void new_rx_edge(unsigned int);
 
 };
 

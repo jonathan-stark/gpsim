@@ -72,7 +72,6 @@ void P16F874::set_out_of_range_pm(int address, int value)
 
 void P16F874::create_sfr_map(void)
 {
-
   if(verbose)
     cout << "creating f874 registers \n";
 
@@ -87,6 +86,7 @@ void P16F874::create_sfr_map(void)
   add_sfr_register(&eeadrh,  0x10f);
 
   add_sfr_register(&adresl,  0x9e, 0);
+
   adres.new_name("adresh");
   adresl.new_name("adresl");
 
@@ -136,8 +136,6 @@ void P16F874::create_sfr_map(void)
   adcon1.configuration_bits[14] = 0;
   adcon1.configuration_bits[15] = 0x0d;
 
-
-
 }
 
 void P16F874::create(void)
@@ -166,12 +164,14 @@ pic_processor * P16F874::construct(void)
     cout << " f874 construct\n";
 
   p->create();
-
+  p->create_invalid_registers ();
   p->eeprom.cpu = p;
   p->eeprom.initialize(128,
 		    &p->eecon1, &p->eecon2, 
 		    &p->eedata, &p->eeadr,
 		    &p->eedatah, &p->eeadrh);
+
+  p->pic_processor::create_symbols();
 
   p->name_str = "16F874";
 
@@ -233,13 +233,15 @@ pic_processor * P16F877::construct(void)
     cout << " f877 construct\n";
 
   p->create();
-
+  p->create_invalid_registers ();
   p->eeprom.cpu = p;
   p->eeprom.initialize(256,
 		    &p->eecon1, &p->eecon2, 
 		    &p->eedata, &p->eeadr,
 		    &p->eedatah, &p->eeadrh);
 
+
+  p->pic_processor::create_symbols();
 
   p->name_str = "16F877";
 

@@ -1149,6 +1149,10 @@ TRIS::TRIS (pic_processor *new_cpu, unsigned int new_opcode)
 	register_address = 0;
       
     }
+  else {
+     if(cpu->base_isa() == _14BIT_PROCESSOR_)
+       register_address |= 0x80;  // The destination register is the TRIS
+  }
   sprintf(name_str,"%s","tris");
 }
 
