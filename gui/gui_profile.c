@@ -109,7 +109,7 @@ static menu_item range_menu_items[] = {
     {"Remove range", MENU_REMOVE_GROUP},
     {"Add range...", MENU_ADD_GROUP},
     {"Add all labels", MENU_ADD_ALL_LABELS},
-    {"Add C functions (non-matching _<hexval>_DS_)", MENU_ADD_FUNCTION_LABELS},
+    {"Add C functions (bad hack (labels not containing \"_DS_\"))", MENU_ADD_FUNCTION_LABELS},
     {"Snapshot to plot", MENU_PLOT},
 };
 
@@ -2331,7 +2331,7 @@ BuildProfileWindow(Profile_Window *pw)
 
   gtk_widget_show(scrolled_window);
 
-  label=gtk_label_new("Exe time stats");
+  label=gtk_label_new("Routine profile");
   gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
   ///////////////////////////////////////////////////
 

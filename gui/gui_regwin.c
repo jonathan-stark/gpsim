@@ -99,18 +99,18 @@ static int dlg_x=200, dlg_y=200;
 // Used only in popup menus
 Register_Window *popup_rw;
 
+
+// get_value
 static void a_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=TRUE;
     gtk_main_quit();
 }
-
 static void b_cb(GtkWidget *w, gpointer user_data)
 {
     *(int*)user_data=FALSE;
     gtk_main_quit();
 }
-
 // used for reading a value from user when break on value is requested
 int gui_get_value(char *prompt)
 {
@@ -194,6 +194,126 @@ int gui_get_value(char *prompt)
     return -1;
 }
 
+// used for reading a value from user when break on value is requested
+void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
+{
+    static GtkWidget *dialog=NULL;
+    GtkWidget *button;
+    GtkWidget *hbox1, *hbox2;
+    static GtkWidget *label1, *label2, *label;
+    static GtkWidget *entry1, *entry2;
+
+    int value;
+    
+    int retval;
+
+    if(dialog==NULL)
+    {
+	dialog = gtk_dialog_new();
+	gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
+//	gtk_signal_connect(GTK_OBJECT(dialog),
+//			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+
+	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
+	gtk_widget_show(label);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), label,FALSE,FALSE,20);
+	
+	button = gtk_button_new_with_label("OK");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
+	
+	button = gtk_button_new_with_label("Cancel");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
+
+        // Value 1
+	hbox1 = gtk_hbox_new(0,0);
+	gtk_widget_show(hbox1);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox1,FALSE,FALSE,20);
+
+	label1=gtk_label_new(prompt1);
+	gtk_widget_show(label1);
+	gtk_box_pack_start(GTK_BOX(hbox1), label1,
+			   FALSE,FALSE, 20);
+
+	entry1=gtk_entry_new();
+	gtk_widget_show(entry1);
+	gtk_box_pack_start(GTK_BOX(hbox1), entry1,FALSE,FALSE,20);
+
+        // Value 2
+	hbox2 = gtk_hbox_new(0,0);
+	gtk_widget_show(hbox2);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox2,FALSE,FALSE,20);
+
+	label2=gtk_label_new(prompt2);
+	gtk_widget_show(label2);
+	gtk_box_pack_start(GTK_BOX(hbox2), label2,
+			   FALSE,FALSE, 20);
+
+	entry2=gtk_entry_new();
+	gtk_widget_show(entry2);
+	gtk_box_pack_start(GTK_BOX(hbox2), entry2,FALSE,FALSE,20);
+
+    }
+    else
+    {
+	gtk_label_set_text(GTK_LABEL(label1),prompt1);
+	gtk_label_set_text(GTK_LABEL(label2),prompt2);
+    }
+    
+//    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+    gtk_widget_show_now(dialog);
+
+    gtk_grab_add(dialog);
+    gtk_main();
+    gtk_grab_remove(dialog);
+    
+    gtk_widget_hide(dialog);
+
+    if(retval)
+    {
+	// "Ok"
+
+	char *end;
+	gchar *entry_text;
+
+	entry_text = gtk_entry_get_text(GTK_ENTRY(entry1));
+	value = strtoul(entry_text,&end,0);
+	if(*entry_text=='\0' || *end!='\0')
+	{
+	    *value1=-1;
+            *value2=-1;
+	    return;
+	}
+        *value1=value;
+
+	entry_text = gtk_entry_get_text(GTK_ENTRY(entry2));
+	value = strtoul(entry_text,&end,0);
+	if(*entry_text=='\0' || *end!='\0')
+	{
+	    *value1=-1;
+            *value2=-1;
+	    return;
+	}
+        *value2=value;
+        return;
+    }
+
+    // "Cancel"
+
+    *value1=-1;
+    *value2=-1;
+    return;
+}
+
 
 static char *file_selection_name;
 
@@ -260,7 +380,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     unsigned int pic_id;
     GtkSheetRange range;
     unsigned int address;
-    int value;
+    int value, mask;
     char *filename;
 
     if(widget==NULL || data==NULL)
@@ -355,25 +475,27 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    }
         break;
     case MENU_LOG_READ_VALUE:
-	value = gui_get_value("value that the read must match for logging it:");
+	gui_get_2values("Value that the read must match for logging it:", &value,
+			"Bitmask that specifies the bits to bother about:", &mask);
 	if(value<0)
 	    break; // Cancel
 	for(j=range.row0;j<=range.rowi;j++)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
 		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, 0xff);
+		gpsim_reg_set_read_value_logging(pic_id, popup_rw->type, address, value, mask);
 	    }
         break;
     case MENU_LOG_WRITE_VALUE:
-	value = gui_get_value("value that the write must match for logging it:");
+	gui_get_2values("Value that the write must match for logging it:", &value,
+			"Bitmask that specifies the bits to bother about:", &mask);
 	if(value<0)
 	    break; // Cancel
 	for(j=range.row0;j<=range.rowi;j++)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
 		address=popup_rw->row_to_address[j]+i;
-		gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, 0xff);
+		gpsim_reg_set_write_value_logging(pic_id, popup_rw->type, address, value, mask);
 	    }
         break;
     default:
