@@ -52,7 +52,13 @@ string gpsimObject::showType()
     name++;
   }
 #elif defined _MSC_VER
-  #pragma message("--->You might want to clean up the result of typeid() here...")
+  /*
+  From Visual C++ on line documentation
+  The type_info::name member function returns a const char* to
+  a null-terminated string representing the human-readable name
+  of the type. The memory pointed to is cached and should never
+  be directly deallocated.
+  */
 #else
   #warning --->You might want to clean up the result of typeid() here...
 #endif
