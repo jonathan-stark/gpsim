@@ -1868,6 +1868,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 
   unsigned int nRegs;
   nRegs = (rma->get_size() < MAX_REGISTERS) ? (rma->get_size()) : MAX_REGISTERS;
+      cout<<"number of registers 0x" << hex << MAX_REGISTERS << endl;
 
   for(reg_number=0;reg_number<nRegs;reg_number++) {
     i=reg_number%REGISTERS_PER_ROW;

@@ -1,3 +1,13 @@
+2004-09-24 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: save_state() was skipping address 0.
+	* src/registers.cc: Bit string encoding has been enhanced
+	
+2004-09-15 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.h, gui/gui_regwin.cc: max allowable registers
+	is 64k (used to be 4k)
+	* gui/gui_src_asm.cc: improperly initialized instructions were
+	causing a core dump.
+
 2004-09-19 Borut Razem <borut.razem@siol.net>
 	* configure.in: gpsim is configured to link with GTK+ 2.x by default.
 	  Use --enable-gtk1 for linking with GTK+ 1.x (deprecated).
