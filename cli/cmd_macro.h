@@ -29,7 +29,7 @@ typedef list<string> StringList_t;
 
 class Macro :public gpsimObject {
 public:
-  Macro(char *new_name);
+  Macro(const char *new_name);
   StringList_t arguments;     // declared when macro is defined
   StringList_t body;          // what the macro contains.
   StringList_t parameters;    // passed to macro during invocation
@@ -38,9 +38,9 @@ public:
   void prepareForInvocation();
   int substituteParameter(const string &s,string &replaced);
   int nParameters();
-  void add_argument(char *new_arg);
-  void add_parameter(char *s);
-  void add_body(char *new_line);
+  void add_argument(const char *new_arg);
+  void add_parameter(const char *s);
+  void add_body(const char *new_line);
   void print(void);
 };
 
@@ -51,10 +51,10 @@ public:
 
   cmd_macro(void);
   void list(void);
-  void define(char *name);
-  void add_parameter(char *parameter);
-  void add_body(char *line);
-  void end_define(char *opt_name=0);
+  void define(const char *name);
+  void add_parameter(const char *parameter);
+  void add_body(const char *line);
+  void end_define(const char *opt_name=0);
 
   virtual int is_repeatable(void) { return 1; };
 };

@@ -33,16 +33,11 @@ public:
   void list(void);
 
   void set_break(cmd_options *co, ExprList_t *el=0);
-  void set_break(cmd_options *co, char *sym);
 private:
   
   void set_break(int bit_flag);
   void set_break(int bit_flag,guint64 value);
   void set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
-  //void set_break(int bit_flag,char *sym);
-  void set_break(int bit_flag,char *sym, int value,int mask);
-   
-
 };
 
 extern cmd_break c_break;

@@ -31,7 +31,7 @@ public:
 
   void processor(int bit_flag);
 
-  void processor(char *proc, char *name);
+  void processor(const char *proc, const char *name);
 
 
 };

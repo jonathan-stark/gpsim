@@ -254,7 +254,7 @@ void command::evaluate(ExprList_t *eList,
 //========================================================================
 // Command options
 
-cmd_options_str::cmd_options_str(char *new_val)
+cmd_options_str::cmd_options_str(const char *new_val)
 {
   if(new_val)
     str = strdup(new_val);

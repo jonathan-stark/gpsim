@@ -566,20 +566,20 @@ public:
 
   // The processor name (plus upto three aliases).
   #define nProcessorNames 4
-  char *names[nProcessorNames];
+  const char *names[nProcessorNames];
 
 
   //------------------------------------------------------------
   // contructor -- 
   //
   ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
-			 char *name1, 
-			 char *name2, 
-			 char *name3=0,
-			 char *name4=0);
+			 const char *name1, 
+			 const char *name2, 
+			 const char *name3=0,
+			 const char *name4=0);
 
 
-  ProcessorConstructor * find(char *name);
+  ProcessorConstructor * find(const char *name);
   void dump(void);
 
 

@@ -30,7 +30,7 @@ public:
   cmd_help(void);
 
   void help(void);
-  void help(char *cmd);
+  void help(const char *cmd);
   void help(Value *);
 
   virtual int is_repeatable(void) { return 1; };

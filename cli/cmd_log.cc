@@ -79,7 +79,7 @@ void cmd_log::log(void)
 
 
 
-void cmd_log::log(cmd_options *opt, char *str, ExprList_t *eList)
+void cmd_log::log(cmd_options *opt, const char *str, ExprList_t *eList)
 {
 
   if (!opt) {
@@ -129,7 +129,7 @@ void cmd_log::log(cmd_options *opt)
 
 }
 
-void cmd_log::log(cmd_options *opt, char *str, guint64 val, guint64 mask)
+void cmd_log::log(cmd_options *opt, const char *str, guint64 val, guint64 mask)
 {
 
   //int sym_value;

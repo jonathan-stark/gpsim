@@ -1808,11 +1808,11 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
 
 list <ProcessorConstructor *> *ProcessorConstructor::processor_list;
 
-ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
-			 char *name1, 
-			 char *name2, 
-			 char *name3,
-			 char *name4) 
+ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void),
+					   const char *name1, 
+					   const char *name2, 
+					   const char *name3,
+					   const char *name4) 
 {
   if (processor_list == 0)
     processor_list = new list <ProcessorConstructor *>;
@@ -1835,7 +1835,7 @@ ProcessorConstructor::ProcessorConstructor(  Processor * (*_cpu_constructor) (vo
 //         the one matching 'name'.
 
 
-ProcessorConstructor *ProcessorConstructor::find(char *name)
+ProcessorConstructor *ProcessorConstructor::find(const char *name)
 {
 
 

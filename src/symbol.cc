@@ -457,7 +457,7 @@ void register_symbol::set(Value *v)
   }
 }
 
-void register_symbol::set(char *buffer, int buf_size)
+void register_symbol::set(const char *buffer, int buf_size)
 {
   if(buffer) {
 
@@ -598,7 +598,7 @@ void attribute_symbol::set(Value *v)
   if(attribute)
     attribute->set(v);
 }
-void attribute_symbol::set(char *cp,int len)
+void attribute_symbol::set(const char *cp,int len)
 {
   if(attribute)
     attribute->set(cp,len);

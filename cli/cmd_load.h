@@ -26,9 +26,7 @@ class cmd_load : public command
 public:
 
   cmd_load(void);
-  void load(void) { cout << "load command\n";};
-
-  void load(int bit_flag,char *filename);
+  void load(int bit_flag,const char *filename);
 };
 
 extern cmd_load c_load;

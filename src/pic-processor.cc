@@ -209,7 +209,7 @@ void display_available_processors(void)
 }
 
 //-------------------------------------------------------------------
-Processor * add_processor(char * processor_type, char * processor_new_name)
+Processor * add_processor(const char * processor_type, const char * processor_new_name)
 {
   if(verbose)
     cout << "Trying to add new processor '" << processor_type << "' named '" 

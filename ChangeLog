@@ -1,3 +1,21 @@
+2004-11-30 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.cc, cli/cmd_break.h, cli/cmd_help.cc, cli/cmd_help.h,
+	cli/cmd_load.cc, cli/cmd_load.h, cli/cmd_log.cc, cli/cmd_log.h,
+	cli/cmd_macro.cc,, cli/cmd_macro.h, cli/cmd_module.cc, cli/cmd_module.h,
+	cli/cmd_processor.cc,, cli/cmd_processor.h, cli/cmd_symbol.cc,
+	cli/cmd_symbol.h, cli/command.cc, cli/misc.h, cli/parse.yy, cli/scan.ll:
+	Changed the parser token STRING to LITERAL_STRING_T. The reason for
+	this is to allow string type attributes to be treated like numeric 
+	attributes.
+	* src/pic-processor.cc, src/pic-processor.h, src/processor.cc,
+	src/processor.h, src/symbol.cc, src/symbol.h, src/value.cc,
+	src/value.h:
+	- Enhanced the 'String' class so that 1) it uses char * instead
+	of STL string (yes this IS an enhancement) 2) the set() and get()
+	methods can read and write to the String class.
+	- Changed many instances of 'char *' to 'const char *'.
+
+
 2004-11-29 Scott Dattalo <scott@dattalo.com>
 	* src/pic-processor.cc, src/processor.cc, src/processor.h,
 	src/trace.cc, src/value.cc, src/value.h: Change Integer,

@@ -72,7 +72,7 @@ cmd_load::cmd_load(void)
 int parse_string(char *cmd_string);
 extern void process_command_file(const char * file_name);
 
-void cmd_load::load(int bit_flag,char *filename)
+void cmd_load::load(int bit_flag,const char *filename)
 {
   switch(bit_flag)
     {
