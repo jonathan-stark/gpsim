@@ -187,6 +187,7 @@ public:
   char *log_filename;
   FILE *log_file;
   pic_processor *cpu;
+  unsigned int last_trace_index;
 
   TraceLog(void);
   ~TraceLog(void);
@@ -199,5 +200,7 @@ public:
   void close_logfile(void);
 
 };
+
+extern TraceLog trace_log;
 
 #endif
