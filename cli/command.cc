@@ -46,6 +46,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_reset.h"
 #include "cmd_run.h"
 #include "cmd_set.h"
+#include "cmd_shell.h"
 #include "cmd_step.h"
 #include "cmd_stimulus.h"
 #include "cmd_symbol.h"
@@ -63,6 +64,7 @@ int quit_gpsim = 0;
 
 command *command_list[] =
 {
+  &c_shell,
   &attach,
   &c_break,
   //  &c_bus,

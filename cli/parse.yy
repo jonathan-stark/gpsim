@@ -53,6 +53,7 @@ using namespace std;
 #include "cmd_run.h"
 #include "cmd_set.h"
 #include "cmd_step.h"
+#include "cmd_shell.h"
 #include "cmd_stimulus.h"
 #include "cmd_symbol.h"
 #include "cmd_trace.h"
@@ -153,6 +154,7 @@ void yyerror(char *message)
 %token   RESET
 %token   RUN
 %token   SET
+%token <String_P>  SHELL 
 %token   STEP
 %token   STIMULUS
 %token   SYMBOL
@@ -302,6 +304,7 @@ cmd:
      | run_cmd
      | set_cmd
      | step_cmd
+     | shell_cmd
      | stimulus_cmd
      | symbol_cmd
      | trace_cmd
@@ -344,10 +347,10 @@ opt_comment
 aborting: ABORT
           {
        	  abort_gpsim = 1;
-	  quit_parse = 1;
-	  YYABORT;
-	  }
-	  ;
+          quit_parse = 1;
+          YYABORT;
+          }
+          ;
             
 attach_cmd
           : ATTACH string_list          {attach.attach($2); delete $2;}
@@ -402,15 +405,15 @@ list_cmd
 
 load_cmd: LOAD bit_flag LITERAL_STRING_T
           {
-	    c_load.load($2->value,$3->getVal());
+            c_load.load($2->value,$3->getVal());
             free($3);
 
-	    if(quit_parse)
-	      {
-		quit_parse = 0;
-		YYABORT;
-	      }
-	  }
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+	        }
           ;
 
 log_cmd
@@ -488,24 +491,28 @@ step_cmd
           | STEP bit_flag               {step.over();}
           ;
 
+shell_cmd
+          : SHELL                       {c_shell.shell($1); delete $1;}
+          ;
+
 stimulus_cmd: STIMULUS
           {
-	    c_stimulus.stimulus();
-	  }
+          c_stimulus.stimulus();
+          }
           | STIMULUS cmd_subtype
           {
-	    c_stimulus.stimulus($2->value);
-	  }
+          c_stimulus.stimulus($2->value);
+          }
           | stimulus_cmd stimulus_opt
           {
-	    /* do nothing */
-	  }
+          /* do nothing */
+          }
           | stimulus_cmd  END_OF_COMMAND
           { 
             if(verbose)
-	      cout << " end of stimulus command\n";
-	    c_stimulus.end();
-	  }
+              cout << " end of stimulus command\n";
+            c_stimulus.end();
+          }
           ;
 
 stimulus_opt: 
@@ -787,6 +794,7 @@ void initialize_commands(void)
   version.token_value = gpsim_VERSION;
   c_x.token_value = X;
   c_icd.token_value = ICD;
+  c_shell.token_value = SHELL;
 
   initialized = 1;
 

@@ -70,6 +70,7 @@ static int process_booleanLiteral(bool value);
 static int process_macroBody(const char *text);
 static int process_floatLiteral(char *buffer);
 static int process_stringLiteral(const char *buffer);
+static int process_shellLine(const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
 
@@ -101,6 +102,10 @@ HEX2    ("$"[0-9a-fA-F]+)
 FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
+SHELLCHAR (!)
+SHELLLINE	({SHELLCHAR}.*)
+QUOTEDTOKEN (\".*\")
+
 
 %{
 /* Lexer States */
@@ -133,11 +138,11 @@ BIN2    ([bB]\'[01]+\')
 
       input_mode = 0;  // assume that this is not a multi-line command.
       if(cmd && cmd->can_span_lines() && have_parameters && !end_of_command ) 
-	{
+        {
           input_mode = CONTINUING_LINE;
         }
       else
-	return recognize(EOLN_T, " end of line");
+        return recognize(EOLN_T, " end of line");
     }
 
 q{S}+\n { /* short cut for quiting */ 
@@ -180,6 +185,8 @@ abort_gpsim_now {
 {FLOAT}             {return process_floatLiteral(yytext);}
 "true"              {return(process_booleanLiteral(true));}
 "false"             {return(process_booleanLiteral(false));}
+
+{SHELLLINE}         {return(process_shellLine(&yytext[1]));}
 
 
 %{
@@ -399,7 +406,7 @@ int handle_identifier(const string &s, cmd_options **op )
     string replaced;
     if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
       if(replaced != s)
-	return handle_identifier(  replaced, op);
+        return handle_identifier(  replaced, op);
 
   } else {
 
@@ -407,10 +414,10 @@ int handle_identifier(const string &s, cmd_options **op )
     string replaced;
     if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
       if(replaced != s) {
-	//yy_delete_buffer(yy_scan_string(replaced.c_str()));
-	push_input_stack();
-	yy_scan_string(replaced.c_str());
-	return 0;
+        //yy_delete_buffer(yy_scan_string(replaced.c_str()));
+        push_input_stack();
+        yy_scan_string(replaced.c_str());
+        return 0;
       }
     // We already have the command, so search the options. 
 
@@ -551,6 +558,15 @@ static int process_stringLiteral(const char *buffer)
 {
   yylval.String_P = new String(buffer);
   return(recognize(LITERAL_STRING_T, "string literal"));
+}
+
+/*****************************************************************
+ *
+ */
+static int process_shellLine(const char *buffer)
+{
+  yylval.String_P = new String(buffer);
+  return(recognize(SHELL, "shell line"));
 }
 
 

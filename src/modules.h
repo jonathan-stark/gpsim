@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
-
+#include "../cli/cmd_gpsim.h"
 
 class Module;
 class Module_Types;
@@ -89,7 +89,11 @@ public:
     return _handle;
   }
 
+  ICommandHandler *GetCli();
+
 };
+
+ICommandHandler * module_get_command_handler(const char *name);
 
 extern list <Module_Library *> module_list;
 
