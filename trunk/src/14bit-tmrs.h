@@ -275,7 +275,9 @@ enum
     TXIF    = 1<<4,
     RCIF    = 1<<5,
     ADIF    = 1<<6,     // 18cxxx
-    PSPIF   = 1<<7
+    CMIF    = 1<<6,     // 16f62x
+    PSPIF   = 1<<7,
+    EEIF    = 1<<7      // 16f62x
 };
 
 //  int VALID_BITS;
@@ -316,9 +318,19 @@ enum
       put(get() | ADIF);
     }
 
+  inline void set_cmif(void)
+    {
+      put(get() | CMIF);
+    }
+
   inline void set_pspif(void)
     {
       put(get() | PSPIF);
+    }
+
+  inline void set_eeif(void)
+    {
+      put(get() | EEIF);
     }
 
  unsigned int get_txif(void)

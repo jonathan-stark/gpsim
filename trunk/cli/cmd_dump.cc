@@ -109,10 +109,10 @@ void cmd_dump::dump_sfrs(void)
 
 void cmd_dump::dump(int mem_type)
 {
-  unsigned int i, j, reg_num,mem_size;
+  unsigned int i, j, reg_num,mem_size=0;
   unsigned int v;
   unsigned int previous_row_is_invalid, all_invalid;
-  file_register **fr;
+  file_register **fr=NULL;
 
   if(!have_cpu(1))
     return;
@@ -121,9 +121,11 @@ void cmd_dump::dump(int mem_type)
   switch(mem_type)
     {
     case DUMP_EEPROM:
-      mem_size = cpu->eeprom_get_size();
-      if(mem_size)
-	fr = cpu14->eeprom.rom;
+      if(cpu->eeprom) {
+	fr = cpu->eeprom->rom;
+	mem_size = cpu->eeprom->rom_size;
+      } else
+	return;
       break;
     case DUMP_RAM:
       mem_size = cpu->register_memory_size();

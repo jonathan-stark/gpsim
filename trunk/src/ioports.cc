@@ -855,7 +855,19 @@ void PORTA_62x::put(unsigned int new_value)
   // update only those bits that are really outputs
   //cout << "IOPORT::put trying to put " << new_value << '\n';
 
-  value = (new_value & ~tris->value) | (value & tris->value);
+  // Bit 4 is an open collector output (it can only drive low)
+  // If we're trying to drive bit 4 high and bit 4 is an output
+  // then don't change the value on the I/O pin in the same state.
+  // Also, bit 5 is an input regardless of the TRIS setting
+
+  pin_value = value = (((new_value & 0xcf) | (new_value & value & 0x10)) & ~tris->value) 
+    | (value & (tris->value | 0x20));
+
+
+  // FIXME - this is obviously wrong
+  if(comparator && comparator->enabled()) 
+    value &= (0xff & ~( AN0 | AN1 | AN2 | AN3));
+
 
   //cout << " IOPORT::put just set port value to " << value << '\n';
 

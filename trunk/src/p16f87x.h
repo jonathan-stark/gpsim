@@ -42,11 +42,13 @@ class P16F873 : public P16C73
   void create(void);
   virtual unsigned int register_memory_size () const { return 0x200;};
 
+#if 0
   virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
   virtual unsigned int eeprom_get_value(unsigned int address) ;
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address);
   virtual file_register *eeprom_get_register(unsigned int address);
+#endif
 
   P16F873(void);
   static pic_processor *construct(void);
@@ -69,12 +71,13 @@ class P16F874 : public P16C74
   void create_sfr_map(void);
   void create(void);
   virtual unsigned int register_memory_size () const { return 0x200;};
-
+#if 0
   virtual unsigned int eeprom_get_size(void) {return eeprom_size;};
   virtual unsigned int eeprom_get_value(unsigned int address) ;
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address);
   virtual file_register *eeprom_get_register(unsigned int address);
+#endif
 
   P16F874(void);
   static pic_processor *construct(void);

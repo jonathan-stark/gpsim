@@ -64,6 +64,7 @@ void P16F62x::create_iopin_map(void)
   // Build the links between the I/O Ports and their tris registers.
   porta->tris = &trisa;
   trisa.port = porta;
+  trisa.valid_iopins = 0xdf;  // Bit 5 is an input only and always reads 0
 
   portb->tris = &trisb;
   trisb.port = portb;
@@ -128,10 +129,10 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(portb,   0x106);
   add_sfr_register(&trisb,  0x186, 0xff);
 
-  add_sfr_register(&eedata,  0x9a);
-  add_sfr_register(&eeadr,   0x9b);
-  add_sfr_register(&eecon1,  0x9c, 0);
-  add_sfr_register(&eecon2,  0x9d);
+  add_sfr_register(&(eeprom->eedata),  0x9a);
+  add_sfr_register(&(eeprom->eeadr),   0x9b);
+  add_sfr_register(&(eeprom->eecon1),  0x9c, 0);
+  add_sfr_register(&(eeprom->eecon2),  0x9d);
 
   add_sfr_register(&pclath, 0x18a, 0);
   add_sfr_register(&pclath, 0x10a, 0);
@@ -160,7 +161,8 @@ void P16F62x::create_sfr_map(void)
   // Link the comparator and porta
   ((PORTA_62x*)porta)->comparator = &comparator;
 
-
+  pir1.valid_bits = pir1.TMR1IF | pir1.TMR2IF | pir1.CCP1IF | pir1.TXIF 
+    | pir1.RCIF | pir1.CMIF | pir1.EEIF;
 }
 
 void P16F62x::create_symbols(void)
@@ -176,12 +178,12 @@ void P16F62x::create_symbols(void)
 void P16F62x::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + EEPROM_SIZE))
+  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
     {
-      eeprom.rom[address - 0x2100]->value = value;
+      eeprom->rom[address - 0x2100]->value = value;
     }
 }
-
+#if 0
 unsigned int P16F62x::eeprom_get_value(unsigned int address)
 {
 
@@ -205,12 +207,18 @@ void  P16F62x::eeprom_put_value(unsigned int value,
     eeprom.rom[address]->put_value(value);
 
 }
+#endif
 
 void  P16F62x::create(int ram_top)
 {
   create_iopin_map();
 
   _14bit_processor::create();
+
+  eeprom = new EEPROM_62x;
+  eeprom->cpu = this;
+  eeprom->initialize(128);
+  ((EEPROM_62x *)eeprom)->pir1 = &pir1;
 
   P16X6X_processor::create_sfr_map();
 
@@ -220,8 +228,6 @@ void  P16F62x::create(int ram_top)
 
   P16F62x::create_sfr_map();
 
-  eeprom.cpu = this;
-  eeprom.initialize(128,&eecon1, &eecon2, &eedata, &eeadr);
 }
 
 //========================================================================

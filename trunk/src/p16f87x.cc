@@ -37,7 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 
-
+#if 0
 unsigned int P16F873::eeprom_get_value(unsigned int address)
 {
 
@@ -62,12 +62,14 @@ void  P16F873::eeprom_put_value(unsigned int value,
 
 }
 
+#endif
+
 void P16F873::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + eeprom_get_size()))
+  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
     {
-      eeprom.rom[address - 0x2100]->value = value;
+      eeprom->rom[address - 0x2100]->value = value;
     }
 }
 
@@ -77,15 +79,15 @@ void P16F873::create_sfr_map(void)
   if(verbose)
     cout << "creating f873 registers \n";
 
-  add_sfr_register(&eedata,  0x10c);
-  add_sfr_register(&eecon1,  0x18c, 0);
-  eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
+  add_sfr_register(&(eeprom->eedata),  0x10c);
+  add_sfr_register(&(eeprom->eecon1),  0x18c, 0);
+  eeprom->eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
 
-  add_sfr_register(&eeadr,   0x10d);
-  add_sfr_register(&eecon2,  0x18d);
+  add_sfr_register(&(eeprom->eeadr),   0x10d);
+  add_sfr_register(&(eeprom->eecon2),  0x18d);
 
-  add_sfr_register(&eedatah, 0x10e);
-  add_sfr_register(&eeadrh,  0x10f);
+  add_sfr_register(&(((EEPROM_87x *)eeprom)->eedatah), 0x10e);
+  add_sfr_register(&(((EEPROM_87x *)eeprom)->eeadrh),  0x10f);
 
   add_sfr_register(&adresl,  0x9e, 0);
 
@@ -166,13 +168,12 @@ pic_processor * P16F873::construct(void)
   if(verbose)
     cout << " f873 construct\n";
 
+  p->eeprom = new EEPROM_87x;
+  p->eeprom->cpu = p;
+  p->eeprom->initialize(128);
+
   p->create();
   p->create_invalid_registers ();
-  p->eeprom.cpu = p;
-  p->eeprom.initialize(128,
-		    &p->eecon1, &p->eecon2, 
-		    &p->eedata, &p->eeadr,
-		    &p->eedatah, &p->eeadrh);
 
   p->pic_processor::create_symbols();
 
@@ -199,7 +200,7 @@ P16F873::P16F873(void)
 
 //-------------------------------------------------------
 
-
+#if 0
 unsigned int P16F874::eeprom_get_value(unsigned int address)
 {
 
@@ -223,13 +224,14 @@ void  P16F874::eeprom_put_value(unsigned int value,
     eeprom.rom[address]->put_value(value);
 
 }
+#endif
 
 void P16F874::set_out_of_range_pm(int address, int value)
 {
 
-  if( (address>= 0x2100) && (address < 0x2100 + eeprom_get_size()))
+  if( (address>= 0x2100) && (address < 0x2100 + eeprom->rom_size))
     {
-      eeprom.rom[address - 0x2100]->value = value;
+      eeprom->rom[address - 0x2100]->value = value;
     }
 }
 
@@ -239,15 +241,15 @@ void P16F874::create_sfr_map(void)
   if(verbose)
     cout << "creating f874 registers \n";
 
-  add_sfr_register(&eedata,  0x10c);
-  add_sfr_register(&eecon1,  0x18c, 0);
-  eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
+  add_sfr_register(&(eeprom->eedata),  0x10c);
+  add_sfr_register(&(eeprom->eecon1),  0x18c, 0);
+  eeprom->eecon1.valid_bits |= EECON1::EEPGD;  // Enable program memory reads and writes.
 
-  add_sfr_register(&eeadr,   0x10d);
-  add_sfr_register(&eecon2,  0x18d);
+  add_sfr_register(&(eeprom->eeadr),   0x10d);
+  add_sfr_register(&(eeprom->eecon2),  0x18d);
 
-  add_sfr_register(&eedatah, 0x10e);
-  add_sfr_register(&eeadrh,  0x10f);
+  add_sfr_register(&(((EEPROM_87x *)eeprom)->eedatah), 0x10e);
+  add_sfr_register(&(((EEPROM_87x *)eeprom)->eeadrh),  0x10f);
 
   add_sfr_register(&adresl,  0x9e, 0);
 
@@ -328,13 +330,12 @@ pic_processor * P16F874::construct(void)
   if(verbose)
     cout << " f874 construct\n";
 
+  p->eeprom = new EEPROM_87x;
+  p->eeprom->cpu = p;
+  p->eeprom->initialize(128);
+
   p->create();
   p->create_invalid_registers ();
-  p->eeprom.cpu = p;
-  p->eeprom.initialize(128,
-		    &p->eecon1, &p->eecon2, 
-		    &p->eedata, &p->eeadr,
-		    &p->eedatah, &p->eeadrh);
 
   p->pic_processor::create_symbols();
 
@@ -399,12 +400,11 @@ pic_processor * P16F877::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->eeprom.cpu = p;
-  p->eeprom.initialize(256,
-		    &p->eecon1, &p->eecon2, 
-		    &p->eedata, &p->eeadr,
-		    &p->eedatah, &p->eeadrh);
 
+  p->eeprom = new EEPROM_87x;
+
+  p->eeprom->cpu = p;
+  p->eeprom->initialize(128);
 
   p->pic_processor::create_symbols();
 

@@ -52,6 +52,7 @@ class Stimulus_Node;
 
 class IOPORT_TRIS;
 class USART_MODULE;
+class EEPROM;
 
 class Module;
 class Module_Types;

@@ -182,7 +182,9 @@ P12C508::P12C508(void)
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
 
-  config_modes.valid_bits = CM_FOSC0 | CM_FOSC1 | CM_FOSC1x | CM_WDTE | CM_MCLRE;
+  if(config_modes)
+    config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
+      config_modes->CM_FOSC1x | config_modes->CM_WDTE | config_modes->CM_MCLRE;
 }
 
 
