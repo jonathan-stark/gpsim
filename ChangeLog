@@ -1,3 +1,6 @@
+2004-06-30 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: small fix for MSVC compilation
+
 2004-06-28 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/misc.h, cli/cmd_symbol.cc, src/symbol.cc:
 	Removed 'NUMBER' and 'FLOATING_NUMBER' types from the CLI parser. Now
@@ -13,7 +16,6 @@
 	using module pixmaps.
 	* cli/cmd_module.cc, cli/cmd_module.h, cli/command.cc,
 	cli/parse.yy: cli module command now supports expressions.
-
 
 2004-06-27 Borut Razem <borut.razem@siol.net>
 	* gpsim.sln: set project dependency - modules depends on gpsim

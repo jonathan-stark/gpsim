@@ -30,7 +30,7 @@ EXPORTS
     ?find_free@BreakpointObject@@UAEHXZ
     ?get@IOPORT@@UAEIXZ
     ?get_active_cpu@@YAPAVProcessor@@XZ
-    ?get_attribute@Module@@UAEPAVAttribute@@PAD@Z
+    ?get_attribute@Module@@UAEPAVAttribute@@PAD_N@Z
     ?get_bit@IOPORT@@UAEHI@Z
     ?get_bit_voltage@IOPORT@@UAEHI@Z
     ?get_cycles@@YAAAVCycle_Counter@@XZ
