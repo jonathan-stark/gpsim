@@ -106,9 +106,9 @@ public:
     const virtual char *type(void) { return ("paraface"); };
     static ExternalModule *construct(char *new_name);
 
-#ifdef LINUX
+#ifdef linux
     int open_parallel_port(char *device="/dev/parport0");
-#endif // LINUX
+#endif // linux
 #ifdef __FreeBSD__
     int open_parallel_port(char *device="/dev/ppi0");
 #endif // __FreeBSD__
