@@ -95,19 +95,16 @@ void quit_gui(void)
 }
 
 /*------------------------------------------------------------------
- * gui_new_processor - Add a new processor to the register viewer
+ * gui_new_processor - Add a new processor 
  *
- * This routine adds another pic processor to the list of currently
+ * This routine adds another processor to the list of currently
  * simulated processors (as of 0.0.14 though, you're still limited
  * to a list of one). It then notifies each child window. Finally
  * a communication link between the gui and the simulator is established.
- * (This was a corba link, but now it consists of direct calls...)
  */
 
 void gui_new_processor (unsigned int pic_id)
 {
-
-  // printf("gui is adding a new processor\n");
 
   // Create an gui representation of the new processor
 
@@ -142,7 +139,7 @@ void gui_new_module (Module *module)
   // FIX ME - need to search for *p in the gp list...
   if(gp)
   {
-      BreadboardWindow_new_module((Breadboard_Window*)gp->breadboard_window, module);
+      BreadboardWindow_new_module(gp->breadboard_window, module);
   }
 }
 
@@ -442,7 +439,7 @@ int gui_init (int argc, char **argv)
   create_dispatcher();
 
   ram    = new  RAM_RegisterWindow(gp);
-  eeprom = new  EEPROM_RegisterWindow();
+  eeprom = new  EEPROM_RegisterWindow(gp);
   sbaw   = new  SourceBrowserAsm_Window();
   sbow   = new  SourceBrowserOpcode_Window();
   ww     = new  Watch_Window();
@@ -454,7 +451,7 @@ int gui_init (int argc, char **argv)
   pw     = new  Profile_Window();
 
   //  ram->Create(gp);
-  eeprom->Create(gp);
+  //  eeprom->Create(gp);
   sbaw->Create(gp);
   sbow->Create(gp);
   ww->Create(gp);

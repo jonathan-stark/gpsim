@@ -1864,7 +1864,13 @@ void Register_Window::Build(void)
   UpdateMenuItem();
 }
 
-int Register_Window::Create(GUI_Processor *_gp)
+Register_Window::Register_Window(void)
+{
+  printf("WARNING: calling default constructor: %s\n",__FUNCTION__);
+
+}
+
+Register_Window::Register_Window(GUI_Processor *_gp)
 {
   int i;
 
@@ -1885,29 +1891,16 @@ int Register_Window::Create(GUI_Processor *_gp)
   if(!get_config())
     printf("warning %s\n",__FUNCTION__);
 
-  if(enabled)
-      Build();
-
-  return 1;
 }
 
 
-RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp)
+RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp) :
+  Register_Window(_gp)
 {
   menu = "<main>/Windows/Ram";
   type = REGISTER_RAM;
 
   int i;
-
-  gp = _gp;
-  window = NULL;
-  wc = WC_data;
-  wt = WT_register_window;
-  is_built = 0;
-  enabled = 0;
-
-  registers_loaded=0;
-  processor=0;
 
   gp->regwin_ram = this;
       
@@ -1915,61 +1908,26 @@ RAM_RegisterWindow::RAM_RegisterWindow(GUI_Processor *_gp)
   // Add a status bar
   gp->status_bar= (StatusBar_Window *)malloc(sizeof(StatusBar_Window));
   gp->status_bar->created=0;
-  
-  
-  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
-  for(i=0;i<MAX_REGISTERS;i++)
-    registers[i]=NULL;
-
-  if(!get_config())
-    printf("warning %s\n",__FUNCTION__);
 
   if(enabled)
       Build();
-  printf(__FUNCTION__);
-
 }
 
 
 
 
-EEPROM_RegisterWindow::EEPROM_RegisterWindow(void)
+EEPROM_RegisterWindow::EEPROM_RegisterWindow(GUI_Processor *_gp) :
+  Register_Window(_gp)
 {
   menu = "<main>/Windows/EEPROM";
   type = REGISTER_EEPROM;
 
-}
-
-int EEPROM_RegisterWindow::Create(GUI_Processor *_gp)
-{
-  int i;
-
-  gp = _gp;
-  window = NULL;
-  wc = WC_data;
-  wt = WT_register_window;
-  is_built = 0;
-  enabled = 0;
-
-  registers_loaded=0;
-  processor=0;
-
   gp->regwin_eeprom = this;
   name = "register_viewer_eeprom";
   
-  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
-  for(i=0;i<MAX_REGISTERS;i++)
-    registers[i]=NULL;
-
-  if(!get_config())
-    printf("warning %s\n",__FUNCTION__);
-
   if(enabled)
       Build();
-
-  return 1;
 }
-
 
 
 #endif // HAVE_GUI
