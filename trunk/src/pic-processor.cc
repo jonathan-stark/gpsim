@@ -193,10 +193,10 @@ processor_types available_processors[] =
     P16C65::construct },
   {_P16C72_,
    "__16C72",   "pic16c72",   "p16c72",  "16c72",
-   pic_processor::construct },
+   P16C72::construct },
   {_P16C73_,
    "__16C73",   "pic16c73",   "p16c73",  "16c73",
-   pic_processor::construct },
+   P16C73::construct },
   {_P16C74_,
    "__16C74",   "pic16c74",   "p16c74",  "16c74",
    P16C74::construct },
@@ -1127,17 +1127,20 @@ void pic_processor::init_program_memory (unsigned int memory_size)
 
   if(verbose)
     cout << "Initializing program memory: 0x"<<memory_size<<" words\n";
-  pc.memory_size_mask = memory_size - 1;
-  if ((pc.memory_size_mask) & memory_size)
+
+  if ((memory_size-1) & memory_size)
     {
       cout << "*** WARNING *** memory_size should be of the form 2^N\n";
 
       memory_size = (memory_size + ~memory_size) & MAX_PROGRAM_MEMORY;
-      pc.memory_size_mask = memory_size - 1;
 
       cout << "gpsim is rounding up to memory_size = " << memory_size << '\n';
 
     }
+
+  // The memory_size_mask is used by the branching instructions 
+
+  pc.memory_size_mask = memory_size - 1;
 
   // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
   // pointers of type 'instruction'. This is where the simulated instructions

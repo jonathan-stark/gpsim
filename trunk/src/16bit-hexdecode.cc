@@ -41,36 +41,6 @@ Boston, MA 02111-1307, USA.  */
 #include "p12x.h"
 
 
-// This is a whole cleaner/simpler way to decode an instruction
-// set... This technique will eventually be used to decode
-// the other instruction sets (12 and 14-bit) (and the "don't
-// fix what ain't broken" rule will be violated in the 
-// process). In addition this will be used to dynamically
-// instantiate processors.
-//
-// The way it works is the 'instruction_constructor' structure
-// contains three pieces of info for each instruction:
-//   inst_mask - a bit mask indicating which bits uniquely
-//               identify an instruction
-//   opcode    - What those unique bits should be
-//   inst_constructor - A pointer to the static member function
-//                      'construct' in the instruction class.
-//
-// An instruction is decoded by finding a matching entry in
-// the instruction_constructor array. A match is defined to
-// be:
-//    inst_mask & passed_opcode == opcode
-// which means that the opcode that is passed to the decoder
-// is ANDed with the instruction mask bits and compared to
-// the base bits of the opcode. If this test passes, then the
-// 'inst_constructor' will be called.
-
-struct instruction_constructor {
-  unsigned int inst_mask;
-  unsigned int opcode;
-  instruction * (*inst_constructor) (pic_processor *cpu, unsigned int inst);
-};
-
 
 /* PIC 16-bit instruction set */
 

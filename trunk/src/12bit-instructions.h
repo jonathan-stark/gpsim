@@ -43,6 +43,8 @@ class ANDLW : public Literal_op
 public:
   ANDLW(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new ANDLW(new_cpu,new_opcode);}
 
 };
 
@@ -53,6 +55,8 @@ public:
 
   ANDWF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new ANDWF(new_cpu,new_opcode);}
 
 };
 
@@ -117,6 +121,9 @@ public:
   CALL(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   char *name(char *str);
+
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new CALL(new_cpu,new_opcode);}
 };
 
 //---------------------------------------------------------
@@ -138,6 +145,8 @@ public:
 
   CLRW(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new CLRW(new_cpu,new_opcode);}
 
 };
 
@@ -172,6 +181,8 @@ public:
 
   DECF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new DECF(new_cpu,new_opcode);}
 
 };
 
@@ -182,6 +193,8 @@ public:
 
   DECFSZ(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new DECFSZ(new_cpu,new_opcode);}
 
 };
 
@@ -194,6 +207,9 @@ public:
   GOTO(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   char *name(char *str);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new GOTO(new_cpu,new_opcode);}
+
 };
 
 //---------------------------------------------------------
@@ -203,6 +219,8 @@ public:
 
   INCF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new INCF(new_cpu,new_opcode);}
 
 };
 
@@ -213,6 +231,8 @@ public:
 
   INCFSZ(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new INCFSZ(new_cpu,new_opcode);}
 
 };
 
@@ -224,6 +244,8 @@ class IORLW : public Literal_op
 public:
   IORLW(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new IORLW(new_cpu,new_opcode);}
 
 };
 
@@ -234,6 +256,8 @@ public:
 
   IORWF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new IORWF(new_cpu,new_opcode);}
 
 };
 
@@ -245,6 +269,8 @@ public:
   MOVF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual void debug(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVF(new_cpu,new_opcode);}
 
 };
 
@@ -268,6 +294,9 @@ public:
   MOVWF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   char *name(char *str);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new MOVWF(new_cpu,new_opcode);}
+
 };
 
 //---------------------------------------------------------
@@ -289,6 +318,8 @@ public:
 
   OPTION(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new OPTION(new_cpu,new_opcode);}
 
 };
 
@@ -312,6 +343,8 @@ public:
 
   RLF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new RLF(new_cpu,new_opcode);}
 
 };
 
@@ -322,6 +355,8 @@ public:
 
   RRF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new RRF(new_cpu,new_opcode);}
 
 };
 
@@ -333,6 +368,8 @@ public:
 
   SLEEP(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new SLEEP(new_cpu,new_opcode);}
 
 };
 
@@ -343,6 +380,8 @@ public:
 
   SUBWF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new SUBWF(new_cpu,new_opcode);}
 
 };
 
@@ -370,6 +409,9 @@ public:
   TRIS(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   char *name(char *str);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new TRIS(new_cpu,new_opcode);}
+
 };
 
 //---------------------------------------------------------
@@ -381,6 +423,8 @@ public:
 
   XORLW(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new XORLW(new_cpu,new_opcode);}
 
 };
 
@@ -391,6 +435,8 @@ public:
 
   XORWF(pic_processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)
+    {return new XORWF(new_cpu,new_opcode);}
 
 };
 

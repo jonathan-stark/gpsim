@@ -1872,7 +1872,7 @@ void gpsim_register_gui_update(unsigned int interface_id,
 //--------------------------------------------------------------------------
 
 
-static void gui_update_callback  (gpointer *p)
+static void gui_update_callback  (gpointer p)
 {
   gpsimInterface *gpsiminterface = (gpsimInterface *)p;
   GSList *interface_list = gpsiminterface->interfaces;

@@ -489,7 +489,7 @@ void CALL::execute(void)
 
   cpu->stack->push(cpu->pc.get_next());
 
-  cpu->pc.jump(destination);
+  cpu->pc.jump(cpu->get_pclath_branching_jump() | destination);
 
 }
 
@@ -707,7 +707,7 @@ void GOTO::execute(void)
 {
   trace.instruction(opcode);
 
-  cpu->pc.jump(destination);
+  cpu->pc.jump(cpu->get_pclath_branching_jump() | destination);
 
 }
 

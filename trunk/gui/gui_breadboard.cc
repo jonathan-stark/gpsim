@@ -2378,7 +2378,7 @@ static void trace_all_foreach_function(GtkWidget *item, gpointer bbw_gpointer)
 
     node = (Stimulus_Node*)gtk_object_get_data(GTK_OBJECT(item), "snode");
 
-    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(bbw->node_tree), node->name());
+    struct gui_node * gn = (struct gui_node*) gtk_object_get_data(GTK_OBJECT(((Breadboard_Window*)bbw)->node_tree), node->name());
 
     trace_node(gn);
 }

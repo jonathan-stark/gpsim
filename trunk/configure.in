@@ -15,7 +15,7 @@ AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=20
-GPSIM_MICRO_VERSION=14
+GPSIM_MICRO_VERSION=15
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -97,7 +97,9 @@ if test "$use_gui" = "no"; then
 
 else
   dnl gtk checks
-  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
+  dnl note that the gtk12-config is the name of gtk-config on BSD
+  AC_PATH_PROG(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
+dnl  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, no, ${PATH})
 
   if test $GTKCONFIG = "no"; then
     AC_MSG_ERROR(Cannot find gtk-config)

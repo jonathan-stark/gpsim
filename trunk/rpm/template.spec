@@ -55,7 +55,7 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 ./libtool --finish $RPM_BUILD_ROOT/usr/lib
 
 %files
-%defattr(-, bin, bin)
-/usr/bin/gpsim
+%defattr(-, root, root)
+%{_bindir}/gpsim
 %doc AUTHORS COPYING ChangeLog INSTALL NEWS README 
 %doc doc/gpsim.lyx doc/gpsim.pdf
