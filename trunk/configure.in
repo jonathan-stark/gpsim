@@ -6,16 +6,16 @@ dnl option for setting exdbm path prefix
 dnl exdbm must be lowercase in --with option. sorry.
 dnl this check must be done very early otherwise internal
 dnl configure shell variables are set too late (CPPFLAGS)
-AC_ARG_WITH(exdbm,
-    [  --with-exdbm=PREFIX     where is exdbm installed],
-    [CPPFLAGS="$CPPFLAGS -I$with_exdbm/include"
-    LDFLAGS="$LDFLAGS -L$with_exdbm/lib"])
+dnl AC_ARG_WITH(exdbm,
+dnl    [  --with-exdbm=PREFIX     where is exdbm installed],
+dnl    [CPPFLAGS="$CPPFLAGS -I$with_exdbm/include"
+dnl     LDFLAGS="$LDFLAGS -L$with_exdbm/lib"])
 
 AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=20
-GPSIM_MICRO_VERSION=13
+GPSIM_MICRO_VERSION=14
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -120,17 +120,17 @@ else
   Y_CFLAGS=`$GTKEXTRACONFIG --cflags`
 
   dnl check that the eXdbm header can be found
-  AC_CHECK_HEADER(eXdbm/eXdbm.h,,[
-  AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
-  see ./configure --help for instructions])
-  ])
+  dnl AC_CHECK_HEADER(eXdbm/eXdbm.h,,[
+  dnl AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  dnl see ./configure --help for instructions])
+  dnl ])
 
   dnl check that the eXdbm library can be linked, and add the link command
   dnl to the LIBS variable.
-  AC_CHECK_LIB(eXdbm,eXdbmInit,,[
-  AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
-  see ./configure --help for instructions])
-  ],-lm)
+  dnl AC_CHECK_LIB(eXdbm,eXdbmInit,,[
+  dnl AC_MSG_ERROR([eXdbm is needed. please use --with-exdbm option.
+  dnl see ./configure --help for instructions])
+  dnl ],-lm)
 
 fi
 
@@ -176,7 +176,8 @@ AC_OUTPUT( src/Makefile cli/Makefile Makefile \
 	modules/Makefile \
 	examples/12bit/Makefile examples/14bit/Makefile examples/16bit/Makefile \
 	doc/Makefile \
-	rpm/Makefile )
+	rpm/Makefile \
+	eXdbm/Makefile )
 
 AC_MSG_RESULT([
 
