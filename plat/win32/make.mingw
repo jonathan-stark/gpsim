@@ -5,7 +5,7 @@
 # The makefile.mingw files in the source directories (or
 # subdirectories) all include this file right at the top after
 # defining some macros used here.
-
+DEBUG=1
 ifdef DEBUG
   ifndef OPTIMIZE
     OPTIMIZE = -O2 -g

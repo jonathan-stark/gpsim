@@ -2140,7 +2140,7 @@ void Register_Window::Build(void)
 
   gtk_widget_grab_default(location);
   
-
+  GTKwait();
   enabled=1;
   
   is_built=1;
@@ -2151,6 +2151,7 @@ void Register_Window::Build(void)
   NewProcessor(gp);
 
   UpdateMenuItem();
+  Dprintf((" regwin is built\n"));
 }
 
 //------------------------------------------------------------------------

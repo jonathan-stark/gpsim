@@ -1230,6 +1230,8 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
   gtk_sheet_thaw(GTK_SHEET(sheet));
 
+  GTKwait();
+
   if(!gp || !gp->cpu)
     return;
 
@@ -1315,6 +1317,8 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
 
   gtk_sheet_thaw(GTK_SHEET(sheet));
 
+  GTKwait();
+
   range.row0=range.rowi=0;
   range.col0=range.coli=0;
   gtk_sheet_select_range(GTK_SHEET(sheet),&range);
@@ -1345,16 +1349,11 @@ void SourceBrowserOpcode_Window::Build(void)
 
   gtk_window_set_title (GTK_WINDOW (window), "Program memory");
 
-
-
-
   notebook = gtk_notebook_new();
   gtk_widget_show(notebook);
 
   gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
 
-
-  
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
 
@@ -1564,7 +1563,7 @@ void SourceBrowserOpcode_Window::Build(void)
 
   is_built=1;
 
-
+  GTKwait();
   
   if(gp->cpu)
     NewProcessor(gp);

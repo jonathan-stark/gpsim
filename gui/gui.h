@@ -39,7 +39,13 @@ Boston, MA 02111-1307, USA.  */
 #include "settings.h"
 
 #define SBAW_NRFILES 20 // Max number of source files
-//#define MAX_BREAKPOINTS 32
+
+
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 
 //------------------------------------------------------------
 //

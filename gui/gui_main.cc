@@ -245,7 +245,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     gp->stopwatch_window->NewProcessor(gp);
     //gp->scope_window->NewProcessor(gp);
 
-
+    Dprintf((" New processor has been added"));
   }
 
 }

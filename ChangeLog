@@ -1,3 +1,11 @@
+2004-10-01 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/processor.h, gui/gui.h, gui/gui_regwin.c
+	gui/gui_asm.cc, gui/gui_src_opcode.c, plat/win32/make.mingw:
+	Stabilizing windows port. Apparently under windows there's a
+	problem if you issue too many gui calls to the GTK library. I
+	found that this can be mitigated by periodically clearing out
+	the gtk event queue.
+	
 2004-09-29 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, gui/gui_menu.cc, gui/gui_src_asm.cc, 
 	src/modules.h, src/modules.cc, src/processor.cc,

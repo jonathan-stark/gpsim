@@ -1288,12 +1288,12 @@ void ProgramMemoryAccess::init(Processor *new_cpu)
 
 
 }
-
+/*
 void ProgramMemoryAccess::name(string & new_name)
 {
   name_str = new_name;
 }
-
+*/
 void ProgramMemoryAccess::put(unsigned int address, instruction *new_instruction)
 {
 
