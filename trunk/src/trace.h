@@ -59,14 +59,24 @@ class Trace
 
 #define    TRACE_BUFFER_SIZE  (1<<12)
 #define    TRACE_BUFFER_MASK  (TRACE_BUFFER_SIZE-1)
+#define    TRACE_STRING_BUFFER 50
 
   unsigned int trace_buffer[TRACE_BUFFER_SIZE];
   unsigned int trace_index;
   unsigned int trace_flag;
 
+  // When interfaced with a gui, the contents of the trace
+  // buffer are decoded one line-at-a-time, copied to the string_buffer
+  // and sent to the gui via xref interface (actually, the gui
+  // is notified that new data is available in the string_buffer).
+  XrefObject *xref;
+  char  string_buffer[TRACE_STRING_BUFFER];
+  guint64 string_cycle;  // The cycle corresponding to the decoded string
+
   pic_processor *cpu;
 
   Trace (void);
+  ~Trace(void);
 
   inline void instruction (unsigned int opcode)
   {
@@ -181,9 +191,9 @@ class Trace
 
   void switch_cpus(pic_processor *new_cpu) {cpu = new_cpu;};
 
-  int  dump (unsigned int n=0);
+  int  dump (unsigned int n=0, FILE *out_stream=NULL);
   void dump_last_instruction(void);
-  int  dump1(unsigned int);
+  int  dump1(unsigned int,char *, int);
   int is_cycle_trace(unsigned int index);
   guint64 find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index);
 };

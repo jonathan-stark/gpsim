@@ -1042,10 +1042,11 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
   if(xref == NULL)
   {
       printf("Warning update_register_cell: xref=%x\n",(unsigned int)xref);
-      if(xref->data == NULL || xref->parent_window==NULL)
+/*      if(xref->data == NULL || xref->parent_window==NULL)
       {
 	  printf("Warning update_register_cell: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
       }
+*/
       return;
   }
   

@@ -104,6 +104,8 @@ typedef struct _sym
   guint64  gpsim_get_update_rate(void);
   void     gpsim_set_update_rate(guint64);
   void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref);
+  void gpsim_assign_trace_xref(gpointer xref);
+  void gpsim_get_current_trace(guint64 *current_cycle, char *current_trace, int bufsize);
   void gpsim_step(unsigned int processor_id, unsigned int steps);
   void gpsim_step_over(unsigned int processor_id);
   void gpsim_run(unsigned int processor_id);

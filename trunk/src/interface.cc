@@ -655,6 +655,25 @@ void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref)
 }
 
 //--------------------------------------------------------------------------
+
+void gpsim_assign_trace_xref(gpointer xref)
+{
+
+  if(trace.xref)
+      trace.xref->add(xref);
+
+}
+//--------------------------------------------------------------------------
+
+void gpsim_get_current_trace(guint64 *current_cycle, char *current_trace, int bufsize)
+{
+
+  if(current_cycle)
+    *current_cycle = trace.string_cycle;
+  if(current_trace)
+    strncpy(current_trace,trace.string_buffer,bufsize);
+}
+//--------------------------------------------------------------------------
 void gpsim_step(unsigned int processor_id, unsigned int steps)
 {
   pic_processor *pic = get_processor(processor_id);
