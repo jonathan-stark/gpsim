@@ -117,7 +117,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 }
 
-void Symbol_Table::add_register(pic_processor *cpu, file_register *new_reg)
+void Symbol_Table::add_register(pic_processor *cpu, Register *new_reg)
 {
 
   if(new_reg==NULL)

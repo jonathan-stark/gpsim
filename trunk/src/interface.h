@@ -247,13 +247,7 @@ typedef struct _sym
   void gpsim_toggle_break_at_line(unsigned int processor_id,
 				  unsigned int file_id,
 				  unsigned int line);
-  void gpsim_toggle_break_at_hll_line(unsigned int processor_id,
-				  unsigned int file_id,
-				  unsigned int line);
   unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id,
-						   unsigned int file_id,
-						   unsigned int line);
-  unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id,
 						   unsigned int file_id,
 						   unsigned int line);
   char *gpsim_get_opcode_name(Processor *cpu,
@@ -266,6 +260,5 @@ typedef struct _sym
 			unsigned int opcode);
   unsigned int gpsim_get_src_line(unsigned int processor_id,
 				  unsigned int address);
-  unsigned int gpsim_get_hll_src_line(unsigned int processor_id,
-                                    unsigned int address);
+
 #endif /* __INTERFACE_H__ */

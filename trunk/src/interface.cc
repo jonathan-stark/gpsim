@@ -51,8 +51,6 @@ extern Processor *active_cpu;
 
 unsigned int gpsim_is_initialized = 0;  // Flag to tell us when all of the init stuff is done.
 
-int hll_mode=0; // 0 - asm, 1 - HLL
-
 
 unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_TYPE type);
 
@@ -112,16 +110,16 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
   
   if(register_number < pic->register_memory_size())
     {
-      file_register *reg = pic->registers[register_number];
+      Register *reg = pic->registers[register_number];
 
       
-      while(reg->isa() == file_register::BP_REGISTER)
+      while(reg->isa() == Register::BP_REGISTER)
 	{
 	  reg = ((Notify_Register *)reg)->replaced;
 	}
 
 
-      if(reg->isa() == file_register::INVALID_REGISTER)
+      if(reg->isa() == Register::INVALID_REGISTER)
 	return 0;
       else
 	return 1;
@@ -136,7 +134,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 }
 
 //--------------------------------------------------------------------------
-// file_register *gpsim_get_register(
+// Register *gpsim_get_register(
 //         unsigned int processor_id, 
 //         REGISTER_TYPE type, 
 //         unsigned int register_number)
@@ -146,7 +144,7 @@ unsigned int valid_register(pic_processor *pic, REGISTER_TYPE type, unsigned int
 // exist, then NULL is returned.
 //
 
-file_register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
+Register *gpsim_get_register(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
   pic_processor *pic = (pic_processor *)get_processor(processor_id);
 
@@ -175,7 +173,7 @@ char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, uns
 {
   static char buffer[128];
   char *name = NULL;
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr)
     name = fr->name();
@@ -191,10 +189,10 @@ char *gpsim_get_register_name(unsigned int processor_id, REGISTER_TYPE type, uns
 }
 
 //--------------------------------------------------------------------------
-
+#if 0
 unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr)
     return fr->get_value();
@@ -202,12 +200,12 @@ unsigned int gpsim_get_register_value(unsigned int processor_id, REGISTER_TYPE t
     return INVALID_VALUE;
 
 }
-
+#endif
 //--------------------------------------------------------------------------
 
 gboolean gpsim_register_is_alias(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr) 
     if(fr->address!=register_number)
@@ -229,7 +227,7 @@ gboolean gpsim_register_is_sfr(unsigned int processor_id, REGISTER_TYPE type, un
     if(type == REGISTER_EEPROM)
 	return FALSE;
 
-    if(pic->registers[register_number]->isa()==file_register::SFR_REGISTER)
+    if(pic->registers[register_number]->isa()==Register::SFR_REGISTER)
 	return TRUE;
 
     return FALSE;
@@ -249,18 +247,6 @@ gboolean gpsim_register_is_valid(unsigned int processor_id, REGISTER_TYPE type, 
 
 
 //--------------------------------------------------------------------------
-
-void  gpsim_put_register_value(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, unsigned int register_value)
-{
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
-
-  if(fr) 
-    fr->put_value(register_value);
-
-}
-
-//--------------------------------------------------------------------------
-
 
 #include <list>
 #include "symbol.h"
@@ -449,10 +435,10 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
 //--------------------------------------------------------------------------
 unsigned int gpsim_reg_has_breakpoint(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number)
 {
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr) 
-    if(fr->isa() == file_register::BP_REGISTER)
+    if(fr->isa() == Register::BP_REGISTER)
       return TRUE;
 
   return FALSE;
@@ -542,7 +528,7 @@ unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
 
 void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr)
     if(fr->xref)
@@ -554,7 +540,7 @@ void  gpsim_clear_register_xref(unsigned int processor_id, REGISTER_TYPE type, u
 
 void  gpsim_assign_register_xref(unsigned int processor_id, REGISTER_TYPE type, unsigned int register_number, gpointer xref)
 {
-  file_register *fr = gpsim_get_register( processor_id, type,  register_number);
+  Register *fr = gpsim_get_register( processor_id, type,  register_number);
 
   if(fr)
     if(fr->xref)
@@ -682,64 +668,68 @@ void gpsim_step_over(unsigned int processor_id)
 //--------------------------------------------------------------------------
 void gpsim_hll_step(unsigned int processor_id)
 {
-    unsigned int initial_line;
-    unsigned int initial_pc;
+  unsigned int initial_line;
+  unsigned int initial_pc;
 
-    pic_processor *pic = get_pic_processor(processor_id);
+  Processor *cpu = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!cpu)
+    return;
 
-    // pic->step(1) until pc==initial_pc, or source line has changed.
+  // cpu->step(1) until pc==initial_pc, or source line has changed.
 
-    initial_line = gpsim_get_hll_src_line(processor_id,pic->pc->get_value());
+  //
+  initial_line = cpu->pma.get_src_line(cpu->pc->get_value());
 
-    initial_pc = pic->pc->get_value();
+  initial_pc = cpu->pc->get_value();
 
-    while(1)
+  while(1)
     {
-	pic->step(1);
-	if(pic->pc->get_value()==initial_pc)
-	    break;
-	if(gpsim_get_hll_src_line(processor_id, pic->pc->get_value())
-	   != initial_line)
-	    break;
+      cpu->step(1);
+      if(cpu->pc->get_value()==initial_pc)
+	break;
+
+      if(cpu->pma.get_src_line(cpu->pc->get_value())
+	 != initial_line)
+	break;
     }
 }
 //--------------------------------------------------------------------------
 void gpsim_hll_step_over(unsigned int processor_id)
 {
-    unsigned int initial_line;
-    unsigned int address;
-    unsigned int initial_stack_depth;
-    unsigned int initial_pc;
-    unsigned int initial_id;
+  unsigned int initial_line;
+  unsigned int address;
+  unsigned int initial_stack_depth;
+  unsigned int initial_pc;
+  unsigned int initial_id;
 
-    pic_processor *pic = get_pic_processor(processor_id);
+  pic_processor *pic = get_pic_processor(processor_id);
 
-    if(!pic)
-	return;
+  if(!pic)
+    return;
 
-    initial_pc = pic->pc->get_value();
-    initial_line = gpsim_get_hll_src_line(processor_id, initial_pc);
+  initial_pc = pic->pc->get_value();
 
-    initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
+  initial_line = pic->pma.get_src_line(initial_pc);
 
-    initial_id = gpsim_get_file_id(processor_id, initial_pc);
+  initial_stack_depth = pic->stack->pointer&pic->stack->stack_mask;
 
-    while(1)
+  initial_id = gpsim_get_file_id(processor_id, initial_pc);
+
+  while(1)
     {
-	gpsim_hll_step(processor_id);
+      gpsim_hll_step(processor_id);
 
-	if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
+      if(initial_stack_depth < pic->stack->pointer&pic->stack->stack_mask)
 	{
-	    gpsim_finish(processor_id);
+	  gpsim_finish(processor_id);
 	}
 
-	if(pic->pc->get_value()==initial_pc)
-	    break;
-	if(gpsim_get_hll_src_line(processor_id, pic->pc->get_value())
-	   != initial_line)
+      if(pic->pc->get_value()==initial_pc)
+	break;
+
+      if(pic->pma.get_src_line(initial_pc)
+	 != initial_line)
 	{
 	  if(gpsim_get_file_id(processor_id, pic->pc->get_value()))
 	    break;
@@ -964,16 +954,7 @@ void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id,
 
   pic->pma.toggle_break_at_line(file_id, line);
 }
-//--------------------------------------------------------------------------
-void gpsim_toggle_break_at_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
 
-  if(!pic)
-    return;
-
-  pic->pma.toggle_break_at_hll_line(file_id, line);
-}
 //--------------------------------------------------------------------------
 unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
 {
@@ -984,16 +965,7 @@ unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id, unsi
 
   return pic->pma.find_closest_address_to_line(file_id, line);
 }
-//--------------------------------------------------------------------------
-unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id, unsigned int file_id, unsigned int line)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
 
-  if(!pic)
-    return INVALID_VALUE;
-
-  return pic->pma.find_closest_address_to_hll_line(file_id, line);
-}
 //--------------------------------------------------------------------------
 unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address)
 {
@@ -1004,10 +976,10 @@ unsigned int gpsim_get_file_id(unsigned int processor_id, unsigned int address)
   if(pic->program_memory_size()<=address)
       return INVALID_VALUE;
 
-  if(gpsim_get_hll_mode(processor_id))
-      return pic->program_memory[address]->get_hll_file_id();
+  if(pic->pma.isHLLmode())
+    return pic->program_memory[address]->get_hll_file_id();
   else
-      return pic->program_memory[address]->get_file_id();
+    return pic->program_memory[address]->get_file_id();
 
 }
 
@@ -1025,77 +997,6 @@ struct file_context * gpsim_get_file_context(unsigned int processor_id, unsigned
 
 
 }
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_get_src_line(unsigned int processor_id, unsigned int address)
-{
-    unsigned int line;
-    
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  if(pic->program_memory_size()<=address)
-      return INVALID_VALUE;
-
-  line = pic->program_memory[address]->get_src_line();
-
-  // line 1 is first line (?), so zero or less means invalid line
-  if(line<=0)
-      return INVALID_VALUE;
-
-  return line;
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_get_hll_src_line(unsigned int processor_id, unsigned int address)
-{
-    unsigned int line;
-    
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return INVALID_VALUE;
-  if(pic->program_memory_size()<=address)
-      return INVALID_VALUE;
-
-  line = pic->program_memory[address]->get_hll_src_line();
-
-  // line 1 is first line (?), so zero or less means invalid line
-  if(line<=0)
-      return INVALID_VALUE;
-
-  return line;
-}
-#if 0
-//--------------------------------------------------------------------------
-char *gpsim_get_opcode_name(Processor *cpu, unsigned int address, char *buffer)
-{
-  if(!cpu)
-    return NULL;
-
-  if(cpu->program_memory_size()<=address)
-      return NULL;
-
-  return cpu->program_memory[address]->name(buffer);
-
-}
-
-//--------------------------------------------------------------------------
-unsigned int gpsim_get_opcode(unsigned int processor_id, unsigned int address)
-{
-  pic_processor *pic = get_pic_processor(processor_id);
-
-  if(!pic)
-    return 0;
-  if(pic->program_memory_size()<=address)
-      return 0;
-
-  //  return pic->program_memory[address]->get_opcode();
-  return pic->pma.get_opcode(address);
-
-}
-#endif
 //--------------------------------------------------------------------------
 void gpsim_put_opcode(unsigned int processor_id, unsigned int address, unsigned int opcode)
 {
@@ -1244,27 +1145,6 @@ char *gpsim_get_version(char *dest, int max_len)
 
   return( strncpy(dest, GPSIM_VERSION, max_len));
 
-}
-
-//---------------------------------------------------------------------------
-//   int gpsim_get_hll_mode(unsigned int processor_id)
-//---------------------------------------------------------------------------
-int gpsim_get_hll_mode(unsigned int processor_id)
-{
-  return hll_mode;
-}
-
-
-//---------------------------------------------------------------------------
-//   int gpsim_set_hll_mode(unsigned int processor_id, int mode)
-//---------------------------------------------------------------------------
-int gpsim_set_hll_mode(unsigned int processor_id, int mode)
-{
-  if(mode==0)
-    hll_mode=0;
-  if(mode==1)
-    hll_mode=1;
-  return hll_mode;
 }
 
 //---------------------------------------------------------------------------

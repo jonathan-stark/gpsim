@@ -562,7 +562,7 @@ public:
 
   void put_state( int new_digital_state) {
 
-    file_register *port = get_iop();
+    Register *port = get_iop();
 
     if(port) {
       // If the new state to which the stimulus is being set is different than

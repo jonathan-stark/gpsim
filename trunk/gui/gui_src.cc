@@ -55,6 +55,7 @@ key_press(GtkWidget *widget,
   if(!sbw) return(FALSE);
   if(!sbw->gp) return(FALSE);
   if(!sbw->gp->pic_id) return(FALSE);
+  if(!sbw->gp->cpu) return(FALSE);
 
   // fix this
   if(sbw->wt == WT_opcode_source_window)
@@ -73,7 +74,7 @@ key_press(GtkWidget *widget,
   case 'S':
   case GDK_F7:
       //sbw->gui_obj.gp->p->step(1);
-      if(gpsim_get_hll_mode(sbw->gp->pic_id)
+    if(sbw->gp->cpu->pma.isHLLmode()   //gpsim_get_hll_mode(sbw->gp->pic_id)
 	&&!low_level_step)
       	gpsim_hll_step(sbw->gp->pic_id);
       else
@@ -84,7 +85,7 @@ key_press(GtkWidget *widget,
   case 'O':
   case 'n':
   case GDK_F8:
-      if(gpsim_get_hll_mode(sbw->gp->pic_id)
+    if(sbw->gp->cpu->pma.isHLLmode()   //gpsim_get_hll_mode(sbw->gp->pic_id)
 	&&!low_level_step)
       	gpsim_hll_step_over(sbw->gp->pic_id);
       else

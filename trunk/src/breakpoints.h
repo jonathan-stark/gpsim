@@ -178,9 +178,9 @@ struct BreakStatus
   unsigned int set_wdt_break(Processor *cpu);
   unsigned int set_stk_overflow_break(Processor *cpu);
   unsigned int set_stk_underflow_break(Processor *cpu);
-  unsigned int check_write_break(file_register *fr);
-  unsigned int check_read_break(file_register *fr);
-  unsigned int check_break(file_register *fr);
+  unsigned int check_write_break(Register *fr);
+  unsigned int check_read_break(Register *fr);
+  unsigned int check_break(Register *fr);
   unsigned int check_invalid_fr_break(invalid_file_register *fr);
   unsigned int check_cycle_break(unsigned int abp);
 
@@ -236,10 +236,10 @@ extern Breakpoints bp;
 // the simulation can be manipulated.
 //
 
-class Notify_Register : public file_register
+class Notify_Register : public Register
 {
 public:
-  file_register *replaced;   // A pointer to the register that this break replaces
+  Register *replaced;   // A pointer to the register that this break replaces
   Notify_Register *next; /* If multiple breaks are set on one register,
 			      * then this will point to the next one.  */
 

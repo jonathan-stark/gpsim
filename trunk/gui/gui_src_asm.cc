@@ -255,8 +255,10 @@ void SourceBrowserAsm_Window::SetPC(int address)
   GtkWidget *new_pcw;
   int id=-1;
     
-  if(!source_loaded) return;
-
+  if(!source_loaded)
+    return;
+  if(!gp || !gp->cpu)
+    return;
 
   // find notebook page containing address 'address'
   sbawFileId = gpsim_get_file_id( gp->pic_id, address);
@@ -283,14 +285,12 @@ void SourceBrowserAsm_Window::SetPC(int address)
     
   new_pcw = source_pcwidget[id];
 
-  if(gpsim_get_hll_mode(gp->pic_id))
-    row = gpsim_get_hll_src_line(gp->pic_id, address);
-  else
-    row = gpsim_get_src_line(gp->pic_id, address);
+  row = gp->cpu->pma.get_src_line(address);
+
   if(row==INVALID_VALUE)
     return;
   row--;
-  //printf("%s address = 0x%x, row = %d\n",__FUNCTION__,address,row);
+
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)
@@ -337,7 +337,11 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   float inc;
   int line;
     
-  if(!source_loaded) return;
+  if(!source_loaded)
+    return;
+  if(!gp || !gp->cpu)
+    return;
+
 
   for(i=0;i<SBAW_NRFILES;i++) {
     if(pageindex_to_fileid[i]==gpsim_get_file_id(gp->pic_id, address))
@@ -352,10 +356,8 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
-  if(gpsim_get_hll_mode(gp->pic_id))
-    line = gpsim_get_hll_src_line(gp->pic_id, address);
-  else
-    line = gpsim_get_src_line(gp->pic_id, address);
+  line = gp->cpu->pma.get_src_line(address);
+
   if(line==INVALID_VALUE)
     return;
     
@@ -395,14 +397,12 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   if(id==-1)
   {
-      puts("SourceBrowserAsm_update_line(): could not find notebook page");
-      return;
+    puts("SourceBrowserAsm_update_line(): could not find notebook page");
+    return;
   }
   
-  if(gpsim_get_hll_mode(gp->pic_id))
-      row = gpsim_get_hll_src_line(gp->pic_id, address);
-  else
-      row = gpsim_get_src_line(gp->pic_id, address);
+  row = gp->cpu->pma.get_src_line(address);
+
   if(row==INVALID_VALUE)
       return;
   row--;
@@ -534,168 +534,155 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     pic_id=popup_sbaw->gp->pic_id;
     
-    switch(item->id)
-    {
+    switch(item->id) {
+
     case MENU_SETTINGS:
-        settings_dialog(popup_sbaw);
-        break;
+      settings_dialog(popup_sbaw);
+      break;
     case MENU_FIND_TEXT:
-	gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
-	gtk_widget_show(searchdlg.window);
-	break;
+      gtk_widget_set_uposition(GTK_WIDGET(searchdlg.window),dlg_x,dlg_y);
+      gtk_widget_show(searchdlg.window);
+      break;
     case MENU_FIND_PC:
-	pic_id = popup_sbaw->gp->pic_id;
-	address=popup_sbaw->gp->cpu->pc->get_raw_value();
-	//address=gpsim_get_pc_value(pic_id);
-	//SourceBrowserAsm_set_pc(popup_sbaw, address);
-	popup_sbaw->SetPC(address);
-//	gui_simulation_has_stopped(); // FIXME
-	break;
+      pic_id = popup_sbaw->gp->pic_id;
+      address=popup_sbaw->gp->cpu->pc->get_raw_value();
+      popup_sbaw->SetPC(address);
+      //	gui_simulation_has_stopped(); // FIXME
+      break;
     case MENU_MOVE_PC:
-	line = popup_sbaw->menu_data->line;
+      line = popup_sbaw->menu_data->line;
 
-	if(gpsim_get_hll_mode(pic_id))
-	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-        else
-	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(address!=INVALID_VALUE)
-	  popup_sbaw->gp->cpu->pc->put_value(address);
-	break;
+      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
+      if(address!=INVALID_VALUE)
+	popup_sbaw->gp->cpu->pc->put_value(address);
+      break;
+
     case MENU_RUN_HERE:
-	line = popup_sbaw->menu_data->line;
+      line = popup_sbaw->menu_data->line+1;
 
-	if(gpsim_get_hll_mode(pic_id))
-	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-        else
-	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-        if(address!=INVALID_VALUE)
-	    gpsim_run_to_address(pic_id, address);
-	break;
+      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line);
+
+      if(address!=INVALID_VALUE)
+	gpsim_run_to_address(pic_id, address);
+      break;
+
     case MENU_BP_HERE:
-	line = popup_sbaw->menu_data->line;
-	if(gpsim_get_hll_mode(pic_id))
-	    gpsim_toggle_break_at_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id] ,line+1);
-        else
-	    gpsim_toggle_break_at_line(pic_id,popup_sbaw->pageindex_to_fileid[id] ,line+1);
-	break;
+      line = popup_sbaw->menu_data->line + 1;
+
+      popup_sbaw->gp->cpu->pma.toggle_break_at_line(popup_sbaw->pageindex_to_fileid[id],line);
+
+      break;
     case MENU_PROFILE_START_HERE:
-	line = popup_sbaw->menu_data->line;
-	if(gpsim_get_hll_mode(pic_id))
-	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-        else
-	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->gp->profile_window->enabled)
-	{
-	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
-	}
-	if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
-	    gpsim_clear_profile_start_at_address(pic_id,address);
-	else
-	{
-	    if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
-	    {
-		// Can't have both start and stop at the same address
-		// ..it becomes difficult to calculate the cycles
-		gpsim_clear_profile_stop_at_address(pic_id,address);
-	    }
-	    gpsim_set_profile_start_at_address(pic_id,
-					       address,
-					       (void (*)(gpointer))ProfileWindow_notify_start_callback,
-					       popup_sbaw->gp->profile_window);
-	}
-	break;
-    case MENU_PROFILE_STOP_HERE:
-	line = popup_sbaw->menu_data->line;
-	if(gpsim_get_hll_mode(pic_id))
-	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-        else
-	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->gp->profile_window->enabled)
-	{
+      line = popup_sbaw->menu_data->line;
+      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
 
-	  popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
-	}
+      if(!popup_sbaw->gp->profile_window->enabled)
+	popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
+
+      if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
+	gpsim_clear_profile_start_at_address(pic_id,address);
+      else {
+
 	if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
-	    gpsim_clear_profile_stop_at_address(pic_id,address);
-	else
-	{
-	    if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
-	    {
-		// Can't have both start and stop at the same address
-		// ..it becomes difficult to calculate the cycles
-		gpsim_clear_profile_start_at_address(pic_id,address);
-	    }
-	    gpsim_set_profile_stop_at_address(pic_id,
-					      address,
-					      (void (*)(gpointer))ProfileWindow_notify_stop_callback,
-					      popup_sbaw->gp->profile_window);
-	}
-	break;
-    case MENU_SELECT_SYMBOL:
-#if GTK_MAJOR_VERSION >= 2
-        if (!gtk_editable_get_selection_bounds(
-          GTK_EDITABLE(popup_sbaw->source_text[id]),
-          &start, &end))
-          break;
-#else
-        start=GTK_EDITABLE(popup_sbaw->source_text[id])->selection_start_pos;
-	end=GTK_EDITABLE(popup_sbaw->source_text[id])->selection_end_pos;
-#endif
-	if(start>end)
-	{
-		temp=start;
-		start=end;
-		end=temp;
-	}
-	if((end-start+2)>256) // FIXME bounds?
-	    end=start+256-2;
-	for(i=start;i<end;i++)
-	{
-	    text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->source_text[id]),i);
-	}
-	text[i-start]=0;
+	  // Can't have both start and stop at the same address
+	  // ..it becomes difficult to calculate the cycles
+	  gpsim_clear_profile_stop_at_address(pic_id,address);
+
+	gpsim_set_profile_start_at_address(pic_id,
+					   address,
+					   (void (*)(gpointer))ProfileWindow_notify_start_callback,
+					   popup_sbaw->gp->profile_window);
+      }
+      break;
+
+    case MENU_PROFILE_STOP_HERE:
+      line = popup_sbaw->menu_data->line;
+
+      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
+
+      if(!popup_sbaw->gp->profile_window->enabled)
+	popup_sbaw->gp->profile_window->ChangeView(VIEW_SHOW);
+
+      if(popup_sbaw->gp->cpu->pma.address_has_profile_stop(address))
+	gpsim_clear_profile_stop_at_address(pic_id,address);
+      else {
 	
-	if(!popup_sbaw->gp->symbol_window->enabled)
+	if(popup_sbaw->gp->cpu->pma.address_has_profile_start(address))
+	  // Can't have both start and stop at the same address
+	  // ..it becomes difficult to calculate the cycles
+	  gpsim_clear_profile_start_at_address(pic_id,address);
+
+	gpsim_set_profile_stop_at_address(pic_id,
+					  address,
+					  (void (*)(gpointer))ProfileWindow_notify_stop_callback,
+					  popup_sbaw->gp->profile_window);
+      }
+      break;
+
+    case MENU_SELECT_SYMBOL:
+
+#if GTK_MAJOR_VERSION >= 2
+      if (!gtk_editable_get_selection_bounds(
+					     GTK_EDITABLE(popup_sbaw->source_text[id]),
+					     &start, &end))
+	break;
+#else
+      start=GTK_EDITABLE(popup_sbaw->source_text[id])->selection_start_pos;
+      end=GTK_EDITABLE(popup_sbaw->source_text[id])->selection_end_pos;
+#endif
+      if(start>end)
 	{
-	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
-			    
+	  temp=start;
+	  start=end;
+	  end=temp;
 	}
-	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+      if((end-start+2)>256) // FIXME bounds?
+	end=start+256-2;
+      for(i=start;i<end;i++)
+	text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->source_text[id]),i);
+
+      text[i-start]=0;
+	
+      if(!popup_sbaw->gp->symbol_window->enabled)
+	popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+
+      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
 
 
-	// We also try with a '_' prefix.
-	for(i=strlen(text)+1;i>0;i--)
-	    text[i]=text[i-1];
-        text[i]='_';
-	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
-	break;
+      // We also try with a '_' prefix.
+      for(i=strlen(text)+1;i>0;i--)
+	text[i]=text[i-1];
+      text[i]='_';
+      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+      break;
     case MENU_STEP:
-	if(gpsim_get_hll_mode(popup_sbaw->gp->pic_id))
-	    gpsim_hll_step(popup_sbaw->gp->pic_id);
-	else
-	    gpsim_step(popup_sbaw->gp->pic_id, 1);
-	break;
+
+      if(popup_sbaw->gp->cpu->pma.isHLLmode())
+	gpsim_hll_step(popup_sbaw->gp->pic_id);
+      else
+	gpsim_step(popup_sbaw->gp->pic_id, 1);
+      break;
     case MENU_STEP_OVER:
-	if(gpsim_get_hll_mode(popup_sbaw->gp->pic_id))
-	    gpsim_hll_step_over(popup_sbaw->gp->pic_id);
-	else
-	    gpsim_step_over(popup_sbaw->gp->pic_id);
-	break;
+      if(popup_sbaw->gp->cpu->pma.isHLLmode())
+	gpsim_hll_step_over(popup_sbaw->gp->pic_id);
+      else
+	gpsim_step_over(popup_sbaw->gp->pic_id);
+      break;
     case MENU_RUN:
-	gpsim_run(popup_sbaw->gp->pic_id);
-	break;
+      gpsim_run(popup_sbaw->gp->pic_id);
+      break;
     case MENU_STOP:
-	gpsim_stop(popup_sbaw->gp->pic_id);
-	break;
+      gpsim_stop(popup_sbaw->gp->pic_id);
+      break;
     case MENU_RESET:
-	gpsim_reset(popup_sbaw->gp->pic_id);
-	break;
+      gpsim_reset(popup_sbaw->gp->pic_id);
+      break;
     case MENU_FINISH:
-	gpsim_finish(popup_sbaw->gp->pic_id);
-	break;
+      gpsim_finish(popup_sbaw->gp->pic_id);
+      break;
     default:
-	puts("Unhandled menuitem?");
-	break;
+      puts("Unhandled menuitem?");
+      break;
     }
 }
 
@@ -799,28 +786,25 @@ static gint switch_page_cb(GtkNotebook     *notebook,
     if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
       return 1;
 
-    if(current_page!=page_num)
-    {
-	int id;
-	unsigned int address;
+    if(current_page!=page_num) {
+    
+      int id;
+      unsigned int address;
 
-        current_page=page_num;
-	id=sbaw->pageindex_to_fileid[current_page];
-	gpsim_set_hll_mode(sbaw->gp->pic_id,file_id_to_source_mode[id]);
+      current_page=page_num;
+      id=sbaw->pageindex_to_fileid[current_page];
+	
+      sbaw->gp->cpu->pma.set_hll_mode(file_id_to_source_mode[id]);
 
-        // Update pc widget
-	address=sbaw->gp->cpu->pc->get_raw_value();
-	//address=gpsim_get_pc_value(sbaw->gp->pic_id);
-	//SourceBrowserAsm_set_pc(sbaw, address);
-	sbaw->SetPC(address);
+      // Update pc widget
+      address=sbaw->gp->cpu->pc->get_raw_value();
+      sbaw->SetPC(address);
 
-        remove_all_points(sbaw);
+      remove_all_points(sbaw);
 
-	// update breakpoint widgets
-	for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
-	{
-	    sbaw->UpdateLine(address);
-	}
+      // update breakpoint widgets
+      for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
+	sbaw->UpdateLine(address);
     }
     return 1;
 }
@@ -961,7 +945,7 @@ static gint drag_scroll_cb(gpointer data)
 
 /*
  This is handler for motion, button press and release for source_layout.
- The GdkEventMotion and GdkEventButton are very similar so I use
+ The GdkEventMotion and GdkEventButton are very similar so I (Ralf) use
  the same for both!
  This function is too complex, FIXME.
  */
@@ -971,197 +955,187 @@ static void marker_cb(GtkWidget *w1,
 		      GdkEventButton *event,
 		     SourceBrowserAsm_Window *sbaw)
 {
-    static int dragbreak=0;
-    static int dragstartline;
-    struct breakpoint_info *bpi;
-    struct breakpoint_info *dragbpi;
-    static int button_pressed;
-    static int button_pressed_y;
-    static int button_pressed_x;
-    static int dragwidget_oldy;
-    int pixel;
-    int line;
-    unsigned int address;
+  static int dragbreak=0;
+  static int dragstartline;
+  struct breakpoint_info *bpi;
+  struct breakpoint_info *dragbpi;
+  static int button_pressed;
+  static int button_pressed_y;
+  static int button_pressed_x;
+  static int dragwidget_oldy;
+  int pixel;
+  int line;
+  unsigned int address;
     
-    static GtkWidget *dragwidget;
-    static int dragwidget_x;
+  static GtkWidget *dragwidget;
+  static int dragwidget_x;
     
 
-    int mindiff;
-    int i;
-    int diff;
+  int mindiff;
+  int i;
+  int diff;
     
-    GList *iter;
+  GList *iter;
 
-    static int timeout_tag=-1;
+  static int timeout_tag=-1;
 
-    int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+  if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
+    return;
 
-    int pic_id = sbaw->gp->pic_id;
+  int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+
+  int pic_id = sbaw->gp->pic_id;
+
+  switch(event->type) {
     
-    switch(event->type)
-    {
-    case GDK_MOTION_NOTIFY:
-	if(button_pressed == 1 && dragbreak == 0)
-	{
-	    button_pressed=0;
-	    // actually button is pressed, but setting
-	    // this to zero makes this block of code
-	    // execute exactly once for each drag motion
-	    
-	    if(button_pressed_x<PIXMAP_SIZE)
-	    {
-		// find out if we want to start drag of a breakpoint
-		i=0;
-		mindiff=1000000; // large distance
-		dragbpi=NULL;   // start with invalid index
-
-		// loop all breakpoints, and save the one that is closest as dragbpi
-		iter=sbaw->breakpoints;
-		while(iter!=NULL)
-		{
-		    bpi=(struct breakpoint_info*)iter->data;
-		    
-		    diff = button_pressed_y - (bpi->widget->allocation.y+PIXMAP_SIZE/2);
-		    if(abs(diff) < abs(mindiff))
-		    {
-			mindiff=diff;
-			dragbpi=(struct breakpoint_info *)iter->data;
-		    }
-		    
-		    iter=iter->next;
-		}
-		
-		if(dragbpi!=NULL && mindiff<PIXMAP_SIZE/2)
-		{  // mouse hit breakpoint pixmap in dragbpi
-
-		    // pixel = (position of pixmap in window)
-		    //         - (constant) + (constant)
-		    //         + (top of window, counting from top of text)
-		    pixel = dragbpi->widget->allocation.y-
-			sbaw->layout_offset+PIXMAP_SIZE/2+
-			(int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
-
-		    // we want to remember which line drag started on
-		    // to be able to disable this breakpoint later
-		    // FIXME: perhaps we should simply disable bp now?
-		    dragstartline = gui_pixel_to_entry(id,pixel)->line;
-
-		    dragbreak=1;  // start drag
-		    dragwidget = dragbpi->widget;
-		    dragwidget_x = 0;
-		    dragwidget_oldy=dragwidget->allocation.y+
-			    (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
-                    gtk_grab_add(sbaw->source_layout[id]);
-		}
-	    }
-	    else
-	    { // we see if we hit the pixmap widget
-		if( abs(button_pressed_y-
-			(sbaw->source_pcwidget[id]->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2)
-		{ // hit
-		    dragbreak=1; // start drag
-		    dragwidget = sbaw->source_pcwidget[id];
-		    dragwidget_x = PIXMAP_SIZE;
-		    dragwidget_oldy=dragwidget->allocation.y+
-			    (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
-                    gtk_grab_add(sbaw->source_layout[id]);
-		}
-	    }
-	}
-	else if(dragbreak==1)
-	{  // drag is in progress
-	    if((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size) >0.9
-	       ||(event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size) <0.1)
-	    {
-		if(timeout_tag==-1)
-		{
-		    timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
-		}
-		if((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size)>0.5)
-		    drag_scroll_speed = ((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size)-0.9)*100;
-		else
-		    drag_scroll_speed = -(0.1-(event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size))*100;
-	    }
-	    else if(timeout_tag!=-1)
-	    {
-		gtk_timeout_remove(timeout_tag);
-		timeout_tag=-1;
-	    }
-	    
-	    // update position of dragged pixmap
-	    gtk_layout_move(GTK_LAYOUT(sbaw->source_layout[id]),
-			    dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2+
-			    (int)GTK_TEXT(sbaw->source_text[id])->vadj->value);
-	}
-	break;
-    case GDK_BUTTON_PRESS:
-	if(button_pressed==1)
-	    break;  // click number two(/three?) of a double click?
-	button_pressed = 1;
-	button_pressed_x = (int)event->x;  // and initial position of
-	button_pressed_y = (int)event->y;  // possible drag action
-	break;
-    case GDK_2BUTTON_PRESS:
-	if(event->button == 1)
-	{
-	    line = gui_pixel_to_entry(id, (int)event->y -
-				      sbaw->layout_offset +
-				      (int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->line;
-            if(gpsim_get_hll_mode(pic_id))
-		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
-	    else
-		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
-	}
-	break;
-    case GDK_BUTTON_RELEASE:
+  case GDK_MOTION_NOTIFY:
+    if(button_pressed == 1 && dragbreak == 0)
+      {
 	button_pressed=0;
-	if(timeout_tag!=-1)
-	{
+	// actually button is pressed, but setting
+	// this to zero makes this block of code
+	// execute exactly once for each drag motion
+	    
+	if(button_pressed_x<PIXMAP_SIZE)
+	  {
+	    // find out if we want to start drag of a breakpoint
+	    i=0;
+	    mindiff=1000000; // large distance
+	    dragbpi=NULL;   // start with invalid index
+
+	    // loop all breakpoints, and save the one that is closest as dragbpi
+	    iter=sbaw->breakpoints;
+	    while(iter!=NULL)
+	      {
+		bpi=(struct breakpoint_info*)iter->data;
+		    
+		diff = button_pressed_y - (bpi->widget->allocation.y+PIXMAP_SIZE/2);
+		if(abs(diff) < abs(mindiff))
+		  {
+		    mindiff=diff;
+		    dragbpi=(struct breakpoint_info *)iter->data;
+		  }
+		    
+		iter=iter->next;
+	      }
+		
+	    if(dragbpi!=NULL && mindiff<PIXMAP_SIZE/2)
+	      {  // mouse hit breakpoint pixmap in dragbpi
+
+		// pixel = (position of pixmap in window)
+		//         - (constant) + (constant)
+		//         + (top of window, counting from top of text)
+		pixel = dragbpi->widget->allocation.y-
+		  sbaw->layout_offset+PIXMAP_SIZE/2+
+		  (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
+
+		// we want to remember which line drag started on
+		// to be able to disable this breakpoint later
+		// FIXME: perhaps we should simply disable bp now?
+		dragstartline = gui_pixel_to_entry(id,pixel)->line;
+
+		dragbreak=1;  // start drag
+		dragwidget = dragbpi->widget;
+		dragwidget_x = 0;
+		dragwidget_oldy=dragwidget->allocation.y+
+		  (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
+		gtk_grab_add(sbaw->source_layout[id]);
+	      }
+	  }
+	else
+	  { // we see if we hit the pixmap widget
+	    if( abs(button_pressed_y-
+		    (sbaw->source_pcwidget[id]->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2)
+	      { // hit
+		dragbreak=1; // start drag
+		dragwidget = sbaw->source_pcwidget[id];
+		dragwidget_x = PIXMAP_SIZE;
+		dragwidget_oldy=dragwidget->allocation.y+
+		  (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
+		gtk_grab_add(sbaw->source_layout[id]);
+	      }
+	  }
+      }
+    else if(dragbreak==1)
+      {  // drag is in progress
+	if((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size) >0.9
+	   ||(event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size) <0.1)
+	  {
+	    if(timeout_tag==-1)
+	      {
+		timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
+	      }
+	    if((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size)>0.5)
+	      drag_scroll_speed = ((event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size)-0.9)*100;
+	    else
+	      drag_scroll_speed = -(0.1-(event->y/GTK_TEXT(sbaw->source_text[id])->vadj->page_size))*100;
+	  }
+	else if(timeout_tag!=-1)
+	  {
 	    gtk_timeout_remove(timeout_tag);
 	    timeout_tag=-1;
-	}
-	if(dragbreak==0)
-	    break;  // we weren't dragging, so we don't move anything
-	dragbreak=0;
-
-	gtk_grab_remove(sbaw->source_layout[id]);
-
-	
-	// pixel = (position of pixmap in window)
-	//         + (constant) - (constant)
-	//         + (top of window, counting from top of text)
-	pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
-	    sbaw->layout_offset+
-	    (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
-	line = gui_pixel_to_entry(id,pixel)->line;
-	
-	if(dragwidget == sbaw->source_pcwidget[id])
-	{
-            if(gpsim_get_hll_mode(pic_id))
-		address = gpsim_find_closest_address_to_hll_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
-	    else
-		address = gpsim_find_closest_address_to_line(pic_id,sbaw->pageindex_to_fileid[id],line+1);
-	    if(address!=INVALID_VALUE)
-	      sbaw->gp->cpu->pc->put_value(address);
-	}
-	else
-	{
-            if(gpsim_get_hll_mode(pic_id))
-		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,dragstartline+1);
-            else
-		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,dragstartline+1);
-
-	    if(gpsim_get_hll_mode(pic_id))
-		gpsim_toggle_break_at_hll_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
-            else
-		gpsim_toggle_break_at_line(pic_id,sbaw->pageindex_to_fileid[id] ,line+1);
-	}
-	break;
-    default:
-	printf("Whoops? event type %d\n",event->type);
-	break;
+	  }
+	    
+	// update position of dragged pixmap
+	gtk_layout_move(GTK_LAYOUT(sbaw->source_layout[id]),
+			dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2+
+			(int)GTK_TEXT(sbaw->source_text[id])->vadj->value);
+      }
+    break;
+  case GDK_BUTTON_PRESS:
+    if(button_pressed==1)
+      break;  // click number two(/three?) of a double click?
+    button_pressed = 1;
+    button_pressed_x = (int)event->x;  // and initial position of
+    button_pressed_y = (int)event->y;  // possible drag action
+    break;
+  case GDK_2BUTTON_PRESS:
+    if(event->button == 1) {
+      
+      line = gui_pixel_to_entry(id, (int)event->y -
+				sbaw->layout_offset +
+				(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->line;
+      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
     }
+    break;
+  case GDK_BUTTON_RELEASE:
+    button_pressed=0;
+    if(timeout_tag!=-1)
+      {
+	gtk_timeout_remove(timeout_tag);
+	timeout_tag=-1;
+      }
+    if(dragbreak==0)
+      break;  // we weren't dragging, so we don't move anything
+    dragbreak=0;
+
+    gtk_grab_remove(sbaw->source_layout[id]);
+
+	
+    // pixel = (position of pixmap in window)
+    //         + (constant) - (constant)
+    //         + (top of window, counting from top of text)
+    pixel = dragwidget->allocation.y+PIXMAP_SIZE/2-
+      sbaw->layout_offset+
+      (int)GTK_TEXT(sbaw->source_text[id])->vadj->value;
+    line = gui_pixel_to_entry(id,pixel)->line;
+	
+    if(dragwidget == sbaw->source_pcwidget[id]) {
+      
+      sbaw->gp->cpu->pma.find_closest_address_to_line(sbaw->pageindex_to_fileid[id] ,line+1);
+
+      if(address!=INVALID_VALUE)
+	sbaw->gp->cpu->pc->put_value(address);
+    } else {
+      
+      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,dragstartline+1);
+      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
+    }
+    break;
+  default:
+    printf("Whoops? event type %d\n",event->type);
+    break;
+  }
 }
 
 /*
@@ -1288,16 +1262,14 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 }
 
 // Return true of there are instructions corresponding to the source line
-int hll_source_line_represents_code(unsigned int processor_id,
+int hll_source_line_represents_code(Processor *cpu,
 				    unsigned int file_id,
 				    unsigned int line)
 {
     int address;
-    address = gpsim_find_closest_address_to_hll_line(processor_id,
-						     file_id,
-						     line);
+    address = cpu->pma.find_closest_address_to_line(file_id,line);
 
-    return line==gpsim_get_hll_src_line(processor_id, address);
+    return line==cpu->pma.get_src_line(address);
 }
 
 /*
@@ -1323,9 +1295,9 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
     struct breakpoint_info *bpi;
     
     // get a manageable pointer to the processor
-    pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
+    pic_id = sbaw->gp->pic_id;
 
-    
+    Processor *cpu = sbaw->gp->cpu;
     
     gtk_text_freeze(GTK_TEXT(sbaw->source_text[id]));
 
@@ -1377,67 +1349,67 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	 or similar funtionality
 	 There is also a gtkextext widget... and scintilla...
 	 */
-	if(file_id_to_source_mode[file_id]==0)
-	{
-	    if(*p=='#' || !strncmp(p,"include",7))
+	if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::ASM_MODE) {
+	
+	  if(*p=='#' || !strncmp(p,"include",7))
 	    { // not a label
-		q=p;
+	      q=p;
+	      q++;
+	      while(isalnum(*q) || *q=='_')
 		q++;
-		while(isalnum(*q) || *q=='_')
-		    q++;
 #if GTK_MAJOR_VERSION >= 2
-		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-				gtk_style_get_font(sbaw->default_text_style),
-				&sbaw->default_text_style->fg[GTK_STATE_NORMAL],
-				&sbaw->default_text_style->base[GTK_STATE_NORMAL],
-				p,
-				q-p);
+	      gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+			      gtk_style_get_font(sbaw->default_text_style),
+			      &sbaw->default_text_style->fg[GTK_STATE_NORMAL],
+			      &sbaw->default_text_style->base[GTK_STATE_NORMAL],
+			      p,
+			      q-p);
 #else
-		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-				sbaw->default_text_style->font,
-				&sbaw->default_text_style->fg[GTK_STATE_NORMAL],
-				&sbaw->default_text_style->base[GTK_STATE_NORMAL],
-				p,
-				q-p);
+	      gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+			      sbaw->default_text_style->font,
+			      &sbaw->default_text_style->fg[GTK_STATE_NORMAL],
+			      &sbaw->default_text_style->base[GTK_STATE_NORMAL],
+			      p,
+			      q-p);
 #endif
 
-		p=q;
-		instruction_done=1; // well, varable misnamed
+	      p=q;
+	      instruction_done=1; // well, varable misnamed
 	    }
-	    else if( (isalnum(*p) || *p=='_'))
+	  else if( (isalnum(*p) || *p=='_'))
 	    { // a label
-		// locate end of label
-		q=p;
-		while(isalnum(*q) || *q=='_')
-		    q++;
+	      // locate end of label
+	      q=p;
+	      while(isalnum(*q) || *q=='_')
+		q++;
 
 #if GTK_MAJOR_VERSION >= 2
-                GdkFont *font = gtk_style_get_font(sbaw->label_text_style);
-		if (lineascent < font->ascent)
-		    lineascent = font->ascent;
-		if (linedescent < font->descent)
-		    linedescent = font->descent;
-		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-				font,
-				&sbaw->label_text_style->fg[GTK_STATE_NORMAL],
-				&sbaw->label_text_style->base[GTK_STATE_NORMAL],
-				text_buffer,
-				q-p);
+	      GdkFont *font = gtk_style_get_font(sbaw->label_text_style);
+	      if (lineascent < font->ascent)
+		lineascent = font->ascent;
+	      if (linedescent < font->descent)
+		linedescent = font->descent;
+	      gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+			      font,
+			      &sbaw->label_text_style->fg[GTK_STATE_NORMAL],
+			      &sbaw->label_text_style->base[GTK_STATE_NORMAL],
+			      text_buffer,
+			      q-p);
 #else
-		if(lineascent<sbaw->label_text_style->font->ascent)
-		    lineascent=sbaw->label_text_style->font->ascent;
-		if(linedescent<sbaw->label_text_style->font->descent)
-		    linedescent=sbaw->label_text_style->font->descent;
-		gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
-				sbaw->label_text_style->font,
-				&sbaw->label_text_style->fg[GTK_STATE_NORMAL],
-				&sbaw->label_text_style->base[GTK_STATE_NORMAL],
-				text_buffer,
-				q-p);
+	      if(lineascent<sbaw->label_text_style->font->ascent)
+		lineascent=sbaw->label_text_style->font->ascent;
+	      if(linedescent<sbaw->label_text_style->font->descent)
+		linedescent=sbaw->label_text_style->font->descent;
+	      gtk_text_insert(GTK_TEXT(sbaw->source_text[id]),
+			      sbaw->label_text_style->font,
+			      &sbaw->label_text_style->fg[GTK_STATE_NORMAL],
+			      &sbaw->label_text_style->base[GTK_STATE_NORMAL],
+			      text_buffer,
+			      q-p);
 #endif
 
-		// advance the pointer p
-		p=q;
+	      // advance the pointer p
+	      p=q;
 	    }
 	}
 
@@ -1447,9 +1419,9 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 	// loop through the rest of the line
 	while( p < end )
 	{
-	    if(file_id_to_source_mode[file_id]==1)
+	    if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
 	    {
-		if(hll_source_line_represents_code(pic_id,file_id,line+1))
+		if(hll_source_line_represents_code(cpu,file_id,line+1))
 		{
 #if GTK_MAJOR_VERSION >= 2
                     GdkFont *font = gtk_style_get_font(sbaw->default_text_style);
@@ -1768,7 +1740,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   struct file_context *gpsim_file;
   int file_id;
 
-  CrossReferenceToGUI *cross_reference;
+  SourceXREF *cross_reference;
   int address;
 
   if(gp == NULL)
@@ -1791,7 +1763,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
-  cross_reference = new CrossReferenceToGUI();
+  cross_reference = new SourceXREF();
   cross_reference->parent_window_type =   WT_asm_source_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = (gpointer) NULL;
@@ -1813,8 +1785,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 	     ||!strcmp(file_name+strlen(file_name)-4,".JAL")
 	    )
 	  {
-	      file_id_to_source_mode[i]=1; // These are HLL sources
-              gpsim_set_hll_mode(pic_id,1);
+	    // These are HLL sources
+	    file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
+	    gp->cpu->pma.set_hll_mode(ProgramMemoryAccess::HLL_MODE);
 	  }
 
 	  // FIXME, gpsim may change sometime making this fail

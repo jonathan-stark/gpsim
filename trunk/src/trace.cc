@@ -212,7 +212,7 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
   char a_string[50];
   unsigned int i;
-  file_register *r;
+  Register *r;
 
   int return_value = is_cycle_trace(index);
 
@@ -618,7 +618,7 @@ int Trace::dump(unsigned int n, FILE *out_stream, int watch_reg)
     found_pc =0,
     found_cycle = 0;
 
-  file_register *r;
+  Register *r;
 
   if(!cpu)
       return 0;
@@ -1131,7 +1131,7 @@ ProfileKeeper::~ProfileKeeper(void)
 
 void ProfileKeeper::catchup(void)
 {
-    file_register *r;
+    Register *r;
     if(!enabled)
         return;
     for(int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK)
@@ -1154,7 +1154,7 @@ void ProfileKeeper::catchup(void)
 	    break;
 	case REGISTER_READ:
 	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
-	    if(r->isa() == file_register::FILE_REGISTER)
+	    if(r->isa() == Register::FILE_REGISTER)
 	    {
 		r->read_access_count++;
 		//printf("register read address = 0x%x, count=%d\n",(trace.trace_buffer[i]>>8) & 0xfff,r->access_count);
@@ -1162,7 +1162,7 @@ void ProfileKeeper::catchup(void)
 	    break;
 	case REGISTER_WRITE:
 	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
-	    if(r->isa() == file_register::FILE_REGISTER)
+	    if(r->isa() == Register::FILE_REGISTER)
 	    {
 		r->write_access_count++;
 		//printf("register write address = 0x%x, count=%d\n",(trace.trace_buffer[i]>>8) & 0xfff,r->access_count);

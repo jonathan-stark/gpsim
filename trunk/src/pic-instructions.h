@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 
 class XrefObject;
 class pic_processor;
-class file_register;
+class Register;
 
 /*
  *  base class for an instruction
@@ -161,7 +161,7 @@ class Bit_op : public instruction
 public:
   unsigned int mask,register_address;
   bool access;
-  file_register *reg;
+  Register *reg;
 
   virtual void execute(void){ };
   virtual void debug(void){ };
@@ -177,11 +177,11 @@ class Register_op : public instruction
 {
 public:
 
-  static file_register *source;
+  static Register *source;
   unsigned int register_address;
   bool destination, access;
 
-  /*  file_register *destination;*/
+  /*  Register *destination;*/
 
   virtual void execute(void){ };
   virtual void debug(void){ };

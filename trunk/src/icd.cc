@@ -55,10 +55,10 @@ static int icd_sync(void);
 
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
-class icd_Register : public file_register
+class icd_Register : public Register
 {
 public:
-    file_register *replaced;
+    Register *replaced;
     int is_stale;
 
     icd_Register();
@@ -379,9 +379,9 @@ char *icd_target(void)
 
 struct termios oldtio, newtio;
 
-void put_dumb_register(file_register **frp, int address)
+void put_dumb_register(Register **frp, int address)
 {
-    file_register *fr = *frp;
+    Register *fr = *frp;
     icd_Register *ir = new icd_Register;
     ir->cpu = fr->cpu;
     *frp = ir;

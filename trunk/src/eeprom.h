@@ -169,7 +169,7 @@ public:
   virtual void write_is_complete(void);
   virtual void start_program_memory_read(void);  
   virtual void initialize(unsigned int new_rom_size);
-  virtual file_register *get_register(unsigned int address);
+  virtual Register *get_register(unsigned int address);
 
   inline virtual void change_rom(unsigned int offset, unsigned int val) {
     assert(offset < rom_size);
@@ -178,7 +178,7 @@ public:
 
   inline virtual unsigned int get_rom_size(void) { return (rom_size); }
   // XXX might want to make get_rom a friend only to cli_dump
-  inline virtual file_register **get_rom(void) { return (rom); }
+  inline virtual Register **get_rom(void) { return (rom); }
 
   inline virtual EECON1 *get_reg_eecon1(void) { return (&eecon1); }
   inline virtual EECON2 *get_reg_eecon2(void) { return (&eecon2); }
@@ -197,7 +197,7 @@ protected:
   EEDATA eedata;
   EEADR  eeadr;
 
-  file_register **rom;          //  and the data area.
+  Register **rom;          //  and the data area.
   unsigned int rom_size;
   unsigned int wr_adr,wr_data;  // latched adr and data for eewrites.
   unsigned int rd_adr;          // latched adr for eereads.

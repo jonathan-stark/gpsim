@@ -112,7 +112,6 @@ void Watch_Window::ClearWatch(WatchEntry *entry)
 {
   gtk_clist_remove(GTK_CLIST(watch_clist),current_row);
   watches=g_list_remove(watches,entry);
-  //gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
   entry->Clear_xref();
   free(entry);
 }
@@ -191,7 +190,6 @@ popup_activated(GtkWidget *widget, gpointer data)
       value = gui_get_value("value:");
       if(value<0)
 	break; // Cancel
-      //gpsim_put_register_value(entry->pic_id,entry->type,entry->address, value);
       entry->put_value(value);
       break;
     case MENU_BREAK_READ:
@@ -381,11 +379,10 @@ static gint sigh_button_event(GtkWidget *widget,
 	int value;  // , bit;
 	    
 	// Toggle the bit.
-	value = entry->get_value();//gpsim_get_register_value(entry->pic_id,entry->type, entry->address);
+	value = entry->get_value();
 
 	value ^= (1<< (7-(column-MSBCOL)));
 	entry->put_value(value);
-	//gpsim_put_register_value(entry->pic_id,entry->type, entry->address,value);
       }
     }
 
@@ -605,7 +602,6 @@ void Watch_Window::ClearWatches(void)
     entry=(WatchEntry*)iter->data;
     row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
     gtk_clist_remove(GTK_CLIST(watch_clist),row);
-    //gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
     entry->Clear_xref();
     free(entry);
     iter=iter->next;

@@ -271,6 +271,7 @@ LCD_BUSY_CHECK
         BSF     LCD_CONTROL_PORT,LCD_R_W
 
         CALL    LCD_READ
+  movlw 0
         ANDLW   0x80                    ;Check busy flag, high = busy
 
         SKPNZ

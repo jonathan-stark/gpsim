@@ -1,4 +1,12 @@
 2004-01-26  Scott Dattalo  <scott@dattalo.com>
+	* src/* gui/*
+	  Replaced references to 'file_register' with 'Register'.
+	  Removed many gpsim_*() calls. 
+	  Renamed the program_memory_access class to ProgramMemoryAccess.
+	  Moved processor member functions associated with code breakpoints
+	  into the ProgramMemoryAccess class.
+	
+2004-01-26  Scott Dattalo  <scott@dattalo.com>
 	* src/register.h, src/register.cc, src/pic-register.h, src/pic-processor.h,
 	  src/14bit-registers.cc
 	cleaned up some include file dependencies.
