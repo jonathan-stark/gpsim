@@ -184,7 +184,6 @@ public:
 
   unsigned int value;              /* pc's current value */
   unsigned int memory_size_mask; 
-  unsigned int reset_address;      /* Value pc gets at reset */
   unsigned int pclath_mask;        /* pclath confines PC to banks */
   unsigned int instruction_phase;
 
@@ -209,12 +208,24 @@ public:
   virtual void set_phase(int phase) { instruction_phase = phase;}
   virtual int get_phase(void) {return instruction_phase; }
 
+  void set_reset_address(unsigned int _reset_address)
+    {
+      reset_address = _reset_address;
+    }
+  unsigned int get_reset_address(void) 
+    {
+      return reset_address;
+    }
+
   void reset(void);
 
   virtual unsigned int get_next(void);
 
   XrefObject *xref;
 
+private:
+  unsigned int reset_address;      /* Value pc gets at reset */
+  
 };
 
 #endif // __REGISTERS__

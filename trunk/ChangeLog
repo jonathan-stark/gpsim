@@ -1,3 +1,17 @@
+2004-02-05  Scott Dattalo  <scott@dattalo.com>
+	* src/pic-processor.h
+	Fixed a nasty, nasty bug. The "GP_Processor" pointer in the
+	pic_processor class was conditionally compiled. However the
+	condition (HAVE_GUI) occurs in the include file config.h. Now
+	the bug is that config.h was not included in all cases. Some
+	classes were derived from pic_processor with this definition
+	while others weren't. Syntactically, everything was okay. But
+	the compile had the conflicting information for the size of
+	pic_processor class.
+	* src/* - whole bunch of other files touched while looking for
+	this bug.
+
+	
 2004-02-04  Scott Dattalo  <scott@dattalo.com>
 	* src/processor.cc
 	Experimenting with operator [] for the ProgramMemoryAccess class.

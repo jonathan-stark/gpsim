@@ -31,9 +31,10 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
-#include "symbol.h"
 #include "packages.h"
 #include "p16x5x.h"
+
+#include "symbol.h"
 
 
 void P16C54::create_iopin_map(void)
@@ -221,9 +222,10 @@ Processor * P16C54::construct(void)
 
   P16C54 *p = new P16C54;
 
-  cout << " c54 construct\n";
+  if(verbose)
+    cout << " c54 construct\n";
 
-  p->pc->reset_address = 0x1ff;
+  p->pc->set_reset_address(0x1ff);
 
   p->create();
 
@@ -326,7 +328,7 @@ Processor * P16C55::construct(void)
 
   cout << " c55 construct\n";
 
-  p->pc->reset_address = 0x1ff;
+  p->pc->set_reset_address(0x1ff);
 
   p->create();
 

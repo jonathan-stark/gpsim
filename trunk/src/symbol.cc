@@ -495,9 +495,61 @@ void node_symbol::print(void)
 
 }
 
+//------------------------------------------------------------------------
 void register_symbol::print(void)
 {
   if(reg)
     cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->cpu->registers[reg->address]->get_value() <<'\n';
 }
+int register_symbol::get_value(void)
+{
+  if(reg)
+    return reg->address;
+}
+void register_symbol::put_value(int new_value)
+{
+  if(reg)
+    reg->put_value(new_value);
+}
 
+//------------------------------------------------------------------------
+void w_symbol::print(void)
+{
+  if(cpu)
+    cout << w->name() << hex << " = 0x" << w->get_value() <<'\n';
+}
+int w_symbol::get_value(void) 
+{
+  return w->value;
+}
+void w_symbol::put_value(int new_value) 
+{
+  if(w)
+    w->put_value(new_value);
+}
+
+//------------------------------------------------------------------------
+void ioport_symbol::put_value(int new_value)
+{
+  if(ioport)
+    ioport->put_value(new_value);
+}
+
+//------------------------------------------------------------------------
+void constant_symbol::print(void)
+{
+  cout << *name() << " = 0x" << hex << val <<'\n';
+}
+//------------------------------------------------------------------------
+void address_symbol::print(void)
+{
+  cout << *name() << " at address 0x" << hex << val <<'\n';
+}
+//------------------------------------------------------------------------
+void module_symbol::print(void)
+{
+  if(cpu)
+    cout << cpu->type() << "  named ";
+
+  cout << *name() << '\n';
+}

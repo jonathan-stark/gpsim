@@ -32,8 +32,6 @@ class IOPIN;
 extern instruction *disasm12 (pic_processor *cpu,unsigned int inst);
 
 
-
-#include "pic-processor.h"
 class _12bit_processor : public pic_processor
 {
 
