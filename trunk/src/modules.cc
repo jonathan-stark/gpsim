@@ -70,14 +70,13 @@ list <Module *> instantiated_modules_list;
 Module::Module(void)
 {
 
-  //name_str = 0;
-  //widget=0;
   package = 0;
   interface = 0;
 
-  // FIXME - remove these gui references:
-  //x=-1; // -1 means automatic positioning
-  //y=-1;
+  // Derived modules should assign more reasonable values for this.
+  major_version = 0;
+  minor_version = 0;
+  micro_version = 0;
 
   xref = new XrefObject;
 

@@ -976,7 +976,7 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 //
 extern int readihex16 (pic_processor *cpu, FILE * file);
 
-void pic_processor::load_hex (const char *hex_file)
+bool pic_processor::load_hex (const char *hex_file)
 {
 
   FILE *inputfile = fopen_path (hex_file, "r");
@@ -987,7 +987,7 @@ void pic_processor::load_hex (const char *hex_file)
   if (inputfile == 0)
     {
       cout << "Error: Couldn't open " << hex_file << '\n';
-      return;
+      return false;
     }
 
   // assume no configuration word is in the hex file.
@@ -1014,8 +1014,11 @@ void pic_processor::load_hex (const char *hex_file)
 
     if(verbose)
       cycles.dump_breakpoints();
+
+    return true;
   }
 
+  return false;
 }
 
 

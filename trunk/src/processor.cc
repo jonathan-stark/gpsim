@@ -80,6 +80,11 @@ Processor::Processor(void)
 
   interface = new ProcessorInterface(this);
 
+  // let the processor version number simply be gpsim's version number.
+  major_version = GPSIM_MAJOR_VERSION;
+  minor_version = GPSIM_MINOR_VERSION;
+  micro_version = GPSIM_MICRO_VERSION;
+
 }
 
 //-------------------------------------------------------------------
