@@ -86,7 +86,7 @@ void  initialization_is_complete(void);
 typedef struct _sym
 {
     enum SYMBOL_TYPE type;
-    char name[SYMBOL_NAME_LEN];
+    char *name;
     int value;
 } sym;
 
