@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdkkeysyms.h>
 #include <glib.h>
 #include <string.h>
+#include <math.h>
 
 #include <assert.h>
 
@@ -55,6 +56,9 @@ static char *profile_range_titles[PROFILE_RANGE_COLUMNS]={"Start address", "End 
 
 #define PROFILE_REGISTER_COLUMNS    4
 static char *profile_register_titles[PROFILE_REGISTER_COLUMNS]={"Address", "Register", "Read count", "Write count"};
+
+#define PROFILE_EXESTATS_COLUMNS    9
+static char *profile_exestats_titles[PROFILE_EXESTATS_COLUMNS]={"From address", "To address", "Executions", "Min", "Max",  "Median", "Average", "Std. Dev.", "Total"};
 
 struct profile_entry {
     unsigned int pic_id;
@@ -101,7 +105,7 @@ typedef struct _menu_item {
     GtkWidget *item;
 } menu_item;
 
-static menu_item menu_items[] = {
+static menu_item range_menu_items[] = {
     {"Remove range", MENU_REMOVE_GROUP},
     {"Add range...", MENU_ADD_GROUP},
     {"Add all labels", MENU_ADD_ALL_LABELS},
@@ -113,6 +117,15 @@ static menu_item plot_menu_items[] = {
     {"Save postscript...", MENU_SAVE_PS},
     {"Print", MENU_PRINT},
 };
+
+static menu_item exestats_menu_items[] = {
+    {"Remove entry", MENU_REMOVE_GROUP},
+    {"Add a measurement range...", MENU_ADD_GROUP},
+    {"Add all labels", MENU_ADD_ALL_LABELS},
+    {"Add C functions (non-matching _<hexval>_DS_)", MENU_ADD_FUNCTION_LABELS},
+    {"Snapshot entry to plot", MENU_PLOT},
+};
+
 
 extern int gui_message(char *message);
 
@@ -418,7 +431,155 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
     }
 }
 
-// called from do_popup
+// called when user has selected a menu item in exestats tab
+static void
+exestats_popup_activated(GtkWidget *widget, gpointer data)
+{
+    menu_item *item;
+//    struct profile_entry *entry;
+    unsigned int pic_id;
+
+    if(widget==NULL || data==NULL)
+    {
+	printf("Warning exestats_popup_activated(%p,%p)\n",widget,data);
+	return;
+    }
+    
+    item = (menu_item *)data;
+    pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
+
+//    entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
+
+    switch(item->id)
+    {
+    case MENU_REMOVE_GROUP:
+        puts("Remove group");
+//	remove_entry(popup_pw,entry);
+	break;
+    case MENU_ADD_GROUP:
+        puts("Add group");
+//        add_range_dialog(popup_pw);
+	break;
+    case MENU_ADD_ALL_LABELS:
+        puts("Add labels");
+/*	gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+	while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+	{
+	    sym *data;
+	    if(s->type==SYMBOL_ADDRESS)
+	    {
+		data=malloc(sizeof(sym));
+		memcpy(data,s,sizeof(sym));
+		symlist=g_list_append(symlist,data);
+	    }
+	}
+	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+	strcpy(fromaddress_string,"0");
+	iter=symlist;
+	while(iter!=NULL)
+	{
+	    s=iter->data;
+
+	    strcpy(toaddress_string,s->name);
+	    add_range(popup_pw,fromaddress_string,toaddress_string);
+	    strcpy(fromaddress_string,toaddress_string);
+	    toaddress_string[0]='\0';
+	    free(s);
+            iter=iter->next;
+	}
+
+	sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	add_range(popup_pw,fromaddress_string,toaddress_string);
+
+	while(symlist!=NULL)
+	    symlist=g_list_remove(symlist,symlist->data);
+*/
+	break;
+    case MENU_ADD_FUNCTION_LABELS:
+        puts("Add functions");
+/*	gpsim_symbol_rewind((unsigned int)gp->pic_id);
+
+	while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
+	{
+	    if(s->type==SYMBOL_ADDRESS)
+	    {
+		if(NULL==strstr(s->name,"_DS_"))
+		{
+		    sym *data;
+		    data=malloc(sizeof(sym));
+		    memcpy(data,s,sizeof(sym));
+		    symlist=g_list_append(symlist,data);
+		}
+	    }
+	}
+	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+
+	iter=symlist;
+	if(iter!=NULL)
+	{
+	    s=iter->data;
+	    strcpy(fromaddress_string,s->name);
+	    free(s);
+	    iter=iter->next;
+	    while(iter!=NULL)
+	    {
+		s=iter->data;
+		strcpy(toaddress_string,s->name);
+		add_range(popup_pw,fromaddress_string,toaddress_string);
+		strcpy(fromaddress_string,toaddress_string);
+		toaddress_string[0]='\0';
+		free(s);
+		iter=iter->next;
+	    }
+
+	    sprintf(toaddress_string,"%d",gpsim_get_program_memory_size(gp->pic_id));
+	    add_range(popup_pw,fromaddress_string,toaddress_string);
+
+	}
+
+	while(symlist!=NULL)
+	    symlist=g_list_remove(symlist,symlist->data);
+  */
+	break;
+    case MENU_PLOT:
+/*	{
+	guint64 *cyclearray;//{100,200,300,400,500,600,900,555};
+	char **pointlabel;
+	int numpoints=8;
+        int i;
+
+	pointlabel=malloc(sizeof(char*)*numpoints);
+        cyclearray=malloc(sizeof(guint64)*numpoints);
+
+	for(i=0;i<numpoints;i++)
+	{
+	    range_entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),i);
+	    if(range_entry==NULL)
+	    {
+		if(i!=0)
+		    plotit(popup_pw,pointlabel,cyclearray,i);
+                break;
+	    }
+	    else
+	    {
+                pointlabel[i]=malloc(128);
+		sprintf(pointlabel[i],"%s (end: %s)",range_entry->startaddress_text,range_entry->endaddress_text);
+                cyclearray[i]=range_entry->last_count;
+	    }
+	}
+        if(range_entry!=NULL)
+	    plotit(popup_pw,pointlabel,cyclearray,numpoints);
+	}*/
+        puts("Plot");
+	break;
+    default:
+	puts("Unhandled menuitem?");
+	break;
+    }
+}
+
+// called from plot_do_popup
 static GtkWidget *
 plot_build_menu(Profile_Window *pw)
 {
@@ -453,6 +614,67 @@ plot_build_menu(Profile_Window *pw)
   }
 
   return menu;
+}
+
+// called from exestats_do_popup
+static GtkWidget *
+exestats_build_menu(Profile_Window *pw)
+{
+  GtkWidget *menu;
+  GtkWidget *item;
+  int i;
+
+
+  if(pw==NULL)
+  {
+      printf("Warning build_menu(%p)\n",pw);
+      return NULL;
+  }
+    
+  popup_pw = pw;
+  
+  menu=gtk_menu_new();
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  for (i=0; i < (sizeof(exestats_menu_items)/sizeof(exestats_menu_items[0])) ; i++){
+      exestats_menu_items[i].item=item=gtk_menu_item_new_with_label(exestats_menu_items[i].name);
+
+      gtk_signal_connect(GTK_OBJECT(item),"activate",
+			 (GtkSignalFunc) exestats_popup_activated,
+			 &exestats_menu_items[i]);
+      
+      gtk_widget_show(item);
+      gtk_menu_append(GTK_MENU(menu),item);
+  }
+
+  return menu;
+}
+
+// button press handler
+static gint
+exestats_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
+{
+
+    GtkWidget *popup;
+
+    if(widget==NULL || event==NULL || pw==NULL)
+    {
+	printf("Warning exestats_popup(%p,%p,%p)\n",widget,event,pw);
+	return 0;
+    }
+
+    popup=pw->exestats_popup_menu;
+
+    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+
+      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+		     3, event->time);
+    }
+    return FALSE;
 }
 
 // button press handler
@@ -819,7 +1041,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	{
 	    if(s->type==SYMBOL_ADDRESS)
 	    {
-                unsigned int whatever;
 		if(NULL==strstr(s->name,"_DS_"))
 		{
 		    sym *data;
@@ -909,17 +1130,17 @@ static void update_menus(Profile_Window *pw)
     struct profile_entry *entry;
     int i;
 
-    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-	item=menu_items[i].item;
-//	if(menu_items[i].id!=MENU_ADD_GROUP)
+    for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
+	item=range_menu_items[i].item;
+//	if(range_menu_items[i].id!=MENU_ADD_GROUP)
 	{
 	    if(pw)
 	    {
 		entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
-		if(menu_items[i].id!=MENU_ADD_GROUP &&
-		   menu_items[i].id!=MENU_ADD_ALL_LABELS &&
-		   menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
-		   menu_items[i].id!=MENU_PLOT &&
+		if(range_menu_items[i].id!=MENU_ADD_GROUP &&
+		   range_menu_items[i].id!=MENU_ADD_ALL_LABELS &&
+		   range_menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
+		   range_menu_items[i].id!=MENU_PLOT &&
 		   entry==NULL)
 		    gtk_widget_set_sensitive (item, FALSE);
 		else
@@ -1001,12 +1222,12 @@ build_menu(Profile_Window *pw)
   gtk_menu_append (GTK_MENU (menu), item);
   gtk_widget_show (item);
   
-  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
+  for (i=0; i < (sizeof(range_menu_items)/sizeof(range_menu_items[0])) ; i++){
+      range_menu_items[i].item=item=gtk_menu_item_new_with_label(range_menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
 			 (GtkSignalFunc) popup_activated,
-			 &menu_items[i]);
+			 &range_menu_items[i]);
       
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
@@ -1099,6 +1320,127 @@ profile_compare_func(GtkCList *clist, gconstpointer ptr1,gconstpointer ptr2)
     return strcmp(text1,text2);
 }
 
+
+
+gint histogram_list_compare_func(gconstpointer a, gconstpointer b)
+{
+    const struct cycle_histogram_counter *h1=(struct cycle_histogram_counter*)a;
+    const struct cycle_histogram_counter *h2=(struct cycle_histogram_counter*)b;
+
+    if(h1->start_address > h2->start_address)
+	return 1;
+    if(h1->start_address == h2->start_address)
+    {
+	if(h1->stop_address > h2->stop_address)
+	    return 1;
+	if(h1->stop_address == h2->stop_address)
+	{
+	    if(h1->cycles*h1->count > h2->cycles*h2->count)
+		return 1;
+	    if(h1->cycles*h1->count == h2->cycles*h2->count)
+		return 0;
+	}
+    }
+    return -1;
+}
+
+double calculate_median(GList *start, GList *stop)
+{
+    struct cycle_histogram_counter *chc_start, *chc_stop;//, *chc_result;
+//    GList *result;
+    int count_sum=0;
+
+    chc_start=(struct cycle_histogram_counter*)start->data;
+    chc_stop=(struct cycle_histogram_counter*)stop->data;
+
+    while(start!=stop)
+    {
+	if(count_sum>=0)
+	{
+	    // Move start to right
+	    start = start->next;
+	    count_sum-=chc_start->count;
+	    chc_start=(struct cycle_histogram_counter*)start->data;
+            continue;
+	}
+	else
+	{
+	    // Move stop to left
+	    stop=stop->prev;
+	    count_sum+=chc_stop->count;
+	    chc_stop=(struct cycle_histogram_counter*)stop->data;
+            continue;
+	}
+    }
+
+    if(count_sum>chc_start->count)
+    {
+        start=start->next;
+	chc_start=(struct cycle_histogram_counter*)start->data;
+	return chc_start->cycles;
+    }
+    if(count_sum<-chc_start->count)
+    {
+        start=start->prev;
+	chc_start=(struct cycle_histogram_counter*)start->data;
+	return chc_start->cycles;
+    }
+    if(-count_sum==chc_start->count)
+    {
+        stop=stop->prev;
+	chc_stop=(struct cycle_histogram_counter*)stop->data;
+	return (chc_start->cycles+chc_stop->cycles)/2.0;
+    }
+    if(count_sum==chc_start->count)
+    {
+        stop=stop->next;
+	chc_stop=(struct cycle_histogram_counter*)stop->data;
+	return (chc_start->cycles+chc_stop->cycles)/2.0;
+    }
+    if(abs(count_sum)<chc_start->count)
+    {
+	return chc_start->cycles;
+    }
+
+    assert(0);
+    return 0.0;
+}
+
+float calculate_stddev(GList *start, GList *stop, float average)
+{
+    float variance;
+    int count=0;
+    float sum=0;
+    struct cycle_histogram_counter *chc_start, *chc_stop;
+
+    if(start==stop)
+	return 0.0;
+
+    stop=stop->next;
+
+    while(start!=stop)
+    {
+	float diff, diff2;
+
+	chc_start=(struct cycle_histogram_counter*)start->data;
+	chc_stop=(struct cycle_histogram_counter*)stop->data;
+
+	diff=chc_start->cycles-average;
+
+	diff2=diff*diff;
+
+	sum+=diff2*chc_start->count;
+
+	count+=chc_start->count;
+
+	start=start->next;
+    }
+
+    variance=sum/count;
+    return sqrt(variance);
+}
+
+
 void ProfileWindow_update(Profile_Window *pw)
 {
   GUI_Processor *gp;
@@ -1119,8 +1461,8 @@ void ProfileWindow_update(Profile_Window *pw)
       return;
   }
 
+  // Update profile list
   iter=pw->profile_list;
-
   while(iter)
   {
       struct profile_entry *entry;
@@ -1184,6 +1526,7 @@ void ProfileWindow_update(Profile_Window *pw)
   }
   gtk_clist_sort(pw->profile_range_clist);
 
+  // Update register list
   iter=pw->profile_register_list;
   while(iter)
   {
@@ -1217,6 +1560,189 @@ void ProfileWindow_update(Profile_Window *pw)
       iter=iter->next;
   }
 
+  // Update cummulative statistics list
+  pw->histogram_profile_list = g_list_sort(pw->histogram_profile_list,
+					   histogram_list_compare_func);
+  // Remove all of clist (for now)
+  gtk_clist_freeze(GTK_CLIST(pw->profile_exestats_clist));
+  gtk_clist_clear(GTK_CLIST(pw->profile_exestats_clist));
+  if(pw->histogram_profile_list!=NULL)
+  {
+      struct cycle_histogram_counter *chc;
+      int count_sum=0;
+      unsigned int start=0xffffffff, stop=0xffffffff;
+      guint64 min=0xffffffffffffffffULL, max=0;
+      guint64 cycles_sum=0;
+      GList *list_start=NULL, *list_end=NULL;
+	char fromaddress_string[100]="";
+	char toaddress_string[100]="";
+	char executions_string[100]="";
+	char min_string[100]="";
+	char max_string[100]="";
+	char median_string[100]="";
+	char average_string[100]="";
+	char stddev_string[100]="";
+	char total_string[100]="";
+	char *entry[PROFILE_EXESTATS_COLUMNS]={
+	    fromaddress_string,
+	    toaddress_string,
+	    executions_string,
+            min_string,
+	    max_string,
+            median_string,
+	    average_string,
+            stddev_string,
+            total_string
+	};
+
+	iter=pw->histogram_profile_list;
+        list_start = iter;
+      while(iter!=NULL)
+      {
+	  chc=(struct cycle_histogram_counter*)iter->data;
+
+	  if(start==chc->start_address &&
+	     stop==chc->stop_address)
+	  {
+	      // Add data to statistics
+
+	      count_sum+=chc->count;
+	      if(chc->cycles<min)
+		  min=chc->cycles;
+	      if(chc->cycles>max)
+		  max=chc->cycles;
+              cycles_sum+=chc->cycles*chc->count;
+	  }
+	  else
+	  {
+	      if(count_sum!=0)
+	      {
+		  // We have data, display it.
+		  sprintf(fromaddress_string,"0x%04x",start);
+		  sprintf(toaddress_string,"0x%04x",stop);
+		  sprintf(executions_string,"%d",count_sum);
+		  sprintf(min_string,"%ld",(long)min);
+		  sprintf(max_string,"%ld",(long)max);
+		  sprintf(median_string,"%.2f", calculate_median(list_start,list_end));
+                  sprintf(average_string,"%.2f",((float)cycles_sum)/count_sum);
+		  sprintf(stddev_string,"%.2f",calculate_stddev(list_start,list_end,cycles_sum/count_sum));
+                  sprintf(total_string,"%d",(int)cycles_sum);
+		  gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
+	      }
+
+	      // Start new calculation
+	      count_sum=chc->count;
+	      start = chc->start_address;
+	      stop = chc->stop_address;
+	      min=chc->cycles;
+	      max=chc->cycles;
+	      cycles_sum=chc->cycles*chc->count;
+	      list_start = iter;
+
+	  }
+          list_end=iter;
+          iter=iter->next;
+      }
+      // add current to clist
+
+      sprintf(fromaddress_string,"0x%04x",start);
+      sprintf(toaddress_string,"0x%04x",stop);
+      sprintf(executions_string,"%d",count_sum);
+      sprintf(min_string,"%ld",(long)min);
+      sprintf(max_string,"%ld",(long)max);
+      sprintf(median_string,"%.2f", calculate_median(list_start,list_end));
+      sprintf(average_string,"%.2f",((float)cycles_sum)/count_sum);
+      sprintf(stddev_string,"%.2f",calculate_stddev(list_start,list_end,cycles_sum/count_sum));
+      sprintf(total_string,"%d",(int)cycles_sum);
+      gtk_clist_append(GTK_CLIST(pw->profile_exestats_clist),entry);
+  }
+
+  // print debug info:
+/*  iter=pw->histogram_profile_list;
+  while(iter!=NULL)
+  {
+      struct cycle_histogram_counter *chc;
+      chc=(struct cycle_histogram_counter*)iter->data;
+      printf("start %d, stop %d, cycles %d, count %d\n",
+	     (int)chc->start_address,
+	     (int)chc->stop_address,
+	     (int)chc->cycles,
+	     (int)chc->count);
+      iter=iter->next;
+  }*/
+
+  gtk_clist_thaw(GTK_CLIST(pw->profile_exestats_clist));
+
+}
+
+#define END_OF_TIME 0xFFFFFFFFFFFFFFFFULL
+static guint64 startcycle=END_OF_TIME;
+static unsigned int startaddress;
+static guint64 stopcycle=END_OF_TIME;
+static unsigned int stopaddress;
+
+void ProfileWindow_notify_start_callback(Profile_Window *pw)
+{
+    if(startcycle==END_OF_TIME)
+    {
+	startcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
+	startaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
+    }
+}
+
+void ProfileWindow_notify_stop_callback(Profile_Window *pw)
+{
+    if(stopcycle==END_OF_TIME && startcycle!=END_OF_TIME)
+    {
+	stopcycle=gpsim_get_cycles(((GUI_Object*)pw)->gp->pic_id);
+	if(startcycle==stopcycle)
+	{
+	    // This was probably an attempt to measure the whole loop.
+	    // Set stopcycle to unset, and wait for the next one
+	    stopcycle=END_OF_TIME;
+	}
+	else
+	{
+	    guint64 cycles;
+            GList *iter;
+	    stopaddress=gpsim_get_pc_value(((GUI_Object*)pw)->gp->pic_id);
+	    // We have a new measurement
+            cycles=(int)stopcycle-(int)startcycle;
+
+	    // Search to see if there are an entry with this startaddress,
+            // stopaddress and cycle count.
+	    iter=pw->histogram_profile_list;
+	    while(iter!=NULL)
+	    {
+		struct cycle_histogram_counter *chc;
+		chc=(struct cycle_histogram_counter*)iter->data;
+		if(chc->start_address == startaddress &&
+		   chc->stop_address == stopaddress &&
+		   chc->cycles == cycles)
+		{
+		    // If so then add 1 to the counter
+		    chc->count++;
+                    break;
+		}
+                iter=iter->next;
+	    }
+	    if(iter==NULL)
+	    {
+		// Else malloc a new struct, fill with values and add (sorted) to list
+		struct cycle_histogram_counter *chc;
+
+		chc=malloc(sizeof(struct cycle_histogram_counter));
+		chc->start_address=startaddress;
+		chc->stop_address=stopaddress;
+		chc->cycles=cycles;
+		chc->count=1;
+
+		pw->histogram_profile_list=g_list_append(pw->histogram_profile_list,chc);
+	    }
+
+	    startcycle=stopcycle=END_OF_TIME;
+	}
+    }
 }
 
 /*****************************************************************
@@ -1284,7 +1810,6 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
     for(i=0; i < gpsim_get_register_memory_size(gp->pic_id,REGISTER_RAM); i++)
     {
 	struct profile_register_entry *profile_register_entry;
-	char buf[100];
 	char address_string[100];
 	char count_string_read[100];
 	char count_string_write[100];
@@ -1352,6 +1877,7 @@ void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp)
     
     pw->gui_obj.gp = gp;
     pic_id = gp->pic_id;
+
 }
 
 static int delete_event(GtkWidget *widget,
@@ -1378,6 +1904,7 @@ BuildProfileWindow(Profile_Window *pw)
   GtkWidget *profile_clist;
   GtkWidget *profile_register_clist;
   GtkWidget *profile_range_clist;
+  GtkWidget *profile_exestats_clist;
   GtkWidget *label;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
@@ -1430,16 +1957,6 @@ BuildProfileWindow(Profile_Window *pw)
 			     (GtkCListCompareFunc)profile_compare_func);
 
   GTK_WIDGET_UNSET_FLAGS(profile_clist,GTK_CAN_DEFAULT);
-    
-
-  width=((GUI_Object*)pw)->width;
-  height=((GUI_Object*)pw)->height;
-  x=((GUI_Object*)pw)->x;
-  y=((GUI_Object*)pw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
-
 
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
@@ -1455,6 +1972,7 @@ BuildProfileWindow(Profile_Window *pw)
   ///////////////////////////////////////////////////
   ///////////////////////////////////////////////////
 
+
   // Instruction range profile clist
   profile_range_clist=gtk_clist_new_with_titles(PROFILE_RANGE_COLUMNS,profile_range_titles);
   pw->profile_range_clist = GTK_CLIST(profile_range_clist);
@@ -1467,14 +1985,6 @@ BuildProfileWindow(Profile_Window *pw)
 
   GTK_WIDGET_UNSET_FLAGS(profile_range_clist,GTK_CAN_DEFAULT);
     
-
-  width=((GUI_Object*)pw)->width;
-  height=((GUI_Object*)pw)->height;
-  x=((GUI_Object*)pw)->x;
-  y=((GUI_Object*)pw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
-
   pw->range_popup_menu=build_menu(pw);
 
   gtk_signal_connect(GTK_OBJECT(pw->profile_range_clist),
@@ -1500,11 +2010,14 @@ BuildProfileWindow(Profile_Window *pw)
 
   ///////////////////////////////////////////////////
 
+
   // Register profile clist
   profile_register_clist=gtk_clist_new_with_titles(PROFILE_REGISTER_COLUMNS,profile_register_titles);
   pw->profile_register_clist = GTK_CLIST(profile_register_clist);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),0,TRUE);
   gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),1,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),2,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_register_clist),3,TRUE);
 //  gtk_clist_set_sort_column (pw->profile_register_clist,1);
 //  gtk_clist_set_sort_type (pw->profile_register_clist,GTK_SORT_DESCENDING);
   gtk_clist_set_compare_func(GTK_CLIST(pw->profile_register_clist),
@@ -1512,16 +2025,6 @@ BuildProfileWindow(Profile_Window *pw)
 
   GTK_WIDGET_UNSET_FLAGS(profile_register_clist,GTK_CAN_DEFAULT);
     
-
-  width=((GUI_Object*)pw)->width;
-  height=((GUI_Object*)pw)->height;
-  x=((GUI_Object*)pw)->x;
-  y=((GUI_Object*)pw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
-
-
   scrolled_window=gtk_scrolled_window_new(NULL, NULL);
 
   gtk_container_add(GTK_CONTAINER(scrolled_window), profile_register_clist);
@@ -1533,8 +2036,51 @@ BuildProfileWindow(Profile_Window *pw)
 //  gtk_box_pack_start(GTK_BOX(main_vbox), scrolled_window, TRUE, TRUE, 0);
   label=gtk_label_new("Register profile");
   gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+
   ///////////////////////////////////////////////////
 
+
+  // Execution time statistics tab
+  profile_exestats_clist=gtk_clist_new_with_titles(PROFILE_EXESTATS_COLUMNS,profile_exestats_titles);
+  pw->profile_exestats_clist = GTK_CLIST(profile_exestats_clist);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),0,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),1,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),2,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),3,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),4,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),5,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),6,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),7,TRUE);
+  gtk_clist_set_column_auto_resize(GTK_CLIST(profile_exestats_clist),8,TRUE);
+
+  GTK_WIDGET_UNSET_FLAGS(profile_exestats_clist,GTK_CAN_DEFAULT);
+
+  pw->exestats_popup_menu=exestats_build_menu(pw);
+  gtk_signal_connect(GTK_OBJECT(pw->profile_exestats_clist),
+		     "button_press_event",
+		     (GtkSignalFunc) exestats_do_popup,
+		     pw);
+
+  scrolled_window=gtk_scrolled_window_new(NULL, NULL);
+
+  gtk_container_add(GTK_CONTAINER(scrolled_window), profile_exestats_clist);
+  
+  gtk_widget_show(profile_exestats_clist);
+
+  gtk_widget_show(scrolled_window);
+
+  label=gtk_label_new("Exe time stats");
+  gtk_notebook_append_page(GTK_NOTEBOOK(pw->notebook),scrolled_window,label);
+  ///////////////////////////////////////////////////
+
+
+  width=((GUI_Object*)pw)->width;
+  height=((GUI_Object*)pw)->height;
+  x=((GUI_Object*)pw)->x;
+  y=((GUI_Object*)pw)->y;
+  gtk_window_set_default_size(GTK_WINDOW(pw->gui_obj.window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(pw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(pw->gui_obj.window),pw->gui_obj.name,"Gpsim");
 
   normal_style = gtk_style_new ();
   char_width = gdk_string_width (normal_style->font,"9");
@@ -1561,6 +2107,9 @@ BuildProfileWindow(Profile_Window *pw)
 
   update_menu_item((GUI_Object*)pw);
 
+
+
+
   return 0;
 }
 
@@ -1580,6 +2129,8 @@ int CreateProfileWindow(GUI_Processor *gp)
   profile_window->profile_list=NULL;
   profile_window->profile_range_list=NULL;
   profile_window->profile_register_list=NULL;
+  profile_window->histogram_profile_list=NULL;
+
   gp->profile_window = profile_window;
 
   profile_window->processor=0;

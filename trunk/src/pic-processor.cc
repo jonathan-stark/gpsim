@@ -500,7 +500,7 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(program_memory[pc.value]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+  if(find_instruction(pc.value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
     {
       simulation_start_cycle = cycles.value;
     }
@@ -608,9 +608,9 @@ void pic_processor::step_over (void)
 
   if( ! ( (pc.value >= saved_pc) && (pc.value <= saved_pc+2) ) )
     {
-      if(program_memory[pc.value]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-	return;
-      else
+        if(find_instruction(pc.value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+	  return;
+	else
 	{
 	  // Set a break point at the instruction just past the one over which we are stepping
 	  unsigned int bp_num = bp.set_execution_break(this, saved_pc + 1);
@@ -1345,50 +1345,220 @@ void pic_processor::set_break_at_address(int address)
 }
 
 //-------------------------------------------------------------------
-void pic_processor::clear_break_at_address(int address)
+void pic_processor::set_notify_at_address(int address, BreakCallBack *cb)
 {
-    int b;
-
-    if( address >= 0)
+  if( address >= 0)
     {
-
 	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
 	{
-	    if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-	    {
-		b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
-		bp.clear( b );
-	    }
-	    else
-	    {
-		cout << "failed to clear execution break\n";
-	    }
+	    bp.set_notify_break(this, address, cb);
 	}
     }
 }
 
 //-------------------------------------------------------------------
-void pic_processor::toggle_break_at_address(int address)
+void pic_processor::set_profile_start_at_address(int address, BreakCallBack *cb)
 {
-
-  int b;
-
   if( address >= 0)
     {
-
-      if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
 	{
-	  b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
-	  bp.clear( b );
-	  //cout << "cleared ";
+	    bp.set_profile_start_break(this, address, cb);
 	}
-      else
+    }
+}
+
+//-------------------------------------------------------------------
+void pic_processor::set_profile_stop_at_address(int address, BreakCallBack *cb)
+{
+  if( address >= 0)
+    {
+	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
 	{
-	  b = bp.set_execution_break(this, address);
-	  //cout << "set ";
+	    bp.set_profile_stop_break(this, address, cb);
+	}
+    }
+}
+
+//-------------------------------------------------------------------
+instruction *pic_processor::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
+{
+    instruction *p;
+
+    if(program_memory_size()<=address)
+	return NULL;
+
+    p=program_memory[address];
+
+    if(p==NULL)
+        return NULL;
+
+    if(p->isa()==instruction::INVALID_INSTRUCTION)
+        return NULL;
+
+    for(;;)
+    {
+	if(p->isa()==type)
+	    return p;
+
+	switch(p->isa())
+	{
+	case instruction::MULTIWORD_INSTRUCTION:
+	case instruction::INVALID_INSTRUCTION:
+	case instruction::NORMAL_INSTRUCTION:
+            return NULL;
+	case instruction::BREAKPOINT_INSTRUCTION:
+	case instruction::NOTIFY_INSTRUCTION:
+	case instruction::PROFILE_START_INSTRUCTION:
+	case instruction::PROFILE_STOP_INSTRUCTION:
+	    p=((Breakpoint_Instruction *)p)->replaced;
+            break;
 	}
 
     }
+
+    return NULL;
+}
+
+void pic_processor::clear_break_at_address(int address)
+{
+    instruction *instr;
+    int b;
+
+    if(program_memory_size()<=address)
+	return;
+
+    instr=find_instruction(address,instruction::BREAKPOINT_INSTRUCTION);
+    if(instr!=NULL)
+    {
+	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
+	bp.clear( b );
+    }
+    else
+    {
+	cout << "failed to clear execution break\n";
+    }
+}
+
+//-------------------------------------------------------------------
+void pic_processor::clear_notify_at_address(int address)
+{
+    instruction *instr;
+    int b;
+
+    if(program_memory_size()<=address)
+	return;
+
+    instr=find_instruction(address,instruction::NOTIFY_INSTRUCTION);
+    if(instr!=NULL)
+    {
+	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
+	bp.clear( b );
+    }
+    else
+    {
+	cout << "failed to clear execution break\n";
+    }
+}
+
+//-------------------------------------------------------------------
+void pic_processor::clear_profile_start_at_address(int address)
+{
+    instruction *instr;
+    int b;
+
+    if(program_memory_size()<=address)
+	return;
+
+    instr=find_instruction(address,instruction::PROFILE_START_INSTRUCTION);
+    if(instr!=NULL)
+    {
+	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
+	bp.clear( b );
+    }
+    else
+    {
+	cout << "failed to clear execution break\n";
+    }
+}
+
+//-------------------------------------------------------------------
+void pic_processor::clear_profile_stop_at_address(int address)
+{
+    instruction *instr;
+    int b;
+
+    if(program_memory_size()<=address)
+	return;
+
+    instr=find_instruction(address,instruction::PROFILE_STOP_INSTRUCTION);
+    if(instr!=NULL)
+    {
+	b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
+	bp.clear( b );
+    }
+    else
+    {
+	cout << "failed to clear execution break\n";
+    }
+}
+
+//-------------------------------------------------------------------
+int pic_processor::address_has_break(int address)
+{
+    instruction *instr;
+    if(program_memory_size()<=address)
+	return 0;
+    instr=find_instruction(address,instruction::BREAKPOINT_INSTRUCTION);
+    if(instr!=NULL)
+        return 1;
+    return 0;
+}
+
+//-------------------------------------------------------------------
+int pic_processor::address_has_notify(int address)
+{
+    instruction *instr;
+    if(program_memory_size()<=address)
+	return 0;
+    instr=find_instruction(address,instruction::NOTIFY_INSTRUCTION);
+    if(instr!=NULL)
+        return 1;
+    return 0;
+}
+
+//-------------------------------------------------------------------
+int pic_processor::address_has_profile_start(int address)
+{
+    instruction *instr;
+    if(program_memory_size()<=address)
+	return 0;
+    instr=find_instruction(address,instruction::PROFILE_START_INSTRUCTION);
+    if(instr!=NULL)
+        return 1;
+    return 0;
+}
+
+//-------------------------------------------------------------------
+int pic_processor::address_has_profile_stop(int address)
+{
+    instruction *instr;
+    if(program_memory_size()<=address)
+	return 0;
+    instr=find_instruction(address,instruction::PROFILE_STOP_INSTRUCTION);
+    if(instr!=NULL)
+        return 1;
+    return 0;
+}
+
+
+//-------------------------------------------------------------------
+void pic_processor::toggle_break_at_address(int address)
+{
+    if(address_has_break(address))
+	clear_break_at_address(address);
+    else
+        set_break_at_address(address);
 }
 //-------------------------------------------------------------------
 
@@ -1397,44 +1567,16 @@ void pic_processor::set_break_at_line(int file_id, int src_line)
   int address;
 
   if( (address = find_closest_address_to_line(file_id, src_line)) >= 0)
-    {
-
-      int b = bp.set_execution_break(this, address);
-
-      if(b < MAX_BREAKPOINTS)
-	{
-	  //cout << "break at address: " << address << " break #: " << b << '\n';
-//	    if(program_memory[address]->xref)
-//		program_memory[address]->xref->update();
-	}
-      else
-	cout << "failed to set execution break (check the address)\n";
-
-    }
-
+      set_break_at_address(address);
 }
 
 void pic_processor::clear_break_at_line(int file_id, int src_line)
 {
 
   int address;
-  int b;
 
   if( (address = find_closest_address_to_line(file_id, src_line)) >= 0)
-    {
-
-      if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-	{
-	  b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
-	  bp.clear( b );
-	  //cout << "cleared break at address: " << address << " break #: " << b << '\n';
-
-//	    if(program_memory[address]->xref)
-//		program_memory[address]->xref->update();
-	}
-      else
-	cout << "break point wasn't found at address: 0x" << address << '\n';
-    }
+      clear_break_at_address(address);
 }
 
 void pic_processor::toggle_break_at_line(int file_id, int src_line)
@@ -1453,44 +1595,16 @@ void pic_processor::set_break_at_hll_line(int file_id, int src_hll_line)
   int address;
 
   if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-    {
-
-      int b = bp.set_execution_break(this, address);
-
-      if(b < MAX_BREAKPOINTS)
-	{
-	  //cout << "break at address: " << address << " break #: " << b << '\n';
-//	    if(program_memory[address]->xref)
-//		program_memory[address]->xref->update();
-	}
-      else
-	cout << "failed to set execution break (check the address)\n";
-
-    }
-
+      set_break_at_address(address);
 }
 
 void pic_processor::clear_break_at_hll_line(int file_id, int src_hll_line)
 {
 
   int address;
-  int b;
 
   if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-    {
-
-      if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-	{
-	  b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
-	  bp.clear( b );
-	  //cout << "cleared break at address: " << address << " break #: " << b << '\n';
-
-//	    if(program_memory[address]->xref)
-//		program_memory[address]->xref->update();
-	}
-      else
-	cout << "break point wasn't found at address: 0x" << address << '\n';
-    }
+      clear_break_at_address(address);
 }
 
 void pic_processor::toggle_break_at_hll_line(int file_id, int src_hll_line)
@@ -1673,25 +1787,31 @@ instruction *program_memory_access::get(int addr)
 // like get, but will ignore instruction break points 
 instruction *program_memory_access::get_base_instruction(int addr)
 {
-  instruction *inst;
+    instruction *p;
 
-  inst = get(addr);
+    p=get(addr);
 
-  if(!inst)
-    return inst;
+    if(p==NULL)
+        return NULL;
 
-  if(inst->isa() != instruction::BREAKPOINT_INSTRUCTION)
-    return inst;
+    for(;;)
+    {
+	switch(p->isa())
+	{
+	case instruction::MULTIWORD_INSTRUCTION:
+	case instruction::INVALID_INSTRUCTION:
+	case instruction::NORMAL_INSTRUCTION:
+            return p;
+	case instruction::BREAKPOINT_INSTRUCTION:
+	case instruction::NOTIFY_INSTRUCTION:
+	case instruction::PROFILE_START_INSTRUCTION:
+	case instruction::PROFILE_STOP_INSTRUCTION:
+	    p=((Breakpoint_Instruction *)p)->replaced;
+            break;
+	}
 
-  int i = 0;
-
-  do {
-    i++;
-    bpi = (Breakpoint_Instruction *) inst;
-    inst = bpi->replaced;
-  } while( (inst->isa() == instruction::BREAKPOINT_INSTRUCTION) && (i<10));
-
-  return inst;
+    }
+    return NULL;
 }
 
 unsigned int program_memory_access::get_opcode(int addr)

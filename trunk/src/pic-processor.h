@@ -336,7 +336,18 @@ public:
   int  find_closest_address_to_line(int file_id, int src_line);
   int  find_closest_address_to_hll_line(int file_id, int src_line);
   void set_break_at_address(int address);
+  void set_notify_at_address(int address, BreakCallBack *cb);
+  void set_profile_start_at_address(int address, BreakCallBack *cb);
+  void set_profile_stop_at_address(int address, BreakCallBack *cb);
   void clear_break_at_address(int address);
+  void clear_notify_at_address(int address);
+  void clear_profile_start_at_address(int address);
+  void clear_profile_stop_at_address(int address);
+  int address_has_break(int address);
+  int address_has_notify(int address);
+  int address_has_profile_start(int address);
+  int address_has_profile_stop(int address);
+  instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
   void toggle_break_at_address(int address);
   void set_break_at_line(int file_id, int src_line);
   void clear_break_at_line(int file_id, int src_line);

@@ -328,7 +328,9 @@ struct sa_entry{         // entry in the sa_xlate_list
 struct _SourceBrowserAsm_Window {
     SourceBrowser_Window sbw;
 
-    GList *breakpoints;
+    GList *breakpoints;       // List of breakpoint info structs
+    GList *notify_start_list; // List of breakpoint info structs
+    GList *notify_stop_list;  // List of breakpoint info structs
     int layout_offset;
 
     // We need one of these for each source file
@@ -347,7 +349,10 @@ struct _SourceBrowserAsm_Window {
 
     struct sa_entry *menu_data;  // used by menu callbacks
     
-    GdkBitmap *mask;
+    GdkBitmap *pc_mask;
+    GdkBitmap *bp_mask;
+    GdkBitmap *startp_mask;
+    GdkBitmap *stopp_mask;
     GtkWidget *notebook;
 
     GtkStyle symbol_text_style;       // for symbols in .asm display
@@ -359,6 +364,8 @@ struct _SourceBrowserAsm_Window {
     
     GdkPixmap *pixmap_pc;
     GdkPixmap *pixmap_break;
+    GdkPixmap *pixmap_profile_start;
+    GdkPixmap *pixmap_profile_stop;
     int source_loaded;
 
     int load_source;
@@ -492,6 +499,15 @@ typedef struct _Trace_Window Trace_Window;
 // The profile window
 //
 
+struct cycle_histogram_counter{
+    // Three variables that determine which cycle_histogram_counter we add
+    // the differences in cycle counter to:
+    unsigned int start_address; // Start profile address
+    unsigned int stop_address; // Stop profile address
+    guint64 cycles; // The number of cycles that this counter counts.
+
+    int count; // The number of time 'cycles' cycles are used.
+};
 struct _Profile_Window {
   GUI_Object     gui_obj;
 
@@ -501,15 +517,20 @@ struct _Profile_Window {
   GtkCList *profile_clist;
   GtkCList *profile_range_clist;
   GtkCList *profile_register_clist;
+  GtkCList *profile_exestats_clist;
   GList *profile_list;
   GList *profile_range_list;
   GList *profile_register_list;
+  GList *profile_exestats_list;
   GtkWidget *notebook;
   gint range_current_row;
+  GtkWidget *exestats_popup_menu;
   GtkWidget *range_popup_menu;
   GtkWidget *plot_popup_menu;
   GtkWidget *plot_canvas;
 
+  // List of cycle_count structs
+  GList *histogram_profile_list;
 };
 
 typedef struct _Profile_Window Profile_Window;
@@ -686,6 +707,8 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp);
 int BuildProfileWindow(Profile_Window *pw);
 int CreateProfileWindow(GUI_Processor *gp);
 void ProfileWindow_update(Profile_Window *pw);
+void ProfileWindow_notify_start_callback(Profile_Window *pw);
+void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 
 #endif // __GUI_H__
 

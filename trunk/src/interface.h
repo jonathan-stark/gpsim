@@ -222,6 +222,10 @@ typedef struct _sym
   unsigned int gpsim_get_program_memory_size(unsigned int processor_id);
   unsigned int gpsim_address_has_breakpoint(unsigned int processor_id,
 					    unsigned int address);
+  unsigned int gpsim_address_has_profile_start(unsigned int processor_id,
+					       unsigned int address);
+  unsigned int gpsim_address_has_profile_stop(unsigned int processor_id,
+					       unsigned int address);
   unsigned int gpsim_address_has_opcode(unsigned int processor_id,
 					unsigned int address);
   unsigned int gpsim_address_has_changed(unsigned int processor_id,
@@ -235,6 +239,22 @@ typedef struct _sym
 					  unsigned int address);
   void gpsim_set_execute_break_at_address(unsigned int processor_id,
 					  unsigned int address);
+  void gpsim_set_notify_point_at_address(unsigned int processor_id,
+					 unsigned int address,
+					 void (*cb)(gpointer),
+					 gpointer data);
+  void gpsim_set_profile_start_at_address(unsigned int processor_id,
+					  unsigned int address,
+					  void (*cb)(gpointer),
+					  gpointer data);
+  void gpsim_set_profile_stop_at_address(unsigned int processor_id,
+					 unsigned int address,
+					 void (*cb)(gpointer),
+					 gpointer data);
+  void gpsim_clear_profile_start_at_address(unsigned int processor_id,
+					    unsigned int address);
+  void gpsim_clear_profile_stop_at_address(unsigned int processor_id,
+					   unsigned int address);
   void gpsim_clear_breakpoints_at_address(unsigned int processor_id,
 					  unsigned int address);
   void gpsim_toggle_break_at_address(unsigned int processor_id,
