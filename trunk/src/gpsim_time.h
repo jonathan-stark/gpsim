@@ -87,19 +87,26 @@ public:
       // it other wise halt execution by setting the global break flag.
 
       // Loop in case there are multiple breaks
-      while(value == break_on_this && active.next) {
+      //while(value == break_on_this && active.next) {
+      while(active.next  && value == active.next->break_value) {
 	
 
-	reassigned = 0;    // This flag will get set true if the call back
-	// function moves the break point to another cycle.
+	if(active.next->f) {
+	  // This flag will get set true if the call back
+	  // function moves the break point to another cycle.
+	  reassigned = false;
 
-	if(active.next->f)
 	  active.next->f->callback();
-	else 
+
+	  if(!reassigned)    // don't try to clear if the break point was reassigned.
+	    clear_current_break();
+
+	  if(active.next)
+	    break_on_this = active.next->break_value;
+
+	} else 
 	  get_bp().check_cycle_break(active.next->breakpoint_number);
 
-	if(!reassigned)    // don't try to clear if the break point was reassigned.
-	  clear_current_break();
       }
     }
 
