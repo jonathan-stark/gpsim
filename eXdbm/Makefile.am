@@ -27,6 +27,8 @@ libgpsim_eXdbm_la_SOURCES = hash.c parse.c misc.c eXdbm.c \
 
 gpsim_eXdbminclude_HEADERS = eXdbm.h eXdbmErrors.h eXdbmTypes.h
 
+libgpsim_eXdbm_la_LDFLAGS =  @X_LDFLAGS@
+
 EXTRA_DIST = \
 	Makefile.orig README LICENSE COPYING.LIB eXdbm.txt \
 	test1.c test2.c test3.c test1.cfg.orig test2.cfg \

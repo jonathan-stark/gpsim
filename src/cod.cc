@@ -616,23 +616,29 @@ void check_for_gpasm(char *block)
   int have_gpasm = 0;
 
   substr(buffer,&block[COD_DIR_COMPILER],12);
-  //cout << "Compiler " << buffer  << '\n';
+
   if(strcmp("gpasm",buffer) == 0) {
     if(verbose)
       cout << "Have gpasm\n";
     have_gpasm = 1;
+
+    substr(buffer,&block[COD_DIR_VERSION],19);
+
+    // Extract gpasm's version numbers
+    int major=0, minor=0, micro=0;
+    sscanf(&buffer[6],"%d.%d.%d",&major,&minor,&micro);
+
+    if(verbose)
+      cout << "gpasm version major "<< major << " minor " << minor << " micro " << micro << endl;
+
+    // if gpasm version is greater than or equal to 0.8.5, then gpasm 
+    // is considered "recent"
+    if( (major >= 1) || ( minor > 8) || ( (minor == 8) && (micro >= 5)))
+      gpasm_recent = 1;
+
   }
 
-  substr(buffer,&block[COD_DIR_VERSION],19);
-  // Please do not look at the next few lines of really bad code:
-  gpasm_recent = 0;
-  if( (buffer[6] >= '0') && buffer[8] >= '8') {
-    if(buffer[11] == ' ') {
-      if(buffer[10] >= '5')
-	gpasm_recent = 1;
-    } else 
-      gpasm_recent = 1;
-  }
+
 
   if(have_gpasm && gpasm_recent) {
     if(verbose)

@@ -109,6 +109,8 @@ libgpsim_eXdbm_la_SOURCES = hash.c parse.c misc.c eXdbm.c \
 
 gpsim_eXdbminclude_HEADERS = eXdbm.h eXdbmErrors.h eXdbmTypes.h
 
+libgpsim_eXdbm_la_LDFLAGS = @X_LDFLAGS@
+
 EXTRA_DIST = \
 	Makefile.orig README LICENSE COPYING.LIB eXdbm.txt \
 	test1.c test2.c test3.c test1.cfg.orig test2.cfg \
@@ -124,7 +126,6 @@ DEFS = @DEFS@ -I. -I$(srcdir) -I..
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-libgpsim_eXdbm_la_LDFLAGS = 
 libgpsim_eXdbm_la_LIBADD = 
 libgpsim_eXdbm_la_OBJECTS =  hash.lo parse.lo misc.lo eXdbm.lo
 CFLAGS = @CFLAGS@

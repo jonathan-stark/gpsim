@@ -59,7 +59,7 @@ cmd_log::cmd_log(void)
 
     long_doc = string ("\nlog [[on [file_name]]|[off]] | [w|r reg] [wv|rv reg val]\n\
 \tLog will record simulation history in a file. It's similar to the\n\
-\ttrace command except that you have to specify what you want to log.\n\
+\tbreak command\n\
 \tExamples:\n\
 \t\tlog               - Display log status\n\
 \t\tlog on            - Begin logging in file gpsim.log\n\
@@ -73,8 +73,7 @@ cmd_log::cmd_log(void)
 
 void cmd_log::log(void)
 {
-  // trace_dump_all();
-  cout << " dump log \n";
+  trace_log.status();
 }
 
 
@@ -206,6 +205,7 @@ void cmd_log::log(cmd_options *opt, int reg, int value, int mask)
       cout << " is " << str <<" register " << reg << '\n' << 
 	"bp#: " << b << '\n';
     }
+    break;
 
   default:
     cout << "error log opt, int,int,int\n";

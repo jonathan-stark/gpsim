@@ -232,6 +232,7 @@ class TraceLog : public BreakCallBack
 public:
   bool logging;
   bool lograw;
+  int items_logged;
   char *log_filename;
   FILE *log_file;
   pic_processor *cpu;
@@ -248,6 +249,7 @@ public:
   void open_logfile(char *new_fname);
   void close_logfile(void);
   void write_logfile(void);
+  void status(void);
 };
 
 extern TraceLog trace_log;
