@@ -1,3 +1,10 @@
+2004-03-17 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui.h, gui/gui_breadboard.h, gui/gui_object.h, gui/gui_processor.h,
+	* gui/gui_profile.h, gui/gui_register.h, gui/gui_regwin.h, gui/gui_scope.h,
+	* gui/gui_src.h, gui/gui_stack.h, gui/gui_stopwatch.h, gui/gui_symbols.h,
+	* gui/gui_trace.h, gui/gui_watch.h
+	Split gui.h into a bunch of separate include files.
+
 2004-03-16 Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_regwin.cc, gui/gui.h:
 	abstracted the width of registers
