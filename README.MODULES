@@ -1,11 +1,26 @@
 
 INTRODUCTION
 ------------
-Starting with version gpsim-0.20.0, support for external modules has been added. This allows gpsim to create a full simulation environment that extends beyond just a PIC. It also provides for users to create their own simulation modules without having to be aware of the detailed internals of gpsim. 
 
-The module approach attempts to leverage off the gpsim infrastructure. The definition of a pic processor is now derived from a `module'. A module can have pins just like a PIC. The node infrastructure for connecting stimuli to gpsim I/O pins has been extended to now include the module I/O pins. Break points and internal module events can be traced just like they are in a real pic. A stimulus can be connected to a module. In fact, although I haven't tried it, gpsim can almost simulate a module with no PIC present!
+Starting with version gpsim-0.20.0, support for external modules has
+been added. This allows gpsim to create a full simulation environment
+that extends beyond just a PIC. It also provides for users to create
+their own simulation modules without having to be aware of the
+detailed internals of gpsim.
 
-Several example modules have been created and serve as example templates. These are found in the ./modules/ subdirectory. In addition, examples may also be found in the ./examples/14bit/ subdirectory that illustrate how the modules can be used.
+The module approach attempts to leverage off the gpsim
+infrastructure. The definition of a pic processor is now derived from
+a `module'. A module can have pins just like a PIC. The node
+infrastructure for connecting stimuli to gpsim I/O pins has been
+extended to now include the module I/O pins. Break points and internal
+module events can be traced just like they are in a real pic. A
+stimulus can be connected to a module. In fact, although I haven't
+tried it, gpsim can almost simulate a module with no PIC present!
+
+Several example modules have been created and serve as example
+templates. These are found in the ./modules/ subdirectory. In
+addition, examples may also be found in the ./examples/14bit/
+subdirectory that illustrate how the modules can be used.
 
 
 HOW DO I LOAD A MODULE?
@@ -52,7 +67,10 @@ As you can see, there's a whole lot of stuff packed into this new command.
 
 HOW DO I CREATE MY OWN MODULE?
 ------------------------------
-Probably the best place to begin is to find a pre-existing module that is close to the one you wish to create and then make copy it and make changes. 
+
+Probably the best place to begin is to find a pre-existing module that
+is close to the one you wish to create and then make copy it and make
+changes.
 
 (basic structure of modules)
 
@@ -60,9 +78,14 @@ HOW DO I CREATE A LIBRARY FOR MY MODULES?
 -----------------------------------------
 Without a doubt, the best thing to do is copy the way gpsim does it. 
 
-The distributions for the LED and the Logic modules is probably the best place to begin. There are many details that I can't satisfactory cover in the scope of this document.
+The distributions for the LED and the Logic modules is probably the
+best place to begin. There are many details that I can't satisfactory
+cover in the scope of this document.
 
-In the example module libraries you'll find two major sections. First there's something I've called the `module manager'. This is a necessary managerial layer that provides the dynamic interface. Second is the module section that defines a module's behavior.
+In the example module libraries you'll find two major sections. First
+there's something I've called the `module manager'. This is a
+necessary managerial layer that provides the dynamic interface. Second
+is the module section that defines a module's behavior.
 
 Module Manager
 --------------
@@ -89,7 +112,9 @@ This function returns a pointer to the list of modules that are supported in the
 
   }
 
-For this to work of course, a list called `available_modules' of type Module_Types must be declared. From the Led library, the list is only one deep and looks like so:
+For this to work of course, a list called `available_modules' of type
+Module_Types must be declared. From the Led library, the list is only
+one deep and looks like so:
 
 /*
 class Module_Types
@@ -102,19 +127,35 @@ public:
 */
 Module_Types available_modules[] =
 {
-  { "led_7Segments", "led", Led_7Segments::construct}
+  { "led_7Segments", "led", Led_7Segments::construct},
+  { 0,0,0}  // indicates there are no more modules
 };
 
-The first two parameters are names that the module may be called. The last parameter is a pointer to a static member function of the module. gpsim will call this function to create a new module.
+The first two parameters are names that the module may be called. The
+last parameter is a pointer to a static member function of the
+module. gpsim will call this function to create a new module.
+
+Note the all 0's module. This marks the end of the list.
 
 more...
 
 Shared Libraries
 ----------------
 
-The link between modules and gpsim is `dynamic'. Which is to say, when gpsim is compiled it knows nothing about a specific module. Similarly, when a module is compiled it is done so indepently of gpsim. The module compilation depends on gpsim only to the degree of using the include files provided. The module compilation however does not include a step at which it is linked with gpsim. Is that clear? I guess the point to understand, is that gpsim and the modules are built separately.
+The link between modules and gpsim is `dynamic'. Which is to say, when
+gpsim is compiled it knows nothing about a specific module. Similarly,
+when a module is compiled it is done so indepently of gpsim. The
+module compilation depends on gpsim only to the degree of using the
+include files provided. The module compilation however does not
+include a step at which it is linked with gpsim. Is that clear? I
+guess the point to understand, is that gpsim and the modules are built
+separately.
 
-Now, when gpsim loads a module, it will open the `shared library' in which it is contained. The infrastructure of shared libraries is defined by the OS and not by gpsim. Consequently, there are a few details that have to be managed before the shared libraries will work properly.
+Now, when gpsim loads a module, it will open the `shared library' in
+which it is contained. The infrastructure of shared libraries is
+defined by the OS and not by gpsim. Consequently, there are a few
+details that have to be managed before the shared libraries will work
+properly.
 
 (ldconfig)
 
