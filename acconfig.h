@@ -2,3 +2,4 @@
 #undef HAVE_GUI
 #undef PACKAGE
 #undef VERSION
+#undef HAVE_LIBREADLINE

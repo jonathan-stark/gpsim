@@ -83,6 +83,7 @@ GTKCONFIG = @GTKCONFIG@
 GTKEXTRACONFIG = @GTKEXTRACONFIG@
 LD = @LD@
 LEX = @LEX@
+LIBREADLINE = @LIBREADLINE@
 LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
@@ -104,7 +105,7 @@ bin_PROGRAMS = gpsim
 gpsim_SOURCES = main.cc
 
 gpsim_LDFLAGS = $(shell gtk-config --cflags)
-gpsim_LDADD = ../src/libgpsim.la ../cli/libgpsimcli.la ../gui/libgui.la  @GTK@ @GDK@ @GLIB@ -lstdc++ @X_LDFLAGS@ @Y_LDFLAGS@
+gpsim_LDADD = ../src/libgpsim.la ../cli/libgpsimcli.la ../gui/libgui.la  @GTK@ @GDK@ @GLIB@ -lstdc++ @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
