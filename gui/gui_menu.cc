@@ -746,40 +746,71 @@ void dispatch_Update()
 //========================================================================
 //========================================================================
 // experimental register window replacement
-static gint
-do_popup(GtkWidget *widget, GdkEventButton *event, void *)
-{
 
-  if(widget==0 || event==0 ) {
-    
-    printf("Warning do_popup(%p,%p)\n",widget,event);
-    return FALSE;
-  }
-  printf("event\n");
-  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) ) {
-    printf("button 3 pressed\n");
-    
-    return TRUE;
-  }
-  return FALSE;
-}
+//========================================================================
+class RegCell
+{
+public:
+  RegCell(int _address, const char *initialText,int _cell_width=2);
+  GtkWidget *getWidget() { return entry; }
+  gint ButtonPressEvent(GtkWidget *widget, GdkEventButton *event);
+private:
+  int address;
+  int cell_width;
+  GtkWidget *entry;
+
+};
+
 
 //========================================================================
 //
 class RegWindow
 {
 public:
+  RegWindow();
+
+  GtkWidget *Build();
+  gint ButtonPressEvent(GtkWidget *widget, GdkEventButton *event);
 
 private:
 
   GtkWidget *parent;  /// Container that holds the register window.
-  int rows;
-  int cols;
+  int nRows;
+  int nCols;
 
-  int cols_per_row;
 };
 
-GtkWidget *BuildExperimentalRegisterWindow()
+//------------------------------------------------------------------------
+static gint
+RegWindow_ButtonPressEvent(GtkWidget *widget, GdkEventButton *event, RegWindow *rw)
+{
+  printf("regwindow event\n");
+  if(widget && event && rw) {
+    return rw->ButtonPressEvent(widget,event);
+  }
+  return FALSE;
+}
+
+static gint
+RegCell_ButtonPressEvent(GtkWidget *widget, GdkEventButton *event, RegCell *rc)
+{
+
+  if(widget && event && rc) {
+    return rc->ButtonPressEvent(widget,event);
+  }
+  return FALSE;
+}
+
+
+//------------------------------------------------------------------------
+
+RegWindow::RegWindow()
+{
+  nCols = 18;
+  nRows = 5;
+}
+
+GtkWidget *RegWindow::Build()
 {
   GtkWidget *frame = gtk_frame_new("Table");
 
@@ -788,34 +819,134 @@ GtkWidget *BuildExperimentalRegisterWindow()
   GtkWidget *scrolled_window = gtk_scrolled_window_new(hadj,vadj);
   gtk_widget_show(scrolled_window);
   gtk_container_add(GTK_CONTAINER(frame),scrolled_window);
-  GtkWidget *table = gtk_table_new (5,18,TRUE);
+  GtkWidget *table = gtk_table_new (64,18,TRUE);
   gtk_scrolled_window_add_with_viewport(GTK_SCROLLED_WINDOW(scrolled_window),table);
 
+  gtk_table_set_row_spacings (GTK_TABLE(table),0);
+
+  char buf[32];
   int row,col;
-  for(row=0; row<5; row++)
-    for(col=0; col<18;col++) {
-      char buf[32];
+  GtkWidget *label;
+  for(col=0; col<nCols;col++) {
+    snprintf(buf,sizeof(buf),"%02X",col);
+    label = gtk_label_new(buf);
+    gtk_table_attach_defaults(GTK_TABLE(table),label, col+1, col+2, 0, 1);
+  }
+  label = gtk_label_new("ASCII");
+  gtk_table_attach_defaults(GTK_TABLE(table),label, nCols+1, nCols+5, 0, 1);
+
+  for(row=0; row<nRows;row++) {
+    snprintf(buf,sizeof(buf),"%02X",row);
+    label = gtk_label_new(buf);
+    gtk_table_attach_defaults(GTK_TABLE(table),label, 0, 1, row+1, row+2);
+  }
+
+  for(row=0; row<nRows; row++) {
+    for(col=0; col<nCols;col++) {
+
       snprintf(buf,sizeof(buf),"%02X%02X",row,col);
-      GtkWidget *entry = gtk_entry_new ();
-      gtk_widget_set_size_request (entry,36,-1);
-      gtk_entry_set_text (GTK_ENTRY (entry), buf);
 
-      //GtkWidget *label = gtk_label_new(buf);
-      gtk_table_attach_defaults(GTK_TABLE(table),entry, col, col+1, row, row+1);
+      RegCell *rc = new RegCell(row * nCols + col, buf);
 
-      gtk_signal_connect(GTK_OBJECT(entry),
-			 "button_press_event",
-			 (GtkSignalFunc) do_popup, 
-			 0);
+      gtk_table_attach_defaults(GTK_TABLE(table),rc->getWidget(), col+1, col+2, row+1, row+2);
+
     }
+  
+    snprintf(buf,sizeof(buf),"%02X23456789ABCDEF",row);
 
+    RegCell *rc = new RegCell(row * nCols + nCols+1, buf, nCols);
+
+    gtk_table_attach_defaults(GTK_TABLE(table),rc->getWidget(), nCols+1, nCols+5, row+1, row+2);
+  }
   gtk_signal_connect(GTK_OBJECT(table),
 		     "button_press_event",
-		     (GtkSignalFunc) do_popup, 
-		     0);
+		     (GtkSignalFunc) RegWindow_ButtonPressEvent, 
+		     this);
 
+  gtk_table_resize(GTK_TABLE(table), nRows +1 , nCols+1);
   return frame;
 
+}
+
+gint RegWindow::ButtonPressEvent(GtkWidget *widget, GdkEventButton *event)
+{
+  if(!event || !widget)
+    return FALSE;
+
+  printf("ButtonPressEvent for RegWindow\n");
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) ) {
+    printf("button 3 pressed\n");
+    return TRUE;
+  }
+  return FALSE;
+}
+
+//------------------------------------------------------------------------
+// RegCell
+RegCell::RegCell(int _address, const char *initialText, int _cell_width)
+  : address(_address), cell_width(_cell_width)
+{
+  entry = gtk_entry_new ();
+
+  PangoContext *pc = gtk_widget_get_pango_context(entry);
+  PangoFontDescription *pfd = pango_context_get_font_description(pc);
+  pango_font_description_set_family_static(pfd, "Monospace");
+  gtk_widget_modify_font(entry, pfd);
+
+  gtk_entry_set_width_chars(GTK_ENTRY (entry), cell_width);
+  gtk_entry_set_text (GTK_ENTRY (entry), initialText);
+
+  gtk_signal_connect(GTK_OBJECT(entry),
+		     "button_press_event",
+		     (GtkSignalFunc) RegCell_ButtonPressEvent, 
+		     this);
+}
+
+static void debugFont(PangoContext *pc)
+{
+  if(!pc)
+    return;
+
+  PangoFontDescription *pfd = pango_context_get_font_description(pc);
+  G_CONST_RETURN char *fontDesc = pango_font_description_get_family(pfd);
+  gint fsize = pango_font_description_get_size(pfd);
+  printf("Font: %s size %d\n",fontDesc,fsize);
+
+  char *fullDesc = pango_font_description_to_string(pfd);
+  if(fullDesc) {
+    printf("full description: %s\n",fullDesc);
+    g_free(fullDesc);
+  }
+
+  int i,n_families=0;
+  PangoFontFamily **families;
+
+  pango_context_list_families(pc, &families, &n_families);
+
+  printf("Number of families for the context:%d\n",n_families);
+  for(i=0; i<n_families; i++) {
+    fullDesc = (char *)pango_font_family_get_name(families[i]);
+    if(fullDesc)
+      printf(" %s\n",fullDesc);
+  }
+  g_free(families);
+
+}
+gint RegCell::ButtonPressEvent(GtkWidget *widget, GdkEventButton *event)
+{
+  if(!event || !widget)
+    return FALSE;
+
+  printf("ButtonPressEvent for RegCell, address = 0x%x\n",address);
+  if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) ) {
+    printf("button 3 pressed\n");
+
+    //PangoLayout *pl = gtk_entry_get_layout(GTK_ENTRY(entry));
+    //PangoContext *pc = pango_layout_get_context(pl);
+    debugFont(gtk_widget_get_pango_context(entry));
+    return TRUE;
+  }
+  return FALSE;
 }
 
 //========================================================================
@@ -971,44 +1102,36 @@ void MainWindow::Create (void)
   //
 
   separator = gtk_hseparator_new ();
-  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
+  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
 
   GtkWidget *vpane = gtk_vpaned_new ();
-  gtk_box_pack_start (GTK_BOX (box1), vpane, TRUE, TRUE, 5);
+  gtk_box_pack_start (GTK_BOX (box1), vpane, TRUE, TRUE, 0);
 
   SourceBrowserExperiment = gtk_frame_new("SourceBrowser");
-  RegisterWindowExperiment = gtk_frame_new("Registers");
-  gtk_frame_set_shadow_type (GTK_FRAME (SourceBrowserExperiment), GTK_SHADOW_IN);
-  gtk_frame_set_shadow_type (GTK_FRAME (RegisterWindowExperiment), GTK_SHADOW_IN);
+  RegWindow *rw = new RegWindow();
+  frame = rw->Build();
 
+  gtk_frame_set_shadow_type (GTK_FRAME (SourceBrowserExperiment), GTK_SHADOW_IN);
+  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_IN);
 
   gtk_paned_pack1 (GTK_PANED (vpane), SourceBrowserExperiment, TRUE, TRUE);
   gtk_widget_set_size_request (SourceBrowserExperiment, 50, -1);
 
-  gtk_paned_pack2 (GTK_PANED (vpane), RegisterWindowExperiment, TRUE, TRUE);
-  gtk_widget_set_size_request (RegisterWindowExperiment, 50, -1);
-
+  gtk_paned_pack2 (GTK_PANED (vpane), frame, TRUE, TRUE);
+  gtk_widget_set_size_request (frame, 50, -1);
 
 
 
   // Status Bar
 
   separator = gtk_hseparator_new ();
-  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
+  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
 
   frame = gtk_frame_new("Status Bar");
-  gtk_box_pack_start (GTK_BOX (box1), frame, FALSE, FALSE, 5);
+  gtk_box_pack_start (GTK_BOX (box1), frame, FALSE, FALSE, 0);
 
   StatusBarExperiment = gtk_hbox_new (FALSE, 0);
   gtk_container_add(GTK_CONTAINER(frame),StatusBarExperiment);
-
-  // experimental table
-  separator = gtk_hseparator_new ();
-  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
-
-  // experimental register window.
-  frame = BuildExperimentalRegisterWindow();
-  gtk_box_pack_start (GTK_BOX (box1), frame, FALSE, FALSE, 0);
 
   gtk_widget_show_all (dispatcher_window);
       
