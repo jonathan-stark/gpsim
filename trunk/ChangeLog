@@ -1,3 +1,11 @@
+2005-03-30 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_dump.cc: Changed ram dump command to handle ram sizes
+	greater than one byte.
+	* cli/cmd_x.cc: Removed call to dump.dump(DUMP_SFRS) since previous
+	call to dump.dump(DUMP_RAM) already dump thes sfrs too.ram halt.
+	* Cleaned up a couple of GUI error messages. (invalid window handle,
+	invalid value strings)
+
 2005-03-24 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/processor.cc, h, cli/cmd_clear.cc:
 	Fixed crash in Breakpoints::clear() that I reintroduced in my last checkin.
@@ -18,6 +26,9 @@
 	* regression/ccp/ccp.asm: added more features to the ccp
 	regression test.
 	
+2005-03-22 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui/gui_watch.cc: Fixed problem with register values > 127 causing pango runtime warnings
+
 2005-03-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/processor.h: created a notification
 	to Processor when breakpoints are set or cleared. Cleaned up
