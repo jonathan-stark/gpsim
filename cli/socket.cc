@@ -31,8 +31,8 @@ Boston, MA 02111-1307, USA.  */
 #include <unistd.h>
 #include <sys/types.h>
 
-#include "../src/processor.h"
-
+//#include "../src/processor.h"
+#include "../src/symbol.h"
 
 #ifndef _WIN32
 #include <sys/socket.h>
@@ -42,6 +42,7 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 
+class SocketLink;
 
 // in input.cc -- parse_string sends a string through the command parser
 extern int parse_string(char * str);
@@ -171,7 +172,11 @@ enum eGPSIMObjectTypes
     GPSIM_CMD_VERSION    = 0x98,
     GPSIM_CMD_ASSIGN_RAM = 0x99,
 
-    GPSIM_CMD_SOCKET_LINK = 0xF0,
+    GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
+    GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
+    GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
+    GPSIM_CMD_WRITE_TO_SOCKET_LINK  = 0xF3,
+
   };
 
 
@@ -214,6 +219,8 @@ int ParseString(char **buffer, char *retStr, int maxLen)
   return 0;
 }
 
+//------------------------------------------------------------------------
+int ParseSocketLink(char **buffer, SocketLink **);
 
 //------------------------------------------------------------------------
 // Socket wrapper class
@@ -262,6 +269,7 @@ public:
     return (client != 0);
   }
 
+
   //private:
   char     buffer[BUFSIZE];
   SocketBase *my_socket;
@@ -278,16 +286,44 @@ public:
   SocketLink(unsigned int _handle, Socket *);
   void receive(char *);
   void send(char *);
+
+  virtual void set(char *s, int i=0)=0;
+  virtual void get(char *, int)=0;
+  unsigned int getHandle() { return handle; }
 private:
   unsigned int handle;
   Socket *sock;
+};
+
+class AttributeLink : public SocketLink
+{
+public:
+  AttributeLink(unsigned int _handle, Socket *, Value *);
+
+  void set(char *s, int i=0);
+  void get(char *, int);
+
+private:
+  Value *v;
 };
 
 #define nSOCKET_LINKS 16
 
 SocketLink *links[nSOCKET_LINKS];
 
+SocketLink *gCreateSocketLink(unsigned int, Socket *, char**);
 
+unsigned int FindFreeHandle()
+{
+  unsigned int i;
+  static unsigned int sequence = 0;
+
+  for(i=0; i<nSOCKET_LINKS; i++)
+    if(links[i] == 0)
+      return i | (++sequence << 16);
+
+  return 0xffff;
+}
 //========================================================================
 SocketBase::SocketBase(SOCKET s)
   : socket(s)
@@ -304,6 +340,44 @@ void SocketBase::Close()
     closesocket(socket);
 
   socket = INVALID_SOCKET;
+
+}
+
+//========================================================================
+int ParseSocketLink(char **buffer, SocketLink **sl)
+{
+  if(!sl)
+    return 0;
+
+  char *b = *buffer;
+  int ret = 0;
+
+  unsigned int handle;
+
+  ret += ParseInt(&b,handle);
+
+  if(ret) {
+    //unsigned int sequence = (handle>>16) & 0xffff;
+    unsigned int index    = handle & 0xffff;
+
+    *sl = links[index&0x0f];
+    if( (*sl)->getHandle() != handle)
+      *sl = 0;
+  }
+
+  return ret;
+
+}
+
+//========================================================================
+void CloseSocketLink(SocketLink *sl)
+{
+  if(!sl)
+    return;
+
+  unsigned int handle = sl->getHandle();
+  if(links[handle&0x000f] == sl)
+    links[handle&0x000f] = 0;
 
 }
 //========================================================================
@@ -575,11 +649,12 @@ void Socket::ParseObject(char *buffer)
 
     case GPSIM_CMD_EXAMINE_RAM:
       {
+
 	unsigned int ram_address;
 	int bl = ParseInt(&b,ram_address);
 	if(bl) {
 	  buffer_len -= bl;
-
+	  /*
 	  char tmp[256];
 	  Processor *cpu = get_active_cpu();
 
@@ -588,7 +663,8 @@ void Socket::ParseObject(char *buffer)
 	    snprintf(tmp,sizeof(tmp),"$03%08x",reg->get_value());
 	    respond(tmp);
 	  } else
-	    respond("no cpu");
+	  */
+	  respond("no cpu");
 	} else 
 	  respond("examinecmd");
  
@@ -607,6 +683,7 @@ void Socket::ParseObject(char *buffer)
 	if(bl) {
 	  buffer_len -= bl;
 
+	  /*
 	  Processor *cpu = get_active_cpu();
 
 	  if(cpu) {
@@ -615,22 +692,19 @@ void Socket::ParseObject(char *buffer)
 	    reg->put_value(ram_value);
 	    respond("ACK");
 	  } else
-	    respond("no cpu");
+	  */
+	  respond("no cpu");
 	} else 
 	  respond("assigncmd");
  
       }
       break;
 
-    case GPSIM_CMD_SOCKET_LINK:
+    case GPSIM_CMD_CREATE_SOCKET_LINK:
       {
-	unsigned int sequence = 0<<16;
-	unsigned int index = 0;
-	unsigned int handle = sequence | index;
+	unsigned int handle = FindFreeHandle();
 
-	// search for a slot and then place the new link there
-
-	links[index] = new SocketLink(handle, this);
+	links[handle&0x0f] = gCreateSocketLink(handle, this, &b);
 
 	// throw away the rest of the buffer for now...
 	buffer_len = 0;
@@ -638,6 +712,63 @@ void Socket::ParseObject(char *buffer)
       }
       break;
 
+    case GPSIM_CMD_REMOVE_SOCKET_LINK:
+      {
+	SocketLink *sl=0;
+
+	int bl = ParseSocketLink(&b, &sl);
+
+	buffer_len -= bl;
+
+	if(sl)
+	  CloseSocketLink(sl);
+	Send("+");
+
+	// throw away the rest of the buffer for now...
+	buffer_len = 0;
+
+      }
+      break;
+
+    case GPSIM_CMD_QUERY_SOCKET_LINK:
+      {
+	SocketLink *sl=0;
+
+	int bl = ParseSocketLink(&b, &sl);
+
+	buffer_len -= bl;
+
+	if(sl) {
+	  char buf[256];
+	  buf[0]='+';
+	  sl->get(&buf[1], sizeof(buf)-1);
+	  sl->send(buf);
+	}
+
+	// throw away the rest of the buffer for now...
+	buffer_len = 0;
+
+      }
+      break;
+
+    case GPSIM_CMD_WRITE_TO_SOCKET_LINK:
+      {
+	SocketLink *sl=0;
+
+	int bl = ParseSocketLink(&b, &sl);
+	buffer_len -= bl;
+	b += bl;
+
+	if(sl) {
+	  sl->set(b);
+	  sl->send("+");
+	}
+
+	// throw away the rest of the buffer for now...
+	buffer_len = 0;
+
+      }
+      break;
     default:
       printf("Invalid object type: %d\n",ObjectType);
     }
@@ -653,7 +784,7 @@ SocketLink::SocketLink(unsigned int _handle, Socket *s)
 {
   char  buf[256];
 
-  sprintf(buf, "%08X:LINK",handle);
+  sprintf(buf, "+%08X:LINK",handle);
   send(buf);
 }
 
@@ -666,6 +797,52 @@ void SocketLink::send(char *m)
   if(sock)
     sock->respond(m);
 }
+
+//========================================================================
+AttributeLink::AttributeLink(unsigned int _handle, Socket *s, Value *_v)
+  : SocketLink(_handle,s), v(_v)
+{
+}
+
+void AttributeLink::set(char *b, int len)
+{
+  if(v)
+    v->set(b,len);
+}
+
+void AttributeLink::get(char *b, int len)
+{
+  if(v)
+    v->get(b,len);
+}
+
+//========================================================================
+
+SocketLink *gCreateSocketLink(unsigned int handle, Socket *s, char **type)
+{
+  if(type && *type) {
+    cout << "creating socket link of type:" << *type << endl;
+
+    char tmp[256];
+    char *b = *type;
+
+    int bl = ParseString(&b,tmp,256);
+
+    if(bl) {
+
+      printf("Creating socket link for  %s\n",tmp);
+      Value *sym = get_symbol_table().find(tmp);
+      if(sym)
+	return new AttributeLink(handle,s,sym);
+      else
+	s->respond("-symcmd failed");
+    }
+  }
+
+  return 0; 
+}
+
+//////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_THREADS_BUT_NOT_RECOMMENDED_BECAUSE_OF_CROSS_PLATFORM_ISSUES
 void *server_thread(void *ignored)
@@ -792,7 +969,6 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
       if (*s->buffer == '$') {
 	s->buffer[bytes_read-2] = 0;
 	s->ParseObject(&s->buffer[1]);
-
       } else {
 	parse_string(s->buffer);
 	s->respond("ACK");
