@@ -20,10 +20,12 @@ Boston, MA 02111-1307, USA.  */
 
 /*
 Minimal implementation of glib:
-only slist functionality is needed by gpsim with --disable-gui
+only slist functionality and g_win32_error_message
+is needed by gpsim with --disable-gui
 */
 
 #include "glib.h"
+#include <windows.h>
 
 gpointer
 g_malloc0 (gulong n_bytes)
@@ -50,9 +52,9 @@ GSList*
 g_slist_alloc (void)
 {
   GSList *list;
-  
+
   list = g_new0 (GSList, 1);
-  
+
   return list;
 }
 
@@ -66,7 +68,7 @@ g_slist_free_1 (GSList *list)
 
 GSList*
 g_slist_append (GSList   *list,
-		gpointer  data)
+                gpointer  data)
 {
   GSList *new_list;
   GSList *last;
@@ -89,7 +91,7 @@ g_slist_append (GSList   *list,
 
 GSList*
 g_slist_remove (GSList        *list,
-		gconstpointer  data)
+                gconstpointer  data)
 {
   GSList *tmp, *prev = NULL;
 
@@ -97,15 +99,15 @@ g_slist_remove (GSList        *list,
   while (tmp)
     {
       if (tmp->data == data)
-	{
-	  if (prev)
-	    prev->next = tmp->next;
-	  else
-	    list = tmp->next;
+        {
+          if (prev)
+            prev->next = tmp->next;
+          else
+            list = tmp->next;
 
-	  g_slist_free_1 (tmp);
-	  break;
-	}
+          g_slist_free_1 (tmp);
+          break;
+        }
       prev = tmp;
       tmp = prev->next;
     }
@@ -120,8 +122,33 @@ g_slist_last (GSList *list)
   if (list)
     {
       while (list->next)
-	list = list->next;
+        list = list->next;
     }
 
   return list;
+}
+
+gchar *
+g_win32_error_message (gint error)
+{
+  gchar *msg;
+  gchar *retval;
+  int nbytes;
+
+  FormatMessage (FORMAT_MESSAGE_ALLOCATE_BUFFER
+                 |FORMAT_MESSAGE_IGNORE_INSERTS
+                 |FORMAT_MESSAGE_FROM_SYSTEM,
+                 NULL, error, 0,
+                 (LPTSTR) &msg, 0, NULL);
+  nbytes = strlen (msg);
+
+  if (nbytes > 2 && msg[nbytes-1] == '\n' && msg[nbytes-2] == '\r')
+    msg[nbytes-2] = '\0';
+
+  retval = strdup (msg);
+
+  if (msg != NULL)
+    LocalFree (msg);
+
+  return retval;
 }
