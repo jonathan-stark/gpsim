@@ -69,10 +69,9 @@ public:
 
   InterfaceObject(void) {pic = NULL;};
   virtual void callback(void)
-    {
-	trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
-	if(callback_function)
-	    callback_function(callback_data);
+  {
+      if(callback_function)
+	  callback_function(callback_data);
     };
 
 };
@@ -96,6 +95,8 @@ public:
       
   virtual void callback(void)
     {
+//      trace.cycle_counter(pic->cycles.value); // FIXME, temporary.
+      profile_keeper.catchup();
       InterfaceObject::callback();
       set_break();
     };
