@@ -831,7 +831,7 @@ dc_supply::dc_supply(char *n)
 //========================================================================
 //
 
-IOPIN::IOPIN(IOPORT *i, unsigned int b)
+IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name)
 {
   iop = i;
   iobit=b;
@@ -840,16 +840,28 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   h2l_threshold = -100;
   drive = 0;
   snode = NULL;
+
   //cout << "IOPIN constructor called \n";
 
   if(iop) {
     iop->attach_iopin(this,b);
 
-    strcpy(name_str, iop->name());
-    char bs[2];
-    bs[0] = iobit+'0';
-    bs[1] = 0;
-    strcat(name_str,bs);
+    // assign the name to the I/O pin.
+    // If one was passed to us (opt_name), then use it
+    // otherwise, derive the name from the I/O port to 
+    // which this pin is attached.
+
+    if(opt_name)
+      strncpy(name_str,opt_name,STIMULUS_NAME_LENGTH);
+
+    else {
+
+      strncpy(name_str, iop->name(),STIMULUS_NAME_LENGTH-2);
+      char bs[2];
+      bs[0] = iobit+'0';
+      bs[1] = 0;
+      strcat(name_str,bs);
+    }
   }
 
   add_stimulus(this);
@@ -905,8 +917,8 @@ void IOPIN::attach(Stimulus_Node *s)
 
 //========================================================================
 //
-IO_input::IO_input(IOPORT *i, unsigned int b)
-  : IOPIN(i,b)
+IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL)
+  : IOPIN(i,b,opt_name)
 {
 
   state = 0;
@@ -1028,8 +1040,8 @@ void IO_input::put_node_state( int new_state)
 
 //========================================================================
 //
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
-  : IO_input(i,b)
+IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL)
+  : IO_input(i,b,opt_name)
 {
   //  source = new source_stimulus();
 
@@ -1085,8 +1097,8 @@ IO_bi_directional::IO_bi_directional(void)
   cout << "IO_bi_directional constructor shouldn't be called\n";
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b)
-  : IO_bi_directional(i, b)
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL)
+  : IO_bi_directional(i, b,opt_name)
 {
 
   pull_up_resistor = new resistor();
@@ -1193,8 +1205,8 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 }
 
 
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b)
-  : IO_input(i,b)
+IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL)
+  : IO_input(i,b,opt_name)
 {
 
   drive = MAX_DRIVE / 2;

@@ -109,7 +109,7 @@ public:
 class stimulus
 {
 public:
-  char name_str[30];
+  char name_str[STIMULUS_NAME_LENGTH];
   Stimulus_Node *snode;      /* Node to which this stimulus is attached */
   int drive;        /* This defines the strength of the source or the magnitude of the load. */
   int state;                 /* The most recent value of this stimulus */
@@ -217,7 +217,7 @@ enum IOPIN_DIRECTION
   int h2l_threshold;
 
   IOPIN(void);
-  IOPIN(IOPORT *i, unsigned int b);
+  IOPIN(IOPORT *i, unsigned int b,char *opt_name=NULL);
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
@@ -239,7 +239,7 @@ class IO_input : public IOPIN
 public:
 
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
-  IO_input(IOPORT *i, unsigned int b);
+  IO_input(IOPORT *i, unsigned int b,char *opt_name=NULL);
   IO_input(void);
   virtual int get_voltage(guint64 current_time); //{return drive;};
   virtual void toggle(void);
@@ -259,7 +259,7 @@ public:
   
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
-  IO_bi_directional(IOPORT *i, unsigned int b);
+  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=NULL);
   virtual void put_state( int new_state);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
@@ -274,7 +274,7 @@ public:
   resistor *pull_up_resistor;
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
-  IO_bi_directional_pu(IOPORT *i, unsigned int b);
+  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=NULL);
   virtual int get_voltage(guint64 current_time);
 
 };
@@ -286,7 +286,7 @@ public:
   bool driving;
   
   virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
-  IO_open_collector(IOPORT *i, unsigned int b);
+  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=NULL);
   virtual int get_voltage(guint64 current_time);
   virtual void update_direction(unsigned int);
   virtual void change_direction(unsigned int);
