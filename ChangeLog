@@ -4,6 +4,12 @@
 	* regressions/instructions_12bit/instructions_12bit.stc: added
 	Now the 12bit core has a regression test.
 	
+2004-06-05 Scott Dattalo <scott@dattalo.com>
+	* src/eeprom.cc: The eeprom memory access object was not getting
+	initialized.
+	* src/stimuli.cc: applied patch from Manuel Boyer. The IO_open_collector
+	was duplicating the base class' job of setting the pin name.
+	
 2004-06-02 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, src/processor.cc: 18fxxx addressing was broken.
 	(the divide by 2 issue for the 18f addressess was not being handled

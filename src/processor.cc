@@ -111,7 +111,7 @@ void Processor::init_register_memory (unsigned int memory_size)
     }
 
 
-  // For processors with banked memory, the register_bank cooresponds to the
+  // For processors with banked memory, the register_bank corresponds to the
   // active bank. Let this point to the beginning of the register array for
   // now.
 

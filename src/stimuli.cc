@@ -1468,24 +1468,6 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
 
   state = 0;
 
-
-  char name_str[100];
-  char suffix[3];
-
-  strncpy(name_str, iop->name().c_str(),sizeof(name_str) - sizeof(suffix));
-
-  if(iobit < 10) {
-    suffix[0] = iobit+'0';
-    suffix[1] = 0;
-  } else {
-    suffix[0] = (iobit / 10) + '0';
-    suffix[1] = (iobit % 10) + '0';
-    suffix[2] = 0;
-  }
-
-  strcat(name_str,suffix);
-
-
   add_stimulus(this);
 }
 
