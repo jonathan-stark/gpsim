@@ -380,6 +380,8 @@ extern int open_cod_file(pic_processor **, char *);
 int gpsim_open(Processor *cpu, const char *file)
 {
   char *str;
+  char command_str[256];
+  char type =0;
 
   str = strrchr(file,'.');
   if(str==0)
@@ -389,42 +391,33 @@ int gpsim_open(Processor *cpu, const char *file)
   }
   str++;
 
-  if(!cpu)
-  {
-    puts("gpsim_open::No processor has been selected!");
-    return 0;
-  }
 
   if(!strcmp(str,"hex"))
   {
 
-    cpu->load_hex(file);
-    
-  }
-  else if(!strcmp(str,"cod"))
-  {
-
-    int i;
-    i=load_symbol_file(&cpu, file);
-
-    if(i)
+    if(!cpu)
     {
-      cout << "found a fatal error in the symbol file " << file <<'\n';
+      puts("gpsim_open::No processor has been selected!");
       return 0;
     }
 
-    // FIXME: questionable
-    command_list[0]->cpu=cpu;
-    get_trace().switch_cpus(cpu);
-      
+    type = 'h';
+
+
   }
+  else if(!strcmp(str,"cod"))
+    type = 's';
   else if(!strcmp(str,"stc"))
-    process_command_file(file);
+    type = 'c';
   else
   {
     cout << "Unknown file extension \"" << str <<"\" \n";
     return 0;
   }
+
+  snprintf(command_str, sizeof(command_str),
+	   "load %c %s\n",type,file);
+  parse_string(command_str);
 
   return 1;
 }

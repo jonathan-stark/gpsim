@@ -132,6 +132,14 @@ abort_gpsim_now {
 
 ":"                 {return(recognize(COLON_T, ":"));}
 "+"                 {return(recognize(PLUS_T,"+"));}
+"-"                 {return(recognize(MINUS_T,"-"));}
+"*"                 {return(recognize(MPY_T,"*"));}
+"/"                 {return(recognize(DIV_T,"/"));}
+"^"                 {return(recognize(XOR_T,"^"));}
+"&"                 {return(recognize(AND_T,"^"));}
+"|"                 {return(recognize(OR_T,"^"));}
+"<<"                {return(recognize(SHL_T,"<<"));}
+">>"                {return(recognize(SHR_T,">>"));}
 
 {BIN1}              {return(process_intLiteral(&yytext[2], 2));}
 {BIN2}              {return(process_intLiteral(&yytext[2], 2));}
