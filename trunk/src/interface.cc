@@ -60,61 +60,6 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   extern void redisplay_prompt(void);  // in input.cc
 //}
 
-//--------------------------------------------------------------------
-// InterfaceObject 
-//
-// This class is used only within interface.cc's scope. It's purpose
-// is to provide a way to call back some function not gpsim's code
-// space.
-
-class InterfaceObject : public BreakCallBack
-{
-public:
-  pic_processor *pic;
-
-  void (*callback_function)(gpointer);
-  gpointer callback_data;
-
-  InterfaceObject(void) {pic = NULL;};
-  virtual void callback(void)
-  {
-      if(callback_function)
-	  callback_function(callback_data);
-    };
-
-};
-
-class CyclicBreakPoint : public InterfaceObject
-{
-public:
-  guint64 delta_cycles;
-
-  void set_break(void)
-    {
-      pic->cycles.set_break(pic->cycles.value + delta_cycles, this);
-    }
-      
-  virtual void callback(void)
-    {
-      set_break();
-      profile_keeper.catchup();
-      InterfaceObject::callback();
-    };
-  virtual ~CyclicBreakPoint()
-  {
-    if (NULL != pic)
-      pic->cycles.clear_break(this);
-  }
-  void set_delta(guint64 delta)
-  {
-      pic->cycles.clear_break(this);
-
-      delta_cycles = delta;
-      set_break();
-  }
-};
-
-
 //
 // interface.cc
 //

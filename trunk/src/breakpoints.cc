@@ -1369,3 +1369,39 @@ void GuiCallBack::set_break(int cycle,
 #endif
 
 
+//------------------------------------------------------------------------
+void InterfaceObject::callback(void)
+{
+  if(callback_function)
+    callback_function(callback_data);
+}
+
+//------------------------------------------------------------------------
+void CyclicBreakPoint::set_break(void)
+{
+  if(pic)
+    pic->cycles.set_break(pic->cycles.value + delta_cycles, this);
+}
+      
+void CyclicBreakPoint::callback(void)
+{
+  set_break();
+  profile_keeper.catchup();
+  InterfaceObject::callback();
+}
+
+CyclicBreakPoint::~CyclicBreakPoint(void)
+{
+  if (pic)
+    pic->cycles.clear_break(this);
+}
+
+void CyclicBreakPoint::set_delta(guint64 delta)
+{
+  if(pic) {
+    pic->cycles.clear_break(this);
+
+    delta_cycles = delta;
+    set_break();
+  }
+}

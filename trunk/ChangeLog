@@ -1,3 +1,14 @@
+2003-09-07  Scott Dattalo  <scott@dattalo.com>
+	* src/pic_processor.cc -- Fixed the "Too many cycle counter breakpoints" bug
+	* src/interface.cc        It turns out that the "realtime" stuff was 
+	* src/breakpoints.cc      1) duplicating a class declaration. 2) not clearing
+	* src/breakpoints.h       cycle counter break points.
+	* gpsim.sln - added for win32 port.
+	
+2003-08-30  Scott Dattalo  <scott@dattalo.com>
+	* src/p12x.cc -- The 12c5xx will reset if an I/O is toggled and the processor
+	is sleeping.
+
 2003-08-27  Scott Dattalo  <scott@dattalo.com>
 	* config_win32.h.in - added
 
