@@ -216,8 +216,8 @@ Section -Icons
 ;  CreateShortCut "$DESKTOP\${PRODUCT_NAME}.lnk" "$INSTDIR\${PRODUCT_NAME}.bat" "" "$INSTDIR\gpsim.ico" "" "" "" ""
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\${PRODUCT_NAME} on the Web.lnk" "$INSTDIR\${PRODUCT_NAME}.url"
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Uninstall.lnk" "$INSTDIR\uninst.exe"
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\doc\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
-  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Change Log.lnk" "$INSTDIR\doc\ChangeLog_head.txt" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Documentation.lnk" "$INSTDIR\README.TXT" "" "$INSTDIR\gpsim.ico" "" "" "" ""
+  CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\Change Log.lnk" "$INSTDIR\ChangeLog.txt" "" "$INSTDIR\gpsim.ico" "" "" "" ""
   CreateShortCut "$SMPROGRAMS\${PRODUCT_NAME}\GPL 2 License.lnk" "$INSTDIR\COPYING.TXT"
 SectionEnd
 
