@@ -22,7 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __BINARY_INDICATOR_H__
 #define __BINARY_INDICATOR_H__
 
-
+#include <glib.h>
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"

@@ -38,7 +38,7 @@ do_quit_app(GtkWidget *widget)
 	exit_gpsim();
 }
 
-
+/*
 #ifdef DOING_GNOME
 static void
 about_cb (GtkWidget *widget, void *data)
@@ -51,7 +51,7 @@ about_cb (GtkWidget *widget, void *data)
 	};
 	
 	about = gnome_about_new ( "The GNUPIC Simulator - ", GPSIM_VERSION,
-				  /* copyright notice */
+	// copyright notice
 				  "(C) 1999 ",
 				  authors,
 				  "A simulator for Microchip PIC microcontrollers.",
@@ -61,6 +61,7 @@ about_cb (GtkWidget *widget, void *data)
 	return;
 }
 #endif
+*/
 
 static void
 show_message (char *title, char *message)
@@ -105,7 +106,12 @@ about_cb (gpointer             callback_data,
 	  guint                callback_action,
 	  GtkWidget           *widget)
 {
-  gchar *version = "The GNUPIC Simulator - " GPSIM_VERSION;
+  gchar version[100];
+  //gchar *version = "The GNUPIC Simulator - " GPSIM_VERSION;
+  strncpy(version, "The GNUPIC Simulator - ", 100);
+
+  gpsim_get_version(&version[strlen(version)], (100 - strlen(version)) );
+
   show_message(  version, "A simulator for Microchip PIC microcontrollers.
 by T. Scott Dattalo - mailto:scott@dattalo.com
    Ralf Forsberg - mailto:rfg@home.se
@@ -493,6 +499,7 @@ void create_dispatcher (void)
       
       int x,y,width,height;
       int update_rate;
+      char version_buffer[100];
       
       dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -523,7 +530,8 @@ void create_dispatcher (void)
 				(GtkDestroyNotify) gtk_object_unref);
 //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
       gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
-      gtk_window_set_title (GTK_WINDOW (dispatcher_window), GPSIM_VERSION);
+      gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
+			    gpsim_get_version(version_buffer,100)); //GPSIM_VERSION);
       gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
       
       box1 = gtk_vbox_new (FALSE, 0);
@@ -584,7 +592,7 @@ void create_dispatcher (void)
 	  gpsim_set_update_rate(update_rate);
       else
 	  update_rate=gpsim_get_update_rate();
-      spinadj = gtk_adjustment_new(update_rate,1,2000000,1,100,100);
+      spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
       spinb = gtk_spin_button_new(spinadj,1,0);
       gtk_container_add(GTK_CONTAINER(frame),spinb);
       gtk_signal_connect(GTK_OBJECT(spinb),"changed",
