@@ -100,6 +100,7 @@ public:
   stimulus(char *n=NULL);
   virtual int get_state(guint64 current_time) {return state;};
   virtual void put_state(int new_state) {state=new_state;};
+  virtual void put_state_value(int new_state);
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
 };
@@ -165,6 +166,8 @@ enum IOPIN_DIRECTION
 
   virtual int get_state(guint64 current_time) {return state;};
   virtual void put_state(int new_state) {state=new_state;}; 
+  virtual void put_state_value(int new_state);
+  virtual void toggle(void) {state = !state;}; 
   virtual void attach(Stimulus_Node *s);
   virtual void change_direction(unsigned int){return;};
   virtual void update_direction(unsigned int x){return;};
@@ -179,6 +182,7 @@ public:
   IO_input(IOPORT *i, unsigned int b);
   IO_input(void);
   virtual int get_state(guint64 current_time){return drive;};
+  virtual void toggle(void);
   virtual void put_state( int new_state) 
     {
       if(new_state>threshold) {
@@ -233,6 +237,8 @@ public:
   IO_open_collector(IOPORT *i, unsigned int b);
   virtual int get_state(guint64 current_time);
   virtual void update_direction(unsigned int);
+  virtual void change_direction(unsigned int);
+  virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 
 };
 

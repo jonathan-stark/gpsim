@@ -43,7 +43,9 @@ public:
     internal_latch; // 
 
   void put(unsigned int new_value);
+  void put_value(unsigned int new_value);
   virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit_value(unsigned int bit_number, bool new_value);
   int get_bit(unsigned int bit_number);
   unsigned int get(void);
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);

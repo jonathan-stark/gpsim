@@ -102,7 +102,7 @@ void update(Breadboard_Window *bbw)
 	    int type=gpsim_pin_get_dir(pic_id, pinnr);
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
-	    draw_pin(bbw,type==0?PIN_INPUT:PIN_OUTPUT,
+	    draw_pin(bbw,type==0?PIN_OUTPUT:PIN_INPUT,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength,
 		     XOFFSET+bbw->pinstatewidth,
 		     YOFFSET+dy+bbw->pinspacing/2);
@@ -131,7 +131,7 @@ void update(Breadboard_Window *bbw)
 	    int type=gpsim_pin_get_dir(pic_id, pinnr);
 	    // Draw pin
 	    gdk_gc_set_foreground(bbw->pinline_gc,state>0?&high_output_color:&low_output_color);
-	    draw_pin(bbw,type==0?PIN_INPUT:PIN_OUTPUT,
+	    draw_pin(bbw,type==0?PIN_OUTPUT:PIN_INPUT,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width,
 		     XOFFSET+bbw->pinstatewidth+bbw->pinlength+bbw->case_width+bbw->pinlength,
 		     YOFFSET+dy+bbw->pinspacing/2);
@@ -270,9 +270,9 @@ static gint button(GtkWidget *widget,
 	    if(hit_state(bbw,x,y))
 	    {
 		printf("hit state\n");
-		value = gpsim_pin_get_value(pic_id, pin);
-		value = !value;
-		gpsim_pin_set_value(pic_id, pin, value);
+		//value = gpsim_pin_get_value(pic_id, pin);
+		//value = !value;
+		gpsim_pin_toggle(pic_id, pin);
 	    }
 	    else//if(hit_direction(bbw,x,y))
 	    {
@@ -280,6 +280,7 @@ static gint button(GtkWidget *widget,
 		dir = !dir;
 		gpsim_pin_set_dir(pic_id, pin, dir);
 		printf("hit direction, %d\n",dir);
+		//update(bbw);
 	    }
 	}
 	

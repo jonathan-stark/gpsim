@@ -106,6 +106,8 @@ void Package::assign_pin(unsigned int pin_number, IOPIN *pin)
 
   case E_NO_PIN:
     pins[pin_number-1] = pin;
+    // Tell the I/O pin its number
+    //pin->new_pin_number(pin_number);
     break;
 
   }

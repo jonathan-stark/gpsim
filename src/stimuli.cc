@@ -338,8 +338,14 @@ int Stimulus_Node::update(unsigned int current_time)
 stimulus::stimulus(char *n = NULL)
 {
   strcpy(name_str,"stimulus");
-  cout << "stimulus\n";
+  //cout << "stimulus\n";
   xref = new XrefObject((unsigned int *)&state);
+}
+
+void stimulus::put_state_value(int new_state)
+{
+  put_state(new_state);
+  if(xref) xref->update();
 }
 
 //========================================================================
@@ -653,7 +659,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b)
   threshold = 0;
   drive = 0;
   snode = NULL;
-    cout << "IOPIN constructor called \n";
+  //  cout << "IOPIN constructor called \n";
 
   if(iop)
     iop->attach_iopin(this,b);
@@ -664,6 +670,15 @@ IOPIN::IOPIN(void)
 
   cout << "IOPIN default constructor\n";
 
+}
+
+void IOPIN::put_state_value(int new_state)
+{
+  if(iop)
+    iop->setbit_value(iobit, new_state &1);
+  //put_state(new_state);
+  if(xref)
+    xref->update();
 }
 
 void IOPIN::attach(Stimulus_Node *s)
@@ -689,6 +704,20 @@ IO_input::IO_input(void)
 
 
 }
+void IO_input::toggle(void)
+{
+  if(iop) {
+    iop->setbit(iobit, 1^iop->get_bit(iobit));
+    if(iop->xref)
+      iop->xref->update();
+    state = iop->get_bit(iobit);
+  }
+  else
+    state ^= 1;
+
+  if(xref)
+    xref->update();
+}
 
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
   : IO_input(i,b)
@@ -701,7 +730,7 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b)
 
   //sprintf(name_str,"%s%n",iop->name_str,iobit);
   //cout << name_str;
-  cout << "IO_bi_directional\n";
+  // cout << "IO_bi_directional\n";
   strcpy(name_str, iop->name());
   char bs[2];
   bs[0] = iobit+'0';
@@ -741,21 +770,25 @@ int IO_bi_directional::get_state(guint64 current_time)
     {
       if( iop->value & (1<<iobit))
 	{
-	  //cout << "high\n";
+	  //cout << " high\n";
 	  return drive;
 	}
       else
 	{
-	  //cout << "low\n";
+	  //cout << " low\n";
 	  return -drive;
 	}
     }
   else
     {
-      //cout << "bi-directional is configured as an input\n";
-      return(0);
+      if(snode)
+	return 0;
+      else
+	return ( (iop->value & (1<<iobit)) ? 1 : 0);
     }
+
 }
+
 
 //---------------
 //::update_direction(unsigned int new_direction)
@@ -776,7 +809,7 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 }
 
 //---------------
-//::change_direction(unsigned int new_direction)
+//void IO_bi_directional::change_direction(unsigned int new_direction)
 //
 //  This is called by the gui to change the direction of an 
 // io pin. 
@@ -784,9 +817,12 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 void IO_bi_directional::change_direction(unsigned int new_direction)
 {
 
-  cout << __FUNCTION__ << '\n';
+  //  cout << __FUNCTION__ << '\n';
 
   iop->tris->setbit(iobit, new_direction & 1);
+
+  if(xref)
+    xref->update();
 }
 
 int IO_bi_directional_pu::get_state(guint64 current_time)
@@ -809,7 +845,10 @@ int IO_bi_directional_pu::get_state(guint64 current_time)
   else
     {
       //cout << " pulled up\n";
-    return (pull_up_resistor->get_state(current_time));
+      if(snode)
+	return (pull_up_resistor->get_state(current_time));
+      else
+	return ( (iop->value & (1<<iobit)) ? 1 : 0);
     }
 
 }
@@ -854,18 +893,38 @@ int IO_open_collector::get_state(guint64 current_time)
   else
     {
       //cout << "open collector is configured as an input\n";
-      return(0);
+      if(snode)
+	return 0;
+      else
+	return ( (iop->value & (1<<iobit)) ? 1 : 0);
     }
 }
 
 void IO_open_collector::update_direction(unsigned int new_direction)
 {
-
+  //cout << "IO_open_collector::" << __FUNCTION__ << " to new direction " << new_direction << '\n';
   if(new_direction)
     driving = 1;
   else
     driving = 0;
 
+}
+
+//---------------
+//void IO_open_collector::change_direction(unsigned int new_direction)
+//
+//  This is called by the gui to change the direction of an 
+// io pin. 
+
+void IO_open_collector::change_direction(unsigned int new_direction)
+{
+
+  //cout << "IO_open_collector::" << __FUNCTION__ << '\n';
+
+  iop->tris->setbit(iobit, new_direction & 1);
+
+  if(xref)
+    xref->update();
 }
 
 //*****************************************************************
