@@ -256,7 +256,9 @@ class SocketLink
 public:
   SocketLink(unsigned int _handle, SocketBase *);
 
-  bool Send();
+  /// Send a response back to the link.
+  /// if the bTimeStamp is true, then the cycle counter is sent too.
+  bool Send(bool bTimeStamp=false);
 
   virtual void set(Packet &)=0;
   virtual void get(Packet &)=0;
@@ -781,13 +783,16 @@ SocketLink::SocketLink(unsigned int _handle, SocketBase *sb)
 {
 }
 
-bool SocketLink::Send()
+bool SocketLink::Send(bool bTimeStamp)
 {
   if(parent) {
     parent->packet->prepare();
     parent->packet->EncodeHeader();
     get(*parent->packet);
+    if(bTimeStamp)
+      parent->packet->EncodeUInt64(get_cycles().value);
     parent->packet->txTerminate();
+    //std::cout << "SocketLink::Send() sending " << parent->packet->txBuff() << endl;
     return parent->Send(parent->packet->txBuff());
   }
 
@@ -815,14 +820,19 @@ void AttributeLink::get(Packet &p)
 NotifyLink::NotifyLink(AttributeLink *_sl)
   : Value(), sl(_sl)
 {
-  if(sl && sl->getValue())
+  new_name("notifylink");
+
+  if(sl && sl->getValue()) {
+    Value *v = sl->getValue();
+    //std::cout<< "Creating a notify link and asoc with "<< v->name()<<endl;
     sl->getValue()->set_xref(this);
+  }
 }
 void NotifyLink::set(gint64 i)
 {
-  std::cout << "notify link is sending data back to client\n";
+  //  std::cout << "notify link is sending data back to client\n";
   if(sl)
-    sl->Send();
+    sl->Send(true);
 }
 
 //========================================================================

@@ -141,12 +141,24 @@ Packet::Packet(unsigned int rxsize, unsigned int txsize)
 
 bool Packet::DecodeHeader()
 {
-  if(*rxBuffer->buffer =='$') {
+  
+  if(*rxBuffer->buffer == '$') {
     rxBuffer->index = 1;
     return true;
   }
 
   rxBuffer->index = 0;
+
+  return false;
+}
+
+bool Packet::DecodeChar(char c)
+{
+  if(*rxBuffer->getBuffer() == c) {
+    rxBuffer->index++;
+    return true;
+  }
+
   return false;
 }
 

@@ -134,6 +134,7 @@ public:
 
   bool DecodeHeader();
   bool DecodeObjectType(unsigned int &);
+  bool DecodeChar(char);
   bool DecodeUInt32(unsigned int &);
   bool DecodeUInt64(guint64 &);
   bool DecodeString(char *, int);

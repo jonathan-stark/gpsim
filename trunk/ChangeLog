@@ -1,3 +1,8 @@
+2005-01-10 Scott Dattalo <scott@dattalo.com>
+	* cli/sockect.cc, src/protocol.cc, src/protocol.h,
+	src/symbol.cc, src/symbol.h, src/value.cc,src/value.h:
+	Fixed bugs associated with socket notify links.
+	
 2005-01-09 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc: Began I/O port redesign.
 	* cli/socket.cc, src/protocol.h: Added Socket callbacks.
