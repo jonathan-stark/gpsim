@@ -1,3 +1,6 @@
+2004-08-24 Manuel Bouyer <bouyer@antioche.eu.org>
+	* src/stimuli.cc: Fixed iopin stimulus update. 
+
 2004-08-24 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_attach.cc, cli/cmd_attach.h, cli/cmd_symbol.cc,
 	  cli/cmd_symbol.h, cli/expr.cc, cli/expr.h, cli/parse.yy,

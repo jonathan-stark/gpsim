@@ -1136,14 +1136,12 @@ void IOPIN::put_digital_state(bool new_state)
   Register *port = get_iop();
   if(port)
     port->setbit(iobit, new_state);
-  else {
 
-    if(new_state != digital_state) {
-      digital_state = new_state;
-      Vth = digital_state ? 5.0 : 0.3;
-      if(snode)
-	snode->update(0);
-    }
+  if(new_state != digital_state) {
+    digital_state = new_state;
+    Vth = digital_state ? 5.0 : 0.3;
+    if(snode)
+      snode->update(0);
   }
 }
 
