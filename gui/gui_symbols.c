@@ -85,12 +85,20 @@ static void update_symbols(Symbol_Window *sw, GUI_Processor *gp)
 	case SYMBOL_IOPORT:
 	    strcpy(entry[1],"ioport");
 	    break;
+	case SYMBOL_STIMULUS:
+	    strcpy(entry[1],"stimulus");
+	    break;
+	case SYMBOL_BASE_CLASS:
+	    strcpy(entry[1],"symbol base class");
+	    break;
 	default:
-	    strcpy(entry[1],"unknown symbol type, add it to regwin.c");
+	    strcpy(entry[1],"unknown symbol type");
             break;
 	}
 	entry[2]=(char*)malloc(32);
-	if(s->type!=SYMBOL_IOPORT)
+	if(s->type==SYMBOL_ADDRESS||
+	   s->type==SYMBOL_CONSTANT||
+	   s->type==SYMBOL_REGISTER)
 	    sprintf(entry[2],"0x%X",s->value);
 	else
             strcpy(entry[2],"");
