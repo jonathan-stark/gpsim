@@ -1185,8 +1185,8 @@ unsigned int Processor::getReadTT(unsigned int j)
 //-------------------------------------------------------------------
 //
 // run  -- Begin simulating and don't stop until there is a break.
-//
-void Processor::run (void)
+// FIXME - shouldn't this be a pure virtual function?
+void Processor::run (bool refresh)
 {
 
   cout << __FUNCTION__ << endl;
@@ -1705,9 +1705,9 @@ void ProgramMemoryAccess::step_over(bool refresh)
 }
 
 //--------------------------------------------------------------------------
-void ProgramMemoryAccess::run(void)
+void ProgramMemoryAccess::run(bool refresh)
 {
-  cpu->run();
+  cpu->run(refresh);
 
 }
 

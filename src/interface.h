@@ -23,11 +23,8 @@ Boston, MA 02111-1307, USA.  */
 
 /*
  * interface.h
- *
- * Here are (hopefully) all of the definitions needed for an
- * external program (such as a gui) to interface with gpsim
- *
  */
+
 #include <stdio.h>
 #include <unistd.h>
 #include <glib.h>
@@ -55,21 +52,11 @@ void  initialization_is_complete(void);
 #define INVALID_VALUE 0xffffffff
 
 
-/*
-#define SYMBOL_NAME_LEN 32
-typedef struct _sym
-{
-    enum SYMBOL_TYPE type;
-    char *name;
-    int value;
-} sym;
-*/
-
 
 void gpsim_set_bulk_mode(int flag);
 extern const char *get_dir_delim(const char *path);
   
-
+extern int initialize_gpsim_core();
 
 
 #endif /* __INTERFACE_H__ */

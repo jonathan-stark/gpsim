@@ -27,9 +27,12 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_run.h"
 
 #include "../src/pic-processor.h"
+#include "../src/value.h"
 
 extern void redisplay_prompt(void);  // in input.cc
 
+// Attribute describing the simulator's verboseness
+extern Integer *verbosity;  // in ../src/init.cc
 
 cmd_run c_run;
 
@@ -61,10 +64,14 @@ void cmd_run::run(void)
       return;
     }
 
-  cout << "running...\n";
 
-  cpu->run();
+  bool bRefresh = (verbosity && verbosity->getVal()) ? true : false;
+  if(bRefresh) {
+    cout << "running...\n";
 
-  redisplay_prompt();
+    cpu->run(true);
+    redisplay_prompt();
+  } else
+    cpu->run(false);
 
 }

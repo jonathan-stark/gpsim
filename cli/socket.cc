@@ -730,33 +730,19 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 #if GLIB_MAJOR_VERSION >= 2
 
     GError *err=NULL;
-
-#if 1
-    g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
     GIOStatus stat;
-    bytes_read = 0;
-    do {
-      gsize b;
-      GIOStatus stat = g_io_channel_read_chars(channel, 
-					       s->packet->rxBuff(), 
-					       BUFSIZE, 
-					       &b, 
-					       &err);
-    //stat = g_io_channel_read_chars(channel, &s->buffer[bytes_read], 1, &b, &err);
-      bytes_read++;
-      //printf("read: %c  ", *s->buffer);
-      debugPrintChannelStatus(stat);
-      debugPrintCondition(g_io_channel_get_buffer_condition (channel));
+    gsize b;
 
-    } while(G_IO_STATUS_NORMAL == stat);
-#else
-    GIOStatus stat = g_io_channel_read_chars(channel, 
-					     s->packet->rxBuff(), 
-					     BUFSIZE, 
-					     &bytes_read, 
-					     &err);
-    //g_io_channel_read(channel, s->packet->rxBuff(), BUFSIZE, &bytes_read);
-#endif
+    g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+    stat = g_io_channel_read_chars(channel, 
+				   s->packet->rxBuff(), 
+				   BUFSIZE, 
+				   &b, 
+				   &err);
+    bytes_read = b;
+
+    //debugPrintChannelStatus(stat);
+    //debugPrintCondition(g_io_channel_get_buffer_condition (channel));
 
     if(err) {
       std::cout << "GError:" << err->message << endl;
@@ -773,6 +759,7 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 	//s->packet->rxBuff()[bytes_read-1] = 0;
 	s->ParseObject();
       } else {
+	//std::cout << " command line string from socket: " << s->packet->rxBuff() << endl;
 	parse_string(s->packet->rxBuff());
 	s->respond("ACK");
       }

@@ -1,4 +1,25 @@
 2004-12-14 Scott Dattalo <scott@dattalo.com>
+	* src/init.cc: added new function for initialization. Also added
+	new attribute 'sim.verbosity' that will control the simulator's
+	verbosity. Note, this duplicates the behavior of the global
+	variable 'verbose'. However, the goal is to phase out the global
+	variable.
+	* cli/cmd_run.cc: the run command now examines the new verbosity
+	attribute.
+	* src/pic-processor.cc, src/pic-processor.h, src/processor.cc,
+	src/processor.h: the run member function now takes a parameter
+	that controls whether or text will be printed.
+	* cli/socket.cc:
+	* src/interface.h: added extern def for new init function.
+	* gpsim/main.cc: call new initialization function
+	* src/breakpoints.cc: removed superfluous carriage return print.
+	* examples/scripts/README, examples/scripts/client.cc,
+	examples/scripts/makefile:  added  new files to illustrate
+	scripting.
+	* examples/scripts/gensquares.asm: minor tweak to simplify example
+	regression test. 
+
+2004-12-14 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/socket.cc, src/protocol.cc, src/protocol.h,
 	src/value.cc: Fixed compilation issues with FC3 on an Athlon 64.
 

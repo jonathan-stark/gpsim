@@ -507,7 +507,7 @@ void pic_processor::save_state()
 //
 // run  -- Begin simulating and don't stop until there is a break.
 //
-void pic_processor::run (void)
+void pic_processor::run (bool refresh)
 {
   if(use_icd)
   {
@@ -543,12 +543,11 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  //if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
-  //  if((*pma)[pc->value]->isa() == instruction::BREAKPOINT_INSTRUCTION)
-    simulation_start_cycle = cycles.value;
+  simulation_start_cycle = cycles.value;
 
   do {
 
+    // Take one step to get past any break point.
     step(1,false);
 
     do {
@@ -573,11 +572,14 @@ void pic_processor::run (void)
 
   bp.clear_global();
   trace.cycle_counter(cycles.value);
-  trace.dump_last_instruction();
 
   simulation_mode = STOPPED;
 
-  gi.simulation_has_stopped();
+  if(refresh) {
+    trace.dump_last_instruction(); 
+    gi.simulation_has_stopped();
+  }
+
 
 }
 
@@ -601,7 +603,8 @@ void pic_processor::step (unsigned int steps, bool refresh)
       icd_step();
       pc->get_value();
       disassemble((signed int)pc->value, (signed int)pc->value); // FIXME, don't want this in HLL ICD mode.
-      gi.simulation_has_stopped();
+      if(refresh)
+	gi.simulation_has_stopped();
       return;
   }
 

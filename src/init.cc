@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "trace.h"
-
+#include "symbol.h"
 
 
 //==============================================================
@@ -35,5 +35,22 @@ void simulation_cleanup(void)
   // Flush the log file (if there is one).
 
   trace_log.close_logfile();
+
+}
+
+
+//========================================================================
+//
+Integer *verbosity;
+
+//========================================================================
+// initialize_gpsim_core()
+//
+int initialize_gpsim_core()
+{
+
+  verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
+  get_symbol_table().add(verbosity);
+
 
 }

@@ -202,6 +202,7 @@ main (int argc, char *argv[])
   if(poptPeekArg(optCon))
 	  hex_name=strdup(poptPeekArg(optCon));
   
+  initialize_gpsim_core();
   initialize_gpsim();
   init_parser();
   initialize_readline();
