@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
   ST_INITIALIZED,
   ST_COMMAND_PH0,
   ST_STATUS_READ,
+  ST_DATA_READ,
   
 */
 
@@ -193,6 +194,59 @@ void LcdDisplay::send_status(void)
   }
 
   newState(ST_STATUS_READ);
+}
+
+void LcdDisplay::read_data(void)
+{
+  unsigned char data = 0;
+  bool bump_cursor = false;
+
+  if (in_cgram)
+    data = cgram[cgram_cursor];
+  else
+    data = ch_data[cursor.row][cursor.col];
+
+  if (debug)
+    cout << "Read data: 0x" << data << endl;
+
+  if(in_8bit_mode()) {
+    data_port->update_pin_directions(true);
+    data_port->put ( data );
+    bump_cursor = true;
+  } else {
+    data_port->update_pin_directions(true);
+
+    if (data_latch_phase & 1 ) {
+      data_port->put ( data & 0xf0 );
+    } else {
+      data_port->put ( data << 4 );
+      bump_cursor = true;
+    }
+
+    data_latch_phase ^= 1;
+  }
+
+  if (debug)
+    cout << "bump_cursor=" << (bump_cursor ? "true" : "false") << endl;
+  if (bump_cursor) {
+    if (in_cgram) {
+      cgram_cursor = (cgram_cursor + 1) & CGRAM_MASK;
+    } else {
+      // FIXME: cursor behavior should be emulated more carefully
+      // this requires some experimentation with an actual device (and
+      // probably a more accurate modelling of DDRAM). For now, treat
+      // DDRAM as a circular buffer sized rows*columns
+      cursor.col++;
+      if (cursor.col >= cols) {
+        cursor.col = 0;
+        cursor.row++;
+        if (cursor.row >= rows)
+          cursor.row = 0;
+      }
+    }
+  }
+
+  newState(ST_DATA_READ);
 }
 
 void LcdDisplay::release_port(void)
@@ -416,10 +470,8 @@ void LcdDisplay::advanceState( ControlLineEvent e)
     case  EWC:  // Active Write Command
       start_data();
       break;
-
     case  ERD:
-      cout << "LCD: Read Data is not supported\n";
-      newState(ST_INITIALIZED);
+      read_data();
       break;
 
     case  eRD:
@@ -478,6 +530,25 @@ void LcdDisplay::advanceState( ControlLineEvent e)
       newState(ST_INITIALIZED);
       break;
     }
+
+  case ST_DATA_READ:
+    switch(e) {
+    case  eRD:
+    case  eRC:
+    case  eWD:
+    case  eWC:
+      release_port();
+      break;
+
+    case  ERD:
+    case  ERC:
+    case  EWD:
+    case  EWC:
+      debug_events(this, e, current_state);
+      cout << "?? unhandled state transition\n";
+      newState(ST_INITIALIZED);
+      break;
+    }
     
   default:
     
@@ -507,6 +578,8 @@ char * LcdDisplay::getStateName(State s)
     return "command start";
   case ST_STATUS_READ:
     return "reading status";
+  case ST_DATA_READ:
+    return "reading data";
 
   default:
     break;

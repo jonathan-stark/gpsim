@@ -237,6 +237,7 @@ enum State {
   ST_INITIALIZED,
   ST_COMMAND_PH0,
   ST_STATUS_READ,
+  ST_DATA_READ,
 
   //_8BITMODE_START,
   //_8BITMODE,
@@ -393,6 +394,7 @@ public:
   void start_data(void);
   void latch_data(void);
   void send_status(void);
+  void read_data(void);
   void release_port(void);
   void new_command(void);
   void new_data(void);
