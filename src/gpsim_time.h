@@ -96,7 +96,7 @@ public:
 	if(active.next->f)
 	  active.next->f->callback();
 	else 
-	  bp.check_cycle_break(active.next->breakpoint_number);
+	  get_bp().check_cycle_break(active.next->breakpoint_number);
 
 	if(!reassigned)    // don't try to clear if the break point was reassigned.
 	  clear_current_break();
@@ -151,7 +151,7 @@ public:
 	      if(active.next->f)
 		active.next->f->callback();
 	      else
-		bp.check_cycle_break(active.next->breakpoint_number);
+		get_bp().check_cycle_break(active.next->breakpoint_number);
 
 	      clear_current_break();
 	    }

@@ -1,4 +1,13 @@
 2004-06-30 Scott Dattalo <scott@dattalo.com>
+	* plat/win32/gpsim.def: Added additional export definitions.
+	* cli/cmd_clear.cc: type casting fixes.
+	* src/breakpoints.h: added get_bp accessor function for the 
+	global bp (breakpoint) object
+	* src/gpsim_time.h: now uses the bp accessor function.
+	* src/processor.cc: If the listing file is not present,
+	gpsim will not crash now...
+	
+2004-06-30 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, cli/input.cc:
 	Starting gpsim in cli only mode would cause a crash.
 	

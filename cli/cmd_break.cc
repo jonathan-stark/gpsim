@@ -237,9 +237,9 @@ void cmd_break::set_break(int bit_flag, guint64 v)
 }
 
 void cmd_break::set_break(int bit_flag,
-			  guint64 reg,
-			  guint64 value,
-			  guint64 mask)
+			  guint64 r,
+			  guint64 v,
+			  guint64 m)
 {
 
   if(!cpu)
@@ -247,6 +247,9 @@ void cmd_break::set_break(int bit_flag,
 
   int b = MAX_BREAKPOINTS;
   char *str = "err";
+  unsigned int reg = (unsigned int)r;
+  unsigned int value = (unsigned int)v;
+  unsigned int mask = (unsigned int)m;
 
 
   switch(bit_flag) {
