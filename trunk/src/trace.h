@@ -185,7 +185,7 @@ class Trace
   void dump_last_instruction(void);
   int  dump1(unsigned int);
   int is_cycle_trace(unsigned int index);
-
+  guint64 find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index);
 };
 
 extern Trace trace;

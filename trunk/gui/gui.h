@@ -397,8 +397,8 @@ struct _Trace_Window {
     GUI_Object     gui_obj;
 
     GtkSheet *trace_sheet;
-    
-    GtkWidget *entry;
+  guint64   last_cycle;   // The cycle of the last trace in the window.
+
     GtkWidget *location;
     GtkWidget *popup_menu;
 
