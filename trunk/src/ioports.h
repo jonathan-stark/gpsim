@@ -125,6 +125,9 @@ public:
   void rbpu_intedg_update(unsigned int);
   unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
+
+  virtual void reset(RESET_TYPE r);
+
 };
 
 // PORTB on the 62x devices is totally different than PORTB on

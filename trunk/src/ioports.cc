@@ -761,6 +761,15 @@ PORTB::PORTB(void)
 {
   new_name("portb");
 }
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void PORTB::reset(RESET_TYPE r)
+{
+  rbpu = 0xc0; // These are the same as the upper 
+               // two bits of the option register
+
+
+}
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -768,17 +777,43 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
 {
   int i;
 
-  if((new_configuration ^ rbpu) & rbpu_MASK )
-    {
-      rbpu = new_configuration & rbpu_MASK;
-      for(i=0; i<8; i++)
-	( (IO_bi_directional_pu *)pins[i]) ->pull_up_resistor->drive = rbpu;
-    }
+  // Set the state of the interrupt bit first.
+  // The reason is because it may be that the pullups will cause a
+  // an i/o to toggle and hence cause an interrupt.
 
   if((new_configuration ^ intedg) & intedg_MASK )
     {
       intedg = new_configuration & intedg_MASK;
     }
+
+  if((new_configuration ^ rbpu) & rbpu_MASK )
+    {
+      rbpu = new_configuration & rbpu_MASK;
+      int drive = rbpu ? 0 : MAX_DRIVE/2;
+
+      for(i=0; i<8; i++)
+	( (IO_bi_directional_pu *)pins[i]) ->pull_up_resistor->drive = drive;
+
+
+      // Update each pin that has a stimulus connect:
+
+      int temp_value = value;
+      if(stimulus_mask)
+	temp_value = ( (temp_value & ~stimulus_mask) | update_stimuli());
+
+      // If the pullup resistors are being turned on, and the I/O's are
+      // inputs, and there are no stimuli attached, then drive I/O's high.
+
+      temp_value &= stimulus_mask;
+      if(drive)
+	temp_value = (tris->value & ~stimulus_mask);
+
+      if(temp_value ^ value) {
+	value = temp_value;
+	trace.register_write(address,value);
+      }
+    }
+
 }
 
 
