@@ -47,8 +47,10 @@ public:
 
   virtual unsigned int get_opcode(void);
   virtual int get_src_line(void);
+  virtual int get_hll_src_line(void);
   virtual int get_lst_line(void);
   virtual int get_file_id(void);
+  virtual int get_hll_file_id(void);
 
   Breakpoint_Instruction(pic_processor *new_cpu, unsigned int new_address, unsigned int bp);
 

@@ -111,6 +111,8 @@ typedef struct _sym
   void gpsim_trace_dump_to_file(int number_of_instructions, FILE *f);
   void gpsim_step(unsigned int processor_id, unsigned int steps);
   void gpsim_step_over(unsigned int processor_id);
+  void gpsim_hll_step(unsigned int processor_id);
+  void gpsim_hll_step_over(unsigned int processor_id);
   void gpsim_run(unsigned int processor_id);
   void gpsim_stop(unsigned int processor_id);
   void gpsim_reset(unsigned int processor_id);
@@ -140,11 +142,15 @@ typedef struct _sym
 					  guint64 cycle);
   int gpsim_open(unsigned int processor_id, char *file);
   unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
+  unsigned int gpsim_get_hll_file_id(unsigned int processor_id,
+			  	 unsigned int address);
   unsigned int gpsim_get_file_id(unsigned int processor_id,
 				 unsigned int address);
   struct file_context * gpsim_get_file_context(unsigned int processor_id,
 					       unsigned int file_id);
   char *gpsim_get_version(char *dest, int max_len);
+  int gpsim_get_hll_mode(unsigned int processor_id);
+  int gpsim_set_hll_mode(unsigned int processor_id, int mode);
 
   
   //---------------------------------------------------------------------------
@@ -231,7 +237,13 @@ typedef struct _sym
   void gpsim_toggle_break_at_line(unsigned int processor_id,
 				  unsigned int file_id,
 				  unsigned int line);
+  void gpsim_toggle_break_at_hll_line(unsigned int processor_id,
+				  unsigned int file_id,
+				  unsigned int line);
   unsigned int  gpsim_find_closest_address_to_line(unsigned int processor_id,
+						   unsigned int file_id,
+						   unsigned int line);
+  unsigned int  gpsim_find_closest_address_to_hll_line(unsigned int processor_id,
 						   unsigned int file_id,
 						   unsigned int line);
   char *gpsim_get_opcode_name(unsigned int processor_id,
@@ -244,7 +256,8 @@ typedef struct _sym
 			unsigned int opcode);
   unsigned int gpsim_get_src_line(unsigned int processor_id,
 				  unsigned int address);
-
+  unsigned int gpsim_get_hll_src_line(unsigned int processor_id,
+                                    unsigned int address);
 
   //---------------------------------------------------------------------------
   // pin interface functions

@@ -1228,7 +1228,7 @@ void pic_processor::attach_src_line(int address,int file_id,int sline,int lst_li
 
   if(address < program_memory_size())
     {
-      program_memory[address]->update_line_number(file_id,sline,lst_line);
+      program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
       if(sline > files[file_id].max_line)
 	files[file_id].max_line = sline;
@@ -1302,7 +1302,65 @@ int pic_processor::find_closest_address_to_line(int file_id, int src_line)
 }
 
 //-------------------------------------------------------------------
+int pic_processor::find_closest_address_to_hll_line(int file_id, int src_line)
+{
 
+    int closest_address = -1;
+    int closest_distance = 0x7fffffff;
+
+    for(int i = program_memory_size()-1; i>=0; i--)
+    {
+	// Find the closet instruction to the src file line number
+	if(program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
+	   program_memory[i]->get_hll_file_id()==file_id )
+	{
+	    if(program_memory[i]->get_hll_src_line() >= src_line &&
+	       (program_memory[i]->get_hll_src_line() - src_line) <= closest_distance)
+	       {
+		   closest_address = i;
+		   closest_distance = program_memory[i]->get_hll_src_line() - src_line;
+	       }
+	}
+    }
+
+    return closest_address;
+
+}
+
+//-------------------------------------------------------------------
+void pic_processor::set_break_at_address(int address)
+{
+  if( address >= 0)
+    {
+	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+	    bp.set_execution_break(this, address);
+    }
+}
+
+//-------------------------------------------------------------------
+void pic_processor::clear_break_at_address(int address)
+{
+    int b;
+
+    if( address >= 0)
+    {
+
+	if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+	{
+	    if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+	    {
+		b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
+		bp.clear( b );
+	    }
+	    else
+	    {
+		cout << "failed to clear execution break\n";
+	    }
+	}
+    }
+}
+
+//-------------------------------------------------------------------
 void pic_processor::toggle_break_at_address(int address)
 {
 
@@ -1325,7 +1383,6 @@ void pic_processor::toggle_break_at_address(int address)
 
     }
 }
-
 //-------------------------------------------------------------------
 
 void pic_processor::set_break_at_line(int file_id, int src_line)
@@ -1378,6 +1435,62 @@ void pic_processor::toggle_break_at_line(int file_id, int src_line)
 
 
   toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
+
+
+}
+
+//-------------------------------------------------------------------
+
+void pic_processor::set_break_at_hll_line(int file_id, int src_hll_line)
+{
+  int address;
+
+  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
+    {
+
+      int b = bp.set_execution_break(this, address);
+
+      if(b < MAX_BREAKPOINTS)
+	{
+	  //cout << "break at address: " << address << " break #: " << b << '\n';
+//	    if(program_memory[address]->xref)
+//		program_memory[address]->xref->update();
+	}
+      else
+	cout << "failed to set execution break (check the address)\n";
+
+    }
+
+}
+
+void pic_processor::clear_break_at_hll_line(int file_id, int src_hll_line)
+{
+
+  int address;
+  int b;
+
+  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
+    {
+
+      if(program_memory[address]->isa() == instruction::BREAKPOINT_INSTRUCTION)
+	{
+	  b = ((Breakpoint_Instruction *)(program_memory[address]))->bpn & BREAKPOINT_MASK;
+	  bp.clear( b );
+	  //cout << "cleared break at address: " << address << " break #: " << b << '\n';
+
+//	    if(program_memory[address]->xref)
+//		program_memory[address]->xref->update();
+	}
+      else
+	cout << "break point wasn't found at address: 0x" << address << '\n';
+    }
+}
+
+void pic_processor::toggle_break_at_hll_line(int file_id, int src_hll_line)
+{
+
+
+  toggle_break_at_address(find_closest_address_to_hll_line(file_id, src_hll_line));
 
 
 }
@@ -1635,7 +1748,9 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
 
   new_inst->update_line_number(old_inst->get_file_id(), 
 			       old_inst->get_src_line(), 
-			       old_inst->get_lst_line());
+			       old_inst->get_lst_line(),
+			       old_inst->get_hll_src_line(),
+			       old_inst->get_hll_file_id());
 
   new_inst->xref = old_inst->xref;
 

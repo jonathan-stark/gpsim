@@ -36,6 +36,8 @@ instruction::instruction(void)
 #endif
     is_modified=0;
     cycle_count=0;
+  hll_file_id = 0;
+  hll_src_line = -1;
 }
 
 void instruction::add_line_number_symbol(int address)
@@ -45,14 +47,13 @@ void instruction::add_line_number_symbol(int address)
 
 }
 
-void instruction::update_line_number(int file, int sline, int lline)
+void instruction::update_line_number(int file, int sline, int lline, int hllfile, int hllsline)
 {
-
   file_id = file;
   src_line = sline;
   lst_line = lline;
-
-
+  hll_src_line = hllsline;
+  hll_file_id = hllfile;
 }
 
 char * Literal_op::name(char *return_str)

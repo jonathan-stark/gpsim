@@ -333,10 +333,16 @@ public:
 
   // A couple of functions for manipulating  breakpoints
   int  find_closest_address_to_line(int file_id, int src_line);
+  int  find_closest_address_to_hll_line(int file_id, int src_line);
+  void set_break_at_address(int address);
+  void clear_break_at_address(int address);
   void toggle_break_at_address(int address);
   void set_break_at_line(int file_id, int src_line);
   void clear_break_at_line(int file_id, int src_line);
   void toggle_break_at_line(int file_id, int src_line);
+  void set_break_at_hll_line(int file_id, int src_line);
+  void clear_break_at_hll_line(int file_id, int src_line);
+  void toggle_break_at_hll_line(int file_id, int src_line);
 
   void init_register_memory(unsigned int memory_size);
   //  void create_iopins (const IOPIN_map iopin_map[], unsigned int num_of_iopins);
