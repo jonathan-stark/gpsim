@@ -1281,12 +1281,22 @@ void Processor::MessageBreakOnRead(unsigned int uAddress, unsigned uValue) {
    FormattedMessage("break reading register 0x%04x with value %u\n", uAddress, uValue);
 }
 
+void Processor::MessageBreakOnRead(unsigned int uAddress, const char * sOperator, unsigned uValue) {
+   FormattedMessage("break reading register 0x%04x %s %u\n",
+     uAddress, sOperator, uValue);
+}
+
 void Processor::MessageBreakOnWrite(unsigned int uAddress) {
    FormattedMessage("break writing register 0x%04x\n", uAddress);
 }
 
 void Processor::MessageBreakOnWrite(unsigned int uAddress, unsigned uValue) {
    FormattedMessage("break writing register 0x%04x with value %u\n", uAddress, uValue);
+}
+
+void Processor::MessageBreakOnWrite(unsigned int uAddress, const char * sOperator, unsigned uValue) {
+   FormattedMessage("break writing register 0x%04x %s %u\n",
+     uAddress, sOperator, uValue);
 }
 
 void Processor::MessageBreakExecuteAddress(unsigned int uAddress) {
