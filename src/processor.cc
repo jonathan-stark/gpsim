@@ -920,6 +920,14 @@ unsigned int program_memory_access::get_opcode(int addr)
     return 0;
 }
 
+
+//----------------------------------------
+// Get the current value of the program counter.
+unsigned int program_memory_access::get_PC(void)
+{
+  return 0;
+}
+
 void program_memory_access::put_opcode_start(int addr, unsigned int new_opcode)
 {
 
