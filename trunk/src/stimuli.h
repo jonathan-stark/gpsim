@@ -183,7 +183,8 @@ enum SOURCE_TYPE
   void put_duty(unsigned new_duty) { duty = new_duty; };
   void put_phase(unsigned new_phase) { phase = new_phase; };
   void put_initial_state(unsigned new_initial_state) { initial_state = new_initial_state; };
-  void put_start_cycle(unsigned new_start_cycle) { start_cycle = new_start_cycle; };
+  void put_start_cycle(unsigned new_start_cycle) { 
+    phase = start_cycle = new_start_cycle; };
   virtual void put_data(guint64 data_point) {};
   virtual void put_data(float data_point) {};
   virtual void set_digital(void) { };
