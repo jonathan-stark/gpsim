@@ -343,6 +343,10 @@ void read_src_files_from_cod(pic_processor *cpu)
   int found_lst_in_cod = 0;
 
   if(num_files) {
+    cpu->_files = new Files(num_files+1+MAX_HLL_FILES);
+    cpu->_files->nsrc_files(num_files);
+    cpu->_files->list_id(num_files);
+
     cpu->files = new file_context[num_files+1+MAX_HLL_FILES];
     cpu->number_of_source_files = num_files;
     cpu->lst_file_id = num_files;
@@ -395,21 +399,19 @@ void read_src_files_from_cod(pic_processor *cpu)
 	      printf ("Found redundant source file %s\n", filenm);
 					// fix:: this leaks memory
 	    cpu->number_of_source_files--; // adjust total file count
+
+	    cpu->_files->nsrc_files(cpu->_files->nsrc_files() - 1);
 	    break;
 	  }
 	}
 	if(temp_block[offset] && !alreadyExists) {
 
-	  //cpu->files[num_files].name = new char [strlen(b)];
-	  //strcpy(cpu->files[num_files].name,b);
-
+	  //// old way
 	  cpu->files[num_files].name = strdup(filenm);
-
 	  if(verbose)
 	    printf("%s\n",cpu->files[num_files].name);
-
-	  cpu->files[num_files].file_ptr = open_a_file(&cpu->files[num_files].name);
-	  
+	  FILE *fp  = open_a_file(&cpu->files[num_files].name);
+	  cpu->files[num_files].file_ptr = fp;
 	  cpu->files[num_files].max_line = 0;
 
 	  if((strncmp(lstfilename, filenm,256) == 0) && 
@@ -421,32 +423,82 @@ void read_src_files_from_cod(pic_processor *cpu)
 	      found_lst_in_cod = 1;
 	    }
 
+	  //// new way
+
+	  //
+	  // Add this file to the list
+	  //
+	  cpu->_files->Add(filenm, fp);
+
+	  if((strncmp(lstfilename, filenm,256) == 0) && 
+	     (cpu->_files->list_id() >= cpu->_files->nsrc_files()) )
+	    {
+	      //if(verbose)
+	      cout << "Found list file " << ((*cpu->_files)[num_files])->name() << endl;
+	      cpu->_files->list_id(num_files);
+	      found_lst_in_cod = 1;
+	    }
+
 	  num_files++;
 	}
       }
     }
 
     if(verbose)
-      printf ("Found %d source files in .cod file\n", num_files);
+      cout << "Found " << num_files << " source files in .cod file\n";
+
+
+    //// old way
 
     if(num_files != cpu->number_of_source_files)
-      cout << "warning, number of sources changed from " << num_files << " to " << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
+      cout << "warning, number of sources changed from " << num_files << " to " 
+	   << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
 
-    if(!found_lst_in_cod)
-      {
-	cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
-	cpu->files[num_files].name = strdup(lstfilename);
-	//	  cpu->files[cpu->number_of_source_files].file_ptr = 0;
-	if(verbose)
-	  printf("List file %s wasn't in .cod\n",cpu->files[num_files].name);
-	cpu->files[num_files].file_ptr = 
-	  open_a_file(&cpu->files[num_files].name);
+    if(!found_lst_in_cod) {
+      
+      cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
+      cpu->files[num_files].name = strdup(lstfilename);
+      //	  cpu->files[cpu->number_of_source_files].file_ptr = 0;
+      if(verbose)
+	printf("List file %s wasn't in .cod\n",cpu->files[num_files].name);
 
-	cpu->files[num_files].max_line = 0;
-      }
+      cpu->files[num_files].file_ptr = open_a_file(&cpu->files[num_files].name);
+
+      cpu->files[num_files].max_line = 0;
+    }
+
+
+    //// new way
+    if(num_files != cpu->_files->nsrc_files())
+      cout << "warning, number of sources changed from " << num_files << " to " 
+	   << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
+
+    if(!found_lst_in_cod) {
+      cpu->_files->nsrc_files(num_files + 1);
+
+      cpu->_files->Add(lstfilename, open_a_file(&lstfilename));
+
+
+      // if(verbose)
+        printf("List file %s wasn't in .cod\n",lstfilename);
+    }
 
   }else
     printf("No source file info\n");
+
+  {
+    // Debug code 
+    int i;
+
+    cout << " new file stuff: " << cpu->_files->nsrc_files() << " new files\n";
+
+    for(i=0; i<cpu->_files->nsrc_files(); i++) {
+
+      cout << ((*cpu->_files)[i])->name() << endl;
+    }
+    cout << " end of new file stuff\n";
+  }
+
 }
 
 //-----------------------------------------------------------
@@ -671,197 +723,197 @@ void check_for_gpasm(char *block)
 // Read .c line numbers from special .asm files.
 void read_hll_line_numbers_from_asm(pic_processor *cpu)
 {
-    int i;
-    struct file_context *gpsim_file;
-    char *file_name;
+  int i;
+  struct file_context *gpsim_file;
+  char *file_name;
+  char filename[256];
+  char text_buffer[256];
+  int line_number;
+  char *srcptrbegin;
+  char *ptr;
+  FILE *file;
+  int line_nr;
+  int address;
+  int asmfile_id;
+  int asmsrc_line;
+  int found_line_numbers=0;
+
+  struct {
     char filename[256];
-    char text_buffer[256];
-    int line_number;
-    char *srcptrbegin;
-    char *ptr;
-    FILE *file;
-    int line_nr;
-    int address;
-    int asmfile_id;
-    int asmsrc_line;
-    int found_line_numbers=0;
+    struct file_context *file;
+  }hll_source_files[MAX_HLL_FILES];
+  int nr_of_hll_files=0;
+  int hll_files_index;
+  int file_index;
+  int filearray_index;
 
-    struct {
-	char filename[256];
-	struct file_context *file;
-    }hll_source_files[MAX_HLL_FILES];
-    int nr_of_hll_files=0;
-    int hll_files_index;
-    int file_index;
-    int filearray_index;
-
-    // Find the file context that contain the .asm file.
-    // This assumes 'there can be only one'.
-    for(i=0;i<cpu->number_of_source_files;i++)
-    {
-	gpsim_file = &cpu->files[i];
-	file_name = gpsim_file->name;
-	if(!strcmp(file_name+strlen(file_name)-4,".asm"))
+  // Find the file context that contain the .asm file.
+  // This assumes 'there can be only one'.
+  for(i=0;i<cpu->number_of_source_files;i++) {
+    
+    gpsim_file = &cpu->files[i];
+    file_name = gpsim_file->name;
+    if(!strcmp(file_name+strlen(file_name)-4,".asm")) {
+      
+      // Make sure that the file is open
+      if(gpsim_file->file_ptr == 0)
 	{
-	    // Make sure that the file is open
-	    if(gpsim_file->file_ptr == 0)
+	  gpsim_file->file_ptr = fopen_path(file_name,"r");
+	  if(gpsim_file->file_ptr == 0)
 	    {
-		gpsim_file->file_ptr = fopen_path(file_name,"r");
-		if(gpsim_file->file_ptr == 0)
-		{
-		    printf("file \"%s\" not found!!!\n",file_name);
-		    return;
-		}
+	      printf("file \"%s\" not found!!!\n",file_name);
+	      return;
 	    }
-            break;
+	}
+      break;
+    }
+  }
+
+  if(i==cpu->number_of_source_files)
+    {
+      puts("Could not find .asm file!");
+      return;
+    }
+
+  // Reset hll_file_id and hll_src_line throughout cpu memory
+  for(address=0;cpu->program_memory_size()>address;address++)
+    {
+      cpu->program_memory[address]->hll_file_id=0;
+      cpu->program_memory[address]->hll_src_line=0;
+    }
+
+  // asmfile_id is index into file context array.
+  asmfile_id=i;
+
+  for(i=0;cpu->files[i].file_ptr!=0;i++)
+    ;
+  filearray_index=i;
+
+  rewind(gpsim_file->file_ptr);
+  asmsrc_line=0;
+
+  // Loop through the whole .asm file and look for any ";#CSRC" markers
+  while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=0)
+    {
+      char *ptr2;
+      asmsrc_line++;
+      if(0!=strncmp(text_buffer,";#CSRC",6))
+	continue;
+
+      // Found a line marker
+
+      ptr=text_buffer+7;
+      for(;*ptr!='\0';ptr++)
+	if(*ptr==' '||*ptr=='\t')
+	  break;
+      if(*ptr=='\0')
+	continue; // Syntax error
+
+      // file name
+      for(ptr2=text_buffer+7;ptr2<ptr;ptr2++)
+	filename[ptr2-(text_buffer+7)]=*ptr2;
+      filename[ptr2-(text_buffer+7)]=0;
+
+      ptr++;
+      for(;*ptr!='\0';ptr++)
+	if(isdigit(*ptr) || isspace(*ptr))
+	  break;
+      if(!isdigit(*ptr))
+	continue; // Syntax error
+
+      found_line_numbers=1; // The .asm file contains line numbers.
+
+      line_number=atoi(ptr);
+
+      // Locate filename in hll_source_files[]
+      for(hll_files_index=0;hll_files_index<nr_of_hll_files;hll_files_index++)
+	{
+	  if(!strcmp(filename,hll_source_files[hll_files_index].filename))
+	    {
+	      // Found it!
+	      file_index=hll_files_index+cpu->number_of_source_files;
+	      break;
+	    }
+	}
+      if(nr_of_hll_files==MAX_HLL_FILES)
+	{
+	  printf("Too many hll files, increase MAX_HLL_FILES\n");
+	}
+      else if(hll_files_index==nr_of_hll_files)
+	{
+	  // Add new file
+
+	  int maxline;
+
+	  file_index=hll_files_index+cpu->number_of_source_files;
+	  strcpy(hll_source_files[hll_files_index].filename,filename);
+	  hll_source_files[hll_files_index].file=0;
+	  nr_of_hll_files++;
+
+	  cpu->files[file_index].name=strdup(filename);
+	  file=fopen(cpu->files[file_index].name,"r");
+	  if(file==0)
+	    {
+	      puts("file is not found\n");
+	      assert(0);
+	    }
+	  cpu->files[file_index].file_ptr=file;
+
+	  rewind(cpu->files[file_index].file_ptr);
+	  maxline=0;
+	  while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=0)
+	    maxline++;
+
+	  // Make a new file context
+	  cpu->files[file_index].line_seek=0;//new int[maxline+1];
+	  cpu->files[file_index].max_line=maxline;
+
+	  cpu->files[file_index+1].file_ptr=0; // End of list
+
+	  line_nr=0;
+	  //	    cpu->files[file_index].line_seek[line_nr++]=0;
+
+	}
+
+
+      address=cpu->pma.find_closest_address_to_line(asmfile_id, asmsrc_line);
+      if(address >= 0) {
+	cpu->program_memory[address]->hll_src_line=line_number;
+	cpu->program_memory[address]->hll_file_id=file_index;
+      }
+
+    }
+  if(found_line_numbers)
+    {
+      cpu->number_of_source_files+=nr_of_hll_files;
+    }
+  else
+    {
+      cpu->files[i].file_ptr=0;
+    }
+
+  // Find first valid line number.
+  for(address=cpu->program_memory_size()-1;address>=0;address--)
+    {
+      if(cpu->program_memory[address]->hll_src_line)
+	{
+	  line_number=cpu->program_memory[address]->hll_src_line;
+	  file_index=cpu->program_memory[address]->hll_file_id;
 	}
     }
 
-    if(i==cpu->number_of_source_files)
+  // Fill the addresses in the gaps.
+  for(address=0;cpu->program_memory_size()>address;address++)
     {
-        puts("Could not find .asm file!");
-	return;
-    }
-
-    // Reset hll_file_id and hll_src_line throughout cpu memory
-    for(address=0;cpu->program_memory_size()>address;address++)
-    {
-	cpu->program_memory[address]->hll_file_id=0;
-	cpu->program_memory[address]->hll_src_line=0;
-    }
-
-    // asmfile_id is index into file context array.
-    asmfile_id=i;
-
-    for(i=0;cpu->files[i].file_ptr!=0;i++)
-    	;
-    filearray_index=i;
-
-    rewind(gpsim_file->file_ptr);
-    asmsrc_line=0;
-
-    // Loop through the whole .asm file and look for any ";#CSRC" markers
-    while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=0)
-    {
-        char *ptr2;
-	asmsrc_line++;
-	if(0!=strncmp(text_buffer,";#CSRC",6))
-	    continue;
-
-        // Found a line marker
-
-	ptr=text_buffer+7;
-	for(;*ptr!='\0';ptr++)
-	    if(*ptr==' '||*ptr=='\t')
-		break;
-	if(*ptr=='\0')
-	    continue; // Syntax error
-
-	// file name
-	for(ptr2=text_buffer+7;ptr2<ptr;ptr2++)
-            filename[ptr2-(text_buffer+7)]=*ptr2;
-	filename[ptr2-(text_buffer+7)]=0;
-
-        ptr++;
-	for(;*ptr!='\0';ptr++)
-	    if(isdigit(*ptr) || isspace(*ptr))
-                break;
-	if(!isdigit(*ptr))
-	    continue; // Syntax error
-
-	found_line_numbers=1; // The .asm file contains line numbers.
-
-	line_number=atoi(ptr);
-
-	// Locate filename in hll_source_files[]
-	for(hll_files_index=0;hll_files_index<nr_of_hll_files;hll_files_index++)
+      if(cpu->program_memory[address]->hll_src_line)
 	{
-	    if(!strcmp(filename,hll_source_files[hll_files_index].filename))
-	    {
-		// Found it!
-		file_index=hll_files_index+cpu->number_of_source_files;
-                break;
-	    }
+	  line_number=cpu->program_memory[address]->hll_src_line;
+	  file_index=cpu->program_memory[address]->hll_file_id;
 	}
-	if(nr_of_hll_files==MAX_HLL_FILES)
+      if(cpu->program_memory[address]->isa()!=instruction::INVALID_INSTRUCTION)
 	{
-            printf("Too many hll files, increase MAX_HLL_FILES\n");
-	}
-	else if(hll_files_index==nr_of_hll_files)
-	{
-	    // Add new file
-
-	    int maxline;
-
-	    file_index=hll_files_index+cpu->number_of_source_files;
-	    strcpy(hll_source_files[hll_files_index].filename,filename);
-            hll_source_files[hll_files_index].file=0;
-	    nr_of_hll_files++;
-
-	    cpu->files[file_index].name=strdup(filename);
-	    file=fopen(cpu->files[file_index].name,"r");
-	    if(file==0)
-	    {
-		puts("file is not found\n");
-		assert(0);
-	    }
-	    cpu->files[file_index].file_ptr=file;
-
-	    rewind(cpu->files[file_index].file_ptr);
-	    maxline=0;
-	    while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=0)
-		maxline++;
-
-	    // Make a new file context
-	    cpu->files[file_index].line_seek=0;//new int[maxline+1];
-	    cpu->files[file_index].max_line=maxline;
-
-	    cpu->files[file_index+1].file_ptr=0; // End of list
-
-	    line_nr=0;
-//	    cpu->files[file_index].line_seek[line_nr++]=0;
-
-	}
-
-
-        address=cpu->pma.find_closest_address_to_line(asmfile_id, asmsrc_line);
-	if(address >= 0) {
-	  cpu->program_memory[address]->hll_src_line=line_number;
 	  cpu->program_memory[address]->hll_file_id=file_index;
-	}
-
-    }
-    if(found_line_numbers)
-    {
-	cpu->number_of_source_files+=nr_of_hll_files;
-    }
-    else
-    {
-	cpu->files[i].file_ptr=0;
-    }
-
-    // Find first valid line number.
-    for(address=cpu->program_memory_size()-1;address>=0;address--)
-    {
-	if(cpu->program_memory[address]->hll_src_line)
-	{
-	    line_number=cpu->program_memory[address]->hll_src_line;
-	    file_index=cpu->program_memory[address]->hll_file_id;
-	}
-    }
-
-    // Fill the addresses in the gaps.
-    for(address=0;cpu->program_memory_size()>address;address++)
-    {
-	if(cpu->program_memory[address]->hll_src_line)
-	{
-	    line_number=cpu->program_memory[address]->hll_src_line;
-	    file_index=cpu->program_memory[address]->hll_file_id;
-	}
-	if(cpu->program_memory[address]->isa()!=instruction::INVALID_INSTRUCTION)
-	{
-	    cpu->program_memory[address]->hll_file_id=file_index;
-	    cpu->program_memory[address]->hll_src_line=line_number;
+	  cpu->program_memory[address]->hll_src_line=line_number;
 	}
     }
 }

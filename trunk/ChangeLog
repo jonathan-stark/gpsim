@@ -1,3 +1,11 @@
+2004-02-12  Scott Dattalo  <scott@dattalo.com>
+	* src/interface.cc, src/interface.h:
+	Finally, the C-style interface is gone (or nearly gone).
+	* src/processor.cc, src/processor.h, src/cod.cc
+	Redesigning the "file_context" object.
+	* gui/gui_watch.cc, gui/gui_profile.cc: 
+	Removed final traces of the old C-style interface.
+
 2004-02-11  Scott Dattalo  <scott@dattalo.com>
 	* gui/gui_symbols.cc: - changed strndup to a strcpy (plus malloc...):
 	
