@@ -387,21 +387,20 @@ int gui_init (int argc, char **argv)
     gdk_threads_init();
     printf("g_thread supported\n");
 
-    GThread          *Thread1, *Thread2;
+    GThread          *Thread1;
     GError           *err1 = NULL ;
-    GError           *err2 = NULL ;
 
     muSimStopMutex     = g_mutex_new ();
     cvSimStopCondition = g_cond_new ();
     g_mutex_lock(muSimStopMutex);
 
-    if( (Thread2 = g_thread_create((GThreadFunc)SimulationHasStopped, 
-				   (void *)message2, 
+    if( (Thread1 = g_thread_create((GThreadFunc)SimulationHasStopped, 
+				   (void *)0, 
 				   TRUE, 
-				   &err2)) == NULL)
+				   &err1)) == NULL)
     {
-      printf("Thread create failed: %s!!\n", err2->message );
-      g_error_free ( err2 ) ;
+      printf("Thread create failed: %s!!\n", err1->message );
+      g_error_free ( err1 ) ;
     }
     g_mutex_unlock(muSimStopMutex);
 
