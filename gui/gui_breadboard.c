@@ -83,7 +83,9 @@ static void update(Breadboard_Window *bbw)
 
     pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
-
+    if(bbw->pixmap==NULL)
+	return;
+    
     gdk_draw_rectangle (bbw->pixmap,
 			widget->style->white_gc,
 			TRUE,
@@ -341,6 +343,10 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
     int pin;
 
     bbw->processor=1;
+
+    if(!bbw->gui_obj.enabled)
+	return;
+
     
     pic_id = ((GUI_Object*)bbw)->gp->pic_id;
 
@@ -458,7 +464,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 		      (GtkSignalFunc) configure_event, bbw);
 
   gtk_widget_show(da);
-  gtk_widget_show_now(window);
+  gtk_widget_show(window);
 
   bbw->pinnamefont = gdk_font_load ("-adobe-courier-bold-r-*-*-*-140-*-*-*-*-*-*");
   bbw->pinnameheight = gdk_string_height (bbw->pinnamefont,"9y")+LABELPAD;
