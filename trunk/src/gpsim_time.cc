@@ -32,6 +32,12 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 //#include "gpsim_time.h"
 
+#define __DEBUG_CYCLE_COUNTER__
+
+// Largest cycle counter value
+
+#define END_OF_TIME 0xFFFFFFFFFFFFFFFF
+
 //--------------------------------------------------
 // member functions for the Cycle_Counter class
 //--------------------------------------------------
@@ -57,6 +63,16 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
 {
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
+
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+  cout << "Cycle_Counter::set_break  cycle = 0x" << hex<<future_cycle;
+
+    if(f)
+      cout << " has callback\n";
+    else
+      cout << " does not have callback\n";
+#endif
 
 
   if(inactive.next == NULL)
@@ -97,7 +113,10 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
       l1->next->break_value = future_cycle;
       l1->next->f = f;
       l1->next->breakpoint_number = bpn;
-      //cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+      cout << "cycle break " << future_cycle << " bpn " << bpn << '\n';
+#endif
 
     }
 
@@ -114,6 +133,14 @@ bool Cycle_Counter::set_break(guint64 future_cycle, BreakCallBack *f=NULL, unsig
 bool Cycle_Counter::set_break_delta(guint64 delta, BreakCallBack *f=NULL, unsigned int bpn=MAX_BREAKPOINTS)
 {
 
+#ifdef __DEBUG_CYCLE_COUNTER__
+  cout << "Cycle_Counter::set_break_delta  delta = 0x" << hex<<delta;
+
+  if(f)
+    cout << " has callback\n";
+  else
+    cout << " does not have callback\n";
+#endif
 
   return set_break(value+delta,f,bpn);
 
@@ -136,9 +163,11 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   bool found_old = 0;
   bool break_set = 0;
 
-  //cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle << '\n';
+#ifdef __DEBUG_CYCLE_COUNTER__
+  cout << "Cycle_Counter::reassign_break, old " << old_cycle << " new " << new_cycle << '\n';
+  dump_breakpoints();
+#endif
 
-  //dump_breakpoints();
   while( (l1->next) && !found_old)
     {
       
@@ -147,9 +176,13 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
       // Otherwise 
 	  if(l1->next->break_value ==  old_cycle)
 	    {
-	      //cout << " cycle match ";
+#ifdef __DEBUG_CYCLE_COUNTER__
+	      cout << " cycle match ";
+#endif
 	      if(l1->next->f == f)
 		found_old = 1;
+	      else
+		l1 = l1->next;
 	    }
 	  else
 	    l1 = l1->next;
@@ -159,7 +192,9 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   if(found_old)
     {
       // Now move the break point
-      //cout << " found old ";
+#ifdef __DEBUG_CYCLE_COUNTER__
+      cout << " found old ";
+#endif
 
       if(new_cycle > old_cycle)
 	{
@@ -168,25 +203,33 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 	  // Is this the last one in the list? (or equivalently, is the one after this one a NULL)
 	  if(l1->next->next == NULL)
 	    {
-	      //cout << " replaced at current position (next is NULL)\n";
+
 	      l1->next->break_value = new_cycle;
 	      break_on_this = active.next->break_value;
-	      //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	      cout << " replaced at current position (next is NULL)\n";
+	      dump_breakpoints();   // debug
+#endif
 	      return 1;
 	    }
 
 	  // Is the next one in the list still beyond this one?
 	  if(l1->next->next->break_value >= new_cycle)
 	    {
-	      //cout << " replaced at current position (next is greater)\n";
 	      l1->next->break_value = new_cycle;
 	      break_on_this = active.next->break_value;
-	      //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	      cout << " replaced at current position (next is greater)\n";
+	      dump_breakpoints();   // debug
+#endif
 	      return 1;
 	    }
 
 	  // Darn. Looks like we have to move it.
-	  //cout << " moving \n";
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+	  cout << " moving \n";
+#endif
 
 	  l2 = l1->next;                        // l2 now points to this break point
 
@@ -212,28 +255,37 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 
 	  l2->break_value = new_cycle;
 
-	  //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	  dump_breakpoints();   // debug
+#endif
 	}
       else      // old_cycle < new_cycle
 	{
 	  // First check to see if we can stay in the same relative position within the list
-	  //cout << " old cycle is less than new one\n";
+
+#ifdef __DEBUG_CYCLE_COUNTER__
+	  cout << " old cycle is less than new one\n";
+#endif
 	  // Is this the first one in the list?
 	  if(l1 == &active)
 	    {
-	      //cout << " replaced at current position\n";
 	      l1->next->break_value = new_cycle;
 	      break_on_this = new_cycle;
-	      //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	      cout << " replaced at current position\n";
+	      dump_breakpoints();   // debug
+#endif
 	      return 1;
 	    }
 
 	  // Is the previous one in the list still before this one?
 	  if(l1->break_value < new_cycle)
 	    {
-	      //cout << " replaced at current position\n";
 	      l1->next->break_value = new_cycle;
-	      //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	      cout << " replaced at current position\n";
+	      dump_breakpoints();   // debug
+#endif
 	      return 1;
 	    }
 
@@ -265,7 +317,9 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
 
 	  break_on_this = active.next->break_value;
 
-	  //dump_breakpoints();   // debug
+#ifdef __DEBUG_CYCLE_COUNTER__
+	  dump_breakpoints();   // debug
+#endif
 	}
     }
   else {
@@ -284,7 +338,11 @@ void Cycle_Counter::clear_current_break(void)
 
   if(value == break_on_this)
     {
-      //cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this <<'\n';
+#ifdef __DEBUG_CYCLE_COUNTER__
+      cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this <<'\n';
+      if(active.next->next)
+	cout << "  but there's one pending at the same cycle\n";
+#endif
       Cycle_Counter_breakpoint_list  *l1;
 
       l1 = inactive.next;                  // ptr to 1st inactive bp
@@ -295,7 +353,7 @@ void Cycle_Counter::clear_current_break(void)
       if(active.next != NULL)
 	break_on_this = active.next->break_value;
       else
-	break_on_this = 0;
+	break_on_this = END_OF_TIME;
     }
   else
     {
@@ -336,7 +394,7 @@ void Cycle_Counter::dump_breakpoints(void)
 Cycle_Counter::Cycle_Counter(void)
 {
   value         = 0;
-  break_on_this = 0;
+  break_on_this = END_OF_TIME;
   time_step     = 1;
 
   active.next   = NULL;

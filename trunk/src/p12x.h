@@ -66,6 +66,7 @@ class P12C508 : public  _12bit_processor, public _12bit_8pins
   virtual void create_sfr_map(void);
   virtual void dump_registers(void);
   virtual void tris_instruction(unsigned int tris_register);
+  virtual void reset(RESET_TYPE r);
 
   P12C508(void);
   static pic_processor *construct(void);
@@ -75,6 +76,7 @@ class P12C508 : public  _12bit_processor, public _12bit_8pins
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
+  virtual void option_new_bits_6_7(unsigned int);
 
 };
 

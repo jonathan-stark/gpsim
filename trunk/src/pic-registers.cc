@@ -47,11 +47,11 @@ void WDT::initialize(bool enable, double _timeout)
   warned = 0;
 
   if(verbose)
-    cout << " WDT init called. en = " << enable << " to = " << timeout << '\n';
+    cout << " WDT init called "<< ( (enable) ? "enabling\n" :", but disabling WDT\n");
+
   if(wdte)
     {
-      cout << "Enabling WDT\n";
-
+      cout << "Enabling WDT " << " timeout = " << timeout << " seconds\n";
       value = cpu->time_to_cycles(timeout);
       prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
@@ -67,23 +67,25 @@ void WDT::callback(void)
 {
 
 
-  cout<<"WDT timeout: " << hex << cpu->cycles.value << '\n';
+  if(wdte) {
+    cout<<"WDT timeout: " << hex << cpu->cycles.value << '\n';
+    
+    prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
-  prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
+    future_cycle = cpu->cycles.value + value * (1<<prescale);
 
-  future_cycle = cpu->cycles.value + value * (1<<prescale);
+    cpu->cycles.set_break(future_cycle, this);
 
-  cpu->cycles.set_break(future_cycle, this);
+    // The TO bit gets cleared when the WDT times out.
+    cpu->status.put_TO(0);
 
-  // The TO bit gets cleared when the WDT times out.
-  cpu->status.put_TO(0);
-
-  if(break_point)
-    bp.halt();
-  else if(bp.have_sleep()) {
-    bp.clear_sleep();
-  }else
-    cpu->reset(WDT_RESET);
+    if(break_point)
+      bp.halt();
+    else if(bp.have_sleep()) {
+      bp.clear_sleep();
+    }else
+      cpu->reset(WDT_RESET);
+  }
 
 }
 
@@ -110,4 +112,20 @@ void WDT::clear(void)
 	}
     }
 
+}
+
+void WDT::start_sleep(void)
+{
+
+  if(wdte) {
+    prescale = 0;
+
+    guint64 fc = cpu->cycles.value + value * (1<<prescale);
+
+    // cout << "moving break from " << future_cycle << " to " << fc << '\n';
+
+    cpu->cycles.reassign_break(future_cycle, fc, this);
+
+    future_cycle = fc;
+  }
 }

@@ -69,6 +69,20 @@ void _12bit_8pins::create_iopin_map(void)
 }
 
 //--------------------------------------------------------
+void P12C508::reset(RESET_TYPE r)
+{
+
+  tris.value = tris.por_value;
+  option_reg.value = option_reg.por_value;
+  pic_processor::reset(r);
+  
+}
+
+void  P12C508::option_new_bits_6_7(unsigned int)
+{
+  if(verbose)
+    cout << "p12c508 option_new_bits_6_7\n";
+}
 
 void P12C508::create_sfr_map(void)
 {
@@ -82,7 +96,8 @@ void P12C508::create_sfr_map(void)
   add_sfr_register(&gpio,  6);
 
   add_sfr_register(&W, 0xffffffff);
-  add_sfr_register(&option_reg, 0xffffffff);
+  add_sfr_register(&option_reg, 0xffffffff, 0xff);
+  add_sfr_register(&tris, 0xffffffff, 0x3f);
 
   osccal.new_name("osccal");
 
@@ -103,16 +118,18 @@ void P12C508::dump_registers (void)
 
   _12bit_processor::dump_registers();
 
-  cout << "tris = " << tris.value << '\n';
-  cout << "osccal = " << osccal.value  << '\n';
+  cout << "tris = 0x" << hex << tris.value << '\n';
+  cout << "osccal = 0x" << osccal.value  << '\n';
 
 }
 
 
 void P12C508::tris_instruction(unsigned int tris_register)
 {
+  cout << " Tris instruction\n";
 
-  tris.value = W.value;
+  //tris.value = W.value;
+  tris.put(W.value);
   trace.write_TRIS(tris.value);
 
 }
@@ -161,6 +178,8 @@ P12C508::P12C508(void)
 {
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
+
+  config_modes.valid_bits = CM_FOSC0 | CM_FOSC1 | CM_FOSC1x | CM_WDTE | CM_MCLRE;
 }
 
 
@@ -224,9 +243,36 @@ unsigned int GPIO::get(void)
 
 void GPIO::setbit(unsigned int bit_number, bool new_value)
 {
+  unsigned int old_value = value;
 
-  //  cout << "GPIO::setbit() bit " << bit_number << " to " << new_value << '\n';
+  if(verbose)
+    cout << "GPIO::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
+
+  int diff = old_value ^ value; // The difference between old and new
+
+  // If gpio bit 0,1 or 3 changed states AND
+  // ~GPWU is low (wake up on change is enabled) AND
+  // the processor is sleeping.
+  //    Then wake 
+  if( diff & 0x0b)
+    {
+      if( ((cpu->option_reg.value & 0x80) == 0) && bp.have_sleep()) {
+
+	if(verbose)
+	  cout << "IO bit changed while the processor was sleeping,\n\
+so the processor is waking up\n";
+
+	cpu->status.put(cpu->status.get() | 0x80);  // Set GPWUF flag
+	bp.clear_sleep();                 // Wake up the processor.
+
+	// If the cpu is not running then advance the program counter
+	if((simulation_mode == STOPPED) ||
+	   (simulation_mode == SINGLE_STEPPING) )
+	  cpu->pc.increment();
+      }
+    }
+
 
 }

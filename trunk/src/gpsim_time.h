@@ -88,9 +88,10 @@ public:
 	  // There's a break point set on this cycle. If there's a callback function, then call
 	  // it other wise halt execution by setting the global break flag.
 
-	  while(value >= break_on_this)   // Loop in case there are multiple breaks
+	  while(value >= break_on_this && active.next)   // Loop in case there are multiple breaks
 	    {
-	      if(active.next->f != NULL)
+
+	      if(active.next->f)
 		active.next->f->callback();
 	      else
 		bp.check_cycle_break(active.next->breakpoint_number);

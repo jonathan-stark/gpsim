@@ -61,6 +61,8 @@ enum _12BIT_DEFINITIONS
 
   //  OPTION_REG   option_reg;
 
+  virtual void reset(RESET_TYPE r);
+
   virtual void create_symbols(void);
 //  virtual void load_hex(char *hex_file);
   virtual void por(void);
@@ -102,6 +104,9 @@ enum _12BIT_DEFINITIONS
 
 
   virtual void option_new_bits_6_7(unsigned int);
+
+  virtual unsigned int config_word_address(void) const {return 0xfff;};
+  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
 
 };
 

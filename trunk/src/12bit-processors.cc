@@ -43,6 +43,31 @@ void _12bit_processor::por(void)
   pic_processor::por();
 }
 
+void _12bit_processor::reset(RESET_TYPE r)
+{
+  pic_processor::reset(r);
+  
+}
+//-------------------------------------------------------------------
+
+void _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
+{
+  config_word = cfg_word;
+
+  // Clear all of the configuration bits in config_modes and then
+  // reset each of them based on the config bits in cfg_word:
+  //config_modes &= ~(CM_WDTE);
+  //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
+  //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
+
+  if(address == config_word_address())
+    config_modes.config_mode = (config_modes.config_mode & ~7) | (cfg_word & 7);
+
+  if(verbose)
+    config_modes.print();
+
+}
+
 void _12bit_processor::create(void)
 {
 

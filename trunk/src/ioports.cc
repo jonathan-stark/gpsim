@@ -547,6 +547,7 @@ void IOPORT_TRIS::put(unsigned int new_value)
 {
   int save_port_latch = port->internal_latch;
 
+  cout << "IOPORT_TRIS::put 0x"<<hex<<new_value<<'\n';
   port->update_pin_directions(new_value);
 
   value = new_value;

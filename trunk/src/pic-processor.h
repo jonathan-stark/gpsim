@@ -117,25 +117,36 @@ enum PROCESSOR_TYPE
 //  The remapping removes processor dependent bit definitions.
 class ConfigMode {
 public:
-#define  CM_FOSC0 1<<0
-#define  CM_FOSC1 1<<1
-#define  CM_WDTE  1<<2
-#define  CM_CP0   1<<3
+#define  CM_FOSC0 1<<0    // FOSC0 and  FOSC1 together define the PIC clock
+#define  CM_FOSC1 1<<1    // All PICs todate have these two bits, but the
+                          // ones with internal oscillators use them differently
+#define  CM_WDTE  1<<2    // Watch dog timer enable
+#define  CM_CP0   1<<3    // Code Protection
 #define  CM_CP1   1<<4
-#define  CM_PWRTE 1<<5
-#define  CM_BODEN 1<<6
+#define  CM_PWRTE 1<<5    // Power on/Reset timer enable
+#define  CM_BODEN 1<<6    // Brown out detection enable
 #define  CM_CPD   1<<7
+#define  CM_MCLRE 1<<8    // MCLR enable
+
+#define  CM_FOSC1x 1<<9   // Hack for internal oscillators
+
 
   int config_mode;
   int valid_bits;
-  ConfigMode(void) { config_mode = 0xffff; valid_bits=0x7;};
+  ConfigMode(void) { 
+    config_mode = 0xffff; 
+    valid_bits = CM_FOSC0 | CM_FOSC1 | CM_WDTE;
+  };
 
+  void set_config_mode(int new_value) { config_mode = new_value & valid_bits;};
+  void set_valid_bits(int new_value) { valid_bits = new_value;};
   void set_fosc0(void){config_mode |= CM_FOSC0;};
   void clear_fosc0(void){config_mode &= ~CM_FOSC0;};
   bool get_fosc0(void){return (config_mode & CM_FOSC0);};
   void set_fosc1(void){config_mode |= CM_FOSC1;};
   void clear_fosc1(void){config_mode &= ~CM_FOSC1;};
   bool get_fosc1(void){return (config_mode & CM_FOSC1);};
+  bool get_fosc1x(void){return (config_mode & CM_FOSC1x);};
 
   void set_cp0(void)  {config_mode |= CM_CP0;  valid_bits |= CM_CP0;};
   void clear_cp0(void){config_mode &= ~CM_CP0; valid_bits |= CM_CP0;};
@@ -147,6 +158,10 @@ public:
   void enable_wdt(void)  {config_mode |= CM_WDTE;};
   void disable_wdt(void) {config_mode &= ~CM_WDTE;};
   bool get_wdt(void)     {return (config_mode & CM_WDTE);};
+
+  void enable_mclre(void)  {config_mode |= CM_MCLRE;};
+  void disable_mclre(void) {config_mode &= ~CM_MCLRE;};
+  bool get_mclre(void)     {return (config_mode & CM_MCLRE);};
 
   void enable_pwrte(void)   {config_mode |= CM_PWRTE;  valid_bits |= CM_PWRTE;};
   void disable_pwrte(void)  {config_mode &= ~CM_PWRTE; valid_bits |= CM_PWRTE;};
@@ -343,10 +358,11 @@ public:
 
   virtual void set_config_word(unsigned int address, unsigned int cfg_word);
   unsigned int get_config_word(void) {return config_word;};
+  virtual unsigned int config_word_address(void) const {return 0x2007;};
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
   unsigned int time_to_cycles( double t) 
     {if(period>0) return((int) (frequency * t)); else return 0;};
-  void reset(RESET_TYPE r);
+  virtual void reset(RESET_TYPE r);
   void disassemble (int start_address, int end_address);
   void list(int file_id, int pcval, int start_line, int end_line);
 
@@ -356,7 +372,6 @@ public:
   virtual unsigned int program_memory_size(void) const {return 0;};
   void init_program_memory(int address, int value);
   virtual void set_out_of_range_pm(int address, int value);
-  virtual unsigned int config_word_address(void) const {return 0x2007;};
   guint64 cycles_used(unsigned int address);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};

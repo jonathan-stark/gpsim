@@ -452,9 +452,11 @@ void pic_processor::sleep (void)
   do
     {
       cycles.increment();   // burn cycles until something wakes us
-    } while(bp.have_sleep()); // %%%FIX ME%%% ===>  && !bp.have_halt());
+    } while(bp.have_sleep() && !bp.have_halt());
 
-  pc.increment();
+  if(!bp.have_sleep())
+    pc.increment();
+
   simulation_mode = RUNNING;
 
 }
@@ -1448,7 +1450,7 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
   //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
   //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
-  if(address == 0x2007)
+  if(address == config_word_address())
     config_modes.config_mode = (config_modes.config_mode & ~7) | (cfg_word & 7);
 
   if(verbose)
@@ -1483,7 +1485,7 @@ void pic_processor::load_hex (char *hex_file)
   //for(int i = 0; i<MAXPICSIZE; i++)
   //  memory[i] = 0xffffffff;
 
-  set_config_word(0x2007,0xffff);  // assume no configuration word is in the hex file.
+  set_config_word(config_word_address(),0xffff);  // assume no configuration word is in the hex file.
 
   if (!readihex16 (this, inputfile))
     {
@@ -1656,16 +1658,46 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
 void ConfigMode::print(void)
 {
 
-  switch(config_mode&0x3) {  // Lower two bits are the clock type
-  case 0: cout << "LP"; break;
-  case 1: cout << "XT"; break;
-  case 2: cout << "HS"; break;
-  case 3: cout << "RC"; break;
+
+  if(config_mode & CM_FOSC1x) {
+    // Internal Oscillator type processor 
+
+    switch(config_mode& (CM_FOSC0 | CM_FOSC1)) {  // Lower two bits are the clock type
+    case 0: cout << "LP"; break;
+    case CM_FOSC0: cout << "XT"; break;
+    case CM_FOSC1: cout << "Internal RC"; break;
+    case (CM_FOSC0|CM_FOSC1): cout << "External RC"; break;
+
+    } 
+  }else {
+    switch(config_mode& (CM_FOSC0 | CM_FOSC1)) {  // Lower two bits are the clock type
+    case 0: cout << "LP"; break;
+    case CM_FOSC0: cout << "XT"; break;
+    case CM_FOSC1: cout << "HS"; break;
+    case (CM_FOSC0|CM_FOSC1): cout << "RC"; break;
+    }
   }
 
   cout << " oscillator\n";
 
-  cout << " WDT is " << ( get_wdt() ? "enabled\n" : "disabled\n");
+  if(valid_bits & CM_WDTE) 
+    cout << " WDT is " << (get_wdt() ? "enabled\n" : "disabled\n");
+
+  if(valid_bits & CM_MCLRE) 
+    cout << "MCLR is " << (get_mclre() ? "enabled\n" : "disabled\n");
+
+  if(valid_bits & CM_CP0) {
+
+    if(valid_bits & CM_CP1) {
+      cout << "CP0 is " << (get_cp0() ? "high\n" : "low\n");
+      cout << "CP1 is " << (get_cp1() ? "high\n" : "low\n");
+    } else {
+
+      cout << "code protection is " << (get_cp0() ? "enabled\n" : "disabled\n");
+
+    }
+  }
+
 
 }
 

@@ -40,19 +40,21 @@ void _TXREG::put(unsigned int new_value)
   if(verbose)
     cout << "txreg just got a new value\n";
 
-  if(txsta->value & _TXSTA::TRMT)
+  // The transmit register has data,
+  // so clear the TXIF flag
+
+  full();
+
+  if( (txsta->value & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN))
     {
-      // If the transmit buffer is empty, 
+      // If the transmit buffer is empty and the transmitter is enabled
       // then transmit this new data now...
 
       txsta->start_transmitting();
     }
-  else
-    {
-      // The transmit buffer is busy transmitting,
-      // So clear the TXIF flag and wait.
-      full();
-    }
+
+  trace.register_write(address,value);
+
 }
 
 void _TXREG::put_value(unsigned int new_value)
@@ -60,8 +62,8 @@ void _TXREG::put_value(unsigned int new_value)
 
   put(new_value);
 
-  trace.register_write(address,value);
-
+  if(xref)
+    xref->update();
 }
 
 //-----------------------------------------------------------
@@ -70,22 +72,83 @@ void _TXREG::put_value(unsigned int new_value)
 void _TXSTA::put_value(unsigned int new_value)
 {
 
-  value = (new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT);
+  put(new_value);
+
+  if(xref)
+    xref->update();
 
 }
 
 void _TXSTA::put(unsigned int new_value)
 {
 
-  put_value(new_value);
+  unsigned int old_value = value;
+
+  // The TRMT bit is controlled entirely by hardware.
+  // It is high if the TSR has any data.
+
+  value = (new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT);
+
+  if(verbose)
+    cout << "TXSTA::put 0x" << value << '\n';
+
+
+  if( (old_value ^ value) & TXEN) {
+
+    // The TXEN bit has changed states.
+    //
+    // If transmitter is being enabled and the transmit register
+    // has some data that needs to be sent, then start a
+    // transmission.
+    // If the transmitter is being disabled, then abort any
+    // transmission.
+
+    if(value & TXEN) {
+      if(!txreg->is_empty())
+	start_transmitting();
+    } else 
+      stop_transmitting();
+  }
 
   trace.register_write(address,value);
 
 }
 
+// _TXSTA::stop_transmitting(void)
+//
+void _TXSTA::stop_transmitting(void)
+{
+  if(verbose)
+    cout << "stopping a USART transmission\n";
+
+  bit_count = 0;
+  value |= TRMT;
+
+  // It's not clear from the documentation as to what happens
+  // to the TXIF when we are aborting a transmission. According
+  // to the documentation, the TXIF is set when the TXEN bit
+  // is set. In other words, when the Transmitter is enabled
+  // the txreg is emptied (and hence TXIF set). But what happens
+  // when TXEN is cleared? Should we clear TXIF too?
+  // 
+  // There is one sentence that says when the transmitter is
+  // disabled that the whole transmitter is reset. So I interpret
+  // this to mean that the TXIF gets cleared. I could be wrong
+  // (and I don't have a way to test it on a real device).
+  // 
+  // Another interpretation is that TXIF retains it state 
+  // through changing TXEN. However, when SPEN (serial port) is
+  // set then the whole usart is reinitialized and TXIF will
+  // get set.
+  //
+  //  txreg->full();   // Clear TXIF
+
+}
+
 void _TXSTA::start_transmitting(void)
 {
-  //cout << "starting a USART transmission\n";
+  if(verbose)
+    cout << "starting a USART transmission\n";
 
   // Build the serial byte that's about to be transmitted.
   // I doubt the pic really does this way, but gpsim builds
@@ -194,13 +257,6 @@ void _TXSTA::callback(void)
     if(cpu) {
       cpu->cycles.set_break(spbrg->get_cpu_cycle(1),this);
     }
-/*
-      if(value & BRGH) 
-	cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGH_STATES),this);
-      else
-	cpu->cycles.set_break(spbrg->get_cpu_cycle(TOTAL_BRGL_STATES),this);
-    }
-*/
   }
 
 }
@@ -240,10 +296,24 @@ void _RCSTA::put(unsigned int new_value)
   value = ( value & (RX9D | OERR | FERR) )   |  (new_value & ~(RX9D | OERR | FERR));
 
   // First check whether or not the serial port is being enabled
-  if(value & diff & SPEN) {
-    spbrg->start();
-    // Make the tx line high when the serial port is enabled.
-    txsta->txpin->put_state(1);
+  if(diff & SPEN) {
+
+    if(value & SPEN) {
+      spbrg->start();
+      // Make the tx line high when the serial port is enabled.
+      txsta->txpin->put_state(1);
+      txsta->txreg->empty();
+    } else {
+
+      // Completely disable the usart:
+
+      txsta->stop_transmitting();
+      txsta->txreg->full();         // Turn off TXIF
+      stop_receiving();
+
+      return;
+    }
+
   }
 
   if(!(txsta->value & _TXSTA::SYNC)) {
@@ -338,6 +408,15 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 	}
 
     }
+
+}
+
+void _RCSTA::stop_receiving(void)
+{
+
+  rsr = 0;
+  bit_count = 0;
+  state = RCSTA_DISABLED;
 
 }
 
@@ -437,8 +516,9 @@ void _RCSTA::callback(void)
     break;
 
   default:
-    cout << "Error RCSTA callback with bad state\n";
-
+    //cout << "Error RCSTA callback with bad state\n";
+    // The receiver was probably disabled in the middle of a reception.
+    ;
   }
 
 }
