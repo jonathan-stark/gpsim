@@ -21,9 +21,11 @@ Boston, MA 02111-1307, USA.  */
 
 #define GTK_ENABLE_BROKEN
 
+#include <stdio.h>
+#include "../config.h"
 #ifdef HAVE_GUI
 
-#include <stdio.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
@@ -31,7 +33,6 @@ Boston, MA 02111-1307, USA.  */
 #include <math.h>
 #include <assert.h>
 
-#include "../config.h"
 
 #include "../src/modules.h"
 #include "../src/stimuli.h"
