@@ -327,7 +327,11 @@ struct _SourceBrowserAsm_Window {
     int pageindex_to_fileid[SBAW_NRFILES];
     GtkWidget *source_pcwidget[SBAW_NRFILES];
     GtkWidget *notebook_child[SBAW_NRFILES];
-    
+
+    // Font strings
+    char commentfont_string[256];
+    char sourcefont_string[256];
+
     GtkWidget *popup_menu;
 
     struct sa_entry *menu_data;  // used by men callbacks

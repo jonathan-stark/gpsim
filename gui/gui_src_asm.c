@@ -68,7 +68,8 @@ typedef enum {
     MENU_RUN,
     MENU_STOP,
     MENU_FINISH,
-    MENU_RESET
+    MENU_RESET,
+    MENU_SETTINGS
 } menu_id;
 
 
@@ -85,6 +86,7 @@ static menu_item menu_items[] = {
     {"Breakpoint here", MENU_BP_HERE,NULL},
     {"Select symbol",   MENU_SELECT_SYMBOL,NULL},
     {"Find text...",    MENU_FIND_TEXT,NULL},
+    {"Settings...",     MENU_SETTINGS,NULL},
 };
 
 static menu_item submenu_items[] = {
@@ -467,6 +469,9 @@ popup_activated(GtkWidget *widget, gpointer data)
     
     switch(item->id)
     {
+    case MENU_SETTINGS:
+        font_dialog(popup_sbaw);
+        break;
     case MENU_FIND_TEXT:
 	gtk_widget_set_uposition(GTK_WIDGET(search.window),dlg_x,dlg_y);
 	gtk_widget_show(search.window);
@@ -1432,7 +1437,166 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
     gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
     return 0; // what should be returned?, FIXME
 }
+
+/*************** Font dialog *********************/
+
+
+int font_dialog_browse(GtkWidget *w, gpointer user_data)
+{
+    GtkEntry *entry=GTK_ENTRY(user_data);
+    gtk_entry_set_text(entry,"Hej");
+}
+
+static void fontok_cb(GtkWidget *w, gpointer user_data)
+{
+    gtk_main_quit();
+}
+
+static int load_fonts(SourceBrowserAsm_Window *sbaw)
+{
+    sbaw->comment_text_style.font=
+	gdk_font_load(sbaw->commentfont_string);
+
+    sbaw->default_text_style.font=
+	sbaw->label_text_style.font=
+	sbaw->symbol_text_style.font=
+	sbaw->instruction_text_style.font=
+	sbaw->number_text_style.font=
+	gdk_font_load(sbaw->sourcefont_string);
+
+    if(sbaw->comment_text_style.font==NULL)
+        return 0;
+    if(sbaw->default_text_style.font==NULL)
+	return 0;
+    return 1;
+}
+
+int font_dialog(SourceBrowserAsm_Window *sbaw)
+{
+    static GtkWidget *dialog=NULL;
+    GtkWidget *button;
+    static int retval;
+    GtkWidget *hbox;
+    GtkWidget *vbox;
+    static GtkWidget *commentfontstringentry;
+    static GtkWidget *sourcefontstringentry;
+    GtkWidget *label;
+    int fonts_ok;
     
+    if(dialog==NULL)
+    {
+	dialog = gtk_dialog_new();
+	gtk_window_set_title (GTK_WINDOW (dialog), "Source browser settings");
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+	gtk_signal_connect_object(GTK_OBJECT(dialog),
+			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+
+
+	// Source font
+	hbox = gtk_hbox_new(0,0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+	gtk_widget_show(hbox);
+	label=gtk_label_new("Font for source:");
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+	gtk_widget_show(label);
+	sourcefontstringentry=gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), sourcefontstringentry,
+			   TRUE, TRUE, 0);
+	gtk_widget_show(sourcefontstringentry);
+	button = gtk_button_new_with_label("Browse...");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(hbox), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)sourcefontstringentry);
+
+
+	// Comment font
+	hbox = gtk_hbox_new(0,0);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
+	gtk_widget_show(hbox);
+	label=gtk_label_new("Font for comments:");
+	gtk_box_pack_start(GTK_BOX(hbox), label,
+			   FALSE,FALSE, 20);
+	gtk_widget_show(label);
+	commentfontstringentry=gtk_entry_new();
+	gtk_box_pack_start(GTK_BOX(hbox), commentfontstringentry,
+			   TRUE, TRUE, 0);
+	gtk_widget_show(commentfontstringentry);
+	button = gtk_button_new_with_label("Browse...");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(hbox), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(font_dialog_browse),(gpointer)commentfontstringentry);
+
+
+	// OK button
+	button = gtk_button_new_with_label("OK");
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+			   FALSE,FALSE,10);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+			   GTK_SIGNAL_FUNC(fontok_cb),(gpointer)dialog);
+    }
+    
+    gtk_entry_set_text(GTK_ENTRY(sourcefontstringentry), sbaw->sourcefont_string);
+    gtk_entry_set_text(GTK_ENTRY(commentfontstringentry), sbaw->commentfont_string);
+
+    gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
+    gtk_widget_show_now(dialog);
+
+    gtk_grab_add(dialog);
+
+
+    while(fonts_ok!=2)
+    {
+	char fontname[256];
+        GdkFont *font;
+	gtk_main();
+
+	fonts_ok=0;
+
+	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
+	if((font=gdk_font_load(fontname))==NULL)
+	{
+	    if(gui_question("Sourcefont did not load!","Try again","Ignore/Cancel")==FALSE)
+		break;
+	}
+	else
+	{
+            gdk_font_unref(font);
+	    strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
+	    config_set_string(sbaw->sbw.gui_obj.name,"sourcefont",sbaw->sourcefont_string);
+            fonts_ok++;
+	}
+
+	strcpy(fontname,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
+	if((font=gdk_font_load(fontname))==NULL)
+	{
+	    if(gui_question("Commentfont did not load!","Try again","Ignore/Cancel")==FALSE)
+		break;
+	}
+        else
+	{
+            gdk_font_unref(font);
+	    strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
+	    config_set_string(sbaw->sbw.gui_obj.name,"commentfont",sbaw->commentfont_string);
+            fonts_ok++;
+	}
+    }
+
+    load_fonts(sbaw);
+    SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
+
+    gtk_grab_remove(dialog);
+    gtk_widget_hide(dialog);
+
+    return retval;
+}
+
 static gboolean
 message_close_cb(GtkWidget *widget, gpointer d)
 {
@@ -1506,7 +1670,8 @@ int gui_question(char *question, char *a, char *b)
 {
     static GtkWidget *dialog=NULL;
     static GtkWidget *label;
-    GtkWidget *button;
+    static GtkWidget *abutton;
+    static GtkWidget *bbutton;
     GtkWidget *hbox;
     static int retval;
     
@@ -1521,20 +1686,20 @@ int gui_question(char *question, char *a, char *b)
 	hbox = gtk_hbox_new(0,0);
 	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox), hbox,FALSE,FALSE,20);
 
-	button = gtk_button_new_with_label(a);
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+	abutton = gtk_button_new_with_label(a);
+	gtk_widget_show(abutton);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), abutton,
 			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+	gtk_signal_connect(GTK_OBJECT(abutton),"clicked",
 			   GTK_SIGNAL_FUNC(a_cb),(gpointer)&retval);
-	GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-	gtk_widget_grab_default(button);
+	GTK_WIDGET_SET_FLAGS (abutton, GTK_CAN_DEFAULT);
+	gtk_widget_grab_default(abutton);
 	
-	button = gtk_button_new_with_label(b);
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
+	bbutton = gtk_button_new_with_label(b);
+	gtk_widget_show(bbutton);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), bbutton,
 			   FALSE,FALSE,10);
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+	gtk_signal_connect(GTK_OBJECT(bbutton),"clicked",
 			   GTK_SIGNAL_FUNC(b_cb),(gpointer)&retval);
 
 	label=gtk_label_new(question);
@@ -1547,6 +1712,8 @@ int gui_question(char *question, char *a, char *b)
     else
     {
 	gtk_label_set_text(GTK_LABEL(label),question);
+        gtk_label_set_text(GTK_LABEL(GTK_BIN(abutton)->child),a);
+        gtk_label_set_text(GTK_LABEL(GTK_BIN(bbutton)->child),b);
     }
     
     gtk_widget_set_uposition(GTK_WIDGET(dialog),dlg_x,dlg_y);
@@ -1783,6 +1950,7 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
   GtkWidget *label;
     GdkColor text_fg;
     GdkColor text_bg;
+    char *fontstring;
 
   int x,y,width,height;
   
@@ -1838,17 +2006,30 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     sbaw->comment_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
 
-    sbaw->comment_text_style.font=
-	gdk_font_load("-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*");
-    
-    sbaw->default_text_style.font=
-	sbaw->label_text_style.font=
-	sbaw->symbol_text_style.font=
-	sbaw->instruction_text_style.font=
-	sbaw->number_text_style.font=
-	gdk_font_load("-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*");
+    strcpy(sbaw->commentfont_string,"-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*");
+    if(config_get_string(sbaw->sbw.gui_obj.name,"commentfont",&fontstring))
+	strcpy(sbaw->sourcefont_string,fontstring);
 
-    
+    strcpy(sbaw->sourcefont_string,"-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*");
+    if(config_get_string(sbaw->sbw.gui_obj.name,"sourcefont",&fontstring))
+	strcpy(sbaw->sourcefont_string,fontstring);
+
+    while(!load_fonts(sbaw))
+    {
+	if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
+	{
+	    strcpy(sbaw->sourcefont_string,"-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*");
+	    strcpy(sbaw->commentfont_string,"-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*");
+	    config_set_string(sbaw->sbw.gui_obj.name,"sourcefont",sbaw->sourcefont_string);
+	    config_set_string(sbaw->sbw.gui_obj.name,"commentfont",sbaw->commentfont_string);
+	}
+	else
+	{
+	    font_dialog(sbaw);
+	}
+    }
+
+
     search.lastid=-1;  // will reset search
     
     search.window = gtk_dialog_new();
