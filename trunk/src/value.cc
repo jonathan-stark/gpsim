@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 
 #include "protocol.h"
+#include "config.h"
 
 //------------------------------------------------------------------------
 Value::Value()
@@ -619,7 +620,7 @@ void Integer::get(char *buffer, int buf_size)
     gint64 i;
     get(i);
     long long int j = i;
-    snprintf(buffer,buf_size,"%Ld",j);
+    snprintf(buffer,buf_size,"%" PRINTF_INT64_MODIFIER "d",j);
   }
 
 }
@@ -638,7 +639,8 @@ string Integer::toString()
   gint64 i;
   get(i);
   long long int j = i;
-  snprintf(buf,sizeof(buf)," = %Ld = 0x%08LX",j,j);
+  snprintf(buf,sizeof(buf)," = %" PRINTF_INT64_MODIFIER
+    "d = 0x%08" PRINTF_INT64_MODIFIER "X",j,j);
   return (name() +string(buf));
 }
 
@@ -667,7 +669,7 @@ string Integer::toString(gint64 value)
 {
   char cvtBuf[1024];
   long long int v=value;
-  snprintf(cvtBuf,sizeof(cvtBuf), "%Ld", v);
+  snprintf(cvtBuf,sizeof(cvtBuf), "%" PRINTF_INT64_MODIFIER "d", v);
   return (string(&cvtBuf[0]));  
 }
 
@@ -676,7 +678,7 @@ char *Integer::toString(char *return_str, int len)
   if(return_str) {
     gint64 i;
     get(i);
-    snprintf(return_str,len,"%d",i);
+    snprintf(return_str,len,"%" PRINTF_INT64_MODIFIER "d",i);
   }
 
   return return_str;

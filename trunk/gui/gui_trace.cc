@@ -118,7 +118,7 @@ public:
 
       clist=GTK_CLIST(tw->trace_clist);
 
-      sprintf(cycle_string,"0x%016llx", trace.string_cycle);
+      sprintf(cycle_string,"0x%016" PRINTF_INT64_MODIFIER "x", trace.string_cycle);
 
       gtk_clist_append  (clist, entry);
       
