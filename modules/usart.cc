@@ -134,7 +134,7 @@ public:
     // logged in the "index". I.e. 1 events are at odd indices.
     if(state ^ (index & 1))  {
       index = (index + 1) & max_events;
-      cout << "New event " << state << "  index = " << index << '\n';
+      //cout << "New event " << state << "  index = " << index << '\n';
       buffer[index] = gpsim_get_current_time();
     }
 
@@ -378,8 +378,8 @@ public:
 
 
     //if(verbose)
-    cout << "SPBRG::start   last_cycle = " << 
-      hex << last_time << " future_cycle = " << future_time << '\n';
+    //cout << "SPBRG::start   last_cycle = " << 
+    //  hex << last_time << " future_cycle = " << future_time << '\n';
 
   };
 
@@ -394,7 +394,7 @@ public:
 #endif
 
   void set_baud_rate(double new_baud) {
-    cout << "SPBRG::" << __FUNCTION__ << "\n";
+    //cout << "SPBRG::" << __FUNCTION__ << "\n";
 
     baud = new_baud;
 
@@ -429,7 +429,7 @@ public:
   USART_CORE *usart;
 
   USART_RXPIN(void) {
-    cout << "USART_RXPIN constructor - do nothing\n";
+    //cout << "USART_RXPIN constructor - do nothing\n";
   }
   USART_RXPIN (USART_CORE *_usart,
 	       IOPORT *i, 
@@ -506,7 +506,7 @@ public:
   USART_CORE *usart;
 
   USART_TXPIN(void) {
-    cout << "USART_TXPIN constructor - do nothing\n";
+    //cout << "USART_TXPIN constructor - do nothing\n";
   }
   USART_TXPIN (USART_CORE *_usart,
 	       IOPORT *i, 
@@ -522,7 +522,7 @@ public:
 
   virtual void put_node_state(int new_state) {
 
-    cout << "USART_TXPIN put_node_state " << new_state << '\n';
+    // cout << "USART_TXPIN put_node_state " << new_state << '\n';
     /*
     state = new_state;
 
@@ -542,7 +542,7 @@ public:
 
   void put_digital_state(bool new_dstate) { 
 
-    cout << "usart tx put_digital_state " << new_dstate << '\n';
+    //cout << "usart tx put_digital_state " << new_dstate << '\n';
     /*
     bool diff = new_dstate ^ digital_state;
     digital_state = new_dstate;
@@ -585,7 +585,7 @@ public:
   }
 
   virtual int get_voltage(guint64 current_time) {
-    cout << "USART_TXPIN::" <<__FUNCTION__ <<  " digital state=" << digital_state << '\n';
+    //cout << "USART_TXPIN::" <<__FUNCTION__ <<  " digital state=" << digital_state << '\n';
     
     if(digital_state)
       return drive;
@@ -684,11 +684,11 @@ class TXREG : public BreakCallBack
 					    use_parity)           //
 					    /baud);
     time_per_bit = gpsim_digitize_time( 1.0/baud );
-    cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
+    //cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
   }
 
   void set_baud_rate(double new_baud) {
-    cout << "TXREG::" << __FUNCTION__ << "\n";
+    //cout << "TXREG::" << __FUNCTION__ << "\n";
 
     baud = new_baud;
     update_packet_time();
@@ -713,16 +713,18 @@ class TXREG : public BreakCallBack
 
 
   virtual void callback(void) {
-    cout << "\n\n";
-    cout << "TXREG::" << __FUNCTION__ << "\n";
-    cout << "\n\n";
+    if(0) {
+      cout << "\n\n";
+      cout << "TXREG::" << __FUNCTION__ << "\n";
+      cout << "\n\n";
+    }
 
     last_time = gpsim_get_current_time();
     start_time = last_time;
 
     if(txpin) {
       txpin->put_state(txr & 1);
-      cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
+      //cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
     }
 
     if(bit_count) {
@@ -754,15 +756,16 @@ class TXREG : public BreakCallBack
     // total bits = byte + start and stop bits
     bit_count = bits_per_byte + 1 + 1;
 
-    cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb <<" txr 0x" << txr << "  bits " << bit_count << '\n';
+    //cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb <<" txr 0x" << txr << "  bits " << bit_count << '\n';
 
   }
 
   void enable(void) {
-
-    cout << "\n\n";
-    cout << "TXREG::" << __FUNCTION__ << "\n";
-    cout << "\n\n";
+    if(0) {
+      cout << "\n\n";
+      cout << "TXREG::" << __FUNCTION__ << "\n";
+      cout << "\n\n";
+    }
 
     build_tx_packet(tx_byte);
     last_time = gpsim_get_current_time();
@@ -934,9 +937,11 @@ class RCREG : public BreakCallBack // : public _RCREG
     
 
   virtual void callback(void) {
-    cout << "\n\n";
-    cout << "RCREG::" << __FUNCTION__ << "\n";
-    cout << "\n\n";
+    if(0) {
+      cout << "\n\n";
+      cout << "RCREG::" << __FUNCTION__ << "\n";
+      cout << "\n\n";
+    }
 
     //// process the data.....
 
@@ -970,17 +975,17 @@ class RCREG : public BreakCallBack // : public _RCREG
 	receive_state = RS_WAITING_FOR_START;
 
 	unsigned int b = decode_byte(start_bit_index, time_per_bit);
-	cout << "RCREG: decoded to 0x" << b << "\n";
+	//cout << "RCREG: decoded to 0x" << b << "\n";
 
       } else {
 	receive_state = RS_OVERRUN;
-	cout << "Looks like we've overrun\n";
+	//cout << "Looks like we've overrun\n";
       }
 
       break;
     case RS_STOPPED:
       receive_state = RS_WAITING_FOR_START;
-      cout << "received a stop bit\n";
+      //cout << "received a stop bit\n";
       break;
     }
 
@@ -1212,7 +1217,7 @@ class RCREG : public BreakCallBack // : public _RCREG
   */
 
   void new_rx_edge(bool bit) {
-
+/*
     cout << "USART MODULE RCREG::" << __FUNCTION__ << "\n";
     switch(receive_state) {
     case RS_WAITING_FOR_START:
@@ -1227,8 +1232,9 @@ class RCREG : public BreakCallBack // : public _RCREG
     case RS_OVERRUN:
       cout << "state = OVERRUN\n";
       break;
-    }
 
+    }
+*/
     // If this bit is different from the last one we got
     // then save it in the event buffer.
 

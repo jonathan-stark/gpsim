@@ -92,8 +92,8 @@ public:
   T2CON   t2con;
   PR2     pr2;
   TMR2    tmr2;
-  TMR1L   tmr1l;
-  TMR1H   tmr1h;
+  TMRL    tmr1l;
+  TMRH    tmr1h;
   CCPCON  ccp1con;
   CCPRL   ccpr1l;
   CCPRH   ccpr1h;

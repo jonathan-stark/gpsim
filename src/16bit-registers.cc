@@ -509,6 +509,27 @@ void Fast_Stack::pop(void)
   cpu->bsr.put(bsr);
 
 }
+//--------------------------------------------------
+// member functions for the PCL base class
+//--------------------------------------------------
+PCL16::PCL16(void) : PCL()
+{
+  break_point = 0;
+  new_name("pcl");
+}
+
+
+unsigned int PCL16::get(void)
+{
+  return(((value+1)<<1) & 0xff);
+}
+
+unsigned int PCL16::get_value(void)
+{
+  return(((value+1)<<1) & 0xff);
+
+}
+
 
 //--------------------------------------------------
 
@@ -567,10 +588,11 @@ void Program_Counter16::skip(void)
 void Program_Counter16::jump(unsigned int new_address)
 {
 
-  // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
-  // to generate the destination address:
+  // Unlike the 12 and 14 bit cores, the 18fxxx parts do not use
+  // PCLATH for jumps
 
-  value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+  //value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
+  value = new_address & memory_size_mask;
 
   cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
@@ -614,7 +636,7 @@ void Program_Counter16::interrupt(unsigned int new_address)
 void Program_Counter16::computed_goto(unsigned int new_address)
 {
 
-  cout << "Program_Counter16::put_value 0x" << hex << new_address << '\n';
+  //cout << "Program_Counter16::put_value 0x" << hex << new_address << '\n';
   // Use the new_address and the cached pclath (or page select bits for 12 bit cores)
   // to generate the destination address:
 
@@ -665,9 +687,10 @@ void Program_Counter16::put_value(unsigned int new_value)
 {
   cout << "Program_Counter16::put_value 0x" << hex << new_value << '\n';
 
-  value = (new_value >> 1) & memory_size_mask;
+  //value = (new_value >> 1) & memory_size_mask;
+  value = (new_value) & memory_size_mask;
   cpu->pcl->value = value & 0xff;
-  cpu->pclath->value = (new_value >> 8) & 0xff;
+  cpu->pclath->value = (value >> 8) & 0xff;
 
   trace.program_counter(value << 1);
 
@@ -1287,6 +1310,60 @@ void TMR0_16::callback(void)
 
 }
 
+void TMR0_16::callback_print(void)
+{
+  cout << "TMR0_16 " << name() << " CallBack ID " << CallBackID << '\n';
+}
+
+//--------------------------------------------------
+// T3CON
+void T3CON::put(unsigned int new_value)
+{
+  int diff = (value ^ new_value);
+
+  if(diff & (T3CCP1 |  T3CCP2)) {
+    cout << "T3CON changing CCP capture source\n";
+    switch(new_value & (T3CCP1 |  T3CCP2)) {
+    case 0:
+      ccpr1l->assign_tmr(tmr1l);   // Both CCP modules use TMR1 as their source
+      ccpr2l->assign_tmr(tmr1l);
+      break;
+    case T3CCP1:
+      ccpr1l->assign_tmr(tmr1l);   // CCP1 uses TMR1
+      ccpr2l->assign_tmr(tmrl);    // CCP2 uses TMR3
+      break;
+    default:
+      ccpr1l->assign_tmr(tmrl);    // Both CCP modules use TMR3 as their source
+      ccpr2l->assign_tmr(tmrl);
+    } 
+  }
+
+  // Let the T1CON class deal with everything else.
+  T1CON::put(new_value);
+
+}
+
+//--------------------------------------------------
+// TMR3_MODULE
+//
+// 
+
+TMR3_MODULE::TMR3_MODULE(void)
+{
+
+  t3con = NULL;
+  pir1 = NULL;
+
+}
+
+void TMR3_MODULE::initialize(T3CON *t3con_, PIR1 *pir1_)
+{
+
+  t3con = t3con_;
+  pir1  = pir1_;
+
+}
+
 //--------------------------------------------------
 
 TXREG_16::TXREG_16(void)
@@ -1420,7 +1497,7 @@ void  USART_MODULE16::new_rx_edge(unsigned int bit)
 
   if( (rcsta.state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
     rcsta.receive_start_bit();
-  cout << "USART_MODULE16::new_rx_edge\n";
+  //  cout << "USART_MODULE16::new_rx_edge\n";
 }
 
 //-------------------------------------------------------------------
@@ -1661,9 +1738,10 @@ unsigned int PORTC16::get(void)
   int diff = old_value ^ value; // The difference between old and new
 
   // 
-  if( ccp1con && (diff & CCP1) )
+  if( ccp1con && (diff & CCP1) ) {
+    cout << "Saw an event on CCP1!";
     ccp1con->new_edge(value & CCP1);
- 
+  }
   // if this cpu has a usart and there's been a change detected on
   // the RX pin, then we need to notify the usart
   if( usart && (diff & RX))
@@ -1679,14 +1757,16 @@ void PORTC16::setbit(unsigned int bit_number, bool new_value)
 
   unsigned int old_value = value;
 
-  cout << "PORTC16::setbit() bit " << bit_number << " to " << new_value << '\n';
+  //cout << "PORTC16::setbit() bit " << bit_number << " to " << new_value << '\n';
 
   IOPORT::setbit( bit_number,  new_value);
 
   int diff = old_value ^ value; // The difference between old and new
 
-  if(ccp1con && ( diff & CCP1) )
+  if(ccp1con && ( diff & CCP1) ) {
+    cout << "Saw an event on CCP1!";
     ccp1con->new_edge(value & CCP1);
+  }
 
   if( usart && (diff & RX))
     usart->new_rx_edge(value & RX);

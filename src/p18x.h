@@ -203,7 +203,7 @@ class P18F452 : public P18F442
   void create(void);
   void create_sfr_map(void);
 
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual unsigned int program_memory_size(void) const { return 0x4000; };
 
 };
 #endif

@@ -253,11 +253,15 @@ public:
   int number_of_source_files;  // The number of elements allocated to that array
   int lst_file_id;
 
-  int processor_id; // An identifier to differentiate this instantiation from others
+  int processor_id;              // An identifier to differentiate this instantiation from others
 
-  unsigned int config_word;        // as read from hex or cod file
-  ConfigMode   *config_modes;       // processor independent configuration bits.
+  unsigned int config_word;      // as read from hex or cod file
+  ConfigMode   *config_modes;    // processor independent configuration bits.
   double frequency,period;
+
+  unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
+                                 // to the instruction execution rate.
+
   double Vdd;
   double nominal_wdt_timeout;
 
@@ -305,12 +309,14 @@ public:
 
   void init_program_memory(unsigned int memory_size);
   void build_program_memory(int *memory,int minaddr, int maxaddr);
+  virtual int  map_pm_address2index(int address) {return address;};
+  virtual int  map_pm_index2address(int index) {return index;};
   void attach_src_line(int address,int file_id,int sline,int lst_line);
   void read_src_files(void);
 
   // A couple of functions for manipulating  breakpoints
-  int  find_closest_address_to_line(int file_id, int src_line);
-  int  find_closest_address_to_hll_line(int file_id, int src_line);
+  virtual int  find_closest_address_to_line(int file_id, int src_line);
+  virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
   void set_break_at_address(int address);
   void set_notify_at_address(int address, BreakCallBack *cb);
   void set_profile_start_at_address(int address, BreakCallBack *cb);

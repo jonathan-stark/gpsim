@@ -33,38 +33,13 @@ Boston, MA 02111-1307, USA.  */
 
 
 //-------------------------------------------------------------------
-//
-// usart registers are fucked up.
-
-
-class vapid_sfr : public sfr_register
-{
- public:
-
-  void put(unsigned int new_value)
-  {
-
-    cout << name() << " is not implemented\n";
-
-    sfr_register::put(new_value);
-  }
-
-};
-
-vapid_sfr rcsta;
-vapid_sfr txsta;
-vapid_sfr txreg;
-vapid_sfr rcreg;
-vapid_sfr spbrg;
-vapid_sfr pie1;
-
-
-//-------------------------------------------------------------------
 _16bit_processor::_16bit_processor(void)
 {
 
-  cout << "_16bit processor constructor, type = " << isa() << '\n';
   package = NULL;
+  cout << "FIXME: 16bit processor is assuming that PLL is on - should check config bits\n";
+  pll_factor = 2;
+
   pc = new Program_Counter16();
 
 }
@@ -110,22 +85,13 @@ void _16bit_processor :: create_sfr_map(void)
 
   add_sfr_register(&(usart16.rcsta),  0xfab,0,"rcsta");
   add_sfr_register(&(usart16.txsta),  0xfac,0x02,"txsta");
-  cout << "txsta assignment name: " << usart16.txsta.name() << "\n";
-  cout << "txreg assignment name: " << usart16.txreg.name() << "\n";
   add_sfr_register(&(usart16.txreg),  0xfad,0,"txreg");
-  cout << "txreg assignment name: " << usart16.txreg.name() << "\n";
   add_sfr_register(&(usart16.rcreg),  0xfae,0,"rcreg");
   add_sfr_register(&(usart16.spbrg),  0xfaf,0,"spbrg");
 
-//   add_sfr_register(&rcsta,  0xfab,0,"rcsta");
-//   add_sfr_register(&txsta,  0xfac,0x02,"txsta");
-//   add_sfr_register(&txreg,  0xfad,0,"txreg");
-//   add_sfr_register(&rcreg,  0xfae,0,"rcreg");
-//   add_sfr_register(&spbrg,  0xfaf,0,"spbrg");
-
-  //add_sfr_register(&t3con,	  0xfb1,0xff,"t3con");
-  //add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
-  //add_sfr_register(&tmr3h,	  0xfb3,0,"tmr3h");
+  add_sfr_register(&t3con,	  0xfb1,0,"t3con");
+  add_sfr_register(&tmr3l,	  0xfb2,0,"tmr3l");
+  add_sfr_register(&tmr3h,	  0xfb3,0,"tmr3h");
 
   add_sfr_register(&ccp2con,	  0xfba,0,"ccp2con");
   add_sfr_register(&ccpr2l,	  0xfbb,0,"ccpr2l");
@@ -205,6 +171,10 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&tbl.tabptrh, 0xff7, 0,"tabptrh");
   add_sfr_register(&tbl.tabptru, 0xff8, 0,"tabptru");
 
+  if(pcl)
+    delete pcl;
+  pcl = new PCL16();
+
   add_sfr_register(pcl,    0xff9);
   add_sfr_register(pclath, 0xffa);
   //add_sfr_register(&pclatu, 0xffb);
@@ -218,14 +188,14 @@ void _16bit_processor :: create_sfr_map(void)
   // Initialize all of the register cross linkages
   pir1.valid_bits = 0xff;  /* All PIR bits are valid for 18x parts */
 
-  tmr1l.tmr1h = &tmr1h;
-  tmr1l.t1con = &t1con;
-  tmr1l.pir1  = &pir1;
+  tmr1l.tmrh   = &tmr1h;
+  tmr1l.t1con  = &t1con;
+  tmr1l.pir1   = &pir1;
   tmr1l.ccpcon = &ccp1con;
 
-  tmr1h.tmr1l = &tmr1l;
+  tmr1h.tmrl  = &tmr1l;
 
-  t1con.tmr1l = &tmr1l;
+  t1con.tmrl  = &tmr1l;
 
   t2con.tmr2  = &tmr2;
   tmr2.pir1   = &pir1;
@@ -236,11 +206,23 @@ void _16bit_processor :: create_sfr_map(void)
   pr2.tmr2    = &tmr2;
 
 
+  tmr3l.tmrh  = &tmr3h;
+  tmr3l.t1con = &t3con;
+  tmr3l.pir1  = &pir1;
+  tmr3l.ccpcon = &ccp1con;
+
+  tmr3h.tmrl  = &tmr3l;
+
+  t3con.tmrl  = &tmr3l;
+  t3con.tmr1l = &tmr1l;
+  t3con.ccpr1l = &ccpr1l;
+  t3con.ccpr2l = &ccpr2l;
+
   ccp1con.ccprl = &ccpr1l;
   ccp1con.pir   = &pir1;
   ccp1con.tmr2  = &tmr2;
   ccpr1l.ccprh  = &ccpr1h;
-  ccpr1l.tmr1l  = &tmr1l;
+  ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
   pir1.intcon = &intcon;
@@ -294,8 +276,6 @@ void _16bit_processor :: create (void)
 
   tbl.initialize(this);
   tmr0l.start(0);
-
-// note usart.txsta is fucked right here for some damned reason.
 
 }
 

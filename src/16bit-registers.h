@@ -30,6 +30,7 @@ class invalid_file_register;   // Forward reference
 
 #include "pic-processor.h"
 #include "14bit-registers.h"
+#include "14bit-tmrs.h"
 #include "uart.h"
 
 #define _16BIT_REGISTER_MASK   0xfff
@@ -251,6 +252,17 @@ class Fast_Stack
   void push(void);
   void pop(void);
 
+};
+
+//---------------------------------------------------------
+class PCL16 : public PCL
+{
+public:
+
+  virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
+
+  PCL16(void);
 };
 
 //---------------------------------------------------------
@@ -533,6 +545,8 @@ public:
   TMR0H  *tmr0h;
 
   virtual void callback(void);
+  virtual void callback_print(void);
+
   virtual void increment(void);
   virtual unsigned int get_value(void);
   virtual unsigned int get_prescale(void);
@@ -542,6 +556,58 @@ public:
   virtual void initialize(void);
 };
 
+
+//---------------------------------------------------------
+class TMR3H : public TMRH
+{
+public:
+
+};
+
+class TMR3L : public TMRL
+{
+public:
+
+};
+
+class T3CON : public T1CON
+{
+public:
+enum
+{
+  T3CCP1 = 1<<3,
+  T3CCP2 = 1<<6,
+};
+
+  CCPRL *ccpr1l;
+  CCPRL *ccpr2l;
+  TMRL  *tmr1l; 
+
+
+  virtual void put(unsigned int new_value);
+
+};
+
+//---------------------------------------------------------
+//
+// TMR3_MODULE
+//
+// 
+
+class TMR3_MODULE
+{
+public:
+
+  _16bit_processor *cpu;
+  char * name_str;
+
+  T3CON *t3con;
+  PIR1  *pir1;
+
+  TMR3_MODULE(void);
+  void initialize(T3CON *t1con, PIR1 *pir1);
+
+};
 
 //---------------------------------------------------------
 // uart 
@@ -554,7 +620,7 @@ class TXREG_16 : public _TXREG
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-  virtual void assign_pir(PIR1 *new_pir);//{pir1 = new_pir;};
+  virtual void assign_pir(PIR1 *new_pir);
 
 };
 
@@ -565,7 +631,7 @@ class RCREG_16 : public _RCREG
   RCREG_16(void);
   virtual void push(unsigned int);
   virtual void pop(void);
-  virtual void assign_pir(PIR1 *new_pir);//{pir1 = new_pir;};
+  virtual void assign_pir(PIR1 *new_pir);
 
 };
 

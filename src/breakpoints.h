@@ -68,12 +68,14 @@ public:
 // a mechanism by which a break point can notify an object that the break
 // has occurred.
 // Note that BreakCallBack is typically used in conjunction with Cycle
-// Counter break points (see the CycleCounter class). 
+// Counter break points (see the Cycle_Counter class). 
 //
 
 class BreakCallBack
 {
 public:
+  int CallBackID;  // A unique number assigned when the break point is armed.
+
   virtual void callback(void)
     {
       cout << "generic callback\n";
@@ -81,7 +83,7 @@ public:
 
   // Invoked by Cycle counter to display info about break call back.
   virtual void callback_print(void) {
-    cout << " has callback\n";
+    cout << " has callback, ID =  " << CallBackID << '\n';
   }
 
   // clear_break is invoked when a BreakCallBack object's

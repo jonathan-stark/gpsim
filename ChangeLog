@@ -1,6 +1,19 @@
+2003-06-19  Scott Dattalo  <scott@localhost.localdomain>
+
+	* src/gpsim_time.h Multiple breaks at one Cycle were getting clobbered.
+	* src/gpsim_time.cc
+	* src/16bit-registers.cc Added support for TMR3
+	* src/pic-processor.h add pll_scale for the 18f devices.
+	
+2003-05-25  Scott Dattalo  <scott@dattalo.com>
+
+	* src/breakpoints.cc program memory break points were not working.
+	* Started formatting the Changelog properly
+	
 gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 
 T. Scott Dattalo
+
 
 gpsim-0.21.0
 	* Starting with 0.21.0, Changelog will be properly formatted

@@ -55,8 +55,6 @@ public:
   unsigned int current_disasm_address;  // Used only when .hex/.cod files are loaded
   unsigned int interrupt_vector;        // Starting address of the interrupt
 
-  //  PCLATH       pclath;
-
   PIC_IOPORT   porta;      // So far, all 18xxx parts contain ports A,B,C
   IOPORT_TRIS  trisa;
   IOPORT_LATCH lata;
@@ -88,14 +86,17 @@ public:
   T2CON        t2con;
   PR2          pr2;
   TMR2         tmr2;
-  TMR1L        tmr1l;
-  TMR1H        tmr1h;
+  TMRL         tmr1l;
+  TMRH         tmr1h;
   CCPCON       ccp1con;
   CCPRL        ccpr1l;
   CCPRH        ccpr1h;
   CCPCON       ccp2con;
   CCPRL        ccpr2l;
   CCPRH        ccpr2h;
+  TMR3L        tmr3l;
+  TMR3H        tmr3h;
+  T3CON        t3con;
 
   OSCCON       osccon;
   LVDCON       lvdcon;
@@ -110,8 +111,9 @@ public:
   USART_MODULE16       usart16;
   TBL_MODULE           tbl;
   TMR2_MODULE          tmr2_module;
+  TMR3_MODULE          tmr3_module;
   SSPMODULE            ssp;
-  //  Package              *package;
+
 
 
   virtual void create_symbols(void);
@@ -182,6 +184,9 @@ public:
   virtual void set_out_of_range_pm(int address, int value);
 
   virtual void create_iopin_map(void);
+
+  virtual int  map_pm_address2index(int address) {return address/2;};
+  virtual int  map_pm_index2address(int index) {return index*2;};
 
   static pic_processor *construct(void);
   _16bit_processor(void);

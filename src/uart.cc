@@ -273,7 +273,7 @@ void _TXSTA::transmit_a_bit(void)
 void _TXSTA::callback(void)
 {
 
-  cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
+  //cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
 
   transmit_a_bit();
 
@@ -515,7 +515,7 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 void _RCSTA::receive_start_bit(void)
 {
 
-  cout << "USART received a start bit\n";
+  //cout << "USART received a start bit\n";
 
   if((value & (CREN | SREN)) == 0) {
     cout << "  but not enabled\n";
@@ -535,7 +535,7 @@ void _RCSTA::receive_start_bit(void)
 void _RCSTA::callback(void)
 {
 
-  cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
+  //cout << "RCSTA callback " << (cpu->cycles.value) << '\n';
 
   switch(state) {
   case RCSTA_WAITING_MID1:
@@ -875,7 +875,7 @@ void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
 //--------------------------------------------------
 void   USART_MODULE::new_rx_edge(unsigned int bit)
 {
-  cout << "USART_MODULE::new_rx_edge - shouldn't get called!\n";
+  //cout << "USART_MODULE::new_rx_edge - shouldn't get called!\n";
 
 }
 //--------------------------------------------------

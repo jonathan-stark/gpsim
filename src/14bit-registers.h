@@ -591,9 +591,10 @@ class PCL : public sfr_register
 {
 public:
 
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  unsigned int get(void);
+  virtual void put(unsigned int new_value);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get(void);
+  virtual unsigned int get_value(void);
 
   PCL(void);
 };

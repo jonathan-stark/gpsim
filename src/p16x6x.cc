@@ -369,14 +369,14 @@ void P16X6X_processor::create_sfr_map(void)
   // Maybe there's a better place for this, but let's go ahead and link all
   // of the registers together (there's probably a better way too) :
 
-  tmr1l.tmr1h = &tmr1h;
+  tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
   tmr1l.pir1  = &pir1;
   tmr1l.ccpcon = &ccp1con;
 
-  tmr1h.tmr1l = &tmr1l;
+  tmr1h.tmrl  = &tmr1l;
 
-  t1con.tmr1l = &tmr1l;
+  t1con.tmrl  = &tmr1l;
 
   t2con.tmr2  = &tmr2;
   tmr2.pir1   = &pir1;
@@ -391,7 +391,7 @@ void P16X6X_processor::create_sfr_map(void)
   ccp1con.pir   = &pir1;
   ccp1con.tmr2  = &tmr2;
   ccpr1l.ccprh  = &ccpr1h;
-  ccpr1l.tmr1l  = &tmr1l;
+  ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
 
   //  portc->ccp1con = &ccp1con;
@@ -531,7 +531,7 @@ void P16C63::create_sfr_map(void)
   ccp2con.pir   = &pir2;
   ccp2con.tmr2  = &tmr2;
   ccpr2l.ccprh  = &ccpr2h;
-  ccpr2l.tmr1l  = &tmr1l;
+  ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
   add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
@@ -748,7 +748,7 @@ void P16C65::create_sfr_map(void)
   ccp2con.pir   = &pir2;
   ccp2con.tmr2  = &tmr2;
   ccpr2l.ccprh  = &ccpr2h;
-  ccpr2l.tmr1l  = &tmr1l;
+  ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
   add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
