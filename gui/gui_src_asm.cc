@@ -839,19 +839,21 @@ static gint sigh_button_event(GtkWidget *widget,
     int id;
     unsigned int i;
     GtkWidget *item;
+    int vadj_value=0;
 
     assert(event&&sbaw);
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+
+    vadj_value=GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
 	popup_sbaw=sbaw;
 
-	sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y));
+	sbaw->menu_data = sbaw->getBPatPixel(id, (int) (event->y+vadj_value));
 
-	
 	for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
 	    item=menu_items[i].item;
 	    
@@ -1325,9 +1327,9 @@ int source_line_represents_code(Processor *cpu,
 				unsigned int line)
 {
     int address;
-    address = cpu->pma->find_closest_address_to_line(file_id,line);
+    address = cpu->pma->find_address_from_line(file_id,line);
 
-    return line==cpu->pma->get_src_line(address);
+    return address>=0;
 }
 
 static GdkFont *_gtk_style_get_font(GtkStyle *style)
@@ -2554,8 +2556,6 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_widget_show(window);
 
-  enabled=1;
-
   bIsBuilt = true;;
   if(load_source)
     NewSource(gp);
@@ -2605,7 +2605,6 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   notify_stop_list.iter=0;
   
   layout_offset=-1;
-  enabled = 0;
     
     
   pixmap_pc = 0; // these are created somewhere else

@@ -1522,8 +1522,6 @@ void SourceBrowserOpcode_Window::Build(void)
   
   gtk_widget_show(window);
 
-  enabled=1;
-
   bIsBuilt = true;
 
   GTKWAIT;

@@ -654,7 +654,6 @@ void Symbol_Window::Build(void)
   
   gtk_widget_show_all (window);
   
-  enabled=1;
 
   bIsBuilt = true;
 

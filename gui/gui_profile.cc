@@ -2483,7 +2483,6 @@ void Profile_Window::Build(void)
   gtk_widget_show (window);
 
 
-  enabled=1;
   bIsBuilt=true;
 
   NewProcessor(gp);

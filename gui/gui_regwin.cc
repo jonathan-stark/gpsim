@@ -2153,7 +2153,6 @@ void Register_Window::Build(void)
   gtk_widget_grab_default(location);
   
   GTKWAIT;
-  enabled=1;
   
   bIsBuilt = true;
   
@@ -2181,7 +2180,6 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   window = 0;
   wc = WC_data;
   wt = WT_register_window;
-  enabled = 0;
   pCellFormat = 0;
   char_width = 0;
   chars_per_column = 3; // assume byte-sized registers
