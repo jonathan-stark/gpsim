@@ -323,7 +323,7 @@ void module_display_available(void)
 
 void module_load_library(char *library_name)
 {
-  cout << __FUNCTION__ << "() " << library_name << '\n';
+  //  cout << __FUNCTION__ << "() " << library_name << '\n';
 
 #ifdef HAVE_GUI
 
@@ -353,7 +353,7 @@ void module_load_library(char *library_name)
 void module_load_module(char *module_type, char *module_name=NULL)
 {
 
-  cout << __FUNCTION__ << '\n';
+  //cout << __FUNCTION__ << '\n';
 
   if(!module_type) {
     cout << "WARNING: module type is NULL\n";
@@ -437,7 +437,7 @@ void module_pins(char *module_name)
     return;
   }
 
-  for(int i=1; i<cpu->get_pin_count(); i++) {
+  for(int i=1; i<=cpu->get_pin_count(); i++) {
 
     cout << " Pin number " << i << " named " << cpu->get_pin_name(i) 
 	 << " is " << ( (cpu->get_pin_state(i)>0) ? "high\n" : "low\n");

@@ -1,5 +1,6 @@
 .
 gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
+http://www.dattalo.com/gnupic/gpsim.html
 
 
 Please see the INSTALL file to get instructions on how to install gpsim.
@@ -12,7 +13,7 @@ Please see COPYING for the GPL.
 
 gpsim-0.20.0 new stuff:
 
-05APR00 gpsim-0.20.0
+28JUL00 gpsim-0.20.0
   o Modules - gpsim now supports dynamically loaded modules
     -- module command
   o gui - upgraded to latest versions of gtk & gtkextra
@@ -22,6 +23,11 @@ gpsim-0.20.0 new stuff:
   o gui - Stack Window has been added
   o BSD is now supported
   o numerous bug fixes
+
+*note:
+eXdbm and gtk+extra are needed by gpsim.
+With version gpsim-0.20.0 you'll need to upgrade to gtk+extra-0.99.9.
+Please see the gpsim web page.
 
 
 Modules

@@ -107,8 +107,20 @@ Module_Types available_modules[] =
 
 The first two parameters are names that the module may be called. The last parameter is a pointer to a static member function of the module. gpsim will call this function to create a new module.
 
+more...
 
-(format is a shared library)
+Shared Libraries
+----------------
+
+The link between modules and gpsim is `dynamic'. Which is to say, when gpsim is compiled it knows nothing about a specific module. Similarly, when a module is compiled it is done so indepently of gpsim. The module compilation depends on gpsim only to the degree of using the include files provided. The module compilation however does not include a step at which it is linked with gpsim. Is that clear? I guess the point to understand, is that gpsim and the modules are built separately.
+
+Now, when gpsim loads a module, it will open the `shared library' in which it is contained. The infrastructure of shared libraries is defined by the OS and not by gpsim. Consequently, there are a few details that have to be managed before the shared libraries will work properly.
+
 (ldconfig)
-(/etc/ld.so.conf)
 
+
+$ more /etc/ld.so.conf
+/usr/X11R6/lib
+/usr/i486-linux-libc5/lib
+/usr/local/lib
+/usr/lib

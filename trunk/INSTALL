@@ -25,6 +25,13 @@ eXdbm
 
 are going to be needed. Please see the end of this file for instructions on their installation.
 
+************* NOTE ****************
+
+for gpsim-0.20.0, gtk+-extra.0.99.9 is needed. See the gpsim web page on 
+how to get it.
+
+***********************************
+
 
 INSTALLATION (the most common way)
 ----------------------------------
