@@ -1041,11 +1041,17 @@ void Break_register_write::put(unsigned int new_value)
 unsigned int Break_register_read_value::get(void)
 {
   unsigned int v = replaced->get();
-  if(v == break_value)
+
+  if( ((  (break_mask & 0x100) && ((v ^ last_value) & break_mask & 0xff))
+       ||
+       (  (break_mask & 0x100) == 0))
+      &&
+      (v & break_mask) == break_value)
     {
       bp.halt();
       trace_log.buffer.register_read_value(replaced->address, break_value);
     }
+  last_value = v;
   return v;
 }
 
@@ -1125,11 +1131,18 @@ unsigned int Log_Register_Read::get(void)
 unsigned int Log_Register_Read_value::get(void)
 {
   unsigned int v = replaced->get();
-  if(v == break_value)
+
+  if( ((  (break_mask & 0x100) && ((v ^ last_value) & break_mask & 0xff))
+       ||
+       (  (break_mask & 0x100) == 0))
+      &&
+      (v & break_mask) == break_value)
     {
       trace_log.buffer.cycle_counter(cpu->cycles.value);
       trace_log.buffer.register_read_value(replaced->address, v);
     }
+
+  last_value = v;
   return v;
 }
 
