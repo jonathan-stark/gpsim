@@ -384,7 +384,7 @@ ws2
 	movwf	PCL
 
 
-#define WS_TABLE_MASK  1   ; This should equal 2^number of strings
+WS_TABLE_MASK  equ	1   ; This should equal 2^number of strings
 
 ; The first part of the table contains pointers to the start of the 
 ; strings. Note that each string has a two word pointer for the low

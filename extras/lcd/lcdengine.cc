@@ -349,7 +349,7 @@ void LcdDisplay::revertState(void)
 //   advanceState
 //
 
-void LcdDisplay::advanceState( Event e)
+void LcdDisplay::advanceState( ControlLineEvent e)
 {
 
   last_event = e;
@@ -422,7 +422,7 @@ char * LcdDisplay::getStateName(State s)
   return "unknown state";
 }
 
-char *LcdDisplay::getEventName( Event e)
+char *LcdDisplay::getEventName( ControlLineEvent e)
 {
   switch(e) {
   case  eRD:

@@ -104,7 +104,7 @@ public:
 //     State Machine Events
 //
 
-enum Event {
+enum ControlLineEvent {
   ERD = 0,
   ERC,
   EWD,
@@ -154,10 +154,10 @@ public:
 class SMEvent : public SMObject
 {
 public:
-  Event e;
-  SMEvent(Event _e,char *_nameP): SMObject(_nameP) {e = _e;};
+  ControlLineEvent e;
+  SMEvent(ControlLineEvent _e,char *_nameP): SMObject(_nameP) {e = _e;};
   SMEvent(char *_nameP=NULL) : SMObject(_nameP) {e = BAD_EVENT;};
-  void init(Event _e,char *_nameP) {
+  void init(ControlLineEvent _e,char *_nameP) {
     e = _e;
     new_name(_nameP);
   };
@@ -194,7 +194,7 @@ public:
 #define BLINK_ON_FLAG           (1<<5)
 
   State current_state, previous_state;
-  Event last_event;
+  ControlLineEvent last_event;
   int mode_flag;
   int data_latch;
   int data_latch_phase;
@@ -304,12 +304,12 @@ public:
 
 
   // State Machine Functions:
-  void advanceState(Event e);
+  void advanceState(ControlLineEvent e);
   void newState(State s);
   void revertState(void);
   void viewInternals(int);   // debugging
 
-  char *getEventName( Event e);
+  char *getEventName( ControlLineEvent e);
   char *getStateName( State s);
 
   void execute_command(void);

@@ -4,11 +4,11 @@
 	;; a pic. Nothing useful is performed - this program is only used to
 	;; debug gpsim.
 
-	list	p=16f84
+	list	p=16f628
 	
-include "p16f84.inc"
+include "p16f628.inc"
 
-  cblock  0x0c
+  cblock  0x20
 
 	temp,temp1,temp2
 	failures

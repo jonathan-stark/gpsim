@@ -1,3 +1,9 @@
+2003-09-14  Scott Dattalo  <scott@dattalo.com>
+ 	* src/gpsim_time.h - changed cycle counter break point from a Singly linked
+	list to a doubly linked list. This is in preparation for separating module
+	time from pic processor time so that when the PIC goes to sleep, time 
+	doesn't stop.
+	
 2003-09-07  Scott Dattalo  <scott@dattalo.com>
 	* src/p16f62x.h - duplicate declaration of intcon register
 	

@@ -42,6 +42,47 @@ Boston, MA 02111-1307, USA.  */
 // member functions for the Cycle_Counter class
 //--------------------------------------------------
 
+/*
+
+  Overview of Cycle Counter break points.
+
+  The Cycle Counter break points coordinate simulation time. At the
+  moment, the cycle counter advances one count for every instruction
+  cycle. Thus "real time" is defined in terms of "instruction cycles".
+  (NOTE - This will change!)
+
+  Now, the way gpsim uses these break points is by allowing peripherals
+  to grab control of the simulation at a particular instance of time.
+  For example, if the UART peripheral needs to send the next data
+  bit in 100 microseconds, then it needs to have control of the simulator
+  in exactly 100 microseconds from right now. The way this is handled,
+  is that the cycle counter is advanced at every instruction cycle
+  (This will change...) and when the cycle counter matches the cycle
+  that corresponds to that 100 microsecond gap, gpsim will divert
+  control to the UART peripheral.
+
+  There are 3 components to a cycle counter break point. First there's
+  the obvious thing: the number that corresponds to the cycle at which
+  we wish to break. This is a 64-bit integer and thus should cover a
+  fairly significant simulation interval! A 32-bit integer only covers
+  about 7 minutes of simulation time for a pic running at 20MHz.
+
+  The next component is the call back function. This is a pointer to a
+  function, or actually a class that contains a function, that is 
+  called when the current value of the cycle counter matches the
+  break point value. In the UART example, this function will be something
+  that the UART peripheral passed when it set the break point. This
+  is how the UART peripheral gets control of the simulator.
+
+  Finally, the third component is the linked list mechanism. Each time
+  a break point is set, it gets inserted into a linked list that is
+  sorted by the cycle break point value. Thus the first element in
+  the list (if there are any elements at all) is always the next 
+  cycle counter break point.
+
+
+*/
+
 //--------------------------------------------------
 
 void Cycle_Counter::preset(guint64 new_value)
@@ -287,6 +328,29 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   dump_breakpoints();
 #endif
 
+  //
+  // First, we search for the break point by comparing the 'old_cycle'
+  // with the break point cycle of all active break points. Two criteria
+  // must be satisfied for a match:
+  //
+  //     1)  The 'old_cycle' must exactly match the cycle of an active
+  //         break point.
+  //     2)  The Call back function pointer must exactly match the call back
+  //         function point of the same active break point.
+  //
+  // The reason for both of these, is so that we can differentiate multiple
+  // break points set at the same cycle.
+  //
+  // NOTE to consider:
+  //
+  // It would be far more efficient to have the "set_break" function return
+  // a handle or a pointer that we could use here to immediately identify
+  // the break we wish to reassign. This would also disambiguate multiple
+  // breaks set at the same cycle. We'd still have to perform a search through
+  // the linked list to find the new point, but that search would be limited
+  // (i.e. the reassignment is either before *or* after the current). A bi-
+  // directional search can be optimized with a doubly-linked list...
+
   while( (l1->next) && !found_old) {
       
     // If the next break point is at a cycle greater than the
@@ -440,7 +504,7 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, BreakCa
   else {
 
     // oops our assumption was wrong, we were unable to reassign the break point 
-    // to another cycle.
+    // to another cycle because we couldn't find the old one!
 
     reassigned = 0;
 
@@ -528,13 +592,17 @@ Cycle_Counter::Cycle_Counter(void)
   time_step     = 1;
 
   active.next   = NULL;
+  active.prev   = NULL;
   inactive.next = NULL;
+  inactive.prev = NULL;
 
   Cycle_Counter_breakpoint_list  *l1 = &inactive;
 
   for(int i=0; i<BREAK_ARRAY_SIZE; i++)
     {
       l1->next = new Cycle_Counter_breakpoint_list;
+      l1->next->prev = l1;
+
       l1 = l1->next;
     }
   l1->next = NULL;

@@ -33,13 +33,13 @@ Boston, MA 02111-1307, USA.  */
 
 class Cycle_Counter_breakpoint_list
 {
-  // This class is used to implement a very simple single-linked-list.
+  // This class is used to implement a very simple doubly-linked-list.
   // See Cycle_Counter::set_break for more details on how it is used.
 
 public:
   Cycle_Counter_breakpoint_list *next;
-  //  unsigned int break_value_lo;
-  //  unsigned int break_value_hi;
+  Cycle_Counter_breakpoint_list *prev;
+
   guint64 break_value;
   unsigned int breakpoint_number;  // sytem bp (this is used if the user set a bp.
 				   // It tells which system bp needs to be cleared
