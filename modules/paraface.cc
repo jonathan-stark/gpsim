@@ -346,7 +346,8 @@ Paraface::Paraface(void)
 
 Paraface::~Paraface()
 {
-
+    gpsim_unregister_interface(interface_id);
+    gpsim_clear_break(input_port); // Hmmmm. FIXME.
     delete input_port;
     delete output_port;
     if(fd!=-1)

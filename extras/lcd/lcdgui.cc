@@ -308,7 +308,7 @@ GdkColor *NewColor(gint32 red, gint32 green, gint32 blue)
 void LcdDisplay::CreateGraphics (void)
 {
 
-  GtkWidget *window;
+//  GtkWidget *window;
   GtkWidget *main_vbox;
   GtkWidget *frame;
   GtkWidget *vbox;
@@ -341,8 +341,8 @@ void LcdDisplay::CreateGraphics (void)
 
     gtk_window_set_title(GTK_WINDOW(window), "LCD");
 
-    gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
+//    gtk_signal_connect (GTK_OBJECT (window), "destroy",
+//			GTK_SIGNAL_FUNC (gtk_main_quit), NULL);
       
     main_vbox = gtk_vbox_new (FALSE, 5);
     gtk_container_set_border_width (GTK_CONTAINER (main_vbox), 0);

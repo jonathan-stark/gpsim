@@ -59,6 +59,8 @@ Boston, MA 02111-1307, USA.  */
 #include "lcd.h"
 pic_processor *gpsim_get_active_cpu(void);
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
+void gpsim_clear_break(gpointer b);
+void gpsim_unregister_interface(unsigned int interface_id);
 
 
 extern "C" {
@@ -386,7 +388,9 @@ LcdDisplay::~LcdDisplay()
   if (verbose)
       cout << "LcdDisplay destructor\n";
 
+  gpsim_unregister_interface(interface_id);
   delete data_port;
+  gpsim_clear_break(control_port); // Hmmmm. FIXME.
   delete control_port;
 
   gtk_widget_destroy(window);

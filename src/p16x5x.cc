@@ -220,7 +220,8 @@ pic_processor * P16C54::construct(void)
 
   p->create();
 
-  p->name_str = "16c54";
+  p->name_str = "p16c54";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -322,7 +323,8 @@ pic_processor * P16C55::construct(void)
 
   p->create();
 
-  p->name_str = "16c55";
+  p->name_str = "p16c55";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

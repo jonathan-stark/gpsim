@@ -143,6 +143,7 @@ typedef struct _sym
   gpointer gpsim_set_cyclic_break_point2( void (*interface_callback)(gpointer), 
 					  gpointer interface_callback_data,
 					  guint64 cycle);
+  void gpsim_clear_break(gpointer b);
   int gpsim_open(unsigned int processor_id, char *file);
   unsigned int gpsim_get_number_of_source_files(unsigned int processor_id);
   unsigned int gpsim_get_hll_file_id(unsigned int processor_id,
@@ -328,6 +329,7 @@ typedef struct _sym
   //
   //---------------------------------------------------------------------------
   unsigned int gpsim_register_interface(gpointer _new_object);
+  void gpsim_unregister_interface(unsigned int interface_id);
   void gpsim_register_update_object(unsigned int interface_id,
 				    void (*update_object) (gpointer xref,int new_value) );
   void gpsim_register_remove_object(unsigned int interface_id, 

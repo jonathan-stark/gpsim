@@ -149,7 +149,7 @@ public:
 
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
-  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = NULL;};
+  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = NULL; else cout<<"errrrrrr\n";};
 };
 
 class source_stimulus : public stimulus, public BreakCallBack

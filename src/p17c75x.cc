@@ -190,7 +190,8 @@ pic_processor * P17C7xx::construct(void)
   p->create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c7xx";
+  p->name_str = "p17c7xx";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -205,7 +206,7 @@ P17C7xx::P17C7xx(void)
   
   //  create_iopins(iopin_map, num_of_iopins);
   
-  name_str = "17c7xx";
+  name_str = "p17c7xx";
   
 }
 
@@ -279,7 +280,8 @@ pic_processor * P17C75x::construct(void)
   cout << "3\n";
   p->pic_processor::create_symbols();
   cout << "4\n";
-  p->name_str = "17c75x";
+  p->name_str = "p17c75x";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -487,7 +489,8 @@ pic_processor * P17C756::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c756";
+  p->name_str = "p17c756";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -544,7 +547,8 @@ pic_processor * P17C756A::construct(void)
   p->P17C7xx::create(0x1fff);
   //p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c756a";
+  p->name_str = "p17c756a";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -604,7 +608,8 @@ pic_processor * P17C752::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c752";
+  p->name_str = "p17c752";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -660,7 +665,8 @@ pic_processor * P17C762::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c762";
+  p->name_str = "p17c762";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -716,7 +722,8 @@ pic_processor * P17C766::construct(void)
   p->P17C7xx::create(0x1fff);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "17c766";
+  p->name_str = "p17c766";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

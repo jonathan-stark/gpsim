@@ -211,7 +211,8 @@ pic_processor * P16C84::construct(void)
   p->P16C8x::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16c84";
+  p->name_str = "p16c84";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -242,7 +243,8 @@ pic_processor * P16F84::construct(void)
   p->P16C8x::create(0x4f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16f84";
+  p->name_str = "p16f84";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -264,7 +266,7 @@ P16F83::P16F83(void)
   if(verbose)
     cout << "f83 constructor, type = " << isa() << '\n';
 
-  name_str = "16f83";
+  name_str = "p16f83";
 }
 
 pic_processor * P16F83::construct(void)
@@ -277,7 +279,8 @@ pic_processor * P16F83::construct(void)
   p->P16C8x::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
-  p->name_str = "16f83";
+  p->name_str = "p16f83";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

@@ -54,7 +54,7 @@ P18Cxx2::P18Cxx2(void)
 
   //  create_iopins(iopin_map, num_of_iopins);
 
-  name_str = "18cxx2";
+  name_str = "p18cxx2";
 
 }
 
@@ -244,7 +244,8 @@ pic_processor * P18C242::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "18c242";
+  p->name_str = "p18c242";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -297,7 +298,8 @@ pic_processor * P18C252::construct(void)
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
 
-  p->name_str = "18c252";
+  p->name_str = "p18c252";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -422,7 +424,8 @@ pic_processor * P18C442::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "18c442";
+  p->name_str = "p18c442";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -475,7 +478,8 @@ pic_processor * P18C452::construct(void)
   p->create();
   p->create_invalid_registers();
   p->pic_processor::create_symbols();
-  p->name_str = "18c452";
+  p->name_str = "p18c452";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

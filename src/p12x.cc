@@ -170,7 +170,8 @@ pic_processor * P12C508::construct(void)
   p->create();
   p->pic_processor::create_symbols();
 
-  p->name_str = "12c508";
+  p->name_str = "p12c508";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 
@@ -207,7 +208,8 @@ pic_processor * P12C509::construct(void)
   p->create();
   p->pic_processor::create_symbols();
 
-  p->name_str = "12c509";
+  p->name_str = "p12c509";
+  symbol_table.add_module(p,p->name_str);
 
   return p;
 

@@ -143,6 +143,7 @@ public:
   void dump_breakpoints(void);
 
   void clear_break(guint64 at_cycle);
+  void clear_break(BreakCallBack *f);
 };
 
 
