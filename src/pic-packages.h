@@ -72,10 +72,10 @@ class _40pins  : public _28pins
 {
 public:
 
-
-  IOPORT       *portd;
+  //cvs has a bug?
+  PIC_IOPORT   *portd;
   IOPORT_TRIS  trisd;
-  IOPORT       *porte;
+  PIC_IOPORT   *porte;
   IOPORT_TRIS  trise;
 
 

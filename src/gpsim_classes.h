@@ -32,9 +32,11 @@ Boston, MA 02111-1307, USA.  */
 
 class IOPIN;
 class IOPORT;
+class PIC_IOPORT;
 
 class instruction;
 class file_register;
+class gpsimInterface;
 class pic_processor;
 class symbol;
 class XrefObject;
