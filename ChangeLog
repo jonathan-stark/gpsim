@@ -1,3 +1,12 @@
+2005-01-09 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc: Began I/O port redesign.
+	* cli/socket.cc, src/protocol.h: Added Socket callbacks.
+	* examples/scripts/client3.cc, examples/scripts/makefile,
+	examples/scripts/client_interface.cc,
+	examples/scripts/client_interface.h: Added a new client script
+	example illustrating socket callbacks.
+	* gui/gui_main.cc: removed a printf debug statement.
+
 2005-01-09 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 	* doc/gpsimWin32.html: dependedncy on gawk, ...

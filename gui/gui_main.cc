@@ -179,7 +179,6 @@ GUI_Interface::~GUI_Interface()
 void GUI_Interface::UpdateObject(gpointer gui_xref,int new_value)
 {
 
-  printf("%s\n",__FUNCTION__);
   gte ();
   CrossReferenceToGUI  *xref = (CrossReferenceToGUI *)gui_xref;
   xref->Update(new_value);

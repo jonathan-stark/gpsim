@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #if !defined(CLIENT_INTERFACE_H)
 #define  CLIENT_INTERFACE_H
-
+#include <glib.h>
 class Packet;
 
 class ClientSocketInterface
@@ -32,6 +32,7 @@ public:
   bool SendCmd(const char *);
 
   /// Link interface
+  unsigned int CreateCallbackLink(guint64);
   unsigned int CreateLinkUInt32(const char *sym_name);
   bool QueryLinkUInt32(unsigned int handle, unsigned int &i);
   void WriteToLinkUInt32(unsigned int  handle, unsigned int val);
@@ -40,6 +41,8 @@ public:
   /// Symbol interface
   bool QuerySymbolUInt32(const char *sym_name, unsigned int &i);
   bool WriteSymbolUInt32(const char *sym_name, unsigned int v);
+
+  const char *Receive();
 
 private:
   void Send();
