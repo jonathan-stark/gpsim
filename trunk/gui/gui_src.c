@@ -58,7 +58,7 @@ key_press(GtkWidget *widget,
   // fix this
   if(sbw->gui_obj.wt == WT_opcode_source_window)
   {
-      SourceBrowserOpcode_Window *sbow =sbw;
+      SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
 
       if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
 	  return FALSE;

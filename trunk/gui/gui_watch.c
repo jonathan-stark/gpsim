@@ -646,7 +646,6 @@ void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp)
     GList *iter;
     struct watch_entry *entry;
     int row;
-    int i=0;
 
     iter=ww->watches;
 

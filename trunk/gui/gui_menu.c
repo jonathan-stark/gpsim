@@ -43,8 +43,8 @@ Boston, MA 02111-1307, USA.  */
 #include "gui.h"
 #include "gui_callbacks.h"
 
-static void
-create_notebook (void);
+//static void
+//create_notebook (void);
 
 typedef struct _note_book_item
 {
@@ -175,7 +175,7 @@ entry_toggle_visibility (GtkWidget *checkbutton,
 //
 //
 
-static GtkWidget *new_processor_name_entry;
+//static GtkWidget *new_processor_name_entry;
 
 /*
 static void
@@ -346,6 +346,7 @@ fileopen_dialog(gpointer             callback_data,
       gtk_widget_show (button);
     }
     gtk_widget_show (window);
+    return NULL;
 }
 
 
@@ -412,6 +413,7 @@ toggle_window (gpointer             callback_data,
 
 //	printf("%s\n",gtk_widget_get_name(widget));
     }
+    return NULL;
 }
 
 static void 
@@ -471,7 +473,7 @@ gtk_ifactory_cb (gpointer             callback_data,
 		 GtkWidget           *widget)
 {
   g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
-
+    return NULL;
 }
 
 static GtkItemFactoryEntry menu_items[] =

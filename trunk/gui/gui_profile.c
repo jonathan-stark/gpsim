@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <sys/errno.h>
 
 #include "../config.h"
@@ -42,7 +43,9 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkplot.h>
 #include <gtkextra/gtkplotdata.h>
 #include <gtkextra/gtkplotcanvas.h>
+#include <gtkextra/gtkplotbar.h>
 #include <gtkextra/gtkplotps.h>
+#include <gtkextra/gtkplotprint.h>
 
 #define PROFILE_COLUMNS    3
 static char *profile_titles[PROFILE_COLUMNS]={"Address", "Count","Instruction"};
@@ -134,14 +137,12 @@ static void add_range(Profile_Window *pw,
 {
     guint64 cycles;
     struct profile_range_entry *profile_range_entry;
-    char buf[100];
     unsigned int startaddress;
     unsigned int endaddress;
     char count_string[100];
     char *entry[PROFILE_COLUMNS]={startaddress_text,endaddress_text,count_string};
     int row;
     int i;
-    int pic_id;
     GUI_Processor *gp;
     char *end;
     char msg[128];
@@ -189,7 +190,7 @@ static void add_range(Profile_Window *pw,
     strcpy(profile_range_entry->endaddress_text,endaddress_text);
     profile_range_entry->startaddress=startaddress;
     profile_range_entry->endaddress=endaddress;
-    profile_range_entry->pic_id=pic_id;
+    profile_range_entry->pic_id=gp->pic_id;
     profile_range_entry->last_count=cycles;
 
     gtk_clist_set_row_data(GTK_CLIST(pw->profile_range_clist), row, (gpointer)profile_range_entry);
@@ -219,9 +220,7 @@ static void add_range_dialog(Profile_Window *pw)
     GtkWidget *label;
     static GtkWidget *startentry;
     static GtkWidget *endentry;
-    int i;
     int retval;
-    unsigned int startaddress, endaddress;
 
     if(dialog==NULL)
     {
@@ -315,26 +314,11 @@ symcompare(sym *sym1, sym *sym2)
     return 0;
 }
 
-static void save_plot(Profile_Window *pw, char *filename)
-{
-    FILE *fo;
-    fo=fopen(filename,"w");
-    if(fo==NULL)
-    {
-	gui_message("could not save file");
-        return;
-    }
-
-
-}
-
 static void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-    unsigned int pic_id;
     char *file;
-    char msg[200];
 
     file=gtk_file_selection_get_filename (fs);
     gtk_plot_canvas_export_ps(GTK_PLOT_CANVAS(popup_pw->plot_canvas), file, 0, 0,
@@ -363,7 +347,6 @@ static GtkItemFactoryCallback
 open_plotsave_dialog(Profile_Window *pw)
 {
     static GtkWidget *window = NULL;
-    GtkWidget *button;
 
     if (!window)
     {
@@ -388,6 +371,7 @@ open_plotsave_dialog(Profile_Window *pw)
 				   GTK_OBJECT (window));
     }
     gtk_widget_show (window);
+    return NULL;
 }
 
 
@@ -397,10 +381,7 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
 {
     menu_item *item;
     struct profile_entry *entry;
-    struct profile_range_entry *range_entry;
-
     unsigned int pic_id;
-    int value;
 
     if(widget==NULL || data==NULL)
     {
@@ -496,14 +477,13 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
     GtkWidget *scrollw1;
     static GtkWidget *active_plot;
     static GtkWidget *canvas;
-    GtkPlotCanvasChild *child;
     static GdkColor color;
     gint page_width, page_height;
     gfloat scale = 1.;
     static GtkPlotText *infotext;
     static GtkPlotText **bartext;
     GtkWidget *plot;
-    static GtkWidget *dataset;
+    static GtkPlotData *dataset;
     char infostring[128];
     char filename[128];
 
@@ -699,7 +679,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     gtk_plot_data_set_connector(GTK_PLOT_DATA(dataset), GTK_PLOT_CONNECT_NONE);
 
-    gtk_widget_show(dataset);
+    gtk_widget_show(GTK_WIDGET(dataset));
 
 //    gtk_plot_data_draw_points(GTK_PLOT_DATA(dataset),numpoints);
 //    gtk_plot_data_paint(GTK_PLOT_DATA(dataset));
@@ -750,6 +730,7 @@ int plotit(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpo
 
     has_old_graph=1;
     last_numpoints=numpoints;
+    return 0;
 }
 
 // called when user has selected a menu item
@@ -764,10 +745,9 @@ popup_activated(GtkWidget *widget, gpointer data)
     GList *iter;
 
     struct profile_entry *entry;
-    struct profile_range_entry *range_entry;
+    struct profile_range_entry *range_entry=NULL;
 
     unsigned int pic_id;
-    int value;
 
     if(widget==NULL || data==NULL)
     {
@@ -806,7 +786,6 @@ popup_activated(GtkWidget *widget, gpointer data)
 	iter=symlist;
 	while(iter!=NULL)
 	{
-	    int row;
 	    sym *s=iter->data;
 
 	    strcpy(toaddress_string,s->name);
@@ -1069,8 +1048,6 @@ void ProfileWindow_update(Profile_Window *pw)
   GUI_Processor *gp;
   GtkCList *profile_clist;
   GtkCList *profile_range_clist;
-  char buffer[50];
-  guint64 cycle;
   guint64 count;
   int i;
 
@@ -1232,13 +1209,7 @@ void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *gp)
 
 #define NAME_SIZE 32
 
-    gint i,j, border_mask, border_width;
-    GtkCList *clist;
-    struct cross_reference_to_gui *cross_reference;
-    gboolean row_created;
-//    GtkCListRange range;
     int pic_id;
-    char row_label[50];
 
 
     if(pw == NULL || gp == NULL)
@@ -1279,20 +1250,8 @@ BuildProfileWindow(Profile_Window *pw)
   GtkWidget *label;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
-/*  GtkWidget *scrollw1;
-  GtkWidget *da;
-  GtkWidget *canvas;
-  GtkWidget *active_plot;
-  GtkWidget *plot;
-  GtkWidget *window1;
-  GtkWidget *vbox1;
- GdkColor color;
- GtkPlotText *testtext;*/
     
-  gchar name[10];
-  gint i;
   gint column_width,char_width;
-//  gint page_height, page_width;
 
   int x,y,width,height;
   
@@ -1300,7 +1259,7 @@ BuildProfileWindow(Profile_Window *pw)
   if(pw==NULL)
   {
       printf("Warning build_profile_viewer(%x)\n",(unsigned int)pw);
-      return;
+      return 0;
   }
 
   gui_message("There are bugs here in the profile viewer.\n\
@@ -1441,7 +1400,6 @@ BuildProfileWindow(Profile_Window *pw)
 
 int CreateProfileWindow(GUI_Processor *gp)
 {
-    int i;
   Profile_Window *profile_window;
 
   profile_window = (Profile_Window *)malloc(sizeof(Profile_Window));
