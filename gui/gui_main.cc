@@ -396,6 +396,7 @@ static  Watch_Window *ww=NULL;
 static  Stack_Window *stackw=NULL;
 static  StopWatch_Window *sww=NULL;
 static  Symbol_Window *symbolw=NULL;
+static  Trace_Window *tw=NULL;
 
 int gui_init (int argc, char **argv)
 {
@@ -457,6 +458,7 @@ int gui_init (int argc, char **argv)
   stackw = new  Stack_Window();
   sww    = new  StopWatch_Window();
   symbolw= new  Symbol_Window();
+  tw     = new  Trace_Window();
 
   ram->Create(gp);
   eeprom->Create(gp);
@@ -466,7 +468,7 @@ int gui_init (int argc, char **argv)
   stackw->Create(gp);
   symbolw->Create(gp);
   CreateBreadboardWindow(gp);
-  CreateTraceWindow(gp);
+  tw->Create(gp);
   CreateProfileWindow(gp);
   sww->Create(gp);
 
