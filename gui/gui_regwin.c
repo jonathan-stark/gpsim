@@ -396,9 +396,10 @@ static char *gui_get_log_settings(char **filename, int *mode)
 			 FALSE,FALSE,20);
 
 	label = gtk_label_new("File format:");
-	gtk_box_pack_end(GTK_BOX(hbox),
+	gtk_box_pack_start(GTK_BOX(hbox),
 			 label,
 			 FALSE,FALSE,20);
+        gtk_widget_show(label);
 
 	optionmenu = gtk_option_menu_new();
         gtk_widget_show(optionmenu);
