@@ -207,8 +207,8 @@ void Logic_Input::put_node_state( int new_state)
   IO_input::put_node_state(new_state);
 
   if(current_state ^ state) {
-    cout << "logic Input " << name() << " changed to new state: " <<
-      state << '\n';
+//    cout << "logic Input " << name() << " changed to new state: " <<
+//      state << '\n';
 
     if(LGParent)
       LGParent->update_state();
@@ -224,13 +224,13 @@ void Logic_Input::put_node_state( int new_state)
 LogicGate::LogicGate(void)
 {
 
-  cout << "LogicGate base class constructor\n";
+  //cout << "LogicGate base class constructor\n";
 }
 
 LogicGate::~LogicGate(void)
 {
 
-    cout << "LogicGate base class destructor\n";
+    //cout << "LogicGate base class destructor\n";
 
     delete port;
 }
@@ -320,7 +320,7 @@ void LogicGate::create_iopin_map(void)
   input_bit_mask = (1<< (number_of_pins)) - 2;
 
   
-  cout << hex << "  input_bit_mask = " << input_bit_mask << '\n';
+  //cout << hex << "  input_bit_mask = " << input_bit_mask << '\n';
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
@@ -330,7 +330,7 @@ void LogicGate::create_iopin_map(void)
     symbol_table.add_stimulus(Package::get_pin(i));
 
 
-  cout << "Iopin map should be created\n";
+  //cout << "Iopin map should be created\n";
 }
 
 GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
@@ -356,7 +356,7 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 ExternalModule * AND2Gate::construct(char *new_name)
 {
 
-  cout << " AND2Gate  construct\n";
+  //cout << " AND2Gate  construct\n";
 
   AND2Gate *a2gP = new AND2Gate ;
 
@@ -364,7 +364,7 @@ ExternalModule * AND2Gate::construct(char *new_name)
   a2gP->set_number_of_pins(3);
   a2gP->create_iopin_map();
 
-  cout << "AND2Gate should be constructed\n";
+  //cout << "AND2Gate should be constructed\n";
 
   return a2gP;
 
@@ -375,12 +375,12 @@ AND2Gate::AND2Gate(void)
 
     widget = create_pixmap(and2_pixmap);
 
-  cout << "AND2Gate constructor\n";
+  //cout << "AND2Gate constructor\n";
 }
 AND2Gate::~AND2Gate(void)
 {
 
-    cout << "AND2Gate destructor\n";
+    //cout << "AND2Gate destructor\n";
 
 }
 
@@ -389,7 +389,7 @@ void ANDGate::update_state(void)
 {
   unsigned int old_value = port->value;
 
-  cout << "update_state of ANDGate\n";
+  //cout << "update_state of ANDGate\n";
   if((port->value & input_bit_mask) == input_bit_mask)
     port->value |= output_bit_mask;
   else
@@ -400,8 +400,8 @@ void ANDGate::update_state(void)
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
     }
-    cout << "logic gate output just went " <<
-      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+//    cout << "logic gate output just went " <<
+//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
   }
 
 }
@@ -415,18 +415,18 @@ OR2Gate::OR2Gate(void)
 
     widget = create_pixmap(or2_pixmap);
 
-  cout << "OR2Gate constructor\n";
+  //cout << "OR2Gate constructor\n";
 }
 OR2Gate::~OR2Gate(void)
 {
-  cout << "OR2Gate destructor\n";
+  //cout << "OR2Gate destructor\n";
 
 }
 
 ExternalModule * OR2Gate::construct(char *new_name)
 {
 
-  cout << " OR2Gate  construct\n";
+  //cout << " OR2Gate  construct\n";
 
   OR2Gate *o2gP = new OR2Gate ;
 
@@ -434,7 +434,7 @@ ExternalModule * OR2Gate::construct(char *new_name)
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 
-  cout << "OR2Gate should be constructed\n";
+  //cout << "OR2Gate should be constructed\n";
 
   return o2gP;
 
@@ -444,7 +444,7 @@ void ORGate::update_state(void)
 {
   unsigned int old_value = port->value;
 
-  cout << "update_state of ORGate\n";
+  //cout << "update_state of ORGate\n";
   if(port->value & input_bit_mask) 
     port->value |= output_bit_mask;
   else
@@ -455,8 +455,8 @@ void ORGate::update_state(void)
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
     }
-    cout << "logic gate output just went " <<
-      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+//    cout << "logic gate output just went " <<
+//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
   }
 
 }
@@ -467,7 +467,7 @@ void ORGate::update_state(void)
 ExternalModule * NOTGate::construct(char *new_name)
 {
 
-  cout << " NOTGate  construct\n";
+  //cout << " NOTGate  construct\n";
 
   NOTGate *a2gP = new NOTGate ;
 
@@ -475,7 +475,7 @@ ExternalModule * NOTGate::construct(char *new_name)
   a2gP->set_number_of_pins(2);
   a2gP->create_iopin_map();
 
-  cout << "NOTGate should be constructed\n";
+  //cout << "NOTGate should be constructed\n";
 
   return a2gP;
 
@@ -486,12 +486,12 @@ NOTGate::NOTGate(void)
 
     widget = create_pixmap(not_pixmap);
 
-  cout << "NOTGate constructor\n";
+  //cout << "NOTGate constructor\n";
 }
 NOTGate::~NOTGate(void)
 {
 
-  cout << "NOTGate destructor\n";
+  //cout << "NOTGate destructor\n";
 
 }
 
@@ -499,7 +499,7 @@ void NOTGate::update_state(void)
 {
   unsigned int old_value = port->value;
 
-  cout << "update_state of NOTGate\n";
+  //cout << "update_state of NOTGate\n";
   if((port->value & input_bit_mask) == input_bit_mask)
     port->value &= ~output_bit_mask;
   else
@@ -510,8 +510,8 @@ void NOTGate::update_state(void)
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
     }
-    cout << "logic gate output just went " <<
-      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+//    cout << "logic gate output just went " <<
+//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
   }
 
 }
@@ -525,18 +525,18 @@ XOR2Gate::XOR2Gate(void)
 
     widget = create_pixmap(xor2_pixmap);
 
-  cout << "XOR2Gate constructor\n";
+  //cout << "XOR2Gate constructor\n";
 }
 XOR2Gate::~XOR2Gate(void)
 {
-  cout << "XOR2Gate destructor\n";
+  //cout << "XOR2Gate destructor\n";
 
 }
 
 ExternalModule * XOR2Gate::construct(char *new_name)
 {
 
-  cout << " XOR2Gate  construct\n";
+  //cout << " XOR2Gate  construct\n";
 
   XOR2Gate *o2gP = new XOR2Gate ;
 
@@ -544,7 +544,7 @@ ExternalModule * XOR2Gate::construct(char *new_name)
   o2gP->set_number_of_pins(3);
   o2gP->create_iopin_map();
 
-  cout << "XOR2Gate should be constructed\n";
+  //cout << "XOR2Gate should be constructed\n";
 
   return o2gP;
 
@@ -556,14 +556,14 @@ void XORGate::update_state(void)
   int i;
   int out_value=0;
 
-  cout << "update_state of XORGate\n";
+  //cout << "update_state of XORGate\n";
 
   for(i=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
       if(port->value & (1<<i))
 	  out_value++;
   }
 
-  printf("out_value %d\n",out_value);
+  //printf("out_value %d\n",out_value);
 
   if(out_value&1)
     port->value |= output_bit_mask;
@@ -575,8 +575,8 @@ void XORGate::update_state(void)
     if(port->pins[0]->snode) {
       port->pins[0]->snode->update(0);
     }
-    cout << "logic gate output just went " <<
-      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
+//    cout << "logic gate output just went " <<
+//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
   }
 
 }

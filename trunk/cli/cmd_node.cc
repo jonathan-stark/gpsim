@@ -71,7 +71,8 @@ void cmd_node::add_nodes(char_list *nodes)
 
   while(nodes)
     {
-      cout << "new node : " << nodes->name << '\n';
+      if(verbose)
+        cout << "new node : " << nodes->name << '\n';
       add_node(nodes->name);
       nodes = nodes->next;
 
