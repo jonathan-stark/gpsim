@@ -259,6 +259,62 @@ static void treeselect_module(GtkItem *item, struct gui_module *p)
     p->bbw->selected_module = p;
 }
 
+void position_module(Breadboard_Window *bbw, struct gui_module *p, int x, int y)
+{
+    if(x != p->x || y != p->y)
+    {
+	p->x=x-x%pinspacing;
+	p->y=y-y%pinspacing;
+
+	p->module->x = p->x;
+        p->module->y = p->y;
+
+        gtk_layout_move(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
+    }
+}
+
+static void marker_cb(GtkWidget *w,
+		      GdkEventButton *event,
+		      struct gui_module *p)
+{
+    static int x_offset, y_offset; // Hotspot of module
+
+    static int x,y;
+
+    static int dragging;
+
+    switch(event->type)
+    {
+    case GDK_MOTION_NOTIFY:
+	if(dragging)
+	{
+	    puts("drag");
+	    x = p->x + event->x - x_offset;
+            y = p->y + event->y - y_offset;
+	    position_module(p->bbw, p, x, y);
+	}
+	break;
+    case GDK_BUTTON_PRESS:
+        puts("Press");
+	x_offset = event->x;
+	y_offset = event->y;
+//	gtk_grab_add(w);
+        dragging = 1;
+	break;
+    case GDK_2BUTTON_PRESS:
+	break;
+    case GDK_BUTTON_RELEASE:
+        puts("Release");
+//	gtk_grab_remove(w);
+        dragging = 0;
+	break;
+    default:
+	printf("Whoops? event type %d\n",event->type);
+	break;
+    }
+}
+
+
 static gint button(GtkWidget *widget,
 		   GdkEventButton *event,
 		   struct gui_pin *p)
@@ -504,7 +560,7 @@ static void copy_node_tree_to_clist(GtkWidget *item, gpointer clist)
 static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
-    GtkWidget *node_clist;
+    static GtkWidget *node_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
     int cancel=-1;
@@ -593,7 +649,7 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
 static char *select_module_dialog(Breadboard_Window *bbw)
 {
     static GtkWidget *dialog;
-    GtkWidget *module_clist;
+    static GtkWidget *module_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
     int cancel=-1;
@@ -843,6 +899,12 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 	fprintf(fo, "module load %s %s\n",
 		m->type(),
 		m->name());
+
+        if(m->x>=0 && m->y>=0)
+	    fprintf(fo, "module position %s %d %d\n",
+		    m->name(),
+		    m->x,
+		    m->y);
     }
 
 
@@ -1004,9 +1066,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
     p->module=module;
     p->module_widget = widget;
     p->type=type;
-    p->x=x;
-    p->y=y;
-
 
     p->pins=NULL;
 
@@ -1186,11 +1245,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 	x=max_x+4*PINLENGTH;
     }
 
-    p->x=x;
-    p->y=y;
-
-
-
     // Create xref
     cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
     cross_reference->parent_window_type = WT_breadboard_window;
@@ -1204,6 +1258,18 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
 
     p->fixed = gtk_fixed_new();
+
+    gtk_widget_set_events(p->fixed,
+			  gtk_widget_get_events(p->fixed)|
+			  GDK_BUTTON_PRESS_MASK |
+			  GDK_BUTTON_MOTION_MASK |
+			  GDK_BUTTON_RELEASE_MASK);
+    gtk_signal_connect(GTK_OBJECT(p->fixed),"motion-notify-event",
+		       GTK_SIGNAL_FUNC(marker_cb),p);
+    gtk_signal_connect(GTK_OBJECT(p->fixed),"button_press_event",
+		       GTK_SIGNAL_FUNC(marker_cb),p);
+    gtk_signal_connect(GTK_OBJECT(p->fixed),"button_release_event",
+		       GTK_SIGNAL_FUNC(marker_cb),p);
 
 
 
@@ -1317,8 +1383,9 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     gtk_widget_show(p->fixed);
 
-    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
+    gtk_layout_put(GTK_LAYOUT(bbw->layout), p->fixed, 0, 0);
 
+    position_module(p->bbw, p, x, y);
 
     bbw->modules=g_list_append(bbw->modules, p);
 
@@ -1326,17 +1393,6 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 
     if(x+p->width>max_x)
 	max_x=x+p->width;
-}
-
-void position_module(Breadboard_Window *bbw, struct gui_module *p, int x, int y)
-{
-    if(p->module->x != p->x || p->module->y != p->y)
-    {
-	p->x=p->module->x;
-	p->y=p->module->y;
-
-        gtk_layout_move(GTK_LAYOUT(bbw->layout), p->fixed, p->x, p->y);
-    }
 }
 
 void BreadboardWindow_update(Breadboard_Window *bbw)
