@@ -87,7 +87,10 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 
 {COMMENT} { 
    unput('\n');
-   return IGNORED;
+   if(verbose)
+     cout << "Lex comment\n";
+
+   //return IGNORED;
    }
 
 {S} { 
@@ -96,28 +99,38 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
     c = yyinput();
    } while(c == ' ');
 
-   if(c == '\n')
+   if(c == '\n') {
+     if(verbose)
+       cout << "Lex found EOL after white space\n";
      return IGNORED;
+   }
 
    unput(c);
 
    }
 
+
 \n  { 
       // Got an eol.
+      if(verbose)
+          cout << "got EOL\n";
+
       input_mode = 0;  // assume that this is not a multi-line command.
       if(cmd) {
-	if((verbose) && DEBUG_PARSER)
+	if(verbose)
           cout << "EOL with " << cmd->name << '\n';
         if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
-	  if((verbose) && DEBUG_PARSER)
+	  if(verbose)
             cout << " spanning lines     \n";
           input_mode = CONTINUING_LINE;
           return SPANNING_LINES; //IGNORED; 
-        } else
+        } else {
+	  if(verbose)
+	    cout << " returning IGNORED\n";
           return IGNORED;
+	}
       } else {
-	if((verbose) && DEBUG_PARSER)
+	if((verbose))// && DEBUG_PARSER)
           cout << "EOL but no pending command\n";
         return IGNORED; 
       }
@@ -194,17 +207,16 @@ abort_gpsim_now {
 %}
 
 {IDENT}{S}* {
-    string tok = strip_trailing_whitespace (yytext);
-    if(strlen(tok.c_str()))
-      return handle_identifier (tok,&op);
-    else
-      return 0;
+  string tok = strip_trailing_whitespace (yytext);
+  if(strlen(tok.c_str()))
+    return handle_identifier (tok,&op);
+  else
+    return 0;
   }
 
-.         {
-             printf("ignoring\n"); 
-            // ECHO;
-          }
+. {
+    printf("ignoring\n"); 
+  }
 
 %%
 
@@ -223,18 +235,22 @@ int translate_token(int tt)
 {
   switch(tt)
   {
-    case OPT_TT_BITFLAG:
-      if((verbose & 0x2) && DEBUG_PARSER)
-        cout << " tt bit flag\n";
-      return BIT_FLAG;
-     case OPT_TT_NUMERIC:
-      if((verbose & 0x2) && DEBUG_PARSER)
-        cout << " tt numeric\n";
-      return NUMERIC_OPTION;
-     case OPT_TT_STRING:
-      if((verbose & 0x2) && DEBUG_PARSER)
-        cout << " tt string\n";
-      return STRING_OPTION;
+  case OPT_TT_BITFLAG:
+    if((verbose & 0x2) && DEBUG_PARSER)
+      cout << " tt bit flag\n";
+    return BIT_FLAG;
+  case OPT_TT_NUMERIC:
+    if((verbose & 0x2) && DEBUG_PARSER)
+      cout << " tt numeric\n";
+    return NUMERIC_OPTION;
+  case OPT_TT_STRING:
+    if((verbose & 0x2) && DEBUG_PARSER)
+      cout << " tt string\n";
+    return STRING_OPTION;
+  case OPT_TT_SUBTYPE:
+    if((verbose & 0x2) && DEBUG_PARSER)
+      cout << " tt bit flag\n";
+    return CMD_SUBTYPE;
   }
 
   return 0;
@@ -306,12 +322,12 @@ int handle_identifier(const string &s, cmd_options **op )
 
    have_parameters = 1;
 
-   if((verbose) && DEBUG_PARSER)
+   if(verbose&2)
      cout << "search options\n";
 
    while(opt->name)
     if(strcmp(opt->name, s.c_str()) == 0) {
-      if((verbose) && DEBUG_PARSER)
+      if(verbose&2)
         cout << "found option '" << opt->name << "'\n";
       yylval.co = opt;
       return translate_token(opt->token_type);

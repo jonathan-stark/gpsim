@@ -43,6 +43,10 @@ enum COMMAND_MODES
                             // is associated with the option
 #define OPT_TT_STRING   3   // indicates that a string parameter
                             // is associated with the option
+#define OPT_TT_SUBTYPE  4   // indicates that this command can
+                            // be subtyped (e.g. the stimulus command
+                            // is subtyped by the type of stimulus
+                            // that is being created).
 
 void init_parser(void);
 
