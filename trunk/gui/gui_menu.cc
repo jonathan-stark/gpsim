@@ -19,14 +19,15 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "../config.h"
 #ifdef HAVE_GUI
 
 #ifdef DOING_GNOME
 #include <gnome.h>
 #endif
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <gtk/gtk.h>
 #include <gdk/gdk.h>
@@ -34,7 +35,6 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include <string.h>
 
-#include "../config.h"
 
 #include <gtkextra/gtkcombobox.h>
 #include <gtkextra/gtkbordercombo.h>
