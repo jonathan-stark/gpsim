@@ -147,7 +147,7 @@ main (int argc, const char *argv[])
   poptContext optCon;   /* context for parsing command-line options */
 
 
-  optCon = poptGetContext(NULL, argc, (const char **)argv, optionsTable, 0);
+  optCon = poptGetContext(NULL, argc, (char **)argv, optionsTable, 0);
   poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
 
