@@ -134,6 +134,23 @@ void Symbol_Table::add_register(pic_processor *cpu, file_register *new_reg)
 
 }
 
+void Symbol_Table::add_w(pic_processor *cpu, WREG *new_w)
+{
+
+  if(cpu==NULL || new_w==NULL)
+    return;
+
+  w_symbol *ws = new w_symbol();
+
+  ws->name_str = new_w->name();
+  ws->cpu      = cpu;
+  ws->w        = new_w;
+  new_w->symbol_alias = ws;
+
+  st.push_back(ws);
+
+}
+
 void Symbol_Table::add_constant(pic_processor *cpu, char *new_name, int value)
 {
 
@@ -220,6 +237,7 @@ symbol::symbol(void)
 {
   //  cout << " a symbol table\n";
 
+  cpu = NULL;
 }
 
 void symbol::print(void)
@@ -408,10 +426,34 @@ int get_symbol_value(char *sym, int *sym_value)
   if(s)
     {
       *sym_value = s->get_value();
-      return 0;
+      return 1;
     }
 
-  return 1; // symbol not found
+  return 0; // symbol not found
 
 }
 
+//--------------------------------------------
+void print_symbol(char *sym)
+{
+
+  symbol *s = symbol_table.find(sym);
+
+  if(s)
+    s->print();
+  else 
+    cout << sym << " was not found in the symbol table\n";
+
+}
+
+void update_symbol_value(char *sym, int new_value)
+{
+
+  symbol *s = symbol_table.find(sym);
+
+  if(s)
+    s->put_value(new_value);
+  else 
+    cout << sym << " was not found in the symbol table\n";
+
+}

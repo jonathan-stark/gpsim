@@ -259,9 +259,9 @@ void _16bit_processor::set_out_of_range_pm(int address, int value)
     if(value & WDTEN) {
       if(verbose)
 	cout << "Enabling WDT\n";
-      config_modes |= CM_WDTE;
+      config_modes.enable_wdt();
     } else
-      config_modes &= ~CM_WDTE;
+      config_modes.disable_wdt();
 
     if((value & (FOSC0 | FOSC1 | FOSC2)) != (FOSC0 | FOSC1 | FOSC2))
       cout << "FOSC bits in CONFIG2H are not supported\n";

@@ -649,10 +649,10 @@ void pic_processor::reset (RESET_TYPE r)
 
       if(verbose) {
 	cout << "POR\n";
-	cout << "config_modes = " << config_modes << '\n';
+	config_modes.print();
       }
 
-      wdt.initialize( (config_modes & CM_WDTE) != 0, nominal_wdt_timeout);
+      wdt.initialize( config_modes.get_wdt() , nominal_wdt_timeout);
     }
   else if (r==WDT_RESET)
     status.put_TO(0);
@@ -668,7 +668,7 @@ void pic_processor::reset (RESET_TYPE r)
 void pic_processor::por(void)
 {
 
-  wdt.initialize( (config_modes & WDTE) != 0, nominal_wdt_timeout);
+  wdt.initialize( config_modes.get_wdt(), nominal_wdt_timeout);
 
 }
 
@@ -833,7 +833,6 @@ pic_processor::pic_processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
   files = NULL;
-  config_modes = 0;
 
 }
 
@@ -1167,6 +1166,10 @@ void pic_processor::create_symbols (void)
 	  symbol_table.add_register(this, registers[i]);
       }
     }
+
+  // now add a special symbol for W
+  symbol_table.add_w(this, &W);
+
 }
 
 //-------------------------------------------------------------------
@@ -1348,6 +1351,7 @@ void    pic_processor::set_out_of_range_pm(int address, int value)
 //-------------------------------------------------------------------
 void pic_processor::init_program_memory(int address, int value)
 {
+  cout << hex <<  "address 0x" << address << "  value = 0x" << value << '\n';
   if(address < program_memory_size())
     {
       program_memory[address] = disasm(address,value);
@@ -1357,7 +1361,8 @@ void pic_processor::init_program_memory(int address, int value)
     }
   else if(address == config_word_address())
     {
-      set_config_word(value);
+      cout << "** SETTING CONFIG\n";
+      set_config_word(address, value);
     }
   else
     set_out_of_range_pm(address,value);  // could be e2prom
@@ -1385,15 +1390,22 @@ void pic_processor::build_program_memory(int *memory,int minaddr, int maxaddr)
 }
 //-------------------------------------------------------------------
 
-void pic_processor::set_config_word(unsigned int cfg_word)
+void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
   config_word = cfg_word;
 
   // Clear all of the configuration bits in config_modes and then
   // reset each of them based on the config bits in cfg_word:
-  config_modes &= ~(CM_WDTE);
-  config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
-  cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
+  //config_modes &= ~(CM_WDTE);
+  //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
+  //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
+
+  if(address == 0x2007)
+    config_modes.config_mode = (config_modes.config_mode & ~7) | (cfg_word & 7);
+
+  if(verbose)
+    config_modes.print();
+
 }
 
 //-------------------------------------------------------------------
@@ -1423,7 +1435,7 @@ void pic_processor::load_hex (char *hex_file)
   //for(int i = 0; i<MAXPICSIZE; i++)
   //  memory[i] = 0xffffffff;
 
-  set_config_word(0xffff);  // assume no configuration word is in the hex file.
+  set_config_word(0x2007,0xffff);  // assume no configuration word is in the hex file.
 
   if (!readihex16 (this, inputfile))
     {
@@ -1580,6 +1592,25 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
       cpu->program_memory[addr]->xref->update();
   
   delete(old_inst);
+}
+
+//-------------------------------------------------------------------
+//  ConfigMode
+//
+void ConfigMode::print(void)
+{
+
+  switch(config_mode&0x3) {  // Lower two bits are the clock type
+  case 0: cout << "LP"; break;
+  case 1: cout << "XT"; break;
+  case 2: cout << "HS"; break;
+  case 3: cout << "RC"; break;
+  }
+
+  cout << " oscillator\n";
+
+  cout << " WDT is " << ( get_wdt() ? "enabled\n" : "disabled\n");
+
 }
 
 //-------------------------------------------------------------------

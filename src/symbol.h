@@ -68,6 +68,7 @@ public:
   void add_constant(pic_processor *cpu, char *, int );
   void add_register(pic_processor *cpu, file_register *reg);
   void add_address(pic_processor *cpu, char *, int );
+  void add_w(pic_processor *cpu, WREG *w );
   void add_module(Module * m, char *module_name);
   void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
@@ -96,6 +97,7 @@ public:
   void new_name(string *new_name_str) {name_str = *new_name_str;};
   virtual void print(void);
   virtual int get_value(void){return 0;};
+  virtual void put_value(int i) {;};
   symbol(void);
 
 };
@@ -120,6 +122,7 @@ public:
 
   IOPORT *ioport;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_IOPORT;};
+  virtual void put_value(int new_value) { if(ioport) ioport->put_value(new_value);};
 };
 
 class node_symbol : public symbol
@@ -128,6 +131,19 @@ public:
 
   Stimulus_Node *stimulus_node;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS_NODE;};
+  virtual void print(void) {
+    if(stimulus_node) {
+      cout << "node: " << stimulus_node->name() << '\n';
+      stimulus *s = stimulus_node->stimuli;
+      while(s) {
+	cout << '\t' << s->name() << '\n';
+	s = s->next;
+      }
+    } else
+      cout << "has no attached stimuli\n";
+
+  };
+
 };
 
 class register_symbol : public symbol
@@ -144,7 +160,10 @@ public:
     if(reg)
       return reg->address;
   }
-
+  virtual void put_value(int new_value) {
+    if(reg)
+      reg->put_value(new_value);
+  };
 };
 
 class stimulus_symbol : public symbol
@@ -194,5 +213,28 @@ class module_symbol : public symbol
       
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_MODULE;};
 
+};
+
+// a hack. Place W into the symbol table
+class w_symbol : public symbol
+{
+ public:
+
+  WREG *w;
+
+  virtual SYMBOL_TYPE isa(void) { return SYMBOL_SPECIAL_REGISTER;};
+
+  virtual void print(void) {
+    if(cpu)
+      cout << w->name() << hex << " = 0x" << w->value <<'\n';
+  }
+  virtual int get_value(void) {
+    return w->value;
+  }
+
+  virtual void put_value(int new_value) {
+    if(w)
+      w->put_value(new_value);
+  };
 };
 #endif  //  __SYMBOL_H__

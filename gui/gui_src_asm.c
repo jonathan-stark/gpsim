@@ -194,6 +194,7 @@ void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
     unsigned int pixel;
     float inc;
     int i;
+    int sbawFileId;
 
 //    static GtkWidget *old_pcw=NULL;
 
@@ -206,9 +207,10 @@ void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
 
 
     // find notebook page containing address 'address'
+    sbawFileId = gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address);
     for(i=0;i<SBAW_NRFILES;i++)
     {
-	if(sbaw->pageindex_to_fileid[i]==gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address))
+	if(sbaw->pageindex_to_fileid[i] == sbawFileId)
 	{
 	    id=i;
 	}
@@ -220,7 +222,12 @@ void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
 	}
     }
 
-    assert(id>-1);
+
+    if(id==-1)
+    {
+	puts("SourceBrowserAsm_update_line(): could not find notebook page");
+	return;
+    }
     
     new_pcw = sbaw->source_pcwidget[id];
 
@@ -299,7 +306,13 @@ void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address
 	    id=i;
 	}
     }
-    assert(id>-1);
+
+    if(id==-1)
+    {
+	puts("SourceBrowserAsm_update_line(): could not find notebook page");
+	return;
+    }
+
     gtk_notebook_set_page(GTK_NOTEBOOK(sbaw->notebook),id);
     
     line = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
@@ -1340,8 +1353,11 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   {
       gpsim_file = gpsim_get_file_context(pic_id, i);
       file_name = gpsim_file->name;
-      if(!strcmp(file_name+strlen(file_name)-3,"asm")
-	 ||!strcmp(file_name+strlen(file_name)-3,"inc")
+      if(!strcmp(file_name+strlen(file_name)-4,".asm")
+	 ||!strcmp(file_name+strlen(file_name)-4,".inc")
+	 ||!strcmp(file_name+strlen(file_name)-4,".ASM")
+	 ||!strcmp(file_name+strlen(file_name)-4,".INC")
+	 ||!strcmp(file_name+strlen(file_name)-2,".h")
 	)
       {
 	  // FIXME, gpsim may change sometime making this fail
@@ -1364,6 +1380,9 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 
 	  set_text(sbaw,id,file_id);
 	  
+      } else {
+	  printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
+		  file_name);
       }
   }
 

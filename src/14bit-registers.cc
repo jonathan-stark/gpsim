@@ -44,6 +44,7 @@ pic_processor *temp_cpu;
 
 file_register::file_register(void)
 {
+  cpu = NULL;
   name_str1 = NULL;
   new_name("file_register");
   xref = new XrefObject(&value);
