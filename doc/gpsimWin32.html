@@ -114,22 +114,23 @@ addition to popt and glib, mentioned in the CLI section:</p>
   Software and released under the LGPL license.
     <ul>
       <li>
-      <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a>: sources from CVS, with the 
-      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-src-1.1.0-20040626.patch">patch</a> 
-        applied. Sources from the package can be successfully compiled on WIN32 
-      using Cygwin gcc -mno-cygwin native compilation and on Red Hat Linux 9.0.</li>
+      <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a>: modified sources 
+      from. Sources from the package can be successfully compiled on WIN32 
+      using Cygwin gcc -mno-cygwin native compilation, on Red Hat Linux 9.0 and 
+      on Fedora Core 3.</li>
       <li>
     <a href="#gtk_extra_dev">gtk+extra-2-dev-*.zip</a>: header files and static library, 
       built from
       <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a></li>
     </ul>
   </li>
-  <li>pthreads - The <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> package implements Posix Threads on Win32. Note, pthreads are only currently used in modules and in particular the usart module.</li>
+  <li>pthreads - The <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> package implements Posix Threads on Win32. Note, pthreads are only currently used in modules and in particular the usart module.
     <ul>
       <li>
       <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> is an ftp directory containing the latest dll builds. The contents of this directory can be copied to gpsim_proj/pthreads/
       </li>
     </ul>
+  </li>
 </ul>
 <p>The WIN32 ports of following packages are a part of Tor Lillqvist&#39;s <a href="http://www.gimp.org/~tml/gimp/win32/">GTK+ (and GIMP) 
   for Windows</a> project.
@@ -228,9 +229,8 @@ compilation)</span>:</b></h3>
     create gtkextra-2\lib directory and copy gtkextra-2\gtkextra\libgtkextra-win32-2.0.a 
     to gtkextra-2\lib\libgtkextra-win32-2.0.lib</li>
     </ul>
-    <li>Create the pthreads directory and copy the <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> to it.
-    </ul>
   </li>
+  <li>Create the pthreads directory and copy the <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> to it.</li>
   <li>
   Compile gpsim native WIN32 port:<ul>
   <li><p>For MinGW compilation, you have to compile the radline DLL. Run the 
@@ -348,9 +348,9 @@ project:</p>
       From <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> get
 <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a></li>
       <li>
-      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-dev-1.1.0-20040626.zip" name="gtk_extra_dev">gtk+extra-2-dev-1.1.0-20040626.zip</a></li>
+      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-dev-1.1.0-20050102.zip" name="gtk_extra_dev">gtk+extra-2-dev-1.1.0-20050102.zip</a></li>
       <li>
-      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-src-1.1.0-20040626.tar.gz" name="gtk_extra_src">gtk+extra-2-src-1.1.0-20040626.tar.gz</a></li>
+      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-src-1.1.0-20050102.tar.gz" name="gtk_extra_src">gtk+extra-2-src-1.1.0-20050102.tar.gz</a></li>
     </ul>
 <hr />
 <p>Last update: January 2, 2005 by Borut Ražem</p>
