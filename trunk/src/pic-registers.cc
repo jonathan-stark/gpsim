@@ -175,6 +175,7 @@ Program_Counter::Program_Counter(void)
   reset_address = 0;
   value = 0;
   pclath_mask = 0x1800;    // valid pclath bits for branching in 14-bit cores 
+  _xref.assign_data(this);
 
 }
 

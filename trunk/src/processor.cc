@@ -1253,6 +1253,14 @@ unsigned int ProgramMemoryAccess::get_PC(void)
   return 0;
 }
 
+//----------------------------------------
+// Get the current value of the program counter.
+void ProgramMemoryAccess::set_PC(unsigned int new_pc)
+{
+  if(cpu && cpu->pc)
+    return cpu->pc->put_value(new_pc);
+}
+
 void ProgramMemoryAccess::put_opcode_start(unsigned int addr, unsigned int new_opcode)
 {
 

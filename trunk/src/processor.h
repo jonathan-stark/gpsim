@@ -64,6 +64,7 @@ class ProgramMemoryAccess :  public BreakpointObject
   unsigned int get_opcode(unsigned int addr);
   char *get_opcode_name(unsigned int addr, char *buffer, unsigned int size);
   virtual unsigned int get_PC(void);
+  virtual void set_PC(unsigned int);
 
   void put_opcode(unsigned int addr, unsigned int new_opcode);
   // When a pic is replacing one of it's own instructions, this routine
