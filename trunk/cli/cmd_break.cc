@@ -163,7 +163,7 @@ void cmd_break::set_break(int bit_flag, guint64 value)
     break;
 
   case EXECUTION:
-    b = bp.set_execution_break(cpu, cpu->map_pm_address2index(value));
+    b = bp.set_execution_break(cpu, value);
     if(b < MAX_BREAKPOINTS)
       {
 	cout << "break at address: " << value << " break #: " << b << '\n';
