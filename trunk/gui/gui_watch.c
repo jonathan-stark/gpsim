@@ -617,6 +617,31 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
     update_menus(ww);
 }
 
+
+void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp)
+{
+    GList *iter;
+    struct watch_entry *entry;
+    int row;
+    int i=0;
+
+    iter=ww->watches;
+
+    while(iter)
+    {
+	entry=iter->data;
+	row=gtk_clist_find_row_from_data(GTK_CLIST(ww->watch_clist),entry);
+	gtk_clist_remove(GTK_CLIST(ww->watch_clist),row);
+	gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
+	free(entry);
+	iter=iter->next;
+    }
+
+    while( (ww->watches=g_list_remove_link(ww->watches,ww->watches))!=NULL)
+	;
+}
+
+
 int BuildWatchWindow(Watch_Window *ww)
 {
     GtkWidget *window;

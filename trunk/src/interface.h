@@ -130,7 +130,7 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
 				   void (*interface_callback)(gpointer), 
 				   gpointer interface_callback_data,
 				   guint64 cycle);
-
+  int gpsim_open(unsigned int processor_id, char *file);
   //---------------------------------------------------------------------------
   // pin interface functions
   //---------------------------------------------------------------------------
