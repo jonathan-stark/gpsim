@@ -475,50 +475,93 @@ resetbutton_cb(GtkWidget *widget)
 }
 
 int gui_animate_delay; // in milliseconds
-    
+extern int realtime_mode;
+extern int realtime_mode_with_gui;
+
+static void set_simulation_mode(char m)
+{
+    guint64 value=1;
+
+    gui_animate_delay=0;
+
+    switch(m)
+    {
+    case 'r':
+        value=0;
+        gui_animate_delay=0;
+	realtime_mode=1;
+        realtime_mode_with_gui=0;
+	break;
+    case 'R':
+        value=0;
+        gui_animate_delay=0;
+	realtime_mode=1;
+        realtime_mode_with_gui=1;
+        break;
+    case 'b':
+	value=1;
+        gui_animate_delay=100;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case 'c':
+	value=1;
+        gui_animate_delay=300;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case 'd':
+	value=1;
+        gui_animate_delay=600;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case '1':
+        value=1;
+        gui_animate_delay=0;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case '2':
+        value=1000;
+        gui_animate_delay=0;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case '3':
+        value=100000;
+        gui_animate_delay=0;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case '4':
+        value=2000000;
+        gui_animate_delay=0;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    case '5':
+        value=0;
+        gui_animate_delay=0;
+	realtime_mode=0;
+        realtime_mode_with_gui=0;
+        break;
+    }
+
+    gpsim_set_update_rate(value);
+
+    gpsim_stop(gp->pic_id);
+
+    config_set_variable("dispatcher", "simulation_mode", m);
+}
+
 static void
 gui_update_cb(GtkWidget *widget, gpointer data)
 {
     char *s = (char*)data;
 
-    guint64 value=1;
+    set_simulation_mode(*s);
 
-    gui_animate_delay=0;
-
-    switch(*s)
-    {
-    case 'b':
-	value=1;
-        gui_animate_delay=100;
-        break;
-    case 'c':
-	value=1;
-        gui_animate_delay=300;
-        break;
-    case 'd':
-	value=1;
-        gui_animate_delay=600;
-        break;
-    case '1':
-        value=1;
-        break;
-    case '2':
-        value=1000;
-        break;
-    case '3':
-        value=100000;
-        break;
-    case '4':
-        value=2000000;
-        break;
-    case '5':
-        value=0;
-        break;
-    }
-
-    gpsim_set_update_rate(value);
-    config_set_variable("dispatcher", "gui_update_rate", value);
-    config_set_variable("dispatcher", "gui_animate_delay", gui_animate_delay);
 }
 
 
@@ -551,10 +594,10 @@ static GtkItemFactoryEntry menu_items[] =
 {
   { "/_File",            NULL,         0,                     0, "<Branch>" },
   { "/File/tearoff1",    NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Tearoff>" },
-  { "/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //{ "/File/_New",        "<control>N", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   { "/File/_Open",       "<control>O", (GtkItemFactoryCallback)fileopen_dialog,       0 },
-  { "/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
-  { "/File/Save _As...", NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //{ "/File/_Save",       "<control>S", (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
+  //{ "/File/Save _As...", NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0 },
   { "/File/sep1",        NULL,         (GtkItemFactoryCallback)gtk_ifactory_cb,       0, "<Separator>" },
   { "/File/_Quit",       "<control>Q", (GtkItemFactoryCallback)do_quit_app,         0 },
 
@@ -613,13 +656,14 @@ void create_dispatcher (void)
       GtkAccelGroup *accel_group;
       
       int x,y,width,height;
-      int update_rate;
       char version_buffer[100];
 
       GtkWidget *menu;
       GtkWidget *item;
 
       GtkWidget *update_rate_menu;
+
+      int simulation_mode;
       
       dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -707,26 +751,12 @@ void create_dispatcher (void)
 //      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
 
 
-      frame = gtk_frame_new("gui update rate");
-      if(config_get_variable("dispatcher", "gui_update_rate", &update_rate))
+      frame = gtk_frame_new("Execution mode");
+      if(!config_get_variable("dispatcher", "simulation_mode", &simulation_mode))
       {
-	  //printf("set update rate %d from file\n",update_rate);
-	  gpsim_set_update_rate(update_rate);
+	  simulation_mode='R';
       }
-      else
-      {
-	//printf("using default update rate\n");
-	  update_rate=gpsim_get_update_rate();
-      }
-      if(config_get_variable("dispatcher", "gui_animate_delay", &gui_animate_delay))
-      {
-	  //printf("set animate delay %d from file\n",gui_animate_delay);
-      }
-      else
-      {
-	//printf("using default update rate\n");
-          gui_animate_delay=0;
-      }
+      set_simulation_mode(simulation_mode);
 //      spinadj = (GtkAdjustment *)gtk_adjustment_new(update_rate,1,2000000,1,100,100);
 //      spinb = gtk_spin_button_new(spinadj,1,0);
 //      gtk_container_add(GTK_CONTAINER(frame),spinb);
@@ -794,35 +824,55 @@ void create_dispatcher (void)
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 
+	item=gtk_menu_item_new_with_label("Realtime without gui");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"r");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
+	item=gtk_menu_item_new_with_label("Realtime with gui");
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) gui_update_cb,
+			   (gpointer)"R");
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(menu),item);
+
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
 
 	int gui_update_index;
-
-	if(gui_animate_delay==0)
+	switch(simulation_mode) // ugh
 	{
-	    // No animate
-
-	    gui_update_index=1; // 2000000 cycles
-
-	    if(update_rate<400000)
-		gui_update_index=2; // 100000 cycles
-	    if(update_rate<4000)
-		gui_update_index=3; // 1000 cycles
-            if(update_rate==1)
-		gui_update_index=4; // every cycle
-	    if(update_rate<=0)
-                gui_update_index=0; // Never
-	}
-	else
-	{
-	    // Animate
-
-	    gui_update_index=7;       // 700 ms
-
-            if(gui_animate_delay<500)
-		gui_update_index=6;   // 300 ms
-	    if(gui_animate_delay<200)
-		gui_update_index=5;   // 100 ms
+	case '5':
+            gui_update_index=0;
+            break;
+	case '4':
+            gui_update_index=1;
+            break;
+	case '3':
+            gui_update_index=2;
+            break;
+	case '2':
+            gui_update_index=3;
+            break;
+	case '1':
+            gui_update_index=4;
+            break;
+	case 'b':
+            gui_update_index=5;
+            break;
+	case 'c':
+            gui_update_index=6;
+            break;
+	case 'd':
+            gui_update_index=7;
+	    break;
+	case 'r':
+            gui_update_index=8;
+	    break;
+	case 'R':
+            gui_update_index=9;
+            break;
 	}
 
 	gtk_option_menu_set_history(GTK_OPTION_MENU(update_rate_menu), gui_update_index);
