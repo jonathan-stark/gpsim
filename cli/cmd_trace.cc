@@ -71,7 +71,8 @@ cmd_trace::cmd_trace(void)
 
 void cmd_trace::trace(void)
 {
-  get_trace().dump(0, stdout);
+  if(cpu)
+    cpu->trace_dump(0, 0);
 }
 
 void cmd_trace::trace(Expression *expr)
@@ -87,7 +88,7 @@ void cmd_trace::trace(cmd_options *opt)
   switch(opt->value) {
 
   case TRACE_LOGOFF_CMD:
-    trace_enable_logging();
+    get_trace().disableLogging();
     cout << "Logging to file disabled" << endl;
     break;
   default:

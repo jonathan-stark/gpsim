@@ -76,13 +76,9 @@ void P12C508::create_iopin_map(void)
 void P12C508::reset(RESET_TYPE r)
 {
 
-/*<<<<<<< p12x.cc
-  tris.put ( tris.por_value );
+  tris.value = tris.por_value;
   option_reg.value = option_reg.por_value;
-=======*/
-  tris.value.put(tris.por_value);
-  option_reg.value.put(option_reg.por_value);
-/*>>>>>>> 1.22*/
+
   pic_processor::reset(r);
   
 }
@@ -105,8 +101,8 @@ void P12C508::create_sfr_map(void)
   add_sfr_register(&gpio,  6);
 
   add_sfr_register(W, 0xffffffff);
-  add_sfr_register(&option_reg, 0xffffffff, 0xff);
-  add_sfr_register(&tris, 0xffffffff, 0x3f);
+  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(&tris, 0xffffffff, RegisterValue(0x3f,0));
 
   osccal.new_name("osccal");
 
@@ -318,7 +314,6 @@ void P12CE518::create(void)
   tris.value.put(0xff);
   tris.put(0x3f);
   
-//  tris.put ( tris.por_value );
 }
 
 P12CE518::P12CE518(void)

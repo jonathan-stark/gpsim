@@ -896,8 +896,8 @@ void Stack16::put_tos(unsigned int new_tos)
 //--------------------------------------------------
 T0CON::T0CON(void)
 {
-  por_value = 0xff;
-  wdtr_value = 0xff;
+  por_value = RegisterValue(0xff,0);
+  wdtr_value = RegisterValue(0xff,0);
   new_name("t0con");
 }
 

@@ -122,35 +122,35 @@ void P16F62x::create_sfr_map(void)
   alias_file_registers(0x81,0x84,0x100);
 
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0xff);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0xff,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
   add_sfr_register(portb,   0x106);
-  add_sfr_register(&trisb,  0x186, 0xff);
+  add_sfr_register(&trisb,  0x186, RegisterValue(0xff,0));
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x9a);
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x9b);
-  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, 0);
+  add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x9c, RegisterValue(0,0));
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x9d);
 
-  add_sfr_register(pclath, 0x18a, 0);
-  add_sfr_register(pclath, 0x10a, 0);
+  add_sfr_register(pclath, 0x18a, RegisterValue(0,0));
+  add_sfr_register(pclath, 0x10a, RegisterValue(0,0));
 
-  add_sfr_register(&intcon_reg, 0x18b, 0);
-  add_sfr_register(&intcon_reg, 0x10b, 0);
-  add_sfr_register(&intcon_reg, 0x08b, 0);
-  add_sfr_register(&intcon_reg, 0x00b, 0);
+  add_sfr_register(&intcon_reg, 0x18b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x10b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
+  add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
 
-  add_sfr_register(usart.rcsta, 0x18, 0,"rcsta");
-  add_sfr_register(usart.txsta, 0x98, 2,"txsta");
-  add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
-  add_sfr_register(usart.txreg, 0x19, 0,"txreg");
-  add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
+  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
   usart.initialize_14(this,get_pir_set(),portb,1);
 
-  add_sfr_register(&comparator.cmcon, 0x1f, 0,"cmcon");
-  add_sfr_register(&comparator.vrcon, 0x9f, 0,"vrcon");
+  add_sfr_register(&comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
+  add_sfr_register(&comparator.vrcon, 0x9f, RegisterValue(0,0),"vrcon");
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());

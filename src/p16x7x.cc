@@ -318,11 +318,11 @@ void P16C71::create_sfr_map(void)
 
   //  P16C61::create_sfr_map();
 
-  add_sfr_register(&adcon0, 0x08, 0);
-  add_sfr_register(&adcon1, 0x88, 0);
+  add_sfr_register(&adcon0, 0x08, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x88, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x89, 0);
-  add_sfr_register(&adres,  0x09, 0);
+  add_sfr_register(&adres,  0x89, RegisterValue(0,0));
+  add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
   adcon0.analog_port = porta;
   adcon0.adres = &adres;
@@ -424,16 +424,16 @@ void P16C712::create_sfr_map(void)
 
   /* Input/Output ports */
   add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, 0x1f);
+  add_sfr_register(&trisa,  0x85, RegisterValue(0x1f,0));
 
   add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, 0xff);
+  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
 
   /* The A/D section is similar to 16x71, but not equal */
-  add_sfr_register(&adcon0, 0x1F, 0);
-  add_sfr_register(&adcon1, 0x9F, 0);
+  add_sfr_register(&adcon0, 0x1F, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9F, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x1E, 0);
+  add_sfr_register(&adres,  0x1E, RegisterValue(0,0));
 
   adcon0.analog_port = porta;
   adcon0.adres = &adres;
@@ -570,10 +570,10 @@ void P16C72::create_sfr_map(void)
   pir_set_2_def.set_pir1(&pir1_2_reg);
   pir_set_2_def.set_pir2(&pir2_2_reg);
 
-  add_sfr_register(&adcon0, 0x1f, 0);
-  add_sfr_register(&adcon1, 0x9f, 0);
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x1e, 0);
+  add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
   adcon0.analog_port = porta;
   adcon0.analog_port2 = 0;
@@ -705,10 +705,10 @@ void P16C73::create_sfr_map(void)
   pir_set_2_def.set_pir1(&pir1_2_reg);
   pir_set_2_def.set_pir2(&pir2_2_reg);
 
-  add_sfr_register(&adcon0, 0x1f, 0);
-  add_sfr_register(&adcon1, 0x9f, 0);
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x1e, 0);
+  add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
   adcon0.analog_port = porta;
   adcon0.analog_port2 = 0;
@@ -841,10 +841,10 @@ void P16C74::create_sfr_map(void)
   pir_set_2_def.set_pir1(&pir1_2_reg);
   pir_set_2_def.set_pir2(&pir2_2_reg);
 
-  add_sfr_register(&adcon0, 0x1f, 0);
-  add_sfr_register(&adcon1, 0x9f, 0);
+  add_sfr_register(&adcon0, 0x1f, RegisterValue(0,0));
+  add_sfr_register(&adcon1, 0x9f, RegisterValue(0,0));
 
-  add_sfr_register(&adres,  0x1e, 0);
+  add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
   adcon0.analog_port = porta;
   adcon0.analog_port2 = porte;

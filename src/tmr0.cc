@@ -354,7 +354,7 @@ void  TMR0::reset(RESET_TYPE r)
   switch(r) {
   case POR_RESET:
     cout << "TMR0::reset - por\n";
-    value.put(por_value);
+    value = por_value;
     break;
   default:
     break;

@@ -208,6 +208,10 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
       registers[j]->alias_mask = 0;
 
     registers[j]->address = j;
+
+    registers[j]->set_write_trace(Trace::REGISTER_WRITE | (j << 8));
+    registers[j]->set_read_trace(Trace::REGISTER_READ | (j << 8));
+
     registers[j]->symbol_alias = 0;
 
     //The default register name is simply its address
@@ -695,6 +699,40 @@ void Processor::disassemble (signed int s, signed int e)
 
 
 //-------------------------------------------------------------------
+void Processor::save_state(FILE *fp)
+{
+
+  if(!fp)
+    return;
+
+  unsigned int i;
+
+  fprintf(fp,"PROCESSOR:%s\n",name().c_str());
+
+  for(i=1; i<register_memory_size(); i++) {
+
+    Register *reg = rma.get_register(i);
+
+    if(reg && reg->isa() != Register::INVALID_REGISTER) {
+
+      fprintf(fp,"R:%X:%s:(%X,%X)\n",
+	      reg->address,
+	      reg->name().c_str(),
+	      reg->value.get(),
+	      reg->value.geti());
+
+    }
+  }
+}
+//-------------------------------------------------------------------
+void Processor::load_state(FILE *fp)
+{
+  if(!fp)
+    return;
+
+  
+}
+//-------------------------------------------------------------------
 int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 {
   int closest_address = -1;
@@ -948,6 +986,14 @@ void Processor::trace_dump(int type, int amount)
 }
 
 //-------------------------------------------------------------------
+// Decode a single trace item
+int Processor::trace_dump1(int type, char *buffer, int bufsize)
+{
+  snprintf(buffer, bufsize,"*** INVALID TRACE *** 0x%x\n",type);
+
+  return 1;
+}
+//-------------------------------------------------------------------
 //
 // run  -- Begin simulating and don't stop until there is a break.
 //
@@ -984,7 +1030,7 @@ void Processor::step (unsigned int steps)
 	  // then step one cycle - but don't execute any code  
 
 	  get_cycles().increment();
-	  get_trace().dump(1);
+	  trace_dump(0,1);
 
 	}
       else if(bp.have_interrupt())
@@ -996,7 +1042,7 @@ void Processor::step (unsigned int steps)
 
 	  step_one();
 	  get_trace().cycle_counter(get_cycles().value);
-	  get_trace().dump_last_instruction();
+	  trace_dump(0,1);
 
 	} 
 

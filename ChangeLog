@@ -1,3 +1,15 @@
+2004-08-04 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-registers.cc, src/16bit-processors.cc, src/16bit-registers.cc
+	  src/p12x.cc, src/p16f62x.cc, src/p16f87x.cc, src/p16x5x.cc, src/p16x6x.cc
+	  src/p16x7x.cc, src/p16x8x.cc, src/p18x.cc, src/pic-processor.cc, 
+	  src/pic-processor.h, src/processor.cc, src/processor.h, src/registers.cc
+	  src/registers.h, src/tmr0.cc, src/trace.cc, src/trace.h, gui/gui_regwin.cc
+	  cli/cmd_trace.cc:
+	Two categories of changes have been made: First, the unitialized register
+	concept has been propogated to all of the register constructions. Second,
+	tracing has been improved yet again.
+
+
 2004-08-04 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: packaging of MinGW executables
 	* gpsim/gpsim.vcproj: cleanup
