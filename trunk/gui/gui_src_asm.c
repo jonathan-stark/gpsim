@@ -484,9 +484,13 @@ popup_activated(GtkWidget *widget, gpointer data)
 	gpsim_run(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     case MENU_STOP:
+	gpsim_stop(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	break;
     case MENU_RESET:
+	gpsim_reset(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	break;
     case MENU_RETURN:
-	puts("Not implemented");
+	gpsim_return(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     default:
 	puts("Unhandled menuitem?");
@@ -531,11 +535,11 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
 
 	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
-	if(submenu_items[i].id==MENU_STOP)
+/*	if(submenu_items[i].id==MENU_STOP)
 	{
 	    GTK_WIDGET_UNSET_FLAGS (item,
 				    GTK_SENSITIVE | GTK_CAN_FOCUS);
-	}
+	}*/
       
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(submenu),item);

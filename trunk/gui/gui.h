@@ -511,6 +511,7 @@ void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp);
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);
 int BuildBreadboardWindow(Breadboard_Window *bbw);
 int CreateBreadboardWindow(GUI_Processor *gp);
+void BreadboardWindow_update(Breadboard_Window *bbw);
 
 
 #endif // __GUI_H__

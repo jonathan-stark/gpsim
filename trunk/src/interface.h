@@ -115,6 +115,9 @@ sym *gpsim_symbol_iter(unsigned int processor_id); // NULL on end
   void gpsim_step(unsigned int processor_id, unsigned int steps);
   void gpsim_step_over(unsigned int processor_id);
   void gpsim_run(unsigned int processor_id);
+  void gpsim_stop(unsigned int processor_id);
+  void gpsim_reset(unsigned int processor_id);
+  void gpsim_return(unsigned int processor_id);
   void gpsim_run_to_address(unsigned int processor_id, unsigned int address);
   void gpsim_toggle_break_at_address(unsigned int processor_id, unsigned int address);
   void gpsim_toggle_break_at_line(unsigned int processor_id, unsigned int file_id, unsigned int line);

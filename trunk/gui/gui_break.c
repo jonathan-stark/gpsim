@@ -34,6 +34,7 @@ void gui_simulation_has_stopped(void)
       SourceBrowser_update(gp->program_memory);
       SourceBrowser_update(gp->source_browser);
       WatchWindow_update(gp->watch_window);
+      BreadboardWindow_update(gp->breadboard_window);
     }
 }
 
@@ -57,9 +58,14 @@ void  gui_cycle_callback (gpointer callback_data)
       RegWindow_update(gp->regwin_ram);
       RegWindow_update(gp->regwin_eeprom);
       StatusBar_update(gp->status_bar);
-//      SourceBrowser_update(gp->program_memory);
-//      SourceBrowser_update(gp->source_browser);
+      SourceBrowser_update(gp->program_memory);
+      SourceBrowser_update(gp->source_browser);
       WatchWindow_update(gp->watch_window);
+      BreadboardWindow_update(gp->breadboard_window);
+
+      // update gui
+      while(gtk_events_pending())
+	  gtk_main_iteration();
     }
   else
     {
