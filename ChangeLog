@@ -1,3 +1,8 @@
+2005-01-26 Scott Dattalo <scott@dattalo.com>
+	* plat/win32/gpsim.def: added more external cross references.
+	* module/modules.vcproj: changed from pthreadVC1.lib to
+	pthreadVC.lib.
+
 2005-01-23 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: Craig Franklin updated gpsim's configure files. It
 	turns out there was a tiny bug preventing things to build a
