@@ -537,15 +537,15 @@ struct _Breadboard_Window {
     GtkWidget *pic_frame;
     GtkWidget *node_frame;
     GtkWidget *module_frame;
-    GtkWidget *stimuli_frame;
+    GtkWidget *stimulus_frame;
 
     GtkWidget *node_tree;
 
     GtkWidget *node_settings_clist;
 
-    GtkWidget *stimuli_settings_label;
+    GtkWidget *stimulus_settings_label;
 
-    GtkWidget *stimuli_add_node_button;
+    GtkWidget *stimulus_add_node_button;
 
     int processor;
 

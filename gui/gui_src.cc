@@ -349,7 +349,7 @@ void update_menu_item(struct _gui_object *_this)
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_breadboard_window:
-	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Pins");
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_stack_window:
