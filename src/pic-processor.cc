@@ -43,6 +43,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "xref.h"
 
+#include "fopen-path.h"
+
 int parse_string(char *cmd_string);
 
 SIMULATION_MODES simulation_mode;
@@ -765,7 +767,7 @@ void pic_processor::list(int file_id, int pc_val, int start_line, int end_line)
   if(files[file_id].file_ptr == NULL)
     {
       if(files[file_id].name != NULL)
-	files[file_id].file_ptr = fopen(files[file_id].name,"r");
+	files[file_id].file_ptr = fopen_path(files[file_id].name,"r");
 
       if(files[file_id].file_ptr == NULL)
 	{
@@ -1191,7 +1193,7 @@ void pic_processor::read_src_files(void)
 	  // file. (e.g. files[3].line_seek[20] references the
 	  // 20th line of the third source file.)
 	  files[i].line_seek = new int[files[i].max_line];
-	  if( NULL == (files[i].file_ptr = fopen(files[i].name,"r")))
+	  if( NULL == (files[i].file_ptr = fopen_path(files[i].name,"r")))
 	    continue;
 	  rewind(files[i].file_ptr);
 
@@ -1381,7 +1383,7 @@ extern int readihex16 (pic_processor *cpu, FILE * file);
 void pic_processor::load_hex (char *hex_file)
 {
 
-  FILE *inputfile = fopen (hex_file, "r");
+  FILE *inputfile = fopen_path (hex_file, "r");
 
   if(verbose)
     cout << "load hex\n";

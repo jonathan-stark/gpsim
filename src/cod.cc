@@ -1,3 +1,4 @@
+/* -*- Mode: C++; c-file-style: "GNU"; comment-column: 40 -*- */
 /*
    Copyright (C) 1998,1999 T. Scott Dattalo
 
@@ -42,6 +43,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../gui/gui_interface.h"
 extern "C" { void gui_new_program (unsigned int); }
 #endif
+
+#include "fopen-path.h"
 
 static FILE *codefile = NULL;
 static FILE *lstfp = NULL;
@@ -238,18 +241,18 @@ FILE *open_a_file(char **filename)
   if(verbose)
     cout << "Trying to open a file: " << *filename << '\n';
 
-  if(NULL != (t = fopen(*filename,"r")))
+  if(NULL != (t = fopen_path(*filename,"r")))
     return t;
 
   if(!ignore_case_in_cod)
     return NULL;
 
   strtoupper(*filename);
-  if(NULL != (t = fopen(*filename,"r")))
+  if(NULL != (t = fopen_path(*filename,"r")))
     return t;
 
   strtolower(*filename);
-  if(NULL != (t = fopen(*filename,"r")))
+  if(NULL != (t = fopen_path(*filename,"r")))
     return t;
 
   cout << "couldn't open " << *filename << " (or any upper/lower case variation)\n";
@@ -318,6 +321,7 @@ void read_src_files_from_cod(pic_processor *cpu)
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_NAMTAB]);
 
   // First, just count the number of source files
+  // These may be duplicates, but this is an upper bound
   if(start_block) {
     //    end_block   = get_short_int(&directory_block_data[COD_DIR_NAMTAB+2]);
     end_block   = get_short_int(&main_dir.dir.block[COD_DIR_NAMTAB+2]);
@@ -348,9 +352,21 @@ void read_src_files_from_cod(pic_processor *cpu)
     for(j=start_block; j<=end_block; j++) {
       read_block(temp_block, j);
       for(i=0; i<FILES_PER_BLOCK; i++) {
+	int	alreadyExists = 0;
+	int	jj;
 	offset = i*FILE_SIZE;
 	substr(b,&temp_block[offset+1],FILE_SIZE);
-	if(temp_block[offset]) {
+	for (jj = 0; jj < num_files; ++jj) {
+	  // this could be fooled by search pathes
+	  if (0 == strcmp (b, cpu->files[jj].name)) {
+	    alreadyExists = 1;
+	    if (verbose) printf ("Found redundant source file %s\n", b);
+					// fix:: this leaks memory
+	    cpu->number_of_source_files--; // adjust total file count
+	    break;
+	  }
+	}
+	if(temp_block[offset] && !alreadyExists) {
 
 	  //cpu->files[num_files].name = new char [strlen(b)];
 	  //strcpy(cpu->files[num_files].name,b);
@@ -368,6 +384,8 @@ void read_src_files_from_cod(pic_processor *cpu)
 	  if((strncmp(lstfilename, b,256) == 0) && 
 	     (cpu->lst_file_id > cpu->number_of_source_files))
 	    {
+	      if(verbose)
+		printf("Found list file %s\n",cpu->files[num_files].name);
 	      cpu->lst_file_id = num_files;
 	      found_lst_in_cod = 1;
 	    }
@@ -375,27 +393,26 @@ void read_src_files_from_cod(pic_processor *cpu)
 	  num_files++;
 	}
       }
-
-      if(num_files != cpu->number_of_source_files)
-	cout << "warning, number of sources changed while reading code (gpsim bug)\n";
-
-      if(!found_lst_in_cod)
-	{
-	  cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
-	  cpu->files[num_files].name = strdup(lstfilename);
-	  //	  cpu->files[cpu->number_of_source_files].file_ptr = NULL;
-	  if(verbose)
-	    printf("%s wasn't in .cod\n",cpu->files[num_files].name);
-	  cpu->files[num_files].file_ptr = 
-	    open_a_file(&cpu->files[num_files].name);
-
-	  cpu->files[num_files].max_line = 0;
-	}
-
     }
+
+    if(num_files != cpu->number_of_source_files)
+      cout << "warning, number of sources changed from " << num_files << " to " << cpu->number_of_source_files << " while reading code (gpsim bug)\n";
+
+    if(!found_lst_in_cod)
+      {
+	cpu->number_of_source_files = num_files+1; // cpu->lst_file_id;
+	cpu->files[num_files].name = strdup(lstfilename);
+	//	  cpu->files[cpu->number_of_source_files].file_ptr = NULL;
+	if(verbose)
+	  printf("List file %s wasn't in .cod\n",cpu->files[num_files].name);
+	cpu->files[num_files].file_ptr = 
+	  open_a_file(&cpu->files[num_files].name);
+
+	cpu->files[num_files].max_line = 0;
+      }
+
   }else
     printf("No source file info\n");
-
 }
 
 //-----------------------------------------------------------
