@@ -131,19 +131,10 @@ void read_block(char * block, int block_number)
   fread(block, COD_BLOCK_SIZE, 1, codefile);
 }
 
-// reverse the endian type (big to little or little to big)
-// note: there's probably a wonderful macro nestled deep in
-// the bowels of the os that nicely handles this conversion...
-
-unsigned int endian_swap(unsigned int a)
+unsigned int get_be_int( char * buff)
 {
-
-  return
-    ( (a>>24) & 0x000000ff) | 
-    ( (a>>8)  & 0x0000ff00) |
-    ( (a<<8)  & 0x00ff0000) |
-    ( (a<<24) & 0xff000000);
-
+  return ( (unsigned char)buff[3]       + ((unsigned char)buff[2] << 8) +
+	   ((unsigned char)buff[1] << 16) + ((unsigned char)buff[0] << 24));
 }
 
 //-----------------------------------------------------------
@@ -520,8 +511,7 @@ void read_symbols( pic_processor *cpu )
 	type  = *(short *)&s[length+1];
 	if(type>128)
 	  type = COD_ST_CONSTANT;
-	value = *(int *)&s[length+3];
-	value = endian_swap(value);
+	value = get_be_int(&s[length+3]);
 
 	switch(type) 
 	  {

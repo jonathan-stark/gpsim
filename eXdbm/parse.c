@@ -65,7 +65,7 @@ enum {
 
 int ParseComment(FILE *f, char *comment)
 {
-  char current;
+  int current;
   int pos_in_comment=0;
 
   do {
@@ -97,7 +97,7 @@ int ParseComment(FILE *f, char *comment)
 
 int ParseIdentifier(FILE *f, char *token)
 {
-  char current;
+  int current;
   int pos_in_token=0;
 
   /* the first char is available */
@@ -173,7 +173,7 @@ int ParseIdentifier(FILE *f, char *token)
 
 int ParseEntryValue(FILE *f, TDbmEntryValue *value)
 {
-  char current;
+  int current;
   int state;
   char value_string[MAX_ENTRY_LENGTH];
   int pos_in_string = 0;
@@ -452,7 +452,7 @@ int ParseFile(FILE *f, TDbmListEntry *list, int level)
   int token_type;
   static char last_comment[MAX_ENTRY_LENGTH];
   static int last_comment_available = 0;
-  char current;
+  int current;
   int hash_value;
   TDbmListEntry *newnode;
   int ret;

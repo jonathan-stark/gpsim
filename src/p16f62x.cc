@@ -214,6 +214,67 @@ void  P16F62x::eeprom_put_value(unsigned int value,
 }
 #endif
 
+//========================================================================
+void P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
+{
+  enum {
+    CFG_FOSC0 = 1<<0,
+    CFG_FOSC1 = 1<<1,
+    CFG_FOSC2 = 1<<4,
+    CFG_MCLRE = 1<<5
+  };
+
+  // Let the base class do most of the work:
+
+  cout << "p16f628 setting config word 0x" << hex << cfg_word << '\n';
+
+  pic_processor::set_config_word(address, cfg_word);
+
+  switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
+
+  case 0:  // LP oscillator: low power crystal is on RA6 and RA7
+  case 1:  // XT oscillator: crystal/resonator is on RA6 and RA7
+  case 2:  // HS oscillator: crystal/resonator is on RA6 and RA7
+  case 7:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
+
+    porta->valid_iopins &= 0x3f;
+    break;
+
+  case 3:  // EC:  RA6 is an I/O, RA7 is a CLKIN
+  case 6:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
+
+    porta->valid_iopins &= 0x7f;
+    porta->valid_iopins |= 0x40;
+    break;
+
+  case 4:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+
+    porta->valid_iopins |= 0xc0;
+    break;
+
+  case 5:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+    porta->valid_iopins &= 0xbf;
+    porta->valid_iopins |= 0x80;
+    break;
+
+  }
+
+  // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
+  // a general purpose input-only pin.
+
+  unsigned int m = (cfg_word & CFG_MCLRE) ? 0 : (1<<5);
+  
+  porta->valid_iopins |= m;
+  porta->valid_iopins &= ~m;
+
+  trisa.valid_iopins |= m;
+  trisa.valid_iopins &= ~m;
+
+  cout << " porta valid_iopins " << porta->valid_iopins << 
+    "  tris valid io " << trisa.valid_iopins << '\n';
+}
+
+//========================================================================
 void  P16F62x::create(int ram_top)
 {
   create_iopin_map();

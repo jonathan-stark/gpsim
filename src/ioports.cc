@@ -976,29 +976,30 @@ void PORTA_62x::put(unsigned int new_value)
   internal_latch = new_value;
 
   // update only those bits that are really outputs
-  cout << "PORTA_62X::put trying to put " << new_value << '\n';
+  cout << "PORTA_62X::put trying to put " << new_value << "  Tris is " << tris->value <<'\n';
 
   // Bit 4 is an open collector output (it can only drive low)
   // If we're trying to drive bit 4 high and bit 4 is an output
   // then don't change the value on the I/O pin in the same state.
   // Also, bit 5 is an input regardless of the TRIS setting
 
-  pin_value = value = (((new_value & 0xcf) | (new_value & value & 0x10)) & ~tris->value) 
-    | (value & (tris->value | 0x20));
+  //  pin_value = value = (((new_value & 0xcf) | (new_value & value & 0x10)) & ~tris->value) 
+  //    | (value & (tris->value | 0x20));
 
+  value = ((new_value & ~tris->value) | (value & tris->value)) & valid_iopins ;
 
   // FIXME - this is obviously wrong
   if(comparator && comparator->enabled()) 
     value &= (0xff & ~( AN0 | AN1 | AN2 | AN3));
 
 
-  //cout << " IOPORT::put just set port value to " << value << '\n';
+  cout << " IOPORT::put just set port value to " << value << '\n';
 
   // Update the stimuli - if there are any
   if(stimulus_mask)
     update_stimuli();
 
-  cout << " PORTA_62X::put port value is " << value << " after updating stimuli\n";
+  //cout << " PORTA_62X::put port value is " << value << " after updating stimuli\n";
 
   trace.register_write(address,value);
 
@@ -1018,30 +1019,23 @@ unsigned int PORTA_62x::get(void)
 {
   unsigned int old_value;
 
-  old_value = pin_value;
+  old_value = value;
 
   if(stimulus_mask) {
-    pin_value = ( (pin_value & ~stimulus_mask) | update_stimuli());
+    value = ( (value & ~stimulus_mask) | update_stimuli());
   }
-
 
   // If the comparator is enabled, then all of the "analog" pins are
   // read as zero.
 
   if(comparator && comparator->enabled()) {
 
-    value = pin_value & (0xff & ~( AN0 | AN1 | AN2 | AN3));
-
-  } else {
-
-    value = pin_value;
-
-    //int diff = old_value ^ value; // The difference between old and new
-
+    value = value & (0xff & ~( AN0 | AN1 | AN2 | AN3));
 
   }
 
-  cout << " PORTA_62X::get port value is " << value << " \n";
+  //int diff = old_value ^ value; // The difference between old and new
+  // cout << " PORTA_62X::get port value is " << value << " \n";
 
   return value;
 }

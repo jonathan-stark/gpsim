@@ -254,7 +254,7 @@ public:
   int processor_id;              // An identifier to differentiate this instantiation from others
 
   unsigned int config_word;      // as read from hex or cod file
-  ConfigMode   *config_modes;    // processor independent configuration bits.
+  ConfigMode   *config_modes;    // processor dependent configuration bits.
   double frequency,period;
 
   unsigned int pll_factor;       // 2^pll_factor is the speed boost the PLL adds 
