@@ -50,12 +50,13 @@ Breakpoints bp;
 int Breakpoints::find_free(void)
 {
 
-
   for(int i=0; i<MAX_BREAKPOINTS; i++) {
 
-    if(break_status[i].type == BREAK_CLEAR)
+    if(break_status[i].type == BREAK_CLEAR)  {
+      if (i + 1 > m_iMaxAllocated)
+          m_iMaxAllocated = i + 1;
       return i;
-
+    }
   }
 
   cout << "*** out of breakpoints\n";
@@ -393,13 +394,10 @@ bool Breakpoints::dump1(unsigned int bp_num)
 void Breakpoints::dump(void)
 {
   bool have_breakpoints = 0;
-
-
-  for(int i = 0; i<MAX_BREAKPOINTS; i++)
+  for(int i = 0; i<m_iMaxAllocated; i++)
     {
-
       if(dump1(i))
-	have_breakpoints = 1;
+        have_breakpoints = 1;
     }
 
   cout << "Internal Cycle counter break points" << endl;
@@ -408,7 +406,6 @@ void Breakpoints::dump(void)
 
   if(!have_breakpoints)
     cout << "No user breakpoints are set" << endl;
-
 }
 
 
@@ -417,8 +414,6 @@ instruction *Breakpoints::find_previous(Processor *cpu,
 					instruction *_this)
 {
   Breakpoint_Instruction *p;
-
-
   p = (Breakpoint_Instruction*) cpu->pma->get(address);
 
   if(!_this || p==_this)
@@ -600,7 +595,7 @@ void Breakpoints::halt(void)
 }
 Breakpoints::Breakpoints(void)
 {
-  
+  m_iMaxAllocated = 0;
   breakpoint_number = 0;
 
   for(int i=0; i<MAX_BREAKPOINTS; i++)

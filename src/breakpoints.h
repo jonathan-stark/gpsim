@@ -231,6 +231,8 @@ public:
     TriggerObject *bpo;
   } break_status[MAX_BREAKPOINTS];
 
+  int m_iMaxAllocated;
+
   class iterator {
   public:
     iterator(int index) : iIndex(index) { }
@@ -252,7 +254,7 @@ public:
   }
 
   iterator end() {
-    return iterator(MAX_BREAKPOINTS);
+    return iterator(m_iMaxAllocated);
   }
 
   unsigned int  global_break;
