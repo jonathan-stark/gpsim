@@ -312,6 +312,7 @@ public:
 
   virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
   IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  ~IO_bi_directional_pu();
   virtual int get_voltage(guint64 current_time);
   virtual void update_pullup(bool new_state) { pull_up_enabled = new_state; }
 };
