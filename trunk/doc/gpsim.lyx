@@ -1346,7 +1346,7 @@ Menus
 \layout List
 \labelwidthstring 00000000.00.0000
 
-File->OpenOpen .stc or .cod files.
+File->Open .stc or .cod files.
 \layout List
 \labelwidthstring 00000000.00.0000
 
@@ -1432,10 +1432,11 @@ browser is a color coded display of your pic source.
 
 When a .cod file with source is loaded, there should be something in this
  display.
+ (TODO: add section about high level debugging).
 \layout Standard
 
 There is an area to the left of the source, where symbols representing the
- program counter and breakpoints are displayed.
+ program counter, breakpoints, etc are displayed.
  Double clicking in this area toggles breakpoints.
  You can drag these symbols up or down in order to move them and change
  the PC or move a breakpoint.
@@ -1475,6 +1476,19 @@ here This simply changes PC to the address that line 'here'in source
 
 Breakpoint\SpecialChar ~
 here Set a breakpoint 'here'.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Profile\SpecialChar ~
+start\SpecialChar ~
+here Set a start marker for routine profiling here.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Profile\SpecialChar ~
+stop\SpecialChar ~
+here Set a stop marker.
+ (See the section for the profiling window.)
 \layout List
 \labelwidthstring 00.00.0000.0000
 
@@ -1551,20 +1565,23 @@ Opcode view - the .obj Browser
 
 This window has two tabs.
  One with each memory cell on one line and information about address, hexadecima
-l value and decoded instruction.
- 
+l value and decoded instruction (i.e.
+ disassembly), and one with the program memory
+\layout Standard
+
+displayed with sixteen memory cells per row and a configurable ascii column.
 \layout Subsubsection*
 
-The Assembly tab
-\layout Standard
+The Assembly tab you can:
+\layout Itemize
 
 Double click on a line to toggle breakpoints.
-\layout Standard
+\layout Itemize
 
-This window has the same keyboard commands as the source browser.
-\layout Standard
+Use the same keyboard commands as the in the source browser.
+\layout Itemize
 
-You can right click to get a menu where you can change fonts.
+Right click to get a menu where you can change the font used.
 \layout Subsubsection*
 
 The Opcode tab.
@@ -1576,7 +1593,7 @@ Here the program memory is ordered as columns of sixteen memory cells per
 \layout Standard
 
 The seventeenth column contains an ASCII representation of the program memory.
- You can configure this column to use three different modes:
+ You can configure this column to use one of three different modes:
 \layout Itemize
 
 One byte per cell
@@ -1604,7 +1621,8 @@ There are two similar register windows.
 
 Here you see all registers in the current processor.
  Clicking on a cell displays it's name and value above the sheet of registers.
- You can change values by entering it in the entry (or in the cell).
+ You can change values by entering it in the entry (or in the spreadsheet
+ cell).
 \layout Standard
 
 The following things can be done on one register, or a range of registers.
@@ -1618,6 +1636,12 @@ Set and clear breakpoints.
  You can also "clear breakpoints", notice the s in "clear breakpoints",
  every breakpoint on the registers are cleared.
  
+\layout Itemize
+
+Set and clear logging of registers.
+ You can log reads, writes, reads/writes of specific values and to bits
+ selected by a specified mask.
+ You can select a different file name with 'set log filename...'.
 \layout Itemize
 
 Copy cells.
@@ -1634,7 +1658,7 @@ Watch them.
  Select the "Add Watch" menu item.
 \layout Standard
 
-The cells have different backgroung colors depending on if they represent:
+The cells have different background colors depending on if they represent:
 \layout Itemize
 
 File Register (e.g.
@@ -1654,12 +1678,14 @@ invalid register: black.
  If all sixteen registers in a row are invalid, then the row is not shown.
 \layout Itemize
 
-a register with one or more breakpoints:red
+a register with one or more breakpoints: red.
+ Logged registers are also red.
 \layout Standard
 
 gpsim dynamically updates the registers as the simulation proceeds.
- Registers that change contents between pauses in the simulation are highlighted
- with a blue foreground color.
+ Registers that change value between updates of the window during simulation
+ are highlighted with a blue foreground color.
+ 
 \layout Standard
 
 The menu also has a 'settings' item where you can change the font used.
@@ -1770,6 +1796,7 @@ Stack viewer
 
 This window displays current stack.
  Selecting an entry makes the code windows display the return address.
+ Double clicking sets a breakpoint on the return address.
 \layout Section
 
 Pins view
@@ -1841,7 +1868,31 @@ labels Add all code labels as ranges.
 Snapshot\SpecialChar ~
 to\SpecialChar ~
 plot Open a window containing a graph of the data.
- From this window you can save or print it.
+ From this new window you can also save (postscript) or print it.
+\layout Subsubsection*
+
+Register profile
+\layout Standard
+
+This shows the number of reads or writes the simulator does on register.
+\layout Subsubsection*
+
+Routine profile
+\layout Standard
+
+Here you can see statistics about execution time for a selected routine.
+ You mark the entry and exit points from the source browser (profile start/stop).
+ You have to put a marker on every entry point as well as (and especially)
+ every exit point.
+ Othervise you will get bad data.
+ 
+\layout Standard
+
+When you have done that, gpsim will (as simulation goes by) store the execution
+ times of that routine and calculate min/max/average/etc.
+ You can also use the menu item 'Plot distribution' to open a window displaying
+ a histogram of the data.
+ From this new window you can also save (in postscript) or print it.
 \layout Chapter
 
 Controlling the Flow: Break Points
