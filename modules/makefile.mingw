@@ -15,7 +15,7 @@ include ../plat/win32/make.mingw
 LIBS = ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib \
 	../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib \
 	../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib \
-	../../pthreads/lib/pthreadVC.lib ../gpsim/gpsim.lib
+	../../pthreads/lib/pthreadVC1.lib ../gpsim/gpsim.lib
 
 INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \

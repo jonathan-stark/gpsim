@@ -1,3 +1,6 @@
+2005-04-08 Borut Razem <borut.razem@siol.net>
+	* modules/makefile.mingw: pthreads upgrade
+
 2005-03-08 Scott Dattalo <scott@dattalo.com>
 	* src/value.cc, gui/gui_profile.cc, gui/gui_statusbar.cc,
 	gui/gui_trace.cc: Corrected temporary hack regarding PRINTF_INT64_MODIFIER
