@@ -1,3 +1,6 @@
+2004-03-25 Scott Dattalo  <scott@dattalo.com>
+	* gui/gui_src_asm.cc: Now we can load hex files again.
+
 2004-03-25  Bert Driehuis <driehuis@playbeing.org>
 	* extras/lcd/lcdengine.cc, extras/lcd/lcdengine.cc,
 	extras/lcd/lcd.h, extras/lcd/lcdgui.cc, extras/lcd/examples/lcd.asm:
