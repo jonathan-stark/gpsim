@@ -466,6 +466,26 @@ gpsim_read (char *buf, unsigned max_size)
 
 }
 
+//**************************************************
+void cli_main(void)
+{
+  do
+    {
+#ifdef HAVE_READLINE
+      rl_callback_read_char ();
+#else
+      char line[256];
+
+      fgets(line, sizeof(line),stdin);
+      have_line(line);
+
+#endif
+    }
+  while(!quit_parse);
+
+}
+
+
 /* **************************************************************** */
 /*                                                                  */
 /*                  Interface to Readline Completion                */
@@ -552,15 +572,17 @@ static GIOChannel *channel;
 // the stimulus engine.
 
 static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer data)
-  {
+{
+  cout << "keypressed\n";
   if(simulation_mode == STOPPED) {
 #ifdef HAVE_READLINE
-  rl_callback_read_char ();
+    rl_callback_read_char ();
 #endif
   } else { 
 
     // We're either running, sleeping, single stepping...
   }
+
   return TRUE;
 }
 
@@ -573,7 +595,7 @@ static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer
 
 void have_line(char *s)
 {
-#ifdef HAVE_READLINE
+
   if(simulation_mode != STOPPED)
     return;
 
@@ -586,7 +608,9 @@ void have_line(char *s)
   } else {
     // save a copy in the history buffer:
     strncpy(last_line,s,256);
+#ifdef HAVE_READLINE
     add_history (s);
+#endif
     add_string_to_input_buffer(s);
   }
 
@@ -594,7 +618,6 @@ void have_line(char *s)
   start_parse();
 
   free(s);
-#endif
 }
 
 #endif
@@ -653,12 +676,16 @@ static int gpsim_rl_getc(FILE *in)
 void initialize_readline (void)
 {
 
+  const char *gpsim_prompt="gpsim> ";
+  const char *gpsim_cli_prompt="**gpsim> ";
+  const char *prompt = gpsim_cli_prompt;
+
 #ifdef HAVE_READLINE
-#ifdef HAVE_GUI
-  #ifdef _WIN32
-    /* set console to raw mode */ 
-    win32_fd_to_raw(fileno(stdin));
-  #endif
+
+#ifdef _WIN32
+  /* set console to raw mode */ 
+  win32_fd_to_raw(fileno(stdin));
+#endif
 
   rl_getc_function = gpsim_rl_getc;
   channel = g_io_channel_unix_new (fileno(stdin));
@@ -668,10 +695,14 @@ void initialize_readline (void)
   win32_set_is_readable(channel);
 #endif
 
+#ifdef HAVE_GUI
+  if(bUseGUI)
+    prompt = gpsim_prompt;
+#endif
+
   g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
 
-  rl_callback_handler_install ("gpsim> ", have_line);
-#endif
+  rl_callback_handler_install (prompt, have_line);
 
 
   /* Tell the completer that we want a crack first. */
