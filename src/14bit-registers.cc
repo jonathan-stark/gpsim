@@ -176,7 +176,7 @@ unsigned int FSR_12::get(void)
 unsigned int FSR_12::get_value(void)
 {
   // adjust for missing bits
-  cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
+  //cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
   return ((value.get() & valid_bits) | (~valid_bits & 0xff));
 
 }

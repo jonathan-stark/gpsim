@@ -420,7 +420,7 @@ double Stimulus_Node::update(guint64 current_time)
 	  double Zt = Z1 + Z2;
 	  voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / Zt;
 
-	  
+	  /*
 	  cout << " *N1: " <<sptr->name() 
 	       << " V=" << sptr->get_Vth() 
 	       << " Z=" << sptr->get_Zth() << endl;
@@ -429,7 +429,7 @@ double Stimulus_Node::update(guint64 current_time)
 	       << " Z=" << sptr2->get_Zth() << endl;
 	  cout << " * ==>:  V=" << voltage
 	       << " Z=" << Zt << endl;
-	  
+	  */
 
 	  sptr->set_nodeVoltage(voltage);
 	  sptr2->set_nodeVoltage(voltage);
@@ -1013,31 +1013,27 @@ Register *IOPIN::get_iop(void)
 // 
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
-  Register *port = get_iop();
 
-  cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
-
+  // cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
+  
   nodeVoltage = new_nodeVoltage;
 
-  if( digital_state &&  (nodeVoltage < h2l_threshold)) {
+  if( nodeVoltage < h2l_threshold) {
 
-    // the input is currently high, but the voltage being applied is lower
-    // than the switching threshold
-  
+    // The voltage is below the low threshold
     set_digital_state(false);
 
-    if(port)
-      port->setbit(iobit,false);
-
   } 
-  else if(!digital_state && (nodeVoltage > l2h_threshold)) {
+  else if(nodeVoltage > l2h_threshold) {
 
+    // The voltage is above the high threshold
     set_digital_state(true);
 
-    if(port)
-      port->setbit(iobit,true);
-
+  }  else {
+    // The voltage is between the low and high thresholds,
+    // so do nothing
   }
+
 }
 
 void IOPIN::put_digital_state(bool new_state)
@@ -1052,6 +1048,15 @@ void IOPIN::put_digital_state(bool new_state)
     if(snode)
       snode->update(0);
   }
+}
+
+void IOPIN::set_digital_state(bool new_state)
+{ 
+  digital_state = new_state;
+
+  Register *port = get_iop();
+  if(port)
+    port->setbit(iobit, new_state);
 }
 
 bool IOPIN::get_digital_state(void)
@@ -1136,13 +1141,10 @@ void IO_bi_directional::set_nodeVoltage( double new_nodeVoltage)
 
 double IO_bi_directional::get_Vth()
 {
-  if(iop) 
-    digital_state = iop->get_bit(iobit);
-
   if(driving)
-    return digital_state ? Vth : 0;
+    return get_digital_state() ? Vth : 0;
   else
-    return digital_state ? VthIn : 0;
+    return get_digital_state() ? VthIn : 0;
 
 }
 
@@ -1193,9 +1195,6 @@ double IO_bi_directional_pu::get_Zth()
 
 double IO_bi_directional_pu::get_Vth()
 {
-  if(iop) 
-    digital_state = iop->get_bit(iobit);
-
   // If the pin is configured as an output, then the driving voltage
   // depends on the pin state. If the pin is an input, and the pullup resistor
   // is enabled, then the pull-up resistor will 'drive' the output. The
@@ -1203,7 +1202,7 @@ double IO_bi_directional_pu::get_Vth()
   // which is assigned to be same as the processor's supply voltage).
 
   if(driving)
-    return digital_state ? Vth : 0;
+    return get_digital_state() ? Vth : 0;
   else
     return bPullUp ? Vth : VthIn;
 
@@ -1217,14 +1216,12 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, R
 
 double IO_open_collector::get_Vth()
 {
-  if(iop) 
-    digital_state = iop->get_bit(iobit);
   /*
   cout << name() << "get_Vth "
        << " digital_state=" << digital_state
        << " bPullUp=" << bPullUp << endl;
   */
-  if(driving && !digital_state)
+  if(driving && !get_digital_state())
     return 0.0;
 
   return bPullUp ? Vth : VthIn;
@@ -1233,10 +1230,7 @@ double IO_open_collector::get_Vth()
 
 double IO_open_collector::get_Zth()
 {
-  if(iop) 
-    digital_state = iop->get_bit(iobit);
-
-  if(driving && !digital_state)
+  if(driving && !get_digital_state())
     return Zth;
 
   return bPullUp ? Zpullup : ZthIn;

@@ -271,6 +271,7 @@ class IOPIN : public stimulus
   virtual void set_nodeVoltage(double v);
   virtual bool get_digital_state(void);
   virtual void put_digital_state(bool new_dstate);
+  virtual void set_digital_state(bool new_dstate);
 
   virtual Register *get_iop(void);
   virtual void toggle(void);
