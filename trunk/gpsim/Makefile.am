@@ -7,4 +7,4 @@ bin_PROGRAMS = gpsim
 gpsim_SOURCES = main.cc
 
 gpsim_LDFLAGS =  $(shell gtk-config --cflags)
-gpsim_LDADD = ../src/libgpsim.la ../cli/libgpsimcli.la ../gui/libgui.la  @GTK@ @GDK@ @GLIB@ -lstdc++ @X_LDFLAGS@ @Y_LDFLAGS@
+gpsim_LDADD = ../src/libgpsim.la ../cli/libgpsimcli.la ../gui/libgui.la  @GTK@ @GDK@ @GLIB@ -lstdc++ @X_LDFLAGS@ @Y_LDFLAGS@ @LIBREADLINE@

@@ -30,6 +30,8 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 #include <stdio.h>
+
+#if 0        //tsd removed in 0.20.4
 extern "C" {
 char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
 #define completion_matches completion_matches_oldcdecl
@@ -40,6 +42,11 @@ char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
 extern "C" {
 #include <readline/history.h>
 }
+
+#endif
+
+#include <readline/readline.h>
+#include <readline/history.h>
 
 #include <sys/types.h>
 #include <sys/file.h>
@@ -486,7 +493,7 @@ void myfunc(int data, int fd, GdkInputCondition gdk_cond)
 
 }
 
-void test_func(void)
+void test_func(...)
 {
 
   char *t;

@@ -15,7 +15,7 @@ AC_CANONICAL_SYSTEM
 
 GPSIM_MAJOR_VERSION=0
 GPSIM_MINOR_VERSION=20
-GPSIM_MICRO_VERSION=3
+GPSIM_MICRO_VERSION=4
 GPSIM_VERSION=$GPSIM_MAJOR_VERSION.$GPSIM_MINOR_VERSION.$GPSIM_MICRO_VERSION
 
 AM_INIT_AUTOMAKE(gpsim, $GPSIM_VERSION)
@@ -69,7 +69,10 @@ dnl Checks for libraries.
 dnl Replace `main' with a function in -lfl:
 dnl AC_CHECK_LIB(fl, main)
 dnl Replace `main' with a function in -lreadline:
-AC_CHECK_LIB(readline, main)
+wi_LIB_READLINE
+dnl AC_CHECK_LIB(readline, readline)
+dnl AC_CHECK_LIB(ncurses, main)
+
 dnl Replace `main' with a function in -ltermcap:
 dnl AC_CHECK_LIB(termcap, main)
 
@@ -138,7 +141,7 @@ AC_SUBST(X_LDFLAGS)
 AC_SUBST(GTK)
 AC_SUBST(GDK)
 AC_SUBST(GLIB)
-
+AC_SUBST(LIBREADLINE)
 
 dnl Checks for header files.
 AC_HEADER_STDC
