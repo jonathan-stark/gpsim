@@ -1,3 +1,6 @@
+2004-12-06 Scott Dattalo <scott@dattalo.com>
+	* src/socket.cc: Wrap gtk2.x calls with #defines
+	
 2004-12-02 Scott Dattalo <scott@dattalo.com>
 	* src/socket.cc: More additions to SocketLinks. It's now possible
 	to tie a socket to a gpsim attribute. This allows an external
