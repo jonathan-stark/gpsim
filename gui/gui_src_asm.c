@@ -501,7 +501,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	gpsim_reset(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     case MENU_RETURN:
-	gpsim_return(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	gpsim_finish(popup_sbaw->sbw.gui_obj.gp->pic_id);
 	break;
     default:
 	puts("Unhandled menuitem?");

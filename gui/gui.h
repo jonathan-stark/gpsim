@@ -201,6 +201,23 @@ struct _Watch_Window {
 typedef struct _Watch_Window Watch_Window;
 
 //
+// The stack window
+//
+struct _Stack_Window {
+    GUI_Object     gui_obj;
+
+    int last_stacklen;
+    
+    int current_row;
+    int current_column;
+    
+    GtkWidget *stack_clist;
+//    GtkWidget *popup_menu;
+};
+
+typedef struct _Stack_Window Stack_Window;
+
+//
 // The symbol window
 //
 struct _Symbol_Window {
@@ -405,6 +422,7 @@ struct _gui_processor {
   SourceBrowser_Window *source_browser;
   Symbol_Window *symbol_window;
   Watch_Window *watch_window;
+  Stack_Window *stack_window;
   Breadboard_Window *breadboard_window;
   // GtkWidget *stack_window;
   // GtkWidget *sfr_window;
@@ -512,6 +530,12 @@ int CreateWatchWindow(GUI_Processor *gp);
 int BuildWatchWindow(Watch_Window *ww);
 void WatchWindow_update(Watch_Window *ww);
 void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp);
+
+// gui_stack.c
+int CreateStackWindow(GUI_Processor *gp);
+int BuildStackWindow(Stack_Window *sw);
+void StackWindow_update(Stack_Window *sw);
+void StackWindow_new_processor(Stack_Window *sw, GUI_Processor *gp);
 
 // gui_breadboard.c
 void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);

@@ -55,6 +55,10 @@ key_press(GtkWidget *widget,
       //sbw->gui_obj.gp->p->run();
       gpsim_run(sbw->gui_obj.gp->pic_id);
       break;
+  case 'f':
+  case 'F':
+      gpsim_finish(sbw->gui_obj.gp->pic_id);
+      break;
 // Exit is Ctrl-Q; the dispatcher menu shortcut
 //  case 'q':
 //  case 'Q':
@@ -301,8 +305,12 @@ void update_menu_item(struct _gui_object *_this)
 	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
+    case WT_stack_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Stack");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
     default:
-	puts("SourceBrowser_change_view(): unhandled case");
+	puts("update_menu_item(): unhandled case");
 	break;
     }
 }
@@ -337,6 +345,9 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 	      break;
 	  case WT_breadboard_window:
 	      BuildBreadboardWindow((Breadboard_Window*)_this);
+	      break;
+	  case WT_stack_window:
+	      BuildStackWindow((Stack_Window*)_this);
 	      break;
 	  default:
 	      puts("SourceBrowser_change_view(): unhandled case");

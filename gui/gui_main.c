@@ -107,6 +107,7 @@ void gui_new_processor (unsigned int pic_id)
       SymbolWindow_new_symbols(gp->symbol_window, gp);
       WatchWindow_clear_watches(gp->watch_window, gp);
       BreadboardWindow_new_processor((Breadboard_Window*)gp->breadboard_window, gp);
+      StackWindow_new_processor(gp->stack_window,gp);
 
       init_link_to_gpsim(gp);
       //  redisplay_prompt();
@@ -368,6 +369,7 @@ int gui_init (int argc, char **argv)
   CreateSymbolWindow(gp);
   CreateWatchWindow(gp);
   CreateBreadboardWindow(gp);
+  CreateStackWindow(gp);
 
 
   interface_id = gpsim_register_interface((gpointer) gp);

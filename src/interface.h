@@ -105,8 +105,10 @@ typedef struct _sym
   void gpsim_run(unsigned int processor_id);
   void gpsim_stop(unsigned int processor_id);
   void gpsim_reset(unsigned int processor_id);
-  void gpsim_return(unsigned int processor_id);
+  void gpsim_finish(unsigned int processor_id);
   void gpsim_run_to_address(unsigned int processor_id, unsigned int address);
+  unsigned int gpsim_get_stack_size(unsigned int processor_id);
+  unsigned int gpsim_get_stack_value(unsigned int processor_id, unsigned int address);
 
 
   //---------------------------------------------------------------------------
