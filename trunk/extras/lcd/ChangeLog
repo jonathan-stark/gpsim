@@ -1,3 +1,7 @@
+2004-04-13  Scott Dattalo  <scott@dattalo.com>
+	* lcd.h: updated to latest simulator interface changes (The BreakCallBack
+	class has been renamed).
+	
 2004-03-30  Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc: updated to latest simulator interface changes (where 
 	char *'s were changed to strings)
