@@ -30,7 +30,6 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <popt.h>
 
 #include <iostream.h>
 #include "../config.h"
@@ -47,6 +46,7 @@ int use_gui=0;
 int quit_state;
 
 extern "C" {
+#include <popt.h>
 int gui_init (int argc, char **argv);
 void gui_main(void);
 extern void exit_gpsim(void);

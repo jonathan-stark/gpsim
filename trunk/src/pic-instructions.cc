@@ -34,6 +34,7 @@ instruction::instruction(void)
 #ifdef HAVE_GUI
     xref = new XrefObject;
 #endif
+    is_modified=0;
 }
 
 void instruction::add_line_number_symbol(int address)
