@@ -1,4 +1,5 @@
 
+#include <string.h>
 #include <math.h>
 #include "hash.h"
 
@@ -9,8 +10,8 @@
 
 int HashValueGenerator( char *name )
 {
-  int len;
-  int i;
+  size_t len;
+  size_t i;
   unsigned char cvalue;
   double mvalue;
 

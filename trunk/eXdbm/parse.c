@@ -38,6 +38,7 @@ static char vcid[] = "$Id$";
 
 #include <ctype.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "eXdbmErrors.h"
@@ -329,7 +330,7 @@ int ParseEntryValue(FILE *f, TDbmEntryValue *value)
 	value_string[pos_in_string] = (char) 0;
 
 	value->real_val = atof(value_string);
-	value->int_val = ceil(value->real_val);
+	value->int_val = (int)ceil(value->real_val);
 	value->str_val = NULL;
 
 	return(DBM_ENTRY_VAR_REAL);
@@ -622,10 +623,13 @@ int ParseFile(FILE *f, TDbmListEntry *list, int level)
 	  }
 
 	  newnode=newnode->next;
-	  newnode->next = NULL;
 	}
 
 	/* fill the new entry */
+
+        /* next */
+
+	newnode->next = NULL;
 
 	/* key name */
 

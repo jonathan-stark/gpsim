@@ -37,6 +37,7 @@ static char vcid[] = "$Id$";
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "eXdbmTypes.h"
 #include "eXdbmErrors.h"
@@ -527,8 +528,6 @@ int DeleteListEntry(TDbmListEntry *list, char *entryname)
     free(node->child);
     free(node->order);
     break;
-
-  default:
   }
 
   /* update the chained list */

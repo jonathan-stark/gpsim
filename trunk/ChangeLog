@@ -1,4 +1,8 @@
 2003-10-26  Scott Dattalo  <scott@dattalo.com>
+	* eXdbm/* applied patch from  Borut Razem mailto:borut.razem@siol.net to
+	fix an uninitialized pointer bug.
+	
+2003-10-26  Scott Dattalo  <scott@dattalo.com>
 	* modules/* removed all references to gui if not building with the gui
 
 2003-09-24  Scott Dattalo  <scott@dattalo.com> (patches from Steve Tell)
