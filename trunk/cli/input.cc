@@ -406,9 +406,10 @@ int gpsim_open(Processor *cpu, const char *file)
   }
   else if(!strcmp(str,"cod") || !strcmp(str,"COD"))
     load_symbol_file(&command::cpu, file);
-  else if(!strcmp(str,"stc") || !strcmp(str,"STC"))
+  else if(!strcmp(str,"stc") || !strcmp(str,"STC")) {
     process_command_file(file);
-  else
+    parse_string("\n");
+  } else
   {
     cout << "Unknown file extension \"" << str <<"\" \n";
     return 0;
