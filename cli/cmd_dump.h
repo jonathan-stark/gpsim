@@ -30,7 +30,7 @@ public:
 
   void dump(int bit_flag);
   void dump_sfrs(void);
-
+  virtual int is_repeatable(void) { return 1; };
 };
 
 extern cmd_dump dump;

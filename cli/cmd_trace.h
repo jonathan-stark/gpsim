@@ -33,6 +33,7 @@ public:
   void trace(cmd_options_num *con);
   void trace(cmd_options_str *cos);
   void trace(int bit_flag, int force_bit_test);
+  virtual int is_repeatable(void) { return 1; };
 };
 
 extern cmd_trace c_trace;

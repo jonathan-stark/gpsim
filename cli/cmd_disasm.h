@@ -31,6 +31,7 @@ public:
   //  void disassemble(int len);
   void disassemble(int start, int end);
 
+  virtual int is_repeatable(void) { return 1; };
 
 };
 

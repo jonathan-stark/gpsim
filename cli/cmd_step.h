@@ -30,7 +30,7 @@ public:
   void step(int instructions);
   void over(void);
 
-
+  virtual int is_repeatable(void) { return 1; };
 };
 
 extern cmd_step step;

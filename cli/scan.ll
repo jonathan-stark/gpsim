@@ -47,6 +47,7 @@ static int have_parameters = 0;
 static int end_of_command = 0;
 extern int quit_parse;
 extern int parser_spanning_lines;
+extern int last_command_is_repeatable;
 
 static string strip_trailing_whitespace (char *s);
 int handle_identifier(const string &tok, cmd_options **op );
@@ -279,7 +280,9 @@ int handle_identifier(const string &s, cmd_options **op )
 	
       *op = cmd->get_op();
       have_parameters = 0;
-      return cmd->get_token();
+      retval = cmd->get_token();
+      last_command_is_repeatable = cmd->is_repeatable();
+      return retval;
 
     } else {
       cout << " command: \"" << s << "\" was not found\n";

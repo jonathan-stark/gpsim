@@ -70,7 +70,7 @@ int parser_warnings;
 int parser_spanning_lines=0;
 extern int use_gui;
 extern int quit_state;
-
+extern int Gcmd_file_ref_count;
 char_list *str_list_head;
 char_list *str_list;
 
@@ -176,10 +176,12 @@ cmd: ignored
      | spanning_lines
      | END_OF_INPUT
      {
-       //if((verbose&2) && DEBUG_PARSER)
+       if((verbose&2) && DEBUG_PARSER)
          cout << "got an END_OF_INPUT\n";
-	//if(use_gui)
-       	  quit_parse = 1;
+        /* If we're processing a command file then quit parsing 
+         * when we run out of input */
+       if(Gcmd_file_ref_count)
+       	 quit_parse = 1;
        YYABORT;
      }
    ;
@@ -195,8 +197,9 @@ ignored: IGNORED
                 cout << "  parser is aborting current input stream\n";
 
 	      YYABORT;
-            } else
-		YYACCEPT;
+            } else {
+	      YYACCEPT;
+            }
           }
           ;
 
