@@ -1,7 +1,7 @@
 #!/usr/bin/awk
 
 # configure_win32.awk - Genarate config.h using config_win32.h.in as template
-#                       and insert the version number definitions from configure.in
+#                       and insert the version number definitions from configure.ac
 #
 # Written By - Borut Razem borut.razem@siol.net
 #
@@ -22,37 +22,54 @@
 # Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 BEGIN {
-  # get the version values from configure.in
+  # get the values from configure.ac
 
-  FS="=";
-  while (getline <"configure.in" > 0) {
-    if ($0 ~ "^GPSIM_MAJOR_VERSION=")
-      majv = $2;
-    else if ($0 ~ "^GPSIM_MINOR_VERSION=")
-      minv = $2;
-    else if ($0 ~ "^GPSIM_MICRO_VERSION=")
-      micv = $2;
+  while (getline <"configure.ac" > 0) {
+    if ($0 ~ "^AC_INIT\\(.*\\)") {
+      package = gensub("^AC_INIT\\(\\[([^]]*)\\].*", "\\1", "1", $0);
+      version = gensub("^AC_INIT\\(\\[[^]]*\\], \\[([^]]*)\\].*", "\\1", "1", $0);
+      bugreport = gensub("^AC_INIT\\(\\[[^]]*\\], \\[[^]]*\\], \\[([^]]*)\\].*", "\\1", "1", $0);
+    }
   }
-  print "/* config.h                                                     */";
-  print "/* Generated automatically by configure_win32.awk, DO NOT edit! */";
-  print "/* To make changes to config.h edit config_win32.h.in instead.  */";
-  print "" 
-
+  print("/* config.h                                                     */");
+  print("/* Generated automatically by configure_win32.awk, DO NOT EDIT! */");
+  print("/* To make changes to config.h edit config_win32.h.in instead.  */");
+  print("");
 }
 
-/^#define GPSIM_MAJOR_VERSION/ {
-  print("#define GPSIM_MAJOR_VERSION " majv);
+/^#undef PACKAGE_BUGREPORT/ {
+  print("#define PACKAGE_BUGREPORT \"" bugreport "\"");
+  next;
+}
+
+/^#undef PACKAGE_NAME/ {
+  print("#define PACKAGE_NAME \"" package "\"");
+  next;
+}
+
+/^#undef PACKAGE_STRING/ {
+  print("#define PACKAGE_STRING \"" package " " version "\"");
+  next;
+}
+
+/^#undef PACKAGE_TARNAME/ {
+  print("#define PACKAGE_TARNAME \"" package "\"");
+  next;
+}
+
+/^#undef PACKAGE_VERSION/ {
+  print("#define PACKAGE_VERSION \"" version "\"");
   next
 }
 
-/^#define GPSIM_MINOR_VERSION/ {
-  print("#define GPSIM_MINOR_VERSION " minv);
-  next
+/^#undef PACKAGE/ {
+  print("#define PACKAGE \"" package "\"");
+  next;
 }
 
-/^#define GPSIM_MICRO_VERSION/ {
-  print("#define GPSIM_MICRO_VERSION " micv);
-  next
+/^#undef VERSION/ {
+  print("#define VERSION \"" version "\"");
+  next;
 }
 
 {

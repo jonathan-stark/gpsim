@@ -1,7 +1,11 @@
+2005-01-30 Borut Razem <borut.razem@siol.net>
+	* config_win32.h.in, configure_win32.awk: extract version, package and
+	  bugreport values from configure.ac
+
 2005-01-26 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: repositioned the call to the m4 macro wi_READLINE_LIB
 	so that it would run properly.
-	
+
 2005-01-26 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: added more external cross references.
 	* module/modules.vcproj: changed from pthreadVC1.lib to
