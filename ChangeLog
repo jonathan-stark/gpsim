@@ -1,3 +1,11 @@
+2004-07-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_statusbar.h, gui/gui_statusbar.cc: Now the status bar can
+	accept an arbitrary of registers to display.
+	* src/16bit-processors.cc, src/processor.h: Added BSR to the list
+	of registers viewable in the status bar.
+	* cli/cmd_trace.cc, cli/cmd_trace.h, cli/parse.yy, src/trace.cc: The
+	trace raw option was broken.
+	
 2004-07-15 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, cli/socket.cc, gui/gui_main.cc: The newly created
 	gpsim socket interface now uses GLib GIOChannels instead of Pthreads.

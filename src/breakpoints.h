@@ -534,6 +534,7 @@ public:
 
 
   virtual unsigned int get(void);
+  virtual RegisterValue getRV(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
@@ -549,6 +550,7 @@ public:
   Break_register_write(Processor *_cpu, int _repl, int bp ):
     BreakpointRegister(_cpu,_repl,bp ) { };
   virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write"; }
 
@@ -567,6 +569,7 @@ public:
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual unsigned int get(void);
+  virtual RegisterValue getRV(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
@@ -586,6 +589,7 @@ public:
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write value"; }
 
@@ -599,6 +603,7 @@ class Log_Register_Write : public Break_register_write
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Break_register_write(_cpu,_repl,bp ) { };
   virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "log register write"; }
 
@@ -613,6 +618,7 @@ public:
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Break_register_read(_cpu,_repl,bp ) { };
   virtual unsigned int get(void);
+  virtual RegisterValue getRV(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read"; }
@@ -631,6 +637,7 @@ public:
 			  unsigned int bm ) :
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
   virtual unsigned int get(void);
+  virtual RegisterValue getRV(void);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read value"; }
@@ -649,6 +656,7 @@ public:
     BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
 
   virtual void put(unsigned int new_value);
+  virtual void putRV(RegisterValue rv);
   virtual char const * bpName() { return "log register write value"; }
 
 };
