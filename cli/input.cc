@@ -412,7 +412,7 @@ int gpsim_open(Processor *cpu, const char *file)
 
     // FIXME: questionable
     command_list[0]->cpu=cpu;
-    trace.switch_cpus(cpu);
+    get_trace().switch_cpus(cpu);
       
   }
   else if(!strcmp(str,"stc"))
@@ -635,6 +635,9 @@ gpsim_completion (const char *text, int start, int end)
 
 
 #ifdef HAVE_GUI
+
+static GIOChannel *channel;
+
 //============================================================================ 
 //
 // keypressed().
@@ -643,8 +646,8 @@ gpsim_completion (const char *text, int start, int end)
 // If a simulation is running, then we'll pass the key to
 // the stimulus engine.
 
-void keypressed(int data, int fd, GdkInputCondition gdk_cond)
-{
+static gboolean keypressed (GIOChannel *source, GIOCondition condition, gpointer data)
+  {
   if(simulation_mode == STOPPED) {
 #ifdef HAVE_READLINE
   rl_callback_read_char ();
@@ -653,7 +656,7 @@ void keypressed(int data, int fd, GdkInputCondition gdk_cond)
 
     // We're either running, sleeping, single stepping...
   }
-
+  return TRUE;
 }
 
 //============================================================================
@@ -663,20 +666,15 @@ void keypressed(int data, int fd, GdkInputCondition gdk_cond)
 // is copied into a buffer and passed to the command parser.
 //
 
-void have_line(void)
+void have_line(char *s)
 {
 #ifdef HAVE_READLINE
-  char *t;
-  if(simulation_mode != STOPPED) {
+  if(simulation_mode != STOPPED)
     return;
-  }
 
-  t = rl_copy_text(0,1000);
-
-  parse_string(t);
-  free(t);
+  parse_string(s);
+  free(s);
 #endif
-
 }
 
 #endif
@@ -684,18 +682,17 @@ void have_line(void)
 
 void exit_gpsim(void)
 {
-
   if(use_icd)
     icd_disconnect();
   
 #ifdef HAVE_GUI
   if(bUseGUI)
     quit_gui();
-
 #endif
 
 #ifdef HAVE_READLINE
-  rl_callback_handler_remove ();
+  rl_callback_handler_remove();
+  g_io_channel_unref(channel);
 #endif
 
   //  simulation_cleanup();
@@ -710,13 +707,25 @@ void exit_gpsim(void)
 
 void redisplay_prompt(void)
 {
-  //cout << __FUNCTION__ << endl;
-
-  //cout << '\n';
 #ifdef HAVE_READLINE
   rl_forced_update_display();
 #endif
 }
+
+static int gpsim_rl_getc(FILE *in)
+{
+  gchar buf[6];
+  gsize bytes_read;
+
+#if GLIB_MAJOR_VERSION >= 2
+  g_io_channel_read_chars(channel, buf, 1, &bytes_read, NULL);
+#else
+  g_io_channel_read(channel, buf, 1, &bytes_read);
+#endif
+
+  return buf[0];
+}
+
 
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames
@@ -725,37 +734,20 @@ void initialize_readline (void)
 {
   //cout << __FUNCTION__ << endl;
 #ifdef HAVE_READLINE
-
-  static char b[100];
-
-  sprintf(b,"hello");
-
-  rl_initialize ();
-
 #ifdef HAVE_GUI
-  gdk_input_add (fileno(stdin), GDK_INPUT_READ, 
-                 (GdkInputFunction) keypressed, b);
+  rl_getc_function = gpsim_rl_getc;
+  channel = g_io_channel_unix_new (fileno(stdin));
 
-  // Sigh - the readline library has changed again (and again...)
-  // I don't have an automated way to choose between the following
-  // two lines
-#ifdef READLINE_CB_TAKES_CAST
-  rl_callback_handler_install ("gpsim> ", (void(*)(char*))have_line);
-#else
+  g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+
   rl_callback_handler_install ("gpsim> ", have_line);
-#endif
 #endif
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   //  rl_readline_name = "gpsim";
 
   /* Tell the completer that we want a crack first. */
-#ifdef HAVE_NSCLEAN_READLINE
-    rl_attempted_completion_function = &gpsim_completion;
-#else
-    rl_attempted_completion_function = (CPPFunction *)gpsim_completion;
-#endif
-
+    rl_attempted_completion_function = gpsim_completion;
 #else
   //char buf [256];
 

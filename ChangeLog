@@ -1,3 +1,7 @@
+2004-04-27 Borut Razem <borut.razem@siol.net>
+	* cli/input.cc, gui/gui_main.cc: fixes to make working of CLI & GUI
+	in parallel
+
 2004-04-22 Borut Razem <borut.razem@siol.net>
 	* modules/binary_indicator.cc modules/binary_indicator.h modules/encoder.cc
 	modules/encoder.h modules/gpsim_modules.cc modules/led.cc modules/led.h
