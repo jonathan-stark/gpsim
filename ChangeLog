@@ -1,4 +1,8 @@
 2004-12-17 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, src/interface.cc: replaced pthread_* calls and
+	declarations with the corresponding GTK ones.
+
+2004-12-17 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, src/interface.cc: Added experimental code to
 	test threading.
 	
