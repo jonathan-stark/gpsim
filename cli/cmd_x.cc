@@ -144,13 +144,24 @@ void cmd_x::x(Expression *expr)
 
     Value *v = toValue(expr);
     cout << v->toString() << endl;
-    unsigned int i = v->get_leftVal();
 
-    while (i<=v->get_rightVal()) {
-      x(i);
-      i++;
-    } 
-
+    if(typeid(register_symbol) == typeid(*v) ||
+      (typeid(LiteralSymbol) == typeid(*expr) &&
+      !((LiteralSymbol*)expr)->toString().empty() )) {
+      // v->toString() dumped the value to cout
+    }
+    else if(typeid(Integer) == typeid(*v)) {
+        int i;
+        v->get(i);
+        x(i);
+    }
+    else if(typeid(AbstractRange) == typeid(*v)) {
+      unsigned int i = v->get_leftVal();
+      while (i<=v->get_rightVal()) {
+        x(i);
+        i++;
+      }
+    }
   
     delete v;
     delete expr;
