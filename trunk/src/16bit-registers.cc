@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "interface.h"
+#include "stimuli.h"
 
 
 //--------------------------------------------------
@@ -1552,3 +1553,94 @@ void PORTC16::setbit(unsigned int bit_number, bool new_value)
 
 }
 
+//-------------------------------------------------------------------
+//  PORTC16::put(unsigned int new_value)
+//
+//  inputs:  new_value - here's where the I/O port is written (e.g.
+//                       gpsim is executing a MOVWF IOPORT,F instruction.)
+//  returns: none
+//
+//  The I/O Port is updated with the new value. If there are any stimuli
+// attached to the I/O pins then they will be updated as well.
+// This is the same as PIC_IOPORT::put(), but check for the transmit
+// enable bit of the usart in addition to the TRISC register.
+//
+//-------------------------------------------------------------------
+
+void PORTC16::put(unsigned int new_value)
+{
+  if(new_value > 255)
+    cout << "PORTC16::put value >255\n";
+  // The I/O Ports have an internal latch that holds the state of the last
+  // write, even if the I/O pins are configured as inputs. If the tris port
+  // changes an I/O pin from an input to an output, then the contents of this
+  // internal latch will be placed onto the external I/O pin.
+
+  internal_latch = new_value;
+
+  // update only those bits that are really outputs
+  //cout << "PORTC16::put trying to put " << new_value << '\n';
+  int mack_value = tris->value.get();
+  if (usart && usart->txsta.get() & _TXSTA::TXEN)
+      mack_value |= 1 << 6;
+  value.put((new_value & ~mack_value) | (value.get() & mack_value));
+
+  //cout << " PORTC16::put just set port value to " << value << '\n';
+
+  // Update the stimuli - if there are any
+  if(stimulus_mask)
+    update_stimuli();
+
+  //cout << " PORTC16::put port value is " << value << " after updating stimuli\n";
+
+  trace.register_write(address,value.get());
+
+}
+
+//-------------------------------------------------------------------
+// PORTC16::update_pin_directions(unsigned int new_tris)
+//
+//  Whenever a new value is written to a tris register, then we need
+// to update the stimuli associated with the I/O pins. This is true
+// even if the I/O pin are not connected to external stimuli (like a
+// square wave). An example scenario would be like changing a port b
+// pin from an output that's driving low to an input. If there's no
+// stimulus attached to the port b I/O pin then the pull up (if enabled)
+// will pull the I/O pin high.
+// This is the same as PIC_IOPORT::update_pin_directions(), but check for the
+// transmit enable bit of the usart in addition to the TRISC register.
+//
+//-------------------------------------------------------------------
+void PORTC16::update_pin_directions(unsigned int new_tris)
+{
+
+  if(!tris)
+    return;
+
+  unsigned int diff = tris->value.get() ^ new_tris;
+
+  if (usart && usart->txsta.get() & _TXSTA::TXEN)
+      diff &= ~(1 << 6); // don't update TX pin if TXEN
+
+  if(diff)
+    {
+      // Update the I/O port value to that of the internal latch
+      value.put((value.get() & ~diff) | (internal_latch & diff));
+
+      // Go through and update the direction of the I/O pins
+      int i,m;
+      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
+	if(m & diff & valid_iopins)
+	  {
+	  pins[i]->update_direction(m & (~new_tris));
+	  //cout << __FUNCTION__ << " name " << pins[i]->name() << " pin number " << i << '\n';
+	  }
+      // Now, update the nodes to which the(se) pin(s) may be attached
+
+      guint64 time = cycles.value;
+      for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
+	if(stimulus_mask & m & diff)
+          if(pins[i]->snode!=0)
+            pins[i]->snode->update(time);
+    }
+}

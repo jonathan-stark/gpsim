@@ -587,6 +587,8 @@ enum
   PORTC16(void);
   unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
+  virtual void put(unsigned int new_value);
+  void update_pin_directions(unsigned int new_tris);
 };
 
 //-------------------------------------------------------------------
