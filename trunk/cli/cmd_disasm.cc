@@ -27,7 +27,6 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_disasm.h"
 
 #include "../src/pic-processor.h"
-#include "expr.h"
 #include "errors.h"
 
 cmd_disassemble disassemble;

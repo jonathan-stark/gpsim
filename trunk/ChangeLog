@@ -1,3 +1,32 @@
+
+2004-09-11 Scott Dattalo <scott@dattalo.com>
+	* configure.in: Bumped the Revision up to 0.22.3 since there
+	have been *so* many changes.
+	* cli/expr.h, cli/expr.cc, cli/operator.cc, cli/operator.h:
+	  - moved to the src/ directory
+	* src/expr.h, src/expr.cc: copied from the cli/ directory
+	* src/Makefile.am, cli/Makefile.am
+	* src/symbol.h, src/value.h, src/symbol.cc, src/value.cc:
+	  - It turns out that gpsim's symbols are essentially identical
+	to the value objects that were recently added to support
+	expression parsing. Since expressions need to handle symbols
+	too, I decided to make the Value class a base class for 
+	gpsimValue. Now, much of what has been written for 
+	expressions will naturally handle many of gpsim fundamental
+	types.
+	* src/pic-processor.cc, src/pic-processor.h, src/eeprom.cc,
+	src/eeprom.h, src/14bit-registers.cc: The W register, eeprom,
+	and option register states were not saved during a processor
+	'save_state()' call.
+	* src/p12x.cc: internal 12ce518 i2c module was not connected 
+	correctly.
+	* cli/cmd_clear.cc, cli/cmd_disasm.cc, cli/cmd_frequency.cc,
+	cli/cmd_log.h, cli/cmd_macro.cc, cli/cmd_module.h,
+	cli/cmd_set.cc, cli/cmd_step.cc, cli/cmd_stimulus.h,
+	cli/cmd_symbol.cc, cli/cmd_trace.cc, cli/cmd_trace.h,
+	cli/cmd_x.cc, cli/command.cc, cli/command.h:
+	Updated the paths to the include files that have moved
+
 2004-09-08 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_x.cc, cli/expr.cc, cli/expr.h, cli/operator.cc,
 	cli/operator.h, cli/parse.yy, cli/scan.ll:

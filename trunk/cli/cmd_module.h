@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <list>
 using namespace std;
-#include "expr.h"
+#include "command.h"
 
 class cmd_module : public command
 {

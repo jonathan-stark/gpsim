@@ -25,7 +25,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_clear.h"
-#include "expr.h"
 
 #include "../src/pic-processor.h"
 

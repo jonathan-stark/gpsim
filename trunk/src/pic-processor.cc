@@ -489,6 +489,20 @@ public:
 RealTimeBreakPoint realtime_cbp;
 
 //-------------------------------------------------------------------
+void pic_processor::save_state()
+{
+  Processor::save_state();
+
+  if(W)
+    W->put_trace_state(W->value);
+
+  if(eeprom)
+    eeprom->save_state();
+
+  option_reg.put_trace_state(option_reg.value);
+}
+
+//-------------------------------------------------------------------
 //
 // run  -- Begin simulating and don't stop until there is a break.
 //

@@ -58,6 +58,8 @@ libgpsim_la_SOURCES = \
 	ssp.cc \
 	xref.cc \
 	icd.cc \
+	expr.cc	\
+	operator.cc \
 	value.cc
 
 gpsiminclude_HEADERS = \
@@ -117,7 +119,10 @@ gpsiminclude_HEADERS = \
 	xref.h \
 	icd.h \
 	ssp.h \
+	expr.h \
+	operator.cc \
 	value.h
+
 
 
 #libgpsim_la_LDFLAGS = $(shell gtk-config --libs)
