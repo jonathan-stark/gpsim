@@ -23,10 +23,6 @@ Boston, MA 02111-1307, USA.  */
 
 //-------------------------------------------------------------------
 
-#include <list>
-#include <iostream>
-
-#include "xref.h"
 
 enum  ATTRIBUTE_VALUE_TYPES {
   ATTRIBUTE_INT,

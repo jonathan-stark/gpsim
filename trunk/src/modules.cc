@@ -47,6 +47,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimulus_orb.h"
 #include "symbol.h"
 #include "xref.h"
+#include "attribute.h"
 
 FloatAttribute *newFloatAttribute(char * n, double v)
 {
