@@ -877,7 +877,7 @@ void TraceLog::open_logfile(char *new_fname, int format)
       lxtp = lt_init(new_fname);
       lt_set_timescale(lxtp, -8);
       lt_set_clock_compress(lxtp);
-      lt_set_initial_value(lxtp, 'Z');
+      lt_set_initial_value(lxtp, 'X');
       log_file=NULL;
       break;
   }
