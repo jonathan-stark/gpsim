@@ -190,6 +190,7 @@ void gui_new_program (unsigned int pic_id)
       SymbolWindow_new_symbols(gp->symbol_window, gp);
 //      WatchWindow_clear_watches(gp->watch_window, gp);
       SourceBrowserOpcode_new_program((SourceBrowserOpcode_Window*)gp->program_memory, gp);
+      ProfileWindow_new_program(gp->profile_window,gp);
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
     }
@@ -209,7 +210,7 @@ void gui_new_source (unsigned int pic_id)
       SourceBrowserAsm_new_source((SourceBrowserAsm_Window*)gp->source_browser, gp);
       SymbolWindow_new_symbols(gp->symbol_window, gp);
 //      WatchWindow_clear_watches(gp->watch_window, gp);
-      ProfileWindow_new_program(gp->profile_window,gp);
+//      ProfileWindow_new_program(gp->profile_window,gp);
 
       link_src_to_gpsim( gp);
       //      redisplay_prompt();
