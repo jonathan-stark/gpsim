@@ -82,6 +82,9 @@ Processor::Processor(void)
   set_ClockCycles_per_Instruction(1);
   set_Vdd(5.0);
 
+  readTT = 0;
+  writeTT = 0;
+
   interface = new ProcessorInterface(this);
 
   // let the processor version number simply be gpsim's version number.
