@@ -1,5 +1,6 @@
 /*
-   Copyright (C) 1998 T. Scott Dattalo
+   Copyright (C) 2004
+   T. Scott Dattalo
 
 This file is part of gpsim.
 
@@ -14,31 +15,42 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with gpasm; see the file COPYING.  If not, write to
+along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-#ifndef __XREF_H__
-#define __XREF_H__
 
-//-------------------------------------------------------------------
+#ifndef __GUI_STATUSBAR_H__
+#define __GUI_STATUSBAR_H__
 
-#include <list>
-using namespace std;
+#include "gui.h"
 
-class XrefObject {
-private:
-    unsigned int *data;
-    list<void*> xrefs;
-public:
-    XrefObject();
-    XrefObject(unsigned int *value);
-    ~XrefObject();
-    
-    virtual void add(void *xref);
-    virtual void clear(void *xref);
-    virtual void update();
-    virtual int get_val(void);
+
+class LabeledEntry;
+
+//
+// The Status Bar window 
+//
+
+class StatusBar_Window {
+ public:
+  GUI_Processor *gp;
+
+  GtkWidget *popup_menu;
+  
+  LabeledEntry *status;
+  LabeledEntry *W;
+  LabeledEntry *pc;
+  LabeledEntry *cpu_cycles;
+  LabeledEntry *time;
+  
+  int created;
+
+  StatusBar_Window(void);
+  void NewProcessor(GUI_Processor *_gp);
+  void Create(GtkWidget *vbox_main);
+  void Update(void);
+
 };
 
-#endif
+#endif //__GUI_STATUSBAR_H__

@@ -27,31 +27,6 @@ Boston, MA 02111-1307, USA.  */
 
 
 
-//
-// The Status Bar window 
-//
-
-class StatusBar_Window {
- public:
-  GUI_Processor *gp;
-
-  GtkWidget *popup_menu;
-  
-  labeled_entry *status;
-  labeled_entry *W;
-  labeled_entry *pc;
-  labeled_entry *cpu_cycles;
-  labeled_entry *time;
-  
-  int created;
-
-  StatusBar_Window(void);
-  void NewProcessor(GUI_Processor *_gp);
-  void Create(GtkWidget *vbox_main);
-  void Update(void);
-
-};
-
 
 //======================================================================
 // The register window 

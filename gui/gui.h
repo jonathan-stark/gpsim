@@ -101,28 +101,6 @@ public:
 #include "gui_processor.h"
 
 //
-// A 'labeled entry' is an object consisting of gtk entry
-// widget that is labeled (with a gtk lable widget) and 
-// has information about its parent.
-//
-
-struct _labeled_entry {
-  GtkWidget *label;
-  GtkWidget *entry;
-
-  union {
-    gint32    i32;
-    guint64   ui64;
-    double    db;
-  } value;           // value displayed
-
-  gpointer parent;   // a pointer to the owner
-  int handle_id;     // unique identifier
-};
-
-typedef struct _labeled_entry labeled_entry;
-
-//
 // External references and function prototypes
 //
 

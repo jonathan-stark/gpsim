@@ -35,18 +35,25 @@ void XrefObject::clear(void *xref)
 
 void XrefObject::update()
 {
-    list<void*>::iterator ioi;
+  list<void*>::iterator ioi;
 
-    ioi=xrefs.begin();
-    for(;ioi!=xrefs.end();++ioi)
-    {
-	int new_value=0;
-	gpointer *xref;
-	
-	if(data)
-	    new_value=*data;
-	xref=(gpointer *) *ioi;
+  ioi=xrefs.begin();
+  for(;ioi!=xrefs.end();++ioi)
+  {
 
-	gi.update_object(xref,new_value);
-    }
+    gpointer *xref = (gpointer *) *ioi;
+
+    gi.update_object(xref,get_val());
+  }
+}
+
+
+int XrefObject::get_val(void)
+{
+
+  if(data)
+    return *data;
+
+  return 0;
+
 }

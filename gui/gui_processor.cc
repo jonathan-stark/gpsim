@@ -48,6 +48,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_scope.h"
 #include "gui_src.h"
 #include "gui_stack.h"
+#include "gui_statusbar.h"
 #include "gui_stopwatch.h"
 #include "gui_symbols.h"
 #include "gui_trace.h"

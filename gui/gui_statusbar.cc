@@ -41,6 +41,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "gui.h"
+#include "gui_statusbar.h"
 #include "gui_regwin.h"
 
 typedef enum {
@@ -68,6 +69,33 @@ static menu_id time_format=MENU_TIME_USECONDS;
 static StatusBar_Window *popup_sbw;
 
 //========================================================================
+//
+// A LabeledEntry is an object consisting of gtk entry
+// widget that is labeled (with a gtk lable widget) and 
+// has information about its parent.
+//
+
+class LabeledEntry {
+public:
+  GtkWidget *label;
+  GtkWidget *entry;
+
+  union {
+    gint32    i32;
+    guint64   ui64;
+    double    db;
+  } value;           // value displayed
+
+  gpointer parent;   // a pointer to the owner
+
+
+  LabeledEntry(void);
+  void Create(GtkWidget *box,char *clabel, int string_width);
+
+};
+
+
+//========================================================================
 
 class StatusBarXREF : public CrossReferenceToGUI
 {
@@ -86,6 +114,46 @@ public:
 
 //========================================================================
 
+
+LabeledEntry::LabeledEntry(void)
+{
+  label = 0;
+  entry = 0;
+  parent = 0;
+}
+
+void LabeledEntry::Create(GtkWidget *box,char *clabel, int string_width)
+{
+
+  label = (GtkWidget *)gtk_label_new (clabel);
+
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_widget_set_usize (label, 0, 15);
+  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
+  gtk_widget_show (label);
+
+  entry = gtk_entry_new ();
+
+  gtk_entry_set_text (GTK_ENTRY (entry), "----");
+
+  value.i32 = 0;
+
+
+#if GTK_MAJOR_VERSION >= 2
+ gtk_widget_set_usize (entry,
+		       string_width * gdk_string_width (gtk_style_get_font(entry->style), "9") + 6,
+			-1);
+#else
+ gtk_widget_set_usize (entry,
+		       string_width * gdk_string_width (entry->style->font, "9") + 6,
+		       -1);
+#endif
+
+  gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
+  gtk_widget_show (entry);
+
+
+}
 
 // called when user has selected a menu item
 static void
@@ -272,7 +340,7 @@ static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 /*
  * create_labeled_entry
  */
-
+#if 0
 labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width)
 {
 
@@ -310,7 +378,7 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
 
   return(le);
 }
-
+#endif //0
 
 // button press handler
 static gint
@@ -356,30 +424,37 @@ void StatusBar_Window::Create(GtkWidget *vbox_main)
   gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
+  status = new LabeledEntry();
+  status->Create(hbox,"Status:", 4);
+/*
   status = create_labeled_entry(hbox,"Status:", 4);
   status->parent = this;
+*/
   gtk_signal_connect(GTK_OBJECT(status->entry), "activate",
 		     GTK_SIGNAL_FUNC(status_callback),
 		     this);
 
-  W = create_labeled_entry(hbox,"W:", 4);
-  W->parent = this;
+  W = new LabeledEntry();
+  W->Create(hbox,"W:", 4);
   gtk_signal_connect(GTK_OBJECT(W->entry), "activate",
 		     GTK_SIGNAL_FUNC(w_callback),
 		     this);
 
-  pc = create_labeled_entry(hbox,"PC:", 6);
-  pc->parent = this;
+  pc = new LabeledEntry();
+  pc->Create(hbox,"PC:", 6);
+
   gtk_signal_connect(GTK_OBJECT(pc->entry), "activate",
 		     GTK_SIGNAL_FUNC(pc_callback),
 		     this);
 
-  cpu_cycles = create_labeled_entry(hbox,"Cycles:", 18);
-  cpu_cycles->parent = this;
+  cpu_cycles = new LabeledEntry();
+  cpu_cycles->Create(hbox,"Cycles:", 18);
+
   gtk_entry_set_editable(GTK_ENTRY(cpu_cycles->entry),0);
 
-  time = create_labeled_entry(hbox,"Time:", 22);
-  time->parent = this;
+  time = new LabeledEntry();
+  time->Create(hbox,"Time:", 22);
+
   gtk_entry_set_editable(GTK_ENTRY(time->entry),0);
 
   /* create popupmenu */
