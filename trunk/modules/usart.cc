@@ -1794,10 +1794,10 @@ void USARTModule::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(Package::get_pin(1));
-  symbol_table.add_stimulus(Package::get_pin(2));
-  symbol_table.add_stimulus(Package::get_pin(3));
-  symbol_table.add_stimulus(Package::get_pin(4));
+  symbol_table.add_stimulus(get_pin(1));
+  symbol_table.add_stimulus(get_pin(2));
+  symbol_table.add_stimulus(get_pin(3));
+  symbol_table.add_stimulus(get_pin(4));
 
 
   // Complete the usart initialization
@@ -1827,7 +1827,7 @@ void USARTModule::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-ExternalModule * USARTModule::USART_construct(const char *new_name)
+Module * USARTModule::USART_construct(const char *new_name)
 {
 
   cout << "USART construct \n";

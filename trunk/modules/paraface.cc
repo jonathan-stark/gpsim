@@ -332,7 +332,7 @@ void Paraface::create_iopin_map(void)
     // in the CLI).
 
     for(int i =1; i<get_pin_count(); i++) {
-	IOPIN *p = Package::get_pin(i);
+	IOPIN *p = get_pin(i);
 	if(p)
 	    symbol_table.add_stimulus(p);
     }
@@ -345,7 +345,7 @@ void Paraface::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Paraface::construct(const char *new_name=NULL)
+Module * Paraface::construct(const char *new_name=NULL)
 {
 
 //    cout << " Parport constructor\n";

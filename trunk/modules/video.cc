@@ -266,15 +266,15 @@ void Video::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  for(i= 1; i<=number_of_pins; i++)
-    symbol_table.add_stimulus(Package::get_pin(i));
+  for(i= 1; i<=package->get_pin_count(); i++)
+    symbol_table.add_stimulus(get_pin(i));
 
 }
 
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Video::construct(const char *new_name)
+Module * Video::construct(const char *new_name)
 {
 
   //cout << " AND2Gate  construct\n";

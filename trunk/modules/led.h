@@ -64,7 +64,7 @@ public:
 //------------------------------------------------------------------------
 // LED base class
 
-class Led_base : public ExternalModule
+class Led_base : public Module
 {
  public:
 
@@ -159,7 +159,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("led_7segments"); };
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
 
 };
 
@@ -193,7 +193,7 @@ public:
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("led"); };
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
 
 
 };

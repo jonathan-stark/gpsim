@@ -102,13 +102,13 @@ void Switch::create_iopin_map(void)
     //   below) then we can call the member function 'get_pin'.
 
     assign_pin(1, new IO_bi_directional(switch_port, 0,"out"));
-    set_pin_position(1,2.5); // Position pin on middle right side of package
+    package->set_pin_position(1,2.5); // Position pin on middle right side of package
 
     // Create an entry in the symbol table for the new I/O pins.
     // This is how the pins are accessed at the higher levels (like
     // in the CLI).
 
-    switch_pin = Package::get_pin(1);
+    switch_pin = get_pin(1);
     if(switch_pin)
     {
 	symbol_table.add_stimulus(switch_pin);
@@ -150,7 +150,7 @@ void Switch::create_widget(Switch *sw)
 
 //--------------------------------------------------------------
 // construct
-ExternalModule * Switch::construct(const char *new_name=NULL)
+Module * Switch::construct(const char *new_name=NULL)
 {
 
 //    cout << " Switch constructor\n";

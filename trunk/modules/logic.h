@@ -86,7 +86,7 @@ public:
  * Here's the definition for the LogicGate class and all of its
  * children
  *
- *    ExternalModule
+ *    Module
  *      |
  *      --------
  *             |
@@ -100,7 +100,7 @@ public:
  *                       |- OR2Gate
  */
 
-class LogicGate : public ExternalModule
+class LogicGate : public Module
 {
 public:
 
@@ -137,7 +137,7 @@ class AND2Gate: public ANDGate
 {
 public:
 
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("and2"); };
   // virtual void update_state(void);
   AND2Gate(void);
@@ -160,7 +160,7 @@ class OR2Gate: public ORGate
 public:
 
   //virtual void update_state(void);
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("or2"); };
   OR2Gate(void);
   ~OR2Gate(void);
@@ -182,7 +182,7 @@ class XOR2Gate: public XORGate
 public:
 
   //virtual void update_state(void);
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("xor2"); };
   XOR2Gate(void);
   ~XOR2Gate(void);
@@ -194,7 +194,7 @@ class NOTGate: public LogicGate
 public:
 
   //virtual void update_state(void);
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
   const virtual char *type(void) { return ("not"); };
   virtual void update_state(void);
   NOTGate(void);

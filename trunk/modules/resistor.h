@@ -106,7 +106,7 @@ public:
 
 
 
-class Resistor : public ExternalModule 
+class Resistor : public Module 
 {
 public:
 
@@ -118,12 +118,12 @@ public:
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
 
-  static ExternalModule *construct(const char *new_name=NULL);
+  static Module *construct(const char *new_name=NULL);
 
 };
 
 
-class PullupResistor : public ExternalModule 
+class PullupResistor : public Module 
 {
 public:
   resistor *res;
@@ -142,8 +142,8 @@ public:
   // Inheritances from the Module class
   virtual void set_attribute(char *attr, char *val);
 
-  static ExternalModule *pu_construct(const char *new_name=NULL);
-  static ExternalModule *pd_construct(const char *new_name=NULL);
+  static Module *pu_construct(const char *new_name=NULL);
+  static Module *pd_construct(const char *new_name=NULL);
 
 #ifdef HAVE_GUI
   void build_window(void);

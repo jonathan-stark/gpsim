@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 
-class Switch : public ExternalModule
+class Switch : public Module
 {
     void create_widget(Switch *sw);
 public:
@@ -50,7 +50,7 @@ public:
 
     // Inheritance from Module class
     const virtual char *type(void) { return ("switch"); };
-    static ExternalModule *construct(const char *new_name);
+    static Module *construct(const char *new_name);
 
 
 

@@ -66,7 +66,7 @@ public:
 #define XRES 320
 #define YRES 625
 
-class Video : public ExternalModule
+class Video : public Module
 {
 public:
 
@@ -99,7 +99,7 @@ public:
   guint64 cycles_to_us(guint64 cycles);
   guint64 us_to_cycles(guint64 cycles);
   void refresh(void);
-  static ExternalModule *construct(const char *new_name);
+  static Module *construct(const char *new_name);
 
 private:
     Video_Interface *interface;

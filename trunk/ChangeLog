@@ -1,3 +1,13 @@
+2004-03-15 Scott Dattalo  <scott@dattalo.com>
+	* src/modules.h, src/modules.cc:
+	Removed the "ExternalModule" class
+	* modules/binary_indicator.cc, modules/gpsim_modules.cc,
+	modules/led.cc, modules/logic.cc, modules/paraface.cc,
+	modules/push_button.cc, modules/resistor.cc, modules/switch.cc,
+	modules/usart.cc, modules/video.cc, extras/lcd/lcd.h, 
+	extras/lcd/lcd.cc
+	Now the modules are no longer "external".
+
 2004-03-14  Bert Driehuis <driehuis@playbeing.org>
 	* extras/lcd/lcdengine.cc, extras/lcd/lcd.h, extras/lcd/examples/lcd.asm:
 	Fixed the LCD modules "E" logic. 

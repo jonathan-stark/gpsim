@@ -299,7 +299,9 @@ void LogicGate::create_iopin_map(void)
   Logic_Output *LOP = new Logic_Output(port, OUTPUT_BITPOSITION, "out");
   LOP->new_logic_gate(this);
   LOP->update_direction(1);                 // make the bidirectional an output
-  set_pin_position(1,2.5); // Position pin on middle right side of package
+
+  // Position pin on middle right side of package
+  package->set_pin_position(1,2.5);
   assign_pin(OUTPUT_BITPOSITION + 1, LOP);  // output
 
   Logic_Input *LIP;
@@ -312,9 +314,9 @@ void LogicGate::create_iopin_map(void)
     LIP = new Logic_Input(port, i,p);
     LIP->new_logic_gate(this);
     if(number_of_pins==2)
-	set_pin_position(i+1, 0.5); // Left side of package
+      package->set_pin_position(i+1, 0.5); // Left side of package
     else
-	set_pin_position(i+1, (i-INPUT_FIRST_BITPOSITION)*0.9999); // Left side of package
+      package->set_pin_position(i+1, (i-INPUT_FIRST_BITPOSITION)*0.9999); // Left side of package
     assign_pin(i+1, LIP );       //  Pin numbers begin at 1
   }
 
@@ -331,7 +333,7 @@ void LogicGate::create_iopin_map(void)
   // in the CLI).
 
   for(i= 1; i<=number_of_pins; i++)
-    symbol_table.add_stimulus(Package::get_pin(i));
+    symbol_table.add_stimulus(get_pin(i));
 
 
   //cout << "Iopin map should be created\n";
@@ -357,7 +359,7 @@ GtkWidget *LogicGate::create_pixmap(char **pixmap_data)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * AND2Gate::construct(const char *new_name)
+Module * AND2Gate::construct(const char *new_name)
 {
 
   //cout << " AND2Gate  construct\n";
@@ -427,7 +429,7 @@ OR2Gate::~OR2Gate(void)
 
 }
 
-ExternalModule * OR2Gate::construct(const char *new_name)
+Module * OR2Gate::construct(const char *new_name)
 {
 
   //cout << " OR2Gate  construct\n";
@@ -468,7 +470,7 @@ void ORGate::update_state(void)
 
 //--------------------------------------------------------------
 // construct NOT
-ExternalModule * NOTGate::construct(const char *new_name)
+Module * NOTGate::construct(const char *new_name)
 {
 
   //cout << " NOTGate  construct\n";
@@ -537,7 +539,7 @@ XOR2Gate::~XOR2Gate(void)
 
 }
 
-ExternalModule * XOR2Gate::construct(const char *new_name)
+Module * XOR2Gate::construct(const char *new_name)
 {
 
   //cout << " XOR2Gate  construct\n";

@@ -428,7 +428,7 @@ void LcdDisplay::create_iopin_map(void)
   // in the CLI).
 
   for(int i =1; i<get_pin_count(); i++) {
-    IOPIN *p = Package::get_pin(i);
+    IOPIN *p = get_pin(i);
     if(p)
       symbol_table.add_stimulus(p);
   }
@@ -437,7 +437,7 @@ void LcdDisplay::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * LcdDisplay::construct(const char *new_name=NULL)
+Module * LcdDisplay::construct(const char *new_name=NULL)
 {
 
   cout << " LCD display constructor\n";
@@ -510,7 +510,7 @@ LcdDisplay::~LcdDisplay()
 // Displaytech 161A, added by Salvador E. Tropea <set@computer.org>
 // construct
 
-ExternalModule * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
+Module * LcdDisplayDisplaytech161A::construct(const char *new_name=NULL)
 {
 
   if (verbose)

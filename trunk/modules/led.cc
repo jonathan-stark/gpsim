@@ -644,14 +644,14 @@ void Led_7Segments::create_iopin_map(void)
 
   // Position pins on left side of package
   float pos=0.0;
-  set_pin_position(1,pos);pos+=0.9999/7.0;
-  set_pin_position(2,pos);pos+=0.9999/7.0;
-  set_pin_position(3,pos);pos+=0.9999/7.0;
-  set_pin_position(4,pos);pos+=0.9999/7.0;
-  set_pin_position(5,pos);pos+=0.9999/7.0;
-  set_pin_position(6,pos);pos+=0.9999/7.0;
-  set_pin_position(7,pos);pos+=0.9999/7.0;
-  set_pin_position(8,pos);pos+=0.9999/7.0;
+  package->set_pin_position(1,pos);pos+=0.9999/7.0;
+  package->set_pin_position(2,pos);pos+=0.9999/7.0;
+  package->set_pin_position(3,pos);pos+=0.9999/7.0;
+  package->set_pin_position(4,pos);pos+=0.9999/7.0;
+  package->set_pin_position(5,pos);pos+=0.9999/7.0;
+  package->set_pin_position(6,pos);pos+=0.9999/7.0;
+  package->set_pin_position(7,pos);pos+=0.9999/7.0;
+  package->set_pin_position(8,pos);pos+=0.9999/7.0;
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is
@@ -678,14 +678,14 @@ void Led_7Segments::create_iopin_map(void)
   // in the CLI).
 
   // again, this could be looped (and even combined with the above)
-  symbol_table.add_stimulus(Package::get_pin(1));
-  symbol_table.add_stimulus(Package::get_pin(2));
-  symbol_table.add_stimulus(Package::get_pin(3));
-  symbol_table.add_stimulus(Package::get_pin(4));
-  symbol_table.add_stimulus(Package::get_pin(5));
-  symbol_table.add_stimulus(Package::get_pin(6));
-  symbol_table.add_stimulus(Package::get_pin(7));
-  symbol_table.add_stimulus(Package::get_pin(8));
+  symbol_table.add_stimulus(get_pin(1));
+  symbol_table.add_stimulus(get_pin(2));
+  symbol_table.add_stimulus(get_pin(3));
+  symbol_table.add_stimulus(get_pin(4));
+  symbol_table.add_stimulus(get_pin(5));
+  symbol_table.add_stimulus(get_pin(6));
+  symbol_table.add_stimulus(get_pin(7));
+  symbol_table.add_stimulus(get_pin(8));
 
 
 }
@@ -693,7 +693,7 @@ void Led_7Segments::create_iopin_map(void)
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Led_7Segments::construct(const char *new_name=NULL)
+Module * Led_7Segments::construct(const char *new_name=NULL)
 {
 
 //  cout << " 7-segment LED display constructor\n";
@@ -908,7 +908,7 @@ void Led::create_iopin_map(void)
   create_pkg(1);
 
   // Position pin on left side of package
-  set_pin_position(1,0.5);
+  package->set_pin_position(1,0.5);
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is
@@ -928,14 +928,14 @@ void Led::create_iopin_map(void)
   // in the CLI).
 
   // again, this could be looped (and even combined with the above)
-  symbol_table.add_stimulus(Package::get_pin(1));
+  symbol_table.add_stimulus(get_pin(1));
 
 }
 
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Led::construct(const char *new_name=NULL)
+Module * Led::construct(const char *new_name=NULL)
 {
 
 //  cout << " 7-segment LED display constructor\n";
