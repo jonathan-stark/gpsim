@@ -287,7 +287,7 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
   gtk_widget_show (table);
   gtk_box_pack_start (GTK_BOX (vbox), table, FALSE, TRUE, 0);
 
-  label = gtk_label_new ("Delta cycles");
+  label = gtk_label_new ("Cycles");
   gtk_widget_show (label);
   gtk_table_attach (GTK_TABLE (table), label, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),

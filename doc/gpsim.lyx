@@ -1372,7 +1372,7 @@ Over Step until pc is after next instruction
 \layout List
 \labelwidthstring 00000000.00.0000
 
-Finish Finish subroutine
+Finish Run to return address
 \layout List
 \labelwidthstring 00000000.00.0000
 
@@ -1557,7 +1557,7 @@ Escape Stop simulation.
 \layout List
 \labelwidthstring 00.00.0000
 
-f,F Finish subroutine.
+f,F Run to return address
 \layout Subsection
 
 Opcode view - the .obj Browser
@@ -1642,6 +1642,10 @@ Set and clear logging of registers.
  You can log reads, writes, reads/writes of specific values and to bits
  selected by a specified mask.
  You can select a different file name with 'set log filename...'.
+ Default is "gpsim.log".
+ You can choose LXT or ASCII format.
+ LXT can be read with the program gtkwave.
+ ASCII is default.
 \layout Itemize
 
 Copy cells.
@@ -1703,6 +1707,12 @@ This window, as its name suggests, displays symbols.
 You can filter out some symbol types using the buttons in the top of the
  window, and you can sort the rows by clicking on the column buttons (the
  ones reading 'symbol', 'type' and 'address').
+\layout Standard
+
+You can add the symbol to the watch window by right-clicking and selecting
+ the "Add to watch window" menu item.
+ This will add the ram register with address equal to the symbols value
+ to the watch window.
 \layout Standard
 
 The symbol viewer is linked to the other windows.
@@ -1799,16 +1809,73 @@ This window displays current stack.
  Double clicking sets a breakpoint on the return address.
 \layout Section
 
-Pins view
+Breadboard
 \layout Standard
 
-This window shows the cpu and its pin states.
- The arrows on the pins display the port direction.
+Here you can create/modify and examine the environment around the pic.
+ Pins are displayed as an arrow.
+ The direction of the arrow indicates if its an input or output pin.
+ The color of the arrow indicates its state (green=low, red=high).
 \layout Standard
 
-The colors and letters next to the pins display state high or low.
- Double clicking on the letter toggles the value.
- Double clicking on the arrow changes its direction.
+You can't instantiate pic processors from here, you'll have to do that from
+ the command line, or from a .stc file.
+\layout Standard
+
+Your can create nodes by clicking on the "new node" button.
+ (A node is 'a piece of wire' to which you can connect stimulus.) You can
+ see the list of created nodes under the "nodes" item in the upper-left
+ tree widget.
+\layout Standard
+
+You can create connections to nodes by clicking on a pin, and then clicking
+ on the button "Connect stimulus to node".
+ This will bring up a list of nodes.
+ Choose one by double-clicking on the one you like.
+\layout Standard
+
+If you click on a pin that is already connected to a node, then you'll see
+ the node and its connections in the lower left part of the window.
+ You can disconnect a stimulus by clicking on it and pressing the "remove
+ stimulus" button.
+\layout Standard
+
+When you want to add a module to the simulation, you first have to specify
+ the library which contains the module you want.
+ Click on the "add library" button and enter the library name (e.g.
+ "libgpsim_modules.so").
+ Now you can click the "add module" button.
+ Select the module you want from the list by double-clicking on it.
+ Enter a name for the module (this has to be unique, and not used before).
+ You now have to position the module.
+ Move the mouse pointer to where you'd like the module, and left-click.
+\layout Standard
+
+If you middle-click on a pin, you'll see how the pin is connected.
+ Press the "trace all" to see all at
+\layout Standard
+
+once, and "clear traces" to remove all (you'll only remove the graphical
+ trace, not the connection!).
+ If it doesn't work, try moving the packages so that there are more space
+ around the pins.
+\layout Standard
+
+When you are done, you can save by clicking the "save configuration" button.
+ You can then load this file from the command line like this (assuming the
+ .cod file with your source is called "mycode.cod", and the file you just
+ saved was called "mynets.stc":
+\layout Standard
+
+gpsim -s mycode.cod -c mynets.stc
+\layout Standard
+
+You can't load only the .stc file since this doesn't contain the processor
+ settings.
+ You can create (with an editor) your own .stc file (e.g.
+ my_project.stc) and in that file put a command "load c mynets.stc" after
+ you have loaded the .cod file.
+ You then only have to load this file (gpsim -c my_project.stc).
 \layout Section
 
 Trace viewer
@@ -1882,7 +1949,8 @@ Routine profile
 
 Here you can see statistics about execution time for a selected routine.
  You mark the entry and exit points from the source browser (profile start/stop).
- You have to put a marker on every entry point as well as (and especially)
+ If the routine you want to measure have multiple entry and/or exit points,
+ then you have to put a marker on every entry point as well as (and especially)
  every exit point.
  Othervise you will get bad data.
  
@@ -1893,6 +1961,39 @@ When you have done that, gpsim will (as simulation goes by) store the execution
  You can also use the menu item 'Plot distribution' to open a window displaying
  a histogram of the data.
  From this new window you can also save (in postscript) or print it.
+\layout Standard
+
+You can also measure call period by switching the 'entry' and 'exit' points.
+ If also want the time from reset (or some equal point) to the first 'entry',
+ then you must also put an 'entry' point there.
+\layout Section
+
+Stopwatch
+\layout Standard
+
+The stopwatch window shows a cycle counter and a re-settable counter.
+ The cycle counter is the same as the one in the register window.
+ It basically counts instructions.
+ 
+\layout Standard
+
+The other counter counts at the same rate as the cycle counter, but can
+ be cleared by clicking the "clear" button (or preset by entering a number
+ in the entry box).
+ 
+\layout Standard
+
+The up/down indicator denotes the direction the counter counts.
+\layout Standard
+
+The rollover value specifies the range the cycle counter can be in (a modulo
+ counter).
+ For example, if the rollover value is specified to be 0x42, then whenever
+ the resettable counter reaches 0x42 it will rollover to zero.
+ If the counter is counting down, then when it reaches 0 the next state
+ will be 0x41.
+ If you don't want is like this, then set the rollover value to something
+ large.
 \layout Chapter
 
 Controlling the Flow: Break Points
