@@ -78,6 +78,8 @@ public:
   virtual unsigned int get(void);
   virtual unsigned int get_value(void);
 
+  IOPIN *getIO(unsigned int pin_number);
+
   /// Stimuli 
   void attach_stimulus(stimulus *new_stim, unsigned int bit_position);
   virtual int update_stimuli(void);

@@ -1,4 +1,13 @@
 2005-02-11 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h: Added a 'getIO' method to the
+	IOPIN class that will allow an individual I/O pin in a port to be
+	accessed.
+	* src/stimuli.h, src/stimuli.cc: Add more state information to the
+	snode class. Also, added the 'getBitChar()' method that will
+	return the state of the stimulus in the form of an ASCII character
+	(e.g. 0,1,Z,W).
+
+2005-02-11 Scott Dattalo <scott@dattalo.com>
 	* src/os_dependent.cc: Libraries stored in system directories were
 	getting ignored.
 
