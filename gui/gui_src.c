@@ -63,22 +63,28 @@ key_press(GtkWidget *widget,
       if(gtk_notebook_get_current_page(GTK_NOTEBOOK(sbow->notebook)))
 	  return FALSE;
   }
-
-  
+      
   switch(key->keyval) {
 
   case 's':  // Single Step
   case 'S':
   case GDK_F7:
       //sbw->gui_obj.gp->p->step(1);
-      gpsim_step(sbw->gui_obj.gp->pic_id, 1);
+      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id))
+      	gpsim_hll_step(sbw->gui_obj.gp->pic_id);
+      else
+      	gpsim_step(sbw->gui_obj.gp->pic_id, 1);
       break;
 
-  case 'o':  // Step Over Next instruction
+  case 'o':  // Step Over Next instruction, or hll statement
   case 'O':
+  case 'n':
   case GDK_F8:
       //sbw->gui_obj.gp->p->step_over();
-      gpsim_step_over(sbw->gui_obj.gp->pic_id);
+      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id))
+      	gpsim_hll_step_over(sbw->gui_obj.gp->pic_id);
+      else
+      	gpsim_step_over(sbw->gui_obj.gp->pic_id);
       break;
   case 'r':
   case 'R':
