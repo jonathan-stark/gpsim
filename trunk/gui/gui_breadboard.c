@@ -452,6 +452,7 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   y=((GUI_Object*)bbw)->y;
   gtk_window_set_default_size(GTK_WINDOW(bbw->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(bbw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(bbw->gui_obj.window),bbw->gui_obj.name,"Gpsim");
   
   gtk_signal_connect (GTK_OBJECT (window), "destroy",
 		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);

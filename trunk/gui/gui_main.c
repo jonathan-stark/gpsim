@@ -21,6 +21,8 @@
 #include "gui.h"
 #include "gui_interface.h"
 
+#undef TRUE
+#undef FALSE
 #include "eXdbm/eXdbm.h"
 // #include <eXdbm.h>
 

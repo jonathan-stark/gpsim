@@ -49,6 +49,8 @@ class P16C61 : public  _14bit_processor, public _14bit_18pins
 {
 public:
 
+  INTCON       intcon_reg;
+
   virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
   virtual void create_symbols(void);
 

@@ -48,6 +48,8 @@ class P16C8x : public  _14bit_processor, public _14bit_18pins
 {
 public:
 
+  INTCON       intcon_reg;
+
   virtual void set_out_of_range_pm(int address, int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16C84_;};

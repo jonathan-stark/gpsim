@@ -667,6 +667,7 @@ int BuildWatchWindow(Watch_Window *ww)
   y=((GUI_Object*)ww)->y;
   gtk_window_set_default_size(GTK_WINDOW(ww->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(ww->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(ww->gui_obj.window),ww->gui_obj.name,"Gpsim");
   
   gtk_signal_connect (GTK_OBJECT (window), "destroy",
 		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);

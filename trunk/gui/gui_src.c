@@ -229,6 +229,7 @@ void CreateSBW(SourceBrowser_Window *sbw)
   y=((GUI_Object*)sbw)->y;
   gtk_window_set_default_size(GTK_WINDOW(sbw->gui_obj.window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(sbw->gui_obj.window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(sbw->gui_obj.window),sbw->gui_obj.name,"Gpsim");
 
   sbw->gui_obj.window = window;
 

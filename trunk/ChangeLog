@@ -2,6 +2,43 @@ gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 
 T. Scott Dattalo
 
+gpsim-0.21.0
+  o Profiling has been added
+  o Trace viewer has been added
+  o Added 16c62,16c63,16c72,16c73 processors
+  o breadboard updates when either a tris or port is changed in the register viewer
+  o Enhanced module interface - now LCD module works with gpsim
+  o Patch from Rudy Moore to fix TMR0 bug
+  o Beautified the Single Step and Trace dump outputs
+  o Added break on stack overflow and underflow
+  o Added "abort_gpsim_now" command. This will unconditionally abort gpsim.
+  o Added "--cli" command line option. Invokes gpsim in command line mode
+    even if it has been configured to use the gui.
+  o Program viewer can now display ASCII encode text in "dt" tables
+  o Symbolic setting of execution breaks was not working.
+  o C++ bugs fixed
+
+From Salvador Eduardo Tropea mailto:salvador@inti.gov.ar
+* Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps
+  is a fault in the version I use of popt, double check it.
+* Added: gtk_window_set_wmclass calls to help Enlightenment to remmember the
+  positions of the windows.     
+* Added: In gui/gui_main.c a couple of #undef to avoid redefinitions in
+  eXdbm.h. Also check if that's OK for the eXdbm you are using.
+* Modified: Moved the INTCON register from _14bit_18pins class to child
+  classes. That's because I needed to inherit from it and P16X6X_processor
+  and both defines INTCON. I also think things are more clear in this way.
+* Fixed: A bug in the A/D routines. If you started a conversion at the same
+  time you were enabling the A/D this conversion was aborted. To fix it I
+  transfered new_value to value before calling start_conversion().
+* Added: Partial support for 16C712 and 16C716 CPUs, they inherit from 14bits
+  18pins processors because they have 18 pins and also from 16x6x because
+  they have TMR1, TMR2 and Capture/Compare facilities like in 16C63. I could
+  check it deeply, just the A/D part. I also didn't implement the DATACCP and
+  TRISCCP registers, I don't know how they work, but I think they control the
+  use of some I/O pins (normal or CCP function).
+
+	
 28JUL00 gpsim-0.20.0
   o Modules - gpsim now supports dynamically loaded modules
     -- module command
