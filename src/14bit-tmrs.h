@@ -209,16 +209,16 @@ public:
 
   TMR1L(void);
 
-  void put(unsigned int new_value);
-  unsigned int get(void);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get(void);
   virtual unsigned int get_value(void);
-  unsigned int get_low_and_high(void);
-  void on_or_off(int new_state);
-  void increment(void);   // Used when TMR1 is attached to an external clock
-  void current_value(void);
-  void new_clock_source(void);
-  void update(void);
-  void clear_timer(void);
+  virtual unsigned int get_low_and_high(void);
+  virtual void on_or_off(int new_state);
+  virtual void increment(void);   // Used when TMR1 is attached to an external clock
+  virtual void current_value(void);
+  virtual void new_clock_source(void);
+  virtual void update(void);
+  virtual void clear_timer(void);
 };
 
 
@@ -274,7 +274,7 @@ enum
     SSPIF   = 1<<3,
     TXIF    = 1<<4,
     RCIF    = 1<<5,
-    spareIF = 1<<6,
+    ADIF    = 1<<6,     // 18cxxx
     PSPIF   = 1<<7
 };
 
@@ -311,9 +311,9 @@ enum
       put(get() | RCIF);
     }
 
-  inline void set_spareif(void)
+  inline void set_adif(void)
     {
-      put(get() | spareIF);
+      put(get() | ADIF);
     }
 
   inline void set_pspif(void)

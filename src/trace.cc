@@ -314,9 +314,9 @@ int Trace::find_previous_cycle(int index)
 //------------------------------------------------------------------
 // find_cycle
 //
-//  This routine will search for the n'th cycle BEFORE the last one
-// in the trace buffer. It will then find the instruction and pc indices
-// after this cycle.
+//  This routine will search for the n'th cycle in the trace buffer
+// BEFORE the one at "in_index". It will then find the instruction 
+// and pc indices after this cycle.
 //
 // INPUT
 //    n - number of cycles to search back into the trace buffer.
@@ -332,7 +332,7 @@ int Trace::find_previous_cycle(int index)
 // the n'th cycle has been found
 
 
-guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cycle_index)
+guint64 Trace::find_cycle(int n, int in_index, int &instruction_index, int &pc_index, int &cycle_index)
 {
   unsigned int i;
   guint64 cycle=0;
@@ -346,12 +346,18 @@ guint64 Trace::find_cycle(int n, int &instruction_index, int &pc_index, int &cyc
   pc_index=-1;
   cycle_index=-1;
 
-  // The trace_index is pointing to the next available slot,
-  // but we need to start looking at the last traced thing.
-  i = (trace_index-1) & TRACE_BUFFER_MASK;
+  if(in_index>0) {
+    i = in_index & TRACE_BUFFER_MASK;
+  } else {
 
-  // Starting at the latest trace, search backwards first for 
-  // an instruction and then for a program_counter
+    // The trace_index is pointing to the next available slot,
+    // but we need to start looking at the last traced thing.
+    i = (trace_index-1) & TRACE_BUFFER_MASK;
+
+  }
+
+  // search backwards first for an instruction and then for a program_counter
+
   do
   {
     if(is_cycle_trace(i) == 2) {
@@ -563,7 +569,7 @@ int Trace::dump(unsigned int n=0, FILE *out_stream=NULL)
   if(!n)
     n = 5;
 
-  string_cycle = find_cycle(n,instruction_index, pc_index, cycle_index);
+  string_cycle = find_cycle(n,-1,instruction_index, pc_index, cycle_index);
 
   if(pc_index>0) {
 

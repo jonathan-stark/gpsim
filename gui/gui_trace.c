@@ -38,13 +38,8 @@ typedef enum {
 
 guint64 row_to_cycle[MAXTRACES];
 
-struct TraceMapping {
 
-  guint64 cycle;
-  int simulation_trace_index;
-};
-
-struct TraceMapping trace_map[MAXTRACES];
+//struct TraceMapping trace_map[MAXTRACES];
 
 /*****************************************************************
  * xref_update
@@ -57,6 +52,8 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
   GUI_Processor *gp;
   guint64 cycle;
+  int trace_index;
+
 #define TRACE_STRING 100
   char str[TRACE_STRING];
   GtkSheet *sheet;
@@ -87,10 +84,16 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
     return;
 
   str[0] = 0;  // Assume that the trace is empty.
-  gpsim_get_current_trace(&cycle, str, TRACE_STRING);
+  gpsim_get_current_trace(&cycle, &trace_index, str, TRACE_STRING);
 
   if(str[0] && (cycle>=tw->last_cycle)) {
     tw->last_cycle = cycle;
+    tw->trace_map[tw->trace_map_index].cycle = cycle;
+    tw->trace_map[tw->trace_map_index].simulation_trace_index = index;
+
+    // Advance the trace_map_index using rollover arithmetic
+    if(++tw->trace_map_index >= MAXTRACES)
+      tw->trace_map_index = 0;
 
     sheet=GTK_SHEET(tw->trace_sheet);
     gtk_sheet_freeze(sheet);
@@ -349,8 +352,15 @@ BuildTraceWindow(Trace_Window *tw)
 
   gtk_widget_show (window);
 
-  for(i=0; i<MAXTRACES; i++)
-     trace_map[i].cycle = 0;
+  if(!tw->trace_map) { 
+    tw->trace_map = (struct TraceMapping *)malloc(MAXTRACES * sizeof(struct TraceMapping));
+    
+    for(i=0; i<MAXTRACES; i++) {
+      tw->trace_map[i].cycle = 0;
+      tw->trace_map[i].simulation_trace_index = 0;
+    }
+    tw->trace_map_index = 0;
+  }
 
   tw->gui_obj.enabled=1;
   tw->gui_obj.is_built=1;
@@ -375,7 +385,7 @@ int CreateTraceWindow(GUI_Processor *gp)
   trace_window->gui_obj.wt = WT_trace_window;
   trace_window->gui_obj.change_view = SourceBrowser_change_view;//change_view;
   trace_window->gui_obj.is_built = 0;
-
+  trace_window->trace_map = NULL;
 
   gp->trace_window = trace_window;
 

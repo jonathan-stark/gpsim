@@ -673,11 +673,14 @@ void gpsim_assign_trace_xref(gpointer xref)
 
 //--------------------------------------------------------------------------
 
-void gpsim_get_current_trace(guint64 *current_cycle, char *current_trace, int bufsize)
+void gpsim_get_current_trace(guint64 *current_cycle, int *current_index,
+			     char *current_trace, int bufsize)
 {
 
   if(current_cycle)
     *current_cycle = trace.string_cycle;
+  if(current_index)
+    *current_index = trace.string_index;
   if(current_trace)
     strncpy(current_trace,trace.string_buffer,bufsize);
 }

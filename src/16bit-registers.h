@@ -419,6 +419,7 @@ enum
 
 //---------------------------------------------------------
 // PIR1
+/*
 class PIR1_16 : public sfr_register
 {
  public:
@@ -459,8 +460,9 @@ enum
      value |= RCIF;
      trace.register_write(address,value);
    }
+ PIR1_16(void);
 };
-
+*/
 //---------------------------------------------------------
 // T0CON - Timer 0 control register
 class T0CON : public OPTION_REG
@@ -476,39 +478,13 @@ class T0CON : public OPTION_REG
 };
 
 //---------------------------------------------------------
-// TMR0 - Timer
-/*
-class _TMR0 : public TMR0 // public sfr_register, public BreakCallBack
-{
-public:
-
-  unsigned int 
-    synchronized_cycle,
-    prescale,
-    prescale_counter,
-    last_cycle,
-    future_cycle;
-
-
-  virtual void callback(void) = 0;
-
-  _TMR0(void);
-
-  virtual void put(unsigned int new_value)=0;
-  unsigned int get(void);
-  virtual unsigned int get_value(void) = 0;
-  void start(void);
-  virtual void increment(void)=0;   // Used when tmr0 is attached to an external clock
-  virtual void new_prescale(void)=0;
-  void new_clock_source(void);
-
-  virtual unsigned int get_prescale(void)=0;
-  virtual void set_t0if(void)=0;
-  virtual unsigned int get_t0cs(void)=0;
-  virtual void initialize(void)=0;
-};
-
-  */
+// TMR0 - Timer for the 16bit core.
+//
+// The 18cxxx extends TMR0 to a 16-bit timer. However, it maintains 
+// an 8-bit mode that is compatible with the 8-bit TMR0's in the 
+// 14 and 12-bit cores. The 18cxxx TMR0 reuses this code by deriving
+// from the TMR0 class and providing definitions for many of the
+// virtual functions.
 
 class TMR0H : public sfr_register
 {
@@ -525,16 +501,15 @@ class TMR0_16 : public TMR0
 {
 public:
 
-  T0CON *t0con;
+  T0CON  *t0con;
   INTCON *intcon;
   TMR0H  *tmr0h;
 
   virtual void callback(void);
   virtual void increment(void);
-  virtual void put(unsigned int new_value);
   virtual unsigned int get_value(void);
   virtual unsigned int get_prescale(void);
-  virtual void new_prescale(void);
+  virtual unsigned int max_counts(void);
   virtual void set_t0if(void);
   virtual unsigned int get_t0cs(void);
   virtual void initialize(void);
@@ -546,7 +521,7 @@ public:
 class TXREG_16 : public _TXREG
 {
  public:
-  PIR1_16 *pir1;
+  PIR1 *pir1;
 
   virtual bool is_empty(void);
   virtual void empty(void);
@@ -557,7 +532,7 @@ class TXREG_16 : public _TXREG
 class RCREG_16 : public _RCREG
 {
  public:
-  PIR1_16 *pir1;
+  PIR1 *pir1;
 
   virtual void push(unsigned int);
 

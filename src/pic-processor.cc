@@ -1053,7 +1053,7 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
       registers[addr]->address = addr;
       registers[addr]->alias_mask = 0;
       if(new_name)
-	registers[addr]->new_name(new_name);
+        registers[addr]->new_name(new_name);
 
     }
 

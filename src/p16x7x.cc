@@ -263,7 +263,7 @@ void ADCON0::set_interrupt(void)
 void ADCON0_withccp::set_interrupt(void)
 {
 
-  pir->set_spareif();
+  pir->set_adif();
 
 }
 
