@@ -31,6 +31,10 @@ Boston, MA 02111-1307, USA.  */
 #include <string.h>
 #include <unistd.h>
 
+
+#include "../src/breakpoints.h"
+#include "../src/processor.h"
+
 // in input.cc -- parse_string sends a string through the command parser
 extern int parse_string(char * str);
 
@@ -85,25 +89,81 @@ unsigned int ascii2uint(char **buffer, int digits)
 
 enum eGPSIMObjectTypes
   {
-    GPSIM_OBJTYP_CONTAINER = 1,
-    GPSIM_OBJTYP_STRING = 2,
-    GPSIM_OBJTYP_INT32 = 3,
-    GPSIM_OBJTYP_COMMAND = 4
 
+    // Basic types
+
+    GPSIM_OBJTYP_CONTAINER = 1,
+    GPSIM_OBJTYP_STRING    = 2,
+    GPSIM_OBJTYP_INT32     = 3,
+    GPSIM_OBJTYP_COMMAND   = 4,
+
+    // commands:
+
+    GPSIM_CMD_BREAK              = 0x80, // Query # of breaks
+    GPSIM_CMD_BREAK_EXEC         = 0x81, // Set execution break
+    GPSIM_CMD_BREAK_REGWRITE     = 0x82, // Set reg write break
+    GPSIM_CMD_BREAK_REGREAD      = 0x83, // Set reg read break
+    GPSIM_CMD_BREAK_REGWRITE_VAL = 0x84, // Set reg write val break
+    GPSIM_CMD_BREAK_REGREAD_VAL  = 0x85, // Set reg read val break
+    GPSIM_CMD_BREAK_STKOV        = 0x86, // Set break on stack overflow
+    GPSIM_CMD_BREAK_STKUN        = 0x87, // Set break on stack underflow
+    GPSIM_CMD_BREAK_WDT          = 0x88, // Set break on Watch Dog timer
+
+    GPSIM_CMD_CLEAR       = 0x90,
+    GPSIM_CMD_EXAMINE_RAM = 0x91,
+    GPSIM_CMD_EXAMINE_ROM = 0x92,
+    GPSIM_CMD_STEPOVER   = 0x93,
+    GPSIM_CMD_RUN        = 0x94,
+    GPSIM_CMD_SET        = 0x95,
+    GPSIM_CMD_STEP       = 0x96,
+    GPSIM_CMD_SYMBOL     = 0x97, // Query the value of a symbol
+    GPSIM_CMD_VERSION    = 0x98
   };
 
-enum eGPSIMCommands
-  {
-    GPSIM_CMD_BREAK = 1,
-    GPSIM_CMD_CLEAR = 2,
-    GPSIM_CMD_EXAMINE = 3,
-    GPSIM_CMD_STEPOVER = 4,
-    GPSIM_CMD_RUN = 5,
-    GPSIM_CMD_SET = 6,
-    GPSIM_CMD_STEP = 7,
-    GPSIM_CMD_VERSION = 8
 
+//--------------------
+int ParseInt(char **buffer, unsigned int &retInt)
+{
+
+  char *b = *buffer;
+
+  if(ascii2uint(&b,2) == GPSIM_OBJTYP_INT32) {
+    retInt = ascii2uint(&b,8);
+    *buffer = b;
+    return 2+8;
   }
+
+  return 0;
+}
+
+//--------------------
+bool ParseString(char **buffer, char *retStr, int maxLen)
+{
+
+  char *b = *buffer;
+
+  if(ascii2uint(&b,2) == GPSIM_OBJTYP_STRING) {
+    int length = ascii2uint(&b,2);
+
+    maxLen--;   // reserve space for a terminating 0.
+
+    length = (maxLen < length) ? maxLen  : length;
+
+    strncpy(retStr, b, length);
+    retStr[length] = 0;
+
+    *buffer = b + length;
+    return 2+2+length;
+  }
+
+  return 0;
+}
+
+//------------------------------------------------------------------------
+// Socket wrapper class
+// 
+// This class is a simple wrapper around the standard BSD socket calls.
+// 
 
 class Socket
 {
@@ -281,8 +341,16 @@ void Socket::respond(char *buf)
     Send(buf);
 }
 
-
-
+//------------------------------------------------------------------------
+// ParseObject
+//
+// Given a pointer to a string, this routine will extract gpsim 
+// objects from it. These objects essentially tell gpsim how to
+//
+//   * * * W A R N I N G * * *
+//
+// This code will change. 
+//
 
 void Socket::ParseObject(char *buffer)
 {
@@ -308,16 +376,19 @@ void Socket::ParseObject(char *buffer)
     case GPSIM_OBJTYP_STRING:
       {
 	char tmp[256];
+	
 	int length = ascii2uint(&b,2);
 
   	length = (255 < length) ? 255  : length;
 
 	strncpy(tmp, b, length);
 	tmp[length] = 0;
-
+	
 	printf("String %s\n",tmp);
 	buffer_len -= (length+2);
 	respond("String");
+       
+
       }
       break;
 
@@ -330,14 +401,49 @@ void Socket::ParseObject(char *buffer)
       }
       break;
 
-    case GPSIM_OBJTYP_COMMAND:
-      {
-	int command = ascii2uint(&b,2);
+    case GPSIM_CMD_BREAK:
+    case GPSIM_CMD_BREAK_EXEC:
+    case GPSIM_CMD_BREAK_REGWRITE:
+    case GPSIM_CMD_BREAK_REGREAD:
+    case GPSIM_CMD_BREAK_REGWRITE_VAL:
+    case GPSIM_CMD_BREAK_REGREAD_VAL:
+    case GPSIM_CMD_BREAK_STKOV:
+    case GPSIM_CMD_BREAK_STKUN:
+    case GPSIM_CMD_BREAK_WDT:
 
-	printf("Command %d\n", command);
-	buffer_len -= 8;
+
+    case GPSIM_CMD_CLEAR:
+    case GPSIM_CMD_EXAMINE_RAM:
+    case GPSIM_CMD_EXAMINE_ROM:
+    case GPSIM_CMD_STEPOVER:
+    case GPSIM_CMD_RUN:
+    case GPSIM_CMD_SET:
+    case GPSIM_CMD_STEP:
+    case GPSIM_CMD_VERSION:
+
+      {
+	printf("Command\n");
+	respond("Command");
 
       }
+      break;
+    case GPSIM_CMD_SYMBOL:
+      {
+	char tmp[256];
+	int bl = ParseString(&b,tmp,256);
+	if(bl) {
+	  buffer_len -= bl;
+	  printf("Symbol command with string %s\n",tmp);
+	  symbol *sym = get_symbol_table().find(tmp);
+	  if(sym) {
+	    snprintf(tmp,sizeof(tmp),"$03%08x",sym->get_value());
+	    printf("responding with %d\n",tmp);
+	    respond(tmp);
+	  } else
+	    respond("symcmd");
+	}
+      }
+      break;
     default:
       printf("Invalid object type: %d\n",ObjectType);
     }
