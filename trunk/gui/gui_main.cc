@@ -221,6 +221,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     gp->status_bar->NewProcessor(gp);
     gp->program_memory->NewProcessor(gp);
     gp->source_browser->CloseSource();
+    gp->source_browser->NewProcessor(gp);
     gp->symbol_window->NewSymbols();
     gp->watch_window->ClearWatches();
     gp->breadboard_window->NewProcessor(gp);

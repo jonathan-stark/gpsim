@@ -77,6 +77,8 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 {
  public:
 
+  ProgramMemoryAccess *pma;   // pointer to the processor's pma.
+
   BreakPointList breakpoints;
   BreakPointList notify_start_list;
   BreakPointList notify_stop_list;
@@ -126,7 +128,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 
   SourceBrowserParent_Window *parent;
 
-  SourceBrowserAsm_Window(GUI_Processor *gp);
+  SourceBrowserAsm_Window(GUI_Processor *gp,char* new_name);
   virtual void Build(void);
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
@@ -213,6 +215,7 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
+  virtual void ChangeView(int view_state);
 
 };
 

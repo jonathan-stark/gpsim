@@ -259,11 +259,11 @@ void SourceBrowserAsm_Window::SetPC(int address)
     
   if(!source_loaded)
     return;
-  if(!gp || !gp->cpu)
+  if(!pma)
     return;
 
   // find notebook page containing address 'address'
-  sbawFileId = gp->cpu->pma.get_file_id(address);
+  sbawFileId = pma->get_file_id(address);
 
   for(i=0;i<SBAW_NRFILES;i++)
     {
@@ -288,7 +288,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     
   new_pcw = source_pcwidget[id];
 
-  row = gp->cpu->pma.get_src_line(address);
+  row = pma->get_src_line(address);
 
   if(row==INVALID_VALUE)
     return;
@@ -342,11 +342,11 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
     
   if(!source_loaded)
     return;
-  if(!gp || !gp->cpu)
+  if(!pma)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pageindex_to_fileid[i]==gp->cpu->pma.get_file_id(address))
+    if(pageindex_to_fileid[i]==pma->get_file_id(address))
       id=i;
   }
 
@@ -358,7 +358,7 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 
   gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
-  line = gp->cpu->pma.get_src_line(address);
+  line = pma->get_src_line(address);
 
   if(line==INVALID_VALUE)
     return;
@@ -389,11 +389,11 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   
   assert(address>=0);
 
-  if(!source_loaded || !gp->cpu)
+  if(!source_loaded || !pma)
     return;
 
   for(i=0;i<SBAW_NRFILES;i++) {
-    if(pageindex_to_fileid[i]==gp->cpu->pma.get_file_id(address))
+    if(pageindex_to_fileid[i]==pma->get_file_id(address))
       id=i;
   }
 
@@ -403,7 +403,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     return;
   }
   
-  row = gp->cpu->pma.get_src_line(address);
+  row = pma->get_src_line(address);
 
   if(row==INVALID_VALUE)
       return;
@@ -420,19 +420,19 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   notify_stop_list.Remove(address);
 
 
-  if(gp->cpu->pma.address_has_profile_start(address))
+  if(pma->address_has_profile_start(address))
     notify_start_list.Add(address, 
 			 gtk_pixmap_new(pixmap_profile_start,startp_mask), 
 			 source_layout[id],
 			 PIXMAP_POS(this,e));
 
-  if(gp->cpu->pma.address_has_profile_stop(address))
+  if(pma->address_has_profile_stop(address))
     notify_stop_list.Add(address, 
 			 gtk_pixmap_new(pixmap_profile_stop,stopp_mask), 
 			 source_layout[id],
 			 PIXMAP_POS(this,e));
 
-  if(gp->cpu->pma.address_has_break(address))
+  if(pma->address_has_break(address))
     breakpoints.Add(address,
 		    gtk_pixmap_new(pixmap_break,bp_mask),
 		    source_layout[id],
@@ -450,7 +450,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     char text[256];
     int i,start,end, temp;
 
-    if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu)
+    if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu || !popup_sbaw->pma)
       return;
 
     item = (menu_item *)data;
@@ -473,7 +473,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_MOVE_PC:
       line = popup_sbaw->menu_data->line;
 
-      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
       if(address!=INVALID_VALUE)
 	popup_sbaw->gp->cpu->pc->put_value(address);
       break;
@@ -481,7 +481,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_RUN_HERE:
       line = popup_sbaw->menu_data->line+1;
 
-      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line);
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line);
 
       if(address!=INVALID_VALUE)
 	popup_sbaw->gp->cpu->run_to_address(address);
@@ -490,12 +490,12 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_BP_HERE:
       line = popup_sbaw->menu_data->line + 1;
 
-      popup_sbaw->gp->cpu->pma.toggle_break_at_line(popup_sbaw->pageindex_to_fileid[id],line);
+      popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pageindex_to_fileid[id],line);
 
       break;
     case MENU_PROFILE_START_HERE:
       line = popup_sbaw->menu_data->line;
-      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
 
       popup_sbaw->gp->profile_window->StartExe(address);
 
@@ -504,7 +504,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     case MENU_PROFILE_STOP_HERE:
       line = popup_sbaw->menu_data->line;
 
-      address = popup_sbaw->gp->cpu->pma.find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
+      address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pageindex_to_fileid[id],line+1);
 
       popup_sbaw->gp->profile_window->StopExe(address);
 
@@ -547,22 +547,22 @@ popup_activated(GtkWidget *widget, gpointer data)
       popup_sbaw->gp->symbol_window->SelectSymbolName(text);
       break;
     case MENU_STEP:
-      popup_sbaw->gp->cpu->pma.step(1);
+      popup_sbaw->pma->step(1);
       break;
     case MENU_STEP_OVER:
-      popup_sbaw->gp->cpu->pma.step_over();
+      popup_sbaw->pma->step_over();
       break;
     case MENU_RUN:
       popup_sbaw->gp->cpu->run();
       break;
     case MENU_STOP:
-      popup_sbaw->gp->cpu->pma.stop();
+      popup_sbaw->pma->stop();
       break;
     case MENU_RESET:
       popup_sbaw->gp->cpu->reset(POR_RESET);
       break;
     case MENU_FINISH:
-      popup_sbaw->gp->cpu->pma.finish();
+      popup_sbaw->pma->finish();
       break;
     default:
       puts("Unhandled menuitem?");
@@ -706,7 +706,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
       current_page=page_num;
       id=sbaw->pageindex_to_fileid[current_page];
 	
-      sbaw->gp->cpu->pma.set_hll_mode(file_id_to_source_mode[id]);
+      sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
 
       // Update pc widget
       address=sbaw->gp->cpu->pc->get_raw_value();
@@ -1005,7 +1005,7 @@ static void marker_cb(GtkWidget *w1,
       line = gui_pixel_to_entry(id, (int)event->y -
 				sbaw->layout_offset +
 				(int)GTK_TEXT(sbaw->source_text[id])->vadj->value)->line;
-      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
+      sbaw->pma->toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
     }
     break;
   case GDK_BUTTON_RELEASE:
@@ -1032,14 +1032,14 @@ static void marker_cb(GtkWidget *w1,
 	
     if(dragwidget == sbaw->source_pcwidget[id]) {
       
-      sbaw->gp->cpu->pma.find_closest_address_to_line(sbaw->pageindex_to_fileid[id] ,line+1);
+      sbaw->pma->find_closest_address_to_line(sbaw->pageindex_to_fileid[id] ,line+1);
 
       if(address!=INVALID_VALUE)
 	sbaw->gp->cpu->pc->put_value(address);
     } else {
       
-      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,dragstartline+1);
-      sbaw->gp->cpu->pma.toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
+      sbaw->pma->toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,dragstartline+1);
+      sbaw->pma->toggle_break_at_line(sbaw->pageindex_to_fileid[id] ,line+1);
     }
     break;
   default:
@@ -1543,6 +1543,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
       return;
   }
   
+  if(!pma)
+    pma = &(gp->cpu->pma);
+
   assert(wt==WT_asm_source_window);
 
   CloseSource();
@@ -1569,24 +1572,20 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
     FileContext *fc = (*gp->cpu->files)[i];
     file_name = fc->name().c_str();
 
-    //gpsim_file = &(gp->cpu->files[i]);
-    //file_name = gpsim_file->name;
-
-
-      if(strcmp(file_name+strlen(file_name)-4,".lst")
-	 &&strcmp(file_name+strlen(file_name)-4,".LST")
-	 &&strcmp(file_name+strlen(file_name)-4,".cod")
-	 &&strcmp(file_name+strlen(file_name)-4,".COD"))
+    if(strcmp(file_name+strlen(file_name)-4,".lst")
+       &&strcmp(file_name+strlen(file_name)-4,".LST")
+       &&strcmp(file_name+strlen(file_name)-4,".cod")
+       &&strcmp(file_name+strlen(file_name)-4,".COD"))
       {
-	  if(!strcmp(file_name+strlen(file_name)-2,".c")
-	     ||!strcmp(file_name+strlen(file_name)-2,".C")
-	     ||!strcmp(file_name+strlen(file_name)-4,".jal")
-	     ||!strcmp(file_name+strlen(file_name)-4,".JAL")
-	    )
+	if(!strcmp(file_name+strlen(file_name)-2,".c")
+	   ||!strcmp(file_name+strlen(file_name)-2,".C")
+	   ||!strcmp(file_name+strlen(file_name)-4,".jal")
+	   ||!strcmp(file_name+strlen(file_name)-4,".JAL")
+	   )
 	  {
 	    // These are HLL sources
 	    file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
-	    gp->cpu->pma.set_hll_mode(ProgramMemoryAccess::HLL_MODE);
+	    pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
 	  }
 
 	  // FIXME, gpsim may change sometime making this fail
@@ -1846,7 +1845,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
             gdk_font_unref(font);
 #endif
 	    strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-	    config_set_string(sbaw->name,"sourcefont",sbaw->sourcefont_string);
+	    config_set_string(sbaw->name(),"sourcefont",sbaw->sourcefont_string);
             fonts_ok++;
 	}
 
@@ -1867,7 +1866,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
             gdk_font_unref(font);
 #endif
 	    strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-	    config_set_string(sbaw->name,"commentfont",sbaw->commentfont_string);
+	    config_set_string(sbaw->name(),"commentfont",sbaw->commentfont_string);
             fonts_ok++;
 	}
     }
@@ -2288,12 +2287,12 @@ void SourceBrowserAsm_Window::Build(void)
 #define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
 #endif
 
-  if(config_get_string(name,"commentfont",&fontstring))
+  if(config_get_string(name(),"commentfont",&fontstring))
     strcpy(commentfont_string,fontstring);
   else 
     strcpy(commentfont_string,DEFAULT_COMMENTFONT);
 
-  if(config_get_string(name,"sourcefont",&fontstring))
+  if(config_get_string(name(),"sourcefont",&fontstring))
     strcpy(sourcefont_string,fontstring);
   else
     strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
@@ -2304,8 +2303,8 @@ void SourceBrowserAsm_Window::Build(void)
       {
 	strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
 	strcpy(commentfont_string,DEFAULT_COMMENTFONT);
-	config_set_string(name,"sourcefont",sourcefont_string);
-	config_set_string(name,"commentfont",commentfont_string);
+	config_set_string(name(),"sourcefont",sourcefont_string);
+	config_set_string(name(),"commentfont",commentfont_string);
       }
     else
       {
@@ -2388,7 +2387,7 @@ void SourceBrowserAsm_Window::Build(void)
   UpdateMenuItem();
 }
 
-SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp)
+SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
 {
   gint i;
 
@@ -2396,7 +2395,12 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp)
 
   window = 0;
   gp = _gp;
-  name = "source_browser";
+
+  if(new_name)
+    set_name(new_name);
+  else
+    set_name("source_browser");
+
   wc = WC_source;
   wt = WT_asm_source_window;
   is_built = 0;
@@ -2439,10 +2443,14 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp)
 // Here is some experimental code that allows multiple source browser
 // windows.
 
-SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *gp)
+SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
+  : GUI_Object()
 {
-  children.push_back(new SourceBrowserAsm_Window(gp));
-  //children.push_back(new SourceBrowserAsm_Window(gp));
+
+  gp = _gp;
+  set_name("source_browser_parent");
+
+  children.push_back(new SourceBrowserAsm_Window(_gp));
 }
 
 void SourceBrowserParent_Window::Build(void)
@@ -2457,12 +2465,36 @@ void SourceBrowserParent_Window::Build(void)
 
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 {
-  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
 
-  for (sbaw_iterator = children.begin();  
-       sbaw_iterator != children.end(); 
-       sbaw_iterator++)
-    (*sbaw_iterator)->NewProcessor(gp);
+  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
+  list <ProgramMemoryAccess *> :: iterator pma_iterator;
+
+  sbaw_iterator = children.begin();
+  pma_iterator = gp->cpu->pma_context.begin();
+
+  SourceBrowserAsm_Window *sbaw=0;
+  while( (sbaw_iterator != children.end()) ||
+	 (pma_iterator != gp->cpu->pma_context.end()))
+    {
+
+      if(sbaw_iterator == children.end())
+	{
+	  sbaw = new SourceBrowserAsm_Window(gp);
+	  children.push_back(sbaw);
+	}
+      else
+	sbaw = *sbaw_iterator++;
+
+      if(pma_iterator != gp->cpu->pma_context.end()) 
+	{
+	  //(*sbaw_iterator)->NewProcessor(gp);
+	  sbaw->pma = *pma_iterator;
+	  pma_iterator++;
+	}
+      else
+	sbaw->enabled = false;
+
+    }
 }
 
 void SourceBrowserParent_Window::SelectAddress(int address)
@@ -2525,5 +2557,14 @@ void SourceBrowserParent_Window::NewSource(GUI_Processor *gp)
    (*sbaw_iterator)->NewSource(gp);
 }
 
+void SourceBrowserParent_Window::ChangeView(int view_state)
+{
+  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
+
+  for (sbaw_iterator = children.begin();  
+       sbaw_iterator != children.end(); 
+       sbaw_iterator++)
+   (*sbaw_iterator)->ChangeView(view_state);
+}
 
 #endif // HAVE_GUI

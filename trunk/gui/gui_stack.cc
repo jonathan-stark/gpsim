@@ -272,7 +272,7 @@ void Stack_Window::Build(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   gtk_signal_connect (GTK_OBJECT (window), "destroy",
 		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
@@ -333,7 +333,7 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
   menu = "<main>/Windows/Stack";
 
   gp = _gp;
-  name = "stack_viewer";
+  set_name("stack_viewer");
   wc = WC_data;
   wt = WT_stack_window;
   window = 0;

@@ -55,8 +55,10 @@ GUI_Object::GUI_Object(void)
 
   gp = 0;
 
+  wc = WC_misc;
+  wt = WT_INVALID;
+  is_built = 0;
   window = 0;
-  name = 0;
   menu = 0;
 
   x=0; y=0;
@@ -70,6 +72,33 @@ int GUI_Object::Create(GUI_Processor *_gp)
 
   return 0;
 }
+
+char *GUI_Object::name(void)
+{
+  static char p[128];
+  int len = string::npos;
+  if(len > (1+sizeof(p)))
+    len = sizeof(p)-1;
+  
+  p[name_str.copy(p,len)] = 0;
+
+  return p;
+}
+
+void GUI_Object::set_name(char *new_name)
+{
+  if(new_name)
+    name_str = string(new_name);
+  else
+    name_str = string("no_name");
+
+}
+
+void GUI_Object::set_name(string &new_name)
+{
+  name_str = new_name;
+}
+
 void GUI_Object::UpdateMenuItem(void)
 {
   GtkWidget *menu_item;
@@ -133,18 +162,20 @@ void GUI_Object::Build(void)
 
 int GUI_Object::get_config(void)
 {
-  if(!name)
+  char *pName = name();
+
+  if(!pName)
     return 0;
 
-  if(!config_get_variable(name, "enabled", &enabled))
+  if(!config_get_variable(pName, "enabled", &enabled))
     enabled=0;
-  if(!config_get_variable(name, "x", &x))
+  if(!config_get_variable(pName, "x", &x))
     x=10;
-  if(!config_get_variable(name, "y", &y))
+  if(!config_get_variable(pName, "y", &y))
     y=10;
-  if(!config_get_variable(name, "width", &width))
+  if(!config_get_variable(pName, "width", &width))
     width=300;
-  if(!config_get_variable(name, "height", &height))
+  if(!config_get_variable(pName, "height", &height))
     height=100;
 
   //printf("get_config: enabled:%d x:%d y:%d w:%d h:%d\n",enabled,x,y,width,height);
@@ -189,11 +220,16 @@ int GUI_Object::set_config(void)
 {
   check();
 
-  config_set_variable(name, "enabled", ((enabled) ? 1 : 0) );
-  config_set_variable(name, "x", x);
-  config_set_variable(name, "y", y);
-  config_set_variable(name, "width", width);
-  config_set_variable(name, "height", height);
+  char *pName = name();
+
+  if(!pName)
+    return 0;
+
+  config_set_variable(pName, "enabled", ((enabled) ? 1 : 0) );
+  config_set_variable(pName, "x", x);
+  config_set_variable(pName, "y", y);
+  config_set_variable(pName, "width", width);
+  config_set_variable(pName, "height", height);
   return 1;
 }
 
@@ -251,48 +287,51 @@ int config_set_string(char *module, char *entry, const char *string)
 
 int config_set_variable(char *module, char *entry, int value)
 {
-    int ret;
-    DB_LIST list;
+  int ret;
+  DB_LIST list;
 
-    list = eXdbmGetList(dbid, 0, module);
-    if(list==0)
+  if(!module || !entry)
+    return 0;
+
+  list = eXdbmGetList(dbid, 0, module);
+  if(list==0)
     {
-	ret = eXdbmCreateList(dbid, 0, module, 0);
-	if(ret==-1)
+      ret = eXdbmCreateList(dbid, 0, module, 0);
+      if(ret==-1)
 	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
+	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
+	  return 0;
 	}
 	
-	list = eXdbmGetList(dbid, 0, module);
-	if(list==0)
+      list = eXdbmGetList(dbid, 0, module);
+      if(list==0)
 	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
+	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
+	  return 0;
 	}
     }
 
-    // We have the list
+  // We have the list
     
-    ret = eXdbmChangeVarInt(dbid, list, entry, value);
-    if(ret == -1)
+  ret = eXdbmChangeVarInt(dbid, list, entry, value);
+  if(ret == -1)
     {
-	ret = eXdbmCreateVarInt(dbid, list, entry, 0, value);
-	if(ret==-1)
+      ret = eXdbmCreateVarInt(dbid, list, entry, 0, value);
+      if(ret==-1)
 	{
-	    puts("\n\n\n\ndidn't work");
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    puts("\n\n\n\n");
-	    return 0;
+	  puts("\n\n\n\ndidn't work");
+	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
+	  puts("\n\n\n\n");
+	  return 0;
 	}
     }
-    ret=eXdbmUpdateDatabase(dbid);
-    if(ret==-1)
+  ret=eXdbmUpdateDatabase(dbid);
+  if(ret==-1)
     {
-	puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	return 0;
+      puts(eXdbmGetErrorString(eXdbmGetLastError()));
+      return 0;
     }
-    return 1;
+  return 1;
 }
 
 int config_get_variable(char *module, char *entry, int *value)

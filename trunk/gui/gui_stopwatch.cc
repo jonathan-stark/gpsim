@@ -146,11 +146,11 @@ modepopup_activated(GtkWidget *widget, gpointer data)
   {
   case '+':
     sww->count_dir=1;
-    config_set_variable(sww->name,"count_dir",sww->count_dir);
+    config_set_variable(sww->name(),"count_dir",sww->count_dir);
     break;
   case '-':
     sww->count_dir=-1;
-    config_set_variable(sww->name,"count_dir",sww->count_dir);
+    config_set_variable(sww->name(),"count_dir",sww->count_dir);
     break;
   default:
     assert(0);
@@ -218,7 +218,7 @@ rolloverchanged(GtkWidget *widget, StopWatch_Window *sww)
 	if(v!=sww->rollover)
 	{
             sww->rollover=v;
-	    config_set_string(sww->name,"rollover",text);
+	    config_set_string(sww->name(),"rollover",text);
 	    sww->Update();
 	}
     }
@@ -236,7 +236,7 @@ void StopWatch_Window::Build(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
 
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event), (gpointer)this);
@@ -380,7 +380,7 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   menu = "<main>/Windows/Stopwatch";
 
   gp = _gp;
-  name = "stopwatch_viewer";
+  set_name("stopwatch_viewer");
   wc = WC_data;
   wt = WT_stopwatch_window;
   window = 0;
@@ -394,9 +394,9 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   from_update = 0;
 
   get_config();
-  if(config_get_string(name,"rollover",&string))
+  if(config_get_string(name(),"rollover",&string))
     rollover = strtoll(string,0,10);
-  config_get_variable(name,"count_dir",&count_dir);
+  config_get_variable(name(),"count_dir",&count_dir);
     
   if(enabled)
     Build();

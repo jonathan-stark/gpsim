@@ -273,21 +273,21 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
     case MENU_ASCII_1BYTE:
       popup_sbow->ascii_mode=0;
-      config_set_variable(popup_sbow->name,"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 16*char_width + 6);
       for(i=0;i<pm_size/16;i++)
 	update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTEMSB:
       popup_sbow->ascii_mode=1;
-      config_set_variable(popup_sbow->name,"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
 	update_ascii(popup_sbow,i);
       break;
     case MENU_ASCII_2BYTELSB:
       popup_sbow->ascii_mode=2;
-      config_set_variable(popup_sbow->name,"ascii_mode",popup_sbow->ascii_mode);
+      config_set_variable(popup_sbow->name(),"ascii_mode",popup_sbow->ascii_mode);
       gtk_sheet_set_column_width (GTK_SHEET(popup_sbow->sheet), 16, 32*char_width + 6);
       for(i=0;i<pm_size/16;i++)
 	update_ascii(popup_sbow,i);
@@ -827,7 +827,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
             gdk_font_unref(font);
 #endif
 	    strcpy(sbow->normalfont_string,gtk_entry_get_text(GTK_ENTRY(normalfontstringentry)));
-	    config_set_string(sbow->name,"normalfont",sbow->normalfont_string);
+	    config_set_string(sbow->name(),"normalfont",sbow->normalfont_string);
             fonts_ok++;
 	}
 
@@ -848,7 +848,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
             gdk_font_unref(font);
 #endif
 	    strcpy(sbow->breakpointfont_string,gtk_entry_get_text(GTK_ENTRY(breakpointfontstringentry)));
-	    config_set_string(sbow->name,"breakpointfont",sbow->breakpointfont_string);
+	    config_set_string(sbow->name(),"breakpointfont",sbow->breakpointfont_string);
             fonts_ok++;
 	}
 
@@ -869,7 +869,7 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
             gdk_font_unref(font);
 #endif
 	    strcpy(sbow->pcfont_string,gtk_entry_get_text(GTK_ENTRY(pcfontstringentry)));
-	    config_set_string(sbow->name,"pcfont",sbow->pcfont_string);
+	    config_set_string(sbow->name(),"pcfont",sbow->pcfont_string);
             fonts_ok++;
 	}
     }
@@ -1355,15 +1355,15 @@ void SourceBrowserOpcode_Window::Build(void)
 #endif
 
   strcpy(normalfont_string,DEFAULT_NORMALFONT);
-  if(config_get_string(name,"normalfont",&fontstring))
+  if(config_get_string(name(),"normalfont",&fontstring))
       strcpy(normalfont_string,fontstring);
 
   strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
-  if(config_get_string(name,"breakpointfont",&fontstring))
+  if(config_get_string(name(),"breakpointfont",&fontstring))
     strcpy(breakpointfont_string,fontstring);
 
   strcpy(pcfont_string,DEFAULT_PCFONT);
-  if(config_get_string(name,"pcfont",&fontstring))
+  if(config_get_string(name(),"pcfont",&fontstring))
       strcpy(pcfont_string,fontstring);
 
   while(!load_styles(this))
@@ -1373,9 +1373,9 @@ void SourceBrowserOpcode_Window::Build(void)
 	  strcpy(normalfont_string,DEFAULT_NORMALFONT);
 	  strcpy(breakpointfont_string,DEFAULT_BREAKPOINTFONT);
 	  strcpy(pcfont_string,DEFAULT_PCFONT);
-	  config_set_string(name,"normalfont",normalfont_string);
-	  config_set_string(name,"breakpointfont",breakpointfont_string);
-	  config_set_string(name,"pcfont",pcfont_string);
+	  config_set_string(name(),"normalfont",normalfont_string);
+	  config_set_string(name(),"breakpointfont",breakpointfont_string);
+	  config_set_string(name(),"pcfont",pcfont_string);
       }
       else
       {
@@ -1581,7 +1581,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
 
   gp = _gp;
   //  gp->program_memory = this;
-  name = "program_memory";
+  set_name("program_memory");
   wc = WC_source;
   wt = WT_opcode_source_window;
 
@@ -1593,7 +1593,7 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   program=0;
 
   ascii_mode=1; /// default, two bytes/cell, MSB first
-  config_get_variable(name,"ascii_mode",&ascii_mode);
+  config_get_variable(name(),"ascii_mode",&ascii_mode);
 
   get_config();
 

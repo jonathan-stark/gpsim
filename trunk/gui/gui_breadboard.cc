@@ -3722,7 +3722,7 @@ void Breadboard_Window::Build(void)
   //printf("bb %s:%d, w=%d, h=%d\n",__FUNCTION__,__LINE__,width,height);
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
+  gtk_window_set_wmclass(GTK_WINDOW(window),name(),"Gpsim");
   
   //  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
   //			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
@@ -3810,7 +3810,7 @@ Breadboard_Window::Breadboard_Window(GUI_Processor *_gp)
 {
   menu = "<main>/Windows/Breadboard";
 
-  name = "pinout";
+  set_name("pinout");
   wc = WC_misc;
   wt = WT_breadboard_window;
   window = 0;
