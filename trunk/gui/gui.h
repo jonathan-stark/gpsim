@@ -436,6 +436,7 @@ extern GtkStyle *normal_style;
 extern GtkStyle *current_line_number_style;
 extern GtkStyle *breakpoint_line_number_style;
 
+extern GtkItemFactory *item_factory;
 
 void exit_gpsim(void);
 

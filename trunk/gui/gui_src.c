@@ -265,6 +265,7 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
 
 void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
 {
+    GtkWidget *menu_item;
 /*    if (GTK_WIDGET_VISIBLE(GTK_WIDGET(_this->window)))
     {
 	gdk_window_get_size(_this->window->window, &_this->width, &_this->height);
@@ -310,26 +311,57 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
       else
       {
 	  gtk_widget_show(_this->window);
-          _this->enabled=1;
+	  _this->enabled=1;
       }
 
     }
   else if (GTK_WIDGET_VISIBLE(GTK_WIDGET(_this->window)))
   {
-/*      if(_this->wt == WT_register_window)
-      {
-	  Register_Window *rw = (Register_Window *)_this;
-	  if(rw->type == REGISTER_RAM)
-	      rw->gui_obj.gp->status_bar->created=0;
-      }
-      gtk_widget_destroy(_this->window);
-      _this->window=NULL;*/
       _this->enabled=0;
       gtk_widget_hide(_this->window);
   }
 
     // we update config database
     gui_object_set_config(_this);
-    
+
+    // Update menu item
+    switch(_this->wt)
+    {
+    case WT_register_window:
+	if(((Register_Window*)_this)->type==REGISTER_RAM)
+	{
+	    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Ram");
+	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	}
+	else
+	{
+	    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/EEPROM");
+	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	}
+	break;
+    case WT_symbol_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Symbols");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
+    case WT_asm_source_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Source");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
+    case WT_opcode_source_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Disassembly");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
+    case WT_watch_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Watch");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
+    case WT_breadboard_window:
+	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Breadboard");
+	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+	break;
+    default:
+	puts("SourceBrowser_change_view(): unhandled case");
+	break;
+    }
 }
 #endif // HAVE_GUI
