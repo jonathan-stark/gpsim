@@ -1452,7 +1452,8 @@ void NEGF::execute(void)
 	    :
 	    cpu->register_bank[register_address] );
 
-  new_value = -(src_value = source->get());
+  src_value = source->get();
+  new_value = 1 + ~src_value;        // two's complement
 
 
   if(destination)

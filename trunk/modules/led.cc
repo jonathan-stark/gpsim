@@ -306,9 +306,9 @@ void Led_7Segments::build_segments( int w, int h)
 
   // Hard code the display parameters...
 
-  space_factor = 0.13;
-  width_factor = 0.13;
-  sxw = 0.13;
+  space_factor = (float)0.13;
+  width_factor = (float)0.13;
+  sxw = (float)0.13;
   angle = 6;
 
   /* define various useful constants */
@@ -317,10 +317,10 @@ void Led_7Segments::build_segments( int w, int h)
   slope = angle;
   seg_width = width_factor * w;
   spacer = (float)w * space_factor;
-  hskip = (float)seg_width * 0.125;
+  hskip = (float)(seg_width * 0.125);
   fslope = 1 / (segxw/seg_width + 1/slope);
   bslope = -1 / (segxw/seg_width - 1/slope);
-  midpt = h / 2;
+  midpt = (float)h / 2;
 
   /* define some trigonometric values */
   /*  phi is the forward angle separating two segments; 
@@ -384,7 +384,7 @@ void Led_7Segments::build_segments( int w, int h)
   pts[3].x = spacer + (h - pts[3].y)/slope + xfactor;
 
   pts = &(seg_pts[BOTTOM][0]);
-  pts[3].y = pts[4].y = h;
+  pts[3].y = pts[4].y = (float)h;
   pts[2].y = pts[5].y = h - (seg_width / 2) + dy5 + dy6;
   pts[0].y = pts[1].y = h - seg_width;
   pts[0].x = spacer + segxw + seg_width/slope + dx3;  
@@ -596,14 +596,15 @@ void Led_7Segments::create_iopin_map(void)
 
   // Position pins on left side of package
   float pos=0.0;
-  package->set_pin_position(1,pos);pos+=0.9999/7.0;
-  package->set_pin_position(2,pos);pos+=0.9999/7.0;
-  package->set_pin_position(3,pos);pos+=0.9999/7.0;
-  package->set_pin_position(4,pos);pos+=0.9999/7.0;
-  package->set_pin_position(5,pos);pos+=0.9999/7.0;
-  package->set_pin_position(6,pos);pos+=0.9999/7.0;
-  package->set_pin_position(7,pos);pos+=0.9999/7.0;
-  package->set_pin_position(8,pos);pos+=0.9999/7.0;
+  const float dp = (float)(0.9999/7.0);
+  package->set_pin_position(1,pos);pos+=dp;
+  package->set_pin_position(2,pos);pos+=dp;
+  package->set_pin_position(3,pos);pos+=dp;
+  package->set_pin_position(4,pos);pos+=dp;
+  package->set_pin_position(5,pos);pos+=dp;
+  package->set_pin_position(6,pos);pos+=dp;
+  package->set_pin_position(7,pos);pos+=dp;
+  package->set_pin_position(8,pos);pos+=dp;
 
   // Define the I/O pins and assign them to the package.
   //   There are two things happening here. First, there is

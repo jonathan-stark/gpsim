@@ -327,7 +327,7 @@ void Video::copy_scanline_to_pixmap(void)
 
 guint64 Video::cycles_to_us(guint64 cycles)
 {
-  float ret = 0;;
+  double ret = 0;;
 
   if(cpu)
     ret = cycles*4000000.0/cpu->frequency;
@@ -337,7 +337,7 @@ guint64 Video::cycles_to_us(guint64 cycles)
 
 guint64 Video::us_to_cycles(guint64 us)
 {
-  float ret = 0;
+  double ret = 0;
 
   if(cpu)
     ret = us*cpu->frequency/4000000.0;
@@ -358,7 +358,7 @@ void Video::refresh(void)
 void Video::update_state(void)
 {
   guint64 cycletime;
-  int index;
+  guint64 index;
   static int last_port_value=0;
   int val=port->value.get();
   static int shortsync_counter, last_shortsync_counter;
@@ -445,7 +445,7 @@ void Video::update_state(void)
   }
   if(last_port_value==0 && port->value.get()!=0) // End of sync
   {
-    int us_time;
+    guint64 us_time;
 	  
     // Should be 4 us (0.000004*12000000
     us_time = cycles_to_us(cycletime-sync_time);

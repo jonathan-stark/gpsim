@@ -172,7 +172,7 @@ public:
   // -- the derived classes must define their parameters appropriately.
 
   virtual unsigned int register_memory_size () const { return 0x1000;};
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual void create_iopin_map(void);
 

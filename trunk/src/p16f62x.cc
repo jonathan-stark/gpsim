@@ -178,7 +178,7 @@ void P16F62x::create_symbols(void)
 
 }
 
-void P16F62x::set_out_of_range_pm(int address, int value)
+void P16F62x::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))

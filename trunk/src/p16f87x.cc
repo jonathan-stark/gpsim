@@ -39,7 +39,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 
-void P16F871::set_out_of_range_pm(int address, int value)
+void P16F871::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
@@ -197,7 +197,7 @@ P16F871::P16F871(void)
 
 
 
-void P16F873::set_out_of_range_pm(int address, int value)
+void P16F873::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
@@ -346,7 +346,7 @@ P16F873::P16F873(void)
 
 //-------------------------------------------------------
 
-void P16F874::set_out_of_range_pm(int address, int value)
+void P16F874::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))

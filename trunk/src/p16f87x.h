@@ -34,7 +34,7 @@ class P16F871 : public P16C74
  public:
   ADRES  adresl;
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F871_;};
   virtual unsigned int program_memory_size(void) const { return 0x0800; };
@@ -64,7 +64,7 @@ class P16F873 : public P16C73
 
  ADRES  adresl;
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F873_;};
   virtual unsigned int program_memory_size(void) const { return 0x1000; };
@@ -95,7 +95,7 @@ class P16F874 : public P16C74
  public:
   ADRES  adresl;
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _P16F874_;};
   virtual unsigned int program_memory_size(void) const { return 0x1000; };

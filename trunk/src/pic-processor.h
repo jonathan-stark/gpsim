@@ -285,7 +285,7 @@ public:
   virtual void por(void);
   virtual void create(void);
 
-  void init_program_memory(int address, int value);
+  void init_program_memory(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};

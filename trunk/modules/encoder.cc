@@ -106,9 +106,9 @@ void Encoder::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
   assign_pin(1, new IO_bi_directional(enc_port, 0,"a"));
-  package->set_pin_position(1,0.0);
+  package->set_pin_position(1,(float)0.0);
   assign_pin(2, new IO_bi_directional(enc_port, 1,"b"));
-  package->set_pin_position(2,0.9999);
+  package->set_pin_position(2,(float)0.9999);
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like

@@ -154,7 +154,7 @@ class P18F242 : public P18C242
 
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);
@@ -188,7 +188,7 @@ class P18F442 : public P18C442
 
   virtual unsigned int program_memory_size(void) const { return 0x2000; };
 
-  virtual void set_out_of_range_pm(int address, int value);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
     // Use set_eeprom_pir as the 18Fxxx devices use an EEPROM with PIR
    assert(0);
