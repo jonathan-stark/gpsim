@@ -343,7 +343,7 @@ void read_src_files_from_cod(pic_processor *cpu)
   int found_lst_in_cod = 0;
 
   if(num_files) {
-    cpu->files = new file_context[num_files+1+1];
+    cpu->files = new file_context[num_files+1+MAX_HLL_FILES];
     cpu->number_of_source_files = num_files;
     cpu->lst_file_id = num_files;
     cpu->files[num_files].file_ptr = NULL;
@@ -649,18 +649,26 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     int i;
     struct file_context *gpsim_file;
     char *file_name;
-    char cfilename[256];
+    char filename[256];
     char text_buffer[256];
     int line_number;
     char *srcptrbegin;
     char *ptr;
     FILE *file;
-    int maxline;
     int line_nr;
     int address;
     int asmfile_id;
     int asmsrc_line;
     int found_line_numbers=0;
+
+    struct {
+	char filename[256];
+	struct file_context *file;
+    }hll_source_files[MAX_HLL_FILES];
+    int nr_of_hll_files=0;
+    int hll_files_index;
+    int file_index;
+    int filearray_index;
 
     // Find the file context that contain the .asm file.
     // This assumes 'there can be only one'.
@@ -700,47 +708,9 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     // asmfile_id is index into file context array.
     asmfile_id=i;
 
-    // source line strings are ignored, and the file with
-    // the same basename is used instead.
-    // Each program memory address should have a line number in them.
-    //for(i=0;cpu->files[i].file_ptr!=NULL;i++)
-    //	;
-    i=cpu->number_of_source_files;
-
-    // 'i' is where we can put the ".c" file entry.
-
-    strcpy(cfilename,file_name);
-    ptr=strrchr(cfilename,'.');
-    if(ptr==NULL)
-    {
-        puts("ptr is NULL\n");
-	return;
-    }
-    *ptr='\0';
-    strcat(cfilename,".c");
-
-    // cfilename contains the full .c path
-
-    cpu->files[i].name=strdup(cfilename);
-    file=fopen(cfilename,"r");
-    if(file==NULL)
-    {
-	puts("file is NULL\n");
-	return;
-    }
-    cpu->files[i].file_ptr=file;
-
-    rewind(gpsim_file->file_ptr);
-    maxline=0;
-    while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=NULL)
-	maxline++;
-
-    cpu->files[i].line_seek=new int[maxline+1];
-    cpu->files[i].max_line=maxline;
-    cpu->files[i+1].file_ptr=NULL;
-
-    line_nr=0;
-    cpu->files[i].line_seek[line_nr++]=0;
+    for(i=0;cpu->files[i].file_ptr!=NULL;i++)
+    	;
+    filearray_index=i;
 
     rewind(gpsim_file->file_ptr);
     asmsrc_line=0;
@@ -748,8 +718,9 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
     // Loop through the whole .asm file and look for any ";#CSRC" markers
     while(fgets(text_buffer,sizeof(text_buffer),gpsim_file->file_ptr)!=NULL)
     {
+        char *ptr2;
 	asmsrc_line++;
-	if(strncmp(text_buffer,";#CSRC",6))
+	if(0!=strncmp(text_buffer,";#CSRC",6))
 	    continue;
 
         // Found a line marker
@@ -760,48 +731,112 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 		break;
 	if(*ptr=='\0')
 	    continue; // Syntax error
+
+	// file name
+	for(ptr2=text_buffer+7;ptr2<ptr;ptr2++)
+            filename[ptr2-(text_buffer+7)]=*ptr2;
+	filename[ptr2-(text_buffer+7)]=0;
+
+        ptr++;
 	for(;*ptr!='\0';ptr++)
-	    if(isdigit(*ptr))
+	    if(isdigit(*ptr) || isspace(*ptr))
                 break;
-	if(*ptr=='\0')
+	if(!isdigit(*ptr))
 	    continue; // Syntax error
 
 	found_line_numbers=1; // The .asm file contains line numbers.
 
 	line_number=atoi(ptr);
 
-	cpu->files[i].line_seek[line_nr++]=line_number;
+	// Locate filename in hll_source_files[]
+	for(hll_files_index=0;hll_files_index<nr_of_hll_files;hll_files_index++)
+	{
+	    if(!strcmp(filename,hll_source_files[hll_files_index].filename))
+	    {
+		// Found it!
+		file_index=hll_files_index+cpu->number_of_source_files;
+                break;
+	    }
+	}
+	if(nr_of_hll_files==MAX_HLL_FILES)
+	{
+            printf("Too many hll files, increase MAX_HLL_FILES\n");
+	}
+	else if(hll_files_index==nr_of_hll_files)
+	{
+	    // Add new file
+
+	    int maxline;
+
+	    file_index=hll_files_index+cpu->number_of_source_files;
+	    strcpy(hll_source_files[hll_files_index].filename,filename);
+            hll_source_files[hll_files_index].file=NULL;
+	    nr_of_hll_files++;
+
+	    cpu->files[file_index].name=strdup(filename);
+	    file=fopen(cpu->files[file_index].name,"r");
+	    if(file==NULL)
+	    {
+		puts("file is not found\n");
+		assert(0);
+	    }
+	    cpu->files[file_index].file_ptr=file;
+
+	    rewind(cpu->files[file_index].file_ptr);
+	    maxline=0;
+	    while(fgets(text_buffer,sizeof(text_buffer),cpu->files[file_index].file_ptr)!=NULL)
+		maxline++;
+
+	    // Make a new file context
+	    cpu->files[file_index].line_seek=NULL;//new int[maxline+1];
+	    cpu->files[file_index].max_line=maxline;
+
+	    cpu->files[file_index+1].file_ptr=NULL; // End of list
+
+	    line_nr=0;
+//	    cpu->files[file_index].line_seek[line_nr++]=0;
+
+	}
+
+
+//        printf("filename %s line number %d (eq file id %d)\n",filename,line_number,file_index);
+
         address=cpu->find_closest_address_to_line(asmfile_id, asmsrc_line);
 	cpu->program_memory[address]->hll_src_line=line_number;
-	cpu->program_memory[address]->hll_file_id=i;
+	cpu->program_memory[address]->hll_file_id=file_index;
 
-	printf("Found line=%d address=%d\n",line_number, address);
+//	printf("Found line=%d address=%d\n",line_number, address);
     }
     if(found_line_numbers)
     {
-	cpu->number_of_source_files++;
+	cpu->number_of_source_files+=nr_of_hll_files;
     }
     else
     {
 	cpu->files[i].file_ptr=NULL;
     }
 
-
     // Find first valid line number.
     for(address=cpu->program_memory_size()-1;address>=0;address--)
     {
 	if(cpu->program_memory[address]->hll_src_line)
+	{
 	    line_number=cpu->program_memory[address]->hll_src_line;
+	    file_index=cpu->program_memory[address]->hll_file_id;
+	}
     }
 
     // Fill the addresses in the gaps.
     for(address=0;cpu->program_memory_size()>address;address++)
     {
 	if(cpu->program_memory[address]->hll_src_line)
+	{
 	    line_number=cpu->program_memory[address]->hll_src_line;
+	    file_index=cpu->program_memory[address]->hll_file_id;
+	}
 	if(cpu->program_memory[address]->isa()!=instruction::INVALID_INSTRUCTION)
 	{
-	    cpu->program_memory[address]->hll_file_id=i;
+	    cpu->program_memory[address]->hll_file_id=file_index;
 	    cpu->program_memory[address]->hll_src_line=line_number;
 	}
     }
@@ -903,8 +938,8 @@ int open_cod_file(pic_processor **pcpu, char *filename)
   read_line_numbers_from_cod(ccpu);
   read_symbols(ccpu);
 
-  // If the .asm file contains special C source line comment, then
-  // read these and put the C line numbers into each instruction.
+  // If the .asm file contains special HLL source line comment, then
+  // read these and put the HLL line numbers into each instruction.
   read_hll_line_numbers_from_asm(ccpu);
 
   //delete directory_block_data;

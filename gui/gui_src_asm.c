@@ -1651,10 +1651,14 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	 ||!strcmp(file_name+strlen(file_name)-2,".h")
 	 ||!strcmp(file_name+strlen(file_name)-2,".c")
 	 ||!strcmp(file_name+strlen(file_name)-2,".C")
+	 ||!strcmp(file_name+strlen(file_name)-4,".jal")
+	 ||!strcmp(file_name+strlen(file_name)-4,".JAL")
 	)
       {
 	  if(!strcmp(file_name+strlen(file_name)-2,".c")
 	     ||!strcmp(file_name+strlen(file_name)-2,".C")
+	     ||!strcmp(file_name+strlen(file_name)-4,".jal")
+	     ||!strcmp(file_name+strlen(file_name)-4,".JAL")
 	    )
 	  {
 	      file_id_to_source_mode[i]=1; // These are HLL sources
