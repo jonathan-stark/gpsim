@@ -436,8 +436,6 @@ void StatusBar_Window::Update(void)
   if( !created)
       return;
 
-  Dprintf((" %s\n",__FUNCTION__));
-
   //update the displayed values
 
   if(!gp || !gp->cpu)
