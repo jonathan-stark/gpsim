@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_load.h"
 
 #include "../src/processor.h"
+#include "../src/cod.h"
 
 extern int parser_warnings;
 extern void redisplay_prompt(void);  // in input.cc
@@ -72,8 +73,9 @@ cmd_load::cmd_load(void)
 int parse_string(char *cmd_string);
 extern void process_command_file(const char * file_name);
 
-void cmd_load::load(int bit_flag,const char *filename)
+int cmd_load::load(int bit_flag,const char *filename)
 {
+  int iReturn = 1; // as a boolean
   switch(bit_flag)
     {
     case 1:
@@ -81,7 +83,7 @@ void cmd_load::load(int bit_flag,const char *filename)
       {
 	      if(verbose)
 	        cout << "cmd_load::load hex file " << filename << '\n';
-	      cpu->load_hex(filename);
+	      iReturn = cpu->load_hex(filename);
       }
       else
         cout << " No cpu has been selected\n";
@@ -95,18 +97,18 @@ void cmd_load::load(int bit_flag,const char *filename)
       break;
     case 3:
       if(verbose)
-	cout << " cmd_load::load cod file "  << filename << '\n';
+        cout << " cmd_load::load cod file "  << filename << '\n';
 
-      int i=load_symbol_file(&cpu, filename);
+      iReturn=load_symbol_file(&cpu, filename);
 
-      if(i)
-	{
-	  cout << "found a fatal error in the symbol file " << filename <<'\n';
-	  display_symbol_file_error(i);
-	}
+      if(iReturn)
+      {
+        cout << "found a fatal error in the symbol file " << filename <<'\n';
+        display_symbol_file_error(iReturn);
+      }
       else
-	new_processor(cpu);
-
+        new_processor(cpu);
+      iReturn = iReturn == COD_SUCCESS;
       break;
     }
 
@@ -114,5 +116,6 @@ void cmd_load::load(int bit_flag,const char *filename)
   // is being loaded.
 
   redisplay_prompt();
+  return iReturn;
 }
 

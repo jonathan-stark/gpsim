@@ -64,10 +64,10 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/icd.h"
 #include "../src/pic-processor.h"
 #include "../src/breakpoints.h"
+#include "../src/cod.h"
 #include "command.h"
 #include "input.h"
 #include "cmd_macro.h"
-
 #ifdef HAVE_LIBREADLINE
 #define HAVE_READLINE
 #endif
@@ -455,7 +455,16 @@ void process_command_file(const char * file_name)
 }
 
 extern int load_symbol_file(Processor **, const char *);
-//*********************************************
+/*********************************************
+  Function: gpsim_open()
+
+  JRH - gpsim_open() was returning different values
+  to indicate a success. I have  made this function return
+  1 for success and 0 for failure.
+
+  Returns:  1   - success
+            0   - failure
+*/
 
 int gpsim_open(Processor *cpu, const char *file)
 {
@@ -477,13 +486,13 @@ int gpsim_open(Processor *cpu, const char *file)
       return 0;
     }
 
-    cpu->load_hex(file);
+    return cpu->load_hex(file);
   }
   else if(!strcmp(str,"cod") || !strcmp(str,"COD"))
-    load_symbol_file(&command::cpu, file);
+    return load_symbol_file(&command::cpu, file) == COD_SUCCESS;
   else if(!strcmp(str,"stc") || !strcmp(str,"STC")) {
     process_command_file(file);
-    return parse_string("\n");
+    return parse_string("\n") == 0;
   } else
 
     cout << "Unknown file extension \"" << str <<"\" \n";

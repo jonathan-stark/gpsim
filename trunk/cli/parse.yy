@@ -405,7 +405,7 @@ list_cmd
 
 load_cmd: LOAD bit_flag LITERAL_STRING_T
           {
-            c_load.load($2->value,$3->getVal());
+            quit_parse = c_load.load($2->value,$3->getVal()) == 0;
             free($3);
 
             if(quit_parse)

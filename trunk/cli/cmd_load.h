@@ -26,7 +26,7 @@ class cmd_load : public command
 public:
 
   cmd_load(void);
-  void load(int bit_flag,const char *filename);
+  int load(int bit_flag,const char *filename);
 };
 
 extern cmd_load c_load;

@@ -22,6 +22,16 @@ Boston, MA 02111-1307, USA.  */
 #if !defined(__COD_H)
 #define __COD_H
 
+enum cod_errors
+{
+  COD_SUCCESS,
+  COD_FILE_NOT_FOUND,
+  COD_UNRECOGNIZED_PROCESSOR,
+  COD_FILE_NAME_TOO_LONG,
+  COD_LST_NOT_FOUND,
+  COD_BAD_FILE
+};
+
 /*
  * .cod definitions
  *
