@@ -66,6 +66,10 @@ using namespace std;
 #include "../src/symbol.h"
 #include "../src/stimuli.h"
 
+extern void lexer_setMacroBodyMode(void);
+ extern void lexer_setInitialMode(void);
+
+
 #define YYERROR_VERBOSE
 
 extern char *yytext; 
@@ -134,12 +138,14 @@ void yyerror(char *message)
 %token <s>  CLEAR
 %token <s>  DISASSEMBLE
 %token <s>  DUMP
+%token <s>  ENDM
 %token <s>  FREQUENCY
 %token <s>  HELP
 %token <s>  LOAD
 %token <s>  LOG
 %token <s>  LIST
 %token <s>  NODE
+%token <s>  MACRO
 %token <s>  MODULE
 %token <s>  PROCESSOR
 %token <s>  QUIT
@@ -156,8 +162,17 @@ void yyerror(char *message)
 %token <s>  ICD
 %token <s>  END_OF_COMMAND
 
+%token MACRODEF_T
+%token MACRODEF_ARG_T
+%type <s>    mdef_arglist opt_mdef_arglist
+%type <s>    mdef_body_
+%type <s>    mdef_end
+
+%token <s>   MACROBODY_T
+%token ENDM_T
 
 %token <s>  STRING
+%token <s>  UNQ_ID_T
 
 %token <li>  INDIRECT
 
@@ -202,6 +217,17 @@ void yyerror(char *message)
 %token XOR_T
 
 
+
+%token OPT_DEFAULT_T
+%token OPT_LABEL_T
+%token OPT_NAMED_T
+%token OPT_NUM_T
+%token OPT_OPT_T
+%token OPT_POS_T
+%token OPT_REQ_T
+%token OPT_TEXT_T
+%token OPT_VARARG_T
+%token OPT_VAL_T
 
 //%type  <li>   _register
 %type  <co>  bit_flag
@@ -262,6 +288,7 @@ cmd:
      | log_cmd
      | load_cmd
      | node_cmd
+     | macro_cmd
      | module_cmd
      | processor_cmd
      | quit_cmd
@@ -540,6 +567,65 @@ icd_cmd:
           ICD                           { c_icd.icd(); }
           | ICD string_option           { c_icd.icd($2); }
           ;
+
+
+//------------------------------------------------------------
+//  macro definitions
+//
+//  Syntax:
+//
+// name macro [arg1, arg2, ...]
+//   macro body
+// endm
+//
+// 'name' is the macro name
+// 'macro' is a keyword
+// arg1,arg2,... are optional arguments
+// 'macro body' - any valid gpsim command
+// 'endm' is a keyword
+//
+
+macro_cmd:
+	  MACRODEF_T                    { cout << "display currently defined macros\n";};
+         | macrodef_directive           { cout << " defining new macro\n";}
+         ;
+
+macrodef_directive
+        : STRING MACRODEF_T
+                                        {cout << "macro definition" << endl;}
+          opt_mdef_arglist rol
+                                        {cout << "have the macro arg list" << endl;
+                                                 lexer_setMacroBodyMode();}
+
+          mdef_body mdef_end            { cout << "macro has been defined" << endl;}
+        ;
+
+opt_mdef_arglist
+        : /* empty */                   { cout << " empty macro arg list\n";}
+        | mdef_arglist                  {$$=$1;}
+        ;
+
+mdef_arglist
+        : STRING                        {cout << "mdef_arg list " << $$ << endl; }
+        | mdef_arglist ',' STRING       {cout << "macro arg:" << $3 << endl;}
+        ;
+
+
+mdef_body
+        : /* empty */                   {cout << "empty macro body \n"; }
+        | mdef_body_
+        ;
+
+mdef_body_
+        : MACROBODY_T                   {cout << " macro body:" << $$ << endl;}
+        | mdef_body_ MACROBODY_T        {cout << $2;}
+        ;
+
+mdef_end
+        : ENDM_T                        { cout << "ending the macro definition\n"; }
+        | STRING ENDM_T                 { cout << "ending the macro definition\n"; }
+        ;
+
 
 // Indirect addressing is supported with the indirect
 // operator '*'. E.g. If register 0x20 contains 0x2e

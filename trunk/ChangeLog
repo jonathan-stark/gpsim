@@ -1,3 +1,8 @@
+2004-08-31 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, cli/parse.yy:
+	Added language support for macro definitions. (although,
+	macros are not yet supported).
+	
 2004-08-29 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gsim.def, cli/makefile.migw, src/makefile.migw,
 	  cli/cli.vcproj, src/src.vcproj: updated
