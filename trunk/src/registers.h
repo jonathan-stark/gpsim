@@ -272,7 +272,10 @@ public:
    */
   virtual char * toString(char *str, int len);
   virtual char * toBitStr(char *s, int len); 
-
+  virtual string &baseName()
+  {
+    return name_str; 
+  }
 };
 
 

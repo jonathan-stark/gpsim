@@ -104,14 +104,17 @@ void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
   if(!new_reg)
     return;
 
-  if(symbol_name && 
-     new_reg->name() == string(symbol_name)  &&  
-     find(&new_reg->name())) {
-    if(verbose)
-      cout << "Warning not adding  "
-	   << symbol_name
-	   << " to symbol table\n because it is already in.\n";
-    return;
+  if(symbol_name) {
+    string sName(symbol_name);
+    if((new_reg->name() == sName ||
+       new_reg->baseName() == sName) &&  
+      (find(&new_reg->name()) || find(&new_reg->baseName()))) {
+      if(verbose)
+        cout << "Warning not adding  "
+	           << symbol_name
+	           << " to symbol table\n because it is already in.\n";
+      return;
+     }
   }
 
   register_symbol *rs = new register_symbol(symbol_name, new_reg);
