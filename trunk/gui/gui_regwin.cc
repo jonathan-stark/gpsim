@@ -225,8 +225,7 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat,
         str[min-i-1] = '?';
       else
         str[min-i-1] = hex2ascii[value.data & 0x0f];
-      value.init >>= 4;
-      value.data >>= 4;
+      value >>= 4;
     }
     str[min] = 0;
 
@@ -239,11 +238,7 @@ char * GUIRegister::getValueAsString(char *str, int len, char *pFormat,
 
 bool GUIRegister::hasChanged(RegisterValue &current_value) const
 {
-  if( (shadow.data != current_value.data)  ||
-      (shadow.init != current_value.init) )
-    return true;
-
-  return false;
+  return (shadow != current_value);
 }
 
 void GUIRegister::Clear_xref(void)
