@@ -31,10 +31,11 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __MODULES_H__
 #define __MODULES_H__
 
+#include <list>
+
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
 #include "packages.h"
-#include "attribute.h"
 #include "string"
 
 
@@ -47,6 +48,8 @@ class Module;
 class Module_Types;
 class ModuleInterface;
 class IOPIN;
+class XrefObject;
+class Attribute;
 
 typedef  Module * (*Module_FPTR)();
 typedef  Module_Types * (*Module_Types_FPTR)();
