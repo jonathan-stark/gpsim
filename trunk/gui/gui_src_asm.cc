@@ -226,92 +226,90 @@ static struct sa_entry *gui_index_to_entry(int id, int index)
     return e;
 }
 
-void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address)
-{ struct sa_entry *e; int row; unsigned int pixel; float inc; int i;
-int sbawFileId;
+void SourceBrowserAsm_Window::SetPC(int address)
+{ 
+  struct sa_entry *e; 
+  int row; 
+  unsigned int pixel; 
+  float inc; 
+  int i;
+  int sbawFileId;
 
-//    static GtkWidget *old_pcw=NULL;
-
-    GtkWidget *new_pcw;
-    int id=-1;
+  GtkWidget *new_pcw;
+  int id=-1;
     
-    assert(sbaw);
-
-    if(!sbaw->source_loaded) return;
+  if(!source_loaded) return;
 
 
-    // find notebook page containing address 'address'
-    sbawFileId = gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address);
-    for(i=0;i<SBAW_NRFILES;i++)
+  // find notebook page containing address 'address'
+  sbawFileId = gpsim_get_file_id( gp->pic_id, address);
+  for(i=0;i<SBAW_NRFILES;i++)
     {
-	if(sbaw->pageindex_to_fileid[i] == sbawFileId)
+      if(pageindex_to_fileid[i] == sbawFileId)
 	{
-	    id=i;
+	  id=i;
 	}
-	else
+      else
 	{
-	    if( sbaw->source_pcwidget[i]!=NULL &&
-		GTK_WIDGET_VISIBLE(sbaw->source_pcwidget[i]) )
-		gtk_widget_hide(sbaw->source_pcwidget[i]);
+	  if( source_pcwidget[i]!=NULL &&
+	      GTK_WIDGET_VISIBLE(source_pcwidget[i]) )
+	    gtk_widget_hide(source_pcwidget[i]);
 	}
     }
 
 
-    if(id==-1)
+  if(id==-1)
     {
-	puts("SourceBrowserAsm_set_pc(): could not find notebook page");
-	return;
+      puts("SourceBrowserAsm_set_pc(): could not find notebook page");
+      return;
     }
     
-    new_pcw = sbaw->source_pcwidget[id];
+  new_pcw = source_pcwidget[id];
 
-    if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
-	row = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
-    else
-	row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
-    if(row==INVALID_VALUE)
-	return;
-    row--;
+  if(gpsim_get_hll_mode(gp->pic_id))
+    row = gpsim_get_hll_src_line(gp->pic_id, address);
+  else
+    row = gpsim_get_src_line(gp->pic_id, address);
+  if(row==INVALID_VALUE)
+    return;
+  row--;
     
-    gtk_notebook_set_page(GTK_NOTEBOOK(sbaw->notebook),id);
+  gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
-    if(sbaw->layout_offset<0)
+  if(layout_offset<0)
     {   // can it normally be less than zero?
 	// FIXME, this should be done whenever windows are reconfigured.
-	int xtext,ytext;
-	int xfixed, yfixed;
+      int xtext,ytext;
+      int xfixed, yfixed;
 
-	if(GTK_TEXT(sbaw->source_text[id])->text_area!=NULL &&
-	   sbaw->source_layout[id]->window!=NULL)
+      if(GTK_TEXT(source_text[id])->text_area!=NULL &&
+	 source_layout[id]->window!=NULL)
 	{
-	    gdk_window_get_origin(GTK_TEXT(sbaw->source_text[id])->text_area,&xtext,&ytext);
-	    gdk_window_get_origin(sbaw->source_layout[id]->window,&xfixed,&yfixed);
+	  gdk_window_get_origin(GTK_TEXT(source_text[id])->text_area,&xtext,&ytext);
+	  gdk_window_get_origin(source_layout[id]->window,&xfixed,&yfixed);
 
-	    sbaw->layout_offset = ytext-yfixed;
+	  layout_offset = ytext-yfixed;
 	}
     }
-    e = gui_line_to_entry(id, row);
+  e = gui_line_to_entry(id, row);
 
-    pixel = PIXMAP_POS(sbaw,e);
-    inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->source_text[id])->vadj)->page_increment;
+  pixel = PIXMAP_POS(this,e);
+  inc = GTK_ADJUSTMENT(GTK_TEXT(source_text[id])->vadj)->page_increment;
 
-    if( pixel<= GTK_TEXT(sbaw->source_text[id])->first_onscreen_ver_pixel ||
-	pixel>= GTK_TEXT(sbaw->source_text[id])->first_onscreen_ver_pixel+inc )
-	gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->source_text[id])->vadj),
-				 pixel-inc/2);
+  if( pixel<= GTK_TEXT(source_text[id])->first_onscreen_ver_pixel ||
+      pixel>= GTK_TEXT(source_text[id])->first_onscreen_ver_pixel+inc )
+    gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT(source_text[id])->vadj),
+			     pixel-inc/2);
 
-//    if(GTK_IS_WIDGET(old_pcw) && old_pcw!=new_pcw)
-//	gtk_widget_hide(old_pcw);
-//    old_pcw=new_pcw;
     
-    gtk_layout_move(GTK_LAYOUT(sbaw->source_layout[id]),
-		    new_pcw,
-		    PIXMAP_SIZE,
-		    PIXMAP_POS(sbaw,e)
-		   );
+  gtk_layout_move(GTK_LAYOUT(source_layout[id]),
+		  new_pcw,
+		  PIXMAP_SIZE,
+		  PIXMAP_POS(this,e)
+		  );
 
-    if(!GTK_WIDGET_VISIBLE(new_pcw))
-	gtk_widget_show(new_pcw);
+  if(!GTK_WIDGET_VISIBLE(new_pcw))
+    gtk_widget_show(new_pcw);
 }
 
 static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
@@ -322,53 +320,50 @@ static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
 
     if(sbaw->source_loaded)
     {
-        SourceBrowserAsm_set_pc(sbaw, new_address);
+      //SourceBrowserAsm_set_pc(sbaw, new_address);
+      sbaw->SetPC(new_address);
     }
 }
 
-void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address)
+void SourceBrowserAsm_Window::SelectAddress(int address)
 {
-    struct sa_entry *e;
-    int id=-1, i;
-    int pixel;
-    float inc;
-    int line;
+  struct sa_entry *e;
+  int id=-1, i;
+  int pixel;
+  float inc;
+  int line;
     
-    if(!sbaw->source_loaded) return;
+  if(!source_loaded) return;
 
-    for(i=0;i<SBAW_NRFILES;i++)
+  for(i=0;i<SBAW_NRFILES;i++) {
+    if(pageindex_to_fileid[i]==gpsim_get_file_id(gp->pic_id, address))
+      id=i;
+  }
+
+  if(id==-1)
     {
-	if(sbaw->pageindex_to_fileid[i]==gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address))
-	{
-	    id=i;
-	}
+      puts("SourceBrowserAsm_select_address(): could not find notebook page");
+      return;
     }
 
-    if(id==-1)
-    {
-	puts("SourceBrowserAsm_select_address(): could not find notebook page");
-	return;
-    }
+  gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
-    gtk_notebook_set_page(GTK_NOTEBOOK(sbaw->notebook),id);
-
-    if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
-	line = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
-    else
-	line = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
-    if(line==INVALID_VALUE)
-	return;
+  if(gpsim_get_hll_mode(gp->pic_id))
+    line = gpsim_get_hll_src_line(gp->pic_id, address);
+  else
+    line = gpsim_get_src_line(gp->pic_id, address);
+  if(line==INVALID_VALUE)
+    return;
     
-    //line = ((GUI_Object*)sbaw)->gp->p->program_memory[address]->get_src_line();
-    e = gui_line_to_entry(id, line);
+  e = gui_line_to_entry(id, line);
 
-    pixel = PIXMAP_POS(sbaw,e);
-    inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->source_text[id])->vadj)->page_increment;
+  pixel = PIXMAP_POS(this,e);
+  inc = GTK_ADJUSTMENT(GTK_TEXT(source_text[id])->vadj)->page_increment;
 
-    if( pixel<= GTK_TEXT(sbaw->source_text[id])->first_onscreen_ver_pixel ||
-	pixel>= GTK_TEXT(sbaw->source_text[id])->first_onscreen_ver_pixel+inc )
-	gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->source_text[id])->vadj),
-				 pixel-inc/2);
+  if( pixel<= GTK_TEXT(source_text[id])->first_onscreen_ver_pixel ||
+      pixel>= GTK_TEXT(source_text[id])->first_onscreen_ver_pixel+inc )
+    gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( source_text[id])->vadj),
+			     pixel-inc/2);
 }
 
 /*
@@ -387,7 +382,7 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
   assert(sbaw);
 
   
-  assert(sbaw->sbw.gui_obj.wt == WT_asm_source_window);
+  assert(sbaw->wt == WT_asm_source_window);
   assert(address>=0);
 
   if(!sbaw->source_loaded) return;
@@ -548,9 +543,10 @@ popup_activated(GtkWidget *widget, gpointer data)
 	gtk_widget_show(searchdlg.window);
 	break;
     case MENU_FIND_PC:
-	pic_id = popup_sbaw->sbw.gui_obj.gp->pic_id;
+	pic_id = popup_sbaw->gp->pic_id;
 	address=gpsim_get_pc_value(pic_id);
-	SourceBrowserAsm_set_pc(popup_sbaw, address);
+	//SourceBrowserAsm_set_pc(popup_sbaw, address);
+	popup_sbaw->SetPC(address);
 //	gui_simulation_has_stopped(); // FIXME
 	break;
     case MENU_MOVE_PC:
@@ -586,10 +582,10 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
         else
 	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj.enabled)
+	if(!popup_sbaw->gp->profile_window->gui_obj.enabled)
 	{
-	    popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj.
-		change_view(&popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj,
+	  popup_sbaw->gp->profile_window->gui_obj.
+	    change_view(&popup_sbaw->gp->profile_window->gui_obj,
 			    VIEW_SHOW);
 	}
 	if(gpsim_address_has_profile_start(pic_id,address))
@@ -605,7 +601,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    gpsim_set_profile_start_at_address(pic_id,
 					       address,
 					       (void (*)(gpointer))ProfileWindow_notify_start_callback,
-					       popup_sbaw->sbw.gui_obj.gp->profile_window);
+					       popup_sbaw->gp->profile_window);
 	}
 	break;
     case MENU_PROFILE_STOP_HERE:
@@ -614,11 +610,12 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    address = gpsim_find_closest_address_to_hll_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
         else
 	    address = gpsim_find_closest_address_to_line(pic_id,popup_sbaw->pageindex_to_fileid[id],line+1);
-	if(!popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj.enabled)
+	if(!popup_sbaw->gp->profile_window->gui_obj.enabled)
 	{
-	    popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj.
-		change_view(&popup_sbaw->sbw.gui_obj.gp->profile_window->gui_obj,
-			    VIEW_SHOW);
+
+	  popup_sbaw->gp->profile_window->gui_obj.
+	    change_view(&popup_sbaw->gp->profile_window->gui_obj,
+			VIEW_SHOW);
 	}
 	if(gpsim_address_has_profile_stop(pic_id,address))
 	    gpsim_clear_profile_stop_at_address(pic_id,address);
@@ -633,7 +630,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    gpsim_set_profile_stop_at_address(pic_id,
 					      address,
 					      (void (*)(gpointer))ProfileWindow_notify_stop_callback,
-					      popup_sbaw->sbw.gui_obj.gp->profile_window);
+					      popup_sbaw->gp->profile_window);
 	}
 	break;
     case MENU_SELECT_SYMBOL:
@@ -653,44 +650,44 @@ popup_activated(GtkWidget *widget, gpointer data)
 	}
 	text[i-start]=0;
 	
-	if(!popup_sbaw->sbw.gui_obj.gp->symbol_window->gui_obj.enabled)
+	if(!popup_sbaw->gp->symbol_window->enabled)
 	{
-	    popup_sbaw->sbw.gui_obj.gp->symbol_window->gui_obj.
-		change_view(&popup_sbaw->sbw.gui_obj.gp->symbol_window->gui_obj,
-			    VIEW_SHOW);
+	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+	  //change_view(&popup_sbaw->gp->symbol_window->gui_obj,
+			    
 	}
-	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
+	SymbolWindow_select_symbol_name(popup_sbaw->gp->symbol_window,text);
 
 
 	// We also try with a '_' prefix.
 	for(i=strlen(text)+1;i>0;i--)
 	    text[i]=text[i-1];
         text[i]='_';
-	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
+	SymbolWindow_select_symbol_name(popup_sbaw->gp->symbol_window,text);
 	break;
     case MENU_STEP:
-	if(gpsim_get_hll_mode(popup_sbaw->sbw.gui_obj.gp->pic_id))
-	    gpsim_hll_step(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	if(gpsim_get_hll_mode(popup_sbaw->gp->pic_id))
+	    gpsim_hll_step(popup_sbaw->gp->pic_id);
 	else
-	    gpsim_step(popup_sbaw->sbw.gui_obj.gp->pic_id, 1);
+	    gpsim_step(popup_sbaw->gp->pic_id, 1);
 	break;
     case MENU_STEP_OVER:
-	if(gpsim_get_hll_mode(popup_sbaw->sbw.gui_obj.gp->pic_id))
-	    gpsim_hll_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	if(gpsim_get_hll_mode(popup_sbaw->gp->pic_id))
+	    gpsim_hll_step_over(popup_sbaw->gp->pic_id);
 	else
-	    gpsim_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	    gpsim_step_over(popup_sbaw->gp->pic_id);
 	break;
     case MENU_RUN:
-	gpsim_run(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	gpsim_run(popup_sbaw->gp->pic_id);
 	break;
     case MENU_STOP:
-	gpsim_stop(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	gpsim_stop(popup_sbaw->gp->pic_id);
 	break;
     case MENU_RESET:
-	gpsim_reset(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	gpsim_reset(popup_sbaw->gp->pic_id);
 	break;
     case MENU_FINISH:
-	gpsim_finish(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	gpsim_finish(popup_sbaw->gp->pic_id);
 	break;
     default:
 	puts("Unhandled menuitem?");
@@ -701,55 +698,49 @@ popup_activated(GtkWidget *widget, gpointer data)
 static GtkWidget *
 build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
 {
-    GtkWidget *menu;
-    GtkWidget *submenu;
-    GtkWidget *item;
-    int i;
-    int id;
+  GtkWidget *menu;
+  GtkWidget *submenu;
+  GtkWidget *item;
+  int i;
+  int id;
 
-	popup_sbaw=sbaw;
+  popup_sbaw=sbaw;
 
-    id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
-    menu=gtk_menu_new();
-    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-	item=gtk_menu_item_new_with_label(menu_items[i].name);
-	menu_items[i].item=item;
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) popup_activated,
-			   &menu_items[i]);
+  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
+  menu=gtk_menu_new();
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+    item=gtk_menu_item_new_with_label(menu_items[i].name);
+    menu_items[i].item=item;
+    gtk_signal_connect(GTK_OBJECT(item),"activate",
+		       (GtkSignalFunc) popup_activated,
+		       &menu_items[i]);
 
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-    }
+    gtk_widget_show(item);
+    gtk_menu_append(GTK_MENU(menu),item);
+  }
 
-    submenu=gtk_menu_new();
-    item = gtk_tearoff_menu_item_new ();
-    gtk_menu_append (GTK_MENU (submenu), item);
-    gtk_widget_show (item);
-    for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
-	item=gtk_menu_item_new_with_label(submenu_items[i].name);
-	submenu_items[i].item=item;
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) popup_activated,
-			   &submenu_items[i]);
+  submenu=gtk_menu_new();
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (submenu), item);
+  gtk_widget_show (item);
+  for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
+    item=gtk_menu_item_new_with_label(submenu_items[i].name);
+    submenu_items[i].item=item;
+    gtk_signal_connect(GTK_OBJECT(item),"activate",
+		       (GtkSignalFunc) popup_activated,
+		       &submenu_items[i]);
 
-	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+    GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
-/*	if(submenu_items[i].id==MENU_STOP)
-	{
-	    GTK_WIDGET_UNSET_FLAGS (item,
-				    GTK_SENSITIVE | GTK_CAN_FOCUS);
-	}*/
-      
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(submenu),item);
-    }
-    item = gtk_menu_item_new_with_label ("Controls");
-    gtk_menu_append (GTK_MENU (menu), item);
-    gtk_widget_show (item);
-    gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
+    gtk_widget_show(item);
+    gtk_menu_append(GTK_MENU(submenu),item);
+  }
+  item = gtk_menu_item_new_with_label ("Controls");
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
-    return menu;
+  return menu;
 }
 
 void remove_all_points(SourceBrowserAsm_Window *sbaw)
@@ -811,12 +802,13 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 
         // Update pc widget
 	address=gpsim_get_pc_value(((GUI_Object*)sbaw)->gp->pic_id);
-	SourceBrowserAsm_set_pc(sbaw, address);
+	//SourceBrowserAsm_set_pc(sbaw, address);
+	sbaw->SetPC(address);
 
         remove_all_points(sbaw);
 
 	// update breakpoint widgets
-	for(address=0;address<gpsim_get_program_memory_size(sbaw->sbw.gui_obj.gp->pic_id);address++)
+	for(address=0;address<gpsim_get_program_memory_size(sbaw->gp->pic_id);address++)
 	{
 	    SourceBrowserAsm_update_line(sbaw, address);
 	}
@@ -1244,19 +1236,19 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
       sbaw->bp_mask = NULL;
       sbaw->startp_mask = NULL;
       sbaw->stopp_mask = NULL;
-      sbaw->pixmap_pc = gdk_pixmap_create_from_xpm_d(sbaw->sbw.gui_obj.window->window,
+      sbaw->pixmap_pc = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 						     &sbaw->pc_mask,
 						     &style->bg[GTK_STATE_NORMAL],
 						     (gchar**)pc_xpm);
-      sbaw->pixmap_break = gdk_pixmap_create_from_xpm_d(sbaw->sbw.gui_obj.window->window,
+      sbaw->pixmap_break = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							&sbaw->bp_mask,
 							&style->bg[GTK_STATE_NORMAL],
 							(gchar**)break_xpm);
-      sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->sbw.gui_obj.window->window,
+      sbaw->pixmap_profile_start = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							       &sbaw->startp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
 							       (gchar**)startp_xpm);
-      sbaw->pixmap_profile_stop = gdk_pixmap_create_from_xpm_d(sbaw->sbw.gui_obj.window->window,
+      sbaw->pixmap_profile_stop = gdk_pixmap_create_from_xpm_d(sbaw->window->window,
 							       &sbaw->stopp_mask,
 							       &style->bg[GTK_STATE_NORMAL],
 							       (gchar**)stopp_xpm);
@@ -1626,9 +1618,9 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
       return;
   }
   
-  assert(sbaw->sbw.gui_obj.wt==WT_asm_source_window);
+  assert(sbaw->wt==WT_asm_source_window);
   
-  pic_id = ((GUI_Object*)sbaw)->gp->pic_id;
+  pic_id = sbaw->gp->pic_id;
 
   SourceBrowserAsm_close_source(sbaw,gp);
 
@@ -1712,7 +1704,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else
-      SourceBrowserAsm_set_pc(sbaw, address);
+      sbaw->SetPC(address);
 }
 
 
@@ -1913,7 +1905,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	{
             gdk_font_unref(font);
 	    strcpy(sbaw->sourcefont_string,gtk_entry_get_text(GTK_ENTRY(sourcefontstringentry)));
-	    config_set_string(sbaw->sbw.gui_obj.name,"sourcefont",sbaw->sourcefont_string);
+	    config_set_string(sbaw->name,"sourcefont",sbaw->sourcefont_string);
             fonts_ok++;
 	}
 
@@ -1927,14 +1919,14 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 	{
             gdk_font_unref(font);
 	    strcpy(sbaw->commentfont_string,gtk_entry_get_text(GTK_ENTRY(commentfontstringentry)));
-	    config_set_string(sbaw->sbw.gui_obj.name,"commentfont",sbaw->commentfont_string);
+	    config_set_string(sbaw->name,"commentfont",sbaw->commentfont_string);
             fonts_ok++;
 	}
     }
 
     load_fonts(sbaw);
     if(sbaw->load_source)
-	SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
+	SourceBrowserAsm_new_source(sbaw,sbaw->gp);
 
     gtk_widget_hide(dialog);
 
@@ -2289,224 +2281,218 @@ static void find_clear_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(searchdlg.entry)->entry),"");
 }
 
-void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
+void SourceBrowserAsm_Window::Build(void)
 {
   GtkWidget *hbox;
   GtkWidget *button;
 
   GtkWidget *label;
-    GdkColor text_fg;
-    GdkColor text_bg;
-    char *fontstring;
+  GdkColor text_fg;
+  GdkColor text_bg;
+  char *fontstring;
 
-  int x,y,width,height;
-  
 
-  CreateSBW((SourceBrowser_Window*)sbaw);
+  SourceBrowser_Window::Create();
 
   
-  gtk_window_set_title (GTK_WINDOW (sbaw->sbw.gui_obj.window), "Source Browser");
+  gtk_window_set_title (GTK_WINDOW (window), "Source Browser");
 
-  width=((GUI_Object*)sbaw)->width;
-  height=((GUI_Object*)sbaw)->height;
-  x=((GUI_Object*)sbaw)->x;
-  y=((GUI_Object*)sbaw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(sbaw->sbw.gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(sbaw->sbw.gui_obj.window),x,y);
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
 
   
-    sbaw->notebook = gtk_notebook_new();
-    gtk_notebook_set_tab_pos((GtkNotebook*)sbaw->notebook,GTK_POS_LEFT);
-    gtk_notebook_set_scrollable((GtkNotebook*)sbaw->notebook,TRUE);
-    gtk_signal_connect(GTK_OBJECT(sbaw->notebook),
-		       "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),sbaw);
-    gtk_widget_show(sbaw->notebook);
+  notebook = gtk_notebook_new();
+  gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_LEFT);
+  gtk_notebook_set_scrollable((GtkNotebook*)notebook,TRUE);
+  gtk_signal_connect(GTK_OBJECT(notebook),
+		     "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),this);
+  gtk_widget_show(notebook);
 
-    sbaw->popup_menu=build_menu(sbaw->notebook,sbaw);
+  popup_menu=build_menu(notebook,this);
 
-    gtk_box_pack_start (GTK_BOX (sbaw->sbw.vbox), sbaw->notebook, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
 
-    gdk_color_parse("black", &text_fg);
-    gdk_color_parse("white", &text_bg);
-    sbaw->default_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->default_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("black", &text_fg);
+  gdk_color_parse("white", &text_bg);
+  default_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  default_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
-    gdk_color_parse("dark green", &text_fg);
-    gdk_color_parse("white", &text_bg);
-    sbaw->symbol_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->symbol_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("dark green", &text_fg);
+  gdk_color_parse("white", &text_bg);
+  symbol_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  symbol_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
-    gdk_color_parse("orange", &text_fg);
-    gdk_color_parse("white", &text_bg);
-    sbaw->label_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->label_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("orange", &text_fg);
+  gdk_color_parse("white", &text_bg);
+  label_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  label_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
-    gdk_color_parse("red", &text_fg);
-    gdk_color_parse("white", &text_bg);
-    sbaw->instruction_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->instruction_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("red", &text_fg);
+  gdk_color_parse("white", &text_bg);
+  instruction_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  instruction_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
-    gdk_color_parse("blue", &text_fg);
-    gdk_color_parse("white", &text_bg);
-    sbaw->number_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->number_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("blue", &text_fg);
+  gdk_color_parse("white", &text_bg);
+  number_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  number_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
-    gdk_color_parse("black", &text_fg);
-    gdk_color_parse("gray", &text_bg);
-    sbaw->comment_text_style.base[GTK_STATE_NORMAL] = text_bg;
-    sbaw->comment_text_style.fg[GTK_STATE_NORMAL] = text_fg;
+  gdk_color_parse("black", &text_fg);
+  gdk_color_parse("gray", &text_bg);
+  comment_text_style.base[GTK_STATE_NORMAL] = text_bg;
+  comment_text_style.fg[GTK_STATE_NORMAL] = text_fg;
 
 #define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
 #define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
 
-    strcpy(sbaw->commentfont_string,DEFAULT_COMMENTFONT);
-    if(config_get_string(sbaw->sbw.gui_obj.name,"commentfont",&fontstring))
-	strcpy(sbaw->commentfont_string,fontstring);
+  strcpy(commentfont_string,DEFAULT_COMMENTFONT);
+  if(config_get_string(name,"commentfont",&fontstring))
+    strcpy(commentfont_string,fontstring);
 
-    strcpy(sbaw->sourcefont_string,DEFAULT_SOURCEFONT);
-    if(config_get_string(sbaw->sbw.gui_obj.name,"sourcefont",&fontstring))
-	strcpy(sbaw->sourcefont_string,fontstring);
+  strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+  if(config_get_string(name,"sourcefont",&fontstring))
+    strcpy(sourcefont_string,fontstring);
 
-    while(!load_fonts(sbaw))
-    {
-	if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
-	{
-	    strcpy(sbaw->sourcefont_string,DEFAULT_SOURCEFONT);
-	    strcpy(sbaw->commentfont_string,DEFAULT_COMMENTFONT);
-	    config_set_string(sbaw->sbw.gui_obj.name,"sourcefont",sbaw->sourcefont_string);
-	    config_set_string(sbaw->sbw.gui_obj.name,"commentfont",sbaw->commentfont_string);
-	}
-	else
-	{
-	    settings_dialog(sbaw);
-	}
-    }
+  while(!load_fonts(this)) {
+
+    if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
+      {
+	strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+	strcpy(commentfont_string,DEFAULT_COMMENTFONT);
+	config_set_string(name,"sourcefont",sourcefont_string);
+	config_set_string(name,"commentfont",commentfont_string);
+      }
+    else
+      {
+	settings_dialog(this);
+      }
+  }
 
 
-    searchdlg.lastid=-1;  // will reset search
+  searchdlg.lastid=-1;  // will reset search
     
-    searchdlg.window = gtk_dialog_new();
+  searchdlg.window = gtk_dialog_new();
 
-    gtk_signal_connect(GTK_OBJECT(searchdlg.window),
-		       "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-    gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+  gtk_signal_connect(GTK_OBJECT(searchdlg.window),
+		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+  gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
+			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
-    gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
+  gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
     
-    hbox = gtk_hbox_new(FALSE,15);
-    gtk_widget_show(hbox);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		       FALSE,TRUE,5);
-    label = gtk_label_new("Find:");
-    gtk_widget_show(label);
-    gtk_box_pack_start(GTK_BOX(hbox),label,
-		       FALSE,FALSE,5);
-    searchdlg.entry = gtk_combo_new();
-    gtk_widget_show(searchdlg.entry);
-    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
-		       TRUE,TRUE,5);
-    gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
-    gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
-		       GTK_SIGNAL_FUNC(find_cb),sbaw);
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_widget_show(hbox);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  label = gtk_label_new("Find:");
+  gtk_widget_show(label);
+  gtk_box_pack_start(GTK_BOX(hbox),label,
+		     FALSE,FALSE,5);
+  searchdlg.entry = gtk_combo_new();
+  gtk_widget_show(searchdlg.entry);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
+		     TRUE,TRUE,5);
+  gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
+		     GTK_SIGNAL_FUNC(find_cb),this);
     
-    hbox = gtk_hbox_new(FALSE,15);
-    gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		      FALSE,TRUE,5);
-    gtk_widget_show(hbox);
-    searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
-    gtk_widget_show(searchdlg.case_button);
-    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
-		      FALSE,FALSE,5);
-    searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
-    gtk_widget_show(searchdlg.backwards_button);
-    gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
-		      FALSE,FALSE,5);
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  gtk_widget_show(hbox);
+  searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
+  gtk_widget_show(searchdlg.case_button);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
+		     FALSE,FALSE,5);
+  searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
+  gtk_widget_show(searchdlg.backwards_button);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
+		     FALSE,FALSE,5);
     
-    button = gtk_button_new_with_label("Find");
-    gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(find_cb),sbaw);
-    GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
-    gtk_widget_grab_default(button);
+  button = gtk_button_new_with_label("Find");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_cb),this);
+  GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
+  gtk_widget_grab_default(button);
     
-    button = gtk_button_new_with_label("Clear");
-    gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-    gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		       GTK_SIGNAL_FUNC(find_clear_cb),NULL);
+  button = gtk_button_new_with_label("Clear");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_clear_cb),NULL);
     
-    button = gtk_button_new_with_label("Close");
-    gtk_widget_show(button);
-    gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-    gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			      GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+  button = gtk_button_new_with_label("Close");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
 
-    gtk_signal_connect_after(GTK_OBJECT(sbaw->sbw.gui_obj.window), "configure_event",
-			     GTK_SIGNAL_FUNC(gui_object_configure_event),sbaw);
+  gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
+			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
 
-    gtk_widget_show(sbaw->sbw.gui_obj.window);
+  gtk_widget_show(window);
 
-    sbaw->sbw.gui_obj.enabled=1;
+  enabled=1;
 
-    sbaw->sbw.gui_obj.is_built=1;
+  is_built=1;
 
-    if(sbaw->load_source)
-	SourceBrowserAsm_new_source(sbaw,sbaw->sbw.gui_obj.gp);
-  update_menu_item((GUI_Object*)sbaw);
+  if(load_source)
+    SourceBrowserAsm_new_source(this,gp);
+  UpdateMenuItem();
 }
 
 
-int CreateSourceBrowserAsmWindow(GUI_Processor *gp)
+int SourceBrowserAsm_Window::Create(GUI_Processor *_gp)
 {
   gint i;
 
-  SourceBrowserAsm_Window *sbaw;
+  window = NULL;
+  gp = _gp;
+  name = "source_browser";
+  wc = WC_source;
+  wt = WT_asm_source_window;
+  is_built = 0;
 
-  sbaw = (SourceBrowserAsm_Window *) malloc(sizeof(SourceBrowserAsm_Window));
-
-  
-  sbaw->sbw.gui_obj.window = NULL;
-  sbaw->sbw.gui_obj.gp = gp;
-  sbaw->sbw.gui_obj.name = "source_browser";
-  sbaw->sbw.gui_obj.wc = WC_source;
-  sbaw->sbw.gui_obj.wt = WT_asm_source_window;
-  sbaw->sbw.gui_obj.is_built = 0;
-
-  gp->source_browser = (SourceBrowser_Window*)sbaw;
-  sbaw->sbw.gui_obj.change_view = SourceBrowser_change_view;
+  gp->source_browser = this;
+  change_view = NULL; //SourceBrowser_change_view;
 
 
   for(i=0;i<SBAW_NRFILES;i++)
-      sbaw->notebook_child[i]=NULL;
+      notebook_child[i]=NULL;
 
-  sbaw->breakpoints=NULL;
-  sbaw->notify_start_list=NULL;
-  sbaw->notify_stop_list=NULL;
+  breakpoints=NULL;
+  notify_start_list=NULL;
+  notify_stop_list=NULL;
   
-  sbaw->layout_offset=-1;
-  sbaw->sbw.gui_obj.enabled = 0;
+  layout_offset=-1;
+  enabled = 0;
     
     
-    sbaw->pixmap_pc = NULL; // these are created somewhere else
-    sbaw->pixmap_break=NULL;
-    sbaw->pixmap_profile_start=NULL;
-    sbaw->pixmap_profile_stop=NULL;
+  pixmap_pc = NULL; // these are created somewhere else
+  pixmap_break=NULL;
+  pixmap_profile_start=NULL;
+  pixmap_profile_stop=NULL;
     
 
-    sbaw->source_loaded = 0;
+  source_loaded = 0;
     
-    sbaw->load_source=0;
+  load_source=0;
 
-    gp->add_window_to_list((GUI_Object *)sbaw);
+  gp->add_window_to_list(this);
 
-    sbaw->sbw.gui_obj.get_config();
-    //gui_object_get_config((GUI_Object*)sbaw);
+  get_config();
 
-    if(sbaw->sbw.gui_obj.enabled)
-	BuildSourceBrowserAsmWindow(sbaw);
+  if(enabled)
+    Build();
 
-    return 1;
+  return 1;
 }
+
+SourceBrowserAsm_Window::SourceBrowserAsm_Window(void)
+{
+  menu = "<main>/Windows/Source";
+}
+
 #endif // HAVE_GUI

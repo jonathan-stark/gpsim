@@ -534,8 +534,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    // WatchWindow_add(popup_rw->gui_obj.gp->watch_window,pic_id, popup_rw->type, address);
-	    WatchWindow_add(popup_rw->gp->watch_window,pic_id, popup_rw->type, address);
+	    //WatchWindow_add(popup_rw->gp->watch_window,pic_id, popup_rw->type, address);
+	    popup_rw->gp->watch_window->Add(pic_id, popup_rw->type, address);
 	  }
       break;
     case MENU_SETTINGS:
@@ -1721,7 +1721,8 @@ void Register_Window::Build(void)
     register_sheet=GTK_SHEET(gtk_sheet_new(1,MAXCOLS,"gpsim Register Viewer [RAM]"));
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [RAM]");
     // Add a status bar
-    StatusBar_create(main_vbox,gp->status_bar);
+    //StatusBar_create(main_vbox,gp->status_bar);
+    gp->status_bar->Create(main_vbox);
   }
   else
   {

@@ -261,96 +261,120 @@ class EEPROM_RegisterWindow : public Register_Window
 //
 // The watch window
 //
-struct _Watch_Window {
-    GUI_Object     gui_obj;
+class Watch_Window : public  GUI_Object
+{
+ public:
 
-    GList *watches;
+  GList *watches;
 
-    int current_row;
-    int current_column;
+  int current_row;
+  int current_column;
     
-    GtkWidget *watch_clist;
-    GtkWidget *popup_menu;
-};
+  GtkWidget *watch_clist;
+  GtkWidget *popup_menu;
 
-typedef struct _Watch_Window Watch_Window;
+  Watch_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void ClearWatches(void);
+  virtual void Add(unsigned int pic_id, REGISTER_TYPE type, int address);
+  virtual void Update(void);
+  
+};
 
 //
 // The stack window
 //
-struct _Stack_Window {
-    GUI_Object     gui_obj;
+class Stack_Window : public GUI_Object
+{
+ public:
 
-    int last_stacklen;
+  int last_stacklen;
     
-    int current_row;
-    int current_column;
+  int current_row;
+  int current_column;
 
-    int has_processor;
+  int has_processor;
     
-    GtkWidget *stack_clist;
-//    GtkWidget *popup_menu;
+  GtkWidget *stack_clist;
+
+
+  Stack_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
 };
 
-typedef struct _Stack_Window Stack_Window;
+
 
 //
 // The stopwatch window
 //
-struct _StopWatch_Window {
-    GUI_Object     gui_obj;
+class StopWatch_Window : public GUI_Object
+{
+ public:
+  int count_dir;
 
-    int count_dir;
+  long long rollover;
+  long long cyclecounter;
+  long long offset;
 
-    long long rollover;
-    long long cyclecounter;
-    long frequency;
-    long long offset;
+  GtkWidget *cycleentry;
+  GtkWidget *timeentry;
+  GtkWidget *frequencyentry;
+  GtkWidget *offsetentry;
+  GtkWidget *rolloverentry;
 
-    GtkWidget *cycleentry;
-    GtkWidget *timeentry;
-    GtkWidget *frequencyentry;
-    GtkWidget *offsetentry;
-    GtkWidget *rolloverentry;
+  int has_processor;
 
-    int has_processor;
+  StopWatch_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
 };
 
-typedef struct _StopWatch_Window StopWatch_Window;
 
 //
 // The symbol window
 //
-struct _Symbol_Window {
-    GUI_Object     gui_obj;
+class Symbol_Window : public GUI_Object
+{
+ public:
 
-//    GtkWidget *symbol_window;
-    GtkWidget *symbol_clist;
-    GList *symbols;
+  GtkWidget *symbol_clist;
+  GList *symbols;
     
-    GtkWidget *popup_menu;
+  GtkWidget *popup_menu;
   
-    int current_row;
+  int current_row;
 
-    int filter_addresses;
-    int filter_constants;
-    int filter_registers;
+  int filter_addresses;
+  int filter_constants;
+  int filter_registers;
 
-    GtkWidget *addressesbutton;
-    GtkWidget *constantsbutton;
-    GtkWidget *registersbutton;
+  GtkWidget *addressesbutton;
+  GtkWidget *constantsbutton;
+  GtkWidget *registersbutton;
 
-    int load_symbols;
+  int load_symbols;
+
+  Symbol_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void Update(void);
+
+
 };
-
-typedef struct _Symbol_Window Symbol_Window;
 
 
 //
 // The Status Bar window 
 //
 
-struct _StatusBar_Window {
+class StatusBar_Window {
+ public:
   GUI_Processor *gp;
 
   GtkWidget *popup_menu;
@@ -363,17 +387,28 @@ struct _StatusBar_Window {
   
   int created;
 
+  StatusBar_Window(void);
+  void NewProcessor(GUI_Processor *_gp);
+  void Create(GtkWidget *vbox_main);
+  void Update(void);
 
 };
 
-typedef struct _StatusBar_Window StatusBar_Window;
 
-struct _SourceBrowser_Window {
-    GUI_Object gui_obj;
-    GtkWidget *vbox; /* for children to put widgets in */
+class SourceBrowser_Window : public GUI_Object {
+ public:
+
+  GtkWidget *vbox;          // for children to put widgets in
+
+  void Create(void);
+  virtual void NewProcessor(GUI_Processor *gp);
+  virtual void SelectAddress(int address);
+  virtual void Update(void);
+  virtual void SetPC(int address);
+
 };
 
-typedef struct _SourceBrowser_Window SourceBrowser_Window;
+//typedef struct _SourceBrowser_Window SourceBrowser_Window;
 
 
 struct breakpoint_info {
@@ -391,100 +426,110 @@ struct sa_entry{         // entry in the sa_xlate_list
 //
 // The Source Assembler Browser Data
 //
-struct _SourceBrowserAsm_Window {
-    SourceBrowser_Window sbw;
+class SourceBrowserAsm_Window :public  SourceBrowser_Window
+{
+ public:
 
-    GList *breakpoints;       // List of breakpoint info structs
-    GList *notify_start_list; // List of breakpoint info structs
-    GList *notify_stop_list;  // List of breakpoint info structs
-    int layout_offset;
+  GList *breakpoints;       // List of breakpoint info structs
+  GList *notify_start_list; // List of breakpoint info structs
+  GList *notify_stop_list;  // List of breakpoint info structs
+  int layout_offset;
 
-    // We need one of these for each source file
-    GtkAdjustment *source_layout_adj[SBAW_NRFILES];
-    GtkWidget *source_layout[SBAW_NRFILES];
-    GtkWidget *source_text[SBAW_NRFILES];
-    int pageindex_to_fileid[SBAW_NRFILES];
-    GtkWidget *source_pcwidget[SBAW_NRFILES];
-    GtkWidget *notebook_child[SBAW_NRFILES];
+  // We need one of these for each source file
+  GtkAdjustment *source_layout_adj[SBAW_NRFILES];
+  GtkWidget *source_layout[SBAW_NRFILES];
+  GtkWidget *source_text[SBAW_NRFILES];
+  int pageindex_to_fileid[SBAW_NRFILES];
+  GtkWidget *source_pcwidget[SBAW_NRFILES];
+  GtkWidget *notebook_child[SBAW_NRFILES];
 
-    // Font strings
-    char commentfont_string[256];
-    char sourcefont_string[256];
+  // Font strings
+  char commentfont_string[256];
+  char sourcefont_string[256];
 
-    GtkWidget *popup_menu;
+  GtkWidget *popup_menu;
 
-    struct sa_entry *menu_data;  // used by menu callbacks
+  struct sa_entry *menu_data;  // used by menu callbacks
     
-    GdkBitmap *pc_mask;
-    GdkBitmap *bp_mask;
-    GdkBitmap *startp_mask;
-    GdkBitmap *stopp_mask;
-    GtkWidget *notebook;
+  GdkBitmap *pc_mask;
+  GdkBitmap *bp_mask;
+  GdkBitmap *startp_mask;
+  GdkBitmap *stopp_mask;
+  GtkWidget *notebook;
 
-    GtkStyle symbol_text_style;       // for symbols in .asm display
-    GtkStyle label_text_style;        // for label in .asm display
-    GtkStyle instruction_text_style;  // for instruction in .asm display
-    GtkStyle number_text_style;       // for numbers in .asm display
-    GtkStyle comment_text_style;      // for comments in .asm display
-    GtkStyle default_text_style;      // the rest
+  GtkStyle symbol_text_style;       // for symbols in .asm display
+  GtkStyle label_text_style;        // for label in .asm display
+  GtkStyle instruction_text_style;  // for instruction in .asm display
+  GtkStyle number_text_style;       // for numbers in .asm display
+  GtkStyle comment_text_style;      // for comments in .asm display
+  GtkStyle default_text_style;      // the rest
     
-    GdkPixmap *pixmap_pc;
-    GdkPixmap *pixmap_break;
-    GdkPixmap *pixmap_profile_start;
-    GdkPixmap *pixmap_profile_stop;
-    int source_loaded;
+  GdkPixmap *pixmap_pc;
+  GdkPixmap *pixmap_break;
+  GdkPixmap *pixmap_profile_start;
+  GdkPixmap *pixmap_profile_stop;
+  int source_loaded;
 
-    int load_source;
+  int load_source;
+
+  SourceBrowserAsm_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void SelectAddress(int address);
+  virtual void SetPC(int address);
 };
-
-typedef struct _SourceBrowserAsm_Window SourceBrowserAsm_Window;
-
 
 //
 // The Source Opcode Browser Data
 //
-struct _SourceBrowserOpcode_Window {
-    SourceBrowser_Window sbw;
+class SourceBrowserOpcode_Window : public SourceBrowser_Window
+{
+ public:
 
-    GtkWidget *clist;
-//    int clist_rows;      // Number of rows in the clist
-    int current_address;   // current PC
+  GtkWidget *clist;
 
-    // Font strings
-    char normalfont_string[256];
-    char breakpointfont_string[256];
-    char pcfont_string[256];
-    GtkStyle *normal_style;
-    GtkStyle *current_line_number_style;
-    GtkStyle *breakpoint_line_number_style;
-    GdkColor pm_has_changed_color;
-    GdkColor normal_pm_bg_color;
-    GdkColor breakpoint_color;
+  int current_address;   // current PC
 
-    char **column_titles; //
-    int  columns;         //
+  // Font strings
+  char normalfont_string[256];
+  char breakpointfont_string[256];
+  char pcfont_string[256];
+  GtkStyle *normal_style;
+  GtkStyle *current_line_number_style;
+  GtkStyle *breakpoint_line_number_style;
+  GdkColor pm_has_changed_color;
+  GdkColor normal_pm_bg_color;
+  GdkColor breakpoint_color;
 
-    int processor;
-    int program;
+  char **column_titles; //
+  int  columns;         //
+
+  int processor;
+  int program;
     
-    GtkWidget *notebook;
-    GtkWidget *sheet;
-    GtkWidget *entry;
-    GtkWidget *label;
-//    GtkWidget *pcwidget;
-    GtkWidget *sheet_popup_menu;
-    GtkWidget *clist_popup_menu;
+  GtkWidget *notebook;
+  GtkWidget *sheet;
+  GtkWidget *entry;
+  GtkWidget *label;
+  //    GtkWidget *pcwidget;
+  GtkWidget *sheet_popup_menu;
+  GtkWidget *clist_popup_menu;
 
-    int ascii_mode; // 0, 1 or 2 equals
-                    // one byte/cell,
-                    // two bytes/cell MSB first
-                    // two bytes/cell LSB first
+  int ascii_mode; // 0, 1 or 2 equals
+  // one byte/cell,
+  // two bytes/cell MSB first
+  // two bytes/cell LSB first
     
-    int *memory;
+  int *memory;
+
+  SourceBrowserOpcode_Window(void);
+  virtual int Create(GUI_Processor *gp);
+  virtual void Build(void);
+  virtual void NewProcessor(GUI_Processor *gp);
+  virtual void SelectAddress(int address);
+  virtual void SetPC(int address);
+
 };
-
-typedef struct _SourceBrowserOpcode_Window SourceBrowserOpcode_Window;
-
 
 
 

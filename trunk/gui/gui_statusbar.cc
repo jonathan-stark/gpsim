@@ -80,7 +80,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     
     item = (menu_item *)data;
     time_format = (menu_id)item->id;
-    StatusBar_update(popup_sbw);
+    popup_sbw->Update(); //StatusBar_update(popup_sbw);
 }
 
 static GtkWidget *
@@ -112,45 +112,42 @@ build_menu(void)
 }
 
 
-void StatusBar_update(StatusBar_Window *sbw)
+void StatusBar_Window::Update(void)
 {
   char buffer[32];
-  unsigned int pic_id;
 
-  pic_id = sbw->gp->pic_id;
-
-  if( !sbw->created)
+  if( !created)
       return;
   
   //update the displayed values
 
-  sbw->status->value.i32 = gpsim_get_status(pic_id);
-  sprintf(buffer,"0x%02x",sbw->status->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->status->entry), buffer);
+  status->value.i32 = gpsim_get_status(gp->pic_id);
+  sprintf(buffer,"0x%02x",status->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (status->entry), buffer);
 
 
-  sbw->W->value.i32 = gpsim_get_w(pic_id);
-  sprintf(buffer,"0x%02x",sbw->W->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->W->entry), buffer);
+  W->value.i32 = gpsim_get_w(gp->pic_id);
+  sprintf(buffer,"0x%02x",W->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (W->entry), buffer);
 
-  sbw->pc->value.i32 = gpsim_get_pc_value(pic_id);
-  sprintf(buffer,"0x%04x",sbw->pc->value.i32);
-  gtk_entry_set_text (GTK_ENTRY (sbw->pc->entry), buffer);
+  pc->value.i32 = gpsim_get_pc_value(gp->pic_id);
+  sprintf(buffer,"0x%04x",pc->value.i32);
+  gtk_entry_set_text (GTK_ENTRY (pc->entry), buffer);
 
-  sbw->cycles->value.ui64 = gpsim_get_cycles(pic_id);
-  sprintf(buffer,"0x%016Lx",sbw->cycles->value.ui64);
-  gtk_entry_set_text (GTK_ENTRY (sbw->cycles->entry), buffer);
+  cycles->value.ui64 = gpsim_get_cycles(gp->pic_id);
+  sprintf(buffer,"0x%016Lx",cycles->value.ui64);
+  gtk_entry_set_text (GTK_ENTRY (cycles->entry), buffer);
 
   if(time_format==MENU_TIME_USECONDS) {
-    sbw->time->value.db = gpsim_get_cycles(pic_id)*1e6/(double)gpsim_get_inst_clock(pic_id);
-    sprintf(buffer,"%19.2f us",sbw->time->value.db);
+    time->value.db = gpsim_get_cycles(gp->pic_id)*1e6/(double)gpsim_get_inst_clock(gp->pic_id);
+    sprintf(buffer,"%19.2f us",time->value.db);
   }
   else if(time_format==MENU_TIME_MSECONDS) {
-    sbw->time->value.db = gpsim_get_cycles(pic_id)*1e3/(double)gpsim_get_inst_clock(pic_id);
-    sprintf(buffer,"%19.3f ms",sbw->time->value.db);
+    time->value.db = gpsim_get_cycles(gp->pic_id)*1e3/(double)gpsim_get_inst_clock(gp->pic_id);
+    sprintf(buffer,"%19.3f ms",time->value.db);
   }
   else if(time_format==MENU_TIME_HHMMSS) {
-    double v=sbw->time->value.db = gpsim_get_cycles(pic_id)/(double)gpsim_get_inst_clock(pic_id);
+    double v=time->value.db = gpsim_get_cycles(gp->pic_id)/(double)gpsim_get_inst_clock(gp->pic_id);
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
     mm=(int)(v/60);
@@ -160,10 +157,10 @@ void StatusBar_update(StatusBar_Window *sbw)
     sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
   }
   else {
-    sbw->time->value.db = gpsim_get_cycles(pic_id)/(double)gpsim_get_inst_clock(pic_id);
-    sprintf(buffer,"%19.3f s",sbw->time->value.db);
+    time->value.db = gpsim_get_cycles(gp->pic_id)/(double)gpsim_get_inst_clock(gp->pic_id);
+    sprintf(buffer,"%19.3f s",time->value.db);
   }
-  gtk_entry_set_text (GTK_ENTRY (sbw->time->entry), buffer);
+  gtk_entry_set_text (GTK_ENTRY (time->entry), buffer);
 
 }
 
@@ -183,7 +180,7 @@ static void w_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
     gpsim_put_w(pic_id, value);
 
-    StatusBar_update(sbw);
+    sbw->Update();
 
     return;
 }
@@ -204,7 +201,7 @@ static void status_callback(GtkWidget *entry, StatusBar_Window *sbw)
     
     gpsim_put_status(pic_id, value);
     
-    StatusBar_update(sbw);
+    sbw->Update();
 
     return;
 }
@@ -225,7 +222,7 @@ static void pc_callback(GtkWidget *entry, StatusBar_Window *sbw)
 
     gpsim_put_pc_value(pic_id, value);
     
-    StatusBar_update(sbw);
+    sbw->Update();
 
     return;
 }
@@ -302,7 +299,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
  *
  */ 
 
-void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw)
+void StatusBar_Window::Create(GtkWidget *vbox_main)
 {
   GtkWidget *hbox;
 
@@ -313,40 +310,40 @@ void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw)
   gtk_box_pack_end (GTK_BOX (vbox_main), hbox, FALSE, FALSE, 0);
   gtk_widget_show (hbox);
 
-  sbw->status = create_labeled_entry(hbox,"Status:", 4);
-  sbw->status->parent = sbw;
-  gtk_signal_connect(GTK_OBJECT(sbw->status->entry), "activate",
+  status = create_labeled_entry(hbox,"Status:", 4);
+  status->parent = this;
+  gtk_signal_connect(GTK_OBJECT(status->entry), "activate",
 		     GTK_SIGNAL_FUNC(status_callback),
-		     sbw);
+		     this);
 
-  sbw->W = create_labeled_entry(hbox,"W:", 4);
-  sbw->W->parent = sbw;
-  gtk_signal_connect(GTK_OBJECT(sbw->W->entry), "activate",
+  W = create_labeled_entry(hbox,"W:", 4);
+  W->parent = this;
+  gtk_signal_connect(GTK_OBJECT(W->entry), "activate",
 		     GTK_SIGNAL_FUNC(w_callback),
-		     sbw);
+		     this);
 
-  sbw->pc = create_labeled_entry(hbox,"PC:", 6);
-  sbw->pc->parent = sbw;
-  gtk_signal_connect(GTK_OBJECT(sbw->pc->entry), "activate",
+  pc = create_labeled_entry(hbox,"PC:", 6);
+  pc->parent = this;
+  gtk_signal_connect(GTK_OBJECT(pc->entry), "activate",
 		     GTK_SIGNAL_FUNC(pc_callback),
-		     sbw);
+		     this);
 
-  sbw->cycles = create_labeled_entry(hbox,"Cycles:", 18);
-  sbw->cycles->parent = sbw;
-  gtk_entry_set_editable(GTK_ENTRY(sbw->cycles->entry),0);
+  cycles = create_labeled_entry(hbox,"Cycles:", 18);
+  cycles->parent = this;
+  gtk_entry_set_editable(GTK_ENTRY(cycles->entry),0);
 
-  sbw->time = create_labeled_entry(hbox,"Time:", 22);
-  sbw->time->parent = sbw;
-  gtk_entry_set_editable(GTK_ENTRY(sbw->time->entry),0);
+  time = create_labeled_entry(hbox,"Time:", 22);
+  time->parent = this;
+  gtk_entry_set_editable(GTK_ENTRY(time->entry),0);
 
   /* create popupmenu */
-  sbw->popup_menu=build_menu();
-  gtk_signal_connect(GTK_OBJECT(sbw->time->entry),
+  popup_menu=build_menu();
+  gtk_signal_connect(GTK_OBJECT(time->entry),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
-		     sbw);
+		     this);
 
-  sbw->created=1;
+  created=1;
   
 }
 
@@ -355,19 +352,20 @@ void StatusBar_update_xref(struct cross_reference_to_gui *xref, int new_value)
   StatusBar_Window *sbw;
 
   sbw  = (StatusBar_Window *) (xref->parent_window);
-  StatusBar_update(sbw);
+  sbw->Update();
 }
 
-void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp)
+void StatusBar_Window::NewProcessor(GUI_Processor *_gp)
 {
 
   struct cross_reference_to_gui  *cross_reference;
 
-  if(sbw == NULL || gp == NULL)
+  if(_gp == NULL)
     return;
 
-  sbw->gp = gp;
-  gp->status_bar = sbw;
+  gp = _gp;
+
+  gp->status_bar = this;
 
 
   /* Now create a cross-reference link that the simulator can use to
@@ -376,14 +374,29 @@ void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp)
 
   cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
   cross_reference->parent_window_type =   WT_status_bar;
-  cross_reference->parent_window = (gpointer) sbw;
-  cross_reference->data = (gpointer) sbw;
+  cross_reference->parent_window = (gpointer) this;
+  cross_reference->data = (gpointer) this;
   cross_reference->update = StatusBar_update_xref;
   cross_reference->remove = NULL;
   
-  gpsim_assign_pc_xref(sbw->gp->pic_id, (gpointer) cross_reference);
+  gpsim_assign_pc_xref(gp->pic_id, (gpointer) cross_reference);
 
-  StatusBar_update(sbw);
+  Update();
 
 }
+
+StatusBar_Window::StatusBar_Window(void)
+{
+  gp = NULL;
+
+  popup_menu = NULL;
+  
+  status = NULL;
+  W = NULL;
+  pc = NULL;
+  cycles = NULL;
+  time = NULL;
+  
+}
+
 #endif // HAVE_GUI

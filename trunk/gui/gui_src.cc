@@ -53,11 +53,11 @@ key_press(GtkWidget *widget,
   SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
 
   if(!sbw) return(FALSE);
-  if(!sbw->gui_obj.gp) return(FALSE);
-  if(!sbw->gui_obj.gp->pic_id) return(FALSE);
+  if(!sbw->gp) return(FALSE);
+  if(!sbw->gp->pic_id) return(FALSE);
 
   // fix this
-  if(sbw->gui_obj.wt == WT_opcode_source_window)
+  if(sbw->wt == WT_opcode_source_window)
   {
       SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
 
@@ -73,36 +73,34 @@ key_press(GtkWidget *widget,
   case 'S':
   case GDK_F7:
       //sbw->gui_obj.gp->p->step(1);
-      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id)
+      if(gpsim_get_hll_mode(sbw->gp->pic_id)
 	&&!low_level_step)
-      	gpsim_hll_step(sbw->gui_obj.gp->pic_id);
+      	gpsim_hll_step(sbw->gp->pic_id);
       else
-      	gpsim_step(sbw->gui_obj.gp->pic_id, 1);
+      	gpsim_step(sbw->gp->pic_id, 1);
       break;
 
   case 'o':  // Step Over Next instruction, or hll statement
   case 'O':
   case 'n':
   case GDK_F8:
-      //sbw->gui_obj.gp->p->step_over();
-      if(gpsim_get_hll_mode(sbw->gui_obj.gp->pic_id)
+      if(gpsim_get_hll_mode(sbw->gp->pic_id)
 	&&!low_level_step)
-      	gpsim_hll_step_over(sbw->gui_obj.gp->pic_id);
+      	gpsim_hll_step_over(sbw->gp->pic_id);
       else
-      	gpsim_step_over(sbw->gui_obj.gp->pic_id);
+      	gpsim_step_over(sbw->gp->pic_id);
       break;
   case 'r':
   case 'R':
   case GDK_F9:
-      //sbw->gui_obj.gp->p->run();
-      gpsim_run(sbw->gui_obj.gp->pic_id);
+      gpsim_run(sbw->gp->pic_id);
       break;
   case GDK_Escape:
-      gpsim_stop(sbw->gui_obj.gp->pic_id);
+      gpsim_stop(sbw->gp->pic_id);
       break;
   case 'f':
   case 'F':
-      gpsim_finish(sbw->gui_obj.gp->pic_id);
+      gpsim_finish(sbw->gp->pic_id);
       break;
       
 // Exit is Ctrl-Q; the dispatcher menu shortcut
@@ -114,47 +112,12 @@ key_press(GtkWidget *widget,
   return TRUE;
 }
 
-/*
-static int
-SourceBrowser_close(GtkWidget *widget,
-		    SourceBrowser_Window *sbw)
-{
-  printf("closing browser\n");
-  SourceBrowser_change_view((GUI_Object *)sbw,VIEW_HIDE);
-
-  //gtk_widget_hide(widget);
-  printf("browser should be closed\n");
-
-  return(TRUE);
-
-}
-*/
-
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         SourceBrowser_Window *sbw)
 {
     SourceBrowser_change_view((GUI_Object *)sbw,VIEW_HIDE);
     return TRUE;
-}
-
-void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address)
-{
-    SourceBrowserOpcode_Window *sbow=(SourceBrowserOpcode_Window*)sbw;
-    SourceBrowserAsm_Window *sbaw=(SourceBrowserAsm_Window*)sbw;
-    switch(sbw->gui_obj.wt)
-    {
-    case WT_asm_source_window:
-	SourceBrowserAsm_select_address(sbaw, address);
-	break;
-
-    case WT_opcode_source_window:
-	SourceBrowserOpcode_select_address(sbow,address);
-	break;
-    default:
-	puts("SourceBrowser_select_address(): unhandled case");
-	break;
-    }
 }
 
 void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value)
@@ -177,111 +140,39 @@ void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_valu
 
 }
 
-void SourceBrowser_update(SourceBrowser_Window *sbw)
+void SourceBrowser_Window::SetPC(int address)
 {
-  gint new_address;
-  
-  SourceBrowserOpcode_Window *sbow = (SourceBrowserOpcode_Window*)sbw;
-  SourceBrowserAsm_Window *sbaw = (SourceBrowserAsm_Window*)sbw;
-  unsigned int pic_id;
-  
-  if(!sbw) return;     // this shouldn't happen
-
-  // get a manageable pointer 
-  pic_id = sbw->gui_obj.gp->pic_id;
-
-  new_address=gpsim_get_pc_value(pic_id);
-  
-  //update the displayed values
-  switch(sbw->gui_obj.wt) {
-
-  case WT_asm_source_window:
-//      new_row =  pic->program_memory[pic->pc.value]->get_src_line();
-      //      new_address = pic->find_closest_address_to_line(0,new_row);
-      //new_address=pic->pc.value;
-      SourceBrowserAsm_set_pc( sbaw, new_address);
-      break;
-
-  case WT_opcode_source_window:
-      SourceBrowserOpcode_set_pc( sbow, new_address);
-      break;
-
-  case WT_list_source_window:
-      assert(0);/*
-    last_address = pic->find_closest_address_to_line(1,sbw->current_row);
-    new_row =  pic->program_memory[pic->pc.value]->get_lst_line();
-    break;        */
-
-
-  default:
-    printf("SourceBrowser_update: bad window type %d\n",sbw->gui_obj.wt);
-    return;
-  }
-  
-
+  printf("%s shouldn't be called \n",__FUNCTION__);
 
 }
-/*
-static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
+void SourceBrowser_Window::Update(void)
 {
-    SourceBrowserAsm_Window *sbaw=(SourceBrowserAsm_Window*)(xref->parent_window);
-    SourceBrowserOpcode_Window *sbow=(SourceBrowserOpcode_Window*)(xref->parent_window);
 
-    if(sbaw->source_loaded)
-    {
-	SourceBrowserAsm_set_pc(sbaw, new_address);
-    }
-    SourceBrowserOpcode_set_pc(sbow,new_address);
+  SetPC(gpsim_get_pc_value(gp->pic_id));
 }
-*/
 
-void CreateSBW(SourceBrowser_Window *sbw)
+
+void SourceBrowser_Window::Create(void)
 {
 
 
-  GtkWidget *window;
-  GtkWidget *vbox;
-  
-  int x,y,width,height;
-  
-  
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-/*  gtk_widget_set_events(window,
-			gtk_widget_get_events(window)|
-			GDK_KEY_RELEASE_MASK);*/
-  
-
-
-  ((GUI_Object*)sbw)->window=window;
-  
-  width=((GUI_Object*)sbw)->width;
-  height=((GUI_Object*)sbw)->height;
-  x=((GUI_Object*)sbw)->x;
-  y=((GUI_Object*)sbw)->y;
-  gtk_window_set_default_size(GTK_WINDOW(sbw->gui_obj.window), width,height);
-  gtk_widget_set_uposition(GTK_WIDGET(sbw->gui_obj.window),x,y);
-  gtk_window_set_wmclass(GTK_WINDOW(sbw->gui_obj.window),sbw->gui_obj.name,"Gpsim");
-
-  sbw->gui_obj.window = window;
+  gtk_window_set_default_size(GTK_WINDOW(window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  gtk_window_set_wmclass(GTK_WINDOW(window),name,"Gpsim");
 
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event),
-		      (gpointer) sbw);
+		      (gpointer) this);
 
   /* Add a signal handler for key press events. This will capture
    * key commands for single stepping, running, etc.
    */
   gtk_signal_connect(GTK_OBJECT(window),"key_press_event",
 		     (GtkSignalFunc) key_press,
-		     (gpointer) sbw);
+		     (gpointer) this);
 
-  /* Add a signal handler for key press events. This will capture
-   * key commands for single stepping, running, etc.
-   */
-//  gtk_signal_connect(GTK_OBJECT(window),"key_release_event",
-//		     (GtkSignalFunc) key_release,
-//		     (gpointer) sbw);
 
   
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -290,7 +181,15 @@ void CreateSBW(SourceBrowser_Window *sbw)
   gtk_widget_show(vbox);
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
-  sbw->vbox=vbox;
+}
+
+void SourceBrowser_Window::NewProcessor(GUI_Processor *gp)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
+}
+void SourceBrowser_Window::SelectAddress(int address)
+{
+  printf("%s shouldn't be called \n",__FUNCTION__);
 }
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go)
@@ -304,13 +203,6 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
     gdk_window_get_size(widget->window,&go->width,&go->height);
     
     go->set_config();
-/*
-    winattr.x=go->x;
-    winattr.y=go->y;
-    winattr.width=go->width;
-    winattr.height=go->height;
-    winattr.visible=go->visible;
-    gui_config_save_winattr(go->name,&winattr);*/
     
     return 0; // what should be returned?, FIXME
 }
@@ -322,32 +214,21 @@ void update_menu_item(struct GUI_Object *_this)
     {
     case WT_register_window:
       _this->UpdateMenuItem();
-
-/*
-	if(((Register_Window*)_this)->type==REGISTER_RAM)
-	{
-	    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Ram");
-	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
-	}
-	else
-	{
-	    menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/EEPROM");
-	    gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
-	}
-	break;
-*/
       break;
     case WT_symbol_window:
 	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Symbols");
 	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_asm_source_window:
-	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Source");
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
-	break;
+      _this->UpdateMenuItem();
+
+      //menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Source");
+      //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+      break;
     case WT_opcode_source_window:
-	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Program memory");
-	gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
+      _this->UpdateMenuItem();
+      //menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Program memory");
+      //gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(menu_item),_this->enabled);
 	break;
     case WT_watch_window:
 	menu_item = gtk_item_factory_get_item (item_factory,"<main>/Windows/Watch");
@@ -399,23 +280,26 @@ void SourceBrowser_change_view (GUI_Object *_this, int view_state)
 	      _this->Build();
 	      break;
 	  case WT_symbol_window:
-	      BuildSymbolWindow((Symbol_Window*)_this);
+	    _this->Build();
+	    //BuildSymbolWindow((Symbol_Window*)_this);
 	      break;
 	  case WT_asm_source_window:
-	      BuildSourceBrowserAsmWindow((SourceBrowserAsm_Window*)_this);
+	      _this->Build();
 	      break;
 	  case WT_opcode_source_window:
-	      BuildSourceBrowserOpcodeWindow((SourceBrowserOpcode_Window*)_this);
+	      _this->Build();
 	      break;
 	  case WT_watch_window:
-	      BuildWatchWindow((Watch_Window*)_this);
+	    //BuildWatchWindow((Watch_Window*)_this);
+	    _this->Build();
 	      break;
 	  case WT_breadboard_window:
 	      _this->enabled=1;
 	      BuildBreadboardWindow((Breadboard_Window*)_this);
 	      break;
 	  case WT_stack_window:
-	      BuildStackWindow((Stack_Window*)_this);
+	    _this->Build();
+	    //BuildStackWindow((Stack_Window*)_this);
 	      break;
 	  case WT_trace_window:
 	      BuildTraceWindow((Trace_Window*)_this);
@@ -424,7 +308,8 @@ void SourceBrowser_change_view (GUI_Object *_this, int view_state)
 	      BuildProfileWindow((Profile_Window*)_this);
 	      break;
 	  case WT_stopwatch_window:
-	      BuildStopWatchWindow((StopWatch_Window*)_this);
+	    _this->Build();
+	    //BuildStopWatchWindow((StopWatch_Window*)_this);
 	      break;
 	  default:
 	      puts("SourceBrowser_change_view(): unhandled case");
