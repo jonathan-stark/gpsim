@@ -153,8 +153,6 @@ void P12C508::create(void)
 
   tmr0.start(0);
 
-  fsr->register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
-
   pc->reset();
   //trace.program_counter (pc->value);
 
@@ -229,7 +227,6 @@ void P12C509::create(void)
   alias_file_registers(0x00,0x0f,0x20);
   add_file_registers(0x30, 0x3f, 0);
 
-  fsr->register_page_bits = RP0;  // the 509 has two register pages (i.e. RP0 in fsr is used)
   pa_bits = PA0;                 // the 509 has two code pages (i.e. PAO in status is used)
 
 

@@ -67,10 +67,17 @@ public:
 
   static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
-  virtual unsigned int get_fsr_value ( unsigned int load_value )
+
+  virtual unsigned int fsr_valid_bits(void)
     {
-      return ( load_value | 0xE0 );
+      return 0x1f;  // Only 32 register addresses 
     }
+
+  virtual unsigned int fsr_register_page_bits(void)
+    {
+      return 0;     // Only one register page.
+    }
+
 
 };
 
@@ -108,11 +115,6 @@ public:
 
   static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
-
-  virtual unsigned int get_fsr_value ( unsigned int load_value )
-    {
-      return ( load_value | 0xE0 );
-    }
 
 };
 

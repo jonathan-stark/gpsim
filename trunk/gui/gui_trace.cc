@@ -198,22 +198,18 @@ void Trace_Window::NewProcessor(GUI_Processor *_gp)
 
   TraceXREF *cross_reference;
 
-  if(gp == 0)
+  if(!gp)
     return;
 
-  has_processor=true;
-    
   if(!enabled)
     return;
     
-  gp = _gp;
-
   cross_reference = new TraceXREF();
   cross_reference->parent_window_type =  WT_trace_window;
   cross_reference->parent_window = (gpointer) this;
   cross_reference->data = 0;
   if(trace.xref)
-      trace.xref->add((gpointer) cross_reference);
+    trace.xref->add((gpointer) cross_reference);
 
 }
 
@@ -299,8 +295,7 @@ void Trace_Window::Build(void)
   is_built=1;
   last_cycle = 0;
 
-  if(has_processor)
-    NewProcessor(gp);
+  NewProcessor(gp);
 
   Update();
   UpdateMenuItem();
@@ -327,7 +322,6 @@ Trace_Window::Trace_Window(GUI_Processor *_gp)
   trace_map = 0;
 
   trace_flags = 0;
-  has_processor=false;
 
   get_config();
 

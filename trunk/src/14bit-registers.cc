@@ -123,12 +123,6 @@ void  FSR::put(unsigned int new_value)
   value = new_value;
   trace.register_write(address,value);
 
-  /* The 12-bit core selects the register page using the fsr */
-  if(cpu_pic->base_isa() == _12BIT_PROCESSOR_)
-    {
-      cpu->register_bank = &cpu->registers[ value & register_page_bits ];
-      value = cpu_pic->get_fsr_value ( new_value );	// adjust for missing bits
-    }
 }
 
 void  FSR::put_value(unsigned int new_value)
@@ -149,6 +143,75 @@ void  FSR::put_value(unsigned int new_value)
 
 
 }
+
+
+unsigned int FSR::get(void)
+{
+
+  trace.register_read(address,value);
+  return(value);
+}
+
+unsigned int FSR::get_value(void)
+{
+  return(value);
+}
+
+
+//
+//--------------------------------------------------
+// member functions for the FSR_12 class
+//--------------------------------------------------
+//
+FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
+{
+  register_page_bits = _rpb;
+  valid_bits = _valid_bits;
+}
+void  FSR_12::put(unsigned int new_value)
+{
+  value = new_value;
+  trace.register_write(address,value);
+
+  /* The 12-bit core selects the register page using the fsr */
+  cpu->register_bank = &cpu->registers[ value & register_page_bits ];
+}
+
+void  FSR_12::put_value(unsigned int new_value)
+{
+
+  put(new_value);
+
+  //#ifdef HAVE_GUI
+
+  if(xref)
+  {
+      xref->update();
+      if(cpu_pic->indf->xref)
+	cpu_pic->indf->xref->update();
+  }
+
+  //#endif
+
+
+}
+
+
+unsigned int FSR_12::get(void)
+{
+  unsigned int v = get_value();
+  trace.register_read(address,v);
+  return(v);
+}
+
+unsigned int FSR_12::get_value(void)
+{
+  // adjust for missing bits
+  cout << "FSR_12:get_value - valid_bits 0x" << hex << valid_bits << endl;
+  return ((value & valid_bits) | (~valid_bits & 0xff));
+
+}
+
 
 //
 //--------------------------------------------------
@@ -248,7 +311,7 @@ void INDF::put(unsigned int new_value)
 {
 
   trace.register_write(address,value);
-  int reg = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+  int reg = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
 	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
@@ -275,7 +338,7 @@ void INDF::put_value(unsigned int new_value)
   if(xref)
     {
       xref->update();
-      int r = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+      int r = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
 	       ((cpu_pic->status->value & base_address_mask1)<<1)& base_address_mask2);
       if(r & fsr_mask) 
 	{
@@ -291,7 +354,7 @@ unsigned int INDF::get(void)
 {
 
   trace.register_read(address,value);
-  int reg = (cpu_pic->map_fsr_indf() + //cpu->fsr->value + 
+  int reg = (cpu_pic->fsr->get_value() +
 	     ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get());
@@ -301,7 +364,7 @@ unsigned int INDF::get(void)
 
 unsigned int INDF::get_value(void)
 {
-  int reg = (cpu_pic->fsr->value + 
+  int reg = (cpu_pic->fsr->get_value() +
 	       ((cpu_pic->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get_value());

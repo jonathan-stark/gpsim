@@ -314,11 +314,14 @@ static void do_symbol_select(Symbol_Window *sw, sym *e)
 
 static gint symbol_list_row_selected(GtkCList *symlist,gint row, gint column,GdkEvent *event, Symbol_Window *sw)
 {
-    sym *e=(sym*)gtk_clist_get_row_data(symlist,row);
-    sw->current_row=row;
-    do_symbol_select(sw,e);
-    update_menus(sw);
+  if(!symlist || !sw)
     return 0;
+
+  sym *e=(sym*)gtk_clist_get_row_data(symlist,row);
+  sw->current_row=row;
+  do_symbol_select(sw,e);
+  update_menus(sw);
+  return 0;
 }
 
 /*

@@ -62,6 +62,8 @@ void _14bit_processor :: create (void)
     cout << "_14bit_processor create, type = " << isa() << '\n';
 
   pic_processor::create();
+  fsr = new FSR;
+  fsr->new_name("fsr");
 
   tmr0.cpu = this;
   tmr0.start(0);

@@ -8,7 +8,7 @@ if [ $# -lt 2 ] ; then
 fi
 
 #GPSIM=g
-GPSIM=../gpsim/gpsim
+GPSIM=../../gpsim/gpsim
 GPSIM_SCRIPT=$1
 LOGFILE=$2
 touch $2

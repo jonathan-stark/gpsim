@@ -59,9 +59,7 @@ void StopWatch_Window::Update(void)
   char offsetstring[100];
   char rolloverstring[100];
 
-  if(!has_processor || !is_built)
-    return;
-  if(!gp || !gp->cpu)
+  if(!is_built || !gp || !gp->cpu)
     return;
 
   if(rollover<=0)
@@ -398,9 +396,6 @@ StopWatch_Window::StopWatch_Window(GUI_Processor *_gp)
   rollover=1000000;
   cyclecounter=0;
   offset=0;
-
-  has_processor=1;
-
 
   get_config();
   if(config_get_string(name,"rollover",&string))

@@ -1207,12 +1207,8 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   char buf[128];
   GtkSheetRange range;
 
-  if(_gp == 0)
+  if(!gp)
     return;
-
-  gp = _gp;
-
-  has_processor=true;
 
   current_address=0;
     
@@ -1525,8 +1521,7 @@ void SourceBrowserOpcode_Window::Build(void)
 
 
   
-  if(has_processor)
-      NewProcessor(gp);
+  NewProcessor(gp);
   if(program)
     NewSource(gp);
   
@@ -1565,7 +1560,6 @@ SourceBrowserOpcode_Window::SourceBrowserOpcode_Window(GUI_Processor *_gp)
   memory=0;
   current_address=0;
 
-  has_processor=false;
   program=0;
 
   ascii_mode=1; /// default, two bytes/cell, MSB first

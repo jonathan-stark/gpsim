@@ -61,9 +61,6 @@ static gint sigh_button_event(GtkWidget *widget,
   struct stack_entry *entry;
   assert(event&&sw);
     
-  if(!sw->has_processor)
-    return 0;
-
   if(!sw->gp || !sw->gp->cpu)
     return 0;
 
@@ -195,7 +192,7 @@ void Stack_Window::Update(void)
   unsigned int retaddress;
   struct stack_entry *stack_entry;
 
-  if(!has_processor || !enabled)
+  if(!gp || !enabled)
     return;
     
   //pic_id = gp->pic_id;
@@ -344,7 +341,6 @@ Stack_Window::Stack_Window(GUI_Processor *_gp)
 
   last_stacklen=0;
   current_row=0;
-  has_processor=true;
 
   get_config();
     
