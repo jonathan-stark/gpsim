@@ -37,9 +37,9 @@ Boston, MA 02111-1307, USA.  */
 
 
 
-void _12bit_8pins::create_iopin_map(IOPIN_map ** iopin_map_ptr, int * num_of_iopins_ptr)
+void _12bit_8pins::create_iopin_map(void)
 {
-
+#if 0
   IOPIN_map im[] =
   {
     // pin, port, bit in port, type
@@ -65,6 +65,7 @@ void _12bit_8pins::create_iopin_map(IOPIN_map ** iopin_map_ptr, int * num_of_iop
   for(int i=0; i<num_of_iopins; i++)
     iopin_map[i] = im[i];
 
+#endif
 
        // ---- Complete the initialization for the I/O Ports
 
@@ -79,6 +80,18 @@ void _12bit_8pins::create_iopin_map(IOPIN_map ** iopin_map_ptr, int * num_of_iop
   // Define the valid I/O pins.
   gpio.valid_iopins = 0x3f;
 
+  create_pkg(8);
+
+  assign_pin(7, new IO_bi_directional_pu(&gpio, 0));
+  assign_pin(6, new IO_bi_directional_pu(&gpio, 1));
+  assign_pin(5, new IO_bi_directional(&gpio, 2));
+  assign_pin(4, new IO_input(&gpio, 3));
+  assign_pin(3, new IO_bi_directional(&gpio, 4));
+  assign_pin(2, new IO_bi_directional(&gpio, 5));
+
+  assign_pin(1, NULL);
+  assign_pin(8, NULL);
+
 
 }
 
@@ -86,12 +99,6 @@ void _12bit_8pins::create_iopin_map(IOPIN_map ** iopin_map_ptr, int * num_of_iop
 
 void P12C508::create_sfr_map(void)
 {
-
-  add_file_registers(0x07, 0x1f, 0);
-
-  sfr_map = NULL;
-  num_of_sfrs = 0;
-  
 
   add_sfr_register(&indf,  0);
   add_sfr_register(&tmr0,  1);
@@ -138,34 +145,47 @@ void P12C508::tris_instruction(unsigned int tris_register)
 
 }
   
+void P12C508::create(void)
+{
 
-// const GPR_map P12C508::gpr_map[];
+  cout << " 12c508 create \n";
+
+  //P12C508::create();
+  create_iopin_map();
+
+  _12bit_processor::create();
+
+  add_file_registers(0x07, 0x1f, 0);
+  P12C508::create_sfr_map();
+  tmr0.start();
+
+  fsr.register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
+
+  trace.program_counter (pc.value);
+
+}
+
+
+pic_processor * P12C508::construct(void)
+{
+
+  P12C508 *p = new P12C508;
+
+  cout << " 12c508 construct\n";
+
+  p->create();
+
+  p->name_str = "12c508";
+
+  return p;
+
+}
+
 
 P12C508::P12C508(void)
 {
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
-  //  create_sfr_map();
-  create_iopin_map(&iopin_map, &num_of_iopins);
-  create_iopins(iopin_map, num_of_iopins);
-
-  sfr_map = NULL;
-  num_of_sfrs = 0;
- 
-  _12bit_processor::create();
-  create_sfr_map();
-  tmr0.start();
-
-  fsr.register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
-
-  // Build the links between the I/O Pins and the internal peripherals
-  //ccp1con.iopin = portc.pins[2];
-
-
-  name_str = "12c508";
-
-  trace.program_counter (pc.value);
-
 }
 
 
@@ -173,19 +193,38 @@ P12C508::P12C508(void)
 
 void P12C509::create_sfr_map(void)
 {
-  add_file_registers(0x10, 0x1f, 0);
+
+}
+
+pic_processor * P12C509::construct(void)
+{
+
+  P12C509 *p = new P12C509;
+
+  cout << " 12c508 construct\n";
+
+  p->create();
+
+  p->name_str = "12c509";
+
+  return p;
+
+}
+
+
+void P12C509::create(void)
+{
+
+  cout << " 12c508 create \n";
+
+  P12C508::create();
+
+  alias_file_registers(0x00,0x0f,0x20);
   add_file_registers(0x30, 0x3f, 0);
-  alias_file_registers(0x07,0x0f,0x20);
 
-  add_sfr_register(&indf,  0x20);
-  add_sfr_register(&tmr0,  0x21);
-  add_sfr_register(&pcl,   0x22);
-  add_sfr_register(&status,0x23);
-  add_sfr_register(&fsr,   0x24);
-  add_sfr_register(&osccal,0x25);
-  add_sfr_register(&gpio,  0x26);
+  fsr.register_page_bits = RP0;  // the 509 has two register pages (i.e. RP0 in fsr is used)
+  pa_bits = PA0;                 // the 509 has two code pages (i.e. PAO in status is used)
 
-  pic_processor::create_symbols();
 
 }
 
@@ -193,28 +232,6 @@ P12C509::P12C509(void)
 {
   if(verbose)
     cout << "12c509 constructor, type = " << isa() << '\n';
-  // create_sfr_map();
-  create_iopin_map(&iopin_map, &num_of_iopins);
-  create_iopins(iopin_map, num_of_iopins);
-
-  sfr_map = NULL;
-  num_of_sfrs = 0;
- 
-  _12bit_processor::create();
-
-  P12C508::create_sfr_map();
-  create_sfr_map();
-  tmr0.start();
-
-  fsr.register_page_bits = RP0;  // the 509 has two register pages (i.e. RP0 in fsr is used)
-  pa_bits = PA0;                 // the 509 has two code pages (i.e. PAO in status is used)
-
-  // Build the links between the I/O Pins and the internal peripherals
-
-  name_str = "12c509";
-
-  trace.program_counter (pc.value);
-
 }
 
 

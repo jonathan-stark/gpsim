@@ -14,7 +14,7 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with gpasm; see the file COPYING.  If not, write to
+along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
@@ -162,6 +162,8 @@ class P16C71 :  public P16C61
 
 
   P16C71(void);
+  void create(void);
+  static pic_processor *construct(void);
 
 };
 
@@ -179,12 +181,14 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
 
   virtual PROCESSOR_TYPE isa(void){return _P16C74_;};
   virtual void create_symbols(void);
+  void create_sfr_map(void);
 
-  virtual unsigned int program_memory_size(void) const { return 0x800; };
-  virtual void create_sfr_map(void);
+  virtual unsigned int program_memory_size(void) const { return 0x1000; };
 
 
   P16C74(void);
+  void create(void);
+  static pic_processor *construct(void);
 
 };
 

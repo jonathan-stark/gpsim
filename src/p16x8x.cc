@@ -169,28 +169,44 @@ void  P16C8x::eeprom_put_value(unsigned int value,
 
 }
 
+void  P16C8x::create(int ram_top)
+{
+  create_iopin_map();
+
+  _14bit_processor::create();
+
+  add_file_registers(0x0c, ram_top, 0x80);
+  P16C8x::create_sfr_map();
+
+  eeprom.cpu = this;
+  eeprom.initialize(EEPROM_SIZE,&eecon1, &eecon2, &eedata, &eeadr);
+}
+
 //========================================================================
 //
 // Pic 16C84 
 //
 
+pic_processor * P16C84::construct(void)
+{
+
+  P16C84 *p = new P16C84;
+
+  cout << " c84 construct\n";
+
+  p->P16C8x::create(0x2f);
+
+  p->name_str = "16c84";
+
+  return p;
+
+}
 
 P16C84::P16C84(void)
 {
   if(verbose)
     cout << "c84 constructor, type = " << isa() << '\n';
 
-  create_iopin_map();
-
-  _14bit_processor::create();
-
-  add_file_registers(0x0c, 0x2f, 0x80);
-  create_sfr_map();
-
-  eeprom.cpu = this;
-  eeprom.initialize(EEPROM_SIZE,&eecon1, &eecon2, &eedata, &eeadr);
-
-  name_str = "16c84";
 }
 
 
@@ -200,26 +216,27 @@ P16C84::P16C84(void)
 // Pic 16F84 
 //
 
+
+pic_processor * P16F84::construct(void)
+{
+
+  P16F84 *p = new P16F84;
+
+  cout << " c84 construct\n";
+
+  p->P16C8x::create(0x4f);
+
+  p->name_str = "16f84";
+
+  return p;
+
+}
+
 P16F84::P16F84(void)
 {
   if(verbose)
     cout << "f84 constructor, type = " << isa() << '\n';
-
-  create_iopin_map();
-
-  _14bit_processor::create();
-
-  add_file_registers(0x0c, 0x4f, 0x80);
-  create_sfr_map();
-
-  eeprom.cpu = this;
-  eeprom.initialize(EEPROM_SIZE,&eecon1, &eecon2, &eedata, &eeadr);
-
-  name_str = "16f84";
 }
-
-
-
 
 //========================================================================
 //
@@ -231,18 +248,39 @@ P16F83::P16F83(void)
   if(verbose)
     cout << "f83 constructor, type = " << isa() << '\n';
 
-  create_iopin_map();
-
-  _14bit_processor::create();
-
-  add_file_registers(0x0c, 0x2f, 0x80);
-  create_sfr_map();
-
-  eeprom.cpu = this;
-  eeprom.initialize(EEPROM_SIZE,&eecon1, &eecon2, &eedata, &eeadr);
-
   name_str = "16f83";
 }
 
+pic_processor * P16F83::construct(void)
+{
 
+  P16F83 *p = new P16F83;
+
+  cout << " f83 construct\n";
+
+  p->P16C8x::create(0x2f);
+
+  p->name_str = "16f83";
+
+  return p;
+
+}
+
+pic_processor * P16CR83::construct(void)
+{
+
+  cout << " cr83 construct\n";
+
+  return NULL;
+
+}
+
+pic_processor * P16CR84::construct(void)
+{
+
+  cout << " cr84 construct\n";
+
+  return NULL;
+
+}
 

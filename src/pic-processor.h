@@ -89,6 +89,8 @@ enum PROCESSOR_TYPE
   _P16C65_,
   _P16C65A_,
   _P16C74_,
+  _P16F874_,
+  _P16F877_,
   _P18Cxx2_,
   _P18C2x2_,
   _P18C242_,
@@ -163,7 +165,7 @@ public:
 
   PROCESSOR_TYPE type;
   char *names[4];
-
+  pic_processor * (*cpu_constructor) (void);
 };
 
 #ifdef HAVE_GUI
@@ -343,6 +345,7 @@ public:
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
+  static pic_processor *construct(void);
   pic_processor(void);
 };
 

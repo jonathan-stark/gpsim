@@ -25,6 +25,7 @@ libgpsim_la_SOURCES = \
 	ioports.cc \
 	p12x.cc \
 	p16x8x.cc \
+	p16f87x.cc \
 	p16x7x.cc \
 	p16x6x.cc \
 	p18x.cc \
@@ -57,6 +58,7 @@ libgpsim_la_SOURCES = \
 	p16x6x.h \
 	p16x7x.h \
 	p16x8x.h \
+	p16f87x.h \
 	p18x.h \
 	packages.h \
 	pic-instructions.h \

@@ -138,6 +138,21 @@ void _28pins::create_iopin_map(void)
 // Pic 18C2x2
 //
 
+void P18C2x2::create(void)
+{
+
+  create_iopin_map();
+
+
+  P18C2x2::create_sfr_map();
+  //  create_iopin_map(&iopin_map, &num_of_iopins);
+
+  _16bit_processor::create();
+
+  //  create_iopins(iopin_map, num_of_iopins);
+
+}
+
 void P18C2x2::create_sfr_map(void)
 {
 
@@ -156,19 +171,83 @@ P18C2x2::P18C2x2(void)
   if(verbose)
     cout << "18c2x2 constructor, type = " << isa() << '\n';
 
-  create_iopin_map();
+}
 
-  sfr_map = NULL;
-  num_of_sfrs = 0;
- 
 
-  create_sfr_map();
-  //  create_iopin_map(&iopin_map, &num_of_iopins);
+//------------------------------------------------------------------------
+//
+// P18C242
+// 
 
-  _16bit_processor::create();
+P18C242::P18C242(void)
+{
 
-  //  create_iopins(iopin_map, num_of_iopins);
+  if(verbose)
+    cout << "18c242 constructor, type = " << isa() << '\n';
 
-  name_str = "18c2x2";
+}
+
+void P18C242::create(void)
+{
+
+  cout << " 18c242 create \n";
+
+  P18C2x2::create();
+
+  //  P18C242::create_sfr_map();
+
+}
+
+pic_processor * P18C242::construct(void)
+{
+
+  P18C242 *p = new P18C242;
+
+  cout << " 18c242 construct\n";
+
+  p->create();
+
+  p->name_str = "18c242";
+
+  return p;
+
+}
+
+//------------------------------------------------------------------------
+//
+// P18C252
+// 
+
+P18C252::P18C252(void)
+{
+
+  if(verbose)
+    cout << "18c252 constructor, type = " << isa() << '\n';
+
+}
+
+void P18C252::create(void)
+{
+
+  cout << " 18c252 create \n";
+
+  P18C242::create();
+
+  //  P18C252::create_sfr_map();
+
+}
+
+pic_processor * P18C252::construct(void)
+{
+
+  P18C252 *p = new P18C252;
+
+  cout << " 18c252 construct\n";
+
+  p->create();
+
+  p->name_str = "18c252";
+
+  return p;
 
 }

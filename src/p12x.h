@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __P12X_H__
 
 #include "12bit-processors.h"
+#include "packages.h"
 
 class GPIO : public IOPORT
 {
@@ -39,7 +40,7 @@ class OSCCAL : public sfr_register
 
 */
 
-class _12bit_8pins
+class _12bit_8pins : public Package
 {
 public:
 
@@ -47,7 +48,7 @@ public:
   IOPORT_TRIS  tris;
   sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
 
-  void create_iopin_map(IOPIN_map ** iopin_map_ptr, int * num_of_iopins_ptr);
+  void create_iopin_map(void);
 
 };
 
@@ -67,12 +68,14 @@ class P12C508 : public  _12bit_processor, public _12bit_8pins
   virtual void tris_instruction(unsigned int tris_register);
 
   P12C508(void);
-  /*
+  static pic_processor *construct(void);
+  void create(void);
+
   virtual int get_pin_count(void){return Package::get_pin_count();};
   virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
   virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  */
+
 };
 
 
@@ -92,6 +95,8 @@ class P12C509 : public P12C508
 
 
   P12C509(void);
+  static pic_processor *construct(void);
+  void create(void);
 
 
 };

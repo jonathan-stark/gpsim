@@ -293,21 +293,35 @@ void P16C71::create_symbols(void)
 
 
 }
+void P16C71::create(void)
+{
+
+  P16C61::create();
+
+  create_sfr_map();
+
+}
+
+pic_processor * P16C71::construct(void)
+{
+
+  P16C71 *p = new P16C71;
+
+  cout << " c71 construct\n";
+
+  p->create();
+
+  p->name_str = "16c71";
+
+  return p;
+
+}
 
 
 P16C71::P16C71(void)
 {
   if(verbose)
     cout << "c71 constructor, type = " << isa() << '\n';
-
-  //  create_iopin_map(&iopin_map, &num_of_iopins);
-  //  create_iopins(iopin_map, num_of_iopins);
-
-  //  _14bit_processor::create();
-  create_sfr_map();
-
-  name_str = "16c71";
-
 }
 
 
@@ -376,14 +390,38 @@ void P16C74::create_symbols(void)
 }
 
 
+void P16C74::create(void)
+{
+
+  P16C65::create();
+
+  P16C74::create_sfr_map();
+
+}
+
+pic_processor * P16C74::construct(void)
+{
+
+  P16C74 *p = new P16C74;
+
+  cout << " c74 construct\n";
+
+  p->create();
+
+  p->name_str = "16c74";
+
+  return p;
+
+}
+
+
 P16C74::P16C74(void)
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';
 
-  create_sfr_map();
-
-  name_str = "16c74";
+  //  create_sfr_map();
+  //  name_str = "16c74";
 
 }
 
