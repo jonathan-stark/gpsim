@@ -349,7 +349,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, SourceBrowserOpcod
     gtk_sheet_get_attributes(sheet,sheet->active_cell.row,
 			     sheet->active_cell.col, &attributes);
     gtk_entry_set_editable(GTK_ENTRY(sbow->entry), attributes.is_editable);
-    gtk_sheet_range_set_justification(sheet, sheet->range, GTK_JUSTIFY_RIGHT);
+    gtk_sheet_range_set_justification(sheet, &sheet->range, GTK_JUSTIFY_RIGHT);
 
 
     return TRUE;
