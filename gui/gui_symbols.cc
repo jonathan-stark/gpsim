@@ -80,7 +80,7 @@ static void update_menus(Symbol_Window *sw)
 	if(sw)
 	{
             sym *entry;
-	    entry = gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
+	    entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(sw->symbol_clist),sw->current_row);
 	    if(entry==NULL)
 		gtk_widget_set_sensitive (item, FALSE);
 	    else
@@ -112,7 +112,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     item = (menu_item *)data;
     pic_id = ((GUI_Object*)popup_sw)->gp->pic_id;
 
-    entry = gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
+    entry = (sym*) gtk_clist_get_row_data(GTK_CLIST(popup_sw->symbol_clist),popup_sw->current_row);
 
     if(entry==NULL)
 	return;
@@ -597,7 +597,7 @@ int BuildSymbolWindow(Symbol_Window *sw)
   gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"select_row",
 		     (GtkSignalFunc)symbol_list_row_selected,sw);
   gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),"unselect_row",
-		     /*(GtkSignalFunc)*/unselect_row,sw);
+		     (GtkSignalFunc)unselect_row,sw);
   gtk_signal_connect(GTK_OBJECT(sw->symbol_clist),
 		     "button_press_event",
 		     (GtkSignalFunc) do_popup,
@@ -677,7 +677,7 @@ int CreateSymbolWindow(GUI_Processor *gp)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-  symbol_window = malloc(sizeof(Symbol_Window));
+  symbol_window = (Symbol_Window *) malloc(sizeof(Symbol_Window));
   
   symbol_window->gui_obj.gp = gp;
   symbol_window->gui_obj.name = "symbol_viewer";

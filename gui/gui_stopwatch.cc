@@ -163,7 +163,7 @@ modepopup_activated(GtkWidget *widget, gpointer data)
 
     unsigned char dir = *(unsigned char*)data;
 
-    sww = gtk_object_get_data(GTK_OBJECT(widget),"sww");
+    sww = (StopWatch_Window *)gtk_object_get_data(GTK_OBJECT(widget),"sww");
 
     pic_id = ((GUI_Object*)sww)->gp->pic_id;
 
@@ -347,14 +347,14 @@ int BuildStopWatchWindow(StopWatch_Window *sww)
   gtk_object_set_data(GTK_OBJECT(menuitem), "sww", sww);
   gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
 		     (GtkSignalFunc) modepopup_activated,
-		     "+");
+		     (gpointer)"+");
   menuitem = gtk_menu_item_new_with_label ("Down");
   gtk_widget_show (menuitem);
   gtk_menu_append (GTK_MENU (optionmenu_menu), menuitem);
   gtk_object_set_data(GTK_OBJECT(menuitem), "sww", sww);
   gtk_signal_connect(GTK_OBJECT(menuitem),"activate",
 		     (GtkSignalFunc) modepopup_activated,
-		     "-");
+		     (gpointer)"-");
   gtk_option_menu_set_menu (GTK_OPTION_MENU (optionmenu), optionmenu_menu);
 
   gtk_option_menu_set_history (GTK_OPTION_MENU (optionmenu),sww->count_dir>0?0:1);
@@ -414,7 +414,7 @@ int CreateStopWatchWindow(GUI_Processor *gp)
     StopWatch_Window *stopwatch_window;
     char *string;
 
-    stopwatch_window = malloc(sizeof(StopWatch_Window));
+    stopwatch_window = (StopWatch_Window*)malloc(sizeof(StopWatch_Window));
 
     stopwatch_window->gui_obj.gp = gp;
     stopwatch_window->gui_obj.name = "stopwatch_viewer";

@@ -66,7 +66,7 @@ static gint sigh_button_event(GtkWidget *widget,
     {
 	int row=sw->current_row;
 	
-	entry = gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
+	entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
 	if(entry!=NULL)
 	    gpsim_toggle_break_at_address(((GUI_Object*)sw)->gp->pic_id, entry->retaddress);
@@ -88,7 +88,7 @@ static gint stack_list_row_selected(GtkCList *stacklist,gint row, gint column,Gd
 
     gp=sw->gui_obj.gp;
     
-    entry = gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
+    entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), row);
 
     if(!entry)
 	return TRUE;
@@ -214,7 +214,7 @@ static void update(Stack_Window *sw)
 		// Stack has shrunk
 
 		// remove row 0
-		stack_entry = gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), 0);
+		stack_entry = (struct stack_entry*) gtk_clist_get_row_data(GTK_CLIST(sw->stack_clist), 0);
 		free(stack_entry);
 		gtk_clist_remove(GTK_CLIST(sw->stack_clist),0);
 		
@@ -238,7 +238,7 @@ static void update(Stack_Window *sw)
 				  entry);
 
 		// FIXME this memory is never freed?
-		stack_entry = malloc(sizeof(struct stack_entry));
+		stack_entry = (struct stack_entry*) malloc(sizeof(struct stack_entry));
 		stack_entry->retaddress=retaddress;
 		stack_entry->depth=i;
 
@@ -364,7 +364,7 @@ int CreateStackWindow(GUI_Processor *gp)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-    stack_window = malloc(sizeof(Stack_Window));
+    stack_window = (Stack_Window *) malloc(sizeof(Stack_Window));
 
     stack_window->gui_obj.gp = gp;
     stack_window->gui_obj.name = "stack_viewer";

@@ -118,7 +118,7 @@ static void update_menus(Watch_Window *ww)
 	{
 	    if(ww)
 	    {
-		entry = gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
+		entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
 		if(menu_items[i].id!=MENU_COLUMNS && (entry==NULL ||
 						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
 						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
@@ -167,7 +167,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     item = (menu_item *)data;
     pic_id = ((GUI_Object*)popup_ww)->gp->pic_id;
 
-    entry = gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
+    entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
 
     if(entry==NULL && item->id!=MENU_COLUMNS)
 	return;
@@ -234,7 +234,7 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 
     gtk_container_set_border_width(GTK_CONTAINER(dialog),30);
 
-    gtk_signal_connect_object(GTK_OBJECT(dialog),
+    gtk_signal_connect(GTK_OBJECT(dialog),
 			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),(gpointer)dialog);
 
     for(i=0;i<COLUMNS;i++)
@@ -254,7 +254,7 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
     gtk_widget_show(button);
     gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->action_area), button,
 		       FALSE,FALSE,10);
-    gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+    gtk_signal_connect(GTK_OBJECT(button),"clicked",
 		       GTK_SIGNAL_FUNC(gtk_widget_destroy),(gpointer)dialog);
     GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
     gtk_widget_grab_default(button);
@@ -295,7 +295,7 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
 			 &menu_items[i]);
 //      GTK_WIDGET_UNSET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
-/*      entry = gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
+/*      entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
 
       if(menu_items[i].id!=MENU_COLUMNS && (
 	 entry==NULL ||
@@ -373,7 +373,7 @@ key_press(GtkWidget *widget,
   switch(key->keyval) {
 
   case GDK_Delete:
-      entry = gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
+      entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
       if(entry!=NULL)
 	  remove_entry(ww,entry);
       break;
@@ -396,7 +396,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	int column=ww->current_column;
 	int row=ww->current_row;
 	
-	entry = gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+	entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
     
 	if(column>=MSBCOL && column<=LSBCOL)
 	{
@@ -431,7 +431,7 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
 
     gp=ww->gui_obj.gp;
     
-    entry = gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
+    entry = (struct watch_entry*) gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist), row);
 
     if(!entry)
 	return TRUE;
@@ -553,7 +553,7 @@ void WatchWindow_update(Watch_Window *ww)
 
     while(iter)
     {
-	entry=iter->data;
+	entry=(struct watch_entry*)iter->data;
 
 	value = gpsim_get_register_value(entry->pic_id,entry->type,entry->address);
 	
@@ -622,7 +622,7 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
     row=gtk_clist_append(GTK_CLIST(ww->watch_clist), entry);
 
     // FIXME this memory is never freed?
-    watch_entry = malloc(sizeof(struct watch_entry));
+    watch_entry = (struct watch_entry*) malloc(sizeof(struct watch_entry));
     watch_entry->address=address;
     watch_entry->pic_id=pic_id;
     watch_entry->type=type;
@@ -658,7 +658,7 @@ void WatchWindow_clear_watches(Watch_Window *ww, GUI_Processor *gp)
 
     while(iter)
     {
-	entry=iter->data;
+	entry=(struct watch_entry*)iter->data;
 	row=gtk_clist_find_row_from_data(GTK_CLIST(ww->watch_clist),entry);
 	gtk_clist_remove(GTK_CLIST(ww->watch_clist),row);
 	gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
@@ -724,7 +724,7 @@ int BuildWatchWindow(Watch_Window *ww)
   gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"select_row",
 		     (GtkSignalFunc)watch_list_row_selected,ww);
   gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"unselect_row",
-		     /*(GtkSignalFunc)*/unselect_row,ww);
+		     (GtkSignalFunc)unselect_row,ww);
   
   gtk_signal_connect(GTK_OBJECT(ww->watch_clist),
 		     "button_press_event",
@@ -770,7 +770,7 @@ int CreateWatchWindow(GUI_Processor *gp)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
 
 
-  watch_window = malloc(sizeof(Watch_Window));
+  watch_window = (Watch_Window *) malloc(sizeof(Watch_Window));
   
   watch_window->gui_obj.gp = gp;
   watch_window->gui_obj.name = "watch_viewer";

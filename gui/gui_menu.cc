@@ -338,9 +338,9 @@ fileopen_dialog(gpointer             callback_data,
       gtk_widget_show (button);
 
       button = gtk_button_new_with_label ("Show Fileops");
-      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-				 (GtkSignalFunc) gtk_file_selection_show_fileop_buttons, 
-				 (gpointer) window);
+      gtk_signal_connect (GTK_OBJECT (button), "clicked",
+			  (GtkSignalFunc) gtk_file_selection_show_fileop_buttons,
+			  (gpointer) window);
       gtk_box_pack_start (GTK_BOX (GTK_FILE_SELECTION (window)->action_area), 
 			  button, FALSE, FALSE, 0);
       gtk_widget_show (button);

@@ -3,7 +3,7 @@
 
 
 #ifdef __cplusplus
-extern "C" {
+//extern "C" {
 #endif /* __cplusplus */
 
 
@@ -16,7 +16,7 @@ void update_program_memory(GUI_Processor *gp, unsigned int reg_number);
 
 
 #ifdef __cplusplus
-}
+//}
 #endif /* __cplusplus */
 
 

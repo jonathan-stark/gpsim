@@ -91,13 +91,9 @@ typedef enum {
     MENU_ADD_ALL_LABELS,
     MENU_ADD_FUNCTION_LABELS,
     MENU_PLOT,
-} menu_id;
-
-typedef enum {
     MENU_SAVE_PS,
     MENU_PRINT,
-} plot_menu_id;
-
+} menu_id;
 
 typedef struct _menu_item {
     char *name;
@@ -209,7 +205,7 @@ static void add_range(Profile_Window *pw,
     row=gtk_clist_append(GTK_CLIST(pw->profile_range_clist), entry);
 
     // FIXME this memory is never freed?
-    profile_range_entry = malloc(sizeof(struct profile_range_entry));
+    profile_range_entry = (struct profile_range_entry*)malloc(sizeof(struct profile_range_entry));
     strcpy(profile_range_entry->startaddress_text,startaddress_text);
     strcpy(profile_range_entry->endaddress_text,endaddress_text);
     profile_range_entry->startaddress=startaddress;
@@ -250,7 +246,7 @@ static void add_range_dialog(Profile_Window *pw)
     {
 	dialog = gtk_dialog_new();
 	gtk_window_set_title(GTK_WINDOW(dialog),"Add range");
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
+	gtk_signal_connect(GTK_OBJECT(dialog),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
 
 	label=gtk_label_new("addresses can be entered either as symbols, or as values. \nValues can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
@@ -381,16 +377,16 @@ open_plotsave_dialog(Profile_Window *pw)
 
 	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect_object(GTK_OBJECT(window),
+	gtk_signal_connect(GTK_OBJECT(window),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
-	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+	gtk_signal_connect (GTK_OBJECT (window), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 			    (gpointer)&window);
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
 			    window);
-	gtk_signal_connect_object (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
+	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->cancel_button),
 				   "clicked", GTK_SIGNAL_FUNC(gtk_widget_hide),
 				   GTK_OBJECT (window));
     }
@@ -416,7 +412,7 @@ plot_popup_activated(GtkWidget *widget, gpointer data)
     item = (menu_item *)data;
     pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
 
-    entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
+    entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
 
     switch(item->id)
     {
@@ -633,9 +629,9 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
         free(bartext);
     }
 
-    px2=malloc(numpoints*sizeof(double));
-    py2=malloc(numpoints*sizeof(double));
-    bartext=malloc(numpoints*sizeof(GtkPlotText*));
+    px2=(double*)malloc(numpoints*sizeof(double));
+    py2=(double*)malloc(numpoints*sizeof(double));
+    bartext=(GtkPlotText**)malloc(numpoints*sizeof(GtkPlotText*));
 
 #define WINDOWWIDTH 550
 #define WINDOWHEIGHT 650
@@ -720,9 +716,9 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
 	gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect_object(GTK_OBJECT(window1),
+	gtk_signal_connect(GTK_OBJECT(window1),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window1);
-	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+	gtk_signal_connect (GTK_OBJECT (window1), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 			    (gpointer)&window1);
 
@@ -776,13 +772,13 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_BOTTOM);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_LEFT);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
-	gtk_plot_set_legends_border(GTK_PLOT(active_plot), 2, 3);
+	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
 	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
 	gtk_widget_show(active_plot);
 
 
 
-	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_PLOT_AXIS_Y));
+	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
@@ -924,8 +920,8 @@ int plot_routine_histogram(Profile_Window *pw)
 	iter=iter->next;
     }
 //    numpoints=10;
-    px2=malloc(numpoints*sizeof(double));
-    py2=malloc(numpoints*sizeof(double));
+    px2=(double*)malloc(numpoints*sizeof(double));
+    py2=(double*)malloc(numpoints*sizeof(double));
 
     totalcycles=0;
     totalcount=0;
@@ -1012,9 +1008,9 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_widget_set_usize(window1,WINDOWWIDTH,WINDOWHEIGHT);
 	gtk_container_border_width(GTK_CONTAINER(window1),0);
 
-	gtk_signal_connect_object(GTK_OBJECT(window1),
+	gtk_signal_connect(GTK_OBJECT(window1),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window1);
-	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+	gtk_signal_connect (GTK_OBJECT (window1), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 			    (gpointer)&window1);
 
@@ -1065,13 +1061,13 @@ int plot_routine_histogram(Profile_Window *pw)
 	gtk_plot_canvas_add_plot(GTK_PLOT_CANVAS(canvas), GTK_PLOT(active_plot), PLOTXPOS, PLOTYPOS);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_TOP);
 	gtk_plot_axis_hide_title(GTK_PLOT(active_plot), GTK_PLOT_AXIS_RIGHT);
-	gtk_plot_set_legends_border(GTK_PLOT(active_plot), 2, 3);
+	gtk_plot_set_legends_border(GTK_PLOT(active_plot), GTK_PLOT_BORDER_SHADOW, 3);
 	gtk_plot_legends_move(GTK_PLOT(active_plot), .58, .05);
 	gtk_widget_show(active_plot);
 
 
 
-	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_PLOT_AXIS_Y));
+	dataset = GTK_PLOT_DATA(gtk_plot_bar_new(GTK_ORIENTATION_VERTICAL));
 	gtk_plot_add_data(GTK_PLOT(active_plot), GTK_PLOT_DATA(dataset));
     }
 
@@ -1201,7 +1197,7 @@ popup_activated(GtkWidget *widget, gpointer data)
     item = (menu_item *)data;
     pic_id = ((GUI_Object*)popup_pw)->gp->pic_id;
 
-    entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
+    entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),popup_pw->range_current_row);
 
     switch(item->id)
     {
@@ -1219,7 +1215,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    sym *data;
 	    if(s->type==SYMBOL_ADDRESS)
 	    {
-		data=malloc(sizeof(sym));
+		data=(sym*)malloc(sizeof(sym));
 		memcpy(data,s,sizeof(sym));
 		symlist=g_list_append(symlist,data);
 	    }
@@ -1229,7 +1225,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	iter=symlist;
 	while(iter!=NULL)
 	{
-	    s=iter->data;
+	    s=(sym*)iter->data;
 
 	    strcpy(toaddress_string,s->name);
 	    add_range(popup_pw,fromaddress_string,toaddress_string);
@@ -1256,7 +1252,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 		if(NULL==strstr(s->name,"_DS_"))
 		{
 		    sym *data;
-		    data=malloc(sizeof(sym));
+		    data=(sym*)malloc(sizeof(sym));
 		    memcpy(data,s,sizeof(sym));
 		    symlist=g_list_append(symlist,data);
 		}
@@ -1267,13 +1263,13 @@ popup_activated(GtkWidget *widget, gpointer data)
 	iter=symlist;
 	if(iter!=NULL)
 	{
-	    s=iter->data;
+	    s=(sym*)iter->data;
 	    strcpy(fromaddress_string,s->name);
 	    free(s);
 	    iter=iter->next;
 	    while(iter!=NULL)
 	    {
-		s=iter->data;
+		s=(sym*)iter->data;
 		strcpy(toaddress_string,s->name);
 		add_range(popup_pw,fromaddress_string,toaddress_string);
 		strcpy(fromaddress_string,toaddress_string);
@@ -1307,12 +1303,12 @@ popup_activated(GtkWidget *widget, gpointer data)
 	int numpoints=8;
         int i;
 
-	pointlabel=malloc(sizeof(char*)*numpoints);
-        cyclearray=malloc(sizeof(guint64)*numpoints);
+	pointlabel=(char**)malloc(sizeof(char*)*numpoints);
+        cyclearray=(guint64*)malloc(sizeof(guint64)*numpoints);
 
 	for(i=0;i<numpoints;i++)
 	{
-	    range_entry = gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),i);
+	    range_entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(popup_pw->profile_range_clist),i);
 	    if(range_entry==NULL)
 	    {
 		if(i!=0)
@@ -1321,7 +1317,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    }
 	    else
 	    {
-                pointlabel[i]=malloc(128);
+                pointlabel[i]=(char*)malloc(128);
 		sprintf(pointlabel[i],"%s (end: %s)",range_entry->startaddress_text,range_entry->endaddress_text);
                 cyclearray[i]=range_entry->last_count;
 	    }
@@ -1348,7 +1344,7 @@ static void update_menus(Profile_Window *pw)
 	{
 	    if(pw)
 	    {
-		entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+		entry = (struct profile_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
 		if(range_menu_items[i].id!=MENU_ADD_GROUP &&
 		   range_menu_items[i].id!=MENU_ADD_ALL_LABELS &&
 		   range_menu_items[i].id!=MENU_ADD_FUNCTION_LABELS &&
@@ -1382,7 +1378,7 @@ key_press(GtkWidget *widget,
   switch(key->keyval) {
 
   case GDK_Delete:
-      entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
+      entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_range_clist),pw->range_current_row);
       if(entry!=NULL)
 	  remove_entry(pw,(struct profile_entry *)entry);
       break;
@@ -1401,7 +1397,7 @@ static gint profile_range_list_row_selected(GtkCList *profilelist,gint row, gint
 
     gp=pw->gui_obj.gp;
     
-    entry = gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
+    entry = (struct profile_range_entry *)gtk_clist_get_row_data(GTK_CLIST(pw->profile_clist), row);
 
     if(!entry)
 	return TRUE;
@@ -1730,7 +1726,7 @@ void ProfileWindow_update(Profile_Window *pw)
       struct profile_entry *entry;
       guint64 count;
 
-      entry=iter->data;
+      entry=(struct profile_entry*)iter->data;
 
       count=gpsim_get_cycles_used(gp->pic_id,entry->address);
 
@@ -1761,7 +1757,7 @@ void ProfileWindow_update(Profile_Window *pw)
   {
       struct profile_range_entry *range_entry;
       guint64 count;
-      range_entry=iter->data;
+      range_entry=(struct profile_range_entry*)iter->data;
 
       count=0;
       for(i=range_entry->startaddress;i<range_entry->endaddress;i++)
@@ -1795,7 +1791,7 @@ void ProfileWindow_update(Profile_Window *pw)
       struct profile_register_entry *register_entry;
       guint64 count_read, count_write;
 
-      register_entry=iter->data;
+      register_entry=(struct profile_register_entry*)iter->data;
 
       count_read=gpsim_get_register_read_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
       count_write=gpsim_get_register_write_accesses(gp->pic_id,REGISTER_RAM,register_entry->address);
@@ -1993,7 +1989,7 @@ void ProfileWindow_notify_stop_callback(Profile_Window *pw)
 		// Else malloc a new struct, fill with values and add (sorted) to list
 		struct cycle_histogram_counter *chc;
 
-		chc=malloc(sizeof(struct cycle_histogram_counter));
+		chc=(struct cycle_histogram_counter*)malloc(sizeof(struct cycle_histogram_counter));
 		chc->start_address=startaddress;
 		chc->stop_address=stopaddress;
 		chc->cycles=cycles;
@@ -2054,7 +2050,7 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
 	    row=gtk_clist_append(GTK_CLIST(pw->profile_clist), entry);
 
 	    // FIXME this memory is never freed?
-	    profile_entry = malloc(sizeof(struct profile_entry));
+	    profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
 	    profile_entry->address=i;
 	    profile_entry->pic_id=pic_id;
 //	profile_entry->type=type;
@@ -2100,7 +2096,7 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
 	    row=gtk_clist_append(GTK_CLIST(pw->profile_register_clist), entry_register);
 
 	    // FIXME this memory is never freed?
-	    profile_register_entry = malloc(sizeof(struct profile_register_entry));
+	    profile_register_entry = (struct profile_register_entry*) malloc(sizeof(struct profile_register_entry));
 	    profile_register_entry->address=i;
 	    profile_register_entry->pic_id=pic_id;
 	    profile_register_entry->last_count_read=read_cycles;

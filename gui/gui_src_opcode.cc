@@ -642,7 +642,7 @@ static int load_styles(SourceBrowserOpcode_Window *sbow)
 }
 
 /********************** Settings dialog ***************************/
-int settings_active;
+static int settings_active;
 static void settingsok_cb(GtkWidget *w, gpointer user_data)
 {
     if(settings_active)
@@ -669,8 +669,8 @@ static int settings_dialog(SourceBrowserOpcode_Window *sbow)
 	gtk_window_set_title (GTK_WINDOW (dialog), "Opcode browser settings");
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
 
 
 	// Normal font
@@ -822,7 +822,7 @@ static unsigned long get_number_in_string(char *number_string)
   {
       printf("Warning get_number_in_string(%p)\n",number_string);
       errno = EINVAL;
-      return -1;
+      return (unsigned long)-1;
   }
 
 
@@ -1183,7 +1183,7 @@ void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Pro
 
     if(sbow->memory!=NULL)
 	free(sbow->memory);
-    sbow->memory=malloc(pm_size*sizeof(*sbow->memory));
+    sbow->memory=(int*)malloc(pm_size*sizeof(*sbow->memory));
 
     gtk_clist_freeze (GTK_CLIST (sbow->clist));
     gtk_sheet_freeze(GTK_SHEET(sbow->sheet));

@@ -133,8 +133,8 @@ int gui_get_value(char *prompt)
 	gtk_window_set_title(GTK_WINDOW(dialog),"enter value");
 //	gtk_signal_connect(GTK_OBJECT(dialog),
 //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
 
 	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 	gtk_widget_show(label);
@@ -216,8 +216,8 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
 	gtk_window_set_title(GTK_WINDOW(dialog),"enter values");
 //	gtk_signal_connect(GTK_OBJECT(dialog),
 //			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
 
 	label=gtk_label_new("values can be entered in decimal, hexadecimal, and octal.\nFor example: 31 is the same as 0x1f and 037");
 	gtk_widget_show(label);
@@ -375,9 +375,9 @@ static char *gui_get_log_settings(char **filename, int *mode)
 
 	gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-	gtk_signal_connect_object(GTK_OBJECT(window),
-				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
-	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+	gtk_signal_connect(GTK_OBJECT(window),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)window);
+	gtk_signal_connect (GTK_OBJECT (window), "destroy",
 			    GTK_SIGNAL_FUNC(gtk_widget_destroyed),
 			    (gpointer)&window);
 
@@ -412,14 +412,14 @@ static char *gui_get_log_settings(char **filename, int *mode)
 	item=gtk_menu_item_new_with_label("ASCII");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) modepopup_activated,
-			   "ASCII");
+			   (gpointer)"ASCII");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
 	item=gtk_menu_item_new_with_label("LXT");
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) modepopup_activated,
-			   "LXT");
+			   (gpointer)"LXT");
 //      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
@@ -440,11 +440,12 @@ static char *gui_get_log_settings(char **filename, int *mode)
     if(file_selection_name==NULL)
     {
         *filename=NULL;
-	return;
+	return NULL;
     }
 
     *filename=file_selection_name;
     *mode=filemode;
+    return NULL;
 }
 
 extern int gui_question(char *question, char *a, char *b);
@@ -686,7 +687,7 @@ static unsigned long get_number_in_string(char *number_string)
   {
       printf("Warning get_number_in_string(%p)\n",number_string);
       errno = EINVAL;
-      return -1;
+      return (unsigned long)-1;
   }
 
 
@@ -899,7 +900,7 @@ static int load_styles(Register_Window *rw)
 }
 
 /********************** Settings dialog ***************************/
-int settings_active;
+static int settings_active;
 static void settingsok_cb(GtkWidget *w, gpointer user_data)
 {
     if(settings_active)
@@ -930,8 +931,8 @@ static int settings_dialog(Register_Window *rw)
 	gtk_window_set_title (GTK_WINDOW (dialog), "Register window settings");
 	gtk_signal_connect(GTK_OBJECT(dialog),
 			   "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-	gtk_signal_connect_object(GTK_OBJECT(dialog),
-			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
+	gtk_signal_connect(GTK_OBJECT(dialog),
+			   "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),(gpointer)dialog);
 
 
 	// Normal font
