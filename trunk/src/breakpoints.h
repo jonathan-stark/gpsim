@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "pic-instructions.h"
 #include "pic-registers.h"
+#include "icd.h"
 
 #include  <iostream.h>
 
@@ -187,7 +188,13 @@ struct BreakStatus
   unsigned int set_notify_write_value(pic_processor *cpu, unsigned int register_number, unsigned int value, unsigned int mask=0xff);
 
   inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
-  inline void halt(void) { global_break |= GLOBAL_STOP_RUNNING;};
+  inline void halt(void) {
+      if(use_icd) {
+	  icd_halt();
+	  return;
+      }
+      global_break |= GLOBAL_STOP_RUNNING;
+  };
   inline bool have_halt(void) { return( (global_break & GLOBAL_STOP_RUNNING) != 0 );};
   inline void clear_halt(void) {global_break &= ~GLOBAL_STOP_RUNNING;};
   inline bool have_interrupt(void) { return( (global_break & GLOBAL_INTERRUPT) != 0 );};

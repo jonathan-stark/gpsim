@@ -42,13 +42,13 @@ libgpsim_la_SOURCES = \
 	pic-processor.cc \
 	pic-registers.cc \
 	pic-instructions.cc \
-	ssp.cc \
 	stimuli.cc \
 	symbol.cc \
 	tmr0.cc \
 	trace.cc \
 	uart.cc \
-	xref.cc
+	xref.cc \
+	icd.cc
 
 gpsiminclude_HEADERS = \
 	12bit-instructions.h \
@@ -96,7 +96,8 @@ gpsiminclude_HEADERS = \
 	trace.h \
 	trace_orb.h \
 	uart.h \
-	xref.h
+	xref.h \
+	icd.h
 
 
 #libgpsim_la_LDFLAGS = $(shell gtk-config --libs)

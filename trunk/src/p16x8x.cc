@@ -105,8 +105,8 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(&tmr0,  0x01);
   add_sfr_register(&option_reg,  0x81, 0xff);
 
-  add_sfr_register(&pcl,    0x02, 0);
-  add_sfr_register(&status, 0x03, 0x18);
+  add_sfr_register(pcl,    0x02, 0);
+  add_sfr_register(status, 0x03, 0x18);
   add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
@@ -122,8 +122,8 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(&(eeprom->eeadr),   0x09);
   add_sfr_register(&(eeprom->eecon2),  0x89);
 
-  add_sfr_register(&pclath, 0x8a, 0);
-  add_sfr_register(&pclath, 0x0a, 0);
+  add_sfr_register(pclath, 0x8a, 0);
+  add_sfr_register(pclath, 0x0a, 0);
 
   add_sfr_register(&intcon_reg, 0x8b, 0);
   add_sfr_register(&intcon_reg, 0x0b, 0);

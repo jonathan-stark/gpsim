@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "gpsim_classes.h"
 #include "14bit-processors.h"
+#include "icd.h"
 
 
 #ifndef __SYMBOL_H__
@@ -155,7 +156,9 @@ public:
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
   virtual void print(void) {
     if(reg)
-      cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->value <<'\n';
+    {
+      cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->cpu->registers[reg->address]->get_value() <<'\n';
+    }
   }
   virtual int get_value(void) {
     if(reg)
@@ -227,7 +230,7 @@ class w_symbol : public symbol
 
   virtual void print(void) {
     if(cpu)
-      cout << w->name() << hex << " = 0x" << w->value <<'\n';
+      cout << w->name() << hex << " = 0x" << w->cpu->W->get_value() <<'\n';
   }
   virtual int get_value(void) {
     return w->value;

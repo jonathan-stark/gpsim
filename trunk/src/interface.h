@@ -155,7 +155,7 @@ typedef struct _sym
   char *gpsim_get_version(char *dest, int max_len);
   int gpsim_get_hll_mode(unsigned int processor_id);
   int gpsim_set_hll_mode(unsigned int processor_id, int mode);
-
+  void gpsim_set_bulk_mode(int flag);
   
   //---------------------------------------------------------------------------
   // symbol functions

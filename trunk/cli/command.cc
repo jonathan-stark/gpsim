@@ -51,6 +51,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_trace.h"
 #include "cmd_version.h"
 #include "cmd_x.h"
+#include "cmd_icd.h"
 
 #include "../src/pic-processor.h"
 #include "../src/trace.h"
@@ -68,6 +69,7 @@ command *command_list[] =
   //  &echo,
   &frequency,
   &help,
+  &c_icd,
   &c_list,
   &c_load,
   &c_log,

@@ -78,13 +78,13 @@ public:
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump(void)
     {
-      return ((pclath.value & 0x18)<<8);
+      return ((pclath->value & 0x18)<<8);
     }
 
   // Return the portion of pclath that is used during modify PCL instructions
   virtual unsigned int get_pclath_branching_modpcl(void)
     {
-      return((pclath.value & 0x1f)<<8);
+      return((pclath->value & 0x1f)<<8);
     }
 
   virtual unsigned int map_fsr_indf ( void )

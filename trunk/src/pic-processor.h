@@ -274,12 +274,12 @@ public:
   program_memory_access pma;
 
   Cycle_Counter cycles;
-  Status_register status;
-  WREG          W;
+  Status_register *status;
+  WREG          *W;
   Program_Counter *pc;
   OPTION_REG   option_reg;
-  PCL          pcl;
-  PCLATH       pclath;
+  PCL          *pcl;
+  PCLATH       *pclath;
 
   SFR_map*     sfr_map;
   int          num_of_sfrs;

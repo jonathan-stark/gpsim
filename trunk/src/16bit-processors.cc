@@ -163,7 +163,7 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&tmr0h,	  0xfd7,0,"tmr0h");
   t0con.put(0xff);  /**FIXME - need a way to set this to 0xff at reset*/
 
-  add_sfr_register(&status,       0xfd8);
+  add_sfr_register(status,       0xfd8);
 
   add_sfr_register(&ind2.fsrl,	  0xfd9,0,"fsr2l");
   add_sfr_register(&ind2.fsrh,    0xfda,0,"fsr2h");
@@ -183,7 +183,7 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&ind1.postinc, 0xfe6,0,"postinc1");
   add_sfr_register(&ind1.indf,    0xfe7,0,"indf1");
 
-  add_sfr_register(&W,            0xfe8);
+  add_sfr_register(W,            0xfe8);
 
   add_sfr_register(&ind0.fsrl,	  0xfe9,0,"fsr0l");
   add_sfr_register(&ind0.fsrh,    0xfea,0,"fsr0h");
@@ -205,8 +205,8 @@ void _16bit_processor :: create_sfr_map(void)
   add_sfr_register(&tbl.tabptrh, 0xff7, 0,"tabptrh");
   add_sfr_register(&tbl.tabptru, 0xff8, 0,"tabptru");
 
-  add_sfr_register(&pcl,    0xff9);
-  add_sfr_register(&pclath, 0xffa);
+  add_sfr_register(pcl,    0xff9);
+  add_sfr_register(pclath, 0xffa);
   //add_sfr_register(&pclatu, 0xffb);
 
   add_sfr_register(&((Stack16 *)stack)->stkptr,  0xffc,0,"stkptr");
@@ -249,7 +249,7 @@ void _16bit_processor :: create_sfr_map(void)
   pie1.new_name("pie1");
 
   // All of the status bits on the 16bit core are writable
-  status.write_mask = 0xff;
+  status->write_mask = 0xff;
 
 
   //cout << "end  txsta assignment name: " << usart.txsta->name() << "\n";

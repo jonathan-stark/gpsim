@@ -89,13 +89,13 @@ void P12C508::create_sfr_map(void)
 
   add_sfr_register(indf,   0);
   add_sfr_register(&tmr0,  1);
-  add_sfr_register(&pcl,   2);
-  add_sfr_register(&status,3);
+  add_sfr_register(pcl,   2);
+  add_sfr_register(status,3);
   add_sfr_register(fsr,    4);
   add_sfr_register(&osccal,5);
   add_sfr_register(&gpio,  6);
 
-  add_sfr_register(&W, 0xffffffff);
+  add_sfr_register(W, 0xffffffff);
   add_sfr_register(&option_reg, 0xffffffff, 0xff);
   add_sfr_register(&tris, 0xffffffff, 0x3f);
 
@@ -129,7 +129,7 @@ void P12C508::tris_instruction(unsigned int tris_register)
   cout << " Tris instruction\n";
 
   //tris.value = W.value;
-  tris.put(W.value);
+  tris.put(W->value);
   trace.write_TRIS(tris.value);
 
 }
@@ -273,7 +273,7 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
 	  cout << "IO bit changed while the processor was sleeping,\n\
 so the processor is waking up\n";
 
-	cpu->status.put(cpu->status.get() | 0x80);  // Set GPWUF flag
+	cpu->status->put(cpu->status->get() | 0x80);  // Set GPWUF flag
 	bp.clear_sleep();                 // Wake up the processor.
 
 	// If the cpu is not running then advance the program counter

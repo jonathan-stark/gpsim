@@ -428,8 +428,8 @@ void SourceBrowser_change_view (struct _gui_object *_this, int view_state)
       }
       else
       {
-	  gtk_widget_show(_this->window);
 	  _this->enabled=1;
+	  gtk_widget_show(_this->window);
       }
 
     }

@@ -20,6 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "../src/gpsim_def.h"
+#include "../src/icd.h"
 #include "../config.h"
 
 #ifdef HAVE_GUI
@@ -171,7 +172,7 @@ int parse_string(char *cmd_string)
   if(!cmd_string)
     return 0;
 
-  //if(verbose & 2)
+  if(verbose & 2)
     printf("   %s: %s\n",__FUNCTION__,cmd_string);
 
   cmd_string = strip_cmd(cmd_string);
@@ -298,8 +299,8 @@ get_user_input (void)
 
   if( !use_gui && using_readline) {
     //cout << "  1";
-    //#ifdef HAVE_READLINE
-#if 0
+    #ifdef HAVE_READLINE
+// #if 0
     // If we're in cli-only mode and we're not processing a command file
     // then we use readline to get the commands
     retval = gnu_readline ( "**gpsim> ",1);
@@ -560,6 +561,9 @@ void test_func(void)
 void exit_gpsim(void)
 {
 
+  if(use_icd)
+    icd_disconnect();
+  
 #ifdef HAVE_GUI
   if(use_gui)
     quit_gui();

@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/pic-processor.h"
 #include "../src/14bit-processors.h"
+#include "../src/interface.h"
 
 cmd_dump dump;
 
@@ -117,7 +118,6 @@ void cmd_dump::dump(int mem_type)
   if(!have_cpu(1))
     return;
 
-
   switch(mem_type)
     {
     case DUMP_EEPROM:
@@ -140,6 +140,8 @@ void cmd_dump::dump(int mem_type)
   if(mem_size == 0)
     return;
 
+  gpsim_set_bulk_mode(1);
+  
   printf("     ");
 
   // Column labels
@@ -205,8 +207,10 @@ void cmd_dump::dump(int mem_type)
 
     dump_sfrs();
 
-    printf("\n%s = %02x\n",cpu->W.name(), cpu->W.get_value());
+    printf("\n%s = %02x\n",cpu->W->name(), cpu->W->get_value());
     printf("pc = 0x%x\n",cpu->pc->value);
   }
+  
+  gpsim_set_bulk_mode(0);
 
 }

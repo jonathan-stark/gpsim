@@ -369,13 +369,13 @@ void INDF::put(unsigned int new_value)
 
   trace.register_write(address,value);
   int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
+	     ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
   if(reg & fsr_mask){
     cpu->registers[reg]->put(new_value);
 
-    //(cpu->fsr->value & base_address_mask2) + ((cpu->status.value & base_address_mask1)<<1)
+    //(cpu->fsr->value & base_address_mask2) + ((cpu->status->value & base_address_mask1)<<1)
   }
 
 }
@@ -396,7 +396,7 @@ void INDF::put_value(unsigned int new_value)
     {
       xref->update();
       int r = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	       ((cpu->status.value & base_address_mask1)<<1)& base_address_mask2);
+	       ((cpu->status->value & base_address_mask1)<<1)& base_address_mask2);
       if(r & fsr_mask) 
 	{
 	  if(cpu->registers[r]->xref)
@@ -412,7 +412,7 @@ unsigned int INDF::get(void)
 
   trace.register_read(address,value);
   int reg = (cpu->map_fsr_indf() + //cpu->fsr->value + 
-	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
+	     ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get());
   else
@@ -422,7 +422,7 @@ unsigned int INDF::get(void)
 unsigned int INDF::get_value(void)
 {
   int reg = (cpu->fsr->value + 
-	       ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
+	       ((cpu->status->value & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
     return(cpu->registers[reg]->get_value());
   else
@@ -624,7 +624,7 @@ void Program_Counter::increment(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl.value = value & 0xff;
+  cpu->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -646,7 +646,7 @@ void Program_Counter::skip(void)
   // break point on pcl should not be triggered by advancing the program
   // counter).
 
-  cpu->pcl.value = value & 0xff;
+  cpu->pcl->value = value & 0xff;
   cpu->cycles.increment();
 }
 
@@ -662,7 +662,7 @@ void Program_Counter::jump(unsigned int new_address)
 
   value = (new_address | cpu->get_pclath_branching_jump() ) & memory_size_mask;
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -685,7 +685,7 @@ void Program_Counter::interrupt(unsigned int new_address)
 
   value = new_address & memory_size_mask;
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
   cpu->cycles.increment();
   
@@ -712,7 +712,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
 
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
@@ -730,7 +730,7 @@ void Program_Counter::new_address(unsigned int new_value)
   trace.cycle_increment();
   trace.program_counter(value);
 
-  cpu->pcl.value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
+  cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   cpu->cycles.increment();
   cpu->cycles.increment();
 }
@@ -754,17 +754,17 @@ unsigned int Program_Counter::get_next(void)
 void Program_Counter::put_value(unsigned int new_value)
 {
   value = new_value & memory_size_mask;
-  cpu->pcl.value = value & 0xff;
-  cpu->pclath.value = (new_value >> 8) & PCLATH_MASK;
+  cpu->pcl->value = value & 0xff;
+  cpu->pclath->value = (new_value >> 8) & PCLATH_MASK;
 
   trace.program_counter(value);
 
   if(xref)
     {
-      if(cpu->pcl.xref)
-	cpu->pcl.xref->update();
-      if(cpu->pclath.xref)
-	cpu->pclath.xref->update();
+      if(cpu->pcl->xref)
+	cpu->pcl->xref->update();
+      if(cpu->pclath->xref)
+	cpu->pclath->xref->update();
 	xref->update();
     }
   

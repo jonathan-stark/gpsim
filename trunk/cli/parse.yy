@@ -21,12 +21,13 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
-#include <iostream.h>
-#include <iomanip.h>
+#include <iostream>
+#include <iomanip>
 #include <string>
 #include <vector>
 #include <unistd.h>
 #include <glib.h>
+using namespace std;
 
 #include "misc.h"
 #include "command.h"
@@ -55,6 +56,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_trace.h"
 #include "cmd_version.h"
 #include "cmd_x.h"
+#include "cmd_icd.h"
 
 #define YYERROR_VERBOSE
 void yyerror(char *message)
@@ -118,6 +120,7 @@ void free_char_list(char_list *);
 %token <s>  TRACE
 %token <s>  gpsim_VERSION
 %token <s>  X
+%token <s>  ICD
 %token <s>  END_OF_COMMAND
 %token <s>  IGNORED
 %token <s>  SPANNING_LINES
@@ -173,6 +176,7 @@ cmd: ignored
      | trace_cmd
      | version_cmd
      | x_cmd
+     | icd_cmd
      | spanning_lines
      | END_OF_INPUT
      {
@@ -219,6 +223,7 @@ aborting: ABORT
 	  quit_parse = 1;
 	  YYABORT;
 	  }
+	  ;
             
 attach_cmd: ATTACH string_list
           {
@@ -700,6 +705,16 @@ x_cmd: X
 	  }
           ;
 
+icd_cmd: ICD
+          {
+	    c_icd.icd(); YYABORT;
+	  }
+          | ICD string_option
+          {
+	    c_icd.icd($2); YYABORT;
+	  }
+          ;
+
 // Indirect addressing is supported with the indirect
 // operator '*'. E.g. If register 0x20 contains 0x2e
 // then *0x20 means that the contents of register 0x2e
@@ -826,6 +841,7 @@ void initialize_commands(void)
   c_trace.token_value = TRACE;
   version.token_value = gpsim_VERSION;
   c_x.token_value = X;
+  c_icd.token_value = ICD;
 
   initialized = 1;
 
