@@ -736,7 +736,7 @@ void Processor::save_state(void)
 
   unsigned int i;
 
-  for(i=1; i<register_memory_size(); i++) {
+  for(i=0; i<register_memory_size(); i++) {
 
     Register *reg = rma.get_register(i);
 

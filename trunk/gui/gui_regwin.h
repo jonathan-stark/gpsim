@@ -31,7 +31,7 @@ class StatusBar_Window;
 //======================================================================
 // The register window 
 //
-#define MAX_REGISTERS      4096
+#define MAX_REGISTERS        0x10000
 #define REGISTERS_PER_ROW    16
 #define MAX_ROWS ((MAX_REGISTERS)/(REGISTERS_PER_ROW))
 

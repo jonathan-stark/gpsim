@@ -284,6 +284,9 @@ void SourceBrowserAsm_Window::SetPC(int address)
   // find notebook page containing address 'address'
   sbawFileId = pma->get_file_id(address);
 
+  if(sbawFileId == 0xffffffff)
+    return;
+
   for(i=0;i<SBAW_NRFILES;i++)
     {
       if(pages[i].pageindex_to_fileid == sbawFileId)

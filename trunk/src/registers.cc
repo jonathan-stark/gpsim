@@ -81,6 +81,56 @@ char * RegisterValue::toString(char *str, int len, int regsize)
 }
 
 //========================================================================
+// SplitBitString
+//
+// The purpose of this routine is to convert a string of bitnames into
+// an array of names. The string is formatted like:
+//
+//  b1.b2.b3 
+//
+// In other words, a period is the delimeter between the names.
+// This gets converted to:
+//
+//  b1
+//  b2
+//  b2
+// 
+// INPUTS
+//  n - number of names
+//  in - input string formatted as described
+//  in2 - if 'in' is NULL, then all 'n' names will be 'in2'
+//  
+// OUTPUTS
+//  out - an array to hold the strings.
+//
+// Note, the input string 'in' will be modified such that all of the '.'s will
+// get turned into string terminating 0's.
+//
+
+static void SplitBitString(int n, const char **out, char *in, const char *in2)
+{
+
+  if(!in) {
+    for(int i=0; i<n; i++)
+      out[i] = in2;
+  } else {
+
+    char *str = in;
+    for(int i =0; i<n; i++ ) {
+
+      out[i] = in;
+
+      str = strchr(in, '.');
+      if(str) {
+	*str = 0;
+	in = ++str;
+      }
+      //cout << "split :" << i << " ==> " << out[i] << endl;
+    }
+  }
+}
+
+//========================================================================
 // toBitStr
 //
 // Convert a RegisterValue type to a bit string
@@ -99,38 +149,61 @@ char * RegisterValue::toBitStr(char *s, int len, unsigned int BitPos,
 			     char *LoBitNames,
 			     char *UndefBitNames)
 {
-  unsigned int j,mask,max;
-  int i;
+  unsigned int i,mask,max;
 
   if(!s || len<=0)
     return 0;
 
   max = 32;
 
-  int nBits = count_bits(BitPos);
+  unsigned int nBits = count_bits(BitPos);
 
-  if(nBits >= len)
-    nBits = len-1;
+  if(nBits >= max)
+    nBits = max;
 
-  for(i=nBits-1,j=0,mask=1; j<max; j++, mask<<=1) {
+  const char *HiNames[32];
+  const char *LoNames[32];
+  const char *UndefNames[32];
+
+
+  char *cHi = strdup(HiBitNames);
+  char *cLo = strdup(LoBitNames);
+  char *cUn = strdup(UndefBitNames);
+
+  SplitBitString(nBits, HiNames, cHi, "1");
+  SplitBitString(nBits, LoNames, cLo, "0");
+  SplitBitString(nBits, UndefNames, cUn, "?");
+
+  char *dest = s;
+
+  for(i=0,mask=1<<31; mask; mask>>=1) {
 
     if(BitPos & mask) {
 
-      char H = HiBitNames ? HiBitNames[i] : '1';
-      char L = LoBitNames ? LoBitNames[i] : '0';
-      char U = UndefBitNames ? UndefBitNames[i] : '?';
-
-      s[i] = (init & mask) ?  U : 
+      const char *H = HiNames[i];
+      const char *L = LoNames[i];
+      const char *U = UndefNames[i];
+      
+      const char *c = (init & mask) ?  U : 
 	((data & mask) ? H : L);
 
-      if(--i < 0)
+      strncpy(dest, c, len);
+      int l = strlen(c);
+      len -= l;
+      dest += l;
+      *dest = 0;
+
+      if(i++>nBits || len < 0)
 	break;
+
     }
 
   }
 
-  s[nBits] = 0;
-
+  free(cHi);
+  free(cLo);
+  free(cUn);
+    
   return s;
 }
 
