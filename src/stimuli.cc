@@ -396,6 +396,12 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 
 void Stimulus_Node::update(guint64 current_time)
 {
+  // So far, 'update' only applies to the current time. 
+  update();
+}
+
+void Stimulus_Node::update()
+{
 
   //cout << "getting state of Node " << name() << " " << nStimuli << " stim are attached\n";
 

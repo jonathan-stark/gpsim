@@ -1,3 +1,9 @@
+2004-10-20 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h, src/stimuli.cc, src/stimuli.h:
+	PORTB pullups updated. 
+	Added an overloaded update() member to Stimulus_Node that doesn't
+	require time as an input (we never used it anyway).
+	
 2004-10-19 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc, src/ioports.cc, src/i2c-ee.cc:
 	Optimized I/O port stimulus updates.
