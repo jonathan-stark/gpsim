@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 
 #include <string>
+#include <unistd.h>
 #include <glib.h>
 
 #include "command.h"

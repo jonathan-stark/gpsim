@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #if !defined (__COMMAND_H_)
 #define __COMMAND_H_
 
+#include <unistd.h>
 #include <glib.h>
 #include "misc.h"
 #include "../config.h"

@@ -5,7 +5,8 @@
 
 #ifdef HAVE_GUI
 
-
+#include <unistd.h>
+#include <glib.h>
 #include <gtk/gtk.h>
 #include <gtkextra/gtksheet.h>
 #include "../src/interface.h"

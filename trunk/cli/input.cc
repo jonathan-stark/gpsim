@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 
 #ifdef HAVE_GUI
+#include <unistd.h>
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gdk/gdk.h>
@@ -51,7 +52,7 @@ extern "C" {
 #include <string>
 #include <list>
 #include <csignal>
-
+#include <iostream.h>
 
 #include "command.h"
 #include "input.h"

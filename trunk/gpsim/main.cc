@@ -29,13 +29,10 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <iostream.h>
-#include <iomanip.h>
-#include <string>
-#include <list>
+#include <string.h>
 
+#include <iostream.h>
 #include "../config.h"
-#include "../cli/command.h"
 #include "../cli/input.h"
 #include "../src/gpsim_def.h"
 #include "../src/interface.h"
@@ -46,7 +43,6 @@ void gui_main(void);
 
 }
 
-extern int server_main (int argc, char *argv[]);
 
 void initialize_gpsim(void);
 
@@ -54,13 +50,14 @@ unsigned int config_word;   //%%%FIX_ME%%%
 
 int yyparse(void);
 int parse_string(char *cmd_string);
+extern void init_parser(void);
 
 extern int yydebug;
 extern int quit_parse;
 
 void gpsim_version(void)
 {
-  cout << VERSION << '\n';
+  printf("%s\n", VERSION);
 }
 
 void 
@@ -79,8 +76,8 @@ helpme (char *iam)
 void welcome(void)
 {
 
-  cout << "\ngpsim - the GNUPIC simulator\
-\nversion: " << VERSION << "\n\ntype help for help\n";
+  printf("\ngpsim - the GNUPIC simulator\nversion: %s\n", VERSION);
+  printf("\n\ntype help for help\n");
 
 }
 
@@ -107,8 +104,6 @@ main (int argc, char *argv[])
 
   welcome();
 
-  cout << hex ;
-  cin >> hex;
 
 #if 0
   i = 1;
@@ -192,6 +187,7 @@ main (int argc, char *argv[])
   if (usage) 
     helpme(argv[0]);
 
+
   initialize_gpsim();
   init_parser();
   initialize_readline();
@@ -201,8 +197,8 @@ main (int argc, char *argv[])
   i = gui_init (argc,argv);
 #endif
 
-  initialization_is_complete();
 
+  initialization_is_complete();
 
   yydebug = 0;
 

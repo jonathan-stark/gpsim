@@ -30,8 +30,6 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/modules.h"
 
 
-//void display_available_modules(void);
-//void load_module_library(char *library_name);
 
 cmd_module c_module;
 

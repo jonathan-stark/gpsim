@@ -27,9 +27,12 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <vector>
 
-#include <dlfcn.h>
-
 #include "../config.h"
+
+#ifdef HAVE_GUI
+#include <dlfcn.h>
+#endif
+
 #include "modules.h"
 #include "pic-processor.h"
 #include "stimuli.h"
@@ -202,6 +205,7 @@ public:
   Module_Types *module_list;
 
   Module_Library(char *new_name, void *library_handle) {
+    #ifdef HAVE_GUI
     const char * error;
 
     if(new_name)
@@ -223,7 +227,13 @@ public:
       // Get a pointer to the list of modules that this library supports.
       module_list = get_mod_list();
     }
+    #else
 
+    module_list = NULL;
+    _name = NULL;
+    _handle = NULL;
+
+    #endif
 
   };
 
@@ -298,9 +308,9 @@ void display_available_modules(void)
 
 void load_module_library(char *library_name)
 {
-
   cout << __FUNCTION__ << "() " << library_name << '\n';
 
+#ifdef HAVE_GUI
 
   void *handle;
   char *error;
@@ -317,23 +327,11 @@ void load_module_library(char *library_name)
   add_module_library(library_name,handle);
 
   display_available_modules();
+#else
 
-  /*
-  getmodule = (Module_FPTR) dlsym(handle, "getmodule");
+  cout << "  -- gpsim doesn't support modules in the cli-only mode\n";
 
-  if ((error = dlerror()) != NULL)  {
-    fputs(error, stderr);
-  }
-  else {
-    testmodule = getmodule();
-    if(testmodule) {
-      cout << " got the module, here's its name:\n  "
-	   << testmodule->name() << '\n';
-    }
-  }
-
-  dlclose(handle);
-  */
+#endif
 
 }
 
@@ -402,3 +400,5 @@ void dump_module_list(void)
  cout << __FUNCTION__ << '\n';
 
 }
+
+

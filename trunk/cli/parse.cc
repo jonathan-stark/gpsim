@@ -66,6 +66,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 #include <string>
 #include <vector>
+#include <unistd.h>
 #include <glib.h>
 
 #include "misc.h"
@@ -112,7 +113,7 @@ char_list *str_list;
 void free_char_list(char_list *);
  
 
-#line 77 "parse.yy"
+#line 78 "parse.yy"
 typedef union {
   guint32              i;
   guint64             li;
@@ -225,17 +226,17 @@ static const short yyrhs[] = {    37,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   141,   142,   143,   144,   145,   146,   147,   148,   149,   150,
-   151,   152,   153,   154,   155,   156,   157,   158,   159,   160,
-   161,   162,   163,   164,   165,   174,   190,   200,   211,   213,
-   218,   220,   222,   224,   228,   232,   241,   245,   247,   249,
-   253,   255,   260,   262,   266,   268,   270,   278,   291,   295,
-   304,   309,   311,   318,   329,   331,   333,   335,   343,   351,
-   355,   359,   363,   367,   371,   377,   379,   381,   385,   392,
-   399,   406,   413,   420,   428,   436,   446,   452,   459,   465,
-   471,   477,   483,   489,   495,   503,   507,   511,   518,   522,
-   528,   534,   538,   542,   546,   550,   561,   569,   576,   583,
-   594,   605,   616,   625
+   142,   143,   144,   145,   146,   147,   148,   149,   150,   151,
+   152,   153,   154,   155,   156,   157,   158,   159,   160,   161,
+   162,   163,   164,   165,   166,   175,   191,   201,   212,   214,
+   219,   221,   223,   225,   229,   233,   242,   246,   248,   250,
+   254,   256,   261,   263,   267,   269,   271,   279,   292,   296,
+   305,   310,   312,   319,   330,   332,   334,   336,   344,   352,
+   356,   360,   364,   368,   372,   378,   380,   382,   386,   393,
+   400,   407,   414,   421,   429,   437,   447,   453,   460,   466,
+   472,   478,   484,   490,   496,   504,   508,   512,   519,   523,
+   529,   535,   539,   543,   547,   551,   562,   570,   577,   584,
+   595,   606,   617,   626
 };
 #endif
 
@@ -900,7 +901,7 @@ yyreduce:
   switch (yyn) {
 
 case 25:
-#line 166 "parse.yy"
+#line 167 "parse.yy"
 {
        if((verbose&2) && DEBUG_PARSER)
          cout << "got an END_OF_INPUT\n";
@@ -909,7 +910,7 @@ case 25:
      ;
     break;}
 case 26:
-#line 175 "parse.yy"
+#line 176 "parse.yy"
 {
             //if(parser_warnings || (verbose & 2 ))
             if((verbose & 2) && DEBUG_PARSER)
@@ -925,7 +926,7 @@ case 26:
           ;
     break;}
 case 27:
-#line 191 "parse.yy"
+#line 192 "parse.yy"
 {
             if((verbose) && DEBUG_PARSER)
               cout << "parser is spanning lines\n";
@@ -935,7 +936,7 @@ case 27:
           ;
     break;}
 case 28:
-#line 201 "parse.yy"
+#line 202 "parse.yy"
 {
             if((verbose&2) && DEBUG_PARSER)
 	      cout << "attach command with a string list\n";
@@ -946,40 +947,40 @@ case 28:
 	  ;
     break;}
 case 29:
-#line 212 "parse.yy"
+#line 213 "parse.yy"
 { c_break.list(); YYABORT;;
     break;}
 case 30:
-#line 214 "parse.yy"
+#line 215 "parse.yy"
 { 
 	    cmd_options *opt = yyvsp[0].co;
 	    c_break.set_break(opt->value); YYABORT;
 	  ;
     break;}
 case 31:
-#line 219 "parse.yy"
+#line 220 "parse.yy"
 { c_break.set_break(yyvsp[-1].co->value,yyvsp[0].li); YYABORT;;
     break;}
 case 32:
-#line 221 "parse.yy"
+#line 222 "parse.yy"
 { c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].li,yyvsp[0].li); YYABORT;;
     break;}
 case 33:
-#line 223 "parse.yy"
+#line 224 "parse.yy"
 { c_break.set_break(yyvsp[-1].co->value,yyvsp[0].s); YYABORT;;
     break;}
 case 34:
-#line 225 "parse.yy"
+#line 226 "parse.yy"
 { c_break.set_break(yyvsp[-2].co->value,yyvsp[-1].s,yyvsp[0].li); YYABORT;;
     break;}
 case 35:
-#line 229 "parse.yy"
+#line 230 "parse.yy"
 { 
 	    c_bus.list_busses(); YYABORT;
 	  ;
     break;}
 case 36:
-#line 233 "parse.yy"
+#line 234 "parse.yy"
 {
 	    //cout << "bus command with a string list\n";
 	    c_bus.add_busses(str_list_head);
@@ -988,47 +989,47 @@ case 36:
           ;
     break;}
 case 37:
-#line 242 "parse.yy"
+#line 243 "parse.yy"
 { clear.clear(yyvsp[0].li); YYABORT;;
     break;}
 case 38:
-#line 246 "parse.yy"
+#line 247 "parse.yy"
 { disassemble.disassemble(-10, 5); YYABORT; ;
     break;}
 case 39:
-#line 248 "parse.yy"
+#line 249 "parse.yy"
 { disassemble.disassemble(0, yyvsp[0].li); YYABORT;;
     break;}
 case 40:
-#line 250 "parse.yy"
+#line 251 "parse.yy"
 { disassemble.disassemble(-yyvsp[-1].li,yyvsp[0].li); YYABORT;;
     break;}
 case 41:
-#line 254 "parse.yy"
+#line 255 "parse.yy"
 { dump.dump(2); YYABORT;;
     break;}
 case 42:
-#line 256 "parse.yy"
+#line 257 "parse.yy"
 { dump.dump(yyvsp[0].co->value); YYABORT;;
     break;}
 case 43:
-#line 261 "parse.yy"
+#line 262 "parse.yy"
 { help.help(); YYABORT;;
     break;}
 case 44:
-#line 263 "parse.yy"
+#line 264 "parse.yy"
 { help.help(yyvsp[0].s); free(yyvsp[0].s); YYABORT;;
     break;}
 case 45:
-#line 267 "parse.yy"
+#line 268 "parse.yy"
 { c_list.list(); YYABORT;;
     break;}
 case 46:
-#line 269 "parse.yy"
+#line 270 "parse.yy"
 { printf("got a list with an indirect reference %d\n",yyvsp[0].li);YYABORT;;
     break;}
 case 47:
-#line 271 "parse.yy"
+#line 272 "parse.yy"
 { 
 	    cmd_options *opt = yyvsp[0].co;
 	    //cout << "  --- list with bit flag " << opt->name << '\n';
@@ -1036,7 +1037,7 @@ case 47:
 	  ;
     break;}
 case 48:
-#line 279 "parse.yy"
+#line 280 "parse.yy"
 {
 	    c_load.load(yyvsp[-1].co->value,yyvsp[0].s);
 	    //cout << "load completed\n\n";
@@ -1049,13 +1050,13 @@ case 48:
 	  ;
     break;}
 case 49:
-#line 292 "parse.yy"
+#line 293 "parse.yy"
 { 
 	    c_node.list_nodes(); YYABORT;
 	  ;
     break;}
 case 50:
-#line 296 "parse.yy"
+#line 297 "parse.yy"
 {
 	    //cout << "node command with a string list\n";
 	    c_node.add_nodes(str_list_head);
@@ -1064,18 +1065,18 @@ case 50:
           ;
     break;}
 case 51:
-#line 305 "parse.yy"
+#line 306 "parse.yy"
 { 
             cout << "module command\n";
             c_module.module(); YYABORT;
           ;
     break;}
 case 52:
-#line 310 "parse.yy"
+#line 311 "parse.yy"
 { c_module.module(yyvsp[0].co->value); YYABORT;;
     break;}
 case 53:
-#line 312 "parse.yy"
+#line 313 "parse.yy"
 { 
             c_module.module(yyvsp[0].cos);
             delete yyvsp[0].cos;
@@ -1083,7 +1084,7 @@ case 53:
           ;
     break;}
 case 54:
-#line 319 "parse.yy"
+#line 320 "parse.yy"
 { 
             c_module.module(yyvsp[-1].cos, yyvsp[0].s);
             delete(yyvsp[-1].cos);
@@ -1092,26 +1093,26 @@ case 54:
           ;
     break;}
 case 55:
-#line 330 "parse.yy"
+#line 331 "parse.yy"
 { c_processor.processor(); YYABORT;;
     break;}
 case 56:
-#line 332 "parse.yy"
+#line 333 "parse.yy"
 { c_processor.processor(yyvsp[0].co->value); YYABORT;;
     break;}
 case 57:
-#line 334 "parse.yy"
+#line 335 "parse.yy"
 { c_processor.processor(yyvsp[0].s,NULL); YYABORT; ;
     break;}
 case 58:
-#line 336 "parse.yy"
+#line 337 "parse.yy"
 { 
             c_processor.processor(yyvsp[-1].s,yyvsp[0].s);
             YYABORT;
           ;
     break;}
 case 59:
-#line 344 "parse.yy"
+#line 345 "parse.yy"
 { 
             printf("got a quit\n");
             quit_parse = 1;
@@ -1119,51 +1120,51 @@ case 59:
           ;
     break;}
 case 60:
-#line 352 "parse.yy"
+#line 353 "parse.yy"
 { reset.reset(); YYABORT; ;
     break;}
 case 61:
-#line 356 "parse.yy"
+#line 357 "parse.yy"
 { c_run.run(); YYABORT;;
     break;}
 case 62:
-#line 360 "parse.yy"
+#line 361 "parse.yy"
 { 
             c_set.set(); YYABORT;
           ;
     break;}
 case 63:
-#line 364 "parse.yy"
+#line 365 "parse.yy"
 {
             c_set.set(yyvsp[0].co->value,1); YYABORT;
           ;
     break;}
 case 64:
-#line 368 "parse.yy"
+#line 369 "parse.yy"
 {
             c_set.set(yyvsp[-1].co->value,yyvsp[0].li);YYABORT;
           ;
     break;}
 case 65:
-#line 372 "parse.yy"
+#line 373 "parse.yy"
 {
 	    c_set.set(yyvsp[0].con); YYABORT;
 	  ;
     break;}
 case 66:
-#line 378 "parse.yy"
+#line 379 "parse.yy"
 { step.step(1); YYABORT;;
     break;}
 case 67:
-#line 380 "parse.yy"
+#line 381 "parse.yy"
 { step.step(yyvsp[0].li); YYABORT;;
     break;}
 case 68:
-#line 382 "parse.yy"
+#line 383 "parse.yy"
 { step.over(); YYABORT;;
     break;}
 case 69:
-#line 386 "parse.yy"
+#line 387 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus\n";
@@ -1172,7 +1173,7 @@ case 69:
 	  ;
     break;}
 case 70:
-#line 393 "parse.yy"
+#line 394 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with number: " << yyvsp[0].li << '\n';
@@ -1181,7 +1182,7 @@ case 70:
 	  ;
     break;}
 case 71:
-#line 400 "parse.yy"
+#line 401 "parse.yy"
 { 
             if(verbose)
               cout << " stimulus cmd is spanning a line\n";
@@ -1190,7 +1191,7 @@ case 71:
 	  ;
     break;}
 case 72:
-#line 407 "parse.yy"
+#line 408 "parse.yy"
 { 
             if(verbose)
               cout << " stimulus cmd is spanning a line\n";
@@ -1199,7 +1200,7 @@ case 72:
 	  ;
     break;}
 case 73:
-#line 414 "parse.yy"
+#line 415 "parse.yy"
 { 
             if(verbose)
               cout << " stimulus cmd is ignoring stuff\n";
@@ -1208,7 +1209,7 @@ case 73:
 	  ;
     break;}
 case 74:
-#line 421 "parse.yy"
+#line 422 "parse.yy"
 { 
             if(verbose)
               cout << " stimulus cmd is ignoring stuff\n";
@@ -1218,7 +1219,7 @@ case 74:
 	  ;
     break;}
 case 75:
-#line 429 "parse.yy"
+#line 430 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with float number: " << yyvsp[0].f << '\n';
@@ -1227,7 +1228,7 @@ case 75:
 	  ;
     break;}
 case 76:
-#line 437 "parse.yy"
+#line 438 "parse.yy"
 { 
             if(verbose)
 	      cout << " end of stimulus command\n";
@@ -1237,7 +1238,7 @@ case 76:
 	  ;
     break;}
 case 77:
-#line 447 "parse.yy"
+#line 448 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus(in _opt)\n"; // << $1->value << '\n';
@@ -1245,7 +1246,7 @@ case 77:
 	  ;
     break;}
 case 78:
-#line 453 "parse.yy"
+#line 454 "parse.yy"
 {
             //if(verbose)
               //cout << "parser is ignoring spanned line in stimulus\n";
@@ -1254,7 +1255,7 @@ case 78:
           ;
     break;}
 case 79:
-#line 460 "parse.yy"
+#line 461 "parse.yy"
 {
             //if(verbose)
               //cout << "parser is ignoring garbage in stimulus\n";
@@ -1262,7 +1263,7 @@ case 79:
           ;
     break;}
 case 80:
-#line 466 "parse.yy"
+#line 467 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with bit flag: " << yyvsp[0].co->value << '\n';
@@ -1270,7 +1271,7 @@ case 80:
 	  ;
     break;}
 case 81:
-#line 472 "parse.yy"
+#line 473 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
@@ -1278,7 +1279,7 @@ case 81:
 	  ;
     break;}
 case 82:
-#line 478 "parse.yy"
+#line 479 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with numeric float option\n";
@@ -1286,7 +1287,7 @@ case 82:
 	  ;
     break;}
 case 83:
-#line 484 "parse.yy"
+#line 485 "parse.yy"
 {
             if(verbose)
               cout << "parser sees stimulus with string option\n";
@@ -1294,7 +1295,7 @@ case 83:
 	  ;
     break;}
 case 84:
-#line 490 "parse.yy"
+#line 491 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with number\n";
@@ -1302,7 +1303,7 @@ case 84:
 	  ;
     break;}
 case 85:
-#line 496 "parse.yy"
+#line 497 "parse.yy"
 { 
             if(verbose)
               cout << "parser sees stimulus with floating point number\n";
@@ -1310,73 +1311,73 @@ case 85:
 	  ;
     break;}
 case 86:
-#line 504 "parse.yy"
+#line 505 "parse.yy"
 {
 	    c_symbol.dump_all(); YYABORT;
 	  ;
     break;}
 case 87:
-#line 508 "parse.yy"
+#line 509 "parse.yy"
 {
 	    c_symbol.dump_one(yyvsp[0].s); YYABORT;
 	  ;
     break;}
 case 88:
-#line 512 "parse.yy"
+#line 513 "parse.yy"
 {
 	    c_symbol.add_one(yyvsp[-2].s,yyvsp[-1].s,yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 89:
-#line 519 "parse.yy"
+#line 520 "parse.yy"
 {
 	    c_trace.trace(); YYABORT;
 	  ;
     break;}
 case 90:
-#line 523 "parse.yy"
+#line 524 "parse.yy"
 {
 	    c_trace.trace(yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 91:
-#line 529 "parse.yy"
+#line 530 "parse.yy"
 {
 	    version.version(); YYABORT;
 	  ;
     break;}
 case 92:
-#line 535 "parse.yy"
+#line 536 "parse.yy"
 {
 	    c_x.x(); YYABORT;
 	  ;
     break;}
 case 93:
-#line 539 "parse.yy"
+#line 540 "parse.yy"
 {
 	    c_x.x(yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 94:
-#line 543 "parse.yy"
+#line 544 "parse.yy"
 {
 	    c_x.x(yyvsp[-1].li,yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 95:
-#line 547 "parse.yy"
+#line 548 "parse.yy"
 {
 	    c_x.x(yyvsp[0].s); YYABORT;
 	  ;
     break;}
 case 96:
-#line 551 "parse.yy"
+#line 552 "parse.yy"
 {
 	    c_x.x(yyvsp[-1].s,yyvsp[0].li); YYABORT;
 	  ;
     break;}
 case 97:
-#line 562 "parse.yy"
+#line 563 "parse.yy"
 {
 	  if(verbose)
             printf(" indirect register *%d",yyvsp[0].li);
@@ -1384,21 +1385,21 @@ case 97:
         ;
     break;}
 case 98:
-#line 570 "parse.yy"
+#line 571 "parse.yy"
 {
 	if(verbose)
          printf("  --- register %d\n", yyvsp[0].li);
        ;
     break;}
 case 99:
-#line 577 "parse.yy"
+#line 578 "parse.yy"
 {
 	 yyval.co = yyvsp[0].co;
 	 //cout << "  --- bit_flag " << $$->name << '\n';
        ;
     break;}
 case 100:
-#line 584 "parse.yy"
+#line 585 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.con = new cmd_options_num;
@@ -1409,7 +1410,7 @@ case 100:
 	;
     break;}
 case 101:
-#line 595 "parse.yy"
+#line 596 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.cof = new cmd_options_float;
@@ -1420,7 +1421,7 @@ case 101:
 	;
     break;}
 case 102:
-#line 606 "parse.yy"
+#line 607 "parse.yy"
 { 
 	  //cout << $1->name;
 	  yyval.cos = new cmd_options_str;
@@ -1431,7 +1432,7 @@ case 102:
 	;
     break;}
 case 103:
-#line 617 "parse.yy"
+#line 618 "parse.yy"
 {
 	  str_list = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list_head = str_list;
@@ -1442,7 +1443,7 @@ case 103:
 	;
     break;}
 case 104:
-#line 626 "parse.yy"
+#line 627 "parse.yy"
 {
 	  str_list->next = (char_list *) malloc(sizeof(char_list)); //new(char_list);
 	  str_list = str_list->next;
@@ -1674,7 +1675,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 637 "parse.yy"
+#line 638 "parse.yy"
 
 
        // parsing is over 

@@ -20,7 +20,7 @@ Boston, MA 02111-1307, USA.  */
 
 #ifndef __PROCESSORS_H__
 #define __PROCESSORS_H__
-
+#include <unistd.h>
 #include <glib.h>
 
 #include "gpsim_classes.h"

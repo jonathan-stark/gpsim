@@ -432,6 +432,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream.h>
 
 #include <string>
+#include <unistd.h>
 #include <glib.h>
 
 #include "command.h"
@@ -461,7 +462,7 @@ int cli_corba_init (char *ior_id);
 
 #define YYDEBUG 1
 
-#line 465 "lex.yy.c"
+#line 466 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -612,14 +613,14 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 76 "scan.ll"
+#line 77 "scan.ll"
 
 
 
 // Comments. Ignore all text after a comment character
 
 
-#line 623 "lex.yy.c"
+#line 624 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -704,7 +705,7 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 82 "scan.ll"
+#line 83 "scan.ll"
 { 
    unput('\n');
    return IGNORED;
@@ -712,7 +713,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 87 "scan.ll"
+#line 88 "scan.ll"
 { 
    int c;
    do {
@@ -728,7 +729,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 100 "scan.ll"
+#line 101 "scan.ll"
 { 
       // Got an eol.
       input_mode = 0;  // assume that this is not a multi-line command.
@@ -751,13 +752,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 120 "scan.ll"
+#line 121 "scan.ll"
 { 
    quit_parse  =1;
    return 0;  }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 124 "scan.ll"
+#line 125 "scan.ll"
 {
     //cout << "got an <<EOF>> in scan.l\n";
     //quit_parse = 1;
@@ -766,7 +767,7 @@ case YY_STATE_EOF(INITIAL):
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 130 "scan.ll"
+#line 131 "scan.ll"
 {
    //yylval.i = strtoul(yytext,NULL,numeric_base);
    sscanf(yytext,"%Ld",&yylval.li);
@@ -776,7 +777,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 137 "scan.ll"
+#line 138 "scan.ll"
 { 
    //yylval.i = strtoul(yytext,NULL,0);
    sscanf(yytext,"%Lx",&yylval.li);
@@ -786,7 +787,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 144 "scan.ll"
+#line 145 "scan.ll"
 {
     sscanf(yytext,"%f",&yylval.f);
     return FLOAT_NUMBER;  
@@ -801,7 +802,7 @@ YY_RULE_SETUP
 
 case 8:
 YY_RULE_SETUP
-#line 157 "scan.ll"
+#line 158 "scan.ll"
 {
    fprintf(yyout,"%s",&yytext[5]);
   }
@@ -811,7 +812,7 @@ YY_RULE_SETUP
 
 case 9:
 YY_RULE_SETUP
-#line 165 "scan.ll"
+#line 166 "scan.ll"
 {
   // printf("got indirect\n");
   return INDIRECT;
@@ -823,7 +824,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 175 "scan.ll"
+#line 176 "scan.ll"
 {
     end_of_command = 1;
     return(END_OF_COMMAND);
@@ -835,7 +836,7 @@ YY_RULE_SETUP
 
 case 11:
 YY_RULE_SETUP
-#line 185 "scan.ll"
+#line 186 "scan.ll"
 {
     string tok = strip_trailing_whitespace (yytext);
     if(strlen(tok.c_str()))
@@ -846,7 +847,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 193 "scan.ll"
+#line 194 "scan.ll"
 {
              printf("ignoring\n"); 
             // ECHO;
@@ -854,10 +855,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 198 "scan.ll"
+#line 199 "scan.ll"
 ECHO;
 	YY_BREAK
-#line 861 "lex.yy.c"
+#line 862 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1741,7 +1742,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 198 "scan.ll"
+#line 199 "scan.ll"
 
 
 // Include these so that we don't have to link to libfl.a.

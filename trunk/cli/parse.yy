@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip.h>
 #include <string>
 #include <vector>
+#include <unistd.h>
 #include <glib.h>
 
 #include "misc.h"
