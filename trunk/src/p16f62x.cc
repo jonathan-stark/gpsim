@@ -161,6 +161,9 @@ void P16F62x::create_sfr_map(void)
   // Link the comparator and porta
   ((PORTA_62x*)porta)->comparator = &comparator;
 
+  // Link ccp1 and portb
+  ((PORTB_62x*)portb)->ccp1con = &ccp1con;
+
   pir1.valid_bits = pir1.TMR1IF | pir1.TMR2IF | pir1.CCP1IF | pir1.TXIF 
     | pir1.RCIF | pir1.CMIF | pir1.EEIF;
 }
@@ -228,6 +231,8 @@ void  P16F62x::create(int ram_top)
 
   P16F62x::create_sfr_map();
 
+  // Build the links between the I/O Pins and the internal peripherals
+  ccp1con.iopin = portb->pins[3];
 }
 
 //========================================================================
