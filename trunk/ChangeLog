@@ -1,3 +1,9 @@
+2004-11-17 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc, src/value.cc, src/value.h: made Integer,Float
+	and Boolean values get() and set() their values through just one
+	member function. This allows derived attributes to trap reads and
+	writes to the values.
+	
 2004-11-16 Scott Dattalo <scott@dattalo.com>
 	* src/value.h, src/value.cc, src/processor.h, src/processor.cc,
 	src/pic-processor.cc, src/symbol.h, src/symbol.cc: Added 3 new

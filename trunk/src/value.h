@@ -62,6 +62,7 @@ public:
   virtual void set(double);
   virtual void set(gint64);
   virtual void set(int);
+  virtual void set(bool);
   virtual void set(Value *);
   virtual void set(Expression *);
 
@@ -195,10 +196,11 @@ public:
   static string toString(bool value);
   static string toString(char* format, bool value);
 
-  virtual void get(bool &b) { b = *value; }
-  virtual void get(int &i) { i = *value ? 1 : 0; }
-  virtual void get(double &d) { d = *value ? 1.0 : 0.0;}
+  virtual void get(bool &b);
+  virtual void get(int &i);
+  virtual void get(double &d);
 
+  virtual void set(bool);
   virtual void set(Value *);
 
   bool getVal() { return *value; }
