@@ -115,7 +115,19 @@ public:
   symbol * find(SYMBOL_TYPE symt, char *s);
 };
 
+#ifdef IN_MODULE
+// we are in a module: don't access trace object directly!
+Symbol_Table &get_symbol_table(void);
+#else
+// we are in gpsim: use of get_trace() is recommended,
+// even if trace object can be accessed directly.
 extern Symbol_Table symbol_table;
+
+inline Symbol_Table &get_symbol_table(void)
+{
+  return symbol_table;
+}
+#endif
 
 
 

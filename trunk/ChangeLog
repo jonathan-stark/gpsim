@@ -1,3 +1,11 @@
+2004-04-18 Borut Razem <scott@dattalo.com>
+	* src/14bit-registers.h, src/gpsim_interface.h, src/gpsim_time.h,
+	src/processor.h, src/symbol.h, src/trace.h: introduced get_interface(),
+	get_cycles(), get_active_cpu(), get_symbol_table(), get_trace(void)
+	accessor methods
+	* config_win32.h.in: defined GPSIM_MAJOR_VERSION, GPSIM_MINOR_VERSION and
+	GPSIM_MICRO_VERSION symbols
+
 2004-04-15 Scott Dattalo <scott@dattalo.com>
 	* src/14bit-tmrs.cc, src/ioports.cc, src/ioports.h: PORTC's T1OSC input
 	can clock TMR1 on some PIC's. I've added some preliminary support for this.

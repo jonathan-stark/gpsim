@@ -182,7 +182,19 @@ public:
   void set_cycles_per_second(guint64 cps);
 };
 
+#ifdef IN_MODULE
+// we are in a module: don't access cycles object directly!
+Cycle_Counter &get_cycles(void);
+#else
+// we are in gpsim: use of get_cycles() is recommended,
+// even if cycles object can be accessed directly.
 extern Cycle_Counter cycles;
+
+inline Cycle_Counter &get_cycles(void)
+{
+  return cycles;
+}
+#endif
 
 
 
