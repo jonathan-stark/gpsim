@@ -19,31 +19,34 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-//extern void simulation_cleanup(void);
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <string.h>
 
-#include "../src/gpsim_def.h"
-#include "../src/gpsim_classes.h"
-#include "../src/icd.h"
-#include "../config.h"
+#include <string>
+#include <list>
+#include <csignal>
+#include <iostream>
 
-// Defined in ../src/pic-processors.cc
-extern SIMULATION_MODES simulation_mode;
+#ifdef _WIN32
+#include <direct.h>
+#include "fd2raw.h"
+#else
+#include <sys/file.h>
+#include <unistd.h>
+#endif
 
 #ifdef HAVE_GUI
-#include <unistd.h>
 #include <glib.h>
 #include <gdk/gdktypes.h>
 #include <gdk/gdk.h>
 #endif
 
-#include <stdio.h>
-
 #ifdef HAVE_LIBREADLINE
 #define HAVE_READLINE
 #endif
-
-extern const char *get_dir_delim(const char *path);
-extern bool bUseGUI;
 
 #ifdef HAVE_READLINE
 /* See if we have namespace-clean readline or not */
@@ -57,27 +60,20 @@ extern "C" {
 }
 #endif /* HAVE_READLINE */
 
-#include <sys/types.h>
-#ifdef _WIN32
-#include <direct.h>
-#include "fd2raw.h"
-#else
-#include <sys/file.h>
-#endif
-#include <sys/stat.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-//#include <slang/slang.h>
-#include <string>
-#include <list>
-#include <csignal>
-#include <iostream>
-
-#include "command.h"
-#include "input.h"
+#include "../src/gpsim_def.h"
+#include "../src/gpsim_classes.h"
+#include "../src/icd.h"
 #include "../src/pic-processor.h"
 #include "../src/breakpoints.h"
+#include "../config.h"
+#include "command.h"
+#include "input.h"
+
+// Defined in ../src/pic-processors.cc
+extern SIMULATION_MODES simulation_mode;
+
+extern const char *get_dir_delim(const char *path);
+extern bool bUseGUI;
 
 int yyparse(void);
 void initialize_readline (void);

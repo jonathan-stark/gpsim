@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 //-------------------------------------------------------------------
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "../config.h"
 #define GPSIM_VERSION VERSION 
