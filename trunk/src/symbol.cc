@@ -394,8 +394,6 @@ string node_symbol::toString(void)
 register_symbol::register_symbol(const char *_name, Register *_reg)
   : symbol(_name), reg(_reg)
 {
-  if(reg)
-    new_name(reg->name());
 }
 
 string register_symbol::toString()
