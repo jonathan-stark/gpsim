@@ -41,6 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x8x.h"
 #include "xref.h"
 #include "interface.h"
+#include "trace.h"
 
 gpointer create_interface(unsigned int processor_id, 
 			  void (*interface_callback)(gpointer), 
@@ -555,12 +556,9 @@ unsigned int gpsim_get_register_memory_size(unsigned int processor_id,REGISTER_T
   if(!valid_register(pic,type,0))
       return 0;
   
-  if(type == REGISTER_EEPROM) {
-    if(pic->eeprom) 
-      return pic->eeprom->rom_size;
-    return 0;
-  }
-
+  if(type == REGISTER_EEPROM)
+    return pic->eeprom_get_size();
+  
   return pic->register_memory_size();
 }
 
@@ -633,6 +631,95 @@ unsigned int gpsim_reg_clear_breakpoints(unsigned int processor_id, REGISTER_TYP
     redisplay_prompt();
 
     return 1;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_set_log_name(unsigned int processor_id, char *filename)
+{
+    pic_processor *pic = get_processor(processor_id);
+    
+    if(!pic)
+	return 0;
+
+    if(filename!=NULL)
+	trace_log.enable_logging(filename);
+
+    return 0;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_reg_set_read_logging(unsigned int processor_id,
+					REGISTER_TYPE type,
+					unsigned int register_number)
+{
+    int b;
+    pic_processor *pic = get_processor(processor_id);
+    
+    if(!pic)
+	return 0;
+
+    if(!trace_log.logging)
+	trace_log.enable_logging();
+
+    b = bp.set_notify_read(pic, register_number);
+
+    return 0;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_reg_set_write_logging(unsigned int processor_id,
+					 REGISTER_TYPE type,
+					 unsigned int register_number)
+{
+    int b;
+    pic_processor *pic = get_processor(processor_id);
+    
+    if(!pic)
+	return 0;
+
+    if(!trace_log.logging)
+	trace_log.enable_logging();
+
+    b = bp.set_notify_write(pic, register_number);
+
+    return 0;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_reg_set_read_value_logging(unsigned int processor_id,
+					      REGISTER_TYPE type,
+					      unsigned int register_number,
+					      unsigned int value,
+					      unsigned int mask)
+{
+    int b;
+    pic_processor *pic = get_processor(processor_id);
+    
+    if(!pic)
+	return 0;
+
+    if(!trace_log.logging)
+	trace_log.enable_logging();
+
+    b = bp.set_notify_read_value(pic, register_number, value, mask);
+
+    return 0;
+}
+//--------------------------------------------------------------------------
+unsigned int gpsim_reg_set_write_value_logging(unsigned int processor_id,
+					       REGISTER_TYPE type,
+					       unsigned int register_number,
+					       unsigned int value,
+					       unsigned int mask)
+{
+    int b;
+    pic_processor *pic = get_processor(processor_id);
+    
+    if(!pic)
+	return 0;
+
+    if(!trace_log.logging)
+	trace_log.enable_logging();
+
+    b = bp.set_notify_write_value(pic, register_number, value, mask);
+
+    return 0;
 }
 //--------------------------------------------------------------------------
 unsigned int gpsim_address_has_breakpoint(unsigned int processor_id, unsigned int address)
