@@ -1,3 +1,10 @@
+2005-03-31 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cpp: Changed call ProgramCounter->get_PC() to
+	ProgramCounter->get_value() to fix a problem where the initial
+	position of the PC in the source was not getting set properly.
+	Return value is used for indexing into source code line.
+	Mostly used by the UI so should not affect behavior.
+
 2005-03-30 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_dump.cc: Changed ram dump command to handle ram sizes
 	greater than one byte.
