@@ -1,3 +1,8 @@
+2004-04-04  Borut Razem  <borut.razem@siol.net>
+	* modules/encoder.cc, modules/gpsim_modules.cc, modules/paraface.cc,
+	modules/push_button.cc, modules/switch.cc, modules/video.cc:
+	modules port on WIN32
+
 2004-04-03  Borut Razem  <borut.razem@siol.net>
 	* src/stimuli.cc: fixed warning C4715: 'IOPIN::get_iop' : not all
 	control paths return a value: IOPIN::get_iop() returns 0 in case that
