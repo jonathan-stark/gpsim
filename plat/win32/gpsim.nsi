@@ -138,6 +138,7 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\bin\libpangoft2-1.0-0.dll"
   File "${PKG_ROOT}\bin\libpangowin32-1.0-0.dll"
   File "${PKG_ROOT}\bin\popt1.dll"
+  File "${PKG_ROOT}\bin\pthreadVC.dll"
   File "${PKG_ROOT}\bin\readline.dll"
 
   SetOutPath "$INSTDIR\doc"

@@ -1,3 +1,12 @@
+2004-11-18 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc: disallow TAB characters under windows since it
+	causes a crash most of the time.
+	* modules/bitlog.cc, modules/bytelog.cc, modules/ttoken.cc,
+	modules/makefile.mingw: These were not getting built under windows.
+	* plat/win32/gpsim.nsi: added pthreadVC.dll to gpsim's windows binary
+	distribution.
+	* doc/gpsimWin32.html: Updated documentation for pthreads.
+	
 2004-11-17 Scott Dattalo <scott@dattalo.com>
 	* src/processor.cc, src/value.cc, src/value.h: made Integer,Float
 	and Boolean values get() and set() their values through just one
