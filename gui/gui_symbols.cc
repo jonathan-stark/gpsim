@@ -578,8 +578,8 @@ int BuildSymbolWindow(Symbol_Window *sw)
   gtk_widget_set_uposition(GTK_WIDGET(sw->gui_obj.window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(sw->gui_obj.window),sw->gui_obj.name,"Gpsim");
   
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+//  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+//		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
   gtk_signal_connect (GTK_OBJECT (sw->gui_obj.window), "delete_event",
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)sw);
 

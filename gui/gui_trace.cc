@@ -286,8 +286,8 @@ BuildTraceWindow(Trace_Window *tw)
 
   ((GUI_Object*)tw)->window=window;
 
-  gtk_signal_connect (GTK_OBJECT (window), "destroy",
-		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
+//  gtk_signal_connect (GTK_OBJECT (window), "destroy",
+//		      GTK_SIGNAL_FUNC (gtk_widget_destroyed), &window);
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 

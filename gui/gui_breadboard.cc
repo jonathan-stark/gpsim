@@ -2321,9 +2321,9 @@ static char *gui_get_filename(char *filename)
 
 	gtk_signal_connect_object(GTK_OBJECT(window),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window));
-	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				   GTK_OBJECT(window));
+//	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				   GTK_OBJECT(window));
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -3722,8 +3722,8 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_set_uposition(GTK_WIDGET(bbw->gui_obj.window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(bbw->gui_obj.window),bbw->gui_obj.name,"Gpsim");
   
-  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
+//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   gtk_signal_connect (GTK_OBJECT (bbw->gui_obj.window), "delete_event",
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)bbw);
   gtk_signal_connect_after(GTK_OBJECT(bbw->gui_obj.window), "configure_event",

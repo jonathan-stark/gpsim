@@ -696,8 +696,8 @@ int BuildWatchWindow(Watch_Window *ww)
   gtk_widget_set_uposition(GTK_WIDGET(ww->gui_obj.window),x,y);
   gtk_window_set_wmclass(GTK_WINDOW(ww->gui_obj.window),ww->gui_obj.name,"Gpsim");
   
-  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
+//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
   gtk_signal_connect (GTK_OBJECT (ww->gui_obj.window), "delete_event",
 			    GTK_SIGNAL_FUNC(delete_event), (gpointer)ww);
   gtk_signal_connect_after(GTK_OBJECT(ww->gui_obj.window), "configure_event",

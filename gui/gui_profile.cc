@@ -384,9 +384,9 @@ open_plotsave_dialog(Profile_Window *pw)
 				  "delete_event",
 				  GTK_SIGNAL_FUNC(gtk_widget_hide),
 				  GTK_OBJECT(window));
-	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				   GTK_OBJECT(window));
+//	gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				   GTK_OBJECT(window));
 
 	gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			    "clicked", GTK_SIGNAL_FUNC(file_selection_ok),
@@ -723,9 +723,9 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
 	gtk_signal_connect_object(GTK_OBJECT(window1),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
-	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				   GTK_OBJECT(window1));
+//	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				   GTK_OBJECT(window1));
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -1015,9 +1015,9 @@ int plot_routine_histogram(Profile_Window *pw)
 
 	gtk_signal_connect_object(GTK_OBJECT(window1),
 				  "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(window1));
-	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
-				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-				   GTK_OBJECT(window1));
+//	gtk_signal_connect_object (GTK_OBJECT (window1), "destroy",
+//				   GTK_SIGNAL_FUNC(gtk_widget_destroyed),
+//				   GTK_OBJECT(window1));
 
 	vbox1=gtk_vbox_new(FALSE,0);
 	gtk_container_add(GTK_CONTAINER(window1),vbox1);
@@ -2193,8 +2193,8 @@ BuildProfileWindow(Profile_Window *pw)
 
   ((GUI_Object*)pw)->window=window;
 
-  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
+//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
+//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
 
   main_vbox=gtk_vbox_new(FALSE,1);
   gtk_container_set_border_width(GTK_CONTAINER(main_vbox),0); 
