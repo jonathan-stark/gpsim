@@ -57,6 +57,11 @@ void Value::set(gint64 i)
 {
   throw new Error(" cannot assign an integer to a " + showType());
 }
+void Value::set(bool v)
+{
+  throw new Error(" cannot assign a boolean to a " + showType());
+}
+
 void Value::set(int i)
 {
   gint64 i64 = i;
@@ -328,7 +333,9 @@ Boolean::~Boolean()
 
 string Boolean::toString()
 {
-  return (string(*value ? "true" : "false"));
+  bool b;
+  get(b);
+  return (string(b ? "true" : "false"));
 }
 
 string Boolean::toString(bool value)
@@ -339,8 +346,10 @@ string Boolean::toString(bool value)
 string Boolean::toString(char* format)
 {
   char cvtBuf[1024];
+  bool b;
+  get(b);
 
-  sprintf(cvtBuf, format, *value);
+  sprintf(cvtBuf, format, b);
   return (string(&cvtBuf[0]));
 }
 
@@ -371,10 +380,42 @@ bool Boolean::compare(ComparisonOperator *compOp, Value *rvalue)
   return false; // keep the compiler happy.
 }
 
+
+// get(bool&) - primary method for accessing the value.
+void Boolean::get(bool &b)
+{
+  b = *value;
+}
+
+// get(int&) - type cast an integer into a boolean. Note
+// that we call get(bool &) instead of directly accessing
+// the member value. The reason for this is so that derived
+// classes can capture the access.
+void Boolean::get(int &i)
+{ 
+  bool b;
+  get(b);
+  i = b ? 1 : 0; 
+}
+
+void Boolean::get(double &d) 
+{
+  bool b;
+  get(b);
+  d = b ? 1.0 : 0.0;
+}
+
+
 void Boolean::set(Value *v)
 {
   Boolean *bv = typeCheck(v,string("set "));
-  *value = bv->getVal();
+  bool b = bv->getVal();
+  set(b);
+}
+
+void Boolean::set(bool v)
+{
+  *value = v;
 }
 
 /*
@@ -427,7 +468,8 @@ Integer::~Integer()
 }
 void Integer::set(double d)
 {
-  *value = (gint64) d;
+  gint64 i = (gint64)d;
+  set(i);
 }
 
 void Integer::set(gint64 i)
@@ -436,12 +478,13 @@ void Integer::set(gint64 i)
 }
 void Integer::set(int i)
 {
-  *value = i;
+  gint64 ii = i;
+  set(ii);
 }
 void Integer::set(Value *v)
 {
   Integer *iv = typeCheck(v,string("set "));
-  *value = iv->getVal();
+  set(iv->getVal());
 }
 
 void Integer::get(gint64 &i)
@@ -450,14 +493,17 @@ void Integer::get(gint64 &i)
 }
 void Integer::get(double &d)
 { 
-  d = *value;
+  gint64 i;
+  get(i);
+  d = i;;
 }
 
 string Integer::toString()
 {
   char buf[256];
-  int i = *value;
-  snprintf(buf,sizeof(buf)," = %d = 0x%08X",i,i);
+  gint64 i;
+  get(i);
+  snprintf(buf,sizeof(buf)," = %Ld = 0x%08LX",i,i);
   return (name() +string(buf));
 }
 
@@ -466,7 +512,10 @@ string Integer::toString(char* format)
 {
   char cvtBuf[1024];
 
-  snprintf(cvtBuf,sizeof(cvtBuf), format, *value);
+  gint64 i;
+  get(i);
+
+  snprintf(cvtBuf,sizeof(cvtBuf), format, i);
   return (string(&cvtBuf[0]));
 }
 
@@ -539,10 +588,15 @@ bool Integer::compare(ComparisonOperator *compOp, Value *rvalue)
   
   Integer *rv = typeCheck(rvalue,"");
 
-  if(*value < *rv->value)
+  gint64 i,r;
+
+  get(i);
+  rv->get(r);
+
+  if(i < r)
     return compOp->less();
 
-  if(*value > *rv->value)
+  if(i > r)
     return compOp->greater();
 
   return compOp->equal();
@@ -604,18 +658,22 @@ void Float::set(double d)
 
 void Float::set(gint64 i)
 {
-  *value = i;
+  double d = i;
+  set(d);
 }
 
 void Float::set(Value *v)
 {
   Float *fv = typeCheck(v,string("set "));
-  *value = fv->getVal();
+  double d = fv->getVal();
+  set(d);
 }
 
 void Float::get(gint64 &i)
 { 
-  i = (gint64)*value;
+  double d;
+  get(d);
+  i = (gint64)d;
 }
 void Float::get(double &d)
 { 
@@ -632,7 +690,10 @@ string Float::toString(char* format)
 {
   char cvtBuf[1024];
 
-  sprintf(cvtBuf, format, *value);
+  double d;
+  get(d);
+
+  sprintf(cvtBuf, format, d);
   return (string(&cvtBuf[0]));
 }
 
@@ -651,10 +712,14 @@ bool Float::compare(ComparisonOperator *compOp, Value *rvalue)
   
   Float *rv = typeCheck(rvalue,"");
 
-  if(*value < *rv->value)
+  double d,r;
+  get(d);
+  rv->get(r);
+
+  if(d < r)
     return compOp->less();
 
-  if(*value > *rv->value)
+  if(d > r)
     return compOp->greater();
 
   return compOp->equal();

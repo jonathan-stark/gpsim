@@ -86,6 +86,11 @@ public:
     get(currentVal);
     cpu->setWarnMode(currentVal);
   }
+  void get(bool &b)
+  {
+    b = cpu->getWarnMode();
+    Boolean::set(&b);
+  }
 };
 
 class SafeModeAttribute : public Boolean
@@ -108,6 +113,11 @@ public:
     get(currentVal);
     cpu->setSafeMode(currentVal);
   }
+  void get(bool &b)
+  {
+    b = cpu->getSafeMode();
+    Boolean::set(b);
+  }
 };
 
 class UnknownModeAttribute : public Boolean
@@ -129,6 +139,11 @@ public:
     bool currentVal;
     get(currentVal);
     cpu->setUnknownMode(currentVal);
+  }
+  void get(bool &b)
+  {
+    b = cpu->getUnknownMode();
+    Boolean::set(b);
   }
 };
 
