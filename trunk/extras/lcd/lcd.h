@@ -283,6 +283,7 @@ public:
   //  LCDStateMachine state_machine;
 
   LcdDisplay(int aRows, int aCols, unsigned aType=0);
+  ~LcdDisplay();
 
 
   void CreateGraphics (void);
@@ -347,6 +348,7 @@ class LcdDisplayDisplaytech161A : public LcdDisplay
 {
 public:
   LcdDisplayDisplaytech161A(int aRows, int aCols, unsigned aType);
+  ~LcdDisplayDisplaytech161A();
 
   // Inheritance from Module class
   const virtual char *type(void) { return ("lcd_dt161A"); };

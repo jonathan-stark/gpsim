@@ -70,6 +70,14 @@ Binary_Indicator::Binary_Indicator(void)
   name_str = "Binary Indicator";
 }
 
+Binary_Indicator::~Binary_Indicator(void)
+{
+
+    cout << "binary indicator destructor\n";
+
+    delete port;
+}
+
 void Binary_Indicator::test(void)
 {
 

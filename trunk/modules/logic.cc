@@ -230,7 +230,9 @@ LogicGate::LogicGate(void)
 LogicGate::~LogicGate(void)
 {
 
-  cout << "LogicGate base class destructor\n";
+    cout << "LogicGate base class destructor\n";
+
+    delete port;
 }
 
 //--------------------------------------------------------------
@@ -305,7 +307,10 @@ void LogicGate::create_iopin_map(void)
     p[2] = i-j +'0';
     LIP = new Logic_Input(port, i,p);
     LIP->new_logic_gate(this);
-    set_pin_position(i+1, (i-INPUT_FIRST_BITPOSITION)*0.9999); // Left side of package
+    if(number_of_pins==2)
+	set_pin_position(i+1, 0.5); // Left side of package
+    else
+	set_pin_position(i+1, (i-INPUT_FIRST_BITPOSITION)*0.9999); // Left side of package
     assign_pin(i+1, LIP );       //  Pin numbers begin at 1
   }
 
@@ -375,7 +380,8 @@ AND2Gate::AND2Gate(void)
 AND2Gate::~AND2Gate(void)
 {
 
-  cout << "AND2Gate destructor\n";
+    cout << "AND2Gate destructor\n";
+
 }
 
 
@@ -414,6 +420,7 @@ OR2Gate::OR2Gate(void)
 OR2Gate::~OR2Gate(void)
 {
   cout << "OR2Gate destructor\n";
+
 }
 
 ExternalModule * OR2Gate::construct(char *new_name)
@@ -485,6 +492,7 @@ NOTGate::~NOTGate(void)
 {
 
   cout << "NOTGate destructor\n";
+
 }
 
 void NOTGate::update_state(void)
@@ -522,6 +530,7 @@ XOR2Gate::XOR2Gate(void)
 XOR2Gate::~XOR2Gate(void)
 {
   cout << "XOR2Gate destructor\n";
+
 }
 
 ExternalModule * XOR2Gate::construct(char *new_name)

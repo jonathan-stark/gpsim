@@ -89,6 +89,7 @@ class USARTModule : public ExternalModule
   virtual void set_attribute(char *attr, char *val);
 
   USARTModule(char *new_name = NULL);
+  ~USARTModule();
 
   static ExternalModule *USART_construct(char *new_name=NULL);
 

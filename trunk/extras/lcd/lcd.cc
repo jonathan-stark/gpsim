@@ -381,6 +381,20 @@ LcdDisplay::LcdDisplay(int aRows, int aCols, unsigned aType)
 
 }
 
+LcdDisplay::~LcdDisplay()
+{
+  if (verbose)
+      cout << "LcdDisplay destructor\n";
+
+  delete data_port;
+  delete control_port;
+
+  gtk_widget_destroy(window);
+
+  // FIXME free all data...
+
+}
+
 //-----------------------------------------------------------------
 // Displaytech 161A, added by Salvador E. Tropea <set@computer.org>
 // construct
@@ -409,5 +423,9 @@ ExternalModule * LcdDisplayDisplaytech161A::construct(char *new_name=NULL)
 LcdDisplayDisplaytech161A::LcdDisplayDisplaytech161A(int aRows, int aCols,
   unsigned aType) :
   LcdDisplay(aRows,aCols,aType)
+{
+}
+
+LcdDisplayDisplaytech161A::~LcdDisplayDisplaytech161A()
 {
 }

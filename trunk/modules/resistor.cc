@@ -140,6 +140,13 @@ Resistor::Resistor(void)
   name_str = "Resistor";
 }
 
+Resistor::~Resistor(void)
+{
+    cout << "resistor destructor\n";
+
+    delete port;
+}
+
 //--------------------------------------------------------------
 // create_iopin_map 
 //
@@ -369,6 +376,11 @@ PullupResistor::PullupResistor(char *init_name)
     cout << "Creating resistor window\n";
   }
 #endif
+}
+
+PullupResistor::~PullupResistor()
+{
+    delete res;
 }
 
 #ifdef HAVE_GUI

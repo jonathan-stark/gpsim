@@ -70,6 +70,7 @@ public:
   void add_address(pic_processor *cpu, char *, int );
   void add_w(pic_processor *cpu, WREG *w );
   void add_module(Module * m, char *module_name);
+  void remove_module(Module * m, char *module_name);
   void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);

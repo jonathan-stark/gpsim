@@ -99,6 +99,11 @@ void add_node(Stimulus_Node * new_node)
     node_list.push_back(new_node);
 }
 
+void remove_node(Stimulus_Node * node)
+{
+    node_list.remove(node);
+}
+
 void dump_node_list(void)
 {
   cout << "Node List\n";
@@ -180,6 +185,11 @@ void add_stimulus(stimulus * new_stimulus)
   stimulus_list.push_back(new_stimulus);
 }
 
+void remove_stimulus(stimulus * stimulus)
+{
+  stimulus_list.remove(stimulus);
+}
+
 void dump_stimulus_list(void)
 {
 	cout << "Stimulus List\n";
@@ -230,6 +240,22 @@ Stimulus_Node::Stimulus_Node(char *n=NULL)
   add_node(this);
 
   gi.node_configuration_changed(this);
+}
+
+Stimulus_Node::~Stimulus_Node()
+{
+    cout << "Stimulus_Node destructor" <<endl;
+    stimulus *sptr;
+
+    sptr = stimuli;
+    while(sptr)
+    {
+        cout << "detach " << sptr->name() <<" from node "<<name()<<endl;
+	sptr->detach(this);
+	sptr = sptr->next;
+    }
+
+    remove_node(this);
 }
 
 //
@@ -298,7 +324,7 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 	  // This was the first stimulus in the list.
 
 	  stimuli = s->next;
-	  //  s->detach(this);
+	  s->detach(this);
 	}
       else
 	{
@@ -310,8 +336,8 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 	      if(s == sptr->next)
 		{
 		  sptr->next = s->next;
-		  //  s->detach(this);
-		  gi.node_configuration_changed(this);
+		  s->detach(this);
+		  //gi.node_configuration_changed(this);
 		  return;
 		}
 
@@ -896,6 +922,14 @@ IOPIN::IOPIN(void)
 
   add_stimulus(this);
 
+}
+
+IOPIN::~IOPIN()
+{
+    if(snode)
+	snode->detach_stimulus(this);
+
+    remove_stimulus(this);
 }
 
 void IOPIN::put_state_value(int new_state)

@@ -1404,6 +1404,10 @@ USARTModule::USARTModule(char *_name = NULL)
   usart = NULL;
 }
 
+USARTModule::~USARTModule()
+{
+    // FIXME
+}
 
 
 

@@ -102,6 +102,7 @@ public:
   stimulus *stimuli;            /* Pointer to the first stimulus connected to this node. */
 
   Stimulus_Node(char *n = NULL);
+  ~Stimulus_Node();
   char * name(void){return name_str;};
   int get_voltage(void) { return state; };
   int update(unsigned int current_time);
@@ -148,6 +149,7 @@ public:
 
   virtual char * name(void){return name_str;};
   virtual void attach(Stimulus_Node *s) { snode = s;};
+  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = NULL;};
 };
 
 class source_stimulus : public stimulus, public BreakCallBack
@@ -230,6 +232,7 @@ enum IOPIN_DIRECTION
 
   IOPIN(void);
   IOPIN(IOPORT *i, unsigned int b,char *opt_name=NULL);
+  ~IOPIN();
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
   virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 

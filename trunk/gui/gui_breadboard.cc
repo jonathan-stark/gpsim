@@ -199,6 +199,8 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
     text[0]=name;
 
+    printf("treeselect_node %p\n",gui_node);
+
     if(gui_node->node!=NULL)
     {
 	snprintf(string,sizeof(string),"Node %s",gui_node->node->name());
@@ -215,7 +217,7 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
     gtk_widget_hide(gui_node->bbw->pic_frame);
 
     // Clear node_clist
-    gtk_clist_clear(GTK_CLIST(gui_node->bbw->node_settings_clist));
+    gtk_clist_clear(GTK_CLIST(gui_node->bbw->node_clist));
 
     if(gui_node->node!=NULL)
     {
@@ -224,9 +226,17 @@ static void treeselect_node(GtkItem *item, struct gui_node *gui_node)
 
 	while(stimulus!=NULL)
 	{
+	    int row;
+
 	    strncpy(name, stimulus->name(), sizeof(name));
-	    gtk_clist_append(GTK_CLIST(gui_node->bbw->node_settings_clist),
-			     text);
+
+	    row = gtk_clist_append(GTK_CLIST(gui_node->bbw->node_clist),
+				   text);
+
+	    gtk_clist_set_row_data (GTK_CLIST(gui_node->bbw->node_clist),
+				    row,
+				    stimulus);
+
 	    stimulus = stimulus->next;
 	}
     }
@@ -318,14 +328,14 @@ int module_distance(struct gui_module *p, int x, int y)
     if(distance<min_distance)
 	min_distance=distance;
 
-    printf("Module %s x=%d, y=%d, width=%d, height %d\n",
+/*    printf("Module %s x=%d, y=%d, width=%d, height %d\n",
 	   p->module->name(),
 	   p->x,
 	   p->y,
 	   p->width,
 	   p->height);
     printf("distance %f\n\n",min_distance);
-
+*/
     return min_distance;
 }
 
@@ -333,7 +343,7 @@ struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
 {
     GList *mi;
     gui_module *closest=NULL;
-    int distance, min_distance=1000000;
+    double distance, min_distance=1000000;
 
     mi = bbw->modules;
 
@@ -362,7 +372,7 @@ struct gui_module *find_closest_module(Breadboard_Window *bbw, int x, int y)
     return closest;
 }
 
-static void marker_cb(GtkWidget *w,
+static void pointer_cb(GtkWidget *w,
 		      GdkEventButton *event,
 		     Breadboard_Window *bbw)
 {
@@ -388,6 +398,7 @@ static void marker_cb(GtkWidget *w,
 	dragged_module = find_closest_module(bbw, x, y);
 //	printf("Dragging %s\n",dragged_module->module->name());
 	gtk_grab_add(w);
+        treeselect_module(NULL,dragged_module);
         dragging = 1;
 	break;
     case GDK_2BUTTON_PRESS:
@@ -411,6 +422,21 @@ static gint button(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
+	if(p->iopin->snode!=NULL)
+	{
+	    struct gui_node *gn;
+
+	    gn = (struct gui_node *)
+		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
+				    p->iopin->snode->name());
+
+	    if(gn!=NULL)
+	    {
+		treeselect_node(NULL, gn);
+                return 1;
+	    }
+	}
+
 	treeselect_stimulus(NULL, p);
 	return 1;
     }
@@ -947,9 +973,104 @@ static void add_module(GtkWidget *button, Breadboard_Window *bbw)
 
     if(module_type!=NULL)
     {
-        module_name = gui_get_string("Module name", module_type);
-	module_load_module(module_type, module_name);
+	module_name = gui_get_string("Module name", module_type);
+        if(module_name != NULL)
+	    module_load_module(module_type, module_name);
     }
+}
+
+static void remove_module(GtkWidget *button, Breadboard_Window *bbw)
+{
+    GList *pin_iter;
+
+    delete(bbw->selected_module->module);
+
+    // FIXME the rest should be as callback from src
+
+
+    // Remove pins
+    pin_iter=bbw->selected_module->pins;
+    while(pin_iter!=NULL)
+    {
+	struct gui_pin *pin;
+
+	pin = (struct gui_pin *) pin_iter->data;
+
+	gtk_widget_destroy(GTK_WIDGET(pin->widget));
+
+	pin_iter = pin_iter->next;
+    }
+
+    // Remove widget
+    gtk_container_remove(GTK_CONTAINER(bbw->layout),
+			 bbw->selected_module->module_widget);
+
+    // Remove from local list of modules
+    bbw->modules=g_list_remove(bbw->modules, bbw->selected_module);
+
+    // Remove module from tree
+    gtk_container_remove(GTK_CONTAINER(bbw->tree),
+			 bbw->selected_module->tree_item);
+
+    gtk_widget_hide(bbw->module_frame);
+    gtk_widget_hide(bbw->pic_frame);
+
+    free(bbw->selected_module);
+
+    bbw->selected_module=NULL;
+}
+
+static void node_clist_cb(GtkCList       *clist,
+			  gint            row,
+			  gint            column,
+			  GdkEvent       *event,
+			  Breadboard_Window *bbw)
+
+{
+    bbw->selected_node->selected_row = row;
+}
+
+static void remove_node(GtkWidget *button, Breadboard_Window *bbw)
+{
+    printf("Remove node %p.",bbw->selected_node);
+
+//    gtk_signal_disconnect_by_data(GTK_OBJECT(bbw->selected_node->tree_item),
+//				  bbw->selected_node);
+
+    gtk_object_remove_data(GTK_OBJECT(bbw->node_tree),
+			   bbw->selected_node->node->name());
+
+    gtk_object_remove_data(GTK_OBJECT(bbw->selected_node->tree_item), "snode");
+
+//    gtk_widget_destroy(bbw->selected_node->tree_item);
+    gtk_container_remove(GTK_CONTAINER(bbw->node_tree),
+			 bbw->selected_node->tree_item);
+
+    delete bbw->selected_node->node;
+
+    free(bbw->selected_node);
+
+    bbw->selected_node=NULL;
+
+    gtk_widget_hide(bbw->node_frame);
+    gtk_widget_hide(bbw->stimulus_frame);
+    gtk_widget_hide(bbw->module_frame);
+    gtk_widget_hide(bbw->pic_frame);
+}
+
+static void remove_node_stimulus(GtkWidget *button, Breadboard_Window *bbw)
+{
+    puts("Remove stimulus from node.");
+
+    stimulus *s;
+
+    s = (stimulus*) gtk_clist_get_row_data(GTK_CLIST(bbw->node_clist), bbw->selected_node->selected_row);
+
+    bbw->selected_node->node->detach_stimulus(s);
+
+    gtk_clist_remove(GTK_CLIST(bbw->node_clist), bbw->selected_node->selected_row);
+
+    bbw->selected_node->selected_row=-1;
 }
 
 static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
@@ -1175,6 +1296,7 @@ struct gui_module *create_gui_module(Breadboard_Window *bbw,
 		       p);
     gtk_widget_show(tree_item);
     gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
+    p->tree_item = tree_item;
 
     package_height=(p->module->get_pin_count()/2+(p->module->get_pin_count()&1)-1)*pinspacing;
 
@@ -1606,10 +1728,12 @@ void BreadboardWindow_node_configuration_changed(Breadboard_Window *bbw,Stimulus
 	    gn->node=node;
 
 	    node_item = gtk_tree_item_new_with_label (node->name());
-	    gtk_signal_connect(GTK_OBJECT(node_item),
-			       "select",
-			       (GtkSignalFunc) treeselect_node,
-			       gn);
+            gn->tree_item = node_item;
+	    gtk_signal_connect/*_while_alive*/(GTK_OBJECT(node_item),
+					   "select",
+					   (GtkSignalFunc) treeselect_node,
+					   gn/*,
+					   GTK_OBJECT(node_item)*/);
 	    gtk_widget_show(node_item);
 	    gtk_tree_append(GTK_TREE(bbw->node_tree), node_item);
 	    gtk_object_set_data(GTK_OBJECT(bbw->node_tree), node->name(), gn);
@@ -1663,7 +1787,6 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   GtkWidget *save_stc_button;
   GtkWidget *scrolledwindow5;
   GtkWidget *pic_settings_clist;
-  GtkWidget *node_settings_clist;
   GtkWidget *module_settings_clist;
 
     int x,y,width,height;
@@ -1865,12 +1988,16 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
   gtk_widget_show (viewport7);
   gtk_container_add (GTK_CONTAINER (scrolledwindow2), viewport7);
 
-  bbw->node_settings_clist = gtk_clist_new (1);
-  gtk_widget_ref (bbw->node_settings_clist);
-  gtk_object_set_data_full (GTK_OBJECT (window), "bbw->node_settings_clist", bbw->node_settings_clist,
+  bbw->node_clist = gtk_clist_new (1);
+  gtk_widget_ref (bbw->node_clist);
+  gtk_object_set_data_full (GTK_OBJECT (window), "bbw->node_clist", bbw->node_clist,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (bbw->node_settings_clist);
-  gtk_container_add (GTK_CONTAINER (viewport7), bbw->node_settings_clist);
+  gtk_widget_show (bbw->node_clist);
+  gtk_container_add (GTK_CONTAINER (viewport7), bbw->node_clist);
+  gtk_signal_connect(GTK_OBJECT(bbw->node_clist),
+		     "select_row",
+		     (GtkSignalFunc) node_clist_cb,
+		     (gpointer)bbw);
 
   hbox10 = gtk_hbox_new (FALSE, 0);
   gtk_widget_ref (hbox10);
@@ -1885,6 +2012,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (remove_stimulus_button);
   gtk_box_pack_start (GTK_BOX (hbox10), remove_stimulus_button, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(remove_stimulus_button),
+		     "clicked",
+		     (GtkSignalFunc) remove_node_stimulus,
+		     bbw);
 
   remove_node_button = gtk_button_new_with_label ("Remove node");
   gtk_widget_ref (remove_node_button);
@@ -1892,6 +2023,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (remove_node_button);
   gtk_box_pack_start (GTK_BOX (hbox10), remove_node_button, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(remove_node_button),
+		     "clicked",
+		     (GtkSignalFunc) remove_node,
+		     bbw);
 
 
 
@@ -2031,6 +2166,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
                             (GtkDestroyNotify) gtk_widget_unref);
   gtk_widget_show (remove_module_button);
   gtk_box_pack_start (GTK_BOX (hbox14), remove_module_button, FALSE, FALSE, 0);
+  gtk_signal_connect(GTK_OBJECT(remove_module_button),
+		     "clicked",
+		     (GtkSignalFunc) remove_module,
+		     bbw);
 
 
 
@@ -2074,11 +2213,11 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 			GDK_BUTTON_MOTION_MASK |
 			GDK_BUTTON_RELEASE_MASK);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"motion-notify-event",
-		     GTK_SIGNAL_FUNC(marker_cb),bbw);
+		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_press_event",
-		     GTK_SIGNAL_FUNC(marker_cb),bbw);
+		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
   gtk_signal_connect(GTK_OBJECT(bbw->layout),"button_release_event",
-		     GTK_SIGNAL_FUNC(marker_cb),bbw);
+		     GTK_SIGNAL_FUNC(pointer_cb),bbw);
 
 
 
@@ -2127,10 +2266,10 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
     gn->bbw=bbw;
     gn->node=NULL; // indicates that this is the root node.
     tree_item = gtk_tree_item_new_with_label ("nodes");
-    gtk_signal_connect(GTK_OBJECT(tree_item),
-		       "select",
-		       (GtkSignalFunc) treeselect_node,
-		       gn);
+//    gtk_signal_connect(GTK_OBJECT(tree_item),
+//		       "select",
+//		       (GtkSignalFunc) treeselect_node,
+//		       gn);
     gtk_widget_show(tree_item);
     gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
     bbw->node_tree= gtk_tree_new();
@@ -2179,7 +2318,7 @@ int CreateBreadboardWindow(GUI_Processor *gp)
 
     bbw->modules=NULL;
 
-    bbw->node_settings_clist=NULL;
+    bbw->node_clist=NULL;
 
     bbw->stimulus_settings_label=NULL;
 

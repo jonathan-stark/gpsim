@@ -344,6 +344,15 @@ Paraface::Paraface(void)
     gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
 }
 
+Paraface::~Paraface()
+{
+
+    delete input_port;
+    delete output_port;
+    if(fd!=-1)
+	close(fd);
+}
+
 int Paraface::open_parallel_port(char *device)
 {
     int mode;
