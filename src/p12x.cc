@@ -131,7 +131,7 @@ void P12C508::create(void)
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
-  tmr0.start();
+  tmr0.start(0);
 
   fsr.register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
 

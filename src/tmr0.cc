@@ -45,27 +45,34 @@ TMR0::TMR0(void)
   new_name("tmr0");
 }
 
-void TMR0::start(void)
+void TMR0::start(int restart_value, int sync=0)
 {
 
-  value = 0;
+  value = restart_value;
   if(verbose)
     cout << "TMRO::start\n";
 
-  synchronized_cycle = cpu->cycles.value;    // + 2 ???
+  synchronized_cycle = cpu->cycles.value + sync;
 
   prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
+
+  prescale_counter = prescale;
 
   last_cycle = value * prescale;
   last_cycle = synchronized_cycle - last_cycle;
 
-  future_cycle = last_cycle + 256 * prescale;
+  unsigned int fc = last_cycle + 256 * prescale;
+
+  if(future_cycle)
+    cpu->cycles.reassign_break(future_cycle, fc, this);
+  else
+    cpu->cycles.set_break(fc, this);
+
+  future_cycle = fc;
 
   if(verbose)
     cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
-  cpu->cycles.set_break(future_cycle, this);
-  if(verbose)
-    cpu->cycles.dump_breakpoints();
+
 
 }
 
@@ -98,7 +105,11 @@ void TMR0::put(unsigned int new_value)
       cout << "TMR0::put external clock...\n";
     }
 
+  start(new_value,2);
 
+  trace.register_write(address,value);
+
+#if 0
   // Note, anytime something is written to TMR0, the prescaler, if it's
   // assigned to tmr0, is also cleared. This is implicitly handled by
   // saving the value of cpu's cycle counter and associating that value
@@ -131,7 +142,7 @@ void TMR0::put(unsigned int new_value)
   cout << " future_cycle " << future_cycle << '\n';
   cout << " last_cycle " << last_cycle << '\n';
   */
-
+#endif
 }
 
 unsigned int TMR0::get_value(void)
@@ -162,7 +173,14 @@ unsigned int TMR0::get_value(void)
 	"  last_cycle = " << last_cycle <<
 	"  prescale = "  << prescale << 
 	"  calculated value = " << new_value << '\n';
+
+      // cop out. tmr0 has a bug. So rather than annoy
+      // the user with an infinite number of messages,
+      // let's just go ahead and reset the logic.
       new_value &= 0xff;
+      last_cycle = new_value*prescale;
+      last_cycle = cpu->cycles.value - last_cycle;
+      synchronized_cycle = last_cycle;
     }
 
   value = new_value;
@@ -180,20 +198,26 @@ void TMR0::new_prescale(void)
 {
   //cout << "tmr0 new_prescale\n";
 
+  int new_value = (cpu->cycles.value - last_cycle)/prescale;
+
+  if(new_value>255)
+    cout << "TMR0 bug value>255 - new_prescale\n";
+
+  prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
+  prescale_counter = prescale;
+
   if(cpu->option_reg.get_t0cs())
     {
       //cout << "external clock...\n";
 
-      prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
-      prescale_counter = prescale;
+      value = new_value;
     }
   else
     {
       // Get the current value of TMR0
-      int new_value = (cpu->cycles.value - last_cycle)/prescale;
+
       //cout << "cycles " << cpu->cycles.value  << " old prescale " << prescale;
 
-      prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
 
       //cout << " new prescale " << prescale;
 

@@ -59,7 +59,7 @@ void _14bit_processor :: create (void)
   pic_processor::create();
 
   tmr0.cpu = this;
-  tmr0.start();
+  tmr0.start(0);
 
 }
 
