@@ -73,9 +73,6 @@ void  gui_cycle_callback (gpointer callback_data)
 
 void init_link_to_gpsim(GUI_Processor *gp)
 {
-  int cycle;
-  int i,*address;
-  struct cross_reference_to_gui *cross_reference;
 
   if(verbose)
     printf("init link to gpsim\n");
@@ -113,7 +110,6 @@ void init_link_to_gpsim(GUI_Processor *gp)
 
 void link_src_to_gpsim(GUI_Processor *gp)
 {
-  int cycle;
   int i,*address,pm_size;
   struct cross_reference_to_gui *cross_reference;
 

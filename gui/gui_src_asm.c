@@ -264,7 +264,7 @@ static void pc_changed(struct cross_reference_to_gui *xref, int new_address)
 void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address)
 {
     struct sa_entry *e;
-    int id, i;
+    int id=-1, i;
     int pixel;
     float inc;
     int line;
@@ -303,7 +303,7 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 {
   int row;
 
-  int i,id;
+  int i,id=-1;
   struct sa_entry *e;
   
   assert(sbaw);
@@ -322,6 +322,12 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
       }
   }
 
+  if(id==-1)
+  {
+      puts("SourceBrowserAsm_update_line(): could not find notebook page");
+      return;
+  }
+  
   row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
   //row = ((GUI_Object*)sbaw)->gp->p->program_memory[address]->get_src_line();
 
@@ -398,7 +404,10 @@ popup_activated(GtkWidget *widget, gpointer data)
 	gtk_widget_show(search.window);
 	break;
     case MENU_FIND_PC:
-	gui_simulation_has_stopped(); // FIXME
+	pic_id = popup_sbaw->sbw.gui_obj.gp->pic_id;
+	address=gpsim_get_pc_value(pic_id);
+	SourceBrowserAsm_set_pc(popup_sbaw, address);
+//	gui_simulation_has_stopped(); // FIXME
 	break;
     case MENU_MOVE_PC:
 	line = popup_sbaw->menu_data->line;
@@ -481,6 +490,8 @@ build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
 					GTK_SENSITIVE | GTK_CAN_FOCUS);
 	    }
 	    break;
+	default:
+	    break;
 	}
 
 	gtk_widget_show(item);
@@ -499,8 +510,6 @@ static gint sigh_button_event(GtkWidget *widget,
 		       GdkEventButton *event,
 		       SourceBrowserAsm_Window *sbaw)
 {
-    int index;
-    struct sa_entry *e;
     int id;
 
     assert(event&&sbaw);
@@ -1631,8 +1640,6 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
     GdkColor text_fg;
     GdkColor text_bg;
 
-    GtkAccelGroup *accel_group;
-    
   int x,y,width,height;
   
 

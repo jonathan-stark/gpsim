@@ -86,14 +86,12 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     struct watch_entry *entry;
 
-    int i,j;
     unsigned int pic_id;
-    unsigned int address;
     int value;
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",widget,data);
+	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
 	return;
     }
     
@@ -160,9 +158,7 @@ void set_column(GtkCheckButton *button, struct _coldata *coldata)
 static void select_columns(Watch_Window *ww, GtkWidget *clist)
 {
     GtkWidget *dialog=NULL;
-    GtkWidget *label;
     GtkWidget *button;
-    GtkWidget *vbox;
     int i;
 
     dialog = gtk_dialog_new();
@@ -211,7 +207,7 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
 
   if(sheet==NULL || ww==NULL)
   {
-      printf("Warning build_menu(%x,%x)\n",sheet,ww);
+      printf("Warning build_menu(%x,%x)\n",(unsigned int)sheet,(unsigned int)ww);
       return NULL;
   }
     
@@ -274,7 +270,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 
   if(widget==NULL || event==NULL || ww==NULL)
   {
-      printf("Warning do_popup(%x,%x,%x)\n",widget,event,ww);
+      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)ww);
       return 0;
   }
   
@@ -367,7 +363,6 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
     struct watch_entry *entry;
     //    int bit;
     GUI_Processor *gp;
-    int value;
     
     ww->current_row=row;
     ww->current_column=column;
@@ -517,10 +512,10 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     if(xref == NULL)
     {
-	printf("Warning gui_watch.c: xref_update: xref=%x\n",xref);
+	printf("Warning gui_watch.c: xref_update: xref=%x\n",(unsigned int)xref);
 	if(xref->data == NULL || xref->parent_window==NULL)
 	{
-	    printf("Warning gui_watch.c: xref_update: xref->data=%x, xref->parent_window=%x\n",xref->data,xref->parent_window);
+	    printf("Warning gui_watch.c: xref_update: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
 	}
 	return;
     }
@@ -535,7 +530,6 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
 {
     char name[50], addressstring[50], typestring[30];
     char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","",""};
-    int i, value;
     int row;
     struct cross_reference_to_gui *cross_reference;
     char *regname;
@@ -587,8 +581,6 @@ int BuildWatchWindow(Watch_Window *ww)
     GtkWidget *vbox;
   GtkWidget *scrolled_window;
 //  GtkWidget *separator;
-  GtkWidget *hbox;
-  GtkWidget *button;
 
   int i;
 
@@ -657,6 +649,8 @@ int BuildWatchWindow(Watch_Window *ww)
   gtk_widget_show (window);
   
   ww->gui_obj.enabled=1;
+
+  return 0;
 }
 
 int CreateWatchWindow(GUI_Processor *gp)

@@ -1,6 +1,7 @@
 #include <gui.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <gtk/gtk.h>
 
@@ -13,9 +14,9 @@
 
 #define LABELPAD 10 // increase this so wide lines doesn't clutter labels
 
-enum _pintype {PIN_OUTPUT, PIN_INPUT, PIN_OTHER};
+static enum _pintype {PIN_OUTPUT, PIN_INPUT, PIN_OTHER};
 
-void draw_pin(GdkDrawable  *drawable,
+static void draw_pin(GdkDrawable  *drawable,
 	      GdkGC *gc,
 	      enum _pintype type,
 	      Breadboard_Window *bbw,
@@ -72,7 +73,7 @@ void draw_pin(GdkDrawable  *drawable,
 #define XOFFSET 20
 #define YOFFSET 20
 
-void update(Breadboard_Window *bbw)
+static void update(Breadboard_Window *bbw)
 {
     int dy;
     GtkWidget *widget = bbw->da;
@@ -214,7 +215,7 @@ static gint configure_event (GtkWidget *widget,
     return TRUE;
 }
 
-void expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
+static void expose(GtkWidget *widget, GdkEventExpose *event, Breadboard_Window *bbw)
 {
     if(bbw->pixmap==NULL)
     {
@@ -236,10 +237,10 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
 
     if(xref == NULL)
     {
-	printf("Warning gui_breadboard.c: xref_update: xref=%x\n",xref);
+	printf("Warning gui_breadboard.c: xref_update: xref=%x\n",(unsigned int)xref);
 	if(xref->data == NULL || xref->parent_window==NULL)
 	{
-	    printf("Warning gui_breadboard.c: xref_update: xref->data=%x, xref->parent_window=%x\n",xref->data,xref->parent_window);
+	    printf("Warning gui_breadboard.c: xref_update: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
 	}
 	return;
     }
@@ -257,7 +258,7 @@ static int delete_event(GtkWidget *widget,
 }
 
 // calculate which pin is closest to (x,y)
-int get_pin(Breadboard_Window *bbw, int x, int y)
+static int get_pin(Breadboard_Window *bbw, int x, int y)
 {
     int pin;
 
@@ -282,7 +283,7 @@ int get_pin(Breadboard_Window *bbw, int x, int y)
     return pin;
 }
 
-int hit_state(Breadboard_Window *bbw, int x, int y)
+static int hit_state(Breadboard_Window *bbw, int x, int y)
 {
     int center_offset;
     
@@ -479,17 +480,14 @@ int BuildBreadboardWindow(Breadboard_Window *bbw)
 
   if(bbw->processor)
       BreadboardWindow_new_processor(bbw, ((GUI_Object*)bbw)->gp);
+
+  return 0;
 }
 
 
 int CreateBreadboardWindow(GUI_Processor *gp)
 {
     Breadboard_Window *bbw;
-
-    int err;
-
-    GtkWidget *window;
-    GtkWidget *da;
 
     bbw = (struct _Breadboard_Window*)malloc(sizeof(struct _Breadboard_Window));
 

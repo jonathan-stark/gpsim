@@ -17,13 +17,6 @@
 
 #include "gui.h"
 
-
-#include "../xpms/center.xpm"
-#include "../xpms/font.xpm"
-#include "../xpms/left.xpm"
-#include "../xpms/paint.xpm"
-#include "../xpms/right.xpm"
-
 #define DEFAULT_PRECISION 3
 #define DEFAULT_SPACE 8
 
@@ -169,7 +162,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
     if(widget==NULL || data==NULL)
     {
-	printf("Warning popup_activated(%x,%x)\n",widget,data);
+	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
 	return;
     }
     
@@ -251,7 +244,7 @@ build_menu(GtkWidget *sheet, Register_Window *rw)
 
   if(sheet==NULL || rw==NULL)
   {
-      printf("Warning build_menu(%x,%x)\n",sheet,rw);
+      printf("Warning build_menu(%x,%x)\n",(unsigned int)sheet,(unsigned int)rw);
       return NULL;
   }
     
@@ -301,7 +294,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 
   if(widget==NULL || event==NULL || rw==NULL)
   {
-      printf("Warning do_popup(%x,%x,%x)\n",widget,event,rw);
+      printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)rw);
       return 0;
   }
   
@@ -340,7 +333,7 @@ static unsigned long get_number_in_string(char *number_string)
   
   if(number_string==NULL)
   {
-      printf("Warning get_number_in_string(%x)\n",number_string);
+      printf("Warning get_number_in_string(%x)\n",(unsigned int)number_string);
       errno = EINVAL;
       return -1;
   }
@@ -368,7 +361,7 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
 {
   GtkSheet *sheet;
   gchar *text;
-  int justification,n;
+  int justification,n=0;
 
   GUI_Processor *gp;
   
@@ -378,7 +371,7 @@ parse_numbers(GtkWidget *widget, int row, int col, Register_Window *rw)
      row>sheet->maxrow || row<0 ||
      col>sheet->maxcol || col<0 || rw==NULL)
   {
-      printf("Warning parse_numbers(%x,%x,%x,%x)\n",widget,row,col,rw);
+      printf("Warning parse_numbers(%x,%x,%x,%x)\n",(unsigned int)widget,row,col,(unsigned int)rw);
       return;
   }
 
@@ -459,7 +452,7 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
     
   if(widget==NULL || old_range==NULL || new_range==NULL || rw==NULL)
   {
-      printf("Warning resize_handler(%x,%x,%x,%x)\n",widget,old_range,new_range,rw);
+      printf("Warning resize_handler(%x,%x,%x,%x)\n",(unsigned int)widget,(unsigned int)old_range,(unsigned int)new_range,(unsigned int)rw);
       return;
   }
 
@@ -491,7 +484,7 @@ move_handler(GtkWidget *widget, GtkSheetRange *old_range,
 
   if(widget==NULL || old_range==NULL || new_range==NULL || rw==NULL)
   {
-      printf("Warning move_handler(%x,%x,%x,%x)\n",widget,old_range,new_range,rw);
+      printf("Warning move_handler(%x,%x,%x,%x)\n",(unsigned int)widget,(unsigned int)old_range,(unsigned int)new_range,(unsigned int)rw);
       return;
   }
     cti = new_range->coli - new_range->col0 + 1;
@@ -523,7 +516,7 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
  
  if(widget==NULL|| rw==NULL)
   {
-      printf("Warning show_sheet_entry(%x,%x)\n",widget,rw);
+      printf("Warning show_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
       return;
   }
 
@@ -559,7 +552,7 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 
   if(widget==NULL|| rw==NULL)
   {
-      printf("Warning activate_sheet_entry(%x,%x)\n",widget,rw);
+      printf("Warning activate_sheet_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
       return;
   }
   
@@ -585,7 +578,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 
   if(widget==NULL|| rw==NULL)
   {
-      printf("Warning show_entry(%x,%x)\n",widget,rw);
+      printf("Warning show_entry(%x,%x)\n",(unsigned int)widget,(unsigned int)rw);
       return;
   }
   
@@ -620,7 +613,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
   if(widget==NULL || row>sheet->maxrow || row<0||
      column>sheet->maxcol || column<0 || rw==NULL)
   {
-      printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",widget,row,column,rw);
+      printf("Warning activate_sheet_cell(%x,%x,%x,%x)\n",(unsigned int)widget,row,column,(unsigned int)rw);
       return 0;
   }
   
@@ -679,13 +672,13 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
   
   return TRUE;
 }
-
+/*
 static void
 do_quit_app(GtkWidget *widget) 
 {
 	exit_gpsim();
 }
-
+*/
 void RegWindow_select_register(Register_Window *rw, int regnumber)
 {
   GtkSheet *sheet;
@@ -698,7 +691,7 @@ void RegWindow_select_register(Register_Window *rw, int regnumber)
     
   if(rw == NULL || regnumber > MAX_REGISTERS || regnumber<0)
   {
-      printf("Warning RegWindow_select_register(%x,%x)\n",rw,regnumber);
+      printf("Warning RegWindow_select_register(%x,%x)\n",(unsigned int)rw,regnumber);
       return;
   }
   
@@ -728,8 +721,6 @@ void RegWindow_select_register(Register_Window *rw, int regnumber)
 	else
 	    strncpy(cell,n,100);
     }
-  else
-      sprintf(cell,"ehh", regnumber);
 
   gtk_label_set(GTK_LABEL(rw->location), cell);
 
@@ -759,7 +750,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   
   if(main_vbox == NULL || rw==NULL)
   {
-      printf("Warning build_entry_bar(%x,%x)\n",main_vbox,rw);
+      printf("Warning build_entry_bar(%x,%x)\n",(unsigned int)main_vbox,(unsigned int)rw);
       return;
   }
   
@@ -783,12 +774,12 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 
 static void update_ascii(Register_Window *rw, gint row)
 {
-  gint i,reg_number;
+  gint i;
   gchar name[32];
 
   if(rw == NULL || row<0 || row > rw->register_sheet->maxrow)
   {
-      printf("Warning update_ascii(%x,%x)\n",rw,row);
+      printf("Warning update_ascii(%x,%x)\n",(unsigned int)rw,row);
       return;
   }
   
@@ -822,14 +813,14 @@ static gboolean update_register_cell(Register_Window *rw, unsigned int reg_numbe
   
   if(rw == NULL || reg_number<0 || reg_number>MAX_REGISTERS)
   {
-      printf("Warning update_register_cell(%x,%x)\n",rw,reg_number);
+      printf("Warning update_register_cell(%x,%x)\n",(unsigned int)rw,reg_number);
       return 0;
   }
   
   pic_id = rw->gui_obj.gp->pic_id;
   
   if((reg_number >= MAX_REGISTERS) || (reg_number >= gpsim_get_register_memory_size(pic_id,rw->type)))
-      return;
+      return 0;
 
   gp=((GUI_Object*)rw)->gp;
 
@@ -927,7 +918,7 @@ void RegWindow_update(Register_Window *rw)
     
   if(rw == NULL)
   {
-      printf("Warning RegWindow_update(%x)\n",rw);
+      printf("Warning RegWindow_update(%x)\n",(unsigned int)rw);
       return;
   }
 
@@ -976,15 +967,14 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
 {
   Register *reg;
   Register_Window *rw;
-  char name[16];
   int address;
 
   if(xref == NULL)
   {
-      printf("Warning update_register_cell: xref=%x\n",xref);
+      printf("Warning update_register_cell: xref=%x\n",(unsigned int)xref);
       if(xref->data == NULL || xref->parent_window==NULL)
       {
-	  printf("Warning update_register_cell: xref->data=%x, xref->parent_window=%x\n",xref->data,xref->parent_window);
+	  printf("Warning update_register_cell: xref->data=%x, xref->parent_window=%x\n",(unsigned int)xref->data,(unsigned int)xref->parent_window);
       }
       return;
   }
@@ -1015,7 +1005,7 @@ static void xref_remove_cell(struct cross_reference_to_gui *xref)
     printf("%s() doesn't do anything\n", __FUNCTION__);
 
 }
-static int change_view (struct _gui_object *_this, int view_state)
+static void change_view (struct _gui_object *_this, int view_state)
 {
     Register_Window *rw;
 
@@ -1027,11 +1017,13 @@ static int change_view (struct _gui_object *_this, int view_state)
         assert(0);
 
     if(!_this->gp->regwin_eeprom->allow_change_view)
-	return 0;
+	return;
 
     SourceBrowser_change_view(_this,view_state);
     
     RegWindow_update(rw);
+
+    return;
 }
 
 void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
@@ -1039,9 +1031,6 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 
 
 #define NAME_SIZE 32
-    gchar name[NAME_SIZE];
-    gchar *n;
-
     gint i,j,reg_number, border_mask, border_width;
     GtkSheet *sheet;
     struct cross_reference_to_gui *cross_reference;
@@ -1182,17 +1171,6 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 
 }
 
-static int
-RegisterWindow_close(GtkWidget *widget,
-		    Register_Window *rw)
-{
-
-    ((GUI_Object *)rw)->change_view((GUI_Object*)rw,VIEW_HIDE);
-
-  return(TRUE);
-
-}
-
 static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
@@ -1201,8 +1179,6 @@ static int delete_event(GtkWidget *widget,
     return TRUE;
 }
 
-static char *symbol_titles[3]={"Name","Type","Value"};
-
 void
 BuildRegisterWindow(Register_Window *rw)
 {
@@ -1210,9 +1186,6 @@ BuildRegisterWindow(Register_Window *rw)
     GtkWidget *register_sheet;
   GtkWidget *main_vbox;
   GtkWidget *scrolled_window;
-  GtkWidget *separator;
-  GtkWidget *hbox;
-  GtkWidget *button;
 
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
@@ -1225,14 +1198,12 @@ BuildRegisterWindow(Register_Window *rw)
 	gint i;
 	gint column_width,char_width;
 
-	GdkColormap *colormap = gdk_colormap_get_system();
-
   int x,y,width,height;
   
 	
   if(rw==NULL)
   {
-      printf("Warning build_register_viewer(%x)\n",rw);
+      printf("Warning build_register_viewer(%x)\n",(unsigned int)rw);
       return;
   }
 

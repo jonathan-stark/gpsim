@@ -103,7 +103,7 @@ struct _gui_object {
 #define VIEW_HIDE 0
 #define VIEW_SHOW 1
 #define VIEW_TOGGLE 2
-  int (* change_view) (struct _gui_object *_this, int view_state);
+  void (* change_view) (struct _gui_object *_this, int view_state);
 };
 
 typedef struct _gui_object GUI_Object;
@@ -420,11 +420,15 @@ extern GtkStyle *current_line_number_style;
 extern GtkStyle *breakpoint_line_number_style;
 
 
+void exit_gpsim(void);
+
+
 // gui_symbols.c
 void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber);
 void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name);
 void SymbolWindow_new_symbols(Symbol_Window *sw, GUI_Processor *gp);
 int CreateSymbolWindow(GUI_Processor *gp);
+int BuildSymbolWindow(Symbol_Window *sw);
 
 // gui_statusbar.c
 void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw);
@@ -438,6 +442,7 @@ void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address);
 void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
 void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
 int CreateSourceBrowserOpcodeWindow(GUI_Processor *gp);
+void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow);
 
 // gui_src_asm.c
 int CreateSourceBrowserAsmWindow(GUI_Processor *gp);
@@ -446,13 +451,15 @@ void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor 
 void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address);
 void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address);
 void SourceBrowserAsm_new_processor(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
+void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address);
+void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw);
 
 // gui_src.c
 void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address);
 void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value);
 void SourceBrowser_update(SourceBrowser_Window *sbw);
-GtkWidget *CreateSBW(SourceBrowser_Window *sbw);
-int SourceBrowser_change_view (struct _gui_object *_this, int view_state);
+void CreateSBW(SourceBrowser_Window *sbw);
+void SourceBrowser_change_view (struct _gui_object *_this, int view_state);
 
 // gui_regwin.c
 int gui_get_value(char *prompt);
@@ -461,6 +468,8 @@ void RegWindow_select_symbol_name(Register_Window *rw, char *name);
 void RegWindow_select_symbol_regnumber(Register_Window *rw, int n);
 void RegWindow_select_register(Register_Window *rw, int regnumber);
 int CreateRegisterWindow(GUI_Processor *gp, REGISTER_TYPE type);
+void BuildRegisterWindow(Register_Window *rw);
+void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp);
 
 // gui_processor.c
 extern GUI_Processor *gp;
@@ -476,5 +485,14 @@ gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Obj
 // gui_watch.c
 void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address);
 int CreateWatchWindow(GUI_Processor *gp);
+int BuildWatchWindow(Watch_Window *ww);
+void WatchWindow_update(Watch_Window *ww);
+
+// gui_breadboard.c
+void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp);
+int BuildBreadboardWindow(Breadboard_Window *bbw);
+int CreateBreadboardWindow(GUI_Processor *gp);
+
 
 #endif // __GUI_H__
+
