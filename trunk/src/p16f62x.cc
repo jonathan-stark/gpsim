@@ -52,6 +52,9 @@ VRCON::VRCON(void)
 
 void P16F62x::create_iopin_map(void)
 {
+  package = new Package(18);
+  if(!package)
+    return;
 
   // ---- This is probably going to be moved:
   porta = new PORTA_62x;
@@ -78,27 +81,25 @@ void P16F62x::create_iopin_map(void)
 
   // Now Create the package and place the I/O pins
 
-  create_pkg(18);
+  package->assign_pin(17, new IO_bi_directional(porta, 0));
+  package->assign_pin(18, new IO_bi_directional(porta, 1));
+  package->assign_pin(1, new IO_bi_directional(porta, 2));
+  package->assign_pin(2, new IO_bi_directional(porta, 3));
+  package->assign_pin(3, new IO_open_collector(porta, 4));
+  package->assign_pin(4, new IO_input(porta, 5));
+  package->assign_pin(15, new IO_bi_directional(porta, 6));  // Assume RC mode
+  package->assign_pin(16, new IO_bi_directional(porta, 7));  //   "        "
 
-  assign_pin(17, new IO_bi_directional(porta, 0));
-  assign_pin(18, new IO_bi_directional(porta, 1));
-  assign_pin(1, new IO_bi_directional(porta, 2));
-  assign_pin(2, new IO_bi_directional(porta, 3));
-  assign_pin(3, new IO_open_collector(porta, 4));
-  assign_pin(4, new IO_input(porta, 5));
-  assign_pin(15, new IO_bi_directional(porta, 6));  // Assume RC mode
-  assign_pin(16, new IO_bi_directional(porta, 7));  //   "        "
-
-  assign_pin(5, NULL);  // Vss
-  assign_pin(6, new IO_bi_directional_pu(portb, 0));
-  assign_pin(7, new IO_bi_directional_pu(portb, 1));
-  assign_pin(8, new IO_bi_directional_pu(portb, 2));
-  assign_pin(9, new IO_bi_directional_pu(portb, 3));
-  assign_pin(10, new IO_bi_directional_pu(portb, 4));
-  assign_pin(11, new IO_bi_directional_pu(portb, 5));
-  assign_pin(12, new IO_bi_directional_pu(portb, 6));
-  assign_pin(13, new IO_bi_directional_pu(portb, 7));
-  assign_pin(14, NULL);  // Vdd
+  package->assign_pin(5, NULL);  // Vss
+  package->assign_pin(6, new IO_bi_directional_pu(portb, 0));
+  package->assign_pin(7, new IO_bi_directional_pu(portb, 1));
+  package->assign_pin(8, new IO_bi_directional_pu(portb, 2));
+  package->assign_pin(9, new IO_bi_directional_pu(portb, 3));
+  package->assign_pin(10, new IO_bi_directional_pu(portb, 4));
+  package->assign_pin(11, new IO_bi_directional_pu(portb, 5));
+  package->assign_pin(12, new IO_bi_directional_pu(portb, 6));
+  package->assign_pin(13, new IO_bi_directional_pu(portb, 7));
+  package->assign_pin(14, NULL);  // Vdd
 
 }
 

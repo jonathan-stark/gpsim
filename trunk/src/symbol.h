@@ -47,7 +47,8 @@ void display_symbol_file_error(int);
   SYMBOL_ADDRESS
 };*/
 
-
+class stimulus;
+class Stimulus_Node;
 
 class symbol_type
 {
@@ -133,18 +134,7 @@ public:
 
   Stimulus_Node *stimulus_node;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_STIMULUS_NODE;};
-  virtual void print(void) {
-    if(stimulus_node) {
-      cout << "node: " << stimulus_node->name() << '\n';
-      stimulus *s = stimulus_node->stimuli;
-      while(s) {
-	cout << '\t' << s->name() << '\n';
-	s = s->next;
-      }
-    } else
-      cout << "has no attached stimuli\n";
-
-  };
+  virtual void print(void);
 
 };
 
@@ -154,12 +144,7 @@ public:
 
   Register *reg;
   virtual SYMBOL_TYPE isa(void) { return SYMBOL_REGISTER;};
-  virtual void print(void) {
-    if(reg)
-    {
-      cout << *name() << hex << " [0x" << reg->address << "] = 0x" << reg->cpu->registers[reg->address]->get_value() <<'\n';
-    }
-  }
+  virtual void print(void);
   virtual int get_value(void) {
     if(reg)
       return reg->address;

@@ -25,7 +25,8 @@ Boston, MA 02111-1307, USA.  */
 #include "assert.h"
 #include "pic-registers.h"
 #include "pie.h"
-#include "intcon.h"
+
+class INTCON;
 
 //---------------------------------------------------------
 // PIR Peripheral Interrupt register base class for PIR1 & PIR2
@@ -38,7 +39,14 @@ public:
   int valid_bits;
  
   virtual void set_ccpif(void){}
-  virtual bool interrupt_status(void){ return true;}
+
+  virtual bool interrupt_status(void)
+    {
+      if( value & valid_bits & pie->value)
+	return true;
+
+      return false;
+    }
 
   virtual void put(unsigned int new_value);
 
@@ -117,24 +125,15 @@ enum
    }
  void clear_rcif(void);
  
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
 
-    }
-
-  PIR1v1(void)
-    {
-      // Even though TXIF is a valid bit, it can't be written by the PIC
-      // source code.  Its state reflects whether the usart txreg is full
-      // or not.
-      valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
-      break_point = 0;
-      new_name("pir1");
-    }
+ PIR1v1(void)
+   {
+     // Even though TXIF is a valid bit, it can't be written by the PIC
+     // source code.  Its state reflects whether the usart txreg is full
+     // or not.
+     valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | CMIF | EEIF;
+     break_point = 0;
+   }
 };
 
 
@@ -211,15 +210,6 @@ public:
     }
   void clear_rcif(void);
  
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
   PIR1v2(void)
     {
       // Even though TXIF is a valid bit, it can't be written by the PIC
@@ -227,7 +217,6 @@ public:
       // or not.
       valid_bits = TMR1IF | TMR2IF | CCP1IF | SSPIF | RCIF | ADIF | PSPIF;
       break_point = 0;
-      new_name("pir1");
     }
 };
 
@@ -252,21 +241,10 @@ enum
       put(get() | CCP2IF);
     }
 
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
-
   PIR2v1(void)
     {
       valid_bits = CCP2IF;
       break_point = 0;
-      new_name("pir2");
     }
 };
 
@@ -320,21 +298,10 @@ enum
       put(get() | CMIF);
     }
 
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
-
   PIR2v2(void)
     {
       valid_bits = ECCP1IF | TMR3IF | LVDIF | BCLIF | EEIF | CMIF;
       break_point = 0;
-      new_name("pir2");
     }
 };
 
@@ -401,22 +368,11 @@ enum
       put(get() | IRXIF);
     }
 
-  bool interrupt_status(void)
-    {
-      if( value & valid_bits & pie->value)
-	return(1);
-      else
-	return(0);
-
-    }
-
-
   PIR3v2(void)
     {
       valid_bits = RXB0IF | RXB1IF | TXB0IF | TXB1IF | TXB2IF | ERRIF |
                    WAKIF | IRXIF;
       break_point = 0;
-      new_name("pir3");
     }
 };
 

@@ -30,10 +30,13 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <string>
 
-#include "../config.h"
+
+#include "packages.h"
+#include "stimuli.h"
 #include "symbol.h"
 
 #include "p16x6x.h"
+#include "intcon.h"
 
 
 void P16C61::create_sfr_map(void)
@@ -125,8 +128,12 @@ P16C61::P16C61(void)
 //
 //
 
-void _14bit_28pins::create_iopin_map(void)
+void P16C62::create_iopin_map(void)
 {
+  package = new Package(28);
+  if(!package)
+    return;
+
 
   porta = new PORTA;
   portb = new PORTB;
@@ -158,42 +165,41 @@ void _14bit_28pins::create_iopin_map(void)
 
   // Now Create the package and place the I/O pins
 
-  create_pkg(28);
 
-  assign_pin(1, NULL);
+  package->assign_pin(1, NULL);
 
-  assign_pin(2, new IO_bi_directional(porta, 0));
-  assign_pin(3, new IO_bi_directional(porta, 1));
-  assign_pin(4, new IO_bi_directional(porta, 2));
-  assign_pin(5, new IO_bi_directional(porta, 3));
-  assign_pin(6, new IO_open_collector(porta, 4));
-  assign_pin(7, new IO_bi_directional(porta, 5));
+  package->assign_pin(2, new IO_bi_directional(porta, 0));
+  package->assign_pin(3, new IO_bi_directional(porta, 1));
+  package->assign_pin(4, new IO_bi_directional(porta, 2));
+  package->assign_pin(5, new IO_bi_directional(porta, 3));
+  package->assign_pin(6, new IO_open_collector(porta, 4));
+  package->assign_pin(7, new IO_bi_directional(porta, 5));
 
-  assign_pin(8, NULL); //VSS
-  assign_pin(9, NULL);  // OSC
-  assign_pin(10, NULL); // OSC
+  package->assign_pin(8, NULL); //VSS
+  package->assign_pin(9, NULL);  // OSC
+  package->assign_pin(10, NULL); // OSC
 
-  assign_pin(11, new IO_bi_directional(portc, 0));
-  assign_pin(12, new IO_bi_directional(portc, 1));
-  assign_pin(13, new IO_bi_directional(portc, 2));
-  assign_pin(14, new IO_bi_directional(portc, 3));
-  assign_pin(15, new IO_bi_directional(portc, 4));
-  assign_pin(16, new IO_bi_directional(portc, 5));
-  assign_pin(17, new IO_bi_directional(portc, 6));
-  assign_pin(18, new IO_bi_directional(portc, 7));
+  package->assign_pin(11, new IO_bi_directional(portc, 0));
+  package->assign_pin(12, new IO_bi_directional(portc, 1));
+  package->assign_pin(13, new IO_bi_directional(portc, 2));
+  package->assign_pin(14, new IO_bi_directional(portc, 3));
+  package->assign_pin(15, new IO_bi_directional(portc, 4));
+  package->assign_pin(16, new IO_bi_directional(portc, 5));
+  package->assign_pin(17, new IO_bi_directional(portc, 6));
+  package->assign_pin(18, new IO_bi_directional(portc, 7));
 
 
-  assign_pin(19, NULL); //VSS
-  assign_pin(20, NULL); //VDD
+  package->assign_pin(19, NULL); //VSS
+  package->assign_pin(20, NULL); //VDD
 
-  assign_pin(21, new IO_bi_directional_pu(portb, 0));
-  assign_pin(22, new IO_bi_directional_pu(portb, 1));
-  assign_pin(23, new IO_bi_directional_pu(portb, 2));
-  assign_pin(24, new IO_bi_directional_pu(portb, 3));
-  assign_pin(25, new IO_bi_directional_pu(portb, 4));
-  assign_pin(26, new IO_bi_directional_pu(portb, 5));
-  assign_pin(27, new IO_bi_directional_pu(portb, 6));
-  assign_pin(28, new IO_bi_directional_pu(portb, 7));
+  package->assign_pin(21, new IO_bi_directional_pu(portb, 0));
+  package->assign_pin(22, new IO_bi_directional_pu(portb, 1));
+  package->assign_pin(23, new IO_bi_directional_pu(portb, 2));
+  package->assign_pin(24, new IO_bi_directional_pu(portb, 3));
+  package->assign_pin(25, new IO_bi_directional_pu(portb, 4));
+  package->assign_pin(26, new IO_bi_directional_pu(portb, 5));
+  package->assign_pin(27, new IO_bi_directional_pu(portb, 6));
+  package->assign_pin(28, new IO_bi_directional_pu(portb, 7));
 
 }
 
@@ -201,8 +207,12 @@ void _14bit_28pins::create_iopin_map(void)
 //
 //
 
-void _14bit_40pins::create_iopin_map(void)
+void P16C64::create_iopin_map(void)
 {
+
+  package = new Package(40);
+  if(!package)
+    return;
 
   porta = new PORTA;
   portb = new PORTB;
@@ -246,58 +256,55 @@ void _14bit_40pins::create_iopin_map(void)
 
   // Now Create the package and place the I/O pins
 
-  create_pkg(40);
+  package->assign_pin(1, NULL);
 
-  assign_pin(1, NULL);
+  package->assign_pin(2, new IO_bi_directional(porta, 0));
+  package->assign_pin(3, new IO_bi_directional(porta, 1));
+  package->assign_pin(4, new IO_bi_directional(porta, 2));
+  package->assign_pin(5, new IO_bi_directional(porta, 3));
+  package->assign_pin(6, new IO_open_collector(porta, 4));
+  package->assign_pin(7, new IO_bi_directional(porta, 5));
 
-  assign_pin(2, new IO_bi_directional(porta, 0));
-  assign_pin(3, new IO_bi_directional(porta, 1));
-  assign_pin(4, new IO_bi_directional(porta, 2));
-  assign_pin(5, new IO_bi_directional(porta, 3));
-  assign_pin(6, new IO_open_collector(porta, 4));
-  assign_pin(7, new IO_bi_directional(porta, 5));
-
-  assign_pin(8, new IO_bi_directional(porte, 0));
-  assign_pin(9, new IO_bi_directional(porte, 1));
-  assign_pin(10, new IO_bi_directional(porte, 2));
+  package->assign_pin(8, new IO_bi_directional(porte, 0));
+  package->assign_pin(9, new IO_bi_directional(porte, 1));
+  package->assign_pin(10, new IO_bi_directional(porte, 2));
 
 
-  assign_pin(11, NULL);
-  assign_pin(12, NULL);
-  assign_pin(13, NULL);
-  assign_pin(14, NULL);
+  package->assign_pin(11, NULL);
+  package->assign_pin(12, NULL);
+  package->assign_pin(13, NULL);
+  package->assign_pin(14, NULL);
 
-  cout << "Creating portc iopin\n";
-  assign_pin(15, new IO_bi_directional(portc, 0));
-  assign_pin(16, new IO_bi_directional(portc, 1));
-  assign_pin(17, new IO_bi_directional(portc, 2));
-  assign_pin(18, new IO_bi_directional(portc, 3));
-  assign_pin(23, new IO_bi_directional(portc, 4));
-  assign_pin(24, new IO_bi_directional(portc, 5));
-  assign_pin(25, new IO_bi_directional(portc, 6));
-  assign_pin(26, new IO_bi_directional(portc, 7));
+  package->assign_pin(15, new IO_bi_directional(portc, 0));
+  package->assign_pin(16, new IO_bi_directional(portc, 1));
+  package->assign_pin(17, new IO_bi_directional(portc, 2));
+  package->assign_pin(18, new IO_bi_directional(portc, 3));
+  package->assign_pin(23, new IO_bi_directional(portc, 4));
+  package->assign_pin(24, new IO_bi_directional(portc, 5));
+  package->assign_pin(25, new IO_bi_directional(portc, 6));
+  package->assign_pin(26, new IO_bi_directional(portc, 7));
 
 
-  assign_pin(19, new IO_bi_directional(portd, 0));
-  assign_pin(20, new IO_bi_directional(portd, 1));
-  assign_pin(21, new IO_bi_directional(portd, 2));
-  assign_pin(22, new IO_bi_directional(portd, 3));
-  assign_pin(27, new IO_bi_directional(portd, 4));
-  assign_pin(28, new IO_bi_directional(portd, 5));
-  assign_pin(29, new IO_bi_directional(portd, 6));
-  assign_pin(30, new IO_bi_directional(portd, 7));
+  package->assign_pin(19, new IO_bi_directional(portd, 0));
+  package->assign_pin(20, new IO_bi_directional(portd, 1));
+  package->assign_pin(21, new IO_bi_directional(portd, 2));
+  package->assign_pin(22, new IO_bi_directional(portd, 3));
+  package->assign_pin(27, new IO_bi_directional(portd, 4));
+  package->assign_pin(28, new IO_bi_directional(portd, 5));
+  package->assign_pin(29, new IO_bi_directional(portd, 6));
+  package->assign_pin(30, new IO_bi_directional(portd, 7));
 
-  assign_pin(31, NULL);
-  assign_pin(32, NULL);
+  package->assign_pin(31, NULL);
+  package->assign_pin(32, NULL);
 
-  assign_pin(33, new IO_bi_directional_pu(portb, 0));
-  assign_pin(34, new IO_bi_directional_pu(portb, 1));
-  assign_pin(35, new IO_bi_directional_pu(portb, 2));
-  assign_pin(36, new IO_bi_directional_pu(portb, 3));
-  assign_pin(37, new IO_bi_directional_pu(portb, 4));
-  assign_pin(38, new IO_bi_directional_pu(portb, 5));
-  assign_pin(39, new IO_bi_directional_pu(portb, 6));
-  assign_pin(40, new IO_bi_directional_pu(portb, 7));
+  package->assign_pin(33, new IO_bi_directional_pu(portb, 0));
+  package->assign_pin(34, new IO_bi_directional_pu(portb, 1));
+  package->assign_pin(35, new IO_bi_directional_pu(portb, 2));
+  package->assign_pin(36, new IO_bi_directional_pu(portb, 3));
+  package->assign_pin(37, new IO_bi_directional_pu(portb, 4));
+  package->assign_pin(38, new IO_bi_directional_pu(portb, 5));
+  package->assign_pin(39, new IO_bi_directional_pu(portb, 6));
+  package->assign_pin(40, new IO_bi_directional_pu(portb, 7));
 
 }
 

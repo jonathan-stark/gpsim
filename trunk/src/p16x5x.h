@@ -29,36 +29,23 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __P16X5X_H__
 #define __P16X5X_H__
 
+#include "packages.h"
+#include "stimuli.h"
 #include "12bit-processors.h"
-#include "pic-packages.h"
 
 
 
-
-class _12bit_18pins : public _18pins
+class P16C54 : public  _12bit_processor
 {
 public:
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
 
-  void create_iopin_map(void);
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
 
-};
-
-
-class _12bit_28pins : public _28pins
-{
-public:
-
-  void create_iopin_map(void);
-
-};
-
-
-
-class P16C54 : public  _12bit_processor, public _12bit_18pins
-{
-public:
-
-  //  const int PROGRAM_MEMORY_SIZE = 0x400;
+  PIC_IOPORT   *portc;
+  IOPORT_TRIS  trisc;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C54_;};
   virtual void create_symbols(void);
@@ -76,11 +63,8 @@ public:
 
   P16C54(void);
   void create(void);
+  virtual void create_iopin_map(void);
 
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
   virtual unsigned int get_fsr_value ( unsigned int load_value )
@@ -90,11 +74,19 @@ public:
 
 };
 
-class P16C55 : public  _12bit_processor, public _12bit_28pins
+class P16C55 : public  _12bit_processor
 {
 public:
 
-  //  const int PROGRAM_MEMORY_SIZE = 0x400;
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
+
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
+
+  PIC_IOPORT   *portc;
+  IOPORT_TRIS  trisc;
+
 
   virtual PROCESSOR_TYPE isa(void){return _P16C55_;};
   virtual void create_symbols(void);
@@ -112,11 +104,8 @@ public:
 
   P16C55(void);
   void create(void);
+  virtual void create_iopin_map(void);
 
-  virtual int get_pin_count(void){return Package::get_pin_count();};
-  virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-  virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
 

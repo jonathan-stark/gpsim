@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "trace.h"
 #include "pir.h"
+#include "intcon.h"
 
 void PIR::put(unsigned int new_value)
 {

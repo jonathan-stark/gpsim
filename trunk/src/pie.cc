@@ -1,10 +1,11 @@
 #include <glib.h>	// for guint64
 #include <iostream>		// for cout used in breakpoints.h
 using namespace std;
-#include "breakpoints.h"
+//#include "breakpoints.h"
 #include "trace.h"
 #include "gpsim_classes.h"	// for RESET_TYPE
 
+#include "intcon.h"
 #include "pie.h"
 #include "pir.h"
 
