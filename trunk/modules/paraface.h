@@ -22,10 +22,10 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PARAFACE_H__
 #define __PARAFACE_H__
 
-#include <gpsim/stimuli.h>
-#include <gpsim/ioports.h>
-#include <gpsim/symbol.h>
-#include <gpsim/trace.h>
+#include <../src/stimuli.h>
+#include <../src/ioports.h>
+#include <../src/symbol.h>
+#include <../src/trace.h>
 
 #include <gtk/gtk.h>
 
