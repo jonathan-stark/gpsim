@@ -398,11 +398,123 @@ void Stimulus_Node::update(guint64 current_time)
   update();
 }
 
+//------------------------------------------------------------------------
+// refresh() - compute the Thevenin voltage and Thevenin impedance
+//
+void Stimulus_Node::refresh()
+{
+  if(stimuli) {
+
+    stimulus *sptr = stimuli;
+
+    initial_voltage = get_nodeVoltage();
+
+    switch (nStimuli) {
+
+    case 0:
+      // hmm, strange nStimuli is 0, but the stimuli pointer is non null.
+      break;
+
+    case 1:
+      // Only one stimulus is attached.
+      voltage = sptr->get_Vth();
+      Zth =  sptr->get_Zth();
+      break;
+
+    case 2:
+      // 2 stimuli are attached to the node. This is the typical case
+      // and we'll optimize for it.
+      {
+	stimulus *sptr2 = sptr ? sptr->next : 0;
+	if(!sptr2)
+	  break;     // error, nStimuli is two, but there aren't two stimuli
+
+	double Z1 = sptr->get_Zth();
+	double Z2 = sptr2->get_Zth();
+	double resistance = Z1 + Z2;
+	finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
+	Zth = Z1*Z2/resistance;
+	Cth = sptr->get_Cth() + sptr2->get_Cth();
+      }
+      break;
+
+    default:
+      {
+	/*
+	  There are 3 or more stimuli connected to this node. Recall
+	  that these are all in parallel. The Thevenin voltage and 
+	  impedance for this is:
+
+	  Thevenin impedance:
+	  Zt = 1 / sum(1/Zi)
+
+	  Thevenin voltage:
+
+	  Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
+	  = sum( Vi * Zt /Zi)
+	  = Zt * sum(Vi/Zi)
+	*/
+
+	double conductance=0.0;	// Thevenin conductance.
+	Cth=0;
+	finalVoltage=0.0; 
+
+	//cout << "multi-node summing:\n";
+	while(sptr) {
+	  /*
+	  cout << " N: " <<sptr->name() 
+	  << " V=" << sptr->get_Vth() 
+	  << " Z=" << sptr->get_Zth()
+	  << " C=" << sptr->get_Cth() << endl; 
+	  */
+	  double Cs = 1 / sptr->get_Zth();
+	  finalVoltage += sptr->get_Vth() * Cs;
+	  conductance += Cs;
+	  Cth += sptr->get_Cth();
+	  sptr = sptr->next;
+	}
+	Zth = 1.0/conductance;
+	finalVoltage *= Zth;
+      }
+    }
+
+  }
+
+}
 void Stimulus_Node::update()
 {
 
-  //cout << "getting state of Node " << name() << " " << nStimuli << " stim are attached\n";
+  if(stimuli) {
 
+    refresh();
+
+    delta_voltage = 0.0;
+    current_time_constant = Cth * Zth;
+
+    if(current_time_constant < min_time_constant) {
+      voltage = finalVoltage;
+
+      stimulus *sptr = stimuli;
+
+      while(sptr) {
+	sptr->set_nodeVoltage(voltage);
+	sptr = sptr->next;
+      }
+    } else {
+
+      // Capacitive loading must be relatively large.
+      delta_voltage = finalVoltage - initial_voltage;
+
+      if(bSettling) 
+	get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
+      else
+	get_cycles().set_break(get_cycles().value +1,this);
+
+      bSettling = true;
+    }
+  }
+
+#if 0
   if(stimuli) {
 
     stimulus *sptr = stimuli;
@@ -434,7 +546,7 @@ void Stimulus_Node::update()
 	double Z1 = sptr->get_Zth();
 	double Z2 = sptr2->get_Zth();
 	double resistance = Z1 + Z2;
-	double final_voltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
+	double finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
 	Zth = Z1*Z2/resistance;
 	current_time_constant = (sptr->get_Cth() + sptr2->get_Cth()) * Zth;
 
@@ -445,17 +557,17 @@ void Stimulus_Node::update()
 	  cout << " *N2: " <<sptr2->name() 
 	  << " V=" << sptr2->get_Vth() 
 	  << " Z=" << sptr2->get_Zth() << endl;
-	  cout << " * ==>:  V=" << final_voltage
+	  cout << " * ==>:  V=" << finalVoltage
 	  << " Z=" << resistance << endl;
 	*/
 
 	if(current_time_constant < min_time_constant) {
-	  voltage = final_voltage;
-	  sptr->set_nodeVoltage(final_voltage);
-	  sptr2->set_nodeVoltage(final_voltage);
+	  voltage = finalVoltage;
+	  sptr->set_nodeVoltage(finalVoltage);
+	  sptr2->set_nodeVoltage(finalVoltage);
 	} else {
 
-	  delta_voltage = final_voltage - initial_voltage;
+	  delta_voltage = finalVoltage - initial_voltage;
 
 	  if(bSettling) 
 	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
@@ -486,7 +598,7 @@ void Stimulus_Node::update()
 
 	double conductance=0.0;	// Thevenin conductance.
 	double capacitance=0.0; // total capacitance on the node.
-	double final_voltage=0.0; 
+	double finalVoltage=0.0; 
 
 	//cout << "multi-node summing:\n";
 	while(sptr) {
@@ -497,19 +609,19 @@ void Stimulus_Node::update()
 	  << " C=" << sptr->get_Cth() << endl; 
 	  */
 	  double Cs = 1 / sptr->get_Zth();
-	  final_voltage += sptr->get_Vth() * Cs;
+	  finalVoltage += sptr->get_Vth() * Cs;
 	  conductance += Cs;
 	  capacitance += sptr->get_Cth();
 	  sptr = sptr->next;
 	}
 	Zth = 1.0/conductance;
-	final_voltage *= Zth;
+	finalVoltage *= Zth;
 	current_time_constant = capacitance * Zth;
 
 	if(current_time_constant < min_time_constant) {
-	  voltage = final_voltage;
+	  voltage = finalVoltage;
 	  sptr = stimuli;
-	  //cout << " Setting voltage to: " << final_voltage << endl;
+	  //cout << " Setting voltage to: " << finalVoltage << endl;
 	  while(sptr) {
 	    sptr->set_nodeVoltage(voltage);
 	    sptr = sptr->next;
@@ -517,7 +629,7 @@ void Stimulus_Node::update()
 	} else {
 
 	  // Capacitive loading must be relatively large.
-	  delta_voltage = final_voltage - initial_voltage;
+	  delta_voltage = finalVoltage - initial_voltage;
 
 	  if(bSettling) 
 	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
@@ -536,9 +648,7 @@ void Stimulus_Node::update()
     warned = 1;
   }
 
-
-     //  return(voltage);
-
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -849,6 +959,23 @@ IOPIN::IOPIN(void)
 
   add_stimulus(this);
 
+}
+
+void IOPIN::attach_to_port(IOPORT *i, unsigned int b)
+{
+  iop = i; 
+  iobit=b;
+  if(iop)
+    iop->attach_iopin(this,b);
+}
+
+void IOPIN::disconnect_from_port()
+{
+  if(iop) {
+    //iop->detach_iopin(this);
+    iop = 0;
+  }
+  iobit = 0;
 }
 
 IOPIN::~IOPIN()
@@ -1692,227 +1819,3 @@ void stimuli_attach(SymbolList_t *sl)
 
   }
 }
-
-#if 0
-
-
-
-void asynchronous_stimulus::callback(void)
-{
-
-  guint64 current_cycle = future_cycle;
-
-  if(digital)
-    current_state = (next_sample.value > 0.0) ? Vth : 0.0;
-  else
-    current_state = next_sample.value;
-
-  if(verbose)
-    cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
-
-  // If there's a node attached to this stimulus, then update it.
-  if(snode)
-    snode->update();
-
-  ++sample_iterator;
-
-  if(sample_iterator == samples.end()) {
-
-    // We've gone through all of the data. Now let's try to start over
-
-    sample_iterator = samples.begin();
-
-    // If the period is zero or if there's no data then we don't want to 
-    // regenerate the data stream.
-
-    if( (period == 0) || (sample_iterator == samples.end())) {
-
-      future_cycle = 0;    // Acts like a flag - indicates this stimulus inactive
-      return;
-    }
-
-    next_sample = *sample_iterator;
-    start_cycle += period;
-
-    if(verbose) {
-      cout << "  asynchronous stimulus rolled over\n"
-	   << "   next start_cycle " << start_cycle << "  period " << period << '\n';
-    }
-  } else
-    next_sample = *sample_iterator;
-
-  if(verbose) {
-    cout << "  current_sample (" << next_sample.time << "," 
-	 << next_sample.value << ")\n";
-    cout << " start cycle " << start_cycle << endl;
-  }
-
-  // get the cycle when the data will change next
-
-  future_cycle = next_sample.time + start_cycle;
-      
-
-  if(future_cycle <= current_cycle) {
-    
-      // There's an error in the data. Set a break on the next simulation cycle
-      // and see if it can be resolved.
-
-      future_cycle = current_cycle+1;
-  }
-
-
-  get_cycles().set_break(future_cycle, this);
-
-  if(verbose) {
-    cout <<"  next transition = " << future_cycle << '\n';
-    //cout <<"  next value = " << next_state << '\n';
-  }
-
-}
-
-double asynchronous_stimulus::get_Vth() 
-{
-  double cs;
-  if(digital)
-    cs = (next_sample.value > 0.0) ? Vth : 0.0;
-  else
-    cs = next_sample.value;
-
-  if(cs != current_state)
-    cout << " diff " << cs << "  " << current_state << endl;
-  return current_state;
-}
-
-//------------------------------------------------------------------------
-// start the asynchronous stimulus.
-
-void asynchronous_stimulus::start(void)
-{
-
-  if(verbose)
-    cout << "Starting asynchronous stimulus\n";
-
-  sample_iterator = samples.begin();
-
-  if(sample_iterator != samples.end()) {
-
-
-    if(digital)
-      initial_state = (initial_state > 0.0) ? Vth : 0.0;
-
-    current_state = initial_state;
-    next_sample   = *sample_iterator;
-    future_cycle  = next_sample.time + start_cycle;
-
-    get_cycles().set_break(future_cycle, this);
-
-    if(verbose) {
-
-      cout << "  states = " << samples.size() << '\n';
-
-      list<StimulusData>::iterator si;
-
-      for(si = samples.begin();
-	  si != samples.end();
-	  ++si) {
-	  
-	cout << "    " << dec << (*si).time
-	     <<  '\t'  << (*si).value
-	     << '\n';
-
-      }
-
-      cout << "period = " << period << '\n'
-	   << "phase = " << phase << '\n'
-	   << "start_cycle = " << start_cycle << '\n'
-	   << "Next break cycle = " << future_cycle << '\n';
-
-    }
-
-  }
-
-  if(verbose)
-    cout << "asy should've been started\n";
-
-
-}
-
-//========================================================================
-
-
-void asynchronous_stimulus::re_start(guint64 new_start_time)
-{
-
-  if(verbose)
-    cout << "Re starting asynchronous stimulus\n";
-
-  sample_iterator = samples.begin();
-
-  if(sample_iterator != samples.end()) {
-
-    guint64 old_future_cycle = future_cycle;
-    start_cycle = new_start_time;
-    current_state = initial_state;
-
-    future_cycle = next_sample.time + start_cycle;
-
-    if(old_future_cycle) 
-      get_cycles().reassign_break(old_future_cycle,future_cycle, this);
-    else
-      get_cycles().set_break(future_cycle, this);
-
-  }
-
-  if(verbose)
-    cout << "asy should've been started\n";
-
-
-}
-
-
-//-------------------------------------------------------------
-// put_data
-//
-void asynchronous_stimulus::put_data(StimulusData &data_point)
-{
-  samples.push_back(data_point);
-}
-
-
-// Create an asynchronous stimulus. If invoked with a non-null name, then
-// give the stimulus that name, other wise create one.
-// Note that most of the stimulus' initialization must be performed outside
-// of the constructor.
-
-asynchronous_stimulus::asynchronous_stimulus(const char *n)
-{
-  cpu = 0;
-
-  snode = 0;
-  next = 0;
-
-  period = 0;
-  duty   = 0;
-  phase  = 0;
-  initial_state  = 0.0;
-  start_cycle    = 0;
-
-  next_sample.value = 0.0;
-  next_sample.time  = 0;
-
-  if(n)
-    new_name(n);
-  else
-    {
-      char name_str[100];
-      snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
-      num_stimuli++;
-      new_name(name_str);
-    }
-
-  add_stimulus(this);
-  symbol_table.add_stimulus(this);
-
-}
-
-#endif

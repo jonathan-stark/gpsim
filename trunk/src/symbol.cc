@@ -108,7 +108,7 @@ void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
     string sName(symbol_name);
     if((new_reg->name() == sName ||
        new_reg->baseName() == sName) &&  
-      (find(&new_reg->name()) || find(&new_reg->baseName()))) {
+      (find(new_reg->name()) || find(new_reg->baseName()))) {
       if(verbose)
         cout << "Warning not adding  "
 	           << symbol_name
@@ -189,6 +189,13 @@ void Symbol_Table::remove_module(Module * m)
   }
 }
 
+Value *Symbol_Table::remove(string &s)
+{
+  Value *sym = find(s);
+  if(sym)
+    st.remove(sym);
+}
+
 void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 {
 
@@ -206,7 +213,7 @@ void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 Value * Symbol_Table::find(const char *str)
 {
   string s =  string(str);
-  return(find(&s));
+  return(find(s));
 
 }
 
@@ -233,7 +240,7 @@ Value * Symbol_Table::find(type_info const &symt, const char *str)
 void Symbol_Table::dump_one(string *s)
 {
 
-  Value *val = find(s);
+  Value *val = find(*s);
 
   if(val)
     cout << val->toString() << endl;
@@ -349,23 +356,22 @@ string symbol::toString()
   return showType();
 }
 
-Value * Symbol_Table::find(string *s)
+Value * Symbol_Table::find(string &s)
 {
   const bool findDuplicates=false;
   sti = st.begin();
 
   Value *ret=0;
-  while( sti != st.end())
-    {
+  while( sti != st.end()) {
       Value *val = *sti;
-      if(val && val->name() == *s) {
+      if(val && val->name() == s) {
         if(!findDuplicates)
-	        return val;
+	  return val;
 
         if(!ret) {
-	        ret = val;
-	      } else
-	        cout << "Found duplicate:" << val->show()<<endl;
+	  ret = val;
+	} else
+	  cout << "Found duplicate:" << val->show()<<endl;
       }
 
       sti++;
