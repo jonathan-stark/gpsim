@@ -57,6 +57,7 @@ EXPORTS
     ?Add@Files@@QAEHPADPAU_iobuf@@@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
     ?Find@Files@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?FormattedMessage@Processor@@SAXPAU_iobuf@@PBDZZ
     ?add@Symbol_Table@@QAEXPAVValue@@@Z
     ?add@TraceFrame@@UAEXPAVTraceObject@@@Z
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
@@ -306,6 +307,8 @@ EXPORTS
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@IOPIN@@UAEXXZ
+    ?SimulatedGet@Register@@UAEIXZ
+    ?SimulatedSet@Register@@UAEXI@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_start_cycle@@3_KA
     ?step@Processor@@UAEXI_N@Z
@@ -315,7 +318,7 @@ EXPORTS
     ?toBitStr@Boolean@@UAEPADPADH@Z
     ?toBitStr@Integer@@UAEPADPADH@Z
     ?toBitStr@Register@@UAEPADPADH@Z
-    ?toBitStr@RegisterValue@@QAEPADPADHIPBD111@Z
+    ?toBitStr@RegisterValue@@QBEPADPADHIPBD111@Z
     ?toBitStr@gpsimObject@@UAEPADPADH@Z
     ?toString@Boolean@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Boolean@@UAEPADPADH@Z
@@ -324,7 +327,7 @@ EXPORTS
     ?toString@Integer@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Integer@@UAEPADPADH@Z
     ?toString@Register@@UAEPADPADH@Z
-    ?toString@RegisterValue@@QAEPADPADHH@Z
+    ?toString@RegisterValue@@QBEPADPADHH@Z
     ?toString@String@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@String@@UAEPADPADH@Z
     ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ

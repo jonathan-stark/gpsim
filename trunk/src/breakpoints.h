@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 using namespace std;
 
+extern Integer *verbosity;  // in ../src/init.cc
 class InvalidRegister;
 
 class TriggerGroup : public TriggerAction
@@ -402,6 +403,7 @@ public:
   BreakpointRegister(void) : TriggerObject(0)
   { replaced = 0;};
   BreakpointRegister(Processor *, int, int );
+  BreakpointRegister(Processor *, TriggerAction *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
   virtual string &name(void)
@@ -442,6 +444,9 @@ public:
     {
       return replaced->getRV();
     }
+  virtual RegisterValue getRVN(void) {
+    return replaced->getRVN();
+  }
   virtual unsigned int get(void)
     {
       return(replaced->get());
@@ -515,10 +520,17 @@ public:
     }
 
   BreakpointRegister_Value(Processor *_cpu, 
-			   int _repl, 
-			   int bp, 
-			   unsigned int bv, 
-			   unsigned int bm=0xffffffff );
+        int _repl, 
+        int bp, 
+        unsigned int bv, 
+        unsigned int bm=0xffffffff );
+
+  BreakpointRegister_Value(Processor *_cpu, 
+         TriggerAction *pTA,
+        int _repl, 
+        int bp, 
+        unsigned int bv, 
+        unsigned int bm=0xffffffff );
 
   virtual void print(void);
 
@@ -528,80 +540,117 @@ public:
 class Break_register_read : public BreakpointRegister
 {
 public:
+  class TA : public TriggerAction {
+  public:
+    TA(int uAddress) {
+      m_uAddress = uAddress;
+    }
+    void action(void);
+    int m_uAddress;
+  };
 
-
-  Break_register_read(void){ };
+//  Break_register_read(void){ };
   Break_register_read(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,_repl,bp ) { };
-
+    BreakpointRegister(_cpu,&m_ta,_repl,bp ), m_ta(_repl) { };
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
+  virtual RegisterValue getRVN(void);
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
-
+  TA m_ta;
 };
 
 class Break_register_write : public BreakpointRegister
 {
 public:
+  class TA : public TriggerAction {
+  public:
+    TA(int uAddress) {
+      m_uAddress = uAddress;
+    }
+    void action(void);
+    int m_uAddress;
+  };
 
-
-  Break_register_write(void){ };
+//  Break_register_write(void){ };
   Break_register_write(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,_repl,bp ) { };
+    BreakpointRegister(_cpu,&m_ta,_repl,bp ), m_ta(_repl) { };
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write"; }
-
+  TA m_ta;
 };
 
 class Break_register_read_value : public BreakpointRegister_Value
 {
 public:
+  class TA : public TriggerAction {
+  public:
+    TA(int uAddress, unsigned int uValue) {
+      m_uAddress = uAddress;
+      m_uValue = uValue;
+    }
+    void action(void);
+    int m_uAddress;
+    unsigned int m_uValue;
+  };
 
-  Break_register_read_value(void){ };
+//  Break_register_read_value(void){ };
   Break_register_read_value(Processor *_cpu, 
 			    int _repl, 
 			    int bp, 
 			    unsigned int bv, 
 			    unsigned int bm ) :
-    BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
+    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
+      m_ta(_repl, bv) { };
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
+  virtual RegisterValue getRVN(void);
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
-
+  TA m_ta;
 };
 
 class Break_register_write_value : public BreakpointRegister_Value
 {
 public:
+  class TA : public TriggerAction {
+  public:
+    TA(int uAddress, unsigned int uValue) {
+      m_uAddress = uAddress;
+      m_uValue = uValue;
+    }
+    void action(void);
+    int m_uAddress;
+    unsigned int m_uValue;
+  };
 
-  Break_register_write_value(void){ };
+//  Break_register_write_value(void){ };
   Break_register_write_value(Processor *_cpu, 
 			     int _repl, 
 			     int bp, 
 			     unsigned int bv, 
 			     unsigned int bm ) :
-    BreakpointRegister_Value(_cpu,  _repl, bp, bv, bm ) { };
+    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
+      m_ta(_repl, bv) { };
 
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write value"; }
-
+  TA m_ta;
 };
 
 class Log_Register_Write : public Break_register_write
 {
  public:
 
-  Log_Register_Write(void){ };
+//  Log_Register_Write(void){ };
   Log_Register_Write(Processor *_cpu, int _repl, int bp ):
     Break_register_write(_cpu,_repl,bp ) { };
   virtual void put(unsigned int new_value);
@@ -616,11 +665,12 @@ class Log_Register_Read : public Break_register_read
 public:
 
 
-  Log_Register_Read(void){ };
+//  Log_Register_Read(void){ };
   Log_Register_Read(Processor *_cpu, int _repl, int bp ):
     Break_register_read(_cpu,_repl,bp ) { };
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
+  virtual RegisterValue getRVN(void);
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "log register read"; }

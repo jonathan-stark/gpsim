@@ -836,6 +836,17 @@ void RegisterAssertion::print(void)
        << " ANDed with 0x"  << regMask << " equals 0x" << regValue << endl;
 }
 //------------------------------------------------------------------------------
+BreakpointRegister::BreakpointRegister(Processor *_cpu, TriggerAction *ta,
+                                       int _repl, int bp)
+  : TriggerObject(ta)
+
+{
+
+  bpn = bp;
+  replace(_cpu,_repl);
+  address = _repl;
+}
+
 BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
   : TriggerObject(0)
 
@@ -898,22 +909,47 @@ void BreakpointRegister::print(void)
 
 }
 //-------------------------------------------------------------------
-BreakpointRegister_Value::BreakpointRegister_Value(Processor *_cpu, 
-						   int _repl, 
-						   int bp, 
-						   unsigned int bv, 
-						   unsigned int bm ) :
+BreakpointRegister_Value::BreakpointRegister_Value(
+    Processor *_cpu, 
+    int _repl, 
+    int bp, 
+    unsigned int bv, 
+    unsigned int bm ) :
   BreakpointRegister(_cpu,_repl,bp ) 
 { 
   break_value = bv;
   break_mask = bm;
+  for (unsigned int i = 1; i < _cpu->register_size(); i++) {
+    break_mask <<= 8;
+    break_mask |= bm;
+  }
 
   int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
 
   if(break_mask == 0)
     break_mask = regMask;
+}
 
-  
+BreakpointRegister_Value::BreakpointRegister_Value(
+    Processor *_cpu, 
+    TriggerAction * pTA,
+    int _repl, 
+    int bp, 
+    unsigned int bv, 
+    unsigned int bm ) :
+  BreakpointRegister(_cpu,pTA,_repl,bp ) 
+{ 
+  break_value = bv;
+  break_mask = bm;
+  for (unsigned int i = 1; i < _cpu->register_size(); i++) {
+    break_mask <<= 8;
+    break_mask |= bm;
+  }
+
+  int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
+
+  if(break_mask == 0)
+    break_mask = regMask;
 }
 
 void BreakpointRegister_Value::print(void)
@@ -931,6 +967,34 @@ void BreakpointRegister_Value::print(void)
 }
 //-------------------------------------------------------------------
 //
+void Break_register_read::TA::action(void) {
+  if(verbosity && verbosity->getVal())
+    Processor::MessageBreakOnRead(m_uAddress);
+    // cout << "Hit a Breakpoint!\n";
+  bp.halt();
+}
+
+void Break_register_write::TA::action(void) {
+  if(verbosity && verbosity->getVal())
+    Processor::MessageBreakOnWrite(m_uAddress);
+    // cout << "Hit a Breakpoint!\n";
+  bp.halt();
+}
+
+void Break_register_read_value::TA::action(void) {
+  if(verbosity && verbosity->getVal())
+    Processor::MessageBreakOnRead(m_uAddress, m_uValue);
+    // cout << "Hit a Breakpoint!\n";
+  bp.halt();
+}
+
+void Break_register_write_value::TA::action(void) {
+  if(verbosity && verbosity->getVal())
+    Processor::MessageBreakOnWrite(m_uAddress, m_uValue);
+    // cout << "Hit a Breakpoint!\n";
+  bp.halt();
+}
+
 unsigned int Break_register_read::get(void)
 {
 
@@ -948,6 +1012,14 @@ RegisterValue  Break_register_read::getRV(void)
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 		      | address);
   return(replaced->getRV());
+}
+
+RegisterValue  Break_register_read::getRVN(void)
+{
+  if(action->evaluate())
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		      | address);
+  return(replaced->getRVN());
 }
 
 bool Break_register_read::get_bit(unsigned int bit_number)
@@ -972,6 +1044,7 @@ void Break_register_write::put(unsigned int new_value)
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 		      | (replaced->address)  );
 }
+
 void Break_register_write::putRV(RegisterValue rv)
 {
   replaced->putRV(rv);
@@ -1003,6 +1076,17 @@ unsigned int Break_register_read_value::get(void)
 RegisterValue  Break_register_read_value::getRV(void)
 {
   RegisterValue v = replaced->getRV();
+
+  if( (v.data & break_mask) == break_value)
+    if(action->evaluate())
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+			| address);
+  return(v);
+}
+
+RegisterValue  Break_register_read_value::getRVN(void)
+{
+  RegisterValue v = replaced->getRVN();
 
   if( (v.data & break_mask) == break_value)
     if(action->evaluate())
@@ -1136,6 +1220,14 @@ unsigned int Log_Register_Read::get(void)
 RegisterValue Log_Register_Read::getRV(void)
 {
   RegisterValue rv = replaced->getRV();
+  trace_log.register_read(replaced->address, rv.data, get_cycles().value);
+  return rv;
+
+}
+
+RegisterValue Log_Register_Read::getRVN(void)
+{
+  RegisterValue rv = replaced->getRVN();
   trace_log.register_read(replaced->address, rv.data, get_cycles().value);
   return rv;
 
