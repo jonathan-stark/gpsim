@@ -314,6 +314,7 @@ break_cmd
           : BREAK                       {c_break.list();}
           | BREAK bit_flag              {c_break.set_break($2);}
           | BREAK bit_flag expr_list    {c_break.set_break($2,$3);}
+          | BREAK bit_flag STRING       {c_break.set_break($2,$3);}
           ;
 
 bus_cmd

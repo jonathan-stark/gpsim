@@ -317,7 +317,7 @@ void cmd_break::set_break(int bit_flag, char *sym, int value, int mask)
 
 }
 
-void cmd_break::set_break(int bit_flag, char *sym)
+void cmd_break::set_break(cmd_options *co, char *sym)
 {
   int sym_value;
 
@@ -326,6 +326,8 @@ void cmd_break::set_break(int bit_flag, char *sym)
       cout << '`' << sym << '\'' << " was not found in the symbol table\n";
       return;
     }
+
+  int bit_flag = co->value;
 
   set_break(bit_flag,sym_value);
 

@@ -117,7 +117,10 @@ enum eGPSIMObjectTypes
     GPSIM_CMD_SET        = 0x95,
     GPSIM_CMD_STEP       = 0x96,
     GPSIM_CMD_SYMBOL     = 0x97, // Query the value of a symbol
-    GPSIM_CMD_VERSION    = 0x98
+    GPSIM_CMD_VERSION    = 0x98,
+    GPSIM_CMD_ASSIGN_RAM = 0x99,
+
+
   };
 
 
@@ -413,7 +416,6 @@ void Socket::ParseObject(char *buffer)
 
 
     case GPSIM_CMD_CLEAR:
-    case GPSIM_CMD_EXAMINE_RAM:
     case GPSIM_CMD_EXAMINE_ROM:
     case GPSIM_CMD_STEPOVER:
     case GPSIM_CMD_RUN:
@@ -437,13 +439,62 @@ void Socket::ParseObject(char *buffer)
 	  symbol *sym = get_symbol_table().find(tmp);
 	  if(sym) {
 	    snprintf(tmp,sizeof(tmp),"$03%08x",sym->get_value());
-	    printf("responding with %d\n",tmp);
+	    printf("responding with %s\n",tmp);
 	    respond(tmp);
 	  } else
 	    respond("symcmd");
 	}
       }
       break;
+
+    case GPSIM_CMD_EXAMINE_RAM:
+      {
+	unsigned int ram_address;
+	int bl = ParseInt(&b,ram_address);
+	if(bl) {
+	  buffer_len -= bl;
+
+	  char tmp[256];
+	  Processor *cpu = get_active_cpu();
+
+	  if(cpu) {
+	    Register *reg = cpu->rma.get_register(ram_address);
+	    snprintf(tmp,sizeof(tmp),"$03%08x",reg->get_value());
+	    respond(tmp);
+	  } else
+	    respond("no cpu");
+	} else 
+	  respond("examinecmd");
+ 
+      }
+      break;
+
+    case GPSIM_CMD_ASSIGN_RAM:
+      {
+	unsigned int ram_address;
+	unsigned int ram_value;
+	int bl =0;
+
+	bl += ParseInt(&b,ram_address);
+	bl += ParseInt(&b,ram_value);
+
+	if(bl) {
+	  buffer_len -= bl;
+
+	  Processor *cpu = get_active_cpu();
+
+	  if(cpu) {
+	    Register *reg = cpu->rma.get_register(ram_address);
+	    reg->put_value(ram_value);
+	    respond("ACK");
+	  } else
+	    respond("no cpu");
+	} else 
+	  respond("assigncmd");
+ 
+      }
+      break;
+
     default:
       printf("Invalid object type: %d\n",ObjectType);
     }
