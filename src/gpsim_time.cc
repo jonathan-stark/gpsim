@@ -32,7 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 //#include "gpsim_time.h"
 
-#define __DEBUG_CYCLE_COUNTER__
+//#define __DEBUG_CYCLE_COUNTER__
 
 // Largest cycle counter value
 
