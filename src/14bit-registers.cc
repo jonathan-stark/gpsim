@@ -62,10 +62,18 @@ file_register::~file_register(void)
 //--------------------------------------------------
 // get
 //
-//  Return the contents of the file register. If a
-// 'break on read' break point is set, then set the
-// global break point flag.
-
+//  Return the contents of the file register.
+// (note - breakpoints on file register reads
+//  are not checked here. Instead, a breakpoint
+//  object replaces those instances of file 
+//  registers for which we wish to monitor.
+//  So a file_register::get call will invoke
+//  the breakpoint::get member function. Depending
+//  on the type of break point, this get() may
+//  or may not get called).
+//
+//
+// FIXME - should be inlined
 unsigned int file_register::get(void)
 {
   trace.register_read(address,value);
@@ -75,10 +83,10 @@ unsigned int file_register::get(void)
 
 //--------------------------------------------------
 //
-//  Update the contents of the file register. If a
-// 'break on write' break point is set and this write
-// meets the conditions for the break point then set the
-// global break point flag.
+//  Update the contents of the file register.
+//  See the comment above in file_register::get()
+//  with respect to break points
+//
 
 void file_register::put(unsigned int new_value)
 {

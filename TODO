@@ -12,6 +12,7 @@ Gui is coming along
 
 TODO - In no particular order:
 
+  o 23may01 - Provide option to disable the nop portion of two-word 18cxxx instructions in assembly dumps.
   o Capacitive stimuli
   o Parallel stimuli
   o High frequency stimuli (currently, the cpu frequency is the maximum stimulation frequency)

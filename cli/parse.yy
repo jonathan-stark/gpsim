@@ -353,6 +353,22 @@ module_cmd: MODULE
             free($4);
             YYABORT;
           }
+          | MODULE string_option STRING NUMBER
+	  { 
+            c_module.module($2, $3, double($4));
+            delete($2);
+            free($3);
+            YYABORT;
+          }
+
+          | MODULE string_option STRING FLOAT_NUMBER
+	  { 
+            c_module.module($2, $3, $4);
+            delete($2);
+            free($3);
+            YYABORT;
+          }
+
 /*
           | MODULE string_option STRING STRING STRING
 	  { 
@@ -476,7 +492,7 @@ stimulus_cmd: STIMULUS
             if(verbose)
               cout << "parser sees stimulus with float number: " << $2 << '\n';
 
-	    c_stimulus.stimulus($2);
+	    c_stimulus.stimulus(int($2));
 	  }
 
           | STIMULUS stimulus_opt END_OF_COMMAND

@@ -54,6 +54,10 @@ cmd_frequency::cmd_frequency(void)
 
 void cmd_frequency::set(float value)
 {
+
+  if(!have_cpu(1))
+    return;
+
   if(value<0) {
     cout << "Error: the clock must be a positive value.\n";
     return;
@@ -63,6 +67,9 @@ void cmd_frequency::set(float value)
 
 void cmd_frequency::print()
 {
+  if(!have_cpu(1))
+    return;
+
   cout << "Clock frequency: " << cpu->get_clock()/1e6 << " MHz.\n";
 }
 

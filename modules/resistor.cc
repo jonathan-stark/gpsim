@@ -40,6 +40,56 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 #include "../src/ioports.h"
 #include "../src/symbol.h"
+#include "../src/attribute.h"
+
+
+class ResistanceAttribute : public FloatAttribute {
+
+public:
+  PullupResistor *pur;
+
+
+  ResistanceAttribute(PullupResistor *ppur) {
+
+    pur = ppur;
+    if(!pur)
+      return;
+
+    new_name("resistance");
+    cout << "Resistance Attribute constructor\n";
+
+    if(pur->res->drive)
+      value = 1000*MAX_DRIVE/(pur->res->drive);
+  }
+
+
+  void set(double r) {
+    int res;
+    value = r;
+    cout << "Setting resistance attribute!\n";
+    if(r!= 0.0)
+      res = int(1000*MAX_DRIVE/r);
+    else
+      res = MAX_DRIVE;
+
+    if(res>MAX_DRIVE)
+      res = MAX_DRIVE;
+
+    if(!pur)
+      return;
+
+    if(pur->res->drive > 0)
+      pur->res->drive = res;
+    else
+      pur->res->drive = -res;
+
+  };
+
+
+  void set(int r) {
+    set(double(r));
+  };
+};
 
 
 //--------------------------------------------------------------
@@ -181,6 +231,24 @@ int PUResistor_IO::get_voltage(guint64 current_time)
 
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+
+void PullupResistor::set_attribute(char *attr, char *val)
+{
+
+  cout << " Pull up resistor " << name_str << " update attribute\n";
+  if(attr) {
+    cout << "(attr = " << attr;
+    if(val)
+      cout << " , val = " << val;
+    cout << ")\n";
+
+  }
+
+  Module::set_attribute(attr,val);
+
+}
 //--------------------------------------------------------------
 // PullupResistor::create_iopin_map 
 //
@@ -272,12 +340,16 @@ ExternalModule * PullupResistor::pd_construct(char *new_name = NULL)
 PullupResistor::PullupResistor(void)
 {
 
+  ResistanceAttribute *attr;
   cout << "Pull up resistor constructor\n";
 
   // Create the resistor:
 
   res = new resistor;
   res->drive = MAX_DRIVE/2;
+
+  attr = new ResistanceAttribute(this);
+  add_attribute(attr);
 
   name_str = "pur";
 }

@@ -8,6 +8,7 @@ gpsim-0.21.0
 	- Trace viewer has been added
 	- Added 16c62,16c63,16c72,16c73 processors
 	- Added 18c442,18c452 processor
+	- Added module attibutes (attribute.cc) 
 	- breadboard updates when either a tris or port is changed in the register viewer
 	- Enhanced module interface - now LCD module works with gpsim
 	- Patch from Rudy Moore to fix TMR0 bug

@@ -198,20 +198,116 @@ void Module::new_name(char *s)
 }
 
 
+
+
+Attribute * Module::get_attribute(char *attribute_name)
+{
+
+  list <Attribute *> :: iterator attribute_iterator;
+
+  for (attribute_iterator = attributes.begin();  
+       attribute_iterator != attributes.end(); 
+       attribute_iterator++) {
+
+    Attribute *locattr = *attribute_iterator;
+
+    if(attribute_name) {
+      if(strcmp(locattr->get_name(), attribute_name) == 0) {
+	cout << "Found attribute: " << locattr->get_name() << '\n';
+
+	return locattr;
+      }
+    } else {
+      char buf[50];
+
+      cout << locattr->get_name() << " = " << locattr->sGet(buf,50) << '\n';
+    }
+  }
+
+  if(attribute_name)
+    cout << "Could not find attribute named " << attribute_name  << '\n';
+
+  return NULL;
+}
+
+
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
 void Module::set_attribute(char *attr, char *val)
 {
 
-  cout << " warning " << name_str << " does not have any changable attributes\n";
-  if(attr) {
-    cout << "(attr = " << attr;
-    if(val)
-      cout << " , val = " << val;
-    cout << ")\n";
+  Attribute *locattr = get_attribute(attr);
 
+  if(locattr)
+    locattr->set(val);
+
+  //cout << " warning " << name_str << " does not have any changable attributes\n";
+/*
+  if(!attr)
+    return;
+
+  list <Attribute *> :: iterator attribute_iterator;
+
+  for (attribute_iterator = attributes.begin();  
+       attribute_iterator != attributes.end(); 
+       attribute_iterator++) {
+
+    Attribute *locattr = *attribute_iterator;
+
+    if(strcmp(locattr->get_name(), attr) == 0) {
+      cout << "Found attribute: " << locattr->get_name() << '\n';
+
+      locattr->set(val);
+
+      return;
+    }
   }
+
+  cout << "Could not find (attr = " << attr << " , val = " << val << ")\n";
+*/
+}
+
+void Module::set_attribute(char *attr, double val)
+{
+
+  Attribute *locattr = get_attribute(attr);
+
+  if(locattr)
+    locattr->set(val);
+
+  // cout << " warning " << name_str << " does not have any changable attributes\n";
+/*
+  if(!attr)
+    return;
+
+  list <Attribute *> :: iterator attribute_iterator;
+
+  for (attribute_iterator = attributes.begin();  
+       attribute_iterator != attributes.end(); 
+       attribute_iterator++) {
+
+    Attribute *locattr = *attribute_iterator;
+
+    if(strcmp(locattr->get_name(), attr) == 0) {
+      cout << "Found attribute: " << locattr->get_name() << '\n';
+
+      locattr->set(val);
+
+      return;
+    }
+  }
+
+  cout << "Could not find (attr = " << attr << " , val = " << val << ")\n";
+*/
+}
+
+void Module::add_attribute(Attribute *new_attribute)
+{
+
+  attributes.push_back(new_attribute);
+
+  cout << "add_attribute  name = " << new_attribute->get_name() << '\n';
 
 }
 
@@ -340,14 +436,11 @@ void module_display_available(void)
 
 void module_load_library(char *library_name)
 {
-  //  cout << __FUNCTION__ << "() " << library_name << '\n';
 
 #ifdef HAVE_GUI
 
   void *handle;
   char *error;
-  Module * (*getmodule) (void);
-  Module *testmodule;
 
   handle = dlopen (library_name, RTLD_LAZY);
   if (!handle) {
@@ -361,7 +454,7 @@ void module_load_library(char *library_name)
   module_display_available();
 #else
 
-  cout << "  -- gpsim doesn't support modules in the cli-only mode\n";
+  cout << "  -- gpsim doesn't support modules in the cli-only mode yet\n";
 
 #endif
 
@@ -424,11 +517,36 @@ void module_load_module(char *module_type, char *module_name=NULL)
 
 }
 
+//--------------------------------------------------
+// Print out all of the symbols that are of type 'SYMBOL_MODULE'
 
 void module_list_modules(void)
 {
 
  symbol_table.dump_type( SYMBOL_MODULE);
+}
+
+//--------------------------------------------------
+// Module *module_check_cpu(symbol *mP)
+//
+// Given a pointer to a symbol, check to see if the cpu is valid.
+//
+
+Module *module_check_cpu(char *module_name)
+{
+
+  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+
+  if(mP && mP->cpu) {
+
+    cout << "Module " << mP->cpu->name() << '\n';
+    return mP->cpu;
+  }
+  else {
+    cout << "module `" << module_name << "' wasn't found\n";
+    return NULL;
+  }
+
 }
 
 //--------------------------------------------------
@@ -438,20 +556,10 @@ void module_list_modules(void)
 void module_pins(char *module_name)
 {
 
-  Module *cpu;
-  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+  Module *cpu=module_check_cpu(module_name);
 
-
-  if(mP && mP->cpu) {
-
-    cpu = mP->cpu;
-    cout << "Module " << cpu->name() << '\n';
-
-  }
-  else {
-    cout << "module `" << module_name << "' wasn't found\n";
+  if(!cpu)
     return;
-  }
 
   for(int i=1; i<=cpu->get_pin_count(); i++) {
 
@@ -468,20 +576,26 @@ void module_pins(char *module_name)
 void module_set_attr(char *module_name,char *attr, char *val)
 {
 
-  Module *cpu;
-  symbol *mP = symbol_table.find(SYMBOL_MODULE,module_name);
+  Module *cpu=module_check_cpu(module_name);
 
 
-  if(mP && mP->cpu) {
-
-    cpu = mP->cpu;
-    cout << "Module " << cpu->name() << '\n';
-
-  }
-  else {
-    cout << "module `" << module_name << "' wasn't found\n";
+  if(!cpu)
     return;
-  }
+
+  cpu->set_attribute(attr,val);
+
+}
+//--------------------------------------------------
+// module_set_attr
+// Display the states of the pins of a module
+
+void module_set_attr(char *module_name,char *attr, double val)
+{
+
+  Module *cpu=module_check_cpu(module_name);
+
+  if(!cpu)
+    return;
 
   cpu->set_attribute(attr,val);
 

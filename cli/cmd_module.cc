@@ -147,6 +147,11 @@ void cmd_module::module(cmd_options_str *cos)
       module_pins(cos->str);
       break;
 
+    case CMD_MOD_SET:
+      cout << "module set command :  module name = " << cos->str <<'\n';
+      module_set_attr(cos->str,(char *)NULL,(char *)NULL);
+      break;
+
     default:
       cout << "cmd_module error\n";
     }
@@ -176,7 +181,7 @@ void cmd_module::module(cmd_options_str *cos, char * op1)
       if(op1)
 	cout << "   option1 = " << op1 <<'\n';
 
-      module_set_attr(cos->str,op1,NULL);
+      module_set_attr(cos->str,op1,(char *)NULL);
       break;
 
     default:
@@ -208,3 +213,26 @@ void  cmd_module::module(cmd_options_str *cos, char *op1, char *op2)
     }
 }
 
+void cmd_module::module(cmd_options_str *cos, char *op1, double op2)
+{
+
+  switch(cos->co->value)
+    {
+
+    case CMD_MOD_SET:
+      cout << "module set command :  module name = " << cos->str <<'\n';
+      if(op1)
+	cout << "   option1 = " << op1 <<'\n';
+
+      if(op2)
+	cout << "   option2 = " << op2 <<'\n';
+
+      module_set_attr(cos->str,op1,op2);
+      break;
+
+    default:
+      cout << "Warning, ignoring module command\n";
+    }
+
+
+}
