@@ -79,13 +79,14 @@ public:
   void add_module(Module * m, const char *module_name);
   void remove_module(Module * m);
   void add(const char *symbol_name, const char *symbol_type, int value);
+  Value *remove(string &);
   void dump_all(void);
   void dump_one(const char *s);
   void dump_one(string *s);
   void dump_type(type_info const&t);
 
   Value *find(const char *s);
-  Value *find(string *s);
+  Value *find(string &s);
   Value *find(type_info const&t, const char *s);
 };
 

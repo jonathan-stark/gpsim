@@ -49,6 +49,7 @@ extern void add_node(char *node_name);
 extern void dump_node_list(void);
 extern stimulus * find_stimulus (string name);
 extern void add_stimulus(stimulus * );
+void remove_stimulus(stimulus * stimulus);
 extern void dump_stimulus_list(void);
 
 extern void stimuli_attach(StringList_t *);
@@ -93,12 +94,14 @@ class Stimulus_Node : public gpsimObject, public TriggerObject
 public:
   bool warned;         // keeps track of node warnings (e.g. floating node, contention)
   double voltage;      // The most recent target voltage of this node
-  double capacitance;  // The most recent capacitance (to ground) measured on this node.
+  double Cth;          // The most recent capacitance (to ground) measured on this node.
   double Zth;          // The most recent thevenin resistance computed on this node.
 
   double current_time_constant; // The most recent time constant for the attached stimuli.
-  double delta_voltage;   // Amplitude of initial change
-  double initial_voltage; // node voltage at the instant of change
+  double delta_voltage;     // Amplitude of initial change
+  double initial_voltage;   // node voltage at the instant of change
+  double finalVoltage;      // Target voltage when settling
+
   double min_time_constant; // time constants longer than this induce settling
   bool bSettling;           // true when the voltage is settling 
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
@@ -110,10 +113,11 @@ public:
 
   double get_nodeVoltage() { return voltage; }
   double get_nodeZth() { return Zth;}
-  double get_nodeCapacitance() { return capacitance; }
+  double get_nodeCth() { return Cth; }
 
   void update(guint64 current_time);
   void update();
+  void refresh();
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
@@ -155,7 +159,6 @@ public:
   double Cth;                // Stimulus capacitance.
 
   double nodeVoltage;        // The voltage driven on to this stimulus by the snode
-
   stimulus *next;            // next stimulus that's on the snode
 
   stimulus(const char *n=0);
@@ -296,7 +299,8 @@ class IOPIN : public stimulus
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
   ~IOPIN();
 
-  void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
+  void attach_to_port(IOPORT *i, unsigned int b);
+  void disconnect_from_port();
 
   virtual void set_nodeVoltage(double v);
   virtual bool getDrivingState(void);

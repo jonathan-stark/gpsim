@@ -1,3 +1,8 @@
+2005-03-16 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, src/stimuli.h, src/stimuli.cc, src/symbol.cc,
+	src/symbol.h: Added/enhanced methods for searching, adding, and
+	removing symbols and stimuli.
+
 2005-03-14 J.R. Heisey <jrheisey@sourceforge.com>
   * src/modules.h, modules.cc, os_dependent.cc: Elimaticated
   undesired error message on failure to load a function of a
