@@ -108,7 +108,7 @@ public:
   static string toString(char* format, gint64 value);
   gint64 getVal();
 
-  virtual int getAsInt() { return value; }
+  virtual int getAsInt() { return (int)value; }
   virtual double getAsDouble() { return (double)value;}
   virtual void put(gint64 v) {value = v; }
 

@@ -165,10 +165,13 @@ void cmd_log::log(cmd_options *opt, char *str, guint64 val, guint64 mask)
 
 }
 
-void cmd_log::log(cmd_options *opt, guint64 reg, guint64 value, guint64 mask)
+void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
 {
   int b=MAX_BREAKPOINTS;
   char *str=0;
+  unsigned int reg = (unsigned int)r;
+  unsigned int value = (unsigned int)v;
+  unsigned int mask = (unsigned int)m;
 
   if(!cpu)
     cout << "warning, no cpu\n";

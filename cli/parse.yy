@@ -611,7 +611,7 @@ symbol_cmd: SYMBOL
 	  }
           | SYMBOL STRING STRING NUMBER
           {
-	    c_symbol.add_one($2,$3,$4);
+	    c_symbol.add_one($2,$3,(int)$4);
 	  }
           ;
 

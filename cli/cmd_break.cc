@@ -177,13 +177,14 @@ void cmd_break::set_break(int bit_flag)
 }
 
 
-void cmd_break::set_break(int bit_flag, guint64 value)
+void cmd_break::set_break(int bit_flag, guint64 v)
 {
 
   if(!cpu)
     return;
 
   int b;
+  unsigned int value = (unsigned int)v;
 
   switch(bit_flag) {
 
