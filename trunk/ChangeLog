@@ -25,7 +25,7 @@ gpsim-0.21.0
 	- Numerous patches from from (SET) Salvador mailto:salvador@inti.gov.ar
 	- SET - added "frequency" command
 	- SET - Added time field to the gui status bar.
-
+	- Carlos Nieves Ónega - Massive patch for the 17cxx core
 From Salvador Eduardo Tropea mailto:salvador@inti.gov.ar
 * Modified: In gpsim/main.cc put a cast in poptGetContext call, but perhaps
   is a fault in the version I use of popt, double check it.

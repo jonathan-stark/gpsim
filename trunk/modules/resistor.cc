@@ -34,7 +34,11 @@ Boston, MA 02111-1307, USA.  */
 #include <errno.h>
 #include <stdlib.h>
 #include <string>
+#include "../config.h"
 
+#ifdef HAVE_GUI
+#include <gtk/gtk.h>
+#endif
 
 #include "resistor.h"
 #include "../src/stimuli.h"
@@ -42,6 +46,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/symbol.h"
 #include "../src/attribute.h"
 
+
+extern int use_gui; // fixme - declared in gpsim/main.cc
 
 class ResistanceAttribute : public FloatAttribute {
 
@@ -299,7 +305,7 @@ ExternalModule * PullupResistor::pu_construct(char *new_name = NULL)
 
   cout << "Pullup Resistor construct \n";
 
-  PullupResistor *pur = new PullupResistor;
+  PullupResistor *pur = new PullupResistor(new_name);
 
   if(new_name) {
     pur->new_name(new_name);
@@ -320,7 +326,7 @@ ExternalModule * PullupResistor::pd_construct(char *new_name = NULL)
 
   cout << "Pulldown Resistor construct \n";
 
-  PullupResistor *pur = new PullupResistor;
+  PullupResistor *pur = new PullupResistor(new_name);
 
   if(new_name) {
     pur->new_name(new_name);
@@ -337,7 +343,7 @@ ExternalModule * PullupResistor::pd_construct(char *new_name = NULL)
 }
 
 //--------------------------------------------------------------
-PullupResistor::PullupResistor(void)
+PullupResistor::PullupResistor(char *init_name)
 {
 
   ResistanceAttribute *attr;
@@ -351,5 +357,48 @@ PullupResistor::PullupResistor(void)
   attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
-  name_str = "pur";
+  name_str = NULL; 
+
+  new_name(init_name);
+
+  pu_window = NULL;
+
+#ifdef HAVE_GUI
+  if(use_gui) {
+    build_window();
+    cout << "Creating resistor window\n";
+  }
+#endif
 }
+
+#ifdef HAVE_GUI
+
+static void pu_cb(GtkWidget *button, gpointer pur_class)
+{
+  PullupResistor *pur = (PullupResistor *)pur_class;
+
+  cout << "pu_cb call back for " << pur->name() << '\n';
+}
+
+void PullupResistor::build_window(void)
+{
+  GtkWidget *buttonbox;
+  GtkWidget *button;
+
+  pu_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+
+  buttonbox = gtk_hbox_new(FALSE,0);
+  gtk_container_add (GTK_CONTAINER (pu_window), buttonbox);
+
+  gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
+      
+  button = gtk_button_new_with_label (name());
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) pu_cb, (gpointer)this);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+
+  gtk_widget_show_all (pu_window);
+
+}
+
+#endif

@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 #include "p16x7x.h"
 #include "p12x.h"
+#include "p17c75x.h"
 #include "p18x.h"
 
 #include "16bit-instructions.h" // this is only needed for pma class
@@ -204,6 +205,27 @@ processor_types available_processors[] =
   {_P16F877_,
    "__16F877", "pic16f877",  "p16f877", "16f877",
    P16F877::construct },
+  {_P17C7xx_,
+   "__17C7xx", "pic17c7xx",  "p17c7xx", "17c7xx",
+   P17C7xx::construct },
+  {_P17C75x_,
+   "__17C75x", "pic17c75x",  "p17c75x", "17c75x",
+   P17C75x::construct },
+  {_P17C752_,
+   "__17C752", "pic17c752",  "p17c752", "17c752",
+   P17C752::construct },
+  {_P17C756_,
+   "__17C756", "pic17c756",  "p17c756", "17c756",
+   P17C756::construct },
+  {_P17C756A_,
+   "__17C756A", "pic17c756a",  "p17c756a", "17c756a",
+   P17C756A::construct },
+  {_P17C762_,
+   "__17C762", "pic17c762",  "p17c762", "17c762",
+   P17C762::construct },
+  {_P17C766_,
+   "__17C766", "pic17c766",  "p17c766", "17c766",
+   P17C766::construct },
   {_P18Cxx2_,
    "__18Cxx2", "pic18cxx2",  "p18cxx2", "18cxx2",
    pic_processor::construct },

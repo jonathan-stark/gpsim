@@ -71,13 +71,35 @@ void Bit_op::decode(pic_processor *new_cpu, unsigned int new_opcode)
   switch(cpu->base_isa())
     {
     case _16BIT_PROCESSOR_:
-      mask = 1 << ((opcode >> 9) & 7);
-      register_address = opcode & REG_MASK_16BIT;
-      access = opcode & ACCESS_MASK_16BIT;
-      register_address = opcode & REG_MASK_16BIT;
-      if((!access) && (opcode & 0x80))
-	register_address |= 0xf00;
+      switch(cpu->isa()) {
+        case  _P18Cxx2_:
+	case  _P18C2x2_:
+	case  _P18C242_:
+	case  _P18C252_:
+	case  _P18C442_:
+	case  _P18C452_:
+          mask = 1 << ((opcode >> 9) & 7);
+          register_address = opcode & REG_MASK_16BIT;
+          access = opcode & ACCESS_MASK_16BIT;
+          if((!access) && (opcode & 0x80))
+	    register_address |= 0xf00;
 
+          break;
+	case _P17C7xx_:
+	case _P17C75x_:
+	case _P17C756_:
+	case _P17C756A_:
+	case _P17C762_:
+	case _P17C766_:
+          mask = 1 << ((opcode >> 8) & 7);
+          register_address = opcode & REG_MASK_16BIT;
+          access = 0;
+	  break;
+
+	default:
+          cout << "ERROR: (Bit_op) the processor is not defined\n";
+	  break;
+      }
       break;
 
     case _14BIT_PROCESSOR_:

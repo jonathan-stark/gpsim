@@ -22,7 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __RESISTOR_H__
 #define __RESISTOR_H__
 
+#include "../config.h"
+
+#ifdef HAVE_GUI
+#include <gtk/gtk.h>
+#endif
+
+
 #include <glib.h>
+
 #include "../src/modules.h"
 #include "../src/packages.h"
 #include "../src/stimuli.h"
@@ -117,8 +125,13 @@ class PullupResistor : public ExternalModule
 {
 public:
   resistor *res;
+#ifdef HAVE_GUI
 
-  PullupResistor(void);
+  GtkWidget *pu_window;
+
+#endif
+
+  PullupResistor(char *init_name=NULL);
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
@@ -128,6 +141,10 @@ public:
 
   static ExternalModule *pu_construct(char *new_name=NULL);
   static ExternalModule *pd_construct(char *new_name=NULL);
+
+#ifdef HAVE_GUI
+  void build_window(void);
+#endif
 
 };
 #endif //  __RESISTOR_H__

@@ -47,6 +47,7 @@ support:
 #include "../src/modules.h"
 #include "binary_indicator.h"
 #include "resistor.h"
+#include "usart.h"
 
 /*
 class Module_Types
@@ -63,7 +64,13 @@ Module_Types available_modules[] =
 
   //  { "resistor",         "res",  Resistor::construct }
   { "pullup",           "pu",   PullupResistor::pu_construct },
-  { "pulldown",         "pd",   PullupResistor::pd_construct }
+  { "pulldown",         "pd",   PullupResistor::pd_construct },
+
+  // USART
+  { "usart",            "usart", USARTModule::USART_construct},
+
+  // No more modules
+  { NULL,NULL,NULL}
 };
 
 #ifdef __cplusplus
