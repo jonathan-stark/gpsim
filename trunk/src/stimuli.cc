@@ -1341,7 +1341,7 @@ char IO_bi_directional_pu::getBitChar()
 	else
 	  return '1';
       } else {
-	if(nodeVoltage > 0.5)
+	if(nodeVoltage > 0.9)
 	  return 'X';
 	else
 	  return '0';
