@@ -76,7 +76,7 @@ static void draw_pin(GdkDrawable  *drawable,
 #define XOFFSET 20
 #define YOFFSET 20
 
-static void update(Breadboard_Window *bbw)
+void BreadboardWindow_update(Breadboard_Window *bbw)
 {
     int dy;
     GtkWidget *widget = bbw->da;
@@ -203,7 +203,7 @@ static gint configure_event (GtkWidget *widget,
 				 widget->allocation.width,
 				 widget->allocation.height,
 				 -1);
-    update(bbw);
+    BreadboardWindow_update(bbw);
 
     return TRUE;
 }
@@ -239,7 +239,7 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
     }
 
     bbw  = (Breadboard_Window *) (xref->parent_window);
-    update(bbw);
+    BreadboardWindow_update(bbw);
 }
 
 static int delete_event(GtkWidget *widget,
@@ -420,7 +420,7 @@ void BreadboardWindow_new_processor(Breadboard_Window *bbw, GUI_Processor *gp)
 	gpsim_assign_pin_xref(pic_id,pin, cross_reference);
     }
     
-    update(bbw);
+    BreadboardWindow_update(bbw);
 }
 
 int BuildBreadboardWindow(Breadboard_Window *bbw)

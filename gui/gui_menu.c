@@ -371,6 +371,48 @@ toggle_window (gpointer             callback_data,
     }
 }
 
+static void 
+runbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_run(gp->pic_id);
+}
+
+static void 
+stopbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_stop(gp->pic_id);
+}
+    
+static void 
+stepbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_step(gp->pic_id, 1);
+}
+    
+static void 
+overbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_step_over(gp->pic_id);
+}
+    
+static void 
+returnbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_return(gp->pic_id);
+}
+
+static void 
+resetbutton_cb(GtkWidget *widget)
+{
+    if(gp)
+	gpsim_reset(gp->pic_id);
+}
+    
 static GtkItemFactoryCallback
 gtk_ifactory_cb (gpointer             callback_data,
 		 guint                callback_action,
@@ -431,7 +473,8 @@ void create_dispatcher (void)
   if (!dispatcher_window)
     {
       GtkWidget *box1;
-      GtkWidget *box2;
+//      GtkWidget *box2;
+      GtkWidget *buttonbox;
       GtkWidget *separator;
       GtkWidget *button;
       GtkAccelGroup *accel_group;
@@ -478,25 +521,77 @@ void create_dispatcher (void)
 			  FALSE, FALSE, 0);
 
 
+      
+      buttonbox = gtk_hbox_new(TRUE,0);
+      gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
+      gtk_box_pack_start (GTK_BOX (box1), buttonbox, TRUE, TRUE, 0);
+
+      
+      
+      // Buttons
+      button = gtk_button_new_with_label ("step");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) stepbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+      
+      button = gtk_button_new_with_label ("over");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) overbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+
+      button = gtk_button_new_with_label ("return");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) returnbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+
+      button = gtk_button_new_with_label ("run");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) runbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+
+      button = gtk_button_new_with_label ("stop");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) stopbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+
+      button = gtk_button_new_with_label ("reset");
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) resetbutton_cb, NULL);
+      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+
+
+
+
+      
+      
+      
       separator = gtk_hseparator_new ();
-      gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
+      gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
 
 
-      box2 = gtk_vbox_new (FALSE, 10);
-      gtk_container_set_border_width (GTK_CONTAINER (box2), 10);
-      gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, TRUE, 0);
+
+      
+//      box2 = gtk_vbox_new (FALSE, 10);
+//      gtk_container_set_border_width (GTK_CONTAINER (box2), 10);
+//      gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, TRUE, 0);
 
       button = gtk_button_new_with_label ("Quit gpsim");
       /*      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
 				 GTK_SIGNAL_FUNC(gtk_widget_destroy),
 				 GTK_OBJECT (dispatcher_window));
       */
-  gtk_signal_connect(GTK_OBJECT(button), "clicked",
-		     (GtkSignalFunc) do_quit_app, NULL);
+      gtk_signal_connect(GTK_OBJECT(button), "clicked",
+			 (GtkSignalFunc) do_quit_app, NULL);
 
-      gtk_box_pack_start (GTK_BOX (box2), button, TRUE, TRUE, 0);
-      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-      gtk_widget_grab_default (button);
+      gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
+//      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+//      gtk_widget_grab_default (button);
 
       gtk_widget_show_all (dispatcher_window);
       

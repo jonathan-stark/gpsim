@@ -618,6 +618,36 @@ void gpsim_run(unsigned int processor_id)
   pic->run();
 }
 //--------------------------------------------------------------------------
+void gpsim_stop(unsigned int processor_id)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return;
+
+  puts("Stop not implemented");
+}
+//--------------------------------------------------------------------------
+void gpsim_reset(unsigned int processor_id)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return;
+
+  puts("Reset not implemented");
+}
+//--------------------------------------------------------------------------
+void gpsim_return(unsigned int processor_id)
+{
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return;
+
+  puts("Return not implemented");
+}
+//--------------------------------------------------------------------------
 void gpsim_run_to_address(unsigned int processor_id, unsigned int address)
 {
   pic_processor *pic = get_processor(processor_id);
