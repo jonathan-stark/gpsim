@@ -28,3 +28,5 @@ ${RT} p16f84 p16f84
 ${RT} digital_stim digital_stim
 
 ${RT} p12ce518 p12ce518
+
+${RT} interrupts_14bit interrupts_14bit
