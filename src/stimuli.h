@@ -88,11 +88,14 @@ extern list <Stimulus_Node *> node_list;
 extern list <stimulus *> stimulus_list;
 
 
-class Stimulus_Node : public gpsimValue
+class Stimulus_Node : public gpsimValue, public TriggerObject
 {
 public:
-  bool warned;        // keeps track of node warnings (e.g. floating node, contentiong)
-  double voltage;     // The most recent value of this node
+  bool warned;        // keeps track of node warnings (e.g. floating node, contention)
+  double voltage;     // The most recent target voltage of this node
+  double current_voltage; // voltage as node settles (updated by callbacks)
+  double capacitance; // Most recent capacitance on this node.
+  double resistance;  
 
   stimulus *stimuli;  // Pointer to the first stimulus connected to this node.
   int nStimuli;       // number of stimuli attached to this node.
@@ -106,7 +109,14 @@ public:
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
 
-  // FIXME: do we need this: ?
+  // When the node is settling (due to RC charging/discharging)
+  // it's voltage is periodically updated by invoking callback()
+  virtual void callback(void);
+  virtual void callback_print(void);
+
+  // FIXME: do we need this: ? - no but these are  pure virtual functions
+  // inherited from the gpsimValue class.
+
   virtual unsigned int get_value(void) { return 0;}
   virtual void put_value(unsigned int new_value) { }
 
@@ -136,6 +146,7 @@ public:
   
   double Vth;                // Open-circuit or Thevenin voltage
   double Zth;                // Input or Thevenin resistance
+  double Cth;                // Stimulus capacitance.
 
   double nodeVoltage;        // The voltage driven on to this stimulus by the snode
 
@@ -152,6 +163,9 @@ public:
   virtual void   set_Vth(double v) { Vth = v; }
   virtual double get_Zth() { return Zth; }
   virtual void   set_Zth(double z) { Zth = z; }
+  virtual double get_Cth() { return Cth; }
+  virtual void   set_Cth(double c) { Cth = c; }
+
   virtual double get_nodeVoltage() { return nodeVoltage; }
   virtual void   set_nodeVoltage(double v) { nodeVoltage = v; }
 
