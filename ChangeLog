@@ -1,3 +1,10 @@
+2004-06-14 Scott Dattalo <scott@dattalo.com>
+	* aclocal.m4, configure.in
+	The AC_DEFINE macro was incompletely defined.
+	* acconfig.h: removed from CVS
+	* INSTALL: updated installation instructions for CVS checkouts
+	* doc/gpsim_cvs.html: Added to the CVS
+	
 2004-06-12 Borut Razem <borut.razem@siol.net>
 	* cli/viewable.cc: #warning not recognised by MSVC
 	* eXdbm/eXdbm.vcproj, gui/gui.vcproj, modules.vcproj:
