@@ -1324,7 +1324,7 @@ int Register_Window::SettingsDialog(void)
   return 0;
 }
 
-static void
+static gboolean
 clipboard_handler(GtkWidget *widget, GdkEventKey *key)
 {
   GtkSheet *sheet;
@@ -1346,6 +1346,7 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
     if(key->keyval=='x' || key->keyval == 'X')
             gtk_sheet_unclip_range(sheet);    
   }
+  return 0;
 }
 
 static void 
