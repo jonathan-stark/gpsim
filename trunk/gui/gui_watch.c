@@ -54,6 +54,7 @@ typedef enum {
 typedef struct _menu_item {
     char *name;
     menu_id id;
+    GtkWidget *item;
 } menu_item;
 
 static menu_item menu_items[] = {
@@ -76,6 +77,47 @@ static void remove_entry(Watch_Window *ww, struct watch_entry *entry)
     ww->watches=g_list_remove(ww->watches,entry);
     gpsim_clear_register_xref(entry->pic_id, entry->type, entry->address, entry->xref);
     free(entry);
+}
+
+void update_menus(Watch_Window *ww)
+{
+    GtkWidget *item;
+    struct watch_entry *entry;
+    int i;
+
+    for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+	item=menu_items[i].item;
+	if(menu_items[i].id!=MENU_COLUMNS)
+	{
+	    if(ww)
+	    {
+		entry = gtk_clist_get_row_data(GTK_CLIST(ww->watch_clist),ww->current_row);
+		if(menu_items[i].id!=MENU_COLUMNS && (entry==NULL ||
+						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
+						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
+						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
+						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
+						      (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
+						     ))
+		    gtk_widget_set_sensitive (item, FALSE);
+		else
+		    gtk_widget_set_sensitive (item, TRUE);
+	    }
+	    else
+	    {
+		gtk_widget_set_sensitive (item, FALSE);
+	    }
+	}
+    }
+}
+
+static void unselect_row(GtkCList *clist,
+//			 gint row,
+//			 gint column,
+//			 GdkEvent *event,
+			 Watch_Window *ww)
+{
+    update_menus(NULL);
 }
 
 // called when user has selected a menu item
@@ -202,7 +244,6 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
   GtkWidget *menu;
   GtkWidget *item;
   int i;
-    struct watch_entry *entry;
 
 
   if(sheet==NULL || ww==NULL)
@@ -215,15 +256,19 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
   
   menu=gtk_menu_new();
 
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
-      item=gtk_menu_item_new_with_label(menu_items[i].name);
+      menu_items[i].item=item=gtk_menu_item_new_with_label(menu_items[i].name);
 
       gtk_signal_connect(GTK_OBJECT(item),"activate",
 			 (GtkSignalFunc) popup_activated,
 			 &menu_items[i]);
-      GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+//      GTK_WIDGET_UNSET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
 
-      entry = gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
+/*      entry = gtk_clist_get_row_data(GTK_CLIST(popup_ww->watch_clist),popup_ww->current_row);
 
       if(menu_items[i].id!=MENU_COLUMNS && (
 	 entry==NULL ||
@@ -235,7 +280,7 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
 	))
 	  GTK_WIDGET_UNSET_FLAGS (item,
 				  GTK_SENSITIVE | GTK_CAN_FOCUS);
-
+*/
       
 /*      if(ww->type == REGISTER_EEPROM)
       {
@@ -257,6 +302,8 @@ build_menu(GtkWidget *sheet, Watch_Window *ww)
       gtk_menu_append(GTK_MENU(menu),item);
   }
 
+  update_menus(ww);
+  
   return menu;
 }
 
@@ -265,7 +312,7 @@ static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
 {
 
-    static GtkWidget *popup;
+    GtkWidget *popup;
 //	GdkModifierType mods;
 
   if(widget==NULL || event==NULL || ww==NULL)
@@ -273,24 +320,12 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
       printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)ww);
       return 0;
   }
-  
+  popup=ww->popup_menu;
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
-	if(popup)
-	    g_free(popup);
-
-/*	if (event->window == sheet->column_title_window )
-	    //printf("popup column window\n");
-	    return TRUE;
-	else if (event->window == sheet->row_title_window )
-	    //printf("popup  window\n");
-	    return TRUE;
-	else*/
-	popup=build_menu(widget,ww);
-
-	gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
-		       3, event->time);
+      gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
+		     3, event->time);
     }
     return FALSE;
 }
@@ -382,7 +417,9 @@ static gint watch_list_row_selected(GtkCList *watchlist,gint row, gint column,Gd
     {
 	RegWindow_select_register(gp->regwin_eeprom, entry->address);
     }
-	
+
+    update_menus(ww);
+    
 /*    if(column>=MSBCOL && column<=LSBCOL)
     {
 	// Toggle the bit.
@@ -572,6 +609,8 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
     gpsim_assign_register_xref(pic_id, type, address, (gpointer) cross_reference);
 
     watch_entry->xref=cross_reference;
+    
+    update_menus(ww);
 }
 
 int BuildWatchWindow(Watch_Window *ww)
@@ -590,7 +629,7 @@ int BuildWatchWindow(Watch_Window *ww)
   ww->gui_obj.window = window;
 
   gtk_window_set_title(GTK_WINDOW(ww->gui_obj.window), "Watch Viewer");
-  
+
   width=((GUI_Object*)ww)->width;
   height=((GUI_Object*)ww)->height;
   x=((GUI_Object*)ww)->x;
@@ -625,6 +664,8 @@ int BuildWatchWindow(Watch_Window *ww)
 		     (GtkSignalFunc)watch_click_column,NULL);
   gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"select_row",
 		     (GtkSignalFunc)watch_list_row_selected,ww);
+  gtk_signal_connect(GTK_OBJECT(ww->watch_clist),"unselect_row",
+		     /*(GtkSignalFunc)*/unselect_row,ww);
   
   gtk_signal_connect(GTK_OBJECT(ww->watch_clist),
 		     "button_press_event",
@@ -646,7 +687,10 @@ int BuildWatchWindow(Watch_Window *ww)
 
   gtk_box_pack_start_defaults(GTK_BOX(vbox),scrolled_window);
   
+  ww->popup_menu=build_menu(window,ww);
+  
   gtk_widget_show (window);
+  
   
   ww->gui_obj.enabled=1;
 

@@ -348,13 +348,13 @@ void create_dispatcher (void)
 			  GTK_SIGNAL_FUNC (gtk_true),
 			  NULL);
       
-      accel_group = gtk_accel_group_new ();
+      accel_group = gtk_accel_group_get_default ();
       item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
       gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
 				"<main>",
 				item_factory,
 				(GtkDestroyNotify) gtk_object_unref);
-      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
+//      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
       gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, NULL);
       gtk_window_set_title (GTK_WINDOW (dispatcher_window), GPSIM_VERSION);
       gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);

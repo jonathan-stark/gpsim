@@ -164,6 +164,7 @@ struct _Register_Window {
     
     GtkWidget *entry;
     GtkWidget *location;
+    GtkWidget *popup_menu;
 
     int allow_change_view;
 
@@ -187,6 +188,7 @@ struct _Watch_Window {
     int current_column;
     
     GtkWidget *watch_clist;
+    GtkWidget *popup_menu;
 };
 
 typedef struct _Watch_Window Watch_Window;
@@ -266,6 +268,8 @@ struct _SourceBrowserAsm_Window {
     int pageindex_to_fileid[SBAW_NRFILES];
     GtkWidget *source_pcwidget[SBAW_NRFILES];
     GtkWidget *notebook_child[SBAW_NRFILES];
+    
+    GtkWidget *popup_menu;
 
     struct sa_entry *menu_data;  // used by men callbacks
     

@@ -35,22 +35,38 @@ typedef enum {
     MENU_MOVE_PC,
     MENU_RUN_HERE,
     MENU_BP_HERE,
-    MENU_SELECT_SYMBOL
+    MENU_SELECT_SYMBOL,
+    MENU_STEP,
+    MENU_STEP_OVER,
+    MENU_RUN,
+    MENU_STOP,
+    MENU_RETURN,
+    MENU_RESET
 } menu_id;
 
 
 typedef struct _menu_item {
     char *name;
     menu_id id;
+    GtkWidget *item;
 } menu_item;
 
 static menu_item menu_items[] = {
-    {"Select symbol",   MENU_SELECT_SYMBOL},
-    {"Find PC",         MENU_FIND_PC},
-    {"Run here",        MENU_RUN_HERE},
-    {"Move PC here",    MENU_MOVE_PC},
-    {"Breakpoint here", MENU_BP_HERE},
-    {"Find text...",    MENU_FIND_TEXT},
+    {"Find PC",         MENU_FIND_PC,NULL},
+    {"Run here",        MENU_RUN_HERE,NULL},
+    {"Move PC here",    MENU_MOVE_PC,NULL},
+    {"Breakpoint here", MENU_BP_HERE,NULL},
+    {"Select symbol",   MENU_SELECT_SYMBOL,NULL},
+    {"Find text...",    MENU_FIND_TEXT,NULL},
+};
+
+static menu_item submenu_items[] = {
+    {"Step",            MENU_STEP,NULL},
+    {"Step Over",       MENU_STEP_OVER,NULL},
+    {"Run",             MENU_RUN,NULL},
+    {"Stop",            MENU_STOP,NULL},
+    {"Reset",           MENU_RESET,NULL},
+    {"Return",          MENU_RETURN,NULL},
 };
 
 // this should be in SourceBrowserAsm struct FIXME
@@ -452,6 +468,20 @@ popup_activated(GtkWidget *widget, gpointer data)
 	}
 	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
 	break;
+    case MENU_STEP:
+	gpsim_step(popup_sbaw->sbw.gui_obj.gp->pic_id, 1);
+	break;
+    case MENU_STEP_OVER:
+	gpsim_step_over(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	break;
+    case MENU_RUN:
+	gpsim_run(popup_sbaw->sbw.gui_obj.gp->pic_id);
+	break;
+    case MENU_STOP:
+    case MENU_RESET:
+    case MENU_RETURN:
+	puts("Not implemented");
+	break;
     default:
 	puts("Unhandled menuitem?");
 	break;
@@ -462,41 +492,52 @@ static GtkWidget *
 build_menu(GtkWidget *sheet, SourceBrowserAsm_Window *sbaw)
 {
     GtkWidget *menu;
+    GtkWidget *submenu;
     GtkWidget *item;
     int i;
     int id;
 
-    popup_sbaw=sbaw;
+	popup_sbaw=sbaw;
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
     menu=gtk_menu_new();
-
     for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
 	item=gtk_menu_item_new_with_label(menu_items[i].name);
-	
+	menu_items[i].item=item;
 	gtk_signal_connect(GTK_OBJECT(item),"activate",
 			   (GtkSignalFunc) popup_activated,
 			   &menu_items[i]);
-	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
-	
-	switch(menu_items[i].id){
-	case MENU_SELECT_SYMBOL:
-
-	    // Why does "if(editable->has_selection)" not work? FIXME
-	    if(GTK_EDITABLE(popup_sbaw->source_text[id])->selection_start_pos
-	       ==GTK_EDITABLE(popup_sbaw->source_text[id])->selection_end_pos)
-	    {
-		GTK_WIDGET_UNSET_FLAGS (item,
-					GTK_SENSITIVE | GTK_CAN_FOCUS);
-	    }
-	    break;
-	default:
-	    break;
-	}
 
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(menu),item);
     }
+
+    submenu=gtk_menu_new();
+    item = gtk_tearoff_menu_item_new ();
+    gtk_menu_append (GTK_MENU (submenu), item);
+    gtk_widget_show (item);
+    for (i=0; i < (sizeof(submenu_items)/sizeof(submenu_items[0])) ; i++){
+	item=gtk_menu_item_new_with_label(submenu_items[i].name);
+	submenu_items[i].item=item;
+	gtk_signal_connect(GTK_OBJECT(item),"activate",
+			   (GtkSignalFunc) popup_activated,
+			   &submenu_items[i]);
+
+	GTK_WIDGET_SET_FLAGS (item, GTK_SENSITIVE | GTK_CAN_FOCUS);
+
+	if(submenu_items[i].id==MENU_STOP)
+	{
+	    GTK_WIDGET_UNSET_FLAGS (item,
+				    GTK_SENSITIVE | GTK_CAN_FOCUS);
+	}
+      
+	gtk_widget_show(item);
+	gtk_menu_append(GTK_MENU(submenu),item);
+    }
+    item = gtk_menu_item_new_with_label ("Controls");
+    gtk_menu_append (GTK_MENU (menu), item);
+    gtk_widget_show (item);
+    gtk_menu_item_set_submenu (GTK_MENU_ITEM (item), submenu);
 
     return menu;
 }
@@ -511,6 +552,8 @@ static gint sigh_button_event(GtkWidget *widget,
 		       SourceBrowserAsm_Window *sbaw)
 {
     int id;
+    int i;
+    GtkWidget *item;
 
     assert(event&&sbaw);
 
@@ -520,17 +563,36 @@ static gint sigh_button_event(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
     {
-	static GtkWidget *popup=NULL;
- 
-	if(popup)
-	    g_free(popup);
+	GtkWidget *popup=NULL;
 
-	popup=build_menu(widget,sbaw);
-
-	gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
-		       3, event->time);
+	popup_sbaw=sbaw;
 
 	sbaw->menu_data = gui_pixel_to_entry(id, (int) (event->y + GTK_TEXT(sbaw->source_text[id])->vadj->value));
+
+	
+	for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+	    item=menu_items[i].item;
+	    
+	    switch(menu_items[i].id){
+	    case MENU_SELECT_SYMBOL:
+		// Why does "if(editable->has_selection)" not work? FIXME
+		if(GTK_EDITABLE(popup_sbaw->source_text[id])->selection_start_pos
+		   ==GTK_EDITABLE(popup_sbaw->source_text[id])->selection_end_pos)
+		{
+		    gtk_widget_set_sensitive (item, FALSE);
+		}
+		else
+		{
+		    gtk_widget_set_sensitive (item, TRUE);
+		}
+		break;
+	    default:
+		break;
+	    }
+	}
+
+	gtk_menu_popup(GTK_MENU(sbaw->popup_menu), NULL, NULL, NULL, NULL,
+		       3, event->time);
 
 	// override source_text[id]'s handler
 	// is there a better way? FIXME
@@ -1658,7 +1720,8 @@ void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw)
   
     sbaw->notebook = gtk_notebook_new();
     gtk_widget_show(sbaw->notebook);
-    
+
+    sbaw->popup_menu=build_menu(sbaw->notebook,sbaw);
 
     gtk_box_pack_start (GTK_BOX (sbaw->sbw.vbox), sbaw->notebook, TRUE, TRUE, 0);
 

@@ -34,6 +34,8 @@ typedef enum {
 } menu_id;
 
 
+
+
 typedef struct _menu_item {
     char *name;
     menu_id id;
@@ -47,6 +49,7 @@ static menu_item menu_items[] = {
     {"Set break on write value...", MENU_BREAK_WRITE_VALUE},
     {"Add watch", MENU_ADD_WATCH},
 };
+
 
 // Used only in popup menus
 Register_Window *popup_rw;
@@ -153,7 +156,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     GtkSheet *sheet;
 
     menu_item *item;
-
     int i,j;
     unsigned int pic_id;
     GtkSheetRange range;
@@ -234,12 +236,12 @@ popup_activated(GtkWidget *widget, gpointer data)
 }
 
 
-// helper function, called from do_popup
 static GtkWidget *
 build_menu(GtkWidget *sheet, Register_Window *rw)
 {
   GtkWidget *menu;
   GtkWidget *item;
+//  GtkAccelGroup *accel_group;
   int i;
 
   if(sheet==NULL || rw==NULL)
@@ -248,10 +250,19 @@ build_menu(GtkWidget *sheet, Register_Window *rw)
       return NULL;
   }
     
-  popup_rw = rw;
-  
   menu=gtk_menu_new();
 
+/*  accel_group = gtk_accel_group_new ();
+  gtk_accel_group_attach (accel_group, GTK_OBJECT (rw->gui_obj.window));
+  
+  gtk_menu_set_accel_group (GTK_MENU (menu), accel_group);
+  */
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  
   for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
       item=gtk_menu_item_new_with_label(menu_items[i].name);
 
@@ -265,21 +276,10 @@ build_menu(GtkWidget *sheet, Register_Window *rw)
 	  GTK_WIDGET_UNSET_FLAGS (item,
 				  GTK_SENSITIVE | GTK_CAN_FOCUS);
       }
-/*      switch(menu_items[i].id){
-      case MENU_BREAK_READ:
-      case MENU_BREAK_WRITE:
-      case MENU_BREAK_CLEAR:
-	  break;
-      default:
-          GTK_WIDGET_UNSET_FLAGS (item,
-             GTK_SENSITIVE | GTK_CAN_FOCUS);
-	  break;
-      }*/
-      
       gtk_widget_show(item);
       gtk_menu_append(GTK_MENU(menu),item);
   }
-
+  
   return menu;
 }
 
@@ -288,10 +288,12 @@ static gint
 do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
 {
 
-    static GtkWidget *popup;
+    GtkWidget *popup;
 //	GdkModifierType mods;
     GtkSheet *sheet;
 
+    popup=rw->popup_menu;
+    
   if(widget==NULL || event==NULL || rw==NULL)
   {
       printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)rw);
@@ -303,20 +305,17 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Register_Window *rw)
     if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
     {
 
-	if(popup)
-	    g_free(popup);
-
-	if (event->window == sheet->column_title_window )
+/*	if (event->window == sheet->column_title_window )
 	    //printf("popup column window\n");
 	    return TRUE;
 	else if (event->window == sheet->row_title_window )
 	    //printf("popup  window\n");
 	    return TRUE;
-	else
-	    popup=build_menu(widget,rw);
-
+	else*/
+	popup_rw = rw;
+  
 	gtk_menu_popup(GTK_MENU(popup), NULL, NULL, NULL, NULL,
-		       3, event->time);
+			   3, event->time);
     }
     return FALSE;
 }
@@ -763,6 +762,7 @@ build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
   gtk_widget_size_request(rw->location, &request);
   gtk_widget_set_usize(rw->location, 160, request.height);
   gtk_box_pack_start(GTK_BOX(status_box), rw->location, FALSE, TRUE, 0);
+  GTK_WIDGET_SET_FLAGS(rw->location,GTK_CAN_DEFAULT);
   gtk_widget_show(rw->location);
 
   rw->entry=gtk_entry_new();
@@ -1234,7 +1234,12 @@ BuildRegisterWindow(Register_Window *rw)
       gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
   }
     
+    GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
+    
   rw->register_sheet = GTK_SHEET(register_sheet);
+
+    /* create popupmenu */
+    rw->popup_menu=build_menu(sheet,rw);
 
   build_entry_bar(main_vbox, rw);
 
@@ -1331,6 +1336,8 @@ BuildRegisterWindow(Register_Window *rw)
 
   gtk_widget_show (window);
 
+  gtk_widget_grab_default(rw->location);
+  
   rw->gui_obj.enabled=1;
   
   for(i=0;i<MAX_REGISTERS;i++)
