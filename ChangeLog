@@ -1,9 +1,13 @@
+2005-01-09 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.def: MSVC sync
+	* doc/gpsimWin32.html: dependedncy on gawk, ...
+
 2005-01-07 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc: stop gap hack - added registers
 	to hold the places of the analog SFR's
 	* cli/socket.cc, src/protocol.h, src/value.cc, src/value.h:
 	More socket improvements.
-	
+
 2005-01-05 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/gpsim_classes.h, src/gpsim_interface.h,
 	src/interface.cc, src/modules.cc, src/modules.h,
@@ -15,7 +19,7 @@
 2005-01-02 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, cli/input.cc, src/interface.cc: Added function
 	'gUseThreads()' and use it to run-time select the usage of threads.
-	
+
 2005-01-02 Borut Razem <borut.razem@siol.net>
 	* gui/gui_break.cc, gui/dialog.cc, gui/gui_init.cc, gui/gui_menu.cc,
 	  gui/gui_processor.cc, gui/gui_src.cc, gui/gui_src_asm.cc
@@ -30,7 +34,6 @@
 2004-12-17 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, src/interface.cc, cli/socket.cc: removed
 	dependencies on GTK 2.0.
-
 
 2004-12-19 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: added examples/scripts/client_interface.h

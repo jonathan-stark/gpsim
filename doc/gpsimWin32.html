@@ -36,12 +36,15 @@ gcc -mno-cygwin compiler using makefile.mingw make files (&quot;Official&quot; b
 <p>Some additional GNU tools are required to build gpsim:</p>
 <ul>
   <li>bison (or some other yacc compatible parser generator)</li>
-  <li>flex (or some other lex compatible lexical analyzer generator)</li>
+  <li>flex (or some other lex compatible lexical analyzer generator). The 
+  recommended flex version is 2.5.4. Gpsim doesn&#39;t compile with flex version 
+  2.5.31!</li>
+  <li>gawk (or some other awk compatible interpreter)</li>
   <li>GNU make for MinGW compilation</li>
 </ul>
-<p>The recommended installation for bison and flex is from 
+<p>The recommended installation for bison, flex and gawk is from 
 <a href="http://www.cygwin.com">Cygwin</a> environment. The other possibility 
-is to use nativeWIN32 ports of bison and flex, which are part of 
+is to use nativeWIN32 ports of bison, flex and gawk, which are part of 
 <a href="http://unxutils.sourceforge.net">UnxUtils</a> project 
 and <a href="http://gnuwin32.sourceforge.net">GnuWin32</a> project.</p>
 <p>Cygwin environment is required (or at least recommended) for WIN32 native 
@@ -50,9 +53,9 @@ compilation of additional packages.<br />
 <h2 align="center">How to set up development environment for WIN32 port of gpsim</h2>
 <h3 align="left">Cygwin installation:</h3>
 <p align="left">Select DOS as the Default Text File type. In the Devel Category 
-select bison, flex, make, gcc, gcc-g++, gcc-mingw-core and&nbsp; gcc-mingw-g++ 
+select bison, flex, gawk, make, gcc, gcc-g++, gcc-mingw-core and&nbsp; gcc-mingw-g++ 
 packages.<br />
-You have to have c:\cygwin\bin specified in the PATH environment variable, but I 
+You have to have C:\cygwin\bin specified in the PATH environment variable, but I 
 think that this is done by default from the Cygwin installation.</p>
 <p align="left">In Microsoft Visual Studio .NET 2003 select Tools/Options...<br />
 In the Options dialog select Projects VC++ Directories and add C:\cygwin\bin 
@@ -114,8 +117,7 @@ addition to popt and glib, mentioned in the CLI section:</p>
   Software and released under the LGPL license.
     <ul>
       <li>
-      <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a>: modified sources 
-      from. Sources from the package can be successfully compiled on WIN32 
+      <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a>: modified sources. Sources from the package can be successfully compiled on WIN32 
       using Cygwin gcc -mno-cygwin native compilation, on Red Hat Linux 9.0 and 
       on Fedora Core 3.</li>
       <li>
@@ -124,10 +126,13 @@ addition to popt and glib, mentioned in the CLI section:</p>
       <a href="#gtk_extra_src">gtk+extra-2-src-*.tar.gz</a></li>
     </ul>
   </li>
-  <li>pthreads - The <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> package implements Posix Threads on Win32. Note, pthreads are only currently used in modules and in particular the usart module.
+  <li>pthreads - The 
+  <a name="pthreads-win32" href="http://sources.redhat.com/pthreads-win32/">pthreads-win32</a> package implements Posix Threads on Win32. Note, pthreads are only currently used in modules and in particular the usart module.
     <ul>
       <li>
-      <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> is an ftp directory containing the latest dll builds. The contents of this directory can be copied to gpsim_proj/pthreads/
+      <a href="#pthreads">pthreads-*-*-*.exe</a>: sources, header files, static 
+      libraries and DLLs, required for gpsim modules development and by gpsim 
+      modules runtime.
       </li>
     </ul>
   </li>
@@ -230,19 +235,21 @@ compilation)</span>:</b></h3>
     to gtkextra-2\lib\libgtkextra-win32-2.0.lib</li>
     </ul>
   </li>
-  <li>Create the pthreads directory and copy the <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a> to it.</li>
+  <li>Unpack <a href="#pthreads">pthreads-*-*-*.exe</a> self extracting archive 
+  to some directory and copy the contents of&nbsp; the Pre-built directory to pthreads.</li>
   <li>
   Compile gpsim native WIN32 port:<ul>
-  <li><p>For MinGW compilation, you have to compile the radline DLL. Run the 
+    <li>
+    <p>For MinGW compilation, you have to compile the radline DLL. Run the 
   shell, go to the readline/win32/shlib subdirectory and execute:</p>
-  <pre>make -f GNUmakefile</pre>
-  <p>Go to the gpsim subdirectory and execute:</p>
-  <pre>make -f makefile.mingw</pre>
+    <pre>make -f GNUmakefile</pre>
+    <p>Go to the gpsim subdirectory and execute:</p>
+    <pre>make -f makefile.mingw</pre>
+    </li>
+    <li>For VS .NET compilation double-click on gpsim.sln to start the Microsoft Visual Studio .NET 2003, select Debug GUI or Release GUI solution configuration and rebuild the solution.
+    </li>
+  </ul>
   </li>
-  <li>For VS .NET compilation double-click on gpsim.sln to start the Microsoft Visual Studio .NET 2003, select Debug GUI or Release GUI solution configuration and rebuild the solution.
-  </li>
-</ul>
-</li>
 </ul>
 <pre>gpsim_proj
   |
@@ -290,8 +297,9 @@ compilation)</span>:</b></h3>
 </ul>
 <h3><b>Modules:</b></h3>
 <ul>
-  <li>Extract bin\pthreadVC.dll from 
-  <a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/lib/">pthreads latest</a> and copy it it to the same directory where gpsim.exe resides.</li>
+  <li>Unpack <a href="#pthreads">pthreads-*-*-*.exe</a> self extracting archive 
+  to some directory and copy file Pre-built\lib\pthreadVC1.dll to the same 
+  directory where gpsim.exe resides.</li>
 </ul>
 <h2 align="center">gpsimWin32 snapshots</h2>
 <p>gpsimWin32 snapshots can be found at <a href="http://gpsim.sourceforge.net/snap.php">http://gpsim.sourceforge.net/snap.php.</a><br />
@@ -345,15 +353,15 @@ project:</p>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/readline-4.3-5-mswin32.zip" name="readline_mswin32">readline-4.3-5-mswin32.zip</a></li>
       <li>
-      From <a href="http://sources.redhat.com/pthreads-win32/" name="pthreads-win32">pthreads-win32</a> get
-<a href="ftp://sources.redhat.com/pub/pthreads-win32/dll-latest/" name="dll-latest">dll-latest</a></li>
+      <a href="ftp://sources.redhat.com/pub/pthreads-win32/pthreads-2005-01-03.exe" name="pthreads">
+      pthreads-2005-01-03.exe</a></li>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-dev-1.1.0-20050102.zip" name="gtk_extra_dev">gtk+extra-2-dev-1.1.0-20050102.zip</a></li>
       <li>
       <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2-src-1.1.0-20050102.tar.gz" name="gtk_extra_src">gtk+extra-2-src-1.1.0-20050102.tar.gz</a></li>
     </ul>
 <hr />
-<p>Last update: January 2, 2005 by Borut Ražem</p>
+<p>Last update: January 9, 2005 by Borut Ražem</p>
 <table border="0" width="100%">
   <tr>
     <td align="center">
