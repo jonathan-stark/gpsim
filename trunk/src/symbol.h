@@ -66,7 +66,7 @@ enum SYMBOL_TYPE
 class Symbol_Table
 {
 public:
-  void add(symbol*);
+  void add(Value*);
 
   void add_ioport(IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
@@ -162,6 +162,7 @@ public:
   virtual void get(int &);
   virtual void get(gint64 &);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   virtual void set(int);
   virtual void set(Value *);
@@ -260,6 +261,7 @@ public:
   virtual void get(gint64 &);
   virtual void get(double &);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
 };
 

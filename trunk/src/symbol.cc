@@ -92,7 +92,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 }
 
-void Symbol_Table::add(symbol *s)
+void Symbol_Table::add(Value *s)
 {
   if(s)
     st.push_back(s);
@@ -124,8 +124,6 @@ void Symbol_Table::add_w(WREG *new_w)
 
 void Symbol_Table::add_constant(const char *_name, int value)
 {
-
-  //  constant_symbol *sc = new constant_symbol(new_name, value);
 
   Integer *i = new Integer(value);
   i->new_name(_name);
@@ -419,6 +417,16 @@ void register_symbol::get(char *buffer, int buf_size)
 
 }
 
+void register_symbol::get(Packet &p)
+{
+  if(reg) {
+    unsigned int i = reg->get_value();
+    p.EncodeUInt32(i);
+  }
+
+}
+
+
 void register_symbol::set(int new_value)
 {
   if(reg)
@@ -462,10 +470,7 @@ void register_symbol::set(Packet &p)
 {
   unsigned int i;
   if(p.DecodeUInt32(i)) {
-
-    RegisterValue rv(i,0);
-
-    reg->putRV_notrace(rv);
+    set((int)i);
   }
 
 }
@@ -632,6 +637,11 @@ void attribute_symbol::get(char *c, int len)
     attribute->get(c,len);
 }
 
+void attribute_symbol::get(Packet &p)
+{
+  if(attribute)
+    attribute->get(p);
+}
 
 string module_symbol::toString()
 {

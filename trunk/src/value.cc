@@ -107,7 +107,7 @@ void Value::set(Expression *expr)
 
 void Value::set(Packet &pb)
 {
-  cout << "Value is ignoring packet buffer\n";
+  cout << "Value is ignoring packet buffer for set()\n";
 }
 
 void Value::get(gint64 &i)
@@ -145,6 +145,11 @@ void Value::get(char *buffer, int buf_size)
 {
   if(buffer)
     strncpy(buffer,"INVALID",buf_size);
+}
+
+void Value::get(Packet &pb)
+{
+  cout << "Value is ignoring packet buffer for get\n";
 }
 
 bool Value::compare(ComparisonOperator *compOp, Value *rvalue)
@@ -434,6 +439,12 @@ void Boolean::get(char *buffer, int buf_size)
   }
 
 }
+void Boolean::get(Packet &pb)
+{
+  bool b;
+  get(b);
+  pb.EncodeBool(b);
+}
 
 void Boolean::set(Value *v)
 {
@@ -582,6 +593,14 @@ void Integer::get(char *buffer, int buf_size)
     snprintf(buffer,buf_size,"%Ld",i);
   }
 
+}
+void Integer::get(Packet &pb)
+{
+  gint64 i;
+  get(i);
+
+  unsigned int j = (unsigned int) (i &0xffffffff);
+  pb.EncodeUInt32(j);
 }
 
 string Integer::toString()
@@ -795,6 +814,14 @@ void Float::get(char *buffer, int buf_size)
   }
 
 }
+void Float::get(Packet &pb)
+{
+  double d;
+  get(d);
+
+  pb.EncodeFloat(d);
+}
+
 string Float::toString()
 {
   return toString("%#-16.16g");
@@ -912,6 +939,11 @@ void String::get(char *buf, int len)
   if(buf && value) {
     strncpy(buf,value,len);
   }
+}
+
+void String::get(Packet &p)
+{
+  p.EncodeString(value);
 }
 
 /*

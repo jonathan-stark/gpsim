@@ -77,6 +77,7 @@ public:
   virtual void get(gint64 &);
   virtual void get(double &);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   /// compare - this method will compare another object to this 
   /// object. It takes a pointer to a ComparisonOperator as its
@@ -202,6 +203,7 @@ public:
   virtual void get(bool &b);
   virtual void get(int &i);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   virtual void set(bool);
   virtual void set(Value *);
@@ -239,6 +241,7 @@ public:
   virtual void get(gint64 &i);
   virtual void get(double &d);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   virtual void set(gint64 v);
   virtual void set(int);
@@ -279,6 +282,7 @@ public:
   virtual void get(gint64 &i);
   virtual void get(double &d);
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   virtual void set(gint64 v);
   virtual void set(double d);
@@ -316,6 +320,7 @@ public:
   virtual void set(Packet &);
 
   virtual void get(char *, int len);
+  virtual void get(Packet &);
 
   virtual Value *copy();
 
