@@ -142,7 +142,7 @@ LOOP2       DECFSZ  temp, F         ; Delay time = tmp * ((3 * 256) + 3) * Tcy
 
 LCD_TOGGLE_E
         BCF  LCD_CONTROL_PORT,LCD_E     ;Make sure E is low
-  movlw 0
+;  movlw 0
 LTE1:   GOTO    $+1                     ;Delays needed primarily for 10Mhz and faster clocks
         GOTO    $+1
         GOTO    $+1
@@ -153,9 +153,9 @@ LTE1:   GOTO    $+1                     ;Delays needed primarily for 10Mhz and f
         GOTO    LTE1
 
 LTE2:
-  addlw 1
-  skpz 
-    goto LTE2
+;  addlw 1
+;  skpz 
+;    goto LTE2
 
         MOVF    LCD_DATA_PORT, W        ;Read the LCD Data bus
         ANDLW   LCD_DATA_MASK           ;We're only interested in the data lines
