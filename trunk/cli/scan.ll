@@ -231,6 +231,30 @@ int translate_token(int tt)
 
 }
 
+/*************************************************************************
+*
+* handle_identifier
+*
+*  input   string &s
+*          cmd_options **op
+*  output  int 
+*
+*  1 - If `op' is NULL, then handle identifier hasn't been called
+*      for the current command that's being processed. So, the
+*      the string `s' is compared to all of the valid commands.
+*      If it is valid, then `op' is assigned a pointer to the 
+*      options associated with the command. If the string is not
+*      found, then that's a syntax error and the string is ignored.
+*  2 - If `op' is non-NULL, then handle_identifier has been called
+*      at least once before for the command that's being processed.
+*      So the string `s' is then compared to the options associated
+*      with the command. If an option is not found, then the string
+*      is returned to the parser (as a type STRING). This places the
+*      burden of syntax checking on the parser and/or the individual
+*      command.
+*
+*/
+
 int handle_identifier(const string &s, cmd_options **op )
 {
   int retval = 0;

@@ -53,7 +53,7 @@ public:
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
 
-  static Module *construct(void);
+  static Module *construct(char *new_name=NULL);
   void test(void) ;
 };
 

@@ -144,13 +144,24 @@ void add_bus(Stimulus_Node * new_node)
   node_list.push_back(new_node);
 }
 */
+
+/*****************************************************************
+*
+*  stimulus * find_stimulus (string name) 
+* 
+*  Helper function that will search the stimulus list for the stimulus
+* called `name' and return a pointer to it if it's found.
+*
+*/
+
 stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 {
   register int i;
 
-  //cout << "searching for " << name << '\n';
 
-  for (stimulus_iterator = stimulus_list.begin();  stimulus_iterator != stimulus_list.end(); stimulus_iterator++)
+  for (stimulus_iterator = stimulus_list.begin();
+       stimulus_iterator != stimulus_list.end(); 
+       stimulus_iterator++)
     {
       stimulus *t = *stimulus_iterator;
       string s(t->name_str);
@@ -160,6 +171,7 @@ stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
 	  return (t);
 	}
     }
+
   return ((stimulus *)NULL);
 }
 
@@ -316,7 +328,7 @@ int Stimulus_Node::update(unsigned int current_time)
 
   int node_voltage = 0;
 
-  //cout << "getting state of " << name() << '\n';
+  cout << "getting state of " << name() << '\n';
 
   if(stimuli != NULL)
     {
@@ -332,10 +344,11 @@ int Stimulus_Node::update(unsigned int current_time)
       while(sptr)
 	{
 	  node_voltage += sptr->get_voltage(current_time);
-	  //cout << sptr->name() << '\n';
+	  cout << " node " << sptr->name() << " voltage is " << sptr->get_voltage(current_time) <<'\n';
+
 	  sptr = sptr->next;
 	}
-      //cout << "node voltage " << node_voltage << '\n';
+      cout << "node voltage " << node_voltage << '\n';
 
       // 'node_voltage' now represents the most up-to-date value of this node.
       // Now, tell all of the stimuli that are interested:
@@ -1270,6 +1283,9 @@ void stimorb_attach(char *node, char_list *stimuli)
   if(verbose&2)
     cout << " doing an attach (stimuli.cc) node: " << node << '\n';
 
+  if(!node)
+    return;
+
   string s = string(node);
   Stimulus_Node *sn = find_node (s);
 
@@ -1290,5 +1306,8 @@ void stimorb_attach(char *node, char_list *stimuli)
 	  stimuli = stimuli->next;
 	}
     }
+  else {
+    cout << "Warning: Node \"" << node << "\" was not found in the node list\n";
+  }
 
 }

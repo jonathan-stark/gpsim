@@ -58,7 +58,6 @@ public:
 
   char * name_str;
 
-  char *name(void) {return name_str;};
 
   unsigned int interface_id;
 
@@ -67,8 +66,10 @@ public:
   virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
+  char *name(void) {return name_str;};
+  virtual void new_name(char *);
 
-  static Module *construct(void);
+  static Module *construct(char *name);
   Module(void);
 
 };
@@ -79,7 +80,7 @@ class Module_Types
 public:
 
   char *names[2];
-  Module * (*module_constructor) (void);
+  Module * (*module_constructor) (char *module_name=NULL);
 };
 
 
