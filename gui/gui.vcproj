@@ -180,11 +180,20 @@
 			<File
 				RelativePath=".\gui_watch.cc">
 			</File>
+			<File
+				RelativePath=".\settings_exdbm.cc">
+			</File>
+			<File
+				RelativePath="..\plat\win32\settings_reg.cpp">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath="..\plat\win32\config_reg.h">
+			</File>
 			<File
 				RelativePath="..\plat\win32\fd2raw.h">
 			</File>
@@ -196,6 +205,15 @@
 			</File>
 			<File
 				RelativePath=".\gui_interface.h">
+			</File>
+			<File
+				RelativePath=".\settings.h">
+			</File>
+			<File
+				RelativePath=".\settings_exdbm.h">
+			</File>
+			<File
+				RelativePath="..\plat\win32\settings_reg.h">
 			</File>
 		</Filter>
 		<Filter

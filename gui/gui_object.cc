@@ -40,14 +40,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui_callbacks.h"
 
-#undef TRUE
-#undef FALSE
-
-extern "C" {
-#include "../eXdbm/eXdbm.h"
-}
-extern DB_ID dbid;
-
 
 GUI_Object::GUI_Object(void)
 {
@@ -239,142 +231,28 @@ int GUI_Object::set_config(void)
 }
 
 
-
 //------------------------------------------------------------------------
 // Helper functions for setting and retrieving variables stored in
 // gpsim configuration file.
 
-int config_set_string(char *module, char *entry, const char *string)
+int config_set_string(const char *module, const char *entry, const char *str)
 {
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, 0, module);
-    if(list==0)
-    {
-	ret = eXdbmCreateList(dbid, 0, module, 0);
-	if(ret==-1)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-	
-	list = eXdbmGetList(dbid, 0, module);
-	if(list==0)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-    }
-
-    // We have the list
-    
-    ret = eXdbmChangeVarString(dbid, list, entry, (char *)string);
-    if(ret == -1)
-    {
-	ret = eXdbmCreateVarString(dbid, list, entry, 0, (char *)string);
-	if(ret==-1)
-	{
-	    puts("\n\n\n\ndidn't work");
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    puts("\n\n\n\n");
-	    return 0;
-	}
-    }
-    ret=eXdbmUpdateDatabase(dbid);
-    if(ret==-1)
-    {
-	puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	return 0;
-    }
-    return 1;
+  return settings->set(module, entry, str);
 }
 
-int config_set_variable(char *module, char *entry, int value)
+int config_set_variable(const char *module, const char *entry, int value)
 {
-  int ret;
-  DB_LIST list;
-
-  if(!module || !entry)
-    return 0;
-
-  list = eXdbmGetList(dbid, 0, module);
-  if(list==0)
-    {
-      ret = eXdbmCreateList(dbid, 0, module, 0);
-      if(ret==-1)
-	{
-	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	  return 0;
-	}
-	
-      list = eXdbmGetList(dbid, 0, module);
-      if(list==0)
-	{
-	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	  return 0;
-	}
-    }
-
-  // We have the list
-    
-  ret = eXdbmChangeVarInt(dbid, list, entry, value);
-  if(ret == -1)
-    {
-      ret = eXdbmCreateVarInt(dbid, list, entry, 0, value);
-      if(ret==-1)
-	{
-	  puts("\n\n\n\ndidn't work");
-	  puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	  puts("\n\n\n\n");
-	  return 0;
-	}
-    }
-  ret=eXdbmUpdateDatabase(dbid);
-  if(ret==-1)
-    {
-      puts(eXdbmGetErrorString(eXdbmGetLastError()));
-      return 0;
-    }
-  return 1;
+  return settings->set(module, entry, value);
 }
 
-int config_get_variable(char *module, char *entry, int *value)
+int config_get_variable(const char *module, const char *entry, int *value)
 {
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, 0, module);
-    if(list==0)
-	return 0;
-
-    // We have the list
-    
-    ret = eXdbmGetVarInt(dbid, list, entry, value);
-    if(ret == -1)
-	return 0;
-    
-    return 1;
+  return settings->get(module, entry, value);
 }
 
-int config_get_string(char *module, char *entry, char **string)
+int config_get_string(const char *module, const char *entry, char **str)
 {
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, 0, module);
-    if(list==0)
-	return 0;
-
-    // We have the list
-    
-    ret = eXdbmGetVarString(dbid, list, entry, string);
-    if(ret == -1)
-	return 0;
-    
-    return 1;
+  return settings->get(module, entry, str);
 }
-
-
 
 #endif  // HAVE_GUI

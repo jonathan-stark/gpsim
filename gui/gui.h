@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/modules.h"
 #include "../src/processor.h"
 #include "../src/pic-processor.h"
+#include "settings.h"
 
 #define SBAW_NRFILES 20 // Max number of source files
 //#define MAX_BREAKPOINTS 32
@@ -117,11 +118,12 @@ void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_valu
 
 
 // Configuration -- records window states.
+extern Settings *settings;
 
-int config_get_variable(char *module, char *entry, int *value);
-int config_set_variable(char *module, char *entry, int value);
-int config_get_string(char *module, char *entry, char **string);
-int config_set_string(char *module, char *entry, const char *string);
+int config_get_variable(const char *module, const char *entry, int *value);
+int config_set_variable(const char *module, const char *entry, int value);
+int config_get_string(const char *module, const char *entry, char **string);
+int config_set_string(const char *module, const char *entry, const char *string);
 
 gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
