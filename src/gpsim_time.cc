@@ -115,8 +115,11 @@ void Cycle_Counter_breakpoint_list::clear()
 
 void Cycle_Counter_breakpoint_list::invoke()
 {
-  if(f)
-    f->callback();
+  if(bActive) {
+    clear();
+    if(f)
+      f->callback();
+  }
 }
 
 //--------------------------------------------------
@@ -224,7 +227,7 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
       l1->next->break_value = future_cycle;
       l1->next->f = f;
       l1->next->breakpoint_number = bpn;
-
+      l1->next->bActive = true;
 
 
       if(f)
@@ -239,7 +242,6 @@ bool Cycle_Counter::set_break(guint64 future_cycle, TriggerObject *f, unsigned i
     }
 
   break_on_this = active.next->break_value;
-  active.next->bActive = true;
 
   return 1;
 }
@@ -372,8 +374,42 @@ void Cycle_Counter::clear_break(guint64 at_cycle)
 
 }
 
+//------------------------------------------------------------------------
+// breakpoint
+//
+// When the cycle counter has encountered a cycle that has a breakpoint,
+// this routine is called.
+//
 
+void Cycle_Counter::breakpoint()
+{
+  // There's a break point set on this cycle. If there's a callback function, then call
+  // it other wise halt execution by setting the global break flag.
 
+  // Loop in case there are multiple breaks
+  //while(value == break_on_this && active.next) {
+  while(active.next  && value == active.next->break_value) {
+	
+
+    if(active.next->f) {
+      // This flag will get set true if the call back
+      // function moves the break point to another cycle.
+      Cycle_Counter_breakpoint_list  *l1 = active.next;
+      //reassigned = false;
+      l1->bActive = false;
+      l1->f->callback();
+      if(!l1->bActive)
+	clear_current_break();
+    } else {
+      get_bp().check_cycle_break(active.next->breakpoint_number);
+      clear_current_break();
+    }
+  }
+
+  if(active.next)
+    break_on_this = active.next->break_value;
+
+}
 //------------------------------------------------------------------------
 // reassign_break
 //   change the cycle of an existing break point.
@@ -455,6 +491,13 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
 #ifdef __DEBUG_CYCLE_COUNTER__
     cout << " found old ";
 #endif
+    if(l1->next->bActive == false) {
+      cout << "CycleCounter - reassigning in active break ";
+      if(l1->next->f)
+	l1->next->f->callback_print();
+      cout << endl;
+    }
+      
 
     if(new_cycle > old_cycle) {
 
@@ -635,12 +678,13 @@ void Cycle_Counter::clear_current_break(void)
 #endif
       Cycle_Counter_breakpoint_list  *l1;
 
+      active.next->bActive = false;
       l1 = inactive.next;                  // ptr to 1st inactive bp
       inactive.next = active.next;         // let the 1st active bp become the 1st inactive one
       active.next = active.next->next;     // The 2nd active bp is now the 1st
       inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
 
-      if(active.next != 0) {
+      if(active.next) {
 	break_on_this = active.next->break_value;
 	active.next->prev = &active;
       } else

@@ -114,34 +114,7 @@ public:
     breakpoint() is called.
   */
 
-  void breakpoint(void)
-    {
-      // There's a break point set on this cycle. If there's a callback function, then call
-      // it other wise halt execution by setting the global break flag.
-
-      // Loop in case there are multiple breaks
-      //while(value == break_on_this && active.next) {
-      while(active.next  && value == active.next->break_value) {
-	
-
-	reassigned = false;
-	if(active.next->f) {
-	  // This flag will get set true if the call back
-	  // function moves the break point to another cycle.
-
-	  active.next->f->callback();
-
-	} else 
-	  get_bp().check_cycle_break(active.next->breakpoint_number);
-
-	if(!reassigned)    // don't try to clear if the break point was reassigned.
-	  clear_current_break();
-
-	if(active.next)
-	  break_on_this = active.next->break_value;
-
-      }
-    }
+  void breakpoint(void);
 
  public:
   /*
