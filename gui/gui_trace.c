@@ -51,18 +51,14 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
   char str[TRACE_STRING];
   GtkSheet *sheet;
 
-
-  //struct watch_entry *entry;
   Trace_Window *tw;
 
-  //  printf("trace update in gui\n");
   if(xref == NULL)
     {
       printf("Warning gui_trace.c: xref_update: xref=%x\n",(unsigned int)xref);
       return;
     }
 
-  //entry = (struct watch_entry*) xref->data;
   tw  = (Trace_Window *) (xref->parent_window);
   if(  (tw == NULL)  || (!((GUI_Object*)tw)->enabled))
     return;
@@ -76,31 +72,32 @@ static void xref_update(struct cross_reference_to_gui *xref, int new_value)
       return;
     }
 
+  str[0] = 0;  // Assume that the trace is empty.
   gpsim_get_current_trace(&cycle, str, TRACE_STRING);
 
   if(str[0] && (cycle>=tw->last_cycle)) {
     tw->last_cycle = cycle;
 
-    //printf("Gui trace %s\n",str);
-
     sheet=GTK_SHEET(tw->trace_sheet);
     gtk_sheet_freeze(sheet);
 
+    // Delete the first row in the sheet
     gtk_sheet_delete_rows(sheet,0,1);
 
+    // and then add a row at the end for the new trace data
     gtk_sheet_add_row(sheet,1);
 
     gtk_sheet_set_cell(sheet,
 		       sheet->maxrow,
 		       1,  // column
-		       GTK_JUSTIFY_RIGHT,str);
+		       GTK_JUSTIFY_LEFT,str);
 
     sprintf(str,"%016x", cycle);
 
     gtk_sheet_set_cell(sheet,
 		       sheet->maxrow,
 		       0,  // column
-		       GTK_JUSTIFY_RIGHT,str);
+		       GTK_JUSTIFY_LEFT,str);
     gtk_sheet_thaw(sheet);
   }
 
@@ -162,18 +159,18 @@ void TraceWindow_update(Trace_Window *tw)
 
     // update the most recent cycles
     
-    gtk_sheet_delete_rows(sheet,0,1);
+    //gtk_sheet_delete_rows(sheet,0,1);
 
-    gtk_sheet_add_row(sheet,1);
-    sprintf(buffer,"%016x", cycle);
+    //gtk_sheet_add_row(sheet,1);
+    //sprintf(buffer,"%016x", cycle);
 
     //gtk_sheet_row_button_add_label(sheet, sheet->maxrow, buffer);
     //gtk_sheet_set_row_title(sheet, sheet->maxrow, buffer);
 
-    gtk_sheet_set_cell(sheet,
-		       sheet->maxrow,
-		       0,  // column
-		       GTK_JUSTIFY_RIGHT,buffer);
+    //gtk_sheet_set_cell(sheet,
+    //	       sheet->maxrow,
+    //	       0,  // column
+    //	       GTK_JUSTIFY_RIGHT,buffer);
 
 
   }
