@@ -419,7 +419,7 @@ void Indirect_Addressing::put_fsr(unsigned int new_fsr)
 void Indirect_Addressing::update_fsr_value(void)
 {
 
-  if(current_cycle != cpu->cycles.value)
+  if(current_cycle != cycles.value)
     {
       fsr_value = (fsrh.value << 8) |  fsrl.value;
       fsr_delta = 0;
@@ -436,11 +436,11 @@ void Indirect_Addressing::update_fsr_value(void)
 void Indirect_Addressing::preinc_fsr_value(void)
 {
 
-  if(current_cycle != cpu->cycles.value)
+  if(current_cycle != cycles.value)
     {
       fsr_value += (fsr_delta+1);
       fsr_delta = 0;
-      current_cycle = cpu->cycles.value;
+      current_cycle = cycles.value;
       put_fsr(fsr_value);
     }
 
@@ -449,11 +449,11 @@ void Indirect_Addressing::preinc_fsr_value(void)
 void Indirect_Addressing::postinc_fsr_value(void)
 {
 
-  if(current_cycle != cpu->cycles.value)
+  if(current_cycle != cycles.value)
     {
       fsr_value += fsr_delta;
       fsr_delta = 1;
-      current_cycle = cpu->cycles.value;
+      current_cycle = cycles.value;
       put_fsr(fsr_value+1);
       
     }
@@ -462,11 +462,11 @@ void Indirect_Addressing::postinc_fsr_value(void)
 void Indirect_Addressing::postdec_fsr_value(void)
 {
 
-  if(current_cycle != cpu->cycles.value)
+  if(current_cycle != cycles.value)
     {
       fsr_value += fsr_delta;
       fsr_delta = -1;
-      current_cycle = cpu->cycles.value;
+      current_cycle = cycles.value;
       put_fsr(fsr_value-1);
       
     }
@@ -556,7 +556,7 @@ void Program_Counter16::increment(void)
   // counter).
 
   cpu->pcl->value = value & 0xff;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -578,7 +578,7 @@ void Program_Counter16::skip(void)
   // counter).
 
   cpu->pcl->value = value & 0xff;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -596,12 +596,12 @@ void Program_Counter16::jump(unsigned int new_address)
 
   cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
-  cpu->cycles.increment();
+  cycles.increment();
   
   trace.cycle_increment(); 
   trace.program_counter(value);
 
-  cpu->cycles.increment();
+  cycles.increment();
 
 }
 
@@ -619,12 +619,12 @@ void Program_Counter16::interrupt(unsigned int new_address)
 
   cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
-  cpu->cycles.increment();
+  cycles.increment();
   
   trace.cycle_increment(); 
   trace.program_counter(value);
 
-  cpu->cycles.increment();
+  cycles.increment();
 
 }
 
@@ -650,7 +650,7 @@ void Program_Counter16::computed_goto(unsigned int new_address)
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
   value--;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -664,8 +664,8 @@ void Program_Counter16::new_address(unsigned int new_value)
   trace.program_counter(value);
 
   cpu->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
-  cpu->cycles.increment();
-  cpu->cycles.increment();
+  cycles.increment();
+  cycles.increment();
 }
 //--------------------------------------------------
 // get_next - get the next address that is just pass the current one
@@ -1271,13 +1271,13 @@ unsigned int TMR0_16::get_value(void)
   //cout << "tmr0_16 get_value\n";
   // If the _TMR0 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
-  if(cpu->cycles.value <= synchronized_cycle)
+  if(cycles.value <= synchronized_cycle)
     return value;
 
   if(get_t0cs() ||  ((t0con->value & T0CON::TMR0ON) == 0))
     return(value);
 
-  int new_value = (cpu->cycles.value - last_cycle)/ prescale;
+  int new_value = (cycles.value - last_cycle)/ prescale;
 
   value = new_value & 0xff;
 
@@ -1290,7 +1290,7 @@ unsigned int TMR0_16::get_value(void)
 void TMR0_16::callback(void)
 {
 
-  //cout<<"_TMR0 rollover: " << hex << cpu->cycles.value << '\n';
+  //cout<<"_TMR0 rollover: " << hex << cycles.value << '\n';
   if((t0con->value & T0CON::TMR0ON) == 0) {
     cout << " tmr0 isn't turned on\n";
     return;

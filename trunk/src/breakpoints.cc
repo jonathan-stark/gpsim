@@ -199,7 +199,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
 	cyc = (cyc<<32) | arg1;
 
 	// The cycle counter does its own break points.
-	if(cpu->cycles.set_break(cyc, f1, breakpoint_number))
+	if(cycles.set_break(cyc, f1, breakpoint_number))
 	  return(breakpoint_number);
 	else
 	  break_status[breakpoint_number].type = BREAK_CLEAR;
@@ -567,7 +567,7 @@ void Breakpoints::dump(void)
 
   //  if(verbose) {
     cout << " Cycle counter break points\n";
-    active_cpu->cycles.dump_breakpoints();
+    cycles.dump_breakpoints();
     // }
 
   if(!have_breakpoints)
@@ -898,7 +898,7 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (simulation_mode == RUNNING) && (simulation_start_cycle != cpu->cycles.value))
+  if( (simulation_mode == RUNNING) && (simulation_start_cycle != cycles.value))
     {
       cout << "Hit a breakpoint!\n";
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
@@ -1194,7 +1194,7 @@ void Log_Register_Write::put(unsigned int new_value)
 
 #endif
 
-  trace_log.register_write(replaced->address, v, cpu->cycles.value);
+  trace_log.register_write(replaced->address, v, cycles.value);
 
 }
 
@@ -1203,14 +1203,14 @@ void Log_Register_Write::setbit(unsigned int bit_number, bool new_value)
 
   replaced->setbit(bit_number,new_value);
   
-  trace_log.register_write( replaced->address, replaced->get_value(), cpu->cycles.value);
+  trace_log.register_write( replaced->address, replaced->get_value(), cycles.value);
 
 }
 
 unsigned int Log_Register_Read::get(void)
 {
   int v = replaced->get();
-  trace_log.register_read(replaced->address, v, cpu->cycles.value);
+  trace_log.register_read(replaced->address, v, cycles.value);
   return v;
 
 }
@@ -1218,7 +1218,7 @@ unsigned int Log_Register_Read::get(void)
 int Log_Register_Read::get_bit(unsigned int bit_number)
 {
   int v = replaced->get_bit(bit_number);
-  trace_log.register_read(replaced->address, v, cpu->cycles.value);
+  trace_log.register_read(replaced->address, v, cycles.value);
   return v;
 
 }
@@ -1237,7 +1237,7 @@ unsigned int Log_Register_Read_value::get(void)
       &&
       (v & break_mask) == break_value)
     {
-	trace_log.register_read_value(replaced->address, v, cpu->cycles.value);
+	trace_log.register_read_value(replaced->address, v, cycles.value);
     }
 
   last_value = v;
@@ -1250,7 +1250,7 @@ int Log_Register_Read_value::get_bit(unsigned int bit_number)
   unsigned int mask = 1<<(bit_number & 7);
 
   if( (break_mask & mask) && (v & mask) == (break_value&mask))
-    trace_log.register_read_value(replaced->address, v, cpu->cycles.value);
+    trace_log.register_read_value(replaced->address, v, cycles.value);
 
   return replaced->get_bit(bit_number);
 }
@@ -1273,7 +1273,7 @@ void Log_Register_Write_value::put(unsigned int new_value)
       &&
       (new_value & break_mask) == break_value)
     {
-      trace_log.register_write_value(replaced->address, break_value, cpu->cycles.value);
+      trace_log.register_write_value(replaced->address, break_value, cycles.value);
     }
   last_value = new_value;
   replaced->put(new_value);
@@ -1301,74 +1301,6 @@ void catch_control_c(int sig)
 
 }
 
-#if HAVE_GUI
-
-//-------------------------------------------------------------------
-//
-/*GuiCallBack gcb;
-
-GuiCallBack::GuiCallBack(void)
-{
-  gui_callback_data = NULL;
-
-  gui_callback = NULL;
-}
-
-//
-//  GuiCallBack::callback 
-// This routine provides an interface back to the gui. A 'cycle' break point
-// will interrupt a running simulation and invoke this routine.
-//
-void GuiCallBack::callback(void)
-{
-
-  if(gui_callback)
-    {
-      gui_callback(gui_callback_data);
-
-      //unsigned int lo = active_cpu->cycles.value.lo + 0x100000;
-      //unsigned int hi = active_cpu->cycles.value.hi;
-      //if(lo < active_cpu->cycles.value.lo) // rollover
-      //hi++;
-      //active_cpu->cycles.set_break(lo, hi, this);
-
-      active_cpu->cycles.set_break(active_cpu->cycles.value + gui_update_rate, this);
-
-    }
-
-
-}
-
-void GuiCallBack::set_break(int cycle, 
-			    void (*new_gui_callback)(gpointer), 
-			    gpointer new_gui_callback_data)
-{
-  active_cpu->cycles.set_break(active_cpu->cycles.value + 0x100000, this);
-
-
-  gui_callback_data = new_gui_callback_data;
-
-  gui_callback = new_gui_callback;
-
-  new_gui_callback(new_gui_callback_data);
-
-}*/
-
-//-------------------------------------------------------------------
-//
-// utility routines to interface with the gui...
-//
-
-// gui_set_cycle_break_point - a C-wrapper for a C++ function...
-
-//void gui_set_cycle_break_point(guint64 cycle, void (*gui_callback)(gpointer), gpointer gui_callback_data)
-//{
-//
-//  gcb.set_break(cycle, gui_callback,gui_callback_data);
-//
-//}
-
-#endif
 
 
 //------------------------------------------------------------------------
@@ -1381,8 +1313,7 @@ void InterfaceObject::callback(void)
 //------------------------------------------------------------------------
 void CyclicBreakPoint::set_break(void)
 {
-  if(pic)
-    pic->cycles.set_break(pic->cycles.value + delta_cycles, this);
+  cycles.set_break(cycles.value + delta_cycles, this);
 }
       
 void CyclicBreakPoint::callback(void)
@@ -1394,14 +1325,13 @@ void CyclicBreakPoint::callback(void)
 
 CyclicBreakPoint::~CyclicBreakPoint(void)
 {
-  if (pic)
-    pic->cycles.clear_break(this);
+  cycles.clear_break(this);
 }
 
 void CyclicBreakPoint::set_delta(guint64 delta)
 {
   if(pic) {
-    pic->cycles.clear_break(this);
+    cycles.clear_break(this);
 
     delta_cycles = delta;
     set_break();

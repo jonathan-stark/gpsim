@@ -377,7 +377,7 @@ class StatusBar_Window {
   labeled_entry *status;
   labeled_entry *W;
   labeled_entry *pc;
-  labeled_entry *cycles;
+  labeled_entry *cpu_cycles;
   labeled_entry *time;
   
   int created;
@@ -725,7 +725,7 @@ struct cycle_histogram_counter{
     // the differences in cycle counter to:
     unsigned int start_address; // Start profile address
     unsigned int stop_address; // Stop profile address
-    guint64 cycles; // The number of cycles that this counter counts.
+    guint64 histo_cycles; // The number of cycles that this counter counts.
 
     int count; // The number of time 'cycles' cycles are used.
 };

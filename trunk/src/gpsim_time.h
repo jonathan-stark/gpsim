@@ -26,10 +26,10 @@ Boston, MA 02111-1307, USA.  */
 //---------------------------------------------------------
 // Cycle Counter
 //
-// This not really a real PIC register. The cycle counter class
-// is used to coordinate the timing between the different peripherals
-// within a PIC and in some cases, the timing between several simulated
-// PICs.
+// The cycle counter class is used to coordinate the timing 
+// between the different peripherals within a processor and
+// in some cases, the timing between several simulated processors
+// and modules.
 
 class Cycle_Counter_breakpoint_list
 {
@@ -65,14 +65,21 @@ public:
     active,     // Head of the active breakpoint linked list
     inactive;   // Head of the inactive one.
 
+  bool bSynchronous; // a flag that's true when the time per counter tick is constant
+
+  double cycles_per_second; // The number of cycles that correspond to one second
+                            // i.e. this is the frequency.
+
   Cycle_Counter(void);
   void preset(guint64 new_value);     // not used currently.
 
   /*
-    increment - This inline member function is called once or twice for every simulated
-    instruction. Its purpose is to increment the cycle counter using roll over arithmetic.
-    If there's a breakpoint set on the new value of the cycle counter then the simulation
-    is either stopped or a callback function is invoked. In either case, the break point is
+    increment - This inline member function is called once or 
+    twice for every simulated instruction. Its purpose is to
+    increment the cycle counter using roll over arithmetic.
+    If there's a breakpoint set on the new value of the cycle
+    counter then the simulation is either stopped or a callback
+    function is invoked. In either case, the break point is
     cleared.
    */
 						
@@ -150,6 +157,36 @@ public:
   void clear_break(guint64 at_cycle);
   void clear_break(BreakCallBack *f);
 };
+
+extern Cycle_Counter cycles;
+
+
+
+// The stopwatch object is used to keep track of the amount of
+// time between events.
+class StopWatch 
+{
+ public:
+  bool enabled;
+  bool count_dir;
+
+  guint64 rollover;
+  guint64 offset;
+  guint64 value;
+
+  guint64 get(void);
+  double get_time(void);
+
+  void start(void);
+  void stop(void);
+  void set_rollover(guint64 new_rollover);
+  void set_offset(guint64 new_rollover);
+
+  StopWatch(void);
+
+};
+
+extern StopWatch stop_watch;
 
 
 #endif

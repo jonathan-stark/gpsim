@@ -536,7 +536,7 @@ void Program_Counter::increment(void)
   // counter).
 
   cpu_pic->pcl->value = value & 0xff;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -558,7 +558,7 @@ void Program_Counter::skip(void)
   // counter).
 
   cpu_pic->pcl->value = value & 0xff;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -575,12 +575,12 @@ void Program_Counter::jump(unsigned int new_address)
 
   cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
-  cpu->cycles.increment();
+  cycles.increment();
   
   trace.cycle_increment(); 
   trace.program_counter(value);
 
-  cpu->cycles.increment();
+  cycles.increment();
 
 }
 
@@ -598,12 +598,12 @@ void Program_Counter::interrupt(unsigned int new_address)
 
   cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
   
-  cpu->cycles.increment();
+  cycles.increment();
   
   trace.cycle_increment(); 
   trace.program_counter(value);
 
-  cpu->cycles.increment();
+  cycles.increment();
 
 }
 
@@ -628,7 +628,7 @@ void Program_Counter::computed_goto(unsigned int new_address)
   // The instruction modifying the PCL will also increment the program counter. So, pre-compensate
   // the increment with a decrement:
   value--;
-  cpu->cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -642,8 +642,8 @@ void Program_Counter::new_address(unsigned int new_value)
   trace.program_counter(value);
 
   cpu_pic->pcl->value = value & 0xff;    // see Update pcl comment in Program_Counter::increment()
-  cpu->cycles.increment();
-  cpu->cycles.increment();
+  cycles.increment();
+  cycles.increment();
 }
 
 //--------------------------------------------------
@@ -1023,7 +1023,7 @@ file_register *EEPROM::get_register(unsigned int address)
 void EEPROM::start_write(void)
 {
 
-  cpu->cycles.set_break(cpu->cycles.value + EPROM_WRITE_TIME, this);
+  cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
 
   wr_adr = eeadr.value;
   wr_data = eedata.value;
@@ -1033,7 +1033,7 @@ void EEPROM::start_write(void)
 void EEPROM_87x::start_write(void)
 {
 
-  cpu->cycles.set_break(cpu->cycles.value + EPROM_WRITE_TIME, this);
+  cycles.set_break(cycles.value + EPROM_WRITE_TIME, this);
 
   wr_adr = eeadr.value + (eeadrh.value << 8);
   wr_data = eedata.value + (eedatah.value << 8);
@@ -1078,7 +1078,7 @@ void EEPROM_87x::start_program_memory_read(void)
 
   rd_adr = eeadr.value | (eeadrh.value << 8);
 
-  cpu->cycles.set_break(cpu->cycles.value + 2, this);
+  cycles.set_break(cycles.value + 2, this);
 
 }
 

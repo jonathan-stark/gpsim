@@ -75,7 +75,7 @@ void ADCON0::start_conversion(void)
     return;
   }
 
-  guint64 fc = cpu->cycles.value + Tad_2;
+  guint64 fc = cycles.value + Tad_2;
 
   if(ad_state != AD_IDLE)
     {
@@ -83,10 +83,10 @@ void ADCON0::start_conversion(void)
       // in either case, there is callback break that needs to be moved.
 
       stop_conversion();
-      cpu->cycles.reassign_break(future_cycle, fc, this);
+      cycles.reassign_break(future_cycle, fc, this);
     }
   else
-    cpu->cycles.set_break(fc, this);
+    cycles.set_break(fc, this);
 
   future_cycle = fc;
   ad_state = AD_ACQUIRING;
@@ -207,7 +207,7 @@ void ADCON0::callback(void)
 {
   int channel;
   #ifdef DEBUG_AD
-  cout<<"ADCON0 Callback: " << hex << cpu->cycles.value << '\n';
+  cout<<"ADCON0 Callback: " << hex << cycles.value << '\n';
   #endif
 
   //
@@ -243,8 +243,8 @@ void ADCON0::callback(void)
       << acquired_value << ", Vref = " << reference << '\n';
       #endif
 
-      future_cycle = cpu->cycles.value + 5*Tad_2;
-      cpu->cycles.set_break(future_cycle, this);
+      future_cycle = cycles.value + 5*Tad_2;
+      cycles.set_break(future_cycle, this);
       
       ad_state = AD_CONVERTING;
 

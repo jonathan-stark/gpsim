@@ -408,7 +408,7 @@ unsigned int gpsim_get_cycles_lo(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return (pic->cycles.value & 0xffffffff);
+  return (cycles.value & 0xffffffff);
 
 }
 
@@ -422,7 +422,7 @@ guint64 gpsim_get_cycles(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return (pic->cycles.value);
+  return (cycles.value);
 
 }
 
@@ -1410,7 +1410,7 @@ void gpsim_clear_break(gpointer b)
     // modules can delete this on their own?
 
     BreakCallBack *bcb = (BreakCallBack*)(b);
-    active_cpu->cycles.clear_break(bcb);
+    cycles.clear_break(bcb);
 //    delete bcb;
 }
 
@@ -1423,7 +1423,7 @@ guint64 gpsim_get_current_time(void)
 {
 
   if(active_cpu)
-    return active_cpu->cycles.value;
+    return cycles.value;
   
   return 0;
 
@@ -1431,14 +1431,14 @@ guint64 gpsim_get_current_time(void)
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL)
 {
   if(active_cpu)
-    active_cpu->cycles.set_break_delta(delta, f);
+    cycles.set_break_delta(delta, f);
 
 }
 
 void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL)
 {
   if(active_cpu)
-    active_cpu->cycles.set_break(next_cycle, f);
+    cycles.set_break(next_cycle, f);
 
 }
 

@@ -98,7 +98,7 @@ int IOPORT::update_stimuli(void)
   // any sources attached to the same node
 
   //cout << "updating the stimuli\n";
-  guint64 time = active_cpu->cycles.value;
+  guint64 time = cycles.value;
   int input = 0;
 
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
@@ -137,7 +137,7 @@ int PIC_IOPORT::update_stimuli(void)
   // any sources attached to the same node
 
   //cout << "updating the stimuli\n";
-  guint64 time = cpu->cycles.value;
+  guint64 time = cycles.value;
   int input = 0;
 
   for(int i = 0, m=1; i<IOPINS; i++, m <<= 1)
@@ -174,7 +174,7 @@ int PIC_IOPORT::update_stimuli(void)
 int IOPORT::get_bit_voltage(unsigned int bit_number)
 {
 
-  guint64 time = cpu->cycles.value;
+  guint64 time = cycles.value;
   int v;
 
   if(pins[bit_number]) {
@@ -526,7 +526,7 @@ void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 	  }
       // Now, update the nodes to which the(se) pin(s) may be attached
 
-      guint64 time = cpu->cycles.value;
+      guint64 time = cycles.value;
       for(i = 0, m=1; i<IOPINS; i++, m <<= 1)
 	if(stimulus_mask & m & diff)
           if(pins[i]->snode!=NULL)
