@@ -29,11 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 
-#ifdef WIN32
-#undef HAVE_GUI
-#endif
-
-#ifdef HAVE_GUI
+#ifndef _WIN32
 #include <dlfcn.h>
 #endif
 
@@ -318,7 +314,7 @@ IOPIN *Module::get_pin(unsigned int pin_number)
 //-------------------------------------------------------------------
 Module_Library::Module_Library(const char *new_name, void *library_handle)
 {
-
+#ifndef _WIN32
   const char * error;
 
   if(new_name)
@@ -348,8 +344,11 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
       initialize();
 
   }
-
-
+#else
+  module_list = 0;
+  _name = 0;
+  _handle = 0;
+#endif
 }
 
 //------------------------------------------------------------------------
@@ -408,7 +407,7 @@ void module_display_available(void)
 
 void module_load_library(const char *library_name)
 {
-
+#ifndef _WIN32
   void *handle;
   char *error;
 
@@ -422,7 +421,9 @@ void module_load_library(const char *library_name)
   module_add_library(library_name,handle);
 
   module_display_available();
-
+#else
+  cout << "  -- gpsim on WIN32 doesn't support modules yet\n";
+#endif
 }
 
 void module_load_module(const char *module_type, const char *module_name)
