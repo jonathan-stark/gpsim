@@ -128,10 +128,10 @@ GUI_Interface::GUI_Interface(GUI_Processor *_gp) : Interface ( (gpointer *) _gp)
 GUI_Interface::~GUI_Interface()
 {
   if(gp) {
-    gp->regwin_ram->set_config();
-    gp->regwin_eeprom->set_config();
+    //gp->regwin_ram->set_config();
+    //gp->regwin_eeprom->set_config();
     gp->program_memory->set_config();
-    gp->source_browser->set_config();
+    //gp->source_browser->set_config();
     gp->watch_window->set_config();
     gp->stack_window->set_config();
     gp->breadboard_window->set_config();
@@ -180,7 +180,7 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
  * SimulationHasStopped
  *
  */
-
+extern void dispatch_Update();
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
   //while(gtk_events_pending())
@@ -191,7 +191,7 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     GUI_Processor *gp = (GUI_Processor *) callback_data;
 
     gp->regwin_ram->Update();
-    gp->regwin_eeprom->Update();
+    //gp->regwin_eeprom->Update();
     gp->program_memory->Update();
     gp->source_browser->Update();
     gp->watch_window->Update();
@@ -201,6 +201,8 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
     gp->profile_window->Update();
     gp->stopwatch_window->Update();
     //gp->scope_window->Update();
+
+    dispatch_Update();
 
   }
 
@@ -279,7 +281,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
 
   if(gp) {
 
-    gp->regwin_eeprom->NewProcessor(gp);
+    //gp->regwin_eeprom->NewProcessor(gp);
       
     gp->source_browser->CloseSource();
     gp->source_browser->NewSource(gp);

@@ -41,6 +41,8 @@ Boston, MA 02111-1307, USA.  */
 #include <gtkextra/gtkcolorcombo.h>
 #include <gtkextra/gtksheet.h>
 
+#define DEBUG
+
 #include "gui.h"
 #include "gui_src.h"
 #include "gui_profile.h"
@@ -2461,7 +2463,7 @@ void SourceBrowserAsm_Window::Build(void)
   Dprintf(("Build\n"));
 
   SourceBrowser_Window::Create();
-
+  /*
   if(pma) {
     char buffer[256];
     sprintf(buffer,"Source Browser: %s",pma->name().c_str());
@@ -2471,6 +2473,8 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
   gtk_widget_set_uposition(GTK_WIDGET(window),x,y);
+  */
+
 
   notebook = gtk_notebook_new();
   gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_LEFT);

@@ -35,9 +35,8 @@ class MemoryAccess;		// in src/processor.h
 // The Status Bar window 
 //
 
-class StatusBar_Window {
+class StatusBar_Window : public GUI_Object {
  public:
-  GUI_Processor *gp;
 
   CyclesLabeledEntry *cpu_cycles;
   TimeLabeledEntry *time;

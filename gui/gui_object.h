@@ -78,6 +78,7 @@ class GUI_Object {
   virtual void Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
+  virtual void Update(void);
   virtual void NewProcessor(GUI_Processor *_gp)
     {
       gp = _gp;

@@ -182,10 +182,14 @@ void SourceBrowser_Window::Update(void)
 }
 
 
+extern GtkWidget* SourceBrowserExperiment;
+
 void SourceBrowser_Window::Create(void)
 {
 
+  window = SourceBrowserExperiment;
 
+  /*
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
   gtk_window_set_default_size(GTK_WINDOW(window), width,height);
@@ -195,6 +199,10 @@ void SourceBrowser_Window::Create(void)
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
 		      GTK_SIGNAL_FUNC(delete_event),
 		      (gpointer) this);
+  */
+
+
+
 
   // FIXME - populate the KeyMap map with source browser functions. This should
   // FIXME   probably go into some kind of configuration file.

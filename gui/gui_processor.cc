@@ -65,7 +65,7 @@ GUI_Processor::GUI_Processor(void)
   create_dispatcher();
 
   regwin_ram =  new  RAM_RegisterWindow(this);
-  regwin_eeprom = new  EEPROM_RegisterWindow(this);
+  //regwin_eeprom = new  EEPROM_RegisterWindow(this);
   program_memory = new  SourceBrowserOpcode_Window(this);
   source_browser = new  SourceBrowserParent_Window(this);
   symbol_window = new  Symbol_Window(this);
