@@ -1,3 +1,8 @@
+2004-10-05 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: Moved the creation of the Search Dialog
+	window out of Build() and into its own function. Changed the behavior 
+	of the signal callbacks to conform to GTK+ 2.X
+
 2004-10-04 Scott Dattalo <scott@dattalo.com>
 	* README, INSTALL: Cleaned up stale documentation.
 	

@@ -327,7 +327,6 @@ void SourceBrowserAsm_Window::SetPC(int address)
     Dprintf((" SetPC: %s , vadj=%g, lower=%g, upper=%g,page_size=%g, page_inc=%g\n", 
 	   name(),
 	   adj->value,adj->lower, adj->upper, adj->page_size, adj->page_increment));
-    //gtk_adjustment_get_value(GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj)));
   }
 
   new_pcw = pages[id].source_pcwidget;
@@ -370,6 +369,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
     gdouble nvalue = pixel - inc/2;
+    printf("%d: setting adjustment to %g old value = %g\n",__LINE__,nvalue,adj->value);
     gtk_adjustment_set_value(adj, nvalue);
 
   }
@@ -424,9 +424,12 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
   if( pixel<= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      pixel>= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc )
+      pixel>= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
     gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
 			     pixel-inc/2);
+    printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
+
+  }
 }
 
 void SourceBrowserAsm_Window::Update(void)
@@ -807,7 +810,7 @@ static gint switch_page_cb(GtkNotebook     *notebook,
     for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
       sbaw->UpdateLine(address);
   }
-  return 1;
+  return 0;
 }
 
 /*
@@ -883,7 +886,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	// override pages[id].source_text's handler
 	// is there a better way? FIXME
 	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbaw->pages[id].source_text),"button_press_event");
-	return TRUE;
+	return 0;
     }
 
     if(event->type==GDK_BUTTON_PRESS && event->button==4)
@@ -893,7 +896,7 @@ static gint sigh_button_event(GtkWidget *widget,
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value < GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->lower;
 	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return TRUE;
+	return 0;
     }
     if(event->type==GDK_BUTTON_PRESS && event->button==5)
     { // wheel scroll down
@@ -902,12 +905,12 @@ static gint sigh_button_event(GtkWidget *widget,
 	if(GTK_TEXT(sbaw->pages[id].source_text)->vadj->value > GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment)
 	    GTK_TEXT(sbaw->pages[id].source_text)->vadj->value = GTK_TEXT(sbaw->pages[id].source_text)->vadj->upper-GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_increment;
 	gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
-	return TRUE;
+	return 0;
     }
-    return FALSE;
+    return 0;
 }
 
-static void text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
+static gint text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
 {
     // when sbaw->pages[id].source_text adjustment changes, we update the layout adj.
     
@@ -919,9 +922,12 @@ static void text_adj_cb(GtkAdjustment *adj, GtkAdjustment *adj_to_update)
     {
 	if (adj_to_update->upper >= adj->value )
 	{
+	    printf("%d: setting adjustment to %g old value %g\n",__LINE__,adj->value, adj_to_update->value);
 	    gtk_adjustment_set_value(adj_to_update, adj->value);
 	}
     }
+
+    return 0;
 }
 
 static float drag_scroll_speed;
@@ -945,7 +951,7 @@ static gint drag_scroll_cb(gpointer data)
     
     gtk_adjustment_value_changed(GTK_TEXT(sbaw->pages[id].source_text)->vadj);
     
-    return 1;
+    return 0;
 }
 
 /*
@@ -956,7 +962,7 @@ static gint drag_scroll_cb(gpointer data)
  */
 
 
-static void marker_cb(GtkWidget *w1,
+static gint marker_cb(GtkWidget *w1,
 		      GdkEventButton *event,
 		     SourceBrowserAsm_Window *sbaw)
 {
@@ -985,7 +991,7 @@ static void marker_cb(GtkWidget *w1,
   static int timeout_tag=-1;
 
   if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
-    return;
+    return 1;
   //printf("marker_cb\n");
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
@@ -1156,6 +1162,8 @@ static void marker_cb(GtkWidget *w1,
     printf("Whoops? event type %d\n",event->type);
     break;
   }
+
+  return 0;
 }
 
 static void find_char_and_skip(char **str, char c)
@@ -1183,7 +1191,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     FileContext *fc = (*sbaw->gp->cpu->files)[file_id];
     
     //strcpy(str,(gp->cpu->files[file_id]).name);
-    strcpy(str,fc->name().c_str());
+    strncpy(str,fc->name().c_str(),sizeof(str));
 
     label_string=str;
 
@@ -1833,7 +1841,6 @@ static void fontselcancel_cb(GtkWidget *w, gpointer user_data)
 }
 int font_dialog_browse(GtkWidget *w, gpointer user_data)
 {
-    gchar *spacings[] = { "c", "m", 0 };
     static GtkWidget *fontsel;
     GtkEntry *entry=GTK_ENTRY(user_data);
     const char *fontstring;
@@ -1850,6 +1857,7 @@ int font_dialog_browse(GtkWidget *w, gpointer user_data)
 	fontstring=gtk_entry_get_text(entry);
 	gtk_font_selection_dialog_set_font_name(GTK_FONT_SELECTION_DIALOG(fontsel),fontstring);
 #if GTK_MAJOR_VERSION < 2
+	gchar *spacings[] = { "c", "m", 0 };
         gtk_font_selection_dialog_set_filter (GTK_FONT_SELECTION_DIALOG (fontsel),
 					      GTK_FONT_FILTER_BASE, GTK_FONT_ALL,
 					      0, 0, 0, 0, spacings, 0);
@@ -2296,6 +2304,8 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 	      inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->pages[id].source_text)->vadj)->page_increment;
 	      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->pages[id].source_text)->vadj),
 				       pixel-inc/2);
+	      printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
+
 	      gtk_editable_select_region(GTK_EDITABLE(sbaw->pages[id].source_text),start_i,end_i);
 	      return;
 	    }
@@ -2397,16 +2407,79 @@ static void set_style_colors(const char *fg_color, const char *bg_color, GtkStyl
 
 }
 
+static void BuildSearchDlg(SourceBrowserAsm_Window *sbaw)
+{
+  GtkWidget *hbox;
+  GtkWidget *button;
+  GtkWidget *label;
+
+  searchdlg.lastid=-1;  // will reset search
+
+  searchdlg.window = gtk_dialog_new();
+
+  gtk_signal_connect(GTK_OBJECT(searchdlg.window),
+		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
+  gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
+			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+
+  gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
+    
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_widget_show(hbox);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  label = gtk_label_new("Find:");
+  gtk_widget_show(label);
+  gtk_box_pack_start(GTK_BOX(hbox),label,
+		     FALSE,FALSE,5);
+  searchdlg.entry = gtk_combo_new();
+  gtk_widget_show(searchdlg.entry);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
+		     TRUE,TRUE,5);
+  gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
+  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
+		     GTK_SIGNAL_FUNC(find_cb),sbaw);
+    
+  hbox = gtk_hbox_new(FALSE,15);
+  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
+		     FALSE,TRUE,5);
+  gtk_widget_show(hbox);
+  searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
+  gtk_widget_show(searchdlg.case_button);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
+		     FALSE,FALSE,5);
+  searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
+  gtk_widget_show(searchdlg.backwards_button);
+  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
+		     FALSE,FALSE,5);
+    
+  button = gtk_button_new_with_label("Find");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_cb),sbaw);
+  GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
+  gtk_widget_grab_default(button);
+    
+  button = gtk_button_new_with_label("Clear");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect(GTK_OBJECT(button),"clicked",
+		     GTK_SIGNAL_FUNC(find_clear_cb),0);
+    
+  button = gtk_button_new_with_label("Close");
+  gtk_widget_show(button);
+  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
+  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
+			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+
+}
 
 void SourceBrowserAsm_Window::Build(void)
 {
   if(bIsBuilt)
     return;
 
-  GtkWidget *hbox;
-  GtkWidget *button;
-
-  GtkWidget *label;
   char *fontstring;
 
 
@@ -2471,65 +2544,7 @@ void SourceBrowserAsm_Window::Build(void)
   }
 
 
-  searchdlg.lastid=-1;  // will reset search
-    
-  searchdlg.window = gtk_dialog_new();
-
-  gtk_signal_connect(GTK_OBJECT(searchdlg.window),
-		     "configure_event",GTK_SIGNAL_FUNC(configure_event),0);
-  gtk_signal_connect_object(GTK_OBJECT(searchdlg.window),
-			    "delete_event",GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
-
-  gtk_window_set_title(GTK_WINDOW(searchdlg.window),"Find");
-    
-  hbox = gtk_hbox_new(FALSE,15);
-  gtk_widget_show(hbox);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		     FALSE,TRUE,5);
-  label = gtk_label_new("Find:");
-  gtk_widget_show(label);
-  gtk_box_pack_start(GTK_BOX(hbox),label,
-		     FALSE,FALSE,5);
-  searchdlg.entry = gtk_combo_new();
-  gtk_widget_show(searchdlg.entry);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.entry,
-		     TRUE,TRUE,5);
-  gtk_combo_disable_activate(GTK_COMBO(searchdlg.entry));
-  gtk_signal_connect(GTK_OBJECT(GTK_COMBO(searchdlg.entry)->entry),"activate",
-		     GTK_SIGNAL_FUNC(find_cb),this);
-    
-  hbox = gtk_hbox_new(FALSE,15);
-  gtk_box_pack_start(GTK_BOX(GTK_DIALOG(searchdlg.window)->vbox),hbox,
-		     FALSE,TRUE,5);
-  gtk_widget_show(hbox);
-  searchdlg.case_button = gtk_check_button_new_with_label("Case Sensitive");
-  gtk_widget_show(searchdlg.case_button);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.case_button,
-		     FALSE,FALSE,5);
-  searchdlg.backwards_button = gtk_check_button_new_with_label("Find Backwards");
-  gtk_widget_show(searchdlg.backwards_button);
-  gtk_box_pack_start(GTK_BOX(hbox),searchdlg.backwards_button,
-		     FALSE,FALSE,5);
-    
-  button = gtk_button_new_with_label("Find");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_cb),this);
-  GTK_WIDGET_SET_FLAGS(button,GTK_CAN_DEFAULT);
-  gtk_widget_grab_default(button);
-    
-  button = gtk_button_new_with_label("Clear");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect(GTK_OBJECT(button),"clicked",
-		     GTK_SIGNAL_FUNC(find_clear_cb),0);
-    
-  button = gtk_button_new_with_label("Close");
-  gtk_widget_show(button);
-  gtk_box_pack_start_defaults(GTK_BOX(GTK_DIALOG(searchdlg.window)->action_area),button);
-  gtk_signal_connect_object(GTK_OBJECT(button),"clicked",
-			    GTK_SIGNAL_FUNC(gtk_widget_hide),GTK_OBJECT(searchdlg.window));
+  BuildSearchDlg(this);
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);
