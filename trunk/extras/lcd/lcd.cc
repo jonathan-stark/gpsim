@@ -58,10 +58,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "lcd.h"
 #include <gpsim/gpsim_time.h>
-pic_processor *gpsim_get_active_cpu(void);
-
-
-
 
 
 //------------------------------------------------------------------------

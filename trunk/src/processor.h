@@ -327,6 +327,7 @@ public:
   Files *files;               // The source files for this processor.
 
   double frequency,period;    // Oscillator frequency and period.
+  unsigned int clocks_per_inst;	// Osc cycles for 1 instruction
 
   Register **registers;       // 
   Register **register_bank;   //
@@ -415,8 +416,23 @@ public:
   //
 
   void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
-  unsigned int time_to_cycles( double t) 
-    {if(period>0) return((int) (frequency * t)); else return 0;};
+  virtual double get_frequency() { return frequency; }
+
+  void set_ClockCycles_per_Instruction(unsigned int cpi) 
+  { clocks_per_inst = cpi; }
+  unsigned int get_ClockCycles_per_Instruction(void) 
+  {
+    return clocks_per_inst;
+  }
+
+  virtual double get_OSCperiod()
+  {
+    return period;
+  }
+  virtual double get_InstPeriod()
+  {
+    return get_OSCperiod() * get_ClockCycles_per_Instruction();
+  }
 
   virtual void disassemble (signed int start_address, 
 			    signed int end_address);

@@ -345,29 +345,38 @@ TimeLabeledEntry::TimeLabeledEntry()
 void TimeLabeledEntry::Update()
 {
   char buffer[32];
-  double time_db = 4.0 * cycles.value / (double)gp->cpu->time_to_cycles(1.0);
 
-  if(time_format==MENU_TIME_USECONDS) {
+  double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+
+
+  switch(time_format) {
+  case MENU_TIME_USECONDS:
     time_db *= 1e6;
     sprintf(buffer,"%19.2f us",time_db);
-  }
-  else if(time_format==MENU_TIME_MSECONDS) {
+    break;
+  
+  case MENU_TIME_MSECONDS:
     time_db *= 1e3;
     sprintf(buffer,"%19.3f ms",time_db);
-  }
-  else if(time_format==MENU_TIME_HHMMSS) {
-    double v=time_db;
-    int hh=(int)(v/3600),mm,ss,cc;
-    v-=hh*3600.0;
-    mm=(int)(v/60);
-    v-=mm*60.0;
-    ss=(int)v;
-    cc=(int)(v*100.0+0.5);
-    sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
-  }
-  else {
+    break;
+
+  case MENU_TIME_HHMMSS:
+    {
+      double v=time_db;
+      int hh=(int)(v/3600),mm,ss,cc;
+      v-=hh*3600.0;
+      mm=(int)(v/60);
+      v-=mm*60.0;
+      ss=(int)v;
+      cc=(int)(v*100.0+0.5);
+      sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
+    }
+    break;
+
+  default:
     sprintf(buffer,"%19.3f s",time_db);
   }
+
   gtk_entry_set_text (GTK_ENTRY (entry), buffer);
 
 }

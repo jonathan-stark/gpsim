@@ -1,3 +1,10 @@
+2004-07-19 Scott Dattalo <scott@dattalo.com>
+	* src/pic-processor.cc, src/pic-processor.h, src/pic-registers.cc,
+	src/processor.h, src/processor.cc, gui/gui_statusbar.cc, 
+	gui/gui_stopwatch.cc, modules/usart.cc, cli/cmd_frequency.cc:
+	Added new member functions to the Processor class to simplify
+	handling time.
+
 2004-07-17 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def, src/src.vcproj, src/i2c-ee.cc:
 	  small fixes for MSVC compilation
