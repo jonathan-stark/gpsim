@@ -837,7 +837,7 @@ void RCREG_14::pop(void)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
-void USART_MODULE::initialize(IOPORT *uart_port)
+void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
 {
 
   if(spbrg) {
@@ -862,7 +862,7 @@ void USART_MODULE::initialize(IOPORT *uart_port)
     rcsta->spbrg = spbrg;
     rcsta->txsta = txsta;
     rcsta->uart_port = uart_port;
-    rcsta->rx_bit = 7;
+    rcsta->rx_bit = rx_pin;
   }
 
   if(rcreg) {
@@ -903,11 +903,11 @@ USART_MODULE14::USART_MODULE14(void)
 }
 
 //--------------------------------------------------
-void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port)
+void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR1 *pir1, IOPORT *uart_port, int rx_pin)
 {
   _cpu14 = new_cpu;
 
-  USART_MODULE::initialize(uart_port);
+  USART_MODULE::initialize(uart_port, rx_pin);
 
   //spbrg.txsta = &txsta;
   //spbrg.rcsta = &rcsta;

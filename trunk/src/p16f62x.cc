@@ -145,7 +145,7 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(usart.spbrg, 0x99, 0,"spbrg");
   add_sfr_register(usart.txreg, 0x19, 0,"txreg");
   add_sfr_register(usart.rcreg, 0x1a, 0,"rcreg");
-  usart.initialize_14(this,&pir1,portb);
+  usart.initialize_14(this,&pir1,portb,1);
 
   add_sfr_register(&comparator.cmcon, 0x1f, 0,"cmcon");
   add_sfr_register(&comparator.vrcon, 0x9f, 0,"vrcon");

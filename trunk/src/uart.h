@@ -232,7 +232,7 @@ public:
   _RCREG       *rcreg;
 
   USART_MODULE(void);
-  void initialize(IOPORT *uart_port);
+  void initialize(IOPORT *uart_port, int rx_pin);
 
   virtual void  new_rx_edge(unsigned int);
 };
@@ -247,7 +247,7 @@ class USART_MODULE14 : public USART_MODULE
   //RCREG_14     rcreg;
 
   USART_MODULE14(void);
-  void initialize_14(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
+  void initialize_14(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port, int rx_pin);
   virtual void new_rx_edge(unsigned int);
 
 };

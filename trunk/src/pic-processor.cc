@@ -607,7 +607,7 @@ static void realtime_callback  (void *p)
 	if(diff/4>1000000)
 	{
 	    // we are simulating too slow
-	    if(warntimer<20)
+	    if(warntimer<10)
 		warntimer++;
 	    else
 	    {
