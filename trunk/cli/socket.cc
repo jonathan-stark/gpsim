@@ -42,6 +42,49 @@ Boston, MA 02111-1307, USA.  */
 #endif
 
 
+//******** E X P E R I M E N T A L   C O D E !!! *************************
+// Here is an experimental attribute for testing the socket interface.
+// The purpose is to isolate socket testing from the rest of the simulator.
+//
+class TestInt32Array : public symbol
+{
+public:
+  TestInt32Array(const char *_name, int _sz)
+    : symbol(_name)
+  {
+    set_description(" test array for testing sockets");
+
+    size = _sz;
+    array = new int[size];
+  }
+  ~TestInt32Array()
+  {
+    delete[] array;
+  }
+
+  virtual void set(const char *cP,int len=0)
+  {
+    std::cout << name() << " set\n";
+  }
+  virtual void get(char *, int len)
+  {
+    std::cout << name() << " get\n";
+  }
+  virtual string toString()
+  {
+    return name();
+  }
+
+private:
+  int size;
+  int *array;
+
+};
+
+
+//*************************  end of experimental code ********************
+
+
 class SocketLink;
 
 // in input.cc -- parse_string sends a string through the command parser
@@ -139,9 +182,21 @@ unsigned int ascii2uint(char **buffer, int digits)
 #define PORT 		0x1234
 #define BUFSIZE 	8192
 
-enum eGPSIMObjectTypes
+enum eGPSIMSocketCommands
   {
 
+    GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
+    GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
+    GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
+    GPSIM_CMD_WRITE_TO_SOCKET_LINK  = 0xF3,
+
+    GPSIM_CMD_QUERY_SYMBOL          = 0xF4,
+    GPSIM_CMD_WRITE_TO_SYMBOL       = 0xF5,
+
+  };
+
+
+#if 0
     // Basic types
 
     GPSIM_OBJTYP_CONTAINER = 1,
@@ -173,17 +228,7 @@ enum eGPSIMObjectTypes
     GPSIM_CMD_ASSIGN_RAM = 0x99,
 
     GPSIM_CMD_TEST_BINARY = 0xa0,
-
-    GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
-    GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
-    GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
-    GPSIM_CMD_WRITE_TO_SOCKET_LINK  = 0xF3,
-
-    GPSIM_CMD_QUERY_SYMBOL          = 0xF4,
-    GPSIM_CMD_WRITE_TO_SYMBOL       = 0xF5,
-
-  };
-
+#endif
 
 //--------------------
 int ParseInt(char **buffer, unsigned int &retInt)
@@ -415,8 +460,6 @@ void Socket::init(void)
 
   my_socket = new SocketBase(new_socket);
 
-  std::cout << "initializing socket\n";
-
   int on = 1;
   if ( setsockopt ( new_socket, SOL_SOCKET, SO_REUSEADDR, ( const char* ) &on, sizeof ( on ) ) != 0 ) {
     psocketerror("setsockopt");
@@ -507,7 +550,6 @@ void Socket::Send(char *b)
   if(!client)
     return;
 
-  //printf("socket-sending %s",buffer);
   if (send(client->getSocket(), b, strlen(b), 0) < 0) {
     psocketerror("send");
     closesocket(client->getSocket());
@@ -546,147 +588,6 @@ void Socket::respond(char *buf)
     Send(buf);
 }
 
-#if 0
-    case GPSIM_OBJTYP_CONTAINER:
-      printf("Container of %d objects\n",ascii2uint(&b,2));
-      buffer_len -= 2;
-      respond("Container");
-      
-      break;
-
-    case GPSIM_OBJTYP_STRING:
-      {
-	char tmp[256];
-	
-	int length = ascii2uint(&b,2);
-
-  	length = (255 < length) ? 255  : length;
-
-	strncpy(tmp, b, length);
-	tmp[length] = 0;
-	
-	printf("String %s\n",tmp);
-	buffer_len -= (length+2);
-	respond("String");
-       
-
-      }
-      break;
-
-    case GPSIM_OBJTYP_INT32:
-      {
-	int i = ascii2uint(&b,8);
-	printf("Integer %d\n",i);
-	buffer_len -= 8;
-	respond("Integer");
-      }
-      break;
-
-    case GPSIM_CMD_TEST_BINARY:
-      printf("Binary data: %02x %02x %02x %02x\n",b[0],b[1],b[2],b[3]);
-      buffer_len -= 4;
-      respond("+");
-      break;
-
-    case GPSIM_CMD_BREAK:
-    case GPSIM_CMD_BREAK_EXEC:
-    case GPSIM_CMD_BREAK_REGWRITE:
-    case GPSIM_CMD_BREAK_REGREAD:
-    case GPSIM_CMD_BREAK_REGWRITE_VAL:
-    case GPSIM_CMD_BREAK_REGREAD_VAL:
-    case GPSIM_CMD_BREAK_STKOV:
-    case GPSIM_CMD_BREAK_STKUN:
-    case GPSIM_CMD_BREAK_WDT:
-
-
-    case GPSIM_CMD_CLEAR:
-    case GPSIM_CMD_EXAMINE_ROM:
-    case GPSIM_CMD_STEPOVER:
-    case GPSIM_CMD_RUN:
-    case GPSIM_CMD_SET:
-    case GPSIM_CMD_STEP:
-    case GPSIM_CMD_VERSION:
-
-      {
-	printf("Command\n");
-	respond("Command");
-
-      }
-      break;
-    case GPSIM_CMD_SYMBOL:
-      {
-	char tmp[256];
-	int bl = ParseString(&b,tmp,256);
-	if(bl) {
-	  buffer_len -= bl;
-	  printf("Symbol command with string %s\n",tmp);
-	  Value *sym = get_symbol_table().find(tmp);
-	  if(sym) {
-	    int i;
-	    sym->get(i);
-	    snprintf(tmp,sizeof(tmp),"$03%08x",i);
-	    printf("responding with %s\n",tmp);
-	    respond(tmp);
-	  } else
-	    respond("symcmd");
-	}
-      }
-      break;
-
-    case GPSIM_CMD_EXAMINE_RAM:
-      {
-
-	unsigned int ram_address;
-	int bl = ParseInt(&b,ram_address);
-	if(bl) {
-	  buffer_len -= bl;
-	  /*
-	  char tmp[256];
-	  Processor *cpu = get_active_cpu();
-
-	  if(cpu) {
-	    Register *reg = cpu->rma.get_register(ram_address);
-	    snprintf(tmp,sizeof(tmp),"$03%08x",reg->get_value());
-	    respond(tmp);
-	  } else
-	  */
-	  respond("no cpu");
-	} else 
-	  respond("examinecmd");
- 
-      }
-      break;
-
-    case GPSIM_CMD_ASSIGN_RAM:
-      {
-	unsigned int ram_address;
-	unsigned int ram_value;
-	int bl =0;
-
-	bl += ParseInt(&b,ram_address);
-	bl += ParseInt(&b,ram_value);
-
-	if(bl) {
-	  buffer_len -= bl;
-
-	  /*
-	  Processor *cpu = get_active_cpu();
-
-	  if(cpu) {
-	    //std::cout << " writing 0x" << hex << ram_value << " to " << ram_address << endl;
-	    Register *reg = cpu->rma.get_register(ram_address);
-	    reg->put_value(ram_value);
-	    respond("ACK");
-	  } else
-	  */
-	  respond("no cpu");
-	} else 
-	  respond("assigncmd");
- 
-      }
-      break;
-
-#endif
 
 //------------------------------------------------------------------------
 // ParseObject
@@ -794,7 +695,7 @@ void Socket::ParseObject(char *buffer)
 	Value *sym = get_symbol_table().find(tmp);
 
 	if(sym) {
-	  //b += bl;
+
 	  sym->set(b);
 
 	  printf("writing %s to %s\n",b,tmp);
@@ -954,8 +855,8 @@ static void debugPrintCondition(GIOCondition cond)
 
 gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
 {
-  std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
-  debugPrintCondition(condition);
+  //std::cout << " Server callback for condition: 0x" << hex  << condition <<endl;
+  //debugPrintCondition(condition);
 
   Socket *s = (Socket *)d;
 
@@ -975,34 +876,28 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
     unsigned int bytes_read=0;
 
     memset(s->buffer, 0, 256);
-    //std::cout << "Reading bytes\n";
 
 #if GLIB_MAJOR_VERSION >= 2
 
     GError *err=NULL;
 
-    std::cout << "reading chars \n";
+#if 0
+    g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+    GIOStatus stat;
+    bytes_read = 0;
+    do {
+      unsigned int b;
+      stat = g_io_channel_read_chars(channel, &s->buffer[bytes_read], 1, &b, &err);
+      bytes_read++;
+      printf("read: %c  ", *s->buffer);
+      debugPrintChannelStatus(stat);
+      debugPrintCondition(g_io_channel_get_buffer_condition (channel));
+
+    } while(G_IO_STATUS_NORMAL == stat);
+#else
     //GIOStatus stat = g_io_channel_read_chars(channel, s->buffer, BUFSIZE, &bytes_read, &err);
     g_io_channel_read(channel, s->buffer, BUFSIZE, &bytes_read);
-
-    /*
-    gsize terminator_pos;
-
-
-    GString *line = g_string_sized_new(512);
-
-    GIOStatus stat = g_io_channel_read_line_string(channel, line, &terminator_pos, &err);
-    if(stat & G_IO_STATUS_EOF)
-      return FALSE;
-
-    //std::cout << "received " <<line->str << endl;
-    memcpy(s->buffer, line->str, ( (line->len+1 < BUFSIZE) ? line->len+1 : BUFSIZE));
-    bytes_read = line->len+1;
-    g_string_free(line,TRUE);
-    */
-
-    //std::cout << "channel status " << hex << stat << "  " ;
-    //debugPrintChannelStatus(stat);
+#endif
 
     if(err) {
       std::cout << "GError:" << err->message << endl;
@@ -1017,7 +912,6 @@ gboolean server_callback(GIOChannel *channel, GIOCondition condition, void *d )
     if(bytes_read) {
       if (*s->buffer == '$') {
 	s->buffer[bytes_read-1] = 0;
-	//s->buffer[bytes_read-2] = 0;
 	s->ParseObject(&s->buffer[1]);
       } else {
 	parse_string(s->buffer);
@@ -1045,7 +939,13 @@ gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 
   GIOChannel *new_channel = g_io_channel_unix_new(s->client->getSocket());
   GIOCondition new_condition = (GIOCondition)(G_IO_IN | G_IO_HUP | G_IO_ERR);
-  //GIOCondition new_condition = (GIOCondition) (G_IO_OUT | G_IO_PRI | G_IO_NVAL | G_IO_IN | G_IO_HUP | G_IO_ERR);
+
+  GError *err = NULL;
+  GIOStatus stat;
+
+  stat = g_io_channel_set_encoding (channel, NULL, &err);
+  //stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+  stat = g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
 
   g_io_add_watch(new_channel, 
 		 new_condition,
@@ -1058,6 +958,8 @@ gboolean server_accept(GIOChannel *channel, GIOCondition condition, void *d )
 
 void start_server(void)
 {
+  TestInt32Array *test = new TestInt32Array("test",16);
+  symbol_table.add(test);
 
   static Socket s;
 
@@ -1073,7 +975,7 @@ void start_server(void)
 #endif
 
   s.init();
-
+ 
   if(s.my_socket->getSocket() > 0) {
 
     GIOChannel *channel = g_io_channel_unix_new(s.my_socket->getSocket());

@@ -129,23 +129,26 @@ public:
   virtual void assign_pin(unsigned int pin_number, IOPIN *pin);
   virtual void create_pkg(unsigned int number_of_pins);
 
-  // Attributes:
+  /// Attributes:
 
   void add_attribute(Value *);
 
-  virtual void set_attribute(char *attr, char *val, int val2);
-  virtual void set_attribute(char *attr, char *val);
-  virtual void set_attribute(char *attr, double val);
+  virtual void set(const char *cP,int len=0);
+  virtual void get(char *, int len);
+
+  //virtual void set_attribute(char *attr, char *val, int val2);
+  //virtual void set_attribute(char *attr, char *val);
+  //virtual void set_attribute(char *attr, double val);
 
   virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual void dump_attributes(int show_values=1);
 
-  // Version
+  /// Version
   virtual int get_major_version(void) { return major_version;}
   virtual int get_minor_version(void) { return minor_version;}
   virtual int get_micro_version(void) { return micro_version;}
 
-  // gui
+  /// gui
   virtual void set_widget(void * a_widget) {widget = a_widget;}
   virtual void *get_widget(void) {return widget;}
 
@@ -181,12 +184,11 @@ public:
 
 void module_display_available(void);
 void module_list_modules(void);
-//int find_in_available_module_list(char * module_type);
 void module_load_library(const char *library_name);
 void module_load_module(const char * module_type, const char * module_new_name=0);
 void module_pins(char *module_name);
-void module_set_attr(char *module_name,char *attr, char *val);
-void module_set_attr(char *module_name,char *attr, char *val, int val2);
-void module_set_attr(char *module_name,char *attr, double val);
+//void module_set_attr(char *module_name,char *attr, char *val);
+//void module_set_attr(char *module_name,char *attr, char *val, int val2);
+//void module_set_attr(char *module_name,char *attr, double val);
 void module_update(char *module_name);
 #endif // __MODULES_H__

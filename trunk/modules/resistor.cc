@@ -175,24 +175,6 @@ Module * Resistor::construct(const char *_new_name)
 
 }
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-
-void PullupResistor::set_attribute(char *attr, char *val)
-{
-  /*
-  cout << " Pull up resistor " << name_str << " update attribute\n";
-  if(attr) {
-    cout << "(attr = " << attr;
-    if(val)
-      cout << " , val = " << val;
-    cout << ")\n";
-
-  }
-  */
-  Module::set_attribute(attr,val);
-
-}
 //--------------------------------------------------------------
 // PullupResistor::create_iopin_map 
 //

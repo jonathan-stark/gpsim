@@ -159,6 +159,7 @@ Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
 }
 
 
+#if 0
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 
@@ -216,6 +217,17 @@ void Module::set_attribute(char *attr, double val)
   }
  
 
+}
+#endif
+
+void Module::set(const char *cP,int len)
+{
+  cout << "Module:" <<name() << " doesn't support set()\n"; 
+}
+
+void Module::get(char *, int len)
+{
+  cout << "Module:" <<name() << " doesn't support get()\n"; 
 }
 
 //-------------------------------------------------------------------
@@ -583,6 +595,8 @@ void module_pins(char *module_name)
 
 }
 
+
+#if 0
 //--------------------------------------------------
 // module_set_attr
 // Set module attribute
@@ -633,6 +647,9 @@ void module_set_attr(char *module_name,char *attr, double val)
   cpu->set_attribute(attr,val);
 
 }
+#endif
+
+
 
 //--------------------------------------------------
 // module_update
