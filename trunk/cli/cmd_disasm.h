@@ -21,15 +21,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_DISASM_H__
 #define __CMD_DISASM_H__
 
+class Expression;
+
 class cmd_disassemble : public command
 {
 public:
 
   cmd_disassemble(void);
 
-  //  void disassemble(void);
-  //  void disassemble(int len);
-  void disassemble(int start, int end);
+  void disassemble(Expression *);
 
   virtual int is_repeatable(void) { return 1; };
 

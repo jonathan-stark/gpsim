@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_frequency.h"
+#include "expr.h"
+
 #include "../src/pic-processor.h"
 
 static cmd_options cmd_frequency_options[] =
@@ -51,17 +53,19 @@ cmd_frequency::cmd_frequency(void)
 }
 
 
-void cmd_frequency::set(double value)
+void cmd_frequency::set(Expression *expr)
 {
 
   if(!have_cpu(1))
     return;
 
-  if(value<0) {
+  double frequency = evaluate(expr);
+
+  if(frequency <= 0.0) 
     cout << "Error: the clock must be a positive value.\n";
-    return;
-  }
-  cpu->set_frequency(value);
+  else
+    cpu->set_frequency(frequency);
+
 }
 
 void cmd_frequency::print()

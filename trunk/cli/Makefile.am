@@ -7,7 +7,7 @@ lib_LTLIBRARIES = libgpsimcli.la
 libgpsimcli_la_SOURCES = \
 	parse.yy \
 	scan.ll \
-	expr.cc \
+	expr.cc errors.cc \
 	operator.cc \
 	viewable.cc \
 	cmd_attach.cc \
@@ -45,7 +45,7 @@ libgpsimcli_la_SOURCES = \
 	input.h cmd_clear.h cmd_help.h cmd_processor.h cmd_set.h cmd_step.h \
 	cmd_version.h misc.h cmd_disasm.h  cmd_list.h  cmd_quit.h \
 	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h cmd_icd.h \
-	expr.h operator.h viewable.h
+	expr.h errors.h operator.h viewable.h
 
 
 YFLAGS = -dvt

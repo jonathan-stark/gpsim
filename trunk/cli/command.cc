@@ -54,6 +54,9 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_x.h"
 #include "cmd_icd.h"
 
+#include "expr.h"
+#include "errors.h"
+
 #include "../src/pic-processor.h"
 #include "../src/trace.h"
 
@@ -158,4 +161,67 @@ bool command::have_cpu(bool display_warning)
 
   return 1;
 
+}
+
+double command::evaluate(Expression *expr)
+{
+  double value = 0.0;
+
+  try {
+    if(expr) {
+
+      Value *v = expr->evaluate();
+      //cout << "Expression:" << expr->toString() << "==>" << v->toString() << endl;
+      if(v) {
+
+	value = v->getAsDouble();
+
+	delete v;
+      }
+      delete expr;
+    }
+
+  }
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
+  return value;
+}
+
+
+//========================================================================
+// Command options
+
+cmd_options_str::cmd_options_str(char *new_val)
+{
+  if(new_val)
+    str = strdup(new_val);
+  else
+    str = 0;
+}
+
+cmd_options_str::~cmd_options_str()
+{
+
+  if(str)
+    free (str);
+
+
+}
+
+
+cmd_options_expr::cmd_options_expr(cmd_options *_co, Expression *_expr)
+{
+  co = _co;
+  expr = _expr;
+}
+
+cmd_options_expr::~cmd_options_expr()
+{
+  delete co;
+  delete expr;
 }

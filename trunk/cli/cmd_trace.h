@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __CMD_TRACE_H__
 #define __CMD_TRACE_H__
 
+class Expression;
+
 class cmd_trace : public command
 {
 public:
@@ -28,7 +30,7 @@ public:
   cmd_trace(void);
   void trace(void);
 
-  void trace(int numberof);
+  void trace(Expression *);
   void trace(cmd_options *opt);
   void trace(cmd_options_num *con);
   void trace(cmd_options_str *cos);

@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_step.h"
 
 #include "../src/pic-processor.h"
+#include "expr.h"
 
 cmd_step step;
 
@@ -60,6 +61,15 @@ void cmd_step::step(int instructions)
     return;
 
   cpu->step(instructions);
+
+}
+
+void cmd_step::step(Expression *expr)
+{
+  if(!have_cpu(1))
+    return;
+
+  cpu->step((int)evaluate(expr));
 
 }
 

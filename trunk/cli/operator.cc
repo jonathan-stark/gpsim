@@ -24,7 +24,7 @@ BinaryOperator::~BinaryOperator()
 
 Value* BinaryOperator::shortCircuit(Value* leftValue)
 {
-
+  return 0;
 }
 
 string BinaryOperator::show()
@@ -75,6 +75,35 @@ Value *BinaryOperator::evaluate()
   return tmp;
 }
 
+/******************************************************************************
+ Operator: AbstractRange 
+ 
+ *****************************************************************************/
+OpAbstractRange::OpAbstractRange(Expression *lVal, Expression *rVal)
+  : BinaryOperator(":", lVal, rVal)
+{
+}
+
+
+OpAbstractRange::~OpAbstractRange()
+{
+}
+
+
+Value* OpAbstractRange::applyOp(Value* lVal, Value* rVal)
+{
+  Value* result=0;
+
+  Integer* lInteger = Integer::typeCheck(lVal, showOp());
+  Integer* rInteger = Integer::typeCheck(rVal, showOp());
+  
+  int left = lInteger->getVal();
+  int right = rInteger->getVal();
+  
+  result = new AbstractRange(left, right);
+  return(result);
+}
+
 //------------------------------------------------------------------------
 
 
@@ -90,6 +119,6 @@ OpAdd::~OpAdd()
 Value *OpAdd::applyOp(Value *lval, Value *rval)
 {
 
-  return new Integer(lval->get() + rval->get());
+  return new Integer(lval->getAsInt() + rval->getAsInt());
 
 }

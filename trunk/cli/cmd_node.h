@@ -22,14 +22,16 @@ Boston, MA 02111-1307, USA.  */
 #define __CMD_NODE_H__
 #include "misc.h"
 
+#include <list>
+using namespace std;
+
 class cmd_node : public command
 {
 public:
 
   cmd_node(void);
   void list_nodes(void);
-
-  void add_nodes(char_list *nodes);
+  void add_nodes(list <string> *);
 
 
 };

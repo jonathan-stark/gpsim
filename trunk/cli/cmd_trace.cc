@@ -25,6 +25,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_trace.h"
+#include "expr.h"
+
 #include "../src/trace_orb.h"
 
 cmd_trace c_trace;
@@ -62,9 +64,11 @@ void cmd_trace::trace(void)
   trace_dump_all();
 }
 
-void cmd_trace::trace(int numberof)
+void cmd_trace::trace(Expression *expr)
 {
-  trace_dump_n(numberof);
+
+  trace_dump_n((int)evaluate(expr));
+
 }
 
 void cmd_trace::trace(cmd_options *opt)

@@ -65,18 +65,19 @@ void cmd_node::list_nodes(void)
 }
 
 
-
-void cmd_node::add_nodes(char_list *nodes)
+void cmd_node::add_nodes(list <string> * nodes)
 {
+  if(nodes) {
 
+    list <string> :: iterator si;
 
-  while(nodes)
-    {
-      if(verbose)
-        cout << "new node : " << nodes->name << '\n';
-      add_node(nodes->name);
-      nodes = nodes->next;
+    for (si = nodes->begin();  
+	 si != nodes->end(); 
+	 ++si) {
 
+      string s = *si;
+      add_node((char *)s.c_str());
     }
-}
 
+  }
+}

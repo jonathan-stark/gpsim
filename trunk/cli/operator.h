@@ -70,6 +70,15 @@ class BinaryOperator : public Operator {
 };
 
 //-----------------------------------------------------------------
+class OpAbstractRange : public BinaryOperator {
+
+public:
+  OpAbstractRange(Expression *leftExpr, Expression *rightExpr);
+  virtual ~OpAbstractRange();
+  Value* applyOp(Value* leftValue, Value* rightValue);
+};
+
+//-----------------------------------------------------------------
 class OpAdd : public BinaryOperator {
 
 public:

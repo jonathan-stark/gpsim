@@ -71,16 +71,23 @@ void gpsim_version(void)
 #define FILE_STRING_LENGTH 50
 
 static char *startup_name = "";
-static char *pic_name     = "";
+static char *processor_name = "";
 static char *cod_name     = "";
 static char *hex_name     = "";
 static char *search_path  = "";
 static char *icd_port     = "";
 
+#define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
+			0, "Examples:\n\
+  gpsim -s myprog.cod          <-- loads a symbol file\n\
+  gpsim -p p16f877 myprog.hex  <-- select processor and load hex\n\
+  gpsim -c myscript.stc        <-- loads a script\n\
+\nHelp options:", NULL },
+
 struct poptOption optionsTable[] = {
   //  { "help", 'h', 0, 0, 'h',
   //    "this help list" },
-  { "processor", 'p', POPT_ARG_STRING, &pic_name, 0,
+  { "processor", 'p', POPT_ARG_STRING, &processor_name, 0,
     "processor (e.g. -pp16c84 for the 'c84)","<processor name>" },
   { "command",   'c', POPT_ARG_STRING, &startup_name, 0,
     "startup command file",0 },
@@ -94,14 +101,17 @@ struct poptOption optionsTable[] = {
     "command line mode only",0},
   { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
     "use ICD (e.g. -d /dev/ttyS0).",0 },
-  POPT_AUTOHELP
-  { 0, 0, 0, 0, 0, 0 }
+  POPT_MYEXAMPLES
+  POPT_TABLEEND
 };
+
+// copied the format of this from the popt.h include file:
+
 
 void 
 helpme (char *iam)
 {
-  printf ("\n\nuseage:\n%s [-h] [-p <device> [<hex_file>]] [-c <stc_file>]\n", iam);
+  printf ("\n\nuseage:\n%s [-h] [[-p <device> [<hex_file>]] | [-s <cod_file>]] [-c <stc_file>]\n", iam);
   printf ("\t-h             : this help list\n");
   printf ("\t-p <device>    : processor (e.g. -pp16c84 for the 'c84)\n");
   printf ("\t<hex_file>     : input file in \"intelhex16\" format\n");
@@ -112,14 +122,13 @@ helpme (char *iam)
   printf ("\n\t-v             : gpsim version\n");
   printf ("\n Long options:\n\n");
   printf ("\t--cli          : command line mode only\n");
+  printf ("\n\texamples:\n\n");
+  printf ("%s -s myprog.cod          <-- loads a symbol file\n",iam);
+  printf ("%s -p p16f877 myprog.hex  <-- select processor and load hex\n",iam);
+  printf ("%s -c myscript.stc        <-- loads a script\n",iam);
+
 }
-/*void usage(poptContext optCon, int exitcode, char *error, char *addl) 
-{
-  poptPrintUsage(optCon, stderr, 0);
-  if (error) 
-    fprintf(stderr, "%s: %s", error, addl);
-  exit(exitcode);
-}*/
+
 
 
 
@@ -147,7 +156,7 @@ main (int argc, char *argv[])
 #endif 
 
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
-  poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
+  //poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
 
   welcome();
@@ -162,18 +171,6 @@ main (int argc, char *argv[])
       case 'h':
 	usage = 1;
 	break;
-
-	//case 'p':
-	//strncpy(pic_name, optarg,FILE_STRING_LENGTH);
-	//break;
-
-	//case 'c':
-	//strncpy(startup_name, optarg,FILE_STRING_LENGTH);
-	//break;
-
-	//case 's':
-	//strncpy(cod_name, optarg,FILE_STRING_LENGTH);
-	//break;
 
       case 'L':
 	set_search_path (search_path);
@@ -232,39 +229,38 @@ main (int argc, char *argv[])
   quit_parse = 0;
   abort_gpsim = 0;
 
-  if(*pic_name)
+  if(*processor_name)
     {
-      strcpy(command_str, "processor ");
-      strcat(command_str, pic_name);
+      snprintf(command_str, sizeof(command_str),
+	       "processor %s\n",processor_name);
       parse_string(command_str);
     }
 
   if(*hex_name)
     {
-	    printf("Hex file \"%s\"\n",hex_name);
-      strcpy(command_str, "load h ");
-      strcat(command_str, hex_name);
+      snprintf(command_str, sizeof(command_str),
+	       "load h %s\n",hex_name);
       parse_string(command_str);
     }
 
   if(*cod_name)
     {
-      strcpy(command_str, "load s ");
-      strcat(command_str, cod_name);
+      snprintf(command_str, sizeof(command_str),
+	       "load s %s\n",cod_name);
       parse_string(command_str);
     }
 
   if(*icd_port)
     {
-      strcpy(command_str, "icd open ");
-      strcat(command_str, icd_port);
+      snprintf(command_str, sizeof(command_str),
+	       "icd open %s\n",icd_port);
       parse_string(command_str);
     }
   
   if(*startup_name)
     {
-      strcpy(command_str, "load c ");
-      strcat(command_str, startup_name);
+      snprintf(command_str, sizeof(command_str),
+	       "load c %s\n",startup_name);
       parse_string(command_str);
     }
 
@@ -281,11 +277,13 @@ main (int argc, char *argv[])
     gui_main();
   else
 #endif
-    do {
+    //do
+    {
       init_parser();
       i = yyparse();
 
-    } while(!quit_parse);
+      }
+  // while(!quit_parse);
 
   exit_gpsim();
 

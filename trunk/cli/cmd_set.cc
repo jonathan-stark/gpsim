@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_set.h"
+#include "expr.h"
+#include "errors.h"
 #include "input.h"
 
 #include "../src/pic-processor.h"
@@ -78,8 +80,29 @@ void cmd_set::set(void)
   cout << "gui_update = " << gi.gui_update_rate << '\n';
 }
 
-void cmd_set::set(int bit_flag, int number)
+void cmd_set::set(int bit_flag, Expression *expr)
 {
+  int number=1;
+
+  if(expr) {
+    try
+      {
+	Value *v = expr->evaluate();
+	if(v) {
+	  number = v->getAsInt();
+	  delete v;
+	}
+	delete expr;
+      }
+    catch (Error *err)
+      {
+	if(err)
+	  cout << "ERROR:" << err->toString() << endl;
+	delete err;
+
+	return;
+      }
+  }
 
   switch(bit_flag) {
   case SET_VERBOSE:
@@ -94,15 +117,3 @@ void cmd_set::set(int bit_flag, int number)
   }
 }
 
-void cmd_set::set(cmd_options_num *con)
-{
-
-  switch(con->co->value) {
-  case SET_RADIX:
-    cout << "radix is not supported yet\n";
-    break;
-  default:
-    cout << " Invalid set option\n";
-  }
-
-}

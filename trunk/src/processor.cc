@@ -613,12 +613,29 @@ void Processor::list(unsigned int file_id,
 // is not implemented.
 //
 
-void Processor::disassemble (unsigned int start_address, unsigned int end_address)
+void Processor::disassemble (signed int s, signed int e)
 {
   instruction *inst;
   int use_src_to_disasm =0;
 
-  if(end_address >= pc->memory_size_mask) end_address = pc->memory_size_mask;
+  if(s >= e)
+    return;
+
+  unsigned int start_address = (int)(pc->value ) + s;
+  unsigned int end_address = (int)(pc->value ) + e;
+
+  if(start_address >= program_memory_size()) {
+    if(s <0)
+      start_address = 0;
+    else 
+      return;
+  }
+  if(end_address  >= program_memory_size()) {
+    if(e<0)
+      return;
+    else
+      end_address = program_memory_size()-1;
+  }
 
   char str[50];
 
@@ -650,9 +667,9 @@ void Processor::disassemble (unsigned int start_address, unsigned int end_addres
 	  char buf[256];
 
 	  files->ReadLine(program_memory[i]->file_id,
-			   program_memory[i]->src_line - 1,
-			   buf,
-			   sizeof(buf));
+			  program_memory[i]->src_line - 1,
+			  buf,
+			  sizeof(buf));
 	  cout << buf;
 
 	}
@@ -930,6 +947,9 @@ void Processor::run (void)
 //
 void Processor::step (unsigned int steps)
 {
+  if(!steps)
+    return;
+
   if(simulation_mode != STOPPED) {
     if(verbose)
       cout << "Ignoring step request because simulation is not stopped\n";

@@ -65,15 +65,20 @@ void cmd_bus::list_busses(void)
 }
 
 
-void cmd_bus::add_busses(char_list *busses)
+void cmd_bus::add_busses(list <string> * busses)
 {
 
+  if(busses) {
 
-  while(busses)
-    {
-      cout << "new bus : " << busses->name << '\n';
-      add_bus(busses->name);
-      busses = busses->next;
+    list <string> :: iterator si;
 
+    for (si = busses->begin();  
+	 si != busses->end(); 
+	 ++si) {
+
+      string s = *si;
+      add_bus((char *)s.c_str());
     }
+
+  }
 }

@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "operator.h"
 #include "expr.h"
+#include "errors.h"
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
@@ -45,7 +46,7 @@ int state;
 // This means that unless the number is prefixed with '0x' for hex or
 // '0' (zero) for octal it is assumed to be base 10.
 
-static int numeric_base = 0;
+//static int numeric_base = 0;
 
 static struct cmd_options *op = 0;
 static command *cmd = 0;
@@ -58,11 +59,14 @@ extern int last_command_is_repeatable;
 static string strip_trailing_whitespace (char *s);
 static int handle_identifier(const string &tok, cmd_options **op );
 static int process_intLiteral(char *buffer, int conversionBase);
+static int process_booleanLiteral(bool value);
+static int process_floatLiteral(char *buffer);
 static int recognize(int token,const char *);
 
 int cli_corba_init (char *ior_id);
 
 #define YYDEBUG 1
+#define YY_NO_UNPUT
 
 %}
 
@@ -73,15 +77,19 @@ SNL	({S}|{NL})
 BS	(\\)
 CONT	({EL}|{BS})
 CCHAR	(#)
-COMMENT	({CCHAR}.*{NL})
+COMMENT	({CCHAR}.*)
 SNLCMT	({SNL}|{COMMENT})
 INDIRECT (\*)
 IDENT	([/_a-zA-Z\.][/_a-zA-Z0-9\.\-]*)
 EXPON	([DdEe][+-]?{D}+)
 DEC     ({D}+)
-HEX     ((0[Xx])[0-9a-fA-F]+)
+HEX1    ((0[Xx])[0-9a-fA-F]+)
+HEX2    ("$"[0-9a-fA-F]+)
 FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
+BIN1    (0[bB][01]+)
+BIN2    ([bB]\'[01]+\')
 
+%x MULTILINE_MODE
 
 %%
 
@@ -89,9 +97,13 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 // Comments. Ignore all text after a comment character
 %}
 
-{COMMENT} { unput('\n'); }   /* ignore comments */
+{COMMENT} 
+  { 
+    return recognize(COMMENT_T,"comment");
+  }
+ 
 
-{S}+  /* ignore white space */
+{S}+      {   /* ignore white space */ }
 
 \n  { 
       // Got an eol.
@@ -99,20 +111,15 @@ FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
           cout << "got EOL\n";
 
       input_mode = 0;  // assume that this is not a multi-line command.
-      if(cmd) {
-	if(verbose)
-          cout << "EOL with " << cmd->name << '\n';
-        if(cmd->can_span_lines() && have_parameters && !end_of_command ) {
+      if(cmd && cmd->can_span_lines() && have_parameters && !end_of_command ) 
+	{
           input_mode = CONTINUING_LINE;
-          return recognize(SPANNING_LINES,"spanning lines");
-        } else
-	  return recognize(IGNORED, "returning IGNORED"); 
-
-      } else
-        return recognize(IGNORED, "EOL but no pending command"); 
+        }
+      else
+	return recognize(EOLN_T, " end of line");
     }
 
-q\n { /* short cut for quiting */ 
+q{S}+\n { /* short cut for quiting */ 
       quit_parse  =1;
       return QUIT;
     }
@@ -122,32 +129,18 @@ abort_gpsim_now {
    return ABORT;
    }
 
-<<EOF>> {
-    return END_OF_INPUT;
-  }
 
-"+"    {return(recognize(PLUS_T,"+"));}
+":"                 {return(recognize(COLON_T, ":"));}
+"+"                 {return(recognize(PLUS_T,"+"));}
 
-L{DEC} {return(process_intLiteral(&yytext[1], 10));}
-
-{DEC} {
-   //yylval.i = strtoul(yytext,0,numeric_base);
-   sscanf(yytext,"%Ld",&yylval.li);
-   // printf("a number: 0x%x\n",yylval.i);
-   return recognize(NUMBER,"decimal number");
-  }
-
-{HEX} { 
-   //yylval.i = strtoul(yytext,0,0);
-   sscanf(yytext,"%Lx",&yylval.li);
-   // printf("a hex number: 0x%x\n",yylval.i);
-   return recognize(NUMBER,"hex number");
-  }
-
-{FLOAT} {
-    sscanf(yytext,"%f",&yylval.f);
-    return recognize(FLOAT_NUMBER,"float number");  
-  }
+{BIN1}              {return(process_intLiteral(&yytext[2], 2));}
+{BIN2}              {return(process_intLiteral(&yytext[2], 2));}
+{DEC}               {return(process_intLiteral(&yytext[0], 10));}
+{HEX1}              {return(process_intLiteral(&yytext[2], 16));}
+{HEX2}              {return(process_intLiteral(&yytext[1], 16));}
+{FLOAT}             {return process_floatLiteral(yytext);}
+"true"              {return(process_booleanLiteral(true));}
+"false"             {return(process_booleanLiteral(false));}
 
 %{
 
@@ -157,11 +150,14 @@ L{DEC} {return(process_intLiteral(&yytext[1], 10));}
 
 %}
 
-"echo".*{NL} {
+"echo"{S}.*{NL} {
    fprintf(yyout,"%s",&yytext[5]);
-   unput('\n');
-   // return IGNORED;
   }
+
+"echo"{NL} {
+   fprintf(yyout,"\n");
+  }
+
 
 %{
 // Indirect register access
@@ -177,9 +173,12 @@ L{DEC} {return(process_intLiteral(&yytext[1], 10));}
 // then the 'end' command will finish it.
 %}
 
-"end"{S}*{NL} {
-    end_of_command = 1;
-    return(END_OF_COMMAND);
+"end"{S}* {
+    if (cmd && cmd->can_span_lines() ) {
+      end_of_command = 1;
+      return(END_OF_COMMAND);
+    }
+    printf("Warning: found \"end\" while not in multiline mode\n");
   }
 
 %{
@@ -189,15 +188,17 @@ L{DEC} {return(process_intLiteral(&yytext[1], 10));}
 
 {IDENT} {
   string tok = strip_trailing_whitespace (yytext);
+
   if(strlen(tok.c_str()))
     return handle_identifier (tok,&op);
   else
     return recognize(0,"invalid identifier");
   }
 
-. {
-    printf("ignoring\n"); 
-  }
+%{
+/* Default is to recognize the character we are looking at as a single char */
+%}
+.                       {return(recognize(*yytext,"Single character"));}
 
 %%
 
@@ -223,7 +224,7 @@ int translate_token(int tt)
   case OPT_TT_NUMERIC:
     if((verbose & 0x2) && DEBUG_PARSER)
       cout << " tt numeric\n";
-    return NUMERIC_OPTION;
+    return EXPRESSION_OPTION;
   case OPT_TT_STRING:
     if((verbose & 0x2) && DEBUG_PARSER)
       cout << " tt string\n";
@@ -287,8 +288,8 @@ int handle_identifier(const string &s, cmd_options **op )
 
     } else {
       cout << " command: \"" << s << "\" was not found\n";
-      //cout << " command: was not found\n";
-      return recognize(IGNORED,"ignoring command");
+
+      return recognize(COMMENT_T,"ignoring command");
 
     }
 
@@ -352,11 +353,13 @@ static int process_intLiteral(char *buffer, int conversionBase)
 
   while (*buffer) {
     c = toupper(*buffer++);
-    /*printf("%s:c=%c\n", __FUNCTION__, c);*/
+
     nxtDigit = (c) <= '9' ? c-'0' : c-'A'+10;
-    if (nxtDigit >= conversionBase) {
-      //lexErr = new Error("bad digit in integer literal");
-      literalValue = 0;
+    if ((nxtDigit >= conversionBase) || (nxtDigit<0)) {
+      /* If the next digit exceeds the base, then it's an error unless
+	 this is a binary conversion and the character is a single quote */
+      if(!(conversionBase == 2 && c == '\''))
+	literalValue = 0;
       break;
     }
     
@@ -370,13 +373,53 @@ static int process_intLiteral(char *buffer, int conversionBase)
 }
 
 /*****************************************************************
+ *
+ */
+//static int process_stringLiteral(char *stringValue)
+//{
+//  yylval.String_P = new String(stringValue, true);
+//  return(recognize(LITERAL_STRING_T, "string literal"));
+//}
+
+
+/*****************************************************************
+ *
+ */
+static int process_booleanLiteral(bool value)
+{
+  yylval.Boolean_P = new Boolean(value, true);
+  return(recognize(LITERAL_BOOL_T, "boolean literal"));
+}
+
+
+/*****************************************************************
+ *
+ */
+static int process_floatLiteral(char *buffer)
+{
+  double floatValue;
+
+  errno = 0;
+  floatValue = atof(buffer);
+  
+  if (errno != 0) {
+    /* The conversion failed */
+    throw new Error("Bad floating point literal");
+  }
+
+  yylval.Float_P = new Float(floatValue, true);
+  return(recognize(LITERAL_FLOAT_T, "float literal"));
+}
+
+
+/*****************************************************************
  * 
  */
 static int recognize(int token_id,const char *description)
 {
   /* add optional debugging stuff here */
-  if(0)
-    cout << description << endl;
+  if(verbose && description)
+    cout << "scan: " << description << endl;
 
   return(token_id);
 }
@@ -398,6 +441,14 @@ strip_trailing_whitespace (char *s)
 
 void initialize_commands(void);
 
+void init_cmd_state(void)
+{
+    cmd = 0;
+    op = 0;
+    input_mode = 0;
+    end_of_command = 0;
+}
+
 void init_parser(void)
 {
   if((verbose & 2) && DEBUG_PARSER)
@@ -409,10 +460,9 @@ void init_parser(void)
 
   // Can't have any options until we get a command.
   if(!parser_spanning_lines) {
-    cmd = 0;
-    op = 0;
-    input_mode = 0;
-    end_of_command = 0;
+
+    init_cmd_state();
+
     if((verbose & 2) && DEBUG_PARSER)
       cout << "not ";
 

@@ -26,7 +26,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_attach.h"
-#include "../src/stimulus_orb.h"
+//#include "../src/stimulus_orb.h"
+
+extern void stimuli_attach(list <string> * sl);
 
 cmd_attach attach;
 
@@ -57,10 +59,8 @@ cmd_attach::cmd_attach(void)
 }
 
 
-void cmd_attach::attach(char_list *strings)
+void cmd_attach::attach(list <string> * strings)
 {
-
-  if(strings)
-    stimorb_attach(strings->name, strings->next);
+  stimuli_attach(strings);
 }
 

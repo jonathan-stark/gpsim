@@ -24,6 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <list>
 #include <vector>
 #include <unistd.h>
 #include <glib.h>
@@ -60,14 +61,10 @@ using namespace std;
 #include "cmd_icd.h"
 #include "expr.h"
 #include "operator.h"
+#include "errors.h"
 #define YYERROR_VERBOSE
 
- extern char *yytext; 
-void yyerror(char *message)
-{
-  printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
-  //exit(1);
-}
+extern char *yytext; 
 
 int yylex(void);
 int quit_parse=0;
@@ -76,11 +73,25 @@ int parser_warnings;
 int parser_spanning_lines=0;
 extern int use_gui;
 extern int quit_state;
-extern int Gcmd_file_ref_count;
-char_list *str_list_head;
-char_list *str_list;
 
-void free_char_list(char_list *);
+
+void init_cmd_state(void);
+
+
+void yyerror(char *message)
+{
+  printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
+  init_cmd_state();
+
+#if 1
+  static int i = 0;
+
+  if(i++>5)
+    exit(0);
+#endif
+
+}
+
 
 %}
 
@@ -95,10 +106,17 @@ void free_char_list(char_list *);
   cmd_options_num   *con;
   cmd_options_float *cof;
   cmd_options_str   *cos;
+  cmd_options_expr  *coe;
 
   BinaryOperator*           BinaryOperator_P;
+  Boolean*                  Boolean_P;
   Expression*               Expression_P;
+  Float*                    Float_P;
   Integer*                  Integer_P;
+  String*                   String_P;
+
+  StringList_t             *StringList_P;
+  ExprList_t               *ExprList_P;
 
 }
 
@@ -132,10 +150,7 @@ void free_char_list(char_list *);
 %token <s>  X
 %token <s>  ICD
 %token <s>  END_OF_COMMAND
-%token <s>  IGNORED
-%token <s>  SPANNING_LINES
 
-/*%token <i>  NODE_SYM STIMULUS_SYM*/
 
 %token <s>  STRING
 
@@ -144,6 +159,7 @@ void free_char_list(char_list *);
 %token <li>  END_OF_INPUT
 
 %token <co>  BIT_FLAG
+%token <co>  EXPRESSION_OPTION
 %token <co>  NUMERIC_OPTION
 %token <co>  STRING_OPTION
 %token <co>  CMD_SUBTYPE
@@ -156,8 +172,19 @@ void free_char_list(char_list *);
 %type <Expression_P>            expr
 %type <Expression_P>            literal
 %type <Expression_P>            unary_expr
+%type <ExprList_P>              expr_list
+%type <ExprList_P>              array
+
 
 %token <Integer_P>   LITERAL_INT_T
+%token <Boolean_P>   LITERAL_BOOL_T
+%token <Float_P>     LITERAL_FLOAT_T
+%token <String_P>    LITERAL_STRING_T
+
+
+%token COLON_T
+%token COMMENT_T
+%token EOLN_T
 %token PLUS_T
 
 
@@ -165,35 +192,50 @@ void free_char_list(char_list *);
 %type  <li>   _register
 %type  <co>  bit_flag
 %type  <co>  cmd_subtype
-%type  <li>  indirect
+
 %type  <con> numeric_option
 %type  <cof> numeric_float_option
 %type  <cos> string_option
+%type  <coe> expression_option
+%type  <StringList_P>              string_list
 
+%nonassoc COLON_T
 %left     PLUS_T
 
 %%
 /* Grammar rules */
 
-list_of_commands:
-     /* nothing */
-     | list_of_commands  cmd
-       ;
-cmd:
+/*
+input:
 
-     ignored
-        {
-	  cout << " cmd ignored\n";
-	}
+      {
+	// Command is complete. Prepare for the next command.
+	cout << " command has been parsed\n";
+        init_cmd_state();
+      }
+     | list_of_commands
+      {
+	// Command is complete. Prepare for the next command.
+	cout << " command has been parsed\n";
+
+      }
+
+*/
+list_of_commands:
+         //rol  { cout << " list_of_commands: rol\n";}
+      cmd rol  { 
+        init_cmd_state();
+
+      }
+      | list_of_commands  cmd rol
+      { 
+        init_cmd_state();
+      }
+       ;
+
+cmd:
+     /* empty */
      | aborting
-     | expr {
-       Value *v = $1->evaluate();
-       if(v) {
-	 cout << " " << v->toString() << endl;
-	 delete v;
-       }
-       delete $1;
-     }
      | attach_cmd
      | break_cmd
      | bus_cmd
@@ -220,18 +262,18 @@ cmd:
      | version_cmd
      | x_cmd
      | icd_cmd
-     //| spanning_lines
      | END_OF_INPUT
      {
-       if(verbose&2)
+       //if(verbose&2)
          cout << "got an END_OF_INPUT\n";
         /* If we're processing a command file then quit parsing 
          * when we run out of input */
-       if(Gcmd_file_ref_count)
-       	 quit_parse = 1;
+	 //if(Gcmd_file_ref_count)
+       	 //quit_parse = 1;
        YYABORT;
      }
      | error {
+       init_cmd_state();
        yyclearin;
        yyerrok;
        
@@ -239,33 +281,19 @@ cmd:
 
    ;
 
-ignored: IGNORED
-          {
-            //if(parser_warnings || (verbose & 2 ))
-            if(verbose & 2)
-              cout << "parser is ignoring input\n";
+/*****************************************************************
+ * All lines must terminate with a 'rol' (Rest Of Line) - even empty ones! 
+ */
+rol
+        : opt_comment EOLN_T
+        ;
 
-            if(!parser_spanning_lines) {
-              if(verbose & 2)
-                cout << "  parser is aborting current input stream\n";
 
-	      YYABORT;
-            } else {
-	      YYACCEPT;
-            }
-          }
-          ;
-/*
-spanning_lines:  SPANNING_LINES
-          {
-            if(verbose)
-              cout << "parser is spanning lines\n";
+opt_comment
+        : /* empty */
+        | COMMENT_T
+        ;
 
-            parser_spanning_lines = 1;
-	    YYACCEPT;
-          }
-          ;
-*/
 
 aborting: ABORT
           {
@@ -277,10 +305,8 @@ aborting: ABORT
             
 attach_cmd: ATTACH string_list
           {
-            if((verbose&2) && DEBUG_PARSER)
-	      cout << "attach command with a string list\n";
-	    attach.attach(str_list_head);
-	    free_char_list(str_list_head);
+	    attach.attach($2);
+	    delete $2;
 	  }
           ;
 
@@ -323,84 +349,47 @@ bus_cmd: BUS
 	  }
           | BUS string_list
           {
-	    //cout << "bus command with a string list\n";
-	    c_bus.add_busses(str_list_head);
-	    free_char_list(str_list_head);
-            YYABORT;
+	    c_bus.add_busses($2);
+	    delete $2;
           }
           ;
 
-clear_cmd: CLEAR NUMBER
-          { clear.clear($2); YYABORT;}
+clear_cmd: CLEAR expr                   { clear.clear($2); }
           ;
 
-disassemble_cmd: DISASSEMBLE
-          {
-	    disassemble.disassemble(-10, 5);
-	  }
-          |  DISASSEMBLE NUMBER
-          {
-	    disassemble.disassemble(0, $2);
-	  }
-          |  DISASSEMBLE NUMBER NUMBER
-          {
-	    disassemble.disassemble(-$2,$3);
-	  }
+disassemble_cmd:
+          DISASSEMBLE                   {disassemble.disassemble(0);}
+          |  DISASSEMBLE expr           {disassemble.disassemble($2);}
           ;
 
-dump_cmd: DUMP
-          {
-	    dump.dump(2);
-	  }
-          | DUMP bit_flag
-          {
-	    dump.dump($2->value);
-	  }
+dump_cmd: 
+          DUMP                          { dump.dump(2); }
+          | DUMP bit_flag               { dump.dump($2->value); }
           ;
 
-frequency_cmd: FREQUENCY
-          {
-	    frequency.print();
-	  }
-          | FREQUENCY NUMBER
-          { frequency.set($2); YYABORT;}
+frequency_cmd: 
+          FREQUENCY                     { frequency.print(); }
+          | FREQUENCY expr              { frequency.set($2); }
           ;
 
-help_cmd: HELP
-          {
-	    help.help();
-	  }
-          | HELP STRING
-          {
-	    help.help($2);
-	    free($2);
-	  }
+help_cmd: HELP                          { help.help(); }
+          | HELP STRING                 { help.help($2); free($2); }
           ;
 
-list_cmd: LIST
-          {
-	    c_list.list();
-	  }
-          | LIST indirect
-          {
-	    printf("got a list with an indirect reference %d\n",(int)$2);
-	  }
-          | LIST bit_flag
-          { 
-	    c_list.list($2);
-	  }
-           ;
+list_cmd: 
+          LIST                          { c_list.list(); }
+          | LIST bit_flag               { c_list.list($2); }
+          ;
 
 load_cmd: LOAD bit_flag STRING
           {
 	    c_load.load($2->value,$3);
-	    //cout << "load completed\n\n";
+
 	    if(quit_parse)
 	      {
 		quit_parse = 0;
 		YYABORT;
 	      }
-	     YYABORT;
 	  }
           ;
 
@@ -448,14 +437,14 @@ node_cmd: NODE
 	  }
           | NODE string_list
           {
-	    c_node.add_nodes(str_list_head);
-	    free_char_list(str_list_head);
+	    c_node.add_nodes($2);
+	    delete $2;
           }
           ;
 
 module_cmd: MODULE
           { 
-            c_module.module(); YYABORT;
+            c_module.module();
           }
           | MODULE bit_flag
 	  {
@@ -541,12 +530,12 @@ quit_cmd: QUIT
 	  }
           ;
 
-reset_cmd: RESET
-          { reset.reset(); }
+reset_cmd: 
+          RESET                         { reset.reset(); }
           ;
 
-run_cmd: RUN
-          { c_run.run();}
+run_cmd: 
+          RUN                           { c_run.run();}
           ;
 
 set_cmd: SET
@@ -555,23 +544,19 @@ set_cmd: SET
           }
           | SET bit_flag
           {
-            c_set.set($2->value,1);
+            c_set.set($2->value,0);
           }
-            | SET bit_flag NUMBER
+            | SET bit_flag expr
           {
             c_set.set($2->value,$3);
           }
-            | SET numeric_option
-          {
-	    c_set.set($2);
-	  }
           ;
 
 step_cmd: STEP
           {
 	    step.step(1);
 	  }
-          | STEP NUMBER
+          | STEP expr
           {
 	    step.step($2);
 	  }
@@ -609,20 +594,12 @@ stimulus_cmd: STIMULUS
             if(verbose)
 	      cout << " end of stimulus command\n";
 	    c_stimulus.end();
-            parser_spanning_lines = 0;
 	  }
           ;
 
 stimulus_opt: 
 	  
-	  SPANNING_LINES
-          {
-            if(verbose)
-              cout << "parser is ignoring spanned line in stimulus\n";
-            parser_spanning_lines=1;
-          }
-          | 
-	  numeric_option
+	  expression_option
           {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
@@ -634,35 +611,39 @@ stimulus_opt:
               cout << "parser sees stimulus with bit flag: " << $2->value << '\n';
 	    c_stimulus.stimulus($2->value);
 	  }
-          | stimulus_opt numeric_option
+/*          | stimulus_opt numeric_option
           {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
 	    c_stimulus.stimulus($2);
 	  }
+
           | stimulus_opt numeric_float_option
           {
             if(verbose)
               cout << "parser sees stimulus with numeric float option\n";
 	    c_stimulus.stimulus($2);
 	  }
+*/
           | stimulus_opt string_option
           {
             if(verbose)
               cout << "parser sees stimulus with string option\n";
 	    c_stimulus.stimulus($2);
 	  }
-          | stimulus_opt NUMBER
+/*
+          | stimulus_opt expr
           { 
             if(verbose)
               cout << "parser sees stimulus with number\n";
-	    c_stimulus.data_point($2);
+	    //c_stimulus.data_point($2);
 	  }
-          | stimulus_opt FLOAT_NUMBER
+*/
+          | stimulus_opt array
           { 
             if(verbose)
-              cout << "parser sees stimulus with floating point number\n";
-	    c_stimulus.data_point($2);
+              cout << "parser sees stimulus with an array\n";
+	    c_stimulus.stimulus($2);
 	  }
           ;
 
@@ -682,26 +663,12 @@ symbol_cmd: SYMBOL
           ;
 
 
-trace_cmd: TRACE
-          {
-	    c_trace.trace();
-	  }
-          | TRACE NUMBER
-          {
-	    c_trace.trace($2);
-	  }
-          | TRACE numeric_option
-          {
-	    c_trace.trace($2);
-	  }
-          | TRACE string_option
-          {
-	    c_trace.trace($2);
-	  }
-          | TRACE bit_flag
-          {
-	    c_trace.trace($2);
-	  }
+trace_cmd: 
+          TRACE                         { c_trace.trace(); }
+          | TRACE expr                  { c_trace.trace($2); }
+          | TRACE numeric_option        { c_trace.trace($2); }
+          | TRACE string_option         { c_trace.trace($2); }
+          | TRACE bit_flag              { c_trace.trace($2); }
           ;
 
 version_cmd: gpsim_VERSION
@@ -710,37 +677,14 @@ version_cmd: gpsim_VERSION
 	  }
           ;
 
-x_cmd: X
-          {
-	    c_x.x();
-	  }
-          | X expr { c_x.x($2); }
-          | X NUMBER
-          {
-	    c_x.x($2);
-	  }
-          | X _register NUMBER
-          {
-	    c_x.x($2,$3);
-	  }
-          | X STRING
-          {
-	    c_x.x($2);
-	  }
-          | X STRING NUMBER
-          {
-	    c_x.x($2,$3);
-	  }
+x_cmd: 
+          X                             { c_x.x();}
+          | X expr                      { c_x.x($2); }
           ;
 
-icd_cmd: ICD
-          {
-	    c_icd.icd();
-	  }
-          | ICD string_option
-          {
-	    c_icd.icd($2);
-	  }
+icd_cmd: 
+          ICD                           { c_icd.icd(); }
+          | ICD string_option           { c_icd.icd($2); }
           ;
 
 // Indirect addressing is supported with the indirect
@@ -748,13 +692,14 @@ icd_cmd: ICD
 // then *0x20 means that the contents of register 0x2e
 // are referenced.
 
-indirect: INDIRECT _register
-	{
-	  if(verbose)
-            printf(" indirect register *%d",(int)$2);
-	  $$ = $2;
-        }
-        ;
+//
+//indirect: INDIRECT _register
+//	{
+//	  if(verbose)
+//            printf(" indirect register *%d",(int)$2);
+//	  $$ = $2;
+//        }
+//        ;
 
 _register: NUMBER
       {
@@ -775,20 +720,20 @@ cmd_subtype: CMD_SUBTYPE
       }
       ;
 
-numeric_option: NUMERIC_OPTION NUMBER
+expression_option: EXPRESSION_OPTION expr { $$ = new cmd_options_expr($1,$2); }
+        ;
+
+numeric_option: NUMERIC_OPTION expr
         { 
 
 	  $$ = new cmd_options_num;
 	  $$->co = $1;
-	  $$->n  = $2;
-          if(verbose&2)
-	    cout << "name " << $$->co->name << " value " << $$->n << " got a numeric option \n"; 
+	  //$$->n = $2;
 	}
         ;
 
 numeric_float_option:  NUMERIC_OPTION FLOAT_NUMBER
         { 
-	  //cout << $1->name;
 	  $$ = new cmd_options_float;
 	  $$->co = $1;
 	  $$->f  = $2;
@@ -799,35 +744,17 @@ numeric_float_option:  NUMERIC_OPTION FLOAT_NUMBER
 
 string_option: STRING_OPTION STRING
         { 
-	  //cout << $1->name;
-	  $$ = new cmd_options_str;
+	  $$ = new cmd_options_str($2);
 	  $$->co  = $1;
-	  $$->str = strdup($2);
           if(verbose&2)
 	    cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
 	}
         ;
 
-string_list: STRING
-        {
-	  str_list = (char_list *) malloc(sizeof(char_list)); //new(char_list);
-	  str_list_head = str_list;
-	  str_list->name = strdup($1);
-	  str_list->next = 0;
-	  if(verbose&2)
-	    cout << "got a string. added " << str_list->name << '\n';
-	}
-        | string_list STRING
-        {
-	  str_list->next = (char_list *) malloc(sizeof(char_list)); //new(char_list);
-	  str_list = str_list->next;
-	  str_list->name = strdup($2);
-	  str_list->next = 0;
-	  if(verbose&2)
-	    cout << " -- have a list of strings. added " << str_list->name << '\n';
-	}
+string_list
+        : STRING                        {$$ = new StringList_t(); $$->push_back($1);}
+        | string_list STRING            {$1->push_back($2);}
         ;
-
 
 //----------------------------------------
 // Expression parsing
@@ -836,15 +763,27 @@ expr    : binary_expr                   {$$=$1;}
         | unary_expr                    {$$=$1;}
         ;
 
+array   : '(' expr_list ')'             {$$=$2;}
+        ;
+
+expr_list
+        : expr                          {$$ = new ExprList_t(); $$->push_back($1);}
+        | expr_list expr                {$1->push_back($2);}
+        ;
+
 binary_expr
-        : expr   PLUS_T      expr         {$$ = new OpAdd($1, $3);}
+        : expr   PLUS_T      expr       {$$ = new OpAdd($1, $3);}
+        | expr   COLON_T     expr       {$$ = new OpAbstractRange($1, $3);}
         ;
 
 unary_expr
-        : literal                                       {$$=$1;}
+        : literal                       {$$=$1;}
         ;
 
-literal : LITERAL_INT_T                         {$$ = new LiteralInteger($1);}
+literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
+        | LITERAL_BOOL_T                {$$ = new LiteralBoolean($1);}
+        | LITERAL_STRING_T              {$$ = new LiteralString($1);}
+        | LITERAL_FLOAT_T               {$$ = new LiteralFloat($1);}
         ;
 
 %%
@@ -899,21 +838,4 @@ void initialize_commands(void)
 
   parser_spanning_lines = 0;
   parser_warnings = 1; // display parser warnings.
-}
-
-void free_char_list(char_list *chl)
-{
-  char_list *old_node;
-
-  while(chl)
-    {
-
-      old_node = chl;
-      chl = chl->next;
-
-      free (old_node->name);
-      free (old_node);
-
-    }
-
 }
