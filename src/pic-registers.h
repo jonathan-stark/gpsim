@@ -104,6 +104,7 @@ public:
   virtual char *name(void) { return(name_str1);};
   virtual void new_name(char *);
   virtual REGISTER_TYPES isa(void) {return FILE_REGISTER;};
+  virtual void reset(RESET_TYPE r) { return; };
 };
 
 //---------------------------------------------------------
@@ -111,11 +112,27 @@ public:
 class sfr_register : public file_register
 {
 public:
-    sfr_register() :file_register(){}
+  sfr_register() :file_register(){}
   unsigned int wdtr_value; // wdt or mclr reset value
 
   virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};
   virtual void initialize(void) {return;};
+
+  virtual void reset(RESET_TYPE r) {
+    switch (r) {
+
+    POR_RESET:
+      value = por_value;
+      break;
+
+    WDT_RESET:
+      value = wdtr_value;
+      break;
+    SOFT_RESET:
+      break;
+    }
+
+  }
 };
 
 

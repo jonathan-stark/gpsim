@@ -54,26 +54,49 @@ void TMR0::start(int restart_value, int sync=0)
   if(verbose)
     cout << "TMRO::start\n";
 
-  synchronized_cycle = cpu->cycles.value + sync;
+  old_option = cpu->option_reg.value;
 
   prescale = 1 << get_prescale();
   prescale_counter = prescale;
 
-  last_cycle = value * prescale;
-  last_cycle = synchronized_cycle - last_cycle;
+  if(get_t0cs()) {
+    if(verbose)
+      cout << "tmr0 starting with external clock \n";
 
-  guint64 fc = last_cycle + max_counts() * prescale;
+  } else {
 
-  if(future_cycle)
-    cpu->cycles.reassign_break(future_cycle, fc, this);
-  else
-    cpu->cycles.set_break(fc, this);
+    synchronized_cycle = cpu->cycles.value + sync;
+  
+    last_cycle = value * prescale;
+    last_cycle = synchronized_cycle - last_cycle;
 
-  future_cycle = fc;
+    guint64 fc = last_cycle + max_counts() * prescale;
 
+
+    if(future_cycle)
+      cpu->cycles.reassign_break(future_cycle, fc, this);
+    else
+      cpu->cycles.set_break(fc, this);
+
+    future_cycle = fc;
+
+    if(verbose)
+      cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
+
+
+  }
+
+
+
+}
+
+void TMR0::clear_break(void)
+{
   if(verbose)
-    cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
+    cout << "TMR0 break was cleared\n";
 
+  future_cycle = 0;
+  last_cycle = 0;
 
 }
 
@@ -112,40 +135,6 @@ void TMR0::put(unsigned int new_value)
 
   trace.register_write(address,value);
 
-#if 0
-  // Note, anytime something is written to TMR0, the prescaler, if it's
-  // assigned to tmr0, is also cleared. This is implicitly handled by
-  // saving the value of cpu's cycle counter and associating that value
-  // with the tmr rollover.
-
-  value = new_value & 0xff;
-
-  prescale = 1 << (cpu->option_reg.get_psa() ? 0 : (1+cpu->option_reg.get_prescale()));
-  prescale_counter = prescale;
-
-  synchronized_cycle = cpu->cycles.value + 2;
-
-  last_cycle = value * prescale;
-  last_cycle = synchronized_cycle - last_cycle;
-
-  unsigned int fc = last_cycle + 256 * prescale;
-
-  if(future_cycle)
-    cpu->cycles.reassign_break(future_cycle, fc, this);
-  else
-    cpu->cycles.set_break(fc, this);
-
-  future_cycle = fc;
-
-  trace.register_write(address,value);
-
-  /*
-  cout << "TMR0::put\n";
-  cout << " value " << value << '\n';
-  cout << " future_cycle " << future_cycle << '\n';
-  cout << " last_cycle " << last_cycle << '\n';
-  */
-#endif
 }
 
 unsigned int TMR0::get_value(void)
@@ -202,31 +191,59 @@ void TMR0::new_prescale(void)
   //cout << "tmr0 new_prescale\n";
 
   int new_value;
-  if(last_cycle < cpu->cycles.value)
-    new_value = (cpu->cycles.value - last_cycle)/prescale;
-  else
-    new_value = 0;
 
-  if(new_value>=max_counts())
-    cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
+  int option_diff = old_option ^ cpu->option_reg.value;
 
-  prescale = 1 << get_prescale();
-  prescale_counter = prescale;
+  old_option ^= option_diff;   // save old option value. ( (a^b) ^b = a)
 
-  if(get_t0cs())
-    {
-      //cout << "external clock...\n";
+  if(option_diff & OPTION_REG::T0CS) {
+    // TMR0's clock source has changed.
+    if(verbose)
+      cout << "T0CS has changed to ";
 
-      value = new_value;
+    if(cpu->option_reg.get_t0cs()) {
+      // External clock
+      if(verbose)
+	cout << "external clock\n";
+      cpu->cycles.clear_break(future_cycle);
+    } else {
+      if(verbose)
+	cout << "internal clock\n";
+      // Internal Clock
+      start(value);
     }
-  else
-    {
+
+  } else {
+
+    if(cpu->option_reg.get_t0cs()) {
+      prescale = 1 << get_prescale();
+      prescale_counter = prescale;
+
+    } else {
+
+      if(last_cycle < cpu->cycles.value)
+	new_value = (cpu->cycles.value - last_cycle)/prescale;
+      else
+	new_value = 0;
+
+      if(new_value>=max_counts()) {
+	cout << "TMR0 bug (new_prescale): exceeded max count"<< max_counts() <<'\n';
+	cout << "   last_cycle = 0x" << hex << last_cycle << endl;
+	cout << "   cpu cycle = 0x" << hex << (cpu->cycles.value) << endl;
+
+	cout << "   prescale = 0x" << hex << prescale << endl;
+
+      }
+
+
       // Get the current value of TMR0
 
-      //cout << "cycles " << cpu->cycles.value  << " old prescale " << prescale;
+      // cout << "cycles " << cpu->cycles.value  << " old prescale " << prescale;
 
+      prescale = 1 << get_prescale();
+      prescale_counter = prescale;
 
-      //cout << " new prescale " << prescale;
+      // cout << " new prescale " << prescale;
 
       // Now compute the 'last_cycle' as though if TMR0 had been running on the 
       // new prescale all along. Recall, 'last_cycle' records the value of the cpu's
@@ -235,18 +252,20 @@ void TMR0::new_prescale(void)
       last_cycle = value * prescale;
       last_cycle = synchronized_cycle - last_cycle;
 
-      //cout << " effective last_cycle " << last_cycle << '\n';
+      // cout << " effective last_cycle " << last_cycle << '\n';
 
       if(cpu->cycles.value <= synchronized_cycle)
 	last_cycle += (synchronized_cycle - cpu->cycles.value);
 
       guint64 fc = last_cycle + max_counts() * prescale;
-      //cout << "moving break from " << future_cycle << " to " << fc << '\n';
+
+      // cout << "moving break from " << future_cycle << " to " << fc << '\n';
 
       cpu->cycles.reassign_break(future_cycle, fc, this);
 
       future_cycle = fc;
     }
+  }
 }
 
 unsigned int TMR0::get_t0cs(void)
@@ -263,7 +282,8 @@ void TMR0::set_t0if(void)
 
 void TMR0::new_clock_source(void)
 {
-
+  // This is handled in the new_prescale() function now
+#if 0
   //  cout << "TMR0:new_clock_source changed to the ";
   if(get_t0cs())
     {
@@ -275,6 +295,7 @@ void TMR0::new_clock_source(void)
       //cout << "internal\n";
       put(value);    // let TMR0::put() set a cycle counter break point
     }
+#endif
 }
 
 // TMR0 callback is called when the cycle counter hits the break point that
@@ -301,4 +322,25 @@ void TMR0::callback(void)
   future_cycle = last_cycle + max_counts()*prescale;
   cpu->cycles.set_break(future_cycle, this);
   set_t0if();
+}
+
+void  TMR0::reset(RESET_TYPE r)
+{
+
+  switch(r) {
+  POR_RESET:
+    cout << "TMR0::reset - por\n";
+    value = por_value;
+    break;
+  default:
+    break;
+  }
+
+
+}
+
+void TMR0::callback_print(void)
+{
+
+  cout << "TMR0\n";
 }

@@ -28,7 +28,8 @@ class TMR0 : public sfr_register, public BreakCallBack
 public:
   unsigned int 
     prescale,
-    prescale_counter;
+    prescale_counter,
+    old_option;       // Save option register contents here.
   guint64
     synchronized_cycle,
     future_cycle;
@@ -51,6 +52,10 @@ public:
   void new_clock_source(void);
   virtual unsigned int get_t0cs(void);
   virtual void set_t0if(void);
+  virtual void reset(RESET_TYPE r);
+  virtual void clear_break(void); 
+  virtual void callback_print(void);
+
 };
 
 #endif

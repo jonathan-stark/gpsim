@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_stimulus.h"
+#include "../src/pic-processor.h"
 #include "../src/stimulus_orb.h"
 #include "../src/stimuli.h"
 

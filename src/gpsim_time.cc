@@ -147,6 +147,45 @@ bool Cycle_Counter::set_break_delta(guint64 delta, BreakCallBack *f=NULL, unsign
   
 
 }
+
+
+//--------------------------------------------------
+// clear_break
+// remove the break at this cycle
+
+void Cycle_Counter::clear_break(guint64 at_cycle)
+{
+
+  Cycle_Counter_breakpoint_list  *l1 = &active, *l2;
+
+  bool found = 0;
+
+  while( (l1->next) && !found) {
+      
+    // If the next break point is at a cycle greater than the
+    // one we wish to set, then we found the insertion point.
+    // Otherwise 
+
+    if(l1->next->break_value ==  at_cycle)
+      found = 1;
+  }
+
+  if(!found) {
+    cout << "Cycle_Counter::clear_break could not find break at cycle 0x"
+      << hex << setw(16) << setfill('0') << at_cycle << endl;
+    return;
+  }
+
+  l2 = l1->next;  // save a copy for a moment
+  l1->next = l1->next->next;  // remove the break
+
+  if(l2->f)
+    l2->f->clear_break();
+}
+
+
+
+
 // reassign_break
 //   change the cycle of an existing break point.
 //
@@ -378,12 +417,12 @@ void Cycle_Counter::dump_breakpoints(void)
     {
       //cout << cpu->name_str << "  " << "internal cycle break  " <<
       cout << "internal cycle break  " <<
-	hex << setw(16) << setfill('0') <<  l1->next->break_value;
+	hex << setw(16) << setfill('0') <<  l1->next->break_value << ' ';
 
       if(l1->next->f)
-	cout << " has callback\n";
+	l1->next->f->callback_print();
       else
-	cout << " does not have callback\n";
+	cout << "does not have callback\n";
 
       l1 = l1->next;
     }

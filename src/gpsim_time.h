@@ -142,6 +142,7 @@ public:
   void clear_current_break(void);
   void dump_breakpoints(void);
 
+  void clear_break(guint64 at_cycle);
 };
 
 

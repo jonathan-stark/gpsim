@@ -37,13 +37,30 @@ wdt_reset			; to:pd = 01 wdt reset
 	;; wdt timed out while the processor was not sleeping.
 	;; A cause for concern if you're doing something real.
 
-	goto	por_reset	; the Processor may be in a bad
-				; state, so just do the por stuff.
+	;; Here, we just increase the Prescale count by 1 until
+	;; we roll it over (it's only a 3-bit counter).
+
+	bsf	status,rp0
+	bcf	option_reg,psa	;
+	incf	option_reg,f	;Advance to the next prescale count
+	bsf	option_reg,psa	;
+	bcf	status,rp0
+
+	goto	$		;wait for WDT
+
 	
 por_reset			;  to:pd = 11 por reset
-	;; Power on reset OR perhaps one more other kinds of resets
+	;; Power on reset OR perhaps one other kind of reset
 	;; that executed code that cleared the wdt. In either case,
 	;; the processor wasn't sleeping when the reset occurred.
+
+	bsf	status,rp0
+	movf	option_reg,W
+	iorlw	(1<<psa)	;switch the prescaler to 
+	andlw	~(ps0|ps1|ps2)	;set the prescaler to 0
+	movwf	option_reg
+	bcf	status,rp0
+
 
 	;; Let's go to sleep and let the wdt time out and wake us
 	nop

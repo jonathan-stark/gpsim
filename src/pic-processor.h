@@ -27,42 +27,8 @@ Boston, MA 02111-1307, USA.  */
 #include "modules.h"
 
 
-/*==================================================================
- *
- * Here are a few enum definitions that probably should go somewhere
- * else, but are here for right now...
- *
- *
- * Define all of the different types of reset conditions:
- */
-
-enum RESET_TYPE
-{
-  POR_RESET,
-  WDT_RESET,
-  SOFT_RESET
-};
-
-enum SIMULATION_MODES
-{
-  STOPPED,
-  RUNNING,
-  SLEEPING,
-  SINGLE_STEPPING,
-  STEPPING_OVER,
-  RUNNING_OVER
-};
 
 extern SIMULATION_MODES simulation_mode;
-
-enum PROCESSOR_STATES
-{
-
-  POR_,
-  IDLE
-
-};
-
 
 enum PROCESSOR_TYPE
 {
