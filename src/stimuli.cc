@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimulus_orb.h"
 #include "symbol.h"
 #include "interface.h"
+#include "errors.h"
 
 list <Stimulus_Node *> node_list;
 list <Stimulus_Node *> :: iterator node_iterator;
@@ -572,7 +573,7 @@ void Stimulus_Node::time_constant(double new_tc)
 }
 
 //------------------------------------------------------------------------
-stimulus::stimulus(char *n)
+stimulus::stimulus(const char *n)
 {
   new_name("stimulus");
 
@@ -593,7 +594,7 @@ stimulus::~stimulus(void)
 //========================================================================
 
 
-square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n)
+square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, const char *n)
 {
       
   //cout << "creating sqw stimulus\n";
@@ -637,7 +638,7 @@ double square_wave::get_Vth()
 //
 // triangle_wave
 
-triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, char *n)
+triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, const char *n)
 {
       
   //cout << "creating sqw stimulus\n";
@@ -774,16 +775,16 @@ void asynchronous_stimulus::callback(void)
   guint64 current_cycle = future_cycle;
 
   if(digital)
-    current_state = (current_sample.value > 0.0) ? Vth : 0.0;
+    current_state = (next_sample.value > 0.0) ? Vth : 0.0;
   else
-    current_state = current_sample.value;
+    current_state = next_sample.value;
 
   if(verbose)
     cout << "asynchro cycle " << current_cycle << "  state " << current_state << '\n';
 
   // If there's a node attached to this stimulus, then update it.
   if(snode)
-    snode->update(current_cycle);
+    snode->update();
 
   ++sample_iterator;
 
@@ -802,7 +803,7 @@ void asynchronous_stimulus::callback(void)
       return;
     }
 
-    current_sample = *sample_iterator;
+    next_sample = *sample_iterator;
     start_cycle += period;
 
     if(verbose) {
@@ -810,29 +811,26 @@ void asynchronous_stimulus::callback(void)
 	   << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
   } else
-    current_sample = *sample_iterator;
+    next_sample = *sample_iterator;
 
   if(verbose) {
-    cout << "  current_sample (" << current_sample.time << "," 
-	 << current_sample.value << ")\n";
+    cout << "  current_sample (" << next_sample.time << "," 
+	 << next_sample.value << ")\n";
     cout << " start cycle " << start_cycle << endl;
   }
 
   // get the cycle when the data will change next
 
-  future_cycle = current_sample.time + start_cycle;
+  future_cycle = next_sample.time + start_cycle;
       
 
-  if(future_cycle <= current_cycle)
-    {
-
+  if(future_cycle <= current_cycle) {
+    
       // There's an error in the data. Set a break on the next simulation cycle
       // and see if it can be resolved.
 
       future_cycle = current_cycle+1;
-    }
-  else
-    next_state = current_sample.value;
+  }
 
 
   cycles.set_break(future_cycle, this);
@@ -846,6 +844,14 @@ void asynchronous_stimulus::callback(void)
 
 double asynchronous_stimulus::get_Vth() 
 {
+  double cs;
+  if(digital)
+    cs = (next_sample.value > 0.0) ? Vth : 0.0;
+  else
+    cs = next_sample.value;
+
+  if(cs != current_state)
+    cout << " diff " << cs << "  " << current_state << endl;
   return current_state;
 }
 
@@ -862,15 +868,13 @@ void asynchronous_stimulus::start(void)
 
   if(sample_iterator != samples.end()) {
 
-    current_sample = *sample_iterator;
 
     if(digital)
       initial_state = (initial_state > 0.0) ? Vth : 0.0;
 
     current_state = initial_state;
-
-    next_state = current_sample.value;
-    future_cycle = current_sample.time + start_cycle;
+    next_sample   = *sample_iterator;
+    future_cycle  = next_sample.time + start_cycle;
 
     cycles.set_break(future_cycle, this);
 
@@ -922,13 +926,10 @@ void asynchronous_stimulus::re_start(guint64 new_start_time)
   if(sample_iterator != samples.end()) {
 
     guint64 old_future_cycle = future_cycle;
-
     start_cycle = new_start_time;
-
     current_state = initial_state;
 
-    next_state = current_sample.value;
-    future_cycle = current_sample.time + start_cycle;
+    future_cycle = next_sample.time + start_cycle;
 
     if(old_future_cycle) 
       cycles.reassign_break(old_future_cycle,future_cycle, this);
@@ -958,7 +959,7 @@ void asynchronous_stimulus::put_data(StimulusData &data_point)
 // Note that most of the stimulus' initialization must be performed outside
 // of the constructor.
 
-asynchronous_stimulus::asynchronous_stimulus(char *n)
+asynchronous_stimulus::asynchronous_stimulus(const char *n)
 {
   cpu = 0;
 
@@ -970,6 +971,9 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
   phase  = 0;
   initial_state  = 0.0;
   start_cycle    = 0;
+
+  next_sample.value = 0.0;
+  next_sample.time  = 0;
 
   if(n)
     new_name(n);
@@ -989,7 +993,7 @@ asynchronous_stimulus::asynchronous_stimulus(char *n)
 //========================================================================
 //
 
-IOPIN::IOPIN(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 {
   iop = i;
   iopp = _iopp;
@@ -1229,7 +1233,7 @@ double IOPIN::get_Vth()
 
 //========================================================================
 //
-IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   : IOPIN(i,b,opt_name,_iopp)
 {
 
@@ -1301,7 +1305,8 @@ void IO_bi_directional::update_direction(unsigned int new_direction)
 }
 
 
-IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
+					   const char *opt_name, Register **_iopp)
   : IO_bi_directional(i, b,opt_name,_iopp)
 {
 
@@ -1344,7 +1349,8 @@ double IO_bi_directional_pu::get_Vth()
     return bPullUp ? Vth : VthIn;
 
 }
-IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, Register **_iopp)
+IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
+				     const char *opt_name, Register **_iopp)
   : IO_bi_directional_pu(i,b,opt_name,_iopp)
 {
 
@@ -1369,6 +1375,269 @@ double IO_open_collector::get_Zth()
 
 }
 
+//========================================================================
+//
+// ValueStimulusData
+//
+
+ValueStimulus::ValueStimulus(const char *n)
+{
+  initial = 0;
+  current = 0;
+
+  if(n)
+    new_name(n);
+  else
+    {
+      char name_str[100];
+      snprintf(name_str,sizeof(name_str),"s%d_asynchronous_stimulus",num_stimuli);
+      num_stimuli++;
+      new_name(name_str);
+    }
+
+  add_stimulus(this);
+  symbol_table.add_stimulus(this);
+
+}
+ValueStimulus::~ValueStimulus()
+{
+  delete initial;
+  delete current;
+
+  for(sample_iterator = samples.begin();
+      sample_iterator != samples.end();
+      ++sample_iterator) {
+	  
+    delete (*sample_iterator).v;
+  }
+
+}
+
+void ValueStimulus::callback()
+{
+  guint64 current_cycle = future_cycle;
+
+  current = next_sample.v;
+
+  if(verbose)
+    cout << "asynchro cycle " << current_cycle << "  state " << current->toString() << '\n';
+
+  // If there's a node attached to this stimulus, then update it.
+  if(snode)
+    snode->update();
+
+  ValueStimulusData *n = getNextSample();
+
+  if(n) {
+    next_sample = *n;
+
+    if(verbose) {
+      cout << "  current_sample (" << next_sample.time << "," 
+	   << next_sample.v->toString() << ")\n";
+      cout << " start cycle " << start_cycle << endl;
+    }
+
+    // get the cycle when the data will change next
+
+    future_cycle = next_sample.time + start_cycle;
+      
+
+    if(future_cycle <= current_cycle) {
+    
+      // There's an error in the data. Set a break on the next simulation cycle
+      // and see if it can be resolved.
+
+      future_cycle = current_cycle+1;
+    }
+
+    cycles.set_break(future_cycle, this);
+  } else
+    future_cycle = 0;
+
+  if(verbose)
+    cout <<"  next transition = " << future_cycle << '\n';
+}
+
+void ValueStimulus::put_data(ValueStimulusData &data_point)
+{
+  samples.push_back(data_point);
+
+}
+double ValueStimulus::get_Vth()
+{
+  double v=initial_state;
+  if(current) {
+    try {
+      current->get(v);
+      if(digital & v >0.0)
+	v = 5.0;
+    }
+
+    catch (Error *err) {
+      if(err) {
+	cout << "Warning stimulus: " << name() << " failed on: "<< err->toString() << endl;
+	delete err;
+      }
+    }
+
+  }
+  return v;
+}
+
+
+void ValueStimulus::start(void)
+{
+
+  if(verbose)
+    cout << "Starting asynchronous stimulus\n";
+
+  sample_iterator = samples.begin();
+
+  if(sample_iterator != samples.end()) {
+
+
+    if(digital)
+      initial_state = (initial_state > 0.0) ? Vth : 0.0;
+
+    current       = initial;
+    next_sample   = *sample_iterator;
+    future_cycle  = next_sample.time + start_cycle;
+
+    cycles.set_break(future_cycle, this);
+
+    if(verbose) {
+
+      cout << "  states = " << samples.size() << '\n';
+
+      list<ValueStimulusData>::iterator si;
+
+      for(si = samples.begin();
+	  si != samples.end();
+	  ++si) {
+	  
+	cout << "    " << (*si).time
+	     <<  '\t'  << (*si).v->toString()
+	     << '\n';
+
+      }
+
+      cout << "first break will be at cycle " <<future_cycle << '\n';
+
+
+      cout << "period = " << period << '\n'
+	   << "phase = " << phase << '\n'
+	   << "start_cycle = " << start_cycle << '\n'
+	   << "Next break cycle = " << future_cycle << '\n';
+
+    }
+  }
+
+
+
+  if(verbose)
+    cout << "asy should've been started\n";
+
+}
+
+void ValueStimulus::put_initial(Value *i)
+{
+  initial = i;
+}
+
+ValueStimulusData *ValueStimulus::getNextSample()
+{
+
+  ++sample_iterator;
+
+  if(sample_iterator == samples.end()) {
+
+    // We've gone through all of the data. Now let's try to start over
+
+    sample_iterator = samples.begin();
+
+    // If the period is zero or if there's no data then we don't want to 
+    // regenerate the data stream.
+
+    if( (period == 0) || (sample_iterator == samples.end()))
+      return 0;
+
+    start_cycle += period;
+
+    if(verbose) {
+      cout << "  asynchronous stimulus rolled over\n"
+	   << "   next start_cycle " << start_cycle << "  period " << period << '\n';
+    }
+  }
+
+  return &(*sample_iterator);
+}
+//------------------------------------------------------------------------
+AttributeStimulus::AttributeStimulus(const char *n)
+  : ValueStimulus(n), attr(0)
+{
+}
+/*
+AttributeStimulus::~AttributeStimulus()
+{
+  ValueStimulus::~ValueStimulus();
+
+}
+*/
+void AttributeStimulus::callback()
+{
+  guint64 current_cycle = future_cycle;
+
+  current = next_sample.v;
+
+  if(verbose)
+    cout << "asynchro cycle " << current_cycle << "  state " << current->toString() << '\n';
+
+  // If there's a node attached to this stimulus, then update it.
+  if(attr)
+    attr->set(current);
+
+  ValueStimulusData *n = getNextSample();
+
+  if(n) {
+    next_sample = *n;
+
+    if(verbose) {
+      cout << "  current_sample (" << next_sample.time << "," 
+	   << next_sample.v->toString() << ")\n";
+      cout << " start cycle " << start_cycle << endl;
+    }
+
+    // get the cycle when the data will change next
+
+    future_cycle = next_sample.time + start_cycle;
+      
+
+    if(future_cycle <= current_cycle) {
+    
+      // There's an error in the data. Set a break on the next simulation cycle
+      // and see if it can be resolved.
+
+      future_cycle = current_cycle+1;
+    }
+
+    cycles.set_break(future_cycle, this);
+  } else
+    future_cycle = 0;
+
+  if(verbose)
+    cout <<"  next transition = " << future_cycle << '\n';
+}
+
+void AttributeStimulus::setClientAttribute(Value *v)
+{
+  if(attr)
+    cout << "overwriting target attribute in AttributeStimulus\n";
+
+  attr = v;
+
+  if(verbose && v)
+    cout << " attached " << name() << " to attribute: " << v->name() << endl;
+}
 
 //========================================================================
 // 
@@ -1476,26 +1745,53 @@ void stimuli_attach(SymbolList_t *sl)
 
   Stimulus_Node *sn = find_node (*si);
 
-  if(sn)
-    {
-      for(++si; si != sl->end(); ++si)
-	{
-	  Value *s = *si;
-	  stimulus *st = find_stimulus(s);
+  if(sn) {
 
-	  if(st) {
-	    sn->attach_stimulus(st);
-	    if(verbose&2)
-	      cout << " attaching stimulus: " << s << '\n';
-	  }
-	  else
-	    cout << "Warning, stimulus: " << s << " not attached\n";
+    for(++si; si != sl->end(); ++si)
+      {
+	Value *s = *si;
+	stimulus *st = find_stimulus(s);
+
+	if(st) {
+	  sn->attach_stimulus(st);
+	  if(verbose&2)
+	    cout << " attaching stimulus: " << s->name() 
+		 << " to node: " << sn->name() 
+		 << endl;
 	}
+	else
+	  cout << "Warning, stimulus: " << s->toString() << " not attached\n";
+      }
 
-      sn->update(0);
-    }
+    sn->update(0);
+  }
   else {
-    cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
+    // The first symbol is not a node - so let's assume that 
+    // we're performing a register stimulus.
+
+    //cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
+
+    stimulus *st;
+    Value *v;
+    if(sl->size() == 2) {
+      st = find_stimulus(*si);
+
+      if(st) {
+	++si;
+	v = *si;
+      } else {
+	v = *si;
+	++si;
+	st = find_stimulus(*si);
+      }
+
+      if(st) {
+	AttributeStimulus *ast = dynamic_cast<AttributeStimulus *>(st);
+	if(ast)
+	  ast->setClientAttribute(v);
+      }
+    }
+
   }
 }
 

@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/stimuli.h"
 
 
-static asynchronous_stimulus *last_stimulus=0;
+static ValueStimulus *last_stimulus=0;
 cmd_stimulus c_stimulus;
 
 #define ASYNCHRONOUS_STIMULUS    1
@@ -44,16 +44,15 @@ cmd_stimulus c_stimulus;
 #define  STIM_INITIAL_STATE   (1 << 3)
 #define  STIM_START_CYCLE     (1 << 4)
 #define  STIM_DATA            (1 << 5)
-#define  STIM_IOPORT          (1 << 6)
+
 #define  STIM_ASY             (1 << 7)
 #define  STIM_SQW             (1 << 8)
 #define  STIM_NAME            (1 << 9)
 #define  STIM_TRI             (1 << 10)
-#define  STIM_AD              (1 << 11)
+#define  STIM_ATTRIBUTE       (1 << 11)
 #define  STIM_ANALOG          (1 << 12)
 #define  STIM_DIGITAL         (1 << 13)
 #define  STIM_DUMP            (1 << 14)
-#define  STIM_PORT            (1 << 15)
 
 const unsigned int
 SQW_OPTIONS = STIM_SQW | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_CYCLE;
@@ -61,11 +60,15 @@ const unsigned int
 ASY_OPTIONS = STIM_ASY | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_CYCLE | STIM_DATA;
 const unsigned int
 TRI_OPTIONS = STIM_TRI | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_CYCLE;
+const unsigned int
+ATTR_OPTIONS = STIM_ATTRIBUTE | STIM_PERIOD | STIM_PHASE | STIM_HIGH_TIME | STIM_START_CYCLE | STIM_DATA;
 
 static cmd_options cmd_stimulus_options[] =
 {
   {"asy",                   STIM_ASY,           OPT_TT_SUBTYPE},
   {"asynchronous_stimulus", STIM_ASY,           OPT_TT_SUBTYPE},
+  {"attr",                  STIM_ATTRIBUTE,     OPT_TT_SUBTYPE},
+  {"attribute_stimulus",    STIM_ATTRIBUTE,     OPT_TT_SUBTYPE},
   {"period",                STIM_PERIOD,        OPT_TT_NUMERIC},
   {"phase",                 STIM_PHASE,         OPT_TT_NUMERIC},
   {"high_time",             STIM_HIGH_TIME,     OPT_TT_NUMERIC},
@@ -81,7 +84,6 @@ static cmd_options cmd_stimulus_options[] =
   {"square_wave",           STIM_SQW,           OPT_TT_SUBTYPE},
   {"tri",                   STIM_TRI,           OPT_TT_SUBTYPE},
   {"triangle_wave",         STIM_TRI,           OPT_TT_SUBTYPE},
-  {"port",                  STIM_PORT,          OPT_TT_STRING},
 
  { 0,0,0}
 };
@@ -170,9 +172,21 @@ void cmd_stimulus::stimulus(int bit_flag)
 
       if(!last_stimulus) {
 	//create_stimulus(NEW_ASY,stim_name);
-	last_stimulus = new asynchronous_stimulus;
+	last_stimulus = new ValueStimulus;
 	valid_options = ASY_OPTIONS;
 	options_entered = STIM_ASY;
+      }else
+	cout << "warning: ignoring asy stim creation";
+      break;
+
+    case STIM_ATTRIBUTE:
+      if(verbose)
+	cout << "creating asy stimulus\n";
+
+      if(!last_stimulus) {
+	last_stimulus = new AttributeStimulus;
+	valid_options = ATTR_OPTIONS;
+	options_entered = STIM_ATTRIBUTE;
       }else
 	cout << "warning: ignoring asy stim creation";
       break;
@@ -195,13 +209,13 @@ void cmd_stimulus::stimulus(int bit_flag)
       return;
 
     case STIM_DIGITAL:
-      if(last_stimulus)
-	last_stimulus->set_digital();
+      //if(last_stimulus)
+      //  last_stimulus->set_digital();
       return;
 
     case STIM_ANALOG:
-      if(last_stimulus)
-	last_stimulus->set_analog();
+      //if(last_stimulus)
+      //  last_stimulus->set_analog();
       return;
 
     default:
@@ -296,8 +310,6 @@ void cmd_stimulus::stimulus(cmd_options_str *cos)
       last_stimulus->new_name(cos->str);
 
       break;
-    case STIM_PORT:
-      cout << "the port option has been deprecated\n";
     }
 
   options_entered |= cos->co->value;
@@ -308,24 +320,38 @@ void cmd_stimulus::stimulus(ExprList_t *eList)
   ExprList_itor ei;
 
   bool bHaveSample=false;
-  StimulusData sample;
+  ValueStimulusData sample;
   sample.time = 0;
-  sample.value = 0.0;
+  sample.v = 0;
 
   if(last_stimulus) {
     for(ei = eList->begin(); ei != eList->end(); ++ei) {
 
-      double v = evaluate(*ei);
 
-      if(!bHaveSample) {
-	sample.time = (guint64) v;
-	bHaveSample = true;
-      } else {
-	sample.value = v;
-	last_stimulus->put_data(sample);
-	bHaveSample = false;
-	have_data = 1;
+
+      try {
+
+	Value *v = (*ei)->evaluate();
+
+	if(!bHaveSample) {
+	  v->get(sample.time);
+	  delete v;
+	  bHaveSample = true;
+	} else {
+	  sample.v = v;
+	  last_stimulus->put_data(sample);
+	  bHaveSample = false;
+	  have_data = 1;
+	}
+
       }
+
+      catch (Error *err) {
+	if(err)
+	  cout << "ERROR:" << err->toString() << endl;
+	delete err;
+      }
+
     }
 
   }
@@ -356,6 +382,12 @@ void cmd_stimulus::end(void)
     case STIM_ASY:
       if(verbose)
 	cout << "created asy stimulus\n";
+      last_stimulus->start();
+      break;
+
+    case STIM_ATTRIBUTE:
+      if(verbose)
+	cout << "created attribute stimulus\n";
       last_stimulus->start();
       break;
 

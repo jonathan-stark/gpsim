@@ -779,7 +779,7 @@ void initialize_commands(void)
 
   attach.token_value = ATTACH;
   c_break.token_value = BREAK;
-  c_bus.token_value = BUS;
+  // c_bus.token_value = BUS;
   clear.token_value = CLEAR;
   disassemble.token_value = DISASSEMBLE;
   dump.token_value = DUMP;

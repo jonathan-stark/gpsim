@@ -88,7 +88,7 @@ extern list <Stimulus_Node *> node_list;
 extern list <stimulus *> stimulus_list;
 
 
-class Stimulus_Node : public gpsimValue, public TriggerObject
+class Stimulus_Node : public gpsimObject, public TriggerObject
 {
 public:
   bool warned;        // keeps track of node warnings (e.g. floating node, contention)
@@ -119,12 +119,6 @@ public:
   // it's voltage is periodically updated by invoking callback()
   virtual void callback(void);
   virtual void callback_print(void);
-
-  // FIXME: do we need this: ? - no but these are  pure virtual functions
-  // inherited from the gpsimValue class.
-
-  virtual unsigned int get_value(void) { return 0;}
-  virtual void put_value(unsigned int new_value) { }
 
 };
 
@@ -158,7 +152,7 @@ public:
 
   stimulus *next;            // next stimulus that's on the snode
 
-  stimulus(char *n=0);
+  stimulus(const char *n=0);
   virtual ~stimulus();
 
 
@@ -224,8 +218,6 @@ enum SOURCE_TYPE
     digital = true;
   };
 
-  virtual SOURCE_TYPE isa(void) {return SQW;};
-
   virtual void callback(void);
   virtual void callback_print(void);
 
@@ -282,11 +274,10 @@ class IOPIN : public stimulus
 
 
   IOPIN(void);
-  IOPIN(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
   ~IOPIN();
 
   void attach_to_port(IOPORT *i, unsigned int b) {iop = i; iobit=b;};
-  virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
 
   virtual void set_nodeVoltage(double v);
   virtual bool get_digital_state(void);
@@ -307,17 +298,6 @@ class IOPIN : public stimulus
 
 
 };
-/*
-class IO_input : public IOPIN
-{
-public:
-
-  virtual IOPIN_TYPE isa(void) {return INPUT_ONLY;};
-  IO_input(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
-  IO_input(void);
-
-};
-*/
 
 class IO_bi_directional : public IOPIN
 {
@@ -335,9 +315,8 @@ public:
   double VthIn;
 
 
-  virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL;};
   IO_bi_directional(void);
-  IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
 
   virtual double get_Zth();
   virtual double get_Vth();
@@ -357,8 +336,7 @@ public:
   bool bPullUp;    // True when pullup is enable
   double Zpullup;  // resistance of the pullup
 
-  virtual IOPIN_TYPE isa(void) {return BI_DIRECTIONAL_PU;};
-  IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
   ~IO_bi_directional_pu();
   virtual double get_Vth();
   virtual double get_Zth();
@@ -370,8 +348,7 @@ class IO_open_collector : public IO_bi_directional_pu
 {
 public:
 
-  virtual IOPIN_TYPE isa(void) {return OPEN_COLLECTOR;};
-  IO_open_collector(IOPORT *i, unsigned int b,char *opt_name=0, Register **_iop=0);
+  IO_open_collector(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
 
   virtual IOPIN_DIRECTION  get_direction(void) {return ((driving) ? DIR_OUTPUT : DIR_INPUT);};
 
@@ -384,11 +361,10 @@ class square_wave : public source_stimulus
 {
 public:
 
-  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
+  square_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0); 
 
   virtual double get_Vth();
 
-  virtual SOURCE_TYPE isa(void) {return SQW;};
 
 };
 
@@ -398,10 +374,9 @@ public:
 
   double m1,b1,m2,b2;
 
-  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, char *n=0); 
+  triangle_wave(unsigned int _period, unsigned int _duty, unsigned int _phase, const char *n=0); 
 
   virtual double get_Vth();
-  virtual SOURCE_TYPE isa(void) {return TRI;};
 
 };
 
@@ -412,22 +387,20 @@ public:
 
 };
 
+/// asynchronous_stimulus
+///
 class asynchronous_stimulus : public source_stimulus
 {
-public:
+private:
+  unsigned int  max_states;
+  guint64       future_cycle;
+  double        current_state;
+  StimulusData  next_sample;
 
-  unsigned int max_states;
-
-  guint64
-    future_cycle;
-
-  double current_state, next_state;
-
-  StimulusData current_sample;
   list<StimulusData> samples;
   list<StimulusData>::iterator sample_iterator;
 
-  Processor *cpu;
+public:
 
   virtual void callback(void);
   virtual double get_Vth();
@@ -435,11 +408,57 @@ public:
   virtual void re_start(guint64 new_start_time);
   virtual void put_data(StimulusData &data_point);
 
-  asynchronous_stimulus(char *n=0);
-  virtual SOURCE_TYPE isa(void) {return ASY;};
+  asynchronous_stimulus(const char *n=0);
 
 };
 
+class ValueStimulusData {
+public:
+  guint64 time;
+  Value  *v;
+
+};
+
+/// ValueStimulus
+///
+
+class ValueStimulus : public source_stimulus
+{
+protected:
+  Value             *initial;
+  Value             *current;
+  guint64            future_cycle;
+  ValueStimulusData  next_sample;
+
+  list<ValueStimulusData> samples;
+  list<ValueStimulusData>::iterator sample_iterator;
+
+public:
+
+  virtual void callback();
+  virtual void put_data(ValueStimulusData &data_point);
+  virtual void put_initial(Value *);
+  virtual double get_Vth();
+  virtual void start(void);
+
+  ValueStimulus(const char*n=0);
+  virtual ~ValueStimulus();
+protected:
+  ValueStimulusData *getNextSample();
+};
+
+class AttributeStimulus : public ValueStimulus
+{
+  Value    *attr;
+public:
+
+  AttributeStimulus(const char *n=0);
+  // virtual ~AttributeStimulus();
+
+  virtual void callback();
+  void setClientAttribute(Value *);
+
+};
 
 /*
  * An "Event" is a special stimulus that will assert for a single clock
@@ -455,7 +474,6 @@ class Event : public source_stimulus
 public:
 
   unsigned int current_state;
-  virtual SOURCE_TYPE isa(void) {return EVENT;};
   virtual void callback(void);
   Event(void);
 };
