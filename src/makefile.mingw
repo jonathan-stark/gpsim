@@ -1,0 +1,88 @@
+## Makefile for building the gpsim with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+TOP = ../..
+
+include ../plat/win32/make.mingw
+
+################################################################
+
+# Nothing much configurable below
+
+INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
+	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include \
+	-I ../../gtk+/lib/gtk+/include
+
+DEFINES = -DWIN32 -DNDEBUG -D_LIB -DHAVE_GUI
+
+all :				\
+	../config.h		\
+	libsrc.a 
+
+src_OBJECTS =			\
+	12bit-hexdecode.o	\
+	12bit-processors.o	\
+	14bit-hexdecode.o	\
+	14bit-instructions.o	\
+	14bit-processors.o	\
+	14bit-registers.o	\
+	14bit-tmrs.o		\
+	16bit-hexdecode.o	\
+	16bit-instructions.o	\
+	16bit-processors.o	\
+	16bit-registers.o	\
+	16bit-tmrs.o		\
+	attribute.o		\
+	breakpoints.o		\
+	cod.o			\
+	eeprom.o		\
+	fopen-path.o		\
+	gpsim_time.o		\
+	hexutils.o		\
+	i2c-ee.o		\
+	icd.o			\
+	init.o			\
+	intcon.o		\
+	interface.o		\
+	ioports.o		\
+	lxt_write.o		\
+	modules.o		\
+	p12x.o			\
+	p16f62x.o		\
+	p16f87x.o		\
+	p16x5x.o		\
+	p16x6x.o		\
+	p16x7x.o		\
+	p16x8x.o		\
+	p17c75x.o		\
+	p18x.o			\
+	packages.o		\
+	pic-instructions.o	\
+	pic-processor.o		\
+	pic-registers.o		\
+	pie.o			\
+	pir.o			\
+	processor.o		\
+	registers.o		\
+	ssp.o			\
+	stimuli.o		\
+	symbol.o		\
+	tmr0.o			\
+	trace.o			\
+	uart.o			\
+	value.o			\
+	xref.o
+
+../config.h : ../config_win32.h.in
+	$(CP) ../config_win32.h.in ../config.h
+
+icd.o : ../plat/win32/icd.cc
+	$(CXX) -I . $(CFLAGS) -c $< -o $@
+
+################ The libsrc LIB
+
+libsrc.a : $(src_OBJECTS)
+	$(RM) -f $@
+	$(AR) $(ARFLAGS) $@ $(src_OBJECTS) icd.o
