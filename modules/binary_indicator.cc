@@ -132,15 +132,15 @@ void Binary_Indicator::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(Package::get_pin(1));
-  symbol_table.add_stimulus(Package::get_pin(2));
+  symbol_table.add_stimulus(get_pin(1));
+  symbol_table.add_stimulus(get_pin(2));
 
 }
 
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Binary_Indicator::construct(const char *new_name)
+Module * Binary_Indicator::construct(const char *new_name)
 {
 
   cout << " Binary Indicator \n";

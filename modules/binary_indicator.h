@@ -42,7 +42,7 @@ public:
   Binary_Input (IOPORT *i, unsigned int b) : IO_input(i,b) { };
 };
 
-class Binary_Indicator : public ExternalModule //public Module, public Package
+class Binary_Indicator : public Module
 {
 public:
 
@@ -54,7 +54,7 @@ public:
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
 
-  static ExternalModule *construct(const char *new_name=NULL);
+  static Module *construct(const char *new_name=NULL);
   void test(void) ;
 };
 

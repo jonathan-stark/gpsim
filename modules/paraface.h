@@ -22,10 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PARAFACE_H__
 #define __PARAFACE_H__
 
-#include <../src/stimuli.h>
-#include <../src/ioports.h>
-//#include <../src/symbol.h>
-#include <../src/modules.h>
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/modules.h"
 
 #include <gtk/gtk.h>
 
@@ -83,7 +82,7 @@ public:
 
 };
 
-class Paraface : public ExternalModule
+class Paraface : public Module
 {
 public:
     int fd; // file descriptor to parallel port
@@ -105,7 +104,7 @@ public:
 
     // Inheritance from Module class
     const virtual char *type(void) { return ("paraface"); };
-    static ExternalModule *construct(const char *new_name);
+    static Module *construct(const char *new_name);
 
 #ifdef linux
     int open_parallel_port(char *device="/dev/parport0");

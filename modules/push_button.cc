@@ -100,13 +100,13 @@ void PushButton::create_iopin_map(void)
   //   below) then we can call the member function 'get_pin'.
 
   assign_pin(1, new IO_bi_directional(pshb_port, 0,"out"));
-  set_pin_position(1,2.5); // Position pin on middle right side of package
+  package->set_pin_position(1,2.5); // Position pin on middle right side of package
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  pshb_pin = Package::get_pin(1);
+  pshb_pin = get_pin(1);
   if(pshb_pin)
     {
       symbol_table.add_stimulus(pshb_pin);
@@ -169,7 +169,7 @@ void PushButton::create_widget(PushButton *pb)
 
 //--------------------------------------------------------------
 // construct
-ExternalModule * PushButton::construct(const char *new_name=NULL)
+Module * PushButton::construct(const char *new_name=NULL)
 {
 
   PushButton *pshbP = new PushButton ;

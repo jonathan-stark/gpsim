@@ -82,11 +82,12 @@ Module::Module(void)
 Module::~Module(void)
 {
 
-    symbol_table.remove_module(this,name_str);
+  symbol_table.remove_module(this,name_str);
 
-    instantiated_modules_list.remove(this);
+  instantiated_modules_list.remove(this);
 
-    delete xref;
+  delete package;
+  delete xref;
 }
 
 
@@ -243,6 +244,8 @@ void Module::set_attribute(char *attr, double val)
 
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 void Module::add_attribute(Attribute *new_attribute)
 {
 
@@ -252,6 +255,67 @@ void Module::add_attribute(Attribute *new_attribute)
 
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::create_pkg(unsigned int number_of_pins)
+{
+  if(package)
+    delete package;
+
+  package = new Package(number_of_pins);
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::assign_pin(unsigned int pin_number, IOPIN *pin)
+{
+  if(package)
+    package->assign_pin(pin_number, pin);
+
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::get_pin_count(void)
+{
+  if(package)
+    return package->get_pin_count();
+
+  return 0;
+
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+char *Module::get_pin_name(unsigned int pin_number)
+{
+  if(package)
+    return package->get_pin_name(pin_number);
+  return 0;
+
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+int Module::get_pin_state(unsigned int pin_number)
+{
+  if(package)
+    return package->get_pin_state(pin_number);
+
+  return 0;
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+IOPIN *Module::get_pin(unsigned int pin_number)
+{
+  if(package)
+    return package->get_pin(pin_number);
+
+  return 0;
+}
+
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 Module_Library::Module_Library(const char *new_name, void *library_handle)
 {
 #ifdef HAVE_GUI

@@ -190,15 +190,15 @@ void Resistor::create_iopin_map(void)
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
 
-  symbol_table.add_stimulus(Package::get_pin(1));
-  symbol_table.add_stimulus(Package::get_pin(2));
+  symbol_table.add_stimulus(get_pin(1));
+  symbol_table.add_stimulus(get_pin(2));
 
 }
 
 //--------------------------------------------------------------
 // construct
 
-ExternalModule * Resistor::construct(const char *new_name)
+Module * Resistor::construct(const char *new_name)
 {
 
   cout << " Resistor construct \n";
@@ -292,12 +292,12 @@ void PullupResistor::create_iopin_map(void)
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
   // in the CLI).
-  IOPIN *iop = Package::get_pin(1);
+  IOPIN *iop = get_pin(1);
   if(iop) {
     cout << "pullup resistor pin name: "<<iop->name() << '\n';
     cout << "voltage " << iop->get_voltage(0) << '\n';
   }
-  symbol_table.add_stimulus(Package::get_pin(1));
+  symbol_table.add_stimulus(get_pin(1));
 
 }
 
@@ -305,7 +305,7 @@ void PullupResistor::create_iopin_map(void)
 
 //--------------------------------------------------------------
 
-ExternalModule * PullupResistor::pu_construct(const char *new_name)
+Module * PullupResistor::pu_construct(const char *new_name)
 {
 
   cout << "Pullup Resistor construct \n";
@@ -326,7 +326,7 @@ ExternalModule * PullupResistor::pu_construct(const char *new_name)
 }
 
 //--------------------------------------------------------------
-ExternalModule * PullupResistor::pd_construct(const char *new_name)
+Module * PullupResistor::pd_construct(const char *new_name)
 {
 
   cout << "Pulldown Resistor construct \n";

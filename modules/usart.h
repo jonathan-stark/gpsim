@@ -85,7 +85,7 @@ class USART_CORE //: public USART_MODULE
   USART_CORE(void);
 };
 
-class USARTModule : public ExternalModule
+class USARTModule : public Module
 {
  public:
 
@@ -101,7 +101,7 @@ class USARTModule : public ExternalModule
   USARTModule(const char *new_name = NULL);
   ~USARTModule();
 
-  static ExternalModule *USART_construct(const char *new_name=NULL);
+  static Module *USART_construct(const char *new_name=NULL);
 
 };
 #endif //  __USART_MODULE_H__

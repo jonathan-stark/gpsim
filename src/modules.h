@@ -100,10 +100,14 @@ public:
 
   // I/O pin specific
 
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return 0;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return 0;};
+  virtual int get_pin_count(void);
+  virtual char *get_pin_name(unsigned int pin_number);
+  virtual int get_pin_state(unsigned int pin_number);
+  virtual IOPIN *get_pin(unsigned int pin_number);
+  virtual void assign_pin(unsigned int pin_number, IOPIN *pin);
+  virtual void create_pkg(unsigned int number_of_pins);
+
+  // Attributes:
 
   void add_attribute(Attribute *);
 
@@ -124,7 +128,7 @@ public:
 
 };
 
-
+#if 0
 /**************************************************************
 * External Modules
 *  The class for external modules is a combination of the internal
@@ -159,12 +163,14 @@ class ExternalModule : public Module, public Package
     };
 
 };
+#endif
+
 class Module_Types
 {
 public:
 
   char *names[2];
-  ExternalModule * (*module_constructor) (const char *module_name);
+  Module * (*module_constructor) (const char *module_name);
 };
 
 
