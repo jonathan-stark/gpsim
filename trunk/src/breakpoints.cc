@@ -35,14 +35,39 @@ extern "C"{
 }
 
 extern guint64 simulation_start_cycle;
-//extern Processor *active_cpu;
-//extern "C" {
-  extern void redisplay_prompt(void);  // in input.cc
-//}
+extern void redisplay_prompt(void);  // in input.cc
 
+// Global declaration of THE breakpoint object
 Breakpoints bp;
 
-unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor *cpu,unsigned int arg1, unsigned arg2, BreakCallBack *f1)
+
+//------------------------------------------------------------------------
+// find_free - search the array that holds the break points for a free slot
+// 
+int Breakpoints::find_free(void)
+{
+
+
+  for(int i=0; i<MAX_BREAKPOINTS; i++) {
+
+    if(break_status[i].type == BREAK_CLEAR)
+      return i;
+
+  }
+
+  cout << "*** out of breakpoints\n";
+  return(MAX_BREAKPOINTS);
+
+}
+
+//------------------------------------------------------------------------
+// set_breakpoint - Set a breakpoint of a specific type.
+//
+unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, 
+					 Processor *cpu,
+					 unsigned int arg1, 
+					 unsigned arg2, 
+					 BreakCallBack *f1)
 {
   Register *fr;
   int i;
@@ -50,86 +75,25 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
 
   bool found =0;
 
-  if(use_icd)
-  {
-      if(break_type==BREAK_ON_EXECUTION)
-      {
-	  clear_all(cpu);
-      }
-      else
-      {
-	  puts("Can only break on execution with ICD");
-          return MAX_BREAKPOINTS;
-      }
-  }
+  breakpoint_number = find_free();
+  if(breakpoint_number >= MAX_BREAKPOINTS)
+    return breakpoint_number;
 
-  // First, find a free break point
-  i=0;
-  //  breakpoint_number = (last_breakpoint+ 1) % MAX_BREAKPOINTS;
-  breakpoint_number = 0;
-
-  do
-    {
-      if(break_status[breakpoint_number].type == BREAK_CLEAR)
-	found=1;
-      else
-	breakpoint_number = (breakpoint_number + 1) % MAX_BREAKPOINTS;
-
-      i++;
-    } while((i < MAX_BREAKPOINTS) && !found);
-
-
-  if(!found)
-    {
-      cout << "*** out of breakpoints\n";
-      return(MAX_BREAKPOINTS);
-    }
-  //  else
-  //  {
-  //      last_breakpoint = breakpoint_number;
-  //    }
 
   break_status[breakpoint_number].type = break_type;
   break_status[breakpoint_number].cpu  = cpu;
   break_status[breakpoint_number].arg1 = arg1;
   break_status[breakpoint_number].arg2 = arg2;
-  break_status[breakpoint_number].f    = f1;
+  break_status[breakpoint_number].bpo  = f1;
 
 
   switch (break_type)
     {
-    case BREAK_ON_EXECUTION:
-
-      // Get a new breakpoint instruction and let it replace
-      // the instruction at which we are setting the break
-      //   (note: the constructor saves the instruction we are replacing)
-
-      if(arg1 < cpu->program_memory_size())
-	{
-
-	  //cpu->pma[arg1] = *  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number);
-	  cpu->pma.put(arg1,  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number));
-
-	  //cpu->program_memory[arg1] =
-	  //  new Breakpoint_Instruction(cpu,arg1,BREAK_ON_EXECUTION | breakpoint_number);
-
-	  if(use_icd)
-	  {
-	      icd_set_break(arg1);
-	  }
-
-	  return(breakpoint_number);
-	}
-      else
-	break_status[breakpoint_number].type = BREAK_CLEAR;
-
-      break;
 
     case NOTIFY_ON_EXECUTION:
       if(arg1 < cpu->program_memory_size())
 	{
 
-	  //cpu->pma[arg1] = *  new  Notify_Instruction(cpu,arg1,NOTIFY_ON_EXECUTION | breakpoint_number, f1);
 	  cpu->pma.put(arg1,  new Notify_Instruction(cpu,arg1,NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -142,7 +106,6 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
-	  //cpu->pma[arg1] = *  new Profile_Start_Instruction(cpu,arg1,PROFILE_START_NOTIFY_ON_EXECUTION | breakpoint_number, f1);
 	  cpu->pma.put(arg1,  new Profile_Start_Instruction(cpu,arg1,PROFILE_START_NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -155,7 +118,7 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
       if(arg1 < cpu->program_memory_size())
 	{
 
-	  //cpu->pma[arg1] = *  new Profile_Stop_Instruction(cpu,arg1,PROFILE_STOP_NOTIFY_ON_EXECUTION | breakpoint_number, f1);
+
 	  cpu->pma.put(arg1,  new Profile_Stop_Instruction(cpu,arg1,PROFILE_STOP_NOTIFY_ON_EXECUTION | breakpoint_number, f1));
 
 	  return(breakpoint_number);
@@ -263,9 +226,19 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, Processor 
 }
 
 
-unsigned int  Breakpoints::set_execution_break(Processor *cpu, unsigned int address)
+unsigned int  Breakpoints::set_execution_break(Processor *cpu, 
+					       unsigned int address)
 {
-  return(set_breakpoint (Breakpoints::BREAK_ON_EXECUTION, cpu, address, 0));
+
+  Breakpoint_Instruction *bpi = new Breakpoint_Instruction(cpu,address,0);
+
+  if(bpi) {
+    bpi->set_break();
+    return bpi->bpn;
+  }
+
+  return MAX_BREAKPOINTS;
+
 }
 
 unsigned int  Breakpoints::set_notify_break(Processor *cpu, unsigned int address, BreakCallBack *f1 = 0)
@@ -345,19 +318,23 @@ unsigned int  Breakpoints::set_wdt_break(Processor *cpu)
 }
 
 
-unsigned int Breakpoints::set_notify_read(Processor *cpu, unsigned int register_number)
+unsigned int Breakpoints::set_notify_read(Processor *cpu,
+					  unsigned int register_number)
 {
   trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ, cpu, register_number, 0));
 }
 
-unsigned int Breakpoints::set_notify_write(Processor *cpu, unsigned int register_number)
+unsigned int Breakpoints::set_notify_write(Processor *cpu, 
+					   unsigned int register_number)
 {
   trace_log.enable_logging();
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_WRITE, cpu, register_number, 0));
 }
-unsigned int Breakpoints::set_notify_read_value(Processor *cpu, unsigned int register_number, 
-						unsigned int value, unsigned int mask)
+unsigned int Breakpoints::set_notify_read_value(Processor *cpu, 
+						unsigned int register_number, 
+						unsigned int value, 
+						unsigned int mask)
 {
   trace_log.enable_logging();
 
@@ -371,8 +348,10 @@ unsigned int Breakpoints::set_notify_read_value(Processor *cpu, unsigned int reg
   return(set_breakpoint (Breakpoints::NOTIFY_ON_REG_READ_VALUE, cpu, register_number, value));
 }
 
-unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int register_number,
-						 unsigned int value, unsigned int mask)
+unsigned int Breakpoints::set_notify_write_value(Processor *cpu,
+						 unsigned int register_number,
+						 unsigned int value, 
+						 unsigned int mask)
 {
   trace_log.enable_logging();
 
@@ -387,70 +366,6 @@ unsigned int Breakpoints::set_notify_write_value(Processor *cpu, unsigned int re
 }
 
 
-//---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_write_break(Register *fr)
-{
-  cout << "debug   checking for write break point " << fr->name() << endl;
-  /*
-  if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_REG_WRITE)
-  {
-    if(simulation_mode == RUNNING)
-      {
-	cout << "Hit a breakpoint!\n";
-	trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) );
-	halt();
-      }
-    else
-      {
-	cout << "Stepped over a write breakpoint\n";
-      }
-
-    return(1);
-  }
-  */
-  return(0);
-}
-
-//---------------------------------------------------------------------------------------
-unsigned int Breakpoints::check_read_break(Register *fr)
-{
-
-  cout << "debug   checking for read break point " << fr->address << '\n';
-  /*
-  if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_REG_READ)
-  {
-    if(simulation_mode == RUNNING)
-      {
-	cout << "Hit a breakpoint!\n";
-	trace.breakpoint(fr->break_point & ~BREAK_MASK);
-	halt();
-      }
-    else
-      {
-	cout << "Stepped over a read breakpoint\n";
-      }
-
-    return(1);
-  }
-  */
-  return(0);
-}
-
-//------------------------------------------------------------------------
-unsigned int Breakpoints::check_invalid_fr_break(InvalidRegister *fr)
-{
-
-  cout << "debug   checking for invalid file register access  break point " << fr->name() << '\n';
-  /*  
-  if( (fr->break_point & BREAK_MASK) ==  BREAK_ON_INVALID_FR)
-  {
-    halt();
-    trace.breakpoint(fr->break_point & ~BREAK_MASK);
-    return(1);
-  }
-  */
-  return(0);
-}
 
 unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 {
@@ -460,8 +375,8 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
   halt();
   if( abp < MAX_BREAKPOINTS)
     {
-      if (0 != break_status[abp].f)
-	  break_status[abp].f->callback();
+      if (break_status[abp].bpo)
+	  break_status[abp].bpo->callback();
 
       trace.breakpoint( (Breakpoints::BREAK_ON_CYCLE>>8) );
 
@@ -470,13 +385,6 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 
   return(1);
 
-}
-//------------------------------------------------------------------------
-unsigned int Breakpoints::check_break(Register *fr)
-{
-  cout << "checking for a bp doesn't do anything...\n";
-
-  return(0);
 }
 
 bool Breakpoints::dump1(unsigned int bp_num)
@@ -489,8 +397,11 @@ bool Breakpoints::dump1(unsigned int bp_num)
   switch (break_type)
     {
     case BREAK_ON_EXECUTION:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-      cout << "exec at " << hex << setw(4) << setfill('0') <<  break_status[bp_num].arg1 << '\n';
+      //cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
+      //cout << "exec at " << hex << setw(4) << setfill('0') <<  break_status[bp_num].arg1 << '\n';
+      if(break_status[bp_num].bpo)
+	break_status[bp_num].bpo->dump1();
+
       set_by_user = 1;
       break;
 
@@ -585,11 +496,12 @@ void Breakpoints::dump(void)
 }
 
 
-instruction *Breakpoints::find_previous(Processor *cpu, unsigned int address, instruction *_this)
+instruction *Breakpoints::find_previous(Processor *cpu, 
+					unsigned int address, 
+					instruction *_this)
 {
   Breakpoint_Instruction *p;
 
-  //p=(Breakpoint_Instruction*) &(cpu->pma[address]); //cpu->program_memory[address];
 
   p = (Breakpoint_Instruction*) cpu->pma.get(address);
 
@@ -610,220 +522,214 @@ void Breakpoints::clear(unsigned int b)
   instruction *previous;
   Register *fr;
 
-  if(b<MAX_BREAKPOINTS)
-    {
-      BreakStatus bs = break_status[b];   // 
+  if(b<MAX_BREAKPOINTS) {
 
-      switch (bs.type)
+    BreakStatus bs = break_status[b];   // 
+
+    switch (bs.type) {
+
+    case BREAK_ON_EXECUTION:
+      if(bs.bpo)
+	bs.bpo->clear();
+      /*
+      if(use_icd)
+	icd_clear_break();
+
+      inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::BREAKPOINT_INSTRUCTION);
+      abp= (Breakpoint_Instruction *) inst;
+
+      previous = find_previous(bs.cpu, bs.arg1, inst);
+      if(previous==0)
 	{
-	case BREAK_ON_EXECUTION:
+	  // Restore the instruction
+	  bs.cpu->pma.put(bs.arg1, abp->replaced);
+	}
+      else
+	{
+	  // There are instructions 'above' this breakpoint
+	  // Set the ->replaced of this instruction to our
+	  // ->replaced
+	  ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
 
-	    if(use_icd)
-	    {
-                icd_clear_break();
-	    }
+	  bs.cpu->pma[bs.arg1].xref->update();
+	}
 
-	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::BREAKPOINT_INSTRUCTION);
-	  abp= (Breakpoint_Instruction *) inst;
+      delete abp;
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared execution breakpoint number " << b << '\n';
+      */
+      break;
 
-	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==0)
-	  {
-	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
-	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
-	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
+    case NOTIFY_ON_EXECUTION:
+      inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::NOTIFY_INSTRUCTION);
+      abp= (Breakpoint_Instruction *) inst;
 
-	  }
-	  else
-	  {
-	      // There are instructions 'above' this breakpoint
-	      // Set the ->replaced of this instruction to our
-	      // ->replaced
-	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-
-	      //bs.cpu->program_memory[bs.arg1]->xref->update();
-	      bs.cpu->pma[bs.arg1].xref->update();
-	  }
-
-	  delete abp;
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared execution breakpoint number " << b << '\n';
-
-	  break;
-
-	case NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::NOTIFY_INSTRUCTION);
-	  abp= (Breakpoint_Instruction *) inst;
-
-	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==0)
-	  {
-	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
-	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
-	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
-
-	  }
-	  else
-	  {
-	      // There are instructions 'above' this breakpoint
-	      // Set the ->replaced of this instruction to our
-	      // ->replaced
-	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->pma[bs.arg1].xref->update();
-	      //bs.cpu->program_memory[bs.arg1]->xref->update();
-	  }
-
-	  delete abp;
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared notify on execution number " << b << '\n';
-
-	  break;
-	case PROFILE_START_NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_START_INSTRUCTION);
-	  abp= (Breakpoint_Instruction *) inst;
-
-	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==0)
-	  {
-	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
-	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
-	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
-	  }
-	  else
-	  {
-	      // There are instructions 'above' this breakpoint
-	      // Set the ->replaced of this instruction to our
-	      // ->replaced
-	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->pma[bs.arg1].xref->update();
-	      //bs.cpu->program_memory[bs.arg1]->xref->update();
-	  }
-
-	  delete abp;
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared profile start on execution number " << b << '\n';
-
-	  break;
-	case PROFILE_STOP_NOTIFY_ON_EXECUTION:
-	  inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_STOP_INSTRUCTION);
-	  abp= (Breakpoint_Instruction *) inst;
-
-	  previous = find_previous(bs.cpu, bs.arg1, inst);
-	  if(previous==0)
-	  {
-	      //bs.cpu->program_memory[bs.arg1] = abp->replaced;     // Restore the instruction
-	      bs.cpu->pma.put(bs.arg1, abp->replaced);             // Restore the instruction
-	      //bs.cpu->pma[bs.arg1] = * abp->replaced;          // Restore the instruction
-
-	  }
-	  else
-	  {
-	      // There are instructions 'above' this breakpoint
-	      // Set the ->replaced of this instruction to our
-	      // ->replaced
-	      ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
-	      bs.cpu->pma[bs.arg1].xref->update();
-	      //bs.cpu->program_memory[bs.arg1]->xref->update();
-	  }
-
-	  delete abp;
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared profile stop on execution number " << b << '\n';
-
-	  break;
-
-	case BREAK_ON_CYCLE:
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared cycle breakpoint number " << b << '\n';
-
-	  break;
-
-	case NOTIFY_ON_REG_READ:
-	case NOTIFY_ON_REG_WRITE:
-	case NOTIFY_ON_REG_READ_VALUE:
-	case NOTIFY_ON_REG_WRITE_VALUE:
-	case BREAK_ON_REG_READ:
-	case BREAK_ON_REG_READ_VALUE:
-	case BREAK_ON_REG_WRITE:
-	case BREAK_ON_REG_WRITE_VALUE:
-	  fr = bs.cpu->registers[bs.arg1];
-	  if (fr->isa() == Register::BP_REGISTER )
-	    {
-	      Notify_Register *br = (Notify_Register *)fr;
-	      int cleared = 0;
-	      // There may be multiple break points set on this register.
-	      // So let's loop through them all to find the one that has
-	      // breakpoint 'b' set on it.
-
-	      while( br )
-		{
-		  if(br->clear(b))
-		    {
-		      cleared = 1;
-		      delete br;
-		      br = 0;
-		    }
-		  else
-		    {
-		      if(br->replaced->isa() == Register::BP_REGISTER)
-			br = (Notify_Register *)br->replaced;
-		      else
-			br = 0; // Break out of loop and display error
-		    }
-		}
-
-	      // If we looped through all of the breakpoints that are set
-	      // on this register, but we didn't find the break point number
-	      // we were seeking, then there's an error in the break point
-	      // logic. Specifically, when we set the break and assigned a
-	      // a break point number and associated it with a file register,
-	      // that information was stored in the break_status structure.
-	      // If that information got corrupted somehow, then we'll get
-	      // the internal error.
-
-	      if(!cleared)
-		cout << "Breakpoints::cleared: internal error\n";
-
-	      if(bs.cpu->registers[bs.arg1]->xref)
-		  bs.cpu->registers[bs.arg1]->xref->update();
-
-	      cout << "Cleared breakpoint number " << b << " on register " << bs.arg1 << '\n';
-
-	    }
-	  else
-	    {
-	      cout << "??? break is not set\n";
-	    }
-
-	  break;
-
-	case BREAK_ON_STK_OVERFLOW:
-
-	  break_status[b].type = BREAK_CLEAR;
-	  if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
-	    cout << "Cleared stack overflow break point.\n";
-	  else
-	    cout << "Stack overflow break point is already cleared.\n";
-
-	  break;
-
-	case BREAK_ON_STK_UNDERFLOW:
-	  break_status[b].type = BREAK_CLEAR;
-	  if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
-	    cout << "Cleared stack underflow break point.\n";
-	  else
-	    cout << "Stack underflow break point is already cleared.\n";
-	  break;
-
-	case BREAK_ON_WDT_TIMEOUT:
-	  break_status[b].type = BREAK_CLEAR;
-	  cout << "Cleared wdt timeout breakpoint number " << b << '\n';
-	  ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
-
-	  break;
+      previous = find_previous(bs.cpu, bs.arg1, inst);
+      if(previous==0)
+	{
+	  // Restore the instruction
+	  bs.cpu->pma.put(bs.arg1, abp->replaced);
 
 	}
+      else
+	{
+	  // There are instructions 'above' this breakpoint
+	  // Set the ->replaced of this instruction to our
+	  // ->replaced
+	  ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
+	  bs.cpu->pma[bs.arg1].xref->update();
+	}
+
+      delete abp;
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared notify on execution number " << b << '\n';
+
+      break;
+    case PROFILE_START_NOTIFY_ON_EXECUTION:
+      inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_START_INSTRUCTION);
+      abp= (Breakpoint_Instruction *) inst;
+
+      previous = find_previous(bs.cpu, bs.arg1, inst);
+      if(previous==0)
+	{
+	  // Restore the instruction
+	  bs.cpu->pma.put(bs.arg1, abp->replaced);
+	}
+      else
+	{
+	  // There are instructions 'above' this breakpoint
+	  // Set the ->replaced of this instruction to our
+	  // ->replaced
+	  ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
+	  bs.cpu->pma[bs.arg1].xref->update();
+	  //bs.cpu->program_memory[bs.arg1]->xref->update();
+	}
+
+      delete abp;
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared profile start on execution number " << b << '\n';
+
+      break;
+    case PROFILE_STOP_NOTIFY_ON_EXECUTION:
+      inst = bs.cpu->pma.find_instruction(bs.arg1, instruction::PROFILE_STOP_INSTRUCTION);
+      abp= (Breakpoint_Instruction *) inst;
+
+      previous = find_previous(bs.cpu, bs.arg1, inst);
+      if(previous==0)
+	{
+
+	  // Restore the instruction
+	  bs.cpu->pma.put(bs.arg1, abp->replaced);
+
+	}
+      else
+	{
+	  // There are instructions 'above' this breakpoint
+	  // Set the ->replaced of this instruction to our
+	  // ->replaced
+	  ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
+	  bs.cpu->pma[bs.arg1].xref->update();
+	  //bs.cpu->program_memory[bs.arg1]->xref->update();
+	}
+
+      delete abp;
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared profile stop on execution number " << b << '\n';
+
+      break;
+
+    case BREAK_ON_CYCLE:
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared cycle breakpoint number " << b << '\n';
+
+      break;
+
+    case NOTIFY_ON_REG_READ:
+    case NOTIFY_ON_REG_WRITE:
+    case NOTIFY_ON_REG_READ_VALUE:
+    case NOTIFY_ON_REG_WRITE_VALUE:
+    case BREAK_ON_REG_READ:
+    case BREAK_ON_REG_READ_VALUE:
+    case BREAK_ON_REG_WRITE:
+    case BREAK_ON_REG_WRITE_VALUE:
+      fr = bs.cpu->registers[bs.arg1];
+      if (fr->isa() == Register::BP_REGISTER )
+	{
+	  BreakpointRegister *br = (BreakpointRegister *)fr;
+	  int cleared = 0;
+	  // There may be multiple break points set on this register.
+	  // So let's loop through them all to find the one that has
+	  // breakpoint 'b' set on it.
+
+	  while( br )
+	    {
+	      if(br->clear(b))
+		{
+		  cleared = 1;
+		  delete br;
+		  br = 0;
+		}
+	      else
+		{
+		  if(br->replaced->isa() == Register::BP_REGISTER)
+		    br = (BreakpointRegister *)br->replaced;
+		  else
+		    br = 0; // Break out of loop and display error
+		}
+	    }
+
+	  // If we looped through all of the breakpoints that are set
+	  // on this register, but we didn't find the break point number
+	  // we were seeking, then there's an error in the break point
+	  // logic. Specifically, when we set the break and assigned a
+	  // a break point number and associated it with a file register,
+	  // that information was stored in the break_status structure.
+	  // If that information got corrupted somehow, then we'll get
+	  // the internal error.
+
+	  if(!cleared)
+	    cout << "Breakpoints::cleared: internal error\n";
+
+	  if(bs.cpu->registers[bs.arg1]->xref)
+	    bs.cpu->registers[bs.arg1]->xref->update();
+
+	  cout << "Cleared breakpoint number " << b << " on register " << bs.arg1 << '\n';
+
+	}
+      else
+	{
+	  cout << "??? break is not set\n";
+	}
+
+      break;
+
+    case BREAK_ON_STK_OVERFLOW:
+
+      break_status[b].type = BREAK_CLEAR;
+      if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
+	cout << "Cleared stack overflow break point.\n";
+      else
+	cout << "Stack overflow break point is already cleared.\n";
+
+      break;
+
+    case BREAK_ON_STK_UNDERFLOW:
+      break_status[b].type = BREAK_CLEAR;
+      if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
+	cout << "Cleared stack underflow break point.\n";
+      else
+	cout << "Stack underflow break point is already cleared.\n";
+      break;
+
+    case BREAK_ON_WDT_TIMEOUT:
+      break_status[b].type = BREAK_CLEAR;
+      cout << "Cleared wdt timeout breakpoint number " << b << '\n';
+      ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+
+      break;
+
     }
+  }
 }
 
 //
@@ -919,7 +825,7 @@ void Breakpoints::clear_all_register(Processor *c,unsigned int address)
 
   while(c->registers[address]->isa()==Register::BP_REGISTER) {
 
-    Notify_Register *nr = dynamic_cast<Notify_Register *>(c->registers[address]);
+    BreakpointRegister *nr = dynamic_cast<BreakpointRegister *>(c->registers[address]);
 
     if(!nr)
       return;
@@ -948,7 +854,7 @@ Breakpoints::Breakpoints(void)
 
 }
 
-//---------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------
 void Breakpoint_Instruction::execute(void)
 {
 
@@ -966,17 +872,19 @@ void Breakpoint_Instruction::execute(void)
 
 }
 
-Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, unsigned int new_address,unsigned int bp)
+Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, 
+					       unsigned int new_address,
+					       unsigned int bp)
 {
   cpu = new_cpu;
   address = new_address;
   opcode = 0xffffffff;
   bpn = bp;
-  //replaced = &(cpu->pma[address]);//cpu->program_memory[address];
+
   replaced = cpu->pma.get(address);
 
   // use the replaced instructions xref object
-  xref = replaced->xref; //cpu->program_memory[address]->xref;
+  xref = replaced->xref;
 }
 
 unsigned int Breakpoint_Instruction::get_opcode(void)
@@ -1011,7 +919,77 @@ char * Breakpoint_Instruction::name(char *return_str)
   return(replaced->name(return_str));
 }
 
-//---------------------------------------------------------------------------------------
+void Breakpoint_Instruction::set_break(void)
+{
+  if(find_free() >= MAX_BREAKPOINTS)
+    return;
+
+  bp.break_status[bpn].type = Breakpoints::BREAK_ON_EXECUTION;
+  bp.break_status[bpn].arg1 = address;
+
+  if(use_icd)
+    bp.clear_all(cpu);
+
+  if(address < cpu->program_memory_size()) {
+
+    cpu->pma.put(address, this);
+
+    if(use_icd)
+      icd_set_break(address);
+  }
+  else
+    bp.break_status[bpn].type = Breakpoints::BREAK_CLEAR;
+
+
+}
+
+void Breakpoint_Instruction::dump1(void)
+{
+  cout << hex << setw(0) << bpn << ": " << cpu->name_str << "  ";
+  cout << "exec at " << hex << setw(4) << setfill('0') <<  address << '\n';
+
+}
+
+void Breakpoint_Instruction::clear(void)
+{
+  if(use_icd)
+    icd_clear_break();
+
+  Breakpoint_Instruction *abp;
+  instruction *inst;
+  instruction *previous;
+
+  if(bp.break_status[bpn].bpo != this) {
+    cout << "can't clear breakpoint that doesn't belong to this bp instruction\n";
+  }
+
+  inst = cpu->pma.find_instruction(address, instruction::BREAKPOINT_INSTRUCTION);
+  abp= (Breakpoint_Instruction *) inst;
+
+  previous = bp.find_previous(cpu, address, inst);
+  if(!previous)
+    // Restore the instruction
+    cpu->pma.put(address, abp->replaced);
+
+  else {
+
+    // There are instructions 'above' this breakpoint
+    // Set the ->replaced of this instruction to our
+    // ->replaced
+    ((Breakpoint_Instruction*)previous)->replaced=abp->replaced;
+    
+  }
+
+  cpu->pma[address].xref->update();
+
+  delete abp;
+  bp.break_status[bpn].type = Breakpoints::BREAK_CLEAR;
+  bp.break_status[bpn].bpo = 0;
+
+  cout << "Cleared execution breakpoint number " << bpn << '\n';
+}
+
+//------------------------------------------------------------------------
 void Notify_Instruction::execute(void)
 {
     if(callback)
@@ -1021,18 +999,30 @@ void Notify_Instruction::execute(void)
     replaced->execute();
 }
 
-Notify_Instruction::Notify_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Breakpoint_Instruction(cpu, address,bp)
+Notify_Instruction::Notify_Instruction(Processor *cpu, 
+				       unsigned int address, 
+				       unsigned int bp, 
+				       BreakCallBack *cb) : 
+  Breakpoint_Instruction(cpu, address,bp)
 {
     callback=cb;
     
 }
-//---------------------------------------------------------------------------------------
-Profile_Start_Instruction::Profile_Start_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
+//------------------------------------------------------------------------
+Profile_Start_Instruction::Profile_Start_Instruction(Processor *cpu, 
+						     unsigned int address, 
+						     unsigned int bp, 
+						     BreakCallBack *cb) : 
+  Notify_Instruction(cpu, address, bp, cb)
 {
     
 }
 
-Profile_Stop_Instruction::Profile_Stop_Instruction(Processor *cpu, unsigned int address, unsigned int bp, BreakCallBack *cb):Notify_Instruction(cpu, address, bp, cb)
+Profile_Stop_Instruction::Profile_Stop_Instruction(Processor *cpu, 
+						   unsigned int address, 
+						   unsigned int bp, 
+						   BreakCallBack *cb) : 
+  Notify_Instruction(cpu, address, bp, cb)
 {
     
 }
@@ -1052,7 +1042,36 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 }
 
 //------------------------------------------------------------------------------
-Notify_Register::Notify_Register(Processor *_cpu, int _repl, int bp)
+void RegisterAssertion::execute(void)
+{
+
+  if(cpu->rma[regAddress].get_value() & regMask != regValue) {
+
+    cout << "Assertion: register 0x" 
+	 << hex 
+	 << regAddress
+	 << " = 0x"
+	 << cpu->rma[regAddress].get_value() << endl;
+
+    cout << "0x" << cpu->rma[regAddress].get_value()
+	 << " & 0x" << regMask 
+	 << " != 0x" << regValue << endl;
+
+    if( (simulation_mode == RUNNING) && 
+	(simulation_start_cycle != cycles.value)) {
+
+      trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
+      bp.halt();
+
+    } else {
+      cout << "Ignoring assertion\n";
+      replaced->execute();
+    }
+  }
+}
+
+//------------------------------------------------------------------------------
+BreakpointRegister::BreakpointRegister(Processor *_cpu, int _repl, int bp)
 {
 
   break_point = bp;
@@ -1060,14 +1079,14 @@ Notify_Register::Notify_Register(Processor *_cpu, int _repl, int bp)
 
 }
 
-void Notify_Register::replace(Processor *_cpu, unsigned int reg)
+void BreakpointRegister::replace(Processor *_cpu, unsigned int reg)
 {
   Register *fr = _cpu->registers[reg];
 
   if(fr->isa() == Register::BP_REGISTER)
     {
       // We're setting a break on top of another break
-      ((Notify_Register *)fr)->next = this;
+      ((BreakpointRegister *)fr)->next = this;
     }
 
   cpu = _cpu;
@@ -1084,28 +1103,24 @@ void Notify_Register::replace(Processor *_cpu, unsigned int reg)
 
 }
   
-unsigned int Notify_Register::clear(unsigned int bp_num)
+unsigned int BreakpointRegister::clear(unsigned int bp_num)
 {
-
-  if(bp.break_status[bp_num].type == Breakpoints::BREAK_CLEAR)   // This is a redundant check.
+  // This is a redundant check.
+  if(bp.break_status[bp_num].type == Breakpoints::BREAK_CLEAR)
     return 0;
 
-  /*
-  if(bp_num != (break_point & ~Breakpoints::BREAK_MASK))
-    return 0;
-  */
 
   if(replaced->isa() == Register::BP_REGISTER)
     {
       // We're clearing a break that is set on top of another break
-      ((Notify_Register *)replaced)->next = next;
+      ((BreakpointRegister *)replaced)->next = next;
     }
 
   if(next)
     {
       // There's a break that is set on top of this one
       if(next->replaced != this)
-	cout << "Notify_Register::clear is confused\n";
+	cout << "BreakpointRegister::clear is confused\n";
 
       next->replaced = replaced;
 
@@ -1130,7 +1145,7 @@ unsigned int Break_register_read::get(void)
 {
   bp.halt();
   return(replaced->get());
-  //  trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) | (replaced->address)  );
+
 }
 
 int Break_register_read::get_bit(unsigned int bit_number)
@@ -1149,14 +1164,16 @@ void Break_register_write::put(unsigned int new_value)
 {
   bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
   replaced->put(new_value);
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
+  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		    | (replaced->address)  );
 }
 
 void Break_register_write::setbit(unsigned int bit_number, bool new_value)
 {
   bp.halt();  /* %%%FIX ME%%% - add a break before/after write option */
   replaced->setbit(bit_number,new_value);
-  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) | (replaced->address)  );
+  trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		    | (replaced->address)  );
 
 }
 
@@ -1232,7 +1249,7 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
 
 }
 
-//====================================================================================
+//============================================================================
 
 
 // Log_Register_write::put
@@ -1334,9 +1351,10 @@ int Log_Register_Read_value::get_bit_voltage(unsigned int bit_number)
 void Log_Register_Write_value::put(unsigned int new_value)
 {
 
-  // The lower 8-bits of 'break_mask' describe the bits which are significant. If bit-9 of break_mask
-  // is set, then we only break if this write is DIFFERENT than the last write to this register. This
-  // saves us from breaking multiple times for writing the same value.
+  // The lower 8-bits of 'break_mask' describe the bits which are significant. 
+  // If bit-9 of break_mask is set, then we only break if this write is
+  // DIFFERENT than the last write to this register. This saves us from
+  // breaking multiple times for writing the same value.
 
   if( ((  (break_mask & 0x100) && ((new_value ^ last_value) & break_mask & 0xff))
        ||
@@ -1353,19 +1371,47 @@ void Log_Register_Write_value::put(unsigned int new_value)
 
 
 //------------------------------------------------------------------------
-void BreakCallBack::callback(void)
+void BreakpointObject::callback(void)
 {
   cout << "generic callback\n";
 }
 
-void BreakCallBack::callback_print(void)
+void BreakpointObject::callback_print(void)
 {
   cout << " has callback, ID =  " << CallBackID << '\n';
 }
 
-void BreakCallBack::clear_break(void)
-{
+//void BreakpointObject::clear_break(void)
+//{
+//
+//}
 
+int BreakpointObject::find_free(void)
+{
+  bpn = bp.find_free();
+
+  if(bpn < MAX_BREAKPOINTS) {
+
+    bp.break_status[bpn].type = Breakpoints::BREAK_CLEAR;
+    bp.break_status[bpn].cpu  = get_cpu();
+    bp.break_status[bpn].arg1 = 0;
+    bp.break_status[bpn].arg2 = 0;
+    bp.break_status[bpn].bpo  = this;
+  }
+
+  return bpn;
+
+}
+
+void BreakpointObject::dump1(void)
+{
+  cout << "Generic breakpoint " << bpn << endl;
+}
+
+
+void BreakpointObject::clear(void)
+{
+  cout << "clear Generic breakpoint " << bpn << endl;
 }
 
 //------------------------------------------------------------------------

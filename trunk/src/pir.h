@@ -113,6 +113,12 @@ enum
       put(get() | EEIF);
     }
 
+  unsigned int get_sspif(void)
+  {
+	return value & SSPIF;
+  }
+  void clear_sspif(void);
+
  unsigned int get_txif(void)
    {
      return value & TXIF;
@@ -177,6 +183,12 @@ public:
     {
       put(get() | SSPIF);
     }
+
+  unsigned int get_sspif(void)
+    {
+      return value & SSPIF;
+    }
+  void clear_sspif(void);
 
   inline void set_txif(void)
     {
@@ -395,6 +407,11 @@ public:
   virtual bool get_rcif(void) = 0;
   virtual void set_rcif(void) = 0;
   virtual void clear_rcif(void) = 0;
+	
+  // ssp stuff
+  virtual bool get_sspif(void) = 0;
+  virtual void set_sspif(void) = 0;
+  virtual void clear_sspif(void) = 0;
 
   // eeprom stuff
   virtual void set_eeif(void) = 0;
@@ -450,6 +467,20 @@ class PIR_SET_1 : public PIR_SET
   virtual void clear_rcif(void) {
     assert(pir1 != 0);
     pir1->clear_rcif();
+  }
+	
+  // ssp stuff
+  virtual bool get_sspif(void) {
+    assert(pir1 != 0);
+    return (pir1->get_sspif() != 0);
+  }
+  virtual void set_sspif(void) {
+    assert(pir1 != 0);
+    pir1->set_sspif();
+  }
+  virtual void clear_sspif(void) {
+    assert(pir1 != 0);
+    pir1->clear_sspif();
   }
 
   // eeprom stuff
@@ -521,6 +552,21 @@ class PIR_SET_2 : public PIR_SET
     assert(pir1 != 0);
     pir1->clear_rcif();
   }
+	
+  // ssp stuff
+  virtual bool get_sspif(void) {
+    assert(pir1 != 0);
+    return (pir1->get_sspif() != 0);
+  }
+  virtual void set_sspif(void) {
+    assert(pir1 != 0);
+    pir1->set_sspif();
+  }
+  virtual void clear_sspif(void) {
+    assert(pir1 != 0);
+    pir1->clear_sspif();
+  }
+
 
   // eeprom stuff
   virtual void set_eeif(void) {

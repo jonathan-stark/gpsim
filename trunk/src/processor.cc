@@ -1424,7 +1424,7 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
   // through them until we get to the real register.
 
   while(reg->isa() == Register::BP_REGISTER)
-    reg = ((Notify_Register *)reg)->replaced;
+    reg = ((BreakpointRegister *)reg)->replaced;
 
 
   return reg;

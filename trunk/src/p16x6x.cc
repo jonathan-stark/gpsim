@@ -357,11 +357,12 @@ void P16X6X_processor::create_sfr_map(void)
   add_sfr_register(&t2con,  0x12, 0);
   add_sfr_register(&pr2,    0x92, 0xff);
 
-  //add_sfr_register(&sspbuf,  0x13, 0);
-  //add_sfr_register(&sspcon,  0x14, 0);
-
-  //add_sfr_register(&sspadd,  0x93, 0);
-  //add_sfr_register(&sspstat, 0x94, 0);
+  if( init_ssp ) {
+	add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+	add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+	add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+	add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  }
 
   add_sfr_register(&ccpr1l,  0x15, 0);
   add_sfr_register(&ccpr1h,  0x16, 0);
@@ -422,9 +423,12 @@ void P16X6X_processor::create_sfr_map(void)
 
 P16X6X_processor::P16X6X_processor(void)
 {
+  
 
   if(verbose)
     cout << "generic 16X6X constructor, type = " << isa() << '\n';
+
+  init_ssp = false;
 
 }
 
@@ -504,6 +508,8 @@ Processor * P16C62::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
+  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
+
   p->new_name("p16c62");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -515,6 +521,9 @@ P16C62::P16C62(void)
 {
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
+
+  init_ssp = true;
+  
 }
 
 //------------------------------------------------------------------------
@@ -561,11 +570,13 @@ void P16C63::create_sfr_map(void)
     }
   }
 
-  //add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  //add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  //add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  //add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
-  //ssp.initialize(this);
+  /*
+  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
+  */
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
@@ -578,6 +589,8 @@ void P16C63::create_sfr_map(void)
 
 
   ((PORTC*)portc)->usart = &usart;
+  ((PORTC*)portc)->ssp = &ssp;
+  ((PORTA*)porta)->ssp = &ssp;
 }
 
 void P16C63::create_symbols(void)
@@ -604,6 +617,8 @@ P16C63::P16C63(void)
 
   if(verbose)
     cout << "c63 constructor, type = " << isa() << '\n';
+
+  init_ssp = true;
 
 }
 
@@ -634,6 +649,8 @@ Processor * P16C63::construct(void)
   p->create_invalid_registers ();
 
   p->pic_processor::create_symbols();
+
+  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c63");
   symbol_table.add_module(p,p->name().c_str());
@@ -722,6 +739,8 @@ Processor * P16C64::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
+  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
+
   p->new_name("p16c64");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -733,6 +752,8 @@ P16C64::P16C64(void)
 {
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
+
+  init_ssp = true;
 }
 
 //------------------------------------------------------------------------
@@ -779,11 +800,13 @@ void P16C65::create_sfr_map(void)
     }
   }
 
-  //add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
-  //add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
-  //add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
-  //add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
-  //ssp.initialize(this);
+  /*
+  add_sfr_register(ssp.sspbuf, 0x13, 0,"sspbuf");
+  add_sfr_register(ssp.sspcon, 0x14, 0,"sspcon");
+  add_sfr_register(ssp.sspadd, 0x93, 0,"sspadd");
+  add_sfr_register(ssp.sspstat, 0x94, 0,"sspstat");
+  ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
+  */
 
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
@@ -796,6 +819,8 @@ void P16C65::create_sfr_map(void)
 
 
   ((PORTC*)portc)->usart = &usart;
+  ((PORTC*)portc)->ssp = &ssp;
+  ((PORTA*)porta)->ssp = &ssp;
 }
 
 void P16C65::create_symbols(void)
@@ -822,6 +847,8 @@ P16C65::P16C65(void)
 
   if(verbose)
     cout << "c65 constructor, type = " << isa() << '\n';
+
+  init_ssp = true;
 
 }
 
@@ -852,6 +879,8 @@ Processor * P16C65::construct(void)
   p->create_invalid_registers ();
 
   p->pic_processor::create_symbols();
+
+  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c65");
   symbol_table.add_module(p,p->name().c_str());

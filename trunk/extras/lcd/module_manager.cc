@@ -72,7 +72,7 @@ extern "C" {
 
 
 /********************************************************************************
- * mod_list - Display all of the modules in this library.
+ * get_mod_list - Display all of the modules in this library.
  *
  * This is a required function for gpsim compliant libraries.
  */
@@ -83,7 +83,6 @@ extern "C" {
     return available_modules;
 
   }
-
 
 #ifdef __cplusplus
 }

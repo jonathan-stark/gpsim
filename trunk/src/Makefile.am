@@ -53,6 +53,7 @@ libgpsim_la_SOURCES = \
 	tmr0.cc \
 	trace.cc \
 	uart.cc \
+	ssp.cc \
 	xref.cc \
 	icd.cc
 
