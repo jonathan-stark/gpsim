@@ -445,4 +445,38 @@ public:
 };
 #endif // HAVE_GUI
 
+//--------------------------------------------------------------------
+// InterfaceObject 
+//
+// This class is used only within interface.cc's scope. It's purpose
+// is to provide a way to call back some function not gpsim's code
+// space.
+
+class InterfaceObject : public BreakCallBack
+{
+public:
+  pic_processor *pic;
+
+  void (*callback_function)(gpointer);
+  gpointer callback_data;
+
+  InterfaceObject(void) {pic = NULL;};
+  virtual void callback(void);
+
+};
+
+//------------------------------------------------------------------------
+// Primarily for interface.cc
+class CyclicBreakPoint : public InterfaceObject
+{
+public:
+  guint64 delta_cycles;
+
+  void set_break(void);
+  virtual void callback(void);
+  ~CyclicBreakPoint(void);
+  void set_delta(guint64 delta);
+};
+
+
 #endif   //  __BREAKPOINTS_H__

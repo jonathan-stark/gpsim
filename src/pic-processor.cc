@@ -514,101 +514,110 @@ void pic_processor::pm_write (void)
 
 int realtime_mode=0;
 int realtime_mode_with_gui=0;
+extern void update_gui(void);
 
-// FIXME duplicate classes with those in interface.cc...
-class InterfaceObject : public BreakCallBack
+class RealTimeBreakPoint : public BreakCallBack
 {
 public:
-  pic_processor *pic;
+  pic_processor *cpu;
+  struct timeval tv_start;
+  guint64 cycle_start;
+  guint64 future_cycle;
+  int warntimer;
+  int period;
 
-  void (*callback_function)(gpointer);
-  gpointer callback_data;
-
-  InterfaceObject(void) {pic = NULL;};
-  virtual void callback(void)
+  RealTimeBreakPoint(void)
   {
-      if(callback_function)
-	  callback_function(callback_data);
-    };
+    cpu = NULL;
+    warntimer = 1;
+    period = 1;
+    future_cycle = 0;
+  }
 
-};
-class CyclicBreakPoint : public InterfaceObject
-{
-public:
-  guint64 delta_cycles;
+  void start(pic_processor *active_cpu) 
+  {
+    if(!active_cpu)
+      return;
 
-  void set_break(void)
-    {
-      pic->cycles.set_break(pic->cycles.value + delta_cycles, this);
+    // Grab the system time and record the simulated pic's time.
+    // We'll then set a break point a short time in the future
+    // and compare how the two track.
+
+    cpu = active_cpu;
+
+    gettimeofday(&tv_start,NULL);
+
+    cycle_start=cpu->cycles.value;
+
+    guint64 fc = cycle_start+100;
+
+    if(future_cycle)
+      cpu->cycles.reassign_break(future_cycle, fc, this);
+    else
+      cpu->cycles.set_break(fc, this);
+
+    future_cycle = fc;
+
+  }
+
+  void stop(void)
+  {
+
+    // Clear any pending break point.
+
+    if(future_cycle) {
+      cpu->cycles.clear_break(this);
+      future_cycle = 0;
     }
       
-  virtual void callback(void)
-    {
-      profile_keeper.catchup(); // What does this do again?
-      InterfaceObject::callback();
-      set_break();
-    };
-  virtual ~CyclicBreakPoint()
-  {
-      if(pic!=NULL)
-	  pic->cycles.clear_break(this);
   }
-  void set_delta(guint64 delta)
-  {
-      pic->cycles.clear_break(this);
 
-      delta_cycles = delta;
-      set_break();
-  }
-};
-CyclicBreakPoint realtime_cbp;
-extern void update_gui(void);
-static void realtime_callback  (void *p)
-{
-    gint64 system_time, diff;
+  void callback(void)
+  {
+    gint64 system_time;
+    double diff;
     struct timeval tv;
-    static struct timeval tv_start;
-    CyclicBreakPoint *rtcbp = (CyclicBreakPoint*)p;
-    static int warntimer;
-    static int period=1;
-    static guint64 cycle_start;
 
-    // look at system time and compare with simulation time.
-    // Adjust delta_cycles accordingly
+    // We just hit the break point. A few moments ago we 
+    // grabbed a snap shot of the system time and the simulated
+    // pic's time. Now we're going to compare the two deltas and
+    // see how well they've tracked. If the host is running
+    // way faster than the PIC, we'll put the host to sleep 
+    // briefly.
+
 
     gettimeofday(&tv,NULL);
 
-    if(rtcbp==NULL)
-    {
-	tv_start=tv;
-        cycle_start=active_cpu->cycles.value;
-        return;
-    }
     system_time = (tv.tv_sec-tv_start.tv_sec)*1000000+(tv.tv_usec-tv_start.tv_usec); // in micro-seconds
 
-    diff = system_time - ((rtcbp->pic->cycles.value-cycle_start)*4.0e6*rtcbp->pic->period);
+    diff = system_time - ((cpu->cycles.value-cycle_start)*4.0e6*cpu->period);
 
+    guint64  idiff;
     if( diff < 0 )
     {
 	// we are simulating too fast
 
-	if(-diff/4>1000)
-	    period-=-diff/4/500;
+        idiff = (guint64)(-diff/4);
+
+	if(idiff>1000)
+	    period -= idiff/500;
 	if(period<1)
             period=1;
 
 	// Then sleep for a while
-	usleep(-diff/4);
+	if(idiff)
+	  usleep(idiff);
     }
     else
     {
+      idiff = (guint64)(diff/4);
 
-	if(diff/4>1000)
-	    period+=diff/4/500;
+	if(idiff>1000)
+	    period+=idiff/500;
 	if(period>10000)
             period=10000;
 
-	if(diff/4>1000000)
+	if(idiff>1000000)
 	{
 	    // we are simulating too slow
 	    if(warntimer<10)
@@ -623,9 +632,9 @@ static void realtime_callback  (void *p)
             warntimer=0;
     }
 
-    rtcbp->delta_cycles=100*period*rtcbp->pic->frequency/4000000;
-    if(rtcbp->delta_cycles<1)
-	    rtcbp->delta_cycles=1;
+    guint64 delta_cycles= (guint64)(100*period*cpu->frequency/4000000);
+    if(delta_cycles<1)
+      delta_cycles=1;
 
     // Look at realtime_mode_with_gui and update the gui if true
     if(realtime_mode_with_gui)
@@ -633,17 +642,21 @@ static void realtime_callback  (void *p)
 	update_gui();
     }
 
-/*    {
-	static int i;
-	if(i<5)
-	    i++;
-	else
-	{
-            i=0;
-	    printf("%Ld, %d\n",llabs(diff/4),period);
-	}
-    }*/
-}
+
+    guint64 fc = cpu->cycles.value + delta_cycles;
+
+    if(future_cycle)
+      cpu->cycles.reassign_break(future_cycle, fc, this);
+    else
+      cpu->cycles.set_break(fc, this);
+
+    future_cycle = fc;
+
+  }
+
+};
+
+RealTimeBreakPoint realtime_cbp;
 
 
 //-------------------------------------------------------------------
@@ -679,6 +692,7 @@ void pic_processor::run (void)
   simulation_mode = RUNNING;
 
   // Start the cyclic breakpoint
+#if 0
   realtime_callback(NULL); // initialize system_time_at_start
   realtime_cbp.pic = active_cpu;
   realtime_cbp.callback_function = realtime_callback;
@@ -686,6 +700,10 @@ void pic_processor::run (void)
   realtime_cbp.delta_cycles = 100;
   if(realtime_mode)
       realtime_cbp.set_break();
+#endif
+
+  if(realtime_mode)
+    realtime_cbp.start(active_cpu);
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
@@ -712,7 +730,8 @@ void pic_processor::run (void)
 
     } while(!bp.global_break);
 
-  realtime_cbp.pic->cycles.clear_break(&realtime_cbp);
+  if(realtime_mode)
+    realtime_cbp.stop();
 
   bp.clear_global();
   trace.cycle_counter(cycles.value);

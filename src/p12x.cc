@@ -276,10 +276,13 @@ so the processor is waking up\n";
 	cpu->status->put(cpu->status->get() | 0x80);  // Set GPWUF flag
 	bp.clear_sleep();                 // Wake up the processor.
 
+	cpu->pc->reset();
+
 	// If the cpu is not running then advance the program counter
-	if((simulation_mode == STOPPED) ||
-	   (simulation_mode == SINGLE_STEPPING) )
-	  cpu->pc->increment();
+	//if((simulation_mode == STOPPED) ||
+	//   (simulation_mode == SINGLE_STEPPING) )
+	//  cpu->pc->increment();
+
       }
     }
 
