@@ -68,6 +68,7 @@ public:
   virtual int get_pin_state(unsigned int pin_number) {return 0;};
   virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
+  virtual void set_attribute(char *attr, char *val);
 
   const virtual char *type(void) { return (name_str); };
   char *name(void) {return name_str;};
@@ -132,4 +133,5 @@ void module_list_modules(void);
 void module_load_library(char *library_name);
 void module_load_module(char * module_type, char * module_new_name=NULL);
 void module_pins(char *module_name);
+void module_set_attr(char *module_name,char *attr, char *val);
 #endif // __MODULES_H__

@@ -250,6 +250,7 @@ class pic_processor : public Module
 public:
 
   #define FILE_REGISTERS  0x100
+  #define DEFAULT_PIC_CLOCK 4000000
 
   struct file_context *files;  // A dynamically allocated array for src file info
   int number_of_source_files;  // The number of elements allocated to that array
@@ -290,6 +291,10 @@ public:
   
   TMR0         tmr0;
   int          num_of_gprs;
+
+  unsigned int clock; // Frequency of the clock
+  unsigned int get_clock() { return clock; };
+  void set_clock(unsigned int value) { clock=value; };
 
   void create_invalid_registers (void);
   void add_sfr_register(sfr_register *reg, unsigned int addr,

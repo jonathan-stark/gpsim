@@ -42,9 +42,79 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gui.h"
 
+typedef enum {
+    MENU_TIME_USECONDS,
+    MENU_TIME_MSECONDS,
+    MENU_TIME_SECONDS,
+    MENU_TIME_HHMMSS
+} menu_id;
+
+typedef struct _menu_item {
+    char *name;
+    menu_id id;
+} menu_item;
+
+static menu_item menu_items[] = {
+    {"Micro seconds", MENU_TIME_USECONDS},
+    {"Mili seconds", MENU_TIME_MSECONDS},
+    {"Seconds", MENU_TIME_SECONDS},
+    {"HH:MM:SS.CC", MENU_TIME_HHMMSS}
+};
+
+static menu_id time_format=MENU_TIME_USECONDS;
+
+// Used only in popup menus
+static StatusBar_Window *popup_sbw;
+
+// called when user has selected a menu item
+static void
+popup_activated(GtkWidget *widget, gpointer data)
+{
+    menu_item *item;
+
+    if(widget==NULL || data==NULL)
+    {
+	printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
+	return;
+    }
+    
+    item = (menu_item *)data;
+    time_format = (menu_id)item->id;
+    StatusBar_update(popup_sbw);
+}
+
+static GtkWidget *
+build_menu(void)
+{
+  GtkWidget *menu;
+  GtkWidget *item;
+  int i;
+
+  menu=gtk_menu_new();
+
+  item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+  
+  
+  for (i=0; i < (sizeof(menu_items)/sizeof(menu_items[0])) ; i++){
+      item=gtk_menu_item_new_with_label(menu_items[i].name);
+
+      gtk_signal_connect(GTK_OBJECT(item),"activate",
+			 (GtkSignalFunc) popup_activated,
+			 &menu_items[i]);
+
+      gtk_widget_show(item);
+      gtk_menu_append(GTK_MENU(menu),item);
+  }
+  
+  return menu;
+}
+
+
 void StatusBar_update(StatusBar_Window *sbw)
 {
-  char buffer[20];
+  char buffer[32];
   unsigned int pic_id;
 
   pic_id = sbw->gp->pic_id;
@@ -70,6 +140,30 @@ void StatusBar_update(StatusBar_Window *sbw)
   sbw->cycles->value.ui64 = gpsim_get_cycles(pic_id);
   sprintf(buffer,"0x%016Lx",sbw->cycles->value.ui64);
   gtk_entry_set_text (GTK_ENTRY (sbw->cycles->entry), buffer);
+
+  if(time_format==MENU_TIME_USECONDS) {
+    sbw->time->value.db = gpsim_get_cycles(pic_id)*1e6/(double)gpsim_get_inst_clock(pic_id);
+    sprintf(buffer,"%19.2f µs",sbw->time->value.db);
+  }
+  else if(time_format==MENU_TIME_MSECONDS) {
+    sbw->time->value.db = gpsim_get_cycles(pic_id)*1e3/(double)gpsim_get_inst_clock(pic_id);
+    sprintf(buffer,"%19.3f ms",sbw->time->value.db);
+  }
+  else if(time_format==MENU_TIME_HHMMSS) {
+    double v=sbw->time->value.db = gpsim_get_cycles(pic_id)/(double)gpsim_get_inst_clock(pic_id);
+    int hh=(int)(v/3600),mm,ss,cc;
+    v-=hh*3600.0;
+    mm=(int)(v/60);
+    v-=mm*60.0;
+    ss=(int)v;
+    cc=(int)(v*100.0+0.5);
+    sprintf(buffer,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
+  }
+  else {
+    sbw->time->value.db = gpsim_get_cycles(pic_id)/(double)gpsim_get_inst_clock(pic_id);
+    sprintf(buffer,"%19.3f s",sbw->time->value.db);
+  }
+  gtk_entry_set_text (GTK_ENTRY (sbw->time->entry), buffer);
 
 }
 
@@ -173,6 +267,33 @@ labeled_entry *create_labeled_entry(GtkWidget *box,char *label, int string_width
 
   return(le);
 }
+
+
+// button press handler
+static gint
+do_popup(GtkWidget *widget, GdkEventButton *event, StatusBar_Window *sbw)
+{
+    GtkWidget *popup;
+
+    if(widget==NULL || event==NULL || sbw==NULL)
+    {
+        printf("Warning do_popup(%x,%x,%x)\n",(unsigned int)widget,(unsigned int)event,(unsigned int)sbw);
+        return 0;
+    }
+  
+    if( (event->type == GDK_BUTTON_PRESS) &&  (event->button == 3) )
+    {
+	popup_sbw = sbw;
+  
+	gtk_menu_popup(GTK_MENU(sbw->popup_menu), NULL, NULL, NULL, NULL,
+			   3, event->time);
+	// It looks like we need it to avoid a selection in the entry.
+	// For this we tell the entry to stop reporting this event.
+	gtk_signal_emit_stop_by_name(GTK_OBJECT(sbw->time->entry),"button_press_event");
+    }
+    return FALSE;
+}
+
 /*
  * CreateStatusBar
  *
@@ -215,6 +336,17 @@ void StatusBar_create(GtkWidget *vbox_main, StatusBar_Window *sbw)
   sbw->cycles = create_labeled_entry(hbox,"Cycles:", 18);
   sbw->cycles->parent = sbw;
   gtk_entry_set_editable(GTK_ENTRY(sbw->cycles->entry),0);
+
+  sbw->time = create_labeled_entry(hbox,"Time:", 22);
+  sbw->time->parent = sbw;
+  gtk_entry_set_editable(GTK_ENTRY(sbw->time->entry),0);
+
+  /* create popupmenu */
+  sbw->popup_menu=build_menu();
+  gtk_signal_connect(GTK_OBJECT(sbw->time->entry),
+		     "button_press_event",
+		     (GtkSignalFunc) do_popup,
+		     sbw);
 
   sbw->created=1;
   

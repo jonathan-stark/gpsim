@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_disasm.h"
 #include "cmd_dump.h"
 #include "cmd_echo.h"
+#include "cmd_frequency.h"
 #include "cmd_help.h"
 #include "cmd_list.h"
 #include "cmd_load.h"
@@ -64,6 +65,7 @@ command *command_list[] =
   &disassemble,
   &dump,
   //  &echo,
+  &frequency,
   &help,
   &c_list,
   &c_load,

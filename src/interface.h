@@ -101,6 +101,7 @@ typedef struct _sym
   void gpsim_put_w(unsigned int processor_id, unsigned int w_value);
   unsigned int gpsim_get_cycles_lo(unsigned int processor_id);
   guint64  gpsim_get_cycles(unsigned int processor_id);
+  double gpsim_get_inst_clock(unsigned int processor_id);
   guint64  gpsim_get_update_rate(void);
   void     gpsim_set_update_rate(guint64);
   void gpsim_assign_pc_xref(unsigned int processor_id, gpointer xref);

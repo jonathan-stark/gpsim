@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x7x.h"
 #include "stimuli.h"
 
+//#define DEBUG_AD
 
 //------------------------------------------------------
 // ADRES
@@ -64,7 +65,9 @@ void ADRES::put(int new_value)
 void ADCON0::start_conversion(void)
 {
 
-  //cout << "starting A/D conversion\n";
+  #ifdef DEBUG_AD
+  cout << "starting A/D conversion\n";
+  #endif
 
   if(!(value & ADON) ) {
     //cout << " A/D converter is disabled\n";
@@ -93,8 +96,9 @@ void ADCON0::start_conversion(void)
 void ADCON0::stop_conversion(void)
 {
 
-  //cout << "stopping A/D conversion\n";
-
+  #ifdef DEBUG_AD
+  cout << "stopping A/D conversion\n";
+  #endif
   ad_state = AD_IDLE;
 
 }
@@ -186,7 +190,9 @@ void ADCON0::put_conversion(void)
     else
       converted = 0xffffffff;  // As close to infinity as possible...
 
+    #ifndef DEBUG_AD
     if(verbose)
+    #endif
       cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
     adres->put((converted ) & 0xff);
 
@@ -200,7 +206,9 @@ void ADCON0::put_conversion(void)
 void ADCON0::callback(void)
 {
   int channel;
-  //cout<<"ADCON0 Callback: " << hex << cpu->cycles.value << '\n';
+  #ifdef DEBUG_AD
+  cout<<"ADCON0 Callback: " << hex << cpu->cycles.value << '\n';
+  #endif
 
   //
   // The a/d converter is simulated with a state machine. 
@@ -214,6 +222,9 @@ void ADCON0::callback(void)
 
     case AD_ACQUIRING:
       channel = (value >> 3) & channel_mask;
+      #ifdef DEBUG_AD
+      printf("Valor: 0x%02X >>3 0x%02X máscara: 0x%02X => 0x%02X\n",value,value>>3,channel_mask,channel);
+      #endif
 
       if(channel <= 4) {
 	// analog channels 0-4 map to porta
@@ -227,8 +238,10 @@ void ADCON0::callback(void)
       }
 
       reference = adcon1->get_Vref();
-      //cout << "A/D acquiring ==> converting channel " << channel << " voltage "
-      //   << acquired_value << ", Vref = " << reference << '\n';
+      #ifdef DEBUG_AD
+      cout << "A/D acquiring ==> converting channel " << channel << " voltage "
+      << acquired_value << ", Vref = " << reference << '\n';
+      #endif
 
       future_cycle = cpu->cycles.value + 5*Tad_2;
       cpu->cycles.set_break(future_cycle, this);
@@ -238,8 +251,10 @@ void ADCON0::callback(void)
       break;
 
     case AD_CONVERTING:
-      //cout << "A/D converting ==> idle\n";
-      //cout << "--- acquired_value " << acquired_value << "  reference " << reference <<'\n';
+      #ifdef DEBUG_AD
+      cout << "A/D converting ==> idle\n";
+      cout << "--- acquired_value " << acquired_value << "  reference " << reference <<'\n';
+      #endif
 
       put_conversion();
 

@@ -469,6 +469,20 @@ guint64 gpsim_get_cycles(unsigned int processor_id)
 }
 
 //--------------------------------------------------------------------------
+
+double gpsim_get_inst_clock(unsigned int processor_id)
+{
+
+  pic_processor *pic = get_processor(processor_id);
+
+  if(!pic)
+    return INVALID_VALUE;
+
+  return (pic->clock/4.0);
+
+}
+
+//--------------------------------------------------------------------------
 //
 // gui_update_rate - a global variable defining how many simulation cycles
 //                   to wait between calls to updating the gui.

@@ -846,6 +846,7 @@ pic_processor::pic_processor(void)
     cout << "pic_processor constructor\n";
   files = NULL;
 
+  clock = DEFAULT_PIC_CLOCK;
   // Test code for logging to disk:
   //trace_log.switch_cpus(this);
   //trace_log.enable_logging("gpsim.log");
