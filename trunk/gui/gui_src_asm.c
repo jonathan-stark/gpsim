@@ -541,6 +541,13 @@ popup_activated(GtkWidget *widget, gpointer data)
 			    VIEW_SHOW);
 	}
 	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
+
+
+	// We also try with a '_' prefix.
+	for(i=strlen(text)+1;i>0;i--)
+	    text[i]=text[i-1];
+        text[i]='_';
+	SymbolWindow_select_symbol_name(((GUI_Object*)popup_sbaw)->gp->symbol_window,text);
 	break;
     case MENU_STEP:
 	gpsim_step(popup_sbaw->sbw.gui_obj.gp->pic_id, 1);
