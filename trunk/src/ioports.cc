@@ -1192,6 +1192,8 @@ PORTC::PORTC(void)
   new_name("portc");
   usart = 0;
   ssp = 0;
+  tmrl = 0;
+  ccp1con = 0;
 }
 
 //-------------------------------------------------------------------
@@ -1207,6 +1209,9 @@ unsigned int PORTC::get(void)
 
   int diff = old_value ^ value; // The difference between old and new
 
+  // ugh. go through and check each bit and see if we need to propogate
+  // info to a peripheral.
+
   // 
   if( ccp1con && (diff & CCP1) )
     ccp1con->new_edge(value & CCP1);
@@ -1218,6 +1223,9 @@ unsigned int PORTC::get(void)
 
   if( ssp && (diff & SCK))
     ssp->new_sck_edge(value & SCK);
+
+  if(tmrl && (diff & T1CKI))
+    tmrl->increment();
 
   return(value);
 }

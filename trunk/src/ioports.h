@@ -30,6 +30,7 @@ class SSP_MODULE;
 class IOPIN;
 class stimulus;
 class Stimulus_Node;
+class TMRL;
 
 //---------------------------------------------------------
 // IOPORT
@@ -231,36 +232,36 @@ class PORTA_62x : public PIC_IOPORT
 
 class PORTC : public PIC_IOPORT
 {
-public:
+ public:
 
   /* Define the I/O pins that are common among the various PIC's
    * endowed with a port C.
    */
 
-enum
-{
-    T1CKI = 1 << 0,
-    CCP1  = 1 << 2,
-    SCK   = 1 << 3,
-    SCL   = 1 << 3,  /* SCL and SCK share the same pin */
-    SDI   = 1 << 4,
-    SDA   = 1 << 4,  /* SDA and SDI share the same pin */
-    SDO   = 1 << 5
-};
+  enum
+    {
+      T1CKI = 1 << 0,
+      CCP1  = 1 << 2,
+      SCK   = 1 << 3,
+      SCL   = 1 << 3,  /* SCL and SCK share the same pin */
+      SDI   = 1 << 4,
+      SDA   = 1 << 4,  /* SDA and SDI share the same pin */
+      SDO   = 1 << 5
+    };
 
   /* Now define the I/O pins that are device dependent */
-enum
-{
-    T1OSO = 1 << 0,
-    T1OSI = 1 << 1,
-    _T1OSO = 1 << 1,  /* For some bizarre reason, TMR1's OS interface */
-    _T1OSI = 1 << 0,  /* varies from pic to pic... */
-    CCP2  = 1 << 1,
-    TX    = 1 << 6,  /* Not all pics with a port C have a usart, */
-    CK    = 1 << 6,  /* but the ones that do share TX and CK */
-    RX    = 1 << 7,  /* Same goes for RX and DT */
-    DT    = 1 << 7
-};
+  enum
+    {
+      T1OSO = 1 << 0,
+      T1OSI = 1 << 1,
+      _T1OSO = 1 << 1,  /* For some bizarre reason, TMR1's OS interface */
+      _T1OSI = 1 << 0,  /* varies from pic to pic... */
+      CCP2  = 1 << 1,
+      TX    = 1 << 6,  /* Not all pics with a port C have a usart, */
+      CK    = 1 << 6,  /* but the ones that do share TX and CK */
+      RX    = 1 << 7,  /* Same goes for RX and DT */
+      DT    = 1 << 7
+    };
 
   /* A flag to sort out how the TMR1 OS interface is implemented.
    *   set: T1OSO == RC0 && T1OSI == RC1
@@ -271,6 +272,7 @@ enum
   CCPCON *ccp1con;
   USART_MODULE *usart;
   SSP_MODULE *ssp;
+  TMRL *tmrl;
 
   PORTC(void);
   unsigned int get(void);
