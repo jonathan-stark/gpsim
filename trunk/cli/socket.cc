@@ -185,6 +185,9 @@ unsigned int ascii2uint(char **buffer, int digits)
 enum eGPSIMSocketCommands
   {
 
+    GPSIM_OBJTYP_STRING    = 2,
+    GPSIM_OBJTYP_INT32     = 3,
+
     GPSIM_CMD_CREATE_SOCKET_LINK    = 0xF0,
     GPSIM_CMD_REMOVE_SOCKET_LINK    = 0xF1,
     GPSIM_CMD_QUERY_SOCKET_LINK     = 0xF2,
