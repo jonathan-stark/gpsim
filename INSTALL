@@ -23,7 +23,8 @@ Starting with gpsim-0.18.0, two probably not so common packages:
 gtk+-extra
 eXdbm
 
-are going to be needed. Please see the end of this file for instructions on their installation.
+are going to be needed. Please see the end of this file for instructions 
+on their installation.
 
 ************* NOTE ****************
 
@@ -36,7 +37,8 @@ how to get it.
 INSTALLATION (the most common way)
 ----------------------------------
 
-If you've ever installed software under Linux/UNIX before, then this will be completely familiar to you.
+If you've ever installed software under Linux/UNIX before, then this 
+will be completely familiar to you.
 
 1) create a parent subdirectory for gpsim (e.g. gnupic)
 
@@ -88,15 +90,80 @@ Note: if you already had built gpsim with the gui support and then decide you wa
 3.0 HOW TO BUILD gpsim WITHOUT ROOT PRIVILEGES
     ------------------------------------------
 
+Contributed by Erik Thiele <mailto:erikyyy@erikyyy.de>
 
-If you don't have su privileges, then you can build gpsim and copy it to a directory in your execution path. Please note that you'll need to build gpsim with the shared libraries disabled.
+(
+Preface by Scott:
 
-     > # here are the commands to install gpsim if you don't have root privileges
-     > ./configure --disable-shared
-     > make all
-     > mv gpsim/gpsim ~/bin  # the executable called 'gpsim' is placed in
-     >                       # a directory with the same name. Now what kind
-     >                       # of idiot would do that?
+Erik has created a step-by-step list of instructions for
+completely installing gpsim into a local directory. If you
+do not have root priviledges or just do not wish to install 
+gpsim into the default directories then these instructions 
+are for you.
+)
+
+
+ first create your local installation directory,
+# if you don't already have one.
+mkdir $HOME/localinst
+
+# now make the directory where you compile the programs in.
+mkdir $HOME/compiling
+
+# go into that directory
+cd $HOME/compiling
+# now download exdbm-VERSION-tar.gz and
+# gpsim-VERSION-tar.gz into the current directory.
+# also download gtk+extra-VERSION-tar.gz
+# if your distribution doesn't contain it. just start
+gtkextra-config
+# if that program was not found, you need to install gtk+extra
+
+# now let's first compile and install gtk+extra
+# you can skip this step if you already have gtk+extra installed.
+cd $HOME/compiling
+tar xzvf gtk+extra-VERSION-tar.gz
+cd gtk+extra-VERSION-
+./configure --prefix=$HOME/localinst/gtk+extra
+make install
+cd $HOME
+# edit your shell configuration and add something like
+export PATH="$PATH":$HOME/localinst/gtk+extra/bin
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":$HOME/localinst/gtk+extra/lib
+# don't forget to relogin to let changes take effect.
+# now you can try to execute
+gtkextra-config
+# if it worked, gtk+extra is now installed.
+
+# now lets install exdbm library.
+cd $HOME/compiling
+tar xzvf exdbm-VERSION-tar.gz
+cd exdbm-VERSION-
+./configure --prefix=$HOME/localinst/eXdbm
+make install
+cd $HOME
+# edit your shell configuration and add something like
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":~/localinst/eXdbm/lib
+# don't forget to relogin to let changes take effect.
+
+# now lets install gpsim
+cd $HOME/compiling
+tar xzvf gpsim-VERSION-tar.gz
+cd gpsim-VERSION-
+./configure --with-exdbm=$HOME/localinst/eXdbm --prefix=$HOME/localinst/gpsim
+make install
+cd $HOME
+# edit your shell configuration and add something like
+export PATH="$PATH":$HOME/localinst/gpsim/bin
+# don't forget to relogin to let changes take effect.
+
+# if you want to save diskspace you can now do
+rm -rf $HOME/compiling/eXdbm
+rm -rf $HOME/compiling/gpsim
+rm -rf $HOME/compiling/gtk+extra
+# as these files were only needed for compiling and installation.
+
+
 
 4.0 HOW TO MAKE YOUR OWN gpsim DISTRIBUTION
     ---------------------------------------
