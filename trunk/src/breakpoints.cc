@@ -324,7 +324,7 @@ unsigned int Breakpoints::set_notify_write_value(Processor *cpu,
 unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 {
   if(verbose)
-    "cycle break is halting sim\n";
+    cout << "cycle break is halting sim\n";
 
   halt();
   if( abp < MAX_BREAKPOINTS)
@@ -764,8 +764,8 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 				     unsigned int address,
 				     unsigned int bp,
 				     unsigned int _regAddress,
-				     int _regMask,
-				     int _regValue,
+				     unsigned int _regMask,
+				     unsigned int _regValue,
 				     bool _bPostAssertion) :
   Breakpoint_Instruction(cpu, address,bp),
   regAddress(_regAddress),

@@ -189,17 +189,17 @@ class Profile_Stop_Instruction : public Notify_Instruction
 class RegisterAssertion : public Breakpoint_Instruction
 {
  public:
-  int regAddress;
-  int regMask;
-  int regValue;
+  unsigned int regAddress;
+  unsigned int regMask;
+  unsigned int regValue;
   bool bPostAssertion; // True if assertion is checked after instruction simulates.
 
   RegisterAssertion(Processor *new_cpu, 
 		    unsigned int instAddress, 
 		    unsigned int bp,
 		    unsigned int _regAddress,
-		    int _regMask,
-		    int _regValue,
+		    unsigned int _regMask,
+		    unsigned int _regValue,
 		    bool bPostAssertion=false
 		    );
 

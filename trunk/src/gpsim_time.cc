@@ -228,8 +228,6 @@ void Cycle_Counter::clear_break(BreakpointObject *f)
 
   Cycle_Counter_breakpoint_list  *l1 = &active, *l2 = 0;
 
-  bool found = 0;
-
   if(!f)
     return;
 
