@@ -20,7 +20,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;;../eXdbm"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;YYDEBUG=1"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -61,7 +61,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.1/include/glib-2.0&quot;;&quot;../../glib-2.2.1/lib/glib-2.0/include&quot;;../eXdbm"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;YYDEBUG=1"
 				RuntimeLibrary="4"
 				UsePrecompiledHeader="0"
@@ -167,6 +167,9 @@
 				RelativePath=".\cmd_stimulus.cc">
 			</File>
 			<File
+				RelativePath=".\cmd_stopwatch.cc">
+			</File>
+			<File
 				RelativePath=".\cmd_symbol.cc">
 			</File>
 			<File
@@ -194,6 +197,7 @@
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="bison  -d -o $(InputName).cpp $(InputFileName)
+if exist $(InputName).h del $(InputName).h
 ren $(InputName).hpp $(InputName).h
 "
 						Outputs="$(InputName).cpp;$(InputName).h"/>
@@ -203,6 +207,7 @@ ren $(InputName).hpp $(InputName).h
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="bison  -d -o $(InputName).cpp $(InputFileName)
+if exist $(InputName).h del $(InputName).h
 ren $(InputName).hpp $(InputName).h
 "
 						Outputs="$(InputName).cpp;$(InputName).h"/>
@@ -305,6 +310,9 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\cmd_stimulus.h">
+			</File>
+			<File
+				RelativePath=".\cmd_stopwatch.h">
 			</File>
 			<File
 				RelativePath=".\cmd_symbol.h">

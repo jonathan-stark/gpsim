@@ -226,6 +226,12 @@
 				RelativePath=".\pic-registers.cc">
 			</File>
 			<File
+				RelativePath=".\processor.cc">
+			</File>
+			<File
+				RelativePath=".\registers.cc">
+			</File>
+			<File
 				RelativePath=".\ssp.cc">
 			</File>
 			<File
@@ -384,6 +390,12 @@
 			</File>
 			<File
 				RelativePath=".\picdis.h">
+			</File>
+			<File
+				RelativePath=".\processor.h">
+			</File>
+			<File
+				RelativePath=".\registers.h">
 			</File>
 			<File
 				RelativePath=".\ssp.h">

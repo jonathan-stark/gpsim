@@ -1,3 +1,6 @@
+2003-12-27  Scott Dattalo  <scott@dattalo.com>
+	* patch from Borut Razem for Visual Studio projects
+	
 2003-11-29  Scott Dattalo  <scott@dattalo.com>
 	* src/pic-processor.cc - rewrote the way gpsim groups together all of
 	the processors it supports. Now the ProcessorConstructor class will
