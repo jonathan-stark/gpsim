@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 #include "protocol.h"
 #include "config.h"
 
+#define PRINTF_INT64_MODIFIER "L"
 //------------------------------------------------------------------------
 Value::Value()
   : cpDescription(0), xref(0)

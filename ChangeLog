@@ -1,3 +1,12 @@
+2005-03-08 Scott Dattalo <scott@dattalo.com>
+	* regression/ccp/ccp.asm: improvements to ccp regression test
+	* gui/gui_profile.cc, gui/gui_trace.cc, gui/gui_statusbar.cc,
+	src/value.cc: Temporarily removed windows-specific macro.
+	* src/stimulus.cc, src/stimuli.h: Cleaned up asynchronous stimuli
+	* src/registers.h, src/ssp.cc, src/ioports.cc, src/14bit-tmrs.cc:
+	Made the default register class access functions all go through
+	one function to obtain a register's value.
+
 2005-02-26 Scott Dattalo <scott@dattalo.com>
 	* src/processor.h, src/trace.h, src/breakpoints.h, src/symbol.h,
 	src/gpsim_interface.h, src/gpsim_time.h:

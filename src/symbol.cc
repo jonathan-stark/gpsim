@@ -755,6 +755,8 @@ string &stimulus_symbol::name()
 }
 string stimulus_symbol::toString()
 {
+  if(s)
+    s->show();
   return name();
 }
 //------------------------------------------------------------------------

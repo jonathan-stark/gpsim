@@ -324,7 +324,8 @@ CyclesLabeledEntry::CyclesLabeledEntry()
 void CyclesLabeledEntry::Update(void)
 {
   char buffer[32];
-  sprintf(buffer,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
+  //sprintf(buffer,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
+  sprintf(buffer,"0x%016Lx",get_cycles().value);
   gtk_entry_set_text (GTK_ENTRY (entry), buffer);
 }
 
@@ -379,10 +380,7 @@ static void
 popup_activated(GtkWidget *widget, gpointer data)
 {
   if(!widget || !data)
-  {
-    printf("Warning popup_activated(%x,%x)\n",(unsigned int)widget,(unsigned int)data);
     return;
-  }
     
   popup_data *pd = (popup_data *)data;
   if(pd->tle) {
