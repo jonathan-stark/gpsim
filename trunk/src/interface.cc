@@ -201,9 +201,9 @@ void update_gui(void)
 
 gpsimInterface::gpsimInterface (void )
 {
-
   interfaces = 0;
   gui_update_cbp  = 0;
+  interface_seq_number = 0;
 }
 
 //--------------------------------------------------------------------------
