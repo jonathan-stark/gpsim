@@ -461,6 +461,10 @@ void TMR1H::put(unsigned int new_value)
 {
 
   value = new_value & 0xff;
+
+  tmr1l->synchronized_cycle = cpu->cycles.value;
+  tmr1l->last_cycle = tmr1l->synchronized_cycle - ( tmr1l->value + (value<<8))*tmr1l->prescale;
+
   if(tmr1l->t1con->get_tmr1on())
     tmr1l->update();
   trace.register_write(address,value);
@@ -631,6 +635,10 @@ void TMR1L::put(unsigned int new_value)
 {
 
   value = new_value & 0xff;
+
+  synchronized_cycle = cpu->cycles.value;
+  last_cycle = synchronized_cycle - ( value + (tmr1h->value<<8)) * prescale;
+
   if(t1con->get_tmr1on())
     update();
   trace.register_write(address,value);
