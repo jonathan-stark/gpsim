@@ -1231,7 +1231,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
   struct sa_entry *entry;
   GList *iter;
   breakpoint_info *bpi;
-    
+
   // get a manageable pointer to the processor
   Processor *cpu = gp->cpu;
     
@@ -1244,7 +1244,6 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
       free( (struct sa_entry*)iter->data );
       g_list_remove(iter,iter->data);
       iter=next;
-      //	g_list_free_1(sa_xlate_list[id]);  // FIXME, g_list_free() difference?
     }
   sa_xlate_list[id]=0;
 
@@ -1534,7 +1533,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   int address;
 
-  if(!gp)
+  if(!gp || !gp->cpu)
     return;
 
   if(!enabled)
@@ -1566,27 +1565,27 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   }
 
-  //for(i=0;i<gp->cpu->number_of_sourcefiles;i++)
-  for(i=0;i<gp->cpu->files->nsrc_files();i++)
-  {
-    FileContext *fc = (*gp->cpu->files)[i];
-    file_name = fc->name().c_str();
+  if(gp->cpu->files) {
 
-    if(strcmp(file_name+strlen(file_name)-4,".lst")
-       &&strcmp(file_name+strlen(file_name)-4,".LST")
-       &&strcmp(file_name+strlen(file_name)-4,".cod")
-       &&strcmp(file_name+strlen(file_name)-4,".COD"))
-      {
-	if(!strcmp(file_name+strlen(file_name)-2,".c")
-	   ||!strcmp(file_name+strlen(file_name)-2,".C")
-	   ||!strcmp(file_name+strlen(file_name)-4,".jal")
-	   ||!strcmp(file_name+strlen(file_name)-4,".JAL")
-	   )
-	  {
-	    // These are HLL sources
-	    file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
-	    pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
-	  }
+    for(i=0;i<gp->cpu->files->nsrc_files();i++) {
+      FileContext *fc = (*gp->cpu->files)[i];
+      file_name = fc->name().c_str();
+
+      if(strcmp(file_name+strlen(file_name)-4,".lst")
+	 &&strcmp(file_name+strlen(file_name)-4,".LST")
+	 &&strcmp(file_name+strlen(file_name)-4,".cod")
+	 &&strcmp(file_name+strlen(file_name)-4,".COD"))
+	{
+	  if(!strcmp(file_name+strlen(file_name)-2,".c")
+	     ||!strcmp(file_name+strlen(file_name)-2,".C")
+	     ||!strcmp(file_name+strlen(file_name)-4,".jal")
+	     ||!strcmp(file_name+strlen(file_name)-4,".JAL")
+	     )
+	    {
+	      // These are HLL sources
+	      file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
+	      pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
+	    }
 
 	  // FIXME, gpsim may change sometime making this fail
 	  file_id = i;
@@ -1598,14 +1597,17 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
 	  SetText(id,file_id);
 	  
-      } else {
-	if(verbose)
-	  printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
-		  file_name);
-      }
+	} else {
+	  if(verbose)
+	    printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
+		    file_name);
+	}
+    }
+
+    source_loaded = 1;
+
   }
 
-  source_loaded = 1;
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
