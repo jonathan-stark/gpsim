@@ -384,13 +384,11 @@ void Register::put_value(unsigned int new_value)
 //
 void Register::set_write_trace(unsigned int wt)
 {
-  write_trace.data = wt;
-  write_trace.init = wt + (1<<24); //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
+  write_trace.put(wt, wt + (1<<24)); //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
 }
 void Register::set_read_trace(unsigned int rt)
 {
-  read_trace.data = rt;
-  read_trace.init = rt + (1<<24); //(Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
+  read_trace.put(rt, rt + (1<<24));  //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
 }
 
 //------------------------------------------------------------
