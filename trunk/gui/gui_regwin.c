@@ -602,6 +602,12 @@ static int settings_dialog(Register_Window *rw)
     static GtkWidget *normalfontstringentry;
     GtkWidget *label;
     int fonts_ok=0;
+    GtkSheet *sheet;
+    GtkSheetRange range;
+    gint row_height,column_width,char_width;
+    int i;
+
+    sheet=GTK_SHEET(rw->register_sheet);
     
     if(dialog==NULL)
     {
@@ -674,7 +680,26 @@ static int settings_dialog(Register_Window *rw)
 	}
     }
 
-    BuildRegisterWindow(rw);
+    load_styles(rw);
+
+    gtk_sheet_freeze(rw->register_sheet);
+    range.row0=0;
+    range.rowi=sheet->maxrow;
+    range.col0=0;
+    range.coli=sheet->maxcol;
+    gtk_sheet_range_set_font(sheet, &range, rw->normalfont);
+
+    char_width = gdk_string_width (rw->normalfont,"9");
+    row_height = 3 * char_width + 6;
+    column_width = 3 * char_width + 6;
+    for(i=0; i<rw->register_sheet->maxcol; i++){
+	gtk_sheet_set_column_width (rw->register_sheet, i, column_width);
+	gtk_sheet_set_row_height (rw->register_sheet, i, row_height);
+    }
+    gtk_sheet_set_column_width (rw->register_sheet, i, REGISTERS_PER_ROW*char_width + 6);
+    gtk_sheet_set_row_titles_width(rw->register_sheet, column_width);
+    gtk_sheet_set_column_titles_height(rw->register_sheet, row_height);
+    gtk_sheet_thaw(rw->register_sheet);
 
     gtk_widget_hide(dialog);
 
@@ -1275,7 +1300,8 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     gboolean row_created;
     GtkSheetRange range;
     int pic_id;
-
+    int row_height, char_width;
+    
     if(rw == NULL || gp == NULL)
 	return;
 
@@ -1287,7 +1313,6 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     rw->gui_obj.gp = gp;
     pic_id = gp->pic_id;
 
-    
     for(i=0;i<MAX_REGISTERS;i++)
     {
 	if(rw->registers[i]!=NULL)
@@ -1306,6 +1331,9 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
     gtk_sheet_freeze(sheet);
     
     j=0;
+    char_width = gdk_string_width (rw->normalfont,"9");
+    row_height = 3 * char_width + 6;
+    gtk_sheet_set_row_height (rw->register_sheet, j, row_height);
     for(reg_number=0;reg_number<gpsim_get_register_memory_size(pic_id, rw->type);reg_number++)
     {
 	i=reg_number%REGISTERS_PER_ROW;
@@ -1343,6 +1371,7 @@ void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp)
 		if(sheet->maxrow<j)
 		{
 		    gtk_sheet_add_row(sheet,1);
+		    gtk_sheet_set_row_height (rw->register_sheet, j, row_height);
 		}
 
 		sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
