@@ -31,7 +31,8 @@ void PIR::put(unsigned int new_value)
   // The "invalid" ones (such as TXIF) are written
   // through the set_/clear_ member functions.
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & valid_bits | value.get() & ~valid_bits);
 
   if( value.get() & pie->value.get() )
@@ -42,13 +43,13 @@ void PIR::put(unsigned int new_value)
 
 void PIR1v1::clear_sspif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~SSPIF);
 }
 
 void PIR1v1::set_txif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() | TXIF);
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
@@ -56,25 +57,25 @@ void PIR1v1::set_txif(void)
 
 void PIR1v1::clear_txif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TXIF);
 }
 
 void PIR1v1::clear_rcif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~RCIF);
 }
 
 void PIR1v2::clear_sspif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~SSPIF);
 }
 
 void PIR1v2::set_txif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() | TXIF);
   if( value.get() & pie->value.get() )
     intcon->peripheral_interrupt();
@@ -82,13 +83,13 @@ void PIR1v2::set_txif(void)
 
 void PIR1v2::clear_txif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TXIF);
 }
 
 void PIR1v2::clear_rcif(void)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~RCIF);
 }
 

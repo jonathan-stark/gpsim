@@ -349,6 +349,9 @@ public:
   list<ProgramMemoryAccess *> pma_context;
 
   //
+  TraceType *readTT, *writeTT;
+
+  //
   // Creation and manipulation of registers
   //
 
@@ -423,8 +426,12 @@ public:
   virtual void step_one(void) = 0;
   virtual void interrupt(void) = 0 ;
 
+  // Tracing control
+
   virtual void trace_dump(int type, int amount);
   virtual int trace_dump1(int type, char *buffer, int bufsize);
+  virtual TraceType *getWriteTT();
+  virtual TraceType *getReadTT();
   //
   // Processor Clock control
   //

@@ -209,8 +209,8 @@ void Processor::add_file_registers(unsigned int start_address, unsigned int end_
 
     registers[j]->address = j;
 
-    registers[j]->set_write_trace(Trace::REGISTER_WRITE | (j << 8));
-    registers[j]->set_read_trace(Trace::REGISTER_READ | (j << 8));
+    registers[j]->set_write_trace(getWriteTT()->type | (j << 8));
+    registers[j]->set_read_trace(getReadTT()->type | (j << 8));
 
     registers[j]->symbol_alias = 0;
 
@@ -1016,6 +1016,27 @@ int Processor::trace_dump1(int type, char *buffer, int bufsize)
 
   return 1;
 }
+
+TraceType *Processor::getWriteTT()
+{
+  if(!writeTT) {
+    writeTT = new RegisterWriteTraceType(this,0,1);
+    trace.allocateTraceType(writeTT);
+  }
+
+  return writeTT;
+
+}
+
+TraceType *Processor::getReadTT()
+{
+  if(!readTT) {
+    readTT = new RegisterReadTraceType(this,0,1);
+    trace.allocateTraceType(readTT);
+  }
+  return readTT;
+}
+
 //-------------------------------------------------------------------
 //
 // run  -- Begin simulating and don't stop until there is a break.

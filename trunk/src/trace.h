@@ -53,15 +53,22 @@ public:
 
 };
 
-class RegisterTraceObject : public TraceObject
+class RegisterWriteTraceObject : public TraceObject
 {
 public:
   Register *reg;
   RegisterValue from;
   RegisterValue to;
 
-  RegisterTraceObject();
-  RegisterTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
+  //RegisterTraceObject();
+  RegisterWriteTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
+  virtual void print(void);
+};
+
+class RegisterReadTraceObject : public RegisterWriteTraceObject
+{
+public:
+  RegisterReadTraceObject(Processor *_cpu, Register *_reg, RegisterValue trv);
   virtual void print(void);
 };
 
@@ -94,6 +101,10 @@ public:
   virtual TraceObject *decode(unsigned int tbi) = 0;
 
   virtual bool isFrameBoundary() { return false;}
+  // Returns true if the trace record starting at index 'tbi' is of the same
+  // type as this TraceType
+  virtual bool isValid(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
 };
 
 class ProcessorTraceType : public TraceType
@@ -116,17 +127,30 @@ class PCTraceType : public ProcessorTraceType
 {
 public:
   PCTraceType(Processor *_cpu, unsigned int t, unsigned int s);
-  TraceObject *decode(unsigned int tbi);
+  virtual TraceObject *decode(unsigned int tbi);
   virtual bool isFrameBoundary() { return true; }
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
 };
 
-class RegisterTraceType : public ProcessorTraceType
+class RegisterWriteTraceType : public ProcessorTraceType
 {
 public:
 
-  RegisterTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+  RegisterWriteTraceType(Processor *_cpu, unsigned int t, unsigned int s);
 
-  TraceObject *decode(unsigned int tbi);
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
+
+};
+
+class RegisterReadTraceType : public ProcessorTraceType
+{
+public:
+
+  RegisterReadTraceType(Processor *_cpu, unsigned int t, unsigned int s);
+
+  virtual TraceObject *decode(unsigned int tbi);
+  virtual int dump_raw(unsigned tbi, char *buf, int bufsize);
 
 };
 
@@ -183,29 +207,16 @@ class Trace
   enum eTraceTypes {
     NOTHING =  0,
     INSTRUCTION        = (1<<24),
-    //PROGRAM_COUNTER    = (2<<24),
-    //PROGRAM_COUNTER_2C = (3<<24),
-    REGISTER_READ      = (4<<24),
-    REGISTER_READ_INIT = (5<<24),
-    REGISTER_WRITE     = (6<<24),
-    REGISTER_WRITE_INIT= (7<<24),
-    BREAKPOINT         = (8<<24),
-    INTERRUPT          = (9<<24),
-    //READ_W             = (0x0a<<24),
-    //WRITE_W            = (0x0b<<24),
-    _RESET             = (0x0c<<24),
-    //PC_SKIP            = (0x0d<<24),
-    WRITE_TRIS         = (0x0e<<24),
-    WRITE_OPTION       = (0x0f<<24),
-    OPCODE_WRITE       = (0x10<<24),
-    MODULE_TRACE1      = (0x11<<24),
-    MODULE_TRACE2      = (0x12<<24),
-    CYCLE_INCREMENT    = (0x13<<24),
-    REGISTER_READ_VAL  = (0x14<<24),
-    REGISTER_WRITE_VAL = (0x15<<24),
-    REGISTER_READ_16BITS  = (0x16<<24),
-    REGISTER_WRITE_16BITS = (0x17<<24),
-    LAST_TRACE_TYPE       = (0x18<<24),
+    BREAKPOINT         = (2<<24),
+    INTERRUPT          = (3<<24),
+    _RESET             = (4<<24),
+    WRITE_TRIS         = (5<<24),
+    WRITE_OPTION       = (6<<24),
+    OPCODE_WRITE       = (7<<24),
+    //CYCLE_INCREMENT    = (0x13<<24),
+    //REGISTER_READ_VAL  = (0x14<<24),
+    //REGISTER_WRITE_VAL = (0x15<<24),
+    LAST_TRACE_TYPE       = (8<<24),
 
     CYCLE_COUNTER_LO   = (0x80<<24),
     CYCLE_COUNTER_HI   = (0x40<<24)
@@ -259,17 +270,6 @@ class Trace
     trace_buffer[trace_index] = INSTRUCTION | opcode;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  inline void register_read (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_READ | (address << 8) | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void register_write (unsigned int address, unsigned int value)
-  {
-    trace_buffer[trace_index] = REGISTER_WRITE | (address << 8) | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
   inline void opcode_write (unsigned int address, unsigned int opcode)
   {
     trace_buffer[trace_index] = OPCODE_WRITE | (address & 0xffffff);
@@ -289,6 +289,7 @@ class Trace
     if(bLogging && near_full()) 
       logger.log();
   }
+  /*
   inline void cycle_increment (void)
   {
     // For those instructions that advance the cycle counter by 2,
@@ -296,7 +297,7 @@ class Trace
     trace_buffer[trace_index] = CYCLE_INCREMENT;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-
+  */
   inline void breakpoint (unsigned int bp)
   {
     trace_buffer[trace_index] = BREAKPOINT | bp;
@@ -308,20 +309,6 @@ class Trace
     trace_buffer[trace_index] = INTERRUPT;
     trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
   }
-  /*
-  inline void read_W (unsigned int value)
-  {
-    trace_buffer[trace_index] = READ_W | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-
-  inline void write_W (unsigned int value)
-  {
-    trace_buffer[trace_index] = WRITE_W | value;
-    trace_index = (trace_index + 1) & TRACE_BUFFER_MASK;
-  }
-  */
-
   inline void reset (RESET_TYPE r)
     {
       trace_buffer[trace_index] = _RESET | ( (int) r);

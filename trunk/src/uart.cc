@@ -64,7 +64,7 @@ _SPBRG::_SPBRG(void)
 void _TXREG::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(new_value & 0xff);
 
   if(verbose)
@@ -111,7 +111,7 @@ void _TXSTA::put(unsigned int new_value)
 
   unsigned int old_value = value.get();
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 
   // The TRMT bit is controlled entirely by hardware.
   // It is high if the TSR has any data.
@@ -242,7 +242,7 @@ void _TXSTA::start_transmitting(void)
   // The TSR now has data, so clear the Transmit Shift 
   // Register Status bit.
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put(value.get() & ~TRMT);
 
   // Tell the TXREG that its data has been consumed.
@@ -351,7 +351,7 @@ void _RCSTA::put(unsigned int new_value)
   unsigned int diff;
 
   diff = new_value ^ value.get();
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
   value.put( ( value.get() & (RX9D | OERR | FERR) )   |  (new_value & ~(RX9D | OERR | FERR)));
 
   if(!txsta || !txsta->txreg)
@@ -599,7 +599,7 @@ void _RCSTA::callback(void)
 //
 void _RCREG::push(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 
   if(fifo_sp >= 2)
     {
@@ -639,7 +639,7 @@ unsigned int _RCREG::get(void)
 {
 
   pop();
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
   return value.get();
 }
 void _RCREG::assign_pir_set(PIR_SET *new_pir_set)

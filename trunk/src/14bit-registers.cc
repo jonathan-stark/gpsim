@@ -102,7 +102,8 @@ void file_register::put_value(unsigned int new_value)
 //
 void  FSR::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
 }
 
@@ -121,7 +122,8 @@ void  FSR::put_value(unsigned int new_value)
 unsigned int FSR::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get());
 }
 
@@ -144,7 +146,8 @@ FSR_12::FSR_12(unsigned int _rpb, unsigned int _valid_bits)
 
 void  FSR_12::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value);
 
   /* The 12-bit core selects the register page using the fsr */
@@ -165,7 +168,8 @@ void  FSR_12::put_value(unsigned int new_value)
 unsigned int FSR_12::get(void)
 {
   unsigned int v = get_value();
-  trace.register_read(address,v);
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,v);
   return(v);
 }
 
@@ -201,7 +205,8 @@ Status_register::Status_register(void)
 
 void inline Status_register::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
 
   value.put((value.get() & ~write_mask) | (new_value & write_mask));
 
@@ -276,7 +281,8 @@ void INDF::initialize(void)
 void INDF::put(unsigned int new_value)
 {
 
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   int reg = (cpu_pic->fsr->get_value() + //cpu->fsr->value + 
 	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
 
@@ -313,7 +319,8 @@ void INDF::put_value(unsigned int new_value)
 unsigned int INDF::get(void)
 {
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   int reg = (cpu_pic->fsr->get_value() +
 	     ((cpu_pic->status->value.get() & base_address_mask1)<<1) ) &  base_address_mask2;
   if(reg & fsr_mask)
@@ -346,6 +353,13 @@ OPTION_REG::OPTION_REG(void)
 void OPTION_REG::put(unsigned int new_value)
 {
 
+  //FIXME trace OPTION for 12bit processors is broken.
+  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
+    trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,old_value);
+  else
+    trace.write_OPTION(value.get());
+
   unsigned int old_value = value.get();
   value.put(new_value);
 
@@ -367,11 +381,6 @@ void OPTION_REG::put(unsigned int new_value)
   if( (value.get() ^ old_value) & (BIT6 | BIT7))
     cpu_pic->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
-  //FIXME trace OPTION for 12bit processors is broken.
-  if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)
-    trace.register_write(address,old_value);
-  else
-    trace.write_OPTION(value.get());
 
 }
 
@@ -390,8 +399,9 @@ PCL::PCL(void) : sfr_register()
 void PCL::put(unsigned int new_value)
 {
 
+  trace.raw(write_trace.get() | value.get());
   cpu_pic->pc->computed_goto(new_value);
-  trace.register_write(address,value.get());
+  //trace.register_write(address,value.get());
 }
 
 void PCL::put_value(unsigned int new_value)
@@ -424,7 +434,8 @@ PCLATH::PCLATH(void)
 
 void PCLATH::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value & PCLATH_MASK);
 }
 
@@ -439,7 +450,8 @@ void PCLATH::put_value(unsigned int new_value)
 
 unsigned int PCLATH::get(void)
 {
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
+  //trace.register_read(address,value.get());
   return(value.get() & PCLATH_MASK);
 }
 
@@ -454,7 +466,8 @@ PCON::PCON(void)
 
 void PCON::put(unsigned int new_value)
 {
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
   value.put(new_value&valid_bits);
 }
 
@@ -581,14 +594,14 @@ void WREG::put(unsigned int new_value)
 
 
 //========================================================================
-class WReadTraceObject : public RegisterTraceObject
+class WReadTraceObject : public RegisterReadTraceObject
 {
 public:
   WReadTraceObject(Processor *_cpu, RegisterValue trv);
   virtual void print(void);
 };
 
-class WWriteTraceObject : public RegisterTraceObject
+class WWriteTraceObject : public RegisterWriteTraceObject
 {
 public:
   WWriteTraceObject(Processor *_cpu, RegisterValue trv);
@@ -612,7 +625,7 @@ public:
 
 //========================================================================
 WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv) 
-  : RegisterTraceObject(_cpu,0,trv)
+  : RegisterWriteTraceObject(_cpu,0,trv)
 {
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
 
@@ -625,14 +638,18 @@ WWriteTraceObject::WWriteTraceObject(Processor *_cpu, RegisterValue trv)
 
 void WWriteTraceObject::print(void)
 {
-  fprintf(stdout, " Wrote (0x%04X,0x%04X) to W was (0x%04X,0x%04X) is \n",
-	   to.data, to.init, from.data,from.init);
+  char sFrom[16];
+  char sTo[16];
+
+  fprintf(stdout, "  Wrote: 0x%s to W was 0x%s\n",
+	  to.toString(sTo,sizeof(sTo)),
+	  from.toString(sFrom,sizeof(sFrom)));
 
 }
 
 //========================================================================
 WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv) 
-  : RegisterTraceObject(_cpu,0,trv)
+  : RegisterReadTraceObject(_cpu,0,trv)
 {
   pic_processor *pcpu = dynamic_cast<pic_processor *>(cpu);
 
@@ -645,8 +662,10 @@ WReadTraceObject::WReadTraceObject(Processor *_cpu, RegisterValue trv)
 
 void WReadTraceObject::print(void)
 {
-  fprintf(stdout, " Read (0x%04X,0x%04X) from W\n",
-	  from.data,from.init);
+  char sFrom[16];
+
+  fprintf(stdout, "  Read: 0x%s from W\n",
+	  from.toString(sFrom,sizeof(sFrom)));
 
 }
 
@@ -658,7 +677,7 @@ TraceObject * WTraceType::decode(unsigned int tbi)
   printf(" WTraceType: 0x%x\n",tv);
 
   RegisterValue rv = RegisterValue(tv & 0xff,0);
-  RegisterTraceObject *wto;
+  TraceObject *wto;
 
   if (tbi & (1<<23)) 
     wto = new WReadTraceObject(cpu, rv);

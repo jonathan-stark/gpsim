@@ -29,6 +29,49 @@ Boston, MA 02111-1307, USA.  */
 #include "registers.h"
 #include "trace.h"
 
+
+//========================================================================
+// toString
+//
+// Convert a RegisterValue type to a string.
+//
+// A RegisterValue type allows the bits of a register to take on three
+// values: High, Low, or undefined. If all of the bits are defined,
+// then this routine will convert register value to a hexadecimal string.
+// Any undefined bits within a nibble will cause the associated nibble to
+// be undefined and will get converted to a question mark.
+//
+
+char * RegisterValue::toString(char *str, int len, int regsize)
+{
+  if(str && len) {
+    RegisterValue rv = *this;
+
+    char hex2ascii[] = "0123456789ABCDEF";
+    char undefNibble = '?';
+    int i;
+
+    int m = regsize+1;
+    if(len < m)
+      m = len;
+
+    m--;
+
+    for(i=0; i < m; i++) {
+      if(rv.init & 0x0f)
+	str[m-i-1] = undefNibble;
+      else
+	str[m-i-1] = hex2ascii[rv.data & 0x0f];
+      rv.init >>= 4;
+      rv.data >>= 4;
+    }
+    str[m] = 0;
+
+  }
+  return str;
+}
+
+
 //--------------------------------------------------
 // Member functions for the file_register base class
 //--------------------------------------------------
@@ -133,7 +176,7 @@ double Register::get_bit_voltage(unsigned int bit_number)
 void Register::setbit(unsigned int bit_number, bool new_value)
 {
   if(bit_number < bit_mask) {
-    trace.register_write(address,value.get());
+    trace.raw(write_trace.get() | value.get());
     value.put((value.get() & ~(1<<bit_number)) | (1<<bit_number));
   }
 }
@@ -193,12 +236,12 @@ void Register::put_value(unsigned int new_value)
 void Register::set_write_trace(unsigned int wt)
 {
   write_trace.data = wt;
-  write_trace.init = wt + (Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
+  write_trace.init = wt + (1<<24); //(Trace::REGISTER_WRITE_INIT - Trace::REGISTER_WRITE);
 }
 void Register::set_read_trace(unsigned int rt)
 {
   read_trace.data = rt;
-  read_trace.init = rt + (Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
+  read_trace.init = rt + (1<<24); //(Trace::REGISTER_READ_INIT - Trace::REGISTER_READ);
 }
 
 //--------------------------------------------------
@@ -219,7 +262,7 @@ void InvalidRegister::put(unsigned int new_value)
     hex << address<< ", value 0x" << new_value << '\n';
 
   bp.halt();
-  trace.register_write(address,value.get());
+  trace.raw(write_trace.get() | value.get());
 
   return;
 }
@@ -228,7 +271,7 @@ unsigned int InvalidRegister::get(void)
 {
   cout << "attempt read from invalid file register\n";
 
-  trace.register_read(address,value.get());
+  trace.raw(read_trace.get() | value.get());
 
   return(0);
 }

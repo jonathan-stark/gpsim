@@ -309,14 +309,9 @@ void TraceObject::print_frame(TraceFrame *tf)
 //========================================================================
 // RegisterTraceObject
 //
-RegisterTraceObject::RegisterTraceObject() 
-  : reg(0)
-{
-  throw "RegisterTraceObject";
-}
-RegisterTraceObject::RegisterTraceObject(Processor *_cpu,
-					 Register *_reg,
-					 RegisterValue trv) 
+RegisterWriteTraceObject::RegisterWriteTraceObject(Processor *_cpu,
+						   Register *_reg,
+						   RegisterValue trv) 
   : TraceObject(_cpu), reg(_reg), from(trv)
 {
   if(reg) {
@@ -324,14 +319,36 @@ RegisterTraceObject::RegisterTraceObject(Processor *_cpu,
     reg->trace_state = from;
   }
 }
-void RegisterTraceObject::print(void)
+void RegisterWriteTraceObject::print(void)
 {
+  char sFrom[16];
+  char sTo[16];
   if(reg)
-    fprintf(stdout, "  Wrote: (0x%04X,0x%04X) to %s(0x%04X) was (0x%04X,0x%04X) \n",
-	    to.data, to.init, reg->name().c_str(), reg->address, from.data,from.init);
+    fprintf(stdout, "  Wrote: 0x%s to %s(0x%04X) was 0x%s\n",
+	    to.toString(sTo,sizeof(sTo)),
+	    reg->name().c_str(), reg->address, 
+	    from.toString(sFrom,sizeof(sFrom)));
 }
 
 
+RegisterReadTraceObject::RegisterReadTraceObject(Processor *_cpu,
+						   Register *_reg,
+						   RegisterValue trv) 
+  : RegisterWriteTraceObject(_cpu, _reg, trv)
+{
+  if(reg) {
+    //to = reg->trace_state;
+    reg->trace_state = from;
+  }
+}
+void RegisterReadTraceObject::print(void)
+{
+  char sFrom[16];
+
+  if(reg)
+    fprintf(stdout, "  Read: 0x%s from %s(0x%04X)\n",
+	    from.toString(sFrom,sizeof(sFrom)), reg->name().c_str(), reg->address);
+}
 
 //========================================================================
 PCTraceObject::PCTraceObject(Processor *_cpu, unsigned int _address) 
@@ -344,9 +361,22 @@ void PCTraceObject::print(void)
   char a_string[50];
 
   unsigned addr = address & 0xffff;
+  // ugh - hardcoding the specific program counter trace type 
+  unsigned int tracetype = (address>>16) & 3;
+  switch (tracetype) {
+
+  case 1:
+    fprintf(stdout,"branched to: ");
+    break;
+  case 2:
+    fprintf(stdout,"skipped: ");
+    break;
+  default:
+    break;
+  }
 
   fprintf(stdout,"0x%04X 0x%04X %s\n",
-	  address &0xffffff,
+	  address &0xffff,
 	  cpu->pma->get_opcode(addr),
 	  (*cpu->pma)[addr].name(a_string,sizeof(a_string)));
 
@@ -377,9 +407,55 @@ TraceType::TraceType(unsigned int t, unsigned int s)
 
 }
 
+//----------------------------------------
+//
+// isValid
+//
+// If the trace record starting at the trace buffer index 'tbi' is of the
+// same type as this trace object, then return true.
+//
+bool TraceType::isValid(unsigned int tbi)
+{
+  unsigned int i;
+
+  // The upper 8-bits of the 'type' specify the trace type for this object.
+  // This is assigned whenever Trace::allocateTraceType() is called. Multi-
+  // sized trace records occupy consecutive types.
+  for(i=0; i<size; i++) {
+
+    if(trace.type(tbi + i) != (type + (i<<24))) 
+      return false;
+  }
+
+  return true;
+
+}
+
+int TraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+{
+  int total_chars=0;
+  if(isValid(tbi)) {
+    unsigned int i=0;
+
+    for(i=0; i< size; i++) {
+
+      int n = snprintf(buf,bufsize,"%08X:", trace.get(tbi+i));
+      if(n < 0)
+	break;
+
+      total_chars += n;
+      buf += n;
+      bufsize -= n;
+    }      
+  }
+
+  return total_chars;
+    
+}
+
 //========================================================================
 
-RegisterTraceType::RegisterTraceType(Processor *_cpu, 
+RegisterWriteTraceType::RegisterWriteTraceType(Processor *_cpu, 
 				     unsigned int t,
 				     unsigned int s)
   : ProcessorTraceType(_cpu,t,s)
@@ -387,21 +463,79 @@ RegisterTraceType::RegisterTraceType(Processor *_cpu,
     
 }
 
-TraceObject *RegisterTraceType::decode(unsigned int tbi)
+TraceObject *RegisterWriteTraceType::decode(unsigned int tbi)
 {
 
   unsigned int tv = trace.get(tbi);
   RegisterValue rv = RegisterValue(tv & 0xff, 0);
   unsigned int address = (tv >> 8) & 0xfff;
 
-  printf(" RegisterTraceType: tv=0x%x\n",tv);
+  printf(" RegisterWriteTraceType: tv=0x%x\n",tv);
 
-  RegisterTraceObject *rto = new RegisterTraceObject(cpu, cpu->rma.get_register(address), rv);
+  RegisterWriteTraceObject *rto = new RegisterWriteTraceObject(cpu, cpu->rma.get_register(address), rv);
   trace.addToCurrentFrame(rto);
 
   return rto;
 }
 
+int RegisterWriteTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int tv = trace.get(tbi);
+  
+  int m = snprintf(buf, bufsize," Register 0x%02x was 0x%02x",(tv>>8)&0xfff, tv&0xff);
+  if(m>0)
+    n += m;
+
+  return n;
+		   
+}
+
+//========================================================================
+
+RegisterReadTraceType::RegisterReadTraceType(Processor *_cpu, 
+				     unsigned int t,
+				     unsigned int s)
+  : ProcessorTraceType(_cpu,t,s)
+{
+    
+}
+
+TraceObject *RegisterReadTraceType::decode(unsigned int tbi)
+{
+
+  unsigned int tv = trace.get(tbi);
+  RegisterValue rv = RegisterValue(tv & 0xff, 0);
+  unsigned int address = (tv >> 8) & 0xfff;
+
+  printf(" RegisterReadTraceType: tv=0x%x\n",tv);
+
+  RegisterReadTraceObject *rto = new RegisterReadTraceObject(cpu, cpu->rma.get_register(address), rv);
+  trace.addToCurrentFrame(rto);
+
+  return rto;
+}
+
+int RegisterReadTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  unsigned int tv = trace.get(tbi);
+  
+  int m = snprintf(buf, bufsize," Read 0x%02x from Register 0x%02x", tv&0xff,(tv>>8)&0xfff);
+  if(m>0)
+    n += m;
+
+  return n;
+		   
+}
 
 //========================================================================
 PCTraceType::PCTraceType(Processor *_cpu, 
@@ -431,6 +565,20 @@ TraceObject *PCTraceType::decode(unsigned int tbi)
   return pcto;
 }
 
+int PCTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
+{
+  int n = TraceType::dump_raw(tbi,buf,bufsize);
+
+  buf += n;
+  bufsize -= n;
+
+  int m = snprintf(buf, bufsize," PC: %04X",trace.get(tbi) & 0xffff);
+  if(m>0)
+    n += m;
+
+  return n;
+
+}
 
 //========================================================================
 
@@ -595,7 +743,7 @@ int Trace::is_cycle_trace(unsigned int index, guint64 *cvt_cycle)
 int Trace::dump1(unsigned index, char *buffer, int bufsize)
 {
   //  char a_string[50];
-  Register *r;
+  //Register *r;
 
   guint64 cycle;
   int return_value = is_cycle_trace(index,&cycle);
@@ -624,56 +772,6 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 	snprintf(buffer, bufsize," instruction: 0x%04x",
 		 get(index)&0xffff);
       break;
-      /*
-    case PROGRAM_COUNTER_2C:
-    case PROGRAM_COUNTER:
-      if(trace_flag & TRACE_PROGRAM_COUNTER) {
-	int address  = cpu->map_pm_index2address(get(index)&0xffff);
-	snprintf(buffer, bufsize," pc: 0x%04x %s", 
-		 address ,
-		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
-      }
-      break;
-    case PC_SKIP:
-      {
-	int address  = cpu->map_pm_index2address(get(index)&0xffff);
-	snprintf(buffer, bufsize,"  skipped: %04x %s",
-		 address ,
-		 (*cpu->pma)[address].name(a_string,sizeof(a_string)));
-      }
-      break;
-      */
-    case REGISTER_READ_VAL:
-    case REGISTER_READ:
-      r = cpu->registers[(get(index)>>8) & 0xfff];
-      snprintf(buffer, bufsize,"   read: 0x%02x from %s",
-	       get(index)&0xff, r->name().c_str());
-      break;
-    case REGISTER_WRITE_VAL:
-    case REGISTER_WRITE:
-      r = cpu->registers[(get(index)>>8) & 0xfff];
-      snprintf(buffer, bufsize,"  wrote: 0x%02x to %s",
-	       get(index)&0xff, r->name().c_str());
-      break;
-    case REGISTER_READ_16BITS:
-      r = cpu->registers[(get(index)>>16) & 0xff];
-      snprintf(buffer, bufsize,"   read: 0x%04x from %s",
-	       get(index)&0xffff, r->name().c_str());
-      break;
-    case REGISTER_WRITE_16BITS:
-      r = cpu->registers[(get(index)>>16) & 0xff];
-      snprintf(buffer, bufsize,"  wrote: 0x%04x to %s",
-	       get(index)&0xffff, r->name().c_str());
-      break;
-      /*
-    case READ_W:
-      snprintf(buffer, bufsize,"   read: 0x%02x from W",
-	       get(index)&0xff);
-      break;
-    case WRITE_W:
-      snprintf(buffer, bufsize,"  wrote: 0x%02x to W",
-	       get(index)&0xff);
-	       break; */
     case WRITE_TRIS:
       snprintf(buffer, bufsize,"  wrote: 0x%02x to TRIS",
 	       get(index)&0xff);
@@ -686,9 +784,11 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
       snprintf(buffer, bufsize,"BREAK: ");
       bp.dump_traced(get(index) & 0xffffff);
       break;
+      /*
     case INTERRUPT:
       snprintf(buffer, bufsize," interrupt");
       break;
+      */
     case _RESET:
       switch( (RESET_TYPE) (get(index)&0xff))
 	{
@@ -714,19 +814,26 @@ int Trace::dump1(unsigned index, char *buffer, int bufsize)
 
       break;
       /*
-    case CYCLE_INCREMENT:
-      if(trace_flag & TRACE_CYCLE_INCREMENT)
-	snprintf(buffer, bufsize," cycle increment");
-      break;
-      */
     case MODULE_TRACE2:
       return_value = 2;
     case MODULE_TRACE1:
-
+      */
       // fall through
 
     default:
       if(type(index) != CYCLE_COUNTER_HI) {
+	map<unsigned int, TraceType *>::iterator tti = trace_map.find(type(index));
+
+	if(tti != trace_map.end()) {
+	  TraceType *tt = (*tti).second;
+
+	  if(tt) 
+	    tt->dump_raw(index,buffer,bufsize);
+
+	  break;
+	} 
+
+
 	if(cpu)
 	  return_value = cpu->trace_dump1(index,buffer,bufsize);
       }
@@ -782,19 +889,6 @@ int Trace::dump(unsigned int n, FILE *out_stream)
   unsigned int frame_end = trace_index;
   k = frame_start;
 
-  //  unsigned int cycle_delta = 0;
-
-  static bool bMapIsInitialized = false;
-
-  if(!bMapIsInitialized) {
-    //trace_map[PROGRAM_COUNTER] = new PCTraceType(cpu,PROGRAM_COUNTER,1);
-    //cpu->pc->set_trace_command(PROGRAM_COUNTER);
-    trace_map[REGISTER_WRITE] = new RegisterTraceType(cpu,REGISTER_WRITE,1);
-    //trace_map[WRITE_W] = new WTraceType(cpu,WRITE_W,1);
-
-    bMapIsInitialized = true;
-  }
-
 
   // Save the state of the CPU here. 
   cpu->save_state();
@@ -847,102 +941,6 @@ int Trace::dump(unsigned int n, FILE *out_stream)
 
   deleteTraceFrame();
 
-  /*
-  try {
-    for(i=0;i<n && k!=frame_end;i++) {
-
-      found_pc = false;
-
-
-      cycle -= cycle_delta;
-      cycle_delta = 0;
-
-      do {
-
-	k = tbi(k-1);
-	switch (type(k)) {
-	case PROGRAM_COUNTER_2C:
-	  cycle_delta++;
-
-	  // fall through
-
-	case PROGRAM_COUNTER:
-	  cycle_delta++;
-	  found_pc = true;
-	  found_frame = true;
-	  break;
-	}
-      } while (!((k==frame_end) || found_pc));
-
-
-      if(found_pc)
-	frame_start = k;
-
-    }
-  }
-  catch (const char * err) {
-    cout << err << endl;
-    return 0;
-  }
-
-  if(!found_frame)
-    return 0;
-
-
-  trace_flag = TRACE_ALL & ~(TRACE_CYCLE_INCREMENT | 
-			     CYCLE_COUNTER_LO      | 
-			     CYCLE_COUNTER_HI      |
-			     TRACE_INSTRUCTION     |
-			     TRACE_PROGRAM_COUNTER);
-
-  for(i=0; i<n; i++) {
-
-    unsigned int j = tbi(frame_start + 1);
-    found_pc = false;
-
-    while (!((j==frame_end) || found_pc)) {
-      if( type(j) == PROGRAM_COUNTER   || type(j) == PROGRAM_COUNTER_2C) {
-	frame_index = j;
-	break;
-      }
-      j = tbi(j+1);
-    }
-    
-    if(j != frame_end) {
-
-      printf("Trace frame: 0x%x - 0x%x\n",frame_start,frame_index);
-
-      int address  = cpu->map_pm_index2address(trace_buffer[frame_index]&0xffff);
-
-      fprintf(out_stream,"0x%016LX  %s  0x%04X  0x%04X  %s\n",
-	      cycle,
-	      cpu->name().c_str(),
-	      address,
-	      cpu->pma->get_opcode(address), //trace_buffer[instruction_index]&0xffff,
-	      (*cpu->pma)[address].name(a_string,sizeof(a_string))
-	      );
-
-      cycle++;
-      if( type(j) == PROGRAM_COUNTER_2C) 
-	cycle++;
-
-      int j = tbi(frame_start + 1);
-
-      while (inRange(j,frame_start, frame_index)) {
-	// Decode the next item in the trace buffer.
-	j = tbi(j + dump1(j,string_buffer, sizeof(string_buffer)));
-
-	// If the item was decoded, then print it out.
-	if(*string_buffer)
-	  printf("%s\n",string_buffer);
-      }
-
-      frame_start = frame_index;
-    }
-    else 
-      i = n; // abort the loop.
-  }
-  */
   return n;
 }
 //------------------------------------------------------------------------
@@ -950,9 +948,14 @@ unsigned int Trace::allocateTraceType(TraceType *tt, int nSlots)
 {
   
   if(tt) {
-    trace_map[lastTraceType] = tt;
+    int i;
+
     tt->type = lastTraceType;
-    lastTraceType += (nSlots<<24);
+
+    for(i=0; i<nSlots; i++) {
+      trace_map[lastTraceType] = tt;
+      lastTraceType += (1<<24);
+    }
 
     return tt->type;
   }
@@ -1278,7 +1281,7 @@ void TraceLog::register_read(unsigned int address, unsigned int value, guint64 c
     {
     case TRACE_FILE_FORMAT_ASCII:
 	buffer.cycle_counter(cc);
-	buffer.register_read(address, value);
+	//buffer.register_read(address, value);
 	break;
     case TRACE_FILE_FORMAT_LXT:
 	lxt_trace(address, value, cc);
@@ -1292,7 +1295,7 @@ void TraceLog::register_write(unsigned int address, unsigned int value, guint64 
     {
     case TRACE_FILE_FORMAT_ASCII:
 	buffer.cycle_counter(cc);
-	buffer.register_write(address, value);
+	//buffer.register_write(address, value);
 	if(buffer.near_full())
 	    write_logfile();
 	break;
@@ -1351,7 +1354,7 @@ ProfileKeeper::~ProfileKeeper(void)
 
 void ProfileKeeper::catchup(void)
 {
-    Register *r;
+  //Register *r;
     if(!enabled)
         return;
     for(unsigned int i=last_trace_index; i!=trace.trace_index; i = (i+1)& TRACE_BUFFER_MASK)
@@ -1369,9 +1372,12 @@ void ProfileKeeper::catchup(void)
 	    trace_pc_value=trace.trace_buffer[i]&0xffff;
 	    break;
 	    */
+	    /*
 	case Trace::CYCLE_INCREMENT:
 	    cpu->program_memory[instruction_address]->cycle_count++;
 	    break;
+	    */
+	    /*
 	case Trace::REGISTER_READ:
 	    r = cpu->registers[(trace.trace_buffer[i]>>8) & 0xfff];
 	    if(r->isa() == Register::FILE_REGISTER)
@@ -1386,6 +1392,7 @@ void ProfileKeeper::catchup(void)
 		r->write_access_count++;
 	    }
 	    break;
+	    */
 	}
     }
 

@@ -186,10 +186,10 @@ Program_Counter::Program_Counter(void)
 //--------------------------------------------------
 void Program_Counter::set_trace_command(unsigned int new_command)
 {
-  trace_increment = new_command | (0<<22);
-  trace_branch    = new_command | (1<<22);
-  trace_skip      = new_command | (2<<22);
-  trace_other     = new_command | (3<<22);
+  trace_increment = new_command | (0<<16);
+  trace_branch    = new_command | (1<<16);
+  trace_skip      = new_command | (2<<16);
+  trace_other     = new_command | (3<<16);
 }
 //--------------------------------------------------
 // increment - update the program counter. All non-branching instructions pass through here.

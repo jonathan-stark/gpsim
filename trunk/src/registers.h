@@ -90,7 +90,7 @@ public:
     init = rv.init;
   }
 
-
+  char * toString(char *str, int len, int regsize=2);
 };
 
 
