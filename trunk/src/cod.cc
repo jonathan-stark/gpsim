@@ -824,7 +824,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 	}
 
 
-        address=cpu->find_closest_address_to_line(asmfile_id, asmsrc_line);
+        address=cpu->pma.find_closest_address_to_line(asmfile_id, asmsrc_line);
 	if(address >= 0) {
 	  cpu->program_memory[address]->hll_src_line=line_number;
 	  cpu->program_memory[address]->hll_file_id=file_index;

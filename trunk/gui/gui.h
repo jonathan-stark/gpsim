@@ -187,6 +187,8 @@ class GUIRegister {
   void Clear_xref(void);
   void Assign_xref(CrossReferenceToGUI *);
 
+  bool hasBreak(void);
+
 };
 
 class WatchEntry : public GUIRegister {

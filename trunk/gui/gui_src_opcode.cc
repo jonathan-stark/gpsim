@@ -262,7 +262,8 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
 		address=j*16+i;
-		gpsim_clear_breakpoints_at_address(popup_sbow->gp->pic_id, address);
+		popup_sbow->gp->cpu->pma.set_break_at_address(address);
+		//gpsim_clear_breakpoints_at_address(popup_sbow->gp->pic_id, address);
 	    }
 	break;
     case MENU_ADD_WATCH:
@@ -271,7 +272,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    for(i=range.col0;i<=range.coli;i++)
 	    {
 		address=j*16+i;
-//		WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
+		//WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
 	    }
 	break;
     case MENU_ASCII_1BYTE:
@@ -426,7 +427,10 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
     GtkWidget *popup;
     int break_row;
 
-    if(widget==NULL || event==NULL || sbow==NULL)
+    if(!sbow || !sbow->gp || !sbow->gp->cpu)
+      return 0;
+
+    if(widget==NULL || event==NULL)
     {
 	printf("Warning button_press(%p,%p,%p)\n",widget,event,sbow);
 	return 0;
@@ -458,10 +462,9 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 	{
 	    break_row =  GTK_CLIST (sbow->clist)->focus_row;
 
-	    if(!sbow->has_processor)
-		return TRUE;      // no code is in this window
 
-	    gpsim_toggle_break_at_address(sbow->gp->pic_id, break_row);
+	    sbow->gp->cpu->pma.toggle_break_at_address(break_row);
+	    //gpsim_toggle_break_at_address(sbow->gp->pic_id, break_row);
 	    return TRUE;
 	}
     }
@@ -472,25 +475,25 @@ button_press(GtkWidget *widget, GdkEventButton *event, SourceBrowserOpcode_Windo
 static void filter(char *clean, char *dirty, int max)
 {
 
-    int i=0,j;
+  int i=0,j;
 
-    if(dirty==NULL)
-        return;
+  if(dirty!=NULL) {
 
     do {
 
 
-	if(*dirty == '\t')
-	    for(j=0,dirty++; j<8 && i%8; j++,i++)
-		*clean++ = ' ';
-	else if (*dirty <' ')
-	    dirty++;
-	else
-	    *clean++ = *dirty++;
+      if(*dirty == '\t')
+	for(j=0,dirty++; j<8 && i%8; j++,i++)
+	  *clean++ = ' ';
+      else if (*dirty <' ')
+	dirty++;
+      else
+	*clean++ = *dirty++;
 
 
 
-  }while(*dirty && ++i < max);
+    } while(*dirty && ++i < max);
+  }
 
   *clean = 0;
 
@@ -512,7 +515,7 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
       return;
     }
 
-    if(sbow->gp->cpu && sbow->gp->cpu->address_has_break(address)) {
+    if(sbow->gp->cpu && sbow->gp->cpu->pma.address_has_break(address)) {
 
       gtk_clist_set_row_style (GTK_CLIST (sbow->clist), address, sbow->breakpoint_line_number_style);
       gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
@@ -527,66 +530,70 @@ static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
         gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
     }
 
-/*    
-    if(gpsim_address_has_breakpoint(sbow->gp->pic_id, address))
-	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
-    else if(gpsim_address_has_changed(sbow->gp->pic_id, address))
-	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
-    else
-        gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
-*/
 }
+
 
 static void update_label(SourceBrowserOpcode_Window *sbow, int address)
 {
-    char labeltext[128];
-    char entrytext[128];
-    GtkEntry *sheet_entry;
-    unsigned int oc;
+  char labeltext[128];
+  char entrytext[128];
+  GtkEntry *sheet_entry;
+  unsigned int oc;
 
-    if(address<0)
-    {
-	strcpy(labeltext,"ASCII");
-    }
-    else
-    {
-	oc=gpsim_get_opcode(sbow->gp->pic_id  ,address);
+  if(!sbow || !sbow->gp || !sbow->gp->cpu)
+    return;
+
+  if(address<0) {
+    entrytext[0]=0;
+    strcpy(labeltext,"ASCII");
+  } else {
+
+    oc = sbow->gp->cpu->pma.get_opcode(address);
 	
-	filter(labeltext,gpsim_get_opcode_name( sbow->gp->cpu, address,entrytext),sizeof(labeltext));
-	sprintf(entrytext, "0x%04X", oc);
-    }
+    filter(labeltext,
+	   sbow->gp->cpu->pma.get_opcode_name(address,entrytext,sizeof(entrytext)),
+	   sizeof(labeltext));
+
+    sprintf(entrytext, "0x%04X", oc);
+  }
     
-    sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet)));
-    gtk_label_set(GTK_LABEL(sbow->label), labeltext);
-    gtk_entry_set_max_length(GTK_ENTRY(sbow->entry),
-			     GTK_ENTRY(sheet_entry)->text_max_length);
-    gtk_entry_set_text(GTK_ENTRY(sbow->entry), entrytext);
+  sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(GTK_SHEET(sbow->sheet)));
+  gtk_label_set(GTK_LABEL(sbow->label), labeltext);
+  gtk_entry_set_max_length(GTK_ENTRY(sbow->entry),
+			   GTK_ENTRY(sheet_entry)->text_max_length);
+  gtk_entry_set_text(GTK_ENTRY(sbow->entry), entrytext);
 
 }
 
 static void update_values(SourceBrowserOpcode_Window *sbow, int address)
 {
-    int row=address/16;
-    int column=address%16;
-    char buf[128];
-    unsigned int oc;
+  if(!sbow || !sbow->gp || !sbow->gp->cpu)
+    return;
 
-    oc=gpsim_get_opcode(sbow->gp->pic_id  ,address);
+  int row=address/16;
+  int column=address%16;
+  char buf[128];
+  unsigned int oc;
 
-    if(oc != sbow->memory[address])
-    {
-	sbow->memory[address]=oc;
-	// Put new values, in case they changed
-	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
-	sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( sbow->gp->cpu, address,buf), 128);
-	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
-	gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
+    oc = sbow->gp->cpu->pma.get_opcode(address);
 
-	gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
-			   row,column,
-			   GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
-    }
+  if(oc != sbow->memory[address]) {
+    
+    sbow->memory[address]=oc;
+    // Put new values, in case they changed
+    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
+    sprintf(row_text[OPCODE_COLUMN], "0x%04X", oc);
+    filter(row_text[MNEMONIC_COLUMN], 
+	   sbow->gp->cpu->pma.get_opcode_name(address,buf,sizeof(buf)),
+	   sizeof(buf));
+
+    gtk_clist_set_text (GTK_CLIST (sbow->clist), address, OPCODE_COLUMN, row_text[OPCODE_COLUMN]);
+    gtk_clist_set_text (GTK_CLIST (sbow->clist), address, MNEMONIC_COLUMN, row_text[MNEMONIC_COLUMN]);
+
+    gtk_sheet_set_cell(GTK_SHEET(sbow->sheet),
+		       row,column,
+		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+  }
 }
 
 static void update(SourceBrowserOpcode_Window *sbow, int address)
@@ -892,17 +899,18 @@ static unsigned long get_number_in_string(const char *number_string)
 static void
 parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *sbow)
 {
+
+  if(!sbow || !sbow->gp || !sbow->gp->cpu || !widget)
+    return;
+
   GtkSheet *sheet;
   const gchar *text;
   int justification,n=0;
 
-  GUI_Processor *gp;
-  
   sheet=GTK_SHEET(widget);
   
-  if(widget==NULL ||
-     row>sheet->maxrow || row<0 ||
-     col>sheet->maxcol || col<0 || sbow==NULL)
+  if(row>sheet->maxrow || row<0 ||
+     col>sheet->maxcol || col<0)
   {
       printf("Warning parse_numbers(%p,%x,%x,%p)\n",widget,row,col,sbow);
       return;
@@ -911,7 +919,6 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
   if(sbow->memory==NULL)
       return;
 
-  gp = ((GUI_Object*)sbow)->gp;
   
   justification=GTK_JUSTIFY_RIGHT;
 
@@ -930,7 +937,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
 
       if(errno != 0)
       {
-	  n = gpsim_get_opcode(sbow->gp->pic_id,reg);
+	  n = sbow->gp->cpu->pma.get_opcode(reg);
 	  sbow->memory[reg] = -1;
       }
 
@@ -938,7 +945,7 @@ parse_numbers(GtkWidget *widget, int row, int col, SourceBrowserOpcode_Window *s
       {
 	  printf("Writing new value, new %d, last %d\n",n,sbow->memory[reg]);
 	  sbow->memory[reg]=n;
-	  gpsim_put_opcode(gp->pic_id, reg, n);
+	  sbow->gp->cpu->pma.put_opcode(reg, n);
 	  update_ascii(sbow,row);
       }
     }
@@ -978,7 +985,7 @@ show_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
 /* when we have new data in the entry above the sheet, we
  copy the data to the cells/registers
 
- this don't get called when it is clicked
+ this doesn't get called when it is clicked
  in, only when we hit return
  */
 static void
@@ -994,7 +1001,8 @@ activate_sheet_entry(GtkWidget *widget, SourceBrowserOpcode_Window *sbow)
   }
 
   sheet=GTK_SHEET(sbow->sheet);
-  row=sheet->active_cell.row; col=sheet->active_cell.col;
+  row=sheet->active_cell.row;
+  col=sheet->active_cell.col;
 
   parse_numbers(GTK_WIDGET(sheet),sheet->active_cell.row,sheet->active_cell.col,sbow);
   
@@ -1097,6 +1105,9 @@ void SourceBrowserOpcode_Window::SetPC(int address)
 
   if(address != last_address)
     {
+      UpdateLine(last_address);
+      gtk_clist_set_row_style (GTK_CLIST (clist), last_address, normal_style);
+
       UpdateLine(address);
       gtk_clist_set_row_style (GTK_CLIST (clist), address, current_line_number_style);
     }
@@ -1155,11 +1166,13 @@ void SourceBrowserOpcode_Window::NewSource(GUI_Processor *_gp)
 
     for(i=0; i < pm_size; i++)
     {
-	opcode = gpsim_get_opcode(gp->pic_id  ,i);
+	opcode = gp->cpu->pma.get_opcode(i);
 	memory[i]=opcode;
 	sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
 	sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-	filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), sizeof(buf));
+	filter(row_text[MNEMONIC_COLUMN],
+	       gp->cpu->pma.get_opcode_name(i,buf,sizeof(buf)),
+	       128);
 
 	gtk_sheet_set_cell(GTK_SHEET(sheet),
 			   i/16,
@@ -1230,10 +1243,7 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
       gtk_sheet_set_row_title(GTK_SHEET(sheet), i/16, row_label);
     }
   if(i/16 < GTK_SHEET(sheet)->maxrow)
-    {
-      //      printf(">>>>>>>%d %d %d\n",j,sheet->maxrow,sheet->maxrow+1-j);
-      gtk_sheet_delete_rows(GTK_SHEET(sheet),i/16,GTK_SHEET(sheet)->maxrow-i/16);
-    }
+    gtk_sheet_delete_rows(GTK_SHEET(sheet),i/16,GTK_SHEET(sheet)->maxrow-i/16);
 
   range.row0=0;range.col0=0;
   range.rowi=GTK_SHEET(sheet)->maxrow;
@@ -1249,17 +1259,22 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   // Clearing and appending is faster than changing
   gtk_clist_clear(GTK_CLIST(clist));
     
-  for(i=0; i < pm_size; i++)
-    {
-      memory[i]=opcode=gpsim_get_opcode(gp->pic_id  ,i);
-      sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
-      sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
-      filter(row_text[MNEMONIC_COLUMN], gpsim_get_opcode_name( gp->cpu, i,buf), 128);
-      gtk_clist_append (GTK_CLIST (clist), row_text);
-      gtk_sheet_set_cell(GTK_SHEET(sheet),
-			 i/16,i%16,
-			 GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
-    }
+  for(i=0; i < pm_size; i++) {
+
+    memory[i] = opcode = gp->cpu->pma.get_opcode(i);
+
+    sprintf (row_text[ADDRESS_COLUMN], "0x%04X", i);
+    sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
+
+    filter(row_text[MNEMONIC_COLUMN],
+	   gp->cpu->pma.get_opcode_name(i,buf,sizeof(buf)),
+	   128);
+
+    gtk_clist_append (GTK_CLIST (clist), row_text);
+    gtk_sheet_set_cell(GTK_SHEET(sheet),
+		       i/16,i%16,
+		       GTK_JUSTIFY_RIGHT,row_text[OPCODE_COLUMN]+2);
+  }
 
   gtk_clist_thaw (GTK_CLIST (clist));
 

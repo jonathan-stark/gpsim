@@ -62,6 +62,7 @@ class program_memory_access :  public BreakCallBack
   instruction *get(int addr);
   instruction *get_base_instruction(int addr);
   unsigned int get_opcode(int addr);
+  char *get_opcode_name(int addrr, char *buffer, int size);
   unsigned int get_PC(void);
 
   void put_opcode(int addr, unsigned int new_opcode);
@@ -87,6 +88,33 @@ class program_memory_access :  public BreakCallBack
   // (this is only valid for those processor capable of writing to their own
   // program memory)
   bool isModified(unsigned int address);
+
+
+  // A couple of functions for manipulating  breakpoints
+  virtual int  find_closest_address_to_line(int file_id, int src_line);
+  virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
+  void set_break_at_address(int address);
+  void set_notify_at_address(int address, BreakCallBack *cb);
+  void set_profile_start_at_address(int address, BreakCallBack *cb);
+  void set_profile_stop_at_address(int address, BreakCallBack *cb);
+  int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
+  int clear_notify_at_address(int address);
+  int clear_profile_start_at_address(int address);
+  int clear_profile_stop_at_address(int address);
+  int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
+  int address_has_notify(int address);
+  int address_has_profile_start(int address);
+  int address_has_profile_stop(int address);
+  instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
+  void toggle_break_at_address(int address);
+  void set_break_at_line(int file_id, int src_line);
+  void clear_break_at_line(int file_id, int src_line);
+  void toggle_break_at_line(int file_id, int src_line);
+  void set_break_at_hll_line(int file_id, int src_line);
+  void clear_break_at_hll_line(int file_id, int src_line);
+  void toggle_break_at_hll_line(int file_id, int src_line);
+
+
 };
 
 
@@ -159,33 +187,6 @@ public:
   void attach_src_line(int address,int file_id,int sline,int lst_line);
   void read_src_files(void);
 
-
-
-
-
-  // A couple of functions for manipulating  breakpoints
-  virtual int  find_closest_address_to_line(int file_id, int src_line);
-  virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
-  void set_break_at_address(int address);
-  void set_notify_at_address(int address, BreakCallBack *cb);
-  void set_profile_start_at_address(int address, BreakCallBack *cb);
-  void set_profile_stop_at_address(int address, BreakCallBack *cb);
-  int clear_break_at_address(int address,enum instruction::INSTRUCTION_TYPES type);
-  int clear_notify_at_address(int address);
-  int clear_profile_start_at_address(int address);
-  int clear_profile_stop_at_address(int address);
-  int address_has_break(int address,enum instruction::INSTRUCTION_TYPES type=instruction::BREAKPOINT_INSTRUCTION);
-  int address_has_notify(int address);
-  int address_has_profile_start(int address);
-  int address_has_profile_stop(int address);
-  instruction *find_instruction(int address, enum instruction::INSTRUCTION_TYPES type);
-  void toggle_break_at_address(int address);
-  void set_break_at_line(int file_id, int src_line);
-  void clear_break_at_line(int file_id, int src_line);
-  void toggle_break_at_line(int file_id, int src_line);
-  void set_break_at_hll_line(int file_id, int src_line);
-  void clear_break_at_hll_line(int file_id, int src_line);
-  void toggle_break_at_hll_line(int file_id, int src_line);
 
   virtual void dump_registers(void);
   virtual instruction * disasm ( unsigned int address,unsigned int inst)=0;

@@ -586,7 +586,7 @@ void pic_processor::run (void)
 
   // If the first instruction we're simulating is a break point, then ignore it.
 
-  if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+  if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
     {
       simulation_start_cycle = cycles.value;
     }
@@ -673,7 +673,7 @@ void pic_processor::step_over (void)
 
   if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
     {
-        if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+        if(pma.find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
 	  return;
 	else
 	{

@@ -440,20 +440,23 @@ void Processor::read_src_files(void)
 
 
 //-------------------------------------------------------------------
-int Processor::find_closest_address_to_line(int file_id, int src_line)
+int program_memory_access::find_closest_address_to_line(int file_id, int src_line)
 {
-
   int closest_address = -1;
-  int distance = program_memory_size();
 
-  for(int i = program_memory_size()-1; i>=0; i--) {
+  if(!cpu)
+    return closest_address;
+
+  int distance = cpu->program_memory_size();
+
+  for(int i = cpu->program_memory_size()-1; i>=0; i--) {
 
     // Find the closet instruction to the src file line number
-    if(program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-       program_memory[i]->get_file_id()==file_id ) {
+    if(cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
+       cpu->program_memory[i]->get_file_id()==file_id ) {
 
-      if(abs(program_memory[i]->get_src_line() - src_line) < distance) {
-	distance = abs(program_memory[i]->get_src_line() - src_line);
+      if(abs(cpu->program_memory[i]->get_src_line() - src_line) < distance) {
+	distance = abs(cpu->program_memory[i]->get_src_line() - src_line);
 	closest_address = i;
 	if(distance == 0)
 	  break;
@@ -466,112 +469,110 @@ int Processor::find_closest_address_to_line(int file_id, int src_line)
 }
 
 //-------------------------------------------------------------------
-int Processor::find_closest_address_to_hll_line(int file_id, int src_line)
+int program_memory_access::find_closest_address_to_hll_line(int file_id, int src_line)
 {
 
-    int closest_address = -1;
-    int closest_distance = 0x7fffffff;
+  int closest_address = -1;
 
-    for(int i = program_memory_size()-1; i>=0; i--)
-    {
-	// Find the closet instruction to the src file line number
-	if(program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-	   program_memory[i]->get_hll_file_id()==file_id )
-	{
-	    if(program_memory[i]->get_hll_src_line() >= src_line &&
-	       (program_memory[i]->get_hll_src_line() - src_line) <= closest_distance)
-	       {
-		   closest_address = i;
-		   closest_distance = program_memory[i]->get_hll_src_line() - src_line;
-	       }
-	}
-    }
+  if(!cpu)
+    return closest_address;
 
-    return  map_pm_index2address(closest_address);
+  int closest_distance = 0x7fffffff;
+
+  for(int i = cpu->program_memory_size()-1; i>=0; i--) {
+    // Find the closet instruction to the src file line number
+    if(cpu->program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
+       cpu->program_memory[i]->get_hll_file_id()==file_id )
+      {
+	if(cpu->program_memory[i]->get_hll_src_line() >= src_line &&
+	   (cpu->program_memory[i]->get_hll_src_line() - src_line) <= closest_distance)
+	  {
+	    closest_address = i;
+	    closest_distance = cpu->program_memory[i]->get_hll_src_line() - src_line;
+	  }
+      }
+  }
+
+  return  cpu->map_pm_index2address(closest_address);
 
 }
 
 
 
 //-------------------------------------------------------------------
-void Processor::set_break_at_address(int address)
+void program_memory_access::set_break_at_address(int address)
 {
-  if( address >= 0)
-    if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_execution_break(this, address);
+  if( address >= 0  && address<cpu->program_memory_size())
+    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+      bp.set_execution_break(cpu, address);
 }
 
 //-------------------------------------------------------------------
-void Processor::set_notify_at_address(int address, BreakCallBack *cb)
+void program_memory_access::set_notify_at_address(int address, BreakCallBack *cb)
 {
-  if(address >= 0)
-    if (program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_notify_break(this, address, cb);
+  if( address >= 0  && address<cpu->program_memory_size())
+    if (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+      bp.set_notify_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
-void Processor::set_profile_start_at_address(int address, BreakCallBack *cb)
+void program_memory_access::set_profile_start_at_address(int address, BreakCallBack *cb)
 {
-  if( address >= 0)
-    if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_profile_start_break(this, address, cb);
+  if( address >= 0  && address<cpu->program_memory_size())
+    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+      bp.set_profile_start_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
-void Processor::set_profile_stop_at_address(int address, BreakCallBack *cb)
+void program_memory_access::set_profile_stop_at_address(int address, BreakCallBack *cb)
 {
-  if( address >= 0)
-    if(program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_profile_stop_break(this, address, cb);
+  if( address >= 0  && address<cpu->program_memory_size())
+    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+      bp.set_profile_stop_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
-int  Processor::clear_break_at_address(int address, 
+int program_memory_access::clear_break_at_address(int address, 
 				       enum instruction::INSTRUCTION_TYPES type = 
 				       instruction::BREAKPOINT_INSTRUCTION)
 {
 
-  if(program_memory_size()<=address)
-    return 0;
+  if( address >= 0  && address<cpu->program_memory_size()) {
 
-  instruction *instr = find_instruction(address,type);
+    instruction *instr = find_instruction(address,type);
 
-  if(instr!=NULL) {
+    if(instr!=NULL) {
       int b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
       bp.clear( b );
       return 1;
-  } 
+    } 
+  }
 
   return 0;
-    
-
 }
 
 //-------------------------------------------------------------------
-int  Processor::clear_notify_at_address(int address)
+int program_memory_access::clear_notify_at_address(int address)
 {
   return clear_break_at_address(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int Processor::clear_profile_start_at_address(int address)
+int program_memory_access::clear_profile_start_at_address(int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int Processor::clear_profile_stop_at_address(int address)
+int program_memory_access::clear_profile_stop_at_address(int address)
 {
   return clear_break_at_address(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int Processor::address_has_break(int address, 
-				     enum instruction::INSTRUCTION_TYPES type)
+int program_memory_access::address_has_break(int address, 
+					     enum instruction::INSTRUCTION_TYPES type)
 {
-  if(program_memory_size()<=address)
-    return 0;
-
   if(find_instruction(address,type)!=NULL)
     return 1;
 
@@ -579,26 +580,26 @@ int Processor::address_has_break(int address,
 }
 
 //-------------------------------------------------------------------
-int Processor::address_has_notify(int address)
+int program_memory_access::address_has_notify(int address)
 {
   return address_has_break(address,instruction::NOTIFY_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int Processor::address_has_profile_start(int address)
+int program_memory_access::address_has_profile_start(int address)
 {
   return address_has_break(address,instruction::PROFILE_START_INSTRUCTION);
 }
 
 //-------------------------------------------------------------------
-int Processor::address_has_profile_stop(int address)
+int program_memory_access::address_has_profile_stop(int address)
 {
   return address_has_break(address,instruction::PROFILE_STOP_INSTRUCTION);
 }
 
 
 //-------------------------------------------------------------------
-void Processor::toggle_break_at_address(int address)
+void program_memory_access::toggle_break_at_address(int address)
 {
   if(address_has_break(address))
     clear_break_at_address(address);
@@ -607,7 +608,7 @@ void Processor::toggle_break_at_address(int address)
 }
 //-------------------------------------------------------------------
 
-void Processor::set_break_at_line(int file_id, int src_line)
+void program_memory_access::set_break_at_line(int file_id, int src_line)
 {
   int address;
 
@@ -615,7 +616,7 @@ void Processor::set_break_at_line(int file_id, int src_line)
       set_break_at_address(address);
 }
 
-void Processor::clear_break_at_line(int file_id, int src_line)
+void program_memory_access::clear_break_at_line(int file_id, int src_line)
 {
 
   int address;
@@ -624,18 +625,14 @@ void Processor::clear_break_at_line(int file_id, int src_line)
       clear_break_at_address(address);
 }
 
-void Processor::toggle_break_at_line(int file_id, int src_line)
+void program_memory_access::toggle_break_at_line(int file_id, int src_line)
 {
-
-
   toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
-
-
 }
 
 //-------------------------------------------------------------------
 
-void Processor::set_break_at_hll_line(int file_id, int src_hll_line)
+void program_memory_access::set_break_at_hll_line(int file_id, int src_hll_line)
 {
   int address;
 
@@ -643,7 +640,7 @@ void Processor::set_break_at_hll_line(int file_id, int src_hll_line)
       set_break_at_address(address);
 }
 
-void Processor::clear_break_at_hll_line(int file_id, int src_hll_line)
+void program_memory_access::clear_break_at_hll_line(int file_id, int src_hll_line)
 {
 
   int address;
@@ -652,13 +649,9 @@ void Processor::clear_break_at_hll_line(int file_id, int src_hll_line)
       clear_break_at_address(address);
 }
 
-void Processor::toggle_break_at_hll_line(int file_id, int src_hll_line)
+void program_memory_access::toggle_break_at_hll_line(int file_id, int src_hll_line)
 {
-
-
   toggle_break_at_address(find_closest_address_to_hll_line(file_id, src_hll_line));
-
-
 }
 
 
@@ -794,14 +787,14 @@ void Processor::dump_registers (void)
 
 
 //-------------------------------------------------------------------
-instruction *Processor::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
+instruction *program_memory_access::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
 {
     instruction *p;
 
-    if(program_memory_size()<=address)
+    if(cpu->program_memory_size()<=address  || address<0)
 	return NULL;
 
-    p=program_memory[address];
+    p=cpu->program_memory[address];
 
     if(p==NULL)
         return NULL;
@@ -908,11 +901,12 @@ instruction *program_memory_access::get_base_instruction(int addr)
     return NULL;
 }
 
+//----------------------------------------
+// get_opcode - return an opcode from program memory.
+//              If the address is out of range return 0.
+
 unsigned int program_memory_access::get_opcode(int addr)
 {
-
-  //  cout << __FUNCTION__ << "  get_opcode: 0x" << cpu->program_memory[addr]->get_opcode() <<
-  //  " opcode (direct): 0x" << cpu->program_memory[addr]->opcode << '\n';
 
   if(addr < cpu->program_memory_size())
     return(cpu->program_memory[addr]->get_opcode());
@@ -920,6 +914,20 @@ unsigned int program_memory_access::get_opcode(int addr)
     return 0;
 }
 
+
+//----------------------------------------
+// get_opcode_name - return an opcode name from program memory.
+//                   If the address is out of range return NULL;
+
+char *program_memory_access::get_opcode_name(int addr, char *buffer, int size)
+{
+
+  if(addr < cpu->program_memory_size())
+    return cpu->program_memory[addr]->name(buffer);
+
+  *buffer = 0;
+  return NULL;
+}
 
 //----------------------------------------
 // Get the current value of the program counter.
