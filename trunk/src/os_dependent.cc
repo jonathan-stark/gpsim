@@ -151,12 +151,10 @@ void * get_library_export(const char *name, void *library_handle)
   dlerror();	// Clear possible previous errors
   pExport = dlsym(library_handle, name);
 #else
-  pExport = GetProcAddress((HMODULE)library_handle, name);
+  pExport = (void*)GetProcAddress((HMODULE)library_handle, name);
 #endif
   if (NULL == pExport) {
     pszError = get_error_message();
-    // cout << "WARNING: non-conforming module library\n"
-	  //      << "  gpsim libraries should have the get_mod_list() function defined\n";
     fprintf(stderr, "%s\n", pszError);
     free_error_message(pszError);
   }
