@@ -28,8 +28,6 @@ class XrefObject;
 
 #include "gpsim_classes.h"
 #include "breakpoints.h"
-#include "trace.h"
-
 
 //---------------------------------------------------------
 // Base class for a file register.
@@ -131,18 +129,16 @@ class file_register : public Register
 
   file_register(void);
   ~file_register(void);
-
-  virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  virtual char *name(void) { return(name_str1);};
+
+/*
+  virtual void put(unsigned int new_value);
   virtual void new_name(char *);
-  virtual REGISTER_TYPES isa(void) {return GENERIC_REGISTER;};
-  virtual void reset(RESET_TYPE r) { return; };
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual void setbit_value(unsigned int bit_number, bool new_value);
   virtual int get_bit(unsigned int bit_number);
   virtual int get_bit_voltage(unsigned int bit_number);
-
+*/
 };
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to

@@ -63,22 +63,6 @@ file_register::~file_register(void)
 }
 
 
-
-
-void file_register::new_name(char *s)
-{
-  if(name_str1)
-    delete name_str1;
-
-  //name_str1 = new char[strlen(s)+1];
-  //strcpy(name_str1,s);
-  if(s)
-    name_str1 = strdup(s);
-  else
-    name_str1 = NULL;
-
-}
-
 //-----------------------------------------------------------
 //  void file_register::put_value(unsigned int new_value)
 //

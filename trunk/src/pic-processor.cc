@@ -70,11 +70,7 @@ int     verbose=0;
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
 extern int use_gui;
-void gui_refresh(void)
-{
-	while(gtk_events_pending())
-		gtk_main_iteration();
-}
+extern void gui_refresh(void);
 #endif
 
 // Number of simulation cycles between calls to refresh the gui
@@ -695,6 +691,79 @@ public:
 
 RealTimeBreakPoint realtime_cbp;
 
+//-------------------------------------------------------------------
+//
+// run  -- Begin simulating and don't stop until there is a break.
+//
+void pic_processor::run (void)
+{
+  if(use_icd)
+  {
+      simulation_mode=RUNNING;
+      icd_run();
+      while(!icd_stopped())
+      {
+#ifdef HAVE_GUI
+	  if(use_gui)
+	      gui_refresh();
+#endif
+      }
+      simulation_mode=STOPPED;
+      disassemble(pc->get_value(), pc->get_value());
+      gi.simulation_has_stopped();
+      return;
+  }
+
+
+  if(simulation_mode != STOPPED) {
+    if(verbose)
+      cout << "Ignoring run request because simulation is not stopped\n";
+    return;
+  }
+
+  simulation_mode = RUNNING;
+
+  if(realtime_mode)
+    realtime_cbp.start(active_cpu);
+
+  // If the first instruction we're simulating is a break point, then ignore it.
+
+  if(find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=NULL)
+    {
+      simulation_start_cycle = cycles.value;
+    }
+
+  do
+    {
+      do
+	{
+	  step_one();
+	} while(!bp.global_break);
+
+      if(bp.have_interrupt())
+	interrupt();
+
+      if(bp.have_sleep())
+	sleep();
+
+      if(bp.have_pm_write())
+	pm_write();
+
+    } while(!bp.global_break);
+
+  if(realtime_mode)
+    realtime_cbp.stop();
+
+  bp.clear_global();
+  trace.cycle_counter(cycles.value);
+  trace.dump_last_instruction();
+
+  simulation_mode = STOPPED;
+
+  gi.simulation_has_stopped();
+
+}
+
 
 //-------------------------------------------------------------------
 //
@@ -1003,15 +1072,6 @@ pic_processor::pic_processor(void)
   trace_log.switch_cpus(this);
 }
 
-
-invalid_file_register::invalid_file_register(unsigned int at_address)
-{
-
-  char name_str[100];
-  sprintf (name_str, "invalid fr  0x%02x", at_address);
-  new_name(name_str);
-}
-
 //-------------------------------------------------------------------
 //
 // 
@@ -1185,103 +1245,6 @@ void pic_processor::create_symbols (void)
 
 
 //-------------------------------------------------------------------
-int pic_processor::find_closest_address_to_line(int file_id, int src_line)
-{
-
-  int closest_address = -1;
-
-  for(int i = program_memory_size()-1; i>=0; i--)
-    {
-      // Find the closet instruction to the src file line number
-	if(program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-	   program_memory[i]->get_file_id()==file_id )
-	{
-	  if(program_memory[i]->get_src_line() >= src_line)
-	    closest_address = i;
-	}
-    }
-
-  return closest_address;
-
-}
-
-//-------------------------------------------------------------------
-int pic_processor::find_closest_address_to_hll_line(int file_id, int src_line)
-{
-
-    int closest_address = -1;
-    int closest_distance = 0x7fffffff;
-
-    for(int i = program_memory_size()-1; i>=0; i--)
-    {
-	// Find the closet instruction to the src file line number
-	if(program_memory[i]->isa() != instruction::INVALID_INSTRUCTION &&
-	   program_memory[i]->get_hll_file_id()==file_id )
-	{
-	    if(program_memory[i]->get_hll_src_line() >= src_line &&
-	       (program_memory[i]->get_hll_src_line() - src_line) <= closest_distance)
-	       {
-		   closest_address = i;
-		   closest_distance = program_memory[i]->get_hll_src_line() - src_line;
-	       }
-	}
-    }
-
-    return  map_pm_index2address(closest_address);
-
-}
-
-
-//-------------------------------------------------------------------
-instruction *pic_processor::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
-{
-    instruction *p;
-
-    if(program_memory_size()<=address)
-	return NULL;
-
-    p=program_memory[address];
-
-    if(p==NULL)
-        return NULL;
-
-    if(p->isa()==instruction::INVALID_INSTRUCTION)
-        return NULL;
-
-    for(;;)
-    {
-	if(p->isa()==type)
-	    return p;
-
-	switch(p->isa())
-	{
-	case instruction::MULTIWORD_INSTRUCTION:
-	case instruction::INVALID_INSTRUCTION:
-	case instruction::NORMAL_INSTRUCTION:
-            return NULL;
-	case instruction::BREAKPOINT_INSTRUCTION:
-	case instruction::NOTIFY_INSTRUCTION:
-	case instruction::PROFILE_START_INSTRUCTION:
-	case instruction::PROFILE_STOP_INSTRUCTION:
-	    p=((Breakpoint_Instruction *)p)->replaced;
-            break;
-	}
-
-    }
-
-    return NULL;
-}
-
-//-------------------------------------------------------------------
-void    pic_processor::set_out_of_range_pm(int address, int value)
-{
-
-  cout << "Warning::Out of range address " << address << " value " << value << endl;
-  cout << "Max allowed address is " << (program_memory_size()-1) << '\n';
-
-}
-
-//-------------------------------------------------------------------
 void pic_processor::init_program_memory(int address, int value)
 {
 
@@ -1315,6 +1278,9 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
     config_modes->print();
 
 }
+
+
+
 
 //-------------------------------------------------------------------
 //

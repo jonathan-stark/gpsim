@@ -65,6 +65,7 @@ class multi_word_instruction : public instruction
   virtual int instruction_size(void) { return 2;}
   virtual INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
 
+  virtual void initialize(bool init_state) { initialized = init_state; }
 };
 
 //---------------------------------------------------------

@@ -1493,7 +1493,7 @@ void Register_Window::Update(void)
 
 static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
 {
-  Register *reg;
+  GUIRegister *reg;
   Register_Window *rw;
   int address;
 
@@ -1503,7 +1503,7 @@ static void xref_update_cell(struct cross_reference_to_gui *xref, int new_value)
       return;
   }
   
-  reg = (Register *) (xref->data);
+  reg = (GUIRegister *) (xref->data);
   rw  = (Register_Window *) (xref->parent_window);
 
   if(reg->row > GTK_SHEET(rw->register_sheet)->maxrow)
@@ -1583,7 +1583,7 @@ void Register_Window::NewProcessor(GUI_Processor *gp)
 	row_created=FALSE;
       }
 	
-    registers[reg_number] = (Register  *)malloc(sizeof(Register));
+    registers[reg_number] = (GUIRegister  *)malloc(sizeof(GUIRegister));
     registers[reg_number]->row = j;
     registers[reg_number]->col = i;
     registers[reg_number]->value = -1;
@@ -1884,7 +1884,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
   registers_loaded=0;
   has_processor=false;
   
-  registers = (Register  **)malloc(MAX_REGISTERS*sizeof(Register *));
+  registers = (GUIRegister  **)malloc(MAX_REGISTERS*sizeof(GUIRegister *));
   for(i=0;i<MAX_REGISTERS;i++)
     registers[i]=NULL;
 

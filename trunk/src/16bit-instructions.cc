@@ -103,7 +103,7 @@ void multi_word_branch::runtime_initialize(void)
 
       cpu16->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       destination = ( (word2_opcode & 0xfff)<<8) | (opcode & 0xff);
-      initialized = 1;
+      initialized = true;
     }
 }
 
@@ -493,7 +493,7 @@ CALL16::CALL16 (pic_processor *new_cpu, unsigned int new_opcode)
   fast = new_opcode & 0x100;
   cpu = new_cpu;
   address = cpu16->current_disasm_address;
-  initialized = 0;
+  initialized = false;
 
   sprintf(name_str,"call");
 
@@ -762,7 +762,7 @@ GOTO16::GOTO16 (pic_processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
   address = cpu16->current_disasm_address;
-  initialized = 0;
+  initialized = false;
 
   sprintf(name_str,"goto");
 }
@@ -973,7 +973,7 @@ LFSR::LFSR (pic_processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
   address = cpu16->current_disasm_address;
-  initialized = 0;
+  initialized = false;
 
   fsr = (opcode & 0x30)>>4;
   switch(fsr)
@@ -1012,7 +1012,7 @@ void LFSR::runtime_initialize(void)
 
       cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       k = ( (opcode & 0xf)<<8) | (word2_opcode & 0xff);
-      initialized = 1;
+      initialized = true;
     }
 
 }
@@ -1085,7 +1085,7 @@ MOVFF::MOVFF (pic_processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
   address = cpu16->current_disasm_address;
-  initialized = 0;
+  initialized = false;
   destination = 0;
   source = opcode & 0xfff;
 
@@ -1106,7 +1106,7 @@ void MOVFF::runtime_initialize(void)
 
       cpu->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       destination = word2_opcode & 0xfff;
-      initialized = 1;
+      initialized = true;
     }
 
 }

@@ -880,8 +880,8 @@ unsigned int icd_Register::get(void)
 	{
 	case 2:
 	    value = icd_cmd("$$701F\r");
-	    cpu->pcl->value = value & 0xff;
-	    cpu->pclath->value = value >> 8;
+	    cpu_pic->pcl->value = value & 0xff;
+	    cpu_pic->pclath->value = value >> 8;
 
 	    is_stale=0;
 	    break;
@@ -899,8 +899,8 @@ unsigned int icd_Register::get(void)
 	    break;
 	case 10:
 	    value = icd_cmd("$$701F\r");
-	    cpu->pcl->value = value & 0xff;
-	    cpu->pclath->value = value >> 8;
+	    cpu_pic->pcl->value = value & 0xff;
+	    cpu_pic->pclath->value = value >> 8;
 
 	    is_stale=0;
 	    break;
@@ -1151,8 +1151,8 @@ unsigned int icd_PC::get_value(void)
     if(is_stale)
     {
 	value = icd_cmd("$$701F\r");
-	cpu->pcl->value = value & 0xff;
-	cpu->pclath->value = value >> 8;
+	cpu_pic->pcl->value = value & 0xff;
+	cpu_pic->pclath->value = value >> 8;
 
 	is_stale=0;
     }

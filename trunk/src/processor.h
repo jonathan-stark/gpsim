@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 extern SIMULATION_MODES simulation_mode;
 class GUI_Processor;
+class Processor;
 extern int verbose;
 
 
@@ -46,7 +47,7 @@ extern int verbose;
 class program_memory_access :  public BreakCallBack
 {
  public:
-  pic_processor *cpu;
+  Processor *cpu;
 
   unsigned int address, opcode, state;
 
@@ -193,12 +194,6 @@ public:
   guint64 register_write_accesses(unsigned int address);
 
   virtual unsigned int register_memory_size () const { return 0;};
-
-
-  virtual int get_pin_count(void){return 0;};
-  virtual char *get_pin_name(unsigned int pin_number) {return NULL;};
-  virtual int get_pin_state(unsigned int pin_number) {return 0;};
-  virtual IOPIN *get_pin(unsigned int pin_number) {return NULL;};
 
   static Processor *construct(void);
 

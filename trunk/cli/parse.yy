@@ -52,6 +52,7 @@ using namespace std;
 #include "cmd_set.h"
 #include "cmd_step.h"
 #include "cmd_stimulus.h"
+#include "cmd_stopwatch.h"
 #include "cmd_symbol.h"
 #include "cmd_trace.h"
 #include "cmd_version.h"
@@ -116,6 +117,7 @@ void free_char_list(char_list *);
 %token <s>  SET
 %token <s>  STEP
 %token <s>  STIMULUS
+%token <s>  STOPWATCH
 %token <s>  SYMBOL
 %token <s>  TRACE
 %token <s>  gpsim_VERSION
@@ -172,6 +174,7 @@ cmd: ignored
      | set_cmd
      | step_cmd
      | stimulus_cmd
+     | stopwatch_cmd
      | symbol_cmd
      | trace_cmd
      | version_cmd
@@ -522,6 +525,17 @@ step_cmd: STEP
           { step.over(); YYABORT;}
           ;
 
+stopwatch_cmd: STOPWATCH
+          {
+	    stopwatch.set(); YYABORT;
+          }
+          | STOPWATCH bit_flag
+	  {
+	    cmd_options *opt = $2;
+	    stopwatch.set(opt->value); YYABORT;
+          }
+          ;
+
 stimulus_cmd: STIMULUS
           {
             if(verbose)
@@ -639,6 +653,7 @@ stimulus_opt:
 	    c_stimulus.data_point($2);
 	  }
           ;
+
 
 symbol_cmd: SYMBOL
           {
@@ -837,6 +852,7 @@ void initialize_commands(void)
   c_set.token_value = SET;
   step.token_value = STEP;
   c_stimulus.token_value = STIMULUS;
+  stopwatch.token_value = STOPWATCH;
   c_symbol.token_value = SYMBOL;
   c_trace.token_value = TRACE;
   version.token_value = gpsim_VERSION;

@@ -158,14 +158,14 @@ class GUI_Object {
 //   1) its location and 2) value that is being displayed
 //
 
-struct _register {
+class GUIRegister {
+ public:
   int row;        // row & col in register window
   int col;
   int value;      // value displayed in register window
   gboolean update_full;
 };
 
-typedef struct _register Register;
 
 //
 // A 'labeled entry' is an object consisting of gtk entry
@@ -218,7 +218,7 @@ class Register_Window : public GUI_Object
   GdkColor invalid_color;
 
   REGISTER_TYPE type;
-  Register **registers;
+  GUIRegister **registers;
   GtkSheet *register_sheet;
     
   GtkWidget *entry;
