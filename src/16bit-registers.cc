@@ -52,7 +52,7 @@ void  BSR::put_value(unsigned int new_value)
   if(xref)
   {
       xref->update();
-      cpu->indf.xref->update();
+      cpu->indf->xref->update();
     }
 
 
@@ -84,7 +84,7 @@ void  FSRL::put_value(unsigned int new_value)
     {
 	xref->update();
   
-	cpu->indf.xref->update();
+	cpu->indf->xref->update();
     }
 
 
@@ -110,8 +110,8 @@ void  FSRH::put_value(unsigned int new_value)
 
 	xref->update();
   
-	if(cpu->indf.xref)
-	  cpu->indf.xref->update();
+	if(cpu->indf->xref)
+	  cpu->indf->xref->update();
 
     }
 }

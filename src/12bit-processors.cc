@@ -76,8 +76,13 @@ void _12bit_processor::create(void)
 
   pa_bits = 0;                 // Assume only one code page (page select bits in status)
 
-  fsr.register_page_bits = 0;  // Assume only one register page (e.g. 12c508)
   pic_processor::create();
+  fsr->register_page_bits = 0;  // Assume only one register page (e.g. 12c508)
+
+  // Sigh. Hack, hack,... manually assign indf bits
+  indf->fsr_mask = 0x1f;
+  indf->base_address_mask1 = 0x0;
+  indf->base_address_mask2 = 0x1f;
 
   stack->stack_mask = 1;        // The 12bit core only has 2 stack positions
 

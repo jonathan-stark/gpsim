@@ -40,6 +40,26 @@ instruction::instruction(void)
   hll_src_line = -1;
 }
 
+
+void invalid_instruction::execute(void)  
+{ 
+  //cout << "*** INVALID INSTRUCTION ***\n";
+#ifdef __DEBUG_VERBOSE__
+  debug();
+#endif
+
+  /* Don't know what to do, so just plow thorugh like nothing happened */
+  if(cpu)
+    cpu->pc.increment();
+
+};
+
+invalid_instruction::invalid_instruction(pic_processor *new_cpu=NULL,unsigned int new_opcode=0)
+{
+  cpu=new_cpu;
+  opcode=new_opcode;
+}
+
 void instruction::add_line_number_symbol(int address)
 {
 

@@ -121,23 +121,14 @@ class invalid_instruction : public instruction
 {
 public:
 
-  virtual void execute(void)
-  { 
-    //cout << "*** INVALID INSTRUCTION ***\n";
-    #ifdef __DEBUG_VERBOSE__
-      debug();
-    #endif
-  };
+  virtual void execute(void);
+
   virtual void debug(void)
   {
     //cout << "*** INVALID INSTRUCTION ***\n";
   };
 
-  invalid_instruction(pic_processor *new_cpu=NULL,unsigned int new_opcode=0)
-    {
-      cpu=new_cpu;
-      opcode=new_opcode;
-    }
+  invalid_instruction(pic_processor *new_cpu=NULL,unsigned int new_opcode=0);
   virtual INSTRUCTION_TYPES isa(void) {return INVALID_INSTRUCTION;};
   virtual char *name(char *str){return("INVALID");};
   static instruction *construct(pic_processor *new_cpu, unsigned int new_opcode)

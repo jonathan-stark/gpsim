@@ -33,9 +33,12 @@ Boston, MA 02111-1307, USA.  */
 
 extern int use_gui;
 
+//#define RALF
+#define SCOTT
+
 //#if 0        //tsd removed in 0.20.4
 extern "C" {
-char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
+char** completion_matches(const char* txt, char* (*cmdgen)(const char* text, int state));
 #define completion_matches completion_matches_oldcdecl
 #include <readline/readline.h>
 #undef completion_matches
@@ -434,7 +437,7 @@ ___main_input (void)
    to start from scratch; without any state (i.e. STATE == 0), then we
    start at the top of the list. */
 char *
-command_generator (char *text, int state)
+command_generator (const char *text, int state)
 {
   char  *n;
   static int i = 0;
@@ -472,7 +475,7 @@ command_generator (char *text, int state)
    entire line in case we want to do some simple parsing.  Return the
    array of matches, or NULL if there aren't any. */
 char **
-gpsim_completion (char *text, int start, int end)
+gpsim_completion (const char *text, int start, int end)
 {
   char **matches;
   //char *command_generator (char *, int);
@@ -569,16 +572,20 @@ void initialize_readline (void)
   // Sigh - the readline library has changed again (and again...)
   // I don't have an automated way to choose between the following
   // two lines
+  //#ifdef RALF
   rl_callback_handler_install ("gpsim> ", test_func);
+  //#endif
+  //#ifdef SCOTT
   //rl_callback_handler_install ("gpsim> ", (void(*)(char*))test_func);
-
+  //#endif
 #endif
 
   /* Allow conditional parsing of the ~/.inputrc file. */
   //  rl_readline_name = "gpsim";
 
   /* Tell the completer that we want a crack first. */
-  rl_attempted_completion_function = (CPPFunction *)gpsim_completion;
+    rl_attempted_completion_function = (CPPFunction *)gpsim_completion;
+  //rl_attempted_completion_function = &gpsim_completion;
 
 
 }

@@ -87,11 +87,11 @@ void  P12C508::option_new_bits_6_7(unsigned int)
 void P12C508::create_sfr_map(void)
 {
 
-  add_sfr_register(&indf,  0);
+  add_sfr_register(indf,   0);
   add_sfr_register(&tmr0,  1);
   add_sfr_register(&pcl,   2);
   add_sfr_register(&status,3);
-  add_sfr_register(&fsr,   4);
+  add_sfr_register(fsr,    4);
   add_sfr_register(&osccal,5);
   add_sfr_register(&gpio,  6);
 
@@ -150,9 +150,10 @@ void P12C508::create(void)
 
   tmr0.start(0);
 
-  fsr.register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
+  fsr->register_page_bits = 0;  // the 508 has only one register page (the rp bits aren't used)
 
-  trace.program_counter (pc.value);
+  pc.reset();
+  //trace.program_counter (pc.value);
 
 }
 
@@ -163,6 +164,8 @@ pic_processor * P12C508::construct(void)
   P12C508 *p = new P12C508;
 
   cout << " 12c508 construct\n";
+
+  p->pc.reset_address = 0x1ff;
 
   p->create();
   p->pic_processor::create_symbols();
@@ -197,6 +200,8 @@ pic_processor * P12C509::construct(void)
 
   cout << " 12c508 construct\n";
 
+  p->pc.reset_address = 0x3ff;
+
   p->create();
   p->pic_processor::create_symbols();
 
@@ -217,7 +222,7 @@ void P12C509::create(void)
   alias_file_registers(0x00,0x0f,0x20);
   add_file_registers(0x30, 0x3f, 0);
 
-  fsr.register_page_bits = RP0;  // the 509 has two register pages (i.e. RP0 in fsr is used)
+  fsr->register_page_bits = RP0;  // the 509 has two register pages (i.e. RP0 in fsr is used)
   pa_bits = PA0;                 // the 509 has two code pages (i.e. PAO in status is used)
 
 

@@ -99,15 +99,15 @@ void _14bit_18pins::create_iopin_map(void)
 void P16C8x::create_sfr_map(void)
 {
  
-  add_sfr_register(&indf,  0x80);
-  add_sfr_register(&indf,  0x00);
+  add_sfr_register(indf,   0x80);
+  add_sfr_register(indf,   0x00);
 
   add_sfr_register(&tmr0,  0x01);
   add_sfr_register(&option_reg,  0x81, 0xff);
 
   add_sfr_register(&pcl,    0x02, 0);
   add_sfr_register(&status, 0x03, 0x18);
-  add_sfr_register(&fsr,    0x04);
+  add_sfr_register(fsr,     0x04);
   alias_file_registers(0x02,0x04,0x80);
 
   add_sfr_register(porta,   0x05);

@@ -148,7 +148,8 @@ void P16F873::create(void)
   P16C73::create();
 
   status.rp_mask = 0x60;  // rp0 and rp1 are valid.
-  indf.base_address_mask = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
 
   P16F873::create_sfr_map();
 
@@ -309,7 +310,8 @@ void P16F874::create(void)
   P16C74::create();
 
   status.rp_mask = 0x60;  // rp0 and rp1 are valid.
-  indf.base_address_mask = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask1 = 0x80; // used for indirect accesses above 0x100
+  indf->base_address_mask2 = 0x1ff; // used for indirect accesses above 0x100
 
   P16F874::create_sfr_map();
 

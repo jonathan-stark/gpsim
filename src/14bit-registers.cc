@@ -155,10 +155,10 @@ void file_register::put_value(unsigned int new_value)
     {
       xref->update();
 
-      if(cpu && address == cpu->fsr.value)
+      if(cpu && address == cpu->fsr->value)
 	{
-	  if(cpu->indf.xref)
-	    cpu->indf.xref->update();
+	  if(cpu->indf->xref)
+	    cpu->indf->xref->update();
 	}
     }
 }
@@ -220,8 +220,8 @@ void  FSR::put_value(unsigned int new_value)
   if(xref)
   {
       xref->update();
-      if(cpu->indf.xref)
-	cpu->indf.xref->update();
+      if(cpu->indf->xref)
+	cpu->indf->xref->update();
   }
 
   //#endif
@@ -295,8 +295,9 @@ void inline Status_register::put(unsigned int new_value)
 INDF::INDF(void)
 {
   break_point = 0;
-  fsr_mask = 0x7f;       // assume a 14bit core
-  base_address_mask = 0; //   "          "
+  fsr_mask = 0x7f;           // assume a 14bit core
+  base_address_mask1 = 0;    //   "          "
+  base_address_mask2 = 0xff; //   "          "
   new_name("indf");
 }
 
@@ -307,6 +308,9 @@ void INDF::initialize(void)
 
   _12BIT_PROCESSOR_:
     fsr_mask = 0x1f;
+    base_address_mask1 = 0x1f;
+    base_address_mask2 = 0x0;
+
     break;
 
   _14BIT_PROCESSOR_:
@@ -324,10 +328,15 @@ void INDF::put(unsigned int new_value)
 {
 
   trace.register_write(address,value);
+  int reg = (cpu->fsr->value + 
+	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
 
   // if the fsr is 0x00 or 0x80, then it points to the indf
-  if(cpu->fsr.value & fsr_mask)
-    cpu->registers[cpu->fsr.value+ ((cpu->status.value & base_address_mask)<<1) ]->put(new_value);
+  if(reg & fsr_mask){
+    cpu->registers[reg]->put(new_value);
+
+    //(cpu->fsr->value & base_address_mask2) + ((cpu->status.value & base_address_mask1)<<1)
+  }
 
 }
 
@@ -346,9 +355,10 @@ void INDF::put_value(unsigned int new_value)
   if(xref)
     {
       xref->update();
-      if(cpu->fsr.value & fsr_mask) 
+      int r = (cpu->fsr->value + 
+	       ((cpu->status.value & base_address_mask1)<<1)& base_address_mask2);
+      if(r & fsr_mask) 
 	{
-	  int r = cpu->fsr.value + ((cpu->status.value & base_address_mask)<<1);
 	  if(cpu->registers[r]->xref)
 	    cpu->registers[r]->xref->update();
 	}
@@ -361,18 +371,21 @@ unsigned int INDF::get(void)
 {
 
   trace.register_read(address,value);
-
-  if(cpu->fsr.value & fsr_mask)
-    return(cpu->registers[cpu->fsr.value + ((cpu->status.value & base_address_mask)<<1)]->get());
+  int reg = (cpu->fsr->value + 
+	     ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
+  if(reg & fsr_mask)
+    return(cpu->registers[reg]->get());
   else
     return(0);   // avoid infinite loop if fsr points to the indf
 }
 
 unsigned int INDF::get_value(void)
 {
-
-  if(cpu->fsr.value & fsr_mask)
-    return(cpu->registers[cpu->fsr.value+ ((cpu->status.value & base_address_mask)<<1)]->get_value());
+  cout <<"INDF::get_value\n";
+  int reg = (cpu->fsr->value + 
+	       ((cpu->status.value & base_address_mask1)<<1) ) &  base_address_mask2;
+  if(reg & fsr_mask)
+    return(cpu->registers[reg]->get_value());
   else
     return(0);   // avoid infinite loop if fsr points to the indf
 }
@@ -543,6 +556,8 @@ Program_Counter::Program_Counter(void)
 {
   if(verbose)
     cout << "pc constructor\n";
+
+  reset_address = 0;
   value = 0;
 
   xref = new XrefObject(&value);

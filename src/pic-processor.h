@@ -81,6 +81,7 @@ enum PROCESSOR_TYPE
   _P16C712_,
   _P16C716_,
   _P16C54_,
+  _P16C55_,
   _P16C61_,
   _P16C62_,
   _P16C62A_,
@@ -292,8 +293,8 @@ public:
 
   WDT          wdt;
 
-  INDF         indf;
-  FSR          fsr;
+  INDF         *indf;
+  FSR          *fsr;
   Stack         *stack;
   file_register **registers;
   file_register **register_bank;   // a pointer to the currently active register bank

@@ -327,6 +327,7 @@ public:
   pic_processor *cpu;
   unsigned int value;              /* pc's current value */
   unsigned int memory_size_mask; 
+  unsigned int reset_address;      /* Value pc gets at reset */
 
   Program_Counter(void);
   void increment(void);
@@ -337,7 +338,7 @@ public:
   virtual void put_value(unsigned int new_value);
   void reset(void)
     { 
-      value = 0;
+      value = reset_address;
       trace.program_counter(value);
     };
 
@@ -518,7 +519,8 @@ class INDF : public sfr_register
 {
 public:
   unsigned int fsr_mask;
-  unsigned int base_address_mask;
+  unsigned int base_address_mask1;
+  unsigned int base_address_mask2;
 
   INDF(void);
   void put(unsigned int new_value);
