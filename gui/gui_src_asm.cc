@@ -1552,42 +1552,39 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 
 }
 
-void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp)
+void SourceBrowserAsm_Window::CloseSource(void)
 {
-    int i;
+  int i;
 
-    GList *iter;
-    struct breakpoint_info *bpi;
     
+  load_source=0;
+  source_loaded = 0;
+  if(!enabled)
+    return;
     
-    sbaw->load_source=0;
-    sbaw->source_loaded = 0;
-    if(! ((GUI_Object*)sbaw)->enabled)
-	return;
-    
-    for(i=0;i<SBAW_NRFILES;i++)
+  for(i=0;i<SBAW_NRFILES;i++)
     {
-	if(sbaw->notebook_child[i]!=NULL)
+      if(notebook_child[i]!=NULL)
 	{
-	    int num=gtk_notebook_page_num(GTK_NOTEBOOK(sbaw->notebook),sbaw->notebook_child[i]);
-	    gtk_notebook_remove_page(GTK_NOTEBOOK(sbaw->notebook),num);
-	    sbaw->notebook_child[i]=NULL;
+	  int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child[i]);
+	  gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
+	  notebook_child[i]=NULL;
 	}
-	sbaw->source_pcwidget[i]=NULL;
-	sbaw->pageindex_to_fileid[i]=-1;
+      source_pcwidget[i]=NULL;
+      pageindex_to_fileid[i]=-1;
     }
 
-    sbaw->pixmap_pc=NULL;
-    sbaw->pixmap_break=NULL;
-    sbaw->pixmap_profile_start=NULL;
-    sbaw->pixmap_profile_stop=NULL;
+  pixmap_pc=NULL;
+  pixmap_break=NULL;
+  pixmap_profile_start=NULL;
+  pixmap_profile_stop=NULL;
 
-    remove_all_points(sbaw);
+  remove_all_points(this);
 
-    sbaw->layout_offset=-1;
+  layout_offset=-1;
 }
 
-void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp)
+void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 {
 
   int i;
@@ -1602,31 +1599,29 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   struct cross_reference_to_gui *cross_reference;
   int address;
 
-  assert(sbaw);
-  
-  if(sbaw == NULL || gp == NULL)
+  if(gp == NULL)
     return;
 
-  if(! ((GUI_Object*)sbaw)->enabled)
+  if(!enabled)
   {
-      sbaw->load_source=1;
+      load_source=1;
       return;
   }
   
-  assert(sbaw->wt==WT_asm_source_window);
+  assert(wt==WT_asm_source_window);
   
-  pic_id = sbaw->gp->pic_id;
+  pic_id = gp->pic_id;
 
-  SourceBrowserAsm_close_source(sbaw,gp);
+  CloseSource();
 
-  sbaw->load_source=1;
+  load_source=1;
   
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
   cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
   cross_reference->parent_window_type =   WT_asm_source_window;
-  cross_reference->parent_window = (gpointer) sbaw;
+  cross_reference->parent_window = (gpointer) this;
   cross_reference->data = (gpointer) NULL;
   cross_reference->update = pc_changed;
   cross_reference->remove = NULL;
@@ -1636,16 +1631,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   {
       gpsim_file = gpsim_get_file_context(pic_id, i);
       file_name = gpsim_file->name;
-/*      if(!strcmp(file_name+strlen(file_name)-4,".asm")
-	 ||!strcmp(file_name+strlen(file_name)-4,".inc")
-	 ||!strcmp(file_name+strlen(file_name)-4,".ASM")
-	 ||!strcmp(file_name+strlen(file_name)-4,".INC")
-	 ||!strcmp(file_name+strlen(file_name)-2,".h")
-	 ||!strcmp(file_name+strlen(file_name)-2,".c")
-	 ||!strcmp(file_name+strlen(file_name)-2,".C")
-	 ||!strcmp(file_name+strlen(file_name)-4,".jal")
-	 ||!strcmp(file_name+strlen(file_name)-4,".JAL")
-	)*/
+
       if(strcmp(file_name+strlen(file_name)-4,".lst")
 	 &&strcmp(file_name+strlen(file_name)-4,".LST")
 	 &&strcmp(file_name+strlen(file_name)-4,".cod")
@@ -1677,9 +1663,9 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
 	      }
 	  }
 
-	  id = add_page(sbaw,file_id);
+	  id = add_page(this,file_id);
 
-	  set_text(sbaw,id,file_id);
+	  set_text(this,id,file_id);
 	  
       } else {
 	if(verbose)
@@ -1688,7 +1674,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
       }
   }
 
-  sbaw->source_loaded = 1;
+  source_loaded = 1;
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
@@ -1699,7 +1685,7 @@ void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *g
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else
-      sbaw->SetPC(address);
+      SetPC(address);
 }
 
 
@@ -1921,7 +1907,7 @@ static int settings_dialog(SourceBrowserAsm_Window *sbaw)
 
     load_fonts(sbaw);
     if(sbaw->load_source)
-	SourceBrowserAsm_new_source(sbaw,sbaw->gp);
+      sbaw->NewSource(sbaw->gp);
 
     gtk_widget_hide(dialog);
 
@@ -2434,7 +2420,7 @@ void SourceBrowserAsm_Window::Build(void)
   is_built=1;
 
   if(load_source)
-    SourceBrowserAsm_new_source(this,gp);
+    NewSource(gp);
   UpdateMenuItem();
 }
 

@@ -132,11 +132,6 @@ static void zero_cb(GtkWidget *w, gpointer user_data)
     sww->Update();
 }
 
-void StopWatchWindow_new_processor(StopWatch_Window *sww, GUI_Processor *gp)
-{
-    sww->has_processor=1;
-}
-
 void StopWatchWindow_update(StopWatch_Window *sww)
 {
   if( !sww->enabled)
@@ -409,6 +404,7 @@ int StopWatch_Window::Create(GUI_Processor *_gp)
   offset=0;
 
   has_processor=1;
+
 
   get_config();
   if(config_get_string(name,"rollover",&string))

@@ -2120,24 +2120,18 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp)
  * 
  */
 
-void ProfileWindow_new_processor(Profile_Window *pw, GUI_Processor *_gp)
+void Profile_Window::NewProcessor(GUI_Processor *_gp)
 {
 
-#define NAME_SIZE 32
+  if(_gp == NULL)
+    return;
 
-    int pic_id;
-
-
-    if(pw == NULL || gp == NULL)
-	return;
-
-    pw->processor=1;
+  has_processor=true;
     
-    if( !pw->enabled)
-	return;
+  if(!enabled)
+    return;
     
-    pw->gp = _gp;
-    pic_id = gp->pic_id;
+  gp = _gp;
 
 }
 
@@ -2337,8 +2331,8 @@ void Profile_Window::Build(void)
   enabled=1;
   is_built=1;
 
-  if(processor)
-      ProfileWindow_new_processor(this, gp);
+  if(has_processor)
+    NewProcessor(gp);
 
   if(program)
     ProfileWindow_new_program(this, gp);
@@ -2365,7 +2359,7 @@ int Profile_Window::Create(GUI_Processor *_gp)
 
   gp->profile_window = this;
 
-  processor=0;
+  has_processor=false;
   program=0;
 
   get_config();
