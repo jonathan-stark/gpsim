@@ -28,7 +28,7 @@ LIBS = -l wsock32 \
      -L $(GTK_PATH)/lib -l gtk-win32-2.0 -l gdk-win32-2.0 \
      -L $(GLIB_PATH)/lib -l gobject-2.0 -l glib-2.0
 
-gpsim_LIBS = ../gui/libgui.a ../src/libsrc.a ../cli/libcli.a
+gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libsrc.a
 
 INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0			\
 	-I ../../glib/lib/glib-2.0/include -I ../../popt/include

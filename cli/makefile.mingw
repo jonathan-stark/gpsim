@@ -53,10 +53,8 @@ cli_OBJECTS =			\
 	cmd_x.o			\
 	command.o		\
 	errors.o		\
-	expr.o			\
 	fd2raw.o		\
 	input.o			\
-	operator.o		\
 	parse.o			\
 	scan.o			\
 	socket.o		\

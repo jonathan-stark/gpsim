@@ -233,6 +233,9 @@
 				RelativePath=".\eeprom.cc">
 			</File>
 			<File
+				RelativePath=".\expr.cc">
+			</File>
+			<File
 				RelativePath=".\fopen-path.cc">
 			</File>
 			<File
@@ -306,6 +309,9 @@
 			</File>
 			<File
 				RelativePath=".\modules.cc">
+			</File>
+			<File
+				RelativePath=".\operator.cc">
 			</File>
 			<File
 				RelativePath=".\p12x.cc">
@@ -460,6 +466,9 @@
 				RelativePath=".\eeprom.h">
 			</File>
 			<File
+				RelativePath=".\expr.h">
+			</File>
+			<File
 				RelativePath=".\fopen-path.h">
 			</File>
 			<File
@@ -497,6 +506,9 @@
 			</File>
 			<File
 				RelativePath=".\modules.h">
+			</File>
+			<File
+				RelativePath=".\operator.h">
 			</File>
 			<File
 				RelativePath=".\p12x.h">
