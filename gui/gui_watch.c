@@ -574,6 +574,7 @@ void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, 
     cross_reference->parent_window = (gpointer) ww;
     cross_reference->data = (gpointer) watch_entry;
     cross_reference->update = xref_update;
+    cross_reference->remove = NULL;
     gpsim_assign_register_xref(pic_id, type, address, (gpointer) cross_reference);
 
     watch_entry->xref=cross_reference;

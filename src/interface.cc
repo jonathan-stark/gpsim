@@ -98,6 +98,7 @@ public:
 //
 
 void (*update_object) (gpointer xref,int new_value);
+void (*remove_object) (gpointer xref);
 void (*simulation_has_stopped) (void);
 void (*new_processor) (unsigned int processor_id);
 //void (*new_program)  (pic_processor *p);

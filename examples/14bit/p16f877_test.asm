@@ -2,9 +2,10 @@
 	list	p=16f877
   __config _wdt_off
 
-	;; The purpose of this program is to test gpsim's ability to simulate a pic 16c64.
-
-include "p16c64.inc"
+	;; The purpose of this program is to test gpsim's ability to simulate a pic 16f877.
+	;; (this was derived from the similar program for testing the c64).
+	
+include "p16f877.inc"
 		
   cblock  0x20
 
@@ -22,6 +23,49 @@ include "p16c64.inc"
 	retfie
 
 main:
+	
+	;; clear ram
+	movlw	0
+	call	preset_ram
+	movlw	0x55
+	call	preset_ram
+	movlw	0
+	call	preset_ram
+	
+	;; use the indirect register to increment register 0x70.
+	;; This register is aliased in all four banks.
+	;; Then use direct addressing to verify that the increment
+	;; occurred. Note that bank switching is necessary to access
+	;; 0x70 directly in the other banks (that is to access 0xf0,
+	;; 0x170 and 0x1f0 directly, you need to switch to bank 1,2
+	;; or 3 respectively).
+	
+	bcf	status,rp0
+	movlw	0x70
+	movwf	fsr
+
+	clrf	0x70
+	incf	indf,f
+	btfss	0x70,0
+	 goto	$-1
+
+	bsf	status,rp0	;bank 1
+	incf	indf,f
+	btfsc	0x70,0
+	 goto	$-1
+
+	bsf	status,rp1	;bank 3
+	incf	indf,f
+	btfss	0x70,0
+	 goto	$-1
+
+	bcf	status,rp0	;bank 2
+	incf	indf,f
+	btfsc	0x70,0
+	 goto	$-1
+
+	bcf	status,rp1	;bank 0
+
 
 	;; disable (primarily) global and peripheral interrupts
 	
@@ -196,4 +240,40 @@ pwm_test1:
 die:
 
 	goto	$
+
+
+preset_ram
+	clrf	status
+
+	movwf	0x20
+	movlw	0x20
+	movwf	fsr
+	movf	0x20,w
+cb0:	
+	movwf	indf
+	incf	fsr,f
+	btfss	fsr,7
+	 goto	cb0
+	bsf	fsr,5
+cb1:	
+	movwf	indf
+	incfsz	fsr,f
+	 goto	cb1
+	bsf	fsr,4
+	bsf	status,7
+cb2:	
+	movwf	indf
+	incf	fsr,f
+	btfss	fsr,7
+	 goto	cb2
+	bsf	fsr,5
+cb3:	
+	movwf	indf
+	incfsz	fsr,f
+	 goto	cb3
+
+	clrf	status
+
+	return
+	
 	end

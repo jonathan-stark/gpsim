@@ -936,8 +936,6 @@ void pic_processor :: create (void)
 }
 
 //-------------------------------------------------------------------
-//
-// 
 //    add_file_registers
 //
 //  The purpose of this member function is to allocate memory for the
@@ -955,11 +953,12 @@ void pic_processor::add_file_registers(unsigned int start_address, unsigned int 
   for (j = start_address; j <= end_address; j++)
     {
       registers[j] = new file_register;
-      if (alias_offset)
-	{
-	  registers[j + alias_offset] = registers[j];
-	  registers[j]->alias_mask = alias_offset;
-	}
+      if (alias_offset) {
+	registers[j + alias_offset] = registers[j];
+	registers[j]->alias_mask = alias_offset;
+      } else
+	registers[j]->alias_mask = 0;
+
       registers[j]->address = j;
       registers[j]->break_point = 0;
       registers[j]->value = 0;
@@ -972,6 +971,37 @@ void pic_processor::add_file_registers(unsigned int start_address, unsigned int 
       registers[j]->cpu = this;
 
     }
+
+}
+
+//-------------------------------------------------------------------
+//    delete_file_registers
+//
+//  The purpose of this member function is to delete file registers
+//
+
+void pic_processor::delete_file_registers(unsigned int start_address, unsigned int end_address)
+{
+
+#define SMALLEST_ALIAS_DISTANCE  32
+  int i,j;
+
+
+  for (j = start_address; j <= end_address; j++) {
+    if(registers[j]) {
+
+      if(registers[j]->alias_mask) {
+	// This registers appears in more than one place. Let's find all
+	// of its aliases.
+	for(i=SMALLEST_ALIAS_DISTANCE; i<register_memory_size(); i+=SMALLEST_ALIAS_DISTANCE)
+	  if(registers[j] == registers[i])
+	    registers[i] = NULL;
+      }
+
+      delete registers[j];
+      registers[j] = NULL;
+    }
+  }
 
 }
 

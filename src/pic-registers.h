@@ -68,6 +68,7 @@ public:
   //  #endif
 
   file_register(void);
+  ~file_register(void);
   virtual void put(unsigned int new_value)
   {
     value = new_value;
