@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __PARAFACE_H__
 #define __PARAFACE_H__
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include "../src/stimuli.h"
 #include "../src/ioports.h"
 #include "../src/modules.h"

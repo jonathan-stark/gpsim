@@ -32,6 +32,9 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <time.h>
 #include <stdio.h>
 
@@ -132,7 +135,7 @@ OutputPort::OutputPort (unsigned int _num_iopins) : Paraface_Port(_num_iopins)
 void Paraface_Port::trace_register_write(void)
 {
 
-    trace.module1(value);
+    get_trace().module1(value);
 }
 
 //-----------------------------------------------------
@@ -159,7 +162,7 @@ void InputPort::callback(void)
 
     //    cout << "InputPort::callback(void)\n";
 
-    cycles.set_break_delta(1, this);
+    get_cycles().set_break_delta(1, this);
 
 
     if(paraface->output_port->value!=
@@ -333,7 +336,7 @@ void Paraface::create_iopin_map(void)
     for(int i =1; i<get_pin_count(); i++) {
 	IOPIN *p = get_pin(i);
 	if(p)
-	    symbol_table.add_stimulus(p);
+	    get_symbol_table().add_stimulus(p);
     }
 
     write_parallel_data(output_port->value);
@@ -365,7 +368,7 @@ Paraface::Paraface(void)
   name_str = "Paraface";
 
   interface = new Paraface_Interface(this);
-  gi.add_interface(interface);
+  get_interface().add_interface(interface);
 
   // interface_id = gpsim_register_interface((gpointer)this);
 

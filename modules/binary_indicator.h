@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __BINARY_INDICATOR_H__
 #define __BINARY_INDICATOR_H__
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <glib.h>
 #include "../src/modules.h"
 #include "../src/packages.h"

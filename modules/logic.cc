@@ -29,6 +29,10 @@ In here you'll find some simple logic devices:
   OR2Gate - A 2-input OR gate
 
 */
+
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include "../config.h"    // get the definition for HAVE_GUI
 
 #ifdef HAVE_GUI
@@ -333,7 +337,7 @@ void LogicGate::create_iopin_map(void)
   // in the CLI).
 
   for(i= 1; i<=number_of_pins; i++)
-    symbol_table.add_stimulus(get_pin(i));
+    get_symbol_table().add_stimulus(get_pin(i));
 
 
   //cout << "Iopin map should be created\n";

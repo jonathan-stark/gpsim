@@ -1,9 +1,20 @@
-2004-04-21 Borut Razem <scott@dattalo.com>
+2004-04-22 Borut Razem <borut.razem@siol.net>
+	* modules/binary_indicator.cc modules/binary_indicator.h modules/encoder.cc
+	modules/encoder.h modules/gpsim_modules.cc modules/led.cc modules/led.h
+	modules/logic.cc modules/logic.h modules/paraface.cc modules/paraface.h
+	modules/push_button.cc modules/push_button.h modules/resistor.cc
+	modules/resistor.h modules/switch.cc modules/switch.h modules/usart.cc
+	modules/usart.h modules/video.cc modules/video.h: defined IN_MODULE
+	symbol for modules, call get_interface(), get_cycles(), get_active_cpu(),
+	get_symbol_table(), get_trace(void) accessor methods instead direct object
+	access
+
+2004-04-21 Borut Razem <borut.razem@siol.net>
 	* src/gpsim_interface.h, src/gpsim_time.h, src/processor.cc, src/symbol.cc,
 	src/trace.cc: create instances of inline methods by taking theirs address,
 	so that they can be accessed from dynamic loadable modules
 
-2004-04-18 Borut Razem <scott@dattalo.com>
+2004-04-18 Borut Razem <borut.razem@siol.net>
 	* src/14bit-registers.h, src/gpsim_interface.h, src/gpsim_time.h,
 	src/processor.h, src/symbol.h, src/trace.h: introduced get_interface(),
 	get_cycles(), get_active_cpu(), get_symbol_table(), get_trace(void)
@@ -43,7 +54,6 @@
 	src/trace.h, src/uart.h, gui/gui_profile.cc, modules/encoder.h, modules/paraface.h,:
 	Removed the BreakCallBack class. The functionality it was providing is now
 	implemented by the BreakpointObject class.
-
 
 2004-04-11  Borut Razem  <borut.razem@siol.net>
 	* src/interface.cc: added initialization of interface_seq_number in

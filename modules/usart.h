@@ -22,6 +22,9 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __USART_MODULE_H__
 #define __USART_MODULE_H__
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include "../config.h"
 
 #ifdef HAVE_GUI

@@ -27,6 +27,9 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <time.h>
 #include <stdio.h>
 
@@ -109,7 +112,7 @@ void Switch::create_iopin_map(void)
     switch_pin = get_pin(1);
     if(switch_pin)
     {
-	symbol_table.add_stimulus(switch_pin);
+	get_symbol_table().add_stimulus(switch_pin);
 	switch_pin->update_direction(1);
 	if(switch_pin->snode)
 	    switch_pin->snode->update(0);

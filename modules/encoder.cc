@@ -26,6 +26,9 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <time.h>
 #include <stdio.h>
 
@@ -114,7 +117,7 @@ void Encoder::create_iopin_map(void)
   a_pin = get_pin(1);
   if(a_pin)
     {
-      symbol_table.add_stimulus(a_pin);
+      get_symbol_table().add_stimulus(a_pin);
       a_pin->update_direction(1);
       if(a_pin->snode)
 	a_pin->snode->update(0);
@@ -123,7 +126,7 @@ void Encoder::create_iopin_map(void)
   b_pin = get_pin(2);
   if(b_pin)
     {
-      symbol_table.add_stimulus(b_pin);
+      get_symbol_table().add_stimulus(b_pin);
       b_pin->update_direction(1);
       if(b_pin->snode)
 	b_pin->snode->update(0);
@@ -248,7 +251,7 @@ void
 Encoder::schedule_tick()
 {
     /* XXX: make the time delay configurable */
-    if (!cycles.set_break_delta(100, this)) {
+    if (!get_cycles().set_break_delta(100, this)) {
 	std::cerr << "Encoder: error setting breakpoint." << std::endl;
     }
 }

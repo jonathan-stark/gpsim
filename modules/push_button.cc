@@ -25,6 +25,9 @@ Boston, MA 02111-1307, USA.  */
 
 */
 
+/* IN_MODULE should be defined for modules */
+#define IN_MODULE
+
 #include <time.h>
 #include <stdio.h>
 
@@ -107,7 +110,7 @@ void PushButton::create_iopin_map(void)
   pshb_pin = get_pin(1);
   if(pshb_pin)
     {
-      symbol_table.add_stimulus(pshb_pin);
+      get_symbol_table().add_stimulus(pshb_pin);
       pshb_pin->update_direction(1);
       if(pshb_pin->snode)
 	pshb_pin->snode->update(0);
