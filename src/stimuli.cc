@@ -991,7 +991,7 @@ file_register *IOPIN::get_iop(void)
 //========================================================================
 //
 IO_input::IO_input(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
-  : IOPIN(i,b,opt_name,iopp)
+  : IOPIN(i,b,opt_name,_iopp)
 {
 
   state = 0;
@@ -1148,7 +1148,7 @@ void IO_input::put_node_state( int new_state)
 //========================================================================
 //
 IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
-  : IO_input(i,b,opt_name,iopp)
+  : IO_input(i,b,opt_name,_iopp)
 {
   //  source = new source_stimulus();
 
@@ -1220,7 +1220,7 @@ IO_bi_directional::IO_bi_directional(void)
 }
 
 IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
-  : IO_bi_directional(i, b,opt_name,iopp)
+  : IO_bi_directional(i, b,opt_name,_iopp)
 {
 
   pull_up_resistor = new resistor();
@@ -1329,7 +1329,7 @@ int IO_bi_directional_pu::get_voltage(guint64 current_time)
 
 
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,char *opt_name, file_register **_iopp)
-  : IO_input(i,b,opt_name,iopp)
+  : IO_input(i,b,opt_name,_iopp)
 {
 
   drive = MAX_DRIVE / 2;

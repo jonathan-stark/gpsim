@@ -222,6 +222,7 @@ static void update_symbols(Symbol_Window *sw, GUI_Processor *gp)
     for(iter=sw->symbols;iter!=NULL;)
     {
 	GList *next=iter->next;
+        free(((sym*)iter->data)->name);
 	free((sym*)iter->data);
 	g_list_remove(iter,iter->data); // FIXME. I really need a tutorial
 	iter=next;
@@ -283,6 +284,8 @@ static void update_symbols(Symbol_Window *sw, GUI_Processor *gp)
 	
 	e=(sym*)malloc(sizeof(sym));
 	memcpy(e,s,sizeof(sym));
+	e->name=(char*)malloc(strlen(s->name)+1);
+	strcpy(e->name,s->name);
 	sw->symbols=g_list_append(sw->symbols,e);
 
 	row=gtk_clist_append(GTK_CLIST(sw->symbol_clist),entry);

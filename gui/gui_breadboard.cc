@@ -316,6 +316,8 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
 	return FALSE;
     if(depth>mask_matrix[p.x][p.y])
 	return FALSE;
+    if(abs(p.x-end.x)+abs(p.y-end.y)+depth>maxdepth)
+	return FALSE;
     if(p.x == end.x && p.y==end.y)
     {
 	// We are at end point
@@ -1111,7 +1113,7 @@ static void trace_node(struct gui_node *gn)
 
 	if(nodepath!=NULL)
 	{
-	    compress_path(&nodepath);
+//	    compress_path(&nodepath);
 
 	    add_path_to_matrix(nodepath);
 
@@ -1295,6 +1297,8 @@ static void treeselect_stimulus(GtkItem *item, struct gui_pin *pin)
 
       if(pin->iopin->snode!=NULL)
 	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name());
+      else
+	snprintf(text,sizeof(text),"Not connected");
       pText = text;
     }
 
@@ -1655,13 +1659,15 @@ char *gui_get_string(char *prompt, char *initial_text)
     static GtkWidget *dialog=NULL;
     static GtkWidget *label;
     static GtkWidget *entry;
+    static int retval;
     GtkWidget *button;
     GtkWidget *hbox;
     
-    int retval=-1;
 
     char *string;
     
+    retval=-1;
+
     if(dialog==NULL)
     {
 	dialog = gtk_dialog_new();
@@ -1830,7 +1836,9 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     static GtkWidget *node_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
-    int cancel=-1;
+    static int cancel;
+
+    cancel=-1;
 
     Stimulus_Node *snode=NULL;
 
@@ -1905,7 +1913,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     static GtkWidget *module_clist;
     GtkWidget *okbutton;
     GtkWidget *cancelbutton;
-    int cancel=-1;
+    static int cancel;
     list <Module_Library *> :: iterator mi;
     static char module_type[STRING_SIZE];
 
@@ -1915,6 +1923,8 @@ static char *select_module_dialog(Breadboard_Window *bbw)
 
 	char *module_clist_titles[]={"Name","Library"};
 
+	cancel=-1;
+	
     if(dialog==NULL)
     {
 
