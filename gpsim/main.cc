@@ -30,6 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <popt.h>
 
 #include <iostream.h>
 #include "../config.h"
@@ -38,28 +39,64 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
 
+#ifdef HAVE_GUI
+int use_gui=1;
+#else
+int use_gui=0;
+#endif 
+int quit_state;
+
 extern "C" {
 int gui_init (int argc, char **argv);
 void gui_main(void);
+extern void exit_gpsim(void);
 
 }
 
 
 void initialize_gpsim(void);
 
-unsigned int config_word;   //%%%FIX_ME%%%
 
 int yyparse(void);
 int parse_string(char *cmd_string);
 extern void init_parser(void);
+//extern void parser_cleanup(void);
 
 extern int yydebug;
 extern int quit_parse;
+extern int abort_gpsim;
 
 void gpsim_version(void)
 {
   printf("%s\n", VERSION);
 }
+
+#define FILE_STRING_LENGTH 50
+
+static char *startup_name = "";
+static char *pic_name     = "";
+static char *cod_name     = "";
+static char *hex_name     = "";
+
+
+struct poptOption optionsTable[] = {
+  //  { "help", 'h', 0, 0, 'h',
+  //    "this help list" },
+  { "processor", 'p', POPT_ARG_STRING, &pic_name, 0,
+    "processor (e.g. -pp16c84 for the 'c84)","<processor name>" },
+  { "command",   'c', POPT_ARG_STRING, &startup_name, 0,
+    "startup command file" },
+  { "symbol",    's', POPT_ARG_STRING, &cod_name, 0,
+    ".cod symbol file" } ,
+  { "", 'L',0,0,'L',
+    "colon separated list of directories to search."},
+  { "version",'v',0,0,'v',
+    "gpsim version"},
+  { "cli",'i',0,0,'i',
+    "command line mode only"},
+  POPT_AUTOHELP
+  { NULL, 0, 0, NULL, 0 }
+};
 
 void 
 helpme (char *iam)
@@ -72,7 +109,17 @@ helpme (char *iam)
   printf ("\t-s <cod_file>  : .cod symbol file\n");
   printf ("\t-L <path list> : colon separated list of directories to search.\n");
   printf ("\n\t-v             : gpsim version\n");
+  printf ("\n Long options:\n\n");
+  printf ("\t--cli          : command line mode only\n");
 }
+void usage(poptContext optCon, int exitcode, char *error, char *addl) 
+{
+  poptPrintUsage(optCon, stderr, 0);
+  if (error) 
+    fprintf(stderr, "%s: %s", error, addl);
+  exit(exitcode);
+}
+
 
 
 void welcome(void)
@@ -84,18 +131,11 @@ void welcome(void)
 }
 
 
-
 void 
 main (int argc, char *argv[])
 {
 
   FILE *inputfile = stdin, *startup=NULL;
-#define FILE_STRING_LENGTH 50
-  char 
-    startup_name[FILE_STRING_LENGTH] = "",
-    pic_name[FILE_STRING_LENGTH]   = "",
-    cod_name[FILE_STRING_LENGTH]   = "",
-    hex_name[FILE_STRING_LENGTH]   = "";
 
   int i;
   int j;
@@ -103,57 +143,23 @@ main (int argc, char *argv[])
   char command_str[256];
   char *b;
   int architecture;
+  int option_index=0;
+  poptContext optCon;   /* context for parsing command-line options */
+
+
+  optCon = poptGetContext(NULL, argc, argv, optionsTable, 0);
+  poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
+
+
+  if (argc < 2) {
+    poptPrintUsage(optCon, stderr, 0);
+    exit(1);
+  }
 
   welcome();
 
-
-#if 0
-  i = 1;
-
-  while(i < argc)
-    {
-      if (argv[i][0] == '-')
-	switch (argv[i][1])
-	  {
-	  case 'P':
-	  case 'p':
-	    strncpy(pic_name, &argv[i][2],FILE_STRING_LENGTH);
-	    break;
-
-          case 'C':
-          case 'c':
-	    printf("%s  %s\n", &argv[i][0], &argv[i][2]);
-	    strncpy (startup_name, &argv[i][2],FILE_STRING_LENGTH);
-	    break;
-
-          case 'S':
-          case 's':
-	    printf("%s  %s\n", &argv[i][0], &argv[i][2]);
-	    strncpy (cod_name, &argv[i][2],FILE_STRING_LENGTH);
-	    break;
-
-	  case 'V':
-	  case 'v':
-	    printf("%s\n",VERSION);
-	    break;
-
-	  case 'H':
-          case 'h':
-	  default:
-	    helpme (argv[0]);
-	    exit (1);
-
-	  }
-      else
-	{
-	  strncpy(hex_name, argv[i],FILE_STRING_LENGTH);
-	}
-
-      i++;
-    }
-#endif
-
-  while ((c = getopt(argc, argv, "h?p:c:s:L:v")) != EOF) {
+  //while ((c = getopt(argc, argv, "h?p:c:s:L:v")) != EOF) {
+  while ((c = poptGetNextOpt(optCon)) >= 0) {
     switch (c) {
 
     default:
@@ -162,17 +168,18 @@ main (int argc, char *argv[])
     case 'h':
       usage = 1;
       break;
-    case 'p':
-      strncpy(pic_name, optarg,FILE_STRING_LENGTH);
-      break;
 
-    case 'c':
-      strncpy(startup_name, optarg,FILE_STRING_LENGTH);
-      break;
+      //case 'p':
+      //strncpy(pic_name, optarg,FILE_STRING_LENGTH);
+      //break;
 
-    case 's':
-      strncpy(cod_name, optarg,FILE_STRING_LENGTH);
-      break;
+      //case 'c':
+      //strncpy(startup_name, optarg,FILE_STRING_LENGTH);
+      //break;
+
+      //case 's':
+      //strncpy(cod_name, optarg,FILE_STRING_LENGTH);
+      //break;
 
     case 'L':
 	set_search_path (optarg);
@@ -182,14 +189,23 @@ main (int argc, char *argv[])
       printf("%s\n",VERSION);
       break;
 
+    case 'i':
+      use_gui = 0;
+      printf("not using gui");
     }
     if (usage)
       break;
   }
-  
-  if (optind < argc)
-    strncpy(hex_name, argv[optind],FILE_STRING_LENGTH);
 
+  
+  //if (optind < argc)
+  //  strncpy(hex_name, argv[optind],FILE_STRING_LENGTH);
+/*
+  hex_name = poptGetArg(optCon);
+
+  if((hex_name == NULL) || !(poptPeekArg(optCon) == NULL))
+    usage(optCon, 1, "Specify a hex file", ".e.g., /dev/cua0");
+*/
   if (usage) {
     helpme(argv[0]);
     exit (1);
@@ -202,7 +218,8 @@ main (int argc, char *argv[])
 
   // initialize the gui
 #ifdef HAVE_GUI
-  i = gui_init (argc,argv);
+  if(use_gui)
+    i = gui_init (argc,argv);
 #endif
 
 
@@ -211,7 +228,7 @@ main (int argc, char *argv[])
   yydebug = 0;
 
   quit_parse = 0;
-
+  abort_gpsim = 0;
 
   if(*pic_name)
     {
@@ -241,19 +258,25 @@ main (int argc, char *argv[])
       parse_string(command_str);
     }
 
+  if(abort_gpsim)
+    exit_gpsim();
+
+  //    parser_cleanup();
 
   // Now enter the event loop and start processing user
   // commands.
 
 #ifdef HAVE_GUI
-  gui_main();
-#else
-  do {
-    init_parser();
-    i = yyparse();
-
-  } while(!quit_parse);
-
+  if(use_gui)
+    gui_main();
+  else
 #endif
+    do {
+      init_parser();
+      i = yyparse();
+
+    } while(!quit_parse);
+
+
 
 }

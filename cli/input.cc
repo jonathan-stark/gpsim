@@ -31,6 +31,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include <stdio.h>
 
+extern int use_gui;
+
 //#if 0        //tsd removed in 0.20.4
 extern "C" {
 char** completion_matches(char* txt, char* (*cmdgen)(char* text, int state));
@@ -78,6 +80,7 @@ void exit_gpsim(void);
 void redisplay_prompt(void);
 }
 
+char *gnu_readline (char *s, unsigned int force_readline);
 bool using_readline=1;
 int input_mode = 0;
 int allocs = 0;
@@ -262,24 +265,20 @@ get_user_input (void)
   if((verbose&4) && DEBUG_PARSER)
     cout << __FUNCTION__ <<"()\n";
 
-  #ifndef HAVE_GUI
+  if( !use_gui && using_readline) {
 
-  if(using_readline)
-    {
+    // If we're in cli-only mode and we're not processing a command file
+    // then we use readline to get the commands
+    retval = gnu_readline ( "gpsim> ",1);
 
-      //retval = gnu_readline (const_cast<char*>(gpsim),1);
-      retval = gnu_readline ( "gpsim> ",1);
-    }
-  else
-    {
-  #endif
+  } else {
 
-      gets_from_cmd_file(&cmd_string_buf);
+    // We're either using the gui or we're parsing a command file.
 
-      retval = cmd_string_buf;
-  #ifndef HAVE_GUI
-    }
-  #endif
+    gets_from_cmd_file(&cmd_string_buf);
+    retval = cmd_string_buf;
+
+  }
 
   return retval;
 }
@@ -515,14 +514,14 @@ void exit_gpsim(void)
 {
 
 #ifdef HAVE_GUI
-
-	quit_gui();
+  if(use_gui)
+    quit_gui();
 
 #endif
 
-	rl_callback_handler_remove ();
+  rl_callback_handler_remove ();
 
-	exit(0);
+  exit(0);
 }
 
 /* redisplay_prompt will redisplay the current data in the readline buffer.
@@ -568,9 +567,14 @@ void initialize_readline (void)
 
 
 }
+/*
+void parser_cleanup(void)
+{
 
-
-#ifndef HAVE_GUI
+  rl_clear_signals();
+}
+*/
+//#ifndef HAVE_GUI
 
 char *gnu_readline (char *s, unsigned int force_readline)
 {
@@ -649,4 +653,4 @@ char *gnu_readline (char *s, unsigned int force_readline)
 }
 
 
-#endif
+//#endif

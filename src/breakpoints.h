@@ -84,6 +84,8 @@ enum BREAKPOINT_TYPES
   BREAK_ON_INVALID_FR  = 6<<24,
   BREAK_ON_CYCLE       = 7<<24,
   BREAK_ON_WDT_TIMEOUT = 8<<24,
+  BREAK_ON_STK_OVERFLOW  = 9<<24,
+  BREAK_ON_STK_UNDERFLOW = 10<<24,
   BREAK_MASK           = 0xff<<24
 };
 
@@ -116,6 +118,8 @@ struct BreakStatus
   unsigned int set_write_value_break(pic_processor *cpu, unsigned int register_number, unsigned int value);
   unsigned int set_cycle_break(pic_processor *cpu, guint64 cycle,BreakCallBack *f = NULL);
   unsigned int set_wdt_break(pic_processor *cpu);
+  unsigned int set_stk_overflow_break(pic_processor *cpu);
+  unsigned int set_stk_underflow_break(pic_processor *cpu);
   unsigned int check_write_break(file_register *fr);
   unsigned int check_read_break(file_register *fr);
   unsigned int check_break(file_register *fr);

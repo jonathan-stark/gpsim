@@ -153,6 +153,20 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type, pic_proces
       }
       break;
 
+    case BREAK_ON_STK_OVERFLOW:
+      if(cpu->stack->set_break_on_overflow(1))
+	return (breakpoint_number);
+
+      break_status[breakpoint_number].type = BREAK_CLEAR;
+      break;
+
+    case BREAK_ON_STK_UNDERFLOW:
+      if(cpu->stack->set_break_on_underflow(1))
+	return (breakpoint_number);
+
+      break_status[breakpoint_number].type = BREAK_CLEAR;
+      break;
+
     case BREAK_ON_WDT_TIMEOUT:
       ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
       return(breakpoint_number);
@@ -196,6 +210,16 @@ unsigned int  Breakpoints::set_cycle_break(pic_processor *cpu, guint64 future_cy
 {
 
   return(set_breakpoint (Breakpoints::BREAK_ON_CYCLE, cpu, future_cycle & 0xffffffff, future_cycle>>32,f1));    
+}
+
+
+unsigned int Breakpoints::set_stk_overflow_break(pic_processor *cpu)
+{
+  return(set_breakpoint (Breakpoints::BREAK_ON_STK_OVERFLOW, cpu, 0, 0));
+}
+unsigned int Breakpoints::set_stk_underflow_break(pic_processor *cpu)
+{
+  return(set_breakpoint (Breakpoints::BREAK_ON_STK_UNDERFLOW, cpu, 0, 0));
 }
 
 unsigned int  Breakpoints::set_wdt_break(pic_processor *cpu)
@@ -344,13 +368,20 @@ bool Breakpoints::dump1(unsigned int bp_num)
 
 
     case BREAK_ON_CYCLE:
+      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
       {
-	guint64 cyc =  break_status[bp_num].arg2;
-	cyc = (cyc <<32)  | break_status[bp_num].arg1;
-	cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-	cout << "cycle " << hex << setw(16) << setfill('0') <<  cyc << '\n';
-	set_by_user = 1;
+      guint64 cyc =  break_status[bp_num].arg2;
+      cyc = (cyc <<32)  | break_status[bp_num].arg1;
+      cout << "cycle " << hex << setw(16) << setfill('0') <<  cyc << '\n';
       }
+      set_by_user = 1;
+      break;
+
+    case BREAK_ON_STK_UNDERFLOW:
+    case BREAK_ON_STK_OVERFLOW:
+      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
+      cout << "stack " << ((break_type == BREAK_ON_STK_OVERFLOW)?"ov":"und") << "er flow\n";
+      set_by_user = 1;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
@@ -476,8 +507,24 @@ void Breakpoints::clear(unsigned int b)
 
 	  break;
 
+	case BREAK_ON_STK_OVERFLOW:
+	  break_status[b].type = BREAK_CLEAR;
+	  if(bs.cpu->stack->set_break_on_overflow(0))
+	    cout << "Cleared stack overflow break point.\n";
+	  else
+	    cout << "Stack overflow break point is already cleared.\n";
+	  break;
+
+	case BREAK_ON_STK_UNDERFLOW:
+	  break_status[b].type = BREAK_CLEAR;
+	  if(bs.cpu->stack->set_break_on_underflow(0))
+	    cout << "Cleared stack underflow break point.\n";
+	  else
+	    cout << "Stack underflow break point is already cleared.\n";
+	  break;
+
 	case BREAK_ON_WDT_TIMEOUT:
-	  bs.type = BREAK_CLEAR;
+	  break_status[b].type = BREAK_CLEAR;
 	  cout << "Cleared wdt timeout breakpoint number " << b << '\n';
 	  ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
 
