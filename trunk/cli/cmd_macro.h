@@ -36,7 +36,7 @@ public:
 
   void invoke();
   void prepareForInvocation();
-  int substituteParameter(string &s);
+  int substituteParameter(const string &s,string &replaced);
   int nParameters();
   void add_argument(char *new_arg);
   void add_parameter(char *s);

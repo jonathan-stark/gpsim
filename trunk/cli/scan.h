@@ -23,10 +23,6 @@ Boston, MA 02111-1307, USA.  */
 #if !defined (__SCAN_H_)
 #define __SCAN_H_
 
-// Arrange to get input via readline.
-
-extern bool using_readline;
-
 #ifdef YY_INPUT
 #undef YY_INPUT
 #endif
