@@ -68,30 +68,60 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"    // get the definition for HAVE_GUI
 
-#ifdef _HAVE_GUI
+#ifdef HAVE_GUI
 #include <gtk/gtk.h>
 #include <math.h>
+
+#include "../src/gpsim_interface.h"
+
 #include "led.h"
 
-extern "C" {
+//--------------------------------------------------------------
+//
+// Create an "interface" to gpsim
+//
 
-  static void led7_simulation_has_stopped(gpointer l7s)
+
+class LED_Interface : public Interface
+{
+private:
+  Led_base *led;
+  int lastport;
+
+public:
+
+  //virtual void UpdateObject (gpointer xref,int new_value);
+  //virtual void RemoveObject (gpointer xref);
+  virtual void SimulationHasStopped (gpointer object)
+  {
+    GuiUpdate(object);
+  }
+
+  //virtual void NewProcessor (unsigned int processor_id);
+  //virtual void NewModule (Module *module);
+  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
+  //virtual void NewProgram  (unsigned int processor_id);
+  virtual void GuiUpdate  (gpointer object)
+  {
+    if(led)
     {
-      if(l7s)
+      int portval = led->port->get_value();
+      if(lastport != portval)
       {
-	  static int lastport=-1;
-          int portval;
-	  Led_7Segments *l = (Led_7Segments*)l7s;
-	  portval = l->port->get_value();
-	  if(lastport != portval)
-	  {
-	      lastport=portval;
-	      ((Led_7Segments *)l7s)->update();
-	  }
-	}
+	lastport=portval;
+	led->update();
+      }
     }
+  }
 
-}
+
+  LED_Interface(Led_base *_led) : Interface((gpointer *) _led)
+  {
+    led = _led;
+    lastport = -1;
+  }
+
+};
 
 Led_Port::Led_Port (unsigned int _num_iopins) : IOPORT(_num_iopins)
 {
@@ -547,6 +577,9 @@ Led_7Segments::Led_7Segments(void)
   build_segments(100, 100);
   build_window();
 
+  interface = new LED_Interface(this);
+  gi.add_interface(interface);
+  /*
   interface_id = gpsim_register_interface((gpointer)this);
 
   gpsim_register_simulation_has_stopped(interface_id, led7_simulation_has_stopped);
@@ -555,15 +588,15 @@ Led_7Segments::Led_7Segments(void)
   cbp =  gpsim_set_cyclic_break_point2(led7_simulation_has_stopped,
 				       (gpointer)this,
 				       10000000);
-
+  */
 }
 
 Led_7Segments::~Led_7Segments(void)
 {
     //cout << "7-segment led destructor\n";
 
-    gpsim_unregister_interface(interface_id);
-    gpsim_clear_break(cbp);
+    //gpsim_unregister_interface(interface_id);
+    //gpsim_clear_break(cbp);
     delete port;
 }
 
@@ -679,25 +712,6 @@ ExternalModule * Led_7Segments::construct(const char *new_name=NULL)
 //-------------------------------------------------------------
 // Led (simple)
 //-------------------------------------------------------------
-extern "C" {
-
-  static void led_simulation_has_stopped(gpointer led)
-    {
-      if(led)
-      {
-	  static int lastport=-1;
-          int portval;
-	  Led *l = (Led*)led;
-	  portval = l->port->get_value();
-	  if(lastport != portval)
-	  {
-	      lastport=portval;
-	      l->update();
-	  }
-	}
-    }
-
-}
 void Led::update(void)
 {
   update(darea, w_width,w_height);
@@ -829,22 +843,26 @@ Led::Led(void)
 
   build_window();
 
+  interface = new LED_Interface(this);
+  gi.add_interface(interface);
+
+  /*
   interface_id = gpsim_register_interface((gpointer)this);
 
   gpsim_register_simulation_has_stopped(interface_id, led_simulation_has_stopped);
   gpsim_register_gui_update(interface_id, led_simulation_has_stopped);
-
   cbp =  gpsim_set_cyclic_break_point2(led_simulation_has_stopped,
 				       (gpointer)this,
 				       10000000);
+  */
 }
 
 Led::~Led(void)
 {
     //cout << "7-segment led destructor\n";
 
-    gpsim_unregister_interface(interface_id);
-    gpsim_clear_break(cbp);
+    //gpsim_unregister_interface(interface_id);
+    //gpsim_clear_break(cbp);
     delete port;
 }
 

@@ -410,7 +410,7 @@ void Processor::attach_src_line(int address,int file_id,int sline,int lst_line)
 
     program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
 
-    printf("%s address=%x, sline=%d, lst_li ne=%d\n", __FUNCTION__,address,sline,lst_line);
+    // printf("%s address=%x, sline=%d, lst_line=%d\n", __FUNCTION__,address,sline,lst_line);
 
     FileContext *fc = (*_files)[file_id];
 
@@ -1477,7 +1477,7 @@ void FileContext::ReadSource(void)
   if(line_seek)
     delete line_seek;
 
-  line_seek = new vector<int>(max_line());
+  line_seek = new vector<int>(max_line()+1);
 
 
   std::rewind(fptr);

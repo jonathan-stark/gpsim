@@ -22,13 +22,15 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __LED_H__
 #define __LED_H__
 
-#include <../src/stimuli.h>
-#include <../src/ioports.h>
-#include <../src/symbol.h>
-#include <../src/trace.h>
-#include <../src/interface.h>
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/symbol.h"
+#include "../src/trace.h"
+#include "../src/interface.h"
 
 #include <gtk/gtk.h>
+
+class LED_Interface;  // Defined in led.cc
 
 // Create a few classes from which an LED may be constructed
 
@@ -58,6 +60,28 @@ public:
 
 };
 
+
+//------------------------------------------------------------------------
+// LED base class
+
+class Led_base : public ExternalModule
+{
+ public:
+
+  virtual void build_window( void ) = 0;
+  virtual void update(void) = 0;
+  virtual void update( GtkWidget *drawable,   
+		       guint max_width,
+		       guint max_height) = 0;
+  LED_Interface *interface;
+  Led_Port  *port;
+
+};
+
+
+//------------------------------------------------------------------------
+// 7-segment leds
+
 // define a point
 typedef struct {
    float x;
@@ -81,16 +105,9 @@ typedef struct {
 
 typedef XfPoint segment_pts[NUM_SEGS][MAX_PTS];
 
-class Led_7Segments : public ExternalModule
+class Led_7Segments : public Led_base
 {
 public:
-
-  /*
-  struct {
-    GdkPoint *p;  // Segments built from little polygons whose endpoint are here
-    int n;        // Here's the number of endpoints.
-  } segments[7];
-  */
 
   struct {
     GdkPoint p[7];  // Segments 
@@ -118,26 +135,24 @@ public:
 
   GtkWidget *darea;
   GdkGC *segment_gc;
-  //  GdkGC led_segment_off_gc;
 
   GdkColor led_segment_on_color;
   GdkColor led_segment_off_color;
   GdkColor led_background_color;
 
-  gpointer cbp;  // cycle break point pointer (need to delete in destructor)
-
-  Led_Port  *port;
+  //gpointer cbp;  // cycle break point pointer (need to delete in destructor)
 
   Led_7Segments(void);
   ~Led_7Segments(void);  
 
 
   void build_segments( int w, int h);
-  void build_window( void );
-  void update(void);
-  void update( GtkWidget *drawable,   
-	       guint max_width,
-	       guint max_height);
+
+  virtual void build_window( void );
+  virtual void update(void);
+  virtual void update( GtkWidget *drawable,   
+		       guint max_width,
+		       guint max_height);
 
   // Inheritances from the Package class
   virtual void create_iopin_map(void);
@@ -146,10 +161,13 @@ public:
   const virtual char *type(void) { return ("led_7segments"); };
   static ExternalModule *construct(const char *new_name);
 
-
 };
 
-class Led: public ExternalModule
+//------------------------------------------------------------------------
+// Simple LED
+//
+
+class Led: public Led_base
 {
 public:
 
@@ -161,14 +179,12 @@ public:
 
   gpointer cbp;  // cycle break point pointer (need to delete in destructor)
 
-  Led_Port  *port;
-
   Led(void);
   ~Led(void);
 
-  void build_window( void );
-  void update(void);
-  void update( GtkWidget *drawable,   
+  virtual void build_window( void );
+  virtual void update(void);
+  virtual void update( GtkWidget *drawable,   
 	       guint max_width,
 	       guint max_height);
 
