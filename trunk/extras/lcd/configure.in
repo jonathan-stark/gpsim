@@ -102,6 +102,4 @@ lcd-$LCD_VERSION is now configured for $canonical_host_type
   C compiler:           $CC $XTRA_CFLAGS $CFLAGS
   C++ compiler:         $CXX $XTRA_CXXFLAGS $CXXFLAGS
 
-  gui:			$use_gui
-
 ])
