@@ -514,32 +514,41 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_break_at_address(int address)
 {
-  if( address >= 0  && address<cpu->program_memory_size())
-    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+  int pm_index = cpu->map_pm_address2index(address);
+
+  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
+    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_execution_break(cpu, address);
+
 }
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_notify_at_address(int address, BreakCallBack *cb)
 {
-  if( address >= 0  && address<cpu->program_memory_size())
-    if (cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+  int pm_index = cpu->map_pm_address2index(address);
+
+  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
+    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_notify_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_start_at_address(int address, BreakCallBack *cb)
 {
-  if( address >= 0  && address<cpu->program_memory_size())
-    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+  int pm_index = cpu->map_pm_address2index(address);
+
+  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
+    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_profile_start_break(cpu, address, cb);
 }
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_profile_stop_at_address(int address, BreakCallBack *cb)
 {
-  if( address >= 0  && address<cpu->program_memory_size())
-    if(cpu->program_memory[address]->isa() != instruction::INVALID_INSTRUCTION)
+  int pm_index = cpu->map_pm_address2index(address);
+
+  if( pm_index >= 0  && pm_index<cpu->program_memory_size()) 
+    if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
       bp.set_profile_stop_break(cpu, address, cb);
 }
 
@@ -641,32 +650,6 @@ void ProgramMemoryAccess::toggle_break_at_line(int file_id, int src_line)
 {
   toggle_break_at_address(find_closest_address_to_line(file_id, src_line));
 }
-
-//-------------------------------------------------------------------
-#if 0
-void ProgramMemoryAccess::set_break_at_hll_line(int file_id, int src_hll_line)
-{
-  int address;
-
-  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-      set_break_at_address(address);
-}
-
-void ProgramMemoryAccess::clear_break_at_hll_line(int file_id, int src_hll_line)
-{
-
-  int address;
-
-  if( (address = find_closest_address_to_hll_line(file_id, src_hll_line)) >= 0)
-      clear_break_at_address(address);
-}
-
-void ProgramMemoryAccess::toggle_break_at_hll_line(int file_id, int src_hll_line)
-{
-  toggle_break_at_address(find_closest_address_to_hll_line(file_id, src_hll_line));
-}
-
-#endif
 
 //-------------------------------------------------------------------
 //
@@ -800,41 +783,43 @@ void Processor::dump_registers (void)
 //-------------------------------------------------------------------
 instruction *ProgramMemoryAccess::find_instruction(int address, enum instruction::INSTRUCTION_TYPES type)
 {
-    instruction *p;
+  instruction *p;
 
-    if(cpu->program_memory_size()<=address  || address<0)
-	return NULL;
+  address = cpu->map_pm_address2index(address);
 
-    p=cpu->program_memory[address];
+  if(cpu->program_memory_size()<=address  || address<0)
+    return NULL;
 
-    if(p==NULL)
-        return NULL;
+  p=cpu->program_memory[address];
 
-    if(p->isa()==instruction::INVALID_INSTRUCTION)
-        return NULL;
+  if(p==NULL)
+    return NULL;
 
-    for(;;)
+  if(p->isa()==instruction::INVALID_INSTRUCTION)
+    return NULL;
+
+  for(;;)
     {
-	if(p->isa()==type)
-	    return p;
+      if(p->isa()==type)
+	return p;
 
-	switch(p->isa())
+      switch(p->isa())
 	{
 	case instruction::MULTIWORD_INSTRUCTION:
 	case instruction::INVALID_INSTRUCTION:
 	case instruction::NORMAL_INSTRUCTION:
-            return NULL;
+	  return NULL;
 	case instruction::BREAKPOINT_INSTRUCTION:
 	case instruction::NOTIFY_INSTRUCTION:
 	case instruction::PROFILE_START_INSTRUCTION:
 	case instruction::PROFILE_STOP_INSTRUCTION:
-	    p=((Breakpoint_Instruction *)p)->replaced;
-            break;
+	  p=((Breakpoint_Instruction *)p)->replaced;
+	  break;
 	}
 
     }
 
-    return NULL;
+  return NULL;
 }
 
 
