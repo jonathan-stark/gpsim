@@ -277,6 +277,56 @@ void gpsimInterface::simulation_has_stopped (void)
 
 }
 
+
+// pthread variables.
+pthread_attr_t thAttribute;
+pthread_mutex_t muRunMutex;
+pthread_cond_t  cvRunCondition;
+pthread_t thPrint;
+
+static Processor *tcpu=0;
+
+static void *run_thread( void *ptr )
+{
+  printf("run thread\n");
+  while(1) {
+
+    pthread_mutex_lock(&muRunMutex);
+    printf("running waiting for condition\n");
+
+    pthread_cond_wait(&cvRunCondition, &muRunMutex);
+    if(tcpu) {
+      printf("running\n");
+      tcpu->run();
+      printf("stopped running\n");
+    }
+
+    pthread_mutex_unlock(&muRunMutex);
+
+  }
+
+}
+
+
+void start_run_thread(void)
+{
+  std::cout << "starting run thread....\n";
+
+  pthread_mutex_init(&muRunMutex, NULL);
+  pthread_cond_init (&cvRunCondition, NULL);
+
+  pthread_mutex_lock(&muRunMutex);
+
+  pthread_attr_init(&thAttribute);
+  pthread_attr_setdetachstate(&thAttribute, PTHREAD_CREATE_JOINABLE);
+  pthread_create(&thPrint, &thAttribute, run_thread, (void *)0);
+
+  pthread_mutex_unlock(&muRunMutex);
+
+  std::cout << " started thread\n";
+}
+
+
 void gpsimInterface::start_simulation (void)
 {
   Processor *cpu = get_active_cpu();
@@ -285,11 +335,28 @@ void gpsimInterface::start_simulation (void)
 
   if(cpu) {
 
+    static bool thread_initialized=false;
+
+    if(!thread_initialized) {
+      start_run_thread();
+      g_usleep(10000);
+      thread_initialized = true;
+    }
+
+    pthread_mutex_lock(&muRunMutex);
+
+    tcpu = cpu;
+    /*
     if(verbosity && verbosity->getVal()) {
       cout << "running...\n";
       cpu->run(true);
     } else
       cpu->run(false);
+    */
+    printf("signalling run thread\n");
+    pthread_cond_signal(&cvRunCondition);
+    pthread_mutex_unlock(&muRunMutex);
+    printf("leaving start_simulation\n");
   }
 
   mbSimulating = false;
