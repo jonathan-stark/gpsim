@@ -64,6 +64,7 @@ GUI_Processor::GUI_Processor(void)
   stopwatch_window = new  StopWatch_Window(this);
 
   pic_id = 0;
+  cpu = NULL;
 }
 
 

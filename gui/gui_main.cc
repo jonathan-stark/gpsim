@@ -108,6 +108,8 @@ void gui_new_processor (unsigned int pic_id)
   if(gp)
     {
       gp->pic_id = pic_id;
+      gp->cpu = get_processor(pic_id);
+
       gui_processors = g_slist_append(gui_processors,gp);
 
       gp->regwin_ram->NewProcessor(gp);
@@ -235,134 +237,6 @@ void gui_remove_object(gpointer gui_xref)
   if(xref->remove)
     xref->remove(xref);
 
-}
-
-int config_set_string(char *module, char *entry, char *string)
-{
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
-    {
-	ret = eXdbmCreateList(dbid, NULL, module, NULL);
-	if(ret==-1)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-	
-	list = eXdbmGetList(dbid, NULL, module);
-	if(list==NULL)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-    }
-
-    // We have the list
-    
-    ret = eXdbmChangeVarString(dbid, list, entry, string);
-    if(ret == -1)
-    {
-	ret = eXdbmCreateVarString(dbid, list, entry, NULL, string);
-	if(ret==-1)
-	{
-	    puts("\n\n\n\ndidn't work");
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    puts("\n\n\n\n");
-	    return 0;
-	}
-    }
-    ret=eXdbmUpdateDatabase(dbid);
-    if(ret==-1)
-    {
-	puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	return 0;
-    }
-    return 1;
-}
-
-int config_set_variable(char *module, char *entry, int value)
-{
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
-    {
-	ret = eXdbmCreateList(dbid, NULL, module, NULL);
-	if(ret==-1)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-	
-	list = eXdbmGetList(dbid, NULL, module);
-	if(list==NULL)
-	{
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    return 0;
-	}
-    }
-
-    // We have the list
-    
-    ret = eXdbmChangeVarInt(dbid, list, entry, value);
-    if(ret == -1)
-    {
-	ret = eXdbmCreateVarInt(dbid, list, entry, NULL, value);
-	if(ret==-1)
-	{
-	    puts("\n\n\n\ndidn't work");
-	    puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	    puts("\n\n\n\n");
-	    return 0;
-	}
-    }
-    ret=eXdbmUpdateDatabase(dbid);
-    if(ret==-1)
-    {
-	puts(eXdbmGetErrorString(eXdbmGetLastError()));
-	return 0;
-    }
-    return 1;
-}
-
-int config_get_variable(char *module, char *entry, int *value)
-{
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
-	return 0;
-
-    // We have the list
-    
-    ret = eXdbmGetVarInt(dbid, list, entry, value);
-    if(ret == -1)
-	return 0;
-    
-    return 1;
-}
-
-int config_get_string(char *module, char *entry, char **string)
-{
-    int ret;
-    DB_LIST list;
-
-    list = eXdbmGetList(dbid, NULL, module);
-    if(list==NULL)
-	return 0;
-
-    // We have the list
-    
-    ret = eXdbmGetVarString(dbid, list, entry, string);
-    if(ret == -1)
-	return 0;
-    
-    return 1;
 }
 
 /*------------------------------------------------------------------

@@ -370,7 +370,7 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
  this happens when breakpoint is set or unset
  ( Can it happen for another reason? )
  */
-void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
+void SourceBrowserAsm_Window::UpdateLine(int address)
 {
   int row;
 
@@ -379,20 +379,14 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
   struct breakpoint_info *bpi;
   GList *iter;
   
-  assert(sbaw);
-
-  
-  assert(sbaw->wt == WT_asm_source_window);
   assert(address>=0);
 
-  if(!sbaw->source_loaded) return;
+  if(!source_loaded)
+    return;
 
-  for(i=0;i<SBAW_NRFILES;i++)
-  {
-      if(sbaw->pageindex_to_fileid[i]==gpsim_get_file_id( ((GUI_Object*)sbaw)->gp->pic_id, address))
-      {
-	  id=i;
-      }
+  for(i=0;i<SBAW_NRFILES;i++) {
+    if(pageindex_to_fileid[i]==gpsim_get_file_id( gp->pic_id, address))
+      id=i;
   }
 
   if(id==-1)
@@ -401,10 +395,10 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
       return;
   }
   
-  if(gpsim_get_hll_mode(((GUI_Object*)sbaw)->gp->pic_id))
-      row = gpsim_get_hll_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+  if(gpsim_get_hll_mode(gp->pic_id))
+      row = gpsim_get_hll_src_line(gp->pic_id, address);
   else
-      row = gpsim_get_src_line(((GUI_Object*)sbaw)->gp->pic_id, address);
+      row = gpsim_get_src_line(gp->pic_id, address);
   if(row==INVALID_VALUE)
       return;
   row--;
@@ -419,7 +413,7 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
   }
 
   // Find widget from address, and remove if found
-  iter=sbaw->breakpoints;
+  iter=breakpoints;
   while(iter!=NULL)
   {
       GList *next=iter->next;
@@ -431,12 +425,12 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 	  // remove the breakpoint
 	  gtk_widget_destroy(bpi->widget);
 	  free( (struct breakpoint_info*)iter->data );
-	  sbaw->breakpoints=g_list_remove(sbaw->breakpoints,iter->data); // FIXME. I really need a tutorial
+	  breakpoints=g_list_remove(breakpoints,iter->data); // FIXME. I really need a tutorial
       }
       iter=next;
   }
   // Find widget from address, and remove if found
-  iter=sbaw->notify_start_list;
+  iter=notify_start_list;
   while(iter!=NULL)
   {
       GList *next=iter->next;
@@ -447,12 +441,12 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 	  // remove the breakpoint
 	  gtk_widget_destroy(bpi->widget);
 	  free( (struct breakpoint_info*)iter->data );
-	  sbaw->notify_start_list=g_list_remove(sbaw->notify_start_list,iter->data); // FIXME. I really need a tutorial
+	  notify_start_list=g_list_remove(notify_start_list,iter->data); // FIXME. I really need a tutorial
       }
       iter=next;
   }
   // Find widget from address, and remove if found
-  iter=sbaw->notify_stop_list;
+  iter=notify_stop_list;
   while(iter!=NULL)
   {
       GList *next=iter->next;
@@ -463,57 +457,57 @@ void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address)
 	  // remove the breakpoint
 	  gtk_widget_destroy(bpi->widget);
 	  free( (struct breakpoint_info*)iter->data );
-	  sbaw->notify_stop_list=g_list_remove(sbaw->notify_stop_list,iter->data); // FIXME. I really need a tutorial
+	  notify_stop_list=g_list_remove(notify_stop_list,iter->data); // FIXME. I really need a tutorial
       }
       iter=next;
   }
 
   // Create a new profile start widget if address has notify start
-  if(gpsim_address_has_profile_start( ((GUI_Object*)sbaw)->gp->pic_id, address))
+  if(gpsim_address_has_profile_start(gp->pic_id, address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
-      bpi->widget = gtk_pixmap_new(sbaw->pixmap_profile_start,sbaw->startp_mask);
-      gtk_layout_put(GTK_LAYOUT(sbaw->source_layout[id]),
+      bpi->widget = gtk_pixmap_new(pixmap_profile_start,startp_mask);
+      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
 		     bpi->widget,
 		     PIXMAP_SIZE*0,
-		     PIXMAP_POS(sbaw,e)
+		     PIXMAP_POS(this,e)
 		    );
       gtk_widget_show(bpi->widget);
-      sbaw->notify_start_list=g_list_append(sbaw->notify_start_list,bpi);
+      notify_start_list=g_list_append(notify_start_list,bpi);
   }
 
   // Create a new profile stop widget if address has notify start
-  if(gpsim_address_has_profile_stop( ((GUI_Object*)sbaw)->gp->pic_id, address))
+  if(gpsim_address_has_profile_stop(gp->pic_id, address))
   {
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
-      bpi->widget = gtk_pixmap_new(sbaw->pixmap_profile_stop,sbaw->stopp_mask);
-      gtk_layout_put(GTK_LAYOUT(sbaw->source_layout[id]),
+      bpi->widget = gtk_pixmap_new(pixmap_profile_stop,stopp_mask);
+      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
 		     bpi->widget,
 		     PIXMAP_SIZE*0,
-		     PIXMAP_POS(sbaw,e)
+		     PIXMAP_POS(this,e)
 		    );
       gtk_widget_show(bpi->widget);
-      sbaw->notify_stop_list=g_list_append(sbaw->notify_stop_list,bpi);
+      notify_stop_list=g_list_append(notify_stop_list,bpi);
   }
 
   // Create a new breakpoint widget if address has breakpoint
-  if(gpsim_address_has_breakpoint( ((GUI_Object*)sbaw)->gp->pic_id, address))
+  if(gpsim_address_has_breakpoint( gp->pic_id, address))
   {
       // There has appeared a new breakpoint, so we
       // append it to sbaw->breakpoints;
 
       bpi=(struct breakpoint_info*)malloc(sizeof(struct breakpoint_info));
       bpi->address=address;
-      bpi->widget = gtk_pixmap_new(sbaw->pixmap_break,sbaw->bp_mask);
-      gtk_layout_put(GTK_LAYOUT(sbaw->source_layout[id]),
+      bpi->widget = gtk_pixmap_new(pixmap_break,bp_mask);
+      gtk_layout_put(GTK_LAYOUT(source_layout[id]),
 		     bpi->widget,
 		     0,
-		     PIXMAP_POS(sbaw,e)
+		     PIXMAP_POS(this,e)
 		    );
       gtk_widget_show(bpi->widget);
-      sbaw->breakpoints=g_list_append(sbaw->breakpoints,bpi);
+      breakpoints=g_list_append(breakpoints,bpi);
   }
 }
 
@@ -651,14 +645,14 @@ popup_activated(GtkWidget *widget, gpointer data)
 	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
 			    
 	}
-	SymbolWindow_select_symbol_name(popup_sbaw->gp->symbol_window,text);
+	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
 
 
 	// We also try with a '_' prefix.
 	for(i=strlen(text)+1;i>0;i--)
 	    text[i]=text[i-1];
         text[i]='_';
-	SymbolWindow_select_symbol_name(popup_sbaw->gp->symbol_window,text);
+	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
 	break;
     case MENU_STEP:
 	if(gpsim_get_hll_mode(popup_sbaw->gp->pic_id))
@@ -803,9 +797,9 @@ static gint switch_page_cb(GtkNotebook     *notebook,
         remove_all_points(sbaw);
 
 	// update breakpoint widgets
-	for(address=0;address<gpsim_get_program_memory_size(sbaw->gp->pic_id);address++)
+	for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
 	{
-	    SourceBrowserAsm_update_line(sbaw, address);
+	    sbaw->UpdateLine(address);
 	}
     }
     return 1;

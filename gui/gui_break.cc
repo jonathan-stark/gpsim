@@ -57,19 +57,18 @@ void gui_simulation_has_stopped(gpointer callback_data)
   if(callback_data)
     {
       GUI_Processor *gp = (GUI_Processor *) callback_data;
+
       gp->regwin_ram->Update();
       gp->regwin_eeprom->Update();
-      //StatusBar_update(gp->status_bar);
       gp->status_bar->Update();
       gp->program_memory->Update();
       gp->source_browser->Update();
-      //WatchWindow_update(gp->watch_window);
       gp->watch_window->Update();
       gp->stack_window->Update();
       gp->breadboard_window->Update();
       gp->trace_window->Update();
       gp->profile_window->Update();
-      StopWatchWindow_update(gp->stopwatch_window);
+      gp->stopwatch_window->Update();
     }
 
   if(gui_animate_delay!=0)
@@ -80,69 +79,7 @@ void gui_simulation_has_stopped(gpointer callback_data)
 }
 
 
-/*
- * gui_cycle_callback
- *
- * This callback routine is invoked on 'cycle' break points.
- * In other words, the gui will set a break point at a specific
- * simulation cycle number in order to regain control (for 
- * updating displays or whatever). When the simulator hits
- * that break point, this is the routine that is called.
- */
 
-/*void  gui_cycle_callback (gpointer callback_data)
-{
-
-  if(callback_data)
-    {
-
-      // Update all of the windows in the gui
-      gui_simulation_has_stopped(callback_data);
-
-      // update gui
-      while(gtk_events_pending())
-	  gtk_main_iteration();
-    }
-  else
-    {
-      printf("*** warning - the gui got an unkown break point (gui_break.c)\n");
-    }
-
-}*/
-
-/*
- * init_link_to_gpsim
- *
- * After a processor has been loaded, this routine will be called.
- * Its purpose is to establish a communication link between the
- * simulator and the gui. 
- */
-/*
-void init_link_to_gpsim(GUI_Processor *gp)
-{
-
-  if(verbose)
-    printf("init link to gpsim\n");
-
-  if(gp)
-    {
-
-
-      //      cycle = gp->p->cycles.value_lo + 0x100000;
-
-      gpsim_set_cyclic_break_point( gp->pic_id,
-				   gui_cycle_callback, 
-				   (gpointer) gp,
-				   gpsim_get_update_rate());
-
-      if(verbose)
-	printf("gui break was set\n");
-
-    }
-
-
-
-}*/
 /*
  * link_src_to_gpsim
  *
@@ -159,31 +96,30 @@ void link_src_to_gpsim(GUI_Processor *gp)
   struct cross_reference_to_gui *cross_reference;
 
 
-  if(gp)
-    {
+  if(gp) {
+
       // Create a cross reference between the pic's program memory and the gui.
-      pm_size = gpsim_get_program_memory_size( gp->pic_id);
+      pm_size =  gp->cpu->program_memory_size();
 
       if(verbose) {
 	printf("link_src_to_gpsim\n");
 	printf(" processor pma = %d\n",pm_size);
       }
 
-      for(i=0; i < pm_size; i++)
-	{
-	  cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
-	  cross_reference->parent_window_type =   WT_asm_source_window;
-	  cross_reference->parent_window = (gpointer) gp;
-	  address = (int *) malloc(sizeof(int));
-	  *address = i;
+      for(i=0; i < pm_size; i++) {
+	
+	cross_reference = (struct cross_reference_to_gui *) malloc(sizeof(struct cross_reference_to_gui));
+	cross_reference->parent_window_type =   WT_asm_source_window;
+	cross_reference->parent_window = (gpointer) gp;
+	address = (int *) malloc(sizeof(int));
+	*address = i;
 
-	  cross_reference->data = (gpointer) address;
-	  cross_reference->update = SourceBrowser_update_line;
-	  cross_reference->remove = NULL;
+	cross_reference->data = (gpointer) address;
+	cross_reference->update = SourceBrowser_update_line;
+	cross_reference->remove = NULL;
 
-	  //gp->p->program_memory[i]->assign_xref((gpointer) cross_reference);
-	  gpsim_assign_program_xref(gp->pic_id, i,(gpointer) cross_reference);
-	}
+	gp->cpu->pma.assign_xref(i,(gpointer) cross_reference);
+      }
     }
 }
 

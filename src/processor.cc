@@ -996,6 +996,18 @@ void program_memory_access::put_opcode(int addr, unsigned int new_opcode)
   delete(old_inst);
 }
 
+//--------------------------------------------------------------------------
+
+void  program_memory_access::assign_xref(unsigned int address, gpointer xref)
+{
+
+  if(cpu->program_memory_size()<=address)
+    return;
+
+  if(cpu->program_memory[address] && cpu->program_memory[address]->xref)
+      cpu->program_memory[address]->xref->add(xref);
+
+}
 
 //========================================================================
 // Processor Constructor

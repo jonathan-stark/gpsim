@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/interface.h"
 #include "../src/gpsim_def.h"
 #include "../src/modules.h"
+#include "../src/processor.h"
+#include "../src/pic-processor.h"
 
 #define SBAW_NRFILES 20 // Max number of source files
 //#define MAX_BREAKPOINTS 32
@@ -142,6 +144,7 @@ class GUI_Object {
   void check(void);
   int set_default_config(void);
   int set_config(void);
+
   virtual void Build(void);
   virtual int Create(GUI_Processor *_gp);
   virtual void UpdateMenuItem(void);
@@ -356,7 +359,7 @@ class Symbol_Window : public GUI_Object
   virtual void Build(void);
   virtual void Update(void);
   void NewSymbols(void);
-
+  void SelectSymbolName(char *name);
 
 };
 
@@ -396,6 +399,7 @@ class SourceBrowser_Window : public GUI_Object {
   virtual void NewProcessor(GUI_Processor *gp);
   virtual void SelectAddress(int address);
   virtual void Update(void);
+  virtual void UpdateLine(int address);
   virtual void SetPC(int address);
   virtual void CloseSource(void){};
   virtual void NewSource(GUI_Processor *gp){};
@@ -472,6 +476,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void SetPC(int address);
   virtual void CloseSource(void);
   virtual void NewSource(GUI_Processor *gp);
+  virtual void UpdateLine(int address);
 
 
 };
@@ -524,6 +529,8 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
   virtual void SelectAddress(int address);
   virtual void SetPC(int address);
   virtual void NewSource(GUI_Processor *gp);
+  virtual void UpdateLine(int address);
+
 };
 
 
@@ -791,6 +798,7 @@ class GUI_Processor {
 
   // The pic that's associated with the gui
   unsigned int pic_id;
+  Processor *cpu;
 };
 
 
@@ -799,11 +807,33 @@ class GUI_Processor {
 //
 
 extern GtkItemFactory *item_factory;
+// gui_processor.c
+extern GUI_Processor *gp;
 
 void exit_gpsim(void);
 
 void update_menu_item(GUI_Object *_this);
 
+
+void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value);
+
+
+// Configuration -- records window states.
+
+int config_get_variable(char *module, char *entry, int *value);
+int config_set_variable(char *module, char *entry, int value);
+int config_get_string(char *module, char *entry, char **string);
+int config_set_string(char *module, char *entry, char *string);
+
+gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
+
+
+void ProfileWindow_notify_start_callback(Profile_Window *pw);
+void ProfileWindow_notify_stop_callback(Profile_Window *pw);
+int gui_get_value(char *prompt);
+
+
+#if 0
 // gui_symbols.c
 void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber);
 void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name);
@@ -818,7 +848,6 @@ void StatusBar_new_processor(StatusBar_Window *sbw, GUI_Processor *gp);
 
 // gui_src_opcode.c
 void SourceBrowserOpcode_select_address(SourceBrowserOpcode_Window *sbow,int address);
-void SourceBrowserOpcode_update_line( SourceBrowserOpcode_Window *sbow, int address, int row);
 void SourceBrowserOpcode_set_pc(SourceBrowserOpcode_Window *sbow, int address);
 void SourceBrowserOpcode_new_program(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
 void SourceBrowserOpcode_new_processor(SourceBrowserOpcode_Window *sbow, GUI_Processor *gp);
@@ -829,34 +858,24 @@ void BuildSourceBrowserOpcodeWindow(SourceBrowserOpcode_Window *sbow);
 int CreateSourceBrowserAsmWindow(GUI_Processor *gp);
 void SourceBrowserAsm_new_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
 void SourceBrowserAsm_close_source(SourceBrowserAsm_Window *sbaw, GUI_Processor *gp);
-void SourceBrowserAsm_update_line( SourceBrowserAsm_Window *sbaw, int address);
 void SourceBrowserAsm_set_pc(SourceBrowserAsm_Window *sbaw, int address);
 void SourceBrowserAsm_select_address( SourceBrowserAsm_Window *sbaw, int address);
 void BuildSourceBrowserAsmWindow(SourceBrowserAsm_Window *sbaw);
 
 // gui_src.c
 void SourceBrowser_select_address(SourceBrowser_Window *sbw,int address);
-void SourceBrowser_update_line(struct cross_reference_to_gui *xref, int new_value);
 void SourceBrowser_update(SourceBrowser_Window *sbw);
 void CreateSBW(SourceBrowser_Window *sbw);
 void SourceBrowser_change_view (GUI_Object *_this, int view_state);
 
 // gui_regwin.c
-int gui_get_value(char *prompt);
 void RegWindow_update(Register_Window *rw);
 void RegWindow_select_symbol_name(Register_Window *rw, char *name);
 void RegWindow_select_symbol_regnumber(Register_Window *rw, int n);
 void RegWindow_select_register(Register_Window *rw, int regnumber);
 void RegWindow_new_processor(Register_Window *rw, GUI_Processor *gp);
 
-// gui_processor.c
-extern GUI_Processor *gp;
 
-int config_get_variable(char *module, char *entry, int *value);
-int config_set_variable(char *module, char *entry, int value);
-int config_get_string(char *module, char *entry, char **string);
-int config_set_string(char *module, char *entry, char *string);
-gint gui_object_configure_event(GtkWidget *widget, GdkEventConfigure *e, GUI_Object *go);
 
 // gui_watch.c
 void WatchWindow_add(Watch_Window *ww, unsigned int pic_id, REGISTER_TYPE type, int address);
@@ -892,8 +911,6 @@ void ProfileWindow_new_program(Profile_Window *pw, GUI_Processor *gp);
 int BuildProfileWindow(Profile_Window *pw);
 int CreateProfileWindow(GUI_Processor *gp);
 void ProfileWindow_update(Profile_Window *pw);
-void ProfileWindow_notify_start_callback(Profile_Window *pw);
-void ProfileWindow_notify_stop_callback(Profile_Window *pw);
 
 // gui_stopwatch.c
 void StopWatchWindow_new_processor(StopWatch_Window *sww, GUI_Processor *gp);
@@ -901,6 +918,7 @@ void StopWatchWindow_new_program(StopWatch_Window *sww, GUI_Processor *gp);
 int BuildStopWatchWindow(StopWatch_Window *sww);
 int CreateStopWatchWindow(GUI_Processor *gp);
 void StopWatchWindow_update(StopWatch_Window *sww);
+#endif
 
 #endif // __GUI_H__
 

@@ -75,7 +75,7 @@ void  initialization_is_complete(void);
 
   /*********************************************************************
    * 
-   * What follows is a whole bunch of functions that provide access to
+   * What follows are a whole bunch of functions that provide access to
    * gpsim's innards. This is what the gui uses to interface to gpsim.
    * All of the functions here have "C" signatures, which is to say
    * they may be called from "C" code as well as from C++
@@ -250,9 +250,6 @@ typedef struct _sym
 					unsigned int address);
   unsigned int gpsim_address_has_changed(unsigned int processor_id,
 					 unsigned int address);
-  void  gpsim_assign_program_xref(unsigned int processor_id,
-				  unsigned int address,
-				  gpointer xref);
   void gpsim_set_read_break_at_address(unsigned int processor_id,
 					  unsigned int address);
   void gpsim_set_write_break_at_address(unsigned int processor_id,

@@ -354,81 +354,76 @@ void SymbolWindow_select_symbol_regnumber(Symbol_Window *sw, int regnumber)
     }
 }
 
-void SymbolWindow_select_symbol_name(Symbol_Window *sw, char *name)
+void Symbol_Window::SelectSymbolName(char *symbol_name)
 {
-    GList *p;
-    sym *s;
+  GList *p;
+  sym *s;
     
-    if(name==NULL)
-	return;
+  if(symbol_name==NULL)
+    return;
 
-    // If window is not displayed, then display it.
-    if(!sw->enabled)
-    {
-	sw->ChangeView(VIEW_SHOW);
-    }
+  // If window is not displayed, then display it.
+  if(!enabled)
+    ChangeView(VIEW_SHOW);
 
-    // See if the type of symbol selected is currently filtered out, and
-    // if so we unfilter it.
-    gpsim_symbol_rewind((unsigned int)gp->pic_id);
-    while(NULL != (s = gpsim_symbol_iter(gp->pic_id)))
-    {
-	if(!strcasecmp(s->name,name))
-	{
-	    switch(s->type)
-	    {
-	    case SYMBOL_ADDRESS:
-		if(sw->filter_addresses)
-		{
-		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->addressesbutton), TRUE);
-		    while(gtk_events_pending()) // FIXME. Not so nice...
-                        gtk_main_iteration();
-		}
-		break;
-	    case SYMBOL_CONSTANT:
-		if(sw->filter_constants)
-		{
-		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->constantsbutton), TRUE);
-		    while(gtk_events_pending()) // FIXME. Not so nice...
-                        gtk_main_iteration();
-		}
-		break;
-	    case SYMBOL_REGISTER:
-		if(sw->filter_registers)
-		{
-		    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (sw->registersbutton), TRUE);
-		    while(gtk_events_pending()) // FIXME. Not so nice...
-                        gtk_main_iteration();
-		}
-		break;
-	    default:
-		break;
-	    }
-	    break;
+  // See if the type of symbol selected is currently filtered out, and
+  // if so we unfilter it.
+  gpsim_symbol_rewind((unsigned int)gp->pic_id);
+  while(NULL != (s = gpsim_symbol_iter(gp->pic_id))) {
+    
+    if(!strcasecmp(s->name,symbol_name)) {
+	
+      switch(s->type) {
+	    
+      case SYMBOL_ADDRESS:
+	if(filter_addresses) {
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (addressesbutton), TRUE);
+	  while(gtk_events_pending()) // FIXME. Not so nice...
+	    gtk_main_iteration();
 	}
-    }
-
-    // Find the symbol and select it in the clist
-    p=sw->symbols;
-    while(p)
-    {
-	sym *e;
-	e=(sym*)p->data;
-	if(!strcasecmp(e->name,name))
-	{
-	    int row;
-	    row=gtk_clist_find_row_from_data(GTK_CLIST(sw->symbol_clist),e);
-	    if(row!=-1)
-	    {
-		gtk_clist_select_row(GTK_CLIST(sw->symbol_clist),row,0);
-		gtk_clist_moveto(GTK_CLIST(sw->symbol_clist),row,0,0.5,0.5);
-		
-		do_symbol_select(sw,e);
-		
-	    }
+	break;
+      case SYMBOL_CONSTANT:
+	if(filter_constants) {
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (constantsbutton), TRUE);
+	  while(gtk_events_pending()) // FIXME. Not so nice...
+	    gtk_main_iteration();
 	}
-	p=p->next;
+	break;
+      case SYMBOL_REGISTER:
+	if(filter_registers) {
+	  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (registersbutton), TRUE);
+	  while(gtk_events_pending()) // FIXME. Not so nice...
+	    gtk_main_iteration();
+	}
+	break;
+      default:
+	break;
+      }
+      break;
     }
+  }
+
+  // Find the symbol and select it in the clist
+  p=symbols;
+  while(p) {
+    
+    sym *e;
+    e=(sym*)p->data;
+    if(!strcasecmp(e->name,symbol_name)) {
+      
+      int row;
+      row=gtk_clist_find_row_from_data(GTK_CLIST(symbol_clist),e);
+      if(row!=-1) {
+
+	gtk_clist_select_row(GTK_CLIST(symbol_clist),row,0);
+	gtk_clist_moveto(GTK_CLIST(symbol_clist),row,0,0.5,0.5);
+		
+	do_symbol_select(this,e);
+		
+      }
+    }
+    p=p->next;
+  }
 }
 
 void Symbol_Window::NewSymbols(void)
