@@ -29,7 +29,55 @@ The big story this release is Modules. gpsim now has a way to allow you to creat
 
 The idea is that you'll be able to create your own custom modules, package these into a library, and then load them from gpsim.
 
-There are two example modules: an LED one and a Logic one. These are somewhat experimental, but can serve as templates for creating your own modules. The LED module consist
+There are two example modules: an LED one and a Logic one. These are somewhat experimental, but can serve as templates for creating your own modules. The LED module consists of a single digit, 7-segment, common-anode display. The Logic module contains a two-input AND gate and a two-input OR gate. Both libraries are available from the gpsim web page:
+
+  http://www.dattalo.com/gnupic/led-0.0.3.tar.gz
+  http://www.dattalo.com/gnupic/logic-0.0.1.tar.gz
+
+(Note, the version number may change, so it would be best to go to the gpsim web page and look for the latest version there).
+
+
+`module' command
+----------------
+
+A new command has been added to gpsim to support modules:
+
+gpsim> help module
+module [ [load module_type [module_name]] | [lib lib_name] | [list] | 
+[[dump | pins] module_name] ]
+        If no options are specified, then the currently defined module(s)
+        will be displayed. This is the same as the `module list' command.
+        The `module load lib_name' tells gpsim to search for the module
+        library called `lib_name' and to load it. (Note that the format of
+        module libraries is exactly the same as a Linux shared library. This
+        means that the module library should reside in a path available to
+        dlopen(). Please see the README.MODULES in the gpsim distribution.
+        To instantiate a new module, then type
+          module module_type module_name
+        where module_type refers to a specific module in a module library
+        and module_name is the user name assigned to it.
+        Information about a module can be displayed by the commad
+          module module_name [dump | pins]
+
+        where module_name is the name that you assigned when the module
+        was instantiated. The optional dump and pins identifiers specify
+        the information you wish to display (dump is the default).
+
+        examples:
+
+
+        module                      // Display the modules you've already defined.
+        module lib my_mods.so       // Load the module library called my_mods.
+        module list                 // Display the list of modules supported.
+        module load lcd my_lcd      // Create an instance of an 'lcd'
+        module pins my_lcd          // Display the pin states of an instantiated module
+        module load lcd lcd2x20     // Create a new module.
+        module load led start_light // and another.
+
+-------
+
+It's fairly tedious to memorize all of the details of this command. So your best bet is to copy the configuration scripts in the example libraries. 
+
 
 gui - Menu items now work
 -------------------------
@@ -37,7 +85,8 @@ Before Ralf joined the gpsim development, I had created a rough outline of the g
 
 gui - button bar
 ----------------
-Ralf has added a button bar to the gui control panel. This allows you to perform simple commands like step, run, stop, etc. with a simple click. 
+Ralf has added a button bar to the gui control panel. This allows you to perform simple commands like step, run, stop, etc. with a simple click. These complement the hot-keys that were already present.
+
 
 gui - now refreshes while simulating
 ------------------------------------
@@ -47,58 +96,18 @@ bug fixes
 ---------
 
 
-Program Memory sheet
---------------------
-
-Now the program memory may displayed like register memory. Ralf has modified the disassembly window into a notebook window with two tabs. One tab is like the previous disassembly window ( a listing of the disassembled hex file (no symbols)). The other tab is a matrix that contains the instruction opcodes. This window allows you to modify the program memory opcodes. Like before, Ralf has done great work!
-
-"Breadboard" window (or pinout window)
---------------------------------------
-Ralf has added a new window that displays the pin out of the pic. All of the pins along with their names, states (high or low), and directions (in or out) are shown. The pin directions are shown with a arrow. If the arrow is pointing toward the pic then the pin is an input other wise it's an output. The states of the pins are shown in two ways. First the color of the arrows reflect the states, a green is low and a red is high. Additionally, an 'L' or an 'H' is placed next to the pin. The 'L' and 'H' are hot - if you double click these the pins will toggle states. The pin directions are hot too; double clicking on the arrows will toggle the pin directions.
-
-Limitations:
-1) Pin numbers are not shown
-2) Packages are shown as dip packages only (gpsim doesn't support quad packages).
-
-USART fix
----------
-
-The newly added usart peripheral had several bugs. For example, the receive pin was taking only one sample and that sample was occuring synchronous to the tx pin driving. This version better mimicks a real usart. The receiver will not sample until a start bit is received, and then when it does sample it takes three samples in the center of each bit and uses majority waiting to determine the bit state.
-
-A new example illustrates the usart behavior fairly well:
-
-examples/14bit/usart-14.asm
-examples/14bit/usart.stc
-
-Run this example (after gpsim has been installed) by:
-
-$ cd examples/14bit
-$ gpasm usart-14.asm
-$ gpsim -c usart.stc
-
-The usart.stc is a command file that will load the usart-14.cod file and added a node that ties the usart RX and TX pins together. In other words, the node configures the serial port for loop back (realize that this is OUTside of the simulated pic; this is analogous to configuring a real RS232 port for loop back). When the simulated software runs, it will configure the usart TX pin for asynchronous transmissions and repeatedly send the string "0123456789ABCDEF". The RX pin is configured such that an interrupt routine is invoked when the receive register fills up with data. The interrupt routine copies the received data into a circular buffer 16 bytes long. 
-
-Limitations:
-1) Only the asynchronous mode is supported.
-
-A/D converter enhanced
-----------------------
-
-The 16f87x devices have an A/D converter with 10-bits of resolution. Previous versions of gpsim supported the A/D in the 16c74 which is only 8-bits. This version has enhanced the A/D peripheral so that both resolutions are supported. In addition, if analog stimuli (see below) are attached to the A/D inputs, then the analog values are scaled properly regardless of whether the 8-bit or 10-bit A/D is used.
-
 What's coming next?
 -------------------
 
-Modules.
 Register Stimuli.
 
 
 System Requirements:
 --------------------
 
-I've only tested the code on a Intel based Linux boxes (redhat 4.2, 5.1, 5.2, 6.0, 6.1). Much of the software is in C++, so you'll need the standard include files and libraries etc. I tried not to use any gcc specific C++ things (like the operator ?> for example). So I see no reason gpsim wouldn't compile on any system. The g++ compiler and include files are required. The GNU readline library is also required.
+I've only tested the code on a Intel based Linux boxes (redhat 4.2, 5.1, 5.2, 6.0, 6.1).
 
-The latest C++ compiler doesn't work properly on the PPC Linux distribution, so unfortunately it's not possible to build gpsim there. (Is this still true? Eric Sh.?).
+ Much of the software is in C++, so you'll need the standard include files and libraries etc. I tried not to use any gcc specific C++ things (like the operator ?> for example). So I see no reason gpsim wouldn't compile on any system. The g++ compiler and include files are required. The GNU readline library is also required.
 
 
 If you want the gui support then you'll also need glib and gtk. I'm using version 1.2.3 (the version numbers for these packages track one another). I've also have successfully used 1.2.1. You're also going to need the latest gtk+-extra, eXdbm packages. See INSTALL about these.
