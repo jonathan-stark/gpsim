@@ -320,6 +320,13 @@ EXPORTS
     ?put@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?get_cpu@gpsimValue@@QAEPAVProcessor@@XZ
     ?get@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
+    ?get_src_line@ProgramMemoryAccess@@QAEII@Z
+    ?getIO@IOPORT@@QAEPAVIOPIN@@I@Z
+    ?getBitChar@IOPIN@@UAEDXZ
+    ?getBitChar@IO_bi_directional@@UAEDXZ
+    ?getBitChar@IO_bi_directional_pu@@UAEDXZ
+    ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?getReg@register_symbol@@QAEPAVRegister@@XZ
     load_library
     get_library_export
     free_error_message
