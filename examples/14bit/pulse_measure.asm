@@ -7,7 +7,7 @@ include "p16c84.inc"
 
   cblock  0x0c
 
-        lo,hi,upper,kz
+        lo,hi,_upper,kz
   endc
 
 ioport  equ     portb
@@ -19,7 +19,7 @@ iobit   equ     0
 start:  
         clrf  lo
         clrf  hi
-        clrf  upper     ;Used as a known zero in
+        clrf  _upper     ;Used as a known zero in
                         ;the loop
         call    cnt16bit
 
@@ -55,7 +55,7 @@ loop
    btfsc ioport,iobit   ;
     goto high2          ;
                         ;
-   rlf   upper,w        ;Pick up the carry (if lo byte
+   rlf   _upper,w        ;Pick up the carry (if lo byte
                         ;overflowed)
    btfsc ioport,iobit   ;
     goto high3          ;
@@ -81,54 +81,54 @@ loop
 
   ;fall through... Add 7 to the total count
 
-   incf  upper,f
+   incf  _upper,f
 
 high6:
-   incf  upper,f
+   incf  _upper,f
 
 high5_or_done:
    skpnc            ;If c=1 then we have an
     goto overflow   ;overflow
 
-   incf  upper,f
+   incf  _upper,f
 
 high4:
-   incf  upper,f
+   incf  _upper,f
 
 high3:
-   incf  upper,f
+   incf  _upper,f
 
 high2:
    decf  lo,f       ;Get rid of the extra
                     ;increment of the lo byte
-   incf  upper,f
+   incf  _upper,f
 
 high1:
-   incf  upper,f
+   incf  _upper,f
 
 high0:
 
 
-   rlf   upper,f
+   rlf   _upper,f
 
    rlf   lo,f
    rlf   hi,f
-   rlf   upper,f
+   rlf   _upper,f
 
    rlf   lo,f
    rlf   hi,f
-   rlf   upper,f
+   rlf   _upper,f
 
    rlf   lo,f
    rlf   hi,f
-   rlf   upper,f
+   rlf   _upper,f
 
-   swapf upper,w
+   swapf _upper,w
    andlw 7
    iorwf lo,f
 
    movlw 7
-   andwf upper,f
+   andwf _upper,f
 
    retlw 0
 
@@ -138,7 +138,7 @@ overflow
    ;counter are zero. Decrementing all three
    ;will set them to 0xff.
 
-   decf  upper,f
+   decf  _upper,f
    decf  hi,f
    decf  lo,f
 
