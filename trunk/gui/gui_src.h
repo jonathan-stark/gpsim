@@ -177,6 +177,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   int source_loaded;
 
   int load_source;
+  unsigned int current_page;        //Shadows the notebook->current_page;
 
   SourceBrowserParent_Window *parent;
 

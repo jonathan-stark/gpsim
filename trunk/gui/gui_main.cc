@@ -183,8 +183,8 @@ void GUI_Interface::RemoveObject(gpointer gui_xref)
 
 void GUI_Interface::SimulationHasStopped(gpointer callback_data)
 {
-  while(gtk_events_pending())
-    gtk_main_iteration();
+  //while(gtk_events_pending())
+  //  gtk_main_iteration();
 
   if(callback_data) {
     

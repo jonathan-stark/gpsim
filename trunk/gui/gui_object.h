@@ -82,6 +82,7 @@ class GUI_Object {
     {
       gp = _gp;
     }
+  void GTKwait();
 
  private:
   string name_str;

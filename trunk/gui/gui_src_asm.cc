@@ -302,18 +302,27 @@ void SourceBrowserAsm_Window::SetPC(int address)
       else
 	{
 	  if( pages[i].source_pcwidget!=0 &&
-	      GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) )
+	      GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
+	    //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
 	    gtk_widget_hide(pages[i].source_pcwidget);
+	  }
 	}
     }
 
 
-  if(id==-1)
-    {
-      puts("SourceBrowserAsm_set_pc(): could not find notebook page");
-      return;
-    }
-    
+  if(id==-1) {
+    puts("SourceBrowserAsm_set_pc(): could not find notebook page");
+    return;
+  }
+  if(0){
+    GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
+
+    printf(" SetPC: %s , vadj=%g, lower=%g, upper=%g,page_size=%g, page_inc=%g\n", 
+	   name(),
+	   adj->value,adj->lower, adj->upper, adj->page_size, adj->page_increment);
+    //gtk_adjustment_get_value(GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj)));
+  }
+
   new_pcw = pages[id].source_pcwidget;
 
   row = pma->get_src_line(address);
@@ -322,7 +331,8 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   row--;
 
-  gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
+  if(current_page != id)
+    gtk_notebook_set_page(GTK_NOTEBOOK(notebook),id);
 
   if(layout_offset<0)
     {   // can it normally be less than zero?
@@ -337,6 +347,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
 	  gdk_window_get_origin(pages[id].source_layout->window,&xfixed,&yfixed);
 
 	  layout_offset = ytext-yfixed;
+	  //cout << " SetPC: " << name() << "  updating layout offset "  << layout_offset << endl;
 	}
     }
   e = gui_line_to_entry(id, row);
@@ -346,19 +357,45 @@ void SourceBrowserAsm_Window::SetPC(int address)
   pixel = PIXMAP_POS(this,e);
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
-  if( pixel<= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      pixel>= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc )
-    gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj),
-			     pixel-inc/2);
+  if( pixel< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
+      pixel> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
+    // FIXME GtkAdjustment hack Gtk 2+ bug?
+    //
+    // For some weird reason, if the adjustment value is larger than
+    //   upper - page_size - 'a little amount'
+    // then there appears to be a scaling error. I.e. the icons along
+    // the side of the browser do not line up with the source code.
+    //
+    // So as a hack, we'll check to see if the value of the adjustment
+    // is too big and then clip it if it is.
+    //
+    GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
+
+    gdouble nvalue = pixel - inc/2;
+
+    if(nvalue > (adj->upper -adj->page_size - 50))
+      nvalue = adj->upper -adj->page_size - 50.0;
+    gtk_adjustment_set_value(adj, nvalue);
+
+    //printf(" SetPC: %s , setting adjustment to %g\n", 
+    //   name(),  nvalue );
+  }
+  
+  if(!GTK_WIDGET_VISIBLE(new_pcw)) {
+    //cout << "showing the widget\n";
+    gtk_widget_show(new_pcw);
+  }
   gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
 		  new_pcw,
 		  PIXMAP_SIZE,
 		  PIXMAP_POS(this,e)
 		  );
 
-  if(!GTK_WIDGET_VISIBLE(new_pcw))
-    gtk_widget_show(new_pcw);
+  // printf(" SetPC: %s , moving to %d\n", 
+  //   name(), PIXMAP_POS(this,e));
+
+  GTKwait();
 }
 
 void SourceBrowserAsm_Window::SelectAddress(int address)
@@ -409,10 +446,13 @@ void SourceBrowserAsm_Window::Update(void)
 {
   if(!gp || !pma)
     return;
-
+  //cout << "Update " << name() << endl;
   SetPC(pma->get_PC());
+
   if(status_bar)
     status_bar->Update();
+
+  GTKwait();
 }
 
 /*
@@ -431,7 +471,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
   if(!source_loaded || !pma)
     return;
 
-  for(i=0;i<SBAW_NRFILES;i++) {
+  for(i=0;i<SBAW_NRFILES && id<0;i++) {
     if(pages[i].pageindex_to_fileid==pma->get_file_id(address))
       id=i;
   }
@@ -445,7 +485,9 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     }
     return;
   }
-  
+  if(id != current_page) {
+    return;
+  }
   row = pma->get_src_line(address);
 
   if(row==INVALID_VALUE)
@@ -476,6 +518,8 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 			 PIXMAP_POS(this,e));
 
   else if(pma->address_has_break(address)) {
+    //printf("adding a break: address=%d, current_page=%d, id=%d\n",
+    //   address,current_page,id);
     breakpoints.Add(address,
 		    gtk_pixmap_new(pixmap_break,bp_mask),
 		    pages[id].source_layout,
@@ -485,6 +529,7 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
     if(!e->bpwidget) {
       e->bpwidget = gtk_pixmap_new(pixmap_canbreak, canbp_mask);
 
+      //printf("adding canbreak, address=%d pos=%d\n",address, PIXMAP_POS(this,e) );
       gtk_layout_put(GTK_LAYOUT(pages[id].source_layout),
 		     e->bpwidget,
 		     PIXMAP_SIZE*0,
@@ -705,7 +750,6 @@ void BreakPointList::Remove(int address = -1)
     {
       iter = g_list_remove(li,li->data);
       if(bpi) {
-	printf("removing break at address:%d\n",address);
 	if(bpi->widget)
 	  gtk_widget_destroy(bpi->widget);
 
@@ -726,7 +770,7 @@ void BreakPointList::Remove(int address = -1)
 void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int pos)
 {
   breakpoint_info *bpi=(breakpoint_info*)malloc(sizeof(breakpoint_info));
-
+  //printf("Add: address:%d, pos:%d\n",address,pos);
   bpi->address=address;
   bpi->widget = pwidget;
   gtk_layout_put(GTK_LAYOUT(layout),
@@ -751,32 +795,32 @@ static gint switch_page_cb(GtkNotebook     *notebook,
 			   guint            page_num,
 			   SourceBrowserAsm_Window *sbaw)
 {
-    static unsigned int current_page=INVALID_VALUE;
-    printf("switch_page_cb\n");
-    if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
-      return 1;
-
-    if(current_page!=page_num) {
-    
-      int id;
-      unsigned int address;
-
-      current_page=page_num;
-      id=sbaw->pages[current_page].pageindex_to_fileid;
-	
-      sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
-
-      // Update pc widget
-      address=sbaw->gp->cpu->pc->get_raw_value();
-      sbaw->SetPC(address);
-
-      remove_all_points(sbaw);
-
-      // update breakpoint widgets
-      for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
-	sbaw->UpdateLine(address);
-    }
+  if(!sbaw || !sbaw->gp || !sbaw->gp->cpu)
     return 1;
+
+
+  if(sbaw->current_page!=page_num) {
+    
+    printf("switch_page_cb: %s, from:%d to%d\n",sbaw->name(),sbaw->current_page,page_num);
+    int id;
+    unsigned int address;
+
+    sbaw->current_page=page_num;
+    id=sbaw->pages[page_num].pageindex_to_fileid;
+	
+    sbaw->pma->set_hll_mode(file_id_to_source_mode[id]);
+
+    // Update pc widget
+    address=sbaw->gp->cpu->pc->get_raw_value();
+    sbaw->SetPC(address);
+
+    remove_all_points(sbaw);
+
+    // update breakpoint widgets
+    for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
+      sbaw->UpdateLine(address);
+  }
+  return 1;
 }
 
 /*
@@ -796,7 +840,7 @@ static gint sigh_button_event(GtkWidget *widget,
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-      printf("button event\n");
+    //printf("button event\n");
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
@@ -1158,13 +1202,6 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
     find_char_and_skip(&label_string,'/');
     find_char_and_skip(&label_string,'\\');
-    /*
-    label_string=strrchr(str,'/');
-    if(label_string!=0)
-      label_string++; // Skip the '/'
-    else
-      label_string=str;
-    */
 
     label=gtk_label_new(label_string);
 
@@ -1231,9 +1268,10 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
     gtk_signal_connect(GTK_OBJECT(sbaw->pages[id].source_layout),"button_release_event",
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
-    
-    while(gtk_events_pending()) // display everything, so that
-	gtk_main_iteration();  // gtk_notebook_get_current_page() works
+
+    sbaw->GTKwait();
+    //while(gtk_events_pending()) // display everything, so that
+    //	gtk_main_iteration();  // gtk_notebook_get_current_page() works
 
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
@@ -1281,7 +1319,8 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   sbaw->pages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
 		 sbaw->pages[id].source_pcwidget,0,0);
-
+  gtk_widget_show(sbaw->pages[id].source_pcwidget);
+  sbaw->GTKwait();
   return id;
     
 }
@@ -1730,15 +1769,15 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
-  while(gtk_events_pending())
-      gtk_main_iteration();
-  
+  GTKwait();
+
   address=gp->cpu->pc->get_value();
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else
       SetPC(address);
 
+  cout << "about to UpdateLine's in page\n";
   // update breakpoint widgets
   for(address=0;address<gp->cpu->program_memory_size();address++)
     UpdateLine(address);
@@ -2404,13 +2443,13 @@ void SourceBrowserAsm_Window::Build(void)
   set_style_colors("black", "gray", &comment_text_style);
 
 
-#if GTK_MAJOR_VERSION >= 2
-#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
-#define DEFAULT_SOURCEFONT "Courier Bold 12"
-#else
+  //#if GTK_MAJOR_VERSION >= 2
+  //#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
+  //#define DEFAULT_SOURCEFONT "Courier Bold 12"
+  //#else
 #define DEFAULT_COMMENTFONT "-adobe-courier-bold-o-*-*-*-120-*-*-*-*-*-*"
 #define DEFAULT_SOURCEFONT "-adobe-courier-bold-r-*-*-*-120-*-*-*-*-*-*"
-#endif
+  //#endif
 
   if(config_get_string(name(),"commentfont",&fontstring))
     strcpy(commentfont_string,fontstring);
@@ -2421,6 +2460,8 @@ void SourceBrowserAsm_Window::Build(void)
     strcpy(sourcefont_string,fontstring);
   else
     strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+
+  cout << " source font: " << sourcefont_string << endl;
 
   while(!load_fonts(this)) {
 
@@ -2505,10 +2546,11 @@ void SourceBrowserAsm_Window::Build(void)
 
   gtk_widget_show(window);
 
+  GTKwait();
   enabled=1;
 
   is_built=1;
-
+  cout << name() << " is built" << endl;
   if(load_source)
     NewSource(gp);
   UpdateMenuItem();
@@ -2569,7 +2611,7 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   load_source=0;
 
   get_config();
-
+  current_page = 0xffffffff;
   if(enabled)
     Build();
 
