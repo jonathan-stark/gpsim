@@ -34,7 +34,7 @@ void WDT::update(void)
 {
   if(wdte){
 
-    value = cpu->time_to_cycles(timeout);
+    value = (unsigned int )(cpu->get_frequency()*timeout);
     prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
     if(future_cycle) {
@@ -81,7 +81,7 @@ void WDT::initialize(bool enable, double _timeout)
   if(wdte)
     {
       cout << "Enabling WDT " << " timeout = " << timeout << " seconds\n";
-      value = cpu->time_to_cycles(timeout);
+      value = (unsigned int) (cpu->get_frequency()*timeout);
       prescale = cpu->option_reg.get_psa() ? (cpu->option_reg.get_prescale()) : 0;
 
       future_cycle = cycles.value + value * (1<<prescale);

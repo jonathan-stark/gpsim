@@ -69,7 +69,7 @@ void StopWatch_Window::Update(void)
   if(offset>rollover)
     offset%=rollover;
 
-  double frequency = gp->cpu->time_to_cycles(1.0);
+  double frequency = gp->cpu->get_frequency();
 
   _cyclecounter=cyclecounter;
 

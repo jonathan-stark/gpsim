@@ -406,7 +406,7 @@ public:
     //pic_processor *cpu = gpsim_get_active_cpu();
     if(get_active_cpu() && baud>0.0) {
 
-      time_per_bit = get_active_cpu()->time_to_cycles(1.0/baud);
+      time_per_bit = (guint64)(get_active_cpu()->get_frequency()/baud);
 
     }
   };
@@ -684,12 +684,13 @@ class TXREG : public BreakpointObject
       Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
     */
     if(get_active_cpu()) {
-      time_per_packet = get_active_cpu()->time_to_cycles( (1.0 +             // start bit
-						     bits_per_byte +   // data bits
-						     stop_bits  +      // stop bit(s)
-						     use_parity)       //
-						    /baud);
-      time_per_bit = get_active_cpu()->time_to_cycles( 1.0/baud );
+      time_per_packet = 
+	(guint64)( get_active_cpu()->get_frequency() * ( (1.0 +   // start bit
+							  bits_per_byte +   // data bits
+							  stop_bits  +      // stop bit(s)
+							  use_parity)       //
+							 /baud));
+      time_per_bit = (guint64)(get_active_cpu()->get_frequency() / baud);
     } else
       time_per_packet = time_per_bit = 0;
 
@@ -902,12 +903,14 @@ class RCREG : public BreakpointObject // : public _RCREG
     */
 
     if(get_active_cpu()) {
-      time_per_packet = get_active_cpu()->time_to_cycles( (1.0 +             // start bit
-						     bits_per_byte +   // data bits
-						     stop_bits  +      // stop bit(s)
-						     use_parity)       //
-						    /baud);
-      time_per_bit = get_active_cpu()->time_to_cycles( 1.0/baud );
+      time_per_packet = 
+	(guint64)(get_active_cpu()->get_frequency() * (1.0 +     // start bit
+						       bits_per_byte +   // data bits
+						       stop_bits  +      // stop bit(s)
+						       use_parity)       //
+		  /baud);
+
+      time_per_bit = (guint64)(get_active_cpu()->get_frequency() / baud);
     } else
       time_per_packet = time_per_bit = 0;
 
@@ -1355,7 +1358,7 @@ class RCREG : public BreakpointObject // : public _RCREG
 	    cout << "Minimum pulse width " 
 		 << hex << min 
 		 << " Baud = " 
-		 << (get_active_cpu()->time_to_cycles((1.0)/w)) <<'\n';
+		 << (get_active_cpu()->get_frequency()/w) <<'\n';
 
 	    // Assume the baud rate is correct.
 	    // use it to decode the bit stream.

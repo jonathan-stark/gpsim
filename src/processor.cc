@@ -79,6 +79,7 @@ Processor::Processor(void)
   pc = 0;
 
   set_frequency(1.0);
+  set_ClockCycles_per_Instruction(1);
 
   interface = new ProcessorInterface(this);
 

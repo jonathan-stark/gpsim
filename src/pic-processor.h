@@ -254,9 +254,6 @@ public:
   unsigned int get_config_word(void) {return config_word;};
   virtual unsigned int config_word_address(void) const {return 0x2007;};
   virtual ConfigMode *create_ConfigMode(void) { return new ConfigMode; };
-  void set_frequency(double f) { frequency = f; if(f>0) period = 1/f; };
-  unsigned int time_to_cycles( double t) 
-    {if(period>0) return((int) (frequency * t)); else return 0;};
   virtual void reset(RESET_TYPE r);
 
   virtual void por(void);

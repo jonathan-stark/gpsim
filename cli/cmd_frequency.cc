@@ -73,7 +73,7 @@ void cmd_frequency::print()
   if(!have_cpu(1))
     return;
 
-  cout << "Clock frequency: " << cpu->time_to_cycles(1.0)/1e6 << " MHz.\n";
+  cout << "Clock frequency: " << cpu->get_frequency()/1e6 << " MHz.\n";
 }
 
 cmd_frequency frequency;
