@@ -62,7 +62,7 @@ cmd_break::cmd_break(void)
 
     brief_doc = string("Set a break point");
 
-    long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value] ]\n\n\
+    long_doc = string ("break [c e | w | r | wv | rv | so | su | wdt [location] [value [mask]] ]\n\n\
 \toptions:\n\
 \t\tc   - cycle\n\
 \t\te   - execution\n\
@@ -75,10 +75,11 @@ cmd_break::cmd_break(void)
 \t\twdt - wdt timeout\n\
 \t\t    - no argument, display the break points that are set.
 \texamples:\n\
-\t\tbreak e 0x20     // set an execution break point at address 0x20\n\
-\t\tbreak wv 0x30 0  // break if a zero is written to register 0x30\n\
-\t\tbreak c 1000000  // break on the one million'th cycle\n\
-\t\tbreak            // display all of the break points\n\
+\t\tbreak e 0x20       // set an execution break point at address 0x20\n\
+\t\tbreak wv 0x30 0    // break if a zero is written to register 0x30\n\
+\t\tbreak wv 0x40 0xf0 // break if all ones are written to the upper nibble\n\
+\t\tbreak c 1000000    // break on the one million'th cycle\n\
+\t\tbreak              // display all of the break points\n\
 \n");
 
   op = cmd_break_options; 
@@ -198,13 +199,15 @@ void cmd_break::set_break(int bit_flag, guint64 value)
   }
 }
 
-void cmd_break::set_break(int bit_flag, int reg, int value)
+void cmd_break::set_break(int bit_flag, int reg, int value,int mask)
 {
 
   if(cpu==NULL)
     return;
 
-  int b;
+  int b = MAX_BREAKPOINTS;
+  char *str = "err";
+
 
   switch(bit_flag) {
 
@@ -220,27 +223,44 @@ void cmd_break::set_break(int bit_flag, int reg, int value)
 
   case READ_VALUE:
 
-    b = bp.set_read_value_break(cpu, reg,value);
+    b = bp.set_read_value_break(cpu, reg,value,mask);
 
-    if(b < MAX_BREAKPOINTS)
-      cout << "break when " << value << " is read from register " << reg << '\n' << 
-	"bp#: " << b << '\n';
-
+    str = "read from";
 	
     break;
 
   case WRITE_VALUE:
 
-    b = bp.set_write_value_break(cpu, reg,value);
+    b = bp.set_write_value_break(cpu, reg,value,mask);
 
-    if(b < MAX_BREAKPOINTS)
-      cout << "break when " << value << " is written to register " << reg << '\n' << 
+    str = "written to";
+
+  }
+
+  if(b<MAX_BREAKPOINTS) {
+
+    cout << "break when ";
+    if(mask == 0 || mask == 0xff)
+      cout << (value&0xff);
+    else {
+      cout << "bit pattern ";
+      for(unsigned int ui=0x80; ui; ui>>=1) 
+	if(ui & mask) {
+	  if(ui & value)
+	    cout << '1';
+	  else
+	    cout << '0';
+	}
+	else
+	  cout << 'X';
+    }
+
+    cout << " is " << str <<" register " << reg << '\n' << 
 	"bp#: " << b << '\n';
-
   }
 }
 
-void cmd_break::set_break(int bit_flag, char *sym, int value)
+void cmd_break::set_break(int bit_flag, char *sym, int value, int mask)
 {
   int sym_value;
 
@@ -250,7 +270,7 @@ void cmd_break::set_break(int bit_flag, char *sym, int value)
       return;
     }
 
-  set_break(bit_flag,sym_value,value);
+  set_break(bit_flag,sym_value,value,mask);
 
 }
 

@@ -478,7 +478,20 @@ double gpsim_get_inst_clock(unsigned int processor_id)
   if(!pic)
     return INVALID_VALUE;
 
-  return (pic->clock/4.0);
+  return (pic->time_to_cycles(1.0)/4.0);
+
+}
+//--------------------------------------------------------------------------
+//  guint64 gpsim_digitize_time(double time)
+//  -- this is hack for now. Eventually gpsim will support "simulated real time".
+//
+guint64 gpsim_digitize_time(double time)
+{
+
+  if(!active_cpu)
+    return 0;
+
+  return (active_cpu->time_to_cycles(time));
 
 }
 
@@ -1103,6 +1116,16 @@ pic_processor *gpsim_get_active_cpu(void)
 {
   return active_cpu;
 }
+
+guint64 gpsim_get_current_time(void)
+{
+
+  if(active_cpu)
+    return active_cpu->cycles.value;
+  
+  return 0;
+
+}
 void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL)
 {
   if(active_cpu)
@@ -1110,6 +1133,12 @@ void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL)
 
 }
 
+void  gpsim_set_break(guint64 next_cycle, BreakCallBack *f=NULL)
+{
+  if(active_cpu)
+    active_cpu->cycles.set_break(next_cycle, f);
+
+}
 //---------------------------------------------------------------------------
 //   char *gpsim_get_version(char *dest)
 //---------------------------------------------------------------------------
@@ -1230,7 +1259,7 @@ void  gpsim_pin_set_dir(unsigned int processor_id, unsigned int pin, unsigned in
 
 extern void process_command_file(char * file_name);
 extern int open_cod_file(pic_processor **, char *);
-#include <cli/command.h>
+#include "../cli/command.h"
 
 int gpsim_open(unsigned int processor_id, char *file)
 {

@@ -1,8 +1,5 @@
-processor p16c84
 
-x
-
-load h pulse_measure.hex
+load s pulse_measure.cod
 
 
 # Stimulus file for testing 3-tcyc resolution
@@ -41,10 +38,8 @@ digital
 # Now the cycles at which stimulus changes states are
 # specified. The initial cycle was specified above. 
 
-
-0x20  1
 0x40  0
-0x4b  1
+0x80  1
 
 
 # Give the stimulus a name:
@@ -60,13 +55,18 @@ end
 
 attach test_node asy1 portb0
 
-# but we can still have more stuff
+# Show all of the stimuli:
 
 stimulus
 
 echo stimulus created
 
+# set an excution break at address 0
+
 break e 0
 
-run
-x
+# run
+
+# x
+
+

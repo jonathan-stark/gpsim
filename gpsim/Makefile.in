@@ -10,7 +10,9 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
-# gpsim gui
+# gpsim  executable Makefile
+#
+#
 
 
 SHELL = @SHELL@

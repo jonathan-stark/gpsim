@@ -299,10 +299,6 @@ public:
   TMR0         tmr0;
   int          num_of_gprs;
 
-  unsigned int clock; // Frequency of the clock
-  unsigned int get_clock() { return clock; };
-  void set_clock(unsigned int value) { clock=value; };
-
   void create_invalid_registers (void);
   void add_sfr_register(sfr_register *reg, unsigned int addr,
 			unsigned int por_value=0,char *new_name=NULL);

@@ -337,6 +337,7 @@ Cycle_Counter::Cycle_Counter(void)
 {
   value         = 0;
   break_on_this = 0;
+  time_step     = 1;
 
   active.next   = NULL;
   inactive.next = NULL;

@@ -55,6 +55,7 @@ class _TXREG : public sfr_register
   virtual void empty(void)=0;
   virtual void full(void)=0;
 
+  virtual void assign_pir(PIR1 *new_pir)=0;
 };
 
 class _TXSTA : public sfr_register, public BreakCallBack
@@ -104,6 +105,7 @@ class _RCREG : public sfr_register
   virtual void push(unsigned int);
   virtual void pop(void);
 
+  virtual void assign_pir(PIR1 *new_pir)=0;
 
 };
 
@@ -179,9 +181,10 @@ class _SPBRG : public sfr_register, public BreakCallBack
     future_cycle;  // The next cycle spbrg is predicted to change
 
   virtual void callback(void);
-  void start(void);
-  void get_next_cycle_break(void);
-  guint64 get_cpu_cycle(unsigned int edges_from_now);
+  virtual void start(void);
+  virtual void get_next_cycle_break(void);
+  virtual guint64 get_cpu_cycle(unsigned int edges_from_now);
+  virtual guint64 get_last_cycle(void);
 };
 
 //---------------------------------------------------------------
@@ -193,7 +196,7 @@ class TXREG_14 : public _TXREG
   virtual bool is_empty(void);
   virtual void empty(void);
   virtual void full(void);
-
+  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
 };
 
 class RCREG_14 : public _RCREG
@@ -204,6 +207,8 @@ class RCREG_14 : public _RCREG
   virtual void push(unsigned int);
   virtual void pop(void);
 
+  virtual void assign_pir(PIR1 *new_pir){pir1 = new_pir;};
+
 };
 
 //---------------------------------------------------------------
@@ -213,11 +218,15 @@ public:
 
   //  pic_processor *cpu;
 
-  _TXSTA       txsta;
-  _RCSTA       rcsta;
-  _SPBRG       spbrg;
+  _TXSTA       *txsta;
+  _RCSTA       *rcsta;
+  _SPBRG       *spbrg;
 
-  //  USART_MODULE(void);
+  _TXREG       *txreg;
+  _RCREG       *rcreg;
+
+  USART_MODULE(void);
+  void initialize(IOPORT *uart_port);
 
   virtual  void  new_rx_edge(unsigned int)=0;
 };
@@ -228,9 +237,10 @@ class USART_MODULE14 : public USART_MODULE
 
   _14bit_processor *cpu;
 
-  TXREG_14     txreg;
-  RCREG_14     rcreg;
+  //TXREG_14     txreg;
+  //RCREG_14     rcreg;
 
+  USART_MODULE14(void);
   virtual void initialize(_14bit_processor *new_cpu,PIR1 *pir1, IOPORT *uart_port);
   virtual void new_rx_edge(unsigned int);
 

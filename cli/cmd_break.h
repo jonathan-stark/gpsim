@@ -33,9 +33,9 @@ public:
 
   void set_break(int bit_flag);
   void set_break(int bit_flag,guint64 value);
-  void set_break(int bit_flag,int reg, int value);
+  void set_break(int bit_flag,int reg, int value,int mask);
   void set_break(int bit_flag,char *sym);
-  void set_break(int bit_flag,char *sym, int value);
+  void set_break(int bit_flag,char *sym, int value,int mask);
 
 
 };

@@ -41,6 +41,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 
+static int module_sequence_number = 0;
 
 /*****************************************************************************
  *
@@ -503,6 +504,7 @@ void module_load_module(char *module_type, char *module_name=NULL)
 
 	      cout << " Found it!\n";
 	      Module *new_module = t->module_list[i].module_constructor(module_name);
+	      new_module->interface_id = ++module_sequence_number;  // fixme make this a member function.
 	      symbol_table.add_module(new_module,module_name);
 	      return;
 	    }

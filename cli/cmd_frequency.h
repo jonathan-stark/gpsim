@@ -26,7 +26,7 @@ class cmd_frequency : public command
 public:
 
   cmd_frequency(void);
-  void set(float value);
+  void set(double value);
   void print();
 };
 

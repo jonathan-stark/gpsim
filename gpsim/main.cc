@@ -265,6 +265,6 @@ main (int argc, const char *argv[])
 
     } while(!quit_parse);
 
-
+  exit_gpsim();
 
 }

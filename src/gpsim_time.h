@@ -56,13 +56,9 @@ public:
 #define BREAK_ARRAY_SIZE  32
 #define BREAK_ARRAY_MASK  (BREAK_ARRAY_SIZE -1)
 
-  //  unsigned int value_lo;           // Current value of the cycle counter.
-  //  unsigned int value_hi;           // High int of the Current value
-  //  unsigned int break_on_this_lo;   // Break if the cycle counter reaches this value.
-  //  unsigned int break_on_this_hi;   // Break if the cycle counter reaches this value.
-
-  guint64 value;
-  guint64 break_on_this;
+  guint64 value;          // Current value of the cycle counter.
+  guint64 break_on_this;  // If there's a pending cycle break point, then it'll be this
+  guint64 time_step;      // Amount of "real time" for each cycle
 
   Cycle_Counter_breakpoint_list
     active,     // Head of the active breakpoint linked list
@@ -82,19 +78,17 @@ public:
   inline void increment(void)
     {
  
-      // Increment the current cycle
+      // Increment the current cycle then check if
       // we have a break point set here
-      //if(++value.lo == 0)
-      //++value.hi;
-      value++;
 
-      //if((value.lo == break_on_this.lo) && (value.hi == break_on_this.hi))
-      if(value == break_on_this)
+      value += time_step;
+
+      if(value >= break_on_this)
 	{
 	  // There's a break point set on this cycle. If there's a callback function, then call
 	  // it other wise halt execution by setting the global break flag.
 
-	  while(value == break_on_this)   // Loop in case there are multiple breaks
+	  while(value >= break_on_this)   // Loop in case there are multiple breaks
 	    {
 	      if(active.next->f != NULL)
 		active.next->f->callback();
@@ -105,10 +99,39 @@ public:
 	    }
 	}
 
-      //trace.cycle_counter(value);
+      // Note that it's really inefficient to trace every cycle increment. 
+      // Instead, we implicitly trace the increments with the instruction traces.
+
     }
 
+  /*
+    advance the Cycle Counter by more than one instruction quantum.
+    This is almost identical to the increment() function except that
+    we allow the counter to be advanced by an arbitrary amount.
+    They're separated only for efficiency reasons. This one runs slower.
+   */    
+  inline void advance(guint64 step)
+    {
 
+      value += step;
+      
+      if(value >= break_on_this)
+	{
+	  // There's a break point set on this cycle. If there's a callback function, then call
+	  // it other wise halt execution by setting the global break flag.
+
+	  while(value >= break_on_this)   // Loop in case there are multiple breaks
+	    {
+	      if(active.next->f != NULL)
+		active.next->f->callback();
+	      else
+		bp.check_cycle_break(active.next->breakpoint_number);
+
+	      clear_current_break();
+	    }
+	}
+
+    }
 
   bool set_break(guint64 future_cycle,
 		 BreakCallBack *f=NULL, unsigned int abp = MAX_BREAKPOINTS);
