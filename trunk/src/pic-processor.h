@@ -335,15 +335,7 @@ public:
   pic_processor(void);
 };
 
-/*
-class peripheral
-{
-public:
 
-  char * name_str;
-};
-
-*/
 
 //---------------------------------------------------------
 // define a special 'invalid' register class. Accessess to
@@ -359,6 +351,10 @@ public:
   virtual REGISTER_TYPES isa(void) {return INVALID_REGISTER;};
 };
 
+//----------------------------------------------------------
+// Global definitions:
+
+extern pic_processor *active_cpu;
 
 //--------------------------------------
 //

@@ -463,6 +463,9 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
 {
 
+  if(!tris)
+    return;
+
   unsigned int diff = tris->value ^ new_tris;
 
   if(diff)
