@@ -1,3 +1,10 @@
+2004-09-06 Scott Dattalo <scott@dattalo.com>
+	* examples/14bit/analog_stim2.stc, examples/14bit/ap.stc,
+	examples/14bit/async_pulse.stc, examples/14bit/async_stim2.stc,
+	examples/14bit/dtmf.stc, examples/12bit/gpio_stim.stc:
+	- Updated the asynchronous stimulus syntax in all of the example
+	startup scripts
+
 2004-09-05 Scott Dattalo <scott@dattalo.com>
 	* src/ioport.cc, src/stimuli.cc:
 	Applied patch from Robert Pearce regarding I/O Pins and stimuli

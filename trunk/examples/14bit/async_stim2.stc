@@ -43,12 +43,12 @@ period 5000
 # In this example, the stimulus will go high at cycle 100
 # and then go low at cycle 200, high at 300, and so on
 
-203 0
+{ 203 0
 300 1
 400 0
 600 1
 1000 0
-3000 1
+3000 1 }
 
 # specify the ioport that this stimulus drives
 
