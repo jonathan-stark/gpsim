@@ -282,6 +282,11 @@ void _16bit_processor :: create (void)
   tbl.initialize(this);
   tmr0l.start(0);
 
+  if(pma) {
+
+    pma->SpecialRegisters.push_back(&bsr);
+    rma.SpecialRegisters.push_back(&bsr);
+  }
 }
 
 //
