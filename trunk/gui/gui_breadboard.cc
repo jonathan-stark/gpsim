@@ -2718,9 +2718,6 @@ void GuiModule::Build()
   if(!bbw->enabled)
     return;
 
-  static int sx=80;
-  static int sy=80;
-  static int max_x=0;
   float package_height;
 
   int i;
@@ -2735,27 +2732,14 @@ void GuiModule::Build()
 
   //p->module_widget = widget;
   module_widget = (GtkWidget *)module->get_widget();
-  x=sx;
-  y=sy;
 
   pins=0;
   pin_count=module->get_pin_count();
 
   Value *xpos = module->get_attribute("xpos", false);
   Value *ypos = module->get_attribute("ypos", false);
-  if(!xpos || !ypos) {
-
-    xpos = new PositionAttribute(bbw,"xpos",(double)sx);//newFloatAttribute("xpos",(double)sx);
-    ypos = new PositionAttribute(bbw,"ypos",(double)sy);//newFloatAttribute("ypos",(double)sy);
-
-      module->add_attribute(xpos);
-      module->add_attribute(ypos);
-  } else {
-
-    xpos->get(x);
-    ypos->get(y);
-  }
-
+  xpos->get(x);
+  ypos->get(y);
 
   tree_item = gtk_tree_item_new_with_label (module->name().c_str());
   gtk_signal_connect(GTK_OBJECT(tree_item),
@@ -2892,14 +2876,6 @@ void GuiModule::Build()
     if(package_height<height-pinspacing)
       package_height=height-pinspacing;
   }
-
-  if(y+height>LAYOUTSIZE_Y-30)
-    {
-      // When we reach the bottom of the layout, we move up again
-      // and to the right of current row of modules.
-      sy=30;
-      sx=max_x+4*PINLENGTH;
-    }
 
   // Create xref
   cross_reference = new BreadBoardXREF();
@@ -3040,11 +3016,6 @@ void GuiModule::Build()
   xpos->set(x);
   ypos->set(y);
 
-  sy+=height+PACKAGESPACING;
-
-  if(sx+width>max_x)
-    max_x=sx+width;
-
   bIsBuilt = true;
 
   update_board_matrix(bbw);
@@ -3167,6 +3138,15 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 {
   // Create a Gui representation (note that this memory is
   // placed onto the 'modules' list.
+  
+  Value *xpos = gp->cpu->get_attribute("xpos", false);
+  Value *ypos = gp->cpu->get_attribute("ypos", false);
+  if(!xpos || !ypos) {
+    xpos = new PositionAttribute(this,"xpos",(double)80);
+    ypos = new PositionAttribute(this,"ypos",(double)80);
+    gp->cpu->add_attribute(xpos);
+    gp->cpu->add_attribute(ypos);
+  }
 
   if(!enabled)
     return;
@@ -3182,6 +3162,27 @@ void Breadboard_Window::NewProcessor(GUI_Processor *_gp)
 /* When a module is created */
 void Breadboard_Window::NewModule(Module *module)
 {
+  // If the xpos and ypos attributes does not exist, then create them.
+  static int sx=80;
+  static int sy=280;
+
+  Value *xpos = module->get_attribute("xpos", false);
+  Value *ypos = module->get_attribute("ypos", false);
+  if(!xpos || !ypos) {
+    xpos = new PositionAttribute(this,"xpos",(double)sx);
+    ypos = new PositionAttribute(this,"ypos",(double)sy);
+    module->add_attribute(xpos);
+    module->add_attribute(ypos);
+  }
+  sy+=100;
+  if(sy>LAYOUTSIZE_Y)
+  {
+  	sy=0;
+	sx+=100;
+	if(sx>LAYOUTSIZE_X)
+		sx=50;
+  }
+
   if(!enabled)
     return;
 
