@@ -1,4 +1,6 @@
-
+2004-01-03  Scott Dattalo  <scott@dattalo.com>
+	* Applied patch from Borut Razem - adds new files to Visual Studio project files.
+	
 2004-01-03  Scott Dattalo  <scott@dattalo.com>
 	* Applied patch from Bradley McLean mailto:bradlist@bradm.net that adds support
 	for the 18f1320.
