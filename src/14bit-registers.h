@@ -597,11 +597,13 @@ enum
  WR    = (1<<1),
  WREN  = (1<<2),
  WRERR = (1<<3),
- EEIF  = (1<<4)
+ EEIF  = (1<<4),
+ EEPGD = (1<<7)
 };
 
-#define VALID_BITS  (RD | WR | WREN | WRERR | EEIF);
-
+ #define EECON1_VALID_BITS  (RD | WR | WREN | WRERR | EEIF)
+  unsigned int valid_bits;
+ 
   EEPROM *eeprom;
 
   void put(unsigned int new_value);
@@ -620,17 +622,18 @@ public:
 
 enum EE_STATES
 {
-  NOT_READY,
-  HAVE_0x55,
-  READY,
-  UNARMED
+  EENOT_READY,
+  EEHAVE_0x55,
+  EEREADY_FOR_WRITE,
+  EEUNARMED,
+  EEREAD
 } eestate;
 
   EEPROM *eeprom;
 
   void put(unsigned int new_value);
   unsigned int get(void);
-  void ee_reset(void) { eestate = NOT_READY;};
+  void ee_reset(void) { eestate = EENOT_READY;};
 
   EECON2(void);
 };
@@ -687,12 +690,14 @@ public:
   file_register **rom;          //  and the data area.
   unsigned int rom_size;
   unsigned int wr_adr,wr_data;  // latched adr and data for eewrites.
+  unsigned int rd_adr;          // latched adr for eereads.
   unsigned int abp;             // break point number that's set during eewrites
 
   EEPROM(void);
   void reset(RESET_TYPE);
   virtual void callback(void);
   void start_write(void);
+  void start_program_memory_read(void);
   void initialize(unsigned int new_rom_size,
 		  EECON1 *con1, EECON2 *con2, 
 		  EEDATA *data, EEADR *adr,
