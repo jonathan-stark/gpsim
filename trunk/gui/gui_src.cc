@@ -54,7 +54,6 @@ key_press(GtkWidget *widget,
 
   if(!sbw) return(FALSE);
   if(!sbw->gp) return(FALSE);
-  if(!sbw->gp->pic_id) return(FALSE);
   if(!sbw->gp->cpu) return(FALSE);
 
   // fix this

@@ -115,11 +115,14 @@ void cmd_dump::dump(int mem_type)
   switch(mem_type)
     {
     case DUMP_EEPROM:
-      if(cpu->eeprom) {
-	fr = cpu->eeprom->get_rom();
-	mem_size = cpu->eeprom->get_rom_size();
-      } else
-	return;
+      {
+	pic_processor *pic = dynamic_cast<pic_processor *> (cpu);
+	if(pic && pic->eeprom) {
+	  fr = pic->eeprom->get_rom();
+	  mem_size = pic->eeprom->get_rom_size();
+	} else
+	  return;
+      }
       break;
     case DUMP_RAM:
       mem_size = cpu->register_memory_size();
@@ -201,7 +204,10 @@ void cmd_dump::dump(int mem_type)
 
     dump_sfrs();
 
-    printf("\n%s = %02x\n",cpu->W->name(), cpu->W->get_value());
+    pic_processor *pic = dynamic_cast<pic_processor *>(cpu);
+    if(pic)
+      printf("\n%s = %02x\n",pic->W->name(), pic->W->get_value());
+
     printf("pc = 0x%x\n",cpu->pc->value);
   }
   

@@ -40,7 +40,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol_orb.h"
 
 
-int open_cod_file(pic_processor **, const char *);
+int open_cod_file(Processor **, const char *);
 
 //
 // ***NOTE*** Ideally, I would like to use a the std container 'map' 
@@ -60,7 +60,7 @@ list <symbol *>::iterator sti;
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
-void Symbol_Table::add_ioport(pic_processor *cpu, IOPORT *_ioport)
+void Symbol_Table::add_ioport(Processor *cpu, IOPORT *_ioport)
 {
 
   ioport_symbol *is = new ioport_symbol();
@@ -96,7 +96,7 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 }
 
-void Symbol_Table::add_register(pic_processor *cpu, Register *new_reg)
+void Symbol_Table::add_register(Processor *cpu, Register *new_reg)
 {
 
   if(new_reg==0)
@@ -113,7 +113,7 @@ void Symbol_Table::add_register(pic_processor *cpu, Register *new_reg)
 
 }
 
-void Symbol_Table::add_w(pic_processor *cpu, WREG *new_w)
+void Symbol_Table::add_w(Processor *cpu, WREG *new_w)
 {
 
   if(cpu==0 || new_w==0)
@@ -130,7 +130,7 @@ void Symbol_Table::add_w(pic_processor *cpu, WREG *new_w)
 
 }
 
-void Symbol_Table::add_constant(pic_processor *cpu, char *new_name, int value)
+void Symbol_Table::add_constant(Processor *cpu, char *new_name, int value)
 {
 
   constant_symbol *sc = new constant_symbol();
@@ -142,7 +142,7 @@ void Symbol_Table::add_constant(pic_processor *cpu, char *new_name, int value)
 
 }
 
-void Symbol_Table::add_address(pic_processor *cpu, char *new_name, int value)
+void Symbol_Table::add_address(Processor *cpu, char *new_name, int value)
 {
 
   address_symbol *as = new address_symbol();
@@ -203,7 +203,7 @@ void Symbol_Table::remove_module(Module * m, char *name)
     }
 }
 
-void Symbol_Table::add(pic_processor *cpu, char *new_name, char *new_type, int value)
+void Symbol_Table::add(Processor *cpu, char *new_name, char *new_type, int value)
 {
 
   cout << "NOT SUPPORTED-->Adding new symbol " << new_name << " of type " << new_type << '\n';
@@ -377,7 +377,7 @@ void Symbol_Table::dump_type(SYMBOL_TYPE symt)
 
 //--------------------------------------------
 
-int  load_symbol_file(pic_processor **cpu, const char *filename)
+int  load_symbol_file(Processor **cpu, const char *filename)
 {
   cout << "Loading " << filename << '\n';
   return open_cod_file(cpu,  filename);
@@ -402,7 +402,7 @@ void symbol_dump_one(char *sym_name)
 }
 
 //--------------------------------------------
-void symbol_add_one(pic_processor *cpu, char *sym_name, char *sym_type, int value)
+void symbol_add_one(Processor *cpu, char *sym_name, char *sym_type, int value)
 {
 
   symbol_table.add(cpu, sym_name,sym_type,value);

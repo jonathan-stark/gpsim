@@ -92,7 +92,6 @@ public:
   Package  *package;              // A package for the module
   ModuleInterface *interface;     // An interface to the module.
 
-  unsigned int interface_id;
 
   void *widget; // GtkWidget * that is put in the breadboard.
 

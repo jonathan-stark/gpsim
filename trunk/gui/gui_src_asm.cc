@@ -524,7 +524,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     int id, address, line;
     char text[256];
     int i,start,end, temp;
-    int pic_id;
 
     if(!popup_sbaw || !popup_sbaw->gp || !popup_sbaw->gp->cpu)
       return;
@@ -532,8 +531,6 @@ popup_activated(GtkWidget *widget, gpointer data)
     item = (menu_item *)data;
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(popup_sbaw->notebook));
 
-    pic_id=popup_sbaw->gp->pic_id;
-    
     switch(item->id) {
 
     case MENU_SETTINGS:
@@ -544,7 +541,6 @@ popup_activated(GtkWidget *widget, gpointer data)
       gtk_widget_show(searchdlg.window);
       break;
     case MENU_FIND_PC:
-      pic_id = popup_sbaw->gp->pic_id;
       address=popup_sbaw->gp->cpu->pc->get_raw_value();
       popup_sbaw->SetPC(address);
       //	gui_simulation_has_stopped(); // FIXME
@@ -947,8 +943,6 @@ static void marker_cb(GtkWidget *w1,
 
   int id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-  int pic_id = sbaw->gp->pic_id;
-
   switch(event->type) {
     
   case GDK_MOTION_NOTIFY:
@@ -1112,8 +1106,6 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
     int id;
 
-    int pic_id = sbaw->gp->pic_id;
-
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
 
@@ -1256,16 +1248,12 @@ static void set_text(SourceBrowserAsm_Window *sbaw, int id, int file_id)
 
     int index;
 
-    int pic_id;
-    
     int line=0;
     struct sa_entry *entry;
     GList *iter;
     struct breakpoint_info *bpi;
     
     // get a manageable pointer to the processor
-    pic_id = sbaw->gp->pic_id;
-
     Processor *cpu = sbaw->gp->cpu;
     
     gtk_text_freeze(GTK_TEXT(sbaw->source_text[id]));
@@ -1706,8 +1694,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   int i;
   int id;
   
-  //int pic_id;
-
   const char *file_name;
   //struct file_context *gpsim_file;
   int file_id;
@@ -1724,8 +1710,6 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   }
   
   assert(wt==WT_asm_source_window);
-  
-  //pic_id = gp->pic_id;
 
   CloseSource();
 

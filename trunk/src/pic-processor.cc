@@ -239,7 +239,7 @@ Processor * add_processor(char * processor_type, char * processor_new_name)
 
       // Tell the gui or any modules that are interfaced to gpsim
       // that a new processor has been declared.
-      gi.new_processor(p->processor_id);
+      gi.new_processor(p);
 
       return p;
     }
@@ -1179,41 +1179,31 @@ void pic_processor::load_hex (const char *hex_file)
       return;
     }
 
-  //  int *memory = new int [MAXPICSIZE];
-  //int minaddr, maxaddr;
+  // assume no configuration word is in the hex file.
+  set_config_word(config_word_address(),0xffff);
 
-  // Fill the memory array with bogus data
-  //for(int i = 0; i<MAXPICSIZE; i++)
-  //  memory[i] = 0xffffffff;
+  if (!readihex16 (this, inputfile)) {
+    
+    // No errors were found in the hex file.
 
-  set_config_word(config_word_address(),0xffff);  // assume no configuration word is in the hex file.
+    fclose (inputfile);
 
-  if (!readihex16 (this, inputfile))
-    {
-      // No errors were found in the hex file.
+    // Tell the gui that we've got some code.
+    gi.new_program(this);
 
-      fclose (inputfile);
+    if(verbose)
+      cout << "Configuration word = 0x"  
+	   << setw(4) << setfill('0') << get_config_word() << '\n';
 
-      //build_program_memory(memory, minaddr, maxaddr);
+    set_frequency(10e6);
 
-      // Tell the gui that we've got some code.
-      gi.new_program(processor_id);
+    reset(POR_RESET);
 
-      //disassemble(minaddr, maxaddr);
-      if(verbose)
-	cout << "Configuration word = 0x"  << setw(4) << setfill('0') << get_config_word() << '\n';
+    simulation_mode = STOPPED;
 
-      set_frequency(10e6);
-      //set_config_word(::config_word);
-      reset(POR_RESET);
-
-      simulation_mode = STOPPED;
-
-      if(verbose)
-	cycles.dump_breakpoints();
-    }
-
-      //  delete(memory);
+    if(verbose)
+      cycles.dump_breakpoints();
+  }
 
 }
 

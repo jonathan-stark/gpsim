@@ -1,3 +1,11 @@
+2004-03-01 Scott Dattalo  <scott@dattalo.com>
+	* modules/* - 
+	Updated the (internal) modules to comply with the new gpsim interface standard
+	* dozens of files:
+	  -- removed all references to 'pic_id'
+	  -- changed pic_processor references to Processor references
+	
+	
 2004-02-29  Borut Razem  <borut.razem@siol.net>
 	* src/eeprom.cc: initialization of variable eestate in EECON2::EECON2(void)
 	by calling ee_reset()

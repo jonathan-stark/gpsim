@@ -67,7 +67,6 @@ Module::Module(void)
 {
 
   name_str = 0;
-  interface_id = 0;
   widget=0;
   package = 0;
   interface = 0;

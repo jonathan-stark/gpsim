@@ -22,10 +22,11 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __SWITCH_H__
 #define __SWITCH_H__
 
-#include <../src/stimuli.h>
-#include <../src/ioports.h>
-#include <../src/symbol.h>
-#include <../src/trace.h>
+#include "../src/stimuli.h"
+#include "../src/ioports.h"
+#include "../src/symbol.h"
+#include "../src/trace.h"
+#include "../src/modules.h"
 
 #include <gtk/gtk.h>
 

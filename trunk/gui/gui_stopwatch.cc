@@ -68,7 +68,8 @@ void StopWatch_Window::Update(void)
   if(offset>rollover)
     offset%=rollover;
 
-  double frequency = gp->cpu->time_to_cycles(1.0); //gpsim_get_inst_clock(gp->pic_id)*4;
+  double frequency = gp->cpu->time_to_cycles(1.0);
+
   _cyclecounter=cyclecounter;
 
   ////////////////////////
@@ -123,45 +124,39 @@ void StopWatch_Window::Update(void)
 
 static void zero_cb(GtkWidget *w, gpointer user_data)
 {
-    unsigned int pic_id;
-    StopWatch_Window *sww=(StopWatch_Window *)user_data;
+  StopWatch_Window *sww=(StopWatch_Window *)user_data;
 
-    pic_id = sww->gp->pic_id;
+  sww->offset = sww->cyclecounter;
 
-    sww->offset = sww->cyclecounter;
-
-    sww->Update();
+  sww->Update();
 }
 
 static void
 modepopup_activated(GtkWidget *widget, gpointer data)
 {
-    StopWatch_Window *sww;
+  StopWatch_Window *sww;
 
-    unsigned int pic_id;
+  unsigned char dir = *(unsigned char*)data;
 
-    unsigned char dir = *(unsigned char*)data;
+  sww = (StopWatch_Window *)gtk_object_get_data(GTK_OBJECT(widget),"sww");
 
-    sww = (StopWatch_Window *)gtk_object_get_data(GTK_OBJECT(widget),"sww");
 
-    pic_id = ((GUI_Object*)sww)->gp->pic_id;
+  switch(dir)
+  {
+  case '+':
+    sww->count_dir=1;
+    config_set_variable(sww->name,"count_dir",sww->count_dir);
+    break;
+  case '-':
+    sww->count_dir=-1;
+    config_set_variable(sww->name,"count_dir",sww->count_dir);
+    break;
+  default:
+    assert(0);
+    break;
+  }
 
-    switch(dir)
-    {
-    case '+':
-	sww->count_dir=1;
-	config_set_variable(sww->name,"count_dir",sww->count_dir);
-	break;
-    case '-':
-	sww->count_dir=-1;
-	config_set_variable(sww->name,"count_dir",sww->count_dir);
-        break;
-    default:
-	assert(0);
-        break;
-    }
-
-    sww->Update();
+  sww->Update();
 }
 
 static void

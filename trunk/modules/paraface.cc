@@ -56,32 +56,67 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#include "../config.h"    // get the definition for HAVE_GUI
+
 
 #ifdef HAVE_GUI
 
 #include <gtk/gtk.h>
 
+#include "../src/gpsim_interface.h"
+#include "../src/trace.h"
+#include "../src/gpsim_time.h"       // Cycle counter interface.
+
 #include "paraface.h"
-pic_processor *gpsim_get_active_cpu(void);
-void  gpsim_set_break_delta(guint64 delta, BreakCallBack *f=NULL);
+
+//--------------------------------------------------------------
+//
+// Create an "interface" to gpsim
+//
 
 
-//extern "C" {
+class Paraface_Interface : public Interface
+{
+private:
+  Paraface *paraface;
 
-    // This function is registerd with gpsim when a module
-    // is instantiated. It gets invoke when gpsim has stopped
-    // simulating.
+public:
 
-    static void simulation_has_stopped(gpointer paraface)
+  //virtual void UpdateObject (gpointer xref,int new_value);
+  //virtual void RemoveObject (gpointer xref);
+  virtual void SimulationHasStopped (gpointer object)
+  {
+    cout << "stopped" << endl;
+    if(paraface)
     {
-	cout << "stopped" << endl;
-	if(paraface)
-	{
-	    ((Paraface *)paraface)->update();
-	}
+      paraface->update();
     }
+  }
 
-//}
+  //virtual void NewProcessor (unsigned int processor_id);
+  //virtual void NewModule (Module *module);
+  //virtual void NodeConfigurationChanged (Stimulus_Node *node);
+  //virtual void NewProgram  (unsigned int processor_id);
+  //virtual void GuiUpdate  (gpointer object);
+
+
+  Paraface_Interface(Paraface *_paraface) : Interface((gpointer *) _paraface)
+  {
+    paraface = _paraface;
+  }
+
+};
+
+#if 0
+static void simulation_has_stopped(gpointer paraface)
+{
+  cout << "stopped" << endl;
+  if(paraface)
+    {
+      ((Paraface *)paraface)->update();
+    }
+}
+#endif
 
 
 //--------------------------------------------------------------
@@ -137,7 +172,7 @@ void InputPort::callback(void)
 
     //    cout << "InputPort::callback(void)\n";
 
-    gpsim_set_break_delta(1, this);
+    cycles.set_break_delta(1, this);
 
 
     if(paraface->output_port->value!=
@@ -340,17 +375,20 @@ Paraface::Paraface(void)
 {
 
 //    cout << "Paraface constructor\n";
-    name_str = "Paraface";
+  name_str = "Paraface";
 
-    interface_id = gpsim_register_interface((gpointer)this);
+  interface = new Paraface_Interface(this);
+  gi.add_interface(interface);
 
-    gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
+  // interface_id = gpsim_register_interface((gpointer)this);
+
+  //  gpsim_register_simulation_has_stopped(interface_id, simulation_has_stopped);
 }
 
 Paraface::~Paraface()
 {
-    gpsim_unregister_interface(interface_id);
-    gpsim_clear_break(input_port); // Hmmmm. FIXME.
+  //gpsim_unregister_interface(interface_id);
+  //gpsim_clear_break(input_port); // Hmmmm. FIXME.
     delete input_port;
     delete output_port;
     if(fd!=-1)

@@ -95,10 +95,10 @@ public:
   virtual void UpdateObject (gpointer xref,int new_value);
   virtual void RemoveObject (gpointer xref);
   virtual void SimulationHasStopped (gpointer object);
-  virtual void NewProcessor (unsigned int processor_id);
+  virtual void NewProcessor (Processor *);
   virtual void NewModule (Module *module);
   virtual void NodeConfigurationChanged (Stimulus_Node *node);
-  virtual void NewProgram  (unsigned int processor_id);
+  virtual void NewProgram  (Processor *);
   virtual void GuiUpdate  (gpointer object);
 
 
@@ -193,14 +193,14 @@ void GUI_Interface::SimulationHasStopped(gpointer callback_data)
  * a communication link between the gui and the simulator is established.
  */
 
-void GUI_Interface::NewProcessor (unsigned int pic_id)
+void GUI_Interface::NewProcessor (Processor *new_cpu)
 {
 
   // Create a gui representation of the new processor
 
   if(gp) {
-    gp->pic_id = pic_id;
-    gp->cpu = dynamic_cast<Processor *>(get_processor(pic_id));
+
+    gp->cpu = new_cpu;
 
     gui_processors = g_slist_append(gui_processors,gp);
 
@@ -246,10 +246,9 @@ void GUI_Interface::NodeConfigurationChanged (Stimulus_Node *node)
 /*------------------------------------------------------------------
  *
  */
-void GUI_Interface::NewProgram (unsigned int pic_id)
+void GUI_Interface::NewProgram (Processor *new_cpu)
 {
 
-  // FIX ME - need to search for *p in the gp list...
   if(gp) {
 
     // this is here because the eeprom is not set to values in cod
@@ -308,7 +307,7 @@ void quit_gui(void)
  * to a list of one). It then notifies each child window. Finally
  * a communication link between the gui and the simulator is established.
  */
-
+#if 0
 void gui_new_processor (unsigned int pic_id)
 {
 
@@ -362,6 +361,7 @@ void gui_new_program (unsigned int pic_id)
     }
 }
 
+
 /*------------------------------------------------------------------
  *
  */
@@ -378,6 +378,7 @@ void gui_new_source (unsigned int pic_id)
 
   }
 }
+#endif
 
 #if 0
 /*------------------------------------------------------------------

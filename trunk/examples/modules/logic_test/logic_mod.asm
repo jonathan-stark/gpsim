@@ -12,7 +12,7 @@ include "p16c84.inc"
 
 	;; Make all of portb I/O pins outputs
 	clrw
-	tris	portb	
+	tris	PORTB	
 
 	
 	;; Loop continuously and increment portb.
@@ -21,7 +21,7 @@ include "p16c84.inc"
 
 begin
 
-	incf	portb,f
+	incf	PORTB,F
 
 	goto	begin
 

@@ -45,6 +45,8 @@ support:
 #include <dlfcn.h>
 #include <stdio.h>
 
+#include "../config.h"    // get the definition for HAVE_GUI
+
 #include "../src/modules.h"
 #include "binary_indicator.h"
 #include "resistor.h"
@@ -78,7 +80,7 @@ Module_Types available_modules[] =
   // USART
   { "usart",            "usart", USARTModule::USART_construct},
 
-#ifdef _HAVE_GUI
+#ifdef HAVE_GUI
   // Parallel port interface
   { "parallel_interface",         "paraface", Paraface::construct},
 
@@ -92,8 +94,8 @@ Module_Types available_modules[] =
   { "not",  "not",  NOTGate::construct},
 
   // Leds
-  { "led_7segments", "led7s", Led_7Segments::construct},
-  { "led", "led", Led::construct},
+  //{ "led_7segments", "led7s", Led_7Segments::construct},
+  //{ "led", "led", Led::construct},
 
   // Video
   { "PAL_video", "video", Video::construct},

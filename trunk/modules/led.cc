@@ -66,6 +66,8 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <iostream>
 
+#include "../config.h"    // get the definition for HAVE_GUI
+
 #ifdef _HAVE_GUI
 #include <gtk/gtk.h>
 #include <math.h>

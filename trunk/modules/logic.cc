@@ -29,6 +29,7 @@ In here you'll find some simple logic devices:
   OR2Gate - A 2-input OR gate
 
 */
+#include "../config.h"    // get the definition for HAVE_GUI
 
 #ifdef HAVE_GUI
 

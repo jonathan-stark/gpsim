@@ -48,7 +48,6 @@ void create_dispatcher (void);
 GUI_Processor::GUI_Processor(void)
 {
 
-  pic_id = 0;
   cpu = 0;
 
   create_dispatcher();

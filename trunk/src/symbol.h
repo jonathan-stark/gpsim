@@ -31,8 +31,8 @@ using namespace std;
 #ifndef __SYMBOL_H__
 #define __SYMBOL_H__
 
-class pic_processor;
-int load_symbol_file(pic_processor **, const char *);
+class Processor;
+int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
 //#include "gpsim_interface.h"
@@ -93,17 +93,17 @@ class Symbol_Table
 {
 public:
 
-  void add_ioport(pic_processor *cpu, IOPORT *ioport);
+  void add_ioport(Processor *cpu, IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
   void add_line_number(Processor *cpu, int address);
-  void add_constant(pic_processor *cpu, char *, int );
-  void add_register(pic_processor *cpu, Register *reg);
-  void add_address(pic_processor *cpu, char *, int );
-  void add_w(pic_processor *cpu, WREG *w );
+  void add_constant(Processor *cpu, char *, int );
+  void add_register(Processor *cpu, Register *reg);
+  void add_address(Processor *cpu, char *, int );
+  void add_w(Processor *cpu, WREG *w );
   void add_module(Module * m, const char *module_name);
   void remove_module(Module * m, char *module_name);
-  void add(pic_processor *cpu, char *symbol_name, char *symbol_type, int value);
+  void add(Processor *cpu, char *symbol_name, char *symbol_type, int value);
   void dump_all(void);
   void dump_one(char *s);
   void dump_one(string *s);

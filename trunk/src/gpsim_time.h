@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __GPSIM_TIME_H__
 #define __GPSIM_TIME_H__
 
-
+#include "breakpoints.h"
 
 //---------------------------------------------------------
 // Cycle Counter
@@ -157,6 +157,12 @@ public:
 	}
 
     }
+
+
+  guint64 get(void) 
+  {
+    return value;
+  }
 
   bool set_break(guint64 future_cycle,
 		 BreakCallBack *f=0, unsigned int abp = MAX_BREAKPOINTS);

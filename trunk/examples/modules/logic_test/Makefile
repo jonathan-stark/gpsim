@@ -8,7 +8,7 @@ ARC             = tar -cvf
 ZIP             = gzip
 
 # gpasm programs
-ASM             = gpasm -c
+ASM             = gpasm
 DIASM           = gpdasm
 CODVIEWER       = gpvc -d 
 
@@ -19,8 +19,6 @@ GPSIM		= gpsim
 PROJECT         = logic_mod
 VERSION         = 0.0.1
 
-HEADER	        = /usr/local/share/gpasm/header
-
 # derived variables
 ARCHIVE         = $(PROJECT)-$(VERSION).tar
 
@@ -30,7 +28,7 @@ sim:	$(PROJECT).cod
 	$(GPSIM) -c $(PROJECT).stc
 
 $(PROJECT).cod: $(PROJECT).asm
-	$(ASM) -I $(HEADER) $(PROJECT).asm
+	$(ASM)  $(PROJECT).asm
 
 $(ARCHIVE):
 	$(ARC) $(ARCHIVE) *

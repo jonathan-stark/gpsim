@@ -39,7 +39,8 @@ Boston, MA 02111-1307, USA.  */
 #include <stdlib.h>
 #include <string>
 #include <math.h>  // for floor()
-#include "../config.h"
+
+#include "../config.h"    // get the definition for HAVE_GUI
 
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
@@ -1500,7 +1501,8 @@ public:
     value = (value & ~mask) | (new_value ? mask : 0);
 
     if(usart)
-      trace.module1( (usart->interface_id << 4 ) | (value & 0xf));
+      //trace.module1( (usart->interface_id << 4 ) | (value & 0xf));
+      trace.module1( value & 0xf);
   }
 };
 

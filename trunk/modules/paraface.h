@@ -24,12 +24,13 @@ Boston, MA 02111-1307, USA.  */
 
 #include <../src/stimuli.h>
 #include <../src/ioports.h>
-#include <../src/symbol.h>
-#include <../src/trace.h>
+//#include <../src/symbol.h>
+#include <../src/modules.h>
 
 #include <gtk/gtk.h>
 
 class Paraface;
+class Paraface_Interface;  // defined in paraface.cc
 
 // Create a few classes from which an PARAFACE may be constructed
 
@@ -118,7 +119,8 @@ public:
     int read_parallel_status(void);
     int write_parallel_data(int data);
 
-
+ private:
+    Paraface_Interface *interface;
 };
 
 #endif //  __PARAFACE_H__

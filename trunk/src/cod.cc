@@ -52,7 +52,7 @@ static FILE *lstfp = 0;
 static char *temp_block = 0;
 static char *lstfilename = 0;
 
-static pic_processor *ccpu = 0;
+static Processor *ccpu = 0;
 DirBlockInfo main_dir;
 
 // Define a flag that tells whether or not we should care about the
@@ -177,7 +177,7 @@ int cod_address_in_range(char *range_block,int address)
 // the .cod file and intialize the pic program memory with them.
 //
 
-void read_hex_from_cod( pic_processor *cpu )
+void read_hex_from_cod( Processor *cpu )
 {
   int _64k_base;
   int safety = 0;
@@ -295,7 +295,7 @@ int cod_open_lst(const char *filename)
 
 
 //-----------------------------------------------------------
-void read_src_files_from_cod(pic_processor *cpu)
+void read_src_files_from_cod(Processor *cpu)
 {
 #define FILE_SIZE  64
 #define FILES_PER_BLOCK (COD_BLOCK_SIZE/FILE_SIZE)
@@ -458,7 +458,7 @@ void read_src_files_from_cod(pic_processor *cpu)
 }
 
 //-----------------------------------------------------------
-void read_line_numbers_from_cod(pic_processor *cpu)
+void read_line_numbers_from_cod(Processor *cpu)
 {
   int lst_line_number = 0;
   int last_src_line = 0;
@@ -508,7 +508,7 @@ void read_line_numbers_from_cod(pic_processor *cpu)
 //-----------------------------------------------------------
 // open_cod_file
 //
-void read_symbols( pic_processor *cpu )
+void read_symbols( Processor *cpu )
 {
   char *s,length;
   short type;
@@ -677,7 +677,7 @@ void check_for_gpasm(char *block)
 }
 //-----------------------------------------------------------
 // Read .c line numbers from special .asm files.
-void read_hll_line_numbers_from_asm(pic_processor *cpu)
+void read_hll_line_numbers_from_asm(Processor *cpu)
 {
   int i;
   struct file_context *gpsim_file;
@@ -891,7 +891,7 @@ void read_hll_line_numbers_from_asm(pic_processor *cpu)
 // function will attempt to determine the cpu from the .cod file.
 //
 
-int open_cod_file(pic_processor **pcpu, const char *filename)
+int open_cod_file(Processor **pcpu, const char *filename)
 {
   int buffer_size;
   int suspicions = 0; // count the number of legal but suspicious items in the .cod file
@@ -947,14 +947,14 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
       if(verbose)
 	cout << "found a " << processor_name << " in the .cod file\n";
 
-      *pcpu = (pic_processor *)add_processor(processor_name,processor_name);
+      *pcpu = (Processor *)add_processor(processor_name,processor_name);
       if(*pcpu == 0) {
 	if(!ignore_case_in_cod)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
 
 	// Could be that there's a case sensitivity issue:
 	strtolower(processor_name);
-	*pcpu = (pic_processor *)add_processor(processor_name,processor_name);
+	*pcpu = (Processor *)add_processor(processor_name,processor_name);
 
 	if(*pcpu == 0)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
@@ -991,7 +991,7 @@ int open_cod_file(pic_processor **pcpu, const char *filename)
 
   // Tell all of the interfaces that a new program exists.
 
-  gi.new_program(ccpu->processor_id);
+  gi.new_program(ccpu);
 
   return error_code;
 
