@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2000 T. Scott Dattalo, Daniel Schudel
+   Copyright (C) 2000,2001 T. Scott Dattalo, Daniel Schudel, Robert Pearce
 
 This file is part of gpsim.
 
@@ -64,7 +64,7 @@ public:
   virtual void create_symbols(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x200; };
-  virtual unsigned int register_memory_size(void) const { return 0x20; };
+  virtual unsigned int register_memory_size(void) const { return 0x20 + 3; };
   virtual unsigned int config_word_address(void) const {return 0xFFF;};
 
   virtual void create_sfr_map(void);
@@ -83,6 +83,10 @@ public:
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   static pic_processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
+  virtual unsigned int get_fsr_value ( unsigned int load_value )
+    {
+      return ( load_value | 0xE0 );
+    }
 
 };
 
@@ -115,6 +119,11 @@ public:
   virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
   static pic_processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
+
+  virtual unsigned int get_fsr_value ( unsigned int load_value )
+    {
+      return ( load_value | 0xE0 );
+    }
 
 };
 

@@ -87,6 +87,11 @@ public:
       return((pclath.value & 0x1f)<<8);
     }
 
+  virtual unsigned int map_fsr_indf ( void )
+    {
+      return ( this->fsr->value );
+    }
+
   virtual void option_new_bits_6_7(unsigned int);
 
   virtual unsigned int eeprom_get_size(void) {return 0;};

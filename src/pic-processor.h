@@ -394,6 +394,16 @@ public:
 
   virtual void option_new_bits_6_7(unsigned int)=0;
 
+  virtual unsigned int get_fsr_value ( unsigned int load_value )
+    {
+      return load_value;
+    };
+  
+  virtual unsigned int map_fsr_indf ( void )
+    {
+      return ( this->fsr->value );
+    }
+
   // There's probably a better way to specify eeprom stuff other than definining it
   // here in the base class...
   virtual unsigned int eeprom_get_size(void) {return 0;};
