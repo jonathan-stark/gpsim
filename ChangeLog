@@ -1,3 +1,8 @@
+2004-09-05 Scott Dattalo <scott@dattalo.com>
+	* src/ioport.cc, src/stimuli.cc:
+	Applied patch from Robert Pearce regarding I/O Pins and stimuli
+	Fixed a couple more issues with I/O pins and contention.
+
 2004-09-02 Borut Razem <borut.razem@siol.net>
 	* cli/socket.cc: read complete line before procesing,
 	  support for different line endings (LF, CR-FL)

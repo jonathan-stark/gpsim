@@ -387,7 +387,7 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
 double Stimulus_Node::update(guint64 current_time)
 {
 
-  //cout << "getting state of " << name() << '\n';
+  //cout << "getting state of Node " << name() << " " << nStimuli << " stim are attached\n";
 
   if(stimuli != 0)
     {
@@ -445,9 +445,9 @@ double Stimulus_Node::update(guint64 current_time)
 
 	    Thevenin impedance:
 	      Zt = 1 / sum(1/Zi)
-                                                                                                 
+
 	    Thevenin voltage:
-                                                                                                 
+
 	    Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
 	       = sum( Vi * Zt /Zi)
 	       = Zt * sum(Vi/Zi)
@@ -1239,7 +1239,7 @@ void IO_bi_directional::set_nodeVoltage( double new_nodeVoltage)
 double IO_bi_directional::get_Vth()
 {
   if(iop) 
-    digital_state = (iop->value.get() & (1<<iobit)) ? true : false;
+    digital_state = iop->get_bit(iobit);
 
   if(driving)
     return digital_state ? Vth : 0;
@@ -1296,7 +1296,7 @@ double IO_bi_directional_pu::get_Zth()
 double IO_bi_directional_pu::get_Vth()
 {
   if(iop) 
-    digital_state = (iop->value.get() & (1<<iobit)) ? true : false;
+    digital_state = iop->get_bit(iobit);
 
   // If the pin is configured as an output, then the driving voltage
   // depends on the pin state. If the pin is an input, and the pullup resistor
