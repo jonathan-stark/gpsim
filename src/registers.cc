@@ -492,3 +492,88 @@ InvalidRegister::InvalidRegister(void)
 
 
 
+#if 0
+// Here is an unused Bit class that *may* be useful one day.
+// The main feature is that it introduces a Bit 'type' that can
+// be operated on the same way that a 'bool' can be operated
+// one. The main difference between a Bit and a bool is that
+// the Bit can support 3-state information too.
+
+class Bit
+{
+public:
+
+  Bit(RegisterValue &rv, unsigned int bit_mask)
+  {
+    d = rv.get() & bit_mask ? true : false;
+    i = rv.get() & bit_mask ? true : false;
+  }
+  Bit(bool nd=false, bool ni=false)
+    : d(nd), i(ni)
+  {
+  }
+  inline void operator = (const Bit &bv)
+  {
+    d = bv.d;
+    i = bv.i;
+  }
+  bool operator == (const Bit &bv) const
+  {
+    return d==bv.d && i==bv.i;
+  }
+  inline void operator |= (const Bit &bv)
+  {
+    d |= bv.d;
+    i |= bv.i;
+  }
+
+  inline void operator &= (const Bit &bv)
+  {
+    i = i&bv.i | i&bv.d | d&bv.i;
+    d &= bv.d;
+  }
+
+  inline void operator ^= (const Bit &bv) 
+  {
+    d ^= bv.d;
+    i |= bv.i;
+  }
+
+  bool isZero()
+  {
+    return d==false & i==false;
+  }
+  bool isOne()
+  {
+    return d==true & i==false;
+  }
+  bool isUnknown()
+  {
+    return i==false;
+  }
+
+  inline void set(bool nd, bool ni)
+  {
+    d = nd;
+    i = ni;
+  }
+
+  void setZero()
+  {
+    d=false;
+    i=false;
+  }
+  void setOne() 
+  {
+    d = true;
+    i = false;
+  }
+  void setUnknown()
+  {
+    i = true;
+  }
+private:
+  bool d,i;
+};
+
+#endif

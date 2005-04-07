@@ -1,3 +1,18 @@
+2005-04-07 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_manager.h, cli/cmd_manager.cc, cli/cmd_gpsim.h:
+	moved from cli/ to src/
+	* src/processor.cc, src/Makefile.am, src/interface.cc,
+	src/processor.cc, gpsim/main.cc, cli/Makefile.am,
+	cli/cmd_manager.cc, cli/cmd_module.cc, cli/cmd_shell.cc:
+	Updated these files to use the newly relocated .h files. The reason
+	for doing this is to fix a src/ dependency on cli/ files. When
+	src/ depends on cli/ then any module that links against the gpsim
+	library must also link against the cli library.
+	* src/registers.cc: added a Bit class (currently not used though)
+	* src/symbol.cc: attribute symbols that wrap other symbols now change
+	the name of the wrapped symbol. This allows heirarchical names
+	such as processor_name.attribute to appear in the symbol table.
+
 2005-04-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc.h: Two new break message functions.
 

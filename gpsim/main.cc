@@ -40,7 +40,7 @@ using namespace std;
 #include "../cli/input.h"
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
-#include "../cli/cmd_manager.h"
+#include "../src/cmd_manager.h"
 
 bool bUseGUI=false;  // assume that we don't want to use the gui
 int quit_state;

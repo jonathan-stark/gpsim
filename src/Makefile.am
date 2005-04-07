@@ -21,6 +21,7 @@ libgpsim_la_SOURCES = \
 	attributes.cc \
 	breakpoints.cc \
 	cod.cc \
+	cmd_manager.cc \
 	eeprom.cc \
 	errors.cc \
 	i2c-ee.cc \

@@ -4,7 +4,7 @@ using namespace std;
 
 #include "command.h"
 #include "cmd_shell.h"
-#include "cmd_manager.h"
+#include "../src/cmd_manager.h"
 
 cmd_shell c_shell;
 
