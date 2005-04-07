@@ -49,7 +49,7 @@ Boston, MA 02111-1307, USA.  */
 #include "attributes.h"
 
 #include "fopen-path.h"
-#include "../../../gpsim/cli/cmd_gpsim.h"
+#include "cmd_gpsim.h"
 
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 

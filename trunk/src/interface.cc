@@ -43,7 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include "eeprom.h"
 #include "icd.h"
 
-#include "../cli/cmd_manager.h"
+#include "cmd_manager.h"
 
 
 extern Integer *verbosity;  // in ../src/init.cc

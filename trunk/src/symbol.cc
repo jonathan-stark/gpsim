@@ -655,6 +655,7 @@ attribute_symbol::attribute_symbol(Module *_module, Value *_attribute)
     if(verbose)
       cout << "creating attribute symbol named: " << buf << endl;
     new_name(buf);
+    attribute->new_name(buf);
   } 
 }
 

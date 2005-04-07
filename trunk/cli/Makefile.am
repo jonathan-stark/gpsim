@@ -22,7 +22,6 @@ libgpsimcli_la_SOURCES = \
 	cmd_log.cc \
 	cmd_macro.cc \
 	cmd_module.cc \
-	cmd_manager.cc \
 	cmd_node.cc \
 	cmd_processor.cc \
 	cmd_quit.cc \
