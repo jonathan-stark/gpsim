@@ -1,4 +1,10 @@
 2005-04-08 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/cmd_break.h: Added support for a break command
+	like: 
+	    break r|w reg(N) 
+	Where N is an integer and 'reg' is the new reg operator.
+	
+2005-04-08 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/scan.ll: Added a "reg()" operator that can cast
 	integers into registers (although this is not fully implemented
 	yet).
