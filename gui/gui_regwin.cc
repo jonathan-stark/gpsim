@@ -1005,7 +1005,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   // n is the value in the sheet cell
 
-  if(n != (int) reg->get_shadow().data)
+  if(errno != EINVAL && n != (int) reg->get_shadow().data)
     {
       printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
       reg->put_value(n&0xff);
@@ -1098,7 +1098,7 @@ void Register_Window::UpdateEntry(void)
   if(reg && reg->bIsValid() )
     {
       if((text=gtk_entry_get_text (GTK_ENTRY(sheet_entry))))
-	gtk_entry_set_text(GTK_ENTRY(entry), text);
+          gtk_entry_set_text(GTK_ENTRY(entry), text);
     }
 }
 
@@ -1637,6 +1637,7 @@ void Register_Window::UpdateASCII(gint row)
 gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
 
 {
+  static gboolean bTrace = false;
   gchar name[16];
 
   GtkSheetRange range;
@@ -1651,84 +1652,94 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   if(!enabled) 
     return 0;	   // Don't read registers when hidden. Esp with ICD.
   
-  GUIRegister *greg = registers[reg_number];
+  GUIRegister *guiReg = registers[reg_number];
 
-  if(reg_number >= greg->rma->get_size())
+  if(reg_number >= guiReg->rma->get_size())
     return 0;
 
-  range.row0=registers[reg_number]->row;
-  range.rowi=registers[reg_number]->row;
-  range.col0=registers[reg_number]->col;
-  range.coli=registers[reg_number]->col;
+  range.row0=guiReg->row;
+  range.rowi=guiReg->row;
+  range.col0=guiReg->col;
+  range.coli=guiReg->col;
 
   // bulk mode stuff is for the ICD.
   gpsim_set_bulk_mode(1);
-  RegisterValue new_value = registers[reg_number]->getRV();
+  RegisterValue new_value = guiReg->getRV();
   gpsim_set_bulk_mode(0);
 
-  RegisterValue last_value=registers[reg_number]->get_shadow();
+  RegisterValue last_value=guiReg->get_shadow();
 
-  if(registers[reg_number]->bUpdateFull) {
+  if(bTrace)
+    printf("UpdateRegisterCell() Entry: regID=%3d, Full=%s, hasChanged=%s\n",
+      reg_number, guiReg->bUpdateFull ? "true " : "false",\
+      guiReg->hasChanged(new_value) ? "true " : "false");
+  if(guiReg->bUpdateFull) {
 
     // A 'Full Update' means that the foreground and background colors
     // need to be repainted.
 
-    registers[reg_number]->bUpdateFull=false;
+    guiReg->bUpdateFull=false;
 
-    if(registers[reg_number]->row<=register_sheet->maxrow) {
+    if(guiReg->row<=register_sheet->maxrow) {
 
-      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat, new_value);
+      guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
     
       gtk_sheet_set_cell(GTK_SHEET(register_sheet),
-			 registers[reg_number]->row,
-			 registers[reg_number]->col,
+			 guiReg->row,
+			 guiReg->col,
 			 GTK_JUSTIFY_RIGHT,name);
     }
     // else the register is invalid and out of the register sheet
  
 
     //if(new_value != last_value) {
-    if(greg->hasChanged(new_value)) {
+    if(guiReg->hasChanged(new_value)) {
 
-      registers[reg_number]->put_shadow(new_value);
-      registers[reg_number]->bUpdateFull=true;
+      guiReg->put_shadow(new_value);
+      guiReg->bUpdateFull=true;
+      if(bTrace)
+        printf("UpdateRegisterCell()    regID=3%d, bUpdateFull set to true 1\n", reg_number);
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
     } else
       gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
 
-    if(registers[reg_number]->hasBreak())
+    if(bTrace)
+      printf("UpdateRegisterCell()    Background\n");
+    if(guiReg->hasBreak())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &breakpoint_color);
-    else if(!registers[reg_number]->bIsValid())
+    else if(!guiReg->bIsValid())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &invalid_color);
-    else if(registers[reg_number]->bIsAliased)
+    else if(guiReg->bIsAliased)
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &alias_color);
-    else if(registers[reg_number]->bIsSFR())
+    else if(guiReg->bIsSFR())
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &sfr_bg_color);
     else
       gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &normal_bg_color);
    
 
     retval=TRUE;
-  } else if(greg->hasChanged(new_value)) { //new_value!=last_value) {
+  } else if(guiReg->hasChanged(new_value)) { //new_value!=last_value) {
 
     if(new_value.data==INVALID_VALUE) {
       
-      registers[reg_number]->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
+      guiReg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
       sprintf (name, "??");
     } else {
 
       // the register has changed since last update
-      registers[reg_number]->put_shadow(new_value);
-      registers[reg_number]->getValueAsString(name,sizeof(name),pCellFormat, new_value);
+      guiReg->put_shadow(new_value);
+      guiReg->getValueAsString(name,sizeof(name),pCellFormat, new_value);
       //sprintf (name, pCellFormat, new_value.data);
     }
 
     gtk_sheet_set_cell(GTK_SHEET(register_sheet),
-		       registers[reg_number]->row,
-		       registers[reg_number]->col,
+		       guiReg->row,
+		       guiReg->col,
 		       GTK_JUSTIFY_RIGHT,name);
 
-    registers[reg_number]->bUpdateFull=true;
+    guiReg->bUpdateFull=true;
+    if(bTrace)
+      printf("UpdateRegisterCell()    regID=3%d, bUpdateFull set to true 2\n", reg_number);
     gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
 
     retval=TRUE;
@@ -1743,6 +1754,11 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       UpdateEntry();
   }
 
+  if(bTrace)
+    printf("UpdateRegisterCell() Exit:  regID=%3d, Full=%s, hasChanged=%s, retval=%s\n",
+      reg_number, guiReg->bUpdateFull
+      ? "true " : "false",
+    guiReg->hasChanged(new_value) ? "true " : "false", retval ? "true " : "false");
   return retval;
 }
 
@@ -1780,7 +1796,7 @@ void Register_Window::Update(void)
       if(registers[address]->get_shadow().data!=INVALID_VALUE ||
         registers[address]->bUpdateFull) {
 
-        if(UpdateRegisterCell(row_to_address[j]+i) == TRUE)
+        if(UpdateRegisterCell(row_to_address[j]+i) == true)
           bRowChanged = true;
       }
     }
@@ -2009,8 +2025,8 @@ void Register_Window::Build(void)
     gtk_widget_destroy(window);
     for(i=0;i<MAX_REGISTERS;i++)
       {
-	delete registers[i];
-	registers[i]=&THE_invalid_register;
+      delete registers[i];
+      registers[i]=&THE_invalid_register;
       }
   }
 	
@@ -2062,12 +2078,12 @@ void Register_Window::Build(void)
   {
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
       {
-	strcpy(normalfont_string,DEFAULT_NORMALFONT);
-	config_set_string(name(),"normalfont",normalfont_string);
+      strcpy(normalfont_string,DEFAULT_NORMALFONT);
+      config_set_string(name(),"normalfont",normalfont_string);
       }
       else
       {
-	SettingsDialog();
+      SettingsDialog();
       }
   }
 

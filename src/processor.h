@@ -329,8 +329,11 @@ public:
   /// Processor capabilities
   unsigned long m_Capabilities;
   enum {
-    eSTACK            = 0x00000001,
-    eWATCHDOGTIMER    = 0x00000002,
+    eSTACK                  = 0x00000001,
+    eWATCHDOGTIMER          = 0x00000002,
+    eBREAKONSTACKOVER       = 0x00000004,
+    eBREAKONSTACKUNDER      = 0x00000009,
+    eBREAKONWATCHDOGTIMER   = 0x00000010,
   };
   unsigned long GetCapabilities();
 
@@ -536,17 +539,6 @@ public:
   //
 
   virtual void Debug();
-
-  // Console or file output messages
-  static void MessageBreakOnRead(unsigned int uAddress);
-  static void MessageBreakOnRead(unsigned int uAddress, unsigned uValue);
-  static void MessageBreakOnRead(unsigned int uAddress, const char * sOperator, unsigned uValue);
-  static void MessageBreakOnWrite(unsigned int uAddress);
-  static void MessageBreakOnWrite(unsigned int uAddress, unsigned uValue);
-  static void MessageBreakOnWrite(unsigned int uAddress, const char * sOperator, unsigned uValue);
-  static void MessageBreakExecuteAddress(unsigned int uAddress);
-  static void FormattedMessage(FILE * pOut, const char *fmt, ...);
-  static void FormattedMessage(const char *fmt, ...);
 
   //
   // FIXME -- create -- a way of constructing a processor (why not use constructors?)

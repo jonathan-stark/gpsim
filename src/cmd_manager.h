@@ -8,23 +8,6 @@
 #include <functional>
 using namespace std;
 
-class CGpsimConsole : public ISimConsole {
-public:
-  CGpsimConsole(FILE* pOut = NULL);
-  void Printf(const char *fmt, ...);
-  void VPrintf(const char *fmt, va_list argptr);
-  void Puts(const char*);
-  void Putc(const char);
-  char* Gets(char *, int);
-
-  void SetOut(FILE *pOut);
-  void SetIn(FILE *pIn);
-
-protected:
-  FILE * m_pfOut;
-  FILE * m_pfIn;
-};
-
 class CommandHandlerKey : public ICommandHandler {
 public:
   CommandHandlerKey(const char *name) {
@@ -40,8 +23,7 @@ public:
 
 class CCommandManager {
 public:
-  CCommandManager(FILE *out = NULL, FILE *in = NULL);
-  void  SetFileStream(FILE *out);
+  CCommandManager();
   int   Register(ICommandHandler * ch);
   int   Execute(string &sName, const char *cmdline);
 
@@ -49,7 +31,7 @@ public:
   static CCommandManager &GetManager();
   ICommandHandler * find(const char *name);
   ISimConsole &GetConsole() {
-    return m_Console;
+    return GetUserInterface().GetConsole();
   }
 
 private:
@@ -63,7 +45,6 @@ private:
   typedef vector<ICommandHandler*> List;
 
   List                  m_HandlerList;
-  CGpsimConsole         m_Console;
 };
 
 #endif

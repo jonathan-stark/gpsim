@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 
+#include "cmd_gpsim.h"
 #include "../config.h"
 #include "pic-processor.h"
 #include "breakpoints.h"
@@ -107,7 +108,8 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
       break;
 
     case BREAK_ON_STK_OVERFLOW:
-      if ((cpu->GetCapabilities() & Processor::eSTACK) == Processor::eSTACK) {
+      if ((cpu->GetCapabilities() & Processor::eBREAKONSTACKOVER)
+        == Processor::eBREAKONSTACKOVER) {
         // pic_processor should not be referenced here
         // Should have a GetStack() virtual function in Processor class.
         // Of course then the Stack class needs to be a virtual class.
@@ -122,7 +124,8 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
-      if ((cpu->GetCapabilities() & Processor::eSTACK) == Processor::eSTACK) {
+      if ((cpu->GetCapabilities() & Processor::eBREAKONSTACKUNDER)
+        == Processor::eBREAKONSTACKUNDER) {
         // pic_processor should not be referenced here
         // Should have a GetStack() virtual function in Processor class.
         // Of course then the Stack class needs to be a virtual class.
@@ -137,8 +140,8 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
-      if ((cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
-        == Processor::eWATCHDOGTIMER) {
+      if ((cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
+        == Processor::eBREAKONWATCHDOGTIMER) {
         // pic_processor should not be referenced here
         // Should have a GetStack() virtual function in Processor class.
         // Of course then the Stack class needs to be a virtual class.
@@ -285,8 +288,8 @@ unsigned int Breakpoints::set_stk_underflow_break(Processor *cpu)
 
 unsigned int  Breakpoints::set_wdt_break(Processor *cpu)
 {
-  if ((cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
-    == Processor::eWATCHDOGTIMER) {
+  if ((cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
+    == Processor::eBREAKONWATCHDOGTIMER) {
     // Set a wdt break only if one is not already set.
     if(cpu14->wdt.break_point == 0)
       return(set_breakpoint (Breakpoints::BREAK_ON_WDT_TIMEOUT, cpu, 0, 0));
@@ -501,8 +504,8 @@ void Breakpoints::clear(unsigned int b)
 
     case BREAK_ON_WDT_TIMEOUT:
       bs.type = BREAK_CLEAR;
-      if ((bs.cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
-        == Processor::eWATCHDOGTIMER) {
+      if ((bs.cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
+        == Processor::eBREAKONWATCHDOGTIMER) {
         cout << "Cleared wdt timeout breakpoint number " << b << '\n';
         ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
       }
@@ -1013,29 +1016,27 @@ void BreakpointRegister_Value::print(void)
 //
 void Break_register_read::TA::action(void) {
   if(verbosity && verbosity->getVal())
-    Processor::MessageBreakOnRead(m_uAddress);
-    // cout << "Hit a Breakpoint!\n";
+    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG, m_uAddress);
   bp.halt();
 }
 
 void Break_register_write::TA::action(void) {
   if(verbosity && verbosity->getVal())
-    Processor::MessageBreakOnWrite(m_uAddress);
-    // cout << "Hit a Breakpoint!\n";
+    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG, m_uAddress);
   bp.halt();
 }
 
 void Break_register_read_value::TA::action(void) {
   if(verbosity && verbosity->getVal())
-    Processor::MessageBreakOnRead(m_uAddress, m_uValue);
-    // cout << "Hit a Breakpoint!\n";
+    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG_VALUE,
+      m_uAddress, m_uValue);
   bp.halt();
 }
 
 void Break_register_write_value::TA::action(void) {
   if(verbosity && verbosity->getVal())
-    Processor::MessageBreakOnWrite(m_uAddress, m_uValue);
-    // cout << "Hit a Breakpoint!\n";
+    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG_VALUE,
+      m_uAddress, m_uValue);
   bp.halt();
 }
 

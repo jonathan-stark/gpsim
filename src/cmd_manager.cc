@@ -3,64 +3,16 @@
 #include <algorithm>
 
 //
-//  CGpsimConsole
-//  Connector between the gpsim console and the
-//  console handler for the loaded modules.
-//////////////////////////////////////////////////
-
-CGpsimConsole::CGpsimConsole(FILE*) {
-}
-
-void CGpsimConsole::Printf(const char *fmt, ...) {
-  va_list ap;
-
-  va_start(ap,fmt);
-  vfprintf(m_pfOut, fmt, ap);
-  va_end(ap);
-}
-
-void CGpsimConsole::VPrintf(const char *fmt, va_list argptr) {
-  vfprintf(m_pfOut, fmt, argptr);
-}
-
-void CGpsimConsole::Puts(const char*s) {
-  fputs(s, m_pfOut);
-}
-
-void CGpsimConsole::Putc(const char c) {
-  fputc(c, m_pfOut);
-}
-
-char* CGpsimConsole::Gets(char *s, int size) {
-  return fgets(s, size, m_pfIn);
-}
-
-void CGpsimConsole::SetOut(FILE *pOut) {
-  m_pfOut = pOut;
-}
-
-void CGpsimConsole::SetIn(FILE *pIn) {
-  m_pfIn = pIn;
-}
-
-//
 //  CCommandManager
 //////////////////////////////////////////////////
 
-CCommandManager::CCommandManager(FILE *out, FILE *in) {
-  m_Console.SetOut(out);
-  m_Console.SetIn(in);
-}
-
-void CCommandManager::SetFileStream(FILE *out) {
-  m_Console.SetOut(out);
+CCommandManager::CCommandManager() {
 }
 
 int CCommandManager::Execute(string &sName, const char *cmdline) {
   ICommandHandler *handler = find(sName.c_str());
   if (handler != NULL) {
-    SetFileStream(stdout);
-    return handler->Execute(cmdline, &m_Console);
+    return handler->Execute(cmdline, &GetConsole());
   }
   return CMD_ERR_PROCESSORNOTDEFINED;
 }

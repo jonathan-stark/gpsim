@@ -40,7 +40,7 @@ using namespace std;
 #include "../cli/input.h"
 #include "../src/interface.h"
 #include "../src/fopen-path.h"
-#include "../src/cmd_manager.h"
+#include "../cli/ui_gpsim.h"
 
 bool bUseGUI=false;  // assume that we don't want to use the gui
 int quit_state;
@@ -218,7 +218,7 @@ main (int argc, char *argv[])
   }
 #endif
 
-  CCommandManager::GetManager().SetFileStream(stdout);
+  s_GpsimUI.SetStreams(stdin, stdout);
 
   initialization_is_complete();
 
