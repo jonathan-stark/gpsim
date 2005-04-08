@@ -914,24 +914,38 @@ unsigned int BreakpointRegister::clear(unsigned int bp_num)
   return 1;
 }
 
-void BreakpointRegister::clear(void)
-{
+/// BreakpointRegister::clear() will delete itself from the
+/// chain of BreakpointRegister objects.
+/// All derived classes that override this function need to
+/// call this function of this base class.
 
-  while(replaced->isa() == Register::BP_REGISTER) {
-    
-    BreakpointRegister *br = dynamic_cast<BreakpointRegister *>(replaced);
-    if(br) {
-      br->clear();
-      replaced = br->replaced;
-      delete br;
-    } else
-      break;
+//  Note: There should be a RegisterChain class and this code
+//  should exist in the RegisterChain class. get_cpu()->registers
+// would then be an array of RegisterChains.
+void BreakpointRegister::clear(void) {
+  BreakpointRegister *br = dynamic_cast<BreakpointRegister *>(get_cpu()->registers[address]);
+  if (br == this) {
+    // at the head of the chain
+    get_cpu()->registers[address] = replaced;
   }
-
-  get_cpu()->registers[address] = replaced;
-
+  else {
+    BreakpointRegister *pLast = br;
+    // Find myself in the chain
+    while(br != NULL) {
+      if (br == this) {
+        // found
+        pLast->replaced = replaced;
+        // for good measure
+        replaced = NULL;
+        break;
+      }
+      else {
+        pLast = br;
+        br = dynamic_cast<BreakpointRegister *>(br->replaced);
+      }
+    }
+  }
   get_cpu()->registers[address]->update();
-
   return;
 }
 
