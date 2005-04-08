@@ -56,7 +56,8 @@ class BinaryOperator : public Operator {
   virtual Value* shortCircuit(Value* leftValue);
   virtual Value* applyOp(Value* leftValue, Value* rightValue)=0;
   virtual Value* evaluate();
-
+  virtual Expression *getLeft();
+  virtual Expression *getRight();
 
   string show();
   string showType();

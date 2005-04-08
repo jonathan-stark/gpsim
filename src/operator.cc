@@ -68,6 +68,14 @@ Value *BinaryOperator::evaluate()
 
   return applyOp(leftExpr->evaluate(), rightExpr->evaluate());
 }
+Expression *BinaryOperator::getLeft() {
+  return leftExpr;
+}
+
+Expression *BinaryOperator::getRight() {
+  return rightExpr;
+}
+
 
 /*****************************************************************
  * The basic unary operator class.

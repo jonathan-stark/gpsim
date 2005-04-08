@@ -748,6 +748,7 @@ void pic_processor::por(void)
 
 pic_processor::pic_processor(void)
 {
+  m_Capabilities = eSTACK | eWATCHDOGTIMER;
 
   if(verbose)
     cout << "pic_processor constructor\n";

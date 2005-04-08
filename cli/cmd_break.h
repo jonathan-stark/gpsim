@@ -34,8 +34,10 @@ public:
   cmd_break(void);
   void list(void);
 
-  void set_break(cmd_options *co, ExprList_t *el=0);
+  void set_break(cmd_options *co);
   void set_break(Value *);
+  void set_break(cmd_options *co, Value *pValue);
+  void set_break(cmd_options *co, Expression *pExpr);
 
 private:
   

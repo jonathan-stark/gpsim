@@ -72,7 +72,7 @@ static char pkg_version[] = PACKAGE_VERSION;
 
 Processor::Processor(void)
 {
-
+  m_Capabilities = 0;
   if(verbose)
     cout << "pic_processor constructor\n";
 
@@ -104,6 +104,11 @@ Processor::~Processor()
 {
   delete registers;
 }
+
+unsigned long Processor::GetCapabilities() {
+  return m_Capabilities;
+}
+
 
 void Processor::initializeAttributes()
 {

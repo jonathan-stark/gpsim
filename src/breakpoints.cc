@@ -107,23 +107,48 @@ unsigned int Breakpoints::set_breakpoint(BREAKPOINT_TYPES break_type,
       break;
 
     case BREAK_ON_STK_OVERFLOW:
-      if(((pic_processor *)(cpu))->stack->set_break_on_overflow(1))
-        return (breakpoint_number);
-
+      if ((cpu->GetCapabilities() & Processor::eSTACK) == Processor::eSTACK) {
+        // pic_processor should not be referenced here
+        // Should have a GetStack() virtual function in Processor class.
+        // Of course then the Stack class needs to be a virtual class.
+        if(((pic_processor *)(cpu))->stack->set_break_on_overflow(1))
+          return (breakpoint_number);
+      }
+      else {
+        // Need to add console object
+        printf("Stack breaks not available on a %s processor\n", cpu->name().c_str());
+      }
       bs.type = BREAK_CLEAR;
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
-      if(((pic_processor *)(cpu))->stack->set_break_on_underflow(1))
-        return (breakpoint_number);
-
+      if ((cpu->GetCapabilities() & Processor::eSTACK) == Processor::eSTACK) {
+        // pic_processor should not be referenced here
+        // Should have a GetStack() virtual function in Processor class.
+        // Of course then the Stack class needs to be a virtual class.
+        if(((pic_processor *)(cpu))->stack->set_break_on_underflow(1))
+          return (breakpoint_number);
+      }
+      else {
+        // Need to add console object
+        printf("Stack breaks not available on a %s processor\n", cpu->name().c_str());
+      }
       bs.type = BREAK_CLEAR;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
-      ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
-      return(breakpoint_number);
-
+      if ((cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
+        == Processor::eWATCHDOGTIMER) {
+        // pic_processor should not be referenced here
+        // Should have a GetStack() virtual function in Processor class.
+        // Of course then the Stack class needs to be a virtual class.
+        ((_14bit_processor *)cpu)->wdt.break_point = BREAK_ON_WDT_TIMEOUT | breakpoint_number;
+        return(breakpoint_number);
+      }
+      else {
+        // Need to add console object
+        printf("Watch dog timer breaks not available on a %s processor\n", cpu->name().c_str());
+      }
     default:   // Not a valid type
       bs.type = BREAK_CLEAR;
       break;
@@ -260,12 +285,17 @@ unsigned int Breakpoints::set_stk_underflow_break(Processor *cpu)
 
 unsigned int  Breakpoints::set_wdt_break(Processor *cpu)
 {
-  // Set a wdt break only if one is not already set.
-
-  if(cpu14->wdt.break_point == 0)
-    return(set_breakpoint (Breakpoints::BREAK_ON_WDT_TIMEOUT, cpu, 0, 0));
-  else
-    return MAX_BREAKPOINTS;
+  if ((cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
+    == Processor::eWATCHDOGTIMER) {
+    // Set a wdt break only if one is not already set.
+    if(cpu14->wdt.break_point == 0)
+      return(set_breakpoint (Breakpoints::BREAK_ON_WDT_TIMEOUT, cpu, 0, 0));
+  }
+  else {
+    // Need to add console object
+    printf("Watch dog timer breaks not available on a %s processor\n", cpu->name().c_str());
+  }
+  return MAX_BREAKPOINTS;
 }
 
 
@@ -448,26 +478,34 @@ void Breakpoints::clear(unsigned int b)
       break;
 
     case BREAK_ON_STK_OVERFLOW:
-
       bs.type = BREAK_CLEAR;
-      if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
-        cout << "Cleared stack overflow break point.\n";
-      else
-        cout << "Stack overflow break point is already cleared.\n";
+      if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
+        == Processor::eSTACK) {
+        if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
+          cout << "Cleared stack overflow break point.\n";
+        else
+          cout << "Stack overflow break point is already cleared.\n";
+      }
       break;
 
     case BREAK_ON_STK_UNDERFLOW:
       bs.type = BREAK_CLEAR;
-      if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
-        cout << "Cleared stack underflow break point.\n";
-      else
-        cout << "Stack underflow break point is already cleared.\n";
+      if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
+        == Processor::eSTACK) {
+        if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
+          cout << "Cleared stack underflow break point.\n";
+        else
+          cout << "Stack underflow break point is already cleared.\n";
+      }
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
       bs.type = BREAK_CLEAR;
-      cout << "Cleared wdt timeout breakpoint number " << b << '\n';
-      ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+      if ((bs.cpu->GetCapabilities() & Processor::eWATCHDOGTIMER)
+        == Processor::eWATCHDOGTIMER) {
+        cout << "Cleared wdt timeout breakpoint number " << b << '\n';
+        ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+      }
       break;
 
     default:
@@ -919,10 +957,6 @@ BreakpointRegister_Value::BreakpointRegister_Value(
 { 
   break_value = bv;
   break_mask = bm;
-  for (unsigned int i = 1; i < _cpu->register_size(); i++) {
-    break_mask <<= 8;
-    break_mask |= bm;
-  }
 
   int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
 
@@ -941,10 +975,6 @@ BreakpointRegister_Value::BreakpointRegister_Value(
 { 
   break_value = bv;
   break_mask = bm;
-  for (unsigned int i = 1; i < _cpu->register_size(); i++) {
-    break_mask <<= 8;
-    break_mask |= bm;
-  }
 
   int regMask = (0x100 << (_cpu->register_size()-1)) - 1;
 

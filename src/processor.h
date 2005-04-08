@@ -326,6 +326,14 @@ public:
   /// Supply voltage
   double Vdd;
 
+  /// Processor capabilities
+  unsigned long m_Capabilities;
+  enum {
+    eSTACK            = 0x00000001,
+    eWATCHDOGTIMER    = 0x00000002,
+  };
+  unsigned long GetCapabilities();
+
   /// Processor RAM
 
   Register **registers;
@@ -386,6 +394,7 @@ public:
   virtual void init_register_memory(unsigned int memory_size);
   virtual unsigned int register_memory_size () const { return 0;};
   virtual unsigned int register_size () const { return 1;};
+  virtual unsigned int register_mask () const { return 0xff;};
 
   //
   // Creation and manipulation of Program Memory
