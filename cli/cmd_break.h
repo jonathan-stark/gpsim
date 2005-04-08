@@ -38,12 +38,11 @@ public:
   void set_break(Value *);
   void set_break(cmd_options *co, Value *pValue);
   void set_break(cmd_options *co, Expression *pExpr);
-
-private:
-  
+  void set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
   void set_break(int bit_flag);
   void set_break(int bit_flag,guint64 value);
-  void set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
+private:
+
 };
 
 extern cmd_break c_break;

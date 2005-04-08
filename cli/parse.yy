@@ -361,12 +361,19 @@ attach_cmd
           | ATTACH symbol_list          {attach.attach($2); delete $2;}
           ;
 
+
 break_cmd
           : BREAK                             {c_break.list();}
           | BREAK bit_flag SYMBOL_T           {c_break.set_break($2,$3);}
           | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3);}
           | BREAK bit_flag break_boolean_expr {c_break.set_break($2,$3);}
           | BREAK bit_flag                    {c_break.set_break($2);}
+          | BREAK bit_flag REG_T '(' LITERAL_INT_T ')'  
+            {
+              // break r|w reg(number)
+              c_break.set_break($2->value, $5->getVal());
+              delete $5;
+            }
           ;
 
 bus_cmd
@@ -741,9 +748,6 @@ binary_expr
 break_mask_expr 
         : SYMBOL_T                                        {$$ = new LiteralSymbol($1);}
         | SYMBOL_T          AND_T     LITERAL_INT_T       {$$ = new OpAnd(new LiteralSymbol($1), new LiteralSymbol($3));}
-        | REG_T '(' LITERAL_INT_T ')'                     {
-          cout<<"reg expression\n";
-$$ = new LiteralInteger($3);}
         ;
 
 break_boolean_expr
