@@ -57,15 +57,6 @@ EXPORTS
     ?Add@Files@@QAEHPADPAU_iobuf@@@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
     ?Find@Files@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?FormattedMessage@Processor@@SAXPAU_iobuf@@PBDZZ
-    ?FormattedMessage@Processor@@SAXPBDZZ
-    ?MessageBreakExecuteAddress@Processor@@SAXI@Z
-    ?MessageBreakOnRead@Processor@@SAXI@Z
-    ?MessageBreakOnRead@Processor@@SAXII@Z
-    ?MessageBreakOnRead@Processor@@SAXIPBDI@Z
-    ?MessageBreakOnWrite@Processor@@SAXI@Z
-    ?MessageBreakOnWrite@Processor@@SAXII@Z
-    ?MessageBreakOnWrite@Processor@@SAXIPBDI@Z
     ?add@Symbol_Table@@QAEXPAVValue@@@Z
     ?add@TraceFrame@@UAEXPAVTraceObject@@@Z
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
@@ -353,6 +344,7 @@ EXPORTS
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?verbose@@3HA
+    GetUserInterface
     load_library
     get_library_export
     free_error_message

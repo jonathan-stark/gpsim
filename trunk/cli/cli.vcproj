@@ -227,9 +227,6 @@
 				RelativePath=".\cmd_macro.cc">
 			</File>
 			<File
-				RelativePath=".\cmd_manager.cc">
-			</File>
-			<File
 				RelativePath=".\cmd_module.cc">
 			</File>
 			<File
@@ -362,6 +359,9 @@ ren $(InputName).hpp $(InputName).h
 				RelativePath=".\socket.cc">
 			</File>
 			<File
+				RelativePath=".\ui_gpsim.cc">
+			</File>
+			<File
 				RelativePath="..\plat\win32\uxtime.cc">
 			</File>
 		</Filter>
@@ -394,9 +394,6 @@ ren $(InputName).hpp $(InputName).h
 				RelativePath=".\cmd_frequency.h">
 			</File>
 			<File
-				RelativePath=".\cmd_gpsim.h">
-			</File>
-			<File
 				RelativePath=".\cmd_help.h">
 			</File>
 			<File
@@ -413,9 +410,6 @@ ren $(InputName).hpp $(InputName).h
 			</File>
 			<File
 				RelativePath=".\cmd_macro.h">
-			</File>
-			<File
-				RelativePath=".\cmd_manager.h">
 			</File>
 			<File
 				RelativePath=".\cmd_module.h">
@@ -521,6 +515,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\symbol_t.h">
+			</File>
+			<File
+				RelativePath=".\ui_gpsim.h">
 			</File>
 			<File
 				RelativePath="..\plat\win32\unistd.h">
