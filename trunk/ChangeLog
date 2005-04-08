@@ -1,3 +1,12 @@
+2005-04-08 Scott Dattalo <scott@dattalo.com>
+	* cli/parse.yy, cli/scan.ll: Added a "reg()" operator that can cast
+	integers into registers (although this is not fully implemented
+	yet).
+	A single quote before an identifier now acts as an 'escape'
+	character. This allows user defined strings to collide with gpsim
+	built in strings. (e.g. If a user has a variable named help, its
+	contents can be examined by typing 'help at the command line).
+
 2005-04-07 J.R. Heisey <jrheisey@sourceforge.com>
 	src/breakpoints.cc: Fixed a memory leak by properly removing
 	chained BreakpointRegister objects from the Register chain when
