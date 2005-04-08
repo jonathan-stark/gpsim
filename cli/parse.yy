@@ -245,12 +245,13 @@ void yyerror(char *message)
 %nonassoc IND_T
 
 %left     BIT_T BITS_T
-%right    LOW_T HIGH_T REG_T LADDR_T WORD_T
+%right    LOW_T HIGH_T LADDR_T WORD_T
 %nonassoc INDEXED_T
 
 %right    LNOT_T ONESCOMP_T UNARYOP_PREC
 %right    POW_T
 
+%left     REG_T
 
 %%
 /* Grammar rules */
@@ -736,9 +737,13 @@ binary_expr
 // break r A == 2
 // break r A & 0xff == 2
 // break w A & 0x1f == 5
+
 break_mask_expr 
         : SYMBOL_T                                        {$$ = new LiteralSymbol($1);}
         | SYMBOL_T          AND_T     LITERAL_INT_T       {$$ = new OpAnd(new LiteralSymbol($1), new LiteralSymbol($3));}
+        | REG_T '(' LITERAL_INT_T ')'                     {
+          cout<<"reg expression\n";
+$$ = new LiteralInteger($3);}
         ;
 
 break_boolean_expr

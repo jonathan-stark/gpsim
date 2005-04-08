@@ -55,7 +55,7 @@ static char* max_bodyPtr = &macroBody[0] + sizeof(macroBody)-1;
 
 //static int numeric_base = 0;
 
-static struct cmd_options *op = 0;
+static struct cmd_options *options = 0;
 static command *cmd = 0;
 static int have_parameters = 0;
 static int end_of_command = 0;
@@ -64,7 +64,7 @@ extern int parser_spanning_lines;
 extern int last_command_is_repeatable;
 
 static string strip_trailing_whitespace (char *s);
-static int handle_identifier(const string &tok, cmd_options **op );
+static int handle_identifier(string &tok, cmd_options **op );
 static int process_intLiteral(char *buffer, int conversionBase);
 static int process_booleanLiteral(bool value);
 static int process_macroBody(const char *text);
@@ -94,7 +94,7 @@ CCHAR	(#)
 COMMENT	({CCHAR}.*)
 SNLCMT	({SNL}|{COMMENT})
 INDIRECT (\*)
-IDENT	([/_a-zA-Z\.][/_a-zA-Z0-9\.\-]*)
+IDENTIFIER ([\']?[/_a-zA-Z\.][/_a-zA-Z0-9\.\-]*)
 EXPON	([DdEe][+-]?{D}+)
 DEC     ({D}+)
 HEX1    ((0[Xx])[0-9a-fA-F]+)
@@ -185,6 +185,7 @@ abort_gpsim_now {
 {FLOAT}             {return process_floatLiteral(yytext);}
 "true"              {return(process_booleanLiteral(true));}
 "false"             {return(process_booleanLiteral(false));}
+"reg"               {return(recognize(REG_T,"reg"));}
 
 {SHELLLINE}         {return(process_shellLine(&yytext[1]));}
 
@@ -263,12 +264,12 @@ abort_gpsim_now {
 // Identifiers. These are either gpsim commands or user macros.
 %}
 
-{IDENT} {
+{IDENTIFIER} {
   string tok = strip_trailing_whitespace (yytext);
 
   int ret=0;
   if(strlen(tok.c_str()))
-    ret = handle_identifier (tok,&op);
+    ret = handle_identifier (tok,&options);
   else
     ret = recognize(0,"invalid identifier");
 
@@ -370,7 +371,7 @@ int translate_token(int tt)
 *
 */
 
-int handle_identifier(const string &s, cmd_options **op )
+int handle_identifier(string &s, cmd_options **op )
 {
   int retval = 0;
 
@@ -379,19 +380,27 @@ int handle_identifier(const string &s, cmd_options **op )
 
   if(! *op) {
 
-    // Search the commands
     
-    cmd = search_commands(s);
-    if(cmd) {
-      if(verbose&2)
-        cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
-	  (cmd->get_token()) << "\n *******\n";
+    // If the first character in the string is a ' (single quote character) then
+    // this means that the user is explicitly trying to access a user defined symbol
+    if(s[0] == '\'')
+      s=s.erase(0,1);
+    else {
+
+      // Search the commands
+      cmd = search_commands(s);
+      if(cmd) {
+        if(verbose&2)
+          cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
+            (cmd->get_token()) << "\n *******\n";
 	
-      *op = cmd->get_op();
-      have_parameters = 0;
-      retval = cmd->get_token();
-      last_command_is_repeatable = cmd->is_repeatable();
-      return recognize(retval,"good command");
+        *op = cmd->get_op();
+        have_parameters = 0;
+        retval = cmd->get_token();
+        last_command_is_repeatable = cmd->is_repeatable();
+        return recognize(retval,"good command");
+
+      }
 
     }
 
@@ -463,8 +472,6 @@ int handle_identifier(const string &s, cmd_options **op )
 
   if(verbose&2)
     cout << " returning unknown string: " << s << endl;
-  //yylval.s = strdup(s.c_str());
-  //return recognize(STRING,"string");
 
   return process_stringLiteral(s.c_str());
 
@@ -595,7 +602,7 @@ void initialize_commands(void);
 void init_cmd_state(void)
 {
     cmd = 0;
-    op = 0;
+    options = 0;
     input_mode = 0;
     end_of_command = 0;
 }
