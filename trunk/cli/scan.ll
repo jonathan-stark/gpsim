@@ -433,14 +433,13 @@ int handle_identifier(const string &s, cmd_options **op )
 
     while(opt->name)
       if(strcmp(opt->name, s.c_str()) == 0) {
-	if(verbose&2)
-	  cout << "found option '" << opt->name << "'\n";
-	yylval.co = opt;
-	return recognize(translate_token(opt->token_type),"option");
+        if(verbose&2)
+          cout << "found option '" << opt->name << "'\n";
+        yylval.co = opt;
+        return recognize(translate_token(opt->token_type),"option");
       }
       else
-	opt++;
-
+        opt++;
   }
 
   // If we get here, then the option was not found.
