@@ -1,3 +1,9 @@
+2005-04-07 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/scan.ll, cli/parse.yy, cli/cmd_break.cc,h,
+	src/processor.cc,h, src/pic-processor.cc, operator.cc,h,
+	src/breakpoints.cc: Changed the break command syntax.
+	Added code to support the syntax.
+
 2005-04-07 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_manager.h, cli/cmd_manager.cc, cli/cmd_gpsim.h:
 	moved from cli/ to src/
