@@ -1,3 +1,15 @@
+2005-04-08 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/breakpoints.cc, src/cmd_manager.cc,h, gpsim/main.cc,
+	src/processor.cc,h, cli/ui_gpsim.cc,h, src/registers.cc,
+	cli.vcproj, gpsim.vcproj, src.vcproj: Created a IUserInterface
+	and CGpsimUserInterface as the implementation with functions to
+	write predefined parameterized strings to the console (or in the
+	future a GUI popup).
+	Modules call the C function GetUserInterface() to retrieve an
+	instance of CGpsimUserInterface as a IUserInterface.
+	Using IUserInterface functions is the prefered way of writing error
+	and notification messages to the gpsim console from other modules.
+
 2005-04-08 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/cmd_break.h: Added support for a break command
 	like: 
