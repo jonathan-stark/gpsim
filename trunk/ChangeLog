@@ -1,3 +1,6 @@
+2005-04-09 Borut Razem <borut.razem@siol.net>
+	* cli/makefile.mingw, src/makefile.mingw: MINGW sync
+
 2005-04-08 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/cmd_manager.cc,h, gpsim/main.cc,
 	src/processor.cc,h, cli/ui_gpsim.cc,h, src/registers.cc,
@@ -15,7 +18,7 @@
 	like: 
 	    break r|w reg(N) 
 	Where N is an integer and 'reg' is the new reg operator.
-	
+
 2005-04-08 Scott Dattalo <scott@dattalo.com>
 	* cli/parse.yy, cli/scan.ll: Added a "reg()" operator that can cast
 	integers into registers (although this is not fully implemented
@@ -103,7 +106,7 @@
 
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: changed the comment text color to 'dim gray'
-	
+
 2005-03-23 Scott Dattalo <scott@dattalo.com>
 	* src/value.cc: Fixed write to a null pointer in String::get(char
 	*buf, int len).

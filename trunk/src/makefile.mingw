@@ -36,6 +36,7 @@ src_OBJECTS =			\
 	16bit-tmrs.o		\
 	attributes.o		\
 	breakpoints.o		\
+	cmd_manager.o		\
 	cod.o			\
 	eeprom.o		\
 	errors.o		\
