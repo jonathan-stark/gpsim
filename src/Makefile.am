@@ -80,6 +80,8 @@ gpsiminclude_HEADERS = \
 	16bit-tmrs.h \
 	attributes.h \
 	breakpoints.h \
+	cmd_gpsim.h \
+	cmd_manager.h \
 	cod.h \
 	eeprom.h \
 	i2c-ee.h \
