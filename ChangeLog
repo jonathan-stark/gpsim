@@ -1,3 +1,7 @@
+2005-04-13 Scott Dattalo <scott@dattalo.com>
+	* build.xml: An XML script for an experimental regression tool
+	(based on the open source projects "ant" and "CruiseControl").
+
 2005-04-09 Borut Razem <borut.razem@siol.net>
 	* cli/makefile.mingw, src/makefile.mingw: MINGW sync
 
