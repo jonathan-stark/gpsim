@@ -33,6 +33,7 @@
     <target name="make" depends="init">
         <!-- run through all of the configuration scripts -->
         <exec executable="libtoolize" failonerror="true">
+            <arg value="--force" />
         </exec>
         <exec executable="aclocal" failonerror="true">
         </exec>
@@ -40,6 +41,8 @@
         </exec>
         <exec executable="automake" failonerror="true">
             <arg value="--add-missing" />
+        </exec>
+        <exec executable="autoconf" failonerror="true">
         </exec>
         <exec executable="./configure" failonerror="true">
         </exec>
