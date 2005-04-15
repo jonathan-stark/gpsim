@@ -44,7 +44,8 @@
         </exec>
         <exec executable="autoconf" failonerror="true">
         </exec>
-        <exec executable="./configure" failonerror="true">
+        <exec executable="sh" failonerror="true">
+            <arg value="configure" />
         </exec>
         <exec executable="make" failonerror="true">
         </exec>
