@@ -68,6 +68,8 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "input.h"
 #include "cmd_macro.h"
+#include "cmd_run.h"
+
 #ifdef HAVE_LIBREADLINE
 #define HAVE_READLINE
 #endif
@@ -104,7 +106,6 @@ void redisplay_prompt(void);
 
 char *gnu_readline (char *s, unsigned int force_readline);
 
-int input_mode = 0;
 int last_command_is_repeatable=0;
 extern Macro *gCurrentMacro;
 
@@ -112,6 +113,33 @@ extern int quit_parse;
 
 extern void start_server(void);
 extern void stop_server(void);
+
+//------------------------------------------------------------------------
+// Command Handler - create an interface to the CLI
+//------------------------------------------------------------------------
+#include "../src/cmd_manager.h"
+//class ISimConsole;
+class CCliCommandHandler : public ICommandHandler
+{
+public:
+  virtual char *GetName();
+  virtual int Execute(const char * commandline, ISimConsole *out);
+};
+
+char *CCliCommandHandler::GetName()
+{
+  return "gpsimCLI";
+}
+
+int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
+{
+  cout << "GCLICommandHandler::Execute:" << commandline << endl;
+}
+static CCliCommandHandler sCliCommandHandler;
+
+//------------------------------------------------------------------------
+//------------------------------------------------------------------------
+
 
 /*
   temporary --- linked list input buffer
@@ -212,7 +240,10 @@ void initialize_signals(void)
 #endif
 
 }
-
+void initialize_CLI()
+{
+  CCommandManager::GetManager().Register(&sCliCommandHandler);  
+}
 //==============================================================
 // initialize_gpsim 
 //
@@ -221,6 +252,7 @@ void initialize_signals(void)
 
 void initialize_gpsim(void)
 {
+  initialize_CLI();
   if(gUsingThreads()) 
     initialize_threads();
   initialize_signals();
@@ -343,6 +375,7 @@ void start_new_input_stream(void)
  */
 int start_parse(void)
 {
+
   static bool bParsing = false;
 
   if(bParsing)
@@ -361,7 +394,6 @@ int start_parse(void)
     exit_gpsim();
 
   return retval;
-
 }
 
 
@@ -751,12 +783,6 @@ static int gpsim_rl_getc(FILE *in)
 #else
   g_io_channel_read(channel, buf, 1, &bytes_read);
 #endif
-  /*
-#if defined(_WIN32)
-  if(buf[0] == 9)
-    return 0x61;  // don't accept tabs in windows
-#endif
-  */
   return buf[0];
 }
 #endif

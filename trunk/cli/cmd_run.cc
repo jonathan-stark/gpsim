@@ -55,7 +55,7 @@ cmd_run::cmd_run(void)
   op = cmd_run_options; 
 }
 
-void cmd_run::run(void)
+void cmd_run::run()
 {
 
   get_interface().start_simulation();
