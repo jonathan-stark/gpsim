@@ -74,15 +74,12 @@ extern void lexer_InvokeMacro(Macro *m);
 #define YYERROR_VERBOSE
 
 extern char *yytext; 
-
-int yylex(void);
 int quit_parse=0;
 int abort_gpsim=0;
 int parser_warnings;
 int parser_spanning_lines=0;
 extern int use_gui;
 extern int quit_state;
-
 
 void init_cmd_state(void);
 
@@ -91,18 +88,13 @@ void yyerror(char *message)
 {
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
   init_cmd_state();
-
-#if 0
-  static int i = 0;
-
-  if(i++>5)
-    exit(0);
-#endif
-
 }
 
 
 %}
+
+/* The pure-parser mode is used to enable reentrancy */
+%pure-parser
 
 /* Bison declarations */
 
@@ -130,6 +122,13 @@ void yyerror(char *message)
 
   Macro                    *Macro_P;
 }
+
+
+
+%{
+/* Define the interface to the lexer */
+extern int yylex(YYSTYPE* lvalP);
+%}
 
 
 /* gpsim commands: */
@@ -256,24 +255,8 @@ void yyerror(char *message)
 %%
 /* Grammar rules */
 
-/*
-input:
-
-      {
-	// Command is complete. Prepare for the next command.
-	cout << " command has been parsed\n";
-        init_cmd_state();
-      }
-     | list_of_commands
-      {
-	// Command is complete. Prepare for the next command.
-	cout << " command has been parsed\n";
-
-      }
-
-*/
 list_of_commands:
-         //rol  { cout << " list_of_commands: rol\n";}
+
       cmd rol  { 
         init_cmd_state();
 

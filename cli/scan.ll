@@ -43,34 +43,44 @@ Boston, MA 02111-1307, USA.  */
 #include "input.h"
 #include "scan.h"
 
-  //int state;
+/* Since our parser is reentrant, it needs to pass us a pointer
+ * to the yylval that it would like us to use */
+#define YY_DECL int yylex YY_PROTO(( YYSTYPE* yylvalP ))
 
 /* This is the max length of a line within a macro definition */
 static char macroBody[65536], *macroBodyPtr=0;
 static char* max_bodyPtr = &macroBody[0] + sizeof(macroBody)-1;
 
-// gpsim uses base '0' for the base of the numbers that are read from stdin.
-// This means that unless the number is prefixed with '0x' for hex or
-// '0' (zero) for octal it is assumed to be base 10.
+struct LexerStateStruct {
+  struct cmd_options *options;
+  command *cmd;
+  int input_mode;
+  int end_of_command;
+  int have_parameters;
+};
 
-//static int numeric_base = 0;
-
+static LexerStateStruct mLexerState = {0,0,0,0,0};
+static LexerStateStruct *pLexerState = 0;
+/*
 static struct cmd_options *options = 0;
 static command *cmd = 0;
-static int have_parameters = 0;
+static int input_mode = 0;
 static int end_of_command = 0;
+static int have_parameters = 0;
+*/
+
 extern int quit_parse;
 extern int parser_spanning_lines;
 extern int last_command_is_repeatable;
 
 static string strip_trailing_whitespace (char *s);
-static int handle_identifier(string &tok, cmd_options **op );
-static int process_intLiteral(char *buffer, int conversionBase);
-static int process_booleanLiteral(bool value);
-static int process_macroBody(const char *text);
-static int process_floatLiteral(char *buffer);
-static int process_stringLiteral(const char *buffer);
-static int process_shellLine(const char *buffer);
+static int handle_identifier(YYSTYPE* yylvalP, string &tok, cmd_options **op );
+static int process_intLiteral(YYSTYPE* yylvalP, char *buffer, int conversionBase);
+static int process_booleanLiteral(YYSTYPE* yylvalP, bool value);
+static int process_macroBody(YYSTYPE* yylvalP, const char *text);
+static int process_floatLiteral(YYSTYPE* yylvalP, char *buffer);
+static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer);
+static int process_shellLine(YYSTYPE* yylvalP, const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
 
@@ -80,7 +90,6 @@ extern Macro *isMacro(const string &s);
 extern Macro *gCurrentMacro;
 
 #define YYDEBUG 1
-//#define YY_NO_UNPUT
 
 %}
 
@@ -136,11 +145,14 @@ QUOTEDTOKEN (\".*\")
       if(verbose)
           cout << "got EOL\n";
 
-      input_mode = 0;  // assume that this is not a multi-line command.
-      if(cmd && cmd->can_span_lines() && have_parameters && !end_of_command ) 
-        {
-          input_mode = CONTINUING_LINE;
-        }
+      pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
+      if(pLexerState->cmd && 
+	 pLexerState->cmd->can_span_lines() && 
+	 pLexerState->have_parameters && 
+	 !pLexerState->end_of_command ) 
+
+	pLexerState->input_mode = CONTINUING_LINE;
+
       else
         return recognize(EOLN_T, " end of line");
     }
@@ -177,17 +189,17 @@ abort_gpsim_now {
 "<="                {return(recognize(LE_T, "<="));}
 ">="                {return(recognize(GE_T, ">="));}
 
-{BIN1}              {return(process_intLiteral(&yytext[2], 2));}
-{BIN2}              {return(process_intLiteral(&yytext[2], 2));}
-{DEC}               {return(process_intLiteral(&yytext[0], 10));}
-{HEX1}              {return(process_intLiteral(&yytext[2], 16));}
-{HEX2}              {return(process_intLiteral(&yytext[1], 16));}
-{FLOAT}             {return process_floatLiteral(yytext);}
-"true"              {return(process_booleanLiteral(true));}
-"false"             {return(process_booleanLiteral(false));}
+{BIN1}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
+{BIN2}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
+{DEC}               {return(process_intLiteral(yylvalP,&yytext[0], 10));}
+{HEX1}              {return(process_intLiteral(yylvalP,&yytext[2], 16));}
+{HEX2}              {return(process_intLiteral(yylvalP,&yytext[1], 16));}
+{FLOAT}             {return process_floatLiteral(yylvalP,yytext);}
+"true"              {return(process_booleanLiteral(yylvalP,true));}
+"false"             {return(process_booleanLiteral(yylvalP,false));}
 "reg"               {return(recognize(REG_T,"reg"));}
 
-{SHELLLINE}         {return(process_shellLine(&yytext[1]));}
+{SHELLLINE}         {return(process_shellLine(yylvalP,&yytext[1]));}
 
 
 %{
@@ -201,7 +213,7 @@ abort_gpsim_now {
 <MACROBODY>\n            {*macroBodyPtr++ = '\n';
                           *macroBodyPtr = 0;
                            macroBodyPtr = macroBody;
-                           return(process_macroBody(macroBody));}
+                           return(process_macroBody(yylvalP,macroBody));}
 
 
 <MACROBODY>.             {  *macroBodyPtr++ = *yytext;
@@ -253,8 +265,8 @@ abort_gpsim_now {
 %}
 
 "end"{S}* {
-    if (cmd && cmd->can_span_lines() ) {
-      end_of_command = 1;
+    if (pLexerState->cmd && pLexerState->cmd->can_span_lines() ) {
+      pLexerState->end_of_command = 1;
       return(END_OF_COMMAND);
     }
     printf("Warning: found \"end\" while not in multiline mode\n");
@@ -269,7 +281,7 @@ abort_gpsim_now {
 
   int ret=0;
   if(strlen(tok.c_str()))
-    ret = handle_identifier (tok,&options);
+    ret = handle_identifier (yylvalP, tok, &pLexerState->options);
   else
     ret = recognize(0,"invalid identifier");
 
@@ -294,6 +306,15 @@ abort_gpsim_now {
 static int input_stack_index=0;
 YY_BUFFER_STATE input_stack[MAX_STACK_LEVELS];
 
+/************************************************************************
+ * yywrap()
+ *
+ * Revert to an old input stream if there is one. If there is not an old
+ * old stream, then the lexer will try to get data from YY_INPUT which
+ * is a macro that calls gpsim_read() (see scan.h).
+ * An 'old' stream is one that was interrupted by a macro expansion.
+ *
+ */
 #ifdef yywrap
 #undef yywrap
 #endif
@@ -308,13 +329,18 @@ int yywrap (void)
   return 1;
 }
 
-void push_input_stack(void)
+/************************************************************************
+ * push_input_stack
+ * 
+ * called when macros are being expanded.
+ */
+static void push_input_stack(void)
 {
   if(input_stack_index<MAX_STACK_LEVELS)
     input_stack[input_stack_index++] = YY_CURRENT_BUFFER;
 }
 
-/*****************************************************************
+/************************************************************************
  * 
  */
 static int recognize(int token_id,const char *description)
@@ -326,7 +352,8 @@ static int recognize(int token_id,const char *description)
   return(token_id);
 }
 
-
+/************************************************************************
+ */
 int translate_token(int tt)
 {
   switch(tt)
@@ -371,7 +398,7 @@ int translate_token(int tt)
 *
 */
 
-int handle_identifier(string &s, cmd_options **op )
+int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 {
   int retval = 0;
 
@@ -383,30 +410,41 @@ int handle_identifier(string &s, cmd_options **op )
     
     // If the first character in the string is a ' (single quote character) then
     // this means that the user is explicitly trying to access a user defined symbol
+    // (e.g. if there is variable named "help" in the user's symbol table, then the
+    // only way to get access to it is by using the single quote character:
+    //    'help   
+
     if(s[0] == '\'')
-      s=s.erase(0,1);
+
+      // Strip away the quote, we won't treat this as a command and the parser
+      // doesn't want to know about it.
+
+      s=s.erase(0,1); 
+    
     else {
 
       // Search the commands
-      cmd = search_commands(s);
-      if(cmd) {
+      pLexerState->cmd = search_commands(s);
+      if(pLexerState->cmd) {
         if(verbose&2)
-          cout << "\n  *******\nprocessing command " << cmd->name << "\n  token value " <<
-            (cmd->get_token()) << "\n *******\n";
+          cout << "\n  *******\nprocessing command " << (pLexerState->cmd->name) << "\n  token value " <<
+            (pLexerState->cmd->get_token()) << "\n *******\n";
 	
-        *op = cmd->get_op();
-        have_parameters = 0;
-        retval = cmd->get_token();
-        last_command_is_repeatable = cmd->is_repeatable();
-        return recognize(retval,"good command");
+        *op = pLexerState->cmd->get_op();
+        pLexerState->have_parameters = 0;
+        retval = pLexerState->cmd->get_token();
 
+	// ugh. This is problem when we the parser becomes re-entrant.
+        last_command_is_repeatable = pLexerState->cmd->is_repeatable();
+
+        return recognize(retval,"good command");
       }
 
     }
 
     // Search the macros
-    yylval.Macro_P = isMacro(s);
-    if(yylval.Macro_P) {
+    yylvalP->Macro_P = isMacro(s);
+    if(yylvalP->Macro_P) {
 
       return MACROINVOCATION_T;
     }
@@ -415,7 +453,7 @@ int handle_identifier(string &s, cmd_options **op )
     string replaced;
     if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
       if(replaced != s)
-        return handle_identifier(  replaced, op);
+        return handle_identifier(yylvalP, replaced, op);
 
   } else {
 
@@ -423,7 +461,6 @@ int handle_identifier(string &s, cmd_options **op )
     string replaced;
     if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
       if(replaced != s) {
-        //yy_delete_buffer(yy_scan_string(replaced.c_str()));
         push_input_stack();
         yy_scan_string(replaced.c_str());
         return 0;
@@ -435,7 +472,7 @@ int handle_identifier(string &s, cmd_options **op )
     // We also have one or more parameters now (though they
     // may not be correct, but that's the parser's job to determine).
 
-    have_parameters = 1;
+    pLexerState->have_parameters = 1;
 
     if(verbose&2)
       cout << "search options\n";
@@ -444,7 +481,7 @@ int handle_identifier(string &s, cmd_options **op )
       if(strcmp(opt->name, s.c_str()) == 0) {
         if(verbose&2)
           cout << "found option '" << opt->name << "'\n";
-        yylval.co = opt;
+        yylvalP->co = opt;
         return recognize(translate_token(opt->token_type),"option");
       }
       else
@@ -456,7 +493,7 @@ int handle_identifier(string &s, cmd_options **op )
   string s1(s);
   Value *sym = get_symbol_table().find(s1);
   if(sym) {
-    yylval.Symbol_P = sym;
+    yylvalP->Symbol_P = sym;
 
     if(verbose&2)
       cout << "found symbol '" << sym->name() << "'\n";
@@ -473,7 +510,7 @@ int handle_identifier(string &s, cmd_options **op )
   if(verbose&2)
     cout << " returning unknown string: " << s << endl;
 
-  return process_stringLiteral(s.c_str());
+  return process_stringLiteral(yylvalP,s.c_str());
 
   return 0;
 
@@ -485,7 +522,7 @@ int handle_identifier(string &s, cmd_options **op )
  * YYSTYPE object.  The caller is responsible from returning the
  * LITERAL_INT_T token identifer to the parser.
  */
-static int process_intLiteral(char *buffer, int conversionBase)
+static int process_intLiteral(YYSTYPE* yylvalP, char *buffer, int conversionBase)
 {
   char c;
   gint64 literalValue=0;
@@ -507,7 +544,7 @@ static int process_intLiteral(char *buffer, int conversionBase)
     literalValue += nxtDigit;
   }
 
-  yylval.Integer_P = new Integer(literalValue);
+  yylvalP->Integer_P = new Integer(literalValue);
 
   return(recognize(LITERAL_INT_T,"literal int"));
 }
@@ -515,18 +552,18 @@ static int process_intLiteral(char *buffer, int conversionBase)
 /*****************************************************************
  *
  */
-static int process_macroBody(const char *text)
+static int process_macroBody(YYSTYPE* yylvalP, const char *text)
 {
-  yylval.s = strdup(text);
+  yylvalP->s = strdup(text);
   return recognize(MACROBODY_T,"macro body");
 }
 
 /*****************************************************************
  *
  */
-static int process_booleanLiteral(bool value)
+static int process_booleanLiteral(YYSTYPE* yylvalP, bool value)
 {
-  yylval.Boolean_P = new Boolean(value);
+  yylvalP->Boolean_P = new Boolean(value);
   return(recognize(LITERAL_BOOL_T, "boolean literal"));
 }
 
@@ -534,7 +571,7 @@ static int process_booleanLiteral(bool value)
 /*****************************************************************
  *
  */
-static int process_floatLiteral(char *buffer)
+static int process_floatLiteral(YYSTYPE* yylvalP, char *buffer)
 {
   double floatValue;
 #if 0
@@ -552,7 +589,7 @@ static int process_floatLiteral(char *buffer)
     throw new Error("Bad floating point literal");
 #endif
 
-  yylval.Float_P = new Float(floatValue);
+  yylvalP->Float_P = new Float(floatValue);
   return(recognize(LITERAL_FLOAT_T, "float literal"));
 }
 
@@ -560,18 +597,18 @@ static int process_floatLiteral(char *buffer)
 /*****************************************************************
  *
  */
-static int process_stringLiteral(const char *buffer)
+static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 {
-  yylval.String_P = new String(buffer);
+  yylvalP->String_P = new String(buffer);
   return(recognize(LITERAL_STRING_T, "string literal"));
 }
 
 /*****************************************************************
  *
  */
-static int process_shellLine(const char *buffer)
+static int process_shellLine(YYSTYPE* yylvalP, const char *buffer)
 {
-  yylval.String_P = new String(buffer);
+  yylvalP->String_P = new String(buffer);
   return(recognize(SHELL, "shell line"));
 }
 
@@ -601,10 +638,14 @@ void initialize_commands(void);
 
 void init_cmd_state(void)
 {
-    cmd = 0;
-    options = 0;
-    input_mode = 0;
-    end_of_command = 0;
+
+  pLexerState = &mLexerState;
+
+  mLexerState.cmd = 0;
+  mLexerState.options = 0;
+  mLexerState.input_mode = 0;
+  mLexerState.end_of_command = 0;
+  mLexerState.have_parameters = 0;
 }
 
 void init_parser(void)
@@ -708,7 +749,7 @@ static bool isWhiteSpace(char c)
 // getNextMacroParameter(char *s, int l)
 // 
 // returns true if a macro parameter can be extracted
-// from yyinput buffer.If does return true, then the
+// from yyinput buffer. If it does return true, then the
 // extracted macro parameter will get copied to
 // the string 's'. 
 //
@@ -717,10 +758,11 @@ static bool isWhiteSpace(char c)
 // macro invocation. It might be possible to add a new
 // lex state and do this work in the lexer...
 //
-// If input stream may looks something like
+// If input stream looks something like:
+//
 //  expression1, expression2, expression3, ...
 //
-// This function will return true and copy 'expression1'
+// then this function will return true and copies 'expression1'
 // to 's'.
 
 static bool getNextMacroParameter(char *s, int l)
@@ -733,9 +775,9 @@ static bool getNextMacroParameter(char *s, int l)
     c = yyinput();
   } while(isWhiteSpace(c));
 
-  if(c==',') {
+  if(c==',')
     goto done;
-  }
+
 
   unput(c);
 
@@ -748,8 +790,6 @@ static bool getNextMacroParameter(char *s, int l)
 
     do {
       c = yyinput();
-
-      //cout << "[" << c << "]\n";
 
       if(c == '(')
 	nParen++;

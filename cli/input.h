@@ -27,7 +27,6 @@ extern int gpsim_read (char *buf, unsigned max_size);
 extern void initialize_readline (void);
 extern void exit_gpsim(void);
 
-extern int input_mode;
 #ifndef HAVE_GUI
 extern char *gnu_readline (char *s, unsigned int force_readline);
 #endif

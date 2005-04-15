@@ -25,12 +25,13 @@ class cmd_run : public command
 {
 public:
 
-  cmd_run(void);
-  void run(void);
-  virtual int is_repeatable(void) { return 1; };
+  cmd_run();
+  void run();
+  virtual int is_repeatable() { return 1; };
 
 };
 
 extern cmd_run c_run;
+extern bool GbDoRun;
 #endif
 

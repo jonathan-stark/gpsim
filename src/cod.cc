@@ -45,9 +45,11 @@ Boston, MA 02111-1307, USA.  */
 #include "interface.h"
 #include "fopen-path.h"
 
+/*  experiment with assertions */
+#include "cmd_manager.h"
+/*  end of assertion experiment */
 
 static FILE *codefile = 0;
-//static char *directory_block_data = 0;
 static char *temp_block = 0;
 static char *lstfilename = 0;
 
@@ -437,12 +439,10 @@ void read_line_numbers_from_cod(Processor *cpu)
   int file_id, sline,smod;
   unsigned int address;
 
-  //  start_block = get_short_int(&directory_block_data[COD_DIR_LSTTAB]);
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB]);
 
   if(start_block) {
 
-    //    end_block   = get_short_int(&directory_block_data[COD_DIR_LSTTAB+2]);
     end_block   = get_short_int(&main_dir.dir.block[COD_DIR_LSTTAB+2]);
 
     // Loop through all of the .cod file blocks that contain line number info
@@ -486,6 +486,10 @@ void read_message_area(Processor *cpu)
   unsigned short i, j, start_block, end_block;
   unsigned short laddress;
 
+  ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
+  if(!pCli)
+    printf("experimental:cod unable to find cli interface\n");
+
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_MESSTAB]);
 
   if(start_block) {
@@ -528,7 +532,10 @@ void read_message_area(Processor *cpu)
         case 'a':
         case 'A':
           // assertion
-
+	  if(pCli) {
+	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(DebugMessage,0))
+	      printf("cod: Failed to parse assertion:%s\n",DebugMessage);
+	  }
           break;
         case 'e':
         case 'E':
@@ -592,10 +599,7 @@ void read_symbols( Processor *cpu )
 	    {
 	      // Change the register name to its symbolic name
 	      cpu->registers[value]->new_name(get_string(b, s, sizeof b));
-	      //cout << cpu->registers[value]->name() << '\n';
 	      register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
-
-	      //symbol_table.add_register(cpu->registers[value]);
 	      symbol_table.add(rs);
 	    }
 	    break;
@@ -606,10 +610,8 @@ void read_symbols( Processor *cpu )
 
               symbol = get_string(b, s, sizeof b);
 	      symbol_table.add_address(symbol, value);
-	      //cout << "symbol at address " << value << " name " << symbol <<'\n';
             }
 	    break;
-	    //COD_ST_CONSTANT:
 	  default:
 	    symbol_table.add_constant(get_string(b,s,sizeof b),value);
 	  }
@@ -955,8 +957,6 @@ int open_cod_file(Processor **pcpu, const char *filename)
   char directory[256];
   const char *dir_path_end;
 
-  //cout << "processing cod file " << filename << '\n';
-
   dir_path_end = get_dir_delim(filename);
   
   if(dir_path_end!=0)
@@ -981,8 +981,6 @@ int open_cod_file(Processor **pcpu, const char *filename)
   temp_block = new char[COD_BLOCK_SIZE];
 
   /* Start off by reading the directory block */
-
-  //  directory_block_data = new char[COD_BLOCK_SIZE];
 
   read_directory();
 

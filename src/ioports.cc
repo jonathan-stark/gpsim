@@ -61,6 +61,15 @@ Boston, MA 02111-1307, USA.  */
 
 class SignalSource
 {
+public:
+  //SignalSource();
+  virtual unsigned int get()
+  {
+    return value.data & valid_bits;
+  }
+private:
+  unsigned int valid_bits;
+  RegisterValue value;
 };
 
 class SignalSink
@@ -143,9 +152,12 @@ public:
   IOPIN **iopins;
 
 private:
-  unsigned int sourceState;
-  unsigned int sinkState;
-  unsigned int controlState;
+  unsigned int mSourceState;
+  unsigned int mSinkState;
+  unsigned int mControlState;
+
+  unsigned int mNumIopins;
+  unsigned int mStimulusMask;
 };
 
 class PortRegister : public Register
@@ -155,8 +167,19 @@ public:
     : mPortModule(0)
   {
   }
-  virtual void put(unsigned int new_value);
-  virtual unsigned int get(unsigned int new_value);
+  virtual void put_value(unsigned int new_value)
+  {
+    unsigned int diff = mEnableMask & (new_value ^ value.data);
+    if(diff) {
+      value.data ^= diff;
+      update();
+    }
+  }
+  virtual unsigned int get_value(unsigned int new_value)
+  {
+    update();
+    return value.data;
+  }
 
   void setEnableMask(unsigned int nEnableMask)
   {
@@ -251,7 +274,13 @@ PortModule::PortModule()
 
 void PortModule::update()
 {
+  // Update the 'control' state
+  unsigned int oldControlState = mControlState;
+  mControlState = 0;
 
+  list <SignalControl *>::iterator cti;
+  for(cti = controls.begin(); cti != controls.end(); ++cti)
+    ;
 }
 
 
