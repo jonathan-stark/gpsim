@@ -94,7 +94,6 @@ extern bool bUseGUI;
 // 
 extern bool gUsingThreads(); // in ../src/interface.cc
 
-int yyparse(void);
 void initialize_readline (void);
 
 void exit_gpsim(void);
@@ -373,21 +372,23 @@ void start_new_input_stream(void)
  *this is useful if you want to execute a command but do not
  *wish to go through the readline stuff.
  */
+extern int init_parser();
+
 int start_parse(void)
 {
 
+  /*
   static bool bParsing = false;
 
   if(bParsing)
     return -1;
 
   bParsing = true;
+  */
 
-  init_parser();
+  int retval = init_parser();
 
-  int retval = yyparse();
-
-  bParsing = false;
+  //  bParsing = false;
 
 
   if(quit_parse)

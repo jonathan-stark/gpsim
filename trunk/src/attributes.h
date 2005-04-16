@@ -64,5 +64,15 @@ public:
 };
 
 
+/// BreakOnResetAttribute
+class BreakOnResetAttribute : public Boolean
+{
+protected:
+  Processor *cpu;
+public:
+  BreakOnResetAttribute(Processor *_cpu);
+  virtual void set(Value *v);
+  virtual void get(bool &b);
+};
 #endif //if !defined(__ATTRIBUTES_H__)
 

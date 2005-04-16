@@ -56,9 +56,8 @@ extern void cli_main(void);
 void initialize_gpsim(void);
 
 
-int yyparse(void);
 int parse_string(char *cmd_string);
-extern void init_parser(void);
+extern void initialize_commands();
 
 extern int yydebug;
 extern int quit_parse;
@@ -205,7 +204,7 @@ main (int argc, char *argv[])
   
   initialize_gpsim_core();
   initialize_gpsim();
-  init_parser();
+  initialize_commands();
   initialize_readline();
 
   // initialize the gui

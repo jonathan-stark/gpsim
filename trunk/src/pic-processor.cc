@@ -683,6 +683,7 @@ void pic_processor::finish(void)
 
 void pic_processor::reset (RESET_TYPE r)
 {
+  bool bHaltSimulation = true;
 
   if(use_icd)
   {
@@ -722,9 +723,14 @@ void pic_processor::reset (RESET_TYPE r)
       }
       if(config_modes)
 	wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
+
+      bHaltSimulation = false;
     }
   else if (r==WDT_RESET)
     status->put_TO(0);
+
+  if(bHaltSimulation)
+    bp.halt();
 
   gi.simulation_has_stopped();
 }

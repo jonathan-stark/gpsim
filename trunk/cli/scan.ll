@@ -46,6 +46,7 @@ Boston, MA 02111-1307, USA.  */
 /* Since our parser is reentrant, it needs to pass us a pointer
  * to the yylval that it would like us to use */
 #define YY_DECL int yylex YY_PROTO(( YYSTYPE* yylvalP ))
+extern int yyparse(void);
 
 /* This is the max length of a line within a macro definition */
 static char macroBody[65536], *macroBodyPtr=0;
@@ -57,17 +58,14 @@ struct LexerStateStruct {
   int input_mode;
   int end_of_command;
   int have_parameters;
+  int mode;
+
+  struct LexerStateStruct *prev;
+  struct LexerStateStruct *next;
 };
 
-static LexerStateStruct mLexerState = {0,0,0,0,0};
 static LexerStateStruct *pLexerState = 0;
-/*
-static struct cmd_options *options = 0;
-static command *cmd = 0;
-static int input_mode = 0;
-static int end_of_command = 0;
-static int have_parameters = 0;
-*/
+
 
 extern int quit_parse;
 extern int parser_spanning_lines;
@@ -632,6 +630,8 @@ strip_trailing_whitespace (char *s)
 static void SetMode(int newmode)
 {
   BEGIN(newmode);
+  if(pLexerState)
+    pLexerState->mode = newmode;
 }
 
 void initialize_commands(void);
@@ -639,37 +639,86 @@ void initialize_commands(void);
 void init_cmd_state(void)
 {
 
-  pLexerState = &mLexerState;
+  if(pLexerState) {
+    pLexerState->cmd = 0;
+    pLexerState->options = 0;
+    pLexerState->input_mode = 0;
+    pLexerState->end_of_command = 0;
+    pLexerState->have_parameters = 0;
+    pLexerState->mode = 0;
+  }
 
-  mLexerState.cmd = 0;
-  mLexerState.options = 0;
-  mLexerState.input_mode = 0;
-  mLexerState.end_of_command = 0;
-  mLexerState.have_parameters = 0;
 }
 
-void init_parser(void)
+static void pushLexerState()
 {
-  if((verbose & 2) && DEBUG_PARSER)
-    cout << __FUNCTION__  << "()\n";
-  initialize_commands();
+  if(verbose)
+    cout << "pushing lexer state\n";
+
+  LexerStateStruct  *pLS = new LexerStateStruct();
+
+  if(pLexerState)
+    pLexerState->next = pLS;
+
+  pLS->prev = pLexerState;
+
+  pLexerState = pLS;
+  pLS->next = 0;
+
+  init_cmd_state();
+}
+
+static void popLexerState()
+{
+  if(verbose)
+    cout << "popping lexer state\n";
+
+  if(pLexerState) {
+
+    LexerStateStruct  *pLS = pLexerState;
+
+    pLexerState = pLS->prev;
+
+    if(pLexerState)
+      pLexerState->next = 0;
+
+    SetMode(pLS->mode);
+
+    delete pLS;
+  }
+
+}
+
+
+
+int init_parser()
+{
+
+  pushLexerState();
+
+  if(verbose)
+    cout << "init_parser\n";
 
   // Start off in a known state.
-  SetMode(INITIAL);
+  //  SetMode(INITIAL);
 
   // Can't have any options until we get a command.
   if(!parser_spanning_lines) {
 
     init_cmd_state();
-
-    if((verbose & 2) && DEBUG_PARSER)
-      cout << "not ";
-
     yyrestart (stdin);
 
   }
-  if((verbose & 2) && DEBUG_PARSER)
-    cout << "spanning lines"  << '\n';
+
+  if(verbose)
+    cout << "init_parser done\n";
+
+
+  int ret = yyparse();
+
+  popLexerState();
+
+  return ret;
 
 }
 
@@ -720,7 +769,15 @@ delete_input_buffer (void *buf)
 {
   delete_buffer ((YY_BUFFER_STATE) buf);
 }
+//------------------------------------------------------------------------
+// called by the parser error handler.
+command *getLastKnownCommand()
+{
+  if(pLexerState)
+    return pLexerState->cmd;
 
+  return 0;
+}
 //----------------------------------------
 //
 void lexer_setMacroBodyMode(void)
@@ -730,14 +787,6 @@ void lexer_setMacroBodyMode(void)
     cout << "setting lexer MACROBODY mode\n";
   SetMode(MACROBODY);
 }
-
-void lexer_setInitialMode(void)
-{
-  if(verbose&4)
-    cout << "setting lexer INITIAL mode\n";
-  SetMode(INITIAL);
-}
-
 
 //----------------------------------------
 static bool isWhiteSpace(char c)

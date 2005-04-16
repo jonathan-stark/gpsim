@@ -102,6 +102,28 @@ void UnknownModeAttribute::get(bool &b)
   Boolean::set(b);
 }
 
+//========================================================================
+// BreakOnResetAttribute
+//========================================================================
+BreakOnResetAttribute::BreakOnResetAttribute(Processor *_cpu) :
+    Boolean(false) ,cpu(_cpu)
+{
+  new_name("BreakOnReset");
+  set_description(" If true, halt simulation when reset occurs \n");
+
+}
+void BreakOnResetAttribute::set(Value *v)
+{
+  Boolean::set(v);
+  bool currentVal;
+  Boolean::get(currentVal);
+  cpu->setBreakOnReset(currentVal);
+}
+void BreakOnResetAttribute::get(bool &b)
+{
+  b = cpu->getBreakOnReset();
+  Boolean::set(b);
+}
 
 //########################################################################
 void init_attributes()
