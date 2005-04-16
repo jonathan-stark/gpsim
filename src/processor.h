@@ -36,6 +36,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 class Processor;
+class ProcessorConstructor;
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -231,8 +232,8 @@ class FileContext
 
  public:
 
-  FileContext(string &new_name, FILE *_fptr);
-  FileContext(char *new_name, FILE *_fptr);
+  FileContext(string &new_name);
+  FileContext(char *new_name);
   ~FileContext(void);
 
   void ReadSource(void);
@@ -240,6 +241,7 @@ class FileContext
   char *gets(char *buf, unsigned int nBytes);
   void rewind(void);
   void open(const char *mode);
+  void close();
 
   int get_address(unsigned int line);
   void put_address(unsigned int line, unsigned int address);
@@ -263,16 +265,19 @@ class FileContext
 
 //------------------------------------------------------------------------
 //
-// Files
-class Files
+// FileContextList
+class FileContextList : private vector<FileContext>
 {
  public:
+#ifndef _MSC_VER
+   typedef vector<FileContext> _Myt;
+#endif
 
-  Files(int nFiles);
-  ~Files(void);
+  FileContextList();
+  ~FileContextList(void);
 
-  int Add(string& new_name, FILE *fptr);
-  int Add(char *new_name, FILE *fptr);
+  int Add(string& new_name);
+  int Add(char *new_name);
 
   int Find(string &fname);
 
@@ -303,7 +308,6 @@ class Files
   void rewind(int file_id);
 
  private:
-  vector<FileContext *> *vpfile;
   int lastFile;
   int num_src_files;
   int list_file_id;
@@ -318,7 +322,7 @@ class Processor : public Module
 public:
 
   /// The source files for this processor.
-  Files *files;
+  FileContextList files;
 
   /// Oscillator cycles for 1 instruction
   unsigned int clocks_per_inst;
@@ -351,6 +355,7 @@ public:
   /// Program memory interface
   ProgramMemoryAccess  *pma;
   virtual ProgramMemoryAccess * createProgramMemoryAccess(Processor *processor);
+  virtual void                  destroyProgramMemoryAccess(ProgramMemoryAccess *pma);
 
   /// register memory interface
   RegisterMemoryAccess rma;
@@ -551,6 +556,7 @@ public:
 
   virtual void create(void);
   static Processor *construct(void);
+  ProcessorConstructor  *m_pConstructorObject;
 
   Processor();
   virtual ~Processor();
@@ -589,14 +595,10 @@ private:
 // it precluded processors that were defined outside of the gpsim
 // core library.
 
-
-
 class ProcessorConstructor
 {
 public:
-  // THE list of all of gpsim's processors:
 
-  static list <ProcessorConstructor *> *processor_list;
 
   // A pointer to a function that when called will construct a processor
   Processor * (*cpu_constructor) (void);
@@ -616,9 +618,18 @@ public:
 			 const char *name4=0);
 
 
-  ProcessorConstructor * find(const char *name);
-  void dump(void);
 
+};
+
+// THE list of all of gpsim's processors:
+class ProcessorConstructorList : public list <ProcessorConstructor *> {
+public:
+  ProcessorConstructorList() {}
+  static ProcessorConstructor * find(const char *name);
+  static void dump(void);
+  static ProcessorConstructorList *GetList();
+private:
+  static ProcessorConstructorList *processor_list;
 
 };
 

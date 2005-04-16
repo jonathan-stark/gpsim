@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <list>
+#include <map>
 
 #include "../config.h"
 #include "gpsim_def.h"
@@ -70,34 +70,6 @@ int     verbose=0;
 // common to all pic microcontrollers.
 //
 //
-
-//-------------------------------------------------------------------
-//
-// Define a list for keeping track of the processors being simulated.
-// (Recall, gpsim can simultaneously simulate more than one processor.)
-
-list <Processor *> processor_list;
-list <Processor *> :: iterator processor_iterator;
-
-// active_cpu_id is the id of the currently active cpu. In other words:
-//  active_cpu_id == active_cpu->processor_id
-// It's redundant to define this id in addition to the *active_cpu pointer.
-// However, if there ever comes a day when the cli is truely separate from
-// the simulator, then it would be more convenient to deal with ints than
-// pointers.
-
-static  int  active_cpu_id = 0;
-
-// cpu_ids is a counter that increments everytime a processor is added by the
-// user. If the user deletes a processor, this counter will not be affected.
-// The value of this counter will be assigned to the processor's id when a
-// new processor is added. It's purpose is to uniquely identifier user 
-// processors.
-
-static  int  cpu_ids = 0;
-
-ProcessorConstructor Generic(pic_processor::construct,
-			     "generic_pic", "generic_pic");
 
 ProcessorConstructor pP12C508(P12C508::construct ,
 			      "__12C508", "pic12c508",  "p12c508", "12c508");
@@ -200,84 +172,6 @@ ProcessorConstructor pP18F1220(P18F1220::construct,
 ProcessorConstructor pP18F1320(P18F1320::construct,
 			      "__18F1320", "pic18f1320",  "p18f1320", "18f1320");
 
-
-//-------------------------------------------------------------------
-//
-// display_available_processors - list all of the processors gpsim supports.
-
-void display_available_processors(void)
-{
-  Generic.dump();  // any ProcessorConstructor object could've been called.
-}
-
-//-------------------------------------------------------------------
-Processor * add_processor(const char * processor_type, const char * processor_new_name)
-{
-  if(verbose)
-    cout << "Trying to add new processor '" << processor_type << "' named '" 
-	 << processor_new_name << "'\n";
-
-  ProcessorConstructor *pc = Generic.find(processor_type);
-
-
-  if(pc) {
-
-    Processor *p = pc->cpu_constructor();
-
-    if(p) {
-
-      processor_list.push_back(p);
-      p->initializeAttributes();
-      active_cpu = p;
-      //p->processor_id = 
-      active_cpu_id = ++cpu_ids;
-      if(verbose) {
-	cout << processor_type << '\n';
-	cout << "Program Memory size " <<  p->program_memory_size() << '\n';
-	cout << "Register Memory size " <<  p->register_memory_size() << '\n';
-      }
-
-      // Tell the gui or any modules that are interfaced to gpsim
-      // that a new processor has been declared.
-      gi.new_processor(p);
-      instantiated_modules_list.push_back(p);
-
-      return p;
-    }
-    else
-      cout << " unable to add a processor (BUG?)\n";
-
-  } else
-    cout << processor_type << " is not a valid processor.\n(try 'processor list' to see a list of valid processors.\n";
-
-  return(0);
-}
-
-
-//------------------------------------------------------------------------
-// dump_processor_list - print out all of the processors a user is 
-//                       simulating.
-
-void dump_processor_list(void)
-{
-
-  cout << "Processor List\n";
-
-  bool have_processors = 0;
-
-  for (processor_iterator = processor_list.begin();
-       processor_iterator != processor_list.end(); 
-       processor_iterator++) {
-
-      Processor *p = *processor_iterator;
-      cout << p->name() << '\n';
-      have_processors = 1;
-    }
-
-  if(!have_processors)
-    cout << "(empty)\n";
-
-}
 
 //-------------------------------------------------------------------
 //
@@ -760,8 +654,6 @@ pic_processor::pic_processor(void)
     cout << "pic_processor constructor\n";
 
   pc = 0;
-
-  files = 0;
 
   eeprom = 0;
   config_modes = create_ConfigMode();

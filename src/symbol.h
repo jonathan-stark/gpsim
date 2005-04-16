@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 //
 
 #include <string>
+#include <list>
 #include "value.h"
 
 using namespace std;
@@ -65,7 +66,12 @@ enum SYMBOL_TYPE
 
 class Symbol_Table
 {
+private:
+  class SymbolList : public list<Value*> {
+  };
+
 public:
+  typedef SymbolList::iterator iterator;
   void add(Value*);
 
   void add_ioport(IOPORT *ioport);
@@ -90,22 +96,21 @@ public:
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
-};
+  void clear();
+  iterator begin() {
+    return st.begin();
+  }
+  iterator end() {
+    return st.end();
+  }
 
-/// The Symbol_Table_Iterator is a class that provides an accessor interface
-/// to the symbol table.
-
-class Symbol_Table_Iterator
-{
+private:
+  SymbolList st;
   list <Value *>::iterator sti;
-  
-public:
-  Symbol_Table_Iterator();
-  Value *begin();
-  Value *end();
-  Value *next();
+
 
 };
+
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access symbol_table object directly!

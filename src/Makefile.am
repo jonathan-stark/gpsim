@@ -54,6 +54,7 @@ libgpsim_la_SOURCES = \
 	processor.cc \
 	protocol.cc \
 	registers.cc \
+	sim_context.cc \
 	stimuli.cc \
 	symbol.cc \
 	tmr0.cc \
@@ -117,6 +118,7 @@ gpsiminclude_HEADERS = \
 	processor.h \
 	protocol.h \
 	registers.h \
+	sim_context.h \
 	stimuli.h \
 	stimulus_orb.h \
 	symbol.h \

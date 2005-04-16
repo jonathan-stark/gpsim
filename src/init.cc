@@ -39,6 +39,7 @@ public:
   CycleCounterAttribute() :
     Integer(0) 
   {
+    m_bClearableSymbol = false;
     new_name("cycles");
     set_description(" Simulation time in terms of cycles.");
   }
@@ -69,6 +70,7 @@ public:
   GUIUpdateRateAttribute() :
     Integer(0) 
   {
+    m_bClearableSymbol = false;
     new_name("sim.gui_update_rate");
     set_description(" Specifies the number of cycles between gui updates");
   }
@@ -112,6 +114,7 @@ int initialize_gpsim_core()
 
   // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
+  verbosity->setClearableSymbol(false);
   get_symbol_table().add(verbosity);
   get_symbol_table().add(new CycleCounterAttribute());
   stop_watch.init();

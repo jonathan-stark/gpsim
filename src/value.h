@@ -107,9 +107,14 @@ public:
   virtual void set_break();
   virtual void clear_break();
 
+  virtual void setClearableSymbol(bool bClear);
+  virtual bool isClearable();
+
  private:
   const char *cpDescription;
   Value *xref;
+protected:
+  bool m_bClearableSymbol;
 };
 
 //========================================================================

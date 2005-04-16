@@ -38,6 +38,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "gpsim_def.h"
+#include "sim_context.h"
 #include "pic-processor.h"
 #include "picdis.h"
 #include "symbol.h"
@@ -295,7 +296,7 @@ void read_src_files_from_cod(Processor *cpu)
   int i,j,start_block,end_block,offset,num_files;
   char b[FILE_SIZE];
 
-  if(cpu->files) 
+  if(cpu->files.nsrc_files() > 0) 
     {
       cout << "This cpu already has source files\n";
       return;
@@ -327,9 +328,8 @@ void read_src_files_from_cod(Processor *cpu)
 
   if(num_files) {
 
-    cpu->files = new Files(num_files+1+MAX_HLL_FILES);
-    cpu->files->nsrc_files(num_files);
-    cpu->files->list_id(num_files);
+    cpu->files.nsrc_files(num_files);
+    cpu->files.list_id(num_files);
 
 
 
@@ -371,42 +371,38 @@ void read_src_files_from_cod(Processor *cpu)
 
 	string s1 = string(filenm);
 
-	if(temp_block[offset] && (cpu->files->Find(s1) < 0)) {
+	if(temp_block[offset] && (cpu->files.Find(s1) < 0)) {
 
 	  //
 	  // Add this file to the list
 	  //
-	  FILE *fp  = open_a_file(&filenm);
-	  cpu->files->Add(filenm, fp);
+	  cpu->files.Add(filenm);
 
-	  if((strncmp(lstfilename, filenm,256) == 0) && 
-	     (cpu->files->list_id() >= cpu->files->nsrc_files()) )
-	    {
-	      if(verbose)
-		cout << "Found list file " << ((*cpu->files)[num_files])->name() << endl;
-	      cpu->files->list_id(num_files);
-	      found_lst_in_cod = 1;
-	    }
+    if((strncmp(lstfilename, filenm,256) == 0) && 
+       (cpu->files.list_id() >= cpu->files.nsrc_files()) )
+      {
+        if(verbose)
+          cout << "Found list file " << ((cpu->files)[num_files])->name() << endl;
+        cpu->files.list_id(num_files);
+        found_lst_in_cod = 1;
+      }
 
-	  num_files++;
-	}
+    num_files++;
+  }
       }
     }
 
     if(verbose)
       cout << "Found " << num_files << " source files in .cod file\n";
 
-
-
-
-    if(num_files != cpu->files->nsrc_files())
+    if(num_files != cpu->files.nsrc_files())
       cout << "warning, number of sources changed from " << num_files << " to " 
-	   << cpu->files->nsrc_files() << " while reading code (gpsim bug)\n";
+	   << cpu->files.nsrc_files() << " while reading code (gpsim bug)\n";
 
     if(!found_lst_in_cod) {
-      cpu->files->nsrc_files(num_files + 1);
+      cpu->files.nsrc_files(num_files + 1);
 
-      cpu->files->Add(lstfilename, open_a_file(&lstfilename));
+      cpu->files.Add(lstfilename);
 
 
       if(verbose)
@@ -420,11 +416,11 @@ void read_src_files_from_cod(Processor *cpu)
     // Debug code 
     int i;
 
-    cout << " new file stuff: " << cpu->files->nsrc_files() << " new files\n";
+    cout << " new file stuff: " << cpu->files.nsrc_files() << " new files\n";
 
-    for(i=0; i<cpu->files->nsrc_files(); i++) {
+    for(i=0; i<cpu->files.nsrc_files(); i++) {
 
-      cout << ((*cpu->files)[i])->name() << endl;
+      cout << ((cpu->files)[i])->name() << endl;
     }
     cout << " end of new file stuff\n";
   }
@@ -463,7 +459,7 @@ void read_line_numbers_from_cod(Processor *cpu)
 	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
 	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
-	  if( (file_id <= cpu->files->nsrc_files()) &&
+	  if( (file_id <= cpu->files.nsrc_files()) &&
 	      (address <= cpu->program_memory_size()) &&
 	      (smod == 0x80) )
 
@@ -1000,14 +996,14 @@ int open_cod_file(Processor **pcpu, const char *filename)
       if(verbose)
 	cout << "found a " << processor_name << " in the .cod file\n";
 
-      *pcpu = (Processor *)add_processor(processor_name,processor_name);
+      *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
       if(*pcpu == 0) {
 	if(!ignore_case_in_cod)
 	  return(COD_UNRECOGNIZED_PROCESSOR);
 
 	// Could be that there's a case sensitivity issue:
 	strtolower(processor_name);
-	*pcpu = (Processor *)add_processor(processor_name,processor_name);
+	*pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
 
 	if(*pcpu == 0)
 	  return(COD_UNRECOGNIZED_PROCESSOR);

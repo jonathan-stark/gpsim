@@ -76,7 +76,6 @@ Processor::Processor(void)
   if(verbose)
     cout << "pic_processor constructor\n";
 
-  files = 0;
   pc = 0;
 
   mFrequency = new Float("frequency",20e6, " oscillator frequency.");
@@ -103,7 +102,11 @@ Processor::Processor(void)
 //-------------------------------------------------------------------
 Processor::~Processor()
 {
+  // register_bank points to current active bank
+  // pc is allocated by the derived class
+  delete []program_memory;
   delete registers;
+  destroyProgramMemoryAccess(pma);
 }
 
 unsigned long Processor::GetCapabilities() {
@@ -191,7 +194,7 @@ void Processor::init_register_memory (unsigned int memory_size)
   if(verbose)
     cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
 
-  registers = (Register **) new char[sizeof (Register *) * memory_size];
+  registers = new Register *[memory_size];
 
   if (registers  == 0)
     {
@@ -382,32 +385,23 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
 
 void Processor::init_program_memory (unsigned int memory_size)
 {
-
   if(verbose)
     cout << "Initializing program memory: 0x"<<memory_size<<" words\n";
-
   if ((memory_size-1) & memory_size)
     {
       cout << "*** WARNING *** memory_size should be of the form 2^N\n";
-
       memory_size = (memory_size + ~memory_size) & MAX_PROGRAM_MEMORY;
-
       cout << "gpsim is rounding up to memory_size = " << memory_size << '\n';
-
     }
-
   // Initialize 'program_memory'. 'program_memory' is a pointer to an array of
   // pointers of type 'instruction'. This is where the simulated instructions
   // are stored.
-
-  program_memory = (instruction **) new char[sizeof (instruction *) * memory_size];
-
+  program_memory = new instruction *[memory_size];
   if (program_memory == 0)
     {
       cout << "*** ERROR *** Out of memory for program space\n";
       exit (1);
     }
-
 
   for (unsigned int i = 0; i < memory_size; i++)
     {
@@ -417,12 +411,14 @@ void Processor::init_program_memory (unsigned int memory_size)
 
   pma = createProgramMemoryAccess(this);
   pma->name();
-
-
 }
 
 ProgramMemoryAccess * Processor::createProgramMemoryAccess(Processor *processor) {
   return new ProgramMemoryAccess(processor);
+}
+
+void Processor::destroyProgramMemoryAccess(ProgramMemoryAccess *pma) {
+  delete pma;
 }
 
 
@@ -496,14 +492,14 @@ void Processor::attach_src_line(unsigned int address,
 
     //printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
 
-    FileContext *fc = (*files)[file_id];
+    FileContext *fc = files[file_id];
 
     if(fc && sline > fc->max_line())
       fc->max_line(sline);
 
     // If there's a listing file then handle it as well
-    if(files->list_id() >=0 && lst_line != 0) {
-      fc = (*files)[files->list_id()];
+    if(files.list_id() >=0 && lst_line != 0) {
+      fc = files[files.list_id()];
     
       // FIX ME - what is this '+5' junk?
       if(fc && lst_line+5 > fc->max_line())
@@ -547,30 +543,29 @@ void Processor::read_src_files(void)
       files[i].pm_address = new int[files[i].max_line+1];
 
       if( 0 == (files[i].file_ptr = fopen_path(files[i].name,"r")))
-	continue;
+        continue;
 
       rewind(files[i].file_ptr);
 
       char buf[256],*s;
       files[i].line_seek[0] = 0;
-      for(int j=1; j<=files[i].max_line; j++)
-	{
-	  files[i].pm_address[j] = -1;
-	  files[i].line_seek[j] = ftell(files[i].file_ptr);
-	  s = fgets(buf,256,files[i].file_ptr);
-	  if(s != buf)
-	    break;
-	}
+      for(int j=1; j<=files[i].max_line; j++) {
+        files[i].pm_address[j] = -1;
+        files[i].line_seek[j] = ftell(files[i].file_ptr);
+        s = fgets(buf,256,files[i].file_ptr);
+        if(s != buf)
+	        break;
+      }
     }
   }
 #else
 
   int i;
   // Are there any src files ?
-  for(i=0; i<files->nsrc_files(); i++) {
+  for(i=0; i<files.nsrc_files(); i++) {
 
 
-    FileContext *fc = (*files)[i];
+    FileContext *fc = files[i];
 
     // did this src file generate any code?
     if(fc && fc->max_line() > 0) {
@@ -590,11 +585,11 @@ void Processor::read_src_files(void)
 
     if( (program_memory[addr]->isa() != instruction::INVALID_INSTRUCTION)) {
 
-      FileContext *fc = (*files)[program_memory[addr]->get_file_id()];
+      FileContext *fc = files[program_memory[addr]->get_file_id()];
       
       if(fc)
-	fc->put_address(program_memory[addr]->get_src_line(),
-			map_pm_index2address(addr));
+        fc->put_address(program_memory[addr]->get_src_line(),
+                        map_pm_index2address(addr));
 
     }
   }
@@ -616,7 +611,7 @@ void Processor::list(unsigned int file_id,
 {
 
 
-  if(!files || files->nsrc_files())
+  if(files.nsrc_files())
     return;
 
   if(pc_val > program_memory_size())
@@ -631,7 +626,7 @@ void Processor::list(unsigned int file_id,
   unsigned int line,pc_line;
   if(file_id)
     {
-      file_id = files->list_id();
+      file_id = files.list_id();
       line = program_memory[pc_val]->get_lst_line();
       pc_line = program_memory[pc->value]->get_lst_line();
     }
@@ -645,7 +640,7 @@ void Processor::list(unsigned int file_id,
   start_line += line;
   end_line += line;
 
-  FileContext *fc = (*files)[file_id];
+  FileContext *fc = files[file_id];
   if(fc)
     return;
 
@@ -663,7 +658,7 @@ void Processor::list(unsigned int file_id,
 
     char buf[256];
 
-    files->ReadLine(program_memory[i]->file_id,
+    files.ReadLine(program_memory[i]->file_id,
 		    program_memory[i]->src_line - 1,
 		    buf,
 		    sizeof(buf));
@@ -740,11 +735,11 @@ void Processor::disassemble (signed int s, signed int e)
 	  inst = bpi->replaced;
 	}
 
-      if(files && use_src_to_disasm)
+  if(files.nsrc_files() && use_src_to_disasm)
 	{
 	  char buf[256];
 
-	  files->ReadLine(program_memory[i]->file_id,
+	  files.ReadLine(program_memory[i]->file_id,
 			  program_memory[i]->src_line - 1,
 			  buf,
 			  sizeof(buf));
@@ -825,7 +820,7 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   if(!cpu)
     return closest_address;
 
-  FileContext *fc = (*cpu->files)[file_id];
+  FileContext *fc = cpu->files[file_id];
   
   if(fc)
   {
@@ -878,7 +873,7 @@ int ProgramMemoryAccess::find_address_from_line(int file_id, int src_line)
   if(!cpu)
     return -1;
 
-  FileContext *fc = (*cpu->files)[file_id];
+  FileContext *fc = cpu->files[file_id];
   
   if(fc)
     return fc->get_address(src_line);
@@ -1764,7 +1759,7 @@ RegisterMemoryAccess::RegisterMemoryAccess(Processor *new_cpu) :
 
 RegisterMemoryAccess::~RegisterMemoryAccess()
 {
-
+  // registers memory is owned by the Processor class
 }
 
 //--------------------------------------------------------------------------
@@ -1820,7 +1815,12 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
 //========================================================================
 // Processor Constructor
 
-list <ProcessorConstructor *> *ProcessorConstructor::processor_list;
+ProcessorConstructorList *ProcessorConstructorList::processor_list = 
+  new ProcessorConstructorList();
+
+ProcessorConstructorList * ProcessorConstructorList::GetList() {
+  return processor_list;
+}
 
 ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void),
 					   const char *name1, 
@@ -1828,8 +1828,6 @@ ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void
 					   const char *name3,
 					   const char *name4) 
 {
-  if (processor_list == 0)
-    processor_list = new list <ProcessorConstructor *>;
 
   cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
   names[0] = name1;                    // First name
@@ -1839,7 +1837,7 @@ ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void
 
   // Add the processor to the list of supported processors:
 
-  processor_list->push_back(this);
+  ProcessorConstructorList::GetList()->push_back(this);
 
 }
 
@@ -1849,11 +1847,11 @@ ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void
 //         the one matching 'name'.
 
 
-ProcessorConstructor *ProcessorConstructor::find(const char *name)
+ProcessorConstructor *ProcessorConstructorList::find(const char *name)
 {
 
 
-  list <ProcessorConstructor *> :: iterator processor_iterator;
+  ProcessorConstructorList::iterator processor_iterator;
 
   for (processor_iterator = processor_list->begin();
        processor_iterator != processor_list->end(); 
@@ -1863,18 +1861,17 @@ ProcessorConstructor *ProcessorConstructor::find(const char *name)
 
     for(int j=0; j<nProcessorNames; j++)
       if(p->names[j] && strcmp(name,p->names[j]) == 0)
-	return p;
+        return p;
   }
 
   return 0;
-
 }
 
 //------------------------------------------------------------
 // dump() --  Print out a list of all of the processors
 //
 
-void ProcessorConstructor::dump(void)
+void ProcessorConstructorList::dump(void)
 {
 
   list <ProcessorConstructor *> :: iterator processor_iterator;
@@ -1916,12 +1913,12 @@ void ProcessorConstructor::dump(void)
 
       if(i<nPerRow-1) {
 
-	// if this is not the last processor in the column, then
-	// pad a few spaces to align the columns.
+        // if this is not the last processor in the column, then
+        // pad a few spaces to align the columns.
 
-	k = longest + 2 - strlen(p->names[1]);
-	for(j=0; j<k; j++)
-	  cout << ' ';
+        k = longest + 2 - strlen(p->names[1]);
+        for(j=0; j<k; j++)
+          cout << ' ';
       }
     }
     cout << '\n';
@@ -1932,19 +1929,19 @@ void ProcessorConstructor::dump(void)
 
 //------------------------------------------------------------------------
 
-FileContext::FileContext(string &new_name, FILE *_fptr)
+FileContext::FileContext(string &new_name)
 {
   name_str = new_name;
-  fptr = _fptr;
+  fptr = NULL;
   line_seek = 0;
   _max_line =0;
   pm_address = 0;
 }
 
-FileContext::FileContext(char *new_name, FILE *_fptr)
+FileContext::FileContext(char *new_name)
 {
   name_str = string(new_name);
-  fptr = _fptr;
+  fptr = NULL;
   line_seek = 0;
   _max_line =0;
   pm_address = 0;
@@ -1952,7 +1949,8 @@ FileContext::FileContext(char *new_name, FILE *_fptr)
 
 FileContext::~FileContext(void)
 {
-
+  delete line_seek;
+  delete pm_address;
 }
 
 //----------------------------------------
@@ -2049,6 +2047,14 @@ void FileContext::open(const char *mode)
 
 }
 //----------------------------------------
+void FileContext::close() {
+  if(fptr != NULL) {
+    fclose(fptr);
+    fptr = NULL;
+  }
+}
+
+//----------------------------------------
 int FileContext::get_address(unsigned int line_number)
 {
   if(line_number < max_line()  && pm_address)
@@ -2065,44 +2071,37 @@ void FileContext::put_address(unsigned int line_number, unsigned int address)
 //------------------------------------------------------------------------
 
 
-Files::Files(int nFiles)
+FileContextList::FileContextList()
 {
-
-  vpfile = new vector<FileContext *>(nFiles);
   lastFile=0;
   list_file_id = -1;  // assume that no list file is present.
 }
 
-Files::~Files(void)
+FileContextList::~FileContextList(void)
 {
-
-  //  for(int i=0; i<vpfile->size(); i++
-
+  FileContextList::iterator it;
+  FileContextList::iterator itEnd = end();
+  for (it = begin(); it != itEnd; it++) {
+    it->close();
+  }
 }
 
-int Files::Find(string &fname)
+int FileContextList::Find(string &fname)
 {
   if(lastFile) {
-
     for (int i = 0; i < lastFile; i++) {
-
-      if ((*vpfile)[i]->name() == fname)
-	return i;
-
+      if ((*this)[i]->name() == fname)
+        return i;
     }
   }
-
   return -1;
-
 }
 
-int Files::Add(string &new_name, FILE *fptr)
+int FileContextList::Add(string &new_name)
 {
-
-  (*vpfile)[lastFile] = new FileContext(new_name,fptr);
-
+  push_back(FileContext(new_name));
   lastFile++;
-
+  back().open("r");
   if(verbose)
     cout << "Added new file named: " << new_name 
 	 << "  id = " << lastFile << endl;
@@ -2110,34 +2109,26 @@ int Files::Add(string &new_name, FILE *fptr)
   return lastFile-1;
 }
 
-int Files::Add(char *new_name, FILE *fptr)
+int FileContextList::Add(char *new_name)
 {
-
-  (*vpfile)[lastFile] = new FileContext(new_name,fptr);
-
+  push_back(FileContext(new_name));
   lastFile++;
-
+  back().open("r");
   if(verbose)
     cout << "Added new file named: " << new_name 
-	 << "  id = " << lastFile << endl;
+         << "  id = " << lastFile << endl;
 
   return lastFile-1;
 }
 
-FileContext *Files::operator [] (int file_id)
+FileContext *FileContextList::operator [] (int file_id)
 {
   if(file_id<0 || file_id >= lastFile)
     return 0;
-
-#define GCC_VERSION 296
-#if GCC_VERSION == 296
-  return (*vpfile)[file_id];   // sigh...
-#else
-  return (*vpfile).at(file_id);
-#endif
+  return &this->_Myt::at(file_id);
 }
 
-char *Files::ReadLine(int file_id, int line_number, char *buf, int nBytes)
+char *FileContextList::ReadLine(int file_id, int line_number, char *buf, int nBytes)
 {
   FileContext *fc = operator[](file_id);
   if(fc)
@@ -2148,7 +2139,7 @@ char *Files::ReadLine(int file_id, int line_number, char *buf, int nBytes)
 
 //----------------------------------------
 //
-char *Files::gets(int file_id, char *buf, int nBytes)
+char *FileContextList::gets(int file_id, char *buf, int nBytes)
 {
   FileContext *fc = operator[](file_id);
   if(fc)
@@ -2158,7 +2149,7 @@ char *Files::gets(int file_id, char *buf, int nBytes)
 }
 
 //----------------------------------------
-void Files::rewind(int file_id)
+void FileContextList::rewind(int file_id)
 {
   FileContext *fc = operator[](file_id);
   if(fc)

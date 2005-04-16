@@ -36,11 +36,13 @@ Boston, MA 02111-1307, USA.  */
 Value::Value()
   : cpDescription(0), xref(0)
 {
+  m_bClearableSymbol = true;
 }
 
 Value::Value(const char *_name, const char *desc)
   : cpDescription(desc), xref(0)
 {
+  m_bClearableSymbol = true;
   new_name(_name);
 }
 
@@ -189,6 +191,13 @@ void Value::set_xref(Value *v)
 {
   delete xref;
   xref = v;
+}
+void Value::setClearableSymbol(bool bClear) {
+  m_bClearableSymbol = bClear;
+}
+
+bool Value::isClearable() {
+  return m_bClearableSymbol;
 }
 
 Value *Value::get_xref()

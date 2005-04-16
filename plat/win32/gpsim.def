@@ -2,7 +2,6 @@ EXPORTS
     ??0Boolean@@QAE@_N@Z
     ??0Breakpoint_Instruction@@QAE@PAVProcessor@@II@Z
     ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ??0Files@@QAE@H@Z
     ??0Float@@QAE@N@Z
     ??0Float@@QAE@PBDN0@Z
     ??0IOPIN@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
@@ -51,12 +50,13 @@ EXPORTS
     ??1gpsimValue@@UAE@XZ
     ??1stimulus@@UAE@XZ
     ??1symbol@@UAE@XZ
-    ??AFiles@@QAEPAVFileContext@@H@Z
+    ??AFileContextList@@QAEPAVFileContext@@H@Z
     ??AProgramMemoryAccess@@QAEAAVinstruction@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
-    ?Add@Files@@QAEHPADPAU_iobuf@@@Z
+    ?Add@FileContextList@@QAEHPAD@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
-    ?Find@Files@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?GetContext@CSimulationContext@@SAPAV1@XZ
     ?add@Symbol_Table@@QAEXPAVValue@@@Z
     ?add@TraceFrame@@UAEXPAVTraceObject@@@Z
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
@@ -113,6 +113,7 @@ EXPORTS
     ?Debug@Processor@@UAEXXZ
     ?decode@instruction@@QAEXPAVProcessor@@I@Z
     ?description@Value@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?destroyProgramMemoryAccess@Processor@@UAEXPAVProgramMemoryAccess@@@Z
     ?detach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
     ?disassemble@Processor@@UAEXHH@Z
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
@@ -215,6 +216,7 @@ EXPORTS
     ?init_register_memory@Processor@@UAEXI@Z
     ?initializeAttributes@Processor@@UAEXXZ
     ?interrupt@Program_Counter@@UAEXI@Z
+    ?isClearable@Value@@UAE_NXZ
     ?isValid@TraceType@@UAE_NI@Z
     ?list@Processor@@UAEXIIII@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
@@ -228,6 +230,7 @@ EXPORTS
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPBD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
+    ?parse_string@@YAHPAD@Z
     ?print@Breakpoint_Instruction@@UAEXXZ
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
@@ -303,6 +306,8 @@ EXPORTS
     ?set_trace_command@Program_Counter@@UAEXI@Z
     ?set_write_trace@Register@@UAEXI@Z
     ?set_xref@Value@@UAEXPAV1@@Z
+    ?setBreakOnReset@Processor@@UAEX_N@Z
+    ?setClearableSymbol@Value@@UAEX_N@Z
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@IOPIN@@UAEXXZ
@@ -310,6 +315,7 @@ EXPORTS
     ?SimulatedSet@Register@@UAEXI@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
     ?simulation_start_cycle@@3_KA
+    ?start_new_input_stream@@YAXXZ
     ?step@Processor@@UAEXI_N@Z
     ?step_over@Processor@@UAEX_N@Z
     ?stop@ProgramMemoryAccess@@UAEXXZ

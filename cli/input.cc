@@ -59,6 +59,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #endif
 
+#include "../src/sim_context.h"
 #include "../src/gpsim_def.h"
 #include "../src/gpsim_classes.h"
 #include "../src/icd.h"
@@ -133,6 +134,7 @@ char *CCliCommandHandler::GetName()
 int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
 {
   cout << "GCLICommandHandler::Execute:" << commandline << endl;
+  return 1;
 }
 static CCliCommandHandler sCliCommandHandler;
 
@@ -525,7 +527,10 @@ int gpsim_open(Processor *cpu, const char *file)
     return load_symbol_file(&command::cpu, file) == COD_SUCCESS;
   else if(!strcmp(str,"stc") || !strcmp(str,"STC")) {
     process_command_file(file);
-    return parse_string("\n") == 0;
+    // A stc file could have any sequence of commands.
+    // Just ignore the return value of parse_string().
+    parse_string("\n");
+    return 1;
   } else
 
     cout << "Unknown file extension \"" << str <<"\" \n";
@@ -756,6 +761,7 @@ void exit_gpsim(void)
   g_io_channel_unref(channel);
 #endif
 
+  CSimulationContext::GetContext()->GetContext()->Clear();
   stop_server();
 
   exit(0);

@@ -1201,7 +1201,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
     hbox = gtk_hbox_new(0,0);
     gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
 
-    FileContext *fc = (*sbaw->gp->cpu->files)[file_id];
+    FileContext *fc = sbaw->gp->cpu->files[file_id];
     
     strncpy(str,fc->name().c_str(),sizeof(str));
 
@@ -1405,9 +1405,9 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
   totallinesheight=0;
 
-  cpu->files->rewind(file_id);
+  cpu->files.rewind(file_id);
 
-  while(cpu->files->gets(file_id, text_buffer, 256))
+  while(cpu->files.gets(file_id, text_buffer, 256))
   {
     char *end, *q;
 
@@ -1725,10 +1725,10 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   }
 
-  if(gp->cpu->files) {
+  if(gp->cpu->files.nsrc_files() != 0) {
 
-    for(i=0;i<gp->cpu->files->nsrc_files();i++) {
-      FileContext *fc = (*gp->cpu->files)[i];
+    for(i=0;i<gp->cpu->files.nsrc_files();i++) {
+      FileContext *fc = gp->cpu->files[i];
       file_name = fc->name().c_str();
 
       if(strcmp(file_name+strlen(file_name)-4,".lst")

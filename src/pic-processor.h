@@ -283,16 +283,4 @@ public:
 
 #define cpu_pic ( (pic_processor *)cpu)
 
-
-//--------------------------------------
-//
-// non-class helper functions.
-
-void initialize_processor_constructor(void);
-Processor *  add_processor(const char * processor_type, const char * processor_new_name);
-void display_available_processors(void);
-void dump_processor_list(void);
-Processor *get_processor(unsigned int cpu_id);
-
-
 #endif

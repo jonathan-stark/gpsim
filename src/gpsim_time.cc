@@ -769,6 +769,7 @@ private:
 public:
   StopWatchValue(StopWatch *_sw) : Integer(0), sw(_sw) 
   {
+    m_bClearableSymbol = false;
     new_name("stopwatch");
     set_description(" A timer for monitoring and controlling the simulation.\n"
 		    " The units are in simulation cycles.\n"
@@ -804,6 +805,7 @@ private:
 public:
   StopWatchRollover(StopWatch *_sw) : Integer(1000000), sw(_sw) 
   {
+    m_bClearableSymbol = false;
     new_name("stopwatch.rollover");
     set_description(" specifies the stop watch roll over time.");
   }
@@ -821,6 +823,7 @@ private:
 public:
   StopWatchEnable(StopWatch *_sw) : Boolean(true) , sw(_sw)
   {
+    m_bClearableSymbol = false;
     new_name("stopwatch.enable");
     set_description(" If true, the stop watch is enabled.");
   }
@@ -839,6 +842,7 @@ private:
 public:
   StopWatchDirection(StopWatch *_sw) : Boolean(true) , sw(_sw)
   {
+    m_bClearableSymbol = false;
     new_name("stopwatch.direction");
     set_description(" If true, the stop watch counts up otherwise down.");
   }
