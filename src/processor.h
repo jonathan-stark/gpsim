@@ -479,6 +479,11 @@ public:
   virtual void setUnknownMode(bool);
   virtual bool getUnknownMode() { return bUnknownMode; }
 
+  /// setBreakOnReset - when true, gpsim will implement three-state logic
+  /// for data. When false, unkown data are treated as zeros. 
+  virtual void setBreakOnReset(bool);
+  virtual bool getBreakOnReset() { return bBreakOnReset; }
+
   ///
   /// Notification of breakpoint set
   virtual void NotifyBreakpointSet(Breakpoints::BreakStatus &bs, TriggerObject *bpo) { }
@@ -558,7 +563,7 @@ private:
   bool bSafeMode;
   bool bWarnMode;
   bool bUnknownMode;
-
+  bool bBreakOnReset;
 };
 
 

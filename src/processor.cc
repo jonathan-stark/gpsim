@@ -85,6 +85,7 @@ Processor::Processor(void)
   setWarnMode(true);
   setSafeMode(true);
   setUnknownMode(true);
+  setBreakOnReset(true);
 
   readTT = 0;
   writeTT = 0;
@@ -115,6 +116,7 @@ void Processor::initializeAttributes()
   add_attribute(new WarnModeAttribute(this));
   add_attribute(new SafeModeAttribute(this));
   add_attribute(new UnknownModeAttribute(this));
+  add_attribute(new BreakOnResetAttribute(this));
 
   add_attribute(mFrequency);
 }
@@ -132,6 +134,10 @@ void Processor::setSafeMode(bool newSafeMode)
 void Processor::setUnknownMode(bool newUnknownMode)
 {
   bUnknownMode = newUnknownMode;
+}
+void Processor::setBreakOnReset(bool newBreakOnReset)
+{
+  bBreakOnReset = newBreakOnReset;
 }
 
 //------------------------------------------------------------------------
@@ -714,7 +720,7 @@ void Processor::disassemble (signed int s, signed int e)
   for(unsigned int i = start_address; i<=end_address; i++)
     {
       str[0] =0;
-      if (pc->value == i)
+      if (map_pm_address2index(pc->get_value()) == i)
 	cout << "==>";
       else
 	cout << "   ";

@@ -1,3 +1,11 @@
+2005-04-15 Scott Dattalo <scott@dattalo.com>
+	* cli/command.h, cli/input.cc, cli/parse.yy, cli/scan.ll,
+	gpsim/main.cc: Finished support for reentrant parsing.
+	* cli/cmd_disasm.cc: Cleaned up a buglet in printing.
+	* src/attributes.cc, src/attributes.h, src/pic-processor.cc,
+	src/processor.cc, src/processor.h: Added an attribute that
+	controls the behavior of simulator when a reset is encountered. 
+
 2005-04-14 Scott Dattalo <scott@dattalo.com>
 	* build.xml: configure was not getting invoked.
 

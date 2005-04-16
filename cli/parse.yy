@@ -67,7 +67,6 @@ using namespace std;
 #include "../src/stimuli.h"
 
 extern void lexer_setMacroBodyMode(void);
-extern void lexer_setInitialMode(void);
 extern void lexer_InvokeMacro(Macro *m);
 
 
@@ -81,12 +80,18 @@ int parser_spanning_lines=0;
 extern int use_gui;
 extern int quit_state;
 
-void init_cmd_state(void);
+extern command *getLastKnownCommand();
+extern void init_cmd_state();
 
 
 void yyerror(char *message)
 {
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
+  command *lastCommand = getLastKnownCommand();
+  if(lastCommand) {
+    printf(" Last command: %s\n",lastCommand->name);
+  }
+
   init_cmd_state();
 }
 

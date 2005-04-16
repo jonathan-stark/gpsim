@@ -52,8 +52,6 @@ enum COMMAND_MODES
                             // that is being created).
 #define OPT_TT_SYMBOL   5   // A symbol is the option parameter
 
-void init_parser(void);
-
 class command
 {
 
