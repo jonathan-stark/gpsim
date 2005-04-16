@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
+#include "../src/sim_context.h"
 #include "../src/interface.h"
 #include "../src/errors.h"
 
@@ -151,19 +152,17 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 
 static unsigned int lookup_address_symbol(const char *name)
 {
-  Value *sym=0;
-  Symbol_Table_Iterator sti;
+  Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
+  Symbol_Table::iterator symIt;
 
+  for(symIt=st.begin(); symIt != st.end(); symIt++) {
 
-  for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
-
-    if(!strcmp(sym->name().data(),name)) {
+    if(!strcmp((*symIt)->name().data(),name)) {
       int i;
-      sym->get(i);
+      (*symIt)->get(i);
       return i;
     }
   }
-
   return UINT_MAX;
 }
 
@@ -706,10 +705,10 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     t=time(0);
 
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->files->nsrc_files();i++)
+    for(i=0;i<pw->gp->cpu->files.nsrc_files();i++)
     {
       //struct file_context *gpsim_file;
-      FileContext *fc = (*pw->gp->cpu->files)[i];
+      FileContext *fc = pw->gp->cpu->files[i];
 
       const char *file_name;
 
@@ -1154,10 +1153,10 @@ int plot_routine_histogram(Profile_Window *pw)
     // Infostring1
     t=time(0);
     // Compute module name to put in infostring
-    for(i=0;i<pw->gp->cpu->files->nsrc_files();i++)
+    for(i=0;i<pw->gp->cpu->files.nsrc_files();i++)
     {
       //struct file_context *gpsim_file;
-      FileContext *fc = (*pw->gp->cpu->files)[i];
+      FileContext *fc = pw->gp->cpu->files[i];
 
       const char *file_name;
 
@@ -1273,105 +1272,100 @@ popup_activated(GtkWidget *widget, gpointer data)
     switch(item->id)
     {
     case MENU_REMOVE_GROUP:
-	remove_entry(popup_pw,entry);
-	break;
+      remove_entry(popup_pw,entry);
+      break;
     case MENU_ADD_GROUP:
-        add_range_dialog(popup_pw);
-	break;
+      add_range_dialog(popup_pw);
+      break;
     case MENU_ADD_ALL_LABELS:
       for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
 
-	if(typeid(*sym) == typeid(address_symbol)) {
+      if(typeid(*sym) == typeid(address_symbol)) {
 
-	  char *pstr=(char*)malloc(sym->name().length()+1);
-	  strncpy(pstr,
-		  sym->name().data(),
-		  sym->name().length());
-	  pstr[sym->name().length()]=0;
+        char *pstr=(char*)malloc(sym->name().length()+1);
+        strncpy(pstr,
+          sym->name().data(),
+          sym->name().length());
+        pstr[sym->name().length()]=0;
 
-	  sym * data=(sym*)malloc(sizeof(sym));
-	  data->name = pstr;
-	  data->type = (*sti)->isa();
-	  (*sti)->get(data->value);
-	  symlist=g_list_append(symlist,data);
-
-	}
+        sym * data=(sym*)malloc(sizeof(sym));
+        data->name = pstr;
+        data->type = (*sti)->isa();
+        (*sti)->get(data->value);
+        symlist=g_list_append(symlist,data);
+        }
       }
-	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
-	strcpy(fromaddress_string,"0");
-	iter=symlist;
-	while(iter!=0)
-	{
-	    s=(sym*)iter->data;
+      symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+      strcpy(fromaddress_string,"0");
+      iter=symlist;
+      while(iter!=0)
+      {
+        s=(sym*)iter->data;
 
-	    strcpy(toaddress_string,s->name);
-	    add_range(popup_pw,fromaddress_string,toaddress_string);
-	    strcpy(fromaddress_string,toaddress_string);
-	    toaddress_string[0]='\0';
-            free(s->name);
-	    free(s);
-            iter=iter->next;
-	}
+        strcpy(toaddress_string,s->name);
+        add_range(popup_pw,fromaddress_string,toaddress_string);
+        strcpy(fromaddress_string,toaddress_string);
+        toaddress_string[0]='\0';
+        free(s->name);
+        free(s);
+        iter=iter->next;
+      }
 
-	sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
-	add_range(popup_pw,fromaddress_string,toaddress_string);
+      sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
+      add_range(popup_pw,fromaddress_string,toaddress_string);
 
-	while(symlist!=0)
-	    symlist=g_list_remove(symlist,symlist->data);
+      while(symlist!=0)
+        symlist=g_list_remove(symlist,symlist->data);
 
-	break;
+      break;
     case MENU_ADD_FUNCTION_LABELS:
-      for(sti = st.begin(); sti != st.end(); sti++) {
+      for(Symbol_Table::iterator sti = st.begin(); sti != st.end(); sti++) {
 
-	if(((*sti)->isa() == SYMBOL_ADDRESS) &&
-	   !strstr((*sti)->name().data(),"_DS_")) {
-	 
+        if(((*sti)->isa() == SYMBOL_ADDRESS) &&
+          !strstr((*sti)->name().data(),"_DS_")) {
 
-	  char *pstr=(char*)malloc((*sti)->name().length()+1);
-	  strncpy(pstr,
-		  (*sti)->name().data(),
-		  (*sti)->name().length());
-	  pstr[(*sti)->name().length()]=0;
+          char *pstr=(char*)malloc((*sti)->name().length()+1);
+          strncpy(pstr,
+                  (*sti)->name().data(),
+                  (*sti)->name().length());
+          pstr[(*sti)->name().length()]=0;
 
-	  sym * data=(sym*)malloc(sizeof(sym));
-	  data->name = pstr;
-	  data->type = (*sti)->isa();
-	  (*sti)->get(data->value);
-	  symlist=g_list_append(symlist,data);
-
-	}
+          sym * data=(sym*)malloc(sizeof(sym));
+          data->name = pstr;
+          data->type = (*sti)->isa();
+          (*sti)->get(data->value);
+          symlist=g_list_append(symlist,data);
+        }
       }
 
-	symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
+      symlist=g_list_sort(symlist,(GCompareFunc)symcompare);
 
-	iter=symlist;
-	if(iter!=0)
-	{
-	    s=(sym*)iter->data;
-	    strcpy(fromaddress_string,s->name);
-            free(s->name);
-	    free(s);
-	    iter=iter->next;
-	    while(iter!=0)
-	    {
-		s=(sym*)iter->data;
-		strcpy(toaddress_string,s->name);
-		add_range(popup_pw,fromaddress_string,toaddress_string);
-		strcpy(fromaddress_string,toaddress_string);
-		toaddress_string[0]='\0';
-		free(s);
-		iter=iter->next;
-	    }
+      iter=symlist;
+      if(iter!=0)
+      {
+        s=(sym*)iter->data;
+        strcpy(fromaddress_string,s->name);
+              free(s->name);
+        free(s);
+        iter=iter->next;
+        while(iter!=0)
+        {
+          s=(sym*)iter->data;
+          strcpy(toaddress_string,s->name);
+          add_range(popup_pw,fromaddress_string,toaddress_string);
+          strcpy(fromaddress_string,toaddress_string);
+          toaddress_string[0]='\0';
+          free(s);
+          iter=iter->next;
+	      }
+	      sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
+	      add_range(popup_pw,fromaddress_string,toaddress_string);
+      }
 
-	    sprintf(toaddress_string,"%d",gp->cpu->program_memory_size());
-	    add_range(popup_pw,fromaddress_string,toaddress_string);
+      while(symlist!=0)
+        symlist=g_list_remove(symlist,symlist->data);
 
-	}
-
-	while(symlist!=0)
-	    symlist=g_list_remove(symlist,symlist->data);
-
-	break;
+      break;
     case MENU_PLOT:
 	{
 	guint64 *cyclearray;//{100,200,300,400,500,600,900,555};

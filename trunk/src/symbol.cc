@@ -31,7 +31,6 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 
 #include <string>
-#include <list>
 #include <vector>
 
 #include "../config.h"
@@ -56,9 +55,6 @@ int open_cod_file(Processor **, const char *);
 
 //map <string, symbol *, less<string> > st;
 //map <string, symbol *, less<string> >::iterator sti;
-
-list <Value *> st;
-list <Value *>::iterator sti;
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
@@ -331,27 +327,13 @@ void Symbol_Table::dump_type(type_info const &symt)
 
 }
 
-//------------------------------------------------------------------------
-Symbol_Table_Iterator::Symbol_Table_Iterator()
+bool IsClearable(Value* value)
 {
-  sti = st.begin();
+  return value->isClearable();
 }
 
-Value *Symbol_Table_Iterator::begin()
-{
-  sti = st.begin();
-  return *sti;
-}
-
-Value *Symbol_Table_Iterator::end()
-{
-  return *st.end();
-}
-
-Value *Symbol_Table_Iterator::next()
-{
-  ++sti;
-  return *sti;
+void Symbol_Table::clear() {
+  st.remove_if(IsClearable);
 }
 
 //--------------------------------------------

@@ -73,6 +73,7 @@ src_OBJECTS =			\
 	pir.o			\
 	processor.o		\
 	registers.o		\
+	sim_context.o \
 	ssp.o			\
 	stimuli.o		\
 	symbol.o		\

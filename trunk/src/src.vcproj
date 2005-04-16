@@ -362,6 +362,9 @@
 				RelativePath=".\registers.cc">
 			</File>
 			<File
+				RelativePath=".\sim_context.cc">
+			</File>
+			<File
 				RelativePath=".\ssp.cc">
 			</File>
 			<File
@@ -590,6 +593,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\registers.h">
+			</File>
+			<File
+				RelativePath=".\sim_context.h">
 			</File>
 			<File
 				RelativePath=".\ssp.h">

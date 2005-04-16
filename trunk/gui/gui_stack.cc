@@ -34,11 +34,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
+#include "../src/sim_context.h"
 #include "../src/interface.h"
 
 #include "../src/symbol.h"
-
-extern list <Value *> st;  //FIXME
 
 #include "gui.h"
 #include "gui_stack.h"
@@ -154,20 +153,22 @@ static int get_closest_label(Stack_Window *sw,
   int minimum_delta=0x2000000;
   int delta;
 
-  list <Value *>::iterator sti;
+  Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
+  Symbol_Table::iterator symIt;
+  Symbol_Table::iterator symItEnd = st.end();
 
-  for(sti = st.begin(); sti != st.end(); sti++) {
+  for(symIt=st.begin(); symIt != symItEnd; symIt++) {
 
-    Value *s = *sti;
+    Value *s = *symIt;
 
     if(  (typeid(*s) == typeid(address_symbol)) /*||
 	 (typeid(*s) == typeid(line_number_symbol))*/) {
       int i;
-      (*sti)->get(i);
+      s->get(i);
       delta = abs( i - address);
       if(delta < minimum_delta) {
-	minimum_delta = delta;
-	closest_symbol = *sti;
+        minimum_delta = delta;
+        closest_symbol = s;
       }
     }
   }

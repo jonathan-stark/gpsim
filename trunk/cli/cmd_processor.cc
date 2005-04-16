@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_processor.h"
 
-#include "../src/pic-processor.h"
+#include "../src/sim_context.h"
 
 cmd_processor c_processor;
 
@@ -143,7 +143,7 @@ void cmd_processor::processor(void)
 
   if(verbose)
     cout << "cmd_processor: display processors\n";
-  dump_processor_list();
+  CSimulationContext::GetContext()->dump_processor_list();
 
 }
 
@@ -154,7 +154,7 @@ void cmd_processor::processor(int bit_flag)
     {
 
     case 1:
-      display_available_processors();
+      ProcessorConstructorList::GetList()->dump();
       break;
 
     case 2:
@@ -165,10 +165,14 @@ void cmd_processor::processor(int bit_flag)
 }
 
 
-void cmd_processor::processor(const char * processor_type, const char * processor_new_name)
+void cmd_processor::processor(const char * processor_type,
+                              const char * processor_new_name)
 {
-
-  new_processor((Processor *)add_processor( processor_type,  processor_new_name));
+  // In preperation for allowing the hex file to determine processor type
+//  CSimulationContext::GetContext()->SetDefaultProcessor( processor_type,
+//    processor_new_name);
+  new_processor((Processor *)CSimulationContext::GetContext()->set_processor(
+    processor_type,  processor_new_name));
 
   if(!cpu)
     cout << "Unable to add processor\n";

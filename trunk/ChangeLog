@@ -1,3 +1,25 @@
+2005-04-16 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/value.cc,h, src/symbol.cc,h, src/processor.cc,h,
+	src/pic-processor.cc,h, makefile.mingw, Makefile.am,
+	cli/input.cc, cli/init.cc, gui/gui_symbols.cc, gui/gui_stack.cc,
+	gui/gui_src_asm.cc, gui/gui_profile.cc, src/gpsim_time.cc,
+	plat/win32/gpsim.def, src/cod.cc, cli/cmd_processor.cc,
+	added src/sim_context.cc.h: Restructured classes in preparation
+	for allowing a simulation context to be reset for a new processor
+	with out having to close the program and with out memory leaks.
+	The new class CSimulationContext, implemented as a singleton for
+	now, owns a CProcessorList. The singelton class
+	ProcessorContructorList is used to create processor objects.
+	Eventually CSimulationContext may own Breakpoints, Symbol_Table
+	and the active_cpu objects. For now. there are accessor functions
+	to get to the global objects. CSimulationContext.set_processor()
+	will check for a matching processor in the processor list before
+	allocating a new processor.
+	Processor related classes now delete the objects that they own
+	on destruction. May not be conprehensive. set_processor() currently
+	deletes a matching processor object rather than reinitializing it
+	for a new simulation session.
+
 2005-04-15 Scott Dattalo <scott@dattalo.com>
 	* cli/command.h, cli/input.cc, cli/parse.yy, cli/scan.ll,
 	gpsim/main.cc: Finished support for reentrant parsing.

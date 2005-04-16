@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <assert.h>
 
+#include "../src/sim_context.h"
 #include "../src/interface.h"
 
 #include "gui.h"
@@ -240,12 +241,12 @@ void Symbol_Window::Update(void)
     }
   symbols=0;
 
-  Value *sym=0;
-  Symbol_Table_Iterator sti;
+  Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
+  Symbol_Table::iterator symIt;
+  Symbol_Table::iterator symItEnd = st.end();
 
-
-  for(sym=sti.begin(); sym != sti.end(); sym = sti.next()) {
-
+  for(symIt=st.begin(); symIt != symItEnd; symIt++) {
+    Value *sym = *symIt;
     // ignore line numbers
     if((typeid(*sym) == typeid(line_number_symbol) )            ||
        (filter_addresses && (typeid(*sym) == typeid(address_symbol)))  ||
