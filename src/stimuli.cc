@@ -114,7 +114,7 @@ void add_node(Stimulus_Node * new_node)
 
 void remove_node(Stimulus_Node * node)
 {
-    node_list.remove(node);
+  node_list.remove(node);
 }
 
 void dump_node_list(void)
@@ -272,18 +272,18 @@ Stimulus_Node::Stimulus_Node(const char *n)
 
 Stimulus_Node::~Stimulus_Node()
 {
-    cout << "Stimulus_Node destructor" <<endl;
-    stimulus *sptr;
+  stimulus *sptr;
 
-    sptr = stimuli;
-    while(sptr)
-    {
-        cout << "detach " << sptr->name() <<" from node "<<name()<<endl;
-	sptr->detach(this);
-	sptr = sptr->next;
-    }
+  sptr = stimuli;
+  while(sptr) {
+    sptr->detach(this);
+    sptr = sptr->next;
+  }
 
-    remove_node(this);
+  remove_node(this);
+
+  Value *vpNodeSym = symbol_table.remove(name());
+  delete vpNodeSym;
 }
 
 //
@@ -353,36 +353,34 @@ void Stimulus_Node::detach_stimulus(stimulus *s)
   if(!s)          // You can't remove a non-existant stimulus
     return;
 
-  if(stimuli)
-    {
-      if(s == stimuli)
-	{
-	  // This was the first stimulus in the list.
+  if(stimuli) {
+    if(s == stimuli) {
 
-	  stimuli = s->next;
-	  s->detach(this);
-	}
-      else
-	{
+      // This was the first stimulus in the list.
 
-	  sptr = stimuli;
+      stimuli = s->next;
+      s->detach(this);
+      nStimuli--;
 
-	  do
-	    {
-	      if(s == sptr->next)
-		{
-		  sptr->next = s->next;
-		  s->detach(this);
-		  nStimuli--;
-		  //gi.node_configuration_changed(this);
-		  return;
-		}
+    } else {
 
-	      sptr = sptr->next;
-	    } while(sptr);
+      sptr = stimuli;
 
-	} 
-    }
+      do {
+        if(s == sptr->next) {
+
+          sptr->next = s->next;
+          s->detach(this);
+          nStimuli--;
+          //gi.node_configuration_changed(this);
+          return;
+        }
+
+        sptr = sptr->next;
+      } while(sptr);
+
+    } 
+  }
 }
 
 //------------------------------------------------------------------------
@@ -513,142 +511,6 @@ void Stimulus_Node::update()
       bSettling = true;
     }
   }
-
-#if 0
-  if(stimuli) {
-
-    stimulus *sptr = stimuli;
-
-    initial_voltage = get_nodeVoltage();
-
-    delta_voltage = 0.0;
-
-    switch (nStimuli) {
-
-    case 0:
-      // hmm, strange nStimuli is 0, but the stimuli pointer is non null.
-      break;
-
-    case 1:
-      // Only one stimulus is attached.
-      voltage = sptr->get_Vth();
-      Zth =  sptr->get_Zth();
-      break;
-
-    case 2:
-      // 2 stimuli are attached to the node. This is the typical case
-      // and we'll optimize for it.
-      {
-	stimulus *sptr2 = sptr ? sptr->next : 0;
-	if(!sptr2)
-	  break;     // error, nStimuli is two, but there aren't two stimuli
-
-	double Z1 = sptr->get_Zth();
-	double Z2 = sptr2->get_Zth();
-	double resistance = Z1 + Z2;
-	double finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
-	Zth = Z1*Z2/resistance;
-	current_time_constant = (sptr->get_Cth() + sptr2->get_Cth()) * Zth;
-
-	/*
-	  cout << " *N1: " <<sptr->name() 
-	  << " V=" << sptr->get_Vth() 
-	  << " Z=" << sptr->get_Zth() << endl;
-	  cout << " *N2: " <<sptr2->name() 
-	  << " V=" << sptr2->get_Vth() 
-	  << " Z=" << sptr2->get_Zth() << endl;
-	  cout << " * ==>:  V=" << finalVoltage
-	  << " Z=" << resistance << endl;
-	*/
-
-	if(current_time_constant < min_time_constant) {
-	  voltage = finalVoltage;
-	  sptr->set_nodeVoltage(finalVoltage);
-	  sptr2->set_nodeVoltage(finalVoltage);
-	} else {
-
-	  delta_voltage = finalVoltage - initial_voltage;
-
-	  if(bSettling) 
-	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
-	  else
-	    get_cycles().set_break(get_cycles().value +1,this);
-
-	  bSettling = true;
-	}
-      }
-      break;
-
-    default:
-      {
-	/*
-	  There are 3 or more stimuli connected to this node. Recall
-	  that these are all in parallel. The Thevenin voltage and 
-	  impedance for this is:
-
-	  Thevenin impedance:
-	  Zt = 1 / sum(1/Zi)
-
-	  Thevenin voltage:
-
-	  Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
-	  = sum( Vi * Zt /Zi)
-	  = Zt * sum(Vi/Zi)
-	*/
-
-	double conductance=0.0;	// Thevenin conductance.
-	double capacitance=0.0; // total capacitance on the node.
-	double finalVoltage=0.0; 
-
-	//cout << "multi-node summing:\n";
-	while(sptr) {
-	  /*
-	  cout << " N: " <<sptr->name() 
-	  << " V=" << sptr->get_Vth() 
-	  << " Z=" << sptr->get_Zth()
-	  << " C=" << sptr->get_Cth() << endl; 
-	  */
-	  double Cs = 1 / sptr->get_Zth();
-	  finalVoltage += sptr->get_Vth() * Cs;
-	  conductance += Cs;
-	  capacitance += sptr->get_Cth();
-	  sptr = sptr->next;
-	}
-	Zth = 1.0/conductance;
-	finalVoltage *= Zth;
-	current_time_constant = capacitance * Zth;
-
-	if(current_time_constant < min_time_constant) {
-	  voltage = finalVoltage;
-	  sptr = stimuli;
-	  //cout << " Setting voltage to: " << finalVoltage << endl;
-	  while(sptr) {
-	    sptr->set_nodeVoltage(voltage);
-	    sptr = sptr->next;
-	  }
-	} else {
-
-	  // Capacitive loading must be relatively large.
-	  delta_voltage = finalVoltage - initial_voltage;
-
-	  if(bSettling) 
-	    get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
-	  else
-	    get_cycles().set_break(get_cycles().value +1,this);
-
-	  bSettling = true;
-	}
-      }
-    }
-
-  }
-  else if(!warned) {
-    cout << "Warning: No stimulus is attached to node: \"" 
-	 << name_str << "\"\n";
-    warned = 1;
-  }
-
-#endif
 }
 
 //------------------------------------------------------------------------
@@ -701,6 +563,8 @@ stimulus::stimulus(const char *n)
 
 stimulus::~stimulus(void)
 {
+  if(snode)
+    snode->detach_stimulus(this);
 }
 void stimulus::show()
 {
