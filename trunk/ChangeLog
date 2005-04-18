@@ -1,3 +1,11 @@
+2005-04-17 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.h, src/stimuli.cc: Added methods to control the
+	resistance and voltage of the IO_bi_directional_pu pullup resistor.
+	
+2005-04-16 Scott Dattalo <scott@dattalo.com>
+	* src/symbol.cc: set methods for register symbol now initialize
+	the "init" field in the register object.
+	
 2005-04-16 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/value.cc,h, src/symbol.cc,h, src/processor.cc,h,
 	src/pic-processor.cc,h, makefile.mingw, Makefile.am,
@@ -27,6 +35,16 @@
 	* src/attributes.cc, src/attributes.h, src/pic-processor.cc,
 	src/processor.cc, src/processor.h: Added an attribute that
 	controls the behavior of simulator when a reset is encountered. 
+
+2005-04-15 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc, cli/cmd_run.cc, cli/cmd_run.h, cli/input.cc,
+	cli/input.h, cli/parse.yy, cli/scan.ll:
+	Added initial support for .COD file assertions.
+	  -- Parser is now reentrant
+	  -- gpsim's CLI interface is now a registered interface
+	     that can be referenced and accessed by the simulation
+	     engine.
+	* src/ioports.cc: experimental tinkering
 
 2005-04-14 Scott Dattalo <scott@dattalo.com>
 	* build.xml: configure was not getting invoked.

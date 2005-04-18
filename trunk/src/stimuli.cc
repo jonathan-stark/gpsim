@@ -1278,7 +1278,7 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
 					   const char *opt_name, Register **_iopp)
   : IO_bi_directional(i, b,opt_name,_iopp)
 {
-
+  Vpullup = Vth;
   Zpullup = 10e3;
   bPullUp = false;
 }
@@ -1316,7 +1316,7 @@ double IO_bi_directional_pu::get_Vth()
   if(getDriving())
     return getDrivingState() ? Vth : 0;
   else
-    return bPullUp ? Vth : VthIn;
+    return bPullUp ? Vpullup : VthIn;
 
 }
 
@@ -1383,7 +1383,7 @@ double IO_open_collector::get_Vth()
   if(getDriving() && !getDrivingState())
     return 0.0;
 
-  return bPullUp ? Vth : VthIn;
+  return bPullUp ? Vpullup : VthIn;
 }
 
 

@@ -508,7 +508,7 @@ void register_symbol::get(Packet &p)
 void register_symbol::set(int new_value)
 {
   if(reg)
-    reg->put_value(new_value);
+    reg->putRV(RegisterValue(new_value,0));
 }
 
 void register_symbol::set(Value *v)
@@ -516,7 +516,7 @@ void register_symbol::set(Value *v)
   if(reg && v) {
     int i;
     v->get(i);
-    reg->put_value(i);
+    reg->putRV(RegisterValue(i,0));
   }
 }
 
