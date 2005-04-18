@@ -1,3 +1,7 @@
+2005-04-18 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc: Stimulus_Node destructor now removes itself from
+	the symbol table.
+	
 2005-04-17 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added methods to control the
 	resistance and voltage of the IO_bi_directional_pu pullup resistor.
