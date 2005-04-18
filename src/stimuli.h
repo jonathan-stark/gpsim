@@ -366,15 +366,22 @@ class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
 
-  bool bPullUp;    // True when pullup is enable
-  double Zpullup;  // resistance of the pullup
-
   IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
   ~IO_bi_directional_pu();
   virtual double get_Vth();
   virtual double get_Zth();
+
+  virtual void set_Zpullup(double Z) { Zpullup = Z; }
+  virtual double get_Zpullup() { return Zpullup; }
+  virtual void set_Vpullup(double V) { Vpullup = V; }
+  virtual double get_Vpullup() { return Vpullup; }
+
   virtual char getBitChar();
   virtual void update_pullup(bool new_state) { bPullUp = new_state; }
+protected:
+  bool bPullUp;    // True when pullup is enable
+  double Zpullup;  // resistance of the pullup
+  double Vpullup;  // voltage of the pullup resistor is tied to.
 };
 
 
