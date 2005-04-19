@@ -97,6 +97,7 @@ public:
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
   void clear();
+  void Symbol_Table::clear_all();
   iterator begin() {
     return st.begin();
   }
@@ -112,18 +113,17 @@ private:
 };
 
 
-#if defined(IN_MODULE) && defined(_WIN32)
-// we are in a module: don't access symbol_table object directly!
-Symbol_Table &get_symbol_table(void);
+#if !defined(IN_MODULE) 
+extern Symbol_Table symbol_table;
+#endif
+
+#if defined(_WIN32)
+// we are in Windows: don't access symbol_table object directly!
+extern "C" Symbol_Table &get_symbol_table(void);
 #else
 // we are in gpsim: use of get_symbol_table() is recommended,
 // even if trace object can be accessed directly.
-extern Symbol_Table symbol_table;
-
-inline Symbol_Table &get_symbol_table(void)
-{
-  return symbol_table;
-}
+inline Symbol_Table &get_symbol_table(void);
 #endif
 
 

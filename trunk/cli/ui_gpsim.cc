@@ -77,14 +77,14 @@ ISimConsole &CGpsimUserInterface::GetConsole(void) {
 
 void CGpsimUserInterface::DisplayMessage(unsigned int uStringID, ...) {
   va_list ap;
-  va_start(ap,m_paStrings[uStringID]);
+  va_start(ap,uStringID);
   m_Console.VPrintf(m_paStrings[uStringID], ap);
   va_end(ap);
 }
 
 void CGpsimUserInterface::DisplayMessage(FILE * pOut, unsigned int uStringID, ...) {
   va_list ap;
-  va_start(ap,m_paStrings[uStringID]);
+  va_start(ap,uStringID);
   if (pOut == NULL || pOut == stdout) {
     m_Console.VPrintf(m_paStrings[uStringID], ap);
   }

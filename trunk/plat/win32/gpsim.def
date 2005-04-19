@@ -204,7 +204,6 @@ EXPORTS
     ?get_pin_state@Module@@UAEHI@Z
     ?get_src_line@Breakpoint_Instruction@@UAEHXZ
     ?get_src_line@ProgramMemoryAccess@@QAEII@Z
-    ?get_symbol_table@@YAAAVSymbol_Table@@XZ
     ?get_trace@@YAAAVTrace@@XZ
     ?get_value@IOPORT@@UAEIXZ
     ?get_xref@Value@@UAEPAV1@XZ
@@ -350,6 +349,7 @@ EXPORTS
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?verbose@@3HA
+    get_symbol_table
     GetUserInterface
     load_library
     get_library_export

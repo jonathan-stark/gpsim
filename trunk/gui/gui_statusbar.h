@@ -30,6 +30,45 @@ class RegisterLabeledEntry;	// in gui_statusbar.cc
 class CyclesLabeledEntry;	// in gui_statusbar.cc
 class TimeLabeledEntry;		// in gui_statusbar.cc
 class MemoryAccess;		// in src/processor.h
+class StatusBar_Window;
+
+//========================================================================
+//
+// A LabeledEntry is an object consisting of gtk entry
+// widget that is labeled (with a gtk lable widget)
+//
+
+class LabeledEntry {
+public:
+  GtkWidget *label;
+  GtkWidget *entry;
+  StatusBar_Window *sbw;
+
+  LabeledEntry(void);
+  ~LabeledEntry();
+  void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
+  void SetEntryWidth(int string_width);
+  void NewLabel(char *clabel);
+  virtual void Update(void);
+  void AssignParent(StatusBar_Window *);
+  virtual void put_value(unsigned int);
+
+};
+
+class RegisterLabeledEntry : public LabeledEntry {
+public:
+
+  Register *reg;
+  char *pCellFormat;
+
+  RegisterLabeledEntry(GtkWidget *,Register *,bool isEditable=true);
+  ~RegisterLabeledEntry();
+
+  virtual void put_value(unsigned int);
+  void AssignRegister(Register *new_reg);
+  virtual void Update(void);
+
+};
 
 //
 // The Status Bar window 
@@ -41,7 +80,24 @@ class StatusBar_Window {
 
   CyclesLabeledEntry *cpu_cycles;
   TimeLabeledEntry *time;
-  list<RegisterLabeledEntry *> entries;
+
+
+  class RegisterLabeledList : public list<RegisterLabeledEntry*> {
+  public:
+    void push_back(GtkWidget *hbox, Register *reg) {
+      list<RegisterLabeledEntry*>::push_back(new RegisterLabeledEntry(hbox, reg));
+    }
+    void clear() {
+      iterator iRLE;
+      for(iRLE = begin();
+          iRLE != end();
+          ++iRLE) {
+        delete *iRLE;
+      }
+      list<RegisterLabeledEntry*>::clear();
+    }
+  };
+  RegisterLabeledList entries;
   
 
   StatusBar_Window(void);

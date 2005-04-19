@@ -32,12 +32,9 @@ Boston, MA 02111-1307, USA.  */
 #include <map>
 
 #include "../config.h"
-// #include "gpsim_def.h"
 
 #include "sim_context.h"
 #include "breakpoints.h"
-
-// #include "fopen-path.h"
 
 
 //================================================================================
@@ -163,6 +160,7 @@ void CSimulationContext::dump_processor_list(void)
 void CSimulationContext::Clear() {
   GetBreakpoints().clear_all(GetActiveCPU());
   CProcessorList::iterator processor_iterator; 
+  GetSymbolTable().clear_all();
   for (processor_iterator = processor_list.begin();
        processor_iterator != processor_list.end(); 
        processor_iterator++) {
@@ -171,7 +169,6 @@ void CSimulationContext::Clear() {
       delete p;
     }
   processor_list.clear();
-  GetSymbolTable().clear();
 }
 
 extern Symbol_Table symbol_table;  // There's only one instance of "the" symbol table

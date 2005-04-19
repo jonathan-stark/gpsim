@@ -40,41 +40,6 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_statusbar.h"
 #include "../src/processor.h"
 
-//========================================================================
-//
-// A LabeledEntry is an object consisting of gtk entry
-// widget that is labeled (with a gtk lable widget)
-//
-
-class LabeledEntry {
-public:
-  GtkWidget *label;
-  GtkWidget *entry;
-  StatusBar_Window *sbw;
-
-  LabeledEntry(void);
-  void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
-  void SetEntryWidth(int string_width);
-  void NewLabel(char *clabel);
-  virtual void Update(void);
-  void AssignParent(StatusBar_Window *);
-  virtual void put_value(unsigned int);
-
-};
-
-class RegisterLabeledEntry : public LabeledEntry {
-public:
-
-  Register *reg;
-  char *pCellFormat;
-
-  RegisterLabeledEntry(GtkWidget *,Register *,bool);
-
-  virtual void put_value(unsigned int);
-  void AssignRegister(Register *new_reg);
-  virtual void Update(void);
-
-};
 
 class CyclesLabeledEntry : public LabeledEntry {
 public:
@@ -170,6 +135,12 @@ LabeledEntry::LabeledEntry(void)
   entry = 0;
   sbw = 0;
 }
+
+LabeledEntry::~LabeledEntry() {
+  gtk_widget_destroy(entry);
+  gtk_widget_destroy(label);
+}
+
 #if GTK_MAJOR_VERSION < 2
 #define gtk_style_get_font(X) X->font
 #endif
@@ -179,27 +150,22 @@ void LabeledEntry::Create(GtkWidget *box,
 			  int string_width,
 			  bool isEditable=true)
 {
-
-  label = (GtkWidget *)gtk_label_new (clabel);
-    
-  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
-  gtk_widget_set_usize (label, 0, 15);
-  gtk_box_pack_start (GTK_BOX (box), label, FALSE, FALSE, 0);
-  gtk_widget_show (label);
-
+  // Entry to the right
   entry = gtk_entry_new ();
-
   gtk_entry_set_text (GTK_ENTRY (entry), "----");
-
   SetEntryWidth(string_width);
-
-  gtk_box_pack_start (GTK_BOX (box), entry, FALSE, FALSE, 0);
-
+  gtk_box_pack_end (GTK_BOX (box), entry, FALSE, FALSE, 0);
   gtk_widget_show (entry);
 
   if(!isEditable)
     gtk_entry_set_editable(GTK_ENTRY(entry),0);
-
+  // Lable to the left of the entry
+  label = (GtkWidget *)gtk_label_new (clabel);
+    
+  gtk_misc_set_alignment (GTK_MISC (label), 1.0, 0.5);
+  gtk_widget_set_usize (label, 0, 15);
+  gtk_box_pack_end (GTK_BOX (box), label, FALSE, FALSE, 0);
+  gtk_widget_show (label);
 }
 
 void LabeledEntry::SetEntryWidth(int string_width)
@@ -237,7 +203,7 @@ void LabeledEntry::NewLabel(char *clabel)
 //------------------------------------------------------------------------
 RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
 					   Register *new_reg,
-					   bool isEditable=true) 
+					   bool isEditable) 
  : LabeledEntry()
 {
   reg = new_reg;
@@ -278,6 +244,10 @@ RegisterLabeledEntry::RegisterLabeledEntry(GtkWidget *box,
   } else
     pCellFormat=0;
 
+}
+
+RegisterLabeledEntry::~RegisterLabeledEntry() {
+  delete pCellFormat;
 }
 
 void RegisterLabeledEntry::put_value(unsigned int new_value)
@@ -439,7 +409,7 @@ void StatusBar_Window::Update(void)
     return;
 
 
-  list<RegisterLabeledEntry *>::iterator iRLE;
+  RegisterLabeledList::iterator iRLE;
 
   for(iRLE = entries.begin();
       iRLE != entries.end();
@@ -507,52 +477,53 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
   if(!_gp  || !_gp->cpu || !_ma || !hbox)
     return;
 
-  if(ma)
-    return;
-
   gp = _gp;
   ma = _ma;
   Dprintf((" %s",__FUNCTION__));
 
+  if(cpu_cycles == NULL) {
+    cpu_cycles = new CyclesLabeledEntry();
+    cpu_cycles->Create(hbox,"Cycles:", 18,false);
+  }
+  if(time == NULL) {
+    TimeLabeledEntry *tle = new TimeLabeledEntry();
+    time = tle;
+    time->Create(hbox,"Time:", 22,false);
+    /* create popupmenu */
+    tle->build_menu();
+    gtk_signal_connect(GTK_OBJECT(time->entry),
+		      "button_press_event",
+		      (GtkSignalFunc) do_popup,
+		      tle);
+
+    /* Now create a cross-reference link that the simulator can use to
+    * send information back to the gui
+    */
+
+    if(gp->cpu && gp->cpu->pc) {
+      StatusBarXREF *cross_reference;
+
+      cross_reference = new StatusBarXREF();
+      cross_reference->parent_window_type =   WT_status_bar;
+      cross_reference->parent_window = (gpointer) this;
+      cross_reference->data = (gpointer) this;
+    
+      gp->cpu->pc->add_xref((gpointer) cross_reference);
+
+    }
+  }
+
   list<Register *>::iterator iReg;
+  entries.clear();
 
   for(iReg = ma->SpecialRegisters.begin();
       iReg != ma->SpecialRegisters.end();
       ++iReg) {
 
     //cout << " Adding " << ((*iReg)->showType()) << " to status bar\n";
-    entries.push_back(new RegisterLabeledEntry(hbox, *iReg));
+    entries.push_back(hbox, *iReg);
   }
 
-  cpu_cycles = new CyclesLabeledEntry();
-  cpu_cycles->Create(hbox,"Cycles:", 18,false);
-
-  TimeLabeledEntry *tle = new TimeLabeledEntry();
-  time = tle;
-  time->Create(hbox,"Time:", 22,false);
-
-  /* create popupmenu */
-  tle->build_menu();
-  gtk_signal_connect(GTK_OBJECT(time->entry),
-		     "button_press_event",
-		     (GtkSignalFunc) do_popup,
-		     tle);
-
-  /* Now create a cross-reference link that the simulator can use to
-   * send information back to the gui
-   */
-
-  if(gp->cpu && gp->cpu->pc) {
-    StatusBarXREF *cross_reference;
-
-    cross_reference = new StatusBarXREF();
-    cross_reference->parent_window_type =   WT_status_bar;
-    cross_reference->parent_window = (gpointer) this;
-    cross_reference->data = (gpointer) this;
-  
-    gp->cpu->pc->add_xref((gpointer) cross_reference);
-
-  }
 
   Update();
 
@@ -566,6 +537,9 @@ StatusBar_Window::StatusBar_Window(void)
   cpu_cycles = 0;
   time = 0;
   created = false;
+
+  time = NULL;
+  cpu_cycles = NULL;
 
   /* --- Create h-box for holding the status line --- */
   hbox = gtk_hbox_new (FALSE, 0);
