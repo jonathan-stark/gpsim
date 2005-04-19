@@ -1654,11 +1654,17 @@ void SourcePage::Close(void)
     {
       int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
       gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
+      gtk_widget_destroy(notebook_child);
+      // this is all that is needed to destroy all child widgets
+      // of notebook_child.
       notebook_child=0;
+      source_layout_adj = 0;
+      source_layout = 0;
+      source_text = 0;
+      pageindex_to_fileid = INVALID_VALUE;
+      source_pcwidget = 0;
+      notebook = 0;
     }
-  source_pcwidget=0;
-  pageindex_to_fileid=INVALID_VALUE;
-  
 }
 
 void SourceBrowserAsm_Window::CloseSource(void)
@@ -1677,6 +1683,9 @@ void SourceBrowserAsm_Window::CloseSource(void)
   remove_all_points(this);
 
   layout_offset=-1;
+  for(int i=0;i<SBAW_NRFILES;i++) {
+    pages[i].Close();
+  }
 }
 
 void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
@@ -1732,36 +1741,36 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
       file_name = fc->name().c_str();
 
       if(strcmp(file_name+strlen(file_name)-4,".lst")
-	 &&strcmp(file_name+strlen(file_name)-4,".LST")
-	 &&strcmp(file_name+strlen(file_name)-4,".cod")
-	 &&strcmp(file_name+strlen(file_name)-4,".COD"))
-	{
-	  if(!strcmp(file_name+strlen(file_name)-2,".c")
-	     ||!strcmp(file_name+strlen(file_name)-2,".C")
-	     ||!strcmp(file_name+strlen(file_name)-4,".jal")
-	     ||!strcmp(file_name+strlen(file_name)-4,".JAL")
-	     )
-	    {
-	      // These are HLL sources
-	      file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
-	      pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
-	    }
+        &&strcmp(file_name+strlen(file_name)-4,".LST")
+        &&strcmp(file_name+strlen(file_name)-4,".cod")
+        &&strcmp(file_name+strlen(file_name)-4,".COD"))
+      {
+        if(!strcmp(file_name+strlen(file_name)-2,".c")
+          ||!strcmp(file_name+strlen(file_name)-2,".C")
+          ||!strcmp(file_name+strlen(file_name)-4,".jal")
+          ||!strcmp(file_name+strlen(file_name)-4,".JAL")
+          )
+        {
+          // These are HLL sources
+          file_id_to_source_mode[i]=ProgramMemoryAccess::HLL_MODE;
+          pma->set_hll_mode(ProgramMemoryAccess::HLL_MODE);
+        }
 
-	  // FIXME, gpsim may change sometime making this fail
-	  file_id = i;
+        // FIXME, gpsim may change sometime making this fail
+        file_id = i;
 
-	  // Make sure that the file is open
-	  fc->open("r");
+        // Make sure that the file is open
+        fc->open("r");
 
-	  id = add_page(this,file_id);
+        id = add_page(this,file_id);
 
-	  SetText(id,file_id);
-	  
-	} else {
-	  if(verbose)
-	    printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
-		    file_name);
-	}
+        SetText(id,file_id);
+
+       } else {
+        if(verbose)
+          printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
+                  file_name);
+      }
     }
 
     source_loaded = 1;
@@ -1792,7 +1801,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
     if(widget->window==0)
-	return 0;
+        return 0;
     
     gdk_window_get_root_origin(widget->window,&dlg_x,&dlg_y);
     return 0;
@@ -1817,19 +1826,19 @@ static int load_fonts(SourceBrowserAsm_Window *sbaw)
 	return 0;
 #else
     sbaw->comment_text_style->font=
-	gdk_fontset_load(sbaw->commentfont_string);
+        gdk_fontset_load(sbaw->commentfont_string);
 
     sbaw->default_text_style->font=
-	sbaw->label_text_style->font=
-	sbaw->symbol_text_style->font=
-	sbaw->instruction_text_style->font=
-	sbaw->number_text_style->font=
-	gdk_fontset_load(sbaw->sourcefont_string);
+        sbaw->label_text_style->font=
+        sbaw->symbol_text_style->font=
+        sbaw->instruction_text_style->font=
+        sbaw->number_text_style->font=
+        gdk_fontset_load(sbaw->sourcefont_string);
 
     if(sbaw->comment_text_style->font==0)
         return 0;
     if(sbaw->default_text_style->font==0)
-	return 0;
+        return 0;
 #endif
     return 1;
 }

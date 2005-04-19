@@ -58,8 +58,11 @@ int open_cod_file(Processor **, const char *);
 
 Symbol_Table symbol_table;  // There's only one instance of "the" symbol table
 
-// create an instance of inline get_symbol_table() method by taking its address
-static Symbol_Table &(*dummy_symbol_table)(void) = get_symbol_table;
+#if defined(_WIN32)
+Symbol_Table &get_symbol_table(void) {
+  return symbol_table;
+}
+#endif
 
 void Symbol_Table::add_ioport(IOPORT *_ioport)
 {
@@ -334,6 +337,14 @@ bool IsClearable(Value* value)
 
 void Symbol_Table::clear() {
   st.remove_if(IsClearable);
+}
+
+void Symbol_Table::clear_all() {
+  clear();
+  while(!st.empty()) {
+    delete st.front();
+    st.pop_front();
+  }
 }
 
 //--------------------------------------------

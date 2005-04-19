@@ -63,6 +63,16 @@ using namespace std;
 #endif
 
 char * get_error_message();
+unsigned long get_error();
+
+#ifdef _WIN32
+#define OS_E_FILENOTFOUND 0x0000007E
+#define OS_E_MEMORYACCESS 0x000003E6
+#else
+// JRH - just made a guess
+#define OS_E_FILENOTFOUND ENOENT
+#define OS_E_MEMORYACCESS EADDRNOTAVAIL
+#endif
 
 void translatePath(string &sPath) {
   string::size_type nPos;
@@ -129,22 +139,31 @@ void * load_library(const char *library_name, char **pszError)
   if( (handle = sLoad(sPath.c_str())) != 0)
     return handle;
 
-  // Failed to find the library in the system paths, so try to load
-  // from one of our paths.
-
-  vector<string>::iterator itSearchPath;
-  for (itSearchPath = asDllSearchPath.begin();
-      itSearchPath != asDllSearchPath.end();
-      itSearchPath++) {
-     sPath = *itSearchPath + sFile;
-
-    handle = sLoad(sPath.c_str());
-
-    if (NULL != handle) {
-      return handle;
-    }
-  }
   *pszError = get_error_message();
+  unsigned long uError = get_error();
+#ifdef _WIN32
+  if(uError == OS_E_FILENOTFOUND) {
+#else
+  printf("Debug: need to define OS_E_FILENOTFOUND for Linux and test error code for failed load_library() : error = %lu\n", uError);
+  if(true) {
+#endif
+    // Failed to find the library in the system paths, so try to load
+    // from one of our paths.
+
+    vector<string>::iterator itSearchPath;
+    for (itSearchPath = asDllSearchPath.begin();
+        itSearchPath != asDllSearchPath.end();
+        itSearchPath++) {
+      sPath = *itSearchPath + sFile;
+
+      handle = sLoad(sPath.c_str());
+
+      if (NULL != handle) {
+        return handle;
+      }
+    }
+    *pszError = get_error_message();
+  }
   return NULL;
 }
 
@@ -154,6 +173,14 @@ void free_library(void *handle)
   FreeLibrary((HMODULE)handle);
 #else
   dlclose (handle);
+#endif
+}
+
+unsigned long get_error() {
+#ifdef _WIN32
+  return GetLastError();
+#else
+  return errno;
 #endif
 }
 

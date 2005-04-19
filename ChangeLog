@@ -1,3 +1,14 @@
+2005-04-19 J.R. Heisey <jrheisey@sourceforge.com>
+	*  gui/gui_src_asm.cc, gui/gui_statusbar.cc, gui/gui_statusbar.h:
+	Modified the statusbar so that it can handle a switch from
+	one processor to another.
+	* src/sim_context.cc, src/symbol.cc,h: Fixed a crash on gpsim
+	exit.
+	* src/os_dependent.c: added test in load_library() to the first
+	call to sLoad() to determine whether the a failure was due
+	to the library file not found or some other error. This needs
+	to be completed for the linux builds.
+
 2005-04-18 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: Stimulus_Node destructor now removes itself from
 	the symbol table.
