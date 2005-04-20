@@ -113,17 +113,20 @@ private:
 };
 
 
-#if !defined(IN_MODULE) 
-extern Symbol_Table symbol_table;
-#endif
 
 #if defined(_WIN32)
+  #if !defined(IN_MODULE) 
+  extern Symbol_Table symbol_table;
+  #endif
 // we are in Windows: don't access symbol_table object directly!
 extern "C" Symbol_Table &get_symbol_table(void);
 #else
 // we are in gpsim: use of get_symbol_table() is recommended,
 // even if trace object can be accessed directly.
-inline Symbol_Table &get_symbol_table(void);
+extern Symbol_Table symbol_table;
+inline Symbol_Table &get_symbol_table(void) {
+  return symbol_table;
+}
 #endif
 
 
