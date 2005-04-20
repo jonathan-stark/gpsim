@@ -72,6 +72,7 @@ unsigned long get_error();
 // JRH - just made a guess
 #define OS_E_FILENOTFOUND ENOENT
 #define OS_E_MEMORYACCESS EADDRNOTAVAIL
+#include <errno.h>
 #endif
 
 void translatePath(string &sPath) {
