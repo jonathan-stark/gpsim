@@ -753,7 +753,7 @@ void Breakpoint_Instruction::clear(void)
   if(use_icd)
     icd_clear_break();
 
-  get_cpu()->pma->remove(address, this);
+  get_cpu()->pma->clear_break_at_address(address, this);
   (*get_cpu()->pma)[address].update();
 
 }

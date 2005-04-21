@@ -144,6 +144,8 @@ class ProgramMemoryAccess :  public MemoryAccess
 					   TriggerObject *cb);
   virtual int clear_break_at_address(unsigned int address,
 				     enum instruction::INSTRUCTION_TYPES type);
+  virtual int clear_break_at_address(unsigned int address,
+    instruction * pInstruction);
   virtual int clear_notify_at_address(unsigned int address);
   virtual int clear_profile_start_at_address(unsigned int address);
   virtual int clear_profile_stop_at_address(unsigned int address);

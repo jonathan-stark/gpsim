@@ -984,15 +984,46 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
   if( address >= 0  && address<cpu->program_memory_size()) {
 
     instruction *instr = find_instruction(address,type);
-
     if(instr!=0) {
       int b = ((Breakpoint_Instruction *)instr)->bpn & BREAKPOINT_MASK;
+      // this actually removes the object
       bp.clear( b );
       return 1;
     } 
   }
 
   return 0;
+}
+
+//-------------------------------------------------------------------
+int ProgramMemoryAccess::clear_break_at_address(unsigned int address, 
+                                                instruction * pInstruction) {
+  if(!cpu ||cpu->IsAddressInRange(address))
+    return -1;
+
+  instruction **ppAddressLocation = &cpu->program_memory[cpu->map_pm_address2index(address)];
+  Breakpoint_Instruction *br = dynamic_cast<Breakpoint_Instruction *>(*ppAddressLocation);
+  if (br == pInstruction) {
+    // at the head of the chain
+    *ppAddressLocation = br->replaced;
+  }
+  else {
+    Breakpoint_Instruction *pLast = br;
+    // Find myself in the chain
+    while(br != NULL) {
+      if (br == pInstruction) {
+        // found
+        pLast->replaced = br->replaced;
+        // for good measure
+        br->replaced = NULL;
+        break;
+      }
+      else {
+        pLast = br;
+        br = dynamic_cast<Breakpoint_Instruction *>(br->replaced);
+      }
+    }
+  }
 }
 
 //-------------------------------------------------------------------
