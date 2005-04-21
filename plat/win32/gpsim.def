@@ -92,6 +92,7 @@ EXPORTS
     ?clear@TriggerObject@@UAEXXZ
     ?clear_break@Cycle_Counter@@QAEXPAVTriggerObject@@@Z
     ?clear_break@Value@@UAEXXZ
+    ?clear_break_at_address@ProgramMemoryAccess@@UAEHIPAVinstruction@@@Z
     ?clear_break_at_address@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?clear_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?clear_current_break@Cycle_Counter@@QAEXXZ
