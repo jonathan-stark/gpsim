@@ -1,6 +1,5 @@
 2005-04-19 J.R. Heisey <jrheisey@sourceforge.com>
-	* src/breakpoints.cc, src/processor.cc, src/processor.h
-	plat/win32/gpsim.def, gpsim/gpsim.vcproj, modules/modules.vcproj:
+	* src/breakpoints.cc, src/processor.cc, src/processor.h:
 	Fixed corruption when clearing a Breakpoint_Instruction object.
 	The object was not removed properly from the chain of instruction
 	objects in the pma.
