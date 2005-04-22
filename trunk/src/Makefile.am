@@ -19,6 +19,8 @@ libgpsim_la_SOURCES = \
 	16bit-hexdecode.cc \
 	16bit-tmrs.cc \
 	attributes.cc \
+	bitlog.cc \
+	bytelog.cc \
 	breakpoints.cc \
 	cod.cc \
 	cmd_manager.cc \
@@ -60,6 +62,7 @@ libgpsim_la_SOURCES = \
 	tmr0.cc \
 	trace.cc \
 	trigger.cc \
+	ttoken.cc \
 	uart.cc \
 	ssp.cc \
 	xref.cc \
@@ -80,7 +83,9 @@ gpsiminclude_HEADERS = \
 	16bit-registers.h \
 	16bit-tmrs.h \
 	attributes.h \
+	bitlog.h \
 	breakpoints.h \
+	bytelog.h \
 	cmd_gpsim.h \
 	cmd_manager.h \
 	cod.h \
@@ -117,6 +122,7 @@ gpsiminclude_HEADERS = \
 	pir.h \
 	processor.h \
 	protocol.h \
+	pthread-wrap.h \
 	registers.h \
 	sim_context.h \
 	stimuli.h \
@@ -127,6 +133,7 @@ gpsiminclude_HEADERS = \
 	trace.h \
 	trigger.h \
 	trace_orb.h \
+	ttoken.h \
 	uart.h \
 	xref.h \
 	icd.h \
