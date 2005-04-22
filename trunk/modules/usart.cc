@@ -63,7 +63,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/trace.h"
 #include "../src/uart.h"
 
-#include "bitlog.h"
+#include "../src/bitlog.h"
 
 
 /**********************************************************************************
