@@ -1846,10 +1846,12 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
 //========================================================================
 // Processor Constructor
 
-ProcessorConstructorList *ProcessorConstructorList::processor_list = 
-  new ProcessorConstructorList();
+ProcessorConstructorList *ProcessorConstructorList::processor_list;
 
 ProcessorConstructorList * ProcessorConstructorList::GetList() {
+  if(processor_list == NULL) {
+    new ProcessorConstructorList();
+  }
   return processor_list;
 }
 
