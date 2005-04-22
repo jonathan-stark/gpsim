@@ -1,3 +1,8 @@
+2005-04-22 Scott Dattalo <scott@dattalo.com>
+	* bitlog.cc, bitlog.h, bytelog.cc, bytelog.h, ttoken.cc, ttoken.h,
+	pthread-wrap.h: moved these from the modules/ directory into the
+	src/ directory.
+
 2005-04-19 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/processor.cc, src/processor.h:
 	Fixed corruption when clearing a Breakpoint_Instruction object.
