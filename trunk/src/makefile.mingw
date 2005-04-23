@@ -13,7 +13,7 @@ include ../plat/win32/make.mingw
 
 INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include \
-	-I ../../gtk+/lib/gtk+/include
+	-I ../../gtk+/lib/gtk+/include -I ../../pthreads/include
 
 DEFINES += -DHAVE_GUI
 
@@ -35,7 +35,9 @@ src_OBJECTS =			\
 	16bit-registers.o	\
 	16bit-tmrs.o		\
 	attributes.o		\
+	bitlog.o		\
 	breakpoints.o		\
+	bytelog.o		\
 	cmd_manager.o		\
 	cod.o			\
 	eeprom.o		\
@@ -73,13 +75,14 @@ src_OBJECTS =			\
 	pir.o			\
 	processor.o		\
 	registers.o		\
-	sim_context.o \
+	sim_context.o		\
 	ssp.o			\
 	stimuli.o		\
 	symbol.o		\
 	tmr0.o			\
 	trace.o			\
 	trigger.o		\
+	ttoken.o		\
 	uart.o			\
 	value.o			\
 	xref.o

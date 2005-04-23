@@ -30,7 +30,7 @@ LIBS = -l wsock32 \
 
 gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libsrc.a
 
-INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0			\
+INCLUDES = -I ../plat/win32 -I ../../glib/include/glib-2.0 \
 	-I ../../glib/lib/glib-2.0/include -I ../../popt/include
 
 DEFINES += -DHAVE_GUI
@@ -60,5 +60,5 @@ gpsim_OBJECTS =			\
 
 gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS)
 	$(CXX) $(CFLAGS) $(CLDFLAGS) \
-	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib \
+	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib -Wl,-u,__ZN15BoolEventLogger14dump_ASCII_artEyyi \
 	-o gpsim.exe $(gpsim_OBJECTS) $(gpsim_LIBS) $(LIBS)

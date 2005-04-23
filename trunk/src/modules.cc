@@ -144,10 +144,10 @@ void  Module::dump_attributes(int show_values)
 
 Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
 {
-
   if(!attribute_name)
     return 0;
 
+  string full_name = name() + "." + attribute_name;
   list <Value *> :: iterator attribute_iterator;
 
   for (attribute_iterator = attributes.begin();  
@@ -156,11 +156,11 @@ Value *Module::get_attribute(char *attribute_name, bool bWarnIfNotFound)
 
     Value *locattr = *attribute_iterator;
 
-    if(locattr->name() == string(attribute_name))
+    if (locattr->name() == full_name)
       return locattr;
   }
 
-  if(bWarnIfNotFound)
+  if (bWarnIfNotFound)
     cout << "Could not find attribute named " << attribute_name  << '\n';
 
   return 0;
