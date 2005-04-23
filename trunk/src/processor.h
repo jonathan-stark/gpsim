@@ -597,6 +597,8 @@ private:
 // it precluded processors that were defined outside of the gpsim
 // core library.
 
+class ProcessorConstructorList;
+
 class ProcessorConstructor
 {
 public:
@@ -619,7 +621,8 @@ public:
 			 const char *name3=0,
 			 const char *name4=0);
 
-
+  static ProcessorConstructorList * processor_list;
+  static ProcessorConstructorList * GetList();
 
 };
 
