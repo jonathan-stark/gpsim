@@ -1849,10 +1849,7 @@ Register &RegisterMemoryAccess::operator [] (unsigned int address)
 ProcessorConstructorList *ProcessorConstructorList::processor_list;
 
 ProcessorConstructorList * ProcessorConstructorList::GetList() {
-  if(processor_list == NULL) {
-    new ProcessorConstructorList();
-  }
-  return processor_list;
+  return processor_list = ProcessorConstructor::GetList();
 }
 
 ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void),
@@ -1870,9 +1867,19 @@ ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void
 
   // Add the processor to the list of supported processors:
 
-  ProcessorConstructorList::GetList()->push_back(this);
+  GetList()->push_back(this);
 
 }
+
+ProcessorConstructorList * ProcessorConstructor::processor_list = new ProcessorConstructorList();
+
+ProcessorConstructorList * ProcessorConstructor::GetList() {
+  if(processor_list == NULL) {
+    processor_list = new ProcessorConstructorList();
+  }
+  return processor_list;
+}
+
 
 
 //------------------------------------------------------------
