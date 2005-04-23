@@ -1,4 +1,5 @@
 EXPORTS
+    ??0BoolEventLogger@@QAE@I@Z
     ??0Boolean@@QAE@_N@Z
     ??0Breakpoint_Instruction@@QAE@PAVProcessor@@II@Z
     ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -117,12 +118,14 @@ EXPORTS
     ?destroyProgramMemoryAccess@Processor@@UAEXPAVProgramMemoryAccess@@@Z
     ?detach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
     ?disassemble@Processor@@UAEXHH@Z
+    ?dump_ASCII_art@BoolEventLogger@@QAEX_K0H@Z
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
     ?dump_attributes@Module@@UAEXH@Z
     ?dump_last_instruction@Trace@@QAEXXZ
     ?dump_raw@PCTraceType@@UAEHIPADH@Z
     ?dump_raw@TraceType@@UAEHIPADH@Z
     ?dump_registers@Processor@@UAEXXZ
+    ?event@BoolEventLogger@@QAEX_N@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
@@ -194,6 +197,7 @@ EXPORTS
     ?get_frequency@Processor@@UAENXZ
     ?get_hll_file_id@Breakpoint_Instruction@@UAEHXZ
     ?get_hll_src_line@Breakpoint_Instruction@@UAEHXZ
+    ?get_index@BoolEventLogger@@QAEI_K@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
     ?get_lst_line@Breakpoint_Instruction@@UAEHXZ

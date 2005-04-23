@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="./..;../cli;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;"
+				AdditionalIncludeDirectories="./..;../cli;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
 				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_DLL_EXPORT"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -62,7 +62,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
 				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_EXT_CLASS"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -103,7 +103,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
 				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;snprintf=_snprintf;GPSIM_EXT_CLASS"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -146,7 +146,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
 				PreprocessorDefinitions="WIN32;_LIB;snprintf=_snprintf;GPSIM_EXT_CLASS"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
@@ -224,7 +224,13 @@
 				RelativePath=".\attributes.cc">
 			</File>
 			<File
+				RelativePath=".\bitlog.cc">
+			</File>
+			<File
 				RelativePath=".\breakpoints.cc">
+			</File>
+			<File
+				RelativePath=".\bytelog.cc">
 			</File>
 			<File
 				RelativePath=".\cmd_manager.cc">
@@ -383,6 +389,9 @@
 				RelativePath=".\trigger.cc">
 			</File>
 			<File
+				RelativePath=".\ttoken.cc">
+			</File>
+			<File
 				RelativePath=".\uart.cc">
 			</File>
 			<File
@@ -430,7 +439,13 @@
 				RelativePath=".\attributes.h">
 			</File>
 			<File
+				RelativePath=".\bitlog.h">
+			</File>
+			<File
 				RelativePath=".\breakpoints.h">
+			</File>
+			<File
+				RelativePath=".\bytelog.h">
 			</File>
 			<File
 				RelativePath=".\cmd_gpsim.h">
@@ -592,6 +607,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 				RelativePath=".\protocol.h">
 			</File>
 			<File
+				RelativePath=".\pthread-wrap.h">
+			</File>
+			<File
 				RelativePath=".\registers.h">
 			</File>
 			<File
@@ -623,6 +641,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\trigger.h">
+			</File>
+			<File
+				RelativePath=".\ttoken.h">
 			</File>
 			<File
 				RelativePath=".\uart.h">

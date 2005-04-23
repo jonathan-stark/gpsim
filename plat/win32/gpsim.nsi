@@ -524,7 +524,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\msvcr71.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\readline.dll"
-  Delete "$INSTDIR\bin\pthreadVC.dll"
+  Delete "$INSTDIR\bin\pthreadVC1.dll"
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"

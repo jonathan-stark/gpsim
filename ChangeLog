@@ -1,3 +1,13 @@
+2005-04-23 Borut Razem <borut.razem@siol.net>
+	* src/bitlog.cc, src/bytelog.cc, src/ttoken.cc: removed #define IN_MODULE
+	* plat/win32/gpsim.def, modules/makefile.mingw, src/makefile.mingw,
+	modules/modules.vcproj, src/src.vcproj: MINGW sync
+	* gpsim/makefile.mingw: force linker to onclude BoolEventLogger class
+	methods in gpsim.exe, so that they can be referenced by modules
+	* src/modules.cc (get_attribute): fixed attribute name comparison
+	* src/sim_context.h: added end of line at end of file
+	* plat/win32/gpsim.nsi: remove pthreadVC1.dll
+
 2005-04-22 Scott Dattalo <scott@dattalo.com>
 	* bitlog.cc, bitlog.h, bytelog.cc, bytelog.h, ttoken.cc, ttoken.h,
 	pthread-wrap.h: moved these from the modules/ directory into the
@@ -17,7 +27,7 @@
 2005-04-19 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc, src/symbol.h: Fixed reference to symbol table
 	that was preventing compilation on Linux.
-	
+
 2005-04-19 J.R. Heisey <jrheisey@sourceforge.com>
 	*  gui/gui_src_asm.cc, gui/gui_statusbar.cc, gui/gui_statusbar.h:
 	Modified the statusbar so that it can handle a switch from
@@ -32,15 +42,15 @@
 2005-04-18 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc: Stimulus_Node destructor now removes itself from
 	the symbol table.
-	
+
 2005-04-17 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.h, src/stimuli.cc: Added methods to control the
 	resistance and voltage of the IO_bi_directional_pu pullup resistor.
-	
+
 2005-04-16 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc: set methods for register symbol now initialize
 	the "init" field in the register object.
-	
+
 2005-04-16 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/value.cc,h, src/symbol.cc,h, src/processor.cc,h,
 	src/pic-processor.cc,h, makefile.mingw, Makefile.am,

@@ -19,7 +19,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;;../../pthreads/include"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
@@ -32,7 +32,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Debug GUI/gpsim.lib&quot; ../../pthreads/lib/pthreadVC1.lib"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Debug GUI/gpsim.lib&quot;"
 				OutputFile="$(OutDir)/modules.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -70,7 +70,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;;../../pthreads/include"
+				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -81,7 +81,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Release GUI/gpsim.lib&quot; ../../pthreads/lib/pthreadVC1.lib"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Release GUI/gpsim.lib&quot;"
 				OutputFile="$(OutDir)/modules.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -136,12 +136,6 @@
 						AdditionalIncludeDirectories="../plat/win32;&quot;../../glib-2.2.3/include/glib-2.0&quot;;&quot;../../glib-2.2.3/lib/glib-2.0/include&quot;;&quot;../../gtk+-2.2.4/include/gtk-2.0&quot;;&quot;../../gtk+-2.2.4/lib/gtk-2.0/include&quot;;;&quot;../../pango-1.2.5/include/pango-1.0&quot;;&quot;../../atk-1.2.4/include/atk-1.0&quot;"
 						PreprocessorDefinitions="HAVE_GUI"/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\bitlog.cc">
-			</File>
-			<File
-				RelativePath=".\bytelog.cc">
 			</File>
 			<File
 				RelativePath=".\dummy.c">
@@ -300,9 +294,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ttoken.cc">
-			</File>
-			<File
 				RelativePath=".\usart.cc">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -345,12 +336,6 @@
 				RelativePath=".\binary_indicator.h">
 			</File>
 			<File
-				RelativePath=".\bitlog.h">
-			</File>
-			<File
-				RelativePath=".\bytelog.h">
-			</File>
-			<File
 				RelativePath=".\encoder.h">
 			</File>
 			<File
@@ -375,9 +360,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\pthread-wrap.h">
-			</File>
-			<File
 				RelativePath=".\push_button.h">
 			</File>
 			<File
@@ -390,9 +372,6 @@
 			</File>
 			<File
 				RelativePath=".\switch.h">
-			</File>
-			<File
-				RelativePath=".\ttoken.h">
 			</File>
 			<File
 				RelativePath=".\usart.h">
