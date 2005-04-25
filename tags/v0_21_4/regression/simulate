@@ -1,0 +1,28 @@
+#!/bin/sh
+# gpsim Regression test script
+# 
+USAGE="Usage: `basename $0` GPSIM_SCRIPT OUTPUT"
+
+if [ $# -lt 2 ] ; then
+  echo "$USAGE"
+  exit 1
+fi
+
+[ -f lt-gpsim.core ] && rm lt-gpsim.core
+
+GPSIM=../../gpsim/gpsim
+
+LOGFILE=$2
+touch $2
+
+$GPSIM --cli -c $1 >test.out
+grep "failures" test.out | grep "= 0x0 ="
+if [ $? -eq 0 ] ; then
+  echo "PASSED" >> $LOGFILE
+else
+  echo "FAILED" >> $LOGFILE
+fi
+rm test.out
+if [ -f lt-gpsim.core ] ; then
+	echo "GPSIM dropped core! Please investigate."
+fi

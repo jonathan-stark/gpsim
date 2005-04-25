@@ -1,0 +1,59 @@
+Regression tests for gpsim
+
+Introduction
+------------
+
+The purpose of the regression tests is to ensure that gpsim works.
+Basic elements like instruction simulation and breakpoints are 
+verified. In addition when new bugs are found and fixed, specific
+tests are created to ensure that future versions of gpsim are not
+infected.
+
+Each regression test or a collection of similar regression tests
+occupies a subdirectory that is child of this README's directory.
+The item(s) to be tested are placed into their own .asm file. This
+file is assembled by gpasm and simulated by gpsim and then the results
+are "analyzed" by a script. Once the .asm file is created, the whole
+process becomes automatic. However, the regression files need to 
+adhere to a format that is understood by the scripts.
+
+Running
+-------
+
+If you want to perform a regression test with the default set up then
+run:
+
+./run_regression.sh
+
+(You may need to change the file to an executable [chmod +x]).
+This should step through each test and print PASS or FAIL results.
+
+
+Files needed for a regression test
+----------------------------------
+
+Each test requires a .asm file and a .stc file. The .asm file contains
+the assembly code (of course) and the .stc file contains startup 
+commands that allow you to configure your simulation environment for
+your test. For example, if your test involves measuring the width
+of a pulse then you'll want to create an asynchronous stimulus to
+generate the pulse.
+
+Assembly file format
+--------------------
+
+The assembly file can contain anything you want. However, to simplify
+the parsing of the results there are two things that are required:
+
+  - a variable named "failures" is required. Your regression test
+    should set this to a non-zero value if it detects a failure.
+
+  - there should be a label called "done:"
+
+A script will be created automatically to load your regression test
+and to run it. This script sets a break point at the label "done"
+and when it's it hit, the script will examine the contents of the
+variable "failures". If "failures" is zero then the test passed.
+
+Currently, the regression tests are limited to absolute mode formatted
+files. 

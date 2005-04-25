@@ -1,0 +1,4274 @@
+#LyX 1.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 221
+\textclass book
+\language english
+\inputencoding default
+\fontscheme times
+\graphics default
+\paperfontsize 10
+\spacing single 
+\papersize Default
+\paperpackage a4
+\use_geometry 0
+\use_amsmath 0
+\use_natbib 0
+\use_numerical_citations 0
+\paperorientation portrait
+\leftmargin -0.5cm
+\topmargin 0.5cm
+\rightmargin 0.5cm
+\bottommargin 0.5cm
+\secnumdepth 2
+\tocdepth 2
+\paragraph_separation skip
+\defskip smallskip
+\quotes_language english
+\quotes_times 2
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+
+\layout Title
+
+gpsim
+\layout Author
+
+T.
+ Scott Dattalo
+\layout Date
+
+27 JANUARY 2004
+\layout Standard
+
+
+\begin_inset LatexCommand \tableofcontents{}
+
+\end_inset 
+
+
+\layout Chapter*
+
+Introduction
+\layout Standard
+
+gpsim is a full-featured software simulator for Microchip PIC microcontrollers
+ distributed under the GNU General Public License 
+\begin_inset Note
+collapsed true
+
+\layout Standard
+
+scott2 Wed Sep 30 13:25:58 1998
+\end_inset 
+
+(see the COPYING section).
+\layout Standard
+
+gpsim has been designed to be as accurate as possible.
+ Accuracy includes the entire PIC - from the core to the I/O pins and including
+ ALL of the internal peripherals.
+ Thus it's possible to create stimuli and tie them to the I/O pins and test
+ the PIC the same PIC the same way you would in the real world.
+\layout Standard
+
+gpsim has been designed to be as fast as possible.
+ Real time simulation speeds of 20Mhz pics are possible.
+\layout Standard
+
+gpsim has been designed to be as useful as possible.
+ The standard simulation paradigm including breakpoints, single stepping,
+ disassembling, memory inspect & change, and so on has been implemented.
+ In addition, gpsim supports many debugging features that are only available
+ with in-circuit emulators.
+ For example, a continuous trace buffer tracks every action of the simulator
+ (whether you want it or not).
+ Also, it's possible to set read and write break points on values (e.g.
+ break if a specific value is read from or written to a register).
+\layout Standard
+
+gpsim can be operated either in a command line only mode or in a graphical
+ mode.
+ The command line mode is similar to gdb.
+ Users can set break points and control the simulation.
+ The graphical mode provides a more intuitive debugging interface.
+\layout Standard
+
+gpsim also supports external modules.
+ Users can extend gpsim for their custom debugging applications.
+\layout Chapter
+
+gpsim - An Overview
+\layout Standard
+
+If you don't care to wade through details, this chapter should help you
+ get things up and running.
+ The INSTALL and README files will provide more up-to-date information then
+ this document, so please refer to those first.
+\layout Section
+
+Making the executable
+\layout Standard
+
+gpsim's executable is create in a manner that's consistant with many of
+ the other open source software:
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features>
+<column alignment="left" valignment="top" leftline="true" width="0pt">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+command 
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+description
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+tar -xvzf gpsim-x.y.z.tar.gz
+\end_inset 
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+expand the compressed tar file
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+./configure
+\end_inset 
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Create a 'makefile' unique to your system
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+make
+\end_inset 
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+compile gpsim
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="left" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+make install
+\end_inset 
+</cell>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+install gpsim
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+The last step will require root privileges.
+\layout Subsection
+
+Make Details - ./configure options
+\layout Subsubsection*
+
+gui-less
+\layout Standard
+
+The default configuration will provide a gui (graphical user interface).
+ The cli (command line interface) is still available, however many people
+ prefer just to use the cli.
+ These hardy souls may build a command-line only interface by configuring
+ gpsim:
+\layout LyX-Code
+
+./configure --disable-gui
+\layout Subsubsection*
+
+debugging
+\layout Standard
+
+If you want to debug gpsim then you'll probably use gdb.
+ Consequently, you'll want to disable shared libraries:
+\layout LyX-Code
+
+./configure --disable-shared
+\layout Standard
+
+This will create one, huge monolithic executable with symbolic information.
+ 
+\layout Section
+
+Running
+\layout Standard
+
+The executable created above is called: gpsim.
+ The following command line options may be specified when gpsim is invoked.
+\layout LyX-Code
+
+gpsim [-?] [-p <device> [<hex_file>]] [-c <stc_file>]
+\layout LyX-Code
+
+  -p, --processor=<processor name>     processor (e.g.
+ -pp16c84 for the 'c84)
+\layout LyX-Code
+
+  -c, --command=STRING                 startup command file
+\layout LyX-Code
+
+  -s, --symbol=STRING                  .cod symbol file
+\layout LyX-Code
+
+  -L, --                               colon separated list of directories
+ to
+\layout LyX-Code
+
+                                       search.
+\layout LyX-Code
+
+  -v, --version                        gpsim version
+\layout LyX-Code
+
+  -i, --cli                            command line mode only
+\layout LyX-Code
+
+  -d, --icd=STRING                     use ICD (e.g.
+ -d /dev/ttyS0).
+\layout LyX-Code
+
+  Help options:
+\layout LyX-Code
+
+  -?, --help                           Show this help message
+\layout LyX-Code
+
+  --usage                              Display brief usage message
+\layout LyX-Code
+
+\layout Section
+
+Requirements
+\layout Standard
+
+gpsim has been developed under Linux.
+ It should build and run just fine under the popular Linux distributions
+ like Redhat.
+ gpsim has also been ported to the MAC, MicroSoft Windows, Solaris, and
+ BSD.
+ Two packages gpsim requires that may not be available with all Linux distributi
+ons are readline and gtk (the gimp tool kit).
+ The ./configure script should tell you if these packages are not installed
+ on your system or if the revisions that are installed are too old.
+ 
+\layout Standard
+
+There are no minimum hardware requirements to run gpsim.
+ Faster is better though!
+\layout Standard
+
+gputils, the gnupic utilities package, is also very useful.
+ gpsim will accept straight hex files, but if you want to do any symbolic
+ debugging then you'll want to use the .cod
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+.cod files are symbol files that were created by ByteCraft and are used by
+ Microchip.
+\end_inset 
+
+ files that gputils produces.
+ The .cod files are in the same format as the .cod files MPASM
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+MPASM is Microchip's Assembler.
+\end_inset 
+
+ produces.
+ 
+\layout Chapter
+
+Command Line Interface
+\layout Standard
+
+The command line interface is fairly straight-forward.
+ If you're familiar with gdb's cli, then you'll fill fairly comfortable
+ with gpsim's cli.
+ The table below summarizes the available commands.
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="27" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+command
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+summary
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+attach
+\begin_inset LatexCommand \index{attach}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Attach stimuli to nodes 
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+break
+\begin_inset LatexCommand \index{break}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Set a break point
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+bus
+\begin_inset LatexCommand \index{bus}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Add or display node busses
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+clear
+\begin_inset LatexCommand \index{clear}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Remove a break point
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+disassemble
+\begin_inset LatexCommand \index{disassemble}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Disassemble the current cpu
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+dump
+\begin_inset LatexCommand \index{dump}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Display either the RAM or EEPROM 
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+frequency
+\begin_inset LatexCommand \index{frequency}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Set processor frequency
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+help
+\begin_inset LatexCommand \index{help}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Type help "command" for more help on a command
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+icd
+\begin_inset LatexCommand \index{icd}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+In Circuit Debugger support.
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+list
+\begin_inset LatexCommand \index{list}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Display source and list files
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+load
+\begin_inset LatexCommand \index{load}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Load either a hex or command file
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+log
+\begin_inset LatexCommand \index{log}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Log/record events to a file
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+node
+\begin_inset LatexCommand \index{node}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Add or display stimulus nodes
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+module
+\begin_inset LatexCommand \index{module}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Select & Display modules
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+processor
+\begin_inset LatexCommand \index{processor}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Add/list processors
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+quit
+\begin_inset LatexCommand \index{quit}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Quit gpsim
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+reset
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Reset all or parts of the simulation
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+run
+\begin_inset LatexCommand \index{run}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Execute the pic program
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+set
+\begin_inset LatexCommand \index{set}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+display and control gpsim behavior flags
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+step
+\begin_inset LatexCommand \index{step}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Execute one or more instructions
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+stimulus
+\begin_inset LatexCommand \index{stimulus}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Create a stimulus
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+stopwatch
+\begin_inset LatexCommand \index{stopwatch}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+
+\family roman 
+\series medium 
+\shape up 
+\size normal 
+\emph off 
+\bar no 
+\noun off 
+\color none
+Measure time between events
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+symbol
+\begin_inset LatexCommand \index{symbol}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Add/list symbols
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+trace
+\begin_inset LatexCommand \index{trace}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Dump the trace history
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+version
+\begin_inset LatexCommand \index{version}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Display gpsim's version
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+x
+\begin_inset LatexCommand \index{x}
+
+\end_inset 
+
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+examine and/or modify memory
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+The built in 'help' command provides additional online information.
+\layout Subsection*
+
+attach
+\begin_inset LatexCommand \index{attach}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+attach node1 stimulus1 [stimulus2 stimulus_N]
+\layout Standard
+
+attach is used to define the connections between stimuli and nodes.
+ At least one node and one stimulus must be specified.
+ If more stimuli are specified then they will all be attached to the node
+ examples:
+\layout LyX-Code
+
+gpsim> node  n1                # Define a new node.
+\layout LyX-Code
+
+gpsim> attach n1 porta4 portb0 # Connect two I/O pins to the node.
+\layout LyX-Code
+
+gpsim> node                    # Display the new "net list".
+\layout Subsection*
+
+break
+\begin_inset LatexCommand \index{break}
+
+\end_inset 
+
+
+\layout Standard
+
+The break command is used to set and examine break points:
+\layout LyX-Code
+
+break [c | e | w | r | wv | rv | wdt [location] [value] ]
+\newline 
+
+\layout LyX-Code
+
+  options:
+\layout LyX-Code
+
+      c   - cycle
+\layout LyX-Code
+
+      e   - execution
+\layout LyX-Code
+
+      w   - write
+\layout LyX-Code
+
+      r   - read
+\layout LyX-Code
+
+      wv  - write value
+\layout LyX-Code
+
+      rv  - read value
+\layout LyX-Code
+
+      wdt - wdt timeout
+\layout LyX-Code
+
+          - no argument, display the break points that are set.
+\layout LyX-Code
+
+  examples:
+\layout LyX-Code
+
+      break e 0x20     # set an execution break point at address 0x20
+\layout LyX-Code
+
+      break wv 0x30 0  # break if zero is written to register 0x30
+\layout LyX-Code
+
+      break c 1000000  # break on the one million'th cycle
+\layout LyX-Code
+
+      break            # display all of the break points  
+\layout Subsection*
+
+bus
+\begin_inset LatexCommand \index{bus}
+
+\end_inset 
+
+
+\layout Subsection*
+
+clear
+\begin_inset LatexCommand \index{clear}
+
+\end_inset 
+
+
+\layout Standard
+
+The clear command is used to clear break points:
+\layout LyX-Code
+
+clear bp_number
+\layout LyX-Code
+
+where bp_number is the number assigned to the break point
+\layout LyX-Code
+
+when it was created.
+ (type "break" without any arguments to
+\layout LyX-Code
+
+display the currently set break points.
+  
+\layout Subsection*
+
+disassemble
+\begin_inset LatexCommand \index{disassemble}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+disassemble [[start | length] [end]]
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  no arguments:  disassembles 10 instructions before and 5 after the pc.
+\layout LyX-Code
+
+  one argument:  disassemble [length] instructions after the pc.
+\layout LyX-Code
+
+  two arguments: disassemble from [start] to [end].
+\layout Standard
+
+disasemble does not use symbols.
+ However, special function registers like status will be displayed by name
+ rather than value.
+\layout Subsection*
+
+dump
+\begin_inset LatexCommand \index{dump}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+dump [r | e]
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  dump r or dump with no options will display all of the file
+\layout LyX-Code
+
+  registers and special function registers.
+\layout LyX-Code
+
+  dump e will display the contents of the eeprom (if the pic
+\layout LyX-Code
+
+  being simulated contains any)
+\layout Standard
+
+See the 'x' command for examining and modifying individual registers.
+\layout Subsection*
+
+echo
+\begin_inset LatexCommand \index{echo}
+
+\end_inset 
+
+
+\layout Standard
+
+The echo command is used like a print statement within configuration files.
+ It just lets you display information about your configuration file.
+\layout Subsection*
+
+frequency
+\begin_inset LatexCommand \index{frequency}
+
+\end_inset 
+
+
+\layout Standard
+
+This command sets the clock frequency.
+ By default gpsim uses 4 MHz as clock.
+ The clock frequency is used to compute time in seconds.
+ Use this command to adjust this value.
+ If no value is provided this command prints the current clock.
+ Note that PICs have an instruction clock that's a forth of the external
+ clock.
+ This value is the external clock.
+\layout Subsection*
+
+help
+\begin_inset LatexCommand \index{help}
+
+\end_inset 
+
+
+\layout Standard
+
+By itself, help will display all of the commands along with a brief description
+ on how they work.
+ 'help <command>' provides more extensive online help.
+\layout Subsection*
+
+icd
+\begin_inset LatexCommand \index{icd}
+
+\end_inset 
+
+
+\layout Standard
+
+
+\emph on 
+icd [open <port>]
+\layout Standard
+
+The open command is used to enable ICD mode and specify the serial port
+ where the ICD is.
+ (e.g.
+ "icd open /dev/ttyS0").
+ Without options (and after the icd is enabled), it will print some information
+ about the ICD.
+\layout Subsection*
+
+list 
+\begin_inset LatexCommand \index{list}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+list [[s | l] [*pc] [line_number1 [,line_number2]]]
+\layout LyX-Code
+
+Display the contents of source and list files.
+ 
+\layout LyX-Code
+
+Without any options, list will use the last specified options.
+ 
+\layout LyX-Code
+
+list s will display lines in the source (or .asm) file.
+ 
+\layout LyX-Code
+
+list l will display lines in the .lst file 
+\layout LyX-Code
+
+list *pc will display either .asm or .lst lines around the pc
+\layout Standard
+
+The list command allows you to view the source code while you are debugging.
+ 
+\layout Subsection*
+
+load
+\begin_inset LatexCommand \index{load}
+
+\end_inset 
+
+
+\layout Standard
+
+The load command is used to load either hex, configuration, or .cod files.
+ A hex file is usually used to program the physical part.
+ Consequently, it provides no symbolic information.
+ .cod files on the other hand, do provide symbolic information.
+ Unless you suspect there's something wrong with the way you're assembler
+ or compiler is generating hex files, I'd recommend always using .cod files
+ for debugging.
+\layout Standard
+
+Configuration files are script files containing gpsim commands.
+ These are extremely useful for creating a debugging enviroment that will
+ be used repeatedly.
+ For example
+\layout Subsection*
+
+log
+\begin_inset LatexCommand \index{log}
+
+\end_inset 
+
+
+\layout Subsection*
+
+module
+\begin_inset LatexCommand \index{module}
+
+\end_inset 
+
+
+\layout Subsection*
+
+node
+\begin_inset LatexCommand \index{node}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+node [new_node1 new_node2 ...]
+\layout LyX-Code
+
+     If no new_node is specified then all of the nodes that have been
+\layout LyX-Code
+
+    defined are displayed.
+ If a new_node is specified then it will be
+\layout LyX-Code
+
+    added to the node list.
+ See the "attach" and "stimulus" commands
+\layout LyX-Code
+
+    to see how stimuli are added to the nodes.
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+    examples:
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+    node           // display the node list
+\layout LyX-Code
+
+    node n1 n2 n3  // create and add 3 new nodes to the list 
+\layout Subsection*
+
+processor
+\begin_inset LatexCommand \index{processor}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+processor [new_processor_type [new_processor_name]] | [list] | [dump] 
+\layout LyX-Code
+
+ If no new processor is specified, then the currently defined processor(s)
+ will be displayed.
+ To see a list of the processors supported by gpsim, type 'processor list'.
+ To define a new processor, specify the processor type and name.
+ To display the state of the I/O processor, type 'processor pins' (For now,
+ this will display the pin numbers and their current state.
+\layout LyX-Code
+
+examples:
+\layout LyX-Code
+
+processor // Display the processors you've already defined.
+ processor list                   // Display the list of processors supported.
+ processor pins 
+\layout LyX-Code
+
+          // Display the processor package and pin state processor p16cr84
+ fred 
+\layout LyX-Code
+
+          // Create a new processor.
+ processor p16c74 wilma
+\layout LyX-Code
+
+          // and another.
+ processor p16c65
+\layout LyX-Code
+
+          // Create one with no name.
+\layout Subsection*
+
+quit
+\begin_inset LatexCommand \index{quit}
+
+\end_inset 
+
+
+\layout Standard
+
+Quit gpsim.
+\layout Subsection*
+
+run
+\begin_inset LatexCommand \index{run}
+
+\end_inset 
+
+
+\layout Standard
+
+Start (or continue) simulation.
+ The simulation will continue until the next break point is encountered.
+\layout Subsection*
+
+step
+\begin_inset LatexCommand \index{step}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+step [over | n]
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+     no arguments:  step one instruction.
+\layout LyX-Code
+
+ numeric argument:  step a number of instructions 
+\layout LyX-Code
+
+  "over" argument:  step over the next instruction
+\layout Subsection*
+
+symbol
+\begin_inset LatexCommand \index{symbol}
+
+\end_inset 
+
+
+\layout Subsection*
+
+stimulus
+\begin_inset LatexCommand \index{stimulus}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+stimulus [[type] options]
+\layout LyX-Code
+
+  stimulus will create a signal that can be tied to an io port.
+\layout LyX-Code
+
+  Note that in most cases it is easier to create a stimulus
+\layout LyX-Code
+
+  file then to type all this junk by hand.
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+      Supported stimuli:
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+square_wave | sqw  [period p] [high_time h] [phase ph] [initial_state i]
+\layout LyX-Code
+
+  port port_name bit_pos end
+\newline 
+
+\layout LyX-Code
+
+      creates a square wave with a period of "p" cpu cycles.
+\layout LyX-Code
+
+      If the high time is specified then that's the number of cycles
+\layout LyX-Code
+
+      the square wave will be high.
+\layout LyX-Code
+
+      The phase is with respect to the cpu's cycle counter.
+\layout LyX-Code
+
+      The "port_name" and "bit_pos" describe where the stimulus
+\layout LyX-Code
+
+      will be attached.
+\newline 
+
+\layout LyX-Code
+
+asynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]
+\layout LyX-Code
+
+   d0 [d1 d2 ...
+ dn] port port_name bit_pos end
+\newline 
+
+\layout LyX-Code
+
+      creates an asynchronous square wave with a period of "p" cpu
+\layout LyX-Code
+
+      cycles.
+  The phase is with respect to the cpu's cycle counter.
+\layout LyX-Code
+
+      The "port_name" and "bit_pos" describe where the stimulus
+\layout LyX-Code
+
+      will be attached.
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  examples:
+\layout LyX-Code
+
+      stimulus sqw period 200 high_time 20 phase 60 port portb 0 end
+\layout LyX-Code
+
+      create a square wave stimulus that repeats every 200 cpu cycles,
+\layout LyX-Code
+
+      is high for 20 cpu cycles (and low for 200-20=180 cycles).
+ The
+\layout LyX-Code
+
+      first rising edge will occur at cycle 60, the second at 260,...
+ 
+\layout LyX-Code
+
+      Bit 0 of portb will receive the stimulus
+\layout Subsection*
+
+stopwatch
+\begin_inset LatexCommand \index{stopwatch}
+
+\end_inset 
+
+
+\layout Subsection*
+
+trace
+\begin_inset LatexCommand \index{trace}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+trace [dump_amount]
+\layout LyX-Code
+
+      trace will print out the most recent "dump_amount" traces.
+\layout LyX-Code
+
+      If no dump_amount is specified, then the entire trace buffer
+\layout LyX-Code
+
+      will be displayed.
+\layout Subsection*
+
+version
+\layout LyX-Code
+
+version
+\layout LyX-Code
+
+    Display gpsim's version.
+\layout LyX-Code
+
+ 
+\layout Subsection*
+
+x
+\begin_inset LatexCommand \index{x}
+
+\end_inset 
+
+
+\layout LyX-Code
+
+x [file_register] [new_value]
+\layout LyX-Code
+
+  options:
+\layout LyX-Code
+
+    file_register - ram location to be examined or modified.
+\layout LyX-Code
+
+    new_value - the new value written to the file_register.
+\layout LyX-Code
+
+    if no options are specified, then the entire contents
+\layout LyX-Code
+
+    of the file registers will be displayed (dump).
+\layout LyX-Code
+
+ 
+\layout Chapter
+
+Graphical User Interface
+\layout Standard
+
+gpsim also provides a graphical user interface that simplifies some of the
+ drudgery associated with the cli.
+ It's possible to open windows to view all the details about your debug
+ environment.
+ To get the most out of your debugging session, you'll want to assemble
+ your code with gpasm (the gnupic assembler) and use the symbolic .cod files
+ it produces.
+\layout Section
+
+Main window
+\layout Subsection
+
+Menus
+\layout List
+\labelwidthstring 00000000.00.0000
+
+File->Open .stc or .cod files.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+File->Quit Quit gpsim
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Windows->* Open/Close the windows.
+\layout Subsection
+
+Buttons
+\layout Standard
+
+(These are also found as keyboard bindings in the source windows.)
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Step Step one instruction
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Over Step until pc is after next instruction
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Finish Run to return address
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Run Run continuously
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Stop Stop execution
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Reset Reset CPU
+\layout Subsection
+
+Simulation mode
+\layout Standard
+
+This controls how gpsim simulates, and how the gui updates.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+Never Don't ever update the gui when simulating.
+ This is the fastest mode.
+ You'll have to stop simulation by pressing Ctrl-C in the command line interface.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+x\SpecialChar ~
+cycles Update the gui every x cycles simulated.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+every\SpecialChar ~
+cycle Update the gui every cycle.
+ (you see everything, if you have filled up on coffee :-)
+\layout List
+\labelwidthstring 0000000.00.0000
+
+x\SpecialChar ~
+ms\SpecialChar ~
+animate Here you can slow down simulation with a delay between every
+ cycle.
+\layout List
+\labelwidthstring 0000000.00.0000
+
+realtime This will make gpsim try to synchronize simulation speed with wall
+ clock time.
+\layout Section
+
+Source Browsers
+\layout Standard
+
+gpsim provides two views of your source: '.
+\emph on 
+asm'
+\emph default 
+ and '.
+\emph on 
+obj' 
+\emph default 
+browsers.
+ The '.
+\emph on 
+asm' 
+\emph default 
+browser is a color coded display of your pic source.
+ 
+\layout Subsection
+
+.asm Browser
+\layout Standard
+
+When a .cod file with source is loaded, there should be something in this
+ display.
+ (TODO: add section about high level debugging).
+\layout Standard
+
+There is an area to the left of the source, where symbols representing the
+ program counter, breakpoints, etc are displayed.
+ Double clicking in this area toggles breakpoints.
+ You can drag these symbols up or down in order to move them and change
+ the PC or move a breakpoint.
+\layout Standard
+
+A right button click on the source pops up a menu with six items (the word
+ 'here' in some menu items denote the line in source the mouse pointer was
+ on when right mouse button was clicked.):
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+
+\series bold 
+Menu\SpecialChar ~
+item Description
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Find\SpecialChar ~
+PC This menu item will find the PC and changed page tab and scroll the
+ source view to the current PC.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Run\SpecialChar ~
+here This sets a breakpoint 'here'and starts running until a breakpoint
+ is hit.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Move\SpecialChar ~
+PC\SpecialChar ~
+here This simply changes PC to the address that line 'here'in source
+ has.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Breakpoint\SpecialChar ~
+here Set a breakpoint 'here'.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Profile\SpecialChar ~
+start\SpecialChar ~
+here Set a start marker for routine profiling here.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Profile\SpecialChar ~
+stop\SpecialChar ~
+here Set a stop marker.
+ (See the section for the profiling window.)
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Select\SpecialChar ~
+symbol.
+ This menu item is only available when some text is selected in the text
+ widget.
+ What it does is search the list of symbols for the selected word, and if
+ it is found it is selected in the symbol window.
+ Depending of type of symbol other things are also done, the same thing
+ as when selecting a symbol in the symbol window: 
+\begin_deeper 
+\layout Itemize
+
+If it is an address, then the opcode and source views display the address.
+ 
+\layout Itemize
+
+If it's a register, the register viewer selects the cell.
+\layout Itemize
+
+If it's a constant, address, register or ioport, it is selected in the symbol
+ window.
+\end_deeper 
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Find\SpecialChar ~
+text This opens up a search dialog.
+ Every time you hit the 'Find' button, the current notebook page is found
+ and the source in that page is used.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Settings A dialog with which you can change the fonts used.
+\layout List
+\labelwidthstring 00.00.0000.0000
+
+Controls A submenu containing the simulation commands.
+ (these are also found as keyboard bindings (recommended), or in the main
+ window.)
+\layout Standard
+
+These are the keyboard bindings:
+\layout List
+\labelwidthstring 00.00.0000
+
+
+\series bold 
+Key command
+\layout List
+\labelwidthstring 00.00.0000
+
+s,S,F7 Step one instruction.
+\layout List
+\labelwidthstring 00.00.0000
+
+o,O,F8 Step over instruction
+\layout List
+\labelwidthstring 00.00.0000
+
+r,R,F9 Run continously.
+\layout List
+\labelwidthstring 00.00.0000
+
+Escape Stop simulation.
+\layout List
+\labelwidthstring 00.00.0000
+
+f,F Run to return address
+\layout Subsection
+
+Opcode view - the .obj Browser
+\layout Standard
+
+This window has two tabs.
+ One with each memory cell on one line and information about address, hexadecima
+l value and decoded instruction (i.e.
+ disassembly), and one with the program memory
+\layout Standard
+
+displayed with sixteen memory cells per row and a configurable ascii column.
+\layout Subsubsection*
+
+The Assembly tab you can:
+\layout Itemize
+
+Double click on a line to toggle breakpoints.
+\layout Itemize
+
+Use the same keyboard commands as the in the source browser.
+\layout Itemize
+
+Right click to get a menu where you can change the fonts.
+\layout Subsubsection*
+
+The Opcode tab.
+\layout Standard
+
+Here the program memory is ordered as columns of sixteen memory cells per
+ column and as many row as needed to contain all memory.
+ 
+\layout Standard
+
+The seventeenth column contains an ASCII representation of the program memory.
+ You can configure this column to use one of three different modes:
+\layout Itemize
+
+One byte per cell
+\layout Itemize
+
+Two bytes per cell, MSB first.
+\layout Itemize
+
+Two bytes per cell, LSB first.
+\layout Standard
+
+You can change fonts with the menu item 'Settings'.
+\layout Standard
+
+You can set breakpoints on one or more (drag the mouse to select more cells)
+ addresses with the right click menu.
+\layout Section
+
+Register views
+\layout Standard
+
+There are two similar register windows.
+ One for the RAM and one for the EEPROM data, when available.
+\layout Standard
+
+Here you see all registers in the current processor.
+ Clicking on a cell displays it's name and value above the sheet of registers.
+ You can change values by entering it in the entry (or in the spreadsheet
+ cell).
+\layout Standard
+
+The following things can be done on one register, or a range of registers.
+ (Selecting a range of registers is done by holding down left mouse button,
+ moving cursor, and releasing button.)
+\layout Itemize
+
+Set and clear breakpoints.
+ Use the right mousebutton menu to pop up a menu where you can select set
+ read, write, read value and write value breakpoints.
+ You can also "clear breakpoints", notice the s in "clear breakpoints",
+ every breakpoint on the registers are cleared.
+ 
+\layout Itemize
+
+Set and clear logging of registers.
+ You can log reads, writes, reads/writes of specific values and to bits
+ selected by a specified mask.
+ You can select a different file name with 'set log filename...'.
+ Default is "gpsim.log".
+ You can choose LXT or ASCII format.
+ LXT can be read with the program gtkwave.
+ ASCII is default.
+\layout Itemize
+
+Copy cells.
+ You copy cells by dragging the border of the selected cell(s).
+\layout Itemize
+
+Fill cells.
+ Move mouse to lower right corner of the frame of the selected cell(s),
+ and drag it.
+ The one cell's contents will be copied to the other cells.
+\layout Itemize
+
+Watch them.
+ Select the "Add Watch" menu item.
+\layout Standard
+
+The cells have different background colors depending on if they represent:
+\layout Itemize
+
+File Register (e.g.
+ RAM): light cyan.
+\layout Itemize
+
+Special Function Registers (e.g.
+ STATUS,TMR0): dark cyan
+\layout Itemize
+
+aliased register (e.g.
+ the INDF located at address 0x80 is the same as the one located at address
+ 0x00): gray
+\layout Itemize
+
+invalid register: black.
+ If all sixteen registers in a row are invalid, then the row is not shown.
+\layout Itemize
+
+a register with one or more breakpoints: red.
+ Logged registers are also red.
+\layout Standard
+
+gpsim dynamically updates the registers as the simulation proceeds.
+ Registers that change value between updates of the window during simulation
+ are highlighted with a blue foreground color.
+ 
+\layout Standard
+
+The menu also has a 'settings' item where you can change the font used.
+\layout Section
+
+Symbol view
+\layout Standard
+
+This window, as its name suggests, displays symbols.
+ All of the special function registers will have entries in the symbol viewer.
+ If you're using .cod files then you'll additionally have file registers
+ (that are defined in cblocks), equates, and address labels.
+\layout Standard
+
+You can filter out some symbol types using the buttons in the top of the
+ window, and you can sort the rows by clicking on the column buttons (the
+ ones reading 'symbol', 'type' and 'address').
+\layout Standard
+
+You can add the symbol to the watch window by right-clicking and selecting
+ the "Add to watch window" menu item.
+ This will add the ram register with address equal to the symbols value
+ to the watch window.
+\layout Standard
+
+The symbol viewer is linked to the other windows.
+ For example, if you click on a symbol and:
+\layout Itemize
+
+If it is an address, then the opcode and source views display the address.
+\layout Itemize
+
+If it's a register, the register viewer selects the cell.
+\layout Section
+
+Watch view
+\layout Standard
+
+This is not a output-only window as the name suggests (change name?).
+ You can both view and change data.
+ Double-clicking on a bit toggles the bit.
+ You add variables here by marking them in a register viewer and select
+ 
+\begin_inset Quotes eld
+\end_inset 
+
+Add watch
+\begin_inset Quotes erd
+\end_inset 
+
+ from menu.
+ The right-click menu has the following items:
+\layout Itemize
+
+Remove watch
+\layout Itemize
+
+Set register value
+\layout Itemize
+
+Clear Breakpoints
+\layout Itemize
+
+Set break on read
+\layout Itemize
+
+Set break on write
+\layout Itemize
+
+Set break on read value
+\layout Itemize
+
+Set break on write value
+\layout Itemize
+
+Columns...
+ 
+\layout Standard
+
+"Columns...
+\begin_inset Quotes erd
+\end_inset 
+
+ opens up a window where you can select which of the following data to display:
+\layout Itemize
+
+BP
+\layout Itemize
+
+Type
+\layout Itemize
+
+Name
+\layout Itemize
+
+Address
+\layout Itemize
+
+Dec
+\layout Itemize
+
+Hex
+\layout Itemize
+
+Bx (bits of word)
+\layout Standard
+
+You can sort the list of watches by clicking on the column buttons.
+ Clicking twice sorts the list backwards.
+\layout Section
+
+Stack viewer
+\layout Standard
+
+This window displays current stack.
+ Selecting an entry makes the code windows display the return address.
+ Double clicking sets a breakpoint on the return address.
+\layout Section
+
+Breadboard
+\layout Standard
+
+Here you can create/modify and examine the environment around the pic.
+ Pins are displayed as an arrow.
+ The direction of the arrow indicates if its an input or output pin.
+ The color of the arrow indicates its state (green=low, red=high).
+\layout Standard
+
+You can't instantiate pic processors from here, you'll have to do that from
+ the command line, or from a .stc file.
+\layout Standard
+
+Your can create nodes by clicking on the "new node" button.
+ (A node is 'a piece of wire' to which you can connect stimulus.) You can
+ see the list of created nodes under the "nodes" item in the upper-left
+ tree widget.
+\layout Standard
+
+You can create connections to nodes by clicking on a pin, and then clicking
+ on the button "Connect stimulus to node".
+ This will bring up a list of nodes.
+ Choose one by double-clicking on the one you like.
+\layout Standard
+
+If you click on a pin that is already connected to a node, then you'll see
+ the node and its connections in the lower left part of the window.
+ You can disconnect a stimulus by clicking on it and pressing the "remove
+ stimulus" button.
+\layout Standard
+
+When you want to add a module to the simulation, you first have to specify
+ the library which contains the module you want.
+ Click on the "add library" button and enter the library name (e.g.
+ "libgpsim_modules.so").
+ Now you can click the "add module" button.
+ Select the module you want from the list by double-clicking on it.
+ Enter a name for the module (this has to be unique, and not used before).
+ You now have to position the module.
+ Move the mouse pointer to where you'd like the module, and left-click.
+\layout Standard
+
+If you middle-click on a pin, you'll see how the pin is connected.
+ Press the "trace all" to see all at
+\layout Standard
+
+once, and "clear traces" to remove all (you'll only remove the graphical
+ trace, not the connection!).
+ If the tracing doesn't work, try moving the packages so that there are
+ more space around the pins.
+\layout Standard
+
+When you are done, you can save by clicking the "save configuration" button.
+ You can then load this file from the command line like this (assuming the
+ .cod file with your source is called "mycode.cod", and the file you just
+ saved was called "mynets.stc":
+\layout Standard
+
+gpsim -s mycode.cod -c mynets.stc
+\layout Standard
+
+You can't load only the .stc file since this doesn't contain the processor
+ type and code.
+ You can create (with an editor) your own .stc file (e.g.
+ my_project.stc) and in that file put a command "load c mynets.stc" after
+ you have loaded the .cod file.
+ You then only have to load this file (gpsim -c my_project.stc).
+\layout Section
+
+Trace viewer
+\layout Standard
+
+This window shows the trace of instructions executed.
+ See 
+\begin_inset LatexCommand \ref{trace}
+
+\end_inset 
+
+.
+\layout Section
+
+Profile viewer
+\layout Standard
+
+This window show execution count for program memory addresses.
+ The profile window must be opened before starting simulation, because the
+ traceing is not enabled by default.
+\layout Subsubsection
+
+Instruction profile
+\layout Standard
+
+This shows the number of times each instruction are executed.
+\layout Subsubsection
+
+Instruction range profile
+\layout Standard
+
+Here you can group ranges of instruction into one entry.
+ 
+\layout Standard
+
+The right click menu contains:
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Remove\SpecialChar ~
+range Remove an entry.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Add\SpecialChar ~
+range...
+ Open a disalog from where you can add a range of instructions as an entry.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Add\SpecialChar ~
+all\SpecialChar ~
+labels Add all code labels as ranges.
+\layout List
+\labelwidthstring 00000000.00.0000
+
+Snapshot\SpecialChar ~
+to\SpecialChar ~
+plot Open a window containing a graph of the data.
+ From this new window you can also save (postscript) or print it.
+\layout Subsubsection*
+
+Register profile
+\layout Standard
+
+This shows the number of reads or writes the simulator does on register.
+\layout Subsubsection*
+
+Routine profile
+\layout Standard
+
+Here you can see statistics about execution time for a selected routine.
+ You mark the entry and exit points from the source browser (profile start/stop).
+ If the routine you want to measure have multiple entry and/or exit points,
+ then you have to put a marker on every entry point as well as (and especially)
+ every exit point.
+ Othervise you will get bad data.
+ 
+\layout Standard
+
+When you have done that, gpsim will (as simulation goes by) store the execution
+ times of that routine and calculate min/max/average/etc.
+ You can also use the menu item 'Plot distribution' to open a window displaying
+ a histogram of the data.
+ From this new window you can also save (in postscript) or print it.
+\layout Standard
+
+You can also measure call period by switching the 'entry' and 'exit' points.
+ If also want the time from reset (or some equal point) to the first 'entry',
+ then you must also put an 'entry' point there.
+\layout Section
+
+Stopwatch
+\layout Standard
+
+The stopwatch window shows a cycle counter and a re-settable counter.
+ The cycle counter is the same as the one in the register window.
+ It basically counts instructions.
+ 
+\layout Standard
+
+The other counter counts at the same rate as the cycle counter, but can
+ be cleared by clicking the "clear" button (or preset by entering a number
+ in the entry box).
+ 
+\layout Standard
+
+The up/down indicator denotes the direction the counter counts.
+\layout Standard
+
+The rollover value specifies the range the cycle counter can be in (a modulo
+ counter).
+ For example, if the rollover value is specified to be 0x42, then whenever
+ the resettable counter reaches 0x42 it will rollover to zero.
+ If the counter is counting down, then when it reaches 0 the next state
+ will be 0x41.
+ If you don't want is like this, then set the rollover value to something
+ large.
+\layout Chapter
+
+Controlling the Flow: Break Points
+\layout Standard
+
+One of gpsim's strong features is the flexibility provided with break points.
+ Most simulators are limited to execution type break points.
+ 
+\layout Standard
+
+If you want to set break points on registers, on execution cycles, invalid
+ program locations, stack over flows, etc.
+ then you're usually forced to debug your code with an ICE.
+ 
+\layout Section
+
+Execution Break Points
+\layout Standard
+
+An execution break point is one that will halt a running program when the
+ program memory address at which it is set is encountered.
+ For example, if you were debugging a mid-ranged PIC and wished to stop
+ execution when ever an interrupt occurs, you could set a break point at
+ program memory address 0x04:
+\layout LyX-Code
+
+gpsim> break e 4
+\layout Standard
+
+(To be more precise, an interrupt doesn't have to occur for this break point
+ to be encountered - errant code could have branched here too).
+\layout Standard
+
+The break point occurs BEFORE the instruction executes.
+ Other simulators such as MPLAB break after the instruction executes.
+ In many cases this distinction is insignificant.
+ However, if the break is set on a 'goto' or 'call' instruction, then it's
+ convenient to stop before the branch occurs.
+ This way it's easy to determine from where a brance occurred.
+\layout Subsection
+
+Invalid Instruction Break Points
+\layout Standard
+
+gpsim automatically will halt execution if a program attempts to venture
+ beyond its bounds.
+ Program memory locations that are not defined by your source code will
+ be initialized with an 'Invalid Instruction'.
+ These are quite visible when you disassemble the program.
+ 
+\layout Section
+
+Register Break Points
+\layout Standard
+
+gpsim provides the ability to break whenever a register accessed, either
+ read or written or both.
+ Furthermore, it's possible to break whenever a specific value is written
+ to or read from a register.
+\layout Section
+
+Cycle Break Points
+\layout Standard
+
+Cycle break points allow the program to be halted at a specific instruction
+ cycle.
+ Suppose you have a 20 Mhz pic and want to break after one second of simulation
+ time.
+ You could set a break at the 5 millionth instruction cycle.
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+There are 4 clock cycles per instruction.
+ Also, a future feature of gpsim will provide you with the ability to set
+ break points in terms of seconds.
+\end_inset 
+
+
+\layout Chapter
+
+What has happen?: Trace
+\begin_inset LatexCommand \label{trace}
+
+\end_inset 
+
+
+\layout Standard
+
+Inspecting the current state of your program is sometimes insufficient to
+ determine the cause of a bug.
+ Often times it's useful to know the conditions that led up to the current
+ state.
+ gpsim provides a history or trace of everything that occurs - whether you
+ want it or not - to help you diagnose these otherwise difficult to analyze
+ bugs.
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="13" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell multicolumn="1" alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+What's traced
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+notes
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+program counter
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+adresses executed
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+instructions
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+opcode
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+register read
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+value and location
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+register write
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+value and location
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+cycle counter
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+current value
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+skipped instructions
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+addresses skipped
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+status register
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+during implicit modification
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+interrupts
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+break points
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+type
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+resets
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+type
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+The 'trace' command will dump the contents of the trace buffer.
+ 
+\layout Standard
+
+A large circular buffer (whose size is hard coded) stores the information
+ for the trace buffer.
+ When it fills, it will wrap around and write over the old history.
+ To sustain high performance, gpsim encodes all trace information into a
+ 32 bit integer.
+\layout Chapter
+
+Simulating the Real World: Stimuli
+\begin_inset LatexCommand \index{Stimulus}
+
+\end_inset 
+
+
+\layout Standard
+
+Stimuli are extremely useful, if not necessary, for simulations.
+ They provides a means for simulating interactions with the real world.
+ 
+\layout Standard
+
+The gpsim stimuli capability is designed to be accurate, efficient and flexible.
+ The models for the PIC's I/O pins mimic the real devices.
+ For example, the open collector output on port A of an PIC16C84 can only
+ drive low.
+ Multiple I/O pins may tied to one another so that the open collector on
+ port A can get a pull up resistor from port B.
+ The overhead for stimuli only occurs when a stimulus changes states.
+ In other words, stimuli are not polled to determine their state.
+\layout Standard
+
+Analog stimuli are also available.
+ It's possible to create voltage references and sources to simulate almost
+ any kind of real world thing.
+ For example, it's possible to combine two analog stimuli together to create
+ signals like DTMF tones.
+ 
+\layout Section
+
+How They Work
+\layout Standard
+
+In the simplest case, a stimulus acts a source for an I/O pin on a pic.
+ For example, you may want to simulate a clock and measure its period using
+ TMR0.
+ In this case, the stimulus is the source and the TMR0 input pin on the
+ pic is the load.
+ In gpsim you would create a stimulus for the clock using the stimulus command
+ and connect it to the I/O pin using the node command.
+ 
+\layout Standard
+
+In general, you can have several 'sources' and several 'loads' that are
+ interconnected with nodes
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+Although, gpsim is currently limited to 'one-port' devices.
+ In other words, it is assumed that ground serves as a common reference
+ for the sources and the loads.
+\end_inset 
+
+.
+ A good analogy is a spice circuit.
+ The spice netlist corresponds to a node-list in gpsim and the spice elements
+ correspond to the stimuli sources and loads.
+ This general approach makes it possible to create a variety of simulation
+ environments.
+ Here's a list of different ways in which stimuli may be connected:
+\layout Enumerate
+
+Stimulus connected to one I/O pin
+\layout Enumerate
+
+Stimulus connected to several I/O pins
+\layout Enumerate
+
+Several stimuli connected to one I/O pin
+\layout Enumerate
+
+Several stimuli connected to several I/O pins
+\layout Enumerate
+
+I/O pins connected to I/O pins
+\layout Standard
+
+The general technique for implementing stimuli is as follows:
+\layout Enumerate
+
+Define the stimulus or stimuli.
+\layout Enumerate
+
+Define a node.
+\layout Enumerate
+
+Attach the stimuli to the node.
+\layout Standard
+
+More often then not, the stimulus definition will reside in a file.
+\layout Subsection
+
+Contention among stimuli
+\layout Standard
+
+One of the problems with this nodal approach to modeling stimuli is that
+ it's possible for contention to exist.
+ For example, if two I/O pins are connected to one another and driving in
+ the opposite directions, there will be contention.
+ gpsim resolves contention with attribute summing.
+ Each stimulus - even if it's an input - has an effect on the node.
+ This effect is given a weight.
+ When a node is updated, gpsim will simply add the weights of all the stimuli
+ together and assign that numeric value to the node.
+ A weight value of zero corresponds to no load.
+ A large positive weight is used by a stimulus to drive the node positive,
+ while a large negative weight is used to drive it negative.
+ 
+\layout Standard
+
+Attribute summing is useful for pull up resistors.
+ In the port A open collector / port B weak pull-up connection example,
+ gpsim assigns a relatively small weight to the pull up resistor and a large
+ negative weight to the open collector if it is active or no weight if it's
+ not driving.
+ Capacitive effects (which are not currently supported) can be simulated
+ with dynamically changing weight values.
+\layout Section
+
+I/O Pins
+\layout Standard
+
+gpsim models I/O pins as stimuli.
+ Thus anywhere a stimulus is used, an I/O pin may be substituted.
+ For example, you may want to tie two I/O pins to one another (for example,
+ a port B pull up resistor to a port A open collector).
+ gpsim automatically creates the I/O pin stimuli whenever a processor is
+ created.
+ All you need to do is to specify a node and then attach the stimuli to
+ it.
+ The names of these stimuli are formed by concatenating the port name with
+ the bit position of the I/O pin.
+ For example, bit 3 in port B is called portb3.
+\layout Standard
+
+Here's a list of the types of I/O pin stimuli that are supported:
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+I/O Pin Type
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Function
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+INPUT_ONLY
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Only accepts input (like MCLR)
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+BI_DIRECTIONAL
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Can be a source or a load (most I/O pins)
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+BI_DIRECTIONAL_PU
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+PU=Pullup resistor (PORTB)
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+OPEN_COLLECTOR
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Can only drive low (RA4 on c84)
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+There is no special pin type for analog I/O pins.
+ All pic analog inputs are multiplexed with digital inputs.
+ The I/O pin definition will always be for the digital input.
+ gpsim automatically knows when I/O pin is analog input
+\layout Section
+
+Synchronous Stimuli
+\layout Standard
+
+Synchronous stimuli are periodic functions that are synchronized to the
+ cpu's clock
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+This will probably be made optional in the future.
+ In other words, you'll get the choice to specify whether or not the 'synchronou
+s' stimulus parameters are synchronized to the cpu or are absolute time
+ values.
+\end_inset 
+
+.
+ They are defined by the following parameters:
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="left" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+parameter
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+function
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+phase
+\end_inset 
+</cell>
+<cell alignment="left" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The # of cycles (after start) before the stimulus starts
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+period
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The # of cycles for one period
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+start
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The cycle the stimulus becomes active
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+initial_state
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The initial state of the stimulus
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+type
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Analog or Digital
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+One cycle of the periodic function can be written like so
+\layout Standard
+\align center 
+
+\begin_inset Formula $func(t)=something\: for\: t=0\ldots period$
+\end_inset 
+
+
+\layout Standard
+
+And then can be made periodic by:
+\layout Standard
+\align center 
+
+\begin_inset Formula $func(t+period)=func(t)$
+\end_inset 
+
+ 
+\layout Standard
+
+which just says that the function has the same value at 
+\begin_inset Formula $t$
+\end_inset 
+
+ and 
+\begin_inset Formula $t+period$
+\end_inset 
+
+.
+ 
+\layout Standard
+
+The 
+\begin_inset Formula $phase$
+\end_inset 
+
+ allows the periodic function to be shifted by an arbitrary amount.
+ 
+\layout Standard
+
+In some instances, you don't want the stimulus to be active until after
+ a certain amount of time.
+ The parameters 
+\begin_inset Formula $start$
+\end_inset 
+
+and 
+\begin_inset Formula $initial\: state$
+\end_inset 
+
+ describe how long the stimulus should wait before becoming active and what
+ state the stimulus should be in during that waiting period.
+\layout Standard
+
+By default, the synchronous stimulus is assumed to be digital.
+ This can be overridden by specifying 
+\emph on 
+analog.
+
+\emph default 
+ In many cases, the context in which the stimulus is used makes the analog/digit
+al choice clear.
+ For example, a square wave is usually digital and a sine wave is usually
+ analog.
+ There are instances where you might want to change this.
+ For example, [how would you create a sinusoidally PWM'd wave form??? add
+ it here...]
+\layout Subsection
+
+Square Wave
+\layout Standard
+
+The simplest example of a synchronous stimulus is a square wave.
+ All of the parameters described above still apply.
+ There's one additional parameter for the square wave:
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="2" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+parameter
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+function
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+duty cycle
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+'high time' for a square wave
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+The synchronous stimulus begins with the 'initial state' at cycle 0.
+ After 'phase' cycles happen, the stimulus changes states.
+ After 'high time' more cycles, the state changes again.
+ The frequency of the square wave is:
+\layout Standard
+
+
+\begin_inset Formula \[
+f_{sq}=\frac{1}{period}*\frac{f_{osc}}{4}\]
+
+\end_inset 
+
+
+\layout Standard
+
+Where 
+\emph on 
+
+\begin_inset Formula $f_{osc}$
+\end_inset 
+
+
+\emph toggle 
+ is the simulated oscillator frequency.
+ The duty cycle is:
+\layout Standard
+
+
+\begin_inset Formula \[
+DutyCycle=\frac{hightime}{period}\]
+
+\end_inset 
+
+
+\layout Standard
+\align left 
+Synchronous stimuli are useful as clocks.
+ For example, it's possible to create a synchronous stimulus and attach
+ it to the TMR0 input pin.
+ Or another example may be the clock line in an 
+\begin_inset Formula $I^{2}C$
+\end_inset 
+
+ interface.
+\layout Subsubsection
+
+Square Wave example 
+\layout Standard
+
+Here's a sequence of commands to create a square wave:
+\layout LyX-Code
+
+stimulus sqw
+\layout LyX-Code
+
+initial_state 1
+\layout LyX-Code
+
+start 10000
+\layout LyX-Code
+
+period 1000
+\layout LyX-Code
+
+high_time 300
+\layout LyX-Code
+
+phase 100
+\layout LyX-Code
+
+port portb 0
+\layout LyX-Code
+
+end
+\layout Standard
+
+There's really just one command, 'stimulus', spread over several lines.
+ In this example, the square wave has a period of 1000 cpu cycles and a
+ 30% duty cycle (it's high for 300 out of the 1000 cycles).
+ It will start off high and remain high until cycle 10000, the start cycle,
+ after which it will go low.
+ Then 100 cycles later (phase delay) it will go high.
+ This is the 'phase shift'.
+ 300 more cycles later, or cycle 14000 it will go low.
+ Since the period is 1000 cycles, the square will repeat this sequence at
+ cycle 11000, 12000, etc.
+ So in terms of absolute cpu cycles, the stimulus starts off high and then
+ goes low at cycle 10000, high at cycle 10100, low at 10400, high at 11100,
+ low at 11400...
+ 
+\layout Standard
+
+Or if you prefer, the state of the square wave can be expressed:
+\layout LyX-Code
+
+if(cpu cycle < start)
+\layout LyX-Code
+
+  state = initial_state;
+\layout LyX-Code
+
+else {
+\layout LyX-Code
+
+ cycle_in_period = (cpu cycle - start) % period;
+\layout LyX-Code
+
+ if( (cycle_in_period > phase) && (cycle_in_period < (phase+high_time))
+ )
+\layout LyX-Code
+
+   state = 1;
+\layout LyX-Code
+
+ else
+\layout LyX-Code
+
+   state = 0;
+\layout LyX-Code
+
+}
+\layout Subsection
+
+Triangle Wave
+\layout Standard
+
+In it's simplest form, you can described a triangle wave as a periodic wave
+ that is composed of two line segments, one with a positive slope the other
+ with a negative slope.
+ It's sometimes also called a 'sawtooth' wave because the repeated rising
+ and falling edges look similar to the cutting teeth on a hand saw.
+ gpsim defines triangle waves the same way as square waves and adds two
+ new parameters.
+ In other words, all of the parameters that apply to square waves also apply
+ to triangle waves and in addition you may also specify the positive and
+ negative peaks.
+ The traingle wave can be most easily envisioned (PICTURE!!!) when superimposed
+ on a square wave.
+ When the square wave is 'high' the triangle wave has a positive slope and
+ when it's low the triangle wave has a negative slope.
+ If the triangle wave has the same amplitude excursions as a square wave,
+ then the triangle wave peaks exactly coincide with the square wave's high-to-lo
+w and low-to-high transitions.
+\layout Subsection
+
+Sine Wave
+\layout Standard
+
+Doesn't exist yet.
+\layout Section
+
+Asynchronous Stimuli
+\layout Standard
+
+Asynchronous stimuli are analog or digital stimuli that can change states
+ at any given instant (limited to the resolution of the cycle counter).
+ They can be defined to be repetitive too.
+\layout Standard
+\added_space_top 0.3cm \added_space_bottom 0.3cm \align center 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="6" columns="2">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+parameter
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+function
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+start
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The # of cycles before the stimulus starts
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+cycles[]
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+An array of cycle #'s
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+data[]
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Stimulus state for a cycle
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+period
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The # of cycles for one period
+\end_inset 
+</cell>
+</row>
+<row bottomline="true">
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+initial state
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+The initial state of data[0]
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+When the stimulus is first initialized, it will be driven to the 'initial
+ state' and will remain there until the cpu's instruction cycle counter
+ matches the specified 'start' cycle.
+ After that, the two arrays 'cycles[]' and 'data[]' define the stimulus'
+ outputs.
+ The size of the arrays are the same and correspond to the number of events
+ that are to be created.
+ So the event number, if you will, serves as the index into these arrays.
+ The 'cycles[]' array define when the events occur while the 'data[]' array
+ defines the states the stimulus will enter.
+ The 'cycles[]' are measured with respect to the 'start' cycle.
+ The asynchronous stimulus can be made periodic by specifying the number
+ of cycles in the 'period' parameter.
+\layout Standard
+
+Here's an example that generates three pulses and then repeats:
+\layout LyX-Code
+
+stimulus asynchronous_stimulus # or we could've used asy
+\newline 
+
+\layout LyX-Code
+
+# The initial state AND the state the stimulus is when
+\layout LyX-Code
+
+# it rolls over
+\newline 
+
+\layout LyX-Code
+
+initial_state 1
+\newline 
+
+\layout LyX-Code
+
+# all times are with respect to the cpu's cycle counter
+\layout LyX-Code
+
+start_cycle 100
+\newline 
+
+\layout LyX-Code
+
+# the asynchronous stimulus will roll over in 'period'
+\newline 
+# cycles.
+ Delete this line if you don't want a roll over.
+\layout LyX-Code
+
+period 5000
+\newline 
+
+\layout LyX-Code
+
+# Now the cycles at which stimulus changes states are 
+\layout LyX-Code
+
+# specified.
+ The initial cycle was specified above.
+ So 
+\newline 
+# the first cycle specified below will toggle this state.
+ 
+\layout LyX-Code
+
+# In this example, the stimulus will start high.
+ 
+\layout LyX-Code
+
+# At cycle 100 the stimulus 'begins'.
+ However nothing happens
+\layout LyX-Code
+
+# until cycle 200+100.
+\layout LyX-Code
+
+200 0 
+\layout LyX-Code
+
+300 1 
+\layout LyX-Code
+
+400 0 
+\layout LyX-Code
+
+600 1 
+\layout LyX-Code
+
+1000 0 
+\layout LyX-Code
+
+3000 1
+\newline 
+
+\layout LyX-Code
+
+# Give the stimulus a name:
+\layout LyX-Code
+
+name asy_test
+\newline 
+
+\layout LyX-Code
+
+# Finally, tell the command line interface that we're done # with the stimulus
+\layout LyX-Code
+
+end
+\layout Standard
+
+ds
+\layout Section
+
+Analog Stimuli
+\layout Standard
+
+Analog Stimuli are really a subset or type of asynchronous or synchronous
+ stimuli.
+\layout Chapter
+
+Modules
+\layout Standard
+
+gpsim has been designed to debug microprocessors.
+ However, microprocessors are always a part of a system.
+ And invariably, the bugs one often encounters are those that are a result
+ of interfacing with a system.
+ Modules provide users with a way to extend gpsim and simulate a system.
+\layout Standard
+
+A module is a stand alone application that a user writes.
+ 
+\layout Chapter
+
+Symbolic Debugging
+\layout Standard
+
+Early versions of gpsim provided hard coded symbols like 'status' or 'porta'.
+ As a version 0.0.12, gpsim provides symbolic debugging capabilities.
+ So in addition to the hard coded symbols, you can now have access to all
+ of the symbols defined by your assembler.
+ This includes cross referencing the program memory to source and list files,
+ access to registers defined within cblocks, access to program memory labels,
+ and access to all of the constants that are defined (either with equates
+ or #defines) by your program.
+\layout Chapter
+
+Hex Files
+\layout Standard
+
+The target code simulated by gpsim comes from a hex file, or more specifically
+ an Intel Hex file.
+ gpsim accepts the format of hex provided by gpasm and mpasm.
+ The hex file does not provide any symbolic information.
+ It's recommended that hex files only be used if 1) you suspect there's
+ a problem with the way .cod files are generated by your assembler or compiler
+ OR 2) your assembler or compiler doesn't generate .cod files.
+\layout Chapter
+
+The ICD
+\layout Standard
+
+gpsim supports (partly) the first version of the ICD (as opposed to ICD2
+ (the round hockey-puck shaped one)).
+ 
+\layout Subsection*
+
+Special configuration of the code
+\layout Standard
+
+Read the MPLAB ICD USER's GUIDE.
+ 
+\layout Standard
+
+Here's the short version:
+\layout Itemize
+
+disable at least: brown out detection, low voltage programming and all code
+ protection.
+ It is probably good to turn of the watchdog too.
+ see the MPLAB ICD USER's GUIDE for more information.
+ 
+\layout Itemize
+
+have a NOP as the first instruction.
+\layout Itemize
+
+Don't touch RB6 or RB7.
+\layout Itemize
+
+Don't use the last stack level.
+\layout Itemize
+
+Don't use these registers and program words:
+\newline 
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="4" columns="3">
+<features>
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" width="0pt">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0pt">
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Processor
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Register
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+Program
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+-870/1/2
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0x70, 0xBB-0xBF
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0x6E0-0x7FF
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+-873/4
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0x6D, 0x1fD, 0xEB-0xF0, 0x1Eb-0x1F0
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0xEE0-0xFFF
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+-876/7
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0x70, 0x1Eb-0x1Ef
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+0x1F00-0x1FFF
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Subsection*
+
+icdprog
+\layout Standard
+
+Download and install icdprog.
+ 
+\layout Standard
+
+Use icdprog to program the target with the hex file (
+\emph on 
+icdprog mycode.hex
+\emph default 
+).
+\layout Subsection*
+
+ICD usage
+\layout Standard
+
+Start gpsim like this:
+\layout Standard
+
+
+\emph on 
+gpsim -d /dev/ttyS0 -s mycode.cod
+\layout Standard
+
+, assuming the ICD is connected to the first serial port.
+\layout Standard
+
+Now you can type 'icd' to see some information:
+\layout Standard
+
+
+\emph on 
+**gpsim> icd 
+\newline 
+ICD version "2.31.00" was found.
+ 
+\newline 
+Target controller is 16F877 rev 13.
+ 
+\newline 
+Vdd: 5.2 Vpp: 13.3 
+\newline 
+Debug module is present
+\layout Standard
+
+2.31 is the firmware version.
+ I have only tried this particular version...
+\layout Standard
+
+You can step, reset, run, halt, set the breakpoint and read file registers.
+ It works both from the gui and the cli.
+\layout Subsection*
+
+ICD TODO
+\layout Itemize
+
+MPLAB has a setting for target cpu frequency, I have only tried with a 20MHz
+ crystal, so there may be adjustments to be made to the serial port timeout
+ settings in gpsim.
+\layout Itemize
+
+The source, disassembly, watch, symbol and RAM windows works.
+ And the rest doesn't.
+ I guess the breadboard should be able to work at least for the pic, but
+ it doesn't.
+ 
+\layout Itemize
+
+eeprom support 
+\layout Itemize
+
+modifying data 
+\layout Itemize
+
+Fix the UI to give more feedback about what's happening during long delays.
+\layout Itemize
+
+Better error detection.
+ gpsim doesn't always see that the target is not functional.
+\layout Chapter
+
+Theory of Operation
+\layout Standard
+
+This section is only provided for those who may be interested in how gpsim
+ operates.
+ The information in here is 'mostly' accurate.
+ However, as gpsim evolves so do the details of the theory of operation.
+ Use the information provided here as a high level introduction and use
+ the (well commented :]) source to learn the details.
+\layout Section
+
+Background
+\layout Standard
+
+gpsim is written mostly in C++.
+ Why? Well the main reason is to easily implement a hierarchical model of
+ a pic.
+ If you think about a microcontroller, it's really easy to modularize the
+ various components.
+ C++ lends itself well to this conceptualization.
+ Furthermore Microchip, like other microcontroller manufacturers, has created
+ families of devices that are quite similar to one another.
+ Again, the C++ provides 'inheritance' that allows the relationships to
+ be shared among the various models of pics.
+\layout Section
+
+Instructions
+\begin_inset LatexCommand \index{instructions}
+
+\end_inset 
+
+
+\layout Standard
+
+There's a base class for the 14-bit instructions (I plan to go one step
+ further and create a base class from which all pic instructions can be
+ derived).
+ It primarily serves two purposes: storage that is common for each instruction
+ and a means for generically accessing virtual functions.
+ The common information consists of a name - or more specifically the instructio
+n mnemonic, the opcode, and a pointer to the processor owning the instruction.
+ Some of the virtual functions are 'execute' and 'name'.
+ As the hex file is decoded, instances of the instructions are created and
+ stored in an array called program_memory.
+ The index into this array is the address at which the instruction resides.
+ To execute an instruction the following code sequence is invoked:
+\layout Quotation
+
+program_memory[pc.value]->execute();
+\layout Standard
+
+which says, get the instruction at the current program counter (pc.value)
+ and invoke via the virtual function execute().
+ This approach allows execution break points to be easily set.
+ A special break point instruction can replace the one residing in the program
+ memory array.
+ When 'execute' is called the break point can be invoked.
+\layout Section
+
+General File Registers
+\begin_inset LatexCommand \index{registers}
+
+\end_inset 
+
+
+\layout Standard
+
+A file register is simulated by the 'file_register' class.
+ There is one instance of a 'file_register' object for each file register
+ in the PIC.
+ All of the registers are collected together into an array called 'registers'
+ which is indexed by the registers' corresponding PIC addresses.
+ The array is linear and not banked like it is in the PIC.
+ (Banking is handled during the simulation.)
+\layout Section
+
+Special File Registers
+\layout Standard
+
+Special file registers are all of the other registers that are not general
+ file registers.
+ This includes the core registers like status and option and also the peripheral
+ registers like eeadr for the eeprom.
+ The special file registers are derived from the general file registers
+ and are also stored in the 'registers' array.
+ There is one instance for each register - even if the register is accessible
+ in more than one bank.
+ So for example, there's only one instance for the 'status' register, however
+ it may be accessed through the 'registers' array in more than one place.
+\layout Standard
+
+All file registers are accessed by the virtual functions 'put' and 'get'.
+ This is done for two main reasons.
+ First, it conveniently encapsulates the breakpoint overhead (for register
+ breakpoints) in the file register and not in the instruction.
+ Second, and more important, it allows derived classes to implement the
+ put and get more specifically.
+ For example, a 'put' to the indf register is a whole lot different than
+ a put to the intcon register.
+ In each case, the 'put' initiates an action beyond simply storing a byte
+ of data in an array.
+ It also allows the following code sequence to be easily implemented:
+\layout LyX-Code
+
+movlw   trisa   ;Get the address of tris 
+\layout LyX-Code
+
+movwf   fsr 
+\layout LyX-Code
+
+movf    indf,w  ;Read trisa indirectly
+\layout Section
+
+Example of an instruction
+\layout Standard
+
+Here's an example of the code for the movf instruction that illustrates
+ what has been discussed above.
+ Somewhere in gpsim the code sequence:
+\layout LyX-Code
+
+program_memory[pc.value]->execute();
+\layout Standard
+
+is executed.
+ Let's say that the pc is pointing to a movf instruction.
+ The ->execute() virtual function will invoke MOVF::execute.
+ I've added extra comments (that aren't in the main code) to illustrate
+ in detail what's happening.
+\layout LyX-Code
+
+void MOVF::execute(void)
+\layout LyX-Code
+
+{
+\layout LyX-Code
+
+  unsigned int source_value;
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // All instructions are 'traced' (discussed below).
+ It's sufficient 
+\layout LyX-Code
+
+  //to only store the opcode.
+ However, even this may be unnecessary since 
+\layout LyX-Code
+
+  //the progam counter is also traced.
+ Expect this to disappear in the 
+\layout LyX-Code
+
+  //future...
+ 
+\layout LyX-Code
+
+  trace.instruction(opcode);
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // 'source' is a pointer to a 'file_register' object.
+ It is initialized 
+\layout LyX-Code
+
+  //by reading the 'registers' array.
+ Note that the index depends on the 
+\layout LyX-Code
+
+  //'rp' bits (actually just one bit) in the status register.
+ Time is
+\layout LyX-Code
+
+  // saved by caching rp as opposed to decoding the status register.
+\layout LyX-Code
+
+  source = cpu->registers[cpu->rp | opcode&REG_IN_INSTRUCTION_MASK];
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // We have no idea which register we are trying to access and how it 
+\layout LyX-Code
+
+  //should be accessed or if there's a breakpoint set on it.
+ No problem,
+\layout LyX-Code
+
+  //the virtual function 'get' will resolve all of those details
+\layout LyX-Code
+
+  // and 'do the right thing'.
+\layout LyX-Code
+
+  source_value = source->get();
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // If the destination is W, then the constructor has already initialized
+ 
+\layout LyX-Code
+
+  //'destination'.
+ Otherwise the destination and source are the same.
+\layout LyX-Code
+
+  if(opcode&DESTINATION_MASK)
+\layout LyX-Code
+
+    destination = source;      // Result goes to source
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // Write the source value to the destination.
+ Again, we have no idea 
+\layout LyX-Code
+
+  // where the destination may be or
+\layout LyX-Code
+
+  // or how the data should be written there.
+\layout LyX-Code
+
+  destination->put(source_value);
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // The movf instruction will set Z (zero) bit in the status register
+\layout LyX-Code
+
+  //if the source value was zero.
+\layout LyX-Code
+
+  cpu->status.put_Z(0==source_value);
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+  // Finally, advance the pc by one.
+\layout LyX-Code
+
+  cpu->pc.increment();
+\layout LyX-Code
+
+ 
+\layout LyX-Code
+
+}
+\layout LyX-Code
+
+ 
+\layout Section
+
+Trace
+\layout Standard
+
+Everything that is simulated is traced - 
+\emph on 
+all
+\emph toggle 
+ of the time.
+ The trace buffer is one huge circular buffer of integers.
+ Information is or'ed with a trace token and then is stored in the trace
+ buffer.
+ No attempt is made to associate the items in the trace buffer while the
+ simulator is simulating a PIC.
+ Thus, if you look at the raw buffer you'll see stuff like: cycle counter
+ = ..., opcode fetch = ..., register read = ..., register write = ..., etc.
+ However, this information is post processed to ascertain what happened
+ and when it happened.
+ It's also possible to use this information to undo the simulation, or in
+ other words you can step backwards.
+ I don't have this implemented yet though.
+\layout Section
+
+Breakpoints
+\layout Standard
+
+Breakpoints fall into three categories: execution, register, and cycle.
+\layout Subsubsection
+
+Execution:
+\layout Standard
+
+For execution breakpoints a special instruction appropriately called 'Breakpoint
+_Instruction' is created and placed into the program memory array at the
+ location the break point is desired.
+ The original instruction is saved in the newly created breapoint instruction.
+ When the break point is cleared, the original instruction is fetched from
+ the break point instruction and placed back into the program memory array.
+\layout Standard
+
+Note that this scheme has zero overhead.
+ The simulation is only affected when the breakpoint is encountered.
+\layout Subsubsection
+
+Register:
+\layout Standard
+
+There are at least four different breakpoint types that can be set on a
+ register: read any value, write any value, read a specific value, or write
+ a specific value.
+ Like the execution breakpoints, there are special breakpoint registers
+ that replace a register object.
+ So when the user sets a write breakpoint at register 0x20 for example,
+ a new breakpoint object is created and insert into the file register array
+ at location 0x20.
+ When the simulator attempts to access register location 0x20, the breakpoint
+ object will be accessed instead.
+\layout Standard
+
+Note that this scheme too has zero overhead, accept when a breakpoint is
+ encountered.
+\layout Subsubsection
+
+Cycle:
+\layout Standard
+
+Cycle breakpoints allow gpsim to alter execution at a specific instruction
+ cycle.
+ This is useful for running your simulation for a very specific amount of
+ time.
+ Internally, gpsim makes extensive use of the cycle breakpoints.
+ For example, the TMR0 object can be programmed to generate a periodic cycle
+ break point.
+\layout Standard
+
+Cycle break points are implemented with a sorted doubly-linked list.
+ The linked list contains two pieces of information (besides the links):
+ the cycle at which the break is to occur and the call back function
+\begin_inset Foot
+collapsed true
+
+\layout Standard
+
+A call back function is a pointer to a function.
+ In this context, gpsim is given a pointer to the function that's to be
+ invoked (called) whenever a cycle break occurs.
+ 
+\end_inset 
+
+ that's to be invoked when the cycle does occur.
+ The break logic is extremely simple.
+ Whenever the cycle counter is advanced (that is, incremented), it's compared
+ to the next desired cycle break point.
+ If there's NO match, then we're done.
+ So the overhead for cycle breaks is the time required to implement a comparison.
+ If there IS a match, then the call back function associated with this break
+ point is invoked and the next break point in the doubly-linked list serves
+ as the reference for the next cycle break.
+\layout Chapter*
+
+COPYING
+\layout Standard
+
+The document is part of gpsim.
+\layout Standard
+
+gpsim is free software; you can redistribute it and/or modify it under the
+ terms of the 
+\begin_inset LatexCommand \index{GNU}
+
+\end_inset 
+
+GNU General Public 
+\begin_inset LatexCommand \index{License}
+
+\end_inset 
+
+License as published by the Free Software Foundation; either version 2,
+ or (at your option) any later version.
+\layout Standard
+
+gpsim is distributed in the hope that it will be useful, but WITHOUT ANY
+ 
+\begin_inset LatexCommand \index{NO WARRANTY}
+
+\end_inset 
+
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ FOR A PARTICULAR PURPOSE.
+ See the GNU General Public License for more details.
+ 
+\layout Standard
+
+You should have received a copy of the GNU General Public License along
+ with gpsim; see the file COPYING.
+ If not, write to the Free Software Foundation, 59 Temple Place - Suite
+ 330, Boston, MA 02111-1307, USA.
+\layout Standard
+\start_of_appendix 
+
+\begin_inset LatexCommand \printindex{}
+
+\end_inset 
+
+
+\the_end

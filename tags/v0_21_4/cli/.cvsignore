@@ -1,0 +1,9 @@
+*.deps
+*.libs
+*.la
+*.lo
+Makefile
+Makefile.in
+parse.cc
+scan.cc
+y.output
