@@ -33,14 +33,15 @@
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;"
+				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;
+"
 				Outputs="&quot;$(TargetDir)\popt1.dll&quot;;&quot;$(TargetDir)\libintl-2.dll&quot;;&quot;$(TargetDir)\libiconv-2.dll&quot;;&quot;$(TargetDir)\libglib-2.0-0.dll&quot;;&quot;$(TargetDir)\libgthread.dll&quot;;&quot;$(TargetDir)\libgobject-2.0-0.dll&quot;;&quot;$(TargetDir)\libgmodule-2.0-0.dll&quot;;&quot;$(TargetDir)\iconv.dll&quot;;&quot;$(TargetDir)\intl.dll&quot;;&quot;$(TargetDir)\libgdk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libgdk_pixbuf-2.0-0.dll&quot;;&quot;$(TargetDir)\libpango-1.0-0.dll&quot;;&quot;$(TargetDir)\libpangowin32-1.0-0.dll&quot;;&quot;$(TargetDir)\libgtk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libatk-1.0-0.dll&quot;"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="wsock32.lib ../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib ../../gtkextra-2/lib/libgtkextra-win32-2.0.lib ../../readline/lib/readline-static.lib ../gui/Debug/gui.lib ../eXdbm/Debug/eXdbm.lib"
 				OutputFile="$(OutDir)/gpsim.exe"
 				LinkIncremental="2"
-				IgnoreDefaultLibraryNames="msvcrt.lib"
+				IgnoreDefaultLibraryNames=""
 				ModuleDefinitionFile="../plat/win32/gpsim.def"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/gpsim.pdb"
@@ -89,7 +90,8 @@
 				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;"
+				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;
+"
 				Outputs="&quot;$(TargetDir)\popt1.dll&quot;;&quot;$(TargetDir)\libintl-2.dll&quot;;&quot;$(TargetDir)\libiconv-2.dll&quot;;&quot;$(TargetDir)\libglib-2.0-0.dll&quot;;&quot;$(TargetDir)\libgthread.dll&quot;;&quot;$(TargetDir)\libgobject-2.0-0.dll&quot;;&quot;$(TargetDir)\libgmodule-2.0-0.dll&quot;;&quot;$(TargetDir)\iconv.dll&quot;;&quot;$(TargetDir)\intl.dll&quot;;&quot;$(TargetDir)\libgdk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libgdk_pixbuf-2.0-0.dll&quot;;&quot;$(TargetDir)\libpango-1.0-0.dll&quot;;&quot;$(TargetDir)\libpangowin32-1.0-0.dll&quot;;&quot;$(TargetDir)\libgtk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libatk-1.0-0.dll&quot;"/>
 			<Tool
 				Name="VCLinkerTool"
@@ -146,7 +148,8 @@
 				DebugInformationFormat="4"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;"
+				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;
+"
 				Outputs="&quot;$(TargetDir)\popt1.dll&quot;;&quot;$(TargetDir)\libintl-2.dll&quot;;&quot;$(TargetDir)\libiconv-2.dll&quot;;&quot;$(TargetDir)\libglib-2.0-0.dll&quot;;&quot;$(TargetDir)\libgthread.dll&quot;;&quot;$(TargetDir)\libgobject-2.0-0.dll&quot;;&quot;$(TargetDir)\libgmodule-2.0-0.dll&quot;;&quot;$(TargetDir)\iconv.dll&quot;;&quot;$(TargetDir)\intl.dll&quot;;&quot;$(TargetDir)\libgdk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libgdk_pixbuf-2.0-0.dll&quot;;&quot;$(TargetDir)\libpango-1.0-0.dll&quot;;&quot;$(TargetDir)\libpangowin32-1.0-0.dll&quot;;&quot;$(TargetDir)\libgtk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libatk-1.0-0.dll&quot;"/>
 			<Tool
 				Name="VCLinkerTool"
@@ -200,7 +203,8 @@
 				DebugInformationFormat="0"/>
 			<Tool
 				Name="VCCustomBuildTool"
-				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;"
+				CommandLine="call CopyDlls.bat &quot;$(TargetDir)&quot;
+"
 				Outputs="&quot;$(TargetDir)\popt1.dll&quot;;&quot;$(TargetDir)\libintl-2.dll&quot;;&quot;$(TargetDir)\libiconv-2.dll&quot;;&quot;$(TargetDir)\libglib-2.0-0.dll&quot;;&quot;$(TargetDir)\libgthread.dll&quot;;&quot;$(TargetDir)\libgobject-2.0-0.dll&quot;;&quot;$(TargetDir)\libgmodule-2.0-0.dll&quot;;&quot;$(TargetDir)\iconv.dll&quot;;&quot;$(TargetDir)\intl.dll&quot;;&quot;$(TargetDir)\libgdk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libgdk_pixbuf-2.0-0.dll&quot;;&quot;$(TargetDir)\libpango-1.0-0.dll&quot;;&quot;$(TargetDir)\libpangowin32-1.0-0.dll&quot;;&quot;$(TargetDir)\libgtk-win32-2.0-0.dll&quot;;&quot;$(TargetDir)\libatk-1.0-0.dll&quot;"/>
 			<Tool
 				Name="VCLinkerTool"
