@@ -62,8 +62,8 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_EXT_CLASS"
+					AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
+				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
