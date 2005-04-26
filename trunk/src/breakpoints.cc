@@ -644,9 +644,9 @@ void Breakpoint_Instruction::execute(void)
 
   if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != get_cycles().value)) {
 
-    if(action->evaluate()) {
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
-      // cout << message() << endl;
     }
   } else {
     replaced->execute();
@@ -854,7 +854,7 @@ void RegisterAssertion::execute(void)
     if( (PCPU->simulation_mode == RUNNING) && 
 	(simulation_start_cycle != get_cycles().value)) {
 
-      action->evaluate();
+      eval_Expression();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
 
       return;
@@ -1043,35 +1043,42 @@ void Break_register_write_value::TA::action(void) {
 unsigned int Break_register_read::get(void)
 {
 
-  if(action->evaluate())
+  if(eval_Expression()) {
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 		      | address);
-
+  }
   return(replaced->get());
 
 }
 
 RegisterValue  Break_register_read::getRV(void)
 {
-  if(action->evaluate())
+  if(eval_Expression()) {
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 		      | address);
+  }
   return(replaced->getRV());
 }
 
 RegisterValue  Break_register_read::getRVN(void)
 {
-  if(action->evaluate())
+  if(eval_Expression()) {
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 		      | address);
+  }
   return(replaced->getRVN());
 }
 
 bool Break_register_read::get_bit(unsigned int bit_number)
 {
-  if(action->evaluate())
+  if(eval_Expression()) {
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 		      | address);
+  }
   return(replaced->get_bit(bit_number));
 }
 
@@ -1085,26 +1092,31 @@ double Break_register_read::get_bit_voltage(unsigned int bit_number)
 void Break_register_write::put(unsigned int new_value)
 {
   replaced->put(new_value);
-  if(action->evaluate())
+  if(eval_Expression()){
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 		      | (replaced->address)  );
+  }
 }
 
 void Break_register_write::putRV(RegisterValue rv)
 {
   replaced->putRV(rv);
-  if(action->evaluate())
+  if(eval_Expression()){
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 		      | (replaced->address)  );
+  }
 }
 
 void Break_register_write::setbit(unsigned int bit_number, bool new_value)
 {
   replaced->setbit(bit_number,new_value);
-  if(action->evaluate())
+  if(eval_Expression()) {
+    action->action();
     trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 		      | (replaced->address)  );
-
+  }
 }
 
 unsigned int Break_register_read_value::get(void)
@@ -1112,9 +1124,11 @@ unsigned int Break_register_read_value::get(void)
   unsigned int v = replaced->get();
 
   if( (v & break_mask) == break_value)
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 			| address);
+    }
   return v;
 }
 
@@ -1123,9 +1137,11 @@ RegisterValue  Break_register_read_value::getRV(void)
   RegisterValue v = replaced->getRV();
 
   if( (v.data & break_mask) == break_value)
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 			| address);
+    }
   return(v);
 }
 
@@ -1134,9 +1150,11 @@ RegisterValue  Break_register_read_value::getRVN(void)
   RegisterValue v = replaced->getRVN();
 
   if( (v.data & break_mask) == break_value)
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 			| address);
+    }
   return(v);
 }
 
@@ -1146,10 +1164,11 @@ bool Break_register_read_value::get_bit(unsigned int bit_number)
   unsigned int mask = 1<<(bit_number & 7);
 
   if( (break_mask & mask) && (v & mask) == (break_value&mask))
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
 			| address);
-
+    }
   return replaced->get_bit(bit_number);
 }
 
@@ -1164,10 +1183,11 @@ void Break_register_write_value::put(unsigned int new_value)
 {
 
   if((new_value & break_mask) == break_value)
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 			| address);
-
+    }
   replaced->put(new_value);
 }
 
@@ -1175,9 +1195,11 @@ void Break_register_write_value::putRV(RegisterValue rv)
 {
   
   if((rv.data & break_mask) == break_value)
-    if(action->evaluate())
+    if(eval_Expression()) {
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 			| (replaced->address)  );
+    }
 
   replaced->putRV(rv);
 }
@@ -1193,9 +1215,11 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
 	 | new_value)                   // set the new bit
 	& break_mask) == break_value)
     {
-      if(action->evaluate())
+      if(eval_Expression()) {
+        action->action();
 	trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
 			  | address);
+      }
     }
 
   replaced->setbit(bit_number,new_value ? true  : false);

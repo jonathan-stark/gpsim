@@ -23,10 +23,30 @@ Boston, MA 02111-1307, USA.  */
 #define __TRIGGER_H__
 
 class TriggerObject;
+class Expression;
 
 //========================================================================
 //
+// Triggers
+// (these comments are not completely implemented in code)
 //
+// gpsim divides a breakpoint into a TriggerAction and a TriggerObject.
+// The TriggerObject is something that gets evaluated. If it evaluates
+// to true then a TriggerAction is invoked.
+// Most breakpoints are simple and don't need this complexity. For example,
+// an execution breakpoint only needs to halt simulation whenever it's 
+// encountered. But gpsim defines the TriggerObject to be something like
+// 'if address is executed' and the TriggerAction to be 'halt simulation'.
+// However this design accomodates much more complicated situations. For
+// example, the use may wish to break whenever register 42 is cleared during
+// a time when interrupts are disabled. In this case, the trigger action
+// is still a simple halt. However, the trigger object is more complicated:
+//
+// break w reg(42) (reg(42) == 0) && (STATUS & GIE == 0)
+//
+// In this case, the compound expression gets associated with write operations
+// to register 42. 
+
 class TriggerAction
 {
 public:
@@ -50,8 +70,10 @@ protected:
 // TriggerObject - a base class for handling all of gpsim's breakpoints.
 //
 // The TriggerObject class is designed to be part of a multiple inheritance
-// class heirarchy. Its main function is to provide interface to the 
+// class heirarchy. Its main function is to provide an interface to the 
 // breakpoint functionality.
+//
+// 
 
 class TriggerObject
 {
@@ -97,6 +119,10 @@ class TriggerObject
   // Clear the breakpoint
   virtual void clear(void);
 
+  // set_Expr - associates an expression with the trigger
+  virtual void set_Expression(Expression *);
+  virtual bool eval_Expression();
+
   virtual char const * bpName() { return "Generic"; }
 
   virtual void set_action(TriggerAction *ta) { action = ta; }
@@ -106,6 +132,8 @@ class TriggerObject
   TriggerObject(TriggerAction *);
   // Virtual destructor place holder
   virtual ~TriggerObject() { }
+private:
+  Expression *m_PExpr;
 
 };
 
