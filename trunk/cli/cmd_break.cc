@@ -96,8 +96,89 @@ void cmd_break::list(void)
 const char *TOO_FEW_ARGS="missing register or location\n";
 const char *TOO_MANY_ARGS="too many arguments\n";
 
+//------------------------------------------------------------------------
+// Certain break options are incompatible with certain symbol types.
+// E.g. it doesn't make sense to associate the 'execute' option with
+// a register. 
+
+static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
+{
+  if(co && pValue) {
+
+    if(co->value==READ || co->value==WRITE || co->value==EXECUTION) {
+      Integer * pAddress = dynamic_cast<Integer*>(pValue);
+      if (pAddress)
+	return true;
+    }
+
+    if(co->value==READ || co->value==WRITE) {
+      register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
+      if (pRegSymbol)
+	return true;
+    }
+
+    printf("Syntax error:  %s is incompatible with the '%s' break option\n",
+	   pValue->name().c_str(), co->name);
+
+  }
+
+  return false;
+}
+//------------------------------------------------------------------------
+// set_break(cmd_options *co, Value *pValue, Expression *pExpr)
+// 
+// supports the following breaks:
+//
+//   break e|r|w ADDRESS_SYMBOL expression
+//   break r|w REGISTER_SYMBOL expression
+//
+// Example:
+//
+// Halt execution if the interrupt routine writes to the register 'temp1':
+//
+//  break w temp1  PC>=InterruptStart && PC<InterruptEnd
+
+void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
+{
+  if (!bCheckOptionCompatibility(co, pValue) || !cpu)
+    return;
+
+  // 
+  int b;
+
+  Integer * pAddress = dynamic_cast<Integer*>(pValue);
+  if (pAddress != NULL) { 
+    gint64 iAddress;
+    pAddress->get(iAddress);
+    b = bp.set_cycle_break(cpu,iAddress);
+    if (!bp.set_expression(b,pExpr))
+      delete pExpr;
+    return;
+  }
+
+  register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
+  if (pRegSymbol) {
+    b = set_break(co->value, pRegSymbol->getReg()->address);
+    
+    if (!bp.set_expression(b,pExpr))
+      delete pExpr;
+    return;
+  }
+
+}
+//------------------------------------------------------------------------
+//  set_break(cmd_options *co, Value *pValue)
+//
+//  Supports the following breaks:
+//
+//   break e|r|w ADDRESS_SYMBOL
+//   break r|w REGISTER_SYMBOL
+//
 void cmd_break::set_break(cmd_options *co, Value *pValue)
 {
+  if (!bCheckOptionCompatibility(co, pValue))
+    return;
+
   Integer * pAddress = dynamic_cast<Integer*>(pValue);
   if (pAddress != NULL) { 
     gint64 iAddress;
@@ -105,15 +186,14 @@ void cmd_break::set_break(cmd_options *co, Value *pValue)
     set_break(co->value, iAddress);
     return;
   }
+
   register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
   if (pRegSymbol) {
     set_break(co->value, pRegSymbol->getReg()->address);
     return;
   }
-  printf("Syntax error: param %s does not represent a memory address\n",
-    pValue->name().c_str());
 }
-
+//------------------------------------------------------------------------
 void cmd_break::set_break(cmd_options *co, Expression *pExpr)
 {
 
@@ -243,13 +323,13 @@ void cmd_break::set_break(int bit_flag)
 }
 
 
-void cmd_break::set_break(int bit_flag, guint64 v)
+int cmd_break::set_break(int bit_flag, guint64 v)
 {
 
+  int b = MAX_BREAKPOINTS;
   if(!cpu)
-    return;
+    return b;
 
-  int b;
   unsigned int value = (unsigned int)v;
 
   switch(bit_flag) {
@@ -295,6 +375,8 @@ void cmd_break::set_break(int bit_flag, guint64 v)
   case WDT:
     cout << TOO_MANY_ARGS;
   }
+
+  return b;
 }
 
 void cmd_break::set_break(int bit_flag,

@@ -354,6 +354,7 @@ break_cmd
           : BREAK                             {c_break.list();}
           | BREAK SYMBOL_T                    {c_break.set_break($2);}
           | BREAK bit_flag SYMBOL_T           {c_break.set_break($2,$3);}
+          | BREAK bit_flag SYMBOL_T expr      {c_break.set_break($2,$3,$4);}
           | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3);}
           | BREAK bit_flag break_boolean_expr {c_break.set_break($2,$3);}
           | BREAK bit_flag                    {c_break.set_break($2);}

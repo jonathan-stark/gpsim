@@ -308,6 +308,7 @@ public:
 				      unsigned int register_number,
 				      unsigned int value, 
 				      unsigned int mask=0xff);
+  bool set_expression(unsigned bp_number, Expression *pExpr);
 
   inline void clear_global(void) {global_break = GLOBAL_CLEAR;};
   void halt(void);
