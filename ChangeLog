@@ -1,3 +1,7 @@
+2005-04-25 Scott Dattalo <scott@dattalo.com>
+	* src/trigger.h, src/trigger.cc, src/breakpoints.cc: Added complex 
+	expressions to the TriggerObject class. (not complete)
+
 2005-04-23 Borut Razem <borut.razem@siol.net>
 	* src/bitlog.cc, src/bytelog.cc, src/ttoken.cc: removed #define IN_MODULE
 	* plat/win32/gpsim.def, modules/makefile.mingw, src/makefile.mingw,

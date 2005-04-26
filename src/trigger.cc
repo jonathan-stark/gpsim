@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #include "trigger.h"
 #include "../config.h"
 #include "value.h"
+#include "expr.h"
 #include "breakpoints.h"
 
 #include <iostream>
@@ -84,11 +85,14 @@ void SimpleTriggerAction::action(void)
 //------------------------------------------------------------------------
 TriggerObject::TriggerObject()
 {
+  m_PExpr = 0;
   set_action(&DefaultTrigger);
 }
 
 TriggerObject::TriggerObject(TriggerAction *ta)
 {
+  m_PExpr = 0;
+
   if(ta)
     set_action(ta);
   else
@@ -131,4 +135,26 @@ void TriggerObject::print(void)
 void TriggerObject::clear(void)
 {
   cout << "clear Generic breakpoint " << bpn << endl;
+}
+
+void TriggerObject::set_Expression(Expression *newExpression)
+{
+  delete m_PExpr;
+  m_PExpr = newExpression;
+}
+
+bool TriggerObject::eval_Expression()
+{
+  if(m_PExpr) {
+    Value *v = m_PExpr->evaluate();
+
+    bool bRet = false;
+
+    if(v)
+      v->get(bRet);
+
+    return bRet;
+  }
+
+  return true;
 }
