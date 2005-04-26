@@ -178,6 +178,19 @@ unsigned int Breakpoints::set_breakpoint(TriggerObject *bpo)
   return bpn;
 }
 
+bool Breakpoints::set_expression(unsigned int bpn, Expression *pExpr)
+{
+  if(bpn < MAX_BREAKPOINTS) {
+
+    BreakStatus &bs = break_status[bpn];
+    if(bs.bpo) {
+      bs.bpo->set_Expression(pExpr);
+      return true;
+    }
+  }
+  return false;
+}
+
 unsigned int  Breakpoints::set_execution_break(Processor *cpu, 
 					       unsigned int address)
 {

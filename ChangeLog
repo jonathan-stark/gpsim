@@ -1,3 +1,8 @@
+2005-04-26 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc, src/breakpoints.h, cli/parse.yy,
+	cli/cmd_break.cc, cli/cmd_break.h: continuing with complex break
+	expressions. 
+
 2005-04-25 Scott Dattalo <scott@dattalo.com>
 	* src/trigger.h, src/trigger.cc, src/breakpoints.cc: Added complex 
 	expressions to the TriggerObject class. (not complete)
