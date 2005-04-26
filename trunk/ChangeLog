@@ -1,4 +1,14 @@
 2005-04-26 Scott Dattalo <scott@dattalo.com>
+	* cli/Makefile.am, examples/14bit/Makefile.am: Updated so that
+	'make dist' would work again.
+	* src/attributes.cc, src/init.cc: Moved attribute initialization
+	from init.cc to attributes.cc 
+	* src/breakpoints.cc, src/symbol.cc, src/symbol.h, src/trigger.cc:
+	Complex expressions are now fully supported. Updated the help info
+	for the break command to reflect the new syntax (more work
+	needed).
+	
+2005-04-26 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/breakpoints.h, cli/parse.yy,
 	cli/cmd_break.cc, cli/cmd_break.h: continuing with complex break
 	expressions. 

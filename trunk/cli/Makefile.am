@@ -41,11 +41,11 @@ libgpsimcli_la_SOURCES = \
 	ui_gpsim.cc \
 	cmd_attach.h cmd_bus.h cmd_dump.h cmd_load.h cmd_reset.h cmd_symbol.h \
 	command.h cmd_break.h cmd_echo.h cmd_log.h cmd_module.h cmd_node.h cmd_run.h \
-	cmd_manager.h cmd_shell.h cmd_gpsim.h cmd_trace.h \
+	cmd_shell.h cmd_trace.h \
 	input.h cmd_clear.h cmd_help.h cmd_processor.h cmd_set.h cmd_step.h \
 	cmd_version.h misc.h cmd_disasm.h  cmd_list.h  cmd_quit.h \
 	cmd_stimulus.h cmd_x.h symbol_t.h cmd_frequency.h cmd_icd.h \
-	cmd_macro.h
+	cmd_macro.h ui_gpsim.h
 
 
 AM_YFLAGS = -dvt

@@ -38,6 +38,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol_orb.h"
 #include "expr.h"
+#include "operator.h"
 #include "errors.h"
 #include "protocol.h"
 
@@ -562,6 +563,25 @@ void register_symbol::set(Packet &p)
     set((int)i);
   }
 
+}
+
+bool register_symbol::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  if(!compOp || !rvalue)
+    return false;
+
+  gint64 i,r;
+
+  get(i);
+  rvalue->get(r);
+
+  if(i < r)
+    return compOp->less();
+
+  if(i > r)
+    return compOp->greater();
+
+  return compOp->equal();
 }
 
 symbol *register_symbol::copy()

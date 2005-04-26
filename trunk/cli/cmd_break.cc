@@ -59,29 +59,40 @@ cmd_break::cmd_break(void)
 
   brief_doc = string("Set a break point");
 
-  long_doc = string ("break [c | e addr | w [break_expr] | r [break_expr] | so | su | wdt ] \n"
-    "\n"
-    "  options:\n"
-    "\tc          - cycle\n"
-    "\te          - execution\n"
-    "\t             addr - address value or symbol\n"
-    "\tw          - write\n"
-    "\tr          - read\n"
-    "\tbreak_expr - r [& m] == v\n"
-    "\t             r - register address or symbol\n"
-    "\t             m - bit mask value to mask value in the register\n"
-    "\t             v - integer value on which to break\n"
-    "\tso         - stack over flow\n"
-    "\tsu         - stack under flow\n"
-    "\twdt        - wdt timeout\n"
-    "\t           - no argument, display the break points that are set.\n"
-    "  Examples:\n"
-    "\tbreak e 0x20       // set an execution break point at address 0x20\n"
-    "\tbreak w 8 == 0     // break if a zero is written to register 8\n"
-    "\tbreak w 9 & 0x30 == 0xf0 // break if '3' is written to the upper nibble or reg 9\n"
-    "\tbreak c 1000000    // break on the one million'th cycle\n"
-    "\tbreak              // display all of the break points\n"
-    "\n");
+  long_doc = string ("The 'break' command can be used to examine or set breakpoints.\n"
+                     "gpsim supports execution style breaks, register access breaks,\n"
+                     "complex expression breaks, attribute breaks, and other special breaks.\n"
+                     "Program Memory breaks:\n"
+                     "  break e|r|w ADDRESS [expr]\n"
+                     "    Halts when the address is executed, read, or written. The ADDRESS can be \n"
+                     "    a symbol or a number. If the optional expr is specified, then it must\n"
+                     "    evaluate to true before the simulation will halt.\n"
+                     "Register Memory breaks:\n"
+                     "  break r|w REGISTER [expr]\n"
+                     "    Halts when 'REGISTER' is read or written and the optional expression\n"
+                     "    evaluates to true.\n"
+                     "Cycle counter breaks:"
+                     "  break c VALUE\n"
+                     "    Halts when the cycle counter reaches 'VALUE'.\n"
+                     "Attribute breaks:\n"
+                     "  break attribute\n"
+                     "    Arms the breakpoint condition for those attributes that support breaks.\n"
+                     "    For example, the stopwatch (help stopwatch) attribute can cause a break.\n"
+                     "Miscellaneous breaks:\n"
+                     "  break so   # halts on stack overflow.\n"
+                     "  break su   # halts on stack underflow.\n"
+                     "  break wdt  # halts on Watch Dog Timer timeout.\n"
+                     "Expressions:\n"
+                     "  The conditional expressions mentioned above are syntactically similar to C's\n"
+                     "  expressions.\n"
+                     "Examples:\n"
+                     "\tbreak              # display all of the break points\n"
+                     "\tbreak e 0x20       # set an execution break point at address 0x20\n"
+                     "\tbreak w 8 == 0     # break if a zero is written to register 8\n"
+                     "\tbreak w 9 & 0x30 == 0xf0 # break if '3' is written to the\n"
+                     "\t                         # upper nibble or reg 9\n"
+                     "\tbreak c 1000000    # break on the one million'th cycle\n"
+                     );
 
   op = cmd_break_options; 
 }
@@ -117,6 +128,9 @@ static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
 	return true;
     }
 
+    if(co->value==CYCLE)
+      return true;
+
     printf("Syntax error:  %s is incompatible with the '%s' break option\n",
 	   pValue->name().c_str(), co->name);
 
@@ -150,7 +164,7 @@ void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
   if (pAddress != NULL) { 
     gint64 iAddress;
     pAddress->get(iAddress);
-    b = bp.set_cycle_break(cpu,iAddress);
+    b = bp.set_execution_break(cpu,iAddress);
     if (!bp.set_expression(b,pExpr))
       delete pExpr;
     return;
