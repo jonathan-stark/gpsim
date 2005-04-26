@@ -20,71 +20,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "trace.h"
-#include "symbol.h"
-#include "gpsim_time.h"
-#include "protocol.h"
 #include "gpsim_interface.h"
 
-//========================================================================
-//
-// Cycle_Counter attribute
-//
-// The Cycle_counter attribute exposes the cycle counter through the 
-// gpsim attribute interface. This allows for it to be queried from
-// the command line or sockets.
-
-class CycleCounterAttribute : public Integer
-{
-public:
-  CycleCounterAttribute() :
-    Integer(0) 
-  {
-    m_bClearableSymbol = false;
-    new_name("cycles");
-    set_description(" Simulation time in terms of cycles.");
-  }
-  void set(gint64 i)
-  {
-    static bool warned = false;
-    if(!warned)
-      cout << "cycle counter is read only\n";
-    warned = true;
-  }
-  void get(gint64 &i)
-  {
-    i = cycles.get();
-  }
-  void get(Packet &p)
-  {
-    p.EncodeUInt64(cycles.get());
-  }
-};
-
-//========================================================================
-//
-// GUI update rate attribute
-#ifdef HAVE_GUI
-class GUIUpdateRateAttribute : public Integer
-{
-public:
-  GUIUpdateRateAttribute() :
-    Integer(0) 
-  {
-    m_bClearableSymbol = false;
-    new_name("sim.gui_update_rate");
-    set_description(" Specifies the number of cycles between gui updates");
-  }
-  void set(gint64 i)
-  {
-    gi.set_update_rate(i);
-  }
-  void get(gint64 &i)
-  {
-    i = gi.get_update_rate();
-  }
-};
-#endif
-
+// in attribute.cc:
+extern void init_attributes();
 
 //==============================================================
 // simulation_cleanup()
@@ -103,24 +42,11 @@ void simulation_cleanup(void)
 
 
 //========================================================================
-//
-Integer *verbosity;
-
-//========================================================================
 // initialize_gpsim_core()
 //
 int initialize_gpsim_core()
 {
 
-  // Define internal simulator attributes .
-  verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
-  verbosity->setClearableSymbol(false);
-  get_symbol_table().add(verbosity);
-  get_symbol_table().add(new CycleCounterAttribute());
-  stop_watch.init();
-#ifdef HAVE_GUI
-  get_symbol_table().add(new GUIUpdateRateAttribute());
-#endif
-
+  init_attributes();
   return 0;
 }

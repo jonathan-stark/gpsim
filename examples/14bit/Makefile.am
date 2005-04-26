@@ -12,8 +12,7 @@ EXTRA_DIST = \
 	p16c65_pwm.asm p16c71_test.asm p16c74_test.asm pcl_test.asm \
 	p16f877_test.asm p16f877_test2.asm \
 	pulse_measure.asm sine.asm stim_test.asm twist.asm vertical_adder.asm wdt_test.asm \
-	usart_14.asm \
-	p16c64.inc p16c65.inc p16c71.inc p16c74.inc p16c84.inc
+	usart_14.asm
 
 
 MOSTLYCLEANFILES = *.hex *.cod *.lst *~

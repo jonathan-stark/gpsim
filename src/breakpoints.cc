@@ -370,8 +370,8 @@ unsigned int Breakpoints::set_notify_write_value(Processor *cpu,
 
 unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 {
-  if(verbose)
-    cout << "cycle break is halting sim\n";
+
+  cout << "cycle break: 0x" << hex << cycles.value << dec << " = " << cycles.value << endl;
 
   halt();
   if( abp < MAX_BREAKPOINTS)

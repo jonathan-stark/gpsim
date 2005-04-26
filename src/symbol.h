@@ -183,6 +183,8 @@ public:
   virtual void set(const char *cP,int len=0);
   virtual void set(Packet &);
 
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+
   Register *getReg();
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);

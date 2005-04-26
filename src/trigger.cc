@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "value.h"
 #include "expr.h"
+#include "errors.h"
 #include "breakpoints.h"
 
 #include <iostream>
@@ -146,12 +147,19 @@ void TriggerObject::set_Expression(Expression *newExpression)
 bool TriggerObject::eval_Expression()
 {
   if(m_PExpr) {
-    Value *v = m_PExpr->evaluate();
-
     bool bRet = false;
 
-    if(v)
-      v->get(bRet);
+    try {
+      Value *v = m_PExpr->evaluate();
+
+      if(v)
+        v->get(bRet);
+    }
+    catch (Error *Perr) {
+      if(Perr)
+        cout << "ERROR:" << Perr->toString() << endl;
+      delete Perr;
+    }
 
     return bRet;
   }
