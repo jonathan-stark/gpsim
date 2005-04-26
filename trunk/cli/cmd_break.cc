@@ -71,6 +71,8 @@ cmd_break::cmd_break(void)
                      "  break r|w REGISTER [expr]\n"
                      "    Halts when 'REGISTER' is read or written and the optional expression\n"
                      "    evaluates to true.\n"
+                     "  break r|w boolean_expression\n"
+                     "    older style to be deprecated..."
                      "Cycle counter breaks:"
                      "  break c VALUE\n"
                      "    Halts when the cycle counter reaches 'VALUE'.\n"
@@ -88,9 +90,10 @@ cmd_break::cmd_break(void)
                      "Examples:\n"
                      "\tbreak              # display all of the break points\n"
                      "\tbreak e 0x20       # set an execution break point at address 0x20\n"
-                     "\tbreak w 8 == 0     # break if a zero is written to register 8\n"
-                     "\tbreak w 9 & 0x30 == 0xf0 # break if '3' is written to the\n"
-                     "\t                         # upper nibble or reg 9\n"
+                     "\tbreak w reg1 == 0  # break if a zero is written to register reg1\n"
+                     "\tbreak w reg2 & 0x30 == 0xf0 # break if '3' is written to the\n"
+                     "\t                            # upper nibble or reg2\n"
+                     "\tbreak w reg3 (reg4 > 45)    # break if reg4>45 while writing to reg3\n"
                      "\tbreak c 1000000    # break on the one million'th cycle\n"
                      );
 
