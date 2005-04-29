@@ -1,3 +1,7 @@
+2005-04-29 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc: Register assertions were not halting
+	simulation when assertion was true.
+	
 2005-04-26 Scott Dattalo <scott@dattalo.com>
 	* cli/Makefile.am, examples/14bit/Makefile.am: Updated so that
 	'make dist' would work again.
