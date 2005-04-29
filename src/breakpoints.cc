@@ -868,6 +868,7 @@ void RegisterAssertion::execute(void)
 	(simulation_start_cycle != get_cycles().value)) {
 
       eval_Expression();
+      action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
 
       return;
