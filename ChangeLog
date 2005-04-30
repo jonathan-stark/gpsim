@@ -1,4 +1,10 @@
 2005-04-29 Scott Dattalo <scott@dattalo.com>
+	* HISTORY, README, INSTALL, configure.ac, gpsim.spec.in: Updates
+	for the 0.21.4 
+	* extras/lcd/ChangeLog, Makefile.am, configure.in: bumped the Rev
+	of the LCD module to 0.2.4
+
+2005-04-29 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Register assertions were not halting
 	simulation when assertion was true.
 	

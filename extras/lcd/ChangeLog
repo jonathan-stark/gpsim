@@ -1,3 +1,6 @@
+2005-04-29 Scott Dattalo  <scott@dattalo.com>
+	* configure.in: Changed the revision to 0.2.4
+
 2004-11-24 Scott Dattalo  <scott@dattalo.com>
 	* lcd.cc: Fixed LCD ports so that they conform to recent gpsim
 	changes.

@@ -30,7 +30,7 @@ and documentation for compiling programs that use the gpsim library.
 %setup
 
 %build
-./configure --prefix=/usr --disable-shared
+./configure --prefix=/usr
 make
 
 %clean
@@ -52,3 +52,4 @@ make DESTDIR="$RPM_BUILD_ROOT" install
 %{_includedir}/gpsim/*.h
 %{_libdir}/*.a
 %{_libdir}/*.la
+%{_libdir}/libgpsim*.so*

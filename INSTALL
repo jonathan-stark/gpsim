@@ -197,16 +197,12 @@ $ autoconf
 $ ./configure 
 $ make dist
 
-5.0 INSTALLING gtk+-extra and eXdbm
+5.0 INSTALLING gtk+-extra
     -------------------------------
 
-First, you're going to need to grab these two packages. gtk+-extra can
-be obtained from either its own web page or gpsim's (At the time of
-this writing, I do not know gtk+-extra's home page url). eXdbm, on the
-other hand, should be grabbed from gpsim's web page. I've fixed a bug
-in their install logic and changed their static Makefile to an
-automake type. For each of these packages, you can use the `standard'
-technique for installing gnu software:
+First, you're going to need to grab gtk+-extra. The best place to get
+this is from gpsim's web page since gtk+extra's page doesn't have a
+valid tar ball...
 
 $ tar -xvzf package.tar.gz
 $ cd package
@@ -216,11 +212,30 @@ $ su
 $ make install
 $ exit
 
-Where package is either gtk+-extra or eXdbm.
+Where package is gtk+-extra.
 
 
 6.0 INSTALLING RPM's
     ----------------
+
+gpsim has two RPM's that both must be install. In addition, gpsim
+depends gtk+extra's RPMs. First, get the latest versions of:
+
+   gtk+extra2-LATEST.rpm
+   gtk+extra2-devel-LATEST.rpm
+   gpsim-LATEST.rpm
+   gpsim-devel-LATEST.rpm
+
+As root, install gtk+extra:
+# rpm -ihv gtk+extra2-LATEST.rpm
+# rpm -ihv gtk+extra2-devel-LATEST.rpm
+
+Then gpsim
+
+# rpm -ihv gpsim-devel-LATEST.rpm
+# rpm -ihv gpsim-LATEST.rpm
+
+Note that the order is important (and rpm will tell you if you're wrong).
 
 7.0 MAC OS
     ------
