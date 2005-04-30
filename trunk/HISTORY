@@ -2,6 +2,8 @@ gpsim - Gnu Pic Simulator, a simulator for Microchip's PIC microcontrollers.
 
 T. Scott Dattalo
 
+See the ChangeLog for changes since 0.20.0
+
 28JUL00 gpsim-0.20.0
   o Modules - gpsim now supports dynamically loaded modules
     -- module command

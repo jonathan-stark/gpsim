@@ -17,7 +17,7 @@ libgpsim_lcd_la_LDFLAGS =  @X_LDFLAGS@
 
 
 EXTRA_DIST = lcd.gif caps.pl lcd.xpm lcdfont.h lcdfont.inc README lcd.h  \
-	autogen.sh 
+	autogen.sh makefile.mingw
 
 
 SUBDIRS = examples
