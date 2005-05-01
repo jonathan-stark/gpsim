@@ -125,6 +125,7 @@ EXPORTS
     ?dump_raw@PCTraceType@@UAEHIPADH@Z
     ?dump_raw@TraceType@@UAEHIPADH@Z
     ?dump_registers@Processor@@UAEXXZ
+    ?eval_Expression@TriggerObject@@UAE_NXZ
     ?event@BoolEventLogger@@QAEX_N@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -287,6 +288,7 @@ EXPORTS
     ?setSafeMode@Processor@@UAEX_N@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
     ?setWarnMode@Processor@@UAEX_N@Z
+    ?set_Expression@TriggerObject@@UAEXPAVExpression@@@Z
     ?set_PC@ProgramMemoryAccess@@UAEXI@Z
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
