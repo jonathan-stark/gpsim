@@ -158,7 +158,7 @@ void cmd_processor::processor(int bit_flag)
       break;
 
     case 2:
-      dump_pins(cpu);
+      dump_pins(GetActiveCPU());
       break;
     }
 
@@ -168,14 +168,8 @@ void cmd_processor::processor(int bit_flag)
 void cmd_processor::processor(const char * processor_type,
                               const char * processor_new_name)
 {
-  // In preperation for allowing the hex file to determine processor type
-//  CSimulationContext::GetContext()->SetDefaultProcessor( processor_type,
-//    processor_new_name);
-  new_processor((Processor *)CSimulationContext::GetContext()->set_processor(
-    processor_type,  processor_new_name));
-
-  if(!cpu)
-    cout << "Unable to add processor\n";
-  if(have_cpu(1) && verbose)
-     cout <<"seems like cmd_processor worked\n";
+  if(CSimulationContext::GetContext()->SetDefaultProcessor( processor_type,
+    processor_new_name)) {
+    cout << "Unable to find processor\n";
+  }
 }

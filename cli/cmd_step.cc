@@ -59,7 +59,7 @@ void cmd_step::step(int instructions)
   if(!have_cpu(1))
     return;
 
-  cpu->step(instructions);
+  GetActiveCPU()->step(instructions);
 
 }
 
@@ -68,7 +68,7 @@ void cmd_step::step(Expression *expr)
   if(!have_cpu(1))
     return;
 
-  cpu->step((int)evaluate(expr));
+  GetActiveCPU()->step((int)evaluate(expr));
 
 }
 
@@ -78,6 +78,6 @@ void cmd_step::over(void)
   if(!have_cpu(1))
     return;
 
-  cpu->step_over();
+  GetActiveCPU()->step_over();
 
 }

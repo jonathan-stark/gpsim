@@ -58,6 +58,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/expr.h"
 
 #include "../src/pic-processor.h"
+#include "../src/sim_context.h"
 #include "../src/trace.h"
 
 int quit_gpsim = 0;
@@ -95,21 +96,17 @@ command *command_list[] =
 };
 
 
-Processor *command::cpu = 0;
-
 command::command(void)
 {
   op = 0;
   name = 0;
   token_value = 0;
-  cpu = 0;
 }
 
 command::command(struct cmd_options *options,int tv) 
 { 
   op = options; 
   token_value = tv;
-  cpu = 0;
 }
 
 
@@ -140,24 +137,17 @@ void execute_line(char *cmd)
     cout << "Executing a line:\n  " << cmd;
 }
 
-
-void command::new_processor(Processor *p)
-{
-
-  cpu = p;
-  set_active_cpu(p);
-  trace.switch_cpus(cpu);
-
+Processor *command::GetActiveCPU() {
+  return CSimulationContext::GetContext()->GetActiveCPU();
 }
-
 
 bool command::have_cpu(bool display_warning)
 {
 
-  if(!cpu)
+  if(!GetActiveCPU())
     {
       if(display_warning)
-	cout << "No cpu has been selected\n";
+        cout << "No cpu has been selected\n";
       return(0);
     }
 

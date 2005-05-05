@@ -23,15 +23,14 @@ Boston, MA 02111-1307, USA.  */
 // cod.cc
 //
 //  The file contains the code for reading Byte Craft's .cod
-// formatted symbol files. (Technically this is a c++ file. 
-// However, I use the same include file (cod.h) that's used
-// by gpasm (which is written in C). Consequently
+// formatted symbol files. 
 //
 #include <stdio.h>
 #include <iostream>
 #include <string>
 #include <string.h>
 #include <assert.h>
+#include <memory.h>
 #ifdef _WIN32
 #include <direct.h>
 #endif
@@ -50,30 +49,32 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_manager.h"
 /*  end of assertion experiment */
 
-static FILE *codefile = 0;
-static char *temp_block = 0;
-static char *lstfilename = 0;
+PicCodProgramFileType::PicCodProgramFileType() {
+  codefile = 0;
+  temp_block = 0;
+  lstfilename = 0;
 
-static Processor *ccpu = 0;
-DirBlockInfo main_dir;
+  memset(&main_dir, 0, sizeof(main_dir));
 
-// Define a flag that tells whether or not we should care about the
-// case of text strings in the .cod file. 
-static int ignore_case_in_cod = 1;
+  // Define a flag that tells whether or not we should care about the
+  // case of text strings in the .cod file. 
+  ignore_case_in_cod = 1;
 
-static int gputils_recent = 0;
+  gputils_recent = 0;
+  RegisterProgramFileType(this);
+}
 
-
-static char *get_string(char *dest, char *src, size_t len)
+int PicCodProgramFileType::get_string(char *dest, char *src, size_t len)
 {
   size_t n = *src++;
 
-  assert(n < len);
-  n = min(n, len - 1);
-  strncpy(dest, src, n);
-  dest[n] = '\0';
-
-  return dest;
+  if(n < len) {
+    n = min(n, len - 1);
+    strncpy(dest, src, n);
+    dest[n] = '\0';
+    return SUCCESS;
+  }
+  return ERR_BAD_FILE;
 }
 
 
@@ -116,7 +117,7 @@ unsigned short get_short_int( char * buff)
   return ( (unsigned char)buff[0] + ((unsigned char)buff[1] << 8));
 }
 
-void read_block(char * block, int block_number)
+void PicCodProgramFileType::read_block(char * block, int block_number)
 {
   fseek(codefile, block_number * COD_BLOCK_SIZE, SEEK_SET);
   fread(block, COD_BLOCK_SIZE, 1, codefile);
@@ -170,7 +171,7 @@ int cod_address_in_range(char *range_block,int address)
 // the .cod file and intialize the pic program memory with them.
 //
 
-void read_hex_from_cod( Processor *cpu )
+void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
 {
   int _64k_base;
   int safety = 0;
@@ -222,7 +223,7 @@ void read_hex_from_cod( Processor *cpu )
 }
 
 //-----------------------------------------------------------
-FILE *open_a_file(char **filename)
+FILE *PicCodProgramFileType::open_a_file(char **filename)
 {
   FILE *t;
 
@@ -258,7 +259,7 @@ FILE *open_a_file(char **filename)
 // file - unfortunately mpasm doesn't ... so gpsim has to assume
 // the list file isn't present
 
-int cod_open_lst(const char *filename)
+int PicCodProgramFileType::cod_open_lst(const char *filename)
 {
   char *pc;
   int i;
@@ -271,36 +272,30 @@ int cod_open_lst(const char *filename)
     if( (i = strlen(lstfilename)) < (256-4))
       pc = lstfilename + i;
     else
-      return COD_FILE_NAME_TOO_LONG;
+      return ERR_FILE_NAME_TOO_LONG;
       
   }
   strcpy(pc, ".lst");
 
   // Now, let's see if we can open the file
   if(0 == (t = open_a_file(&lstfilename)))
-    return COD_LST_NOT_FOUND;
+    return ERR_LST_FILE_NOT_FOUND;
 
   fclose(t);
 
-  return COD_SUCCESS;
+  return SUCCESS;
 }
 
 
 
 //-----------------------------------------------------------
-void read_src_files_from_cod(Processor *cpu)
+int PicCodProgramFileType::read_src_files_from_cod(Processor *cpu)
 {
 #define FILE_SIZE  64
 #define FILES_PER_BLOCK (COD_BLOCK_SIZE/FILE_SIZE)
-
+  int iReturn = SUCCESS;
   int i,j,start_block,end_block,offset,num_files;
   char b[FILE_SIZE];
-
-  if(cpu->files.nsrc_files() > 0) 
-    {
-      cout << "This cpu already has source files\n";
-      return;
-    }
 
   num_files = 0;
   end_block = 0;			// eliminates a (spurious) warning
@@ -315,9 +310,9 @@ void read_src_files_from_cod(Processor *cpu)
     for(j=start_block; j<=end_block; j++) {
       read_block(temp_block, j);
       for(i=0; i<FILES_PER_BLOCK; i++) {
-	offset = i*FILE_SIZE;
-	if(temp_block[offset])
-	  num_files++;
+        offset = i*FILE_SIZE;
+        if(temp_block[offset])
+          num_files++;
       }
     }
     if(verbose)
@@ -328,67 +323,62 @@ void read_src_files_from_cod(Processor *cpu)
 
   if(num_files) {
 
-    cpu->files.nsrc_files(num_files);
     cpu->files.list_id(num_files);
-
-
-
     num_files = 0;  // now use 'num_files' as a counter.
 
     for(j=start_block; j<=end_block; j++) {
       read_block(temp_block, j);
       for(i=0; i<FILES_PER_BLOCK; i++) {
 
-	char	*filenm;
+        char	*filenm;
 
-	offset = i*FILE_SIZE;
-	get_string(b,&temp_block[offset],sizeof b);
-	filenm = b;
+        offset = i*FILE_SIZE;
+        if((iReturn = get_string(b,&temp_block[offset],sizeof b)) != SUCCESS) {
+          goto _Cleanup;
+        }
+        filenm = b;
 
 #ifdef _WIN32
         // convert to DOS style file name
-        {
-          char *cp;
+        char *cp;
 
-          // convert Unix slash to DOS slash
-	  for (cp = filenm; *cp; ++cp) { // convert Unix slash to DOS slash
-	    if ('/' == *cp)
-              *cp = '\\';
-          }
+        // convert Unix slash to DOS slash
+        for (cp = filenm; *cp; ++cp) { // convert Unix slash to DOS slash
+          if ('/' == *cp)
+            *cp = '\\';
         }
 #else
         // convert to Unix style file name
-	if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
-	    && (':' == filenm[1]) && ('\\' == filenm[2])) {
-	  char *cp;
-	  filenm += 3;			// strip C:\ from MPLAB files
-					// convert \ to / now???
-	  for (cp = filenm; *cp; ++cp) { // convert DOS slash to Unix slash
-	    if ('\\' == *cp) *cp = '/';
-	  }
-	}
+        if ((filenm[0] >= 'A') && (filenm[0] <= 'Z')
+            && (':' == filenm[1]) && ('\\' == filenm[2])) {
+          char *cp;
+          filenm += 3;			// strip C:\ from MPLAB files
+			    // convert \ to / now???
+          for (cp = filenm; *cp; ++cp) { // convert DOS slash to Unix slash
+            if ('\\' == *cp) *cp = '/';
+          }
+        }
 #endif
 
-	string s1 = string(filenm);
+        string s1 = string(filenm);
 
-	if(temp_block[offset] && (cpu->files.Find(s1) < 0)) {
+        if(temp_block[offset] && (cpu->files.Find(s1) < 0)) {
 
-	  //
-	  // Add this file to the list
-	  //
-	  cpu->files.Add(filenm);
+          //
+          // Add this file to the list
+          //
+          cpu->files.Add(filenm);
 
-    if((strncmp(lstfilename, filenm,256) == 0) && 
-       (cpu->files.list_id() >= cpu->files.nsrc_files()) )
-      {
-        if(verbose)
-          cout << "Found list file " << ((cpu->files)[num_files])->name() << endl;
-        cpu->files.list_id(num_files);
-        found_lst_in_cod = 1;
-      }
+          if((strncmp(lstfilename, filenm,256) == 0) && 
+              (cpu->files.list_id() >= cpu->files.nsrc_files()) ) {
+            if(verbose)
+              cout << "Found list file " << ((cpu->files)[num_files])->name() << endl;
+            cpu->files.list_id(num_files);
+            found_lst_in_cod = 1;
+          }
 
-    num_files++;
-  }
+          num_files++;
+        }
       }
     }
 
@@ -400,11 +390,7 @@ void read_src_files_from_cod(Processor *cpu)
 	   << cpu->files.nsrc_files() << " while reading code (gpsim bug)\n";
 
     if(!found_lst_in_cod) {
-      cpu->files.nsrc_files(num_files + 1);
-
       cpu->files.Add(lstfilename);
-
-
       if(verbose)
         printf("List file %s wasn't in .cod\n",lstfilename);
     }
@@ -412,23 +398,21 @@ void read_src_files_from_cod(Processor *cpu)
   } else
     printf("No source file info\n");
 
+_Cleanup:
   if(0){
     // Debug code 
     int i;
-
     cout << " new file stuff: " << cpu->files.nsrc_files() << " new files\n";
-
     for(i=0; i<cpu->files.nsrc_files(); i++) {
-
       cout << ((cpu->files)[i])->name() << endl;
     }
     cout << " end of new file stuff\n";
   }
-
+  return iReturn;
 }
 
 //-----------------------------------------------------------
-void read_line_numbers_from_cod(Processor *cpu)
+void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 {
   int lst_line_number = 0;
   int j,start_block,end_block,offset;
@@ -474,7 +458,7 @@ void read_line_numbers_from_cod(Processor *cpu)
 }
 
 //-----------------------------------------------------------
-void read_message_area(Processor *cpu)
+void PicCodProgramFileType::read_message_area(Processor *cpu)
 {
 #define MAX_STRING_LEN  255 /* Maximum length of a debug message */
   char DebugType,DebugMessage[MAX_STRING_LEN];
@@ -560,8 +544,9 @@ void read_message_area(Processor *cpu)
 //-----------------------------------------------------------
 // open_cod_file
 //
-void read_symbols( Processor *cpu )
+void PicCodProgramFileType::read_symbols( Processor *cpu )
 {
+  int iReturn = SUCCESS;
   char *s,length;
   short type;
   int i,j,start_block,end_block, value;
@@ -578,42 +563,36 @@ void read_symbols( Processor *cpu )
       read_block(temp_block, j);
 
       for(i=0; i<COD_BLOCK_SIZE;) {
-	s =  &temp_block[i];
+        s =  &temp_block[i];
 
-	if(*s==0)
-	  break;
+        if(*s==0)
+            break;
 
-	length = *s;
-	type  = get_short_int(&s[length+1]);
-	if(type>128)
-	  type = COD_ST_CONSTANT;
-	value = get_be_int(&s[length+3]);
+        length = *s;
+        type  = get_short_int(&s[length+1]);
+        if(type>128)
+            type = COD_ST_CONSTANT;
+        value = get_be_int(&s[length+3]);
 
-	switch(type) 
-	  {
-          case COD_ST_C_SHORT:
-	    {
-	      // Change the register name to its symbolic name
-	      cpu->registers[value]->new_name(get_string(b, s, sizeof b));
-	      register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
-	      symbol_table.add(rs);
-	    }
-	    break;
-
-	  case COD_ST_ADDRESS:
-            {
-              char *symbol;
-
-              symbol = get_string(b, s, sizeof b);
-	      symbol_table.add_address(symbol, value);
-            }
-	    break;
-	  default:
-	    symbol_table.add_constant(get_string(b,s,sizeof b),value);
-	  }
-
-
-	i += (length + 7);
+        switch(type) {
+        case COD_ST_C_SHORT: {
+          // Change the register name to its symbolic name
+          iReturn = get_string(b, s, sizeof b);
+          cpu->registers[value]->new_name(b);
+          register_symbol *rs = new register_symbol((char*)0, cpu->registers[value]);
+          symbol_table.add(rs);
+          }
+          break;
+        case COD_ST_ADDRESS:
+          iReturn = get_string(b, s, sizeof b);
+          symbol_table.add_address(b, value);
+          break;
+        default:
+          iReturn = get_string(b,s,sizeof b);
+          symbol_table.add_constant(b,value);
+          break;
+        }
+        i += (length + 7);
       }
     }
   }else
@@ -658,7 +637,7 @@ void delete_block(Block *b)
  * read_directory - read the directory block(s) in the .cod file
  */
 
-void read_directory(void)
+void PicCodProgramFileType::read_directory(void)
 {
   DirBlockInfo *dbi;
 
@@ -682,24 +661,31 @@ void read_directory(void)
   } while(1);
 }
 
-void delete_directory(void)
+void PicCodProgramFileType::delete_directory(void)
 {
-  //write me.
+//  Block *b = main_dir.dir;
+//   dbi->next_dir_block_info
+//write me.
 }
 
-void check_for_gputils(char *block)
+int PicCodProgramFileType::check_for_gputils(char *block)
 {
+  int iReturn = SUCCESS;
   char buffer[256];
   int have_gputils = 0;
 
-  get_string(buffer,&block[COD_DIR_COMPILER - 1],12);
+  if((iReturn = get_string(buffer,&block[COD_DIR_COMPILER - 1],12)) != SUCCESS) {
+    goto _Cleanup;
+  }
 
   if ((strcmp("gpasm",buffer) == 0) || (strcmp("gplink",buffer) == 0)) {
     if(verbose)
       cout << "Have gputils\n";
     have_gputils = 1;
 
-    get_string(buffer,&block[COD_DIR_VERSION - 1],19);
+    if((iReturn = get_string(buffer,&block[COD_DIR_VERSION - 1],19)) != SUCCESS) {
+      goto _Cleanup;
+    }
 
     int major=0, minor=0, micro=0;
     if (isdigit(buffer[0])) {
@@ -728,10 +714,12 @@ void check_for_gputils(char *block)
     cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
     cout << "(You're assembler version is  " << buffer << ")\n";
   }
+_Cleanup:
+  return iReturn;
 }
 //-----------------------------------------------------------
 // Read .c line numbers from special .asm files.
-void read_hll_line_numbers_from_asm(Processor *cpu)
+void PicCodProgramFileType::read_hll_line_numbers_from_asm(Processor *cpu)
 {
 #if USE_OLD_FILE_CONTEXT == 1
 
@@ -893,8 +881,8 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
 
       address=cpu->pma->find_closest_address_to_line(asmfile_id, asmsrc_line);
       if(address >= 0) {
-	cpu->program_memory[address]->hll_src_line=line_number;
-	cpu->program_memory[address]->hll_file_id=file_index;
+        cpu->program_memory[address]->hll_src_line=line_number;
+        cpu->program_memory[address]->hll_file_id=file_index;
       }
 
     }
@@ -911,25 +899,25 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
   for(address=cpu->program_memory_size()-1;address>=0;address--)
     {
       if(cpu->program_memory[address]->hll_src_line)
-	{
-	  line_number=cpu->program_memory[address]->hll_src_line;
-	  file_index=cpu->program_memory[address]->hll_file_id;
-	}
+      {
+        line_number=cpu->program_memory[address]->hll_src_line;
+        file_index=cpu->program_memory[address]->hll_file_id;
+      }
     }
 
   // Fill the addresses in the gaps.
   for(address=0;cpu->program_memory_size()>address;address++)
     {
       if(cpu->program_memory[address]->hll_src_line)
-	{
-	  line_number=cpu->program_memory[address]->hll_src_line;
-	  file_index=cpu->program_memory[address]->hll_file_id;
-	}
+      {
+        line_number=cpu->program_memory[address]->hll_src_line;
+        file_index=cpu->program_memory[address]->hll_file_id;
+      }
       if(cpu->program_memory[address]->isa()!=instruction::INVALID_INSTRUCTION)
-	{
-	  cpu->program_memory[address]->hll_file_id=file_index;
-	  cpu->program_memory[address]->hll_src_line=line_number;
-	}
+      {
+        cpu->program_memory[address]->hll_file_id=file_index;
+        cpu->program_memory[address]->hll_src_line=line_number;
+      }
     }
 
 #else
@@ -945,14 +933,11 @@ void read_hll_line_numbers_from_asm(Processor *cpu)
 // If a cpu hasn't been declared prior to calling this function, then this
 // function will attempt to determine the cpu from the .cod file.
 //
-
+/*
 int open_cod_file(Processor **pcpu, const char *filename)
 {
-  char processor_name[16];
-  int error_code= COD_SUCCESS;
   char directory[256];
   const char *dir_path_end;
-
   dir_path_end = get_dir_delim(filename);
   
   if(dir_path_end!=0)
@@ -964,15 +949,25 @@ int open_cod_file(Processor **pcpu, const char *filename)
       filename=dir_path_end+1;
       printf("filename is \"%s\"\n",filename);
   }
-  
-  codefile = fopen(filename,"rb");
+  return load_cod_file(pcpu, filename, fopen(filename,"rb"));
+}
+*/
 
+int PicCodProgramFileType::LoadProgramFile(Processor **pcpu, const char *filename,
+                                            FILE *pFile) {
+  int error_code= SUCCESS;
+  Processor *ccpu = 0;
+
+  codefile = pFile;
   if(codefile == 0) {
     printf("Unable to open %s\n",filename);
-    return COD_FILE_NOT_FOUND;
+    return ERR_FILE_NOT_FOUND;
   }
-
-  display_symbol_file_error(cod_open_lst(filename));
+  error_code= cod_open_lst(filename);
+  if(error_code != SUCCESS) {
+    display_symbol_file_error(error_code);
+    return error_code;
+  }
 
   temp_block = new char[COD_BLOCK_SIZE];
 
@@ -982,31 +977,34 @@ int open_cod_file(Processor **pcpu, const char *filename)
 
   // Perform a series of integrity checks
 
-  check_for_gputils(main_dir.dir.block);
+  if((error_code = check_for_gputils(main_dir.dir.block)) != SUCCESS) {
+    goto _Cleanup;
+  }
 
   // If we get here, then the .cod file is good.
-
   if(*pcpu == 0) 
     {
+      char processor_name[16];
       if(verbose)
-	cout << "ascertaining cpu from the .cod file\n";
+        cout << "ascertaining cpu from the .cod file\n";
 
       get_string(processor_name,&main_dir.dir.block[COD_DIR_PROCESSOR - 1], sizeof processor_name);
 
       if(verbose)
-	cout << "found a " << processor_name << " in the .cod file\n";
+        cout << "found a " << processor_name << " in the .cod file\n";
 
       *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
       if(*pcpu == 0) {
-	if(!ignore_case_in_cod)
-	  return(COD_UNRECOGNIZED_PROCESSOR);
+        if(!ignore_case_in_cod)
+          return(ERR_UNRECOGNIZED_PROCESSOR);
 
-	// Could be that there's a case sensitivity issue:
-	strtolower(processor_name);
-	*pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
+        // Could be that there's a case sensitivity issue:
+        strtolower(processor_name);
+        *pcpu = (Processor *)CSimulationContext::GetContext()->
+          add_processor(processor_name,processor_name);
 
-	if(*pcpu == 0)
-	  return(COD_UNRECOGNIZED_PROCESSOR);
+        if(*pcpu == 0)
+          return(ERR_UNRECOGNIZED_PROCESSOR);
       }
     }
   else
@@ -1034,36 +1032,35 @@ int open_cod_file(Processor **pcpu, const char *filename)
   // Read all the debug messages
   read_message_area(ccpu);
 
+_Cleanup:
   //delete directory_block_data;
   delete_directory();
   delete [] temp_block;
-  fclose(codefile);
 
-  ccpu->reset(POR_RESET);
-
-  // Tell all of the interfaces that a new program exists.
-
-  gi.new_program(ccpu);
-
+  if(*pcpu != NULL) {
+    (*pcpu)->reset(POR_RESET);
+  }
   return error_code;
 
 }
 
 
-void display_symbol_file_error(int err)
+
+
+void PicCodProgramFileType::display_symbol_file_error(int err)
 {
 
   switch(err) {
 
-  case COD_FILE_NOT_FOUND:
+  case ERR_FILE_NOT_FOUND:
     cout << "unable to find the symbol file\n";
     break;
 
-  case COD_UNRECOGNIZED_PROCESSOR:
+  case ERR_UNRECOGNIZED_PROCESSOR:
     cout << "unrecognized processor in the symbol file\n";
     break;
 
-  case COD_BAD_FILE:
+  case ERR_BAD_FILE:
     cout << "bad file format\n";
     break;
   }

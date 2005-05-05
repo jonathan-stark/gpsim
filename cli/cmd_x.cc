@@ -61,27 +61,27 @@ cmd_x::cmd_x(void)
 void cmd_x::x(void)
 {
   dump.dump(cmd_dump::DUMP_RAM);
-  if(cpu)
-    cpu->dump_registers();
+  if(GetActiveCPU())
+    GetActiveCPU()->dump_registers();
 }
 
 void cmd_x::x(int reg)
 {
-  if(!cpu)
+  if(!GetActiveCPU())
     return;
 
-  if(reg<0 || (reg >= (int)cpu->register_memory_size()) )
+  if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
     {
       cout << "bad file register\n";
       return;
     }
 
   char str[33];
-  RegisterValue ov = cpu->registers[reg]->getRV();
+  RegisterValue ov = GetActiveCPU()->registers[reg]->getRV();
 
-  cout << cpu->registers[reg]->name() << '[' << hex << reg << "]= "
+  cout << GetActiveCPU()->registers[reg]->name() << '[' << hex << reg << "]= "
        << ov.data 
-       << " = 0b" << cpu->registers[reg]->toBitStr(str,sizeof(str))
+       << " = 0b" << GetActiveCPU()->registers[reg]->toBitStr(str,sizeof(str))
        << endl;
 }
 
@@ -89,18 +89,18 @@ void cmd_x::x(int reg, int val)
 {
 
 
-  if(!cpu)
+  if(!GetActiveCPU())
     return;
 
-  if(reg<0 || (reg >= (int)cpu->register_memory_size()) )
+  if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
     {
       cout << "bad file register\n";
       return;
     }
 
-  int ov = cpu->registers[reg]->get_value();
+  int ov = GetActiveCPU()->registers[reg]->get_value();
 
-  cout << cpu->registers[reg]->name() << '(' << hex << reg << ')';
+  cout << GetActiveCPU()->registers[reg]->name() << '(' << hex << reg << ')';
 
   if(ov == val  ||  val < 0 || val > 255)
     {
@@ -109,11 +109,11 @@ void cmd_x::x(int reg, int val)
     }
 
   // write the new value to the file register:
-  cpu->registers[reg]->put_value(val);
+  GetActiveCPU()->registers[reg]->put_value(val);
 
   // read it back (some of the file registers have bit's that can't be changed)
   cout << " was " << ov << " now is " 
-       << cpu->registers[reg]->get_value() << '\n';
+       << GetActiveCPU()->registers[reg]->get_value() << '\n';
 
 
 }

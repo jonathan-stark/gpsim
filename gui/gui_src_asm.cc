@@ -144,6 +144,8 @@ public:
       sbaw->SetPC(new_value);
     }
   }
+
+  void Remove(void) {}
 };
 
 //========================================================================
@@ -1650,7 +1652,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
 void SourcePage::Close(void)
 {
-  if(notebook_child)
+  if(notebook != NULL && notebook_child != NULL)
     {
       int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
       gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
@@ -1663,7 +1665,7 @@ void SourcePage::Close(void)
       source_text = 0;
       pageindex_to_fileid = INVALID_VALUE;
       source_pcwidget = 0;
-      notebook = 0;
+//      notebook = 0;
     }
 }
 
@@ -2505,6 +2507,10 @@ void SourceBrowserAsm_Window::Build(void)
   notebook = gtk_notebook_new();
   gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_LEFT);
   gtk_notebook_set_scrollable((GtkNotebook*)notebook,TRUE);
+
+  for(int i=0;i<SBAW_NRFILES;i++) {
+    pages[i].notebook = notebook;
+  }
   gtk_signal_connect(GTK_OBJECT(notebook),
 		     "switch_page",GTK_SIGNAL_FUNC(switch_page_cb),this);
   gtk_widget_show(notebook);

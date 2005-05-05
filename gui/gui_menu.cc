@@ -246,7 +246,7 @@ file_selection_ok (GtkWidget        *w,
   if(gp)
   {
     file=gtk_file_selection_get_filename (fs);
-    if(!gpsim_open(gp->cpu, file))
+    if(!gpsim_open(gp->cpu, file, NULL))
     {
       sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
       gui_message(msg);

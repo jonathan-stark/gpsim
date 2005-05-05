@@ -25,24 +25,29 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_load.h"
+#include "input.h"
 
+#include "../src/sim_context.h"
 #include "../src/processor.h"
-#include "../src/cod.h"
 
 extern int parser_warnings;
 extern void redisplay_prompt(void);  // in input.cc
 
 // instead of including the whole symbol.h file, just get what we need:
-int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
 cmd_load c_load;
 
+#define CMD_LOAD_HEXFILE 1
+#define CMD_LOAD_CMDFILE 2
+#define CMD_LOAD_CODFILE 3 // s for Symbol file
+
+
 static cmd_options cmd_load_options[] =
 {
-  {"h",1,    OPT_TT_BITFLAG},
-  {"c",2,    OPT_TT_BITFLAG},
-  {"s",3,    OPT_TT_BITFLAG},
+  {"h",CMD_LOAD_HEXFILE,    OPT_TT_BITFLAG},
+  {"c",CMD_LOAD_CMDFILE,    OPT_TT_BITFLAG},
+  {"s",CMD_LOAD_CODFILE,    OPT_TT_BITFLAG},
  { 0,0,0}
 };
 
@@ -73,43 +78,40 @@ cmd_load::cmd_load(void)
 int parse_string(char *cmd_string);
 extern void process_command_file(const char * file_name);
 
+/**
+  * cmd_load.load()
+  * returns boolean
+  */
 int cmd_load::load(int bit_flag,const char *filename)
 {
-  int iReturn = 1; // as a boolean
+  int iReturn = (int)TRUE;
   switch(bit_flag)
     {
-    case 1:
-      if(have_cpu(1))
-      {
-	      if(verbose)
-	        cout << "cmd_load::load hex file " << filename << '\n';
-	      iReturn = cpu->load_hex(filename);
+    case CMD_LOAD_HEXFILE:
+    case CMD_LOAD_CODFILE:
+      if(verbose) {
+        switch(bit_flag) {
+          case CMD_LOAD_HEXFILE:
+  	        cout << "cmd_load::load hex file " << filename << '\n';
+            break;
+          case CMD_LOAD_CODFILE:
+            cout << " cmd_load::load cod file "  << filename << '\n';
+            break;
+        }
       }
-      else
-        cout << " No cpu has been selected\n";
+      iReturn = CSimulationContext::GetContext()->LoadProgram(
+        filename);
       break;
 
-    case 2:
+    case CMD_LOAD_CMDFILE:
       /* Don't display parser warnings will processing the command file */
       parser_warnings = 0;
       process_command_file(filename);
       parser_warnings = 1;
       break;
-    case 3:
-      if(verbose)
-        cout << " cmd_load::load cod file "  << filename << '\n';
-
-      iReturn=load_symbol_file(&cpu, filename);
-
-      if(iReturn)
-      {
-        cout << "found a fatal error in the symbol file " << filename <<'\n';
-        display_symbol_file_error(iReturn);
-      }
-      else
-        new_processor(cpu);
-      iReturn = iReturn == COD_SUCCESS;
-      break;
+    default:
+      cout << "Unknown option flag" << endl;
+      iReturn = (int)FALSE; // as a boolean
     }
 
   // Most of the time diagnostic info will get printed while a processor
@@ -119,3 +121,6 @@ int cmd_load::load(int bit_flag,const char *filename)
   return iReturn;
 }
 
+int cmd_load::load(const char *file, const char * pProcessorType) {
+  return gpsim_open(get_active_cpu(), file, pProcessorType);
+}

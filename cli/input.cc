@@ -367,6 +367,16 @@ void start_new_input_stream(void)
 {
   Stack.Push();
 }
+
+/*******************************************************
+ */
+void clear_input_buffer(void)
+{
+  LLInput * pLine;
+  while((pLine = Stack.GetNext()) != NULL)
+    delete pLine;
+}
+
 /*******************************************************
  * start_parse
  * 
@@ -403,7 +413,14 @@ int start_parse(void)
 int parse_string(char * str)
 {
   add_string_to_input_buffer(str);
-  return start_parse();
+  int iReturn = start_parse();
+  if(iReturn == 1) {
+    // If the str was a 'load c x.stc' file and the parsing
+    // was aborted we need to remove the remaining
+    // strings.
+    clear_input_buffer();
+  }
+  return iReturn;
 }
 
 //========================================================================
@@ -414,18 +431,18 @@ static int check_old_command(char *s)
     char new_command[256];
     { // "module position <modulename> <xpos> <ypos>
     	char module_name[256];
-	int xpos, ypos;
+      int xpos, ypos;
     	if(sscanf(s,"module position %s %d %d\n",module_name, &xpos, &ypos)==3)
-	{
-		cout<<"Found old style \"module position\" command"<<endl;
-		sprintf(new_command,"%s.xpos=%d.0\n",module_name,xpos);
-		add_string_to_input_buffer(new_command);
-		cout<<"Translation: "<<new_command<<endl;
-		sprintf(new_command,"%s.ypos=%d.0\n",module_name,ypos);
-		add_string_to_input_buffer(new_command);
-		cout<<"Translation: "<<new_command<<endl;
-		return 1;
-	}
+      {
+        cout<<"Found old style \"module position\" command"<<endl;
+        sprintf(new_command,"%s.xpos=%d.0\n",module_name,xpos);
+        add_string_to_input_buffer(new_command);
+        cout<<"Translation: "<<new_command<<endl;
+        sprintf(new_command,"%s.ypos=%d.0\n",module_name,ypos);
+        add_string_to_input_buffer(new_command);
+        cout<<"Translation: "<<new_command<<endl;
+        return 1;
+      }
     }
     return 0;
 }
@@ -457,7 +474,7 @@ void process_command_file(const char * file_name)
     {
 
       if((verbose) && DEBUG_PARSER)
-	cout << "processing a command file\n";
+          cout << "processing a command file\n";
 
       Stack.Push();
 
@@ -489,7 +506,6 @@ void process_command_file(const char * file_name)
 
 }
 
-extern int load_symbol_file(Processor **, const char *);
 /*********************************************
   Function: gpsim_open()
 
@@ -501,46 +517,25 @@ extern int load_symbol_file(Processor **, const char *);
             0   - failure
 */
 
-int gpsim_open(Processor *cpu, const char *file)
+int gpsim_open(Processor *cpu, const char *file, const char * pProcessorType)
 {
   if(!file)
     return 0;
 
-  char *str = strrchr(file,'.');
-  if(!str)
-    return 0;
-
-  str++;
-
-  // Check for the acceptible file extensions.
-
-  if(!strcmp(str,"hex") || !strcmp(str,"HEX")) {
-
-    if(!cpu) {
-      puts("gpsim_open::No processor has been selected!");
-      return 0;
-    }
-
-    return cpu->load_hex(file);
-  }
-  else if(!strcmp(str,"cod") || !strcmp(str,"COD"))
-    return load_symbol_file(&command::cpu, file) == COD_SUCCESS;
-  else if(!strcmp(str,"stc") || !strcmp(str,"STC")) {
+  // Check for the command file, file extension.
+  if(IsFileExtension(file,"stc") || IsFileExtension(file,"STC")) {
     process_command_file(file);
     // A stc file could have any sequence of commands.
     // Just ignore the return value of parse_string().
     parse_string("\n");
     return 1;
-  } else
-
-    cout << "Unknown file extension \"" << str <<"\" \n";
-
+  } else {
+    // Assume a Program file
+    return CSimulationContext::GetContext()->LoadProgram(
+      file, pProcessorType);
+  }
   return 0;
-
 }
-
-
-
 
 
 //*********************************************

@@ -22,10 +22,12 @@ Boston, MA 02111-1307, USA.  */
 #define __PIC_PROCESSORS_H__
 #include <unistd.h>
 #include <glib.h>
+#include <stdio.h>
 
 #include "gpsim_classes.h"
 #include "modules.h"
 #include "processor.h"
+#include "program_files.h"
 
 #include "14bit-registers.h"
 
@@ -222,6 +224,8 @@ public:
 
   EEPROM      *eeprom;       // set to NULL for PIC's that don't have a data EEPROM
 
+  bool LoadProgramFile(const char *pFilename, FILE *pFile);
+
   void add_sfr_register(sfr_register *reg, unsigned int addr,
 			RegisterValue por_value=RegisterValue(0,0),char *new_name=0);
 
@@ -233,7 +237,6 @@ public:
   virtual void tris_instruction(unsigned int tris_register) {return;};
   virtual void create_symbols(void);
   virtual void create_stack(void) {stack = new Stack;};
-  virtual bool load_hex(const char *hex_file);
   virtual void run(bool refresh=true);
   virtual void finish(void);
 
@@ -280,6 +283,31 @@ public:
   static Processor *construct(void);
   pic_processor(void);
 };
+
+
+/*
+ *  PicHexProgramFileType
+ *  Note that the code is in hexutils.cc
+ *
+ */
+
+class PicHexProgramFileType : public ProgramFileType {
+private:
+  unsigned char checksum;
+
+  int           readihex16 (Processor **pProcessor, FILE * file);
+  int           getachar (FILE * file);
+  unsigned char getbyte (FILE * file);
+  unsigned int  getword(FILE *file);
+
+public:
+  PicHexProgramFileType();
+
+  // ProgramFileType overrides
+  virtual int  LoadProgramFile(Processor **pProcessor, const char *pFilename,
+                               FILE *pFile);
+};
+
 
 #define cpu_pic ( (pic_processor *)cpu)
 

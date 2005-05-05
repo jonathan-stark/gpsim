@@ -348,14 +348,6 @@ void Symbol_Table::clear_all() {
   }
 }
 
-//--------------------------------------------
-
-int  load_symbol_file(Processor **cpu, const char *filename)
-{
-  cout << "Loading " << filename << '\n';
-  return open_cod_file(cpu,  filename);
-
-}
 
 //------------------------------------------------------------------------
 // symbols

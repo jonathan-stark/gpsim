@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 
+#include "fopen-path.h"
+#include "program_files.h"
 #include "sim_context.h"
 #include "breakpoints.h"
 
@@ -65,18 +67,28 @@ CSimulationContext *CSimulationContext::GetContext() {
   return s_SimulationContext;
 }
 
-void CSimulationContext::SetDefaultProcessor(const char * processor_type,
+bool CSimulationContext::SetDefaultProcessor(const char * processor_type,
                                              const char * processor_new_name) {
-  m_DefProcessorName    = processor_type;
-  m_DefProcessorNameNew = processor_new_name;
+  ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
+  if(pc != NULL) {
+    m_DefProcessorName    = processor_type;
+    if(processor_new_name == NULL)
+      m_DefProcessorNameNew.clear();
+    else
+      m_DefProcessorNameNew = processor_new_name;
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
 //-------------------------------------------------------------------
-Processor * CSimulationContext::set_processor(const char * processor_type,
-                                              const char * processor_new_name)
+Processor * CSimulationContext::SetProcessorByType(const char * processor_type,
+                                                   const char * processor_new_name)
 {
   Processor *p;
-  CProcessorList::iterator it = processor_list.find(string(processor_type));
+  CProcessorList::iterator it = processor_list.findByType(string(processor_type));
   GetBreakpoints().clear_all(GetActiveCPU());
   GetSymbolTable().clear();
   if(processor_list.end() == it) {
@@ -99,38 +111,88 @@ Processor * CSimulationContext::add_processor(const char * processor_type,
     cout << "Trying to add new processor '" << processor_type << "' named '" 
 	 << processor_new_name << "'\n";
 
-  ProcessorConstructor *pc = ProcessorConstructorList::GetList()->find(processor_type);
+  ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
   if(pc) {
-    Processor *p = pc->cpu_constructor();
-    if(p) {
-      p->m_pConstructorObject = pc;
-      processor_list.insert(CProcessorList::value_type(p->name(), p));
-      p->initializeAttributes();
-      active_cpu = p;
-      //p->processor_id = 
-      active_cpu_id = ++cpu_ids;
-      if(verbose) {
-        cout << processor_type << '\n';
-        cout << "Program Memory size " <<  p->program_memory_size() << '\n';
-        cout << "Register Memory size " <<  p->register_memory_size() << '\n';
-      }
-
-      // Tell the gui or any modules that are interfaced to gpsim
-      // that a new processor has been declared.
-      gi.new_processor(p);
-      instantiated_modules_list.push_back(p);
-
-      return p;
-    }
-    else
-      cout << " unable to add a processor (BUG?)\n";
-
+    return add_processor(pc);
   } else
-    cout << processor_type << " is not a valid processor.\n(try 'processor list' to see a list of valid processors.\n";
-
-  return(0);
+    cout << processor_type << " is not a valid processor.\n"
+      "(try 'processor list' to see a list of valid processors.\n";
+  return 0;
 }
 
+Processor * CSimulationContext::add_processor(ProcessorConstructor *pc)
+{
+  Processor *  p = pc->cpu_constructor();
+  if(p) {
+    add_processor(p);
+    p->m_pConstructorObject = pc;
+  }
+  else
+    cout << " unable to add a processor (BUG?)\n";
+  return p;
+}
+
+Processor * CSimulationContext::add_processor(Processor *p)
+{
+    processor_list.insert(CProcessorList::value_type(p->name(), p));
+    p->initializeAttributes();
+    active_cpu = p;
+    //p->processor_id = 
+    active_cpu_id = ++cpu_ids;
+    if(verbose) {
+      cout << p->name() << '\n';
+      cout << "Program Memory size " <<  p->program_memory_size() << '\n';
+      cout << "Register Memory size " <<  p->register_memory_size() << '\n';
+    }
+
+    // Tell the gui or any modules that are interfaced to gpsim
+    // that a new processor has been declared.
+    gi.new_processor(p);
+    instantiated_modules_list.push_back(p);
+
+    return p;
+
+  return 0;
+}
+
+int CSimulationContext::LoadProgram(const char *filename,
+                                    const char *pProcessorType) {
+  bool bReturn = false;
+  Processor *pProcessor;
+  FILE * pFile = fopen_path (filename, "r");
+  if(pProcessorType != NULL) {
+    pProcessor = SetProcessorByType(pProcessorType, NULL);
+    if(pProcessor != NULL) {
+      bReturn  = pProcessor->LoadProgramFile(filename, pFile);
+    }
+  }
+  else if(!m_DefProcessorName.empty()) {
+    pProcessor = SetProcessorByType(m_DefProcessorName.c_str(), NULL);
+    if(pProcessor != NULL) {
+      bReturn  = pProcessor->LoadProgramFile(filename, pFile);
+    }
+  }
+  else {
+    pProcessor = NULL;
+    // use processor defined in program file
+    bReturn  = ProgramFileTypeList::GetList().LoadProgramFile(
+      &pProcessor, filename, pFile);
+    // JRH - I would prefer that CSimulationContext add the processor
+    // but since LoadProgramFile() can create a processor based on the
+    // the processor definition in the program file, then it also adds
+    // it to the processor list.
+//    if(bReturn) {
+      // set processor into the simulation context
+//      add_processor(pProcessor);
+//    }
+  }
+  fclose(pFile);
+  if(bReturn) {
+    // Tell all of the interfaces that a new program exists.
+    gi.new_program(pProcessor);
+  }
+  return bReturn;
+}
 
 //------------------------------------------------------------------------
 // dump_processor_list - print out all of the processors a user is 
@@ -185,12 +247,17 @@ Processor * CSimulationContext::GetActiveCPU() {
 }
 
 CSimulationContext::CProcessorList::iterator
-CSimulationContext::CProcessorList::find(const key_type& _Keyval) {
+CSimulationContext::CProcessorList::findByType(const key_type& _Keyval) {
+  // First find a ProcessorConstructor that matches the
+  // processor type we are looking for. This should handle
+  // naming variations.
   ProcessorConstructorList * pcl = ProcessorConstructorList::GetList();
-  ProcessorConstructor * pc = pcl->find(_Keyval.c_str());
+  ProcessorConstructor * pc = pcl->findByType(_Keyval.c_str());
   if(pc == NULL)
     return end();
-
+  // Now find the specific allocated processor that
+  // was created with the ProcessorConstructor object 
+  // we found above.
   iterator it;
   iterator itEnd = end();
   for(it = begin(); it != itEnd; it++) {

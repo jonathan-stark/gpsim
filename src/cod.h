@@ -22,15 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #if !defined(__COD_H)
 #define __COD_H
 
-enum cod_errors
-{
-  COD_SUCCESS,
-  COD_FILE_NOT_FOUND,
-  COD_UNRECOGNIZED_PROCESSOR,
-  COD_FILE_NAME_TOO_LONG,
-  COD_LST_NOT_FOUND,
-  COD_BAD_FILE
-};
+#include "program_files.h"
 
 /*
  * .cod definitions
@@ -134,5 +126,47 @@ typedef struct dir_block_info {
 #define COD_ST_C_SHORT       2
 #define COD_ST_ADDRESS      46
 #define COD_ST_CONSTANT     47
+
+class PicCodProgramFileType : public ProgramFileType {
+private:
+  // PicHexProgramFileType member functions
+  void    display_symbol_file_error(int err);
+
+  FILE *  open_a_file(char **filename);
+  int     cod_open_lst(const char *filename);
+
+  void    read_directory(void);
+  int     check_for_gputils(char *block);
+  void    read_hex_from_cod( Processor *cpu );
+  void    read_line_numbers_from_cod(Processor *cpu);
+  void    read_message_area(Processor *cpu);
+  void    delete_directory(void);
+  int     read_src_files_from_cod(Processor *cpu);
+
+  int     get_string(char *dest, char *src, size_t len);
+  void    read_block(char * block, int block_number);
+
+  void    read_symbols( Processor *cpu );
+  void    read_hll_line_numbers_from_asm(Processor *cpu);
+
+
+  FILE *codefile;
+  char *temp_block;
+  char *lstfilename;
+
+  DirBlockInfo main_dir;
+
+  // Define a flag that tells whether or not we should care about the
+  // case of text strings in the .cod file. 
+  int ignore_case_in_cod;
+
+  int gputils_recent;
+
+public:
+  PicCodProgramFileType();
+  // ProgramFileType overrides
+  virtual int  LoadProgramFile(Processor **pProcessor, const char *pFilename,
+                               FILE *pFile);
+};
 
 #endif

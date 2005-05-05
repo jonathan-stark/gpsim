@@ -54,6 +54,7 @@ libgpsim_la_SOURCES = \
 	pie.cc \
 	pir.cc \
 	processor.cc \
+	program_files.cc \
 	protocol.cc \
 	registers.cc \
 	sim_context.cc \
@@ -121,6 +122,7 @@ gpsiminclude_HEADERS = \
 	pie.h \
 	pir.h \
 	processor.h \
+	program_files.h \
 	protocol.h \
 	pthread-wrap.h \
 	registers.h \

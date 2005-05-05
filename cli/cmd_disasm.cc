@@ -55,7 +55,7 @@ cmd_disassemble::cmd_disassemble(void)
 
 void cmd_disassemble::disassemble(Expression *expr)
 {
-
+  Processor *cpu = GetActiveCPU();
   if(cpu) {
 
     // Select a default range:

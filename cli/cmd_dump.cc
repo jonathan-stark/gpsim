@@ -69,6 +69,7 @@ cmd_dump::cmd_dump(void)
 
 void cmd_dump::dump_sfrs(void)
 {
+  Processor * cpu = GetActiveCPU();
   unsigned int reg_size = cpu->register_size();
   unsigned int uToDisplayCount = 0;
   unsigned int uColumns = SFR_COLUMNS;
@@ -76,12 +77,13 @@ void cmd_dump::dump_sfrs(void)
   unsigned int auTopRowIndex[SFR_COLUMNS];
   // Examine all registers this pic has to offer
   for (unsigned int i = 0; i < cpu->register_memory_size(); i++) {
-    if(cpu->registers[i]->isa() == Register::SFR_REGISTER &&
+    Register * pReg = cpu->registers[i];
+    if(pReg->isa() == Register::SFR_REGISTER &&
       // Found an sfr. Display its contents only if not aliased
       // at some other address too.
-      i == cpu->registers[i]->address) {
+      i == pReg->address) {
       uToDisplayCount++;
-      RegListToDisplay.push_back(cpu->registers[i]);
+      RegListToDisplay.push_back(pReg);
     }
   }
   //
@@ -131,7 +133,7 @@ void cmd_dump::dump(int mem_type)
     {
     case DUMP_EEPROM:
       {
-      pic_processor *pic = dynamic_cast<pic_processor *> (cpu);
+      pic_processor *pic = dynamic_cast<pic_processor *> (GetActiveCPU());
       if(pic && pic->eeprom) {
         fr = pic->eeprom->get_rom();
         mem_size = pic->eeprom->get_rom_size();
@@ -140,10 +142,10 @@ void cmd_dump::dump(int mem_type)
       }
       break;
     case DUMP_RAM:
-      mem_size = cpu->register_memory_size();
-      reg_size = cpu->register_size();
+      mem_size = GetActiveCPU()->register_memory_size();
+      reg_size = GetActiveCPU()->register_size();
       uRegPerRow = reg_size == 1 ? REGISTERS_PER_ROW : 8;
-      fr = cpu->registers;
+      fr = GetActiveCPU()->registers;
       break;
     case DUMP_SFRS:
       dump_sfrs();
@@ -224,11 +226,11 @@ void cmd_dump::dump(int mem_type)
 
     dump_sfrs();
 
-    pic_processor *pic = dynamic_cast<pic_processor *>(cpu);
+    pic_processor *pic = dynamic_cast<pic_processor *>(GetActiveCPU());
     if(pic)
       printf("\n%s = %02x\n",pic->W->name().c_str(), pic->W->get_value());
 
-    printf("pc = 0x%x\n",cpu->pc->value);
+    printf("pc = 0x%x\n",GetActiveCPU()->pc->value);
   }
   
   gpsim_set_bulk_mode(0);

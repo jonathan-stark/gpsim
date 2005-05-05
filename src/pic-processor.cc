@@ -53,6 +53,8 @@ Boston, MA 02111-1307, USA.  */
 
 guint64 simulation_start_cycle;
 
+#include "cod.h"
+
 
 //================================================================================
 // Global Declarations
@@ -858,51 +860,28 @@ void pic_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 //
 extern int readihex16 (pic_processor *cpu, FILE * file);
 
-bool pic_processor::load_hex (const char *hex_file)
-{
-
-  FILE *inputfile = fopen_path (hex_file, "r");
-
-  if(verbose)
-    cout << "load hex\n";
-
-  if (inputfile == 0)
-    {
-      cout << "Error: Couldn't open " << hex_file << '\n';
-      return false;
-    }
-
-  // assume no configuration word is in the hex file.
-  set_config_word(config_word_address(),0xffff);
-
-  if (!readihex16 (this, inputfile)) {
-    
-    // No errors were found in the hex file.
-
-    fclose (inputfile);
-
-    // Tell the gui that we've got some code.
-    gi.new_program(this);
-
-    if(verbose)
-      cout << "Configuration word = 0x"  
-	   << setw(4) << setfill('0') << get_config_word() << '\n';
-
-    set_frequency(10e6);
-
-    reset(POR_RESET);
-
-    simulation_mode = STOPPED;
-
-    if(verbose)
-      get_cycles().dump_breakpoints();
-
-    return true;
+bool pic_processor::LoadProgramFile(const char *pFilename, FILE *pFile) {
+  Processor * pProcessor = this;
+  // Tries the file type based on the file extension first.
+  // If it fails tries the other type. This code will need
+  // to change if pic_processor is moved to its own module
+  // because then we cannot garrentee that these file types
+  // will be the first two in the list.
+  ProgramFileType * aFileTypes[] = {
+    ProgramFileTypeList::GetList()[0],  // PicHexProgramFileType
+    ProgramFileTypeList::GetList()[1]   // PicCodProgramFileType
+  };
+  if(IsFileExtension(pFilename,"cod")) {
+    // If 'cod' file extension, try PicCodProgramFileType first
+    swap(aFileTypes[0], aFileTypes[1]);
   }
-
-  return false;
+  int iReturn  = aFileTypes[0]->LoadProgramFile(&pProcessor, pFilename, pFile);
+  if (iReturn != ProgramFileType::SUCCESS) {
+    fseek(pFile, 0, SEEK_SET);
+    iReturn = aFileTypes[1]->LoadProgramFile(&pProcessor, pFilename, pFile);
+  }
+  return iReturn == ProgramFileType::SUCCESS;
 }
-
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------

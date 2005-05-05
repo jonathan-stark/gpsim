@@ -27,6 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <map>
 
+#include "../config.h"
 #include "gpsim_classes.h"
 #include "modules.h"
 #include "trace.h"
@@ -37,6 +38,9 @@ Boston, MA 02111-1307, USA.  */
 
 class Processor;
 class ProcessorConstructor;
+class ProgramFileType;
+
+void GPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT);
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
@@ -295,14 +299,9 @@ class FileContextList : private vector<FileContext>
       return list_file_id;
     }
 
-  void nsrc_files(int _num_src_files) 
-    {
-      num_src_files = _num_src_files;
-    }
-
   int nsrc_files(void) 
     {
-      return num_src_files;
+      return (int) size();
     }
 
   char *ReadLine(int file_id, int line_number, char *buf, int nBytes);
@@ -311,7 +310,6 @@ class FileContextList : private vector<FileContext>
 
  private:
   int lastFile;
-  int num_src_files;
   int list_file_id;
 };
 
@@ -322,7 +320,8 @@ class FileContextList : private vector<FileContext>
 class Processor : public Module
 {
 public:
-
+  typedef bool (*LPFNISPROGRAMFILE)(const char *, FILE *);
+  virtual bool LoadProgramFile(const char *hex_file, FILE *pFile) = 0;
   /// The source files for this processor.
   FileContextList files;
 
@@ -452,7 +451,8 @@ public:
   // restore the processor state
   virtual void load_state(FILE *);
 
-  virtual bool load_hex(const char *hex_file)=0;
+//  virtual bool is_hex_file(const char *hex_file)=0;
+//  virtual bool load_hex(FILE *)=0;
 
   //
   // Execution control
@@ -534,6 +534,7 @@ public:
   // Configuration control
 
   virtual void set_config_word(unsigned int address, unsigned int cfg_word) = 0;
+  virtual unsigned int get_config_word(void) = 0;
   virtual unsigned int config_word_address(void) {return 0;}
 
   //
@@ -603,9 +604,10 @@ class ProcessorConstructor
 {
 public:
 
+  typedef Processor * (*tCpuContructor) (void);
 
   // A pointer to a function that when called will construct a processor
-  Processor * (*cpu_constructor) (void);
+  tCpuContructor cpu_constructor;
 
   // The processor name (plus upto three aliases).
   #define nProcessorNames 4
@@ -615,7 +617,8 @@ public:
   //------------------------------------------------------------
   // contructor -- 
   //
-  ProcessorConstructor(  Processor * (*_cpu_constructor) (void),
+  ProcessorConstructor(
+       tCpuContructor    _cpu_constructor,
 			 const char *name1, 
 			 const char *name2, 
 			 const char *name3=0,
@@ -630,7 +633,7 @@ public:
 class ProcessorConstructorList : public list <ProcessorConstructor *> {
 public:
   ProcessorConstructorList() {}
-  static ProcessorConstructor * find(const char *name);
+  static ProcessorConstructor * findByType(const char *type);
   static void dump(void);
   static ProcessorConstructorList *GetList();
 private:
