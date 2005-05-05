@@ -33,6 +33,9 @@ ProgramFileTypeList &ProgramFileTypeList::GetList() {
 ProgramFileTypeList::ProgramFileTypeList() {
 }
 
+ProgramFileTypeList::~ProgramFileTypeList() {
+}
+
 bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
                                           const char *pFilename,
                                           FILE *pFile) {
