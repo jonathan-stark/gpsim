@@ -73,6 +73,7 @@ src_OBJECTS =			\
 	pie.o			\
 	protocol.o		\
 	pir.o			\
+	program_files.o \
 	processor.o		\
 	registers.o		\
 	sim_context.o		\
