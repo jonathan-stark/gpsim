@@ -423,7 +423,7 @@ register_symbol::register_symbol(const char *_name, Register *_reg)
 }
 
 register_symbol::register_symbol(Register *_reg)
-  : reg(_reg), symbol(_reg->name())
+  : symbol(_reg->name()), reg(_reg)
 {
 }
 

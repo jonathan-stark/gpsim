@@ -63,7 +63,6 @@ ProgramFileBuf::ProgramFileBuf(FILE *pFile) {
 }
 
 ProgramFileBuf::int_type ProgramFileBuf::underflow( ) {
-  char z = 0;
   if(gptr() < egptr()) {
     return *gptr();
   }
