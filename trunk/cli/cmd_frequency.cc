@@ -63,7 +63,7 @@ void cmd_frequency::set(Expression *expr)
   if(frequency <= 0.0) 
     cout << "Error: the clock must be a positive value.\n";
   else
-    cpu->set_frequency(frequency);
+    GetActiveCPU()->set_frequency(frequency);
 
 }
 
@@ -72,7 +72,7 @@ void cmd_frequency::print()
   if(!have_cpu(1))
     return;
 
-  cout << "Clock frequency: " << cpu->get_frequency()/1e6 << " MHz.\n";
+  cout << "Clock frequency: " << GetActiveCPU()->get_frequency()/1e6 << " MHz.\n";
 }
 
 cmd_frequency frequency;

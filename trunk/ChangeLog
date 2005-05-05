@@ -1,3 +1,30 @@
+2005-05-05 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_break.cc, cli/cmd_disasm.cc, cli/cmd_dump.cc,
+	cli/cmd_frequency.cc, cli/cmd_list.cc, cli/cmd_load.cc,
+	cli/cmd_load.h, cli/cmd_log.cc, cli/cmd_processor.cc,
+	cli/cmd_reset.cc, cli/cmd_step.cc, cli/cmd_x.cc, cli/command.cc,
+	cli/command.h, cli/input.cc, cli/input.h, cli/parse.yy,
+	src/cod.cc, src/cod.h, src/hexutils.cc, src/Makefile.am,
+	src/modules.h, src/os_dependent.cc, src/pic-processor.cc,
+	src/pic-processor.h, src/processor.cc, src/processor.h,
+	src/program_files.cc, src/program_files.h, src/sim_context.cc,
+	src/sim_context.h, src/src.vcproj, src/symbol.cc, src/symbol.h,
+	config_win32.h.in, configure.ac, plat/win32/gpsim.def,
+	gui/gui_menu.cc, gui/gui_src_asm.cc, gui/gui_statusbar.cc,
+	gpsim/Makefile.am:
+	- Replaced the cli and gui references to hexfiles verses
+	cod file with program files. Gpsim will now figure out
+	the file type and load the file.
+	- Both the gui and cli will recoginze command files by the stc
+	file extension. All other files are assumed to be program files.
+	- The c, h and s load options of the load command will be accepted
+	for backwards compatibility of existing command files but are no
+	longer needed.
+	- The processor command is not optional. If the program file
+	contains the information about the processor type, gpsim will
+	allocate the processor type based on the program file information.
+	Using the processor command overrides this behavior.
+
 2005-05-01 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.def: MSVC sync
 

@@ -439,7 +439,7 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
     {
       program_memory[address] = disasm(address,value);
       if(program_memory[address] == 0)
-	program_memory[address] = &bad_instruction;
+        program_memory[address] = &bad_instruction;
       program_memory[address]->add_line_number_symbol(address);
     }
   else
@@ -1016,7 +1016,7 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
         pLast->replaced = br->replaced;
         // for good measure
         br->replaced = NULL;
-        break;
+        return 1;
       }
       else {
         pLast = br;
@@ -1024,6 +1024,7 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
       }
     }
   }
+  return 0;
 }
 
 //-------------------------------------------------------------------
@@ -1852,23 +1853,19 @@ ProcessorConstructorList * ProcessorConstructorList::GetList() {
   return processor_list = ProcessorConstructor::GetList();
 }
 
-ProcessorConstructor::ProcessorConstructor(Processor * (*_cpu_constructor) (void),
+ProcessorConstructor::ProcessorConstructor(tCpuContructor _cpu_constructor,
 					   const char *name1, 
 					   const char *name2, 
 					   const char *name3,
 					   const char *name4) 
 {
-
   cpu_constructor = _cpu_constructor;  // Pointer to the processor constructor
   names[0] = name1;                    // First name
   names[1] = name2;                    //  and three aliases...
   names[2] = name3;
   names[3] = name4;
-
   // Add the processor to the list of supported processors:
-
   GetList()->push_back(this);
-
 }
 
 ProcessorConstructorList * ProcessorConstructor::processor_list = new ProcessorConstructorList();
@@ -1883,27 +1880,22 @@ ProcessorConstructorList * ProcessorConstructor::GetList() {
 
 
 //------------------------------------------------------------
-// find -- search through the list of supported processors for
-//         the one matching 'name'.
+// findByType -- search through the list of supported processors for
+//               the one matching 'name'.
 
 
-ProcessorConstructor *ProcessorConstructorList::find(const char *name)
+ProcessorConstructor *ProcessorConstructorList::findByType(const char *name)
 {
-
-
   ProcessorConstructorList::iterator processor_iterator;
-
   for (processor_iterator = processor_list->begin();
        processor_iterator != processor_list->end(); 
        processor_iterator++) {
 
     ProcessorConstructor *p = *processor_iterator;
-
     for(int j=0; j<nProcessorNames; j++)
       if(p->names[j] && strcmp(name,p->names[j]) == 0)
         return p;
   }
-
   return 0;
 }
 

@@ -33,6 +33,8 @@ Boston, MA 02111-1307, USA.  */
 #include <vector>
 #include <algorithm>
 
+#include "../config.h"
+
 #ifndef _WIN32
 #include <dlfcn.h>
 #define STRICMP strcasecmp
@@ -94,7 +96,7 @@ int FileExtCompare(const char *pExt1, const char *pExt2) {
 #endif
 }
 
-bool IsFileExtension(const char *pszFile, const char *pFileExt) {
+bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
   string s(pszFile);
   translatePath(s);
   string::size_type pos = s.find_last_of('.');

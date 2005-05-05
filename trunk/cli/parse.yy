@@ -416,7 +416,29 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
               YYABORT;
             }
 	        }
-          ;
+	        | LOAD LITERAL_STRING_T
+          {
+            quit_parse = c_load.load($2->getVal()) == 0;
+            free($2);
+
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+	        }
+          | LOAD LITERAL_STRING_T LITERAL_STRING_T
+          {
+            quit_parse = c_load.load($3->getVal(), $2->getVal()) == 0;
+            free($3);
+
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+	        }
+	        ;
 
 log_cmd
           : LOG                         {c_log.log();}

@@ -103,7 +103,7 @@ cmd_break::cmd_break(void)
 
 void cmd_break::list(void)
 {
-  if(cpu)
+  if(GetActiveCPU())
     bp.dump();
 }
 
@@ -157,7 +157,7 @@ static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
 
 void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
 {
-  if (!bCheckOptionCompatibility(co, pValue) || !cpu)
+  if (!bCheckOptionCompatibility(co, pValue) || !GetActiveCPU())
     return;
 
   // 
@@ -167,7 +167,7 @@ void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
   if (pAddress != NULL) { 
     gint64 iAddress;
     pAddress->get(iAddress);
-    b = bp.set_execution_break(cpu,iAddress);
+    b = bp.set_execution_break(GetActiveCPU(),iAddress);
     if (!bp.set_expression(b,pExpr))
       delete pExpr;
     return;
@@ -228,7 +228,7 @@ void cmd_break::set_break(cmd_options *co, Expression *pExpr)
   if (pCompareExpr != NULL) {
      
     Register * pReg = NULL;
-    int  uMask = cpu->register_mask();
+    int  uMask = GetActiveCPU()->register_mask();
     LiteralSymbol* pLeftSymbol = dynamic_cast<LiteralSymbol*>(pCompareExpr->getLeft());
     if (pLeftSymbol != NULL) {
       register_symbol *pRegSym = dynamic_cast<register_symbol*>(pLeftSymbol->evaluate());
@@ -298,7 +298,7 @@ void cmd_break::set_break(Value *v)
 void cmd_break::set_break(int bit_flag)
 {
 
-  if(!cpu)
+  if(!GetActiveCPU())
     return;
 
   int b;
@@ -306,7 +306,7 @@ void cmd_break::set_break(int bit_flag)
   switch(bit_flag) {
 
   case STK_OVERFLOW:
-    b = bp.set_stk_overflow_break(cpu);
+    b = bp.set_stk_overflow_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when stack over flows.  " <<
@@ -315,7 +315,7 @@ void cmd_break::set_break(int bit_flag)
     break;
 
   case STK_UNDERFLOW:
-    b = bp.set_stk_underflow_break(cpu);
+    b = bp.set_stk_underflow_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when stack under flows.  " <<
@@ -325,7 +325,7 @@ void cmd_break::set_break(int bit_flag)
 
 
   case WDT:
-    b = bp.set_wdt_break(cpu);
+    b = bp.set_wdt_break(GetActiveCPU());
 
     if(b < MAX_BREAKPOINTS)
       cout << "break when wdt times out.  " <<
@@ -344,7 +344,7 @@ int cmd_break::set_break(int bit_flag, guint64 v)
 {
 
   int b = MAX_BREAKPOINTS;
-  if(!cpu)
+  if(!GetActiveCPU())
     return b;
 
   unsigned int value = (unsigned int)v;
@@ -352,7 +352,7 @@ int cmd_break::set_break(int bit_flag, guint64 v)
   switch(bit_flag) {
 
   case CYCLE:
-    b = bp.set_cycle_break(cpu,value);
+    b = bp.set_cycle_break(GetActiveCPU(),value);
 
     if(b < MAX_BREAKPOINTS)
       cout << "break at cycle: " << value << " break #: " <<  b << '\n';
@@ -362,7 +362,7 @@ int cmd_break::set_break(int bit_flag, guint64 v)
     break;
 
   case EXECUTION:
-    b = bp.set_execution_break(cpu, value);
+    b = bp.set_execution_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
 	    cout << "break at address: " << value << " break #: " << b << '\n';
     }
@@ -373,14 +373,14 @@ int cmd_break::set_break(int bit_flag, guint64 v)
 
   case WRITE:
 
-    b = bp.set_write_break(cpu, value);
+    b = bp.set_write_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS)
       cout << "break when register " << value << " is written. bp#: " << b << '\n';
 
     break;
 
   case READ:
-    b = bp.set_read_break(cpu, value);
+    b = bp.set_read_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS)
       cout << "break when register " << value << " is read.\n" << 
 	      "bp#: " << b << '\n';
@@ -402,7 +402,7 @@ void cmd_break::set_break(int bit_flag,
 			  guint64 m)
 {
 
-  if(!cpu)
+  if(!GetActiveCPU())
     return;
 
   int b = MAX_BREAKPOINTS;
@@ -422,12 +422,12 @@ void cmd_break::set_break(int bit_flag,
     break;
 
   case READ:
-    b = bp.set_read_value_break(cpu, reg,value,mask);
+    b = bp.set_read_value_break(GetActiveCPU(), reg,value,mask);
     str = "read from";
     break;
 
   case WRITE:
-    b = bp.set_write_value_break(cpu, reg,value,mask);
+    b = bp.set_write_value_break(GetActiveCPU(), reg,value,mask);
     str = "written to";
     break;
   }

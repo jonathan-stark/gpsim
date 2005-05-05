@@ -36,21 +36,27 @@ class CSimulationContext {
 
   class CProcessorList : public map<const string, Processor *> {
   public:
-    iterator find(const key_type& _Keyval);
+    iterator findByType(const key_type& _Keyval);
 
   };
 
 public:
   CSimulationContext();
-  Processor * add_processor(const char * processor_type,
-    const char * processor_new_name);
-  Processor * set_processor(const char * processor_type,
-    const char * processor_new_name);
-  void dump_processor_list(void);
+
+  Processor * add_processor(            const char * processor_type,
+                                        const char * processor_new_name = NULL);
+  Processor * add_processor(            ProcessorConstructor *pc);
+  Processor * SetProcessorByType(       const char * processor_type,
+                                        const char * processor_new_name);
+  Processor * add_processor(            Processor  * p);
+  int         LoadProgram(              const char *filename,
+                                        const char *pProcessorType = NULL);
+  void        dump_processor_list(void);
   static CSimulationContext *GetContext();
-  void SetDefaultProcessor(const char * processor_type,
-    const char * processor_new_name); 
-  void Clear();
+  bool        SetDefaultProcessor(      const char * processor_type,
+                                        const char * processor_new_name); 
+  void        Clear();
+
   Symbol_Table &  GetSymbolTable();
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();

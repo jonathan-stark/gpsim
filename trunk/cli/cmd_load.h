@@ -27,6 +27,7 @@ public:
 
   cmd_load(void);
   int load(int bit_flag,const char *filename);
+  int load(const char *file, const char * pProcessorType = NULL);
 };
 
 extern cmd_load c_load;

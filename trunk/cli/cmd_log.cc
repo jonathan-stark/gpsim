@@ -113,8 +113,8 @@ void cmd_log::log(cmd_options *opt, const char *str, ExprList_t *eList)
 void cmd_log::log(cmd_options *opt)
 {
 
-  if(!cpu)
-    cout << "warning, no cpu\n";
+  if(!GetActiveCPU())
+    cout << "warning, no GetActiveCPU()\n";
 
   switch(opt->value) {
   case LOG_ON:
@@ -134,8 +134,8 @@ void cmd_log::log(cmd_options *opt, const char *str, guint64 val, guint64 mask)
 
   //int sym_value;
 
-  if(!cpu)
-    cout << "warning, no cpu\n";
+  if(!GetActiveCPU())
+    cout << "warning, no GetActiveCPU()\n";
 
   switch(opt->value) {
   case LOG_ON:
@@ -175,8 +175,8 @@ void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
   unsigned int value = (unsigned int)v;
   unsigned int mask = (unsigned int)m;
 
-  if(!cpu)
-    cout << "warning, no cpu\n";
+  if(!GetActiveCPU())
+    cout << "warning, no GetActiveCPU()\n";
 
   switch(opt->value) {
   case LOG_ON:
@@ -186,13 +186,13 @@ void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
     trace_log.disable_logging();
     break;
   case WRITE:
-    b = bp.set_notify_write(cpu, reg);
+    b = bp.set_notify_write(GetActiveCPU(), reg);
     if(b < MAX_BREAKPOINTS)
       cout << "log register " << reg << " when it is written. bp#: " << b << '\n';
 
     break;
   case READ:
-    b = bp.set_notify_read(cpu, reg);
+    b = bp.set_notify_read(GetActiveCPU(), reg);
     if(b < MAX_BREAKPOINTS)
       cout << "log register " << reg << " when it is read.\n" << 
 	"bp#: " << b << '\n';
@@ -203,11 +203,11 @@ void cmd_log::log(cmd_options *opt, guint64 r, guint64 v, guint64 m)
   case READ_VALUE:
 
     if(opt->value == READ_VALUE) {
-      b = bp.set_notify_read_value(cpu, reg,value,mask);
+      b = bp.set_notify_read_value(GetActiveCPU(), reg,value,mask);
       str = "read from";
     } else {
 
-      b = bp.set_notify_write_value(cpu, reg,value,mask);
+      b = bp.set_notify_write_value(GetActiveCPU(), reg,value,mask);
       str = "written to";
     }
 

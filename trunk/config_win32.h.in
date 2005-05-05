@@ -121,17 +121,19 @@
 
 #endif
 
-#if 0 // _WIN32
+#if _WIN32
 // Microsoft Visual C DLL export and import macros
 // for classes exported from gpsim.exe.
 // Supported by GCC on Windows.
 // Each DLL will need its own versions with xxx_DLL_EXPORT
 // defined for the modules that contain the code.
 # if defined(GPSIM_DLL_EXPORT)
-# define GPSIM_EXT_CLASS __declspec( dllexport )
+#  define GPSIM_EXT_CLASS __declspec( dllexport )
+#  define GPSIM_EXPORT    __declspec( dllexport )
 // #pragma message ("dllexport")
 # else
-# define GPSIM_EXT_CLASS __declspec( dllimport )
+#  define GPSIM_EXT_CLASS __declspec( dllimport )
+#  define GPSIM_EXPORT
 // #pragma message ("dllimport")
 # endif
 #else

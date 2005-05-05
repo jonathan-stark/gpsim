@@ -43,7 +43,6 @@ class Module;
 class Expression;
 class symbol;
 
-int load_symbol_file(Processor **, const char *);
 void display_symbol_file_error(int);
 
 

@@ -31,12 +31,10 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "pic-processor.h"
-
-
-unsigned char checksum;
+#include "program_files.h"
 
 int 
-getachar (FILE * file)
+PicHexProgramFileType::getachar (FILE * file)
 {
   int c;
 
@@ -48,7 +46,7 @@ getachar (FILE * file)
 }
 
 unsigned char 
-getbyte (FILE * file)
+PicHexProgramFileType::getbyte (FILE * file)
 {
   unsigned char byte;
   unsigned int data;
@@ -62,14 +60,47 @@ getbyte (FILE * file)
 }
 
 unsigned int
-getword(FILE *file)
+PicHexProgramFileType::getword(FILE *file)
 {
   unsigned char lo = getbyte(file);
   return ((getbyte(file) << 8) | lo);
 }
 
-int
-readihex16 (pic_processor *cpu, FILE * file)
+PicHexProgramFileType::PicHexProgramFileType() {
+  RegisterProgramFileType(this);
+}
+
+int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
+                                           const char *pFilename,
+                                           FILE *inputfile) {
+  if(verbose)
+    cout << "load hex\n";
+
+  if(*pProcessor == NULL) {
+    // Need to determine processor from file.
+    // for now return error.
+    return ERR_NO_PROCESSOR_SPECIFIED;
+  }
+  // assume no configuration word is in the hex file.
+  (*pProcessor)->set_config_word((*pProcessor)->config_word_address(),0xffff);
+  int iReturn;
+  if ((iReturn = readihex16 (pProcessor, inputfile)) != SUCCESS) {
+    // No errors were found in the hex file.
+    if(verbose)
+      cout << "Configuration word = 0x"  
+	   << setw(4) << setfill('0') << (*pProcessor)->get_config_word() << '\n';
+
+    (*pProcessor)->set_frequency(10e6);
+    (*pProcessor)->reset(POR_RESET);
+    (*pProcessor)->simulation_mode = STOPPED;
+    if(verbose)
+      get_cycles().dump_breakpoints();
+    return SUCCESS;
+  }
+  return iReturn;
+}
+
+int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 {
   int address;
   int linetype = 0;
@@ -78,19 +109,17 @@ readihex16 (pic_processor *cpu, FILE * file)
   int lineCount = 1;
   int csby;
   unsigned char hi, lo;
+  Processor *& cpu = *pProcessor;
 
-  while (1)
-    {
-      if (getachar (file) != ':')
-	{
-	  printf ("Need a colon as first character in each line\n");
-	  printf ("Colon missing in line %d\n", lineCount);
-	  //exit (1);
-	  return 1;
-	}
+  while (1) {
+      if (getachar (file) != ':') {
+        printf ("Need a colon as first character in each line\n");
+        printf ("Colon missing in line %d\n", lineCount);
+        //exit (1);
+        return ERR_BAD_FILE;
+      }
 
       checksum = 0;
-
       wordsthisline = getbyte (file) / 2;
       hi = getbyte (file);
       lo = getbyte (file);
@@ -102,45 +131,47 @@ readihex16 (pic_processor *cpu, FILE * file)
       linetype = getbyte (file);	/* 0 for data, 1 for end  */
 
       if (linetype == 1)	/* lets get out of here hit the end */
-	break;
+        break;
 
       if (0 == linetype) {	// data record
-	  for (i = 0; i < wordsthisline; i++)
-	      cpu->init_program_memory(address++, getword(file));
-      } else if (4 == linetype) {	// Extended linear address
-	  unsigned char b1, b2;
-	  b1 = getbyte (file);		// not sure what these mean
-	  b2 = getbyte (file);
+        for (i = 0; i < wordsthisline; i++)
+          cpu->init_program_memory(address++, getword(file));
+      }
+      else if (4 == linetype) {	// Extended linear address
+        unsigned char b1, b2;
+        b1 = getbyte (file);		// not sure what these mean
+        b2 = getbyte (file);
 
-	  if ((0 != address) || (0 != b1) || (0 != b2)) {
-	      printf ("Error! Unhandled Extended linear address! %x %.2x%.2x\n",
-		      address, b1, b2);
-	      break;
-	  }
+        if ((0 != address) || (0 != b1) || (0 != b2)) {
+          printf ("Error! Unhandled Extended linear address! %x %.2x%.2x\n",
+                  address, b1, b2);
+          return ERR_BAD_FILE;
+        }
 	  // Should do something with all this info
 	  // BUG: must fix this for pic18 support
-      } else {
-	  printf ("Error! Unknown record type! %d\n", linetype);
-	  break;
+      }
+      else {
+        printf ("Error! Unknown record type! %d\n", linetype);
+        return ERR_BAD_FILE;
       }
 
       csby = getbyte (file);	/* get the checksum byte */
       /* this should make the checksum zero */
       /* due to side effect of getbyte */
 
-      if (checksum)
-	{
-	  printf ("Checksum error in input file.\n");
-	  printf ("Got 0x%02x want 0x%02x at line %d\n", csby, (0 - checksum) & 0xff, lineCount);
-	  exit (1);
-	}
+      if (checksum)	{
+        printf ("Checksum error in input file.\n");
+        printf ("Got 0x%02x want 0x%02x at line %d\n",
+          csby, (0 - checksum) & 0xff, lineCount);
+        return ERR_BAD_FILE;
+      }
 
       (void) getachar (file);	/* lose <return> */
 
       lineCount++;
     }
 
-  return 0;
+  return SUCCESS;
 }
 
 /* ... The End ... */

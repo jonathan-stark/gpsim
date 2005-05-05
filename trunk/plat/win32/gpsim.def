@@ -21,6 +21,7 @@ EXPORTS
     ??0ProcessorConstructor@@QAE@P6APAVProcessor@@XZPBD111@Z
     ??0ProgramMemoryAccess@@QAE@PAVProcessor@@@Z
     ??0Program_Counter@@QAE@XZ
+    ??0ProgramFileBuf@@QAE@PAU_iobuf@@@Z
     ??0Register@@QAE@XZ
     ??0RegisterAssertion@@QAE@PAVProcessor@@IIIII_N@Z
     ??0RegisterReadTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
@@ -55,6 +56,7 @@ EXPORTS
     ??AProgramMemoryAccess@@QAEAAVinstruction@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
     ?Add@FileContextList@@QAEHPAD@Z
+    ?Add@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
     ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?GetContext@CSimulationContext@@SAPAV1@XZ
@@ -67,6 +69,7 @@ EXPORTS
     ?add_constant@Symbol_Table@@QAEXPBDH@Z
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
+    ?add_processor@CSimulationContext@@QAEPAVProcessor@@PAV2@@Z
     ?add_register@Symbol_Table@@QAEXPAVRegister@@PBD@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
@@ -301,6 +304,7 @@ EXPORTS
     ?set_cpu@gpsimValue@@UAEXPAVProcessor@@@Z
     ?set_description@Value@@QAEXPBD@Z
     ?set_execution_break@Breakpoints@@QAEIPAVProcessor@@I@Z
+    ?set_Expression@TriggerObject@@UAEXPAVExpression@@@Z
     ?set_frequency@Processor@@QAEXN@Z
     ?set_nodeVoltage@IOPIN@@UAEXN@Z
     ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z

@@ -53,7 +53,7 @@ cmd_reset::cmd_reset(void)
 
 void cmd_reset::reset(void)
 {
-  if(cpu)
-    cpu->reset(POR_RESET);
+  if(GetActiveCPU())
+    GetActiveCPU()->reset(POR_RESET);
 
 }

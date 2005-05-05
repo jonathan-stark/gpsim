@@ -99,6 +99,12 @@ public:
     sbw->Update();
 
   }
+
+  /**
+    * Remove()
+    * Override to circumvent the default behavior
+    */
+  void Remove(void) {}
 };
 
 

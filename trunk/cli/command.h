@@ -56,7 +56,6 @@ class command
 {
 
 public:
-  static Processor  *cpu;
   struct cmd_options *op;
   char   *name;
   string brief_doc;
@@ -75,7 +74,7 @@ public:
       return op;
     };
 
-  void new_processor(Processor *p);
+  static Processor * GetActiveCPU();
 
   int get_token(void) {return token_value;};
 
