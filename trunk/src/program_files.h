@@ -35,6 +35,7 @@ public:
 class ProgramFileTypeList : public vector<ProgramFileType*> {
 public:
   ProgramFileTypeList();
+  virtual ~ProgramFileTypeList();
 
   static ProgramFileTypeList &GetList();
 
@@ -65,8 +66,8 @@ class ProgramFileStream : public std::istream {
 protected:
   ProgramFileBuf m_buf;
 public:
-  ProgramFileStream(FILE * pFile) : m_buf(pFile),
-    std::istream(&m_buf) {
+  ProgramFileStream(FILE * pFile) : std::istream(&m_buf),
+    m_buf(pFile) {
   }
 };
 
