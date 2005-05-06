@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 #include "program_files.h"
 #include "sim_context.h"
 #include "breakpoints.h"
+#include "trace.h"
 
 
 //================================================================================
@@ -145,6 +146,7 @@ Processor * CSimulationContext::add_processor(Processor *p)
       cout << "Register Memory size " <<  p->register_memory_size() << '\n';
     }
 
+    trace.switch_cpus(p);
     // Tell the gui or any modules that are interfaced to gpsim
     // that a new processor has been declared.
     gi.new_processor(p);
