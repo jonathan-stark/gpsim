@@ -158,9 +158,6 @@ AC_CHECK_FUNCS([floor gethostbyname gethostname gettimeofday memset pow select s
 # config_win32.h.in defines this for Visual Studio stdclib as "I64"
 AC_DEFINE([PRINTF_INT64_MODIFIER],["ll"],[printf modifier define for long long])
 
-AC_DEFINE([GPSIM_EXT_CLASS],[],[Defined to _cdecl for class exporting under Windows])
-AC_DEFINE([GPSIM_EXPORT],[],[Defined to export functions in DLLs under Windows])
-
 AM_CFLAGS=
 AM_CXXFLAGS=
 AM_LDFLAGS=

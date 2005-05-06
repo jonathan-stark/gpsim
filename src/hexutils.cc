@@ -29,7 +29,7 @@ Boston, MA 02111-1307, USA.  */
 #include <ctype.h>
 #include "picdis.h"
 
-#include "../config.h"
+#include "exports.h"
 #include "pic-processor.h"
 #include "program_files.h"
 

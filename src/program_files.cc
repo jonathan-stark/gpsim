@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "exports.h"
 #include "program_files.h"
 #include "pic-processor.h"
 #include "cod.h"

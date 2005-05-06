@@ -19,8 +19,6 @@ the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
 
-#include "../config.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -59,6 +57,7 @@ Boston, MA 02111-1307, USA.  */
 #include <gdk/gdk.h>
 #endif
 
+#include "../src/exports.h"
 #include "../src/sim_context.h"
 #include "../src/gpsim_def.h"
 #include "../src/gpsim_classes.h"

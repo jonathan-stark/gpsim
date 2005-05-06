@@ -179,7 +179,6 @@ public:
  * Helper functions
  *
  *****************************************************************************/
-bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt);
 void * load_library(const char *library_name, char **pszError);
 void * get_library_export(const char *name, void *library_handle, char **pszError);
 void free_library(void *handle);

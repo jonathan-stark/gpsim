@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <map>
 
-#include "../config.h"
+#include "exports.h"
 #include "gpsim_def.h"
 #include "pic-processor.h"
 #include "pic-registers.h"
