@@ -1,3 +1,8 @@
+2005-06-05 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cc:  Fixed broken list command
+	* src/sim_context.cc: Fixed broken register output on stepping
+	that broken on previous check in.
+
 2005-05-05 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_break.cc, cli/cmd_disasm.cc, cli/cmd_dump.cc,
 	cli/cmd_frequency.cc, cli/cmd_list.cc, cli/cmd_load.cc,
