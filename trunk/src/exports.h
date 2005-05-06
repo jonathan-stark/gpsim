@@ -1,7 +1,7 @@
 #ifndef __EXPORTS_H__
 #define __EXPORTS_H__
 
-#if _WIN32
+#ifdef _WIN32
 // Microsoft Visual C DLL export and import macros
 // for classes exported from gpsim.exe.
 // Supported by GCC on Windows.
