@@ -611,7 +611,7 @@ void Processor::list(unsigned int file_id,
 {
 
 
-  if(files.nsrc_files())
+  if(files.nsrc_files() == 0)
     return;
 
   if(pc_val > program_memory_size())
@@ -641,7 +641,7 @@ void Processor::list(unsigned int file_id,
   end_line += line;
 
   FileContext *fc = files[file_id];
-  if(fc)
+  if(fc == NULL)
     return;
 
   if(start_line < 0) start_line = 0;
@@ -658,8 +658,7 @@ void Processor::list(unsigned int file_id,
 
     char buf[256];
 
-    files.ReadLine(program_memory[i]->file_id,
-		    program_memory[i]->src_line - 1,
+    fc->ReadLine(i,
 		    buf,
 		    sizeof(buf));
 
