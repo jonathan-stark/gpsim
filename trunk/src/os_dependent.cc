@@ -34,6 +34,7 @@ Boston, MA 02111-1307, USA.  */
 #include <algorithm>
 
 #include "../config.h"
+#include "exports.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>

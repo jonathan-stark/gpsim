@@ -35,7 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include <direct.h>
 #endif
 
-#include "../config.h"
+#include "exports.h"
 #include "gpsim_def.h"
 #include "sim_context.h"
 #include "pic-processor.h"
@@ -666,6 +666,19 @@ void PicCodProgramFileType::delete_directory(void)
 //  Block *b = main_dir.dir;
 //   dbi->next_dir_block_info
 //write me.
+  DirBlockInfo *dbi;
+  DirBlockInfo *next;
+
+  next = main_dir.next_dir_block_info;
+
+  while(next != 0) {
+      dbi = next;
+      next = dbi->next_dir_block_info;
+      free(dbi->next_dir_block_info);
+      delete_block(&dbi->dir);
+  }
+  delete_block(&main_dir.dir);
+  free(main_dir.next_dir_block_info);
 }
 
 int PicCodProgramFileType::check_for_gputils(char *block)

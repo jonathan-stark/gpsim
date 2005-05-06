@@ -35,12 +35,10 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_time.h"
 #include "gpsim_interface.h"
 
-
 class Processor;
 class ProcessorConstructor;
 class ProgramFileType;
 
-void GPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT);
 
 //---------------------------------------------------------
 /// MemoryAccess - A base class designed to support
