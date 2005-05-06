@@ -34,8 +34,6 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <string>
 
-#include "../config.h"
-
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
 
