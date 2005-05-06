@@ -17,7 +17,8 @@
 // #pragma message ("dllimport")
 # endif
 #else
-# define GPSIM_EXT_CLASS
+#  define GPSIM_EXT_CLASS
+#  define GPSIM_EXPORT
 // #pragma message ("GPSIM_EXT_CLASS defined a nothing")
 #endif
 
@@ -26,5 +27,4 @@ class ProgramFileType;
 ///   Exported functions
 bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt);
 void GPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT);
-
 #endif
