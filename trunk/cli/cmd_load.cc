@@ -56,13 +56,20 @@ cmd_load::cmd_load(void)
 { 
   name = "load";
 
-  brief_doc = string("Load either a hex,command, or .cod file");
+  brief_doc = string("Load either a program or command file");
 
-  long_doc = string ("load  h | c | s  file_name\
-\n\n\tload either a hex file, command file, or a symbol file.\
-\n\t(Byte Craft's .cod files are the only symbol files that\
-\n\tare recognized.)\
+  long_doc = string ("load [hexfile | codfile | cmdfile.stc]\
+\n\n\tLoad either a program or command file. Program files may be in\
+\n\thex or cod (symbol) file format.\
+\n\t(Byte Craft's .cod files are the only program files with symbols\
+\n\tthat are recognized.)\
 \n\n\tExample:\
+\n\t  hexfile     - a hex formatted file.\
+\n\t  codfile     - a cod formatted file. Often called a symbol file.\
+\n\t  cmdfile.stc - a gpsim command file. Must have an .stc extension.\
+\n\
+\n\tdeprecated:\
+\n\t  load  h | c | s  file_name\
 \n\t  load s perfect_program.cod\
 \n\t    will load the symbol file perfect_program.cod\
 \n\t    note that the .cod file contains the hex stuff\
