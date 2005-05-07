@@ -162,6 +162,9 @@ int CSimulationContext::LoadProgram(const char *filename,
   bool bReturn = false;
   Processor *pProcessor;
   FILE * pFile = fopen_path (filename, "r");
+  if(pFile == NULL) {
+    return false;
+  }
   if(pProcessorType != NULL) {
     pProcessor = SetProcessorByType(pProcessorType, NULL);
     if(pProcessor != NULL) {
