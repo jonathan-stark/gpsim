@@ -18,6 +18,7 @@ public:
     ERR_LST_FILE_NOT_FOUND      = -4,
     ERR_BAD_FILE                = -5,
     ERR_NO_PROCESSOR_SPECIFIED  = -6,
+    ERR_PROCESSOR_INIT_FAILED   = -7,
   };
   /*
    *  LoadProgramFile
