@@ -1,4 +1,9 @@
 2005-06-05 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui/gui_regwin.cc:  Fixed crash that occurs when RAM register
+	count is not a multiple of 16.
+	* plat/win32/gpsim.def: Added new function reference.
+
+2005-06-05 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc:  Fixed broken list command
 	* src/sim_context.cc: Fixed broken register output on stepping
 	that broken on previous check in. Test for open file failure.

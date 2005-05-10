@@ -282,6 +282,7 @@ EXPORTS
     ?set@Value@@UAEXAAVPacket@@@Z
     ?set@Value@@UAEXH@Z
     ?set@Value@@UAEXN@Z
+    ?set@Value@@UAEXPAV1@@Z
     ?set@Value@@UAEXPAVExpression@@@Z
     ?set@Value@@UAEXPBDH@Z
     ?set@Value@@UAEX_J@Z
