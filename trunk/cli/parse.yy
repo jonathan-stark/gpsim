@@ -417,6 +417,7 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
             }
 	        }
 	        | LOAD LITERAL_STRING_T
+          // load [programname | cmdfile]
           {
             quit_parse = c_load.load($2->getVal()) == 0;
             free($2);
@@ -428,7 +429,9 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
             }
 	        }
           | LOAD LITERAL_STRING_T LITERAL_STRING_T
+          // load processor filename
           {
+            //                        filename,   processor
             quit_parse = c_load.load($3->getVal(), $2->getVal()) == 0;
             free($3);
 
