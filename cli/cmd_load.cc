@@ -58,15 +58,20 @@ cmd_load::cmd_load(void)
 
   brief_doc = string("Load either a program or command file");
 
-  long_doc = string ("load [hexfile | codfile | cmdfile.stc]\
+  long_doc = string ("load [processortype] programfile \
+\nload cmdfile.stc\
 \n\n\tLoad either a program or command file. Program files may be in\
 \n\thex or cod (symbol) file format.\
 \n\t(Byte Craft's .cod files are the only program files with symbols\
 \n\tthat are recognized.)\
-\n\n\tExample:\
-\n\t  hexfile     - a hex formatted file.\
-\n\t  codfile     - a cod formatted file. Often called a symbol file.\
-\n\t  cmdfile.stc - a gpsim command file. Must have an .stc extension.\
+\n\
+\n\t  processortype - (optional) Name of the processor type simulation\
+\n\t                  to load the program file.\
+\n\t                  Ignored if the processor command has been previous\
+\n\t                  used.\
+\n\t  codfile       - a hex or cod formatted file. Cod is often called\
+\n\t                  a symbol file.\
+\n\t  cmdfile.stc   - a gpsim command file. Must have an .stc extension.\
 \n\
 \n\tdeprecated:\
 \n\t  load  h | c | s  file_name\
@@ -129,5 +134,6 @@ int cmd_load::load(int bit_flag,const char *filename)
 }
 
 int cmd_load::load(const char *file, const char * pProcessorType) {
+  cout << endl;
   return gpsim_open(get_active_cpu(), file, pProcessorType);
 }
