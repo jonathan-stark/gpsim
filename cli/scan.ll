@@ -78,6 +78,7 @@ static int process_booleanLiteral(YYSTYPE* yylvalP, bool value);
 static int process_macroBody(YYSTYPE* yylvalP, const char *text);
 static int process_floatLiteral(YYSTYPE* yylvalP, char *buffer);
 static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer);
+static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer);
 static int process_shellLine(YYSTYPE* yylvalP, const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
@@ -198,6 +199,7 @@ abort_gpsim_now {
 "reg"               {return(recognize(REG_T,"reg"));}
 
 {SHELLLINE}         {return(process_shellLine(yylvalP,&yytext[1]));}
+{QUOTEDTOKEN}       {return(process_quotedStringLiteral(yylvalP,&yytext[1]));}
 
 
 %{
@@ -600,6 +602,17 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
   yylvalP->String_P = new String(buffer);
   return(recognize(LITERAL_STRING_T, "string literal"));
 }
+
+
+static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer)
+{
+  // JRH don't understand why buffer++; is not needed. 
+  char * pCloseQuote = strchr(buffer, '\"');
+  *pCloseQuote = 0;
+  yylvalP->String_P = new String(buffer);
+  return(recognize(LITERAL_STRING_T, "string literal"));
+}
+
 
 /*****************************************************************
  *
