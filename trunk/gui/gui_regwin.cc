@@ -1793,10 +1793,12 @@ void Register_Window::Update(void)
     bRowChanged = false;
     for(i = 0; i<REGISTERS_PER_ROW; i++) {
       address = row_to_address[j]+i;
-      if(registers[address]->get_shadow().data!=INVALID_VALUE ||
-        registers[address]->bUpdateFull) {
+      GUIRegister * pGuiReg = registers[address];
+      if(pGuiReg != &THE_invalid_register &&
+        (pGuiReg->get_shadow().data!=INVALID_VALUE ||
+        pGuiReg->bUpdateFull)) {
 
-        if(UpdateRegisterCell(row_to_address[j]+i) == true)
+        if(UpdateRegisterCell(address) == true)
           bRowChanged = true;
       }
     }
