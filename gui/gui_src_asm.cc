@@ -1656,7 +1656,9 @@ void SourcePage::Close(void)
     {
       int num=gtk_notebook_page_num(GTK_NOTEBOOK(notebook),notebook_child);
       gtk_notebook_remove_page(GTK_NOTEBOOK(notebook),num);
-      gtk_widget_destroy(notebook_child);
+      // JRH - looks like gtk_notebook_remove_page() is also
+      //       deallocating notebook_chile.
+      // gtk_widget_destroy(notebook_child);
       // this is all that is needed to destroy all child widgets
       // of notebook_child.
       notebook_child=0;
