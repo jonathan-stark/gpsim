@@ -1,9 +1,18 @@
-2005-06-05 J.R. Heisey <jrheisey@sourceforge.com>
+2005-05-10 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_load.cc: Updated on line help for load command.
+	* gui/gui_src_asm.cc: Removed a call to gtk_widget_destory()
+	in SourcePage::Close() where it was causing a crash in Windows.
+	* cli/scan.ll: Defined literal string values to be quoted. This
+	was done so that quoted Windows paths in the load command to 
+	accommodate colons for drive designation and backslashes for
+	folder delimiters.
+	* gpsim/main.cc: Added the gpsim.exe startup folder to the
+	module/library search path.
+
+2005-05-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui/gui_regwin.cc:  Fixed crash that occurs when RAM register
 	count is not a multiple of 16.
 	* plat/win32/gpsim.def: Added new function reference.
-
-2005-06-05 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc:  Fixed broken list command
 	* src/sim_context.cc: Fixed broken register output on stepping
 	that broken on previous check in. Test for open file failure.
