@@ -90,7 +90,6 @@ public:
   }
 
   ICommandHandler *GetCli();
-
 };
 
 ICommandHandler * module_get_command_handler(const char *name);
@@ -172,18 +171,32 @@ public:
 };
 
 
+/**
+  * CFileSearchPath
+  * Implemented in os_dependent.cc
+  */
+class CFileSearchPath : public list<string> {
+public:
+  CFileSearchPath() {}
+  void AddPathFromFilePath(string &sFolder, string &sFile);
+  const char * Find(string &path);
+};
+
 /*****************************************************************************
  *
  * Helper functions
  *
  *****************************************************************************/
+void GetFileName(string &sPath, string &sName);
+void GetFileNameBase(string &sPath, string &sName);
+void FixupLibraryName(string &sPath);
 void * load_library(const char *library_name, char **pszError);
 void * get_library_export(const char *name, void *library_handle, char **pszError);
 void free_library(void *handle);
 void free_error_message(char * pszError);
 void module_display_available(void);
 void module_list_modules(void);
-void module_load_library(const char *library_name);
+bool module_load_library(const char *library_name);
 void module_load_module(const char * module_type, const char * module_new_name=0);
 void module_reset_all(RESET_TYPE r);
 

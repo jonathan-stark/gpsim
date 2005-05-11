@@ -52,6 +52,8 @@ extern "C" {
 extern int gui_init (int argc, char **argv,bool);
 extern void gui_main(void);
 extern void cli_main(void);
+// os_dependent.cc'
+extern void AddModulePathFromFilePath(string &sFolder);
 
 void initialize_gpsim(void);
 
@@ -218,6 +220,10 @@ main (int argc, char *argv[])
 #endif
 
   s_GpsimUI.SetStreams(stdin, stdout);
+
+  string s;
+  string sGpsimPath(argv[0]);
+  AddModulePathFromFilePath(sGpsimPath);
 
   initialization_is_complete();
 

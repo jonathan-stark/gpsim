@@ -302,8 +302,20 @@ ICommandHandler *Module_Library::GetCli() {
 
 //------------------------------------------------------------------------
 // As module libraries are loaded, they're placed into the following list:
-list <Module_Library *> module_list;
-list <Module_Library *> :: iterator module_iterator;
+typedef list <Module_Library *> ModuleLibraryList;
+ModuleLibraryList module_list;
+ModuleLibraryList :: iterator module_iterator;
+
+bool ModuleLibraryExists(string sName) {
+  ModuleLibraryList::iterator it;
+  ModuleLibraryList::iterator itEnd = module_list.end();
+  for(it = module_list.begin(); it != itEnd; it++) {
+    if(sName.compare((*it)->name()) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
 
 //------------------------------------------------------------------------
 // Each time a new module is instantiated from a module library, the 
@@ -311,19 +323,25 @@ list <Module_Library *> :: iterator module_iterator;
 // to accomodate different reference designator types).
 //static int  ref_des_count = 1;
 
-void module_add_library(const char *library_name, void *library_handle)
+void module_canonical_name(string &sPath, string &sName) {
+  GetFileName(sPath, sName);
+  for(unsigned int i = 0; i < sName.size(); i++) {
+    sName[i] = ::toupper(sName[i]);
+  }
+}
+
+static bool module_add_library(const char *library_name, void *library_handle)
 {
 
-
   if(library_name) {
-
-    Module_Library *ml = new Module_Library(library_name, library_handle);
-
+    string sName(library_name);
+    module_canonical_name(sName, sName);
+    Module_Library *ml = new Module_Library(sName.c_str(), library_handle);
     module_list.push_back(ml);
-
+    return true;
   } else 
     cout << "BUG: " << __FUNCTION__ << " called with NULL library_name";
-
+  return false;
 }
 
 // dump_available_libraries
@@ -347,39 +365,46 @@ void module_display_available(void)
       int i=0;
 
       while(t->module_list[i].names[0]) {
-	cout << "   " << t->module_list[i++].names[0] << '\n';
+        cout << "   " << t->module_list[i++].names[0] << '\n';
       }
     }
   }
 }
 
-
-void module_load_library(const char *library_name)
+bool module_load_library(const char *library_name)
 {
   void *handle;
   char *pszError;
+  bool bReturn = false;
 
-  if ((handle = load_library(library_name, &pszError)) == NULL) {
-    char cw[_MAX_PATH];
-//    GetCurrentDirectory(_MAX_PATH, cw);
-    getcwd(cw, _MAX_PATH);
-    //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
-    cerr << "failed to open library module ";
-    cerr << library_name;
-    cerr << ": ";
-    cerr << pszError;
-    cerr << endl;
-    cerr << "current working directory is ";
-    cerr << cw;
-    cerr << endl;
-    free_error_message(pszError);
-    return;
+  string sPath(library_name);
+  FixupLibraryName(sPath);
+  string sName;
+  module_canonical_name(sPath, sName);
+  if(!ModuleLibraryExists(sName)) {
+    if ((handle = load_library(sPath.c_str(), &pszError)) == NULL) {
+      char cw[_MAX_PATH];
+  //    GetCurrentDirectory(_MAX_PATH, cw);
+      getcwd(cw, _MAX_PATH);
+      //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
+      cerr << "failed to open library module ";
+      cerr << sPath;
+      cerr << ": ";
+      cerr << pszError;
+      cerr << endl;
+      cerr << "current working directory is ";
+      cerr << cw;
+      cerr << endl;
+      free_error_message(pszError);
+    }
+
+    if(module_add_library(sPath.c_str(),handle)) {
+      bReturn = true;
+    }
   }
-
-  module_add_library(library_name,handle);
-
   if(verbose)
     module_display_available();
+  return bReturn;
 }
 
 void module_load_module(const char *module_type, const char *module_name)

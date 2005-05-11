@@ -6,6 +6,7 @@
 #include "gpsim_object.h"
 using namespace std;
 
+unsigned long get_error();
 
 //*****************************************************************
 class AnError : public gpsimObject {
