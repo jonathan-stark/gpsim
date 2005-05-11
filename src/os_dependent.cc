@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "exports.h"
+#include "modules.h"
 
 #ifndef _WIN32
 #include <dlfcn.h>
@@ -111,9 +112,22 @@ bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
   }
 }
 
-static vector<string> asDllSearchPath;
+const char * CFileSearchPath::Find(string &path) {
+  const_iterator it = find(begin(), end(), path);
+  if (it != end()) {
+    return (*it).c_str();
+  }
+  return NULL;
+}
 
-void AddToSearchPath(string &sFolder, string &sFile) {
+static CFileSearchPath asDllSearchPath;
+
+void AddModulePathFromFilePath(string &sFolder) {
+  string sFile;
+  asDllSearchPath.AddPathFromFilePath(sFolder, sFile);
+}
+
+void CFileSearchPath::AddPathFromFilePath(string &sFolder, string &sFile) {
   string::size_type LastDelimiter = sFolder.find_last_of(FOLDERDELIMITER);
   if (LastDelimiter == string::npos) {
     sFile = sFolder;
@@ -122,7 +136,7 @@ void AddToSearchPath(string &sFolder, string &sFile) {
     string sNewFolder;
     sNewFolder = sFolder.substr(0, LastDelimiter + 1);
     sFile = sFolder.substr(LastDelimiter + 1);
-    vector<string>::iterator it = find(asDllSearchPath.begin(),
+    iterator it = find(asDllSearchPath.begin(),
       asDllSearchPath.end(), sNewFolder);
     if (it == asDllSearchPath.end()) {
       asDllSearchPath.insert(asDllSearchPath.begin(), sNewFolder);
@@ -152,17 +166,42 @@ static void * sLoad(const char *library_name)
   return handle;
 }
 
+void FixupLibraryName(string &sPath) {
+  translatePath(sPath);
+  if (STRICMP(&sPath[sPath.size() - (sizeof(MODULE_EXT)-1)], MODULE_EXT) != 0) {
+    sPath.append(MODULE_EXT);
+  }
+}
+
+void GetFileName(string &sPath, string &sName) {
+  string::size_type pos = sPath.find_last_of(FOLDERDELIMITER);
+  if(pos != string::npos) {
+    sName = sPath.substr(pos + 1);
+  }
+  else if(&sName != &sPath) {
+    sName = sPath;
+  }
+}
+
+void GetFileNameBase(string &sPath, string &sName) {
+  GetFileName(sPath, sName);
+  string::size_type pos = sName.find_last_of('.');
+  if(pos != string::npos) {
+    sName = sName.substr(0, sName.size() - pos + 1);
+  }
+  else {
+    sName = sPath;
+  }
+}
+
 void * load_library(const char *library_name, char **pszError)
 {
   void *handle;
 
   string sFile;
   string sPath(library_name);
-  translatePath(sPath);
-  if (STRICMP(&sPath[sPath.size() - (sizeof(MODULE_EXT)-1)], MODULE_EXT) != 0) {
-    sPath.append(MODULE_EXT);
-  }
-  AddToSearchPath(sPath, sFile);
+  FixupLibraryName(sPath);
+  asDllSearchPath.AddPathFromFilePath(sPath, sFile);
 
   // First, see if we can load the library from where ever the 
   // system thinks libraries are located.
@@ -180,7 +219,7 @@ void * load_library(const char *library_name, char **pszError)
     // Failed to find the library in the system paths, so try to load
     // from one of our paths.
 
-    vector<string>::iterator itSearchPath;
+    CFileSearchPath::iterator itSearchPath;
     for (itSearchPath = asDllSearchPath.begin();
         itSearchPath != asDllSearchPath.end();
         itSearchPath++) {

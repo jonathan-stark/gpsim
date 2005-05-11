@@ -180,13 +180,13 @@ void cmd_module::module(cmd_options_str *cos)
 
   switch(cos->co->value)
     {
-    case CMD_MOD_LIB: {
+    case CMD_MOD_LIB:
       if(verbose)
         cout << "module command got the library " << cos->str << '\n';
-      module_load_library(cos->str);
-      ICommandHandler * handler = module_get_command_handler(cos->str);
-      if (handler != NULL)
-        CCommandManager::GetManager().Register(handler);
+      if(module_load_library(cos->str)) {
+        ICommandHandler * handler = module_get_command_handler(cos->str);
+        if (handler != NULL)
+          CCommandManager::GetManager().Register(handler);
       }
       break;
     case CMD_MOD_LOAD:
