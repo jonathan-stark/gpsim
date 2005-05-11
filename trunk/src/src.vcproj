@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf"
+				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_DLL_EXPORT"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
@@ -104,7 +104,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;snprintf=_snprintf;GPSIM_EXT_CLASS"
+				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;snprintf=_snprintf;GPSIM_DLL_EXPORT"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -147,7 +147,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="WIN32;_LIB;snprintf=_snprintf;GPSIM_EXT_CLASS"
+				PreprocessorDefinitions="WIN32;_LIB;snprintf=_snprintf;GPSIM_DLL_EXPORT"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
