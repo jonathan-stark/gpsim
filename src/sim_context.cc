@@ -30,9 +30,11 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 #include <string>
 #include <map>
+#include <direct.h>
 
 #include "../config.h"
 
+#include "errors.h"
 #include "fopen-path.h"
 #include "program_files.h"
 #include "sim_context.h"
@@ -163,6 +165,18 @@ int CSimulationContext::LoadProgram(const char *filename,
   Processor *pProcessor;
   FILE * pFile = fopen_path (filename, "r");
   if(pFile == NULL) {
+    char cw[_MAX_PATH];
+//    GetCurrentDirectory(_MAX_PATH, cw);
+    getcwd(cw, _MAX_PATH);
+    //fprintf(stderr, "%s in module_load_library(%s)\n", pszError, library_name);
+    cerr << "failed to open program file ";
+    cerr << filename;
+    cerr << ": ";
+    cerr << get_error();
+    cerr << endl;
+    cerr << "current working directory is ";
+    cerr << cw;
+    cerr << endl;
     return false;
   }
   if(pProcessorType != NULL) {
