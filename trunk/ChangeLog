@@ -8,6 +8,11 @@
 	folder delimiters.
 	* gpsim/main.cc: Added the gpsim.exe startup folder to the
 	module/library search path.
+	* src/sim_context.cc, src/errors.h: Added an error message to CSimulationContext::
+	LoadProgram().
+	* cli/cmd_module.cc, src/modules.cc, src/modules.h,
+	src/os_dependent.cc, gpsim/main.cc: Added code to not load
+	a module library that is already loaded.
 
 2005-05-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui/gui_regwin.cc:  Fixed crash that occurs when RAM register
