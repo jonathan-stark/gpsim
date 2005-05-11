@@ -30,7 +30,15 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 #include <string>
 #include <map>
+
+#ifndef _WIN32
+#if !defined(_MAX_PATH)
+  #define _MAX_PATH 1024
+#endif
+#else
 #include <direct.h>
+#endif
+
 
 #include "../config.h"
 

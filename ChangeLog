@@ -1,3 +1,7 @@
+2005-05-11 Scott Dattalo <scott@dattalo.com>
+	* src/sim_context.cc: The included file "direct.h" does not exist
+	on FC3.
+
 2005-05-10 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_load.cc: Updated on line help for load command.
 	* gui/gui_src_asm.cc: Removed a call to gtk_widget_destory()
