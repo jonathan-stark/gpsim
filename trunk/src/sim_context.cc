@@ -133,7 +133,7 @@ Processor * CSimulationContext::add_processor(const char * processor_type,
 
 Processor * CSimulationContext::add_processor(ProcessorConstructor *pc)
 {
-  Processor *  p = pc->cpu_constructor();
+  Processor *  p = pc->ConstructProcessor();
   if(p) {
     add_processor(p);
     p->m_pConstructorObject = pc;
