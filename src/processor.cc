@@ -1867,6 +1867,10 @@ ProcessorConstructor::ProcessorConstructor(tCpuContructor _cpu_constructor,
   GetList()->push_back(this);
 }
 
+Processor * ProcessorConstructor::ConstructProcessor() {
+  return cpu_constructor();
+}
+
 ProcessorConstructorList * ProcessorConstructor::processor_list = new ProcessorConstructorList();
 
 ProcessorConstructorList * ProcessorConstructor::GetList() {
