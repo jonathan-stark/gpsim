@@ -603,8 +603,12 @@ public:
 
   typedef Processor * (*tCpuContructor) (void);
 
+protected:
   // A pointer to a function that when called will construct a processor
   tCpuContructor cpu_constructor;
+
+public:
+  virtual Processor * ConstructProcessor();
 
   // The processor name (plus upto three aliases).
   #define nProcessorNames 4
