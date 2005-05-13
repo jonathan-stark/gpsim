@@ -1784,7 +1784,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
-  GTKWAIT;
+  //GTKWAIT;
 
   address=gp->cpu->pma->get_PC();
   if(address==INVALID_VALUE)

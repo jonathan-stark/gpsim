@@ -2160,7 +2160,7 @@ void Register_Window::Build(void)
 
   gtk_widget_grab_default(location);
   
-  GTKWAIT;
+  //  GTKWAIT;
   
   bIsBuilt = true;
   

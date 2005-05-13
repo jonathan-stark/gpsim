@@ -1524,7 +1524,7 @@ void SourceBrowserOpcode_Window::Build(void)
 
   bIsBuilt = true;
 
-  GTKWAIT;
+  //GTKWAIT;
 
   NewProcessor(gp);
   NewSource(gp);
