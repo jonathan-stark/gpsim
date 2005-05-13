@@ -1,3 +1,9 @@
+2005-05-12 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.cc, gui/gui_src_opcode.cc, gui/gui_src_asm.cc:
+	Removed calls to GTKWAIT because they sometimes block in the newer
+	version (2.6.7) of GTK. Thanks to Micah Carrick for pin-pointing
+	this one.
+	
 2005-05-11 Scott Dattalo <scott@dattalo.com>
 	* src/sim_context.cc: The included file "direct.h" does not exist
 	on FC3.
