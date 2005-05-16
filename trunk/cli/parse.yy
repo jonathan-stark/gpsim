@@ -352,10 +352,11 @@ attach_cmd
 
 break_cmd
           : BREAK                             {c_break.list();}
+          | BREAK LITERAL_INT_T               {c_break.list($2->getVal());delete $2;}
           | BREAK SYMBOL_T                    {c_break.set_break($2);}
           | BREAK bit_flag SYMBOL_T           {c_break.set_break($2,$3);}
           | BREAK bit_flag SYMBOL_T expr      {c_break.set_break($2,$3,$4);}
-          | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3);}
+          | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3); delete $3;}
           | BREAK bit_flag break_boolean_expr {c_break.set_break($2,$3);}
           | BREAK bit_flag                    {c_break.set_break($2);}
           | BREAK bit_flag REG_T '(' LITERAL_INT_T ')'  
@@ -385,8 +386,9 @@ dump_cmd:
           ;
 
 eval_cmd:
-	  SYMBOL_T {c_symbol.dump_one($1);}
-          | SYMBOL_T EQU_T expr { $1->set($3);}
+	  SYMBOL_T                      {c_symbol.dump_one($1);}
+          | SYMBOL_T EQU_T expr         { $1->set($3);}
+          | REG_T '(' LITERAL_INT_T ')' { c_x.x($3->getVal()); delete $3; }
           ;
 
 frequency_cmd
@@ -408,40 +410,44 @@ list_cmd
 load_cmd: LOAD bit_flag LITERAL_STRING_T
           {
             quit_parse = c_load.load($2->value,$3->getVal()) == 0;
-            free($3);
+            delete $3;
 
             if(quit_parse)
             {
               quit_parse = 0;
               YYABORT;
             }
-	        }
-	        | LOAD LITERAL_STRING_T
+	  }
+	  | LOAD LITERAL_STRING_T
           // load [programname | cmdfile]
           {
             quit_parse = c_load.load($2->getVal()) == 0;
-            free($2);
+            delete $2;
+	    quit_parse =0;
 
             if(quit_parse)
             {
               quit_parse = 0;
               YYABORT;
             }
-	        }
+
+	  }
           | LOAD LITERAL_STRING_T LITERAL_STRING_T
           // load processor filename
           {
             //                        filename,   processor
             quit_parse = c_load.load($3->getVal(), $2->getVal()) == 0;
-            free($3);
+            delete $2;
+            delete $3;
+
 
             if(quit_parse)
             {
               quit_parse = 0;
               YYABORT;
             }
-	        }
-	        ;
+	  }
+	  ;
 
 log_cmd
           : LOG                         {c_log.log();}

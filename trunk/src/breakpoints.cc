@@ -390,6 +390,10 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 
 bool Breakpoints::dump1(unsigned int bp_num)
 {
+  if(bp_num>=MAX_BREAKPOINTS) {
+    cout << "Break point number:" << bp_num <<" is out of range\n";
+    return false;
+  }
 
   if(break_status[bp_num].bpo) {
     break_status[bp_num].bpo->print();

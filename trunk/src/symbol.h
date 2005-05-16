@@ -309,7 +309,11 @@ class val_symbol : public symbol
   virtual string toString();
 
   virtual void get(int &);
+  virtual void get(gint64 &);
   virtual void set(int);
+  virtual void set(gint64);
+  virtual symbol *copy();
+  virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
   virtual string &name(void);
 

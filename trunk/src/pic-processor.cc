@@ -811,7 +811,9 @@ void pic_processor::create_symbols (void)
   // now add a special symbol for W
   symbol_table.add_w(W);
 
-  symbol_table.add(new val_symbol(pc));
+  val_symbol *vpc = new val_symbol(pc);
+  vpc->set_description("Program Counter");
+  symbol_table.add(vpc);
 
 }
 

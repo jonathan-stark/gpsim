@@ -79,9 +79,11 @@ CSimulationContext *CSimulationContext::GetContext() {
 }
 
 bool CSimulationContext::SetDefaultProcessor(const char * processor_type,
-                                             const char * processor_new_name) {
+                                             const char * processor_new_name) 
+{
   ProcessorConstructor *pc = ProcessorConstructorList::GetList()->findByType(processor_type);
-  if(pc != NULL) {
+
+  if (pc) {
     m_DefProcessorName    = processor_type;
     if(processor_new_name == NULL)
       m_DefProcessorNameNew.clear();
@@ -89,9 +91,8 @@ bool CSimulationContext::SetDefaultProcessor(const char * processor_type,
       m_DefProcessorNameNew = processor_new_name;
     return true;
   }
-  else {
-    return false;
-  }
+
+  return false;
 }
 
 //-------------------------------------------------------------------

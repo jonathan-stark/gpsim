@@ -1,3 +1,19 @@
+2005-05-14 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_processor.cc: The processor command wasn't working
+	because of a typo in an if statement.
+	* cli/parse.yy, cli/cmd_break.cc, cli/cmd_break.h: Added 'break
+	#number' to allow inspection of an individual break point. Clean
+	up some memory 	management.
+	* src/breakpoints.cc: 'dump1()' wasn't checking to see if the
+	break point number was valid.
+	* src/os_dependent.cc: non-windows file extension comparisons were
+	not working.
+	* src/pic-processor.cc, src/symbol.h, src/symbol.cc, src/value.cc:
+	val_symbols like the PIC program counter can now be parts of gpsim
+	expressions.
+	* src/cod.cc: hack - line number offset errof.
+	* doc/gpsim.lyx: Updated the documentation.
+
 2005-05-12 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc, gui/gui_src_opcode.cc, gui/gui_src_asm.cc:
 	Removed calls to GTKWAIT because they sometimes block in the newer

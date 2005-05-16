@@ -101,10 +101,12 @@ cmd_break::cmd_break(void)
 }
 
 
-void cmd_break::list(void)
+void cmd_break::list(guint64 value)
 {
-  if(GetActiveCPU())
+  if(value == CMDBREAK_BAD_BREAK_NUMBER)
     bp.dump();
+  else
+    bp.dump1(value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";
