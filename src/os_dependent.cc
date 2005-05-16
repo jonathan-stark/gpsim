@@ -94,7 +94,7 @@ int FileExtCompare(const char *pExt1, const char *pExt2) {
 #ifdef _WIN32
   return stricmp(pExt1, pExt2);
 #else
-  return strcmp(pExt1, pExt1);
+  return strcmp(pExt1, pExt2);
 #endif
 }
 

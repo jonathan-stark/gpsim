@@ -26,13 +26,13 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 
 class Value;
-
+#define CMDBREAK_BAD_BREAK_NUMBER 0xffff
 class cmd_break : public command
 {
 public:
 
   cmd_break(void);
-  void list(void);
+  void list(guint64 value=CMDBREAK_BAD_BREAK_NUMBER);
 
   void set_break(cmd_options *co);
   void set_break(Value *);

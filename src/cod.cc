@@ -414,7 +414,7 @@ _Cleanup:
 //-----------------------------------------------------------
 void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 {
-  int lst_line_number = 0;
+  int lst_line_number = 6;
   int j,start_block,end_block,offset;
   int file_id, sline,smod;
   unsigned int address;

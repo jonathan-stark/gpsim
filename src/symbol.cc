@@ -832,11 +832,46 @@ void val_symbol::get(int &i)
     i = 0;
 }
 
+void val_symbol::get(gint64 &i)
+{
+  if (val)
+    i = val->get_value();
+  else
+    i = 0;
+}
 void val_symbol::set(int new_value)
 {
-  val->put_value(new_value);
+  if(val)
+    val->put_value(new_value);
+}
+void val_symbol::set(gint64 new_value)
+{
+  if(val) 
+    val->put_value((int)new_value);
 }
 string &val_symbol::name(void)
 {
   return val->name();
+}
+symbol *val_symbol::copy()
+{
+  return new val_symbol(val);
+}
+bool val_symbol::compare(ComparisonOperator *compOp, Value *rvalue)
+{
+  if(!compOp || !rvalue)
+    return false;
+
+  gint64 i,r;
+
+  get(i);
+  rvalue->get(r);
+
+  if(i < r)
+    return compOp->less();
+
+  if(i > r)
+    return compOp->greater();
+
+  return compOp->equal();
 }

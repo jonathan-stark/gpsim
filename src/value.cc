@@ -129,7 +129,7 @@ void Value::get(int &i)
 
 void Value::get(guint64 &i)
 {
-  // FIXME - casting an signed int to an unsigned int -- probably should issue a warning
+  // FIXME - casting a signed int to an unsigned int -- probably should issue a warning
   gint64 i64;
   get(i64);
   i = (gint64) i64;

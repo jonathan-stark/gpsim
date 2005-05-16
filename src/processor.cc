@@ -1892,7 +1892,7 @@ ProcessorConstructor *ProcessorConstructorList::findByType(const char *name)
   ProcessorConstructorList::iterator processor_iterator;
   for (processor_iterator = processor_list->begin();
        processor_iterator != processor_list->end(); 
-       processor_iterator++) {
+       ++processor_iterator) {
 
     ProcessorConstructor *p = *processor_iterator;
     for(int j=0; j<nProcessorNames; j++)
