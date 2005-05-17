@@ -1,3 +1,13 @@
+2005-05-16 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/os_dependent.cc: Added debug code to allow alternate
+	directory paths for module libraries so I can specify debug
+	build locations for shared libraries.
+	* src/program_files.cc: Fixed bug caused by symbol table not
+	being cleared when Program files are loaded.
+	* src/modules.cc: Fixed bug when a module library failed to 
+	load it was still being added to the installed library list.
+	* configure.ac: bumped build number to 0.21.5
+
 2005-05-16 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, cli/scan.h, cli/scan.ll, cli/input.cc: command
 	assertions where causing parse errors.
