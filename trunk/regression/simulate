@@ -22,7 +22,7 @@ if [ $? -eq 0 ] ; then
 else
   echo "FAILED" >> $LOGFILE
 fi
-rm test.out
+#rm test.out
 if [ -f lt-gpsim.core ] ; then
 	echo "GPSIM dropped core! Please investigate."
 fi

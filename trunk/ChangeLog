@@ -1,3 +1,7 @@
+2005-05-16 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc, cli/scan.h, cli/scan.ll, cli/input.cc: command
+	assertions where causing parse errors.
+
 2005-05-14 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_processor.cc: The processor command wasn't working
 	because of a typo in an if statement.

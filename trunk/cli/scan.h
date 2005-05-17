@@ -23,11 +23,13 @@ Boston, MA 02111-1307, USA.  */
 #if !defined (__SCAN_H_)
 #define __SCAN_H_
 
+int scan_read (char *buf, unsigned max_size);
+
 #ifdef YY_INPUT
 #undef YY_INPUT
 #endif
 #define YY_INPUT(buf,result,max_size) \
-  if ((result = gpsim_read (buf, max_size)) < 0) \
+  if ((result = scan_read (buf, max_size)) < 0) \
     YY_FATAL_ERROR ("gpsim_read () in flex scanner failed");
 
 #endif
