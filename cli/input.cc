@@ -146,24 +146,26 @@ static CCliCommandHandler sCliCommandHandler;
 /*
   temporary --- linked list input buffer
 */
+
 class LLInput {
 public:
-  LLInput *next;
-  void *data;
-  Macro *macro;  // macro generating this text
 
   LLInput();
   LLInput(char *,Macro *);
   ~LLInput();
+
+  Macro *macro;  // macro generating this text
+  char *data;
+  LLInput *next_input;
 };
 
 LLInput::LLInput()
-  : next(0), data(0) 
+  : macro(0),data(0), next_input(0)
 {
 }
 
 LLInput::LLInput(char *s,Macro *m)
-  : next(0), macro(m)
+  : macro(m), next_input(0)
 {
   data = strdup(s);
 }
@@ -175,7 +177,7 @@ LLInput::~LLInput()
 }
 
 //************************************************************************
-class LLStack : public LLInput
+class LLStack
 {
 public:
   LLStack();
@@ -186,16 +188,21 @@ public:
   LLInput *GetNext();
 
   void print();
+
+  LLInput *LLdata;
+  LLStack *next_stack;
 };
 
 LLStack::LLStack()
+  : LLdata(0), next_stack(0)
+  
 {
 
 }
 
-static LLStack Stack;
+static LLStack *Stack=0;
 
-//====================================================================================
+//========================================================================
 //
 // catch_control_c
 //
@@ -265,21 +272,21 @@ void initialize_gpsim(void)
 void LLStack::print(void)
 {
 #if 0
-  LLInput *s = &Stack;
+  LLStack *s = Stack;
 
   cout << "Current state of input buffer:\n";
   int stack_number=0;
-  while (s->data) {
-    LLInput *h = (LLInput *)s->data;
+  while (s) {
+    LLInput *h = s->LLdata;
     int depth =0;
     while(h) {
       
-      cout << "   " <<stack_number <<':'<<depth << "  "<< (char *)  h->data;
+      cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
       depth++;
-      h = h->next;
+      h = h->next_input;
     }
     stack_number++;
-    s = s->next;
+    s = s->next_stack;
   }
   cout << "\n ---Leaving dump \n";
 #endif
@@ -287,86 +294,83 @@ void LLStack::print(void)
 
 void LLStack::Push(void)
 {
-  LLInput *s = new LLInput();
+  LLStack *s = new LLStack();
 
+  s->next_stack = Stack;
+  Stack = s;
+    
   print();
-  if(s) {
-    s->next = next;
-    s->data = data;
-    next = s;
-    data = 0;
-  }
-  
 }
 
 void LLStack::Pop()
 {
+  if (Stack)
+    Stack = Stack->next_stack;
   print();
-
-  if(!next)
-    return;
-
-  data = next->data;
-  next = next->next;
-
 }
 
 void LLStack::Append(char *s, Macro *m)
 {
   
   LLInput *d = new LLInput(s,m);
-  LLInput *h = (LLInput *)data;
 
-  if(!h) {
-    data = d;
-    return;
-  }
+  LLInput *h = LLdata;
 
-  /* go to the end of the list */
-  while(h->next)
-    h = h->next;
+  if (h) {
 
-  /* add d to the end */
+    /* go to the end of the list */
+    while(h->next_input)
+      h = h->next_input;
 
-  h->next = d;
+    /* add d to the end */
+
+    h->next_input = d;
+    
+  } else
+    LLdata = d;
+
 
 }
 
 
 LLInput *LLStack::GetNext()
 {
-  if(!data) {
-    if(!next)
-      return 0;
 
+  if (Stack) {
+    if (Stack->LLdata) {
+      LLInput *d = Stack->LLdata;
+
+      // remove this item from the list  
+      if(d)
+        Stack->LLdata = d->next_input;
+
+      return d;
+    }
     Pop();
 
     return GetNext();
   }
 
-  LLInput *d = (LLInput *)data;
-
-  // remove this item from the list  
-  if(d) {
-    data = (void *)d->next;
-
-  }
-
-  return d;
+  return 0;
 }
 
 /*******************************************************
  */
 void add_string_to_input_buffer(char *s, Macro *m=0)
 {
-  Stack.Append(s,m);
+  if(!Stack)
+    Stack = new LLStack();
+  Stack->Append(s,m);
 }
 
 /*******************************************************
  */
 void start_new_input_stream(void)
 {
-  Stack.Push();
+  if(!Stack)
+    Stack = new LLStack();
+  else 
+    Stack->Push();
 }
 
 /*******************************************************
@@ -374,8 +378,9 @@ void start_new_input_stream(void)
 void clear_input_buffer(void)
 {
   LLInput * pLine;
-  while((pLine = Stack.GetNext()) != NULL)
-    delete pLine;
+  if (Stack)
+    while((pLine = Stack->GetNext()) != NULL)
+      delete pLine;
 }
 
 /*******************************************************
@@ -390,19 +395,7 @@ extern int init_parser();
 int start_parse(void)
 {
 
-  /*
-  static bool bParsing = false;
-
-  if(bParsing)
-    return -1;
-
-  bParsing = true;
-  */
-
   int retval = init_parser();
-
-  //  bParsing = false;
-
 
   if(quit_parse)
     exit_gpsim();
@@ -455,7 +448,7 @@ void process_command_file(const char * file_name)
   char directory[256];
   const char *dir_path_end;
 
-  if((verbose&4) && DEBUG_PARSER)
+  if(verbose&4)
     cout << __FUNCTION__ <<"()\n";
 
   dir_path_end = get_dir_delim(file_name);
@@ -474,10 +467,11 @@ void process_command_file(const char * file_name)
   if(cmd_file)
     {
 
-      if((verbose) && DEBUG_PARSER)
+      if(verbose)
           cout << "processing a command file\n";
 
-      Stack.Push();
+      start_new_input_stream();
+      //Stack.Push();
 
       char *s;
       char str[256];
@@ -503,7 +497,8 @@ void process_command_file(const char * file_name)
 
     }
 
-  Stack.print();
+  if(Stack)
+    Stack->print();
 
 }
 
@@ -551,23 +546,25 @@ int
 gpsim_read (char *buf, unsigned max_size)
 {
 
-  if((verbose&4) && DEBUG_PARSER)
-    cout <<"gpsim_read\n";
 
-  LLInput *d = Stack.GetNext();
+  LLInput *d = Stack ? Stack->GetNext() : 0;
 
-  if(!d  || !d->data) {
+  if (!d || !d->data) {
+  if(verbose&4)
+    cout <<"gpsim_read -- no more data\n";
     return 0;
   }
 
   gCurrentMacro = d->macro;
 
-  char *cPstr = (char *) d->data;
+  char *cPstr = d->data;
   unsigned int count = strlen(cPstr);
   count = (count < max_size) ? count : max_size;
 
   strncpy(buf, cPstr, count);
 
+  if(verbose&4)
+    cout <<"gpsim_read returning " << count << ":" << cPstr << endl;
   delete (d);
 
   return count;

@@ -65,7 +65,7 @@ struct LexerStateStruct {
 };
 
 static LexerStateStruct *pLexerState = 0;
-
+static int sLevels=0;
 
 extern int quit_parse;
 extern int parser_spanning_lines;
@@ -139,7 +139,12 @@ QUOTEDTOKEN (\".*\")
 
 {S}+      {   /* ignore white space */ }
 
-<INITIAL>\n  { 
+\n {
+        return recognize(EOLN_T, " end of line");
+
+}
+
+<INITIAL>  { 
       // Got an eol.
       if(verbose)
           cout << "got EOL\n";
@@ -152,8 +157,8 @@ QUOTEDTOKEN (\".*\")
 
 	pLexerState->input_mode = CONTINUING_LINE;
 
-      else
-        return recognize(EOLN_T, " end of line");
+      //else
+      //  return recognize(EOLN_T, " end of line");
     }
 
 q{S}+\n { /* short cut for quiting */ 
@@ -666,7 +671,10 @@ void init_cmd_state(void)
 static void pushLexerState()
 {
   if(verbose)
-    cout << "pushing lexer state\n";
+    cout << "pushing lexer state: from level " << sLevels 
+         << " to " << (sLevels+1) << endl;
+
+  sLevels++;
 
   LexerStateStruct  *pLS = new LexerStateStruct();
 
@@ -684,7 +692,10 @@ static void pushLexerState()
 static void popLexerState()
 {
   if(verbose)
-    cout << "popping lexer state\n";
+    cout << "popping lexer state: from level " << sLevels 
+         << " to " << (sLevels-1) << endl;
+
+  sLevels--;
 
   if(pLexerState) {
 
@@ -702,30 +713,26 @@ static void popLexerState()
 
 }
 
+int
+scan_read (char *buf, unsigned max_size)
+{
+  static int lastRet = -1;
+  // hack
+  int ret = gpsim_read(buf,max_size);
 
+  if (lastRet == ret && ret == 0) {
+
+    *buf = '\n';
+    ret = 1;
+  }
+  lastRet = ret;
+  return ret;
+}
 
 int init_parser()
 {
 
   pushLexerState();
-
-  if(verbose)
-    cout << "init_parser\n";
-
-  // Start off in a known state.
-  //  SetMode(INITIAL);
-
-  // Can't have any options until we get a command.
-  if(!parser_spanning_lines) {
-
-    init_cmd_state();
-    yyrestart (stdin);
-
-  }
-
-  if(verbose)
-    cout << "init_parser done\n";
-
 
   int ret = yyparse();
 
@@ -735,7 +742,7 @@ int init_parser()
 
 }
 
-// Tell us all what the current buffer is.
+// Tell us what the current buffer is.
 
 YY_BUFFER_STATE
 current_buffer (void)

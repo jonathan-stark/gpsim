@@ -616,7 +616,7 @@ double square_wave::get_Vth()
 {
   guint64 current_time = get_cycles().value;
 
-  if(verbose)
+  if(verbose & 1)
     cout << "Getting new state of the square wave.\n";
 
   if( ((current_time+phase) % period) <= duty)
@@ -889,7 +889,7 @@ Register *IOPIN::get_iop(void)
 // 
 void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 {
-  if(verbose)
+  if(verbose & 1)
     cout << name()<< " set_nodeVoltage old="<<nodeVoltage <<" new="<<new_nodeVoltage<<endl;
   
   nodeVoltage = new_nodeVoltage;
@@ -921,7 +921,7 @@ void IOPIN::putDrivingState(bool new_state)
     bDrivingState = new_state;
     Vth = bDrivingState ? 5.0 : 0.3;
     
-    if(verbose)
+    if(verbose & 1)
       cout << name()<< " putDrivingState= " 
 	   << (new_state ? "high" : "low") << endl;
     
@@ -945,7 +945,7 @@ void IOPIN::setDrivingState(bool new_state)
 { 
   bDrivingState = new_state;
 
-  if(verbose)
+  if(verbose & 1)
     cout << name()<< " setDrivingState= " 
 	 << (new_state ? "high" : "low") << endl;
 }
@@ -970,7 +970,7 @@ void IOPIN::setDrivenState(bool new_state)
   bDrivenState = new_state;
   //setDrivingState(new_state);
 
-  if(verbose)
+  if(verbose & 1)
     cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
 
@@ -1161,7 +1161,7 @@ double IO_bi_directional_pu::get_Vth()
 {
   
   /**/
-  if(verbose)
+  if(verbose & 1)
     cout << name() << "get_Vth "
 	 << " driving=" << getDriving()
 	 << " bDrivingState=" << bDrivingState
@@ -1369,7 +1369,7 @@ void ValueStimulus::callback()
 
   current = next_sample.v;
 
-  if(verbose)
+  if(verbose & 1)
     cout << "asynchro cycle " << current_cycle << "  state " << current->toString() << '\n';
 
   // If there's a node attached to this stimulus, then update it.
@@ -1381,7 +1381,7 @@ void ValueStimulus::callback()
   if(n) {
     next_sample = *n;
 
-    if(verbose) {
+    if(verbose & 1) {
       cout << "  current_sample (" << next_sample.time << "," 
 	   << next_sample.v->toString() << ")\n";
       cout << " start cycle " << start_cycle << endl;
@@ -1404,7 +1404,7 @@ void ValueStimulus::callback()
   } else
     future_cycle = 0;
 
-  if(verbose)
+  if(verbose & 1)
     cout <<"  next transition = " << future_cycle << '\n';
 }
 
@@ -1446,7 +1446,7 @@ double ValueStimulus::get_Vth()
 void ValueStimulus::start()
 {
 
-  if(verbose)
+  if(verbose & 1)
     cout << "Starting asynchronous stimulus\n";
 
   if(period) {
@@ -1471,15 +1471,11 @@ void ValueStimulus::start()
 
     get_cycles().set_break(future_cycle, this);
 
-    if(verbose) {
-
-
-    }
   }
 
 
 
-  if(verbose)
+  if(verbose & 1)
     cout << "asy should've been started\n";
 
 }
@@ -1504,7 +1500,7 @@ ValueStimulusData *ValueStimulus::getNextSample()
 
     start_cycle += period;
 
-    if(verbose) {
+    if(verbose & 1) {
       cout << "  asynchronous stimulus rolled over\n"
 	   << "   next start_cycle " << start_cycle << "  period " << period << '\n';
     }
@@ -1535,7 +1531,7 @@ void AttributeStimulus::callback()
 
   current = next_sample.v;
 
-  if(verbose)
+  if(verbose & 1)
     cout << "asynchro cycle " << current_cycle << "  state " << current->toString() << '\n';
 
   // If there's a node attached to this stimulus, then update it.
@@ -1547,7 +1543,7 @@ void AttributeStimulus::callback()
   if(n) {
     next_sample = *n;
 
-    if(verbose) {
+    if(verbose & 1) {
       cout << "  current_sample (" << next_sample.time << "," 
 	   << next_sample.v->toString() << ")\n";
       cout << " start cycle " << start_cycle << endl;
@@ -1570,7 +1566,7 @@ void AttributeStimulus::callback()
   } else
     future_cycle = 0;
 
-  if(verbose)
+  if(verbose & 1)
     cout <<"  next transition = " << future_cycle << '\n';
 }
 
