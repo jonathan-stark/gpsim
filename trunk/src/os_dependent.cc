@@ -121,10 +121,38 @@ const char * CFileSearchPath::Find(string &path) {
 }
 
 static CFileSearchPath asDllSearchPath;
-
+static bool bAltPaths = false;
 void AddModulePathFromFilePath(string &sFolder) {
   string sFile;
   asDllSearchPath.AddPathFromFilePath(sFolder, sFile);
+#if defined(_DEBUG)
+  if(!bAltPaths) {
+    bAltPaths = true;
+    string sPath;
+    int iPos = sFolder.find_last_of(FOLDERDELIMITER);
+    if(iPos != string::npos) {
+      char szLine[1024];
+      sPath = sFolder.substr(0, iPos + 1);
+      sPath.append("altpaths.txt");
+      FILE *pFile = fopen(sPath.c_str(), "r");
+      if(pFile) {
+        while(fgets(szLine, 1024, pFile) != NULL) {
+          char *pChar = &szLine[strlen(szLine) - 1];
+          while((*pChar == '\n' || *pChar == '\n') && pChar != szLine)
+            *pChar-- = 0;
+          if(*pChar != FOLDERDELIMITER) {
+            pChar++;
+            *pChar = FOLDERDELIMITER;
+            pChar++;
+            *pChar = 0;
+          }
+          asDllSearchPath.push_back(string(szLine));
+        }
+        fclose(pFile);
+      }
+    }
+  }
+#endif
 }
 
 void CFileSearchPath::AddPathFromFilePath(string &sFolder, string &sFile) {
