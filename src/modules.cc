@@ -397,9 +397,11 @@ bool module_load_library(const char *library_name)
       cerr << endl;
       free_error_message(pszError);
     }
+    else {
 
-    if(module_add_library(sPath.c_str(),handle)) {
-      bReturn = true;
+      if(module_add_library(sPath.c_str(),handle)) {
+        bReturn = true;
+      }
     }
   }
   if(verbose)
