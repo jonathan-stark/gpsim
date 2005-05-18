@@ -271,25 +271,25 @@ void initialize_gpsim(void)
 
 void LLStack::print(void)
 {
-#if 0
-  LLStack *s = Stack;
+  if(verbose & 4) {
+    LLStack *s = Stack;
 
-  cout << "Current state of input buffer:\n";
-  int stack_number=0;
-  while (s) {
-    LLInput *h = s->LLdata;
-    int depth =0;
-    while(h) {
+    cout << "Current state of input buffer:\n";
+    int stack_number=0;
+    while (s) {
+      LLInput *h = s->LLdata;
+      int depth =0;
+      while(h) {
       
-      cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
-      depth++;
-      h = h->next_input;
+	cout << "   " <<stack_number <<':'<<depth << "  "<<  h->data;
+	depth++;
+	h = h->next_input;
+      }
+      stack_number++;
+      s = s->next_stack;
     }
-    stack_number++;
-    s = s->next_stack;
+    cout << "\n ---Leaving dump \n";
   }
-  cout << "\n ---Leaving dump \n";
-#endif
 }
 
 void LLStack::Push(void)

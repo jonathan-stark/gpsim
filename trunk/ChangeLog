@@ -1,3 +1,6 @@
+2005-05-18 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll: Fixed end-of-line scan bug introduced on 5-16.
+
 2005-05-16 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/os_dependent.cc: Added debug code to allow alternate
 	directory paths for module libraries so I can specify debug
