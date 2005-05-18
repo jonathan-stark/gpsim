@@ -140,14 +140,25 @@ QUOTEDTOKEN (\".*\")
 {S}+      {   /* ignore white space */ }
 
 \n {
-        return recognize(EOLN_T, " end of line");
+      if(verbose)
+          cout << "got EOL\n";
 
+      pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
+      if(pLexerState->cmd && 
+	 pLexerState->cmd->can_span_lines() && 
+	 pLexerState->have_parameters && 
+	 !pLexerState->end_of_command ) 
+
+	pLexerState->input_mode = CONTINUING_LINE;
+
+      else
+        return recognize(EOLN_T, " end of line");
 }
 
 <INITIAL>  { 
       // Got an eol.
       if(verbose)
-          cout << "got EOL\n";
+          cout << "got INITIAL\n";
 
       pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
       if(pLexerState->cmd && 
