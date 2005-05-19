@@ -108,7 +108,8 @@ void redisplay_prompt(void);
 char *gnu_readline (char *s, unsigned int force_readline);
 
 int last_command_is_repeatable=0;
-extern Macro *gCurrentMacro;
+//extern Macro *gCurrentMacro;
+extern void  scanPushMacroState(Macro *);
 
 extern int quit_parse;
 
@@ -555,7 +556,8 @@ gpsim_read (char *buf, unsigned max_size)
     return 0;
   }
 
-  gCurrentMacro = d->macro;
+  scanPushMacroState(d->macro);
+  //gCurrentMacro = d->macro;
 
   char *cPstr = d->data;
   unsigned int count = strlen(cPstr);
@@ -563,8 +565,12 @@ gpsim_read (char *buf, unsigned max_size)
 
   strncpy(buf, cPstr, count);
 
-  if(verbose&4)
+  if(verbose&4) {
     cout <<"gpsim_read returning " << count << ":" << cPstr << endl;
+    if (d->macro) {
+      cout << "   and it's a macro named:" << d->macro->name() << endl;
+    }
+  }
   delete (d);
 
   return count;

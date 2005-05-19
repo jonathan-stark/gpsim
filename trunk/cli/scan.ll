@@ -83,10 +83,11 @@ static int process_shellLine(YYSTYPE* yylvalP, const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
 
+void scanPopMacroState();
 int cli_corba_init (char *ior_id);
 
 extern Macro *isMacro(const string &s);
-extern Macro *gCurrentMacro;
+static Macro *gCurrentMacro=0;
 
 #define YYDEBUG 1
 
@@ -192,8 +193,8 @@ abort_gpsim_now {
 "*"                 {return(recognize(MPY_T,"*"));}
 "/"                 {return(recognize(DIV_T,"/"));}
 "^"                 {return(recognize(XOR_T,"^"));}
-"&"                 {return(recognize(AND_T,"^"));}
-"|"                 {return(recognize(OR_T,"^"));}
+"&"                 {return(recognize(AND_T,"&"));}
+"|"                 {return(recognize(OR_T,"|"));}
 "<<"                {return(recognize(SHL_T,"<<"));}
 ">>"                {return(recognize(SHR_T,">>"));}
 
@@ -213,6 +214,8 @@ abort_gpsim_now {
 "true"              {return(process_booleanLiteral(yylvalP,true));}
 "false"             {return(process_booleanLiteral(yylvalP,false));}
 "reg"               {return(recognize(REG_T,"reg"));}
+
+"endm"              {scanPopMacroState();}
 
 {SHELLLINE}         {return(process_shellLine(yylvalP,&yytext[1]));}
 {QUOTEDTOKEN}       {return(process_quotedStringLiteral(yylvalP,&yytext[1]));}
@@ -450,7 +453,7 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
         pLexerState->have_parameters = 0;
         retval = pLexerState->cmd->get_token();
 
-	// ugh. This is problem when we the parser becomes re-entrant.
+	// ugh. This is problem when the parser becomes re-entrant.
         last_command_is_repeatable = pLexerState->cmd->is_repeatable();
 
         return recognize(retval,"good command");
@@ -461,15 +464,18 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
     // Search the macros
     yylvalP->Macro_P = isMacro(s);
     if(yylvalP->Macro_P) {
-
       return MACROINVOCATION_T;
     }
 
     // If we're invoking a macro, search the parameters
     string replaced;
     if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
-      if(replaced != s)
-        return handle_identifier(yylvalP, replaced, op);
+      if(replaced != s) {
+        //return handle_identifier(yylvalP, replaced, op);
+        push_input_stack();
+        yy_scan_string(replaced.c_str());
+        return 0;
+      }
 
   } else {
 
@@ -892,7 +898,7 @@ done:
   return true;
 }
 
-void lexer_InvokeMacro(class Macro *m)
+void lexer_InvokeMacro(Macro *m)
 {
 
   if(!m)
@@ -918,4 +924,15 @@ void lexer_InvokeMacro(class Macro *m)
   } while (bValidParameter && i<m->nParameters());
 
   m->invoke();
+}
+
+void scanPushMacroState(Macro *m)
+{
+  cout << "pushing macro state \n";
+  gCurrentMacro = m;
+}
+
+void scanPopMacroState()
+{
+  cout << "popping macro state \n";
 }
