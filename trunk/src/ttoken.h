@@ -21,44 +21,46 @@ Boston, MA 02111-1307, USA.  */
 #if !defined(__TTOKEN_H__)
 #define __TTOKEN_H__
 
+namespace gpsim {
 
-/// Token - a class used to synchronize two threads.
-/// Token will spawn a new thread and keep it synchronized
-/// with the thread that called it. In gpsim, the simulation
-/// engine is a single thread application. However, it's 
-/// sometimes quite difficult to implement modules within the
-/// context of this thread. So modules that are instantiated
-/// from within the context of the simulator can use the Token
-/// class to spawn a new thread.
-/// 
-/// Note - the underlying implementation depends on pthreads.
-/// However, that implementation is completely hidden with an
-/// opaque pointer to the PThreadWrapper object. This way,
-/// if it turns out that pthreads are not installed or there's
-/// another implementation preferred for the synchronization
-/// then it's easy to change with impacting the whole system.
-
-struct ThreadWrapper;
-
-class Token
-{
-public:
-  Token();
-
-  /// Initialize - a wrapper for pthread create.
-
-  void Initialize(void *(*child) (void *), void *data);
-
+  /// Token - a class used to synchronize two threads.
+  /// Token will spawn a new thread and keep it synchronized
+  /// with the thread that called it. In gpsim, the simulation
+  /// engine is a single thread application. However, it's 
+  /// sometimes quite difficult to implement modules within the
+  /// context of this thread. So modules that are instantiated
+  /// from within the context of the simulator can use the Token
+  /// class to spawn a new thread.
   /// 
-  void waitForChild();
-  void passToChild();
-  void passToParent();
-  void grab();
+  /// Note - the underlying implementation depends on pthreads.
+  /// However, that implementation is completely hidden with an
+  /// opaque pointer to the PThreadWrapper object. This way,
+  /// if it turns out that pthreads are not installed or there's
+  /// another implementation preferred for the synchronization
+  /// then it's easy to change with impacting the whole system.
 
-private:
+  struct ThreadWrapper;
 
-  ThreadWrapper *thread;
-};
+  class Token
+  {
+  public:
+    Token();
 
+    /// Initialize - a wrapper for pthread create.
+
+    void Initialize(void *(*child) (void *), void *data);
+
+    /// 
+    void waitForChild();
+    void passToChild();
+    void passToParent();
+    void grab();
+
+  private:
+
+    ThreadWrapper *thread;
+  };
+
+} // end of namespace gpsim
 
 #endif // !defined(__TTOKEN_H__)

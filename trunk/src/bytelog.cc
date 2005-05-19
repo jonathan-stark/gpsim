@@ -22,69 +22,72 @@ Boston, MA 02111-1307, USA.  */
 #include "bytelog.h"
 
 
+namespace gpsim {
 
-ByteLogger::ByteLogger(int _bufsize) 
-  : bufsize(_bufsize)
-{
-  index = 0;
-  buffer = (TimedByte *) new char[bufsize * sizeof(TimedByte)];
+  ByteLogger::ByteLogger(int _bufsize) 
+    : bufsize(_bufsize)
+  {
+    index = 0;
+    buffer = (TimedByte *) new char[bufsize * sizeof(TimedByte)];
 
-}
+  }
 
-int ByteLogger::modIndex(int i)
-{
-  if(i<0) {
-    i+=bufsize;
-    if(i<0)
+  int ByteLogger::modIndex(int i)
+  {
+    if(i<0) {
+      i+=bufsize;
+      if(i<0)
+        return index;
+    } else  if(i>=bufsize)
       return index;
-  } else  if(i>=bufsize)
-    return index;
 
-  return i;
-}
+    return i;
+  }
 
 
-void ByteLogger::start(unsigned long long t)
-{
-  buffer[index].start = t;
-}
-void ByteLogger::stop(unsigned long long t) 
-{
-  buffer[index].stop = t;
+  void ByteLogger::start(unsigned long long t)
+  {
+    buffer[index].start = t;
+  }
+  void ByteLogger::stop(unsigned long long t) 
+  {
+    buffer[index].stop = t;
 
-  if(++index > bufsize)
-    index  = 0;
-}
-void ByteLogger::byte(unsigned int b) 
-{
-  buffer[index].b = b&0xff;
-}
-void ByteLogger::rts(unsigned long long r) 
-{
-  buffer[index].rts = r;
-}
-/*
-void ByteLogger::statistics(int i=-1)
-{
-  i = modIndex(i+index);
+    if(++index > bufsize)
+      index  = 0;
+  }
+  void ByteLogger::byte(unsigned int b) 
+  {
+    buffer[index].b = b&0xff;
+  }
+  void ByteLogger::rts(unsigned long long r) 
+  {
+    buffer[index].rts = r;
+  }
+  /*
+    void ByteLogger::statistics(int i=-1)
+    {
+    i = modIndex(i+index);
 
-  unsigned long long t = (buffer[i].stop-buffer[i].start);
-  double td= t/2.0;
+    unsigned long long t = (buffer[i].stop-buffer[i].start);
+    double td= t/2.0;
 
-  cout << "0x" << hex << buffer[i].b 
-       << " start time: 0x" << buffer[i].start
-       << " byte time: 0x" << t << " cycles = "
-       << td  << " uS\n";
-}
-*/
-unsigned long long ByteLogger::getStart(int i)
-{
+    cout << "0x" << hex << buffer[i].b 
+    << " start time: 0x" << buffer[i].start
+    << " byte time: 0x" << t << " cycles = "
+    << td  << " uS\n";
+    }
+  */
+  unsigned long long ByteLogger::getStart(int i)
+  {
 
-  return buffer[modIndex(i+index)].start;
-}
+    return buffer[modIndex(i+index)].start;
+  }
 
-void ByteLogger::get(int i, TimedByte &b)
-{
+  void ByteLogger::get(int i, TimedByte &b)
+  {
 
-  b = buffer[modIndex(i+index)];
-}
+    b = buffer[modIndex(i+index)];
+  }
+
+} // end of namespace gpsim
