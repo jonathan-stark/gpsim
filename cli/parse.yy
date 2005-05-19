@@ -174,7 +174,7 @@ extern int yylex(YYSTYPE* lvalP);
 %token <s>   MACROBODY_T
 %token <Macro_P>   MACROINVOCATION_T
 
-%token <s>  STRING
+/*%token <s>  STRING*/
 
 %token <li>  INDIRECT
 
@@ -398,7 +398,7 @@ frequency_cmd
 
 help_cmd
           : HELP                        {help.help(); }
-          | HELP LITERAL_STRING_T       {help.help($2->getVal()); /*free($2);*/}
+          | HELP LITERAL_STRING_T       {help.help($2->getVal()); delete $2;}
           | HELP SYMBOL_T               {help.help($2);}
           ;
 
@@ -632,7 +632,7 @@ macro_cmd:
 
 macrodef_directive
         : LITERAL_STRING_T MACRO
-                                        {c_macro.define($1->getVal());}
+                                        {c_macro.define($1->getVal()); delete $1;}
           opt_mdef_arglist rol
                                         {lexer_setMacroBodyMode();}
 
@@ -641,8 +641,16 @@ macrodef_directive
 
 opt_mdef_arglist
         : /* empty */
-        | STRING                        {c_macro.add_parameter($1);}
-        | opt_mdef_arglist ',' STRING   {c_macro.add_parameter($3);}
+        | LITERAL_STRING_T                        
+          {
+            c_macro.add_parameter($1->getVal());
+	    delete $1;
+	  }
+        | opt_mdef_arglist ',' LITERAL_STRING_T
+          {
+	    c_macro.add_parameter($3->getVal());
+	    delete $3;
+	  }
         ;
 
 
@@ -658,7 +666,7 @@ mdef_body_
 
 mdef_end
         : ENDM                          {c_macro.end_define();}
-        | LITERAL_STRING_T ENDM                   {c_macro.end_define($1->getVal()); }
+        | LITERAL_STRING_T ENDM         {c_macro.end_define($1->getVal()); delete $1; }
         ;
 
 

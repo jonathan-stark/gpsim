@@ -96,8 +96,9 @@ void Macro::invoke()
 	si != body.end();
 	++si)
       add_string_to_input_buffer((char *) ((*si).c_str()), this);
-
   }
+
+  add_string_to_input_buffer("endm\n", this);
 
 }
 //----------------------------------------
@@ -204,8 +205,6 @@ void Macro::print()
 
 // hack....
 static Macro *theMacro = 0;   // Used during macro definition
-Macro *gCurrentMacro = 0;     // Used during macro invocation
-
 
 Macro *isMacro(const string &s)
 {
@@ -241,9 +240,9 @@ cmd_macro::cmd_macro(void)
 		       "macro body\n"
 		       "endm\n\n"
 		       "Example:\n\n"
-		       "s macro n regs\n"
+		       "s macro n, regs\n"
 		       "echo Step and Show\n"
-		       "step n"
+		       "step n\n"
 		       "x regs\n"
 		       "endm\n\n"
 		       "Invoke by\n\n"

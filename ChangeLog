@@ -1,3 +1,11 @@
+2005-05-19 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, cli/cmd_macro.cc, cli/parse.yy, cli/input.cc:
+	A recent change in string processing broke macros. Also, began
+	adding code to support nested macros.
+	* regression/macro_test/macro_test.asm,
+	regression/macro_test/macro_test.stc: Added new regression test
+	for macros.
+	
 2005-05-18 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll: Fixed end-of-line scan bug introduced on 5-16.
 
