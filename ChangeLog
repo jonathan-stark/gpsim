@@ -1,4 +1,10 @@
 2005-05-19 Scott Dattalo <scott@dattalo.com>
+	* src/ttoken.h, src/ttoken.cc, src/bytelog.cc, src/bytelog.h,
+	src/pthread-wrap.h: Create a gpsim namespace and place the objects
+	in these files in there.
+	* cli/scan.ll: removed some printf debugging junk.
+
+2005-05-19 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/cmd_macro.cc, cli/parse.yy, cli/input.cc:
 	A recent change in string processing broke macros. Also, began
 	adding code to support nested macros.

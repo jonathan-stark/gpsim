@@ -24,18 +24,22 @@ Boston, MA 02111-1307, USA.  */
 
 #include <pthread.h>
 
-/// ThreadWrapper
-/// a private implementation of pthread variables for the
-/// Token class. This is not intended to be used directly
-/// by modules.
+namespace gpsim {
 
-struct ThreadWrapper
-{
-  /// pthread variables.
-  pthread_t thHostInterface;
-  pthread_attr_t thAttribute;
-  pthread_mutex_t mutex;
-  pthread_cond_t cvWaitOnParent;
-  pthread_cond_t cvWaitOnChild;
-};
+  /// ThreadWrapper
+  /// a private implementation of pthread variables for the
+  /// Token class. This is not intended to be used directly
+  /// by modules.
+
+  struct ThreadWrapper
+  {
+    /// pthread variables.
+    pthread_t thHostInterface;
+    pthread_attr_t thAttribute;
+    pthread_mutex_t mutex;
+    pthread_cond_t cvWaitOnParent;
+    pthread_cond_t cvWaitOnChild;
+  };
+} // end of namespace gpsim
+
 #endif // !defined(__PTHREAD_WRAP_H__)

@@ -23,38 +23,40 @@ Boston, MA 02111-1307, USA.  */
 
 class Cycle_Counter;
 
+namespace gpsim {
 
-//========================================================================
+  //========================================================================
 
-struct TimedByte {
-  unsigned long long start;
-  unsigned long long stop;
-  unsigned long long rts;
-  unsigned int b;
-};
+  struct TimedByte {
+    unsigned long long start;
+    unsigned long long stop;
+    unsigned long long rts;
+    unsigned int b;
+  };
 
-class ByteLogger
-{
-protected:
-  int index;
-  int bufsize;
-  TimedByte *buffer;
+  class ByteLogger
+    {
+    protected:
+      int index;
+      int bufsize;
+      TimedByte *buffer;
 
-public:
+    public:
 
-  ByteLogger(int _bufsize=128);
+      ByteLogger(int _bufsize=128);
 
-  int modIndex(int i);
-  void start(unsigned long long t);
-  void stop(unsigned long long t);
-  void byte(unsigned int b);
-  void rts(unsigned long long r);
-  //  void statistics(int i=-1);
-  unsigned long long getStart(int i=-1);
-  void get(int i, TimedByte &b);
+      int modIndex(int i);
+      void start(unsigned long long t);
+      void stop(unsigned long long t);
+      void byte(unsigned int b);
+      void rts(unsigned long long r);
+      //  void statistics(int i=-1);
+      unsigned long long getStart(int i=-1);
+      void get(int i, TimedByte &b);
 
-};
+    };
 
+} // end of namespace gpsim
 
 
 #endif //!defined(__BYTELOG_H__)

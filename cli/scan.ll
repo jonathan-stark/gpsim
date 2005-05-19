@@ -928,11 +928,13 @@ void lexer_InvokeMacro(Macro *m)
 
 void scanPushMacroState(Macro *m)
 {
-  cout << "pushing macro state \n";
+  if(verbose & 4)
+    cout << "pushing macro state \n";
   gCurrentMacro = m;
 }
 
 void scanPopMacroState()
 {
-  cout << "popping macro state \n";
+  if(verbose & 4)
+    cout << "popping macro state \n";
 }
