@@ -1,0 +1,27 @@
+# Macro test
+#
+
+echo gpsim macro test
+
+set verbose 0xfe
+
+mac_exp macro add, mask
+  mac_flags = (mac_flags+add) & mask
+endm
+
+mac1 macro p1, p2
+ echo run until break, then increment a variable
+ reg(p1)
+ run
+ mac_exp p1, p2
+endm
+
+break e mac_loop
+
+run
+mac1 1, 0b00000010
+failures = failures + mac_flags
+#mac1 0xff, 0
+failures = failures + mac_flags
+
+mac1 1, 0x1f
