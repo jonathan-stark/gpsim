@@ -91,6 +91,96 @@ static Macro *gCurrentMacro=0;
 
 #define YYDEBUG 1
 
+
+
+//========================================================================
+// MacroChain class
+//
+// 
+
+class MacroChain
+{
+public:
+
+  struct Link {
+    Link *prev;
+    Link *next;
+    Macro *m;
+  };
+
+  MacroChain() {
+    head.prev = head.next =0;
+    curr = &head;
+  }
+  
+  void push(Macro *m) {
+    if (verbose & 4 && m) {
+      cout << "Pushing " << m->name() << " onto the macro chain\n";
+    }
+
+    Link *pL = new Link();
+    pL->m = m;
+    pL->prev = &head;
+    pL->next = head.next;
+    head.next = pL;
+    param = pL;
+    curr = &head;
+  }
+
+  void pop()
+  {
+    Link *pL = head.next;
+    if (pL) {
+
+      if (verbose & 4 && pL->m) {
+        cout << "Popping " << pL->m->name() << " from the macro chain\n";
+      }
+
+      head.next = pL->next;
+      if (pL->next)
+        pL->next->prev = &head;
+      delete pL;
+    }
+  }
+
+  Macro *nextParamSource()
+  {
+    if (curr)
+      curr = curr->next;
+    if (verbose & 4 && curr && curr->m ) {
+      cout << " selecting parameter source " << curr->m->name() << endl;
+    }
+    if(curr)
+      return curr->m;
+    return 0;
+  }
+  void popParamSource()
+  {
+    if (verbose & 4 && curr && curr->m ) {
+      cout << " popping parameter source " << curr->m->name() << endl;
+    }
+    if (curr)
+      curr = curr->prev;
+  }
+
+  void resetParamSource()
+  {
+    if (verbose & 4) {
+      cout << " resetparameter source\n";
+    }
+    curr = &head;
+  }
+
+private:
+  Link *curr;
+  Link head;
+  Link *param;
+};
+
+static MacroChain theMacroChain;
+
+
+
 %}
 
 D	[0-9]
@@ -393,6 +483,37 @@ int translate_token(int tt)
 
 }
 
+static bool bTryMacroParameterExpansion(string &s)
+{
+
+  // If we're invoking a macro, search the parameters
+  string replaced;
+  Macro *currentMacro = theMacroChain.nextParamSource();
+
+  if (verbose & 4) { 
+    cout << "Searching for parameter named:" << s;
+    if (currentMacro) 
+      cout << " in macro: " << currentMacro->name() << endl;
+    else
+      cout << " but there is no current macro\n";
+  }
+
+  if(currentMacro && currentMacro->substituteParameter(s,replaced))
+    if(replaced != s) {
+      if (verbose & 4)
+        cout << "  -- found it and replaced it with " << replaced << endl;
+      if (bTryMacroParameterExpansion (replaced))
+        return true;
+      push_input_stack();
+      yy_scan_string(replaced.c_str());
+      theMacroChain.resetParamSource();
+      return true;
+    }
+  theMacroChain.popParamSource();
+  return false;
+
+}
+
 /*************************************************************************
 *
 * handle_identifier
@@ -467,26 +588,14 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
       return MACROINVOCATION_T;
     }
 
-    // If we're invoking a macro, search the parameters
-    string replaced;
-    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
-      if(replaced != s) {
-        //return handle_identifier(yylvalP, replaced, op);
-        push_input_stack();
-        yy_scan_string(replaced.c_str());
-        return 0;
-      }
+    if (bTryMacroParameterExpansion(s))
+      return 0;
 
   } else {
 
-    // If we're invoking a macro, search the parameters
-    string replaced;
-    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
-      if(replaced != s) {
-        push_input_stack();
-        yy_scan_string(replaced.c_str());
-        return 0;
-      }
+    if (bTryMacroParameterExpansion(s))
+      return 0;
+
     // We already have the command, so search the options. 
 
     struct cmd_options *opt = *op;
@@ -904,6 +1013,11 @@ void lexer_InvokeMacro(Macro *m)
   if(!m)
     return;
 
+  if(verbose &4)
+    cout << "Invoking macro: " << m->name() << endl;
+
+  theMacroChain.push(m);
+
   m->prepareForInvocation();
 
   int i=0;
@@ -928,13 +1042,11 @@ void lexer_InvokeMacro(Macro *m)
 
 void scanPushMacroState(Macro *m)
 {
-  if(verbose & 4)
-    cout << "pushing macro state \n";
   gCurrentMacro = m;
 }
 
 void scanPopMacroState()
 {
-  if(verbose & 4)
-    cout << "popping macro state \n";
+
+  theMacroChain.pop();
 }

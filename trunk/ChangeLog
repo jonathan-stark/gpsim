@@ -1,4 +1,8 @@
 2005-05-20 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, regression/run_regression.sh,
+	regression/macro_test/macro_test.stc:  Macros can now be nested.
+
+2005-05-20 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_profile.cc: ifdef'd out code that a) is seldom (never?)
 	used and b) incompatible with the latest official release of
 	gtkextra. 
