@@ -1,3 +1,8 @@
+2005-05-20 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_profile.cc: ifdef'd out code that a) is seldom (never?)
+	used and b) incompatible with the latest official release of
+	gtkextra. 
+	
 2005-05-19 Scott Dattalo <scott@dattalo.com>
 	* src/ttoken.h, src/ttoken.cc, src/bytelog.cc, src/bytelog.h,
 	src/pthread-wrap.h: Create a gpsim namespace and place the objects
