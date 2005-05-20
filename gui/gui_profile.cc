@@ -612,6 +612,7 @@ plot_do_popup(GtkWidget *widget, GdkEventButton *event, Profile_Window *pw)
 int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int numpoints)
 {
 
+#if 0
     static GtkWidget *window1;
     GtkWidget *vbox1;
     GtkWidget *scrollw1;
@@ -803,6 +804,7 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 	gdk_color_alloc(gtk_widget_get_colormap(canvas), &color2);
 
 	gtk_plot_hide_legends(GTK_PLOT(active_plot));
+
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_TOP,0);
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_BOTTOM,0);
 	gtk_plot_axis_show_labels(GTK_PLOT(active_plot),GTK_PLOT_AXIS_RIGHT,0);
@@ -891,11 +893,12 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
     has_old_graph=1;
     last_numpoints=numpoints;
     return 0;
+#endif // 
 }
 
 int plot_routine_histogram(Profile_Window *pw)
 {
-
+#if 0
     static GtkWidget *window1;
     GtkWidget *vbox1;
     GtkWidget *scrollw1;
@@ -1232,6 +1235,7 @@ int plot_routine_histogram(Profile_Window *pw)
 
     has_old_graph=1;
     last_numpoints=numpoints;
+#endif
     return 0;
 }
 
