@@ -342,7 +342,7 @@ void cmd_break::set_break(int bit_flag)
 }
 
 
-int cmd_break::set_break(int bit_flag, guint64 v)
+int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
 {
 
   int b = MAX_BREAKPOINTS;
@@ -366,7 +366,7 @@ int cmd_break::set_break(int bit_flag, guint64 v)
   case EXECUTION:
     b = bp.set_execution_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
-	    cout << "break at address: " << value << " break #: " << b << '\n';
+      cout << "break at address: " << value << " break #: " << b << '\n';
     }
     else
       cout << "failed to set execution break (check the address)\n";
@@ -394,6 +394,10 @@ int cmd_break::set_break(int bit_flag, guint64 v)
   case WDT:
     cout << TOO_MANY_ARGS;
   }
+
+  
+  if (pExpr && (b>=MAX_BREAKPOINTS || !bp.set_expression(b,pExpr)))
+    delete pExpr;
 
   return b;
 }

@@ -478,10 +478,24 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 
     for(i=start_block; i<=end_block; i++) {
       read_block(temp_block, i);
+#if 0
+  int q,p;
+  printf ("Codefile block 0x%x\n",i);
+
+  for (q=0,p=0; q < COD_BLOCK_SIZE; q+=16) {
+
+    for (p=0; p<16; p++)
+      printf("%02X ",(unsigned char)temp_block[q+p]);
+    for (p=0; p<16; p++)
+      printf("%c", isascii(temp_block[q+p]) ? temp_block[q+p] : '.');
+    printf("\n");
+  }
+
+#endif
     
       j = 0;
 
-      while (j < 504) {
+      while (j < COD_BLOCK_SIZE-8) {
 
 	/* read big endian */
 	laddress = get_be_int(&temp_block[j]);
@@ -496,7 +510,7 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 
         get_string(DebugMessage, &temp_block[j], sizeof DebugMessage);
 
-	j += strlen(DebugMessage);
+	j += strlen(DebugMessage)+1;
 
         if(verbose)
           printf("debug message: addr=%#x command=\"%c\" string=\"%s\"\n",
@@ -513,13 +527,19 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
         case 'A':
           // assertion
 	  if(pCli) {
-	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(DebugMessage,0))
-	      printf("cod: Failed to parse assertion:%s\n",DebugMessage);
+	    char buff[256];
+	    snprintf(buff,sizeof(buff),"break e %d %s\n",laddress,DebugMessage);
+	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(buff,0))
+	      printf("cod: Failed to parse assertion:%s\n",buff);
 	  }
           break;
         case 'e':
         case 'E':
           // gpsim command
+	  if(pCli) {
+	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(DebugMessage,0))
+	      printf("cod: Failed to parse assertion:%s\n",DebugMessage);
+	  }
 
           break;
         case 'f':

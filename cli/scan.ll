@@ -201,8 +201,8 @@ HEX2    ("$"[0-9a-fA-F]+)
 FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
-SHELLCHAR (!)
-SHELLLINE	({SHELLCHAR}.*)
+SHELLCHAR (^[!])
+SHELLLINE   ({SHELLCHAR}.*)
 QUOTEDTOKEN (\".*\")
 
 
@@ -307,7 +307,7 @@ abort_gpsim_now {
 
 "endm"              {scanPopMacroState();}
 
-{SHELLLINE}         {return(process_shellLine(yylvalP,&yytext[1]));}
+^[!].*              {return(process_shellLine(yylvalP,&yytext[1]));}
 {QUOTEDTOKEN}       {return(process_quotedStringLiteral(yylvalP,&yytext[1]));}
 
 

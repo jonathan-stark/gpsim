@@ -1,3 +1,14 @@
+2005-05-21 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_break.h, cli/cmd_break.cc, cli/input.cc, cli/parse.yy,
+	src/cod.cc, src/breakpoints.cc: Execution breakpoints were failing
+	to propogate execute() if an attached expression evaluated false.
+	Added support for gpasm style assertions.
+	* cli/scan.ll: Shell command escape character ('!') was
+	conflicting with the not operator.
+	* regression/assertions/assertions.asm,
+	regression/assertions/Makefile, regression/assertions/16f873.lkr:
+	Added a regression test for gpasm assertions.
+
 2005-05-20 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, regression/run_regression.sh,
 	regression/macro_test/macro_test.stc:  Macros can now be nested.

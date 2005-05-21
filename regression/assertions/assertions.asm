@@ -38,12 +38,20 @@ start
 	clrf	var2
 	clrf	var3
 
+  ; var1 and var2 have just been cleared, so the following two
+  ; assertions should fail
+
   .direct "A",  "var1==5"
 	nop
-
   .direct "A",  "var2==6"
 	nop
+
+  ; compound expression
+  .direct "A",  "var2!=0 || var1!=0"
+	nop
+
 done:
+  ; If no expression is specified, then break unconditionally
   .direct "A",  ""
 	goto	done
 
