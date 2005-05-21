@@ -659,16 +659,15 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != get_cycles().value)) {
+  if( (cpu->simulation_mode == RUNNING) && 
+      (simulation_start_cycle != get_cycles().value) &&
+      eval_Expression()) {
 
-    if(eval_Expression()) {
       action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
-    }
-  } else {
-    replaced->execute();
   }
-
+  else
+    replaced->execute();
 }
 
 Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, 

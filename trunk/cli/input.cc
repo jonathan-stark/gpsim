@@ -91,6 +91,7 @@ extern "C" {
 
 extern const char *get_dir_delim(const char *path);
 extern bool bUseGUI;
+int parse_string(char * str);
 
 //------------------------------------------------------------------------
 // 
@@ -136,7 +137,9 @@ char *CCliCommandHandler::GetName()
 int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
 {
   cout << "GCLICommandHandler::Execute:" << commandline << endl;
-  return 1;
+  
+  return parse_string((char*)commandline);
+
 }
 static CCliCommandHandler sCliCommandHandler;
 

@@ -41,7 +41,7 @@ public:
   void set_break(cmd_options *co, Value *pValue, Expression *pExpr);
   void set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
   void set_break(int bit_flag);
-  int  set_break(int bit_flag,guint64 value);
+  int  set_break(int bit_flag,guint64 value, Expression *pExpr=0);
 private:
 
 };
