@@ -174,7 +174,8 @@ extern int yylex(YYSTYPE* lvalP);
 %token <s>   MACROBODY_T
 %token <Macro_P>   MACROINVOCATION_T
 
-/*%token <s>  STRING*/
+
+%type  <i>   break_set
 
 %token <li>  INDIRECT
 
@@ -353,17 +354,30 @@ attach_cmd
 break_cmd
           : BREAK                             {c_break.list();}
           | BREAK LITERAL_INT_T               {c_break.list($2->getVal());delete $2;}
-          | BREAK SYMBOL_T                    {c_break.set_break($2);}
-          | BREAK bit_flag SYMBOL_T           {c_break.set_break($2,$3);}
-          | BREAK bit_flag SYMBOL_T expr      {c_break.set_break($2,$3,$4);}
-          | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3); delete $3;}
-          | BREAK bit_flag LITERAL_INT_T expr {c_break.set_break($2,$3,$4); delete $3;}
-          | BREAK bit_flag break_boolean_expr {c_break.set_break($2,$3);}
-          | BREAK bit_flag                    {c_break.set_break($2);}
+          | break_set                         {  }
+          | break_set ',' LITERAL_STRING_T
+            {
+	      if (get_bp().bIsValid($1)) {
+		string m = string($3->getVal());
+		get_bp().set_message((unsigned int)$1,m);
+	      }
+	      delete $3;
+	    }
+          ;
+
+
+break_set
+          : BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
+          | BREAK bit_flag SYMBOL_T           {$$=c_break.set_break($2,$3);}
+          | BREAK bit_flag SYMBOL_T expr      {$$=c_break.set_break($2,$3,$4);}
+          | BREAK bit_flag LITERAL_INT_T      {$$=c_break.set_break($2,$3); delete $3;}
+          | BREAK bit_flag LITERAL_INT_T expr {$$=c_break.set_break($2,$3,$4); delete $3;}
+          | BREAK bit_flag break_boolean_expr {$$=c_break.set_break($2,$3);}
+          | BREAK bit_flag                    {$$=c_break.set_break($2);}
           | BREAK bit_flag REG_T '(' LITERAL_INT_T ')'  
             {
               // break r|w reg(number)
-              c_break.set_break($2->value, $5->getVal());
+              $$=c_break.set_break($2->value, $5->getVal());
               delete $5;
             }
           ;

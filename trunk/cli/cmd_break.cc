@@ -157,13 +157,12 @@ static bool bCheckOptionCompatibility(cmd_options *co, Value *pValue)
 //
 //  break w temp1  PC>=InterruptStart && PC<InterruptEnd
 
-void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
+unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
 {
   if (!bCheckOptionCompatibility(co, pValue) || !GetActiveCPU())
-    return;
+    return MAX_BREAKPOINTS;
 
-  // 
-  int b;
+  unsigned int b = MAX_BREAKPOINTS;
 
   Integer * pAddress = dynamic_cast<Integer*>(pValue);
   if (pAddress != NULL) { 
@@ -172,7 +171,7 @@ void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
     b = bp.set_execution_break(GetActiveCPU(),iAddress);
     if (!bp.set_expression(b,pExpr))
       delete pExpr;
-    return;
+    return b;
   }
 
   register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
@@ -181,9 +180,10 @@ void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
     
     if (!bp.set_expression(b,pExpr))
       delete pExpr;
-    return;
+    return b;
   }
 
+  return b;
 }
 //------------------------------------------------------------------------
 //  set_break(cmd_options *co, Value *pValue)
@@ -193,39 +193,39 @@ void cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pExpr)
 //   break e|r|w ADDRESS_SYMBOL
 //   break r|w REGISTER_SYMBOL
 //
-void cmd_break::set_break(cmd_options *co, Value *pValue)
+unsigned int cmd_break::set_break(cmd_options *co, Value *pValue)
 {
-  if (!bCheckOptionCompatibility(co, pValue))
-    return;
+  if (bCheckOptionCompatibility(co, pValue)) {
 
-  Integer * pAddress = dynamic_cast<Integer*>(pValue);
-  if (pAddress != NULL) { 
-    gint64 iAddress;
-    pAddress->get(iAddress);
-    set_break(co->value, iAddress);
-    return;
+    Integer * pAddress = dynamic_cast<Integer*>(pValue);
+    if (pAddress != NULL) { 
+      gint64 iAddress;
+      pAddress->get(iAddress);
+      return set_break(co->value, iAddress);
+    }
+
+    register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
+    if (pRegSymbol)
+      return  set_break(co->value, pRegSymbol->getReg()->address);
   }
 
-  register_symbol* pRegSymbol = dynamic_cast<register_symbol*>(pValue);
-  if (pRegSymbol) {
-    set_break(co->value, pRegSymbol->getReg()->address);
-    return;
-  }
+  return MAX_BREAKPOINTS;
 }
 //------------------------------------------------------------------------
-void cmd_break::set_break(cmd_options *co, Expression *pExpr)
+unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
 {
 
   if (!co) {
     list();
-    return;
+    return MAX_BREAKPOINTS;
   }
 
-  int bit_flag = co->value;
-  if (!pExpr) {
-    set_break(bit_flag);
-    return;
-  }
+  unsigned int bit_flag = co->value;
+  if (!pExpr)
+    return set_break(bit_flag);
+
+  unsigned int b = MAX_BREAKPOINTS;
+
   ComparisonOperator *pCompareExpr = dynamic_cast<ComparisonOperator *>(pExpr);
   if (pCompareExpr != NULL) {
      
@@ -260,7 +260,7 @@ void cmd_break::set_break(cmd_options *co, Expression *pExpr)
         Value *pInt = pInteger->evaluate();
         pInt->get(uValue);
         delete pInt;
-        set_break(bit_flag, pReg->address, uValue, uMask);
+        b = set_break(bit_flag, pReg->address, uValue, uMask);
       }
       else {
         cout << pCompareExpr->show() << " of type " << pCompareExpr->showType() <<
@@ -277,33 +277,37 @@ void cmd_break::set_break(cmd_options *co, Expression *pExpr)
       " not allowed\n";
   }
   delete pExpr;
+
+  return b;
 }
 
-void cmd_break::set_break(cmd_options *co)
+unsigned int cmd_break::set_break(cmd_options *co)
 {
 
   if (!co) {
     list();
-    return;
+    return MAX_BREAKPOINTS;
   }
 
   int bit_flag = co->value;
-  set_break(bit_flag);
+  return set_break(bit_flag);
 }
 
-void cmd_break::set_break(Value *v)
+// attribute breakpoints
+unsigned int cmd_break::set_break(Value *v)
 {
-  if(v)
+  if (v)
     v->set_break();
+
+  return MAX_BREAKPOINTS;
 }
 
-void cmd_break::set_break(int bit_flag)
+unsigned int cmd_break::set_break(int bit_flag)
 {
+  unsigned int b = MAX_BREAKPOINTS;
 
   if(!GetActiveCPU())
-    return;
-
-  int b;
+    return b;
 
   switch(bit_flag) {
 
@@ -339,13 +343,15 @@ void cmd_break::set_break(int bit_flag)
     cout << TOO_FEW_ARGS;
     break;
   }
+
+  return b;
 }
 
 
-int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
+unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
 {
 
-  int b = MAX_BREAKPOINTS;
+  unsigned int b = MAX_BREAKPOINTS;
   if(!GetActiveCPU())
     return b;
 
@@ -396,22 +402,25 @@ int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
   }
 
   
-  if (pExpr && (b>=MAX_BREAKPOINTS || !bp.set_expression(b,pExpr)))
+  if (pExpr && (bp.bIsValid(b) || !bp.set_expression(b,pExpr)))
     delete pExpr;
+
+  if (bp.bIsValid(b))
+    bp.dump1(b);
 
   return b;
 }
 
-void cmd_break::set_break(int bit_flag,
+unsigned int cmd_break::set_break(int bit_flag,
 			  guint64 r,
 			  guint64 v,
 			  guint64 m)
 {
 
+  unsigned int b = MAX_BREAKPOINTS;
   if(!GetActiveCPU())
-    return;
+    return b;
 
-  int b = MAX_BREAKPOINTS;
   const char *str = "err";
   unsigned int reg = (unsigned int)r;
   unsigned int value = (unsigned int)v;
@@ -438,7 +447,7 @@ void cmd_break::set_break(int bit_flag,
     break;
   }
 
-  if(b<MAX_BREAKPOINTS) {
+  if( bp.bIsValid(b)) {
     cout << "break when ";
     if(mask == 0 || mask == 0xff)
       cout << (value&0xff);
@@ -452,12 +461,15 @@ void cmd_break::set_break(int bit_flag,
             cout << '0';
         }
         else {
-	        cout << 'X';
+	  cout << 'X';
         }
       }
     }
     cout << " is " << str <<" register " << reg << '\n' << 
 	    "bp#: " << b << '\n';
   }
+
+  return b;
+
 }
 

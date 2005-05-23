@@ -8,7 +8,7 @@ $(OUTPUT) : $(OBJECTS) $(SCRIPT)
 	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
 
 %.o : %.asm
-	gpasm -p 16f873 -c $<
+	gpasm -c $<
 
 clean:
 	rm -f *~ *.o *.lst *.map *.hex

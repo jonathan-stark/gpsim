@@ -131,7 +131,11 @@ void TriggerObject::print(void)
 {
   cout << "Generic breakpoint " << bpn << endl;
 }
-
+void TriggerObject::printExpression()
+{
+  if (m_PExpr)
+    cout << m_PExpr->toString() << endl;
+}
 
 void TriggerObject::clear(void)
 {
@@ -165,4 +169,16 @@ bool TriggerObject::eval_Expression()
   }
 
   return true;
+}
+
+//-------------------------------------------------------------------
+void TriggerObject::new_message(char *s)
+{
+  m_sMessage = string(s);
+}
+
+
+void TriggerObject::new_message(string &new_message)
+{
+  m_sMessage = new_message;
 }

@@ -34,14 +34,14 @@ public:
   cmd_break(void);
   void list(guint64 value=CMDBREAK_BAD_BREAK_NUMBER);
 
-  void set_break(cmd_options *co);
-  void set_break(Value *);
-  void set_break(cmd_options *co, Value *pValue);
-  void set_break(cmd_options *co, Expression *pExpr);
-  void set_break(cmd_options *co, Value *pValue, Expression *pExpr);
-  void set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
-  void set_break(int bit_flag);
-  int  set_break(int bit_flag,guint64 value, Expression *pExpr=0);
+  unsigned int set_break(cmd_options *co);
+  unsigned int set_break(Value *);
+  unsigned int set_break(cmd_options *co, Value *pValue);
+  unsigned int set_break(cmd_options *co, Expression *pExpr);
+  unsigned int set_break(cmd_options *co, Value *pValue, Expression *pExpr);
+  unsigned int set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
+  unsigned int set_break(int bit_flag);
+  unsigned int set_break(int bit_flag,guint64 value, Expression *pExpr=0);
 private:
 
 };

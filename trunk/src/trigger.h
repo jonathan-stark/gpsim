@@ -21,6 +21,8 @@ Boston, MA 02111-1307, USA.  */
 
 #if !defined(__TRIGGER_H__)
 #define __TRIGGER_H__
+#include <string>
+using namespace std;
 
 class TriggerObject;
 class Expression;
@@ -115,12 +117,14 @@ class TriggerObject
 
   // Display the breakpoint - Probably should tie into a stream...
   virtual void print(void);
+  virtual void printExpression();
 
   // Clear the breakpoint
   virtual void clear(void);
 
   // set_Expr - associates an expression with the trigger
   virtual void set_Expression(Expression *);
+  virtual bool bHasExpression() { return m_PExpr!=0; }
   virtual bool eval_Expression();
 
   virtual char const * bpName() { return "Generic"; }
@@ -128,13 +132,18 @@ class TriggerObject
   virtual void set_action(TriggerAction *ta) { action = ta; }
   virtual TriggerAction *get_action(void) { return action;}
 
+  // Messages can be associatated with triggers
+  string &message(void) {return m_sMessage;}
+  virtual void new_message(char *);
+  virtual void new_message(string &);
+
   TriggerObject();
   TriggerObject(TriggerAction *);
   // Virtual destructor place holder
   virtual ~TriggerObject() { }
 private:
   Expression *m_PExpr;
-
+  string m_sMessage;
 };
 
 
