@@ -648,9 +648,10 @@ string Integer::toString()
   gint64 i;
   get(i);
   long long int j = i;
-  snprintf(buf,sizeof(buf)," = %" PRINTF_INT64_MODIFIER
-    "d = 0x%08" PRINTF_INT64_MODIFIER "X",j,j);
-  return (name() +string(buf));
+  //  snprintf(buf,sizeof(buf)," = %" PRINTF_INT64_MODIFIER
+  //  "d = 0x%08" PRINTF_INT64_MODIFIER "X",j,j);
+  snprintf(buf,sizeof(buf),"%" PRINTF_INT64_MODIFIER "X",j);
+  return string(buf);
 }
 
 

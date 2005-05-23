@@ -203,7 +203,7 @@ BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
 SHELLCHAR (^[!])
 SHELLLINE   ({SHELLCHAR}.*)
-QUOTEDTOKEN (\".*\")
+QUOTEDTOKEN ("\"".*\")
 
 
 %{
@@ -737,7 +737,6 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 
 static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer)
 {
-  // JRH don't understand why buffer++; is not needed. 
   char * pCloseQuote = strchr(buffer, '\"');
   *pCloseQuote = 0;
   yylvalP->String_P = new String(buffer);
