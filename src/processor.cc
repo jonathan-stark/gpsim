@@ -1191,13 +1191,13 @@ void Processor::step (unsigned int steps, bool refresh)
   if(!steps)
     return;
 
-  if(simulation_mode != STOPPED) {
+  if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring step request because simulation is not stopped\n";
     return;
   }
 
-  simulation_mode = SINGLE_STEPPING;
+  simulation_mode = eSM_SINGLE_STEPPING;
   do
     {
 
@@ -1229,7 +1229,7 @@ void Processor::step (unsigned int steps, bool refresh)
   while(!bp.have_halt() && --steps>0);
 
   bp.clear_halt();
-  simulation_mode = STOPPED;
+  simulation_mode = eSM_STOPPED;
 
   if(refresh)
     get_interface().simulation_has_stopped();
@@ -1267,7 +1267,7 @@ void Processor::run_to_address (unsigned int destination)
 { 
   
   
-  if(simulation_mode != STOPPED) {
+  if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring run-to-address request because simulation is not stopped\n";
     return;

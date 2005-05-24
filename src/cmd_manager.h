@@ -2,7 +2,7 @@
 #define __CMD_MANAGER_H__
 #include <stdio.h>
 #include "cmd_gpsim.h"
-#include "../src/gpsim_interface.h"
+#include "gpsim_interface.h"
 #include <vector>
 #include <string>
 #include <functional>

@@ -201,7 +201,7 @@ void pic_processor::set_eeprom(EEPROM *e)
 
 void pic_processor::sleep (void)
 {
-  simulation_mode = SLEEPING;
+  simulation_mode = eSM_SLEEPING;
 
   if(!bp.have_sleep())
     return;
@@ -214,7 +214,7 @@ void pic_processor::sleep (void)
   if(!bp.have_sleep())
     pc->increment();
 
-  simulation_mode = RUNNING;
+  simulation_mode = eSM_RUNNING;
 
 }
 
@@ -232,7 +232,7 @@ void pic_processor::pm_write (void)
       get_cycles().increment();     // burn cycles until we're through writing
     } while(bp.have_pm_write());
 
-  simulation_mode = RUNNING;
+  simulation_mode = eSM_RUNNING;
 
 }
 
@@ -411,7 +411,7 @@ void pic_processor::run (bool refresh)
     cout  << "WARNING: gui_refresh is not being called " 
 	  <<  __FILE__<<':'<<__LINE__<<endl;
 
-      simulation_mode=RUNNING;
+      simulation_mode = eSM_RUNNING;
       icd_run();
       while(!icd_stopped())
       {
@@ -420,20 +420,20 @@ void pic_processor::run (bool refresh)
 	//	      gui_refresh();
 	//#endif
       }
-      simulation_mode=STOPPED;
+      simulation_mode=eSM_STOPPED;
       disassemble((signed int)pc->get_value(), (signed int)pc->get_value());
       gi.simulation_has_stopped();
       return;
   }
 
 
-  if(simulation_mode != STOPPED) {
+  if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring run request because simulation is not stopped\n";
     return;
   }
 
-  simulation_mode = RUNNING;
+  simulation_mode = eSM_RUNNING;
 
   if(realtime_mode)
     realtime_cbp.start(active_cpu);
@@ -478,7 +478,7 @@ void pic_processor::run (bool refresh)
   bp.clear_global();
   trace.cycle_counter(get_cycles().value);
 
-  simulation_mode = STOPPED;
+  simulation_mode = eSM_STOPPED;
 
   if(refresh) {
     trace.dump_last_instruction(); 
@@ -530,7 +530,7 @@ void pic_processor::step_over (bool refresh)
 
   unsigned int saved_pc = pc->value;
 
-  if(simulation_mode != STOPPED) {
+  if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring step-over request because simulation is not stopped\n";
     return;

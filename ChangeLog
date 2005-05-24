@@ -1,3 +1,16 @@
+2005-05-24 Scott Dattalo <scott@dattalo.com>
+	* src/modules.h, src/modules.cc, src/processor.cc,
+	src/breakpoints.cc, src/pic-processor.cc, src/hexutils.cc,
+	gui/gui_src.cc, gui/gui_src_asm.cc, cli/scan.ll,
+	src/cmd_manager.h, cli/cmd_dump.cc:
+	
+	-- renamed the enum's for the SIMULATION_MODE(s) (the
+	enum 'INITIAL' collides with a macro in flex)
+	-- added support for module scripts
+	-- If a symbol begins with a period, then the scanner
+	will automatically prepend the active processor name.
+	(This is a short cut for accessing processor attributes).
+
 2005-05-24 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html, gpsim/gpsim.vcproj, gpsim/makefile.mingw:
 	WIN32 with official release of gtk+extra-2.0.0

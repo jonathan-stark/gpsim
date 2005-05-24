@@ -55,6 +55,7 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 #include "value.h"
 #include "packages.h"
+#include "cmd_manager.h"
 
 static int module_sequence_number = 0;
 
@@ -85,7 +86,7 @@ Module::Module(void)
 
   xref = new XrefObject;
 
-  simulation_mode = STOPPED;
+  simulation_mode = eSM_STOPPED;
   widget = 0;
 }
 
@@ -250,6 +251,62 @@ IOPIN *Module::get_pin(unsigned int pin_number)
   return 0;
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::add_command(string &script_name, string &command)
+{
+  ModuleScript *script = m_scripts[script_name];
+  if (!script) {
+    script = new ModuleScript(script_name);
+    m_scripts[script_name] = script;
+  }
+
+  script->add_command(command);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::run_script(string &script_name)
+{
+  ModuleScript *script = m_scripts[script_name];
+  if (script) {
+    ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
+    script->run(pCli);
+  }
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+Module::ModuleScript::ModuleScript(string &name_)
+  : name(name_)
+{
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::ModuleScript::add_command(string &command)
+{
+  string *new_command = new string(command);
+  m_commands.push_back(new_command);
+}
+
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::ModuleScript::run(ICommandHandler *pCommandHandler)
+{
+  if (!pCommandHandler)
+    return;
+
+  list <string *> :: iterator command_iterator;
+
+  for (command_iterator = m_commands.begin();
+       command_iterator != m_commands.end(); 
+       ++command_iterator) {
+
+    string *cmd = *command_iterator;
+    if(CMD_ERR_COMMANDNOTDEFINED == pCommandHandler->Execute(cmd->c_str(),0))
+      printf("Module script %s: Failed to execute command:%s\n",name.c_str(),cmd->c_str());
+  }
+}
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -290,6 +347,8 @@ Module_Library::Module_Library(const char *new_name, void *library_handle)
   }
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 ICommandHandler *Module_Library::GetCli() {
 
   PFNGETCOMMANDHANDLER pGetCli = (PFNGETCOMMANDHANDLER)get_library_export(

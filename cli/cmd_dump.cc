@@ -187,7 +187,7 @@ void cmd_dump::dump(int mem_type)
       {
         reg_num = i  + j;
 
-        if(reg_num || fr[reg_num]->address) {
+        if( (reg_num < mem_size) && ( reg_num || fr[reg_num]->address)) {
 
           v = fr[reg_num]->get_value();
           printf("%0*x ",reg_size * 2, v);

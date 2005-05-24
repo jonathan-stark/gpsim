@@ -42,6 +42,7 @@ Boston, MA 02111-1307, USA.  */
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
+#include "../src/processor.h"
 
 /* Since our parser is reentrant, it needs to pass us a pointer
  * to the yylval that it would like us to use */
@@ -621,6 +622,10 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 
   // If we get here, then the option was not found.
   // So let's check the symbols
+  Processor *cpu;
+  if(s[0] == '.' &&  (cpu = get_active_cpu()) != 0)
+    s.insert(0,cpu->name());
+
   string s1(s);
   Value *sym = get_symbol_table().find(s1);
   if(sym) {
