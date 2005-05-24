@@ -233,15 +233,16 @@ EXPORTS
     ?name@gpsimObject@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z
-    ?new_message@Breakpoint_Instruction@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?new_message@Breakpoint_Instruction@@UAEXPAD@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPBD@Z
+    ?new_message@TriggerObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?new_message@TriggerObject@@UAEXPAD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?parse_string@@YAHPAD@Z
     ?print@Breakpoint_Instruction@@UAEXXZ
     ?print@TriggerObject@@UAEXXZ
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
+    ?printExpression@TriggerObject@@UAEXXZ
     ?put@IOPORT@@UAEXI@Z
     ?put@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?putDrivingState@IOPIN@@UAEX_N@Z
