@@ -175,8 +175,8 @@ void SourceBrowser_Window::Update(void)
 {
   if(!gp || !gp->cpu)
     return;
-  if (gp->cpu->simulation_mode == RUNNING ||
-    gp->cpu->simulation_mode == SINGLE_STEPPING)
+  if (gp->cpu->simulation_mode == eSM_RUNNING ||
+    gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
     return;
 
   SetPC(gp->cpu->pma->get_PC());
@@ -185,7 +185,7 @@ void SourceBrowser_Window::Update(void)
 
 void SourceBrowser_Window::Create(void)
 {
-  last_simulation_mode = INITIAL;
+  last_simulation_mode = eSM_INITIAL;
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
@@ -242,19 +242,19 @@ void SourceBrowser_Window::SetTitle() {
       return;
   }
     
-  if (last_simulation_mode != INITIAL &&
-    ((last_simulation_mode == RUNNING &&
-    gp->cpu->simulation_mode == RUNNING) ||
-    (last_simulation_mode != RUNNING &&
-    gp->cpu->simulation_mode != RUNNING)) &&
+  if (last_simulation_mode != eSM_INITIAL &&
+    ((last_simulation_mode == eSM_RUNNING &&
+    gp->cpu->simulation_mode == eSM_RUNNING) ||
+    (last_simulation_mode != eSM_RUNNING &&
+    gp->cpu->simulation_mode != eSM_RUNNING)) &&
     sLastPmaName == pma->name()) {
       return;
   }
   last_simulation_mode = gp->cpu->simulation_mode;
   char * sStatus;
-  if (gp->cpu->simulation_mode == RUNNING)
+  if (gp->cpu->simulation_mode == eSM_RUNNING)
     sStatus = "Run";
-  else // if (gp->cpu->simulation_mode == STOPPED)
+  else // if (gp->cpu->simulation_mode == eSM_STOPPED)
     sStatus = "Stopped";
   sprintf(buffer,"Source Browser: [%s] %s", sStatus, pma != NULL ?
     pma->name().c_str() : "" );

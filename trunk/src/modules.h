@@ -33,6 +33,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <list>
 #include <string>
+#include <map>
 
 #include "gpsim_object.h"
 #include "gpsim_classes.h"
@@ -51,13 +52,13 @@ typedef  Module_Types * (*Module_Types_FPTR)();
 
 enum SIMULATION_MODES
 {
-  INITIAL,
-  STOPPED,
-  RUNNING,
-  SLEEPING,
-  SINGLE_STEPPING,
-  STEPPING_OVER,
-  RUNNING_OVER
+  eSM_INITIAL,
+  eSM_STOPPED,
+  eSM_RUNNING,
+  eSM_SLEEPING,
+  eSM_SINGLE_STEPPING,
+  eSM_STEPPING_OVER,
+  eSM_RUNNING_OVER
 };
 
 
@@ -111,7 +112,8 @@ public:
   ModuleInterface *interface;       // An interface to the module.
   SIMULATION_MODES simulation_mode; // describes the simulation state for this module
 
-  XrefObject *xref;               // Updated when the module changes
+  XrefObject *xref;                 // Updated when the module changes
+  
 
   //! I/O pin specific
   /*
@@ -145,6 +147,11 @@ public:
   virtual void set_widget(void * a_widget) {widget = a_widget;}
   virtual void *get_widget(void) {return widget;}
 
+  /// cli
+  /// Modules can have special scripts associated with them.
+  void add_command(string &script_name, string &command);
+  void run_script(string &script_name);
+
   const virtual char *type(void) { return (name_str.c_str()); };
 
   static Module *construct(char *);
@@ -154,10 +161,24 @@ public:
   /// Functions to support actual hardware
   virtual bool isHardwareOnline() { return true; }
 
- private:
+private:
   void *widget;   // GtkWidget * that is put in the breadboard.
 
- protected:
+  // Storage for scripts specifically associated with this module.
+  class ModuleScript {
+  public:
+    ModuleScript(string &name_);
+    ~ModuleScript();
+    void add_command(string &command);
+    void run(ICommandHandler *);
+  private:
+    string name;
+    list<string *> m_commands;
+  };
+
+  map<string ,ModuleScript *> m_scripts;
+
+protected:
   char *version;
 
 };

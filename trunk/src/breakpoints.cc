@@ -678,7 +678,7 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (cpu->simulation_mode == RUNNING) && 
+  if( (cpu->simulation_mode == eSM_RUNNING) && 
       (simulation_start_cycle != get_cycles().value) &&
       eval_Expression()) {
 
@@ -873,7 +873,7 @@ void RegisterAssertion::execute(void)
 
     PCPU->Debug();
 
-    if( (PCPU->simulation_mode == RUNNING) && 
+    if( (PCPU->simulation_mode == eSM_RUNNING) && 
 	(simulation_start_cycle != get_cycles().value)) {
 
       eval_Expression();

@@ -92,7 +92,7 @@ int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
 
     (*pProcessor)->set_frequency(10e6);
     (*pProcessor)->reset(POR_RESET);
-    (*pProcessor)->simulation_mode = STOPPED;
+    (*pProcessor)->simulation_mode = eSM_STOPPED;
     if(verbose)
       get_cycles().dump_breakpoints();
     return SUCCESS;
