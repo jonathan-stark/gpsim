@@ -892,8 +892,8 @@ int plot_profile(Profile_Window *pw, char **pointlabel, guint64 *cyclearray, int
 
     has_old_graph=1;
     last_numpoints=numpoints;
-    return 0;
 #endif // 
+    return 0;
 }
 
 int plot_routine_histogram(Profile_Window *pw)
