@@ -1,3 +1,7 @@
+2005-05-24 Borut Razem <borut.razem@siol.net>
+	* doc/gpsimWin32.html, gpsim/gpsim.vcproj, gpsim/makefile.mingw,
+	gui/makefile.mingw: WIN32 with official release of gtk+extra-2.0.0
+
 2005-05-22 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_break.cc, cli/cmd_break.h, cli/parse.yy, cli/scan.ll,
 	src/breakpoints.cc, src/breakpoints.h, src/operator.cc,
