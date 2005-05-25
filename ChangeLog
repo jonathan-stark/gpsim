@@ -1,3 +1,9 @@
+2005-05-25 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi, extras/lcd/makefile.mingw:
+	added missing files to the WIN32 installation package in
+	order to be able to compile the LCD modue; make LCD module
+	mingw makefile a litle bit more flexible
+
 2005-05-24 Scott Dattalo <scott@dattalo.com>
 	* src/cod.cc, src/breakpoints.cc, src/trigger.cc,
 	regression/assertions/assertions.asm: Added support
