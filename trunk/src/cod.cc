@@ -466,6 +466,12 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
   unsigned short i, j, start_block, end_block;
   unsigned short laddress;
 
+  // The 'E' option in gpasm specifies a list of gpsim commands that
+  // are to be executed after the .cod file has been loaded.
+
+  list<string *> commands;
+  list<string *>::iterator commands_iterator;
+
   ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
   if(!pCli)
     printf("experimental:cod unable to find cli interface\n");
@@ -536,9 +542,11 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
         case 'e':
         case 'E':
           // gpsim command
-	  if(pCli) {
-	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(DebugMessage,0))
-	      printf("cod: Failed to parse assertion:%s\n",DebugMessage);
+	  {
+	    string script("startup");
+	    string cmd(DebugMessage);
+	    cmd = cmd + '\n';
+	    cpu->add_command(script,cmd);
 	  }
 
           break;
@@ -558,7 +566,7 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
       }
     }
   }
-    
+
 }
 
 //-----------------------------------------------------------
@@ -1072,6 +1080,8 @@ _Cleanup:
 
   if(*pcpu != NULL) {
     (*pcpu)->reset(POR_RESET);
+    string script("startup");
+    (*pcpu)->run_script(script);
   }
   return error_code;
 
