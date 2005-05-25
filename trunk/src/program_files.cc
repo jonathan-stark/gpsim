@@ -2,7 +2,7 @@
 #include "program_files.h"
 #include "pic-processor.h"
 #include "cod.h"
-
+#include "cmd_gpsim.h"
 
 /**
   * RegisterProgramFileType
@@ -12,6 +12,48 @@
 
 void GPSIM_EXPORT RegisterProgramFileType(ProgramFileType * pPFT) {
   ProgramFileTypeList::GetList().push_back(pPFT);
+}
+
+void ProgramFileType::DisplayError(int err, const char *pProgFilename,
+                                   const char *pLstFile)
+{
+  int iMessage;
+  const char * pArg = "";
+  switch(err) {
+  case ERR_UNRECOGNIZED_PROCESSOR:
+    iMessage = IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN;
+    break;
+  case ERR_FILE_NOT_FOUND:
+    iMessage = IDS_FILE_NOT_FOUND;
+    pArg = pProgFilename;
+    break;
+  case ERR_FILE_NAME_TOO_LONG:
+    iMessage = IDS_FILE_NAME_TOO_LONG;
+    pArg = pProgFilename;
+    break;
+  case ERR_LST_FILE_NOT_FOUND:
+    iMessage = IDS_FILE_NOT_FOUND;
+    pArg = pLstFile == NULL ? "unknown" : pLstFile;
+    break;
+  case ERR_BAD_FILE:
+    iMessage = IDS_FILE_BAD_FORMAT;
+    pArg = pProgFilename;
+    break;
+  case ERR_NO_PROCESSOR_SPECIFIED:
+    iMessage = IDS_NO_PROCESSOR_SPECIFIED;
+    break;
+  case ERR_PROCESSOR_INIT_FAILED:
+    iMessage = IDS_PROCESSOR_INIT_FAILED;
+    break;
+  case ERR_NEED_PROCESSOR_SPECIFIED:
+    iMessage = IDS_FILE_NEED_PROCESSOR_SPECIFIED;
+    break;
+  default:
+    iMessage = SUCCESS;
+    break;
+  }
+  if(iMessage != SUCCESS)
+    GetUserInterface().DisplayMessage(iMessage, pArg);
 }
 
 /**
@@ -41,15 +83,28 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
                                           FILE *pFile) {
   iterator it;
   iterator itEnd = end();
+  int iReturn;
   for(it = begin(); it != itEnd; it++) {
     fseek(pFile, 0, SEEK_SET);
     get_symbol_table().clear();
-    if((*it)->LoadProgramFile(pProcessor, pFilename, pFile)
+    if((iReturn = (*it)->LoadProgramFile(pProcessor, pFilename, pFile))
       == ProgramFileType::SUCCESS) {
       return true;
     }
+      if(IsErrorDisplayableInLoop(iReturn)) {
+      (*it)->DisplayError(iReturn, pFilename, NULL);
+    }
+  }
+  if(!IsErrorDisplayableInLoop(iReturn)) {
+    (*it)->DisplayError(iReturn, pFilename, NULL);
   }
   return false;
+}
+
+bool ProgramFileTypeList::IsErrorDisplayableInLoop(int iError) {
+  return iError != ProgramFileType::SUCCESS &&
+         iError != ProgramFileType::ERR_BAD_FILE &&
+         iError != ProgramFileType::ERR_NEED_PROCESSOR_SPECIFIED;
 }
 
 ///
@@ -76,7 +131,8 @@ ProgramFileBuf::int_type ProgramFileBuf::underflow( ) {
 
   int num;
   if((num = ::fread((void*)( m_Buffer + 4), 1, m_iBufferSize - 4, m_pFile)) <= 0) {
-    printf(strerror(errno));
+    if(errno != 0)
+      printf("%s\n", strerror(errno));
     return (int_type )traits_type::eof();
   }
   setg(m_Buffer + (4 - numPutback),

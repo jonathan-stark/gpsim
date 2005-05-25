@@ -7,7 +7,15 @@ const char * s_psEnglishMessages[] = {
   "break writing register 0x%04x\n",                      // IDS_BREAK_WRITING_REG
   "break writing register 0x%04x with value %u\n",        // IDS_BREAK_WRITING_REG_VALUE
   "break writing register 0x%04x %s %u\n",                // IDS_BREAK_WRITING_REG_OP_VALUE
-  "execution break at address 0x%03x\n",                    // IDS_BREAK_ON_EXEC_ADDRESS
+  "execution break at address 0x%03x\n",                  // IDS_BREAK_ON_EXEC_ADDRESS
+  "unrecognized processor in the program file\n",         // IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN
+  "file name '%s' is too long\n",                         // IDS_FILE_NAME_TOO_LONG
+  "file %s not found\n",                                  // IDS_FILE_NOT_FOUND
+  "file %s is not formatted properly\n",                  // IDS_FILE_BAD_FORMAT
+  "no processor has been specified\n",                    // IDS_NO_PROCESSOR_SPECIFIED
+  "processor %s initialization failed\n",                 // IDS_PROCESSOR_INIT_FAILED
+  "the program file type does not contain processor\n"    // first part of IDS_FILE_NEED_PROCESSOR_SPECIFIED
+  "you need to specify processor with the processor command\n", // IDS_FILE_NEED_PROCESSOR_SPECIFIED
   NULL,     // IDS_
 };
 

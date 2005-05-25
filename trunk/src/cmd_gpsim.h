@@ -35,5 +35,13 @@ extern "C" IUserInterface &GetUserInterface(void);
 #define IDS_BREAK_WRITING_REG_VALUE           4
 #define IDS_BREAK_WRITING_REG_OP_VALUE        5
 #define IDS_BREAK_ON_EXEC_ADDRESS             6
+#define IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN  7
+#define IDS_FILE_NAME_TOO_LONG                8
+#define IDS_FILE_NOT_FOUND                    9
+#define IDS_FILE_BAD_FORMAT                   10
+#define IDS_NO_PROCESSOR_SPECIFIED            11
+#define IDS_PROCESSOR_INIT_FAILED             12
+#define IDS_FILE_NEED_PROCESSOR_SPECIFIED     13
+
 
 #endif
