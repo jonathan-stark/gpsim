@@ -1,4 +1,9 @@
 2005-05-24 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc, src/breakpoints.cc, src/trigger.cc,
+	regression/assertions/assertions.asm: Added support
+	for scripts embedded in .cod files.
+
+2005-05-24 Scott Dattalo <scott@dattalo.com>
 	* src/modules.h, src/modules.cc, src/processor.cc,
 	src/breakpoints.cc, src/pic-processor.cc, src/hexutils.cc,
 	gui/gui_src.cc, gui/gui_src_asm.cc, cli/scan.ll,

@@ -151,7 +151,7 @@ void TriggerObject::set_Expression(Expression *newExpression)
 bool TriggerObject::eval_Expression()
 {
   if(m_PExpr) {
-    bool bRet = false;
+    bool bRet = true;
 
     try {
       Value *v = m_PExpr->evaluate();
@@ -168,7 +168,7 @@ bool TriggerObject::eval_Expression()
     return bRet;
   }
 
-  return true;
+  return false;
 }
 
 //-------------------------------------------------------------------
