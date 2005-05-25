@@ -79,7 +79,7 @@ int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
   if(*pProcessor == NULL) {
     // Need to determine processor from file.
     // for now return error.
-    return ERR_NO_PROCESSOR_SPECIFIED;
+    return ERR_NEED_PROCESSOR_SPECIFIED;
   }
   // assume no configuration word is in the hex file.
   (*pProcessor)->set_config_word((*pProcessor)->config_word_address(),0xffff);

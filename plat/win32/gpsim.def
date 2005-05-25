@@ -61,6 +61,7 @@ EXPORTS
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
     ?Add@FileContextList@@QAEHPAD@Z
     ?Add@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?DisplayError@ProgramFileType@@UAEXHPBD0@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
     ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?GetContext@CSimulationContext@@SAPAV1@XZ
@@ -71,6 +72,7 @@ EXPORTS
     ?addToCurrentFrame@Trace@@QAEXPAVTraceObject@@@Z
     ?add_address@Symbol_Table@@QAEXPBDH@Z
     ?add_attribute@Module@@QAEXPAVValue@@@Z
+    ?add_command@Module@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@0@Z
     ?add_constant@Symbol_Table@@QAEXPBDH@Z
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
@@ -271,6 +273,7 @@ EXPORTS
     ?rts@ByteLogger@gpsim@@QAEX_K@Z
     ?run@Processor@@UAEX_N@Z
     ?run@ProgramMemoryAccess@@UAEX_N@Z
+    ?run_script@Module@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?run_to_address@Processor@@UAEXI@Z
     ?save_state@Processor@@UAEXPAU_iobuf@@@Z
     ?save_state@Processor@@UAEXXZ
