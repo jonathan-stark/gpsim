@@ -33,6 +33,4 @@ ${RT} p12ce518 p12ce518
 
 ${RT} interrupts_14bit interrupts_14bit
 
-${RT} macro_test macro_test
-
 #${RT} ccp ccp

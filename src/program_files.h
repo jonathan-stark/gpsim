@@ -11,15 +11,14 @@
 class ProgramFileType {
 public:
   enum {
-    SUCCESS                       = 0,
-    ERR_UNRECOGNIZED_PROCESSOR    = -1,
-    ERR_FILE_NOT_FOUND            = -2,
-    ERR_FILE_NAME_TOO_LONG        = -3,
-    ERR_LST_FILE_NOT_FOUND        = -4,
-    ERR_BAD_FILE                  = -5,
-    ERR_NO_PROCESSOR_SPECIFIED    = -6,
-    ERR_PROCESSOR_INIT_FAILED     = -7,
-    ERR_NEED_PROCESSOR_SPECIFIED  = -8,
+    SUCCESS                     = 0,
+    ERR_UNRECOGNIZED_PROCESSOR  = -1,
+    ERR_FILE_NOT_FOUND          = -2,
+    ERR_FILE_NAME_TOO_LONG      = -3,
+    ERR_LST_FILE_NOT_FOUND      = -4,
+    ERR_BAD_FILE                = -5,
+    ERR_NO_PROCESSOR_SPECIFIED  = -6,
+    ERR_PROCESSOR_INIT_FAILED   = -7,
   };
   /*
    *  LoadProgramFile
@@ -32,8 +31,6 @@ public:
    */
   virtual int  LoadProgramFile(Processor **ppProcessor, 
     const char *pFilename, FILE *pFile) = 0;
-  virtual void DisplayError(int iError, const char *pProgFilename,
-    const char *pLstFile);
 };
 
 class ProgramFileTypeList : public vector<ProgramFileType*> {
@@ -46,7 +43,6 @@ public:
   static ProgramFileTypeList *s_ProgramFileTypeList;
   virtual bool LoadProgramFile(Processor **pProcessor,
     const char *pFilename, FILE *pFile);
-  bool IsErrorDisplayableInLoop(int iError);
 };
 
 #if defined(_MSC_VER)

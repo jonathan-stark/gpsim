@@ -52,6 +52,9 @@ protected:
 
 class Breakpoint_Instruction : public instruction , public TriggerObject
 {
+private:
+  string  message_str;               // printed when break occurs.
+
 public:
 
   unsigned int address;
@@ -93,6 +96,13 @@ public:
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
   virtual char *name(char *,int len);
+
+  string &message(void) {return message_str;}
+  virtual void new_message(char *);
+  virtual void new_message(string &);
+
+
+
 };
 
 
@@ -363,9 +373,6 @@ public:
   void dump(void);
   void dump_traced(unsigned int b);
   void clear(unsigned int b);
-  bool bIsValid(unsigned int b);
-  bool bIsClear(unsigned int b);
-  void set_message(unsigned int b,string &);
   void clear_all(Processor *c);
   void clear_all_set_by_user(Processor *c);
   void clear_all_register(Processor *c,unsigned int address=-1);

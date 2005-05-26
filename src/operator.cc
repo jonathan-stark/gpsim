@@ -49,7 +49,7 @@ Value* BinaryOperator::shortCircuit(Value* leftValue)
 
 string BinaryOperator::show()
 {
-  return toString();
+  return string(showType() + ":" + toString());
 }
 
 string BinaryOperator::showType()
@@ -60,7 +60,7 @@ string BinaryOperator::showType()
 
 string BinaryOperator::toString()
 {
-  return string("(" + leftExpr->toString() + showOp() + rightExpr->toString() + ")");
+  return string("(" + leftExpr->show() + ", " + rightExpr->show() + ")");
 }
 
 Value *BinaryOperator::evaluate()
@@ -100,13 +100,13 @@ string UnaryOperator::showType()
 
 string UnaryOperator::show()
 {
-  return toString();
+  return string(showType() + " (" + expr->show() + ")");
 }
 
 
 string UnaryOperator::toString()
 {
-  return string(showOp() + "(" + expr->toString() + ")");
+  return string("(" + expr->show() + ")");
 }
 
 

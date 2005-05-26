@@ -79,7 +79,7 @@ int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
   if(*pProcessor == NULL) {
     // Need to determine processor from file.
     // for now return error.
-    return ERR_NEED_PROCESSOR_SPECIFIED;
+    return ERR_NO_PROCESSOR_SPECIFIED;
   }
   // assume no configuration word is in the hex file.
   (*pProcessor)->set_config_word((*pProcessor)->config_word_address(),0xffff);
@@ -92,7 +92,7 @@ int PicHexProgramFileType::LoadProgramFile(Processor **pProcessor,
 
     (*pProcessor)->set_frequency(10e6);
     (*pProcessor)->reset(POR_RESET);
-    (*pProcessor)->simulation_mode = eSM_STOPPED;
+    (*pProcessor)->simulation_mode = STOPPED;
     if(verbose)
       get_cycles().dump_breakpoints();
     return SUCCESS;

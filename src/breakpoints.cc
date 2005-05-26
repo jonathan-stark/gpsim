@@ -390,17 +390,13 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 
 bool Breakpoints::dump1(unsigned int bp_num)
 {
-  if(!bIsValid(bp_num)) {
+  if(bp_num>=MAX_BREAKPOINTS) {
     cout << "Break point number:" << bp_num <<" is out of range\n";
     return false;
   }
 
   if(break_status[bp_num].bpo) {
     break_status[bp_num].bpo->print();
-    if (break_status[bp_num].bpo->bHasExpression()) {
-      cout << "    Expression:";
-      break_status[bp_num].bpo->printExpression();
-    }
     return true;
   }
 
@@ -479,81 +475,66 @@ instruction *Breakpoints::find_previous(Processor *cpu,
 
 void Breakpoints::clear(unsigned int b)
 {
-  if (!bIsValid(b))
-    return;
 
-  BreakStatus &bs = break_status[b];   // 
+  if(b<MAX_BREAKPOINTS) {
 
-  if(bs.bpo) {
+    BreakStatus &bs = break_status[b];   // 
 
-    bs.bpo->clear();
-    bs.type = BREAK_CLEAR;
-    get_active_cpu()->NotifyBreakpointCleared(bs, bs.bpo);
-    delete bs.bpo;  // FIXME - why does this delete cause a segv?
-    bs.bpo = 0;
-    return;
-  }
+    if(bs.bpo) {
 
-  switch (bs.type) {
-
-  case BREAK_ON_CYCLE:
-    bs.type = BREAK_CLEAR;
-    //cout << "Cleared cycle breakpoint number " << b << '\n';
-    break;
-
-  case BREAK_ON_STK_OVERFLOW:
-    bs.type = BREAK_CLEAR;
-    if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
-        == Processor::eSTACK) {
-      if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
-	cout << "Cleared stack overflow break point.\n";
-      else
-	cout << "Stack overflow break point is already cleared.\n";
+      bs.bpo->clear();
+      bs.type = BREAK_CLEAR;
+      get_active_cpu()->NotifyBreakpointCleared(bs, bs.bpo);
+      delete bs.bpo;  // FIXME - why does this delete cause a segv?
+      bs.bpo = 0;
+      return;
     }
-    break;
 
-  case BREAK_ON_STK_UNDERFLOW:
-    bs.type = BREAK_CLEAR;
-    if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
+    switch (bs.type) {
+
+    case BREAK_ON_CYCLE:
+      bs.type = BREAK_CLEAR;
+      //cout << "Cleared cycle breakpoint number " << b << '\n';
+      break;
+
+    case BREAK_ON_STK_OVERFLOW:
+      bs.type = BREAK_CLEAR;
+      if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
         == Processor::eSTACK) {
-      if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
-	cout << "Cleared stack underflow break point.\n";
-      else
-	cout << "Stack underflow break point is already cleared.\n";
-    }
-    break;
+        if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
+          cout << "Cleared stack overflow break point.\n";
+        else
+          cout << "Stack overflow break point is already cleared.\n";
+      }
+      break;
 
-  case BREAK_ON_WDT_TIMEOUT:
-    bs.type = BREAK_CLEAR;
-    if ((bs.cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
+    case BREAK_ON_STK_UNDERFLOW:
+      bs.type = BREAK_CLEAR;
+      if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
+        == Processor::eSTACK) {
+        if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
+          cout << "Cleared stack underflow break point.\n";
+        else
+          cout << "Stack underflow break point is already cleared.\n";
+      }
+      break;
+
+    case BREAK_ON_WDT_TIMEOUT:
+      bs.type = BREAK_CLEAR;
+      if ((bs.cpu->GetCapabilities() & Processor::eBREAKONWATCHDOGTIMER)
         == Processor::eBREAKONWATCHDOGTIMER) {
-      cout << "Cleared wdt timeout breakpoint number " << b << '\n';
-      ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+        cout << "Cleared wdt timeout breakpoint number " << b << '\n';
+        ((_14bit_processor *)bs.cpu)->wdt.break_point = 0;
+      }
+      break;
+
+    default:
+      bs.type = BREAK_CLEAR;
+      break;
+
     }
-    break;
-
-  default:
-    bs.type = BREAK_CLEAR;
-    break;
-
+    get_active_cpu()->NotifyBreakpointCleared(bs, NULL);
   }
-  get_active_cpu()->NotifyBreakpointCleared(bs, NULL);
-}
-
-bool Breakpoints::bIsValid(unsigned int b)
-{
-  return b < MAX_BREAKPOINTS;
-}
-
-bool Breakpoints::bIsClear(unsigned int b)
-{
-  return  bIsValid(b) && break_status[b].type == BREAK_CLEAR;
-}
-
-void Breakpoints::set_message(unsigned int b,string &m)
-{
-  if (bIsValid(b) && break_status[b].type != BREAK_CLEAR && break_status[b].bpo)
-    break_status[b].bpo->new_message(m);
 }
 
 //
@@ -678,15 +659,16 @@ Breakpoints::Breakpoints(void)
 void Breakpoint_Instruction::execute(void)
 {
 
-  if( (cpu->simulation_mode == eSM_RUNNING) && 
-      (simulation_start_cycle != get_cycles().value) &&
-      !eval_Expression()) {
+  if( (cpu->simulation_mode == RUNNING) && (simulation_start_cycle != get_cycles().value)) {
 
+    if(eval_Expression()) {
       action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
-  }
-  else
+    }
+  } else {
     replaced->execute();
+  }
+
 }
 
 Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu, 
@@ -709,6 +691,19 @@ Processor* Breakpoint_Instruction::get_cpu(void)
   return dynamic_cast<Processor *>(cpu);
 }
 //-------------------------------------------------------------------
+void Breakpoint_Instruction::new_message(char *s)
+{
+
+  message_str = string(s);
+}
+
+
+void Breakpoint_Instruction::new_message(string &new_message)
+{
+  message_str = new_message;
+}
+
+
 unsigned int Breakpoint_Instruction::get_opcode(void)
 { 
   return(replaced->get_opcode());
@@ -764,9 +759,9 @@ bool Breakpoint_Instruction::set_break(void)
 void Breakpoint_Instruction::print(void)
 {
   cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-  cout << bpName() << " at 0x" << hex << setw(4) << setfill('0') <<  address << '\n';
-  if(message().size())
-    cout << "    Message:" << message() << endl;
+  cout << bpName() << " at " << hex << setw(4) << setfill('0') <<  address << '\n';
+  if(message_str.size())
+    cout << "   " << message_str << endl;
 
 }
 
@@ -873,7 +868,7 @@ void RegisterAssertion::execute(void)
 
     PCPU->Debug();
 
-    if( (PCPU->simulation_mode == eSM_RUNNING) && 
+    if( (PCPU->simulation_mode == RUNNING) && 
 	(simulation_start_cycle != get_cycles().value)) {
 
       eval_Expression();
@@ -983,7 +978,7 @@ bool BreakpointRegister::set_break(void)
 void BreakpointRegister::print(void)
 {
   cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-  cout << bpName() << ": " << name() << "(0x" << hex <<  address << ")\n";
+  cout << bpName() << ": 0x" << hex <<  address << endl;
 
 }
 //-------------------------------------------------------------------

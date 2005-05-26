@@ -21,47 +21,44 @@ Boston, MA 02111-1307, USA.  */
 #include "ttoken.h"
 #include "pthread-wrap.h"
 
-namespace gpsim {
+Token::Token()
+{
+  thread = new ThreadWrapper();
+}
 
-  Token::Token()
-  {
-    thread = new ThreadWrapper();
-  }
+void Token::Initialize(void *(*child) (void *), void *data)
+{
 
-  void Token::Initialize(void *(*child) (void *), void *data)
-  {
+  pthread_mutex_init(&thread->mutex, NULL);
+  pthread_cond_init (&thread->cvWaitOnParent, NULL);
+  pthread_cond_init (&thread->cvWaitOnChild, NULL);
 
-    pthread_mutex_init(&thread->mutex, NULL);
-    pthread_cond_init (&thread->cvWaitOnParent, NULL);
-    pthread_cond_init (&thread->cvWaitOnChild, NULL);
+  grab();
 
-    grab();
+  pthread_attr_init(&thread->thAttribute);
+  pthread_attr_setdetachstate(&thread->thAttribute, PTHREAD_CREATE_JOINABLE);
+  pthread_create(&thread->thHostInterface, &thread->thAttribute, child, data);
+}
 
-    pthread_attr_init(&thread->thAttribute);
-    pthread_attr_setdetachstate(&thread->thAttribute, PTHREAD_CREATE_JOINABLE);
-    pthread_create(&thread->thHostInterface, &thread->thAttribute, child, data);
-  }
+void Token::waitForChild()
+{
+  pthread_cond_wait(&thread->cvWaitOnChild, &thread->mutex);
+}
 
-  void Token::waitForChild()
-  {
-    pthread_cond_wait(&thread->cvWaitOnChild, &thread->mutex);
-  }
+void Token::grab()
+{
+  pthread_mutex_lock(&thread->mutex);
+}
 
-  void Token::grab()
-  {
-    pthread_mutex_lock(&thread->mutex);
-  }
+void Token::passToChild()
+{
+  pthread_cond_signal(&thread->cvWaitOnParent);
+  pthread_cond_wait(&thread->cvWaitOnChild, &thread->mutex);
+}
 
-  void Token::passToChild()
-  {
-    pthread_cond_signal(&thread->cvWaitOnParent);
-    pthread_cond_wait(&thread->cvWaitOnChild, &thread->mutex);
-  }
+void Token::passToParent()
+{
+  pthread_cond_signal(&thread->cvWaitOnChild);
+  pthread_cond_wait(&thread->cvWaitOnParent, &thread->mutex);
+}
 
-  void Token::passToParent()
-  {
-    pthread_cond_signal(&thread->cvWaitOnChild);
-    pthread_cond_wait(&thread->cvWaitOnParent, &thread->mutex);
-  }
-
-} // end of namespace gpsim

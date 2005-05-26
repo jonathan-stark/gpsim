@@ -174,8 +174,7 @@ extern int yylex(YYSTYPE* lvalP);
 %token <s>   MACROBODY_T
 %token <Macro_P>   MACROINVOCATION_T
 
-
-%type  <i>   break_set
+%token <s>  STRING
 
 %token <li>  INDIRECT
 
@@ -354,30 +353,16 @@ attach_cmd
 break_cmd
           : BREAK                             {c_break.list();}
           | BREAK LITERAL_INT_T               {c_break.list($2->getVal());delete $2;}
-          | break_set                         {  }
-          | break_set ',' LITERAL_STRING_T
-            {
-	      if (get_bp().bIsValid($1)) {
-		string m = string($3->getVal());
-		get_bp().set_message((unsigned int)$1,m);
-	      }
-	      delete $3;
-	    }
-          ;
-
-
-break_set
-          : BREAK SYMBOL_T                    {$$=c_break.set_break($2);}
-          | BREAK bit_flag SYMBOL_T           {$$=c_break.set_break($2,$3);}
-          | BREAK bit_flag SYMBOL_T expr      {$$=c_break.set_break($2,$3,$4);}
-          | BREAK bit_flag LITERAL_INT_T      {$$=c_break.set_break($2,$3); delete $3;}
-          | BREAK bit_flag LITERAL_INT_T expr {$$=c_break.set_break($2,$3,$4); delete $3;}
-          | BREAK bit_flag break_boolean_expr {$$=c_break.set_break($2,$3);}
-          | BREAK bit_flag                    {$$=c_break.set_break($2);}
+          | BREAK SYMBOL_T                    {c_break.set_break($2);}
+          | BREAK bit_flag SYMBOL_T           {c_break.set_break($2,$3);}
+          | BREAK bit_flag SYMBOL_T expr      {c_break.set_break($2,$3,$4);}
+          | BREAK bit_flag LITERAL_INT_T      {c_break.set_break($2,$3); delete $3;}
+          | BREAK bit_flag break_boolean_expr {c_break.set_break($2,$3);}
+          | BREAK bit_flag                    {c_break.set_break($2);}
           | BREAK bit_flag REG_T '(' LITERAL_INT_T ')'  
             {
               // break r|w reg(number)
-              $$=c_break.set_break($2->value, $5->getVal());
+              c_break.set_break($2->value, $5->getVal());
               delete $5;
             }
           ;
@@ -413,7 +398,7 @@ frequency_cmd
 
 help_cmd
           : HELP                        {help.help(); }
-          | HELP LITERAL_STRING_T       {help.help($2->getVal()); delete $2;}
+          | HELP LITERAL_STRING_T       {help.help($2->getVal()); /*free($2);*/}
           | HELP SYMBOL_T               {help.help($2);}
           ;
 
@@ -647,7 +632,7 @@ macro_cmd:
 
 macrodef_directive
         : LITERAL_STRING_T MACRO
-                                        {c_macro.define($1->getVal()); delete $1;}
+                                        {c_macro.define($1->getVal());}
           opt_mdef_arglist rol
                                         {lexer_setMacroBodyMode();}
 
@@ -656,16 +641,8 @@ macrodef_directive
 
 opt_mdef_arglist
         : /* empty */
-        | LITERAL_STRING_T                        
-          {
-            c_macro.add_parameter($1->getVal());
-	    delete $1;
-	  }
-        | opt_mdef_arglist ',' LITERAL_STRING_T
-          {
-	    c_macro.add_parameter($3->getVal());
-	    delete $3;
-	  }
+        | STRING                        {c_macro.add_parameter($1);}
+        | opt_mdef_arglist ',' STRING   {c_macro.add_parameter($3);}
         ;
 
 
@@ -681,7 +658,7 @@ mdef_body_
 
 mdef_end
         : ENDM                          {c_macro.end_define();}
-        | LITERAL_STRING_T ENDM         {c_macro.end_define($1->getVal()); delete $1; }
+        | LITERAL_STRING_T ENDM                   {c_macro.end_define($1->getVal()); }
         ;
 
 

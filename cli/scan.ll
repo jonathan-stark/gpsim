@@ -42,7 +42,6 @@ Boston, MA 02111-1307, USA.  */
 #include "parse.h"
 #include "input.h"
 #include "scan.h"
-#include "../src/processor.h"
 
 /* Since our parser is reentrant, it needs to pass us a pointer
  * to the yylval that it would like us to use */
@@ -66,7 +65,7 @@ struct LexerStateStruct {
 };
 
 static LexerStateStruct *pLexerState = 0;
-static int sLevels=0;
+
 
 extern int quit_parse;
 extern int parser_spanning_lines;
@@ -84,103 +83,12 @@ static int process_shellLine(YYSTYPE* yylvalP, const char *buffer);
 static int recognize(int token,const char *);
 static void SetMode(int newmode);
 
-void scanPopMacroState();
 int cli_corba_init (char *ior_id);
 
 extern Macro *isMacro(const string &s);
-static Macro *gCurrentMacro=0;
+extern Macro *gCurrentMacro;
 
 #define YYDEBUG 1
-
-
-
-//========================================================================
-// MacroChain class
-//
-// 
-
-class MacroChain
-{
-public:
-
-  struct Link {
-    Link *prev;
-    Link *next;
-    Macro *m;
-  };
-
-  MacroChain() {
-    head.prev = head.next =0;
-    curr = &head;
-  }
-  
-  void push(Macro *m) {
-    if (verbose & 4 && m) {
-      cout << "Pushing " << m->name() << " onto the macro chain\n";
-    }
-
-    Link *pL = new Link();
-    pL->m = m;
-    pL->prev = &head;
-    pL->next = head.next;
-    head.next = pL;
-    param = pL;
-    curr = &head;
-  }
-
-  void pop()
-  {
-    Link *pL = head.next;
-    if (pL) {
-
-      if (verbose & 4 && pL->m) {
-        cout << "Popping " << pL->m->name() << " from the macro chain\n";
-      }
-
-      head.next = pL->next;
-      if (pL->next)
-        pL->next->prev = &head;
-      delete pL;
-    }
-  }
-
-  Macro *nextParamSource()
-  {
-    if (curr)
-      curr = curr->next;
-    if (verbose & 4 && curr && curr->m ) {
-      cout << " selecting parameter source " << curr->m->name() << endl;
-    }
-    if(curr)
-      return curr->m;
-    return 0;
-  }
-  void popParamSource()
-  {
-    if (verbose & 4 && curr && curr->m ) {
-      cout << " popping parameter source " << curr->m->name() << endl;
-    }
-    if (curr)
-      curr = curr->prev;
-  }
-
-  void resetParamSource()
-  {
-    if (verbose & 4) {
-      cout << " resetparameter source\n";
-    }
-    curr = &head;
-  }
-
-private:
-  Link *curr;
-  Link head;
-  Link *param;
-};
-
-static MacroChain theMacroChain;
-
-
 
 %}
 
@@ -202,9 +110,9 @@ HEX2    ("$"[0-9a-fA-F]+)
 FLOAT	(({D}+\.?{D}*{EXPON}?)|(\.{D}+{EXPON}?))
 BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
-SHELLCHAR (^[!])
-SHELLLINE   ({SHELLCHAR}.*)
-QUOTEDTOKEN ("\"".*\")
+SHELLCHAR (!)
+SHELLLINE	({SHELLCHAR}.*)
+QUOTEDTOKEN (\".*\")
 
 
 %{
@@ -231,7 +139,8 @@ QUOTEDTOKEN ("\"".*\")
 
 {S}+      {   /* ignore white space */ }
 
-\n {
+<INITIAL>\n  { 
+      // Got an eol.
       if(verbose)
           cout << "got EOL\n";
 
@@ -245,23 +154,6 @@ QUOTEDTOKEN ("\"".*\")
 
       else
         return recognize(EOLN_T, " end of line");
-}
-
-<INITIAL>  { 
-      // Got an eol.
-      if(verbose)
-          cout << "got INITIAL\n";
-
-      pLexerState->input_mode = 0;  // assume that this is not a multi-line command.
-      if(pLexerState->cmd && 
-	 pLexerState->cmd->can_span_lines() && 
-	 pLexerState->have_parameters && 
-	 !pLexerState->end_of_command ) 
-
-	pLexerState->input_mode = CONTINUING_LINE;
-
-      //else
-      //  return recognize(EOLN_T, " end of line");
     }
 
 q{S}+\n { /* short cut for quiting */ 
@@ -284,8 +176,8 @@ abort_gpsim_now {
 "*"                 {return(recognize(MPY_T,"*"));}
 "/"                 {return(recognize(DIV_T,"/"));}
 "^"                 {return(recognize(XOR_T,"^"));}
-"&"                 {return(recognize(AND_T,"&"));}
-"|"                 {return(recognize(OR_T,"|"));}
+"&"                 {return(recognize(AND_T,"^"));}
+"|"                 {return(recognize(OR_T,"^"));}
 "<<"                {return(recognize(SHL_T,"<<"));}
 ">>"                {return(recognize(SHR_T,">>"));}
 
@@ -306,9 +198,7 @@ abort_gpsim_now {
 "false"             {return(process_booleanLiteral(yylvalP,false));}
 "reg"               {return(recognize(REG_T,"reg"));}
 
-"endm"              {scanPopMacroState();}
-
-^[!].*              {return(process_shellLine(yylvalP,&yytext[1]));}
+{SHELLLINE}         {return(process_shellLine(yylvalP,&yytext[1]));}
 {QUOTEDTOKEN}       {return(process_quotedStringLiteral(yylvalP,&yytext[1]));}
 
 
@@ -484,37 +374,6 @@ int translate_token(int tt)
 
 }
 
-static bool bTryMacroParameterExpansion(string &s)
-{
-
-  // If we're invoking a macro, search the parameters
-  string replaced;
-  Macro *currentMacro = theMacroChain.nextParamSource();
-
-  if (verbose & 4) { 
-    cout << "Searching for parameter named:" << s;
-    if (currentMacro) 
-      cout << " in macro: " << currentMacro->name() << endl;
-    else
-      cout << " but there is no current macro\n";
-  }
-
-  if(currentMacro && currentMacro->substituteParameter(s,replaced))
-    if(replaced != s) {
-      if (verbose & 4)
-        cout << "  -- found it and replaced it with " << replaced << endl;
-      if (bTryMacroParameterExpansion (replaced))
-        return true;
-      push_input_stack();
-      yy_scan_string(replaced.c_str());
-      theMacroChain.resetParamSource();
-      return true;
-    }
-  theMacroChain.popParamSource();
-  return false;
-
-}
-
 /*************************************************************************
 *
 * handle_identifier
@@ -575,7 +434,7 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
         pLexerState->have_parameters = 0;
         retval = pLexerState->cmd->get_token();
 
-	// ugh. This is problem when the parser becomes re-entrant.
+	// ugh. This is problem when we the parser becomes re-entrant.
         last_command_is_repeatable = pLexerState->cmd->is_repeatable();
 
         return recognize(retval,"good command");
@@ -586,17 +445,26 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
     // Search the macros
     yylvalP->Macro_P = isMacro(s);
     if(yylvalP->Macro_P) {
+
       return MACROINVOCATION_T;
     }
 
-    if (bTryMacroParameterExpansion(s))
-      return 0;
+    // If we're invoking a macro, search the parameters
+    string replaced;
+    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
+      if(replaced != s)
+        return handle_identifier(yylvalP, replaced, op);
 
   } else {
 
-    if (bTryMacroParameterExpansion(s))
-      return 0;
-
+    // If we're invoking a macro, search the parameters
+    string replaced;
+    if(gCurrentMacro && gCurrentMacro->substituteParameter(s,replaced))
+      if(replaced != s) {
+        push_input_stack();
+        yy_scan_string(replaced.c_str());
+        return 0;
+      }
     // We already have the command, so search the options. 
 
     struct cmd_options *opt = *op;
@@ -622,10 +490,6 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 
   // If we get here, then the option was not found.
   // So let's check the symbols
-  Processor *cpu;
-  if(s[0] == '.' &&  (cpu = get_active_cpu()) != 0)
-    s.insert(0,cpu->name());
-
   string s1(s);
   Value *sym = get_symbol_table().find(s1);
   if(sym) {
@@ -742,6 +606,7 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 
 static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer)
 {
+  // JRH don't understand why buffer++; is not needed. 
   char * pCloseQuote = strchr(buffer, '\"');
   *pCloseQuote = 0;
   yylvalP->String_P = new String(buffer);
@@ -801,10 +666,7 @@ void init_cmd_state(void)
 static void pushLexerState()
 {
   if(verbose)
-    cout << "pushing lexer state: from level " << sLevels 
-         << " to " << (sLevels+1) << endl;
-
-  sLevels++;
+    cout << "pushing lexer state\n";
 
   LexerStateStruct  *pLS = new LexerStateStruct();
 
@@ -822,10 +684,7 @@ static void pushLexerState()
 static void popLexerState()
 {
   if(verbose)
-    cout << "popping lexer state: from level " << sLevels 
-         << " to " << (sLevels-1) << endl;
-
-  sLevels--;
+    cout << "popping lexer state\n";
 
   if(pLexerState) {
 
@@ -843,26 +702,30 @@ static void popLexerState()
 
 }
 
-int
-scan_read (char *buf, unsigned max_size)
-{
-  static int lastRet = -1;
-  // hack
-  int ret = gpsim_read(buf,max_size);
 
-  if (lastRet == ret && ret == 0) {
-
-    *buf = '\n';
-    ret = 1;
-  }
-  lastRet = ret;
-  return ret;
-}
 
 int init_parser()
 {
 
   pushLexerState();
+
+  if(verbose)
+    cout << "init_parser\n";
+
+  // Start off in a known state.
+  //  SetMode(INITIAL);
+
+  // Can't have any options until we get a command.
+  if(!parser_spanning_lines) {
+
+    init_cmd_state();
+    yyrestart (stdin);
+
+  }
+
+  if(verbose)
+    cout << "init_parser done\n";
+
 
   int ret = yyparse();
 
@@ -872,7 +735,7 @@ int init_parser()
 
 }
 
-// Tell us what the current buffer is.
+// Tell us all what the current buffer is.
 
 YY_BUFFER_STATE
 current_buffer (void)
@@ -1011,16 +874,11 @@ done:
   return true;
 }
 
-void lexer_InvokeMacro(Macro *m)
+void lexer_InvokeMacro(class Macro *m)
 {
 
   if(!m)
     return;
-
-  if(verbose &4)
-    cout << "Invoking macro: " << m->name() << endl;
-
-  theMacroChain.push(m);
 
   m->prepareForInvocation();
 
@@ -1042,15 +900,4 @@ void lexer_InvokeMacro(Macro *m)
   } while (bValidParameter && i<m->nParameters());
 
   m->invoke();
-}
-
-void scanPushMacroState(Macro *m)
-{
-  gCurrentMacro = m;
-}
-
-void scanPopMacroState()
-{
-
-  theMacroChain.pop();
 }
