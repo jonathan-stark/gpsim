@@ -1,0 +1,96 @@
+#
+# Startup commands for testing a p16c74 usart in conjunction
+# with the gpsim usart module.
+#
+
+# uncomment for debugging gpsim
+# set verbose 3
+
+
+# Load the source code:
+load s usart.cod
+
+# Set the Clock frequency to 20 Mhz.
+frequency 20000000
+
+# load the gpsim module library. Not that this is a 'shared library'.
+# If the library fails to load then 1) it's not installed (try installing
+# gpsim) 2) or the path to library is not available (see the documentation
+# on modules). 
+
+module library libgpsim_modules.so
+
+# load the usart module from the module library and give it a name
+
+module load usart   U1
+
+# Stimuli:
+# Tie rx and tx together to create a loop back.
+# This will cause whatever is transmitted to be received...
+
+#node loop_back
+#attach loop_back portc6 portc7
+node PIC_tx
+node PIC_rx
+
+# Attach the usart module to the PIC
+
+# usart pin out:
+#    1 - Tx - Transmit
+#    2 - Rx - Receive
+#    3 - CTS - Clear To Send
+#    4 - RTS - Request To Send
+
+# Let the usart receiver monitor the data flow.
+
+attach PIC_tx portc6 U1.RX
+attach PIC_rx portc7 U1.TX
+
+# set the usart module's baud rate
+U1.txbaud = 9600
+U1.rxbaud = 9600
+
+
+#
+#  Create a message using the Asynchronous stimulus
+#
+
+stimulus asynchronous_stimulus   # or we could've used asy
+
+# The initial state AND the state the stimulus is when
+# it rolls over
+
+initial_state 1
+
+# all times are with respect to the cpu's cycle counter
+
+start_cycle 100
+
+# the asynchronous stimulus will roll over in 'period'
+# cycles. Delete this line if you don't want a roll over.
+
+period 0x10000
+
+
+{ 0x1000, 0x41,
+0x2000, 0x42,
+0x3000, 0x43,
+0x4000, 0x44,
+0x5000, 0x45
+}
+
+
+# Give the stimulus a name:
+
+name msg1
+
+# Finally, tell the command line interface that we're done
+# with the stimulus
+
+end
+
+
+break c 1000
+
+#break wv PORTC 0x40 0x40
+break w PORTC
