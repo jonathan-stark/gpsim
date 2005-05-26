@@ -82,21 +82,23 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
                                           const char *pFilename,
                                           FILE *pFile) {
   iterator it;
+  iterator itLast;
   iterator itEnd = end();
   int iReturn;
   for(it = begin(); it != itEnd; it++) {
+    itLast = it;
     fseek(pFile, 0, SEEK_SET);
     get_symbol_table().clear();
     if((iReturn = (*it)->LoadProgramFile(pProcessor, pFilename, pFile))
       == ProgramFileType::SUCCESS) {
       return true;
     }
-      if(IsErrorDisplayableInLoop(iReturn)) {
+    if(IsErrorDisplayableInLoop(iReturn)) {
       (*it)->DisplayError(iReturn, pFilename, NULL);
     }
   }
   if(!IsErrorDisplayableInLoop(iReturn)) {
-    (*it)->DisplayError(iReturn, pFilename, NULL);
+    (*itLast)->DisplayError(iReturn, pFilename, NULL);
   }
   return false;
 }
