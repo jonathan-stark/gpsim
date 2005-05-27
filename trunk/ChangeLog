@@ -1,3 +1,7 @@
+2005-05-26 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/program_files.cc: Fixed crashing bug when no file
+	types are able to open a program file.
+
 2005-05-25 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi, extras/lcd/makefile.mingw:
 	added missing files to the WIN32 installation package in
