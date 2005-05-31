@@ -30,6 +30,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "readline", "..\readline\win
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Install", "plat\win32\Install.vcproj", "{9D6358AA-3A6D-4835-8F34-7950A2A6C351}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
@@ -88,6 +92,14 @@ Global
 		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release.Build.0 = Release|Win32
 		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release GUI.ActiveCfg = Release|Win32
 		{AF81F599-C97C-406A-B87B-490046F3BDB3}.Release GUI.Build.0 = Release|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug.ActiveCfg = Debug|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug.Build.0 = Debug|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug GUI.ActiveCfg = Debug|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Debug GUI.Build.0 = Debug|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Release.ActiveCfg = Release|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Release.Build.0 = Release|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Release GUI.ActiveCfg = Release|Win32
+		{9D6358AA-3A6D-4835-8F34-7950A2A6C351}.Release GUI.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
