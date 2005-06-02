@@ -1,3 +1,7 @@
+2005-06-01 Scott Dattalo <scott@dattalo.com>
+	* src/os_dependent.cc: Printed an error message if
+	a shared library fails to open.
+
 2005-05-26 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/program_files.cc: Fixed crashing bug when no file
 	types are able to open a program file.

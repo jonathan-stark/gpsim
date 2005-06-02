@@ -237,6 +237,9 @@ void * load_library(const char *library_name, char **pszError)
     return handle;
 
   *pszError = get_error_message();
+  if (*pszError) 
+    printf("Failed with %s\nNow trying to find %s in the directory paths\n",
+           *pszError,sPath.c_str());
   unsigned long uError = get_error();
 #ifdef _WIN32
   if(uError == OS_E_FILENOTFOUND) {
