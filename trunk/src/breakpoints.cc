@@ -823,6 +823,22 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
 				     unsigned int _regAddress,
 				     unsigned int _regMask,
 				     unsigned int _regValue,
+             bool _bPostAssertion) :
+  Breakpoint_Instruction(cpu, address,bp),
+  regAddress(_regAddress),
+  regMask(_regMask),
+  regValue(_regValue),
+  bPostAssertion(_bPostAssertion),
+  m_pfnIsAssertionBreak(IsAssertionEqualsBreakCondition) {
+}
+
+RegisterAssertion::RegisterAssertion(Processor *cpu,
+				     unsigned int address,
+				     unsigned int bp,
+				     unsigned int _regAddress,
+				     unsigned int _regMask,
+             unsigned int _operator,
+				     unsigned int _regValue,
 				     bool _bPostAssertion) :
   Breakpoint_Instruction(cpu, address,bp),
   regAddress(_regAddress),
@@ -830,7 +846,60 @@ RegisterAssertion::RegisterAssertion(Processor *cpu,
   regValue(_regValue),
   bPostAssertion(_bPostAssertion)
 {
+  switch(_operator) {
+  case eRAEquals:
+    m_pfnIsAssertionBreak = IsAssertionEqualsBreakCondition;
+    break;
+  case eRANotEquals:
+    m_pfnIsAssertionBreak = IsAssertionNotEqualsBreakCondition;
+    break;
+  case eRAGreaterThen:
+    m_pfnIsAssertionBreak = IsAssertionGreaterThenBreakCondition;
+    break;
+  case eRALessThen:
+    m_pfnIsAssertionBreak = IsAssertionLessThenBreakCondition;
+    break;
+  case eRAGreaterThenEquals:
+    m_pfnIsAssertionBreak = IsAssertionGreaterThenEqualsBreakCondition;
+    break;
+  case eRALessThenEquals:
+    m_pfnIsAssertionBreak = IsAssertionLessThenEqualsBreakCondition;
+    break;
+  default:
+    assert(false);
+    break;
+  }
 
+}
+
+bool RegisterAssertion::IsAssertionEqualsBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) != uRegTestValue;
+}
+
+bool RegisterAssertion::IsAssertionNotEqualsBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) == uRegTestValue;
+}
+
+bool RegisterAssertion::IsAssertionGreaterThenBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) <= uRegTestValue;
+}
+
+bool RegisterAssertion::IsAssertionLessThenBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) >= uRegTestValue;
+}
+
+bool RegisterAssertion::IsAssertionGreaterThenEqualsBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) < uRegTestValue;
+}
+
+bool RegisterAssertion::IsAssertionLessThenEqualsBreakCondition(unsigned int uRegValue,
+  unsigned int uRegMask, unsigned int uRegTestValue) {
+  return (uRegValue & uRegMask) > uRegTestValue;
 }
 
 //------------------------------------------------------------------------------
@@ -850,31 +919,31 @@ void RegisterAssertion::execute(void)
   // executes if it's a pre-assertion or after it completes if it's a
   // post assertion.
 
-  if( (((PCPU->rma[regAddress].get_value()) & regMask) != regValue) &&
+  if( m_pfnIsAssertionBreak(PCPU->rma[regAddress].get_value(), regMask, regValue) &&
       (PCPU->pc->get_phase() == 0) )
   {
 
-    cout << "Caught Register assertion ";
-    cout << "while excuting at address " << address << endl;
+    cout  << "Caught Register assertion ";
+    cout  << "while excuting at address " << address << endl;
 
-    cout << "register 0x" 
-	 << hex 
-	 << regAddress
-	 << " = 0x"
-	 << PCPU->rma[regAddress].get_value() << endl;
+    cout  << "register 0x" 
+          << hex 
+          << regAddress
+          << " = 0x"
+          << PCPU->rma[regAddress].get_value() << endl;
 
-    cout << "0x" << PCPU->rma[regAddress].get_value()
-	 << " & 0x" << regMask 
-	 << " != 0x" << regValue << endl;
+    cout  << "0x" << PCPU->rma[regAddress].get_value()
+          << " & 0x" << regMask 
+          << " != 0x" << regValue << endl;
 
-    cout << " regAddress =0x" << regAddress
-	 << " regMask = 0x" << regMask 
-	 << " regValue = 0x" << regValue << endl;
+    cout  << " regAddress =0x" << regAddress
+          << " regMask = 0x" << regMask 
+          << " regValue = 0x" << regValue << endl;
 
     PCPU->Debug();
 
     if( (PCPU->simulation_mode == eSM_RUNNING) && 
-	(simulation_start_cycle != get_cycles().value)) {
+        (simulation_start_cycle != get_cycles().value)) {
 
       eval_Expression();
       action->action();

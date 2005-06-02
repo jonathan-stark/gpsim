@@ -146,12 +146,47 @@ class RegisterAssertion : public Breakpoint_Instruction
   unsigned int regMask;
   unsigned int regValue;
   bool bPostAssertion; // True if assertion is checked after instruction simulates.
+  typedef bool (*PFNISASSERTIONCONDITION)(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  PFNISASSERTIONCONDITION m_pfnIsAssertionBreak;
+
+  enum {
+    eRAEquals,
+    eRANotEquals,
+    eRAGreaterThen,
+    eRALessThen,
+    eRAGreaterThenEquals,
+    eRALessThenEquals,
+  };
+
+  static bool IsAssertionEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsAssertionNotEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsAssertionGreaterThenBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsAssertionLessThenBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsAssertionGreaterThenEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsAssertionLessThenEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
 
   RegisterAssertion(Processor *new_cpu, 
 		    unsigned int instAddress, 
 		    unsigned int bp,
 		    unsigned int _regAddress,
 		    unsigned int _regMask,
+		    unsigned int _regValue,
+		    bool bPostAssertion=false
+		    );
+
+  RegisterAssertion(Processor *new_cpu, 
+		    unsigned int instAddress, 
+		    unsigned int bp,
+		    unsigned int _regAddress,
+		    unsigned int _regMask,
+        unsigned int _operator,
 		    unsigned int _regValue,
 		    bool bPostAssertion=false
 		    );
