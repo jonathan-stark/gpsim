@@ -26,6 +26,7 @@ EXPORTS
     ??0ProgramFileBuf@@QAE@PAU_iobuf@@@Z
     ??0Register@@QAE@XZ
     ??0RegisterAssertion@@QAE@PAVProcessor@@IIIII_N@Z
+    ??0RegisterAssertion@@QAE@PAVProcessor@@IIIIII_N@Z
     ??0RegisterReadTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
     ??0RegisterReadTraceType@@QAE@PAVProcessor@@II@Z
     ??0RegisterWriteTraceObject@@QAE@PAVProcessor@@PAVRegister@@VRegisterValue@@@Z
