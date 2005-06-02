@@ -52,6 +52,10 @@ start
    .sim "run"
    .sim "failures"
 
+  if 0
+   .sim "failures=42"    ; gpasm should ignore this script command.
+  endif
+
         clrf    var1
         clrf    var2
         clrf    var3

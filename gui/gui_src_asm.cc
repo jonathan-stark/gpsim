@@ -1279,7 +1279,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
 
     // display everything, so that gtk_notebook_get_current_page() works
-    GTKWAIT;
+    //GTKWAIT;
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
   // succeed. I tried putting this code in CreateSourceBrowserAsmWindow()

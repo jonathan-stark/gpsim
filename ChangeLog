@@ -1,3 +1,9 @@
+2005-06-02 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc, gui/gui_main.cc: Removed GTKWAIT
+	macros. Apparently on newer versions of GTK these macros block
+	indefinitely. On really old versions of GTK (pre 2.0) these macros
+	were necessary.
+
 2005-05-26 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc,h, plat/win32/gpsim.def: added
 	register assertions functionality. Can now assert the
