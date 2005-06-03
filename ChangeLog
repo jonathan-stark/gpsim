@@ -1,3 +1,8 @@
+2005-06-03 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc: Added a call to g_main_iteration() to allow GTK
+	events to get processed. (This replaces the GTKWAIT macro that was
+	removed in the previous commit).
+
 2005-06-02 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc, gui/gui_main.cc: Removed GTKWAIT
 	macros. Apparently on newer versions of GTK these macros block
