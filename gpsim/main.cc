@@ -242,29 +242,29 @@ main (int argc, char *argv[])
         "\"  ignored\nsince the .cod file specifies the hex code\n";
 
     snprintf(command_str, sizeof(command_str),
-	     "load s %s\n",cod_name);
+	     "load s \"%s\"\n",cod_name);
     parse_string(command_str);
 
   } else  if(*processor_name) {
     snprintf(command_str, sizeof(command_str),
-	     "processor %s\n",processor_name);
+	     "processor \"%s\"\n",processor_name);
     parse_string(command_str);
 
     if(*hex_name){
       snprintf(command_str, sizeof(command_str),
-        "load h %s\n",hex_name);
+        "load h \"%s\"\n",hex_name);
       parse_string(command_str);
     }
   }
   if(*icd_port) {
       snprintf(command_str, sizeof(command_str),
-	       "icd open %s\n",icd_port);
+	       "icd open \"%s\"\n",icd_port);
       parse_string(command_str);
   }
   
   if(*startup_name) {
       snprintf(command_str, sizeof(command_str),
-	       "load c %s\n",startup_name);
+	       "load c \"%s\"\n",startup_name);
       parse_string(command_str);
   }
 
