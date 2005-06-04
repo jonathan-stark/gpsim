@@ -82,9 +82,12 @@ void EECON1::put(unsigned int new_value)
     }
   else
     {
-      // WREN is low so inhibit eeprom writes:
+      // WREN is low so inhibit further eeprom writes:
 
-      eeprom->get_reg_eecon2()->unarm();
+      if ( ! eeprom->get_reg_eecon2()->is_writing() )
+        {
+          eeprom->get_reg_eecon2()->unarm();
+        }
       //cout << "EECON1: write is disabled\n";
 
     }
@@ -279,6 +282,7 @@ void EEPROM::start_write(void)
   wr_adr = eeadr.value.get();
   wr_data = eedata.value.get();
 
+  eecon2.start_write();
 }
 
 // Set the EEIF and clear the WR bits. 
@@ -316,7 +320,7 @@ void EEPROM::callback(void)
     eedata.value.put(rom[eeadr.value.get()]->get());
     eecon1.value.put(eecon1.value.get() & (~EECON1::RD));
     break;
-  case EECON2::EEREADY_FOR_WRITE:
+  case EECON2::EEWRITE_IN_PROGRESS:
     //cout << "eewrite\n";
 
     if(wr_adr < rom_size)
@@ -477,6 +481,7 @@ void EEPROM_WIDE::start_write(void)
   wr_adr = eeadr.value.get() + (eeadrh.value.get() << 8);
   wr_data = eedata.value.get() + (eedatah.value.get() << 8);
 
+  eecon2.start_write();
 }
 
 void EEPROM_WIDE::start_program_memory_read(void)

@@ -753,7 +753,7 @@ int PicCodProgramFileType::check_for_gputils(char *block)
       cout << "good, you have a recent version of gputils\n";
   }  else {
     cout << "Warning, you need to upgrade to gputils-0.13.0 or higher\n";
-    cout << "(You're assembler version is  " << buffer << ")\n";
+    cout << "(Your assembler version is  " << buffer << ")\n";
   }
 _Cleanup:
   return iReturn;
