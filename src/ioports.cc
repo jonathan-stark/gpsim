@@ -1213,8 +1213,8 @@ void PORTA_62x::put(unsigned int new_value)
   value.put(((new_value & ~tris->value.get()) | (value.get() & tris->value.get())) & valid_iopins);
 
   // FIXME - this is obviously wrong
-  if(comparator && comparator->enabled()) 
-    value.put(value.get() & (0xff & ~( AN0 | AN1 | AN2 | AN3)));
+  //if(comparator && comparator->enabled()) 
+  //  value.put(value.get() & (0xff & ~( AN0 | AN1 | AN2 | AN3)));
 
 
   // Update the stimuli - if there are any
@@ -1240,7 +1240,8 @@ unsigned int PORTA_62x::get(void)
   old_value = value.get();
 
   if(stimulus_mask) {
-    value.put(  (value.get() & ~stimulus_mask) | update_stimuli());
+//    value.put(  (value.get() & ~stimulus_mask) | update_stimuli());
+      update_stimuli();
   }
 
   // If the comparator is enabled, then all of the "analog" pins are

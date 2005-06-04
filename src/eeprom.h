@@ -85,6 +85,7 @@ enum EE_STATES
   EENOT_READY,
   EEHAVE_0x55,
   EEREADY_FOR_WRITE,
+  EEWRITE_IN_PROGRESS,
   EEUNARMED,
   EEREAD
 };
@@ -100,12 +101,14 @@ enum EE_STATES
   inline void unarm(void) { eestate = EEUNARMED; }
   inline void unready(void) { eestate = EENOT_READY; }
   inline void read(void) { eestate = EEREAD; }
+  inline void start_write(void) { eestate = EEWRITE_IN_PROGRESS; }
 
   inline bool is_unarmed(void) { return (eestate == EEUNARMED); }
   inline bool is_not_ready(void) { return (eestate == EENOT_READY); }
   inline bool is_ready_for_write(void) {
     return (eestate == EEREADY_FOR_WRITE);
   }
+  inline bool is_writing(void) { return (eestate == EEWRITE_IN_PROGRESS); }
 
   //private:
   EEPROM *eeprom;
