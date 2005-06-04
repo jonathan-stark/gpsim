@@ -1,4 +1,8 @@
 2005-06-04 Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc: Allow filenames whose first character is a
+	number.
+
+2005-06-04 Scott Dattalo <scott@dattalo.com>
 	Patch from: Rob Pearce <rob@bdt-home.demon.co.uk>
 	* src/cod.cc: Fixed gramatical error.
 	* src/eeprom.cc, src/eeprom.h: Added a new state to the eeprom
