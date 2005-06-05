@@ -40,7 +40,6 @@ Boston, MA 02111-1307, USA.  */
 
 #define SBAW_NRFILES 100 // Max number of source files
 
-
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
 #else
@@ -108,6 +107,91 @@ public:
 
 #include "gui_object.h"
 #include "gui_processor.h"
+
+//========================================================================
+class EntryWidget
+{
+public:
+  EntryWidget();
+  virtual void Update()=0;
+  virtual void Create(bool isEditable=true);
+  void SetEntryWidth(int string_width);
+  void AssignParent(GUI_Object *);
+
+  GUI_Object *parent;
+  GtkWidget *entry;
+
+};
+
+//========================================================================
+//
+// A LabeledEntry is an object consisting of gtk entry
+// widget that is labeled (with a gtk lable widget)
+//
+
+class LabeledEntry : public EntryWidget {
+public:
+  GtkWidget *label;
+
+  LabeledEntry(void);
+  void Create(GtkWidget *box,char *clabel, int string_width, bool isEditable);
+  void NewLabel(char *clabel);
+  virtual void Update(void);
+  virtual void put_value(unsigned int);
+
+};
+
+class RegisterLabeledEntry : public LabeledEntry {
+public:
+
+  Register *reg;
+  char *pCellFormat;
+
+  RegisterLabeledEntry(GtkWidget *,Register *,bool);
+
+  virtual void put_value(unsigned int);
+  void AssignRegister(Register *new_reg);
+  virtual void Update(void);
+
+};
+
+class CyclesLabeledEntry : public LabeledEntry {
+public:
+
+  CyclesLabeledEntry();
+  virtual void Update(void);
+};
+
+
+typedef enum {
+  MENU_TIME_USECONDS,
+  MENU_TIME_MSECONDS,
+  MENU_TIME_SECONDS,
+  MENU_TIME_HHMMSS
+} time_menu_id;
+
+typedef struct _time_menu_item {
+  char *name;
+  time_menu_id id;
+} time_menu_item;
+
+class TimeLabeledEntry : public LabeledEntry 
+{
+public:
+  TimeLabeledEntry();
+  virtual void Update(void);
+  GtkWidget *build_menu();
+
+  void set_time_format(time_menu_id id)
+  {
+    time_format = id;
+  }
+
+  GtkWidget *menu;
+  time_menu_id time_format;
+
+};
+
 
 //
 // External references and function prototypes

@@ -82,9 +82,6 @@ show_message (char *title, char *message)
 
   window = gtk_dialog_new ();
 
-//  gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-//			     GTK_SIGNAL_FUNC (gtk_widget_destroyed), GTK_OBJECT(window));
-
   gtk_window_set_title (GTK_WINDOW (window), title);
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
 
@@ -126,105 +123,6 @@ about_cb (gpointer             callback_data,
 
 }
 
-
-//--------------------------------------------------------------
-// new_processor_dialog
-//
-// This will display the 'new processor' dialog window.
-//
-//
-
-//static GtkWidget *new_processor_name_entry;
-
-/*
-static void
-new_processor_dialog (void)
-{
-  static GtkWidget *window = 0;
-
-  GtkWidget *box1;
-  GtkWidget *box2;
-  GtkWidget *cb;
-  GtkWidget *button;
-  GtkWidget *separator;
-  GList *cbitems = 0;
-
-  if (!window)
-    {
-      //      for(i=3; i<number_of_available_processors; i++)
-      //	cbitems = g_list_append(cbitems, available_processors[i].names[2]);
-
-
-      window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-
-      gtk_signal_connect (GTK_OBJECT (window), "destroy",
-			  GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-			  &window);
-
-      gtk_window_set_title (GTK_WINDOW (window), "New Processor (not supported)");
-      gtk_container_set_border_width (GTK_CONTAINER (window), 0);
-
-
-      box1 = gtk_vbox_new (FALSE, 0);
-      gtk_container_add (GTK_CONTAINER (window), box1);
-      gtk_widget_show (box1);
-
-
-      box2 = gtk_vbox_new (FALSE, 10);
-      gtk_container_set_border_width (GTK_CONTAINER (box2), 10);
-      gtk_box_pack_start (GTK_BOX (box1), box2, TRUE, TRUE, 0);
-      gtk_widget_show (box2);
-
-      cb = gtk_combo_new ();
-      gtk_combo_set_popdown_strings (GTK_COMBO (cb), cbitems);
-      cbitems = g_list_first(cbitems);
-      gtk_entry_set_text (GTK_ENTRY (GTK_COMBO(cb)->entry), (gchar *)cbitems->data);
-      gtk_editable_select_region (GTK_EDITABLE (GTK_COMBO(cb)->entry),
-				  0, -1);
-      gtk_box_pack_start (GTK_BOX (box2), cb, TRUE, TRUE, 0);
-      gtk_widget_show (cb);
-
-      new_processor_name_entry = gtk_entry_new ();
-      gtk_entry_set_text (GTK_ENTRY (new_processor_name_entry), "no_name");
-      gtk_editable_select_region (GTK_EDITABLE (new_processor_name_entry), 0, 5);
-      gtk_box_pack_start (GTK_BOX (box2), new_processor_name_entry, TRUE, TRUE, 0);
-      gtk_widget_show (new_processor_name_entry);
-
-
-      separator = gtk_hseparator_new ();
-      gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 0);
-      gtk_widget_show (separator);
-
-
-      box2 = gtk_hbox_new (FALSE, 10);
-      gtk_container_set_border_width (GTK_CONTAINER (box2), 10);
-      gtk_box_pack_start (GTK_BOX (box1), box2, FALSE, TRUE, 0);
-      gtk_widget_show (box2);
-
-
-      button = gtk_button_new_with_label ("NOT");
-      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-				 GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				 GTK_OBJECT (window));
-      gtk_box_pack_start (GTK_BOX (box2), button, TRUE, TRUE, 0);
-      GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-      gtk_widget_grab_default (button);
-      gtk_widget_show (button);
-
-      button = gtk_button_new_with_label ("YET");
-      gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-				 GTK_SIGNAL_FUNC(gtk_widget_destroy),
-				 GTK_OBJECT (window));
-      gtk_box_pack_start (GTK_BOX (box2), button, TRUE, TRUE, 0);
-      gtk_widget_show (button);
-    }
-
-  if (!GTK_WIDGET_VISIBLE (window))
-    gtk_widget_show (window);
-  else
-    gtk_widget_destroy (window);
-}
-*/
 
 void
 file_selection_hide_fileops (GtkWidget *widget,
@@ -274,10 +172,6 @@ fileopen_dialog(gpointer             callback_data,
 
     gtk_window_set_position (GTK_WINDOW (window), GTK_WIN_POS_MOUSE);
 
-    //      gtk_signal_connect_object (GTK_OBJECT (window), "destroy",
-    //				 GTK_SIGNAL_FUNC(gtk_widget_destroyed),
-    //				 GTK_OBJECT(window));
-
     gtk_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (window)->ok_button),
 			"clicked", GTK_SIGNAL_FUNC(file_selection_ok),
 			window);
@@ -315,8 +209,6 @@ toggle_window (gpointer             callback_data,
 	      GtkWidget           *widget)
 {
   GtkWidget *menu_item = 0;
-
-  //    g_message ("\"%s\" is not supported yet.", gtk_item_factory_path_from_widget (widget));
 
   menu_item = gtk_item_factory_get_item (item_factory,
 					 gtk_item_factory_path_from_widget (widget));
@@ -370,145 +262,380 @@ toggle_window (gpointer             callback_data,
   return 0;
 }
 
-static bool bButtonHandler = false;
-static bool bStopButtonHandler = false;
-
+//========================================================================
+// Button callbacks
 static void 
 runbutton_cb(GtkWidget *widget)
 {
-  if (!bButtonHandler) {
-    bButtonHandler = true;
-    get_interface().start_simulation();
-    bButtonHandler = false;
-  }
+  if(gp && gp->cpu)
+    gp->cpu->pma->run();
 }
 
 static void 
 stopbutton_cb(GtkWidget *widget)
 {
-  if (!bStopButtonHandler) {
-    bStopButtonHandler = true;
-    if(gp && gp->cpu)
-      gp->cpu->pma->stop();
-    bStopButtonHandler = false;
-  }
+  if(gp && gp->cpu)
+    gp->cpu->pma->stop();
 }
     
 static void 
 stepbutton_cb(GtkWidget *widget)
 {
-  if (!bButtonHandler) {
-    bButtonHandler = true;
-    if(gp && gp->cpu) 
-      gp->cpu->pma->step(1);
-    bButtonHandler = false;
-  }
+  if(gp && gp->cpu) 
+    gp->cpu->pma->step(1);
 }
     
 static void 
 overbutton_cb(GtkWidget *widget)
 {
-  if (!bButtonHandler) {
-    bButtonHandler = true;
-    if(gp && gp->cpu) 
-      gp->cpu->pma->step_over();
-    bButtonHandler = false;
-  }
+  if(gp && gp->cpu) 
+    gp->cpu->pma->step_over();
+
 }
     
 static void 
 finishbutton_cb(GtkWidget *widget)
 {
-  if (!bButtonHandler) {
-    bButtonHandler = true;
-    if(gp && gp->cpu) 
-      gp->cpu->pma->finish();
-    bButtonHandler = false;
-  }
+  if(gp && gp->cpu) 
+    gp->cpu->pma->finish();
 }
 
 static void 
 resetbutton_cb(GtkWidget *widget)
 {
-  if (!bButtonHandler) {
-    bButtonHandler = true;
-    if(gp && gp->cpu)
-      gp->cpu->reset(POR_RESET);
-    bButtonHandler = false;
-  }
+  if(gp && gp->cpu)
+    gp->cpu->reset(POR_RESET);
 }
+
 
 int gui_animate_delay; // in milliseconds
 extern int realtime_mode;
 extern int realtime_mode_with_gui;
 
-static void set_simulation_mode(char m)
-{
-    guint64 value=1;
 
-    realtime_mode=0;
-    realtime_mode_with_gui=0;
-    gui_animate_delay=0;
+//========================================================================
+//========================================================================
+//
+// UpdateRateMenuItem
 
-    switch(m)
-    {
-    case 'r':
-        value=0;
-        gui_animate_delay=0;
-        realtime_mode=1;
-        break;
-    case 'R':
-        value=0;
-        gui_animate_delay=0;
-        realtime_mode=1;
-        realtime_mode_with_gui=1;
-        break;
-    case 'b':
-        value=1;
-        gui_animate_delay=100;
-        break;
-    case 'c':
-        value=1;
-        gui_animate_delay=300;
-        break;
-    case 'd':
-        value=1;
-        gui_animate_delay=600;
-        break;
-    case '1':
-        value=1;
-        break;
-    case '2':
-        value=1000;
-        break;
-    case '3':
-        value=100000;
-        break;
-    case '4':
-        value=2000000;
-        break;
-    case '5':
-        value=0;
-        break;
-    }
-    gi.set_update_rate(value);
+//========================================================================
+//
+// Class declaration -- probaby should move to a .h file.
 
-    if(gp && gp->cpu)
-      gp->cpu->pma->stop();
+class UpdateRateMenuItem {
+public:
 
-    config_set_variable("dispatcher", "SimulationMode", m);
-}
+  char id;
+  int menu_index;
+  bool bRealTime;
+  bool bWithGui;
+  bool bAnimate;
+
+  int update_rate;
+
+  UpdateRateMenuItem(GtkWidget *,char, const char *, int update_rate=0, bool _bRealTime=false, bool _bWithGui=false);
+
+  void Select();
+  static GtkWidget *menu;
+  static int seq_no;
+};
+//========================================================================
+// UpdateRateMenuItem members
+
+GtkWidget * UpdateRateMenuItem::menu = 0;
+int UpdateRateMenuItem::seq_no=0;
+
+map<guint, UpdateRateMenuItem*> UpdateRateMenuItemMap;
+map<guint, UpdateRateMenuItem*> UpdateRateMenuItemIndexed;
+
 
 static void
 gui_update_cb(GtkWidget *widget, gpointer data)
 {
-    char *s = (char*)data;
+  GtkComboBox *combo_box = GTK_COMBO_BOX(widget);
+  gint index = combo_box ? gtk_combo_box_get_active(combo_box) : 0;
 
-    set_simulation_mode(*s);
+  UpdateRateMenuItem *umi = UpdateRateMenuItemIndexed[index];
+  if (umi)
+    umi->Select();
+  else 
+    cout << "Error UpdateRateMenuItem bad index:" << index << endl;
+}
+
+UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
+				       char _id, 
+				       const char *label,
+				       int _update_rate,
+				       bool _bRealTime,
+				       bool _bWithGui)
+  : id(_id), bRealTime(_bRealTime), bWithGui(_bWithGui), update_rate(_update_rate)
+{
+
+  if(update_rate <0) {
+    bAnimate = true;
+    update_rate = -update_rate;
+  } else
+    bAnimate = false;
+
+  if(!menu)
+    menu = gtk_menu_new();
+
+  gtk_combo_box_append_text (GTK_COMBO_BOX(parent), label);
+
+  menu_index = seq_no;
+  seq_no++;
+
+  UpdateRateMenuItemMap[id] = this;
+  UpdateRateMenuItemIndexed[menu_index] = this;
 
 }
 
+void UpdateRateMenuItem::Select()
+{
+  realtime_mode = bRealTime ? 1 : 0;
+  realtime_mode_with_gui = bWithGui ? 1 : 0;
 
+  if(bAnimate) {
+    gui_animate_delay = update_rate;
+    gi.set_update_rate(1);
+  } else
+    gi.set_update_rate(update_rate);
+
+  if(gp && gp->cpu)
+    gp->cpu->pma->stop();
+
+  config_set_variable("dispatcher", "SimulationMode", id);
+
+  if (0)
+    cout << "Update gui refresh: " << hex << update_rate 
+	 << " ID:" << id << "Seq no:" << menu_index
+	 << endl;
+}
+
+
+//========================================================================
+//========================================================================
+class TimeWidget;
+class TimeFormatter
+{
+public:
+
+  enum eMenuID {
+    eCyclesHex=0,
+    eCyclesDec,
+    eMicroSeconds,
+    eMilliSeconds,
+    eSeconds,
+    eHHMMSS
+  } time_format;
+  TimeFormatter(TimeWidget *_tw,GtkWidget *menu, const char*menu_text)
+   : tw(_tw)
+  {
+    AddToMenu(menu,menu_text);
+  }
+
+  void ChangeFormat();
+  void AddToMenu(GtkWidget *menu, const char*menu_text);
+  virtual void Format(char *, int)=0;
+  TimeWidget *tw;
+};
+
+class TimeWidget : public EntryWidget
+{
+public:
+  TimeWidget();
+  void Create(GtkWidget *);
+  virtual void Update();
+  void NewFormat(TimeFormatter *tf);
+  TimeFormatter *current_format;
+
+  GtkWidget *menu;
+};
+
+
+class TimeMicroSeconds : public TimeFormatter
+{
+public:
+  TimeMicroSeconds(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"MicroSeconds") {}
+  void Format(char *buf, int size)
+  {
+    double time_db = gp->cpu->get_InstPeriod() * cycles.value * 1e6;
+    snprintf(buf,size, "%19.2f us",time_db);
+  }
+};
+
+class TimeMilliSeconds : public TimeFormatter
+{
+public:
+  TimeMilliSeconds(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"MilliSeconds") {}
+  void Format(char *buf, int size)
+  {
+    double time_db = gp->cpu->get_InstPeriod() * cycles.value * 1e3;
+    snprintf(buf,size, "%19.3f ms",time_db);
+  }
+};
+
+class TimeSeconds : public TimeFormatter
+{
+public:
+  TimeSeconds(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"Seconds") {}
+  void Format(char *buf, int size)
+  {
+    double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+    snprintf(buf,size, "%19.3f Sec",time_db);
+  }
+};
+
+class TimeHHMMSS : public TimeFormatter
+{
+public:
+  TimeHHMMSS(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"HH:MM:SS.mmm") {}
+  void Format(char *buf, int size)
+  {
+    double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+    double v=time_db;
+    int hh=(int)(v/3600),mm,ss,cc;
+    v-=hh*3600.0;
+    mm=(int)(v/60);
+    v-=mm*60.0;
+    ss=(int)v;
+    cc=(int)(v*100.0+0.5);
+    snprintf(buf,size,"    %02d:%02d:%02d.%02d",hh,mm,ss,cc);
+  }
+};
+
+class TimeCyclesHex : public TimeFormatter
+{
+public:
+  TimeCyclesHex(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"Cycles (Hex)") {}
+  void Format(char *buf, int size)
+  {
+    snprintf(buf,size,"0x%016Lx",cycles.value);
+  }
+};
+
+class TimeCyclesDec : public TimeFormatter
+{
+public:
+  TimeCyclesDec(TimeWidget *tw, GtkWidget *menu) 
+    : TimeFormatter(tw,menu,"Cycles (Dec)") {}
+  void Format(char *buf, int size)
+  {
+    snprintf(buf,size,"%016Ld",cycles.value);
+  }
+};
+
+//========================================================================
+// called when user has selected a menu item from the time format menu
+static void
+cbTimeFormatActivated(GtkWidget *widget, gpointer data)
+{
+  if(!widget || !data)
+    return;
+    
+  TimeFormatter *tf = static_cast<TimeFormatter *>(data);
+  tf->ChangeFormat();
+}
+// button press handler
+static gint
+cbTimeFormatPopup(GtkWidget *widget, GdkEventButton *event, TimeWidget *tw)
+{
+  if(!widget || !event || !tw)
+    return 0;
+  
+  if( (event->type == GDK_BUTTON_PRESS) ) {// &&  (event->button == 3) ) {
+
+    gtk_menu_popup(GTK_MENU(tw->menu), 0, 0, 0, 0,
+		   3, event->time);
+    // It looks like we need it to avoid a selection in the entry.
+    // For this we tell the entry to stop reporting this event.
+    gtk_signal_emit_stop_by_name(GTK_OBJECT(tw->entry),"button_press_event");
+  }
+  return FALSE;
+}
+
+
+void TimeFormatter::ChangeFormat()
+{
+  if(tw)
+    tw->NewFormat(this);
+}
+
+void TimeFormatter::AddToMenu(GtkWidget *menu, 
+			      const char*menu_text)
+{
+  GtkWidget *item = gtk_menu_item_new_with_label(menu_text);
+  gtk_signal_connect(GTK_OBJECT(item),"activate",
+		     (GtkSignalFunc) cbTimeFormatActivated,
+		     this);
+  gtk_widget_show(item);
+  gtk_menu_append(GTK_MENU(menu),item);
+}
+
+void TimeWidget::Create(GtkWidget *container)
+{
+  EntryWidget::Create(false);
+
+  gtk_container_add(GTK_CONTAINER(container),entry);
+
+  SetEntryWidth(18);
+
+  menu = gtk_menu_new();
+  GtkWidget *item = gtk_tearoff_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), item);
+  gtk_widget_show (item);
+
+
+  // Create an entry for each item in the formatter pop up window.
+
+  new TimeMicroSeconds(this,menu);
+  new TimeMilliSeconds(this,menu);
+  new TimeSeconds(this,menu);
+  new TimeHHMMSS(this,menu);
+  NewFormat(new TimeCyclesHex(this,menu));
+  new TimeCyclesDec(this,menu);
+
+  // Associate a callback with the user button-click actions
+  gtk_signal_connect(GTK_OBJECT(entry),
+		     "button_press_event",
+		     (GtkSignalFunc) cbTimeFormatPopup,
+		     this);
+}
+
+
+void TimeWidget::NewFormat(TimeFormatter *tf)
+{
+  if(tf && tf != current_format) {
+    current_format = tf;
+    Update();
+  }
+}
+
+void TimeWidget::Update()
+{
+  if(!current_format)
+    return;
+
+  char buffer[32];
+
+  current_format->Format(buffer, sizeof(buffer));
+  gtk_entry_set_text (GTK_ENTRY (entry), buffer);
+
+}
+
+TimeWidget::TimeWidget()
+{
+  menu = 0;
+  current_format =0;
+}
+
+
+//========================================================================
 static int dispatcher_delete_event(GtkWidget *widget,
 				   GdkEvent  *event,
 				   gpointer data)
@@ -567,10 +694,6 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
   { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
 
-//  { "/_Preferences",          0, 0,               0, "<Branch>" },
-//  { "/_Preferences/Windows",  0, (GtkItemFactoryCallback)create_notebook,       0 },
-
-
   { "/_Help",            0,         0,                     0, "<LastBranch>" },
   { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
 
@@ -580,284 +703,228 @@ static int nmenu_items = sizeof (menu_items) / sizeof (menu_items[0]);
 
 
 GtkWidget *dispatcher_window = 0;
+//========================================================================
+//========================================================================
 
-void create_dispatcher (void)
+class MainWindow 
 {
-  if (!dispatcher_window)
-    {
-      GtkWidget *box1;
+public:
 
-      GtkWidget *buttonbox;
-      GtkWidget *separator;
-      GtkWidget *button;
-      GtkWidget *frame;
-      GtkAccelGroup *accel_group;
+  TimeWidget   *timeW;
+
+  void Update();
+  void Create();
+
+  MainWindow();
+};
+
+MainWindow TheWindow;
+
+MainWindow::MainWindow()
+{
+  timeW=0;
+}
+
+void MainWindow::Update()
+{
+  if(timeW)
+   timeW->Update();
+}
+
+
+//========================================================================
+//========================================================================
+
+void dispatch_Update()
+{
+  if(!dispatcher_window)
+    return;
+
+  if(gp && gp->cpu) {
+
+    TheWindow.Update();
+
+  }
+}
+
+void MainWindow::Create ()
+{
+
+  if (dispatcher_window)
+    return;
+
+  GtkWidget *box1;
+
+  GtkWidget *buttonbox;
+  GtkWidget *separator;
+  GtkWidget *button;
+  GtkWidget *frame;
+  GtkAccelGroup *accel_group;
       
-      int x,y,width,height;
+  int x,y,width,height;
 
-      GtkWidget *menu;
-      GtkWidget *item;
+  GtkWidget *menu;
+  GtkWidget *item;
 
-      GtkWidget *update_rate_menu;
+  GtkWidget *update_rate_menu;
 
-      int SimulationMode;
+  int SimulationMode;
       
-      dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  dispatcher_window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 
-      if(!config_get_variable("dispatcher", "x", &x))
-	  x=10;
-      if(!config_get_variable("dispatcher", "y", &y))
-	  y=10;
-      if(!config_get_variable("dispatcher", "width", &width))
-	  width=1;
-      if(!config_get_variable("dispatcher", "height", &height))
-	  height=1;
-      gtk_window_set_default_size(GTK_WINDOW(dispatcher_window), width,height);
-      gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
+  if(!config_get_variable("dispatcher", "x", &x))
+    x=10;
+  if(!config_get_variable("dispatcher", "y", &y))
+    y=10;
+  if(!config_get_variable("dispatcher", "width", &width))
+    width=1;
+  if(!config_get_variable("dispatcher", "height", &height))
+    height=1;
+  gtk_window_set_default_size(GTK_WINDOW(dispatcher_window), width,height);
+  gtk_widget_set_uposition(GTK_WIDGET(dispatcher_window),x,y);
       
       
-      gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
-			  GTK_SIGNAL_FUNC (dispatcher_delete_event),
-			  0);
+  gtk_signal_connect (GTK_OBJECT (dispatcher_window), "delete-event",
+		      GTK_SIGNAL_FUNC (dispatcher_delete_event),
+		      0);
       
 #if GTK_MAJOR_VERSION >= 2
-      accel_group = gtk_accel_group_new();
+  accel_group = gtk_accel_group_new();
 #else
-      accel_group = gtk_accel_group_get_default ();
+  accel_group = gtk_accel_group_get_default ();
 #endif
-      item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
-      gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
-				"<main>",
-				item_factory,
-				(GtkDestroyNotify) gtk_object_unref);
-//      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
-      gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
-      gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
-			    VERSION);
-      gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
+  item_factory = gtk_item_factory_new (GTK_TYPE_MENU_BAR, "<main>", accel_group);
+  gtk_object_set_data_full (GTK_OBJECT (dispatcher_window),
+			    "<main>",
+			    item_factory,
+			    (GtkDestroyNotify) gtk_object_unref);
+  //      gtk_accel_group_attach (accel_group, GTK_OBJECT (dispatcher_window));
+  gtk_item_factory_create_items (item_factory, nmenu_items, menu_items, 0);
+  gtk_window_set_title (GTK_WINDOW (dispatcher_window), 
+			VERSION);
+  gtk_container_set_border_width (GTK_CONTAINER (dispatcher_window), 0);
       
-      box1 = gtk_vbox_new (FALSE, 0);
-      gtk_container_add (GTK_CONTAINER (dispatcher_window), box1);
+  box1 = gtk_vbox_new (FALSE, 0);
+  gtk_container_add (GTK_CONTAINER (dispatcher_window), box1);
       
-      gtk_box_pack_start (GTK_BOX (box1),
-			  gtk_item_factory_get_widget (item_factory, "<main>"),
-			  FALSE, FALSE, 0);
-
-
-      
-      buttonbox = gtk_hbox_new(FALSE,0);
-      gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
-      gtk_box_pack_start (GTK_BOX (box1), buttonbox, TRUE, TRUE, 0);
-
-      
-      
-      // Buttons
-      button = gtk_button_new_with_label ("step");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) stepbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-      
-      button = gtk_button_new_with_label ("over");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) overbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-
-      button = gtk_button_new_with_label ("finish");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) finishbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-
-      button = gtk_button_new_with_label ("run");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) runbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-
-      button = gtk_button_new_with_label ("stop");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) stopbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-
-      button = gtk_button_new_with_label ("reset");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) resetbutton_cb, 0);
-      gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
-
-
-      frame = gtk_frame_new("Simulation mode");
-      if(!config_get_variable("dispatcher", "SimulationMode", &SimulationMode))
-      {
-	  SimulationMode='4';
-      }
-      set_simulation_mode(SimulationMode);
-	update_rate_menu = gtk_option_menu_new();
-        gtk_widget_show(update_rate_menu);
-	gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
-
-	menu=gtk_menu_new();
-
-	item=gtk_menu_item_new_with_label("Without gui (fastest simulation)");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"5");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("2000000 cycles/gui update");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"4");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("100000 cycles/gui update");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"3");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("1000 cycles/gui update");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"2");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("Update gui every cycle");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"1");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("100ms animate");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"b");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("300ms animate");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"c");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("700ms animate");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"d");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("Realtime without gui");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"r");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	item=gtk_menu_item_new_with_label("Realtime with gui");
-	gtk_signal_connect(GTK_OBJECT(item),"activate",
-			   (GtkSignalFunc) gui_update_cb,
-			   (gpointer)"R");
-	gtk_widget_show(item);
-	gtk_menu_append(GTK_MENU(menu),item);
-
-	gtk_option_menu_set_menu(GTK_OPTION_MENU(update_rate_menu), menu);
-
-	int gui_update_index=0;
-	switch(SimulationMode) // ugh
-	{
-	case '5':
-            gui_update_index=0;
-            break;
-	case '4':
-            gui_update_index=1;
-            break;
-	case '3':
-            gui_update_index=2;
-            break;
-	case '2':
-            gui_update_index=3;
-            break;
-	case '1':
-            gui_update_index=4;
-            break;
-	case 'b':
-            gui_update_index=5;
-            break;
-	case 'c':
-            gui_update_index=6;
-            break;
-	case 'd':
-            gui_update_index=7;
-	    break;
-	case 'r':
-            gui_update_index=8;
-	    break;
-	case 'R':
-            gui_update_index=9;
-            break;
-	}
-
-	gtk_option_menu_set_history(GTK_OPTION_MENU(update_rate_menu), gui_update_index);
-
-
-      gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
+  gtk_box_pack_start (GTK_BOX (box1),
+		      gtk_item_factory_get_widget (item_factory, "<main>"),
+		      FALSE, FALSE, 0);
 
 
       
-      separator = gtk_hseparator_new ();
-      gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
-      button = gtk_button_new_with_label ("Quit gpsim");
-      gtk_signal_connect(GTK_OBJECT(button), "clicked",
-			 (GtkSignalFunc) do_quit_app, 0);
+  buttonbox = gtk_hbox_new(FALSE,0);
+  gtk_container_set_border_width (GTK_CONTAINER (buttonbox), 1);
+  gtk_box_pack_start (GTK_BOX (box1), buttonbox, TRUE, TRUE, 0);
 
-      gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
-      gtk_widget_show_all (dispatcher_window);
       
-    }
-  else
-    gtk_widget_destroy (dispatcher_window);
-}
-/*
-static GtkWidget *
-build_option_menu (OptionMenuItem items[],
-		   gint           num_items,
-		   gint           history,
-		   gpointer       data)
-{
-  GtkWidget *omenu;
-  GtkWidget *menu;
-  GtkWidget *menu_item;
-  GSList *group;
-  gint i;
+      
+  // Buttons
+  button = gtk_button_new_with_label ("step");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) stepbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+      
+  button = gtk_button_new_with_label ("over");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) overbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
 
-  omenu = gtk_option_menu_new ();
-      
-  menu = gtk_menu_new ();
-  group = 0;
-  
-  for (i = 0; i < num_items; i++)
+  button = gtk_button_new_with_label ("finish");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) finishbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("run");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) runbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("stop");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) stopbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("reset");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) resetbutton_cb, 0);
+  gtk_box_pack_start (GTK_BOX (buttonbox), button, TRUE, TRUE, 0);
+
+
+  //
+  // Simulation Mode Frame
+  //
+
+  frame = gtk_frame_new("Simulation mode");
+  if(!config_get_variable("dispatcher", "SimulationMode", &SimulationMode))
     {
-      menu_item = gtk_radio_menu_item_new_with_label (group, items[i].name);
-      gtk_signal_connect (GTK_OBJECT (menu_item), "activate",
-			  (GtkSignalFunc) items[i].func, data);
-      group = gtk_radio_menu_item_group (GTK_RADIO_MENU_ITEM (menu_item));
-      gtk_menu_append (GTK_MENU (menu), menu_item);
-      if (i == history)
-	gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (menu_item), TRUE);
-      gtk_widget_show (menu_item);
+      SimulationMode='4';
     }
+  //  set_simulation_mode(SimulationMode);
 
-  gtk_option_menu_set_menu (GTK_OPTION_MENU (omenu), menu);
-  gtk_option_menu_set_history (GTK_OPTION_MENU (omenu), history);
-  
-  return omenu;
+  //
+  // Gui Update Rate
+  //
+  cout << "SimulationMode:"<<SimulationMode<<endl;
+
+  update_rate_menu = gtk_combo_box_new_text();
+  gtk_container_add(GTK_CONTAINER(frame),update_rate_menu);
+
+  new UpdateRateMenuItem(update_rate_menu,'5',"Without gui (fastest simulation)",0);
+  new UpdateRateMenuItem(update_rate_menu,'4',"2000000 cycles/gui update",2000000);
+  new UpdateRateMenuItem(update_rate_menu,'3',"100000 cycles/gui update",100000);
+  new UpdateRateMenuItem(update_rate_menu,'2',"1000 cycles/gui update",1000);
+  new UpdateRateMenuItem(update_rate_menu,'1',"Update gui every cycle",1);
+  new UpdateRateMenuItem(update_rate_menu,'b',"100ms animate",-100);
+  new UpdateRateMenuItem(update_rate_menu,'c',"300ms animate",-300);
+  new UpdateRateMenuItem(update_rate_menu,'d',"700ms animate",-700);
+  new UpdateRateMenuItem(update_rate_menu,'r',"Realtime without gui",0,true);
+  new UpdateRateMenuItem(update_rate_menu,'R',"Realtime with gui",0,true,true);
+
+  UpdateRateMenuItem *umi = UpdateRateMenuItemMap[SimulationMode];
+
+  if(!umi)
+    cout << "error selecting update rate menu\n";
+  umi->Select();
+
+  gtk_combo_box_set_active(GTK_COMBO_BOX(update_rate_menu), umi->menu_index);
+
+  gtk_signal_connect(GTK_OBJECT(update_rate_menu),"changed",
+		     (GtkSignalFunc) gui_update_cb,
+		     (gpointer)update_rate_menu);
+
+  gtk_box_pack_start (GTK_BOX (buttonbox), frame, FALSE, FALSE, 5);
+
+  //
+  // Simulation Time Frame
+  //
+
+  frame = gtk_frame_new("Simulation Time");
+  gtk_box_pack_start (GTK_BOX (buttonbox), frame, FALSE, FALSE, 5);
+
+  timeW = new TimeWidget();
+  timeW->Create(frame);
+  timeW->Update();
+
+  //gtk_box_pack_start (GTK_BOX (buttonbox), frame, TRUE, TRUE, 5);
+
+  separator = gtk_hseparator_new ();
+  gtk_box_pack_start (GTK_BOX (box1), separator, FALSE, TRUE, 5);
+  button = gtk_button_new_with_label ("Quit gpsim");
+  gtk_signal_connect(GTK_OBJECT(button), "clicked",
+		     (GtkSignalFunc) do_quit_app, 0);
+
+  gtk_box_pack_start (GTK_BOX (box1), button, FALSE, TRUE, 5);
+  gtk_widget_show_all (dispatcher_window);
+      
+
 }
-*/
 
+//========================================================================
+
+void create_dispatcher ()
+{
+  TheWindow.Create();
+}
 
 #endif // HAVE_GUI

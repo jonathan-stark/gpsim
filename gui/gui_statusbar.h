@@ -37,7 +37,7 @@ class StatusBar_Window;
 // A LabeledEntry is an object consisting of gtk entry
 // widget that is labeled (with a gtk lable widget)
 //
-
+/*
 class LabeledEntry {
 public:
   GtkWidget *label;
@@ -69,6 +69,7 @@ public:
   virtual void Update(void);
 
 };
+*/
 
 //
 // The Status Bar window 
@@ -80,8 +81,9 @@ class StatusBar_Window {
 
   CyclesLabeledEntry *cpu_cycles;
   TimeLabeledEntry *time;
+  list<RegisterLabeledEntry *> entries;
 
-
+  /*
   class RegisterLabeledList : public list<RegisterLabeledEntry*> {
   public:
     void push_back(GtkWidget *hbox, Register *reg) {
@@ -98,7 +100,7 @@ class StatusBar_Window {
     }
   };
   RegisterLabeledList entries;
-  
+  */
 
   StatusBar_Window(void);
   void NewProcessor(GUI_Processor *_gp, MemoryAccess *);

@@ -1,4 +1,21 @@
 2005-06-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui.h, gui/gui_menu.cc, gui/gui_object.cc, gui/gui_object.h,
+	gui/gui_src_asm.cc, gui/gui_statusbar.cc, gui/gui_statusbar.h:
+	-- removed the cycle counter and time view from the status bar of
+	the register and source windows and moved them to the window that
+	contains the buttons.
+	-- fixed text-width bugs in the status window.
+	-- rewrote the implementation of the gui update code.
+	-- Created a 'TimeWidget' class and a 'TimeFormatter' class for
+	displaying the cycle counter object.
+	-- Added a MainWindow class (kind of empty now).
+	-- Re-introduced a few of the GTKWAIT macros.
+
+2005-06-04 Scott Dattalo <scott@dattalo.com>
+	* configure.ac, gpsim/Makefile.am: remove the explicit checks for
+	the pthread library. 
+	
+2005-06-04 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc: Allow filenames whose first character is a
 	number.
 
