@@ -81,6 +81,7 @@ unsigned int interface_id=0;
 Settings *settings;
 
 extern GtkWidget *dispatcher_window;
+extern void dispatch_Update();
 
 //------------------------------------------------------------------------
 // 
@@ -232,6 +233,9 @@ static void *SimulationHasStopped( void *ptr )
       lgp->profile_window->Update();
       lgp->stopwatch_window->Update();
     }
+
+    dispatch_Update();
+
 #if GLIB_MAJOR_VERSION >= 2
     if(gUsingThreads()) 
       g_mutex_unlock(muSimStopMutex);

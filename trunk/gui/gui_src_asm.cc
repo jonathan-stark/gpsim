@@ -1279,7 +1279,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 		       GTK_SIGNAL_FUNC(marker_cb),sbaw);
 
     // display everything, so that gtk_notebook_get_current_page() works
-    //GTKWAIT;
+    GTKWAIT;
 
   // We create pixmaps here, where the gtk_widget_get_style() call will
   // succeed. I tried putting this code in CreateSourceBrowserAsmWindow()
@@ -1784,7 +1784,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
   // Why is this needed? set_page() in SourceBrowserAsm_set_pc()
   // fails with widget_map() -> not visible
-  //GTKWAIT;
+  GTKWAIT;
 
   address=gp->cpu->pma->get_PC();
   if(address==INVALID_VALUE)
@@ -2586,7 +2586,6 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
   if(window && pma) {
 
     SetTitle();
-    Dprintf(("new source browser name: %s\n",buffer));
   }
 
   if(status_bar)

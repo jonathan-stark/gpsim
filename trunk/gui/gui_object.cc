@@ -111,6 +111,10 @@ void GUI_Object::UpdateMenuItem(void)
 
 
 }
+void GUI_Object::Update(void)
+{
+  printf("GUI_Object::Update - shouldn't be called\n");
+}
 
 void GUI_Object::ChangeView (int view_state)
 {
