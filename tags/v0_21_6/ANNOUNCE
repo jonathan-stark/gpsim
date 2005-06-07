@@ -1,0 +1,65 @@
+
+
+                    gpsim
+
+      GNU Pic Simulator, a simulator for 
+      Microchip's PIC microcontrollers.
+
+
+I've just uploaded a new release of gpsim to
+
+http://www.dattalo.com/gnupic/gpsim-0.21.0.tar.gz
+or goto the webpage:
+http://www.dattalo.com/gnupic/gpsim.html
+
+Also, you'll probably want to grab the latest release of gpasm
+http://gputils.sourceforge.net/
+
+New features:
+
+
+04JAN04 gpsim-0.21.1
+  o Added the stopwatch command.
+  o 18f1220 and 18f1320 added by Bradly McLean
+  o EEPROM added to 18F devices by Mike Durian
+
+
+README:
+------
+Please see the README file for all of the details on the new features.
+
+INSTALL:
+-------
+install gpsim the standard way:
+
+tar -xvzf gpsim-0.21.1.tar.gz
+./configure
+cd gpsim-0.20.1/
+make
+su root
+make install
+
+this will expand into a child directory named gpsim-0.21.0 . From there you
+can check the README, README.EXAMPLES, INSTALL, HISTORY, PROCESSORS and TODO
+files for more information. The rest of the steps will build gpsim and place
+the executable into /usr/local/bin . If you don't have root privileges then
+you can copy the executable at gpsim-0.20.0/gpsim/gpsim to a directory in the
+execution path .
+
+Also, don't forget to install eXdbm and gtk+extra. Please see the gpsim
+web page for links to them.
+
+Special Thanks (still) goes out to Ralf Forsberg for his major contributions
+to the gui interface. Additional thanks goes to Joerg Wunsch in his support
+for the BSD port. James Cameron deserves an honorable mention for telling me
+about the strace command and about dlopen().
+
+
+If you have any questions, you can reach me:
+mailto:scott@dattalo.com
+or subscribe to the gnupic mailing list: gnupic-subscribe@linuxhacker.org 
+and send a post there.
+
+Have fun!
+
+Scott

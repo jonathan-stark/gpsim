@@ -1,0 +1,22 @@
+
+
+
+TODO - In no particular order:
+
+  o 23may01 - Provide option to disable the nop portion of two-word 18cxxx instructions in assembly dumps.
+  o Capacitive stimuli
+  o Parallel stimuli
+  o High frequency stimuli (currently, the cpu frequency is the maximum stimulation frequency)
+  o Support different clock types like variable frequency oscillators.
+  o Gui support
+    - Add an 'architecture' command for querying a pic's architecture
+    - Make the displayed data more consistant (e.g. all hex numbers prefaced with 0x)
+    - Provide a means for obtaining the current simulation state, saving the current simulation state, and finding the difference between two simulation states.
+  o Breakpoint ranges. E.g. break if pc is within a range of addresses.
+  o Boolean Breakpoints
+    - This allows multiple conditions to initiate a break. For example, you might want to set a break point such that if register 0x20 is cleared while the program counter is between 0x04 and 0x100.
+  o Enhance internal gpsim diagnostics/debugging. Right now there are numerous print statements embedded within gpsim that provide useful diagnostic information on gpsim's internals. These usually get commented out just before each release. So what I'd like to do is:
+    - Documentation. What can I say?
+    - Memory management. gpsim is very cavalier with memory. In a few instances, I check for insufficient memory, however I need to be more thorough. Fortunately, gpsim very seldom deletes instantiated objects. So I suspect there are no leaks...
+
+  o Support more symbolic types like bit fields and floating point.
