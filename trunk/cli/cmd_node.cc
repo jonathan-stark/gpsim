@@ -75,7 +75,7 @@ void cmd_node::add_nodes(list <string> * nodes)
 	 si != nodes->end(); 
 	 ++si) {
 
-      string s = *si;
+      string &s = *si;
       add_node((char *)s.c_str());
     }
 
