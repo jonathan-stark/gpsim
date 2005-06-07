@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="7.10"
-	Name="Install"
+	Name="GpsimDevInstall"
 	ProjectGUID="{9D6358AA-3A6D-4835-8F34-7950A2A6C351}"
 	RootNamespace="Install"
 	Keyword="CustomAppWizProj">
