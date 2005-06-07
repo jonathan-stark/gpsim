@@ -125,6 +125,32 @@ static bool bAltPaths = false;
 void AddModulePathFromFilePath(string &sFolder) {
   string sFile;
   asDllSearchPath.AddPathFromFilePath(sFolder, sFile);
+  char * pszGpsimModulePath;
+  if((pszGpsimModulePath = getenv("GPSIMPATH")) != NULL) {
+    char * pLast = pszGpsimModulePath;
+    char * pChar = strchr(pszGpsimModulePath, PATHDELIMITER[0]);
+    string sFolder;
+    while(true) {
+      if(pChar != NULL) {
+        *pChar = '\0';
+      }
+      if(*pLast != '\0') {
+        // only add non empty folders
+        sFolder = pLast;
+        translatePath(sFolder);
+        if(sFolder[sFolder.size() - 1] != FOLDERDELIMITER) {
+          sFolder.push_back(FOLDERDELIMITER);
+        }
+        asDllSearchPath.push_back(sFolder);
+      }
+      if(pChar == NULL) {
+        break;
+      }
+      pChar++;
+      pLast = pChar;
+      pChar = strchr(pChar, PATHDELIMITER[0]);
+    }
+  }
 #if defined(_DEBUG)
   if(!bAltPaths) {
     bAltPaths = true;
@@ -237,10 +263,16 @@ void * load_library(const char *library_name, char **pszError)
     return handle;
 
   *pszError = get_error_message();
-  if (*pszError) 
-    printf("Failed with %s\nNow trying to find %s in the directory paths\n",
-           *pszError,sPath.c_str());
   unsigned long uError = get_error();
+#ifdef _WIN32
+  if(uError != OS_E_FILENOTFOUND) {
+#else
+  if(true) {
+#endif
+    if (*pszError) 
+      printf("Failed loading %s: %s\nNow trying to find %s in the directory paths\n",
+            sPath.c_str(), *pszError,sPath.c_str());
+  }
 #ifdef _WIN32
   if(uError == OS_E_FILENOTFOUND) {
 #else
