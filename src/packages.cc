@@ -52,9 +52,9 @@ void Package::create_pkg(unsigned int _number_of_pins)
 
   number_of_pins = _number_of_pins;
 
-  pins = (IOPIN **) new char[sizeof( IOPIN *) * number_of_pins];
+  pins = new IOPIN *[number_of_pins];
 
-  pin_position = (float *) new float[number_of_pins];
+  pin_position =  new float[number_of_pins];
 
   for(unsigned int i=0; i<number_of_pins; i++)
   {
