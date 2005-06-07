@@ -1,3 +1,17 @@
+2005-06-06 J.R. Heisey <jrheisey@sourceforge.com>
+	*src/os_dependent.cc: The environment variable GPSIMPATH may be
+	used to specify folders where shared libraries may be found. This
+	is primarily for windows developers of gpsim.
+	- Small change to prevent load_library() from displaying an error
+	message that is not needed.
+
+	*cli/cmd_node.cc: Use a reference instead of allocating a string
+	on the local stack.
+
+	*modules/modules.vcproj: Changed Visual Studio build of modules
+	to libgpsim_modules.dll
+
+
 2005-06-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui.h, gui/gui_menu.cc, gui/gui_object.cc, gui/gui_object.h,
 	gui/gui_src_asm.cc, gui/gui_statusbar.cc, gui/gui_statusbar.h:
