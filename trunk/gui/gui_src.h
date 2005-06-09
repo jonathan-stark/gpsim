@@ -181,6 +181,13 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GtkStyle *comment_text_style;      // for comments in .asm display
   GtkStyle *default_text_style;      // the rest
     
+  GdkFont  *symbol_font;             // for symbols in .asm display
+  GdkFont  *label_font;              // for label in .asm display
+  GdkFont  *instruction_font;        // for instruction in .asm display
+  GdkFont  *number_font;             // for numbers in .asm display
+  GdkFont  *comment_font;            // for comments in .asm display
+  GdkFont  *default_font;            // the rest
+
   GdkPixmap *pixmap_pc;
   GdkPixmap *pixmap_break;
   GdkPixmap *pixmap_canbreak;
@@ -205,7 +212,21 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void NewSource(GUI_Processor *gp);
   virtual void Update(void);
   virtual void UpdateLine(int address);
-  virtual void SetText(int id, int file_id);
+  virtual void SetText(int id, int file_id, FileContext *fc);
+  void ParseSourceToFormattedText(
+    int id,
+    int &totallinesheight,
+    bool &instruction_done,
+    char *text_buffer,
+    int &cblock,
+    int &index,
+    int &line,
+    GList *iter,
+    FileContext::Cache &FileCache,
+    Processor *cpu,
+    GtkWidget *pSourceWindow,
+    FileContext *fc,
+    int file_id  );
 
   BreakPointInfo *getBPatLine(int id, unsigned int line);
   BreakPointInfo *getBPatPixel(int id, int pixel);

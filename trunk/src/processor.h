@@ -37,6 +37,7 @@ Boston, MA 02111-1307, USA.  */
 class Processor;
 class ProcessorConstructor;
 class ProgramFileType;
+class FileContext;
 
 
 //---------------------------------------------------------
@@ -124,7 +125,7 @@ class ProgramMemoryAccess :  public MemoryAccess
   // Given a file and a line in that file, find the instrucion in the
   // processor's memory that's closest to it.
   virtual int  find_closest_address_to_line(int file_id, int src_line);
-  virtual int  find_address_from_line(int file_id, int src_line);
+  virtual int  find_address_from_line(FileContext *fc, int src_line);
   //virtual int  find_closest_address_to_hll_line(int file_id, int src_line);
 
   // Given an address to an instruction, find the source line that 
@@ -233,7 +234,10 @@ class FileContext
   vector<int> *pm_address;
   unsigned int _max_line;
 
+
  public:
+  typedef vector<gpsimObject*> Cache;
+  Cache m_cache;
 
   FileContext(string &new_name);
   FileContext(char *new_name);
