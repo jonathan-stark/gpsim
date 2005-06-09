@@ -125,6 +125,7 @@ static struct {
     GList *combo_strings;        // list of strings for combo
     char *string;                // current string, extracted from entry
 } searchdlg = {0,0,-1,0,0,0,0,0,0,0};
+static bool bSearchdlgInitialized = true;
 
 
 static int dlg_x=200, dlg_y=200;
@@ -313,11 +314,64 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatIndex(int id, unsigned int index
   return e;
 }
 
+class CFormattedTextFragment : public gpsimObject {
+public:
+  CFormattedTextFragment(const char *pFragment, int length,
+    GtkStyle *pStyle, GdkFont *font);
+
+  GdkFont *   m_font;
+  GtkStyle *  m_text_style;
+  static int  s_lineascent;
+  static int  s_linedescent;
+  int         m_length;
+  string &    m_Fragment;
+  int         s_TotalLength;
+
+  void SetText(GtkText *source_text);
+  int  GetLength();
+
+};
+
+int  CFormattedTextFragment::s_lineascent =-1;
+int  CFormattedTextFragment::s_linedescent = -1;
+
+
+CFormattedTextFragment::CFormattedTextFragment(
+  const char *pFragment, int length,
+  GtkStyle *pStyle, GdkFont *font)
+  : m_Fragment(name_str) {
+  s_TotalLength = 0;
+  m_text_style  = pStyle;
+  m_font = font;
+  // Capture the largest line ascent and descent for
+  // use in BreakPointInfo.
+  if (s_lineascent < m_font->ascent)
+    s_lineascent = m_font->ascent;
+  if (s_linedescent < m_font->descent)
+    s_linedescent = m_font->descent;
+  if(length>0)
+    m_Fragment.assign(pFragment, length);
+  else
+    m_Fragment.assign(pFragment);
+  m_length      = length;
+}
+
+void CFormattedTextFragment::SetText(
+			GtkText *source_text)
+{
+  gtk_text_insert(source_text,
+		  m_font,
+		  &m_text_style->fg[GTK_STATE_NORMAL],
+		  &m_text_style->base[GTK_STATE_NORMAL],
+      m_Fragment.c_str(),
+		  m_length);
+}
+
 void SourceBrowserAsm_Window::SetPC(int address)
 { 
   BreakPointInfo *e; 
   int row; 
-  float inc; 
+  gdouble inc; 
   unsigned int i;
   unsigned int sbawFileId;
 
@@ -390,8 +444,8 @@ void SourceBrowserAsm_Window::SetPC(int address)
 
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
-  if( e->pos< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+  if( (unsigned int)e->pos< GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
+      (unsigned int)e->pos> GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
 
     GtkAdjustment *adj = GTK_ADJUSTMENT( GTK_TEXT(pages[id].source_text)->vadj);
 
@@ -416,7 +470,7 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 {
   BreakPointInfo *e;
   int id=-1, i;
-  float inc;
+  gdouble inc;
   unsigned int line;
     
   if(!source_loaded)
@@ -448,8 +502,8 @@ void SourceBrowserAsm_Window::SelectAddress(int address)
 
   inc = GTK_ADJUSTMENT(GTK_TEXT(pages[id].source_text)->vadj)->page_increment;
 
-  if( e->pos <= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
-      e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
+  if( (unsigned int)e->pos <= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel ||
+      (unsigned int)e->pos >= GTK_TEXT(pages[id].source_text)->first_onscreen_ver_pixel+inc ) {
     gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( pages[id].source_text)->vadj),
 			     e->pos-inc/2);
   }
@@ -850,7 +904,7 @@ static gint sigh_button_event(GtkWidget *widget,
 
     id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
 
-    vadj_value=GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+    vadj_value=(int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==3)
@@ -1100,9 +1154,9 @@ static gint marker_cb(GtkWidget *w1,
           timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
           }
         if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
-          drag_scroll_speed = (((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
+          drag_scroll_speed = (float)(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
         else
-          drag_scroll_speed = -(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
+          drag_scroll_speed = (float)-(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
         }
       else if(timeout_tag!=-1)
         {
@@ -1328,66 +1382,79 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
 
 // Return true of there are instructions corresponding to the source line
 int source_line_represents_code(Processor *cpu,
-				unsigned int file_id,
+				FileContext *fc,
 				unsigned int line)
 {
     int address;
-    address = cpu->pma->find_address_from_line(file_id,line);
+    address = cpu->pma->find_address_from_line(fc,line);
 
     return address>=0;
 }
 
-static GdkFont *_gtk_style_get_font(GtkStyle *style)
+#if GTK_MAJOR_VERSION < 2
+static GdkFont *gtk_style_get_font(GtkStyle *style)
 {
-#if GTK_MAJOR_VERSION >= 2
-  return gtk_style_get_font(style);
-#else
   return style->font;
+}
 #endif
+
+static int s_TotalTextLength = 0;
+static CFormattedTextFragment * s_pLast = NULL;
+
+static void InitCache(FileContext::Cache &FileCache) {
+  s_TotalTextLength = 0;
+  s_pLast = NULL;
 }
 
-static void text_insert(SourceBrowserAsm_Window *sbaw,
-			int id,
-			GtkStyle *style, 
-			char *text, 
-			int length)
-{
+static void AddCache(FileContext::Cache &FileCache, const char *pFragment, int length,
+                     GtkStyle *pStyle, GdkFont *font) {
+  if(s_pLast != NULL && s_pLast->m_text_style == pStyle) {
+    if(length == -1) {
+      s_pLast->m_length = -1;
+      s_pLast->m_Fragment.append(pFragment);
+    }
+    else {
+      s_pLast->m_length += length;
+      s_pLast->m_Fragment.append(pFragment, length);
+    }
+  }
+  else {
+    s_pLast = new CFormattedTextFragment(pFragment, length, pStyle,
+      font);
+    FileCache.push_back(s_pLast);
+  }
+  if(length == -1) {
+    s_TotalTextLength += strlen(pFragment);
+  }
+  else {
+    s_TotalTextLength += length;
+  }
 
-  GdkFont *font = _gtk_style_get_font(style);
-
-  gtk_text_insert(GTK_TEXT(sbaw->pages[id].source_text),
-		  font,
-		  &style->fg[GTK_STATE_NORMAL],
-		  &style->base[GTK_STATE_NORMAL],
-		  text,
-		  length);
 }
 
 /*
  Fills sbaw->pages[id].source_text with text from
  file pointer sbaw->sbw.gui_obj.gp->p->files[file_id].file_ptr
  */
-void SourceBrowserAsm_Window::SetText(int id, int file_id)
+void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
 {
   int totallinesheight;
   bool instruction_done;
-  int lineascent, linedescent;
-  char *p;
   char text_buffer[256];
   int cblock=0;
 
   int index;
 
   int line=0;
-  BreakPointInfo *entry;
   GList *iter;
+  FileContext::Cache &FileCache = fc->m_cache;
 
   // get a manageable pointer to the processor
   Processor *cpu = gp->cpu;
-    
-  gtk_text_freeze(GTK_TEXT(pages[id].source_text));
+  GtkWidget *pSourceWindow = pages[id].source_text;
+  gtk_text_freeze(GTK_TEXT(pSourceWindow));
 
-  gtk_editable_delete_text(GTK_EDITABLE(pages[id].source_text),0,-1);
+  gtk_editable_delete_text(GTK_EDITABLE(pSourceWindow),0,-1);
   for(iter=sa_xlate_list[id];iter!=0;)
     {
       GList *next=iter->next;
@@ -1407,17 +1474,65 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
   totallinesheight=0;
 
-  cpu->files.rewind(file_id);
+  if(FileCache.size() == 0) {
+    InitCache(FileCache);
+    ParseSourceToFormattedText(
+      id,
+      totallinesheight,
+      instruction_done,
+      text_buffer,
+      cblock,
+      index,
+      line,
+      iter,
+      FileCache,
+      cpu,
+      pSourceWindow,
+      fc,
+      file_id  );
+  }
+  FileContext::Cache::iterator it;
+  FileContext::Cache::iterator itEnd = FileCache.end();
+  for(it = FileCache.begin(); it != itEnd; it++) {
+    CFormattedTextFragment* pFragment = (CFormattedTextFragment*)*it;
+    pFragment->SetText(GTK_TEXT(pSourceWindow));
+  }
 
-  while(cpu->files.gets(file_id, text_buffer, 256))
+  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
+		      2*PIXMAP_SIZE,
+		      totallinesheight+5*PIXMAP_SIZE);
+  gtk_text_thaw(GTK_TEXT(pSourceWindow));
+
+}
+
+void SourceBrowserAsm_Window::ParseSourceToFormattedText(
+  int id,
+  int &totallinesheight,
+  bool &instruction_done,
+  char *text_buffer,
+  int &cblock,
+  int &index,
+  int &line,
+  GList *iter,
+  FileContext::Cache &FileCache,
+  Processor *cpu,
+  GtkWidget *pSourceWindow,
+  FileContext *fc,
+  int file_id  ) {
+
+  BreakPointInfo *entry;
+  char *p;
+
+  fc->rewind();
+
+  while(fc->gets(text_buffer, 256))
   {
     char *end, *q;
 
-    lineascent=-1;
-    linedescent=-1;
     instruction_done=false; // to seperate instruction from other text (symbols)
 
-    index=gtk_text_get_length(GTK_TEXT(pages[id].source_text));
+    // index=gtk_text_get_length(GTK_TEXT(pSourceWindow));
+    index = s_TotalTextLength;
 
     p=text_buffer;
 
@@ -1426,36 +1541,27 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
       if(*p=='#' || !strncmp(p,"include",7))
       { // not a label
         q=p;
-	q++;
-	while(isalnum(*q) || *q=='_')
-	  q++;
+        q++;
+        while(isalnum(*q) || *q=='_')
+          q++;
 
-	text_insert(this,id,default_text_style, p, q-p);
-
-
-	p=q;
-	instruction_done=true; // well, variable misnamed
+        AddCache(FileCache, p, q-p,default_text_style,
+          default_font);
+        p=q;
+        instruction_done=true; // well, variable misnamed
       }
       else if( (isalnum(*p) || *p=='_'))
-	{ // a label
-	  // locate end of label
-	  q=p;
-	  while(isalnum(*q) || *q=='_')
-	    q++;
+      { // a label
+        // locate end of label
+        q=p;
+        while(isalnum(*q) || *q=='_')
+          q++;
 
-	  GdkFont *font = _gtk_style_get_font(label_text_style);
-
-	  if (lineascent < font->ascent)
-	    lineascent = font->ascent;
-	  if (linedescent < font->descent)
-	    linedescent = font->descent;
-
-	  text_insert(this,id,label_text_style, text_buffer, q-p);
-
-
-	  // advance the pointer p
-	  p=q;
-	}
+        AddCache(FileCache, text_buffer, q-p,
+          label_text_style, label_font);
+        // advance the pointer p
+        p=q;
+      }
     }
 
     // 'end' is end of line
@@ -1463,165 +1569,84 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
 
     // loop through the rest of the line
     while( p < end )
+    {
+      if(!source_line_represents_code(cpu,fc,line+1)) {
+        AddCache(FileCache, p, -1,comment_text_style,
+          instruction_font);
+        break;
+      }
+      if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
       {
-
-	if(!source_line_represents_code(cpu,file_id,line+1)) {
-	  {
-	    GdkFont *font = _gtk_style_get_font(instruction_text_style);
-	    if (lineascent < font->ascent)
-	      lineascent = font->ascent;
-	    if (linedescent < font->descent)
-	      linedescent = font->descent;
-	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-			    font,
-			      &comment_text_style->fg[GTK_STATE_NORMAL],
-			      &comment_text_style->base[GTK_STATE_NORMAL],
-			    //&comment_text_style->base[GTK_STATE_NORMAL],
-			    //&instruction_text_style->base[GTK_STATE_NORMAL],
-			    p,
-			    -1);
-	    break;
-	  }
-
-	}
-	if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
-	  {
-	    //if(source_line_represents_code(cpu,file_id,line+1))
+        //if(source_line_represents_code(cpu,file_id,line+1))
 	      {
-
-		GdkFont *font = _gtk_style_get_font(default_text_style);
-		if (lineascent < font->ascent)
-		  lineascent = font->ascent;
-		if (linedescent < font->descent)
-		  linedescent = font->descent;
-		gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				font,
-				&default_text_style->fg[GTK_STATE_NORMAL],
-				&default_text_style->base[GTK_STATE_NORMAL],
-				p,
-				-1);
-	      }
+        AddCache(FileCache, p, -1,
+          default_text_style, default_font);
+        }
 	      //else
-	    break;
+        break;
 
-	  } else {
-	    // Asm mode.
+      } else {
+        // Asm mode.
 
-	    if( *p == ';')  { // comment
-
-	      GdkFont *font = _gtk_style_get_font(comment_text_style);
-	      if (lineascent < font->ascent)
-		lineascent = font->ascent;
-	      if (linedescent < font->descent)
-		linedescent = font->descent;
-	      gtk_text_insert(GTK_TEXT(pages[id].source_text),
-			      font,
-			      &comment_text_style->fg[GTK_STATE_NORMAL],
-			      &comment_text_style->base[GTK_STATE_NORMAL],
-			      p,
-			      -1);
-
-	      break;
-	    }
-	    else if(isalpha(*p) || *p=='_')
-	      { // instruction, symbol or cblock
-		q=p;
-		while(isalnum(*q) || *q=='_')
-		  q++;
-		if( ( !instruction_done && cblock==0) || !strncasecmp(p,"endc",4) )
-		  {  // instruction or cblock
-		    instruction_done=true;
-		    cblock=0;
-
-		    GdkFont *font = _gtk_style_get_font(instruction_text_style);
-		    if (lineascent < font->ascent)
-		      lineascent = font->ascent;
-		    if (linedescent < font->descent)
-		      linedescent = font->descent;
-
-		    if(!strncasecmp(p,"cblock",6))
-		      cblock=1;
-
-
-		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				    font,
-				    &instruction_text_style->fg[GTK_STATE_NORMAL],
-				    &instruction_text_style->base[GTK_STATE_NORMAL],
-				    p,
-				    q-p);
-
-		  }
-		else
-		  { // symbol
-
-		    GdkFont *font = _gtk_style_get_font(symbol_text_style);
-		    if (lineascent < font->ascent)
-		      lineascent = font->ascent;
-		    if (linedescent < font->descent)
-		      linedescent = font->descent;
-		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				    font,
-				    &symbol_text_style->fg[GTK_STATE_NORMAL],
-				    &symbol_text_style->base[GTK_STATE_NORMAL],
-				    p,
-				    q-p);
-		  }
-		p=q;
+        if( *p == ';')  { // comment
+          comment_font      = gtk_style_get_font(comment_text_style);
+          AddCache(FileCache, p, -1,
+            comment_text_style, comment_font);
+          break;
 	      }
-	    else if( isxdigit(*p))
-	      { // number
-		q=p;
-		if(*p=='0' && toupper(*(p+1))=='X')
-		  q+=2;
-		while(isxdigit(*q))
-		  q++;
+        else if(isalpha(*p) || *p=='_')
+        { // instruction, symbol or cblock
+          q=p;
+          while(isalnum(*q) || *q=='_')
+            q++;
+          if( ( !instruction_done && cblock==0) || !strncasecmp(p,"endc",4) )
+          {  // instruction or cblock
+            instruction_done=true;
+            cblock=0;
 
-		GdkFont *font = _gtk_style_get_font(number_text_style);
-		if (lineascent < font->ascent)
-		  lineascent = font->ascent;
-		if (linedescent < font->descent)
-		  linedescent = font->descent;
-		gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				font,
-				&number_text_style->fg[GTK_STATE_NORMAL],
-				&number_text_style->base[GTK_STATE_NORMAL],
-				p,
-				q-p);
-		p=q;
+            if(!strncasecmp(p,"cblock",6))
+              cblock=1;
+
+            AddCache(FileCache, p, q-p,
+              instruction_text_style, instruction_font);
+          }
+          else
+          { // symbol
+            AddCache(FileCache, p, q-p,
+              symbol_text_style, symbol_font);
+          }
+          p=q;
+        }
+        else if( isxdigit(*p))
+        { // number
+          q=p;
+          if(*p=='0' && toupper(*(p+1))=='X')
+            q+=2;
+          while(isxdigit(*q))
+            q++;
+
+          AddCache(FileCache, p, q-p,
+            number_text_style, number_font);
+          p=q;
 	      }
-	    else
+        else
 	      { // default
-		// FIXME, add a 'whitespace_text_style'
-		// There is a small annoyance here. If the source
-		// initially on a line have whitespace, followed by
-		// a comment. Now if the comment have a smaller font
-		// than the default font then the line will have line
-		// spacing larger than nessesary.
+          // FIXME, add a 'whitespace_text_style'
+          // There is a small annoyance here. If the source
+          // initially on a line have whitespace, followed by
+          // a comment. Now if the comment have a smaller font
+          // than the default font then the line will have line
+          // spacing larger than nessesary.
 
-		GdkFont *font = _gtk_style_get_font(default_text_style);
-		if (lineascent < font->ascent)
-		  lineascent = font->ascent;
-		if (linedescent < font->descent)
-		  linedescent = font->descent;
-		gtk_text_insert(GTK_TEXT(pages[id].source_text),
-				font,
-				&default_text_style->fg[GTK_STATE_NORMAL],
-				&default_text_style->base[GTK_STATE_NORMAL],
-				p,
-				1);
-		p++;
-	      }
-	  }
-      } //end of while( p < end )
+          AddCache(FileCache, p, 1,
+            default_text_style, default_font);
+          p++;
+        }
+      }
+    } //end of while( p < end )
 
-
-    GdkFont *font = _gtk_style_get_font(default_text_style);
-    if (lineascent == -1)
-      lineascent = font->ascent;
-    if (linedescent == -1)
-      linedescent = font->descent;
-
-    totallinesheight+=linedescent+lineascent;
+    totallinesheight += CFormattedTextFragment::s_linedescent + 
+      CFormattedTextFragment::s_lineascent;
 
     // create an entry in sa_xlate_list for this source line.
     // 'this source line' is the one in 'buf' with line number
@@ -1631,23 +1656,17 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id)
     entry->line=line;
     entry->break_widget = 0;
     entry->canbreak_widget = 0;
-    entry->pos = totallinesheight - (lineascent-linedescent) - PIXMAP_SIZE/2 + PAGE_BORDER;
+    entry->pos = totallinesheight -
+      (CFormattedTextFragment::s_lineascent - 
+       CFormattedTextFragment::s_linedescent) - 
+      PIXMAP_SIZE/2 + PAGE_BORDER;
     sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
     line++;
   }
 
   // this made the end case of the search simpler once
-  gtk_text_insert(GTK_TEXT(pages[id].source_text),
-		  _gtk_style_get_font(default_text_style),
-		  &default_text_style->fg[GTK_STATE_NORMAL],
-		  &default_text_style->base[GTK_STATE_NORMAL],
-		  " ",
-		  1);
-  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
-		      2*PIXMAP_SIZE,
-		      totallinesheight+5*PIXMAP_SIZE);
-  gtk_text_thaw(GTK_TEXT(pages[id].source_text));
-
+  AddCache(FileCache, " ", 1,
+    default_text_style, default_font);
 }
 
 void SourcePage::Close(void)
@@ -1743,16 +1762,17 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
     for(i=0;i<gp->cpu->files.nsrc_files();i++) {
       FileContext *fc = gp->cpu->files[i];
       file_name = fc->name().c_str();
+      int iNameLength = strlen(file_name);
 
-      if(strcmp(file_name+strlen(file_name)-4,".lst")
-        &&strcmp(file_name+strlen(file_name)-4,".LST")
-        &&strcmp(file_name+strlen(file_name)-4,".cod")
-        &&strcmp(file_name+strlen(file_name)-4,".COD"))
+      if(strcmp(file_name+iNameLength-4,".lst")
+        &&strcmp(file_name+iNameLength-4,".LST")
+        &&strcmp(file_name+iNameLength-4,".cod")
+        &&strcmp(file_name+iNameLength-4,".COD"))
       {
-        if(!strcmp(file_name+strlen(file_name)-2,".c")
-          ||!strcmp(file_name+strlen(file_name)-2,".C")
-          ||!strcmp(file_name+strlen(file_name)-4,".jal")
-          ||!strcmp(file_name+strlen(file_name)-4,".JAL")
+        if(!strcmp(file_name+iNameLength-2,".c")
+          ||!strcmp(file_name+iNameLength-2,".C")
+          ||!strcmp(file_name+iNameLength-4,".jal")
+          ||!strcmp(file_name+iNameLength-4,".JAL")
           )
         {
           // These are HLL sources
@@ -1768,8 +1788,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
         id = add_page(this,file_id);
 
-        SetText(id,file_id);
-
+        SetText(id,file_id, fc);
        } else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
@@ -2317,7 +2336,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
 	      searchdlg.lastfound=start_i;
 
 	      pixel = sbaw->getBPatPixel(id,start_i)->pos + 12;
-	      inc = GTK_ADJUSTMENT(GTK_TEXT(sbaw->pages[id].source_text)->vadj)->page_increment;
+	      inc = (float)GTK_ADJUSTMENT(GTK_TEXT(sbaw->pages[id].source_text)->vadj)->page_increment;
 	      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->pages[id].source_text)->vadj),
 				       pixel-inc/2);
 	      //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
@@ -2381,7 +2400,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
   // We ask user it he want to search from other end of file
   if(direction==1)
     {
-      if(gui_question("End of file\ncontinue from start?","Yes","No")==TRUE)
+      if(gui_question("End of file\ncontinue from start?","Yes","No")==(int)TRUE)
 	{
 	  searchdlg.i=0;
 	  searchdlg.looped=1;
@@ -2393,7 +2412,7 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
     }
   else
     {
-      if(gui_question("Top of file\ncontinue from end?","Yes", "No")==TRUE)
+      if(gui_question("Top of file\ncontinue from end?","Yes", "No")==(int)TRUE)
 	{
 	  searchdlg.i=tlen-1;
 	  searchdlg.looped=1;
@@ -2528,7 +2547,6 @@ void SourceBrowserAsm_Window::Build(void)
   set_style_colors("blue", "white", &number_text_style);
   set_style_colors("dim gray", "white", &comment_text_style);
 
-
   //#if GTK_MAJOR_VERSION >= 2
   //#define DEFAULT_COMMENTFONT "Courier Bold Oblique 12"
   //#define DEFAULT_SOURCEFONT "Courier Bold 12"
@@ -2550,20 +2568,29 @@ void SourceBrowserAsm_Window::Build(void)
   while(!load_fonts(this)) {
 
     if(gui_question("Some fonts did not load.","Open font dialog","Try defaults")==FALSE)
-      {
-	strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
-	strcpy(commentfont_string,DEFAULT_COMMENTFONT);
-	config_set_string(name(),"sourcefont",sourcefont_string);
-	config_set_string(name(),"commentfont",commentfont_string);
-      }
+    {
+      strcpy(sourcefont_string,DEFAULT_SOURCEFONT);
+      strcpy(commentfont_string,DEFAULT_COMMENTFONT);
+      config_set_string(name(),"sourcefont",sourcefont_string);
+      config_set_string(name(),"commentfont",commentfont_string);
+    }
     else
-      {
-	settings_dialog(this);
-      }
+    {
+      settings_dialog(this);
+    }
   }
 
+  symbol_font       = gtk_style_get_font(symbol_text_style);
+  label_font        = gtk_style_get_font(label_text_style);
+  instruction_font  = gtk_style_get_font(instruction_text_style);
+  number_font       = gtk_style_get_font(number_text_style);
+  comment_font      = gtk_style_get_font(comment_text_style);
+  default_font      = gtk_style_get_font(default_text_style);
 
-  BuildSearchDlg(this);
+  if(!bSearchdlgInitialized) {
+    BuildSearchDlg(this);
+    bSearchdlgInitialized = true;
+  }
 
   gtk_signal_connect_after(GTK_OBJECT(window), "configure_event",
 			   GTK_SIGNAL_FUNC(gui_object_configure_event),this);

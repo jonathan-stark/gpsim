@@ -867,13 +867,11 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
 
 }
 //-------------------------------------------------------------------
-int ProgramMemoryAccess::find_address_from_line(int file_id, int src_line)
+int ProgramMemoryAccess::find_address_from_line(FileContext *fc, int src_line)
 {
   if(!cpu)
     return -1;
 
-  FileContext *fc = cpu->files[file_id];
-  
   if(fc)
     return fc->get_address(src_line);
   return -1;

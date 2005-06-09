@@ -145,7 +145,7 @@ EXPORTS
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
-    ?find_address_from_line@ProgramMemoryAccess@@UAEHHH@Z
+    ?find_address_from_line@ProgramMemoryAccess@@UAEHPAVFileContext@@H@Z
     ?find_closest_address_to_line@ProgramMemoryAccess@@UAEHHH@Z
     ?find_free@TriggerObject@@UAEHXZ
     ?find_instruction@ProgramMemoryAccess@@UAEPAVinstruction@@IW4INSTRUCTION_TYPES@2@@Z
