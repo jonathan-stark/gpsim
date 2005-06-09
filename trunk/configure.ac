@@ -107,6 +107,9 @@ else
     X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
     Y_LDFLAGS=`$PKGCONFIG --libs gtkextra-2.0`
     Y_CFLAGS=`$PKGCONFIG --cflags gtkextra-2.0`
+    GTK_VERSION_T=`$PKGCONFIG --modversion gtk+-2.0`
+    echo linking with gtk-$GTK_VERSION_T
+    AC_DEFINE_UNQUOTED([GTK_VERSION],"$GTK_VERSION_T",[gtk version])
   fi
 
 fi
@@ -156,7 +159,8 @@ AC_CHECK_FUNCS([floor gethostbyname gethostname gettimeofday memset pow select s
 
 # printf modifier define for long long as "ll"
 # config_win32.h.in defines this for Visual Studio stdclib as "I64"
-AC_DEFINE([PRINTF_INT64_MODIFIER],["ll"],[printf modifier define for long long])
+AC_DEFINE([PRINTF_INT64_MODIFIER],["ll--"],[printf modifier define for long long])
+
 
 AM_CFLAGS=
 AM_CXXFLAGS=
