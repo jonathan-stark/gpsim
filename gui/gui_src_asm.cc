@@ -1796,7 +1796,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   for(address=0;address<gp->cpu->program_memory_size();address++)
     UpdateLine(address);
 
-  //  GTKWAIT;
+  GTKWAIT;
 
   Dprintf((" Source is loaded\n"));
 }

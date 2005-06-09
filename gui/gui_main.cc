@@ -219,9 +219,8 @@ static void *SimulationHasStopped( void *ptr )
     }
 #endif
     if(lgp) {
-      //GTKWAIT;
-      while(g_main_iteration(FALSE))
-	;
+      GTKWAIT;
+
       lgp->regwin_ram->Update();
       lgp->regwin_eeprom->Update();
       lgp->program_memory->Update();

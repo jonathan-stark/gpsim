@@ -1274,7 +1274,8 @@ void SourceBrowserOpcode_Window::NewProcessor(GUI_Processor *_gp)
   range.coli=GTK_SHEET(sheet)->maxcol;
   gtk_sheet_range_set_background(GTK_SHEET(sheet), &range, &normal_pm_bg_color);
 #if GTK_MAJOR_VERSION >= 2
-  gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font_desc);
+  // --tsd - commented this out when the new gtkextra package was released.
+  //gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font_desc);
 #else
   gtk_sheet_range_set_font(GTK_SHEET(sheet), &range, normal_style->font);
 #endif

@@ -123,7 +123,7 @@ key_press(GtkWidget *widget,
 	  GdkEventKey *key, 
 	  gpointer data)
 {
-    int low_level_step=0;
+  int low_level_step=0;
 
   SourceBrowser_Window *sbw = (SourceBrowser_Window *) data;
 

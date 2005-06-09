@@ -600,6 +600,8 @@ file_selection_cancel (GtkWidget        *w,
 static void
 modepopup_activated(GtkWidget *widget, gpointer data)
 {
+  Dprintf((" modepopup_activated\n"));
+
     char *modestring;
 
     modestring=(char*)data;
@@ -721,6 +723,8 @@ popup_activated(GtkWidget *widget, gpointer data)
   int value, mask;
   const char *filename;
   int mode;
+
+  Dprintf((" popup_activated\n"));
 
   if(widget==0 || data==0)
     {
@@ -966,6 +970,8 @@ static unsigned long get_number_in_string(const char *number_string)
 static void
 set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 {
+  Dprintf((" set_cell\n"));
+
   GtkSheet *sheet;
   const gchar *text;
   int n=0;
@@ -989,7 +995,11 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
     return; // ignore user changes in ascii column for right now
 
   // extract value from sheet cell
-  text = gtk_entry_get_text(GTK_ENTRY(sheet->sheet_entry));
+  GtkWidget * sheet_entry = gtk_sheet_get_entry(sheet);
+  if (!sheet_entry)
+    return;
+
+  text = gtk_entry_get_text(GTK_ENTRY(sheet_entry));
 
   errno = 0;
   if(text!=0 && strlen(text)>0)
@@ -1052,9 +1062,9 @@ void Register_Window::UpdateLabel(void)
 {
   int row, col;
 
-  row=register_sheet->active_cell.row;
-  col=register_sheet->active_cell.col;
-
+  //row=register_sheet->active_cell.row;
+  //col=register_sheet->active_cell.col;
+  gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
   if(col >= REGISTERS_PER_ROW)
     gtk_label_set(GTK_LABEL(location), "  ascii  ");
@@ -1083,15 +1093,10 @@ void Register_Window::UpdateEntry(void)
   GtkWidget * sheet_entry;
 
   sheet_entry = gtk_sheet_get_entry(register_sheet);
-  row=register_sheet->active_cell.row;
-  col=register_sheet->active_cell.col;
+  gtk_sheet_get_active_cell(register_sheet, &row, &col);
 
-  
-  // ******************************** update entry:
-  if(row_to_address[row] < 0) {
-    //printf("row_to_address[%d]=0x%x",row,row_to_address[row]);
+  if(row_to_address[row] < 0)
     return;
-  }
 
   GUIRegister *reg = getRegister(row,col);
 
@@ -1116,6 +1121,7 @@ void Register_Window::UpdateLabelEntry(void)
 static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer data)
 {
 
+  Dprintf((" configure_event\n"));
 
   if(widget->window==0)
     return 0;
@@ -1312,6 +1318,8 @@ int Register_Window::SettingsDialog(void)
 static gboolean
 clipboard_handler(GtkWidget *widget, GdkEventKey *key)
 {
+  Dprintf((" clipboard_handler\n"));
+
   GtkSheet *sheet;
 
   sheet = GTK_SHEET(widget);
@@ -1320,8 +1328,12 @@ clipboard_handler(GtkWidget *widget, GdkEventKey *key)
      key->keyval==GDK_Control_R){
     if((key->keyval=='c' || key->keyval == 'C') && sheet->state != GTK_STATE_NORMAL){
 #if GTK_MAJOR_VERSION >= 2
+      /*
+        --- tsd - commented out because this function 
+        is not defined in the official gtkextra-2.0 release.
       if (gtk_sheet_in_clip(sheet))
         gtk_sheet_unclip_range(sheet);
+      */
 #else
       if(GTK_SHEET_IN_CLIP(sheet))
         gtk_sheet_unclip_range(sheet);
@@ -1339,6 +1351,8 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
                                   GtkSheetRange *new_range, 
                                   Register_Window *rw)
 {
+  Dprintf((" resize_handler\n"));
+
   int i, j, cti, ctj;
   int from, to;
     
@@ -1370,6 +1384,8 @@ move_handler(GtkWidget *widget,
 	     GtkSheetRange *new_range, 
 	     Register_Window *rw)
 {
+  Dprintf((" move_handler\n"));
+
   int i, j, cti, ctj;
   int from, to;
 
@@ -1396,6 +1412,8 @@ move_handler(GtkWidget *widget,
 static void
 show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
+  Dprintf((" show_sheet_entry\n"));
+
   const char *text;
   GtkSheet *sheet;
   GtkEntry *sheet_entry;
@@ -1413,12 +1431,13 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
   sheet=GTK_SHEET(rw->register_sheet);
   sheet_entry = GTK_ENTRY(gtk_sheet_get_entry(sheet));
 
-  row=sheet->active_cell.row; col=sheet->active_cell.col;
+  //row=sheet->active_cell.row; col=sheet->active_cell.col;
+  gtk_sheet_get_active_cell(sheet, &row, &col);
 
   GUIRegister *reg = rw->getRegister(row,col);
 
   if(reg && reg->bIsValid() )
-    if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))))
+    if((text=gtk_entry_get_text (GTK_ENTRY(rw->entry))) && sheet_entry)
       gtk_entry_set_text(sheet_entry, text);
 
 }
@@ -1432,6 +1451,8 @@ show_sheet_entry(GtkWidget *widget, Register_Window *rw)
 static void
 activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 {
+  Dprintf((" activity_sheet_entry\n"));
+
   GtkSheet *sheet;
 
   gint row, col;
@@ -1443,7 +1464,8 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
   }
   
   sheet=GTK_SHEET(rw->register_sheet);
-  row=sheet->active_cell.row; col=sheet->active_cell.col;
+  //row=sheet->active_cell.row; col=sheet->active_cell.col;
+  gtk_sheet_get_active_cell(sheet, &row, &col);
 
   // if there are text written in the entry above the sheet, then
   // the same data is in the sheet cell (because of show_sheet_entry())
@@ -1461,6 +1483,8 @@ activate_sheet_entry(GtkWidget *widget, Register_Window *rw)
 static void
 show_entry(GtkWidget *widget, Register_Window *rw)
 {
+  Dprintf((" show_entry\n"));
+
     if(widget==0|| rw==0)
     {
 	printf("Warning show_entry(%p,%p)\n",widget,rw);
@@ -1479,6 +1503,7 @@ show_entry(GtkWidget *widget, Register_Window *rw)
 static gint
 activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *rw) 
 {
+  Dprintf((" activate_sheet_cell\n"));
 
   GtkSheet *sheet=0;
     
@@ -1510,7 +1535,7 @@ activate_sheet_cell(GtkWidget *widget, gint row, gint column, Register_Window *r
 GUIRegister *Register_Window::getRegister(int row, int col)
 {
 
-  if(registers && col < REGISTERS_PER_ROW) {
+  if(registers && col < REGISTERS_PER_ROW && row < MAX_ROWS) {
 
     int reg_address = row_to_address[row];
 
@@ -1576,6 +1601,8 @@ void Register_Window::SelectRegister(Value *regSym)
 static void
 build_entry_bar(GtkWidget *main_vbox, Register_Window *rw)
 {
+  Dprintf((" build_entry_bar\n"));
+
   GtkRequisition request; 
   GtkWidget *status_box;
   
@@ -1745,8 +1772,10 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     retval=TRUE;
   }
 
-  if((int)reg_number==(row_to_address[register_sheet->active_cell.row]+
-		  register_sheet->active_cell.col))
+  gint row,col;
+  gtk_sheet_get_active_cell(register_sheet, &row, &col);
+
+  if((int)reg_number==(row_to_address[row]+col))
   {
     // if sheet cursor is standing on a cell that is changed, then
     // we update the entry above the sheet
@@ -1934,7 +1963,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 	  if(register_sheet->maxrow<j)
 	    {
 	      gtk_sheet_add_row(register_sheet,1);
-	      gtk_sheet_set_row_height (register_sheet, j, row_height(0));
+              gtk_sheet_set_row_height (register_sheet, j, row_height(0));
 	    }
 
 	  sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
@@ -1988,6 +2017,8 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
 static int show_event(GtkWidget *widget,
                         Register_Window *rw)
 {
+  Dprintf((" show_event\n"));
+
   rw->Update();
   return TRUE;
 }
@@ -1996,7 +2027,7 @@ static int delete_event(GtkWidget *widget,
 			GdkEvent  *event,
                         Register_Window *rw)
 {
-
+  Dprintf((" delete_event\n"));
   rw->ChangeView(VIEW_HIDE);
   return TRUE;
 }
@@ -2055,6 +2086,16 @@ void Register_Window::Build(void)
     gtk_window_set_title(GTK_WINDOW(window), "register viewer [EEPROM]");
   }
     
+  /// DEBUG ///
+#if defined(GTK_VERSION)
+  const char *gtk_version = GTK_VERSION;
+  if (gtk_version[0] == '2' && gtk_version[2] >= '6') {
+    gtk_sheet_hide_row_titles(register_sheet);
+    gtk_sheet_hide_column_titles(register_sheet);
+  }
+#endif
+  /// DEBUG ///
+
   //  GTK_WIDGET_UNSET_FLAGS(register_sheet,GTK_CAN_DEFAULT);
 
   /* create popupmenu */

@@ -1,3 +1,12 @@
+2005-06-09 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, gui/gui_regwin.cc, gui/gui_src.cc,
+	gui/gui_src_asm.cc, gui/gui_src_opcode.cc, configure.ac:
+	Found the source of a bug that causes gpsim to hang when gtk-2.6.7
+	and gtkextra-2.0 are used. The problem is either with gtkextra or
+	the interaction of it with gtk. gpsim currently has in place a
+	stop-gap measure to prevent the problem from keeping the simulator
+	from being unusable.
+
 2005-06-06 J.R. Heisey <jrheisey@sourceforge.com>
 	*src/os_dependent.cc: The environment variable GPSIMPATH may be
 	used to specify folders where shared libraries may be found. This
