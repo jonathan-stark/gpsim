@@ -37,7 +37,7 @@ class gpsimObject {
   gpsimObject();
   virtual ~gpsimObject();
 
-  virtual string &name(void);
+  virtual string &name(void) const;
 
   /// copy the name to a user char array
   virtual char *name(char *, int len);

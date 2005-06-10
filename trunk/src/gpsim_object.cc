@@ -106,9 +106,9 @@ char *gpsimObject::toBitStr(char *return_str, int len)
   return return_str;
 }
 
-string &gpsimObject::name(void)
+string &gpsimObject::name(void) const
 {
-  return name_str;
+  return (string &)name_str;
 }
 
 string gpsimObject::toString()
