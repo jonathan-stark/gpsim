@@ -1,3 +1,6 @@
+2005-06-10 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_stimulus.cc, doc/gpsim.lyx: Updated documentation.
+
 2005-06-09 J.R. Heisey <jrheisey@sourceforge.com>
 	*cli/cmd_module.cc: Added extra help for module command.
 

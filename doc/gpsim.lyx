@@ -37,7 +37,7 @@ T.
  Scott Dattalo
 \layout Date
 
-15 MAY 2005
+05 JUNE 2005
 \layout Standard
 
 
@@ -1050,7 +1050,7 @@ examine and/or modify memory
 \layout Standard
 
 The built in 'help' command provides additional online information.
-\layout Subsection*
+\layout Section
 
 attach
 \begin_inset LatexCommand \index{attach}
@@ -1076,7 +1076,7 @@ gpsim> attach n1 porta4 portb0 # Connect two I/O pins to the node.
 \layout LyX-Code
 
 gpsim> node                    # Display the new "net list".
-\layout Subsection*
+\layout Section
 
 break
 \begin_inset LatexCommand \index{break}
@@ -1095,6 +1095,9 @@ The break command is used to set and examine break points.
 \layout Subsubsection*
 
 Examining break points
+\layout LyX-Code
+
+break [bp_number]
 \layout Standard
 
 Break points can be examined by typing the break command without any options.
@@ -1143,8 +1146,11 @@ halt execution whenever bit 4 of register 42 is cleared
 break r|w REGISTER [expr] 
 \layout Standard
 
-The simulation halts when 'REGISTER' is read or written and the optional
- expression evaluates to true.
+The simulation halts when 
+\emph on 
+REGISTER
+\emph default 
+ is read or written and the optional expression evaluates to true.
  There are two styles of expressions supported.
  One involves only expressions of the 
 \emph on 
@@ -1154,9 +1160,9 @@ REGISTER
  The examples below illustrate the differences.
 \layout Standard
 
-Here's an example of register write break.
- This one will halt simulation if any value is written to the variable named
- 
+Here's an example of a register write break.
+ This one will halt the simulation if any value is written to the variable
+ named 
 \emph on 
 temp1
 \emph default 
@@ -1208,10 +1214,8 @@ break w temp1 (pc >= func_start && pc < func_end)
 \layout Standard
 
 
-\series bold 
 \emph on 
 TIP:
-\series default 
 \emph default 
  Use this type of break point if you suspect an interrupt routine is over
  writing a variable.
@@ -1242,15 +1246,7 @@ Attributes are parameters that gpsim and its modules expose to the user
 ts.
  This feature is intend mainly for module writers to provide a mechanism
  for allowing the user to control the module.
-\layout Subsection*
-
-bus
-\begin_inset LatexCommand \index{bus}
-
-\end_inset 
-
-
-\layout Subsection*
+\layout Section
 
 clear
 \begin_inset LatexCommand \index{clear}
@@ -1258,24 +1254,35 @@ clear
 \end_inset 
 
 
-\layout Standard
-
-The clear command is used to clear break points:
 \layout LyX-Code
 
 clear bp_number
 \layout LyX-Code
 
-where bp_number is the number assigned to the break point
-\layout LyX-Code
+\layout Standard
 
-when it was created.
- (type "break" without any arguments to
-\layout LyX-Code
+The clear command is used to clear break points.
+ The break point number must be specified.
+ The 
+\emph on 
+break
+\emph default 
+ command without any arguments displays all of the currently defined break
+ points.
+ This can be used to ascertain the break point number.
+ Once cleared, a break point is deleted.
+ 
+\begin_inset Foot
+collapsed true
 
-display the currently set break points.
-  
-\layout Subsection*
+\layout Standard
+
+A break point disable/enable feature has been discussed and may be added
+ a future date.
+\end_inset 
+
+
+\layout Section
 
 disassemble
 \begin_inset LatexCommand \index{disassemble}
@@ -1285,25 +1292,54 @@ disassemble
 
 \layout LyX-Code
 
-disassemble [[start | length] [end]]
+disassemble [[begin:end] | [length]]
 \layout LyX-Code
 
- 
 \layout LyX-Code
 
-  no arguments:  disassembles 10 instructions before and 5 after the pc.
-\layout LyX-Code
-
-  one argument:  disassemble [length] instructions after the pc.
-\layout LyX-Code
-
-  two arguments: disassemble from [start] to [end].
 \layout Standard
 
-disassemble does not use symbols.
- However, special function registers like status will be displayed by name
- rather than value.
-\layout Subsection*
+The disassemble command decodes the program memory opcodes into their standard
+ mnemonics.
+ With no options, the 
+\emph on 
+disassemble
+\emph default 
+ command disassembles instructions surrounding the current program counter:
+\layout LyX-Code
+
+gpsim> disassemble
+\layout LyX-Code
+
+current pc = 0x1c
+\layout LyX-Code
+
+    0012 2a03 incf reg3,f,0
+\layout LyX-Code
+
+    0014 0004 clrwdt
+\layout LyX-Code
+
+    0016 5000 movf reg,w,0
+\layout LyX-Code
+
+    0018 1001 iorwf reg1,w,0
+\layout LyX-Code
+
+    001a 1002 iorwf reg2,w,0
+\layout LyX-Code
+
+==> 001c 1003 iorwf reg3,w,0
+\layout LyX-Code
+
+    001e e1f4 bnz $-0x16 ;(0x8)
+\layout LyX-Code
+
+    0020 d7ff bra $-0x0 ;(0x00020) 
+\layout Standard
+
+With a single numeric option, the disassemble command will 
+\layout Section
 
 dump
 \begin_inset LatexCommand \index{dump}
@@ -1332,7 +1368,7 @@ dump [r | e]
 \layout Standard
 
 See the 'x' command for examining and modifying individual registers.
-\layout Subsection*
+\layout Section
 
 echo
 \begin_inset LatexCommand \index{echo}
@@ -1344,7 +1380,7 @@ echo
 
 The echo command is used like a print statement within configuration files.
  It just lets you display information about your configuration file.
-\layout Subsection*
+\layout Section
 
 frequency
 \begin_inset LatexCommand \index{frequency}
@@ -1362,7 +1398,7 @@ This command sets the clock frequency.
  Note that PICs have an instruction clock that's a forth of the external
  clock.
  This value is the external clock.
-\layout Subsection*
+\layout Section
 
 help
 \begin_inset LatexCommand \index{help}
@@ -1376,7 +1412,7 @@ By itself, help will display all of the commands along with a brief description
  on how they work.
  'help <command>' provides more extensive online help.
  The help command can also display information about attributes.
-\layout Subsection*
+\layout Section
 
 icd
 \begin_inset LatexCommand \index{icd}
@@ -1397,7 +1433,7 @@ The open command is used to enable ICD mode and specify the serial port
  "icd open /dev/ttyS0").
  Without options (and after the icd is enabled), it will print some information
  about the ICD.
-\layout Subsection*
+\layout Section
 
 list 
 \begin_inset LatexCommand \index{list}
@@ -1430,7 +1466,7 @@ list *pc will display either .asm or .lst lines around the pc
 
 The list command allows you to view the source code while you are debugging.
  
-\layout Subsection*
+\layout Section
 
 load
 \begin_inset LatexCommand \index{load}
@@ -1461,15 +1497,7 @@ gpsim will automatically determine if the file is a .hex or .cod file.
 Configuration files are script files containing gpsim commands.
  These are extremely useful for creating a debugging enviroment that will
  be used repeatedly.
-\layout Subsection*
-
-log
-\begin_inset LatexCommand \index{log}
-
-\end_inset 
-
-
-\layout Subsection*
+\layout Section
 
 macros
 \begin_inset LatexCommand \index{macros}
@@ -1477,7 +1505,189 @@ macros
 \end_inset 
 
 
-\layout Subsection*
+\layout Standard
+
+Macros are defined like:
+\layout LyX-Code
+
+
+\emph on 
+name
+\emph default 
+ macro [arg1, arg2, ..., argN]
+\layout LyX-Code
+
+   macro body
+\layout LyX-Code
+
+endm
+\layout Standard
+
+And they're invoked by:
+\layout LyX-Code
+
+
+\emph on 
+name
+\emph default 
+ param1, param2, ..., paramN
+\layout Standard
+
+Macros are a way of collecting several parameterized commands into one short
+ command.
+ The first line of a macro definition specifies the macro's name and optional
+ arguments.
+ The 
+\emph on 
+name
+\emph default 
+ is used to invoke the macro.
+ The arguments are text string place holders.
+ When a macro is invoked, the parameters are aligned with the arguments.
+ I.e.
+ 
+\emph on 
+param1
+\emph default 
+ in the invocation can be thought of being assigned to 
+\emph on 
+arg1
+\emph default 
+ in the definition.
+ The parameters replace the arguments in the macro body.
+\layout Standard
+
+In the following example, a variable or attribute called 
+\emph on 
+mac_flags
+\emph default 
+ is being manipulated in an expression.
+ The arguments 
+\emph on 
+add
+\emph default 
+ and 
+\emph on 
+mask
+\emph default 
+ appear in the macro body and provide a parameterized way of manipulating
+ this expression.
+\layout LyX-Code
+
+mac_exp macro add, mask
+\layout LyX-Code
+
+  mac_flags = (mac_flags+add) & mask
+\layout LyX-Code
+
+endm 
+\layout Standard
+
+Note that the indentation is arbitrary.
+ The macro is invoked by:
+\layout LyX-Code
+
+mac_exp 1, 0b00001111 # increment the lower nibble
+\layout Standard
+
+The parameter 
+\emph on 
+add
+\emph default 
+ is replaced by the number 
+\emph on 
+1
+\emph default 
+ while 
+\emph on 
+mask
+\emph default 
+ is replaced with the binary number 
+\emph on 
+0b00001111.
+
+\emph default 
+ The invocation turns into the gpsim command:
+\layout LyX-Code
+
+mac_flags = (mac_flags+1) & 0b00001111
+\layout Subsubsection*
+
+Nested Macros
+\layout Standard
+
+The macro body can contain any gpsim command.
+ Of particular interest are macro invocations within other macros.
+ Here's another macro that invokes the one defined above.
+\layout LyX-Code
+
+# Nested macro example
+\layout LyX-Code
+
+mac1 macro p1, p2
+\layout LyX-Code
+
+  run
+\layout LyX-Code
+
+  mac_exp p1, p2
+\layout LyX-Code
+
+endm 
+\layout Standard
+
+And it could be used like:
+\layout LyX-Code
+
+mac1  1,      0b00001111   #  test lower nibble
+\layout LyX-Code
+
+mac1  (1<<4), 0b11110000   #  test upper nibble
+\layout Standard
+
+The first invocation starts the simulator by executing a 
+\emph on 
+run
+\emph default 
+ command.
+ When a break point is encountered, control returns to the command line
+ and the 
+\emph on 
+mac_exp
+\emph default 
+ macro is invoked.
+\layout Subsubsection*
+
+Displaying Defined Macros
+\layout Standard
+
+All currently defined macros can be displayed by typing the macro command
+ without a name or arguments:
+\layout LyX-Code
+
+gpsim> macro
+\layout LyX-Code
+
+mac1 macro p1 p2
+\layout LyX-Code
+
+   run
+\layout LyX-Code
+
+   mac_exp p1, p2
+\layout LyX-Code
+
+endm
+\layout LyX-Code
+
+mac_exp macro add mask
+\layout LyX-Code
+
+    mac_flags = (mac_flags+add) & mask
+\layout LyX-Code
+
+endm 
+\layout Section
 
 module
 \begin_inset LatexCommand \index{module}
@@ -1485,7 +1695,138 @@ module
 \end_inset 
 
 
-\layout Subsection*
+\layout Standard
+
+The 
+\emph on 
+module
+\emph default 
+ command is used to load and query external modules.
+ A module is a special piece of software that can extend gpsim in some manner.
+ LED's and switches are examples of modules.
+ A module library is collection of modules.
+\layout Subsubsection*
+
+Loading module libraries
+\layout LyX-Code
+
+module lib 
+\emph on 
+lib_name
+\layout Standard
+
+The 
+\emph on 
+lib
+\emph default 
+ option is used to load a module library.
+ Module libraries are system dependent shared libraries.
+ I.e.
+ on Windows they're DLL's and UNIX they're shared libraries.
+ This means that either the libraries should reside in a path where the
+ OS knows libraries exist or that the full path name must be specified along
+ with the 
+\emph on 
+lib_name
+\emph default 
+.
+ gpsim provides a module library with a few modules:
+\layout LyX-Code
+
+gpsim> module lib libgpsim_modules
+\layout Subsubsection*
+
+Displaying available modules
+\layout LyX-Code
+
+module list
+\layout Standard
+
+The 
+\emph on 
+list
+\emph default 
+ option will display all of the modules that can be loaded.
+ Here is an example of gpsim's built-in modules.
+\layout LyX-Code
+
+gpsim> module list
+\layout LyX-Code
+
+Module Libraries libgpsim_modules.so
+\layout LyX-Code
+
+   binary_indicator
+\layout LyX-Code
+
+   pullup
+\layout LyX-Code
+
+   pulldown
+\layout LyX-Code
+
+   usart
+\layout LyX-Code
+
+   parallel_interface
+\layout LyX-Code
+
+   switch
+\layout LyX-Code
+
+   and2
+\layout LyX-Code
+
+   or2
+\layout LyX-Code
+
+   xor2
+\layout LyX-Code
+
+   not
+\layout LyX-Code
+
+   led_7segments
+\layout LyX-Code
+
+   led
+\layout LyX-Code
+
+   PAL_video
+\layout LyX-Code
+
+   Encoder 
+\layout Subsubsection*
+
+Loading a specific module 
+\layout LyX-Code
+
+module load module_type [module_name]
+\layout Standard
+
+Once a library has been loaded, specific modules can be instantiated.
+ The 
+\emph on 
+module_type
+\emph default 
+ is what's displayed by the 
+\emph on 
+module list
+\emph default 
+ command.
+ The optional module name Here's an example 
+\layout LyX-Code
+
+gpsim> module load led D1 
+\layout Subsubsection*
+
+Display loaded modules
+\layout Subsubsection*
+
+Querying modules
+\layout LyX-Code
+
+\layout Section
 
 node
 \begin_inset LatexCommand \index{node}
@@ -1525,7 +1866,7 @@ node [new_node1 new_node2 ...]
 \layout LyX-Code
 
     node n1 n2 n3  // create and add 3 new nodes to the list 
-\layout Subsection*
+\layout Section
 
 processor
 \begin_inset LatexCommand \index{processor}
@@ -1536,38 +1877,62 @@ processor
 \layout LyX-Code
 
 processor [new_processor_type [new_processor_name]] | [list] | [dump] 
-\layout LyX-Code
+\layout Standard
 
- If no new processor is specified, then the currently defined processor(s)
- will be displayed.
- To see a list of the processors supported by gpsim, type 'processor list'.
- To define a new processor, specify the processor type and name.
- To display the state of the I/O processor, type 'processor pins' (For now,
- this will display the pin numbers and their current state.
+The 
+\emph on 
+processor
+\emph default 
+ command is used to either define a new processor or to query one that has
+ already been defined.
+ Normally there's no need to explicitly define the processor since the symbol
+ file already contains that information.
+ The two exceptions are when a) the symbolic information is not available
+ or b) you wish to override the processor specified in the symbol file.
+ (See the 
+\emph on 
+load
+\emph default 
+ command on how the processor in a symbol file can be overridden.)
+\layout Standard
+
+To see a list of the processors supported by gpsim, type '
+\emph on 
+processor list
+\emph default 
+'.
+ To display the state of the I/O processor, type '
+\emph on 
+processor pins
+\emph default 
+'.
+ For now, this will display the pin numbers and their current state.
 \layout LyX-Code
 
 examples:
 \layout LyX-Code
 
-processor // Display the processors you've already defined.
- processor list                   // Display the list of processors supported.
- processor pins 
+processor        // Display the processors you've already defined.
+ 
 \layout LyX-Code
 
-          // Display the processor package and pin state processor p16cr84
- fred 
+processor list   // Display the list of processors supported.
+ 
 \layout LyX-Code
 
-          // Create a new processor.
- processor p16c74 wilma
+processor pins   // Display the processor package and pin state 
 \layout LyX-Code
 
-          // and another.
- processor p16c65
+processor p16cr84 fred   // Create a new processor.
+ 
 \layout LyX-Code
 
-          // Create one with no name.
-\layout Subsection*
+processor p16c74 wilma   // and another.
+ 
+\layout LyX-Code
+
+processor p16c65         // Create one with no name.
+\layout Section
 
 quit
 \begin_inset LatexCommand \index{quit}
@@ -1578,7 +1943,7 @@ quit
 \layout Standard
 
 Quit gpsim.
-\layout Subsection*
+\layout Section
 
 run
 \begin_inset LatexCommand \index{run}
@@ -1590,7 +1955,7 @@ run
 
 Start (or continue) simulation.
  The simulation will continue until the next break point is encountered.
-\layout Subsection*
+\layout Section
 
 step
 \begin_inset LatexCommand \index{step}
@@ -1613,7 +1978,7 @@ step [over | n]
 \layout LyX-Code
 
   "over" argument:  step over the next instruction
-\layout Subsection*
+\layout Section
 
 symbol
 \begin_inset LatexCommand \index{symbol}
@@ -1621,7 +1986,16 @@ symbol
 \end_inset 
 
 
-\layout Subsection*
+\layout LyX-Code
+
+symbol [symbol_name [symbol_type value]] 
+\layout Standard
+
+The symbol command is used to query and define symbols.
+ If no options are specified, the whole symbol table is displayed.
+ The creation of user defined symbols is limited at this time (see the online
+ help for the current state of this command).
+\layout Section
 
 stimulus
 \begin_inset LatexCommand \index{stimulus}
@@ -1632,50 +2006,250 @@ stimulus
 \layout LyX-Code
 
 stimulus [[type] options]
-\layout LyX-Code
+\layout Standard
 
-  stimulus will create a signal that can be tied to an io port.
-\layout LyX-Code
-
-  Note that in most cases it is easier to create a stimulus
-\layout LyX-Code
-
-  file then to type all this junk by hand.
-\layout LyX-Code
-
+The 
+\emph on 
+stimulus
+\emph default 
+ command creates a signal that can be tied to a node or an attribute.
+ If no options are specified then all currently defined stimuli are displayed.
  
-\layout LyX-Code
+\layout Standard
 
-      Supported stimuli:
-\layout LyX-Code
-
+Note that in most cases it is easier to create a stimulus file then to type
+ the command by hand.
  
-\newline 
+\layout Standard
+
+
+\begin_inset  Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features islongtable="true" firstHeadEmpty="true" headBottomDL="true">
+<column alignment="center" valignment="top" leftline="true" width="0">
+<column alignment="center" valignment="top" leftline="true" rightline="true" width="0">
+<row topline="true" bottomline="true" endhead="true" endfirsthead="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+option
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+description
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+initial_state
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+state at the start and at the rollover
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+start_cycle
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+simulation cyle when the stimulus will begin
+\end_inset 
+</cell>
+</row>
+<row topline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+period
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+stimulus period 
+\end_inset 
+</cell>
+</row>
+<row topline="true" bottomline="true">
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+name
+\end_inset 
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\layout Standard
+
+specifies the stimulus name
+\end_inset 
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset 
+
+
+\layout Standard
+
+Here's an example of a stimulus that will generate two pulses and repeat
+ this in 1000 cycles.
+\layout LyX-Code
+
+stimulus asynchronous_stimulus
+\layout LyX-Code
 
 \layout LyX-Code
 
-asynchronous_stimulus | asy  [period p] [phase ph]  [initial_state i]
+# The initial state AND the state the stimulus is when 
 \layout LyX-Code
 
-   d0 [,d1, d2, ..., dn] port port_name bit_pos end
-\newline 
+# it rolls over
+\layout LyX-Code
 
 \layout LyX-Code
 
-      creates an asynchronous square wave with a period of "p" cpu
+initial_state 0
 \layout LyX-Code
 
-      cycles.
-  The phase is with respect to the cpu's cycle counter.
+start_cycle 0
 \layout LyX-Code
 
-      The "port_name" and "bit_pos" describe where the stimulus
 \layout LyX-Code
 
-      will be attached.
+# the asynchronous stimulus will roll over in 'period'
 \layout LyX-Code
 
-\layout Subsection*
+# cycles.
+ Delete this line if you don't want a roll over.
+\layout LyX-Code
+
+\layout LyX-Code
+
+period 1000
+\layout LyX-Code
+
+\layout LyX-Code
+
+{ 100, 1,
+\layout LyX-Code
+
+  200, 0,
+\layout LyX-Code
+
+  300, 1,
+\layout LyX-Code
+
+  400, 0 
+\layout LyX-Code
+
+}
+\layout LyX-Code
+
+# Give the stimulus a name:
+\layout LyX-Code
+
+\layout LyX-Code
+
+name two_pulse_repeat
+\layout LyX-Code
+
+\layout LyX-Code
+
+end
+\layout Standard
+
+A stimulus can be queried by typing its name at the command line:
+\layout LyX-Code
+
+gpsim> two_pulse_repeat 
+\layout LyX-Code
+
+two_pulse_repeat attached to pulse_node
+\layout LyX-Code
+
+  Vth=0V  Zth=250 ohms  Cth=0 F  nodeVoltage= 7.49998e-07V 
+\layout LyX-Code
+
+  Driving=0 drivingState=0 drivenState=0 bitState=0
+\layout LyX-Code
+
+\layout LyX-Code
+
+  states = 5
+\layout LyX-Code
+
+    100 1
+\layout LyX-Code
+
+    200 0
+\layout LyX-Code
+
+    300 1
+\layout LyX-Code
+
+    400 0
+\layout LyX-Code
+
+    1000 0   
+\layout LyX-Code
+
+initial=0   
+\layout LyX-Code
+
+period=1000   
+\layout LyX-Code
+
+start_cycle=0   
+\layout LyX-Code
+
+Next break cycle=100 
+\layout Standard
+
+Even though this example uses 1's and 0's for the data, one can use integers,
+ floating point numbers, or expressions instead.
+ Integers are useful for supplying a stimulus to an attribute.
+ Expressions are useful for abstracting the data.
+ See Chapter 
+\begin_inset LatexCommand \ref{cha:Simulating-the-Real}
+
+\end_inset 
+
+ for more discussion and examples of stimuli.
+\layout Section
 
 stopwatch
 \begin_inset LatexCommand \index{stopwatch}
@@ -1683,7 +2257,7 @@ stopwatch
 \end_inset 
 
 
-\layout Subsection*
+\layout Section
 
 trace
 \begin_inset LatexCommand \index{trace}
@@ -1703,19 +2277,18 @@ trace [dump_amount]
 \layout LyX-Code
 
       will be displayed.
-\layout Subsection*
+\layout Section
 
 version
 \layout LyX-Code
 
 version
-\layout LyX-Code
+\layout Standard
 
-    Display gpsim's version.
-\layout LyX-Code
-
- 
-\layout Subsection*
+Display gpsim's version.
+ Note, this command will probably get replaced by an attribute with the
+ same (or similar) name.
+\layout Section
 
 x
 \begin_inset LatexCommand \index{x}
@@ -1745,6 +2318,11 @@ x [file_register] [new_value]
 
  
 \layout Chapter
+
+
+\begin_inset LatexCommand \label{cha:Graphical-User-Interface}
+
+\end_inset 
 
 Graphical User Interface
 \layout Standard
@@ -2950,6 +3528,11 @@ Other events that occur during the trace frame are indented.
  Write traces show the value written and the value that was previously in
  the register.
 \layout Chapter
+
+
+\begin_inset LatexCommand \label{cha:Simulating-the-Real}
+
+\end_inset 
 
 Simulating the Real World: Stimuli
 \begin_inset LatexCommand \index{Stimulus}
