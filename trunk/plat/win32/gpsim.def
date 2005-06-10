@@ -67,7 +67,7 @@ EXPORTS
     ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?GetContext@CSimulationContext@@SAPAV1@XZ
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
-    ?add@Symbol_Table@@QAEXPAVValue@@@Z
+    ?add@Symbol_Table@@QAE_NPAVValue@@@Z
     ?add@TraceFrame@@UAEXPAVTraceObject@@@Z
     ?addFrame@Trace@@QAEXPAVTraceFrame@@@Z
     ?addToCurrentFrame@Trace@@QAEXPAVTraceObject@@@Z
@@ -78,7 +78,7 @@ EXPORTS
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
     ?add_processor@CSimulationContext@@QAEPAVProcessor@@PAV2@@Z
-    ?add_register@Symbol_Table@@QAEXPAVRegister@@PBD@Z
+    ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
@@ -244,7 +244,7 @@ EXPORTS
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
     ?log@TraceRawLog@@QAEXXZ
     ?name@Breakpoint_Instruction@@UAEPADPADH@Z
-    ?name@gpsimObject@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?name@gpsimObject@@UBEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z

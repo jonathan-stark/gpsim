@@ -437,6 +437,10 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
 
   if(address < program_memory_size())
     {
+      if(program_memory[address] != 0 && program_memory[address] != &bad_instruction) {
+        // this should not happen
+        delete program_memory[address];
+      }
       program_memory[address] = disasm(address,value);
       if(program_memory[address] == 0)
         program_memory[address] = &bad_instruction;

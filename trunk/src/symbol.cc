@@ -32,6 +32,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <string>
 #include <vector>
+#include <algorithm>
 
 #include "../config.h"
 #include "14bit-processors.h"
@@ -65,12 +66,16 @@ Symbol_Table &get_symbol_table(void) {
 }
 #endif
 
+Symbol_Table::Symbol_Table() {
+    reserve(500);
+}
+
 void Symbol_Table::add_ioport(IOPORT *_ioport)
 {
 
   ioport_symbol *is = new ioport_symbol(_ioport);
 
-  st.push_back(is);
+  add(is);
 
 }
 
@@ -79,7 +84,7 @@ void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
 
   node_symbol *ns = new node_symbol(s);
 
-  st.push_back(ns);
+  add(ns);
 
 }
 
@@ -88,21 +93,32 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
   stimulus_symbol *ss = new stimulus_symbol(s);
 
-  st.push_back(ss);
+  add(ss);
 
 }
 
-void Symbol_Table::add(Value *s)
-{
-  if(s)
-    st.push_back(s);
+bool Symbol_Table::add(Value *s) {
+  if(s) {
+    iterator it = lower_bound(begin( ), end( ),
+      s, NameLessThan());
+    if (it != end() &&
+      (*it)->name() == s->name()) {
+        printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
+        erase(it);
+//      return false;
+    }
+    insert(it, s);
+    return true;
+  }
+  return false;
 }
 
-void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
+register_symbol *
+Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
 {
 
   if(!new_reg)
-    return;
+    return 0;
 
   if(symbol_name) {
     string sName(symbol_name);
@@ -113,14 +129,14 @@ void Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
         cout << "Warning not adding  "
 	           << symbol_name
 	           << " to symbol table\n because it is already in.\n";
-      return;
+      return 0;
      }
   }
 
   register_symbol *rs = new register_symbol(symbol_name, new_reg);
 
-  st.push_back(rs);
-
+  add(rs);
+  return rs;
 }
 
 void Symbol_Table::add_w(WREG *new_w)
@@ -131,7 +147,7 @@ void Symbol_Table::add_w(WREG *new_w)
 
   w_symbol *ws = new w_symbol((char *)0, new_w);
 
-  st.push_back(ws);
+  add(ws);
 
 }
 
@@ -141,7 +157,7 @@ void Symbol_Table::add_constant(const char *_name, int value)
   Integer *i = new Integer(value);
   i->new_name(_name);
 
-  st.push_back(i);
+  add(i);
 
 }
 
@@ -150,7 +166,7 @@ void Symbol_Table::add_address(const char *new_name, int value)
 
   address_symbol *as = new address_symbol(new_name,value);
 
-  st.push_back(as);
+  add(as);
 
 }
 
@@ -159,89 +175,74 @@ void Symbol_Table::add_line_number(int address, const char *symbol_name)
 
   line_number_symbol *lns = new line_number_symbol(symbol_name,  address);
 
-  st.push_back(lns);
+  add(lns);
 }
 
 void Symbol_Table::add_module(Module * m, const char *cPname)
 {
   module_symbol *ms = new module_symbol(m,cPname);
 
-  st.push_back(ms);
+  add(ms);
 
 }
 
-void Symbol_Table::remove_module(Module * m)
-{
-  sti = st.begin();
+void Symbol_Table::remove_module(Module * m) {
+  iterator sti = FindIt(m->name());
   Value *sym;
 
-  while( sti != st.end()) {
-
+  while( sti != end()) {
     sym = *sti;
     if((typeid(sym) == typeid(module_symbol)) &&
        sym->name() == m->name()) {
-
-      st.remove(sym);
+      erase(sti);
       return;
     }
-
     sti++;
   }
 }
 
 Value *Symbol_Table::remove(string &s)
 {
-  Value *sym = find(s);
-  if(sym)
-    st.remove(sym);
-  return sym;
+  iterator it = FindIt(s);
+  if(it != end() && (*it)->name() == s) {
+    erase(it);
+    return *it;
+  }
+  return NULL;
 }
 
 void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 {
-
-
   if(new_type) {
-
     // ugh.. FIXME
     if ( strcmp("constant", new_type) == 0)
       add_constant(new_name, value);
-
   }
-
 }
 
 Value * Symbol_Table::find(const char *str)
 {
-  string s =  string(str);
+  string s(str);
   return(find(s));
-
 }
 
 Value * Symbol_Table::find(type_info const &symt, const char *str)
 {
-
-  string s =  string(str);
-  sti = st.begin();
-
-  while( sti != st.end()) {
-
+  string s(str);
+  iterator sti = FindIt(str);
+  while( sti != end()) {
     Value *val = *sti;
-    
     if(val && (val->name() == s) && (typeid(val) == symt))
       return(val);
-
     sti++;
   }
-
   return 0;
-
 }
 
 Register * Symbol_Table::findRegister(unsigned int address)
 {
-  sti = st.begin();
-  while( sti != st.end()) {
+  iterator sti = begin();
+  while( sti != end()) {
     Value *val = *sti;
     if(val && typeid(*val) == typeid(register_symbol)) {
       Register * pReg = ((register_symbol*)val)->getReg();
@@ -255,8 +256,8 @@ Register * Symbol_Table::findRegister(unsigned int address)
 
 Register * Symbol_Table::findRegister(const char *s)
 {
-  sti = st.begin();
-  while( sti != st.end()) {
+  iterator sti = FindIt(s); // .begin();
+  while( sti != end()) {
     Value *val = *sti;
     if(val && typeid(*val) == typeid(register_symbol)) {
       if(val->name() == s) {
@@ -270,9 +271,7 @@ Register * Symbol_Table::findRegister(const char *s)
 
 void Symbol_Table::dump_one(string *s)
 {
-
   Value *val = find(*s);
-
   if(val)
     cout << val->toString() << endl;
 }
@@ -287,48 +286,39 @@ void Symbol_Table::dump_one(const char *str)
 void Symbol_Table::dump_all(void)
 {
   cout << "  Symbol Table\n";
-  sti = st.begin();
-
-  while( sti != st.end())
-    {
-      Value *val = *sti;
-
-      if(val &&(typeid(*val) != typeid(line_number_symbol)))
-	cout << val->showType() << ": " << val->toString() << endl;
-
-      sti++;
+  iterator sti = begin();
+  iterator last;
+  while( sti != end()) {
+    Value *val = *sti;
+    if(val &&(typeid(*val) != typeid(line_number_symbol)))
+      cout << val->name() << ": " << val->showType() << endl;
+    last = sti;
+    sti++;
+    if(sti != end() && (*last)->name() == (*sti)->name()) {
+      cout << "***************** Duplicate Found ***********" << endl;
     }
+  }
 }
-
 
 void Symbol_Table::dump_type(type_info const &symt)
 {
-
-
   // Now loop through the whole table and display all instances of the type of interest
-
   int first=1;     // On the first encounter of one, display the title
-
-  sti = st.begin();
-
-  while( sti != st.end()) {
-
+  iterator sti = begin();
+  while( sti != end()) {
     Value *sym = *sti;
     if(sym && (typeid(*sym) == symt)) {
       if(first) {
-	first = 0;
-	cout << "Symbol Table for \"" << sym->showType() << "\"\n";
+        first = 0;
+        cout << "Symbol Table for \"" << sym->showType() << "\"\n";
       }
 
       cout << sym->toString() << endl;
     }
-
     sti++;
   }
-  
   if(first)
     cout << "No symbols found\n";
-
 }
 
 bool IsClearable(Value* value)
@@ -337,17 +327,81 @@ bool IsClearable(Value* value)
 }
 
 void Symbol_Table::clear() {
-  st.remove_if(IsClearable);
+  iterator it;
+  iterator itEnd = end();
+  int i = 0;
+  for(it = begin(); it != itEnd;) {
+    Value *value = *it;
+    if(value->isClearable()) {
+      delete value;
+      erase(it);
+    }
+    else {
+      it++;
+    }
+    i++;
+  }
+//  remove_if(begin(), end(), IsClearable);
 }
 
 void Symbol_Table::clear_all() {
-  clear();
-  while(!st.empty()) {
-    delete st.front();
-    st.pop_front();
+  iterator it;
+  iterator itEnd = end();
+  for(it = begin(); it != itEnd; it++) {
+    Value *value = *it;
+    delete *it;
   }
+  _Myt::clear();
 }
 
+Value * Symbol_Table::find(string &s)
+{
+  const bool findDuplicates=false;
+  iterator sti = FindIt(s); // .begin();
+
+  Value *ret=0;
+  while( sti != end()) {
+      Value *val = *sti;
+      if(val && val->name() == s) {
+        if(!findDuplicates)
+          return val;
+
+        if(!ret) {
+          ret = val;
+        } else
+          cout << "Found duplicate:" << val->show()<<endl;
+      }
+
+      sti++;
+    }
+
+  return ret;
+
+}
+
+
+Symbol_Table::iterator
+Symbol_Table::FindIt(const char *pszKey) {
+  Value KeyValue(pszKey, "key value");
+  return FindIt(&KeyValue);
+}
+
+Symbol_Table::iterator
+Symbol_Table::FindIt(string &sKey) {
+  Value KeyValue(sKey.c_str(), "key value");
+  return FindIt(&KeyValue);
+}
+
+Symbol_Table::iterator
+Symbol_Table::FindIt(Value *key) {
+  iterator it = lower_bound(begin( ), end( ),
+    key, NameLessThan());
+  if (it != end() &&
+    (*it)->name() == key->name()) {
+    return it;
+  }
+  return end();
+}
 
 //------------------------------------------------------------------------
 // symbols
@@ -371,31 +425,6 @@ symbol::~symbol(void)
 string symbol::toString()
 {
   return showType();
-}
-
-Value * Symbol_Table::find(string &s)
-{
-  const bool findDuplicates=false;
-  sti = st.begin();
-
-  Value *ret=0;
-  while( sti != st.end()) {
-      Value *val = *sti;
-      if(val && val->name() == s) {
-        if(!findDuplicates)
-	  return val;
-
-        if(!ret) {
-	  ret = val;
-	} else
-	  cout << "Found duplicate:" << val->show()<<endl;
-      }
-
-      sti++;
-    }
-
-  return ret;
-
 }
 
 //------------------------------------------------------------------------
@@ -608,7 +637,7 @@ address_symbol::address_symbol(const char *_name, unsigned int _val)
 string address_symbol::toString()
 {
   char buf[256];
-  int i = getVal();
+  int i = (int)getVal();
   snprintf(buf,sizeof(buf), " at address %d = 0x%X",i,i);
   
   return name() + string(buf);

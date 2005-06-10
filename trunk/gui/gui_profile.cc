@@ -153,15 +153,11 @@ static void remove_entry(Profile_Window *pw, struct profile_entry *entry)
 static unsigned int lookup_address_symbol(const char *name)
 {
   Symbol_Table &st = CSimulationContext::GetContext()->GetSymbolTable();
-  Symbol_Table::iterator symIt;
-
-  for(symIt=st.begin(); symIt != st.end(); symIt++) {
-
-    if(!strcmp((*symIt)->name().data(),name)) {
-      int i;
-      (*symIt)->get(i);
-      return i;
-    }
+  Value *pValue = st.find(name);
+  if(pValue != NULL) {
+    int i;
+    pValue->get(i);
+    return i;
   }
   return UINT_MAX;
 }
