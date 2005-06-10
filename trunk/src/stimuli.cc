@@ -283,7 +283,8 @@ Stimulus_Node::~Stimulus_Node()
   remove_node(this);
 
   Value *vpNodeSym = symbol_table.remove(name());
-  delete vpNodeSym;
+  if(vpNodeSym != NULL)
+    delete vpNodeSym;
 }
 
 //
