@@ -1,3 +1,14 @@
+<<<<<<< ChangeLog
+2005-06-10 J.R. Heisey <jrheisey@sourceforge.com>
+	*src/gpsim_object.cc,h: Small change to allow name() call
+	in a const variable context.
+
+	*plat/win32/gpsim.def, src/processor.cc, src/stimuli.cc,
+	src/symbol.cc, src/symbol.h, gui/gui_profile.cc: Changed
+	the implementation of the Symbol_Table class to order
+	by symbol name so that a binary search will improve lookup
+	speed.
+
 2005-06-10 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_stimulus.cc, doc/gpsim.lyx: Updated documentation.
 
