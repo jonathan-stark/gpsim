@@ -23,7 +23,7 @@ Boston, MA 02111-1307, USA.  */
 //
 
 #include <string>
-#include <list>
+#include <vector>
 #include "value.h"
 
 using namespace std;
@@ -42,6 +42,7 @@ class Register;
 class Module;
 class Expression;
 class symbol;
+class register_symbol;
 
 void display_symbol_file_error(int);
 
@@ -63,22 +64,32 @@ enum SYMBOL_TYPE
 };
 
 
-class Symbol_Table
-{
+class Symbol_Table : private vector<Value*> {
 private:
-  class SymbolList : public list<Value*> {
+  struct NameLessThan : binary_function<Value*, Value*, bool> {
+    bool operator()(const Value* left, const Value* right) const {
+      return left->name() < right->name();
+    }
   };
+  iterator FindIt(const char *s);
+  iterator FindIt(string &s);
+  iterator FindIt(Value *key);
 
 public:
-  typedef SymbolList::iterator iterator;
-  void add(Value*);
+  Symbol_Table();
+#ifndef _MSC_VER
+   typedef vector<Value> _Myt;
+#endif
+  typedef _Myt::iterator iterator;
+
+  bool add(Value*);
 
   void add_ioport(IOPORT *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
   void add_line_number(int address, const char *symbol_name=0);
   void add_constant(const char *, int );
-  void add_register(Register *reg, const char *symbol_name=0);
+  register_symbol* add_register(Register *reg, const char *symbol_name=0);
   void add_address(const char *, int );
   void add_w(WREG *w );
   void add_module(Module * m, const char *module_name);
@@ -96,19 +107,13 @@ public:
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
   void clear();
-  void Symbol_Table::clear_all();
+  void clear_all();
   iterator begin() {
-    return st.begin();
+    return _Myt::begin();
   }
   iterator end() {
-    return st.end();
+    return _Myt::end();
   }
-
-private:
-  SymbolList st;
-  list <Value *>::iterator sti;
-
-
 };
 
 
@@ -127,6 +132,7 @@ inline Symbol_Table &get_symbol_table(void) {
   return symbol_table;
 }
 #endif
+
 
 
 
