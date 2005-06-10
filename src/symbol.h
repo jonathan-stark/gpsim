@@ -78,7 +78,7 @@ private:
 public:
   Symbol_Table();
 #ifndef _MSC_VER
-   typedef vector<Value> _Myt;
+   typedef vector<Value*> _Myt;
 #endif
   typedef _Myt::iterator iterator;
 
