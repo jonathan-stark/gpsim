@@ -211,6 +211,20 @@ Value *Symbol_Table::remove(string &s)
   return NULL;
 }
 
+void Symbol_Table::rename(const char *pOldName, const char *pNewName)
+{
+  // First make sure the old and new names are both valid.
+  if (pNewName && pOldName && *pOldName && *pNewName) {
+    iterator it = FindIt(pOldName);
+    if(it != end()) {
+      Value *pValue = *it;
+      erase(it);
+      pValue->gpsimObject::new_name(pNewName);
+      add(pValue);
+    }
+  }
+}
+
 void Symbol_Table::add(const char *new_name, const char *new_type, int value)
 {
   if(new_type) {

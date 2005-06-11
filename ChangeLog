@@ -1,4 +1,8 @@
-<<<<<<< ChangeLog
+2005-06-10 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h:
+	Stimuli symbols were not getting added to the symbol table when
+	their name was being changed.
+
 2005-06-10 J.R. Heisey <jrheisey@sourceforge.com>
 	*src/gpsim_object.cc,h: Small change to allow name() call
 	in a const variable context.

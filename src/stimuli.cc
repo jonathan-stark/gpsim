@@ -93,6 +93,21 @@ Stimulus_Node * find_node (Value *sym)
   return ((Stimulus_Node *)0);
 }
 
+void Stimulus_Node::new_name(const char *cPname)
+{
+  const char *cPoldName = name().c_str();
+
+  if (*cPoldName)
+    symbol_table.rename(name().c_str(),cPname);
+
+  gpsimObject::new_name(cPname);
+
+}
+void Stimulus_Node::new_name(string &rName)
+{
+  new_name(rName.c_str());
+}
+
 void add_node(char *node_name)
 {
   
@@ -546,9 +561,9 @@ void Stimulus_Node::time_constant(double new_tc)
 }
 
 //------------------------------------------------------------------------
-stimulus::stimulus(const char *n)
+stimulus::stimulus(const char *cPname)
 {
-  new_name("stimulus");
+  new_name(cPname);
 
   snode = 0;
   bDrivingState = false;
@@ -560,6 +575,19 @@ stimulus::stimulus(const char *n)
   Zth = 250;   // Ohms
   Cth = 0;     // Farads
   nodeVoltage = 0.0; // Volts
+}
+void stimulus::new_name(const char *cPname)
+{
+  const char *cPoldName = name().c_str();
+
+  if (*cPoldName)
+    symbol_table.rename(name().c_str(),cPname);
+
+  gpsimObject::new_name(cPname);
+}
+void stimulus::new_name(string &rName)
+{
+  new_name(rName.c_str());
 }
 
 stimulus::~stimulus(void)

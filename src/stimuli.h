@@ -124,6 +124,9 @@ public:
 
   void time_constant(double new_tc);
 
+  virtual void new_name(const char *);
+  virtual void new_name(string &);
+
   // When the node is settling (due to RC charging/discharging)
   // it's voltage is periodically updated by invoking callback()
   virtual void callback(void);
@@ -166,6 +169,8 @@ public:
   stimulus(const char *n=0);
   virtual ~stimulus();
 
+  virtual void new_name(const char *);
+  virtual void new_name(string &);
 
   // Functions for accessing/manipulating the thevenin voltage and impedance.
   virtual double get_Vth() { return Vth; }
