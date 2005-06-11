@@ -96,6 +96,7 @@ public:
   void remove_module(Module * m);
   void add(const char *symbol_name, const char *symbol_type, int value);
   Value *remove(string &);
+  void rename(const char *pOldName, const char *pNewName);
   void dump_all(void);
   void dump_one(const char *s);
   void dump_one(string *s);
