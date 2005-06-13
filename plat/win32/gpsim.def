@@ -249,6 +249,8 @@ EXPORTS
     ?new_address@Program_Counter@@UAEXI@Z
     ?new_name@gpsimObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_name@gpsimObject@@UAEXPBD@Z
+    ?new_name@stimulus@@UAEXPBD@Z
+    ?new_name@stimulus@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_message@TriggerObject@@UAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?new_message@TriggerObject@@UAEXPAD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
