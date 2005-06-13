@@ -1,3 +1,9 @@
+2005-06-13 J.R. Heisey <jrheisey@sourceforge.com>
+	*src/cmd_manager.cc, src/cmd_manager.h, src/modules.cc,
+	cli/cmd_shell.cc: Fixed introduced bug where the command
+	line interface from a library module was not accessible.
+	A ! bang character alone lists the command line interfaces.
+
 2005-06-13 Scott Dattalo <scott@dattalo.com>
 	* configure.ac: Fixed recently introduced typo.
 	* src/attributes.cc: Cycle counter attribute now prints correctly again.
