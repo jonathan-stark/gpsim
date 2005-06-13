@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "gpsim_time.h"
 #include "protocol.h"
+#include "../config.h"
 
 //========================================================================
 // Attribute wrappers
@@ -161,6 +162,17 @@ public:
   {
     p.EncodeUInt64(cycles.get());
   }
+  virtual string toString()
+  {
+    char buf[256];
+    gint64 i;
+    get(i);
+    long long int j = i;
+    snprintf(buf,sizeof(buf),"%" PRINTF_INT64_MODIFIER
+	     "d = 0x%08" PRINTF_INT64_MODIFIER "X",j,j);
+    return string(buf);
+  }
+
 };
 
 //========================================================================

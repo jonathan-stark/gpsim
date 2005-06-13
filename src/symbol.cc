@@ -287,7 +287,7 @@ void Symbol_Table::dump_one(string *s)
 {
   Value *val = find(*s);
   if(val)
-    cout << val->toString() << endl;
+    cout << val->name() << " = " << val->toString() << endl;
 }
 
 void Symbol_Table::dump_one(const char *str)
@@ -305,7 +305,8 @@ void Symbol_Table::dump_all(void)
   while( sti != end()) {
     Value *val = *sti;
     if(val &&(typeid(*val) != typeid(line_number_symbol)))
-      cout << val->name() << ": " << val->showType() << endl;
+      cout << val->name() << " = " << val->toString() << endl;
+      //cout << val->name() << ": " << val->showType() << endl;
     last = sti;
     sti++;
     if(sti != end() && (*last)->name() == (*sti)->name()) {

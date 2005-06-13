@@ -456,10 +456,14 @@ sfr_register::sfr_register(Processor *_cpu)
 //--------------------------------------------------
 // member functions for the InvalidRegister class
 //--------------------------------------------------
+#define AN_INVALID_ADDRESS 0xffffffff
 void InvalidRegister::put(unsigned int new_value)
 {
-  cout << "attempt write to invalid file register: address 0x" << 
-    hex << address<< ", value 0x" << new_value << '\n';
+  cout << "attempt write to invalid file register\n";
+
+  if (address != AN_INVALID_ADDRESS)
+    cout << "    address 0x" << hex << address << ','; 
+  cout << "   value 0x" << hex << new_value << endl;
 
   bp.halt();
   trace.raw(write_trace.get() | value.get());
@@ -470,6 +474,8 @@ void InvalidRegister::put(unsigned int new_value)
 unsigned int InvalidRegister::get(void)
 {
   cout << "attempt read from invalid file register\n";
+  if (address != AN_INVALID_ADDRESS)
+    cout << "    address 0x" << hex << address << endl; 
 
   trace.raw(read_trace.get() | value.get());
 
@@ -488,6 +494,7 @@ InvalidRegister::InvalidRegister(unsigned int at_address)
 InvalidRegister::InvalidRegister(void)
 {
   new_name("INVALID_REGISTER");
+  address = AN_INVALID_ADDRESS;
 }
 
 

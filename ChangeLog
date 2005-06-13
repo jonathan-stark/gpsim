@@ -1,3 +1,13 @@
+2005-06-13 Scott Dattalo <scott@dattalo.com>
+	* configure.ac: Fixed recently introduced typo.
+	* src/attributes.cc: Cycle counter attribute now prints correctly again.
+	* src/processor.cc, src/processor.h: fixed bug in
+	IsAddressInRange()  method, also reversed return value to match
+	meaning of name (now returns true if the address is in range). 
+	* src/symbol.cc: Symbol table dump was not showing symbol values.
+	* src/registers.cc: fixed warning message for when invalid
+	registers are accessed.
+
 2005-06-10 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h:
 	Stimuli symbols were not getting added to the symbol table when
