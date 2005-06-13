@@ -33,6 +33,7 @@ public:
   ISimConsole &GetConsole() {
     return GetUserInterface().GetConsole();
   }
+  void ListToConsole();
 
 private:
   struct lessThan : binary_function<ICommandHandler*, ICommandHandler*, bool> {
