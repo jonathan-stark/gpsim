@@ -545,13 +545,17 @@ void module_load_module(const char *module_type, const char *module_name)
 }
 
 Module_Library * module_get_library(const char* name) {
+  string sPath(name);
+  FixupLibraryName(sPath);
+  string sName;
+  module_canonical_name(sPath, sName);
 
   for (module_iterator = module_list.begin();  
        module_iterator != module_list.end(); 
        ++module_iterator) {
 
     Module_Library *t = *module_iterator;
-    if (strcmp(t->name(), name) == 0)
+    if (strcmp(t->name(), sName.c_str()) == 0)
       return t;
   }
   return NULL;

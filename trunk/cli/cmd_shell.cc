@@ -33,12 +33,18 @@ void cmd_shell::shell(String *cmd)
   sTarget = cmd->getVal();
   char *pArguments = (char *)sTarget.c_str();
 
-  while(pArguments != NULL && !isspace(*pArguments))
+  if(*pArguments == '\0') {
+     CCommandManager::GetManager().ListToConsole();
+  }
+  else {
+
+    while(pArguments != NULL && *pArguments != '\0' && !isspace(*pArguments))
+      pArguments++;
+    *pArguments = 0;
     pArguments++;
-  *pArguments = 0;
-  pArguments++;
-  int iResult;
-  iResult = CCommandManager::GetManager().Execute(sTarget, pArguments);
-  if (iResult == CMD_ERR_PROCESSORNOTDEFINED)
-    printf("%s module command processor not found\n", sTarget.c_str());
+    int iResult;
+    iResult = CCommandManager::GetManager().Execute(sTarget, pArguments);
+    if (iResult == CMD_ERR_PROCESSORNOTDEFINED)
+      printf("%s module command processor not found\n", sTarget.c_str());
+  }
 }
