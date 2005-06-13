@@ -252,7 +252,7 @@ void Processor::create_invalid_registers (void)
       if (0 == registers[i])
       {
 	  registers[i] = new InvalidRegister(i);
-	  registers[i]->address = 0;    // BAD_REGISTER;
+	  //registers[i]->address = 0;    // BAD_REGISTER;
 	  registers[i]->alias_mask = 0;
 	  registers[i]->value.put(0);	// unimplemented registers are read as 0
 
@@ -900,7 +900,7 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
 {
   unsigned int line=0;
     
-  if(!cpu || cpu->IsAddressInRange(address))
+  if(!cpu || !cpu->IsAddressInRange(address))
     return INVALID_VALUE;
 
   switch(get_hll_mode()) {
@@ -999,7 +999,7 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
 //-------------------------------------------------------------------
 int ProgramMemoryAccess::clear_break_at_address(unsigned int address, 
                                                 instruction * pInstruction) {
-  if(!cpu ||cpu->IsAddressInRange(address))
+  if(!cpu || !cpu->IsAddressInRange(address))
     return -1;
 
   instruction **ppAddressLocation = &cpu->program_memory[cpu->map_pm_address2index(address)];
@@ -1318,7 +1318,7 @@ void Processor::Debug()
 instruction &ProgramMemoryAccess::operator [] (unsigned int address)
 {
   //cout << "pma[0x"<< hex << address << "]\n";
-  if(!cpu ||cpu->IsAddressInRange(address))
+  if(!cpu || !cpu->IsAddressInRange(address))
     return bad_instruction;
 
   return *cpu->program_memory[cpu->map_pm_address2index(address)];
