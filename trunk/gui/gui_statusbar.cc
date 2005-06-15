@@ -316,7 +316,12 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
    * send information back to the gui
    */
 
+  Program_Counter * pPC;
+  ProgramMemoryAccess* pPMA;
+  pPMA = dynamic_cast<ProgramMemoryAccess*>(ma);
+
   if(gp->cpu && gp->cpu->pc) {
+    pPC = pPMA == NULL ? gp->cpu->pc : pPMA->GetProgramCounter();
     StatusBarXREF *cross_reference;
 
     cross_reference = new StatusBarXREF();
@@ -324,7 +329,7 @@ void StatusBar_Window::NewProcessor(GUI_Processor *_gp, MemoryAccess *_ma)
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) this;
   
-    gp->cpu->pc->add_xref((gpointer) cross_reference);
+    pPC->add_xref((gpointer) cross_reference);
 
   }
 

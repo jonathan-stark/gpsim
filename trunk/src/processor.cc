@@ -1561,6 +1561,14 @@ void ProgramMemoryAccess::set_PC(unsigned int new_pc)
     return cpu->pc->put_value(new_pc);
 }
 
+Program_Counter *ProgramMemoryAccess::GetProgramCounter(void)
+{
+  if(cpu)
+    return cpu->pc;
+
+  return 0;
+}
+
 void ProgramMemoryAccess::put_opcode_start(unsigned int addr, unsigned int new_opcode)
 {
 

@@ -125,7 +125,7 @@ static struct {
     GList *combo_strings;        // list of strings for combo
     char *string;                // current string, extracted from entry
 } searchdlg = {0,0,-1,0,0,0,0,0,0,0};
-static bool bSearchdlgInitialized = true;
+static bool bSearchdlgInitialized = false;
 
 
 static int dlg_x=200, dlg_y=200;
@@ -171,6 +171,18 @@ BreakPointInfo::BreakPointInfo()
   //pixel = 0;
   //font_center = 0;
   pos = 0;
+  break_widget = 0;
+  canbreak_widget = 0;
+}
+
+BreakPointInfo::BreakPointInfo(BreakPointInfo & Dup)
+{
+  address = Dup.address; 
+  index = Dup.index;
+  line = Dup.line;
+  //pixel = 0;
+  //font_center = 0;
+  pos = Dup.pos;
   break_widget = 0;
   canbreak_widget = 0;
 }
@@ -367,6 +379,25 @@ void CFormattedTextFragment::SetText(
 		  m_length);
 }
 
+void SourceBrowserAsm_Window::DetermineBreakinfos(int id) {
+  GList *iter;
+  for(iter=sa_xlate_list[id];iter!=0;)
+    {
+      GList *next=iter->next;
+      free( (BreakPointInfo*)iter->data );
+      g_list_remove(iter,iter->data);
+      iter=next;
+    }
+  sa_xlate_list[id]=0;
+  for(iter=s_global_sa_xlate_list[id];iter!=0;) {
+    GList *next=iter->next;
+    BreakPointInfo *pGlobal = (BreakPointInfo*)iter->data;
+    BreakPointInfo *entry= new BreakPointInfo(*pGlobal);
+    sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
+    iter=next;
+  }
+}
+
 void SourceBrowserAsm_Window::SetPC(int address)
 { 
   BreakPointInfo *e; 
@@ -411,6 +442,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
     return;
   }
 
+  GtkWidget *pSourceWindow = pages[id].source_text;
   new_pcw = pages[id].source_pcwidget;
 
   row = pma->get_src_line(address);
@@ -636,7 +668,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
       if(address!=INVALID_VALUE)
-	popup_sbaw->gp->cpu->pc->put_value(address);
+        popup_sbaw->pma->set_PC(address);
       break;
 
     case MENU_RUN_HERE:
@@ -645,7 +677,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
       if(address!=INVALID_VALUE)
-	popup_sbaw->gp->cpu->run_to_address(address);
+        popup_sbaw->gp->cpu->run_to_address(address);
       break;
 
     case MENU_BP_HERE:
@@ -1438,7 +1470,6 @@ static void AddCache(FileContext::Cache &FileCache, const char *pFragment, int l
  */
 void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
 {
-  int totallinesheight;
   bool instruction_done;
   char text_buffer[256];
   int cblock=0;
@@ -1446,7 +1477,6 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   int index;
 
   int line=0;
-  GList *iter;
   FileContext::Cache &FileCache = fc->m_cache;
 
   // get a manageable pointer to the processor
@@ -1455,15 +1485,6 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   gtk_text_freeze(GTK_TEXT(pSourceWindow));
 
   gtk_editable_delete_text(GTK_EDITABLE(pSourceWindow),0,-1);
-  for(iter=sa_xlate_list[id];iter!=0;)
-    {
-      GList *next=iter->next;
-      free( (BreakPointInfo*)iter->data );
-      g_list_remove(iter,iter->data);
-      iter=next;
-    }
-  sa_xlate_list[id]=0;
-
   remove_all_points(this);
 
   // Check the type of file (ASM och C), and seperate the pattern matching
@@ -1472,19 +1493,18 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   // the sa_xlate_list[id] structure list with values, so that the pixmaps
   // are put on the right place.
 
-  totallinesheight=0;
 
   if(FileCache.size() == 0) {
+    s_totallinesheight[id]=0;
     InitCache(FileCache);
     ParseSourceToFormattedText(
       id,
-      totallinesheight,
+      s_totallinesheight[id],
       instruction_done,
       text_buffer,
       cblock,
       index,
       line,
-      iter,
       FileCache,
       cpu,
       pSourceWindow,
@@ -1497,10 +1517,11 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
     CFormattedTextFragment* pFragment = (CFormattedTextFragment*)*it;
     pFragment->SetText(GTK_TEXT(pSourceWindow));
   }
+  DetermineBreakinfos(id);
 
   gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
 		      2*PIXMAP_SIZE,
-		      totallinesheight+5*PIXMAP_SIZE);
+		      s_totallinesheight[id]+5*PIXMAP_SIZE);
   gtk_text_thaw(GTK_TEXT(pSourceWindow));
 
 }
@@ -1513,13 +1534,21 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
   int &cblock,
   int &index,
   int &line,
-  GList *iter,
   FileContext::Cache &FileCache,
   Processor *cpu,
   GtkWidget *pSourceWindow,
   FileContext *fc,
   int file_id  ) {
+  GList *iter;
 
+  for(iter=s_global_sa_xlate_list[id];iter!=0;)
+    {
+      GList *next=iter->next;
+      free( (BreakPointInfo*)iter->data );
+      g_list_remove(iter,iter->data);
+      iter=next;
+    }
+  s_global_sa_xlate_list[id]=0;
   BreakPointInfo *entry;
   char *p;
 
@@ -1660,7 +1689,7 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
       (CFormattedTextFragment::s_lineascent - 
        CFormattedTextFragment::s_linedescent) - 
       PIXMAP_SIZE/2 + PAGE_BORDER;
-    sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
+    s_global_sa_xlate_list[id]=g_list_append(s_global_sa_xlate_list[id],entry);
     line++;
   }
 
@@ -1754,7 +1783,9 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
     cross_reference->data = (gpointer) 0;
   
     gp->cpu->pc->add_xref((gpointer) cross_reference);
-
+    if(gp->cpu->pc != pma->GetProgramCounter()) {
+      pma->GetProgramCounter()->add_xref((gpointer) cross_reference);
+    }
   }
 
   if(gp->cpu->files.nsrc_files() != 0) {
@@ -1788,7 +1819,12 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
 
         id = add_page(this,file_id);
 
-        SetText(id,file_id, fc);
+        static bool bSetTextOld = false;
+        if(bSetTextOld)
+          SetTextOld(id,file_id, fc);
+        else
+          SetText(id,file_id, fc);
+
        } else {
         if(verbose)
           printf ("SourceBrowserAsm_new_source: skipping file: <%s>\n",
@@ -2237,9 +2273,11 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
   int tlen;
   int id;
 
-  if(!sbaw->source_loaded) return;
+  SourceBrowserAsm_Window * pSrcWindow = popup_sbaw;
+  if(!pSrcWindow->source_loaded) return;
     
-  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(sbaw->notebook));
+  id = gtk_notebook_get_current_page(GTK_NOTEBOOK(pSrcWindow->notebook));
+  SourcePage & SrcPage = pSrcWindow->pages[id];
 
   if(id != searchdlg.lastid)
     { //  Changed notebook tab since last search reset search.
@@ -2271,156 +2309,155 @@ static void find_cb(GtkWidget *w, SourceBrowserAsm_Window *sbaw)
       // search list to prevent duplicates
       l=searchdlg.combo_strings;
       while(l)
-	{
-	  if(!strcmp((char*)l->data,p))
-	    {
-	      // the string p already is in list
-	      // move it first?, FIXME
+      {
+        if(!strcmp((char*)l->data,p))
+        {
+          // the string p already is in list
+          // move it first?, FIXME
 
-	      searchdlg.string = (char*)l->data;
-	      break;
-	    }
-
-	  l=l->next;
-	}
+          searchdlg.string = (char*)l->data;
+          break;
+        }
+        l=l->next;
+      }
       if(l == 0)
-	{ // we didn't find string in history, create a new one
-	  searchdlg.string=(char*)malloc(strlen(p)+1);
-	  strcpy(searchdlg.string,p);
-	  searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
-	  gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
-	}
+      { // we didn't find string in history, create a new one
+        searchdlg.string=(char*)malloc(strlen(p)+1);
+        strcpy(searchdlg.string,p);
+        searchdlg.combo_strings = g_list_prepend(searchdlg.combo_strings,searchdlg.string);
+        gtk_combo_set_popdown_strings(GTK_COMBO(searchdlg.entry),searchdlg.combo_strings);
+      }
 
       // initialize variables for a new search
       searchdlg.found=0;
       searchdlg.looped=0;
-      searchdlg.i = sbaw->getBPatPixel(id,0)->index;
+      searchdlg.i = pSrcWindow->getBPatPixel(id,0)->index;
       searchdlg.start = searchdlg.i; // remember where we started searching
     }
 
-  tlen =gtk_text_get_length(GTK_TEXT(sbaw->pages[id].source_text));
-  j=0;
-  for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
+    tlen =gtk_text_get_length(GTK_TEXT(SrcPage.source_text));
+    j=0;
+    for(;searchdlg.i>=0 && searchdlg.i<tlen;searchdlg.i+=direction)
     {
       if(searchdlg.string[j]=='\0')
-	{  // match! We found the string in text.
-	  int start_i, end_i;
+      {  // match! We found the string in text.
+        int start_i, end_i;
 	    
-	  searchdlg.found++;
+        searchdlg.found++;
 
-	  start_i = k+ (direction==-1);      // comparing backwards means
-	  end_i = searchdlg.i+ (direction==-1); // we have to add 1
+        start_i = k+ (direction==-1);      // comparing backwards means
+        end_i = searchdlg.i+ (direction==-1); // we have to add 1
 
-	  if(start_i>end_i)
-	    {
-	      int temp=end_i;  // swap, so that k is the smaller
-	      end_i=start_i;
-	      start_i=temp;
-	    }
-	  assert(start_i<end_i);
-	  if(start_i==searchdlg.lastfound)
-	    {  // we found the same position as last time
-	      // happens when searching backwards
-	      j=0;
-	      if(direction==1)
-		searchdlg.i++; // skip this match
-	      else
-		searchdlg.i--; // skip this match
-	      last_matched=0;
-	    }
-	  else
-	    {
-	      int pixel;
-	      float inc;
+        if(start_i>end_i)
+        {
+          int temp=end_i;  // swap, so that k is the smaller
+          end_i=start_i;
+          start_i=temp;
+        }
+        assert(start_i<end_i);
+        if(start_i==searchdlg.lastfound)
+        { // we found the same position as last time
+          // happens when searching backwards
+          j=0;
+          if(direction==1)
+            searchdlg.i++; // skip this match
+          else
+            searchdlg.i--; // skip this match
+          last_matched=0;
+        }
+        else
+        {
+          int pixel;
+          float inc;
 
-	      searchdlg.lastfound=start_i;
+          searchdlg.lastfound=start_i;
 
-	      pixel = sbaw->getBPatPixel(id,start_i)->pos + 12;
-	      inc = (float)GTK_ADJUSTMENT(GTK_TEXT(sbaw->pages[id].source_text)->vadj)->page_increment;
-	      gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( sbaw->pages[id].source_text)->vadj),
-				       pixel-inc/2);
-	      //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
+          pixel = pSrcWindow->getBPatPixel(id,start_i)->pos + 12;
+          inc = (float)GTK_ADJUSTMENT(GTK_TEXT(SrcPage.source_text)->vadj)->page_increment;
+          gtk_adjustment_set_value(GTK_ADJUSTMENT( GTK_TEXT( SrcPage.source_text)->vadj),
+				          pixel-inc/2);
+          //printf("%d: setting adjustment to %g\n",__LINE__,pixel-inc/2);
 
-	      gtk_editable_select_region(GTK_EDITABLE(sbaw->pages[id].source_text),start_i,end_i);
-	      return;
-	    }
-	}
+          gtk_editable_select_region(GTK_EDITABLE(SrcPage.source_text),start_i,end_i);
+          return;
+        }
+      }
       if(searchdlg.looped && (searchdlg.start == searchdlg.i))
-	{
-	  if(searchdlg.found==0)
-	    {
-	      gui_message("Not found");
-	      return;
-	    }
-	  else if(searchdlg.found==1)
-	    {
-	      gui_message("Just a single occurance in text");
+      {
+        if(searchdlg.found==0)
+        {
+          gui_message("Not found");
+          return;
+        }
+        else if(searchdlg.found==1)
+        {
+          gui_message("Just a single occurance in text");
 
-	      // so that the next next call marks text too, we do:
-	      searchdlg.found=0;
-	      searchdlg.looped=0;
-	      searchdlg.lastfound=-1;
-	      return;
-	    }
-	}
+          // so that the next next call marks text too, we do:
+          searchdlg.found=0;
+          searchdlg.looped=0;
+          searchdlg.lastfound=-1;
+          return;
+        }
+      }
 
       // get another character
-      char1=GTK_TEXT_INDEX(GTK_TEXT(sbaw->pages[id].source_text),(unsigned)searchdlg.i);
+      char1=GTK_TEXT_INDEX(GTK_TEXT(SrcPage.source_text),(unsigned)searchdlg.i);
       if(direction==1)
-	char2=searchdlg.string[j];
+        char2=searchdlg.string[j];
       else
-	char2=searchdlg.string[strlen(searchdlg.string)-1-j];
+        char2=searchdlg.string[strlen(searchdlg.string)-1-j];
       //FIXME, many calls to strlen
 
       if(casesensitive==FALSE)
-	{
-	  char1=toupper(char1); // FIXME, what about native letters?
-	  char2=toupper(char2);
-	}
+      {
+        char1=toupper(char1); // FIXME, what about native letters?
+        char2=toupper(char2);
+      }
 
       if(char1!=char2)
-	{                   // if these characters don't match
-	  j=0;            // set search index for string back to zero
-	  last_matched=0; // char in this loop didn't match
-	}
+      {                   // if these characters don't match
+        j=0;            // set search index for string back to zero
+        last_matched=0; // char in this loop didn't match
+      }
       else
-	{
-	  if(!last_matched)
-	    {
-	      k=searchdlg.i;     // remember first matching index for later
-	      last_matched=1; // char in this loop matched
-	    }
-	  j++;  // forward string index to compare next char
-	}
+      {
+        if(!last_matched)
+        {
+          k=searchdlg.i;     // remember first matching index for later
+          last_matched=1; // char in this loop matched
+        }
+        j++;  // forward string index to compare next char
+      }
 	
     }
-  // the string was not found in text between index 'search start' and
-  // one end of text (index '0' or index 'tlen')
+    // the string was not found in text between index 'search start' and
+    // one end of text (index '0' or index 'tlen')
 
-  // We ask user it he want to search from other end of file
-  if(direction==1)
+    // We ask user it he want to search from other end of file
+    if(direction==1)
     {
       if(gui_question("End of file\ncontinue from start?","Yes","No")==(int)TRUE)
-	{
-	  searchdlg.i=0;
-	  searchdlg.looped=1;
-	  find_cb(w,sbaw);  // tail recursive, FIXME
-	  return;
-	}
+      {
+        searchdlg.i=0;
+        searchdlg.looped=1;
+        find_cb(w,pSrcWindow);  // tail recursive, FIXME
+        return;
+      }
       else
-	searchdlg.i=tlen-1;
+        searchdlg.i=tlen-1;
     }
-  else
+    else
     {
       if(gui_question("Top of file\ncontinue from end?","Yes", "No")==(int)TRUE)
-	{
-	  searchdlg.i=tlen-1;
-	  searchdlg.looped=1;
-	  find_cb(w,sbaw);  // tail recursive, FIXME
-	  return;
-	}
+      {
+        searchdlg.i=tlen-1;
+        searchdlg.looped=1;
+        find_cb(w,pSrcWindow);  // tail recursive, FIXME
+        return;
+      }
       else
-	searchdlg.i=0;
+        searchdlg.i=0;
     }
 }
 
@@ -2606,6 +2643,7 @@ void SourceBrowserAsm_Window::Build(void)
 
 }
 
+
 void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 {
   pma = new_pma;
@@ -2658,15 +2696,21 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
   current_page = 0xffffffff;
 
   for(int i=0; i<SBAW_NRFILES; i++) {
+    if(!bGlobalInitialized) {
+      s_global_sa_xlate_list[i] = 0;
+    }
     sa_xlate_list[i] = 0;
   }
-
+  bGlobalInitialized = true;
   if(enabled)
     Build();
 
 }
 
-
+bool    SourceBrowserAsm_Window::bGlobalInitialized = false;
+GList * SourceBrowserAsm_Window::s_global_sa_xlate_list[SBAW_NRFILES];
+int     SourceBrowserAsm_Window::s_totallinesheight[SBAW_NRFILES];
+  
 //========================================================================
 //
 // SourceBrowserParent_Window
@@ -2696,8 +2740,6 @@ void SourceBrowserParent_Window::Build(void)
 
 void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
 {
-
-
   list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
   list <ProgramMemoryAccess *> :: iterator pma_iterator;
 
@@ -2707,30 +2749,30 @@ void SourceBrowserParent_Window::NewProcessor(GUI_Processor *gp)
   int child = 1;
   SourceBrowserAsm_Window *sbaw=0;
   while( (sbaw_iterator != children.end()) ||
-	 (pma_iterator != gp->cpu->pma_context.end()))
+        (pma_iterator != gp->cpu->pma_context.end()))
+  {
+    char child_name[64];
+    if(sbaw_iterator == children.end())
     {
-      char child_name[64];
-      if(sbaw_iterator == children.end())
-	{
-	  child++;
-	  sprintf(child_name,"source_browser%d",child);
-	  sbaw = new SourceBrowserAsm_Window(gp,child_name);
-	  children.push_back(sbaw);
-	}
-      else
-	sbaw = *sbaw_iterator++;
-
-      if(pma_iterator != gp->cpu->pma_context.end()) 
-	{
-	  sbaw->set_pma(*pma_iterator);
-	  pma_iterator++;
-	}
-      else
-	{
-	  sbaw->set_pma(gp->cpu->pma);
-	}
-
+      child++;
+      sprintf(child_name,"source_browser%d",child);
+      sbaw = new SourceBrowserAsm_Window(gp,child_name);
+      children.push_back(sbaw);
     }
+    else
+      sbaw = *sbaw_iterator++;
+
+    if(pma_iterator != gp->cpu->pma_context.end()) 
+    {
+      sbaw->set_pma(*pma_iterator);
+      pma_iterator++;
+    }
+    else
+    {
+      sbaw->set_pma(gp->cpu->pma);
+    }
+
+  }
 }
 
 void SourceBrowserParent_Window::SelectAddress(int address)
@@ -2824,5 +2866,313 @@ int SourceBrowserParent_Window::set_config()
 
   return 0;
 }
+
+/** SetTextOld()
+  *
+  * I have optimized this function. However I wanted to keep
+  * it around a while so I can determine whether bugs that
+  * I am finding were here in the old version.
+  */
+
+static void text_insert(SourceBrowserAsm_Window *sbaw,
+			int id,
+			GtkStyle *style, 
+			char *text, 
+			int length)
+{
+
+  GdkFont *font = gtk_style_get_font(style);
+
+  gtk_text_insert(GTK_TEXT(sbaw->pages[id].source_text),
+		  font,
+		  &style->fg[GTK_STATE_NORMAL],
+		  &style->base[GTK_STATE_NORMAL],
+		  text,
+		  length);
+}
+
+void SourceBrowserAsm_Window::SetTextOld(int id, int file_id, FileContext *fc)
+{
+  int totallinesheight;
+  bool instruction_done;
+  int lineascent, linedescent;
+  char *p;
+  char text_buffer[256];
+  int cblock=0;
+
+  int index;
+
+  int line=0;
+  BreakPointInfo *entry;
+  GList *iter;
+
+  // get a manageable pointer to the processor
+  Processor *cpu = gp->cpu;
+    
+  gtk_text_freeze(GTK_TEXT(pages[id].source_text));
+
+  gtk_editable_delete_text(GTK_EDITABLE(pages[id].source_text),0,-1);
+  for(iter=sa_xlate_list[id];iter!=0;)
+    {
+      GList *next=iter->next;
+      free( (BreakPointInfo*)iter->data );
+      g_list_remove(iter,iter->data);
+      iter=next;
+    }
+  sa_xlate_list[id]=0;
+
+  remove_all_points(this);
+
+  // Check the type of file (ASM och C), and seperate the pattern matching
+  // into set_text_asm() and set_text_c().
+  // These functions fill the page with the colored source, and also fills
+  // the sa_xlate_list[id] structure list with values, so that the pixmaps
+  // are put on the right place.
+
+  totallinesheight=0;
+
+  cpu->files.rewind(file_id);
+
+  while(cpu->files.gets(file_id, text_buffer, 256))
+  {
+    char *end, *q;
+
+    lineascent=-1;
+    linedescent=-1;
+    instruction_done=false; // to seperate instruction from other text (symbols)
+
+    index=gtk_text_get_length(GTK_TEXT(pages[id].source_text));
+
+    p=text_buffer;
+
+    if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::ASM_MODE) {
+	
+      if(*p=='#' || !strncmp(p,"include",7))
+      { // not a label
+        q=p;
+	q++;
+	while(isalnum(*q) || *q=='_')
+	  q++;
+
+	text_insert(this,id,default_text_style, p, q-p);
+
+
+	p=q;
+	instruction_done=true; // well, variable misnamed
+      }
+      else if( (isalnum(*p) || *p=='_'))
+	{ // a label
+	  // locate end of label
+	  q=p;
+	  while(isalnum(*q) || *q=='_')
+	    q++;
+
+	  GdkFont *font = gtk_style_get_font(label_text_style);
+
+	  if (lineascent < font->ascent)
+	    lineascent = font->ascent;
+	  if (linedescent < font->descent)
+	    linedescent = font->descent;
+
+	  text_insert(this,id,label_text_style, text_buffer, q-p);
+
+
+	  // advance the pointer p
+	  p=q;
+	}
+    }
+
+    // 'end' is end of line
+    end = text_buffer + strlen(text_buffer);
+
+    // loop through the rest of the line
+    while( p < end )
+      {
+
+	if(!source_line_represents_code(cpu,fc,line+1)) {
+	  {
+	    GdkFont *font = gtk_style_get_font(instruction_text_style);
+	    if (lineascent < font->ascent)
+	      lineascent = font->ascent;
+	    if (linedescent < font->descent)
+	      linedescent = font->descent;
+	    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+			    font,
+			      &comment_text_style->fg[GTK_STATE_NORMAL],
+			      &comment_text_style->base[GTK_STATE_NORMAL],
+			    //&comment_text_style->base[GTK_STATE_NORMAL],
+			    //&instruction_text_style->base[GTK_STATE_NORMAL],
+			    p,
+			    -1);
+	    break;
+	  }
+
+	}
+	if(file_id_to_source_mode[file_id]==ProgramMemoryAccess::HLL_MODE)
+	  {
+	    //if(source_line_represents_code(cpu,file_id,line+1))
+	      {
+
+		GdkFont *font = gtk_style_get_font(default_text_style);
+		if (lineascent < font->ascent)
+		  lineascent = font->ascent;
+		if (linedescent < font->descent)
+		  linedescent = font->descent;
+		gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				font,
+				&default_text_style->fg[GTK_STATE_NORMAL],
+				&default_text_style->base[GTK_STATE_NORMAL],
+				p,
+				-1);
+	      }
+	      //else
+	    break;
+
+	  } else {
+	    // Asm mode.
+
+	    if( *p == ';')  { // comment
+
+	      GdkFont *font = gtk_style_get_font(comment_text_style);
+	      if (lineascent < font->ascent)
+		lineascent = font->ascent;
+	      if (linedescent < font->descent)
+		linedescent = font->descent;
+	      gtk_text_insert(GTK_TEXT(pages[id].source_text),
+			      font,
+			      &comment_text_style->fg[GTK_STATE_NORMAL],
+			      &comment_text_style->base[GTK_STATE_NORMAL],
+			      p,
+			      -1);
+
+	      break;
+	    }
+	    else if(isalpha(*p) || *p=='_')
+	      { // instruction, symbol or cblock
+		q=p;
+		while(isalnum(*q) || *q=='_')
+		  q++;
+		if( ( !instruction_done && cblock==0) || !strncasecmp(p,"endc",4) )
+		  {  // instruction or cblock
+		    instruction_done=true;
+		    cblock=0;
+
+		    GdkFont *font = gtk_style_get_font(instruction_text_style);
+		    if (lineascent < font->ascent)
+		      lineascent = font->ascent;
+		    if (linedescent < font->descent)
+		      linedescent = font->descent;
+
+		    if(!strncasecmp(p,"cblock",6))
+		      cblock=1;
+
+
+		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				    font,
+				    &instruction_text_style->fg[GTK_STATE_NORMAL],
+				    &instruction_text_style->base[GTK_STATE_NORMAL],
+				    p,
+				    q-p);
+
+		  }
+		else
+		  { // symbol
+
+		    GdkFont *font = gtk_style_get_font(symbol_text_style);
+		    if (lineascent < font->ascent)
+		      lineascent = font->ascent;
+		    if (linedescent < font->descent)
+		      linedescent = font->descent;
+		    gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				    font,
+				    &symbol_text_style->fg[GTK_STATE_NORMAL],
+				    &symbol_text_style->base[GTK_STATE_NORMAL],
+				    p,
+				    q-p);
+		  }
+		p=q;
+	      }
+	    else if( isxdigit(*p))
+	      { // number
+		q=p;
+		if(*p=='0' && toupper(*(p+1))=='X')
+		  q+=2;
+		while(isxdigit(*q))
+		  q++;
+
+		GdkFont *font = gtk_style_get_font(number_text_style);
+		if (lineascent < font->ascent)
+		  lineascent = font->ascent;
+		if (linedescent < font->descent)
+		  linedescent = font->descent;
+		gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				font,
+				&number_text_style->fg[GTK_STATE_NORMAL],
+				&number_text_style->base[GTK_STATE_NORMAL],
+				p,
+				q-p);
+		p=q;
+	      }
+	    else
+	      { // default
+		// FIXME, add a 'whitespace_text_style'
+		// There is a small annoyance here. If the source
+		// initially on a line have whitespace, followed by
+		// a comment. Now if the comment have a smaller font
+		// than the default font then the line will have line
+		// spacing larger than nessesary.
+
+		GdkFont *font = gtk_style_get_font(default_text_style);
+		if (lineascent < font->ascent)
+		  lineascent = font->ascent;
+		if (linedescent < font->descent)
+		  linedescent = font->descent;
+		gtk_text_insert(GTK_TEXT(pages[id].source_text),
+				font,
+				&default_text_style->fg[GTK_STATE_NORMAL],
+				&default_text_style->base[GTK_STATE_NORMAL],
+				p,
+				1);
+		p++;
+	      }
+	  }
+      } //end of while( p < end )
+
+
+    GdkFont *font = gtk_style_get_font(default_text_style);
+    if (lineascent == -1)
+      lineascent = font->ascent;
+    if (linedescent == -1)
+      linedescent = font->descent;
+
+    totallinesheight+=linedescent+lineascent;
+
+    // create an entry in sa_xlate_list for this source line.
+    // 'this source line' is the one in 'buf' with line number
+    // 'line' and index 'index' into text
+    entry= new BreakPointInfo();
+    entry->index=index;
+    entry->line=line;
+    entry->break_widget = 0;
+    entry->canbreak_widget = 0;
+    entry->pos = totallinesheight - (lineascent-linedescent) - PIXMAP_SIZE/2 + PAGE_BORDER;
+    sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
+    line++;
+  }
+
+  // this made the end case of the search simpler once
+  gtk_text_insert(GTK_TEXT(pages[id].source_text),
+		  gtk_style_get_font(default_text_style),
+		  &default_text_style->fg[GTK_STATE_NORMAL],
+		  &default_text_style->base[GTK_STATE_NORMAL],
+		  " ",
+		  1);
+  gtk_layout_set_size(GTK_LAYOUT(pages[id].source_layout),
+		      2*PIXMAP_SIZE,
+		      totallinesheight+5*PIXMAP_SIZE);
+  gtk_text_thaw(GTK_TEXT(pages[id].source_text));
+
+}
+
 
 #endif // HAVE_GUI
