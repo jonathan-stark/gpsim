@@ -1,3 +1,11 @@
+2005-06-14 J.R. Heisey <jrheisey@sourceforge.com>
+	gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_statusbar.cc,
+	src/processor.cc, src/processor.h, src/registers.h:
+	Fixed some problems with the source window optimization.
+	Fixed problem with the text search dialog not searching
+	alternate source windows.
+	Fixed problem with Set PC Here from an alternate window.
+
 2005-06-13 J.R. Heisey <jrheisey@sourceforge.com>
 	*src/cmd_manager.cc, src/cmd_manager.h, src/modules.cc,
 	cli/cmd_shell.cc: Fixed introduced bug where the command
