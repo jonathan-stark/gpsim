@@ -91,6 +91,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   char *get_opcode_name(unsigned int addr, char *buffer, unsigned int size);
   virtual unsigned int get_PC(void);
   virtual void set_PC(unsigned int);
+  virtual Program_Counter *GetProgramCounter(void);
+
   void remove(unsigned int address, instruction *bp_instruction);
 
   void put_opcode(unsigned int addr, unsigned int new_opcode);

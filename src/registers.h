@@ -414,6 +414,11 @@ public:
     return value;
   }
 
+  virtual void set_PC(unsigned int new_value) {
+    value = new_value;
+    this->update();
+  }
+
   // initialize the dynamically allocated trace type
   virtual void set_trace_command(unsigned int);
 

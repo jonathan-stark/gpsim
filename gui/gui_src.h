@@ -77,6 +77,7 @@ public:
   void Set(GtkWidget *, GdkPixmap *, GdkBitmap *);
   void Clear(GtkWidget *, GdkPixmap *, GdkBitmap *);
   BreakPointInfo();
+  BreakPointInfo(BreakPointInfo & Dup);
   
 };
 
@@ -154,6 +155,8 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   // Where the source is stored:
 
   SourcePage pages[SBAW_NRFILES];
+  static bool bGlobalInitialized;
+  static GList *s_global_sa_xlate_list[SBAW_NRFILES];
   GList *sa_xlate_list[SBAW_NRFILES];
 
   int layout_offset;
@@ -195,6 +198,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   GdkPixmap *pixmap_profile_stop;
 
   PixmapObject canbreak;
+  static int s_totallinesheight[SBAW_NRFILES];
 
   int source_loaded;
 
@@ -213,6 +217,7 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void Update(void);
   virtual void UpdateLine(int address);
   virtual void SetText(int id, int file_id, FileContext *fc);
+  virtual void SetTextOld(int id, int file_id, FileContext *fc);
   void ParseSourceToFormattedText(
     int id,
     int &totallinesheight,
@@ -221,13 +226,13 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
     int &cblock,
     int &index,
     int &line,
-    GList *iter,
     FileContext::Cache &FileCache,
     Processor *cpu,
     GtkWidget *pSourceWindow,
     FileContext *fc,
     int file_id  );
 
+  void DetermineBreakinfos(int id);
   BreakPointInfo *getBPatLine(int id, unsigned int line);
   BreakPointInfo *getBPatPixel(int id, int pixel);
   BreakPointInfo *getBPatIndex(int id, unsigned int index);
