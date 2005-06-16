@@ -147,10 +147,14 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
 {
  public:
 
+  // Something to set a debugger condition on when I want
+  // to debug a specific source window.
+  static int      m_SourceWindowCount;
+  int             m_SourceWindowIndex;
 
-  BreakPointList breakpoints;
-  BreakPointList notify_start_list;
-  BreakPointList notify_stop_list;
+  BreakPointList  breakpoints;
+  BreakPointList  notify_start_list;
+  BreakPointList  notify_stop_list;
 
   // Where the source is stored:
 

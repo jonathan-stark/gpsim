@@ -2659,6 +2659,8 @@ void SourceBrowser_Window::set_pma(ProgramMemoryAccess *new_pma)
 
 SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_name=0)
 {
+  m_SourceWindowIndex = m_SourceWindowCount;
+  m_SourceWindowCount++;
   menu = "<main>/Windows/Source";
 
   window = 0;
@@ -2710,6 +2712,7 @@ SourceBrowserAsm_Window::SourceBrowserAsm_Window(GUI_Processor *_gp, char* new_n
 bool    SourceBrowserAsm_Window::bGlobalInitialized = false;
 GList * SourceBrowserAsm_Window::s_global_sa_xlate_list[SBAW_NRFILES];
 int     SourceBrowserAsm_Window::s_totallinesheight[SBAW_NRFILES];
+int SourceBrowserAsm_Window::m_SourceWindowCount = 0;
   
 //========================================================================
 //
