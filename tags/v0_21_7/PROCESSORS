@@ -1,0 +1,47 @@
+gpsim-0.19.0
+
+Here's a list of supported processors:
+
+12bit:
+-----
+
+12c508, 12c509
+
+16C54
+
+14bit:
+-----
+
+16c61
+
+16c62, 16c62a, 16cr62
+
+16c63 *
+
+16c64, 16c64a, 16cr64  *
+
+16c65, 16c65a  *
+
+16c71
+
+16c74 *
+
+16c83, 16cr83
+
+16c84, 16f84, 16cr84
+
+16f874, 16f877 *
+
+16bit:
+-----
+
+18cxx2 *
+
+Scenix:
+------
+
+
+
+
+
+* These parts are not fully supported

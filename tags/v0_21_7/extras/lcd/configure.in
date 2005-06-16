@@ -1,0 +1,138 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(lcd.cc)
+AM_CONFIG_HEADER(config.h)
+
+dnl AC_CANONICAL_SYSTEM
+
+LCD_MAJOR_VERSION=0
+LCD_MINOR_VERSION=2
+LCD_MICRO_VERSION=4
+LCD_VERSION=$LCD_MAJOR_VERSION.$LCD_MINOR_VERSION.$LCD_MICRO_VERSION
+
+AM_INIT_AUTOMAKE(lcd, $LCD_VERSION)
+
+AC_SUBST(LCD_MAJOR_VERSION)
+AC_SUBST(LCD_MINOR_VERSION)
+AC_SUBST(LCD_MICRO_VERSION)
+AC_SUBST(LCD_VERSION)
+
+dnl Checks for programs.
+AC_PROG_YACC
+
+dnl compilers
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_CXX
+AC_PROG_CXXCPP
+
+dnl AC_PROG_LEX
+AM_PROG_LEX
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+dnl library tools
+AM_PROG_LIBTOOL
+
+
+dnl Checks for libraries.
+dnl Replace `main' with a function in -lfl:
+AC_CHECK_LIB(fl, main)
+dnl Replace `main' with a function in -lreadline:
+
+dnl --enable-gtk1 : link with GTK+ 1.x
+dnl    The default is to link with GTK+ 2.x
+
+AC_ARG_ENABLE(gtk1,
+     [  --enable-gtk1           Use GTK+ 1.x for the gui (deprecated)],
+     [case "${enableval}" in
+       yes) use_gtk1=yes ;;
+       no)  use_gtk1=no ;;
+       *) AC_MSG_ERROR(bad value ${enableval} for --enable-gtk1) ;;
+     esac],[use_gtk1=no])
+
+if test "$use_gtk1" = "no"; then
+  echo linking with GTK+ 2.x
+else
+  echo linking with GTK+ 1.x
+  [
+    use_gtk1=yes
+  ]
+fi
+
+
+if test "$use_gtk1" = "yes"; then
+
+  dnl gtk 1.x
+
+  dnl gtk checks
+  AC_PATH_PROG(GTKCONFIG, gtk-config, no, ${PATH})
+
+  if test $GTKCONFIG = "no"; then
+     AC_MSG_ERROR(Cannot find gtk-config)
+  fi
+
+  LDEXTRA=
+  CFEXTRA=
+  GTK=
+  GDK=
+  GLIB=
+  X_LDFLAGS=`$GTKCONFIG --libs`
+  X_CFLAGS=`$GTKCONFIG --cflags`
+
+else
+  dnl gtk2 checks
+  AC_PATH_PROG(PKGCONFIG, pkg-config, no, ${PATH})
+
+  if test $PKGCONFIG = "no"; then
+    AC_MSG_ERROR(Cannot find pkg-config)
+  fi
+
+  LDEXTRA=
+  CFEXTRA=
+  GTK=
+  GDK=
+  GLIB=
+  X_LDFLAGS=`$PKGCONFIG --libs gtk+-2.0 gthread-2.0`
+  X_CFLAGS=`$PKGCONFIG --cflags gtk+-2.0`
+fi
+
+
+AC_SUBST(X_CFLAGS)
+AC_SUBST(X_LDFLAGS)
+AC_SUBST(GTK)
+AC_SUBST(GDK)
+AC_SUBST(GLIB)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+dnl AC_CHECK_HEADERS(malloc.h sys/file.h unistd.h)
+
+dnl Set lang to C++ after checking for C Gtk; checks after this will use CXX 
+dnl  instead of CC
+AC_LANG_CPLUSPLUS
+
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+AC_TYPE_SIZE_T
+
+dnl Checks for library functions.
+AC_FUNC_ALLOCA
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(strdup strstr strtod strtol strtoul)
+
+AC_OUTPUT( Makefile examples/Makefile)
+
+AC_MSG_RESULT([
+
+lcd-$LCD_VERSION is now configured for $canonical_host_type
+
+  Source directory:     $srcdir
+  Installation prefix:  $prefix
+  C compiler:           $CC $XTRA_CFLAGS $CFLAGS
+  C++ compiler:         $CXX $XTRA_CXXFLAGS $CXXFLAGS
+
+  GTK+ 1.x              $use_gtk1
+
+])
