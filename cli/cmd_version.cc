@@ -39,7 +39,7 @@ static cmd_options cmd_version_options[] =
 cmd_version::cmd_version(void)
 { 
   name = "version";
-
+  abbreviation = "ver";
 
   brief_doc = string("Display the gpsim's version");
 

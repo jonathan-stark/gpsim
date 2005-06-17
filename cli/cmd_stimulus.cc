@@ -92,6 +92,7 @@ static cmd_options cmd_stimulus_options[] =
 cmd_stimulus::cmd_stimulus(void)
 { 
   name = "stimulus";
+  abbreviation = "stim";
 
   brief_doc = string("Create a stimulus");
 

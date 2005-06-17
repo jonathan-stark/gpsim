@@ -39,6 +39,7 @@ static cmd_options cmd_clear_options[] =
 cmd_clear::cmd_clear(void)
 { 
   name = "clear";
+  abbreviation = "cl";
 
     brief_doc = string("Remove a break point");
 

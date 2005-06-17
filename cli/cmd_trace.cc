@@ -52,6 +52,7 @@ static cmd_options cmd_trace_options[] =
 cmd_trace::cmd_trace(void)
 { 
   name = "trace";
+  abbreviation = "tr";
 
     brief_doc = string("Dump the trace history");
 

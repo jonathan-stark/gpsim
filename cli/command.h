@@ -57,6 +57,7 @@ class command
 public:
   struct cmd_options *op;
   char   *name;
+  char   *abbreviation;
   string brief_doc;
   string long_doc;
 
