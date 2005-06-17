@@ -1,3 +1,19 @@
+2005-06-17 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/input.cc: Implemented the	ability to break running 
+	firmware using Ctrl->C key when running under Windows.
+	It would previously exit gpsim.
+
+	* gpsim/main.cc: Changed logic so the -i on the gpsim
+	command line will not attempt to start the gui interface.
+	
+	* cli/cmd_break.cc, cli/cmd_clear.cc, cli/cmd_disasm.cc,
+	cli/cmd_dump.cc, cli/cmd_frequency.cc, cli/cmd_help.cc,
+	cli/cmd_load.cc, cli/cmd_module.cc, cli/cmd_processor.cc,
+	cli/cmd_step.cc, cli/cmd_stimulus.cc, cli/cmd_trace.cc,
+	cli/cmd_version.cc, cli/command.cc, cli/command.h:
+	Implemented command abbreviations. Made abbreviations for
+	several often used commands.
+
 2005-06-14 J.R. Heisey <jrheisey@sourceforge.com>
 	gui/gui_src.h, gui/gui_src_asm.cc, gui/gui_statusbar.cc,
 	src/processor.cc, src/processor.h, src/registers.h:
