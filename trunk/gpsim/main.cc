@@ -42,7 +42,7 @@ using namespace std;
 #include "../src/fopen-path.h"
 #include "../cli/ui_gpsim.h"
 
-bool bUseGUI=false;  // assume that we don't want to use the gui
+bool bUseGUI = true;  // assume that we want to use the gui
 int quit_state;
 
 extern "C" {
@@ -151,14 +151,8 @@ main (int argc, char *argv[])
   char command_str[256];
   poptContext optCon;   /* context for parsing command-line options */
 
-
-#ifdef HAVE_GUI
-  bUseGUI=true;
-#endif 
-
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   //poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
-
 
   welcome();
 
@@ -212,10 +206,12 @@ main (int argc, char *argv[])
   // initialize the gui
   
 #ifdef HAVE_GUI
-  if (gui_init (argc,argv,bUseGUI) != 0) {
-    std::cerr << "Error initialising GUI, reverting to cmd-line mode."
-	      << std::endl;
-    bUseGUI = false;
+  if(bUseGUI) {
+    if (gui_init (argc,argv,bUseGUI) != 0) {
+      std::cerr << "Error initialising GUI, reverting to cmd-line mode."
+	        << std::endl;
+      bUseGUI = false;
+    }
   }
 #endif
 
@@ -292,3 +288,5 @@ main (int argc, char *argv[])
 
   return 0;
 }
+
+
