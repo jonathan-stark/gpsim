@@ -58,13 +58,18 @@ void cmd_help::help(void)
 
   for(int i=0; i<number_of_commands; i++)
     {
-      cout << command_list[i]->name;
+      command * pCmd = command_list[i];
+      cout << pCmd->name;
+      int l = 16 - strlen(pCmd->name);
+      if(pCmd->abbreviation != 0) {
+        cout << ":" << pCmd->abbreviation;
+        l -= strlen(pCmd->abbreviation) + 1;
+      }
 
-      int l = 15 - strlen(command_list[i]->name);
       for(int k=0; k<l; k++)
-	cout << ' ';
+        cout << ' ';
 
-      cout << command_list[i]->brief_doc << '\n';
+      cout << pCmd->brief_doc << '\n';
 	
     }
 }
@@ -72,17 +77,11 @@ void cmd_help::help(void)
 
 void cmd_help::help(const char *cmd)
 {
-
-  for(int i=0; i<number_of_commands; i++)
-    {
-      if(strcmp(cmd, command_list[i]->name) == 0)
-	{
-	  cout << command_list[i]->long_doc << '\n';
-
+  command * pCmd = search_commands(cmd);
+  if(pCmd != 0) {
+	  cout << pCmd->long_doc << '\n';
 	  return;
 	}
-    }
-
   cout << cmd << " is not a valid gpsim command. Try these instead:\n";
   help();
 }

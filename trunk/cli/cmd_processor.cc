@@ -115,6 +115,7 @@ void dump_pins(Processor *cpu)
 cmd_processor::cmd_processor(void)
 { 
   name = "processor";
+  abbreviation = "proc";
 
   brief_doc = string("Select & Display processors");
 

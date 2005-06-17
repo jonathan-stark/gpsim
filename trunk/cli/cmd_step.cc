@@ -40,6 +40,7 @@ static cmd_options cmd_step_options[] =
 cmd_step::cmd_step(void)
 { 
   name = "step";
+  abbreviation = "s";
 
     brief_doc = string("Execute one or more instructions.");
 

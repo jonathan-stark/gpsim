@@ -56,6 +56,7 @@ static cmd_options cmd_module_options[] =
 cmd_module::cmd_module(void)
 { 
   name = "module";
+  abbreviation = "mod";
 
   brief_doc = string("Select & Display modules");
 

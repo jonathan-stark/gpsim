@@ -39,6 +39,7 @@ static cmd_options cmd_disassemble_options[] =
 cmd_disassemble::cmd_disassemble(void)
 { 
   name = "disassemble";
+  abbreviation = "da";
 
     brief_doc = string("Disassemble the current cpu");
 

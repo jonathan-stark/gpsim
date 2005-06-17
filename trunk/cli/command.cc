@@ -100,11 +100,13 @@ command::command(void)
 {
   op = 0;
   name = 0;
+  abbreviation = 0;
   token_value = 0;
 }
 
 command::command(struct cmd_options *options,int tv) 
 { 
+  abbreviation = 0;
   op = options; 
   token_value = tv;
 }
@@ -119,9 +121,10 @@ command *search_commands(const string &s)
   int i=0;
 
   while(i<number_of_commands) {
-
-    if(strcmp(command_list[i]->name, s.c_str()) == 0) {
-      return command_list[i];
+    command * cmd = command_list[i];
+    if(strcmp(cmd->name, s.c_str()) == 0 ||
+      (cmd->abbreviation != 0 && strcmp(cmd->abbreviation, s.c_str()) == 0 )) {
+      return cmd;
     }
 
     i++;
