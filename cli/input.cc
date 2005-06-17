@@ -240,9 +240,18 @@ void initialize_threads(void)
 #endif
 }
 
+#ifdef _WIN32
+void ControlCHandler (int iCode) {
+  CSimulationContext::GetContext()->GetBreakpoints().set_interrupt();
+  ::signal(SIGINT, ControlCHandler);
+}
+#endif
+
 void initialize_signals(void)
 {
-#ifndef _WIN32
+#ifdef _WIN32
+  ::signal(SIGINT, ControlCHandler);
+#else
   static struct sigaction action;
 
   action.sa_handler = catch_control_c;
@@ -581,6 +590,7 @@ gpsim_read (char *buf, unsigned max_size)
 }
 
 void have_line(char *);
+
 
 //**************************************************
 void cli_main(void)
