@@ -1,4 +1,9 @@
 2005-06-17 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_dump.cc: dump register for special registers 
+	broken when pReg->isa() and Register::SFR_REGISTER were 
+	not being used. Now we dump the registers listed in 
+	MemoryAccess::SpecialRegisters.
+
 	* cli/input.cc: Implemented the	ability to break running 
 	firmware using Ctrl->C key when running under Windows.
 	It would previously exit gpsim.
