@@ -77,14 +77,28 @@ void cmd_dump::dump_sfrs(void)
   vector<Register*> RegListToDisplay;
   unsigned int auTopRowIndex[SFR_COLUMNS];
   // Examine all registers this pic has to offer
-  for (unsigned int i = 0; i < cpu->register_memory_size(); i++) {
-    Register * pReg = cpu->registers[i];
-    if(pReg->isa() == Register::SFR_REGISTER &&
-      // Found an sfr. Display its contents only if not aliased
-      // at some other address too.
-      i == pReg->address) {
+  list <ProgramMemoryAccess *> :: iterator itPMA;
+
+  itPMA = cpu->pma_context.begin();
+  for(; itPMA != cpu->pma_context.end(); itPMA++) {
+    list<Register *>::iterator itReg;
+    for(itReg = (*itPMA)->SpecialRegisters.begin();
+        itReg != (*itPMA)->SpecialRegisters.end();
+        itReg++) {
       uToDisplayCount++;
-      RegListToDisplay.push_back(pReg);
+      RegListToDisplay.push_back(*itReg);
+    }
+  }
+  if(RegListToDisplay.size() == 0) {
+    for (unsigned int i = 0; i < cpu->register_memory_size(); i++) {
+      Register * pReg = cpu->registers[i];
+      if(pReg->isa() == Register::SFR_REGISTER &&
+        // Found an sfr. Display its contents only if not aliased
+        // at some other address too.
+        i == pReg->address) {
+        uToDisplayCount++;
+        RegListToDisplay.push_back(pReg);
+      }
     }
   }
   //
