@@ -244,7 +244,7 @@ void initialize_threads(void)
 void ControlCHandler (int iCode) {
   if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
     == eSM_RUNNING) {
-    CSimulationContext::GetContext()->GetBreakpoints().set_interrupt();
+    CSimulationContext::GetContext()->GetBreakpoints().halt();
   }
   ::signal(SIGINT, ControlCHandler);
 }
