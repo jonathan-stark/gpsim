@@ -213,7 +213,18 @@ static LLStack *Stack=0;
 //  
 void catch_control_c(int sig)
 {
-
+#ifdef _WIN32
+  if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
+    == eSM_RUNNING) {
+    CSimulationContext::GetContext()->GetBreakpoints().halt();
+  }
+  ::signal(SIGINT, catch_control_c);
+#else
+  // JRH - I'll let someone else try the above code under Linux.
+  // The readline library appears to call ::signal() itself so
+  // the call will not be needed here. I'm guessing that the CTRL->C
+  // signal handling in readline did not work under Windows so
+  // that is why it was originally ifdef'd out.
   //if(simulation_mode != STOPPED)
   //  {
       cout << "<CTRL C> break\n";
@@ -225,7 +236,7 @@ void catch_control_c(int sig)
   //  redisplay_prompt();
 
   //}
-
+#endif
 }
 
 void initialize_threads(void)
@@ -240,20 +251,10 @@ void initialize_threads(void)
 #endif
 }
 
-#ifdef _WIN32
-void ControlCHandler (int iCode) {
-  if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
-    == eSM_RUNNING) {
-    CSimulationContext::GetContext()->GetBreakpoints().halt();
-  }
-  ::signal(SIGINT, ControlCHandler);
-}
-#endif
-
 void initialize_signals(void)
 {
 #ifdef _WIN32
-  ::signal(SIGINT, ControlCHandler);
+  ::signal(SIGINT, catch_control_c);
 #else
   static struct sigaction action;
 
