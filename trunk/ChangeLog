@@ -16,6 +16,9 @@
 	hasValid_opcode_at_address() and hasValid_opcode_at_index().
 	This mostly effected gui code so the simulation itself
 	should have no impact.
+	The original intent of this change was to fix bugs in the 
+	gui where double clicking on a breakpoint icon in the
+	source window would not toggle the breakpoint.
 
 2005-06-17 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_dump.cc: dump register for special registers 
