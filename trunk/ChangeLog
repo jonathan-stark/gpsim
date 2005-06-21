@@ -1,3 +1,22 @@
+2005-06-21 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_run.cc: Added help text saying that CTRL->C
+	will stop a running simulation.
+
+	* src/breakpoints.cc, src/processor.cc, src/processor.h,
+	src/trace.cc, plat/win32/gpsim.def, gui/gui_profile.cc,
+	gui/gui_src_asm.cc:
+	There was significant ambiguity for some functions
+	that appear to accept an simulation address but acted upon
+	it as a ProgramMemoryAccess index. The ProgramMemoryAccess 
+	indexing operator was a prime example. I have eliminated
+	the indexing operator and added the functions getFromAddress()
+	and getFromIndex() to make things more explicitly clear.
+	I have also removed put() and get() and added putToAddress()
+	and putToIndex(). Other new functions are
+	hasValid_opcode_at_address() and hasValid_opcode_at_index().
+	This mostly effected gui code so the simulation itself
+	should have no impact.
+
 2005-06-17 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_dump.cc: dump register for special registers 
 	broken when pReg->isa() and Register::SFR_REGISTER were 
