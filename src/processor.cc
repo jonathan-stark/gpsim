@@ -719,41 +719,39 @@ void Processor::disassemble (signed int s, signed int e)
     {
       str[0] =0;
       if (map_pm_address2index(pc->get_value()) == i)
-	cout << "==>";
+        cout << "==>";
       else
-	cout << "   ";
+        cout << "   ";
       inst = program_memory[i];
 
       // Breakpoints replace the program memory with an instruction that has
       // an opcode larger than 16 bits.
 
       if(program_memory[i]->opcode < 0x10000)
-	{
-	  cout << ' ';
-	}
+      {
+        cout << ' ';
+      }
       else
-	{
-	  cout << 'B';
-	  Breakpoint_Instruction *bpi =  (Breakpoint_Instruction *)program_memory[i];
-	  inst = bpi->replaced;
-	}
+      {
+        cout << 'B';
+        Breakpoint_Instruction *bpi =  (Breakpoint_Instruction *)program_memory[i];
+        inst = bpi->replaced;
+      }
 
-  if(files.nsrc_files() && use_src_to_disasm)
-	{
-	  char buf[256];
+      if(files.nsrc_files() && use_src_to_disasm)
+      {
+        char buf[256];
 
-	  files.ReadLine(program_memory[i]->file_id,
-			  program_memory[i]->src_line - 1,
-			  buf,
-			  sizeof(buf));
-	  cout << buf;
-
-	}
+        files.ReadLine(program_memory[i]->file_id,
+            program_memory[i]->src_line - 1,
+            buf,
+            sizeof(buf));
+        cout << buf;
+      }
       else
-	cout << hex << setw(4) << setfill('0') << map_pm_index2address(i) << "  "
-	     << hex << setw(4) << setfill('0') << inst->opcode << "    "
-	     << inst->name(str,sizeof(str)) << '\n';
-
+        cout << hex << setw(4) << setfill('0') << map_pm_index2address(i) << "  "
+             << hex << setw(4) << setfill('0') << inst->opcode << "    "
+             << inst->name(str,sizeof(str)) << '\n';
     }
 }
 
@@ -828,21 +826,21 @@ int ProgramMemoryAccess::find_closest_address_to_line(int file_id, int src_line)
   if(fc)
   {
   	int offset=0;
-  	while(src_line+offset<fc->max_line())
-	{
-		closest_address = fc->get_address(src_line+offset);
-		if(closest_address>=0)
-			return closest_address;
-		offset++;
-	}
-	offset=-1;
-  	while(src_line+offset>=0)
-	{
-		closest_address = fc->get_address(src_line+offset);
-		if(closest_address>=0)
-			return closest_address;
-		offset--;
-	}
+  	while((unsigned int)(src_line+offset)<fc->max_line())
+    {
+      closest_address = fc->get_address(src_line+offset);
+      if(closest_address>=0)
+        return closest_address;
+      offset++;
+    }
+    offset=-1;
+    while(src_line+offset>=0)
+    {
+      closest_address = fc->get_address(src_line+offset);
+      if(closest_address>=0)
+        return closest_address;
+      offset--;
+    }
   }
 
   return closest_address;
@@ -906,14 +904,13 @@ unsigned int ProgramMemoryAccess::get_src_line(unsigned int address)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    line = (this->operator[](address)).get_src_line();
+    line = getFromAddress(address)->get_src_line();
     break;
 
   case HLL_MODE:
-    line = (this->operator[](address)).get_hll_src_line();
+    line = getFromAddress(address)->get_hll_src_line();
     break;
   }
-
 
   return line;
 }
@@ -928,11 +925,11 @@ unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
   switch(get_hll_mode()) {
 
   case ASM_MODE:
-    return (this->operator[](address)).get_file_id();
+    return getFromAddress(address)->get_file_id();
     break;
 
   case HLL_MODE:
-    return (this->operator[](address)).get_hll_file_id();
+    return getFromAddress(address)->get_hll_file_id();
     break;
   }
 
@@ -943,16 +940,14 @@ unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_break_at_address(unsigned int address)
 {
-  if(hasValid_opcode(address))
+  if(hasValid_opcode_at_address(address))
     bp.set_execution_break(cpu, address);
-
-
 }
 
 //-------------------------------------------------------------------
 void ProgramMemoryAccess::set_notify_at_address(unsigned int address, TriggerObject *cb)
 {
-  if(hasValid_opcode(address))
+  if(hasValid_opcode_at_address(address))
     bp.set_notify_break(cpu, address, cb);
 
 }
@@ -972,7 +967,7 @@ void ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
 void ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
 						      TriggerObject *cb)
 {
-  if(hasValid_opcode(address))
+  if(hasValid_opcode_at_address(address))
     bp.set_profile_stop_break(cpu, address, cb);
 }
 
@@ -981,8 +976,8 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
 						enum instruction::INSTRUCTION_TYPES type = 
 						instruction::BREAKPOINT_INSTRUCTION)
 {
-
-  if( address >= 0  && address<cpu->program_memory_size()) {
+  unsigned int uIndex = cpu->map_pm_address2index(address);
+  if( uIndex >= 0  && uIndex<cpu->program_memory_size()) {
 
     instruction *instr = find_instruction(address,type);
     if(instr!=0) {
@@ -1313,31 +1308,19 @@ void Processor::Debug()
 }
 
 
-
-//-------------------------------------------------------------------
-instruction &ProgramMemoryAccess::operator [] (unsigned int address)
-{
-  //cout << "pma[0x"<< hex << address << "]\n";
-  if(!cpu || !cpu->IsAddressInRange(address))
-    return bad_instruction;
-
-  return *cpu->program_memory[cpu->map_pm_address2index(address)];
-}
-
 //-------------------------------------------------------------------
 instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
 						   enum instruction::INSTRUCTION_TYPES type)
 {
-
-  if(cpu->program_memory_size()<=address)
+  unsigned int uIndex = cpu->map_pm_address2index(address);
+  if(cpu->program_memory_size()<=uIndex)
     return 0;
 
-  instruction &q = this->operator[](address);
-  if(q.isa()==instruction::INVALID_INSTRUCTION)
+  instruction *p = getFromIndex(uIndex);
+  if(p->isa()==instruction::INVALID_INSTRUCTION)
     return 0;
 
 
-  instruction *p = &q;
 
   for(;;)
     {
@@ -1425,16 +1408,21 @@ void ProgramMemoryAccess::name(string & new_name)
   name_str = new_name;
 }
 */
-void ProgramMemoryAccess::put(unsigned int address, instruction *new_instruction)
+void ProgramMemoryAccess::putToAddress(unsigned int address, instruction *new_instruction)
+{
+    putToIndex(cpu->map_pm_address2index(address), new_instruction);
+}
+
+void ProgramMemoryAccess::putToIndex(unsigned int uIndex, instruction *new_instruction)
 {
 
   if(!new_instruction)
     return;
 
  
-  if(hasValid_opcode(address)) {
+  if(hasValid_opcode_at_index(uIndex)) {
 
-    cpu->program_memory[cpu->map_pm_address2index(address)] = new_instruction;
+    cpu->program_memory[uIndex] = new_instruction;
 
     new_instruction->update();
   }
@@ -1475,21 +1463,28 @@ void ProgramMemoryAccess::remove(unsigned int address, instruction *bp_instructi
 //  assert(typeid(*instr) != typeid(Breakpoint_Instruction));
 }
 
-instruction *ProgramMemoryAccess::get(unsigned int address)
+instruction *ProgramMemoryAccess::getFromAddress(unsigned int address)
 {
-  if(address < cpu->program_memory_size())
-    return &(this->operator[](address));
+  if(!cpu || !cpu->IsAddressInRange(address))
+      return &bad_instruction;
+  unsigned int uIndex = cpu->map_pm_address2index(address);
+  return getFromIndex(uIndex);
+}
+
+instruction *ProgramMemoryAccess::getFromIndex(unsigned int uIndex)
+{
+  if(uIndex < cpu->program_memory_size())
+    return cpu->program_memory[uIndex];
   else
     return 0;
-
 }
 
 // like get, but will ignore instruction break points 
-instruction *ProgramMemoryAccess::get_base_instruction(unsigned int address)
+instruction *ProgramMemoryAccess::get_base_instruction(unsigned int uIndex)
 {
     instruction *p;
 
-    p=get(address);
+    p=getFromIndex(uIndex);
 
     if(p==0)
         return 0;
@@ -1521,9 +1516,9 @@ instruction *ProgramMemoryAccess::get_base_instruction(unsigned int address)
 
 unsigned int ProgramMemoryAccess::get_opcode(unsigned int addr)
 {
-
-  if(addr < cpu->program_memory_size())
-    return(cpu->program_memory[addr]->get_opcode());
+  instruction * pInstr = getFromAddress(addr);
+  if(pInstr != 0)
+    return pInstr->get_opcode();
   else
     return 0;
 }
@@ -1585,12 +1580,12 @@ void ProgramMemoryAccess::put_opcode_start(unsigned int addr, unsigned int new_o
 
 void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 {
-
-  if(addr >= cpu->program_memory_size())
+  unsigned int uIndex = cpu->map_pm_address2index(addr);
+  if(uIndex >= cpu->program_memory_size())
     return;
 
 
-  instruction *old_inst = get_base_instruction(addr);
+  instruction *old_inst = get_base_instruction(uIndex);
   instruction *new_inst = cpu->disasm(addr,new_opcode);
 
   if(new_inst==0)
@@ -1600,12 +1595,12 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
   }
   
   if(!old_inst) {
-    put(addr,new_inst);
+    putToIndex(uIndex,new_inst);
     return;
   }
 
   if(old_inst->isa() == instruction::INVALID_INSTRUCTION) {
-    put(addr,new_inst);
+    putToIndex(uIndex,new_inst);
     return;
   }
 
@@ -1617,7 +1612,7 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 
   // if there was a breakpoint set at addr, save a pointer to the breakpoint.
   Breakpoint_Instruction *b=bpi;
-  instruction *prev = get_base_instruction(addr-1);
+  instruction *prev = get_base_instruction(cpu->map_pm_address2index(addr-1));
 
   if(prev)
     prev->initialize(false);
@@ -1633,12 +1628,12 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
   if(b) 
     b->replaced = new_inst;
   else
-    cpu->program_memory[addr] = new_inst;
+    cpu->program_memory[uIndex] = new_inst;
 
-  cpu->program_memory[addr]->is_modified=1;
+  cpu->program_memory[uIndex]->is_modified=1;
   
   //if(cpu->program_memory[addr]->xref)
-  cpu->program_memory[addr]->update();
+  cpu->program_memory[uIndex]->update();
   
   delete(old_inst);
 }
@@ -1648,7 +1643,7 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
 void  ProgramMemoryAccess::assign_xref(unsigned int address, gpointer xref)
 {
 
-  instruction &q = this->operator[](address);
+  instruction &q = *getFromAddress(address);
   if(q.isa()==instruction::INVALID_INSTRUCTION)
     return;
 
@@ -1767,10 +1762,19 @@ void ProgramMemoryAccess::finish(void)
 
 //--------------------------------------------------------------------------
 
-bool  ProgramMemoryAccess::hasValid_opcode(unsigned int address)
+bool  ProgramMemoryAccess::hasValid_opcode_at_address(unsigned int address)
 {
 
-  if((this->operator[](address)).isa() != instruction::INVALID_INSTRUCTION)
+  if(getFromAddress(address)->isa() != instruction::INVALID_INSTRUCTION)
+    return true;
+
+  return false;
+}
+
+bool  ProgramMemoryAccess::hasValid_opcode_at_index(unsigned int uIndex)
+{
+
+  if((getFromIndex(uIndex))->isa() != instruction::INVALID_INSTRUCTION)
     return true;
 
   return false;
