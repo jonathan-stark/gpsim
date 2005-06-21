@@ -82,10 +82,10 @@ class ProgramMemoryAccess :  public MemoryAccess
 
   ProgramMemoryAccess(Processor *new_cpu=0);
 
-  instruction &operator [] (unsigned int address);
-
-  virtual void put(unsigned int addr, instruction *new_instruction);
-  instruction *get(unsigned int addr);
+  virtual void putToAddress(unsigned int addr, instruction *new_instruction);
+  virtual void putToIndex(unsigned int uIndex, instruction *new_instruction);
+  instruction *getFromAddress(unsigned int addr);
+  instruction *getFromIndex(unsigned int uIndex);
   instruction *get_base_instruction(unsigned int addr);
   unsigned int get_opcode(unsigned int addr);
   char *get_opcode_name(unsigned int addr, char *buffer, unsigned int size);
@@ -108,7 +108,8 @@ class ProgramMemoryAccess :  public MemoryAccess
   // Helper functions for querying the program memory
 
   // hasValid_opcode -- returns true if the opcode at the address is valid
-  bool hasValid_opcode(unsigned int address);
+  bool hasValid_opcode_at_address(unsigned int address);
+  bool hasValid_opcode_at_index(unsigned int uIndex);
 
   // step - step one of more instructions
   virtual void step(unsigned int steps, bool refresh=true);

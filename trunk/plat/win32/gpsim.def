@@ -58,7 +58,6 @@ EXPORTS
     ??1stimulus@@UAE@XZ
     ??1symbol@@UAE@XZ
     ??AFileContextList@@QAEPAVFileContext@@H@Z
-    ??AProgramMemoryAccess@@QAEAAVinstruction@@I@Z
     ??ARegisterMemoryAccess@@QAEAAVRegister@@I@Z
     ?Add@FileContextList@@QAEHPAD@Z
     ?Add@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
@@ -168,7 +167,6 @@ EXPORTS
     ?get@Integer@@UAEXPADH@Z
     ?get@Module@@UAEXPADH@Z
     ?get@Processor@@UAEXPADH@Z
-    ?get@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?get@String@@UAEXAAVPacket@@@Z
     ?get@String@@UAEXPADH@Z
     ?get@Value@@UAEXAAH@Z
@@ -184,6 +182,7 @@ EXPORTS
     ?getBitChar@IO_open_collector@@UAEDXZ
     ?getDrivenState@IOPIN@@UAE_NXZ
     ?getDrivingState@IOPIN@@UAE_NXZ
+    ?getFromAddress@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getIO@IOPORT@@QAEPAVIOPIN@@I@Z
     ?getReg@register_symbol@@QAEPAVRegister@@XZ
     ?getState@RegisterReadTraceObject@@UAEXPAVTraceFrame@@@Z
@@ -231,7 +230,6 @@ EXPORTS
     ?get_xref@Value@@UAEPAV1@XZ
     ?grab@Token@gpsim@@QAEXXZ
     ?halt@Breakpoints@@QAEXXZ
-    ?hasValid_opcode@ProgramMemoryAccess@@QAE_NI@Z
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
     ?init_program_memory@Processor@@UAEXII@Z
@@ -262,8 +260,9 @@ EXPORTS
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
     ?printExpression@TriggerObject@@UAEXXZ
     ?put@IOPORT@@UAEXI@Z
-    ?put@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?putDrivingState@IOPIN@@UAEX_N@Z
+    ?putToAddress@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
+    ?putToIndex@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?put_value@IOPORT@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ

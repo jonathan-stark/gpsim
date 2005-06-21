@@ -912,8 +912,9 @@ static gint switch_page_cb(GtkNotebook     *notebook,
     remove_all_points(sbaw);
 
     // update breakpoint widgets
-    for(address=0;address<sbaw->gp->cpu->program_memory_size();address++)
-      sbaw->UpdateLine(address);
+    unsigned uPMMaxIndex = sbaw->gp->cpu->program_memory_size();
+    for(unsigned int uPMIndex=0; uPMIndex < uPMMaxIndex; uPMIndex++)
+      sbaw->UpdateLine(sbaw->gp->cpu->map_pm_index2address(uPMIndex));
   }
   return 1;
 }
@@ -1755,6 +1756,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   if(!gp || !gp->cpu || !gp->cpu->pma)
     return;
 
+  Processor * pProc = gp->cpu;
   if(!enabled)
   {
       load_source=1;
@@ -1762,7 +1764,7 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   }
   
   if(!pma)
-    pma = gp->cpu->pma;
+    pma = pProc->pma;
 
   assert(wt==WT_asm_source_window);
 
@@ -1775,23 +1777,23 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   /* Now create a cross-reference link that the
    * simulator can use to send information back to the gui
    */
-  if(gp->cpu && gp->cpu->pc) {
+  if(pProc->pc) {
     SourceXREF *cross_reference = new SourceXREF();
 
     cross_reference->parent_window_type =   WT_asm_source_window;
     cross_reference->parent_window = (gpointer) this;
     cross_reference->data = (gpointer) 0;
   
-    gp->cpu->pc->add_xref((gpointer) cross_reference);
-    if(gp->cpu->pc != pma->GetProgramCounter()) {
+    pProc->pc->add_xref((gpointer) cross_reference);
+    if(pProc->pc != pma->GetProgramCounter()) {
       pma->GetProgramCounter()->add_xref((gpointer) cross_reference);
     }
   }
 
-  if(gp->cpu->files.nsrc_files() != 0) {
+  if(pProc->files.nsrc_files() != 0) {
 
-    for(i=0;i<gp->cpu->files.nsrc_files();i++) {
-      FileContext *fc = gp->cpu->files[i];
+    for(i=0;i<pProc->files.nsrc_files();i++) {
+      FileContext *fc = pProc->files[i];
       file_name = fc->name().c_str();
       int iNameLength = strlen(file_name);
 
@@ -1841,15 +1843,16 @@ void SourceBrowserAsm_Window::NewSource(GUI_Processor *_gp)
   // fails with widget_map() -> not visible
   GTKWAIT;
 
-  address=gp->cpu->pma->get_PC();
+  address=pProc->pma->get_PC();
   if(address==INVALID_VALUE)
       puts("Warning, PC is invalid?");
   else
       SetPC(address);
 
   // update breakpoint widgets
-  for(address=0;address<gp->cpu->program_memory_size();address++)
-    UpdateLine(address);
+  unsigned uPMMaxIndex = pProc->program_memory_size();
+  for(unsigned int uPMIndex=0; uPMIndex < uPMMaxIndex; uPMIndex++)
+    UpdateLine(pProc->map_pm_index2address(uPMIndex));
 
   GTKWAIT;
 

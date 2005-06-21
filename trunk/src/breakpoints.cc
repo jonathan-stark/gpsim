@@ -465,7 +465,7 @@ instruction *Breakpoints::find_previous(Processor *cpu,
 					instruction *_this)
 {
   Breakpoint_Instruction *p;
-  p = (Breakpoint_Instruction*) cpu->pma->get(address);
+  p = (Breakpoint_Instruction*) cpu->pma->getFromAddress(address);
 
   if(!_this || p==_this)
     return 0;
@@ -699,7 +699,7 @@ Breakpoint_Instruction::Breakpoint_Instruction(Processor *new_cpu,
   opcode = 0xffffffff;
   bpn = bp;
 
-  replaced = new_cpu->pma->get(address);
+  replaced = new_cpu->pma->getFromAddress(address);
 
   set_action(new SimpleTriggerAction(this));
 }
@@ -746,11 +746,13 @@ bool Breakpoint_Instruction::set_break(void)
   if(use_icd)
     bp.clear_all(get_cpu());
 
-  if(address < get_cpu()->program_memory_size()) {
+  unsigned int uIndex = get_cpu()->map_pm_address2index(address);
 
-    replaced = get_cpu()->pma->get(address);
+  if(uIndex < get_cpu()->program_memory_size()) {
 
-    get_cpu()->pma->put(address, this);
+    replaced = get_cpu()->pma->getFromIndex(uIndex);
+
+    get_cpu()->pma->putToIndex(uIndex, this);
 
     if(use_icd)
       icd_set_break(address);
@@ -776,8 +778,7 @@ void Breakpoint_Instruction::clear(void)
     icd_clear_break();
 
   get_cpu()->pma->clear_break_at_address(address, this);
-  (*get_cpu()->pma)[address].update();
-
+  get_cpu()->pma->getFromAddress(address)->update();
 }
 
 //------------------------------------------------------------------------

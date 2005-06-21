@@ -209,7 +209,7 @@ static void add_range(Profile_Window *pw,
     {
       gcycles+=gp->cpu->cycles_used(i);
     }
-    sprintf(count_string,"0x%Lx",gcycles);
+    sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",gcycles);
 
     row=gtk_clist_append(GTK_CLIST(pw->profile_range_clist), entry);
 
@@ -309,7 +309,7 @@ static void add_range_dialog(Profile_Window *pw)
     
     gtk_widget_hide(dialog);
 
-    if(retval==TRUE)
+    if(retval==(int)TRUE)
     {
 	// Add range.
 
@@ -1703,14 +1703,14 @@ double calculate_median(GList *start, GList *stop)
         start=start->next;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
-	return chc_start->histo_cycles;
+	return (double)chc_start->histo_cycles;
     }
     if(-count_sum>(int)chc_start->count)
     {
         start=start->prev;
 	chc_start=(struct cycle_histogram_counter*)start->data;
 	g_list_free(sorted_list);
-	return chc_start->histo_cycles;
+	return (double)chc_start->histo_cycles;
     }
     if(-count_sum==(int)chc_start->count)
     {
@@ -1726,10 +1726,10 @@ double calculate_median(GList *start, GList *stop)
 	g_list_free(sorted_list);
 	return (chc_start->histo_cycles+chc_stop->histo_cycles)/2.0;
     }
-    if(abs(count_sum)<chc_start->count)
+    if((unsigned int)abs(count_sum)<chc_start->count)
     {
 	g_list_free(sorted_list);
-	return chc_start->histo_cycles;
+	return (double)chc_start->histo_cycles;
     }
 
     assert(0);
@@ -1801,21 +1801,21 @@ void Profile_Window::Update()
 
       entry=(struct profile_entry*)iter->data;
 
-      count=gp->cpu->cycles_used(entry->address);
+      count=gp->cpu->cycles_used(gp->cpu->map_pm_address2index(entry->address));
 
       if(entry->last_count!=count)
       {
-	  int row;
+        int row;
 
-	  entry->last_count=count;
-	  row=gtk_clist_find_row_from_data(GTK_CLIST(profile_clist),entry);
-	  if(row==-1)
-	  {
-	      break;
-	  }
+        entry->last_count=count;
+        row=gtk_clist_find_row_from_data(GTK_CLIST(profile_clist),entry);
+        if(row==-1)
+        {
+          break;
+        }
 
-	  sprintf(count_string,"0x%Lx",count);
-	  gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
+        sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count);
+        gtk_clist_set_text (GTK_CLIST(profile_clist),row,1,count_string);
       }
       iter=iter->next;
   }
@@ -1834,7 +1834,7 @@ void Profile_Window::Update()
       count=0;
       for(i=range_entry->startaddress;i<range_entry->endaddress;i++)
       {
-	  count+=gp->cpu->cycles_used(i);
+        count+=gp->cpu->cycles_used(i);
       }
 
       if(range_entry->last_count!=count)
@@ -1848,7 +1848,7 @@ void Profile_Window::Update()
 	      break;
 	  }
 
-	  sprintf(count_string,"0x%Lx",count);
+	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count);
 	  gtk_clist_set_text (GTK_CLIST(profile_range_clist),row,2,count_string);
       }
       iter=iter->next;
@@ -1881,9 +1881,9 @@ void Profile_Window::Update()
 	      break;
 	  }
 
-	  sprintf(count_string,"0x%Lx",count_read);
+	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count_read);
 	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,2,count_string);
-	  sprintf(count_string,"0x%Lx",count_write);
+	  sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",count_write);
 	  gtk_clist_set_text (GTK_CLIST(profile_register_clist),row,3,count_string);
       }
       iter=iter->next;
@@ -2169,7 +2169,7 @@ void Profile_Window::StopExe(int address)
 void Profile_Window::NewProgram(GUI_Processor *_gp)
 {
   int row;
-  unsigned int i;
+  unsigned int uPMIndex;
 
   if(!_gp)
     return;
@@ -2188,30 +2188,31 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 
   // Instruction clist
   gtk_clist_freeze(profile_clist);
-
-  for(i=0; i < gp->cpu->program_memory_size(); i++) {
+  Processor *pProcessor = gp->cpu;
+  ProgramMemoryAccess *pPMA = pProcessor->pma;
+  for(uPMIndex=0; uPMIndex < pProcessor->program_memory_size(); uPMIndex++) {
     
     struct profile_entry *profile_entry;
-    char buf[100];
     char address_string[100];
     char instruction_string[100];
     char count_string[100];
     char *entry[PROFILE_COLUMNS]={address_string,count_string,instruction_string};
     guint64 cycles;
-
-    if(gp->cpu->pma->hasValid_opcode(i)) {
+    instruction * pInstruction = pProcessor->pma->getFromIndex(uPMIndex);
+    unsigned int uAddress = pProcessor->map_pm_index2address(uPMIndex);
+    if(pPMA->hasValid_opcode_at_index(uPMIndex)) {
 	
-      sprintf(address_string,"0x%04x",i);
-      strcpy(instruction_string,gp->cpu->pma->get_opcode_name(i,buf,sizeof(buf)));
+      sprintf(address_string, "0x%04x",uAddress);
+      strcpy(instruction_string, pInstruction->name().c_str());
 
-      cycles=gp->cpu->cycles_used(i);
-      sprintf(count_string,"0x%Lx",cycles);
+      cycles=pProcessor->cycles_used(uPMIndex);
+      sprintf(count_string,"0x%" PRINTF_INT64_MODIFIER "x",cycles);
 
       row=gtk_clist_append(GTK_CLIST(profile_clist), entry);
 
       // FIXME this memory is never freed?
       profile_entry = (struct profile_entry*)malloc(sizeof(struct profile_entry));
-      profile_entry->address=i;
+      profile_entry->address=uAddress;
       profile_entry->last_count=cycles;
 
       gtk_clist_set_row_data(GTK_CLIST(profile_clist), row, (gpointer)profile_entry);
@@ -2223,7 +2224,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 
   // Register clist
   gtk_clist_freeze(profile_register_clist);
-  for(i=0; i < gp->cpu->rma.get_size(); i++) {
+  for(unsigned int i=0; i < pProcessor->rma.get_size(); i++) {
     
     struct profile_register_entry *profile_register_entry;
     char address_string[100];
@@ -2235,7 +2236,7 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
     guint64 write_cycles;
     char *name;
 
-    Register *reg = gp->cpu->rma.get_register(i);
+    Register *reg = pProcessor->rma.get_register(i);
 
     //
     // If the register is valid, but it's not aliased and it's not a special function
@@ -2253,10 +2254,10 @@ void Profile_Window::NewProgram(GUI_Processor *_gp)
 	strcpy(register_string, name);
 
 	read_cycles=reg->read_access_count;
-	sprintf(count_string_read,"0x%Lx",read_cycles);
+	sprintf(count_string_read,"0x%" PRINTF_INT64_MODIFIER "x",read_cycles);
 
 	write_cycles=reg->write_access_count;
-	sprintf(count_string_write,"0x%Lx",write_cycles);
+	sprintf(count_string_write,"0x%" PRINTF_INT64_MODIFIER "x",write_cycles);
 
 	row=gtk_clist_append(GTK_CLIST(profile_register_clist), entry_register);
 

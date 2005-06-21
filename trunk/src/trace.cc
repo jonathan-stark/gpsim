@@ -397,11 +397,10 @@ void PCTraceObject::print(FILE *fp)
   */
   fprintf(fp,"0x%04X 0x%04X %s\n",
 	  addr,
-	  (*cpu->pma)[addr].opcode,
-	  (*cpu->pma)[addr].name(a_string,sizeof(a_string)));
-
-
+	  (cpu->pma->getFromAddress(address))->opcode,
+	  (cpu->pma->getFromAddress(address))->name(a_string,sizeof(a_string)));
 }
+
 void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
 {
   if(!tf)
