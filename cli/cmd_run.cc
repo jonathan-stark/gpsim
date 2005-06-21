@@ -50,6 +50,7 @@ cmd_run::cmd_run(void)
 
   long_doc = string ("run\n\
 \tStart simulating and don't stop until a break is encountered.\n\
+\tUse CTRL->C to halt the simulation execution.\n\
 \n");
 
   op = cmd_run_options; 
