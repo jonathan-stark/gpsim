@@ -1,3 +1,23 @@
+2005-06-23 J.R. Heisey <jrheisey@sourceforge.com>
+	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
+	register_symbol::m_uMask is used to mask out bits not
+	associated with the symbol after retrieving the value
+	from the register. Masked bit values are right shifted such
+	that if the 16th bit is high in the register and
+	m_uMask = 0x80, then the symbol value returned	
+	or displayed will be one.	
+	Likewise to set the 16th bit of our example register_symbol 
+	you would set the register_symbol value to 0x01 and
+	not 0x80. No other bits in the register are changed.
+	It works as if this symbol is its own register. The encoding
+	into the target register is hidden by register_symbol.
+	The default value of m_uMask is 0xff so that no bits are
+	masked out.
+	An new version of Symbol_Table::add_register() may be used
+	to add masked register_symbol objects to the symbol table.
+	register_symbol::copy() is changed to return the correct
+	symbol string.
+
 2005-06-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_run.cc: Added help text saying that CTRL->C
 	will stop a running simulation.
