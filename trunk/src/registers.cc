@@ -411,6 +411,11 @@ void Register::SimulatedSet(unsigned int new_value)
   put(new_value);
 }
 
+unsigned int Register::register_size () const
+{ 
+  Processor *pProc = gpsimValue::get_cpu();
+  return pProc == 0 ? 1 : pProc->register_size();
+}
 
 
 //-----------------------------------------------------------

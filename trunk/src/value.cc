@@ -254,7 +254,7 @@ string gpsimValue::toString()
   return s;
 }
 
-Processor *gpsimValue::get_cpu()
+Processor *gpsimValue::get_cpu() const
 {
   return static_cast<Processor *>(cpu);
 }
@@ -619,7 +619,7 @@ void Integer::get(double &d)
 { 
   gint64 i;
   get(i);
-  d = i;;
+  d = (double)i;;
 }
 
 void Integer::get(char *buffer, int buf_size)
@@ -830,7 +830,7 @@ void Float::set(double d)
 
 void Float::set(gint64 i)
 {
-  double d = i;
+  double d = (double)i;
   set(d);
 }
 
