@@ -114,7 +114,15 @@ bool Symbol_Table::add(Value *s) {
 }
 
 register_symbol *
-Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
+Symbol_Table::add_register(Register *new_reg, const char *symbol_name)
+{
+  // mask of zero lets the register_symbol calculate a default mask
+  return add_register(new_reg, symbol_name, 0);
+}
+
+register_symbol *
+Symbol_Table::add_register(Register *new_reg, const char *symbol_name,
+                           unsigned int uMask)
 {
 
   if(!new_reg)
@@ -133,7 +141,7 @@ Symbol_Table::add_register(Register *new_reg, const char *symbol_name )
      }
   }
 
-  register_symbol *rs = new register_symbol(symbol_name, new_reg);
+  register_symbol *rs = new register_symbol(symbol_name, new_reg, uMask);
 
   add(rs);
   return rs;
@@ -455,12 +463,54 @@ string node_symbol::toString(void)
   return string("node:")+name();
 }
 
+// Count LSB that are off
+static int BitShiftCount( unsigned int uMask ) {
+  unsigned int uBitMaskCount = 0;
+  if( uMask != 0 ) {
+    for ( int i = 0; i < 16; i++ ) {
+      if( (uMask & (0x1 << i)) == 0 )
+        uBitMaskCount++;
+      else
+        break;
+    }
+  }
+  return uBitMaskCount;
+}
+
 //------------------------------------------------------------------------
 // register_symbol
 //
+register_symbol::register_symbol(const register_symbol & regsym)
+  : symbol(regsym.name_str.c_str()), reg(regsym.reg)
+{
+  m_uMask = regsym.m_uMask;
+  m_uMaskShift = regsym.m_uMaskShift;
+
+  if (name_str.empty()) {
+    name_str = regsym.reg->name();
+  }
+}
+
 register_symbol::register_symbol(const char *_name, Register *_reg)
   : symbol(_name), reg(_reg)
 {
+  setMask(reg);
+  if (_name == NULL && reg != NULL) {
+    name_str = _reg->name();
+  }
+}
+
+register_symbol::register_symbol(const char *_name, Register *_reg,
+                                 unsigned int uMask)
+  : symbol(_name), reg(_reg)
+{
+  if(uMask == 0) {
+    setMask(reg);
+  }
+  else {
+    m_uMask = uMask;
+    m_uMaskShift = BitShiftCount(m_uMask);
+  }
   if (_name == NULL && reg != NULL) {
     name_str = _reg->name();
   }
@@ -469,6 +519,16 @@ register_symbol::register_symbol(const char *_name, Register *_reg)
 register_symbol::register_symbol(Register *_reg)
   : symbol(_reg->name()), reg(_reg)
 {
+  setMask(reg);
+}
+
+void register_symbol::setMask(Register *pReg) {
+  m_uMask = 0xff;
+  for(unsigned int i = 1; i < pReg->register_size(); i++) {
+    m_uMask <<= 8;
+    m_uMask |= 0xff;
+  }
+  m_uMaskShift = BitShiftCount(m_uMask);
 }
 
 string &register_symbol::name(void) {
@@ -484,10 +544,17 @@ string register_symbol::toString()
   if(reg) {
     char buff[256];
     char bits[256];
+    Processor *pProc = reg->get_cpu();
 
     reg->toBitStr(bits,sizeof(bits));
 
-    snprintf(buff,sizeof(buff)," [0x%x] = 0x%x = 0b",reg->address, reg->get_value());
+    int iDigits = pProc->register_size() * 2;
+    // turn off masked bits in dwRead
+    unsigned int uValue = reg->get_value() & m_uMask;
+    uValue  = uValue >> m_uMaskShift;
+    snprintf(buff,sizeof(buff)," [0x%x] BITS 0x%0*x = 0x%0*x = 0b",
+      reg->address, iDigits, m_uMask,
+      iDigits, uValue);
 
     return name() + string(buff) + string(bits);
   }
@@ -520,24 +587,27 @@ char *register_symbol::toBitStr(char *return_str, int len)
 
 void  register_symbol::get(int &i)
 {
-  if(reg)
-    i = reg->get_value();
+  if(reg) {
+    i = reg->get_value() & m_uMask;
+    i >>= m_uMaskShift;
+  }
   else
     i = 0;
 }
 void  register_symbol::get(gint64 &i)
 {
-  if(reg)
-    i = reg->get_value();
+  if(reg) {
+    i = reg->get_value() & m_uMask;
+    i >>= m_uMaskShift;
+  }
   else
     i = 0;
 }
 void register_symbol::get(char *buffer, int buf_size)
 {
   if(buffer) {
-
-    Register *reg = getReg();
-    int v = reg ? reg->get_value() : 0;
+    int v;
+    get(v);
     snprintf(buffer,buf_size,"%d",v);
   }
 
@@ -546,7 +616,8 @@ void register_symbol::get(char *buffer, int buf_size)
 void register_symbol::get(Packet &p)
 {
   if(reg) {
-    unsigned int i = reg->get_value();
+    int i;
+    get(i);
     p.EncodeUInt32(i);
   }
 
@@ -556,7 +627,7 @@ void register_symbol::get(Packet &p)
 void register_symbol::set(int new_value)
 {
   if(reg)
-    reg->putRV(RegisterValue(new_value,0));
+    reg->putRV(RegisterValue(SetMaskedValue(new_value),0));
 }
 
 void register_symbol::set(Value *v)
@@ -564,7 +635,7 @@ void register_symbol::set(Value *v)
   if(reg && v) {
     int i;
     v->get(i);
-    reg->putRV(RegisterValue(i,0));
+    reg->putRV(RegisterValue(SetMaskedValue(i),0));
   }
 }
 
@@ -590,6 +661,20 @@ void register_symbol::set(const char *buffer, int buf_size)
 
   }
 
+}
+
+unsigned int register_symbol::SetMaskedValue(unsigned int uValue) {
+  
+  Register *reg = getReg();
+  unsigned int uCurrentValue = reg ? reg->get_value() & m_uMask: 0;
+  // turn off masked bits in uCurrentValue
+  uCurrentValue &= ~m_uMask;
+  // turn off non-mask bits in uValue
+  uValue = uValue << m_uMaskShift;
+  uValue &= m_uMask;
+  // map the passed in value into the target
+  uCurrentValue |= ((long)uValue);
+  return uCurrentValue;
 }
 
 void register_symbol::set(Packet &p)
@@ -622,7 +707,7 @@ bool register_symbol::compare(ComparisonOperator *compOp, Value *rvalue)
 
 symbol *register_symbol::copy()
 {
-  return new register_symbol((char *)0,reg);
+  return new register_symbol(*this);
 }
 Register *register_symbol::getReg()
 {

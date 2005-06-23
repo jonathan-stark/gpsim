@@ -90,6 +90,8 @@ public:
   void add_line_number(int address, const char *symbol_name=0);
   void add_constant(const char *, int );
   register_symbol* add_register(Register *reg, const char *symbol_name=0);
+  register_symbol* add_register(Register *new_reg, const char *symbol_name,
+                                unsigned int uMask );
   void add_address(const char *, int );
   void add_w(WREG *w );
   void add_module(Module * m, const char *module_name);
@@ -169,9 +171,31 @@ class register_symbol : public symbol
 {
 protected:
   Register *reg;
+  /** m_uMask is used to mask out bits not associated
+    * with the symbol when retrieving the value from the
+    * register. Masked bit values are right shifted such
+    * that if the 16th bit is high in the register and
+    * m_uMask = 0x80, then the symbol value returned
+    * or displayed will be 0x01.
+    * Likewise to set the 16th bit of our example register_symbol
+    * you would set the register_symbol value to 0x01 and
+    * not 0x80. No other bits in the register are changed.
+    * It works as if this symbol is its own register. The 
+    * encoding into the target register is hidden by register_symbol.
+    * The default value of m_uMask is 0xff so that no bits are
+    * masked out.
+    * A new version of Symbol_Table::add_register() may be used
+    * to add masked register_symbol objects to the symbol table.
+    */
+  unsigned int m_uMask;
+  unsigned int m_uMaskShift;
+
+  unsigned int SetMaskedValue(unsigned int uValue);
 
 public:
+  register_symbol(const register_symbol &);
   register_symbol(const char *, Register *);
+  register_symbol(const char *, Register *, unsigned int uMask);
   register_symbol(Register *_reg);
 
   virtual symbol *copy();
@@ -188,6 +212,8 @@ public:
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
   virtual void set(Packet &);
+
+  void setMask(Register *pReg);
 
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
