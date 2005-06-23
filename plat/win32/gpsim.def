@@ -78,6 +78,7 @@ EXPORTS
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
     ?add_processor@CSimulationContext@@QAEPAVProcessor@@PAV2@@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
+    ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBDI@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
@@ -207,7 +208,7 @@ EXPORTS
     ?get_bp@@YAAAVBreakpoints@@XZ
     ?get_cpu@Breakpoint_Instruction@@UAEPAVProcessor@@XZ
     ?get_cpu@MemoryAccess@@UAEPAVProcessor@@XZ
-    ?get_cpu@gpsimValue@@QAEPAVProcessor@@XZ
+    ?get_cpu@gpsimValue@@QBEPAVProcessor@@XZ
     ?get_cycles@@YAAAVCycle_Counter@@XZ
     ?get_file_id@Breakpoint_Instruction@@UAEHXZ
     ?get_frequency@Processor@@UAENXZ
@@ -267,6 +268,7 @@ EXPORTS
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
+    ?register_size@Register@@UBEIXZ
     ?remove@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?remove_stimulus@@YAXPAVstimulus@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
