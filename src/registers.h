@@ -290,10 +290,7 @@ public:
   ///  register_size returns the number of bytes required to store the register
   ///  (this is used primarily by the gui to determine how wide to make text fields)
 
-  virtual unsigned int register_size () const
-  { 
-    return 1;
-  }
+  virtual unsigned int register_size () const;
 
   /*
     When the register is accessed, this action is recorded in the trace buffer.

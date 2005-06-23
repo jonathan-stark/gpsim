@@ -199,7 +199,7 @@ public:
 
   virtual void set_cpu(Processor *new_cpu);
 
-  Processor *get_cpu(void);
+  Processor *get_cpu(void) const;
 
   // When the value changes, then update() is called 
   // to update all things that are watching this value.
