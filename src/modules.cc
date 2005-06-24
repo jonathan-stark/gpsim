@@ -173,9 +173,12 @@ void Module::set(const char *cP,int len)
   cout << "Module:" <<name() << " doesn't support set()\n"; 
 }
 
-void Module::get(char *, int len)
+void Module::get(char *pBuf, int len)
 {
-  cout << "Module:" <<name() << " doesn't support get()\n"; 
+  if(pBuf != 0) {
+    *pBuf = 0;
+  }
+  // cout << "Module:" <<name() << " doesn't support get()\n"; 
 }
 
 //-------------------------------------------------------------------
