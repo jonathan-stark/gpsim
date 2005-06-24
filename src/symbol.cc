@@ -544,11 +544,10 @@ string register_symbol::toString()
   if(reg) {
     char buff[256];
     char bits[256];
-    Processor *pProc = reg->get_cpu();
 
     reg->toBitStr(bits,sizeof(bits));
 
-    int iDigits = pProc->register_size() * 2;
+    int iDigits = reg->register_size() * 2;
     // turn off masked bits in dwRead
     unsigned int uValue = reg->get_value() & m_uMask;
     uValue  = uValue >> m_uMaskShift;
