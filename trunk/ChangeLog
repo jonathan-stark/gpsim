@@ -1,3 +1,9 @@
+2005-06-25 Scott Dattalo <scott@dattalo.com>
+	* src/symbol.cc, regression/simulate: The new 'BITS' indicator for
+	register symbol queries broke the regression test. Now, the BITS
+	indicator is only displayed if only a portion of the register
+	applies to a register symbol. 
+
 2005-06-23 J.R. Heisey <jrheisey@sourceforge.com>
 	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
 	register_symbol::m_uMask is used to mask out bits not

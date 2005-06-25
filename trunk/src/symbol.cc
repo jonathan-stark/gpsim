@@ -551,9 +551,14 @@ string register_symbol::toString()
     // turn off masked bits in dwRead
     unsigned int uValue = reg->get_value() & m_uMask;
     uValue  = uValue >> m_uMaskShift;
-    snprintf(buff,sizeof(buff)," [0x%x] BITS 0x%0*x = 0x%0*x = 0b",
-      reg->address, iDigits, m_uMask,
-      iDigits, uValue);
+    if ( (1<<(4*iDigits))-1 != m_uMask)
+      snprintf(buff,sizeof(buff)," [0x%x] BITS 0x%0*x = 0x%0*x = 0b",
+	       reg->address, iDigits, m_uMask,
+	       iDigits, uValue);
+    else
+      snprintf(buff,sizeof(buff)," [0x%x] = 0x%0*x = 0b",
+	       reg->address, 
+	       iDigits, uValue);
 
     return name() + string(buff) + string(bits);
   }
