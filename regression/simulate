@@ -16,7 +16,7 @@ LOGFILE=$2
 touch $2
 
 $GPSIM --cli -c $1 >test.out
-grep "failures" test.out | grep "= 0x0 ="
+grep "failures" test.out | grep "= 0x00 ="
 if [ $? -eq 0 ] ; then
   echo "PASSED" >> $LOGFILE
 else
