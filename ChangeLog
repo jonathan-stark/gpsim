@@ -1,3 +1,11 @@
+2005-06-26 Scott Dattalo <scott@dattalo.com>
+	* src/trace.cc: The wrong variable was being used to index the
+	program counter array. This caused the trace to get an invalid
+	instruction.
+
+2005-06-26 Scott Dattalo <scott@dattalo.com>
+	* INSTALL: Added notes from Bas Wijnen regarding Debian.
+
 2005-06-25 Scott Dattalo <scott@dattalo.com>
 	* src/symbol.cc, regression/simulate: The new 'BITS' indicator for
 	register symbol queries broke the regression test. Now, the BITS
