@@ -380,25 +380,10 @@ void PCTraceObject::print(FILE *fp)
 
   unsigned addr = cpu->map_pm_index2address(address &0xffff);
 
-  // ugh - hardcoding the specific program counter trace type 
-  /*
-  unsigned int tracetype = (address>>16) & 3;
-  switch (tracetype) {
-
-  case 1:
-    fprintf(fp,"branched to: ");
-    break;
-  case 2:
-    fprintf(fp,"skipped: ");
-    break;
-  default:
-    break;
-  }
-  */
   fprintf(fp,"0x%04X 0x%04X %s\n",
 	  addr,
-	  (cpu->pma->getFromAddress(address))->opcode,
-	  (cpu->pma->getFromAddress(address))->name(a_string,sizeof(a_string)));
+	  (cpu->pma->getFromAddress(addr))->opcode,
+	  (cpu->pma->getFromAddress(addr))->name(a_string,sizeof(a_string)));
 }
 
 void PCTraceObject::print_frame(TraceFrame *tf,FILE *fp)
@@ -600,9 +585,6 @@ int PCTraceType::dump_raw(unsigned int tbi, char *buf, int bufsize)
 
 //========================================================================
 
-//#define TRACE_INSTRUCTION       (1<< (INSTRUCTION >> 24))
-//#define TRACE_PROGRAM_COUNTER   (1<< (PROGRAM_COUNTER >> 24))
-//#define TRACE_CYCLE_INCREMENT   (1<< (CYCLE_INCREMENT >> 24))
 #define TRACE_ALL (0xffffffff)
 
 //

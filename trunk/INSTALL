@@ -9,11 +9,12 @@ TOC
  2.0  How to Build gpsim without the gui
  3.0  How to Build gpsim without root privileges
  4.0  How to create your own gpsim distribution
- 5.0  Installing gtk+-extra and eXdbm
+ 5.0  Installing gtk+-extra
  6.0  How to install gpsim from RPM's
  7.0  MAC OS
  8.0  Windows
- 9.0  CVS 
+ 9.0  Debian
+10.0  CVS 
 
 1.0 Installation instructions
     -------------------------
@@ -254,8 +255,39 @@ http://gpsim.sourceforge.net/gpsimWin32/gpsimWin32.html
 for details on how to build and install gpsim Under Windows.
 
 
+9.0 Debian
+    ------
 
-9.0 CVS
+From Bas Wijnen <shevek@fmf.nl>:
+
+To start, I couldn't use autoreconf.  My system has automake version
+1.4, 1.7 and 1.9 installed and 1.4 is used by default.  I think the
+program can specify a minimum version it needs, but don't know how.  It
+would be a good idea, because automake 1.4 doesn't work.  So I ran by hand:
+$ aclocal-1.9
+$ automake-1.9
+$ autoconf
+$ ./configure --prefix=/tmp --enable-gtk1
+
+The prefix is just so I don't have to be root to do make install.
+
+Then "make" gave me beforementioned errors, which can probably be
+fixed by upgrading flex, but for now I'm using the workaround patch I
+posted before. (This involves down grading to flex 2.5.4)
+
+After that it compiled, but failed linking because libreadline was not
+compiled in.  When checking, I didn't have the -dev package installed.
+Configure had noticed this, but continued anyway.  I think it should
+have aborted.
+
+After installing the package and recompiling, it didn't run, aborting
+with a missing symbol "bUseGUI" in libgpsimcli.so.  Probably the lib
+shouldn't be accessing symbols in the package, the symbols should be
+defined in the lib and used by the package instead.  However, I added
+the -rdynamic flag to the Makefile(.am), which is a workaround also
+"solving" the problem.
+
+10.0 CVS
     ---
 
 See http://www.dattalo.com/gnupic/gpsim_cvs.html for instructions on
