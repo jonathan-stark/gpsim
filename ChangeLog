@@ -11,6 +11,11 @@
 	* modules/logic.cc, modules/logic.h: The logic gate modules had
 	bit rotted. 
 
+2005-06-26 J.R. Heisey <jrheisey@sourceforge.com>
+	* plat/win32/gpsim.def, src/processor.cc, src/processor.h:
+	New function Processor::init_program_memory_at_index() to
+	continue the separation of PM address from PM array index.
+
 2005-06-26 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc: The wrong variable was being used to index the
 	program counter array. This caused the trace to get an invalid
@@ -24,6 +29,16 @@
 	register symbol queries broke the regression test. Now, the BITS
 	indicator is only displayed if only a portion of the register
 	applies to a register symbol. 
+
+2005-06-24 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/modules.cc: Fixed a bug in Module::get() where
+	a derive class does not override this function, now
+	this function will return a null string.
+	This fixes problems when a derived class is being
+	displayed in the GUI symbol window causing a UTF-8
+	warning.
+	* src/symbol.cc: Fixed an introduced null pointer
+	exception.
 
 2005-06-23 J.R. Heisey <jrheisey@sourceforge.com>
 	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
