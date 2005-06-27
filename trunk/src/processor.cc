@@ -434,17 +434,22 @@ void Processor::destroyProgramMemoryAccess(ProgramMemoryAccess *pma) {
 
 void Processor::init_program_memory(unsigned int address, unsigned int value)
 {
+  init_program_memory_at_index(map_pm_address2index(address), value);
+}
 
-  if(address < program_memory_size())
+void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int value)
+{
+  unsigned int address = map_pm_index2address(uIndex);
+  if(uIndex < program_memory_size())
     {
-      if(program_memory[address] != 0 && program_memory[address] != &bad_instruction) {
+      if(program_memory[uIndex] != 0 && program_memory[uIndex] != &bad_instruction) {
         // this should not happen
-        delete program_memory[address];
+        delete program_memory[uIndex];
       }
-      program_memory[address] = disasm(address,value);
-      if(program_memory[address] == 0)
-        program_memory[address] = &bad_instruction;
-      program_memory[address]->add_line_number_symbol(address);
+      program_memory[uIndex] = disasm(address,value);
+      if(program_memory[uIndex] == 0)
+        program_memory[uIndex] = &bad_instruction;
+      program_memory[uIndex]->add_line_number_symbol(address);
     }
   else
     set_out_of_range_pm(address,value);  // could be e2prom
@@ -490,9 +495,10 @@ void Processor::attach_src_line(unsigned int address,
 				unsigned int sline,
 				unsigned int lst_line)
 {
-  if(address < program_memory_size()) {
+  unsigned int uIndex = map_pm_address2index(address);
+  if(uIndex < program_memory_size()) {
 
-    program_memory[address]->update_line_number(file_id,sline,lst_line,0,0);
+    program_memory[uIndex]->update_line_number(file_id,sline,lst_line,0,0);
 
     //printf("%s address=%x, File ID= %d, sline=%d, lst_line=%d\n", __FUNCTION__,address,file_id,sline,lst_line);
 
@@ -692,7 +698,7 @@ void Processor::list(unsigned int file_id,
 void Processor::disassemble (signed int s, signed int e)
 {
   instruction *inst;
-  int use_src_to_disasm =0;
+  int use_src_to_disasm = 0;
 
   if(s >= e)
     return;

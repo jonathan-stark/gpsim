@@ -234,6 +234,7 @@ EXPORTS
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
     ?init_program_memory@Processor@@UAEXI@Z
     ?init_program_memory@Processor@@UAEXII@Z
+    ?init_program_memory_at_index@Processor@@UAEXII@Z
     ?init_register_memory@Processor@@UAEXI@Z
     ?initializeAttributes@Processor@@UAEXXZ
     ?interrupt@Program_Counter@@UAEXI@Z
