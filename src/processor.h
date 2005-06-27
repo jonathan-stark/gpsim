@@ -415,6 +415,8 @@ public:
 
   virtual void init_program_memory(unsigned int memory_size);
   virtual void init_program_memory(unsigned int address, unsigned int value);
+  virtual void init_program_memory_at_index(unsigned int address,
+    unsigned int value);
   virtual unsigned int program_memory_size(void) const {return 0;};
   void build_program_memory(unsigned int *memory,
 			    unsigned int minaddr, 
