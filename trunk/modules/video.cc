@@ -102,12 +102,12 @@ public:
 // remove it later, but for now it does serve a simple purpose.
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
-void Another_Input::putDrivingState( bool new_state)
+void Another_Input::putState( bool new_state)
 {
 
   bool current_state = getDrivingState();
 
-  IOPIN::putDrivingState(new_state);
+  IOPIN::putState(new_state);
 
   if(current_state != getDrivingState()) {
 

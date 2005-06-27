@@ -51,7 +51,7 @@ private:
   Video *video;
 public:
 
-  virtual void putDrivingState( bool new_state);
+  virtual void putState( bool new_state);
 
   Another_Input (Video *v, IOPORT *i, unsigned int b, char *opt_name=NULL) 
     : IOPIN(i,b,opt_name) , video(v)

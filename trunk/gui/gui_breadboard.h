@@ -51,6 +51,9 @@ typedef struct _path
 class GuiPin
 {
  public:
+  GuiPin(Breadboard_Window *, int x, int y, eOrientation _or, IOPIN *);
+  bool getState() {return value;}
+  void putState(bool bNewState) { value = bNewState;}
   Breadboard_Window *bbw;
 
   IOPIN *iopin;
@@ -67,12 +70,13 @@ class GuiPin
 
   int layout_xpos, layout_ypos;
 
-  bool value;
   eDirection direction;
   eOrientation orientation;
   pintype type;
 
-  GuiPin(Breadboard_Window *, int x, int y, eOrientation _or, IOPIN *);
+protected:
+  bool value;
+
 };
 
 

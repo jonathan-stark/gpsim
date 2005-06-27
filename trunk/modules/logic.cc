@@ -207,20 +207,22 @@ static char * not_pixmap[] = {
 // Specifically, this derivation will intercept when a stimulus
 // is being changed. 
 
-void Logic_Input::putDrivingState( bool new_state)
+void Logic_Input::setDrivenState( bool new_state)
 {
 
-  bool current_state = getDrivingState();
+  if(1)
+    cout << name()<< " setDrivenState= " 
+	 << (new_state ? "high" : "low") << endl;
 
+  if(new_state != getDrivenState()) {
 
-  stimulus::putDrivingState(new_state);
+    bDrivingState = new_state;
+    bDrivenState  = new_state;
 
-  if(current_state != getDrivingState()) {
-//    cout << "logic Input " << name() << " changed to new state: " <<
-//      state << '\n';
-
-    if(LGParent)
+    if(LGParent) {
+      LGParent->update_input_pin(iobit, new_state);
       LGParent->update_state();
+    }
   }
 }
 
@@ -232,17 +234,20 @@ void Logic_Input::putDrivingState( bool new_state)
 
 LogicGate::LogicGate(void)
 {
-	pixmap=0;
+  pixmap=0;
 
-  //cout << "LogicGate base class constructor\n";
 }
 
 LogicGate::~LogicGate(void)
 {
+}
 
-    //cout << "LogicGate base class destructor\n";
-
-    delete port;
+//--------------------------------------------------------------
+void LogicGate::update_input_pin(unsigned int pin, bool bValue)
+{
+  unsigned int mask = 1<<pin;
+  input_state &= ~mask;
+  input_state |= bValue ? mask : 0;
 }
 
 //--------------------------------------------------------------
@@ -254,29 +259,6 @@ LogicGate::~LogicGate(void)
 void LogicGate::create_iopin_map(void)
 {
   int i;
-
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port. 
-
-  port = new IOPORT;
-  port->value.put(0);
-
-  // Here, we name the port `pin'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the logic gate (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
-  if(pin_name) {
-    port->new_name(pin_name);
-  }
-  else
-    port->new_name("pin");
-
 
   // Define the physical package.
   //   The Package class, which is a parent of all of the modules,
@@ -294,29 +276,44 @@ void LogicGate::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-
-  // all logic gates have one or more inuts, but only one
+  // all logic gates have one or more inputs, but only one
   // output. The output is arbitrarily assigned to position
   // 0 on the I/O port while the inputs go to positions 1 and above
+
 
 #define OUTPUT_BITPOSITION 0
 #define INPUT_FIRST_BITPOSITION (OUTPUT_BITPOSITION + 1)
 
-  Logic_Output *LOP = new Logic_Output(this,port, OUTPUT_BITPOSITION, "out");
-  LOP->update_direction(1);                 // make the bidirectional an output
+  // Here, we name the port `pin'. So in gpsim, we will reference
+  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
+  //   name of the logic gate (which is assigned by the user and
+  //   obtained with the name() member function call).
+
+  string outname = name() + ".out";
+
+  pOutputPin = new Logic_Output(this, OUTPUT_BITPOSITION, outname.c_str());
+  pOutputPin->update_direction(1);                 // make the bidirectional an output
 
   // Position pin on middle right side of package
   package->set_pin_position(1,2.5);
-  assign_pin(OUTPUT_BITPOSITION + 1, LOP);  // output
+  assign_pin(OUTPUT_BITPOSITION + 1, pOutputPin);
 
   Logic_Input *LIP;
 
   char p[4] = "in0";
   int j;
 
+
+  pInputPins = (IOPIN **) new char[sizeof (IOPIN *) * (number_of_pins-1)];
+
+  string inname;
   for(i=j=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
-    p[2] = i-j +'0';
-    LIP = new Logic_Input(this,port, i,p);
+    char pin_number = i-j +'0';
+    inname = name() + ".in" + pin_number;
+    //p[2] = i-j +'0';
+    LIP = new Logic_Input(this, i-INPUT_FIRST_BITPOSITION,inname.c_str());
+    pInputPins[i-INPUT_FIRST_BITPOSITION] = LIP;
+
     if(number_of_pins==2)
       package->set_pin_position(i+1, 0.5); // Left side of package
     else
@@ -325,12 +322,8 @@ void LogicGate::create_iopin_map(void)
   }
 
   // Form the logic gate bit masks
-  // The output is at port bit position 0
-  output_bit_mask = 1 << OUTPUT_BITPOSITION;
-  input_bit_mask = (1<< (number_of_pins)) - 2;
-
-  
-  //cout << hex << "  input_bit_mask = " << input_bit_mask << '\n';
+  input_bit_mask = (1<< (number_of_pins-1)) - 1;
+  cout << hex << "  input_bit_mask = " << input_bit_mask << '\n';
 
   // Create an entry in the symbol table for the new I/O pins.
   // This is how the pins are accessed at the higher levels (like
@@ -419,23 +412,9 @@ AND2Gate::~AND2Gate(void)
 
 void ANDGate::update_state(void)
 {
-  unsigned int old_value = port->value.get();
-
-  //cout << "update_state of ANDGate\n";
-  if((port->value.get() & input_bit_mask) == input_bit_mask)
-    port->value.put(port->value.get() | output_bit_mask);
-  else
-    port->value.put(port->value.get() & ~output_bit_mask);
-
-  if( (old_value ^ port->value.get()) & output_bit_mask) {
-
-    if(port->pins[0]->snode) {
-      port->pins[0]->snode->update(0);
-    }
-//    cout << "logic gate output just went " <<
-//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
-  }
-
+  pOutputPin->putState((input_state & input_bit_mask) == input_bit_mask);
+  if (pOutputPin->snode)
+    pOutputPin->snode->update();
 }
 
 //--------------------------------------------------------------
@@ -469,22 +448,7 @@ Module * OR2Gate::construct(const char *_new_name)
 
 void ORGate::update_state(void)
 {
-  unsigned int old_value = port->value.get();
-
-  //cout << "update_state of ORGate\n";
-  if(port->value.get() & input_bit_mask) 
-    port->value.put(port->value.get() | output_bit_mask);
-  else
-    port->value.put(port->value.get() & ~output_bit_mask);
-
-  if( (old_value ^ port->value.get()) & output_bit_mask) {
-
-    if(port->pins[0]->snode) {
-      port->pins[0]->snode->update(0);
-    }
-//    cout << "logic gate output just went " <<
-//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
-  }
+  pOutputPin->putState((input_state & input_bit_mask) != 0);
 
 }
 
@@ -517,22 +481,7 @@ NOTGate::~NOTGate(void)
 
 void NOTGate::update_state(void)
 {
-  unsigned int old_value = port->value.get();
-
-  //cout << "update_state of NOTGate\n";
-  if((port->value.get() & input_bit_mask) == input_bit_mask)
-    port->value.put(port->value.get() & ~output_bit_mask);
-  else
-    port->value.put(port->value.get() | output_bit_mask);
-
-  if( (old_value ^ port->value.get()) & output_bit_mask) {
-
-    if(port->pins[0]->snode) {
-      port->pins[0]->snode->update(0);
-    }
-//    cout << "logic gate output just went " <<
-//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
-  }
+  pOutputPin->putState((input_state & input_bit_mask) == 0);
 
 }
 
@@ -565,33 +514,16 @@ Module * XOR2Gate::construct(const char *_new_name)
 
 void XORGate::update_state(void)
 {
-  unsigned int old_value = port->value.get();
-  int i;
-  int out_value=0;
+  bool bNewOutputState=false;
 
-  //cout << "update_state of XORGate\n";
-
-  for(i=INPUT_FIRST_BITPOSITION; i<number_of_pins; i++) {
-      if(port->value.get() & (1<<i))
-	  out_value++;
+  unsigned int mask=input_bit_mask;
+  while(mask) {
+    unsigned int lsb = (~mask + 1) & mask;
+    mask ^= lsb;
+    bNewOutputState ^= (lsb & input_state) ? true : false;
   }
 
-  //printf("out_value %d\n",out_value);
-
-  if(out_value&1)
-    port->value.put(port->value.get() | output_bit_mask);
-  else
-    port->value.put(port->value.get() & ~output_bit_mask);
-
-  if( (old_value ^ port->value.get()) & output_bit_mask) {
-
-    if(port->pins[0]->snode) {
-      port->pins[0]->snode->update(0);
-    }
-//    cout << "logic gate output just went " <<
-//      ( (port->value & output_bit_mask) ? "HIGH" : "LOW") << '\n';
-  }
-
+  pOutputPin->putState(bNewOutputState);
 }
 
 #endif // HAVE_GUI

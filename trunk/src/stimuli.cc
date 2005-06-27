@@ -567,7 +567,6 @@ stimulus::stimulus(const char *cPname)
 
   snode = 0;
   bDrivingState = false;
-  bDrivenState = false;
   bDriving = false;
   next = 0;
 
@@ -780,12 +779,14 @@ void source_stimulus::show()
 //
 
 IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
+  : stimulus()
 {
   iop = i;
   iopp = _iopp;
   iobit=b;
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
+  bDrivenState = false;
 
   Zth = 1e8;
   Vth = 5.0;
@@ -839,6 +840,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 }
 
 IOPIN::IOPIN(void)
+  : stimulus()
 {
   if(verbose)
     cout << "IOPIN default constructor\n";
@@ -848,6 +850,7 @@ IOPIN::IOPIN(void)
   iobit=0;
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
+  bDrivenState = false;
   Vth = 0.3;
   Zth = 1e8;
   ZthWeak = 1e3;
@@ -941,17 +944,17 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
 }
 
 //------------------------------------------------------------
-// putDrivingState - called by peripherals when they wish to
+// putState - called by peripherals when they wish to
 // drive an I/O pin to a new state.
 
-void IOPIN::putDrivingState(bool new_state)
+void IOPIN::putState(bool new_state)
 {
   if(new_state != bDrivingState) {
     bDrivingState = new_state;
     Vth = bDrivingState ? 5.0 : 0.3;
     
     if(verbose & 1)
-      cout << name()<< " putDrivingState= " 
+      cout << name()<< " putState= " 
 	   << (new_state ? "high" : "low") << endl;
     
     // If this pin is tied to a node, then update the node.
@@ -968,6 +971,12 @@ void IOPIN::putDrivingState(bool new_state)
 	port->setbit(iobit, new_state);
     }
   }
+}
+
+//------------------------------------------------------------
+bool IOPIN::getState()
+{
+  return getDriving() ? getDrivingState() : getDrivenState();
 }
 
 void IOPIN::setDrivingState(bool new_state)
@@ -1012,7 +1021,7 @@ void IOPIN::setDrivenState(bool new_state)
 
 void IOPIN::toggle(void)
 {
-  putDrivingState(getDrivingState() ^ true);
+  putState(getState() ^ true);
 }
 
 /*************************************

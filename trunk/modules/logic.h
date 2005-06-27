@@ -53,10 +53,10 @@ private:
 
 public:
 
-  virtual void putDrivingState( bool new_state);
+  virtual void setDrivenState( bool new_state);
 
-  Logic_Input (LogicGate *parent, IOPORT *i, unsigned int b, char *opt_name=NULL) 
-    : IOPIN(i,b,opt_name), LGParent(parent)
+  Logic_Input (LogicGate *parent, unsigned int b, const char *opt_name=0) 
+    : IOPIN(0,b,opt_name), LGParent(parent)
     { 
     }
 
@@ -69,8 +69,8 @@ private:
 
 public:
 
-  Logic_Output (LogicGate *parent, IOPORT *i, unsigned int b,char *opt_name=NULL) 
-    : IO_bi_directional(i,b,opt_name), LGParent(parent)
+  Logic_Output (LogicGate *parent, unsigned int b,const char *opt_name=0) 
+    : IO_bi_directional(0,b,opt_name), LGParent(parent)
     { 
     }
 
@@ -102,11 +102,14 @@ class LogicGate : public Module
 public:
 
   int number_of_pins;
-  int output_bit_mask;
   unsigned int input_bit_mask;
+  unsigned int input_state;
+  IOPIN  **pInputPins;
+  Logic_Output *pOutputPin;
+
   GdkPixmap *pixmap;
 
-  IOPORT  *port;
+  //  IOPORT  *port;
 
   LogicGate(void);
   ~LogicGate(void);
@@ -115,7 +118,8 @@ public:
   virtual void create_iopin_map(void);
 
 
-  virtual void update_state(void){};
+  virtual void update_state(void)=0;
+  void update_input_pin(unsigned int pin, bool bValue);
   virtual int get_num_of_pins(void) {return number_of_pins;};
   void set_number_of_pins(int npins){number_of_pins=npins;};
   GtkWidget *create_pixmap(char **pixmap_data);
