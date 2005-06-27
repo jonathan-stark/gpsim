@@ -1,3 +1,16 @@
+2005-06-27 Scott Dattalo <scott@dattalo.com>
+	* src/stimuli.cc, src/stimuli.h:
+	Added putState()/getState() methods and removed putDrivingState
+	method from the stimulus class. The purpose of this is to abstract
+	away whether a node is driving or not. The main affect is in the
+	gui breadboard where the state of I/O pins is queried.
+	* gui/gui_breadboard.cc, gui/gui_breadboard.h, modules/usart.cc,
+	modules/video.cc, modules/video.h, src/14bit-tmrs.cc,
+	src/i2c-ee.cc, src/ssp.cc, 
+	src/uart.cc: Updated calls to new stimulus class API.
+	* modules/logic.cc, modules/logic.h: The logic gate modules had
+	bit rotted. 
+
 2005-06-26 Scott Dattalo <scott@dattalo.com>
 	* src/trace.cc: The wrong variable was being used to index the
 	program counter array. This caused the trace to get an invalid

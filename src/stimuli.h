@@ -153,17 +153,6 @@ class stimulus : public gpsimValue
 public:
 
   Stimulus_Node *snode;      // Node to which this stimulus is attached
-
-  bool bDrivingState;        // 0/1 digitization of the analog state we're driving
-  bool bDrivenState;         // 0/1 digitization of the state we're being driven to
-  bool bDriving;             // True if this stimulus is a driver
-
-
-  double Vth;                // Open-circuit or Thevenin voltage
-  double Zth;                // Input or Thevenin resistance
-  double Cth;                // Stimulus capacitance.
-
-  double nodeVoltage;        // The voltage driven on to this stimulus by the snode
   stimulus *next;            // next stimulus that's on the snode
 
   stimulus(const char *n=0);
@@ -186,21 +175,23 @@ public:
   virtual bool getDriving() { return bDriving; }
   virtual void setDriving(bool bNewDriving) { bDriving=bNewDriving; }
 
-  // A way of writing digital values to the stimulus.
-  // The difference between the 'put' and the 'set' methods is that
-  // a stimulus that wants to drive it's own digital state will
-  // call 'put' where as when an external node wishes to drive this
-  // stimulus it'll call set.
+  // Functions for accessing/manipulating the stimulus state
+
+  // Control the driving state, i.e. the state this stimulus wishes to drive
   virtual bool getDrivingState(void) {return bDrivingState;};
   virtual void setDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
 
-  virtual bool getDrivenState(void) {return bDrivenState;};
-  virtual void setDrivenState(bool new_dstate) { bDrivenState = new_dstate;};
+  // Control the driven state, i.e. the state some external node wishes to
+  // drive this stimulus.
+  virtual bool getDrivenState(void) { return getDrivingState(); }
+  virtual void setDrivenState(bool new_dstate) { setDrivingState(new_dstate);}
 
-  virtual void putDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
+  // Control the 'state' of the node.
+  virtual bool getState() { return getDrivingState(); }
+  virtual void putState(bool new_dstate) { setDrivingState(new_dstate);}
 
   // getBitChar - this complements the Register class' getBitStr function
-  virtual char getBitChar() { return '0'; }
+  virtual char getBitChar() { return getState() ? '1':'0'; }
   virtual void attach(Stimulus_Node *s) { snode = s;};
   virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
 
@@ -210,6 +201,17 @@ public:
 
   // Display info about the stimulus.
   virtual void show();
+
+protected:
+  bool bDrivingState;        // 0/1 digitization of the analog state we're driving
+  bool bDriving;             // True if this stimulus is a driver
+
+
+  double Vth;                // Open-circuit or Thevenin voltage
+  double Zth;                // Input or Thevenin resistance
+  double Cth;                // Stimulus capacitance.
+
+  double nodeVoltage;        // The voltage driven on to this stimulus by the snode
 
   // These are only here because they're pure virtual functions in the parent class.
   virtual unsigned int get_value(void) { return 0;}
@@ -317,8 +319,8 @@ class IOPIN : public stimulus
   virtual void setDrivingState(bool new_dstate);
   virtual bool getDrivenState(void);
   virtual void setDrivenState(bool new_dstate);
-
-  virtual void putDrivingState(bool new_dstate);
+  virtual bool getState();
+  virtual void putState(bool new_dstate);
 
   virtual Register *get_iop(void);
   virtual void toggle(void);
@@ -334,6 +336,9 @@ class IOPIN : public stimulus
 
   virtual char getBitChar();
   virtual void show();
+
+protected:
+  bool bDrivenState;         // 0/1 digitization of the state we're being driven to
 
 };
 

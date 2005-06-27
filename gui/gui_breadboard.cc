@@ -1202,7 +1202,7 @@ static void draw_pin(GuiPin *pin)
     if(pin->type==PIN_OTHER)
 	gdk_gc_set_foreground(pin->gc,&black_color);
     else
-	gdk_gc_set_foreground(pin->gc,pin->value ? &high_output_color:&low_output_color);
+	gdk_gc_set_foreground(pin->gc,pin->getState() ? &high_output_color:&low_output_color);
 
     // Draw actual pin
     gdk_draw_line(pin->pixmap,pin->gc,
@@ -2525,7 +2525,11 @@ static void trace_all(GtkWidget *button, Breadboard_Window *bbw)
     puts("Trace all is done.");
 }
 
-GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientation, IOPIN *_iopin)
+//========================================================================
+GuiPin::GuiPin(Breadboard_Window *_bbw,
+	       int _x, int _y, 
+	       eOrientation _orientation,
+	       IOPIN *_iopin)
 {
 
     iopin = _iopin;
@@ -2543,7 +2547,7 @@ GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientatio
 
 
     if(iopin) {
-      value=iopin->getDrivingState();
+      value=iopin->getState();
       direction=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
       orientation=_orientation;
       type=PIN_DIGITAL;
@@ -2589,6 +2593,9 @@ GuiPin::GuiPin(Breadboard_Window *_bbw, int _x, int _y, eOrientation _orientatio
 
 }
 
+//------------------------------------------------------------------------
+
+//------------------------------------------------------------------------
 static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
 {
     if(p->name_pixmap==0)
@@ -3103,12 +3110,12 @@ void Breadboard_Window::Update(void)
 
 	if(pin->iopin!=0) {
 	
-	  value=pin->iopin->getDrivingState();
+	  value=pin->iopin->getState();
 	  dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 
-	  if(value!=pin->value || dir!=pin->direction) {
+	  if(value!=pin->getState() || dir!=pin->direction) {
 	  
-	    pin->value=value;
+	    pin->putState(value);
 	    pin->direction=dir;
 
 	    draw_pin(pin);

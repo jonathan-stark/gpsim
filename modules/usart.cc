@@ -274,26 +274,26 @@ public:
 
     if( state < h2l_threshold) {
       state = l2h_threshold + 1;
-      putDrivingState(0);
+      putState(0);
 
     } else {
 
       if(state > l2h_threshold) {
 	state = h2l_threshold - 1;
-	putDrivingState(1);
+	putState(1);
       }
     }
     */
   }
 #endif
-  //  void putDrivingState(bool new_dstate) { 
+  //  void putState(bool new_dstate) { 
 
-    //cout << "usart tx putDrivingState " << new_dstate << '\n';
+    //cout << "usart tx putState " << new_dstate << '\n';
     /*
     bool diff = new_dstate ^ bDrivingState;
     bDrivingState = new_dstate;
 
-    cout << "usart tx putDrivingState " << bDrivingState << '\n';
+    cout << "usart tx putState " << bDrivingState << '\n';
     if( usart && diff ) {
 
       usart->new_rx_edge(bDrivingState);
@@ -305,7 +305,7 @@ public:
 
   //}
 #if 0
-  virtual void putDrivingState(bool newDrivingState) {
+  virtual void putState(bool newDrivingState) {
 
     Register *port = get_iop();
 
@@ -466,7 +466,7 @@ class TXREG : public TriggerObject
     start_time = last_time;
 
     if(txpin) {
-      txpin->putDrivingState((txr & 1) ? true : false);
+      txpin->putState((txr & 1) ? true : false);
       cout << "usart tx module sent a " << (txr&1) <<  " bit count " << bit_count << '\n';
     }
 

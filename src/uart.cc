@@ -259,7 +259,7 @@ void _TXSTA::transmit_a_bit(void)
       if(verbose)
         cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
       if(txpin)
-	txpin->putDrivingState((tsr&1) ? true : false);
+	txpin->putState((tsr&1) ? true : false);
 
       tsr >>= 1;
 
@@ -362,7 +362,7 @@ void _RCSTA::put(unsigned int new_value)
       spbrg->start();
       // Make the tx line high when the serial port is enabled.
       if(txsta->txpin)
-	txsta->txpin->putDrivingState(true);
+	txsta->txpin->putState(true);
       txsta->txreg->empty();
     } else {
 
