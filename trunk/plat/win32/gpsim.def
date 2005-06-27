@@ -262,7 +262,8 @@ EXPORTS
     ?print_frame@TraceObject@@UAEXPAVTraceFrame@@PAU_iobuf@@@Z
     ?printExpression@TriggerObject@@UAEXXZ
     ?put@IOPORT@@UAEXI@Z
-    ?putDrivingState@IOPIN@@UAEX_N@Z
+    ?putState@IOPIN@@UAEX_N@Z
+    ?getState@IOPIN@@UAE_NXZ
     ?putToAddress@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?putToIndex@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?put_value@IOPORT@@UAEXI@Z
