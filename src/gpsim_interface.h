@@ -140,7 +140,8 @@ class gpsimInterface : public TriggerObject {
   void reset (void);
   void simulation_has_stopped (void);
   bool bSimulating();
-
+  bool bUsingGUI();
+  void setGUImode(bool);
   // gpsim will call these functions to notify gui and/or modules
   // that something has changed. 
 
@@ -178,6 +179,7 @@ private:
   guint64 future_cycle;
 
   bool mbSimulating;   // Set true if the simulation is running.
+  bool mbUseGUI;       // Set true if gui is being used.
 };
 
 #if defined(IN_MODULE) && defined(_WIN32)

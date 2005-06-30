@@ -183,6 +183,16 @@ void Module::get(char *pBuf, int len)
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
+void Module::initializeAttributes()
+{
+  // Create position attribute place holders if we're not using the gui
+  if(!get_interface().bUsingGUI()) {
+    add_attribute(new Float("xpos",80.0));
+    add_attribute(new Float("ypos",80.0));
+  }
+}
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
 void Module::add_attribute(Value *new_attribute)
 {
 

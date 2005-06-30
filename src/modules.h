@@ -135,6 +135,7 @@ public:
   virtual void get(char *, int len);
   virtual Value *get_attribute(char *attr, bool bWarnIfNotFound=true);
   virtual void dump_attributes(int show_values=1);
+  virtual void initializeAttributes();
 
   /// Reset 
 

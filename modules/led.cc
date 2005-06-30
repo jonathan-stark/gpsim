@@ -521,11 +521,12 @@ Led_7Segments::Led_7Segments(void)
 {
 
   //cout << "7-segment led constructor\n";
-  name_str = strdup("Led 7-segments");
+  new_name("LED7SEG");
 
-
-  build_segments(100, 100);
-  build_window();
+  if(get_interface().bUsingGUI()) {
+    build_segments(100, 100);
+    build_window();
+  }
 
   interface = new LED_Interface(this);
   get_interface().add_interface(interface);
@@ -609,21 +610,7 @@ void Led_7Segments::create_iopin_map(void)
   assign_pin(8, new Led_Input(port, 7,"seg6"));  // segment 6 (g)
 
 
-
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-
-  // again, this could be looped (and even combined with the above)
-  get_symbol_table().add_stimulus(get_pin(1));
-  get_symbol_table().add_stimulus(get_pin(2));
-  get_symbol_table().add_stimulus(get_pin(3));
-  get_symbol_table().add_stimulus(get_pin(4));
-  get_symbol_table().add_stimulus(get_pin(5));
-  get_symbol_table().add_stimulus(get_pin(6));
-  get_symbol_table().add_stimulus(get_pin(7));
-  get_symbol_table().add_stimulus(get_pin(8));
-
+  initializeAttributes();
 
 }
 
@@ -658,6 +645,8 @@ void Led::update(  GtkWidget *widget,
 		   guint new_width,
 		   guint new_height)
 {
+  if(!get_interface().bUsingGUI())
+    return;
 
   w_width = new_width;
   w_height = new_height;
@@ -772,9 +761,10 @@ void Led::build_window(void)
 
 Led::Led(void)
 {
-  name_str = strdup("Led");
+  new_name("LED");
 
-  build_window();
+  if(get_interface().bUsingGUI())
+    build_window();
 
   interface = new LED_Interface(this);
   get_interface().add_interface(interface);
@@ -782,11 +772,8 @@ Led::Led(void)
 
 Led::~Led(void)
 {
-    //cout << "7-segment led destructor\n";
-
-    //gpsim_unregister_interface(interface_id);
-    //gpsim_clear_break(cbp);
-    delete port;
+  //gpsim_unregister_interface(interface_id);
+  delete port;
 }
 
 //--------------------------------------------------------------
@@ -815,44 +802,21 @@ void Led::create_iopin_map(void)
   //   name of the logic gate (which is assigned by the user and
   //   obtained with the name() member function call).
 
-  char *pin_name = (char*)name().c_str();   // Get the name of this logic gate
+  char *pin_name = (char*)name().c_str();
   if(pin_name) {
     port->new_name(pin_name);
   }
   else
     port->new_name("pin");
 
-
-  // Define the physical package.
-  //   The Package class, which is a parent of all of the modules,
-  //   is responsible for allocating memory for the I/O pins.
-  //
-
   create_pkg(1);
 
   // Position pin on left side of package
   package->set_pin_position(1,0.5);
 
-  // Define the I/O pins and assign them to the package.
-  //   There are two things happening here. First, there is
-  //   a new I/O pin that is being created. For the binary 
-  //   indicator, both pins are inputs. The second thing is
-  //   that the pins are "assigned" to the package. If we
-  //   need to reference these newly created I/O pins (like
-  //   below) then we can call the member function 'get_pin'.
-
-  // Now, I'd normally put this is loop, but to be explicit...
-  assign_pin(1, new Led_Input(port, 0,"in"));  // cathode
-
-
-
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-
-  // again, this could be looped (and even combined with the above)
-  get_symbol_table().add_stimulus(get_pin(1));
-
+  // Define the LED Cathode. (The anode is implicitly tied to VCC)
+  assign_pin(1, new Led_Input(port, 0,"in"));
+  initializeAttributes();
 }
 
 //--------------------------------------------------------------
@@ -860,8 +824,6 @@ void Led::create_iopin_map(void)
 
 Module * Led::construct(const char *_new_name=0)
 {
-
-//  cout << " 7-segment LED display constructor\n";
 
   Led *ledP = new Led;
   ledP->new_name(_new_name);

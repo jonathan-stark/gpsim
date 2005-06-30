@@ -1,3 +1,15 @@
+2005-06-30 Scott Dattalo <scott@dattalo.com>
+	* cli/input.cc, gpsim/main.cc, gui/gui_main.cc,
+	src/gpsim_interface.h, src/interface.cc, src/modules.cc,
+	src/modules.h, src/processor.cc:
+	Added methods to the gpsim_interface class that manage the state
+	of gui. This is done so that gui-based modules can query the gui
+	state and conditionally build their graphical portions. 
+	* modules/led.cc, modules/logic.cc:
+	The Logic and LED modules now will not build any graphics if the
+	gui is not initialized.
+	Pin names were getting added to the symbol twice.
+
 2005-06-27 Scott Dattalo <scott@dattalo.com>
 	* src/stimuli.cc, src/stimuli.h:
 	Added putState()/getState() methods and removed putDrivingState

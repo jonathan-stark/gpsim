@@ -42,7 +42,6 @@ using namespace std;
 #include "../src/fopen-path.h"
 #include "../cli/ui_gpsim.h"
 
-bool bUseGUI = true;  // assume that we want to use the gui
 int quit_state;
 
 extern "C" {
@@ -148,8 +147,9 @@ main (int argc, char *argv[])
 {
 
   int c,usage=0;
+  bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
-  poptContext optCon;   /* context for parsing command-line options */
+  poptContext optCon;     // context for parsing command-line options
 
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
   //poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
@@ -228,6 +228,7 @@ main (int argc, char *argv[])
   quit_parse = 0;
   abort_gpsim = 0;
 
+  // Convert the remaining command line options into gpsim commands
   if(*cod_name) {
 
     if(*processor_name)
@@ -235,7 +236,7 @@ main (int argc, char *argv[])
         "\" is being ignored\nsince the .cod file specifies the processor\n";
     if(*hex_name)
       cout << "WARNING: Ignoring the hex file \"" << hex_name <<
-        "\"  ignored\nsince the .cod file specifies the hex code\n";
+        "\"\nsince the .cod file specifies the hex code\n";
 
     snprintf(command_str, sizeof(command_str),
 	     "load s \"%s\"\n",cod_name);

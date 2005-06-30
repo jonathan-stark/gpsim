@@ -215,6 +215,7 @@ gpsimInterface::gpsimInterface (void )
   interface_seq_number = 0;
   socket_interface = 0;
   mbSimulating = false;
+  mbUseGUI = false;
 }
 
 ISimConsole & gpsimInterface::GetConsole()
@@ -398,6 +399,15 @@ bool gpsimInterface::bSimulating()
   return mbSimulating;
 }
 
+bool gpsimInterface::bUsingGUI()
+{
+  return mbUseGUI;
+}
+void gpsimInterface::setGUImode(bool bnewGUImode)
+{
+  // We can only turn the gui on we can't turn it off.
+  mbUseGUI |= bnewGUImode;
+}
 void gpsimInterface::new_processor (Processor *new_cpu)
 {
   GSList *interface_list = interfaces;
