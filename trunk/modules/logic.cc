@@ -199,6 +199,8 @@ static char * not_pixmap[] = {
 
 #include "logic.h"
 #include "../src/packages.h"
+#include "../src/gpsim_interface.h"
+#include "../src/attributes.h"
 
 //--------------------------------------------------------------
 // Led_Input
@@ -210,7 +212,7 @@ static char * not_pixmap[] = {
 void Logic_Input::setDrivenState( bool new_state)
 {
 
-  if(1)
+  if(0)
     cout << name()<< " setDrivenState= " 
 	 << (new_state ? "high" : "low") << endl;
 
@@ -323,17 +325,9 @@ void LogicGate::create_iopin_map(void)
 
   // Form the logic gate bit masks
   input_bit_mask = (1<< (number_of_pins-1)) - 1;
-  cout << hex << "  input_bit_mask = " << input_bit_mask << '\n';
 
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
+  initializeAttributes();
 
-  for(i= 1; i<=number_of_pins; i++)
-    get_symbol_table().add_stimulus(get_pin(i));
-
-
-  //cout << "Iopin map should be created\n";
 }
 
 static gboolean expose(GtkWidget *widget,
@@ -401,8 +395,8 @@ Module * AND2Gate::construct(const char *_new_name)
 
 AND2Gate::AND2Gate(void)
 {
-
-  set_widget(create_pixmap(and2_pixmap));
+  if(get_interface().bUsingGUI())
+    set_widget(create_pixmap(and2_pixmap));
 
 }
 AND2Gate::~AND2Gate(void)
@@ -423,8 +417,8 @@ void ANDGate::update_state(void)
 
 OR2Gate::OR2Gate(void)
 {
-
-  set_widget(create_pixmap(or2_pixmap));
+  if(get_interface().bUsingGUI())
+    set_widget(create_pixmap(or2_pixmap));
 
 }
 OR2Gate::~OR2Gate(void)
@@ -470,8 +464,8 @@ Module * NOTGate::construct(const char *_new_name)
 
 NOTGate::NOTGate(void)
 {
-
-  set_widget(create_pixmap(not_pixmap));
+  if(get_interface().bUsingGUI())
+    set_widget(create_pixmap(not_pixmap));
 
 }
 NOTGate::~NOTGate(void)
@@ -491,8 +485,8 @@ void NOTGate::update_state(void)
 
 XOR2Gate::XOR2Gate(void)
 {
-
-  set_widget(create_pixmap(xor2_pixmap));
+  if(get_interface().bUsingGUI())
+    set_widget(create_pixmap(xor2_pixmap));
 
 }
 XOR2Gate::~XOR2Gate(void)

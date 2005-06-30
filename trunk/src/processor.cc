@@ -116,6 +116,7 @@ unsigned long Processor::GetCapabilities() {
 
 void Processor::initializeAttributes()
 {
+  Module::initializeAttributes();
   add_attribute(new WarnModeAttribute(this));
   add_attribute(new SafeModeAttribute(this));
   add_attribute(new UnknownModeAttribute(this));

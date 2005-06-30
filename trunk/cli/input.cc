@@ -90,7 +90,6 @@ extern "C" {
 
 
 extern const char *get_dir_delim(const char *path);
-extern bool bUseGUI;
 int parse_string(char * str);
 
 //------------------------------------------------------------------------
@@ -768,8 +767,7 @@ void exit_gpsim(void)
     icd_disconnect();
   
 #ifdef HAVE_GUI
-  if(bUseGUI)
-    quit_gui();
+  quit_gui();
 #endif
 
 #ifdef HAVE_READLINE
@@ -835,7 +833,7 @@ void initialize_readline (void)
 #endif
 
 #ifdef HAVE_GUI
-  if(bUseGUI)
+  if(get_interface().bUsingGUI())
     prompt = gpsim_prompt;
 #endif
 

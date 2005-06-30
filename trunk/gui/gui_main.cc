@@ -369,6 +369,9 @@ void GUI_Interface::Update(gpointer object)
  */
 void quit_gui(void)
 {
+  if(!get_interface().bUsingGUI())
+    return;
+
     int x,y,width,height;
 
     gdk_window_get_root_origin(dispatcher_window->window,&x,&y);
@@ -397,6 +400,8 @@ int gui_init (int argc, char **argv, bool bUseGui)
 #else
   settings = new SettingsReg("gpsim");
 #endif
+
+  get_interface().setGUImode(bUseGui);
 
 #if GLIB_MAJOR_VERSION >= 2
   if(gUsingThreads()) {
