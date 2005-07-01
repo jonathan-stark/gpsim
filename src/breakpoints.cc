@@ -388,33 +388,58 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 
 }
 
-bool Breakpoints::dump1(unsigned int bp_num)
+bool Breakpoints::dump1(unsigned int bp_num, int dump_type)
 {
   if(!bIsValid(bp_num)) {
     cout << "Break point number:" << bp_num <<" is out of range\n";
     return false;
   }
 
-  if(break_status[bp_num].bpo) {
-    break_status[bp_num].bpo->print();
-    if (break_status[bp_num].bpo->bHasExpression()) {
+  BreakStatus &bs = break_status[bp_num];
+  BREAKPOINT_TYPES break_type = break_status[bp_num].type;
+  if(bs.bpo) {
+    switch(dump_type) {
+      case BREAK_ON_EXECUTION:
+        if(dynamic_cast<RegisterAssertion*>(bs.bpo) != 0) {
+        // for 'break e' we skip RegisterAssertions
+        // and dump user execution breaks.
+          return false;
+        }
+        break;
+      case BREAK_ON_REG_WRITE:
+        if(dynamic_cast<Break_register_write *>(bs.bpo) != 0 ||
+           dynamic_cast<Break_register_write_value*>(bs.bpo) != 0) {
+          // for 'break w' we dump register write classes
+          break;
+        }
+        return false;
+      case BREAK_ON_REG_READ:
+        if(dynamic_cast<Break_register_read *>(bs.bpo) != 0 ||
+           dynamic_cast<Break_register_read_value*>(bs.bpo) != 0) {
+          // for 'break r' we dump register read classes
+          break;
+        }
+        return false;
+      }
+
+    bs.bpo->print();
+    if (bs.bpo->bHasExpression()) {
       cout << "    Expression:";
-      break_status[bp_num].bpo->printExpression();
+      bs.bpo->printExpression();
     }
     return true;
   }
 
   bool set_by_user = 0;
 
-  BREAKPOINT_TYPES break_type = break_status[bp_num].type;
-
   switch (break_type)
     {
     case BREAK_ON_CYCLE:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
+      // JRH - 6/30/2005, Looks like this code is dead to me.
+      cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       {
-      guint64 cyc =  break_status[bp_num].arg2;
-      cyc = (cyc <<32)  | break_status[bp_num].arg1;
+      guint64 cyc =  bs.arg2;
+      cyc = (cyc <<32)  | bs.arg1;
       cout << "cycle " << hex << setw(16) << setfill('0') <<  cyc << '\n';
       }
       set_by_user = 1;
@@ -422,13 +447,13 @@ bool Breakpoints::dump1(unsigned int bp_num)
 
     case BREAK_ON_STK_UNDERFLOW:
     case BREAK_ON_STK_OVERFLOW:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
+      cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       cout << "stack " << ((break_type == BREAK_ON_STK_OVERFLOW)?"ov":"und") << "er flow\n";
       set_by_user = 1;
       break;
 
     case BREAK_ON_WDT_TIMEOUT:
-      cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name() << "  ";
+      cout << hex << setw(0) << bp_num << ": " << bs.cpu->name() << "  ";
       cout << "wdt time out\n";
       set_by_user = 1;
       break;
@@ -442,19 +467,23 @@ bool Breakpoints::dump1(unsigned int bp_num)
 }
 
 
-void Breakpoints::dump(void)
+void Breakpoints::dump(int dump_type)
 {
   bool have_breakpoints = 0;
-  for(int i = 0; i<m_iMaxAllocated; i++)
-    {
-      if(dump1(i))
-        have_breakpoints = 1;
-    }
-
-  cout << "Internal Cycle counter break points" << endl;
-  get_cycles().dump_breakpoints();
-  cout << endl;
-
+  if(dump_type != BREAK_ON_CYCLE)  {
+    for(int i = 0; i<m_iMaxAllocated; i++)
+      {
+        if(dump1(i, dump_type))
+          have_breakpoints = 1;
+      }
+  }
+  if(dump_type == BREAK_DUMP_ALL || 
+     dump_type == BREAK_ON_CYCLE)  {
+    cout << "Internal Cycle counter break points" << endl;
+    get_cycles().dump_breakpoints();
+    have_breakpoints = 1;
+    cout << endl;
+  }
   if(!have_breakpoints)
     cout << "No user breakpoints are set" << endl;
 }
@@ -1467,6 +1496,3 @@ void Log_Register_Write_value::putRV(RegisterValue new_rv)
     }
   replaced->putRV(new_rv);
 }
-
-
-

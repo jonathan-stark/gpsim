@@ -107,7 +107,7 @@ void cmd_break::list(guint64 value)
   if(value == CMDBREAK_BAD_BREAK_NUMBER)
     bp.dump();
   else
-    bp.dump1(value);
+    bp.dump1((unsigned int)value);
 }
 
 const char *TOO_FEW_ARGS="missing register or location\n";
@@ -169,7 +169,7 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue, Expression *pE
   if (pAddress != NULL) { 
     gint64 iAddress;
     pAddress->get(iAddress);
-    b = bp.set_execution_break(GetActiveCPU(),iAddress);
+    b = bp.set_execution_break(GetActiveCPU(), (unsigned int)iAddress);
     if (!bp.set_expression(b,pExpr))
       delete pExpr;
     return b;
@@ -340,6 +340,18 @@ unsigned int cmd_break::set_break(int bit_flag)
 
     break;
 
+  case CYCLE:
+    bp.dump(Breakpoints::BREAK_ON_CYCLE);
+    break;
+  case EXECUTION:
+    bp.dump(Breakpoints::BREAK_ON_EXECUTION);
+    break;
+  case WRITE:
+    bp.dump(Breakpoints::BREAK_ON_REG_WRITE);
+    break;
+  case READ:
+    bp.dump(Breakpoints::BREAK_ON_REG_READ);
+    break;
   default:
     cout << TOO_FEW_ARGS;
     break;

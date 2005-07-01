@@ -219,6 +219,7 @@ class Breakpoints
 public:
   enum BREAKPOINT_TYPES
     {
+      BREAK_DUMP_ALL            = 0,
       BREAK_CLEAR               = 0,
       BREAK_ON_EXECUTION        = 1<<24,
       BREAK_ON_REG_READ         = 2<<24,
@@ -394,8 +395,8 @@ public:
       global_break &= ~GLOBAL_SOCKET;
     }
 
-  bool dump1(unsigned int bp_num);
-  void dump(void);
+  bool dump1(unsigned int bp_num, int dump_type = BREAK_DUMP_ALL);
+  void dump(int dump_type = BREAK_DUMP_ALL);
   void dump_traced(unsigned int b);
   void clear(unsigned int b);
   bool bIsValid(unsigned int b);
