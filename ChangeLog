@@ -1,3 +1,10 @@
+2005-07-01 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/scan.ll, cli/parse.yy, cli/input.cc,h:
+	- Full command line text is displayed when a command line error
+	occures.
+	- Command line buffers are cleared appropriately after a command
+	line error.
+
 2005-06-30 Scott Dattalo <scott@dattalo.com>
 	* regression/logic_test/logic_test.asm,
 	regression/logic_test/Makefile, regression/logic_test/16f873.lkr:
