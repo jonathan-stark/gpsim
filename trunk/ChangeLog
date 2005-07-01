@@ -1,3 +1,13 @@
+2005-06-30 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/breakpoints.cc, src/breakpoints.h, cli/cmd_break.cc:
+	New break point dump filtering.
+	break r dumps register read break points.
+	break w dumps register write break points.
+	break e dumps execution break points.
+
+	* cli/cmd_disasm.cc: Updated disassemble command on line help
+	to reflect reality.
+
 2005-06-30 Scott Dattalo <scott@dattalo.com>
 	* cli/input.cc, gpsim/main.cc, gui/gui_main.cc,
 	src/gpsim_interface.h, src/interface.cc, src/modules.cc,
