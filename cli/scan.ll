@@ -63,7 +63,25 @@ struct LexerStateStruct {
 
   struct LexerStateStruct *prev;
   struct LexerStateStruct *next;
+
 };
+
+static char *        m_pLastFullCommand = NULL;
+static unsigned int  m_iLastFullCommandSize = 0;
+
+void SetLastFullCommand(const char *pCmd) {
+  while(m_iLastFullCommandSize < strlen(pCmd) + 1) {
+    if(m_pLastFullCommand != NULL) {
+      delete m_pLastFullCommand;
+    }
+    m_pLastFullCommand = new char [m_iLastFullCommandSize += 80];
+  }
+  strcpy(m_pLastFullCommand, pCmd);
+}
+const char * GetLastFullCommand() {
+  return m_pLastFullCommand = m_pLastFullCommand == NULL ?
+    "" : m_pLastFullCommand;
+}
 
 static LexerStateStruct *pLexerState = 0;
 static int sLevels=0;
@@ -796,6 +814,7 @@ void init_cmd_state(void)
     pLexerState->mode = 0;
   }
 
+  YY_FLUSH_BUFFER;
 }
 
 static void pushLexerState()

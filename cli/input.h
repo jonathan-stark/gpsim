@@ -26,6 +26,8 @@ Boston, MA 02111-1307, USA.  */
 extern int gpsim_read (char *buf, unsigned max_size);
 extern void initialize_readline (void);
 extern void exit_gpsim(void);
+void SetLastFullCommand(const char *pCmd);
+const char * GetLastFullCommand();
 
 #ifndef HAVE_GUI
 extern char *gnu_readline (char *s, unsigned int force_readline);
