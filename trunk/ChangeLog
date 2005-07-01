@@ -1,3 +1,8 @@
+2005-06-30 Scott Dattalo <scott@dattalo.com>
+	* regression/logic_test/logic_test.asm,
+	regression/logic_test/Makefile, regression/logic_test/16f873.lkr:
+	Added a regression test for gpsim Logic Modules.
+
 2005-06-30 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, src/breakpoints.h, cli/cmd_break.cc:
 	New break point dump filtering.
