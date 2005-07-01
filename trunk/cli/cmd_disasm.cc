@@ -43,11 +43,19 @@ cmd_disassemble::cmd_disassemble(void)
 
     brief_doc = string("Disassemble the current cpu");
 
-    long_doc = string ("\ndisassemble [[start | length] [end]]\n\n\
-\t no arguments:  disassembles 10 instructions before and 5 after the pc.\n\
-\t one argument:  disassemble [length] instructions after the pc.\n\
-\ttwo arguments:  disassemble from [start] to [end].\n\
-\n\
+    long_doc = string ("\ndisassemble [startCount : endCount] | [count]]\n\n\
+\t startCount, endCount and count may all be expressions that evaluate\n\
+\t to an integer value. The colon is used to indicate a range.\n\n\
+\t startCount   - Start list with the instruction startCount from the \n\
+\t                instruction at the PC.\n\
+\t endCount     - List instruction in the list is the endCount\n\
+\t                instruction from the PC.\n\
+\t count        - List count instructions from starting with the\n\
+\t                instruction at thePC.\n\n\
+\t no  arguments: disassembles 10 instructions before and 5 after the pc.\n\
+\t one argument:  disassemble [count] instructions after the pc.\n\
+\t two arguments: disassemble from [startCount] to [endCount] relative\n\
+\t                to the PC.\n\
 ");
 
   op = cmd_disassemble_options; 
@@ -67,24 +75,24 @@ void cmd_disassemble::disassemble(Expression *expr)
     if(expr) {
 
       try {
-	Value *v = expr->evaluate();
+        Value *v = expr->evaluate();
 
-	AbstractRange *ar = dynamic_cast<AbstractRange *>(v);
-	if(ar) {
-	  start = ar->get_leftVal();
-	  end = ar->get_rightVal();
-	} else if (v) {
-	  start = 0;
-	  gint64 i;
-	  v->get(i);
-	  end = (int) i;
-	}
+        AbstractRange *ar = dynamic_cast<AbstractRange *>(v);
+        if(ar) {
+          start = ar->get_leftVal();
+          end = ar->get_rightVal();
+        } else if (v) {
+          start = 0;
+          gint64 i;
+          v->get(i);
+          end = (int) i;
+        }
       }
 
       catch (Error *err) {
-	if(err)
-	  cout << "ERROR:" << err->toString() << endl;
-	delete err;
+        if(err)
+          cout << "ERROR:" << err->toString() << endl;
+        delete err;
       }
 
     }
