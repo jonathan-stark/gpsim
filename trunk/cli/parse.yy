@@ -82,16 +82,17 @@ extern int quit_state;
 
 extern command *getLastKnownCommand();
 extern void init_cmd_state();
-
+extern const char * GetLastFullCommand();
 
 void yyerror(char *message)
 {
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
-  command *lastCommand = getLastKnownCommand();
-  if(lastCommand) {
-    printf(" Last command: %s\n",lastCommand->name);
-  }
-
+  printf(" Last command: %s\n", GetLastFullCommand());
+  // JRH - This doesn't seem to work
+  //command *lastCommand = getLastKnownCommand();
+  //if(lastCommand) {
+  //  printf(" Last command: %s\n",lastCommand->name);
+  //}
   init_cmd_state();
 }
 

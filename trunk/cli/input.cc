@@ -97,6 +97,7 @@ int parse_string(char * str);
 extern bool gUsingThreads(); // in ../src/interface.cc
 
 void initialize_readline (void);
+void clear_input_buffer(void);
 
 void exit_gpsim(void);
 #ifdef HAVE_GUI
@@ -215,6 +216,9 @@ void catch_control_c(int sig)
 #ifdef _WIN32
   if(CSimulationContext::GetContext()->GetActiveCPU()->simulation_mode
     == eSM_RUNNING) {
+    // If we get a CTRL->C while processing a command file
+    // we should probably stop the command file processing.
+    clear_input_buffer();
     CSimulationContext::GetContext()->GetBreakpoints().halt();
   }
   ::signal(SIGINT, catch_control_c);
@@ -579,6 +583,7 @@ gpsim_read (char *buf, unsigned max_size)
   count = (count < max_size) ? count : max_size;
 
   strncpy(buf, cPstr, count);
+  SetLastFullCommand(buf);
 
   if(verbose&4) {
     cout <<"gpsim_read returning " << count << ":" << cPstr << endl;
@@ -805,6 +810,9 @@ static int gpsim_rl_getc(FILE *in)
   g_io_channel_read(channel, buf, 1, &bytes_read);
 #endif
   return buf[0];
+  // JRH, 7-1-2005 - I tried this but am not comfortable that it
+  // is working as I intended.
+  // return bytes_read == 0 ? EOF : (buf[0] & 0x000000ff);
 }
 #endif
 
