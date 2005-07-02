@@ -1,3 +1,10 @@
+2005-07-01 Scott Dattalo <scott@dattalo.com>
+	* cli/scan.ll, cli/parse.yy, cli/input.cc: The recently added
+	command line error processing change did not compile under Linux
+	and was free a constant pointer.
+	* gui/gui_main.cc, gpsim/main.cc: The command line prompt was
+	always selected.
+
 2005-07-01 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/scan.ll, cli/parse.yy, cli/input.cc,h:
 	- Full command line text is displayed when a command line error
