@@ -39,6 +39,7 @@ using namespace std;
 #include "../config.h"
 #include "../cli/input.h"
 #include "../src/interface.h"
+#include "../src/gpsim_interface.h"
 #include "../src/fopen-path.h"
 #include "../cli/ui_gpsim.h"
 
@@ -48,7 +49,7 @@ extern "C" {
 #include <popt.h>
 }
 
-extern int gui_init (int argc, char **argv,bool);
+extern int gui_init (int argc, char **argv);
 extern void gui_main(void);
 extern void cli_main(void);
 // os_dependent.cc'
@@ -198,6 +199,9 @@ main (int argc, char *argv[])
   if(poptPeekArg(optCon))
 	  hex_name=strdup(poptPeekArg(optCon));
   
+#ifdef HAVE_GUI  
+  get_interface().setGUImode(bUseGUI);
+#endif
   initialize_gpsim_core();
   initialize_gpsim();
   initialize_commands();
@@ -207,10 +211,9 @@ main (int argc, char *argv[])
   
 #ifdef HAVE_GUI
   if(bUseGUI) {
-    if (gui_init (argc,argv,bUseGUI) != 0) {
+    if (gui_init (argc,argv) != 0) {
       std::cerr << "Error initialising GUI, reverting to cmd-line mode."
 	        << std::endl;
-      bUseGUI = false;
     }
   }
 #endif

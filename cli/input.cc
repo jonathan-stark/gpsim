@@ -583,6 +583,7 @@ gpsim_read (char *buf, unsigned max_size)
   count = (count < max_size) ? count : max_size;
 
   strncpy(buf, cPstr, count);
+  buf[count] = 0;
   SetLastFullCommand(buf);
 
   if(verbose&4) {
@@ -823,7 +824,8 @@ void initialize_readline (void)
 {
   const char *gpsim_prompt="gpsim> ";
   const char *gpsim_cli_prompt="**gpsim> ";
-  const char *prompt = gpsim_cli_prompt;
+
+  const char *prompt = get_interface().bUsingGUI() ? gpsim_prompt : gpsim_cli_prompt;
 
 #ifdef HAVE_READLINE
 
@@ -838,11 +840,6 @@ void initialize_readline (void)
 #ifdef _WIN32
   /* set console to raw mode */ 
   win32_set_is_readable(channel);
-#endif
-
-#ifdef HAVE_GUI
-  if(get_interface().bUsingGUI())
-    prompt = gpsim_prompt;
 #endif
 
   g_io_add_watch (channel, G_IO_IN, keypressed, NULL);

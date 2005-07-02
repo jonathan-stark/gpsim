@@ -393,15 +393,13 @@ void quit_gui(void)
  *
  */
 
-int gui_init (int argc, char **argv, bool bUseGui)
+int gui_init (int argc, char **argv)
 {
 #ifndef _WIN32
   settings = new SettingsEXdbm("gpsim");
 #else
   settings = new SettingsReg("gpsim");
 #endif
-
-  get_interface().setGUImode(bUseGui);
 
 #if GLIB_MAJOR_VERSION >= 2
   if(gUsingThreads()) {
@@ -432,8 +430,7 @@ int gui_init (int argc, char **argv, bool bUseGui)
 
 
   gte();
-  if(bUseGui)
-    gp = new GUI_Processor();
+  gp = new GUI_Processor();
   interface_id = get_interface().add_interface(new GUI_Interface(gp));
   gtl();
 

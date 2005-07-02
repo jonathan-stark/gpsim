@@ -87,12 +87,9 @@ extern const char * GetLastFullCommand();
 void yyerror(char *message)
 {
   printf("***ERROR: %s while parsing:\n'%s'\n",message, yytext);
-  printf(" Last command: %s\n", GetLastFullCommand());
-  // JRH - This doesn't seem to work
-  //command *lastCommand = getLastKnownCommand();
-  //if(lastCommand) {
-  //  printf(" Last command: %s\n",lastCommand->name);
-  //}
+  const char *last = GetLastFullCommand();
+  if (last)
+    printf(" Last command: %s\n", last);
   init_cmd_state();
 }
 
