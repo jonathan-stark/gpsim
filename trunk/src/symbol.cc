@@ -130,9 +130,8 @@ Symbol_Table::add_register(Register *new_reg, const char *symbol_name,
 
   if(symbol_name) {
     string sName(symbol_name);
-    if((new_reg->name() == sName ||
-       new_reg->baseName() == sName) &&  
-      (find(new_reg->name()) || find(new_reg->baseName()))) {
+    if((new_reg->name() == sName && find(new_reg->name()) ) ||
+       new_reg->baseName() == sName && find(new_reg->baseName())) {
       if(verbose)
         cout << "Warning not adding  "
 	           << symbol_name
@@ -289,6 +288,23 @@ Register * Symbol_Table::findRegister(const char *s)
     sti++;
   }
   return NULL;
+}
+
+const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
+  iterator sti = begin();
+  while( sti != end()) {
+    Value *val = *sti;
+    address_symbol * pAddSym = dynamic_cast<address_symbol*>(val);
+    if(pAddSym != NULL) {
+      gint64 iSymbolAddress;
+      pAddSym->get(iSymbolAddress);
+      if(iSymbolAddress == address) {
+        return pAddSym->name().c_str();
+      }
+    }
+    sti++;
+  }
+  return "";
 }
 
 void Symbol_Table::dump_one(string *s)
@@ -531,8 +547,8 @@ void register_symbol::setMask(Register *pReg) {
   m_uMaskShift = BitShiftCount(m_uMask);
 }
 
-string &register_symbol::name(void) {
-  return name_str;
+string &register_symbol::name(void) const {
+  return (string &)name_str;
 }
 
 char *register_symbol::name(char *buf, int len) {
@@ -930,7 +946,7 @@ stimulus_symbol::stimulus_symbol(stimulus *_s)
 }
 
 //------------------------------------------------------------------------
-string &stimulus_symbol::name()
+string &stimulus_symbol::name() const
 {
   if(s)
     return s->name();
@@ -982,7 +998,7 @@ void val_symbol::set(gint64 new_value)
   if(val) 
     val->put_value((int)new_value);
 }
-string &val_symbol::name(void)
+string &val_symbol::name(void) const
 {
   return val->name();
 }

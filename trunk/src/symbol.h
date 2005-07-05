@@ -109,6 +109,7 @@ public:
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
+  const char * findProgramAddressLabel(unsigned int address);
   void clear();
   void clear_all();
   iterator begin() {
@@ -199,7 +200,7 @@ public:
   register_symbol(Register *_reg);
 
   virtual symbol *copy();
-  virtual string &name(void);
+  virtual string &name(void) const;
   virtual char *name(char *, int len);
   virtual string toString();
 
@@ -236,7 +237,7 @@ protected:
   stimulus *s;
 public:
   stimulus_symbol(stimulus *);
-  virtual string &name(void);
+  virtual string &name(void) const;
   virtual string toString();
 
 };
@@ -348,7 +349,7 @@ class val_symbol : public symbol
   virtual symbol *copy();
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
-  virtual string &name(void);
+  virtual string &name(void) const;
 
 };
 
