@@ -795,7 +795,7 @@ bool Breakpoint_Instruction::set_break(void)
 void Breakpoint_Instruction::print(void)
 {
   // Output example
-  // 13a: T1006  Execution at 0xaa22
+  // 13a: p17c756  Execution at 0x0123
   const char * pLabel = get_symbol_table().
     findProgramAddressLabel(address);
   char * pFormat = *pLabel == 0 ? "0x%x: %s %s at %s 0x%x\n" : "0x%x: %s %s at %s(0x%x)\n";
@@ -803,11 +803,6 @@ void Breakpoint_Instruction::print(void)
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
   if(message().size())
     GetUserInterface().DisplayMessage("    Message:%s\n", message().c_str());
-//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-//  cout << bpName() << " at 0x" << hex << setw(4) << setfill('0') <<  address << '\n';
-//  if(message().size())
-//    cout << "    Message:" << message() << endl;
-
 }
 
 void Breakpoint_Instruction::clear(void)
@@ -1010,8 +1005,6 @@ void RegisterAssertion::print(void)
     : "  break when register %s(0x%x) ANDed with 0x%x equals 0x%x\n" ;
   GetUserInterface().DisplayMessage(pFormat,
     sName.c_str(), regAddress, regMask, regValue);
-//  cout << "  break when register 0x" << regAddress 
-//       << " ANDed with 0x"  << regMask << " equals 0x" << regValue << endl;
 }
 //------------------------------------------------------------------------------
 BreakpointRegister::BreakpointRegister(Processor *_cpu, TriggerAction *ta,
@@ -1099,10 +1092,8 @@ void BreakpointRegister::print(void)
   Register * pReg = get_symbol_table().findRegister(address);
   GetUserInterface().DisplayMessage("%x: %s  %s: %s(0x%x)\n",
     bpn, cpu->name().c_str(), bpName(), pReg->name().c_str(), address);
-//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-//  cout << bpName() << ": " << name() << "(0x" << hex <<  address << ")\n";
-
 }
+
 //-------------------------------------------------------------------
 BreakpointRegister_Value::BreakpointRegister_Value(
     Processor *_cpu, 
@@ -1150,18 +1141,8 @@ void BreakpointRegister_Value::print(void)
     : "%x: %s  %s: address=%s(0x%x)  value=0x%x  mask=0x%x\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), address, break_value, break_mask);
-
-//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-//  cout << bpName() << ": address=0x" << hex <<  address 
-//       << "  value=0x" << break_value << "  mask=0x" << break_mask << endl;
-  /*
-  cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
-  cout << "reg write. " << ( (break_type == BREAK_ON_REG_WRITE_VALUE) ?  "Break" : "Log") 
-	   << " when 0x" << hex  
-	   <<  (break_status[bp_num].arg2 & 0xff)
-	   << " is written to register 0x" << break_status[bp_num].arg1 << '\n';
-  */
 }
+
 //-------------------------------------------------------------------
 //
 void Break_register_read::TA::action(void) {
