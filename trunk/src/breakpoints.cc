@@ -798,7 +798,7 @@ void Breakpoint_Instruction::print(void)
   // 13a: p17c756  Execution at 0x0123
   const char * pLabel = get_symbol_table().
     findProgramAddressLabel(address);
-  char * pFormat = *pLabel == 0 ? "0x%x: %s %s at %s 0x%x\n" : "0x%x: %s %s at %s(0x%x)\n";
+  const char * pFormat = *pLabel == 0 ? "0x%x: %s %s at %s 0x%x\n" : "0x%x: %s %s at %s(0x%x)\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
   if(message().size())
@@ -1001,7 +1001,7 @@ void RegisterAssertion::print(void)
   Breakpoint_Instruction::print();
   Register & pReg = PCPU->rma[regAddress];
   string & sName = PCPU->rma[regAddress].name();
-  char * pFormat = sName.empty() ? "  break when register %s0x%x ANDed with 0x%x equals 0x%x\n"
+  const char * pFormat = sName.empty() ? "  break when register %s0x%x ANDed with 0x%x equals 0x%x\n"
     : "  break when register %s(0x%x) ANDed with 0x%x equals 0x%x\n" ;
   GetUserInterface().DisplayMessage(pFormat,
     sName.c_str(), regAddress, regMask, regValue);
@@ -1136,7 +1136,7 @@ void BreakpointRegister_Value::print(void)
 {
   const char * pLabel = get_symbol_table().
     findProgramAddressLabel(address);
-  char *pFormat = *pLabel == 0 
+  const char *pFormat = *pLabel == 0 
     ? "%x: %s  %s: address=%s0x%x  value=0x%x  mask=0x%x\n"
     : "%x: %s  %s: address=%s(0x%x)  value=0x%x  mask=0x%x\n";
   GetUserInterface().DisplayMessage(pFormat,
