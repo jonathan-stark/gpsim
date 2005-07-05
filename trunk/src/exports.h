@@ -1,5 +1,5 @@
-#ifndef __EXPORTS_H__
-#define __EXPORTS_H__
+#ifndef __GPSIM_EXPORTS_H__
+#define __GPSIM_EXPORTS_H__
 
 #ifdef _WIN32
 // Microsoft Visual C DLL export and import macros
