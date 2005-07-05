@@ -1,3 +1,27 @@
+2005-07-05 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/symbol.cc, h: The access to a derived object's name()
+	function was broken when I made the name() function in the
+	base class const. I've propogated the const attribute to
+	overriden versions of name().
+	- Somewhere along this process on of my program variables stopped
+	being added to the symbol table. So, I've changed the if statement
+	that determines when a duplicate variable exists in the symbol
+	table.
+	- I've added a function called findProgramAddressLabel() so
+	that a label name can be displayed where appropriate.
+
+	* src/breakpoints.cc: Changed ::print() functions to output
+	program memory labels where they could. Changed implementation
+	to use the Console object rather than cout.
+
+	* src/registers.cc: InvalidRegiser() constructor was not setting
+	its address member variable. Now the address is included in the
+	console warning.
+
+	* src/attributes.cc: WarnModeAttribute() was not setting its
+	value member variable.
+	-  init_attributes() added some constant attributes for reset types.
+
 2005-07-01 Scott Dattalo <scott@dattalo.com>
 	* cli/scan.ll, cli/parse.yy, cli/input.cc: The recently added
 	command line error processing change did not compile under Linux

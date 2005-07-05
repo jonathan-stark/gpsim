@@ -64,6 +64,7 @@ EXPORTS
     ?DisplayError@ProgramFileType@@UAEXHPBD0@Z
     ?EncodeUInt32@Packet@@QAE_NI@Z
     ?Find@FileContextList@@QAEHAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
+    ?GetActiveCPU@CSimulationContext@@QAEPAVProcessor@@XZ
     ?GetContext@CSimulationContext@@SAPAV1@XZ
     ?Initialize@Token@gpsim@@QAEXP6APAXPAX@Z0@Z
     ?add@Symbol_Table@@QAE_NPAVValue@@@Z
@@ -94,6 +95,7 @@ EXPORTS
     ?bp@@3VBreakpoints@@A
     ?breakpoint@Cycle_Counter@@AAEXXZ
     ?byte@ByteLogger@gpsim@@QAEXI@Z
+    ?bUsingGUI@gpsimInterface@@QAE_NXZ
     ?callback@ProgramMemoryAccess@@UAEXXZ
     ?callback@TriggerObject@@UAEXXZ
     ?callback@source_stimulus@@UAEXXZ
@@ -236,6 +238,7 @@ EXPORTS
     ?init_program_memory@Processor@@UAEXII@Z
     ?init_program_memory_at_index@Processor@@UAEXII@Z
     ?init_register_memory@Processor@@UAEXI@Z
+    ?initializeAttributes@Module@@UAEXXZ
     ?initializeAttributes@Processor@@UAEXXZ
     ?interrupt@Program_Counter@@UAEXI@Z
     ?isClearable@Value@@UAE_NXZ
