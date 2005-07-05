@@ -535,9 +535,9 @@ void Breakpoints::clear(unsigned int b)
     if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
         == Processor::eSTACK) {
       if(((pic_processor *)(bs.cpu))->stack->set_break_on_overflow(0))
-	cout << "Cleared stack overflow break point.\n";
+        cout << "Cleared stack overflow break point.\n";
       else
-	cout << "Stack overflow break point is already cleared.\n";
+        cout << "Stack overflow break point is already cleared.\n";
     }
     break;
 
@@ -546,9 +546,9 @@ void Breakpoints::clear(unsigned int b)
     if ((bs.cpu->GetCapabilities() & Processor::eSTACK)
         == Processor::eSTACK) {
       if(((pic_processor *)(bs.cpu))->stack->set_break_on_underflow(0))
-	cout << "Cleared stack underflow break point.\n";
+        cout << "Cleared stack underflow break point.\n";
       else
-	cout << "Stack underflow break point is already cleared.\n";
+        cout << "Stack underflow break point is already cleared.\n";
     }
     break;
 
@@ -794,10 +794,19 @@ bool Breakpoint_Instruction::set_break(void)
 
 void Breakpoint_Instruction::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-  cout << bpName() << " at 0x" << hex << setw(4) << setfill('0') <<  address << '\n';
+  // Output example
+  // 13a: T1006  Execution at 0xaa22
+  const char * pLabel = get_symbol_table().
+    findProgramAddressLabel(address);
+  char * pFormat = *pLabel == 0 ? "0x%x: %s %s at %s 0x%x\n" : "0x%x: %s %s at %s(0x%x)\n";
+  GetUserInterface().DisplayMessage(pFormat,
+    bpn, cpu->name().c_str(), bpName(), pLabel, address);
   if(message().size())
-    cout << "    Message:" << message() << endl;
+    GetUserInterface().DisplayMessage("    Message:%s\n", message().c_str());
+//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
+//  cout << bpName() << " at 0x" << hex << setw(4) << setfill('0') <<  address << '\n';
+//  if(message().size())
+//    cout << "    Message:" << message() << endl;
 
 }
 
@@ -995,8 +1004,14 @@ void RegisterAssertion::execute(void)
 void RegisterAssertion::print(void)
 {
   Breakpoint_Instruction::print();
-  cout << "  break when register 0x" << regAddress 
-       << " ANDed with 0x"  << regMask << " equals 0x" << regValue << endl;
+  Register & pReg = PCPU->rma[regAddress];
+  string & sName = PCPU->rma[regAddress].name();
+  char * pFormat = sName.empty() ? "  break when register %s0x%x ANDed with 0x%x equals 0x%x\n"
+    : "  break when register %s(0x%x) ANDed with 0x%x equals 0x%x\n" ;
+  GetUserInterface().DisplayMessage(pFormat,
+    sName.c_str(), regAddress, regMask, regValue);
+//  cout << "  break when register 0x" << regAddress 
+//       << " ANDed with 0x"  << regMask << " equals 0x" << regValue << endl;
 }
 //------------------------------------------------------------------------------
 BreakpointRegister::BreakpointRegister(Processor *_cpu, TriggerAction *ta,
@@ -1081,8 +1096,11 @@ bool BreakpointRegister::set_break(void)
 
 void BreakpointRegister::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-  cout << bpName() << ": " << name() << "(0x" << hex <<  address << ")\n";
+  Register * pReg = get_symbol_table().findRegister(address);
+  GetUserInterface().DisplayMessage("%x: %s  %s: %s(0x%x)\n",
+    bpn, cpu->name().c_str(), bpName(), pReg->name().c_str(), address);
+//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
+//  cout << bpName() << ": " << name() << "(0x" << hex <<  address << ")\n";
 
 }
 //-------------------------------------------------------------------
@@ -1121,11 +1139,21 @@ BreakpointRegister_Value::BreakpointRegister_Value(
     break_mask = regMask;
 }
 
+/// BreakpointRegister_Value::print(void) - base class function
+/// would be unusual to not be over ridden.
 void BreakpointRegister_Value::print(void)
 {
-  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
-  cout << bpName() << ": address=0x" << hex <<  address 
-       << "  value=0x" << break_value << "  mask=0x" << break_mask << endl;
+  const char * pLabel = get_symbol_table().
+    findProgramAddressLabel(address);
+  char *pFormat = *pLabel == 0 
+    ? "%x: %s  %s: address=%s0x%x  value=0x%x  mask=0x%x\n"
+    : "%x: %s  %s: address=%s(0x%x)  value=0x%x  mask=0x%x\n";
+  GetUserInterface().DisplayMessage(pFormat,
+    bpn, cpu->name().c_str(), bpName(), address, break_value, break_mask);
+
+//  cout << hex << setw(0) << bpn << ": " << cpu->name() << "  ";
+//  cout << bpName() << ": address=0x" << hex <<  address 
+//       << "  value=0x" << break_value << "  mask=0x" << break_mask << endl;
   /*
   cout << hex << setw(0) << bp_num << ": " << break_status[bp_num].cpu->name_str << "  ";
   cout << "reg write. " << ( (break_type == BREAK_ON_REG_WRITE_VALUE) ?  "Break" : "Log") 
