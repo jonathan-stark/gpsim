@@ -20,7 +20,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;../../gtkextra-2&quot;;.;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_GUI"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;HAVE_GUI;GPSIM_DLL_EXPORT"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories=".;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include/gtk-2.0&quot;;&quot;../../gtk+/lib/gtk-2.0/include&quot;;&quot;../../pango/include/pango-1.0&quot;;&quot;../../atk/include/atk-1.0&quot;;&quot;../../gtkextra-2&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_GUI"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;HAVE_GUI;GPSIM_DLL_EXPORT"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
