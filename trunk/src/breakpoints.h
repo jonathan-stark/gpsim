@@ -436,7 +436,7 @@ public:
   BreakpointRegister(Processor *, TriggerAction *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
-  virtual string &name(void)
+  virtual string &name(void) const
     {
       if(replaced)
 	return replaced->name();
