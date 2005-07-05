@@ -54,7 +54,7 @@ void WarnModeAttribute::set(Value *v)
 void WarnModeAttribute::get(bool &b)
 {
   b = cpu->getWarnMode();
-  Boolean::set(&b);
+  Boolean::set(b);
 }
 
 //========================================================================
@@ -219,5 +219,12 @@ void init_attributes()
 #ifdef HAVE_GUI
   get_symbol_table().add(new GUIUpdateRateAttribute());
 #endif
+
+  get_symbol_table().add_constant("POR_RESET",     POR_RESET);          // Power-on reset
+  get_symbol_table().add_constant("WDT_RESET",     WDT_RESET);          // Watch Dog timer timeout reset
+  get_symbol_table().add_constant("EXTERNAL_RESET",EXTERNAL_RESET);     // I/O pin (e.g. MCLR going low) reset
+  get_symbol_table().add_constant("SOFT_RESET",    SOFT_RESET);         // Software initiated reset
+  get_symbol_table().add_constant("BOD_RESET",     BOD_RESET);          // Brown out detection reset
+  get_symbol_table().add_constant("SIM_RESET",     SIM_RESET);          // Simulation Reset
 
 }
