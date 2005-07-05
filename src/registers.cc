@@ -483,6 +483,10 @@ unsigned int InvalidRegister::get(void)
     cout << "    address 0x" << hex << address << endl; 
 
   trace.raw(read_trace.get() | value.get());
+  // JRH, 7-5-2005 - Consider having invalid register acess
+  // halt the simulation. Perhaps there needs to be an
+  // attribute called BreakOnInvalidRegisterRead.Enable.
+  // get_bp().halt();
 
   return(0);
 }
@@ -494,6 +498,7 @@ InvalidRegister::InvalidRegister(unsigned int at_address)
   char name_str[100];
   sprintf (name_str, "invalid fr  0x%02x", at_address);
   new_name(name_str);
+  address = at_address;
 }
 
 InvalidRegister::InvalidRegister(void)
