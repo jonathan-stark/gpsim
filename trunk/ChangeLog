@@ -1,3 +1,6 @@
+2005-07-06 Borut Razem <borut.razem@siol.net>
+	* plat/win32/gpsim.nsi: NSIS 2.07 compatible
+
 2005-07-05 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/symbol.cc, h: The access to a derived object's name()
 	function was broken when I made the name() function in the
