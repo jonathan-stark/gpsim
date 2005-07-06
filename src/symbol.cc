@@ -226,7 +226,8 @@ void Symbol_Table::rename(const char *pOldName, const char *pNewName)
     if(it != end()) {
       Value *pValue = *it;
       erase(it);
-      pValue->gpsimObject::new_name(pNewName);
+      // pValue->gpsimObject::new_name(pNewName);
+      pValue->new_name(pNewName);
       add(pValue);
     }
   }
@@ -305,6 +306,10 @@ const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
     sti++;
   }
   return "";
+}
+
+bool Symbol_Table::Exist(const char *s) {
+  return this->FindIt(s) != end();
 }
 
 void Symbol_Table::dump_one(string *s)
@@ -940,9 +945,6 @@ Value *attribute_symbol::get_xref()
 stimulus_symbol::stimulus_symbol(stimulus *_s)
   : symbol(0), s(_s)
 {
-  if(s)
-    new_name(s->name());
-
 }
 
 //------------------------------------------------------------------------
@@ -953,12 +955,36 @@ string &stimulus_symbol::name() const
 
   return Value::name();
 }
+
+char *stimulus_symbol::name(char *pName, int len) {
+  if(s)
+    return s->name(pName, len);
+
+  return Value::name(pName, len);
+}
+
+void stimulus_symbol::new_name(const char *pNewName) {
+  if(s)
+    return s->new_name(pNewName);
+
+  return Value::new_name(pNewName);
+}
+
+void stimulus_symbol::new_name(string &sNewName) {
+  if(s)
+    return s->new_name(sNewName);
+
+  return Value::new_name(sNewName);
+}
+
+
 string stimulus_symbol::toString()
 {
   if(s)
     s->show();
   return name();
 }
+
 //------------------------------------------------------------------------
 val_symbol::val_symbol(gpsimValue *v)
   : symbol((char*)0)

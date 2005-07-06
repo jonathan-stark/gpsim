@@ -110,6 +110,7 @@ public:
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
   const char * findProgramAddressLabel(unsigned int address);
+  bool  Exist(const char *);
   void clear();
   void clear_all();
   iterator begin() {
@@ -238,7 +239,10 @@ protected:
 public:
   stimulus_symbol(stimulus *);
   virtual string &name(void) const;
+  virtual char *name(char *, int len);
   virtual string toString();
+  virtual void new_name(const char *);
+  virtual void new_name(string &);
 
 };
 
