@@ -1,3 +1,9 @@
+2005-07-06 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/stimuli.cc, src/symbol.cc, src/symbol.h:
+	Fixed a problem where renamed stimulus_symbol objects
+	were getting lost. This caused a error when running
+	the regression test digital_stim.
+
 2005-07-06 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: NSIS 2.07 compatible
 
