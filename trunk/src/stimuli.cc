@@ -84,23 +84,33 @@ Stimulus_Node * find_node (Value *sym)
   for (node_iterator = node_list.begin();
        node_iterator != node_list.end();
        ++node_iterator)
-    {
+  {
       Stimulus_Node *t = *node_iterator;
 
       if ( t->name() == sym->name())
-	return (t);
-    }
+          return (t);
+  }
   return ((Stimulus_Node *)0);
 }
 
 void Stimulus_Node::new_name(const char *cPname)
 {
   const char *cPoldName = name().c_str();
-
-  if (*cPoldName)
-    symbol_table.rename(name().c_str(),cPname);
-
-  gpsimObject::new_name(cPname);
+  if(symbol_table.Exist(cPoldName)) {
+    // The symbol is in the symbol table. Since the
+    // symbol table is ordered we need to let the
+    // symbol table rename the object to maintain
+    // ordering. Yuk.
+    // Note that rename() will call Stimulus_Node::new_name()
+    // after the symbol is removed. This recursive
+    // call will then enter the branch that calls
+    // gpsimObject::new_name(). The simulus with
+    // its new name is added into the symbol table.
+    symbol_table.rename(cPoldName,cPname);
+  }
+  else {
+    gpsimObject::new_name(cPname);
+  }
 
 }
 void Stimulus_Node::new_name(string &rName)
@@ -204,14 +214,14 @@ stimulus * find_stimulus (Value *sym)
 {
   if(sym) {
     for (stimulus_iterator = stimulus_list.begin();
-	 stimulus_iterator != stimulus_list.end(); 
-	 ++stimulus_iterator)
-      {
-	stimulus *t = *stimulus_iterator;
+      stimulus_iterator != stimulus_list.end(); 
+      ++stimulus_iterator)
+    {
+      stimulus *t = *stimulus_iterator;
 
-	if ( t->name() == sym->name())
-	  return (t);
-      }
+      if ( t->name() == sym->name())
+        return (t);
+    }
   }
 
   return ((stimulus *)0);
@@ -319,19 +329,19 @@ void Stimulus_Node::attach_stimulus(stimulus *s)
       int nTotalStimuliConnected = 1;
 
       while(searching)
-	{
-	  if(s == sptr)
-	    return;      // The stimulus is already attached to this node.
+      {
+        if(s == sptr)
+          return;      // The stimulus is already attached to this node.
 
-	  nTotalStimuliConnected++;
-	  if(sptr->next == 0)
-	    {
-	      sptr->next = s;
-	      // s->next = 0;  This is done below
-	      searching=0;
-	    }
-	  sptr = sptr->next;
-	}
+        nTotalStimuliConnected++;
+        if(sptr->next == 0)
+        {
+          sptr->next = s;
+          // s->next = 0;  This is done below
+          searching=0;
+        }
+        sptr = sptr->next;
+      }
 
       nStimuli = nTotalStimuliConnected;
     }
@@ -511,8 +521,8 @@ void Stimulus_Node::update()
       stimulus *sptr = stimuli;
 
       while(sptr) {
-	sptr->set_nodeVoltage(voltage);
-	sptr = sptr->next;
+        sptr->set_nodeVoltage(voltage);
+        sptr = sptr->next;
       }
     } else {
 
@@ -520,9 +530,9 @@ void Stimulus_Node::update()
       delta_voltage = finalVoltage - initial_voltage;
 
       if(bSettling) 
-	get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
+        get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
       else
-	get_cycles().set_break(get_cycles().value +1,this);
+        get_cycles().set_break(get_cycles().value +1,this);
 
       bSettling = true;
     }
@@ -578,11 +588,22 @@ stimulus::stimulus(const char *cPname)
 void stimulus::new_name(const char *cPname)
 {
   const char *cPoldName = name().c_str();
+  if(symbol_table.Exist(cPoldName)) {
+    // The symbol is in the symbol table. Since the
+    // symbol table is ordered we need to let the
+    // symbol table rename the object to maintain
+    // ordering. Yuk.
+    // Note that rename() will call stimulus::new_name()
+    // after the symbol is removed. This recursive
+    // call will then enter the branch that calls
+    // gpsimObject::new_name(). The simulus with
+    // its new name is added into the symbol table.
+    symbol_table.rename(cPoldName,cPname);
+  }
+  else {
+    gpsimObject::new_name(cPname);
+  }
 
-  if (*cPoldName)
-    symbol_table.rename(name().c_str(),cPname);
-
-  gpsimObject::new_name(cPname);
 }
 void stimulus::new_name(string &rName)
 {
@@ -1728,20 +1749,20 @@ void stimuli_attach(SymbolList_t *sl)
   if(sn) {
 
     for(++si; si != sl->end(); ++si)
-      {
-	Value *s = *si;
-	stimulus *st = find_stimulus(s);
+    {
+      Value *s = *si;
+      stimulus *st = find_stimulus(s);
 
-	if(st) {
-	  sn->attach_stimulus(st);
-	  if(verbose&2)
-	    cout << " attaching stimulus: " << s->name() 
-		 << " to node: " << sn->name() 
-		 << endl;
-	}
-	else
-	  cout << "Warning, stimulus: " << s->toString() << " not attached\n";
+      if(st) {
+        sn->attach_stimulus(st);
+        if(verbose&2)
+          cout << " attaching stimulus: " << s->name() 
+               << " to node: " << sn->name() 
+               << endl;
       }
+      else
+        cout << "Warning, stimulus: " << s->toString() << " not attached\n";
+    }
 
     sn->update(0);
   }
@@ -1757,18 +1778,18 @@ void stimuli_attach(SymbolList_t *sl)
       st = find_stimulus(*si);
 
       if(st) {
-	++si;
-	v = *si;
+        ++si;
+        v = *si;
       } else {
-	v = *si;
-	++si;
-	st = find_stimulus(*si);
+        v = *si;
+        ++si;
+        st = find_stimulus(*si);
       }
 
       if(st) {
-	AttributeStimulus *ast = dynamic_cast<AttributeStimulus *>(st);
-	if(ast)
-	  ast->setClientAttribute(v);
+        AttributeStimulus *ast = dynamic_cast<AttributeStimulus *>(st);
+        if(ast)
+          ast->setClientAttribute(v);
       }
     }
 
