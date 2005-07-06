@@ -38,7 +38,7 @@
 !define SETUP_DIR "..\..\..\..\gpsim_snapshots"
 !define PKG_ROOT "${SETUP_DIR}\gpsim_pkg"
 
-SetCompressor lzma
+SetCompressor /SOLID lzma
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
@@ -197,10 +197,10 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\plat\win32\modules.def"
 
   SetOutPath "$INSTDIR\"
-  File /oname="ChangeLog.txt" "${GPSIM_ROOT}\ChangeLog"
+  File /oname=ChangeLog.txt "${GPSIM_ROOT}\ChangeLog"
   File "${GPSIM_ROOT}\plat\win32\gpsim.ico"
-  File /oname="COPYING.TXT" "${GPSIM_ROOT}\COPYING"
-  File /oname="README.TXT" "${GPSIM_ROOT}\README"
+  File /oname=COPYING.TXT "${GPSIM_ROOT}\COPYING"
+  File /oname=README.TXT "${GPSIM_ROOT}\README"
 
   SetOutPath "$INSTDIR\include\gpsim"
   File "${GPSIM_ROOT}\src\*.h"
