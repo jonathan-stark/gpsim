@@ -1,3 +1,16 @@
+2005-07-07 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_break.cc, cli/cmd_break.h: Code to display
+	address labels in break related messages.
+
+	* plat/win32/gpsim.def, src/pic-instructions.cc,
+	src/pic-instructions.h,	src/processor.cc, src/processor.h,
+	src/symbol.cc: Code to display address labels in a
+	disassembly output. Added members to Processor class to
+	support a page mask and offset mask that can be used to
+	calculate absolute addresses for disassembly output for
+	JUMP and CALL instructions. See the functions
+	CalcJumpAbsoluteAddress() and CalcCallAbsoluteAddress();
+
 2005-07-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/stimuli.cc, src/symbol.cc, src/symbol.h:
 	Fixed a problem where renamed stimulus_symbol objects
