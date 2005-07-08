@@ -31,9 +31,22 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 
-instruction::instruction(void)
+instruction::instruction()
 {
-  opcode = 0;
+  Initialize(0, 0, 0);
+}
+
+instruction::instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr)
+{
+  Initialize(pProcessor, uOpCode, uAddrOfInstr);
+}
+
+void instruction::Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr)
+{
+  cpu = pProcessor;
+  opcode = uOpCode;
+
+  m_uAddrOfInstr = uAddrOfInstr;
 
   is_modified = 0;
   cycle_count = 0;
@@ -45,6 +58,7 @@ instruction::instruction(void)
   hll_src_line = -1;
 
 }
+
 
 void instruction::decode(Processor *new_cpu, unsigned int new_opcode)
 {

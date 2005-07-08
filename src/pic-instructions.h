@@ -71,6 +71,7 @@ public:
 
   //char name_str[20];      /* %%% FIX ME %%% dynamically allocate? */
   unsigned int opcode;
+  unsigned int m_uAddrOfInstr;
   int file_id;            /* The source file that declared this instruction
 			   * (The file_id is an index into an array of files) */
   int hll_file_id;        /* The hll source file that declared this instruction */
@@ -78,7 +79,10 @@ public:
   int lst_line;           /* The line number within the list file */
   int hll_src_line;       /* The line number within the HLL source file */
 
-  instruction(void);
+  instruction();
+  instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
+  void Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
+
   virtual void execute(void){ }
   virtual void debug(void){ }
   //virtual char *name(char *str){ return(name_str);}
