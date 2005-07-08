@@ -108,8 +108,16 @@ public:
   Value *find(string &s);
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
+  register_symbol * findRegister(unsigned int uAddress,
+                                 unsigned int uBitmask);
   Register * findRegister(const char *s);
   const char * findProgramAddressLabel(unsigned int address);
+  // This was intended to be used by disassembly code. I added
+  // this then I figured out that it is not useful unless
+  // you have a cross reference to every address that references
+  // the symbol. So I'm leaving the code for the future when
+  // the constant object include a list of address reference.
+  const char * findConstant(unsigned int uValue, unsigned int uReferencedFromAddress);
   bool  Exist(const char *);
   void clear();
   void clear_all();
@@ -216,6 +224,8 @@ public:
   virtual void set(Packet &);
 
   void setMask(Register *pReg);
+  unsigned int getAddress(void);
+  unsigned int getBitmask(void);
 
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
