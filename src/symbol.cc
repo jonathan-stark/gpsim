@@ -29,6 +29,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 
 #include <string>
 #include <vector>
@@ -276,6 +277,27 @@ Register * Symbol_Table::findRegister(unsigned int address)
   return NULL;
 }
 
+register_symbol * Symbol_Table::findRegister(unsigned int uAddress,
+                                             unsigned int uBitmask)
+{
+  iterator sti = begin();
+  ostringstream sDumbLabel;
+  sDumbLabel << "R" << hex << uppercase << uAddress;
+  while( sti != end()) {
+    Value *val = *sti;
+    if(val && typeid(*val) == typeid(register_symbol)) {
+      register_symbol * pRegSymbol = (register_symbol*)val;
+      if(pRegSymbol->getAddress() == uAddress &&
+        pRegSymbol->getBitmask() == uBitmask &&
+        sDumbLabel.str() != pRegSymbol->name()) {
+          return(pRegSymbol);
+        }
+    }
+    sti++;
+  }
+  return NULL;
+}
+
 Register * Symbol_Table::findRegister(const char *s)
 {
   iterator sti = FindIt(s); // .begin();
@@ -307,6 +329,25 @@ const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
     sti++;
   }
   return "";
+}
+
+const char * Symbol_Table::findConstant(unsigned int uValue, unsigned int uReferencedFromAddress)
+{
+  // regarding uReferencingAddress
+  // see comment in the header.
+  iterator sti = begin();
+  while( sti != end()) {
+    Value *val = *sti;
+    if(val && typeid(*val) == typeid(Integer)) {
+      Integer * pSymbol = (Integer*)val;
+      gint64 uSymValue;
+      pSymbol->get(uSymValue);
+      if(uValue == (unsigned int)uSymValue)
+        return(pSymbol->name().c_str());
+    }
+    sti++;
+  }
+  return NULL;
 }
 
 bool Symbol_Table::Exist(const char *s) {
@@ -551,6 +592,14 @@ void register_symbol::setMask(Register *pReg) {
     m_uMask |= 0xff;
   }
   m_uMaskShift = BitShiftCount(m_uMask);
+}
+
+unsigned int register_symbol::getAddress(void) {
+  return reg->address;
+}
+
+unsigned int register_symbol::getBitmask(void) {
+  return m_uMask;
 }
 
 string &register_symbol::name(void) const {
