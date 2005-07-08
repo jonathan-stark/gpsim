@@ -22,10 +22,12 @@ Boston, MA 02111-1307, USA.  */
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <sstream>
 
 #include "command.h"
 #include "cmd_break.h"
 
+#include "../src/cmd_gpsim.h"
 #include "../src/pic-processor.h"
 #include "../src/symbol_orb.h"
 #include "../src/operator.h"
@@ -385,27 +387,41 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
   case EXECUTION:
     b = bp.set_execution_break(GetActiveCPU(), value);
     if(b < MAX_BREAKPOINTS) {
-      cout << "break at address: " << value << " break #: " << b << '\n';
+      const char * pLabel = get_symbol_table().findProgramAddressLabel(value);
+      const char * pFormat = *pLabel == 0
+        ? "break at address: %s0x%x break #: 0x%x\n"
+        : "break at address: %s(0x%x) break #: 0x%x\n";
+      GetUserInterface().DisplayMessage(pFormat,
+        pLabel, value, b);
     }
     else
-      cout << "failed to set execution break (check the address)\n";
+      GetUserInterface().DisplayMessage("failed to set execution break (check the address)\n");
 
     break;
 
   case WRITE:
 
     b = bp.set_write_break(GetActiveCPU(), value);
-    if(b < MAX_BREAKPOINTS)
-      cout << "break when register " << value << " is written. bp#: " << b << '\n';
-
+    if(b < MAX_BREAKPOINTS) {
+      Register * pReg = get_symbol_table().findRegister(value);
+      const char * pFormat = pReg->name().empty()
+        ? "break when register: %s0x%x is written. break #: 0x%x\n"
+        : "break when register: %s(0x%x) is written. break #: 0x%x\n";
+      GetUserInterface().DisplayMessage(pFormat,
+        pReg->name().c_str(), value, b);
+    }
     break;
 
   case READ:
     b = bp.set_read_break(GetActiveCPU(), value);
-    if(b < MAX_BREAKPOINTS)
-      cout << "break when register " << value << " is read.\n" << 
-	      "bp#: " << b << '\n';
-
+    if(b < MAX_BREAKPOINTS) {
+      Register * pReg = get_symbol_table().findRegister(value);
+      const char * pFormat =  pReg->name().empty()
+        ? "break when register: %s0x%x is read. break #: 0x%x\n"
+        : "break when register: %s(0x%x) is read. break #: 0x%x\n";
+      GetUserInterface().DisplayMessage(pFormat,
+        pReg->name().c_str(), value, b);
+    } 
     break;
 
   case STK_OVERFLOW:
@@ -438,6 +454,9 @@ unsigned int cmd_break::set_break(int bit_flag,
   unsigned int reg = (unsigned int)r;
   unsigned int value = (unsigned int)v;
   unsigned int mask = (unsigned int)m;
+  const char * pFormat = 0;
+  Register * pReg = 0;
+  unsigned int uDefRegMask = GetActiveCPU()->register_mask();
 
   switch(bit_flag) {
 
@@ -452,37 +471,59 @@ unsigned int cmd_break::set_break(int bit_flag,
   case READ:
     b = bp.set_read_value_break(GetActiveCPU(), reg,value,mask);
     str = "read from";
+    pReg = get_symbol_table().findRegister(reg);
+    pFormat = pReg->name().empty()
+      ? "break when %s is read from register %s0x%x. break #: 0x%x\n"
+      : "break when %s is read from register %s(0x%x). break #: 0x%x\n";
     break;
 
   case WRITE:
     b = bp.set_write_value_break(GetActiveCPU(), reg,value,mask);
     str = "written to";
+    pReg = get_symbol_table().findRegister(reg);
+    pFormat = pReg->name().empty()
+      ? "break when %s is written to register %s0x%x. break #: 0x%x\n"
+      : "break when %s is written to register %s(0x%x). break #: 0x%x\n";
     break;
   }
 
   if( bp.bIsValid(b)) {
-    cout << "break when ";
-    if(mask == 0 || mask == 0xff)
-      cout << (value&0xff);
-    else {
-      cout << "bit pattern ";
-      for(unsigned int ui=0x80; ui; ui>>=1) {
-        if(ui & mask) {
-          if(ui & value)
-            cout << '1';
-          else
-            cout << '0';
-        }
-        else {
-	  cout << 'X';
-        }
-      }
+    // example: break when 1 is written to register 0
+    string sValue;
+    if(mask == 0 || mask == uDefRegMask) {
+      sValue = "0x";
+      ostringstream s;
+      s << hex << (value&0xff);
+      sValue += s.str();
     }
-    cout << " is " << str <<" register " << reg << '\n' << 
-	    "bp#: " << b << '\n';
+    else {
+      sValue = "bit pattern ";
+      GenBitPattern(sValue, value, mask);
+    }
+    GetUserInterface().DisplayMessage(pFormat,
+      sValue.c_str(), pReg->name().c_str(), reg, b);
   }
 
   return b;
 
 }
 
+string & cmd_break::GenBitPattern(string &sBits, unsigned int value,
+                                  unsigned int mask) {
+  unsigned int uFirstBit = 0x80;
+  if(uFirstBit > 1) {
+    uFirstBit <<= (GetActiveCPU()->register_size() - 1) * 8;
+  }
+  for(unsigned int ui=uFirstBit; ui; ui>>=1) {
+    if(ui & mask) {
+      if(ui & value)
+        sBits.push_back('1');
+      else
+        sBits.push_back('0');
+    }
+    else {
+      sBits.push_back('X');
+    }
+  }
+  return sBits;
+}

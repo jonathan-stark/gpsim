@@ -43,6 +43,8 @@ public:
   unsigned int set_break(int bit_flag);
   unsigned int set_break(int bit_flag,guint64 value, Expression *pExpr=0);
 private:
+  string & GenBitPattern(string &sBits, unsigned int value,
+                         unsigned int mask);
 
 };
 
