@@ -86,6 +86,10 @@ Processor::Processor(void)
   setUnknownMode(true);
   setBreakOnReset(true);
 
+  // derived classes need to override these values
+  m_uPageMask    = 0x00;
+  m_uAddrMask    = 0xff;
+
   readTT = 0;
   writeTT = 0;
 
@@ -367,8 +371,6 @@ void Processor::alias_file_registers(unsigned int start_address, unsigned int en
     }
 
 }
-
-
 
 //-------------------------------------------------------------------
 //
@@ -724,7 +726,12 @@ void Processor::disassemble (signed int s, signed int e)
 
   for(unsigned int i = start_address; i<=end_address; i++)
     {
+      unsigned int uAddress = map_pm_index2address(i);
       str[0] =0;
+      const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+      if(*pLabel != 0) {
+        cout << pLabel << ":" << endl;
+      }
       if (map_pm_address2index(pc->get_value()) == i)
         cout << "==>";
       else
@@ -756,7 +763,7 @@ void Processor::disassemble (signed int s, signed int e)
         cout << buf;
       }
       else
-        cout << hex << setw(4) << setfill('0') << map_pm_index2address(i) << "  "
+        cout << hex << setw(4) << setfill('0') << uAddress << "  "
              << hex << setw(4) << setfill('0') << inst->opcode << "    "
              << inst->name(str,sizeof(str)) << '\n';
     }

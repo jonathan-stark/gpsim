@@ -299,7 +299,8 @@ const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
     if(pAddSym != NULL) {
       gint64 iSymbolAddress;
       pAddSym->get(iSymbolAddress);
-      if(iSymbolAddress == address) {
+      if(iSymbolAddress == address &&
+        strncmp(pAddSym->name().c_str(), "line_", sizeof("line_") - 1) != 0) {
         return pAddSym->name().c_str();
       }
     }

@@ -367,6 +367,8 @@ public:
 
   /// eeprom memory interface (if present).
   RegisterMemoryAccess ema;
+  unsigned int m_uPageMask;
+  unsigned int m_uAddrMask;
 
   /// Program Counter
   Program_Counter *pc;
@@ -405,9 +407,13 @@ public:
 			    unsigned int end_address, 
 			    unsigned int alias_offset);
   virtual void init_register_memory(unsigned int memory_size);
-  virtual unsigned int register_memory_size () const { return 0;};
-  virtual unsigned int register_size () const { return 1;};
-  virtual unsigned int register_mask () const { return 0xff;};
+  virtual unsigned int register_memory_size () const { return 0;}
+  virtual unsigned int register_size () const { return 1;}
+  virtual unsigned int register_mask () const { return 0xff;}
+  virtual unsigned int CalcJumpAbsoluteAddress(unsigned int uInstAddr,
+    unsigned int uDestAddr) { return uDestAddr; }
+  virtual unsigned int CalcCallAbsoluteAddress(unsigned int uInstAddr,
+    unsigned int uDestAddr) { return uDestAddr; }
 
   //
   // Creation and manipulation of Program Memory
