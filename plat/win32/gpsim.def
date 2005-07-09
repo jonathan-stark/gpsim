@@ -182,6 +182,7 @@ EXPORTS
     ?get@Value@@UAEXAA_K@Z
     ?get@Value@@UAEXAA_N@Z
     ?get@Value@@UAEXPADH@Z
+    ?getAddress@register_symbol@@QAEIXZ
     ?getBitChar@IOPIN@@UAEDXZ
     ?getBitChar@IO_bi_directional@@UAEDXZ
     ?getBitChar@IO_bi_directional_pu@@UAEDXZ
