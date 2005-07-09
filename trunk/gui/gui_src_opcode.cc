@@ -573,8 +573,8 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
   unsigned int oc;
 
   oc = sbow->gp->cpu->pma->get_opcode(address);
-
-  if(oc != sbow->memory[address]) {
+  unsigned uMemoryIndex = sbow->gp->cpu->map_pm_address2index(address);
+  if(oc != sbow->memory[uMemoryIndex]) {
     
     sbow->memory[address]=oc;
     // Put new values, in case they changed
