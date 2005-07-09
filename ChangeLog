@@ -1,3 +1,19 @@
+2005-07-08 J.R. Heisey <jrheisey@sourceforge.com>
+	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
+	Added version of Symbol_Table::findRegister() that takes a bitmask
+	parameter. Added Symbol_Table::findConstant() for future use.
+	Need to implement a symbol to referenced from address
+	cross reference.
+
+	* gui/gui_src_opcode.cc, src/processor.cc: Fixed issues
+	accessing program memory arrays using address instead
+	of an appropriate index.
+
+	* gui/gui_src_opcode.cc, src/processor.cc: Fixed issues
+	with Processor::disassemble() function not traversing
+	over break points to find the base instruction object.
+
+
 2005-07-07 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_break.cc, cli/cmd_break.h: Code to display
 	address labels in break related messages.
