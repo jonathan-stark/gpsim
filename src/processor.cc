@@ -748,8 +748,7 @@ void Processor::disassemble (signed int s, signed int e)
       else
       {
         cout << 'B';
-        Breakpoint_Instruction *bpi =  (Breakpoint_Instruction *)program_memory[i];
-        inst = bpi->replaced;
+        inst = pma->get_base_instruction(i);
       }
 
       if(files.nsrc_files() && use_src_to_disasm)
@@ -1545,8 +1544,9 @@ unsigned int ProgramMemoryAccess::get_opcode(unsigned int addr)
 char *ProgramMemoryAccess::get_opcode_name(unsigned int addr, char *buffer, unsigned int size)
 {
 
-  if(addr < cpu->program_memory_size())
-    return cpu->program_memory[addr]->name(buffer,size);
+  unsigned int uIndex = cpu->map_pm_address2index(addr);
+  if(uIndex < cpu->program_memory_size())
+    return cpu->program_memory[uIndex]->name(buffer,size);
 
   *buffer = 0;
   return 0;
@@ -1581,7 +1581,8 @@ Program_Counter *ProgramMemoryAccess::GetProgramCounter(void)
 void ProgramMemoryAccess::put_opcode_start(unsigned int addr, unsigned int new_opcode)
 {
 
-  if( (addr < cpu->program_memory_size()) && (_state == 0))
+  unsigned int uIndex = cpu->map_pm_address2index(addr);
+  if( (uIndex < cpu->program_memory_size()) && (_state == 0))
     {
       _state = 1;
       _address = addr;
