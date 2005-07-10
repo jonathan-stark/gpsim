@@ -60,8 +60,8 @@ Processor *active_cpu = 0;
 
 // create instances of inline get_active_cpu() and set_active_cpu() methods
 // by taking theirs address
-static Processor *(*dummy_get_active_cpu)(void) = get_active_cpu;
-static void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
+Processor *(*dummy_get_active_cpu)(void) = get_active_cpu;
+void (*dummy_set_active_cpu)(Processor *act_cpu) = set_active_cpu;
 
 static char pkg_version[] = PACKAGE_VERSION;
 

@@ -116,12 +116,12 @@ addition to popt and glib, mentioned in the CLI section:</p>
   Software and released under the LGPL license.
     <ul>
       <li>
-      <a href="#gtk_extra_src">gtk+extra-2.0.0-src-*.zip</a>: modified sources. Sources from the package can be successfully compiled on WIN32 
+      <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a>: modified sources. Sources from the package can be successfully compiled on WIN32 
       using Cygwin gcc -mno-cygwin native compilation.</li>
       <li>
-    <a href="#gtk_extra_dev">gtk+extra-2.0.0-dev-*.zip</a>: header files and static library, 
+    <a href="#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>: header files and static library, 
       built from
-      <a href="#gtk_extra_src">gtk+extra-2.0.0-src-*.zip</a></li>
+      <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a></li>
     </ul>
   </li>
   <li>pthreads - The 
@@ -216,21 +216,23 @@ compilation)</span>:</b></h3>
     into it</li>
   <li>Create the atk subdirectory and extract <a href="#atk_dev">atk-dev-*.zip</a> 
     into it</li>
+	<li>Create the fontconfig subdirectory and extract <a href="#fontconfig_dev">fontconfig-dev-*.zip</a> 
+    into it</li>
   <li>Use precompiled
-  <a href="#gtk_extra_dev">gtk+extra-2.0.0-dev-*.zip</a>:<ul>
+  <a href="#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>:<ul>
     <li>Create the gtkextra-2 subdirectory and extract
-    <a href="#gtk_extra_dev">gtk+extra-2.0.0-dev-*.zip</a> into it</li>
+    <a href="#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a> into it</li>
     </ul>
   or compile 
-    <a href="#gtk_extra_src">gtk+extra-2.0.0-src-*.zip</a>:<ul>
+    <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a>:<ul>
     <li>Create the gtkextra-2 subdirectory and extract the content of 
     gtk+extra-1.1.0 directory from 
-    <a href="#gtk_extra_src">gtk+extra-2.0.0-src-*.zip</a> 
+    <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a> 
     into it</li>
     <li>Go to gtkextra-2\gtkextra directory, run bash and execute<pre>make -f Makefile.win32</pre>
     
     create gtkextra-2\lib directory and copy gtkextra-2\gtkextra\libgtkextra-win32-2.0.a 
-    to gtkextra-2\lib\libgtkextra-win32-2.0.lib</li>
+    to gtkextra-2\lib\libgtkextra-win32-2.1.lib</li>
     </ul>
   </li>
   <li>Unpack <a href="#pthreads">pthreads-*-*-*.exe</a> self extracting archive 
@@ -259,6 +261,7 @@ compilation)</span>:</b></h3>
   +- pango
   +- atk
   +- gtkextra-2
+  +- fontconfig
   +- pthreads    (for modules).
 </pre>
 
@@ -325,22 +328,25 @@ project:</p>
   for Windows</a> project:</p>
 <ul>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/glib-dev-2.4.7.zip" name="glib_dev">glib-dev-2.4.7.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/glib-dev-2.6.5.zip" name="glib_dev">glib-dev-2.6.5.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/glib-2.4.7.zip" name="glib">
-      glib-2.4.7.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/glib-2.6.5.zip" name="glib">
+      glib-2.6.5.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/gtk+-dev-2.4.14.zip" name="gtk_dev">gtk+-dev-2.4.14.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/gtk+-dev-2.6.8.zip" name="gtk_dev">gtk+-dev-2.6.6.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/gtk+-2.4.14.zip" name="gtk">gtk+-2.4.14.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/gtk+-2.6.8.zip" name="gtk">gtk+-2.6.8.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/pango-dev-1.4.1.zip" name="pango_dev">pango-dev-1.4.1.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/pango-dev-1.8.0.zip" name="pango_dev">pango-dev-1.8.0.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/pango-1.4.1.zip" name="pango">pango-1.4.1.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/pango-1.8.0.zip" name="pango">pango-1.8.0.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/atk-dev-1.8.0.zip" name="atk_dev">atk-dev-1.8.0.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/atk-dev-1.9.0.zip" name="atk_dev">atk-dev-1.9.0.zip</a></li>
       <li>
-      <a href="http://www.gimp.org/~tml/gimp/win32/atk-1.8.0.zip" name="atk">atk-1.8.0.zip</a></li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/atk-1.9.0.zip" name="atk">atk-1.9.0.zip</a></li>
+		<li>
+      <a href="http://www.gimp.org/~tml/gimp/win32/fontconfig-dev-2.2.2-20040412.zip" name="fontconfig_dev">
+		fontconfig-dev-2.2.2-20040412.zip</a></li>
       <li>
       <a href="http://www.gimp.org/~tml/gimp/win32/gettext-runtime-0.13.1.zip" name="gettext_runtime">gettext-runtime-0.13.1.zip</a></li>
       <li>
@@ -354,12 +360,12 @@ project:</p>
       <a href="ftp://sources.redhat.com/pub/pthreads-win32/pthreads-2005-01-25.exe" name="pthreads">
       pthreads-2005-01-25.exe</a></li>
       <li>
-      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.0.0-dev-20050524.zip" name="gtk_extra_dev">gtk+extra-2.0.0-dev-20050524.zip</a></li>
+      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-dev.zip" name="gtk_extra_dev">gtk+extra-2.1.1-dev.zip</a></li>
       <li>
-      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.0.0-src-20050524.zip" name="gtk_extra_src">gtk+extra-2.0.0-src-20050524.zip</a></li>
+      <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-src.zip" name="gtk_extra_src">gtk+extra-2.1.1-src.zip</a></li>
     </ul>
 <hr />
-<p>Last update: May 24, 2005 by Borut Ražem</p>
+<p>Last update: July 10, 2005 by Borut Ražem</p>
 <table border="0" width="100%">
   <tr>
     <td align="center">

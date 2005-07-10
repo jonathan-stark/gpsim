@@ -61,7 +61,7 @@ unsigned int gpsim_is_initialized = 0;
 gpsimInterface gi;
 
 // create an instance of inline get_interface() method by taking its address
-static gpsimInterface &(*dummy_gi)(void) = get_interface;
+gpsimInterface &(*dummy_gi)(void) = get_interface;
 
 //------------------------------------------------------------------------
 // Temporary -- provide a flag to inihibit multithreaded support.

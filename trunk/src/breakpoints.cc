@@ -41,7 +41,7 @@ extern guint64 simulation_start_cycle;
 
 // Global declaration of THE breakpoint object
 // create an instance of inline get_trace() method by taking its address
-static Breakpoints &(*dummy_bp)(void) = get_bp;
+Breakpoints &(*dummy_bp)(void) = get_bp;
 Breakpoints bp;
 
 

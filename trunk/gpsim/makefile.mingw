@@ -23,7 +23,7 @@ READLINE_PATH = ../../readline
 LIBS = -l wsock32 \
      -L $(READLINE_PATH)/win32/shlib -l readline \
      -L $(POPT_PATH)/lib -l popt \
-     -L $(GTKEXTRA_PATH)/lib -l libgtkextra-win32-2.0 \
+     -L $(GTKEXTRA_PATH)/lib -l libgtkextra-win32-2.1 \
      -L $(PANGO_PATH)/lib -l pango-1.0 \
      -L $(GTK_PATH)/lib -l gtk-win32-2.0 -l gdk_pixbuf-2.0 -l gdk-win32-2.0 \
      -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0
@@ -60,5 +60,10 @@ gpsim_OBJECTS =			\
 
 gpsim.exe : $(gpsim_OBJECTS) $(gpsim_LIBS)
 	$(CXX) $(CFLAGS) $(CLDFLAGS) \
-	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib -Wl,-u,__ZN15BoolEventLogger14dump_ASCII_artEyyi \
+	-Wl,--export-all-symbols -Wl,--out-implib,gpsim.lib \
+	-Wl,-u,__ZN15BoolEventLogger14dump_ASCII_artEyyi \
+	-Wl,-u,__Z14get_active_cpuv \
+	-Wl,-u,__Z13get_interfacev \
+	-Wl,-u,__Z10get_cyclesv \
+	-Wl,-u,__ZN8Register15get_trace_stateEv \
 	-o gpsim.exe $(gpsim_OBJECTS) $(gpsim_LIBS) $(LIBS)

@@ -27,7 +27,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
-!define PRODUCT_VERSION "0.21.5"
+!define PRODUCT_VERSION "0.21.8"
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_WEB_SITE "http://www.dattalo.com/gnupic/gpsim.html"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
@@ -150,7 +150,6 @@ Section "MainSection" SEC01
 
   SetOutPath "$INSTDIR\etc\gtk-2.0"
   File "${PKG_ROOT}\etc\gtk-2.0\gdk-pixbuf.loaders"
-  File "${PKG_ROOT}\etc\gtk-2.0\gtkrc"
 
   SetOutPath "$INSTDIR\etc\pango"
   File "${PKG_ROOT}\etc\pango\pango.aliases"
