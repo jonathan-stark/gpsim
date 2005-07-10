@@ -43,7 +43,7 @@ Trace trace;               /* Instantiate the trace buffer class.
 			    */
 
 // create an instance of inline get_trace() method by taking its address
-static Trace &(*dummy_trace)(void) = get_trace;
+Trace &(*dummy_trace)(void) = get_trace;
 
 /*Trace trace_log_buffer;   * The trace_log_buffer is a special trace
 			    * buffer intended for logging events that will

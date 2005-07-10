@@ -47,7 +47,7 @@ Boston, MA 02111-1307, USA.  */
 Cycle_Counter cycles;
 
 // create an instance of inline get_cycles() method by taking its address
-static Cycle_Counter &(*dummy_cycles)(void) = get_cycles;
+Cycle_Counter &(*dummy_cycles)(void) = get_cycles;
 
 StopWatch stop_watch;
 

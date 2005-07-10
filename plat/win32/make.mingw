@@ -36,9 +36,9 @@ endif
 # -fnative-struct switch.
 
 CCOMPILER = gcc
-CC = $(CCOMPILER) -mno-cygwin -mcpu=pentium -mms-bitfields
+CC = $(CCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 CXXCOMPILER = c++
-CXX = $(CXXCOMPILER) -mno-cygwin -mcpu=pentium -mms-bitfields
+CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 				
 ################
 # Various other tools

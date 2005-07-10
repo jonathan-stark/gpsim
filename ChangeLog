@@ -1,3 +1,14 @@
+2005-07-06 Borut Razem <borut.razem@siol.net>
+	* src/breakpoints.cc, src/gpsim_time.cc, src/interface.cc, src/processor.src, src/trace.cc:
+	  declare dummy_bp, dummy_cycles, dummy_gi, dummy_get_active_cpu, dummy_set_active_cpu
+	  and dummy_trace as non static to compile with gcc 3.4.4
+	* plat/win32/gpsim.nsi: corrected version number to 0.21.8
+	* gpsim/gpsim.vcproj, gpsim/makefile.mingw: linking with libgtkextra-win32-2.1.lib
+	* doc/gpsimWin32.html: linking with gtk+extra-2.1.1, glib-2.6.5,
+	  gtk+-2.6.8, pango-1.8.0, 1.9.0, fontconfig-2.2.2-20040412
+	* plat/win32/make.mingw: change gcc command line options mcpu with mtune
+	  to compile with gcc 3.4.4
+
 2005-07-08 J.R. Heisey <jrheisey@sourceforge.com>
 	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
 	Added version of Symbol_Table::findRegister() that takes a bitmask
