@@ -155,7 +155,7 @@ EXPORTS
     ?findProgramAddressLabel@Symbol_Table@@QAEPBDI@Z
     ?findRegister@Symbol_Table@@QAEPAVRegister@@I@Z
     ?findRegister@Symbol_Table@@QAEPAVRegister@@PBD@Z
-    ?findRegister@Symbol_Table@@QAEPAVregister_symbol@@II@Z
+    ?findRegisterSymbol@Symbol_Table@@QAEPAVregister_symbol@@II@Z
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
     ?get@Boolean@@UAEXAAH@Z
@@ -189,6 +189,7 @@ EXPORTS
     ?getBitChar@IO_open_collector@@UAEDXZ
     ?getDrivenState@IOPIN@@UAE_NXZ
     ?getDrivingState@IOPIN@@UAE_NXZ
+    ?getFromIndex@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getFromAddress@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getIO@IOPORT@@QAEPAVIOPIN@@I@Z
     ?getReg@register_symbol@@QAEPAVRegister@@XZ

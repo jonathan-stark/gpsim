@@ -108,9 +108,10 @@ public:
   Value *find(string &s);
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
-  register_symbol * findRegister(unsigned int uAddress,
-                                 unsigned int uBitmask);
   Register * findRegister(const char *s);
+  register_symbol * findRegisterSymbol(unsigned int uAddress);
+  register_symbol * findRegisterSymbol(unsigned int uAddress,
+                                       unsigned int uBitmask);
   const char * findProgramAddressLabel(unsigned int address);
   // This was intended to be used by disassembly code. I added
   // this then I figured out that it is not useful unless
