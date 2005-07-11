@@ -266,10 +266,13 @@ Register * Symbol_Table::findRegister(unsigned int address)
 {
   iterator sti = begin();
   while( sti != end()) {
-    Value *val = *sti;
-    if(val && typeid(*val) == typeid(register_symbol)) {
-      Register * pReg = ((register_symbol*)val)->getReg();
-      if(pReg->address == address)
+    register_symbol *pSymbol = dynamic_cast<register_symbol*>(*sti);
+    if(pSymbol != 0) {
+      Register * pReg = pSymbol->getReg();
+      if(pReg->address == address &&
+        pSymbol->getBitmask() == pReg->get_cpu()->register_mask())
+        // This function will find the first symbol that
+        // uses the entire bit field of the register.
         return(pReg);
     }
     sti++;
@@ -277,16 +280,37 @@ Register * Symbol_Table::findRegister(unsigned int address)
   return NULL;
 }
 
-register_symbol * Symbol_Table::findRegister(unsigned int uAddress,
-                                             unsigned int uBitmask)
+register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
 {
   iterator sti = begin();
   ostringstream sDumbLabel;
   sDumbLabel << "R" << hex << uppercase << uAddress;
   while( sti != end()) {
-    Value *val = *sti;
-    if(val && typeid(*val) == typeid(register_symbol)) {
-      register_symbol * pRegSymbol = (register_symbol*)val;
+    register_symbol *pRegSymbol = dynamic_cast<register_symbol*>(*sti);
+    if(pRegSymbol != 0) {
+      Register * pReg = pRegSymbol->getReg();
+      if(pRegSymbol->getAddress() == uAddress &&
+        pRegSymbol->getBitmask() == pReg->get_cpu()->register_mask() &&
+        // This function will find the first symbol that
+        // uses the entire bit field of the register.
+        sDumbLabel.str() != pRegSymbol->name()) {
+          return(pRegSymbol);
+        }
+    }
+    sti++;
+  }
+  return NULL;
+}
+
+register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress,
+                                                   unsigned int uBitmask)
+{
+  iterator sti = begin();
+  ostringstream sDumbLabel;
+  sDumbLabel << "R" << hex << uppercase << uAddress;
+  while( sti != end()) {
+    register_symbol *pRegSymbol = dynamic_cast<register_symbol*>(*sti);
+    if(pRegSymbol != 0) {
       if(pRegSymbol->getAddress() == uAddress &&
         pRegSymbol->getBitmask() == uBitmask &&
         sDumbLabel.str() != pRegSymbol->name()) {
