@@ -703,7 +703,7 @@ void Processor::disassemble (signed int s, signed int e)
   instruction *inst;
   int use_src_to_disasm = 0;
 
-  if(s >= e)
+  if(s > e)
     return;
 
   unsigned int start_address = map_pm_address2index(s);
@@ -723,6 +723,7 @@ void Processor::disassemble (signed int s, signed int e)
   }
 
   char str[50];
+  unsigned uPCAddress = pc->get_value();
 
   for(unsigned int i = start_address; i<=end_address; i++)
     {
@@ -732,7 +733,7 @@ void Processor::disassemble (signed int s, signed int e)
       if(*pLabel != 0) {
         cout << pLabel << ":" << endl;
       }
-      if (map_pm_address2index(pc->get_value()) == i)
+      if (uPCAddress == uAddress)
         cout << "==>";
       else
         cout << "   ";
@@ -741,7 +742,7 @@ void Processor::disassemble (signed int s, signed int e)
       // Breakpoints replace the program memory with an instruction that has
       // an opcode larger than 16 bits.
 
-      if(program_memory[i]->opcode < 0x10000)
+      if(inst->opcode < 0x10000)
       {
         cout << ' ';
       }
@@ -755,8 +756,8 @@ void Processor::disassemble (signed int s, signed int e)
       {
         char buf[256];
 
-        files.ReadLine(program_memory[i]->file_id,
-            program_memory[i]->src_line - 1,
+        files.ReadLine(inst->file_id,
+            inst->src_line - 1,
             buf,
             sizeof(buf));
         cout << buf;
