@@ -209,6 +209,7 @@ EXPORTS
     ??0IO_open_collector@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ?get_active_cpu@@YAPAVProcessor@@XZ
     ?get_attribute@Module@@UAEPAVValue@@PAD_N@Z    
+    ?get_base_instruction@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?get_bit@IOPORT@@UAE_NI@Z
     ?get_bit_voltage@IOPORT@@UAENI@Z
     ?get_bit_voltage@Register@@UAENI@Z
