@@ -709,7 +709,7 @@ void Breakpoint_Instruction::execute(void)
 
   if( (cpu->simulation_mode == eSM_RUNNING) && 
       (simulation_start_cycle != get_cycles().value) &&
-      !eval_Expression()) {
+      eval_Expression()) {
 
       action->action();
       trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
