@@ -21,23 +21,7 @@ protected:
   FILE * m_pfIn;
 };
 
-class CGpsimUserInterface : public IUserInterface {
-public:
-  CGpsimUserInterface(const char *paStrings[]);
-
-  void CGpsimUserInterface::SetStreams(FILE *in, FILE *out);
-  virtual ISimConsole &GetConsole();
-  virtual void DisplayMessage(unsigned int uStringID, ...);
-  virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...);
-  virtual void DisplayMessage(const char *fmt, ...);
-  virtual void DisplayMessage(FILE * pOut, const char *fmt, ...);
-
-protected:
-  const char ** m_paStrings;
-  CGpsimConsole m_Console;
-
-};
-
+class CGpsimUserInterface;
 extern "C" CGpsimUserInterface s_GpsimUI;
 
 #endif

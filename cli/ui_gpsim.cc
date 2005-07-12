@@ -1,13 +1,20 @@
+#include <string>
+#include <sstream>
+
+
 #include "ui_gpsim.h"
+#include "../src/symbol.h"
+#include "../src/cmd_manager.h"
 
 const char * s_psEnglishMessages[] = {
-  "break reading register 0x%04x\n",                      // IDS_BREAK_READING_REG
-  "break reading register 0x%04x with value %u\n",        // IDS_BREAK_READING_REG_VALUE
-  "break reading register 0x%04x %s %u\n",                // IDS_BREAK_READING_REG_OP_VALUE
-  "break writing register 0x%04x\n",                      // IDS_BREAK_WRITING_REG
-  "break writing register 0x%04x with value %u\n",        // IDS_BREAK_WRITING_REG_VALUE
-  "break writing register 0x%04x %s %u\n",                // IDS_BREAK_WRITING_REG_OP_VALUE
-  "execution break at address 0x%03x\n",                  // IDS_BREAK_ON_EXEC_ADDRESS
+  "",                                                     // Place holder so we don't have a zero
+  "break reading register %s\n",                          // IDS_BREAK_READING_REG
+  "break reading register %s with value %u\n",            // IDS_BREAK_READING_REG_VALUE
+  "break reading register %s %s %u\n",                    // IDS_BREAK_READING_REG_OP_VALUE
+  "break writing register %s\n",                          // IDS_BREAK_WRITING_REG
+  "break writing register %s with value %u\n",            // IDS_BREAK_WRITING_REG_VALUE
+  "break writing register %s %s %u\n",                    // IDS_BREAK_WRITING_REG_OP_VALUE
+  "execution break at address %s\n",                      // IDS_BREAK_ON_EXEC_ADDRESS
   "unrecognized processor in the program file\n",         // IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN
   "file name '%s' is too long\n",                         // IDS_FILE_NAME_TOO_LONG
   "file %s not found\n",                                  // IDS_FILE_NOT_FOUND
@@ -19,7 +26,47 @@ const char * s_psEnglishMessages[] = {
   NULL,     // IDS_
 };
 
+
+class CGpsimUserInterface : public IUserInterface {
+public:
+  CGpsimUserInterface(const char *paStrings[]);
+
+  void CGpsimUserInterface::SetStreams(FILE *in, FILE *out);
+  virtual ISimConsole &GetConsole();
+  virtual void DisplayMessage(unsigned int uStringID, ...);
+  virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...);
+  virtual void DisplayMessage(const char *fmt, ...);
+  virtual void DisplayMessage(FILE * pOut, const char *fmt, ...);
+
+  virtual const char * FormatProgramAddress(unsigned int uAddress);
+  virtual const char * FormatRegisterAddress(unsigned int uAddress,
+    unsigned int uMask);
+  virtual const char * FormatLabeledValue(const char * pLabel,
+    unsigned int uValue);
+  virtual const char * FormatLabeledValue(const char * pLabel,
+    unsigned int uValue, int iRadix);
+
+  virtual void SetProgramAddressRadix(int iRadix);
+  virtual void SetRegisterAddressRadix(int iRadix);
+  virtual void SetValueRadix(int iRadix);
+
+protected:
+  string        m_sLabeledAddr;
+  int           m_iProgAddrRadix;
+  int           m_iRegAddrRadix;
+  int           m_iValueRadix;
+
+  const char ** m_paStrings;
+  CGpsimConsole m_Console;
+
+};
+
 CGpsimUserInterface s_GpsimUI(s_psEnglishMessages);
+
+void initialize_ConsoleUI()
+{
+  s_GpsimUI.SetStreams(stdin, stdout);
+}
 
 extern "C" IUserInterface &GetUserInterface(void) {
   return s_GpsimUI;
@@ -72,6 +119,9 @@ void CGpsimConsole::SetIn(FILE *pIn) {
 ///
 CGpsimUserInterface::CGpsimUserInterface(const char *paStrings[]) {
   m_paStrings = paStrings;
+  m_iProgAddrRadix  = eHex;
+  m_iRegAddrRadix   = eHex;
+  m_iValueRadix     = eHex;
 }
 
 void CGpsimUserInterface::SetStreams(FILE *in, FILE *out) {
@@ -121,3 +171,61 @@ void CGpsimUserInterface::DisplayMessage(FILE * pOut, const char *fmt, ...) {
   va_end(ap);
 }
 
+void CGpsimUserInterface::SetProgramAddressRadix(int iRadix) {
+  m_iProgAddrRadix = iRadix;
+}
+
+void CGpsimUserInterface::SetRegisterAddressRadix(int iRadix) {
+  m_iRegAddrRadix = iRadix;
+}
+
+void CGpsimUserInterface::SetValueRadix(int iRadix) {
+  m_iValueRadix = iRadix;
+}
+
+
+const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress) {
+  const char * pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+  return FormatLabeledValue(pLabel, uAddress, m_iProgAddrRadix);
+}
+
+const char * CGpsimUserInterface::FormatRegisterAddress(unsigned int uAddress,
+                                                        unsigned int uMask) {
+  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(uAddress, uMask);
+  const char * pLabel = pRegSym == NULL ? "" : pRegSym->name().c_str();
+  return FormatLabeledValue(pLabel, uAddress, m_iRegAddrRadix);
+}
+
+const char * CGpsimUserInterface::FormatLabeledValue(const char * pLabel,
+                                                     unsigned int uValue) {
+  return FormatLabeledValue(pLabel, uValue, m_iValueRadix);
+}
+
+const char * CGpsimUserInterface::FormatLabeledValue(const char * pLabel,
+                                                     unsigned int uValue,
+                                                     int iRadix) {
+
+  ostringstream m_osLabeledAddr;
+  string sPrefix;
+  switch(iRadix) {
+  case eHex:
+    m_osLabeledAddr << hex;
+    sPrefix = "0x";
+    break;
+  case eDec:
+    m_osLabeledAddr << dec;
+    break;
+  case eOct:
+    m_osLabeledAddr << oct;
+    sPrefix = "0";
+    break;
+  }
+  if(*pLabel != 0) {
+    m_osLabeledAddr << pLabel << "(" << sPrefix << uValue << ")";
+  }
+  else {
+    m_osLabeledAddr << sPrefix << uValue;
+  }
+  m_sLabeledAddr = m_osLabeledAddr.str();
+  return m_sLabeledAddr.c_str();
+}

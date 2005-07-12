@@ -305,6 +305,9 @@ register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
 register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress,
                                                    unsigned int uBitmask)
 {
+  if(uBitmask == 0) {
+    uBitmask = get_active_cpu()->register_mask();
+  }
   iterator sti = begin();
   ostringstream sDumbLabel;
   sDumbLabel << "R" << hex << uppercase << uAddress;
