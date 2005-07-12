@@ -70,6 +70,9 @@ void gpsim_version(void)
   printf("%s\n", VERSION);
 }
 
+// from ui_gpsim.cc
+void initialize_ConsoleUI();
+
 #define FILE_STRING_LENGTH 50
 
 static char *startup_name = "";
@@ -218,7 +221,7 @@ main (int argc, char *argv[])
   }
 #endif
 
-  s_GpsimUI.SetStreams(stdin, stdout);
+  initialize_ConsoleUI();
 
   string s;
   string sGpsimPath(argv[0]);

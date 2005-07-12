@@ -619,13 +619,18 @@ class Break_register_read_value : public BreakpointRegister_Value
 public:
   class TA : public TriggerAction {
   public:
-    TA(int uAddress, unsigned int uValue) {
+    TA(int uAddress, unsigned int uValue, unsigned int uBreakMask,
+       unsigned int uDefMask) {
       m_uAddress = uAddress;
       m_uValue = uValue;
+      m_uBreakMask = uBreakMask;
+      m_uDefMask = uDefMask;
     }
     void action(void);
     int m_uAddress;
     unsigned int m_uValue;
+    unsigned int m_uBreakMask;
+    unsigned int m_uDefMask;
   };
 
 //  Break_register_read_value(void){ };
@@ -633,9 +638,7 @@ public:
 			    int _repl, 
 			    int bp, 
 			    unsigned int bv, 
-			    unsigned int bm ) :
-    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
-      m_ta(_repl, bv) { };
+			    unsigned int bm );
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
@@ -651,13 +654,18 @@ class Break_register_write_value : public BreakpointRegister_Value
 public:
   class TA : public TriggerAction {
   public:
-    TA(int uAddress, unsigned int uValue) {
+    TA(int uAddress, unsigned int uValue, unsigned int uBreakMask,
+       unsigned int uDefMask) {
       m_uAddress = uAddress;
       m_uValue = uValue;
+      m_uBreakMask = uBreakMask;
+      m_uDefMask = uDefMask;
     }
     void action(void);
     int m_uAddress;
     unsigned int m_uValue;
+    unsigned int m_uBreakMask;
+    unsigned int m_uDefMask;
   };
 
 //  Break_register_write_value(void){ };
@@ -665,9 +673,9 @@ public:
 			     int _repl, 
 			     int bp, 
 			     unsigned int bv, 
-			     unsigned int bm ) :
-    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
-      m_ta(_repl, bv) { };
+			     unsigned int bm );// :
+//    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
+//      m_ta(_repl, bv, bm, get_cpu()->register_mask()) { };
 
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);

@@ -16,32 +16,47 @@ public:
 
 class IUserInterface {
 public:
+  enum {
+    eHex,
+    eDec,
+    eOct,
+  };
+
   virtual ISimConsole &GetConsole() = 0;
   virtual void DisplayMessage(unsigned int uStringID, ...) = 0;
   virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...) = 0;
   virtual void DisplayMessage(const char *fmt, ...) = 0;
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) = 0;
 
+  virtual const char * FormatProgramAddress(unsigned int uAddress) = 0;
+  virtual const char * FormatRegisterAddress(unsigned int uAddress,
+    unsigned int uMask) = 0;
+  virtual const char * FormatLabeledValue(const char * pLabel,
+    unsigned int uValue) = 0;
+
+  virtual void SetProgramAddressRadix(int iRadix) = 0;
+  virtual void SetRegisterAddressRadix(int iRadix) = 0;
+  virtual void SetValueRadix(int iRadix) = 0;
 };
 
 extern "C" IUserInterface &GetUserInterface(void);
 
 ///
 ///   Gpsim string IDs
-#define IDS_BREAK_READING_REG                 0
-#define IDS_BREAK_READING_REG_VALUE           1
-#define IDS_BREAK_READING_REG_OP_VALUE        2
-#define IDS_BREAK_WRITING_REG                 3
-#define IDS_BREAK_WRITING_REG_VALUE           4
-#define IDS_BREAK_WRITING_REG_OP_VALUE        5
-#define IDS_BREAK_ON_EXEC_ADDRESS             6
-#define IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN  7
-#define IDS_FILE_NAME_TOO_LONG                8
-#define IDS_FILE_NOT_FOUND                    9
-#define IDS_FILE_BAD_FORMAT                   10
-#define IDS_NO_PROCESSOR_SPECIFIED            11
-#define IDS_PROCESSOR_INIT_FAILED             12
-#define IDS_FILE_NEED_PROCESSOR_SPECIFIED     13
+#define IDS_BREAK_READING_REG                 1
+#define IDS_BREAK_READING_REG_VALUE           2
+#define IDS_BREAK_READING_REG_OP_VALUE        3
+#define IDS_BREAK_WRITING_REG                 4
+#define IDS_BREAK_WRITING_REG_VALUE           5
+#define IDS_BREAK_WRITING_REG_OP_VALUE        6
+#define IDS_BREAK_ON_EXEC_ADDRESS             7
+#define IDS_PROGRAM_FILE_PROCESSOR_NOT_KNOWN  8
+#define IDS_FILE_NAME_TOO_LONG                9
+#define IDS_FILE_NOT_FOUND                    10
+#define IDS_FILE_BAD_FORMAT                   11
+#define IDS_NO_PROCESSOR_SPECIFIED            12
+#define IDS_PROCESSOR_INIT_FAILED             13
+#define IDS_FILE_NEED_PROCESSOR_SPECIFIED     14
 
 
 #endif

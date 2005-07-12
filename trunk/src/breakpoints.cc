@@ -798,7 +798,8 @@ void Breakpoint_Instruction::print(void)
   // 13a: p17c756  Execution at 0x0123
   const char * pLabel = get_symbol_table().
     findProgramAddressLabel(address);
-  const char * pFormat = *pLabel == 0 ? "0x%x: %s %s at %s 0x%x\n" : "0x%x: %s %s at %s(0x%x)\n";
+  const char * pFormat = *pLabel == 0 ? "%x: %s %s at %s0x%x\n"
+                                      : "%x: %s %s at %s(0x%x)\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
   if(message().size())
@@ -1000,8 +1001,9 @@ void RegisterAssertion::print(void)
 {
   Breakpoint_Instruction::print();
   Register & pReg = PCPU->rma[regAddress];
-  string & sName = PCPU->rma[regAddress].name();
-  const char * pFormat = sName.empty() ? "  break when register %s0x%x ANDed with 0x%x equals 0x%x\n"
+  string & sName = pReg.name();
+  const char * pFormat = sName.empty()
+    ? "  break when register %s0x%x ANDed with 0x%x equals 0x%x\n"
     : "  break when register %s(0x%x) ANDed with 0x%x equals 0x%x\n" ;
   GetUserInterface().DisplayMessage(pFormat,
     sName.c_str(), regAddress, regMask, regValue);
@@ -1140,34 +1142,73 @@ void BreakpointRegister_Value::print(void)
     ? "%x: %s  %s: address=%s0x%x  value=0x%x  mask=0x%x\n"
     : "%x: %s  %s: address=%s(0x%x)  value=0x%x  mask=0x%x\n";
   GetUserInterface().DisplayMessage(pFormat,
-    bpn, cpu->name().c_str(), bpName(), address, break_value, break_mask);
+    bpn, cpu->name().c_str(), bpName(), pLabel, address, break_value, break_mask);
 }
+
 
 //-------------------------------------------------------------------
 //
 void Break_register_read::TA::action(void) {
-  if(verbosity && verbosity->getVal())
-    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG, m_uAddress);
+  if(verbosity && verbosity->getVal()) {
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      m_uAddress, 0);
+    GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG,
+      sFormattedRegAddress.c_str());
+  }
   bp.halt();
 }
 
 void Break_register_write::TA::action(void) {
-  if(verbosity && verbosity->getVal())
-    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG, m_uAddress);
+  if(verbosity && verbosity->getVal()) {
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      m_uAddress, 0);
+    GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG,
+      sFormattedRegAddress.c_str());
+  }
   bp.halt();
 }
 
 void Break_register_read_value::TA::action(void) {
-  if(verbosity && verbosity->getVal())
+  if(verbosity && verbosity->getVal()) {
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      m_uAddress, 0);
+    if(m_uBreakMask != m_uDefMask) {
+      sFormattedRegAddress += " & ";
+      sFormattedRegAddress += GetUserInterface().FormatLabeledValue("",
+        m_uBreakMask);
+    }
     GetUserInterface().DisplayMessage(IDS_BREAK_READING_REG_VALUE,
-      m_uAddress, m_uValue);
+      sFormattedRegAddress.c_str(), m_uValue);
+  }
   bp.halt();
 }
 
+Break_register_write_value::Break_register_write_value(Processor *_cpu, 
+			     int _repl, 
+			     int bp, 
+			     unsigned int bv, 
+			     unsigned int bm ) :
+    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
+      m_ta(_repl, bv, bm, get_cpu()->register_mask())
+{
+}
+
 void Break_register_write_value::TA::action(void) {
-  if(verbosity && verbosity->getVal())
+  if(verbosity && verbosity->getVal()) {
+    string sFormattedRegAddress;
+    sFormattedRegAddress = GetUserInterface().FormatRegisterAddress(
+      m_uAddress, 0);
+    if(m_uBreakMask != m_uDefMask) {
+      sFormattedRegAddress += " & ";
+      sFormattedRegAddress += GetUserInterface().FormatLabeledValue("",
+        m_uBreakMask);
+    }
     GetUserInterface().DisplayMessage(IDS_BREAK_WRITING_REG_VALUE,
-      m_uAddress, m_uValue);
+      sFormattedRegAddress.c_str(), m_uValue);
+  }
   bp.halt();
 }
 
@@ -1250,16 +1291,24 @@ void Break_register_write::setbit(unsigned int bit_number, bool new_value)
   }
 }
 
+Break_register_read_value::Break_register_read_value(Processor *_cpu, 
+			    int _repl, 
+			    int bp, 
+			    unsigned int bv, 
+			    unsigned int bm ) :
+    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
+      m_ta(_repl, bv, bm, _cpu->register_mask()) {
+}
+
 unsigned int Break_register_read_value::get(void)
 {
   unsigned int v = replaced->get();
 
-  if( (v & break_mask) == break_value)
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-			| address);
-    }
+  if( (v & break_mask) == break_value){
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		| address);
+  }
   return v;
 }
 
@@ -1267,12 +1316,11 @@ RegisterValue  Break_register_read_value::getRV(void)
 {
   RegisterValue v = replaced->getRV();
 
-  if( (v.data & break_mask) == break_value)
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-			| address);
-    }
+  if( (v.data & break_mask) == break_value) {
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+	  | address);
+  }
   return(v);
 }
 
@@ -1280,12 +1328,11 @@ RegisterValue  Break_register_read_value::getRVN(void)
 {
   RegisterValue v = replaced->getRVN();
 
-  if( (v.data & break_mask) == break_value)
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-			| address);
-    }
+  if( (v.data & break_mask) == break_value) {
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		| address);
+  }
   return(v);
 }
 
@@ -1294,12 +1341,11 @@ bool Break_register_read_value::get_bit(unsigned int bit_number)
   unsigned int v = replaced->get();
   unsigned int mask = 1<<(bit_number & 7);
 
-  if( (break_mask & mask) && (v & mask) == (break_value&mask))
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
-			| address);
-    }
+  if( (break_mask & mask) && (v & mask) == (break_value&mask)) {
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_READ>>8) 
+		| address);
+  }
   return replaced->get_bit(bit_number);
 }
 
@@ -1313,24 +1359,22 @@ double Break_register_read_value::get_bit_voltage(unsigned int bit_number)
 void Break_register_write_value::put(unsigned int new_value)
 {
 
-  if((new_value & break_mask) == break_value)
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-			| address);
-    }
+  if((new_value & break_mask) == break_value) {
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		| address);
+  }
   replaced->put(new_value);
 }
 
 void Break_register_write_value::putRV(RegisterValue rv)
 {
   
-  if((rv.data & break_mask) == break_value)
-    if(eval_Expression()) {
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-			| (replaced->address)  );
-    }
+  if((rv.data & break_mask) == break_value) {
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+		| (replaced->address)  );
+  }
 
   replaced->putRV(rv);
 }
@@ -1342,16 +1386,14 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
   int new_value = ((int)new_bit) << bit_number;
 
   if( (val_mask & break_mask) &&
-      ( ((replaced->value.get() & ~val_mask)  // clear the old bit
-	 | new_value)                   // set the new bit
-	& break_mask) == break_value)
-    {
-      if(eval_Expression()) {
-        action->action();
-	trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
-			  | address);
-      }
-    }
+      ( ( (replaced->value.get() & ~val_mask)  // clear the old bit
+          | new_value)                   // set the new bit
+        & break_mask) == break_value)
+  {
+      action->action();
+      trace.breakpoint( (Breakpoints::BREAK_ON_REG_WRITE>>8) 
+			| address);
+  }
 
   replaced->setbit(bit_number,new_value ? true  : false);
 
