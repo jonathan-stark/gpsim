@@ -1,3 +1,40 @@
+2005-07-11 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/breakpoints.cc, h, src/cmd_gpsim.h, src/symbol.cc,
+	plat/win32/gpsim.def, gpsim/main.cc, cli/ui_gpsim.cc,
+	cli/ui_gpsim.h: Made changes so that when hitting a
+	break will display program and register address symbols. 
+
+	* src/breakpoint.cc: Removed calls to eval_Expression()
+	where it is not necessary. Enhanced the break on value
+	action text to include symbols and bit mask value.
+
+	* cli/ui_gpsim.cc,h, gpsim/main.cc: Added functions that
+	help display program and register address symbols along
+	with the address value.
+
+	* src/trigger.cc: Fixed problem in TriggerObject::
+	eval_Expression() that was preventing non-expression
+	based break points to not fire.
+
+	* src/symbol.cc: Added check in Symbol_Table::
+	findRegisterSymbol() to get register bit mask defined
+	for the CPU when the passed in value is zero.
+
+
+2005-07-10 J.R. Heisey <jrheisey@sourceforge.com>
+	* plat/win32/gpsim.def, src/symbol.cc, src/symbol.h:
+	Change function name from findRegister() to findRegisterSymbol()
+	to reflect the return type. Added new findRegisterSymbol()
+	version that takes a single address parameter. Did some
+	minor code optimization of the findRegister() function.
+	Due to the introductions of register symbol bit mask, I
+	modified findRegister() to only return symbols that are
+	defined for all bits of the register.
+
+	* src/processor.cc: Changed some entry condition checks to
+	allow processor::disassemble to disassemble one program
+	address. Also made some minor code optimizations.
+
 2005-07-06 Borut Razem <borut.razem@siol.net>
 	* src/breakpoints.cc, src/gpsim_time.cc, src/interface.cc, src/processor.src, src/trace.cc:
 	  declare dummy_bp, dummy_cycles, dummy_gi, dummy_get_active_cpu, dummy_set_active_cpu
