@@ -168,7 +168,7 @@ bool TriggerObject::eval_Expression()
     return bRet;
   }
 
-  return false;
+  return true;
 }
 
 //-------------------------------------------------------------------
