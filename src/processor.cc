@@ -774,10 +774,11 @@ void Processor::disassemble (signed int s, signed int e)
         inst = pma->get_base_instruction(i);
       }
 
-      if(inst->file_id != -1 && inst->src_line != -1 &&
-        iLastFileId != inst->file_id) {
+      if(inst->file_id != -1) {
         fc = files[inst->file_id];
-        Console.Printf("%s\n", fc->name().c_str());
+        if(iLastFileId != inst->file_id) {
+          Console.Printf("%s\n", fc->name().c_str());
+        }
         iLastFileId = inst->file_id;
       }
       else {
