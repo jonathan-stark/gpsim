@@ -683,6 +683,25 @@ void Processor::list(unsigned int file_id,
     cout << buf;
   }
 }
+
+
+static void trim(char * pBuffer) {
+  size_t iPos = 0;
+  char * pChar = pBuffer;
+  while(*pChar != 0 && ::isspace(*pChar)) {
+    pChar++;
+  }
+  if(pBuffer != pChar) {
+    memmove(pBuffer, pChar, strlen(pBuffer) - iPos);
+  }
+  iPos = strlen(pBuffer);
+  pChar = pBuffer + iPos - 1;
+  while(pBuffer != pChar && ::isspace(*pChar)) {
+    *pChar = 0;
+    pChar--;
+  }
+}
+
 //-------------------------------------------------------------------
 //
 // disassemble - Disassemble the contents of program memory from
@@ -722,21 +741,24 @@ void Processor::disassemble (signed int s, signed int e)
       end_address = program_memory_size()-1;
   }
 
-  char str[50];
+  const int iConsoleWidth = 80;
+  char str[iConsoleWidth];
+  char str2[iConsoleWidth];
   unsigned uPCAddress = pc->get_value();
+  char *pszPC;
+  char cBreak;
+  ISimConsole &Console = GetUserInterface().GetConsole();
 
+  int iLastFileId = -1;
+  FileContext *fc = NULL;
   for(unsigned int i = start_address; i<=end_address; i++)
     {
       unsigned int uAddress = map_pm_index2address(i);
       str[0] =0;
-      const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
-      if(*pLabel != 0) {
-        cout << pLabel << ":" << endl;
-      }
       if (uPCAddress == uAddress)
-        cout << "==>";
+        pszPC = "==>";
       else
-        cout << "   ";
+        pszPC = "   ";
       inst = program_memory[i];
 
       // Breakpoints replace the program memory with an instruction that has
@@ -744,14 +766,28 @@ void Processor::disassemble (signed int s, signed int e)
 
       if(inst->opcode < 0x10000)
       {
-        cout << ' ';
+        cBreak = ' ';
       }
       else
       {
-        cout << 'B';
+        cBreak = 'B';
         inst = pma->get_base_instruction(i);
       }
 
+      if(inst->file_id != -1 && inst->src_line != -1 &&
+        iLastFileId != inst->file_id) {
+        fc = files[inst->file_id];
+        Console.Printf("%s\n", fc->name().c_str());
+        iLastFileId = inst->file_id;
+      }
+      else {
+        fc = NULL;
+      }
+
+      const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+      if(*pLabel != 0) {
+        cout << pLabel << ":" << endl;
+      }
       if(files.nsrc_files() && use_src_to_disasm)
       {
         char buf[256];
@@ -762,10 +798,26 @@ void Processor::disassemble (signed int s, signed int e)
             sizeof(buf));
         cout << buf;
       }
-      else
-        cout << hex << setw(4) << setfill('0') << uAddress << "  "
-             << hex << setw(4) << setfill('0') << inst->opcode << "    "
-             << inst->name(str,sizeof(str)) << '\n';
+      else {
+        if(fc != NULL && inst->src_line != -1) {
+          fc->ReadLine(inst->src_line,
+            str2, iConsoleWidth - 33);
+          trim(str2);
+        }
+        else {
+          str2[0] = 0;
+        }
+        inst->name(str, sizeof(str));
+        int iNumonicWidth = strchr(str, '\t') - str;
+        int iOperandsWidth = 14;
+        int iSrc = iOperandsWidth - (strlen(str) - iNumonicWidth - 1);
+//        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
+//        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
+        Console.Printf(
+          "% 3s%c%04x  %04x  %s %*s%s\n",
+          pszPC, cBreak, uAddress, inst->opcode, 
+          str, iSrc, "", str2);
+      }
     }
 }
 
