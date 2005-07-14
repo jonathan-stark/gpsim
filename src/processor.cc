@@ -800,15 +800,20 @@ void Processor::disassemble (signed int s, signed int e)
       }
       else {
         if(fc != NULL && inst->src_line != -1) {
-          fc->ReadLine(inst->src_line,
-            str2, iConsoleWidth - 33);
-          trim(str2);
+          if(fc->ReadLine(inst->src_line, str2, iConsoleWidth - 33)
+            != NULL) {
+            trim(str2);
+            }
+          else {
+            str2[0] = 0;
+          }
         }
         else {
           str2[0] = 0;
         }
         inst->name(str, sizeof(str));
-        int iNumonicWidth = strchr(str, '\t') - str;
+        char *pAfterNumonic = strchr(str, '\t');
+        int iNumonicWidth = pAfterNumonic ? pAfterNumonic - str : 5;
         int iOperandsWidth = 14;
         int iSrc = iOperandsWidth - (strlen(str) - iNumonicWidth - 1);
 //        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
