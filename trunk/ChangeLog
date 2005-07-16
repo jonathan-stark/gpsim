@@ -1,3 +1,13 @@
+2005-07-15 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui/gui_watch.cc, gui/gui_watch.h: Fixed problem with
+	register symbol names not displaying in the Watch
+	window. Introduced this	bug when I made the bit mask feature
+	in register symbols.
+
+	* gui/gui_regwin.cc:  Fixed problem with register symbol 
+	names not displaying in the RAM window. Introduced this 
+	bug when I made the bit mask feature in register symbols.
+
 2005-07-11 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/breakpoints.cc, h, src/cmd_gpsim.h, src/symbol.cc,
 	plat/win32/gpsim.def, gpsim/main.cc, cli/ui_gpsim.cc,
