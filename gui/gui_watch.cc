@@ -519,6 +519,16 @@ void Watch_Window::Update(void)
 //------------------------------------------------------------------------
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 {
+  if(!gp || !gp->cpu || !reg || !reg->bIsValid())
+    return;
+  Register *cpu_reg = reg->get_register();
+  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(
+    cpu_reg->address);
+  Add(type, reg, pRegSym);
+}
+
+void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym)
+{
   char name[50], addressstring[50], typestring[30];
   char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
   int row;
@@ -533,9 +543,14 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
     Build();
 
 
-  Register *cpu_reg = reg->get_register();
+  Register *cpu_reg = pRegSym->getReg();
 
-  strncpy(name,cpu_reg->name().c_str(),sizeof(name));
+  if(pRegSym == 0) {
+    strncpy(name,cpu_reg->name().c_str(),sizeof(name));
+  }
+  else {
+    strncpy(name,pRegSym->name().c_str(),sizeof(name));
+  }
   sprintf(addressstring,"0x%02x",reg->address);
   strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 
@@ -580,8 +595,8 @@ void Watch_Window::Add( Value *regSym)
       Register *reg = rs->getReg();
       
       if(reg) {
-	GUIRegister *greg = (*gp->regwin_ram)[reg->address];
-	Add(REGISTER_RAM, greg);
+        GUIRegister *greg = (*gp->regwin_ram)[reg->address];
+        Add(REGISTER_RAM, greg, rs);
       }
     }
   }
