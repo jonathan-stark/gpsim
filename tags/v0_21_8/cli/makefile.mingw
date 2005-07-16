@@ -1,0 +1,89 @@
+## Makefile for building the gpsim with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+TOP = ../..
+
+include ../plat/win32/make.mingw
+
+################################################################
+
+# Nothing much configurable below
+
+INCLUDES = -I ../.. -I ../plat/win32 -I ../../glib/include/glib-2.0 \
+	-I ../../glib/lib/glib-2.0/include -I ../../gtk+/include/gtk-2.0 \
+	-I ../../gtk+/lib/gtk-2.0/include -I ../../pango/include/pango-1.0
+
+DEFINES += -DHAVE_READLINE -DHAVE_GUI -DHAVE_NSCLEAN_READLINE
+#       -DREADLINE_STATIC
+
+all :				\
+	../config.h		\
+	libcli.a 
+
+cli_OBJECTS =			\
+	cmd_attach.o		\
+	cmd_break.o		\
+	cmd_bus.o		\
+	cmd_clear.o		\
+	cmd_disasm.o		\
+	cmd_dump.o		\
+	cmd_echo.o		\
+	cmd_frequency.o		\
+	cmd_help.o		\
+	cmd_icd.o		\
+	cmd_list.o		\
+	cmd_load.o		\
+	cmd_log.o		\
+	cmd_macro.o		\
+	cmd_module.o		\
+	cmd_node.o		\
+	cmd_processor.o		\
+	cmd_quit.o		\
+	cmd_reset.o		\
+	cmd_run.o		\
+	cmd_set.o		\
+	cmd_shell.o		\
+	cmd_step.o		\
+	cmd_stimulus.o		\
+	cmd_stopwatch.o		\
+	cmd_symbol.o		\
+	cmd_trace.o		\
+	cmd_version.o		\
+	cmd_x.o			\
+	command.o		\
+	fd2raw.o		\
+	input.o			\
+	parse.o			\
+	scan.o			\
+	socket.o		\
+	ui_gpsim.o		\
+	uxtime.o
+
+../config.h : ../config_win32.h.in
+	(cd .. ; $(AWK) -f plat/win32/configure_win32.awk config_win32.h.in > config.h)
+
+fd2raw.o : ../plat/win32/fd2raw.cpp
+	$(CXX) $(CFLAGS) -c -o fd2raw.o ../plat/win32/fd2raw.cpp
+
+parse.o : parse.cc
+
+scan.o : scan.cc
+
+uxtime.o : ../plat/win32/uxtime.cc
+	$(CXX) $(CFLAGS) -c $< -o $@
+
+parse.h parse.cc : parse.yy
+	$(BISON) -dt -o parse.cc parse.yy
+	$(RM) -f parse.h
+	$(MV) parse.hh parse.h
+
+scan.cc : scan.ll parse.h
+	$(FLEX) -oscan.cc scan.ll
+
+################ The libcli LIB
+
+libcli.a : $(cli_OBJECTS)
+	$(RM) -f $@
+	$(AR) $(ARFLAGS) $@ $(cli_OBJECTS)
