@@ -270,17 +270,24 @@ char *GUIRegister::name(void)
 {
 
   Register *reg = get_register();
+  register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(
+    reg->address);
 
   if(!reg || reg->isa()==Register::INVALID_REGISTER)
     return 0;
 
   static char buffer[128];
-
-  if(bIsAliased)
+  if(bIsAliased) {
     sprintf(buffer,"alias (%s)", reg->name().c_str());
-  else
-    strcpy(buffer,reg->name().c_str());
-
+  }
+  else {
+    if(pRegSym == 0) {
+      strcpy(buffer,reg->name().c_str());
+    }
+    else {
+      strcpy(buffer,pRegSym->name().c_str());
+    }
+  }
   return buffer;
 }
 
@@ -438,7 +445,7 @@ int gui_get_value(char *prompt)
     
     gtk_widget_hide(dialog);
 
-    if(retval==TRUE)
+    if(retval==(int)TRUE)
     {
       char *end;
       const gchar *entry_text;
@@ -538,7 +545,7 @@ void gui_get_2values(char *prompt1, int *value1, char *prompt2, int *value2)
     
     gtk_widget_hide(dialog);
 
-    if(retval==TRUE)
+    if(retval==(int)TRUE)
     {
       // "Ok"
 
@@ -1017,8 +1024,7 @@ set_cell(GtkWidget *widget, int row, int col, Register_Window *rw)
 
   if(errno != EINVAL && n != (int) reg->get_shadow().data)
     {
-      printf("Writing new value 0x%x -- fixme - ignoring register width\n",n);
-      reg->put_value(n&0xff);
+      reg->put_value(n & gp->cpu->register_mask());
       rw->UpdateASCII(row);
     }
 
@@ -1827,7 +1833,7 @@ void Register_Window::Update(void)
         (pGuiReg->get_shadow().data!=INVALID_VALUE ||
         pGuiReg->bUpdateFull)) {
 
-        if(UpdateRegisterCell(address) == true)
+        if(UpdateRegisterCell(address) == (gboolean)true)
           bRowChanged = true;
       }
     }
