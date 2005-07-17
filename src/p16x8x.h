@@ -24,7 +24,16 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "intcon.h"
 
-class P16C84 : public P16C8x
+class P16X8X : public Pic14Bit
+{
+public:
+  virtual void create_sfr_map(void);
+  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
+  virtual void create_iopin_map(void);
+  virtual void create(int ram_top);
+};
+
+class P16C84 : public P16X8X
 {
 public:
 
@@ -37,7 +46,7 @@ public:
   static Processor *construct(void);
 };
 
-class P16F84 : public P16C8x
+class P16F84 : public P16X8X
 {
 public:
 
@@ -61,7 +70,7 @@ public:
 
 
 
-class P16F83 : public P16C8x
+class P16F83 : public P16X8X
 {
 public:
 

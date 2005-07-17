@@ -324,9 +324,9 @@ double Register::get_bit_voltage(unsigned int bit_number)
 // classes that overide this function
 void Register::setbit(unsigned int bit_number, bool new_value)
 {
-  if(bit_number < bit_mask) {
+  if(bit_number <= bit_mask) {
     trace.raw(write_trace.get() | value.get());
-    value.put((value.get() & ~(1<<bit_number)) | (1<<bit_number));
+    value.put((value.get() & ~(1<<bit_number)) | (new_value ? (1<<bit_number) : 0));
   }
 }
 

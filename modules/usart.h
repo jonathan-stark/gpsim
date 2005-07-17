@@ -77,7 +77,8 @@ class USART_CORE //: public USART_MODULE
   USARTModule *um;
 
   virtual void new_rx_edge(unsigned int);
-  virtual int get_tx_byte(void);
+  // Debug-- the txreg calls this function to get data to send.
+  virtual bool mGetTxByte(unsigned int &);
   void initialize(USART_IOPORT *new_iop=NULL);
 
   USART_CORE(void);

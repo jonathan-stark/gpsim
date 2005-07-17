@@ -235,8 +235,6 @@ class USART_MODULE
 {
 public:
 
-  //  pic_processor *cpu;
-
   _TXSTA       *txsta;
   _RCSTA       *rcsta;
   _SPBRG       *spbrg;
@@ -255,9 +253,6 @@ class USART_MODULE14 : public USART_MODULE
  public:
 
   _14bit_processor *_cpu14;
-
-  //TXREG_14     txreg;
-  //RCREG_14     rcreg;
 
   USART_MODULE14(void);
   void initialize_14(_14bit_processor *new_cpu,PIR_SET *ps,

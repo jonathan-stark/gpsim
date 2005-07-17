@@ -318,7 +318,7 @@ Processor * P16F873::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
 
   p->new_name("p16f873");
   symbol_table.add_module(p,p->name().c_str());
@@ -366,7 +366,7 @@ Processor * P16F876::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
 
   p->new_name("p16f876");
   symbol_table.add_module(p,p->name().c_str());
@@ -541,7 +541,7 @@ Processor * P16F874::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
 
   p->new_name("p16f874");
   symbol_table.add_module(p,p->name().c_str());
@@ -618,7 +618,7 @@ Processor * P16F877::construct(void)
 
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
 
   p->new_name("p16f877");
   symbol_table.add_module(p,p->name().c_str());

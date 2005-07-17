@@ -96,8 +96,8 @@ void _12bit_processor::create(void)
 
   stack->stack_mask = 1;        // The 12bit core only has 2 stack positions
 
-  tmr0.set_cpu(this);
-  tmr0.start(0);
+  //1 tmr0.set_cpu(this);
+  //1 tmr0.start(0);
 
 }
 

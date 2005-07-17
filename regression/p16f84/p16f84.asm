@@ -33,6 +33,7 @@ CONFIG_WORD	EQU	_CP_OFF & _WDT_OFF
 
 	CLRF	TRISA^0x80	;Port A is an output
 	MOVWF	TRISB^0x80	;Port B is an input
+	BSF	OPTION_REG ^ 0x80, NOT_RBPU	;Disable the pullups
 
 	BCF 	STATUS,RP0
 

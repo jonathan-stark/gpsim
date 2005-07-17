@@ -447,7 +447,7 @@ public:
   virtual unsigned int get_prescale(void);
   virtual unsigned int max_counts(void);
   virtual void set_t0if(void);
-  virtual unsigned int get_t0cs(void);
+  virtual bool get_t0cs(void);
   virtual void initialize(void);
 };
 

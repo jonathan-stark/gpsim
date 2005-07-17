@@ -21,9 +21,11 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __TMR0_H__
 #define __TMR0_H__
 
+#include "ioports.h"
+
 //---------------------------------------------------------
 // TMR0 - Timer
-class TMR0 : public sfr_register, public TriggerObject
+class TMR0 : public sfr_register, public TriggerObject, public SignalSink
 {
 public:
   unsigned int 
@@ -52,12 +54,18 @@ public:
   virtual unsigned int get_prescale(void);
   virtual unsigned int max_counts(void) {return 256;};
   void new_clock_source(void);
-  virtual unsigned int get_t0cs(void);
+  virtual bool get_t0cs();
+  virtual bool get_t0se();
   virtual void set_t0if(void);
   virtual void reset(RESET_TYPE r);
   virtual void clear_break(void); 
   virtual void callback_print(void);
 
+  virtual void set_cpu(Processor *, PortRegister *, unsigned int pin);
+  virtual void setSinkState(bool);
+
+private:
+  bool m_bLastClockedState;
 };
 
 #endif

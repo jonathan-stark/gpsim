@@ -314,15 +314,13 @@ void P16C71::create_sfr_map(void)
   if(verbose)
     cout << "creating c71 registers \n";
 
-  //  P16C61::create_sfr_map();
-
   add_sfr_register(&adcon0, 0x08, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x88, RegisterValue(0,0));
 
   add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
-  adcon0.analog_port = porta;
+  //1adcon0.analog_port = porta;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
@@ -330,7 +328,7 @@ void P16C71::create_sfr_map(void)
   adcon0.channel_mask = 3;
   intcon = &intcon_reg;
 
-  adcon1.analog_port = porta;
+  //1adcon1.analog_port = porta;
   adcon1.valid_bits = ADCON1::PCFG1 | ADCON1::PCFG2;
 
   adcon0.new_name("adcon0");
@@ -367,12 +365,8 @@ void P16C71::create_sfr_map(void)
 
 void P16C71::create_symbols(void)
 {
-
-
-  symbol_table.add_ioport(portb);
-  symbol_table.add_ioport(porta);
-
-
+  //symbol_table.add_register(m_portb);
+  //symbol_table.add_ioport(porta);
 }
 void P16C71::create(void)
 {
@@ -420,20 +414,13 @@ void P16C712::create_sfr_map(void)
   /* Extra timers and Capture/Compare are like in 16x63 => 16X6X code */
   P16X6X_processor::create_sfr_map();
 
-  /* Input/Output ports */
-  add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, RegisterValue(0x1f,0));
-
-  add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
-
   /* The A/D section is similar to 16x71, but not equal */
   add_sfr_register(&adcon0, 0x1F, RegisterValue(0,0));
   add_sfr_register(&adcon1, 0x9F, RegisterValue(0,0));
 
   add_sfr_register(&adres,  0x1E, RegisterValue(0,0));
 
-  adcon0.analog_port = porta;
+  //1adcon0.analog_port = porta;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
@@ -441,7 +428,7 @@ void P16C712::create_sfr_map(void)
   adcon0.channel_mask = 3;
   intcon = &intcon_reg;
 
-  adcon1.analog_port = porta;
+  //1adcon1.analog_port = porta;
   adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
 
   adcon0.new_name("adcon0");
@@ -492,7 +479,7 @@ void P16C712::create(void)
   create_iopin_map(); /* 14 bits 18 pins connections */
   _14bit_processor::create();
   create_sfr_map();
-  ccp1con.iopin = portb->pins[2];
+  //1ccp1con.iopin = portb->pins[2];
 
 }
 
@@ -573,7 +560,7 @@ void P16C72::create_sfr_map(void)
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  adcon0.analog_port = porta;
+  //1adcon0.analog_port = porta;
   adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
@@ -585,7 +572,7 @@ void P16C72::create_sfr_map(void)
 
   intcon = &intcon_reg;
 
-  adcon1.analog_port = porta;
+  //1adcon1.analog_port = porta;
   adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
 
 
@@ -667,7 +654,7 @@ Processor * P16C72::construct(void)
   p->pic_processor::create_symbols();
 
   
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c72");
   symbol_table.add_module(p,p->name().c_str());
@@ -708,7 +695,7 @@ void P16C73::create_sfr_map(void)
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  adcon0.analog_port = porta;
+  //1adcon0.analog_port = porta;
   adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
@@ -720,7 +707,7 @@ void P16C73::create_sfr_map(void)
 
   intcon = &intcon_reg;
 
-  adcon1.analog_port = porta;
+  //1adcon1.analog_port = porta;
   adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
 
 
@@ -801,7 +788,7 @@ Processor * P16C73::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c73");
   symbol_table.add_module(p,p->name().c_str());
@@ -844,7 +831,7 @@ void P16C74::create_sfr_map(void)
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  adcon0.analog_port = porta;
+  //1adcon0.analog_port = porta;
   adcon0.analog_port2 = porte;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
@@ -856,7 +843,7 @@ void P16C74::create_sfr_map(void)
 
   intcon = &intcon_reg;
 
-  adcon1.analog_port = porta;
+  //1adcon1.analog_port = porta;
   adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
 
 
@@ -937,7 +924,7 @@ Processor * P16C74::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
+  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c74");
   symbol_table.add_module(p,p->name().c_str());

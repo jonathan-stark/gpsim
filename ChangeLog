@@ -1,3 +1,38 @@
+2005-07-15 Scott Dattalo <scott@dattalo.com>
+	* src/12bit-processors.cc, src/14bit-processors.cc,
+	src/14bit-processors.h, src/16bit-registers.cc,
+	src/16bit-registers.h, src/intcon.h, src/ioports.cc,
+	src/ioports.h, src/p16f62x.cc, src/p16f87x.cc, src/p16x6x.cc,
+	src/p16x6x.h, src/p16x7x.cc, src/p16x7x.h, src/p16x8x.cc,
+	src/p16x8x.h, src/pic-processor.cc, src/pic-processor.h,
+	src/registers.cc, src/registers.h, src/stimuli.cc, src/stimuli.h,
+	src/tmr0.cc, src/tmr0.h, src/uart.cc, src/uart.h:
+
+	I/O Port Redesign: These files have been updated to accommodate a
+	new I/O Port design. Currently the design applies only to the
+	mid-range PIC family, but will be propogated to the 12 and 16 bit
+	cores too.
+
+	In summary, the I/O pins are now managed with I/O pin modules. A
+	port register maintains an array of these modules. In the old
+	design, the I/O pins were managed directly by the Port
+	registers. New classes have been designed to allow multiple signal
+	sources, signal controls, and signal sinks for I/O pins. These new
+	objects can be added at will and thus allow the exact behavior of
+	an I/O pin be tailored to a specific processor (and even changed
+	dynamically). Thus a base class in the processor heirarchy can
+	instantiate a register object, and the derived processors populate
+	it with custom functionality.
+
+	* cli/cmd_break.cc: documentation clean up
+	* modules/usart.cc, modules/usart.h: tinkering - 
+	* regression/logic_test/Makefile,
+	regression/logic_test/logic_test.asm: Incorporates an un-released
+	gpasm feature of the .direct macro. This feature allows multiple
+	strings to be passed to gpasm.
+	* regression/p16f84/p16f84.asm: Bug fix in PORTB pullup test
+
+
 2005-07-15 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui/gui_watch.cc, gui/gui_watch.h: Fixed problem with
 	register symbol names not displaying in the Watch

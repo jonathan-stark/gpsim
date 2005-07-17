@@ -59,146 +59,101 @@ Boston, MA 02111-1307, USA.  */
 //
 //-------------------------------------------------------------------
 
-class SignalSource
+class PicSignalSource : public SignalSource
 {
 public:
-  //SignalSource();
-  virtual unsigned int get()
-  {
-    return value.data & valid_bits;
-  }
-private:
-  unsigned int valid_bits;
-  RegisterValue value;
-};
-
-class SignalSink
-{
-};
-
-class SignalControl
-{
-};
-
-/// PortModule
-///
-///    Data
-///    Select  ======+
-///                +-|-+  Outgoing
-///    Source1 ===>| M |  data
-///    Source2 ===>| U |=============+    
-///    SourceN ===>| X |             |    
-///                +---+             |    +-------+
-///    Control                       +===>| IOPIN |
-///    Select  ======+                    |       |
-///                +-|-+  I/O Pin         |       |
-///   Control1 ===>| M |  Direction       |       |<======> Physical
-///   Control2 ===>| U |=================>|       |         Interface
-///   ControlN ===>| X |                  |       |
-///                +---+                  |       |
-///    Sink Decode                   +===<|       |
-///    Select  ======+               |    +-------+
-///                +-|-+   Incoming  |
-///    Sink1  <====| D |   data      |
-///    Sink2  <====| E |<============|
-///    SinkN  <====| C |
-///                +---+
-///
-/// The PortModule models a Processor's I/O Ports. The schematic illustrates
-/// the abstract description of the PortModule. Its job is to merge together
-/// all of the Processor's peripherals that can control the processor's pins.
-/// For example, a UART peripheral may be shared with a general purpose I/O
-/// pin. The UART may have a transmit and receive pin and select whether it's
-/// in control of the I/O pins. For the transmit pin, there are two data sources
-/// one of which can get mapped onto the outgoing data bus. Similarly, there
-/// are two control sources. The muxes select which one of these is directed
-/// to the I/O pin. Similarly, if an I/O pin's state changes (either because
-/// the out going data is driving it or some other device is connected to the
-/// I/O pin's physical interface) then the incoming data can be directed by
-/// the Decoder.
-///
-/// Each one of the sources can have one or more bits associated with it. So
-/// all of the signal paths in the schematic can be assumed to be busses. The
-/// PortModule handles most of these paths in parallel. However, the I/O pins
-/// are bit-specific.
-///
-
-class PortModule
-{
-public:
-
-  PortModule();
-
-  /// Whenever anything about the port changes, update() will refresh the
-  /// state.
-  void update();
-
-  /// The SignalSource list is a list of all sources that can drive data
-  list <SignalSource *> sources;
-
-  /// The SignalSink list is a list of all sinks that can receive data
-  list <SignalSink *> sinks;
-
-  /// The SignalControl list is a list of all objects that control the output
-  /// data direction.
-  list <SignalControl *> controls;
-
-
-  void add(SignalSource *);
-  void add(SignalSink *);
-  void add(SignalControl *);
-
-  /// The iopins are the physical pins associated with the port.
-  IOPIN **iopins;
-
-private:
-  unsigned int mSourceState;
-  unsigned int mSinkState;
-  unsigned int mControlState;
-
-  unsigned int mNumIopins;
-  unsigned int mStimulusMask;
-};
-
-class PortRegister : public Register
-{
-public:
-  PortRegister()
-    : mPortModule(0)
+  PicSignalSource(PortRegister *_reg, unsigned int bitPosition)
+    : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
-  virtual void put_value(unsigned int new_value)
+  bool getState()
   {
-    unsigned int diff = mEnableMask & (new_value ^ value.data);
-    if(diff) {
-      value.data ^= diff;
-      update();
+    return m_register ? ((m_register->getDriving()&m_bitMask)!=0) : false;
+  }
+private:
+  PortRegister *m_register;
+  unsigned int  m_bitMask;
+};
+
+
+class PortSink : public SignalSink
+{
+public:
+  PortSink(PortRegister *portReg, unsigned int iobit);
+  virtual void setSinkState(bool);
+private:
+  PortRegister *m_PortRegister;
+  unsigned int  m_iobit;
+};
+
+PortSink::PortSink(PortRegister *portReg, unsigned int iobit)
+  : m_PortRegister(portReg), m_iobit(iobit)
+{
+  assert (m_PortRegister);
+}
+
+void PortSink::setSinkState(bool bNewSinkState)
+{
+  m_PortRegister->setbit(m_iobit,bNewSinkState);
+}
+//------------------------------------------------------------------------
+PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
+  : Register(),
+    PortModule(numIopins),
+    mEnableMask(_mask)
+{
+
+  for (unsigned int i=0, m=1; i<numIopins; i++, m<<= 1)
+    if (mEnableMask & m) {
+      operator[](i).setDefaultSource(new PicSignalSource(this, i));
+      addSink(new PortSink(this, i), i);
     }
+      
+}
+void PortRegister::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.data);
+
+  unsigned int diff = mEnableMask & (new_value ^ value.data);
+  if(diff) {
+    drivingValue = new_value & mEnableMask;
+    value.data = drivingValue;
+    // If no stimuli are connected to the Port pins, then the driving
+    // value and the driven value are the same. If there are external
+    // stimuli (or perhaps internal peripherals) overdriving or overriding
+    // this port, then the call to updatePort() will update 'drivenValue'
+    // to its proper value.
+    drivenValue = drivingValue;
+    updatePort();
   }
-  virtual unsigned int get_value(unsigned int new_value)
-  {
-    update();
-    return value.data;
+}
+void PortRegister::setbit(unsigned int bit_number, bool new_value)
+{
+  if(bit_number <= bit_mask) {
+    trace.raw(write_trace.get() | value.data);
+    if (new_value)
+      drivenValue |=  (1<<bit_number);
+    else
+      drivenValue &= ~(1<<bit_number);
+    value.data = drivenValue;
   }
 
-  void setEnableMask(unsigned int nEnableMask)
-  {
-    mEnableMask = nEnableMask;
-  }
-  unsigned int getEnableMask()
-  {
-    return mEnableMask;
-  }
-  void update()
-  {
-    if(mPortModule)
-      mPortModule->update();
-  }
-private:
-  unsigned int mEnableMask;
-  PortModule *mPortModule;
-};
+}
 
+unsigned int PortRegister::get(unsigned int new_value)
+{
+  trace.raw(read_trace.get() | drivenValue);
+
+  return drivenValue;
+}
+void PortRegister::putDrive(unsigned int new_value)
+{
+  put(new_value);
+}
+unsigned int PortRegister::getDriving()
+{
+  return drivingValue;
+}
 class PortLatch : public Register
 {
 public:
@@ -206,106 +161,330 @@ public:
 private:
   PortRegister *port_register;
 };
-
-/// MuxSource - A single input to a Multiplexer.
-///  A MuxSource is a pure virtual base class designed to be 
-///  one of the base classes in in a multiple inheritance 
-///  class design.
-///
-class MuxSource
-{
-public:
-  virtual unsigned int mGet()=0;
-private:
-};
-
-/// MuxControl - The control for a 2:1 multiplexer.
-class MuxControl
-{
-public:
-  virtual bool bGet()=0;
-private:
-};
-
-/// Mux2_1 - A 2:1 multiplexer
-
-class Mux2_1
-{
-public:
-  Mux2_1(MuxSource *srcA, MuxSource *srcB, MuxControl *cont, unsigned int m);
-  unsigned int get();
-private:
-  MuxSource *a;
-  MuxSource *b;
-  MuxControl *control;
-  unsigned int valid_bits;
-};
-
-
-class DecoderSink
-{
-public:
-  virtual void dPut(unsigned int)=0;
-};
-class DecoderControl
-{
-public:
-  virtual bool bDecControl()=0;
-};
-class Decoder1_2
-{
-public:
-  Decoder1_2();
-  void put(unsigned int);
-private:
-  DecoderSink *a;
-  DecoderSink *b;
-  DecoderControl *control;
-  unsigned int valid_bits;
-};
-
 //========================================================================
 //========================================================================
 
-PortModule::PortModule()
-  : iopins(0)
+PortModule::PortModule(int numIopins)
+  : mNumIopins(numIopins)
 {
+
+  iopins = new PinModule *[mNumIopins];
+  for (int i=0; i<mNumIopins; i++)
+    iopins[i] = new PinModule(this,i);
+
 }
-
-void PortModule::update()
+PortModule::~PortModule()
 {
-  // Update the 'control' state
-  unsigned int oldControlState = mControlState;
-  mControlState = 0;
+  for (int i=0; i<mNumIopins; i++)
+    delete iopins[i];
 
-  list <SignalControl *>::iterator cti;
-  for(cti = controls.begin(); cti != controls.end(); ++cti)
-    ;
+  delete iopins;
 }
+static PinModule AnInvalidPinModule;
 
+PinModule &PortModule::operator [] (unsigned int iPinNumber)
+{
+  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+    return *iopins[iPinNumber];
 
-//-------------------------------------------------------------------
-Mux2_1::Mux2_1(MuxSource *srcA, MuxSource *srcB, MuxControl *cont, unsigned int m)
-  : a(srcA), b(srcB), control(cont), valid_bits(m)
-{
-}
-//-------------------------------------------------------------------
-// Mux2_1::get()
-//
-// The mux output is driven from one of 2 inputs
-//-------------------------------------------------------------------
-unsigned int Mux2_1::get()
-{
-  return (control->bGet() ? a->mGet() : b->mGet()) & valid_bits;
+  // error...
+  return AnInvalidPinModule;
 }
 
 
+void PortModule::updatePort()
+{
+  for (int i=0; i<mNumIopins; i++) 
+    if (iopins[i])
+      iopins[i]->updatePinModule();
+}
+void PortModule::updatePin(int iPinNumber)
+{
+  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+    iopins[iPinNumber]->updatePinModule();
+}
 
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-// Experiment:
+SignalSink *PortModule::addSink(SignalSink *new_sink, unsigned int iPinNumber)
+{
+  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+    iopins[iPinNumber]->addSink(new_sink);
+  return new_sink;
+}
 
-//class PortARegister : public Register , public 
+IOPIN *PortModule::addPin(IOPIN *new_pin, unsigned int iPinNumber)
+{
+  if (iPinNumber < mNumIopins)
+    iopins[iPinNumber]->setPin(new_pin);
+  return new_pin;
+}
+
+//------------------------------------------------------------------------
+// PinModule
+
+PinModule::PinModule()
+  : PinMonitor(), m_pin(0),m_port(0), m_pinNumber(0),
+    m_activeControl(0),m_defaultControl(0),
+    m_activeSource(0),m_defaultSource(0)
+{
+
+}
+
+PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
+  : PinMonitor(),
+    m_bLastControlState(true), m_bLastSinkState(false), m_bLastSourceState(false),
+    m_activeControl(0),m_defaultControl(0),
+    m_activeSource(0),m_defaultSource(0),
+    m_pin(_pin),m_port(_port), m_pinNumber(_pinNumber)
+{
+  setPin(m_pin);
+}
+
+void PinModule::setPin(IOPIN *new_pin)
+{
+  // Replace our pin only if this one is valid and we don't have one already.
+  if (!m_pin && new_pin) {
+    m_pin = new_pin;
+    m_pin->setMonitor(this);
+  }
+
+}
+void PinModule::updatePinModule()
+{
+  if (!m_pin)
+    return;
+
+  bool bStateChange=false;
+  bool bCurrentControlState = getControlState();
+
+  if (bCurrentControlState != m_bLastControlState) {
+    //printf("PinModule::%s - pin:%d newControlState=%s\n",__FUNCTION__,m_pinNumber,(bCurrentControlState?"true":"false"));
+    m_bLastControlState = bCurrentControlState;
+    m_pin->update_direction(bCurrentControlState ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT);
+    bStateChange = true;
+  }
+
+  bool bCurrentSourceState = getSourceState();
+
+  if (bCurrentSourceState != m_bLastSourceState) {
+    //printf("PinModule::%s - pin:%d newSourceState=%s\n",__FUNCTION__,m_pinNumber,(bCurrentSourceState?"true":"false"));
+    m_bLastSourceState = bCurrentSourceState;
+    m_pin->setDrivingState(bCurrentSourceState);
+    bStateChange = true;
+  }
+
+  if (bStateChange && m_pin->snode)
+    m_pin->snode->update();
+
+}
+
+void PinModule::setDefaultControl(SignalControl *newDefaultControl)
+{
+  if(!m_defaultControl && newDefaultControl) {
+    m_defaultControl = newDefaultControl;
+    setControl(m_defaultControl);
+  }
+}
+void PinModule::setControl(SignalControl *newControl)
+{
+  m_activeControl = newControl ? newControl : m_defaultControl;
+}
+
+void PinModule::setDefaultSource(SignalSource *newDefaultSource)
+{
+  if(!m_defaultSource && newDefaultSource) {
+    m_defaultSource = newDefaultSource;
+    setSource(m_defaultSource);
+  }
+}
+void PinModule::setSource(SignalSource *newSource)
+{
+  m_activeSource = newSource ? newSource : m_defaultSource;
+}
+
+void PinModule::addSink(SignalSink *new_sink)
+{
+  if(new_sink)
+    sinks.push_back(new_sink);
+}
+
+bool PinModule::getControlState()
+{
+  return m_activeControl ? m_activeControl->getState() : false;
+}
+bool PinModule::getSourceState()
+{
+  return m_activeSource ? m_activeSource->getState() : false;
+}
+
+
+
+void PinModule::setDrivenState(bool new_dstate)
+{
+  /*
+  printf("PinModule::%s pin:%d %s,%s\n",__FUNCTION__,
+	 m_pinNumber,
+	 (new_dstate?"true":"false"),
+	 (m_bLastSinkState?"true":"false")
+	 );
+  */
+  //if (m_bLastSinkState != new_dstate) {
+  m_bLastSinkState = new_dstate;
+
+  list <SignalSink *> :: iterator ssi;
+  for (ssi = sinks.begin(); ssi != sinks.end(); ++ssi)
+    (*ssi)->setSinkState(new_dstate);
+
+  //}
+}
+
+void PinModule::setDrivingState(bool new_dstate)
+{
+  //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
+}
+
+void PinModule::set_nodeVoltage(double)
+{
+  //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
+}
+void PinModule::putState(bool)
+{
+  //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
+}
+void PinModule::setDirection()
+{
+  //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
+}
+
+
+
+
+
+
+
+//------------------------------------------------------------------------
+
+PicPortRegister::PicPortRegister(const char *port_name,
+				 unsigned int numIopins, 
+				 unsigned int enableMask)
+  : PortRegister(numIopins, enableMask), m_tris(0)
+{
+  new_name(port_name);
+}
+class PicSignalControl : public SignalControl
+{
+public:
+  PicSignalControl(Register *_reg, unsigned int bitPosition)
+    : m_register(_reg), m_bitMask(1<<bitPosition)
+  {
+  }
+  bool getState()
+  {
+    return m_register ? ((m_register->get_value()&m_bitMask)!=0) : false;
+  }
+private:
+  Register *m_register;
+  unsigned int m_bitMask;
+};
+void PicPortRegister::setTris(PicTrisRegister *new_tris)
+{
+  if (!m_tris) {
+    m_tris = new_tris;
+
+    for (int i=0; i<mNumIopins; i++) {
+      operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
+    }
+
+  }
+}
+//------------------------------------------------------------------------
+
+PicTrisRegister::PicTrisRegister(PicPortRegister *_port)
+  : m_port(_port)
+{
+  if (m_port)
+    m_port->setTris(this);
+}
+void PicTrisRegister::put(unsigned int new_value)
+{
+  value.data = new_value;
+  if (m_port)
+    m_port->updatePort();
+}
+
+unsigned int PicTrisRegister::get(void)
+{
+  return value.data;
+}
+
+
+
+
+PicPortBRegister::PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask)
+  : PicPortRegister(port_name, numIopins, enableMask),
+    m_bRBPU(false),
+    m_bIntEdge(false)
+{
+}
+
+void PicPortBRegister::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.data);
+
+  unsigned int diff = mEnableMask & (new_value ^ value.data);
+  if(diff) {
+    drivingValue = new_value & mEnableMask;
+    value.data = drivingValue;
+    // If no stimuli are connected to the Port pins, then the driving
+    // value and the driven value are the same. If there are external
+    // stimuli (or perhaps internal peripherals) overdriving or overriding
+    // this port, then the call to updatePort() will update 'drivenValue'
+    // to its proper value.
+    drivenValue = drivingValue;
+    updatePort();
+  }
+
+  cpu14->intcon->set_rbif(false);
+}
+
+unsigned int PicPortBRegister::get(unsigned int new_value)
+{
+  cpu14->intcon->set_rbif(false);
+
+  return drivenValue;
+}
+void PicPortBRegister::setbit(unsigned int bit_number, bool new_value)
+{
+  unsigned int lastDrivenValue = drivenValue;
+  if (bit_number == 0 && ((drivenValue&1==1)!=m_bIntEdge) && (new_value == m_bIntEdge))
+    cpu14->intcon->set_intf(true);
+
+
+  PortRegister::setbit(bit_number, new_value);
+
+  unsigned int bitMask = (1<<bit_number) & 0xF0;
+
+  if ( (drivingValue ^ drivenValue) & m_tris->get() & bitMask )
+    cpu14->intcon->set_rbif(true);
+}
+
+void PicPortBRegister::setRBPU(bool bNewRBPU)
+{
+  m_bRBPU = !bNewRBPU;
+
+  unsigned int mask = getEnableMask();
+  for (unsigned int i=0, m=1; mask; i++, m<<= 1)
+    if (mask & m) {
+      mask ^= m;
+      operator[](i).getPin().update_pullup(m_bRBPU);
+    }
+
+}
+
+void PicPortBRegister::setIntEdge(bool bNewIntEdge)
+{
+  m_bIntEdge = bNewIntEdge;
+}
+
 
 //-------------------------------------------------------------------
 //
@@ -981,8 +1160,8 @@ void PORTB::rbpu_intedg_update(unsigned int new_configuration)
     // Update each I/O pin's pullup resistor.
     for(unsigned int i=0; i<num_iopins; i++) {
       pins[i]->update_pullup(pullup);
-      if(pins[i]->snode)
-	pins[i]->snode->update();
+      //if(pins[i]->snode)
+      //  pins[i]->snode->update();
     }
 
     // Get the new state of each I/O pin 
@@ -1031,7 +1210,7 @@ void PORTB::check_peripherals(RegisterValue oldValue)
 	if(verbose)
 	  cout << "Now setting intf\n";
 
-	cpu14->intcon->set_intf();
+	cpu14->intcon->set_intf(true);
       }
     }
 
@@ -1040,7 +1219,7 @@ void PORTB::check_peripherals(RegisterValue oldValue)
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
   if(diff & 0xf0 & tris->value.get())
-    cpu14->intcon->set_rbif();
+    cpu14->intcon->set_rbif(true);
 
 
 }
@@ -1108,7 +1287,7 @@ unsigned int PORTB_62x::get(void)
       // These two statements can be combined into an exclusive or:
 
       if( (intedg &  intedg_MASK) ^ (old_value & 1))
-	cpu14->intcon->set_intf();
+	cpu14->intcon->set_intf(true);
     }
 
 
@@ -1116,7 +1295,7 @@ unsigned int PORTB_62x::get(void)
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
   if(diff & 0xf0 & tris->value.get())
-    cpu14->intcon->set_rbif();
+    cpu14->intcon->set_rbif(true);
 
   if(ccp1con && ( diff & CCP1) )
     ccp1con->new_edge(value.get() & CCP1);
@@ -1149,7 +1328,7 @@ void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
       // These two statements can be combined into an exclusive or:
       //cout << "PORTB_62x::setbit() - bit changed states\n";
       if( (intedg &  intedg_MASK) ^ (old_value & 1))
-	cpu14->intcon->set_intf();
+	cpu14->intcon->set_intf(true);
     }
 
 
@@ -1157,7 +1336,7 @@ void PORTB_62x::setbit(unsigned int bit_number, bool new_value)
   // Note, that the interrupt on change feature only works for I/O's
   // configured as inputs.
   if(diff & 0xf0 & tris->value.get())
-    cpu14->intcon->set_rbif();
+    cpu14->intcon->set_rbif(true);
 
   if(ccp1con && ( diff & CCP1) )
     ccp1con->new_edge(value.get() & CCP1);

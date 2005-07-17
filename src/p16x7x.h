@@ -191,12 +191,6 @@ class P16C712 :  public P16C62
   void create(void);
   static Processor *construct(void);
 
-  /*
-    virtual int get_pin_count(void){return Package::get_pin_count();};
-    virtual char *get_pin_name(unsigned int pin_number) {return Package::get_pin_name(pin_number);};
-    virtual int get_pin_state(unsigned int pin_number) {return Package::get_pin_state(pin_number);};
-    virtual IOPIN *get_pin(unsigned int pin_number) {return Package::get_pin(pin_number);};
-  */
 };
 
 class P16C716 :  public P16C712
@@ -234,8 +228,6 @@ class P16C72 : public P16C62
   virtual PIR *get_pir2(void) { return (&pir2_2_reg); }
   virtual PIR_SET *get_pir_set(void) { return (&pir_set_2_def); }
 
-  //virtual unsigned int program_memory_size(void) const { return 0x800; };
-
 
   P16C72(void);
   void create(void);
@@ -265,9 +257,6 @@ class P16C73 : public P16C63
   virtual PIR *get_pir2(void) { return (&pir2_2_reg); }
   virtual PIR_SET *get_pir_set(void) { return (&pir_set_2_def); }
 
-  //virtual unsigned int program_memory_size(void) const { return 0x800; };
-
-
   P16C73(void);
   void create(void);
   static Processor *construct(void);
@@ -290,8 +279,6 @@ class P16C74 : public P16C65 // Not a typo, a 'c74 is more like a 'c65 then a 'c
   ADCON0_withccp adcon0;
   ADCON1 adcon1;
   ADRES  adres;
-
-  //const int PROGRAM_MEMORY_SIZE = 0x800;
 
   virtual PROCESSOR_TYPE isa(void){return _P16C74_;};
   virtual void create_symbols(void);

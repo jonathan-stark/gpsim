@@ -13,4 +13,4 @@ $(OUTPUT) : $(OBJECTS) $(SCRIPT)
 clean:
 	rm -f *~ *.o *.lst *.map *.hex
 
-assertions.o : logic_test.asm
+logic_test.o : logic_test.asm

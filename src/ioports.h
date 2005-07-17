@@ -24,6 +24,8 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "registers.h"
 #include "breakpoints.h"
+#include "stimuli.h"
+#include <vector>
 
 class IOPORT_TRIS;
 class IOPORT_LATCH;
@@ -33,6 +35,253 @@ class IOPIN;
 class stimulus;
 class Stimulus_Node;
 class TMRL;
+
+
+/************************************************************************/
+/*                                                                      */
+/*       E X P E R I M E N T A L    C O D E                             */
+/*                                                                      */
+/* The following section is experimenting with a better way to handle   */
+/* I/O ports                                                            */
+/*                                                                      */
+/*                                                                      */
+/*                                                                      */
+/************************************************************************/
+
+
+/// PortPinModule
+///
+/// Here's a general description of gpsim I/O pin design:
+///
+///    Data
+///    Select  ======+
+///                +-|-+  Outgoing
+///    Source1 ===>| M |  data
+///    Source2 ===>| U |=============+    
+///    SourceN ===>| X |             |    
+///                +---+             |    +-------+
+///    Control                       +===>| IOPIN |
+///    Select  ======+                    |       |
+///                +-|-+  I/O Pin         |       |
+///   Control1 ===>| M |  Direction       |       |<======> Physical
+///   Control2 ===>| U |=================>|       |         Interface
+///   ControlN ===>| X |                  |       |
+///                +---+                  |       |
+///    Sink Decode                   +===<|       |
+///    Select  ======+               |    +-------+
+///                +-|-+   Incoming  |
+///    Sink1  <====| D |   data      |
+///    Sink2  <====| E |<============|
+///    SinkN  <====| C |
+///                +---+
+///
+/// The PortPinModule models a Processor's I/O Pin. The schematic illustrates
+/// the abstract description of the PortPinModule. Its job is to merge together
+/// all of the Processor's peripherals that can control a processor's pin.
+/// For example, a UART peripheral may be shared with a general purpose I/O
+/// pin. The UART may have a transmit and receive pin and select whether it's
+/// in control of the I/O pins. The uart transmit pin and the port's I/O pin
+/// can both act as a source for the physical interface. The PortPinModule
+/// arbitrates between the two. Similarly, the UART receive pin can be multiplexed
+/// with a register pin. In this case, the PortPinModule will route signal
+/// changes to both devices. Finally, a peripheral like the '622's comparators
+/// may overide the output control. The PortPinModule again arbitrates.
+///
+
+/// SignalSource - A pure virtual class that defines the interface for 
+/// a signal source. The I/O Pin Modules will query the source's state
+/// via this class.
+
+class SignalSource
+{
+public:
+  virtual bool getState()=0;
+};
+
+/// SignalControl  - A pure virtual class that defines the interface for 
+/// a signal control. The I/O Pin Modules will query the source's state
+/// via SignalControl. The control is usually used to control the I/O pin 
+/// direction (i.e. whether it's an input or output...)
+
+class SignalControl
+{
+public:
+  virtual bool getState()=0;
+};
+
+/// SignalSink - A pure virtual class that allows signals driven by external
+/// stimuli be route to one or more objects monitoring them (e.g. one
+/// sink may be the register associtated with the port while another
+/// may be a peripheral)
+
+class SignalSink
+{
+public:
+  virtual void setSinkState(bool)=0;
+};
+;
+class PinModule;
+
+
+/// PortModule - Manages all of the I/O pins associated with a single
+/// port. The PortModule supplies the interface to the I/O pin's.
+
+class PortModule
+{
+public:
+
+  PortModule(int numIopins);
+  ~PortModule();
+
+  void updatePort();
+  void updatePin(int iPinNumber);
+
+  SignalSource  *addSource(SignalSource *, unsigned int iPinNumber);
+  SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
+  SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
+  IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
+
+  PinModule &operator [] (unsigned int pin_number);
+
+protected:
+  unsigned int mNumIopins;
+private:
+  PinModule  **iopins;
+};
+
+
+/// PinModule - manages the interface to an I/O pin. The parent class
+/// 'PinMonitor', allows the PinModule to be registered with the I/O
+/// pin. In other words, when the I/O pin changes state, the PinModule
+/// will be notified.
+
+class PinModule : public PinMonitor
+{
+public:
+  PinModule();
+  PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
+  void updatePinModule();
+
+  void setPin(IOPIN *);
+  void setDefaultSource(SignalSource *);
+  void setSource(SignalSource *);
+  void setDefaultControl(SignalControl *);
+  void setControl(SignalControl *);
+  void addSink(SignalSink *);
+
+  bool getControlState();
+  bool getSourceState();
+
+  IOPIN &getPin() { return *m_pin;}
+  virtual void setDrivenState(bool);
+  virtual void setDrivingState(bool);
+  virtual void set_nodeVoltage(double);
+  virtual void putState(bool);
+  virtual void setDirection();
+
+protected:
+  /// The SignalSink list is a list of all sinks that can receive data
+  list <SignalSink *> sinks;
+
+private:
+  bool          m_bLastControlState;
+  bool          m_bLastSinkState;
+  bool          m_bLastSourceState;
+
+  SignalSource  *m_defaultSource,  *m_activeSource;
+  SignalControl *m_defaultControl, *m_activeControl;
+
+  IOPIN        *m_pin;
+  PortModule   *m_port;
+  unsigned int  m_pinNumber;
+};
+
+class PortRegister : public Register, public PortModule
+{
+public:
+  PortRegister(unsigned int numIopins, unsigned int enableMask);
+
+  virtual REGISTER_TYPES isa() {return SFR_REGISTER;};
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get(unsigned int new_value);
+  virtual void putDrive(unsigned int new_drivingValue);
+  virtual unsigned int getDriving();
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  void setEnableMask(unsigned int nEnableMask)
+  {
+    mEnableMask = nEnableMask;
+  }
+  unsigned int getEnableMask()
+  {
+    return mEnableMask;
+  }
+protected:
+  unsigned int mEnableMask;
+  unsigned int drivingValue;
+  unsigned int drivenValue;
+};
+
+class PicTrisRegister;
+class PicPortRegister : public PortRegister
+{
+public:
+  PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+  void setTris(PicTrisRegister *new_tris);
+  Register *getTris();
+protected:
+  PicTrisRegister *m_tris;
+};
+
+class PicTrisRegister : public Register
+{
+
+public:
+
+  PicTrisRegister(PicPortRegister *);
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get();
+  
+protected:
+  PicPortRegister *m_port;
+};
+
+class PicPortBRegister : public PicPortRegister
+{
+public:
+  PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
+
+  virtual void put(unsigned int new_value);
+  virtual unsigned int get(unsigned int new_value);
+  virtual void setbit(unsigned int bit_number, bool new_value);
+  void setRBPU(bool);
+  void setIntEdge(bool);
+private:
+  enum {
+    eIntEdge = 1<<6,
+    eRBPU    = 1<<7
+  };
+  bool m_bRBPU;
+  bool m_bIntEdge;
+
+};
+
+
+
+
+/************************************************************************/
+/*                                                                      */
+/*       E X P E R I M E N T A L    C O D E   E N D                     */
+/*                                                                      */
+/*                                                                      */
+/************************************************************************/
+
+
+
+
+
+
+
+
 
 //---------------------------------------------------------
 // IOPORT - Base class for all I/O ports
