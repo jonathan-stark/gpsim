@@ -32,6 +32,30 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 #include "xref.h"
+/*
+class TMR0Sink : public SignalSink
+{
+public:
+  TMR0Sink(TMR0 *);
+  virtual void setSinkState(bool);
+private:
+  TMR0 *m_tmr0;
+  bool bLastState;
+};
+
+TMR0Sink::TMR0Sink(TMR0 *tmr0)
+  : m_tmr0(tmr0), bLastState(false)
+{ 
+}
+
+void TMR0Sink::setSinkState(bool bNewState)
+{
+  if (bLastState != bNewState) {
+    bLastState == bNewState;
+    m_tmr0->get_t0cs
+  }
+}
+*/
 
 //--------------------------------------------------
 // member functions for the TMR0 base class
@@ -44,7 +68,29 @@ TMR0::TMR0(void)
   last_cycle=0;
   state=0;      // start disabled (will change to enabled by other init code)
   prescale=1;
+  m_bLastClockedState=false;
   new_name("tmr0");
+}
+
+//------------------------------------------------------------------------
+// setSinkState
+//
+// Called when the I/O pin driving TMR0 changes states.
+
+void TMR0::setSinkState(bool bNewState)
+{
+  if (m_bLastClockedState != bNewState) {
+    m_bLastClockedState = bNewState;
+    //printf("TMR0::setSinkState:%d cs:%d se:%d\n",bNewState,get_t0cs(),get_t0se());
+    if (get_t0cs() && bNewState == get_t0se())
+      increment();
+  }
+}
+
+void TMR0::set_cpu(Processor *new_cpu, PortRegister *reg, unsigned int pin)
+{
+  cpu = new_cpu;
+  reg->addSink(this,pin);
 }
 
 void TMR0::stop(void)
@@ -114,7 +160,7 @@ unsigned int TMR0::get_prescale(void)
 
 void TMR0::increment(void)
 {
-  //  cout << "TMR0 increment because of external clock ";
+  //cout << "TMR0 increment because of external clock ";
 
   if((state & 1) == 0)
     return;
@@ -125,6 +171,7 @@ void TMR0::increment(void)
       prescale_counter = prescale;
       if(value.get() == 255)
 	{
+	  //cout << "TMR0 rollover because of external clock ";
 	  value.put(0);
 	  set_t0if();
 
@@ -285,10 +332,15 @@ void TMR0::new_prescale(void)
   }
 }
 
-unsigned int TMR0::get_t0cs(void)
+bool TMR0::get_t0cs(void)
 {
-  return cpu_pic->option_reg.get_t0cs();
+  return cpu_pic->option_reg.get_t0cs() != 0;
 }
+bool TMR0::get_t0se(void)
+{
+  return cpu_pic->option_reg.get_t0se() != 0;
+}
+
 void TMR0::set_t0if(void)
 {
   if(cpu_pic->base_isa() == _14BIT_PROCESSOR_)

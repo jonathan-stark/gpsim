@@ -44,81 +44,9 @@ Boston, MA 02111-1307, USA.  */
 
 #include "packages.h"
 
-void P16C8x::create_iopin_map(void)
+void P16X8X::create_sfr_map(void)
 {
-
-  package = new Package(18);
-  if(!package)
-    return;
-
-  // ---- This is probably going to be moved:
-  porta = new PORTA;
-  portb = new PORTB;
-
-  // ---- Complete the initialization for the I/O Ports
-
-  // Build the links between the I/O Ports and their tris registers.
-  porta->tris = &trisa;
-  trisa.port = porta;
-
-  portb->tris = &trisb;
-  trisb.port = portb;
-
-  // And give them a more meaningful name.
-  trisa.new_name("trisa");
-
-  trisb.new_name("trisb");
-
-  // Define the valid I/O pins.
-  porta->valid_iopins = 0x1f;
-  portb->valid_iopins = 0xff;
-
-  // Now Create the package and place the I/O pins
-
-
-  package->assign_pin(17, new IO_bi_directional(porta, 0));
-  package->assign_pin(18, new IO_bi_directional(porta, 1));
-  package->assign_pin(1, new IO_bi_directional(porta, 2));
-  package->assign_pin(2, new IO_bi_directional(porta, 3));
-  package->assign_pin(3, new IO_open_collector(porta, 4));
-  package->assign_pin(4, 0);
-  package->assign_pin(5, 0);
-  package->assign_pin(6, new IO_bi_directional_pu(portb, 0));
-  package->assign_pin(7, new IO_bi_directional_pu(portb, 1));
-  package->assign_pin(8, new IO_bi_directional_pu(portb, 2));
-  package->assign_pin(9, new IO_bi_directional_pu(portb, 3));
-  package->assign_pin(10, new IO_bi_directional_pu(portb, 4));
-  package->assign_pin(11, new IO_bi_directional_pu(portb, 5));
-  package->assign_pin(12, new IO_bi_directional_pu(portb, 6));
-  package->assign_pin(13, new IO_bi_directional_pu(portb, 7));
-  package->assign_pin(14, 0);
-  package->assign_pin(15, 0);
-  package->assign_pin(16, 0);
-
-
-
-}
-
-
-void P16C8x::create_sfr_map(void)
-{
- 
-  add_sfr_register(indf,   0x80);
-  add_sfr_register(indf,   0x00);
-
-  add_sfr_register(&tmr0,  0x01);
-  add_sfr_register(&option_reg,  0x81, RegisterValue(0xff,0));
-
-  add_sfr_register(pcl,    0x02, RegisterValue(0,0));
-  add_sfr_register(status, 0x03, RegisterValue(0x18,0));
-  add_sfr_register(fsr,     0x04);
-  alias_file_registers(0x02,0x04,0x80);
-
-  add_sfr_register(porta,   0x05);
-  add_sfr_register(&trisa,  0x85, RegisterValue(0x3f,0));
-
-  add_sfr_register(portb,   0x06);
-  add_sfr_register(&trisb,  0x86, RegisterValue(0xff,0));
+  Pic14Bit::create_sfr_map();
 
   add_sfr_register(get_eeprom()->get_reg_eedata(),  0x08);
   add_sfr_register(get_eeprom()->get_reg_eecon1(),  0x88, RegisterValue(0,0));
@@ -126,34 +54,56 @@ void P16C8x::create_sfr_map(void)
   add_sfr_register(get_eeprom()->get_reg_eeadr(),   0x09);
   add_sfr_register(get_eeprom()->get_reg_eecon2(),  0x89);
 
-  add_sfr_register(pclath, 0x8a, RegisterValue(0,0));
-  add_sfr_register(pclath, 0x0a, RegisterValue(0,0));
-
-  add_sfr_register(&intcon_reg, 0x8b, RegisterValue(0,0));
-  add_sfr_register(&intcon_reg, 0x0b, RegisterValue(0,0));
-
-  intcon = &intcon_reg;
-
 
 }
 
-void P16C8x::create_symbols(void)
-{
-  symbol_table.add_ioport(portb);
-  symbol_table.add_ioport(porta);
-
-}
-
-void P16C8x::set_out_of_range_pm(unsigned int address, unsigned int value)
+//-------------------------------------------------------------------
+void P16X8X::set_out_of_range_pm(unsigned int address, unsigned int value)
 {
 
   if( (address>= 0x2100) && (address < 0x2100 + get_eeprom()->get_rom_size()))
-    {
       get_eeprom()->change_rom(address - 0x2100, value);
-    }
 }
 
-void  P16C8x::create(int ram_top)
+void P16X8X::create_iopin_map(void)
+{
+
+  package = new Package(18);
+  if(!package)
+    return;
+
+  // Now Create the package and place the I/O pins
+
+  package->assign_pin(17, m_porta->addPin(new IO_bi_directional("porta0"),0));
+  package->assign_pin(18, m_porta->addPin(new IO_bi_directional("porta1"),1));
+  package->assign_pin( 1, m_porta->addPin(new IO_bi_directional("porta2"),2));
+  package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta3"),3));
+  package->assign_pin( 3, m_porta->addPin(new IO_open_collector("porta4"),4));
+
+  //package->assign_pin(17, new IO_bi_directional(porta, 0));
+  //package->assign_pin(18, new IO_bi_directional(porta, 1));
+  //package->assign_pin(1, new IO_bi_directional(porta, 2));
+  //package->assign_pin(2, new IO_bi_directional(porta, 3));
+  //package->assign_pin(3, new IO_open_collector(porta, 4));
+  package->assign_pin( 4, 0);
+  package->assign_pin( 5, 0);
+  package->assign_pin( 6, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
+  package->assign_pin( 7, m_portb->addPin(new IO_bi_directional_pu("portb1"),1));
+  package->assign_pin( 8, m_portb->addPin(new IO_bi_directional_pu("portb2"),2));
+  package->assign_pin( 9, m_portb->addPin(new IO_bi_directional_pu("portb3"),3));
+  package->assign_pin(10, m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
+  package->assign_pin(11, m_portb->addPin(new IO_bi_directional_pu("portb5"),5));
+  package->assign_pin(12, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
+  package->assign_pin(13, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
+  package->assign_pin(14, 0);
+  package->assign_pin(15, 0);
+  package->assign_pin(16, 0);
+}
+
+
+
+
+void  P16X8X::create(int ram_top)
 {
   EEPROM *e;
   create_iopin_map();
@@ -164,14 +114,12 @@ void  P16C8x::create(int ram_top)
   e->set_cpu(this);
   e->initialize(EEPROM_SIZE);
 
-  //ema.set_cpu(this);
-  //ema.set_Registers(e->rom, EEPROM_SIZE);
   e->set_intcon(&intcon_reg);
 
   set_eeprom(e);
 
   add_file_registers(0x0c, ram_top, 0x80);
-  P16C8x::create_sfr_map();
+  P16X8X::create_sfr_map();
 
 }
 
@@ -185,7 +133,7 @@ Processor * P16C84::construct(void)
 
   P16C84 *p = new P16C84;
 
-  p->P16C8x::create(0x2f);
+  p->P16X8X::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
   p->new_name("p16c84");
@@ -212,7 +160,7 @@ Processor * P16F84::construct(void)
 
   P16F84 *p = new P16F84;
 
-  p->P16C8x::create(0x4f);
+  p->P16X8X::create(0x4f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
   p->new_name("p16f84");
@@ -241,7 +189,7 @@ Processor * P16F83::construct(void)
 
   P16F83 *p = new P16F83;
 
-  p->P16C8x::create(0x2f);
+  p->P16X8X::create(0x2f);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
   p->new_name("p16f83");

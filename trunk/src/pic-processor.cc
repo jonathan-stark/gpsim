@@ -735,8 +735,8 @@ void pic_processor::create (void)
 // status or tmr0 registers) then a pointer to that register will be
 // placed in the file register map. 
 
-void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
-				      RegisterValue por_value, char *new_name)
+void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
+				     RegisterValue por_value, const char *new_name)
 {
 
   reg->set_cpu(this);
@@ -754,7 +754,6 @@ void pic_processor::add_sfr_register(sfr_register *reg, unsigned int addr,
 
   reg->value       = por_value;
   reg->por_value   = por_value;
-  reg->wdtr_value  = por_value;
   reg->initialize();
 }
 

@@ -815,6 +815,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   ZthFloating = 1e6;
 
   snode = 0;
+  m_monitor=0;
 
   if(iop) {
     iop->attach_iopin(this,b);
@@ -860,8 +861,8 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   symbol_table.add_stimulus(this);
 }
 
-IOPIN::IOPIN(void)
-  : stimulus()
+IOPIN::IOPIN(const char *_name)
+  : stimulus(_name)
 {
   if(verbose)
     cout << "IOPIN default constructor\n";
@@ -877,9 +878,16 @@ IOPIN::IOPIN(void)
   ZthWeak = 1e3;
   ZthFloating = 1e6;
   snode = 0;
+  m_monitor=0;
 
   add_stimulus(this);
+  symbol_table.add_stimulus(this);
+}
 
+void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
+{
+  if (!m_monitor && new_pinMonitor)
+    m_monitor = new_pinMonitor;
 }
 
 void IOPIN::attach_to_port(IOPORT *i, unsigned int b)
@@ -961,7 +969,8 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
     // The voltage is between the low and high thresholds,
     // so do nothing
   }
-
+  if (m_monitor)
+    m_monitor->set_nodeVoltage(nodeVoltage);
 }
 
 //------------------------------------------------------------
@@ -992,6 +1001,9 @@ void IOPIN::putState(bool new_state)
 	port->setbit(iobit, new_state);
     }
   }
+  if(m_monitor)
+    m_monitor->putState(new_state);
+
 }
 
 //------------------------------------------------------------
@@ -1003,6 +1015,9 @@ bool IOPIN::getState()
 void IOPIN::setDrivingState(bool new_state)
 { 
   bDrivingState = new_state;
+
+  if(m_monitor)
+    m_monitor->setDrivingState(bDrivingState);
 
   if(verbose & 1)
     cout << name()<< " setDrivingState= " 
@@ -1027,7 +1042,6 @@ bool IOPIN::getDrivenState()
 void IOPIN::setDrivenState(bool new_state)
 {
   bDrivenState = new_state;
-  //setDrivingState(new_state);
 
   if(verbose & 1)
     cout << name()<< " setDrivenState= " 
@@ -1037,6 +1051,8 @@ void IOPIN::setDrivenState(bool new_state)
   if(port)
     port->setbit(iobit, new_state);
 
+  if(m_monitor)
+    m_monitor->setDrivenState(bDrivenState);
 }
 
 
@@ -1096,7 +1112,8 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_n
 
 }
 
-IO_bi_directional::IO_bi_directional(void)
+IO_bi_directional::IO_bi_directional(const char *_name)
+  : IOPIN(_name)
 {
 
   // Thevenin equivalent while configured as an output 
@@ -1206,9 +1223,28 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
   bPullUp = false;
 }
 
+IO_bi_directional_pu::IO_bi_directional_pu(const char *_name)
+  : IO_bi_directional(_name)
+{
+  Vpullup = Vth;
+  Zpullup = 10e3;
+  bPullUp = false;
+}
+
 IO_bi_directional_pu::~IO_bi_directional_pu(void)
 {
 
+}
+
+void IO_bi_directional_pu::update_pullup(bool new_state)
+{
+  if (bPullUp != new_state) {
+    bPullUp = new_state;
+    if (snode)
+      snode->update();
+    else
+      setDrivenState(bPullUp);
+  }
 }
 
 double IO_bi_directional_pu::get_Zth()
@@ -1297,7 +1333,10 @@ IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
 				     const char *opt_name, Register **_iopp)
   : IO_bi_directional_pu(i,b,opt_name,_iopp)
 {
-
+}
+IO_open_collector::IO_open_collector(const char *_name)
+  : IO_bi_directional_pu(_name)
+{
 }
 
 

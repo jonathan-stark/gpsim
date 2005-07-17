@@ -275,6 +275,21 @@ protected:
     initial_state;
 };
 
+// The PinMonitor class allows other objects to be notified whenever
+// a Pin changes states.
+// (Note: In older versions of gpsim, iopins notified the Port registers 
+// in which they were contained by direcly calling the register setbit() 
+// method.)
+class PinMonitor
+{
+public:
+  virtual void setDrivenState(bool)=0;
+  virtual void setDrivingState(bool)=0;
+  virtual void set_nodeVoltage(double)=0;
+  virtual void putState(bool)=0;
+  virtual void setDirection()=0;
+};
+
 class IOPIN : public stimulus
 {
  public:
@@ -307,9 +322,11 @@ class IOPIN : public stimulus
   double ZthWeak;
   double ZthFloating;
 
-  IOPIN(void);
+  IOPIN(const char *n=0);
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
   ~IOPIN();
+
+  void setMonitor(PinMonitor *);
 
   void attach_to_port(IOPORT *i, unsigned int b);
   void disconnect_from_port();
@@ -340,6 +357,7 @@ class IOPIN : public stimulus
 protected:
   bool bDrivenState;         // 0/1 digitization of the state we're being driven to
 
+  PinMonitor *m_monitor;
 };
 
 class IO_bi_directional : public IOPIN
@@ -355,7 +373,7 @@ public:
   double VthIn;
 
 
-  IO_bi_directional(void);
+  IO_bi_directional(const char *n=0);
   IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
 
   virtual double get_Zth();
@@ -375,7 +393,7 @@ public:
 class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
-
+  IO_bi_directional_pu(const char *n=0);
   IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
   ~IO_bi_directional_pu();
   virtual double get_Vth();
@@ -387,7 +405,7 @@ public:
   virtual double get_Vpullup() { return Vpullup; }
 
   virtual char getBitChar();
-  virtual void update_pullup(bool new_state) { bPullUp = new_state; }
+  virtual void update_pullup(bool new_state);
 protected:
   bool bPullUp;    // True when pullup is enable
   double Zpullup;  // resistance of the pullup
@@ -398,7 +416,7 @@ protected:
 class IO_open_collector : public IO_bi_directional_pu
 {
 public:
-
+  IO_open_collector(const char *n=0);
   IO_open_collector(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
 
   virtual double get_Vth();

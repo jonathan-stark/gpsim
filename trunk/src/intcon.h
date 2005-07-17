@@ -70,15 +70,21 @@ enum
       put(value.get());
     }
 
-  inline void set_rbif(void)
-    {
+  inline void set_rbif(bool b)
+  {
+    if (b)
       put(get() | RBIF);
-    }
+    else
+      put(get() & ~RBIF);
+  }
 
-  inline void set_intf(void)
-    {
+  inline void set_intf(bool b)
+  {
+    if (b)
       put(get() | INTF);
-    }
+    else
+      put(get() & ~INTF);
+ }
 
   inline void set_t0if(void)
     {

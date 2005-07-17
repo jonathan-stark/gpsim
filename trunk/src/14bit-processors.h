@@ -48,11 +48,9 @@ public:
 
   INTCON       *intcon;
 
-  virtual void create_symbols(void);
-//  virtual void load_hex(char *hex_file);
   void interrupt(void);
   virtual void por(void);
-  virtual void create(void);// {return;};
+  virtual void create(void);
   virtual PROCESSOR_TYPE isa(void){return _14BIT_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _14BIT_PROCESSOR_;};
   virtual instruction * disasm (unsigned int address, unsigned int inst)
@@ -64,7 +62,9 @@ public:
   // get information about the derived classes. NOTE, the values returned here
   // will cause errors if they are used -- the derived classes must define their
   // parameters appropriately.
-  virtual void create_sfr_map(void) { return;};
+  virtual void create_sfr_map(void)=0;
+  virtual void option_new_bits_6_7(unsigned int)=0;
+  virtual void create_symbols(void)=0;
 
   // Return the portion of pclath that is used during branching instructions
   virtual unsigned int get_pclath_branching_jump(void)
@@ -83,15 +83,14 @@ public:
       return ( this->fsr->value.get() );
     }
 
-  virtual void option_new_bits_6_7(unsigned int);
 
   virtual unsigned int eeprom_get_size(void) {return 0;};
   virtual unsigned int eeprom_get_value(unsigned int address) {return 0;};
   virtual void eeprom_put_value(unsigned int value,
 				unsigned int address)
-    {return;};
+    {return;}
 
-  virtual unsigned int program_memory_size(void) const {return 0;};
+  virtual unsigned int program_memory_size(void) const = 0;
 
   static pic_processor *construct(void);
   _14bit_processor(void);
@@ -120,34 +119,27 @@ public:
  *                              |->P16CR84
  *
  ***************************************************************************/
-
-class P16C8x : public  _14bit_processor  //, public _14bit_18pins
+class PortBSink;
+class Pic14Bit : public  _14bit_processor
 {
 public:
 
+  Pic14Bit();
+
+
   INTCON       intcon_reg;
-  PIC_IOPORT   *porta;
-  IOPORT_TRIS  trisa;
 
-  PIC_IOPORT   *portb;
-  IOPORT_TRIS  trisb;
+  PicPortRegister  *m_porta;
+  PicTrisRegister  *m_trisa;
 
+  PicPortBRegister *m_portb;
+  PicTrisRegister  *m_trisb;
+  PortBSink        *m_portbSink;
 
-  virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
-
-  virtual PROCESSOR_TYPE isa(void){return _P16C84_;};
+  virtual PROCESSOR_TYPE isa(void){return _14BIT_PROCESSOR_;};
   virtual void create_symbols(void);
-
-  virtual unsigned int program_memory_size(void) { return 0; };
-
   virtual void create_sfr_map(void);
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-  virtual void create_iopin_map(void);
-  virtual void create(int ram_top);
-
+  virtual void option_new_bits_6_7(unsigned int bits);
 };
 
 

@@ -27,34 +27,30 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
 
+#define DEBUG_UART 1
+
 //-----------------------------------------------------------
 _RCSTA::_RCSTA(void)
 {
-  //cout << "_RCSTA constructor\n";
 }
 
 //-----------------------------------------------------------
 _TXSTA::_TXSTA(void)
 {
-  //cout << "_TXSTA constructor\n";
 }
 
 //-----------------------------------------------------------
 _RCREG::_RCREG(void)
 {
-  //cout << "_RCREG constructor\n";
 }
 
 _TXREG::_TXREG(void)
 {
-  //cout << "_TXREG constructor\n";
-  new_name("txhello");
 }
 
 
 _SPBRG::_SPBRG(void)
 {
-  //cout << "_SPBRG constructor\n";
 }
 
 //-----------------------------------------------------------
@@ -67,7 +63,7 @@ void _TXREG::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value & 0xff);
 
-  if(verbose)
+  if(DEBUG_UART)
     cout << "txreg just got a new value\n";
 
   // The transmit register has data,
@@ -118,7 +114,7 @@ void _TXSTA::put(unsigned int new_value)
 
   value.put((new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT));
 
-  if(verbose)
+  if(DEBUG_UART)
     cout << "TXSTA::put 0x" << value.get() << '\n';
 
 
@@ -135,9 +131,6 @@ void _TXSTA::put(unsigned int new_value)
     if(value.get() & TXEN) {
       cout << "TXSTA - enabling transmitter\n";
       if(txreg) {
-	cout << " TXSTA - does have a txreg\n";
-	//txreg->empty();
-
 	if(txreg->is_empty()) {
 	  txreg->empty();
 	} else {
@@ -154,7 +147,7 @@ void _TXSTA::put(unsigned int new_value)
 //
 void _TXSTA::stop_transmitting(void)
 {
-  if(verbose)
+  if(DEBUG_UART)
     cout << "stopping a USART transmission\n";
 
   bit_count = 0;
@@ -183,7 +176,7 @@ void _TXSTA::stop_transmitting(void)
 
 void _TXSTA::start_transmitting(void)
 {
-  if(verbose)
+  if(DEBUG_UART)
     cout << "starting a USART transmission\n";
 
   // Build the serial byte that's about to be transmitted.
@@ -256,8 +249,10 @@ void _TXSTA::transmit_a_bit(void)
 
   if(bit_count)
     {
-      if(verbose)
-        cout << "Transmit bit #" << bit_count << ": " << (tsr&1) << '\n';
+      if(DEBUG_UART)
+        cout << "Transmit bit #" << bit_count << ": " << (tsr&1) 
+	     << " time:" << get_cycles().value << endl;
+
       if(txpin)
 	txpin->putState((tsr&1) ? true : false);
 
@@ -272,7 +267,7 @@ void _TXSTA::transmit_a_bit(void)
 void _TXSTA::callback(void)
 {
   if(verbose)
-    cout << "TXSTA callback " << (get_cycles().value) << '\n';
+    cout << "TXSTA callback - time:" << (get_cycles().value) << '\n';
 
   transmit_a_bit();
 
@@ -428,7 +423,12 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  // cout << "receive_a_bit state " << state << "bit " << bit << endl;
+  if (DEBUG_UART)
+    cout << "receive_a_bit state " << state 
+	 << " bit:" << bit 
+	 << " time:0x"<<hex << get_cycles().value
+	 << endl;
+
   if( state == RCSTA_MAYBE_START) {
     if (bit)
       state = RCSTA_WAITING_FOR_START;
@@ -450,7 +450,8 @@ void _RCSTA::receive_a_bit(unsigned int bit)
       // copy the rsr to the fifo
       if(rcreg)
         rcreg->push( rsr & 0xff);
-       //cout << "_RCSTA::receive_a_bit received 0x" << (rsr & 0xff) << endl;
+      if(DEBUG_UART)
+        cout << "_RCSTA::receive_a_bit received 0x" << hex <<(rsr & 0xff) << endl;
 
     } else {
       //not stop bit; discard the data and go back receiving
@@ -516,8 +517,8 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 }
 void _RCSTA::receive_start_bit(void)
 {
-
-  //cout << "USART received a start bit\n";
+  if (DEBUG_UART)
+   cout << "USART received a start bit\n";
 
   if((value.get() & (CREN | SREN)) == 0) {
     cout << "  but not enabled\n";
@@ -537,7 +538,8 @@ void _RCSTA::receive_start_bit(void)
 void _RCSTA::callback(void)
 {
 
-  //cout << "RCSTA callback " << (cycles.value) << '\n';
+  if (DEBUG_UART)
+    cout << "RCSTA callback. time:0x" << hex <<(cycles.value) << '\n';
 
   switch(sample_state) {
   case RCSTA_WAITING_MID1:
@@ -675,7 +677,8 @@ void _SPBRG::get_next_cycle_break(void)
   if(cpu)
     get_cycles().set_break(future_cycle, this);
 
-  //cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
+  if (DEBUG_UART)
+    cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
   
 }
 
@@ -691,12 +694,10 @@ void _SPBRG::start(void)
 
   get_next_cycle_break();
 
-  if(verbose)
-    cout << " SPBRG::start   last_cycle = " << 
-      hex << last_cycle << " future_cycle = " << future_cycle << '\n';
+  if (DEBUG_UART)
+    cout << " SPBRG::start   last_cycle = " <<  hex << last_cycle 
+	 << " future_cycle = " << future_cycle << '\n';
 
-  if(verbose && cpu)
-    get_cycles().dump_breakpoints();
 
 }
 
@@ -743,18 +744,16 @@ guint64 _SPBRG::get_cpu_cycle(unsigned int edges_from_now)
   guint64 cycle = (get_cycles().value == future_cycle) ? future_cycle : last_cycle;
 
   if(txsta && (txsta->value.get() & _TXSTA::SYNC))
-    {
-      // Synchronous mode
-      return ( edges_from_now * (value.get() + 1)*4 + cycle);
-    }
-  else
-    {
+    // Synchronous mode
+    return ( edges_from_now * (value.get() + 1)*4 + cycle);
+
+  else  {
       // Asynchronous mode
-      if(txsta && (txsta->value.get() & _TXSTA::BRGH))
-	return ( edges_from_now * (value.get() + 1)*16 + cycle);
-      else
-	return ( edges_from_now * (value.get() + 1)*64 + cycle);
-    }
+    if(txsta && (txsta->value.get() & _TXSTA::BRGH))
+      return ( edges_from_now * (value.get() + 1)*16 + cycle);
+    else
+      return ( edges_from_now * (value.get() + 1)*64 + cycle);
+  }
 
 
 #if 0
@@ -810,11 +809,15 @@ bool TXREG_14::is_empty(void)
 
 void TXREG_14::empty(void)
 {
+  if (DEBUG_UART) 
+    cout << "txreg::empty - setting TXIF\n";
   pir_set->set_txif();
 }
 
 void TXREG_14::full(void)
 {
+  if (DEBUG_UART) 
+    cout << "txreg::full - clearing TXIF\n";
   pir_set->clear_txif();
 }
 
@@ -884,7 +887,6 @@ void   USART_MODULE::new_rx_edge(unsigned int bit)
 //--------------------------------------------------
 USART_MODULE::USART_MODULE(void)
 {
-  //cout << "usart module constructor\n";
   txreg = 0;
   rcreg = 0;
   spbrg = 0;

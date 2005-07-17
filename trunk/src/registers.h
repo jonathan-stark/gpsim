@@ -244,6 +244,9 @@ public:
     return getRV_notrace();
   }
 
+  virtual void initialize()
+  {
+  }
 
   /// In the Register class, the 'Register *get()' returns a
   /// pointer to itself. Derived classes may return something

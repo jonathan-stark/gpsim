@@ -215,7 +215,14 @@ L_XorCheck:
 
 done:
   ; If no expression is specified, then break unconditionally
+
+#define UNRELEASED_GPASM
+
+ ifdef UNRELEASED_GPASM
+  .assert  ",\"*** PASSED\""
+ else
   .assert  ""
+ endif
         goto    done
 
 

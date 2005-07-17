@@ -1005,9 +1005,9 @@ void TMR0_16::set_t0if(void)
   intcon->set_t0if();
 }
 
-unsigned int TMR0_16::get_t0cs(void)
+bool TMR0_16::get_t0cs(void)
 {
- return t0con->value.get() & 0x20;
+ return (t0con->value.get() & 0x20) != 0;
 }
 
 void TMR0_16::initialize(void)

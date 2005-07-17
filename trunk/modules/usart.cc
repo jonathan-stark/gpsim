@@ -165,7 +165,6 @@ public:
 
     baud = new_baud;
 
-    //pic_processor *cpu = gpsim_get_active_cpu();
     if(get_active_cpu() && baud>0.0) {
 
       time_per_bit = (guint64)(get_active_cpu()->get_frequency()/baud);
@@ -348,9 +347,7 @@ public:
 
 class TXREG : public TriggerObject
 {
- public:
-  USART_TXPIN *txpin;
-  USART_CORE  *usart;
+private:
   //BRG         *brg;
 
   bool empty_flag;
@@ -380,14 +377,18 @@ class TXREG : public TriggerObject
   bool use_parity;
   bool parity;         // 0 = even, 1 = odd
 
+ public:
+  USART_TXPIN *txpin;
+  USART_CORE  *usart;
 
-  virtual bool is_empty(void) { return empty_flag;};
-  virtual void empty(void) {empty_flag = 0;};
-  virtual void full(void)  {empty_flag = 1;};
+  virtual bool is_empty() { return empty_flag;};
+  virtual void empty() {empty_flag = 0;};
+  virtual void full()  {empty_flag = 1;};
   virtual void assign_pir_set(PIR_SET *new_pir_set){};
 
   TXREG(void) {
-    txpin = NULL;
+    txpin = 0;
+    usart = 0;
 
     baud = 9600;
     bits_per_byte = 8;
@@ -400,25 +401,19 @@ class TXREG : public TriggerObject
 
   }
 
-  void set_bits_per_byte(int num_bits) {
-    bits_per_byte = num_bits;
-    update_packet_time();
-  }
-
 
 
   void update_packet_time(void) {
-    // for now the stop bit time is included in the total packet time
 
     if(baud <= 0.0)
       baud = 9600;  //arbitrary
 
-    /*
-      Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
-    */
+    // Calculate the total time to send a "packet", i.e. start bit, data, parity, and stop
+    // The stop bit time is included in the total packet time
+
     if(get_active_cpu()) {
       time_per_packet = 
-	(guint64)( get_active_cpu()->get_frequency() * ( (1.0 +   // start bit
+	(guint64)( get_active_cpu()->get_frequency() * ( (1.0 +             // start bit
 							  bits_per_byte +   // data bits
 							  stop_bits  +      // stop bit(s)
 							  use_parity)       //
@@ -430,9 +425,12 @@ class TXREG : public TriggerObject
     //cout << "update_packet_time ==> 0x" << hex<< time_per_packet << "\n";
   }
 
-  void set_baud_rate(double new_baud) {
-    //cout << "TXREG::" << __FUNCTION__ << "\n";
+  void set_bits_per_byte(int num_bits) {
+    bits_per_byte = num_bits;
+    update_packet_time();
+  }
 
+  void set_baud_rate(double new_baud) {
     baud = new_baud;
     update_packet_time();
 
@@ -457,9 +455,7 @@ class TXREG : public TriggerObject
 
   virtual void callback(void) {
     if(1) {
-      cout << "\n\n";
-      cout << "usart module TXREG::" << __FUNCTION__ << "\n";
-      cout << "\n\n";
+      cout << " usart module TXREG::" << __FUNCTION__ << "\n";
     }
 
     last_time = get_cycles().get();
@@ -474,22 +470,36 @@ class TXREG : public TriggerObject
       txr >>= 1;
       bit_count--;
       future_time = last_time + time_per_bit;
+      get_cycles().set_break(future_time, this);
     } else {
+      // We've sent the whole byte. 
 
-      if(usart)
-	tx_byte = usart->get_tx_byte();
+      if(usart && usart->mGetTxByte(tx_byte))
+	mSendByte(tx_byte);
       else
-	tx_byte++;
-
-      build_tx_packet(tx_byte);
-      future_time = last_time + time_per_bit * 12;
-      
+	empty();
     }
 
+  }
+
+
+  void mSendByte(unsigned _tx_byte) 
+  {
+    
+    if(1) {
+      cout << "\n\n";
+      cout << "TXREG::" << __FUNCTION__ << "\n";
+      cout << "\n\n";
+    }
+
+    mBuildTXpacket(tx_byte);
+    last_time = get_cycles().get();
+    future_time = last_time + time_per_bit;
     get_cycles().set_break(future_time, this);
   }
 
-  void build_tx_packet(unsigned int tb) {
+private:
+  void mBuildTXpacket(unsigned int tb) {
 
 
     tx_byte = tb &  ((1<<bits_per_byte) - 1);
@@ -499,22 +509,11 @@ class TXREG : public TriggerObject
     // total bits = byte + start and stop bits
     bit_count = bits_per_byte + 1 + 1;
 
-    //cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb <<" txr 0x" << txr << "  bits " << bit_count << '\n';
+    cout << hex << "TXREG::" << __FUNCTION__ << " byte to send 0x" << tb 
+	 <<" txr 0x" << txr << "  bits " << bit_count << '\n';
 
   }
 
-  void enable(void) {
-    if(0) {
-      cout << "\n\n";
-      cout << "TXREG::" << __FUNCTION__ << "\n";
-      cout << "\n\n";
-    }
-
-    build_tx_packet(tx_byte);
-    last_time = get_cycles().get();
-    future_time = last_time + time_per_bit;
-    get_cycles().set_break(future_time, this);
-  }
 };
 
 //=================================================================
@@ -687,9 +686,7 @@ class RCREG : public TriggerObject // : public _RCREG
 
   virtual void callback(void) {
     if(1) {
-      cout << "\n\n";
-      cout << "RCREG::" << __FUNCTION__ << "\n";
-      cout << "\n\n";
+      cout << " usart module RCREG::" << __FUNCTION__ << "\n";
     }
 
     //// process the data.....
@@ -1318,7 +1315,10 @@ public:
 // Attribute    Default
 //    Name      Value
 // -------------------
-//   baud       9600
+//   txbaud       9600
+//   rxbaud       9600
+//   txreg         --
+//   rxreg         --
 //   parity        0
 //   start_bits    1
 //   stop_bits     1
@@ -1357,7 +1357,7 @@ public:
 
     gint64 new_value;
     get(new_value);
-    cout << " old value: " << old_value << " New value: " << new_value << endl;
+    cout << " old value: " << dec << old_value << " New value: " << new_value << endl;
 
   };
 
@@ -1427,6 +1427,29 @@ public:
 
   }
 };
+
+class TxBuffer : public Integer
+{
+  TXREG *txreg;
+public:
+  TxBuffer(TXREG *_txreg)
+    : Integer("tx",0,"UART Transmit Register"),txreg(_txreg)
+  {
+  }
+  virtual void set(gint64 i)
+  {
+    i &= 0xff;
+
+    cout << name() << " sending byte 0x" << hex << i << endl;
+
+    if(txreg)
+      txreg->mSendByte(i);
+
+    Integer::set(i);
+}
+
+};
+
 //--------------------------------------------------------------
 USART_CORE::USART_CORE(void)
 {
@@ -1456,7 +1479,7 @@ void USART_CORE::initialize(USART_IOPORT *new_iop)
 
   rcreg = new RCREG;
   txreg = new TXREG;
-  txreg->enable();
+  //txreg->enable();
 
 }
 //--------------------------------------------------------------
@@ -1464,12 +1487,13 @@ static unsigned int _tx_index=0;
 static unsigned char Test_Hello[] = {
   0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
 };
-int USART_CORE::get_tx_byte(void)
+bool USART_CORE::mGetTxByte(unsigned int &aByte)
 {
-  if(_tx_index > sizeof(Test_Hello))
-    _tx_index = 0;
+  if (_tx_index > sizeof(Test_Hello))
+    return false;
 
-  return Test_Hello[_tx_index++];
+  aByte = Test_Hello[_tx_index++]; 
+  return true;
 
 }
 //--------------------------------------------------------------

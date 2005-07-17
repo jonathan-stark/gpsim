@@ -22,23 +22,20 @@ Boston, MA 02111-1307, USA.  */
 #define __P16X6X_H__
 
 #include "14bit-processors.h"
+#include "p16x8x.h"
 #include "14bit-tmrs.h"
 #include "intcon.h"
 #include "pir.h"
 #include "ssp.h"
 
-class P16C61 : public P16C8x
+class P16C61 : public P16X8X
 {
 public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
-  virtual void create_symbols(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
-
-  virtual void create_sfr_map(void);
-
   P16C61(void);
+
+  virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
+  virtual unsigned int program_memory_size(void) const { return 0x400; };
   virtual void create(void);
 
   static Processor *construct(void);
@@ -51,18 +48,12 @@ public:
 //      of a 16x6x device (where the second `x' is >= 3
 //
 
-class P16X6X_processor :  public _14bit_processor
+class P16X6X_processor :  public Pic14Bit
 {
 public:
 
-  PIC_IOPORT   *porta;
-  IOPORT_TRIS  trisa;
-
-  PIC_IOPORT   *portb;
-  IOPORT_TRIS  trisb;
-
-  PIC_IOPORT   *portc;
-  IOPORT_TRIS  trisc;
+  PicPortRegister  *m_portc;
+  PicTrisRegister  *m_trisc;
 
   T1CON   t1con;
   PIR1v1  pir1_reg;
@@ -97,11 +88,6 @@ public:
   virtual unsigned int program_memory_size(void) const { return 0x800; };
 
   virtual void create_sfr_map(void);
-  /*  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      //((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-  */
   virtual PIR *get_pir2(void) { return (&pir2_reg); }
   virtual PIR *get_pir1(void) { return (&pir1_reg); }
   virtual PIR_SET *get_pir_set(void) { return (&pir_set_def); }
@@ -126,12 +112,6 @@ class P16C62 : public  P16X6X_processor
   void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
-  /*
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-  */
   P16C62(void);
   static Processor *construct(void);
   virtual void create_iopin_map(void);
@@ -177,12 +157,6 @@ class P16C64 : public  P16X6X_processor
   void create_sfr_map(void);
 
   virtual unsigned int program_memory_size(void) const { return 0x800; };
-  /*
-  virtual void option_new_bits_6_7(unsigned int bits)
-    {
-      ((PORTB *)portb)->rbpu_intedg_update(bits);
-    }
-  */
   P16C64(void);
   static Processor *construct(void);
   void create(void);
