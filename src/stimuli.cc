@@ -1525,7 +1525,7 @@ double ValueStimulus::get_Vth()
   if(current) {
     try {
       current->get(v);
-      if(digital & v >0.0)
+      if(digital && v >0.0)
 	v = 5.0;
     }
 
