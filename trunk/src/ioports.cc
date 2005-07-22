@@ -103,12 +103,6 @@ PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
     mEnableMask(_mask)
 {
 
-  for (unsigned int i=0, m=1; i<numIopins; i++, m<<= 1)
-    if (mEnableMask & m) {
-      operator[](i).setDefaultSource(new PicSignalSource(this, i));
-      addSink(new PortSink(this, i), i);
-    }
-      
 }
 void PortRegister::put(unsigned int new_value)
 {
@@ -163,6 +157,7 @@ private:
 };
 //========================================================================
 //========================================================================
+static PinModule AnInvalidPinModule;
 
 PortModule::PortModule(int numIopins)
   : mNumIopins(numIopins)
@@ -170,7 +165,8 @@ PortModule::PortModule(int numIopins)
 
   iopins = new PinModule *[mNumIopins];
   for (int i=0; i<mNumIopins; i++)
-    iopins[i] = new PinModule(this,i);
+    iopins[i] = &AnInvalidPinModule;
+  //iopins[i] = new PinModule(this,i);
 
 }
 PortModule::~PortModule()
@@ -180,11 +176,10 @@ PortModule::~PortModule()
 
   delete iopins;
 }
-static PinModule AnInvalidPinModule;
 
 PinModule &PortModule::operator [] (unsigned int iPinNumber)
 {
-  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+  if (iPinNumber < mNumIopins)
     return *iopins[iPinNumber];
 
   // error...
@@ -200,22 +195,33 @@ void PortModule::updatePort()
 }
 void PortModule::updatePin(int iPinNumber)
 {
-  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+  if (iPinNumber < mNumIopins)
     iopins[iPinNumber]->updatePinModule();
 }
 
 SignalSink *PortModule::addSink(SignalSink *new_sink, unsigned int iPinNumber)
 {
-  if (iPinNumber < mNumIopins && iopins[iPinNumber])
+  if (iPinNumber < mNumIopins)
     iopins[iPinNumber]->addSink(new_sink);
   return new_sink;
 }
 
 IOPIN *PortModule::addPin(IOPIN *new_pin, unsigned int iPinNumber)
 {
-  if (iPinNumber < mNumIopins)
+  if (iPinNumber < mNumIopins) {
+    // If there is not a PinModule for this pin, then add one.
+    if (iopins[iPinNumber] == &AnInvalidPinModule)
+      iopins[iPinNumber] = new PinModule(this,iPinNumber);
+
     iopins[iPinNumber]->setPin(new_pin);
+  }
   return new_pin;
+}
+
+void PortModule::addPinModule(PinModule *newModule, unsigned int iPinNumber)
+{
+  if (iPinNumber < mNumIopins  && iopins[iPinNumber] == &AnInvalidPinModule)
+    iopins[iPinNumber] = newModule;
 }
 
 //------------------------------------------------------------------------
@@ -369,6 +375,15 @@ PicPortRegister::PicPortRegister(const char *port_name,
   : PortRegister(numIopins, enableMask), m_tris(0)
 {
   new_name(port_name);
+
+  for (unsigned int i=0, m=1; i<numIopins; i++, m<<= 1)
+    if (mEnableMask & m) {
+      PinModule *pmP = new PinModule(this,i);
+      PortModule::addPinModule(pmP,i);
+      pmP->setDefaultSource(new PicSignalSource(this, i));
+      pmP->addSink(new PortSink(this, i));
+    }
+      
 }
 class PicSignalControl : public SignalControl
 {

@@ -1,3 +1,7 @@
+2005-07-21 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.h, src/ioports.cc: classes derived from PortRegister
+	can now specify the type of PinModule class.
+	
 2005-07-15 Scott Dattalo <scott@dattalo.com>
 	* src/12bit-processors.cc, src/14bit-processors.cc,
 	src/14bit-processors.h, src/16bit-registers.cc,

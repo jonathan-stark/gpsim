@@ -140,6 +140,7 @@ public:
   SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
   SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
   IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
+  void           addPinModule(PinModule *, unsigned int iPinNumber);
 
   PinModule &operator [] (unsigned int pin_number);
 
