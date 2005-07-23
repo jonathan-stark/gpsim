@@ -390,8 +390,9 @@ void OPTION_REG::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the PCL base class
 //--------------------------------------------------
-PCL::PCL(void) : sfr_register()
+PCL::PCL() 
 {
+  por_value = RegisterValue(0,0);
   new_name("pcl");
 }
 

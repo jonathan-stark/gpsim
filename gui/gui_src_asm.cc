@@ -420,21 +420,17 @@ void SourceBrowserAsm_Window::SetPC(int address)
   if(sbawFileId == 0xffffffff)
     return;
 
-  for(i=0;i<SBAW_NRFILES;i++)
-    {
-      if(pages[i].pageindex_to_fileid == sbawFileId)
-      {
-        id=i;
-      }
-      else
-      {
+  for(i=0;i<SBAW_NRFILES;i++) {
+    if(pages[i].pageindex_to_fileid == sbawFileId)
+      id=i;
+    else {
       if( pages[i].source_pcwidget!=0 &&
-        GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
-        //cout << " SetPC: " << name() << "  hiding page "  << i << endl;
-        gtk_widget_hide(pages[i].source_pcwidget);
-	      }
+	  GTK_WIDGET_VISIBLE(pages[i].source_pcwidget) ) {
+	//cout << " SetPC: " << name() << "  hiding page "  << i << endl;
+	gtk_widget_hide(pages[i].source_pcwidget);
       }
     }
+  }
 
 
   if(id==-1) {

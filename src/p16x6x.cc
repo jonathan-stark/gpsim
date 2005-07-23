@@ -40,7 +40,13 @@ Boston, MA 02111-1307, USA.  */
 #include "p16x6x.h"
 #include "intcon.h"
 
+void P16X6X_processor::create_symbols()
+{
+  Pic14Bit::create_symbols();
 
+  symbol_table.add_register(m_portc);
+  symbol_table.add_register(m_trisc);
+}
 
 void P16C61::create(void)
 {
@@ -141,24 +147,6 @@ void P16C64::create_iopin_map(void)
   if(!package)
     return;
 
-  portd = new PORTD;
-  porte = new PORTE;
-
-  // ---- Complete the initialization for the I/O Ports
-
-  portd->tris = &trisd;
-  trisd.port = portd;
-
-  porte->tris = &trise;
-  trise.port = porte;
-
-
-  trisd.new_name("trisd");
-  trise.new_name("trise");
-
-  portd->valid_iopins = 0xff;
-  porte->valid_iopins = 0x07;
-
   // Now Create the package and place the I/O pins
 
   package->assign_pin(1, 0);
@@ -170,17 +158,9 @@ void P16C64::create_iopin_map(void)
   package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));
   package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta5"),5));
 
-  //package->assign_pin(2, new IO_bi_directional(porta, 0));
-  //package->assign_pin(3, new IO_bi_directional(porta, 1));
-  //package->assign_pin(4, new IO_bi_directional(porta, 2));
-  //package->assign_pin(5, new IO_bi_directional(porta, 3));
-  //package->assign_pin(6, new IO_open_collector(porta, 4));
-  //package->assign_pin(7, new IO_bi_directional(porta, 5));
-
-  package->assign_pin(8, new IO_bi_directional(porte, 0));
-  package->assign_pin(9, new IO_bi_directional(porte, 1));
-  package->assign_pin(10, new IO_bi_directional(porte, 2));
-
+  package->assign_pin( 8, m_porte->addPin(new IO_bi_directional("porte0"),0));
+  package->assign_pin( 9, m_porte->addPin(new IO_bi_directional("porte1"),1));
+  package->assign_pin(10, m_porte->addPin(new IO_bi_directional("porte2"),2));
 
   package->assign_pin(11, 0);
   package->assign_pin(12, 0);
@@ -197,14 +177,14 @@ void P16C64::create_iopin_map(void)
   package->assign_pin(26, m_portc->addPin(new IO_bi_directional("portc7"),7));
 
 
-  package->assign_pin(19, new IO_bi_directional(portd, 0));
-  package->assign_pin(20, new IO_bi_directional(portd, 1));
-  package->assign_pin(21, new IO_bi_directional(portd, 2));
-  package->assign_pin(22, new IO_bi_directional(portd, 3));
-  package->assign_pin(27, new IO_bi_directional(portd, 4));
-  package->assign_pin(28, new IO_bi_directional(portd, 5));
-  package->assign_pin(29, new IO_bi_directional(portd, 6));
-  package->assign_pin(30, new IO_bi_directional(portd, 7));
+  package->assign_pin(19, m_portd->addPin(new IO_bi_directional("portd0"),0));
+  package->assign_pin(20, m_portd->addPin(new IO_bi_directional("portd1"),1));
+  package->assign_pin(21, m_portd->addPin(new IO_bi_directional("portd2"),2));
+  package->assign_pin(22, m_portd->addPin(new IO_bi_directional("portd3"),3));
+  package->assign_pin(27, m_portd->addPin(new IO_bi_directional("portd4"),4));
+  package->assign_pin(28, m_portd->addPin(new IO_bi_directional("portd5"),5));
+  package->assign_pin(29, m_portd->addPin(new IO_bi_directional("portd6"),6));
+  package->assign_pin(30, m_portd->addPin(new IO_bi_directional("portd7"),7));
 
   package->assign_pin(31, 0);
   package->assign_pin(32, 0);
@@ -238,6 +218,9 @@ void P16X6X_processor::create_sfr_map()
   // at addresses 20-7f and a0-bf
   add_file_registers(0x20, 0x7f, 0);
   add_file_registers(0xa0, 0xbf, 0);
+
+  add_sfr_register(m_portc, 0x07);
+  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
 
   add_sfr_register(get_pir1(),   0x0c, RegisterValue(0,0),"pir1");
   add_sfr_register(&pie1,   0x8c, RegisterValue(0,0));
@@ -352,8 +335,6 @@ void P16C62::create_sfr_map()
     cout << "creating c62 registers\n";
 
   P16X6X_processor::create_sfr_map();
-  add_sfr_register(m_portc, 0x07);
-  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
 
   //1((PORTC*)portc)->ccp1con = &ccp1con;
 
@@ -365,8 +346,7 @@ void P16C62::create_symbols(void)
   if(verbose)
     cout << "creating c62 symbols\n";
 
-  symbol_table.add_register(m_portc);
-
+  P16X6X_processor::create_symbols();
 }
 
 
@@ -549,11 +529,16 @@ void P16C64::create_sfr_map(void)
     cout << "creating c64 registers\n";
 
 
-  add_sfr_register(portd,   0x08);
-  add_sfr_register(&trisd,  0x88, RegisterValue(0xff,0));
+  P16X6X_processor::create_sfr_map();
 
-  add_sfr_register(porte,   0x09);
-  add_sfr_register(&trise,  0x89, RegisterValue(0x07,0));
+  add_sfr_register(m_portc, 0x07);
+  add_sfr_register(m_trisc, 0x87, RegisterValue(0xff,0));
+
+  add_sfr_register(m_portd, 0x08);
+  add_sfr_register(m_trisd, 0x88, RegisterValue(0xff,0));
+
+  add_sfr_register(m_porte, 0x09);
+  add_sfr_register(m_trise, 0x89, RegisterValue(0x07,0));
 
   //1((PORTC*)portc)->ccp1con = &ccp1con;
 
@@ -565,8 +550,13 @@ void P16C64::create_symbols(void)
   if(verbose)
     cout << "creating c64 symbols\n";
 
-  symbol_table.add_ioport(portd);
-  symbol_table.add_ioport(porte);
+  P16X6X_processor::create_symbols();
+
+  symbol_table.add_register(m_portd);
+  symbol_table.add_register(m_porte);
+
+  symbol_table.add_register(m_trisd);
+  symbol_table.add_register(m_trise);
 
 }
 
@@ -581,7 +571,7 @@ void  P16C64::create(void)
   
   _14bit_processor::create();
 
-  P16X6X_processor::create_sfr_map();
+  //P16X6X_processor::create_sfr_map();
   P16C64::create_sfr_map();
 
   // Build the links between the I/O Pins and the internal peripherals
@@ -596,7 +586,7 @@ Processor * P16C64::construct(void)
 
   p->create();
   p->create_invalid_registers ();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
@@ -612,6 +602,14 @@ P16C64::P16C64(void)
   if(verbose)
     cout << "c64 constructor, type = " << isa() << '\n';
 
+  m_portd = new PicPortRegister("portd",8,0xff);
+  m_trisd = new PicTrisRegister(m_portd);
+  m_trisd->new_name("trisd");
+
+  m_porte = new PicPortRegister("porte",8,0x07);
+  m_trise = new PicTrisRegister(m_porte);
+  m_trise->new_name("trise");
+
   init_ssp = true;
 }
 
@@ -624,6 +622,8 @@ void P16C65::create_sfr_map(void)
 
   if(verbose)
     cout << "creating c65 registers\n";
+
+  P16C64::create_sfr_map();
 
   add_file_registers(0xc0, 0xff, 0);
 
@@ -736,7 +736,7 @@ Processor * P16C65::construct(void)
   p->create();
   p->create_invalid_registers ();
 
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 

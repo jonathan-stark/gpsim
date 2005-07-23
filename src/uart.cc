@@ -818,7 +818,8 @@ void TXREG_14::full(void)
 {
   if (DEBUG_UART) 
     cout << "txreg::full - clearing TXIF\n";
-  pir_set->clear_txif();
+  if(pir_set)
+    pir_set->clear_txif();
 }
 
 void RCREG_14::push(unsigned int new_value)

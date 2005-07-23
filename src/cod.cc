@@ -44,6 +44,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cod.h"
 #include "interface.h"
 #include "fopen-path.h"
+#include "breakpoints.h"
 
 /*  experiment with assertions */
 #include "cmd_manager.h"
@@ -175,7 +176,7 @@ void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
 {
   int _64k_base;
   int safety = 0;
-  int i,j,index,address;
+  int i,j,index;
   char range_block[COD_BLOCK_SIZE];
   DirBlockInfo *dbi;
 
@@ -203,17 +204,15 @@ void PicCodProgramFileType::read_hex_from_cod( Processor *cpu )
 
 	index = get_short_int(&dbi->dir.block[2*(COD_DIR_CODE + i)]);
 
-	if (index != 0) 
-	  {
-	    read_block(temp_block, index);
-	    for(j=0; j<COD_BLOCK_SIZE/2; j++)
-	      {
-		address = i*COD_BLOCK_SIZE/2 + j;
-		if(cod_address_in_range(range_block, address)) {
-		  cpu->init_program_memory(address+_64k_base, (int)get_short_int(&temp_block[j*2]));
-		}
-	      }
+	if (index != 0) {
+	  read_block(temp_block, index);
+	  for(j=0; j<COD_BLOCK_SIZE/2; j++) {
+	    int PCindex  = i*COD_BLOCK_SIZE/2 + j;
+	    if(cod_address_in_range(range_block, PCindex)) {
+	      cpu->init_program_memory_at_index(PCindex+_64k_base, (int)get_short_int(&temp_block[j*2]));
+	    }
 	  }
+	}
       }
 
     dbi = dbi->next_dir_block_info;
@@ -439,7 +438,7 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 	  lst_line_number++;
 	  file_id = temp_block[offset+COD_LS_SFILE];
 	  address = get_short_int(&temp_block[offset+COD_LS_SLOC]);
-	  address = cpu->map_pm_address2index(address);
+	  //address = cpu->map_pm_address2index(address);
 	  sline   = get_short_int(&temp_block[offset+COD_LS_SLINE]);
 	  smod    = temp_block[offset+COD_LS_SMOD] & 0xff;
 
@@ -1080,6 +1079,7 @@ _Cleanup:
 
   if(*pcpu != NULL) {
     (*pcpu)->reset(POR_RESET);
+    bp.clear_global();
     string script("startup");
     (*pcpu)->run_script(script);
   }

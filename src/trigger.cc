@@ -156,8 +156,10 @@ bool TriggerObject::eval_Expression()
     try {
       Value *v = m_PExpr->evaluate();
 
-      if(v)
+      if(v) {
         v->get(bRet);
+	delete v;
+      }
     }
     catch (Error *Perr) {
       if(Perr)

@@ -1157,9 +1157,6 @@ void RRF::execute(void)
 {
   unsigned int new_value,old_value;
 
-  // trace.instruction(opcode);
-
-
   if(!access)
     source = cpu_pic->registers[register_address];
   else
@@ -1193,13 +1190,8 @@ SLEEP::SLEEP (Processor *new_cpu, unsigned int new_opcode)
 void SLEEP::execute(void)
 {
 
-  // trace.instruction(opcode);
-
-  cpu_pic->status->put_TO(1);
-  cpu_pic->status->put_PD(0);
-
+  cpu_pic->enter_sleep();
   bp.set_sleep();
-
 }
 
 //--------------------------------------------------

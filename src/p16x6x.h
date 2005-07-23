@@ -85,9 +85,9 @@ public:
   bool init_ssp;
 
 
-  virtual unsigned int program_memory_size(void) const { return 0x800; };
-
-  virtual void create_sfr_map(void);
+  virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual void create_symbols();
+  virtual void create_sfr_map();
   virtual PIR *get_pir2(void) { return (&pir2_reg); }
   virtual PIR *get_pir1(void) { return (&pir1_reg); }
   virtual PIR_SET *get_pir_set(void) { return (&pir_set_def); }
@@ -144,12 +144,11 @@ class P16C64 : public  P16X6X_processor
 {
   public:
 
-  PIC_IOPORT   *portd;
-  IOPORT_TRIS  trisd;
+  PicPortRegister  *m_portd;
+  PicTrisRegister  *m_trisd;
 
-  PIC_IOPORT   *porte;
-  IOPORT_TRIS  trise;
-
+  PicPortRegister  *m_porte;
+  PicTrisRegister  *m_trise;
 
   TMR2_MODULE tmr2_module;
   virtual PROCESSOR_TYPE isa(void){return _P16C64_;};

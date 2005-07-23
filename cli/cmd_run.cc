@@ -46,7 +46,7 @@ cmd_run::cmd_run(void)
 { 
   name = "run";
 
-  brief_doc = string("Execute the pic program");
+  brief_doc = string("Initiate the simulation");
 
   long_doc = string ("run\n\
 \tStart simulating and don't stop until a break is encountered.\n\

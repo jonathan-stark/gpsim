@@ -98,7 +98,7 @@ void PortSink::setSinkState(bool bNewSinkState)
 }
 //------------------------------------------------------------------------
 PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
-  : Register(),
+  : sfr_register(),
     PortModule(numIopins),
     mEnableMask(_mask)
 {
@@ -414,7 +414,7 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
 //------------------------------------------------------------------------
 
 PicTrisRegister::PicTrisRegister(PicPortRegister *_port)
-  : m_port(_port)
+  : sfr_register(),m_port(_port)
 {
   if (m_port)
     m_port->setTris(this);

@@ -452,11 +452,35 @@ char * Register::toBitStr(char *s, int len)
 //--------------------------------------------------
 //--------------------------------------------------
 //--------------------------------------------------
+sfr_register::sfr_register() 
+  : Register(), wdtr_value(0,0)
+{}
+
 sfr_register::sfr_register(Processor *_cpu)
-  : Register(_cpu)
+  : Register(_cpu), wdtr_value(0,0)
 {
+}
+
+void sfr_register::reset(RESET_TYPE r)
+{
+  switch (r) {
+
+  case POR_RESET:
+    putRV(por_value);
+    break;
+
+  case WDT_RESET:
+    // Most registers simply retain their value across WDT resets.
+    //putRV(wdtr_value); 
+    break;
+  default:
+    break;
+  }
 
 }
+
+//--------------------------------------------------
+//--------------------------------------------------
 
 //--------------------------------------------------
 // member functions for the InvalidRegister class

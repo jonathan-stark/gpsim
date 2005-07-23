@@ -99,7 +99,7 @@ void WDT::callback(void)
   if(wdte) {
     cout<<"WDT timeout: " << hex << get_cycles().value << '\n';
 
-    future_cycle = 0;
+    //future_cycle = 0;
     update();
 
     // The TO bit gets cleared when the WDT times out.
@@ -107,10 +107,15 @@ void WDT::callback(void)
 
     if(break_point)
       bp.halt();
-    else if(bp.have_sleep()) {
+    else {
+      bp.clear_sleep();
+      cpu->reset(WDT_RESET);
+    }
+    /*    else if(bp.have_sleep()) {
       bp.clear_sleep();
     }else
       cpu->reset(WDT_RESET);
+    */
   }
 
 }

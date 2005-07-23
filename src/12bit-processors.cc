@@ -42,7 +42,7 @@ _12bit_processor::_12bit_processor(void)
 
 void _12bit_processor::create_symbols(void)
 {
-  cout << "12bit create symbols\n";
+  pic_processor::create_symbols();
 }
 
 void _12bit_processor::por(void)
@@ -52,6 +52,8 @@ void _12bit_processor::por(void)
 
 void _12bit_processor::reset(RESET_TYPE r)
 {
+  option_reg.reset(r);
+
   pic_processor::reset(r);
   
 }
