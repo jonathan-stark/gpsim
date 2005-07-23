@@ -24,36 +24,44 @@ Boston, MA 02111-1307, USA.  */
 #include "12bit-processors.h"
 #include "i2c-ee.h"
 
+#define NEW_GPIO 1
+
+#if defined NEW_GPIO
+class GPIO : public PicPortRegister
+{
+public:
+  GPIO(const char *port_name, 
+       unsigned int numIopins, 
+       unsigned int enableMask);
+  void setbit(unsigned int bit_number, bool new_value);
+};
+#else
 class GPIO : public PIC_IOPORT
 {
 public:
-
-//  unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
 };
-
-/*
-class OSCCAL : public sfr_register
-{
-
-}
-
-*/
+#endif
 
 
 class P12C508 : public  _12bit_processor
 {
   public:
 
+#if defined NEW_GPIO
+
+  GPIO            *m_gpio;
+  PicTrisRegister *m_tris;
+#else
   GPIO         gpio;
   IOPORT_TRIS  tris;
+#endif
   sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
-
-  //  const int PROGRAM_MEMORY_SIZE = 0x200;
 
   virtual PROCESSOR_TYPE isa(void){return _P12C508_;};
   virtual void create_symbols(void);
 
+  virtual void enter_sleep();
   virtual unsigned int program_memory_size(void) const { return 0x200; };
   virtual void create_sfr_map(void);
   virtual void dump_registers(void);

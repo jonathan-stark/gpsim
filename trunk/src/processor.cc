@@ -725,20 +725,26 @@ void Processor::disassemble (signed int s, signed int e)
   if(s > e)
     return;
 
-  unsigned int start_address = map_pm_address2index(s);
-  unsigned int end_address = map_pm_address2index(e);
+  //unsigned int start_PMaddress = map_pm_index2address(s);
+  //unsigned int end_PMaddress   = map_pm_index2address(e);
 
-  if(start_address >= program_memory_size()) {
+  //unsigned int start_PMindex = map_pm_address2index(start_PMaddress);
+  //unsigned int end_PMindex   = map_pm_address2index(end_PMaddress);
+
+  unsigned int start_PMindex = map_pm_address2index(s);
+  unsigned int end_PMindex   = map_pm_address2index(e);
+
+  if(start_PMindex >= program_memory_size()) {
     if(s <0)
-      start_address = 0;
+      start_PMindex = 0;
     else 
       return;
   }
-  if(end_address  >= program_memory_size()) {
+  if(end_PMindex  >= program_memory_size()) {
     if(e<0)
       return;
     else
-      end_address = program_memory_size()-1;
+      end_PMindex = program_memory_size()-1;
   }
 
   const int iConsoleWidth = 80;
@@ -751,15 +757,16 @@ void Processor::disassemble (signed int s, signed int e)
 
   int iLastFileId = -1;
   FileContext *fc = NULL;
-  for(unsigned int i = start_address; i<=end_address; i++)
+
+  for(unsigned int PMindex = start_PMindex; PMindex<=end_PMindex; PMindex++)
     {
-      unsigned int uAddress = map_pm_index2address(i);
+      unsigned int uAddress = map_pm_index2address(PMindex);
       str[0] =0;
       if (uPCAddress == uAddress)
         pszPC = "==>";
       else
         pszPC = "   ";
-      inst = program_memory[i];
+      inst = program_memory[PMindex];
 
       // Breakpoints replace the program memory with an instruction that has
       // an opcode larger than 16 bits.
@@ -771,7 +778,7 @@ void Processor::disassemble (signed int s, signed int e)
       else
       {
         cBreak = 'B';
-        inst = pma->get_base_instruction(i);
+        inst = pma->get_base_instruction(PMindex);
       }
 
       if(inst->file_id != -1) {

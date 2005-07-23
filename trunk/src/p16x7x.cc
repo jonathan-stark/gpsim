@@ -832,7 +832,7 @@ void P16C74::create_sfr_map(void)
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
   //1adcon0.analog_port = porta;
-  adcon0.analog_port2 = porte;
+  //1adcon0.analog_port2 = porte;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;

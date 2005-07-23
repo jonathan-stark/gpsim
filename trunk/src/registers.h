@@ -351,28 +351,14 @@ public:
 class sfr_register : public Register
 {
 public:
-  sfr_register() : Register(){}
+  sfr_register();
   sfr_register(Processor *);
   RegisterValue wdtr_value; // wdt or mclr reset value
 
   virtual REGISTER_TYPES isa(void) {return SFR_REGISTER;};
   virtual void initialize(void) {return;};
 
-  virtual void reset(RESET_TYPE r) {
-    switch (r) {
-
-    case POR_RESET:
-      value = por_value;
-      break;
-
-    case WDT_RESET:
-      value = wdtr_value;
-      break;
-    default:
-      break;
-    }
-
-  }
+  virtual void reset(RESET_TYPE r);
 };
 
 

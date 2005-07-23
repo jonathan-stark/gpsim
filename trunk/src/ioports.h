@@ -197,12 +197,11 @@ private:
   unsigned int  m_pinNumber;
 };
 
-class PortRegister : public Register, public PortModule
+class PortRegister : public sfr_register, public PortModule
 {
 public:
   PortRegister(unsigned int numIopins, unsigned int enableMask);
 
-  virtual REGISTER_TYPES isa() {return SFR_REGISTER;};
   virtual void put(unsigned int new_value);
   virtual unsigned int get(unsigned int new_value);
   virtual void putDrive(unsigned int new_drivingValue);
@@ -233,7 +232,7 @@ protected:
   PicTrisRegister *m_tris;
 };
 
-class PicTrisRegister : public Register
+class PicTrisRegister : public sfr_register
 {
 
 public:

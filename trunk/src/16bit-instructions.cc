@@ -56,7 +56,7 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
     case  _P18F1220_:
     case  _P18F1320_:
       destination = (new_opcode & 0xff)+1;
-      absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
+      absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
  
       if(new_opcode & 0x80)
         {
@@ -413,7 +413,7 @@ BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
   cpu = new_cpu;
 
   destination = (new_opcode & 0x7ff)+1;
-  absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
+  absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
 
   if(new_opcode & 0x400)
     {
@@ -499,7 +499,7 @@ CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   fast = (new_opcode & 0x100) ? true : false;
   cpu = new_cpu;
-  address = cpu16->current_disasm_address;
+  address = cpu16->getCurrentDisasmAddress();
   initialized = false;
 
   new_name("call");
@@ -767,7 +767,7 @@ GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->current_disasm_address;
+  address = cpu16->getCurrentDisasmAddress();
   initialized = false;
 
   new_name("goto");
@@ -978,7 +978,7 @@ LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
   
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->current_disasm_address;
+  address = cpu16->getCurrentDisasmAddress();
   initialized = false;
 
   fsr = (opcode & 0x30)>>4;
@@ -1090,7 +1090,7 @@ MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->current_disasm_address;
+  address = cpu16->getCurrentDisasmAddress();
   initialized = false;
   destination = 0;
   source = opcode & 0xfff;
@@ -1534,7 +1534,7 @@ RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
   if(new_opcode & 0x400)
     destination -= 0x800;
 
-  absolute_destination = (cpu16->current_disasm_address + destination) & 0xfffff;
+  absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
 
   new_name("rcall");
 }

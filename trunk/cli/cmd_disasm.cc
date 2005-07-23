@@ -100,12 +100,13 @@ void cmd_disassemble::disassemble(Expression *expr)
     if(cpu->pma) {
       int current_pc = cpu->pma->get_PC();
 
-      int current_pc_index = cpu->map_pm_address2index(current_pc);
-      if(current_pc_index + start < 0)
-        start = 0;
+      if(start<0) {
+	start += current_pc;
+	end   += current_pc;
+      }
 
       cout << hex << " current pc = 0x"<<current_pc << endl;
-      cpu->disassemble(current_pc + start, current_pc + end);
+      cpu->disassemble(start, end);
     }
 
   }

@@ -54,7 +54,7 @@ void CCPRL::put(unsigned int new_value)
 
   value.put(new_value);
 
-  if(tmrl->compare_mode)
+  if(tmrl && tmrl->compare_mode)
     start_compare_mode();   // Actually, re-start with new capture value.
 
 }
@@ -95,7 +95,7 @@ void CCPRL::stop_compare_mode(void)
   // If tmr1 is in the compare mode, then change to non-compare and update
   // the tmr breakpoint.
 
-  if(tmrl->compare_mode)
+  if(tmrl && tmrl->compare_mode)
     {
       tmrl->compare_mode = 0;
       tmrl->update();
@@ -151,7 +151,7 @@ void CCPRH::put(unsigned int new_value)
 
       value.put(new_value);
 
-      if(ccprl->tmrl->compare_mode)
+      if(ccprl && ccprl->tmrl && ccprl->tmrl->compare_mode)
 	ccprl->start_compare_mode();   // Actually, re-start with new capture value.
 
     }
@@ -335,6 +335,9 @@ void CCPCON::put(unsigned int new_value)
   //trace.register_write(address,value.get());
 
   value.put(new_value);
+  if (!ccprl || !tmr2)
+    return;
+
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
     case ALL_OFF0:
@@ -406,7 +409,8 @@ void T1CON::put(unsigned int new_value)
 
   unsigned int diff = value.get() ^ new_value;
   value.put(new_value);
-  
+  if (!tmrl)
+    return;
   // First, check the tmr1 clock source bit to see if we are  changing from
   // internal to external (or vice versa) clocks.
   if( diff & TMR1CS)
@@ -450,7 +454,8 @@ void TMRH::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
-
+  if(!tmrl)
+    return;
   tmrl->synchronized_cycle = get_cycles().value;
   tmrl->last_cycle = tmrl->synchronized_cycle - (tmrl->value.get() + (value.get()<<8))*tmrl->prescale;
 
@@ -636,6 +641,9 @@ void TMRL::put(unsigned int new_value)
   //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
 
+  if (!tmrh || !t1con)
+    return;
+
   synchronized_cycle = get_cycles().value;
   last_cycle = synchronized_cycle - ( value.get() + (tmrh->value.get()<<8)) * prescale;
 
@@ -809,7 +817,8 @@ void PR2::put(unsigned int new_value)
   if(value.get() != new_value)
     {
       value.put(new_value);
-      tmr2->new_pr2();
+      if (tmr2)
+	tmr2->new_pr2();
     }
   else
     value.put(new_value);
@@ -832,7 +841,8 @@ void T2CON::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   //trace.register_write(address,value.get());
   value.put(new_value);
-  tmr2->new_pre_post_scale();
+  if (tmr2)
+    tmr2->new_pre_post_scale();
 
 }
 
@@ -1059,8 +1069,8 @@ void TMR2::put(unsigned int new_value)
 
       // 'clear' the post scale counter. (I've actually implemented the post scale counter
       // as a count-down counter, so 'clearing it' means resetting it to the starting point.
-
-      post_scale = t2con->get_post_scale();
+      if (t2con)
+	post_scale = t2con->get_post_scale();
     }
 }
 

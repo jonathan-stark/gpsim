@@ -217,10 +217,20 @@ void pic_processor::sleep (void)
   simulation_mode = eSM_RUNNING;
 
 }
+//-------------------------------------------------------------------
+//
+// enter_sleep - The processor is about to go to sleep, so update 
+//  the status register.
+
+void pic_processor::enter_sleep()
+{
+  status->put_TO(1);
+  status->put_PD(0);
+}
 
 //-------------------------------------------------------------------
 //
-// sleep - Begin sleeping and stay asleep until something causes a wake
+// pm_write - program memory write
 //
 
 void pic_processor::pm_write (void)
@@ -600,7 +610,8 @@ void pic_processor::reset (RESET_TYPE r)
     }
 
   for(unsigned int i=0; i<register_memory_size(); i++)
-    registers[i]->reset(r);
+    if (registers[i])
+      registers[i]->reset(r);
 
 
   trace.reset(r);
@@ -608,24 +619,28 @@ void pic_processor::reset (RESET_TYPE r)
   stack->reset();
   bp.clear_global();
 
-  if(r == POR_RESET)
-    {
-      status->put_TO(1);
-      status->put_PD(1);
+  switch (r) {
+  case POR_RESET:
+    status->put_TO(1);
+    status->put_PD(1);
 
-      if(verbose) {
-	cout << "POR\n";
-	if(config_modes) config_modes->print();
-      }
-      if(config_modes)
-	wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
-
-      bHaltSimulation = false;
+    if(verbose) {
+      cout << "POR\n";
+      if(config_modes) config_modes->print();
     }
-  else if (r==WDT_RESET)
-    status->put_TO(0);
+    if(config_modes)
+      wdt.initialize( config_modes->get_wdt() , nominal_wdt_timeout);
 
-  if(bHaltSimulation)
+    bHaltSimulation = false;
+    break;
+  case WDT_RESET:
+    status->put_TO(0);
+    break;
+  default:
+    break;
+  }
+
+  if(bHaltSimulation || getBreakOnReset())
     bp.halt();
 
   gi.simulation_has_stopped();
@@ -685,7 +700,7 @@ void pic_processor::create (void)
   init_register_memory (register_memory_size());
 
   //  create_invalid_registers ();
-  create_symbols();
+  //  create_symbols();
   create_stack();
 
   // Now, initialize the core stuff:
@@ -735,6 +750,10 @@ void pic_processor::create (void)
 // status or tmr0 registers) then a pointer to that register will be
 // placed in the file register map. 
 
+// FIXME It doesn't make any sense to initialize the por_value here!
+// FIXME The preferred way is to initialize all member data in their
+// FIXME parent's constructor.
+
 void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
 				     RegisterValue por_value, const char *new_name)
 {
@@ -753,7 +772,7 @@ void pic_processor::add_sfr_register(Register *reg, unsigned int addr,
     }
 
   reg->value       = por_value;
-  reg->por_value   = por_value;
+  reg->por_value   = por_value;  /// FIXME why are we doing this?
   reg->initialize();
 }
 

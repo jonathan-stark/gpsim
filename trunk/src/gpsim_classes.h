@@ -43,11 +43,12 @@ enum RESET_TYPE
 {
   POR_RESET,          // Power-on reset
   WDT_RESET,          // Watch Dog timer timeout reset
-  EXTERNAL_RESET,     // I/O pin (e.g. MCLR going low) reset
+  IO_RESET,           // I/O pin  reset
+  MCLR_RESET,         // MCLR (Master Clear) reset
   SOFT_RESET,         // Software initiated reset
   BOD_RESET,          // Brown out detection reset
   SIM_RESET,          // Simulation Reset
-  
+  OTHER_RESET         //
 };
 
 

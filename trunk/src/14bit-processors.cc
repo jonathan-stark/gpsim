@@ -179,8 +179,11 @@ Pic14Bit::Pic14Bit()
 //-------------------------------------------------------------------
 void Pic14Bit::create_symbols(void)
 {
+  pic_processor::create_symbols();
   symbol_table.add_register(m_portb);
   symbol_table.add_register(m_porta);
+  symbol_table.add_register(m_trisb);
+  symbol_table.add_register(m_trisa);
 
 }
 

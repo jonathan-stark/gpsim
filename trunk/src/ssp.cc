@@ -154,7 +154,7 @@ void _SSPBUF::put(unsigned int new_value)
 
   value.put(new_value & 0xff);
 
-  if( sspcon->value.get() & _SSPCON::SSPEN ) {
+  if(sspcon &&  sspcon->value.get() & _SSPCON::SSPEN ) {
 	if( state == IDLE ) {
 	  switch( sspcon->value.get() & _SSPCON::SSPM_mask ) {
 	  case _SSPCON::SSPM_SPImaster4:

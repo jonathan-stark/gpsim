@@ -241,6 +241,7 @@ public:
   virtual void finish(void);
 
   void sleep(void);
+  virtual void enter_sleep();
   void step(unsigned int steps,bool refresh=true);
   void step_over(bool refresh=true);
 

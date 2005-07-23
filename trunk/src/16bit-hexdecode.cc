@@ -190,7 +190,7 @@ instruction * disasm16 (pic_processor *cpu, unsigned int address, unsigned int i
 {
   instruction *pi;
 
-  cpu16->current_disasm_address = address;
+  cpu16->setCurrentDisasmAddress(address);
 
   pi = 0;
   for(int i =0; i<NUM_OP_18CXX; i++)

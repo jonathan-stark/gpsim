@@ -47,7 +47,16 @@ void P12C508::create_iopin_map(void)
   package = new Package(8);
   if(!package)
     return;
+#if defined NEW_GPIO
 
+  package->assign_pin(7, m_gpio->addPin(new IO_bi_directional_pu("gpio0"),0));
+  package->assign_pin(6, m_gpio->addPin(new IO_bi_directional_pu("gpio1"),1));
+  package->assign_pin(5, m_gpio->addPin(new IO_bi_directional("gpio2"),2));
+  package->assign_pin(4, m_gpio->addPin(new IOPIN("gpio3"),3));
+  package->assign_pin(3, m_gpio->addPin(new IO_bi_directional("gpio4"),4));
+  package->assign_pin(2, m_gpio->addPin(new IO_bi_directional("gpio5"),5));
+
+#else
   // Build the links between the gpio and tris registers.
   gpio.tris = &tris;
   tris.port = &gpio;
@@ -65,6 +74,7 @@ void P12C508::create_iopin_map(void)
   package->assign_pin(4, new IOPIN(&gpio, 3));
   package->assign_pin(3, new IO_bi_directional(&gpio, 4));
   package->assign_pin(2, new IO_bi_directional(&gpio, 5));
+#endif
 
   package->assign_pin(1, 0);
   package->assign_pin(8, 0);
@@ -75,13 +85,35 @@ void P12C508::create_iopin_map(void)
 //--------------------------------------------------------
 void P12C508::reset(RESET_TYPE r)
 {
+#if defined NEW_GPIO
+  m_tris->reset(r);
+#else
+  tris.reset(r);
+#endif
 
-  tris.value = tris.por_value;
-  option_reg.value = option_reg.por_value;
+  switch (r) {
+  case IO_RESET:
+    // Set GPWUF flag
+    status->put(status->get() | 0x80);
 
-  pic_processor::reset(r);
-  
+    // fall through...
+   default:
+    _12bit_processor::reset(r);
+  }
+
 }
+
+//------------------------------------------------------------------------
+#define STATUS_GPWUF  0x80
+
+void P12C508::enter_sleep()
+{
+  pic_processor::enter_sleep();
+
+  status->put( status->get() & ~STATUS_GPWUF);
+  cout << "enter sleep status="<<hex <<status->get()<<endl;
+}
+
 
 void  P12C508::option_new_bits_6_7(unsigned int)
 {
@@ -92,18 +124,24 @@ void  P12C508::option_new_bits_6_7(unsigned int)
 void P12C508::create_sfr_map(void)
 {
 
-  add_sfr_register(indf,   0);
-  add_sfr_register(&tmr0,  1);
-  add_sfr_register(pcl,   2);
-  add_sfr_register(status,3);
-  add_sfr_register(fsr,    4);
-  add_sfr_register(&osccal,5);
-  add_sfr_register(&gpio,  6);
+  RegisterValue porVal(0,0);
 
-  add_sfr_register(W, 0xffffffff);
-  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
+  add_sfr_register(indf,   0, porVal);
+  add_sfr_register(&tmr0,  1, porVal);
+  add_sfr_register(pcl,    2, porVal);
+  add_sfr_register(status, 3, porVal);
+  add_sfr_register(fsr,    4, porVal);
+  add_sfr_register(&osccal,5, porVal);
+#if defined NEW_GPIO
+  add_sfr_register(m_gpio, 6, porVal);
+  add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x3f,0));
+#else
+  add_sfr_register(&gpio,  6, porVal);
   add_sfr_register(&tris, 0xffffffff, RegisterValue(0x3f,0));
-
+  tris.wdtr_value=RegisterValue(0x3f,0);
+#endif
+  add_sfr_register(W, 0xffffffff, porVal);
+  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
   osccal.new_name("osccal");
 
 
@@ -111,9 +149,14 @@ void P12C508::create_sfr_map(void)
 
 void P12C508::create_symbols(void)
 {
+  _12bit_processor::create_symbols();
 
+#if defined NEW_GPIO
+  symbol_table.add_register(m_gpio);
+  symbol_table.add_register(m_tris);
+#else
   symbol_table.add_ioport(&gpio);
-
+#endif
 }
 
 
@@ -123,7 +166,10 @@ void P12C508::dump_registers (void)
 
   _12bit_processor::dump_registers();
 
+#if defined NEW_GPIO
+#else
   cout << "tris = 0x" << hex << tris.value.get() << '\n';
+#endif
   cout << "osccal = 0x" << osccal.value.get()  << '\n';
 
 }
@@ -134,9 +180,13 @@ void P12C508::tris_instruction(unsigned int tris_register)
 //  cout << " Tris instruction\n";
 
   //tris.value = W.value;
+#if defined NEW_GPIO
+  m_tris->put(W->value.get());
+  trace.write_TRIS(m_tris->value.get());
+#else
   tris.put(W->value.get());
   trace.write_TRIS(tris.value.get());
-
+#endif
 }
   
 void P12C508::create(void)
@@ -144,7 +194,6 @@ void P12C508::create(void)
 
   cout << " 12c508 create \n";
 
-  //P12C508::create();
   create_iopin_map();
 
   _12bit_processor::create();
@@ -171,7 +220,7 @@ Processor * P12C508::construct(void)
   p->pc->set_reset_address(0x1ff);
 
   p->create();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->name_str = "p12c508";
   symbol_table.add_module(p,p->name_str.c_str());
@@ -185,6 +234,11 @@ P12C508::P12C508(void)
 {
   if(verbose)
     cout << "12c508 constructor, type = " << isa() << '\n';
+
+  m_gpio = new GPIO("gpio",8,0x1f);
+  m_tris = new PicTrisRegister(m_gpio);
+  m_tris->new_name("tris");
+  m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)
     config_modes->valid_bits = config_modes->CM_FOSC0 | config_modes->CM_FOSC1 | 
@@ -210,7 +264,7 @@ Processor * P12C509::construct(void)
   p->pc->set_reset_address(0x3ff);
 
   p->create();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->name_str = "p12c509";
   symbol_table.add_module(p,p->name_str.c_str());
@@ -260,7 +314,7 @@ Processor * P12CE518::construct(void)
 
   if(verbose)
     cout << " ... create symbols\n";
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->name_str = "p12ce518";
   symbol_table.add_module(p,p->name_str.c_str());
@@ -275,8 +329,11 @@ void P12CE518::create_iopin_map(void)
   P12C508::create_iopin_map();
 
   // Define the valid I/O pins.
-  gpio.valid_iopins = 0xff;
 
+#if defined NEW_GPIO
+#else
+  gpio.valid_iopins = 0xff;
+#endif
 }
 
 void P12CE518::create(void)
@@ -296,6 +353,24 @@ void P12CE518::create(void)
   e->set_cpu(this);
   e->initialize ( 0x10 );
 
+#if defined NEW_GPIO
+  // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
+  // to the internal I2C device.
+  m_gpio->setEnableMask(0xc0 | m_gpio->getEnableMask());
+
+  scl = new Stimulus_Node ( "EE_SCL" );
+  scl->attach_stimulus( m_gpio->addPin(new IO_bi_directional_pu("gpio7"),7));
+
+  sda = new Stimulus_Node ( "EE_SDA" );
+
+  IO_open_collector *io_sda = new IO_open_collector("gpio6");
+  m_gpio->addPin(io_sda,6);
+  // enable the pullup resistor.
+  if(io_sda)
+    io_sda->update_pullup(true);
+
+  sda->attach_stimulus (io_sda);
+#else
   // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
   // to the internal I2C device.
   gpio.valid_iopins |= 0xc0;
@@ -323,14 +398,22 @@ void P12CE518::create(void)
 
   sda->attach_stimulus (io_sda);
 
+#endif
+
   e->attach ( scl, sda );
 
   set_eeprom(e);
 
+
+#if defined NEW_GPIO
+  // Kludge to force top two bits to be outputs
+  m_tris->value.put(0xff);
+  m_tris->put(0x3f);
+#else
   // Kludge to force top two bits to be outputs
   tris.value.put(0xff);
   tris.put(0x3f);
-  
+#endif  
 }
 
 P12CE518::P12CE518(void)
@@ -347,20 +430,18 @@ void P12CE518::tris_instruction(unsigned int tris_register)
 {
     unsigned int w_val;
 
-//  cout << " Tris instruction\n";
-
-  //tris.value = W.value;
   w_val = W->value.get();
+#if defined NEW_GPIO
+  m_tris->put ( w_val & 0x3F );     // top two bits always output
+#else
   tris.put ( w_val & 0x3F );     // top two bits always output
+#endif
   trace.write_TRIS(w_val);
-
 }
 
 void P12CE518::set_eeprom(I2C_EE *e)
 {
   eeprom = e; 
-
-  //  eeprom->cpu = this;
 
   ema.set_cpu(this);
   ema.set_Registers(e->rom, e->rom_size);
@@ -385,7 +466,7 @@ Processor * P12CE519::construct(void)
   p->pc->set_reset_address(0x3ff);
 
   p->create();
-  p->pic_processor::create_symbols();
+  p->create_symbols();
 
   p->name_str = "p12ce519";
   symbol_table.add_module(p,p->name_str.c_str());
@@ -423,7 +504,39 @@ P12CE519::P12CE519(void)
 //
 // GPIO Port
 
+#if defined NEW_GPIO
 
+GPIO::GPIO(const char *port_name, unsigned int numIopins, 
+	   unsigned int enableMask)
+  : PicPortRegister (port_name, numIopins, enableMask)
+{
+}
+
+void GPIO::setbit(unsigned int bit_number, bool new_value)
+{
+  unsigned int lastDrivenValue = drivenValue;
+
+  PortRegister::setbit(bit_number, new_value);
+
+  // If gpio bit 0,1 or 3 changed states AND
+  // ~GPWU is low (wake up on change is enabled) AND
+  // the processor is sleeping.
+  //    Then wake 
+
+  if ((lastDrivenValue ^ drivenValue) & 0x0b) {
+    if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
+
+      if(verbose)
+	cout << "IO bit changed while the processor was sleeping,\n\
+so the processor is waking up\n";
+
+      cpu->reset(IO_RESET);
+
+    }
+
+  }
+}
+#else
 void GPIO::setbit(unsigned int bit_number, bool new_value)
 {
   unsigned int old_value = value.get();
@@ -439,24 +552,17 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   // ~GPWU is low (wake up on change is enabled) AND
   // the processor is sleeping.
   //    Then wake 
-  if( diff & 0x0b)
-    {
-      if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
+  if( diff & 0x0b) {
+    if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
 
-	if(verbose)
-	  cout << "IO bit changed while the processor was sleeping,\n\
+      if(verbose)
+	cout << "IO bit changed while the processor was sleeping,\n\
 so the processor is waking up\n";
 
-	cpu12->status->put(cpu12->status->get() | 0x80);  // Set GPWUF flag
-	bp.clear_sleep();                 // Wake up the processor.
+      cpu->reset(IO_RESET);
 
-	cpu12->pc->reset();
-
-
-      }
     }
-
-
+  }
 }
 
-
+#endif

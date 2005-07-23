@@ -57,7 +57,6 @@ public:
 #define CONFIG4   (0x300006 >> 1)
 #define DEVID     (0x3ffffe >> 1)
 
-  unsigned int current_disasm_address;  // Used only when .hex/.cod files are loaded
 
   PIC_IOPORT   porta;      // So far, all 18xxx parts contain ports A,B,C
   IOPORT_TRIS  trisa;
@@ -182,7 +181,11 @@ public:
   static pic_processor *construct(void);
   _16bit_processor(void);
 
-
+  unsigned int getCurrentDisasmAddress() { return m_current_disasm_address;}
+  unsigned int getCurrentDisasmIndex()   { return m_current_disasm_address/2;}
+  void setCurrentDisasmAddress(unsigned a) { m_current_disasm_address =a; }
+protected:
+  unsigned int m_current_disasm_address;  // Used only when .hex/.cod files are loaded
 
 };
 
