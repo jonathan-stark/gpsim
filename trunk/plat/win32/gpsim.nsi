@@ -140,7 +140,7 @@ Section "MainSection" SEC01
   File "${PKG_ROOT}\bin\libpangoft2-1.0-0.dll"
   File "${PKG_ROOT}\bin\libpangowin32-1.0-0.dll"
   File "${PKG_ROOT}\bin\popt1.dll"
-  File "${PKG_ROOT}\bin\pthreadVC1.dll"
+  File "${PKG_ROOT}\bin\pthreadVC2.dll"
   File "${PKG_ROOT}\bin\readline.dll"
 
   SetOutPath "$INSTDIR\doc"
@@ -476,7 +476,7 @@ Section Uninstall
   Delete "$INSTDIR\bin\msvcr71.dll"
   Delete "$INSTDIR\bin\popt1.dll"
   Delete "$INSTDIR\bin\readline.dll"
-  Delete "$INSTDIR\bin\pthreadVC1.dll"
+  Delete "$INSTDIR\bin\pthreadVC2.dll"
 
   Delete "$SMPROGRAMS\gpsim\Uninstall.lnk"
   Delete "$SMPROGRAMS\gpsim\Website.lnk"
