@@ -1,3 +1,7 @@
+2005-07-23 Borut Razem <borut.razem@siol.net>
+	* gpsim/gpsim.vcproj, doc/gpsimWin32.html: use pthreads-w32-2-7-0-release
+	* cli/scan.ll: corrected typo
+
 2005-07-22 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_disasm.cc: rnages were disassembling wrong addresses
 	* gui/gui_src_asm.cc: cleanup
