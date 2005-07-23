@@ -423,7 +423,7 @@ abort_gpsim_now {
 
 %%
 
-/* make it work with flex 2.4.31 */
+/* make it work with flex 2.5.31 */
 #ifndef yytext_ptr
 #define yytext_ptr yytext
 #endif
