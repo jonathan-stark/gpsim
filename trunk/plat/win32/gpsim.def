@@ -8,10 +8,10 @@ EXPORTS
     ??0Float@@QAE@N@Z
     ??0Float@@QAE@PBDN0@Z
     ??0IOPIN@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
-    ??0IOPIN@@QAE@XZ
+    ??0IOPIN@@QAE@PBD@Z
     ??0IOPORT@@QAE@I@Z
     ??0IO_bi_directional@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
-    ??0IO_bi_directional@@QAE@XZ
+    ??0IO_bi_directional@@QAE@PBD@Z
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0Integer@@QAE@_J@Z
     ??0Integer@@QAE@PBD_J0@Z
@@ -283,6 +283,7 @@ EXPORTS
     ?remove@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?remove_stimulus@@YAXPAVstimulus@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
+    ?reset@sfr_register@@UAEXW4RESET_TYPE@@@Z
     ?reset@Module@@UAEXW4RESET_TYPE@@@Z
     ?reset@Program_Counter@@QAEXXZ
     ?rts@ByteLogger@gpsim@@QAEX_K@Z
@@ -355,6 +356,7 @@ EXPORTS
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@IOPIN@@UAEXXZ
+    ?signalParent@Token@gpsim@@QAEXXZ
     ?SimulatedGet@Register@@UAEIXZ
     ?SimulatedSet@Register@@UAEXI@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
@@ -394,12 +396,13 @@ EXPORTS
     ?update@Stimulus_Node@@QAEX_K@Z
     ?update@gpsimValue@@UAEXXZ
     ?update_direction@IO_bi_directional@@UAEXI@Z
+    ?update_pullup@IO_bi_directional_pu@@UAEX_N@Z
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?waitForChild@Token@gpsim@@QAEXXZ
     ?verbose@@3HA
-    get_symbol_table
     GetUserInterface
+    get_symbol_table
     load_library
     get_library_export
     free_error_message
