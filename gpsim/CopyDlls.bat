@@ -15,13 +15,14 @@ if not exist %TargetDir%\intl.dll                copy ..\..\gettext\bin\intl.dll
 if not exist %TargetDir%\libgobject-2.0-0.dll    copy ..\..\glib\bin\libgobject-2.0-0.dll %TargetDir%
 if not exist %TargetDir%\libgthread-2.0-0.dll    copy ..\..\glib\bin\libgthread-2.0-0.dll %TargetDir%
 if not exist %TargetDir%\libgmodule-2.0-0.dll    copy ..\..\glib\bin\libgmodule-2.0-0.dll %TargetDir%
+
 if not exist %TargetDir%\libgdk-win32-2.0-0.dll  copy "..\..\gtk+\bin\libgdk-win32-2.0-0.dll" %TargetDir%
 if not exist %TargetDir%\libgdk_pixbuf-2.0-0.dll copy "..\..\gtk+\bin\libgdk_pixbuf-2.0-0.dll" %TargetDir%
 if not exist %TargetDir%\libgtk-win32-2.0-0.dll  copy "..\..\gtk+\bin\libgtk-win32-2.0-0.dll" %TargetDir%
 if not exist %TargetDir%\etc\gtk-2.0\*.*         md %TargetDir%\etc\gtk-2.0
-if not exist %TargetDir%\etc\gtk-2.0\*.*         copy "..\..\gtk+\etc\gtk-2.0\*.*" %TargetDir%\etc\gtk-2.0
+if not exist %TargetDir%\etc\gtk-2.0\g*.*        xcopy /s "..\..\gtk+\etc\gtk-2.0\*.*" %TargetDir%\etc\gtk-2.0
 if not exist %TargetDir%\lib\gtk-2.0\*.*         md %TargetDir%\lib\gtk-2.0
-if not exist %TargetDir%\lib\gtk-2.0\*.*         xcopy /s "..\..\gtk+\lib\gtk-2.0\*.*" %TargetDir%\lib\gtk-2.0
+if not exist %TargetDir%\lib\gtk-2.0\2.4.0\*.*   xcopy /s "..\..\gtk+\lib\gtk-2.0\*.*" %TargetDir%\lib\gtk-2.0
 
 if not exist %TargetDir%\libpango-1.0-0.dll      copy ..\..\pango\bin\libpango-1.0-0.dll %TargetDir%
 if not exist %TargetDir%\libpangowin32-1.0-0.dll copy ..\..\pango\bin\libpangowin32-1.0-0.dll %TargetDir%
@@ -31,5 +32,7 @@ if not exist %TargetDir%\etc\pango\pango.*       xcopy /s ..\..\pango\etc\pango\
 if not exist %TargetDir%\lib\pango\pango.*       xcopy /s ..\..\pango\lib\pango\*.* %TargetDir%\lib\pango
 
 if not exist %TargetDir%\libatk-1.0-0.dll        copy "..\..\atk\bin\libatk-1.0-0.dll" %TargetDir%
-if not exist %TargetDir%\pthreadVC1.dll          copy "..\..\pthreads\lib\pthreadVC1.dll" %TargetDir%
+if not exist %TargetDir%\pthreadVC2.dll          copy "..\..\pthreads\lib\pthreadVC2.dll" %TargetDir%
 
+rem Sanity check
+if not exist %TargetDir%\libiconv-2.dll if exist %TargetDir%\iconv.dll copy ..\..\iconv\bin\iconv.dll %TargetDir%\libiconv-2.dll
