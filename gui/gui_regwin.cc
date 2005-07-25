@@ -591,7 +591,7 @@ file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
 
-    file_selection_name=gtk_file_selection_get_filename (fs);
+    file_selection_name=gtk_file_selection_get_filename_utf8 (fs);
 
     fs_done=1;
 }
