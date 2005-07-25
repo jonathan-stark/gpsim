@@ -204,7 +204,6 @@ popup_activated(GtkWidget *widget, gpointer data)
   menu_item *item;
   int i,j;
   GtkSheetRange range;
-  unsigned int address;
   int pm_size;
   gint char_width;
 
@@ -233,38 +232,36 @@ popup_activated(GtkWidget *widget, gpointer data)
       printf("This function is not implemented\n");
 
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=j*16+i;
-	    popup_sbow->gp->cpu->pma->toggle_break_at_address(address);
-	  }
+	for(i=range.col0;i<=range.coli;i++) {
+	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+	  popup_sbow->gp->cpu->pma->toggle_break_at_address(address);
+	}
       break;
 
     case MENU_BREAK_EXECUTE:
 
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=j*16+i;
-	    popup_sbow->gp->cpu->pma->set_break_at_address(address);
-	  }
+	for(i=range.col0;i<=range.coli;i++) {
+	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+	  popup_sbow->gp->cpu->pma->set_break_at_address(address);
+	}
       break;
     case MENU_BREAK_CLEAR:
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=j*16+i;
-	    popup_sbow->gp->cpu->pma->set_break_at_address(address);
-	  }
+	for(i=range.col0;i<=range.coli;i++) {
+	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+	  popup_sbow->gp->cpu->pma->set_break_at_address(address);
+	}
       break;
     case MENU_ADD_WATCH:
       puts("not implemented");
+      /*
       for(j=range.row0;j<=range.rowi;j++)
-	for(i=range.col0;i<=range.coli;i++)
-	  {
-	    address=j*16+i;
-	    //WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
-	  }
+	for(i=range.col0;i<=range.coli;i++) {
+	  unsigned address = popup_sbow->gp->cpu->map_pm_index2address(j*16+i);
+	  WatchWindow_add(popup_sbow->gui_obj.gp->watch_window,pic_id, popup_sbow->type, address);
+	}
+      */
       break;
     case MENU_ASCII_1BYTE:
       popup_sbow->ascii_mode=0;
@@ -491,41 +488,41 @@ static void filter(char *clean, char *dirty, int max)
 
 static void update_styles(SourceBrowserOpcode_Window *sbow, int address)
 {
-    GtkSheetRange range;
+  GtkSheetRange range;
 
-    int index = address;
+  int index = address;
 
-    if(sbow->gp->cpu)
-      index = sbow->gp->cpu->map_pm_address2index(address);
+  if(sbow->gp->cpu)
+    index = sbow->gp->cpu->map_pm_address2index(address);
 
-    int row=index/16;
-    int column=index%16;
+  int row=index/16;
+  int column=index%16;
 
 
-    range.row0=row;
-    range.rowi=row;
-    range.col0=column;
-    range.coli=column;
+  range.row0=row;
+  range.rowi=row;
+  range.col0=column;
+  range.coli=column;
     
-    if(!sbow->gp->cpu) {
+  if(!sbow->gp->cpu) {
+    gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
+    return;
+  }
+
+  if(sbow->gp->cpu && sbow->gp->cpu->pma->address_has_break(address)) {
+
+    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->breakpoint_line_number_style);
+    gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
+
+  } else {
+
+    gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->normal_style);
+
+    if(sbow->gp->cpu->pma->isModified(address))
+      gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
+    else
       gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
-      return;
-    }
-
-    if(sbow->gp->cpu && sbow->gp->cpu->pma->address_has_break(address)) {
-
-      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->breakpoint_line_number_style);
-      gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->breakpoint_color);
-
-    } else {
-
-      gtk_clist_set_row_style (GTK_CLIST (sbow->clist), index, sbow->normal_style);
-
-      if(sbow->gp->cpu->pma->isModified(address))
-	gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->pm_has_changed_color);
-      else
-        gtk_sheet_range_set_background(GTK_SHEET(sbow->sheet), &range, &sbow->normal_pm_bg_color);
-    }
+  }
 
 }
 
@@ -567,13 +564,13 @@ static void update_values(SourceBrowserOpcode_Window *sbow, int address)
   if(!sbow || !sbow->gp || !sbow->gp->cpu)
     return;
 
-  int row=address/16;
-  int column=address%16;
+  unsigned uMemoryIndex = sbow->gp->cpu->map_pm_address2index(address);
+  int row=uMemoryIndex/16;
+  int column=uMemoryIndex%16;
   char buf[128];
   unsigned int oc;
 
   oc = sbow->gp->cpu->pma->get_opcode(address);
-  unsigned uMemoryIndex = sbow->gp->cpu->map_pm_address2index(address);
   if(oc != sbow->memory[uMemoryIndex]) {
     
     sbow->memory[address]=oc;
@@ -1182,13 +1179,13 @@ void SourceBrowserOpcode_Window::Fill()
 
 
   for(i=0; i < pm_size; i++) {
-    opcode = gp->cpu->pma->get_opcode(i);
-    memory[i]=opcode;
     int address = gp->cpu->map_pm_index2address(i);
+    opcode = gp->cpu->pma->get_opcode(address);
+    memory[i]=opcode;
     sprintf (row_text[ADDRESS_COLUMN], "0x%04X", address);
     sprintf(row_text[OPCODE_COLUMN], "0x%04X", opcode);
     filter(row_text[MNEMONIC_COLUMN],
-	   gp->cpu->pma->get_opcode_name(i,buf,sizeof(buf)),
+	   gp->cpu->pma->get_opcode_name(address,buf,sizeof(buf)),
 	   128);
 
     if(GTK_SHEET(sheet)->maxrow<i/16)

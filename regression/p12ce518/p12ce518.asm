@@ -42,6 +42,8 @@ start:
     movwf   GPIO
     movlw   0x0F
     tris    GPIO
+    movlw   1<<7      ; Assume that we're going to fail
+    movwf   failures  ; by setting the MSB of failures
 
 FillEEPROM:
         movlw   0
@@ -73,14 +75,16 @@ FillWaitForWrite:
         movf    INDF,W
         xorwf   eedata,W
         skpz
-         incf   failures,f
+         incf   failures,f      ; failed 
 
         incf    FSR,F
         incf    temp,F
         btfss   temp,4
          goto   FillLoop
 
-
+    ; If we reach this point then it means that we didn't
+    ; get stuck in the loop. 
+	bcf	failures,7
 done:
         goto    done
 

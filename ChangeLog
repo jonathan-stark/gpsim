@@ -1,3 +1,14 @@
+2005-07-25 Scott Dattalo <scott@dattalo.com>
+	* regression/instructions_16bit/instructions_16bit.asm: added
+	tests for multi-word instructions.
+	* regression/p12ce518/p12ce518.asm: debugging eeprom i2c interface
+	* gui/gui_src_opcode.cc, src/16bit-instructions.cc,
+	src/16bit-instructions.h: Fixed more problems with address <-->
+	index mapping. (and there are still some issues remaing with the
+	program memory viewer).
+	* src/i2c-ee.cc, src/ioports.cc, src/ioports.h, src/p12x.cc,
+	src/p12x.h: The eeprom i2c interface is broken...
+
 2005-07-23 Borut Razem <borut.razem@siol.net>
 	* gpsim/gpsim.vcproj, doc/gpsimWin32.html: use pthreads-w32-2-7-0-release
 	* cli/scan.ll: corrected typo

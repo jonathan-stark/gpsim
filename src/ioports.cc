@@ -372,18 +372,25 @@ void PinModule::setDirection()
 PicPortRegister::PicPortRegister(const char *port_name,
 				 unsigned int numIopins, 
 				 unsigned int enableMask)
-  : PortRegister(numIopins, enableMask), m_tris(0)
+  : PortRegister(numIopins, false), m_tris(0)
 {
   new_name(port_name);
+  PicPortRegister::setEnableMask(enableMask);
+}
 
-  for (unsigned int i=0, m=1; i<numIopins; i++, m<<= 1)
-    if (mEnableMask & m) {
+void PicPortRegister::setEnableMask(unsigned int newEnableMask)
+{
+  unsigned int maskDiff = getEnableMask() ^ newEnableMask;
+
+  for (unsigned int i=0, m=1; i<mNumIopins; i++, m<<= 1)
+    if (maskDiff & m) {
       PinModule *pmP = new PinModule(this,i);
       PortModule::addPinModule(pmP,i);
       pmP->setDefaultSource(new PicSignalSource(this, i));
       pmP->addSink(new PortSink(this, i));
     }
-      
+
+  PortRegister::setEnableMask(newEnableMask);
 }
 class PicSignalControl : public SignalControl
 {

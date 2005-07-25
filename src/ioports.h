@@ -207,7 +207,7 @@ public:
   virtual void putDrive(unsigned int new_drivingValue);
   virtual unsigned int getDriving();
   virtual void setbit(unsigned int bit_number, bool new_value);
-  void setEnableMask(unsigned int nEnableMask)
+  virtual void setEnableMask(unsigned int nEnableMask)
   {
     mEnableMask = nEnableMask;
   }
@@ -227,6 +227,7 @@ class PicPortRegister : public PortRegister
 public:
   PicPortRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
   void setTris(PicTrisRegister *new_tris);
+  virtual void setEnableMask(unsigned int nEnableMask);
   Register *getTris();
 protected:
   PicTrisRegister *m_tris;
