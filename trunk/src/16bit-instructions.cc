@@ -55,13 +55,13 @@ void Branching::decode(Processor *new_cpu, unsigned int new_opcode)
     case  _P18F452_:
     case  _P18F1220_:
     case  _P18F1320_:
-      destination = (new_opcode & 0xff)+1;
-      absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
+      destination_index = (new_opcode & 0xff)+1;
+      absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
  
       if(new_opcode & 0x80)
         {
-          absolute_destination -= 0x100;
-          destination = 0x100 - destination;
+          absolute_destination_index -= 0x100;
+          destination_index = 0x100 - destination_index;
         }
       break;
 
@@ -86,8 +86,8 @@ char *Branching::name(char *return_str, int len)
   snprintf(return_str, len,"%s\t$%c0x%x\t;(0x%x)",
 	   gpsimValue::name().c_str(),
 	   (opcode & 0x80) ? '-' : '+', 
-	   (destination & 0x7f)<<1,
-	   absolute_destination<<1);
+	   (destination_index & 0x7f)<<1,
+	   absolute_destination_index<<1);
 
 
   return(return_str);
@@ -96,9 +96,9 @@ char *Branching::name(char *return_str, int len)
 //--------------------------------------------------
 void multi_word_branch::runtime_initialize(void)
 {
-  if(cpu16->program_memory[address+1] != &bad_instruction)
+  if(cpu16->program_memory[PMindex+1] != &bad_instruction)
     {
-      word2_opcode = cpu16->program_memory[address+1]->get_opcode();
+      word2_opcode = cpu16->program_memory[PMindex+1]->get_opcode();
 
       if((word2_opcode & 0xf000) != 0xf000) 
 	{
@@ -106,8 +106,9 @@ void multi_word_branch::runtime_initialize(void)
 	  return;
 	}
 
-      cpu16->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
-      destination = ( (word2_opcode & 0xfff)<<8) | (opcode & 0xff);
+      cpu16->program_memory[PMindex+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
+      // extract the destination address from the two-word opcode
+      destination_index = ((word2_opcode & 0xfff)<<8) | (opcode & 0xff);
       initialized = true;
     }
 }
@@ -119,7 +120,7 @@ char * multi_word_branch::name(char *return_str,int len)
 
   snprintf(return_str,len,"%s\t0x%05x",
 	   gpsimValue::name().c_str(),
-	   destination<<1);
+	   destination_index<<1);
 
   return(return_str);
 }
@@ -268,7 +269,7 @@ void BC::execute(void)
   // trace.instruction(opcode);
 
   if(cpu16->status->value.get() & STATUS_C)
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
   else
     cpu16->pc->increment();
 
@@ -290,7 +291,7 @@ void BN::execute(void)
   // trace.instruction(opcode);
 
   if(cpu16->status->value.get() & STATUS_N)
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
   else
     cpu16->pc->increment();
 
@@ -314,7 +315,7 @@ void BNC::execute(void)
   if(cpu16->status->value.get() & STATUS_C)
     cpu16->pc->increment();
   else
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -336,7 +337,7 @@ void BNN::execute(void)
   if(cpu16->status->value.get() & STATUS_N)
     cpu16->pc->increment();
   else
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -358,7 +359,7 @@ void BNOV::execute(void)
   if(cpu16->status->value.get() & STATUS_OV)
     cpu16->pc->increment();
   else
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -380,7 +381,7 @@ void BNZ::execute(void)
   if(cpu16->status->value.get() & STATUS_Z)
     cpu16->pc->increment();
   else
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -400,7 +401,7 @@ void BOV::execute(void)
   // trace.instruction(opcode);
 
   if(cpu16->status->value.get() & STATUS_OV)
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
   else
     cpu16->pc->increment();
 
@@ -412,13 +413,13 @@ BRA::BRA (Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
 
-  destination = (new_opcode & 0x7ff)+1;
-  absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
+  destination_index = (new_opcode & 0x7ff)+1;
+  absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
 
   if(new_opcode & 0x400)
     {
-      absolute_destination -= 0x800;
-      destination = 0x800 - destination;
+      absolute_destination_index -= 0x800;
+      destination_index = 0x800 - destination_index;
     }
 
   new_name("bra");
@@ -428,7 +429,7 @@ void BRA::execute(void)
 {
   // trace.instruction(opcode);
 
-  cpu16->pc->jump(absolute_destination);
+  cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -439,8 +440,8 @@ char * BRA::name(char *return_str,int len)
   sprintf(return_str,"%s\t$%c0x%x\t;(0x%05x)",
 	  gpsimValue::name().c_str(),
 	  (opcode & 0x400) ? '-' : '+', 
-	  (destination & 0x7ff)<<1,
-	  absolute_destination<<1);
+	  (destination_index & 0x7ff)<<1,
+	  absolute_destination_index<<1);
 
   return(return_str);
 }
@@ -487,7 +488,7 @@ void BZ::execute(void)
   // trace.instruction(opcode);
 
   if(cpu16->status->value.get() & STATUS_Z)
-    cpu16->pc->jump(absolute_destination);
+    cpu16->pc->jump(absolute_destination_index);
   else
     cpu16->pc->increment();
 
@@ -499,7 +500,8 @@ CALL16::CALL16 (Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   fast = (new_opcode & 0x100) ? true : false;
   cpu = new_cpu;
-  address = cpu16->getCurrentDisasmAddress();
+  PMaddress = cpu16->getCurrentDisasmAddress();
+  PMindex = cpu16->getCurrentDisasmIndex();
   initialized = false;
 
   new_name("call");
@@ -517,7 +519,7 @@ void CALL16::execute(void)
   if(fast)
     cpu16->fast_stack.push();
 
-  cpu16->pc->jump(destination);
+  cpu16->pc->jump(destination_index);
 
 }
 
@@ -528,7 +530,7 @@ char *CALL16::name(char  *return_str,int len)
     runtime_initialize();
 
   snprintf(return_str,len,"call\t0x%05x%s",
-	  destination<<1,
+	   destination_index<<1,
 	  ((fast) ? ",f" : " "));
 
   return(return_str);
@@ -767,7 +769,8 @@ GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->getCurrentDisasmAddress();
+  PMaddress = cpu16->getCurrentDisasmAddress();
+  PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
 
   new_name("goto");
@@ -775,14 +778,10 @@ GOTO16::GOTO16 (Processor *new_cpu, unsigned int new_opcode)
 
 void GOTO16::execute(void)
 {
-  // trace.instruction(opcode);
-
   if(!initialized)
     runtime_initialize();
 
-  //  cpu16->stack.push(cpu16->pc->get_next());
-
-  cpu16->pc->jump(destination);
+  cpu16->pc->jump(destination_index);
 
 }
 //--------------------------------------------------
@@ -791,7 +790,6 @@ void INCF16::execute(void)
 {
   unsigned int new_value, src_value;
 
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -812,14 +810,6 @@ void INCF16::execute(void)
       cpu16->status->put_Z_C_DC_OV_N(new_value, 1, src_value);
     }
 
-//   if(destination) {
-//     source->put(new_value);      // Result goes to source
-//   } else {
-//     cpu_pic->W->put(new_value);
-//   }
-
-//   cpu_pic->status->put_N_Z(new_value);
-
   cpu16->pc->increment();
 
 }
@@ -829,8 +819,6 @@ void INCF16::execute(void)
 void INCFSZ16::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -865,8 +853,6 @@ INFSNZ::INFSNZ (Processor *new_cpu, unsigned int new_opcode)
 void INFSNZ::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -909,8 +895,6 @@ void IORLW16::execute(void)
 void IORWF16::execute(void)
 {
   unsigned int new_value;
-
-  // trace.instruction(opcode);
 
   source = ((!access) ?
 	    cpu_pic->registers[register_address] 
@@ -965,7 +949,7 @@ char *LCALL16::name(char  *return_str,int len)
 //      runtime_initialize();
 
   snprintf(return_str,len,"lcall\t0x%05x%s",
-	  destination,
+	   destination_index<<1,
 	  ((fast) ? ",f" : " "));
 
   return(return_str);
@@ -978,7 +962,8 @@ LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
   
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->getCurrentDisasmAddress();
+  PMaddress = cpu16->getCurrentDisasmAddress();
+  PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
 
   fsr = (opcode & 0x30)>>4;
@@ -1006,9 +991,9 @@ LFSR::LFSR (Processor *new_cpu, unsigned int new_opcode)
 
 void LFSR::runtime_initialize(void)
 {
-  if(cpu_pic->program_memory[address+1])
+  if(cpu_pic->program_memory[PMindex+1])
     {
-      word2_opcode = cpu_pic->program_memory[address+1]->get_opcode();
+      word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
 
       if((word2_opcode & 0xff00) != 0xf000) 
 	{
@@ -1016,7 +1001,7 @@ void LFSR::runtime_initialize(void)
 	  return;
 	}
 
-      cpu_pic->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
+      cpu_pic->program_memory[PMindex+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       k = ( (opcode & 0xf)<<8) | (word2_opcode & 0xff);
       initialized = true;
     }
@@ -1090,7 +1075,8 @@ MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
 {
   opcode = new_opcode;
   cpu = new_cpu;
-  address = cpu16->getCurrentDisasmAddress();
+  PMaddress = cpu16->getCurrentDisasmAddress();
+  PMindex   = cpu16->getCurrentDisasmIndex();
   initialized = false;
   destination = 0;
   source = opcode & 0xfff;
@@ -1100,9 +1086,9 @@ MOVFF::MOVFF (Processor *new_cpu, unsigned int new_opcode)
 
 void MOVFF::runtime_initialize(void)
 {
-  if(cpu_pic->program_memory[address+1])
+  if(cpu_pic->program_memory[PMindex+1])
     {
-      word2_opcode = cpu_pic->program_memory[address+1]->get_opcode();
+      word2_opcode = cpu_pic->program_memory[PMindex+1]->get_opcode();
 
       if((word2_opcode & 0xf000) != 0xf000) 
 	{
@@ -1110,7 +1096,7 @@ void MOVFF::runtime_initialize(void)
 	  return;
 	}
 
-      cpu_pic->program_memory[address+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
+      cpu_pic->program_memory[PMindex+1]->update_line_number( file_id,  src_line, lst_line, 0, 0);
       destination = word2_opcode & 0xfff;
       initialized = true;
     }
@@ -1530,11 +1516,11 @@ RCALL::RCALL (Processor *new_cpu, unsigned int new_opcode)
   opcode = new_opcode;
   cpu = new_cpu;
 
-  destination = (new_opcode & 0x7ff)+1;
+  destination_index = (new_opcode & 0x7ff)+1;
   if(new_opcode & 0x400)
-    destination -= 0x800;
+    destination_index -= 0x800;
 
-  absolute_destination = (cpu16->getCurrentDisasmIndex() + destination) & 0xfffff;
+  absolute_destination_index = (cpu16->getCurrentDisasmIndex() + destination_index) & 0xfffff;
 
   new_name("rcall");
 }
@@ -1545,7 +1531,7 @@ void RCALL::execute(void)
 
   cpu16->stack->push(cpu16->pc->get_next());
 
-  cpu16->pc->jump(absolute_destination);
+  cpu16->pc->jump(absolute_destination_index);
 
 }
 
@@ -1555,9 +1541,9 @@ char * RCALL::name(char *return_str,int len)
 
   snprintf(return_str,len,"%s\t$%c0x%x\t;(0x%05x)",
 	   gpsimValue::name().c_str(),
-	   (destination < 0) ? '-' : '+', 
-	   (destination & 0x7ff)<<1,
-	   absolute_destination<<1);
+	   (destination_index < 0) ? '-' : '+', 
+	   (destination_index & 0x7ff)<<1,
+	   absolute_destination_index<<1);
 
   return(return_str);
 }

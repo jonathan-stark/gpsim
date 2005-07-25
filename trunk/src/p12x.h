@@ -24,9 +24,6 @@ Boston, MA 02111-1307, USA.  */
 #include "12bit-processors.h"
 #include "i2c-ee.h"
 
-#define NEW_GPIO 1
-
-#if defined NEW_GPIO
 class GPIO : public PicPortRegister
 {
 public:
@@ -35,27 +32,13 @@ public:
        unsigned int enableMask);
   void setbit(unsigned int bit_number, bool new_value);
 };
-#else
-class GPIO : public PIC_IOPORT
-{
-public:
-  void setbit(unsigned int bit_number, bool new_value);
-};
-#endif
-
 
 class P12C508 : public  _12bit_processor
 {
   public:
 
-#if defined NEW_GPIO
-
   GPIO            *m_gpio;
   PicTrisRegister *m_tris;
-#else
-  GPIO         gpio;
-  IOPORT_TRIS  tris;
-#endif
   sfr_register osccal;  // %%% FIX ME %%% Nothing's done with this.
 
   virtual PROCESSOR_TYPE isa(void){return _P12C508_;};

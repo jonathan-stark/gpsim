@@ -43,8 +43,8 @@ Boston, MA 02111-1307, USA.  */
 class Branching : public instruction
 {
 public:
-  int destination;
-  unsigned int absolute_destination;
+  int destination_index;
+  unsigned int absolute_destination_index;
 
   virtual void execute(void){ };
   virtual void debug(void){ };
@@ -59,7 +59,8 @@ class multi_word_instruction : public instruction
 {
  public:
   unsigned int word2_opcode;
-  unsigned int address;
+  unsigned int PMaddress;
+  unsigned int PMindex;
   bool initialized;
 
   virtual int instruction_size(void) { return 2;}
@@ -72,7 +73,7 @@ class multi_word_instruction : public instruction
 class multi_word_branch : public multi_word_instruction
 {
  public:
-  unsigned int destination;
+  unsigned int destination_index;
 
   void runtime_initialize(void);
   virtual void execute(void){};
@@ -228,8 +229,8 @@ public:
 class BRA : public instruction
 {
 public:
-  int destination;
-  unsigned int absolute_destination;
+  int destination_index;
+  unsigned int absolute_destination_index;
 
   BRA(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
@@ -667,8 +668,8 @@ public:
 class RCALL : public instruction
 {
 public:
-  int destination;
-  unsigned int absolute_destination;
+  int destination_index;
+  unsigned int absolute_destination_index;
 
   RCALL(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
