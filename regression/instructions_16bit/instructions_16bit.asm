@@ -11,7 +11,9 @@
 
   cblock  0
 
-        temp,temp1,temp2
+        temp
+	temp1		;the regression test depends on temp2 occupying
+	temp2		;the address followin temp1
         failures
   endc
         
@@ -586,7 +588,28 @@ start:
         bz      failed
         incfsz  temp,f
          bra    failed
-        
+
+        goto    BranchTest
+        bra     failed
+BranchTest:
+        call    CallTest
+        bra     MultiWordInstructions
+CallTest
+        return
+
+MultiWordInstructions:
+	movlw	0xa5
+	movwf	temp1
+	movff	WREG,temp2
+	xorwf	temp2,W
+	bnz	failed
+
+        ;; LFSR
+        LFSR	0,temp1
+	MOVF	INDF0,W
+	xorwf	INDF0,W
+	bnz	failed
+	
 done:
         bra     $
 
