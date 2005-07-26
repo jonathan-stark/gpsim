@@ -297,7 +297,7 @@ void P12CE518::create(void)
   e = new I2C_EE();
   e->set_cpu(this);
   e->initialize ( 0x10 );
-
+  e->debug();
 
   // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
   // to the internal I2C device.
@@ -308,19 +308,30 @@ void P12CE518::create(void)
   m_gpio->wdtr_value  = por_value;
   m_gpio->put(0xc0);
 
-  scl = new Stimulus_Node ( "EE_SCL" );
-  scl->attach_stimulus( m_gpio->addPin(new IO_bi_directional_pu("gpio7"),7));
+  // Kludge to force top two bits to be outputs
+  m_tris->put(0x3f);
 
-  sda = new Stimulus_Node ( "EE_SDA" );
+  {
+    scl = new Stimulus_Node ( "EE_SCL" );
+    IO_bi_directional_pu *io_scl = new IO_bi_directional_pu("gpio7");
+    io_scl->update_pullup(true);
+    io_scl->setDrivingState(true);
+    io_scl->setDriving(true);
+    scl->attach_stimulus( m_gpio->addPin(io_scl,7));
+    scl->update();
+  }
+  {
+    sda = new Stimulus_Node ( "EE_SDA" );
 
-  IO_open_collector *io_sda = new IO_open_collector("gpio6");
-  m_gpio->addPin(io_sda,6);
-  // enable the pullup resistor.
-  if(io_sda)
+    IO_open_collector *io_sda = new IO_open_collector("gpio6");
+    // enable the pullup resistor.
     io_sda->update_pullup(true);
-
-  sda->attach_stimulus (io_sda);
-
+    io_sda->setDrivingState(true);
+    io_sda->setDriving(true);
+    m_gpio->addPin(io_sda,6);
+    sda->attach_stimulus (io_sda);
+    sda->update();
+  }
 
 #if defined OLD_GPIO
     // GPIO bits 6 and 7 are not bonded to physical pins, but are tied
@@ -357,9 +368,6 @@ void P12CE518::create(void)
   set_eeprom(e);
 
 
-  // Kludge to force top two bits to be outputs
-  m_tris->value.put(0xff);
-  m_tris->put(0x3f);
 }
 
 P12CE518::P12CE518(void)

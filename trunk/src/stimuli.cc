@@ -1202,14 +1202,14 @@ char IO_bi_directional::getBitChar()
 //  This is called when a new value is written to the tris register
 // with which this bi-direction pin is associated.
 
-void IO_bi_directional::update_direction(unsigned int new_direction)
+void IO_bi_directional::update_direction(unsigned int new_direction, bool refresh)
 {
 
   setDriving(new_direction ? true : false);
 
   // If this pin is not associated with an IO Port, but it's tied
   // to a stimulus, then we need to update the stimulus.
-  if(!iop && snode)
+  if(refresh && !iop && snode)
     snode->update(0);
 }
 

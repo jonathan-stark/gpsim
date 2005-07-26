@@ -45,17 +45,20 @@ public:
 
   I2C_EE(void);
   void reset(RESET_TYPE);
-  virtual void set_cpu(pic_processor *p) { cpu = p; }
+  void debug();
 
-  virtual void callback(void);
-  virtual void start_write(void);
-  virtual void write_is_complete(void);
-//  virtual void start_program_memory_read(void);  
+  virtual void set_cpu(pic_processor *p) { cpu = p; }
+  virtual void callback();
+  virtual void callback_print();
+  virtual void start_write();
+  virtual void write_is_complete();
+
   virtual void initialize(unsigned int new_rom_size);
   virtual Register *get_register(unsigned int address);
-  virtual void I2C_EE::new_scl_edge ( bool direction );
-  virtual void I2C_EE::new_sda_edge ( bool direction );
-  virtual void I2C_EE::attach ( Stimulus_Node *_scl, Stimulus_Node *_sda );
+
+  virtual void new_scl_edge ( bool direction );
+  virtual void new_sda_edge ( bool direction );
+  virtual void attach ( Stimulus_Node *_scl, Stimulus_Node *_sda );
 
   inline virtual void change_rom(unsigned int offset, unsigned int val) {
     assert(offset < rom_size);
@@ -69,8 +72,8 @@ public:
   void dump(void);
 
   //protected:
-  bool I2C_EE::shift_read_bit ( bool x );
-  bool I2C_EE::shift_write_bit ( void );
+  bool shift_read_bit ( bool x );
+  bool shift_write_bit ( void );
 
   char *name_str;
 
