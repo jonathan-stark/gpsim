@@ -143,7 +143,11 @@ file_selection_ok (GtkWidget        *w,
 
   if(gp)
   {
+#ifdef _WIN32
     file=gtk_file_selection_get_filename_utf8 (fs);
+#else
+    file=gtk_file_selection_get_filename (fs);
+#endif
     if(!gpsim_open(gp->cpu, file, NULL))
     {
       sprintf(msg, "Open failedCould not open \"%s\"", (char *)file);
