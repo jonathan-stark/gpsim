@@ -609,7 +609,44 @@ MultiWordInstructions:
 	MOVF	INDF0,W
 	xorwf	INDF0,W
 	bnz	failed
+
+TableRead:
+   ; get a pointer to the start of the table area
+	clrf	TBLPTRU
+	movlw	LOW(TableDATA)
+	movwf	TBLPTRL
+	movlw	HIGH(TableDATA)
+	movwf	TBLPTRH
+
+   ; read the table and test the autoinc and autodec.
+
+	tblrd	*+
+	movlw	0x11
+	rcall	TestTablat
+	tblrd   *
+	movlw	0x22
+	rcall	TestTablat
+	tblrd	*+
+	movlw	0x22
+	rcall	TestTablat
+	tblrd	*-
+	movlw	0x33
+	rcall	TestTablat
+	tblrd   *
+	movlw	0x22
+	rcall	TestTablat
+
+	bra	TableReadEnd
 	
+TableDATA:
+	db	0x11,0x22,0x33,0x44
+
+TestTablat:	
+	cpfseq	TABLAT
+	 bra	failed
+	return
+TableReadEnd:	
+
 done:
         bra     $
 
