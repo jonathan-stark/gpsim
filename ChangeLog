@@ -1,4 +1,11 @@
 2005-07-25 Scott Dattalo <scott@dattalo.com>
+	* src/i2c-ee.cc, src/i2c-ee.h, src/ioports.cc, src/ioports.h,
+	src/p12x.cc, src/stimuli.cc, src/stimuli.h: Fixed 12CE51x internal
+	eeprom peripheral. 
+	* gui/gui_menu.cc, gui/gui_regwin.cc: Removed dependency on gtk
+	win32 port.
+
+2005-07-25 Scott Dattalo <scott@dattalo.com>
 	* regression/instructions_16bit/instructions_16bit.asm: added
 	tests for multi-word instructions.
 	* regression/p12ce518/p12ce518.asm: debugging eeprom i2c interface

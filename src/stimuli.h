@@ -345,7 +345,7 @@ class IOPIN : public stimulus
 
   // These functions don't apply to Inputs, but provide an
   // interface for the derived classes.
-  virtual void update_direction(unsigned int x){ };
+  virtual void update_direction(unsigned int x, bool refresh=true){ };
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
   virtual void update_pullup(bool new_state) { }
 
@@ -382,7 +382,7 @@ public:
 
   virtual void set_nodeVoltage(double new_nodeVoltage);
 
-  virtual void update_direction(unsigned int);
+  virtual void update_direction(unsigned int,bool refresh=true);
   virtual IOPIN_DIRECTION  get_direction(void)
   {return ((getDriving()) ? DIR_OUTPUT : DIR_INPUT);}
 };

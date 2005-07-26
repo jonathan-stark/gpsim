@@ -116,8 +116,9 @@ void PortRegister::put(unsigned int new_value)
     // value and the driven value are the same. If there are external
     // stimuli (or perhaps internal peripherals) overdriving or overriding
     // this port, then the call to updatePort() will update 'drivenValue'
-    // to its proper value.
-    drivenValue = drivingValue;
+    // to its proper value. In either case, calling updatePort ensures 
+    // the drivenValue is updated properly
+    
     updatePort();
   }
 }
@@ -134,10 +135,14 @@ void PortRegister::setbit(unsigned int bit_number, bool new_value)
 
 }
 
-unsigned int PortRegister::get(unsigned int new_value)
+unsigned int PortRegister::get()
 {
   trace.raw(read_trace.get() | drivenValue);
 
+  return drivenValue;
+}
+unsigned int PortRegister::get_value()
+{
   return drivenValue;
 }
 void PortRegister::putDrive(unsigned int new_value)
@@ -251,6 +256,8 @@ void PinModule::setPin(IOPIN *new_pin)
   if (!m_pin && new_pin) {
     m_pin = new_pin;
     m_pin->setMonitor(this);
+    m_bLastControlState = getControlState();
+    m_bLastSourceState = getSourceState();
   }
 
 }
@@ -265,7 +272,8 @@ void PinModule::updatePinModule()
   if (bCurrentControlState != m_bLastControlState) {
     //printf("PinModule::%s - pin:%d newControlState=%s\n",__FUNCTION__,m_pinNumber,(bCurrentControlState?"true":"false"));
     m_bLastControlState = bCurrentControlState;
-    m_pin->update_direction(bCurrentControlState ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT);
+    m_pin->update_direction(bCurrentControlState ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT,
+			    false);
     bStateChange = true;
   }
 
@@ -278,9 +286,12 @@ void PinModule::updatePinModule()
     bStateChange = true;
   }
 
-  if (bStateChange && m_pin->snode)
-    m_pin->snode->update();
-
+  if (bStateChange) {
+    if (m_pin->snode)
+      m_pin->snode->update();
+    else
+      setDrivenState(bCurrentSourceState);
+  }
 }
 
 void PinModule::setDefaultControl(SignalControl *newDefaultControl)

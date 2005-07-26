@@ -203,7 +203,8 @@ public:
   PortRegister(unsigned int numIopins, unsigned int enableMask);
 
   virtual void put(unsigned int new_value);
-  virtual unsigned int get(unsigned int new_value);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
   virtual void putDrive(unsigned int new_drivingValue);
   virtual unsigned int getDriving();
   virtual void setbit(unsigned int bit_number, bool new_value);
