@@ -20,6 +20,7 @@ libgpsim_la_SOURCES = \
 	16bit-tmrs.cc \
 	attributes.cc \
 	bitlog.cc \
+	bit.cc \
 	bytelog.cc \
 	breakpoints.cc \
 	cod.cc \
@@ -84,6 +85,7 @@ gpsiminclude_HEADERS = \
 	16bit-registers.h \
 	16bit-tmrs.h \
 	attributes.h \
+	bit.h \
 	bitlog.h \
 	breakpoints.h \
 	bytelog.h \
