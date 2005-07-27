@@ -1236,11 +1236,11 @@ IO_bi_directional_pu::~IO_bi_directional_pu(void)
 
 }
 
-void IO_bi_directional_pu::update_pullup(bool new_state)
+void IO_bi_directional_pu::update_pullup(bool new_state, bool refresh)
 {
   if (bPullUp != new_state) {
     bPullUp = new_state;
-    if (snode)
+    if (snode && refresh)
       snode->update();
     else
       setDrivenState(bPullUp);

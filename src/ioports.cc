@@ -59,7 +59,7 @@ Boston, MA 02111-1307, USA.  */
 //
 //-------------------------------------------------------------------
 
-class PicSignalSource : public SignalSource
+class PicSignalSource : public SignalControl
 {
 public:
   PicSignalSource(PortRegister *_reg, unsigned int bitPosition)
@@ -235,7 +235,8 @@ void PortModule::addPinModule(PinModule *newModule, unsigned int iPinNumber)
 PinModule::PinModule()
   : PinMonitor(), m_pin(0),m_port(0), m_pinNumber(0),
     m_activeControl(0),m_defaultControl(0),
-    m_activeSource(0),m_defaultSource(0)
+    m_activeSource(0),m_defaultSource(0),
+    m_activePullupControl(0),m_defaultPullupControl(0)
 {
 
 }
@@ -245,6 +246,7 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
     m_bLastControlState(true), m_bLastSinkState(false), m_bLastSourceState(false),
     m_activeControl(0),m_defaultControl(0),
     m_activeSource(0),m_defaultSource(0),
+    m_activePullupControl(0),m_defaultPullupControl(0),
     m_pin(_pin),m_port(_port), m_pinNumber(_pinNumber)
 {
   setPin(m_pin);
@@ -286,6 +288,14 @@ void PinModule::updatePinModule()
     bStateChange = true;
   }
 
+  bool bCurrentPullupControlState = getPullupControlState();
+
+  if (bCurrentPullupControlState != m_bLastPullupControlState) {
+    m_bLastPullupControlState = bCurrentPullupControlState;
+    m_pin->update_pullup(m_bLastPullupControlState,false);
+    bStateChange = true;
+  }  
+
   if (bStateChange) {
     if (m_pin->snode)
       m_pin->snode->update();
@@ -306,16 +316,28 @@ void PinModule::setControl(SignalControl *newControl)
   m_activeControl = newControl ? newControl : m_defaultControl;
 }
 
-void PinModule::setDefaultSource(SignalSource *newDefaultSource)
+void PinModule::setDefaultSource(SignalControl *newDefaultSource)
 {
   if(!m_defaultSource && newDefaultSource) {
     m_defaultSource = newDefaultSource;
     setSource(m_defaultSource);
   }
 }
-void PinModule::setSource(SignalSource *newSource)
+void PinModule::setSource(SignalControl *newSource)
 {
   m_activeSource = newSource ? newSource : m_defaultSource;
+}
+
+void PinModule::setDefaultPullupControl(SignalControl *newDefaultPullupControl)
+{
+  if(!m_defaultPullupControl && newDefaultPullupControl) {
+    m_defaultPullupControl = newDefaultPullupControl;
+    setControl(m_defaultPullupControl);
+  }
+}
+void PinModule::setPullupControl(SignalControl *newPullupControl)
+{
+  m_activePullupControl = newPullupControl ? newPullupControl : m_defaultPullupControl;
 }
 
 void PinModule::addSink(SignalSink *new_sink)
@@ -331,6 +353,10 @@ bool PinModule::getControlState()
 bool PinModule::getSourceState()
 {
   return m_activeSource ? m_activeSource->getState() : false;
+}
+bool PinModule::getPullupControlState()
+{
+  return m_activePullupControl ? m_activePullupControl->getState() : false;
 }
 
 
