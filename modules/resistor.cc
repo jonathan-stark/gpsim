@@ -254,15 +254,13 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 PullupResistor::PullupResistor(const char *init_name)
 {
 
-  ResistanceAttribute *attr;
+  new_name(init_name);
 
   // Create the resistor:
   res.set_Zth(10e3);
 
-  attr = new ResistanceAttribute(this);
+  ResistanceAttribute *attr = new ResistanceAttribute(this);
   add_attribute(attr);
-
-  new_name(init_name);
 
 #ifdef MANAGING_GUI
   pu_window = NULL;
