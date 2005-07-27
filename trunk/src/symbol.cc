@@ -100,16 +100,22 @@ void Symbol_Table::add_stimulus(stimulus *s)
 
 bool Symbol_Table::add(Value *s) {
   if(s) {
-    iterator it = lower_bound(begin( ), end( ),
-      s, NameLessThan());
-    if (it != end() &&
-      (*it)->name() == s->name()) {
-        printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
-        erase(it);
-//      return false;
+    if(s->name().empty()) {
+      printf("Symbol_Table::add() attempt to add a symbol with no name: %s",
+        s->toString().c_str());
     }
-    insert(it, s);
-    return true;
+    else {
+      iterator it = lower_bound(begin( ), end( ),
+        s, NameLessThan());
+      if (it != end() &&
+        (*it)->name() == s->name()) {
+          printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
+          erase(it);
+  //      return false;
+      }
+      insert(it, s);
+      return true;
+    }
   }
   return false;
 }
