@@ -88,20 +88,11 @@ class TMRL;
 /// may overide the output control. The PortPinModule again arbitrates.
 ///
 
-/// SignalSource - A pure virtual class that defines the interface for 
-/// a signal source. The I/O Pin Modules will query the source's state
-/// via this class.
-
-class SignalSource
-{
-public:
-  virtual bool getState()=0;
-};
-
 /// SignalControl  - A pure virtual class that defines the interface for 
 /// a signal control. The I/O Pin Modules will query the source's state
 /// via SignalControl. The control is usually used to control the I/O pin 
-/// direction (i.e. whether it's an input or output...)
+/// direction (i.e. whether it's an input or output...), drive value, 
+/// pullup state, etc.
 
 class SignalControl
 {
@@ -136,9 +127,10 @@ public:
   void updatePort();
   void updatePin(int iPinNumber);
 
-  SignalSource  *addSource(SignalSource *, unsigned int iPinNumber);
-  SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
+  SignalControl *addSource(SignalControl *, unsigned int iPinNumber);
   SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
+  SignalControl *addPullupControl(SignalControl *, unsigned int iPinNumber);
+  SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
   IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
   void           addPinModule(PinModule *, unsigned int iPinNumber);
 
@@ -164,14 +156,17 @@ public:
   void updatePinModule();
 
   void setPin(IOPIN *);
-  void setDefaultSource(SignalSource *);
-  void setSource(SignalSource *);
+  void setDefaultSource(SignalControl *);
+  void setSource(SignalControl *);
   void setDefaultControl(SignalControl *);
   void setControl(SignalControl *);
+  void setPullupControl(SignalControl *);
+  void setDefaultPullupControl(SignalControl *);
   void addSink(SignalSink *);
 
   bool getControlState();
   bool getSourceState();
+  bool getPullupControlState();
 
   IOPIN &getPin() { return *m_pin;}
   virtual void setDrivenState(bool);
@@ -188,9 +183,11 @@ private:
   bool          m_bLastControlState;
   bool          m_bLastSinkState;
   bool          m_bLastSourceState;
+  bool          m_bLastPullupControlState;
 
-  SignalSource  *m_defaultSource,  *m_activeSource;
+  SignalControl *m_defaultSource,  *m_activeSource;
   SignalControl *m_defaultControl, *m_activeControl;
+  SignalControl *m_defaultPullupControl, *m_activePullupControl;
 
   IOPIN        *m_pin;
   PortModule   *m_port;

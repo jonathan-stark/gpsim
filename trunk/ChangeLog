@@ -1,4 +1,13 @@
 2005-07-26 Scott Dattalo <scott@dattalo.com>
+	* src/bit.h, src/bit.cc, src/Makefile.am: Added new files to
+	handle a 'Bit' object. This code was formerly tucked away in
+	registers.cc. 
+	* src/stimuli.h, src/ioports.h, src/ioports.cc: Added a control
+	object for the PinModule to handle I/O pin pullups. Also, added an
+	option to prohibit certain stimulus updates whenever I/O pin state
+	information changes.
+	
+2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-instructions.cc,
 	regression/instructions_16bit/instructions_16bit.asm: Fixed bug
 	with 16bit processors Table Read (more index vs address). Thanks
