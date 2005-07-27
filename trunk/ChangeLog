@@ -1,3 +1,15 @@
+2005-07-15 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/symbol.cc: Added check to prevent a symbol name of a null string
+	from being added as a symbol.
+
+	* src/stimuli.cc: Added a check to prevent a IOPIN name null string
+	pointer	from being added to the symbol table.
+
+	* modules/resistor.cc: PullupResistor() constructor was setting
+	its attribute before it had set its own name resulting in the
+	attribute name not being scoped correctly.
+
+
 2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/bit.h, src/bit.cc, src/Makefile.am: Added new files to
 	handle a 'Bit' object. This code was formerly tucked away in
