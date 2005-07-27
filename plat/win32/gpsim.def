@@ -395,8 +395,8 @@ EXPORTS
     ?update@Stimulus_Node@@QAEXXZ
     ?update@Stimulus_Node@@QAEX_K@Z
     ?update@gpsimValue@@UAEXXZ
-    ?update_direction@IO_bi_directional@@UAEXI@Z
-    ?update_pullup@IO_bi_directional_pu@@UAEX_N@Z
+    ?update_direction@IO_bi_directional@@UAEXI_N@Z
+    ?update_pullup@IO_bi_directional_pu@@UAEX_N0@Z
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?waitForChild@Token@gpsim@@QAEXXZ
