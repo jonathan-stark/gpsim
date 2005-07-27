@@ -881,7 +881,8 @@ IOPIN::IOPIN(const char *_name)
   m_monitor=0;
 
   add_stimulus(this);
-  symbol_table.add_stimulus(this);
+  if(_name)
+    symbol_table.add_stimulus(this);
 }
 
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
