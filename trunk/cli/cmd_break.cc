@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 #include <string>
 #include <sstream>
+#include <assert.h>
 
 #include "command.h"
 #include "cmd_break.h"
@@ -215,6 +216,26 @@ unsigned int cmd_break::set_break(cmd_options *co, Value *pValue)
 
   return MAX_BREAKPOINTS;
 }
+
+static int MapComparisonOperatorToBreakOperator(ComparisonOperator *pCompareOp) {
+  switch(pCompareOp->isa()) {
+    case ComparisonOperator::eOpEq:
+      return BreakpointRegister_Value::eBREquals;
+    case ComparisonOperator::eOpGe:
+      return BreakpointRegister_Value::eBRGreaterThenEquals;
+    case ComparisonOperator::eOpGt:
+      return BreakpointRegister_Value::eBRGreaterThen;
+    case ComparisonOperator::eOpLe:
+      return BreakpointRegister_Value::eBRLessThenEquals;
+    case ComparisonOperator::eOpLt:
+      return BreakpointRegister_Value::eBRLessThen;
+    case ComparisonOperator::eOpNe:
+      return BreakpointRegister_Value::eBRNotEquals;
+  }
+  assert(false);
+  return BreakpointRegister_Value::eBREquals;
+}
+
 //------------------------------------------------------------------------
 unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
 {
@@ -260,11 +281,12 @@ unsigned int cmd_break::set_break(cmd_options *co, Expression *pExpr)
     if (pReg != NULL) {
       LiteralInteger* pInteger = dynamic_cast<LiteralInteger*>((LiteralInteger*)pCompareExpr->getRight());
       if (pInteger != NULL) {
+        int iOperator = MapComparisonOperatorToBreakOperator(pCompareExpr);
         int uValue;
         Value *pInt = pInteger->evaluate();
         pInt->get(uValue);
         delete pInt;
-        b = set_break(bit_flag, pReg->address, uValue, uMask);
+        b = set_break(bit_flag, pReg->address, iOperator, uValue, uMask);
       }
       else {
         cout << pCompareExpr->show() << " of type " << pCompareExpr->showType() <<
@@ -442,9 +464,10 @@ unsigned int cmd_break::set_break(int bit_flag, guint64 v, Expression *pExpr)
 }
 
 unsigned int cmd_break::set_break(int bit_flag,
-			  guint64 r,
-			  guint64 v,
-			  guint64 m)
+                                  guint64 r,
+                                  int     op,
+                                  guint64 v,
+                                  guint64 m)
 {
 
   unsigned int b = MAX_BREAKPOINTS;
@@ -470,7 +493,7 @@ unsigned int cmd_break::set_break(int bit_flag,
     break;
 
   case READ:
-    b = bp.set_read_value_break(GetActiveCPU(), reg,value,mask);
+    b = bp.set_read_value_break(GetActiveCPU(), reg,op,value,mask);
     str = "read from";
     pReg = get_symbol_table().findRegister(reg);
     pFormat = pReg->name().empty()
@@ -479,7 +502,7 @@ unsigned int cmd_break::set_break(int bit_flag,
     break;
 
   case WRITE:
-    b = bp.set_write_value_break(GetActiveCPU(), reg,value,mask);
+    b = bp.set_write_value_break(GetActiveCPU(), reg,op,value,mask);
     str = "written to";
     pReg = get_symbol_table().findRegister(reg);
     pFormat = pReg->name().empty()
