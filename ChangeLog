@@ -9,6 +9,12 @@
 	its attribute before it had set its own name resulting in the
 	attribute name not being scoped correctly.
 
+	* src/breakpoints.cc, src/breakpoints.h, cli/cmd_break.cc,
+	cli/cmd_break.h: Added code to support break expressions of
+	the form (Reg & mask BoolOp value) where BoolOp includes
+	<, >, <=, >= and != operators. Just need to change the print()
+	and action() console output functions of the break classes and
+	uncomment code in parse.yy.
 
 2005-07-26 Scott Dattalo <scott@dattalo.com>
 	* src/bit.h, src/bit.cc, src/Makefile.am: Added new files to
