@@ -313,9 +313,19 @@ public:
 				    unsigned int value, 
 				    unsigned int mask=0xff);
   unsigned int set_write_value_break(Processor *cpu,
-				     unsigned int register_number,
-				     unsigned int value,
-				     unsigned int mask=0xff);
+				    unsigned int register_number,
+				    unsigned int value,
+				    unsigned int mask=0xff);
+  unsigned int set_read_value_break(Processor *cpu, 
+            unsigned int register_number, 
+            unsigned int op,
+            unsigned int value, 
+            unsigned int mask=0xff);
+  unsigned int set_write_value_break(Processor *cpu,
+            unsigned int register_number,
+            unsigned int op,
+            unsigned int value,
+            unsigned int mask=0xff);
   unsigned int set_cycle_break(Processor *cpu,
 			       guint64 cycle,
 			       TriggerObject *f = 0);
@@ -439,9 +449,9 @@ public:
   virtual string &name(void) const
     {
       if(replaced)
-	return replaced->name();
+        return replaced->name();
       else
-	return gpsimValue::name();
+        return gpsimValue::name();
     };
   /* direct all accesses to the member functions of the
    * register that is being replaced. Note that we assume
@@ -485,9 +495,9 @@ public:
   virtual Register *getReg(void)
     {
       if(replaced)
-	return replaced;
+        return replaced;
       else
-	return this;
+        return this;
     }
 
   virtual void setbit(unsigned int bit_number, bool new_value)
@@ -513,19 +523,19 @@ public:
   virtual void update(void)
     {
       if(replaced)
-	replaced->update();
+        replaced->update();
     }
 
   virtual void add_xref(void *an_xref)
     {
       if(replaced)
-	replaced->add_xref(an_xref);
+        replaced->add_xref(an_xref);
     }
 
   virtual void remove_xref(void *an_xref)
     {
       if(replaced)
-	replaced->remove_xref(an_xref);
+        replaced->remove_xref(an_xref);
     }
 
   void replace(Processor *_cpu, unsigned int reg);
@@ -541,6 +551,8 @@ class BreakpointRegister_Value : public BreakpointRegister
 public:
 
   unsigned int break_value, break_mask;
+  unsigned int m_uDefRegMask;
+  string m_sOperator;
 
   BreakpointRegister_Value(void)
     { 
@@ -553,35 +565,61 @@ public:
         int _repl, 
         int bp, 
         unsigned int bv, 
-        unsigned int bm=0xffffffff );
+        unsigned int bm );
 
   BreakpointRegister_Value(Processor *_cpu, 
          TriggerAction *pTA,
         int _repl, 
         int bp, 
         unsigned int bv, 
-        unsigned int bm=0xffffffff );
+        unsigned int bm );
+
+  BreakpointRegister_Value(Processor *_cpu, 
+        int _repl, 
+        int bp, 
+        unsigned int bv, 
+        unsigned int _operator,
+        unsigned int bm );
+
+  typedef bool (*PFNISBREAKCONDITION)(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  PFNISBREAKCONDITION m_pfnIsBreak;
+
+  enum {
+    eBREquals,
+    eBRNotEquals,
+    eBRGreaterThen,
+    eBRLessThen,
+    eBRGreaterThenEquals,
+    eBRLessThenEquals,
+  };
+
+  static bool IsEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsNotEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsGreaterThenBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsLessThenBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsGreaterThenEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
+  static bool IsLessThenEqualsBreakCondition(unsigned int uRegValue,
+      unsigned int uRegMask, unsigned int uRegTestValue);
 
   virtual void print(void);
 
 };
 
 
-class Break_register_read : public BreakpointRegister
+class Break_register_read : public BreakpointRegister, TriggerAction
 {
 public:
-  class TA : public TriggerAction {
-  public:
-    TA(int uAddress) {
-      m_uAddress = uAddress;
-    }
-    void action(void);
-    int m_uAddress;
-  };
 
-//  Break_register_read(void){ };
   Break_register_read(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,&m_ta,_repl,bp ), m_ta(_repl) { };
+    BreakpointRegister(_cpu, _repl,bp ) { 
+    set_action(this);
+  }
 
   virtual unsigned int get(void);
   virtual RegisterValue getRV(void);
@@ -589,55 +627,42 @@ public:
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read"; }
-  TA m_ta;
+
+  // TriggerAction overrides
+  virtual void action(void);
 };
 
-class Break_register_write : public BreakpointRegister
+class Break_register_write : public BreakpointRegister, TriggerAction
 {
 public:
-  class TA : public TriggerAction {
-  public:
-    TA(int uAddress) {
-      m_uAddress = uAddress;
-    }
-    void action(void);
-    int m_uAddress;
-  };
-
-//  Break_register_write(void){ };
   Break_register_write(Processor *_cpu, int _repl, int bp ):
-    BreakpointRegister(_cpu,&m_ta,_repl,bp ), m_ta(_repl) { };
+    BreakpointRegister(_cpu,_repl,bp ) { 
+    set_action(this);
+  }
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write"; }
-  TA m_ta;
+
+  // TriggerAction overrides
+  virtual void action(void);
 };
 
-class Break_register_read_value : public BreakpointRegister_Value
+class Break_register_read_value : public BreakpointRegister_Value, TriggerAction
 {
 public:
-  class TA : public TriggerAction {
-  public:
-    TA(int uAddress, unsigned int uValue, unsigned int uBreakMask,
-       unsigned int uDefMask) {
-      m_uAddress = uAddress;
-      m_uValue = uValue;
-      m_uBreakMask = uBreakMask;
-      m_uDefMask = uDefMask;
-    }
-    void action(void);
-    int m_uAddress;
-    unsigned int m_uValue;
-    unsigned int m_uBreakMask;
-    unsigned int m_uDefMask;
-  };
-
 //  Break_register_read_value(void){ };
   Break_register_read_value(Processor *_cpu, 
 			    int _repl, 
 			    int bp, 
 			    unsigned int bv, 
+			    unsigned int bm );
+
+  Break_register_read_value(Processor *_cpu, 
+			    int _repl, 
+			    int bp, 
+			    unsigned int bv,
+          unsigned int _operator,
 			    unsigned int bm );
 
   virtual unsigned int get(void);
@@ -646,42 +671,34 @@ public:
   virtual bool get_bit(unsigned int bit_number);
   virtual double get_bit_voltage(unsigned int bit_number);
   virtual char const * bpName() { return "register read value"; }
-  TA m_ta;
+
+  // TriggerAction overrides
+  virtual void action(void);
 };
 
-class Break_register_write_value : public BreakpointRegister_Value
+class Break_register_write_value : public BreakpointRegister_Value, TriggerAction
 {
 public:
-  class TA : public TriggerAction {
-  public:
-    TA(int uAddress, unsigned int uValue, unsigned int uBreakMask,
-       unsigned int uDefMask) {
-      m_uAddress = uAddress;
-      m_uValue = uValue;
-      m_uBreakMask = uBreakMask;
-      m_uDefMask = uDefMask;
-    }
-    void action(void);
-    int m_uAddress;
-    unsigned int m_uValue;
-    unsigned int m_uBreakMask;
-    unsigned int m_uDefMask;
-  };
-
-//  Break_register_write_value(void){ };
   Break_register_write_value(Processor *_cpu, 
 			     int _repl, 
 			     int bp, 
 			     unsigned int bv, 
-			     unsigned int bm );// :
-//    BreakpointRegister_Value(_cpu, &m_ta, _repl, bp, bv, bm ),
-//      m_ta(_repl, bv, bm, get_cpu()->register_mask()) { };
+			     unsigned int bm );
+
+  Break_register_write_value(Processor *_cpu, 
+			     int _repl, 
+			     int bp, 
+			     unsigned int bv, 
+           unsigned int _operator,
+			     unsigned int bm );
 
   virtual void put(unsigned int new_value);
   virtual void putRV(RegisterValue rv);
   virtual void setbit(unsigned int bit_number, bool new_value);
   virtual char const * bpName() { return "register write value"; }
-  TA m_ta;
+
+  // TriggerAction overrides
+  virtual void action(void);
 };
 
 class Log_Register_Write : public Break_register_write

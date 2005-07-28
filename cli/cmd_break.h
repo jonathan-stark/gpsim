@@ -39,7 +39,7 @@ public:
   unsigned int set_break(cmd_options *co, Value *pValue);
   unsigned int set_break(cmd_options *co, Expression *pExpr);
   unsigned int set_break(cmd_options *co, Value *pValue, Expression *pExpr);
-  unsigned int set_break(int bit_flag,guint64 reg, guint64 value,guint64 mask);
+  unsigned int set_break(int bit_flag,guint64 reg, int op,guint64 value,guint64 mask);
   unsigned int set_break(int bit_flag);
   unsigned int set_break(int bit_flag,guint64 value, Expression *pExpr=0);
 private:
