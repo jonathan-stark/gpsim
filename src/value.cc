@@ -33,6 +33,45 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "cmd_gpsim.h"
 
+char * TrimWhiteSpaceFromString(char * pBuffer) {
+  size_t iPos = 0;
+  char * pChar = pBuffer;
+  while(*pChar != 0 && ::isspace(*pChar)) {
+    pChar++;
+  }
+  if(pBuffer != pChar) {
+    memmove(pBuffer, pChar, strlen(pBuffer) - iPos);
+  }
+  iPos = strlen(pBuffer);
+  pChar = pBuffer + iPos - 1;
+  while(pBuffer != pChar && ::isspace(*pChar)) {
+    *pChar = 0;
+    pChar--;
+  }
+  return pBuffer;
+}
+
+char * UnquoteString(char * pBuffer) {
+  char cQuote;
+  if(*pBuffer == '\'') {
+    cQuote = '\'';
+  }
+  else if(*pBuffer == '"') {
+    cQuote = '"';
+  }
+  else {
+    return pBuffer;
+  }
+  int iLen = strlen(pBuffer);
+  if(iLen > 1) {
+    if(pBuffer[iLen - 1] == cQuote) {
+      memmove(&pBuffer[0], &pBuffer[1], iLen - 2);
+      pBuffer[iLen - 2] = 0;
+    }
+  }
+  return pBuffer;
+}
+
 //------------------------------------------------------------------------
 Value::Value()
   : cpDescription(0), xref(0)
