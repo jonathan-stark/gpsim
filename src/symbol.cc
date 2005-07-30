@@ -152,14 +152,21 @@ void Symbol_Table::PopulateWithCommandLineSymbols() {
   for(it = s_CmdLineSymbolList.begin(); it != s_CmdLineSymbolList.end(); it++) {
     pSymName = *it;
     pSymValue = strchr(pSymName, 0) + 1;
-    pValue = Integer::New(pSymName, pSymValue, "derived from gpsim command line");
-    if(pValue == NULL) {
-      pValue = Float::New(pSymName, pSymValue, "derived from gpsim command line");
+    if(*pSymValue == '\'') {
+      char * pUnquoted = UnquoteString(strdup(pSymValue));
+      pValue = new String(pSymName, pUnquoted);
+      free(pUnquoted);
+    }
+    else {
+      pValue = Integer::New(pSymName, pSymValue, "derived from gpsim command line");
       if(pValue == NULL) {
-        pValue = Boolean::New(pSymName, pSymValue, "derived from gpsim command line");
+        pValue = Float::New(pSymName, pSymValue, "derived from gpsim command line");
         if(pValue == NULL) {
-          // assume string
-          pValue = new String(pSymName, pSymValue);
+          pValue = Boolean::New(pSymName, pSymValue, "derived from gpsim command line");
+          if(pValue == NULL) {
+            // assume string
+            pValue = new String(pSymName, pSymValue);
+          }
         }
       }
     }
