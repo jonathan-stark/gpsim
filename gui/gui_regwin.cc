@@ -590,12 +590,7 @@ static void
 file_selection_ok (GtkWidget        *w,
 		   GtkFileSelection *fs)
 {
-
-#ifdef _WIN32
-    file_selection_name=gtk_file_selection_get_filename_utf8 (fs);
-#else
     file_selection_name=gtk_file_selection_get_filename (fs);
-#endif
     fs_done=1;
 }
 
