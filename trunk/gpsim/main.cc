@@ -81,6 +81,7 @@ static char *cod_name     = "";
 static char *hex_name     = "";
 static char *search_path  = "";
 static char *icd_port     = "";
+static char *defineSymbol = "";
 
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
 			0, "Examples:\n\
@@ -106,6 +107,8 @@ struct poptOption optionsTable[] = {
     "command line mode only",0},
   { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
     "use ICD (e.g. -d /dev/ttyS0).",0 },
+  { "define",'D',POPT_ARG_STRING, &defineSymbol,'D',
+    "define symbol with value",0},
   POPT_MYEXAMPLES
   POPT_TABLEEND
 };
@@ -145,6 +148,7 @@ void welcome(void)
 
   return;
 }
+
 
 int 
 main (int argc, char *argv[])
@@ -186,7 +190,12 @@ main (int argc, char *argv[])
       case 'i':
         bUseGUI = false;
         printf("not using gui\n");
-      }
+ 
+      case 'D':
+        // add symbols on the command line to the symbol table.
+        get_symbol_table().AddFromCommandLine(defineSymbol);
+        break;
+      }	
       if (usage)
         break;
     }
