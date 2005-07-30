@@ -1,3 +1,55 @@
+2005-07-30 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/symbol.cc, src/symbol.h: Added a list of symbols
+	that are defined from the gpsim command line. The list
+	and the symbol values are preserved when the symbol table
+	is cleared due to a new processor being allocated.
+	Removed the add() function that accepted a symbol type
+	as a string. See comments for cmd_symbol.cc,h.
+
+	* src/attributes.cc, src/sim_context.cc, src/sim_context.h:
+	Changed or added calls to the symbol table.
+	
+	* cli/ui_gpsim.cc, src/cmd_gpsim.h: Added functions to render
+	integer values to strings based on a system level defined
+	radix. The radix will be exposed as a global attribute.
+	There are distinct radix definitions for program addresses,
+	RAM addresses and data values. Will expose a global attribute
+	to define the prefix for displaying hexidecimal values. The
+	default is '$'.
+
+	* gpsim/main.cc: Added -D command line option for defining
+	symbols and their values to be placed into the symbol
+	table.
+
+	* src/value.cc, src/value.h: Added string parsing and
+	constructor functions for each data type. Used for
+	the command line parsing of symbol definitions.
+
+	* cli/cmd_symbol.cc,h, cli/cmd_load.cc,h, cli/parse.yy:
+	The load command will now accept symbols as input for the
+	filename. Combined with	the symbol defines on the command
+	line, one STC file can be used to open any program file by
+	defining a symbol on the gpsim command line and referencing
+	that symbol in the load commmand.
+	* The symbol command can now be used to create a symbol from
+	the gpsim command prompt or an STC file. The syntax is
+	symbol <newsymbol>=<value>. Types include string, integer,
+	float and boolean.
+
+	* gpsim/gpsim.vcproj, gui/gui_menu.cc, gui/gui_regwin.cc:
+	Removed the references for gtk_file_selection_get_filename_utf8().
+	This was added due to compile time issues with gtkextra-2.1
+	under Visual Studio .NET. The VS.NET build links a gtkextra
+	static lib into the exe. Even if you can get it to compile,
+	sometimes gpsim will crash before its main() function is
+	entered. The use of gtkextra-2.1 under VS.NET is not
+	recommended and I have reverted the gpsim.vcproj back to
+	gtkextra-2.0.
+
+	* src/program_files.cc: Changed error handling logic
+	to prevent a "list file not found" error from displaying
+	in an inappropriate situation.
+
 2005-07-29 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h, src/p12x.cc, src/p16x6x.cc,
 	src/registers.h, src/stimuli.cc, src/stimuli.h, src/symbol.cc,
