@@ -31,6 +31,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "protocol.h"
 #include "../config.h"
+#include "cmd_gpsim.h"
 
 //------------------------------------------------------------------------
 Value::Value()
@@ -361,6 +362,26 @@ Boolean::Boolean(const char *_name, bool newValue,const char *_desc)
 
 }
 
+bool Boolean::Parse(const char *pValue, bool &bValue) {
+  if(strncmp("true", pValue, sizeof("true")-1) == 0) {
+    bValue = true;
+    return true;
+  }
+  else if(strncmp("false", pValue, sizeof("false")-1) == 0) {
+  	bValue = false;
+    return true;
+  }
+  return false;
+}
+
+Boolean * Boolean::New(const char *_name, const char *pValue, const char *desc) {
+  bool bValue;
+  if(Parse(pValue, bValue)) {
+    return new Boolean(_name, bValue);
+  }
+  return NULL;
+}
+
 Boolean::~Boolean()
 {
 
@@ -498,12 +519,10 @@ void Boolean::set(bool v)
 void Boolean::set(const char *buffer, int buf_size)
 {
   if(buffer) {
-
-    if(strncmp("true", buffer, sizeof("true")-1) == 0)
-      set(true);
-    else 
-      if(strncmp("false", buffer, sizeof("false")-1) == 0)
-	set(false);
+    bool bValue;
+    if(Parse(buffer, bValue)) {
+      set(bValue);
+    }
   }
 }
 
@@ -600,14 +619,38 @@ void Integer::set(Packet &p)
 void Integer::set(const char *buffer, int buf_size)
 {
   if(buffer) {
-
-    long long int j;
-    int converted = sscanf(buffer, "%Ld",  &j);
-    gint64 i=j;
-
-    if(converted)
+    gint64 i;
+    if(Parse(buffer, i)) {
       set(i);
+    }
   }
+}
+
+bool Integer::Parse(const char *pValue, gint64 &iValue) {
+    if(::isdigit(*pValue)) {
+      if(strchr(pValue, '.')) {
+        false;
+      }
+      else {
+        // decimal or 0x integer
+        return sscanf(pValue, "%" PRINTF_INT64_MODIFIER "i", &iValue) == 1;
+      }
+    }
+    else if(*pValue == '$' && ::isxdigit(*(pValue+1))) {
+      // hexidecimal integer
+      char szHex[10] = "0x";
+      strcat(&szHex[0], pValue + 1);
+      return sscanf(szHex, "%"  PRINTF_INT64_MODIFIER "i" , &iValue) == 1;
+    }
+    return false;
+}
+
+Integer * Integer::New(const char *_name, const char *pValue, const char *desc) {
+  gint64 iValue;
+  if(Parse(pValue, iValue)) {
+    return new Integer(_name, iValue, desc);
+  }
+  return NULL;
 }
 
 
@@ -644,14 +687,10 @@ void Integer::get(Packet &pb)
 
 string Integer::toString()
 {
-  char buf[256];
   gint64 i;
   get(i);
-  long long int j = i;
-  //  snprintf(buf,sizeof(buf)," = %" PRINTF_INT64_MODIFIER
-  //  "d = 0x%08" PRINTF_INT64_MODIFIER "X",j,j);
-  snprintf(buf,sizeof(buf),"%" PRINTF_INT64_MODIFIER "X",j);
-  return string(buf);
+  IUserInterface & TheUI = GetUserInterface();
+  return string(TheUI.FormatValue(i));
 }
 
 
@@ -688,7 +727,9 @@ char *Integer::toString(char *return_str, int len)
   if(return_str) {
     gint64 i;
     get(i);
-    snprintf(return_str,len,"%" PRINTF_INT64_MODIFIER "d",i);
+    IUserInterface & TheUI = GetUserInterface();
+    strncpy(return_str, TheUI.FormatValue(i), len);
+//    snprintf(return_str,len,"%" PRINTF_INT64_MODIFIER "d",i);
   }
 
   return return_str;
@@ -817,6 +858,27 @@ Float::Float(const char *_name, double newValue,const char *_desc)
   value = newValue;
 }
 
+bool Float::Parse(const char *pValue, double &fValue) {
+  if(::isdigit(*pValue)) {
+    if(strchr(pValue, '.')) {
+      // float
+      float f;
+      int iRet = sscanf(pValue, "%f", &f);
+      fValue = (double)f;
+      return iRet == 1;
+    }
+  }
+  return false;
+}
+
+Float * Float::New(const char *_name, const char *pValue, const char *desc) {
+  double fValue;
+  if(Parse(pValue, fValue)) {
+    return new Float(_name, fValue);
+  }
+  return NULL;
+}
+
 Float::~Float()
 {
 }
@@ -846,11 +908,9 @@ void Float::set(const char *buffer, int buf_size)
   if(buffer) {
 
     double d;
-
-    int converted = sscanf(buffer, "%lf",  &d);
-
-    if(converted)
+    if(Parse(buffer, d)) {
       set(d);
+    }
   }
 }
 
