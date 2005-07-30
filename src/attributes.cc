@@ -213,6 +213,7 @@ void init_attributes()
   // Define internal simulator attributes .
   verbosity = new Integer("sim.verbosity",1,"gpsim's verboseness 0=nothing printed 0xff=very verbose");
   verbosity->setClearableSymbol(false);
+  get_symbol_table().Initialize();
   get_symbol_table().add(verbosity);
   get_symbol_table().add(new CycleCounterAttribute());
   stop_watch.init();
