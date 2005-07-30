@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_symbol.h"
+#include "../src/cmd_gpsim.h"
 #include "../src/symbol.h"
 #include "../src/symbol_orb.h"
 
@@ -42,21 +43,24 @@ cmd_symbol::cmd_symbol(void)
 
   brief_doc = string("Add or display symbols");
 
-  long_doc = string ("symbol [symbol_name [symbol_type value]]\n"
+  long_doc = string ("symbol [<symbol_name>]\n"
+    "symbol <symbol_name>=<value>\n"
     "\n"
     "\tIf no options are supplied, the entire symbol table will be\n"
     "\tdisplayed. If only the symbol_name is provided, then only\n"
-    "\tthat symbol will be displayed. If both the symbol_name and\n"
-    "\tthe symbol_type are supplied, then a new symbol will be\n"
-    "\tadded to the symbol table.\n"
+    "\tthat symbol will be displayed.\n"
+    "\tIf a symbol_name that does not currently exist is equated\n"
+    "\tto a value, then a new symbol will be added to the symbol table.\n"
+    "\tThe type of symbol will be derived. To force a string value double\n"
+    "\tdouble quote the value.\n"
     "\n"
     "\tValid symbol types:\n"
-    "\t  ioport | iop, constant\n"
+    "\t  Integer, Float, Boolean and String\n"
     "\n"
     "Examples:\n"
-    "\tsymbol            // display the symbol table\n"
-    "\tsymbol george constant 42  // create a new constant symbol\n"
-    "\t                           // named george and equal to 42\n");
+    "\tsymbol                     // display the symbol table\n"
+    "\tsymbol GpsimIsGreat=true   // create a new constant symbol\n"
+    "\n");
 
   op = cmd_symbol_options; 
 }
@@ -78,8 +82,10 @@ void cmd_symbol::dump_one(Value *s)
     cout << s->toString() << endl;
 }
 
-void cmd_symbol::add_one(const char *sym_name, const char *sym_type, Expression *expr)
+void cmd_symbol::add_one(const char *sym_name, Expression *expr)
 {
-  get_symbol_table().add(sym_name,sym_type,(int)evaluate(expr));
+  Value * pVal = expr->evaluate();
+  pVal->new_name(sym_name);
+  get_symbol_table().add(pVal);
 }
 

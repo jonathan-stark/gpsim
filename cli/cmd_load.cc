@@ -134,7 +134,18 @@ int cmd_load::load(int bit_flag,const char *filename)
   return iReturn;
 }
 
-int cmd_load::load(const char *file, const char * pProcessorType) {
+int cmd_load::load(Value *file, Value *pProcessorType) {
   cout << endl;
-  return gpsim_open(get_active_cpu(), file, pProcessorType);
+  string sFile;
+  const char * psProcessorType;
+  sFile = file->toString();
+  psProcessorType = pProcessorType != NULL ?
+    pProcessorType->toString().c_str() : NULL;
+  return gpsim_open(get_active_cpu(), sFile.c_str(),
+    psProcessorType);
+}
+
+int cmd_load::load(const char *file, const char *pProcessorType) {
+  return gpsim_open(get_active_cpu(), file,
+    pProcessorType);
 }
