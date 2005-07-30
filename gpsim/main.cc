@@ -108,7 +108,8 @@ struct poptOption optionsTable[] = {
   { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
     "use ICD (e.g. -d /dev/ttyS0).",0 },
   { "define",'D',POPT_ARG_STRING, &defineSymbol,'D',
-    "define symbol with value",0},
+    "define symbol with value that is added to the gpsim symbol table. "
+    "Define any number of symbols.",0},
   POPT_MYEXAMPLES
   POPT_TABLEEND
 };
@@ -127,6 +128,8 @@ helpme (char *iam)
   printf ("\t-s <cod_file>  : .cod symbol file\n");
   printf ("\t-L <path list> : colon separated list of directories to search.\n");
   printf ("\t-d <port>      : Use ICD with serial port <port>\n");
+  printf ("\t-D <symbol>=<value> : Define a symbol that will exist in the gpsim\n"
+          "\t                      symbol table\n You may define any number.\n");
   printf ("\n\t-v             : gpsim version\n");
   printf ("\n Long options:\n\n");
   printf ("\t--cli          : command line mode only\n");
