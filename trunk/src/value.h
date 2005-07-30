@@ -462,5 +462,7 @@ private:
   unsigned int right;
 };
 
+char * TrimWhiteSpaceFromString(char * pBuffer);
+char * UnquoteString(char * pBuffer);
 
 #endif // __VALUE_H__
