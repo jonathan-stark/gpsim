@@ -241,6 +241,8 @@ public:
 	
   Boolean(bool newValue);
   Boolean(const char *_name, bool newValue, const char *desc=0);
+  static bool Parse(const char *pValue, bool &bValue);
+  static Boolean * New(const char *_name, const char *pValue, const char *desc);
   virtual ~Boolean();
 
   string toString();
@@ -269,6 +271,12 @@ public:
   virtual char *toString(char *, int len);
   virtual char *toBitStr(char *, int len);
 
+  inline operator bool() {
+    bool bValue;
+    get(bValue);
+    return bValue;
+  }
+
 private:
   bool value;
 };
@@ -283,6 +291,8 @@ public:
 	
   Integer(gint64 new_value);
   Integer(const char *_name, gint64 new_value, const char *desc=0);
+  static bool       Parse(const char *pValue, gint64 &iValue);
+  static Integer *  New(const char *_name, const char *pValue, const char *desc);
 
   virtual ~Integer();
 
@@ -315,9 +325,38 @@ public:
   static Integer* Integer::assertValid(Value* val, string valDesc, gint64 valMin, gint64 valMax);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
 
+  inline operator gint64() {
+    gint64 i;
+    get(i);
+    return i;
+  }
+
+  inline operator int() {
+    gint64 i;
+    get(i);
+    return (int)i;
+  }
+
+  inline operator unsigned int() {
+    gint64 i;
+    get(i);
+    return (unsigned int)i;
+  }
+
+  inline Integer & operator =(int i) {
+    set(i);
+    return *this;
+  }
+
+  inline Integer & operator =(unsigned int i) {
+    set((int)i);
+    return *this;
+  }
+
 private:
   gint64 value;
 };
+
 
 //------------------------------------------------------------------------
 /// Float - built in gpsim type for a 'double'
@@ -328,6 +367,8 @@ public:
 	
   Float(double newValue);
   Float(const char *_name, double newValue, const char *desc=0);
+  static bool Parse(const char *pValue, double &fValue);
+  static Float * New(const char *_name, const char *pValue, const char *desc);
   virtual ~Float();
 
   virtual string toString();
@@ -383,6 +424,10 @@ public:
   virtual Value *copy();
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
+
+  inline operator const char *() {
+    return getVal();
+  }
 
 private:
   char *value;
