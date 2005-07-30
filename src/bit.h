@@ -131,18 +131,17 @@ public:
     return !isKnown() ? '?' : (isOne() ? '1' : '0');
   }
 
-  friend Bit operator ! (Bit &b);
+  friend Bit operator ! (Bit b);
   
 private:
   bool d;  // The data
   bool i;  // i=true if d is valid
 };
 
-inline Bit operator ! (Bit &b)
+inline Bit operator ! (Bit b)
 {
   Bit bLv = b;
   bLv.d = !bLv.d;
   return bLv;
 }
-
 #endif

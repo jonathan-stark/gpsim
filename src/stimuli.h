@@ -155,7 +155,10 @@ public:
   Stimulus_Node *snode;      // Node to which this stimulus is attached
   stimulus *next;            // next stimulus that's on the snode
 
-  stimulus(const char *n=0);
+  stimulus(const char *n=0,
+	   double _Vth=5.0,
+	   double _Zth=1e3
+	   );
   virtual ~stimulus();
 
   virtual void new_name(const char *);
@@ -180,6 +183,8 @@ public:
   // Control the driving state, i.e. the state this stimulus wishes to drive
   virtual bool getDrivingState(void) {return bDrivingState;};
   virtual void setDrivingState(bool new_dstate) { bDrivingState = new_dstate;};
+  virtual void setDrivingState(char new3State) 
+  { bDrivingState = new3State=='1';};
 
   // Control the driven state, i.e. the state some external node wishes to
   // drive this stimulus.
@@ -236,7 +241,7 @@ enum SOURCE_TYPE
 
 
 
-  source_stimulus(void) {
+  source_stimulus() {
     period = 0;
     duty = 0;
     phase = 0;
@@ -283,10 +288,10 @@ protected:
 class PinMonitor
 {
 public:
-  virtual void setDrivenState(bool)=0;
-  virtual void setDrivingState(bool)=0;
+  virtual void setDrivenState(char)=0;
+  virtual void setDrivingState(char)=0;
   virtual void set_nodeVoltage(double)=0;
-  virtual void putState(bool)=0;
+  virtual void putState(char)=0;
   virtual void setDirection()=0;
 };
 
@@ -312,17 +317,12 @@ class IOPIN : public stimulus
   Register **iopp;     // this second one is used to set break points.
   unsigned int iobit;  // 
 
-  // These are the low to high and high to low input thresholds. The
-  // units are volts.
-  double l2h_threshold;
-  double h2l_threshold;
-
-  // When connect to a node, these are thresholds used to determine whether 
-  // we're being driven by a weak driver or not.
-  double ZthWeak;
-  double ZthFloating;
-
-  IOPIN(const char *n=0);
+  IOPIN(const char *n=0,
+	double _Vth=5.0, 
+	double _Zth=250,
+	double _ZthWeak = 1e3,
+	double _ZthFloating = 1e6
+	);
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
   ~IOPIN();
 
@@ -334,10 +334,21 @@ class IOPIN : public stimulus
   virtual void set_nodeVoltage(double v);
   virtual bool getDrivingState(void);
   virtual void setDrivingState(bool new_dstate);
+  virtual void setDrivingState(char);
   virtual bool getDrivenState(void);
   virtual void setDrivenState(bool new_dstate);
   virtual bool getState();
   virtual void putState(bool new_dstate);
+
+  virtual void set_ZthWeak(double Z) { ZthWeak=Z;}
+  virtual double get_ZthWeak() { return ZthWeak;}
+  virtual void set_ZthFloating(double Z) { ZthFloating=Z;}
+  virtual double get_ZthFloating() { return ZthFloating;}
+
+  virtual void set_l2h_threshold(double V) {l2h_threshold=V;}
+  virtual double get_l2h_threshold() { return l2h_threshold;}
+  virtual void set_h2l_threshold(double V) {h2l_threshold=V;}
+  virtual double get_h2l_threshold() { return h2l_threshold;}
 
   virtual Register *get_iop(void);
   virtual void toggle(void);
@@ -355,25 +366,32 @@ class IOPIN : public stimulus
   virtual void show();
 
 protected:
-  bool bDrivenState;         // 0/1 digitization of the state we're being driven to
-
+  bool bDrivenState;    // 0/1 digitization of the state we're being driven to
   PinMonitor *m_monitor;
+
+  // When connected to a node, these are thresholds used to determine whether 
+  // we're being driven by a weak driver or not.
+  double ZthWeak;
+  double ZthFloating;
+
+  // These are the low to high and high to low input thresholds. The
+  // units are volts.
+  double l2h_threshold;
+  double h2l_threshold;
+
 };
 
 class IO_bi_directional : public IOPIN
 {
 public:
 
-  // Impedance of the IOPIN when it's not driving.
-  double ZthIn;
-
-  // Voltage of the IOPIN when it's not driving
-  // (this is the voltage the I/O pin floats to when there's
-  // nothing connected to it)
-  double VthIn;
-
-
-  IO_bi_directional(const char *n=0);
+  IO_bi_directional(const char *n=0,
+		    double _Vth=5.0, 
+		    double _Zth=250,
+		    double _ZthWeak = 1e3,
+		    double _ZthFloating = 1e6,
+		    double _VthIn = 0.3,
+		    double _ZthIn = 1e8);
   IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
 
   virtual double get_Zth();
@@ -385,6 +403,15 @@ public:
   virtual void update_direction(unsigned int,bool refresh=true);
   virtual IOPIN_DIRECTION  get_direction(void)
   {return ((getDriving()) ? DIR_OUTPUT : DIR_INPUT);}
+
+protected:
+  /// Impedance of the IOPIN when it's not driving.
+  double ZthIn;
+
+  /// Voltage of the IOPIN when it's not driving
+  /// (this is the voltage the I/O pin floats to when there's
+  /// nothing connected to it)
+  double VthIn;
 };
 
 
@@ -393,7 +420,16 @@ public:
 class IO_bi_directional_pu : public IO_bi_directional
 {
 public:
-  IO_bi_directional_pu(const char *n=0);
+  IO_bi_directional_pu(const char *n=0,
+		       double _Vth=5.0, 
+		       double _Zth=250,
+		       double _ZthWeak = 1e3,
+		       double _ZthFloating = 1e6,
+		       double _VthIn = 0.3,
+		       double _ZthIn = 1e8,
+		       double _Zpullup = 10e3
+		       );
+
   IO_bi_directional_pu(IOPORT *i, unsigned int b,const char *opt_name=0, Register **_iop=0);
   ~IO_bi_directional_pu();
   virtual double get_Vth();

@@ -37,18 +37,7 @@ class Stimulus_Node;
 class TMRL;
 
 
-/************************************************************************/
-/*                                                                      */
-/*       E X P E R I M E N T A L    C O D E                             */
-/*                                                                      */
-/* The following section is experimenting with a better way to handle   */
-/* I/O ports                                                            */
-/*                                                                      */
-/*                                                                      */
-/*                                                                      */
-/************************************************************************/
-
-
+///**********************************************************************/
 /// PortPinModule
 ///
 /// Here's a general description of gpsim I/O pin design:
@@ -97,7 +86,7 @@ class TMRL;
 class SignalControl
 {
 public:
-  virtual bool getState()=0;
+  virtual char getState()=0;
 };
 
 /// SignalSink - A pure virtual class that allows signals driven by external
@@ -108,7 +97,7 @@ public:
 class SignalSink
 {
 public:
-  virtual void setSinkState(bool)=0;
+  virtual void setSinkState(char)=0;
 };
 ;
 class PinModule;
@@ -164,15 +153,15 @@ public:
   void setDefaultPullupControl(SignalControl *);
   void addSink(SignalSink *);
 
-  bool getControlState();
-  bool getSourceState();
-  bool getPullupControlState();
+  char getControlState();
+  char getSourceState();
+  char getPullupControlState();
 
   IOPIN &getPin() { return *m_pin;}
-  virtual void setDrivenState(bool);
-  virtual void setDrivingState(bool);
+  virtual void setDrivenState(char);
+  virtual void setDrivingState(char);
   virtual void set_nodeVoltage(double);
-  virtual void putState(bool);
+  virtual void putState(char);
   virtual void setDirection();
 
 protected:
@@ -180,10 +169,10 @@ protected:
   list <SignalSink *> sinks;
 
 private:
-  bool          m_bLastControlState;
-  bool          m_bLastSinkState;
-  bool          m_bLastSourceState;
-  bool          m_bLastPullupControlState;
+  char          m_cLastControlState;
+  char          m_cLastSinkState;
+  char          m_cLastSourceState;
+  char          m_cLastPullupControlState;
 
   SignalControl *m_defaultSource,  *m_activeSource;
   SignalControl *m_defaultControl, *m_activeControl;
@@ -204,7 +193,7 @@ public:
   virtual unsigned int get_value();
   virtual void putDrive(unsigned int new_drivingValue);
   virtual unsigned int getDriving();
-  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit(unsigned int bit_number, char new_value);
   virtual void setEnableMask(unsigned int nEnableMask)
   {
     mEnableMask = nEnableMask;
@@ -214,9 +203,9 @@ public:
     return mEnableMask;
   }
 protected:
-  unsigned int mEnableMask;
-  unsigned int drivingValue;
-  unsigned int drivenValue;
+  unsigned int  mEnableMask;
+  unsigned int  drivingValue;
+  RegisterValue rvDrivenValue;
 };
 
 class PicTrisRegister;
@@ -251,7 +240,7 @@ public:
 
   virtual void put(unsigned int new_value);
   virtual unsigned int get(unsigned int new_value);
-  virtual void setbit(unsigned int bit_number, bool new_value);
+  virtual void setbit(unsigned int bit_number, char new_value);
   void setRBPU(bool);
   void setIntEdge(bool);
 private:

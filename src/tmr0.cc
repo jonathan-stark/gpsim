@@ -32,30 +32,6 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 #include "xref.h"
-/*
-class TMR0Sink : public SignalSink
-{
-public:
-  TMR0Sink(TMR0 *);
-  virtual void setSinkState(bool);
-private:
-  TMR0 *m_tmr0;
-  bool bLastState;
-};
-
-TMR0Sink::TMR0Sink(TMR0 *tmr0)
-  : m_tmr0(tmr0), bLastState(false)
-{ 
-}
-
-void TMR0Sink::setSinkState(bool bNewState)
-{
-  if (bLastState != bNewState) {
-    bLastState == bNewState;
-    m_tmr0->get_t0cs
-  }
-}
-*/
 
 //--------------------------------------------------
 // member functions for the TMR0 base class
@@ -77,8 +53,10 @@ TMR0::TMR0(void)
 //
 // Called when the I/O pin driving TMR0 changes states.
 
-void TMR0::setSinkState(bool bNewState)
+void TMR0::setSinkState(char new3State)
 {
+  bool bNewState = new3State == '1';
+
   if (m_bLastClockedState != bNewState) {
     m_bLastClockedState = bNewState;
     //printf("TMR0::setSinkState:%d cs:%d se:%d\n",bNewState,get_t0cs(),get_t0se());

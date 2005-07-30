@@ -1,3 +1,10 @@
+2005-07-29 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h, src/p12x.cc, src/p16x6x.cc,
+	src/registers.h, src/stimuli.cc, src/stimuli.h, src/symbol.cc,
+	src/tmr0.cc, src/tmr0.h:
+	Introduced the concept of Multi-State logic to stimuli.
+
+
 2005-07-15 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/symbol.cc: Added check to prevent a symbol name of a null string
 	from being added as a symbol.

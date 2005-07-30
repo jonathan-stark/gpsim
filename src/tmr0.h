@@ -62,7 +62,7 @@ public:
   virtual void callback_print(void);
 
   virtual void set_cpu(Processor *, PortRegister *, unsigned int pin);
-  virtual void setSinkState(bool);
+  virtual void setSinkState(char);
 
 private:
   bool m_bLastClockedState;
