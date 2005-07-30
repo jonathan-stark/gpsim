@@ -103,12 +103,6 @@ void P16C62::create_iopin_map(void)
   package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));
   package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta5"),5));
 
-  //package->assign_pin(2, new IO_bi_directional(porta, 0));
-  //package->assign_pin(3, new IO_bi_directional(porta, 1));
-  //package->assign_pin(4, new IO_bi_directional(porta, 2));
-  //package->assign_pin(5, new IO_bi_directional(porta, 3));
-  //package->assign_pin(6, new IO_open_collector(porta, 4));
-  //package->assign_pin(7, new IO_bi_directional(porta, 5));
 
   package->assign_pin(8, 0); //VSS
   package->assign_pin(9, 0);  // OSC

@@ -37,6 +37,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "xref.h"
 
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 //-------------------------------------------------------------------
 //
 //                 ioports.cc
@@ -66,9 +71,17 @@ public:
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
-  bool getState()
+  char getState()
   {
-    return m_register ? ((m_register->getDriving()&m_bitMask)!=0) : false;
+    // return m_register ? 
+    //  (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
+    char r = m_register ? (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
+    /*
+    Dprintf(("PicSignalSource::getState() %s  bitmask:0x%x state:%c\n",
+	     (m_register?m_register->name():"NULL"),
+	     m_bitMask,r));
+    */
+    return r;
   }
 private:
   PortRegister *m_register;
@@ -80,7 +93,7 @@ class PortSink : public SignalSink
 {
 public:
   PortSink(PortRegister *portReg, unsigned int iobit);
-  virtual void setSinkState(bool);
+  virtual void setSinkState(char);
 private:
   PortRegister *m_PortRegister;
   unsigned int  m_iobit;
@@ -92,21 +105,27 @@ PortSink::PortSink(PortRegister *portReg, unsigned int iobit)
   assert (m_PortRegister);
 }
 
-void PortSink::setSinkState(bool bNewSinkState)
+void PortSink::setSinkState(char cNewSinkState)
 {
-  m_PortRegister->setbit(m_iobit,bNewSinkState);
+  Dprintf((" PortSink::setSinkState:bit=%d,val=%c\n",m_iobit,cNewSinkState));
+
+  m_PortRegister->setbit(m_iobit,cNewSinkState);
 }
 //------------------------------------------------------------------------
 PortRegister::PortRegister(unsigned int numIopins, unsigned int _mask)
   : sfr_register(),
     PortModule(numIopins),
-    mEnableMask(_mask)
+    mEnableMask(_mask),  
+    drivingValue(0), rvDrivenValue(0,0)
+
 {
 
 }
 void PortRegister::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.data);
+
+  Dprintf(("PortRegister::put old=0x%x:new=0x%x\n",value.data,new_value));
 
   unsigned int diff = mEnableMask & (new_value ^ value.data);
   if(diff) {
@@ -122,28 +141,50 @@ void PortRegister::put(unsigned int new_value)
     updatePort();
   }
 }
-void PortRegister::setbit(unsigned int bit_number, bool new_value)
+
+//------------------------------------------------------------------------
+// PortRegister::setbit
+//
+// This method is called whenever a stimulus changes the state of
+// an I/O pin associated with the port register. 3-state logic is
+// used.
+// FIXME -  rvDrivenValue and value are always the same, so why have
+// FIXME -  both?
+
+void PortRegister::setbit(unsigned int bit_number, char new3State)
 {
   if(bit_number <= bit_mask) {
-    trace.raw(write_trace.get() | value.data);
-    if (new_value)
-      drivenValue |=  (1<<bit_number);
-    else
-      drivenValue &= ~(1<<bit_number);
-    value.data = drivenValue;
+
+    trace.raw(write_trace.get()  | value.data);
+    trace.raw(write_trace.geti() | value.init);
+
+    Dprintf(("PortRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
+
+    if (new3State=='1' || new3State=='W') {
+      rvDrivenValue.data |= (1<<bit_number);
+      rvDrivenValue.init &= ~(1<<bit_number);
+    } else if (new3State=='0') {
+      rvDrivenValue.data &= ~(1<<bit_number);
+      rvDrivenValue.init &= ~(1<<bit_number);
+    } else 
+      // Not a 0 or 1, so it must be unknown.
+      rvDrivenValue.init |= (1<<bit_number);
+
+    value = rvDrivenValue;
   }
 
 }
 
 unsigned int PortRegister::get()
 {
-  trace.raw(read_trace.get() | drivenValue);
+  trace.raw(read_trace.get()  | rvDrivenValue.data);
+  trace.raw(read_trace.geti() | rvDrivenValue.init);
 
-  return drivenValue;
+  return rvDrivenValue.data;
 }
 unsigned int PortRegister::get_value()
 {
-  return drivenValue;
+  return rvDrivenValue.data;
 }
 void PortRegister::putDrive(unsigned int new_value)
 {
@@ -234,6 +275,8 @@ void PortModule::addPinModule(PinModule *newModule, unsigned int iPinNumber)
 
 PinModule::PinModule()
   : PinMonitor(), m_pin(0),m_port(0), m_pinNumber(0),
+    m_cLastControlState('?'), m_cLastSinkState('?'),
+    m_cLastSourceState('?'), m_cLastPullupControlState('?'),
     m_activeControl(0),m_defaultControl(0),
     m_activeSource(0),m_defaultSource(0),
     m_activePullupControl(0),m_defaultPullupControl(0)
@@ -243,7 +286,8 @@ PinModule::PinModule()
 
 PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
   : PinMonitor(),
-    m_bLastControlState(true), m_bLastSinkState(false), m_bLastSourceState(false),
+    m_cLastControlState('?'), m_cLastSinkState('?'),
+    m_cLastSourceState('?'), m_cLastPullupControlState('?'),
     m_activeControl(0),m_defaultControl(0),
     m_activeSource(0),m_defaultSource(0),
     m_activePullupControl(0),m_defaultPullupControl(0),
@@ -258,8 +302,8 @@ void PinModule::setPin(IOPIN *new_pin)
   if (!m_pin && new_pin) {
     m_pin = new_pin;
     m_pin->setMonitor(this);
-    m_bLastControlState = getControlState();
-    m_bLastSourceState = getSourceState();
+    m_cLastControlState = getControlState();
+    m_cLastSourceState = getSourceState();
   }
 
 }
@@ -269,39 +313,48 @@ void PinModule::updatePinModule()
     return;
 
   bool bStateChange=false;
-  bool bCurrentControlState = getControlState();
 
-  if (bCurrentControlState != m_bLastControlState) {
-    //printf("PinModule::%s - pin:%d newControlState=%s\n",__FUNCTION__,m_pinNumber,(bCurrentControlState?"true":"false"));
-    m_bLastControlState = bCurrentControlState;
-    m_pin->update_direction(bCurrentControlState ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT,
+  Dprintf(("PinModule::updatePinModule():%s enter cont=%c,source=%c,pullup%c\n",
+	   (m_pin ? m_pin->name().c_str() : "NOPIN"),
+	    m_cLastControlState,m_cLastSourceState,m_cLastPullupControlState));
+
+  char cCurrentControlState = getControlState();
+
+  if (cCurrentControlState != m_cLastControlState) {
+    m_cLastControlState = cCurrentControlState;
+    m_pin->update_direction((cCurrentControlState=='1') ? IOPIN::DIR_INPUT : IOPIN::DIR_OUTPUT,
 			    false);
     bStateChange = true;
   }
 
-  bool bCurrentSourceState = getSourceState();
+  char cCurrentSourceState = getSourceState();
 
-  if (bCurrentSourceState != m_bLastSourceState) {
-    //printf("PinModule::%s - pin:%d newSourceState=%s\n",__FUNCTION__,m_pinNumber,(bCurrentSourceState?"true":"false"));
-    m_bLastSourceState = bCurrentSourceState;
-    m_pin->setDrivingState(bCurrentSourceState);
+  if (cCurrentSourceState != m_cLastSourceState) {
+    m_cLastSourceState = cCurrentSourceState;
+    m_pin->setDrivingState(cCurrentSourceState);
     bStateChange = true;
   }
 
-  bool bCurrentPullupControlState = getPullupControlState();
+  char cCurrentPullupControlState = getPullupControlState();
 
-  if (bCurrentPullupControlState != m_bLastPullupControlState) {
-    m_bLastPullupControlState = bCurrentPullupControlState;
-    m_pin->update_pullup(m_bLastPullupControlState,false);
+  if (cCurrentPullupControlState != m_cLastPullupControlState) {
+    m_cLastPullupControlState = cCurrentPullupControlState;
+    m_pin->update_pullup(m_cLastPullupControlState,false);
     bStateChange = true;
   }  
 
   if (bStateChange) {
+
+    Dprintf(("PinModule::updatePinModule() exit cont=%c,source=%c,pullup%c\n",
+	     m_cLastControlState,m_cLastSourceState,
+	     m_cLastPullupControlState));
+
     if (m_pin->snode)
       m_pin->snode->update();
     else
-      setDrivenState(bCurrentSourceState);
+      setDrivenState(cCurrentSourceState);
   }
+
 }
 
 void PinModule::setDefaultControl(SignalControl *newDefaultControl)
@@ -346,41 +399,30 @@ void PinModule::addSink(SignalSink *new_sink)
     sinks.push_back(new_sink);
 }
 
-bool PinModule::getControlState()
+char PinModule::getControlState()
 {
-  return m_activeControl ? m_activeControl->getState() : false;
+  return m_activeControl ? m_activeControl->getState() : '?';
 }
-bool PinModule::getSourceState()
+char PinModule::getSourceState()
 {
-  return m_activeSource ? m_activeSource->getState() : false;
+  return m_activeSource ? m_activeSource->getState() : '?';
 }
-bool PinModule::getPullupControlState()
+char PinModule::getPullupControlState()
 {
-  return m_activePullupControl ? m_activePullupControl->getState() : false;
+  return m_activePullupControl ? m_activePullupControl->getState() : '?';
 }
 
 
-
-void PinModule::setDrivenState(bool new_dstate)
+void PinModule::setDrivenState(char new3State)
 {
-  /*
-  printf("PinModule::%s pin:%d %s,%s\n",__FUNCTION__,
-	 m_pinNumber,
-	 (new_dstate?"true":"false"),
-	 (m_bLastSinkState?"true":"false")
-	 );
-  */
-  //if (m_bLastSinkState != new_dstate) {
-  m_bLastSinkState = new_dstate;
+  m_cLastSinkState = new3State;
 
   list <SignalSink *> :: iterator ssi;
   for (ssi = sinks.begin(); ssi != sinks.end(); ++ssi)
-    (*ssi)->setSinkState(new_dstate);
-
-  //}
+    (*ssi)->setSinkState(new3State);
 }
 
-void PinModule::setDrivingState(bool new_dstate)
+void PinModule::setDrivingState(char new3State)
 {
   //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
 }
@@ -389,7 +431,7 @@ void PinModule::set_nodeVoltage(double)
 {
   //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
 }
-void PinModule::putState(bool)
+void PinModule::putState(char)
 {
   //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
 }
@@ -436,9 +478,9 @@ public:
     : m_register(_reg), m_bitMask(1<<bitPosition)
   {
   }
-  bool getState()
+  char getState()
   {
-    return m_register ? ((m_register->get_value()&m_bitMask)!=0) : false;
+    return m_register ? m_register->get3StateBit(m_bitMask) : '?';
   }
 private:
   Register *m_register;
@@ -498,7 +540,8 @@ void PicPortBRegister::put(unsigned int new_value)
     // stimuli (or perhaps internal peripherals) overdriving or overriding
     // this port, then the call to updatePort() will update 'drivenValue'
     // to its proper value.
-    drivenValue = drivingValue;
+    rvDrivenValue.data = drivingValue;
+    rvDrivenValue.init = 0;
     updatePort();
   }
 
@@ -509,26 +552,36 @@ unsigned int PicPortBRegister::get(unsigned int new_value)
 {
   cpu14->intcon->set_rbif(false);
 
-  return drivenValue;
+  return rvDrivenValue.data;
 }
-void PicPortBRegister::setbit(unsigned int bit_number, bool new_value)
+
+//------------------------------------------------------------------------
+// setbit
+// FIXME - a sink should be created for the intf and rbif functions.
+
+void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
 {
-  unsigned int lastDrivenValue = drivenValue;
-  if (bit_number == 0 && ((drivenValue&1==1)!=m_bIntEdge) && (new_value == m_bIntEdge))
+  Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
+
+  bool bNewValue = new3State=='1' || new3State=='W';
+  if (bit_number == 0 && ((rvDrivenValue.data&1==1)!=m_bIntEdge) 
+      && (bNewValue == m_bIntEdge))
     cpu14->intcon->set_intf(true);
 
 
-  PortRegister::setbit(bit_number, new_value);
+  PortRegister::setbit(bit_number, new3State);
 
   unsigned int bitMask = (1<<bit_number) & 0xF0;
 
-  if ( (drivingValue ^ drivenValue) & m_tris->get() & bitMask )
+  if ( (drivingValue ^ rvDrivenValue.data) & m_tris->get() & bitMask )
     cpu14->intcon->set_rbif(true);
 }
 
 void PicPortBRegister::setRBPU(bool bNewRBPU)
 {
   m_bRBPU = !bNewRBPU;
+
+  Dprintf(("PicPortBRegister::setRBPU() =%d\n",(m_bRBPU?1:0)));
 
   unsigned int mask = getEnableMask();
   for (unsigned int i=0, m=1; mask; i++, m<<= 1)
@@ -629,10 +682,10 @@ unsigned int IOPORT::get_value(void)
 
 	if(current_value & m) {
 	  // this io bit is currently a high
-	  if(v <= pins[i]->h2l_threshold)
+	  if(v <= pins[i]->get_h2l_threshold())
 	    current_value ^= m;
 	} else
-	  if (v > pins[i]->l2h_threshold)
+	  if (v > pins[i]->get_l2h_threshold())
 	    current_value ^= m;
       }
     }

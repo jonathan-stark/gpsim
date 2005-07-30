@@ -248,6 +248,17 @@ public:
   {
   }
 
+  /// get3StateBit - returns the 3-state value of a bit
+  /// if a bit is known then a '1' or '0' is returned else, 
+  /// a '?' is returned. No check is performed to ensure
+  /// that only a single bit is checked, thus it's possible
+  /// to get the state of a group of bits using this method.
+
+  virtual char get3StateBit(unsigned int bitMask)
+  {
+    RegisterValue rv = getRV_notrace();
+    return (rv.init&bitMask) ? '?' : (rv.data&bitMask ? '1':'0');
+  }
   /// In the Register class, the 'Register *get()' returns a
   /// pointer to itself. Derived classes may return something
   /// else (e.g. a break point may be pointing to the register

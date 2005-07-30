@@ -462,7 +462,7 @@ GPIO::GPIO(const char *port_name, unsigned int numIopins,
 
 void GPIO::setbit(unsigned int bit_number, bool new_value)
 {
-  unsigned int lastDrivenValue = drivenValue;
+  unsigned int lastDrivenValue = rvDrivenValue.data;
 
   PortRegister::setbit(bit_number, new_value);
 
@@ -471,7 +471,7 @@ void GPIO::setbit(unsigned int bit_number, bool new_value)
   // the processor is sleeping.
   //    Then wake 
 
-  if ((lastDrivenValue ^ drivenValue) & 0x0b) {
+  if ((lastDrivenValue ^ rvDrivenValue.data) & 0x0b) {
     if( ((cpu12->option_reg.value.get() & 0x80) == 0) && bp.have_sleep()) {
 
       if(verbose)

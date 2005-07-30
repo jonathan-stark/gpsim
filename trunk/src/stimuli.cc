@@ -571,7 +571,8 @@ void Stimulus_Node::time_constant(double new_tc)
 }
 
 //------------------------------------------------------------------------
-stimulus::stimulus(const char *cPname)
+stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
+  : Vth(_Vth), Zth(_Zth)
 {
   new_name(cPname);
 
@@ -580,8 +581,6 @@ stimulus::stimulus(const char *cPname)
   bDriving = false;
   next = 0;
 
-  Vth = 5.0;   // Volts
-  Zth = 250;   // Ohms
   Cth = 0;     // Farads
   nodeVoltage = 0.0; // Volts
 }
@@ -861,8 +860,15 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   symbol_table.add_stimulus(this);
 }
 
-IOPIN::IOPIN(const char *_name)
-  : stimulus(_name)
+IOPIN::IOPIN(const char *_name,
+	     double _Vth, 
+	     double _Zth,
+	     double _ZthWeak,
+	     double _ZthFloating
+	     )
+
+  : stimulus(_name,_Vth, _Zth),
+    ZthWeak(_ZthWeak), ZthFloating(_ZthFloating)
 {
   if(verbose)
     cout << "IOPIN default constructor\n";
@@ -873,10 +879,6 @@ IOPIN::IOPIN(const char *_name)
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   bDrivenState = false;
-  Vth = 0.3;
-  Zth = 1e8;
-  ZthWeak = 1e3;
-  ZthFloating = 1e6;
   snode = 0;
   m_monitor=0;
 
@@ -970,6 +972,8 @@ void IOPIN::set_nodeVoltage(double new_nodeVoltage)
     // The voltage is between the low and high thresholds,
     // so do nothing
   }
+
+  //setDrivenState(getBitChar());
   if (m_monitor)
     m_monitor->set_nodeVoltage(nodeVoltage);
 }
@@ -1003,7 +1007,7 @@ void IOPIN::putState(bool new_state)
     }
   }
   if(m_monitor)
-    m_monitor->putState(new_state);
+    m_monitor->putState(new_state?'1':'0');
 
 }
 
@@ -1018,11 +1022,20 @@ void IOPIN::setDrivingState(bool new_state)
   bDrivingState = new_state;
 
   if(m_monitor)
-    m_monitor->setDrivingState(bDrivingState);
+    m_monitor->setDrivingState(bDrivingState?'1':'0');
 
   if(verbose & 1)
     cout << name()<< " setDrivingState= " 
 	 << (new_state ? "high" : "low") << endl;
+}
+
+void IOPIN::setDrivingState(char new3State)
+{ 
+  bDrivingState = new3State=='1';
+
+  if(m_monitor)
+    m_monitor->setDrivingState(new3State);
+
 }
 
 bool IOPIN::getDrivingState(void)
@@ -1040,6 +1053,14 @@ bool IOPIN::getDrivenState()
 {
   return bDrivenState;
 }
+
+//------------------------------------------------------------------------
+// setDrivenState
+//
+// An stimulus attached to this pin is driving us to a new state.
+// This state will be recorded and propagate up to anything 
+// monitoring this pin.
+
 void IOPIN::setDrivenState(bool new_state)
 {
   bDrivenState = new_state;
@@ -1052,10 +1073,11 @@ void IOPIN::setDrivenState(bool new_state)
   if(port)
     port->setbit(iobit, new_state);
 
+  // Propagate the new state to those things monitoring this pin.
+  // (note that the 3-state value is what's propagated).
   if(m_monitor)
-    m_monitor->setDrivenState(bDrivenState);
+    m_monitor->setDrivenState(getBitChar());
 }
-
 
 void IOPIN::toggle(void)
 {
@@ -1113,17 +1135,16 @@ IO_bi_directional::IO_bi_directional(IOPORT *i, unsigned int b,const char *opt_n
 
 }
 
-IO_bi_directional::IO_bi_directional(const char *_name)
-  : IOPIN(_name)
+IO_bi_directional::IO_bi_directional(const char *_name,
+				     double _Vth, 
+				     double _Zth,
+				     double _ZthWeak,
+				     double _ZthFloating,
+				     double _VthIn,
+				     double _ZthIn)
+  : IOPIN(_name, _Vth, _Zth, _ZthWeak, _ZthFloating),
+    VthIn(_VthIn), ZthIn(_ZthIn)
 {
-
-  // Thevenin equivalent while configured as an output 
-  Vth = 5.0;
-  Zth = 250;
-
-  // Thevenin equivalent while configured as an input 
-  VthIn = 0.3;
-  ZthIn = 1e8;
 }
 
 
@@ -1224,11 +1245,19 @@ IO_bi_directional_pu::IO_bi_directional_pu(IOPORT *i, unsigned int b,
   bPullUp = false;
 }
 
-IO_bi_directional_pu::IO_bi_directional_pu(const char *_name)
-  : IO_bi_directional(_name)
+IO_bi_directional_pu::IO_bi_directional_pu(const char *_name,
+					   double _Vth, 
+					   double _Zth,
+					   double _ZthWeak,
+					   double _ZthFloating,
+					   double _VthIn,
+					   double _ZthIn,
+					   double _Zpullup)
+  : IO_bi_directional(_name, _Vth, _Zth, _ZthWeak,
+		      _ZthFloating, _VthIn, _ZthIn),
+    Zpullup(_Zpullup)
 {
   Vpullup = Vth;
-  Zpullup = 10e3;
   bPullUp = false;
 }
 
