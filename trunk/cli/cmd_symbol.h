@@ -34,7 +34,7 @@ public:
   void dump_one(const char *sym_name);
   void dump_one(Value *);
 
-  void add_one(const char *sym_name, const char *sym_type, Expression *);
+  void add_one(const char *sym_name, Expression *);
 };
 
 extern cmd_symbol c_symbol;

@@ -430,13 +430,13 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
               quit_parse = 0;
               YYABORT;
             }
-	  }
-	  | LOAD LITERAL_STRING_T
+          }
+          | LOAD LITERAL_STRING_T
           // load [programname | cmdfile]
           {
-            quit_parse = c_load.load($2->getVal()) == 0;
+            quit_parse = c_load.load($2->getVal(), (const char *)NULL) == 0;
             delete $2;
-	    quit_parse =0;
+            quit_parse =0;
 
             if(quit_parse)
             {
@@ -444,23 +444,35 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
               YYABORT;
             }
 
-	  }
-          | LOAD LITERAL_STRING_T LITERAL_STRING_T
+          }
+          | LOAD SYMBOL_T
+          // load [programname | cmdfile]
+          {
+            quit_parse = c_load.load($2) == 0;
+            quit_parse =0;
+
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+
+          }
+          | LOAD SYMBOL_T SYMBOL_T
           // load processor filename
           {
             //                        filename,   processor
-            quit_parse = c_load.load($3->getVal(), $2->getVal()) == 0;
+            quit_parse = c_load.load($3, $2) == 0;
             delete $2;
             delete $3;
-
 
             if(quit_parse)
             {
               quit_parse = 0;
               YYABORT;
             }
-	  }
-	  ;
+          }
+          ;
 
 log_cmd
           : LOG                         {c_log.log();}
@@ -592,6 +604,8 @@ stimulus_opt:
 
 symbol_cmd
           : SYMBOL                      {c_symbol.dump_all();}
+          | SYMBOL LITERAL_STRING_T EQU_T literal
+                                        {c_symbol.add_one($2->getVal(), $4); delete $4;}
           | SYMBOL LITERAL_STRING_T     {c_symbol.dump_one($2->getVal());}
           | SYMBOL SYMBOL_T             {c_symbol.dump_one($2);}
           ;
