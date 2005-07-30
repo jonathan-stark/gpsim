@@ -32,8 +32,14 @@ void ProgramFileType::DisplayError(int err, const char *pProgFilename,
     pArg = pProgFilename;
     break;
   case ERR_LST_FILE_NOT_FOUND:
-    iMessage = IDS_FILE_NOT_FOUND;
-    pArg = pLstFile == NULL ? "unknown" : pLstFile;
+    if(pLstFile == NULL) {
+      iMessage = IDS_LIST_FILE_NOT_FOUND;
+      pArg = pProgFilename;
+    }
+    else {
+      iMessage = IDS_FILE_NOT_FOUND;
+      pArg = pLstFile;
+    }
     break;
   case ERR_BAD_FILE:
     iMessage = IDS_FILE_BAD_FORMAT;
@@ -106,7 +112,8 @@ bool ProgramFileTypeList::LoadProgramFile(Processor **pProcessor,
 bool ProgramFileTypeList::IsErrorDisplayableInLoop(int iError) {
   return iError != ProgramFileType::SUCCESS &&
          iError != ProgramFileType::ERR_BAD_FILE &&
-         iError != ProgramFileType::ERR_NEED_PROCESSOR_SPECIFIED;
+         iError != ProgramFileType::ERR_NEED_PROCESSOR_SPECIFIED &&
+         iError != ProgramFileType::ERR_LST_FILE_NOT_FOUND;
 }
 
 ///
