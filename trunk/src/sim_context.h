@@ -52,7 +52,6 @@ public:
   int         LoadProgram(              const char *filename,
                                         const char *pProcessorType = NULL);
   void        dump_processor_list(void);
-  static CSimulationContext *GetContext();
   bool        SetDefaultProcessor(      const char * processor_type,
                                         const char * processor_new_name); 
   void        Clear();
@@ -60,6 +59,8 @@ public:
   Symbol_Table &  GetSymbolTable();
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();
+
+  static CSimulationContext *GetContext();
 
 protected:
   CProcessorList processor_list;

@@ -102,7 +102,7 @@ Processor * CSimulationContext::SetProcessorByType(const char * processor_type,
   Processor *p;
   CProcessorList::iterator it = processor_list.findByType(string(processor_type));
   GetBreakpoints().clear_all(GetActiveCPU());
-  GetSymbolTable().clear();
+  GetSymbolTable().Reinitialize();
   if(processor_list.end() == it) {
     p = add_processor(processor_type,processor_new_name);
   }
