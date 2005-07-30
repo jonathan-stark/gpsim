@@ -120,6 +120,54 @@ bool Symbol_Table::add(Value *s) {
   return false;
 }
 
+void Symbol_Table::AddFromCommandLine(char * pSymbol) {
+  char *pSymName;
+  char *pSymValue = strchr(pSymbol, '=');
+  // The name and value are stored as single string with
+  // a null character delimiting between the name and value.
+  if(pSymValue == NULL) {
+    // if no equals sign, define as a null string value
+    pSymName = (char*)malloc(strlen(pSymbol) + 2);   // space for two null chars
+    strcpy(pSymName, pSymbol);
+    pSymValue = strchr(pSymName, 0);
+    pSymValue++;
+    *pSymValue = 0;
+  }
+  else {
+    pSymName = strdup(pSymbol);
+    pSymValue = strchr(pSymName, '=');
+    *pSymValue = 0;
+    pSymValue++;
+  }
+  // Stored each name value pair from the command line it
+  // its own list container.
+  s_CmdLineSymbolList.push_back(pSymName);
+}
+
+void Symbol_Table::PopulateWithCommandLineSymbols() {
+  Value *pValue;
+  SymbolList::iterator it;
+  char *pSymName;
+  char *pSymValue;
+  for(it = s_CmdLineSymbolList.begin(); it != s_CmdLineSymbolList.end(); it++) {
+    pSymName = *it;
+    pSymValue = strchr(pSymName, 0) + 1;
+    pValue = Integer::New(pSymName, pSymValue, "derived from gpsim command line");
+    if(pValue == NULL) {
+      pValue = Float::New(pSymName, pSymValue, "derived from gpsim command line");
+      if(pValue == NULL) {
+        pValue = Boolean::New(pSymName, pSymValue, "derived from gpsim command line");
+        if(pValue == NULL) {
+          // assume string
+          pValue = new String(pSymName, pSymValue);
+        }
+      }
+    }
+    pValue->setClearableSymbol(false);
+    add(pValue);
+  }
+}
+
 register_symbol *
 Symbol_Table::add_register(Register *new_reg, const char *symbol_name)
 {
@@ -237,15 +285,6 @@ void Symbol_Table::rename(const char *pOldName, const char *pNewName)
       pValue->new_name(pNewName);
       add(pValue);
     }
-  }
-}
-
-void Symbol_Table::add(const char *new_name, const char *new_type, int value)
-{
-  if(new_type) {
-    // ugh.. FIXME
-    if ( strcmp("constant", new_type) == 0)
-      add_constant(new_name, value);
   }
 }
 
@@ -462,6 +501,14 @@ void Symbol_Table::clear() {
     i++;
   }
 //  remove_if(begin(), end(), IsClearable);
+}
+
+void Symbol_Table::Initialize() {
+  PopulateWithCommandLineSymbols();
+}
+
+void Symbol_Table::Reinitialize() {
+  clear();
 }
 
 void Symbol_Table::clear_all() {

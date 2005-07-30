@@ -95,8 +95,8 @@ public:
   void add_address(const char *, int );
   void add_w(WREG *w );
   void add_module(Module * m, const char *module_name);
+
   void remove_module(Module * m);
-  void add(const char *symbol_name, const char *symbol_type, int value);
   Value *remove(string &);
   void rename(const char *pOldName, const char *pNewName);
   void dump_all(void);
@@ -122,12 +122,24 @@ public:
   bool  Exist(const char *);
   void clear();
   void clear_all();
+  void Initialize();
+  void Reinitialize();
+
   iterator begin() {
     return _Myt::begin();
   }
   iterator end() {
     return _Myt::end();
   }
+
+  ///
+  ///   Symbols defined from gpsim command line
+  ///
+  typedef list<char*> SymbolList;
+  SymbolList s_CmdLineSymbolList;
+  void AddFromCommandLine(char * pSymbol);
+  void PopulateWithCommandLineSymbols();
+
 };
 
 
