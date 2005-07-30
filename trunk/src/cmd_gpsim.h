@@ -4,6 +4,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include "exports.h"
+#include "glib.h"
 
 class ISimConsole {
 public:
@@ -33,13 +35,16 @@ public:
     unsigned int uMask) = 0;
   virtual const char * FormatLabeledValue(const char * pLabel,
     unsigned int uValue) = 0;
+  virtual const char * FormatValue(unsigned int uValue) = 0;
+  virtual const char * FormatValue(gint64 uValue) = 0;
+  virtual const char * FormatValue(gint64 uValue, int iRadix) = 0;
 
   virtual void SetProgramAddressRadix(int iRadix) = 0;
   virtual void SetRegisterAddressRadix(int iRadix) = 0;
   virtual void SetValueRadix(int iRadix) = 0;
 };
 
-extern "C" IUserInterface &GetUserInterface(void);
+extern "C" IUserInterface & GetUserInterface(void);
 
 ///
 ///   Gpsim string IDs
@@ -57,6 +62,7 @@ extern "C" IUserInterface &GetUserInterface(void);
 #define IDS_NO_PROCESSOR_SPECIFIED            12
 #define IDS_PROCESSOR_INIT_FAILED             13
 #define IDS_FILE_NEED_PROCESSOR_SPECIFIED     14
+#define IDS_LIST_FILE_NOT_FOUND               15
 
 
 #endif
