@@ -31,6 +31,12 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "breakpoints.h"
+#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 
 //--------------------------------------------------
 // member functions for the INTCON base class
@@ -43,7 +49,7 @@ INTCON::INTCON(void)
 
 void INTCON::set_T0IF(void)
 {
-
+  Dprintf((" INTCON::%s\n",__FUNCTION__));
   trace.raw(write_trace.get() | value.get());
 
   value.put(value.get() | T0IF);
@@ -66,6 +72,7 @@ void INTCON::set_cpu(Processor *new_cpu)
 
 void INTCON::put(unsigned int new_value)
 {
+  Dprintf((" INTCON::%s\n",__FUNCTION__));
 
   trace.raw(write_trace.get() | value.get());
 
@@ -103,15 +110,18 @@ void INTCON::put(unsigned int new_value)
 
 void INTCON::peripheral_interrupt(void)
 {
+  Dprintf((" INTCON::%s\n",__FUNCTION__));
+
   if(  (value.get() & (GIE | XXIE)) == (GIE | XXIE) )
     bp.set_interrupt();
 }
 
 
-bool INTCON_14_PIR::check_peripheral_interrupt(void)
+bool INTCON_14_PIR::check_peripheral_interrupt()
 {
   assert(pir_set != 0);
 
+  Dprintf((" INTCON::%s\n",__FUNCTION__));
   return (pir_set->interrupt_status());
 }
 

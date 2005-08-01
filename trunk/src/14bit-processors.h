@@ -127,7 +127,7 @@ public:
   Pic14Bit();
 
 
-  INTCON       intcon_reg;
+  INTCON_14_PIR    intcon_reg;
 
   PicPortRegister  *m_porta;
   PicTrisRegister  *m_trisa;

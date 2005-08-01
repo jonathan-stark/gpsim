@@ -341,6 +341,8 @@ register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
     register_symbol *pRegSymbol = dynamic_cast<register_symbol*>(*sti);
     if(pRegSymbol != 0) {
       Register * pReg = pRegSymbol->getReg();
+      if (pReg && pReg->get_cpu() == NULL)
+	cout << " Null cpu for reg named:"<<pReg->name()<<endl;
       assert(pReg->get_cpu() != NULL);
       if(pRegSymbol->getAddress() == uAddress &&
         pRegSymbol->getBitmask() == pReg->get_cpu()->register_mask() &&

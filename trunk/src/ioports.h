@@ -225,7 +225,7 @@ class PicTrisRegister : public sfr_register
 
 public:
 
-  PicTrisRegister(PicPortRegister *);
+  PicTrisRegister(const char *tris_name, PicPortRegister *);
   virtual void put(unsigned int new_value);
   virtual unsigned int get();
   

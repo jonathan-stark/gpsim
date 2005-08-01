@@ -25,19 +25,6 @@ Boston, MA 02111-1307, USA.  */
 #include "eeprom.h"
 
 
-class P18Cxx2 : public  _16bit_processor
-{
-public:
-
-  P18Cxx2(void);
-
-  virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
-  virtual void create_symbols(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
-
-};
-
 class P18C2x2 : public _16bit_processor
 {
  public:
@@ -46,26 +33,24 @@ class P18C2x2 : public _16bit_processor
 
   void create(void);
 
-  virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual void create_symbols();
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
-  void create_sfr_map(void);
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
 };
 
 class P18C242 : public P18C2x2
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18C242_;};
-  P18C242(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P18C242_;};
+  P18C242();
+  static Processor *construct();
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
 };
 
@@ -73,13 +58,12 @@ class P18C252 : public P18C242
 {
  public:
 
-  virtual PROCESSOR_TYPE isa(void){return _P18C252_;};
-  P18C252(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P18C252_;};
+  P18C252();
+  static Processor *construct();
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 
 
 };
@@ -101,17 +85,17 @@ class P18C4x2 : public _16bit_processor
   IOPORT_TRIS  trise;
   IOPORT_LATCH late;
 
-  P18C4x2(void);
+  P18C4x2();
 
-  void create(void);
+  void create();
 
-  virtual PROCESSOR_TYPE isa(void){return _P18Cxx2_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P18Cxx2_;};
+  virtual void create_symbols();
 
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
+  virtual unsigned int program_memory_size() const { return 0x400; };
 
-  void create_sfr_map(void);
-  virtual void create_iopin_map(void);
+  virtual void create_sfr_map();
+  virtual void create_iopin_map();
 
 };
 
@@ -119,13 +103,11 @@ class P18C4x2 : public _16bit_processor
 class P18C442 : public P18C4x2
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18C442_;};
-  P18C442(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual PROCESSOR_TYPE isa(){return _P18C442_;};
+  P18C442();
+  static Processor *construct();
+  void create();
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
 };
 
@@ -133,26 +115,22 @@ class P18C442 : public P18C4x2
 class P18C452 : public P18C442
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18C452_;};
-  P18C452(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual PROCESSOR_TYPE isa(){return _P18C452_;};
+  P18C452();
+  static Processor *construct();
+  void create();
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 
 };
 
 class P18F242 : public P18C242
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F242_;};
-  P18F242(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual PROCESSOR_TYPE isa(){return _P18F242_;};
+  P18F242();
+  static Processor *construct();
+  void create();
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
@@ -160,33 +138,29 @@ class P18F242 : public P18C242
    assert(0);
   }
   virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
-  virtual EEPROM_PIR *get_eeprom(void) { return ((EEPROM_PIR *)eeprom); }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
 
 };
 
 class P18F252 : public P18F242
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F252_;};
-  P18F252(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual PROCESSOR_TYPE isa(){return _P18F252_;};
+  P18F252();
+  static Processor *construct();
+  void create();
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 
 };
 
 class P18F442 : public P18C442
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F442_;};
-  P18F442(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual PROCESSOR_TYPE isa(){return _P18F442_;};
+  P18F442();
+  static Processor *construct();
+  void create();
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
   virtual void set_out_of_range_pm(unsigned int address, unsigned int value);
   virtual void set_eeprom(EEPROM *ep) {
@@ -194,7 +168,7 @@ class P18F442 : public P18C442
    assert(0);
   }
   virtual void set_eeprom_pir(EEPROM_PIR *ep) { eeprom = ep; }
-  virtual EEPROM_PIR *get_eeprom(void) { return ((EEPROM_PIR *)eeprom); }
+  virtual EEPROM_PIR *get_eeprom() { return ((EEPROM_PIR *)eeprom); }
 
 };
 
@@ -204,24 +178,22 @@ class P18F442 : public P18C442
 class P18F248 : public P18F442
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F248_;};
-  P18F248(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P18F248_;};
+  P18F248();
+  static Processor *construct();
+  void create();
 };
  
 
 class P18F452 : public P18F442
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F452_;};
-  P18F452(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P18F452_;};
+  P18F452();
+  static Processor *construct();
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x4000; };
+  virtual unsigned int program_memory_size() const { return 0x4000; };
 
 };
 
@@ -232,15 +204,12 @@ class P18Fxx20 : public _16bit_processor
 class P18F1220 : public P18Fxx20
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F1220_;};
-  P18F1220(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
-  virtual void create_iopin_map(void);
-  virtual void create_symbols(void);
-
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual PROCESSOR_TYPE isa(){return _P18F1220_;};
+  P18F1220();
+  static Processor *construct();
+  void create();
+  virtual void create_iopin_map();
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
 };
 
@@ -248,12 +217,12 @@ class P18F1220 : public P18Fxx20
 class P18F1320 : public P18F1220
 {
  public:
-  virtual PROCESSOR_TYPE isa(void){return _P18F1320_;};
-  P18F1320(void);
-  static Processor *construct(void);
-  void create(void);
+  virtual PROCESSOR_TYPE isa(){return _P18F1320_;};
+  P18F1320();
+  static Processor *construct();
+  void create();
 
-  virtual unsigned int program_memory_size(void) const { return 0x2000; };
+  virtual unsigned int program_memory_size() const { return 0x2000; };
 
 };
 

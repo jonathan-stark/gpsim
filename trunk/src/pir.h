@@ -38,7 +38,11 @@ public:
   PIE     *pie;
   int valid_bits;
  
-  virtual void set_ccpif(void){}
+  PIR() :
+    intcon(0),pie(0),valid_bits(0)
+  {
+  }
+  virtual void set_ccpif(){}
 
   virtual bool interrupt_status(void)
     {

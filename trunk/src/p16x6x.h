@@ -72,7 +72,6 @@ public:
   CCPRL   ccpr2l;
   CCPRH   ccpr2h;
   PCON    pcon;
-  INTCON_14_PIR intcon_reg;
   PIR_SET_1 pir_set_def;
 
   // Only used in some models. It is initialized based on the value of

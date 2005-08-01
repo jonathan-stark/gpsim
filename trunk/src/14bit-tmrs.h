@@ -82,54 +82,70 @@ public:
 //---------------------------------------------------------
 // CCPCON - Capture and Compare Control register
 //---------------------------------------------------------
+class CCPSignalSource;  // I/O pin interface
+class CCPSignalSink;    // I/O pin interface
+class PinModule;
+
 class CCPCON : public sfr_register
 {
 public:
 
   /* Bit definitions for the register */
-enum
-{
-  CCPM0 = 1 << 0,
-  CCPM1 = 1 << 1,
-  CCPM2 = 1 << 2,
-  CCPM3 = 1 << 3,
-  CCPY  = 1 << 4,
-  CCPX  = 1 << 5
-};
+  enum {
+    CCPM0 = 1 << 0,
+    CCPM1 = 1 << 1,
+    CCPM2 = 1 << 2,
+    CCPM3 = 1 << 3,
+    CCPY  = 1 << 4,
+    CCPX  = 1 << 5
+  };
 
   /* Define the Modes (based on the CCPM bits) */
-enum
-{
-  ALL_OFF0 = 0,
-  ALL_OFF1 = 1,
-  ALL_OFF2 = 2,
-  ALL_OFF3 = 3,
-  CAP_FALLING_EDGE = 4,
-  CAP_RISING_EDGE  = 5,
-  CAP_RISING_EDGE4 = 6,
-  CAP_RISING_EDGE16 = 7,
-  COM_SET_OUT = 8,
-  COM_CLEAR_OUT = 9,
-  COM_INTERRUPT = 10,
-  COM_TRIGGER = 11,
-  PWM0 = 12,
-  PWM1 = 13,
-  PWM2 = 14,
-  PWM3 = 15
-};
-
-  int edges;
-  CCPRL *ccprl;
-  IOPIN *iopin;
-  PIR_SET   *pir_set;
-  TMR2  *tmr2;
-  ADCON0 *adcon0;
+  enum {
+    ALL_OFF0 = 0,
+    ALL_OFF1 = 1,
+    ALL_OFF2 = 2,
+    ALL_OFF3 = 3,
+    CAP_FALLING_EDGE = 4,
+    CAP_RISING_EDGE  = 5,
+    CAP_RISING_EDGE4 = 6,
+    CAP_RISING_EDGE16 = 7,
+    COM_SET_OUT = 8,
+    COM_CLEAR_OUT = 9,
+    COM_INTERRUPT = 10,
+    COM_TRIGGER = 11,
+    PWM0 = 12,
+    PWM1 = 13,
+    PWM2 = 14,
+    PWM3 = 15
+  };
 
   void new_edge(unsigned int level);
-  void compare_match(void);
+  void compare_match();
   void pwm_match(int new_state);
   void put(unsigned int new_value);
-  CCPCON(void);
+  char getState();
+
+  void setCrosslinks(CCPRL *, PIR_SET *, TMR2 *);
+  void setADCON(ADCON0 *);
+  CCPCON();
+
+  void setIOpin(PinModule *);
+private:
+  PinModule *m_PinModule;
+  CCPSignalSource *m_source;
+  CCPSignalSink   *m_sink;
+  bool  m_bInputEnabled;    // Input mode for capture/compare
+  bool  m_bOutputEnabled;   // Output mode for PWM
+  char  m_cOutputState;
+  int   edges;
+
+  CCPRL   *ccprl;
+  PIR_SET *pir_set;
+  TMR2    *tmr2;
+  ADCON0  *adcon0;
+
+
 
 };
 //---------------------------------------------------------

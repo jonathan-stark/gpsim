@@ -1,3 +1,27 @@
+2005-08-05 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-processors.cc, src/14bit-processors.h,
+	src/14bit-tmrs.cc, src/14bit-tmrs.h, src/intcon.cc, src/intcon.h,
+	src/pir.h, src/p16x6x.cc, src/p16x6x.h, src/ioports.cc,
+	src/ioports.h, src/p16x7x.cc, src/p12x.cc:
+
+	-- The intcon and pir registers were not getting set up correctly for
+	   the midrange devices.
+	-- Added 'sinks' and 'sources' for the CCP module.
+	
+	* src/16bit-processors.cc, src/16bit-processors.h, src/p18x.cc,
+	src/p18x.h: Began porting the new I/O port design to the 16bit
+	core devices. 
+
+	* src/symbol.cc: Added a diagnostic message that is printed
+	whenever a register symbol with a null cpu is added to the symbol
+	table.
+
+	* regression/run_regression.sh, regression/p18f452_ports.asm,
+	regression/p18f452_ports.stc:
+	-- Added new regression test to test the P18F family I/O ports.
+	-- Redesigned the processor construction sequence.
+	-- The P18F1220 did not have PortB pullup resistors.
+
 2005-07-30 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/symbol.cc, src/symbol.h: Added a list of symbols
 	that are defined from the gpsim command line. The list

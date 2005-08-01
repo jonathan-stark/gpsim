@@ -163,16 +163,13 @@ void PortBSink::setPullups(bool new_pullupState)
 Pic14Bit::Pic14Bit()
 {
   m_porta = new PicPortRegister("porta",8,0x1f);
-  m_trisa = new PicTrisRegister(m_porta);
-  m_trisa->new_name("trisa");
+  m_trisa = new PicTrisRegister("trisa",m_porta);
 
   tmr0.set_cpu(this, m_porta, 4);
   tmr0.start(0);
 
-
   m_portb = new PicPortBRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister(m_portb);
-  m_trisb->new_name("trisb");
+  m_trisb = new PicTrisRegister("trisb",m_portb);
 
 }
 

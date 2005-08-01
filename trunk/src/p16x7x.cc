@@ -618,9 +618,7 @@ void P16C72::create_sfr_map(void)
   }
 
   // Link the A/D converter to the Capture Compare Module
-  ccp2con.adcon0 = &adcon0;
-
-
+  ccp2con.setADCON(&adcon0);
 }
 
 
@@ -753,9 +751,7 @@ void P16C73::create_sfr_map(void)
   }
 
   // Link the A/D converter to the Capture Compare Module
-  ccp2con.adcon0 = &adcon0;
-
-
+  ccp2con.setADCON(&adcon0);
 }
 
 
@@ -889,9 +885,7 @@ void P16C74::create_sfr_map(void)
   }
 
   // Link the A/D converter to the Capture Compare Module
-  ccp2con.adcon0 = &adcon0;
-
-
+  ccp2con.setADCON(&adcon0);
 }
 
 
