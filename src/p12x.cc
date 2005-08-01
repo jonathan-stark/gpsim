@@ -184,8 +184,7 @@ P12C508::P12C508(void)
     cout << "12c508 constructor, type = " << isa() << '\n';
 
   m_gpio = new GPIO("gpio",8,0x3f);
-  m_tris = new PicTrisRegister(m_gpio);
-  m_tris->new_name("tris");
+  m_tris = new PicTrisRegister("tris",m_gpio);
   m_tris->wdtr_value=RegisterValue(0x3f,0);
 
   if(config_modes)

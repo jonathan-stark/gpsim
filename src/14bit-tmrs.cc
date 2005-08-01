@@ -33,7 +33,13 @@ Boston, MA 02111-1307, USA.  */
 //
 // Timer 1&2  modules for the 14bit core pic processors.
 //
+#define DEBUG
 
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
 
 //--------------------------------------------------
 // CCPRL
@@ -169,20 +175,89 @@ unsigned int CCPRH::get(void)
 }
 
 //--------------------------------------------------
+// 
+//--------------------------------------------------
+class CCPSignalSource : public SignalControl
+{
+public:
+  CCPSignalSource(CCPCON *_ccp)
+    : m_ccp(_ccp)
+  {
+    assert(m_ccp);
+  }
+  char getState()
+  {
+    return m_ccp->getState();
+  }
+private:
+  CCPCON *m_ccp;
+};
+
+//--------------------------------------------------
+//
+//--------------------------------------------------
+
+class CCPSignalSink : public SignalSink
+{
+public:
+  CCPSignalSink(CCPCON *_ccp)
+    : m_ccp(_ccp)
+  {
+    assert(_ccp);
+  }
+
+  void setSinkState(char new3State)
+  {
+    m_ccp->new_edge( new3State=='1' || new3State=='W');
+  }
+private:
+  CCPCON *m_ccp;
+};
+
+//--------------------------------------------------
 // CCPCON
 //--------------------------------------------------
-CCPCON::CCPCON(void)
+CCPCON::CCPCON()
+  : m_PinModule(0),
+    m_source(0),
+    m_bInputEnabled(false),
+    m_bOutputEnabled(false),
+    m_cOutputState('?'),
+    edges(0),
+    ccprl(0), pir_set(0), tmr2(0), adcon0(0)
+
 {
+}
+void CCPCON::setIOpin(PinModule *new_PinModule)
+{
+  Dprintf(("CCPCON::setIOpin\n"));
 
-  edges = 0;
-  adcon0 = 0;
+  m_PinModule = new_PinModule;
 
+  m_sink = new CCPSignalSink(this);
+  m_PinModule->addSink(m_sink);
+
+  m_source = new CCPSignalSource(this);
+
+}
+void CCPCON::setCrosslinks(CCPRL *_ccprl, PIR_SET *_pir_set, TMR2 *_tmr2)
+{
+  ccprl = _ccprl;
+  pir_set = _pir_set;
+  tmr2 = _tmr2;
+}
+void CCPCON::setADCON(ADCON0 *_adcon0)
+{
+  adcon0 = _adcon0;
+}
+char CCPCON::getState()
+{
+  return m_bOutputEnabled ?  m_cOutputState : '?';
 }
 
 void CCPCON::new_edge(unsigned int level)
 {
-  if(verbose &4)
-    cout << "CCPCON processing new edge\n";
+  Dprintf(("CCPCON::new_edge() level=%d\n",level));
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -190,48 +265,42 @@ void CCPCON::new_edge(unsigned int level)
     case ALL_OFF1:
     case ALL_OFF2:
     case ALL_OFF3:
-      //cout << "CCPCON not enabled\n";
+      Dprintf(("--CCPCON not enabled\n"));
       return;
 
     case CAP_FALLING_EDGE:
-      if (level == 0)
+      if (level == 0 && ccprl) {
 	ccprl->capture_tmr();
-
-      //if(level==0) cout << "CCPCON caught falling edge\n";
+	Dprintf(("--CCPCON caught falling edge\n"));
+      }
       break;
 
     case CAP_RISING_EDGE:
-      if (level)
+      if (level && ccprl) {
 	ccprl->capture_tmr();
-      //if(level)cout << "CCPCON caught rising edge\n";
+	Dprintf(("--CCPCON caught rising edge\n"));
+      }
       break;
 
     case CAP_RISING_EDGE4:
-      //cout << "4th rising  level = " << level << '\n';
-      if (level)
-	{
-	  if(--edges <= 0)
-	    {
-	      ccprl->capture_tmr();
-	      edges = 4;
-	      //cout << "CCPCON caught 4th rising edge\n";
-	    }
-	  //else cout << "Saw rising edge, but skipped\n";
-	}
+      if (level && --edges <= 0) {
+	if (ccprl)
+	  ccprl->capture_tmr();
+	edges = 4;
+	Dprintf(("--CCPCON caught 4th rising edge\n"));
+      }
+	//else cout << "Saw rising edge, but skipped\n";
       break;
 
 
     case CAP_RISING_EDGE16:
-      if (level)
-	{
-	  if(--edges <= 0)
-	    {
-	      ccprl->capture_tmr();
-	      edges = 16;
-	      //cout << "CCPCON caught 16th rising edge\n";
-	    }
-	  //else cout << "Saw rising edge, but skipped\n";
-	}
+      if (level && --edges <= 0) {
+	if (ccprl)
+	  ccprl->capture_tmr();
+	edges = 16;
+	Dprintf(("--CCPCON caught 4th rising edge\n"));
+      }
+      //else cout << "Saw rising edge, but skipped\n";
       break;
 
     case COM_SET_OUT:
@@ -250,7 +319,7 @@ void CCPCON::new_edge(unsigned int level)
 void CCPCON::compare_match(void)
 {
 
-  //cout << name() << " compare match\n";
+  Dprintf(("CCPCON::compare_match()\n"));
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -258,38 +327,47 @@ void CCPCON::compare_match(void)
     case ALL_OFF1:
     case ALL_OFF2:
     case ALL_OFF3:
-      //cout << "CCPCON not enabled\n";
+      Dprintf(("-- CCPCON not enabled\n"));
       return;
 
     case CAP_FALLING_EDGE:
     case CAP_RISING_EDGE:
     case CAP_RISING_EDGE4:
     case CAP_RISING_EDGE16:
-      //cout << "CCPCON is programmed for capture??\n";
+      Dprintf(("-- CCPCON is programmed for capture. bug?\n"));
       break;
 
     case COM_SET_OUT:
-      iopin->putState(true);
-      pir_set->set_ccpif();
+      m_cOutputState = '1';
+      m_PinModule->updatePinModule();
+      if (pir_set)
+	pir_set->set_ccpif();
+      Dprintf(("-- CCPCON setting compare output to 1\n"));
       break;
 
     case COM_CLEAR_OUT:
-      iopin->putState(false);
-      pir_set->set_ccpif();
+      m_cOutputState = '0';
+      m_PinModule->updatePinModule();
+      if (pir_set)
+	pir_set->set_ccpif();
+      Dprintf(("-- CCPCON setting compare output to 0\n"));
       break;
 
     case COM_INTERRUPT:
-      pir_set->set_ccpif();
+      if (pir_set)
+	pir_set->set_ccpif();
+      Dprintf(("-- CCPCON setting interrupt\n"));
       break;
 
     case COM_TRIGGER:
-      ccprl->tmrl->clear_timer();
-      pir_set->set_ccpif();
+      if (ccprl)
+	ccprl->tmrl->clear_timer();
+      if (pir_set)
+	pir_set->set_ccpif();
       if(adcon0)
 	adcon0->start_conversion();
 
-      //if(adcon0) cout << "CCP triggering an A/D\n";
-
+      Dprintf(("-- CCPCON triggering an A/D conversion\n"));
       break;
 
     case PWM0:
@@ -303,40 +381,40 @@ void CCPCON::compare_match(void)
 
 void CCPCON::pwm_match(int level)
 {
-  //cout << name() << " CCPCON PWM match\n";
+  Dprintf(("CCPCON::pwm_match()\n"));
 
-  if( (value.get() & PWM0) == PWM0)
-    {
-      iopin->putState(level ? true : false);
+  if( (value.get() & PWM0) == PWM0) {
 
-      // if the level is 'high', then tmr2 == pr2 and the pwm cycle
-      // is starting over. In which case, we need to update the duty
-      // cycle by reading ccprl and the ccp X & Y and caching them
-      // in ccprh's pwm slave register.
+    m_cOutputState = level ? '1' : '0';
+    m_PinModule->updatePinModule();
 
-      if(level)
-	{
-	  ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
-	  tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
-	}
+    // if the level is 'high', then tmr2 == pr2 and the pwm cycle
+    // is starting over. In which case, we need to update the duty
+    // cycle by reading ccprl and the ccp X & Y and caching them
+    // in ccprh's pwm slave register.
 
-      //cout << "iopin should change\n";
+    if(level) {
+      ccprl->ccprh->pwm_value = ((value.get()>>4) & 3) | 4*ccprl->value.get();
+      tmr2->pwm_dc(ccprl->ccprh->pwm_value, address);
     }
-  else
-    {
-      cout << "not pwm mode. bug?\n";
-    }
+
+    //cout << "iopin should change\n";
+  }  else
+    cout << "not pwm mode. bug?\n";
 }
 
 void CCPCON::put(unsigned int new_value)
 {
 
+  Dprintf(("CCPCON::put() new_value=0x%x\n",new_value));
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
 
   value.put(new_value);
   if (!ccprl || !tmr2)
     return;
+
+  bool oldbInEn  = m_bInputEnabled;
+  bool oldbOutEn = m_bOutputEnabled;
 
   switch(value.get() & (CCPM3 | CCPM2 | CCPM1 | CCPM0))
     {
@@ -344,25 +422,35 @@ void CCPCON::put(unsigned int new_value)
     case ALL_OFF1:
     case ALL_OFF2:
     case ALL_OFF3:
-      ccprl->stop_compare_mode();
-      tmr2->stop_pwm(address);
+      if (ccprl)
+	ccprl->stop_compare_mode();
+      if (tmr2)
+	tmr2->stop_pwm(address);
+      m_bInputEnabled = false;
+      m_bOutputEnabled = false;
       break;
     case CAP_FALLING_EDGE:
     case CAP_RISING_EDGE:
       edges = 0;
       ccprl->stop_compare_mode();
       tmr2->stop_pwm(address);
+      m_bInputEnabled = true;
+      m_bOutputEnabled = false;
       break;
 
     case CAP_RISING_EDGE4:
       edges &= 3;
       ccprl->stop_compare_mode();
       tmr2->stop_pwm(address);
+      m_bInputEnabled = true;
+      m_bOutputEnabled = false;
       break;
 
     case CAP_RISING_EDGE16:
       ccprl->stop_compare_mode();
       tmr2->stop_pwm(address);
+      m_bInputEnabled = true;
+      m_bOutputEnabled = false;
       break;
 
     case COM_SET_OUT:
@@ -376,6 +464,8 @@ void CCPCON::put(unsigned int new_value)
       if(adcon0)
 	adcon0->start_conversion();
 
+      m_bInputEnabled = true;
+      m_bOutputEnabled = false;
       //if(adcon0) cout << "CCP triggering an A/D\n";
 
       break;
@@ -386,9 +476,21 @@ void CCPCON::put(unsigned int new_value)
       ccprl->stop_compare_mode();
       ccprl->start_pwm_mode();
       tmr2->pwm_dc( ccprl->ccprh->pwm_value, address);
+      m_bInputEnabled = false;
+      m_bOutputEnabled = true;
+      m_cOutputState = '0';
       break;
 
     }
+
+  if (oldbOutEn != m_bOutputEnabled && m_PinModule) 
+    m_PinModule->setSource(m_bOutputEnabled ? m_source : 0);
+
+  if ((oldbInEn  != m_bInputEnabled  || 
+       oldbOutEn != m_bOutputEnabled)
+      && m_PinModule)
+    m_PinModule->updatePinModule();
+
 }
 
 //--------------------------------------------------

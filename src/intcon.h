@@ -111,11 +111,7 @@ enum
       put(get() & ~GIE);
     }
 
-  virtual bool check_peripheral_interrupt(void)
-    {
-      return 0;
-    }
-
+  virtual bool check_peripheral_interrupt()=0;
   virtual void put(unsigned int new_value);
 
 };
@@ -169,7 +165,7 @@ public:
 
   inline void set_pir_set(PIR_SET *p) { pir_set = p; }
 
-  bool check_peripheral_interrupt(void);
+  virtual bool check_peripheral_interrupt();
 
   //private:
   PIR_SET *pir_set;
@@ -185,12 +181,10 @@ class INTCON_16 : public INTCON
 {
 public:
 
-enum 
-{
-  GIEH = GIE,
-  GIEL = XXIE
-
-};
+  enum {
+    GIEH = GIE,
+    GIEL = XXIE
+  };
 #define INTERRUPT_VECTOR_LO       (0x18 >> 1)
 #define INTERRUPT_VECTOR_HI       (0x08 >> 1)
 
@@ -203,21 +197,21 @@ enum
 
   void clear_gies(void);
   void set_gies(void);
-
-  unsigned int get_interrupt_vector(void) 
-    {
-      return interrupt_vector;
-    }
+  virtual bool check_peripheral_interrupt() {} // Is this right?
+  unsigned int get_interrupt_vector() 
+  {
+    return interrupt_vector;
+  }
   bool haveHighPriorityInterrupt(void) 
-    { 
-      return  true;
-    }
+  { 
+    return  true;
+  }
   void set_interrupt_vector(unsigned int new_int_vect)
-    {
-      interrupt_vector = new_int_vect;
-    }
+  {
+    interrupt_vector = new_int_vect;
+  }
 
- private:
+private:
   unsigned int interrupt_vector;        // Starting address of the interrupt
   RCON *rcon;
   INTCON2 *intcon2;

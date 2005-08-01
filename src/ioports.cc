@@ -499,9 +499,10 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
 }
 //------------------------------------------------------------------------
 
-PicTrisRegister::PicTrisRegister(PicPortRegister *_port)
+PicTrisRegister::PicTrisRegister(const char *tris_name, PicPortRegister *_port)
   : sfr_register(),m_port(_port)
 {
+  new_name(tris_name);
   if (m_port)
     m_port->setTris(this);
 }

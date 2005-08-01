@@ -267,9 +267,8 @@ void P16X6X_processor::create_sfr_map()
   pr2.tmr2    = &tmr2;
 
 
-  ccp1con.ccprl = &ccpr1l;
-  ccp1con.pir_set   = get_pir_set();
-  ccp1con.tmr2  = &tmr2;
+  ccp1con.setCrosslinks(&ccpr1l, get_pir_set(), &tmr2);
+  ccp1con.setIOpin(&((*m_portc)[2]));
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
@@ -299,8 +298,7 @@ P16X6X_processor::P16X6X_processor(void)
 
 
   m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister(m_portc);
-  m_trisc->new_name("trisc");
+  m_trisc = new PicTrisRegister("trisc",m_portc);
 
   init_ssp = false;
 }
@@ -403,9 +401,8 @@ void P16C63::create_sfr_map(void)
   // get_pir_set()->set_pir2(get_pir2());
   pir_set_def.set_pir2(&pir2_reg);
 
-  ccp2con.ccprl = &ccpr2l;
-  ccp2con.pir_set   = get_pir_set();
-  ccp2con.tmr2  = &tmr2;
+  ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
+
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
@@ -597,12 +594,10 @@ P16C64::P16C64(void)
     cout << "c64 constructor, type = " << isa() << '\n';
 
   m_portd = new PicPortRegister("portd",8,0xff);
-  m_trisd = new PicTrisRegister(m_portd);
-  m_trisd->new_name("trisd");
+  m_trisd = new PicTrisRegister("trisd",m_portd);
 
   m_porte = new PicPortRegister("porte",8,0x07);
-  m_trise = new PicTrisRegister(m_porte);
-  m_trise->new_name("trise");
+  m_trise = new PicTrisRegister("trise",m_porte);
 
   init_ssp = true;
 }
@@ -631,9 +626,8 @@ void P16C65::create_sfr_map(void)
   // get_pir_set()->set_pir2(&get_pir2());
   pir_set_def.set_pir2(&pir2_reg);
 
-  ccp2con.ccprl = &ccpr2l;
-  ccp2con.pir_set   = get_pir_set();
-  ccp2con.tmr2  = &tmr2;
+  ccp2con.setCrosslinks(&ccpr2l, get_pir_set(), &tmr2);
+
   ccpr2l.ccprh  = &ccpr2h;
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
