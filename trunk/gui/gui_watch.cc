@@ -36,21 +36,26 @@ Boston, MA 02111-1307, USA.  */
 #include <assert.h>
 
 #include "../src/interface.h"
+#include "../src/cmd_gpsim.h"
 
 #include "gui.h"
 #include "gui_register.h"
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
-#define COLUMNS 15
 #define BPCOL 0
 #define NAMECOL 2
-#define DECIMALCOL 4
-#define HEXCOL 5
-#define ASCIICOL 6
-#define MSBCOL 7
-#define LSBCOL 14
-static char *watch_titles[COLUMNS]={"bp?", "type", "name","address","dec","hex","ascii","b7","b6","b5","b4","b3","b2","b1","b0"};
+#define MASKCOL 4
+#define DECIMALCOL 5
+#define HEXCOL 6
+#define ASCIICOL 7
+#define MSBCOL 8
+#define LSBCOL 23
+#define LASTCOL LSBCOL
+
+static char *watch_titles[]={"bp?", "type", "name","address","mask","dec","hex","ascii","b15","b14","b13","b12","b11","b10","b9","b8","b7","b6","b5","b4","b3","b2","b1","b0"};
+
+#define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
 struct _coldata{
     GtkWidget *clist;
@@ -132,16 +137,16 @@ void Watch_Window::UpdateMenus(void)
 
       entry = (WatchEntry*) gtk_clist_get_row_data(GTK_CLIST(watch_clist),current_row);
       if(menu_items[i].id!=MENU_COLUMNS && 
-	 (entry==0 ||
-	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
-	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
-	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
-	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
-	  (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
-	  ))
-	gtk_widget_set_sensitive (item, FALSE);
+          (entry==0 ||
+          (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_CLEAR)||
+          (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ)||
+          (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE)||
+          (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_READ_VALUE)||
+          (entry->type==REGISTER_EEPROM && menu_items[i].id==MENU_BREAK_WRITE_VALUE)
+          ))
+        gtk_widget_set_sensitive (item, FALSE);
       else
-	gtk_widget_set_sensitive (item, TRUE);
+        gtk_widget_set_sensitive (item, TRUE);
     }
   }
 }
@@ -227,9 +232,9 @@ static void set_column(GtkCheckButton *button, struct _coldata *coldata)
 {
     char str[256];
     if(button->toggle_button.active)
-	gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,1);
+      gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,1);
     else
-	gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,0);
+      gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,0);
     sprintf(str,"show_column%d",coldata->column);
     config_set_variable(coldata->ww->name(),str,button->toggle_button.active);
 }
@@ -249,14 +254,14 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
 
     for(i=0;i<COLUMNS;i++)
     {
-	button=gtk_check_button_new_with_label(watch_titles[i]);
-	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].visible);
-	gtk_widget_show(button);
-	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
-	coldata[i].clist=clist;
-	coldata[i].column=i;
-	coldata[i].ww=ww;
-	gtk_signal_connect(GTK_OBJECT(button),"clicked",
+      button=gtk_check_button_new_with_label(watch_titles[i]);
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].visible);
+      gtk_widget_show(button);
+      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
+      coldata[i].clist=clist;
+      coldata[i].column=i;
+      coldata[i].ww=ww;
+      gtk_signal_connect(GTK_OBJECT(button),"clicked",
 			   GTK_SIGNAL_FUNC(set_column),(gpointer)&coldata[i]);
     }
 
@@ -344,13 +349,13 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
     
       if(column>=MSBCOL && column<=LSBCOL) {
 	
-	int value;  // , bit;
-	    
-	// Toggle the bit.
-	value = entry->get_value();
+        int value;  // , bit;
+        	  
+        // Toggle the bit.
+        value = entry->get_value();
 
-	value ^= (1<< (7-(column-MSBCOL)));
-	entry->put_value(value);
+        value ^= (1<< (7-(column-MSBCOL)));
+        entry->put_value(value);
       }
     }
 
@@ -454,24 +459,52 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   if(row==-1)
     return;
 
-  int new_value = entry->get_value();
-  sprintf(str,"%d", new_value);
+  RegisterValue rvNewValue;
+  int new_value;
+  RegisterValue rvMaskedNewValue;
+  unsigned int uBitmask;
+  unsigned int uBitmaskForMaskedValue = entry->cpu->register_mask();
+  rvNewValue = entry->getRV();
+  new_value = rvNewValue;
+  if(entry->pRegSymbol) {
+    rvMaskedNewValue = *(entry->pRegSymbol);
+    uBitmask = entry->pRegSymbol->getBitmask();
+  }
+  else {
+    rvMaskedNewValue = entry->getRV();
+    uBitmask = entry->cpu->register_mask();
+  }
+  if(rvNewValue.init & uBitmask) {
+    strcpy(str, "?");
+  }
+  else {
+    sprintf(str,"%d", rvNewValue);
+  }
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
 
-  sprintf(str,"0x%02x",new_value);
+  rvMaskedNewValue.toString(str, 80);
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
+
+  strcpy(str, GetUserInterface().FormatValue(
+    uBitmask, entry->cpu->register_mask(), IUserInterface::eHex));
+  gtk_clist_set_text(GTK_CLIST(watch_clist), row, MASKCOL, str);
 
   if(new_value>=32 && new_value<127)
     sprintf(str,"%c",new_value);
   else
     str[0]=0;
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
-
-  for(i=7;i>=0;i--) {
-
-    gtk_clist_set_text(GTK_CLIST(watch_clist), row, MSBCOL+ i,
-			 ((new_value&1) ? "1" : "0"));
-    new_value >>= 1;
+  int iCol;
+  char sBit[2];
+  char sBits[25];
+  sBit[1] = 0;
+  rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(), 
+			       NULL);
+  for(i=15, iCol = LSBCOL;
+      iCol >= MSBCOL;
+      i--, iCol--) {
+    sBit[0] = sBits[i];
+    gtk_clist_set_text(GTK_CLIST(watch_clist), row, iCol, sBit);
   }
 
   if(entry->hasBreak())
@@ -503,8 +536,8 @@ void Watch_Window::Update(void)
       // The register has changed since the last update.
 
       if(clist_frozen==0) {
-	gtk_clist_freeze(GTK_CLIST(watch_clist));
-	clist_frozen=1;
+        gtk_clist_freeze(GTK_CLIST(watch_clist));
+        clist_frozen=1;
       }
 
       // Update value in clist
@@ -543,21 +576,32 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
     Build();
 
 
-  Register *cpu_reg = pRegSym->getReg();
+  Register *cpu_reg;
 
   if(pRegSym == 0) {
+    cpu_reg = reg->get_register();
     strncpy(name,cpu_reg->name().c_str(),sizeof(name));
   }
   else {
+    cpu_reg = pRegSym->getReg();
     strncpy(name,pRegSym->name().c_str(),sizeof(name));
   }
-  sprintf(addressstring,"0x%02x",reg->address);
+  unsigned int uAddrMask = 0;
+  unsigned int uLastAddr = gp->cpu->register_memory_size() - 1;
+  while(uLastAddr) {
+    uLastAddr>>=4;
+    uAddrMask<<=4;
+    uAddrMask |= 0xf;
+  }
+  strcpy(addressstring, GetUserInterface().FormatProgramAddress(
+    cpu_reg->address, uAddrMask, IUserInterface::eHex));
   strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 
   row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
 
   watch_entry = new WatchEntry();
   watch_entry->address=reg->address;
+  watch_entry->pRegSymbol = pRegSym;
   watch_entry->cpu = gp->cpu;
 
   watch_entry->type=type;
@@ -660,7 +704,7 @@ void Watch_Window::Build(void)
   watch_clist = gtk_clist_new_with_titles(COLUMNS,watch_titles);
   gtk_widget_show(watch_clist);
 
-  for(i=0;i<MSBCOL;i++) {
+  for(i=0;i<LASTCOL;i++) {
     gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
     gtk_clist_set_column_visibility(GTK_CLIST(watch_clist),i,coldata[i].visible);
   }
@@ -728,17 +772,25 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
   gp = _gp;
 
   get_config();
-
+  int iRegisterSize = _gp->cpu == NULL ? 1 :_gp->cpu->register_size();
+  int iLSCol = iRegisterSize == 1 ? (MSBCOL + 8) : MSBCOL;
   for(i=0;i<COLUMNS;i++) {
+    int bVisible;
     char str[128];
     sprintf(str,"show_column%d",i);
-    coldata[i].visible=1; // default
+    if(i < MSBCOL) {
+      bVisible = 1;
+    }
+    else {
+      bVisible = i >= iLSCol;
+    }
+    coldata[i].visible=bVisible; // default
     config_get_variable(name(),str,&coldata[i].visible);
   }
 
   if(enabled)
     Build();
-  
+
 }
 
 #endif // HAVE_GUI
