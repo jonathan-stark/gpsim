@@ -243,7 +243,7 @@ FILE *PicCodProgramFileType::open_a_file(char **filename)
   if(0 != (t = fopen_path(*filename,"r")))
     return t;
 
-  cout << "couldn't open " << *filename << " (or any upper/lower case variation)\n";
+//  cout << "couldn't open " << *filename << " (or any upper/lower case variation)\n";
 
   return 0;
 
