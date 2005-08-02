@@ -61,7 +61,7 @@ char * RegisterValue::toString(char *str, int len, int regsize) const
     char undefNibble = '?';
     int i;
 
-    int m = regsize+1;
+    int m = regsize * 2 + 1;
     if(len < m)
       m = len;
 
@@ -69,9 +69,9 @@ char * RegisterValue::toString(char *str, int len, int regsize) const
 
     for(i=0; i < m; i++) {
       if(rv.init & 0x0f)
-	str[m-i-1] = undefNibble;
+        str[m-i-1] = undefNibble;
       else
-	str[m-i-1] = hex2ascii[rv.data & 0x0f];
+        str[m-i-1] = hex2ascii[rv.data & 0x0f];
       rv.init >>= 4;
       rv.data >>= 4;
     }
