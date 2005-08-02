@@ -1,3 +1,23 @@
+2005-07-30 J.R. Heisey <jrheisey@sourceforge.com>
+	src/cmd_gpsim.h
+	* src/cod.cc: Removed an error message from PicCodProgramFileType::
+	open_a_file() that is handled externally.
+
+	* src/registers.cc: Fixed a bug in RegisterValue::toString()
+	not displaying enough digits.
+
+	* src/value.h, src/symbol.h, src/registers.h, gui/gui_register.h:
+	Added some conversion and equals operators.
+
+	* cli/ui_gpsim.cc, src/cmd_gpsim.h: Added several string
+	formatting routines.
+
+	* plat/win32/gpsim.def: Updated for new pin I/o routines.
+
+	* gui/gui_watch.cc, gui/gui_watch.h: Updated display of values
+	to account for uninitialized bits and bit masked register
+	symbols.
+
 2005-08-01 Scott Dattalo <scott@dattalo.com>
 	* src/p16x5x.h, src/p16x5x.cc: Upgraded the P16C54 and P16C55 to
 	the new I/O port design.
