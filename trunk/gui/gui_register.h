@@ -64,6 +64,10 @@ class GUIRegister {
   unsigned int get_value(void);
   RegisterValue getRV(void);
 
+  inline operator RegisterValue() {
+    return getRV();
+  }
+
   Register *get_register();
 
   // put and get for updating the shadow

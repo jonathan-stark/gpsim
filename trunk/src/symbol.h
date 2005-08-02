@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <vector>
 #include "value.h"
+#include "registers.h"
 
 using namespace std;
 
@@ -43,6 +44,7 @@ class Module;
 class Expression;
 class symbol;
 class register_symbol;
+
 
 void display_symbol_file_error(int);
 
@@ -235,6 +237,43 @@ public:
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
   virtual void set(Packet &);
+
+  inline operator gint64() {
+    gint64 i;
+    get(i);
+    return i;
+  }
+
+  inline operator int() {
+    gint64 i;
+    get(i);
+    return (int)i;
+  }
+
+  inline operator unsigned int() {
+    gint64 i;
+    get(i);
+    return (unsigned int)i;
+  }
+
+  inline operator RegisterValue() {
+    return getReg()->getRV_notrace();
+  }
+
+  inline register_symbol & operator =(const RegisterValue &i) {
+    getReg()->putRV_notrace(i);
+    return *this;
+  }
+
+  inline register_symbol & operator =(int i) {
+    set(i);
+    return *this;
+  }
+
+  inline register_symbol & operator =(unsigned int i) {
+    set((int)i);
+    return *this;
+  }
 
   void setMask(Register *pReg);
   unsigned int getAddress(void);
