@@ -1,5 +1,6 @@
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 
 #include "ui_gpsim.h"
@@ -39,19 +40,34 @@ public:
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...);
 
   virtual const char * FormatProgramAddress(unsigned int uAddress);
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask, int iRadix);
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
     unsigned int uMask);
   virtual const char * FormatLabeledValue(const char * pLabel,
     unsigned int uValue);
   virtual const char * FormatLabeledValue(const char * pLabel,
-    unsigned int uValue, int iRadix, const char *pHexPrefix);
+    unsigned int uValue, unsigned int uMask, int iRadix,
+    const char *pHexPrefix);
   virtual const char * FormatValue(unsigned int uValue);
   virtual const char * FormatValue(gint64 uValue);
-  virtual const char * FormatValue(gint64 uValue, int iRadix);
+  virtual const char * FormatValue(gint64 uValue, unsigned int uMask,
+    int iRadix);
+  virtual const char * FormatValue(gint64 uValue,
+    unsigned int uMask, int iRadix, const char * pHexPrefix);
+
+  virtual char *       FormatValue(char *str, int len,
+    int iRegisterSize, RegisterValue value);
+//  virtual char *       FormatValueAsBinary(char *str, int len,
+//    int iRegisterSize, RegisterValue value);
 
   virtual void SetProgramAddressRadix(int iRadix);
   virtual void SetRegisterAddressRadix(int iRadix);
   virtual void SetValueRadix(int iRadix);
+
+  virtual void SetProgramAddressMask(unsigned int uMask);
+  virtual void SetRegisterAddressMask(unsigned int uMask);
+  virtual void SetValueMask(unsigned int uMask);
 
   static Integer  s_iValueRadix;
   static String   s_sValueHexPrefix;
@@ -59,6 +75,10 @@ public:
   static String   s_sProgAddrHexPrefix;
   static Integer  s_iRAMAddrRadix;
   static String   s_sRAMAddrHexPrefix;
+
+  static Integer  s_iValueMask;
+  static Integer  s_iProgAddrMask;
+  static Integer  s_iRAMAddrMask;
 
 protected:
   string        m_sLabeledAddr;
@@ -75,6 +95,10 @@ Integer CGpsimUserInterface::s_iProgAddrRadix(    "UIProgamAddressRadix",     IU
 String  CGpsimUserInterface::s_sProgAddrHexPrefix("UIProgamAddressHexPrefix", "$");
 Integer CGpsimUserInterface::s_iRAMAddrRadix(     "UIRAMAddressRadix",        IUserInterface::eHex);
 String  CGpsimUserInterface::s_sRAMAddrHexPrefix( "UIRAMAddressHexPrefix",    "$");
+
+Integer CGpsimUserInterface::s_iValueMask(        "UIValueMask",             0xff);
+Integer CGpsimUserInterface::s_iProgAddrMask(     "UIProgamAddressMask",     0xff);
+Integer CGpsimUserInterface::s_iRAMAddrMask(      "UIRAMAddressMask",        0xff);
 
 CGpsimUserInterface s_GpsimUI(s_psEnglishMessages);
 
@@ -197,81 +221,131 @@ void CGpsimUserInterface::SetValueRadix(int iRadix) {
   s_iValueRadix = iRadix;
 }
 
+void CGpsimUserInterface::SetProgramAddressMask(unsigned int uMask) {
+  s_iProgAddrMask = uMask;
+}
+
+void CGpsimUserInterface::SetRegisterAddressMask(unsigned int uMask) {
+  s_iRAMAddrMask = uMask;
+}
+
+void CGpsimUserInterface::SetValueMask(unsigned int uMask) {
+  s_iValueMask = uMask;
+}
+
+
 
 const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress) {
   const char * pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
-  return FormatLabeledValue(pLabel, uAddress, s_iProgAddrRadix, s_sProgAddrHexPrefix);
+  return FormatLabeledValue(pLabel, uAddress, s_iProgAddrMask, s_iProgAddrRadix, s_sProgAddrHexPrefix);
+}
+
+const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask, int iRadix) {
+  return FormatValue((gint64)uAddress, uMask, iRadix, s_sProgAddrHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatRegisterAddress(unsigned int uAddress,
                                                         unsigned int uMask) {
   register_symbol * pRegSym = get_symbol_table().findRegisterSymbol(uAddress, uMask);
   const char * pLabel = pRegSym == NULL ? "" : pRegSym->name().c_str();
-  return FormatLabeledValue(pLabel, uAddress, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
+  return FormatLabeledValue(pLabel, uAddress, s_iRAMAddrMask, s_iRAMAddrRadix, s_sRAMAddrHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatLabeledValue(const char * pLabel,
                                                      unsigned int uValue) {
-  return FormatLabeledValue(pLabel, uValue, s_iValueRadix, s_sValueHexPrefix);
+  return FormatLabeledValue(pLabel, uValue, s_iValueMask, s_iValueRadix, s_sValueHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatLabeledValue(const char * pLabel,
                                                      unsigned int uValue,
-                                                     int iRadix,
-                                                     const char *pHexPrefix) {
+                                                     unsigned int uMask,
+                                                     int          iRadix,
+                                                     const char * pHexPrefix) {
 
-  ostringstream m_osLabeledAddr;
-  string sPrefix;
-  switch(iRadix) {
-  case eHex:
-    m_osLabeledAddr << hex;
-    sPrefix = pHexPrefix;
-    break;
-  case eDec:
-    m_osLabeledAddr << dec;
-    break;
-  case eOct:
-    m_osLabeledAddr << oct;
-    sPrefix = "0";
-    break;
-  }
+  const char *pValue = FormatValue(uValue, uMask, iRadix, pHexPrefix);
   if(*pLabel != 0) {
-    m_osLabeledAddr << pLabel << "(" << sPrefix << uValue << ")";
+    m_sLabeledAddr.append(pLabel);
+    m_sLabeledAddr.append("(");
+    m_sLabeledAddr.append(pValue);
+    m_sLabeledAddr.append(")");
   }
   else {
-    m_osLabeledAddr << sPrefix << uValue;
+    m_sLabeledAddr = pValue;
   }
-  m_sLabeledAddr = m_osLabeledAddr.str();
   return m_sLabeledAddr.c_str();
 }
 
 const char * CGpsimUserInterface::FormatValue(unsigned int uValue) {
-  return FormatLabeledValue(NULL, uValue, s_iValueRadix, s_sValueHexPrefix);
+  return FormatLabeledValue(NULL, uValue, s_iValueMask, s_iValueRadix, s_sValueHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatValue(gint64 uValue) {
-  return FormatValue(uValue, s_iValueRadix);
+  return FormatValue(uValue, s_iValueRadix, s_iValueRadix);
 }
 
-const char * CGpsimUserInterface::FormatValue(gint64 uValue, int iRadix) {
+const char * CGpsimUserInterface::FormatValue(gint64 uValue,
+    unsigned int uMask, int iRadix) {
+  return FormatValue(uValue, uMask, iRadix, s_sValueHexPrefix);
+}
+
+const char * CGpsimUserInterface::FormatValue(gint64 uValue,
+    unsigned int uMask, int iRadix, const char * pHexPrefix) {
+
   ostringstream osValue;
   string sPrefix;
+  int iBytes = 0;
+  unsigned int l_uMask = uMask;
+  int iDigits;
+  while(l_uMask) {
+    iBytes++;
+    l_uMask >>= 8;
+  }
   switch(iRadix) {
   case eHex:
-    osValue << hex;
-    sPrefix = s_sValueHexPrefix;
+    iDigits = iBytes * 2;
+    osValue << pHexPrefix;
+    osValue << hex << setw(iDigits) << setfill('0');
     break;
   case eDec:
     osValue << dec;
     break;
   case eOct:
-    osValue << oct;
-    sPrefix = "0";
+    iDigits = iBytes * 3;
+    osValue << "0";
+    osValue << oct << setw(iDigits) << setfill('0');
     break;
   }
-  osValue << sPrefix << uValue;
+  osValue << (uValue & uMask);
   m_sFormatValueGint64 = osValue.str();
   return m_sFormatValueGint64.c_str();
 }
 
+char * CGpsimUserInterface::FormatValue(char *str, int len,
+                                        int iRegisterSize,
+                                        RegisterValue value)
+{
+
+  if(!str || !len)
+    return 0;
+
+  char hex2ascii[] = "0123456789ABCDEF";
+  int i;
+  int min = (len < iRegisterSize*2) ? len : iRegisterSize*2;
+
+  if(value.data == INVALID_VALUE)
+    value.init = 0xfffffff;
+
+  for(i=0; i < min; i++) {
+    if(value.init & 0x0f)
+      str[min-i-1] = '?';
+    else
+      str[min-i-1] = hex2ascii[value.data & 0x0f];
+    value >>= 4;
+  }
+  str[min] = 0;
+
+  return str;
+
+}
 

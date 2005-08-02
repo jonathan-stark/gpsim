@@ -7,6 +7,10 @@
 #include "exports.h"
 #include "glib.h"
 
+#ifndef __REGISTERS_H__
+#include "registers.h"
+#endif
+
 class ISimConsole {
 public:
   virtual void Printf(const char *fmt, ...) = 0;
@@ -31,17 +35,27 @@ public:
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) = 0;
 
   virtual const char * FormatProgramAddress(unsigned int uAddress) = 0;
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask, int iRadix) = 0;
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
     unsigned int uMask) = 0;
   virtual const char * FormatLabeledValue(const char * pLabel,
     unsigned int uValue) = 0;
   virtual const char * FormatValue(unsigned int uValue) = 0;
   virtual const char * FormatValue(gint64 uValue) = 0;
-  virtual const char * FormatValue(gint64 uValue, int iRadix) = 0;
+  virtual const char * FormatValue(gint64 uValue, unsigned int uMask,
+    int iRadix) = 0;
+
+  virtual char *       FormatValue(char *str, int len,
+    int iRegisterSize, RegisterValue value) = 0;
 
   virtual void SetProgramAddressRadix(int iRadix) = 0;
   virtual void SetRegisterAddressRadix(int iRadix) = 0;
   virtual void SetValueRadix(int iRadix) = 0;
+
+  virtual void SetProgramAddressMask(unsigned int uMask) = 0;
+  virtual void SetRegisterAddressMask(unsigned int uMask) = 0;
+  virtual void SetValueMask(unsigned int uMask) = 0;
 };
 
 extern "C" IUserInterface & GetUserInterface(void);
