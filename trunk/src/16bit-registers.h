@@ -557,7 +557,7 @@ class USART_MODULE16
   void new_rx_edge(unsigned int);
 
 };
-
+#if 0
 class PORTC16 : public PIC_IOPORT
 {
 public:
@@ -590,6 +590,7 @@ enum
   virtual void put(unsigned int new_value);
   void update_pin_directions(unsigned int new_tris);
 };
+#endif
 
 //-------------------------------------------------------------------
 #if 0
