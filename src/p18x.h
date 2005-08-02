@@ -77,13 +77,13 @@ class P18C4x2 : public _16bit_processor
  public:
 
 
-  PIC_IOPORT   portd;
-  IOPORT_TRIS  trisd;
-  IOPORT_LATCH latd;
+  PicPortRegister  *m_portd;
+  PicTrisRegister  *m_trisd;
+  PicLatchRegister *m_latd;
 
-  PIC_IOPORT   porte;
-  IOPORT_TRIS  trise;
-  IOPORT_LATCH late;
+  PicPortRegister  *m_porte;
+  PicTrisRegister  *m_trise;
+  PicLatchRegister *m_late;
 
   P18C4x2();
 

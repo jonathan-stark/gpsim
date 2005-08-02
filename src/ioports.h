@@ -331,6 +331,8 @@ public:
 
 };
 
+#if defined(OLD_IOPORT_DESIGN)
+
 //---------------------------------------------------------
 // IOPORT
 
@@ -559,45 +561,6 @@ class PORTC : public PIC_IOPORT
   virtual void check_peripherals(RegisterValue rv);
 };
 
-
-class PORTD : public PIC_IOPORT
-{
-public:
-
-  PORTD(void);
-
-  virtual void check_peripherals(RegisterValue rv);
-
-};
-
-class PORTE : public PIC_IOPORT
-{
-public:
-
-  PORTE(void);
-
-  virtual void check_peripherals(RegisterValue rv);
-
-};
-
-class PORTF : public PIC_IOPORT
-{
-public:
-
-  PORTF(void);
-
-  virtual void check_peripherals(RegisterValue rv);
-
-};
-
-class PORTG : public PIC_IOPORT
-{
-public:
-
-  PORTG(void);
-
-  virtual void check_peripherals(RegisterValue rv);
-
-};
+#endif // OLD_IOPORT_DESIGN
 
 #endif  // __IOPORTS_H__

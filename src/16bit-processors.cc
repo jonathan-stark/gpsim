@@ -96,8 +96,8 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(m_latc,        0xf8b,porv);
 
   add_sfr_register(m_trisa,       0xf92,RegisterValue(0x7f,0));
-  add_sfr_register(m_trisb,       0xf93,RegisterValue(0x7f,0));
-  add_sfr_register(m_trisc,       0xf94,RegisterValue(0x7f,0));
+  add_sfr_register(m_trisb,       0xf93,RegisterValue(0xff,0));
+  add_sfr_register(m_trisc,       0xf94,RegisterValue(0xff,0));
 
   add_sfr_register(&pie1,	  0xf9d,porv,"pie1");
   add_sfr_register(&pir1,	  0xf9e,porv,"pir1");

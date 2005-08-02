@@ -1514,6 +1514,7 @@ SSPMODULE::SSPMODULE(void)
 }
 
 
+#if 0
 //-------------------------------------------------------------------
 //
 // PORTC16
@@ -1659,3 +1660,5 @@ void PORTC16::update_pin_directions(unsigned int new_tris)
             pins[i]->snode->update(time);
     }
 }
+
+#endif // 0

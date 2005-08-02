@@ -135,8 +135,6 @@ void P18C242::create()
 
   P18C2x2::create();
 
-  create_sfr_map();
-
 }
 
 Processor * P18C242::construct()
@@ -235,23 +233,6 @@ void P18C4x2::create_iopin_map()
   if(!package)
     return;
 
-  // Build the links between the I/O Ports and their tris registers.
-  portd.tris = &trisd;
-  trisd.port = &portd;
-
-  porte.tris = &trise;
-  trise.port = &porte;
-
-  portd.new_name("portd");
-  porte.new_name("porte");
-
-  trisd.new_name("trisd");
-  trise.new_name("trise");
-
-  // Define the valid I/O pins.
-  portd.valid_iopins = 0xff;
-  porte.valid_iopins = 0x07;
-
   package->assign_pin(1, 0); // /MCLR
 
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta0"),0));
@@ -261,9 +242,9 @@ void P18C4x2::create_iopin_map()
   package->assign_pin( 6, m_porta->addPin(new IO_open_collector("porta4"),4));
   package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta5"),5));
 
-  package->assign_pin(8, new IO_bi_directional(&porte, 0));
-  package->assign_pin(9, new IO_bi_directional(&porte, 1));
-  package->assign_pin(10, new IO_bi_directional(&porte, 2));
+  package->assign_pin( 8, m_porte->addPin(new IO_bi_directional("porte0"),0));
+  package->assign_pin( 9, m_porte->addPin(new IO_bi_directional("porte1"),1));
+  package->assign_pin(10, m_porte->addPin(new IO_bi_directional("porte2"),2));
 
 
   package->assign_pin(11, 0);
@@ -280,14 +261,14 @@ void P18C4x2::create_iopin_map()
   package->assign_pin(25, m_portc->addPin(new IO_bi_directional("portc6"),6));
   package->assign_pin(26, m_portc->addPin(new IO_bi_directional("portc7"),7));
 
-  package->assign_pin(19, new IO_bi_directional(&portd, 0));
-  package->assign_pin(20, new IO_bi_directional(&portd, 1));
-  package->assign_pin(21, new IO_bi_directional(&portd, 2));
-  package->assign_pin(22, new IO_bi_directional(&portd, 3));
-  package->assign_pin(27, new IO_bi_directional(&portd, 4));
-  package->assign_pin(28, new IO_bi_directional(&portd, 5));
-  package->assign_pin(29, new IO_bi_directional(&portd, 6));
-  package->assign_pin(30, new IO_bi_directional(&portd, 7));
+  package->assign_pin(19, m_portd->addPin(new IO_bi_directional("portd0"),0));
+  package->assign_pin(20, m_portd->addPin(new IO_bi_directional("portd1"),1));
+  package->assign_pin(21, m_portd->addPin(new IO_bi_directional("portd2"),2));
+  package->assign_pin(22, m_portd->addPin(new IO_bi_directional("portd3"),3));
+  package->assign_pin(27, m_portd->addPin(new IO_bi_directional("portd4"),4));
+  package->assign_pin(28, m_portd->addPin(new IO_bi_directional("portd5"),5));
+  package->assign_pin(29, m_portd->addPin(new IO_bi_directional("portd6"),6));
+  package->assign_pin(30, m_portd->addPin(new IO_bi_directional("portd7"),7));
 
   package->assign_pin(31, 0);
   package->assign_pin(32, 0);
@@ -314,8 +295,13 @@ void P18C4x2::create_symbols()
 
   _16bit_processor::create_symbols();
 
-  symbol_table.add_ioport(&portd);
-  symbol_table.add_ioport(&porte);
+  symbol_table.add_register(m_portd);
+  symbol_table.add_register(m_latd);
+  symbol_table.add_register(m_trisd);
+
+  symbol_table.add_register(m_porte);
+  symbol_table.add_register(m_late);
+  symbol_table.add_register(m_trise);
 
 }
 
@@ -325,6 +311,13 @@ P18C4x2::P18C4x2()
   if(verbose)
     cout << "18c4x2 constructor, type = " << isa() << '\n';
 
+  m_portd = new PicPortRegister("portd",8,0xff);
+  m_trisd = new PicTrisRegister("trisd", m_portd);
+  m_latd  = new PicLatchRegister("latd", m_portd);
+
+  m_porte = new PicPortRegister("portd",8,0x07);
+  m_trise = new PicTrisRegister("trisd", m_portd);
+  m_late  = new PicLatchRegister("latd", m_portd);
 
 }
 
@@ -337,23 +330,19 @@ void P18C4x2::create_sfr_map()
 
   _16bit_processor::create_sfr_map();
 
-  add_sfr_register(&portd,	  0xf83,RegisterValue(0,0),"portd");
-  add_sfr_register(&porte,	  0xf84,RegisterValue(0,0),"porte");
+  RegisterValue porv(0,0);
+
+  add_sfr_register(m_portd,       0xf83,porv);
+  add_sfr_register(m_porte,       0xf84,porv);
+
+  add_sfr_register(m_latd,        0xf8c,porv);
+  add_sfr_register(m_late,        0xf8d,porv);
+
+  add_sfr_register(m_trisd,       0xf95,RegisterValue(0xff,0));
+  add_sfr_register(m_trise,       0xf96,RegisterValue(0x07,0));
+
 
   //1 usart16.initialize_16(this,&pir_set_def,&portc);
-
-  add_sfr_register(&latd,	  0xf8c,RegisterValue(0,0),"latd");
-  add_sfr_register(&late,	  0xf8d,RegisterValue(0,0),"late");
-
-  portd.latch = &latd;
-  porte.latch = &late;
-
-  latd.port = &portd;
-  late.port = &porte;
-
-  add_sfr_register(&trisd,	  0xf95,RegisterValue(0xff,0),"trisd");
-  add_sfr_register(&trise,	  0xf96,RegisterValue(0x0f,0),"trise");
-
 
 }
 

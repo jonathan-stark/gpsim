@@ -906,6 +906,46 @@ void IOPORT::attach_node(Stimulus_Node *new_node, unsigned int bit_position)
 }
 
 //-------------------------------------------------------------------
+// trace_register_write
+//   - a wrapper for trace.register_write
+// This provides an option for IOPORTs derived from the IOPORT class 
+// to override the behavior of IOPORT traces.
+//-------------------------------------------------------------------
+void IOPORT::trace_register_write(void)
+{
+  trace.raw(write_trace.get() | value.get());
+  //trace.register_write(address,value.get());
+}
+
+IOPORT::IOPORT(unsigned int _num_iopins)
+  : sfr_register()
+{
+  stimulus_mask = 0;
+  num_iopins = _num_iopins;
+  address = 0;
+  value.put(0);
+  internal_latch = 0;
+
+  pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
+
+  for(unsigned int i=0; i<num_iopins; i++)
+    pins[i] = 0;
+
+  new_name("ioport");
+}
+
+IOPORT::~IOPORT()
+{
+    for(unsigned int i=0; i<num_iopins; i++)
+    {
+	if(pins[i] != 0)
+	    delete pins[i];
+    }
+    delete pins;
+}
+
+#if 0
+//-------------------------------------------------------------------
 //  PIC_IOPORT::put(unsigned int new_value)
 //
 //  inputs:  new_value - here's where the I/O port is written (e.g.
@@ -1024,45 +1064,6 @@ PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
   data_in = 0;
   peripheral_data_in = 0;
 
-}
-
-//-------------------------------------------------------------------
-// trace_register_write
-//   - a wrapper for trace.register_write
-// This provides an option for IOPORTs derived from the IOPORT class 
-// to override the behavior of IOPORT traces.
-//-------------------------------------------------------------------
-void IOPORT::trace_register_write(void)
-{
-  trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
-}
-
-IOPORT::IOPORT(unsigned int _num_iopins)
-  : sfr_register()
-{
-  stimulus_mask = 0;
-  num_iopins = _num_iopins;
-  address = 0;
-  value.put(0);
-  internal_latch = 0;
-
-  pins = (IOPIN **) new char[sizeof (IOPIN *) * num_iopins];
-
-  for(unsigned int i=0; i<num_iopins; i++)
-    pins[i] = 0;
-
-  new_name("ioport");
-}
-
-IOPORT::~IOPORT()
-{
-    for(unsigned int i=0; i<num_iopins; i++)
-    {
-	if(pins[i] != 0)
-	    delete pins[i];
-    }
-    delete pins;
 }
 
 //-------------------------------------------------------------------
@@ -1726,65 +1727,4 @@ void PORTC::setbit(unsigned int bit_number, bool new_value)
   
 }
 
-//-------------------------------------------------------------------
-//
-//  PORTD
-//-------------------------------------------------------------------
-
-PORTD::PORTD(void)
-{
-  new_name("portd");
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTD::check_peripherals(RegisterValue oldValue)
-{
-}
-
-//-------------------------------------------------------------------
-//
-//  PORTE
-//-------------------------------------------------------------------
-
-PORTE::PORTE(void)
-{
-  new_name("porte");
-}
-void PORTE::check_peripherals(RegisterValue oldValue)
-{
-}
-
-//-------------------------------------------------------------------
-//
-//  PORTF
-//-------------------------------------------------------------------
-
-PORTF::PORTF(void)
-{
-  new_name("portf");
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTF::check_peripherals(RegisterValue oldValue)
-{
-}
-
-
-//-------------------------------------------------------------------
-//
-//  PORTG
-//-------------------------------------------------------------------
-
-PORTG::PORTG(void)
-{
-  new_name("portg");
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTG::check_peripherals(RegisterValue oldValue)
-{
-}
-
+#endif //0
