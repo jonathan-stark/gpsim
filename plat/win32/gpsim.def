@@ -7,11 +7,11 @@ EXPORTS
     ??0Error@@QAE@V?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ??0Float@@QAE@N@Z
     ??0Float@@QAE@PBDN0@Z
+    ??0IOPIN@@QAE@PBDNNNN@Z
     ??0IOPIN@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
-    ??0IOPIN@@QAE@PBD@Z
     ??0IOPORT@@QAE@I@Z
+    ??0IO_bi_directional@@QAE@PBDNNNNNN@Z
     ??0IO_bi_directional@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
-    ??0IO_bi_directional@@QAE@PBD@Z
     ??0IO_bi_directional_pu@@QAE@PAVIOPORT@@IPBDPAPAVRegister@@@Z
     ??0Integer@@QAE@_J@Z
     ??0Integer@@QAE@PBD_J0@Z
@@ -322,6 +322,7 @@ EXPORTS
     ?set@Value@@UAEX_J@Z
     ?set@Value@@UAEX_N@Z
     ?setDrivenState@IOPIN@@UAEX_N@Z
+    ?setDrivingState@IOPIN@@UAEXD@Z
     ?setDrivingState@IOPIN@@UAEX_N@Z
     ?setSafeMode@Processor@@UAEX_N@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
