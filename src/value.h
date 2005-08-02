@@ -80,6 +80,34 @@ public:
   virtual void get(char *, int len);
   virtual void get(Packet &);
 
+  inline operator gint64() {
+    gint64 i;
+    get(i);
+    return i;
+  }
+
+  inline operator int() {
+    gint64 i;
+    get(i);
+    return (int)i;
+  }
+
+  inline operator unsigned int() {
+    gint64 i;
+    get(i);
+    return (unsigned int)i;
+  }
+
+  inline Value & operator =(int i) {
+    set(i);
+    return *this;
+  }
+
+  inline Value & operator =(unsigned int i) {
+    set((int)i);
+    return *this;
+  }
+
   /// compare - this method will compare another object to this 
   /// object. It takes a pointer to a ComparisonOperator as its
   /// input. Of the object's are mismatched for the particular

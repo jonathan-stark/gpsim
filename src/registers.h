@@ -60,6 +60,11 @@ public:
   {
   }
 
+  RegisterValue(const RegisterValue &value) : 
+  data(value.data), init(value.init)
+  {
+  }
+
   inline bool initialized(void)
   {
     return init == 0;
@@ -81,7 +86,7 @@ public:
     init = i;
   }
 
-inline unsigned int geti(void)
+  inline unsigned int geti(void)
   {
     return init;
   }
@@ -90,10 +95,21 @@ inline unsigned int geti(void)
   {
     init = i;
   }
+
   inline void operator = (RegisterValue rv)
   {
     data = rv.data;
     init = rv.init;
+  }
+
+  inline operator unsigned int ()
+  {
+    return data;
+  }
+
+  inline operator int ()
+  {
+    return (int)data;
   }
 
   bool operator == (const RegisterValue &rv) const {
