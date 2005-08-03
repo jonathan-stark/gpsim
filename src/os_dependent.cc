@@ -86,6 +86,16 @@ void translatePath(string &sPath) {
   }
 }
 
+void EnsureTrailingFolderDelimiter(string &sPath) {
+  string::reference rLast = sPath.at(sPath.size() - 1);
+  if(rLast != FOLDERDELIMITERALTERNATIVE) {
+    rLast = FOLDERDELIMITER;
+  }
+  else if(rLast != FOLDERDELIMITER) {
+    sPath.push_back(FOLDERDELIMITER);
+  }
+}
+
 int FileExtCompare(const char *pExt1, const char *pExt2) {
   if(*pExt1 == '.')
     pExt1++;
@@ -109,6 +119,19 @@ bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
   }
   else {
     return FileExtCompare(pFileExt, s.substr(pos + 1).c_str()) == 0;
+  }
+}
+
+void SplitPathAndFile(string &sSource, string &sFolder, string &sFile) {
+  string::size_type LastDelimiter = sSource.find_last_of(FOLDERDELIMITER);
+  if (LastDelimiter == string::npos) {
+    sFolder.erase();
+    sFile = sSource;
+  }
+  else {
+    string sNewFolder;
+    sFolder = sSource.substr(0, LastDelimiter + 1);
+    sFile = sSource.substr(LastDelimiter + 1);
   }
 }
 

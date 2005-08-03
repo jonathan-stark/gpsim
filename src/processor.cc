@@ -2216,12 +2216,25 @@ FileContextList::~FileContextList(void)
   }
 }
 
+bool EndsWith(string &sSubject, string &sSubstring) {
+  if(sSubject.size() < sSubject.size()) {
+    return false;
+  }
+  else {
+    string sSubjectEnding = sSubject.substr(sSubject.size() -
+                                            sSubstring.size());
+    return sSubjectEnding == sSubstring;
+  }
+}
+
 int FileContextList::Find(string &fname)
 {
   if(lastFile) {
     for (int i = 0; i < lastFile; i++) {
-      if ((*this)[i]->name() == fname)
+//      if ((*this)[i]->name() == fname)
+      if(EndsWith((*this)[i]->name(), fname)) {
         return i;
+      }
     }
   }
   return -1;
@@ -2229,7 +2242,8 @@ int FileContextList::Find(string &fname)
 
 int FileContextList::Add(string &new_name)
 {
-  push_back(FileContext(new_name));
+  string sFull = sSourcePath + new_name;
+  push_back(FileContext(sFull));
   lastFile++;
   back().open("r");
   if(verbose)
@@ -2241,7 +2255,8 @@ int FileContextList::Add(string &new_name)
 
 int FileContextList::Add(char *new_name)
 {
-  push_back(FileContext(new_name));
+  string sFull = sSourcePath + new_name;
+  push_back(FileContext(sFull));
   lastFile++;
   back().open("r");
   if(verbose)
@@ -2285,4 +2300,15 @@ void FileContextList::rewind(int file_id)
   if(fc)
     return fc->rewind();
 
+}
+
+extern void EnsureTrailingFolderDelimiter(string &sPath);
+extern void SplitPathAndFile(string &sSource, string &sFolder, string &sFile);
+
+//----------------------------------------
+void FileContextList::SetSourcePath(const char *pPath) {
+  string sPath(pPath);
+  string sFolder, sFile;
+  SplitPathAndFile(sPath, sSourcePath, sFile);
+  EnsureTrailingFolderDelimiter(sSourcePath);
 }
