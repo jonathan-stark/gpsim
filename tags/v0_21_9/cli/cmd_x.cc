@@ -1,0 +1,169 @@
+/*
+   Copyright (C) 1999 T. Scott Dattalo
+
+This file is part of gpsim.
+
+gpsim is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
+
+gpsim is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with gpsim; see the file COPYING.  If not, write to
+the Free Software Foundation, 59 Temple Place - Suite 330,
+Boston, MA 02111-1307, USA.  */
+
+
+#include <iostream>
+#include <iomanip>
+#include <string>
+
+
+#include "command.h"
+#include "cmd_x.h"
+#include "cmd_dump.h"
+
+#include "../src/pic-processor.h"
+#include "../src/symbol.h"
+
+
+cmd_x c_x;
+
+static cmd_options cmd_x_options[] =
+{
+  {0,0,0}
+};
+
+
+cmd_x::cmd_x(void)
+{ 
+  name = "x";
+
+  brief_doc = string("examine and/or modify memory");
+
+  long_doc = string ("\nx [file_register] [new_value]\n\
+\toptions:\n\
+\t\tfile_register - ram location to be examined or modified.\n\
+\t\tnew_value - the new value written to the file_register.\n\
+\t\tif no options are specified, then the entire contents\n\
+\t\tof the file registers will be displayed (dump).\n\
+");
+
+  op = cmd_x_options; 
+}
+
+
+void cmd_x::x(void)
+{
+  dump.dump(cmd_dump::DUMP_RAM);
+  if(GetActiveCPU())
+    GetActiveCPU()->dump_registers();
+}
+
+void cmd_x::x(int reg)
+{
+  if(!GetActiveCPU())
+    return;
+
+  if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
+    {
+      cout << "bad file register\n";
+      return;
+    }
+
+  char str[33];
+  RegisterValue ov = GetActiveCPU()->registers[reg]->getRV();
+
+  cout << GetActiveCPU()->registers[reg]->name() << '[' << hex << reg << "]= "
+       << ov.data 
+       << " = 0b" << GetActiveCPU()->registers[reg]->toBitStr(str,sizeof(str))
+       << endl;
+}
+
+void cmd_x::x(int reg, int val)
+{
+
+
+  if(!GetActiveCPU())
+    return;
+
+  if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
+    {
+      cout << "bad file register\n";
+      return;
+    }
+
+  int ov = GetActiveCPU()->registers[reg]->get_value();
+
+  cout << GetActiveCPU()->registers[reg]->name() << '(' << hex << reg << ')';
+
+  if(ov == val  ||  val < 0 || val > 255)
+    {
+      cout << " is " << ov << '\n';
+      return;
+    }
+
+  // write the new value to the file register:
+  GetActiveCPU()->registers[reg]->put_value(val);
+
+  // read it back (some of the file registers have bit's that can't be changed)
+  cout << " was " << ov << " now is " 
+       << GetActiveCPU()->registers[reg]->get_value() << '\n';
+
+
+}
+
+void cmd_x::x(char *reg_name)
+{
+
+  get_symbol_table().dump_one(reg_name);
+}
+
+void cmd_x::x(char *reg_name, int val)
+{
+  cout << "this command is deprecated. use: \n  symbol_name = value\n\ninstead\n";
+  //  update_symbol_value(reg_name,val);
+}
+
+void cmd_x::x(Expression *expr)
+{
+  try {
+
+    Value *v = toValue(expr);
+    cout << v->toString() << endl;
+
+    if(typeid(register_symbol) == typeid(*v) ||
+      (typeid(LiteralSymbol) == typeid(*expr) &&
+      !((LiteralSymbol*)expr)->toString().empty() )) {
+      // v->toString() dumped the value to cout
+    }
+    else if(typeid(Integer) == typeid(*v)) {
+        int i;
+        v->get(i);
+        x(i);
+    }
+    else if(typeid(AbstractRange) == typeid(*v)) {
+      unsigned int i = v->get_leftVal();
+      while (i<=v->get_rightVal()) {
+        x(i);
+        i++;
+      }
+    }
+  
+    delete v;
+    delete expr;
+  }
+
+
+  catch (Error *err) {
+    if(err)
+      cout << "ERROR:" << err->toString() << endl;
+    delete err;
+  }
+
+}

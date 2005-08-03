@@ -1,0 +1,116 @@
+<HTML>
+<HEAD>
+<TITLE>gpsim cvs</TITLE>
+</HEAD>
+<BODY>
+<CENTER>
+<H1>gpsim CVS</H1>
+</CENTER>
+<P></P>
+<P></P>
+<P></P>
+<P>If you need to be on the bleeding edge, you can get the code straight from 
+
+<a href="http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/gpsim/">gpsim's CVS repository</A>
+on 
+ <A HREF="http://sourceforge.net/project/?group_id=2341">gpsim's SourceForge Page</A>
+,
+which is of course hosted by
+<a href="http://sourceforge.net/">SourceForge</a>.
+But <b>BE WARNED</b>, the CVS is development code and may be unstable! </P>
+
+<h2> Getting the source</h2>
+<P>
+First you have to 'login' anonymously to the SorceForge CVS server. This doesn't do anything fancy other than
+to tell SorceForge that you want to estabilish a link:
+</P>
+<pre>
+cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/gpsim login
+</pre>
+When prompted for a password, just press return. You don't need a pass word for anonymous access.
+<p>
+next, you need to checkout the files:
+</p>
+<pre>
+cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/gpsim checkout .
+</pre>
+<p>
+Don't forget the '.' (period) on the
+end of the command. This tells cvs that you want everything. Keep in mind that 
+this will download the code on your local computer in the directory from which the
+command was launched. So you may wish to create a special directory (mkdir gpsim_cvs) and download the
+code there.
+
+</P>
+<h2> Compiling your CVS copy the first time</h2
+<p>
+When you get the code from CVS this first time, you'll have to go through a
+couple of extra steps to build it. But those steps are really simple. In the
+directory you downloaded gpsim from CVS, enter these commands:
+</p>
+<pre>
+$ libtoolize --force
+$ aclocal
+$ autoheader
+$ automake --force-missing --add-missing
+$ autoconf
+$ ./configure
+$ make
+</pre>
+<p>
+Go get a cup of coffee and read <a href="http://slashdot.org">/.</a> as your computer cranks through compiling gpsim. When
+it's done, you can then install it:
+</p>
+<pre>
+
+$ su root
+# make install
+# exit
+</pre>
+<p>
+And you should be ready to go!
+</P>
+<h2>Libraries and Modules</h2>
+<p>
+The instructions given above are suitable for building gpsim. However, it's
+possible to embed gpsim into a custom simulation environment (see 
+<a href="http://ktechlab.fadedminds.com/">KTechLab</a>). Chances are you'll
+want to build a shared library instead of a static one. This can be accomplished
+by specify --enable-shared as an option to the configure:
+</p>
+<pre>
+$ ./configure --enable-shared
+</pre>
+<h2>Getting updates from CVS</h2>
+<p>
+If one of the developers makes a change to CVS and you just want to update your
+local copy, then all you need to do is this:
+</P>
+<pre>
+cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/gpsim update
+</pre>
+<p>
+The 'update' command will compare your local copy with the master CVS copy and
+then update your's with the differences. It's a whole faster than re-downloading
+everything.
+</p>
+<h2>Links</h2>
+<p>
+<a href="/gnupic/gpsim.html">gpsim</a>
+</p>
+<p>
+<A HREF="https://sourceforge.net/project/?group_id=2341">gpsim's CVS repository</A>
+</p>
+<p>
+<a href="http://sourceforge.net/">SourceForge</a>
+</p>
+
+<hr>
+<ADDRESS>This page is maintained by <A HREF="http://www.dattalo.com">Scott
+Dattalo</A>. You can reach me at home: <A HREF="mailto:scott@dattalo.com">scott@dattalo.com 
+</A>
+</ADDRESS>
+<ADDRESS>Last modified on 14JUN04.</ADDRESS>
+<P></P>
+</BODY>
+</HTML>

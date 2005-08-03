@@ -1,0 +1,91 @@
+gpsim
+
+The ./examples subdirectory contains a few examples you may use to test gpsim. Off the examples subdirectory are three more subdirectories 12bit, 14bit, and 16bit for each family of PICs. Most of the examples are accompanied by a startup command file (.stc file). The .stc file will set up the simulation environment for you by selecting the processor, the .hex code, and configure any stimuli.
+
+To experiment with an example, invoke gpsim like this:
+
+gpsim -ctest_start_up_command_file.stc
+
+Where test_start_up_command_file.stc is the name of one of the .stc files.
+
+If there is no .stc file accompanying the .hex file, then the examples can be loaded by hand using:
+
+1) command line:
+
+gpsim -p[processor_type] test_file.hex
+or
+gpsim -stest_file.cod
+
+
+or
+
+2) gpsim prompt:
+
+
+First get gpsim running by invoking it at your terminal's command prompt:
+
+gpsim
+
+
+Then initialize the environment at the gpsim prompt
+
+gpsim> processor processor_type
+gpsim> load h test_file.hex
+
+
+Either of these work equally well. The only caveat is that in the second example the processor must be specified before the .hex file, but gpsim will tell you in case you forget.
+
+Here's a list of the .asm and .stc files that I've written to test gpsim's functionality. You can study these to get a better feeling of how things should be organized. The .asm are identical (in structure) to .asm files in mplab (that is before you could link files together). There is no equivalent .stc, or startup command file, in mplab. I've combined all of the stimulus related stuff together. The .stc files contain gpsim commands. Even though they're called 'startup' command files, they may be invoked at any time. This could be useful for invoking a special stimulus after some point has passed in your code.
+
+it_12bit.asm
+p12_it.asm
+pcl_test_12bit.asm
+eetest.asm
+interrupt_test.asm
+iopin_stim.asm
+it.asm
+loop_test.asm
+p16c64_ccp.asm
+p16c64_pwm.asm
+p16c64_test.asm
+p16c64_tmr1.asm
+p16c65_pwm.asm
+p16c71_test.asm
+p16c74_test.asm
+pcl_test.asm
+pulse_measure.asm
+stim_test.asm
+vertical_adder.asm
+wdt_test.asm
+bt18.asm
+calltest18.asm
+indtest18.asm
+it18.asm
+p18.asm
+
+
+gpio_stim.stc
+p12c508_test.stc
+analog_stim.stc
+analog_stim2.stc
+ap.stc
+async_pulse.stc
+async_stim.stc
+async_stim2.stc
+dtmf.stc
+interrupt_test.stc
+iopin_stim.stc
+ioport_stim.stc
+p16c64_ccp.stc
+p16c64_pwm.stc
+p16c64_test.stc
+p16c65_pwm.stc
+p16c74_pwm.stc
+p16c74_test.stc
+portc_stim.stc
+sync_stim.stc
+t.stc
+time_test.stc
+
+
+Scott Dattalo
