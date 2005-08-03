@@ -357,7 +357,6 @@ EXPORTS
     ?setbit@IOPORT@@UAEXI_N@Z
     ?setbit@Register@@UAEXI_N@Z
     ?show@IOPIN@@UAEXXZ
-    ?signalParent@Token@gpsim@@QAEXXZ
     ?SimulatedGet@Register@@UAEIXZ
     ?SimulatedSet@Register@@UAEXI@Z
     ?simulation_has_stopped@gpsimInterface@@QAEXXZ
