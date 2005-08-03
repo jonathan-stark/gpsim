@@ -325,6 +325,7 @@ EXPORTS
     ?setDrivingState@IOPIN@@UAEXD@Z
     ?setDrivingState@IOPIN@@UAEX_N@Z
     ?setSafeMode@Processor@@UAEX_N@Z
+    ?SetSourcePath@FileContextList@@QAEXPBD@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
     ?setWarnMode@Processor@@UAEX_N@Z
     ?set_Expression@TriggerObject@@UAEXPAVExpression@@@Z

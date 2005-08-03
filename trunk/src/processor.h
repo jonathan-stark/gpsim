@@ -311,8 +311,10 @@ class FileContextList : private vector<FileContext>
   char *ReadLine(int file_id, int line_number, char *buf, int nBytes);
   char *gets(int file_id, char *buf, int nBytes);
   void rewind(int file_id);
+  void SetSourcePath(const char *pPath);
 
  private:
+  string sSourcePath;
   int lastFile;
   int list_file_id;
 };

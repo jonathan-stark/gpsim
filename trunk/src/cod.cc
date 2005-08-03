@@ -993,8 +993,9 @@ int open_cod_file(Processor **pcpu, const char *filename)
 }
 */
 
-int PicCodProgramFileType::LoadProgramFile(Processor **pcpu, const char *filename,
-                                            FILE *pFile) {
+int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
+                                           const char *filename,
+                                           FILE *pFile) {
   int error_code= SUCCESS;
   Processor *ccpu = 0;
 
@@ -1057,6 +1058,7 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu, const char *filenam
 
   read_hex_from_cod(ccpu);
 
+  ccpu->files.SetSourcePath(filename);
   read_src_files_from_cod(ccpu);
 
   // Associate the .lst and .asm files' line numbers with 
