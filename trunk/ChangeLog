@@ -1,3 +1,9 @@
+2005-08-02 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-processors.cc, src/p18x.cc: The new I/O port register
+	symbols were getting added to the symbol table twice. Also, the
+	eeprom peripheral for some of the 18f devices was not getting
+	created.
+
 2005-07-30 J.R. Heisey <jrheisey@sourceforge.com>
 	src/cmd_gpsim.h
 	* src/cod.cc: Removed an error message from PicCodProgramFileType::
