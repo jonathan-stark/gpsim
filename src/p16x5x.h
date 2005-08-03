@@ -38,36 +38,42 @@ Boston, MA 02111-1307, USA.  */
 class P16C54 : public  _12bit_processor
 {
 public:
-  PicPortRegister  *m_porta;
-  PicTrisRegister  *m_trisa;
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
 
-  PicPortRegister  *m_portb;
-  PicTrisRegister  *m_trisb;
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
 
-  virtual PROCESSOR_TYPE isa(){return _P16C54_;};
-  virtual void create_symbols();
+  PIC_IOPORT   *portc;
+  IOPORT_TRIS  trisc;
 
-  virtual unsigned int program_memory_size() const { return 0x200; };
-  virtual unsigned int register_memory_size() const { return 0x20; };
-  virtual unsigned int config_word_address() const {return 0xFFF;};
+  virtual PROCESSOR_TYPE isa(void){return _P16C54_;};
+  virtual void create_symbols(void);
 
-  virtual void create_sfr_map();
+  virtual unsigned int program_memory_size(void) const { return 0x200; };
+  virtual unsigned int register_memory_size(void) const { return 0x20; };
+  virtual unsigned int config_word_address(void) const {return 0xFFF;};
 
-  virtual void option_new_bits_6_7(unsigned int bits) {}
+  virtual void create_sfr_map(void);
 
-  P16C54();
-  void create();
-  virtual void create_iopin_map();
+  virtual void option_new_bits_6_7(unsigned int bits)
+    {
+      // ((PORTB *)portb)->rbpu_intedg_update(bits);
+    }
 
-  static Processor *construct();
+  P16C54(void);
+  void create(void);
+  virtual void create_iopin_map(void);
+
+  static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
 
-  virtual unsigned int fsr_valid_bits()
+  virtual unsigned int fsr_valid_bits(void)
     {
       return 0x1f;  // Only 32 register addresses 
     }
 
-  virtual unsigned int fsr_register_page_bits()
+  virtual unsigned int fsr_register_page_bits(void)
     {
       return 0;     // Only one register page.
     }
@@ -75,27 +81,39 @@ public:
 
 };
 
-class P16C55 : public  P16C54
+class P16C55 : public  _12bit_processor
 {
 public:
 
-  PicPortRegister  *m_portc;
-  PicTrisRegister  *m_trisc;
+  PIC_IOPORT   *porta;
+  IOPORT_TRIS  trisa;
 
-  virtual PROCESSOR_TYPE isa(){return _P16C55_;};
-  virtual void create_symbols();
+  PIC_IOPORT   *portb;
+  IOPORT_TRIS  trisb;
 
-  virtual unsigned int program_memory_size() const { return 0x200; };
-  virtual unsigned int register_memory_size() const { return 0x20; };
-  virtual unsigned int config_word_address() const {return 0xFFF;};
+  PIC_IOPORT   *portc;
+  IOPORT_TRIS  trisc;
 
-  virtual void create_sfr_map();
 
-  P16C55();
-  virtual void create();
-  virtual void create_iopin_map();
+  virtual PROCESSOR_TYPE isa(void){return _P16C55_;};
+  virtual void create_symbols(void);
 
-  static Processor *construct();
+  virtual unsigned int program_memory_size(void) const { return 0x200; };
+  virtual unsigned int register_memory_size(void) const { return 0x20; };
+  virtual unsigned int config_word_address(void) const {return 0xFFF;};
+
+  virtual void create_sfr_map(void);
+
+  virtual void option_new_bits_6_7(unsigned int bits)
+    {
+      // ((PORTB *)portb)->rbpu_intedg_update(bits);
+    }
+
+  P16C55(void);
+  void create(void);
+  virtual void create_iopin_map(void);
+
+  static Processor *construct(void);
   virtual void tris_instruction(unsigned int tris_register);
 
 };

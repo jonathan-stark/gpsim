@@ -30,9 +30,9 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "stimuli.h"
 #include "symbol.h"
-#include "eeprom.h"
+
 //-------------------------------------------------------------------
-_16bit_processor::_16bit_processor()
+_16bit_processor::_16bit_processor(void)
 {
 
   package = 0;
@@ -42,22 +42,9 @@ _16bit_processor::_16bit_processor()
   pc = new Program_Counter16();
   pc->set_trace_command(trace.allocateTraceType(new PCTraceType(this,0,1)));
 
-  m_porta = new PicPortRegister("porta",8,0x7f);
-  m_trisa = new PicTrisRegister("trisa", m_porta);
-  m_lata  = new PicLatchRegister("lata", m_porta);
-  m_lata->setEnableMask(0x7f);
-
-  m_portb = new PicPortRegister("portb",8,0xff);
-  m_trisb = new PicTrisRegister("trisb", m_portb);
-  m_latb  = new PicLatchRegister("latb", m_portb);
-
-  m_portc = new PicPortRegister("portc",8,0xff);
-  m_trisc = new PicTrisRegister("trisc", m_portc);
-  m_latc  = new PicLatchRegister("latc", m_portc);
-
 }
 //-------------------------------------------------------------------
-pic_processor *_16bit_processor::construct()
+pic_processor *_16bit_processor::construct(void)
 {
     cout << "creating 16bit processor construct\n";
 
@@ -78,7 +65,7 @@ pic_processor *_16bit_processor::construct()
 }
 
 //-------------------------------------------------------------------
-void _16bit_processor :: create_sfr_map()
+void _16bit_processor :: create_sfr_map(void)
 {
   if(verbose)
     cout << "creating 18cxxx common registers\n";
@@ -86,18 +73,6 @@ void _16bit_processor :: create_sfr_map()
   add_file_registers(0x0, 0xf7f, 0);
 
   RegisterValue porv(0,0);
-
-  add_sfr_register(m_porta,       0xf80,porv);
-  add_sfr_register(m_portb,       0xf81,porv);
-  add_sfr_register(m_portc,       0xf82,porv);
-
-  add_sfr_register(m_lata,        0xf89,porv);
-  add_sfr_register(m_latb,        0xf8a,porv);
-  add_sfr_register(m_latc,        0xf8b,porv);
-
-  add_sfr_register(m_trisa,       0xf92,RegisterValue(0x7f,0));
-  add_sfr_register(m_trisb,       0xf93,RegisterValue(0xff,0));
-  add_sfr_register(m_trisc,       0xf94,RegisterValue(0xff,0));
 
   add_sfr_register(&pie1,	  0xf9d,porv,"pie1");
   add_sfr_register(&pir1,	  0xf9e,porv,"pir1");
@@ -217,15 +192,6 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&stack16.tosu,    0xfff,porv,"tosu");
 
 
-  EEPROM *e = get_eeprom();
-
-  if (e) {
-    add_sfr_register(e->get_reg_eedata(), 0xfa8);
-    add_sfr_register(e->get_reg_eeadr(), 0xfa9);
-    add_sfr_register(e->get_reg_eecon1(), 0xfa6, RegisterValue(0,0));
-    add_sfr_register(e->get_reg_eecon2(), 0xfa7);
-  }
-
   // Initialize all of the register cross linkages
   //get_pir_set()->set_pir1(get_pir1());
   //get_pir_set()->set_pir2(get_pir2());
@@ -262,7 +228,9 @@ void _16bit_processor :: create_sfr_map()
   t3con.ccpr1l = &ccpr1l;
   t3con.ccpr2l = &ccpr2l;
 
-  ccp1con.setCrosslinks(&ccpr1l, &pir_set_def, &tmr2);
+  ccp1con.ccprl = &ccpr1l;
+  ccp1con.pir_set  = &pir_set_def; //get_pir_set();
+  ccp1con.tmr2  = &tmr2;
   ccpr1l.ccprh  = &ccpr1h;
   ccpr1l.tmrl   = &tmr1l;
   ccpr1h.ccprl  = &ccpr1l;
@@ -292,11 +260,14 @@ void _16bit_processor :: create_sfr_map()
 //  The purpose of this member function is to 'create' those things
 // that are unique to the 16-bit core processors.
 
-void _16bit_processor :: create ()
+void _16bit_processor :: create (void)
 {
 
   if(verbose)
     cout << " _16bit_processor :: create\n" ;
+
+  //create_iopin_map(&iopin_map, &num_of_iopins);
+  //create_iopins(iopin_map, num_of_iopins);
 
   fast_stack.init(this);
   ind0.init(this);
@@ -331,14 +302,16 @@ void _16bit_processor :: create ()
 // status register by name instead of by its address.)
 //
 
-void _16bit_processor::create_symbols ()
+void _16bit_processor::create_symbols (void)
 {
-  pic_processor::create_symbols();
+
+  cout << "16bit create symbols\n";
+
 }
 
 
 //-------------------------------------------------------------------
-// void _16bit_processor::interrupt ()
+// void _16bit_processor::interrupt (void)
 //
 //  When the virtual function cpu->interrupt() is called during 
 // pic_processor::run() AND the cpu gpsim is simulating is an 18cxxx
@@ -350,7 +323,7 @@ void _16bit_processor::create_symbols ()
 //
 //-------------------------------------------------------------------
 void _16bit_processor::
-interrupt ()
+interrupt (void)
 {
   
   bp.clear_interrupt();
@@ -367,7 +340,7 @@ interrupt ()
 
 }
 //-------------------------------------------------------------------
-void _16bit_processor::por()
+void _16bit_processor::por(void)
 {
   pic_processor::por();
 }
@@ -448,43 +421,7 @@ void _16bit_processor::set_out_of_range_pm(unsigned int address, unsigned int va
 //
 // Package stuff
 //
-void _16bit_processor::create_iopin_map()
+void _16bit_processor::create_iopin_map(void)
 {
-  cout << "_16bit_processor::create_iopin_map WARNING --- not creating package \n";
-}
-
-//------------------------------------------------------------------------
-// Latch Register
-// (Probably should put this somewhere else)
-PicLatchRegister::PicLatchRegister(const char *_name, PortRegister *_port)
-  : m_port(_port), m_EnableMask(0xff)
-{
-  new_name(_name);
-}
-
-void PicLatchRegister::put(unsigned int new_value)
-{
-  trace.raw(write_trace.get() | value.data);
-  value.data = new_value & m_EnableMask;
-  m_port->put_value(value.data);
-}
-void PicLatchRegister::put_value(unsigned int new_value)
-{
-  value.data = new_value & m_EnableMask;
-  m_port->put_value(value.data);
-}
-unsigned int PicLatchRegister::get()
-{
-  trace.raw(read_trace.get()  | value.data);
-  trace.raw(read_trace.geti() | value.init);
-
-  return value.data;
-}
-void PicLatchRegister::setbit(unsigned int bit_number, char new_value)
-{
-  printf("PicLatchRegister::setbit() -- shouldn't be called\n");
-}
-void PicLatchRegister::setEnableMask(unsigned int nEnableMask)
-{
-  m_EnableMask = nEnableMask;
+  cout << "_16bit_processor::create_iopin_map WARNING --- not createing package \n";
 }

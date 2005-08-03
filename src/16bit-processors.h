@@ -35,22 +35,6 @@ Boston, MA 02111-1307, USA.  */
 extern instruction *disasm16 (pic_processor *cpu, unsigned int address, unsigned int inst);
 
 
-class PicLatchRegister : public sfr_register
-{
-public:
-  virtual void put(unsigned int new_value);
-  virtual void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual void setbit(unsigned int bit_number, char new_value);
-
-  void setEnableMask(unsigned int nEnableMask);
-
-  PicLatchRegister(const char *, PortRegister *);
-
-protected:
-  PortRegister *m_port;
-  unsigned int m_EnableMask;
-};
 
 //------------------------------------------------------------------------
 //
@@ -74,19 +58,17 @@ public:
 #define DEVID     (0x3ffffe >> 1)
 
 
-  // So far, all 18xxx parts contain ports A,B,C
-  PicPortRegister  *m_porta;
-  PicTrisRegister  *m_trisa;
-  PicLatchRegister *m_lata;
+  PIC_IOPORT   porta;      // So far, all 18xxx parts contain ports A,B,C
+  IOPORT_TRIS  trisa;
+  IOPORT_LATCH lata;
 
-  PicPortRegister  *m_portb;
-  PicTrisRegister  *m_trisb;
-  PicLatchRegister *m_latb;
+  PIC_IOPORT   portb;
+  IOPORT_TRIS  trisb;
+  IOPORT_LATCH latb;
 
-  PicPortRegister  *m_portc;
-  PicTrisRegister  *m_trisc;
-  PicLatchRegister *m_latc;
-
+  PORTC16      portc;
+  IOPORT_TRIS  trisc;
+  IOPORT_LATCH latc;
 
 
   INTCON_16    intcon;
@@ -165,7 +147,7 @@ public:
   virtual PIR2v2 *get_pir2(void) { return (&pir2); }
   virtual PIR_SET_2 *get_pir_set(void) { return (&pir_set_def); }
   */
-  virtual void create_sfr_map(void);
+  void create_sfr_map(void);
 
   virtual void create_stack(void) {stack = &stack16;};
 
