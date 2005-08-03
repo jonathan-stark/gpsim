@@ -88,7 +88,7 @@ void translatePath(string &sPath) {
 
 void EnsureTrailingFolderDelimiter(string &sPath) {
   string::reference rLast = sPath.at(sPath.size() - 1);
-  if(rLast != FOLDERDELIMITERALTERNATIVE) {
+  if(rLast == FOLDERDELIMITERALTERNATIVE) {
     rLast = FOLDERDELIMITER;
   }
   else if(rLast != FOLDERDELIMITER) {
@@ -122,10 +122,18 @@ bool GPSIM_EXPORT IsFileExtension(const char *pszFile, const char *pFileExt) {
   }
 }
 
+/// SplitPathAndFile()
+/// Note this function does not verify whether the trailing
+/// is actually a file component.
 void SplitPathAndFile(string &sSource, string &sFolder, string &sFile) {
+  translatePath(sSource);
   string::size_type LastDelimiter = sSource.find_last_of(FOLDERDELIMITER);
   if (LastDelimiter == string::npos) {
-    sFolder.erase();
+//    sFolder.erase();
+    // JRH - I'm not sure this is a good assumption.
+    // It will do for the one place it is currently being used.
+    static char sCurrentFolder[] = { '.', FOLDERDELIMITER };
+    sFolder.append(sCurrentFolder);
     sFile = sSource;
   }
   else {

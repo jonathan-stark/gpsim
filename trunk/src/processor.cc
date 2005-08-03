@@ -2217,7 +2217,7 @@ FileContextList::~FileContextList(void)
 }
 
 bool EndsWith(string &sSubject, string &sSubstring) {
-  if(sSubject.size() < sSubject.size()) {
+  if(sSubject.size() < sSubstring.size()) {
     return false;
   }
   else {
