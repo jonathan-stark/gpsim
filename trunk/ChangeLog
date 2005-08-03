@@ -1,10 +1,21 @@
+2005-08-02 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/os_dependent.cc, src/processor.cc,h, src/cod.cc,
+	plat/win32/gpsim.def: Fixed a problem where loading a
+	program file (no STC) using the GUI resulted source code
+	not being found even though that source was in the same
+	folder as the program file.
+
+	* gui/gui_menu.cc: Fixed the display of cycle count in
+	cycles where %Lx was used in a sprintf instead of the
+	platform independent project macro PRINTF_INT64_MODIFIER.
+
 2005-08-02 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-processors.cc, src/p18x.cc: The new I/O port register
 	symbols were getting added to the symbol table twice. Also, the
 	eeprom peripheral for some of the 18f devices was not getting
 	created.
 
-2005-07-30 J.R. Heisey <jrheisey@sourceforge.com>
+2005-08-02 J.R. Heisey <jrheisey@sourceforge.com>
 	src/cmd_gpsim.h
 	* src/cod.cc: Removed an error message from PicCodProgramFileType::
 	open_a_file() that is handled externally.
