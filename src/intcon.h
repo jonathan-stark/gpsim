@@ -197,7 +197,7 @@ public:
 
   void clear_gies(void);
   void set_gies(void);
-  virtual bool check_peripheral_interrupt() {} // Is this right?
+  virtual bool check_peripheral_interrupt() {return false;} // Is this right?
   unsigned int get_interrupt_vector() 
   {
     return interrupt_vector;
