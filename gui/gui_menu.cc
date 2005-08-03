@@ -515,7 +515,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Hex)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"0x%016Lx",cycles.value);
+    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",cycles.value);
   }
 };
 
@@ -526,7 +526,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Dec)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"%016Ld",cycles.value);
+    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",cycles.value);
   }
 };
 
@@ -762,9 +762,6 @@ void MainWindow::Create ()
   GtkAccelGroup *accel_group;
       
   int x,y,width,height;
-
-  GtkWidget *menu;
-  GtkWidget *item;
 
   GtkWidget *update_rate_menu;
 
