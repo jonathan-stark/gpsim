@@ -30,7 +30,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include "stimuli.h"
 #include "symbol.h"
-
+#include "eeprom.h"
 //-------------------------------------------------------------------
 _16bit_processor::_16bit_processor()
 {
@@ -217,6 +217,15 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&stack16.tosu,    0xfff,porv,"tosu");
 
 
+  EEPROM *e = get_eeprom();
+
+  if (e) {
+    add_sfr_register(e->get_reg_eedata(), 0xfa8);
+    add_sfr_register(e->get_reg_eeadr(), 0xfa9);
+    add_sfr_register(e->get_reg_eecon1(), 0xfa6, RegisterValue(0,0));
+    add_sfr_register(e->get_reg_eecon2(), 0xfa7);
+  }
+
   // Initialize all of the register cross linkages
   //get_pir_set()->set_pir1(get_pir1());
   //get_pir_set()->set_pir2(get_pir2());
@@ -289,9 +298,6 @@ void _16bit_processor :: create ()
   if(verbose)
     cout << " _16bit_processor :: create\n" ;
 
-  //create_iopin_map(&iopin_map, &num_of_iopins);
-  //create_iopins(iopin_map, num_of_iopins);
-
   fast_stack.init(this);
   ind0.init(this);
   ind1.init(this);
@@ -328,18 +334,6 @@ void _16bit_processor :: create ()
 void _16bit_processor::create_symbols ()
 {
   pic_processor::create_symbols();
-  symbol_table.add_register(m_porta);
-  symbol_table.add_register(m_lata);
-  symbol_table.add_register(m_trisa);
-
-  symbol_table.add_register(m_portb);
-  symbol_table.add_register(m_latb);
-  symbol_table.add_register(m_trisb);
-
-  symbol_table.add_register(m_portc);
-  symbol_table.add_register(m_latc);
-  symbol_table.add_register(m_trisc);
-
 }
 
 

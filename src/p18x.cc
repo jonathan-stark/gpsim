@@ -295,14 +295,6 @@ void P18C4x2::create_symbols()
 
   _16bit_processor::create_symbols();
 
-  symbol_table.add_register(m_portd);
-  symbol_table.add_register(m_latd);
-  symbol_table.add_register(m_trisd);
-
-  symbol_table.add_register(m_porte);
-  symbol_table.add_register(m_late);
-  symbol_table.add_register(m_trise);
-
 }
 
 P18C4x2::P18C4x2()
