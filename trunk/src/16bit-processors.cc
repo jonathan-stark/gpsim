@@ -108,11 +108,14 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&ipr2,	  0xfa2,porv,"ipr2");
 
 
-  add_sfr_register(&(usart16.rcsta),  0xfab,porv,"rcsta");
-  add_sfr_register(&(usart16.txsta),  0xfac,RegisterValue(0x02,0),"txsta");
-  add_sfr_register(&(usart16.txreg),  0xfad,porv,"txreg");
-  add_sfr_register(&(usart16.rcreg),  0xfae,porv,"rcreg");
-  add_sfr_register(&(usart16.spbrg),  0xfaf,porv,"spbrg");
+  usart16.initialize(&pir_set_def,&(*m_portc)[6], &(*m_portc)[7],
+		     new TXREG_16(), new RCREG_16());
+
+  add_sfr_register(&usart16.rcsta,    0xfab,porv,"rcsta");
+  add_sfr_register(&usart16.txsta,    0xfac,RegisterValue(0x02,0),"txsta");
+  add_sfr_register(usart16.txreg,     0xfad,porv,"txreg");
+  add_sfr_register(usart16.rcreg,     0xfae,porv,"rcreg");
+  add_sfr_register(&usart16.spbrg,    0xfaf,porv,"spbrg");
 
   add_sfr_register(&t3con,	  0xfb1,porv,"t3con");
   add_sfr_register(&tmr3l,	  0xfb2,porv,"tmr3l");

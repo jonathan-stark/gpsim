@@ -36,8 +36,9 @@ class _TXSTA;   // Forward references
 class _SPBRG;
 class _RCSTA;
 class  _14bit_processor;
-class IOPORT;
 
+class RXSignalSink;
+class TXSignalSource;
 
 #define TOTAL_BRGH_STATES      16
 #define TOTAL_BRGL_STATES      64
@@ -49,12 +50,12 @@ class _TXREG : public sfr_register
 
   _TXSTA  *txsta;
 
-  _TXREG(void);
+  _TXREG();
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
-  virtual bool is_empty(void);
-  virtual void empty(void);
-  virtual void full(void);
+  virtual bool is_empty();
+  virtual void empty();
+  virtual void full();
   virtual void assign_pir_set(PIR_SET *new_pir_set);
 };
 
@@ -63,7 +64,6 @@ class _TXSTA : public sfr_register, public TriggerObject
 public:
   _TXREG  *txreg;
   _SPBRG  *spbrg;
-  IOPIN   *txpin;
 
   unsigned int tsr;
   unsigned int bit_count;
@@ -78,20 +78,24 @@ public:
     CSRC = 1<<7
   };
 
-  _TXSTA(void);
+  _TXSTA();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
 
-  virtual void transmit_a_bit(void);
-  virtual void start_transmitting(void);
-  virtual void stop_transmitting(void);
-  void callback(void);
-  virtual void callback_print(void) {
-    cout << "_TXSTA " << name() << " CallBack ID " << CallBackID << '\n';
-  }
+  virtual void transmit_a_bit();
+  virtual void start_transmitting();
+  virtual void stop_transmitting();
+  virtual void callback();
+  virtual void callback_print();
+  virtual char getState();
 
-
+  virtual void setIOpin(PinModule *);
+  virtual void putTXState(char newTXState);
+protected:
+  PinModule *m_PinModule;
+  TXSignalSource *m_source;
+  char m_cTxState;
 };
 
 class _RCREG : public sfr_register
@@ -107,11 +111,11 @@ class _RCREG : public sfr_register
 
   unsigned int fifo_sp;       /* fifo stack pointer */
 
-  _RCREG(void);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  _RCREG();
+  virtual unsigned int get();
+  virtual unsigned int get_value();
   virtual void push(unsigned int);
-  virtual void pop(void);
+  virtual void pop();
 
   virtual void assign_pir_set(PIR_SET *new_pir_set);
 
@@ -157,7 +161,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
   _TXSTA  *txsta;
-  IOPORT  *uart_port;
+  //IOPORT  *uart_port;
   
 
   unsigned int rsr;
@@ -166,20 +170,25 @@ class _RCSTA : public sfr_register, public TriggerObject
   unsigned int sample,state, sample_state;
   guint64 future_cycle, last_cycle;
 
-  _RCSTA(void);
+  _RCSTA();
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
   void receive_a_bit(unsigned);
-  void receive_start_bit(void);
-  virtual void start_receiving(void);
-  virtual void stop_receiving(void);
+  void receive_start_bit();
+  virtual void start_receiving();
+  virtual void stop_receiving();
   void set_callback_break(unsigned int spbrg_edge);
-  void callback(void);
-  virtual void callback_print(void) {
-    cout << "_RCSTA " << name() << " CallBack ID " << CallBackID << '\n';
-  }
+  virtual void callback();
+  virtual void callback_print();
+  void setState(char new_RxState);
 
+  virtual void setIOpin(PinModule *);
+
+protected:
+  PinModule *m_PinModule;
+  RXSignalSink *m_sink;
+  char m_cRxState;
 };
 
 
@@ -194,16 +203,16 @@ class _SPBRG : public sfr_register, public TriggerObject
     last_cycle,    // The cycle when the spbrg clock last changed
     future_cycle;  // The next cycle spbrg is predicted to change
 
-  _SPBRG(void);
+  _SPBRG();
 
-  virtual void callback(void);
-  virtual void callback_print(void) {
+  virtual void callback();
+  virtual void callback_print() {
     cout << "_SPBRG " << name() << " CallBack ID " << CallBackID << '\n';
   }
-  virtual void start(void);
-  virtual void get_next_cycle_break(void);
+  virtual void start();
+  virtual void get_next_cycle_break();
   virtual guint64 get_cpu_cycle(unsigned int edges_from_now);
-  virtual guint64 get_last_cycle(void);
+  virtual guint64 get_last_cycle();
 };
 
 //---------------------------------------------------------------
@@ -212,9 +221,9 @@ class TXREG_14 : public _TXREG
  public:
   PIR_SET *pir_set;
 
-  virtual bool is_empty(void);
-  virtual void empty(void);
-  virtual void full(void);
+  virtual bool is_empty();
+  virtual void empty();
+  virtual void full();
   virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
 };
 
@@ -224,7 +233,7 @@ class RCREG_14 : public _RCREG
   PIR_SET *pir_set;
 
   virtual void push(unsigned int);
-  virtual void pop(void);
+  virtual void pop();
 
   virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
 
@@ -235,17 +244,18 @@ class USART_MODULE
 {
 public:
 
-  _TXSTA       *txsta;
-  _RCSTA       *rcsta;
-  _SPBRG       *spbrg;
+  _TXSTA       txsta;
+  _RCSTA       rcsta;
+  _SPBRG       spbrg;
 
-  _TXREG       *txreg;
-  _RCREG       *rcreg;
+  _TXREG      *txreg;
+  _RCREG      *rcreg;
 
-  USART_MODULE(void);
-  void initialize(IOPORT *uart_port, int rx_pin);
+  USART_MODULE();
 
-  virtual void  new_rx_edge(unsigned int);
+  void initialize(PIR_SET *, 
+		  PinModule *tx_pin, PinModule *rx_pin,
+		  _TXREG *, _RCREG *);
 };
 
 class USART_MODULE14 : public USART_MODULE
@@ -254,11 +264,11 @@ class USART_MODULE14 : public USART_MODULE
 
   _14bit_processor *_cpu14;
 
-  USART_MODULE14(void);
+  USART_MODULE14();
+  /*
   void initialize_14(_14bit_processor *new_cpu,PIR_SET *ps,
-     IOPORT *uart_port, int rx_pin);
-  virtual void new_rx_edge(unsigned int);
-
+     PinModule *tx_pin, PinModule *rx_pin);
+  */
 };
 
 #endif

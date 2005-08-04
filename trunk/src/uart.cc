@@ -28,28 +28,68 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-tmrs.h"
 
 #define DEBUG_UART 1
+//--------------------------------------------------
+// 
+//--------------------------------------------------
+class TXSignalSource : public SignalControl
+{
+public:
+  TXSignalSource(_TXSTA *_txsta)
+    : m_txsta(_txsta)
+  {
+    assert(m_txsta);
+  }
+  char getState()
+  {
+    return m_txsta->getState();
+  }
+private:
+  _TXSTA *m_txsta;
+};
+
+//--------------------------------------------------
+//
+//--------------------------------------------------
+
+class RXSignalSink : public SignalSink
+{
+public:
+  RXSignalSink(_RCSTA *_rcsta)
+    : m_rcsta(_rcsta)
+  {
+    assert(_rcsta);
+  }
+
+  void setSinkState(char new3State)
+  {
+    m_rcsta->setState(new3State);
+  }
+private:
+  _RCSTA *m_rcsta;
+};
 
 //-----------------------------------------------------------
-_RCSTA::_RCSTA(void)
+_RCSTA::_RCSTA()
+  : m_PinModule(0), m_sink(0), m_cRxState('?')
 {
 }
 
 //-----------------------------------------------------------
-_TXSTA::_TXSTA(void)
+_TXSTA::_TXSTA()
 {
 }
 
 //-----------------------------------------------------------
-_RCREG::_RCREG(void)
+_RCREG::_RCREG()
 {
 }
 
-_TXREG::_TXREG(void)
+_TXREG::_TXREG()
 {
 }
 
 
-_SPBRG::_SPBRG(void)
+_SPBRG::_SPBRG()
 {
 }
 
@@ -88,6 +128,33 @@ void _TXREG::put_value(unsigned int new_value)
   put(new_value);
 
   update();
+}
+
+//-----------------------------------------------------------
+// TXSTA - setIOpin - assign the I/O pin associated with the
+// the transmitter.
+
+
+void _TXSTA::setIOpin(PinModule *newPinModule)
+{
+  if (!m_source) {
+    m_source = new TXSignalSource(this);
+    m_PinModule = newPinModule;
+  }
+
+}
+//-----------------------------------------------------------
+// TXSTA - putTXState - update the state of the TX output pin
+//
+
+void _TXSTA::putTXState(char newTXState)
+{
+
+  m_cTxState = newTXState;
+
+  if (m_PinModule)
+    m_PinModule->updatePinModule();
+
 }
 
 //-----------------------------------------------------------
@@ -130,22 +197,36 @@ void _TXSTA::put(unsigned int new_value)
 
     if(value.get() & TXEN) {
       cout << "TXSTA - enabling transmitter\n";
+      if (m_PinModule)
+	m_PinModule->setSource(m_source);
       if(txreg) {
 	if(txreg->is_empty()) {
 	  txreg->empty();
 	} else {
-          cout << "start_transmitting1" << endl;
+          cout << "start_transmitting\n" << endl;
 	  start_transmitting();
       }
       }
-    } else 
+    } else {
       stop_transmitting();
+      if (m_PinModule)
+	m_PinModule->setSource(0);
+
+    }
   }
 }
-
-// _TXSTA::stop_transmitting(void)
+//------------------------------------------------------------
 //
-void _TXSTA::stop_transmitting(void)
+char _TXSTA::getState()
+{
+
+  return m_cTxState;
+}
+
+
+// _TXSTA::stop_transmitting()
+//
+void _TXSTA::stop_transmitting()
 {
   if(DEBUG_UART)
     cout << "stopping a USART transmission\n";
@@ -174,7 +255,7 @@ void _TXSTA::stop_transmitting(void)
 
 }
 
-void _TXSTA::start_transmitting(void)
+void _TXSTA::start_transmitting()
 {
   if(DEBUG_UART)
     cout << "starting a USART transmission\n";
@@ -243,7 +324,7 @@ void _TXSTA::start_transmitting(void)
 
 }
 
-void _TXSTA::transmit_a_bit(void)
+void _TXSTA::transmit_a_bit()
 {
 
 
@@ -253,8 +334,7 @@ void _TXSTA::transmit_a_bit(void)
         cout << "Transmit bit #" << bit_count << ": " << (tsr&1) 
 	     << " time:" << get_cycles().value << endl;
 
-      if(txpin)
-	txpin->putState((tsr&1) ? true : false);
+      putTXState(tsr&1 ? '1' : '0');
 
       tsr >>= 1;
 
@@ -264,7 +344,7 @@ void _TXSTA::transmit_a_bit(void)
 
 }
 
-void _TXSTA::callback(void)
+void _TXSTA::callback()
 {
   if(verbose)
     cout << "TXSTA callback - time:" << (get_cycles().value) << '\n';
@@ -295,16 +375,22 @@ void _TXSTA::callback(void)
   }
 
 }
-bool _TXREG::is_empty(void)
+
+void _TXSTA::callback_print()
+{
+  cout << "TXSTA " << name() << " CallBack ID " << CallBackID << '\n';
+}
+
+bool _TXREG::is_empty()
 {
   cout << "TXREG:: function not implemented\n";
   return 0;
 }
-void _TXREG::empty(void)
+void _TXREG::empty()
 {
   cout << "TXREG:: function not implemented\n";
 }
-void _TXREG::full(void)
+void _TXREG::full()
 {
   cout << "TXREG:: function not implemented\n";
 }
@@ -356,8 +442,7 @@ void _RCSTA::put(unsigned int new_value)
     if(value.get() & SPEN) {
       spbrg->start();
       // Make the tx line high when the serial port is enabled.
-      if(txsta->txpin)
-	txsta->txpin->putState(true);
+      txsta->putTXState('1');
       txsta->txreg->empty();
     } else {
 
@@ -385,7 +470,8 @@ void _RCSTA::put(unsigned int new_value)
 	start_receiving();
 
 	// If the rx line is low, then go ahead and start receiving now.
-	if(uart_port && !uart_port->get_bit(rx_bit))
+	//if(uart_port && !uart_port->get_bit(rx_bit))
+	if (m_cRxState == '0' || m_cRxState == 'w')
 	  receive_start_bit();
       }
 
@@ -408,6 +494,36 @@ void _RCSTA::put_value(unsigned int new_value)
   update();
 }
 
+//-----------------------------------------------------------
+// RCSTA - setIOpin - assign the I/O pin associated with the
+// the receiver.
+
+
+void _RCSTA::setIOpin(PinModule *newPinModule)
+{
+  if (!m_sink) {
+    m_sink = new RXSignalSink(this);
+    m_PinModule = newPinModule;
+  }
+
+}
+
+//-----------------------------------------------------------
+// RCSTA - setState
+// This gets called whenever there's a change detected on the RX pin.
+// The usart is only interested in those changes when it is waiting
+// for the start bit. Otherwise, the rcsta callback function will sample
+// the rx pin (if we're receiving).
+
+
+void _RCSTA::setState(char new_RxState)
+{
+  m_cRxState = new_RxState;
+
+  if( (state == RCSTA_WAITING_FOR_START) && (m_cRxState =='0' || m_cRxState=='w'))
+    receive_start_bit();
+
+}
 //-----------------------------------------------------------
 // RCSTA::receive_a_bit(unsigned int bit)
 //
@@ -477,7 +593,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
 }
 
-void _RCSTA::stop_receiving(void)
+void _RCSTA::stop_receiving()
 {
 
   rsr = 0;
@@ -486,7 +602,7 @@ void _RCSTA::stop_receiving(void)
 
 }
 
-void _RCSTA::start_receiving(void)
+void _RCSTA::start_receiving()
 {
   //cout << "The USART is starting to receive data\n";
 
@@ -515,7 +631,7 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
     get_cycles().set_break(get_cycles().value + (spbrg->value.get() + 1) * spbrg_edge, this);
 
 }
-void _RCSTA::receive_start_bit(void)
+void _RCSTA::receive_start_bit()
 {
   if (DEBUG_UART)
    cout << "USART received a start bit\n";
@@ -535,15 +651,18 @@ void _RCSTA::receive_start_bit(void)
   state = RCSTA_MAYBE_START;
 }
 
-void _RCSTA::callback(void)
+//------------------------------------------------------------
+void _RCSTA::callback()
 {
 
   if (DEBUG_UART)
     cout << "RCSTA callback. time:0x" << hex <<(cycles.value) << '\n';
 
+  // A bit is sampled 3 times.
+
   switch(sample_state) {
   case RCSTA_WAITING_MID1:
-    if(uart_port->get_bit(rx_bit))
+    if (m_cRxState == '1' || m_cRxState == 'W')
       sample++;
 
     if(txsta && (txsta->value.get() & _TXSTA::BRGH))
@@ -556,7 +675,7 @@ void _RCSTA::callback(void)
     break;
 
   case RCSTA_WAITING_MID2:
-    if(uart_port->get_bit(rx_bit))
+    if (m_cRxState == '1' || m_cRxState == 'W')
       sample++;
 
     if(txsta && (txsta->value.get() & _TXSTA::BRGH))
@@ -569,7 +688,7 @@ void _RCSTA::callback(void)
     break;
 
   case RCSTA_WAITING_MID3:
-    if(uart_port && uart_port->get_bit(rx_bit))
+    if (m_cRxState == '1' || m_cRxState == 'W')
       sample++;
 
     receive_a_bit( (sample>=2));
@@ -596,6 +715,12 @@ void _RCSTA::callback(void)
 }
 
 //-----------------------------------------------------------
+void _RCSTA::callback_print()
+{
+  cout << "RCSTA " << name() << " CallBack ID " << CallBackID << '\n';
+}
+
+//-----------------------------------------------------------
 // RCREG
 //
 void _RCREG::push(unsigned int new_value)
@@ -618,7 +743,7 @@ void _RCREG::push(unsigned int new_value)
 
 }
 
-void _RCREG::pop(void)
+void _RCREG::pop()
 {
 
   if(fifo_sp == 0)
@@ -629,14 +754,14 @@ void _RCREG::pop(void)
 
 }
 
-unsigned int _RCREG::get_value(void)
+unsigned int _RCREG::get_value()
 {
 
   return value.get();
 
 }
 
-unsigned int _RCREG::get(void)
+unsigned int _RCREG::get()
 {
 
   pop();
@@ -657,7 +782,7 @@ void _RCREG::assign_pir_set(PIR_SET *new_pir_set)
 // serial port is not used. Perhaps gpsim needs some kind of
 // pragma type thing to disable cpu intensive peripherals...)
 
-void _SPBRG::get_next_cycle_break(void)
+void _SPBRG::get_next_cycle_break()
 {
 
   if(txsta && (txsta->value.get() & _TXSTA::SYNC))
@@ -682,7 +807,7 @@ void _SPBRG::get_next_cycle_break(void)
   
 }
 
-void _SPBRG::start(void)
+void _SPBRG::start()
 {
 
   if(verbose)
@@ -702,12 +827,12 @@ void _SPBRG::start(void)
 }
 
 //--------------------------
-//guint64 _SPBRG::get_last_cycle(void)
+//guint64 _SPBRG::get_last_cycle()
 //
 // Get the cpu cycle corresponding to the last edge of the SPBRG
 //
 
-guint64 _SPBRG::get_last_cycle(void)
+guint64 _SPBRG::get_last_cycle()
 {
 
   // There's a chance that a SPBRG break point exists on the current
@@ -784,7 +909,7 @@ const guint64 SPBRG_ASYNC_HI = ~((guint64) 15);
   return cycle;
 #endif
 }
-void _SPBRG::callback(void)
+void _SPBRG::callback()
 {
 
   last_cycle = get_cycles().value;
@@ -802,19 +927,19 @@ void _SPBRG::callback(void)
 }
 //--------------------------------------------------
 
-bool TXREG_14::is_empty(void)
+bool TXREG_14::is_empty()
 {
   return(pir_set->get_txif());
 }
 
-void TXREG_14::empty(void)
+void TXREG_14::empty()
 {
   if (DEBUG_UART) 
     cout << "txreg::empty - setting TXIF\n";
   pir_set->set_txif();
 }
 
-void TXREG_14::full(void)
+void TXREG_14::full()
 {
   if (DEBUG_UART) 
     cout << "txreg::full - clearing TXIF\n";
@@ -831,7 +956,7 @@ void RCREG_14::push(unsigned int new_value)
 
 }
 
-void RCREG_14::pop(void)
+void RCREG_14::pop()
 {
 
   _RCREG::pop();
@@ -844,114 +969,66 @@ void RCREG_14::pop(void)
 //--------------------------------------------------
 // member functions for the USART
 //--------------------------------------------------
-void USART_MODULE::initialize(IOPORT *uart_port, int rx_pin)
+void USART_MODULE::initialize(PIR_SET *pir_set,
+			      PinModule *tx_pin, PinModule *rx_pin,
+			      _TXREG *_txreg, _RCREG *_rcreg)
 {
+  assert(_txreg && _rcreg);
 
-  if(spbrg) {
-    spbrg->txsta = txsta;
-    spbrg->rcsta = rcsta;
-  }
+  spbrg.txsta = &txsta;
+  spbrg.rcsta = &rcsta;
 
-  if(txreg) {
-    txreg->assign_pir_set(0);
-    txreg->txsta = txsta;
-  }
+  txreg = _txreg;
+  txreg->assign_pir_set(pir_set);
+  txreg->txsta = &txsta;
 
-  if(txsta) {
-    txsta->txreg = txreg;
-    txsta->spbrg = spbrg;
-    txsta->txpin = 0; //uart_port->pins[6];
-    txsta->bit_count = 0;
-  }
+  rcreg = _rcreg;
+  rcreg->assign_pir_set(pir_set);
+  rcreg->rcsta = &rcsta;
 
-  if(rcsta) {
-    rcsta->rcreg = rcreg;
-    rcsta->spbrg = spbrg;
-    rcsta->txsta = txsta;
-    rcsta->uart_port = uart_port;
-    rcsta->rx_bit = rx_pin;
-  }
+  txsta.txreg = txreg;
+  txsta.spbrg = &spbrg;
+  txsta.bit_count = 0;
+  txsta.setIOpin(tx_pin);
 
-  if(rcreg) {
-    rcreg->assign_pir_set(0);
-    rcreg->rcsta = rcsta;
-  }
+  rcsta.rcreg = rcreg;
+  rcsta.spbrg = &spbrg;
+  rcsta.txsta = &txsta;
+  rcsta.setIOpin(rx_pin);
 
 }
 
 //--------------------------------------------------
-void   USART_MODULE::new_rx_edge(unsigned int bit)
+USART_MODULE::USART_MODULE()
+  : txreg(0), rcreg(0)
 {
-  //cout << "USART_MODULE::new_rx_edge - shouldn't get called!\n";
 
-}
-//--------------------------------------------------
-USART_MODULE::USART_MODULE(void)
-{
-  txreg = 0;
-  rcreg = 0;
-  spbrg = 0;
-
-  rcsta = new _RCSTA;
-  txsta = new _TXSTA;
+  //rcsta = new _RCSTA;
+  //txsta = new _TXSTA;
 
 }
 
 //--------------------------------------------------
-USART_MODULE14::USART_MODULE14(void)
+USART_MODULE14::USART_MODULE14()
 {
-
+  /*
   txreg = new TXREG_14;
   rcreg = new RCREG_14;
-
   spbrg = new _SPBRG;
-
+  */
 }
 
 //--------------------------------------------------
+/*
 void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR_SET *ps,
-    IOPORT *uart_port, int rx_pin)
+    PinModule *tx_pin, PinModule *rx_pin)
 {
   _cpu14 = new_cpu;
 
-  USART_MODULE::initialize(uart_port, rx_pin);
-
-  //spbrg.txsta = &txsta;
-  //spbrg.rcsta = &rcsta;
+  USART_MODULE::initialize(tx_pin, rx_pin);
 
   if(txreg) //this should be unnecessary
     txreg->assign_pir_set(ps);
-
-  //txreg.txsta = &txsta;
-
-  //txsta.txreg = &txreg;
-  //txsta.spbrg = &spbrg;
-  if(txsta)
-    txsta->txpin = uart_port->pins[6];
-  //txsta.bit_count = 0;
-
-  //rcsta.rcreg = &rcreg;
-  //rcsta.spbrg = &spbrg;
-  //rcsta.txsta = &txsta;
-  //rcsta.uart_port = uart_port;
-  //rcsta.rx_bit = 7;
-
-  //rcreg.rcsta = &rcsta;
-  if(rcreg) 
-    rcreg->assign_pir_set(ps);
-
-  //  spbrg.start();
-
 }
 
-// This gets called whenever there's a change detected on the RX pin.
-// The usart is only interested in those changes when it is waiting
-// for the start bit. Otherwise, the rcsta callback function will sample
-// the rx pin (if we're receiving).
-
-void   USART_MODULE14::new_rx_edge(unsigned int bit)
-{
-  if(rcsta)
-    if( (rcsta->state == _RCSTA::RCSTA_WAITING_FOR_START) && !bit)
-      rcsta->receive_start_bit();
-}
+*/
