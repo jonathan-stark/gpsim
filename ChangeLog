@@ -1,3 +1,9 @@
+2005-08-04 Scott Dattalo <scott@dattalo.com>
+	* src/uart.cc, src/uart.h, src/p16x6x.cc, src/16bit-processors.cc,
+	src/16bit-registers.cc, src/16bit-registers.h, src/p16f62x.cc:
+	Add I/O source and sink connections to the usart peripheral. So
+	now the usart is connected to I/O pins using the new I/O port design.
+
 2005-08-02 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/os_dependent.cc, src/processor.cc,h, src/cod.cc,
 	plat/win32/gpsim.def: Fixed a problem where loading a

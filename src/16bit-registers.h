@@ -531,30 +531,14 @@ class RCREG_16 : public _RCREG
 };
 
 //---------------------------------------------------------
-//class USART_MODULE16 : public USART_MODULE
-// bug in gcc? having problems deriving... vtables are hosed
-class USART_MODULE16
+
+class USART_MODULE16  : public USART_MODULE
 {
  public:
 
   _16bit_processor *_cpu16;
 
-  _TXSTA      txsta;
-  _RCSTA      rcsta;
-  _SPBRG      spbrg;
-
-  TXREG_16    txreg;
-  RCREG_16    rcreg;
-  //_TXREG    txreg;
-  //_RCREG    rcreg;
-
-
   USART_MODULE16(void);
-
-  void initialize_16(_16bit_processor *new_cpu, PIR_SET *pir_set,
-    IOPORT *uart_port);
-  void init_ioport(IOPORT *);
-  void new_rx_edge(unsigned int);
 
 };
 #if 0

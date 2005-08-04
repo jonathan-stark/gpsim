@@ -152,11 +152,14 @@ void P16F62x::create_sfr_map(void)
   add_sfr_register(&intcon_reg, 0x08b, RegisterValue(0,0));
   add_sfr_register(&intcon_reg, 0x00b, RegisterValue(0,0));
 
-  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
-  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
-  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
-  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
-  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
+  usart.initialize(get_pir_set(),&(*m_portb)[2], &(*m_portb)[1],
+		   new _TXREG(), new _RCREG());
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
   //1usart.initialize_14(this,get_pir_set(),portb,1);
 
   add_sfr_register(&comparator.cmcon, 0x1f, RegisterValue(0,0),"cmcon");
@@ -164,9 +167,6 @@ void P16F62x::create_sfr_map(void)
 
   intcon = &intcon_reg;
   intcon_reg.set_pir_set(get_pir_set());
-
-  // Link the usart and portb
-  //1((PORTB_62x*)portb)->usart = &usart;
 
   // Link the comparator and porta
   //1((PORTA_62x*)porta)->comparator = &comparator;

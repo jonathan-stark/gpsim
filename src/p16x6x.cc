@@ -407,12 +407,14 @@ void P16C63::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
-  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
-  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
-  add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
-  add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
-  //1usart.initialize_14(this,get_pir_set(),portc,7);
+  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+		   new _TXREG(), new _RCREG());
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
+  add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
 
   //1int i;
   //1for(i=0; i<8; i++) {
@@ -632,12 +634,14 @@ void P16C65::create_sfr_map(void)
   ccpr2l.tmrl   = &tmr1l;
   ccpr2h.ccprl  = &ccpr2l;
 
-  add_sfr_register(usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
-  add_sfr_register(usart.txsta, 0x98, RegisterValue(2,0),"txsta");
-  add_sfr_register(usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
+  usart.initialize(get_pir_set(),&(*m_portc)[6], &(*m_portc)[7],
+		   new _TXREG(), new _RCREG());
+
+  add_sfr_register(&usart.rcsta, 0x18, RegisterValue(0,0),"rcsta");
+  add_sfr_register(&usart.txsta, 0x98, RegisterValue(2,0),"txsta");
+  add_sfr_register(&usart.spbrg, 0x99, RegisterValue(0,0),"spbrg");
   add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
-  //1usart.initialize_14(this,get_pir_set(),portc,7);
 
   //1int i;
   //1for(i=0; i<8; i++) {
