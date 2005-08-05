@@ -224,6 +224,7 @@ private:
   private:
     Symbol_Table *m_pSymbolTable;
   };
+#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
 
   ///
   /// Note:: Apparently every argument in the template also needs
@@ -247,13 +248,14 @@ private:
   symbol_iterator_t endSymbol(symbol_iterator_t *, _symbol_t*) {
     return symbol_iterator_t(this,_Myt::end());
   }
+#endif
 
 public:
   ///
   /// node_symbol iterator declarations
   ///
+#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
   typedef symbol_iterator_t<node_symbol> node_symbol_iterator;
-
   node_symbol_iterator beginNodeSymbol();
 //  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
 //    (node_symbol*)NULL);
@@ -276,7 +278,7 @@ public:
   stimulus_symbol_iterator endStimulusSymbol();
 //   return endSymbol((stimulus_symbol_iterator*) NULL, (stimulus_symbol*)NULL);
 //  }
-
+#endif
 
   ///
   ///   Symbols defined from gpsim command line
