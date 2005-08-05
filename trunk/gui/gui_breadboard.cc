@@ -480,7 +480,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
 
 
     // Check if some of the recursive traces went well.
-    if(retval==TRUE)
+    if(retval==(int)TRUE)
     {
 	// We found a path to end. Add point p to path.
 /* bug ahead, FIXME:	if(*pat!=0 && (*pat)->next!=0)
@@ -1834,7 +1834,7 @@ const char *gui_get_string(char *prompt, char *initial_text)
     
     gtk_widget_hide(dialog);
 
-    if(retval==TRUE)
+    if(retval==(int)TRUE)
 	string=gtk_entry_get_text(GTK_ENTRY(entry));
     else
         string=0;
@@ -1980,7 +1980,7 @@ static Stimulus_Node *select_node_dialog(Breadboard_Window *bbw)
     gtk_grab_remove(dialog);
 
 
-    if(cancel==TRUE)
+    if(cancel==(int)TRUE)
     {
 	gtk_widget_hide(dialog);
 	return 0;
@@ -2090,7 +2090,7 @@ static char *select_module_dialog(Breadboard_Window *bbw)
     gtk_grab_remove(dialog);
 
 
-    if(cancel==TRUE)
+    if(cancel==(int)TRUE)
     {
 	gtk_widget_hide(dialog);
 	return 0;
@@ -2402,7 +2402,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     Attribute *xpos = m->get_attribute("xpos", false);
     Attribute *ypos = m->get_attribute("ypos", false);
     if(xpos && ypos && xpos->nGet()>=0 && ypos->nGet()>=0)
-	fprintf(fo, "module position %s %d %d\n",
+      fprintf(fo, "module position %s %d %d\n",
 		m->name(),
 		xpos->nGet(),
 		ypos->nGet());*/
@@ -2410,13 +2410,13 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     // Save module libraries
     fprintf(fo, "\n\n# Module libraries:\n");
     for (mi = module_list.begin();
-	 mi != module_list.end();
-	 mi++)
+         mi != module_list.end();
+         mi++)
     {
 
-	Module_Library *t = *mi;
-	fprintf(fo, "module library %s\n",
-		t->name());
+      Module_Library *t = *mi;
+      fprintf(fo, "module library %s\n",
+      t->name());
     }
 
     // Save modules
@@ -2424,35 +2424,35 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     module_iterator = bbw->modules;
     while(module_iterator!=0)
     {
-	GuiModule *p;
+      GuiModule *p;
 
-	p = static_cast<GuiModule*>( module_iterator->data);
+      p = static_cast<GuiModule*>( module_iterator->data);
 
-	list <Value *> :: iterator attribute_iterator;
-	m = p->module;
+      list <Value *> :: iterator attribute_iterator;
+      m = p->module;
 
-    	Processor *cpu;
-	cpu=dynamic_cast<Processor*>(m);
-	if(cpu==0)
-	{ // Module, not a processor, so add the load command
-		fprintf(fo, "module load %s %s\n",
-			m->type(),
-			m->name().c_str());
-	}
+      Processor *cpu;
+      cpu=dynamic_cast<Processor*>(m);
+      if(cpu==0)
+      { // Module, not a processor, so add the load command
+        fprintf(fo, "module load %s %s\n",
+        m->type(),
+        m->name().c_str());
+      }
 
-	for(attribute_iterator = m->attributes.begin();
-		attribute_iterator != m->attributes.end();
-		attribute_iterator++) {
+      for(attribute_iterator = m->attributes.begin();
+          attribute_iterator != m->attributes.end();
+          attribute_iterator++) {
 
-		Value *locattr = *attribute_iterator;
-		
-		fprintf(fo, "%s.%s=%s\n",
-			m->name().c_str(),
-			locattr->name().c_str(),
-			locattr->toString().c_str());
-	}
-	fprintf(fo, "\n");
-	module_iterator=module_iterator->next;
+        Value *locattr = *attribute_iterator;
+
+        fprintf(fo, "%s.%s=%s\n",
+                m->name().c_str(),
+                locattr->name().c_str(),
+                locattr->toString().c_str());
+      }
+      fprintf(fo, "\n");
+      module_iterator=module_iterator->next;
     }
 
 
@@ -2460,30 +2460,31 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
     fprintf(fo, "\n\n# Connections:\n");
     list <Stimulus_Node *> :: iterator node_iterator;
 
-    for (node_iterator = node_list.begin();
-	 node_iterator != node_list.end();
-	 node_iterator++)
-    {
-	Stimulus_Node *node = *node_iterator;
-        stimulus *stimulus;
+    Symbol_Table &ST = get_symbol_table();
+    Symbol_Table::node_symbol_iterator it;
+    Symbol_Table::node_symbol_iterator itEnd = ST.endNodeSymbol();
+    for(it = ST.beginNodeSymbol(); it != itEnd; it++) {
+      Stimulus_Node *node = (*it)->getNode();
+      assert(node != NULL);
+      stimulus *stimulus;
 
-	fprintf(fo, "node %s\n",node->name().c_str());
+      fprintf(fo, "node %s\n",node->name().c_str());
 
-	if(node->stimuli!=0)
-	{
-	    fprintf(fo, "attach %s",node->name().c_str());
+      if(node->stimuli!=0)
+      {
+        fprintf(fo, "attach %s",node->name().c_str());
 
-	    stimulus = node->stimuli;
+        stimulus = node->stimuli;
 
-	    while(stimulus!=0)
-	    {
-		fprintf(fo, " %s",stimulus->name().c_str());
+        while(stimulus!=0)
+        {
+          fprintf(fo, " %s",stimulus->name().c_str());
 
-		stimulus = stimulus->next;
-	    }
+          stimulus = stimulus->next;
+        }
 
-	    fprintf(fo, "\n\n");
-	}
+        fprintf(fo, "\n\n");
+      }
     }
 
     fprintf(fo, "\n\n# End.\n");
@@ -2756,7 +2757,7 @@ void GuiModule::Build()
   gtk_widget_show(tree_item);
   gtk_tree_append(GTK_TREE(bbw->tree), tree_item);
 
-  package_height=(pin_count/2+(pin_count&1)-1)*pinspacing;
+  package_height=(float)((pin_count/2+(pin_count&1)-1)*pinspacing);
 
   float pin_position;
 
@@ -2881,7 +2882,7 @@ void GuiModule::Build()
     height=req.height;
 
     if(package_height<height-pinspacing)
-      package_height=height-pinspacing;
+      package_height=(float)(height-pinspacing);
   }
 
   // Create xref
@@ -3752,12 +3753,15 @@ void Breadboard_Window::Build(void)
   }
 
   // Loop node list
-  list <Stimulus_Node *>::iterator ni;
-  for(ni = node_list.begin();
-  	ni!=node_list.end();
-	ni++)
-  {
-  	NodeConfigurationChanged(*ni);
+  Symbol_Table &ST = get_symbol_table();
+  Symbol_Table::node_symbol_iterator it;
+  Symbol_Table::node_symbol_iterator itEnd = ST.endNodeSymbol();
+  for(it = ST.beginNodeSymbol(); it != itEnd; it++) {
+    Stimulus_Node *node = (*it)->getNode();
+    assert(node != NULL);
+    if(node != NULL) {
+    	NodeConfigurationChanged(node);
+    }
   }
 
   gtk_widget_show(window);

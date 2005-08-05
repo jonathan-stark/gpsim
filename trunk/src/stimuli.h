@@ -43,13 +43,7 @@ typedef list<string> StringList_t;
 
 
 /* Support functions */
-extern Stimulus_Node * find_node (string name);
-extern void add_node(Stimulus_Node * new_node);
-extern void add_node(char *node_name);
 extern void dump_node_list(void);
-extern stimulus * find_stimulus (string name);
-extern void add_stimulus(stimulus * );
-void remove_stimulus(stimulus * stimulus);
 extern void dump_stimulus_list(void);
 
 extern void stimuli_attach(StringList_t *);
@@ -83,11 +77,6 @@ extern void stimuli_attach(SymbolList_t *);
 
 #define MAX_DRIVE        0x100000
 #define MAX_ANALOG_DRIVE 0x1000
-
-extern list <Stimulus_Node *> node_list;
-
-extern list <stimulus *> stimulus_list;
-
 
 class Stimulus_Node : public gpsimObject, public TriggerObject
 {
@@ -131,6 +120,9 @@ public:
   // it's voltage is periodically updated by invoking callback()
   virtual void callback(void);
   virtual void callback_print(void);
+
+  // factory function
+  static Stimulus_Node * construct(const char * psName);
 
 };
 
@@ -206,6 +198,7 @@ public:
 
   // Display info about the stimulus.
   virtual void show();
+  virtual string toString();
 
 protected:
   bool bDrivingState;        // 0/1 digitization of the analog state we're driving
@@ -222,6 +215,8 @@ protected:
   virtual unsigned int get_value(void) { return 0;}
   virtual void put_value(unsigned int new_value) {}
 
+  // factory function
+  static stimulus * construct(const char * psName);
 };
 
 class source_stimulus : public stimulus, public TriggerObject

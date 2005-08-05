@@ -393,7 +393,7 @@ class Float : public Value {
 
 public:
 	
-  Float(double newValue);
+  Float(double newValue = 0.0);
   Float(const char *_name, double newValue, const char *desc=0);
   static bool Parse(const char *pValue, double &fValue);
   static Float * New(const char *_name, const char *pValue, const char *desc);
@@ -423,6 +423,17 @@ public:
 
   static Float* typeCheck(Value* val, string valDesc);
   virtual bool compare(ComparisonOperator *compOp, Value *rvalue);
+
+  inline operator double() {
+    double d;
+    get(d);
+    return d;
+  }
+
+  Float & operator = (double d) {
+    set(d);
+    return *this;
+  }
 
 private:
   double value;

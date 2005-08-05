@@ -43,8 +43,7 @@ Boston, MA 02111-1307, USA.  */
 #include "operator.h"
 #include "errors.h"
 #include "protocol.h"
-
-int open_cod_file(Processor **, const char *);
+#include "cmd_gpsim.h"
 
 //
 // ***NOTE*** Ideally, I would like to use a the std container 'map' 
@@ -76,26 +75,61 @@ void Symbol_Table::add_ioport(IOPORT *_ioport)
 
   ioport_symbol *is = new ioport_symbol(_ioport);
 
-  add(is);
-
+  if(!add(is)) {
+    delete is;
+  }
 }
 
 void Symbol_Table::add_stimulus_node(Stimulus_Node *s)
 {
-
-  node_symbol *ns = new node_symbol(s);
-
-  add(ns);
-
+  node_symbol *sym = findNodeSymbol(s->name());
+  // New paradigm is for the named stimulus objects
+  // to add themselves and remove them selves.
+  // Since there is a lot of code that adds a stimulus
+  // object we will ignore them if the stimulus already
+  // exists unless it is a different object with the
+  // same name.
+  if(sym == NULL) {
+    node_symbol *ns = new node_symbol(s);
+    if(!add(ns)) {
+      delete ns;
+    }
+  }
+  else if(sym->getNode() != s) {
+    GetUserInterface().DisplayMessage("Warning: Attempt to add symbol %s that already exists\n",
+      s->name().c_str());
+  }
+  else {
+    // use this code to capture calls to add_stimulus_node() that are not needed
+    GetUserInterface().DisplayMessage("Warning: Attempt to add symbol object '%s' twice\n",
+      s->name().c_str());
+  }
 }
 
 void Symbol_Table::add_stimulus(stimulus *s)
 {
-
-  stimulus_symbol *ss = new stimulus_symbol(s);
-
-  add(ss);
-
+  stimulus_symbol *sym = findStimulusSymbol(s->name());
+  // New paradigm is for the named stimulus objects
+  // to add themselves and remove them selves.
+  // Since there is a lot of code that adds a stimulus
+  // object we will ignore them if the stimulus already
+  // exists unless it is a different object with the
+  // same name.
+  if(sym == NULL) {
+    stimulus_symbol *ss = new stimulus_symbol(s);
+    if(!add(ss)) {
+      delete ss;
+    }
+  }
+  else if(sym->getStimulus() != s) {
+    GetUserInterface().DisplayMessage("Warning: Attempt to add symbol %s that already exists\n",
+      s->name().c_str());
+  }
+  else {
+    // use this code to capture calls to add_stimulus() that are not needed
+    GetUserInterface().DisplayMessage("Warning: Attempt to add symbol object '%s' twice\n",
+      s->name().c_str());
+  }
 }
 
 bool Symbol_Table::add(Value *s) {
@@ -109,11 +143,18 @@ bool Symbol_Table::add(Value *s) {
         s, NameLessThan());
       if (it != end() &&
         (*it)->name() == s->name()) {
-          printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
-          erase(it);
-  //      return false;
+//          printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
+//          erase(it);
+        GetUserInterface().DisplayMessage(
+            "Symbol_Table::add(): Warning: failed to add symbol "
+            "because a symbol by the name '%s' already exists, new object is type %s\n",
+            s->name().c_str(), s->showType().c_str());
+        return false;
       }
       insert(it, s);
+// for testing
+//      GetUserInterface().DisplayMessage("Symbol added: %s\n",
+//        s->name().c_str());
       return true;
     }
   }
@@ -195,9 +236,10 @@ Symbol_Table::add_register(Register *new_reg, const char *symbol_name,
     if((new_reg->name() == sName && find(new_reg->name()) ) ||
        new_reg->baseName() == sName && find(new_reg->baseName())) {
       if(verbose)
-        cout << "Warning not adding  "
-	           << symbol_name
-	           << " to symbol table\n because it is already in.\n";
+        GetUserInterface().DisplayMessage(
+          "Warning not adding register symbol '%s'"
+	        " to symbol table\n because it is already in.\n",
+	        symbol_name);
       return 0;
      }
   }
@@ -251,8 +293,9 @@ void Symbol_Table::add_module(Module * m, const char *cPname)
 {
   module_symbol *ms = new module_symbol(m,cPname);
 
-  add(ms);
-
+  if(!add(ms)) {
+    delete ms;
+  }
 }
 
 void Symbol_Table::remove_module(Module * m) {
@@ -274,8 +317,9 @@ Value *Symbol_Table::remove(string &s)
 {
   iterator it = FindIt(s);
   if(it != end() && (*it)->name() == s) {
+    Value *pValue = *it;
     erase(it);
-    return *it;
+    return pValue;
   }
   return NULL;
 }
@@ -285,7 +329,7 @@ void Symbol_Table::rename(const char *pOldName, const char *pNewName)
   // First make sure the old and new names are both valid.
   if (pNewName && pOldName && *pOldName && *pNewName) {
     iterator it = FindIt(pOldName);
-    if(it != end()) {
+    if(it != end() && (*it)->name() == pOldName) {
       Value *pValue = *it;
       erase(it);
       // pValue->gpsimObject::new_name(pNewName);
@@ -307,8 +351,14 @@ Value * Symbol_Table::find(type_info const &symt, const char *str)
   iterator sti = FindIt(str);
   while( sti != end()) {
     Value *val = *sti;
-    if(val && (val->name() == s) && (typeid(val) == symt))
-      return(val);
+    int iResult = val->name().compare(s);
+    if(iResult == 0) {
+      return val;
+    }
+    else if(iResult > 0) {
+      // leave early for efficiency
+      return NULL;
+    }
     sti++;
   }
   return 0;
@@ -342,7 +392,7 @@ register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
     if(pRegSymbol != 0) {
       Register * pReg = pRegSymbol->getReg();
       if (pReg && pReg->get_cpu() == NULL)
-	cout << " Null cpu for reg named:"<<pReg->name()<<endl;
+        cout << " Null cpu for reg named:"<<pReg->name()<<endl;
       assert(pReg->get_cpu() != NULL);
       if(pRegSymbol->getAddress() == uAddress &&
         pRegSymbol->getBitmask() == pReg->get_cpu()->register_mask() &&
@@ -430,6 +480,34 @@ const char * Symbol_Table::findConstant(unsigned int uValue, unsigned int uRefer
     sti++;
   }
   return NULL;
+}
+
+node_symbol * Symbol_Table::findNodeSymbol(const char *s)
+{
+  return findSymbol(s, (node_symbol*)NULL);
+}
+
+Stimulus_Node * Symbol_Table::findNode(const char *s)
+{
+  node_symbol * pNodeSym = findNodeSymbol(s);
+  if( pNodeSym != NULL) {
+    return pNodeSym->getNode();
+  }
+  return ((Stimulus_Node *)0);
+}
+
+stimulus_symbol * Symbol_Table::findStimulusSymbol(const char *s)
+{
+  return findSymbol(s, (stimulus_symbol*)NULL);
+}
+
+stimulus * Symbol_Table::findStimulus(const char *s)
+{
+  stimulus_symbol * pNodeSym = findStimulusSymbol(s);
+  if( pNodeSym != NULL) {
+    return pNodeSym->getStimulus();
+  }
+  return ((stimulus *)0);
 }
 
 bool Symbol_Table::Exist(const char *s) {
@@ -578,6 +656,7 @@ Symbol_Table::FindIt(Value *key) {
   }
   return end();
 }
+
 
 //------------------------------------------------------------------------
 // symbols
@@ -1083,7 +1162,7 @@ Value *attribute_symbol::get_xref()
 
 //------------------------------------------------------------------------
 stimulus_symbol::stimulus_symbol(stimulus *_s)
-  : symbol(0), s(_s)
+  : symbol(_s->name().c_str()), s(_s)
 {
 }
 
@@ -1121,7 +1200,7 @@ void stimulus_symbol::new_name(string &sNewName) {
 string stimulus_symbol::toString()
 {
   if(s)
-    s->show();
+    return name() + ": " + s->toString();
   return name();
 }
 

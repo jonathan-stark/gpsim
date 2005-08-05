@@ -25,11 +25,11 @@ Boston, MA 02111-1307, USA.  */
 
 #include "command.h"
 #include "cmd_node.h"
+#include "../src/stimuli.h"
 
 cmd_node c_node;
 
 extern void dump_node_list(void);
-extern void add_node(char *node_name);
 
 static cmd_options cmd_node_options[] =
 {
@@ -76,7 +76,7 @@ void cmd_node::add_nodes(list <string> * nodes)
 	 ++si) {
 
       string &s = *si;
-      add_node((char *)s.c_str());
+      Stimulus_Node::construct((char *)s.c_str());
     }
 
   }
