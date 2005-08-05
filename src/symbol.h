@@ -254,28 +254,28 @@ public:
   ///
   typedef symbol_iterator_t<node_symbol> node_symbol_iterator;
 
-  node_symbol_iterator beginNodeSymbol() {
-  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
-    (node_symbol*)NULL);
-  }
+  node_symbol_iterator beginNodeSymbol();
+//  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
+//    (node_symbol*)NULL);
+//  }
 
-  node_symbol_iterator endNodeSymbol() {
-    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
-  }
+  node_symbol_iterator endNodeSymbol();
+//    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
+//  }
 
   ///
   /// stimulus_symbol iterator declarations
   ///
   typedef symbol_iterator_t<stimulus_symbol> stimulus_symbol_iterator;
 
-  stimulus_symbol_iterator beginStimulusSymbol() {
-  return (stimulus_symbol_iterator)beginSymbol((stimulus_symbol_iterator*)NULL,
-    (stimulus_symbol*)NULL);
-  }
+  stimulus_symbol_iterator beginStimulusSymbol();
+//  return (stimulus_symbol_iterator)beginSymbol((stimulus_symbol_iterator*)NULL,
+//    (stimulus_symbol*)NULL);
+//  }
 
-  stimulus_symbol_iterator endStimulusSymbol() {
-    return endSymbol((stimulus_symbol_iterator*) NULL, (stimulus_symbol*)NULL);
-  }
+  stimulus_symbol_iterator endStimulusSymbol();
+//   return endSymbol((stimulus_symbol_iterator*) NULL, (stimulus_symbol*)NULL);
+//  }
 
 
   ///
