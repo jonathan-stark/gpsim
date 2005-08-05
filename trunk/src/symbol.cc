@@ -496,6 +496,15 @@ Stimulus_Node * Symbol_Table::findNode(const char *s)
   return ((Stimulus_Node *)0);
 }
 
+Symbol_Table::node_symbol_iterator Symbol_Table::beginNodeSymbol() {
+  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
+    (node_symbol*)NULL);
+}
+
+Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol() {
+    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
+}
+
 stimulus_symbol * Symbol_Table::findStimulusSymbol(const char *s)
 {
   return findSymbol(s, (stimulus_symbol*)NULL);
@@ -508,6 +517,17 @@ stimulus * Symbol_Table::findStimulus(const char *s)
     return pNodeSym->getStimulus();
   }
   return ((stimulus *)0);
+}
+
+Symbol_Table::stimulus_symbol_iterator Symbol_Table::beginStimulusSymbol() {
+  return (stimulus_symbol_iterator)beginSymbol(
+    (stimulus_symbol_iterator*)NULL,
+    (stimulus_symbol*)NULL);
+  }
+
+Symbol_Table::stimulus_symbol_iterator Symbol_Table::endStimulusSymbol() {
+  return endSymbol((stimulus_symbol_iterator*) NULL,
+    (stimulus_symbol*)NULL);
 }
 
 bool Symbol_Table::Exist(const char *s) {
