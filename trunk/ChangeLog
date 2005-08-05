@@ -1,3 +1,23 @@
+2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/cmd_node.cc, plat/win32/gpsim.def, gui/gui_breadboard.cc,
+	modules/resistor.cc, src/stimuli.cc, src/stimuli.h,
+	src/symbol.cc, src/symbol.h, src/value.h: Eliminated the
+	node_list and stimulus_list. There are now Symbol_Table
+	functions and iterators available for node_symbol and
+	stimulus_symbol objects which contain Stimulus_Node and
+	stimulus objects respectively.
+	Adjusted the way stimulus and stimulus_Node objects are
+	named. Unnamed objects are not put into the symbol table.
+	The respective new_name() functions will add the objects
+	into the symbol table appropriately. Removes several
+	references that added these objects to the symbol table.
+
+	Also modified the PullupResister to name the res IO_bi_directional
+	i/o pin to pullupname + ".pin". Now the PullupResister
+	exists in the symbol table as a module with what ever you
+	named it. The pin is attribute of the PullupResister module.
+	Whew!
+
 2005-08-04 Scott Dattalo <scott@dattalo.com>
 	* src/uart.cc, src/uart.h, src/p16x6x.cc, src/16bit-processors.cc,
 	src/16bit-registers.cc, src/16bit-registers.h, src/p16f62x.cc:
