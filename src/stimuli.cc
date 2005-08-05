@@ -98,6 +98,9 @@ void Stimulus_Node::new_name(string &rName)
 
 void dump_node_list(void)
 {
+
+#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
+
   cout << "Node List\n";
   Symbol_Table &ST = get_symbol_table();
   Symbol_Table::node_symbol_iterator it;
@@ -115,6 +118,10 @@ void dump_node_list(void)
       }
     }
   }
+#else
+
+  cout <<"WARNING: The symbol table is currently broken - can't display nodes...\n";
+#endif
 }
 
 void dump_bus_list(void)
@@ -140,6 +147,7 @@ void add_bus(char *bus_name)
 
 void dump_stimulus_list(void)
 {
+#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
   cout << "Stimulus List\n";
   Symbol_Table &ST = get_symbol_table();
   Symbol_Table::stimulus_symbol_iterator it;
@@ -155,6 +163,10 @@ void dump_stimulus_list(void)
       }
     }
   cout << "returning from dump\n";
+#else
+  cout << "WARNING: The symbol table is broken - can't display nodes...\n";
+#endif
+
 }
 
 

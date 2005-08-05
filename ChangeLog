@@ -1,3 +1,9 @@
+2005-08-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc, src/symbol.h, src/symbol.cc, src/stimuli.cc:
+	Backed out some of the symbol changes made by JR because the code
+	doesn't compile on Linux (gcc 3.4.2). At the moment, this means
+	that stimuli and node dumps do not work. 
+
 2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_node.cc, plat/win32/gpsim.def, gui/gui_breadboard.cc,
 	modules/resistor.cc, src/stimuli.cc, src/stimuli.h,
