@@ -44,7 +44,8 @@ class Module;
 class Expression;
 class symbol;
 class register_symbol;
-
+class node_symbol;
+class stimulus_symbol;
 
 void display_symbol_file_error(int);
 
@@ -114,13 +115,56 @@ public:
   register_symbol * findRegisterSymbol(unsigned int uAddress);
   register_symbol * findRegisterSymbol(unsigned int uAddress,
                                        unsigned int uBitmask);
-  const char * findProgramAddressLabel(unsigned int address);
+  const char *  findProgramAddressLabel(unsigned int address);
   // This was intended to be used by disassembly code. I added
   // this then I figured out that it is not useful unless
   // you have a cross reference to every address that references
   // the symbol. So I'm leaving the code for the future when
-  // the constant object include a list of address reference.
-  const char * findConstant(unsigned int uValue, unsigned int uReferencedFromAddress);
+  // the constant object includes a list of address references.
+  const char *  findConstant(unsigned int uValue,
+    unsigned int uReferencedFromAddress);
+
+private:
+  template<class _symbol_t>
+  _symbol_t * findSymbol(const char *s, _symbol_t*)
+  {
+    iterator sti = FindIt(s);
+    while( sti != end()) {
+      _symbol_t *pNode = dynamic_cast<_symbol_t*>(*sti);
+      if(pNode != NULL) {
+        int iResult = pNode->name().compare(s);
+        if(iResult == 0) {
+          return pNode;
+        }
+        else if(iResult > 0) {
+          // leave early for efficiency
+          return NULL;
+        }
+      }
+      sti++;
+    }
+    return NULL;
+  }
+
+public:
+  node_symbol *             findNodeSymbol(const char *s);
+  Stimulus_Node *           findNode(const char *s);
+  inline node_symbol *      findNodeSymbol(string &s) {
+    return findNodeSymbol(s.c_str());
+  }
+  inline Stimulus_Node *    findNode(string &s) {
+    return findNode(s.c_str());
+  }
+
+  stimulus_symbol *         findStimulusSymbol(const char *s);
+  stimulus *                findStimulus(const char *s);
+  inline stimulus_symbol *  findStimulusSymbol(string &s) {
+    return findStimulusSymbol(s.c_str());
+  }
+  inline stimulus *         findStimulus(string &s) {
+    return findStimulus(s.c_str());
+  }
+
   bool  Exist(const char *);
   void clear();
   void clear_all();
@@ -133,6 +177,106 @@ public:
   iterator end() {
     return _Myt::end();
   }
+
+private:
+  template<class _symbol_t>
+  class symbol_iterator_t : iterator {
+  public:
+    symbol_iterator_t() {
+      m_pSymbolTable = NULL;
+    }
+
+    symbol_iterator_t(const symbol_iterator_t & it) : iterator(it) {
+      m_pSymbolTable = it.m_pSymbolTable;
+    }
+
+    symbol_iterator_t(Symbol_Table *pSymbolTable, iterator it) {
+      *((iterator*)this) = it;
+      m_pSymbolTable = pSymbolTable;
+    }
+
+    _symbol_t * operator*() const
+			{	// return designated object
+			return ((_symbol_t*)**(const_iterator *)this);
+			}
+
+    bool operator!=(const symbol_iterator_t& _Right) const {
+      return (iterator)*this != (iterator) _Right;
+    }
+
+    symbol_iterator_t& operator++() {
+      // preincrement
+      iterator & it = (iterator&)*this;
+      for(it++; it != m_pSymbolTable->end(); it++) {
+        if(dynamic_cast<_symbol_t*>(*it) != NULL)
+          return (*this);
+      }
+	    return (*this);
+    }
+
+
+    symbol_iterator_t operator++(int)
+			{	// postincrement
+			symbol_iterator_t _Tmp = *this;
+			++*this;
+			return (_Tmp);
+			}
+  private:
+    Symbol_Table *m_pSymbolTable;
+  };
+
+  ///
+  /// Note:: Apparently every argument in the template also needs
+  ///        to be in the function argument list. The function
+  ///        arguments are only used to as place holders to allow
+  //         using this function template for a variety of functions
+  ///        that only need to vary by return type.
+  template<class symbol_iterator_t, class _symbol_t>
+  symbol_iterator_t beginSymbol(symbol_iterator_t *, _symbol_t*) {
+    iterator it;
+    iterator itEnd = _Myt::end();
+    for(it = _Myt::begin(); itEnd != it; it++) {
+      if(dynamic_cast<_symbol_t*>(*it) != NULL) {
+        return symbol_iterator_t(this, it);
+      }
+    }
+    return symbol_iterator_t(this, itEnd);
+  }
+
+  template<class symbol_iterator_t, class _symbol_t>
+  symbol_iterator_t endSymbol(symbol_iterator_t *, _symbol_t*) {
+    return symbol_iterator_t(this,_Myt::end());
+  }
+
+public:
+  ///
+  /// node_symbol iterator declarations
+  ///
+  typedef symbol_iterator_t<node_symbol> node_symbol_iterator;
+
+  node_symbol_iterator beginNodeSymbol() {
+  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
+    (node_symbol*)NULL);
+  }
+
+  node_symbol_iterator endNodeSymbol() {
+    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
+  }
+
+  ///
+  /// stimulus_symbol iterator declarations
+  ///
+  typedef symbol_iterator_t<stimulus_symbol> stimulus_symbol_iterator;
+
+  stimulus_symbol_iterator beginStimulusSymbol() {
+  return (stimulus_symbol_iterator)beginSymbol((stimulus_symbol_iterator*)NULL,
+    (stimulus_symbol*)NULL);
+  }
+
+  stimulus_symbol_iterator endStimulusSymbol() {
+    return endSymbol((stimulus_symbol_iterator*) NULL, (stimulus_symbol*)NULL);
+  }
+
 
   ///
   ///   Symbols defined from gpsim command line
@@ -190,6 +334,9 @@ public:
 
   node_symbol(Stimulus_Node *);
   virtual string toString();
+  Stimulus_Node * getNode() {
+    return stimulus_node;
+  }
 };
 
 class register_symbol : public symbol
@@ -305,6 +452,9 @@ public:
   virtual string toString();
   virtual void new_name(const char *);
   virtual void new_name(string &);
+  stimulus * getStimulus() {
+    return s;
+  }
 
 };
 

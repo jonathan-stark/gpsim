@@ -281,7 +281,6 @@ EXPORTS
     ?reassign_break@Cycle_Counter@@QAE_N_K0PAVTriggerObject@@@Z
     ?register_size@Register@@UBEIXZ
     ?remove@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
-    ?remove_stimulus@@YAXPAVstimulus@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
     ?reset@sfr_register@@UAEXW4RESET_TYPE@@@Z
     ?reset@Module@@UAEXW4RESET_TYPE@@@Z
@@ -388,6 +387,7 @@ EXPORTS
     ?toString@gpsimObject@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@gpsimObject@@UAEPADPADH@Z
     ?toString@gpsimValue@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@stimulus@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@symbol@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toggle@IOPIN@@UAEXXZ
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z

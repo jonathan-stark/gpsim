@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <string>
 #include <list>
 #include <vector>
+#include <sstream>
 
 #include "../config.h"
 #include "pic-processor.h"
@@ -34,14 +35,9 @@ Boston, MA 02111-1307, USA.  */
 #include "symbol.h"
 #include "interface.h"
 #include "errors.h"
+#include "cmd_gpsim.h"
 
 
-list <Stimulus_Node *> node_list;
-list <Stimulus_Node *> :: iterator node_iterator;
-
-list <stimulus *> stimulus_list;
-list <stimulus *> :: iterator stimulus_iterator;
- 
 static char num_nodes = 'a';
 static char num_stimuli = 'a';
 void  gpsim_set_break_delta(guint64 delta, TriggerObject *f=0);
@@ -65,37 +61,18 @@ extern Processor *active_cpu;
  */
 
 //------------------------------------------------------------------
-Stimulus_Node * find_node (string name)  // %%% FIX ME %%% * name ???
-{
-  for (node_iterator = node_list.begin();  node_iterator != node_list.end(); node_iterator++)
-    {
-      Stimulus_Node *t = *node_iterator;
-
-      if ( t->name() == name)
-	{
-	  return (t);
-	}
-    }
-  return ((Stimulus_Node *)0);
-}
-
-Stimulus_Node * find_node (Value *sym)
-{
-  for (node_iterator = node_list.begin();
-       node_iterator != node_list.end();
-       ++node_iterator)
-  {
-      Stimulus_Node *t = *node_iterator;
-
-      if ( t->name() == sym->name())
-          return (t);
-  }
-  return ((Stimulus_Node *)0);
-}
 
 void Stimulus_Node::new_name(const char *cPname)
 {
+  // JRH - Perhaps this could be migrated into gpsimObject
   const char *cPoldName = name().c_str();
+  if(name_str.empty()) {
+    // Assume never in symbol table.
+    // Every named stimulus goes into the symbol table.
+    gpsimObject::new_name(cPname);
+    symbol_table.add_stimulus_node(this);
+    return;
+  }
   if(symbol_table.Exist(cPoldName)) {
     // The symbol is in the symbol table. Since the
     // symbol table is ordered we need to let the
@@ -118,50 +95,26 @@ void Stimulus_Node::new_name(string &rName)
   new_name(rName.c_str());
 }
 
-void add_node(char *node_name)
-{
-  
-  Stimulus_Node *sn = find_node(string(node_name));
-
-  if(sn)
-    cout << "Warning node `" << node_name << "' is already in the node list.\n(You can't have duplicate nodes in the node list.)\n";
-  else
-    sn = new Stimulus_Node(node_name);
-
-}
-
-void add_node(Stimulus_Node * new_node)
-{
-
-  //  if(!node_list.find(new_node))
-    node_list.push_back(new_node);
-}
-
-void remove_node(Stimulus_Node * node)
-{
-  node_list.remove(node);
-}
 
 void dump_node_list(void)
 {
   cout << "Node List\n";
-
-  for (node_iterator = node_list.begin();
-       node_iterator != node_list.end(); 
-       ++node_iterator)
+  Symbol_Table &ST = get_symbol_table();
+  Symbol_Table::node_symbol_iterator it;
+  Symbol_Table::node_symbol_iterator itEnd = ST.endNodeSymbol();
+  for(it = ST.beginNodeSymbol(); it != itEnd; it++) {
+    Stimulus_Node *t = (*it)->getNode();
+    cout << t->name() << " voltage = " << t->get_nodeVoltage() << "V\n";
+    if(t->stimuli)
     {
-      Stimulus_Node *t = *node_iterator;
-      cout << t->name() << " voltage = " << t->get_nodeVoltage() << "V\n";
-      if(t->stimuli)
-	{
-	  stimulus *s = t->stimuli;
-	  while(s)
-	    {
-	      cout << '\t' << s->name() << '\n';
-	      s = s->next;
-	    }
-	}
+      stimulus *s = t->stimuli;
+      while(s)
+      {
+        cout << '\t' << s->name() << '\n';
+        s = s->next;
+      }
     }
+  }
 }
 
 void dump_bus_list(void)
@@ -184,79 +137,21 @@ void add_bus(char *bus_name)
   cout << "add_bus -- not supported\n";
 }
 
-/*****************************************************************
-*
-*  stimulus * find_stimulus (string name) 
-* 
-*  Helper function that will search the stimulus list for the stimulus
-* called `name' and return a pointer to it if it's found.
-*
-*/
-
-stimulus * find_stimulus (string name)  // %%% FIX ME %%% * name ???
-{
-  for (stimulus_iterator = stimulus_list.begin();
-       stimulus_iterator != stimulus_list.end(); 
-       ++stimulus_iterator)
-    {
-      stimulus *t = *stimulus_iterator;
-
-      if ( t->name() == name)
-	{
-	  return (t);
-	}
-    }
-
-  return ((stimulus *)0);
-}
-
-stimulus * find_stimulus (Value *sym)
-{
-  if(sym) {
-    for (stimulus_iterator = stimulus_list.begin();
-      stimulus_iterator != stimulus_list.end(); 
-      ++stimulus_iterator)
-    {
-      stimulus *t = *stimulus_iterator;
-
-      if ( t->name() == sym->name())
-        return (t);
-    }
-  }
-
-  return ((stimulus *)0);
-}
-
-void add_stimulus(stimulus * new_stimulus)
-{
-  stimulus_list.push_back(new_stimulus);
-}
-
-void remove_stimulus(stimulus * stimulus)
-{
-  stimulus_list.remove(stimulus);
-}
 
 void dump_stimulus_list(void)
 {
   cout << "Stimulus List\n";
-
-  for (stimulus_iterator = stimulus_list.begin();  
-       stimulus_iterator != stimulus_list.end(); 
-       ++stimulus_iterator)
-    {
-
-      stimulus *t = *stimulus_iterator;
-
+  Symbol_Table &ST = get_symbol_table();
+  Symbol_Table::stimulus_symbol_iterator it;
+  Symbol_Table::stimulus_symbol_iterator itEnd = ST.endStimulusSymbol();
+  for(it = ST.beginStimulusSymbol(); it != itEnd; it++) {
+      stimulus *t = (*it)->getStimulus();
       if(t) {
-	cout << "stimulus ";
-
-	cout << t->name();
-
-	if(t->snode)
-	  cout << " attached to " << t->snode->name();
-
-	cout << '\n';
+        cout << "stimulus ";
+        cout << t->name();
+        if(t->snode)
+          cout << " attached to " << t->snode->name();
+        cout << '\n';
       }
     }
   cout << "returning from dump\n";
@@ -280,7 +175,6 @@ Stimulus_Node::Stimulus_Node(const char *n)
   if(n)
     {
       new_name(n);
-      symbol_table.add_stimulus_node(this);
     }
   else
     {
@@ -289,8 +183,6 @@ Stimulus_Node::Stimulus_Node(const char *n)
       num_nodes++;    // %%% FIX ME %%%
       new_name(name_str);
     }
-
-  add_node(this);
 
   gi.node_configuration_changed(this);
 }
@@ -305,11 +197,24 @@ Stimulus_Node::~Stimulus_Node()
     sptr = sptr->next;
   }
 
-  remove_node(this);
-
   Value *vpNodeSym = symbol_table.remove(name());
   if(vpNodeSym != NULL)
     delete vpNodeSym;
+}
+
+Stimulus_Node * Stimulus_Node::construct(const char * psName)
+{
+  Stimulus_Node *sn = get_symbol_table().findNode(psName);
+  if(sn) {
+    cout << "Warning node `" << psName
+         << "' is already in the node list.\n"
+            "(You can't have duplicate nodes in the node list.)\n";
+    return NULL;
+  }
+  else {
+    sn = new Stimulus_Node(psName);
+  }
+  return sn;
 }
 
 //
@@ -449,62 +354,61 @@ void Stimulus_Node::refresh()
       // 2 stimuli are attached to the node. This is the typical case
       // and we'll optimize for it.
       {
-	stimulus *sptr2 = sptr ? sptr->next : 0;
-	if(!sptr2)
-	  break;     // error, nStimuli is two, but there aren't two stimuli
+      stimulus *sptr2 = sptr ? sptr->next : 0;
+      if(!sptr2)
+        break;     // error, nStimuli is two, but there aren't two stimuli
 
-	double Z1 = sptr->get_Zth();
-	double Z2 = sptr2->get_Zth();
-	double resistance = Z1 + Z2;
-	finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
-	Zth = Z1*Z2/resistance;
-	Cth = sptr->get_Cth() + sptr2->get_Cth();
+      double Z1 = sptr->get_Zth();
+      double Z2 = sptr2->get_Zth();
+      double resistance = Z1 + Z2;
+      finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
+      Zth = Z1*Z2/resistance;
+      Cth = sptr->get_Cth() + sptr2->get_Cth();
       }
       break;
 
     default:
       {
-	/*
-	  There are 3 or more stimuli connected to this node. Recall
-	  that these are all in parallel. The Thevenin voltage and 
-	  impedance for this is:
+      /*
+        There are 3 or more stimuli connected to this node. Recall
+        that these are all in parallel. The Thevenin voltage and 
+        impedance for this is:
 
-	  Thevenin impedance:
-	  Zt = 1 / sum(1/Zi)
+        Thevenin impedance:
+        Zt = 1 / sum(1/Zi)
 
-	  Thevenin voltage:
+        Thevenin voltage:
 
-	  Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
-	  = sum( Vi * Zt /Zi)
-	  = Zt * sum(Vi/Zi)
-	*/
+        Vt = sum( Vi / ( ((Zi - Zt)/Zt) + 1) )
+        = sum( Vi * Zt /Zi)
+        = Zt * sum(Vi/Zi)
+      */
 
-	double conductance=0.0;	// Thevenin conductance.
-	Cth=0;
-	finalVoltage=0.0; 
+      double conductance=0.0;	// Thevenin conductance.
+      Cth=0;
+      finalVoltage=0.0; 
 
-	//cout << "multi-node summing:\n";
-	while(sptr) {
-	  /*
-	  cout << " N: " <<sptr->name() 
-	  << " V=" << sptr->get_Vth() 
-	  << " Z=" << sptr->get_Zth()
-	  << " C=" << sptr->get_Cth() << endl; 
-	  */
-	  double Cs = 1 / sptr->get_Zth();
-	  finalVoltage += sptr->get_Vth() * Cs;
-	  conductance += Cs;
-	  Cth += sptr->get_Cth();
-	  sptr = sptr->next;
-	}
-	Zth = 1.0/conductance;
-	finalVoltage *= Zth;
+      //cout << "multi-node summing:\n";
+      while(sptr) {
+        /*
+        cout << " N: " <<sptr->name() 
+        << " V=" << sptr->get_Vth() 
+        << " Z=" << sptr->get_Zth()
+        << " C=" << sptr->get_Cth() << endl; 
+        */
+        double Cs = 1 / sptr->get_Zth();
+        finalVoltage += sptr->get_Vth() * Cs;
+        conductance += Cs;
+        Cth += sptr->get_Cth();
+        sptr = sptr->next;
+      }
+      Zth = 1.0/conductance;
+      finalVoltage *= Zth;
       }
     }
-
   }
-
 }
+
 void Stimulus_Node::update()
 {
 
@@ -572,7 +476,7 @@ void Stimulus_Node::time_constant(double new_tc)
 
 //------------------------------------------------------------------------
 stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
-  : Vth(_Vth), Zth(_Zth)
+  : Vth(_Vth), Zth(_Zth), snode(NULL), next(NULL)
 {
   new_name(cPname);
 
@@ -587,6 +491,13 @@ stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
 void stimulus::new_name(const char *cPname)
 {
   const char *cPoldName = name().c_str();
+  if(name_str.empty() && cPname != NULL && *cPname != 0) {
+    // Assume never in symbol table.
+    // Every named stimulus goes into the symbol table.
+    gpsimObject::new_name(cPname);
+    symbol_table.add_stimulus(this);
+    return;
+  }
   if(symbol_table.Exist(cPoldName)) {
     // The symbol is in the symbol table. Since the
     // symbol table is ordered we need to let the
@@ -613,13 +524,24 @@ stimulus::~stimulus(void)
 {
   if(snode)
     snode->detach_stimulus(this);
+
+  Value *vpNodeSym = symbol_table.remove(name());
+  if(vpNodeSym != NULL)
+    delete vpNodeSym;
 }
+
 void stimulus::show()
 {
-  cout << name();
+  GetUserInterface().DisplayMessage(toString().c_str());
+}
+
+string stimulus::toString() 
+{
+  ostringstream s;
+  s << name();
   if(snode)
-    cout << " attached to " << snode->name();
-  cout << endl
+    s << " attached to " << snode->name();
+  s << endl
        << "  Vth=" << get_Vth() << "V"
        << "  Zth=" << get_Zth() << " ohms"
        << "  Cth=" << get_Cth() << " F"
@@ -630,7 +552,9 @@ void stimulus::show()
        << " drivenState=" << getDrivenState()
        << " bitState=" << getBitChar()
        << endl;
+  return s.str();
 }
+
 //========================================================================
 
 
@@ -657,7 +581,6 @@ square_wave::square_wave(unsigned int p, unsigned int dc, unsigned int ph, const
   snode = 0;
   next = 0;
 
-  add_stimulus(this);
 }
 
 double square_wave::get_Vth()
@@ -726,7 +649,6 @@ triangle_wave::triangle_wave(unsigned int p, unsigned int dc, unsigned int ph, c
   //cout << "m1 = " << m1 << " b1 = " << b1 << '\n';
   //cout << "m2 = " << m2 << " b2 = " << b2 << '\n';
 
-  add_stimulus(this);
 }
 
 double triangle_wave::get_Vth()
@@ -836,12 +758,12 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
 
       strncpy(name_str, iop->name().c_str(),sizeof(name_str) - sizeof(bs));
       if(iobit < 10) {
-	bs[0] = iobit+'0';
-	bs[1] = 0;
+        bs[0] = iobit+'0';
+        bs[1] = 0;
       } else {
-	bs[0] = (iobit / 10) + '0';
-	bs[1] = (iobit % 10) + '0';
-	bs[2] = 0;
+        bs[0] = (iobit / 10) + '0';
+        bs[1] = (iobit % 10) + '0';
+        bs[2] = 0;
       }
 
       strcat(name_str,bs);
@@ -856,8 +778,6 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
       new_name(opt_name);
   }
 
-  add_stimulus(this);
-  symbol_table.add_stimulus(this);
 }
 
 IOPIN::IOPIN(const char *_name,
@@ -882,9 +802,6 @@ IOPIN::IOPIN(const char *_name,
   snode = 0;
   m_monitor=0;
 
-  add_stimulus(this);
-  if(_name)
-    symbol_table.add_stimulus(this);
 }
 
 void IOPIN::setMonitor(PinMonitor *new_pinMonitor)
@@ -912,10 +829,6 @@ void IOPIN::disconnect_from_port()
 
 IOPIN::~IOPIN()
 {
-  if(snode)
-    snode->detach_stimulus(this);
-
-  remove_stimulus(this);
 }
 
 
@@ -1325,38 +1238,33 @@ char IO_bi_directional_pu::getBitChar()
     // There's at least one strong driver tied to the node
     if(!getDriving()) {
       if(getDrivenState()) {
-	if(nodeVoltage < 4.5)
-	  return 'X';
-	else
-	  return '1';
+        if(nodeVoltage < 4.5)
+          return 'X';
+        else
+          return '1';
       } else {
-	if(nodeVoltage > 0.9)
-	  return 'X';
-	else
-	  return '0';
+        if(nodeVoltage > 0.9)
+          return 'X';
+        else
+          return '0';
       }
     }
-
   }
 
   if(getDriving()) {
     if(getDrivingState()) {
       if(nodeVoltage < 4.5)
-	return 'X';
+        return 'X';
       else
-	return '1';
+        return '1';
     } else {
       if(nodeVoltage > 0.5)
-	return 'X';
+        return 'X';
       else
-	return '0';
+        return '0';
     }
   }
-
-
-
   return getDrivenState() ? '1' : '0';
-
 }
 
 IO_open_collector::IO_open_collector(IOPORT *i, unsigned int b,
@@ -1444,10 +1352,8 @@ ValueStimulus::ValueStimulus(const char *n)
       new_name(name_str);
     }
 
-  add_stimulus(this);
-  symbol_table.add_stimulus(this);
-
 }
+
 ValueStimulus::~ValueStimulus()
 {
   delete initial;
@@ -1731,35 +1637,33 @@ void stimorb_attach(char *node, char_list *stimuli)
   if(!node)
     return;
 
-  string s = string(node);
-  Stimulus_Node *sn = find_node (s);
+  string s(node);
+  Symbol_Table &ST = get_symbol_table();
+  Stimulus_Node *sn = ST.findNode(s);
 
-  if(sn)
-    {
-	
-      stimulus *st;
-      while(stimuli)
-	{
-	  s = string(stimuli->name);
-	  st = find_stimulus(s);
-	  if(st) {
-	    sn->attach_stimulus(st);
-	    if(verbose&2)
-	      cout << " attaching stimulus: " << s << '\n';
-	  }
-	  else
-	    cout << "Warning, stimulus: " << s << " not attached\n";
+  if(sn) {
+    while(stimuli) {
+      s = string(stimuli->name);
+      stimulus *st = ST.findStimulus(s);
+      if(st) {
+        sn->attach_stimulus(st);
+        if(verbose&2)
+          cout << " attaching stimulus: " << s << '\n';
+      }
+      else
+        cout << "Warning, stimulus: " << s << " not attached\n";
 
-  	  stimuli = stimuli->next;
-	}
-
-      sn->update(0);
+      stimuli = stimuli->next;
     }
+    sn->update(0);
+  }
   else {
     cout << "Warning: Node \"" << node << "\" was not found in the node list\n";
   }
 
 }
+
+void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName);
 
 //========================================================================
 //  stimuli_attach(list <string> * sl)
@@ -1778,26 +1682,16 @@ void stimuli_attach(StringList_t *sl)
 
   si = sl->begin();
 
-  Stimulus_Node *sn = find_node (*si);
+  Symbol_Table &ST = get_symbol_table();
+  Stimulus_Node *sn = ST.findNode((*si));
 
-  if(sn)
-    {
+  if(sn) {
       for(++si; si != sl->end(); ++si)
-	{
-	  string s = *si;
-	  stimulus *st = find_stimulus(s);
-
-	  if(st) {
-	    sn->attach_stimulus(st);
-	    if(verbose&2)
-	      cout << " attaching stimulus: " << s << '\n';
-	  }
-	  else
-	    cout << "Warning, stimulus: " << s << " not attached\n";
-	}
-
+      {
+        AttachStimulusToNode(sn, *si);
+      }
       sn->update(0);
-    }
+  }
   else {
     cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
   }
@@ -1809,30 +1703,19 @@ void stimuli_attach(SymbolList_t *sl)
   if (!sl)
     return;
 
-  list <Value*> :: iterator si;
+  SymbolList_t :: iterator si;
 
+  // The first symbol is always the node name
   si = sl->begin();
-
-  Stimulus_Node *sn = find_node (*si);
+  Symbol_Table &ST = get_symbol_table();
+  Stimulus_Node *sn = ST.findNode((*si)->name());
 
   if(sn) {
-
+    // All symbols thereafter are stimulus objects
     for(++si; si != sl->end(); ++si)
     {
-      Value *s = *si;
-      stimulus *st = find_stimulus(s);
-
-      if(st) {
-        sn->attach_stimulus(st);
-        if(verbose&2)
-          cout << " attaching stimulus: " << s->name() 
-               << " to node: " << sn->name() 
-               << endl;
-      }
-      else
-        cout << "Warning, stimulus: " << s->toString() << " not attached\n";
+      AttachStimulusToNode(sn, (*si)->name());
     }
-
     sn->update(0);
   }
   else {
@@ -1844,7 +1727,7 @@ void stimuli_attach(SymbolList_t *sl)
     stimulus *st;
     Value *v;
     if(sl->size() == 2) {
-      st = find_stimulus(*si);
+      st = ST.findStimulus((*si)->name());
 
       if(st) {
         ++si;
@@ -1852,7 +1735,7 @@ void stimuli_attach(SymbolList_t *sl)
       } else {
         v = *si;
         ++si;
-        st = find_stimulus(*si);
+        st = ST.findStimulus((*si)->name());
       }
 
       if(st) {
@@ -1864,3 +1747,19 @@ void stimuli_attach(SymbolList_t *sl)
 
   }
 }
+
+void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName) {
+  stimulus *st = get_symbol_table().findStimulus(sStimulusName);
+
+  if(st) {
+    // attach each found stimulus to the node
+    sn->attach_stimulus(st);
+    if(verbose&2)
+      cout << " attaching stimulus: " << sStimulusName 
+            << " to node: " << sn->name() 
+            << endl;
+  }
+  else
+    cout << "Warning, stimulus: " << sStimulusName << " not attached\n";
+}
+

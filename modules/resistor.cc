@@ -208,7 +208,6 @@ void PullupResistor::create_iopin_map(void)
     cout << "voltage " << iop->get_Vth() << '\n';
   }
   */
-  get_symbol_table().add_stimulus(iop);
 
 }
 
@@ -222,8 +221,10 @@ Module * PullupResistor::pu_construct(const char *_new_name)
   PullupResistor *pur = new PullupResistor(_new_name);
 
   if(_new_name) {
-    pur->new_name(_new_name);
-    pur->res.new_name(_new_name);
+    string s;
+    s = _new_name;
+    s.append(".pin");
+    pur->res.new_name(s);
   }
 
   pur->create_iopin_map();
@@ -239,8 +240,10 @@ Module * PullupResistor::pd_construct(const char *_new_name)
   PullupResistor *pur = new PullupResistor(_new_name);
 
   if(_new_name) {
-    pur->new_name(_new_name);
-    pur->res.new_name(_new_name);
+    string s;
+    s = _new_name;
+    s.append(".pin");
+    pur->res.new_name(s);
   }
   pur->create_iopin_map();
 
@@ -253,12 +256,15 @@ Module * PullupResistor::pd_construct(const char *_new_name)
 //--------------------------------------------------------------
 PullupResistor::PullupResistor(const char *init_name)
 {
-
-  new_name(init_name);
-
   // Create the resistor:
-  res.set_Zth(10e3);
 
+  if(init_name)
+    // set the module name
+    new_name(init_name);
+
+  res.set_Zth(10e3);
+  // Note ResistanceAttribute is designed to give access
+  // to res.Zth with a symbol name of "modulename + '.resistance'".
   ResistanceAttribute *attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
