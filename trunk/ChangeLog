@@ -1,3 +1,10 @@
+2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
+	* symbol.cc, symbol.h: Fixed the template compile problems for
+	gcc 3.4.4 due to new bugs in gcc. I didn't see this issue using
+	gcc 3..3.3 on linux. I only have 3.4.4 version of the compiler
+	under cygwin. I've left the #define commented out so someone can
+	test it under linux before removing the #ifdef's.
+
 2005-08-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, src/symbol.h, src/symbol.cc, src/stimuli.cc:
 	Backed out some of the symbol changes made by JR because the code
