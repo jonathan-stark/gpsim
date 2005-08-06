@@ -463,23 +463,42 @@ const char * Symbol_Table::findProgramAddressLabel(unsigned int address) {
   return "";
 }
 
-const char * Symbol_Table::findConstant(unsigned int uValue, unsigned int uReferencedFromAddress)
+const char * Symbol_Table::findConstant(unsigned int uValue,
+                                        unsigned int uReferencedFromAddress)
 {
   // regarding uReferencingAddress
   // see comment in the header.
   iterator sti = begin();
   while( sti != end()) {
-    Value *val = *sti;
-    if(val && typeid(*val) == typeid(Integer)) {
-      Integer * pSymbol = (Integer*)val;
+    Integer *val = dynamic_cast<Integer*>(*sti);
+    if(val != NULL) {
       gint64 uSymValue;
-      pSymbol->get(uSymValue);
+      val->get(uSymValue);
       if(uValue == (unsigned int)uSymValue)
-        return(pSymbol->name().c_str());
+        return(val->name().c_str());
     }
     sti++;
   }
   return NULL;
+}
+
+Integer * Symbol_Table::findInteger(const char *s)
+{
+  return findSymbol(s, (Integer*)NULL);
+}
+
+module_symbol *Symbol_Table::findModuleSymbol(const char *s)
+{
+  return findSymbol(s, (module_symbol*)NULL);
+}
+
+Module * Symbol_Table::findModule(const char *s)
+{
+  module_symbol * pNodeSym = findModuleSymbol(s);
+  if( pNodeSym != NULL) {
+    return pNodeSym->get_module();
+  }
+  return ((Module *)0);
 }
 
 node_symbol * Symbol_Table::findNodeSymbol(const char *s)
@@ -497,13 +516,31 @@ Stimulus_Node * Symbol_Table::findNode(const char *s)
 }
 
 #if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
+
+template<class _symbol_iterator_t, class _symbol_t>
+_symbol_iterator_t Symbol_Table::beginSymbol(_symbol_iterator_t *pit, _symbol_t*psym) {
+  iterator it;
+  iterator itEnd = _Myt::end();
+  for(it = _Myt::begin(); itEnd != it; it++) {
+    if(dynamic_cast<_symbol_t*>(*it) != NULL) {
+      return _symbol_iterator_t(this, it);
+    }
+  }
+  return _symbol_iterator_t(this, itEnd);
+}
+
+template<class _symbol_iterator_t, class _symbol_t>
+_symbol_iterator_t Symbol_Table::endSymbol(_symbol_iterator_t *pit, _symbol_t*psym) {
+  return _symbol_iterator_t(this,_Myt::end());
+}
+
 Symbol_Table::node_symbol_iterator Symbol_Table::beginNodeSymbol() {
-  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
-    (node_symbol*)NULL);
+  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)0,
+    (node_symbol*)0);
 }
 
 Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol() {
-    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
+    return endSymbol((node_symbol_iterator*) 0, (node_symbol*)0);
 }
 #endif
 
@@ -525,7 +562,7 @@ Symbol_Table::stimulus_symbol_iterator Symbol_Table::beginStimulusSymbol() {
   return (stimulus_symbol_iterator)beginSymbol(
     (stimulus_symbol_iterator*)NULL,
     (stimulus_symbol*)NULL);
-  }
+}
 
 Symbol_Table::stimulus_symbol_iterator Symbol_Table::endStimulusSymbol() {
   return endSymbol((stimulus_symbol_iterator*) NULL,
@@ -625,7 +662,6 @@ void Symbol_Table::clear_all() {
   iterator it;
   iterator itEnd = end();
   for(it = begin(); it != itEnd; it++) {
-    Value *value = *it;
     delete *it;
   }
   _Myt::clear();
@@ -814,7 +850,7 @@ string register_symbol::toString()
     // turn off masked bits in dwRead
     unsigned int uValue = reg->get_value() & m_uMask;
     uValue  = uValue >> m_uMaskShift;
-    if ( (1<<(4*iDigits))-1 != m_uMask)
+    if ( (unsigned int)((1<<(4*iDigits))-1) != m_uMask)
       snprintf(buff,sizeof(buff)," [0x%x] BITS 0x%0*x = 0x%0*x = 0b",
 	       reg->address, iDigits, m_uMask,
 	       iDigits, uValue);

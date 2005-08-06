@@ -18,6 +18,7 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
+// #define NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK
 //
 // symbol.h
 //
@@ -46,6 +47,7 @@ class symbol;
 class register_symbol;
 class node_symbol;
 class stimulus_symbol;
+class module_symbol;
 
 void display_symbol_file_error(int);
 
@@ -123,6 +125,9 @@ public:
   // the constant object includes a list of address references.
   const char *  findConstant(unsigned int uValue,
     unsigned int uReferencedFromAddress);
+  Integer *     findInteger(const char *s);
+  module_symbol *findModuleSymbol(const char *s);
+  Module *      findModule(const char *s);
 
 private:
   template<class _symbol_t>
@@ -232,22 +237,11 @@ private:
   ///        arguments are only used to as place holders to allow
   //         using this function template for a variety of functions
   ///        that only need to vary by return type.
-  template<class symbol_iterator_t, class _symbol_t>
-  symbol_iterator_t beginSymbol(symbol_iterator_t *, _symbol_t*) {
-    iterator it;
-    iterator itEnd = _Myt::end();
-    for(it = _Myt::begin(); itEnd != it; it++) {
-      if(dynamic_cast<_symbol_t*>(*it) != NULL) {
-        return symbol_iterator_t(this, it);
-      }
-    }
-    return symbol_iterator_t(this, itEnd);
-  }
+  template<class _symbol_iterator_t, class _symbol_t>
+  _symbol_iterator_t beginSymbol(_symbol_iterator_t *, _symbol_t*);
+  template<class _symbol_iterator_t, class _symbol_t>
+  _symbol_iterator_t endSymbol(_symbol_iterator_t *, _symbol_t*);
 
-  template<class symbol_iterator_t, class _symbol_t>
-  symbol_iterator_t endSymbol(symbol_iterator_t *, _symbol_t*) {
-    return symbol_iterator_t(this,_Myt::end());
-  }
 #endif
 
 public:
@@ -257,13 +251,7 @@ public:
 #if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
   typedef symbol_iterator_t<node_symbol> node_symbol_iterator;
   node_symbol_iterator beginNodeSymbol();
-//  return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)NULL,
-//    (node_symbol*)NULL);
-//  }
-
   node_symbol_iterator endNodeSymbol();
-//    return endSymbol((node_symbol_iterator*) NULL, (node_symbol*)NULL);
-//  }
 
   ///
   /// stimulus_symbol iterator declarations
@@ -271,13 +259,8 @@ public:
   typedef symbol_iterator_t<stimulus_symbol> stimulus_symbol_iterator;
 
   stimulus_symbol_iterator beginStimulusSymbol();
-//  return (stimulus_symbol_iterator)beginSymbol((stimulus_symbol_iterator*)NULL,
-//    (stimulus_symbol*)NULL);
-//  }
-
   stimulus_symbol_iterator endStimulusSymbol();
-//   return endSymbol((stimulus_symbol_iterator*) NULL, (stimulus_symbol*)NULL);
-//  }
+
 #endif
 
   ///
