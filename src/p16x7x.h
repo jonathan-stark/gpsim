@@ -191,6 +191,7 @@ class P16C712 :  public P16C62
   void create(void);
   static Processor *construct(void);
 
+  virtual bool hasSSP() { return false; }
 };
 
 class P16C716 :  public P16C712

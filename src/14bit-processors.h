@@ -140,6 +140,7 @@ public:
   virtual void create_symbols(void);
   virtual void create_sfr_map(void);
   virtual void option_new_bits_6_7(unsigned int bits);
+  virtual bool hasSSP() {return false;}
 };
 
 

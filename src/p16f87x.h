@@ -54,6 +54,8 @@ class P16F871 : public P16C74
     eeprom = ep;
   }
   virtual EEPROM_WIDE *get_eeprom(void) { return ((EEPROM_WIDE *)eeprom); }
+
+  virtual bool hasSSP() { return false;}
 };
 
 

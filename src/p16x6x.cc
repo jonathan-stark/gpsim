@@ -128,6 +128,14 @@ void P16C62::create_iopin_map(void)
   package->assign_pin(27, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(28, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+  if (hasSSP()) {
+    ssp.initialize(get_pir_set(),    // PIR
+		   &(*m_portc)[3],   // SCK
+		   &(*m_portc)[4],   // SDO
+		   &(*m_portc)[5],   // SDI
+		   &(*m_porta)[5]);  // SS
+  }
+
 }
 
 //------------------------------------------------------------------------
@@ -192,6 +200,14 @@ void P16C64::create_iopin_map(void)
   package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+  if (hasSSP()) {
+    ssp.initialize(get_pir_set(),    // PIR
+		   &(*m_portc)[3],   // SCK
+		   &(*m_portc)[4],   // SDO
+		   &(*m_portc)[5],   // SDI
+		   &(*m_porta)[5]);  // SS
+  }
+
 }
 
 
@@ -229,11 +245,11 @@ void P16X6X_processor::create_sfr_map()
   add_sfr_register(&t2con,  0x12, RegisterValue(0,0));
   add_sfr_register(&pr2,    0x92, RegisterValue(0xff,0));
 
-  if( init_ssp ) {
-	add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
-	add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
-	add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
-	add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
+  if( hasSSP() ) {
+    add_sfr_register(&ssp.sspbuf,  0x13, RegisterValue(0,0),"sspbuf");
+    add_sfr_register(&ssp.sspcon,  0x14, RegisterValue(0,0),"sspcon");
+    add_sfr_register(&ssp.sspadd,  0x93, RegisterValue(0,0),"sspadd");
+    add_sfr_register(&ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
   }
 
   add_sfr_register(&ccpr1l,  0x15, RegisterValue(0,0));
@@ -300,7 +316,6 @@ P16X6X_processor::P16X6X_processor(void)
   m_portc = new PicPortRegister("portc",8,0xff);
   m_trisc = new PicTrisRegister("trisc",m_portc);
 
-  init_ssp = false;
 }
 
 /*******************************************************************
@@ -314,8 +329,6 @@ P16C62::P16C62(void)
 {
   if(verbose)
     cout << "c62 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
   
 }
 
@@ -370,8 +383,6 @@ Processor * P16C62::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  //1 p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
-
   p->new_name("p16c62");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -388,6 +399,8 @@ void P16C63::create_sfr_map(void)
 
   if(verbose)
     cout << "creating c63 registers\n";
+
+  P16C62::create_sfr_map();
 
   add_file_registers(0xc0, 0xff, 0);
 
@@ -416,21 +429,6 @@ void P16C63::create_sfr_map(void)
   add_sfr_register(usart.txreg,  0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg,  0x1a, RegisterValue(0,0),"rcreg");
 
-  //1int i;
-  //1for(i=0; i<8; i++) {
-  //1  if(portc->pins[i]) {
-  //1    portc->pins[i]->iopp=&(this->registers[7]);
-  //1  }
-  //1}
-
-  /*
-  add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
-  ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
-  */
-
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
@@ -442,8 +440,6 @@ void P16C63::create_sfr_map(void)
 
 
   //1((PORTC*)portc)->usart = &usart;
-  //1((PORTC*)portc)->ssp = &ssp;
-  //1((PORTA*)porta)->ssp = &ssp;
 }
 
 void P16C63::create_symbols(void)
@@ -470,8 +466,6 @@ P16C63::P16C63(void)
 
   if(verbose)
     cout << "c63 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
 
 }
 
@@ -501,8 +495,6 @@ Processor * P16C63::construct(void)
   p->create_invalid_registers ();
 
   p->pic_processor::create_symbols();
-
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c63");
   symbol_table.add_module(p,p->name().c_str());
@@ -581,8 +573,6 @@ Processor * P16C64::construct(void)
   p->create_invalid_registers ();
   p->create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
-
   p->new_name("p16c64");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -601,7 +591,6 @@ P16C64::P16C64(void)
   m_porte = new PicPortRegister("porte",8,0x07);
   m_trise = new PicTrisRegister("trise",m_porte);
 
-  init_ssp = true;
 }
 
 //------------------------------------------------------------------------
@@ -643,21 +632,6 @@ void P16C65::create_sfr_map(void)
   add_sfr_register(usart.txreg, 0x19, RegisterValue(0,0),"txreg");
   add_sfr_register(usart.rcreg, 0x1a, RegisterValue(0,0),"rcreg");
 
-  //1int i;
-  //1for(i=0; i<8; i++) {
-  //1  if(portc->pins[i]) {
-  //1    portc->pins[i]->iopp=&(this->registers[7]);
-  //1  }
-  //1}
-
-  /*
-  add_sfr_register(ssp.sspbuf, 0x13, RegisterValue(0,0),"sspbuf");
-  add_sfr_register(ssp.sspcon, 0x14, RegisterValue(0,0),"sspcon");
-  add_sfr_register(ssp.sspadd, 0x93, RegisterValue(0,0),"sspadd");
-  add_sfr_register(ssp.sspstat, 0x94, RegisterValue(0,0),"sspstat");
-  ssp.initialize_14(this,get_pir_set(),portc,3,4,5,porta,5,SSP_TYPE_SSP);
-  */
-
   ccpr2l.new_name("ccpr2l");
   ccpr2h.new_name("ccpr2h");
   ccp2con.new_name("ccp2con");
@@ -669,8 +643,6 @@ void P16C65::create_sfr_map(void)
 
 
   //1((PORTC*)portc)->usart = &usart;
-  //1((PORTC*)portc)->ssp = &ssp;
-  //((PORTA*)porta)->ssp = &ssp;
 }
 
 void P16C65::create_symbols(void)
@@ -697,9 +669,6 @@ P16C65::P16C65(void)
 
   if(verbose)
     cout << "c65 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
-
 }
 
 void P16C65::create(void)
@@ -729,8 +698,6 @@ Processor * P16C65::construct(void)
   p->create_invalid_registers ();
 
   p->create_symbols();
-
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c65");
   symbol_table.add_module(p,p->name().c_str());
