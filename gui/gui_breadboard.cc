@@ -2455,7 +2455,6 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
       module_iterator=module_iterator->next;
     }
 
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
     // Save nodes and connections
     fprintf(fo, "\n\n# Connections:\n");
     list <Stimulus_Node *> :: iterator node_iterator;
@@ -2489,10 +2488,6 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
     fprintf(fo, "\n\n# End.\n");
     fclose(fo);
-#else
-
-    cout << "WARNING the symbol table is partially broken so the netlist can't be saved.";
-#endif
     //text_dialog(filename);
 
 }

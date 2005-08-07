@@ -18,7 +18,6 @@ along with gpsim; see the file COPYING.  If not, write to
 the Free Software Foundation, 59 Temple Place - Suite 330,
 Boston, MA 02111-1307, USA.  */
 
-// #define NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK
 //
 // symbol.h
 //
@@ -229,7 +228,6 @@ private:
   private:
     Symbol_Table *m_pSymbolTable;
   };
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
 
   ///
   /// Note:: Apparently every argument in the template also needs
@@ -242,13 +240,12 @@ private:
   template<class _symbol_iterator_t, class _symbol_t>
   _symbol_iterator_t endSymbol(_symbol_iterator_t *, _symbol_t*);
 
-#endif
 
 public:
   ///
   /// node_symbol iterator declarations
   ///
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
+
   typedef symbol_iterator_t<node_symbol> node_symbol_iterator;
   node_symbol_iterator beginNodeSymbol();
   node_symbol_iterator endNodeSymbol();
@@ -261,7 +258,6 @@ public:
   stimulus_symbol_iterator beginStimulusSymbol();
   stimulus_symbol_iterator endStimulusSymbol();
 
-#endif
 
   ///
   ///   Symbols defined from gpsim command line
