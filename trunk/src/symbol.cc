@@ -515,8 +515,6 @@ Stimulus_Node * Symbol_Table::findNode(const char *s)
   return ((Stimulus_Node *)0);
 }
 
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
-
 template<class _symbol_iterator_t, class _symbol_t>
 _symbol_iterator_t Symbol_Table::beginSymbol(_symbol_iterator_t *pit, _symbol_t*psym) {
   iterator it;
@@ -542,7 +540,6 @@ Symbol_Table::node_symbol_iterator Symbol_Table::beginNodeSymbol() {
 Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol() {
     return endSymbol((node_symbol_iterator*) 0, (node_symbol*)0);
 }
-#endif
 
 stimulus_symbol * Symbol_Table::findStimulusSymbol(const char *s)
 {
@@ -557,7 +554,7 @@ stimulus * Symbol_Table::findStimulus(const char *s)
   }
   return ((stimulus *)0);
 }
-#if defined(NEW_SYMBOL_TABLE_CHANGES_REALLY_DO_WORK)
+
 Symbol_Table::stimulus_symbol_iterator Symbol_Table::beginStimulusSymbol() {
   return (stimulus_symbol_iterator)beginSymbol(
     (stimulus_symbol_iterator*)NULL,
@@ -568,7 +565,6 @@ Symbol_Table::stimulus_symbol_iterator Symbol_Table::endStimulusSymbol() {
   return endSymbol((stimulus_symbol_iterator*) NULL,
     (stimulus_symbol*)NULL);
 }
-#endif
 
 bool Symbol_Table::Exist(const char *s) {
   return this->FindIt(s) != end();

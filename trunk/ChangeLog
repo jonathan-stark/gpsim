@@ -1,3 +1,9 @@
+2005-08-04 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_breadboard.cc, src/symbol.h, src/symbol.cc,
+	src/stimuli.cc:
+	Verified that template issues with gcc 3.4.X have been resolved
+	and removed a #define that had beed added to get around this.
+
 2005-08-06 Scott Dattalo <scott@dattalo.com>
 	* src/ssp.h, src/ssp.cc: Updated the SSP peripheral with the new
 	I/O port API.
