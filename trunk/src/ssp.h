@@ -30,13 +30,16 @@ class InvalidRegister;   // Forward reference
 #include "pic-processor.h"
 #include "14bit-registers.h"
 
+class PinModule;
+class PeripheralSignalSource;
+class PeripheralSignalSink;
 
 class PIR1;
 class PIR_SET;
 class  _14bit_processor;
-class IOPORT;
 
 class _SSPBUF;
+class _SSPSTAT;
 
 enum SSP_TYPE {
 	SSP_TYPE_BSSP = 1,
@@ -44,9 +47,19 @@ enum SSP_TYPE {
 	SSP_TYPE_MSSP
 };
 
-class _SSPCON : public sfr_register
+// Interface class that redirects a driven I/O pin change
+// to the appropriate peripheral register that wants the
+// change.
+class SinkRecipient
 {
- public:
+public:
+  virtual void setState(const char)=0;
+};
+
+class _SSPCON : public sfr_register, public TriggerObject, public SinkRecipient
+{
+
+protected:
 
   // Register bit definitions
 
@@ -64,33 +77,84 @@ class _SSPCON : public sfr_register
   static const unsigned int SSPM_mask = (SSPM0|SSPM1|SSPM2|SSPM3);
 
   enum {
-	SSPM_SPImaster4 = 0x0,
-	SSPM_SPImaster16 = 0x1,
-	SSPM_SPImaster64 = 0x2,
-	SSPM_SPImasterTMR2 = 0x3,
-	SSPM_SPIslaveSS = 0x4,
-	SSPM_SPIslave = 0x5,
+    SSPM_SPImaster4 = 0x0,      // SPI master mode, clock = FOSC/4
+    SSPM_SPImaster16 = 0x1,     // SPI master mode, clock = FOSC/16
+    SSPM_SPImaster64 = 0x2,     // SPI master mode, clock = FOSC/64
+    SSPM_SPImasterTMR2 = 0x3,   // SPI master mode, clock = TMR2/2
+    SSPM_SPIslaveSS = 0x4,      // SPI slave mode, clock = SCK, /SS controlled
+    SSPM_SPIslave = 0x5,        // SPI slave mode, clock = SCK, not /SS controlled
 
-	// I2C stuff. FIX: This is not implemented in the code!!!
-	SSPM_I2Cslave_7bitaddr = 0x6,
-	SSPM_I2Cslave_10bitaddr = 0x7,
-	SSPM_MSSPI2Cmaster = 0x8,
+    // I2C stuff. FIX: This is not implemented in the code!!!
+    SSPM_I2Cslave_7bitaddr = 0x6,
+    SSPM_I2Cslave_10bitaddr = 0x7,
+    SSPM_MSSPI2Cmaster = 0x8,
 	
-	SSPM_I2Cfirmwaremaster = 0xb,
-	SSPM_I2Cfirmwaremultimaster_7bitaddr_ints = 0xe,
-	SSPM_I2Cfirmwaremaster_10bitaddr_ints = 0xf,
+    SSPM_I2Cfirmwaremaster = 0xb,
+    SSPM_I2Cfirmwaremultimaster_7bitaddr_ints = 0xe,
+    SSPM_I2Cfirmwaremaster_10bitaddr_ints = 0xf,
 
-	/* These are listed in the BSSP section of the midrange ref. manual. I didn't test it but I suspect them of being lies.
-	SSPM_I2Cslave_7bitaddr_ints = 0xe,
-	SSPM_I2Cslave_10bitaddr_ints = 0xf,
-	*/
+    /* These are listed in the BSSP section of the midrange ref. manual. I didn't test it but I suspect them of being lies.
+       SSPM_I2Cslave_7bitaddr_ints = 0xe,
+       SSPM_I2Cslave_10bitaddr_ints = 0xf,
+    */
   };
 
-  IOPIN   *sckpin;
-  _SSPBUF *sspbuf;
+
+public:
+
+  _SSPCON();
+
+
 
   virtual void put(unsigned int);
   virtual void put_value(unsigned int);
+
+  bool isIdle() { return m_state==eIDLE;}
+  virtual void clock(const char);
+  virtual void start_transfer();
+  virtual void stop_transfer();
+  virtual void enable();
+  void set_halfclock_break( unsigned int clocks );
+  virtual void assign_pir_set(PIR_SET *ps);
+  virtual void callback();
+
+  bool isSSPEnabled() { return (value.get() & SSPEN) == SSPEN; }
+  bool isI2CEnabled() { return false; }
+  bool isSPIMaster() {
+    return isSSPEnabled() && ((value.get() & SSPM_mask) <= SSPM_SPImasterTMR2);
+  }
+  void setWCOL();
+  void newSSPBUF(unsigned int);
+  void setIOpins(PinModule *sck,PinModule *ss,PinModule *sdo, PinModule *sdi);
+  void setSSPBUF(_SSPBUF *);
+  void setSSPSTAT(_SSPSTAT *);
+  virtual void setState(const char);
+
+private:
+  PeripheralSignalSource *m_SckSource;
+  PeripheralSignalSource *m_SsSource;
+  PeripheralSignalSource *m_SdoSource;
+  PeripheralSignalSink   *m_SdiSink;
+
+  _SSPBUF   *m_sspbuf;
+  _SSPSTAT  *m_sspstat;
+
+  PIR_SET   *m_pirset;
+
+  char m_cSDIState; 
+
+  unsigned int m_SSPsr;  // internal Shift Register
+  enum SSPStateMachine {
+    eIDLE,
+    eACTIVE,
+    eWAITING_FOR_LAST_SMP
+  } m_state;
+
+
+  int bits_transfered;
+  bool m_bUnread;
+  
+
 };
 
 class _SSPSTAT : public sfr_register
@@ -121,56 +185,28 @@ class _SSPSTAT : public sfr_register
 };
 
 
-class _SSPBUF : public sfr_register, public TriggerObject
+class _SSPBUF : public sfr_register
 {
- public:
-  unsigned int sspsr;
+public:
   
   SSP_TYPE ssptype;
 
-  enum SSP_STATE {
-	IDLE = 0,
-	ACTIVE,
-	WAITING_FOR_LAST_SMP
-  };
-
-  SSP_STATE state;
-  int bits_transfered;
-  bool unread;
-  
-  PIR_SET *pirset;
-
-  IOPORT  *ssp_port;
-  int      sdipin;
-
-  IOPIN   *sckpin;
-  //IOPIN   *sdipin;
-  IOPIN   *sdopin;
-  IOPIN   *sspin;
-
-  _SSPCON *sspcon;
-  _SSPSTAT *sspstat;
-
   _SSPBUF();
-  
-  virtual void clock( unsigned int );
-  
-  virtual void start_transfer();
-  virtual void stop_transfer();
 
-  virtual void enable();
-  
-  void set_halfclock_break( unsigned int clocks );
-  
-  virtual void assign_pir_set(PIR_SET *ps);
-
-  virtual void callback(void);
 
   virtual void put(unsigned int new_value);
   virtual void put_value(unsigned int new_value);
-  
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
+  void putFromSSPSR(unsigned int new_value);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
+
+  void setSSPCON(_SSPCON *);
+
+  bool isFull() { return m_bIsFull; }
+  void setFullFlag(bool bNewFull) { m_bIsFull = bNewFull; }
+private:
+  _SSPCON   *m_sspcon;
+  bool m_bIsFull;
 };
 
 class _SSPADD : public sfr_register
@@ -184,18 +220,24 @@ class _SSPADD : public sfr_register
 class SSP_MODULE // this is SSP, but not MSSP
 {
  public:
-  _SSPBUF   *sspbuf;
-  _SSPCON   *sspcon;
-  _SSPSTAT  *sspstat;
+  _SSPBUF   sspbuf;
+  _SSPCON   sspcon;
+  _SSPSTAT  sspstat;
 
   // set to NULL for BSSP (It doesn't have this register)
-  _SSPADD   *sspadd;
+  _SSPADD   sspadd;
 
-  SSP_MODULE(void);
-  void initialize(PIR_SET *ps, IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin, IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type);
+  SSP_MODULE();
+  //void initialize(PIR_SET *ps,  IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin, IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type);
 
-  virtual void new_sck_edge(unsigned int);
-  virtual void new_ss_edge(unsigned int);
+  void initialize(PIR_SET *ps,
+		  PinModule *_SckPin,
+		  PinModule *_SdiPin,
+		  PinModule *_SdoPin,
+		  PinModule *_SsPin);
+
+  //virtual void new_sck_edge(unsigned int);
+  //virtual void new_ss_edge(unsigned int);
 };
 
 class SSP_MODULE14 : public SSP_MODULE
@@ -203,11 +245,11 @@ class SSP_MODULE14 : public SSP_MODULE
  public:
   _14bit_processor *cpu;
 
-  SSP_MODULE14(void);
+  SSP_MODULE14();
 
-  virtual void new_sck_edge(unsigned int);
-  virtual void new_ss_edge(unsigned int);
-  void initialize_14(_14bit_processor *new_cpu, PIR_SET *ps, IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin, IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type);
+  //virtual void new_sck_edge(unsigned int);
+  //virtual void new_ss_edge(unsigned int);
+  //void initialize_14(_14bit_processor *new_cpu, PIR_SET *ps, IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin, IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type);
 };
 
 #endif  // __SSP_H__

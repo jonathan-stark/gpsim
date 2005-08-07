@@ -1,3 +1,10 @@
+2005-08-06 Scott Dattalo <scott@dattalo.com>
+	* src/ssp.h, src/ssp.cc: Updated the SSP peripheral with the new
+	I/O port API.
+	* src/14bit-processors.h, src/p16f87x.cc, src/p16f87x.h,
+	src/p16x6x.cc, src/p16x6x.h, src/p16x7x.cc, src/p16x7x.h: Updated
+	to the new SSP API.
+
 2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
 	* symbol.cc, symbol.h: Fixed the template compile problems for
 	gcc 3.4.4 due to new bugs in gcc. I didn't see this issue using

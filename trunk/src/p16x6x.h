@@ -32,13 +32,13 @@ class P16C61 : public P16X8X
 {
 public:
 
-  P16C61(void);
+  P16C61();
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C61_;};
-  virtual unsigned int program_memory_size(void) const { return 0x400; };
-  virtual void create(void);
+  virtual PROCESSOR_TYPE isa(){return _P16C61_;};
+  virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual void create();
 
-  static Processor *construct(void);
+  static Processor *construct();
 
 };
 
@@ -73,25 +73,16 @@ public:
   CCPRH   ccpr2h;
   PCON    pcon;
   PIR_SET_1 pir_set_def;
-
-  // Only used in some models. It is initialized based on the value of
-  // init_ssp. Only the sfrs are added, the derived class must still
-  // call initialize_14 on the SSP_MODULE.
-  // This doesn't seem like a good way to do it, but some proccessor
-  // classes that shouldn't have an SSP are derived from classes that
-  // should.
   SSP_MODULE14   ssp;
-  bool init_ssp;
-
 
   virtual unsigned int program_memory_size() const { return 0x800; };
   virtual void create_symbols();
   virtual void create_sfr_map();
-  virtual PIR *get_pir2(void) { return (&pir2_reg); }
-  virtual PIR *get_pir1(void) { return (&pir1_reg); }
-  virtual PIR_SET *get_pir_set(void) { return (&pir_set_def); }
+  virtual PIR *get_pir2() { return (&pir2_reg); }
+  virtual PIR *get_pir1() { return (&pir1_reg); }
+  virtual PIR_SET *get_pir_set() { return (&pir_set_def); }
 
-  P16X6X_processor(void);
+  P16X6X_processor();
 
 };
 
@@ -104,18 +95,19 @@ class P16C62 : public  P16X6X_processor
 {
   public:
 
+  P16C62();
+  static Processor *construct();
 
   TMR2_MODULE tmr2_module;
-  virtual PROCESSOR_TYPE isa(void){return _P16C62_;};
-  virtual void create_symbols(void);
-  void create_sfr_map(void);
+  virtual PROCESSOR_TYPE isa(){return _P16C62_;};
+  virtual void create_symbols();
+  virtual void create_sfr_map();
 
-  virtual unsigned int program_memory_size(void) const { return 0x800; };
-  P16C62(void);
-  static Processor *construct(void);
-  virtual void create_iopin_map(void);
+  virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual void create_iopin_map();
+  virtual bool hasSSP() { return true;}
 
-  void create(void);
+  virtual void create();
 };
 
 
@@ -126,16 +118,16 @@ class P16C63 : public  P16C62
   USART_MODULE14 usart;
   SSP_MODULE14   ssp;
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C63_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P16C63_;};
+  virtual void create_symbols();
 
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
 
-  P16C63(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  P16C63();
+  static Processor *construct();
+  void create();
+  void create_sfr_map();
 };
 
 
@@ -149,16 +141,19 @@ class P16C64 : public  P16X6X_processor
   PicPortRegister  *m_porte;
   PicTrisRegister  *m_trise;
 
-  TMR2_MODULE tmr2_module;
-  virtual PROCESSOR_TYPE isa(void){return _P16C64_;};
-  virtual void create_symbols(void);
-  void create_sfr_map(void);
+  P16C64();
+  static Processor *construct();
 
-  virtual unsigned int program_memory_size(void) const { return 0x800; };
-  P16C64(void);
-  static Processor *construct(void);
-  void create(void);
-  virtual void create_iopin_map(void);
+  TMR2_MODULE tmr2_module;
+  virtual PROCESSOR_TYPE isa(){return _P16C64_;};
+  virtual void create_symbols();
+  void create_sfr_map();
+
+  virtual unsigned int program_memory_size() const { return 0x800; };
+  virtual void create();
+  virtual void create_iopin_map();
+
+  virtual bool hasSSP() {return true;}
 
 };
 
@@ -168,16 +163,16 @@ class P16C65 : public  P16C64
 
   USART_MODULE14 usart;
 
-  virtual PROCESSOR_TYPE isa(void){return _P16C65_;};
-  virtual void create_symbols(void);
+  virtual PROCESSOR_TYPE isa(){return _P16C65_;};
+  virtual void create_symbols();
 
-  virtual unsigned int program_memory_size(void) const { return 0x1000; };
+  virtual unsigned int program_memory_size() const { return 0x1000; };
 
 
-  P16C65(void);
-  static Processor *construct(void);
-  void create(void);
-  void create_sfr_map(void);
+  P16C65();
+  static Processor *construct();
+  void create();
+  void create_sfr_map();
 };
 
 

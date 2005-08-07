@@ -184,9 +184,6 @@ P16F871::P16F871(void)
 {
   if(verbose)
     cout << "f871 constructor, type = " << isa() << '\n';
-
-  init_ssp = false;
-
 }
 
 
@@ -305,6 +302,8 @@ Processor * P16F873::construct(void)
   if(verbose)
     cout << " f873 construct\n";
 
+  p->new_name("p16f873");
+
   e = new EEPROM_WIDE;
   e->set_cpu(p);
   e->initialize(128);
@@ -318,10 +317,6 @@ Processor * P16F873::construct(void)
 
   p->pic_processor::create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
-
-  p->new_name("p16f873");
-  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -332,9 +327,6 @@ void P16F873::create_symbols(void)
 
   if(verbose)
     cout << "f873 create symbols\n";
-
-  init_ssp = true;
-  
 }
 
 P16F873::P16F873(void)
@@ -355,6 +347,8 @@ Processor * P16F876::construct(void)
   if(verbose)
     cout << " f876 construct\n";
 
+  p->new_name("p16f876");
+
   e = new EEPROM_WIDE;
   e->set_cpu(p);
   e->initialize(256);
@@ -366,9 +360,6 @@ Processor * P16F876::construct(void)
 
   p->pic_processor::create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
-
-  p->new_name("p16f876");
   symbol_table.add_module(p,p->name().c_str());
 
   return p;
@@ -413,9 +404,6 @@ P16F876::P16F876(void)
 {
   if(verbose)
     cout << "f876 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
-
 }
 
 
@@ -528,6 +516,8 @@ Processor * P16F874::construct(void)
   if(verbose)
     cout << " f874 construct\n";
 
+  p->new_name("p16f874");
+
   e = new EEPROM_WIDE;
   e->set_cpu(p);
   e->initialize(128);
@@ -541,11 +531,6 @@ Processor * P16F874::construct(void)
 
   p->pic_processor::create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
-
-  p->new_name("p16f874");
-  symbol_table.add_module(p,p->name().c_str());
-
   return p;
 
 }
@@ -555,9 +540,6 @@ void P16F874::create_symbols(void)
 
   if(verbose)
     cout << "f874 create symbols\n";
-
-  init_ssp = true;
-  
 }
 
 P16F874::P16F874(void)
@@ -602,12 +584,12 @@ Processor * P16F877::construct(void)
 {
 
   P16F877 *p = new P16F877;
-  EEPROM_WIDE *e;
 
   if(verbose)
     cout << " f877 construct\n";
+  p->new_name("p16f877");
 
-  e = new EEPROM_WIDE;
+  EEPROM_WIDE *e = new EEPROM_WIDE;
   e->set_cpu(p);
   e->initialize(256);
   e->set_intcon(&p->intcon_reg);
@@ -617,11 +599,6 @@ Processor * P16F877::construct(void)
   p->create_invalid_registers ();
 
   p->pic_processor::create_symbols();
-
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_MSSP);
-
-  p->new_name("p16f877");
-  symbol_table.add_module(p,p->name().c_str());
 
   return p;
 
@@ -639,7 +616,4 @@ P16F877::P16F877(void)
 {
   if(verbose)
     cout << "f877 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
-
 }

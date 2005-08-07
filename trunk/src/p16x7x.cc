@@ -507,8 +507,6 @@ P16C712::P16C712(void)
   if(verbose)
     cout << "c712 constructor, type = " << isa() << '\n';
 
-  init_ssp = false;
-  
 }
 
 
@@ -538,8 +536,6 @@ P16C716::P16C716(void)
   if(verbose)
     cout << "c716 constructor, type = " << isa() << '\n';
 
-  init_ssp = false;
-  
 }
 
 
@@ -651,8 +647,6 @@ Processor * P16C72::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
 
   p->new_name("p16c72");
   symbol_table.add_module(p,p->name().c_str());
@@ -666,12 +660,6 @@ P16C72::P16C72(void)
 {
   if(verbose)
     cout << "c72 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
-  
-  //  create_sfr_map();
-  //  name_str = "p16c72";
-  //  symbol_table.add_module(p,p->name_str);
 
 }
 
@@ -784,8 +772,6 @@ Processor * P16C73::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
-
   p->new_name("p16c73");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -799,11 +785,6 @@ P16C73::P16C73(void)
   if(verbose)
     cout << "c73 constructor, type = " << isa() << '\n';
 
-  init_ssp = true;
-
-  //  create_sfr_map();
-  //  name_str = "p16c73";
-  //  symbol_table.add_module(p,p->name_str);
 
 }
 
@@ -918,8 +899,6 @@ Processor * P16C74::construct(void)
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
 
-  //1p->ssp.initialize_14(p,p->get_pir_set(),p->portc,3,4,5,p->porta,5,SSP_TYPE_BSSP);
-
   p->new_name("p16c74");
   symbol_table.add_module(p,p->name().c_str());
 
@@ -932,12 +911,5 @@ P16C74::P16C74(void)
 {
   if(verbose)
     cout << "c74 constructor, type = " << isa() << '\n';
-
-  init_ssp = true;
-
-  //  create_sfr_map();
-  //  name_str = "p16c74";
-  //  symbol_table.add_module(p,p->name_str);
-
 }
 
