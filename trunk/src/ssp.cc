@@ -93,7 +93,7 @@ public:
     m_pin->addSink(this);
   }
 
-  void setSinkState(const char new3State)
+  void setSinkState(char new3State)
   {
     m_client->setState(new3State);
   }
