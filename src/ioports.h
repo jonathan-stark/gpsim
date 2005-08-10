@@ -142,6 +142,7 @@ class PinModule : public PinMonitor
 public:
   PinModule();
   PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
+  virtual ~PinModule() {}
   void updatePinModule();
 
   void setPin(IOPIN *);
