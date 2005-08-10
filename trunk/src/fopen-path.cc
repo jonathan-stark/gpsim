@@ -38,8 +38,64 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 					// should be command line
-static char **searchPath;
+static char **searchPath = 0;
 static int searchPathCount = 0;
+
+class CSourceSearchPath : public String {
+public:
+  CSourceSearchPath() : String("SourcePath", NULL, "Search path for source files") {
+    setClearableSymbol(false);
+  }
+  virtual void set(const char *cP,int len=0) {
+    set_search_path(cP);
+  }
+  virtual void set(Value *pValue) {
+    String *pString = dynamic_cast<String*>(pValue);
+    if(pString != NULL) {
+      set_search_path(pString->getVal());
+    }
+  }
+
+  string toString() {
+    string sPath;
+    for (int iIndex = 0;
+        iIndex < searchPathCount;
+        ++iIndex) {
+      sPath.append(searchPath[iIndex]);
+      if(iIndex < searchPathCount - 1) {
+        sPath.append(":");
+      }
+    }
+    return sPath;
+  }
+
+  char *toString(char *return_str, int len)
+  {
+    string sPath;
+    for (int iIndex = 0;
+        iIndex < searchPathCount && len < 0;
+        ++iIndex) {
+      char *pFolder = searchPath[iIndex];
+      strncpy(return_str, pFolder, len);
+      len -= strlen(pFolder);
+      if(iIndex < searchPathCount) {
+        len--;
+      }
+    }
+    return return_str;
+  }
+};
+
+///
+/// InitSourceSearchSymbol 
+/// Used to initialize the CSourceSearchPath during startup.
+/// The symbol table will delete the CSourceSearchPath
+/// object so CSourceSearchPath cannot be static.
+void InitSourceSearchAsSymbol() {
+  // The symbol table will delete the CSourceSearchPath object
+  get_symbol_table().add(new CSourceSearchPath());
+}
+
 
 // Given a colon separated path, setup searchPath and searchPathCount
 // Fix:: Any old values are lost (and the memory leaked).
@@ -52,6 +108,10 @@ void set_search_path (const char *path)
 
     if (!path || !*path) {		// clear the path
         searchPathCount = 0;
+        if(searchPath != 0) {
+          free(searchPath);
+          searchPath = 0;
+        }
         if (verbose) cout << "Clearing Search directory.\n";
             return;
     }
@@ -59,13 +119,22 @@ void set_search_path (const char *path)
     for (cp = path, pathLen = 0;
          *cp;
          ++cp) {
-        if (':' == *cp) ++pathLen;
+      if (':' == *cp)
+        ++pathLen;
     }
     ++pathLen;				// always one more segments than colons
     // searchPath = (char *[])calloc (pathLen, sizeof (char *));
+
+    if(searchPath != 0) {
+      free(searchPath);
+    }
+    // allocate an array of string pointers with one extra set to NULL
+    // to mark the end of the array.
     searchPath = static_cast<char **>(calloc (pathLen, sizeof (char *)));
     assert (0 != searchPath);
 
+    // Parse the colon delimited string path and put each folder into
+    // the string array.
     for (cp = path, pathStr = searchPath, ii = 0, tp = strchr (path, ':');
 	       (0 != tp) && (ii < pathLen);
 	       ++ii) {
@@ -131,27 +200,29 @@ FILE *fopen_path(const char *filename, const char *perms)
        ++ii, ++pathStr) {
 					// check each subdir in path
       for (fileStr = filename;
-	   fileStr && *fileStr;
-	   fileStr = strpbrk (fileStr+1, "/\\")) {
-	  strcpy (nameBuff, *pathStr);
-	  strcat (nameBuff, fileStr);
-	  assert (strlen (nameBuff) <= (sizeof (nameBuff) - 1));
-	  for (cp = nameBuff; *cp; ++cp) { // convert DOS slash to Unix slash
-	      if ('\\' == *cp) *cp = '/';
-	  }
-	  fp = fopen (nameBuff, perms);	// try it
-	  if (0 != fp) {
-	      if (verbose) printf ("Found %s as %s\n", filename, nameBuff);
-	      return fp;
-	  }
+           fileStr && *fileStr;
+           fileStr = strpbrk (fileStr+1, "/\\")) {
+        strcpy (nameBuff, *pathStr);
+        strcat (nameBuff, fileStr);
+        assert (strlen (nameBuff) <= (sizeof (nameBuff) - 1));
+        for (cp = nameBuff; *cp; ++cp) { // convert DOS slash to Unix slash
+          if ('\\' == *cp)
+            *cp = '/';
+        }
+        fp = fopen (nameBuff, perms);	// try it
+        if (0 != fp) {
+          if (verbose)
+            printf ("Found %s as %s\n", filename, nameBuff);
+          return fp;
+        }
       }
   }
   if (verbose) {
       printf ("Failed to open %s in path: ", filename);
       for (pathStr = searchPath, ii=0;
-	   ii < searchPathCount;
-	   ++ii, ++pathStr) {
-	  printf ("%s ", *pathStr);
+           ii < searchPathCount;
+           ++ii, ++pathStr) {
+        printf ("%s ", *pathStr);
       }
       printf ("\n");
   }

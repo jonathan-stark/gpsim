@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 extern "C" {
 #endif /* __cplusplus */
 
+extern void InitSourceSearchAsSymbol();
 extern void set_search_path (const char *path);
 extern FILE *fopen_path (const char *filename, const char *perms);
 
