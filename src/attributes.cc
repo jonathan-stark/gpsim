@@ -221,12 +221,12 @@ void init_attributes()
   get_symbol_table().add(new GUIUpdateRateAttribute());
 #endif
 
-  get_symbol_table().add_constant("POR_RESET",  POR_RESET);    // Power-on reset
-  get_symbol_table().add_constant("WDT_RESET",  WDT_RESET);    // Watch Dog timer timeout reset
-  get_symbol_table().add_constant("IO_RESET",   IO_RESET);     // I/O pin reset
-  get_symbol_table().add_constant("SOFT_RESET", SOFT_RESET);   // Software initiated reset
-  get_symbol_table().add_constant("BOD_RESET",  BOD_RESET);    // Brown out detection reset
-  get_symbol_table().add_constant("SIM_RESET",  SIM_RESET);    // Simulation Reset
-  get_symbol_table().add_constant("MCLR_RESET", MCLR_RESET);   // MCLR (Master Clear) Reset
+  get_symbol_table().add_constant("POR_RESET",  POR_RESET, false);    // Power-on reset
+  get_symbol_table().add_constant("WDT_RESET",  WDT_RESET, false);    // Watch Dog timer timeout reset
+  get_symbol_table().add_constant("IO_RESET",   IO_RESET, false);     // I/O pin reset
+  get_symbol_table().add_constant("SOFT_RESET", SOFT_RESET, false);   // Software initiated reset
+  get_symbol_table().add_constant("BOD_RESET",  BOD_RESET, false);    // Brown out detection reset
+  get_symbol_table().add_constant("SIM_RESET",  SIM_RESET, false);    // Simulation Reset
+  get_symbol_table().add_constant("MCLR_RESET", MCLR_RESET, false);   // MCLR (Master Clear) Reset
 
 }
