@@ -76,7 +76,7 @@ private:
     }
   };
   iterator FindIt(const char *s);
-  iterator FindIt(string &s);
+  iterator FindIt(const string &s);
   iterator FindIt(Value *key);
 
 public:
@@ -92,7 +92,7 @@ public:
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
   void add_line_number(int address, const char *symbol_name=0);
-  void add_constant(const char *, int );
+  void add_constant(const char *, int, bool bClearable = true);
   register_symbol* add_register(Register *reg, const char *symbol_name=0);
   register_symbol* add_register(Register *new_reg, const char *symbol_name,
                                 unsigned int uMask );
@@ -107,9 +107,10 @@ public:
   void dump_one(const char *s);
   void dump_one(string *s);
   void dump_type(type_info const&t);
+  void dump_filtered(const string & sSymbol);
 
   Value *find(const char *s);
-  Value *find(string &s);
+  Value *find(const string &s);
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
@@ -165,7 +166,7 @@ public:
   inline stimulus_symbol *  findStimulusSymbol(string &s) {
     return findStimulusSymbol(s.c_str());
   }
-  inline stimulus *         findStimulus(string &s) {
+  inline stimulus *         findStimulus(const string &s) {
     return findStimulus(s.c_str());
   }
 
@@ -420,6 +421,10 @@ class ioport_symbol : public register_symbol
 {
 public:
   ioport_symbol(IOPORT *);
+  ioport_symbol(Module *pParent, IOPORT *);
+  IOPORT *getIOPort() {
+    return (IOPORT*)getReg();
+  }
 };
 
 class stimulus_symbol : public symbol
