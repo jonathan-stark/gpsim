@@ -237,8 +237,8 @@ Symbol_Table::add_register(Register *new_reg, const char *symbol_name,
        new_reg->baseName() == sName && find(new_reg->baseName())) {
       if(verbose)
         GetUserInterface().DisplayMessage(
-          "Warning not adding register symbol '%s'"
-	        " to symbol table\n because it is already in.\n",
+        "Symbol_Table::add_register(): Warning: Not adding register symbol '%s'"
+	        " to symbol table\n because it already exists.\n",
 	        symbol_name);
       return 0;
      }
@@ -262,14 +262,13 @@ void Symbol_Table::add_w(WREG *new_w)
 
 }
 
-void Symbol_Table::add_constant(const char *_name, int value)
+void Symbol_Table::add_constant(const char *_name, int value, bool bClearable)
 {
 
   Integer *i = new Integer(value);
   i->new_name(_name);
-
+  i->setClearableSymbol(bClearable);
   add(i);
-
 }
 
 void Symbol_Table::add_address(const char *new_name, int value)
@@ -602,6 +601,42 @@ void Symbol_Table::dump_all(void)
   }
 }
 
+bool beginsWith(string &sTarget, string &sBeginsWith) {
+  string sT;
+  sT = sTarget.substr(0, sBeginsWith.size());
+  return sT == sBeginsWith;
+}
+
+void Symbol_Table::dump_filtered(const string & sSymbol)
+{
+  string sBeginsWith;
+  int nLastCharPos = sSymbol.size() - 1;
+  if(nLastCharPos < 1) {
+    dump_all();
+    return;
+  }
+  if(sSymbol[nLastCharPos] == '.') {
+    sBeginsWith = sSymbol.substr(0, nLastCharPos);
+  }
+  else {
+    dump_one(sSymbol.c_str());
+  }
+  Value KeyValue(sBeginsWith.c_str(), "key value");
+  iterator sti = lower_bound(begin( ), end( ),
+    &KeyValue, NameLessThan());
+  iterator last;
+  while( sti != end()) {
+    Value *val = *sti;
+    if(val && (typeid(*val) != typeid(line_number_symbol)) &&
+      beginsWith(val->name(), sBeginsWith)) {
+      cout << val->name() << " = " << val->toString() << endl;
+      //cout << val->name() << ": " << val->showType() << endl;
+      }
+    last = sti;
+    sti++;
+  }
+}
+
 void Symbol_Table::dump_type(type_info const &symt)
 {
   // Now loop through the whole table and display all instances of the type of interest
@@ -663,7 +698,7 @@ void Symbol_Table::clear_all() {
   _Myt::clear();
 }
 
-Value * Symbol_Table::find(string &s)
+Value * Symbol_Table::find(const string &s)
 {
   const bool findDuplicates=false;
   iterator sti = FindIt(s); // .begin();
@@ -696,7 +731,7 @@ Symbol_Table::FindIt(const char *pszKey) {
 }
 
 Symbol_Table::iterator
-Symbol_Table::FindIt(string &sKey) {
+Symbol_Table::FindIt(const string &sKey) {
   Value KeyValue(sKey.c_str(), "key value");
   return FindIt(&KeyValue);
 }
@@ -1021,7 +1056,7 @@ w_symbol::w_symbol(const char *_name, Register *_reg)
 
 //------------------------------------------------------------------------
 ioport_symbol::ioport_symbol(IOPORT *_ioport)
-  : register_symbol(0, _ioport)
+  : register_symbol(_ioport->name().c_str(), _ioport)
 {
 }
 
