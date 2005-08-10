@@ -1,3 +1,37 @@
+2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h,
+	cli/cmd_attach.cc, cli/cmd_attach.h, cli/parse.yy,
+	cli/scan.ll, plat/win32/gpsim.def: Modified
+	the attach command with the pin() and port() operators.
+	Now you can use one of 4 variations of these operators to
+	specify the module, port name and/or pin number that represents
+	the underlying stimulus object. An example of how to use: if
+	a pin number is defined as a program file symbol, you
+	may use the symbol name in the port() or pin() operators.
+	This way your STC file can be more generic and support a
+	variety of firmware code files as long as you use the same
+	symbol name for the pin. See the online help for more details.
+
+	The pin() operator refers to package based pins. The port()
+	operator refers to port based pins. Other stimulus may still
+	be refered to using just the name of the stimulus.
+
+	* src/attributes.cc: Changed a few global symbols so that
+	Symbol_Table::Clear() does not remove them.
+
+	* src/fopen-path.cc, src/fopen-path.h, gpsim/main.cc:
+	Fixed -L source path command line option.
+	Added code to support a gpsim SourcePath global string symbol
+	that give command prompt access to the source search path.
+
+	* src/ioports.h: Fixed a warning message about the destructor
+	of PinModule not being virtual.
+
+	* src/symbol.cc,h, cli/cmd_symbol.cc: Added the ability to
+	use the '.' character as a trailing wild card in the symbol
+	command. Example PIC. will list all symbols that begin with
+	the letters PIC.
+
 2005-08-04 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_breadboard.cc, src/symbol.h, src/symbol.cc,
 	src/stimuli.cc:
