@@ -118,10 +118,12 @@ void yyerror(char *message)
   Integer*                  Integer_P;
   String*                   String_P;
   Value*                    Symbol_P;
+  Pin_t*                    Pin_P;
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
   SymbolList_t             *SymbolList_P;
+  PinList_t                *PinList_P;
 
   Macro                    *Macro_P;
 }
@@ -198,6 +200,8 @@ extern int yylex(YYSTYPE* lvalP);
 %type <Expression_P>            break_boolean_expr
 
 %type  <SymbolList_P>           symbol_list
+%type  <PinList_P>              pin_list
+%type  <Pin_P>                  pin
 
 
 %token <Integer_P>   LITERAL_INT_T
@@ -205,6 +209,8 @@ extern int yylex(YYSTYPE* lvalP);
 %token <Float_P>     LITERAL_FLOAT_T
 %token <String_P>    LITERAL_STRING_T
 %token <Symbol_P>    SYMBOL_T
+%token <Pin_P>       PIN_T
+%token <Port_P>      PORT_T
 
 
 %token EQU_T
@@ -255,6 +261,8 @@ extern int yylex(YYSTYPE* lvalP);
 %right    POW_T
 
 %left     REG_T
+%left     PIN_T
+%left     PORT_T
 
 %%
 /* Grammar rules */
@@ -344,10 +352,12 @@ aborting: ABORT
           ;
             
 attach_cmd
-          : ATTACH string_list          {attach.attach($2); delete $2;}
-          | ATTACH symbol_list          {attach.attach($2); delete $2;}
+          : ATTACH SYMBOL_T pin_list {attach.attach($2,$3); delete $3;}
           ;
 
+//          : ATTACH string_list          {attach.attach($2); delete $2;}
+//          | ATTACH symbol_list          {attach.attach($2); delete $2;}
+//          ;
 
 break_cmd
           : BREAK                             {c_break.list();}
@@ -356,8 +366,8 @@ break_cmd
           | break_set ',' LITERAL_STRING_T
             {
 	      if (get_bp().bIsValid($1)) {
-		string m = string($3->getVal());
-		get_bp().set_message((unsigned int)$1,m);
+          string m = string($3->getVal());
+          get_bp().set_message((unsigned int)$1,m);
 	      }
 	      delete $3;
 	    }
@@ -499,21 +509,20 @@ module_cmd
 
 processor_cmd: PROCESSOR
           {
-	    c_processor.processor();
-	  }
+            c_processor.processor();
+          }
           | PROCESSOR bit_flag
-	  {
-	    c_processor.processor($2->value);
-	  }
+          {
+            c_processor.processor($2->value);
+          }
           | PROCESSOR LITERAL_STRING_T
-	  {
-	    c_processor.processor($2->getVal(),0);
-	  }
+          {
+            c_processor.processor($2->getVal(),0);
+          }
           | PROCESSOR LITERAL_STRING_T LITERAL_STRING_T
-	  { 
+          { 
             c_processor.processor($2->getVal(),$3->getVal());
           }
-
           ;
 
 quit_cmd: QUIT
@@ -579,26 +588,26 @@ stimulus_opt:
           {
             if(verbose)
               cout << "parser sees stimulus with numeric option\n";
-	    c_stimulus.stimulus($1);
-	  }
+            c_stimulus.stimulus($1);
+          }
           | stimulus_opt bit_flag
           {
             if(verbose)
               cout << "parser sees stimulus with bit flag: " << $2->value << '\n';
-	    c_stimulus.stimulus($2->value);
-	  }
+            c_stimulus.stimulus($2->value);
+          }
           | stimulus_opt string_option
           {
             if(verbose)
               cout << "parser sees stimulus with string option\n";
-	    c_stimulus.stimulus($2);
-	  }
+            c_stimulus.stimulus($2);
+          }
           | stimulus_opt array
           { 
             if(verbose)
               cout << "parser sees stimulus with an array\n";
-	    c_stimulus.stimulus($2);
-	  }
+            c_stimulus.stimulus($2);
+          }
           ;
 
 
@@ -770,9 +779,25 @@ expr    : binary_expr                   {$$=$1;}
 array   : '{' expr_list '}'             {$$=$2;}
         ;
 
+pin     : PIN_T '(' SYMBOL_T ')'                    {$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);}
+        | PIN_T '(' LITERAL_INT_T ')'               {$$=new Pin_t(Pin_t::ePackageBased | Pin_t::eActiveProc, $3);}
+        | PIN_T '(' SYMBOL_T ',' SYMBOL_T  ')'      {$$=new Pin_t(Pin_t::ePackageBased, $3,$5);}
+        | PIN_T '(' SYMBOL_T ',' LITERAL_INT_T ')'  {$$=new Pin_t(Pin_t::ePackageBased, $3,$5);}
+        | PORT_T '(' SYMBOL_T ',' SYMBOL_T ')'                   {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
+        | PORT_T '(' SYMBOL_T ',' LITERAL_INT_T ')'              {$$=new Pin_t(Pin_t::ePortBased | Pin_t::eActiveProc, NULL, $3, $5);}
+        | PORT_T '(' SYMBOL_T ',' SYMBOL_T ',' SYMBOL_T  ')'     {$$=new Pin_t(Pin_t::ePortBased, $3,$5,$7);}
+        | PORT_T '(' SYMBOL_T ',' SYMBOL_T ',' LITERAL_INT_T ')' {$$=new Pin_t(Pin_t::ePortBased, $3,$5,$7);}
+        | SYMBOL_T                                  {$$=new Pin_t(Pin_t::ePortBased, $1);}
+        ;
+
+pin_list
+        : pin                           {$$ = new PinList_t(); $$->push_back($1);}
+        | pin_list pin                  {$1->push_back($2);}
+        ;
+
 expr_list
         : expr                          {$$ = new ExprList_t(); $$->push_back($1);}
-        | expr_list ',' expr                {$1->push_back($3);}
+        | expr_list ',' expr            {$1->push_back($3);}
         ;
 
 binary_expr

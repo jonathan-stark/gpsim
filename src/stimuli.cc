@@ -477,9 +477,10 @@ void Stimulus_Node::time_constant(double new_tc)
 
 //------------------------------------------------------------------------
 stimulus::stimulus(const char *cPname,double _Vth, double _Zth)
-  : Vth(_Vth), Zth(_Zth), snode(NULL), next(NULL)
+  : snode(NULL), next(NULL), Vth(_Vth), Zth(_Zth)
 {
-  new_name(cPname);
+  if(cPname && *cPname)
+    new_name(cPname);
 
   snode = 0;
   bDrivingState = false;
@@ -1057,7 +1058,7 @@ IO_bi_directional::IO_bi_directional(const char *_name,
 				     double _VthIn,
 				     double _ZthIn)
   : IOPIN(_name, _Vth, _Zth, _ZthWeak, _ZthFloating),
-    VthIn(_VthIn), ZthIn(_ZthIn)
+    ZthIn(_ZthIn), VthIn(_VthIn)
 {
 }
 
@@ -1665,6 +1666,8 @@ void stimorb_attach(char *node, char_list *stimuli)
 }
 
 void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName);
+void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName,
+                          stimulus *st);
 
 //========================================================================
 //  stimuli_attach(list <string> * sl)
@@ -1749,18 +1752,169 @@ void stimuli_attach(SymbolList_t *sl)
   }
 }
 
+void stimuli_attach(Value *pNode, PinList_t *pPinList)
+{
+  bool bSuccess = true;
+  Symbol_Table &ST = get_symbol_table();
+  node_symbol *pNS = dynamic_cast<node_symbol*>(pNode); // ST.findNode(pNode->name());
+  PinList_t::iterator si;
+  if(pNS) {
+    Stimulus_Node *sn = pNS->getNode();
+    // All symbols thereafter are stimulus objects
+    for(si = pPinList->begin();
+        si != pPinList->end() && bSuccess; ++si)
+    {
+      Pin_t * pPinArgument = *si;
+      stimulus_symbol * pPinSymbol = dynamic_cast<stimulus_symbol*>(pPinArgument->m_sPin);
+      stimulus * pPin = pPinSymbol == NULL ? NULL : pPinSymbol->getStimulus();
+      if(pPin != NULL) {
+        // PinName symbol name only
+        AttachStimulusToNode(sn, pPin->name(), pPin);
+      }
+      else {
+        Module *pMod;
+        if(pPinArgument->m_iFlags & Pin_t::eActiveProc) {
+          pMod = get_active_cpu();
+        }
+        else {
+          // this dynamic_cast always fails here
+          pMod = dynamic_cast<Module*>(pPinArgument->m_sModuleName);
+          if(pMod == NULL) {
+            // but the dynamic_cast in findModule() succeeds
+            pMod = ST.findModule(pPinArgument->m_sModuleName->name().c_str());
+            if(pMod == NULL) {
+              String *pModName = dynamic_cast<String*>(pPinArgument->m_sModuleName);
+              // but the dynamic_cast in findModule() succeeds
+              if(pModName != NULL) {
+                pMod = ST.findModule(*pModName);
+              }
+            }
+          }
+        }
+        if(pMod == NULL) {
+          GetUserInterface().DisplayMessage(
+            "attach error: did not find module '%s'\n",
+            pPinArgument->m_sModuleName->name().c_str());
+          bSuccess = false;
+        }
+        else {
+          Integer *pPinInt = dynamic_cast<Integer*>(pPinArgument->m_sPin);
+
+          if(pPinInt != NULL) {
+            IOPIN *pPinObj = NULL;
+            if(pPinArgument->m_iFlags & Pin_t::ePackageBased) {
+              // ModName && Integer
+              // Could be a literal int or a symbol
+              pPinObj = pMod->get_pin(*pPinInt);
+            }
+            else /* if(pPinArgument->m_iFlags & Pin_t::ePortBased) */ {
+              ioport_symbol *pIOPSym = dynamic_cast<ioport_symbol*>(pPinArgument->m_sPort);
+              if(pIOPSym != NULL) {
+                IOPORT * pPort = pIOPSym->getIOPort();
+                pPinObj = pPort->getIO(*pPinInt);
+              }
+              else {
+                bSuccess = false;
+                GetUserInterface().DisplayMessage(
+                  "attach error: did not find port '%s' in module '%s'\n",
+                  pPinArgument->m_sPort->name().c_str());
+              }
+            }
+            if(pPinObj != NULL) {
+              AttachStimulusToNode(sn, pPinInt->name(), pPinObj);
+            }
+            else {
+              bSuccess = false;
+              GetUserInterface().DisplayMessage(
+                  "attach error: did not find pin '%d' in module '%s'\n",
+                  (int)*pPinInt,
+                  pPinArgument->m_sModuleName->name().c_str());
+            }
+          }
+          else {
+            bSuccess = false;
+            if(pPin == NULL) {
+              int iValue = -1;
+              if(pPinArgument->m_sPin) {
+                pPinArgument->m_sPin->get(iValue);
+              }
+              if(pPinArgument->m_sPort) {
+                pPinArgument->m_sPort->get(iValue);
+              }
+              GetUserInterface().DisplayMessage(
+                  "attach error: pin argument '%s'(%d) type(%s) is not of type Integer or stimulus\n",
+                  pPinArgument->m_sPin->name().c_str(), iValue,
+                  pPinArgument->m_sPin->showType().c_str());
+            }
+            else {
+              GetUserInterface().DisplayMessage(
+                  "attach error: pin argument '%s' type(%s) is not of type Integer\n",
+                  pPinArgument->m_sPin->name().c_str(),
+                  pPinArgument->m_sPin->showType().c_str());
+              }
+          }
+        }
+      }
+    }
+    sn->update(0);
+  }
+  else {
+    // The first symbol is not a node - so let's assume that 
+    // we're performing a register stimulus.
+
+    //cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
+
+    stimulus *st;
+    Pin_t *v;
+    if(pPinList->size() == 2) {
+      st = ST.findStimulus((*si)->m_sPin->toString());
+
+      if(st) {
+        ++si;
+        v = *si;
+      } else {
+        v = *si;
+        ++si;
+        st = ST.findStimulus((*si)->m_sPin->toString());
+      }
+
+      if(st) {
+        AttributeStimulus *ast = dynamic_cast<AttributeStimulus *>(st);
+        Value * pV = ST.find(v->m_sPin->toString());
+        if(ast) {
+          ast->setClientAttribute(pV);
+        }
+      }
+    }
+  }
+}
+
 void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName) {
   stimulus *st = get_symbol_table().findStimulus(sStimulusName);
+  AttachStimulusToNode(sn, sStimulusName, st);
+}
 
+void AttachStimulusToNode(Stimulus_Node *sn, string &sStimulusName, stimulus *st) {
   if(st) {
     // attach each found stimulus to the node
     sn->attach_stimulus(st);
-    if(verbose&2)
-      cout << " attaching stimulus: " << sStimulusName 
-            << " to node: " << sn->name() 
-            << endl;
+    if(verbose&2) {
+      if(sStimulusName.empty() || sStimulusName == st->name()) {
+        GetUserInterface().DisplayMessage(
+          "attach stimulus: %s to node: %s\n",
+          st->name().c_str(), sn->name().c_str());
+      }
+      else {
+        GetUserInterface().DisplayMessage(
+          "attach stimulus: %s(%s) to node: %s\n",
+          sStimulusName.c_str(), st->name().c_str(), sn->name().c_str());
+      }
+    }
   }
-  else
-    cout << "Warning, stimulus: " << sStimulusName << " not attached\n";
+  else {
+    GetUserInterface().DisplayMessage(
+      "attach warning: %s(%s) not attached to %s\n",
+      sStimulusName.c_str(), st->name().c_str(), sn->name().c_str());
+  }
 }
 

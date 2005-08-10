@@ -24,6 +24,8 @@ Boston, MA 02111-1307, USA.  */
 using namespace std;
 
 class symbol;
+class Pin_t;
+typedef list<Pin_t*> PinList_t;
 
 class cmd_attach : public command
 {
@@ -32,6 +34,7 @@ public:
   cmd_attach(void);
   void attach(list <string> *);
   void attach(list <Value*> *);
+  void attach(Value*, PinList_t *);
 
 };
 
