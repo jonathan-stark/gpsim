@@ -99,7 +99,7 @@ struct poptOption optionsTable[] = {
     "startup command file",0 },
   { "symbol",    's', POPT_ARG_STRING, &cod_name, 0,
     ".cod symbol file",0 } ,
-  { "", 'L',0,0,'L',
+  { "sourcepath", 'L',POPT_ARG_STRING, &search_path, 'L',
     "colon separated list of directories to search.", 0},
   { "version",'v',0,0,'v',
     "gpsim version",0},
@@ -152,7 +152,6 @@ void welcome(void)
   return;
 }
 
-
 int 
 main (int argc, char *argv[])
 {
@@ -193,7 +192,8 @@ main (int argc, char *argv[])
       case 'i':
         bUseGUI = false;
         printf("not using gui\n");
- 
+        break;
+
       case 'D':
         // add symbols on the command line to the symbol table.
         get_symbol_table().AddFromCommandLine(defineSymbol);
@@ -217,6 +217,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_GUI  
   get_interface().setGUImode(bUseGUI);
 #endif
+  InitSourceSearchAsSymbol();
+  initialize_ConsoleUI();
   initialize_gpsim_core();
   initialize_gpsim();
   initialize_commands();
@@ -233,7 +235,6 @@ main (int argc, char *argv[])
   }
 #endif
 
-  initialize_ConsoleUI();
 
   string s;
   string sGpsimPath(argv[0]);
