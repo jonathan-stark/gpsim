@@ -74,8 +74,9 @@ EXPORTS
     ?add_address@Symbol_Table@@QAEXPBDH@Z
     ?add_attribute@Module@@QAEXPAVValue@@@Z
     ?add_command@Module@@QAEXAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@0@Z
-    ?add_constant@Symbol_Table@@QAEXPBDH@Z
+    ?add_constant@Symbol_Table@@QAEXPBDH_N@Z
     ?add_interface@gpsimInterface@@QAEIPAVInterface@@@Z
+    ?add_ioport@Symbol_Table@@QAEXPAVIOPORT@@@Z
     ?add_module@Symbol_Table@@QAEXPAVModule@@PBD@Z
     ?add_processor@CSimulationContext@@QAEPAVProcessor@@PAV2@@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
@@ -144,8 +145,8 @@ EXPORTS
     ?dump_registers@Processor@@UAEXXZ
     ?eval_Expression@TriggerObject@@UAE_NXZ
     ?event@BoolEventLogger@@QAEX_N@Z
+    ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
-    ?find@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
     ?find_address_from_line@ProgramMemoryAccess@@UAEHPAVFileContext@@H@Z
     ?find_closest_address_to_line@ProgramMemoryAccess@@UAEHHH@Z

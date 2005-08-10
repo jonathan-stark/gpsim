@@ -321,6 +321,8 @@ abort_gpsim_now {
 "true"              {return(process_booleanLiteral(yylvalP,true));}
 "false"             {return(process_booleanLiteral(yylvalP,false));}
 "reg"               {return(recognize(REG_T,"reg"));}
+"pin"               {return(recognize(PIN_T, "pin"));}
+"port"              {return(recognize(PORT_T, "port"));}
 
 "endm"              {scanPopMacroState();}
 
