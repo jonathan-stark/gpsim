@@ -73,7 +73,8 @@ void cmd_symbol::dump_all(void)
 
 void cmd_symbol::dump_one(const char *sym_name)
 {
-  get_symbol_table().dump_one(sym_name);
+  string sName(sym_name);
+  get_symbol_table().dump_filtered(sName);
 }
 
 void cmd_symbol::dump_one(Value *s)
