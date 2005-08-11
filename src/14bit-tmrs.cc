@@ -45,7 +45,7 @@ Boston, MA 02111-1307, USA.  */
 // CCPRL
 //--------------------------------------------------
 
-CCPRL::CCPRL(void)
+CCPRL::CCPRL()
 {
 
   ccprh = 0;
@@ -65,7 +65,7 @@ void CCPRL::put(unsigned int new_value)
 
 }
 
-void CCPRL::capture_tmr(void)
+void CCPRL::capture_tmr()
 {
 
   tmrl->get_low_and_high();
@@ -85,7 +85,7 @@ void CCPRL::capture_tmr(void)
     cout << "CCPRL captured: " << c << '\n';
 }
 
-void CCPRL::start_compare_mode(void)
+void CCPRL::start_compare_mode()
 {
 
   tmrl->compare_mode = 1;
@@ -96,7 +96,7 @@ void CCPRL::start_compare_mode(void)
   tmrl->update();
 }
 
-void CCPRL::stop_compare_mode(void)
+void CCPRL::stop_compare_mode()
 {
   // If tmr1 is in the compare mode, then change to non-compare and update
   // the tmr breakpoint.
@@ -108,7 +108,7 @@ void CCPRL::stop_compare_mode(void)
     }
 }
 
-void CCPRL::start_pwm_mode(void)
+void CCPRL::start_pwm_mode()
 {
   //cout << "CCPRL: starting pwm mode\n";
 
@@ -137,7 +137,7 @@ void CCPRL::assign_tmr(TMRL *ptmr)
 // CCPRH
 //--------------------------------------------------
 
-CCPRH::CCPRH(void)
+CCPRH::CCPRH()
 {
 
   ccprl = 0;
@@ -163,7 +163,7 @@ void CCPRH::put(unsigned int new_value)
     }
 }
 
-unsigned int CCPRH::get(void)
+unsigned int CCPRH::get()
 {
   //cout << "CCPRH get\n";
 
@@ -316,7 +316,7 @@ void CCPCON::new_edge(unsigned int level)
     }
 }
 
-void CCPCON::compare_match(void)
+void CCPCON::compare_match()
 {
 
   Dprintf(("CCPCON::compare_match()\n"));
@@ -496,7 +496,7 @@ void CCPCON::put(unsigned int new_value)
 //--------------------------------------------------
 // T1CON
 //--------------------------------------------------
-T1CON::T1CON(void)
+T1CON::T1CON()
 {
 
   new_name("T1CON");
@@ -525,14 +525,14 @@ void T1CON::put(unsigned int new_value)
 
 }
 
-unsigned int T1CON::get(void)
+unsigned int T1CON::get()
 {
   trace.raw(read_trace.get() | value.get());
   //trace.register_read(address,value.get());
   return(value.get());
 }
 
-unsigned int T1CON::get_prescale(void)
+unsigned int T1CON::get_prescale()
 {
   return( ((value.get() &(T1CKPS0 | T1CKPS1)) >> 4) + cpu_pic->pll_factor);
 }
@@ -542,7 +542,7 @@ unsigned int T1CON::get_prescale(void)
 //--------------------------------------------------
 // member functions for the TMRH base class
 //--------------------------------------------------
-TMRH::TMRH(void)
+TMRH::TMRH()
 {
 
   value.put(0);
@@ -566,7 +566,7 @@ void TMRH::put(unsigned int new_value)
 
 }
 
-unsigned int TMRH::get(void)
+unsigned int TMRH::get()
 {
 
   trace.raw(read_trace.get() | value.get());
@@ -574,7 +574,7 @@ unsigned int TMRH::get(void)
 }
 
 // For the gui and CLI
-unsigned int TMRH::get_value(void)
+unsigned int TMRH::get_value()
 {
   // If the TMR1 is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
@@ -598,7 +598,8 @@ unsigned int TMRH::get_value(void)
 //--------------------------------------------------
 // member functions for the TMRL base class
 //--------------------------------------------------
-TMRL::TMRL(void)
+TMRL::TMRL()
+  : m_cState('?'), m_bExtClkEnabled(false)
 {
 
   value.put(0);
@@ -613,8 +614,23 @@ TMRL::TMRL(void)
 
 }
 
-// %%%FIX ME%%% 
-void TMRL::increment(void)
+void TMRL::setIOpin(PinModule *extClkSource)
+{
+  if (extClkSource)
+    extClkSource->addSink(this);
+}
+
+void TMRL::setSinkState(const char new3State)
+{
+  if (new3State != m_cState) {
+    m_cState = new3State;
+
+    if (m_bExtClkEnabled && (m_cState == '1' || m_cState == 'W'))
+      increment();
+  }
+}
+
+void TMRL::increment()
 {
   if(verbose & 4)
     cout << "TMRL increment because of external clock ";
@@ -639,33 +655,30 @@ void TMRL::increment(void)
 
 }
 
-//
 void TMRL::on_or_off(int new_state)
 {
 
-  if(new_state)
-    {
-      if(verbose & 0x4)
-	cout << "TMR1 is being turned on\n";
-      // turn on the timer
+  if(new_state) {
+    if(verbose & 0x4)
+      cout << "TMR1 is being turned on\n";
+    // turn on the timer
 
-      // Effective last cycle
-      // Compute the "effective last cycle", i.e. the cycle
-      // at which TMR1 was last 0 had it always been counting.
+    // Effective last cycle
+    // Compute the "effective last cycle", i.e. the cycle
+    // at which TMR1 was last 0 had it always been counting.
 
-      last_cycle = get_cycles().value - value_16bit*prescale;
-      update();
-    }
-  else
-    {
-      if(verbose & 0x4)
-	cout << "TMR1 is being turned off\n";
+    last_cycle = get_cycles().value - value_16bit*prescale;
+    update();
+  }
+  else {
+    if(verbose & 0x4)
+      cout << "TMR1 is being turned off\n";
 
-      // turn off the timer and save the current value
-      current_value();
-      value.put(value_16bit & 0xff);
-      tmrh->value.put((value_16bit>>8) & 0xff);
-    }
+    // turn off the timer and save the current value
+    current_value();
+    value.put(value_16bit & 0xff);
+    tmrh->value.put((value_16bit>>8) & 0xff);
+  }
 
 }
 //
@@ -674,61 +687,59 @@ void TMRL::on_or_off(int new_state)
 // correctly.
 //
 
-void TMRL::update(void)
+void TMRL::update()
 {
 
   if(verbose & 0x4)
     cout << "TMR1 update "  << hex << get_cycles().value << '\n';
 
-  if(t1con->get_tmr1on())
-    {
-      if(t1con->get_tmr1cs())
+  if(t1con->get_tmr1on()) {
+
+    if(t1con->get_tmr1cs()) {
+      cout << "TMRl::update - external clock is not fully implemented\n";
+    } else {
+	
+      if(verbose & 0x4)
+	cout << "Internal clock\n";
+
+      current_value();
+
+
+      // Note, unlike TMR0, anytime something is written to TMRL, the 
+      // prescaler is unaffected.
+
+      prescale = 1 << t1con->get_prescale();
+      prescale_counter = prescale;
+
+      //cout << "TMRL: Current prescale " << prescale << '\n';
+      //  synchronized_cycle = cycles.value + 2;
+      synchronized_cycle = get_cycles().value;
+
+      last_cycle = synchronized_cycle - value_16bit * prescale;
+
+      break_value = 0x10000;  // Assume that a rollover will happen first.
+
+      if(compare_mode)
 	{
-	  cout << "TMR1::put external clock (not implemented)...\n";
-	}
-      else
-	{
-	  if(verbose & 0x4)
-	    cout << "Internal clock\n";
-
-	  current_value();
-
-
-	  // Note, unlike TMR0, anytime something is written to TMRL, the 
-	  // prescaler is unaffected.
-
-	  prescale = 1 << t1con->get_prescale();
-	  prescale_counter = prescale;
-
-	  //cout << "TMRL: Current prescale " << prescale << '\n';
-	  //  synchronized_cycle = cycles.value + 2;
-	  synchronized_cycle = get_cycles().value;
-
-	  last_cycle = synchronized_cycle - value_16bit * prescale;
-
-	  break_value = 0x10000;  // Assume that a rollover will happen first.
-
-	  if(compare_mode)
+	  //cout << "compare mode. compare_value = " << compare_value << '\n';
+	  if(compare_value > value_16bit)
 	    {
-	      //cout << "compare mode. compare_value = " << compare_value << '\n';
-	      if(compare_value > value_16bit)
-		{
-		  // A compare interrupt is going to happen before the timer
-		  // will rollover.
-		  break_value = compare_value - value_16bit;
-		}
+	      // A compare interrupt is going to happen before the timer
+	      // will rollover.
+	      break_value = compare_value - value_16bit;
 	    }
-
-	  guint64 fc = get_cycles().value + (break_value - value_16bit) * prescale;
-
-	  if(future_cycle)
-	    get_cycles().reassign_break(future_cycle, fc, this);
-	  else
-	    get_cycles().set_break(fc, this);
-
-	  //cout << "TMR1: update; new break cycle = " << fc << '\n';
-	  future_cycle = fc;
 	}
+
+      guint64 fc = get_cycles().value + (break_value - value_16bit) * prescale;
+
+      if(future_cycle)
+	get_cycles().reassign_break(future_cycle, fc, this);
+      else
+	get_cycles().set_break(fc, this);
+
+      //cout << "TMR1: update; new break cycle = " << fc << '\n';
+      future_cycle = fc;
+    }
     }
   else
     {
@@ -754,14 +765,14 @@ void TMRL::put(unsigned int new_value)
 
 }
 
-unsigned int TMRL::get(void)
+unsigned int TMRL::get()
 {
   trace.raw(read_trace.get() | value.get());
   return get_value();
 }
 
 // For the gui and CLI
-unsigned int TMRL::get_value(void)
+unsigned int TMRL::get_value()
 {
   // If the TMRL is being read immediately after being written, then
   // it hasn't had enough time to synchronize with the PIC's clock.
@@ -780,7 +791,7 @@ unsigned int TMRL::get_value(void)
 }
 
 //%%%FIXME%%% inline this
-void TMRL::current_value(void)
+void TMRL::current_value()
 {
   if(t1con->get_tmr1cs())
     value_16bit = tmrh->value.get() * 256 + value.get();
@@ -788,7 +799,7 @@ void TMRL::current_value(void)
     value_16bit = (unsigned int)((get_cycles().value - last_cycle)/ prescale) & 0xffff;
 }
 
-unsigned int TMRL::get_low_and_high(void)
+unsigned int TMRL::get_low_and_high()
 {
 
   // If the TMRL is being read immediately after being written, then
@@ -812,19 +823,15 @@ unsigned int TMRL::get_low_and_high(void)
   
 }
 
-void TMRL::new_clock_source(void)
+void TMRL::new_clock_source()
 {
 
-  //cout << "TMRL:new_clock_source changed to the ";
   if(t1con->get_tmr1cs())
-    {
-      cout << "TMR1::new_clock_source external clock (not implemented)...\n";
-    }
-  else
-    {
-      //cout << "internal\n";
-      put(value.get());    // let TMRL::put() set a cycle counter break point
-    }
+    m_bExtClkEnabled = true;
+  else {
+    m_bExtClkEnabled = false;
+    put(value.get());    // let TMRL::put() set a cycle counter break point
+  }
 }
 
 //
@@ -833,7 +840,7 @@ void TMRL::new_clock_source(void)
 // value is always referenced to the cpu cycle counter. 
 //
 
-void TMRL::clear_timer(void)
+void TMRL::clear_timer()
 {
 
   last_cycle = get_cycles().value;
@@ -844,7 +851,7 @@ void TMRL::clear_timer(void)
 // was set in TMRL::put. The cycle counter will clear the break point, so
 // we don't need to worry about it. At this point, TMRL is rolling over.
 
-void TMRL::callback(void)
+void TMRL::callback()
 {
 
   if(verbose & 4)
@@ -892,7 +899,7 @@ void TMRL::callback(void)
 
 //---------------------------
 
-void TMRL::callback_print(void)
+void TMRL::callback_print()
 {
   cout << "TMRL " << name() << " CallBack ID " << CallBackID << '\n';
 
@@ -903,7 +910,7 @@ void TMRL::callback_print(void)
 // member functions for the PR2 base class
 //--------------------------------------------------
 
-PR2::PR2(void)
+PR2::PR2()
 {
 
   new_name("PR2");
@@ -931,7 +938,7 @@ void PR2::put(unsigned int new_value)
 // member functions for the T2CON base class
 //--------------------------------------------------
 
-T2CON::T2CON(void)
+T2CON::T2CON()
 {
 
   new_name("T2CON");
@@ -953,7 +960,7 @@ void T2CON::put(unsigned int new_value)
 //--------------------------------------------------
 // member functions for the TMR2 base class
 //--------------------------------------------------
-TMR2::TMR2(void)
+TMR2::TMR2()
 {
   update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
   pwm_mode = 0;
@@ -964,12 +971,12 @@ TMR2::TMR2(void)
   new_name("TMR2");
 }
 
-void TMR2::callback_print(void) 
+void TMR2::callback_print() 
 {
   cout << "TMR2 " << name() << " CallBack ID " << CallBackID << '\n';
 }
 
-void TMR2::start(void)
+void TMR2::start()
 {
 
   value.put(0);
@@ -1176,7 +1183,7 @@ void TMR2::put(unsigned int new_value)
     }
 }
 
-unsigned int TMR2::get(void)
+unsigned int TMR2::get()
 {
 
   if(t2con->get_tmr2on())
@@ -1194,7 +1201,7 @@ unsigned int TMR2::get(void)
   
 }
 
-unsigned int TMR2::get_value(void)
+unsigned int TMR2::get_value()
 {
 
   if(t2con->get_tmr2on())
@@ -1209,7 +1216,7 @@ unsigned int TMR2::get_value(void)
   return(value.get());
   
 }
-void TMR2::new_pre_post_scale(void)
+void TMR2::new_pre_post_scale()
 {
 
   //cout << "T2CON was written to, so update TMR2\n";
@@ -1281,7 +1288,7 @@ void TMR2::new_pre_post_scale(void)
 
 }
 
-void TMR2::new_pr2(void)
+void TMR2::new_pr2()
 {
 
   if(t2con->get_tmr2on())
@@ -1313,7 +1320,7 @@ void TMR2::new_pr2(void)
 
 }
 
-void TMR2::current_value(void)
+void TMR2::current_value()
 {
 //  value.put((unsigned int)((get_cycles().value - last_cycle)/ prescale));
   value.put((unsigned int)(pr2->value.get() - (future_cycle - get_cycles().value)/ prescale ));
@@ -1327,7 +1334,7 @@ void TMR2::current_value(void)
 // was set in TMR2::put. The cycle counter will clear the break point, so
 // we don't need to worry about it. At this point, TMR2 is equal to PR2.
 
-void TMR2::callback(void)
+void TMR2::callback()
 {
 
   //cout<<"TMR2 callback cycle: " << hex << cycles.value << '\n';
@@ -1392,7 +1399,7 @@ void TMR2::callback(void)
 //
 // 
 
-TMR2_MODULE::TMR2_MODULE(void)
+TMR2_MODULE::TMR2_MODULE()
 {
 
   t2con = 0;

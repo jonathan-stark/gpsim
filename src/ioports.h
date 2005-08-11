@@ -21,24 +21,33 @@ Boston, MA 02111-1307, USA.  */
 #ifndef __IOPORTS_H__
 #define __IOPORTS_H__
 
-#include "gpsim_classes.h"
 #include "registers.h"
-#include "breakpoints.h"
 #include "stimuli.h"
-#include <vector>
 
-class IOPORT_TRIS;
-class IOPORT_LATCH;
-class USART_MODULE;
-class SSP_MODULE;
-class IOPIN;
 class stimulus;
 class Stimulus_Node;
-class TMRL;
+class PinModule;
 
 
 ///**********************************************************************/
-/// PortPinModule
+///
+/// I/O ports
+///
+/// An I/O port is collection of I/O pins. For a PIC processor, these 
+/// are the PORTA, PORTB, etc, registers. gpsim models I/O ports in
+/// a similar way it models other registers; there's a base class from
+/// which all specific I/O ports are derived. However, I/O ports are 
+/// special in that they're an interface between a processor's core
+/// and the outside world. The requirements vary wildly from one processor
+/// to the next; in fact they even vary dynamically within one processor.
+/// gpsim attempts to abstract this interface with a set of base classes
+/// that are responsible for routing signal state information. These
+/// base classes make no attempt to decipher this information, instead
+/// this job is left to the peripherals and stimuli connected to the
+/// I/O pins and ports.
+///
+///
+/// PinModule
 ///
 /// Here's a general description of gpsim I/O pin design:
 ///
@@ -64,24 +73,42 @@ class TMRL;
 ///    SinkN  <====| C |
 ///                +---+
 ///
-/// The PortPinModule models a Processor's I/O Pin. The schematic illustrates
-/// the abstract description of the PortPinModule. Its job is to merge together
+/// The PinModule models a Processor's I/O Pin. The schematic illustrates
+/// the abstract description of the PinModule. Its job is to merge together
 /// all of the Processor's peripherals that can control a processor's pin.
 /// For example, a UART peripheral may be shared with a general purpose I/O
 /// pin. The UART may have a transmit and receive pin and select whether it's
 /// in control of the I/O pins. The uart transmit pin and the port's I/O pin
-/// can both act as a source for the physical interface. The PortPinModule
+/// can both act as a source for the physical interface. The PinModule
 /// arbitrates between the two. Similarly, the UART receive pin can be multiplexed
-/// with a register pin. In this case, the PortPinModule will route signal
+/// with a register pin. In this case, the PinModule will route signal
 /// changes to both devices. Finally, a peripheral like the '622's comparators
-/// may overide the output control. The PortPinModule again arbitrates.
+/// may overide the output control. The PinModule again arbitrates.
 ///
+///
+/// PortModule
+///
+/// The PortModule is the base class for processor I/O ports. It's essentially
+/// a register that contains an array of PinModule's.
+///
+///  Register               PortModule
+///    |-> sfr_register         |
+///             |               |
+///             \------+--------/
+///                    |
+///                    +--> PortRegister
+///                            |--> PicPortRegister
 
+
+
+///------------------------------------------------------------
+///
 /// SignalControl  - A pure virtual class that defines the interface for 
 /// a signal control. The I/O Pin Modules will query the source's state
 /// via SignalControl. The control is usually used to control the I/O pin 
 /// direction (i.e. whether it's an input or output...), drive value, 
 /// pullup state, etc.
+
 
 class SignalControl
 {
@@ -89,6 +116,8 @@ public:
   virtual char getState()=0;
 };
 
+///------------------------------------------------------------
+///
 /// SignalSink - A pure virtual class that allows signals driven by external
 /// stimuli be route to one or more objects monitoring them (e.g. one
 /// sink may be the register associtated with the port while another
@@ -99,10 +128,42 @@ class SignalSink
 public:
   virtual void setSinkState(char)=0;
 };
-;
-class PinModule;
 
+///------------------------------------------------------------
+/// SinkRecipient
+/// Interface class that redirects a driven I/O pin change
+/// to the appropriate peripheral register that wants the
+/// change.
 
+class SinkRecipient
+{
+public:
+  virtual void setState(const char)=0;
+};
+
+///------------------------------------------------------------
+/// PeripheralSignalSource - A class to interface I/O pins with
+/// peripheral outputs.
+
+class PeripheralSignalSource : public SignalControl
+{
+public:
+  PeripheralSignalSource(PinModule *_pin);
+
+  /// getState - called by the PinModule to determine the source state
+  virtual char getState();
+
+  /// putState - called by the peripheral to set a new state
+  virtual void putState(const char new3State);
+
+  /// toggle - called by the peripheral to toggle the current state.
+  virtual void toggle();
+private:
+  PinModule *m_pin;
+  char m_cState;
+};
+
+///------------------------------------------------------------
 /// PortModule - Manages all of the I/O pins associated with a single
 /// port. The PortModule supplies the interface to the I/O pin's.
 
@@ -131,7 +192,7 @@ private:
   PinModule  **iopins;
 };
 
-
+///------------------------------------------------------------
 /// PinModule - manages the interface to an I/O pin. The parent class
 /// 'PinMonitor', allows the PinModule to be registered with the I/O
 /// pin. In other words, when the I/O pin changes state, the PinModule
@@ -184,6 +245,8 @@ private:
   unsigned int  m_pinNumber;
 };
 
+
+///------------------------------------------------------------
 class PortRegister : public sfr_register, public PortModule
 {
 public:
@@ -209,6 +272,7 @@ protected:
   RegisterValue rvDrivenValue;
 };
 
+///------------------------------------------------------------
 class PicTrisRegister;
 class PicPortRegister : public PortRegister
 {
@@ -256,34 +320,6 @@ private:
 
 
 
-
-/************************************************************************/
-/*                                                                      */
-/*       E X P E R I M E N T A L    C O D E   E N D                     */
-/*                                                                      */
-/*                                                                      */
-/************************************************************************/
-
-
-
-
-
-
-
-
-
-//---------------------------------------------------------
-// IOPORT - Base class for all I/O ports
-//
-//  Register
-//    |-> sfr_register
-//            |--> IOPORT
-//                   |--> PORTA
-//                   |--> PORTB
-//                   |--> PORTC
-//                   |--> PORTD
-//                   |--> PORTE
-//
 
 /// IOPORT - Base class for I/O ports
 
@@ -337,87 +373,6 @@ public:
 //---------------------------------------------------------
 // IOPORT
 
-class PIC_IOPORT : public IOPORT
-{
-public:
-  IOPORT_TRIS * tris;
-  IOPORT_LATCH * latch;   // non-null on 18x parts only
-
-  virtual void put(unsigned int new_value);
-  void update_pin_directions(unsigned int new_tris);
-  void change_pin_direction(unsigned int bit_number, bool new_direction);
-
-  virtual void check_peripherals(RegisterValue rv) {}
-  virtual unsigned int get(void);
-  virtual bool get_bit(unsigned int bit_number);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  PIC_IOPORT(unsigned int _num_iopins=8);
-private:
-  unsigned int latch_data_out;
-  unsigned int peripheral_data_out;
-  unsigned int data_out_select;
-
-  unsigned int latch_tris_out;
-  unsigned int peripheral_tris_out;
-  unsigned int tris_out_select;
-
-  unsigned int data_in;
-  unsigned int peripheral_data_in;
-};
-
-class IOPORT_TRIS : public sfr_register
-{
-public:
-  PIC_IOPORT * port;
-
-  unsigned int 
-    valid_iopins;   // A mask that for those ports that don't have all 8 io bits.
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  unsigned int get(void);
-  IOPORT_TRIS(void);
-
-};
-
-class IOPORT_LATCH : public sfr_register  // latch register for 18x cores
-{
-public:
-  PIC_IOPORT * port;
-
-  unsigned int 
-    valid_iopins;   // A mask that for those ports that don't have all 8 io bits.
-
-  void put(unsigned int new_value);
-  void put_value(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  IOPORT_LATCH(void);
-
-};
-
-class PORTB : public PIC_IOPORT
-{
-public:
-#define intedg_MASK (1<<6)
-#define rbpu_MASK   (1<<7)
-
-  unsigned int rbpu;
-  unsigned int intedg;
-
-  PORTB(void);
-
-  void rbpu_intedg_update(unsigned int);
-  virtual void put(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  virtual void check_peripherals(RegisterValue rv);
-
-  virtual void reset(RESET_TYPE r);
-
-};
-
 // PORTB on the 62x devices is totally different than PORTB on
 // other PICs.
 class CCPCON;
@@ -449,26 +404,6 @@ class PORTB_62x : public PORTB
   unsigned int get(void);
   void setbit(unsigned int bit_number, bool new_value);
   virtual void check_peripherals(RegisterValue rv);
-};
-
-class PORTA : public PIC_IOPORT
-{
-public:
-
-  PORTA(void);
-
-  enum {
-	// there should probably be other things listed here, but I don't
-	// really know what and I figure better no data than wrong data.
-	SS = 1 << 5,
-  };
-
-  void setbit(unsigned int bit_number, bool new_value);
-  virtual unsigned int get(void);
-  virtual void check_peripherals(RegisterValue rv);
-
-  SSP_MODULE *ssp;
-
 };
 
 class COMPARATOR_MODULE;
@@ -512,55 +447,6 @@ class PORTA_62x : public PIC_IOPORT
 
 };
 
-class PORTC : public PIC_IOPORT
-{
- public:
-
-  /* Define the I/O pins that are common among the various PIC's
-   * endowed with a port C.
-   */
-
-  enum
-    {
-      T1CKI = 1 << 0,
-      CCP1  = 1 << 2,
-      SCK   = 1 << 3,
-      SCL   = 1 << 3,  /* SCL and SCK share the same pin */
-      SDI   = 1 << 4,
-      SDA   = 1 << 4,  /* SDA and SDI share the same pin */
-      SDO   = 1 << 5
-    };
-
-  /* Now define the I/O pins that are device dependent */
-  enum
-    {
-      T1OSO = 1 << 0,
-      T1OSI = 1 << 1,
-      _T1OSO = 1 << 1,  /* For some bizarre reason, TMR1's OS interface */
-      _T1OSI = 1 << 0,  /* varies from pic to pic... */
-      CCP2  = 1 << 1,
-      TX    = 1 << 6,  /* Not all pics with a port C have a usart, */
-      CK    = 1 << 6,  /* but the ones that do share TX and CK */
-      RX    = 1 << 7,  /* Same goes for RX and DT */
-      DT    = 1 << 7
-    };
-
-  /* A flag to sort out how the TMR1 OS interface is implemented.
-   *   set: T1OSO == RC0 && T1OSI == RC1
-   * clear: T1OSO == RC1 && T1OSI == RC0
-   */
-  bool t1oso_order;
-
-  CCPCON *ccp1con;
-  USART_MODULE *usart;
-  SSP_MODULE *ssp;
-  TMRL *tmrl;
-
-  PORTC(void);
-  virtual unsigned int get(void);
-  virtual void setbit(unsigned int bit_number, bool new_value);
-  virtual void check_peripherals(RegisterValue rv);
-};
 
 #endif // OLD_IOPORT_DESIGN
 

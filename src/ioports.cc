@@ -42,6 +42,48 @@ Boston, MA 02111-1307, USA.  */
 #else
 #define Dprintf(arg) {}
 #endif
+
+//--------------------------------------------------
+// 
+//--------------------------------------------------
+PeripheralSignalSource::PeripheralSignalSource(PinModule *_pin)
+  : m_pin(_pin), m_cState('?')
+{
+  assert(m_pin);
+}
+
+// getState is called when the PinModule is attempting to
+// update the output state for the I/O Pin.
+
+char PeripheralSignalSource::getState()
+{
+  return m_cState;
+}
+
+/// putState is called when the peripheral output source
+/// wants to change the output state.
+void PeripheralSignalSource::putState(const char new3State)
+{
+  if (new3State != m_cState) {
+    m_cState = new3State;
+    m_pin->updatePinModule();
+  }
+}
+
+void PeripheralSignalSource::toggle()
+{
+  switch (m_cState) {
+  case '1':
+  case 'W':
+    putState('0');
+    break;
+  case '0':
+  case 'w':
+    putState('0');
+    break;
+  }
+}
+
 //-------------------------------------------------------------------
 //
 //                 ioports.cc
@@ -945,309 +987,6 @@ IOPORT::~IOPORT()
 }
 
 #if 0
-//-------------------------------------------------------------------
-//  PIC_IOPORT::put(unsigned int new_value)
-//
-//  inputs:  new_value - here's where the I/O port is written (e.g.
-//                       gpsim is executing a MOVWF IOPORT,F instruction.)
-//  returns: none
-//
-//  The I/O Port is updated with the new value. If there are any stimuli
-// attached to the I/O pins then they will be updated as well.
-//
-//-------------------------------------------------------------------
-
-void PIC_IOPORT::put(unsigned int new_value)
-{
-  //cout << name() << "::put 0x" << hex << new_value << endl;
-
-  RegisterValue oldValue = value;
-  IOPORT::put(new_value);
-  check_peripherals(oldValue);
-}
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PIC_IOPORT::change_pin_direction(unsigned int bit_number, bool new_direction)
-{
-
-  if(tris)
-    tris->setbit(bit_number, new_direction);
-}
-
-//-------------------------------------------------------------------
-// PIC_IOPORT::update_pin_directions(unsigned int new_tris)
-//
-//  Whenever a new value is written to a tris register, then we need
-// to update the stimuli associated with the I/O pins. This is true
-// even if the I/O pin are not connected to external stimuli (like a
-// square wave). An example scenario would be like changing a port b
-// pin from an output that's driving low to an input. If there's no
-// stimulus attached to the port b I/O pin then the pull up (if enabled)
-// will pull the I/O pin high.
-//
-//-------------------------------------------------------------------
-void PIC_IOPORT::update_pin_directions(unsigned int new_tris)
-{
-
-  if(!tris)
-    return;
-
-  unsigned int diff = tris->value.get() ^ new_tris;
-
-  if(diff)
-    {
-      // Update the I/O port value to that of the internal latch
-      value.put((value.get() & ~diff) | (internal_latch & diff));
-
-      // Go through and update the direction of the I/O pins
-      unsigned int i,m;
-      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-	if((m & diff) && pins[i])
-	  pins[i]->update_direction(m & (~new_tris));
-
-      // Now, update the nodes to which the(se) pin(s) may be attached
-
-      guint64 time = get_cycles().value;
-      for(i = 0, m=1; i<num_iopins; i++, m <<= 1)
-	if(stimulus_mask & m & diff)
-          if(pins[i] && pins[i]->snode!=0)
-            pins[i]->snode->update(time);
-    }
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-unsigned int PIC_IOPORT::get(void)
-{
-  RegisterValue oldValue = value;
-  IOPORT::get();
-  check_peripherals(oldValue);
-
-  return value.get();
-}
-
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-bool PIC_IOPORT::get_bit(unsigned int bit_number)
-{
-  //cout << "get_bit, latch " << internal_latch << " bit " << bit_number << endl;
-  return (internal_latch &  (1<<bit_number )) ? true : false;
-
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PIC_IOPORT::setbit(unsigned int bit_number, bool new_value)
-{
-  RegisterValue oldValue = value;
-  IOPORT::setbit( bit_number,  new_value);
-  check_peripherals(oldValue);
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-PIC_IOPORT::PIC_IOPORT(unsigned int _num_iopins) : IOPORT(_num_iopins)
-{
-  tris = 0;
-  latch = 0;
-
-
-  latch_data_out = 0;
-  peripheral_data_out = 0;
-  data_out_select = 0;
-
-  latch_tris_out = 0;
-  peripheral_tris_out = 0;
-  tris_out_select = 0;
-
-  data_in = 0;
-  peripheral_data_in = 0;
-
-}
-
-//-------------------------------------------------------------------
-// IOPORT_TRIS
-//
-//-------------------------------------------------------------------
-
-unsigned int IOPORT_TRIS::get(void)
-{
-
-  trace.raw(read_trace.get() | value.get());
-
-  return(value.get());
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void IOPORT_TRIS::put(unsigned int new_value)
-{
-  int save_port_latch = port->internal_latch;
-
-  trace.raw(write_trace.get() | value.get());
-
-  port->update_pin_directions(new_value);
-
-  value.put(new_value);
-
-  port->put(save_port_latch);
-
-
-}
-
-//-------------------------------------------------------------------
-// void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
-//
-//  This routine will set the bit, 'bit_number', to the value 'new_value'
-// If the new_value is different than the old one then we will also
-// update the 
-//
-//-------------------------------------------------------------------
-void IOPORT_TRIS::setbit(unsigned int bit_number, bool new_value)
-{
-
-  int diff = port->valid_iopins & (1<<bit_number) & (value.get() ^ (new_value << bit_number));
-
-  if(diff) {
-
-    trace.raw(write_trace.get() | value.get());
-    //trace.register_write(address,value.get());
-
-    port->update_pin_directions(value.get() ^ diff);
-
-    value.put(value.get() ^ diff);
-
-    update();
-    port->pins[bit_number]->update();
-
-  }
-
-}
-
-//-------------------------------------------------------------------
-// void IOPORT_TRIS::put_value(unsigned int new_value)
-//
-//  When the gui tries to change the tris register, we'll pass
-// though here. There are three things that we do. First, we update
-// the tris port the way the gui asks us. Next, we'll update any cross
-// references, and finally we'll update any cross references for the
-// I/O port associated with this tris register.
-//-------------------------------------------------------------------
-
-void IOPORT_TRIS::put_value(unsigned int new_value)
-{
- 
-  put(new_value);
-
-  update();
-
-  port->update();
-
-  for(unsigned int i=0; i<port->num_iopins; i++)
-    port->pins[i]->update();
-
-}
-
-IOPORT_TRIS::IOPORT_TRIS(void)
-{
-  port = 0;
-  valid_iopins = 0;
-  new_name("ioport");
-}
-
-//-------------------------------------------------------------------
-// IOPORT_LATCH
-//
-//-------------------------------------------------------------------
-
-unsigned int IOPORT_LATCH::get(void)
-{
-
-  trace.raw(read_trace.get() | value.get());
-  //trace.register_read(address,value.get());
-
-  return(value.get());
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void IOPORT_LATCH::put(unsigned int new_value)
-{
-
-  if(verbose)
-    cout << "IOPORT_LATCH::put 0x"<<hex<<new_value<<'\n';
-
-  trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
-
-  value.put(new_value);
-
-  port->put(value.get());
-
-
-}
-
-//-------------------------------------------------------------------
-// void IOPORT_LATCH::setbit(unsigned int bit_number, bool new_value)
-//
-//  This routine will set the bit, 'bit_number', to the value 'new_value'
-// If the new_value is different than the old one then we will also
-// update the 
-//
-//-------------------------------------------------------------------
-void IOPORT_LATCH::setbit(unsigned int bit_number, bool new_value)
-{
-
-  port->setbit(bit_number,new_value);
-
-}
-
-//-------------------------------------------------------------------
-// void IOPORT_LATCH::put_value(unsigned int new_value)
-//
-//  When the gui tries to change the tris register, we'll pass
-// though here. There are three things that we do. First, we update
-// the tris port the way the gui asks us. Next, we'll update any cross
-// references, and finally we'll update any cross references for the
-// I/O port associated with this tris register.
-//-------------------------------------------------------------------
-
-void IOPORT_LATCH::put_value(unsigned int new_value)
-{
- 
-  put(new_value);
-  port->put(new_value);
-  update();
-
-}
-
-IOPORT_LATCH::IOPORT_LATCH(void)
-{
-  port = 0;
-  valid_iopins = 0;
-  new_name("ioport");
-}
-
-
-//-------------------------------------------------------------------
-//
-//  PORTB
-//-------------------------------------------------------------------
-
-PORTB::PORTB(void)
-{
-  new_name("portb");
-}
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTB::reset(RESET_TYPE r)
-{
-  rbpu = 0xc0; // These are the same as the upper 
-               // two bits of the option register
-
-
-}
 
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
@@ -1554,177 +1293,6 @@ unsigned int PORTA_62x::get(void)
   // cout << " PORTA_62X::get port value is " << value << " \n";
 
   return value.get();
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTA_62x::setbit(unsigned int bit_number, bool new_value)
-{
-
-  unsigned int old_value = value.get();
-
-
-  IOPORT::setbit( bit_number,  new_value);
-
-  int diff = old_value ^ value.get(); // The difference between old and new
-
-  // If porta bit 4 changed states, check to see if tmr0 should increment
-  if( diff & 0x10)
-    {
-
-      if(cpu14->option_reg.get_t0cs())
-	{
-
-	if( ((value.get() & 0x10) == 0) ^ (cpu14->option_reg.get_t0se() == 0))
-	  cpu14->tmr0.increment();
-	}
-    }
-
-  if( ssp && (diff & SS) ) {
-	  ssp->new_ss_edge(new_value ? SS : 0);
-  }
-  
-}
-void PORTA_62x::check_peripherals(RegisterValue oldValue)
-{
-}
-
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-PORTA_62x::PORTA_62x(void)
-{
-  new_name("porta");
-  comparator = 0;
-  ssp = 0;
-}
-
-//-------------------------------------------------------------------
-//
-//  PORTA
-//-------------------------------------------------------------------
-
-PORTA::PORTA(void)
-{
-  new_name("porta");
-  ssp = 0;
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTA::check_peripherals(RegisterValue oldValue)
-{
-  int diff = oldValue.get() ^ value.get(); // The difference between old and new
-
-  // If porta bit 4 changed states, check to see if tmr0 should increment
-  if( diff & 0x10) {
-
-    if(cpu14->option_reg.get_t0cs()) {
-
-      bool bClockOnRisingEdge = cpu14->option_reg.get_t0se() ? false : true;
-      bool bRisingEdge = (value.get() & 0x10) ? true : false;
-
-      if(verbose)
-	cout << "PORTA check peripherals RA4 changed\n";
-      if(bClockOnRisingEdge == bRisingEdge) {
-	cpu14->tmr0.increment();
-      }
-    }
-  }
-
-  if( ssp && (diff & SS) ) {
-    ssp->new_ss_edge( (value.get() & SS) ? SS : 0);
-  }
-  
-
-}
-
-unsigned int PORTA::get(void)
-{
-
-  RegisterValue oldValue = value;
-
-  IOPORT::get();
-
-  check_peripherals(oldValue);
-
-  return(value.get());
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTA::setbit(unsigned int bit_number, bool new_value)
-{
-
-  RegisterValue oldValue = value;
-  IOPORT::setbit( bit_number,  new_value);
-  check_peripherals(oldValue);
-
-}
-
-//-------------------------------------------------------------------
-//
-// PORTC
-//-------------------------------------------------------------------
-
-
-PORTC::PORTC(void)
-{
-  new_name("portc");
-  usart = 0;
-  ssp = 0;
-  tmrl = 0;
-  ccp1con = 0;
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-unsigned int PORTC::get(void)
-{
-  RegisterValue oldValue = value;
-  IOPORT::get();
-  check_peripherals(oldValue);
-
-  return(value.get());
-
-}
-
-void PORTC::check_peripherals(RegisterValue oldValue)
-{
-  int diff = oldValue.get() ^ value.get(); // The difference between old and new
-
-  if( ccp1con && (diff & CCP1) )
-    ccp1con->new_edge(value.get() & CCP1);
- 
-  // if this cpu has a usart and there's been a change detected on
-  // the RX pin, then we need to notify the usart
-  if( usart && (diff & RX))
-    usart->new_rx_edge(value.get() & RX);
-
-  if( ssp && (diff & SCK))
-    ssp->new_sck_edge(value.get() & SCK);
-
-  if(tmrl && (diff & T1CKI))
-    tmrl->increment();
-
-}
-
-//-------------------------------------------------------------------
-//-------------------------------------------------------------------
-void PORTC::setbit(unsigned int bit_number, bool new_value)
-{
-
-  if(verbose)
-    cout << "PORTC::setbit() bit " << bit_number << " to " << new_value << '\n';
-
-  PIC_IOPORT::setbit( bit_number,  new_value);
-
-  if(verbose)
-    cout << "PORTC::setbit() bit " 
-	 << bit_number << " is done new value is "
-	 << ( (value.get() & (1<<bit_number)) ? "high" : "low")
-	 << endl;
-  
 }
 
 #endif //0
