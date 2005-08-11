@@ -136,6 +136,8 @@ void P16C62::create_iopin_map(void)
 		   &(*m_porta)[5]);  // SS
   }
 
+  tmr1l.setIOpin(&(*m_portc)[0]);
+
 }
 
 //------------------------------------------------------------------------
@@ -208,6 +210,7 @@ void P16C64::create_iopin_map(void)
 		   &(*m_porta)[5]);  // SS
   }
 
+  tmr1l.setIOpin(&(*m_portc)[0]);
 }
 
 

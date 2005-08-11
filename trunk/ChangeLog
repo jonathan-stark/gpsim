@@ -1,3 +1,15 @@
+2005-08-11 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc, src/ioports.h: Added the PeripheralSignalSource
+	class to simplify the connection of I/O pins to peripherals. Also,
+	added more documentation about the I/O port design.
+	* src/p16x7x.h, src/p16x7x.cc, src/p16f87x.cc: The Analog to
+	Digital convertor peripheral now connects to I/O pins again. Also,
+	the A2D module was redesigned so that less of the internal
+	implementation is exposed. 
+	* src/14bit-tmrs.h, src/14bit-tmrs.cc, src/ssp.h, src/ssp.cc,
+	src/p16x6x.cc: Updated the peripheral connections with the new
+	PeripheralSignalSource class.
+
 2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h,
 	cli/cmd_attach.cc, cli/cmd_attach.h, cli/parse.yy,

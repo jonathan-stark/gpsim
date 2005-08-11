@@ -29,10 +29,9 @@ class InvalidRegister;   // Forward reference
 
 #include "pic-processor.h"
 #include "14bit-registers.h"
+#include "ioports.h"
 
 class PinModule;
-class PeripheralSignalSource;
-class PeripheralSignalSink;
 
 class PIR1;
 class PIR_SET;
@@ -47,16 +46,8 @@ enum SSP_TYPE {
 	SSP_TYPE_MSSP
 };
 
-// Interface class that redirects a driven I/O pin change
-// to the appropriate peripheral register that wants the
-// change.
-class SinkRecipient
-{
-public:
-  virtual void setState(const char)=0;
-};
 
-class _SSPCON : public sfr_register, public TriggerObject, public SinkRecipient
+class _SSPCON : public sfr_register, public TriggerObject, public SignalSink
 {
 
 protected:
@@ -128,13 +119,12 @@ public:
   void setIOpins(PinModule *sck,PinModule *ss,PinModule *sdo, PinModule *sdi);
   void setSSPBUF(_SSPBUF *);
   void setSSPSTAT(_SSPSTAT *);
-  virtual void setState(const char);
+  virtual void setSinkState(const char);
 
 private:
   PeripheralSignalSource *m_SckSource;
   PeripheralSignalSource *m_SsSource;
   PeripheralSignalSource *m_SdoSource;
-  PeripheralSignalSink   *m_SdiSink;
 
   _SSPBUF   *m_sspbuf;
   _SSPSTAT  *m_sspstat;

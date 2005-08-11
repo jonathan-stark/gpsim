@@ -24,8 +24,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gpsim_classes.h"
 #include "registers.h"
 #include "breakpoints.h"
-
-class IOPIN;
+#include "ioports.h"
 
 class TMRL;
 class TMRH;
@@ -55,9 +54,9 @@ public:
   bool  pwm_mode;
   unsigned int pwm_value;
 
-  CCPRH(void);
+  CCPRH();
   void put(unsigned int new_value);
-  unsigned int get(void);
+  unsigned int get();
 
 };
 
@@ -70,12 +69,12 @@ public:
   TMRL   *tmrl;
 
   void put(unsigned int new_value);
-  void capture_tmr(void);
-  void start_compare_mode(void);
-  void stop_compare_mode(void);
-  void start_pwm_mode(void);
+  void capture_tmr();
+  void start_compare_mode();
+  void stop_compare_mode();
+  void start_pwm_mode();
   void assign_tmr(TMRL *ptmr);
-  CCPRL(void);
+  CCPRL();
 };
 
 
@@ -168,9 +167,9 @@ enum
 
   TMRL  *tmrl;
 
-  T1CON(void);
+  T1CON();
 
-  unsigned int get(void);
+  unsigned int get();
 
   // For (at least) the 18f family, there's a 4X PLL that effects the
   // the relative timing between gpsim's cycle counter (which is equivalent
@@ -179,13 +178,13 @@ enum
   // However, for the 18f parts, the instructions execute 4 times faster when
   // the PLL is selected.
 
-  virtual unsigned int get_prescale(void);
+  virtual unsigned int get_prescale();
 
-  unsigned int get_tmr1cs(void)
+  unsigned int get_tmr1cs()
     {
       return(value.get() & TMR1CS);
     }
-  unsigned int get_tmr1on(void)
+  unsigned int get_tmr1on()
     {
       return(value.get() & TMR1ON);
     }
@@ -203,14 +202,14 @@ public:
   TMRL *tmrl;
 
   void put(unsigned int new_value);
-  unsigned int get(void);
-  virtual unsigned int get_value(void);
+  unsigned int get();
+  virtual unsigned int get_value();
 
-  TMRH(void);
+  TMRH();
 
 };
 
-class TMRL : public sfr_register, public TriggerObject
+class TMRL : public sfr_register, public TriggerObject, public SignalSink
 {
 public:
 
@@ -233,21 +232,28 @@ public:
 
   bool compare_mode;
 
-  virtual void callback(void);
-  virtual void callback_print(void);
+  virtual void callback();
+  virtual void callback_print();
 
-  TMRL(void);
+  TMRL();
 
   virtual void put(unsigned int new_value);
-  virtual unsigned int get(void);
-  virtual unsigned int get_value(void);
-  virtual unsigned int get_low_and_high(void);
+  virtual unsigned int get();
+  virtual unsigned int get_value();
+  virtual unsigned int get_low_and_high();
   virtual void on_or_off(int new_state);
-  virtual void increment(void);   // Used when TMR1 is attached to an external clock
-  virtual void current_value(void);
-  virtual void new_clock_source(void);
-  virtual void update(void);
-  virtual void clear_timer(void);
+  virtual void current_value();
+  virtual void new_clock_source();
+  virtual void update();
+  virtual void clear_timer();
+  virtual void setSinkState(const char);
+  virtual void setIOpin(PinModule *);
+protected:
+  virtual void increment();   // Used when TMR1 is attached to an external clock
+private:
+  char m_cState;
+  bool m_bExtClkEnabled;
+
 };
 
 
@@ -261,7 +267,7 @@ public:
 
   TMR2 *tmr2;
 
-  PR2(void);
+  PR2();
   void put(unsigned int new_value);
 
 };
@@ -286,29 +292,29 @@ enum
 
   TMR2 *tmr2;
 
-  T2CON(void);
+  T2CON();
 
-  inline unsigned int get_t2ckps0(void)
+  inline unsigned int get_t2ckps0()
     {
       return(value.get() & T2CKPS0);
     }
 
-  inline unsigned int get_t2ckps1(void)
+  inline unsigned int get_t2ckps1()
     {
       return(value.get() & T2CKPS1);
     }
 
-  inline unsigned int get_tmr2on(void)
+  inline unsigned int get_tmr2on()
     {
       return(value.get() & TMR2ON);
     }
 
-  inline unsigned int get_post_scale(void)
+  inline unsigned int get_post_scale()
     {
       return( (value.get() & (TOUTPS0 | TOUTPS1 | TOUTPS2 | TOUTPS3)) >> 3 );
     }
 
-  inline unsigned int get_pre_scale(void)
+  inline unsigned int get_pre_scale()
     {
       //  ps1:ps0 prescale
       //   0   0     1
@@ -368,20 +374,20 @@ public:
   CCPCON *ccp1con;
   CCPCON *ccp2con;
 
-  virtual void callback(void);
-  virtual void callback_print(void);
-  TMR2(void);
+  virtual void callback();
+  virtual void callback_print();
+  TMR2();
 
   void put(unsigned int new_value);
-  unsigned int get(void);
-  void start(void);
-  void new_pre_post_scale(void);
-  void new_pr2(void);
-  void current_value(void);
+  unsigned int get();
+  void start();
+  void new_pre_post_scale();
+  void new_pr2();
+  void current_value();
   void update(int ut = TMR2_DONTCARE_UPDATE);
   void pwm_dc(unsigned int dc, unsigned int ccp_address);
   void stop_pwm(unsigned int ccp_address);
-  virtual unsigned int get_value(void);
+  virtual unsigned int get_value();
 
 };
 
@@ -404,7 +410,7 @@ public:
   PR2   *pr2;
   TMR2  *tmr2;
 
-  TMR2_MODULE(void);
+  TMR2_MODULE();
   void initialize(T2CON *t2con, PR2 *pr2, TMR2  *tmr2);
 
 };
@@ -425,7 +431,7 @@ public:
   T1CON *t1con;
   PIR_SET  *pir_set;
 
-  TMR1_MODULE(void);
+  TMR1_MODULE();
   void initialize(T1CON *t1con, PIR_SET *pir_set);
 
 };

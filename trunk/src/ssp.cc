@@ -30,79 +30,6 @@ Boston, MA 02111-1307, USA.  */
 #include "xref.h"
 
 //#warning only supports SPI mode.
-
-//--------------------------------------------------
-// 
-//--------------------------------------------------
-class PeripheralSignalSource : public SignalControl
-{
-public:
-  PeripheralSignalSource(PinModule *_pin)
-    : m_pin(_pin), m_cState('?')
-  {
-    assert(m_pin);
-  }
-
-  /// getState is called when the PinModule is attempting to
-  /// update the output state for the I/O Pin.
-
-  char getState()
-  {
-    return m_cState;
-  }
-
-  /// putState is called when the peripheral output source
-  /// wants to change the output state.
-  void putState(const char new3State)
-  {
-    if (new3State != m_cState) {
-      m_cState = new3State;
-      m_pin->updatePinModule();
-    }
-  }
-
-  void toggle()
-  {
-    switch (m_cState) {
-    case '1':
-    case 'W':
-      putState('0');
-      break;
-    case '0':
-    case 'w':
-      putState('0');
-      break;
-    }
-  }
-private:
-  PinModule *m_pin;
-  char m_cState;
-};
-
-//--------------------------------------------------
-// 
-//--------------------------------------------------
-class PeripheralSignalSink : public SignalSink
-{
-public:
-  PeripheralSignalSink(PinModule *_pin, SinkRecipient *_client)
-    : m_pin(_pin), m_client(_client)
-  {
-    assert(m_pin);
-    assert(m_client);
-    m_pin->addSink(this);
-  }
-
-  void setSinkState(char new3State)
-  {
-    m_client->setState(new3State);
-  }
-
-private:
-  PinModule *m_pin;
-  SinkRecipient *m_client;
-};
-
 //-----------------------------------------------------------
 // SSPSTAT - Synchronous Serial Port Status register.
 
@@ -149,7 +76,7 @@ void _SSPCON::setIOpins(PinModule *_sck,PinModule *_ss,
   m_SckSource = new PeripheralSignalSource(_sck);
   m_SsSource  = new PeripheralSignalSource(_ss);
   m_SdoSource = new PeripheralSignalSource(_sdo);
-  m_SdiSink   = new PeripheralSignalSink(_sdi,this);
+  _sdi->addSink(this);
 
 }
 void _SSPCON::setSSPBUF(_SSPBUF *sspbuf)
@@ -210,7 +137,7 @@ void _SSPCON::put(unsigned int new_value)
 // setState
 // Called whenever the SDI input changes states.
 // 
-void _SSPCON::setState(const char new3State)
+void _SSPCON::setSinkState(const char new3State)
 {
   m_cSDIState = new3State;
 }
@@ -571,62 +498,9 @@ void SSP_MODULE::initialize(PIR_SET *ps,
 
 }
 
-/*
-void SSP_MODULE::initialize(PIR_SET *ps, IOPORT *ssp_port, int sck_pin, int sdi_pin, int sdo_pin,
-			    IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type)
-{
-  sspbuf->ssp_port = ssp_port;
-  sspbuf->sdipin = sdi_pin;
-  sspbuf->sckpin = ssp_port->pins[sck_pin];
-  sspbuf->sdopin = ssp_port->pins[sdo_pin];
-  sspbuf->sspin = ss_port->pins[ss_pin];
-  sspbuf->ssptype = ssp_type;
-  sspbuf->assign_pir_set(ps);
-
-  sspbuf->sspcon = sspcon;
-  sspbuf->sspstat = sspstat;
-
-  sspcon->sckpin = ssp_port->pins[sck_pin];
-  sspcon->sspbuf = sspbuf;
-	
-  sspstat->ssptype = ssp_type;
-}
-*/
-
 //-----------------------------------------------------------
 SSP_MODULE14::SSP_MODULE14()
   : cpu(0)
 {
 }
  
-/*
-void SSP_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR_SET *ps,
-				 IOPORT *ssp_port, int sck_pin, 
-				 int sdi_pin, int sdo_pin,
-				 IOPORT *ss_port, int ss_pin, SSP_TYPE ssp_type)
-{
-  cpu = new_cpu;
-  
-  SSP_MODULE::initialize(ps, ssp_port, sck_pin, sdi_pin, sdo_pin, ss_port, ss_pin, ssp_type);
-}
-*/
-
-/*
-void SSP_MODULE14::new_sck_edge(unsigned int value)
-{
-
-  if( sspcon && sspcon->value.get() & _SSPCON::SSPEN ) {
-	sspbuf->clock( value );
-  }
-
-}
-
-void SSP_MODULE14::new_ss_edge(unsigned int value)
-{
-
-  if( sspcon && sspcon->value.get() & _SSPCON::SSPEN ) {
-	sspbuf->start_transfer();
-  }
-
-}
-*/

@@ -72,7 +72,6 @@ void P16F871::create_sfr_map(void)
   adresl.new_name("adresl");
 
   adcon0.adresl = &adresl;
-  adcon1.valid_bits |= (ADCON1::PCFG3 | ADCON1::ADFM);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -92,32 +91,29 @@ void P16F871::create_sfr_map(void)
   alias_file_registers(0xf0,0xff,0x100);
 
 
-  adcon1.Vrefhi_position[8] = 3;
-  adcon1.Vrefhi_position[9] = 8;
-  adcon1.Vrefhi_position[10] = 3;
-  adcon1.Vrefhi_position[11] = 3;
-  adcon1.Vrefhi_position[12] = 3;
-  adcon1.Vrefhi_position[13] = 3;
-  adcon1.Vrefhi_position[14] = 8;
-  adcon1.Vrefhi_position[15] = 3;
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3);
 
-  adcon1.Vreflo_position[8] = 2;
-  adcon1.Vreflo_position[9] = 8;
-  adcon1.Vreflo_position[10] = 8;
-  adcon1.Vreflo_position[11] = 2;
-  adcon1.Vreflo_position[12] = 2;
-  adcon1.Vreflo_position[13] = 2;
-  adcon1.Vreflo_position[14] = 8;
-  adcon1.Vreflo_position[15] = 2;
+  adcon1.setChannelConfiguration(8, 0xff);
+  adcon1.setChannelConfiguration(9, 0x3f);
+  adcon1.setChannelConfiguration(10, 0x3f);
+  adcon1.setChannelConfiguration(11, 0x3f);
+  adcon1.setChannelConfiguration(12, 0x1f);
+  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(14, 0x01);
+  adcon1.setChannelConfiguration(15, 0x0d);
+  adcon1.setVrefHiConfiguration(8, 3);
+  adcon1.setVrefHiConfiguration(10, 3);
+  adcon1.setVrefHiConfiguration(11, 3);
+  adcon1.setVrefHiConfiguration(12, 3);
+  adcon1.setVrefHiConfiguration(13, 3);
+  adcon1.setVrefHiConfiguration(15, 3);
 
-  adcon1.configuration_bits[8] = 0xff;
-  adcon1.configuration_bits[9] = 0x3f;
-  adcon1.configuration_bits[10] = 0x3f;
-  adcon1.configuration_bits[11] = 0x3f;
-  adcon1.configuration_bits[12] = 0x1f;
-  adcon1.configuration_bits[13] = 0x0f;
-  adcon1.configuration_bits[14] = 0x01;
-  adcon1.configuration_bits[15] = 0x0d;
+  adcon1.setVrefLoConfiguration(8, 2);
+  adcon1.setVrefLoConfiguration(11, 2);
+  adcon1.setVrefLoConfiguration(12, 2);
+  adcon1.setVrefLoConfiguration(13, 2);
+  adcon1.setVrefLoConfiguration(15, 2);
 
 }
 
@@ -228,7 +224,6 @@ void P16F873::create_sfr_map(void)
   adresl.new_name("adresl");
 
   adcon0.adresl = &adresl;
-  adcon1.valid_bits |= (ADCON1::PCFG3 | ADCON1::ADFM);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -246,33 +241,29 @@ void P16F873::create_sfr_map(void)
   alias_file_registers(0xa0,0xff,0x100);
 
 
-  adcon1.Vrefhi_position[8] = 3;
-  adcon1.Vrefhi_position[9] = 8;
-  adcon1.Vrefhi_position[10] = 3;
-  adcon1.Vrefhi_position[11] = 3;
-  adcon1.Vrefhi_position[12] = 3;
-  adcon1.Vrefhi_position[13] = 3;
-  adcon1.Vrefhi_position[14] = 8;
-  adcon1.Vrefhi_position[15] = 3;
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3);
 
-  adcon1.Vreflo_position[8] = 2;
-  adcon1.Vreflo_position[9] = 8;
-  adcon1.Vreflo_position[10] = 8;
-  adcon1.Vreflo_position[11] = 2;
-  adcon1.Vreflo_position[12] = 2;
-  adcon1.Vreflo_position[13] = 2;
-  adcon1.Vreflo_position[14] = 8;
-  adcon1.Vreflo_position[15] = 2;
+  adcon1.setChannelConfiguration(8, 0x1f);
+  adcon1.setChannelConfiguration(9, 0x1f);
+  adcon1.setChannelConfiguration(10, 0x1f);
+  adcon1.setChannelConfiguration(11, 0x1f);
+  adcon1.setChannelConfiguration(12, 0x1f);
+  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(14, 0x01);
+  adcon1.setChannelConfiguration(15, 0x0d);
+  adcon1.setVrefHiConfiguration(8, 3);
+  adcon1.setVrefHiConfiguration(10, 3);
+  adcon1.setVrefHiConfiguration(11, 3);
+  adcon1.setVrefHiConfiguration(12, 3);
+  adcon1.setVrefHiConfiguration(13, 3);
+  adcon1.setVrefHiConfiguration(15, 3);
 
-  adcon1.configuration_bits[8] = 0xff;
-  adcon1.configuration_bits[9] = 0x3f;
-  adcon1.configuration_bits[10] = 0x3f;
-  adcon1.configuration_bits[11] = 0x3f;
-  adcon1.configuration_bits[12] = 0x3f;
-  adcon1.configuration_bits[13] = 0x0f;
-  adcon1.configuration_bits[14] = 0;
-  adcon1.configuration_bits[15] = 0x0d;
-
+  adcon1.setVrefLoConfiguration(8, 2);
+  adcon1.setVrefLoConfiguration(11, 2);
+  adcon1.setVrefLoConfiguration(12, 2);
+  adcon1.setVrefLoConfiguration(13, 2);
+  adcon1.setVrefLoConfiguration(15, 2);
 }
 
 void P16F873::create(void)
@@ -442,7 +433,6 @@ void P16F874::create_sfr_map(void)
   adresl.new_name("adresl");
 
   adcon0.adresl = &adresl;
-  adcon1.valid_bits |= (ADCON1::PCFG3 | ADCON1::ADFM);
 
   alias_file_registers(0x80,0x80,0x80);
   alias_file_registers(0x01,0x01,0x100);
@@ -459,33 +449,30 @@ void P16F874::create_sfr_map(void)
   alias_file_registers(0x20,0x7f,0x100);
   alias_file_registers(0xa0,0xff,0x100);
 
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | 
+			 ADCON1::PCFG2 | ADCON1::PCFG3);
 
-  adcon1.Vrefhi_position[8] = 3;
-  adcon1.Vrefhi_position[9] = 8;
-  adcon1.Vrefhi_position[10] = 3;
-  adcon1.Vrefhi_position[11] = 3;
-  adcon1.Vrefhi_position[12] = 3;
-  adcon1.Vrefhi_position[13] = 3;
-  adcon1.Vrefhi_position[14] = 8;
-  adcon1.Vrefhi_position[15] = 3;
+  adcon1.setChannelConfiguration(8, 0xff);
+  adcon1.setChannelConfiguration(9, 0x3f);
+  adcon1.setChannelConfiguration(10, 0x3f);
+  adcon1.setChannelConfiguration(11, 0x3f);
+  adcon1.setChannelConfiguration(12, 0x1f);
+  adcon1.setChannelConfiguration(13, 0x0f);
+  adcon1.setChannelConfiguration(14, 0x01);
+  adcon1.setChannelConfiguration(15, 0x0d);
+  adcon1.setVrefHiConfiguration(8, 3);
+  adcon1.setVrefHiConfiguration(10, 3);
+  adcon1.setVrefHiConfiguration(11, 3);
+  adcon1.setVrefHiConfiguration(12, 3);
+  adcon1.setVrefHiConfiguration(13, 3);
+  adcon1.setVrefHiConfiguration(15, 3);
 
-  adcon1.Vreflo_position[8] = 2;
-  adcon1.Vreflo_position[9] = 8;
-  adcon1.Vreflo_position[10] = 8;
-  adcon1.Vreflo_position[11] = 2;
-  adcon1.Vreflo_position[12] = 2;
-  adcon1.Vreflo_position[13] = 2;
-  adcon1.Vreflo_position[14] = 8;
-  adcon1.Vreflo_position[15] = 2;
+  adcon1.setVrefLoConfiguration(8, 2);
+  adcon1.setVrefLoConfiguration(11, 2);
+  adcon1.setVrefLoConfiguration(12, 2);
+  adcon1.setVrefLoConfiguration(13, 2);
+  adcon1.setVrefLoConfiguration(15, 2);
 
-  adcon1.configuration_bits[8] = 0xff;
-  adcon1.configuration_bits[9] = 0x3f;
-  adcon1.configuration_bits[10] = 0x3f;
-  adcon1.configuration_bits[11] = 0x3f;
-  adcon1.configuration_bits[12] = 0x3f;
-  adcon1.configuration_bits[13] = 0x0f;
-  adcon1.configuration_bits[14] = 0;
-  adcon1.configuration_bits[15] = 0x0d;
 
 }
 

@@ -38,6 +38,9 @@ Boston, MA 02111-1307, USA.  */
 
 //#define DEBUG_AD
 
+
+static PinModule AnInvalidAnalogInput;
+
 //------------------------------------------------------
 // ADRES
 //
@@ -59,6 +62,15 @@ void ADRES::put(int new_value)
 //------------------------------------------------------
 // ADCON0
 //
+ADCON0::ADCON0()
+  : ad_state(AD_IDLE)
+{
+}
+
+void ADCON0::setA2DBits(unsigned int nBits)
+{
+  m_A2DScale = (1<<nBits) - 1;
+}
 
 void ADCON0::start_conversion(void)
 {
@@ -160,16 +172,17 @@ void ADCON0::put(unsigned int new_value)
 
 void ADCON0::put_conversion(void)
 {
+  double dRefSep = m_dSampledVrefHi - m_dSampledVrefLo;
+  double dNormalizedVoltage;
 
-  int converted;
+  dNormalizedVoltage = (dRefSep>0.0) ? 
+    (m_dSampledVoltage - m_dSampledVrefLo)/dRefSep : 0.0;
+  dNormalizedVoltage = dNormalizedVoltage>1.0 ? 1.0 : dNormalizedVoltage;
 
+  unsigned int converted = (unsigned int)(m_A2DScale*dNormalizedVoltage);
 
   if(adresl) {   // non-null for 16f877
 
-    if(reference != 0)
-      converted = (int)((1023*acquired_value)/reference);
-    else
-      converted = 0xffffffff;  // As close to infinity as possible...
 
     if(verbose)
       cout << __FUNCTION__ << "() 10-bit result " << (converted &0x3ff)  << '\n';
@@ -183,15 +196,9 @@ void ADCON0::put_conversion(void)
 
   } else {
 
-    if(reference != 0)
-      converted = (int)(255*acquired_value/reference);
-    else
-      converted = 0xffffffff;  // As close to infinity as possible...
-
-    #ifndef DEBUG_AD
     if(verbose)
-    #endif
       cout << __FUNCTION__ << "() 8-bit result " << ((converted) &0xff)  << '\n';
+
     adres->put((converted ) & 0xff);
 
   }
@@ -220,26 +227,10 @@ void ADCON0::callback(void)
 
     case AD_ACQUIRING:
       channel = (value.get() >> 3) & channel_mask;
-      #ifdef DEBUG_AD
-      printf("Valor: 0x%02X >>3 0x%02X máscara: 0x%02X => 0x%02X\n",value.get(),value.get()>>3,channel_mask,channel);
-      #endif
 
-      if(channel <= 4) {
-	// analog channels 0-4 map to porta
-	acquired_value = analog_port->get_bit_voltage( channel);
-      } else {
-	// analog channels 5-7 map to porte
-	if(analog_port2)
-	  acquired_value = analog_port2->get_bit_voltage( channel - 5);
-	else
-	  acquired_value = 0.0;
-      }
-
-      reference = adcon1->get_Vref();
-      #ifdef DEBUG_AD
-      cout << "A/D acquiring ==> converting channel " << channel << " voltage "
-      << acquired_value << ", Vref = " << reference << '\n';
-      #endif
+      m_dSampledVoltage = adcon1->getChannelVoltage(channel);
+      m_dSampledVrefHi  = adcon1->getVrefHi();
+      m_dSampledVrefLo  = adcon1->getVrefLo();
 
       future_cycle = get_cycles().value + 5*Tad_2;
       get_cycles().set_break(future_cycle, this);
@@ -249,10 +240,6 @@ void ADCON0::callback(void)
       break;
 
     case AD_CONVERTING:
-      #ifdef DEBUG_AD
-      cout << "A/D converting ==> idle\n";
-      cout << "--- acquired_value " << acquired_value << "  reference " << reference <<'\n';
-      #endif
 
       put_conversion();
 
@@ -283,30 +270,92 @@ void ADCON0_withccp::set_interrupt(void)
 
 }
 
+
+//------------------------------------------------------
+// ADCON1
+//
+ADCON1::ADCON1()
+  : m_AnalogPins(0), m_nAnalogChannels(0),
+    mValidCfgBits(0)
+{
+  for (int i=0; i<cMaxConfigurations; i++) {
+    setChannelConfiguration(i, 0);
+    setVrefLoConfiguration(i, 0xffff);
+    setVrefHiConfiguration(i, 0xffff);
+  }
+}
+
+void ADCON1::setChannelConfiguration(unsigned int cfg, unsigned int bitMask)
+{
+  if (cfg < cMaxConfigurations) 
+    m_configuration_bits[cfg] = bitMask;
+}
+
+void ADCON1::setVrefLoConfiguration(unsigned int cfg, unsigned int channel)
+{
+  if (cfg < cMaxConfigurations) 
+    Vreflo_position[cfg] = channel;
+}
+
+void ADCON1::setVrefHiConfiguration(unsigned int cfg, unsigned int channel)
+{
+  if (cfg < cMaxConfigurations) 
+    Vrefhi_position[cfg] = channel;
+}
+
+void ADCON1::setNumberOfChannels(unsigned int nChannels)
+{
+  if (m_nAnalogChannels || !nChannels)
+    return;
+
+  m_nAnalogChannels = nChannels;
+  m_AnalogPins = new PinModule *[m_nAnalogChannels];
+
+  for (int i=0; i<m_nAnalogChannels; i++)
+    m_AnalogPins[i] = &AnInvalidAnalogInput;
+}
+
+void ADCON1::setIOPin(unsigned int channel, PinModule *newPin)
+{
+  if (m_AnalogPins[channel] == &AnInvalidAnalogInput && newPin!=0) {
+    m_AnalogPins[channel] = newPin;
+  }
+}
+
+
+//------------------------------------------------------
+double ADCON1::getChannelVoltage(unsigned int channel)
+{
+  double voltage=0.0;
+  if(channel <= m_nAnalogChannels) {
+    if ( (1<<channel) & m_configuration_bits[value.data & mValidCfgBits]) {
+      PinModule *pm = m_AnalogPins[channel];
+      voltage = (pm != &AnInvalidAnalogInput) ? 
+	pm->getPin().get_nodeVoltage() : 0.0;
+    }
+  }
+
+  return voltage;
+}
+
+double ADCON1::getVrefHi()
+{
+  if (Vrefhi_position[value.data & mValidCfgBits] < m_nAnalogChannels)
+    return getChannelVoltage(Vrefhi_position[value.data & mValidCfgBits]);
+
+  return ((Processor *)cpu)->get_Vdd();
+}
+
+double ADCON1::getVrefLo()
+{
+  if (Vreflo_position[value.data & mValidCfgBits] < m_nAnalogChannels)
+    return getChannelVoltage(Vreflo_position[value.data & mValidCfgBits]);
+
+  return 0.0;
+}
+
 //------------------------------------------------------
 
-double ADCON1::get_Vref(void)
-{
-
-
-  double vrefhi,vreflo;
-
-  if ( Vrefhi_position[value.get() & valid_bits] ==  3)
-    vrefhi = analog_port->get_bit_voltage(3);
-  else
-    vrefhi = get_cpu()->get_Vdd();
-
-
-  if ( Vreflo_position[value.get() & valid_bits] ==  2)
-    vreflo = analog_port->get_bit_voltage(2);
-  else
-    vreflo = 0;
-
-  //cout << "AD reading ref hi 0x" << hex <<  vrefhi << " low 0x" << vreflo << '\n';
-
-  return (vrefhi - vreflo);
-
-}
 
 void P16C71::create_sfr_map(void)
 {
@@ -320,54 +369,31 @@ void P16C71::create_sfr_map(void)
   add_sfr_register(&adres,  0x89, RegisterValue(0,0));
   add_sfr_register(&adres,  0x09, RegisterValue(0,0));
 
-  //1adcon0.analog_port = porta;
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1);
+  adcon1.setNumberOfChannels(4);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setChannelConfiguration(0, 0x0f);
+  adcon1.setChannelConfiguration(1, 0x0f);
+  adcon1.setChannelConfiguration(2, 0x03);
+  adcon1.setChannelConfiguration(3, 0x00);
+  adcon1.setVrefHiConfiguration(1, 3);
+
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
-  adcon0.channel_mask = 3;
   intcon = &intcon_reg;
-
-  //1adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG1 | ADCON1::PCFG2;
-
-  adcon0.new_name("adcon0");
-  adcon1.new_name("adcon1");
-  adres.new_name("adres");
-
-  adcon1.Vrefhi_position[0] = 8;
-  adcon1.Vrefhi_position[1] = 3;
-  adcon1.Vrefhi_position[2] = 8;
-  adcon1.Vrefhi_position[3] = 8;
-
-  adcon1.Vreflo_position[0] = 8;
-  adcon1.Vreflo_position[1] = 8;
-  adcon1.Vreflo_position[2] = 8;
-  adcon1.Vreflo_position[3] = 8;
-
-  adcon1.configuration_bits[0] = 0xf;
-  adcon1.configuration_bits[1] = 0xf;
-  adcon1.configuration_bits[2] = 0x3;
-  adcon1.configuration_bits[3] = 0;
-
-  // c71x only has 4 analog configurations. The gpsim analog module
-  // supports 16 different configurations, so modulo duplicate the first
-  // 4 positions to the remaining 12.
-
-  for(int i=4; i<16; i++) {
-    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&3];
-    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&3];
-    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&3];
-  }
 
 }
 
 
 void P16C71::create_symbols(void)
 {
-  //symbol_table.add_register(m_portb);
-  //symbol_table.add_ioport(porta);
 }
+
 void P16C71::create(void)
 {
 
@@ -425,48 +451,30 @@ void P16C712::create_sfr_map(void)
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
-  adcon0.channel_mask = 3;
+  //adcon0.channel_mask = 3;
   intcon = &intcon_reg;
 
-  //1adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+  adcon1.setNumberOfChannels(4);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setChannelConfiguration(0, 0x0f);
+  adcon1.setChannelConfiguration(1, 0x0f);
+  adcon1.setChannelConfiguration(2, 0x0f);
+  adcon1.setChannelConfiguration(3, 0x0f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
 
   adcon0.new_name("adcon0");
   adcon1.new_name("adcon1");
   adres.new_name("adres");
-
-  adcon1.Vrefhi_position[0] = 8;
-  adcon1.Vrefhi_position[1] = 3;
-  adcon1.Vrefhi_position[2] = 8;
-  adcon1.Vrefhi_position[3] = 3;
-  adcon1.Vrefhi_position[4] = 8;
-  adcon1.Vrefhi_position[5] = 3;
-  adcon1.Vrefhi_position[6] = 8;
-  adcon1.Vrefhi_position[7] = 8;
-
-  int i;
-  for (i=0; i<8; i++)
-      adcon1.Vreflo_position[i] = 8;
-
-  adcon1.configuration_bits[0] = 0xf;
-  adcon1.configuration_bits[1] = 0xf;
-  adcon1.configuration_bits[2] = 0xf;
-  adcon1.configuration_bits[3] = 0xf;
-  adcon1.configuration_bits[4] = 0xB;
-  adcon1.configuration_bits[5] = 0xB;
-  adcon1.configuration_bits[6] = 0;
-  adcon1.configuration_bits[7] = 0;
-
-  // c712 only has 8 analog configurations. The gpsim analog module
-  // supports 16 different configurations, so modulo duplicate the first
-  // 8 positions to the remaining 8.
-
-  for(int i=8; i<16; i++) {
-    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
-    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
-    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
-  }
-
 }
 
 
@@ -556,62 +564,38 @@ void P16C72::create_sfr_map(void)
 
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
-  //1adcon0.analog_port = porta;
-  adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+  //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
 
   intcon = &intcon_reg;
 
-  //1adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
-
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+  adcon1.setNumberOfChannels(5);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setChannelConfiguration(0, 0x1f);
+  adcon1.setChannelConfiguration(1, 0x1f);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
 
   adcon0.new_name("adcon0");
   adcon1.new_name("adcon1");
   adres.new_name("adres");
-
-  adcon1.Vrefhi_position[0] = 8;
-  adcon1.Vrefhi_position[1] = 3;
-  adcon1.Vrefhi_position[2] = 8;
-  adcon1.Vrefhi_position[3] = 8;
-  adcon1.Vrefhi_position[4] = 8;
-  adcon1.Vrefhi_position[5] = 3;
-  adcon1.Vrefhi_position[6] = 8;
-  adcon1.Vrefhi_position[7] = 8;
-
-  adcon1.Vreflo_position[0] = 8;
-  adcon1.Vreflo_position[1] = 8;
-  adcon1.Vreflo_position[2] = 8;
-  adcon1.Vreflo_position[3] = 8;
-  adcon1.Vreflo_position[4] = 8;
-  adcon1.Vreflo_position[5] = 8;
-  adcon1.Vreflo_position[6] = 8;
-  adcon1.Vreflo_position[7] = 8;
-
-  adcon1.configuration_bits[0] = 0xff;
-  adcon1.configuration_bits[1] = 0xff;
-  adcon1.configuration_bits[2] = 0x1f;
-  adcon1.configuration_bits[3] = 0x1f;
-  adcon1.configuration_bits[4] = 0x0b;
-  adcon1.configuration_bits[5] = 0x0b;
-  adcon1.configuration_bits[6] = 0;
-  adcon1.configuration_bits[7] = 0;
-
-  // c72 only has 8 analog configurations. The gpsim analog module
-  // supports 16 different configurations, so duplicate the first
-  // 8 positions to the remaining 8.
-
-  for(int i=8; i<16; i++) {
-    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
-    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
-    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
-  }
 
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
@@ -682,61 +666,42 @@ void P16C73::create_sfr_map(void)
   add_sfr_register(&adres,  0x1e, RegisterValue(0,0));
 
   //1adcon0.analog_port = porta;
-  adcon0.analog_port2 = 0;
+  //2adcon0.analog_port2 = 0;
   adcon0.adres = &adres;
   adcon0.adresl = 0;
   adcon0.adcon1 = &adcon1;
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  adcon0.channel_mask = 7;  // even though there are only 5 inputs...
+  //adcon0.channel_mask = 7;  // even though there are only 5 inputs...
 
   intcon = &intcon_reg;
 
   //1adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1| ADCON1::PCFG2);
+
+  adcon1.setNumberOfChannels(5);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setChannelConfiguration(0, 0x1f);
+  adcon1.setChannelConfiguration(1, 0x1f);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
 
 
   adcon0.new_name("adcon0");
   adcon1.new_name("adcon1");
   adres.new_name("adres");
-
-  adcon1.Vrefhi_position[0] = 8;
-  adcon1.Vrefhi_position[1] = 3;
-  adcon1.Vrefhi_position[2] = 8;
-  adcon1.Vrefhi_position[3] = 8;
-  adcon1.Vrefhi_position[4] = 8;
-  adcon1.Vrefhi_position[5] = 3;
-  adcon1.Vrefhi_position[6] = 8;
-  adcon1.Vrefhi_position[7] = 8;
-
-  adcon1.Vreflo_position[0] = 8;
-  adcon1.Vreflo_position[1] = 8;
-  adcon1.Vreflo_position[2] = 8;
-  adcon1.Vreflo_position[3] = 8;
-  adcon1.Vreflo_position[4] = 8;
-  adcon1.Vreflo_position[5] = 8;
-  adcon1.Vreflo_position[6] = 8;
-  adcon1.Vreflo_position[7] = 8;
-
-  adcon1.configuration_bits[0] = 0xff;
-  adcon1.configuration_bits[1] = 0xff;
-  adcon1.configuration_bits[2] = 0x1f;
-  adcon1.configuration_bits[3] = 0x1f;
-  adcon1.configuration_bits[4] = 0x0b;
-  adcon1.configuration_bits[5] = 0x0b;
-  adcon1.configuration_bits[6] = 0;
-  adcon1.configuration_bits[7] = 0;
-
-  // c73 only has 8 analog configurations. The gpsim analog module
-  // supports 16 different configurations, so duplicate the first
-  // 8 positions to the remaining 8.
-
-  for(int i=8; i<16; i++) {
-    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
-    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
-    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
-  }
 
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
@@ -816,54 +781,37 @@ void P16C74::create_sfr_map(void)
   adcon0.intcon = &intcon_reg;
   // adcon0.pir_set = get_pir_set();
   adcon0.pir_set = &pir_set_2_def;
-  adcon0.channel_mask = 7;
+  //adcon0.channel_mask = 7;
 
   intcon = &intcon_reg;
 
-  //1adcon1.analog_port = porta;
-  adcon1.valid_bits = ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2;
+
+  adcon1.setValidCfgBits(ADCON1::PCFG0 | ADCON1::PCFG1 | ADCON1::PCFG2);
+  adcon1.setNumberOfChannels(8);
+  adcon1.setIOPin(0, &(*m_porta)[0]);
+  adcon1.setIOPin(1, &(*m_porta)[1]);
+  adcon1.setIOPin(2, &(*m_porta)[2]);
+  adcon1.setIOPin(3, &(*m_porta)[3]);
+  adcon1.setIOPin(4, &(*m_porta)[5]);
+  adcon1.setIOPin(5, &(*m_porte)[0]);
+  adcon1.setIOPin(6, &(*m_porte)[1]);
+  adcon1.setIOPin(7, &(*m_porte)[2]);
+  adcon1.setChannelConfiguration(0, 0xff);
+  adcon1.setChannelConfiguration(1, 0xff);
+  adcon1.setChannelConfiguration(2, 0x1f);
+  adcon1.setChannelConfiguration(3, 0x1f);
+  adcon1.setChannelConfiguration(4, 0x0b);
+  adcon1.setChannelConfiguration(5, 0x0b);
+  adcon1.setChannelConfiguration(6, 0x00);
+  adcon1.setChannelConfiguration(7, 0x00);
+  adcon1.setVrefHiConfiguration(1, 3);
+  adcon1.setVrefHiConfiguration(3, 3);
+  adcon1.setVrefHiConfiguration(5, 3);
 
 
   adcon0.new_name("adcon0");
   adcon1.new_name("adcon1");
   adres.new_name("adres");
-
-  adcon1.Vrefhi_position[0] = 8;
-  adcon1.Vrefhi_position[1] = 3;
-  adcon1.Vrefhi_position[2] = 8;
-  adcon1.Vrefhi_position[3] = 8;
-  adcon1.Vrefhi_position[4] = 8;
-  adcon1.Vrefhi_position[5] = 3;
-  adcon1.Vrefhi_position[6] = 8;
-  adcon1.Vrefhi_position[7] = 8;
-
-  adcon1.Vreflo_position[0] = 8;
-  adcon1.Vreflo_position[1] = 8;
-  adcon1.Vreflo_position[2] = 8;
-  adcon1.Vreflo_position[3] = 8;
-  adcon1.Vreflo_position[4] = 8;
-  adcon1.Vreflo_position[5] = 8;
-  adcon1.Vreflo_position[6] = 8;
-  adcon1.Vreflo_position[7] = 8;
-
-  adcon1.configuration_bits[0] = 0xff;
-  adcon1.configuration_bits[1] = 0xff;
-  adcon1.configuration_bits[2] = 0x1f;
-  adcon1.configuration_bits[3] = 0x1f;
-  adcon1.configuration_bits[4] = 0x0b;
-  adcon1.configuration_bits[5] = 0x0b;
-  adcon1.configuration_bits[6] = 0;
-  adcon1.configuration_bits[7] = 0;
-
-  // c74 only has 8 analog configurations. The gpsim analog module
-  // supports 16 different configurations, so duplicate the first
-  // 8 positions to the remaining 8.
-
-  for(int i=8; i<16; i++) {
-    adcon1.Vrefhi_position[i] = adcon1.Vrefhi_position[i&7];
-    adcon1.Vreflo_position[i] = adcon1.Vreflo_position[i&7];
-    adcon1.configuration_bits[i] = adcon1.configuration_bits[i&7];
-  }
 
   // Link the A/D converter to the Capture Compare Module
   ccp2con.setADCON(&adcon0);
