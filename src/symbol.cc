@@ -551,8 +551,20 @@ stimulus * Symbol_Table::findStimulus(const char *s)
   if( pNodeSym != NULL) {
     return pNodeSym->getStimulus();
   }
+  attribute_symbol *pSymbol = findAttributeSymbol(s);
+  if(pSymbol != NULL) {
+    Value *pValue;
+    pSymbol->get(&pValue);
+    return dynamic_cast<stimulus*>(pValue);
+  }
   return ((stimulus *)0);
 }
+
+attribute_symbol * Symbol_Table::findAttributeSymbol(const char *s)
+{
+  return findSymbol(s, (attribute_symbol*)NULL);
+}
+
 
 Symbol_Table::stimulus_symbol_iterator Symbol_Table::beginStimulusSymbol() {
   return (stimulus_symbol_iterator)beginSymbol(
@@ -1226,6 +1238,13 @@ void attribute_symbol::get(Packet &p)
   if(attribute)
     attribute->get(p);
 }
+
+void attribute_symbol::get(Value **v)
+{
+  if(attribute && v)
+    *v = attribute;
+}
+
 
 string module_symbol::toString()
 {

@@ -47,6 +47,7 @@ class register_symbol;
 class node_symbol;
 class stimulus_symbol;
 class module_symbol;
+class attribute_symbol;
 
 void display_symbol_file_error(int);
 
@@ -168,6 +169,10 @@ public:
   }
   inline stimulus *         findStimulus(const string &s) {
     return findStimulus(s.c_str());
+  }
+  attribute_symbol *         findAttributeSymbol(const char *s);
+  inline attribute_symbol *  findAttributeSymbol(string &s) {
+    return findAttributeSymbol(s.c_str());
   }
 
   bool  Exist(const char *);
@@ -516,6 +521,7 @@ public:
   virtual void get(double &);
   virtual void get(char *, int len);
   virtual void get(Packet &);
+  virtual void get(Value **);
 
   /// copy the object value to a user char array
   virtual char *toString(char *, int len);
