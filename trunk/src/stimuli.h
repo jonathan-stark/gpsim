@@ -35,6 +35,7 @@ using namespace std;
 class Stimulus_Node;
 class stimulus;
 class IOPORT;
+class IOPIN;
 class symbol;
 
 /* typedefs */
@@ -66,6 +67,9 @@ public:
     m_sPin = pPin;
     m_sPort = pPort;
   }
+  stimulus *GetStimulus();
+  IOPIN * GetIOPin();
+  Value * GetValue();
   Value * m_sModuleName;
   Value * m_sPin;
   Value * m_sPort;
