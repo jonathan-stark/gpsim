@@ -1,3 +1,8 @@
+2005-08-11 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h:
+	Quick fix of when trying to attach an input data stimuli that
+	was broken a couple of checkins ago.
+
 2005-08-11 Borut Razem <borut.razem@siol.net>
 	* plat/win32/gpsim.nsi: bump build number
 
@@ -13,7 +18,7 @@
 	src/p16x6x.cc: Updated the peripheral connections with the new
 	PeripheralSignalSource class.
 
-2005-08-04 J.R. Heisey <jrheisey@sourceforge.com>
+2005-08-10 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/stimuli.cc, src/stimuli.h, src/symbol.cc, src/symbol.h,
 	cli/cmd_attach.cc, cli/cmd_attach.h, cli/parse.yy,
 	cli/scan.ll, plat/win32/gpsim.def: Modified
