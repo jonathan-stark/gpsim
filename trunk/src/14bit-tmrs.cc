@@ -620,7 +620,7 @@ void TMRL::setIOpin(PinModule *extClkSource)
     extClkSource->addSink(this);
 }
 
-void TMRL::setSinkState(const char new3State)
+void TMRL::setSinkState(char new3State)
 {
   if (new3State != m_cState) {
     m_cState = new3State;

@@ -137,7 +137,7 @@ void _SSPCON::put(unsigned int new_value)
 // setState
 // Called whenever the SDI input changes states.
 // 
-void _SSPCON::setSinkState(const char new3State)
+void _SSPCON::setSinkState(char new3State)
 {
   m_cSDIState = new3State;
 }
