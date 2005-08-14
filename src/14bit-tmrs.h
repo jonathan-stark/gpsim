@@ -246,7 +246,7 @@ public:
   virtual void new_clock_source();
   virtual void update();
   virtual void clear_timer();
-  virtual void setSinkState(const char);
+  virtual void setSinkState(char);
   virtual void setIOpin(PinModule *);
 protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock

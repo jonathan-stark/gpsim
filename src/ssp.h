@@ -119,7 +119,7 @@ public:
   void setIOpins(PinModule *sck,PinModule *ss,PinModule *sdo, PinModule *sdi);
   void setSSPBUF(_SSPBUF *);
   void setSSPSTAT(_SSPSTAT *);
-  virtual void setSinkState(const char);
+  virtual void setSinkState(char);
 
 private:
   PeripheralSignalSource *m_SckSource;
