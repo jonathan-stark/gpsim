@@ -93,6 +93,7 @@ public:
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
   virtual char *name(char *,int len);
+  virtual bool eval_Expression();
 };
 
 

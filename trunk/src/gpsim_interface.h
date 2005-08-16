@@ -239,7 +239,9 @@ typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
 class ICommandHandler {
 public:
   virtual char *GetName(void) = 0;
+  // Fixme: should Execute be renamed ExecuteCommand?
   virtual int Execute(const char * commandline, ISimConsole *out) = 0;
+  virtual int ExecuteScript(list<string *> &script, ISimConsole *out) = 0;
 };
 
 #endif // __GPSIM_INTERFACE_H__

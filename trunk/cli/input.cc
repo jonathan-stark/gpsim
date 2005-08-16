@@ -117,6 +117,7 @@ extern int quit_parse;
 extern void start_server(void);
 extern void stop_server(void);
 
+
 //------------------------------------------------------------------------
 // Command Handler - create an interface to the CLI
 //------------------------------------------------------------------------
@@ -127,29 +128,19 @@ class CCliCommandHandler : public ICommandHandler
 public:
   virtual char *GetName();
   virtual int Execute(const char * commandline, ISimConsole *out);
+  virtual int ExecuteScript(list<string *> &script, ISimConsole *out);
 };
 
-char *CCliCommandHandler::GetName()
-{
-  return "gpsimCLI";
-}
+// This instantiation will get registered so that code
+//  in ../src can get access to this class (and consequently the command line).
 
-int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
-{
-  cout << "GCLICommandHandler::Execute:" << commandline << endl;
-  
-  return parse_string((char*)commandline);
-
-}
 static CCliCommandHandler sCliCommandHandler;
 
-//------------------------------------------------------------------------
-//------------------------------------------------------------------------
 
-
-/*
-  temporary --- linked list input buffer
-*/
+//------------------------------------------------------------------------
+// LLInput - A class for storing a command line command
+// This is private to input.cc
+//------------------------------------------------------------------------
 
 class LLInput {
 public:
@@ -162,6 +153,31 @@ public:
   char *data;
   LLInput *next_input;
 };
+
+//------------------------------------------------------------------------
+// LLStack - A class for storing a collection of command line commands.
+// This is private to input.cc
+//------------------------------------------------------------------------
+class LLStack
+{
+public:
+  LLStack();
+
+  void Push();
+  void Pop();
+  void Append(char *, Macro *);
+  LLInput *GetNext();
+
+  void print();
+
+  LLInput *LLdata;
+  LLStack *next_stack;
+};
+
+
+
+//------------------------------------------------------------------------
+// LLInput - linked list input for commands.
 
 LLInput::LLInput()
   : macro(0),data(0), next_input(0)
@@ -180,22 +196,8 @@ LLInput::~LLInput()
     free(data);
 }
 
-//************************************************************************
-class LLStack
-{
-public:
-  LLStack();
-
-  void Push();
-  void Pop();
-  void Append(char *, Macro *);
-  LLInput *GetNext();
-
-  void print();
-
-  LLInput *LLdata;
-  LLStack *next_stack;
-};
+//------------------------------------------------------------------------
+// LLStack - linked list stack for commands.
 
 LLStack::LLStack()
   : LLdata(0), next_stack(0)
@@ -312,7 +314,7 @@ void LLStack::print(void)
   }
 }
 
-void LLStack::Push(void)
+void LLStack::Push()
 {
   LLStack *s = new LLStack();
 
@@ -326,7 +328,6 @@ void LLStack::Pop()
 {
   if (Stack)
     Stack = Stack->next_stack;
-  print();
 }
 
 void LLStack::Append(char *s, Macro *m)
@@ -381,11 +382,12 @@ void add_string_to_input_buffer(char *s, Macro *m=0)
   if(!Stack)
     Stack = new LLStack();
   Stack->Append(s,m);
+
 }
 
 /*******************************************************
  */
-void start_new_input_stream(void)
+void start_new_input_stream()
 {
   if(!Stack)
     Stack = new LLStack();
@@ -439,7 +441,7 @@ int parse_string(char * str)
 
 //========================================================================
 //
-
+// FIXME TSD --16aug05 -- Is this really still needed? Remove after Oct05
 static int check_old_command(char *s)
 {
     char new_command[256];
@@ -851,3 +853,56 @@ void initialize_readline (void)
 
 #endif //HAVE_READLINE
 }
+
+
+//------------------------------------------------------------------------
+// CLI command handler
+//
+// The command handler is an interface that gets 'registered' with gpsim.
+// This means that clients interested in gpsim's cli can look up this
+// registered handler and get access to the command line. This is primarily
+// used by symbol files that embed gpsim scripts. See src/modules.cc.
+// 
+
+char *CCliCommandHandler::GetName()
+{
+  return "gpsimCLI";
+}
+
+int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
+{
+  
+  return parse_string((char*)commandline);
+
+}
+int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
+{
+  if (verbose & 4)
+    cout << "GCLICommandHandler::Execute Script:" << endl;
+
+  // We need to execute the script now. There may be other commands
+  // currently pending, so a new command stream is created and the
+  // commands that are in this script are placed there.
+
+  start_new_input_stream();
+  add_string_to_input_buffer("\n");
+
+  list <string *> :: iterator command_iterator;
+
+  for (command_iterator = script.begin();
+       command_iterator != script.end(); 
+       ++command_iterator) {
+
+    string *cmd = *command_iterator;
+    add_string_to_input_buffer((char *) cmd->c_str());
+  }
+
+  // -- don't start the parser yet...
+  // we need to review this, but if the parser starts now, then it
+  // becomes difficult to Execute several scripts in a row.
+  //start_parse();
+
+  return CMD_ERR_OK;
+}
+
+

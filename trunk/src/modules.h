@@ -149,9 +149,15 @@ public:
   virtual void *get_widget(void) {return widget;}
 
   /// cli
-  /// Modules can have special scripts associated with them.
+  /// Modules can have gpsim CLI scripts associated with them. 
+  /// add_command will add a single CLI command to a script
   void add_command(string &script_name, string &command);
+
+  /// run_script will pass a script to the gpsim CLI. This script
+  /// executes immediately (i.e. it'll execute before any commands
+  /// that may already be queued).
   void run_script(string &script_name);
+
 
   const virtual char *type(void) { return (name_str.c_str()); };
 
@@ -172,6 +178,7 @@ private:
     ~ModuleScript();
     void add_command(string &command);
     void run(ICommandHandler *);
+    void concatenate(ModuleScript *);
   private:
     string name;
     list<string *> m_commands;

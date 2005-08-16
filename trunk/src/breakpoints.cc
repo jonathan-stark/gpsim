@@ -726,6 +726,14 @@ Breakpoints::Breakpoints(void)
 }
 
 //----------------------------------------------------------------------------
+bool Breakpoint_Instruction::eval_Expression()
+{
+  if (bHasExpression())
+    return !TriggerObject::eval_Expression();
+
+  return true;
+}
+
 void Breakpoint_Instruction::execute(void)
 {
 
@@ -733,8 +741,8 @@ void Breakpoint_Instruction::execute(void)
       (simulation_start_cycle != get_cycles().value) &&
       eval_Expression()) {
 
-      action->action();
-      trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
+    action->action();
+    trace.breakpoint( (Breakpoints::BREAK_ON_EXECUTION>>8) | address );
   }
   else
     replaced->execute();

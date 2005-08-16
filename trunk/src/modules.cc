@@ -265,6 +265,19 @@ IOPIN *Module::get_pin(unsigned int pin_number)
 }
 
 //-------------------------------------------------------------------
+// Module Scripts
+//
+// Module command line scripts are named scripts created by symbol 
+// files. For example, with PIC cod files, it's possible to
+// create assertions and simulation commands using the '.assert'
+// and '.sim' directives. These commands are ASCII strings that
+// are collected together. 
+//
+
+//-------------------------------------------------------------------
+// Module::add_command
+//
+// Add a command line command to a Module Script.
 //-------------------------------------------------------------------
 void Module::add_command(string &script_name, string &command)
 {
@@ -278,6 +291,8 @@ void Module::add_command(string &script_name, string &command)
 }
 
 //-------------------------------------------------------------------
+// Module::run_script - execute a gpsim command line script
+// 
 //-------------------------------------------------------------------
 void Module::run_script(string &script_name)
 {
@@ -293,7 +308,11 @@ Module::ModuleScript::ModuleScript(string &name_)
   : name(name_)
 {
 }
-
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+Module::ModuleScript::~ModuleScript()
+{
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 void Module::ModuleScript::add_command(string &command)
@@ -309,18 +328,23 @@ void Module::ModuleScript::run(ICommandHandler *pCommandHandler)
   if (!pCommandHandler)
     return;
 
-  list <string *> :: iterator command_iterator;
-
-  for (command_iterator = m_commands.begin();
-       command_iterator != m_commands.end(); 
-       ++command_iterator) {
-
-    string *cmd = *command_iterator;
-    if(CMD_ERR_COMMANDNOTDEFINED == pCommandHandler->Execute(cmd->c_str(),0))
-      printf("Module script %s: Failed to execute command:%s\n",name.c_str(),cmd->c_str());
-  }
+  pCommandHandler->ExecuteScript(m_commands,0);
 }
 
+//-------------------------------------------------------------------
+//-------------------------------------------------------------------
+void Module::ModuleScript::concatenate(ModuleScript *pOtherScript)
+{
+  if (!pOtherScript)
+    return;
+
+  list <string *> :: iterator command_iterator;
+
+  for (command_iterator = pOtherScript->m_commands.begin();
+       command_iterator != pOtherScript->m_commands.end(); 
+       ++command_iterator)
+    m_commands.push_back(*command_iterator);
+}
 //-------------------------------------------------------------------
 //-------------------------------------------------------------------
 Module_Library::Module_Library(const char *new_name, void *library_handle)
