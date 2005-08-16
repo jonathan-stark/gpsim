@@ -281,7 +281,7 @@ const char * CGpsimUserInterface::FormatValue(unsigned int uValue) {
 }
 
 const char * CGpsimUserInterface::FormatValue(gint64 uValue) {
-  return FormatValue(uValue, s_iValueRadix, s_iValueRadix);
+  return FormatValue(uValue, s_iValueMask, s_iValueRadix);
 }
 
 const char * CGpsimUserInterface::FormatValue(gint64 uValue,

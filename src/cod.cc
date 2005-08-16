@@ -457,6 +457,11 @@ void PicCodProgramFileType::read_line_numbers_from_cod(Processor *cpu)
 }
 
 //-----------------------------------------------------------
+// read_message_area(Processor *cpu)
+//
+// The .cod file message area contains information like assertions
+// and simulation scripts. 
+
 void PicCodProgramFileType::read_message_area(Processor *cpu)
 {
 #define MAX_STRING_LEN  255 /* Maximum length of a debug message */
@@ -465,15 +470,12 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
   unsigned short i, j, start_block, end_block;
   unsigned short laddress;
 
-  // The 'E' option in gpasm specifies a list of gpsim commands that
-  // are to be executed after the .cod file has been loaded.
-
-  list<string *> commands;
-  list<string *>::iterator commands_iterator;
-
+  // If the .cod file contains a simulation script, then we'll
+  // pass it to the command line interface. Note, we go through
+  // this indirect way of accessing the CLI since we don't wish
+  // for code in the src/ directory to depend directly on code
+  // in the cli/ (or any other) directory.
   ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
-  if(!pCli)
-    printf("experimental:cod unable to find cli interface\n");
 
   start_block = get_short_int(&main_dir.dir.block[COD_DIR_MESSTAB]);
 
@@ -483,29 +485,37 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 
     for(i=start_block; i<=end_block; i++) {
       read_block(temp_block, i);
+
 #if 0
-  int q,p;
-  printf ("Codefile block 0x%x\n",i);
+      {
+	// Debug code to display the contents of the message area.
+	int q,p;
+	printf ("Codefile block 0x%x\n",i);
 
-  for (q=0,p=0; q < COD_BLOCK_SIZE; q+=16) {
+	for (q=0,p=0; q < COD_BLOCK_SIZE; q+=16) {
 
-    for (p=0; p<16; p++)
-      printf("%02X ",(unsigned char)temp_block[q+p]);
-    for (p=0; p<16; p++)
-      printf("%c", isascii(temp_block[q+p]) ? temp_block[q+p] : '.');
-    printf("\n");
-  }
-
+	  for (p=0; p<16; p++)
+	    printf("%02X ",(unsigned char)temp_block[q+p]);
+	  for (p=0; p<16; p++)
+	    printf("%c", isascii(temp_block[q+p]) ? temp_block[q+p] : '.');
+	  printf("\n");
+	}
 #endif
     
       j = 0;
+
+      // Each message has the form of
+      // AAAAAAAACCstring
+      // AAAAAAAA - 32bit address in PIC program memory
+      // CC - 8-bit command
+      // string - a 0-terminated string of characters.
 
       while (j < COD_BLOCK_SIZE-8) {
 
 	/* read big endian */
 	laddress = get_be_int(&temp_block[j]);
         
-        j += 4;
+        j += 4;   // 4 = size of big endian
 
 	DebugType = temp_block[j++];
 
@@ -531,16 +541,27 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
         case 'a':
         case 'A':
           // assertion
+	  {
+	    string script("assertions");
+	    char buff[256];
+	    snprintf(buff,sizeof(buff),"break e %d %s\n",laddress,DebugMessage);
+	    string cmd(buff);
+	    cpu->add_command(script,cmd);
+	  }
+	  /*
 	  if(pCli) {
 	    char buff[256];
 	    snprintf(buff,sizeof(buff),"break e %d %s\n",laddress,DebugMessage);
 	    if(CMD_ERR_COMMANDNOTDEFINED == pCli->Execute(buff,0))
 	      printf("cod: Failed to parse assertion:%s\n",buff);
 	  }
+	  */
           break;
         case 'e':
         case 'E':
           // gpsim command
+	  // The 'E' option in gpasm specifies a list of gpsim commands that
+	  // are to be executed after the .cod file has been loaded.
 	  {
 	    string script("startup");
 	    string cmd(DebugMessage);
@@ -1082,7 +1103,9 @@ _Cleanup:
   if(*pcpu != NULL) {
     (*pcpu)->reset(POR_RESET);
     bp.clear_global();
-    string script("startup");
+    string script("assertions");
+    (*pcpu)->run_script(script);
+    script = "startup";
     (*pcpu)->run_script(script);
   }
   return error_code;
