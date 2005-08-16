@@ -1,6 +1,11 @@
 SCRIPT = 16f873.lkr
-OBJECTS =  logic_test.o
-OUTPUT = logic_test.hex
+
+PROJECT = logic_test
+OBJECTS =  $(PROJECT).o
+OUTPUT = $(PROJECT).hex
+COD = $(PROJECT).cod
+GPSIM = ../../gpsim/gpsim
+STC = $(PROJECT).stc
 
 all : $(OUTPUT)
 
@@ -13,4 +18,7 @@ $(OUTPUT) : $(OBJECTS) $(SCRIPT)
 clean:
 	rm -f *~ *.o *.lst *.map *.hex
 
-logic_test.o : logic_test.asm
+$(PROJECT).o : $(PROJECT).asm
+
+sim: $(COD) $(STC)
+	$(GPSIM) -i -c $(STC)

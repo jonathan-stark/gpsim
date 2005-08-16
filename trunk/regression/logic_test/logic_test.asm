@@ -50,7 +50,21 @@ start
         clrf    TRISB^0x80      ;Port B is an output
         movlw   0xff
         movwf   TRISC^0x80      ;Port C is an input
+
+  ; Turn off the A2D converter and make PORTA's I/O's digital:
+
+	movlw	(1<<PCFG1) | (1<<PCFG2)
+	movwf	ADCON1
+
         bcf     STATUS,RP0
+
+
+  ; Don't let the simulation run forever.
+   .sim "break c 0x10000"
+
+  ; assume we failed
+	movlw   1
+	movwf	failures
 
 
   ; Create a script to define the schematic
@@ -107,29 +121,29 @@ start
 L_OrCheck:
 	incf	PORTA,F
    .assert "(portc & 1) == ( ((porta>>2) | (porta>>1) | porta) & 1)"
-	btfss	PORTA,4
+	btfss	PORTA,3
 	 goto	L_OrCheck
 
 
   ; AND Gate check. 
   ;            U3_or
-  ; porta3  ---|-+     U4_or
+  ; portb3  ---|-+     U4_or
   ;            |& )----|-+
-  ; porta4  ---|-+     |& )---+
+  ; portb4  ---|-+     |& )---+
   ;                 +--|-+    |
-  ; porta5  --------+         |
+  ; portb5  --------+         |
   ;                           |
   ; portc1  ------------------+
   ;
 
-   .sim "node na3"
-   .sim "attach na3 U3_and.in0 porta3"
-   .sim "node na4"
-   .sim "attach na4 U3_and.in1 porta4"
+   .sim "node nb3"
+   .sim "attach nb3 U3_and.in0 portb3"
+   .sim "node nb4"
+   .sim "attach nb4 U3_and.in1 portb4"
    .sim "node n3_4"
    .sim "attach n3_4 U3_and.out U4_and.in0"
-   .sim "node na5"
-   .sim "attach na5 U4_and.in1 porta5"
+   .sim "node nb5"
+   .sim "attach nb5 U4_and.in1 portb5"
    .sim "node nc1"
    .sim "attach nc1 U4_and.out portc1"
 
@@ -138,10 +152,10 @@ L_OrCheck:
 
 L_AndCheck
 	movlw	1<<3
-	addwf	PORTA,F
+	addwf	PORTB,F
 
-   .assert "((portc>>1) & 1) == ( ((porta>>5) & (porta>>4) & (porta>>3)) & 1)"
-	movf	PORTA,W
+   .assert "((portc>>1) & 1) == ( ((portb>>5) & (portb>>4) & (portb>>3)) & 1)"
+	movf	PORTB,W
 	andlw	b'111000'
 	skpz	
 	 goto	L_AndCheck
@@ -184,34 +198,49 @@ L_XorCheck:
 
 
 
-  ; Not test
+  ; Not Gate test
+  ;           U7_not
+  ;            |\
+  ; portb6  ---| O-----+
+  ;            |/      |
+  ; portc3  -----------+
+  ;
+  ;           U8_not  U9_not
+  ;            |\      |\
+  ; portb7  ---| O-----| O---+
+  ;            |/      |/    |
+  ; portc4  -----------------+
+  ;
 
-   .sim "node nb3"
-   .sim "attach nb3 U7_not.in0 portb3"
+
+   .sim "node nb6"
+   .sim "attach nb6 U7_not.in0 portb6"
    .sim "node nc3"
    .sim "attach nc3 U7_not.out portc3"
 
-	bsf	PORTB, 3	;(don't need to do this...)
-   .assert "((portc>>3) & 1) == ( ((portb>>3) & 1)^1)"
-	bcf	PORTB, 3
-   .assert "((portc>>3) & 1) == ( ((portb>>3) & 1)^1)"
+	bsf	PORTB, 6	;(don't need to do this...)
+   .assert "((portc>>3) & 1) == ( ((portb>>6) & 1)^1)"
+	bcf	PORTB, 6
+   .assert "((portc>>3) & 1) == ( ((portb>>6) & 1)^1)"
 	nop
 
 
-   .sim "node nb4"
-   .sim "attach nb4 U8_not.in0 portb4"
+   .sim "node nb7"
+   .sim "attach nb7 U8_not.in0 portb7"
    .sim "node n7_8"
    .sim "attach n7_8 U8_not.out U9_not.in0"
    .sim "node nc4"
    .sim "attach nc4 U9_not.out portc4"
 
 
-	bsf	PORTB, 4	;(don't need to do this...)
-   .assert "((portc>>4) & 1) == ( ((portb>>4) & 1))"
-	bcf	PORTB, 4
-   .assert "((portc>>4) & 1) == ( ((portb>>4) & 1))"
+	bsf	PORTB, 7	;(don't need to do this...)
+   .assert "((portc>>4) & 1) == ( ((portb>>7) & 1))"
+	bcf	PORTB, 7
+   .assert "((portc>>4) & 1) == ( ((portb>>7) & 1))"
 	nop
 
+passed:
+	clrf	failures
 
 done:
   ; If no expression is specified, then break unconditionally

@@ -1,0 +1,9 @@
+
+# simple script to load and start the simulation 
+load s logic_test.cod
+
+run
+quit
+
+
+
