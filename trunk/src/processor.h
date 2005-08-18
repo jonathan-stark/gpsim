@@ -505,6 +505,9 @@ public:
   virtual void setBreakOnReset(bool);
   virtual bool getBreakOnReset() { return bBreakOnReset; }
 
+  bool getBreakOnInvalidRegisterRead() { return *m_pbBreakOnInvalidRegisterRead; }
+  bool getBreakOnInvalidRegisterWrite() { return *m_pbBreakOnInvalidRegisterWrite; }
+
   ///
   /// Notification of breakpoint set
   virtual void NotifyBreakpointSet(Breakpoints::BreakStatus &bs, TriggerObject *bpo) { }
@@ -587,6 +590,8 @@ private:
   bool bWarnMode;
   bool bUnknownMode;
   bool bBreakOnReset;
+  Boolean *m_pbBreakOnInvalidRegisterRead;
+  Boolean *m_pbBreakOnInvalidRegisterWrite;
 };
 
 

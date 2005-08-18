@@ -126,6 +126,15 @@ void Processor::initializeAttributes()
   add_attribute(new UnknownModeAttribute(this));
   add_attribute(new BreakOnResetAttribute(this));
 
+  m_pbBreakOnInvalidRegisterRead = new Boolean("BreakOnInvalidRegisterRead",
+    true, "Halt simulation when an invalid register is read from.");
+  m_pbBreakOnInvalidRegisterRead->setClearableSymbol(false);
+  add_attribute(m_pbBreakOnInvalidRegisterRead);
+  m_pbBreakOnInvalidRegisterWrite = new Boolean("BreakOnInvalidRegisterWrite",
+    true, "Halt simulation when an invalid register is written to.");
+  m_pbBreakOnInvalidRegisterWrite->setClearableSymbol(false);
+  add_attribute(m_pbBreakOnInvalidRegisterWrite);
+
   add_attribute(mFrequency);
 }
 
