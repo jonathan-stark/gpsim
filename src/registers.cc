@@ -494,7 +494,9 @@ void InvalidRegister::put(unsigned int new_value)
     cout << "    address 0x" << hex << address << ','; 
   cout << "   value 0x" << hex << new_value << endl;
 
-  bp.halt();
+  if(((Processor*)cpu)->getBreakOnInvalidRegisterWrite()) {
+    bp.halt();
+  }
   trace.raw(write_trace.get() | value.get());
 
   return;
@@ -507,10 +509,9 @@ unsigned int InvalidRegister::get(void)
     cout << "    address 0x" << hex << address << endl; 
 
   trace.raw(read_trace.get() | value.get());
-  // JRH, 7-5-2005 - Consider having invalid register acess
-  // halt the simulation. Perhaps there needs to be an
-  // attribute called BreakOnInvalidRegisterRead.Enable.
-  // get_bp().halt();
+  if(((Processor*)cpu)->getBreakOnInvalidRegisterRead()) {
+    bp.halt();
+  }
 
   return(0);
 }

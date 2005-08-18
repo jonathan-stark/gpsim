@@ -193,7 +193,7 @@ void Symbol_Table::PopulateWithCommandLineSymbols() {
   for(it = s_CmdLineSymbolList.begin(); it != s_CmdLineSymbolList.end(); it++) {
     pSymName = *it;
     pSymValue = strchr(pSymName, 0) + 1;
-    if(*pSymValue == '\'') {
+    if(*pSymValue == '\'' || *pSymValue == '\"') {
       char * pUnquoted = UnquoteString(strdup(pSymValue));
       pValue = new String(pSymName, pUnquoted);
       free(pUnquoted);
