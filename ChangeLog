@@ -3,6 +3,12 @@
 	src/symbol.cc: Added two processor boolean attributes
 	BreakOnValidRegisterRead and BreakOnInvalidRegisterWrite.
 
+	* src/breakpoints.cc, src/breakpoints.h, src/cmd_gpsim.h,
+	plat/win32/gpsim.def, cli/input.cc, cli/ui_gpsim.cc,
+	gpsim/main.cc: Added -e or --exit command line option
+	that accepts a parameter onbreak. This causes gpsim to
+	exit when the simulation halts.
+
 2005-08-11 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc, src/breakpoints.h: Allowed breakpoint 
 	expressions for breakpoint instructions to act like assertions.
