@@ -232,6 +232,7 @@ class ISimConsole;
 #define CMD_ERR_PROCESSORDEFINED      3
 #define CMD_ERR_PROCESSORNOTDEFINED   4
 #define CMD_ERR_COMMANDNOTDEFINED     5
+#define CMD_ERR_NOTIMPLEMENTED        6
 
 #define GPSIM_GETCOMMANDHANDLER "GetCommandHandler"
 typedef ICommandHandler * (*PFNGETCOMMANDHANDLER)(void);
