@@ -1,3 +1,7 @@
+2005-08-19 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/input.cc: Added code to allow stc files with <CR><LF>
+	for Windows EOL to be read under Linux.
+
 2005-08-18 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc, src/processor.h, src/registers.cc,
 	src/symbol.cc: Added two processor boolean attributes
