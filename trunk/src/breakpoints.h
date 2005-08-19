@@ -286,6 +286,10 @@ public:
   }
 
   unsigned int  global_break;
+  bool          m_bExitOnBreak;   // enabled from command line option
+  void EnableExitOnBreak(bool bExitOnBreak) {
+    m_bExitOnBreak = bExitOnBreak;
+  }
 
   unsigned int breakpoint_number,last_breakpoint;
 

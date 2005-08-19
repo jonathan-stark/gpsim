@@ -144,6 +144,7 @@ EXPORTS
     ?dump_raw@TraceType@@UAEHIPADH@Z
     ?dump_registers@Processor@@UAEXXZ
     ?eval_Expression@TriggerObject@@UAE_NXZ
+    ?eval_Expression@Breakpoint_Instruction@@UAE_NXZ
     ?event@BoolEventLogger@@QAEX_N@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
