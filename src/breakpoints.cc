@@ -714,11 +714,17 @@ void Breakpoints::halt(void)
     return;
   }
   global_break |= GLOBAL_STOP_RUNNING;
+  if(m_bExitOnBreak) {
+    // Let the UI or client code choose how and
+    // when to exit.
+    GetUserInterface().NotifyExitOnBreak(0);
+  }
 }
 Breakpoints::Breakpoints(void)
 {
   m_iMaxAllocated = 0;
   breakpoint_number = 0;
+  m_bExitOnBreak = false;
 
   for(int i=0; i<MAX_BREAKPOINTS; i++)
     break_status[i].type = BREAK_CLEAR;

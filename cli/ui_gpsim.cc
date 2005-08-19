@@ -31,6 +31,7 @@ const char * s_psEnglishMessages[] = {
 class CGpsimUserInterface : public IUserInterface {
 public:
   CGpsimUserInterface(const char *paStrings[]);
+  virtual ~CGpsimUserInterface() {}
 
   void CGpsimUserInterface::SetStreams(FILE *in, FILE *out);
   virtual ISimConsole &GetConsole();
@@ -68,6 +69,8 @@ public:
   virtual void SetProgramAddressMask(unsigned int uMask);
   virtual void SetRegisterAddressMask(unsigned int uMask);
   virtual void SetValueMask(unsigned int uMask);
+
+  virtual void NotifyExitOnBreak(int iExitCode);
 
   static Integer  s_iValueRadix;
   static String   s_sValueHexPrefix;
@@ -233,6 +236,13 @@ void CGpsimUserInterface::SetValueMask(unsigned int uMask) {
   s_iValueMask = uMask;
 }
 
+// From input.cc
+class Macro;
+void add_string_to_input_buffer(char *s, Macro *m=0);
+
+void CGpsimUserInterface::NotifyExitOnBreak(int iExitCode) {
+  add_string_to_input_buffer("abort_gpsim_now");
+}
 
 
 const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress) {

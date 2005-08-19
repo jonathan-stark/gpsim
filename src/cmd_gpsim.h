@@ -56,6 +56,8 @@ public:
   virtual void SetProgramAddressMask(unsigned int uMask) = 0;
   virtual void SetRegisterAddressMask(unsigned int uMask) = 0;
   virtual void SetValueMask(unsigned int uMask) = 0;
+
+  virtual void NotifyExitOnBreak(int iExitCode) = 0;
 };
 
 extern "C" IUserInterface & GetUserInterface(void);

@@ -41,6 +41,7 @@ using namespace std;
 #include "../src/interface.h"
 #include "../src/gpsim_interface.h"
 #include "../src/fopen-path.h"
+#include "../src/breakpoints.h"
 #include "../cli/ui_gpsim.h"
 
 int quit_state;
@@ -65,9 +66,15 @@ extern int yydebug;
 extern int quit_parse;
 extern int abort_gpsim;
 
+#if _DEBUG
+  char szBuild[] = "Debug";
+#else
+  char szBuild[] = "Release";
+#endif
+
 void gpsim_version(void)
 {
-  printf("%s\n", VERSION);
+  printf("%s %s\n", szBuild, VERSION);
 }
 
 // from ui_gpsim.cc
@@ -82,6 +89,7 @@ static char *hex_name     = "";
 static char *search_path  = "";
 static char *icd_port     = "";
 static char *defineSymbol = "";
+static char *sExitOn      = "";
 
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
 			0, "Examples:\n\
@@ -110,6 +118,10 @@ struct poptOption optionsTable[] = {
   { "define",'D',POPT_ARG_STRING, &defineSymbol,'D',
     "define symbol with value that is added to the gpsim symbol table. "
     "Define any number of symbols.",0},
+  { "exit", 'e',POPT_ARG_STRING, &sExitOn, 'e',
+    "Causes gpsim to auto exit on a condition. Specifying onbreak will cause "
+    "gpsim to exit when the simulation halts, but not until after the current "
+    "command script completes.",0 },
   POPT_MYEXAMPLES
   POPT_TABLEEND
 };
@@ -145,8 +157,8 @@ helpme (char *iam)
 
 void welcome(void)
 {
-
-  printf("\ngpsim - the GNUPIC simulator\nversion: %s\n", VERSION);
+  printf("\ngpsim - the GNUPIC simulator\nversion: %s %s\n",
+    szBuild, VERSION);
   printf("\n\ntype help for help\n");
 
   return;
@@ -155,7 +167,6 @@ void welcome(void)
 int 
 main (int argc, char *argv[])
 {
-
   int c,usage=0;
   bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
@@ -186,7 +197,7 @@ main (int argc, char *argv[])
         break;
 	
       case 'v':
-        printf("%s\n",VERSION);
+        gpsim_version();
         break;
 
       case 'i':
@@ -198,7 +209,16 @@ main (int argc, char *argv[])
         // add symbols on the command line to the symbol table.
         get_symbol_table().AddFromCommandLine(defineSymbol);
         break;
+      case 'e':
+        if(strcmp(sExitOn, "onbreak") == 0) {
+          get_bp().EnableExitOnBreak(true);
+        }
+        else {
+          printf("%s is invalid exit condition for -e option.\n", sExitOn);
+        }
+        break;
       }	
+
       if (usage)
         break;
     }
