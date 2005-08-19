@@ -86,6 +86,9 @@ extern "C" {
 #include <readline/readline.h>
 #include <readline/history.h>
 }
+
+static GIOChannel *channel;
+
 #endif /* HAVE_READLINE */
 
 
@@ -500,6 +503,23 @@ void process_command_file(const char * file_name)
 
       while( (s = fgets(str, 256, cmd_file)) != 0) 
       {
+          if(str[0] == 0 || 
+             str[0] == '\n' ||
+             ((str[1] == '\n' && str[0] == '\r'))) {
+              // skip the blank lines
+              continue;
+          }
+#ifndef WIN32
+          // Let us be compatible with Windows EOLs
+          // on Linux.
+          int iLast = strlen(str) - 1;
+          if(iLast >= 2 && str[iLast] == '\n' && str[iLast-1] == '\r' ) {
+            // Windows type EOL
+            // convert <CR><LF> to <LF>
+            str[iLast] = '\000';
+            str[iLast-1] = '\n';
+          }
+#endif
           if(!check_old_command(s))
               add_string_to_input_buffer(s);
       }
@@ -609,7 +629,21 @@ void cli_main(void)
   do
     {
 #ifdef HAVE_READLINE
+#ifdef WIN32
+      if(channel->is_readable) {
+        // Channel is not readable when a Windows
+        // stdin is redirected.
+        rl_callback_read_char ();
+      }
+      else {
+          char line[256];
+
+          fgets(line, sizeof(line),stdin);
+          have_line(line);
+      }
+#else
       rl_callback_read_char ();
+#endif
 #else
       char line[256];
 
@@ -710,8 +744,6 @@ gpsim_completion (const char *text, int start, int end)
 
 
 #ifdef HAVE_GUI
-
-static GIOChannel *channel;
 
 //============================================================================ 
 //
@@ -830,6 +862,9 @@ void initialize_readline (void)
   const char *prompt = get_interface().bUsingGUI() ? gpsim_prompt : gpsim_cli_prompt;
 
 #ifdef HAVE_READLINE
+  // Lets us have a gpsim section to .inputrc
+  // JRH - not tested
+//  rl_terminal_name = "gpsim";
 
 #ifdef _WIN32
   /* set console to raw mode */ 
@@ -842,10 +877,16 @@ void initialize_readline (void)
 #ifdef _WIN32
   /* set console to raw mode */ 
   win32_set_is_readable(channel);
+
+  // The channel is not readable if it is a redirected
+  // standard input, in which case we will not be getting
+  // any keypress events.
+  if(channel->is_readable) {
+    g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+  }
+#else
+ g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
 #endif
-
-  g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
-
   rl_callback_handler_install (prompt, have_line);
 
   /* Tell the completer that we want a crack first. */
