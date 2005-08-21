@@ -486,6 +486,11 @@ Integer * Symbol_Table::findInteger(const char *s)
   return findSymbol(s, (Integer*)NULL);
 }
 
+Boolean * Symbol_Table::findBoolean(const char *s)
+{
+  return findSymbol(s, (Boolean*)NULL);
+}
+
 module_symbol *Symbol_Table::findModuleSymbol(const char *s)
 {
   return findSymbol(s, (module_symbol*)NULL);
