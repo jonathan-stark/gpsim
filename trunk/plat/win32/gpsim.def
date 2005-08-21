@@ -154,6 +154,7 @@ EXPORTS
     ?find_free@TriggerObject@@UAEHXZ
     ?find_instruction@ProgramMemoryAccess@@UAEPAVinstruction@@IW4INSTRUCTION_TYPES@2@@Z
     ?findConstant@Symbol_Table@@QAEPBDII@Z
+    ?findInteger@Symbol_Table@@QAEPAVInteger@@PBD@Z
     ?findProgramAddressLabel@Symbol_Table@@QAEPBDI@Z
     ?findRegister@Symbol_Table@@QAEPAVRegister@@I@Z
     ?findRegister@Symbol_Table@@QAEPAVRegister@@PBD@Z
