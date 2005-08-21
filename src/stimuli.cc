@@ -1839,8 +1839,7 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
               bSuccess = false;
               GetUserInterface().DisplayMessage(
                   "attach error: did not find pin '%d' in module '%s'\n",
-                  (int)*pPinInt,
-                  pPinArgument->m_sModuleName->name().c_str());
+                  (int)*pPinInt, pMod->name().c_str());
             }
           }
           else {
