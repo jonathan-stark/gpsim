@@ -127,6 +127,7 @@ public:
   const char *  findConstant(unsigned int uValue,
     unsigned int uReferencedFromAddress);
   Integer *     findInteger(const char *s);
+  Boolean *     findBoolean(const char *s);
   module_symbol *findModuleSymbol(const char *s);
   Module *      findModule(const char *s);
 
