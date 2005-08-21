@@ -56,9 +56,11 @@ public:
                                         const char * processor_new_name); 
   void        Clear();
 
+  void            Initialize();
   Symbol_Table &  GetSymbolTable();
   Breakpoints &   GetBreakpoints();
   Processor *     GetActiveCPU();
+  bool            IsSourceEnabled() { return m_bEnableLoadSource; }
 
   static CSimulationContext *GetContext();
 
@@ -83,6 +85,7 @@ protected:
   // processors.
 
   int  cpu_ids;
+  Boolean &m_bEnableLoadSource; // deleted by Symbol_Table
   static CSimulationContext *s_SimulationContext;
 };
 

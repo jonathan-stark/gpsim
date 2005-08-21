@@ -67,9 +67,16 @@ extern int     verbose;
 //
 //
 
-CSimulationContext::CSimulationContext() {
+CSimulationContext::CSimulationContext() :
+  m_bEnableLoadSource(*new Boolean("EnableSourceLoad", true,
+    "Enables and disables loading of source code")) {
   active_cpu_id = 0;
   cpu_ids = 0;
+  m_bEnableLoadSource.setClearableSymbol(false);
+}
+
+void CSimulationContext::Initialize() {
+  get_symbol_table().add(&m_bEnableLoadSource);
 }
 
 CSimulationContext *CSimulationContext::s_SimulationContext = new CSimulationContext();
