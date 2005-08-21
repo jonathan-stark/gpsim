@@ -28,6 +28,7 @@ extern void initialize_readline (void);
 extern void exit_gpsim(void);
 void SetLastFullCommand(const char *pCmd);
 const char * GetLastFullCommand();
+void EnableSTCEcho(bool bEnable);
 
 #ifndef HAVE_GUI
 extern char *gnu_readline (char *s, unsigned int force_readline);
