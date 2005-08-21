@@ -305,6 +305,11 @@ public:
     return bValue;
   }
 
+  inline Boolean &operator = (bool bValue) {
+    set(bValue);
+    return *this;
+  }
+
 private:
   bool value;
 };
