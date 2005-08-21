@@ -21,6 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../config.h"
 #include "trace.h"
 #include "gpsim_interface.h"
+#include "sim_context.h"
 
 // in attribute.cc:
 extern void init_attributes();
@@ -48,5 +49,6 @@ int initialize_gpsim_core()
 {
 
   init_attributes();
+  CSimulationContext::GetContext()->Initialize();
   return 0;
 }
