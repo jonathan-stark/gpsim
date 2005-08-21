@@ -90,6 +90,7 @@ static char *search_path  = "";
 static char *icd_port     = "";
 static char *defineSymbol = "";
 static char *sExitOn      = "";
+static char *sourceEnabled = "";
 
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
 			0, "Examples:\n\
@@ -111,8 +112,13 @@ struct poptOption optionsTable[] = {
     "colon separated list of directories to search.", 0},
   { "version",'v',0,0,'v',
     "gpsim version",0},
-  { "cli",'i',0,0,'i',
+  { "echo",'E',POPT_ARG_NONE,0,'E',
+    "Echo lines from a command file to the console.",0},
+  { "cli",'i',POPT_ARG_NONE,0,'i',
     "command line mode only",0},
+  { "source",'S',POPT_ARG_STRING,&sourceEnabled,'S',
+    "'enable' or 'disable' the loading of source code. Default is 'enable'. "
+    "Useful for running faster regression tests.",0},
   { "icd", 'd',POPT_ARG_STRING, &icd_port, 0,
     "use ICD (e.g. -d /dev/ttyS0).",0 },
   { "define",'D',POPT_ARG_STRING, &defineSymbol,'D',
@@ -167,6 +173,8 @@ void welcome(void)
 int 
 main (int argc, char *argv[])
 {
+  bool bEcho = false;
+  bool bSourceEnabled = true;
   int c,usage=0;
   bool bUseGUI = true;    // assume that we want to use the gui
   char command_str[256];
@@ -208,7 +216,26 @@ main (int argc, char *argv[])
       case 'D':
         // add symbols on the command line to the symbol table.
         get_symbol_table().AddFromCommandLine(defineSymbol);
+        defineSymbol = "";
         break;
+
+      case 'S':
+        if(strcmp(sourceEnabled, "enable") == 0) {
+          bSourceEnabled = true;
+        }
+        else if(strcmp(sourceEnabled, "disable") == 0) {
+          bSourceEnabled = false;
+        }
+        else {
+          usage = 1;
+        }
+        break;
+
+      case 'E':
+        bEcho = true;
+        EnableSTCEcho(true);
+        break;
+
       case 'e':
         if(strcmp(sExitOn, "onbreak") == 0) {
           get_bp().EnableExitOnBreak(true);
@@ -230,7 +257,12 @@ main (int argc, char *argv[])
     exit (1);
   }
 
-
+  if(bEcho) {
+    for(int index = 0; index < argc; index++) {
+      printf("%s ", argv[index]);
+    }
+    printf("\n");
+  }
   if(poptPeekArg(optCon))
 	  hex_name=strdup(poptPeekArg(optCon));
   
@@ -243,6 +275,10 @@ main (int argc, char *argv[])
   initialize_gpsim();
   initialize_commands();
   initialize_readline();
+
+  // must be done after initialize_gpsim_core()
+  Boolean &bEnableSourceLoad = *get_symbol_table().findBoolean("EnableSourceLoad");
+  bEnableSourceLoad = bSourceEnabled;
 
   // initialize the gui
   
