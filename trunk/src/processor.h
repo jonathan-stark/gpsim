@@ -252,6 +252,7 @@ class FileContext
   void rewind(void);
   void open(const char *mode);
   void close();
+  bool IsOpen() { return fptr != NULL; }
 
   int get_address(unsigned int line);
   void put_address(unsigned int line, unsigned int address);
