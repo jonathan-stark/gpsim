@@ -121,6 +121,12 @@ extern void start_server(void);
 extern void stop_server(void);
 
 
+static Boolean  &s_bSTCEcho = *new Boolean("CliTrace", false,
+  "Enable echoing commands from STC files to the console.");
+void EnableSTCEcho(bool bEnable) {
+  s_bSTCEcho = bEnable;
+}
+
 //------------------------------------------------------------------------
 // Command Handler - create an interface to the CLI
 //------------------------------------------------------------------------
@@ -286,6 +292,8 @@ void initialize_CLI()
 
 void initialize_gpsim(void)
 {
+  s_bSTCEcho.setClearableSymbol(false);
+  get_symbol_table().add(&s_bSTCEcho);
   initialize_CLI();
   if(gUsingThreads()) 
     initialize_threads();
@@ -607,6 +615,10 @@ gpsim_read (char *buf, unsigned max_size)
   strncpy(buf, cPstr, count);
   buf[count] = 0;
   SetLastFullCommand(buf);
+  if(s_bSTCEcho) {
+    cout << cPstr;
+  }
+
 
   if(verbose&4) {
     cout <<"gpsim_read returning " << count << ":" << cPstr << endl;
