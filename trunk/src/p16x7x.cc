@@ -311,7 +311,7 @@ void ADCON1::setNumberOfChannels(unsigned int nChannels)
   m_nAnalogChannels = nChannels;
   m_AnalogPins = new PinModule *[m_nAnalogChannels];
 
-  for (int i=0; i<m_nAnalogChannels; i++)
+  for (unsigned int i=0; i<m_nAnalogChannels; i++)
     m_AnalogPins[i] = &AnInvalidAnalogInput;
 }
 
