@@ -1,26 +1,38 @@
-        list    p=16c84
+
         radix dec
         ;; The purpose of this program is to test gpsim's register stimuli.
         ;;
 
-include "p16c84.inc"
+	list    p=16f84                 ; list directive to define processor
+	include <p16f84.inc>            ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
-  cblock  0x20
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+failures    RES     1
+shift_in    RES     1  ; A shifting bit pattern stimulus is connected to this.
+flag_reg    RES     1  ; Another register stimulus is tied to this.
+temp1       RES     1
 
-        failures
+  GLOBAL  shift_in
+  GLOBAL  flag_reg
 
-        shift_in        ; A shifting bit pattern stimulus is connected to this.
-        flag_reg        ; Another register stimulus is tied to this.
 
-        temp1
-  endc
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+        movlw  high  start               ; load upper byte of 'start' label
+        movwf  PCLATH                    ; initialize PCLATH
+        goto   start                     ; go to beginning of program
 
-        org     0
-        goto    start
-        
-        org     4
-start:
-        clrf    failures
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+start
         clrf    shift_in
         clrf    flag_reg
         clrf    temp1
@@ -29,7 +41,6 @@ start_loop:
 
    ; First, wait for shift_in to become '1'
 
-        bsf     failures,1
         decfsz  shift_in,W
          goto   start_loop
 
@@ -54,7 +65,7 @@ shift_loop
         andwf   temp1,W
 
         skpz
-         goto   done            ; failed
+         goto   failed          ; failed
 
 L1:   
         incfsz  flag_reg,W      ; does flag == 0xff?
@@ -65,10 +76,14 @@ L1:
 
         movlw   0x80
         xorwf   temp1,W
-        skpnz
-         clrf   failures
+        skpz
+         goto	failed
 
 done:
+  .assert  ",\"*** PASSED Register Stimulation test\""
         goto    done
 
+failed:	
+  .assert  ",\"*** FAILED Register Stimulation test\""
+	goto	failed
         end

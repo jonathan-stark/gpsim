@@ -1,3 +1,4 @@
+load p16f84.cod
 
 # Node Test
 #
@@ -25,5 +26,3 @@ attach loop_back2 portb2 porta2
 attach loop_back3 portb3 porta3
 
 attach loop_back4 portb4 porta4
-
-

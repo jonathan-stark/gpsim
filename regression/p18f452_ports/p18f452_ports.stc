@@ -1,5 +1,8 @@
 
-# Node Test
+# Node Test for the 18f452
+
+load p18f452_ports.cod
+
 #
 #  This script will tie Port A and Port B together
 #
@@ -26,6 +29,4 @@ attach loop_back3 portb3 porta3
 
 attach loop_back4 portb4 porta4
 attach loop_back5 portb5 porta5
-
-
 

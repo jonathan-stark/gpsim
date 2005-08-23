@@ -1,22 +1,37 @@
 	;; it.asm
 	;;
 	;; The purpose of this program is to test how well gpsim can simulate
-	;; a pic. Nothing useful is performed - this program is only used to
-	;; debug gpsim.
-
-	list	p=16f628
-	
-include "p16f628.inc"
-
-  cblock  0x20
-
-	temp,temp1,temp2
-	failures
-  endc
-	
-	org 0
+        ;; instructions on a mid-range (14bit core) Pic.
 
 
+	list    p=16f628                ; list directive to define processor
+	include <p16f628.inc>           ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
+
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+temp            RES     1
+temp1           RES     1
+temp2           RES     1
+
+
+  GLOBAL done
+
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+        movlw  high  start               ; load upper byte of 'start' label
+        movwf  PCLATH                    ; initialize PCLATH
+        goto   start                     ; go to beginning of program
+
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+start
 	clrf	temp1		;Assume clrf works...
 				;
 	;;
@@ -25,7 +40,7 @@ include "p16f628.inc"
 	clrw
 	option			;initialize tmr0
 
-start:	
+BankLoop:	
 	;; Perform some basic tests on some important instructions
 
 	setc			;set the Carry flag
@@ -475,9 +490,10 @@ start:
 	;; repeat the test with in the next bank
 	
 	bsf	STATUS,RP0
-	goto	start
+	goto	BankLoop
 	
 done:
+  .assert  ",\"*** PASSED MidRange core instruction test\""
 	bcf	STATUS,RP0
 	
 	NOP
@@ -616,8 +632,7 @@ test_pcl4:
 	goto	$
 
 failed:
-	movlw	1
-	movwf	failures
+  .assert  ",\"*** FAILED MidRange core instruction test\""
 	goto	done
 
 	end

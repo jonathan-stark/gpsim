@@ -1,6 +1,6 @@
-SCRIPT = 16f873.lkr
+SCRIPT = 12c508.lkr
 
-PROJECT = logic_test
+PROJECT = instructions_12bit
 OBJECTS =  $(PROJECT).o
 OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
@@ -25,4 +25,4 @@ clean:
 $(PROJECT).o : $(PROJECT).asm
 
 sim: $(COD)
-	$(GPSIM) -i -c $(STARTUP_STC) -D STC="logic_test.stc"
+	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$(STC)

@@ -5,20 +5,25 @@
         ;; Nothing useful is performed - this program is only used to
         ;; debug gpsim.
 
-        list    p=18f452
-        
- include "p18f452.inc"
+	list    p=18f452                ; list directive to define processor
+	include <p18f452.inc>           ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
-  cblock  0
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+temp            RES     1
+temp1           RES     1
+temp2           RES     1
+failures        RES     1
 
-        temp
-	temp1		;the regression test depends on temp2 occupying
-	temp2		;the address followin temp1
-        failures
-  endc
-        
-        org 0
 
+  GLOBAL done
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
 
         clrf    temp1           ;Assume clrf works...
                                 ;
@@ -648,11 +653,13 @@ TestTablat:
 TableReadEnd:	
 
 done:
+  .assert  ",\"*** PASSED 16bit-core instruction test\""
         bra     $
 
 failed:
         movlw   1
         movwf   failures
+  .assert  ",\"*** FAILED 16bit-core instruction test\""
         bra     done
 
 
