@@ -1,2 +1,2 @@
-echo nothing to set up
-
+# simple script to load the simulation 
+load s instructions_14bit.cod

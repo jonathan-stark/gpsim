@@ -5,21 +5,33 @@
    ;; can interconnect I/O pins.
 
 
-   list p=16f877
-
-include "p16f877.inc"
-
-
-   cblock 0x20
-
-	failures
-
-   endc
+	list    p=16f877                ; list directive to define processor
+	include <p16f877.inc>           ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
 
-	ORG	0
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+temp            RES     1
 
-	CLRF	failures	;Assume success
+  GLOBAL done
+
+
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+        movlw  high  start               ; load upper byte of 'start' label
+        movwf  PCLATH                    ; initialize PCLATH
+        goto   start                     ; go to beginning of program
+
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+start
 
 	MOVLW	0xff
 	BSF	STATUS,RP0
@@ -38,13 +50,15 @@ b_to_c_loop:
 	DECFSZ	PORTC,W
 	 goto	b_to_c_loop
 
-	GOTO	done
-
-FAILED:
-	INCF	failures,F
 done:
 
-	GOTO	$
+  .assert  ",\"*** PASSED Node Test on 16f877\""
+	goto	$
+
+FAILED:
+  .assert  ",\"*** FAILED Node Test on 16f877\""
+	goto	$
+
 
 
   end

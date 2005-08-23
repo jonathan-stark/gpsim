@@ -8,20 +8,20 @@
    ;;     
 
 
-   list p=18f452
+	list    p=18f452                ; list directive to define processor
+	include <p18f452.inc>           ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
-include "p18f452.inc"
-
-;        __CONFIG  CONFIG_WORD
-
-   cblock 0x20
-
-	failures
-
-   endc
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+failures        RES     1
 
 
-	ORG	0
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
 
 	CLRF	failures	;Assume success
 
@@ -60,12 +60,11 @@ b_to_a_loop:
 	DECFSZ	PORTB,W
 	 bra	b_to_a_loop
 
-	GOTO	done
+  .assert  ",\"*** PASSED 18F452 port test\""
+	bra	$
 
 FAILED:
-	INCF	failures,F
-done:
-	GOTO	$
-
+  .assert  ",\"*** FAILED 18F452 port test\""
+	bra	$
 
   end

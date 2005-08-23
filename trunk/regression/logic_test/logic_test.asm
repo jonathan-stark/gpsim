@@ -248,7 +248,7 @@ done:
 #define UNRELEASED_GPASM
 
  ifdef UNRELEASED_GPASM
-  .assert  ",\"*** PASSED\""
+  .assert  ",\"*** PASSED Logic Module test\""
  else
   .assert  ""
  endif

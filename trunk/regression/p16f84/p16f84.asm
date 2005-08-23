@@ -9,22 +9,35 @@
    ;;     
 
 
-   list p=16f84
-
-include "p16f84.inc"
+	list    p=16f84                 ; list directive to define processor
+	include <p16f84.inc>            ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
 CONFIG_WORD	EQU	_CP_OFF & _WDT_OFF
-
         __CONFIG  CONFIG_WORD
 
-   cblock 0x20
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+failures        RES     1
 
-	failures
 
-   endc
+  GLOBAL done
+
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+        movlw  high  start               ; load upper byte of 'start' label
+        movwf  PCLATH                    ; initialize PCLATH
+        goto   start                     ; go to beginning of program
 
 
-	ORG	0
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+start
 
 	CLRF	failures	;Assume success
 
@@ -51,6 +64,7 @@ a_to_b_loop:
 
 	BSF	PORTA,4		;Port A bit 4 is an open collector.
 	BTFSC	PORTB,4
+  .assert  ",\"*** FAILED 16f84 test -RA4 stuck high\""
 	 GOTO	FAILED
 
 
@@ -111,8 +125,10 @@ b_to_a_loop:
 	GOTO	done
 
 FAILED:
+  .assert  ",\"*** FAILED 16f84 test\""
 	INCF	failures,F
 done:
+  .assert  ",\"*** PASSED 16f84 test\""
 	GOTO	$
 
 

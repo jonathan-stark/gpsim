@@ -1,3 +1,5 @@
+load interrupts_14bit.cod
+
 # another test stimulation file
 #
 # the '#' marks the beginning of a comment 

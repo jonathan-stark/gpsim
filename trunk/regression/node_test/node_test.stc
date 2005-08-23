@@ -4,6 +4,7 @@
 #  This script will tie Port B and Port C together
 #
 
+load node_test.cod
 
 # First, create 8 nodes:
 
@@ -28,4 +29,3 @@ attach loop_back4 portb4 portc4
 attach loop_back5 portb5 portc5
 attach loop_back6 portb6 portc6
 attach loop_back7 portb7 portc7
-

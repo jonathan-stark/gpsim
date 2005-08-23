@@ -1,3 +1,5 @@
+load digital_stim.cod
+
 # Digital Stimulus Test
 #
 # Two stimuli are created. One puts out a stream of

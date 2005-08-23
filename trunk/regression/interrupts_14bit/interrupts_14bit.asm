@@ -1,35 +1,54 @@
-        list    p=16c84
+
+        ;; The purpose of this program is to test gpsim's ability to 
+        ;; simulate interrupts on the midrange core (specifically the 'f84).
+
+
+	list    p=16f84                 ; list directive to define processor
+	include <p16f84.inc>            ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
+
+ ;; Suppress warnings of using 'option' instruction.
+	errorlevel -224
+
   __CONFIG _WDT_OFF
 
-        ;; The purpose of this program is to test gpsim's ability to simulate interrupts.
 
-        ;; !!!! SPECIAL NOTES !!!!!
-        ;; Some of the tests require external stimuli. Please use 'ioport_stim.stc'
-        
-include "p16c84.inc"
-                
-  cblock  0x20
 
-        temp1
-        temp2
-        temp3
-        temp4
-        temp5
-        adr_cnt
-        data_cnt
-        failures
+GPR_DATA        UDATA
+temp            RES     1
+temp1           RES     1
+temp2           RES     1
+temp3           RES     1
+temp4           RES     1
+temp5           RES     1
+adr_cnt         RES     1
+data_cnt        RES     1
+failures        RES     1
 
-        w_temp
-        status_temp
+w_temp          RES     1
+status_temp     RES     1
 
-  endc
-        org 0
 
-        goto    start
+ GLOBAL start
+;----------------------------------------------------------------------
+;   ********************* RESET VECTOR LOCATION  ********************
+;----------------------------------------------------------------------
+RESET_VECTOR  CODE    0x000              ; processor reset vector
+        movlw  high  start               ; load upper byte of 'start' label
+        movwf  PCLATH                    ; initialize PCLATH
+        goto   start                     ; go to beginning of program
 
-        org     4
-        ;; Interrupt
-        ;; 
+
+
+
+;------------------------------------------------------------------------
+;
+;  Interrupt Vector
+;
+;------------------------------------------------------------------------
+
+INT_VECTOR   CODE    0x004               ; interrupt vector location
+
         movwf   w_temp
         swapf   STATUS,W
         movwf   status_temp
@@ -68,8 +87,13 @@ exit_int:
         swapf   w_temp,w
         retfie
 
-start
 
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+start
         ;; Assume no failures
 
         clrf    failures
@@ -295,6 +319,11 @@ rbif_l1:
 
 
 done:   
+  .assert  ",\"*** PASSED MidRange core interrupt test\""
+        goto    $
+
+failed:	
+  .assert  ",\"*** FAILED MidRange core interrupt test\""
         goto    $
 
         end

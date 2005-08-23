@@ -1,4 +1,3 @@
-        list    p=12c508
 
         ;; it.asm
         ;;
@@ -13,17 +12,30 @@
         ;; successful.
 
         
-include "p12c508.inc"
+	list    p=12c508                ; list directive to define processor
+	include <p12c508.inc>           ; processor specific variable definitions
+        include <coff.inc>              ; Grab some useful macros
 
   __config _WDT_ON
 
-  cblock  0x0c
+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
+GPR_DATA                UDATA
+temp            RES     1
+temp1           RES     1
+temp2           RES     1
+failures        RES     1
 
-        temp,temp1,temp2
-        failures
-  endc
-        
-        org 0
+
+  GLOBAL done
+
+
+
+;----------------------------------------------------------------------
+;   ******************* MAIN CODE START LOCATION  ******************
+;----------------------------------------------------------------------
+MAIN    CODE
+
 
         ;; Assume that 'goto' works and begin the thorough instruction
         ;; tests below (the pcl related tests must be in bank 0 because
@@ -122,6 +134,7 @@ test_pcl4:
         ;;
 success:
 done:	        
+  .assert  ",\"*** PASSED 12bit core instruction test\""
         goto    $       
 
         NOP
@@ -132,6 +145,7 @@ done:
 failed: 
         movlw   1
         movwf   failures
+  .assert  ",\"*** FAILED: 12bit core instruction test\""
 	goto	done
 start:  
 
