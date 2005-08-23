@@ -427,7 +427,7 @@ void PinModule::setDefaultPullupControl(SignalControl *newDefaultPullupControl)
 {
   if(!m_defaultPullupControl && newDefaultPullupControl) {
     m_defaultPullupControl = newDefaultPullupControl;
-    setControl(m_defaultPullupControl);
+    setPullupControl(m_defaultPullupControl);
   }
 }
 void PinModule::setPullupControl(SignalControl *newPullupControl)

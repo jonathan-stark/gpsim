@@ -1,3 +1,7 @@
+2005-08-22 Scott Dattalo <scott@dattalo.com>
+	* src/ioports.cc: Fixed typo in pullup in setDefaultPullupControl
+	method. 
+
 2005-08-19 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/input.cc: Added code to allow stc files with <CR><LF>
 	for Windows EOL to be read under Linux.
