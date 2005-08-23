@@ -2,6 +2,39 @@
 	* src/ioports.cc: Fixed typo in pullup in setDefaultPullupControl
 	method. 
 
+2005-08-21 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/input.cc, cli/input.h, gpsim/main.cc: Added two
+	command options. Option -E will echo commands to the
+	console. Useful for stc debugging. This will also
+	display all the command line parameters. Useful when
+	another tool launches gpsim but does not display the
+	command line.
+
+	gpsim/main.cc, src/init.cc: Option '-S disable' will
+	prevent source code from being loaded. Usefule for
+	automated regression testing. '-S enable' will enable
+	source code loading. See online help.
+	
+	* src/p16x7x.cc: Fixed an sign/unsigned warning.
+
+	* src/processor.h: Test function for whether source file
+	is open.
+
+	* src/sim_context.cc, src/sim_context.h: Added new
+	global boolean property called EnableSourceLoad. Setting
+	it to false will prevent source code from being loaded.
+	Purpose is when gpsim is used for automated regression
+	testing to speed things up.
+
+	* src/stimuli.cc: Fixed a crashing bug when port()
+	operator is used with out any module explicitly entered
+	as a parameter.
+
+	* src/symbol.h, src/value.h: Added findBoolean() to
+	Symbol_Table.
+
+	* src/value.h: Added a equals operator to Boolean.
+
 2005-08-19 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/input.cc: Added code to allow stc files with <CR><LF>
 	for Windows EOL to be read under Linux.
