@@ -51,13 +51,14 @@ public:
   }
   inline void operator |= (const Bit &bv)
   {
-    i = (i&bv.i) | (i&d) | (bv.d&bv.i);
+    i = (i&bv.i) || (i&d) ||
+      (bv.d&bv.i);
     d |= bv.d;
   }
 
   inline void operator &= (const Bit &bv)
   {
-    i = i&bv.i | (i&!bv.d) | (!d&bv.i);
+    i = i&bv.i || (i&!bv.d) || (!d&bv.i);
     d &= bv.d;
   }
 
@@ -71,7 +72,7 @@ public:
   {
     Bit bLv = *this;
 
-    bLv.i = bLv.i&r.i | (r.i&!r.d) | (!bLv.d&bLv.i);
+    bLv.i = bLv.i&r.i || (r.i&!r.d) || (!bLv.d&bLv.i);
     bLv.d &= r.d;
 
     return bLv;
@@ -91,11 +92,11 @@ public:
   }
   inline bool isZero()
   {
-    return d==false & i==true;
+    return d==false && i==true;
   }
   inline bool isOne()
   {
-    return d==true & i==true;
+    return d==true && i==true;
   }
   inline bool isKnown()
   {
