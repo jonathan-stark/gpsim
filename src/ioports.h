@@ -205,6 +205,11 @@ public:
   PinModule(PortModule *, unsigned int _pinNumber, IOPIN *new_pin=0);
   virtual ~PinModule() {}
   void updatePinModule();
+  /// refreshPinOnUpdate - modal behavior. If set to true, then
+  /// a pin's state will always be refreshed whenever the PinModule
+  /// is updated. If false, then the pin is updated only if there
+  /// is a detected state change.
+  void refreshPinOnUpdate(bool bForcedUpdate);
 
   void setPin(IOPIN *);
   void setDefaultSource(SignalControl *);
@@ -243,6 +248,7 @@ private:
   IOPIN        *m_pin;
   PortModule   *m_port;
   unsigned int  m_pinNumber;
+  bool          m_bForcedUpdate;
 };
 
 
@@ -304,7 +310,7 @@ public:
   PicPortBRegister(const char *port_name, unsigned int numIopins, unsigned int enableMask);
 
   virtual void put(unsigned int new_value);
-  virtual unsigned int get(unsigned int new_value);
+  virtual unsigned int get();
   virtual void setbit(unsigned int bit_number, char new_value);
   void setRBPU(bool);
   void setIntEdge(bool);

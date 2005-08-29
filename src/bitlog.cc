@@ -24,7 +24,6 @@ Boston, MA 02111-1307, USA.  */
 BoolEventLogger::BoolEventLogger(unsigned int _max_events)
   : max_events(_max_events)
 {
-  max_events = _max_events;
 
   // Make sure that max_events is an even power of 2
   if(max_events & (max_events - 1)) {
@@ -221,5 +220,78 @@ unsigned int BoolEventLogger::get_index(unsigned long long event_time)
 }
 
 
+//------------------------------------------------------------------------
+
+ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
+  : max_events(_max_events)
+{
+  // Make sure that max_events is an even power of 2
+  if(max_events & (max_events - 1)) {
+    max_events <<= 1;
+    while(1) {
+      if(max_events && (max_events & (max_events-1)))
+	max_events &= max_events - 1;
+      else
+	break;
+
+    }
+  } else if(!max_events)
+    max_events = 4096;
+    
+  pTimeBuffer  = new unsigned long long[max_events];
+  pEventBuffer = new char[max_events];
+
+  // Initialize the first event to something bogus.
+  *pEventBuffer = -1;
+  *pTimeBuffer  = (unsigned long long)0xffffffffffffffff;
+  gcycles = &get_cycles();
+
+  max_events--;  // make the max_events a mask
+
+  index = 0;
+
+}
+
+unsigned int ThreeStateEventLogger::get_index(unsigned long long event_time)
+{
+  unsigned long start_index, end_index, search_index, bstep;
+
+  end_index = index;
+  start_index = (index + 1) & max_events;
+
+  bstep = (max_events+1) >> 1;
+  search_index = (start_index + bstep) & max_events;
+  bstep >>= 1;
+
+  // Binary search for the event time:
+  do {
+    if(event_time < pTimeBuffer[search_index])
+      search_index = (search_index - bstep) & max_events;
+    else
+      search_index = (search_index + bstep) & max_events;
+
+    bstep >>= 1;
+
+  } while(bstep);
+
+  if(event_time >= pTimeBuffer[search_index])
+    return search_index;
+  else
+    return (--search_index & max_events);
+
+}
 
 
+void ThreeStateEventLogger::event(char state)
+{
+  // If the new event is different the most recently logged one
+  // then we need to log this event. (Note that the event is implicitly
+  // logged in the "index". I.e. 1 events are at odd indices.
+
+  if(state != pEventBuffer[index]) {
+    index = (index + 1) & max_events;
+    pTimeBuffer[index] = gcycles->get();
+    pEventBuffer[index] = state;
+  }
+
+}

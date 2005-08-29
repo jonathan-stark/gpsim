@@ -112,7 +112,7 @@ void PushButton::create_iopin_map(void)
   if(pshb_pin)
     {
       get_symbol_table().add_stimulus(pshb_pin);
-      pshb_pin->update_direction(1);
+      pshb_pin->update_direction(1,true);
       if(pshb_pin->snode)
 	pshb_pin->snode->update(0);
     }

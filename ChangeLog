@@ -1,3 +1,69 @@
+2005-08-29 Scott Dattalo <scott@dattalo.com>
+	* modules/encoder.cc, modules/logic.cc, modules/paraface.cc,
+	modules/push_button.cc, modules/switch.cc, src/i2c-ee.cc, src/p12x.cc
+	IOPIN::update_direction method now has a refresh option.
+	* src/ioports.h, src/ioports.cc:
+	- Added several options to control when I/O pins refresh their state
+	  information (with respect to stimuli that is).
+	- PicPortBRegister::get () had the wrong parameter signature and
+	thus was not getting invoked (the parent get() method was getting
+	invoked instead).
+	* modules/usart.cc: updating to new iopin api. Added new code and
+	removed a bunch dead code and generally cleaned things up - it's
+	still not working yet though.
+	* src/12bit-processors.cc, src/12bit-processors.h, src/p16f62x.cc:
+	pic-processor.cc, pic-processor.h, processor.h
+	set_config_word now returns true if the config word address is
+	successfully set.
+	* src/pic-processor.cc: Fixed bug with
+	init_program_memory_at_index() - it was not setting the
+	configuration word if the address was in configuration memory.
+	* src/bitlog.cc: Added a 'ThreeStateEventLogger' that's analogous
+	to the bit and byte logger. 
+	* src/intcon.cc: Turned off some debugging code.
+	* src/registers.h: fixed typo in comment
+	* src/stimuli.cc, src/stimuli.h: Iopin's were checking Z state
+	before W state - this caused a W-state condition to be returned as
+	a Z-state. In addition, the getDrivingState() was being checked as
+	opposed to the getDrivenState().
+	- Added getMonitor() method.
+	* src/uart.h, src/uart.cc: Updating to new I/O pin design. And
+	numerous changes to clean up and fix the code - this is still not
+	working though.
+	
+2005-08-23 Scott Dattalo <scott@dattalo.com>
+	* run_regression.sh, rt.sh: Redesigned the regression tests to
+	make use of new gpsim scripting features. Also, all tests have
+	been converted from absolute-mode to object-code mode.
+	* digital_stim/digital_stim.asm, digital_stim/digital_stim.stc
+	* instructions_12bit/instructions_12bit.asm
+	* instructions_12bit/instructions_12bit.stc
+	* instructions_14bit/instructions_14bit.asm
+	* instructions_14bit/instructions_14bit.stc
+	* instructions_16bit/instructions_16bit.asm
+	* instructions_16bit/instructions_16bit.stc
+	* interrupts_14bit/interrupts_14bit.asm
+	* interrupts_14bit/interrupts_14bit.stc
+	* logic_test/Makefile, logic_test/logic_test.asm, logic_test/logic_test.stc
+	* macro_test/macro_test.asm, macro_test/macro_test.stc
+	* node_test/node_test.asm, node_test/node_test.stc
+	* p12ce518/p12ce518.asm, p12ce518/p12ce518.stc
+	* p16f84/p16f84.asm, p16f84/p16f84.stc
+	* p18f452_ports/p18f452_ports.asm, p18f452_ports/p18f452_ports.stc
+	* register_stim/register_stim.asm, register_stim/register_stim.stc
+	* digital_stim/16f84.lkr, digital_stim/Makefile: added
+	* instructions_12bit/12c508.lkr, instructions_12bit/Makefile: added
+	* instructions_14bit/16f628.lkr, instructions_14bit/Makefile: added
+	* instructions_16bit/18f452.lkr, instructions_16bit/Makefile: added
+	* interrupts_14bit/16f84.lkr, interrupts_14bit/Makefile: added
+	* macro_test/16f84.lkr, macro_test/Makefile: added
+	* node_test/16f877.lkr, node_test/Makefile: added
+	* p12ce518/p12ce519.lkr, p12ce518/Makefile: added
+	* p16f84/16f84.lkr, p16f84/Makefile: added
+	* p18f452_ports/18f452.lkr, p18f452_ports/Makefile: added
+	* register_stim/16f84.lkr, register_stim/Makefile: added
+
+	
 2005-08-22 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc: Fixed typo in pullup in setDefaultPullupControl
 	method. 

@@ -48,7 +48,6 @@ class _TXREG : public sfr_register
 {
  public:
 
-  _TXSTA  *txsta;
 
   _TXREG();
   virtual void put(unsigned int);
@@ -57,6 +56,11 @@ class _TXREG : public sfr_register
   virtual void empty();
   virtual void full();
   virtual void assign_pir_set(PIR_SET *new_pir_set);
+  virtual void assign_txsta(_TXSTA *new_txsta) { m_txsta = new_txsta; };
+private:
+  _TXSTA  *m_txsta;
+  PIR_SET *pir_set;
+
 };
 
 class _TXSTA : public sfr_register, public TriggerObject
@@ -102,9 +106,6 @@ class _RCREG : public sfr_register
 {
  public:
 
-  _RCSTA  *rcsta;
-
-
   unsigned int oldest_value;  /* rcreg has a 2-deep fifo. The oldest received
 			       * value is stored here, while the most recent
 			       * is stored in sfr_register.value . */
@@ -118,6 +119,12 @@ class _RCREG : public sfr_register
   virtual void pop();
 
   virtual void assign_pir_set(PIR_SET *new_pir_set);
+  virtual void assign_rcsta(_RCSTA *new_rcsta) { m_rcsta = new_rcsta; };
+
+private:
+  _RCSTA  *m_rcsta;
+  PIR_SET *pir_set;
+
 
 };
 
@@ -161,8 +168,6 @@ class _RCSTA : public sfr_register, public TriggerObject
   _RCREG  *rcreg;
   _SPBRG  *spbrg;
   _TXSTA  *txsta;
-  //IOPORT  *uart_port;
-  
 
   unsigned int rsr;
   unsigned int bit_count;
@@ -178,6 +183,7 @@ class _RCSTA : public sfr_register, public TriggerObject
   void receive_start_bit();
   virtual void start_receiving();
   virtual void stop_receiving();
+  virtual void overrun();
   void set_callback_break(unsigned int spbrg_edge);
   virtual void callback();
   virtual void callback_print();
@@ -216,6 +222,7 @@ class _SPBRG : public sfr_register, public TriggerObject
 };
 
 //---------------------------------------------------------------
+/*
 class TXREG_14 : public _TXREG
 {
  public:
@@ -238,7 +245,7 @@ class RCREG_14 : public _RCREG
   virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
 
 };
-
+*/
 //---------------------------------------------------------------
 class USART_MODULE
 {

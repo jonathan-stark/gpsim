@@ -27,7 +27,14 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
 
-#define DEBUG_UART 1
+//#define DEBUG_UART 1
+#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
 //--------------------------------------------------
 // 
 //--------------------------------------------------
@@ -81,10 +88,12 @@ _TXSTA::_TXSTA()
 
 //-----------------------------------------------------------
 _RCREG::_RCREG()
+ : m_rcsta(0), pir_set(0)
 {
 }
 
 _TXREG::_TXREG()
+ : m_txsta(0), pir_set(0)
 {
 }
 
@@ -103,21 +112,20 @@ void _TXREG::put(unsigned int new_value)
   trace.raw(write_trace.get() | value.get());
   value.put(new_value & 0xff);
 
-  if(DEBUG_UART)
-    cout << "txreg just got a new value\n";
+  Dprintf(("txreg just got a new value:0x%x\n",new_value));
 
   // The transmit register has data,
   // so clear the TXIF flag
 
   full();
 
-  if(txsta &&
-     ( (txsta->value.get() & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
+  if(m_txsta &&
+     ( (m_txsta->value.get() & (_TXSTA::TRMT | _TXSTA::TXEN)) == (_TXSTA::TRMT | _TXSTA::TXEN)))
     {
       // If the transmit buffer is empty and the transmitter is enabled
       // then transmit this new data now...
 
-      txsta->start_transmitting();
+      m_txsta->start_transmitting();
     }
 
 }
@@ -181,8 +189,7 @@ void _TXSTA::put(unsigned int new_value)
 
   value.put((new_value & ~TRMT) | ( (bit_count) ? 0 : TRMT));
 
-  if(DEBUG_UART)
-    cout << "TXSTA::put 0x" << value.get() << '\n';
+  Dprintf((" TXSTA value=0x%x\n",value.get()));
 
 
   if( (old_value ^ value.get()) & TXEN) {
@@ -196,16 +203,16 @@ void _TXSTA::put(unsigned int new_value)
     // transmission.
 
     if(value.get() & TXEN) {
-      cout << "TXSTA - enabling transmitter\n";
+      Dprintf(("TXSTA - enabling transmitter\n"));
       if (m_PinModule)
 	m_PinModule->setSource(m_source);
       if(txreg) {
 	if(txreg->is_empty()) {
 	  txreg->empty();
 	} else {
-          cout << "start_transmitting\n" << endl;
+          Dprintf(("start_transmitting\n"));
 	  start_transmitting();
-      }
+	}
       }
     } else {
       stop_transmitting();
@@ -228,8 +235,7 @@ char _TXSTA::getState()
 //
 void _TXSTA::stop_transmitting()
 {
-  if(DEBUG_UART)
-    cout << "stopping a USART transmission\n";
+  Dprintf(("stopping a USART transmission\n"));
 
   bit_count = 0;
   value.put(value.get() | TRMT);
@@ -257,8 +263,7 @@ void _TXSTA::stop_transmitting()
 
 void _TXSTA::start_transmitting()
 {
-  if(DEBUG_UART)
-    cout << "starting a USART transmission\n";
+  Dprintf(("starting a USART transmission\n"));
 
   // Build the serial byte that's about to be transmitted.
   // I doubt the pic really does this way, but gpsim builds
@@ -328,26 +333,23 @@ void _TXSTA::transmit_a_bit()
 {
 
 
-  if(bit_count)
-    {
-      if(DEBUG_UART)
-        cout << "Transmit bit #" << bit_count << ": " << (tsr&1) 
-	     << " time:" << get_cycles().value << endl;
+  if(bit_count) {
 
-      putTXState(tsr&1 ? '1' : '0');
+    Dprintf(("Transmit bit #%x: bit val:%d time:0x%llx\n",bit_count, (tsr&1),get_cycles().value));
 
-      tsr >>= 1;
+    putTXState(tsr&1 ? '1' : '0');
 
-      --bit_count;
+    tsr >>= 1;
 
-    }
+    --bit_count;
+
+  }
 
 }
 
 void _TXSTA::callback()
 {
-  if(verbose)
-    cout << "TXSTA callback - time:" << (get_cycles().value) << '\n';
+  Dprintf(("TXSTA callback - time:%llx\n",get_cycles().value));
 
   transmit_a_bit();
 
@@ -383,20 +385,26 @@ void _TXSTA::callback_print()
 
 bool _TXREG::is_empty()
 {
-  cout << "TXREG:: function not implemented\n";
-  return 0;
+  if (pir_set)
+    return(pir_set->get_txif());
+  return true;
 }
 void _TXREG::empty()
 {
-  cout << "TXREG:: function not implemented\n";
+  Dprintf(("txreg::empty - setting TXIF\n"));
+  if (pir_set)
+    pir_set->set_txif();
+
 }
 void _TXREG::full()
 {
-  cout << "TXREG:: function not implemented\n";
+  Dprintf(("txreg::full - clearing TXIF\n"));
+  if(pir_set)
+    pir_set->clear_txif();
 }
 void _TXREG::assign_pir_set(PIR_SET *new_pir_set)
 {
-  cout << "TXREG:: function not implemented\n";
+  pir_set = new_pir_set;
 }
 
 //-----------------------------------------------------------
@@ -539,11 +547,7 @@ void _RCSTA::receive_a_bit(unsigned int bit)
 
   // If we're waiting for the start bit and this isn't it then
   // we don't need to look any further
-  if (DEBUG_UART)
-    cout << "receive_a_bit state " << state 
-	 << " bit:" << bit 
-	 << " time:0x"<<hex << get_cycles().value
-	 << endl;
+  Dprintf(("receive_a_bit state:%d bit:%d time:0x%llx\n",state,bit,get_cycles().value));
 
   if( state == RCSTA_MAYBE_START) {
     if (bit)
@@ -566,8 +570,8 @@ void _RCSTA::receive_a_bit(unsigned int bit)
       // copy the rsr to the fifo
       if(rcreg)
         rcreg->push( rsr & 0xff);
-      if(DEBUG_UART)
-        cout << "_RCSTA::receive_a_bit received 0x" << hex <<(rsr & 0xff) << endl;
+
+      Dprintf(("_RCSTA::receive_a_bit received 0x%02X\n",rsr & 0xff));
 
     } else {
       //not stop bit; discard the data and go back receiving
@@ -622,6 +626,10 @@ void _RCSTA::start_receiving()
   state = RCSTA_WAITING_FOR_START;
 
 }
+void _RCSTA::overrun()
+{
+  value.put(value.get() | _RCSTA::OERR);
+}
 
 void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 {
@@ -633,11 +641,10 @@ void _RCSTA::set_callback_break(unsigned int spbrg_edge)
 }
 void _RCSTA::receive_start_bit()
 {
-  if (DEBUG_UART)
-   cout << "USART received a start bit\n";
+  Dprintf(("USART received a start bit\n"));
 
   if((value.get() & (CREN | SREN)) == 0) {
-    cout << "  but not enabled\n";
+    Dprintf(("  but not enabled\n"));
     return;
   }
   
@@ -655,8 +662,7 @@ void _RCSTA::receive_start_bit()
 void _RCSTA::callback()
 {
 
-  if (DEBUG_UART)
-    cout << "RCSTA callback. time:0x" << hex <<(cycles.value) << '\n';
+  Dprintf(("RCSTA callback. time:0x%llx\n",cycles.value));
 
   // A bit is sampled 3 times.
 
@@ -727,19 +733,23 @@ void _RCREG::push(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
 
-  if(fifo_sp >= 2)
-    {
-      rcsta->value.put(rcsta->value.get() | _RCSTA::OERR);
-      if(verbose)
-	cout << "receive overrun\n";
-    }
-  else
-    {
-      //cout << "pushing uart reception onto rcreg stack\n";
-      fifo_sp++;
-      oldest_value = value.get();
-      value.put(new_value);
-    }
+  if(fifo_sp >= 2) {
+
+    if (m_rcsta)
+      m_rcsta->overrun();
+      
+    Dprintf(("receive overrun\n"));
+
+  } else {
+
+    Dprintf(("pushing uart reception onto rcreg stack, value received=0x%x\n",new_value));
+    fifo_sp++;
+    oldest_value = value.get();
+    value.put(new_value);
+  }
+
+  if(pir_set)
+    pir_set->set_rcif();
 
 }
 
@@ -751,6 +761,9 @@ void _RCREG::pop()
 
   if(--fifo_sp == 1)
     value.put(oldest_value);
+
+  if(fifo_sp == 0 && pir_set)
+    pir_set->clear_rcif();
 
 }
 
@@ -770,7 +783,7 @@ unsigned int _RCREG::get()
 }
 void _RCREG::assign_pir_set(PIR_SET *new_pir_set)
 {
-  cout <<"_RCREG:: function not impl\n";
+  pir_set = new_pir_set;
 }
 
 
@@ -802,16 +815,12 @@ void _SPBRG::get_next_cycle_break()
   if(cpu)
     get_cycles().set_break(future_cycle, this);
 
-  if (DEBUG_UART)
-    cout << "SPBRG::callback next break at 0x" << hex << future_cycle <<'\n';
+  Dprintf(("SPBRG::callback next break at 0x%llx\n",future_cycle));
   
 }
 
 void _SPBRG::start()
 {
-
-  if(verbose)
-    cout << "SPBRG::start\n";
 
   if(cpu)
     last_cycle = get_cycles().value;
@@ -819,9 +828,7 @@ void _SPBRG::start()
 
   get_next_cycle_break();
 
-  if (DEBUG_UART)
-    cout << " SPBRG::start   last_cycle = " <<  hex << last_cycle 
-	 << " future_cycle = " << future_cycle << '\n';
+  Dprintf((" SPBRG::start   last_cycle:0x%llx: future_cycle:0x%llx\n",last_cycle,future_cycle));
 
 
 }
@@ -914,7 +921,7 @@ void _SPBRG::callback()
 
   last_cycle = get_cycles().value;
 
-  //cout << "SPBRG rollover at cycle " << last_cycle << '\n';
+  Dprintf(("SPBRG rollover at cycle:0x%llx\n",last_cycle));
 
   if(rcsta && (rcsta->value.get() & _RCSTA::SPEN))
     {
@@ -926,7 +933,7 @@ void _SPBRG::callback()
     }
 }
 //--------------------------------------------------
-
+/*
 bool TXREG_14::is_empty()
 {
   return(pir_set->get_txif());
@@ -934,15 +941,13 @@ bool TXREG_14::is_empty()
 
 void TXREG_14::empty()
 {
-  if (DEBUG_UART) 
-    cout << "txreg::empty - setting TXIF\n";
+  Dprintf(("txreg::empty - setting TXIF\n"));
   pir_set->set_txif();
 }
 
 void TXREG_14::full()
 {
-  if (DEBUG_UART) 
-    cout << "txreg::full - clearing TXIF\n";
+  Dprintf(("txreg::full - clearing TXIF\n"));
   if(pir_set)
     pir_set->clear_txif();
 }
@@ -964,7 +969,7 @@ void RCREG_14::pop()
     pir_set->clear_rcif();
 
 }
-
+*/
 
 //--------------------------------------------------
 // member functions for the USART
@@ -980,11 +985,11 @@ void USART_MODULE::initialize(PIR_SET *pir_set,
 
   txreg = _txreg;
   txreg->assign_pir_set(pir_set);
-  txreg->txsta = &txsta;
+  txreg->assign_txsta(&txsta);
 
   rcreg = _rcreg;
   rcreg->assign_pir_set(pir_set);
-  rcreg->rcsta = &rcsta;
+  rcreg->assign_rcsta(&rcsta);
 
   txsta.txreg = txreg;
   txsta.spbrg = &spbrg;

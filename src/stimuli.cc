@@ -1029,7 +1029,7 @@ char IOPIN::getBitChar()
     return 'Z';
 
   if(snode->get_nodeZth() > ZthWeak)
-    return getDrivingState() ? 'W' : 'w';
+    return getDrivenState() ? 'W' : 'w';
 
   return getDrivingState() ? '1' : '0';
 }
@@ -1097,7 +1097,7 @@ char IO_bi_directional::getBitChar()
       return 'Z';
 
     if(snode->get_nodeZth() > ZthWeak)
-      return getDrivingState() ? 'W' : 'w';
+      return getDrivenState() ? 'W' : 'w';
 
     // There's at least one strong driver tied to the node
     if(!getDriving()) {
@@ -1181,14 +1181,17 @@ IO_bi_directional_pu::~IO_bi_directional_pu(void)
 
 }
 
-void IO_bi_directional_pu::update_pullup(bool new_state, bool refresh)
+void IO_bi_directional_pu::update_pullup(char new_state, bool refresh)
 {
-  if (bPullUp != new_state) {
-    bPullUp = new_state;
-    if (snode && refresh)
-      snode->update();
-    else
-      setDrivenState(bPullUp);
+  bool bNewPullupState = new_state == '1' || new_state == 'W';
+  if (bPullUp != bNewPullupState) {
+    bPullUp = bNewPullupState;
+    if (refresh) { 
+      if (snode)
+	snode->update();
+      else
+	setDrivenState(bPullUp);
+    }
   }
 }
 
@@ -1226,7 +1229,7 @@ double IO_bi_directional_pu::get_Vth()
 
 char IO_bi_directional_pu::getBitChar()
 {
-  if(!snode && !getDriving() )
+    if(!snode && !getDriving() )
     return bPullUp ? 'W' : 'Z';
 
   if(snode) {
@@ -1235,7 +1238,7 @@ char IO_bi_directional_pu::getBitChar()
       return 'Z';
 
     if(snode->get_nodeZth() > ZthWeak)
-      return getDrivingState() ? 'W' : 'w';
+      return getDrivenState() ? 'W' : 'w';
 
     // There's at least one strong driver tied to the node
     if(!getDriving()) {

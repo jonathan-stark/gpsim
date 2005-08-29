@@ -119,7 +119,7 @@ void Encoder::create_iopin_map(void)
   if(a_pin)
     {
       get_symbol_table().add_stimulus(a_pin);
-      a_pin->update_direction(1);
+      a_pin->update_direction(1,true);
       if(a_pin->snode)
 	a_pin->snode->update(0);
       //enc_port->attach_iopin(a_pin, 0);
@@ -128,7 +128,7 @@ void Encoder::create_iopin_map(void)
   if(b_pin)
     {
       get_symbol_table().add_stimulus(b_pin);
-      b_pin->update_direction(1);
+      b_pin->update_direction(1,true);
       if(b_pin->snode)
 	b_pin->snode->update(0);
       //enc_port->attach_iopin(b_pin, 1);

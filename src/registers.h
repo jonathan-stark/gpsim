@@ -52,7 +52,7 @@ public:
   RegisterValue(void)
   {
     data = 0;
-    init = 0xff;  // assume 8-bit wide, unitialized registers
+    init = 0xff;  // assume 8-bit wide, uninitialized registers
   }
 
   RegisterValue(unsigned int d, unsigned int i) : 
