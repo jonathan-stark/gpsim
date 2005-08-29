@@ -34,6 +34,7 @@ EXPORTS
     ??0Stimulus_Node@@QAE@PBD@Z
     ??0String@@QAE@PBD@Z
     ??0String@@QAE@PBD00@Z
+    ??0ThreeStateEventLogger@@QAE@I@Z
     ??0TraceFrame@@QAE@XZ
     ??0TriggerObject@@QAE@XZ
     ??0Token@gpsim@@QAE@XZ
@@ -143,6 +144,7 @@ EXPORTS
     ?dump_raw@PCTraceType@@UAEHIPADH@Z
     ?dump_raw@TraceType@@UAEHIPADH@Z
     ?dump_registers@Processor@@UAEXXZ
+    ?event@ThreeStateEventLogger@@QAEXD@Z
     ?eval_Expression@TriggerObject@@UAE_NXZ
     ?eval_Expression@Breakpoint_Instruction@@UAE_NXZ
     ?event@BoolEventLogger@@QAEX_N@Z
@@ -326,6 +328,7 @@ EXPORTS
     ?setDrivenState@IOPIN@@UAEX_N@Z
     ?setDrivingState@IOPIN@@UAEXD@Z
     ?setDrivingState@IOPIN@@UAEX_N@Z
+    ?setMonitor@IOPIN@@UAEXPAVPinMonitor@@@Z
     ?setSafeMode@Processor@@UAEX_N@Z
     ?SetSourcePath@FileContextList@@QAEXPBD@Z
     ?setUnknownMode@Processor@@UAEX_N@Z
@@ -400,7 +403,7 @@ EXPORTS
     ?update@Stimulus_Node@@QAEX_K@Z
     ?update@gpsimValue@@UAEXXZ
     ?update_direction@IO_bi_directional@@UAEXI_N@Z
-    ?update_pullup@IO_bi_directional_pu@@UAEX_N0@Z
+    ?update_pullup@IO_bi_directional_pu@@UAEXD_N@Z
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?waitForChild@Token@gpsim@@QAEXXZ
