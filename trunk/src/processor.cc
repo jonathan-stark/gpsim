@@ -452,17 +452,19 @@ void Processor::init_program_memory(unsigned int address, unsigned int value)
 void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int value)
 {
   unsigned int address = map_pm_index2address(uIndex);
-  if(uIndex < program_memory_size())
-    {
-      if(program_memory[uIndex] != 0 && program_memory[uIndex] != &bad_instruction) {
-        // this should not happen
-        delete program_memory[uIndex];
-      }
-      program_memory[uIndex] = disasm(address,value);
-      if(program_memory[uIndex] == 0)
-        program_memory[uIndex] = &bad_instruction;
-      program_memory[uIndex]->add_line_number_symbol(address);
+  if(uIndex < program_memory_size()) {
+
+    if(program_memory[uIndex] != 0 && program_memory[uIndex] != &bad_instruction) {
+      // this should not happen
+      delete program_memory[uIndex];
     }
+    program_memory[uIndex] = disasm(address,value);
+    if(program_memory[uIndex] == 0)
+      program_memory[uIndex] = &bad_instruction;
+    program_memory[uIndex]->add_line_number_symbol(address);
+  } 
+  else if (set_config_word(address, value))
+    ;
   else
     set_out_of_range_pm(address,value);  // could be e2prom
 

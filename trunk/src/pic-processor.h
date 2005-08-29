@@ -255,7 +255,7 @@ public:
   virtual void interrupt(void) { return; };
   void pm_write(void);
 
-  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
   unsigned int get_config_word(void) {return config_word;};
   virtual unsigned int config_word_address(void) const {return 0x2007;};
   virtual ConfigMode *create_ConfigMode(void) { return new ConfigMode; };
@@ -263,8 +263,6 @@ public:
 
   virtual void por(void);
   virtual void create(void);
-
-  void init_program_memory(unsigned int address, unsigned int value);
 
   virtual PROCESSOR_TYPE isa(void){return _PIC_PROCESSOR_;};
   virtual PROCESSOR_TYPE base_isa(void){return _PIC_PROCESSOR_;};

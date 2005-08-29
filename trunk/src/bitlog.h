@@ -67,7 +67,7 @@ public:
     buffer a specific event is stored. (e.g. The start bit
     of a usart bit stream.)
    */
-  inline unsigned int get_index(void) {
+  inline unsigned int get_index() {
     return index;
   }
 
@@ -106,5 +106,71 @@ public:
   }
 };
 
+
+/**********************************************************************
+ * ThreeState event logging
+ *
+ * The ThreeState event logger is a simple class for logging the time
+ * of 3-state events. (FixMe - the bitlog and bytelog classes should
+ * be deprecated and merged into this class).
+ *
+ * The event buffer stores both the event state and the 64-bit time
+ * at which it occurred. Event states are 'chars' so it is up to the
+ * client of this class to interpret what the events mean.
+ *
+ * Repeated events are not logged. E.g.. if two 1's are logged, the 
+ * second one is ignored.
+ * 
+ */
+
+class ThreeStateEventLogger {
+
+private:
+  Cycle_Counter *gcycles;           // Point to gpsim's cycle counter.
+  unsigned int  index;              // Index into the buffer
+  unsigned long long  *pTimeBuffer; // Where the time is stored
+  char   *pEventBuffer;             // Where the events are stored
+  unsigned int max_events;          // Size of the event buffer
+
+public:
+
+  ThreeStateEventLogger(unsigned int _max_events = 4096);
+
+  /// Log an Event
+  void event(char state);
+
+  inline unsigned int get_index() {
+    return index;
+  }
+
+  unsigned int get_index(unsigned long long event_time);
+  char get_state(unsigned int index)
+  {
+    return pEventBuffer[index % max_events];
+  }
+
+  char get_state(unsigned long long event_time) 
+  {
+    return get_state(get_index(event_time));
+  }
+
+  unsigned long long get_time(unsigned int index)
+  {
+    return pEventBuffer[index & max_events];
+  }
+
+  /*
+  int get_edges(unsigned long long start_time, unsigned long long end_time)
+  {
+    return ( get_index(end_time) - get_index(start_time) ) & max_events;
+  }
+  void dump(int start_index, int end_index=-1);
+  void dump_ASCII_art(unsigned long long time_step, 
+		      unsigned long long start_time,
+		      int end_index=-1);
+  */
+
+
+};
 
 #endif //!defined(__BITLOG_H__)

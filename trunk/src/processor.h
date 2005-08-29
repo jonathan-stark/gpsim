@@ -551,7 +551,8 @@ public:
 
   // Configuration control
 
-  virtual void set_config_word(unsigned int address, unsigned int cfg_word) = 0;
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word)
+    {return false;} // fixme - make this a pure virtual function...
   virtual unsigned int get_config_word(void) = 0;
   virtual unsigned int config_word_address(void) {return 0;}
 

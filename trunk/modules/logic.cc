@@ -294,7 +294,7 @@ void LogicGate::create_iopin_map(void)
   string outname = name() + ".out";
 
   pOutputPin = new Logic_Output(this, OUTPUT_BITPOSITION, outname.c_str());
-  pOutputPin->update_direction(1);                 // make the bidirectional an output
+  pOutputPin->update_direction(1,true);  // make the bidirectional an output
 
   // Position pin on middle right side of package
   package->set_pin_position(1,2.5);

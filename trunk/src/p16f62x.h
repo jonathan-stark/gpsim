@@ -110,7 +110,7 @@ public:
   virtual void create_sfr_map(void);
 
   // The f628 (at least) I/O pins depend on the Fosc Configuration bits.
-  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
 
   /*
   virtual int get_pin_count(void){return Package::get_pin_count();};

@@ -60,7 +60,7 @@ public:
     bDrivenState = true;
 
     // Make the pin an output.
-    update_direction(IO_bi_directional::DIR_OUTPUT);
+    update_direction(IO_bi_directional::DIR_OUTPUT,true);
 
   };
 

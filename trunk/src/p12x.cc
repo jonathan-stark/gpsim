@@ -313,7 +313,7 @@ void P12CE518::create(void)
   {
     scl = new Stimulus_Node ( "EE_SCL" );
     IO_bi_directional_pu *io_scl = new IO_bi_directional_pu("gpio7");
-    io_scl->update_pullup(true);
+    io_scl->update_pullup('1',true);
     io_scl->setDrivingState(true);
     io_scl->setDriving(true);
     scl->attach_stimulus( m_gpio->addPin(io_scl,7));
@@ -324,7 +324,7 @@ void P12CE518::create(void)
 
     IO_open_collector *io_sda = new IO_open_collector("gpio6");
     // enable the pullup resistor.
-    io_sda->update_pullup(true);
+    io_sda->update_pullup('1',true);
     io_sda->setDrivingState(true);
     io_sda->setDriving(true);
     m_gpio->addPin(io_sda,6);
@@ -356,7 +356,7 @@ void P12CE518::create(void)
 
     // enable the pullup resistor.
     if(io_sda)
-      io_sda->update_pullup(true);
+      io_sda->update_pullup('1',true);
 
     sda->attach_stimulus (io_sda);
 #endif

@@ -31,7 +31,7 @@ Boston, MA 02111-1307, USA.  */
 #include "16bit-registers.h"
 #include "16bit-processors.h"
 #include "breakpoints.h"
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
 #else

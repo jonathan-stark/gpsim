@@ -59,9 +59,8 @@ void _12bit_processor::reset(RESET_TYPE r)
 }
 //-------------------------------------------------------------------
 
-void _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
+bool _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_word)
 {
-  config_word = cfg_word;
 
   // Clear all of the configuration bits in config_modes and then
   // reset each of them based on the config bits in cfg_word:
@@ -69,12 +68,18 @@ void _12bit_processor::set_config_word(unsigned int address,unsigned int cfg_wor
   //config_modes |= ( (cfg_word & WDTE) ? CM_WDTE : 0);
   //cout << " setting cfg_word and cfg_modes " << hex << config_word << "  " << config_modes << '\n';
 
-  if((address == config_word_address()) && config_modes)
+  if((address == config_word_address()) && config_modes) {
     config_modes->config_mode = (config_modes->config_mode & ~7) | (cfg_word & 7);
 
-  if(verbose && config_modes)
-    config_modes->print();
+    config_word = cfg_word;
 
+    if(verbose && config_modes)
+      config_modes->print();
+
+    return true;
+  }
+
+  return false;
 }
 
 void _12bit_processor::create(void)

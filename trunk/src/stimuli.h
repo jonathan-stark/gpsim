@@ -359,7 +359,8 @@ class IOPIN : public stimulus
   IOPIN(IOPORT *i, unsigned int b, const char *opt_name=0, Register **_iop=0);
   ~IOPIN();
 
-  void setMonitor(PinMonitor *);
+  virtual void setMonitor(PinMonitor *);
+  virtual PinMonitor *getMonitor() { return m_monitor; }
 
   void attach_to_port(IOPORT *i, unsigned int b);
   IOPORT *getIOPort();
@@ -390,9 +391,9 @@ class IOPIN : public stimulus
 
   // These functions don't apply to Inputs, but provide an
   // interface for the derived classes.
-  virtual void update_direction(unsigned int x, bool refresh=true){ };
+  virtual void update_direction(unsigned int x, bool refresh){ };
   virtual IOPIN_DIRECTION  get_direction(void) {return DIR_INPUT; };
-  virtual void update_pullup(bool new_state, bool refresh=true) { }
+  virtual void update_pullup(char new_state, bool refresh) { }
 
   virtual double get_Vth();
 
@@ -434,7 +435,7 @@ public:
 
   virtual void set_nodeVoltage(double new_nodeVoltage);
 
-  virtual void update_direction(unsigned int,bool refresh=true);
+  virtual void update_direction(unsigned int,bool refresh);
   virtual IOPIN_DIRECTION  get_direction(void)
   {return ((getDriving()) ? DIR_OUTPUT : DIR_INPUT);}
 
@@ -475,11 +476,11 @@ public:
   virtual double get_Vpullup() { return Vpullup; }
 
   virtual char getBitChar();
-  virtual void update_pullup(bool new_state, bool refresh=true);
+  virtual void update_pullup(char new3State, bool refresh);
 protected:
-  bool bPullUp;    // True when pullup is enable
+  bool   bPullUp;  // True when pullup is enabled
   double Zpullup;  // resistance of the pullup
-  double Vpullup;  // voltage of the pullup resistor is tied to.
+  double Vpullup;  // Voltage the pullup resistor is tied to.
 };
 
 

@@ -116,7 +116,7 @@ enum _12BIT_DEFINITIONS
   virtual void option_new_bits_6_7(unsigned int);
 
   virtual unsigned int config_word_address(void) const {return 0xfff;};
-  virtual void set_config_word(unsigned int address, unsigned int cfg_word);
+  virtual bool set_config_word(unsigned int address, unsigned int cfg_word);
 
   _12bit_processor(void);
 };

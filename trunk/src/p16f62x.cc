@@ -195,7 +195,7 @@ void P16F62x::set_out_of_range_pm(unsigned int address, unsigned int value)
 }
 
 //========================================================================
-void P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
+bool P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
 {
   enum {
     CFG_FOSC0 = 1<<0,
@@ -206,64 +206,70 @@ void P16F62x::set_config_word(unsigned int address, unsigned int cfg_word)
 
   // Let the base class do most of the work:
 
-  cout << "p16f628 setting config word 0x" << hex << cfg_word << '\n';
+  if (pic_processor::set_config_word(address, cfg_word)) {
 
-  pic_processor::set_config_word(address, cfg_word);
+    cout << "p16f628 setting config word 0x" << hex << cfg_word << '\n';
 
-  unsigned int valid_pins = m_porta->getEnableMask();
 
-  switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
+    unsigned int valid_pins = m_porta->getEnableMask();
 
-  case 0:  // LP oscillator: low power crystal is on RA6 and RA7
-  case 1:  // XT oscillator: crystal/resonator is on RA6 and RA7
-  case 2:  // HS oscillator: crystal/resonator is on RA6 and RA7
-  case 7:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
+    switch(cfg_word & (CFG_FOSC0 | CFG_FOSC1 | CFG_FOSC2)) {
 
-    //porta->valid_iopins &= 0x3f;
-    m_porta->setEnableMask(valid_pins & 0x3f);
-    break;
+    case 0:  // LP oscillator: low power crystal is on RA6 and RA7
+    case 1:  // XT oscillator: crystal/resonator is on RA6 and RA7
+    case 2:  // HS oscillator: crystal/resonator is on RA6 and RA7
+    case 7:  // ER oscillator: RA6 is CLKOUT, resistor (?) on RA7 
 
-  case 3:  // EC:  RA6 is an I/O, RA7 is a CLKIN
-  case 6:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
+      //porta->valid_iopins &= 0x3f;
+      m_porta->setEnableMask(valid_pins & 0x3f);
+      break;
 
-    //porta->valid_iopins &= 0x7f;
-    //porta->valid_iopins |= 0x40;
-    m_porta->setEnableMask( (valid_pins & 0x7f)|0x40);
-    break;
+    case 3:  // EC:  RA6 is an I/O, RA7 is a CLKIN
+    case 6:  // ER oscillator: RA6 is an I/O, RA7 is a CLKIN
 
-  case 4:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
+      //porta->valid_iopins &= 0x7f;
+      //porta->valid_iopins |= 0x40;
+      m_porta->setEnableMask( (valid_pins & 0x7f)|0x40);
+      break;
 
-    //porta->valid_iopins |= 0xc0;
-    m_porta->setEnableMask( valid_pins | 0xc0);
-    break;
+    case 4:  // INTRC: Internal Oscillator, RA6 and RA7 are I/O's
 
-  case 5:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
-    //porta->valid_iopins &= 0xbf;
-    //porta->valid_iopins |= 0x80;
-    m_porta->setEnableMask( (valid_pins & 0xbf)|0x80);
-    break;
+      //porta->valid_iopins |= 0xc0;
+      m_porta->setEnableMask( valid_pins | 0xc0);
+      break;
 
-  }
+    case 5:  // INTRC: Internal Oscillator, RA7 is an I/O, RA6 is CLKOUT
+      //porta->valid_iopins &= 0xbf;
+      //porta->valid_iopins |= 0x80;
+      m_porta->setEnableMask( (valid_pins & 0xbf)|0x80);
+      break;
 
-  // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
-  // a general purpose input-only pin.
+    }
 
-  if (cfg_word & CFG_MCLRE) {
+    // If the /MCLRE bit is set then RA5 is the MCLR pin, otherwise it's 
+    // a general purpose input-only pin.
 
-    //unsigned int m = (cfg_word & CFG_MCLRE) ? 0 : (1<<5);
+    if (cfg_word & CFG_MCLRE) {
+
+      //unsigned int m = (cfg_word & CFG_MCLRE) ? 0 : (1<<5);
   
-    valid_pins = m_porta->getEnableMask();
-    m_porta->setEnableMask(valid_pins | (1<<5));
+      valid_pins = m_porta->getEnableMask();
+      m_porta->setEnableMask(valid_pins | (1<<5));
     
-    //porta->valid_iopins |= m;
-    //porta->valid_iopins &= ~m;
+      //porta->valid_iopins |= m;
+      //porta->valid_iopins &= ~m;
 
-    //trisa.valid_iopins |= m;
-    //trisa.valid_iopins &= ~m;
+      //trisa.valid_iopins |= m;
+      //trisa.valid_iopins &= ~m;
+    }
+
+    //cout << " porta valid_iopins " << porta->valid_iopins << 
+    //   "  tris valid io " << trisa.valid_iopins << '\n';
+
+    return true;
   }
 
-  //cout << " porta valid_iopins " << porta->valid_iopins << 
-  //   "  tris valid io " << trisa.valid_iopins << '\n';
+  return false;
 }
 
 //========================================================================

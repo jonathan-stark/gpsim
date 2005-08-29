@@ -36,7 +36,7 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 
 #include "xref.h"
-
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }
 #else
@@ -118,11 +118,11 @@ public:
     // return m_register ? 
     //  (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
     char r = m_register ? (((m_register->getDriving()&m_bitMask)!=0)?'1':'0') : 'Z';
-    /*
+    /**/
     Dprintf(("PicSignalSource::getState() %s  bitmask:0x%x state:%c\n",
-	     (m_register?m_register->name():"NULL"),
+	     (m_register?m_register->name().c_str():"NULL"),
 	     m_bitMask,r));
-    */
+    /**/
     return r;
   }
 private:
@@ -170,9 +170,10 @@ void PortRegister::put(unsigned int new_value)
   Dprintf(("PortRegister::put old=0x%x:new=0x%x\n",value.data,new_value));
 
   unsigned int diff = mEnableMask & (new_value ^ value.data);
+  drivingValue = new_value & mEnableMask;
+  value.data = drivingValue;
+
   if(diff) {
-    drivingValue = new_value & mEnableMask;
-    value.data = drivingValue;
     // If no stimuli are connected to the Port pins, then the driving
     // value and the driven value are the same. If there are external
     // stimuli (or perhaps internal peripherals) overdriving or overriding
@@ -205,7 +206,7 @@ void PortRegister::setbit(unsigned int bit_number, char new3State)
     if (new3State=='1' || new3State=='W') {
       rvDrivenValue.data |= (1<<bit_number);
       rvDrivenValue.init &= ~(1<<bit_number);
-    } else if (new3State=='0') {
+    } else if (new3State=='0' || new3State=='w') {
       rvDrivenValue.data &= ~(1<<bit_number);
       rvDrivenValue.init &= ~(1<<bit_number);
     } else 
@@ -333,7 +334,8 @@ PinModule::PinModule(PortModule *_port, unsigned int _pinNumber, IOPIN *_pin)
     m_activeControl(0),m_defaultControl(0),
     m_activeSource(0),m_defaultSource(0),
     m_activePullupControl(0),m_defaultPullupControl(0),
-    m_pin(_pin),m_port(_port), m_pinNumber(_pinNumber)
+    m_pin(_pin),m_port(_port), m_pinNumber(_pinNumber),
+  m_bForcedUpdate(false)
 {
   setPin(m_pin);
 }
@@ -349,12 +351,17 @@ void PinModule::setPin(IOPIN *new_pin)
   }
 
 }
+void PinModule::refreshPinOnUpdate(bool bForcedUpdate)
+{
+  m_bForcedUpdate = bForcedUpdate;
+}
+
 void PinModule::updatePinModule()
 {
   if (!m_pin)
     return;
 
-  bool bStateChange=false;
+  bool bStateChange=m_bForcedUpdate;
 
   Dprintf(("PinModule::updatePinModule():%s enter cont=%c,source=%c,pullup%c\n",
 	   (m_pin ? m_pin->name().c_str() : "NOPIN"),
@@ -591,7 +598,7 @@ void PicPortBRegister::put(unsigned int new_value)
   cpu14->intcon->set_rbif(false);
 }
 
-unsigned int PicPortBRegister::get(unsigned int new_value)
+unsigned int PicPortBRegister::get()
 {
   cpu14->intcon->set_rbif(false);
 
@@ -630,7 +637,7 @@ void PicPortBRegister::setRBPU(bool bNewRBPU)
   for (unsigned int i=0, m=1; mask; i++, m<<= 1)
     if (mask & m) {
       mask ^= m;
-      operator[](i).getPin().update_pullup(m_bRBPU);
+      operator[](i).getPin().update_pullup(m_bRBPU ? '1' : '0',true);
     }
 
 }

@@ -113,7 +113,7 @@ void Switch::create_iopin_map(void)
     if(switch_pin)
     {
 	get_symbol_table().add_stimulus(switch_pin);
-	switch_pin->update_direction(1);
+	switch_pin->update_direction(1,true);
 	if(switch_pin->snode)
 	    switch_pin->snode->update(0);
     }

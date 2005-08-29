@@ -199,7 +199,7 @@ void InputPort::update_pin_directions(unsigned int new_direction)
 	// Change the directions of the I/O pins
 	for(int i=0; i<5; i++) {
 	    if(pins[i]) {
-		pins[i]->update_direction(direction);
+		pins[i]->update_direction(direction,true);
 
 		//        cout << "Direction = "<<direction<<endl;
 
