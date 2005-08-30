@@ -248,19 +248,19 @@ private:
 //========================================================================
 static PinModule AnInvalidPinModule;
 
-PortModule::PortModule(int numIopins)
+PortModule::PortModule(unsigned int numIopins)
   : mNumIopins(numIopins)
 {
 
   iopins = new PinModule *[mNumIopins];
-  for (int i=0; i<mNumIopins; i++)
+  for (unsigned int i=0; i<mNumIopins; i++)
     iopins[i] = &AnInvalidPinModule;
   //iopins[i] = new PinModule(this,i);
 
 }
 PortModule::~PortModule()
 {
-  for (int i=0; i<mNumIopins; i++)
+  for (unsigned int i=0; i<mNumIopins; i++)
     delete iopins[i];
 
   delete iopins;
@@ -278,11 +278,11 @@ PinModule &PortModule::operator [] (unsigned int iPinNumber)
 
 void PortModule::updatePort()
 {
-  for (int i=0; i<mNumIopins; i++) 
+  for (unsigned int i=0; i<mNumIopins; i++) 
     if (iopins[i])
       iopins[i]->updatePinModule();
 }
-void PortModule::updatePin(int iPinNumber)
+void PortModule::updatePin(unsigned int iPinNumber)
 {
   if (iPinNumber < mNumIopins)
     iopins[iPinNumber]->updatePinModule();
@@ -311,6 +311,14 @@ void PortModule::addPinModule(PinModule *newModule, unsigned int iPinNumber)
 {
   if (iPinNumber < mNumIopins  && iopins[iPinNumber] == &AnInvalidPinModule)
     iopins[iPinNumber] = newModule;
+}
+
+IOPIN *PortModule::getPin(unsigned int iPinNumber)
+{
+  if (iPinNumber < mNumIopins) {
+    return &iopins[iPinNumber]->getPin();
+  }
+  return 0;
 }
 
 //------------------------------------------------------------------------
@@ -540,7 +548,7 @@ void PicPortRegister::setTris(PicTrisRegister *new_tris)
   if (!m_tris) {
     m_tris = new_tris;
 
-    for (int i=0; i<mNumIopins; i++) {
+    for (unsigned int i=0; i<mNumIopins; i++) {
       operator[](i).setDefaultControl(new PicSignalControl(m_tris, i));
     }
 
@@ -614,7 +622,7 @@ void PicPortBRegister::setbit(unsigned int bit_number, char new3State)
   Dprintf(("PicPortBRegister::setbit() bit=%d,val=%c\n",bit_number,new3State));
 
   bool bNewValue = new3State=='1' || new3State=='W';
-  if (bit_number == 0 && ((rvDrivenValue.data&1==1)!=m_bIntEdge) 
+  if (bit_number == 0 && (((rvDrivenValue.data&1)==1)!=m_bIntEdge) 
       && (bNewValue == m_bIntEdge))
     cpu14->intcon->set_intf(true);
 
