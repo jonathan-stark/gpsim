@@ -1,3 +1,12 @@
+2005-08-29 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/ioports.cc, src/ioports.h: Added PortModule::getPin().
+	Fixed a few compiler warnings.
+
+	src/src.vcproj: Added bit.cc and bit.h.
+
+	src/stimuli.cc, src/symbol.cc, src/symbol.h: Changed references
+	of IOPORT to PortRegister.
+
 2005-08-29 Scott Dattalo <scott@dattalo.com>
 	* modules/encoder.cc, modules/logic.cc, modules/paraface.cc,
 	modules/push_button.cc, modules/switch.cc, src/i2c-ee.cc, src/p12x.cc
