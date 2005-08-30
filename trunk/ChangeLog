@@ -1,4 +1,8 @@
 2005-08-30 Scott Dattalo <scott@dattalo.com>
+	* src/processor.h, src/processor.cc, src/pic_processor.cc: Fixed
+	step-over feature for the 18F family.
+	
+2005-08-30 Scott Dattalo <scott@dattalo.com>
 	* regression/rt.sh: The new version of the regression test script
 	was not checked in yesterday. This new version creates a simple
 	stc file and invokes a single regression test. It then checks to

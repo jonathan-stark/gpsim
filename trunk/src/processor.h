@@ -140,12 +140,12 @@ class ProgramMemoryAccess :  public MemoryAccess
   unsigned int get_file_id(unsigned int address);
 
   // A couple of functions for manipulating  breakpoints
-  virtual void set_break_at_address(unsigned int address);
-  virtual void set_notify_at_address(unsigned int address,
-				     TriggerObject *cb);
-  virtual void set_profile_start_at_address(unsigned int address,
+  virtual unsigned int  set_break_at_address(unsigned int address);
+  virtual unsigned int  set_notify_at_address(unsigned int address,
+					      TriggerObject *cb);
+  virtual unsigned int  set_profile_start_at_address(unsigned int address,
 					    TriggerObject *cb);
-  virtual void set_profile_stop_at_address(unsigned int address,
+  virtual unsigned int  set_profile_stop_at_address(unsigned int address,
 					   TriggerObject *cb);
   virtual int clear_break_at_address(unsigned int address,
 				     enum instruction::INSTRUCTION_TYPES type);

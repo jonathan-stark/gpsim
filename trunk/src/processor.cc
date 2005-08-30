@@ -1028,37 +1028,44 @@ unsigned int ProgramMemoryAccess::get_file_id(unsigned int address)
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_break_at_address(unsigned int address)
+unsigned int ProgramMemoryAccess::set_break_at_address(unsigned int address)
 {
   if(hasValid_opcode_at_address(address))
-    bp.set_execution_break(cpu, address);
+    return bp.set_execution_break(cpu, address);
+
+  return INVALID_VALUE;
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_notify_at_address(unsigned int address, TriggerObject *cb)
+unsigned int ProgramMemoryAccess::set_notify_at_address(unsigned int address, TriggerObject *cb)
 {
   if(hasValid_opcode_at_address(address))
-    bp.set_notify_break(cpu, address, cb);
+    return bp.set_notify_break(cpu, address, cb);
 
+  return INVALID_VALUE;
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
+unsigned int ProgramMemoryAccess::set_profile_start_at_address(unsigned int address,
 						       TriggerObject *cb)
 {
   unsigned int pm_index = cpu->map_pm_address2index(address);
 
   if(pm_index<cpu->program_memory_size()) 
     if (cpu->program_memory[pm_index]->isa() != instruction::INVALID_INSTRUCTION)
-      bp.set_profile_start_break(cpu, address, cb);
+      return bp.set_profile_start_break(cpu, address, cb);
+
+  return INVALID_VALUE;
 }
 
 //-------------------------------------------------------------------
-void ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
+unsigned int ProgramMemoryAccess::set_profile_stop_at_address(unsigned int address,
 						      TriggerObject *cb)
 {
   if(hasValid_opcode_at_address(address))
-    bp.set_profile_stop_break(cpu, address, cb);
+    return bp.set_profile_stop_break(cpu, address, cb);
+  return INVALID_VALUE;
+
 }
 
 //-------------------------------------------------------------------

@@ -538,28 +538,45 @@ void pic_processor::step (unsigned int steps, bool refresh)
 void pic_processor::step_over (bool refresh)
 {
 
-  unsigned int saved_pc = pc->value;
-
   if(simulation_mode != eSM_STOPPED) {
     if(verbose)
       cout << "Ignoring step-over request because simulation is not stopped\n";
     return;
   }
 
+  unsigned int saved_pc = pma->get_PC();
+  instruction *nextInstruction = pma->getFromAddress(saved_pc);
+  if (!nextInstruction) {
+    // this is really fatal...
+    return;
+  }
+  unsigned int nextExpected_pc = 
+    saved_pc + map_pm_index2address(nextInstruction->instruction_size());
+
   step(1,refresh); // Try one step
 
-  if( ! ( (pc->value >= saved_pc) && (pc->value <= saved_pc+2) ) )
-    {
-      if(pma->find_instruction(pc->value,instruction::BREAKPOINT_INSTRUCTION)!=0)
-	  return;
-	else
-	{
-	  // Set a break point at the instruction just past the one over which we are stepping
-	  unsigned int bp_num = bp.set_execution_break(this, saved_pc + 1);
-	  run();
-	  bp.clear(bp_num);
-	}
+  // if the pc did not advance just one instruction, then some kind of branch occurred.
+
+  unsigned int current_pc = pma->get_PC();
+  if( ! (current_pc >= saved_pc && current_pc <= nextExpected_pc)) {
+
+    // If the branch is not a skip instruction then we'll set a break point and run.
+    // (note, the test that's performed will treat a goto $+2 as a skip.
+    
+    instruction *nextNextInstruction = pma->getFromAddress(nextExpected_pc);
+    unsigned int nextNextExpected_pc = nextExpected_pc + 
+      (nextNextInstruction ? map_pm_index2address(nextNextInstruction->instruction_size()) : 0);
+
+    if (! (current_pc >= saved_pc && current_pc <= nextNextExpected_pc)) {
+    
+      unsigned int bp_num = pma->set_break_at_address(nextExpected_pc);
+      if (bp_num != INVALID_VALUE) {
+	run();
+	bp.clear(bp_num);
+      }
     }
+
+  }
 
   // note that we don't need to tell the gui to update its windows since
   // that is already done by step() or run().
