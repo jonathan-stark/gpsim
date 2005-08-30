@@ -243,7 +243,7 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
 
   // Initialize the first event to something bogus.
   *pEventBuffer = -1;
-  *pTimeBuffer  = (unsigned long long)0xffffffffffffffff;
+  *pTimeBuffer  = Cycle_Counter::END_OF_TIME;
   gcycles = &get_cycles();
 
   max_events--;  // make the max_events a mask
