@@ -171,11 +171,11 @@ class PortModule
 {
 public:
 
-  PortModule(int numIopins);
+  PortModule(unsigned int numIopins);
   ~PortModule();
 
   void updatePort();
-  void updatePin(int iPinNumber);
+  void updatePin(unsigned int iPinNumber);
 
   SignalControl *addSource(SignalControl *, unsigned int iPinNumber);
   SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
@@ -183,6 +183,8 @@ public:
   SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
   IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
   void           addPinModule(PinModule *, unsigned int iPinNumber);
+
+  IOPIN         *getPin(unsigned int iPinNumber);
 
   PinModule &operator [] (unsigned int pin_number);
 
