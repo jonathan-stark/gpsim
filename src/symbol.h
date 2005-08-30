@@ -37,7 +37,7 @@ using namespace std;
 class stimulus;
 class Stimulus_Node;
 class WREG;
-class IOPORT;
+class PortRegister;
 class Processor;
 class Register;
 class Module;
@@ -89,7 +89,7 @@ public:
 
   bool add(Value*);
 
-  void add_ioport(IOPORT *ioport);
+  void add_ioport(PortRegister *ioport);
   void add_stimulus_node(Stimulus_Node *stimulus_node);
   void add_stimulus(stimulus *s);
   void add_line_number(int address, const char *symbol_name=0);
@@ -426,10 +426,10 @@ public:
 class ioport_symbol : public register_symbol
 {
 public:
-  ioport_symbol(IOPORT *);
-  ioport_symbol(Module *pParent, IOPORT *);
-  IOPORT *getIOPort() {
-    return (IOPORT*)getReg();
+  ioport_symbol(PortRegister *);
+  ioport_symbol(Module *pParent, PortRegister *);
+  PortRegister *getIOPort() {
+    return (PortRegister*)getReg();
   }
 };
 

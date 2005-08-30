@@ -1825,8 +1825,8 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
             else /* if(pPinArgument->m_iFlags & Pin_t::ePortBased) */ {
               ioport_symbol *pIOPSym = dynamic_cast<ioport_symbol*>(pPinArgument->m_sPort);
               if(pIOPSym != NULL) {
-                IOPORT * pPort = pIOPSym->getIOPort();
-                pPinObj = pPort->getIO(*pPinInt);
+                PortRegister * pPort = pIOPSym->getIOPort();
+                pPinObj = pPort->getPin(*pPinInt);
               }
               else {
                 bSuccess = false;
@@ -2002,8 +2002,8 @@ IOPIN *Pin_t::GetIOPin() {
       else /* if(m_iFlags & Pin_t::ePortBased) */ {
         ioport_symbol *pIOPSym = dynamic_cast<ioport_symbol*>(m_sPort);
         if(pIOPSym != NULL) {
-          IOPORT * pPort = pIOPSym->getIOPort();
-          pPinObj = pPort->getIO(*pPinInt);
+          PortRegister * pPort = pIOPSym->getIOPort();
+          pPinObj = pPort->getPin(*pPinInt);
         }
         else {
           bSuccess = false;

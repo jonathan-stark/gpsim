@@ -70,7 +70,7 @@ Symbol_Table::Symbol_Table() {
     reserve(500);
 }
 
-void Symbol_Table::add_ioport(IOPORT *_ioport)
+void Symbol_Table::add_ioport(PortRegister *_ioport)
 {
 
   ioport_symbol *is = new ioport_symbol(_ioport);
@@ -1072,7 +1072,7 @@ w_symbol::w_symbol(const char *_name, Register *_reg)
 }
 
 //------------------------------------------------------------------------
-ioport_symbol::ioport_symbol(IOPORT *_ioport)
+ioport_symbol::ioport_symbol(PortRegister *_ioport)
   : register_symbol(_ioport->name().c_str(), _ioport)
 {
 }
