@@ -1,3 +1,14 @@
+2005-08-30 J.R. Heisey <jrheisey@sourceforge.com>
+	* cli/input.cc: Created function parse_string_only() which
+	will parse the passed in command string with out emptying
+	existing commands from the buffer.
+	Modified LLStack::GetNext() and LLStack::Pop() to not remove
+	the last LLStack object.
+	Fixed memory leak in LLStack::Pop().
+	
+	* cli/ui_gpsim.cc: Added EOL to injected abort_gpsim_now
+	command.
+
 2005-08-30 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.h, src/gpsim_time.cc, bitlog.cc: Made the
 	constant 'END_OF_TIME' part of the Cycle_Counter class. This is

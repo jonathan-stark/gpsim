@@ -283,6 +283,7 @@ EXPORTS
     ?new_message@TriggerObject@@UAEXPAD@Z
     ?new_program@gpsimInterface@@QAEXPAVProcessor@@@Z
     ?parse_string@@YAHPAD@Z
+    ?parse_string_only@@YAHPAD@Z
     ?passToChild@Token@gpsim@@QAEXXZ
     ?passToParent@Token@gpsim@@QAEXXZ
     ?print@Breakpoint_Instruction@@UAEXXZ
