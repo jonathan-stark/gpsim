@@ -337,8 +337,13 @@ void LLStack::Push()
 
 void LLStack::Pop()
 {
-  if (Stack)
-    Stack = Stack->next_stack;
+  if (Stack ) {
+    if(Stack->next_stack != NULL) {
+      LLStack *next = Stack->next_stack;
+      delete Stack;
+      Stack = next;
+    }
+  }
 }
 
 void LLStack::Append(char *s, Macro *m)
@@ -378,9 +383,11 @@ LLInput *LLStack::GetNext()
 
       return d;
     }
-    Pop();
+    if(Stack->next_stack != NULL) {
+      Pop();
 
-    return GetNext();
+      return GetNext();
+    }
   }
 
   return 0;
@@ -448,6 +455,15 @@ int parse_string(char * str)
     clear_input_buffer();
   }
   return iReturn;
+}
+
+int parse_string_only(char * str) {
+  LLStack *OldStack= Stack;
+  Stack = 0;
+  int iRet = parse_string(str);
+  delete Stack;
+  Stack = OldStack;
+  return iRet;
 }
 
 //========================================================================
