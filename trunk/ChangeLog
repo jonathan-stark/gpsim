@@ -1,3 +1,10 @@
+2005-08-30 Scott Dattalo <scott@dattalo.com>
+	* regression/rt.sh: The new version of the regression test script
+	was not checked in yesterday. This new version creates a simple
+	stc file and invokes a single regression test. It then checks to
+	see if the test was successful.
+	* regression/simulate, regression/create_stc: Removed from CVS.
+
 2005-08-29 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/ioports.cc, src/ioports.h: Added PortModule::getPin().
 	Fixed a few compiler warnings.
