@@ -224,6 +224,9 @@
 				RelativePath=".\attributes.cc">
 			</File>
 			<File
+				RelativePath=".\bit.cc">
+			</File>
+			<File
 				RelativePath=".\bitlog.cc">
 			</File>
 			<File
@@ -440,6 +443,9 @@
 			</File>
 			<File
 				RelativePath=".\attributes.h">
+			</File>
+			<File
+				RelativePath=".\bit.h">
 			</File>
 			<File
 				RelativePath=".\bitlog.h">
