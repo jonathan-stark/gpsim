@@ -88,6 +88,10 @@ public:
 
 #define BREAK_ARRAY_SIZE  32
 #define BREAK_ARRAY_MASK  (BREAK_ARRAY_SIZE -1)
+// Largest cycle counter value
+
+  static const guint64  END_OF_TIME=0xFFFFFFFFFFFFFFFFULL;
+
 
   guint64 value;          // Current value of the cycle counter.
   guint64 break_on_this;  // If there's a pending cycle break point, then it'll be this

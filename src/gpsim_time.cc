@@ -35,10 +35,6 @@ Boston, MA 02111-1307, USA.  */
 
 //#define __DEBUG_CYCLE_COUNTER__
 
-// Largest cycle counter value
-
-#define END_OF_TIME 0xFFFFFFFFFFFFFFFFULL
-
 //--------------------------------------------------
 // Global instantiation of the cycle counter 
 // and the stop watch;
