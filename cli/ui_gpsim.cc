@@ -241,7 +241,7 @@ class Macro;
 void add_string_to_input_buffer(char *s, Macro *m=0);
 
 void CGpsimUserInterface::NotifyExitOnBreak(int iExitCode) {
-  add_string_to_input_buffer("abort_gpsim_now");
+  add_string_to_input_buffer("abort_gpsim_now\n");
 }
 
 
