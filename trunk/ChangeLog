@@ -1,3 +1,7 @@
+2005-08-31 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/processor.cc: Fixed a crashing bug when the --source=disable
+	option is used.
+
 2005-08-30 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/input.cc: Created function parse_string_only() which
 	will parse the passed in command string with out emptying
