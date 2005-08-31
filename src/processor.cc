@@ -50,6 +50,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "fopen-path.h"
 #include "cmd_gpsim.h"
+#include "sim_context.h"
 
 //------------------------------------------------------------------------
 // active_cpu  is a pointer to the pic processor that is currently 'active'. 
@@ -2263,10 +2264,12 @@ int FileContextList::Add(string &new_name)
   string sFull = sSourcePath + new_name;
   push_back(FileContext(sFull));
   lastFile++;
-  back().open("r");
-  if(verbose)
-    cout << "Added new file named: " << new_name 
-	 << "  id = " << lastFile << endl;
+  if(CSimulationContext::GetContext()->IsSourceEnabled()) {
+    back().open("r");
+    if(verbose)
+      cout << "Added new file named: " << new_name 
+           << "  id = " << lastFile << endl;
+  }
 
   return lastFile-1;
 }
