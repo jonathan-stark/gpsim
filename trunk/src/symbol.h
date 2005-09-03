@@ -480,7 +480,7 @@ public:
   module_symbol(Module *, const char *);
   virtual string toString();
   Module *get_module() { return module;}
-  virtual symbol *copy();
+  virtual Value *copy();
 
   /// The set and get methods for the module_symbol take char strings
   /// as their inputs. These strings are dynamically decoded such
@@ -530,6 +530,7 @@ public:
 
   virtual void set_xref(Value *);
   virtual Value *get_xref();
+  virtual Value *copy();
 
 };
 

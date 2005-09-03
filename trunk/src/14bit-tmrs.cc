@@ -1322,9 +1322,7 @@ void TMR2::new_pr2()
 
 void TMR2::current_value()
 {
-//  value.put((unsigned int)((get_cycles().value - last_cycle)/ prescale));
-  value.put((unsigned int)(pr2->value.get() - (future_cycle - get_cycles().value)/ prescale ));
-// MGF
+  value.put((unsigned int)((future_cycle - get_cycles().value)/ prescale ));
 
   if(value.get()>0xff)
     cout << "TMR2 BUG!! value = " << value.get() << " which is greater than 0xff\n";

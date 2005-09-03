@@ -307,9 +307,9 @@ P18C4x2::P18C4x2()
   m_trisd = new PicTrisRegister("trisd", m_portd);
   m_latd  = new PicLatchRegister("latd", m_portd);
 
-  m_porte = new PicPortRegister("portd",8,0x07);
-  m_trise = new PicTrisRegister("trisd", m_portd);
-  m_late  = new PicLatchRegister("latd", m_portd);
+  m_porte = new PicPortRegister("porte",8,0x07);
+  m_trise = new PicTrisRegister("trise", m_porte);
+  m_late  = new PicLatchRegister("late", m_porte);
 
 }
 
@@ -528,6 +528,7 @@ void P18F252::create()
 
   if(verbose)
     cout << " 18f252 create \n";
+  P18F242::create();
 
 }
 Processor * P18F252::construct()

@@ -44,7 +44,6 @@ Boston, MA 02111-1307, USA.  */
 #include <math.h>  // for floor()
 
 #include "../config.h"    // get the definition for HAVE_GUI
-
 #ifdef HAVE_GUI
 #include <gtk/gtk.h>
 #endif
@@ -66,7 +65,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/bitlog.h"
 
 
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -186,6 +185,7 @@ public:
 
       time_per_bit = (guint64)(get_active_cpu()->get_frequency()/baud);
 
+      Dprintf(("Baud:%f time_per_bit=%lld\n",baud,time_per_bit));
     }
   };
 
@@ -209,18 +209,17 @@ class USART_RXPIN : public IO_bi_directional_pu
 {
 public:
 
-  USART_CORE *usart;
-  /*
-  USART_RXPIN(void) {
-    //cout << "USART_RXPIN constructor - do nothing\n";
-  }
-  */
-  USART_RXPIN (USART_CORE *_usart,
-	       IOPORT *i, 
+  USARTModule *usart;
+
+  USART_RXPIN (USARTModule *_usart,
 	       unsigned int b, 
-	       char *opt_name=NULL) : IO_bi_directional_pu(i,b,opt_name) { 
+	       char *opt_name=NULL) : IO_bi_directional_pu(0,b,opt_name) { 
 
     usart = _usart;
+
+    string n(usart->name());
+    n = n + ".RX";
+    new_name(n.c_str());
 
     // Let the pin think it's in the high state. If this is wrong,
     // then the I/O pin driving it will correct it. (Starting off
@@ -265,90 +264,27 @@ public:
 
 class USART_TXPIN : public IO_bi_directional
 {
+private:
+  USART_TXPIN() {
+  }
 public:
 
-  USART_CORE *usart;
+  USARTModule *usart;
 
-  USART_TXPIN(void) {
-    //cout << "USART_TXPIN constructor - do nothing\n";
-  }
-  USART_TXPIN (USART_CORE *_usart,
-	       IOPORT *i, 
+  USART_TXPIN (USARTModule *_usart,
 	       unsigned int b, 
-	       char *opt_name=NULL) : IO_bi_directional(i,b,opt_name) { 
+	       char *opt_name=NULL) : IO_bi_directional(0,b,0) 
+  { 
 
     usart = _usart;
 
+    string n(usart->name());
+    n = n + ".TX";
+    new_name(n.c_str());
     bDrivingState = true;
     update_direction(1,true);   // Make the TX pin an output.
 
   };
-#if 0
-  virtual void put_node_state(int new_state) {
-
-    // cout << "USART_TXPIN put_node_state " << new_state << '\n';
-    /*
-    state = new_state;
-
-    if( state < h2l_threshold) {
-      state = l2h_threshold + 1;
-      putState(0);
-
-    } else {
-
-      if(state > l2h_threshold) {
-	state = h2l_threshold - 1;
-	putState(1);
-      }
-    }
-    */
-  }
-#endif
-  //  void putState(bool new_dstate) { 
-
-    //cout << "usart tx putState " << new_dstate << '\n';
-    /*
-    bool diff = new_dstate ^ bDrivingState;
-    bDrivingState = new_dstate;
-
-    cout << "usart tx putState " << bDrivingState << '\n';
-    if( usart && diff ) {
-
-      usart->new_rx_edge(bDrivingState);
-
-      if(iop) // this check should not be necessary...
-	iop->setbit(iobit,bDrivingState);
-    }
-    */
-
-  //}
-#if 0
-  virtual void putState(bool newDrivingState) {
-
-    Register *port = get_iop();
-
-    if(port) {
-      // If the new state to which the stimulus is being set is different than
-      // the current state of the bit in the ioport (to which this stimulus is
-      // mapped), then we need to update the ioport.
-
-      if((newDrivingState!=0) ^ ( port->value.get() & (1<<iobit))) {
-
-	bool bNewState = newDrivingState ? true : false;
-	port->setbit(iobit,bNewState);
-
-	bDrivingState = bNewState;
-	// If this stimulus is attached to a node, then let the node be updated
-	// with the new state as well.
-	if(snode)
-	  snode->update(0);
-	// Note that this will auto magically update
-	// the io port.
-
-      }
-    }
-  }
-#endif
 
 };
 
@@ -398,7 +334,7 @@ private:
 
  public:
   USART_TXPIN *txpin;
-  USART_CORE  *usart;
+  USARTModule *usart;
 
   virtual bool is_empty() { return empty_flag;};
   virtual void empty() {empty_flag = 0;};
@@ -539,11 +475,11 @@ private:
 //
 //  RCREG 
 //
-// Create a receive register based upon the receive register defined
-// in the main gpsim code
+// Create a receive register 
+// 
 //
 
-class RCREG : public TriggerObject // : public _RCREG
+class RCREG : public TriggerObject
 {
  public:
 
@@ -568,16 +504,18 @@ class RCREG : public TriggerObject // : public _RCREG
     RS_OVERRUN
   } receive_state;
 
-
-  //  virtual void push(unsigned int);
-  //  virtual void pop(void);
-
-  //  virtual void assign_pir_set(PIR_SET *new_pir_set){};
+  enum RXErrors {
+    eNoError,
+    eNoStartBit,
+    eNoStopBit,
+    eBadParity
+    
+  };
 
   /**************************/
   // RCREG constructor
   /**************************/
-  RCREG();
+  RCREG(USARTModule *);
 
   void set_bits_per_byte(int num_bits) {
     bits_per_byte = num_bits;
@@ -629,27 +567,14 @@ class RCREG : public TriggerObject // : public _RCREG
     parity = new_parity;
   }
 
-  /*
-  void se(guint64 t) {
-    cout << "Search for event at t = 0x"<<t<<'\n';
-
-    if(rx_event->get_state(t))
-      cout << "high";
-    else
-      cout << "low";
-
-    cout <<" at t = 0x"<<t << '\n';
-  }
-  */
-
   virtual void callback();
 
   void start();
-  unsigned int decode_byte(guint32 sindex, guint64 bit_time);
+  RXErrors decode_byte(unsigned sindex, unsigned int &aByte);
   void new_rx_edge(bool bit);
 
 private:
-
+  USARTModule *m_usart;
   ThreeStateEventLogger *rx_event;
 
   char m_cLastRXState;
@@ -660,7 +585,6 @@ private:
 
 
   guint64 time_per_bit;
-  guint64 last_time;
   guint64 start_time;
   guint64 future_time;
 
@@ -685,9 +609,10 @@ private:
 
 //------------------------------------------------------------------------
 
-RCREG::RCREG(void)
-  : rcpin(0), start_bit_event(0), m_cLastRXState('?')
+RCREG::RCREG(USARTModule *pUsart)
+  : m_usart(pUsart), rcpin(0), start_bit_event(0), m_cLastRXState('?')
 {
+  assert(m_usart);
 
   rx_event = new ThreeStateEventLogger(1024);
 
@@ -718,7 +643,16 @@ void RCREG::callback()
     if (bIsHigh(m_cLastRXState)) {
 
       receive_state = RS_WAITING_FOR_START;
-      decode_byte(start_bit_event,0);
+
+      Dprintf((" received a byte\n"));
+      unsigned int rx_byte=0;
+      RXErrors re = decode_byte(start_bit_event,rx_byte);
+      if (re == eNoError) {
+	Dprintf((" Successfully recieved 0x%02x\n",rx_byte));
+	m_usart->newRxByte(rx_byte);
+      } else {
+	Dprintf((" Failed to decode byte\n"));
+      }
 
     } else {
       receive_state = RS_WAITING_FOR_START;
@@ -745,21 +679,65 @@ void RCREG::start()
 
   start_bit_event = rx_event->get_index();
 
-  future_time = last_time + time_per_packet;
+  future_time = rx_event->get_time(start_bit_event) + time_per_packet;
 
   if(!autobaud) {
     get_cycles().set_break(future_time, this);
   }
 
-  Dprintf((" usart module RCREG last_cycle=%llx future_cycle=%llx\n", last_time,future_time));
+  Dprintf((" usart module RCREG current cycle=%lld future_cycle=%lld\n", get_cycles().value,future_time));
 }
 
 //------------------------------------------------------------------------
+// decode_byte
+// 
+// decode_byte will examine the data logged from the receiver's I/O 
+// pin and attempt to decipher it.
+//
+//    +---------------------------------------------  Edge of start bit
+//    | +-------------------------------------------  Middle of start bit
+//  __v v  ___ ___ ___ ___ ___ ___ ___ ___ ____
+//    \___/___X___X___X___X___X___X___X___/    
+//          ^   ^   ^   ^   ^   ^   ^   ^   ^
+//          |   |   |   |   |   |   |   |   +-------  Middle of stop bit
+//          +---+---+---+---+---+---+---+-----------  Middle of data bits
+//
+// The input to decode_byte is the index into the event log holding
+// the captured waveform. The baud rate for the receiver is used to
+// compute the bit time and this in turn is used to compute the times
+// at which the data samples should be taken.
+//
 
-unsigned int RCREG::decode_byte(guint32 sindex, guint64 bit_time)
+RCREG::RXErrors RCREG::decode_byte(unsigned int sindex, unsigned int &rx_byte)
 {
 
-  return '?';
+  Dprintf((" decode_byte start_bit_index=%d \n", sindex));
+
+  rx_byte = 0;
+
+  if (!bIsLow(rx_event->get_state(sindex)))
+    return eNoStartBit;
+
+  guint64 sample_time = rx_event->get_time(sindex) + time_per_bit/2;
+
+  Dprintf((" decode_byte sample_time=%lld start_bit_time=%lld time_per_bit=%d\n", sample_time,
+	   rx_event->get_time(sindex), time_per_bit));
+
+  if (!bIsLow(rx_event->get_state(sample_time)))
+    return eNoStartBit;
+
+  sample_time += time_per_bit;
+
+  unsigned int msb = 1<<(bits_per_byte-1);
+  for (int i=0; i<bits_per_byte; i++, sample_time+=time_per_bit)
+    rx_byte = (rx_byte>>1) | (bIsHigh(rx_event->get_state(sample_time))?msb:0);
+
+  if (!bIsHigh(rx_event->get_state(sample_time)))
+    return eNoStopBit;
+
+  Dprintf((" decoded %d=%x=%c \n", rx_byte,rx_byte,rx_byte));
+
+  return eNoError;
 }
 
 
@@ -773,7 +751,7 @@ unsigned int RCREG::decode_byte(guint32 sindex, guint64 bit_time)
 
 void RCREG::new_rx_edge(bool bit) 
 {
-  /**/
+#if defined(DEBUG)
   cout << "USART MODULE RCREG::" << __FUNCTION__ << "\n";
   switch(receive_state) {
   case RS_WAITING_FOR_START:
@@ -805,6 +783,7 @@ void RCREG::new_rx_edge(bool bit)
     break;
 
   }
+#endif
 
   // Save the event state
   char currentRXState = rxpin->getBitChar();
@@ -817,8 +796,8 @@ void RCREG::new_rx_edge(bool bit)
     switch(receive_state) {
     case RS_WAITING_FOR_START:
       if(bIsLow(currentRXState)) {
-	Dprintf(("Start bit at t=0x%llx\n",rx_event->get_time(start_bit_event)));
 	start();
+	Dprintf(("Start bit at t=0x%llx\n",rx_event->get_time(start_bit_event)));
       }
 
       break;
@@ -848,39 +827,11 @@ public:
   USART_IO(void) {
     cout << "USART_IO constructor - do nothing\n";
   }
-  USART_IO (IOPORT *i, unsigned int b, char *opt_name=NULL) : IOPIN(i,b,opt_name) { };
+  USART_IO (unsigned int b, char *opt_name=NULL) : IOPIN(0,b,opt_name) { };
 
 };
 
 
-
-
-class USART_IOPORT : public IOPORT
-{
-public:
-  USARTModule *usart;
-
-  void trace_register_write(void) {
-    cout << "USART_IOPORT::trace_register_write\n";
-  }
-
-  USART_IOPORT (USARTModule *new_usart, unsigned int _num_iopins=4): IOPORT(_num_iopins) {
-    usart = new_usart;
-  }
-  void put(unsigned int new_value) {
-    cout << "writing " << new_value <<" to usart port\n";
-    //IOPORT::put(new_value);
-  }
-  void setbit(unsigned int bit_number, bool new_value) {
-    int mask = 1<<bit_number;
-
-    value.put( (value.get() & ~mask) | (new_value ? mask : 0));
-
-    if(usart)
-      //get_trace().module1( value.get() & 0xf);
-      get_trace().raw( value.get() & 0xf);
-  }
-};
 
 
 //--------------------------------------------------------------
@@ -943,109 +894,63 @@ public:
 //   stop_bits     1
 //   
 
-class BaudRateAttribute : public Integer 
+
+class RxBaudRateAttribute : public Integer
 {
-
-public:
-  USARTModule *usart;
-
-  BaudRateAttribute(USARTModule *pusart, char *_name=NULL)
-    : Integer(9600)
-  {
-
-    usart = pusart;
-    //brg = pbrg;
-    if(!pusart)// || !pbrg)
-      return;
-
-    if(_name)
-      new_name(_name);
-    else 
-      new_name("baud");
-    cout << "BaudRateAttribute constr\n";
-
-  };
-
-
-  void set(Value *v) {
-
-    cout << "Setting baud rate attribute!\n";
-    gint64 old_value;
-    get(old_value);
-    Integer::set(v);
-
-    gint64 new_value;
-    get(new_value);
-    cout << " old value: " << dec << old_value << " New value: " << new_value << endl;
-
-  };
-
-
-};
-
-
-class RxBaudRateAttribute : public BaudRateAttribute  {
 
 public:
   RCREG *rcreg;
 
-  RxBaudRateAttribute(USARTModule *pusart):BaudRateAttribute(pusart,"rxbaud") {
-
-    if(!pusart || !pusart->usart || !pusart->usart->rcreg)// || !pbrg)
-      return;
-
-    rcreg = pusart->usart->rcreg;
-
-    cout << "RxBaudRateAttribute constructor\n";
-
-  };
+  RxBaudRateAttribute(RCREG *prcreg)
+    : Integer("rxbaud",9600,"USART Module Receiver baud rate"), rcreg(prcreg)
+  {
+    assert(rcreg);
+  }
 
 
   void set(Value *v) {
 
 
     cout << "Setting Rx baud rate attribute!\n";
-    BaudRateAttribute::set(v);
+    Integer::set(v);
 
     gint64 b;
     get(b);
-    if(rcreg)
-      rcreg->set_baud_rate(b);
+    rcreg->set_baud_rate(b);
 
   };
-
+  virtual string toString()
+  {
+    return Integer::toString("%" PRINTF_INT64_MODIFIER "d");
+  }
 
 };
 
-class TxBaudRateAttribute : public BaudRateAttribute
+class TxBaudRateAttribute : public Integer
 {
 
 public:
   TXREG *txreg;
 
-  TxBaudRateAttribute(USARTModule *pusart):BaudRateAttribute(pusart,"txbaud") {
-
-    if(!pusart || !pusart->usart || !pusart->usart->txreg)// || !pbrg)
-      return;
-
-    txreg = pusart->usart->txreg;
-
-    cout << "TxBaudRateAttribute constructor\n";
-
-  };
-
+  TxBaudRateAttribute(TXREG *ptxreg)
+    : Integer("txbaud",9600,"USART Module Transmitter baud rate"), txreg(ptxreg)
+  {
+    assert(txreg);
+  }
 
   void set(Value *v) 
   {
-    cout << "Setting Tx baud rate attribute!\n";
-    BaudRateAttribute::set(v);
+    Integer::set(v);
 
     gint64 b;
     get(b);
-    if(txreg)
-      txreg->set_baud_rate(b);
-
+    txreg->set_baud_rate(b);
   }
+  virtual string toString()
+  {
+    return Integer::toString("%" PRINTF_INT64_MODIFIER "d");
+  }
+
 };
 
 class TxBuffer : public Integer
@@ -1067,47 +972,56 @@ public:
 
     Integer::set(i);
   }
+  virtual string toString()
+  {
+    return Integer::toString("%" PRINTF_INT64_MODIFIER "d");
+  }
 
 };
 
-//--------------------------------------------------------------
-USART_CORE::USART_CORE(void)
+class RxBuffer : public Integer
 {
+  RCREG *rcreg;
+public:
+  RxBuffer(RCREG *_rcreg)
+    : Integer("rx",0,"UART Receive Register"),rcreg(_rcreg)
+  {
+  }
+  virtual void set(gint64 i)
+  {
+    cout << "Receive buffer is read only\n";
+  }
+  virtual string toString()
+  {
+    return Integer::toString("%" PRINTF_INT64_MODIFIER "d");
+  }
 
-  cout << "new USART_CORE\n";
+  void newByte(gint64 b) 
+  {
+    Dprintf((" RxBuffer received a byte: 0x%02x=%d=%c",b,b,b));
+    Integer::set(b);
+  }
+};
 
-  baud_rate = new UsartAttribute("BAUD", UsartAttribute::UA_BAUDRATE, 1200);
-
-  txreg=NULL;
-  rcreg=NULL;
-
+//--------------------------------------------------------------
+void USARTModule::new_rx_edge(unsigned int bit)
+{
+  if(m_rcreg)
+    m_rcreg->new_rx_edge(bit ? true : false);
 }
 
 //--------------------------------------------------------------
-void USART_CORE::new_rx_edge(unsigned int bit)
+void USARTModule::newRxByte(unsigned int aByte)
 {
-  if(rcreg)
-	  rcreg->new_rx_edge(bit ? true : false);
-
+  m_RxBuffer->newByte(aByte);
 }
 
-//--------------------------------------------------------------
-void USART_CORE::initialize(USART_IOPORT *new_iop)
-{
-
-  port = new_iop;
-
-  rcreg = new RCREG;
-  txreg = new TXREG;
-  //txreg->enable();
-
-}
 //--------------------------------------------------------------
 static unsigned int _tx_index=0;
 static unsigned char Test_Hello[] = {
   0x1b,0xff, 0x87,0x05, 'H', 'E',  'L', 'L', 'O', 0x17, 0x55
 };
-bool USART_CORE::mGetTxByte(unsigned int &aByte)
+bool USARTModule::mGetTxByte(unsigned int &aByte)
 {
   if (_tx_index > sizeof(Test_Hello))
     return false;
@@ -1130,38 +1044,6 @@ bool USART_CORE::mGetTxByte(unsigned int &aByte)
 void USARTModule::create_iopin_map(void)
 {
 
-
-  // Create the usart core from the usart class in the main
-  // gpsim source code.
-
-  usart = new USART_CORE; 
-
-  //  usart->brg = new BRG;
-
-  // Create an I/O port to which the I/O pins can interface
-  //   The module I/O pins are treated in a similar manner to
-  //   the pic I/O pins. Each pin has a unique pin number that
-  //   describes it's position on the physical package. This
-  //   pin can then be logically grouped with other pins to define
-  //   an I/O port. 
-
-  port = new USART_IOPORT(this, 4);
-
-
-  // Here, we name the port `pins'. So in gpsim, we will reference
-  //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-  //   name of the usart (which is assigned by the user and
-  //   obtained with the name() member function call).
-
-  char *pin_name = (char*)name().c_str();   // Get the name of this usart
-  if(pin_name) 
-    port->new_name(pin_name);
-  else
-    port->new_name("usart_port");
-
-
-  usart->initialize(port);
-
   // Define the physical package.
   //   The Package class, which is a parent of all of the modules,
   //   is responsible for allocating memory for the I/O pins.
@@ -1173,7 +1055,6 @@ void USARTModule::create_iopin_map(void)
   //    3 - CTS - Clear To Send
   //    4 - RTS - Request To Send
 
-
   create_pkg(4);
 
 
@@ -1184,69 +1065,41 @@ void USARTModule::create_iopin_map(void)
   //   need to reference these newly created I/O pins (like
   //   below) then we can call the member function 'get_pin'.
 
-  USART_TXPIN *txpin = new USART_TXPIN(usart,port, 0,"TX");
-  USART_RXPIN *rxpin = new USART_RXPIN(usart,port, 1,"RX");
+  USART_TXPIN *txpin = new USART_TXPIN(this, 0,"TX");
+  USART_RXPIN *rxpin = new USART_RXPIN(this, 1,"RX");
+
+
   assign_pin(1, txpin);
   assign_pin(2, rxpin);
-  assign_pin(3, new USART_IO(port, 2,"CTS"));
-  assign_pin(4, new USART_IO(port, 3,"RTS"));
-
-
-  // Create an entry in the symbol table for the new I/O pins.
-  // This is how the pins are accessed at the higher levels (like
-  // in the CLI).
-
-  get_symbol_table().add_stimulus(get_pin(1));
-  get_symbol_table().add_stimulus(get_pin(2));
-  get_symbol_table().add_stimulus(get_pin(3));
-  get_symbol_table().add_stimulus(get_pin(4));
-
+  assign_pin(3, new USART_IO(2,"CTS"));
+  assign_pin(4, new USART_IO(3,"RTS"));
 
   // Complete the usart initialization
 
-/*
-  new txreg
-  new rcreg
-  
-*/
-
-  if(usart->txreg) {
-    usart->txreg->txpin = txpin; 
-    usart->txreg->usart = usart; // Point back to the module
-
-  }
-
-  if(usart->rcreg) {
-    usart->rcreg->rxpin = rxpin;
-  }
+  m_txreg->txpin = txpin; 
+  m_txreg->usart = this; // Point back to the module
+  m_rcreg->rxpin = rxpin;
 
   //usart->brg->put(0);
   //usart->spbrg->set_baud_rate(38400);
   //usart->rcsta->put(_RCSTA::SPEN | _RCSTA::CREN);
 
 }
-
+//--------------------------------------------------------------
+void USARTModule::get(char *cP, int len)
+{
+  cout << "USARTModule::get(char *cP, int len)\n";
+}
 
 //--------------------------------------------------------------
 
 Module * USARTModule::USART_construct(const char *_new_name)
 {
 
-  cout << "USART construct \n";
+  Dprintf(("USART construct\n"));
 
-  USARTModule *um = new USARTModule(_new_name);
-  /*
-  if(new_name) {
-    um->new_name((char*)new_name);
-  }
-  */
+  USARTModule *um = new USARTModule( (_new_name ?_new_name:"USART"));
   um->create_iopin_map();
-
-  RxBaudRateAttribute *rxattr = new RxBaudRateAttribute(um);
-  um->add_attribute(rxattr);
-
-  TxBaudRateAttribute *txattr = new TxBaudRateAttribute(um);
-  um->add_attribute(txattr);
 
   return um;
 
@@ -1254,11 +1107,29 @@ Module * USARTModule::USART_construct(const char *_new_name)
 
 USARTModule::USARTModule(const char *_name)
 {
-
-  port = NULL;
-  usart = NULL;
-
+  assert(_name);
   new_name(_name);
+
+  m_rcreg = new RCREG(this);
+  m_txreg = new TXREG;
+
+  m_RxBaud = new RxBaudRateAttribute(m_rcreg);
+  add_attribute(m_RxBaud);
+
+  m_TxBaud = new TxBaudRateAttribute(m_txreg);
+  add_attribute(m_TxBaud);
+
+  m_RxBuffer = new RxBuffer(m_rcreg);
+  add_attribute(m_RxBuffer);
+
+  m_TxBuffer = 0;
+
+  assert(m_rcreg);
+  assert(m_txreg);
+  assert(m_RxBaud);
+  assert(m_TxBaud);
+  assert(m_RxBuffer);
+
 }
 
 USARTModule::~USARTModule()

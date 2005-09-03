@@ -504,12 +504,14 @@ PCL16::PCL16(void) : PCL()
 
 unsigned int PCL16::get(void)
 {
-  return(((value.get()+1)<<1) & 0xff);
+  value.put(cpu_pic->pc->get_value() & 0xff);
+  return((value.get()+2) & 0xff);
 }
 
 unsigned int PCL16::get_value(void)
 {
-  return((value.get()<<1) & 0xff);
+  value.put(cpu_pic->pc->get_value() & 0xff);
+  return((value.get()) & 0xff);
 
 }
 

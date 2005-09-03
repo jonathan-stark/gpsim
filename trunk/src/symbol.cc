@@ -1110,7 +1110,7 @@ module_symbol::module_symbol(Module *_module, const char *_name)
 {
 }
 
-symbol *module_symbol::copy()
+Value *module_symbol::copy()
 {
   cout << "copying module symbol: " << name() << endl;
 
@@ -1179,6 +1179,12 @@ string attribute_symbol::description()
     return attribute->description();
   else
     return string("no attribute");  // <-- this has to be an error
+}
+
+Value *attribute_symbol::copy()
+{
+  if (attribute)
+    return attribute->copy();
 }
 
 void attribute_symbol::set(double d)
