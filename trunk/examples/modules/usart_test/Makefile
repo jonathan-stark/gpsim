@@ -1,43 +1,33 @@
-# Module example
+# USART module regression test
 #
 #
 
-# system programs
-RM              = /bin/rm -f
-ARC             = tar -cvf
-ZIP             = gzip
+SCRIPT = 16f877.lkr
 
-# gpasm programs
-ASM             = gpasm
-DIASM           = gpdasm
-CODVIEWER       = gpvc -d 
+PROJECT = usart_test
+OBJECTS =  $(PROJECT).o
+OUTPUT = $(PROJECT).hex
+COD = $(PROJECT).cod
+GPSIM = ../../gpsim/gpsim
+STC = $(PROJECT).stc
+STARTUP_STC=startup.stc
 
-# simulator
-GPSIM		= gpsim
+all : $(OUTPUT)
 
-# project data
-PROJECT         = usart
-VERSION         = 0.0.1
+$(OUTPUT) : $(OBJECTS) $(SCRIPT)
+	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
 
-HEADER	        = /usr/local/share/gpasm/header
+$(COD) : $(OBJECTS) $(SCRIPT)
+	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
 
-# derived variables
-ARCHIVE         = $(PROJECT)-$(VERSION).tar
-
-all:	$(PROJECT).cod
-
-sim:	$(PROJECT).cod
-	$(GPSIM) -c $(PROJECT).stc
-
-$(PROJECT).cod: $(PROJECT).asm
-	$(ASM) -I $(HEADER) $(PROJECT).asm
-
-$(ARCHIVE):
-	$(ARC) $(ARCHIVE) *
-
-archive: $(ARCHIVE)
-	$(ZIP) $(ARCHIVE)
+%.o : %.asm
+	gpasm -c $<
 
 clean:
-	$(RM) *.hex *.lst *.cod $(PROJECT)*.gz *~
+	rm -f *~ *.o *.lst *.map *.hex
+
+$(PROJECT).o : $(PROJECT).asm
+
+sim: $(COD)
+	$(GPSIM) -i -c $(STARTUP_STC) -D STC=$(STC)
 
