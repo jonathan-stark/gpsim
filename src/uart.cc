@@ -27,8 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "14bit-processors.h"
 #include "14bit-tmrs.h"
 
-//#define DEBUG_UART 1
-#define DEBUG
+//#define DEBUG
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
 #else
@@ -207,12 +206,15 @@ void _TXSTA::put(unsigned int new_value)
       if (m_PinModule)
 	m_PinModule->setSource(m_source);
       if(txreg) {
+	txreg->empty();
+#if 0
 	if(txreg->is_empty()) {
 	  txreg->empty();
 	} else {
           Dprintf(("start_transmitting\n"));
 	  start_transmitting();
 	}
+#endif
       }
     } else {
       stop_transmitting();
@@ -512,6 +514,8 @@ void _RCSTA::setIOpin(PinModule *newPinModule)
   if (!m_sink) {
     m_sink = new RXSignalSink(this);
     m_PinModule = newPinModule;
+    if (m_PinModule)
+      m_PinModule->addSink(m_sink);
   }
 
 }

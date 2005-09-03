@@ -488,13 +488,14 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
     // Now move the break point
 #ifdef __DEBUG_CYCLE_COUNTER__
     cout << " found old ";
-#endif
+
     if(l1->next->bActive == false) {
       cout << "CycleCounter - reassigning in active break ";
       if(l1->next->f)
 	l1->next->f->callback_print();
       cout << endl;
     }
+#endif
       
 
     if(new_cycle > old_cycle) {

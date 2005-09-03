@@ -37,67 +37,39 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/modules.h"
 
 
-class USART_IOPORT;
-class USARTModule;
-class EventLogger;
-
 class TXREG;
 class RCREG;
-class USART_TIMER;
-class USART_IOPORT;
-
-class MSG_BUFFER
-{
- public:
-
-  guint64 byte;
-
-};
-
-class USART_CORE //: public USART_MODULE
-{
- public:
-
-  /* */
-  USART_IOPORT *port;
-
-  /*  receiver stuff **/
-  RCREG *rcreg;
-
-  /* Transmitter stuff **/
-  TXREG *txreg;
-
-  /* USART timer coordinates tranmission timing */
-  USART_TIMER *utimer;
-
-  EventLogger *tx_event;
-
-  Value *baud_rate;
-
-  USARTModule *um;
-
-  virtual void new_rx_edge(unsigned int);
-  // Debug-- the txreg calls this function to get data to send.
-  virtual bool mGetTxByte(unsigned int &);
-  void initialize(USART_IOPORT *new_iop=NULL);
-
-  USART_CORE(void);
-};
+class RxBaudRateAttribute;
+class TxBaudRateAttribute;
+class TxBuffer;
+class RxBuffer;
 
 class USARTModule : public Module
 {
  public:
 
-  USART_IOPORT *port;
-  USART_CORE   *usart;
-
   // Inheritances from the Package class
-  virtual void create_iopin_map(void);
+  virtual void create_iopin_map();
 
-  USARTModule(const char *new_name = NULL);
+  USARTModule(const char *new_name);
   ~USARTModule();
 
   static Module *USART_construct(const char *new_name=NULL);
+
+  virtual void new_rx_edge(unsigned int);
+  virtual bool mGetTxByte(unsigned int &);
+  virtual void newRxByte(unsigned int);
+  virtual void get(char *, int len);
+private:
+  RxBaudRateAttribute *m_RxBaud;
+  TxBaudRateAttribute *m_TxBaud;
+
+  TxBuffer *m_TxBuffer;
+  RxBuffer *m_RxBuffer;
+
+  RCREG *m_rcreg;
+  TXREG *m_txreg;
+
 
 };
 #endif //  __USART_MODULE_H__

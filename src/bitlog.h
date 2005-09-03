@@ -23,6 +23,9 @@ Boston, MA 02111-1307, USA.  */
 
 class Cycle_Counter;
 
+// include the absolute minimum portion of GLIB to get the definitions
+// for guint64, etc.
+#include <glibconfig.h>
 
 /**********************************************************************
  * boolean event logging
@@ -51,9 +54,9 @@ class BoolEventLogger {
 
 private:
   Cycle_Counter *gcycles;           // Point to gpsim's cycle counter.
-  unsigned int  index;              // Index into the buffer
-  unsigned long long  *buffer;      // Where the time is stored
-  unsigned int max_events;          // Size of the event buffer
+  unsigned int   index;             // Index into the buffer
+  guint64       *buffer;            // Where the time is stored
+  unsigned int   max_events;        // Size of the event buffer
 
 public:
 
@@ -78,11 +81,11 @@ public:
     return unmodded_index & max_events;
   }
 
-  unsigned int get_index(unsigned long long event_time);
+  unsigned int get_index(guint64 event_time);
 
   void dump(int start_index, int end_index=-1);
-  void dump_ASCII_art(unsigned long long time_step, 
-		      unsigned long long start_time,
+  void dump_ASCII_art(guint64 time_step, 
+		      guint64 start_time,
 		      int end_index=-1);
 
   unsigned int get_event(int index)
@@ -90,17 +93,17 @@ public:
     return index & 1;
   }
 
-  bool get_state(unsigned long long event_time) 
+  bool get_state(guint64 event_time) 
   {
     return (get_index(event_time) & 1) ? true : false;
   }
 
-  int get_edges(unsigned long long start_time, unsigned long long end_time)
+  int get_edges(guint64 start_time, guint64 end_time)
     {
     return ( get_index(end_time) - get_index(start_time) ) & max_events;
   }
 
-  unsigned long long get_time(unsigned int index)
+  guint64 get_time(unsigned int index)
   {
     return buffer[mod_index(index)];
   }
@@ -127,10 +130,10 @@ class ThreeStateEventLogger {
 
 private:
   Cycle_Counter *gcycles;           // Point to gpsim's cycle counter.
-  unsigned int  index;              // Index into the buffer
-  unsigned long long  *pTimeBuffer; // Where the time is stored
-  char   *pEventBuffer;             // Where the events are stored
-  unsigned int max_events;          // Size of the event buffer
+  unsigned int   index;             // Index into the buffer
+  guint64       *pTimeBuffer;       // Where the time is stored
+  char          *pEventBuffer;      // Where the events are stored
+  unsigned int   max_events;        // Size of the event buffer
 
 public:
 
@@ -143,32 +146,21 @@ public:
     return index;
   }
 
-  unsigned int get_index(unsigned long long event_time);
+  unsigned int get_index(guint64 event_time);
   char get_state(unsigned int index)
-  {
-    return pEventBuffer[index % max_events];
-  }
-
-  char get_state(unsigned long long event_time) 
-  {
-    return get_state(get_index(event_time));
-  }
-
-  unsigned long long get_time(unsigned int index)
   {
     return pEventBuffer[index & max_events];
   }
 
-  /*
-  int get_edges(unsigned long long start_time, unsigned long long end_time)
+  char get_state(guint64 event_time) 
   {
-    return ( get_index(end_time) - get_index(start_time) ) & max_events;
+    return get_state(get_index(event_time));
   }
-  void dump(int start_index, int end_index=-1);
-  void dump_ASCII_art(unsigned long long time_step, 
-		      unsigned long long start_time,
-		      int end_index=-1);
-  */
+
+  guint64 get_time(unsigned int index)
+  {
+    return pTimeBuffer[index & max_events];
+  }
 
 
 };

@@ -38,7 +38,7 @@ BoolEventLogger::BoolEventLogger(unsigned int _max_events)
   } else if(!max_events)
     max_events = 4096;
     
-  buffer = new unsigned long long[max_events];
+  buffer = new guint64[max_events];
 
   gcycles = &get_cycles();
 
@@ -93,8 +93,8 @@ void BoolEventLogger::dump(int start_index, int end_index)
 
 }
 
-void BoolEventLogger::dump_ASCII_art(unsigned long long time_step,
-				     unsigned long long start_time,
+void BoolEventLogger::dump_ASCII_art(guint64 time_step,
+				     guint64 start_time,
 				     int end_index)
 {
 
@@ -122,7 +122,7 @@ void BoolEventLogger::dump_ASCII_art(unsigned long long time_step,
 
   // Loop through and dump events between the start and end points requested
 
-  unsigned long long min_pulse = buffer[end_index] - buffer[start_index];
+  guint64 min_pulse = buffer[end_index] - buffer[start_index];
   unsigned long i = start_index;
   int j = (start_index+1) & max_events;
 
@@ -144,8 +144,8 @@ void BoolEventLogger::dump_ASCII_art(unsigned long long time_step,
   }
 
   int num_chars = 0;
-  unsigned long long t = start_time; //buffer[start_index];
-  unsigned long long stop_time = gcycles->get();
+  guint64 t = start_time; //buffer[start_index];
+  guint64 stop_time = gcycles->get();
 
   i = start_index;
   do {
@@ -189,7 +189,7 @@ void BoolEventLogger::dump_ASCII_art(unsigned long long time_step,
 
 
 
-unsigned int BoolEventLogger::get_index(unsigned long long event_time)
+unsigned int BoolEventLogger::get_index(guint64 event_time)
 {
   unsigned long start_index, end_index, search_index, bstep;
 
@@ -238,7 +238,7 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
   } else if(!max_events)
     max_events = 4096;
     
-  pTimeBuffer  = new unsigned long long[max_events];
+  pTimeBuffer  = new guint64[max_events];
   pEventBuffer = new char[max_events];
 
   // Initialize the first event to something bogus.
@@ -252,7 +252,7 @@ ThreeStateEventLogger::ThreeStateEventLogger(unsigned int _max_events)
 
 }
 
-unsigned int ThreeStateEventLogger::get_index(unsigned long long event_time)
+unsigned int ThreeStateEventLogger::get_index(guint64 event_time)
 {
   unsigned long start_index, end_index, search_index, bstep;
 
@@ -274,11 +274,10 @@ unsigned int ThreeStateEventLogger::get_index(unsigned long long event_time)
 
   } while(bstep);
 
-  if(event_time >= pTimeBuffer[search_index])
-    return search_index;
-  else
-    return (--search_index & max_events);
+  if(event_time < pTimeBuffer[search_index])
+    search_index = (--search_index & max_events);
 
+  return search_index;
 }
 
 

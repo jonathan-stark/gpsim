@@ -1,5 +1,25 @@
+2005-09-03 Scott Dattalo <scott@dattalo.com>
+	* src/bitlog.cc, src/bitlog.h: Fixed bugs with the new
+	ThreeStateEventLogger class.
+	* src/uart.cc, modules/usart.h, modules/usart.cc
+	* regression/usart_test/*: added a regression test for the usart
+	* src/symbol.h, src/symbol.cc: attribute symbol can now be used in expressons.
+
 2005-09-02 Borut Razem <borut.razem@siol.net>
 	* doc/gpsimWin32.html: linking with glib-2.6.6, gtk+-2.6.9, pango-1.8.2
+
+2005-09-02 Manuel Bouyer <bouyer@antioche.eu.org>
+	* src/16bit-registers.cc: PCL accesses were using program memory
+	indexes instead of program memory addresses.
+	* src/14bit-tmrs.cc: TMR2:current_value() would return the
+	contents of PR2 even when configured for normal operation.
+	* src/p18x.cc: typo in porte names.
+	
+2005-09-01 Manuel Bouyer <bouyer@antioche.eu.org>
+	* src/p18x.cc: Fix crash when an 18F252	is instantiated.
+	* src/gpsim_time.cc: Disabled unnecessary debug printing
+	* src/uart.cc: Fixed spurious uart transmit. Add io sink for
+	Receiver. 
 
 2005-08-31 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/processor.cc: Fixed a crashing bug when the --source=disable
