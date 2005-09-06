@@ -508,5 +508,6 @@ private:
 
 char * TrimWhiteSpaceFromString(char * pBuffer);
 char * UnquoteString(char * pBuffer);
+string &toupper(string & sStr);
 
 #endif // __VALUE_H__
