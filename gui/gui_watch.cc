@@ -597,6 +597,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
     cpu_reg->address, uAddrMask, IUserInterface::eHex));
   strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 
+  gtk_clist_freeze(GTK_CLIST(watch_clist));
   row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
 
   watch_entry = new WatchEntry();
@@ -620,6 +621,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
   cross_reference->data = (gpointer) watch_entry;
 
   watch_entry->Assign_xref(cross_reference);
+  gtk_clist_thaw(GTK_CLIST(watch_clist));
 
   UpdateMenus();
 
@@ -632,14 +634,15 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
 
 void Watch_Window::Add( Value *regSym)
 {
-  if(regSym && gp && gp->regwin_ram) {
+  if(regSym && gp) {
 
-    if(typeid(*regSym) == typeid(register_symbol)) {
-      register_symbol *rs = static_cast<register_symbol *>(regSym);
+    register_symbol *rs = dynamic_cast<register_symbol *>(regSym);
+
+    if(rs != 0) {
       Register *reg = rs->getReg();
       
       if(reg) {
-        GUIRegister *greg = (*gp->regwin_ram)[reg->address];
+        GUIRegister *greg = gp->m_pGUIRegisters->Get(reg->address);
         Add(REGISTER_RAM, greg, rs);
       }
     }
