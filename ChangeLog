@@ -1,3 +1,26 @@
+2005-09-06 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui_processor.cc, gui_processor.h, gui_register.h, gui_regwin.cc,
+	gui_regwin.h, gui_watch.cc, gui_main.cc: Changed Register_Window::
+	registers from type GUIRegister* to GUIRegisterList*.
+	Added GUIRegisterList * m_pGUIRegisters to GUI_Processor.
+	Now GUIRegisters are instantiated in a GUI_Processor for
+	that other windows besides the RAM_RegisterWindow. This
+	fixes a bug where you cannot add a register symbol to the
+	watch window unless the RAM_RegisterWindow was opened
+	once.
+
+	* gui/gui_src_asm.cc, gui/gui_watch.cc: Removed 'Select symbol'
+	pop up menu item since it was broken anyway. Added 'Add to watch'
+	pop up menu item. Select symbol text in the source window, selecting
+	'Add to watch' will add register symbols to the Watch window.
+
+	* src/symbol.cc, src/symbol.h: Added findRegisterSymbol() that
+	accepts a const char * as a parameter.
+
+	gui/gui_main.cc: Call new function GUI_Processor::SetCPU() from
+	GUI_Interface::NewProcessor(). SetCPU() does some additional
+	initialization.
+
 2005-09-03 Scott Dattalo <scott@dattalo.com>
 	* src/bitlog.cc, src/bitlog.h: Fixed bugs with the new
 	ThreeStateEventLogger class.
