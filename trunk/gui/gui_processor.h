@@ -38,7 +38,7 @@ class Profile_Window;
 class StopWatch_Window;
 class Scope_Window;
 class Processor;
-
+class GUIRegisterList;
 
 //  The gui_processor structure ties the gui window(s)
 // to a pic that is being simulated.
@@ -48,6 +48,7 @@ class GUI_Processor {
  public:
 
   GUI_Processor(void);
+  void SetCPU(Processor *new_cpu);
 
   RAM_RegisterWindow *regwin_ram;
   EEPROM_RegisterWindow *regwin_eeprom;
@@ -64,6 +65,8 @@ class GUI_Processor {
 
   // The pic that's associated with the gui
   Processor *cpu;
+
+  GUIRegisterList * m_pGUIRegisters;
 };
 
 
