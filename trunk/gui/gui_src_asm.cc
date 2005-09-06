@@ -35,6 +35,7 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include <string.h>
 #include <ctype.h>
+#include <locale>
 
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
@@ -45,6 +46,7 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_profile.h"
 #include "gui_symbols.h"
 #include "gui_statusbar.h"
+#include "gui_watch.h"
 
 #include <assert.h>
 
@@ -54,6 +56,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../xpms/canbreak.xpm"
 #include "../xpms/startp.xpm"
 #include "../xpms/stopp.xpm"
+
 
 #define PAGE_BORDER 3
 #define PIXMAP_SIZE 14
@@ -77,7 +80,8 @@ typedef enum {
     MENU_RESET,
     MENU_SETTINGS,
     MENU_PROFILE_START_HERE,
-    MENU_PROFILE_STOP_HERE
+    MENU_PROFILE_STOP_HERE,
+    MENU_ADD_TO_WATCH,
 } menu_id;
 
 
@@ -94,7 +98,7 @@ static menu_item menu_items[] = {
     {"Breakpoint here", MENU_BP_HERE,0},
     {"Profile start here", MENU_PROFILE_START_HERE,0},
     {"Profile stop here", MENU_PROFILE_STOP_HERE,0},
-    {"Select symbol",   MENU_SELECT_SYMBOL,0},
+    {"Add to watch",    MENU_ADD_TO_WATCH,0},
     {"Find text...",    MENU_FIND_TEXT,0},
     {"Settings...",     MENU_SETTINGS,0},
 };
@@ -700,44 +704,74 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
 
     case MENU_SELECT_SYMBOL:
+    case MENU_ADD_TO_WATCH:
       {
-	gint i, temp;
-	gint start, end;
+      gint i, temp;
+      gint start, end;
 
 
-#if GTK_MAJOR_VERSION >= 2
-	if (!gtk_editable_get_selection_bounds(
-					       GTK_EDITABLE(popup_sbaw->pages[id].source_text),
-					       &start, &end))
-	  break;
-#else
-	start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
-	end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
-#endif
-	if(start>end)
-	  {
-	    temp=start;
-	    start=end;
-	    end=temp;
-	  }
-	if((end-start+2)>256) // FIXME bounds?
-	  end=start+256-2;
-	for(i=start;i<end;i++)
-	  text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
+    #if GTK_MAJOR_VERSION >= 2
+      if (!gtk_editable_get_selection_bounds(
+                    GTK_EDITABLE(popup_sbaw->pages[id].source_text),
+                    &start, &end))
+        break;
+    #else
+      start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
+      end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
+    #endif
+      if(start>end)
+      {
+        temp=start;
+        start=end;
+        end=temp;
+      }
+      if((end-start+2)>256) // FIXME bounds?
+        end=start+256-2;
+      for(i=start;i<end;i++)
+        text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
 
-	text[i-start]=0;
-	
-	if(!popup_sbaw->gp->symbol_window->enabled)
-	  popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+      unsigned int uLastCharIndex = i-start;
+      text[uLastCharIndex]=0;
+      TrimWhiteSpaceFromString(text);
+//      if(!popup_sbaw->gp->symbol_window->enabled)
+//        popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
 
-	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+      register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
+      if(pReg == NULL) {
+        // We also try upper cased.
+        string sName(text);
+        use_facet<ctype<char> > ( locale::empty( ) ).toupper(
+          &sName[0], &sName[uLastCharIndex]);
+        pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+      }
+      if(pReg == NULL) {
+        // We also try with a '_' prefix.
+        string sName("_");
+        sName.append(text);
+        pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+        if(pReg == NULL) {
+          // We also try upper cased.
+          use_facet<ctype<char> > ( locale::empty( ) ).toupper(
+            &sName[1], &sName[uLastCharIndex + 1]);
+          pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+        }
+      }
 
-
-	// We also try with a '_' prefix.
-	for(i=strlen(text)+1;i>0;i--)
-	  text[i]=text[i-1];
-	text[i]='_';
-	popup_sbaw->gp->symbol_window->SelectSymbolName(text);
+      if(pReg == NULL) {
+        GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
+                                GTK_DIALOG_MODAL,
+                                GTK_MESSAGE_WARNING,
+                                GTK_BUTTONS_OK,
+                                "The symbol '%s' does not exist as a register symbol.\n"
+                                "Only register based symbols may be added to the Watch window.",
+                                text);
+        gtk_dialog_run (GTK_DIALOG (dialog));
+        gtk_widget_destroy (dialog);
+      }
+      else {
+        popup_sbaw->gp->watch_window->Add(pReg);
+      }
+//      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
       }
       break;
     case MENU_STEP:
