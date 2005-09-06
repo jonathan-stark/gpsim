@@ -82,8 +82,31 @@ class GUIRegister {
 
   char *name(void);
 
-  GUIRegister(void);
+  GUIRegister();
+  ~GUIRegister();
 
 };
+
+#define MAX_REGISTERS        0x10000
+
+class GUIRegisterList {
+public:
+  GUIRegisterList(Processor * pCPU);
+  ~GUIRegisterList();
+  RegisterMemoryAccess *m_pRMA;  // Apointer to the Processor's rma or ema.
+  GUIRegister * m_paRegisters[MAX_REGISTERS];
+
+  GUIRegister * Get(int iAddress);
+  GUIRegister * Get(unsigned int uAddress);
+};
+
+inline GUIRegister *GUIRegisterList::Get(int iAddress) {
+  return m_paRegisters[iAddress];
+}
+
+inline GUIRegister *GUIRegisterList::Get(unsigned int uAddress) {
+  return m_paRegisters[uAddress];
+}
+
 
 #endif // __GUI_REGISTER_H__

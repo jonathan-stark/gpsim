@@ -305,10 +305,20 @@ bool GUIRegister::bIsSFR(void)
   return false;
 }
 
-GUIRegister:: GUIRegister(void)
+GUIRegister:: GUIRegister()
 {
   rma = 0;
+  xref = 0;
 }
+
+GUIRegister::~GUIRegister()
+{
+  rma = 0;
+  if(xref != NULL) {
+    delete xref;
+  }
+}
+
 //========================================================================
 
 class RegisterWindowXREF : public CrossReferenceToGUI
@@ -333,7 +343,7 @@ public:
 
     address = rw->row_to_address[reg->row]+reg->col;
 
-    rw->registers[address]->bUpdateFull=true;
+    rw->registers->Get(address)->bUpdateFull=true;
     rw->UpdateRegisterCell(address);
   
     rw->UpdateASCII(reg->row);
@@ -800,7 +810,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers[address]);
+	    popup_rw->gp->watch_window->Add(popup_rw->type, popup_rw->registers->Get(address));
 	  }
       break;
     case MENU_SETTINGS:
@@ -1377,7 +1387,7 @@ resize_handler(GtkWidget *widget, GtkSheetRange *old_range,
       for(i=0;i<cti;i++)
 	{
 	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	  rw->registers[to]->put_value(rw->registers[from]->get_value());
+	  rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
 	}
     }
 }
@@ -1405,7 +1415,7 @@ move_handler(GtkWidget *widget,
 	{
 	  from = rw->row_to_address[old_range->row0+j]+old_range->col0+i;
 	  to = rw->row_to_address[new_range->row0+j]+new_range->col0+i;
-	  rw->registers[to]->put_value(rw->registers[from]->get_value());
+	  rw->registers->Get(to)->put_value(rw->registers->Get(from)->get_value());
 	}
     }
 }
@@ -1547,7 +1557,7 @@ GUIRegister *Register_Window::getRegister(int row, int col)
       return 0;
 
     if(reg_address+ col < MAX_REGISTERS)
-      return registers[reg_address+col];
+      return registers->Get(reg_address+col);
   }
 
   return 0;
@@ -1561,7 +1571,7 @@ GUIRegister *Register_Window::operator [] (int address)
   if(!registers || address>=MAX_REGISTERS  || address<0)
     return 0;
 
-  return registers[address];
+  return registers->Get(address);
 }
 
 void Register_Window::SelectRegister(int regnumber)
@@ -1574,12 +1584,12 @@ void Register_Window::SelectRegister(int regnumber)
     return;
   }
   
-  if(!gp || !gp->cpu ||!registers || !registers[regnumber]) {
+  if(!gp || !gp->cpu ||!registers || !registers->Get(regnumber)) {
     printf("SelectRegister is not ready yet\n");
     return;
   }
-  row=registers[regnumber]->row;
-  col=registers[regnumber]->col;
+  row=registers->Get(regnumber)->row;
+  col=registers->Get(regnumber)->col;
   range.row0=range.rowi=row;
   range.col0=range.coli=col;
   gtk_sheet_select_range(GTK_SHEET(register_sheet),&range);
@@ -1652,7 +1662,7 @@ void Register_Window::UpdateASCII(gint row)
   for(i=0; i<REGISTERS_PER_ROW; i++)
   {
 
-    name[i] = registers[row_to_address[row] + i]->get_shadow().data;
+    name[i] = registers->Get(row_to_address[row] + i)->get_shadow().data;
 
     if( (name[i] < ' ') || (name[i]>'z'))
       name[i] = '.';
@@ -1683,7 +1693,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
   if(!enabled) 
     return 0;	   // Don't read registers when hidden. Esp with ICD.
   
-  GUIRegister *guiReg = registers[reg_number];
+  GUIRegister *guiReg = registers->Get(reg_number);
 
   if(reg_number >= guiReg->rma->get_size())
     return 0;
@@ -1826,7 +1836,7 @@ void Register_Window::Update(void)
     bRowChanged = false;
     for(i = 0; i<REGISTERS_PER_ROW; i++) {
       address = row_to_address[j]+i;
-      GUIRegister * pGuiReg = registers[address];
+      GUIRegister * pGuiReg = registers->Get(address);
       if(pGuiReg != &THE_invalid_register &&
         (pGuiReg->get_shadow().data!=INVALID_VALUE ||
         pGuiReg->bUpdateFull)) {
@@ -1885,6 +1895,41 @@ void Register_Window::SetRegisterSize(void)
 
 
 }
+
+GUIRegisterList::GUIRegisterList(Processor * pCPU) {
+  m_pRMA = &pCPU->rma;
+  unsigned int uAddress;
+  unsigned int nRegs;
+  unsigned int uRegisterSize;
+
+  if(pCPU)
+    uRegisterSize = pCPU->register_size();
+  else
+    uRegisterSize = 1;
+
+  nRegs = (m_pRMA->get_size() < MAX_REGISTERS) ? (m_pRMA->get_size()) : MAX_REGISTERS;
+  for(uAddress=0; uAddress < nRegs; uAddress++) {
+    GUIRegister *pReg = new GUIRegister();
+    pReg->rma = m_pRMA;
+    pReg->address = uAddress;
+    pReg->register_size = uRegisterSize;
+    pReg->bIsAliased = (*m_pRMA)[uAddress].address != (unsigned int)uAddress;
+    m_paRegisters[uAddress] = pReg;
+  }
+  for(;uAddress < MAX_REGISTERS; uAddress++)
+    m_paRegisters[uAddress] = &THE_invalid_register;
+}
+
+GUIRegisterList::~GUIRegisterList() {
+  unsigned int nRegs;
+  unsigned int uAddress;
+
+  nRegs = (m_pRMA->get_size() < MAX_REGISTERS) ? (m_pRMA->get_size()) : MAX_REGISTERS;
+  for(uAddress=0; uAddress < nRegs; uAddress++) {
+    delete m_paRegisters[uAddress];
+  }
+}
+
 //------------------------------------------------------------------------
 void Register_Window::NewProcessor(GUI_Processor *_gp)
 {
@@ -1903,8 +1948,7 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   if( !enabled)
     return;
     
-  for(i=0;i<MAX_REGISTERS;i++)
-    registers[i]=&THE_invalid_register;
+  registers = _gp->m_pGUIRegisters;
 
   if(!register_sheet){
     printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
@@ -1933,22 +1977,16 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
       row_created=FALSE;
     }
 	
-    registers[reg_number] = new GUIRegister;
-    registers[reg_number]->row = j;
-    registers[reg_number]->col = i;
-    registers[reg_number]->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
-    registers[reg_number]->bUpdateFull=true;
-    registers[reg_number]->rma = rma;
-    registers[reg_number]->address = reg_number;
-    registers[reg_number]->register_size = register_size;
+    GUIRegister *pGReg = registers->Get(reg_number);
+    pGReg->row = j;
+    pGReg->col = i;
+    pGReg->put_shadow(RegisterValue(INVALID_VALUE,INVALID_VALUE));
+    pGReg->bUpdateFull=true;
 
-
-    registers[reg_number]->bIsAliased = (*rma)[reg_number].address != (unsigned int)reg_number;
-
-    if(registers[reg_number]->bIsValid()) {
+    if(pGReg->bIsValid()) {
 
       gpsim_set_bulk_mode(1);
-      registers[reg_number]->put_shadow(registers[reg_number]->getRV());
+      pGReg->put_shadow(registers->Get(reg_number)->getRV());
       gpsim_set_bulk_mode(0);
 
       /* Now create a cross-reference link that the simulator can use to
@@ -1958,25 +1996,25 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
       cross_reference = new RegisterWindowXREF();
       cross_reference->parent_window_type =   WT_register_window;
       cross_reference->parent_window = (gpointer) this;
-      cross_reference->data = (gpointer) registers[reg_number];
-      registers[reg_number]->Assign_xref(cross_reference);
+      cross_reference->data = (gpointer) pGReg;
+      pGReg->Assign_xref(cross_reference);
 
       if(!row_created)
-	{
-	  char row_label[100];
-	  if(register_sheet->maxrow<j)
-	    {
-	      gtk_sheet_add_row(register_sheet,1);
-              gtk_sheet_set_row_height (register_sheet, j, row_height(0));
-	    }
+      {
+        char row_label[100];
+        if(register_sheet->maxrow<j)
+        {
+          gtk_sheet_add_row(register_sheet,1);
+          gtk_sheet_set_row_height (register_sheet, j, row_height(0));
+        }
 
-	  sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
-	  gtk_sheet_row_button_add_label(register_sheet, j, row_label);
-	  gtk_sheet_set_row_title(register_sheet, j, row_label);
+        sprintf(row_label,"%x0",reg_number/REGISTERS_PER_ROW);
+        gtk_sheet_row_button_add_label(register_sheet, j, row_label);
+        gtk_sheet_set_row_title(register_sheet, j, row_label);
 
-	  row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
-	  row_created=TRUE;
-	}
+        row_to_address[j] = reg_number - reg_number%REGISTERS_PER_ROW;
+        row_created=TRUE;
+      }
     }
   }
 
@@ -2053,18 +2091,10 @@ void Register_Window::Build(void)
 #define MAXROWS  (MAX_REGISTERS/REGISTERS_PER_ROW)
 #define MAXCOLS  (REGISTERS_PER_ROW+1)
     
-  gint i;
-
   char *fontstring;
 
   if(window!=0) {
-
     gtk_widget_destroy(window);
-    for(i=0;i<MAX_REGISTERS;i++)
-      {
-      delete registers[i];
-      registers[i]=&THE_invalid_register;
-      }
   }
 	
   window=gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -2209,9 +2239,6 @@ void Register_Window::Build(void)
   
   bIsBuilt = true;
   
-  for(i=0;i<MAX_REGISTERS;i++)
-      registers[i]=0;
-  
   NewProcessor(gp);
 
   UpdateMenuItem();
@@ -2241,15 +2268,10 @@ Register_Window::Register_Window(GUI_Processor *_gp)
 
   registers_loaded=0;
   
-  registers = (GUIRegister  **)malloc(MAX_REGISTERS*sizeof(GUIRegister *));
-  for(i=0;i<MAX_REGISTERS;i++)
-    registers[i]=&THE_invalid_register;
+  registers = _gp->m_pGUIRegisters;
 
   for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
     row_to_address[i]=-1;
-
-
-
 }
 
 

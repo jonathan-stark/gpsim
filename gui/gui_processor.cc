@@ -60,6 +60,7 @@ GUI_Processor::GUI_Processor(void)
 {
 
   cpu = 0;
+  m_pGUIRegisters = 0;
 
   create_dispatcher();
 
@@ -77,5 +78,12 @@ GUI_Processor::GUI_Processor(void)
   //scope_window = new  Scope_Window(this);
 }
 
+void GUI_Processor::SetCPU(Processor *new_cpu) {
+  cpu = new_cpu;
+  if(m_pGUIRegisters) {
+    delete m_pGUIRegisters;
+  }
+  m_pGUIRegisters = new GUIRegisterList(new_cpu);
+}
 
 #endif // HAVE_GUI

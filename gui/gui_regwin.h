@@ -31,7 +31,6 @@ class StatusBar_Window;
 //======================================================================
 // The register window 
 //
-#define MAX_REGISTERS        0x10000
 #define REGISTERS_PER_ROW    16
 #define MAX_ROWS ((MAX_REGISTERS)/(REGISTERS_PER_ROW))
 
@@ -60,7 +59,7 @@ class Register_Window : public GUI_Object
   GdkColor invalid_color;
 
   REGISTER_TYPE type;
-  GUIRegister **registers;
+  GUIRegisterList *registers;
   GtkSheet *register_sheet;
 
   RegisterMemoryAccess *rma;  // Apointer to the Processor's rma or ema.
