@@ -171,8 +171,8 @@ Value* OpAbstractRange::applyOp(Value* lVal, Value* rVal)
   Integer* lInteger = Integer::typeCheck(lVal, showOp());
   Integer* rInteger = Integer::typeCheck(rVal, showOp());
   
-  int left = lInteger->getVal();
-  int right = rInteger->getVal();
+  int left = (int)lInteger->getVal();
+  int right = (int)rInteger->getVal();
   
   result = new AbstractRange(left, right);
   return(result);
