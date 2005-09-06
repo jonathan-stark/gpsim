@@ -359,7 +359,7 @@ EXPORTS
     ?set_break@Breakpoint_Instruction@@UAE_NXZ
     ?set_break@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_break@Value@@UAEXXZ
-    ?set_break_at_address@ProgramMemoryAccess@@UAEXI@Z
+    ?set_break_at_address@ProgramMemoryAccess@@UAEII@Z
     ?set_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?set_break_delta@Cycle_Counter@@QAE_N_KPAVTriggerObject@@I@Z
     ?set_breakpoint@Breakpoints@@QAEIPAVTriggerObject@@@Z
@@ -372,10 +372,10 @@ EXPORTS
     ?set_nodeVoltage@IOPIN@@UAEXN@Z
     ?set_nodeVoltage@IO_bi_directional@@UAEXN@Z
     ?set_nodeVoltage@PinModule@@UAEXN@Z
-    ?set_notify_at_address@ProgramMemoryAccess@@UAEXIPAVTriggerObject@@@Z
+    ?set_notify_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
     ?set_out_of_range_pm@Processor@@UAEXII@Z
-    ?set_profile_start_at_address@ProgramMemoryAccess@@UAEXIPAVTriggerObject@@@Z
-    ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEXIPAVTriggerObject@@@Z
+    ?set_profile_start_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
+    ?set_profile_stop_at_address@ProgramMemoryAccess@@UAEIIPAVTriggerObject@@@Z
     ?set_read_trace@Register@@UAEXI@Z
     ?set_trace_command@Program_Counter@@UAEXI@Z
     ?set_write_trace@Register@@UAEXI@Z
