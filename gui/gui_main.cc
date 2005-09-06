@@ -137,6 +137,7 @@ public:
   virtual ~GUI_Interface();
 
   GUI_Interface(GUI_Processor *_gp);
+
 };
 
 
@@ -287,7 +288,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
   if(gp) {
     gte ();
 
-    gp->cpu = new_cpu;
+    gp->SetCPU(new_cpu);
 
     gui_processors = g_slist_append(gui_processors,gp);
 
