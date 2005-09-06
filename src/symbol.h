@@ -115,6 +115,7 @@ public:
   Value *find(type_info const&t, const char *s);
   Register * findRegister(unsigned int address);
   Register * findRegister(const char *s);
+  register_symbol * findRegisterSymbol(const char *pName);
   register_symbol * findRegisterSymbol(unsigned int uAddress);
   register_symbol * findRegisterSymbol(unsigned int uAddress,
                                        unsigned int uBitmask);

@@ -381,6 +381,21 @@ Register * Symbol_Table::findRegister(unsigned int address)
   return NULL;
 }
 
+register_symbol * Symbol_Table::findRegisterSymbol(const char *pName)
+{
+  iterator sti;
+  register_symbol *pRegSym;
+  for( sti = FindIt(pName) ;sti != end(); sti++) {
+    Value *val = *sti;
+    if(val->name() == pName) {
+      if((pRegSym = dynamic_cast<register_symbol*>(val)) != NULL) {
+        return pRegSym;
+      }
+    }
+  }
+  return 0;
+}
+
 register_symbol * Symbol_Table::findRegisterSymbol(unsigned int uAddress)
 {
   iterator sti = begin();
@@ -1185,6 +1200,7 @@ Value *attribute_symbol::copy()
 {
   if (attribute)
     return attribute->copy();
+  return copy();
 }
 
 void attribute_symbol::set(double d)
