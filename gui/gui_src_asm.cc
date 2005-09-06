@@ -35,7 +35,6 @@ Boston, MA 02111-1307, USA.  */
 #include <glib.h>
 #include <string.h>
 #include <ctype.h>
-#include <locale>
 
 #include <gtkextra/gtkbordercombo.h>
 #include <gtkextra/gtkcolorcombo.h>
@@ -740,8 +739,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       if(pReg == NULL) {
         // We also try upper cased.
         string sName(text);
-        use_facet<ctype<char> > ( locale::empty( ) ).toupper(
-          &sName[0], &sName[uLastCharIndex]);
+        toupper(sName);
         pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
       }
       if(pReg == NULL) {
@@ -751,8 +749,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
         if(pReg == NULL) {
           // We also try upper cased.
-          use_facet<ctype<char> > ( locale::empty( ) ).toupper(
-            &sName[1], &sName[uLastCharIndex + 1]);
+          toupper(sName);
           pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
         }
       }
