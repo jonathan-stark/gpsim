@@ -122,7 +122,7 @@ void yyerror(char *message)
 
   StringList_t             *StringList_P;
   ExprList_t               *ExprList_P;
-  SymbolList_t             *SymbolList_P;
+//  SymbolList_t             *SymbolList_P;
   PinList_t                *PinList_P;
 
   Macro                    *Macro_P;
@@ -199,7 +199,7 @@ extern int yylex(YYSTYPE* lvalP);
 %type <Expression_P>            break_mask_expr
 %type <Expression_P>            break_boolean_expr
 
-%type  <SymbolList_P>           symbol_list
+// %type  <SymbolList_P>           symbol_list
 %type  <PinList_P>              pin_list
 %type  <Pin_P>                  pin
 
@@ -469,6 +469,20 @@ load_cmd: LOAD bit_flag LITERAL_STRING_T
 
           }
           | LOAD SYMBOL_T SYMBOL_T
+          // load processor filename
+          {
+            //                        filename,   processor
+            quit_parse = c_load.load($3, $2) == 0;
+            delete $2;
+            delete $3;
+
+            if(quit_parse)
+            {
+              quit_parse = 0;
+              YYABORT;
+            }
+          }
+          | LOAD LITERAL_STRING_T LITERAL_STRING_T
           // load processor filename
           {
             //                        filename,   processor
@@ -764,10 +778,10 @@ string_list
         | string_list LITERAL_STRING_T            {$1->push_back($2->getVal());}
         ;
 
-symbol_list
-  : SYMBOL_T {$$ = new SymbolList_t(); $$->push_back($1); }
-  | symbol_list SYMBOL_T {$1->push_back($2);}
-  ;
+// symbol_list
+//  : SYMBOL_T {$$ = new SymbolList_t(); $$->push_back($1); }
+//  | symbol_list SYMBOL_T {$1->push_back($2);}
+//  ;
 
 //----------------------------------------
 // Expression parsing
