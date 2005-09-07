@@ -73,6 +73,9 @@ static char pkg_version[] = PACKAGE_VERSION;
 
 Processor::Processor(void)
 {
+  registers = 0;
+  pma = 0;
+  m_pConstructorObject = 0;
   m_Capabilities = 0;
   if(verbose)
     cout << "pic_processor constructor\n";
