@@ -21,6 +21,13 @@
 	GUI_Interface::NewProcessor(). SetCPU() does some additional
 	initialization.
 
+	* src/value.cc, src/value.h: Added toupper(string&) function.
+
+	* gui/gui_src_asm.cc: Changed to use new toupper() function
+	due to issues between Windows and Linux.
+
+	* src/operator.cc: quite some type mismatch warning messages
+
 2005-09-03 Scott Dattalo <scott@dattalo.com>
 	* src/bitlog.cc, src/bitlog.h: Fixed bugs with the new
 	ThreeStateEventLogger class.
