@@ -241,6 +241,7 @@ EXPORTS
     ?get_hll_file_id@Breakpoint_Instruction@@UAEHXZ
     ?get_hll_src_line@Breakpoint_Instruction@@UAEHXZ
     ?get_index@BoolEventLogger@@QAEI_K@Z
+    ?get_index@ThreeStateEventLogger@@QAEI_K@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
     ?get_lst_line@Breakpoint_Instruction@@UAEHXZ
@@ -411,6 +412,7 @@ EXPORTS
     ?toString@Float@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?toString@Float@@UAEPADPADH@Z
     ?toString@Integer@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
+    ?toString@Integer@@QAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@PAD@Z
     ?toString@Integer@@UAEPADPADH@Z
     ?toString@Register@@UAEPADPADH@Z
     ?toString@RegisterValue@@QBEPADPADHH@Z
