@@ -137,10 +137,12 @@ int cmd_load::load(int bit_flag,const char *filename)
 int cmd_load::load(Value *file, Value *pProcessorType) {
   cout << endl;
   string sFile;
+  string sProcType;
   const char * psProcessorType;
   sFile = file->toString();
+  sProcType = pProcessorType->toString();
   psProcessorType = pProcessorType != NULL ?
-    pProcessorType->toString().c_str() : NULL;
+    sProcType.c_str() : NULL;
   return gpsim_open(get_active_cpu(), sFile.c_str(),
     psProcessorType);
 }
