@@ -23,7 +23,7 @@ INT_VAR        UDATA   0x20
 w_temp          RES     1
 status_temp     RES     1
 pclath_temp     RES     1
-fsr_temp	RES	1
+;fsr_temp	RES	1
 
 INT_VAR1       UDATA   0xA0
 w_temp1          RES     1	;Alias for w_temp at address 0x20
@@ -38,9 +38,9 @@ temp2		RES	1
 temp3		RES	1
 
 tx_ptr		RES	1
-rx_ptr		RES	1
-rx_buffer	RES	RX_BUF_SIZE
 
+rxLastByte	RES	1
+rxFlag		RES	1
 
 ;----------------------------------------------------------------------
 ;   ********************* RESET VECTOR LOCATION  ********************
@@ -75,17 +75,9 @@ INT_VECTOR   CODE    0x004               ; interrupt vector location
 	  goto	int_done
 
 ;;;
-	movf	FSR,w
-	movwf	fsr_temp
-	incf	rx_ptr,w
-	andlw	0x0f
-	movwf	rx_ptr
-	addlw	rx_buffer
-	movwf	FSR
-	movf	RCREG,w
-	movwf	INDF
-	movf	fsr_temp,w
-	movwf	FSR
+	movf	RCREG,W
+	movwf	rxLastByte
+	bsf	rxFlag,0
 	
 int_done:
 	clrf	STATUS
@@ -179,7 +171,7 @@ start
 	;; Enable the transmitter
 	bsf	STATUS,RP0
 	bsf	TXSTA^0x80,TXEN
-	bsf	PIE1^0x80,RCIE
+	bsf	PIE1^0x80,RCIE	; Enable Rx interrupts
 	bcf	STATUS,RP0
 
 	;; Now Transmit some data and verify that it is transmitted correctly.
@@ -216,7 +208,18 @@ start
 
 done:
   .assert  ",\"*** PASSED Usart Module test\""
-	goto	done
+
+
+	clrf	rxFlag
+  .direct "1","test"
+	nop
+rx_loop:
+
+	btfss	rxFlag,0
+	 goto	rx_loop
+
+
+	goto rx_loop
 
 
 TransmitNextByte:	
@@ -242,7 +245,16 @@ tx_message
 TX_TABLE
 	dt	"0123456789ABCDEF",0
 
-	
+
+
+delay	
+	decfsz	temp1,f
+	 goto 	$+2
+	decfsz	temp2,f
+	 goto   delay
+	return
+
+  if 0 ; dead code
 	movlw	0xaa
 	movwf	TXREG
 
@@ -257,25 +269,7 @@ TX_TABLE
 ;;; 	bcf	TXSTA,TXEN
 	bcf	PIR1,TXIF
 	bcf	PIR1,RCIF
+  endif
 
-rx_loop:
-
-	bsf	RCSTA,CREN
-	btfss	PIR1,RCIF
-	 goto	$-1
-
-	bcf	PIR1,RCIF
-
-	goto	rx_loop
-
-	goto $
-
-
-delay	
-	decfsz	temp1,f
-	 goto 	$+2
-	decfsz	temp2,f
-	 goto   delay
-	return
 
 	end

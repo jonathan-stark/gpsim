@@ -1122,13 +1122,16 @@ USARTModule::USARTModule(const char *_name)
   m_RxBuffer = new RxBuffer(m_rcreg);
   add_attribute(m_RxBuffer);
 
-  m_TxBuffer = 0;
+  m_TxBuffer = new TxBuffer(m_txreg);
+  add_attribute(m_TxBuffer);
+
 
   assert(m_rcreg);
   assert(m_txreg);
   assert(m_RxBaud);
   assert(m_TxBaud);
   assert(m_RxBuffer);
+  assert(m_TxBuffer);
 
 }
 
