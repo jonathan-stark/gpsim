@@ -43,10 +43,12 @@ char * TrimWhiteSpaceFromString(char * pBuffer) {
     memmove(pBuffer, pChar, strlen(pBuffer) - iPos);
   }
   iPos = strlen(pBuffer);
-  pChar = pBuffer + iPos - 1;
-  while(pBuffer != pChar && ::isspace(*pChar)) {
-    *pChar = 0;
-    pChar--;
+  if(iPos > 0) {
+    pChar = pBuffer + iPos - 1;
+    while(pBuffer != pChar && ::isspace(*pChar)) {
+      *pChar = 0;
+      pChar--;
+    }
   }
   return pBuffer;
 }
