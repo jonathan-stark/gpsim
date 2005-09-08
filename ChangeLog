@@ -1,3 +1,9 @@
+2005-09-07 Scott Dattalo <scott@dattalo.com>
+	* cli/cmd_load.cc: null pointer fix (was causing core dump in the
+	regression test).
+	* module/usart.cc: added the TxBuffer attribute.
+	* regression/usart_test/usart_test.cc: tested usart module transmitter.
+
 2005-09-07 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/cmd_load.cc, cli/parse.yy: Fixed a bug in load command
 	where you could not specify both processor and file as literal
