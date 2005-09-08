@@ -718,55 +718,58 @@ popup_activated(GtkWidget *widget, gpointer data)
       start=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_start_pos;
       end=GTK_EDITABLE(popup_sbaw->pages[id].source_text)->selection_end_pos;
     #endif
-      if(start>end)
-      {
-        temp=start;
-        start=end;
-        end=temp;
-      }
-      if((end-start+2)>256) // FIXME bounds?
-        end=start+256-2;
-      for(i=start;i<end;i++)
-        text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
-
-      unsigned int uLastCharIndex = i-start;
-      text[uLastCharIndex]=0;
-      TrimWhiteSpaceFromString(text);
-//      if(!popup_sbaw->gp->symbol_window->enabled)
-//        popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
-
-      register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
-      if(pReg == NULL) {
-        // We also try upper cased.
-        string sName(text);
-        toupper(sName);
-        pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
-      }
-      if(pReg == NULL) {
-        // We also try with a '_' prefix.
-        string sName("_");
-        sName.append(text);
-        pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
-        if(pReg == NULL) {
-          // We also try upper cased.
-          toupper(sName);
-          pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+      if(start != end) {
+        if(start>end)
+        {
+          temp=start;
+          start=end;
+          end=temp;
         }
-      }
+        if((end-start+2)>256) // FIXME bounds?
+          end=start+256-2;
+        for(i=start;i<end;i++)
+          text[i-start]=GTK_TEXT_INDEX(GTK_TEXT(popup_sbaw->pages[id].source_text),(guint)i);
 
-      if(pReg == NULL) {
-        GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
-                                GTK_DIALOG_MODAL,
-                                GTK_MESSAGE_WARNING,
-                                GTK_BUTTONS_OK,
-                                "The symbol '%s' does not exist as a register symbol.\n"
-                                "Only register based symbols may be added to the Watch window.",
-                                text);
-        gtk_dialog_run (GTK_DIALOG (dialog));
-        gtk_widget_destroy (dialog);
-      }
-      else {
-        popup_sbaw->gp->watch_window->Add(pReg);
+        unsigned int uLastCharIndex = i-start;
+        text[uLastCharIndex]=0;
+        TrimWhiteSpaceFromString(text);
+  //      if(!popup_sbaw->gp->symbol_window->enabled)
+  //        popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+        if(text[0] != 0) {
+          register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
+          if(pReg == NULL) {
+            // We also try upper cased.
+            string sName(text);
+            toupper(sName);
+            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+          }
+          if(pReg == NULL) {
+            // We also try with a '_' prefix.
+            string sName("_");
+            sName.append(text);
+            pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+            if(pReg == NULL) {
+              // We also try upper cased.
+              toupper(sName);
+              pReg = get_symbol_table().findRegisterSymbol(sName.c_str());
+            }
+          }
+
+          if(pReg == NULL) {
+            GtkWidget *dialog = gtk_message_dialog_new( GTK_WINDOW(popup_sbaw->window),
+                                    GTK_DIALOG_MODAL,
+                                    GTK_MESSAGE_WARNING,
+                                    GTK_BUTTONS_OK,
+                                    "The symbol '%s' does not exist as a register symbol.\n"
+                                    "Only register based symbols may be added to the Watch window.",
+                                    text);
+            gtk_dialog_run (GTK_DIALOG (dialog));
+            gtk_widget_destroy (dialog);
+          }
+          else {
+            popup_sbaw->gp->watch_window->Add(pReg);
+          }
+        }
       }
 //      popup_sbaw->gp->symbol_window->SelectSymbolName(text);
       }
