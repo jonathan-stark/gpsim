@@ -1,3 +1,8 @@
+2005-09-08 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui/gui_src_asm.cc, src/value.cc: Fixed crashes when
+	'Add to watch' menu item is selected with no test selected
+	or with white space selected.
+
 2005-09-07 Scott Dattalo <scott@dattalo.com>
 	* cli/cmd_load.cc: null pointer fix (was causing core dump in the
 	regression test).
