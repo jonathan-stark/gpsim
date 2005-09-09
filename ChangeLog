@@ -1,3 +1,6 @@
+2005-09-09 Scott Dattalo <scott@dattalo.com>
+	* src/cod.cc: delete_directory() incorrectly deleted memory.
+
 2005-09-08 J.R. Heisey <jrheisey@sourceforge.com>
 	* configure.ac, plat/win32/gpsim.nsi: bump build number
 

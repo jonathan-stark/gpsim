@@ -568,8 +568,15 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 	    cmd = cmd + '\n';
 	    cpu->add_command(script,cmd);
 	  }
-
           break;
+
+	case 'c':
+	case 'C':
+	  // gpsim command
+	  // The 'C' option in gpasm specifies a single gpsim command that is
+	  // to be invoked whenever the address associated with this directive
+	  // is being simulated.
+
         case 'f':
         case 'F':
           // printf
@@ -711,9 +718,6 @@ void PicCodProgramFileType::read_directory(void)
 
 void PicCodProgramFileType::delete_directory(void)
 {
-//  Block *b = main_dir.dir;
-//   dbi->next_dir_block_info
-//write me.
   DirBlockInfo *dbi;
   DirBlockInfo *next;
 
@@ -722,11 +726,10 @@ void PicCodProgramFileType::delete_directory(void)
   while(next != 0) {
       dbi = next;
       next = dbi->next_dir_block_info;
-      free(dbi->next_dir_block_info);
       delete_block(&dbi->dir);
+      free(dbi);
   }
   delete_block(&main_dir.dir);
-  free(main_dir.next_dir_block_info);
 }
 
 int PicCodProgramFileType::check_for_gputils(char *block)
