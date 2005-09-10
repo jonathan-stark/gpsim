@@ -34,7 +34,8 @@ public:
   virtual void DisplayMessage(const char *fmt, ...) = 0;
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) = 0;
 
-  virtual const char * FormatProgramAddress(unsigned int uAddress) = 0;
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask) = 0;
   virtual const char * FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask, int iRadix) = 0;
   virtual const char * FormatRegisterAddress(unsigned int uAddress,

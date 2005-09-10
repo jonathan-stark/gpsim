@@ -4,6 +4,7 @@
 
 
 #include "ui_gpsim.h"
+#include "../src/sim_context.h"
 #include "../src/symbol.h"
 #include "../src/cmd_manager.h"
 
@@ -40,7 +41,8 @@ public:
   virtual void DisplayMessage(const char *fmt, ...);
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...);
 
-  virtual const char * FormatProgramAddress(unsigned int uAddress);
+  virtual const char * FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask);
   virtual const char * FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask, int iRadix);
   virtual const char * FormatRegisterAddress(unsigned int uAddress,
@@ -245,9 +247,11 @@ void CGpsimUserInterface::NotifyExitOnBreak(int iExitCode) {
 }
 
 
-const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress) {
+const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
+    unsigned int uMask) {
   const char * pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
-  return FormatLabeledValue(pLabel, uAddress, s_iProgAddrMask, s_iProgAddrRadix, s_sProgAddrHexPrefix);
+  return FormatLabeledValue(pLabel, uAddress, uMask,
+    s_iProgAddrRadix, s_sProgAddrHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatProgramAddress(unsigned int uAddress,
