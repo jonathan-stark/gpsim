@@ -184,7 +184,14 @@ void PortRegister::put(unsigned int new_value)
     updatePort();
   }
 }
+//------------------------------------------------------------------------
+// PortRegister::updateUI()  UI really means GUI.
+// We just pass control to the update method, which is defined in gpsimValue.
 
+void PortRegister::updateUI()
+{
+  update();
+}
 //------------------------------------------------------------------------
 // PortRegister::setbit
 //
@@ -282,6 +289,11 @@ void PortModule::updatePort()
     if (iopins[i])
       iopins[i]->updatePinModule();
 }
+void PortModule::updateUI()
+{
+  // hmmm nothing 
+}
+
 void PortModule::updatePin(unsigned int iPinNumber)
 {
   if (iPinNumber < mNumIopins)
@@ -497,7 +509,10 @@ void PinModule::setDirection()
   //printf("PinModule::%s -- does nothing\n",__FUNCTION__);
 }
 
-
+void PinModule::updateUI()
+{
+  m_port->updateUI();
+}
 
 
 

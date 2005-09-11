@@ -1030,7 +1030,7 @@ static void trace_node(struct gui_node *gn)
 	li = g_list_nth(pinlist,i);
         assert(li!=0);
         pi = static_cast<GuiPin*>(li->data);
-	printf(" %s",pi->iopin->name().c_str());
+
 	fflush(stdout);
 	for(j=i+1;j<nr_of_nodes;j++)
 	{
@@ -1052,8 +1052,8 @@ static void trace_node(struct gui_node *gn)
 	    if(shortest_path[i][j]==0)
 	    {
 		printf("\n### Couldn't trace from pin %s to pin %s!\n",
-                       pi->iopin->name().c_str(),
-                       pj->iopin->name().c_str());
+                       pi->getIOpin()->name().c_str(),
+                       pj->getIOpin()->name().c_str());
 		didnt_work=1;
 	    }
 	    pathlen[i][j]=maxdepth;
@@ -1168,94 +1168,6 @@ GuiPin *find_gui_pin(Breadboard_Window *bbw, stimulus *pin)
 
 
 
-static void draw_pin(GuiPin *pin)
-{
-
-    int pointx;
-    int wingheight, wingx;
-    int casex, endx;
-    int y;
-
-    switch(pin->orientation)
-    {
-    case LEFT:
-	casex = pin->width;
-        endx = 0;
-        break;
-    default:
-	casex = 0;
-        endx = pin->width;
-        break;
-    }
-
-    y = pin->height/2;
-
-    // Clear pixmap
-    gdk_draw_rectangle (pin->pixmap,
-			pin->bbw->window->style->bg_gc[GTK_WIDGET_STATE (pin->widget)],
-			TRUE,
-			0, 0,
-			pin->width,
-			pin->height);
-
-
-    if(pin->type==PIN_OTHER)
-	gdk_gc_set_foreground(pin->gc,&black_color);
-    else
-	gdk_gc_set_foreground(pin->gc,pin->getState() ? &high_output_color:&low_output_color);
-
-    // Draw actual pin
-    gdk_draw_line(pin->pixmap,pin->gc,
-		  casex,y,endx,y);
-
-    if(pin->type==PIN_OTHER)
-	return;
-
-    // Draw direction arrow
-    wingheight=pin->height/3;
-    
-    if(casex>endx)
-    {
-	if(pin->direction==PIN_OUTPUT)
-	{
-	    pointx = endx + PINLENGTH/3;
-	    wingx=endx+(PINLENGTH*2)/3;
-	}
-	else
-	{
-	    pointx = endx + (PINLENGTH*2)/3;
-	    wingx=endx+PINLENGTH/3;
-	}
-    }
-    else
-    {
-	if(pin->direction==PIN_OUTPUT)
-	{
-	    pointx = casex + (PINLENGTH*2)/3;
-	    wingx=casex+PINLENGTH/3;
-	}
-	else
-	{
-	    pointx = casex + PINLENGTH/3;
-	    wingx=casex+(PINLENGTH*2)/3;
-	}
-    }
-
-    
-    // Draw an arrow poining at (endx,endy)
-    gdk_draw_line(pin->pixmap,pin->gc,
-		  pointx,y,wingx,y+wingheight);
-    gdk_draw_line(pin->pixmap,pin->gc,
-		  pointx,y,wingx,y-wingheight);
-
-    if(pin->widget->window!=0)
-	gdk_draw_pixmap(pin->widget->window,
-			pin->widget->style->fg_gc[GTK_WIDGET_STATE (pin->widget)],
-			pin->pixmap,
-			0, 0,
-			0, 0,
-			pin->width, pin->height);
-}
 
 static gboolean expose_pin(GtkWidget *widget,
 		       GdkEventExpose *event,
@@ -1293,12 +1205,12 @@ static void treeselect_stimulus(GtkItem *item, GuiPin *pin)
     gtk_widget_hide(pin->bbw->module_frame);
     gtk_widget_hide(pin->bbw->pic_frame);
 
-    if(pin->iopin) {
-      snprintf(string,sizeof(string),"Stimulus %s",pin->iopin->name().c_str());
+    if(pin->getIOpin()) {
+      snprintf(string,sizeof(string),"Stimulus %s",pin->getIOpin()->name().c_str());
       pString = string;
 
-      if(pin->iopin->snode!=0)
-	snprintf(text,sizeof(text),"Connected to node %s", pin->iopin->snode->name().c_str());
+      if(pin->getSnode()!=0)
+	snprintf(text,sizeof(text),"Connected to node %s", pin->getSnode()->name().c_str());
       else
 	snprintf(text,sizeof(text),"Not connected");
       pText = text;
@@ -1375,13 +1287,14 @@ static void settings_clist_cb(GtkCList       *clist,
 	// Save the Attribute*
 	Value *attr;
 	char str[256];
+	char val[256];
 	attr = (Value*) gtk_clist_get_row_data(GTK_CLIST(bbw->attribute_clist),
 					       row);
 
 	//attr->getAsStr(attrstr,50);
-	double d=0.0;
-	attr->get(d);
-	sprintf(str,"%s = %g",attr->name().c_str(),d);
+	attr->get(val, sizeof(val));
+
+	sprintf(str,"%s = %s",attr->name().c_str(),val);
 	
 	gtk_entry_set_text(GTK_ENTRY(bbw->attribute_entry), str);
 }
@@ -1404,14 +1317,25 @@ static void settings_set_cb(GtkWidget *button,
 	Value *attr;
 	
 	// Change the Attribute
-	attr = bbw->selected_module->module->get_attribute(attribute_name);
+	//attr = bbw->selected_module->module->get_attribute(attribute_name);
+	attr = get_symbol_table().find(attribute_name);
 	if(attr)
 	{
-	  // Set attribute
-	  attr->set(atoi(attribute_newval));
+	  try {
 
-	  // Update clist
-	  treeselect_module(0, bbw->selected_module);
+	    // Set attribute
+	    attr->set(attribute_newval);
+
+	    // Update clist
+	    treeselect_module(0, bbw->selected_module);
+	  }
+	  catch (Error *err) {
+
+	    if(err)
+	      cout << __FUNCTION__ <<": " << err->toString() << endl;
+	    delete err;
+	  }
+
 	}
 	else
 	{
@@ -1445,10 +1369,11 @@ static void UpdateModuleFrame(GuiModule *p, Breadboard_Window *bbw)
 
     try {
 
+      char attribute_value[STRING_SIZE];
       Value *locattr = *attribute_iterator;
-      double d;
-      locattr->get(d);
-      sprintf(attribute_string,"%s = %g",locattr->name().c_str(),d);
+      locattr->get(attribute_value, sizeof(attribute_value));
+
+      sprintf(attribute_string,"%s = %s",locattr->name().c_str(),attribute_value);
 
       row = gtk_clist_append(GTK_CLIST(p->bbw->attribute_clist),
 			   text);
@@ -1696,51 +1621,47 @@ static gint button(GtkWidget *widget,
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==1)
     {
-	if(p->iopin!=0)
-	{
-	    if(p->iopin->snode!=0)
-	    {
-		struct gui_node *gn;
+      if(p->getSnode()) {
+	struct gui_node *gn;
 
-		gn = (struct gui_node *)
-		    gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
-					p->iopin->snode->name().c_str());
+	gn = (struct gui_node *)
+	  gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
+			      p->getSnode()->name().c_str());
 
-		if(gn!=0)
-		{
-		    treeselect_node(0, gn);
-		    return 1;
-		}
-	    }
-
-	    treeselect_stimulus(0, p);
-	    puts("Stimulus should now be selected");
+	if(gn!=0) {
+	  treeselect_node(0, gn);
+	  return 1;
 	}
-	return 1;
+      }
+
+      treeselect_stimulus(0, p);
+      puts("Stimulus should now be selected");
+
+      return 1;
     }
 
     if(event->type==GDK_2BUTTON_PRESS &&
        event->button==1)
     {
-      p->iopin->toggle();
+      p->toggleState();
       return 1;
     }
 
     if(event->type==GDK_BUTTON_PRESS &&
        event->button==2)
     {
-	if(p->iopin->snode)
-	{
-	    struct gui_node *gn;
+      if(p->getSnode()) {
 
-	    gn = (struct gui_node *)
-		gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
-				    p->iopin->snode->name().c_str());
+	struct gui_node *gn;
 
-	    trace_node(gn);
-            draw_nodes(gn->bbw);
-	}
-	return 1;
+	gn = (struct gui_node *)
+	  gtk_object_get_data(GTK_OBJECT(p->bbw->node_tree),
+			      p->getSnode()->name().c_str());
+
+	trace_node(gn);
+	draw_nodes(gn->bbw);
+      }
+      return 1;
     }
 
     return 0;
@@ -2174,7 +2095,7 @@ static void stimulus_add_node(GtkWidget *button, Breadboard_Window *bbw)
 
     if(node!=0 && bbw->selected_pin!=0)
     {
-	node->attach_stimulus(bbw->selected_pin->iopin);
+	node->attach_stimulus(bbw->selected_pin->getIOpin());
 
         // Update stimulus frame
 	treeselect_stimulus(0, bbw->selected_pin);
@@ -2586,13 +2507,166 @@ GuiPin::GuiPin(Breadboard_Window *_bbw,
 			    -1);
 
     // Draw pin
-    draw_pin(this);
+    draw();
 
     gtk_widget_show(widget);
 
 }
 
 //------------------------------------------------------------------------
+// GuiPin::update() - check the state of the iopin and make the gui match
+// 
+void GuiPin::update()
+{
+
+  if(iopin) {
+	
+    bool value=iopin->getState();
+    eDirection dir=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
+
+    if(value!=getState() || dir!=direction) {
+	  
+      putState(value);
+      direction=dir;
+
+      draw();
+    }
+  }
+
+
+}
+//------------------------------------------------------------------------
+void GuiPin::toggleState()
+{
+  if(iopin) {
+    char cPinState = iopin->getForcedDrivenState();
+
+    switch (cPinState) {
+    case '0':
+    case 'Z':
+    case 'X':
+      iopin->forceDrivenState('1');
+      break;
+    case '1':
+      iopin->forceDrivenState('0');
+      break;
+    case 'W':
+      iopin->forceDrivenState('w');
+      break;
+    case 'w':
+      iopin->forceDrivenState('W');
+      break;
+    }
+    bbw->Update();
+  }
+}
+//------------------------------------------------------------------------
+// GuiPin::draw() - draw a single pin 
+//
+// 
+void GuiPin::draw()
+{
+
+  int pointx;
+  int wingheight, wingx;
+  int casex, endx;
+  int y;
+
+  switch(orientation)
+    {
+    case LEFT:
+      casex = width;
+      endx = 0;
+      break;
+    default:
+      casex = 0;
+      endx = width;
+      break;
+    }
+
+  y = height/2;
+
+  // Clear pixmap
+  gdk_draw_rectangle (pixmap,
+		      bbw->window->style->bg_gc[GTK_WIDGET_STATE (widget)],
+		      TRUE,
+		      0, 0,
+		      width,
+		      height);
+
+
+  if(type==PIN_OTHER)
+    gdk_gc_set_foreground(gc,&black_color);
+  else
+    gdk_gc_set_foreground(gc,getState() ? &high_output_color:&low_output_color);
+
+  // Draw actual pin
+  gdk_draw_line(pixmap,gc,
+		casex,y,endx,y);
+
+  if(type==PIN_OTHER)
+    return;
+
+  // Draw direction arrow
+  wingheight=height/3;
+    
+  if(casex>endx)
+    {
+      if(direction==PIN_OUTPUT)
+	{
+	  pointx = endx + PINLENGTH/3;
+	  wingx=endx+(PINLENGTH*2)/3;
+	}
+      else
+	{
+	  pointx = endx + (PINLENGTH*2)/3;
+	  wingx=endx+PINLENGTH/3;
+	}
+    }
+  else
+    {
+      if(direction==PIN_OUTPUT)
+	{
+	  pointx = casex + (PINLENGTH*2)/3;
+	  wingx=casex+PINLENGTH/3;
+	}
+      else
+	{
+	  pointx = casex + PINLENGTH/3;
+	  wingx=casex+(PINLENGTH*2)/3;
+	}
+    }
+
+    
+  // Draw an arrow poining at (endx,endy)
+  gdk_draw_line(pixmap,gc,
+		pointx,y,wingx,y+wingheight);
+  gdk_draw_line(pixmap,gc,
+		pointx,y,wingx,y-wingheight);
+
+  if(widget->window!=0)
+    gdk_draw_pixmap(widget->window,
+		    widget->style->fg_gc[GTK_WIDGET_STATE (widget)],
+		    pixmap,
+		    0, 0,
+		    0, 0,
+		    width, height);
+}
+
+//------------------------------------------------------------------------
+void GuiPin::addXref(CrossReferenceToGUI *newXref)
+{
+  xref = newXref;
+}
+//------------------------------------------------------------------------
+void GuiPin::destroy()
+{
+  if(xref)
+    iopin->remove_xref(xref);
+
+  gdk_pixmap_unref(pixmap);
+  gtk_widget_destroy(widget);
+}
 
 //------------------------------------------------------------------------
 static gboolean name_expose(GtkWidget *widget, GdkEventExpose *event, GuiModule *p)
@@ -2653,13 +2727,7 @@ void GuiModule::Refresh()
   while(pin_iter!=NULL)
     {
       GuiPin *pin = static_cast<GuiPin*>(pin_iter->data);
-    
-      if(pin->xref)
-	pin->iopin->remove_xref(pin->xref);
-
-      gdk_pixmap_unref(pin->pixmap);
-      gtk_widget_destroy(pin->widget);
-
+      pin->destroy();
       pin_iter=pin_iter->next;
     }
     
@@ -2993,7 +3061,7 @@ void GuiModule::Build()
 
     GuiPin *pin = new GuiPin(bbw, pin_x, pin_y, orientation, iopin);
 
-    pin->xref=cross_reference;
+    pin->addXref(cross_reference);
 
     gtk_layout_put(GTK_LAYOUT(bbw->layout),
 		   pin->widget,0,0);//PINLENGTH+pin->x,PINLENGTH+pin->y);
@@ -3102,15 +3170,17 @@ void Breadboard_Window::Update(void)
       pin_iter=p->pins;
       while(pin_iter!=0) {
       
-	bool value;
-	eDirection dir;
 
 	GuiPin *pin = static_cast<GuiPin *>(pin_iter->data);
-
-	if(pin->iopin!=0) {
+	pin->update();
+	/*
+	IOPIN  *iopin = pin->getIOpin();
+	if(iopin) {
 	
-	  value=pin->iopin->getState();
-	  dir=pin->iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
+	bool value;
+	eDirection dir;
+	  value=iopin->getState();
+	  dir=iopin->get_direction()==0?PIN_INPUT:PIN_OUTPUT;
 
 	  if(value!=pin->getState() || dir!=pin->direction) {
 	  
@@ -3120,6 +3190,7 @@ void Breadboard_Window::Update(void)
 	    draw_pin(pin);
 	  }
 	}
+	*/
 	pin_iter = pin_iter->next;
       }
 

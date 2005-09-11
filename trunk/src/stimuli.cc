@@ -556,7 +556,16 @@ string stimulus::toString()
        << endl;
   return s.str();
 }
-
+void stimulus::attach(Stimulus_Node *s)
+{
+  detach(snode);
+  snode = s;
+}
+void stimulus::detach(Stimulus_Node *s)
+{
+  if(snode == s)
+    snode = 0; 
+}
 //========================================================================
 
 
@@ -731,6 +740,7 @@ IOPIN::IOPIN(IOPORT *i, unsigned int b,const char *opt_name, Register **_iopp)
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   bDrivenState = false;
+  cForcedDrivenState = 'Z';
 
   Zth = 1e8;
   Vth = 5.0;
@@ -801,6 +811,7 @@ IOPIN::IOPIN(const char *_name,
   l2h_threshold = 2.0;
   h2l_threshold = 1.0;
   bDrivenState = false;
+  cForcedDrivenState = 'Z';
   snode = 0;
   m_monitor=0;
 
@@ -994,7 +1005,32 @@ void IOPIN::setDrivenState(bool new_state)
     m_monitor->setDrivenState(getBitChar());
 }
 
-void IOPIN::toggle(void)
+//------------------------------------------------------------------------
+// forceDrivenState() - allows the 'driven state' to be manipulated whenever
+// there is no snode attached. The primary purpose of this is to allow the
+// UI to toggle I/O pin states.
+// 
+void IOPIN::forceDrivenState(char newForcedState)
+{
+  if (cForcedDrivenState != newForcedState) {
+
+    cForcedDrivenState = newForcedState;
+
+    bDrivenState = cForcedDrivenState=='1' || cForcedDrivenState=='W';
+    
+    if(m_monitor) {
+      m_monitor->setDrivenState(getBitChar());
+      m_monitor->updateUI();
+    }
+  }
+}
+
+char IOPIN::getForcedDrivenState()
+{
+  return cForcedDrivenState;
+}
+
+void IOPIN::toggle()
 {
   putState(getState() ^ true);
 }
@@ -1089,7 +1125,7 @@ double IO_bi_directional::get_Zth()
 char IO_bi_directional::getBitChar()
 {
   if(!snode && !getDriving() )
-    return 'Z';
+    return getForcedDrivenState();
 
   if(snode) {
 
@@ -1229,8 +1265,10 @@ double IO_bi_directional_pu::get_Vth()
 
 char IO_bi_directional_pu::getBitChar()
 {
-    if(!snode && !getDriving() )
-    return bPullUp ? 'W' : 'Z';
+  if(!snode && !getDriving() ) {
+    char cForced=getForcedDrivenState();
+    return (cForced=='Z' && bPullUp) ? 'W' : cForced;
+  }
 
   if(snode) {
 
@@ -1302,8 +1340,10 @@ double IO_open_collector::get_Zth()
 }
 char IO_open_collector::getBitChar()
 {
-  if(!snode && !getDriving() )
-    return bPullUp ? 'W' : 'Z';
+  if(!snode && !getDriving() ){
+    char cForced=getForcedDrivenState();
+    return (cForced=='Z' && bPullUp) ? 'W' : cForced;
+  }
 
   if(snode) {
 
