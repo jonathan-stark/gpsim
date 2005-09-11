@@ -910,17 +910,9 @@ Float::Float(const char *_name, double newValue,const char *_desc)
   value = newValue;
 }
 
-bool Float::Parse(const char *pValue, double &fValue) {
-  if(::isdigit(*pValue)) {
-    if(strchr(pValue, '.')) {
-      // float
-      float f;
-      int iRet = sscanf(pValue, "%f", &f);
-      fValue = (double)f;
-      return iRet == 1;
-    }
-  }
-  return false;
+bool Float::Parse(const char *pValue, double &fValue) 
+{
+  return pValue ? sscanf(pValue,"%lg",&fValue) : false;
 }
 
 Float * Float::New(const char *_name, const char *pValue, const char *desc) {

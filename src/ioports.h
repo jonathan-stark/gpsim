@@ -177,13 +177,13 @@ public:
   void updatePort();
   void updatePin(unsigned int iPinNumber);
 
+  virtual void   updateUI();
   SignalControl *addSource(SignalControl *, unsigned int iPinNumber);
   SignalControl *addControl(SignalControl *, unsigned int iPinNumber);
   SignalControl *addPullupControl(SignalControl *, unsigned int iPinNumber);
   SignalSink    *addSink(SignalSink *, unsigned int iPinNumber);
   IOPIN         *addPin(IOPIN *, unsigned int iPinNumber);
   void           addPinModule(PinModule *, unsigned int iPinNumber);
-
   IOPIN         *getPin(unsigned int iPinNumber);
 
   PinModule &operator [] (unsigned int pin_number);
@@ -232,6 +232,8 @@ public:
   virtual void set_nodeVoltage(double);
   virtual void putState(char);
   virtual void setDirection();
+  virtual void updateUI();
+
 
 protected:
   /// The SignalSink list is a list of all sinks that can receive data
@@ -274,6 +276,8 @@ public:
   {
     return mEnableMask;
   }
+  virtual void   updateUI();
+
 protected:
   unsigned int  mEnableMask;
   unsigned int  drivingValue;

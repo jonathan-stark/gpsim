@@ -50,14 +50,22 @@ typedef struct _path
 
 class GuiPin
 {
- public:
+public:
   GuiPin(Breadboard_Window *, int x, int y, eOrientation _or, IOPIN *);
   bool getState() {return value;}
   void putState(bool bNewState) { value = bNewState;}
+  void toggleState();
+  void toggleDirection();
+
+  void addXref(CrossReferenceToGUI *);
+  void draw();
+  void update();
+  void destroy();
+
+  Stimulus_Node *getSnode() {return iopin ? iopin->snode : 0;}
+  IOPIN *getIOpin() {return iopin;}
   Breadboard_Window *bbw;
 
-  IOPIN *iopin;
-  CrossReferenceToGUI *xref;
 
   GtkWidget *widget;
   GdkPixmap *pixmap;
@@ -76,7 +84,8 @@ class GuiPin
 
 protected:
   bool value;
-
+  IOPIN *iopin;
+  CrossReferenceToGUI *xref;
 };
 
 

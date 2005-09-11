@@ -227,8 +227,8 @@ public:
 
   // getBitChar - this complements the Register class' getBitStr function
   virtual char getBitChar() { return getState() ? '1':'0'; }
-  virtual void attach(Stimulus_Node *s) { snode = s;};
-  virtual void detach(Stimulus_Node *s) { if(snode == s) snode = 0; };
+  virtual void attach(Stimulus_Node *s);
+  virtual void detach(Stimulus_Node *s);
 
   // If a stimulus changes its state, it can signal this change to
   // any other stimuli that are connected to it.
@@ -317,7 +317,7 @@ protected:
 // a Pin changes states.
 // (Note: In older versions of gpsim, iopins notified the Port registers 
 // in which they were contained by direcly calling the register setbit() 
-// method.)
+// method. This is deprecated - and eventually will cause compile time errors.)
 class PinMonitor
 {
 public:
@@ -326,6 +326,7 @@ public:
   virtual void set_nodeVoltage(double)=0;
   virtual void putState(char)=0;
   virtual void setDirection()=0;
+  virtual void updateUI() {}  // FIXME  - make this pure virtual too.
 };
 
 class IOPIN : public stimulus
@@ -372,6 +373,8 @@ class IOPIN : public stimulus
   virtual void setDrivingState(char);
   virtual bool getDrivenState(void);
   virtual void setDrivenState(bool new_dstate);
+  virtual void forceDrivenState(char);
+  virtual char getForcedDrivenState();
   virtual bool getState();
   virtual void putState(bool new_dstate);
 
@@ -401,7 +404,9 @@ class IOPIN : public stimulus
   virtual void show();
 
 protected:
-  bool bDrivenState;    // 0/1 digitization of the state we're being driven to
+  bool bDrivenState;       // binary state we're being driven to
+  char cForcedDrivenState; // forced state when no snode is attached.
+
   PinMonitor *m_monitor;
 
   // When connected to a node, these are thresholds used to determine whether 
