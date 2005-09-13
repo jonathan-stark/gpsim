@@ -1,4 +1,7 @@
 2005-09-11 Scott Dattalo <scott@dattalo.com>
+	* plat/win32/gpsim.def: updated for API changes.
+
+2005-09-11 Scott Dattalo <scott@dattalo.com>
 	* src/ioports.cc, src/ioports.h, src/stimuli.cc, src/stimuli.h,
 	src/value.cc, gui/gui_breadboard.cc, gui/gui_breadboard.h:
 	Attributes can now be updated through the breadboard. Pin states

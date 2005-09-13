@@ -146,6 +146,7 @@ EXPORTS
     ?description@Value@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?destroyProgramMemoryAccess@Processor@@UAEXPAVProgramMemoryAccess@@@Z
     ?detach_stimulus@Stimulus_Node@@QAEXPAVstimulus@@@Z
+    ?detach@stimulus@@UAEXPAVStimulus_Node@@@Z
     ?disassemble@Processor@@UAEXHH@Z
     ?dump_ASCII_art@BoolEventLogger@@QAEX_K0H@Z
     ?dump@Trace@@QAEHHPAU_iobuf@@@Z
@@ -173,6 +174,7 @@ EXPORTS
     ?findRegisterSymbol@Symbol_Table@@QAEPAVregister_symbol@@II@Z
     ?finish@Processor@@UAEXXZ
     ?finish@ProgramMemoryAccess@@UAEXXZ
+    ?forceDrivenState@IOPIN@@UAEXD@Z
     ?get@Boolean@@UAEXAAH@Z
     ?get@Boolean@@UAEXAAVPacket@@@Z
     ?get@Boolean@@UAEXAA_N@Z
@@ -206,6 +208,7 @@ EXPORTS
     ?getDrivenState@IOPIN@@UAE_NXZ
     ?getDriving@PortRegister@@UAEIXZ
     ?getDrivingState@IOPIN@@UAE_NXZ
+    ?getForcedDrivenState@IOPIN@@UAEDXZ
     ?getFromIndex@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getFromAddress@ProgramMemoryAccess@@QAEPAVinstruction@@I@Z
     ?getIO@IOPORT@@QAEPAVIOPIN@@I@Z
@@ -435,6 +438,8 @@ EXPORTS
     ?update_state@TraceFrame@@UAEXXZ
     ?update_stimuli@IOPORT@@UAEHXZ
     ?updatePort@PortModule@@QAEXXZ
+    ?updateUI@PinModule@@UAEXXZ
+    ?updateUI@PortRegister@@UAEXXZ
     ?waitForChild@Token@gpsim@@QAEXXZ
     ?verbose@@3HA
     GetUserInterface
