@@ -1,0 +1,14 @@
+## Makefile for building the gpsim with gcc for mingw. The build
+## uses tools running on cygwin, however.
+
+## Use: make -f makefile.mingw
+
+PARTS=cli src gui gpsim modules
+CLEAN_PARTS=$(PARTS)
+
+all :
+	for D in $(PARTS); do (cd $$D && $(MAKE) -f makefile.mingw all); done
+
+clean :
+	rm config.h
+	for D in $(CLEAN_PARTS); do (cd $$D && $(MAKE) -f makefile.mingw clean); done
