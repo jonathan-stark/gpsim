@@ -166,16 +166,10 @@ void PixmapObject::CreateFromXPM(GdkWindow *window,
 }
 
 //========================================================================
-BreakPointInfo::BreakPointInfo()
+BreakPointInfo::BreakPointInfo(int _address, int _line, int _index, int _pos)
+  : address(_address), line(_line), index(_index), pos(_pos),
+    break_widget(0), canbreak_widget(0)
 {
-  address = 0; 
-  index = 0;
-  line = 0;
-  //pixel = 0;
-  //font_center = 0;
-  pos = 0;
-  break_widget = 0;
-  canbreak_widget = 0;
 }
 
 BreakPointInfo::BreakPointInfo(BreakPointInfo & Dup)
@@ -183,14 +177,20 @@ BreakPointInfo::BreakPointInfo(BreakPointInfo & Dup)
   address = Dup.address; 
   index = Dup.index;
   line = Dup.line;
-  //pixel = 0;
-  //font_center = 0;
   pos = Dup.pos;
   break_widget = 0;
   canbreak_widget = 0;
 }
 
-void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *bp_mask)// , int pos)
+BreakPointInfo::~BreakPointInfo()
+{
+  if (break_widget)
+    gtk_widget_destroy (break_widget);
+  if (canbreak_widget)
+    gtk_widget_destroy (canbreak_widget);
+ 
+}
+void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *bp_mask)
 {
   if(!break_widget) {
     break_widget = gtk_pixmap_new(pixmap_break,bp_mask);
@@ -201,16 +201,20 @@ void BreakPointInfo::Set(GtkWidget *layout, GdkPixmap *pixmap_break, GdkBitmap *
 		   pos
 		   );
   }
-
-  if(canbreak_widget)
+  if(canbreak_widget) {
     gtk_widget_hide(canbreak_widget);
+  }
 
   gtk_widget_show(break_widget);
 
 }
 
-void BreakPointInfo::Clear(GtkWidget *layout, GdkPixmap *pixmap_canbreak, GdkBitmap *bp_mask)//, int pos)
+void BreakPointInfo::Clear(GtkWidget *layout, GdkPixmap *pixmap_canbreak, GdkBitmap *bp_mask)
 {
+
+  if(break_widget) {
+    gtk_widget_hide(break_widget);
+  }
   if(!canbreak_widget) {
     canbreak_widget = gtk_pixmap_new(pixmap_canbreak,bp_mask);
 
@@ -221,29 +225,34 @@ void BreakPointInfo::Clear(GtkWidget *layout, GdkPixmap *pixmap_canbreak, GdkBit
 		   );
   }
 
-  if(break_widget)
-    gtk_widget_hide(break_widget);
-
   gtk_widget_show(canbreak_widget);
 
 }
 
+void BreakPointInfo::setBreakWidget(GtkWidget *pBreak)
+{
+  assert (break_widget==0);
+  break_widget=pBreak;
+}
+void BreakPointInfo::setCanBreakWidget(GtkWidget *pCanBreak)
+{
+  assert (canbreak_widget==0);
+  canbreak_widget=pCanBreak;
+}
 //========================================================================
 
 static int settings_dialog(SourceBrowserAsm_Window *sbaw);
 
 // all of these gui_xxxx_to_entry() do linear search.
-// Binary search is possible, the list is sorted. But pic
-// sources don't become large (not mine anyways).
-
-//pixel is 0 -> maxfont-1 for line zero.
-//         maxfont -> maxfont*2-1 for line one
+// Binary search is possible, the list is sorted. 
+// pixel is 0 -> maxfont-1 for line zero.
+// maxfont -> maxfont*2-1 for line one
 //         ...
 BreakPointInfo *SourceBrowserAsm_Window::getBPatPixel(int id, int pixel)
 {
 
-  BreakPointInfo *e;      // to simplify expressions
-  GList *p;         // iterator
+  BreakPointInfo *e; // to simplify expressions
+  GList *p;          // iterator
 
   if(!sa_xlate_list[id])
     return 0;
@@ -254,13 +263,13 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatPixel(int id, int pixel)
   p=sa_xlate_list[id];
 
   // find listentry with address larger than argument
-  while(p->next!=0)
-    {
-      e = (BreakPointInfo*)p->data;
-      if(e->pos+12 > pixel)
-	break;
-      p=p->next;
-    }
+  while(p->next!=0) {
+    
+    e = (BreakPointInfo*)p->data;
+    if(e->pos+12 > pixel)
+      break;
+    p=p->next;
+  }
     
   e=(BreakPointInfo*)p->data;
 
@@ -287,7 +296,7 @@ BreakPointInfo *SourceBrowserAsm_Window::getBPatLine(int id, unsigned int line)
     {
       e = (BreakPointInfo*)p->data;
 	      
-      if(e->line > line)
+      if(e->getLine() > line)
 	break;
       p=p->next;
     }
@@ -492,7 +501,7 @@ void SourceBrowserAsm_Window::SetPC(int address)
   gtk_layout_move(GTK_LAYOUT(pages[id].source_layout),
 		  new_pcw,
 		  PIXMAP_SIZE,
-		  e->pos
+		  e->pos+1
 		  );
 
 }
@@ -606,7 +615,10 @@ void SourceBrowserAsm_Window::UpdateLine(int address)
 
   if(e==0)
     return;
-
+  /*
+  printf("SrcBrowserAsm_Window::UpdateLine - address=%d line=%d\n",
+	 address,e->getLine());
+  */
   breakpoints.Remove(address);
   notify_start_list.Remove(address);
   notify_stop_list.Remove(address);
@@ -663,7 +675,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       popup_sbaw->SetPC(address);
       break;
     case MENU_MOVE_PC:
-      line = popup_sbaw->menu_data->line;
+      line = popup_sbaw->menu_data->getLine();
 
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
       if(address!=INVALID_VALUE)
@@ -671,7 +683,7 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
 
     case MENU_RUN_HERE:
-      line = popup_sbaw->menu_data->line+1;
+      line = popup_sbaw->menu_data->getLine()+1;
 
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
@@ -680,26 +692,28 @@ popup_activated(GtkWidget *widget, gpointer data)
       break;
 
     case MENU_BP_HERE:
-      line = popup_sbaw->menu_data->line + 1;
+      line = popup_sbaw->menu_data->getLine() + 1;
 
       popup_sbaw->pma->toggle_break_at_line(popup_sbaw->pages[id].pageindex_to_fileid,line);
 
       break;
     case MENU_PROFILE_START_HERE:
+      /*
       line = popup_sbaw->menu_data->line;
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
 
       popup_sbaw->gp->profile_window->StartExe(address);
-
+      */
       break;
 
     case MENU_PROFILE_STOP_HERE:
+      /*
       line = popup_sbaw->menu_data->line;
 
       address = popup_sbaw->pma->find_closest_address_to_line(popup_sbaw->pages[id].pageindex_to_fileid,line+1);
 
       popup_sbaw->gp->profile_window->StopExe(address);
-
+      */
       break;
 
     case MENU_SELECT_SYMBOL:
@@ -733,8 +747,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         unsigned int uLastCharIndex = i-start;
         text[uLastCharIndex]=0;
         TrimWhiteSpaceFromString(text);
-  //      if(!popup_sbaw->gp->symbol_window->enabled)
-  //        popup_sbaw->gp->symbol_window->ChangeView(VIEW_SHOW);
+
         if(text[0] != 0) {
           register_symbol *pReg = get_symbol_table().findRegisterSymbol(text);
           if(pReg == NULL) {
@@ -871,15 +884,10 @@ void BreakPointList::Remove(int address = -1)
     BreakPointInfo *bpi = (BreakPointInfo*)li->data;
       
     // remove the breakpoint
-    if(address<0 || bpi->address==address)
-    {
+    if(address<0 || bpi->address==address) {
       iter = g_list_remove(li,li->data);
-      if(bpi) {
-	if(bpi->break_widget)
-	  gtk_widget_destroy(bpi->break_widget);
-
-	free(bpi);
-      }
+      if(bpi)
+	delete bpi;
     }
 
     li = next;
@@ -894,16 +902,15 @@ void BreakPointList::Remove(int address = -1)
 //
 void BreakPointList::Add(int address, GtkWidget *pwidget, GtkWidget *layout, int pos)
 {
-  BreakPointInfo *bpi= new BreakPointInfo();
+  BreakPointInfo *bpi= new BreakPointInfo(address, 0,0,0);
   //printf("Add: address:%d, pos:%d\n",address,pos);
-  bpi->address=address;
-  bpi->break_widget = pwidget;
+  bpi->setBreakWidget(pwidget);
   gtk_layout_put(GTK_LAYOUT(layout),
-		 bpi->break_widget,
+		 pwidget,
 		 PIXMAP_SIZE*0,
 		 pos
 		 );
-  gtk_widget_show(bpi->break_widget);
+  gtk_widget_show(pwidget);
   iter=g_list_append(iter,bpi);
 }
 
@@ -1116,7 +1123,6 @@ static gint marker_cb(GtkWidget *w1,
   static int button_pressed_x;
   static int dragwidget_oldy;
   int pixel;
-  int line;
   //  unsigned int address=0;
     
   static GtkWidget *dragwidget;
@@ -1144,98 +1150,101 @@ static gint marker_cb(GtkWidget *w1,
   switch(event->type) {
     
   case GDK_MOTION_NOTIFY:
-    if(button_pressed == 1 && dragbreak == 0)
-      {
-	    button_pressed=0;
-	    // actually button is pressed, but setting
-	    // this to zero makes this block of code
-	    // execute exactly once for each drag motion
-	    if(button_pressed_x<PIXMAP_SIZE)
-	      {
-	        // find out if we want to start drag of a breakpoint
-	        i=0;
-	        mindiff=1000000; // large distance
-	        dragbpi=0;   // start with invalid index
+    // TSD 14SEP05 Break point dragging doesn't work well so I disabled it.
+    /*
+    if(button_pressed == 1 && dragbreak == 0) {
+      
+      button_pressed=0;
+      // actually button is pressed, but setting
+      // this to zero makes this block of code
+      // execute exactly once for each drag motion
+      if(button_pressed_x<PIXMAP_SIZE) {
+	
+	// find out if we want to start drag of a breakpoint
+	i=0;
+	mindiff=1000000; // large distance
+	dragbpi=0;   // start with invalid index
 
-	        // loop all breakpoints, and save the one that is closest as dragbpi
-	        iter=sbaw->breakpoints.iter;
-	        while(iter!=0)
-	          {
-            bpi=(BreakPointInfo*)iter->data;
+	// loop all breakpoints, and save the one that is closest as dragbpi
+	iter=sbaw->breakpoints.iter;
+	while(iter!=0) {
+	  
+	  bpi=(BreakPointInfo*)iter->data;
+	  GtkWidget *pBreakWidget = bpi->getBreakWidget();
+	  diff = button_pressed_y - (pBreakWidget->allocation.y+PIXMAP_SIZE/2);
+	  if(abs(diff) < abs(mindiff)) {
+	    
+	    mindiff=diff;
+	    dragbpi=(BreakPointInfo *)iter->data;
+	  }
     		    
-            diff = button_pressed_y - (bpi->break_widget->allocation.y+PIXMAP_SIZE/2);
-            if(abs(diff) < abs(mindiff))
-              {
-              mindiff=diff;
-              dragbpi=(BreakPointInfo *)iter->data;
-              }
-    		    
-            iter=iter->next;
-            }
+	  iter=iter->next;
+	}
     		
-          if(dragbpi!=0 && mindiff<PIXMAP_SIZE/2)
-            {  // mouse hit breakpoint pixmap in dragbpi
+	if(dragbpi!=0 && mindiff<PIXMAP_SIZE/2) {
+	  // mouse hit breakpoint pixmap in dragbpi
 
-            pixel = dragbpi->break_widget->allocation.y-
-            sbaw->layout_offset+PIXMAP_SIZE/2;
+	  dragwidget = dragbpi->getBreakWidget();
+	  dragwidget_x = 0;
 
-            // we want to remember which line drag started on
-            // to be able to disable this breakpoint later
-            // FIXME: perhaps we should simply disable bp now?
-            //dragstartline = gui_pixel_to_entry(id,pixel)->line;
-            dragstartline = sbaw->getBPatPixel(id,pixel)->line;
+	  pixel = dragwidget->allocation.y-
+	    sbaw->layout_offset+PIXMAP_SIZE/2;
 
-            dragbreak=1;  // start drag
-            dragwidget = dragbpi->break_widget;
-            dragwidget_x = 0;
-            dragwidget_oldy=dragwidget->allocation.y+
-	            (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-            gtk_grab_add(sbaw->pages[id].source_layout);
-	          }
-	      }
-	    else
-	      { // we see if we hit the pixmap widget
-	        if( abs(button_pressed_y-
-		        (sbaw->pages[id].source_pcwidget->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2)
-	          { // hit
-            dragbreak=1; // start drag
-            dragwidget = sbaw->pages[id].source_pcwidget;
-            dragwidget_x = PIXMAP_SIZE;
-            dragwidget_oldy=dragwidget->allocation.y+
-	            (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
-            gtk_grab_add(sbaw->pages[id].source_layout);
-	          }
-	      }
+	  // we want to remember which line drag started on
+	  // to be able to disable this breakpoint later
+	  // FIXME: perhaps we should simply disable bp now?
+	  //dragstartline = gui_pixel_to_entry(id,pixel)->line;
+	  dragstartline = sbaw->getBPatPixel(id,pixel)->line;
+
+	  dragbreak=1;  // start drag
+	  dragwidget_oldy=dragwidget->allocation.y+
+	    (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+	  gtk_grab_add(sbaw->pages[id].source_layout);
+	}
       }
-    else if(dragbreak==1)
-      {  // drag is in progress
+      else {
+	// we see if we hit the pixmap widget
+	if( abs(button_pressed_y-
+		(sbaw->pages[id].source_pcwidget->allocation.y+PIXMAP_SIZE/2)) <PIXMAP_SIZE/2) {
+	  // hit
+	  dragbreak=1; // start drag
+	  dragwidget = sbaw->pages[id].source_pcwidget;
+	  dragwidget_x = PIXMAP_SIZE;
+	  dragwidget_oldy=dragwidget->allocation.y+
+	    (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value;
+	  gtk_grab_add(sbaw->pages[id].source_layout);
+	}
+      }
+    }
+    else if(dragbreak==1) {
+      // drag is in progress
       if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) >0.9
-         ||((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1)
-        {
+         ||((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size) <0.1) {
+        
         if(timeout_tag==-1)
-          {
           timeout_tag = gtk_timeout_add(100,drag_scroll_cb,sbaw);
-          }
+
         if(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)>0.5)
           drag_scroll_speed = (float)(((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size)-0.9)*100;
         else
           drag_scroll_speed = (float)-(0.1-((event->y-vadj_value)/GTK_TEXT(sbaw->pages[id].source_text)->vadj->page_size))*100;
-        }
-      else if(timeout_tag!=-1)
-        {
+      }
+      else if(timeout_tag!=-1) {
+        
         puts("remove timeout");
         gtk_timeout_remove(timeout_tag);
         timeout_tag=-1;
-        }
+      }
 	    
       // update position of dragged pixmap
       gtk_layout_move(GTK_LAYOUT(sbaw->pages[id].source_layout),
                       dragwidget,dragwidget_x,(int)event->y-PIXMAP_SIZE/2
 #if GTK_MAJOR_VERSION < 2
-			                + (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value
+		      + (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value
 #endif
-			                );
-      }
+		      );
+    }
+    */
     break;
   case GDK_BUTTON_PRESS:
     if(button_pressed==1)
@@ -1246,19 +1255,19 @@ static gint marker_cb(GtkWidget *w1,
     break;
   case GDK_2BUTTON_PRESS:
     if(event->button == 1) {
-      int pos = (int)event->y -	sbaw->layout_offset /*+ (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value */ ;
-
+      int pos = (int)event->y -	sbaw->layout_offset;
       BreakPointInfo *e = sbaw->getBPatPixel(id, pos);
-      line = e->line;
+      int line = e->getLine();
+      sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
       /*
-      printf("Toggling break: line:%d pos: (%d,%d), id=%d\n",line,(int)event->x,(int)event->y,id);
-      printf("                BreakPointInfo -- index:%d, line:%d, pixel:%d, font_center:%d\n",
-	     e->index,e->line,e->pixel,e->font_center);
+      printf("Toggling break: line:%d pos: (%d,%d), id=%d\n",line,
+	     (int)event->x,(int)event->y,id);
+      printf("                BreakPointInfo -- index:%d, line:%d\n",
+	     e->index,line);
       printf("                layout_offset:%d, vadj->value=%d\n",
 	     sbaw->layout_offset,
 	     (int)GTK_TEXT(sbaw->pages[id].source_text)->vadj->value);
       */
-      sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
     }
     break;
   case GDK_BUTTON_RELEASE:
@@ -1268,6 +1277,9 @@ static gint marker_cb(GtkWidget *w1,
       gtk_timeout_remove(timeout_tag);
       timeout_tag=-1;
       }
+
+    // TSD 14SEP05 Break point dragging doesn't work well so I disabled it.
+    /*
     if(dragbreak==0)
       break;  // we weren't dragging, so we don't move anything
     dragbreak=0;
@@ -1290,6 +1302,7 @@ static gint marker_cb(GtkWidget *w1,
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,dragstartline+1);
       sbaw->pma->toggle_break_at_line(sbaw->pages[id].pageindex_to_fileid ,line+1);
     }
+    */
     break;
   default:
     printf("Whoops? event type %d\n",event->type);
@@ -1436,7 +1449,7 @@ static int add_page(SourceBrowserAsm_Window *sbaw, int file_id)
   }
   sbaw->pages[id].source_pcwidget = gtk_pixmap_new(sbaw->pixmap_pc,sbaw->pc_mask);
   gtk_layout_put(GTK_LAYOUT(sbaw->pages[id].source_layout),
-		 sbaw->pages[id].source_pcwidget,0,0);
+		 sbaw->pages[id].source_pcwidget,PIXMAP_SIZE,0);
   gtk_widget_show(sbaw->pages[id].source_pcwidget);
 
   return id;
@@ -1518,7 +1531,7 @@ void SourceBrowserAsm_Window::SetText(int id, int file_id, FileContext *fc)
   gtk_editable_delete_text(GTK_EDITABLE(pSourceWindow),0,-1);
   remove_all_points(this);
 
-  // Check the type of file (ASM och C), and seperate the pattern matching
+  // Check the type of file (ASM or C), and seperate the pattern matching
   // into set_text_asm() and set_text_c().
   // These functions fill the page with the colored source, and also fills
   // the sa_xlate_list[id] structure list with values, so that the pixmaps
@@ -1711,15 +1724,12 @@ void SourceBrowserAsm_Window::ParseSourceToFormattedText(
     // create an entry in sa_xlate_list for this source line.
     // 'this source line' is the one in 'buf' with line number
     // 'line' and index 'index' into text
-    entry= new BreakPointInfo();
-    entry->index=index;
-    entry->line=line;
-    entry->break_widget = 0;
-    entry->canbreak_widget = 0;
-    entry->pos = totallinesheight -
+    int     pos = totallinesheight -
       (CFormattedTextFragment::s_lineascent - 
        CFormattedTextFragment::s_linedescent) - 
       PIXMAP_SIZE/2 + PAGE_BORDER;
+
+    entry= new BreakPointInfo(0, line,index,pos);
     s_global_sa_xlate_list[id]=g_list_append(s_global_sa_xlate_list[id],entry);
     line++;
   }
@@ -3186,12 +3196,8 @@ void SourceBrowserAsm_Window::SetTextOld(int id, int file_id, FileContext *fc)
     // create an entry in sa_xlate_list for this source line.
     // 'this source line' is the one in 'buf' with line number
     // 'line' and index 'index' into text
-    entry= new BreakPointInfo();
-    entry->index=index;
-    entry->line=line;
-    entry->break_widget = 0;
-    entry->canbreak_widget = 0;
-    entry->pos = totallinesheight - (lineascent-linedescent) - PIXMAP_SIZE/2 + PAGE_BORDER;
+    int pos = totallinesheight - (lineascent-linedescent) - PIXMAP_SIZE/2 + PAGE_BORDER;
+    entry= new BreakPointInfo(0,line,index,pos);
     sa_xlate_list[id]=g_list_append(sa_xlate_list[id],entry);
     line++;
   }

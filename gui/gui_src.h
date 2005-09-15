@@ -54,31 +54,26 @@ class SourceBrowser_Window : public GUI_Object {
 };
 
 
-/*
-class breakpoint_info {
- public:
-  int address;
-  GtkWidget *break_widget;
-  GtkWidget *can_break_widget;
-};
-*/
-
 class BreakPointInfo {
 public:
+  BreakPointInfo(int _address, int _line, int _index, int _pos);
+  BreakPointInfo(BreakPointInfo & Dup);
+  ~BreakPointInfo();
+  void Set(GtkWidget *, GdkPixmap *, GdkBitmap *);
+  void Clear(GtkWidget *, GdkPixmap *, GdkBitmap *);
+  void setBreakWidget(GtkWidget *);
+  void setCanBreakWidget(GtkWidget *);
+  int getLine() { return line; }
+  GtkWidget *getBreakWidget() { return break_widget;}
+  GtkWidget *getCanBreakWidget() { return canbreak_widget;}
   int address;
   int pos;
   unsigned int index;           // gtktext index to start of line
+private:  
   unsigned int line;            // line number, first line eq. 0
-  //unsigned int pixel;           // pixels from top of text
-  //unsigned int font_center;     // from base line
   GtkWidget *break_widget;      // breakpoint widget on this line.
   GtkWidget *canbreak_widget;   // 'can break' widget on this line.
 
-  void Set(GtkWidget *, GdkPixmap *, GdkBitmap *);
-  void Clear(GtkWidget *, GdkPixmap *, GdkBitmap *);
-  BreakPointInfo();
-  BreakPointInfo(BreakPointInfo & Dup);
-  
 };
 
 class BreakPointList {

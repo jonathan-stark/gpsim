@@ -382,7 +382,7 @@ void PCTraceObject::print(FILE *fp)
 
   fprintf(fp,"0x%04X 0x%04X %s\n",
 	  addr,
-	  (cpu->pma->getFromAddress(addr))->opcode,
+	  (cpu->pma->getFromAddress(addr))->get_opcode(),
 	  (cpu->pma->getFromAddress(addr))->name(a_string,sizeof(a_string)));
 }
 

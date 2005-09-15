@@ -660,7 +660,7 @@ void Processor::list(unsigned int file_id,
     }
   else
     {
-      file_id = program_memory[pc_val]->file_id;
+      file_id = program_memory[pc_val]->get_file_id();
       line = program_memory[pc_val]->get_src_line();
       pc_line = program_memory[pc->value]->get_src_line();
     }
@@ -740,12 +740,6 @@ void Processor::disassemble (signed int s, signed int e)
   if(s > e)
     return;
 
-  //unsigned int start_PMaddress = map_pm_index2address(s);
-  //unsigned int end_PMaddress   = map_pm_index2address(e);
-
-  //unsigned int start_PMindex = map_pm_address2index(start_PMaddress);
-  //unsigned int end_PMindex   = map_pm_address2index(end_PMaddress);
-
   unsigned int start_PMindex = map_pm_address2index(s);
   unsigned int end_PMindex   = map_pm_address2index(e);
 
@@ -786,7 +780,7 @@ void Processor::disassemble (signed int s, signed int e)
       // Breakpoints replace the program memory with an instruction that has
       // an opcode larger than 16 bits.
 
-      if(inst->opcode < 0x10000)
+      if(inst->get_opcode() < 0x10000)
       {
         cBreak = ' ';
       }
@@ -796,12 +790,12 @@ void Processor::disassemble (signed int s, signed int e)
         inst = pma->get_base_instruction(PMindex);
       }
 
-      if(inst->file_id != -1) {
-        fc = files[inst->file_id];
-        if(iLastFileId != inst->file_id) {
+      if(inst->get_file_id() != -1) {
+        fc = files[inst->get_file_id()];
+        if(iLastFileId != inst->get_file_id()) {
           Console.Printf("%s\n", fc->name().c_str());
         }
-        iLastFileId = inst->file_id;
+        iLastFileId = inst->get_file_id();
       }
       else {
         fc = NULL;
@@ -815,15 +809,15 @@ void Processor::disassemble (signed int s, signed int e)
       {
         char buf[256];
 
-        files.ReadLine(inst->file_id,
-            inst->src_line - 1,
+        files.ReadLine(inst->get_file_id(),
+            inst->get_src_line() - 1,
             buf,
             sizeof(buf));
         cout << buf;
       }
       else {
-        if(fc != NULL && inst->src_line != -1) {
-          if(fc->ReadLine(inst->src_line, str2, iConsoleWidth - 33)
+        if(fc != NULL && inst->get_src_line() != -1) {
+          if(fc->ReadLine(inst->get_src_line(), str2, iConsoleWidth - 33)
             != NULL) {
             trim(str2);
             }
@@ -843,7 +837,7 @@ void Processor::disassemble (signed int s, signed int e)
 //        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
         Console.Printf(
           "% 3s%c%04x  %04x  %s %*s%s\n",
-          pszPC, cBreak, uAddress, inst->opcode, 
+          pszPC, cBreak, uAddress, inst->get_opcode(), 
           str, iSrc, "", str2);
       }
     }
@@ -1102,7 +1096,7 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
   Breakpoint_Instruction *br = dynamic_cast<Breakpoint_Instruction *>(*ppAddressLocation);
   if (br == pInstruction) {
     // at the head of the chain
-    *ppAddressLocation = br->replaced;
+    *ppAddressLocation = br->getReplaced();
   }
   else {
     Breakpoint_Instruction *pLast = br;
@@ -1110,14 +1104,13 @@ int ProgramMemoryAccess::clear_break_at_address(unsigned int address,
     while(br != NULL) {
       if (br == pInstruction) {
         // found
-        pLast->replaced = br->replaced;
-        // for good measure
-        br->replaced = NULL;
+        pLast->setReplaced(br->getReplaced());
+        br->setReplaced(0);
         return 1;
       }
       else {
         pLast = br;
-        br = dynamic_cast<Breakpoint_Instruction *>(br->replaced);
+        br = dynamic_cast<Breakpoint_Instruction *>(br->getReplaced());
       }
     }
   }
@@ -1439,7 +1432,7 @@ instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
 	case instruction::PROFILE_START_INSTRUCTION:
 	case instruction::PROFILE_STOP_INSTRUCTION:
 	case instruction::ASSERTION_INSTRUCTION:
-	  p=((Breakpoint_Instruction *)p)->replaced;
+	  p=((Breakpoint_Instruction *)p)->getReplaced();
 	  break;
 	}
 
@@ -1452,7 +1445,7 @@ instruction *ProgramMemoryAccess::find_instruction(unsigned int address,
 //-------------------------------------------------------------------
 guint64 Processor::cycles_used(unsigned int address)
 {
-    return program_memory[address]->cycle_count;
+    return program_memory[address]->getCyclesUsed();
 }
 
 //-------------------------------------------------------------------
@@ -1541,18 +1534,18 @@ void ProgramMemoryAccess::remove(unsigned int address, instruction *bp_instructi
     Breakpoint_Instruction* toRemove = (Breakpoint_Instruction*)bp_instruction;
     Breakpoint_Instruction *last = (Breakpoint_Instruction*)instr;
     if (toRemove == last) {
-      cpu->program_memory[cpu->map_pm_address2index(address)] = last->replaced;
+      cpu->program_memory[cpu->map_pm_address2index(address)] = last->getReplaced();
       return;
     }
     do {
-      if(typeid(Breakpoint_Instruction) != typeid(*last->replaced) &&
-        typeid(RegisterAssertion) != typeid(*last->replaced))
+      if(typeid(Breakpoint_Instruction) != typeid(*last->getReplaced()) &&
+        typeid(RegisterAssertion) != typeid(*last->getReplaced()))
         // not found
         return;
-      Breakpoint_Instruction *replaced = (Breakpoint_Instruction*)last->replaced;
+      Breakpoint_Instruction *replaced = (Breakpoint_Instruction*)last->getReplaced();
       if(toRemove == replaced) {
         // remove from the chain
-        last->replaced = replaced->replaced;
+        last->setReplaced(replaced->getReplaced());
         return;
       }
       last = replaced;
@@ -1603,7 +1596,7 @@ instruction *ProgramMemoryAccess::get_base_instruction(unsigned int uIndex)
         case instruction::PROFILE_START_INSTRUCTION:
         case instruction::PROFILE_STOP_INSTRUCTION:
         case instruction::ASSERTION_INSTRUCTION:
-	          p=((Breakpoint_Instruction *)p)->replaced;
+	          p=((Breakpoint_Instruction *)p)->getReplaced();
                   break;
         }
 
@@ -1729,11 +1722,11 @@ void ProgramMemoryAccess::put_opcode(unsigned int addr, unsigned int new_opcode)
   //new_inst->xref = old_inst->xref;
 
   if(b) 
-    b->replaced = new_inst;
+    b->setReplaced(new_inst);
   else
     cpu->program_memory[uIndex] = new_inst;
 
-  cpu->program_memory[uIndex]->is_modified=1;
+  cpu->program_memory[uIndex]->setModified(true);
   
   //if(cpu->program_memory[addr]->xref)
   cpu->program_memory[uIndex]->update();
@@ -1888,7 +1881,7 @@ bool  ProgramMemoryAccess::isModified(unsigned int address)
 {
 
   if((address < cpu->program_memory_size()) && 
-     cpu->program_memory[address]->is_modified)
+     cpu->program_memory[address]->bIsModified())
     return true;
 
   return false;
@@ -1924,7 +1917,7 @@ Register *RegisterMemoryAccess::get_register(unsigned int address)
   // through them until we get to the real register.
 
   while(reg->isa() == Register::BP_REGISTER)
-    reg = ((BreakpointRegister *)reg)->replaced;
+    reg = ((BreakpointRegister *)reg)->m_replaced;
 
 
   return reg;
