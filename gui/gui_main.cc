@@ -297,7 +297,7 @@ void GUI_Interface::NewProcessor (Processor *new_cpu)
     gp->source_browser->CloseSource();
     gp->source_browser->NewProcessor(gp);
     gp->symbol_window->NewSymbols();
-    gp->watch_window->ClearWatches();
+    //gp->watch_window->NewProcessor(gp);
     gp->breadboard_window->NewProcessor(gp);
     gp->stack_window->NewProcessor(gp);
     gp->trace_window->NewProcessor(gp);
@@ -348,6 +348,7 @@ void GUI_Interface::NewProgram (Processor *new_cpu)
     gp->symbol_window->NewSymbols();
     gp->program_memory->NewSource(gp);
     gp->profile_window->NewProgram(gp);
+    gp->watch_window->NewProcessor(gp);
     link_src_to_gpsim( gp);
     gtl ();
 

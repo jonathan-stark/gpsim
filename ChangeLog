@@ -1,3 +1,8 @@
+2005-09-15 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_main.cc, gui/gui_watch.cc, gui/gui_watch.h: The state of
+	the watch window is now preserved from one debug session to the
+	next.
+	
 2005-09-14 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src.h, gui/gui_src_asm.cc, src/breakpoints.cc,
 	src/breakpoints.h, src/pic-instructions.cc,
