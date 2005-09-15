@@ -58,9 +58,9 @@ class Watch_Window : public  GUI_Object
   virtual void Add(REGISTER_TYPE type,GUIRegister *reg);
   virtual void Add(REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym);
   virtual void Add(Value *);
-  virtual void Update(void);
-  virtual void UpdateMenus(void);
-  
+  virtual void Update();
+  virtual void UpdateMenus();
+  virtual void NewProcessor(GUI_Processor *gp);
 };
 
 

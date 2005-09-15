@@ -53,16 +53,25 @@ Boston, MA 02111-1307, USA.  */
 #define LSBCOL 23
 #define LASTCOL LSBCOL
 
-static char *watch_titles[]={"bp?", "type", "name","address","mask","dec","hex","ascii","b15","b14","b13","b12","b11","b10","b9","b8","b7","b6","b5","b4","b3","b2","b1","b0"};
+static char *watch_titles[]={"bp", "type", "name","address","mask","dec","hex","ascii","b15","b14","b13","b12","b11","b10","b9","b8","b7","b6","b5","b4","b3","b2","b1","b0"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
-struct _coldata{
-    GtkWidget *clist;
-    int column;
-    int visible; // Loaded on startup
-    Watch_Window *ww;
+class ColumnData
+{
+public:
+  int column;
+  int isVisible;
+  bool bIsValid;
+  Watch_Window *ww;
+
+  void SetVisibility(bool bVisibility);
+  void SetValidity(bool );
+  bool isValid();
+  void Show();
+  ColumnData();
 } coldata[COLUMNS];
+
 static void select_columns(Watch_Window *ww, GtkWidget *clist);
 
 
@@ -114,6 +123,33 @@ public:
   }
 };
 
+//========================================================================
+ColumnData::ColumnData()
+  : ww(0),isVisible(1), bIsValid(true)
+{
+}
+
+void ColumnData::SetVisibility(bool bVisibility)
+{
+  isVisible = bVisibility ? 1 : 0;
+  Show();
+}
+void ColumnData::Show()
+{
+  if (ww) {
+    int show = isVisible & (bIsValid ? 1 : 0);
+    gtk_clist_set_column_visibility(GTK_CLIST(ww->watch_clist),column,show);
+    config_set_variable(ww->name(), watch_titles[column],show);
+  }
+}
+bool ColumnData::isValid()
+{
+  return bIsValid;
+}
+void ColumnData::SetValidity(bool newValid)
+{
+  bIsValid = newValid;
+}
 //========================================================================
 
 void Watch_Window::ClearWatch(WatchEntry *entry)
@@ -228,15 +264,12 @@ popup_activated(GtkWidget *widget, gpointer data)
     }
 }
 
-static void set_column(GtkCheckButton *button, struct _coldata *coldata)
+//------------------------------------------------------------
+// call back function to toggle column visibility in the configuration popup
+static void set_column(GtkCheckButton *button, ColumnData *coldata)
 {
-    char str[256];
-    if(button->toggle_button.active)
-      gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,1);
-    else
-      gtk_clist_set_column_visibility(GTK_CLIST(coldata->clist),coldata->column,0);
-    sprintf(str,"show_column%d",coldata->column);
-    config_set_variable(coldata->ww->name(),str,button->toggle_button.active);
+  if (coldata)
+    coldata->SetVisibility(button->toggle_button.active != 0);
 }
 
 static void select_columns(Watch_Window *ww, GtkWidget *clist)
@@ -252,18 +285,15 @@ static void select_columns(Watch_Window *ww, GtkWidget *clist)
     gtk_signal_connect_object(GTK_OBJECT(dialog),
 			      "delete_event",GTK_SIGNAL_FUNC(gtk_widget_destroy),GTK_OBJECT(dialog));
 
-    for(i=0;i<COLUMNS;i++)
-    {
-      button=gtk_check_button_new_with_label(watch_titles[i]);
-      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].visible);
-      gtk_widget_show(button);
-      gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
-      coldata[i].clist=clist;
-      coldata[i].column=i;
-      coldata[i].ww=ww;
-      gtk_signal_connect(GTK_OBJECT(button),"clicked",
+    for(i=0;i<COLUMNS;i++) 
+      if (coldata[i].isValid()) {
+	button=gtk_check_button_new_with_label(watch_titles[i]);
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(button),coldata[i].isVisible);
+	gtk_widget_show(button);
+	gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialog)->vbox),button,FALSE,FALSE,0);
+	gtk_signal_connect(GTK_OBJECT(button),"clicked",
 			   GTK_SIGNAL_FUNC(set_column),(gpointer)&coldata[i]);
-    }
+      }
 
     button = gtk_button_new_with_label("OK");
     gtk_widget_show(button);
@@ -350,11 +380,11 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
       if(column>=MSBCOL && column<=LSBCOL) {
 	
         int value;  // , bit;
-        	  
+        printf("column %d\n",column);
         // Toggle the bit.
         value = entry->get_value();
 
-        value ^= (1<< (7-(column-MSBCOL)));
+        value ^= (1<< (15-(column-MSBCOL)));
         entry->put_value(value);
       }
     }
@@ -478,7 +508,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     strcpy(str, "?");
   }
   else {
-    sprintf(str,"%d", rvNewValue);
+    sprintf(str,"%d", rvNewValue.data);
   }
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
 
@@ -562,8 +592,8 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym)
 {
-  char name[50], addressstring[50], typestring[30];
-  char *entry[COLUMNS]={"",typestring,name, addressstring, "", "","","","","","","","","",""};
+  char vname[50], addressstring[50], typestring[30];
+  char *entry[COLUMNS]={"",typestring,vname, addressstring, "", "","","","","","","","","",""};
   int row;
   WatchWindowXREF *cross_reference;
 
@@ -580,11 +610,11 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
 
   if(pRegSym == 0) {
     cpu_reg = reg->get_register();
-    strncpy(name,cpu_reg->name().c_str(),sizeof(name));
+    strncpy(vname,cpu_reg->name().c_str(),sizeof(vname));
   }
   else {
     cpu_reg = pRegSym->getReg();
-    strncpy(name,pRegSym->name().c_str(),sizeof(name));
+    strncpy(vname,pRegSym->name().c_str(),sizeof(vname));
   }
   unsigned int uAddrMask = 0;
   unsigned int uLastAddr = gp->cpu->register_memory_size() - 1;
@@ -625,6 +655,11 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
 
   UpdateMenus();
 
+  static int wv=0;
+  char cwv[100];
+  snprintf(cwv, sizeof(cwv), "WV%d",wv);
+  wv++;
+  config_set_string(name(), cwv, vname);
 }
 
 //---
@@ -648,6 +683,38 @@ void Watch_Window::Add( Value *regSym)
     }
   }
 
+}
+//------------------------------------------------------------------------
+// NewSymbols
+//
+void Watch_Window::NewProcessor(GUI_Processor *_gp)
+{
+
+  if (!gp || !gp->cpu)
+    return;
+
+  int i;
+
+  // turn off columns 8-15
+  if (gp->cpu->register_size() == 1)
+    for (i=0; i<8; i++)
+      coldata[MSBCOL+i].SetValidity(false);
+  
+  // now read symbols watched from a prior simulation session
+  i=0;
+  char cwv[100];
+  char *vname;
+  while (i<1000) {
+    snprintf(cwv, sizeof(cwv), "WV%d",i++);
+    vname = 0;
+    if (config_get_string(name(), cwv, &vname) ) {
+      Value *val = get_symbol_table().find(vname);
+      Add(val);
+    }
+    else
+      break;
+  }
+  
 }
 //------------------------------------------------------------------------
 // ClearWatches
@@ -709,7 +776,10 @@ void Watch_Window::Build(void)
 
   for(i=0;i<LASTCOL;i++) {
     gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
-    gtk_clist_set_column_visibility(GTK_CLIST(watch_clist),i,coldata[i].visible);
+    coldata[i].ww = this;
+    coldata[i].column = i;
+    coldata[i].Show();
+    //gtk_clist_set_column_visibility(GTK_CLIST(watch_clist),i,coldata[i].isVisible);
   }
   
   gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);
@@ -775,20 +845,12 @@ Watch_Window::Watch_Window(GUI_Processor *_gp)
   gp = _gp;
 
   get_config();
-  int iRegisterSize = _gp->cpu == NULL ? 1 :_gp->cpu->register_size();
-  int iLSCol = iRegisterSize == 1 ? (MSBCOL + 8) : MSBCOL;
+
   for(i=0;i<COLUMNS;i++) {
-    int bVisible;
-    char str[128];
-    sprintf(str,"show_column%d",i);
-    if(i < MSBCOL) {
-      bVisible = 1;
-    }
-    else {
-      bVisible = i >= iLSCol;
-    }
-    coldata[i].visible=bVisible; // default
-    config_get_variable(name(),str,&coldata[i].visible);
+
+    if (!config_get_variable(name(),watch_titles[i],&coldata[i].isVisible))
+      config_set_variable(name(),watch_titles[i],1);
+
   }
 
   if(enabled)
