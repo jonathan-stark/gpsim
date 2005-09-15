@@ -69,33 +69,25 @@ public:
   };
 
 
-  //char name_str[20];      /* %%% FIX ME %%% dynamically allocate? */
-  unsigned int opcode;
-  unsigned int m_uAddrOfInstr;
-  int file_id;            /* The source file that declared this instruction
-			   * (The file_id is an index into an array of files) */
-  int hll_file_id;        /* The hll source file that declared this instruction */
-  int src_line;           /* The line number within the source file */
-  int lst_line;           /* The line number within the list file */
-  int hll_src_line;       /* The line number within the HLL source file */
-
   instruction();
   instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
   void Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
 
-  virtual void execute(void){ }
-  virtual void debug(void){ }
-  //virtual char *name(char *str){ return(name_str);}
-  virtual int instruction_size(void) { return 1;}
-  virtual unsigned int get_opcode(void) { return opcode; }
-  virtual unsigned int get_value(void) { return opcode; }
+  virtual void execute(){ }
+  virtual void debug(){ }
+  virtual int instruction_size() { return 1;}
+  virtual unsigned int get_opcode() { return opcode; }
+  virtual unsigned int get_value() { return opcode; }
   virtual void put_value(unsigned int new_value) { }
-  virtual int get_src_line(void) { return(src_line); }
-  virtual int get_hll_src_line(void) { return(hll_src_line); }
-  virtual int get_lst_line(void) { return(lst_line); }
-  virtual int get_file_id(void) {return(file_id); }
-  virtual int get_hll_file_id(void) {return(hll_file_id); }
-  virtual INSTRUCTION_TYPES isa(void) {return NORMAL_INSTRUCTION;}
+  virtual unsigned int getAddress() { return m_uAddrOfInstr;}
+  virtual void setAddress(unsigned int addr) { m_uAddrOfInstr = addr;}
+  virtual int get_src_line() { return(src_line); }
+  virtual int get_hll_src_line() { return(hll_src_line); }
+  virtual int get_lst_line() { return(lst_line); }
+  virtual int get_file_id() {return(file_id); }
+  virtual int get_hll_file_id() {return(hll_file_id); }
+  virtual INSTRUCTION_TYPES isa() {return NORMAL_INSTRUCTION;}
+  virtual guint64 getCyclesUsed() { return cycle_count;}
   void decode(Processor *new_cpu, unsigned int new_opcode);
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
@@ -106,29 +98,80 @@ public:
   // PIC instructions).
   virtual void initialize(bool init_state) {};
 
+  bool bIsModified() { return is_modified; }
+  void setModified(bool b) { is_modified=b; }
+protected:
   int is_modified; // flag indicating if this instruction has
                    // changed since start.
-
   guint64 cycle_count; // Nr of cycles used up by this instruction
+
+  unsigned int opcode;
+  unsigned int m_uAddrOfInstr;
+  int file_id;            /* The source file that declared this instruction
+			   * (The file_id is an index into an array of files) */
+  int hll_file_id;        /* The hll source file that declared this instruction */
+  int src_line;           /* The line number within the source file */
+  int lst_line;           /* The line number within the list file */
+  int hll_src_line;       /* The line number within the HLL source file */
+
 
 
 };
 
 
 //---------------------------------------------------------
+// An AliasedInstruction is a class that is designed to replace an
+// instruction in program memory. (E.g. breakpoint instructions are an
+// example).
+class AliasedInstruction : public instruction
+{
+public:
+  AliasedInstruction(instruction *);
+  AliasedInstruction();
+  AliasedInstruction(Processor *pProcessor, 
+		     unsigned int uOpCode, 
+		     unsigned int uAddrOfInstr);
+  void setReplaced(instruction *);
+  virtual instruction *getReplaced();
+
+  virtual void execute();
+  virtual void debug();
+  virtual int instruction_size();
+  virtual unsigned int get_opcode();
+  virtual unsigned int get_value();
+  virtual void put_value(unsigned int new_value);
+  virtual int get_src_line();
+  virtual int get_hll_src_line();
+  virtual int get_lst_line();
+  virtual int get_file_id();
+  virtual int get_hll_file_id();
+  virtual INSTRUCTION_TYPES isa();
+  virtual void initialize(bool init_state);
+  virtual char *name(char *,int len);
+
+  virtual void update(void);
+  virtual void add_xref(void *xref);
+  virtual void remove_xref(void *xref);
+
+protected:
+  instruction *m_replaced;
+
+};
+
+//---------------------------------------------------------
 class invalid_instruction : public instruction
 {
 public:
 
-  virtual void execute(void);
+  virtual void execute();
 
-  virtual void debug(void)
+  virtual void debug()
   {
     //cout << "*** INVALID INSTRUCTION ***\n";
   };
 
   invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
-  virtual INSTRUCTION_TYPES isa(void) {return INVALID_INSTRUCTION;};
+  virtual INSTRUCTION_TYPES isa() {return INVALID_INSTRUCTION;};
   //virtual char *name(char *str){return("INVALID");};
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new invalid_instruction(new_cpu,new_opcode);}
@@ -141,8 +184,8 @@ class Literal_op : public instruction
 public:
   unsigned int L;
 
-  virtual void execute(void){ };
-  virtual void debug(void){ };
+  virtual void execute(){ };
+  virtual void debug(){ };
   virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
@@ -157,8 +200,8 @@ public:
   bool access;
   Register *reg;
 
-  virtual void execute(void){ };
-  virtual void debug(void){ };
+  virtual void execute(){ };
+  virtual void debug(){ };
   virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
@@ -177,8 +220,8 @@ public:
 
   /*  Register *destination;*/
 
-  virtual void execute(void){ };
-  virtual void debug(void){ };
+  virtual void execute(){ };
+  virtual void debug(){ };
   virtual char *name(char *,int);
 
   void decode(Processor *new_cpu, unsigned int new_opcode);

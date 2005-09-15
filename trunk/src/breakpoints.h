@@ -50,41 +50,17 @@ protected:
 #define MAX_BREAKPOINTS 0x400
 #define BREAKPOINT_MASK (MAX_BREAKPOINTS-1)
 
-class Breakpoint_Instruction : public instruction , public TriggerObject
+class Breakpoint_Instruction : public AliasedInstruction , public TriggerObject
 {
 public:
 
   unsigned int address;
-  instruction *replaced;
-
-  virtual unsigned int get_opcode(void);
-  virtual int get_src_line(void);
-  virtual int get_hll_src_line(void);
-  virtual int get_lst_line(void);
-  virtual int get_file_id(void);
-  virtual int get_hll_file_id(void);
 
   virtual bool set_break(void);
   virtual Processor* get_cpu(void);
   virtual void print(void);
   virtual void clear(void);
   virtual char const * bpName() { return "Execution"; }
-  virtual void update(void)
-    {
-      if(replaced)
-	replaced->update();
-    }
-  virtual void add_xref(void *an_xref)
-    {
-      if(replaced)
-	replaced->add_xref(an_xref);
-    }
-  virtual void remove_xref(void *an_xref)
-    {
-      if(replaced)
-	replaced->remove_xref(an_xref);
-    }
-
 
   Breakpoint_Instruction(Processor *new_cpu, 
 			 unsigned int new_address, 
@@ -92,7 +68,6 @@ public:
 
   virtual INSTRUCTION_TYPES isa(void) {return BREAKPOINT_INSTRUCTION;};
   virtual void execute(void);
-  virtual char *name(char *,int len);
   virtual bool eval_Expression();
 };
 
@@ -443,24 +418,24 @@ class BreakpointRegister : public Register, public TriggerObject
 {
 public:
 
-  Register *replaced;       // A pointer to the register that this break replaces
+  Register *m_replaced;       // A pointer to the register that this break replaces
 
   BreakpointRegister(void) : TriggerObject(0)
-  { replaced = 0;};
+  { m_replaced = 0;};
   BreakpointRegister(Processor *, int, int );
   BreakpointRegister(Processor *, TriggerAction *, int, int );
 
   virtual REGISTER_TYPES isa(void) {return BP_REGISTER;};
   virtual string &name(void) const
     {
-      if(replaced)
-        return replaced->name();
+      if(m_replaced)
+        return m_replaced->name();
       else
         return gpsimValue::name();
     };
   /* direct all accesses to the member functions of the
    * register that is being replaced. Note that we assume
-   * "replaced" is properly initialized which it will be
+   * "m_replaced" is properly initialized which it will be
    * if this object is accessed. (Why? well, we only access
    * register notify/breaks via the PIC's file register 
    * memory and never directly access them. But the only
@@ -469,55 +444,55 @@ public:
 
   virtual void put_value(unsigned int new_value)
     {
-      replaced->put_value(new_value);
+      m_replaced->put_value(new_value);
     }
   virtual void put(unsigned int new_value)
     {
-      replaced->put(new_value);
+      m_replaced->put(new_value);
     }
 
   virtual void putRV(RegisterValue rv)
     {
-      replaced->putRV(rv);
+      m_replaced->putRV(rv);
     }
 
   virtual unsigned int get_value(void)
     {
-      return(replaced->get_value());
+      return(m_replaced->get_value());
     }
   virtual RegisterValue getRV(void)
     {
-      return replaced->getRV();
+      return m_replaced->getRV();
     }
   virtual RegisterValue getRVN(void) {
-    return replaced->getRVN();
+    return m_replaced->getRVN();
   }
   virtual unsigned int get(void)
     {
-      return(replaced->get());
+      return(m_replaced->get());
     }
 
   virtual Register *getReg(void)
     {
-      if(replaced)
-        return replaced;
+      if(m_replaced)
+        return m_replaced;
       else
         return this;
     }
 
   virtual void setbit(unsigned int bit_number, bool new_value)
     {
-      replaced->setbit(bit_number, new_value);
+      m_replaced->setbit(bit_number, new_value);
     }
 
   virtual bool get_bit(unsigned int bit_number)
     {
-      return(replaced->get_bit(bit_number));
+      return(m_replaced->get_bit(bit_number));
     }
 
   virtual double get_bit_voltage(unsigned int bit_number)
     {
-      return(replaced->get_bit_voltage(bit_number));
+      return(m_replaced->get_bit_voltage(bit_number));
     }
 
   virtual bool hasBreak(void)
@@ -527,20 +502,20 @@ public:
 
   virtual void update(void)
     {
-      if(replaced)
-        replaced->update();
+      if(m_replaced)
+        m_replaced->update();
     }
 
   virtual void add_xref(void *an_xref)
     {
-      if(replaced)
-        replaced->add_xref(an_xref);
+      if(m_replaced)
+        m_replaced->add_xref(an_xref);
     }
 
   virtual void remove_xref(void *an_xref)
     {
-      if(replaced)
-        replaced->remove_xref(an_xref);
+      if(m_replaced)
+        m_replaced->remove_xref(an_xref);
     }
 
   void replace(Processor *_cpu, unsigned int reg);
@@ -561,7 +536,7 @@ public:
 
   BreakpointRegister_Value(void)
     { 
-      replaced = 0;
+      m_replaced = 0;
       break_value = 0;
       break_mask = 0;
     }

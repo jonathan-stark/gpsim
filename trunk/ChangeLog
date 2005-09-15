@@ -1,3 +1,17 @@
+2005-09-14 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src.h, gui/gui_src_asm.cc, src/breakpoints.cc,
+	src/breakpoints.h, src/pic-instructions.cc,
+	src/pic-instructions.h, src/processor.cc, src/trace.cc:
+	Fixed usability issues with setting breakpoints through the source
+	browser. The 'Drag Break' feature has been disabled since it
+	really doesn't work too well for assertions (or at least doesn't
+	apply). Fixed a bug that prevented toggling breaks that occur at
+	the current PC. 
+	A new class was added to better handle the breakpoint
+	classes. This new class, AliasedInstruction, is a base for the
+	breakpoint class and basically will provide an API to handle
+	aliased or replace instructions. 
+
 2005-09-11 Scott Dattalo <scott@dattalo.com>
 	* plat/win32/gpsim.def: updated for API changes.
 

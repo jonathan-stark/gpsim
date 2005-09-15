@@ -86,6 +86,11 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
   new_name("INVALID");
 }
 
+// Instantiate an invalid instruction
+invalid_instruction bad_instruction;
+
+
+//------------------------------------------------------------------------
 void instruction::add_line_number_symbol(int address)
 {
 
@@ -102,6 +107,108 @@ void instruction::update_line_number(int file, int sline, int lline, int hllfile
   hll_file_id = hllfile;
 }
 
+//------------------------------------------------------------------------
+AliasedInstruction::AliasedInstruction(instruction *_replaced)
+  : instruction(), m_replaced(_replaced)
+{
+}
+
+AliasedInstruction::AliasedInstruction()
+  : instruction(), m_replaced(0)
+{
+}
+
+AliasedInstruction::AliasedInstruction(Processor *pProcessor, 
+		     unsigned int uOpCode, 
+		     unsigned int uAddrOfInstr)
+  : instruction(pProcessor, uOpCode, uAddrOfInstr), 
+    m_replaced(0)
+{
+}
+
+void AliasedInstruction::setReplaced(instruction *_replaced)
+{
+  if (!m_replaced)
+    m_replaced = _replaced;
+}
+
+instruction * AliasedInstruction::getReplaced()
+{
+  return m_replaced ? m_replaced : &bad_instruction;
+}
+
+void AliasedInstruction::execute()
+{
+  getReplaced()->execute();
+}
+void AliasedInstruction::debug()
+{
+  getReplaced()->debug();
+}
+int AliasedInstruction::instruction_size()
+{
+  return getReplaced()->instruction_size();
+}
+unsigned int AliasedInstruction::get_opcode()
+{
+  return getReplaced()->get_opcode();
+}
+unsigned int AliasedInstruction::get_value()
+{
+  return getReplaced()->get_value();
+}
+void AliasedInstruction::put_value(unsigned int new_value)
+{
+  getReplaced()->put_value(new_value);
+}
+int AliasedInstruction::get_src_line()
+{
+  return getReplaced()->get_src_line();
+}
+int AliasedInstruction::get_hll_src_line()
+{
+  return getReplaced()->get_hll_src_line();
+}
+int AliasedInstruction::get_lst_line()
+{
+  return getReplaced()->get_lst_line();
+}
+int AliasedInstruction::get_file_id()
+{
+  return getReplaced()->get_file_id();
+}
+int AliasedInstruction::get_hll_file_id()
+{
+  return getReplaced()->get_hll_file_id();
+}
+instruction::INSTRUCTION_TYPES AliasedInstruction::isa()
+{
+  return getReplaced()->isa();
+}
+void AliasedInstruction::initialize(bool init_state)
+{
+  getReplaced()->initialize(init_state);
+}
+char *AliasedInstruction::name(char *cPtr,int len)
+{
+  return getReplaced()->name(cPtr,len);
+}
+void AliasedInstruction::update(void)
+{
+  getReplaced()->update();
+}
+void AliasedInstruction::add_xref(void *an_xref)
+{
+  getReplaced()->add_xref(an_xref);
+}
+void AliasedInstruction::remove_xref(void *an_xref)
+{
+  getReplaced()->remove_xref(an_xref);
+}
+
+
+
+//------------------------------------------------------------------------
 char *Literal_op::name(char *return_str,int len)
 {
 
@@ -296,9 +403,6 @@ void  Register_op::decode(Processor *new_cpu, unsigned int new_opcode)
 }
 
 
-
-// Instantiate an invalid instruction
-invalid_instruction bad_instruction;
 
 Register * Register_op::source = 0;
 
