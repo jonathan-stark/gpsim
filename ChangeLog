@@ -1,3 +1,10 @@
+2005-09-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui.h, gui/gui_main.cc, gui/gui_regwin.cc, gui/gui_regwin.h,
+	gui/gui_watch.cc, gui/gui_watch.h:
+	Added color info to the watch window.
+	Watch window columns are now adjustable.
+	Centralized color processing.
+
 2005-09-15 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_main.cc, gui/gui_watch.cc, gui/gui_watch.h: The state of
 	the watch window is now preserved from one debug session to the
