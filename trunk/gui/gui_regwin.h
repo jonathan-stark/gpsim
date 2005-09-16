@@ -50,13 +50,6 @@ class Register_Window : public GUI_Object
 #endif
   GtkStyle *current_line_number_style;
   GtkStyle *breakpoint_line_number_style;
-  GdkColor breakpoint_color;
-  GdkColor item_has_changed_color;
-  GdkColor normal_fg_color;
-  GdkColor normal_bg_color;
-  GdkColor sfr_bg_color;
-  GdkColor alias_color;
-  GdkColor invalid_color;
 
   REGISTER_TYPE type;
   GUIRegisterList *registers;

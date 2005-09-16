@@ -117,12 +117,17 @@ public:
   {
 
     Watch_Window *ww  = (Watch_Window *) (parent_window);
-
-    ww->Update();
+    if (ww)
+      ww->UpdateWatch((WatchEntry *)data);
 
   }
 };
 
+//========================================================================
+WatchEntry::WatchEntry()
+  : cpu(0)
+{
+}
 //========================================================================
 ColumnData::ColumnData()
   : ww(0),isVisible(1), bIsValid(true)
@@ -484,7 +489,6 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   int i;
 
   int row;
-
   row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
   if(row==-1)
     return;
@@ -496,6 +500,16 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   unsigned int uBitmaskForMaskedValue = entry->cpu->register_mask();
   rvNewValue = entry->getRV();
   new_value = rvNewValue;
+  if (entry->get_shadow() == rvNewValue) {
+    gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.normal_fg());
+    gtk_clist_set_background(GTK_CLIST(watch_clist), 
+			     row, 
+			     (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
+    return;
+  }
+
+  entry->put_shadow(rvNewValue);
+
   if(entry->pRegSymbol) {
     rvMaskedNewValue = *(entry->pRegSymbol);
     uBitmask = entry->pRegSymbol->getBitmask();
@@ -510,6 +524,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   else {
     sprintf(str,"%d", rvNewValue.data);
   }
+  gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.item_has_changed());
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
 
   rvMaskedNewValue.toString(str, 80);
@@ -541,6 +556,11 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "yes");
   else
     gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "no");
+
+  gtk_clist_set_background(GTK_CLIST(watch_clist), 
+			   row, 
+			   (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
+
 }
 
 //------------------------------------------------------------------------
@@ -548,7 +568,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 //
 //
 
-void Watch_Window::Update(void)
+void Watch_Window::Update()
 {
   GList *iter;
   WatchEntry *entry;
@@ -559,21 +579,9 @@ void Watch_Window::Update(void)
   while(iter) {
    
     entry=(WatchEntry*)iter->data;
-
-    RegisterValue value = entry->getRV();
-	
-    if(entry->get_shadow().data != value.data) {
-      // The register has changed since the last update.
-
-      if(clist_frozen==0) {
-        gtk_clist_freeze(GTK_CLIST(watch_clist));
-        clist_frozen=1;
-      }
-
-      // Update value in clist
-      entry->put_shadow(value);
+    if (entry)
       UpdateWatch(entry);
-    }
+
     iter=iter->next;
   }
   if(clist_frozen)
@@ -775,11 +783,11 @@ void Watch_Window::Build(void)
   gtk_widget_show(watch_clist);
 
   for(i=0;i<LASTCOL;i++) {
-    gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
+    //gtk_clist_set_column_auto_resize(GTK_CLIST(watch_clist),i,TRUE);
+    gtk_clist_set_column_resizeable(GTK_CLIST(watch_clist),i,TRUE);
     coldata[i].ww = this;
     coldata[i].column = i;
     coldata[i].Show();
-    //gtk_clist_set_column_visibility(GTK_CLIST(watch_clist),i,coldata[i].isVisible);
   }
   
   gtk_clist_set_selection_mode (GTK_CLIST(watch_clist), GTK_SELECTION_BROWSE);

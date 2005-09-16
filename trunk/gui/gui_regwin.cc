@@ -1146,30 +1146,11 @@ static gint configure_event(GtkWidget *widget, GdkEventConfigure *e, gpointer da
 
 int Register_Window::LoadStyles(void)
 {
-  GdkColormap *colormap = gdk_colormap_get_system();
-
 #if GTK_MAJOR_VERSION >= 2
   normalfont = pango_font_description_from_string(normalfont_string);
 #else
   normalfont=gdk_fontset_load (normalfont_string);
 #endif
-
-  gdk_color_parse("light cyan", &normal_bg_color);
-  gdk_color_parse("black", &normal_fg_color);
-  gdk_color_parse("blue", &item_has_changed_color);
-  gdk_color_parse("red", &breakpoint_color);
-  gdk_color_parse("light gray", &alias_color);
-  gdk_color_parse("black", &invalid_color);
-  gdk_color_parse("cyan", &sfr_bg_color);
-
-  gdk_colormap_alloc_color(colormap, &normal_bg_color,FALSE,TRUE );
-  gdk_colormap_alloc_color(colormap, &normal_fg_color,FALSE,TRUE );
-  gdk_colormap_alloc_color(colormap, &item_has_changed_color,FALSE,TRUE);
-  gdk_colormap_alloc_color(colormap, &breakpoint_color,FALSE,TRUE);
-  gdk_colormap_alloc_color(colormap, &alias_color,FALSE,TRUE);
-  gdk_colormap_alloc_color(colormap, &invalid_color,FALSE,TRUE);
-  gdk_colormap_alloc_color(colormap, &sfr_bg_color,FALSE,TRUE);
-
 
   if(!normalfont)
   {
@@ -1740,22 +1721,22 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
       guiReg->bUpdateFull=true;
       if(bTrace)
         printf("UpdateRegisterCell()    regID=3%d, bUpdateFull set to true 1\n", reg_number);
-      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
+      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, gColors.item_has_changed());
     } else
-      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &normal_fg_color);
+      gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, gColors.normal_fg());
 
     if(bTrace)
       printf("UpdateRegisterCell()    Background\n");
     if(guiReg->hasBreak())
-      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &breakpoint_color);
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.breakpoint());
     else if(!guiReg->bIsValid())
-      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &invalid_color);
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.invalid());
     else if(guiReg->bIsAliased)
-      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &alias_color);
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.alias());
     else if(guiReg->bIsSFR())
-      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &sfr_bg_color);
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.sfr_bg());
     else
-      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, &normal_bg_color);
+      gtk_sheet_range_set_background(GTK_SHEET(register_sheet), &range, gColors.normal_bg());
    
 
     retval=TRUE;
@@ -1781,7 +1762,7 @@ gboolean Register_Window::UpdateRegisterCell(unsigned int reg_number)
     guiReg->bUpdateFull=true;
     if(bTrace)
       printf("UpdateRegisterCell()    regID=3%d, bUpdateFull set to true 2\n", reg_number);
-    gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, &item_has_changed_color);
+    gtk_sheet_range_set_foreground(GTK_SHEET(register_sheet), &range, gColors.item_has_changed());
 
     retval=TRUE;
   }

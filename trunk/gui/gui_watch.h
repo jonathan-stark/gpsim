@@ -30,6 +30,7 @@ public:
   Processor *cpu;
   REGISTER_TYPE type;
   register_symbol *pRegSymbol;
+  WatchEntry();
 };
 
 
