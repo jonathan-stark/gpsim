@@ -524,7 +524,7 @@ static int trace_two_points(path **pat,   // Pointer to resulting path
 //    }
     return FALSE; 
 }
-    /*
+#if 0 // enable for debug
 // print huge ascii picture of the board_matrix for debugging
 void print_matrix(void)
 {
@@ -550,9 +550,8 @@ void print_matrix(void)
 	putchar('\r');
 	putchar('\n');
     }
-} */
+} 
 
-#if 0
 // Debug. Draw routing constraints. FIXME draw from board_matrix instead.
 static void draw_board_matrix(Breadboard_Window *bbw)
 {
@@ -657,7 +656,6 @@ static void draw_nodes(Breadboard_Window *bbw)
 
     gdk_draw_rectangle (bbw->layout_pixmap,
 			bbw->window->style->bg_gc[GTK_WIDGET_STATE (bbw->window)],
-//			((GUI_Object*)bbw)->window->style->white_gc,
 			TRUE,
 			0, 0,
 			LAYOUTSIZE_X,
@@ -1635,7 +1633,7 @@ static gint button(GtkWidget *widget,
       }
 
       treeselect_stimulus(0, p);
-      puts("Stimulus should now be selected");
+      //puts("Stimulus should now be selected");
 
       return 1;
     }
@@ -2367,8 +2365,7 @@ static void save_stc(GtkWidget *button, Breadboard_Window *bbw)
 
         Value *locattr = *attribute_iterator;
 
-        fprintf(fo, "%s.%s=%s\n",
-                m->name().c_str(),
+        fprintf(fo, "%s=%s\n",
                 locattr->name().c_str(),
                 locattr->toString().c_str());
       }
