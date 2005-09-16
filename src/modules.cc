@@ -421,9 +421,11 @@ bool ModuleLibraryExists(string sName) {
 
 void module_canonical_name(string &sPath, string &sName) {
   GetFileName(sPath, sName);
+#ifdef _WIN32
   for(unsigned int i = 0; i < sName.size(); i++) {
     sName[i] = ::toupper(sName[i]);
   }
+#endif
 }
 
 static bool module_add_library(const char *library_name, void *library_handle)
