@@ -43,17 +43,14 @@ Boston, MA 02111-1307, USA.  */
 #include "gui_regwin.h"
 #include "gui_watch.h"
 
-#define BPCOL 0
-#define NAMECOL 2
-#define MASKCOL 4
-#define DECIMALCOL 5
-#define HEXCOL 6
-#define ASCIICOL 7
-#define MSBCOL 8
-#define LSBCOL 23
-#define LASTCOL LSBCOL
+#define NAMECOL 0
+#define DECIMALCOL 2
+#define HEXCOL 3
+#define ASCIICOL 4
+#define BITCOL 5
+#define LASTCOL BITCOL
 
-static char *watch_titles[]={"bp", "type", "name","address","mask","dec","hex","ascii","b15","b14","b13","b12","b11","b10","b9","b8","b7","b6","b5","b4","b3","b2","b1","b0"};
+static char *watch_titles[]={"name","address","dec","hex ","ascii","bits"};
 
 #define COLUMNS sizeof(watch_titles)/sizeof(char*)
 
@@ -371,7 +368,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
     gtk_menu_popup(GTK_MENU(popup), 0, 0, 0, 0,
 		   3, event->time);
 
-
+  /*
   WatchEntry *entry;
 
   if(event->type==GDK_2BUTTON_PRESS &&
@@ -393,7 +390,7 @@ do_popup(GtkWidget *widget, GdkEventButton *event, Watch_Window *ww)
         entry->put_value(value);
       }
     }
-
+  */
   return 0;
 }
 
@@ -482,10 +479,18 @@ static int delete_event(GtkWidget *widget,
   return TRUE;
 }
 
-//static void update(Watch_Window *ww, struct watch_entry *entry, int new_value)
+//========================================================================
+// UpdateWatch
+// A single watch entry is updated here. Here's what's done:
+// 
+// If the value has not changed since the last update, then the
+// foreground and background colors are refreshed and we return.
+//
+// If the value has changed, then each of the value fields are refreshed.
+// Then the foreground and background are refreshed.
+
 void Watch_Window::UpdateWatch(WatchEntry *entry)
 {
-  char str[80];
   int i;
 
   int row;
@@ -493,13 +498,12 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   if(row==-1)
     return;
 
-  RegisterValue rvNewValue;
-  int new_value;
-  RegisterValue rvMaskedNewValue;
-  unsigned int uBitmask;
-  unsigned int uBitmaskForMaskedValue = entry->cpu->register_mask();
-  rvNewValue = entry->getRV();
-  new_value = rvNewValue;
+  RegisterValue rvNewValue = entry->getRV();
+
+
+  // If the value has not changed, then simply update the foreground and background
+  // colors and return.
+
   if (entry->get_shadow() == rvNewValue) {
     gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.normal_fg());
     gtk_clist_set_background(GTK_CLIST(watch_clist), 
@@ -507,6 +511,10 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
 			     (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
     return;
   }
+
+  RegisterValue rvMaskedNewValue;
+  unsigned int uBitmask;
+  unsigned int uBitmaskForMaskedValue = entry->cpu->register_mask();
 
   entry->put_shadow(rvNewValue);
 
@@ -518,47 +526,35 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
     rvMaskedNewValue = entry->getRV();
     uBitmask = entry->cpu->register_mask();
   }
+
+  char str[80];
+
   if(rvNewValue.init & uBitmask) {
     strcpy(str, "?");
   }
-  else {
+  else
     sprintf(str,"%d", rvNewValue.data);
-  }
-  gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.item_has_changed());
+
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, DECIMALCOL, str);
 
+  // Hexadecimal representation:
   rvMaskedNewValue.toString(str, 80);
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
 
-  strcpy(str, GetUserInterface().FormatValue(
-    uBitmask, entry->cpu->register_mask(), IUserInterface::eHex));
-  gtk_clist_set_text(GTK_CLIST(watch_clist), row, MASKCOL, str);
-
-  if(new_value>=32 && new_value<127)
-    sprintf(str,"%c",new_value);
-  else
-    str[0]=0;
+  // ASCII representation
+  str[0] = isprint(rvNewValue.data) ? rvNewValue.data : 0;
+  str[1] =0;
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
-  int iCol;
-  char sBit[2];
+
+  // Bit representation
   char sBits[25];
-  sBit[1] = 0;
   rvNewValue.toBitStr(sBits, 25, entry->cpu->register_mask(), 
 			       NULL);
-  for(i=15, iCol = LSBCOL;
-      iCol >= MSBCOL;
-      i--, iCol--) {
-    sBit[0] = sBits[i];
-    gtk_clist_set_text(GTK_CLIST(watch_clist), row, iCol, sBit);
-  }
+  gtk_clist_set_text(GTK_CLIST(watch_clist), row, BITCOL, sBits);
 
-  if(entry->hasBreak())
-    gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "yes");
-  else
-    gtk_clist_set_text(GTK_CLIST(watch_clist), row, BPCOL, "no");
-
-  gtk_clist_set_background(GTK_CLIST(watch_clist), 
-			   row, 
+  // Set foreground and background colors
+  gtk_clist_set_foreground(GTK_CLIST(watch_clist), row, gColors.item_has_changed());
+  gtk_clist_set_background(GTK_CLIST(watch_clist), row, 
 			   (entry->hasBreak() ? gColors.breakpoint() : gColors.normal_bg()));
 
 }
@@ -600,8 +596,8 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg)
 
 void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * pRegSym)
 {
-  char vname[50], addressstring[50], typestring[30];
-  char *entry[COLUMNS]={"",typestring,vname, addressstring, "", "","","","","","","","","",""};
+  char vname[50], addressstring[50];
+  char *entry[COLUMNS]={vname, addressstring, "", "","",""};
   int row;
   WatchWindowXREF *cross_reference;
 
@@ -633,7 +629,6 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
   }
   strcpy(addressstring, GetUserInterface().FormatProgramAddress(
     cpu_reg->address, uAddrMask, IUserInterface::eHex));
-  strncpy(typestring,type==REGISTER_RAM?"RAM":"EEPROM",30);
 
   gtk_clist_freeze(GTK_CLIST(watch_clist));
   row=gtk_clist_append(GTK_CLIST(watch_clist), entry);
@@ -642,9 +637,7 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
   watch_entry->address=reg->address;
   watch_entry->pRegSymbol = pRegSym;
   watch_entry->cpu = gp->cpu;
-
   watch_entry->type=type;
-
   watch_entry->rma = reg->rma;
 
   gtk_clist_set_row_data(GTK_CLIST(watch_clist), row, (gpointer)watch_entry);
@@ -703,11 +696,6 @@ void Watch_Window::NewProcessor(GUI_Processor *_gp)
 
   int i;
 
-  // turn off columns 8-15
-  if (gp->cpu->register_size() == 1)
-    for (i=0; i<8; i++)
-      coldata[MSBCOL+i].SetValidity(false);
-  
   // now read symbols watched from a prior simulation session
   i=0;
   char cwv[100];

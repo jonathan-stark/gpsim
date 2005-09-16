@@ -1116,25 +1116,25 @@ static gint marker_cb(GtkWidget *w1,
 {
   static int dragbreak=0;
   static int dragstartline;
-  BreakPointInfo *bpi;
-  BreakPointInfo *dragbpi;
+  //BreakPointInfo *bpi;
+  //BreakPointInfo *dragbpi;
   static int button_pressed;
   static int button_pressed_y;
   static int button_pressed_x;
   static int dragwidget_oldy;
-  int pixel;
-  //  unsigned int address=0;
+  // int pixel;
+  // unsigned int address=0;
     
   static GtkWidget *dragwidget;
   static int dragwidget_x;
   static gdouble vadj_value=0.0;
     
 
-  int mindiff;
-  int i;
-  int diff;
+  //int mindiff;
+  //int i;
+  //int diff;
     
-  GList *iter;
+  //GList *iter;
 
   static int timeout_tag=-1;
 

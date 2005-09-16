@@ -760,87 +760,76 @@ void Processor::disassemble (signed int s, signed int e)
   char str[iConsoleWidth];
   char str2[iConsoleWidth];
   unsigned uPCAddress = pc->get_value();
-  char *pszPC;
+  const char *pszPC;
   char cBreak;
   ISimConsole &Console = GetUserInterface().GetConsole();
 
   int iLastFileId = -1;
   FileContext *fc = NULL;
 
-  for(unsigned int PMindex = start_PMindex; PMindex<=end_PMindex; PMindex++)
-    {
-      unsigned int uAddress = map_pm_index2address(PMindex);
-      str[0] =0;
-      if (uPCAddress == uAddress)
-        pszPC = "==>";
-      else
-        pszPC = "   ";
-      inst = program_memory[PMindex];
+  for(unsigned int PMindex = start_PMindex; PMindex<=end_PMindex; PMindex++) {
 
-      // Breakpoints replace the program memory with an instruction that has
-      // an opcode larger than 16 bits.
+    unsigned int uAddress = map_pm_index2address(PMindex);
+    str[0] = 0;
+    pszPC = (uPCAddress == uAddress) ? "==>" : "   ";
 
-      if(inst->get_opcode() < 0x10000)
-      {
-        cBreak = ' ';
-      }
-      else
-      {
-        cBreak = 'B';
-        inst = pma->get_base_instruction(PMindex);
-      }
+    inst = program_memory[PMindex];
 
-      if(inst->get_file_id() != -1) {
-        fc = files[inst->get_file_id()];
-        if(iLastFileId != inst->get_file_id()) {
-          Console.Printf("%s\n", fc->name().c_str());
-        }
-        iLastFileId = inst->get_file_id();
-      }
-      else {
-        fc = NULL;
-      }
-
-      const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
-      if(*pLabel != 0) {
-        cout << pLabel << ":" << endl;
-      }
-      if(files.nsrc_files() && use_src_to_disasm)
-      {
-        char buf[256];
-
-        files.ReadLine(inst->get_file_id(),
-            inst->get_src_line() - 1,
-            buf,
-            sizeof(buf));
-        cout << buf;
-      }
-      else {
-        if(fc != NULL && inst->get_src_line() != -1) {
-          if(fc->ReadLine(inst->get_src_line(), str2, iConsoleWidth - 33)
-            != NULL) {
-            trim(str2);
-            }
-          else {
-            str2[0] = 0;
-          }
-        }
-        else {
-          str2[0] = 0;
-        }
-        inst->name(str, sizeof(str));
-        char *pAfterNumonic = strchr(str, '\t');
-        int iNumonicWidth = pAfterNumonic ? pAfterNumonic - str : 5;
-        int iOperandsWidth = 14;
-        int iSrc = iOperandsWidth - (strlen(str) - iNumonicWidth - 1);
-//        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
-//        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
-        Console.Printf(
-          "% 3s%c%04x  %04x  %s %*s%s\n",
-          pszPC, cBreak, uAddress, inst->get_opcode(), 
-          str, iSrc, "", str2);
-      }
+    // If this is not a "base" instruction then it has been replaced
+    // with something like a break point.
+    cBreak = ' ';
+    if(!inst->isBase()) {
+      cBreak = 'B';
+      inst = pma->get_base_instruction(PMindex);
     }
+
+    if(inst->get_file_id() != -1) {
+      fc = files[inst->get_file_id()];
+      if(iLastFileId != inst->get_file_id())
+	Console.Printf("%s\n", fc->name().c_str());
+      iLastFileId = inst->get_file_id();
+    }
+    else
+      fc = 0;
+
+    const char *pLabel = get_symbol_table().findProgramAddressLabel(uAddress);
+    if(*pLabel != 0)
+      cout << pLabel << ":" << endl;
+
+    if(files.nsrc_files() && use_src_to_disasm) {
+      char buf[256];
+
+      files.ReadLine(inst->get_file_id(),
+		     inst->get_src_line() - 1,
+		     buf,
+		     sizeof(buf));
+      cout << buf;
+    }  else {
+      if(fc != NULL && inst->get_src_line() != -1) {
+	if(fc->ReadLine(inst->get_src_line(), str2, iConsoleWidth - 33)
+	   != NULL) {
+	  trim(str2);
+	}
+	else {
+	  str2[0] = 0;
+	}
+      }
+      else {
+	str2[0] = 0;
+      }
+      inst->name(str, sizeof(str));
+      char *pAfterNumonic = strchr(str, '\t');
+      int iNumonicWidth = pAfterNumonic ? pAfterNumonic - str : 5;
+      int iOperandsWidth = 14;
+      int iSrc = iOperandsWidth - (strlen(str) - iNumonicWidth - 1);
+      //        Console.Printf("0.........1.........2.........3.........4.........5.........6.........7.........");
+      //        Console.Printf("%d, strlen(str)=%d\n", iNumonicWidth, strlen(str));
+      Console.Printf(
+		     "% 3s%c%04x  %04x  %s %*s%s\n",
+		     pszPC, cBreak, uAddress, inst->get_opcode(), 
+		     str, iSrc, "", str2);
+    }
+  }
 }
 
 
