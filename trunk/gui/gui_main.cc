@@ -207,6 +207,8 @@ static GMutex *muSimStopMutex=0;
 static GCond  *cvSimStopCondition=0;
 #endif
 
+extern int gui_animate_delay; // in milliseconds
+
 static GUI_Processor *lgp=0;
 
 static void *SimulationHasStopped( void *ptr )
@@ -232,7 +234,13 @@ static void *SimulationHasStopped( void *ptr )
       lgp->trace_window->Update();
       lgp->profile_window->Update();
       lgp->stopwatch_window->Update();
+
+
+      
     }
+    
+    if(gui_animate_delay!=0)
+          usleep(1000*gui_animate_delay);
 
     dispatch_Update();
 

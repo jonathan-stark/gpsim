@@ -398,8 +398,10 @@ void UpdateRateMenuItem::Select()
   if(bAnimate) {
     gui_animate_delay = update_rate;
     gi.set_update_rate(1);
-  } else
+  } else {
+    gui_animate_delay = 0;
     gi.set_update_rate(update_rate);
+  }
 
   if(gp && gp->cpu)
     gp->cpu->pma->stop();

@@ -560,9 +560,9 @@ void SourceBrowserAsm_Window::Update(void)
     return;
 
   SetTitle();
-  if (gp->cpu->simulation_mode == eSM_RUNNING ||
-    gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
-    return;
+  //animate didn't work if (gp->cpu->simulation_mode == eSM_RUNNING ||
+    //gp->cpu->simulation_mode == eSM_SINGLE_STEPPING)
+    //return;
 
   SetPC(pma->get_PC());
 

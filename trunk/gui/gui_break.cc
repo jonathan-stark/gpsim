@@ -56,37 +56,6 @@ Boston, MA 02111-1307, USA.  */
 
 extern GUI_Processor *gp;
 
-extern int gui_animate_delay; // in milliseconds
-
-void gui_simulation_has_stopped(gpointer callback_data)
-{
-    while(gtk_events_pending())
-	gtk_main_iteration();
-
-  if(callback_data)
-    {
-      GUI_Processor *gp = (GUI_Processor *) callback_data;
-
-      gp->regwin_ram->Update();
-      gp->regwin_eeprom->Update();
-      gp->program_memory->Update();
-      gp->source_browser->Update();
-      gp->watch_window->Update();
-      gp->stack_window->Update();
-      gp->breadboard_window->Update();
-      gp->trace_window->Update();
-      gp->profile_window->Update();
-      gp->stopwatch_window->Update();
-    }
-
-  if(gui_animate_delay!=0)
-      usleep(1000*gui_animate_delay);
-
-  while(gtk_events_pending())
-      gtk_main_iteration();
-}
-
-
 class linkXREF : public CrossReferenceToGUI
 {
 public:
