@@ -73,7 +73,7 @@ public:
   instruction(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
   void Initialize(Processor *pProcessor, unsigned int uOpCode, unsigned int uAddrOfInstr);
 
-  virtual void execute(){ }
+  virtual void execute() = 0;
   virtual void debug(){ }
   virtual int instruction_size() { return 1;}
   virtual unsigned int get_opcode() { return opcode; }
@@ -88,6 +88,7 @@ public:
   virtual int get_hll_file_id() {return(hll_file_id); }
   virtual INSTRUCTION_TYPES isa() {return NORMAL_INSTRUCTION;}
   virtual guint64 getCyclesUsed() { return cycle_count;}
+  virtual bool isBase() = 0;
   void decode(Processor *new_cpu, unsigned int new_opcode);
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
@@ -98,11 +99,11 @@ public:
   // PIC instructions).
   virtual void initialize(bool init_state) {};
 
-  bool bIsModified() { return is_modified; }
-  void setModified(bool b) { is_modified=b; }
+  bool bIsModified() { return m_bIsModified; }
+  void setModified(bool b) { m_bIsModified=b; }
 protected:
-  int is_modified; // flag indicating if this instruction has
-                   // changed since start.
+  bool m_bIsModified; // flag indicating if this instruction has
+                      // changed since start.
   guint64 cycle_count; // Nr of cycles used up by this instruction
 
   unsigned int opcode;
@@ -148,6 +149,7 @@ public:
   virtual INSTRUCTION_TYPES isa();
   virtual void initialize(bool init_state);
   virtual char *name(char *,int len);
+  virtual bool isBase();
 
   virtual void update(void);
   virtual void add_xref(void *xref);
@@ -176,6 +178,8 @@ public:
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new invalid_instruction(new_cpu,new_opcode);}
 
+  virtual bool isBase() { return true; }
+
 };
 
 //---------------------------------------------------------
@@ -184,9 +188,9 @@ class Literal_op : public instruction
 public:
   unsigned int L;
 
-  virtual void execute(){ };
   virtual void debug(){ };
   virtual char *name(char *,int);
+  virtual bool isBase() { return true; }
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 };
@@ -200,9 +204,9 @@ public:
   bool access;
   Register *reg;
 
-  virtual void execute(){ };
   virtual void debug(){ };
   virtual char *name(char *,int);
+  virtual bool isBase() { return true; }
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 
@@ -220,9 +224,9 @@ public:
 
   /*  Register *destination;*/
 
-  virtual void execute(){ };
   virtual void debug(){ };
   virtual char *name(char *,int);
+  virtual bool isBase() { return true; }
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 

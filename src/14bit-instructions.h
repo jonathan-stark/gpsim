@@ -53,6 +53,7 @@ public:
 
   RETFIE(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETFIE(new_cpu,new_opcode);}
 
@@ -66,6 +67,7 @@ public:
 
   RETURN(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RETURN(new_cpu,new_opcode);}
 

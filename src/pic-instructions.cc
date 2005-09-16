@@ -48,7 +48,7 @@ void instruction::Initialize(Processor *pProcessor, unsigned int uOpCode, unsign
 
   m_uAddrOfInstr = uAddrOfInstr;
 
-  is_modified = 0;
+  m_bIsModified = false;
   cycle_count = 0;
 
   file_id = -1;
@@ -205,7 +205,10 @@ void AliasedInstruction::remove_xref(void *an_xref)
 {
   getReplaced()->remove_xref(an_xref);
 }
-
+bool AliasedInstruction::isBase()
+{
+  return getReplaced()->isBase();
+}
 
 
 //------------------------------------------------------------------------

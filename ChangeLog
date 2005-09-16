@@ -1,4 +1,13 @@
 2005-09-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_src_asm.cc: fixed compiler warnings
+	* gui/gui_watch.cc: Removed mask, BP, type, and b15..b0 bit
+	columns. Added a newbit string column.
+	* src/12bit-instructions.h, src/14bit-instructions.h,
+	src/16bit-instructions.h, src/breakpoints.h, src/hexutils.cc,
+	src/pic-instructions.cc, src/pic-instructions.h, src/processor.cc:
+	Fixed disassembly output for shadowed instructions. 
+
+2005-09-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui.h, gui/gui_main.cc, gui/gui_regwin.cc, gui/gui_regwin.h,
 	gui/gui_watch.cc, gui/gui_watch.h:
 	Added color info to the watch window.

@@ -121,6 +121,7 @@ public:
   CALL(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *str,int len);
+  virtual bool isBase() { return true;}
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CALL(new_cpu,new_opcode);}
@@ -145,6 +146,7 @@ public:
 
   CLRW(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CLRW(new_cpu,new_opcode);}
 
@@ -157,6 +159,7 @@ public:
 
   CLRWDT(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new CLRWDT(new_cpu,new_opcode);}
 
@@ -206,6 +209,7 @@ public:
 
   GOTO(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   virtual char *name(char *str,int len);
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new GOTO(new_cpu,new_opcode);}
@@ -306,6 +310,7 @@ public:
 
   NOP(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new NOP(new_cpu,new_opcode);}
 
@@ -318,6 +323,7 @@ public:
 
   OPTION(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new OPTION(new_cpu,new_opcode);}
 
@@ -368,6 +374,7 @@ public:
 
   SLEEP(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new SLEEP(new_cpu,new_opcode);}
 

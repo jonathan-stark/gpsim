@@ -49,6 +49,7 @@ public:
   virtual void execute(void){ };
   virtual void debug(void){ };
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
 
   void decode(Processor *new_cpu, unsigned int new_opcode);
 
@@ -65,6 +66,7 @@ class multi_word_instruction : public instruction
 
   virtual int instruction_size(void) { return 2;}
   virtual INSTRUCTION_TYPES isa(void) {return MULTIWORD_INSTRUCTION;};
+  virtual bool isBase() { return true;}
 
   virtual void initialize(bool init_state) { initialized = init_state; }
 };
@@ -235,6 +237,7 @@ public:
   BRA(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new BRA(new_cpu,new_opcode);}
 };
@@ -335,6 +338,7 @@ public:
 
   DAW(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new DAW(new_cpu,new_opcode);}
 
@@ -647,6 +651,7 @@ public:
 
   POP(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new POP(new_cpu,new_opcode);}
 
@@ -659,6 +664,7 @@ public:
 
   PUSH(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new PUSH(new_cpu,new_opcode);}
 
@@ -674,6 +680,7 @@ public:
   RCALL(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RCALL(new_cpu,new_opcode);}
 };
@@ -685,6 +692,7 @@ public:
 
   RESET(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
+  virtual bool isBase() { return true;}
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new RESET(new_cpu,new_opcode);}
 
@@ -877,6 +885,7 @@ public:
   TBLRD(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TBLRD(new_cpu,new_opcode);}
@@ -891,6 +900,7 @@ public:
   TBLWT(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TBLWT(new_cpu,new_opcode);}
@@ -905,6 +915,7 @@ public:
   TLRD(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TLRD(new_cpu,new_opcode);}
@@ -919,6 +930,7 @@ public:
   TLWT(Processor *new_cpu, unsigned int new_opcode);
   virtual void execute(void);
   virtual char *name(char *,int);
+  virtual bool isBase() { return true;}
 
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)
     {return new TLWT(new_cpu,new_opcode);}

@@ -135,7 +135,7 @@ int PicHexProgramFileType::readihex16 (Processor **pProcessor, FILE * file)
 
       if (0 == linetype) {	// data record
         for (i = 0; i < wordsthisline; i++)
-          cpu->init_program_memory(address++, getword(file));
+          cpu->init_program_memory_at_index(address++, getword(file));
       }
       else if (4 == linetype) {	// Extended linear address
         unsigned char b1, b2;
