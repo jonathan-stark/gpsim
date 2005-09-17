@@ -1,4 +1,5 @@
 EXPORTS
+	??0AliasedInstruction@@QAE@XZ
     ??0Bit@@QAE@AAVRegisterValue@@I@Z
     ??0BoolEventLogger@@QAE@I@Z
     ??0Boolean@@QAE@_N@Z
@@ -92,6 +93,7 @@ EXPORTS
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBD@Z
     ?add_register@Symbol_Table@@QAEPAVregister_symbol@@PAVRegister@@PBDI@Z
     ?add_stimulus@Symbol_Table@@QAEXPAVstimulus@@@Z
+    ?add_xref@AliasedInstruction@@UAEXPAX@Z
     ?add_xref@gpsimValue@@UAEXPAX@Z
     ?address_has_break@ProgramMemoryAccess@@UAEHIW4INSTRUCTION_TYPES@instruction@@@Z
     ?address_has_notify@ProgramMemoryAccess@@UAEHI@Z
@@ -142,6 +144,7 @@ EXPORTS
     ?create_pkg@Module@@UAEXI@Z
     ?cycles@@3VCycle_Counter@@A
     ?Debug@Processor@@UAEXXZ
+    ?debug@AliasedInstruction@@UAEXXZ
     ?decode@instruction@@QAEXPAVProcessor@@I@Z
     ?description@Value@@UAE?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?destroyProgramMemoryAccess@Processor@@UAEXPAVProgramMemoryAccess@@@Z
@@ -159,6 +162,7 @@ EXPORTS
     ?eval_Expression@TriggerObject@@UAE_NXZ
     ?eval_Expression@Breakpoint_Instruction@@UAE_NXZ
     ?event@BoolEventLogger@@QAEX_N@Z
+    ?execute@AliasedInstruction@@UAEXXZ
     ?find@Symbol_Table@@QAEPAVValue@@ABV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?find@Symbol_Table@@QAEPAVValue@@ABVtype_info@@PBD@Z
     ?find@Symbol_Table@@QAEPAVValue@@PBD@Z
@@ -239,27 +243,30 @@ EXPORTS
     ?get_cpu@MemoryAccess@@UAEPAVProcessor@@XZ
     ?get_cpu@gpsimValue@@QBEPAVProcessor@@XZ
     ?get_cycles@@YAAAVCycle_Counter@@XZ
-    ?get_file_id@Breakpoint_Instruction@@UAEHXZ
+    ?get_file_id@AliasedInstruction@@UAEHXZ
     ?get_frequency@Processor@@UAENXZ
-    ?get_hll_file_id@Breakpoint_Instruction@@UAEHXZ
-    ?get_hll_src_line@Breakpoint_Instruction@@UAEHXZ
+    ?get_hll_file_id@AliasedInstruction@@UAEHXZ
+    ?get_hll_src_line@AliasedInstruction@@UAEHXZ
     ?get_index@BoolEventLogger@@QAEI_K@Z
     ?get_index@ThreeStateEventLogger@@QAEI_K@Z
+    ?initialize@AliasedInstruction@@UAEX_N@Z
     ?get_interface@@YAAAVgpsimInterface@@XZ
     ?get_iop@IOPIN@@UAEPAVRegister@@XZ
-    ?get_lst_line@Breakpoint_Instruction@@UAEHXZ
-    ?get_opcode@Breakpoint_Instruction@@UAEIXZ
+    ?get_lst_line@AliasedInstruction@@UAEHXZ
+    ?get_opcode@AliasedInstruction@@UAEIXZ
     ?get_opcode@ProgramMemoryAccess@@QAEII@Z
     ?get_pin@Module@@UAEPAVIOPIN@@I@Z
     ?get_pin_count@Module@@UAEHXZ
     ?get_pin_name@Module@@UAEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@I@Z
     ?get_pin_state@Module@@UAEHI@Z
-    ?get_src_line@Breakpoint_Instruction@@UAEHXZ
+    ?get_src_line@AliasedInstruction@@UAEHXZ
     ?get_src_line@ProgramMemoryAccess@@QAEII@Z
     ?get_trace@@YAAAVTrace@@XZ
+    ?get_value@AliasedInstruction@@UAEIXZ
     ?get_value@IOPORT@@UAEIXZ
     ?get_value@PortRegister@@UAEIXZ
     ?get_xref@Value@@UAEPAV1@XZ
+    ?getReplaced@AliasedInstruction@@UAEPAVinstruction@@XZ
     ?grab@Token@gpsim@@QAEXXZ
     ?halt@Breakpoints@@QAEXXZ
     ?init@ProgramMemoryAccess@@QAEXPAVProcessor@@@Z
@@ -269,13 +276,16 @@ EXPORTS
     ?init_register_memory@Processor@@UAEXI@Z
     ?initializeAttributes@Module@@UAEXXZ
     ?initializeAttributes@Processor@@UAEXXZ
+    ?instruction_size@AliasedInstruction@@UAEHXZ
     ?interrupt@Program_Counter@@UAEXI@Z
+    ?isa@AliasedInstruction@@UAE?AW4INSTRUCTION_TYPES@instruction@@XZ
+    ?isBase@AliasedInstruction@@UAE_NXZ
     ?isClearable@Value@@UAE_NXZ
     ?isValid@TraceType@@UAE_NI@Z
     ?list@Processor@@UAEXIIII@Z
     ?load_state@Processor@@UAEXPAU_iobuf@@@Z
     ?log@TraceRawLog@@QAEXXZ
-    ?name@Breakpoint_Instruction@@UAEPADPADH@Z
+    ?name@AliasedInstruction@@UAEPADPADH@Z
     ?name@gpsimObject@@UBEAAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ
     ?name@gpsimObject@@UAEPADPADH@Z
     ?new_address@Program_Counter@@UAEXI@Z
@@ -301,6 +311,7 @@ EXPORTS
     ?putState@PinModule@@UAEXD@Z
     ?putToAddress@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
     ?putToIndex@ProgramMemoryAccess@@UAEXIPAVinstruction@@@Z
+    ?put_value@AliasedInstruction@@UAEXI@Z
     ?put_value@IOPORT@@UAEXI@Z
     ?put_value@Register@@UAEXI@Z
     ?read_src_files@Processor@@QAEXXZ
@@ -309,6 +320,7 @@ EXPORTS
     ?register_size@Register@@UBEIXZ
     ?remove@Symbol_Table@@QAEPAVValue@@AAV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z
     ?remove_xref@gpsimValue@@UAEXPAX@Z
+    ?remove_xref@AliasedInstruction@@UAEXPAX@Z
     ?reset@sfr_register@@UAEXW4RESET_TYPE@@@Z
     ?reset@Module@@UAEXW4RESET_TYPE@@@Z
     ?reset@Program_Counter@@QAEXXZ
@@ -430,6 +442,7 @@ EXPORTS
     ?toggle_break_at_address@ProgramMemoryAccess@@UAEXI@Z
     ?toggle_break_at_line@ProgramMemoryAccess@@UAEXII@Z
     ?trace_dump1@Processor@@UAEHHPADH@Z
+    ?update@AliasedInstruction@@UAEXXZ
     ?update@Stimulus_Node@@QAEXXZ
     ?update@Stimulus_Node@@QAEX_K@Z
     ?update@gpsimValue@@UAEXXZ

@@ -491,8 +491,6 @@ static int delete_event(GtkWidget *widget,
 
 void Watch_Window::UpdateWatch(WatchEntry *entry)
 {
-  int i;
-
   int row;
   row=gtk_clist_find_row_from_data(GTK_CLIST(watch_clist),entry);
   if(row==-1)
@@ -542,7 +540,7 @@ void Watch_Window::UpdateWatch(WatchEntry *entry)
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, HEXCOL, str);
 
   // ASCII representation
-  str[0] = isprint(rvNewValue.data) ? rvNewValue.data : 0;
+  str[0] = (rvNewValue.data>'0' && rvNewValue.data<='z') ? rvNewValue.data : 0;
   str[1] =0;
   gtk_clist_set_text(GTK_CLIST(watch_clist), row, ASCIICOL, str);
 
