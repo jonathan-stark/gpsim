@@ -1,4 +1,8 @@
 2005-09-16 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_watch.cc: Had to change the way ASCII is checked under
+	windows.
+	
+2005-09-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_src_asm.cc: fixed compiler warnings
 	* gui/gui_watch.cc: Removed mask, BP, type, and b15..b0 bit
 	columns. Added a newbit string column.
