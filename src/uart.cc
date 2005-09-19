@@ -76,12 +76,13 @@ private:
 
 //-----------------------------------------------------------
 _RCSTA::_RCSTA()
-  : m_PinModule(0), m_sink(0), m_cRxState('?')
+  : rcreg(0), spbrg(0), txsta(0), m_PinModule(0), m_sink(0), m_cRxState('?')
 {
 }
 
 //-----------------------------------------------------------
 _TXSTA::_TXSTA()
+  : txreg(0), spbrg(0), m_PinModule(0),  m_source(0), m_cTxState('?')
 {
 }
 
@@ -98,6 +99,7 @@ _TXREG::_TXREG()
 
 
 _SPBRG::_SPBRG()
+  : txsta(0), rcsta(0)
 {
 }
 
@@ -1011,33 +1013,9 @@ void USART_MODULE::initialize(PIR_SET *pir_set,
 USART_MODULE::USART_MODULE()
   : txreg(0), rcreg(0)
 {
-
-  //rcsta = new _RCSTA;
-  //txsta = new _TXSTA;
-
 }
 
 //--------------------------------------------------
 USART_MODULE14::USART_MODULE14()
 {
-  /*
-  txreg = new TXREG_14;
-  rcreg = new RCREG_14;
-  spbrg = new _SPBRG;
-  */
 }
-
-//--------------------------------------------------
-/*
-void USART_MODULE14::initialize_14(_14bit_processor *new_cpu, PIR_SET *ps,
-    PinModule *tx_pin, PinModule *rx_pin)
-{
-  _cpu14 = new_cpu;
-
-  USART_MODULE::initialize(tx_pin, rx_pin);
-
-  if(txreg) //this should be unnecessary
-    txreg->assign_pir_set(ps);
-}
-
-*/

@@ -985,6 +985,10 @@ unsigned int TMR0H::get_value(void)
 //--------------------------------------------------
 // TMR0_16 member functions
 //
+TMR0_16::TMR0_16()
+  : t0con(0), intcon(0), tmr0h(0)
+{
+}
 //--------------------------------------------------
 // TMR0_16::get_prescale
 //
@@ -1174,6 +1178,7 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 //--------------------------------------------------
 
 TXREG_16::TXREG_16(void)
+  : pir_set(0)
 {
 
   cout << "txreg16 constructor\n";
@@ -1208,6 +1213,7 @@ void TXREG_16::assign_pir_set(PIR_SET *new_pir_set)
 
 
 RCREG_16::RCREG_16(void)
+  : pir_set(0)
 {
   cout << "rcreg 16 constructor\n";
 }

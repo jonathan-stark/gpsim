@@ -49,6 +49,7 @@ CCPRL::CCPRL()
 {
 
   ccprh = 0;
+  tmrl = 0;
 
 }
 
@@ -497,6 +498,7 @@ void CCPCON::put(unsigned int new_value)
 // T1CON
 //--------------------------------------------------
 T1CON::T1CON()
+  : tmrl(0)
 {
 
   new_name("T1CON");
@@ -543,6 +545,7 @@ unsigned int T1CON::get_prescale()
 // member functions for the TMRH base class
 //--------------------------------------------------
 TMRH::TMRH()
+  : tmrl(0)
 {
 
   value.put(0);
@@ -610,6 +613,10 @@ TMRL::TMRL()
   compare_mode = 0;
   last_cycle = 0;
 
+  tmrh    = 0;
+  t1con   = 0;
+  pir_set = 0;
+  ccpcon  = 0;
   new_name("TMRL");
 
 }
@@ -911,6 +918,7 @@ void TMRL::callback_print()
 //--------------------------------------------------
 
 PR2::PR2()
+  :  tmr2(0)
 {
 
   new_name("PR2");
@@ -939,6 +947,7 @@ void PR2::put(unsigned int new_value)
 //--------------------------------------------------
 
 T2CON::T2CON()
+  : tmr2(0)
 {
 
   new_name("T2CON");
@@ -961,6 +970,7 @@ void T2CON::put(unsigned int new_value)
 // member functions for the TMR2 base class
 //--------------------------------------------------
 TMR2::TMR2()
+  : pr2(0), pir_set(0), t2con(0), ccp1con(0), ccp2con(0)
 {
   update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
   pwm_mode = 0;
@@ -1403,6 +1413,8 @@ TMR2_MODULE::TMR2_MODULE()
   t2con = 0;
   pr2   = 0;
   tmr2  = 0;
+  cpu   = 0;
+  name_str = 0;
 
 }
 

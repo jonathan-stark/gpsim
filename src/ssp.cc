@@ -66,8 +66,8 @@ void _SSPSTAT::put_value(unsigned int new_value)
 //-----------------------------------------------------------
 
 _SSPCON::_SSPCON()
-  :  m_SckSource(0), m_SsSource(0),
-     m_sspbuf(0)
+  :  m_SckSource(0), m_SsSource(0), m_SdoSource(0),
+     m_sspbuf(0), m_sspstat(0), m_pirset(0)
 {
 }
 void _SSPCON::setIOpins(PinModule *_sck,PinModule *_ss,

@@ -435,6 +435,8 @@ class TMR0_16 : public TMR0
 {
 public:
 
+  TMR0_16();
+
   T0CON  *t0con;
   INTCON *intcon;
   TMR0H  *tmr0h;
