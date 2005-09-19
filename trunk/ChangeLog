@@ -1,3 +1,17 @@
+2005-09-19 Scott Dattalo <scott@dattalo.com>
+	* gui/preferences.cc, gui/preferences.h: New files to support user
+	defined gui preferences.
+	* gui/Makefile.am, gui/gui.h, gui/gui_main.cc, gui/gui_menu.cc,
+	gui/gui_regwin.cc, gui/gui_watch.cc: Updates to support user
+	defined preferences.
+
+2005-09-17 Scott Dattalo <scott@dattalo.com>
+	* src/14bit-tmrs.cc, src/16bit-registers.cc,
+	src/16bit-registers.h, src/ssp.cc, src/uart.cc, src/uart.h:
+	- Initialized data members of many classes. Thanks to Robert
+	Merkel for uncovering this issue.
+
+	
 2005-09-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_watch.cc: Had to change the way ASCII is checked under
 	windows.

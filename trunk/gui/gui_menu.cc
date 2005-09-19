@@ -39,6 +39,7 @@ Boston, MA 02111-1307, USA.  */
 
 
 #include "gui.h"
+#include "preferences.h"
 #include "gui_callbacks.h"
 #include "gui_breadboard.h"
 #include "gui_processor.h"
@@ -107,7 +108,7 @@ show_message (char *title, char *message)
   gtk_grab_add (window);
 
 }
-
+//========================================================================
 static void 
 about_cb (gpointer             callback_data,
 	  guint                callback_action,
@@ -123,7 +124,123 @@ about_cb (gpointer             callback_data,
 
 }
 
+void SetupPreferences();
+static void Preferences_cb (gpointer             callback_data,
+			    guint                callback_action,
+			    GtkWidget           *widget)
+{
+  SetupPreferences();
+}
 
+
+//========================================================================
+struct sTest
+{
+  const char *cName;
+  int id;
+};
+
+static void setColor_cb (GtkWidget           *widget,
+			 gpointer             callback_data)
+{
+  sTest *s = (sTest *) callback_data;
+  if (s)
+    printf("setColor_cb %s %d\n", s->cName, s->id);
+}
+
+
+static void preferences_AddColor(GtkWidget *pParent, GdkColor *color, 
+				 const char *colorName)
+{
+  GtkWidget *hbox        = gtk_hbox_new(0,0);
+  gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
+
+  GtkWidget *colorButton = gtk_color_button_new_with_color (color);
+  gtk_color_button_set_title (GTK_COLOR_BUTTON(colorButton), colorName);
+  gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
+  gtk_widget_show(colorButton);
+
+  sTest *s = new sTest();
+  s->cName = colorName;
+  s->id = 42;
+
+  gtk_signal_connect (GTK_OBJECT(colorButton), 
+		      "color-set", 
+		      GTK_SIGNAL_FUNC(setColor_cb),
+		      s);
+
+  const int cBORDER = 10; // pixels
+  GtkWidget *label       = gtk_label_new(colorName);
+  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
+  gtk_widget_show (label);
+
+  gtk_widget_show (hbox);
+
+
+}
+
+void SetupPreferences()
+{
+  GtkWidget *button;
+
+  GtkWidget *window = gtk_dialog_new ();
+
+  gtk_window_set_title (GTK_WINDOW (window), "Preferences");
+  gtk_container_set_border_width (GTK_CONTAINER (window), 0);
+
+  GtkWidget *vbox = GTK_DIALOG (window)->vbox;
+
+  GtkWidget *notebook = gtk_notebook_new();
+  gtk_notebook_set_tab_pos((GtkNotebook*)notebook,GTK_POS_TOP);
+  gtk_box_pack_start (GTK_BOX (vbox), notebook, TRUE, TRUE, 0);
+  gtk_widget_show(notebook);
+
+  GtkWidget *label;
+  GtkWidget *hbox;
+
+  // Color Preferences
+  hbox = gtk_hbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
+  label=gtk_label_new("colors");
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
+
+  preferences_AddColor(GTK_WIDGET(hbox), gColors.breakpoint(), "Breakpoints");
+
+  gtk_widget_show(hbox);
+
+
+  hbox = gtk_hbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
+  label=gtk_label_new("Source Browser");
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
+  gtk_widget_show(hbox);
+
+  hbox = gtk_hbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
+  label=gtk_label_new("RAM");
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
+  gtk_widget_show(hbox);
+
+  // Close button
+  button = gtk_button_new_with_label ("close");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 10);
+  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
+			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
+			     GTK_OBJECT (window));
+  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+  //gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
+  gtk_box_pack_start (GTK_BOX (vbox), button, TRUE, TRUE, 0);
+  gtk_widget_grab_default(button);
+  gtk_widget_show(button);
+
+  gtk_widget_show (window);
+
+  gtk_grab_add (window);
+
+}
+
+
+//========================================================================
 void
 file_selection_hide_fileops (GtkWidget *widget,
 			     GtkFileSelection *fs)
@@ -695,6 +812,9 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/Pro_file",        0, TOGGLE_WINDOW,WT_profile_window,"<ToggleItem>" },
   { "/Windows/St_opwatch",      0, TOGGLE_WINDOW,WT_stopwatch_window,"<ToggleItem>" },
   { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
+
+  { "/_Edit",     0, 0,       0, "<Branch>" },
+  { "/Edit/Preferences",        0, (GtkItemFactoryCallback)Preferences_cb, 0 },
 
   { "/_Help",            0,         0,                     0, "<LastBranch>" },
   { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },

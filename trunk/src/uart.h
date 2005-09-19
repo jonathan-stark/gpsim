@@ -222,30 +222,6 @@ class _SPBRG : public sfr_register, public TriggerObject
 };
 
 //---------------------------------------------------------------
-/*
-class TXREG_14 : public _TXREG
-{
- public:
-  PIR_SET *pir_set;
-
-  virtual bool is_empty();
-  virtual void empty();
-  virtual void full();
-  virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
-};
-
-class RCREG_14 : public _RCREG
-{
- public:
-  PIR_SET *pir_set;
-
-  virtual void push(unsigned int);
-  virtual void pop();
-
-  virtual void assign_pir_set(PIR_SET *new_pir_set){pir_set = new_pir_set;};
-
-};
-*/
 //---------------------------------------------------------------
 class USART_MODULE
 {
@@ -272,10 +248,6 @@ class USART_MODULE14 : public USART_MODULE
   _14bit_processor *_cpu14;
 
   USART_MODULE14();
-  /*
-  void initialize_14(_14bit_processor *new_cpu,PIR_SET *ps,
-     PinModule *tx_pin, PinModule *rx_pin);
-  */
 };
 
 #endif

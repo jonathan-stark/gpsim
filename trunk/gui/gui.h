@@ -192,33 +192,6 @@ public:
 
 };
 
-//========================================================================
-class GuiColors
-{
-public:
-  GuiColors();
-
-  GdkColor *breakpoint();
-  GdkColor *item_has_changed();
-  GdkColor *normal_fg();
-  GdkColor *normal_bg();
-  GdkColor *sfr_bg();
-  GdkColor *alias();
-  GdkColor *invalid();
-  void initialize();
-private:
-  bool m_bInitialized;
-  GdkColor breakpoint_color;
-  GdkColor item_has_changed_color;
-  GdkColor normal_fg_color;
-  GdkColor normal_bg_color;
-  GdkColor sfr_bg_color;
-  GdkColor alias_color;
-  GdkColor invalid_color;
-};
-
-extern GuiColors gColors;
-
 //
 // External references and function prototypes
 //

@@ -39,6 +39,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/cmd_gpsim.h"
 
 #include "gui.h"
+#include "preferences.h"
 #include "gui_register.h"
 #include "gui_regwin.h"
 #include "gui_watch.h"

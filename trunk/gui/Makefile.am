@@ -14,6 +14,7 @@ libgpsimgui_la_SOURCES =  gui_break.cc gui_callbacks.cc gui_dialog.cc gui_init.c
 	gui_register.h gui_regwin.h \
 	gui_scope.h gui_src.h gui_stack.h gui_statusbar.h gui_stopwatch.h \
 	gui_symbols.h gui_trace.h gui_watch.h \
+	preferences.cc preferences.h \
 	settings.h settings_exdbm.h
 
 libgpsimgui_la_LDFLAGS = @X_LDFLAGS@ @Y_LDFLAGS@
