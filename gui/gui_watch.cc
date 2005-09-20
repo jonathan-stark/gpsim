@@ -663,9 +663,9 @@ void Watch_Window::Add( REGISTER_TYPE type, GUIRegister *reg, register_symbol * 
 }
 
 //---
-// Add - given a symbol, verify that it is a register symbol. If it
-// is then extract the register and use it's address to get the 
-// GUI representation of the register.
+// Add - given a symbol, verify that it is a RAM or EEPROM register
+// symbol. If it is then extract the register and use it's address
+// to get the GUI representation of the register.
 
 void Watch_Window::Add( Value *regSym)
 {
@@ -677,7 +677,7 @@ void Watch_Window::Add( Value *regSym)
       Register *reg = rs->getReg();
       
       if(reg) {
-        GUIRegister *greg = gp->m_pGUIRegisters->Get(reg->address);
+        GUIRegister *greg = gp->m_pGUIRamRegisters->Get(reg->address);
         Add(REGISTER_RAM, greg, rs);
       }
     }

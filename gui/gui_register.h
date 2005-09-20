@@ -91,7 +91,7 @@ class GUIRegister {
 
 class GUIRegisterList {
 public:
-  GUIRegisterList(Processor * pCPU);
+  GUIRegisterList(RegisterMemoryAccess *pRMA);
   ~GUIRegisterList();
   RegisterMemoryAccess *m_pRMA;  // Apointer to the Processor's rma or ema.
   GUIRegister * m_paRegisters[MAX_REGISTERS];
