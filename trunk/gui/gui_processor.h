@@ -66,7 +66,8 @@ class GUI_Processor {
   // The pic that's associated with the gui
   Processor *cpu;
 
-  GUIRegisterList * m_pGUIRegisters;
+  GUIRegisterList * m_pGUIRamRegisters;
+  GUIRegisterList * m_pGUIEEPromRegisters;
 };
 
 

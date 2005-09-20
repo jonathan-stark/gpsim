@@ -1878,19 +1878,14 @@ void Register_Window::SetRegisterSize(void)
 
 }
 
-GUIRegisterList::GUIRegisterList(Processor * pCPU) {
-  m_pRMA = &pCPU->rma;
+GUIRegisterList::GUIRegisterList(RegisterMemoryAccess *pRMA) {
+  m_pRMA = pRMA;
   unsigned int uAddress;
-  unsigned int nRegs;
   unsigned int uRegisterSize;
 
-  if(pCPU)
-    uRegisterSize = pCPU->register_size();
-  else
-    uRegisterSize = 1;
+  uRegisterSize = (pRMA->get_size() < MAX_REGISTERS) ? (pRMA->get_size()) : MAX_REGISTERS;
 
-  nRegs = (m_pRMA->get_size() < MAX_REGISTERS) ? (m_pRMA->get_size()) : MAX_REGISTERS;
-  for(uAddress=0; uAddress < nRegs; uAddress++) {
+  for(uAddress=0; uAddress < uRegisterSize; uAddress++) {
     GUIRegister *pReg = new GUIRegister();
     pReg->rma = m_pRMA;
     pReg->address = uAddress;
@@ -1930,8 +1925,6 @@ void Register_Window::NewProcessor(GUI_Processor *_gp)
   if( !enabled)
     return;
     
-  registers = _gp->m_pGUIRegisters;
-
   if(!register_sheet){
     printf("Warning %s:%d\n",__FUNCTION__,__LINE__);
     return;
@@ -2250,7 +2243,7 @@ Register_Window::Register_Window(GUI_Processor *_gp)
 
   registers_loaded=0;
   
-  registers = _gp->m_pGUIRegisters;
+  registers = 0;
 
   for(i=0;i<MAX_REGISTERS/REGISTERS_PER_ROW;i++)
     row_to_address[i]=-1;
@@ -2281,6 +2274,7 @@ void RAM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
     return;
 
   rma = &_gp->cpu->rma;
+  registers = _gp->m_pGUIRamRegisters;
 
   Register_Window::NewProcessor(_gp);
   if(sbw)
@@ -2317,6 +2311,8 @@ void EEPROM_RegisterWindow::NewProcessor(GUI_Processor *_gp)
     return;
 
   rma = &_gp->cpu->ema;
+  registers = _gp->m_pGUIEEPromRegisters;
+
 
   Register_Window::NewProcessor(_gp);
 }

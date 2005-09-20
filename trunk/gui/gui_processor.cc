@@ -60,7 +60,8 @@ GUI_Processor::GUI_Processor(void)
 {
 
   cpu = 0;
-  m_pGUIRegisters = 0;
+  m_pGUIRamRegisters = 0;
+  m_pGUIEEPromRegisters = 0;
 
   create_dispatcher();
 
@@ -80,10 +81,14 @@ GUI_Processor::GUI_Processor(void)
 
 void GUI_Processor::SetCPU(Processor *new_cpu) {
   cpu = new_cpu;
-  if(m_pGUIRegisters) {
-    delete m_pGUIRegisters;
+  if(m_pGUIRamRegisters) {
+    delete m_pGUIRamRegisters;
   }
-  m_pGUIRegisters = new GUIRegisterList(new_cpu);
+  m_pGUIRamRegisters = new GUIRegisterList(&new_cpu->rma);
+  if(m_pGUIEEPromRegisters) {
+    delete m_pGUIEEPromRegisters;
+  }
+  m_pGUIEEPromRegisters = new GUIRegisterList(&new_cpu->ema);
 }
 
 #endif // HAVE_GUI
