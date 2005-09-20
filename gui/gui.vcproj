@@ -181,6 +181,9 @@
 				RelativePath=".\gui_watch.cc">
 			</File>
 			<File
+				RelativePath=".\preferences.cc">
+			</File>
+			<File
 				RelativePath=".\settings_exdbm.cc">
 			</File>
 			<File
@@ -247,6 +250,9 @@
 			</File>
 			<File
 				RelativePath=".\gui_watch.h">
+			</File>
+			<File
+				RelativePath=".\preferences.h">
 			</File>
 			<File
 				RelativePath=".\settings.h">
