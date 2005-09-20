@@ -1,3 +1,9 @@
+2005-09-20 J.R. Heisey <jrheisey@sourceforge.com>
+	* gui_processor.cc, gui_processor.h, gui_register.h,
+	gui_regwin.cc, gui_watch.cc: Made changes in Register_Window
+	to and other code to support EEPROM memory window in the
+	same way we now support RAM memory window.
+
 2005-09-19 Scott Dattalo <scott@dattalo.com>
 	* gui/preferences.cc, gui/preferences.h: New files to support user
 	defined gui preferences.
