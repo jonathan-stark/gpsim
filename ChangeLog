@@ -1,3 +1,7 @@
+2005-09-20 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_regwin.cc: GUIRegisterList.register_size was being set
+	improperly.
+
 2005-09-20 J.R. Heisey <jrheisey@sourceforge.com>
 	* gui_processor.cc, gui_processor.h, gui_register.h,
 	gui_regwin.cc, gui_watch.cc: Made changes in Register_Window

@@ -1889,7 +1889,7 @@ GUIRegisterList::GUIRegisterList(RegisterMemoryAccess *pRMA) {
     GUIRegister *pReg = new GUIRegister();
     pReg->rma = m_pRMA;
     pReg->address = uAddress;
-    pReg->register_size = uRegisterSize;
+    pReg->register_size = m_pRMA->get_cpu()->register_size();
     pReg->bIsAliased = (*m_pRMA)[uAddress].address != (unsigned int)uAddress;
     m_paRegisters[uAddress] = pReg;
   }
