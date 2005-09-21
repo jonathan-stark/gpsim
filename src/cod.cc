@@ -1053,22 +1053,28 @@ int PicCodProgramFileType::LoadProgramFile(Processor **pcpu,
       if(verbose)
         cout << "ascertaining cpu from the .cod file\n";
 
-      get_string(processor_name,&main_dir.dir.block[COD_DIR_PROCESSOR - 1], sizeof processor_name);
+      if(SUCCESS == get_string(processor_name,
+                               &main_dir.dir.block[COD_DIR_PROCESSOR - 1],
+                               sizeof processor_name)) {
 
-      if(verbose)
-        cout << "found a " << processor_name << " in the .cod file\n";
+        if(verbose)
+          cout << "found a " << processor_name << " in the .cod file\n";
 
-      *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
-      if(*pcpu == 0) {
-        if(!ignore_case_in_cod)
-          return(ERR_UNRECOGNIZED_PROCESSOR);
+        *pcpu = (Processor *)CSimulationContext::GetContext()->add_processor(processor_name,processor_name);
+        if(*pcpu == 0) {
+          if(!ignore_case_in_cod)
+            return(ERR_UNRECOGNIZED_PROCESSOR);
 
-        // Could be that there's a case sensitivity issue:
-        strtolower(processor_name);
-        *pcpu = (Processor *)CSimulationContext::GetContext()->
-          add_processor(processor_name,processor_name);
+          // Could be that there's a case sensitivity issue:
+          strtolower(processor_name);
+          *pcpu = (Processor *)CSimulationContext::GetContext()->
+            add_processor(processor_name,processor_name);
 
-        if(*pcpu == 0)
+          if(*pcpu == 0)
+            return(ERR_UNRECOGNIZED_PROCESSOR);
+        }
+      }
+      else {
           return(ERR_UNRECOGNIZED_PROCESSOR);
       }
     }
