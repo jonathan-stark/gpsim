@@ -1,3 +1,8 @@
+2005-09-21 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/cod.cc: Added an extra test to prevent a error message
+	from displaying when a non cod file attempted. This really
+	should validate that the file is a cod file earlier.
+
 2005-09-20 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_regwin.cc: GUIRegisterList.register_size was being set
 	improperly.
