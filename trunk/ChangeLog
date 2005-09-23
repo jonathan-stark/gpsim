@@ -2,6 +2,9 @@
 	* cli/ui_gpsim.cc: Fixed a bug were a reused string was
 	not being cleared before being appended to.
 
+	*gui/gui_symbols.cc: Added code snippet to truncate
+	multi-line symbol values.
+
 2005-09-21 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/cod.cc: Added an extra test to prevent a error message
 	from displaying when a non cod file attempted. This really
