@@ -272,6 +272,10 @@ void Symbol_Window::Update(void)
     else {
       sym->get(entry[2],cMaxLength);
     }
+    char *pLF = strchr(entry[2], '\n');
+    if(pLF != 0) {
+      *pLF = 0;
+    }
 
     symbols=g_list_append(symbols,sym);
 
