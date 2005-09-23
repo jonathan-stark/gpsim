@@ -276,7 +276,7 @@ const char * CGpsimUserInterface::FormatLabeledValue(const char * pLabel,
                                                      unsigned int uMask,
                                                      int          iRadix,
                                                      const char * pHexPrefix) {
-
+  m_sLabeledAddr.clear();
   const char *pValue = FormatValue(uValue, uMask, iRadix, pHexPrefix);
   if(pLabel != NULL && *pLabel != 0) {
     m_sLabeledAddr.append(pLabel);
