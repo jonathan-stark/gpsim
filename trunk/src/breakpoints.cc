@@ -413,7 +413,8 @@ unsigned int Breakpoints::check_cycle_break(unsigned int abp)
 bool Breakpoints::dump1(unsigned int bp_num, int dump_type)
 {
   if(!bIsValid(bp_num)) {
-    cout << "Break point number:" << bp_num <<" is out of range\n";
+    printf("Break point number: %d is out of range\n",bp_num);
+
     return false;
   }
 
@@ -799,11 +800,11 @@ bool Breakpoint_Instruction::set_break(void)
 void Breakpoint_Instruction::print(void)
 {
   // Output example
-  // 13a: p17c756  Execution at 0x0123
+  // 42: p17c756  Execution at 0x0123
   const char * pLabel = get_symbol_table().
     findProgramAddressLabel(address);
-  const char * pFormat = *pLabel == 0 ? "%x: %s %s at %s0x%x\n"
-                                      : "%x: %s %s at %s(0x%x)\n";
+  const char * pFormat = *pLabel == 0 ? "%d: %s %s at %s0x%x\n"
+                                      : "%d: %s %s at %s(0x%x)\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address);
   if(message().size())
@@ -1096,7 +1097,7 @@ bool BreakpointRegister::set_break(void)
 void BreakpointRegister::print(void)
 {
   Register * pReg = get_symbol_table().findRegister(address);
-  GetUserInterface().DisplayMessage("%x: %s  %s: %s(0x%x)\n",
+  GetUserInterface().DisplayMessage("%d: %s  %s: %s(0x%x)\n",
     bpn, cpu->name().c_str(), bpName(), pReg->name().c_str(), address);
 }
 
@@ -1234,8 +1235,8 @@ void BreakpointRegister_Value::print(void)
 //    bpn, cpu->name().c_str(), bpName(), pLabel, address,  break_value,
 //    m_sOperator.c_str(),break_mask);
   const char *pFormat = *pLabel == 0 
-    ? "%x: %s  %s: [%s0x%x] & 0x%x %s 0x%x\n"
-    : "%x: %s  %s: %s(0x%x) & 0x%x %s 0x%x\n";
+    ? "%d: %s  %s: [%s0x%x] & 0x%x %s 0x%x\n"
+    : "%d: %s  %s: %s(0x%x) & 0x%x %s 0x%x\n";
   GetUserInterface().DisplayMessage(pFormat,
     bpn, cpu->name().c_str(), bpName(), pLabel, address, break_mask,
     m_sOperator.c_str(), break_value);
