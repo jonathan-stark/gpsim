@@ -51,7 +51,7 @@ public:
   //virtual void NewModule (Module *module);
   //virtual void NodeConfigurationChanged (Stimulus_Node *node);
   //virtual void NewProgram  (unsigned int processor_id);
-  virtual void GuiUpdate  (gpointer object);
+  virtual void Update  (gpointer object);
 
 
   LCD_Interface(LcdDisplay *_gp);
