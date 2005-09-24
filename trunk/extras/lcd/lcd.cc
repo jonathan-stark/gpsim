@@ -180,7 +180,7 @@ void LCD_Interface::SimulationHasStopped (gpointer)
     ((LcdDisplay *)lcd)->update();
 }
 
-void LCD_Interface::GuiUpdate (gpointer)
+void LCD_Interface::Update (gpointer)
 {
   if(lcd)
     ((LcdDisplay *)lcd)->update();
