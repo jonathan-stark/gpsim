@@ -1,3 +1,6 @@
+2005-09-23 Scott Dattalo <scott@dattalo.com>
+	* src/breakpoints.cc: Breakpoint numbers are now printed in decimal.
+
 2005-09-23 J.R. Heisey <jrheisey@sourceforge.com>
 	* cli/ui_gpsim.cc: Fixed a bug were a reused string was
 	not being cleared before being appended to.
