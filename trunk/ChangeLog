@@ -1,3 +1,11 @@
+2005-09-26 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc: More work on preferences dialog window.
+
+2005-09-25 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/p12x.cc, src/p12x.h, src/p16x5x.cc, src/p16x5x.h,
+	src/pic-processor.h, src/pic-processor.cc:
+	Added support for the 16C56 and the 10F200.
+	
 2005-09-23 Scott Dattalo <scott@dattalo.com>
 	* src/breakpoints.cc: Breakpoint numbers are now printed in decimal.
 
