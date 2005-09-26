@@ -148,4 +148,21 @@ class P12CE519 : public P12CE518
 
 };
 
+
+
+// A 10F200 is like a 12c508
+class P10F200 : public P12C508
+{
+  public:
+
+  virtual PROCESSOR_TYPE isa(void){return _P10F200_;};
+  virtual unsigned int program_memory_size(void) const { return 0x100; };
+
+  P10F200(void);
+  static Processor *construct(void);
+  void create(void);
+  virtual void create_iopin_map(void);
+
+};
+
 #endif //  __P12X_H__

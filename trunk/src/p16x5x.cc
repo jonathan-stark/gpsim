@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 //  This file supports:
 //    P16C54
 //    P16C55
+//    P16C56
 
 
 #include <stdio.h>
@@ -295,5 +296,37 @@ void P16C55::tris_instruction(unsigned int tris_register)
         cout << __FUNCTION__ << ": Unknown TRIS register " << tris_register << endl;
         break;
    }
+}
+
+
+
+Processor * P16C56::construct()
+{
+
+  P16C56 *p = new P16C56;
+
+  p->new_name("p16c56");
+
+  if(verbose)
+    cout << " c56 construct\n";
+
+  p->pc->set_reset_address(0x3ff);
+
+  p->create();
+  p->create_invalid_registers();
+  p->create_sfr_map();
+  p->create_symbols();
+
+  symbol_table.add_module(p,p->name().c_str());
+
+  return p;
+}
+
+
+P16C56::P16C56()
+{
+  if(verbose)
+    cout << "c56 constructor, type = " << isa() << '\n';
+
 }
 
