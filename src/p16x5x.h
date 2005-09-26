@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 //  This file supports:
 //    P16C54
 //    P16C55
+//    P16C56
 
 #ifndef __P16X5X_H__
 #define __P16X5X_H__
@@ -97,6 +98,22 @@ public:
 
   static Processor *construct();
   virtual void tris_instruction(unsigned int tris_register);
+
+};
+
+class P16C56 : public  P16C54
+{
+public:
+
+  virtual PROCESSOR_TYPE isa(){return _P16C56_;};
+
+  virtual unsigned int program_memory_size() const { return 0x400; };
+  virtual unsigned int register_memory_size() const { return 0x20; };
+  virtual unsigned int config_word_address() const {return 0xFFF;};
+
+  P16C56();
+
+  static Processor *construct();
 
 };
 

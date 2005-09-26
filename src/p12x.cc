@@ -483,3 +483,99 @@ so the processor is waking up\n";
 
   }
 }
+
+
+
+//--------------------------------------------------------
+//------------------------------------------------------------------------
+
+
+void P10F200::create_iopin_map(void)
+{
+
+  package = new Package(6);
+  if(!package)
+    return;
+
+  package->assign_pin(1, m_gpio->addPin(new IO_bi_directional_pu("gpio0"),0));
+  package->assign_pin(3, m_gpio->addPin(new IO_bi_directional_pu("gpio1"),1));
+  package->assign_pin(4, m_gpio->addPin(new IO_bi_directional("gpio2"),2));
+  package->assign_pin(6, m_gpio->addPin(new IOPIN("gpio3"),3));
+  package->assign_pin(2, 0);
+  package->assign_pin(5, 0);
+
+
+}
+
+/*
+void P10F200::create_sfr_map(void)
+{
+
+  RegisterValue porVal(0,0);
+
+  add_sfr_register(indf,   0, porVal);
+  add_sfr_register(&tmr0,  1, porVal);
+  add_sfr_register(pcl,    2, porVal);
+  add_sfr_register(status, 3, porVal);
+  add_sfr_register(fsr,    4, porVal);
+  add_sfr_register(&osccal,5, porVal);
+  add_sfr_register(m_gpio, 6, porVal);
+  add_sfr_register(m_tris, 0xffffffff, RegisterValue(0x0f,0));
+  add_sfr_register(W, 0xffffffff, porVal);
+  add_sfr_register(&option_reg, 0xffffffff, RegisterValue(0xff,0));
+  osccal.new_name("osccal");
+
+
+}
+*/
+
+  
+void P10F200::create(void)
+{
+
+  create_iopin_map();
+
+  _12bit_processor::create();
+
+  add_file_registers(0x10, 0x1f, 0);    // 10F200 only has 16 bytes RAM
+  P12C508::create_sfr_map();
+  create_invalid_registers ();
+
+  tmr0.start(0);
+
+  pc->reset();
+}
+
+
+Processor * P10F200::construct(void)
+{
+
+  P10F200 *p = new P10F200;
+
+  p->pc->set_reset_address(0x0ff);
+
+  p->create();
+  p->create_symbols();
+
+  p->name_str = "p10f200";
+  symbol_table.add_module(p,p->name_str.c_str());
+
+  return p;
+
+}
+
+
+P10F200::P10F200(void)
+{
+  if(verbose)
+    cout << "10f200 constructor, type = " << isa() << '\n';
+
+  m_gpio = new GPIO("gpio",8,0x0f);
+  m_tris = new PicTrisRegister("tris",m_gpio);
+  m_tris->wdtr_value=RegisterValue(0x3f,0);
+
+  if(config_modes)
+    config_modes->valid_bits = config_modes->CM_WDTE | config_modes->CM_MCLRE;
+}
+
+

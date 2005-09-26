@@ -73,6 +73,8 @@ int     verbose=0;
 //
 //
 
+ProcessorConstructor pP10F200(P10F200::construct ,
+			      "__10F200", "pic10f200",  "p10f200", "10f200");
 ProcessorConstructor pP12C508(P12C508::construct ,
 			      "__12C508", "pic12c508",  "p12c508", "12c508");
 ProcessorConstructor pP12C509(P12C509::construct ,
@@ -95,6 +97,8 @@ ProcessorConstructor pP16C54(P16C54::construct ,
 			     "__16C54",   "pic16c54",   "p16c54", "16c54");
 ProcessorConstructor pP16C55(P16C55::construct ,
 			     "__16C55",   "pic16c55",   "p16c55", "16c55");
+ProcessorConstructor pP16C56(P16C56::construct ,
+			     "__16C56",   "pic16c56",   "p16c56", "16c56");
 ProcessorConstructor pP16C61(P16C61::construct ,
 			     "__16C61",   "pic16c61",   "p16c61", "16c61");
 ProcessorConstructor pP16C71(P16C71::construct ,
