@@ -134,40 +134,97 @@ static void Preferences_cb (gpointer             callback_data,
 
 
 //========================================================================
+
+// class ColorSelection 
+//
+// A class to keep track of the state of configurable colors.
+//
+class ColorSelection
+{
+public:
+  ColorSelection(GdkColor *pC)
+    : m_current(pC), m_preferred(pC) 
+  {}
+  bool hasChanged()    { return gdk_color_equal(m_current,m_preferred) != TRUE;}
+  GdkColor *getPreferred() { return m_preferred;}
+  void setPreferred(GdkColor *cP_preferred) { m_preferred = cP_preferred;}
+private:
+  GdkColor *m_current;
+  GdkColor *m_preferred;
+};
+
+
+// class ColorButton
+//
+// Creates a GtkColorButton and places it into a parent widget.
+// When the color button is clicked and changed, the signal will
+// call back into this class and keep track of the selected 
+// color state.
+
+class ColorButton : public ColorSelection
+{
+public:
+  ColorButton (GtkWidget *pParent, GdkColor *pC, const char *label);
+  static void select_cb(GtkWidget    *widget,
+			ColorButton   *This);
+private:
+
+};
+class SourceBrowserPreferences
+{
+public:
+  SourceBrowserPreferences(GtkWidget *pParent);
+private:
+  ColorButton *m_LabelColor;
+  ColorButton *m_MnemonicColor;
+  ColorButton *m_SymbolColor;
+  ColorButton *m_CommentColor;
+  ColorButton *m_ConstantColor;
+
+};
+
+//========================================================================
 struct sTest
 {
   const char *cName;
   int id;
 };
 
-static void setColor_cb (GtkWidget           *widget,
-			 gpointer             callback_data)
+static void setColor_cb (GtkWidget    *widget,
+			 ColorButton  *callback_data)
 {
-  sTest *s = (sTest *) callback_data;
-  if (s)
-    printf("setColor_cb %s %d\n", s->cName, s->id);
+  printf("set color callback\n");
 }
 
+static void setFont_cb (GtkWidget     *pFontButton,
+			gpointer      callback_data)
+{
 
-static void preferences_AddColor(GtkWidget *pParent, GdkColor *color, 
-				 const char *colorName)
+  sTest *s = (sTest *) callback_data;
+  if (s)
+    printf("setFont_cb %s %d\n", s->cName, s->id);
+
+  printf("Font %s\n", gtk_font_button_get_font_name (GTK_FONT_BUTTON(pFontButton)));
+}
+
+//------------------------------------------------------------------------
+// ColorButton Constructor
+ColorButton::ColorButton(GtkWidget *pParent, GdkColor *pColor, 
+			 const char *colorName)
+  : ColorSelection(pColor)
 {
   GtkWidget *hbox        = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
 
-  GtkWidget *colorButton = gtk_color_button_new_with_color (color);
+  GtkWidget *colorButton = gtk_color_button_new_with_color (pColor);
   gtk_color_button_set_title (GTK_COLOR_BUTTON(colorButton), colorName);
   gtk_box_pack_start (GTK_BOX(hbox),colorButton,FALSE, FALSE, 0);
   gtk_widget_show(colorButton);
 
-  sTest *s = new sTest();
-  s->cName = colorName;
-  s->id = 42;
-
   gtk_signal_connect (GTK_OBJECT(colorButton), 
 		      "color-set", 
 		      GTK_SIGNAL_FUNC(setColor_cb),
-		      s);
+		      this);
 
   const int cBORDER = 10; // pixels
   GtkWidget *label       = gtk_label_new(colorName);
@@ -178,7 +235,202 @@ static void preferences_AddColor(GtkWidget *pParent, GdkColor *color,
 
 
 }
+//------------------------------------------------------------------------
+void ColorButton::select_cb(GtkWidget    *widget,
+			    ColorButton  *This)
+{
+  printf("select_cb\n");
+}
 
+//------------------------------------------------------------------------
+
+static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescription,
+				      const char *fontName  )
+{
+  GtkWidget *frame = gtk_frame_new ("Font");
+
+  gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
+  GtkWidget *hbox        = gtk_hbox_new(0,0);
+  //gtk_box_pack_start (GTK_BOX (pParent), hbox, FALSE, TRUE, 0);
+  gtk_container_add (GTK_CONTAINER (frame), hbox);
+
+  //GtkWidget *fontButton = gtk_font_button_new_with_font (fontName);
+  GtkWidget *fontButton = gtk_font_button_new ();
+  gtk_font_button_set_title (GTK_FONT_BUTTON(fontButton), fontDescription);
+  gtk_box_pack_start (GTK_BOX(hbox),fontButton,FALSE, FALSE, 0);
+  gtk_widget_show(fontButton);
+
+  sTest *s = new sTest();
+  s->cName = fontDescription;
+  s->id = 42;
+
+  gtk_signal_connect (GTK_OBJECT(fontButton), 
+		      "font-set", 
+		      GTK_SIGNAL_FUNC(setFont_cb),
+		      s);
+
+  const int cBORDER = 10; // pixels
+  GtkWidget *label       = gtk_label_new(fontName);
+  gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
+  gtk_widget_show (label);
+
+  gtk_widget_show (hbox);
+}
+
+class TextTag {
+public:
+  TextTag(GtkTextTag *,GtkTextBuffer *, int start_index, int end_index);
+  void Apply();
+private:
+  GtkTextTag    *m_tag;
+  GtkTextBuffer *m_buffer;
+  GtkTextIter    m_start;
+  GtkTextIter    m_end;
+
+};
+
+TextTag::TextTag(GtkTextTag *pTag,GtkTextBuffer *pBuffer, int start_index, int end_index)
+  : m_tag(pTag), m_buffer(pBuffer)
+{
+  gtk_text_buffer_get_iter_at_offset (m_buffer, &m_start, start_index);
+  gtk_text_buffer_get_iter_at_offset (m_buffer, &m_end, end_index);
+}
+
+void TextTag::Apply()
+{
+  gtk_text_buffer_apply_tag (m_buffer, m_tag, &m_start, &m_end);
+}
+
+//========================================================================
+SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
+{
+
+  GtkWidget *hbox2 = gtk_hbox_new(0,0);
+  gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
+
+  GtkWidget *vbox3 = gtk_vbox_new(0,0);
+  gtk_box_pack_start (GTK_BOX (hbox2), vbox3, FALSE, TRUE, 0);
+
+  {
+    // Color Frame for Source Browser configuration
+    GtkWidget *colorFrame = gtk_frame_new ("Colors");
+    gtk_box_pack_start (GTK_BOX (hbox2), colorFrame, FALSE, TRUE, 0);
+
+    GtkWidget *colorVbox = gtk_vbox_new(0,0);
+    gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
+
+    m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), gColors.sfr_bg(), "Label");
+    m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), gColors.sfr_bg(), "Mnemonic");
+    m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), gColors.sfr_bg(), "Symbols");
+    m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox), gColors.sfr_bg(), "Constants");
+    m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox), gColors.sfr_bg(), "Comments");
+  }
+
+  {
+    // Tab Frame for the Source browser
+    GtkWidget *tabFrame = gtk_frame_new ("Tabs");
+    gtk_box_pack_start (GTK_BOX (vbox3), tabFrame, FALSE, TRUE, 0);
+
+    GtkWidget *radioUp    = gtk_radio_button_new_with_label (NULL,"up");
+    GtkRadioButton *rb    = GTK_RADIO_BUTTON(radioUp);
+    GtkWidget *radioLeft  = gtk_radio_button_new_with_label_from_widget (rb,"left");
+    GtkWidget *radioDown  = gtk_radio_button_new_with_label_from_widget (rb,"down");
+    GtkWidget *radioRight = gtk_radio_button_new_with_label_from_widget (rb,"right");
+    GtkWidget *radioNone  = gtk_radio_button_new_with_label_from_widget (rb,"none");
+
+    GtkWidget *tabVbox = gtk_vbox_new(0,0);
+    gtk_container_add (GTK_CONTAINER (tabFrame), tabVbox);
+    
+    gtk_box_pack_start (GTK_BOX (tabVbox), radioUp,   FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (tabVbox), radioLeft, FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (tabVbox), radioDown, FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (tabVbox), radioRight,FALSE, TRUE, 0);
+    gtk_box_pack_start (GTK_BOX (tabVbox), radioNone, FALSE, TRUE, 0);
+
+  }
+
+  preferences_AddFontSelect(GTK_WIDGET(vbox3), "Mnemonic", "font");
+
+  {
+
+    GtkWidget *view;
+    GtkTextBuffer *buffer;
+    GtkTextIter start, end;
+    PangoFontDescription *font_desc;
+    GdkColor color;
+    GtkTextTag *tag;
+
+    view = gtk_text_view_new ();
+
+    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
+
+    gtk_text_buffer_set_text (buffer, 
+			      /*1234567890123456789012345678901234567890*/
+			      "Label: MOVF    Temp1,W ;Comment\n"
+			      "       MOVLW   0x42    ;Comment", -1);
+    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(view), GTK_WRAP_NONE);
+
+    /* Change default font throughout the widget */
+    font_desc = pango_font_description_from_string ("Courier 12");
+    gtk_widget_modify_font (view, font_desc);
+    pango_font_description_free (font_desc);
+
+
+    // Label field
+    tag = gtk_text_buffer_create_tag (buffer, "label_foreground",
+				      "foreground", "orange", NULL);
+    TextTag *LabelTag = new TextTag(tag, buffer,  0, 6);
+
+    // Mnemonic field
+    tag = gtk_text_buffer_create_tag (buffer, "mnemonic_foreground",
+				      "foreground", "red", NULL);
+    TextTag *MnemonicTag1 = new TextTag(tag, buffer,  7, 11);
+    TextTag *MnemonicTag2 = new TextTag(tag, buffer, 39, 44);
+
+    // Comment field
+    tag = gtk_text_buffer_create_tag (buffer, "comment_foreground",
+				      "foreground", "dim gray", NULL);
+    TextTag *CommentTag1 = new TextTag(tag, buffer, 22, 30);
+    TextTag *CommentTag2 = new TextTag(tag, buffer, 55, 63);
+
+    // Variable field
+    tag = gtk_text_buffer_create_tag (buffer, "symbol_foreground",
+				      "foreground", "dark green", NULL);
+    TextTag *SymbolTag = new TextTag(tag, buffer, 15, 22);
+
+    // Constants field
+    tag = gtk_text_buffer_create_tag (buffer, "constant_foreground",
+				      "foreground", "blue", NULL);
+    TextTag *ConstantTag = new TextTag(tag, buffer, 47, 51);
+
+    MnemonicTag1->Apply();
+    MnemonicTag2->Apply();
+    LabelTag->Apply();
+    SymbolTag->Apply();
+    ConstantTag->Apply();
+    CommentTag1->Apply();
+    CommentTag2->Apply();
+    delete MnemonicTag1;
+    delete MnemonicTag2;
+    delete LabelTag;
+    delete SymbolTag;
+    delete ConstantTag;
+    delete CommentTag1;
+    delete CommentTag2;
+
+
+    GtkWidget *frame = gtk_frame_new ("Sample");
+    gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
+    
+    gtk_container_add (GTK_CONTAINER (frame), view);
+  }
+
+
+  gtk_widget_show_all(hbox2);
+  gtk_widget_show_all(vbox3);
+
+}
+//========================================================================
 void SetupPreferences()
 {
   GtkWidget *button;
@@ -196,30 +448,39 @@ void SetupPreferences()
   gtk_widget_show(notebook);
 
   GtkWidget *label;
-  GtkWidget *hbox;
+  GtkWidget *vbox2;
 
+  /*
   // Color Preferences
-  hbox = gtk_hbox_new(0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
-  label=gtk_label_new("colors");
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
+  {
+    vbox2 = gtk_vbox_new(0,0);
+    gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
+    label=gtk_label_new("colors");
+    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
 
-  preferences_AddColor(GTK_WIDGET(hbox), gColors.breakpoint(), "Breakpoints");
+    preferences_AddColor(GTK_WIDGET(vbox2), gColors.breakpoint(), "Breakpoints");
+    preferences_AddColor(GTK_WIDGET(vbox2), gColors.sfr_bg(), "SFR Background");
 
-  gtk_widget_show(hbox);
+    gtk_widget_show(vbox2);
+  }
+  */
+
+  // source browser preferences...
+  
+  vbox2 = gtk_vbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
+  label = gtk_label_new("Source Browser");
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
+
+  SourceBrowserPreferences *pSBP = new SourceBrowserPreferences(vbox2);
+  gtk_widget_show_all(vbox2);
 
 
-  hbox = gtk_hbox_new(0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
-  label=gtk_label_new("Source Browser");
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
-  gtk_widget_show(hbox);
-
-  hbox = gtk_hbox_new(0,0);
-  gtk_container_set_border_width (GTK_CONTAINER (hbox), 3);
+  vbox2 = gtk_vbox_new(0,0);
+  gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
   label=gtk_label_new("RAM");
-  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),hbox,label);
-  gtk_widget_show(hbox);
+  gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
+  gtk_widget_show(vbox2);
 
   // Close button
   button = gtk_button_new_with_label ("close");
