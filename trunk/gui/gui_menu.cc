@@ -124,14 +124,6 @@ about_cb (gpointer             callback_data,
 
 }
 
-void SetupPreferences();
-static void Preferences_cb (gpointer             callback_data,
-			    guint                callback_action,
-			    GtkWidget           *widget)
-{
-  SetupPreferences();
-}
-
 
 //========================================================================
 
@@ -143,11 +135,19 @@ class ColorSelection
 {
 public:
   ColorSelection(GdkColor *pC)
-    : m_current(pC), m_preferred(pC) 
-  {}
+    : m_current(pC)
+  {
+    m_preferred=0;
+    setPreferred(pC);
+  }
   bool hasChanged()    { return gdk_color_equal(m_current,m_preferred) != TRUE;}
   GdkColor *getPreferred() { return m_preferred;}
-  void setPreferred(GdkColor *cP_preferred) { m_preferred = cP_preferred;}
+  void setPreferred(GdkColor *cP_preferred) 
+  { 
+    if (m_preferred)
+      gdk_color_free(m_preferred);
+    m_preferred = gdk_color_copy(cP_preferred);
+  }
 private:
   GdkColor *m_current;
   GdkColor *m_preferred;
@@ -165,8 +165,9 @@ class ColorButton : public ColorSelection
 {
 public:
   ColorButton (GtkWidget *pParent, GdkColor *pC, const char *label);
-  static void select_cb(GtkWidget    *widget,
-			ColorButton   *This);
+  static void setColor_cb(GtkColorButton *widget,
+			  ColorButton    *This);
+
 private:
 
 };
@@ -174,6 +175,9 @@ class SourceBrowserPreferences
 {
 public:
   SourceBrowserPreferences(GtkWidget *pParent);
+
+  void apply();
+
 private:
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
@@ -181,7 +185,57 @@ private:
   ColorButton *m_CommentColor;
   ColorButton *m_ConstantColor;
 
+  GtkWidget *m_SampleNotebook;
+
+  GtkPositionType m_TabPosition;
 };
+
+//------------------------------------------------------------------------
+class gpsimGuiPreferences
+{
+public:
+  gpsimGuiPreferences();
+  ~gpsimGuiPreferences();
+
+  void apply();
+
+  static void setup (gpointer             callback_data,
+		     guint                callback_action,
+		     GtkWidget           *widget);
+
+
+private:
+  SourceBrowserPreferences *m_SourceBrowser;
+
+  static gint cancel_cb (gpsimGuiPreferences *Self);
+
+  static gint apply_cb  (gpsimGuiPreferences *Self);
+
+  GtkWidget *window;
+};
+
+
+void gpsimGuiPreferences::setup (gpointer             callback_data,
+				 guint                callback_action,
+				 GtkWidget           *widget)
+{
+  new gpsimGuiPreferences();
+}
+
+
+gint gpsimGuiPreferences::cancel_cb (gpsimGuiPreferences  *Self)
+{
+  printf (" cancel preferences %p \n",Self);
+  delete Self;
+  return TRUE;
+}
+gint gpsimGuiPreferences::apply_cb  (gpsimGuiPreferences *Self)
+{
+  printf (" apply preferences\n");
+  Self->apply();
+  delete Self;
+  return TRUE;
+}
 
 //========================================================================
 struct sTest
@@ -189,12 +243,6 @@ struct sTest
   const char *cName;
   int id;
 };
-
-static void setColor_cb (GtkWidget    *widget,
-			 ColorButton  *callback_data)
-{
-  printf("set color callback\n");
-}
 
 static void setFont_cb (GtkWidget     *pFontButton,
 			gpointer      callback_data)
@@ -225,7 +273,7 @@ ColorButton::ColorButton(GtkWidget *pParent, GdkColor *pColor,
 		      "color-set", 
 		      GTK_SIGNAL_FUNC(setColor_cb),
 		      this);
-
+  printf("create color button %s %p %p\n",colorName,colorButton,this);
   const int cBORDER = 10; // pixels
   GtkWidget *label       = gtk_label_new(colorName);
   gtk_box_pack_start (GTK_BOX(hbox),label,TRUE, TRUE, cBORDER);
@@ -236,10 +284,13 @@ ColorButton::ColorButton(GtkWidget *pParent, GdkColor *pColor,
 
 }
 //------------------------------------------------------------------------
-void ColorButton::select_cb(GtkWidget    *widget,
-			    ColorButton  *This)
+void ColorButton::setColor_cb(GtkColorButton *widget,
+			      ColorButton    *This)
 {
-  printf("select_cb\n");
+  printf("setColor_cb  %p %p\n",widget,This);
+  GdkColor newColor;
+  gtk_color_button_get_color (widget, &newColor);
+  This->setPreferred(&newColor);
 }
 
 //------------------------------------------------------------------------
@@ -328,6 +379,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   {
     // Tab Frame for the Source browser
+    m_TabPosition = GTK_POS_TOP;
     GtkWidget *tabFrame = gtk_frame_new ("Tabs");
     gtk_box_pack_start (GTK_BOX (vbox3), tabFrame, FALSE, TRUE, 0);
 
@@ -386,6 +438,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 				      "foreground", "red", NULL);
     TextTag *MnemonicTag1 = new TextTag(tag, buffer,  7, 11);
     TextTag *MnemonicTag2 = new TextTag(tag, buffer, 39, 44);
+    g_object_set(tag, "foreground" , "112233", NULL);
 
     // Comment field
     tag = gtk_text_buffer_create_tag (buffer, "comment_foreground",
@@ -422,7 +475,19 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkWidget *frame = gtk_frame_new ("Sample");
     gtk_box_pack_start (GTK_BOX (pParent), frame, FALSE, TRUE, 0);
     
-    gtk_container_add (GTK_CONTAINER (frame), view);
+    m_SampleNotebook = gtk_notebook_new();
+    gtk_notebook_set_tab_pos((GtkNotebook*)m_SampleNotebook,m_TabPosition);
+
+    gtk_container_add (GTK_CONTAINER (frame), m_SampleNotebook);
+
+    GtkWidget *label = gtk_label_new("file1.asm");
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),view,label);
+
+    label = gtk_label_new("file2.asm");
+    GtkWidget *emptyBox = gtk_hbox_new(0,0);
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
+
+
   }
 
 
@@ -430,12 +495,17 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
   gtk_widget_show_all(vbox3);
 
 }
+
+void SourceBrowserPreferences::apply()
+{
+  printf ("apply source browser preferences\n");
+}
 //========================================================================
-void SetupPreferences()
+gpsimGuiPreferences::gpsimGuiPreferences()
 {
   GtkWidget *button;
 
-  GtkWidget *window = gtk_dialog_new ();
+  window = gtk_dialog_new ();
 
   gtk_window_set_title (GTK_WINDOW (window), "Preferences");
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -472,7 +542,7 @@ void SetupPreferences()
   label = gtk_label_new("Source Browser");
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
 
-  SourceBrowserPreferences *pSBP = new SourceBrowserPreferences(vbox2);
+  m_SourceBrowser = new SourceBrowserPreferences(vbox2);
   gtk_widget_show_all(vbox2);
 
 
@@ -482,24 +552,52 @@ void SetupPreferences()
   gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
   gtk_widget_show(vbox2);
 
-  // Close button
-  button = gtk_button_new_with_label ("close");
+  // Cancel and Apply buttons
+
+  GtkWidget *buttonBox = gtk_hbutton_box_new();
+  gtk_box_pack_start (GTK_BOX (vbox), buttonBox, TRUE, TRUE, 0);
+
+  button = gtk_button_new_with_label ("Cancel");
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
   gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
-			     GTK_SIGNAL_FUNC(gtk_widget_destroy),
-			     GTK_OBJECT (window));
+			     GTK_SIGNAL_FUNC(gpsimGuiPreferences::cancel_cb),
+			     this);
   GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
-  //gtk_box_pack_start (GTK_BOX (GTK_DIALOG (window)->action_area), button, TRUE, TRUE, 0);
-  gtk_box_pack_start (GTK_BOX (vbox), button, TRUE, TRUE, 0);
+
+  gtk_box_pack_start (GTK_BOX (buttonBox), button, TRUE, TRUE, 0);
   gtk_widget_grab_default(button);
-  gtk_widget_show(button);
+
+  button = gtk_button_new_with_label ("Apply");
+  gtk_container_set_border_width (GTK_CONTAINER (button), 10);
+  gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
+			     GTK_SIGNAL_FUNC(gpsimGuiPreferences::apply_cb),
+			     this);
+
+  GTK_WIDGET_SET_FLAGS (button, GTK_CAN_DEFAULT);
+  gtk_box_pack_start (GTK_BOX (buttonBox), button, TRUE, TRUE, 0);
+  gtk_widget_show_all(buttonBox);
+
 
   gtk_widget_show (window);
-
   gtk_grab_add (window);
 
+  printf("Created preferences %p %p %s\n",this, window, gtk_widget_get_name(window));
 }
 
+gpsimGuiPreferences::~gpsimGuiPreferences()
+{
+
+  printf("Destroying preferences %p %p\n",this, window);
+
+  gtk_widget_destroy (window);
+
+  //delete m_SourceBrowser;
+}
+
+void gpsimGuiPreferences::apply()
+{
+  printf ("apply gui preferences\n");
+}
 
 //========================================================================
 void
@@ -1075,7 +1173,7 @@ static GtkItemFactoryEntry menu_items[] =
   { "/Windows/Sco_pe",          0, TOGGLE_WINDOW,WT_scope_window,"<ToggleItem>" },
 
   { "/_Edit",     0, 0,       0, "<Branch>" },
-  { "/Edit/Preferences",        0, (GtkItemFactoryCallback)Preferences_cb, 0 },
+  { "/Edit/Preferences",        0, (GtkItemFactoryCallback)gpsimGuiPreferences::setup, 0 },
 
   { "/_Help",            0,         0,                     0, "<LastBranch>" },
   { "/Help/_About",      0,         (GtkItemFactoryCallback)about_cb,       0 },
