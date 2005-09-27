@@ -1,4 +1,7 @@
 2005-09-26 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc: Even More work on preferences dialog window.
+
+2005-09-26 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: More work on preferences dialog window.
 
 2005-09-25 Robert Pearce <rob@bdt-home.demon.co.uk>
