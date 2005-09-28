@@ -930,9 +930,11 @@ void T0CON::put(unsigned int new_value)
   if( (value.get() ^ old_value) & (T08BIT | TMR0ON)) {
     cpu16->option_new_bits_6_7(value.get() & (BIT6 | BIT7));
 
-    if(value.get() & TMR0ON)
-      cpu16->tmr0l.start(cpu16->tmr0l.value.get() & 0xff);
-    else
+    if(value.get() & TMR0ON) {
+      unsigned int initialTmr0value = (cpu16->tmr0l.value.get() & 0xff) |
+	( ((value.get() & T08BIT)==0) ? ((cpu16->tmr0l.value.get() & 0xff)<<8) : 0);
+      cpu16->tmr0l.start(initialTmr0value);
+    } else
       cpu16->tmr0l.stop();
 
   } 
@@ -959,9 +961,7 @@ void T0CON::put(unsigned int new_value)
 void TMR0H::put(unsigned int new_value)
 {
   trace.raw(write_trace.get() | value.get());
-  //trace.register_write(address,value.get());
   value.put(new_value & 0xff);
-
 }
 
 //--------------------------------------------------
@@ -986,7 +986,7 @@ unsigned int TMR0H::get_value(void)
 // TMR0_16 member functions
 //
 TMR0_16::TMR0_16()
-  : t0con(0), intcon(0), tmr0h(0)
+  : t0con(0), intcon(0), tmr0h(0), value16(0)
 {
 }
 //--------------------------------------------------
@@ -1032,6 +1032,22 @@ unsigned int TMR0_16::max_counts(void)
     return 0x10000;
 
 }
+void TMR0_16::start(int restart_value, int sync)
+{
+  TMR0::start(restart_value, sync);
+}
+
+void TMR0_16::put_value(unsigned int new_value)
+{
+  value.put(new_value & 0xff);
+
+  if(t0con->value.get() & T0CON::T08BIT)
+    TMR0::put_value(new_value);
+  else
+    start((new_value & 0xff) | (tmr0h ? (tmr0h->get_value()<<8)  : 0));
+}
+
+
 // %%%FIX ME%%% 
 void TMR0_16::increment(void)
 {
@@ -1080,23 +1096,30 @@ void TMR0_16::increment(void)
 
 unsigned int TMR0_16::get_value(void)
 {
-  //cout << "tmr0_16 get_value\n";
-  // If the _TMR0 is being read immediately after being written, then
-  // it hasn't had enough time to synchronize with the PIC's clock.
-  if(get_cycles().value <= synchronized_cycle)
-    return value.get();
+  // If TMR0L:H is configured as an 8-bit timer, then treat as an 8-bit timer
+  if(t0con->value.get() & T0CON::T08BIT)
+    return(TMR0::get_value());
 
-  if(get_t0cs() ||  ((t0con->value.get() & T0CON::TMR0ON) == 0))
-    return(value.get());
+  value16 = (int) ((get_cycles().value - last_cycle)/ prescale);
 
-  int new_value = (int) ((get_cycles().value - last_cycle)/ prescale);
-
-  value.put(new_value & 0xff);
-
-  tmr0h->put_value((new_value >> 8)&0xff);
-
+  value.put(value16 & 0xff);
   return(value.get());
   
+}
+
+unsigned int TMR0_16::get()
+{
+
+  trace.raw(read_trace.get() | value.get());
+
+  get_value();
+
+  if(t0con->value.get() & T0CON::T08BIT)
+    return value.get();
+
+  // reading the low byte of tmr0 latches in the high byte.
+  tmr0h->put_value((value16 >> 8)&0xff);
+  return value.get();
 }
 
 void TMR0_16::callback(void)

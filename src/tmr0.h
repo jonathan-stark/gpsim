@@ -45,7 +45,8 @@ public:
   TMR0(void);
 
   virtual void put(unsigned int new_value);
-  unsigned int get(void);
+  virtual void put_value(unsigned int new_value);
+  virtual unsigned int get(void);
   virtual unsigned int get_value(void);
   virtual void start(int new_value,int sync=0);
   virtual void stop(void);

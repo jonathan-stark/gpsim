@@ -1,3 +1,10 @@
+2005-09-28 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-registers.cc, src/16bit-registers.h, src/tmr0.cc,
+	src/tmr0.h: The high byte of TMR0 for the 18F family was not
+	updating correctly in certain circumstances (like during single
+	stepping). Thanks to Robert Merkel <robert.merkel@benambra.org>
+	for reporting this issue.
+
 2005-09-27 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: Even More work on preferences dialog window.
 
