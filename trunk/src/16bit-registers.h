@@ -440,17 +440,21 @@ public:
   T0CON  *t0con;
   INTCON *intcon;
   TMR0H  *tmr0h;
+  unsigned int value16;
 
   virtual void callback(void);
   virtual void callback_print(void);
 
   virtual void increment(void);
+  virtual unsigned int get(void);
   virtual unsigned int get_value(void);
+  virtual void put_value(unsigned int new_value);
   virtual unsigned int get_prescale(void);
   virtual unsigned int max_counts(void);
   virtual void set_t0if(void);
   virtual bool get_t0cs(void);
   virtual void initialize(void);
+  virtual void start(int new_value,int sync=0);
 };
 
 

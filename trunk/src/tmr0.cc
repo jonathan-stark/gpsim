@@ -81,7 +81,7 @@ void TMR0::start(int restart_value, int sync)
 
   state |= 1;          // the timer is on
 
-  value.put(restart_value);
+  value.put(restart_value&0xff);
   if(verbose)
     cout << "TMRO::start\n";
 
@@ -98,7 +98,7 @@ void TMR0::start(int restart_value, int sync)
 
     synchronized_cycle = get_cycles().value + sync;
   
-    last_cycle = value.get() * prescale;
+    last_cycle = (restart_value % max_counts()) * prescale;
     last_cycle = synchronized_cycle - last_cycle;
 
     guint64 fc = last_cycle + max_counts() * prescale;
@@ -160,20 +160,20 @@ void TMR0::increment(void)
   //  cout << "TMR0 value ="<<value.get() << '\n';
 }
 
-void TMR0::put(unsigned int new_value)
-{
-  if(get_t0cs())
-    {
-      cout << "TMR0::put external clock...\n";
-    }
 
-  trace.raw(write_trace.get() | value.get());
+void TMR0::put_value(unsigned int new_value)
+{
+  value.put(new_value & 0xff);
 
   // If tmr0 is enabled, then start it up.
-
   if(state & 1)
     start(new_value,2);
+}
 
+void TMR0::put(unsigned int new_value)
+{
+  trace.raw(write_trace.get() | value.get());
+  put_value(new_value);
 }
 
 unsigned int TMR0::get_value(void)
