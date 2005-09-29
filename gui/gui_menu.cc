@@ -335,6 +335,36 @@ GtkTextTag *ColorButton::getTag(GtkTextBuffer *pBuffer)
 
 }
 */
+bool isButtonEvent (GdkEventType type)
+{
+  return 
+    type == GDK_BUTTON_PRESS ||
+    type == GDK_2BUTTON_PRESS ||
+    type == GDK_3BUTTON_PRESS ||
+    type == GDK_BUTTON_RELEASE;
+
+}
+gboolean    TagEvent  (GtkTextTag *texttag,
+		       GObject *arg1,
+		       GdkEvent *event,
+		       GtkTextIter *arg2,
+		       gpointer user_data)
+{
+  printf("Received tag event signal Tag:%p arg1:%p Event:%p iter:%p user:%p %08X Line:%d\n",
+	 texttag, arg1,event,arg2, user_data, event->type, gtk_text_iter_get_line(arg2));
+
+  if (isButtonEvent(event->type)) {
+    GdkEventButton *evtButton = (GdkEventButton *) event;
+
+    printf("Button Event: button:%d  modifier:%d coords(%g,%g)\n",
+	   evtButton->button, evtButton->state, evtButton->x,evtButton->y);
+    // If the right mouse button is pressed then suppress the GTK pop up menu.
+    if (evtButton->button == 3)
+      return TRUE;
+  }
+  return FALSE;
+}
+
 class TagRange {
 public:
   TagRange(GtkTextBuffer *pBuffer, GtkTextTag *pTag, int start_index, int end_index)
@@ -343,6 +373,10 @@ public:
     gtk_text_buffer_get_iter_at_offset (pBuffer, &m_start, start_index);
     gtk_text_buffer_get_iter_at_offset (pBuffer, &m_end, end_index);
 
+    g_signal_connect (G_OBJECT (pTag), "event",
+		      GTK_SIGNAL_FUNC(TagEvent),
+		      this);
+    printf("Added TagRange event for %p\n",this);
   }
   void apply();
 private:
@@ -369,6 +403,8 @@ void ColorButton::addTagRange(int start_index, int end_index)
 void ColorButton::apply()
 {
   RangeList::iterator ri;
+  char array[20];
+  g_object_set(m_tag, "foreground" , getPreferred(array), NULL);
   for (ri = rangeList.begin(); ri != rangeList.end(); ++ri) 
     (*ri)->apply();
 }
@@ -435,6 +471,12 @@ void TextTag::Apply()
 SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 {
 
+  if (!gp && !gp->source_browser)
+    return;
+  SourceBrowserAsm_Window *sbaw = gp->source_browser->getChild(0);
+  if (!sbaw)
+    return;
+
   GtkWidget *hbox2 = gtk_hbox_new(0,0);
   gtk_box_pack_start (GTK_BOX (pParent), hbox2, FALSE, TRUE, 0);
 
@@ -452,7 +494,8 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
 				      gColors.sfr_bg(), "Label", this);
     m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
-				      gColors.sfr_bg(), "Mnemonic", this);
+				      &sbaw->instruction_text_style->fg[GTK_STATE_NORMAL],
+				      "Mnemonic", this);
     m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
 				      gColors.sfr_bg(), "Symbols", this);
     m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
@@ -506,6 +549,7 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 			      "Label: MOVF    Temp1,W ;Comment\n"
 			      "       MOVLW   0x42    ;Comment", -1);
     gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(view), GTK_WRAP_NONE);
+    gtk_text_view_set_editable  (GTK_TEXT_VIEW(view), FALSE);
 
     /* Change default font throughout the widget */
     font_desc = pango_font_description_from_string ("Courier 12");
@@ -514,52 +558,33 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
 
     // Label field
-    tag = gtk_text_buffer_create_tag (buffer, "label_foreground",
-				      "foreground", "orange", NULL);
-    TextTag *LabelTag = new TextTag(tag, buffer,  0, 6);
+    m_LabelColor->setBuffer(buffer);
+    m_LabelColor->addTagRange(0, 6);
 
     // Mnemonic field
-    /*
-    tag = m_MnemonicColor->getTag(buffer);
-    TextTag *MnemonicTag1 = new TextTag(tag, buffer,  7, 11);
-    TextTag *MnemonicTag2 = new TextTag(tag, buffer, 39, 44);
-    */
-
     m_MnemonicColor->setBuffer(buffer);
     m_MnemonicColor->addTagRange(7,11);
     m_MnemonicColor->addTagRange(39,44);
 
     // Comment field
-    tag = gtk_text_buffer_create_tag (buffer, "comment_foreground",
-				      "foreground", "dim gray", NULL);
-    TextTag *CommentTag1 = new TextTag(tag, buffer, 22, 30);
-    TextTag *CommentTag2 = new TextTag(tag, buffer, 55, 63);
+    m_CommentColor->setBuffer(buffer);
+    m_CommentColor->addTagRange(22,31);
+    m_CommentColor->addTagRange(55,63);
 
     // Variable field
-    tag = gtk_text_buffer_create_tag (buffer, "symbol_foreground",
-				      "foreground", "dark green", NULL);
-    TextTag *SymbolTag = new TextTag(tag, buffer, 15, 22);
+    m_SymbolColor->setBuffer(buffer);
+    m_SymbolColor->addTagRange(15,22);
 
     // Constants field
-    tag = gtk_text_buffer_create_tag (buffer, "constant_foreground",
-				      "foreground", "blue", NULL);
-    TextTag *ConstantTag = new TextTag(tag, buffer, 47, 51);
+    m_ConstantColor->setBuffer(buffer);
+    m_ConstantColor->addTagRange(47,51);
 
-    //MnemonicTag1->Apply();
-    //MnemonicTag2->Apply();
+    m_LabelColor->apply();
     m_MnemonicColor->apply();
-    LabelTag->Apply();
-    SymbolTag->Apply();
-    ConstantTag->Apply();
-    CommentTag1->Apply();
-    CommentTag2->Apply();
-    //delete MnemonicTag1;
-    //delete MnemonicTag2;
-    delete LabelTag;
-    delete SymbolTag;
-    delete ConstantTag;
-    delete CommentTag1;
-    delete CommentTag2;
+    m_CommentColor->apply();
+    m_SymbolColor->apply();
+    m_ConstantColor->apply();
+
 
 
     GtkWidget *frame = gtk_frame_new ("Sample");

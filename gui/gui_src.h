@@ -302,7 +302,6 @@ class SourceBrowserOpcode_Window : public SourceBrowser_Window
 class SourceBrowserParent_Window : public GUI_Object
 {
  public:
-  list<SourceBrowserAsm_Window *> children;
 
   SourceBrowserParent_Window(GUI_Processor *gp);
   virtual void Build(void);
@@ -317,6 +316,8 @@ class SourceBrowserParent_Window : public GUI_Object
   virtual void ChangeView(int view_state);
   virtual int set_config();
 
+  SourceBrowserAsm_Window *getChild(int);
+  list<SourceBrowserAsm_Window *> children;
 };
 
 

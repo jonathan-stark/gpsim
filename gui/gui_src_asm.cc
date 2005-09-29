@@ -2773,6 +2773,13 @@ SourceBrowserParent_Window::SourceBrowserParent_Window(GUI_Processor *_gp)
 
   children.push_back(new SourceBrowserAsm_Window(_gp));
 }
+SourceBrowserAsm_Window *SourceBrowserParent_Window::getChild(int n)
+{
+  list <SourceBrowserAsm_Window *> :: iterator sbaw_iterator;
+  sbaw_iterator = children.begin();
+
+  return (sbaw_iterator != children.end()) ? *sbaw_iterator : 0;
+}
 
 void SourceBrowserParent_Window::Build(void)
 {
