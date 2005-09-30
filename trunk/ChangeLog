@@ -1,3 +1,7 @@
+2005-09-30 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Source
+	browser clean up. 
+
 2005-09-29 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: More
 	preferences work; now the colors for the source browser example

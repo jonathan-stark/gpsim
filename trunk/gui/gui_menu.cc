@@ -162,7 +162,6 @@ protected:
 // call back into this class and keep track of the selected 
 // color state.
 class SourceBrowserPreferences;
-class TagRange;
 class ColorButton : public ColorSelection
 {
 public:
@@ -191,8 +190,6 @@ private:
   SourceBrowserPreferences *m_prefs;
   GtkTextTag *m_tag;
   const char *m_label;
-  typedef list<TagRange *> RangeList;
-  RangeList rangeList;
   GtkTextBuffer *m_buffer;
 };
 
@@ -365,48 +362,31 @@ gboolean    TagEvent  (GtkTextTag *texttag,
   return FALSE;
 }
 
-class TagRange {
-public:
-  TagRange(GtkTextBuffer *pBuffer, GtkTextTag *pTag, int start_index, int end_index)
-    : m_buffer(pBuffer), m_tag(pTag)
-  {
-    gtk_text_buffer_get_iter_at_offset (pBuffer, &m_start, start_index);
-    gtk_text_buffer_get_iter_at_offset (pBuffer, &m_end, end_index);
-
-    g_signal_connect (G_OBJECT (pTag), "event",
-		      GTK_SIGNAL_FUNC(TagEvent),
-		      this);
-    printf("Added TagRange event for %p\n",this);
-  }
-  void apply();
-private:
-  GtkTextTag    *m_tag;
-  GtkTextBuffer *m_buffer;
-  GtkTextIter    m_start;
-  GtkTextIter    m_end;
-
-};
-
-void TagRange::apply()
-{
-  gtk_text_buffer_apply_tag (m_buffer, m_tag, &m_start, &m_end);
-}
-
+//------------------------------------------------------------------------
+// addTagRange(int start_index, int end_index)
+//
+// Each color button has an associated buffer and tag. 
+// Addtag range applies the tag state to a range of text in the buffer
 void ColorButton::addTagRange(int start_index, int end_index)
 {
-  TagRange *pTagRange = new TagRange(m_buffer, m_tag, start_index, end_index);
+  GtkTextIter    start;
+  GtkTextIter    end;
+  gtk_text_buffer_get_iter_at_offset (m_buffer, &start, start_index);
+  gtk_text_buffer_get_iter_at_offset (m_buffer, &end, end_index);
 
-  rangeList.push_back(pTagRange);
+  gtk_text_buffer_apply_tag (m_buffer, m_tag, &start, &end);
+
+  g_signal_connect (G_OBJECT (m_tag), "event",
+		    GTK_SIGNAL_FUNC(TagEvent),
+		    this);
+  printf("Added TagRange event for %p\n",this);
 
 }
 
 void ColorButton::apply()
 {
-  RangeList::iterator ri;
   char array[20];
   g_object_set(m_tag, "foreground" , getPreferred(array), NULL);
-  for (ri = rangeList.begin(); ri != rangeList.end(); ++ri) 
-    (*ri)->apply();
 }
 //------------------------------------------------------------------------
 
@@ -635,20 +615,6 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   GtkWidget *label;
   GtkWidget *vbox2;
 
-  /*
-  // Color Preferences
-  {
-    vbox2 = gtk_vbox_new(0,0);
-    gtk_container_set_border_width (GTK_CONTAINER (vbox2), 3);
-    label=gtk_label_new("colors");
-    gtk_notebook_append_page(GTK_NOTEBOOK(notebook),vbox2,label);
-
-    preferences_AddColor(GTK_WIDGET(vbox2), gColors.breakpoint(), "Breakpoints");
-    preferences_AddColor(GTK_WIDGET(vbox2), gColors.sfr_bg(), "SFR Background");
-
-    gtk_widget_show(vbox2);
-  }
-  */
 
   // source browser preferences...
   

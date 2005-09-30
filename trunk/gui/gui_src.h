@@ -216,7 +216,6 @@ class SourceBrowserAsm_Window :public  SourceBrowser_Window
   virtual void Update(void);
   virtual void UpdateLine(int address);
   virtual void SetText(int id, int file_id, FileContext *fc);
-  virtual void SetTextOld(int id, int file_id, FileContext *fc);
   void ParseSourceToFormattedText(
     int id,
     int &totallinesheight,
