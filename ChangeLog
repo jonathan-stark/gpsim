@@ -1,3 +1,9 @@
+2005-10-01 Scott Dattalo <scott@dattalo.com>
+	* src/processor.cc: Changed Processor::init_program_memory_at_index()
+	so a derived processor can define its own bad_instruction type.
+	
+	Fixed a crashing bug in trim() when a empty was passed in.
+
 2005-09-30 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc, gui/gui_src.h, gui/gui_src_asm.cc: Source
 	browser clean up. 
