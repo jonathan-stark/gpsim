@@ -458,7 +458,7 @@ void Processor::init_program_memory_at_index(unsigned int uIndex, unsigned int v
   unsigned int address = map_pm_index2address(uIndex);
   if(uIndex < program_memory_size()) {
 
-    if(program_memory[uIndex] != 0 && program_memory[uIndex] != &bad_instruction) {
+    if(program_memory[uIndex] != 0 && program_memory[uIndex]->isa() != instruction::INVALID_INSTRUCTION) {
       // this should not happen
       delete program_memory[uIndex];
     }
@@ -711,7 +711,7 @@ static void trim(char * pBuffer) {
   }
   iPos = strlen(pBuffer);
   pChar = pBuffer + iPos - 1;
-  while(pBuffer != pChar && ::isspace(*pChar)) {
+  while( pChar > pBuffer && ::isspace(*pChar)) {
     *pChar = 0;
     pChar--;
   }
