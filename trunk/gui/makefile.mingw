@@ -44,6 +44,7 @@ gui_OBJECTS =			\
 	gui_symbols.o		\
 	gui_trace.o		\
 	gui_watch.o		\
+	preferences.o		\
 	settings_reg.o
 
 ../config.h : ../config_win32.h.in
