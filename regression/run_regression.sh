@@ -40,4 +40,6 @@ ${RT} logic_test sim
 
 ${RT} usart_test sim
 
+${RT} tmr0_16bit sim
+
 #${RT} ccp ccp
