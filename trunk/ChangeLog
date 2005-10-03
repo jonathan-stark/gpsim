@@ -1,3 +1,20 @@
+2005-10-03 Scott Dattalo <scott@dattalo.com>
+	* gui/gui_menu.cc: More source browser preference configuration.
+	* gui/gui_regwin.cc: Turned register sheet rows and columns back
+	on. (They were off because of a bug in gtkextra, but that bug is
+	fixed now).
+	* src/16bit-processors.cc, src/16bit-registers.cc, src/p18x.cc,
+	src/tmr0.cc:
+	The create+sfr_map() method was getting called twice fof the p18f
+	devices.
+	T0CON was not retaining its 0xff reset value.
+	TMR0L was reporting the wrong value while it was turned off.
+	* regression/run_regression.sh, regression/tmr0_16bit/18f452.lkr,
+	regression/tmr0_16bit/Makefile,
+	regression/tmr0_16bit/tmr0_16bit.asm,
+	regression/tmr0_16bit/tmr0_16bit.stc:
+	Added a regression test for TMR0.
+
 2005-10-02 Borut Razem <borut.razem@siol.net>
 	* gui/makefile.mingw: Updates to support user defined preferences.
 	* doc/gpsimWin32.html: Use CSS

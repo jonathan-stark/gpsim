@@ -2096,7 +2096,8 @@ void Register_Window::Build(void)
   }
     
   /// DEBUG ///
-#if defined(GTK_VERSION)
+  //#if defined(GTK_VERSION)
+#if 0
   const char *gtk_version = GTK_VERSION;
   if (gtk_version[0] == '2' && gtk_version[2] >= '6') {
     gtk_sheet_hide_row_titles(register_sheet);

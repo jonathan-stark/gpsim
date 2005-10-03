@@ -148,7 +148,6 @@ Processor * P18C242::construct()
   p->new_name("p18c242");
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -193,7 +192,6 @@ Processor * P18C252::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   p->new_name("p18c252");
@@ -373,7 +371,6 @@ Processor * P18C442::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   p->new_name("p18c442");
@@ -419,7 +416,6 @@ Processor * P18C452::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -542,7 +538,6 @@ Processor * P18F252::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -619,7 +614,6 @@ Processor * P18F442::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -663,7 +657,6 @@ Processor * P18F248::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -707,7 +700,6 @@ Processor * P18F452::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -734,7 +726,6 @@ Processor * P18F1220::construct()
 
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
@@ -750,9 +741,6 @@ void P18F1220::create()
   create_iopin_map();
 
   _16bit_processor::create();
-
-  create_sfr_map();
-
 
 }
 //------------------------------------------------------------------------
@@ -832,7 +820,6 @@ Processor * P18F1320::construct()
   p->new_name("p18f1320");
   p->create();
   p->create_invalid_registers();
-  p->create_sfr_map();
   p->create_symbols();
 
   symbol_table.add_module(p,p->name().c_str());
