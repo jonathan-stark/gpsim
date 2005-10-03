@@ -172,7 +172,6 @@ public:
 	       );
   static void setColor_cb(GtkColorButton *widget,
 			  ColorButton    *This);
-  //GtkTextTag *getTag(GtkTextBuffer *, const char *);
   void apply();
   void addTagRange(int start_index, int end_index);
   void setBuffer(GtkTextBuffer *pBuffer)
@@ -200,15 +199,16 @@ public:
 
   void apply();
   void update();
+  void parseLine(const char*);
 private:
+  GtkTextView *m_view;
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
   ColorButton *m_SymbolColor;
   ColorButton *m_CommentColor;
   ColorButton *m_ConstantColor;
 
-  GtkWidget *m_SampleNotebook;
-
+  GtkWidget   *m_SampleNotebook;
   GtkPositionType m_TabPosition;
 };
 
@@ -235,6 +235,7 @@ private:
 
   GtkWidget *window;
 };
+static GtkWidget *LocalWindow=0;
 
 
 void gpsimGuiPreferences::setup (gpointer             callback_data,
@@ -321,17 +322,7 @@ const char *ColorSelection::getPreferred(char *cParray)
 	  m_preferred->red, m_preferred->green, m_preferred->blue);
   return cParray;
 }
-/*
-GtkTextTag *ColorButton::getTag(GtkTextBuffer *pBuffer)
-{
-  char cParray[20];
-  return gtk_text_buffer_create_tag (pBuffer, m_label,
-				      "foreground",
-				      getPreferred(cParray),
-				      NULL);
 
-}
-*/
 bool isButtonEvent (GdkEventType type)
 {
   return 
@@ -423,30 +414,171 @@ static void preferences_AddFontSelect(GtkWidget *pParent, const char *fontDescri
   gtk_widget_show (hbox);
 }
 
-class TextTag {
-public:
-  TextTag(GtkTextTag *,GtkTextBuffer *, int start_index, int end_index);
-  void Apply();
-private:
-  GtkTextTag    *m_tag;
-  GtkTextBuffer *m_buffer;
-  GtkTextIter    m_start;
-  GtkTextIter    m_end;
 
-};
-
-TextTag::TextTag(GtkTextTag *pTag,GtkTextBuffer *pBuffer, int start_index, int end_index)
-  : m_tag(pTag), m_buffer(pBuffer)
+//========================================================================
+static int isString(const char *cP)
 {
-  gtk_text_buffer_get_iter_at_offset (m_buffer, &m_start, start_index);
-  gtk_text_buffer_get_iter_at_offset (m_buffer, &m_end, end_index);
+  int i=0;
+
+  if (isalpha(*cP) || *cP=='_')
+    while (isalnum(cP[i]) || cP[i]=='_')
+      i++;
+  return i;
 }
 
-void TextTag::Apply()
+static int isWhiteSpace(const char *cP)
 {
-  gtk_text_buffer_apply_tag (m_buffer, m_tag, &m_start, &m_end);
+  int i=0;
+
+  while (cP[i]==' ' || cP[i]=='\t')
+    i++;
+  return i;
 }
 
+static int isHexNumber(const char *cP)
+{
+  int i=0;
+  if ((*cP == '0' && toupper(cP[1])=='X') ||
+      (*cP == '$')) {
+    i = (*cP=='0') ? 2 : 1;
+
+    while (isxdigit(cP[i]))
+      i++;
+  }
+  return i;
+}
+static int isNumber(const char *cP)
+{
+  int i=isHexNumber(cP);
+  if (!i)
+    while (isdigit(cP[i]))
+      i++;
+  return i;
+}
+
+static bool isEnd(const char c)
+{
+  return c=='\n' || c==0;
+}
+
+static int isComment(const char *cP)
+{
+  int i = (*cP==';') ? 1 : 0;
+  if (i)
+    while (!isEnd(cP[i]))
+      i++;
+  return i;
+}
+
+//#include "../xpms/break.xpm"
+static char * break_xpm[] = {
+"12 12 3 1",
+" 	c None",
+".	c gray",
+"X	c white",
+"   .......    ",
+"  .........   ",
+" ...........  ",
+" ...XXXXX.... ",
+" ...XXXXX.... ",
+" ...XXXXX.... ",
+" ...XXXXX.... ",
+" ...XXXXX.... ",
+" ...........  ",
+"  .........   ",
+"   .......    ",
+"              "};
+
+void SourceBrowserPreferences::parseLine(const char *cP)
+{
+  GtkTextBuffer *buffer = gtk_text_view_get_buffer (m_view);
+  GtkTextIter iEnd;
+
+  gtk_text_buffer_get_end_iter (buffer, &iEnd);
+  if(1){
+
+    //GtkWidget *widget = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD,
+    //						  GTK_ICON_SIZE_BUTTON);
+    //GtkWidget *widget = gtk_check_button_new();
+
+    static GdkPixmap *pixmap_break = 0;
+    static GdkBitmap *bp_mask = 0;
+
+    if (pixmap_break == 0) {
+      GtkStyle  *style;
+
+      style=gtk_style_new();
+
+      pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
+						  &bp_mask,
+						  &style->bg[GTK_STATE_NORMAL],
+						  (gchar**)break_xpm);
+    GtkWidget *widget = gtk_image_new_from_pixmap (pixmap_break,
+						   bp_mask);
+
+    GtkTextChildAnchor *anchor =
+      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
+
+    gtk_text_view_add_child_at_anchor (m_view,
+				       widget,
+				       anchor);
+
+    gtk_widget_show_all (widget);
+    }
+
+  }
+
+
+  //gtk_text_buffer_get_end_iter (buffer, &iEnd);
+
+  char buf[64];
+  int line_number = gtk_text_buffer_get_line_count(buffer);
+  static int opcode=0x1234;
+
+  snprintf(buf, sizeof(buf), "\t%5d %04X ",line_number,opcode);
+  //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, buf, -1, "margin", NULL);
+  gtk_text_buffer_insert (buffer, &iEnd, buf, -1);
+
+  //gtk_text_buffer_get_end_iter (buffer, &iEnd);
+  int offset = gtk_text_iter_get_offset (&iEnd);
+
+  //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, cP, -1, "margin", NULL);
+  gtk_text_buffer_insert (buffer, &iEnd, cP, -1);
+
+  int i=0;
+  int j=0;
+  bool bHaveMnemonic = false;
+
+  if (i != (j = isString(cP))) {
+    //printf ("label %d:%d %d\n",i,j,offset);
+    m_LabelColor->addTagRange(i+offset,j+offset);
+    i=j;
+  }
+  while (!isEnd(cP[i])) {
+
+    if ( (j=isWhiteSpace(&cP[i])) != 0) {
+      //printf ("White space %d:%d\n",i,i+j);
+      i += j;
+    } else if ( (j=isString(&cP[i])) != 0) {
+      if (bHaveMnemonic)
+	m_SymbolColor->addTagRange(i+offset,i+j+offset);
+      else
+	m_MnemonicColor->addTagRange(i+offset,i+j+offset);
+      bHaveMnemonic = true;
+      i += j;
+    } else if ( (j=isNumber(&cP[i])) != 0) {
+      m_ConstantColor->addTagRange(i+offset,i+j+offset);
+      //printf ("number %d:%d\n",i,i+j);
+      i += j;
+    } else if ( (j=isComment(&cP[i])) != 0) {
+      m_CommentColor->addTagRange(i+offset,i+j+offset);
+      //printf ("comment %d:%d\n",i,i+j);
+      i += j;
+      return;
+    } else 
+      i++;
+  }
+}
 //========================================================================
 SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 {
@@ -472,16 +604,20 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_container_add (GTK_CONTAINER (colorFrame), colorVbox);
 
     m_LabelColor    = new ColorButton(GTK_WIDGET(colorVbox), 
-				      gColors.sfr_bg(), "Label", this);
+				      &sbaw->label_text_style->fg[GTK_STATE_NORMAL],
+				      "Label", this);
     m_MnemonicColor = new ColorButton(GTK_WIDGET(colorVbox), 
 				      &sbaw->instruction_text_style->fg[GTK_STATE_NORMAL],
 				      "Mnemonic", this);
     m_SymbolColor   = new ColorButton(GTK_WIDGET(colorVbox), 
-				      gColors.sfr_bg(), "Symbols", this);
+				      &sbaw->symbol_text_style->fg[GTK_STATE_NORMAL],
+				      "Symbols", this);
     m_ConstantColor = new ColorButton(GTK_WIDGET(colorVbox),
-				      gColors.sfr_bg(), "Constants", this);
+				      &sbaw->number_text_style->fg[GTK_STATE_NORMAL],
+				      "Constants", this);
     m_CommentColor  = new ColorButton(GTK_WIDGET(colorVbox),
-				      gColors.sfr_bg(), "Comments", this);
+				      &sbaw->comment_text_style->fg[GTK_STATE_NORMAL],
+				      "Comments", this);
   }
 
   {
@@ -512,7 +648,6 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
   {
 
-    GtkWidget *view;
     GtkTextBuffer *buffer;
     GtkTextIter start, end;
     PangoFontDescription *font_desc;
@@ -520,44 +655,29 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     GtkTextTag *tag;
     char cParray[20];
 
-    view = gtk_text_view_new ();
-
-    buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
-
-    gtk_text_buffer_set_text (buffer, 
-			      /*1234567890123456789012345678901234567890*/
-			      "Label: MOVF    Temp1,W ;Comment\n"
-			      "       MOVLW   0x42    ;Comment", -1);
-    gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW(view), GTK_WRAP_NONE);
-    gtk_text_view_set_editable  (GTK_TEXT_VIEW(view), FALSE);
+    m_view = GTK_TEXT_VIEW (gtk_text_view_new ());
+    gtk_text_view_set_wrap_mode (m_view, GTK_WRAP_NONE);
+    gtk_text_view_set_editable  (m_view, FALSE);
 
     /* Change default font throughout the widget */
     font_desc = pango_font_description_from_string ("Courier 12");
-    gtk_widget_modify_font (view, font_desc);
+    gtk_widget_modify_font (GTK_WIDGET (m_view), font_desc);
     pango_font_description_free (font_desc);
 
+    buffer = gtk_text_view_get_buffer (m_view);
 
-    // Label field
     m_LabelColor->setBuffer(buffer);
-    m_LabelColor->addTagRange(0, 6);
-
-    // Mnemonic field
     m_MnemonicColor->setBuffer(buffer);
-    m_MnemonicColor->addTagRange(7,11);
-    m_MnemonicColor->addTagRange(39,44);
-
-    // Comment field
     m_CommentColor->setBuffer(buffer);
-    m_CommentColor->addTagRange(22,31);
-    m_CommentColor->addTagRange(55,63);
-
-    // Variable field
     m_SymbolColor->setBuffer(buffer);
-    m_SymbolColor->addTagRange(15,22);
-
-    // Constants field
     m_ConstantColor->setBuffer(buffer);
-    m_ConstantColor->addTagRange(47,51);
+
+    gtk_text_buffer_create_tag (buffer, "margin",
+				"left_margin", 50,
+				NULL);
+    parseLine("Label: MOVF    Temp1,W ;Comment\n");
+    parseLine("       MOVLW   0x42    ;Comment");
+
 
     m_LabelColor->apply();
     m_MnemonicColor->apply();
@@ -576,11 +696,14 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
     gtk_container_add (GTK_CONTAINER (frame), m_SampleNotebook);
 
     GtkWidget *label = gtk_label_new("file1.asm");
-    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),view,label);
+    gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),
+			     GTK_WIDGET(m_view),
+			     label);
 
     label = gtk_label_new("file2.asm");
     GtkWidget *emptyBox = gtk_hbox_new(0,0);
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),emptyBox,label);
+
 
 
   }
@@ -600,7 +723,9 @@ gpsimGuiPreferences::gpsimGuiPreferences()
 {
   GtkWidget *button;
 
-  window = gtk_dialog_new ();
+  LocalWindow = gtk_dialog_new ();
+  window = LocalWindow;
+  gtk_widget_show (window);
 
   gtk_window_set_title (GTK_WINDOW (window), "Preferences");
   gtk_container_set_border_width (GTK_CONTAINER (window), 0);
@@ -638,7 +763,7 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   GtkWidget *buttonBox = gtk_hbutton_box_new();
   gtk_box_pack_start (GTK_BOX (vbox), buttonBox, TRUE, TRUE, 0);
 
-  button = gtk_button_new_with_label ("Cancel");
+  button = gtk_button_new_from_stock (GTK_STOCK_CANCEL);
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
   gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
 			     GTK_SIGNAL_FUNC(gpsimGuiPreferences::cancel_cb),
@@ -648,7 +773,7 @@ gpsimGuiPreferences::gpsimGuiPreferences()
   gtk_box_pack_start (GTK_BOX (buttonBox), button, TRUE, TRUE, 0);
   gtk_widget_grab_default(button);
 
-  button = gtk_button_new_with_label ("Apply");
+  button = gtk_button_new_from_stock (GTK_STOCK_APPLY);
   gtk_container_set_border_width (GTK_CONTAINER (button), 10);
   gtk_signal_connect_object (GTK_OBJECT (button), "clicked",
 			     GTK_SIGNAL_FUNC(gpsimGuiPreferences::apply_cb),

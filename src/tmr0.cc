@@ -71,9 +71,23 @@ void TMR0::set_cpu(Processor *new_cpu, PortRegister *reg, unsigned int pin)
   reg->addSink(this,pin);
 }
 
+//------------------------------------------------------------
+// Stop the tmr.
+//
 void TMR0::stop(void)
 {
-  state &= (~1);      // the timer is disabled.
+
+  // If tmr0 is running:
+
+  if (state & 1) {
+
+    // refresh the current value.
+    get_value();
+
+    state &= (~1);      // the timer is disabled.
+    clear_break();
+
+  }
 }
 
 void TMR0::start(int restart_value, int sync)
@@ -125,6 +139,9 @@ void TMR0::clear_break(void)
 {
   if(verbose)
     cout << "TMR0 break was cleared\n";
+
+  if (future_cycle)
+    get_cycles().clear_break(this);
 
   future_cycle = 0;
   last_cycle = 0;

@@ -159,7 +159,7 @@ void _16bit_processor :: create_sfr_map()
   add_sfr_register(&lvdcon,	  0xfd2,porv,"lvdcon");
   add_sfr_register(&osccon,	  0xfd3,porv,"osccon");
   // 0x4 is not defined
-  add_sfr_register(&t0con,	  0xfd5,porv,"t0con");
+  add_sfr_register(&t0con,	  0xfd5,RegisterValue(0xff,0),"t0con");
   add_sfr_register(&tmr0l,	  0xfd6,porv,"tmr0l");
   add_sfr_register(&tmr0h,	  0xfd7,porv,"tmr0h");
   t0con.put(0xff);  /**FIXME - need a way to set this to 0xff at reset*/
