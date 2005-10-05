@@ -43,6 +43,8 @@ _12bit_processor::_12bit_processor(void)
 void _12bit_processor::create_symbols(void)
 {
   pic_processor::create_symbols();
+  // add a special symbol for W
+  symbol_table.add_w(W);
 }
 
 void _12bit_processor::por(void)

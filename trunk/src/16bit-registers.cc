@@ -951,7 +951,7 @@ void T0CON::put(unsigned int new_value)
   if( (value.get() ^ old_value) & (T0SE | PSA | PS2 | PS1 | PS0))
     cpu16->tmr0l.new_prescale();
 
-  cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';
+  //cout <<"T0CON::put - new val 0x" << hex << value.get() <<'\n';
 }
 
 //--------------------------------------------------
@@ -1209,9 +1209,6 @@ void TMR3_MODULE::initialize(T3CON *t3con_, PIR_SET *pir_set_)
 TXREG_16::TXREG_16(void)
   : pir_set(0)
 {
-
-  cout << "txreg16 constructor\n";
-
 }
 
 bool TXREG_16::is_empty(void)
@@ -1244,7 +1241,6 @@ void TXREG_16::assign_pir_set(PIR_SET *new_pir_set)
 RCREG_16::RCREG_16(void)
   : pir_set(0)
 {
-  cout << "rcreg 16 constructor\n";
 }
 
 void RCREG_16::assign_pir_set(PIR_SET *new_pir_set)

@@ -120,7 +120,7 @@ void P12C508::create_symbols(void)
 {
   _12bit_processor::create_symbols();
 
-  symbol_table.add_register(m_gpio);
+  //symbol_table.add_register(m_gpio);
   symbol_table.add_register(m_tris);
 }
 

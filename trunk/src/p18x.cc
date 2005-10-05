@@ -399,7 +399,7 @@ P18C452::P18C452()
 void P18C452::create()
 {
 
-  //if(verbose)
+  if(verbose)
     cout << " 18c452 create \n";
 
   P18C442::create();
@@ -434,7 +434,7 @@ Processor * P18C452::construct()
 P18F242::P18F242()
 {
 
-  //if(verbose)
+  if(verbose)
     cout << "18f242 constructor, type = " << isa() << '\n';
 
 }
@@ -443,7 +443,7 @@ void P18F242::create()
 {
   EEPROM_PIR *e;
 
-  //if(verbose)
+  if(verbose)
     cout << " 18f242 create \n";
 
   P18C242::create();
@@ -555,7 +555,7 @@ Processor * P18F252::construct()
 P18F442::P18F442()
 {
 
-  //if(verbose)
+  if(verbose)
     cout << "18f442 constructor, type = " << isa() << '\n';
 
 }
@@ -564,7 +564,7 @@ void P18F442::create()
 {
   EEPROM_PIR *e;
 
-  //if(verbose)
+  if(verbose)
     cout << " 18f442 create \n";
 
   P18C442::create();
@@ -793,7 +793,7 @@ P18F1220::P18F1220()
 P18F1320::P18F1320()
 {
 
-  //if(verbose)
+  if(verbose)
     cout << "18f1320 constructor, type = " << isa() << '\n';
 
 }
@@ -801,7 +801,7 @@ P18F1320::P18F1320()
 void P18F1320::create()
 {
 
-  //if(verbose)
+  if(verbose)
     cout << " 18fx320 create \n";
 
   P18F1220::create();

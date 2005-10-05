@@ -33,7 +33,7 @@ Boston, MA 02111-1307, USA.  */
 //
 // Timer 1&2  modules for the 14bit core pic processors.
 //
-#define DEBUG
+//#define DEBUG
 
 #if defined(DEBUG)
 #define Dprintf(arg) {printf("%s:%d",__FILE__,__LINE__); printf arg; }

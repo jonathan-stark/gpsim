@@ -125,7 +125,7 @@ void TMR0::start(int restart_value, int sync)
 
     future_cycle = fc;
 
-    //if(verbose)
+    if(verbose)
       cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
 
 
