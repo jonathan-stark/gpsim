@@ -242,7 +242,8 @@ void gpsimGuiPreferences::setup (gpointer             callback_data,
 				 guint                callback_action,
 				 GtkWidget           *widget)
 {
-  new gpsimGuiPreferences();
+  if (0)
+    new gpsimGuiPreferences();
 }
 
 

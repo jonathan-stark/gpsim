@@ -1,4 +1,10 @@
 2005-10-03 Scott Dattalo <scott@dattalo.com>
+	* src/12bit-processors.cc, src/14bit-processors.cc,
+	src/14bit-tmrs.cc, src/16bit-registers.cc, src/p12x.cc,
+	src/p16f62x.cc, src/p18x.cc, src/pic-processor.cc, src/tmr0.cc:
+	Debug cleanups.
+
+2005-10-03 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: More source browser preference configuration.
 	* gui/gui_regwin.cc: Turned register sheet rows and columns back
 	on. (They were off because of a bug in gtkextra, but that bug is

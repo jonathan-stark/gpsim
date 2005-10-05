@@ -57,26 +57,6 @@ void P16F62x::create_iopin_map(void)
   if(!package)
     return;
 
-  // ---- This is probably going to be moved:
-  //porta = new PORTA_62x;
-
-  //m_portb = new PicPortBRegister("portb",8,0xff);
-  //m_trisb = new PicTrisRegister(m_portb);
-  //m_trisb->new_name("trisb");
-
-  // ---- Complete the initialization for the I/O Ports
-
-  // Build the links between the I/O Ports and their tris registers.
-  //porta->tris = &trisa;
-  //trisa.port = porta;
-  //trisa.valid_iopins = 0xdf;  // Bit 5 is an input only and always reads 0
-
-  // And give them a more meaningful name.
-  //trisa.new_name("trisa");
-
-  // Define the valid I/O pins.
-  //porta->valid_iopins = 0xff;
-
   // Now Create the package and place the I/O pins
 
   package->assign_pin(17, m_porta->addPin(new IO_bi_directional("porta0"),0));
@@ -87,15 +67,6 @@ void P16F62x::create_iopin_map(void)
   package->assign_pin( 4, m_porta->addPin(new IO_bi_directional("porta5"),5));
   package->assign_pin(15, m_porta->addPin(new IO_bi_directional("porta6"),6));
   package->assign_pin(16, m_porta->addPin(new IO_bi_directional("porta7"),7));
-
-  //package->assign_pin(17, new IO_bi_directional(porta, 0));
-  //package->assign_pin(18, new IO_bi_directional(porta, 1));
-  //package->assign_pin(1, new IO_bi_directional(porta, 2));
-  //package->assign_pin(2, new IO_bi_directional(porta, 3));
-  //package->assign_pin(3, new IO_open_collector(porta, 4));
-  //package->assign_pin(4, new IOPIN(porta, 5));
-  //package->assign_pin(15, new IO_bi_directional(porta, 6));  // Assume RC mode
-  //package->assign_pin(16, new IO_bi_directional(porta, 7));  //   "        "
 
   package->assign_pin(5, 0);  // Vss
   package->assign_pin( 6, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
@@ -126,9 +97,6 @@ void P16F62x::create_sfr_map(void)
 
   alias_file_registers(0x01,0x04,0x100);
   alias_file_registers(0x81,0x84,0x100);
-
-  //add_sfr_register(porta,   0x05);
-  //add_sfr_register(&trisa,  0x85, RegisterValue(0xff,0));
 
   add_sfr_register(m_porta, 0x05);
   add_sfr_register(m_trisa, 0x85, RegisterValue(0xff,0));
@@ -312,8 +280,6 @@ Processor * P16F627::construct(void)
 
   P16F627 *p = new P16F627;
 
-  cout << " f627 construct\n";
-
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
   p->pic_processor::create_symbols();
@@ -340,8 +306,6 @@ Processor * P16F628::construct(void)
 {
 
   P16F628 *p = new P16F628;
-
-  cout << " f628 construct\n";
 
   p->P16F62x::create(0x2f, 128);
   p->create_invalid_registers ();
@@ -370,8 +334,6 @@ pic_processor * P16F648::construct(void)
 {
 
   P16F648 *p = new P16F648;
-
-  cout << " f648 construct\n";
 
   p->P16F62x::create(0x2f, 256);
   p->create_sfr_map();
