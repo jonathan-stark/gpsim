@@ -1,4 +1,7 @@
 2005-10-03 Scott Dattalo <scott@dattalo.com>
+	* configure.ac: Changed version to 0.24.11
+
+2005-10-03 Scott Dattalo <scott@dattalo.com>
 	* src/12bit-processors.cc, src/14bit-processors.cc,
 	src/14bit-tmrs.cc, src/16bit-registers.cc, src/p12x.cc,
 	src/p16f62x.cc, src/p18x.cc, src/pic-processor.cc, src/tmr0.cc:
