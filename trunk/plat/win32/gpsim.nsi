@@ -27,7 +27,7 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
-!define PRODUCT_VERSION "0.21.10"
+!define PRODUCT_VERSION "0.21.11"
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_WEB_SITE "http://www.dattalo.com/gnupic/gpsim.html"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
@@ -88,7 +88,7 @@ Function .onInit
   StrCmp $R0 "" inst
 
   MessageBox MB_OKCANCEL|MB_ICONEXCLAMATION \
-  "$(^Name) is already installed. $\n$\nClick 'OK' to remove the \
+  "${PRODUCT_NAME} is already installed. $\n$\nClick 'OK' to remove the \
   previous version or 'Cancel' to cancel this upgrade." \
   IDOK uninst
   Abort
