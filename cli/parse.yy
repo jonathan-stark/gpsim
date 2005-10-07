@@ -764,14 +764,31 @@ numeric_option: NUMERIC_OPTION expr
 	}
         ;
 
-string_option: STRING_OPTION LITERAL_STRING_T
+string_option:
+        STRING_OPTION LITERAL_STRING_T
         { 
-	  $$ = new cmd_options_str($2->getVal());
-	  $$->co  = $1;
+          $$ = new cmd_options_str($2->getVal());
+          $$->co  = $1;
           if(verbose&2)
-	    cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
-	}
-        ;
+            cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
+        }
+        | STRING_OPTION SYMBOL_T
+        { 
+          String *pValue = dynamic_cast<String*>($2);
+          if(pValue != NULL) {
+            $$ = new cmd_options_str(pValue->getVal());
+            $$->co  = $1;
+            if(verbose&2)
+              cout << " name " << $$->co->name << " value " << $$->str << " got a string option \n"; 
+          }
+          else {
+            cout << " option variable '"
+                 << $2->name()
+                 << "' is not a string"
+                 << endl; 
+          }
+        }
+	      ;
 
 string_list
         : LITERAL_STRING_T                        {$$ = new StringList_t(); $$->push_back($1->getVal());}
