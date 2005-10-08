@@ -1970,7 +1970,7 @@ Processor * ProcessorConstructor::ConstructProcessor() {
   return cpu_constructor();
 }
 
-ProcessorConstructorList * ProcessorConstructor::processor_list = new ProcessorConstructorList();
+ProcessorConstructorList * ProcessorConstructor::processor_list;
 
 ProcessorConstructorList * ProcessorConstructor::GetList() {
   if(processor_list == NULL) {

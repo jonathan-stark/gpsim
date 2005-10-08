@@ -124,6 +124,7 @@ Section "MainSection" SEC01
   File "${GPSIM_ROOT}\plat\win32\modules.def"
   File "${PKG_ROOT}\bin\asprintf.dll"
   File "${PKG_ROOT}\bin\charset.dll"
+  File "${PKG_ROOT}\bin\gtkextra-win32-2.1.dll"
   File "${PKG_ROOT}\bin\iconv.dll"
   File "${PKG_ROOT}\bin\intl.dll"
   File "${PKG_ROOT}\bin\libatk-1.0-0.dll"
