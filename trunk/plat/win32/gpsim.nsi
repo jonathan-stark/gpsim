@@ -548,8 +548,8 @@ Function CreateBatFile
 
   FileOpen $0 "$INSTDIR\${PRODUCT_NAME}.bat$\r$\n" w
   FileWrite $0 "@echo off$\r$\n"
-  FileWrite $0 "set PATH=$INSTDIR\bin;%PATH$\r$\n"
-  FileWrite $0 "$\"$INSTDIR\bin\${PRODUCT_NAME}$\"$\r$\n"
+  FileWrite $0 "set PATH=$INSTDIR\bin;%PATH%$\r$\n"
+  FileWrite $0 "$\"$INSTDIR\bin\${PRODUCT_NAME}$\" %1 %2 %3 %4 %5 %6 %7 %8 %9$\r$\n"
   FileClose $0
 
   Pop $0

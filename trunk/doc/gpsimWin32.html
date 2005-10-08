@@ -230,7 +230,9 @@ required by gpsim GUI run time</li>
 
 
 <p>The GUI WIN32 version of gpsim requires the following
-additional packages, in addition to <a href="http://www.gnu.org/directory/libs/popt.html">popt</a> and <a href="http://www.gtk.org/">glib</a>, mentioned in the CLI
+additional packages, in addition to <a href="http://www.gnu.org/directory/libs/popt.html">popt</a>
+and <a href="http://www.gtk.org/">glib</a>,
+mentioned in the CLI
 section:</p>
 
 
@@ -272,7 +274,7 @@ on WIN32 using Cygwin gcc -mno-cygwin native compilation.</li>
 
 
       <li> <a href="#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>:
-header files and static library, built from <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a></li>
+header files, static libraries and DLL, built from <a href="#gtk_extra_src">gtk+extra-2.1.1-src-*.zip</a></li>
 
 
     
@@ -283,8 +285,8 @@ header files and static library, built from <a href="#gtk_extra_src">gtk+extra-2
 
 
   <li>pthreads - The <a name="pthreads-win32" href="http://sources.redhat.com/pthreads-win32/">pthreads-win32</a>
-package implements Posix Threads on Win32. Note, pthreads are currently used&nbsp;only
- in modules and in particular in the usart module.
+package implements Posix Threads on Win32. Note, pthreads are currently
+used&nbsp;only in modules and in particular in the usart module.
     
     <ul>
 
@@ -509,9 +511,17 @@ execute
         <pre>make -f Makefile.win32</pre>
 
 
-create gtkextra-2\lib directory and copy
-gtkextra-2\gtkextra\libgtkextra-win32-2.0.a to
-gtkextra-2\lib\libgtkextra-win32-2.1.lib</li>
+      </li>
+
+
+      <li>Create gtkextra-2\lib directory and copy
+gtkextra-2\gtkextra\libgtkextra-win32-2.1_dll.lib to
+gtkextra-2\lib</li>
+
+
+      <li>Create gtkextra-2\bin directory and copy
+gtkextra-2\gtkextra\gtkextra-win32-2.1.dll to
+gtkextra-2\bin</li>
 
 
     
@@ -581,7 +591,7 @@ Release GUI solution configuration and rebuild the solution. </li>
 
 
   <li>Extract popt1.dll from <a href="#popt_bin">popt-*-bin.zip</a>
-package, bin directory o the same directory where gpsim.exe resides.</li>
+package, bin directory to the same directory where gpsim.exe resides.</li>
 
 
   <li>Extract libintl-2.dll from <a href="#libintl_bin">libintl-*-bin.zip</a>
@@ -628,7 +638,13 @@ the same directory where gpsim.exe resides.</li>
 
 
   <li>Extract bin\libatk-1.0-0.dll from <a href="#atk">atk-*.zip</a>
-package to the same directory where gpsim.exe resides.<br />
+package to the same directory where gpsim.exe resides.</li>
+
+
+  <li>Extract bin\gtkextra-win32-2.1.dll from&nbsp;<a href="gpsimWin32.html#gtk_extra_dev">gtk+extra-2.1.1-dev-*.zip</a>
+package to the same directory where gpsim.exe resides or copy compiled
+gtkextra-2\bin\gtkextra-win32-2.1.dll to the same directory where
+gpsim.exe resides.<br />
 
 
 &nbsp;</li>
@@ -753,17 +769,17 @@ GIMP) for Windows</a> project:</p>
   <li> <a href="ftp://sources.redhat.com/pub/pthreads-win32/pthreads-w32-2-7-0-release.exe" name="pthreads"> pthreads-w32-2-7-0-release.exe</a></li>
 
 
-  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-dev.zip" name="gtk_extra_dev">gtk+extra-2.1.1-dev.zip</a></li>
+  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-dev-20051008.zip" name="gtk_extra_dev">gtk+extra-2.1.1-dev-20051008.zip</a></li>
 
 
-  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-src.zip" name="gtk_extra_src">gtk+extra-2.1.1-src.zip</a></li>
+  <li> <a href="http://gpsim.sourceforge.net/gpsimWin32/packages/gtk+extra-2.1.1-src-20051008.zip" name="gtk_extra_src">gtk+extra-2.1.1-src-20051008.zip</a></li>
 
 
 </ul>
 
 
 <hr />
-<p>Last update: September 2, 2005 by Borut Ražem</p>
+<p>Last update: October 8, 2005 by Borut Ražem</p>
 
 
 <table>
