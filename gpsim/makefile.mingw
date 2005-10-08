@@ -23,10 +23,10 @@ READLINE_PATH = ../../readline
 LIBS = -l wsock32 \
      -L $(READLINE_PATH)/win32/shlib -l readline \
      -L $(POPT_PATH)/lib -l popt \
-     -L $(GTKEXTRA_PATH)/lib -l libgtkextra-win32-2.1_dll \
      -L $(PANGO_PATH)/lib -l pango-1.0 \
      -L $(GTK_PATH)/lib -l gtk-win32-2.0 -l gdk_pixbuf-2.0 -l gdk-win32-2.0 \
-     -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0
+     -L $(GLIB_PATH)/lib -l gobject-2.0 -l gthread-2.0 -l glib-2.0 \
+     $(GTKEXTRA_PATH)/lib/libgtkextra-win32-2.1_dll.a
 
 gpsim_LIBS = ../gui/libgui.a ../cli/libcli.a ../src/libsrc.a
 
