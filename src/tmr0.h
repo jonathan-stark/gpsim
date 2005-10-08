@@ -63,6 +63,7 @@ public:
   virtual void callback_print(void);
 
   virtual void set_cpu(Processor *, PortRegister *, unsigned int pin);
+  virtual void set_cpu(Processor *new_cpu, PinModule *pin);
   virtual void setSinkState(char);
 
 private:

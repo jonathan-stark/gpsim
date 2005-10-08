@@ -154,6 +154,7 @@ void P12C508::create(void)
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
+  tmr0.set_cpu(this,m_gpio,2);
   tmr0.start(0);
 
   pc->reset();
@@ -541,6 +542,7 @@ void P10F200::create(void)
   P12C508::create_sfr_map();
   create_invalid_registers ();
 
+  tmr0.set_cpu(this,m_gpio,2);
   tmr0.start(0);
 
   pc->reset();

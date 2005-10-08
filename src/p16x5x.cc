@@ -40,6 +40,9 @@ Boston, MA 02111-1307, USA.  */
 
 void P16C54::create_iopin_map()
 {
+#ifdef USE_PIN_MODULE_FOR_TOCKI
+    IOPIN * tockipin;
+#endif
 
   package = new Package(18);
   if(!package)
@@ -51,17 +54,25 @@ void P16C54::create_iopin_map()
   package->assign_pin(18, m_porta->addPin(new IO_bi_directional("porta1"),1));
   package->assign_pin( 1, m_porta->addPin(new IO_bi_directional("porta2"),2));
   package->assign_pin( 2, m_porta->addPin(new IO_bi_directional("porta3"),3));
-  package->assign_pin( 3, m_porta->addPin(new IO_open_collector("porta4"),4));
+#ifdef USE_PIN_MODULE_FOR_TOCKI
+  // RCP - attempt to add TOCKI without port register
+  tockipin = new IOPIN("tocki");
+  m_tocki->setPin ( tockipin );
+  package->assign_pin( 3, tockipin );
+  // RCP - End new code
+#else
+  package->assign_pin( 3, m_tocki->addPin(new IOPIN("tocki"),0));
+#endif
   package->assign_pin( 4, 0);
   package->assign_pin( 5, 0);
-  package->assign_pin( 6, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
-  package->assign_pin( 7, m_portb->addPin(new IO_bi_directional_pu("portb1"),1));
-  package->assign_pin( 8, m_portb->addPin(new IO_bi_directional_pu("portb2"),2));
-  package->assign_pin( 9, m_portb->addPin(new IO_bi_directional_pu("portb3"),3));
-  package->assign_pin(10, m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
-  package->assign_pin(11, m_portb->addPin(new IO_bi_directional_pu("portb5"),5));
-  package->assign_pin(12, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
-  package->assign_pin(13, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
+  package->assign_pin( 6, m_portb->addPin(new IO_bi_directional("portb0"),0));
+  package->assign_pin( 7, m_portb->addPin(new IO_bi_directional("portb1"),1));
+  package->assign_pin( 8, m_portb->addPin(new IO_bi_directional("portb2"),2));
+  package->assign_pin( 9, m_portb->addPin(new IO_bi_directional("portb3"),3));
+  package->assign_pin(10, m_portb->addPin(new IO_bi_directional("portb4"),4));
+  package->assign_pin(11, m_portb->addPin(new IO_bi_directional("portb5"),5));
+  package->assign_pin(12, m_portb->addPin(new IO_bi_directional("portb6"),6));
+  package->assign_pin(13, m_portb->addPin(new IO_bi_directional("portb7"),7));
   package->assign_pin(14, 0);
   package->assign_pin(15, 0);
   package->assign_pin(16, 0);
@@ -80,20 +91,28 @@ void P16C55::create_iopin_map()
   package->assign_pin( 7, m_porta->addPin(new IO_bi_directional("porta1"),1));
   package->assign_pin( 8, m_porta->addPin(new IO_bi_directional("porta2"),2));
   package->assign_pin( 9, m_porta->addPin(new IO_bi_directional("porta3"),3));
-  package->assign_pin( 1, m_porta->addPin(new IO_open_collector("porta4"),4));
+#ifdef USE_PIN_MODULE_FOR_TOCKI
+  // RCP - attempt to add TOCKI without port register
+  tockipin = new IOPIN("tocki");
+  m_tocki->setPin ( tockipin );
+  package->assign_pin( 1, tockipin );
+  // RCP - End new code
+#else
+  package->assign_pin( 1, m_tocki->addPin(new IOPIN("tocki"),0));
+#endif
   package->assign_pin( 2, 0);
   package->assign_pin( 3, 0);
   package->assign_pin( 4, 0);
   package->assign_pin( 5, 0);
 
-  package->assign_pin(10, m_portb->addPin(new IO_bi_directional_pu("portb0"),0));
-  package->assign_pin(11, m_portb->addPin(new IO_bi_directional_pu("portb1"),1));
-  package->assign_pin(12, m_portb->addPin(new IO_bi_directional_pu("portb2"),2));
-  package->assign_pin(13, m_portb->addPin(new IO_bi_directional_pu("portb3"),3));
-  package->assign_pin(14, m_portb->addPin(new IO_bi_directional_pu("portb4"),4));
-  package->assign_pin(15, m_portb->addPin(new IO_bi_directional_pu("portb5"),5));
-  package->assign_pin(16, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
-  package->assign_pin(17, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
+  package->assign_pin(10, m_portb->addPin(new IO_bi_directional("portb0"),0));
+  package->assign_pin(11, m_portb->addPin(new IO_bi_directional("portb1"),1));
+  package->assign_pin(12, m_portb->addPin(new IO_bi_directional("portb2"),2));
+  package->assign_pin(13, m_portb->addPin(new IO_bi_directional("portb3"),3));
+  package->assign_pin(14, m_portb->addPin(new IO_bi_directional("portb4"),4));
+  package->assign_pin(15, m_portb->addPin(new IO_bi_directional("portb5"),5));
+  package->assign_pin(16, m_portb->addPin(new IO_bi_directional("portb6"),6));
+  package->assign_pin(17, m_portb->addPin(new IO_bi_directional("portb7"),7));
 
   package->assign_pin(18, m_portc->addPin(new IO_bi_directional("portc0"),0));
   package->assign_pin(19, m_portc->addPin(new IO_bi_directional("portc1"),1));
@@ -134,6 +153,10 @@ void P16C54::create_sfr_map()
   add_sfr_register(&option_reg,  0xffffffff, RegisterValue(0xff,0));
   add_sfr_register(m_trisa,  0xffffffff, RegisterValue(0x1f,0));
   add_sfr_register(m_trisb,  0xffffffff, RegisterValue(0xff,0));
+#ifndef USE_PIN_MODULE_FOR_TOCKI
+  add_sfr_register(m_tocki,  0xffffffff, RegisterValue(0x01,0));
+  add_sfr_register(m_trist0, 0xffffffff, RegisterValue(0x01,0));
+#endif
 
 }
 
@@ -190,6 +213,20 @@ P16C54::P16C54()
 
   m_portb = new PicPortRegister("portb",8,0xff);
   m_trisb = new PicTrisRegister("trisb", m_portb);
+
+#ifdef USE_PIN_MODULE_FOR_TOCKI
+//  RCP - Attempt to assign TOCKI without a port register
+  m_tocki = new PinModule();
+  cout << "c54 contructor assigning tmr0\n";
+  tmr0.set_cpu(this, m_tocki);
+#else
+  m_tocki = new PicPortRegister("tockiport",8,0x01);
+  m_trist0 = new PicTrisRegister("trist0", m_tocki);
+//  cout << "c54 contructor assigning tmr0 to tocki register\n";
+  tmr0.set_cpu(this, m_tocki, 0);
+#endif
+  tmr0.start(0);
+
 }
 
 void P16C54::tris_instruction(unsigned int tris_register)

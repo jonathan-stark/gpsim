@@ -380,7 +380,7 @@ void _16bit_processor::option_new_bits_6_7(unsigned int bits)
 {
 
   //portb.rbpu_intedg_update(bits);
-  cout << "16bit, option bits 6 and/or 7 changed\n";
+  //cout << "16bit, option bits 6 and/or 7 changed\n";
 
 }
 

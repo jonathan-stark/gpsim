@@ -33,6 +33,14 @@ Boston, MA 02111-1307, USA.  */
 
 #include "xref.h"
 
+//#define DEBUG
+#if defined(DEBUG)
+#define Dprintf(arg) {printf("%s:%d-%s() ",__FILE__,__LINE__,__FUNCTION__); printf arg; }
+#else
+#define Dprintf(arg) {}
+#endif
+
+
 //--------------------------------------------------
 // member functions for the TMR0 base class
 //--------------------------------------------------
@@ -71,14 +79,22 @@ void TMR0::set_cpu(Processor *new_cpu, PortRegister *reg, unsigned int pin)
   reg->addSink(this,pin);
 }
 
+// RCP - add an alternate way to connect to a CPU
+void TMR0::set_cpu(Processor *new_cpu, PinModule *pin)
+{
+  cpu = new_cpu;
+  pin->addSink(this);
+}
+
 //------------------------------------------------------------
 // Stop the tmr.
 //
 void TMR0::stop(void)
 {
 
-  // If tmr0 is running:
+  Dprintf(("\n"));
 
+  // If tmr0 is running, then stop it:
   if (state & 1) {
 
     // refresh the current value.
@@ -89,15 +105,15 @@ void TMR0::stop(void)
 
   }
 }
-
+  
 void TMR0::start(int restart_value, int sync)
 {
+
+  Dprintf(("restart_value=%d sync=%d\n",restart_value, sync));
 
   state |= 1;          // the timer is on
 
   value.put(restart_value&0xff);
-  if(verbose)
-    cout << "TMRO::start\n";
 
   old_option = cpu_pic->option_reg.value.get();
 
@@ -105,8 +121,7 @@ void TMR0::start(int restart_value, int sync)
   prescale_counter = prescale;
 
   if(get_t0cs()) {
-    if(verbose)
-      cout << "tmr0 starting with external clock \n";
+    Dprintf(("External clock\n"));
 
   } else {
 
@@ -125,9 +140,7 @@ void TMR0::start(int restart_value, int sync)
 
     future_cycle = fc;
 
-    if(verbose)
-      cout << "TMR0::start   last_cycle = " << hex << last_cycle << " future_cycle = " << future_cycle << '\n';
-
+    Dprintf(("last_cycle:0x%llx future_cycle:0xllx\n",last_cycle,future_cycle));
 
   }
 
@@ -137,25 +150,26 @@ void TMR0::start(int restart_value, int sync)
 
 void TMR0::clear_break(void)
 {
-  if(verbose)
-    cout << "TMR0 break was cleared\n";
+  Dprintf(("\n"));
 
-  if (future_cycle)
+  if (future_cycle) {
+    future_cycle = 0;
     get_cycles().clear_break(this);
-
-  future_cycle = 0;
+  }
   last_cycle = 0;
 
 }
 
 unsigned int TMR0::get_prescale(void)
 {
+  Dprintf(("\n"));
+
   return (cpu_pic->option_reg.get_psa() ? 0 : (1+cpu_pic->option_reg.get_prescale()));
 }
 
 void TMR0::increment(void)
 {
-  //cout << "TMR0 increment because of external clock ";
+  Dprintf(("\n"));
 
   if((state & 1) == 0)
     return;
@@ -180,6 +194,8 @@ void TMR0::increment(void)
 
 void TMR0::put_value(unsigned int new_value)
 {
+  Dprintf(("\n"));
+
   value.put(new_value & 0xff);
 
   // If tmr0 is enabled, then start it up.
@@ -189,6 +205,8 @@ void TMR0::put_value(unsigned int new_value)
 
 void TMR0::put(unsigned int new_value)
 {
+  Dprintf(("\n"));
+
   trace.raw(write_trace.get() | value.get());
   put_value(new_value);
 }
@@ -246,7 +264,7 @@ unsigned int TMR0::get(void)
 }
 void TMR0::new_prescale(void)
 {
-  //cout << "tmr0 new_prescale\n";
+  Dprintf(("\n"));
 
   unsigned int new_value;
 
@@ -369,7 +387,7 @@ void TMR0::new_clock_source(void)
 void TMR0::callback(void)
 {
 
-  //cout<<"TMR0 rollover: " << hex << cycles.value << '\n';
+  Dprintf(("0x%llx\n",cycles.value));
 
   if((state & 1) == 0) {
 

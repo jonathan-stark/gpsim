@@ -1,3 +1,14 @@
+2005-10-03 Scott Dattalo <scott@dattalo.com>
+	* src/tmr0.cc, regression/tmr0_16bit/tmr0_16bit.asm: tmr0
+	clear_break was getting called recursively. The tmr0 regression
+	test now checks psa combinations.
+
+2005-10-08 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/p12x.cc, src/p16x5x.cc, src/p16x5x.h, src/stimuli.cc,
+	src/tmr0.cc, src/tmr0.h: Added support for clocking TMR0 from an
+	external source. This applies to the 12-bit core where TMR0 is a
+	dedicated pin.
+
 2005-10-08 Borut Razem <borut.razem@siol.net>
 	* src/processor.cc: fixed the "processor list" problem
 	* gpsim/makefile.mingw, gpsim/gpsim.vcproj, plat/win32/gpsim.nsi,

@@ -44,7 +44,7 @@ Run gpsim by typing:
 $ gpsim --help
 
 gpsim - the GNUPIC simulator
-version: 0.21.3
+version: 0.21.11
  
  
 type help for help
