@@ -45,6 +45,13 @@ public:
   PicPortRegister  *m_portb;
   PicTrisRegister  *m_trisb;
 
+#ifdef USE_PIN_MODULE_FOR_TOCKI
+  PinModule    *m_tocki;
+#else
+  PicPortRegister  *m_tocki;
+  PicTrisRegister  *m_trist0;
+#endif
+  
   virtual PROCESSOR_TYPE isa(){return _P16C54_;};
   virtual void create_symbols();
 

@@ -1059,7 +1059,8 @@ double IOPIN::get_Vth()
 char IOPIN::getBitChar()
 {
   if(!snode)
-    return 'Z';  // High impedance - unknown state.
+    return getForcedDrivenState();      // RCP - Changed to match IO_bi_directional
+//  was  return 'Z';  // High impedance - unknown state.
 
   if(snode->get_nodeZth() > ZthFloating)
     return 'Z';

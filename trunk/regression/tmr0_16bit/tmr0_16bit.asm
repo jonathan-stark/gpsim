@@ -17,8 +17,35 @@ temp2           RES     1
 failures        RES     1
 
 TMR0_RollOver	RES	1
+tmr0Lo		RES	1
+tmr0Hi		RES	1
+psa		RES	1
 
+  GLOBAL tmr0Lo, tmr0Hi
+  GLOBAL psa
   GLOBAL done
+
+
+DELAY	macro	delay
+ local Ldc1, Ldc2
+
+	MOVLW	delay
+Ldc1:	ADDLW	-3	;3-cycle delay loop
+	BC	Ldc1
+
+  ; W now contains either -3 (0xFD), -2 (0xFE) or -1 (0xFF).
+  ; The -2 case needs to be delayed an extra cycle more than
+  ; the -3 case, and the -1 case needs yet another cycle of delay.
+  ;
+  ; Examine the bottom two bits and W to determine the exact delay
+  ;
+
+	BTFSS   WREG,1
+	 BRA	Ldc2	;W=0xFD - no extra delay needed
+	RRCF	WREG,F
+	BC	Ldc2
+Ldc2:
+  endm
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
@@ -58,11 +85,12 @@ ExitInterrupt:
 MAIN	CODE
 
 Start:	
-
   ; At reset, all bits of t0Con should be set.
   .assert "t0con == 0xff"
 	nop
 
+
+TMR0_8BitModeTest:
   ; Stop the timer and clear its value
 	CLRF	T0CON
 	CLRF	TMR0L
@@ -81,15 +109,145 @@ Start:
 
   ; 8-bit mode tests
 
+	CLRF	psa
+;	incf	psa,F
+; 	bsf	psa,2
+
+L1_tmr0_8BitModeTest:
+
+	CLRF	T0CON
 	CLRF	TMR0L
+	CLRF	tmr0Lo
+
 	MOVLW	(1<<TMR0ON) | (1<<T08BIT) | (1<<PSA)
+
+
+	MOVF	psa,F
+	BZ	L_psaInitComplete
+	DECF	psa,W
+	ANDLW	7
+	IORLW	(1<<TMR0ON) | (1<<T08BIT)
+		
+L_psaInitComplete:
 	MOVWF	T0CON
   ;
   ; tmr0 is running now. It should be incrementing once every instruction cycle. 
+  ;
+	MOVF	TMR0L,W
+	MOVF	TMR0H,W
+	MOVWF	tmr0Hi
+
+  .assert "tmr0l == ((tmr0Lo+4)>>psa)"
 	NOP
+  .assert "tmr0l == ((tmr0Lo+5)>>psa)"
 	NOP
+  .assert "tmr0l == ((tmr0Lo+6)>>psa)"
 	NOP
+  .assert "tmr0l == ((tmr0Lo+7)>>psa)"
 	NOP
+  .assert "tmr0l == ((tmr0Lo+8)>>psa)"
+	NOP
+  .assert "tmr0l == ((tmr0Lo+9)>>psa)"
+	NOP
+  .assert "tmr0l == ((tmr0Lo+10)>>psa)"
+	NOP
+
+  ; 8 23-cycle delays.
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+33)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+56)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+79)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+102)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+125)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+148)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+171)>>psa )"
+	NOP
+
+	MOVLW	23 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+194)>>psa )"
+	NOP
+
+  ; 255 and 256 cycle boundary condition
+
+	MOVLW	61 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == ((tmr0Lo+255)>>psa )"
+	NOP
+
+  .assert "tmr0l == (((tmr0Lo+256)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+507)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+758)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+1009)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+1260)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+1511)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+1762)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+2013)>>psa)&0xff)"
+	NOP
+
+	MOVLW	251 - 11
+	RCALL	DelayCycles
+  .assert "tmr0l == (((tmr0Lo+2264)>>psa)&0xff)"
+	NOP
+
+	INCF	psa,F
+	btfss	psa,3
+	 bra	L1_tmr0_8BitModeTest
+
 	NOP
 	NOP
 	NOP
@@ -109,5 +267,29 @@ failed:
   .assert  ",\"*** FAILED 16bit-core TMR0 test\""
         bra     done
 
+;------------------------------------------------------------
+; DelayCycles:
+;
+; Input:   W -- the desired delay
+; Output:  Returns after W+7 cycles
 
-        end
+DelayCycles:
+
+dc1:	ADDLW	-3	;3-cycle delay loop
+	BC	dc1
+
+  ; W now contains either -3 (0xFD), -2 (0xFE) or -1 (0xFF).
+  ; The -2 case needs to be delayed an extra cycle more than
+  ; the -3 case, and the -1 case needs yet another cycle of delay.
+  ;
+  ; Examine the bottom two bits and W to determine the exact delay
+  ;
+
+	BTFSS   WREG,1
+	 BRA	dc2	;W=0xFD - no extra delay needed
+	RRCF	WREG,F
+	BC	dc2
+dc2:    RETURN
+
+
+ end
