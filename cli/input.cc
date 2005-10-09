@@ -903,8 +903,10 @@ void initialize_readline (void)
   channel = g_io_channel_unix_new (fileno(stdin));
 
 #ifdef _WIN32
+#if GLIB_MAJOR_VERSION < 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 6)
   /* set console to raw mode */ 
   win32_set_is_readable(channel);
+#endif
 
   // The channel is not readable if it is a redirected
   // standard input, in which case we will not be getting

@@ -151,6 +151,9 @@ I2C_EE::I2C_EE(void)
 
   bus_state = IDLE;
   ee_busy = false;
+  bit_count = 0;
+  xfr_addr = 0;
+  xfr_data = 0;
 
 }
 

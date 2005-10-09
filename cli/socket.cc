@@ -492,7 +492,9 @@ void Socket::AssignChannel(gboolean (*server_function)(GIOChannel *,GIOCondition
     GIOStatus stat;
 
     stat = g_io_channel_set_encoding (channel, NULL, &err);
-    stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+#if !defined _WIN32 || defined _DEBUG
+	stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
+#endif
 #endif
 
     g_io_add_watch(channel, 
@@ -1114,7 +1116,9 @@ static gboolean server_callback(GIOChannel *channel,
     GIOStatus stat;
     gsize b;
 
+#if !defined _WIN32 || defined _DEBUG
     g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+#endif
     stat = g_io_channel_read_chars(channel, 
 				   s->packet->rxBuff(), 
 				   s->packet->rxSize(), 
@@ -1181,8 +1185,10 @@ static gboolean sink_server_accept(GIOChannel *channel, GIOCondition condition, 
   GIOStatus stat;
 
   stat = g_io_channel_set_encoding (channel, NULL, &err);
+#if !defined _WIN32 || defined _DEBUG
   //stat = g_io_channel_set_flags (channel, G_IO_FLAG_SET_MASK, &err);
   stat = g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, &err);
+#endif
 #endif
 
   g_io_add_watch(new_channel, 

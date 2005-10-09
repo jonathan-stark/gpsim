@@ -1,3 +1,11 @@
+2005-10-09 Borut Razem <borut.razem@siol.net>
+	* plat/win32/fd2raw.cpp, cli/input.cc: win32_set_is_readable() not
+	  needed for glib >= 2.6
+	* src/sim_context.cc, src/i2c_ee.cc: fixed the p12ce518 regression
+	  test problem
+	* cli/socket.cc: g_io_channel_set_flags() not implemented on WIN32;
+	  call it only on non-WIN32 platforms or if _DEBUG
+
 2005-10-03 Scott Dattalo <scott@dattalo.com>
 	* src/tmr0.cc, regression/tmr0_16bit/tmr0_16bit.asm: tmr0
 	clear_break was getting called recursively. The tmr0 regression
