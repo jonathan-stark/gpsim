@@ -94,6 +94,7 @@ bool win32_fd_to_raw(int fd)
 }
 
 
+#if GLIB_MAJOR_VERSION < 2 || (GLIB_MAJOR_VERSION == 2 && GLIB_MINOR_VERSION < 6)
 /*
  * set is_readable flag for character device channel
  * (this should be done in giowin32.c, g_io_win32_fd_get_flags_internal();
@@ -149,3 +150,4 @@ void win32_set_is_readable(GIOChannel *channel)
         }
     }
 }
+#endif

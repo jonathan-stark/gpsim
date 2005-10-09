@@ -179,7 +179,7 @@ int CSimulationContext::LoadProgram(const char *filename,
                                     const char *pProcessorType) {
   bool bReturn = false;
   Processor *pProcessor;
-  FILE * pFile = fopen_path (filename, "r");
+  FILE * pFile = fopen_path (filename, "rb");
   if(pFile == NULL) {
     char cw[_MAX_PATH];
 //    GetCurrentDirectory(_MAX_PATH, cw);
