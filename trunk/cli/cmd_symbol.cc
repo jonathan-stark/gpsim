@@ -86,7 +86,12 @@ void cmd_symbol::dump_one(Value *s)
 void cmd_symbol::add_one(const char *sym_name, Expression *expr)
 {
   Value * pVal = expr->evaluate();
-  pVal->new_name(sym_name);
-  get_symbol_table().add(pVal);
+  if (pVal) {
+    pVal->new_name(sym_name);
+    pVal->setClearableSymbol(false);
+    pVal->set_description("Derived from the command line.");
+    if (!get_symbol_table().add(pVal))
+      delete pVal;
+  }
 }
 

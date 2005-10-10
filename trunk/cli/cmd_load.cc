@@ -131,10 +131,12 @@ int cmd_load::load(int bit_flag,const char *filename)
   // is being loaded.
 
   redisplay_prompt();
+
   return iReturn;
 }
 
-int cmd_load::load(Value *file, Value *pProcessorType) {
+int cmd_load::load(Value *file, Value *pProcessorType)
+{
   cout << endl;
   string sFile;
   string sProcType;
@@ -145,11 +147,10 @@ int cmd_load::load(Value *file, Value *pProcessorType) {
     psProcessorType = sProcType.c_str();
   }
 
-  return gpsim_open(get_active_cpu(), sFile.c_str(),
-    psProcessorType);
+  return gpsim_open(get_active_cpu(), sFile.c_str(), psProcessorType);
 }
 
-int cmd_load::load(const char *file, const char *pProcessorType) {
-  return gpsim_open(get_active_cpu(), file,
-    pProcessorType);
+int cmd_load::load(const char *file, const char *pProcessorType)
+{
+  return gpsim_open(get_active_cpu(), file, pProcessorType);
 }

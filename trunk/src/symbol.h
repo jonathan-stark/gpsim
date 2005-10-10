@@ -270,11 +270,12 @@ public:
   ///
   ///   Symbols defined from gpsim command line
   ///
+  /*
   typedef list<char*> SymbolList;
   SymbolList s_CmdLineSymbolList;
   void AddFromCommandLine(char * pSymbol);
   void PopulateWithCommandLineSymbols();
-
+  */
 };
 
 

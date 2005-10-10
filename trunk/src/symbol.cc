@@ -132,7 +132,8 @@ void Symbol_Table::add_stimulus(stimulus *s)
   }
 }
 
-bool Symbol_Table::add(Value *s) {
+bool Symbol_Table::add(Value *s)
+{
   if(s) {
     if(s->name().empty()) {
       printf("Symbol_Table::add() attempt to add a symbol with no name: %s",
@@ -143,8 +144,6 @@ bool Symbol_Table::add(Value *s) {
         s, NameLessThan());
       if (it != end() &&
         (*it)->name() == s->name()) {
-//          printf("Symbol_Table::add(): Warning: previous symbol %s overwritten\n", s->name().c_str());
-//          erase(it);
         GetUserInterface().DisplayMessage(
             "Symbol_Table::add(): Warning: failed to add symbol "
             "because a symbol by the name '%s' already exists, new object is type %s\n",
@@ -152,82 +151,25 @@ bool Symbol_Table::add(Value *s) {
         return false;
       }
       insert(it, s);
-// for testing
-//      GetUserInterface().DisplayMessage("Symbol added: %s\n",
-//        s->name().c_str());
+
       return true;
     }
   }
   return false;
 }
 
-void Symbol_Table::AddFromCommandLine(char * pSymbol) {
-  char *pSymName;
-  char *pSymValue = strchr(pSymbol, '=');
-  // The name and value are stored as single string with
-  // a null character delimiting between the name and value.
-  if(pSymValue == NULL) {
-    // if no equals sign, define as a null string value
-    pSymName = (char*)malloc(strlen(pSymbol) + 2);   // space for two null chars
-    strcpy(pSymName, pSymbol);
-    pSymValue = strchr(pSymName, 0);
-    pSymValue++;
-    *pSymValue = 0;
-  }
-  else {
-    pSymName = strdup(pSymbol);
-    pSymValue = strchr(pSymName, '=');
-    *pSymValue = 0;
-    pSymValue++;
-  }
-  // Stored each name value pair from the command line it
-  // its own list container.
-  s_CmdLineSymbolList.push_back(pSymName);
-}
-
-void Symbol_Table::PopulateWithCommandLineSymbols() {
-  Value *pValue;
-  SymbolList::iterator it;
-  char *pSymName;
-  char *pSymValue;
-  for(it = s_CmdLineSymbolList.begin(); it != s_CmdLineSymbolList.end(); it++) {
-    pSymName = *it;
-    pSymValue = strchr(pSymName, 0) + 1;
-    if(*pSymValue == '\'' || *pSymValue == '\"') {
-      char * pUnquoted = UnquoteString(strdup(pSymValue));
-      pValue = new String(pSymName, pUnquoted);
-      free(pUnquoted);
-    }
-    else {
-      pValue = Integer::New(pSymName, pSymValue, "derived from gpsim command line");
-      if(pValue == NULL) {
-        pValue = Float::New(pSymName, pSymValue, "derived from gpsim command line");
-        if(pValue == NULL) {
-          pValue = Boolean::New(pSymName, pSymValue, "derived from gpsim command line");
-          if(pValue == NULL) {
-            // assume string
-            pValue = new String(pSymName, pSymValue);
-          }
-        }
-      }
-    }
-    pValue->setClearableSymbol(false);
-    add(pValue);
-  }
-}
-
-register_symbol *
-Symbol_Table::add_register(Register *new_reg, const char *symbol_name)
+//------------------------------------------------------------------------
+// add_register
+register_symbol *Symbol_Table::add_register(Register *new_reg, const char *symbol_name)
 {
   // mask of zero lets the register_symbol calculate a default mask
   return add_register(new_reg, symbol_name, 0);
 }
 
-register_symbol *
-Symbol_Table::add_register(Register *new_reg, const char *symbol_name,
-                           unsigned int uMask)
+register_symbol * Symbol_Table::add_register(Register *new_reg, 
+					     const char *symbol_name,
+					     unsigned int uMask)
 {
-
   if(!new_reg)
     return 0;
 
@@ -264,7 +206,6 @@ void Symbol_Table::add_w(WREG *new_w)
 
 void Symbol_Table::add_constant(const char *_name, int value, bool bClearable)
 {
-
   Integer *i = new Integer(value);
   i->new_name(_name);
   i->setClearableSymbol(bClearable);
@@ -297,7 +238,8 @@ void Symbol_Table::add_module(Module * m, const char *cPname)
   }
 }
 
-void Symbol_Table::remove_module(Module * m) {
+void Symbol_Table::remove_module(Module * m)
+{
   iterator sti = FindIt(m->name());
   Value *sym;
 
@@ -331,7 +273,6 @@ void Symbol_Table::rename(const char *pOldName, const char *pNewName)
     if(it != end() && (*it)->name() == pOldName) {
       Value *pValue = *it;
       erase(it);
-      // pValue->gpsimObject::new_name(pNewName);
       pValue->new_name(pNewName);
       add(pValue);
     }
@@ -551,12 +492,14 @@ _symbol_iterator_t Symbol_Table::endSymbol(_symbol_iterator_t *pit, _symbol_t*ps
   return _symbol_iterator_t(this,_Myt::end());
 }
 
-Symbol_Table::node_symbol_iterator Symbol_Table::beginNodeSymbol() {
+Symbol_Table::node_symbol_iterator Symbol_Table::beginNodeSymbol()
+{
   return (node_symbol_iterator)beginSymbol((node_symbol_iterator*)0,
-    (node_symbol*)0);
+					   (node_symbol*)0);
 }
 
-Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol() {
+Symbol_Table::node_symbol_iterator Symbol_Table::endNodeSymbol()
+{
     return endSymbol((node_symbol_iterator*) 0, (node_symbol*)0);
 }
 
@@ -713,11 +656,15 @@ void Symbol_Table::clear() {
 //  remove_if(begin(), end(), IsClearable);
 }
 
-void Symbol_Table::Initialize() {
+void Symbol_Table::Initialize() 
+{
+#if 0
   PopulateWithCommandLineSymbols();
+#endif
 }
 
-void Symbol_Table::Reinitialize() {
+void Symbol_Table::Reinitialize()
+{
   clear();
 }
 

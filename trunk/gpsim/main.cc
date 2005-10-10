@@ -82,6 +82,10 @@ void initialize_ConsoleUI();
 
 #define FILE_STRING_LENGTH 50
 
+//----------------------------------------------------------
+// Here are the variables that popt (the command line invocation parsing
+// library) will assign values to:
+
 static char *startup_name = "";
 static char *processor_name = "";
 static char *cod_name     = "";
@@ -92,12 +96,25 @@ static char *defineSymbol = "";
 static char *sExitOn      = "";
 static char *sourceEnabled = "";
 
+
 #define POPT_MYEXAMPLES { NULL, '\0', POPT_ARG_INCLUDE_TABLE, poptHelpOptions, \
 			0, "Examples:\n\
   gpsim -s myprog.cod          <-- loads a symbol file\n\
   gpsim -p p16f877 myprog.hex  <-- select processor and load hex\n\
   gpsim -c myscript.stc        <-- loads a script\n\
 \nHelp options:", NULL },
+
+//------------------------------------------------------------------------
+// see popt documentation about how the poptOption structure is defined.
+//  In general, we define legal invocation arguments in this structure.
+// Both the long name (like --processor) and the short name (like -p)
+// are defined. The popt library will assign values to variables if
+// a pointer to a variable is supplied. Some options like the 'echo'
+// option have no associated varaible. After the variable name, the
+// poptOption structure contains a 'val' field. If this is 0 then popt
+// will assign an option to a variable when poptGetNextOpt is called. 
+// Otherwise, poptGetNextOpt will return the value of 'val' and allow
+// gpsim to interpret and further parse the option.
 
 struct poptOption optionsTable[] = {
   //  { "help", 'h', 0, 0, 'h',
@@ -180,10 +197,17 @@ main (int argc, char *argv[])
   char command_str[256];
   poptContext optCon;     // context for parsing command-line options
 
+  // Perform basic initialization before parsing invocation arguments
+
   optCon = poptGetContext(0, argc, (const char **)argv, optionsTable, 0);
-  //poptSetOtherOptionHelp(optCon, "[-h] [-p <device> [<hex_file>]] [-c <stc_file>]");
 
   welcome();
+
+  InitSourceSearchAsSymbol();
+  initialize_ConsoleUI();
+  initialize_gpsim_core();
+  initialize_gpsim();
+  initialize_commands();
 
   if(argc>=2) {
     while ((c = poptGetNextOpt(optCon)) >= 0  && !usage) {
@@ -214,9 +238,12 @@ main (int argc, char *argv[])
         break;
 
       case 'D':
-        // add symbols on the command line to the symbol table.
-        get_symbol_table().AddFromCommandLine(defineSymbol);
-        defineSymbol = "";
+        // add symbols defined at the invocation to the symbol table.
+	snprintf(command_str, sizeof(command_str),
+		 "symbol %s\n",defineSymbol);
+	parse_string(command_str);
+	printf("Execute command: %s",command_str);
+	defineSymbol = "";
         break;
 
       case 'S':
@@ -269,11 +296,6 @@ main (int argc, char *argv[])
 #ifdef HAVE_GUI  
   get_interface().setGUImode(bUseGUI);
 #endif
-  InitSourceSearchAsSymbol();
-  initialize_ConsoleUI();
-  initialize_gpsim_core();
-  initialize_gpsim();
-  initialize_commands();
   initialize_readline();
 
   // must be done after initialize_gpsim_core()
@@ -342,7 +364,6 @@ main (int argc, char *argv[])
 
   if(abort_gpsim)
     exit_gpsim();
-
 
   // Now enter the event loop and start processing user
   // commands.

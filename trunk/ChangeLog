@@ -1,3 +1,8 @@
+2005-10-10 Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc, cli/cmd_load.cc, cli/cmd_symbol.cc,
+	src/symbol.cc, src/symbol.h: Simplified the way user defined
+	symbols are added to the symbol table.
+
 2005-10-09 Borut Razem <borut.razem@siol.net>
 	* plat/win32/fd2raw.cpp, cli/input.cc: win32_set_is_readable() not
 	  needed for glib >= 2.6
