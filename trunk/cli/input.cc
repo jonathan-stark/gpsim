@@ -155,7 +155,7 @@ class LLInput {
 public:
 
   LLInput();
-  LLInput(char *,Macro *);
+  LLInput(const char *,Macro *);
   ~LLInput();
 
   Macro *macro;  // macro generating this text
@@ -174,7 +174,7 @@ public:
 
   void Push();
   void Pop();
-  void Append(char *, Macro *);
+  void Append(const char *, Macro *);
   LLInput *GetNext();
 
   void print();
@@ -193,7 +193,7 @@ LLInput::LLInput()
 {
 }
 
-LLInput::LLInput(char *s,Macro *m)
+LLInput::LLInput(const char *s,Macro *m)
   : macro(m), next_input(0)
 {
   data = strdup(s);
@@ -346,7 +346,7 @@ void LLStack::Pop()
   }
 }
 
-void LLStack::Append(char *s, Macro *m)
+void LLStack::Append(const char *s, Macro *m)
 {
   
   LLInput *d = new LLInput(s,m);
@@ -395,7 +395,7 @@ LLInput *LLStack::GetNext()
 
 /*******************************************************
  */
-void add_string_to_input_buffer(char *s, Macro *m=0)
+void add_string_to_input_buffer(const char *s, Macro *m=0)
 {
   if(!Stack)
     Stack = new LLStack();
@@ -943,8 +943,11 @@ char *CCliCommandHandler::GetName()
 int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
 {
   
-  return parse_string((char*)commandline);
-
+  start_new_input_stream();
+  add_string_to_input_buffer("\n");
+  add_string_to_input_buffer(commandline);
+  return 1;
+  //return parse_string((char*)commandline);
 }
 int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
 {

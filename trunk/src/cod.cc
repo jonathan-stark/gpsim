@@ -573,10 +573,15 @@ void PicCodProgramFileType::read_message_area(Processor *cpu)
 	case 'c':
 	case 'C':
 	  // gpsim command
-	  // The 'C' option in gpasm specifies a single gpsim command that is
+	  // The 'c'/'C' option in gpasm specifies a single gpsim command that is
 	  // to be invoked whenever the address associated with this directive
 	  // is being simulated.
-
+	  {
+	    bool bPost = DebugType == 'c';
+	    CommandAssertion *pCA = new CommandAssertion(cpu,laddress,0,
+							DebugMessage,bPost);
+	    get_bp().set_breakpoint(pCA);
+	  }
         case 'f':
         case 'F':
           // printf

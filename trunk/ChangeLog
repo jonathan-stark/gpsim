@@ -1,3 +1,15 @@
+2005-10-09 Scott Dattalo <scott@dattalo.com>
+	* regression/tmr0_16bit/tmr0_16bit.asm: More tmr0 regressions
+	testing
+	* src/cod.cc, src/breakpoints.h, src/breakpoints.cc: Added the
+	CommandAssertion class. These are assertions that are associated
+	with instructions in such a way that when an instruction executes,
+	the command assertion will issue a gpsim command line command.
+	* gpsim/main.cc: removed a debug printf.
+	* cli/input.cc, cmd_macro.cc, cli/ui_gpsim.cc: command assertions
+	were getting inserted into the end of the command line input
+	stream as opposed to interjected immediately.
+
 2005-10-10 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, cli/cmd_load.cc, cli/cmd_symbol.cc,
 	src/symbol.cc, src/symbol.h: Simplified the way user defined
@@ -11,7 +23,7 @@
 	* cli/socket.cc: g_io_channel_set_flags() not implemented on WIN32;
 	  call it only on non-WIN32 platforms or if _DEBUG
 
-2005-10-03 Scott Dattalo <scott@dattalo.com>
+2005-10-08 Scott Dattalo <scott@dattalo.com>
 	* src/tmr0.cc, regression/tmr0_16bit/tmr0_16bit.asm: tmr0
 	clear_break was getting called recursively. The tmr0 regression
 	test now checks psa combinations.

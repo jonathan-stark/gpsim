@@ -9,6 +9,12 @@
         radix   dec                     ; Numbers are assumed to be decimal
 
 ;----------------------------------------------------------------------
+
+; Printf Command
+.command macro x
+  .direct "C", x
+  endm
+
 ;----------------------------------------------------------------------
 GPR_DATA                UDATA
 temp            RES     1
@@ -91,6 +97,9 @@ Start:
 
 
 TMR0_8BitModeTest:
+
+ .command  "echo *** Testing 8-bit mode"
+
   ; Stop the timer and clear its value
 	CLRF	T0CON
 	CLRF	TMR0L
@@ -106,36 +115,53 @@ TMR0_8BitModeTest:
 	MOVWF	TMR0H
   .assert "tmr0h == 42"
 
-
+  ;------------------------------------------------------------
   ; 8-bit mode tests
+  ;
+  ; First, TMR0 is tested in 8-bit mode and with interrupts disabled.
+  ; All 8 combinations of PSA are tested.
 
-	CLRF	psa
-;	incf	psa,F
-; 	bsf	psa,2
+	CLRF	psa	; Shadow's the PSA bits of T0CON
 
-L1_tmr0_8BitModeTest:
+L1_tmr0_8BitModeTest:   ; Beginning of the loop
 
-	CLRF	T0CON
+    ; Start off with T0CON and TMR0L in a known state.
+
+;  .command  "psa"
+	CLRF	T0CON	
 	CLRF	TMR0L
 	CLRF	tmr0Lo
 
+    ; Assume that the PSA is not assigned to TMR0:
+
 	MOVLW	(1<<TMR0ON) | (1<<T08BIT) | (1<<PSA)
 
-
+    ; if psa is non-zero then the prescaler *is* assigned to tmr0
 	MOVF	psa,F
 	BZ	L_psaInitComplete
+
+    ; psa is one greater than the actually Prescale bits
 	DECF	psa,W
 	ANDLW	7
 	IORLW	(1<<TMR0ON) | (1<<T08BIT)
 		
 L_psaInitComplete:
 	MOVWF	T0CON
-  ;
-  ; tmr0 is running now. It should be incrementing once every instruction cycle. 
-  ;
+    ;
+    ; tmr0 is running now. It should increment once every PSA cycles.
+    ;
+
 	MOVF	TMR0L,W
 	MOVF	TMR0H,W
 	MOVWF	tmr0Hi
+
+    ; Now we'll check TMR0L after various delays. The assertion works
+    ; by reading tmr0l and comparing it to the number of cycles that
+    ; have gone by since the timer started. The shift right by 'psa' allows
+    ; the same assertion to be used as we loop through all combinations
+    ; of psa.
+
+    ; Single cycle checks.
 
   .assert "tmr0l == ((tmr0Lo+4)>>psa)"
 	NOP
@@ -150,99 +176,84 @@ L_psaInitComplete:
   .assert "tmr0l == ((tmr0Lo+9)>>psa)"
 	NOP
   .assert "tmr0l == ((tmr0Lo+10)>>psa)"
-	NOP
 
   ; 8 23-cycle delays.
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+33)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+56)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+79)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+102)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+125)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+148)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+171)>>psa )"
-	NOP
 
-	MOVLW	23 - 11
+	MOVLW	23 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+194)>>psa )"
-	NOP
 
   ; 255 and 256 cycle boundary condition
 
-	MOVLW	61 - 11
+	MOVLW	61 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == ((tmr0Lo+255)>>psa )"
 	NOP
 
   .assert "tmr0l == (((tmr0Lo+256)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+  ; now for some bigger delays.
+
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+507)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+758)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+1009)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+1260)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+1511)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+1762)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+2013)>>psa)&0xff)"
-	NOP
 
-	MOVLW	251 - 11
+	MOVLW	251 - 10
 	RCALL	DelayCycles
   .assert "tmr0l == (((tmr0Lo+2264)>>psa)&0xff)"
-	NOP
+
 
 	INCF	psa,F
 	btfss	psa,3
