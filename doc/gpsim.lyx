@@ -37,7 +37,7 @@ T.
  Scott Dattalo
 \layout Date
 
-05 JUNE 2005
+11 OCTOBER 2005
 \layout Standard
 
 
@@ -1092,6 +1092,12 @@ The break command is used to set and examine break points.
  Break points halt the simulation when the condition associated with them
  is true.
  Break points are ignored during single stepping.
+ See chapter 
+\begin_inset LatexCommand \ref{cha:Assertions-and-Extended}
+
+\end_inset 
+
+ for more examples of breakpoints.
 \layout Subsubsection*
 
 Examining break points
@@ -1246,6 +1252,20 @@ Attributes are parameters that gpsim and its modules expose to the user
 ts.
  This feature is intend mainly for module writers to provide a mechanism
  for allowing the user to control the module.
+\layout Subsubsection*
+
+Cycle counter Breakpoints
+\layout LyX-Code
+
+break c 
+\emph on 
+cycle_number
+\layout Standard
+
+The cycle counter is gpsim's time keeper.
+ It increments once every instruction cycle.
+ The 'c' option to the break command allows a break point to be set at a
+ particular value of the cycle counter.
 \layout Section
 
 clear
@@ -3009,84 +3029,117 @@ The rollover value specifies the range the cycle counter can be in (a modulo
  large.
 \layout Chapter
 
-Controlling the Flow: Break Points
+
+\begin_inset LatexCommand \label{cha:Assertions-and-Extended}
+
+\end_inset 
+
+Assertions and Extended Breakpoints
 \layout Standard
 
-One of gpsim's strong features is the flexibility provided with break points.
- Most simulators are limited to execution type break points.
+gpsim supports a wide variety of breakpoints and assertions.
+ Many of these were described with the break command.
+ This section will illustrate how to extend the break command even further
+ and introduce simulation assertions.
  
+\layout Subsection*
+
+Breakpoint Messages
 \layout Standard
 
-If you want to set break points on registers, on execution cycles, invalid
- program locations, stack over flows, etc.
- then you're usually forced to debug your code with an ICE.
- 
-\layout Section
-
-Execution Break Points
-\layout Standard
-
-An execution break point is one that will halt a running program when the
- program memory address at which it is set is encountered.
- For example, if you were debugging a mid-ranged PIC and wished to stop
- execution when ever an interrupt occurs, you could set a break point at
- program memory address 0x04:
+A breakpoint message is an ASCII string that is displayed whenever a breakpoint
+ is encountered.
+ Any break point can have an associated message.
+ The syntax at the command line is
 \layout LyX-Code
 
-gpsim> break e 4
-\layout Standard
-
-(To be more precise, an interrupt doesn't have to occur for this break point
- to be encountered - errant code could have branched here too).
-\layout Standard
-
-The break point occurs BEFORE the instruction executes.
- Other simulators such as MPLAB break after the instruction executes.
- In many cases this distinction is insignificant.
- However, if the break is set on a 'goto' or 'call' instruction, then it's
- convenient to stop before the branch occurs.
- This way it's easy to determine from where a brance occurred.
-\layout Subsection
-
-Invalid Instruction Break Points
-\layout Standard
-
-gpsim automatically will halt execution if a program attempts to venture
- beyond its bounds.
- Program memory locations that are not defined by your source code will
- be initialized with an 'Invalid Instruction'.
- These are quite visible when you disassemble the program.
- 
-\layout Section
-
-Register Break Points
-\layout Standard
-
-gpsim provides the ability to break whenever a register accessed, either
- read or written or both.
- Furthermore, it's possible to break whenever a specific value is written
- to or read from a register.
-\layout Section
-
-Cycle Break Points
-\layout Standard
-
-Cycle break points allow the program to be halted at a specific instruction
- cycle.
- Suppose you have a 20 Mhz pic and want to break after one second of simulation
- time.
- You could set a break at the 5 millionth instruction cycle.
-\begin_inset Foot
-collapsed true
-
-\layout Standard
-
-There are 4 clock cycles per instruction.
- Also, a future feature of gpsim will provide you with the ability to set
- break points in terms of seconds.
+break conditions, 
+\begin_inset Quotes eld
 \end_inset 
 
 
+\emph on 
+This is a breakpoint message
+\emph default 
+
+\begin_inset Quotes erd
+\end_inset 
+
+
+\layout Standard
+
+The conditions are described above in the break command and are the conditions
+ under which the break occurs.
+ 
+\layout Standard
+
+Breakpoint messages are useful for distinguishing among many different breakpoin
+ts.
+ 
+\layout LyX-Code
+
+break w counter & 0xf0 == 0x80, 
+\begin_inset Quotes eld
+\end_inset 
+
+Counter overflowed!
+\begin_inset Quotes erd
+\end_inset 
+
+
+\layout Standard
+
+In this example, the user is monitoring the upper nibble of the variable
+ counter and breaking whenever it is equal to 8.
+ When the command is entered, gpsim will display:
+\layout LyX-Code
+
+break when bit pattern 1000XXXX is written to register counter(0x26).
+ break #: 0x20 
+\layout Standard
+
+The breakpoint can be queried with the break command:
+\layout LyX-Code
+
+gpsim> 
+\emph on 
+break 32
+\layout LyX-Code
+
+32: p18f452 register write value: [0x26] & 0xf0 == 0x8
+\layout LyX-Code
+
+    Message:Counter overflowed!
+\layout Standard
+
+When the simulation encounters the break, execution halts and the message
+ is printed.
+\layout Subsection*
+
+Assertions
+\layout Standard
+
+discuss how simulation assertions are embedded in .asm source.
+\layout Subsection*
+
+Command Assertions
+\layout Standard
+
+discuss how a gpsim command can be embedded in the .asm source.
+ Explain how the command executes everytime the instruction it's associated
+ with is executed.
+\layout Subsection*
+
+Embedded Simulation Scripts
+\layout Standard
+
+refer to the section on gpsim configuration scripts.
+ Explain how a script can be embedded in the asm source code.
+ Explain how this is different from a command assertion; in other words
+ the embedded scripts are extracted from the source whenever the source
+ is loaded.
+ This collection of commands is then invoked all at once - just before control
+ is given over to the user.
 \layout Chapter
 
 Trace: What has happen?

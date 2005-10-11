@@ -27,7 +27,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_macro.h"
 
 extern int parse_string(char * str);
-extern void add_string_to_input_buffer(char *s,Macro *);
+extern void add_string_to_input_buffer(const char *s,Macro *);
 extern void start_new_input_stream(void);
 class MacroLine {
   string text;
@@ -95,7 +95,7 @@ void Macro::invoke()
     for(si = body.begin();
 	si != body.end();
 	++si)
-      add_string_to_input_buffer((char *) ((*si).c_str()), this);
+      add_string_to_input_buffer( (*si).c_str(), this);
   }
 
   add_string_to_input_buffer("endm\n", this);

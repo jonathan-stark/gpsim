@@ -682,6 +682,25 @@ public:
   virtual void action(void);
 };
 
+class CommandAssertion : public Breakpoint_Instruction
+{
+public:
+  bool bPostAssertion; // True if assertion is checked after instruction simulates.
+
+  CommandAssertion(Processor *new_cpu, 
+                   unsigned int instAddress, 
+                   unsigned int bp,
+                   const char *_command,
+                   bool bPostAssertion
+                   );
+
+  virtual void execute(void);
+  virtual void print(void);
+  virtual char const * bpName() { return "Register Assertion"; }
+private:
+  char *command;
+};
+
 class Log_Register_Write : public Break_register_write
 {
  public:

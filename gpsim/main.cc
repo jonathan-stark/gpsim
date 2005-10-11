@@ -238,11 +238,10 @@ main (int argc, char *argv[])
         break;
 
       case 'D':
-        // add symbols defined at the invocation to the symbol table.
+        // add symbols defined with '-D' to the symbol table.
 	snprintf(command_str, sizeof(command_str),
 		 "symbol %s\n",defineSymbol);
 	parse_string(command_str);
-	printf("Execute command: %s",command_str);
 	defineSymbol = "";
         break;
 

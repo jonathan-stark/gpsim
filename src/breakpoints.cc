@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 #include <iomanip>
 
 #include "cmd_gpsim.h"
+#include "cmd_manager.h"
 #include "../config.h"
 #include "pic-processor.h"
 #include "breakpoints.h"
@@ -1517,6 +1518,50 @@ void Break_register_write_value::setbit(unsigned int bit_number, bool new_bit)
   m_replaced->setbit(bit_number,new_value ? true  : false);
 
 }
+//------------------------------------------------------------------------
+// CommandAssertion
+//
+// Associates a gpsim command with an instruction. I.e. when the simulated
+// instruction is executed, the gpsim command will execute first and then
+// the instruction is simulated.
+
+
+CommandAssertion::CommandAssertion(Processor *new_cpu, 
+                                   unsigned int instAddress, 
+                                   unsigned int bp,
+                                   const char *_command,
+                                   bool _bPostAssertion)
+  : Breakpoint_Instruction(new_cpu, instAddress, bp), bPostAssertion(_bPostAssertion)
+{
+  int len = (int)strlen(_command);
+  command = (char *)malloc(len+3);
+  strcpy(command,_command);
+  command[len]   = '\n';
+  command[len+1] = '\n';
+  command[len+2] = 0;
+}
+
+void CommandAssertion::execute()
+{
+  if(bPostAssertion && m_replaced)
+    m_replaced->execute();
+
+  //printf("execute command: %s -- post = %s\n",command,(bPostAssertion?"true":"false"));
+
+  ICommandHandler *pCli = CCommandManager::GetManager().find("gpsimCLI");
+  pCli->Execute(command, 0);
+
+  if(!bPostAssertion && m_replaced)
+    m_replaced->execute();
+}
+
+//------------------------------------------------------------------------------
+void CommandAssertion::print()
+{
+  Breakpoint_Instruction::print();
+  cout << "  execute command " << command << endl;
+}
+
 
 //============================================================================
 

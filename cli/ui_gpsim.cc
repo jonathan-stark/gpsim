@@ -240,7 +240,7 @@ void CGpsimUserInterface::SetValueMask(unsigned int uMask) {
 
 // From input.cc
 class Macro;
-void add_string_to_input_buffer(char *s, Macro *m=0);
+void add_string_to_input_buffer(const char *s, Macro *m=0);
 
 void CGpsimUserInterface::NotifyExitOnBreak(int iExitCode) {
   add_string_to_input_buffer("abort_gpsim_now\n");
