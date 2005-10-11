@@ -1,3 +1,8 @@
+2005-10-11 Borut Razem <borut.razem@siol.net>
+	* regression/usart_test/usart_test.asm, regression/logic_test/logic_test.asm,
+	  modules/makefile.mingw, gui/gui_breadbord.cc, plat/win32/gpsim.nsi:
+	  gpsim_modules.dll renamed to libgpsim_modules.dll
+
 2005-10-09 Scott Dattalo <scott@dattalo.com>
 	* regression/tmr0_16bit/tmr0_16bit.asm: More tmr0 regressions
 	testing

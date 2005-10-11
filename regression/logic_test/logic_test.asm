@@ -72,7 +72,7 @@ start
 
   ; First, instantiate the gates:
 
-   .sim "module library libgpsim_modules.so"
+   .sim "module library libgpsim_modules"
    .sim "module load xor2 U1_xor"
    .sim "module load xor2 U2_xor"
    .sim "module load and2 U3_and"

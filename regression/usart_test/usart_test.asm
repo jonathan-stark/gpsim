@@ -99,7 +99,7 @@ MAIN    CODE
 start	
 
    .sim ".frequency=20e6"
-   .sim "module library libgpsim_modules.so"
+   .sim "module library libgpsim_modules"
    .sim "module load usart U1"
  ;  .sim "U1.xpos = 250.0"
 ;   .sim "U1.ypos = 80.0"

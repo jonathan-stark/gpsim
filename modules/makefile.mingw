@@ -26,7 +26,7 @@ DEFINES += -DHAVE_GUI
 
 all :				\
 	../config.h		\
-	gpsim_modules.dll 
+	libgpsim_modules.dll 
 
 modules_OBJECTS =		\
 	gpsim_modules.o		\
@@ -45,5 +45,5 @@ modules_OBJECTS =		\
 
 ################ The modules DLL
 
-gpsim_modules.dll : $(modules_OBJECTS)
-	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o gpsim_modules.dll ../plat/win32/modules.def $(modules_OBJECTS) $(LIBS)
+libgpsim_modules.dll : $(modules_OBJECTS)
+	$(CXX) $(CFLAGS) $(CLDFLAGS) -shared -o libgpsim_modules.dll ../plat/win32/modules.def $(modules_OBJECTS) $(LIBS)
