@@ -2105,7 +2105,7 @@ static void add_library(GtkWidget *button, Breadboard_Window *bbw)
 
     const char *library_name;
 
-    library_name = gui_get_string("Module library name (e.g. libgpsim_modules.so)","");
+    library_name = gui_get_string("Module library name (e.g. libgpsim_modules)","");
 
     if(library_name)
       module_load_library(library_name);

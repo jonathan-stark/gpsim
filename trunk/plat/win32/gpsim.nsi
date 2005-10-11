@@ -120,7 +120,7 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR\bin"
   SetOverwrite ifnewer
   File "${GPSIM_ROOT}\gpsim\gpsim.exe"
-  File "${GPSIM_ROOT}\modules\gpsim_modules.dll"
+  File "${GPSIM_ROOT}\modules\libgpsim_modules.dll"
   File "${GPSIM_ROOT}\plat\win32\modules.def"
   File "${PKG_ROOT}\bin\asprintf.dll"
   File "${PKG_ROOT}\bin\charset.dll"
@@ -374,7 +374,7 @@ Section Uninstall
   Delete "$INSTDIR\gpsim.ico"
   Delete "$INSTDIR\ChangeLog.txt"
 
-  Delete "$INSTDIR\bin\gpsim_modules.dll"
+  Delete "$INSTDIR\bin\libgpsim_modules.dll"
   Delete "$INSTDIR\bin\modules.def"
 
   Delete "$INSTDIR\examples\12bit\*.*"
