@@ -93,6 +93,10 @@ public:
   void add_line_number_symbol(int address);
   void update_line_number(int file, int sline, int lline, int hllfile, int hllsline);
 
+  virtual char *ReadSrcLine(char *buf, int nBytes);
+  virtual char *ReadLstLine(char *buf, int nBytes);
+  virtual char *ReadHLLLine(char *buf, int nBytes);
+
   // Some instructions require special initialization after they've
   // been instantiated. For those that do, the instruction base class
   // provides a way to control the initialization state (see the 16-bit
