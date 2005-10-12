@@ -1,3 +1,7 @@
+2005-10-12 Borut Razem <borut.razem@siol.net>
+	* regression/make.regression, regression/run_regression.sh,
+	  regression/*/Makefile: added possibility to define gpism path
+
 2005-10-12 Scott Dattalo <scott@dattalo.com>
 	* src/16bit-registers.cc, regression/tmr0_16bit/tmr0_16bit.asm:
 	The high byte of TMR0 was not getting updated during TMR0L reads.

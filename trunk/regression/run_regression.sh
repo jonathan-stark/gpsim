@@ -3,6 +3,18 @@
 # A meta-script that invokes each of the individual
 # regression tests.
 
+if [ $# -gt 1 ]
+then
+  echo "Usage: `basename $0` [ <gpsim_path> ] "
+  exit 0
+fi
+
+if [ $# -gt 0 ]
+then
+  GPSIM_PATH=$1
+  export GPSIM_PATH
+fi
+
 RT=./rt.sh
 
 # Instruction set simulation of the mid-range devices
