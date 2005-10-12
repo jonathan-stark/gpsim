@@ -106,6 +106,28 @@ void instruction::update_line_number(int file, int sline, int lline, int hllfile
   hll_src_line = hllsline;
   hll_file_id = hllfile;
 }
+char *instruction::ReadSrcLine(char *buf, int nBytes)
+{
+  if (buf && nBytes && cpu)
+    return ((Processor *)cpu)->files.ReadLine(file_id,src_line,buf,nBytes);
+
+  return buf;
+}
+char *instruction::ReadHLLLine(char *buf, int nBytes)
+{
+  if (buf && nBytes && cpu)
+    return ((Processor *)cpu)->files.ReadLine(hll_file_id,hll_src_line,buf,nBytes);
+
+  return buf;
+}
+
+char *instruction::ReadLstLine(char *buf, int nBytes)
+{
+  if (buf && nBytes && cpu)
+    return ((Processor *)cpu)->files.ReadLine(((Processor *)cpu)->files.list_id(),lst_line,buf,nBytes);
+
+  return buf;
+}
 
 //------------------------------------------------------------------------
 AliasedInstruction::AliasedInstruction(instruction *_replaced)
