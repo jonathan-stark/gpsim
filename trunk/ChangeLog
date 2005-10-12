@@ -1,4 +1,8 @@
-2005-10-09 Scott Dattalo <scott@dattalo.com>
+2005-10-12 Scott Dattalo <scott@dattalo.com>
+	* src/16bit-registers.cc, regression/tmr0_16bit/tmr0_16bit.asm:
+	The high byte of TMR0 was not getting updated during TMR0L reads.
+
+2005-10-11 Scott Dattalo <scott@dattalo.com>
 	* src/pic-instructions.cc, src/pic-instructions.h: Added methods
 	to the instruction class that provide acces to the source defining
 	an instruction (this is going to be used with tracing and

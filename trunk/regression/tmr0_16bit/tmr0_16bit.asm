@@ -2,6 +2,10 @@
         ;;
         ;; The purpose of this program is to test how well gpsim can simulate
         ;; TMR0 for a 16bit-core pic (like the 18fxxx family)
+        ;; Here are the tests performed:
+	;;
+	;; -- TMR0L and TMR0H can be read and written
+	;; -- Writing to TMR0L 
 
 	list    p=18f452                ; list directive to define processor
 	include <p18f452.inc>           ; processor specific variable definitions
@@ -95,6 +99,40 @@ Start:
   .assert "t0con == 0xff"
 	nop
 
+  ;------------------------------------------------------------
+  ; The high byte of TMR0 is exposed to the firmware as a shadow register. When
+  ; firmware writes to this register, the value is latched. When the firmware
+  ; writes the to the low byte, then the latched high byte will get copied
+  ; along with the low byte to TMR0. This allows all 16-bits to be written in a
+  ; single cycle. Similarly, when TMR0L is read, the high byte of the timer
+  ; is copied to the shadowed register. 
+
+TMR0H_ShadowRegisterTest:
+  .command  "echo *** Testing TMR0H"
+
+	MOVLW	42
+	MOVWF	TMR0H
+  .assert "tmr0h == 42"
+
+	MOVWF	TMR0L
+  .assert "tmr0l == 42"
+
+	MOVF	TMR0L,W
+  .assert "tmr0l == 42"
+	MOVF	TMR0H,W
+  .assert "tmr0h == 42"
+
+    ; Clear the shadowed TMR0H register and verify that it cleared.
+	CLRF	TMR0H
+  .assert "tmr0h == 0"
+
+    ; Now, when we read the low byte of Timer 0, the high byte gets
+    ; refreshed. So let's check that TMR0H changes due to a TMR0L read:
+	MOVF	TMR0L,W
+  .assert "tmr0l == 42"
+	MOVF	TMR0H,W
+  .assert "tmr0h == 42"
+	NOP
 
 TMR0_8BitModeTest:
 
@@ -114,7 +152,7 @@ TMR0_8BitModeTest:
 
 	MOVWF	TMR0H
   .assert "tmr0h == 42"
-
+	MOVWF	tmr0Hi
   ;------------------------------------------------------------
   ; 8-bit mode tests
   ;
@@ -127,7 +165,7 @@ L1_tmr0_8BitModeTest:   ; Beginning of the loop
 
     ; Start off with T0CON and TMR0L in a known state.
 
-;  .command  "psa"
+  .command  "psa"
 	CLRF	T0CON	
 	CLRF	TMR0L
 	CLRF	tmr0Lo
@@ -150,10 +188,12 @@ L_psaInitComplete:
     ;
     ; tmr0 is running now. It should increment once every PSA cycles.
     ;
+    ; First read the whole 16-bit counter note
 
 	MOVF	TMR0L,W
 	MOVF	TMR0H,W
-	MOVWF	tmr0Hi
+  .assert "W == tmr0Hi"
+	NOP
 
     ; Now we'll check TMR0L after various delays. The assertion works
     ; by reading tmr0l and comparing it to the number of cycles that
@@ -259,7 +299,16 @@ L_psaInitComplete:
 	btfss	psa,3
 	 bra	L1_tmr0_8BitModeTest
 
+    ; Through looping through all combinations of PSA.
+    ; Now make sure that the high byte of TMR0 hasn't changed.
+	MOVF	TMR0H,W
+  .assert "W == tmr0Hi"
 	NOP
+
+
+;------------------------------------------------------------
+; 16bit-mode tests
+
 	NOP
 	NOP
 	NOP
