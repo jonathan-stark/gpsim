@@ -1,26 +1,19 @@
+include ../make.regression
+
+
 SCRIPT = 18f452.lkr
 
 PROJECT = tmr0_16bit
 OBJECTS =  $(PROJECT).o
 OUTPUT = $(PROJECT).hex
 COD = $(PROJECT).cod
-GPSIM = ../../gpsim/gpsim
 STC = $(PROJECT).stc
 STARTUP_STC=startup.stc
 
 all : $(OUTPUT)
 
-$(OUTPUT) : $(OBJECTS) $(SCRIPT)
+$(OUTPUT) $(COD) : $(OBJECTS) $(SCRIPT)
 	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
-
-$(COD) : $(OBJECTS) $(SCRIPT)
-	gplink --map -s $(SCRIPT) -o $(OUTPUT) $(OBJECTS)
-
-%.o : %.asm
-	gpasm -c $<
-
-clean:
-	rm -f *~ *.o *.lst *.map *.hex
 
 $(PROJECT).o : $(PROJECT).asm
 

@@ -1,0 +1,13 @@
+ifdef GPSIM_PATH
+  PATH := $(GPSIM_PATH):$(PATH)
+else
+  PATH := ../../gpsim:$(PATH)
+endif
+
+GPSIM = gpsim
+
+%.o : %.asm
+	gpasm -c $<
+
+clean:
+	rm -f *~ *.o *.lst *.map *.hex
