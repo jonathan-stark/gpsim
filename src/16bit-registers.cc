@@ -1040,11 +1040,12 @@ void TMR0_16::start(int restart_value, int sync)
 void TMR0_16::put_value(unsigned int new_value)
 {
   value.put(new_value & 0xff);
+  value16 = (new_value & 0xff) | (tmr0h ? (tmr0h->get_value()<<8)  : 0);
   if(t0con->value.get() & T0CON::TMR0ON) {
     if(t0con->value.get() & T0CON::T08BIT)
       TMR0::put_value(new_value);
     else
-      start((new_value & 0xff) | (tmr0h ? (tmr0h->get_value()<<8)  : 0));
+      start(value16);
   } else {
     // TMR0 is not enabled
   }
@@ -1102,9 +1103,13 @@ unsigned int TMR0_16::get_value(void)
   if(t0con->value.get() & T0CON::TMR0ON) {
 
     // If TMR0L:H is configured as an 8-bit timer, then treat as an 8-bit timer
-    if(t0con->value.get() & T0CON::T08BIT)
+    if(t0con->value.get() & T0CON::T08BIT) {
+      if (tmr0h)
+	tmr0h->put_value( (value16>>8)&0xff);
+
       return(TMR0::get_value());
 
+    }
     value16 = (int) ((get_cycles().value - last_cycle)/ prescale);
 
     value.put(value16 & 0xff);
