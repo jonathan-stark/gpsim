@@ -3,12 +3,12 @@
 
 ## Use: make -f makefile.mingw
 
-PARTS=cli src gui gpsim modules
+PARTS=cli src gui gpsim modules doc
 CLEAN_PARTS=$(PARTS)
 
 all :
 	for D in $(PARTS); do (cd $$D && $(MAKE) -f makefile.mingw all); done
 
 clean :
-	rm config.h
+	rm -f config.h
 	for D in $(CLEAN_PARTS); do (cd $$D && $(MAKE) -f makefile.mingw clean); done
