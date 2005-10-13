@@ -26,7 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include "command.h"
 #include "cmd_macro.h"
 
-extern int parse_string(char * str);
+extern int parse_string(const char * str);
 extern void add_string_to_input_buffer(const char *s,Macro *);
 extern void start_new_input_stream(void);
 class MacroLine {

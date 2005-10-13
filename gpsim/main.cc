@@ -59,7 +59,7 @@ extern void AddModulePathFromFilePath(string &sFolder);
 void initialize_gpsim(void);
 
 
-int parse_string(char *cmd_string);
+int parse_string(const char *cmd_string);
 extern void initialize_commands();
 
 extern int yydebug;

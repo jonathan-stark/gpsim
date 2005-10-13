@@ -1,3 +1,8 @@
+2005-10-13 Scott Dattalo <scott@dattalo.com>
+	* gpsim/main.cc, cli/cmd_load.cc, cli/cmd_macro.cc, cli/input.cc,
+	cli/socket.cc: command assertions were not getting processed immediately.
+	* regression/tmr0_16bit/tmr0_16bit.asm: Started interrupt test.
+	
 2005-10-12 Borut Razem <borut.razem@siol.net>
 	* regression/make.regression, regression/run_regression.sh,
 	  regression/*/Makefile: added possibility to define gpism path
