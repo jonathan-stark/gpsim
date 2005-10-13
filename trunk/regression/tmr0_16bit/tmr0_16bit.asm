@@ -85,8 +85,8 @@ check_TMR0_interrupt:
     ;; we won't have to worry about the foreground code and interrupt
     ;; code clashing over accesses to this variable.
 	
-	BCF	INTCON,T0IF,0		; Clear the pending interrupt
-	INCF	TMR0_RollOver,F		; Set a flag to indicate rollover
+        BCF     INTCON,T0IF,0           ; Clear the pending interrupt
+        INCF    TMR0_RollOver,F         ; Set a flag to indicate rollover
 
 ExitInterrupt:
 	RETFIE	1
@@ -313,9 +313,24 @@ L_psaInitComplete:
 	NOP
 	NOP
 
+   ; Stop and clear TMR0:
+	CLRF	T0CON
+	CLRF	TMR0H
+	CLRF	TMR0L
+
+	CLRF	TMR0_RollOver   ;Interrupt flag
+	CLRF	INTCON		;Clear any pending interrupts
 	BSF	INTCON,T0IE	;Enable TMR0 overflow interrupts
+	BSF	INTCON,GIE	;Enable global interrupts
+
+	MOVLW	(1<<TMR0ON) | (1<<T08BIT) | (1<<PSA)
+	MOVWF	T0CON
 
 
+TMR0_WaitForInt:
+	clrwdt
+        BTFSS   TMR0_RollOver,0
+	 bra	TMR0_WaitForInt
 
 done:
   .assert  ",\"*** PASSED 16bit-core TMR0 test\""

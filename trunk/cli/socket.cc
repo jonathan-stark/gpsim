@@ -93,7 +93,7 @@ class SocketLink;
 class Socket;
 
 // in input.cc -- parse_string sends a string through the command parser
-extern int parse_string(char * str);
+extern int parse_string(const char * str);
 
 #ifdef WIN32
 #define snprintf  _snprintf

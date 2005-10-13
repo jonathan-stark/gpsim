@@ -93,7 +93,7 @@ static GIOChannel *channel;
 
 
 extern const char *get_dir_delim(const char *path);
-int parse_string(char * str);
+int parse_string(const char * str);
 
 //------------------------------------------------------------------------
 // 
@@ -444,7 +444,7 @@ int start_parse(void)
 }
 
 
-int parse_string(char * str)
+int parse_string(const char * str)
 {
   add_string_to_input_buffer(str);
   int iReturn = start_parse();
@@ -457,7 +457,7 @@ int parse_string(char * str)
   return iReturn;
 }
 
-int parse_string_only(char * str) {
+int parse_string_only(const char * str) {
   LLStack *OldStack= Stack;
   Stack = 0;
   int iRet = parse_string(str);
@@ -469,6 +469,7 @@ int parse_string_only(char * str) {
 //========================================================================
 //
 // FIXME TSD --16aug05 -- Is this really still needed? Remove after Oct05
+#if 0
 static int check_old_command(char *s)
 {
     char new_command[256];
@@ -489,7 +490,7 @@ static int check_old_command(char *s)
     }
     return 0;
 }
-
+#endif
 void process_command_file(const char * file_name)
 {
 
@@ -544,7 +545,9 @@ void process_command_file(const char * file_name)
             str[iLast-1] = '\n';
           }
 #endif
+#if 0
           if(!check_old_command(s))
+#endif
               add_string_to_input_buffer(s);
       }
 
@@ -942,12 +945,10 @@ char *CCliCommandHandler::GetName()
 
 int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
 {
-  
-  start_new_input_stream();
   add_string_to_input_buffer("\n");
-  add_string_to_input_buffer(commandline);
+  start_new_input_stream();
+  parse_string_only(commandline);
   return 1;
-  //return parse_string((char*)commandline);
 }
 int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)
 {

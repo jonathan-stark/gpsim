@@ -88,7 +88,6 @@ cmd_load::cmd_load(void)
 //
 //
 #define MAX_LINE_LENGTH 256  
-int parse_string(char *cmd_string);
 extern void process_command_file(const char * file_name);
 
 /**
