@@ -1,3 +1,6 @@
+2005-10-13 Borut Razem <borut.razem@siol.net>
+	* makefile.mingw, doc/makefile.mingw: building gpsim documentation on WIN32
+
 2005-10-13 Scott Dattalo <scott@dattalo.com>
 	* gpsim/main.cc, cli/cmd_load.cc, cli/cmd_macro.cc, cli/input.cc,
 	cli/socket.cc: command assertions were not getting processed immediately.
@@ -178,7 +181,7 @@
 	- Initialized data members of many classes. Thanks to Robert
 	Merkel for uncovering this issue.
 
-	
+
 2005-09-16 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_watch.cc: Had to change the way ASCII is checked under
 	windows.
