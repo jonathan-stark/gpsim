@@ -30,11 +30,13 @@ TMR0_RollOver	RES	1
 tmr0Lo		RES	1
 tmr0Hi		RES	1
 psa		RES	1
+countLo		RES	1
+countHi		RES	1
 
   GLOBAL tmr0Lo, tmr0Hi
   GLOBAL psa
   GLOBAL done
-
+  GLOBAL countLo, countHi
 
 DELAY	macro	delay
  local Ldc1, Ldc2
@@ -166,7 +168,7 @@ L1_tmr0_8BitModeTest:   ; Beginning of the loop
     ; Start off with T0CON and TMR0L in a known state.
 
   .command  "psa"
-	CLRF	T0CON	
+	CLRF	T0CON
 	CLRF	TMR0L
 	CLRF	tmr0Lo
 
@@ -307,31 +309,66 @@ L_psaInitComplete:
 
 
 ;------------------------------------------------------------
-; 16bit-mode tests
+; Interrupt tests
 
 	NOP
 	NOP
 	NOP
 
-   ; Stop and clear TMR0:
-	CLRF	T0CON
-	CLRF	TMR0H
-	CLRF	TMR0L
 
-	CLRF	TMR0_RollOver   ;Interrupt flag
+	CLRF	T0CON		;Stop TMR0
 	CLRF	INTCON		;Clear any pending interrupts
 	BSF	INTCON,T0IE	;Enable TMR0 overflow interrupts
 	BSF	INTCON,GIE	;Enable global interrupts
 
+	CLRF	psa		;Loop counter and prescaler assignment.
+
+L1_InterruptTest:
+
+    ; Stop and clear TMR0:
+	CLRF	T0CON
+	CLRF	TMR0H
+	CLRF	TMR0L
+	CLRF	TMR0_RollOver   ;Interrupt flag
+
+    ;Software counter to count cycles
+
+	SETF	countLo		;Start off with counter==-1
+	SETF	countHi
+
+    ; Assume that the PSA is not assigned to TMR0:
+
 	MOVLW	(1<<TMR0ON) | (1<<T08BIT) | (1<<PSA)
+
+    ; if psa is non-zero then the prescaler *is* assigned to tmr0
+	MOVF	psa,F
+	BZ	L_psaInitComplete2
+
+    ; psa is one greater than the actually Prescale bits
+	DECF	psa,W
+	ANDLW	7
+	IORLW	(1<<TMR0ON) | (1<<T08BIT)
+L_psaInitComplete2:
 	MOVWF	T0CON
 
+    ; Now enter into a loop and wait for the interrupt.
+    ; Each loop iteration takes exactly 8 cycles.
 
 TMR0_WaitForInt:
+	NOP
+	NOP
 	clrwdt
+	INFSNZ	countLo,F
+	 INCF	countHi,F
         BTFSS   TMR0_RollOver,0
 	 bra	TMR0_WaitForInt
 
+  .assert " (((countHi<<8)+countLo)>>(5+psa)) == 1"
+	INCF	psa,F
+	btfss	psa,3
+	 bra	L1_InterruptTest
+
+	nop
 done:
   .assert  ",\"*** PASSED 16bit-core TMR0 test\""
         bra     $
