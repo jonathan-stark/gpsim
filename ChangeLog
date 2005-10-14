@@ -1,3 +1,6 @@
+2005-10-14 Scott Dattalo <scott@dattalo.com>
+	* regression/tmr0_16bit/tmr0_16bit.asm: Interrupt test assertions.
+
 2005-10-13 Borut Razem <borut.razem@siol.net>
 	* makefile.mingw, doc/makefile.mingw: building gpsim documentation on WIN32
 
