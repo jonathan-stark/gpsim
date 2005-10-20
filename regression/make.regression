@@ -1,3 +1,5 @@
+# Top-level make file included by all of the regression test makefiles
+
 ifdef GPSIM_PATH
   PATH := $(GPSIM_PATH):$(PATH)
 else
@@ -8,6 +10,9 @@ GPSIM = gpsim
 
 %.o : %.asm
 	gpasm -c $<
+
+# Each regression test has a target 'all'
+top: all
 
 clean:
 	rm -f *~ *.o *.lst *.map *.hex
