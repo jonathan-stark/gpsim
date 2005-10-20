@@ -308,7 +308,7 @@ void _16bit_processor :: create ()
   //usart16 = new USART_MODULE16();
 
   pic_processor::create();
-  _16bit_processor::create_sfr_map();
+  create_sfr_map();
 
   tmr0l.initialize();
 
