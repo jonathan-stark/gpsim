@@ -12,6 +12,9 @@
         include <coff.inc>              ; Grab some useful macros
         radix   dec                     ; Numbers are assumed to be decimal
 
+	include "delay.inc"	; Defines the "DELAY" macro
+
+
 ;----------------------------------------------------------------------
 
 ; Printf Command
@@ -30,34 +33,15 @@ TMR0_RollOver	RES	1
 tmr0Lo		RES	1
 tmr0Hi		RES	1
 psa		RES	1
+b16bitMode	RES	1
 countLo		RES	1
 countHi		RES	1
 
   GLOBAL tmr0Lo, tmr0Hi
-  GLOBAL psa
+  GLOBAL psa,b16bitMode
   GLOBAL done
   GLOBAL countLo, countHi
 
-DELAY	macro	delay
- local Ldc1, Ldc2
-
-	MOVLW	delay
-Ldc1:	ADDLW	-3	;3-cycle delay loop
-	BC	Ldc1
-
-  ; W now contains either -3 (0xFD), -2 (0xFE) or -1 (0xFF).
-  ; The -2 case needs to be delayed an extra cycle more than
-  ; the -3 case, and the -1 case needs yet another cycle of delay.
-  ;
-  ; Examine the bottom two bits and W to determine the exact delay
-  ;
-
-	BTFSS   WREG,1
-	 BRA	Ldc2	;W=0xFD - no extra delay needed
-	RRCF	WREG,F
-	BC	Ldc2
-Ldc2:
-  endm
 
 ;----------------------------------------------------------------------
 ;   ******************* MAIN CODE START LOCATION  ******************
@@ -264,38 +248,32 @@ L_psaInitComplete:
 
   ; now for some bigger delays.
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+507)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+758)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+2*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+1009)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+3*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+1260)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+4*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+1511)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+5*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+1762)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+6*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+2013)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+7*251)>>psa)&0xff)"
 
-	MOVLW	251 - 10
-	RCALL	DelayCycles
-  .assert "tmr0l == (((tmr0Lo+2264)>>psa)&0xff)"
+	DELAY  251
+  .assert "tmr0l == (((tmr0Lo+256+8*251)>>psa)&0xff)"
 
+	DELAY  8191
+  .assert "tmr0l == (((tmr0Lo+256+8*251+8191)>>psa)&0xff)"
 
 	INCF	psa,F
 	btfss	psa,3
@@ -369,6 +347,77 @@ TMR0_WaitForInt:
 	 bra	L1_InterruptTest
 
 	nop
+
+;------------------------------------------------------------
+; 16bit-mode tests
+
+	CLRF	psa
+
+L1_tmr0_16BitModeTest:
+
+	CLRF	T0CON
+	CLRF	TMR0H
+	CLRF	TMR0L
+
+    ; Assume that the PSA is not assigned to TMR0:
+
+	MOVLW	(1<<TMR0ON) | (1<<PSA)
+
+    ; if psa is non-zero then the prescaler *is* assigned to tmr0
+	MOVF	psa,F
+	BZ	L_psa16bitInitComplete
+
+    ; psa is one greater than the actually Prescale bits
+	DECF	psa,W
+	ANDLW	7
+	IORLW	(1<<TMR0ON)
+		
+L_psa16bitInitComplete:
+  .command  "psa"
+	MOVWF	T0CON
+
+
+	MOVF	TMR0L,W
+  .assert "( ((tmr0h<<8)+W) == (1>>psa))"
+
+	MOVF	TMR0L,W
+  .assert "( ((tmr0h<<8)+W) == (2>>psa))"
+
+	MOVF	TMR0L,W
+  .assert "( ((tmr0h<<8)+W) == (3>>psa))"
+
+	MOVF	TMR0L,W
+  .assert "( ((tmr0h<<8)+W) == (4>>psa))"
+
+	MOVF	TMR0L,W
+  .assert "( ((tmr0h<<8)+W) == (5>>psa))"
+
+
+	MOVF	TMR0L,W
+	MOVWF	tmr0Lo
+
+  .command  "tmr0Lo"
+  .command  "tmr0h"
+
+	DELAY	1024-2
+	MOVF	TMR0L,W
+	MOVWF	tmr0Lo
+
+  .command  "tmr0Lo"
+  .command  "tmr0h"
+
+	DELAY	8192-2
+	MOVF	TMR0L,W
+	MOVWF	tmr0Lo
+
+  .command  "tmr0Lo"
+  .command  "tmr0h"
+
+	INCF	psa,F
+	btfss	psa,3
+	 bra	L1_tmr0_16BitModeTest
+
+	nop
 done:
   .assert  ",\"*** PASSED 16bit-core TMR0 test\""
         bra     $
@@ -378,30 +427,5 @@ failed:
         movwf   failures
   .assert  ",\"*** FAILED 16bit-core TMR0 test\""
         bra     done
-
-;------------------------------------------------------------
-; DelayCycles:
-;
-; Input:   W -- the desired delay
-; Output:  Returns after W+7 cycles
-
-DelayCycles:
-
-dc1:	ADDLW	-3	;3-cycle delay loop
-	BC	dc1
-
-  ; W now contains either -3 (0xFD), -2 (0xFE) or -1 (0xFF).
-  ; The -2 case needs to be delayed an extra cycle more than
-  ; the -3 case, and the -1 case needs yet another cycle of delay.
-  ;
-  ; Examine the bottom two bits and W to determine the exact delay
-  ;
-
-	BTFSS   WREG,1
-	 BRA	dc2	;W=0xFD - no extra delay needed
-	RRCF	WREG,F
-	BC	dc2
-dc2:    RETURN
-
 
  end
