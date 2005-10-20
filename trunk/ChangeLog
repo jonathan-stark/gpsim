@@ -1,3 +1,16 @@
+2005-10-20 Scott Dattalo <scott@dattalo.com>
+	* regression/make.regression: modified the default make target
+	to create a .cod file
+	* regression/tmr0_16bit/Makefile,
+	regression/tmr0_16bit/tmr0_16bit.asm: Added tests for 16bit mode
+	of tmr0.
+	* regression/tmr0_16bit/delay.inc,
+	regression/tmr0_16bit/delay.asm: Added to CVS. Made the delay routine a separate
+	source module. Also, a DELAY macro has been created so that
+	exactly N cycles can be delayed, where  0 < N < 65536+15.
+	* src/16bit-processors.cc: portd and porte registers were not
+	getting added to the symbol table.
+
 2005-10-14 Scott Dattalo <scott@dattalo.com>
 	* regression/tmr0_16bit/tmr0_16bit.asm: Interrupt test assertions.
 
