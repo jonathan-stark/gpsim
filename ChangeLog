@@ -1,3 +1,7 @@
+2005-10-21 Borut Razem <borut.razem@siol.net>
+	* makefile.mingw, plat/win32/makefile.mingw, plat/win32/make.mingw,
+	  plat/win32/gpsim.nsi: building gpsim setup executable on WIN32
+
 2005-10-20 Scott Dattalo <scott@dattalo.com>
 	* regression/make.regression: modified the default make target
 	to create a .cod file

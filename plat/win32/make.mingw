@@ -46,7 +46,7 @@ CXX = $(CXXCOMPILER) -mno-cygwin -mtune=pentium -mms-bitfields
 AR = ar
 ARFLAGS = rcs
 
-RM = rm
+RM = rm -f
 MV = mv
 CP = cp
 AWK = gawk

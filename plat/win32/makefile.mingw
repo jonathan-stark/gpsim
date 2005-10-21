@@ -1,0 +1,14 @@
+## Makefile for building the gpsim setup executable on WIN32.
+## The build uses tools running on cygwin.
+
+## Use: make -f makefile.mingw
+
+MAKENSYS = "/cygdrive/c/Program Files/NSIS/makensis"
+
+DATE = $(shell date +%Y%m%d)
+VERSION = $(shell awk '/^AC_INIT\(\[[^]]*\], \[[^]]*\].*\).*/ {print(gensub("^AC_INIT\\(\\[[^]]*\\], \\[([^]]*)\\].*\\).*", "\\1", "1"))}' ../../configure.ac)
+
+all:
+	$(MAKENSYS) /DDATE=$(DATE) /DPRODUCT_VERSION=$(VERSION) gpsim.nsi
+
+clean:
