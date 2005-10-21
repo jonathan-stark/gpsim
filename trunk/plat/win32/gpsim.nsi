@@ -27,7 +27,9 @@
 
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "gpsim"
+!ifndef PRODUCT_VERSION
 !define PRODUCT_VERSION "0.21.11"
+!endif
 !define PRODUCT_PUBLISHER "www.dattalo.com"
 !define PRODUCT_WEB_SITE "http://www.dattalo.com/gnupic/gpsim.html"
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\gpsim.bat"
@@ -72,11 +74,12 @@ SetCompressor /SOLID lzma
 
 ; MUI end ------
 
-#!system "lyx -e latex ../../doc/gpsim.lyx" = 0
-#!system "pdflatex ../../doc/gpsim.tex" = 0
+!ifndef DATE
+!define DATE "YYYYMMDD"
+!endif
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "${SETUP_DIR}\gpsim-${PRODUCT_VERSION}-YYYYMMDD-setup.exe"
+OutFile "${SETUP_DIR}\gpsim-${PRODUCT_VERSION}-${DATE}-setup.exe"
 InstallDir "$PROGRAMFILES\gpsim"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
