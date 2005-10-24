@@ -200,7 +200,7 @@ void gpsimInterface::print(void)
 
 void gpsimInterface::callback_print(void)
 {
-
+  cout << "gpsim Interface callback\n";
 }
 
 void update_gui(void)
