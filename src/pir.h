@@ -54,8 +54,21 @@ public:
 
   virtual void put(unsigned int new_value);
 
-};
+  virtual void setInterrupt(unsigned int bitMask);
 
+};
+//---------------------------------------------------------
+// InterruptSource
+
+class InterruptSource
+{
+public:
+  InterruptSource(PIR *_pir, unsigned int bitMask);
+  void Trigger();
+private:
+  PIR *m_pir;
+  unsigned int m_bitMask;
+};
 //---------------------------------------------------------
 // PIR1 Peripheral Interrupt register # 1
 //

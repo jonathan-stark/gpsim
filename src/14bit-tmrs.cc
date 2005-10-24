@@ -79,8 +79,6 @@ void CCPRL::capture_tmr()
   //trace.register_write(ccprh->address,ccprh->value.get());
   ccprh->value.put(tmrl->tmrh->value.get());
 
-  tmrl->pir_set->set_ccpif();
-
   int c = value.get() + 256*ccprh->value.get();
   if(verbose & 4)
     cout << "CCPRL captured: " << c << '\n';
@@ -272,6 +270,7 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_FALLING_EDGE:
       if (level == 0 && ccprl) {
 	ccprl->capture_tmr();
+	pir_set->set_ccpif();
 	Dprintf(("--CCPCON caught falling edge\n"));
       }
       break;
@@ -279,14 +278,15 @@ void CCPCON::new_edge(unsigned int level)
     case CAP_RISING_EDGE:
       if (level && ccprl) {
 	ccprl->capture_tmr();
+	pir_set->set_ccpif();
 	Dprintf(("--CCPCON caught rising edge\n"));
       }
       break;
 
     case CAP_RISING_EDGE4:
       if (level && --edges <= 0) {
-	if (ccprl)
-	  ccprl->capture_tmr();
+	ccprl->capture_tmr();
+	pir_set->set_ccpif();
 	edges = 4;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -296,8 +296,8 @@ void CCPCON::new_edge(unsigned int level)
 
     case CAP_RISING_EDGE16:
       if (level && --edges <= 0) {
-	if (ccprl)
-	  ccprl->capture_tmr();
+	ccprl->capture_tmr();
+	pir_set->set_ccpif();
 	edges = 16;
 	Dprintf(("--CCPCON caught 4th rising edge\n"));
       }
@@ -602,7 +602,7 @@ unsigned int TMRH::get_value()
 // member functions for the TMRL base class
 //--------------------------------------------------
 TMRL::TMRL()
-  : m_cState('?'), m_bExtClkEnabled(false)
+  : m_cState('?'), m_bExtClkEnabled(false), m_Interrupt(0)
 {
 
   value.put(0);
@@ -615,7 +615,6 @@ TMRL::TMRL()
 
   tmrh    = 0;
   t1con   = 0;
-  pir_set = 0;
   ccpcon  = 0;
   new_name("TMRL");
 
@@ -623,6 +622,8 @@ TMRL::TMRL()
 
 void TMRL::setIOpin(PinModule *extClkSource)
 {
+  Dprintf(("TMRL::setIOpin\n"));
+
   if (extClkSource)
     extClkSource->addSink(this);
 }
@@ -637,10 +638,22 @@ void TMRL::setSinkState(char new3State)
   }
 }
 
+//------------------------------------------------------------
+// setInterruptSource()
+//
+// This Timer can be an interrupt source. When the interrupt
+// needs to be generated, then the InterruptSource object will
+// direct the interrupt to where it needs to go (usually this
+// is the Peripheral Interrupt Register).
+
+void TMRL::setInterruptSource(InterruptSource *_int)
+{
+  m_Interrupt = _int;
+}
+
 void TMRL::increment()
 {
-  if(verbose & 4)
-    cout << "TMRL increment because of external clock ";
+  Dprintf(("TMRL increment because of external clock\n"));
 
   if(--prescale_counter == 0) {
     prescale_counter = prescale;
@@ -656,8 +669,8 @@ void TMRL::increment()
 
     tmrh->value.put((value_16bit >> 8) & 0xff);
     value.put(value_16bit & 0xff);
-    if(value_16bit == 0)
-      pir_set->set_tmr1if();
+    if(value_16bit == 0 && m_Interrupt)
+      m_Interrupt->Trigger();
   }
 
 }
@@ -666,8 +679,9 @@ void TMRL::on_or_off(int new_state)
 {
 
   if(new_state) {
-    if(verbose & 0x4)
-      cout << "TMR1 is being turned on\n";
+
+    Dprintf(("TMR1 is being turned on\n"));
+
     // turn on the timer
 
     // Effective last cycle
@@ -678,8 +692,8 @@ void TMRL::on_or_off(int new_state)
     update();
   }
   else {
-    if(verbose & 0x4)
-      cout << "TMR1 is being turned off\n";
+
+    Dprintf(("TMR1 is being turned off\n"));
 
     // turn off the timer and save the current value
     current_value();
@@ -697,8 +711,7 @@ void TMRL::on_or_off(int new_state)
 void TMRL::update()
 {
 
-  if(verbose & 0x4)
-    cout << "TMR1 update "  << hex << get_cycles().value << '\n';
+  Dprintf(("TMR1 update 0x%llx\n",get_cycles().value));
 
   if(t1con->get_tmr1on()) {
 
@@ -891,7 +904,8 @@ void TMRL::callback()
       // The break was due to a roll-over
 
       //cout<<"TMRL rollover: " << hex << cycles.value.lo << '\n';
-      pir_set->set_tmr1if();
+      if (m_Interrupt)
+	m_Interrupt->Trigger();
 
       // Reset the timer to 0.
 
@@ -1080,84 +1094,82 @@ void TMR2::update(int ut)
 
   //cout << "TMR2 update. cpu cycle " << cycles.value <<'\n';
 
-  if(t2con->get_tmr2on())
-    {
-      if(future_cycle)
+  if(t2con->get_tmr2on()) {
+
+    if(future_cycle) {
+
+      // If TMR2 is enabled (i.e. counting) then 'future_cycle' is non-zero,
+      // which means there's a cycle break point set on TMR2 that needs to
+      // be moved to a new cycle.
+
+      current_value();
+
+      // Assume that we are not in pwm mode (and hence the next break will
+      // be due to tmr2 matching pr2)
+
+      break_value = (1 + pr2->value.get()) << 2;
+      unsigned int pwm_break_value = break_value;
+
+      last_update = TMR2_PR2_UPDATE;
+
+      if(pwm_mode & ut & TMR2_PWM1_UPDATE) {
+
+	// We are in pwm mode... So let's see what happens first: a pr2 compare
+	// or a duty cycle compare. (recall, the duty cycle is really 10-bits)
+
+	if( (duty_cycle1 > (value.get()*4*prescale) ) && (duty_cycle1 < break_value))
+	  {
+	    pwm_break_value = duty_cycle1;
+	    last_update = TMR2_PWM1_UPDATE;
+	    //cout << "TMR2:PWM1 update\n";
+	  }
+      }
+
+      if(pwm_mode & ut & TMR2_PWM2_UPDATE)
 	{
-	  // If TMR2 is enabled (i.e. counting) then 'future_cycle' is non-zero,
-	  // which means there's a cycle break point set on TMR2 that needs to
-	  // be moved to a new cycle.
+	  // We are in pwm mode... So let's see what happens first: a pr2 compare
+	  // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
 
-	  current_value();
-
-	  // Assume that we are not in pwm mode (and hence the next break will
-	  // be due to tmr2 matching pr2)
-
-	  break_value = (1 + pr2->value.get()) << 2;
-	  unsigned int pwm_break_value = break_value;
-
-	  last_update = TMR2_PR2_UPDATE;
-
-	  if(pwm_mode & ut & TMR2_PWM1_UPDATE)
+	  if( (duty_cycle2 > (value.get()*4*prescale) ) && (duty_cycle2 < break_value))
 	    {
-	      // We are in pwm mode... So let's see what happens first: a pr2 compare
-	      // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
-
-	      if( (duty_cycle1 > (value.get()*4*prescale) ) && (duty_cycle1 < break_value))
-		{
-		  pwm_break_value = duty_cycle1;
-		  last_update = TMR2_PWM1_UPDATE;
-		  //cout << "TMR2:PWM1 update\n";
-		}
+	      pwm_break_value = duty_cycle2;
+	      last_update = TMR2_PWM2_UPDATE;
+	      //cout << "TMR2:PWM2 update\n";
 	    }
-
-	  if(pwm_mode & ut & TMR2_PWM2_UPDATE)
-	    {
-	      // We are in pwm mode... So let's see what happens first: a pr2 compare
-	      // or a duty cycle compare. (recall, the duty cycle is really 10-bits)
-
-	      if( (duty_cycle2 > (value.get()*4*prescale) ) && (duty_cycle2 < break_value))
-		{
-		  pwm_break_value = duty_cycle2;
-		  last_update = TMR2_PWM2_UPDATE;
-		  //cout << "TMR2:PWM2 update\n";
-		}
-	    }
-
-
-	  // If TMR2 is configured for pwm'ing,
-	  // make sure that the new break cycle is beyond the current one (this
-	  // is necessary because the 'duty_cycle' may be larger than the 'period'.)
-	  //cout << "TMR2: break_value " <<hex<<break_value << " pwm_break_value " << pwm_break_value <<'\n';
-	  if(pwm_break_value >= break_value)
-	    {
-	      last_update = TMR2_PR2_UPDATE;
-	      update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
-	      last_cycle = get_cycles().value;
-	    }
-	  else
-	    break_value = pwm_break_value;
-
-	  guint64 fc = last_cycle + ((break_value>>2) - value.get())  * prescale;
-
-	  if(fc <= future_cycle)
-	    {
-	      cout << "TMR2: update BUG! future_cycle is screwed\n";
-	    }
-
-	  //cout << "TMR2: update new break at cycle "<<hex<<fc<<'\n';
-	  get_cycles().reassign_break(future_cycle, fc, this);
-
-	  future_cycle = fc;
-
-
 	}
+
+
+      // If TMR2 is configured for pwm'ing,
+      // make sure that the new break cycle is beyond the current one (this
+      // is necessary because the 'duty_cycle' may be larger than the 'period'.)
+      //cout << "TMR2: break_value " <<hex<<break_value << " pwm_break_value " << pwm_break_value <<'\n';
+      if(pwm_break_value >= break_value) {
+	last_update = TMR2_PR2_UPDATE;
+	update_state = TMR2_PWM1_UPDATE | TMR2_PWM2_UPDATE | TMR2_PR2_UPDATE;
+	last_cycle = get_cycles().value;
+      }
       else
-	{
-	  cout << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
-	}
+	break_value = pwm_break_value;
+
+      guint64 fc = last_cycle + ((break_value>>2) - value.get())  * prescale;
+
+      if(fc <= future_cycle)
+	cout << "TMR2: update BUG! future_cycle is screwed\n";
+
+
+      //cout << "TMR2: update new break at cycle "<<hex<<fc<<'\n';
+      get_cycles().reassign_break(future_cycle, fc, this);
+
+      future_cycle = fc;
+
 
     }
+    else
+      {
+	cout << "TMR2 BUG!! tmr2 is on but has no cycle_break set on it\n";
+      }
+
+  }
   else
     {
       //cout << "TMR2 is not running (no update occurred)\n";

@@ -1,3 +1,20 @@
+2005-10-24 Scott Dattalo <scott@dattalo.com>
+	* src/gpsim_time.cc, src/gpsim_time.h: Fixed a nasty cycle counter
+	bug that would erroneously clear a break point whenever two breaks
+	were set at the same cycle.
+	* src/interface.cc: Interface callback breakpoint now can display
+	a message in the breakpoint list.
+	* src/p16x6x.cc, src/p18x.cc, src/pir.cc, src/pir.h,
+	src/14bit-tmrs.cc, src/14bit-tmrs.h, src/16bit-processors.cc: The
+	whole "pir_set" design needs to be re-implemented. At issue is
+	that every pic potentially has a different bit mapping for the PIR
+	registers. The pir_set desgin attempts to accommodate this with
+	pure VF's. Unfortunately, peripherals like the TMRL class that
+	need to set PIR bits only can call specific methods like
+	"set_tmr1f()". However, the TMRL class is used as a base for TMR3
+	too! I created a new class called "InterruptSource" that can
+	trigger interrupts instead.
+
 2005-10-21 Borut Razem <borut.razem@siol.net>
 	* makefile.mingw, plat/win32/makefile.mingw, plat/win32/make.mingw,
 	  plat/win32/gpsim.nsi: building gpsim setup executable on WIN32

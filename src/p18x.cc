@@ -92,7 +92,8 @@ void P18C2x2::create_iopin_map()
   package->assign_pin(27, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(28, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
-  //1portc.ccp1con = &ccp1con;
+  tmr1l.setIOpin(&(*m_portc)[0]);
+
   //1portc.usart = &usart16;
 
 }
@@ -280,6 +281,8 @@ void P18C4x2::create_iopin_map()
   package->assign_pin(39, m_portb->addPin(new IO_bi_directional_pu("portb6"),6));
   package->assign_pin(40, m_portb->addPin(new IO_bi_directional_pu("portb7"),7));
 
+
+  tmr1l.setIOpin(&(*m_portc)[0]);
 
   //1portc.ccp1con = &ccp1con;
   //1portc.usart = &usart16;
