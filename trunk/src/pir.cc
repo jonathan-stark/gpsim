@@ -41,6 +41,32 @@ void PIR::put(unsigned int new_value)
 }
 
 
+void PIR::setInterrupt(unsigned int bitMask)
+{
+  put(value.get() | bitMask);
+}
+
+
+
+InterruptSource::InterruptSource(PIR *_pir, unsigned int bitMask)
+  : m_pir(_pir), m_bitMask(bitMask)
+{
+  assert(m_pir);
+  // Only one bit in the bit mask should be set.
+  assert(m_bitMask && ((m_bitMask & (m_bitMask-1)) == 0));
+}
+
+void InterruptSource::Trigger()
+{
+  m_pir->setInterrupt(m_bitMask);
+}
+
+
+
+
+
+
+
 void PIR1v1::clear_sspif(void)
 {
   trace.raw(write_trace.get() | value.get());

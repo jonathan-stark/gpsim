@@ -270,7 +270,7 @@ void P16X6X_processor::create_sfr_map()
 
   tmr1l.tmrh = &tmr1h;
   tmr1l.t1con = &t1con;
-  tmr1l.pir_set  = get_pir_set();
+  tmr1l.setInterruptSource(new InterruptSource(&pir1_reg, PIR1v1::TMR1IF));
   tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;

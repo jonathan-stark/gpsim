@@ -32,6 +32,7 @@ class TMR2;
 class CCPRL;
 class ADCON0;
 class PIR_SET;
+class InterruptSource;
 
 class _14bit_processor;
 
@@ -215,7 +216,6 @@ public:
 
   TMRH  *tmrh;
   T1CON *t1con;
-  PIR_SET  *pir_set;
   CCPCON *ccpcon;
 
   unsigned int 
@@ -248,12 +248,13 @@ public:
   virtual void clear_timer();
   virtual void setSinkState(char);
   virtual void setIOpin(PinModule *);
+  virtual void setInterruptSource(InterruptSource *);
 protected:
   virtual void increment();   // Used when TMR1 is attached to an external clock
 private:
   char m_cState;
   bool m_bExtClkEnabled;
-
+  InterruptSource *m_Interrupt;
 };
 
 

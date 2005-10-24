@@ -237,7 +237,7 @@ void _16bit_processor :: create_sfr_map()
 
   tmr1l.tmrh   = &tmr1h;
   tmr1l.t1con  = &t1con;
-  tmr1l.pir_set =  &pir_set_def; //get_pir_set();
+  tmr1l.setInterruptSource(new InterruptSource(&pir1, PIR1v1::TMR1IF));
   tmr1l.ccpcon = &ccp1con;
 
   tmr1h.tmrl  = &tmr1l;
@@ -255,7 +255,7 @@ void _16bit_processor :: create_sfr_map()
 
   tmr3l.tmrh  = &tmr3h;
   tmr3l.t1con = &t3con;
-  tmr3l.pir_set = &pir_set_def; //get_pir_set();
+  tmr3l.setInterruptSource(new InterruptSource(&pir2, PIR2v2::TMR3IF));
   tmr3l.ccpcon = &ccp1con;
 
   tmr3h.tmrl  = &tmr3l;
