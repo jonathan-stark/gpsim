@@ -88,7 +88,7 @@ public:
 
 #define BREAK_ARRAY_SIZE  32
 #define BREAK_ARRAY_MASK  (BREAK_ARRAY_SIZE -1)
-// Largest cycle counter value
+  // Largest cycle counter value
 
   static const guint64  END_OF_TIME=0xFFFFFFFFFFFFFFFFULL;
 
@@ -99,7 +99,7 @@ public:
   bool reassigned;        // Set true when a break point is reassigned (or deleted)
 
   Cycle_Counter_breakpoint_list
-    active,     // Head of the active breakpoint linked list
+  active,     // Head of the active breakpoint linked list
     inactive;   // Head of the inactive one.
 
   bool bSynchronous; // a flag that's true when the time per counter tick is constant
@@ -111,7 +111,7 @@ public:
   Cycle_Counter(void);
   void preset(guint64 new_value);     // not used currently.
 
- private:
+private:
   /*
     breakpoint
     when the member function "increment()" encounters a break point, 
@@ -120,7 +120,7 @@ public:
 
   void breakpoint(void);
 
- public:
+public:
   /*
     increment - This inline member function is called once or 
     twice for every simulated instruction. Its purpose is to
@@ -129,52 +129,57 @@ public:
     counter then the simulation is either stopped or a callback
     function is invoked. In either case, the break point is
     cleared.
-   */
+  */
 						
   inline void increment(void)
-    {
+  {
  
-      // Increment the current cycle then check if
-      // we have a break point set here
+    // Increment the current cycle then check if
+    // we have a break point set here
 
-      value++;
+    value++;
 
-      if(value == break_on_this)
-	breakpoint();
+    if(value == break_on_this)
+      breakpoint();
 
-      // Note that it's really inefficient to trace every cycle increment. 
-      // Instead, we implicitly trace the increments with the instruction traces.
+    // Note that it's really inefficient to trace every cycle increment. 
+    // Instead, we implicitly trace the increments with the instruction traces.
 
-    }
+  }
 
   /*
     advance the Cycle Counter by more than one instruction quantum.
     This is almost identical to the increment() function except that
     we allow the counter to be advanced by an arbitrary amount.
     They're separated only for efficiency reasons. This one runs slower.
-   */    
+  */    
   inline void advance(guint64 step)
-    {
+  {
 
-      value += step;
+    value += step;
       
-      if(value >= break_on_this)
-	{
-	  // There's a break point set on this cycle. If there's a callback function, then call
-	  // it other wise halt execution by setting the global break flag.
+    if(value >= break_on_this) {
+      // There's a break point set on this cycle. If there's a callback function, then call
+      // it other wise halt execution by setting the global break flag.
 
-	  while(value >= break_on_this)   // Loop in case there are multiple breaks
-	    {
-	      if(active.next->f)
-		active.next->f->callback();
-	      else
-		get_bp().check_cycle_break(active.next->breakpoint_number);
+      while(value >= break_on_this) {  // Loop in case there are multiple breaks
+	
+	// Remember which breakpoint this is, because
+	// it's possible that the callback function may
+	// change the current breakpoint
+	TriggerObject *lastBreak = active.next->f;
 
-	      clear_current_break();
-	    }
-	}
+	if(lastBreak)
+	  active.next->f->callback();
+	else
+	  get_bp().check_cycle_break(active.next->breakpoint_number);
 
+	clear_current_break(lastBreak);
+      }
     }
+
+  }
+
 
 
   // Return the current cycle counter value
@@ -189,9 +194,9 @@ public:
   bool set_break(guint64 future_cycle,
 		 TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
   bool set_break_delta(guint64 future_cycle,
-		 TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
+		       TriggerObject *f=0, unsigned int abp = MAX_BREAKPOINTS);
   bool reassign_break(guint64 old_cycle,guint64 future_cycle, TriggerObject *f=0);
-  void clear_current_break(void);
+  void clear_current_break(TriggerObject *f=0);
   void dump_breakpoints(void);
 
   void clear_break(guint64 at_cycle);

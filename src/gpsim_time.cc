@@ -393,11 +393,11 @@ void Cycle_Counter::breakpoint()
       // This flag will get set true if the call back
       // function moves the break point to another cycle.
       Cycle_Counter_breakpoint_list  *l1 = active.next;
-      //reassigned = false;
+      TriggerObject *lastBreak = active.next->f;
+
       l1->bActive = false;
       l1->f->callback();
-      if(!l1->bActive)
-	clear_current_break();
+      clear_current_break(lastBreak);
     } else {
       get_bp().check_cycle_break(active.next->breakpoint_number);
       clear_current_break();
@@ -466,17 +466,20 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
     // If the next break point is at a cycle greater than the
     // one we wish to set, then we found the insertion point.
 
-    if(l1->next->break_value == old_cycle) {
+    if(l1->next->f == f && l1->next->break_value == old_cycle) {
 #ifdef __DEBUG_CYCLE_COUNTER__
       cout << " cycle match ";
-      if(f && l1->next->f && (f->CallBackID == l1->next->f->CallBackID))
+      if(f && (f->CallBackID == l1->next->f->CallBackID))
 	cout << " Call Back IDs match = " << f->CallBackID << ' ';
 #endif
 	
+      found_old = true;
+      /*
       if(l1->next->f == f)
 	found_old = true;
       else
 	l1 = l1->next;
+      */
     }
     else
       l1 = l1->next;
@@ -653,59 +656,62 @@ bool Cycle_Counter::reassign_break(guint64 old_cycle, guint64 new_cycle, Trigger
   return 1;
 }
 
-void Cycle_Counter::clear_current_break(void)
+void Cycle_Counter::clear_current_break(TriggerObject *f)
 {
 
   if(active.next == 0)
     return;
 
-  if(value == break_on_this)
-    {
-#ifdef __DEBUG_CYCLE_COUNTER__
-      cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this;
-      if(active.next->f)
-	cout << " Call Back ID  = " << active.next->f->CallBackID;
-      cout <<'\n';
+  if(value == break_on_this && (!f || (f && f==active.next->f))) {
 
-      if(active.next->next) {
-	cout << "  but there's one pending at the same cycle";
-	if(active.next->next->f)
-	  cout << " With ID = " << active.next->next->f->CallBackID;
-	cout << '\n';
-      }
+#ifdef __DEBUG_CYCLE_COUNTER__
+    cout << "current cycle " << hex << setw(16) << setfill('0') << value << endl;
+    cout << "clearing current cycle break " << hex << setw(16) << setfill('0') << break_on_this;
+    if(active.next->f)
+      cout << " Call Back ID  = " << active.next->f->CallBackID;
+    cout <<'\n';
+
+    if(active.next->next->break_value == break_on_this) {
+      cout << "  but there's one pending at the same cycle";
+      if(active.next->next->f)
+	cout << " With ID = " << active.next->next->f->CallBackID;
+      cout << '\n';
+    }
 
 #endif
-      Cycle_Counter_breakpoint_list  *l1;
+    Cycle_Counter_breakpoint_list  *l1;
 
-      active.next->bActive = false;
-      l1 = inactive.next;                  // ptr to 1st inactive bp
-      inactive.next = active.next;         // let the 1st active bp become the 1st inactive one
-      active.next = active.next->next;     // The 2nd active bp is now the 1st
-      inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
+    active.next->bActive = false;
+    l1 = inactive.next;                  // ptr to 1st inactive bp
+    inactive.next = active.next;         // let the 1st active bp become the 1st inactive one
+    active.next = active.next->next;     // The 2nd active bp is now the 1st
+    inactive.next->next = l1;            // The 2nd inactive bp used to be the 1st
 
-      if(active.next) {
-	break_on_this = active.next->break_value;
-	active.next->prev = &active;
-      } else
-	break_on_this = END_OF_TIME;
+    if(active.next) {
+      break_on_this = active.next->break_value;
+      active.next->prev = &active;
+    } else
+      break_on_this = END_OF_TIME;
+
+  } else {
+    
+    // If 'value' doesn't equal 'break_on_this' then what's most probably
+    // happened is that the breakpoint associated with 'break_on_this'
+    // has invoked a callback function that then did a ::reassign_break().
+    // There's a slight chance that we have a bug - but very slight...
+    if(verbose & 4) {
+      cout << "debug::Didn't clear the current cycle break because != break_on_this\n";
+      cout << "value = " << value << "\nbreak_on_this = " << break_on_this <<'\n';
     }
-  else
-    {
-      // If 'value' doesn't equal 'break_on_this' then what's most probably
-      // happened is that the breakpoint associated with 'break_on_this'
-      // has invoked a callback function that then did a ::reassign_break().
-      // There's a slight chance that we have a bug - but very slight...
-      if(verbose & 4) {
-	cout << "debug::Didn't clear the current cycle break because != break_on_this\n";
-	cout << "value = " << value << "\nbreak_on_this = " << break_on_this <<'\n';
-      }
-    }
+  }
 }
 
 void Cycle_Counter::dump_breakpoints(void)
 {
   Cycle_Counter_breakpoint_list  *l1 = &active;
 
+  
+  cout << "Current Cycle " << hex << setw(16) << setfill('0') << value << '\n';
   cout << "Next scheduled cycle break " << hex << setw(16) << setfill('0') << break_on_this << '\n';
 
   while(l1->next)
