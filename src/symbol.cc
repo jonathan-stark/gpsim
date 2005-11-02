@@ -641,17 +641,18 @@ bool IsClearable(Value* value)
 void Symbol_Table::clear() {
   iterator it;
   iterator itEnd = end();
-  int i = 0;
+
   for(it = begin(); it != itEnd;) {
     Value *value = *it;
+
     if(value->isClearable()) {
+
       delete value;
       erase(it);
     }
     else {
       it++;
     }
-    i++;
   }
 //  remove_if(begin(), end(), IsClearable);
 }

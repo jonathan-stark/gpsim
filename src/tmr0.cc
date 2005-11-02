@@ -67,8 +67,9 @@ void TMR0::setSinkState(char new3State)
 
   if (m_bLastClockedState != bNewState) {
     m_bLastClockedState = bNewState;
-    //printf("TMR0::setSinkState:%d cs:%d se:%d\n",bNewState,get_t0cs(),get_t0se());
-    if (get_t0cs() && bNewState == get_t0se())
+    if ( verbose & 2 )
+      printf("TMR0::setSinkState:%d cs:%d se:%d\n",bNewState,get_t0cs(),get_t0se());
+    if (get_t0cs() && bNewState != get_t0se())
       increment();
   }
 }
