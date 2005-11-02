@@ -1002,7 +1002,11 @@ void IOPIN::setDrivenState(bool new_state)
   // Propagate the new state to those things monitoring this pin.
   // (note that the 3-state value is what's propagated).
   if(m_monitor)
+  {
     m_monitor->setDrivenState(getBitChar());
+    if(verbose & 16)
+      cout << name() << " setting state of monitor to " << getBitChar() << endl;
+  }
 }
 
 //------------------------------------------------------------------------
@@ -1068,7 +1072,7 @@ char IOPIN::getBitChar()
   if(snode->get_nodeZth() > ZthWeak)
     return getDrivenState() ? 'W' : 'w';
 
-  return getDrivingState() ? '1' : '0';
+  return getDrivenState() ? '1' : '0';
 }
 
 //========================================================================

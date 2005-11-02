@@ -1,3 +1,7 @@
+2005-11-02 Robert Pearce <rob@bdt-home.demon.co.uk>
+	* src/tmr0.cc, src/stimuli.cc: Fix TMR0 external clocking
+	ploarity. Fixed a typo in IOPIN::getBitChar().
+
 2005-10-24 Scott Dattalo <scott@dattalo.com>
 	* src/gpsim_time.cc, src/gpsim_time.h: Fixed a nasty cycle counter
 	bug that would erroneously clear a break point whenever two breaks
