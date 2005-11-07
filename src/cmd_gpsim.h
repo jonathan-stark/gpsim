@@ -44,7 +44,8 @@ public:
     unsigned int uValue) = 0;
   virtual const char * FormatValue(unsigned int uValue) = 0;
   virtual const char * FormatValue(gint64 uValue) = 0;
-  virtual const char * FormatValue(gint64 uValue, unsigned int uMask,
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask) = 0;
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask,
     int iRadix) = 0;
 
   virtual char *       FormatValue(char *str, int len,
