@@ -33,6 +33,9 @@ public:
   void dump_all(void);
   void dump_one(const char *sym_name);
   void dump_one(Value *);
+  void dump(Value *, ExprList_t*);
+
+  void Set(Value *s, ExprList_t*e, Expression *pExpr);
 
   void add_one(const char *sym_name, Expression *);
 };

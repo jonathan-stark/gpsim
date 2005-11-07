@@ -213,6 +213,7 @@ void Processor::init_register_memory (unsigned int memory_size)
     cout << __FUNCTION__ << " memory size: " << memory_size << '\n';
 
   registers = new Register *[memory_size];
+  m_UiAccessOfRegisters = new RegisterCollection(this);
 
   if (registers  == 0)
     {

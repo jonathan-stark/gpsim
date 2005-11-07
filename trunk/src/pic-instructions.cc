@@ -86,6 +86,16 @@ invalid_instruction::invalid_instruction(Processor *new_cpu,unsigned int new_opc
   new_name("INVALID");
 }
 
+invalid_instruction::invalid_instruction(Processor *new_cpu,
+                                         unsigned int address, 
+                                         unsigned int new_opcode)
+{
+  cpu=new_cpu;
+  m_uAddrOfInstr = address;
+  opcode=new_opcode;
+  new_name("INVALID");
+}
+
 // Instantiate an invalid instruction
 invalid_instruction bad_instruction;
 

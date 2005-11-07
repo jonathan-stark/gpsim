@@ -30,8 +30,7 @@ public:
   cmd_x(void);
   void x(void);
 
-  void x(int reg);
-  void x(int reg, int val);
+  void x(int reg, Expression *pExpr = NULL);
   void x(char *reg_name, int val);
   void x(char *reg_name);
   void x(Expression *);

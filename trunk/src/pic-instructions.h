@@ -177,6 +177,8 @@ public:
   };
 
   invalid_instruction(Processor *new_cpu=0,unsigned int new_opcode=0);
+  invalid_instruction(Processor *new_cpu,unsigned int address, 
+    unsigned int new_opcode);
   virtual INSTRUCTION_TYPES isa() {return INVALID_INSTRUCTION;};
   //virtual char *name(char *str){return("INVALID");};
   static instruction *construct(Processor *new_cpu, unsigned int new_opcode)

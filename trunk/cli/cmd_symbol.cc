@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "../src/cmd_gpsim.h"
 #include "../src/symbol.h"
 #include "../src/symbol_orb.h"
+#include "../src/ValueCollections.h"
 
 cmd_symbol c_symbol;
 
@@ -95,3 +96,23 @@ void cmd_symbol::add_one(const char *sym_name, Expression *expr)
   }
 }
 
+void cmd_symbol::dump(Value *s, ExprList_t*e) {
+  IndexedSymbol sym(s, e);
+  cout << sym.toString() << endl;
+}
+
+void cmd_symbol::Set(Value *s, ExprList_t*e, Expression *pExpr) {
+  try {
+    IIndexedCollection *pCollection = dynamic_cast<IIndexedCollection*>(s);
+    if(pCollection == NULL) {
+      GetUserInterface().DisplayMessage("%s is not an indexed symbol\n",
+        s->name().c_str());
+    }
+    else {
+      pCollection->SetAt(e, pExpr);
+    }
+  }
+  catch(Error Message)  {
+    GetUserInterface().DisplayMessage("%s\n", Message.toString().c_str());
+  }
+}

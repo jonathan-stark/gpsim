@@ -40,10 +40,13 @@ Boston, MA 02111-1307, USA.  */
 #include "stimuli.h"
 #include "symbol_orb.h"
 #include "expr.h"
+#include "ValueCollections.h"
 #include "operator.h"
 #include "errors.h"
 #include "protocol.h"
 #include "cmd_gpsim.h"
+
+class IIndexedCollection;
 
 //
 // ***NOTE*** Ideally, I would like to use a the std container 'map' 
@@ -132,8 +135,27 @@ void Symbol_Table::add_stimulus(stimulus *s)
   }
 }
 
-bool Symbol_Table::add(Value *s)
-{
+// This is an experiment to have the symbol table ordered
+// case insensitive unless their is a match for a case insensitive
+// compare, then a case sensitive compare is made.
+int SymbolCompare(const char *pLeft, const char *pRight) {
+#if 0
+  int iResult = stricmp(pLeft, pRight);
+  if(iResult < 0) {
+    return -1;
+  }
+  else if(iResult > 0) {
+    return 1;
+  }
+  else {
+    return strcmp(pLeft, pRight);
+  }
+#else
+    return strcmp(pLeft, pRight);
+#endif
+}
+
+bool Symbol_Table::add(Value *s) {
   if(s) {
     if(s->name().empty()) {
       printf("Symbol_Table::add() attempt to add a symbol with no name: %s",
@@ -565,9 +587,13 @@ void Symbol_Table::dump_all(void)
   iterator last;
   while( sti != end()) {
     Value *val = *sti;
-    if(val &&(typeid(*val) != typeid(line_number_symbol)))
-      cout << val->name() << " = " << val->toString() << endl;
+    if(val &&(typeid(*val) != typeid(line_number_symbol))) {
+      if(dynamic_cast<IIndexedCollection*>(val) == NULL) {
+        cout << val->name() << " = " ;
+      }
+      cout << val->toString() << endl;
       //cout << val->name() << ": " << val->showType() << endl;
+    }
     last = sti;
     sti++;
     if(sti != end() && (*last)->name() == (*sti)->name()) {
@@ -604,7 +630,10 @@ void Symbol_Table::dump_filtered(const string & sSymbol)
     Value *val = *sti;
     if(val && (typeid(*val) != typeid(line_number_symbol)) &&
       beginsWith(val->name(), sBeginsWith)) {
-      cout << val->name() << " = " << val->toString() << endl;
+      if(typeid(val) != typeid(IIndexedCollection*)) {
+        cout << val->name() << " = " ;
+      }
+      cout << val->toString() << endl;
       //cout << val->name() << ": " << val->showType() << endl;
       }
     last = sti;
@@ -721,7 +750,7 @@ Symbol_Table::FindIt(Value *key) {
   iterator it = lower_bound(begin( ), end( ),
     key, NameLessThan());
   if (it != end() &&
-    (*it)->name() == key->name()) {
+      (*it)->name() == key->name()) {
     return it;
   }
   return end();
@@ -1018,6 +1047,11 @@ bool register_symbol::compare(ComparisonOperator *compOp, Value *rvalue)
 
   return compOp->equal();
 }
+
+void register_symbol::update(void) {
+  reg->update();
+}
+
 
 symbol *register_symbol::copy()
 {

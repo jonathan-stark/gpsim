@@ -211,6 +211,8 @@ COMMENT	({CCHAR}.*)
 SNLCMT	({SNL}|{COMMENT})
 INDIRECT (\*)
 IDENTIFIER ([\']?[/_a-zA-Z\.][/_a-zA-Z0-9\.\-]*)
+INDEXERLEFT    (\[)
+INDEXERRIGHT    (\])
 EXPON	([DdEe][+-]?{D}+)
 DEC     ({D}+)
 HEX1    ((0[Xx])[0-9a-fA-F]+)
@@ -220,7 +222,7 @@ BIN1    (0[bB][01]+)
 BIN2    ([bB]\'[01]+\')
 SHELLCHAR (^[!])
 SHELLLINE   ({SHELLCHAR}.*)
-QUOTEDTOKEN ("\"".*\")
+QUOTEDTOKEN (("\"".*\")|("\'".*'))
 
 
 %{
@@ -311,6 +313,9 @@ abort_gpsim_now {
 ">"                 {return(recognize(GT_T, ">"));}
 "<="                {return(recognize(LE_T, "<="));}
 ">="                {return(recognize(GE_T, ">="));}
+
+"["                 {return(recognize(INDEXERLEFT_T, "["));}
+"]"                 {return(recognize(INDEXERRIGHT_T, "]"));}
 
 {BIN1}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
 {BIN2}              {return(process_intLiteral(yylvalP,&yytext[2], 2));}
@@ -761,6 +766,8 @@ static int process_stringLiteral(YYSTYPE* yylvalP, const char *buffer)
 static int process_quotedStringLiteral(YYSTYPE* yylvalP, const char *buffer)
 {
   char * pCloseQuote = strchr(buffer, '\"');
+  if(pCloseQuote == NULL)
+    pCloseQuote = strchr(buffer, '\'');
   *pCloseQuote = 0;
   yylvalP->String_P = new String(buffer);
   return(recognize(LITERAL_STRING_T, "string literal"));

@@ -614,20 +614,35 @@ bool Boolean::operator!=(Value *rv)
 /*****************************************************************
  * The Integer class.
  */
+Integer::Integer(const Integer &new_value) {
+  Integer & nv = (Integer&)new_value;
+  nv.get(value);
+  bitmask = def_bitmask;
+}
+
 Integer::Integer(gint64 newValue)
 {
   value = newValue;
+  bitmask = def_bitmask;
 }
 
 Integer::Integer(const char *_name, gint64 newValue,const char *_desc)
   : Value(_name,_desc)
 {
-   value = newValue;
+  value = newValue;
+  bitmask = def_bitmask;
 }
+
+gint64 Integer::def_bitmask = 0xffffffff;
 
 Integer::~Integer()
 {
 }
+
+void Integer::setDefaultBitmask(gint64 bitmask) {
+  def_bitmask = bitmask;
+}
+
 void Integer::set(double d)
 {
   gint64 i = (gint64)d;
@@ -710,11 +725,12 @@ void Integer::get(gint64 &i)
 { 
   i = value;
 }
+
 void Integer::get(double &d)
 { 
   gint64 i;
   get(i);
-  d = (double)i;;
+  d = (double)i;
 }
 
 void Integer::get(char *buffer, int buf_size)
@@ -742,7 +758,7 @@ string Integer::toString()
   gint64 i;
   get(i);
   IUserInterface & TheUI = GetUserInterface();
-  return string(TheUI.FormatValue(i));
+  return string(TheUI.FormatValue(i, (unsigned int)bitmask));
 }
 
 
@@ -912,7 +928,7 @@ Float::Float(const char *_name, double newValue,const char *_desc)
 
 bool Float::Parse(const char *pValue, double &fValue) 
 {
-  return pValue ? sscanf(pValue,"%lg",&fValue) : false;
+  return pValue ? sscanf(pValue,"%lg",&fValue) == 1 : false;
 }
 
 Float * Float::New(const char *_name, const char *pValue, const char *desc) {
@@ -1029,7 +1045,7 @@ char *Float::toString(char *return_str, int len)
 
 Float* Float::typeCheck(Value* val, string valDesc)
 {
-  if (typeid(*val) != typeid(Float)) {
+  if (typeid((Float*)val) != typeid(Float*)) {
     throw new TypeMismatch(valDesc, "Float", val->showType());
   }
 

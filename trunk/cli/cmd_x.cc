@@ -28,6 +28,7 @@ Boston, MA 02111-1307, USA.  */
 #include "cmd_x.h"
 #include "cmd_dump.h"
 
+#include "../src/cmd_gpsim.h"
 #include "../src/pic-processor.h"
 #include "../src/symbol.h"
 
@@ -65,57 +66,62 @@ void cmd_x::x(void)
     GetActiveCPU()->dump_registers();
 }
 
-void cmd_x::x(int reg)
+void cmd_x::x(int reg, Expression *pExpr)
 {
   if(!GetActiveCPU())
     return;
 
   if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
     {
-      cout << "bad file register\n";
+      GetUserInterface().DisplayMessage("bad file register\n");
       return;
     }
 
-  char str[33];
-  RegisterValue ov = GetActiveCPU()->registers[reg]->getRV();
-
-  cout << GetActiveCPU()->registers[reg]->name() << '[' << hex << reg << "]= "
-       << ov.data 
-       << " = 0b" << GetActiveCPU()->registers[reg]->toBitStr(str,sizeof(str))
-       << endl;
-}
-
-void cmd_x::x(int reg, int val)
-{
-
-
-  if(!GetActiveCPU())
-    return;
-
-  if(reg<0 || (reg >= (int)GetActiveCPU()->register_memory_size()) )
-    {
-      cout << "bad file register\n";
-      return;
+  Register *pReg = GetActiveCPU()->registers[reg];
+  RegisterValue rvCurrent(pReg->getRVN());
+  if(pExpr == NULL) {
+    char str[33];
+    // Display value
+    const char * pAddr = GetUserInterface().FormatRegisterAddress(
+      reg, GetActiveCPU()->m_uAddrMask);
+    const char * pValue = GetUserInterface().FormatValue(
+      rvCurrent.data, GetActiveCPU()->register_mask());
+    GetUserInterface().DisplayMessage("%s[%s] = %s = 0b%s\n",
+      pReg->name().c_str(), pAddr, pValue,
+      pReg->toBitStr(str,sizeof(str)));
+  }
+  else {
+    // Assign value
+    Value *pValue = pExpr->evaluate();
+    if(pValue != NULL) {
+      Integer * pInt = dynamic_cast<Integer*>(pValue);
+      if(pValue != NULL) {
+        char str[33];
+        pReg->toBitStr(str,sizeof(str));
+        RegisterValue value(
+          GetActiveCPU()->register_mask() & (unsigned int)pInt->getVal(), 0);
+        pReg->putRV(value);
+        // Notify listeners
+        pReg->update();
+        // Display new value
+        x(reg);
+        // Display old value
+        const char * pValue = GetUserInterface().FormatValue(
+          (gint64)rvCurrent.get(), GetActiveCPU()->register_mask());
+        GetUserInterface().DisplayMessage("was %s = 0b%s\n",
+          pValue, str);
+      }
+      else {
+        GetUserInterface().DisplayMessage(
+          "Error: the expression did not evaluate to on integer");
+      }
+      delete pValue;
     }
-
-  int ov = GetActiveCPU()->registers[reg]->get_value();
-
-  cout << GetActiveCPU()->registers[reg]->name() << '(' << hex << reg << ')';
-
-  if(ov == val  ||  val < 0 || val > 255)
-    {
-      cout << " is " << ov << '\n';
-      return;
+    else {
+      GetUserInterface().DisplayMessage("Error evaluating the expression");
     }
-
-  // write the new value to the file register:
-  GetActiveCPU()->registers[reg]->put_value(val);
-
-  // read it back (some of the file registers have bit's that can't be changed)
-  cout << " was " << ov << " now is " 
-       << GetActiveCPU()->registers[reg]->get_value() << '\n';
-
-
+    delete pExpr;
+  }
 }
 
 void cmd_x::x(char *reg_name)

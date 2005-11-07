@@ -26,8 +26,8 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../config.h"
 #include "xref.h"
-#include "registers.h"
 #include "processor.h"
+#include "registers.h"
 #include "trace.h"
 
 unsigned int count_bits(unsigned int ui)
@@ -530,6 +530,85 @@ InvalidRegister::InvalidRegister(void)
 {
   new_name("INVALID_REGISTER");
   address = AN_INVALID_ADDRESS;
+}
+
+RegisterCollection::RegisterCollection (Processor *pProcessor) :
+  IIndexedCollection(16), m_ReturnValue(0) {
+  m_pProcessor = pProcessor;
+  Value::new_name("ramData");
+  m_ppRegisters = pProcessor->registers;
+  m_uSize = pProcessor->register_memory_size();
+  get_symbol_table().add(this);
+}
+
+unsigned int RegisterCollection::GetSize() {
+  return m_uSize;
+}
+
+Value &RegisterCollection::GetAt(unsigned int uIndex, Value *) {
+  if(uIndex > m_uSize) {
+    throw Error("index is out of range");
+  }
+  m_ReturnValue.set((int)m_ppRegisters[uIndex]->get_value());
+  m_ReturnValue.setBitmask(m_pProcessor->register_mask());
+  ostringstream sIndex;
+  sIndex << Value::name() << "[" << hex << m_szPrefix << uIndex << "]" << '\000';
+  m_ReturnValue.new_name(sIndex.str().c_str());
+  return m_ReturnValue;
+}
+
+void RegisterCollection::SetAt(unsigned int uIndex, Value *pValue)  {
+  if(uIndex > m_uSize) {
+    throw Error("index is out of range");
+  }
+  Integer *pInt = dynamic_cast<Integer*>(pValue);
+  if(pInt == NULL) {
+    throw Error("rValue is not an Integer");
+  }
+  else {
+    m_ppRegisters[uIndex]->put((unsigned int)(int)*pInt);
+  }
+}
+
+void RegisterCollection::ConsolidateValues(int &iColumnWidth,
+                                           vector<string> &aList,
+                                           vector<string> &aValue) {
+  unsigned int  uFirstIndex = 0;
+  unsigned int  uIndex;
+  Register *    pReg = m_ppRegisters[0];
+  Integer       uLastValue(pReg->getRV_notrace().data);
+  uLastValue.setBitmask(m_pProcessor->register_mask());
+  for(uIndex = 0; uIndex < m_uSize; uIndex++) {
+    ostringstream sIndex;
+    pReg = m_ppRegisters[uIndex];
+    RegisterValue rvValue = pReg->getRV_notrace();
+    if((unsigned int)uLastValue != rvValue.data) {
+      PushValue(uFirstIndex, uIndex,
+                &uLastValue, aList, aValue);
+      iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+      uFirstIndex = uIndex;
+      uLastValue = rvValue.data;
+    }
+  }
+  uIndex--;
+  // Record the last set of elements
+  if(uFirstIndex <= uIndex) {
+    PushValue(uFirstIndex, uIndex,
+              &uLastValue, aList, aValue);
+    iColumnWidth = max(iColumnWidth, (int)aList.back().size());
+  }
+}
+
+//void RegisterCollection::SetAt(ExprList_t* pIndexers, Expression *pExpr) {
+//  throw Error("RegisterCollection::SetAt() not implemented");
+//}
+
+unsigned int RegisterCollection::GetLowerBound() {
+  return 0;
+}
+
+unsigned int RegisterCollection::GetUpperBound() {
+  return m_uSize - 1;
 }
 
 
