@@ -1,5 +1,5 @@
 #if !defined(_ERRORS_H_)
-#define _ERRORS_
+#define _ERRORS_H_
 
 #include <string>
 

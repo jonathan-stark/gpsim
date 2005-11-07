@@ -1,3 +1,35 @@
+	2005-11-06 J.R. Heisey <jrheisey@sourceforge.com>
+	* src/cmd_gpsim.h: Ability to format a value using a bit mask.
+	* cli/cmd_symbol.h: Routines to dump and set an indexed
+	value.
+	* cli/cmd_x.cc cli/cmd_x.h: Lets use set reg(2)=expr.
+	* src/processor.h: Implemented new function Processor::
+	ConstructInvalidInstruction() function to allow derived classes
+	to define there own Invalid instruction types.
+	* src/expr.cc src/expr.h, src/ValueCollections.cc,h, src/symbol.cc
+	src/symbol.h: Implemented classes to expose to the command prompt
+	interface an indexed variable symbol type commonly refered to as
+	arrays.
+	* cli/scan.ll, cli/parse.yy: Implemented the parsing of indexed
+	(array) variables in the command language.
+	RAM, EEPROM and ROM are the first ones.
+	(i.e. RAM[$20])
+	* cli/scan.ll: Implemented strings as single quotes as well as
+	double quotes.
+	* Fixed issue where setting a RAM value from the command
+	prompt would not update the GUI windows.
+	* cli/parse.yy: Allow setting a RAM using the reg() operator.
+	(i.e. reg(3)=54)
+	* src/value.cc src/value.h: Added extra operators for Integer and
+	Float. Also added a bitmask for Integer to be used for display
+	purposes.
+	* src/registers.cc,h: Implemented RegisterCollection class.
+	* src/sim_context.cc: In CSimulationContext::Clear() now clear
+	the symbol table after I delete the processors in the processor
+	list. This provents the symbol table from deleting a symbol
+	that is actually owned by the processor. 
+
+
 2005-11-02 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/tmr0.cc, src/stimuli.cc: Fix TMR0 external clocking
 	ploarity. Fixed a typo in IOPIN::getBitChar().
