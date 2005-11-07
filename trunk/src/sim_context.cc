@@ -257,7 +257,6 @@ void CSimulationContext::dump_processor_list(void)
 void CSimulationContext::Clear() {
   GetBreakpoints().clear_all(GetActiveCPU());
   CProcessorList::iterator processor_iterator; 
-  GetSymbolTable().clear_all();
   for (processor_iterator = processor_list.begin();
        processor_iterator != processor_list.end(); 
        processor_iterator++) {
@@ -265,6 +264,7 @@ void CSimulationContext::Clear() {
       Processor *p = vt.second;
       delete p;
     }
+  GetSymbolTable().clear_all();
   processor_list.clear();
 }
 
