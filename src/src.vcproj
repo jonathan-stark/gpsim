@@ -404,6 +404,9 @@
 				RelativePath=".\value.cc">
 			</File>
 			<File
+				RelativePath=".\ValueCollections.cc">
+			</File>
+			<File
 				RelativePath=".\xref.cc">
 			</File>
 		</Filter>
@@ -665,6 +668,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 			</File>
 			<File
 				RelativePath=".\value.h">
+			</File>
+			<File
+				RelativePath=".\ValueCollections.h">
 			</File>
 			<File
 				RelativePath=".\xref.h">
