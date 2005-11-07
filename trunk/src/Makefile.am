@@ -71,7 +71,8 @@ libgpsim_la_SOURCES = \
 	icd.cc \
 	expr.cc	\
 	operator.cc \
-	value.cc
+	value.cc \
+        ValueCollections.cc
 
 gpsiminclude_HEADERS = \
 	12bit-instructions.h \
@@ -145,7 +146,8 @@ gpsiminclude_HEADERS = \
 	ssp.h \
 	errors.h \
 	expr.h \
-	value.h
+	value.h \
+        ValueCollections.h
 
 
 
