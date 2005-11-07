@@ -54,10 +54,11 @@ public:
     const char *pHexPrefix);
   virtual const char * FormatValue(unsigned int uValue);
   virtual const char * FormatValue(gint64 uValue);
-  virtual const char * FormatValue(gint64 uValue, unsigned int uMask,
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask);
+  virtual const char * FormatValue(gint64 uValue, guint64 uMask,
     int iRadix);
   virtual const char * FormatValue(gint64 uValue,
-    unsigned int uMask, int iRadix, const char * pHexPrefix);
+    guint64 uMask, int iRadix, const char * pHexPrefix);
 
   virtual char *       FormatValue(char *str, int len,
     int iRegisterSize, RegisterValue value);
@@ -299,17 +300,22 @@ const char * CGpsimUserInterface::FormatValue(gint64 uValue) {
 }
 
 const char * CGpsimUserInterface::FormatValue(gint64 uValue,
-    unsigned int uMask, int iRadix) {
+    guint64 uMask) {
+  return FormatValue(uValue, uMask, s_iValueRadix, s_sValueHexPrefix);
+}
+
+const char * CGpsimUserInterface::FormatValue(gint64 uValue,
+    guint64 uMask, int iRadix) {
   return FormatValue(uValue, uMask, iRadix, s_sValueHexPrefix);
 }
 
 const char * CGpsimUserInterface::FormatValue(gint64 uValue,
-    unsigned int uMask, int iRadix, const char * pHexPrefix) {
+    guint64 uMask, int iRadix, const char * pHexPrefix) {
 
   ostringstream osValue;
   string sPrefix;
   int iBytes = 0;
-  unsigned int l_uMask = uMask;
+  guint64 l_uMask = uMask;
   int iDigits;
   while(l_uMask) {
     iBytes++;
