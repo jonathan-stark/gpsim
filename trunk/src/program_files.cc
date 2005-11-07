@@ -79,6 +79,7 @@ ProgramFileTypeList &ProgramFileTypeList::GetList() {
 }
 
 ProgramFileTypeList::ProgramFileTypeList() {
+  reserve(5);
 }
 
 ProgramFileTypeList::~ProgramFileTypeList() {
@@ -137,7 +138,6 @@ ProgramFileBuf::int_type ProgramFileBuf::underflow( ) {
     numPutback = 4;
   }
   std::memcpy (m_Buffer+(4-numPutback), gptr() - numPutback, numPutback);
-
   int num;
   if((num = ::fread((void*)( m_Buffer + 4), 1, m_iBufferSize - 4, m_pFile)) <= 0) {
     if(errno != 0)
