@@ -352,6 +352,7 @@ public:
   /// Processor RAM
 
   Register **registers;
+  RegisterCollection *m_UiAccessOfRegisters;
 
   /// Currently selected RAM bank
   Register **register_bank;
@@ -364,7 +365,9 @@ public:
   ProgramMemoryAccess  *pma;
   virtual ProgramMemoryAccess * createProgramMemoryAccess(Processor *processor);
   virtual void                  destroyProgramMemoryAccess(ProgramMemoryAccess *pma);
-
+  virtual instruction *         ConstructInvalidInstruction(Processor *processor,
+    unsigned int address, unsigned int new_opcode) {
+      return new invalid_instruction(processor,address,new_opcode); }
   /// register memory interface
   RegisterMemoryAccess rma;
 

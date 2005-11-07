@@ -32,6 +32,7 @@ class Processor;
 
 #include "gpsim_classes.h"
 #include "value.h"
+#include "ValueCollections.h"
 
 
 //---------------------------------------------------------
@@ -475,5 +476,26 @@ protected:
   unsigned int reset_address;      /* Value pc gets at reset */
   
 };
+
+// Used in the command prompt interface
+class RegisterCollection : public IIndexedCollection {
+public:
+  RegisterCollection(Processor *pProcessor);
+  virtual unsigned int GetSize();
+  virtual Value &GetAt(unsigned int uIndex, Value *pValue=0);
+  virtual void SetAt(unsigned int uIndex, Value *pValue);
+  virtual void ConsolidateValues(int &iColumnWidth,
+                                 vector<string> &aList,
+                                 vector<string> &aValue);
+//  virtual void SetAt(ExprList_t* pIndexers, Expression *pExpr);
+  virtual unsigned int GetLowerBound();
+  virtual unsigned int GetUpperBound();
+  Processor *   m_pProcessor;
+  Register **   m_ppRegisters;
+  unsigned int  m_uSize;
+  Integer       m_ReturnValue;
+};
+
+
 
 #endif // __REGISTERS__

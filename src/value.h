@@ -23,6 +23,7 @@ Boston, MA 02111-1307, USA.  */
 
 #include "gpsim_object.h"
 #include <glib.h>
+
 class Processor;
 class Module;
 #include "xref.h"
@@ -137,6 +138,9 @@ public:
 
   virtual void setClearableSymbol(bool bClear);
   virtual bool isClearable();
+  // Some Value types that are used for symbol classes
+  // contain a gpsimValue type that have update listeners.
+  virtual void update(void) {}
 
  private:
   const char *cpDescription;
@@ -314,6 +318,10 @@ private:
   bool value;
 };
 
+inline bool operator!=(Boolean &LValue, Boolean &RValue) {
+  return (bool)LValue != (bool)RValue;
+}
+
 
 //------------------------------------------------------------------------
 /// Integer - built in gpsim type for a 64-bit integer.
@@ -322,6 +330,7 @@ class Integer : public Value {
 
 public:
 	
+  Integer(const Integer &new_value);
   Integer(gint64 new_value);
   Integer(const char *_name, gint64 new_value, const char *desc=0);
   static bool       Parse(const char *pValue, gint64 &iValue);
@@ -346,6 +355,16 @@ public:
   virtual void set(const char *cP,int len=0);
   virtual void set(Packet &);
 
+  static void setDefaultBitmask(gint64 bitmask);
+
+  inline void setBitmask(gint64 bitmask) {
+    this->bitmask = bitmask;
+  }
+
+  inline gint64 getBitmask() {
+    return bitmask;
+  }
+
   gint64 getVal() { return value; }
 
   virtual Value *copy() { return new Integer(value); }
@@ -362,6 +381,18 @@ public:
     gint64 i;
     get(i);
     return i;
+  }
+
+  inline operator guint64() {
+    gint64 i;
+    get(i);
+    return (guint64)i;
+  }
+
+  inline operator bool() {
+    gint64 i;
+    get(i);
+    return i != 0;
   }
 
   inline operator int() {
@@ -386,11 +417,65 @@ public:
     return *this;
   }
 
+  inline Integer & operator &=(int iValue) {
+    gint64 i;
+    get(i);
+    set((int)i & iValue);
+    return *this;
+  }
+
+  inline Integer & operator |=(int iValue) {
+    gint64 i;
+    get(i);
+    set((int)i | iValue);
+    return *this;
+  }
+
+  inline Integer & operator +=(int iValue) {
+    gint64 i;
+    get(i);
+    set((int)i + iValue);
+    return *this;
+  }
+
+  inline Integer & operator ++(int) {
+    gint64 i;
+    get(i);
+    set((int)i + 1);
+    return *this;
+  }
+
+  inline Integer & operator --(int) {
+    gint64 i;
+    get(i);
+    set((int)i - 1);
+    return *this;
+  }
+
+  inline Integer & operator <<(int iShift) {
+    gint64 i;
+    get(i);
+    set(i << iShift);
+    return *this;
+  }
+
+  inline bool operator !() {
+    gint64 i;
+    get(i);
+    return i == 0;
+  }
+
 private:
   gint64 value;
+  // Used for display purposes
+  gint64 bitmask;
+  static gint64 def_bitmask;
 };
 
-
+inline bool operator!=(Integer &iLValue, Integer &iRValue) {
+  return (gint64)iLValue != (gint64)iRValue;
+}
+    
 //------------------------------------------------------------------------
 /// Float - built in gpsim type for a 'double'
 
@@ -435,14 +520,38 @@ public:
     return d;
   }
 
-  Float & operator = (double d) {
-    set(d);
+  inline Float & operator = (double d) {
+    set((double)d);
+    return *this;
+  }
+
+  inline Float & operator = (int d) {
+    set((double)d);
+    return *this;
+  }
+
+  inline Float & operator += (Float &d) {
+    set((double)*this + (double)d );
+    return *this;
+  }
+
+  inline Float & operator *= (Float &d) {
+    set((double)*this * (double)d );
+    return *this;
+  }
+
+  inline Float & operator *= (double d) {
+    set((double)*this * d );
     return *this;
   }
 
 private:
   double value;
 };
+
+inline bool operator!=(Float &iLValue, Float &iRValue) {
+  return (double)iLValue != (double)iRValue;
+}
 
 
 /*****************************************************************/
@@ -477,6 +586,11 @@ private:
   char *value;
 };
 
+inline bool operator!=(String &LValue, String &RValue) {
+  return strcmp((const char *)LValue, (const char *)RValue) != 0;
+}
+
+    
 /*****************************************************************/
 
 class AbstractRange : public Value {
@@ -505,6 +619,7 @@ private:
   unsigned int left;
   unsigned int right;
 };
+
 
 char * TrimWhiteSpaceFromString(char * pBuffer);
 char * UnquoteString(char * pBuffer);

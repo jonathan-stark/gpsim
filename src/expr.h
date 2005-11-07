@@ -21,7 +21,7 @@ Boston, MA 02111-1307, USA.  */
 #include <list>
 #include <string>
 #include <glib.h>
-#include "../src/value.h"
+#include "value.h"
 
 #if !defined(__EXPR_H__)
 #define __EXPR_H__
@@ -54,11 +54,27 @@ class Expression : public gpsimObject
 
 //----------------------------------------------------------------
 
+class IndexedSymbol : public Expression {
+
+public:
+
+  IndexedSymbol(Value *, ExprList_t*);
+  virtual ~IndexedSymbol();
+  virtual Value* evaluate();
+  string toString();
+
+ private:
+  Value *       m_pSymbol;
+  ExprList_t *  m_pExprList;
+};
+
+//-----------------------------------------------------------------
 class LiteralSymbol : public Expression {
 
 public:
 
   LiteralSymbol(Value *);
+  LiteralSymbol(Value *, ExprList_t*);
   virtual ~LiteralSymbol();
   virtual Value* evaluate();
   string toString();

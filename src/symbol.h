@@ -240,7 +240,7 @@ private:
   ///
   /// Note:: Apparently every argument in the template also needs
   ///        to be in the function argument list. The function
-  ///        arguments are only used to as place holders to allow
+  ///        arguments are only used as place holders to allow
   //         using this function template for a variety of functions
   ///        that only need to vary by return type.
   template<class _symbol_iterator_t, class _symbol_t>
@@ -315,6 +315,41 @@ public:
   virtual ~symbol();
 };
 
+class AliasedSymbol : public symbol {
+public:
+  AliasedSymbol(const char * pName, Value *pSymbol) :
+    symbol(pName) {
+    m_pData = pSymbol;
+  }
+  // The following functions are implemented to call the
+  // contained object. The name() and new_name() function
+  // will return and set the name of the alias.
+  virtual void set(const char *v,int len=0) {m_pData->set(v, len);}
+  virtual void set(double v) {m_pData->set(v);}
+  virtual void set(gint64 v) {m_pData->set(v);}
+  virtual void set(int v) {m_pData->set(v);}
+  virtual void set(bool v) {m_pData->set(v);}
+  virtual void set(Value *v) {m_pData->set(v);}
+  virtual void set(Expression *v) {m_pData->set(v);}
+  virtual void set(Packet &v) {m_pData->set(v);}
+
+  /// Value 'get' methods provide a mechanism of casting Value objects
+  /// to other value types. If the type cast is not supported in a
+  /// derived class, an Error will be thrown.
+
+  virtual void get(bool &v) {m_pData->get(v);}
+  virtual void get(int &v) {m_pData->get(v);}
+  virtual void get(guint64 &v) {m_pData->get(v);}
+  virtual void get(gint64 &v) {m_pData->get(v);}
+  virtual void get(double &v) {m_pData->get(v);}
+  virtual void get(char *v, int len) {m_pData->get(v,len);}
+  virtual void get(Packet &v) {m_pData->get(v);}
+
+  virtual char *toString(char *v, int len) { return m_pData->toString(v,len);}
+  virtual string toString() { return m_pData->toString();}
+protected:
+  Value *m_pData;
+};
 
 class node_symbol : public symbol
 {
@@ -374,6 +409,8 @@ public:
   virtual void set(Value *);
   virtual void set(const char *cP,int len=0);
   virtual void set(Packet &);
+
+  virtual void update(void);
 
   inline operator gint64() {
     gint64 i;

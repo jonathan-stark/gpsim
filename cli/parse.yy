@@ -228,6 +228,8 @@ extern int yylex(YYSTYPE* lvalP);
 %token SHR_T
 %token XOR_T
 
+%token INDEXERLEFT_T
+%token INDEXERRIGHT_T
 
 
 //%type  <li>   _register
@@ -409,11 +411,35 @@ dump_cmd:
           ;
 
 eval_cmd:
-	  SYMBOL_T                      {c_symbol.dump_one($1);}
-          | SYMBOL_T EQU_T expr         { $1->set($3);}
-          | REG_T '(' LITERAL_INT_T ')' { c_x.x($3->getVal()); delete $3; }
+	  SYMBOL_T                            {c_symbol.dump_one($1);}
+          | SYMBOL_T EQU_T expr         {
+                                          $1->set($3);
+                                          $1->update();
+                                        }
+          | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T
+                                        {
+                                          c_symbol.dump($1,$3);
+                                          $3->clear();
+                                          delete $3;
+                                        } 
+          | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T EQU_T expr
+                                        {
+                                          c_symbol.Set($1, $3, $6);
+                                          $3->clear();
+                                          delete $3;
+                                          delete $6;
+                                        } 
+          | REG_T '(' LITERAL_INT_T ')' {
+                                          c_x.x($3->getVal());
+                                          delete $3;
+                                        }
+          | REG_T '(' LITERAL_INT_T ')' EQU_T expr
+                                        {
+                                          c_x.x($3->getVal(), $6);
+                                          delete $3;
+                                        }
           ;
-
+          
 frequency_cmd
           : FREQUENCY                   {frequency.print();}
           | FREQUENCY expr              {frequency.set($2);}
@@ -759,9 +785,9 @@ expression_option: EXPRESSION_OPTION expr { $$ = new cmd_options_expr($1,$2); }
 numeric_option: NUMERIC_OPTION expr
         { 
 
-	  $$ = new cmd_options_num;
-	  $$->co = $1;
-	}
+	        $$ = new cmd_options_num;
+	        $$->co = $1;
+	      }
         ;
 
 string_option:
@@ -887,7 +913,7 @@ literal : LITERAL_INT_T                 {$$ = new LiteralInteger($1);}
         | LITERAL_STRING_T              {$$ = new LiteralString($1);}
         | LITERAL_FLOAT_T               {$$ = new LiteralFloat($1);}
         | SYMBOL_T                      {$$ = new LiteralSymbol($1);}
-
+        | SYMBOL_T INDEXERLEFT_T expr_list INDEXERRIGHT_T   {$$ = new IndexedSymbol($1,$3);} 
         ;
 
 %%

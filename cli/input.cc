@@ -882,6 +882,7 @@ static int gpsim_rl_getc(FILE *in)
 }
 #endif
 
+gint g_iWatchSourceID = 0;
 /* Tell the GNU Readline library how to complete.  We want to try to complete
    on command names if this is the first word in the line, or on filenames
    if not. */
@@ -915,10 +916,10 @@ void initialize_readline (void)
   // standard input, in which case we will not be getting
   // any keypress events.
   if(channel->is_readable) {
-    g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+    g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
   }
 #else
- g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+  g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
 #endif
   rl_callback_handler_install (prompt, have_line);
 
@@ -926,6 +927,17 @@ void initialize_readline (void)
   rl_attempted_completion_function = gpsim_completion;
 
 #endif //HAVE_READLINE
+}
+
+void EnableKeypressHook(bool bEnable) {
+  if(bEnable) {
+    g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
+  }
+  else {
+//    g_source_remove_by_funcs_user_data(keypressed, NULL);
+    bEnable = g_source_remove(g_iWatchSourceID);
+    g_io_channel_unref(channel);
+  }
 }
 
 
