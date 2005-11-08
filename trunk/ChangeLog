@@ -1,4 +1,8 @@
-	2005-11-06 J.R. Heisey <jrheisey@sourceforge.com>
+2005-11-08 Borut Razem <borut.razem@siol.net>
+
+	* makefile.mingw:  MINGW sync
+
+2005-11-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/cmd_gpsim.h: Ability to format a value using a bit mask.
 	* cli/cmd_symbol.h: Routines to dump and set an indexed
 	value.
@@ -28,7 +32,6 @@
 	the symbol table after I delete the processors in the processor
 	list. This provents the symbol table from deleting a symbol
 	that is actually owned by the processor. 
-
 
 2005-11-02 Robert Pearce <rob@bdt-home.demon.co.uk>
 	* src/tmr0.cc, src/stimuli.cc: Fix TMR0 external clocking
