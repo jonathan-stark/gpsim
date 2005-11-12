@@ -133,18 +133,16 @@ public:
   bool bSettling;           // true when the voltage is settling 
   stimulus *stimuli;        // Pointer to the first stimulus connected to this node.
   int nStimuli;             // number of stimuli attached to this node.
-  guint64 future_cycle;     // next simulation cycle for updating the node voltage
 
   Stimulus_Node(const char *n = 0);
   virtual ~Stimulus_Node();
 
+  void   set_nodeVoltage(double v);
   double get_nodeVoltage() { return voltage; }
   double get_nodeZth() { return Zth;}
   double get_nodeCth() { return Cth; }
 
-  void update(guint64 current_time);
   void update();
-  void refresh();
 
   void attach_stimulus(stimulus *);
   void detach_stimulus(stimulus *);
@@ -161,6 +159,13 @@ public:
 
   // factory function
   static Stimulus_Node * construct(const char * psName);
+
+protected:
+  void update(guint64 current_time); // deprecated
+  void refresh();
+  void updateStimuli();
+
+  guint64 settlingTimeStep;
 
 };
 
@@ -195,6 +200,7 @@ public:
   virtual void new_name(string &);
 
   // Functions for accessing/manipulating the thevenin voltage and impedance.
+  virtual void   getThevenin(double &v, double &z, double &c);
   virtual double get_Vth() { return Vth; }
   virtual void   set_Vth(double v) { Vth = v; }
   virtual double get_Zth() { return Zth; }
@@ -232,7 +238,7 @@ public:
 
   // If a stimulus changes its state, it can signal this change to
   // any other stimuli that are connected to it.
-  virtual void updateNode(void) { if(snode) snode->update(0);}
+  virtual void updateNode(void) { if(snode) snode->update();}
 
   // Display info about the stimulus.
   virtual void show();
