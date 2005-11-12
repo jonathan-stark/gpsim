@@ -960,6 +960,7 @@ int CCliCommandHandler::Execute(const char * commandline, ISimConsole *out)
   add_string_to_input_buffer("\n");
   start_new_input_stream();
   parse_string_only(commandline);
+  add_string_to_input_buffer("\n");
   return 1;
 }
 int CCliCommandHandler::ExecuteScript(list<string *> &script, ISimConsole *out)

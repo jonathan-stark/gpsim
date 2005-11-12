@@ -261,8 +261,10 @@ QUOTEDTOKEN (("\"".*\")|("\'".*'))
 
 	pLexerState->input_mode = CONTINUING_LINE;
 
-      else
+      else {
+	pLexerState->cmd = 0;
         return recognize(EOLN_T, " end of line");
+      }
 }
 
 <INITIAL>  { 
@@ -617,6 +619,11 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
 
   } else {
 
+    if(verbose&2)
+      cout << "search options for command '" 
+	   << (pLexerState->cmd ? pLexerState->cmd->name : "?") 
+	   << "'\n";
+
     if (bTryMacroParameterExpansion(s))
       return 0;
 
@@ -628,9 +635,6 @@ int handle_identifier(YYSTYPE* yylvalP, string &s, cmd_options **op )
     // may not be correct, but that's the parser's job to determine).
 
     pLexerState->have_parameters = 1;
-
-    if(verbose&2)
-      cout << "search options\n";
 
     while(opt->name)
       if(strcmp(opt->name, s.c_str()) == 0) {
@@ -813,6 +817,8 @@ void init_cmd_state(void)
 {
 
   if(pLexerState) {
+    if (verbose)
+      cout << "scan: clearing lexer state and flushing buffer\n";
     pLexerState->cmd = 0;
     pLexerState->options = 0;
     pLexerState->input_mode = 0;
@@ -821,7 +827,7 @@ void init_cmd_state(void)
     pLexerState->mode = 0;
   }
 
-  YY_FLUSH_BUFFER;
+  //YY_FLUSH_BUFFER;
 }
 
 static void pushLexerState()
@@ -859,9 +865,11 @@ static void popLexerState()
 
     pLexerState = pLS->prev;
 
-    if(pLexerState)
+    if(pLexerState) {
       pLexerState->next = 0;
-
+      pLexerState->cmd = 0;
+      pLexerState->options = 0;
+    }
     SetMode(pLS->mode);
 
     delete pLS;
