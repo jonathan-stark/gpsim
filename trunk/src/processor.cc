@@ -168,6 +168,7 @@ void Processor::set_frequency(double f)
 {
   if(mFrequency)
     mFrequency->set(f);
+  get_cycles().set_cycles_per_second((guint64)(f/clocks_per_inst));
 }
 double Processor::get_frequency()
 {

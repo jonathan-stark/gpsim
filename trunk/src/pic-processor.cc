@@ -696,8 +696,8 @@ pic_processor::pic_processor(void)
   eeprom = 0;
   config_modes = create_ConfigMode();
 
-  set_frequency(DEFAULT_PIC_CLOCK);
   set_ClockCycles_per_Instruction(4);
+  set_frequency(DEFAULT_PIC_CLOCK);
   pll_factor = 0;
 
   // Test code for logging to disk:
