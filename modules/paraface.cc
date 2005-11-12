@@ -180,7 +180,7 @@ void InputPort::callback(void)
 		//                cout << "Update stimuli pin = "<<i<<endl;
 
 		if(pins[i]->snode)
-		    pins[i]->snode->update(0);
+		    pins[i]->snode->update();
 	    }
 	}
     }
@@ -204,7 +204,7 @@ void InputPort::update_pin_directions(unsigned int new_direction)
 		//        cout << "Direction = "<<direction<<endl;
 
 		if(pins[i]->snode)
-		    pins[i]->snode->update(0);
+		    pins[i]->snode->update();
 	    }
 	}
     }

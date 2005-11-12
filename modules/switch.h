@@ -26,37 +26,53 @@ Boston, MA 02111-1307, USA.  */
 #define IN_MODULE
 
 #include "../src/stimuli.h"
-#include "../src/ioports.h"
-#include "../src/symbol.h"
-#include "../src/trace.h"
 #include "../src/modules.h"
 
 #include <gtk/gtk.h>
 
+class SwitchPin;       // defined and implemented in switch.cc
+class SwitchAttribute; //    "            "
+
 class Switch : public Module
 {
-    void create_widget(Switch *sw);
+  void create_widget(Switch *sw);
 public:
 
-    IOPORT *switch_port;
-    IOPIN *switch_pin;
-
-    Switch(void);
-    ~Switch(void);
+  Switch();
+  ~Switch();
 
 
-    void test(void);
-    void update(void);
+  void update();
+  void setState(bool);
 
-    // Inheritances from the Package class
-    virtual void create_iopin_map(void);
+  void getThevenin(SwitchPin *, double &v, double &z, double &c);
+  void set_nodeVoltage(SwitchPin *, double v);
 
-    // Inheritance from Module class
-    const virtual char *type(void) { return ("switch"); };
-    static Module *construct(const char *new_name);
+  // Inheritances from the Package class
+  virtual void create_iopin_map();
 
+  // Inheritance from Module class
+  const virtual char *type() { return ("switch"); };
+  static Module *construct(const char *new_name);
 
+  void buttonToggled();
 
+protected:
+  SwitchPin *m_pinA;
+  SwitchPin *m_pinB;
+
+  // State of the switch
+  bool m_bCurrentState;
+  SwitchAttribute *m_aState;
+
+  //
+  double Zopen, Zclosed;
+
+  // The switch's graphical representation.
+  GtkToggleButton *m_button;
+
+private:
+  static void cb_buttonToggle(GtkToggleButton *button, Switch *This);
 };
 
 #endif //  __SWITCH_H__

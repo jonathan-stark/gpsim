@@ -47,7 +47,104 @@ Boston, MA 02111-1307, USA.  */
 
 #include <gtk/gtk.h>
 #include "../src/packages.h"
+#include "../src/stimuli.h"
+#include "../src/symbol.h"
+#include "../src/gpsim_interface.h"
+
 #include "switch.h"
+
+//------------------------------------------------------------------------
+// SwitchPin
+
+class SwitchPin : public IO_bi_directional
+{
+public:
+  SwitchPin(Switch *parent, const char *_name);
+
+  virtual void   getThevenin(double &v, double &z, double &c);
+
+  virtual double get_Zth() { return m_Zopen;}
+  virtual void set_nodeVoltage(double v);
+
+  void PropagateVoltage(double v);
+  double get_Zclosed() { return  m_Zclosed; }
+private:
+  Switch *m_pParent;
+  bool bRefreshing;
+
+  double m_Zclosed;
+  double m_Zopen;
+};
+
+
+SwitchPin::SwitchPin(Switch *parent, const char *_name)
+  : IO_bi_directional(0, 0, _name), m_pParent(parent), bRefreshing(false),
+    m_Zclosed(100), m_Zopen(1e12)
+{
+  assert(m_pParent);
+}
+
+void SwitchPin::getThevenin(double &v, double &z, double &c)
+{
+  if (!bRefreshing) {
+    bRefreshing = true;
+    m_pParent->getThevenin(this, v, z, c);
+    bRefreshing = false;
+  } else {
+    v = 0;
+    z = m_Zopen;
+    c = 0;
+  }
+}
+
+void SwitchPin::set_nodeVoltage(double v)
+{
+
+  if (!bRefreshing) {
+    bRefreshing = true;
+
+    IOPIN::set_nodeVoltage(v);
+    m_pParent->set_nodeVoltage(this,v);
+    bRefreshing = false;
+  }
+}
+
+void SwitchPin::PropagateVoltage(double v)
+{
+
+  if (!bRefreshing)
+    snode->set_nodeVoltage(v);
+}
+
+//========================================================================
+
+class SwitchAttribute : public Boolean
+{
+
+public:
+
+  SwitchAttribute(Switch *_parent)
+    : Boolean("state",false,"Query or Change the switch"), m_pParent(_parent)
+  {
+    assert(m_pParent);
+  }
+
+  virtual void set(bool  b);
+  void setFromButton(bool  b);
+private:
+  Switch *m_pParent;
+};
+
+void SwitchAttribute::set(bool b)
+{
+  Boolean::set(b);
+  m_pParent->setState(b);
+}
+
+void SwitchAttribute::setFromButton(bool b)
+{
+  Boolean::set(b);
+}
 
 
 //--------------------------------------------------------------
@@ -59,94 +156,140 @@ Boston, MA 02111-1307, USA.  */
 void Switch::create_iopin_map(void)
 {
 
-
-    // Create an I/O port to which the I/O pins can interface
-    //   The module I/O pins are treated in a similar manner to
-    //   the pic I/O pins. Each pin has a unique pin number that
-    //   describes it's position on the physical package. This
-    //   pin can then be logically grouped with other pins to define
-    //   an I/O port.
+  // Define the physical package.
+  //   The Package class, which is a parent of all of the modules,
+  //   is responsible for allocating memory for the I/O pins.
+  //
 
 
-    switch_port = new IOPORT(1);
-    switch_port->value.put(0);
-    switch_port->valid_iopins = 0x01;
+  create_pkg(2);
 
 
-    // Here, we name the port `pin'. So in gpsim, we will reference
-    //   the bit positions as U1.pin0, U1.pin1, ..., where U1 is the
-    //   name of the logic gate (which is assigned by the user and
-    //   obtained with the name() member function call).
+  // Define the I/O pins and assign them to the package.
+  //   There are two things happening here. First, there is
+  //   a new I/O pin that is being created. For the binary
+  //   indicator, both pins are inputs. The second thing is
+  //   that the pins are "assigned" to the package. If we
+  //   need to reference these newly created I/O pins (like
+  //   below) then we can call the member function 'get_pin'.
 
-    char *pin_name = (char*)name().c_str();   // Get the name of this switch
-    if(pin_name) {
-	switch_port->new_name(pin_name);
-    }
+  string nameA = name() + ".A";
+  m_pinA = new SwitchPin(this,nameA.c_str());
 
+  string nameB = name() + ".B";
+  m_pinB = new SwitchPin(this,nameB.c_str());
 
+  assign_pin(1, m_pinA);
+  assign_pin(2, m_pinB);
 
-    // Define the physical package.
-    //   The Package class, which is a parent of all of the modules,
-    //   is responsible for allocating memory for the I/O pins.
-    //
+  package->set_pin_position(1,2.5);
+  package->set_pin_position(2,0.5);
 
-
-    create_pkg(1);
-
-
-    // Define the I/O pins and assign them to the package.
-    //   There are two things happening here. First, there is
-    //   a new I/O pin that is being created. For the binary
-    //   indicator, both pins are inputs. The second thing is
-    //   that the pins are "assigned" to the package. If we
-    //   need to reference these newly created I/O pins (like
-    //   below) then we can call the member function 'get_pin'.
-
-    assign_pin(1, new IO_bi_directional(switch_port, 0,"out"));
-    package->set_pin_position(1,2.5); // Position pin on middle right side of package
-
-    // Create an entry in the symbol table for the new I/O pins.
-    // This is how the pins are accessed at the higher levels (like
-    // in the CLI).
-
-    switch_pin = get_pin(1);
-    if(switch_pin)
-    {
-	get_symbol_table().add_stimulus(switch_pin);
-	switch_pin->update_direction(1,true);
-	if(switch_pin->snode)
-	    switch_pin->snode->update(0);
-    }
+  m_aState = new SwitchAttribute(this);
+  add_attribute(m_aState);
 
 }
 
 //--------------------------------------------------------------
 // GUI
-static void
-toggle_cb (GtkToggleButton *button, Switch *sw)
+static void toggle_cb (GtkToggleButton *button, Switch *sw)
 {
-    int state = gtk_toggle_button_get_active(button);
-
-    sw->switch_port->put_value(state);
+  if (sw)
+    sw->buttonToggled();
 }
 
+void Switch::buttonToggled ()
+{
+  bool b = (gtk_toggle_button_get_active(m_button)==TRUE) ? true : false;
 
+  m_aState->set(b); 
+
+  update();
+}
+
+//------------------------------------------------------------------------
+//
+void Switch::setState(bool bNewState)
+{
+  if (m_button)
+    gtk_toggle_button_set_active(m_button, bNewState ? TRUE : FALSE);
+  if ( m_bCurrentState != bNewState) {
+    m_bCurrentState = bNewState;
+    update();
+  }
+}
+
+//------------------------------------------------------------------------
+void Switch::update()
+{
+  if (m_pinA->snode)
+    m_pinA->snode->update();
+
+  if (!m_bCurrentState)
+    m_pinB->snode->update();
+}
+//------------------------------------------------------------------------
+// getThevenin
+//
+// This is called by one of the switch's pins. The purpose is to obtain
+// the electrical state of the switch. If the switch is closed, then the
+// electrical state on the other side (that is on the other side as referred
+// to the callee's side) is obtained and the switch impedance (resistance)
+// is added in. If the switch is open, then the call is reflected back
+// down to the callee.
+
+void Switch::getThevenin(SwitchPin *pin, double &v, double &z, double &c)
+{
+  if (m_bCurrentState) {
+
+    // The switch is closed.
+
+    if (pin == m_pinA)
+      m_pinB->getThevenin(v, z, c);
+    else if (pin == m_pinB)
+      m_pinA->getThevenin(v, z, c);
+    else
+      return;  // shouldn't ever happen.
+
+    z += pin->get_Zclosed();
+
+  } else
+    pin->getThevenin(v, z, c);
+
+}
+//------------------------------------------------------------------------
+void Switch::set_nodeVoltage(SwitchPin *pin, double v)
+{
+  if (m_bCurrentState) {
+
+    // The switch is closed.
+
+    if (pin == m_pinA)
+      m_pinB->PropagateVoltage(v);
+    else if (pin == m_pinB)
+      m_pinA->PropagateVoltage(v);
+  }
+}
+
+//------------------------------------------------------------------------
 void Switch::create_widget(Switch *sw)
 {
-    GtkWidget *box1;
-    GtkWidget *button;
 
-    box1 = gtk_vbox_new (FALSE, 0);
+  GtkWidget *box1;
 
-    button = gtk_toggle_button_new_with_label ((char*)sw->name().c_str());
-    gtk_container_set_border_width (GTK_CONTAINER (button), 5);
-    gtk_signal_connect (GTK_OBJECT (button), "toggled",
-			GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
-    gtk_widget_show(button);
-    gtk_box_pack_start (GTK_BOX (box1), button, FALSE, FALSE, 0);
+  box1 = gtk_vbox_new (FALSE, 0);
 
-    // Tell gpsim which widget to use in breadboard.
-    sw->set_widget(box1);
+  m_button = GTK_TOGGLE_BUTTON(gtk_toggle_button_new_with_label ((char*)sw->name().c_str()));
+  gtk_container_set_border_width (GTK_CONTAINER (m_button), 5);
+  gtk_signal_connect (GTK_OBJECT (m_button), "toggled",
+		      GTK_SIGNAL_FUNC (toggle_cb), (gpointer)sw);
+  gtk_widget_show(GTK_WIDGET(m_button));
+  gtk_box_pack_start (GTK_BOX (box1), GTK_WIDGET(m_button), FALSE, FALSE, 0);
+
+  // Tell gpsim which widget to use in breadboard.
+  sw->set_widget(box1);
+
+  //sw->setState(false);
 }
 
 //--------------------------------------------------------------
@@ -154,19 +297,19 @@ void Switch::create_widget(Switch *sw)
 Module * Switch::construct(const char *_new_name=0)
 {
 
-//    cout << " Switch constructor\n";
+  Switch *switchP = new Switch ;
+  switchP->new_name(_new_name);
+  switchP->create_iopin_map();
 
-    Switch *switchP = new Switch ;
-    switchP->new_name(_new_name);
-    switchP->create_iopin_map();
-
+  if(get_interface().bUsingGUI()) 
     switchP->create_widget(switchP);
 
-    return switchP;
-
+  return switchP;
 }
 
-Switch::Switch(void)
+Switch::Switch()
+  : m_pinA(0), m_pinB(0), m_aState(0), m_button(0),
+    Zopen(1e8), Zclosed(10)
 {
 
   name_str = strdup("Switch");
@@ -176,9 +319,6 @@ Switch::Switch(void)
 
 Switch::~Switch(void)
 {
-//    cout << "Switch destructor\n";
-
-    delete switch_port;
 
 }
 #endif // HAVE_GUI
