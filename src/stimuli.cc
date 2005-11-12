@@ -28,6 +28,8 @@ Boston, MA 02111-1307, USA.  */
 #include <vector>
 #include <sstream>
 
+#include <math.h>
+
 #include "../config.h"
 #include "pic-processor.h"
 #include "stimuli.h"
@@ -358,13 +360,15 @@ void Stimulus_Node::refresh()
       stimulus *sptr2 = sptr ? sptr->next : 0;
       if(!sptr2)
         break;     // error, nStimuli is two, but there aren't two stimuli
-
-      double Z1 = sptr->get_Zth();
-      double Z2 = sptr2->get_Zth();
-      double resistance = Z1 + Z2;
-      finalVoltage = (sptr->get_Vth()*Z2  + sptr2->get_Vth()*Z1) / resistance;
-      Zth = Z1*Z2/resistance;
-      Cth = sptr->get_Cth() + sptr2->get_Cth();
+      
+      double V1,Z1,C1;
+      double V2,Z2,C2;
+      sptr->getThevenin(V1,Z1,C1);
+      sptr2->getThevenin(V2,Z2,C2);
+      finalVoltage = (V1*Z2  + V2*Z1) / (Z1+Z2);
+      Zth = Z1*Z2/(Z1+Z2);
+      Cth = C1+C2;
+      
       }
       break;
 
@@ -391,22 +395,60 @@ void Stimulus_Node::refresh()
 
       //cout << "multi-node summing:\n";
       while(sptr) {
+
+	double V1,Z1,C1;
+	sptr->getThevenin(V1,Z1,C1);
         /*
         cout << " N: " <<sptr->name() 
-        << " V=" << sptr->get_Vth() 
-        << " Z=" << sptr->get_Zth()
-        << " C=" << sptr->get_Cth() << endl; 
+        << " V=" << V1
+        << " Z=" << Z1
+        << " C=" << C1 << endl
         */
-        double Cs = 1 / sptr->get_Zth();
-        finalVoltage += sptr->get_Vth() * Cs;
+
+        double Cs = 1 / Z1;
+        finalVoltage += V1 * Cs;
         conductance += Cs;
-        Cth += sptr->get_Cth();
+        Cth += C1;
         sptr = sptr->next;
       }
       Zth = 1.0/conductance;
       finalVoltage *= Zth;
       }
     }
+
+    current_time_constant = Cth * Zth;
+
+    if(current_time_constant < min_time_constant) {
+      voltage = finalVoltage;
+      settlingTimeStep = 0;
+    } else {
+
+      // Capacitive loading must be relatively large.
+      delta_voltage = (finalVoltage - initial_voltage) / current_time_constant;
+      settlingTimeStep = (guint64) (get_cycles().cycles_per_second() * current_time_constant);
+
+      voltage = initial_voltage + delta_voltage;
+
+      get_cycles().set_break(get_cycles().value + settlingTimeStep,this);
+    }
+
+  }
+
+
+}
+
+//------------------------------------------------------------------------
+// updateStimuli
+// 
+// drive all the stimuli connected to this node.
+
+void Stimulus_Node::updateStimuli()
+{
+  stimulus *sptr = stimuli;
+
+  while(sptr) {
+    sptr->set_nodeVoltage(voltage);
+    sptr = sptr->next;
   }
 }
 
@@ -416,51 +458,34 @@ void Stimulus_Node::update()
   if(stimuli) {
 
     refresh();
-
-    delta_voltage = 0.0;
-    current_time_constant = Cth * Zth;
-
-    if(current_time_constant < min_time_constant) {
-      voltage = finalVoltage;
-
-      stimulus *sptr = stimuli;
-
-      while(sptr) {
-        sptr->set_nodeVoltage(voltage);
-        sptr = sptr->next;
-      }
-    } else {
-
-      // Capacitive loading must be relatively large.
-      delta_voltage = finalVoltage - initial_voltage;
-
-      if(bSettling) 
-        get_cycles().reassign_break(future_cycle,get_cycles().value + 1,this);
-      else
-        get_cycles().set_break(get_cycles().value +1,this);
-
-      bSettling = true;
-    }
+    updateStimuli();
   }
+}
+
+void Stimulus_Node::set_nodeVoltage(double v)
+{
+  voltage = v;
+  updateStimuli();
 }
 
 //------------------------------------------------------------------------
 void Stimulus_Node::callback()
 {
-  voltage = initial_voltage + delta_voltage;
-
   callback_print();
   cout << " - updating voltage from " 
        << initial_voltage << "V to "
        << voltage << "V\n";
 
-  stimulus *sptr = stimuli;
 
-  while(sptr) {
-    sptr->set_nodeVoltage(voltage);
-    sptr = sptr->next;
+  const double minThreshold = 0.1; // volts
+  if (fabs(finalVoltage - voltage) < minThreshold) {
+    voltage = finalVoltage;
+  } else {
+    voltage += delta_voltage;
+    get_cycles().set_break(get_cycles().value + settlingTimeStep,this);
   }
 
+  updateStimuli();
 }
 
 //------------------------------------------------------------------------
@@ -565,6 +590,13 @@ void stimulus::detach(Stimulus_Node *s)
 {
   if(snode == s)
     snode = 0; 
+}
+
+void   stimulus::getThevenin(double &v, double &z, double &c)
+{
+  v = get_Vth();
+  z = get_Zth();
+  c = get_Cth();
 }
 //========================================================================
 
@@ -699,7 +731,7 @@ void Event::callback(void)
 
   // If there's a node attached to this stimulus, then update it.
   if(snode)
-    snode->update(get_cycles().value);
+    snode->update();
 
   // If the event is inactive.
 
@@ -925,7 +957,7 @@ void IOPIN::putState(bool new_state)
     // the I/O port directly.
 
     if(snode)
-      snode->update(0);
+      snode->update();
     else {
       Register *port = get_iop();
       if(port)
@@ -1188,7 +1220,7 @@ void IO_bi_directional::update_direction(unsigned int new_direction, bool refres
   // If this pin is not associated with an IO Port, but it's tied
   // to a stimulus, then we need to update the stimulus.
   if(refresh && !iop && snode)
-    snode->update(0);
+    snode->update();
 }
 
 
@@ -1705,7 +1737,7 @@ void stimorb_attach(char *node, char_list *stimuli)
 
       stimuli = stimuli->next;
     }
-    sn->update(0);
+    sn->update();
   }
   else {
     cout << "Warning: Node \"" << node << "\" was not found in the node list\n";
@@ -1742,7 +1774,7 @@ void stimuli_attach(StringList_t *sl)
       {
         AttachStimulusToNode(sn, *si);
       }
-      sn->update(0);
+      sn->update();
   }
   else {
     cout << "Warning: Node \"" << (*si) << "\" was not found in the node list\n";
@@ -1768,7 +1800,7 @@ void stimuli_attach(SymbolList_t *sl)
     {
       AttachStimulusToNode(sn, (*si)->name());
     }
-    sn->update(0);
+    sn->update();
   }
   else {
     // The first symbol is not a node - so let's assume that 
@@ -1916,7 +1948,7 @@ void stimuli_attach(Value *pNode, PinList_t *pPinList)
       }
 #endif
     }
-    sn->update(0);
+    sn->update();
   }
   else {
     // The first symbol is not a node - so let's assume that 
