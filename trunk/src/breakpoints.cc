@@ -1537,7 +1537,7 @@ CommandAssertion::CommandAssertion(Processor *new_cpu,
   command = (char *)malloc(len+3);
   strcpy(command,_command);
   command[len]   = '\n';
-  command[len+1] = '\n';
+  command[len+1] = 0;
   command[len+2] = 0;
 }
 

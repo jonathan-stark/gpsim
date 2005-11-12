@@ -1,3 +1,31 @@
+2005-11-12 Scott Dattalo <scott@dattalo.com>
+
+	* cli/input.cc, cli/scan.ll: Under certain conditions, command
+	assertions were causing the lexer to get confused.
+	* gui/gui_menu.cc: experiment code with preferences.
+	* src/ioports.cc, modules/encoder.cc, modules/paraface.cc,
+	modules/push_button.cc: Calls to Stimulus_Node->update() method
+	unnecessarily passed the current simulation time.
+	* modules/resistor.cc, modules/resistor.h: The pullup resistor
+	module was completely broken. 
+	* modules/switch.cc, modules/switch.h: The switch module never did
+	work, but now it does! This is now truly a two-port device.
+	* src/gpsim_time.cc, src/gpsim_time.h: Added methods to control
+	the real time to simulated time mapping.
+	* src/breakpoints.cc: Command Assertions were unnecessarily adding
+	an extra '\n' to the end of the command string.
+	* src/stimuli.cc, src/stimuli.h: Originally node updates would
+	update the node state and refresh connected stimuli all within the
+	context of a single method. Now this has been split into two
+	methods. This was added to support the switch module. In addition,
+	the new method 'getThevenin()' retrieves the full electrical state
+	of a stimulus.
+
+2005-11-09 Robert Pearce <rob@bdt-home.demon.co.uk>
+
+	* src/pic-processor.cc, src/processor.cc: Update simulation time
+	base when ever the processor's oscillator frequency is changed.
+
 2005-11-08 Borut Razem <borut.razem@siol.net>
 
 	* makefile.mingw:  MINGW sync
