@@ -200,8 +200,10 @@ public:
   void apply();
   void update();
   void parseLine(const char*);
+  void toggleBreak(int line);
 private:
   GtkTextView *m_view;
+  GtkLayout   *m_layout;
   ColorButton *m_LabelColor;
   ColorButton *m_MnemonicColor;
   ColorButton *m_SymbolColor;
@@ -242,8 +244,7 @@ void gpsimGuiPreferences::setup (gpointer             callback_data,
 				 guint                callback_action,
 				 GtkWidget           *widget)
 {
-  if (0)
-    new gpsimGuiPreferences();
+  new gpsimGuiPreferences();
 }
 
 
@@ -489,6 +490,41 @@ static char * break_xpm[] = {
 "  .........   ",
 "   .......    ",
 "              "};
+void SourceBrowserPreferences::toggleBreak(int line)
+{
+
+  //GtkWidget *widget = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD,
+  //						  GTK_ICON_SIZE_BUTTON);
+  //GtkWidget *widget = gtk_check_button_new();
+
+  static GdkPixmap *pixmap_break = 0;
+  static GdkBitmap *bp_mask = 0;
+
+  if (pixmap_break == 0) {
+    GtkStyle  *style;
+
+    style=gtk_style_new();
+
+    pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
+						&bp_mask,
+						&style->bg[GTK_STATE_NORMAL],
+						(gchar**)break_xpm);
+    GtkWidget *widget = gtk_image_new_from_pixmap (pixmap_break,
+						   bp_mask);
+    /*
+    GtkTextChildAnchor *anchor =
+      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
+
+    gtk_text_view_add_child_at_anchor (m_view,
+				       widget,
+				       anchor);
+    */
+
+    gtk_widget_show_all (widget);
+  }
+
+}
+
 
 void SourceBrowserPreferences::parseLine(const char *cP)
 {
@@ -496,51 +532,15 @@ void SourceBrowserPreferences::parseLine(const char *cP)
   GtkTextIter iEnd;
 
   gtk_text_buffer_get_end_iter (buffer, &iEnd);
-  if(1){
-
-    //GtkWidget *widget = gtk_image_new_from_stock (GTK_STOCK_GO_FORWARD,
-    //						  GTK_ICON_SIZE_BUTTON);
-    //GtkWidget *widget = gtk_check_button_new();
-
-    static GdkPixmap *pixmap_break = 0;
-    static GdkBitmap *bp_mask = 0;
-
-    if (pixmap_break == 0) {
-      GtkStyle  *style;
-
-      style=gtk_style_new();
-
-      pixmap_break = gdk_pixmap_create_from_xpm_d(LocalWindow->window,
-						  &bp_mask,
-						  &style->bg[GTK_STATE_NORMAL],
-						  (gchar**)break_xpm);
-    GtkWidget *widget = gtk_image_new_from_pixmap (pixmap_break,
-						   bp_mask);
-
-    GtkTextChildAnchor *anchor =
-      gtk_text_buffer_create_child_anchor (buffer, &iEnd);
-
-    gtk_text_view_add_child_at_anchor (m_view,
-				       widget,
-				       anchor);
-
-    gtk_widget_show_all (widget);
-    }
-
-  }
-
-
-  //gtk_text_buffer_get_end_iter (buffer, &iEnd);
 
   char buf[64];
   int line_number = gtk_text_buffer_get_line_count(buffer);
   static int opcode=0x1234;
 
-  snprintf(buf, sizeof(buf), "\t%5d %04X ",line_number,opcode);
+  snprintf(buf, sizeof(buf), "%5d %04X ",line_number,opcode);
   //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, buf, -1, "margin", NULL);
   gtk_text_buffer_insert (buffer, &iEnd, buf, -1);
 
-  //gtk_text_buffer_get_end_iter (buffer, &iEnd);
   int offset = gtk_text_iter_get_offset (&iEnd);
 
   //gtk_text_buffer_insert_with_tags_by_name (buffer, &iEnd, cP, -1, "margin", NULL);
@@ -569,11 +569,9 @@ void SourceBrowserPreferences::parseLine(const char *cP)
       i += j;
     } else if ( (j=isNumber(&cP[i])) != 0) {
       m_ConstantColor->addTagRange(i+offset,i+j+offset);
-      //printf ("number %d:%d\n",i,i+j);
       i += j;
     } else if ( (j=isComment(&cP[i])) != 0) {
       m_CommentColor->addTagRange(i+offset,i+j+offset);
-      //printf ("comment %d:%d\n",i,i+j);
       i += j;
       return;
     } else 
@@ -696,9 +694,31 @@ SourceBrowserPreferences::SourceBrowserPreferences(GtkWidget *pParent)
 
     gtk_container_add (GTK_CONTAINER (frame), m_SampleNotebook);
 
+
+
+
+    const int PAGE_BORDER = 3;
+    const int PIXMAP_SIZE = 14;
+    GtkWidget *hbox = gtk_hbox_new(0,0);
+    gtk_container_set_border_width (GTK_CONTAINER (hbox), PAGE_BORDER);
+
+    GtkAdjustment *source_layout_adj = (GtkAdjustment*)gtk_adjustment_new(0.0,0.0,0.0,0.0,0.0,0.0);
+    m_layout = GTK_LAYOUT(gtk_layout_new(0,source_layout_adj));
+    gtk_widget_set_usize(GTK_WIDGET(m_layout),PIXMAP_SIZE*2,0);
+    gtk_widget_show(GTK_WIDGET(m_layout));
+
+    gtk_box_pack_start(GTK_BOX(hbox), GTK_WIDGET(m_layout),
+		       FALSE,FALSE, 0);
+
+    gtk_box_pack_start_defaults(GTK_BOX(hbox), GTK_WIDGET(m_view));
+
+    gtk_widget_show(hbox);
+
+
     GtkWidget *label = gtk_label_new("file1.asm");
     gtk_notebook_append_page(GTK_NOTEBOOK(m_SampleNotebook),
-			     GTK_WIDGET(m_view),
+			     //GTK_WIDGET(m_view),
+			     hbox,
 			     label);
 
     label = gtk_label_new("file2.asm");
