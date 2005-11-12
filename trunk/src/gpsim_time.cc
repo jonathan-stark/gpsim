@@ -132,8 +132,8 @@ void Cycle_Counter::set_cycles_per_second(guint64 cps)
 {
   if(cps)
   {
-    cycles_per_second = (double)cps;
-    seconds_per_cycle = 1.0/cycles_per_second;
+    m_cycles_per_second = (double)cps;
+    m_seconds_per_cycle = 1.0/m_cycles_per_second;
   }
 
 }
@@ -150,7 +150,7 @@ void Cycle_Counter::set_cycles_per_second(guint64 cps)
 
 guint64 Cycle_Counter::get(double future_time_from_now)
 {
-  return value + (guint64)(cycles_per_second * future_time_from_now);
+  return value + (guint64)(m_cycles_per_second * future_time_from_now);
 
 }
 
@@ -736,8 +736,8 @@ Cycle_Counter::Cycle_Counter(void)
   value         = 0;
   break_on_this = END_OF_TIME;
 
-  cycles_per_second = 5.0e6;
-  seconds_per_cycle = 1 / cycles_per_second;
+  m_cycles_per_second = 5.0e6;
+  m_seconds_per_cycle = 1 / m_cycles_per_second;
 
   active.next   = 0;
   active.prev   = 0;
