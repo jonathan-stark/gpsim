@@ -104,14 +104,15 @@ public:
 
   bool bSynchronous; // a flag that's true when the time per counter tick is constant
 
-  double cycles_per_second; // The number of cycles that correspond to one second
-                            // i.e. this is the frequency.
-  double seconds_per_cycle;
-
   Cycle_Counter(void);
   void preset(guint64 new_value);     // not used currently.
 
 private:
+
+ // The number of cycles that correspond to one second
+  double m_cycles_per_second;
+  double m_seconds_per_cycle;
+
   /*
     breakpoint
     when the member function "increment()" encounters a break point, 
@@ -202,6 +203,9 @@ public:
   void clear_break(guint64 at_cycle);
   void clear_break(TriggerObject *f);
   void set_cycles_per_second(guint64 cps);
+  double cycles_per_second() { return m_cycles_per_second; }
+  double seconds_per_cycle() { return m_seconds_per_cycle; }
+
 };
 
 #if defined(IN_MODULE) && defined(_WIN32)
