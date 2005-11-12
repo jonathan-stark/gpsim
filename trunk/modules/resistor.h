@@ -105,7 +105,7 @@ class PullupResistor : public Module
 {
 public:
 
-  IO_bi_directional res;
+  IO_bi_directional_pu res;
 
 #ifdef MANAGING_GUI
 

@@ -78,7 +78,7 @@ public:
     if(!pur)
       return;
 
-    pur->res.set_Zth(r);
+    pur->res.set_Zpullup(r);
 
   };
 
@@ -230,6 +230,7 @@ Module * PullupResistor::pu_construct(const char *_new_name)
   pur->create_iopin_map();
 
   pur->res.set_Vth(5.0);
+  pur->res.set_Vpullup(5.0);
   return pur;
 }
 
@@ -262,20 +263,20 @@ PullupResistor::PullupResistor(const char *init_name)
     // set the module name
     new_name(init_name);
 
-  res.set_Zth(10e3);
   // Note ResistanceAttribute is designed to give access
   // to res.Zth with a symbol name of "modulename + '.resistance'".
   ResistanceAttribute *attr = new ResistanceAttribute(this);
   add_attribute(attr);
 
-#ifdef MANAGING_GUI
-  pu_window = NULL;
+  attr->set(10e3);
+  res.setDriving(false);
+  res.update_pullup('1',true);
 
-  //if(use_gui) {
-  if(1) {
+#ifdef MANAGING_GUI
+  pu_window = 0;
+
+  if(get_interface().bUsingGUI())
     build_window();
-    cout << "Creating resistor window\n";
-  }
 #endif
 }
 
