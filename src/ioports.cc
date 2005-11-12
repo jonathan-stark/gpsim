@@ -819,14 +819,12 @@ void IOPORT::put(unsigned int new_value)
 
     unsigned int diff = current_value ^ new_value;
 
-    guint64 time = get_cycles().value;
-
     // Update all I/O pins that have stimuli attached to
     // them and their state is being changed by this put() operation.
 
     for(unsigned int i = 0; i<num_iopins; i++,diff>>=1)
       if((diff&1) && pins[i] && pins[i]->snode)
-	pins[i]->snode->update(time);
+	pins[i]->snode->update();
   }
 
 }
