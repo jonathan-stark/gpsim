@@ -172,7 +172,7 @@ class PortModule
 public:
 
   PortModule(unsigned int numIopins);
-  ~PortModule();
+  virtual ~PortModule();
 
   void updatePort();
   void updatePin(unsigned int iPinNumber);
