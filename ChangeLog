@@ -1,3 +1,8 @@
+2005-11-13 Borut Razem <borut.razem@siol.net>
+
+	* plat/win32/gpsim.def: MSVC sync
+	* modules/switch.cc: added #include <assert.h>
+
 2005-11-12 Scott Dattalo <scott@dattalo.com>
 
 	* cli/input.cc, cli/scan.ll: Under certain conditions, command
@@ -28,7 +33,7 @@
 
 2005-11-08 Borut Razem <borut.razem@siol.net>
 
-	* makefile.mingw:  MINGW sync
+	* makefile.mingw: MINGW sync
 
 2005-11-06 J.R. Heisey <jrheisey@sourceforge.com>
 	* src/cmd_gpsim.h: Ability to format a value using a bit mask.
