@@ -1,5 +1,5 @@
 #include "cmd_manager.h"
-#include <strstream>
+#include <sstream>
 #include <algorithm>
 
 //
