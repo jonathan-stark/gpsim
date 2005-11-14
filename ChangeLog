@@ -1,3 +1,40 @@
+2005-11-12 J.R. Heisey <jrheisey@sourceforge.com>
+	* src\12bit-processors.cc, src\breakpoints.h, cli\cmd_break.cc,
+	cli\cmd_clear.cc, src\cmd_gpsim.h, cli\cmd_log.cc, cli\cmd_run.cc,
+	cli\cmd_set.cc, gpsim\CopyDlls.bat, src\exports.h, src\fopen-path.h,
+	plat\win32\gpsim.def, plat\win32\libgpsim.def, src\gpsim_interface.h,
+	src\gpsim_time.cc src\gpsim_time.h gui\gui_menu.cc gui\gui_regwin.cc,
+	gui\gui_src_asm.cc gui\gui_trace.cc gui\gui_watch.cc src\hexutils.cc,
+	src\i2c-ee.cc src\icd.cc plat\win32\icd.cc src\icd.h cli\input.cc,
+	src\interface.cc, src\interface.h, gpsim\main.cc, cli\misc.h,
+	src\os_dependent.cc, src\pic-processor.cc, src\pic-processor.h,
+	src\processor.h, src\program_files.cc, cli\scan.ll, src\sim_context.cc,
+	cli\socket.cc, src\stimuli.cc, src\symbol.h, src\trace.h,
+	src\ttoken.cc, src\ttoken.h, cli\ui_gpsim.cc, cli\cli.vcproj,
+	gui\gui.vcproj, src\src.vcproj, gpsim\gpsim.vcproj:
+	These changes are for building the files in the src folder
+	as the library libgpsim.dll under Windows. There were a couple 
+	of global variables that needed to be decoupled with accessor
+	functions for access from gpsim.exe and other modules.
+	I found that putting global variables in the gpsim.def file
+	didn't work. The globals needing accessor functions were realtime_mode,
+	reatime_mode_with_gui, verbose, and use_icd.
+	I also needed to create the NullConsole and NullUserInterface class
+	in src. These provide IConsole and IUserInterface objects
+	with no implementation. Now cli in gpsim.exe creates it own
+	implementation and passes it to the function SetUserInterface().
+	Any other application that links to libgpsim.dll and expects test
+	messages will need to pass there own IConsole and IUserInterface
+	implementations. At some point I hope I (or someone) will clean
+	up all of the cout references and use the GetUserInterface() function.
+	Renamed macros in exports.h from GPSIM_DLL_EXPORT, GPSIM_EXT_CLASS,
+	and GPSIM_EXPORT to added the LIB prefix reflecting the new
+	library file.
+	Created a new file libgpsim.def and moved all the symbols from
+	gpsim.def into it. Emptied gpsim.def of all symbols.
+	References to bp now call get_bp(). 
+	References to ui now call 
+
 2005-11-13 Scott Dattalo <scott@dattalo.com>
 	* gui/gui_menu.cc: The experimental Preferences window caused a
 	crash if it was opened, but the source browser was not opened.
