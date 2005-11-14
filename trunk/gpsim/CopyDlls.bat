@@ -24,6 +24,8 @@ if not exist %TargetDir%\etc\gtk-2.0\g*.*        xcopy /s "..\..\gtk+\etc\gtk-2.
 if not exist %TargetDir%\lib\gtk-2.0\*.*         md %TargetDir%\lib\gtk-2.0
 if not exist %TargetDir%\lib\gtk-2.0\2.4.0\*.*   xcopy /s "..\..\gtk+\lib\gtk-2.0\*.*" %TargetDir%\lib\gtk-2.0
 
+if not exist %TargetDir%\gtkextra-win32-2.1.dll  copy "..\..\gtkextra-2\bin\gtkextra-win32-2.1.dll" %TargetDir%
+
 if not exist %TargetDir%\libpango-1.0-0.dll      copy ..\..\pango\bin\libpango-1.0-0.dll %TargetDir%
 if not exist %TargetDir%\libpangowin32-1.0-0.dll copy ..\..\pango\bin\libpangowin32-1.0-0.dll %TargetDir%
 if not exist %TargetDir%\etc\pango\*.*           md %TargetDir%\etc\pango
