@@ -11,59 +11,15 @@
 	</Platforms>
 	<Configurations>
 		<Configuration
-			Name="Debug GUI|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2">
-			<Tool
-				Name="VCCLCompilerTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="./..;../cli;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_DLL_EXPORT"
-				MinimalRebuild="TRUE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="0"
-				BrowseInformation="1"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="FALSE"
-				DebugInformationFormat="4"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/src.lib"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
 			Name="Release GUI|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;GPSIM_DLL_EXPORT"
+				PreprocessorDefinitions="WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;LIBGPSIM_DLL_EXPORT"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="0"
@@ -73,8 +29,11 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/src.lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="wsock32.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib"
+				OutputFile="$(OutDir)/libgpsim.dll"
+				ModuleDefinitionFile="../plat/win32/libgpsim.def"
+				ImportLibrary="$(OutDir)/libgpsim.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -90,6 +49,8 @@
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
 			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
@@ -98,13 +59,13 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;snprintf=_snprintf;GPSIM_DLL_EXPORT"
+				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;snprintf=_snprintf;LIBGPSIM_DLL_EXPORT"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -117,8 +78,12 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/src.lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="wsock32.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib"
+				OutputFile="$(OutDir)/libgpsim.dll"
+				ModuleDefinitionFile="../plat/win32/libgpsim.def"
+				GenerateDebugInformation="TRUE"
+				ImportLibrary="$(OutDir)/libgpsim.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -133,6 +98,8 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -142,12 +109,12 @@
 			Name="Release|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;../../pthreads/include"
-				PreprocessorDefinitions="WIN32;_LIB;snprintf=_snprintf;GPSIM_DLL_EXPORT"
+				PreprocessorDefinitions="WIN32;_LIB;snprintf=_snprintf;LIBGPSIM_DLL_EXPORT"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="TRUE"
 				WarningLevel="3"
@@ -155,8 +122,11 @@
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/src.lib"/>
+				Name="VCLinkerTool"
+				AdditionalDependencies="wsock32.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib"
+				OutputFile="$(OutDir)/libgpsim.dll"
+				ModuleDefinitionFile="../plat/win32/libgpsim.def"
+				ImportLibrary="$(OutDir)/libgpsim.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -171,6 +141,58 @@
 				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Debug GUI|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="2"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="./..;../cli;../plat/win32;&quot;../../glib/include/glib-2.0&quot;;&quot;../../glib/lib/glib-2.0/include&quot;;&quot;../../gtk+/include&quot;;&quot;../../gtk+/lib/gtk+/include&quot;;../../pthreads/include"
+				PreprocessorDefinitions="_DEBUG;WIN32;_LIB;HAVE_GUI;snprintf=_snprintf;LIBGPSIM_DLL_EXPORT"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="0"
+				BrowseInformation="1"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="FALSE"
+				DebugInformationFormat="4"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="wsock32.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../glib/lib/gthread-2.0.lib ../../pthreads/lib/pthreadVC2.lib"
+				OutputFile="$(OutDir)/libgpsim.dll"
+				ModuleDefinitionFile="../plat/win32/libgpsim.def"
+				GenerateDebugInformation="TRUE"
+				ImportLibrary="$(OutDir)/libgpsim.lib"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
 			<Tool
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool
@@ -268,12 +290,6 @@
 			<File
 				RelativePath="..\plat\win32\icd.cc">
 				<FileConfiguration
-					Name="Debug GUI|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="../src"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -291,6 +307,12 @@
 						Name="VCCLCompilerTool"
 						AdditionalIncludeDirectories="../src"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug GUI|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="../src"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\init.cc">
@@ -303,6 +325,9 @@
 			</File>
 			<File
 				RelativePath=".\ioports.cc">
+			</File>
+			<File
+				RelativePath="..\plat\win32\libgpsim.def">
 			</File>
 			<File
 				RelativePath=".\lxt_write.c">
@@ -474,15 +499,6 @@
 			<File
 				RelativePath="..\config_win32.h.in">
 				<FileConfiguration
-					Name="Debug GUI|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						CommandLine="cd ..
-gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
-"
-						Outputs="../config.h"/>
-				</FileConfiguration>
-				<FileConfiguration
 					Name="Release GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
@@ -502,6 +518,15 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="cd ..
+gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
+"
+						Outputs="../config.h"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug GUI|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="cd ..
@@ -676,6 +701,9 @@ gawk -f plat/win32/configure_win32.awk config_win32.h.in &gt; config.h
 				RelativePath=".\xref.h">
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\plat\win32\uxtime.cc">
+		</File>
 	</Files>
 	<Globals>
 	</Globals>

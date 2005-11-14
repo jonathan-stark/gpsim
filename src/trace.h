@@ -25,6 +25,7 @@ Boston, MA 02111-1307, USA.  */
 #include <stdio.h>
 #include <glib.h>
 
+#include "exports.h"
 #include "gpsim_classes.h"
 #include "trigger.h"
 #include "value.h"
@@ -397,7 +398,7 @@ class Trace
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access trace object directly!
-Trace &get_trace(void);
+LIBGPSIM_EXPORT Trace & get_trace(void);
 #else
 // we are in gpsim: use of get_trace() is recommended,
 // even if trace object can be accessed directly.

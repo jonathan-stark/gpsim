@@ -765,7 +765,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
 	    printf("break on read \n");
-	    bp.set_read_break(popup_rw->gp->cpu, address);
+	    get_bp().set_read_break(popup_rw->gp->cpu, address);
 	  }
       break;
     case MENU_BREAK_WRITE:
@@ -773,7 +773,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_write_break(popup_rw->gp->cpu, address);
+	    get_bp().set_write_break(popup_rw->gp->cpu, address);
 	  }
       break;
     case MENU_BREAK_READ_VALUE:
@@ -784,7 +784,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_read_value_break(popup_rw->gp->cpu,address,value);
+	    get_bp().set_read_value_break(popup_rw->gp->cpu,address,value);
 	  }
       break;
     case MENU_BREAK_WRITE_VALUE:
@@ -795,7 +795,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_write_value_break(popup_rw->gp->cpu,address,value);
+	    get_bp().set_write_value_break(popup_rw->gp->cpu,address,value);
 	  }
       break;
     case MENU_BREAK_CLEAR:
@@ -803,7 +803,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.clear_all_register(popup_rw->gp->cpu,address);
+	    get_bp().clear_all_register(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_ADD_WATCH:
@@ -831,7 +831,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	    // FIXME the register type is ignored here (and in all other cases
 	    // where we're logging -- it's assumed that the register address is
 	    // for ram, even if in fact the user requests eeprom.
-	    bp.set_notify_read(popup_rw->gp->cpu,address);
+	    get_bp().set_notify_read(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_LOG_WRITE:
@@ -839,7 +839,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_notify_write(popup_rw->gp->cpu,address);
+	    get_bp().set_notify_write(popup_rw->gp->cpu,address);
 	  }
       break;
     case MENU_LOG_READ_VALUE:
@@ -851,7 +851,7 @@ popup_activated(GtkWidget *widget, gpointer data)
 	for(i=range.col0;i<=range.coli;i++)
 	  {
 	    address=popup_rw->row_to_address[j]+i;
-	    bp.set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
+	    get_bp().set_notify_read_value(popup_rw->gp->cpu,address, value, mask);
 
 	  }
       break;
@@ -864,7 +864,7 @@ popup_activated(GtkWidget *widget, gpointer data)
         for(i=range.col0;i<=range.coli;i++)
           {
           address=popup_rw->row_to_address[j]+i;
-          bp.set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
+          get_bp().set_notify_write_value(popup_rw->gp->cpu,address, value, mask);
           }
       break;
     case MENU_REGWIN_REFRESH:

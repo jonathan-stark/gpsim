@@ -11,6 +11,8 @@
 #include "registers.h"
 #endif
 
+#include "value.h"
+
 class ISimConsole {
 public:
   virtual void Printf(const char *fmt, ...) = 0;
@@ -33,6 +35,10 @@ public:
   virtual void DisplayMessage(FILE * pOut, unsigned int uStringID, ...) = 0;
   virtual void DisplayMessage(const char *fmt, ...) = 0;
   virtual void DisplayMessage(FILE * pOut, const char *fmt, ...) = 0;
+
+  // To be implemented to test on GetVerbosity()
+  // virtual void TraceMessage(unsigned int uStringID, ...) = 0;
+  // virtual void TraceMessage(const char *fmt, ...) = 0;
 
   virtual const char * FormatProgramAddress(unsigned int uAddress,
     unsigned int uMask) = 0;
@@ -60,9 +66,51 @@ public:
   virtual void SetValueMask(unsigned int uMask) = 0;
 
   virtual void NotifyExitOnBreak(int iExitCode) = 0;
+
+  inline void SetVerbosity(unsigned int uVerbose) {
+    m_uVerbose = uVerbose;
+  }
+
+  inline unsigned int GetVerbosity() {
+    return m_uVerbose;
+  }
+
+  inline unsigned int &GetVerbosityReference() {
+    return m_uVerbose;
+  }
+private:
+  unsigned int m_uVerbose;
 };
 
-extern "C" IUserInterface & GetUserInterface(void);
+
+
+// extern "C" IUserInterface & GetUserInterface(void);
+LIBGPSIM_EXPORT IUserInterface & GetUserInterface(void);
+LIBGPSIM_EXPORT void             SetUserInterface(IUserInterface * rGpsimUI);
+
+class GlobalVerbosityAccessor {
+public:
+  GlobalVerbosityAccessor() {
+  }
+
+  inline operator unsigned int() {
+    return GetUserInterface().GetVerbosity();
+  }
+  // This gives the statements if(verbose) access
+  inline operator bool() {
+    return GetUserInterface().GetVerbosity() != 0;
+  }
+
+  friend unsigned int operator&(const GlobalVerbosityAccessor& rVerbosity,
+    int iValue);
+};
+
+// This gives the statements if(verbose & 4) access
+inline unsigned int operator&(const GlobalVerbosityAccessor& rVerbosity, int iValue) {
+  return (GetUserInterface().GetVerbosity() & iValue) != 0;
+}
+
+extern GlobalVerbosityAccessor verbose;
 
 ///
 ///   Gpsim string IDs

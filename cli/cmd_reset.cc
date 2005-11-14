@@ -28,10 +28,6 @@ Boston, MA 02111-1307, USA.  */
 
 #include "../src/pic-processor.h"
 
-#ifdef HAVE_GUI
-void gui_simulation_has_stopped(void);
-#endif
-
 cmd_reset reset;
 
 static cmd_options cmd_reset_options[] =

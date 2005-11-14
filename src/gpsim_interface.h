@@ -184,7 +184,7 @@ private:
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access gi object directly!
-gpsimInterface &get_interface(void);
+LIBGPSIM_EXPORT gpsimInterface & get_interface(void);
 #else
 // we are in gpsim: use of get_interface() is recommended,
 // even if gi object can be accessed directly.

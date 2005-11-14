@@ -33,7 +33,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Debug GUI/gpsim.lib&quot;"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib"
 				OutputFile="$(OutDir)/libgpsim_modules.dll"
 				LinkIncremental="2"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -83,7 +83,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib &quot;../gpsim/Release GUI/gpsim.lib&quot;"
+				AdditionalDependencies="../../popt/lib/libpopt.lib ../../glib/lib/glib-2.0.lib ../../glib/lib/gobject-2.0.lib ../../gtk+/lib/gdk-win32-2.0.lib ../../gtk+/lib/gtk-win32-2.0.lib ../../pango/lib/pango-1.0.lib"
 				OutputFile="$(OutDir)/libgpsim_modules.dll"
 				LinkIncremental="1"
 				ModuleDefinitionFile="../plat/win32/modules.def"
@@ -116,6 +116,9 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{6BA847CD-9CDA-49A0-AF7E-B25B1144C9B1}"
+			Name="src"/>
 	</References>
 	<Files>
 		<Filter

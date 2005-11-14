@@ -22,6 +22,7 @@ Boston, MA 02111-1307, USA.  */
 #define __GPSIM_TIME_H__
 
 #include "breakpoints.h"
+#include "exports.h"
 
 //---------------------------------------------------------
 // Cycle Counter
@@ -210,7 +211,7 @@ public:
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access cycles object directly!
-Cycle_Counter &get_cycles(void);
+LIBGPSIM_EXPORT Cycle_Counter &get_cycles(void);
 #else
 // we are in gpsim: use of get_cycles() is recommended,
 // even if cycles object can be accessed directly.

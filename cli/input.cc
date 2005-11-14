@@ -97,7 +97,7 @@ int parse_string(const char * str);
 
 //------------------------------------------------------------------------
 // 
-extern bool gUsingThreads(); // in ../src/interface.cc
+LIBGPSIM_EXPORT bool gUsingThreads(); // in ../src/interface.cc
 
 void initialize_readline (void);
 void clear_input_buffer(void);
@@ -259,7 +259,9 @@ void initialize_threads(void)
   if( !g_thread_supported() )
   {
     g_thread_init(NULL);
+#ifdef HAVEGUI
     gdk_threads_init();
+#endif
   }
 
 #endif
@@ -834,7 +836,7 @@ void have_line(char *s)
  **/
 void exit_gpsim(void)
 {
-  if(use_icd)
+  if(get_use_icd())
     icd_disconnect();
   
 #ifdef HAVE_GUI
@@ -929,6 +931,8 @@ void initialize_readline (void)
 #endif //HAVE_READLINE
 }
 
+#if defined(HAVE_READLINE) && defined(HAVE_PERL)
+// JRH - An experiment
 void EnableKeypressHook(bool bEnable) {
   if(bEnable) {
     g_iWatchSourceID = g_io_add_watch (channel, G_IO_IN, keypressed, NULL);
@@ -939,7 +943,7 @@ void EnableKeypressHook(bool bEnable) {
     g_io_channel_unref(channel);
   }
 }
-
+#endif
 
 //------------------------------------------------------------------------
 // CLI command handler

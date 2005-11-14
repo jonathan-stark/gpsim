@@ -45,9 +45,9 @@ struct file_context {
   int max_line;
 };
 
-extern int verbose;
+#include "cmd_gpsim.h"
 extern unsigned int gpsim_is_initialized;
-void  initialization_is_complete(void);
+LIBGPSIM_EXPORT void initialization_is_complete(void);
 
 #define INVALID_VALUE 0xffffffff
 
@@ -56,7 +56,7 @@ void  initialization_is_complete(void);
 void gpsim_set_bulk_mode(int flag);
 extern const char *get_dir_delim(const char *path);
   
-extern int initialize_gpsim_core();
+LIBGPSIM_EXPORT int initialize_gpsim_core();
 
 
 #endif /* __INTERFACE_H__ */

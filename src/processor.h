@@ -674,7 +674,7 @@ private:
 
 #if defined(IN_MODULE) && defined(_WIN32)
 // we are in a module: don't access active_cpu object directly!
-Processor *get_active_cpu(void);
+LIBGPSIM_EXPORT Processor * get_active_cpu(void);
 #else
 // we are in gpsim: use of get_active_cpu() and set_active_cpu() is recommended,
 // even if active_cpu object can be accessed directly.

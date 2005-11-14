@@ -1043,8 +1043,6 @@ resetbutton_cb(GtkWidget *widget)
 
 
 int gui_animate_delay; // in milliseconds
-extern int realtime_mode;
-extern int realtime_mode_with_gui;
 
 
 //========================================================================
@@ -1126,15 +1124,15 @@ UpdateRateMenuItem::UpdateRateMenuItem(GtkWidget *parent,
 
 void UpdateRateMenuItem::Select()
 {
-  realtime_mode = bRealTime ? 1 : 0;
-  realtime_mode_with_gui = bWithGui ? 1 : 0;
+  EnableRealTimeMode(bRealTime);
+  EnableRealTimeModeWithGui(bWithGui);
 
   if(bAnimate) {
     gui_animate_delay = update_rate;
-    gi.set_update_rate(1);
+    get_interface().set_update_rate(1);
   } else {
     gui_animate_delay = 0;
-    gi.set_update_rate(update_rate);
+    get_interface().set_update_rate(update_rate);
   }
 
   if(gp && gp->cpu)
@@ -1196,7 +1194,7 @@ public:
     : TimeFormatter(tw,menu,"MicroSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * cycles.value * 1e6;
+    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value * 1e6;
     snprintf(buf,size, "%19.2f us",time_db);
   }
 };
@@ -1208,7 +1206,7 @@ public:
     : TimeFormatter(tw,menu,"MilliSeconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * cycles.value * 1e3;
+    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value * 1e3;
     snprintf(buf,size, "%19.3f ms",time_db);
   }
 };
@@ -1220,7 +1218,7 @@ public:
     : TimeFormatter(tw,menu,"Seconds") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value;
     snprintf(buf,size, "%19.3f Sec",time_db);
   }
 };
@@ -1232,7 +1230,7 @@ public:
     : TimeFormatter(tw,menu,"HH:MM:SS.mmm") {}
   void Format(char *buf, int size)
   {
-    double time_db = gp->cpu->get_InstPeriod() * cycles.value;
+    double time_db = gp->cpu->get_InstPeriod() * get_cycles().value;
     double v=time_db;
     int hh=(int)(v/3600),mm,ss,cc;
     v-=hh*3600.0;
@@ -1251,7 +1249,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Hex)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",cycles.value);
+    snprintf(buf,size,"0x%016" PRINTF_INT64_MODIFIER "x",get_cycles().value);
   }
 };
 
@@ -1262,7 +1260,7 @@ public:
     : TimeFormatter(tw,menu,"Cycles (Dec)") {}
   void Format(char *buf, int size)
   {
-    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",cycles.value);
+    snprintf(buf,size,"%016" PRINTF_INT64_MODIFIER "d",get_cycles().value);
   }
 };
 

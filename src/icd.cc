@@ -58,14 +58,18 @@ Boston, MA 02111-1307, USA.  */
 #define O_SYNC 0
 #endif
 
-int use_icd;
-int bulk_flag;
+static bool use_icd = false;
+static int bulk_flag = 0;
 
 extern Processor *active_cpu;
 
 static int icd_fd;  /* file descriptor for serial port */
 
 static int icd_sync(void);
+
+bool get_use_icd() {
+  return use_icd;
+}
 
 ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////
@@ -534,7 +538,7 @@ int icd_connect(char *port)
 
     create_dumb_register_file();
 
-    use_icd=1;
+    use_icd=true;
 
     icd_cmd("$$6300\r");
     /* I really don't know what this is, but MPLAB does

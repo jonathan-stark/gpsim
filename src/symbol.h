@@ -26,6 +26,7 @@ Boston, MA 02111-1307, USA.  */
 #include <vector>
 #include "value.h"
 #include "registers.h"
+#include "exports.h"
 
 using namespace std;
 
@@ -285,7 +286,7 @@ public:
   extern Symbol_Table symbol_table;
   #endif
 // we are in Windows: don't access symbol_table object directly!
-extern "C" Symbol_Table &get_symbol_table(void);
+LIBGPSIM_EXPORT Symbol_Table & get_symbol_table(void);
 #else
 // we are in gpsim: use of get_symbol_table() is recommended,
 // even if trace object can be accessed directly.

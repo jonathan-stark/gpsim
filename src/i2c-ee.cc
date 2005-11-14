@@ -426,7 +426,7 @@ void I2C_EE::new_scl_edge ( bool direction )
                 break;
         }
     }
-    if (verbose && bus_state != curBusState) {
+    if ((bool)verbose && bus_state != curBusState) {
       cout << "I2C_EE::new_scl_edge() new bus state = " << bus_state << "\n";
       debug();
     }
@@ -476,7 +476,7 @@ void I2C_EE::new_sda_edge ( bool direction )
             }
         }
 
-    if (verbose && bus_state != curBusState) {
+    if ((bool)verbose && bus_state != curBusState) {
       cout << "I2C_EE::new_sda_edge() new bus state = " << bus_state << "\n";
       debug();
     }

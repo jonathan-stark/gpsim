@@ -239,10 +239,10 @@ main (int argc, char *argv[])
 
       case 'D':
         // add symbols defined with '-D' to the symbol table.
-	snprintf(command_str, sizeof(command_str),
-		 "symbol %s\n",defineSymbol);
-	parse_string(command_str);
-	defineSymbol = "";
+        snprintf(command_str, sizeof(command_str),
+                 "symbol %s\n",defineSymbol);
+        parse_string(command_str);
+        defineSymbol = "";
         break;
 
       case 'S':
@@ -292,9 +292,6 @@ main (int argc, char *argv[])
   if(poptPeekArg(optCon))
 	  hex_name=strdup(poptPeekArg(optCon));
   
-#ifdef HAVE_GUI  
-  get_interface().setGUImode(bUseGUI);
-#endif
   initialize_readline();
 
   // must be done after initialize_gpsim_core()
@@ -308,7 +305,13 @@ main (int argc, char *argv[])
     if (gui_init (argc,argv) != 0) {
       std::cerr << "Error initialising GUI, reverting to cmd-line mode."
 	        << std::endl;
+      bUseGUI = false;
     }
+    // Move this from above to accurately report whether the GUI
+    // has initialized. With out this, gpsim would generate a segmentation
+    // fault on exit under Linux when executed in a telnet session
+    // and with out the -i option.
+    get_interface().setGUImode(bUseGUI);
   }
 #endif
 

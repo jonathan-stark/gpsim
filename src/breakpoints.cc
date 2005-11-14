@@ -710,7 +710,7 @@ void Breakpoints::clear_all_register(Processor *c,unsigned int address)
 
 void Breakpoints::halt(void)
 {
-  if(use_icd) {
+  if(get_use_icd()) {
     icd_halt();
     return;
   }
@@ -778,7 +778,7 @@ Processor* Breakpoint_Instruction::get_cpu(void)
 
 bool Breakpoint_Instruction::set_break(void)
 {
-  if(use_icd)
+  if(get_use_icd())
     bp.clear_all(get_cpu());
 
   unsigned int uIndex = get_cpu()->map_pm_address2index(address);
@@ -789,7 +789,7 @@ bool Breakpoint_Instruction::set_break(void)
 
     get_cpu()->pma->putToIndex(uIndex, this);
 
-    if(use_icd)
+    if(get_use_icd())
       icd_set_break(address);
 
     return true;
@@ -814,7 +814,7 @@ void Breakpoint_Instruction::print(void)
 
 void Breakpoint_Instruction::clear(void)
 {
-  if(use_icd)
+  if(get_use_icd())
     icd_clear_break();
 
   get_cpu()->pma->clear_break_at_address(address, this);
